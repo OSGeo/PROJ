@@ -117,7 +117,7 @@ pj_init_plus( const char *definition )
             break;
 
           default:
-            /* do nothing */
+            /* do nothing */;
         }
     }
 
