@@ -62,15 +62,19 @@ host_triplet = @host@
 AS = @AS@
 CC = @CC@
 DLLTOOL = @DLLTOOL@
+LD = @LD@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
 OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
 
 bin_PROGRAMS = proj nad2nad nad2bin geod
+
+INCLUDES = -DPROJ_LIB=\"$(pkgdatadir)\"
 
 include_HEADERS = projects.h
 
@@ -149,7 +153,7 @@ proj_config.h.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/PJ_aea.P .deps/PJ_aeqd.P .deps/PJ_airy.P \
 .deps/PJ_aitoff.P .deps/PJ_august.P .deps/PJ_bacon.P .deps/PJ_bipc.P \
@@ -384,7 +388,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
