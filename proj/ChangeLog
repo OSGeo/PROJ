@@ -1,3 +1,13 @@
+2003-03-16  Frank Warmerdam  <warmerdam@pobox.com>
+
+	*  Modified get_opt() to terminate reading the definition when a new
+	definition (a word starting with '<') is encountered, in addition 
+	to when the definition terminator '<>' is encountered, so that 
+	unterminated definitions like those in the distributed esri file 
+	will work properly.  Patch provided by Carl Anderson.
+	
+	http://bugzilla.remotesensing.org/show_bug.cgi?id=302
+
 2003-03-03  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Prepare 4.4.6 Release.
