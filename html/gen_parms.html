@@ -13,6 +13,13 @@ projection types.  Some of these can be found in the GeoTIFF
 Transform List</a>.  The definitative documentation for most parameters
 is Gerald's original documentation available from the main PROJ.4 page. <p>
 
+<h2><a name="false_easting_northing">False Easting/Northing</a></h2>
+
+Virtually all coordinate systems allow for the presence of a false easting
+(+x_0) and northing (+y_0).  Note that these values are always expressed in
+meters even if the coordinate system is some other units.  Some coordinate
+systems (such as UTM) have implicit false easting and northing values.<p>
+
 <h2><a name="towgs84">towgs84 - Datum transformation to WGS84</a></h2>
 
 Datum shifts can be approximated by 3 parameter spatial translations (in
@@ -83,3 +90,10 @@ Seven parameter transformation (translation, rotation and scaling):
 
 </body>
 </html>
+
+
+
+
+
+
+
