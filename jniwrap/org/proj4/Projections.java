@@ -186,7 +186,18 @@ public abstract class Projections
     for (int i = 0; i < infos.length - 1; i++)
     {
       String[] pairs = infos[i + 1].split("=");
-      projParameters.put(pairs[0].trim(), pairs[1].trim());
+      if (pairs.length == 1 && pairs[0].equals("no_defs"))
+      {
+        projParameters.put(pairs[0].trim(), "defined");
+      }
+      else if (pairs.length == 1 && !pairs[0].equals("no_defs"))
+      {
+        projParameters.put(pairs[0].trim(), "");
+      }
+      else
+      {
+        projParameters.put(pairs[0].trim(), pairs[1].trim());
+      }
     }
 
     String ellipsinfo = getEllipseInfo();
