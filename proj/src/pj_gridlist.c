@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.2  2003/03/17 19:45:47  warmerda
+ * support '@' marker for optional grids
+ *
  * Revision 1.1  2003/03/15 06:01:18  warmerda
  * New
  *
@@ -205,7 +208,14 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
     for( s = nadgrids; *s != '\0'; )
     {
         int   end_char;
+        int   required = 1;
         char  name[128];
+
+        if( *s == '@' )
+        {
+            required = 0;
+            s++;
+        }
 
         for( end_char = 0; 
              s[end_char] != '\0' && s[end_char] != ','; 
@@ -224,7 +234,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
         if( *s == ',' )
             s++;
 
-        if( !pj_gridlist_merge_gridfile( name ) )
+        if( !pj_gridlist_merge_gridfile( name ) && required )
         {
             pj_errno = -38;
             return NULL;
