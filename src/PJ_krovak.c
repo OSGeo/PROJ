@@ -1,11 +1,12 @@
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- * pj_qv_krovak.c
+/******************************************************************************
+ * $Id$
  *
- * Krovak Projection for Proj.4
- * Definition: http://www.ihsenergy.com/epsg/guid7.html#1.4.3
+ * Project:  PROJ.4
+ * Purpose:  Implementation of the krovak (Krovak) projection.
+ *           Definition: http://www.ihsenergy.com/epsg/guid7.html#1.4.3
+ * Author:   Thomas Flemming, tf@ttqv.com
  *
- * last change 5. April 2002
- *
+ ******************************************************************************
  * Copyright (c) 2001, Thomas Flemming, tf@ttqv.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,6 +27,11 @@
  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ ******************************************************************************
+ *
+ * $Log$
+ * Revision 1.2  2002/12/14 19:35:21  warmerda
+ * updated headers
  *
  */
 
@@ -37,9 +43,8 @@
 #include <string.h>
 #include <stdio.h>
 
-/*
- * insert this line to pj_list.h 
- */
+PJ_CVSID("$Id$");	
+
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Sph.";
 
 FORWARD(s_forward); /* spheroid */
@@ -216,6 +221,3 @@ ENTRY0(krovak)
 	P->fwd = s_forward;
 
 ENDENTRY(P)
-
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
