@@ -1,5 +1,7 @@
 2003-03-03  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* Prepare 4.4.6 Release.
+
 	* nad/epsg: updated to EPSG 6.2.2.
 
 	* src/Makefile.am, nad/Makefile.am: a few fixes for Cygwin 
