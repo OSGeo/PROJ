@@ -5,6 +5,8 @@ Rel. 4.4.9 2004-10-29
 
 	* Preparing 4.4.9 release.
 
+	* src/pj_gridinfo.c: Fixed reported information in ctable debug msg.
+
 	* src/nad_cvt.c: Fixed problem with domai of tb.lam that caused
 	failure of eastern hemisphere locations to transform with null
 	grid (which is world sized).
