@@ -1,3 +1,12 @@
+#
+# Set the following to the directory where the PROJ distribution 
+# data files (ie, the contents of ..\NAD).  The following assumes
+# the PROJ distribution is unpacked as C:\PROJ, which generally must
+# be adjusted.  It is also possible to leave this, and define the
+# PROJ_LIB environment variable to point to the NAD directory.
+#
+PROJ_LIB_DIR=C:/PROJ/NAD
+
 azimuthal = \
 	PJ_aeqd.obj PJ_gnom.obj PJ_laea.obj PJ_mod_ster.obj \
 	PJ_nsper.obj PJ_nzmg.obj PJ_ortho.obj PJ_stere.obj
@@ -48,7 +57,7 @@ LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
 PROJEXE_SRC	=	proj.c gen_cheb.c p_series.c emess.c
 CS2CSEXE_SRC	=	cs2cs.c gen_cheb.c p_series.c emess.c
 GEODEXE_SRC	=	geod.c geod_set.c geod_for.c geod_inv.c emess.c
-CFLAGS	=	/nologo -I. -DPROJ_LIB=\"C:/PROJ/\"
+CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\"
 
 default:	all
 
