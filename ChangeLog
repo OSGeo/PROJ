@@ -1,4 +1,12 @@
+2001-04-04  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* rewrote 7 param datum shift to match EPSG:9606, now works with 
+	example.
+
 2001-03-20  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Added -DPROJ_LIB=\"C:/PROJ/\" in src/makefile.vc to provide for
+	a default proj data file search directory.
 
 	* Added HOWTO-RELEASE document in CVS.
 

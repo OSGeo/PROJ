@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.2  2001/04/04 16:08:08  warmerda
+ * rewrote 7 param datum shift to match EPSG:9606, now works with example
+ *
  * Revision 1.1  2000/07/06 23:32:27  warmerda
  * New
  *
@@ -47,6 +50,17 @@
 #ifndef SRS_WGS84_ESQUARED
 #define SRS_WGS84_ESQUARED 0.006694379990
 #endif
+
+/* SEC_TO_RAD = Pi/180/3600 */
+#define SEC_TO_RAD 4.84813681109535993589914102357e-6
+
+#define Dx_BF (defn->datum_params[0])
+#define Dy_BF (defn->datum_params[1])
+#define Dz_BF (defn->datum_params[2])
+#define Rx_BF (defn->datum_params[3] * SEC_TO_RAD)
+#define Ry_BF (defn->datum_params[4] * SEC_TO_RAD)
+#define Rz_BF (defn->datum_params[5] * SEC_TO_RAD)
+#define M_BF  (1 + defn->datum_params[6] * 0.000001)
 
 /************************************************************************/
 /*                            pj_transform()                            */
@@ -273,21 +287,10 @@ int pj_geocentric_to_wgs84( PJ *defn,
         {
             long io = i * point_offset;
             double x_out, y_out, z_out;
-            
-            x_out = x[io] + defn->datum_params[0] 
-                + y[io] * defn->datum_params[5]
-                + z[io] * defn->datum_params[4]
-                + x[io] * defn->datum_params[6];
 
-            y_out = y[io] + defn->datum_params[1]
-                + x[io] * defn->datum_params[5]
-                + z[io] * defn->datum_params[3]
-                + y[io] * defn->datum_params[6];
-
-            z_out = z[io] + defn->datum_params[2]
-                + x[io] * defn->datum_params[4]
-                + y[io] * defn->datum_params[3]
-                + z[io] * defn->datum_params[6];
+            x_out = M_BF*(       x[io] - Rz_BF*y[io] + Ry_BF*z[io]) + Dx_BF;
+            y_out = M_BF*( Rz_BF*x[io] +       y[io] - Rx_BF*z[io]) + Dy_BF;
+            z_out = M_BF*(-Ry_BF*x[io] + Rx_BF*y[io] +       z[io]) + Dz_BF;
 
             x[io] = x_out;
             y[io] = y_out;
@@ -328,21 +331,10 @@ int pj_geocentric_from_wgs84( PJ *defn,
         {
             long io = i * point_offset;
             double x_out, y_out, z_out;
-            
-            x_out = x[io] - defn->datum_params[0] 
-                - y[io] * defn->datum_params[5]
-                - z[io] * defn->datum_params[4]
-                - x[io] * defn->datum_params[6];
 
-            y_out = y[io] - defn->datum_params[1]
-                - x[io] * defn->datum_params[5]
-                - z[io] * defn->datum_params[3]
-                - y[io] * defn->datum_params[6];
-
-            z_out = z[io] - defn->datum_params[2]
-                - x[io] * defn->datum_params[4]
-                - y[io] * defn->datum_params[3]
-                - z[io] * defn->datum_params[6];
+            x_out = M_BF*(       x[io] + Rz_BF*y[io] - Ry_BF*z[io]) - Dx_BF;
+            y_out = M_BF*(-Rz_BF*x[io] +       y[io] + Rx_BF*z[io]) - Dy_BF;
+            z_out = M_BF*( Ry_BF*x[io] - Rx_BF*y[io] +       z[io]) - Dz_BF;
 
             x[io] = x_out;
             y[io] = y_out;
