@@ -2421,21 +2421,21 @@
 # Lisbon (Lisbon)
 <4803> +proj=longlat +ellps=intl +pm=lisbon +no_defs  no_defs <>
 # Makassar (Jakarta)
-<4804> +proj=longlat +ellps=bessel +pm=jakarta +no_defs  no_defs <>
+<4804> +proj=longlat +ellps=bessel +towgs84=-587.8,519.75,145.76,0,0,0,0 +pm=jakarta +no_defs  no_defs <>
 # MGI (Ferro)
 <4805> +proj=longlat +ellps=bessel +pm=ferro +no_defs  no_defs <>
 # Monte Mario (Rome)
 <4806> +proj=longlat +ellps=intl +pm=rome +no_defs  no_defs <>
 # NTF (Paris)
-<4807> +proj=longlat +a=6378249.2 +b=6356515 +pm=paris +no_defs  no_defs <>
+<4807> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +no_defs  no_defs <>
 # Padang (Jakarta)
 <4808> +proj=longlat +ellps=bessel +pm=jakarta +no_defs  no_defs <>
 # Belge 1950 (Brussels)
 <4809> +proj=longlat +ellps=intl +pm=brussels +no_defs  no_defs <>
 # Tananarive (Paris)
-<4810> +proj=longlat +ellps=intl +pm=paris +no_defs  no_defs <>
+<4810> +proj=longlat +ellps=intl +towgs84=-189,-242,-91,0,0,0,0 +pm=paris +no_defs  no_defs <>
 # Voirol 1875 (Paris)
-<4811> +proj=longlat +a=6378249.2 +b=6356515 +pm=paris +no_defs  no_defs <>
+<4811> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-73,-247,227,0,0,0,0 +pm=paris +no_defs  no_defs <>
 # Batavia (Jakarta)
 <4813> +proj=longlat +ellps=bessel +pm=jakarta +no_defs  no_defs <>
 # RT38 (Stockholm)
@@ -2445,7 +2445,7 @@
 # Carthage (Paris)
 <4816> +proj=longlat +a=6378249.2 +b=6356515 +pm=paris +no_defs  no_defs <>
 # NGO 1948 (Oslo)
-<4817> +proj=longlat +a=6377492.018 +b=6356173.508712696 +pm=oslo +no_defs  no_defs <>
+<4817> +proj=longlat +a=6377492.018 +b=6356173.508712696 +towgs84=278.3,93,474.5,7.889,0.05,-6.61,6.21 +pm=oslo +no_defs  no_defs <>
 # S-JTSK (Ferro)
 <4818> +proj=longlat +ellps=bessel +pm=ferro +no_defs  no_defs <>
 # Nord Sahara 1959 (Paris)
@@ -3012,7 +3012,7 @@
 # Luzon 1911 / Philippines zone V
 <25395> +proj=tmerc +lat_0=0 +lon_0=125 +k=0.999950 +x_0=500000 +y_0=0 +ellps=clrk66 +units=m +no_defs  no_defs <>
 # Makassar (Jakarta) / NEIEZ
-<25700> +proj=merc +lat_ts=0 +lon_0=216.8077194444444 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +pm=jakarta +units=m +no_defs  no_defs <>
+<25700> +proj=merc +lat_ts=0 +lon_0=216.8077194444444 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +towgs84=-587.8,519.75,145.76,0,0,0,0 +pm=jakarta +units=m +no_defs  no_defs <>
 # ETRS89 / UTM zone 28N
 <25828> +proj=utm +zone=28 +ellps=GRS80 +units=m +no_defs  no_defs <>
 # ETRS89 / UTM zone 29N
@@ -3500,21 +3500,21 @@
 # NZGD49 / South Island Grid
 <27292> +proj=tmerc +lat_0=-44 +lon_0=171.5 +k=1.000000 +x_0=457199.2073080143 +y_0=457199.2073080143 +ellps=intl +to_meter=0.9143984146160287 +no_defs  no_defs <>
 # NGO 1948 (Oslo) / NGO zone I
-<27391> +proj=tmerc +lat_0=58 +lon_0=6.056250000000003 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +pm=oslo +units=m +no_defs  no_defs <>
+<27391> +proj=tmerc +lat_0=58 +lon_0=6.056250000000003 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +towgs84=278.3,93,474.5,7.889,0.05,-6.61,6.21 +pm=oslo +units=m +no_defs  no_defs <>
 # NGO 1948 (Oslo) / NGO zone II
-<27392> +proj=tmerc +lat_0=58 +lon_0=8.389583333333336 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +pm=oslo +units=m +no_defs  no_defs <>
+<27392> +proj=tmerc +lat_0=58 +lon_0=8.389583333333336 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +towgs84=278.3,93,474.5,7.889,0.05,-6.61,6.21 +pm=oslo +units=m +no_defs  no_defs <>
 # NGO 1948 (Oslo) / NGO zone III
-<27393> +proj=tmerc +lat_0=58 +lon_0=10.72291666666667 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +pm=oslo +units=m +no_defs  no_defs <>
+<27393> +proj=tmerc +lat_0=58 +lon_0=10.72291666666667 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +towgs84=278.3,93,474.5,7.889,0.05,-6.61,6.21 +pm=oslo +units=m +no_defs  no_defs <>
 # NGO 1948 (Oslo) / NGO zone IV
-<27394> +proj=tmerc +lat_0=58 +lon_0=13.22291666666667 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +pm=oslo +units=m +no_defs  no_defs <>
+<27394> +proj=tmerc +lat_0=58 +lon_0=13.22291666666667 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +towgs84=278.3,93,474.5,7.889,0.05,-6.61,6.21 +pm=oslo +units=m +no_defs  no_defs <>
 # NGO 1948 (Oslo) / NGO zone V
-<27395> +proj=tmerc +lat_0=58 +lon_0=16.88958333333334 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +pm=oslo +units=m +no_defs  no_defs <>
+<27395> +proj=tmerc +lat_0=58 +lon_0=16.88958333333334 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +towgs84=278.3,93,474.5,7.889,0.05,-6.61,6.21 +pm=oslo +units=m +no_defs  no_defs <>
 # NGO 1948 (Oslo) / NGO zone VI
-<27396> +proj=tmerc +lat_0=58 +lon_0=20.88958333333333 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +pm=oslo +units=m +no_defs  no_defs <>
+<27396> +proj=tmerc +lat_0=58 +lon_0=20.88958333333333 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +towgs84=278.3,93,474.5,7.889,0.05,-6.61,6.21 +pm=oslo +units=m +no_defs  no_defs <>
 # NGO 1948 (Oslo) / NGO zone VII
-<27397> +proj=tmerc +lat_0=58 +lon_0=24.88958333333333 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +pm=oslo +units=m +no_defs  no_defs <>
+<27397> +proj=tmerc +lat_0=58 +lon_0=24.88958333333333 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +towgs84=278.3,93,474.5,7.889,0.05,-6.61,6.21 +pm=oslo +units=m +no_defs  no_defs <>
 # NGO 1948 (Oslo) / NGO zone VIII
-<27398> +proj=tmerc +lat_0=58 +lon_0=29.05625 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +pm=oslo +units=m +no_defs  no_defs <>
+<27398> +proj=tmerc +lat_0=58 +lon_0=29.05625 +k=1.000000 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +towgs84=278.3,93,474.5,7.889,0.05,-6.61,6.21 +pm=oslo +units=m +no_defs  no_defs <>
 # Datum 73 / UTM zone 29N
 <27429> +proj=utm +zone=29 +ellps=intl +units=m +no_defs  no_defs <>
 # Datum 73 / Modified Portuguese Grid
@@ -3522,37 +3522,37 @@
 # ATF (Paris) / Nord de Guerre
 <27500> +proj=lcc +lat_1=49.50000000000001 +lat_0=49.50000000000001 +lon_0=7.737229170000001 +k_0=0.99950908 +x_0=500000 +y_0=300000 +a=6376523 +b=6355862.933255573 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Lambert Nord France
-<27561> +proj=lcc +lat_1=49.50000000000001 +lat_0=49.50000000000001 +lon_0=2.33722917 +k_0=0.999877341 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27561> +proj=lcc +lat_1=49.50000000000001 +lat_0=49.50000000000001 +lon_0=2.33722917 +k_0=0.999877341 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Lambert Centre France
-<27562> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=2.33722917 +k_0=0.99987742 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27562> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=2.33722917 +k_0=0.99987742 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Lambert Sud France
-<27563> +proj=lcc +lat_1=44.10000000000001 +lat_0=44.10000000000001 +lon_0=2.33722917 +k_0=0.999877499 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27563> +proj=lcc +lat_1=44.10000000000001 +lat_0=44.10000000000001 +lon_0=2.33722917 +k_0=0.999877499 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Lambert Corse
-<27564> +proj=lcc +lat_1=42.16500000000001 +lat_0=42.16500000000001 +lon_0=2.33722917 +k_0=0.99994471 +x_0=234.358 +y_0=185861.369 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27564> +proj=lcc +lat_1=42.16500000000001 +lat_0=42.16500000000001 +lon_0=2.33722917 +k_0=0.99994471 +x_0=234.358 +y_0=185861.369 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Lambert zone I
-<27571> +proj=lcc +lat_1=49.50000000000001 +lat_0=49.50000000000001 +lon_0=2.33722917 +k_0=0.999877341 +x_0=600000 +y_0=1200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27571> +proj=lcc +lat_1=49.50000000000001 +lat_0=49.50000000000001 +lon_0=2.33722917 +k_0=0.999877341 +x_0=600000 +y_0=1200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Lambert zone II
-<27572> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=2.33722917 +k_0=0.99987742 +x_0=600000 +y_0=2200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27572> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=2.33722917 +k_0=0.99987742 +x_0=600000 +y_0=2200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Lambert zone III
-<27573> +proj=lcc +lat_1=44.10000000000001 +lat_0=44.10000000000001 +lon_0=2.33722917 +k_0=0.999877499 +x_0=600000 +y_0=3200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27573> +proj=lcc +lat_1=44.10000000000001 +lat_0=44.10000000000001 +lon_0=2.33722917 +k_0=0.999877499 +x_0=600000 +y_0=3200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Lambert zone IV
-<27574> +proj=lcc +lat_1=42.16500000000001 +lat_0=42.16500000000001 +lon_0=2.33722917 +k_0=0.99994471 +x_0=234.358 +y_0=4185861.369 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27574> +proj=lcc +lat_1=42.16500000000001 +lat_0=42.16500000000001 +lon_0=2.33722917 +k_0=0.99994471 +x_0=234.358 +y_0=4185861.369 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / France I
-<27581> +proj=lcc +lat_1=49.50000000000001 +lat_0=49.50000000000001 +lon_0=2.33722917 +k_0=0.999877341 +x_0=600000 +y_0=1200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27581> +proj=lcc +lat_1=49.50000000000001 +lat_0=49.50000000000001 +lon_0=2.33722917 +k_0=0.999877341 +x_0=600000 +y_0=1200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / France II
-<27582> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=2.33722917 +k_0=0.99987742 +x_0=600000 +y_0=2200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27582> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=2.33722917 +k_0=0.99987742 +x_0=600000 +y_0=2200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / France III
-<27583> +proj=lcc +lat_1=44.10000000000001 +lat_0=44.10000000000001 +lon_0=2.33722917 +k_0=0.999877499 +x_0=600000 +y_0=3200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27583> +proj=lcc +lat_1=44.10000000000001 +lat_0=44.10000000000001 +lon_0=2.33722917 +k_0=0.999877499 +x_0=600000 +y_0=3200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / France IV
-<27584> +proj=lcc +lat_1=42.16500000000001 +lat_0=42.16500000000001 +lon_0=2.33722917 +k_0=0.99994471 +x_0=234.358 +y_0=4185861.369 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27584> +proj=lcc +lat_1=42.16500000000001 +lat_0=42.16500000000001 +lon_0=2.33722917 +k_0=0.99994471 +x_0=234.358 +y_0=4185861.369 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Nord France
-<27591> +proj=lcc +lat_1=49.50000000000001 +lat_0=49.50000000000001 +lon_0=2.33722917 +k_0=0.999877341 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27591> +proj=lcc +lat_1=49.50000000000001 +lat_0=49.50000000000001 +lon_0=2.33722917 +k_0=0.999877341 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Centre France
-<27592> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=2.33722917 +k_0=0.99987742 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27592> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=2.33722917 +k_0=0.99987742 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Sud France
-<27593> +proj=lcc +lat_1=44.10000000000001 +lat_0=44.10000000000001 +lon_0=2.33722917 +k_0=0.999877499 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27593> +proj=lcc +lat_1=44.10000000000001 +lat_0=44.10000000000001 +lon_0=2.33722917 +k_0=0.999877499 +x_0=600000 +y_0=200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # NTF (Paris) / Corse
-<27594> +proj=lcc +lat_1=42.16500000000001 +lat_0=42.16500000000001 +lon_0=2.33722917 +k_0=0.99994471 +x_0=234.358 +y_0=185861.369 +a=6378249.2 +b=6356515 +pm=paris +units=m +no_defs  no_defs <>
+<27594> +proj=lcc +lat_1=42.16500000000001 +lat_0=42.16500000000001 +lon_0=2.33722917 +k_0=0.99994471 +x_0=234.358 +y_0=185861.369 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # OSGB 1936 / British National Grid
 <27700> +proj=tmerc +lat_0=49 +lon_0=-2 +k=0.999601 +x_0=400000 +y_0=-100000 +ellps=airy +units=m +no_defs  no_defs <>
 # Palestine 1923 / Palestine Grid
@@ -3764,7 +3764,7 @@
 # Sudan / UTM zone 36N
 <29636> +proj=utm +zone=36 +a=6378249.2 +b=6356515 +units=m +no_defs  no_defs <>
 # Tananarive (Paris) / Laborde Grid
-<29700> +proj=omerc +lat_0=-18.9 +lonc=46.43722917000001 +alpha=18.9 +k=0.9995000000000001 +x_0=400000 +y_0=800000 +ellps=intl +pm=paris +units=m +no_defs  no_defs <>
+<29700> +proj=omerc +lat_0=-18.9 +lonc=46.43722917000001 +alpha=18.9 +k=0.9995000000000001 +x_0=400000 +y_0=800000 +ellps=intl +towgs84=-189,-242,-91,0,0,0,0 +pm=paris +units=m +no_defs  no_defs <>
 # Tananarive / UTM zone 38S
 <29738> +proj=utm +zone=38 +south +ellps=intl +towgs84=-189,-242,-91,0,0,0,0 +units=m +no_defs  no_defs <>
 # Tananarive / UTM zone 39S
