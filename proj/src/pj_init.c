@@ -248,6 +248,32 @@ pj_init(int argc, char **argv) {
 	} else
 		PIN->to_meter = PIN->fr_meter = 1.;
 
+	/* prime meridian */
+	s = 0;
+	if (name = pj_param(start, "spm").s) { 
+            const char *value = NULL;
+            char *next_str = NULL;
+
+            for (i = 0; pj_prime_meridians[i].id != NULL; ++i )
+            {
+                if( strcmp(name,pj_prime_meridians[i].id) == 0 )
+                {
+                    value = pj_prime_meridians[i].defn;
+                    break;
+                }
+            }
+            
+            if( value == NULL 
+                && dmstor(name,&next_str) != 0.0 
+                && *next_str == '\0' )
+                value = name;
+
+            if (!value) { pj_errno = -7; goto bum_call; }
+            PIN->from_greenwich = dmstor(value,NULL);
+	}
+        else
+            PIN->from_greenwich = 0.0;
+
 	/* projection specific initialization */
 	if (!(PIN = (*proj)(PIN)) || errno || pj_errno) {
 bum_call: /* cleanup error return */
