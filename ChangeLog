@@ -1,3 +1,17 @@
+2004-10-25  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* fixtimes.sh: Run this after a CVS checkout to setup times of
+	various build files to avoid re-running automake and friends.
+
+	* src/geocent.c,geocent.h,pj_transform.c: Added pj_ prefix to 
+	all Geotrans functions to avoid name conflict if both linked in.
+
+	* configure.in: added --with-jni option.
+
+	* Added src/jniproj.c, src/org_proj4_Projections.h.
+
+	* Added jniwrap subtree (actually Andrea Antonello).
+
 2004-10-21  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/makefile.vc: added support for new files.
