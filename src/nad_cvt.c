@@ -15,7 +15,7 @@ nad_cvt(LP in, int inverse, struct CTABLE *ct) {
 	tb = in;
 	tb.lam -= ct->ll.lam;
 	tb.phi -= ct->ll.phi;
-	tb.lam = adjlon(tb.lam);
+	tb.lam = adjlon(tb.lam - PI) + PI;
 	t = nad_intr(tb, ct);
 	if (inverse) {
 		LP del, dif;
