@@ -42,16 +42,17 @@ support = \
 	pj_zpoly1.obj rtodms.obj vector1.obj pj_release.obj \
 	geocent.obj pj_transform.obj pj_datum_set.obj pj_datums.obj \
 	pj_apply_gridshift.obj emess.obj nad_cvt.obj nad_init.obj \
-	nad_intr.obj strtod.obj
+	nad_intr.obj strtod.obj pj_utils.obj
 
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
 PROJEXE_SRC	=	proj.c gen_cheb.c p_series.c
+CS2CSEXE_SRC	=	cs2cs.c gen_cheb.c p_series.c
 GEODEXE_SRC	=	geod.c geod_set.c geod_for.c geod_inv.c emess.c
 CFLAGS	=	-I. -DPROJ_LIB=\"C:/PROJ/\"
 
-default:	proj.lib
+default:	all
 
-all:            proj.lib proj.dll proj.exe
+all:            proj.lib proj.dll proj.exe cs2cs.exe geod.exe
 
 proj.lib:	$(LIBOBJ)
 	if exist proj.lib del proj.lib
@@ -63,6 +64,9 @@ proj.dll:	$(LIBOBJ)
 
 proj.exe:	$(PROJEXE_SRC) proj.lib
 	cl -I. $(PROJEXE_SRC) proj.lib
+
+cs2cs.exe:	$(CS2CSEXE_SRC) proj.lib
+	cl -I. $(CS2CSEXE_SRC) proj.lib
 
 geod.exe:	$(GEODEXE_SRC) proj.lib
 	cl -I. $(GEODEXE_SRC) proj.lib
