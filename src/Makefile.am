@@ -2,10 +2,10 @@ bin_PROGRAMS =	proj nad2nad nad2bin geod
 
 INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\"
 
-include_HEADERS = projects.h
+include_HEADERS = projects.h nad_list.h
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c emess.c emess.h
-nad2nad_SOURCES = nad2nad.c nad_cvt.c nad_init.c nad_intr.c emess.c nad_list.h
+nad2nad_SOURCES = nad2nad.c 
 nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c emess.c geodesic.h
 
@@ -50,6 +50,8 @@ libproj_la_SOURCES = \
 	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c \
 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c \
 	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c \
-	pj_zpoly1.c rtodms.c vector1.c pj_release.c
+	pj_zpoly1.c rtodms.c vector1.c pj_release.c \
+	\
+	nad_cvt.c nad_init.c nad_intr.c emess.c
 
 
