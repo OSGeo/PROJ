@@ -4,6 +4,7 @@ proj.dll
 *.lib
 *.pdb
 *.exp
+*.opt
 .libs
 .deps
 nad2nad
