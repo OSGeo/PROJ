@@ -31,6 +31,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.7  2003/03/17 19:45:23  warmerda
+ * improved error handling
+ *
  * Revision 1.6  2003/03/17 18:56:34  warmerda
  * implement heirarchical NTv2 gridinfos
  *
@@ -67,10 +70,14 @@ int pj_apply_gridshift( const char *nadgrids, int inverse,
 
 {
     int grid_count = 0;
-    PJ_GRIDINFO   **tables = pj_gridlist_from_nadgrids( nadgrids, &grid_count);
+    PJ_GRIDINFO   **tables;
     int  i;
     int debug_flag = getenv( "PROJ_DEBUG" ) != NULL;
+    static int debug_count = 0;
 
+    pj_errno = 0;
+
+    tables = pj_gridlist_from_nadgrids( nadgrids, &grid_count);
     if( tables == NULL || grid_count == 0 )
         return pj_errno;
 
@@ -82,13 +89,15 @@ int pj_apply_gridshift( const char *nadgrids, int inverse,
 
         input.phi = y[io];
         input.lam = x[io];
+        output.phi = HUGE_VAL;
+        output.lam = HUGE_VAL;
 
         /* keep trying till we find a table that works */
         for( itable = 0; itable < grid_count; itable++ )
         {
             PJ_GRIDINFO *gi = tables[itable];
             struct CTABLE *ct = gi->ct;
-            
+
             /* skip tables that don't match our point at all.  */
             if( ct->ll.phi > input.phi || ct->ll.lam > input.lam
                 || ct->ll.phi + ct->lim.phi * ct->del.phi < input.phi
@@ -130,16 +139,10 @@ int pj_apply_gridshift( const char *nadgrids, int inverse,
             output = nad_cvt( input, inverse, ct );
             if( output.lam != HUGE_VAL )
             {
-                if( debug_flag )
-                {
-                    static int debug_count = 0;
-
-                    if( debug_count < 20 )
-                        fprintf( stderr,
-                                 "pj_apply_gridshift(): used %s\n",
-                                 ct->id );
-                }
-
+                if( debug_flag && debug_count++ < 20 )
+                    fprintf( stderr,
+                             "pj_apply_gridshift(): used %s\n",
+                             ct->id );
                 break;
             }
         }
