@@ -2,7 +2,7 @@
 # SCCSID--- @(#)proj_def.dat	4.3	94/02/23	GIE	REL"
 # very preliminary version
 <general>
-ellps=clrk66 # ellipsoid most compatible with older U.S. maps
+ellps=WGS84 
 <>
 <aea> # Conterminous U.S. map
 lat_1=29.5
