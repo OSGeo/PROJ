@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.4  2002/02/15 14:30:36  warmerda
+ * provide default Z array if none passed in in pj_datum_transform()
+ *
  * Revision 1.3  2001/04/04 21:13:21  warmerda
  * do arcsecond/radian and ppm datum parm transformation in pj_set_datum()
  *
@@ -355,6 +358,7 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 
 {
     double      src_a, src_es, dst_a, dst_es;
+    int         z_is_temp = FALSE;
 
     pj_errno = 0;
 
@@ -371,6 +375,19 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
     dst_es = dstdefn->es;
 
 /* -------------------------------------------------------------------- */
+/*      Create a temporary Z array if one is not provided.              */
+/* -------------------------------------------------------------------- */
+    if( z == NULL )
+    {
+        int	bytes = sizeof(double) * point_count * point_offset;
+        z = (double *) pj_malloc(bytes);
+        memset( z, 0, bytes );
+        z_is_temp = TRUE;
+    }
+
+#define CHECK_RETURN {if( pj_errno != 0 ) { if( z_is_temp ) pj_dalloc(z); return pj_errno; }}
+
+/* -------------------------------------------------------------------- */
 /*	If this datum requires grid shifts, then apply it to geodetic   */
 /*      coordinates.                                                    */
 /* -------------------------------------------------------------------- */
@@ -378,9 +395,7 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
     {
         pj_apply_gridshift( pj_param(srcdefn->params,"snadgrids").s, 0, 
                             point_count, point_offset, x, y, z );
-
-        if( pj_errno != 0 )
-            return pj_errno;
+        CHECK_RETURN;
 
         src_a = SRS_WGS84_SEMIMAJOR;
         src_es = 0.006694379990;
@@ -405,9 +420,7 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /* -------------------------------------------------------------------- */
         pj_geodetic_to_geocentric( src_a, src_es,
                                    point_count, point_offset, x, y, z );
-
-        if( pj_errno )
-            return pj_errno;
+        CHECK_RETURN;
 
 /* -------------------------------------------------------------------- */
 /*      Convert between datums.                                         */
@@ -416,12 +429,10 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
             && dstdefn->datum_type != PJD_UNKNOWN )
         {
             pj_geocentric_to_wgs84( srcdefn, point_count, point_offset,x,y,z);
-            if( pj_errno != 0 )
-                return pj_errno;
-            
+            CHECK_RETURN;
+
             pj_geocentric_from_wgs84( dstdefn, point_count,point_offset,x,y,z);
-            if( pj_errno != 0 )
-                return pj_errno;
+            CHECK_RETURN;
         }
 
 /* -------------------------------------------------------------------- */
@@ -429,9 +440,7 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /* -------------------------------------------------------------------- */
         pj_geocentric_to_geodetic( dst_a, dst_es,
                                    point_count, point_offset, x, y, z );
-        
-        if( pj_errno )
-            return pj_errno;
+        CHECK_RETURN;
     }
 
 /* -------------------------------------------------------------------- */
@@ -441,10 +450,11 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
     {
         pj_apply_gridshift( pj_param(dstdefn->params,"snadgrids").s, 1,
                             point_count, point_offset, x, y, z );
-
-        if( pj_errno != 0 )
-            return pj_errno;
+        CHECK_RETURN;
     }
+
+    if( z_is_temp )
+        pj_dalloc( z );
 
     return 0;
 }
