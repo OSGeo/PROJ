@@ -1,3 +1,10 @@
+2000-03-27  Frank Warmerdam  <warmerda@cs46980-c>
+
+	* Updated COPYING file to MIT style license.  Added man_proj.html
+	in html directory.
+
+	* Add rules to install nad data files in $(prefix)/share/proj.
+
 2000-03-21  Frank Warmerdam  <warmerda@rommel.atlsci.com>
 
 	* Converted to use libtool.
