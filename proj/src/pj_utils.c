@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.3  2002/12/14 20:14:00  warmerda
+ * added pj_is_geocent, added +pm support to pj_get_def
+ *
  * Revision 1.2  2002/04/30 17:01:51  warmerda
  * Removed printf() statement.
  *
@@ -54,6 +57,18 @@ int pj_is_latlong( PJ *pj )
 
 {
     return pj == NULL || pj->is_latlong;
+}
+
+/************************************************************************/
+/*                           pj_is_geocent()                            */
+/*                                                                      */
+/*      Returns TRUE if this coordinate system object is geocentric.    */
+/************************************************************************/
+
+int pj_is_geocent( PJ *pj )
+
+{
+    return pj != NULL && pj->is_geocent;
 }
 
 /************************************************************************/
@@ -146,6 +161,11 @@ PJ *pj_latlong_from_proj( PJ *pj_in )
     if( pj_param(pj_in->params, "tR_lat_g").i )
         sprintf( defn+strlen(defn), " +R_lat_g=%s", 
                  pj_param(pj_in->params,"sR_lat_g").s );
+
+    /* copy over prime meridian */
+    if( pj_param(pj_in->params, "tpm").i )
+        sprintf( defn+strlen(defn), " +pm=%s", 
+                 pj_param(pj_in->params,"spm").s );
 
     return pj_init_plus( defn );
 }
