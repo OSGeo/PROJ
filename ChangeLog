@@ -1,5 +1,8 @@
 2000-09-22  Frank Warmerdam  <warmerda@cs46980-c>
 
+	* Fixed src/Makefile.am install-exec-local target, and added
+	geocent.h, and emess.h.  Reissued 4.4.2 distribution files.
+
 	* Update version to 4.4.2, in preparation for 4.4.2 release.
 
 	* Ensure makefile.vc is distributed, and mention windows building
