@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.3  2001/08/23 20:25:55  warmerda
+ * added pj_set_finder function
+ *
  * Revision 1.2  2001/06/02 03:35:36  warmerda
  * added pj_get_errno_ref()
  *
@@ -93,6 +96,7 @@ void pj_deallocate_grids();
 int pj_is_latlong(projPJ);
 void pj_pr_list(projPJ);
 void pj_free(projPJ);
+void pj_set_finder( const char *(*)(const char *) );
 projPJ pj_init(int, char **);
 projPJ pj_init_plus(const char *);
 projPJ pj_latlong_from_proj( projPJ );
