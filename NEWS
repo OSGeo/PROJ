@@ -1,3 +1,18 @@
+4.4.7 Release Notes
+-------------------
+
+ o Added NTv2 (.gsb) grid shift file support.  
+
+ o Modified datum shift support so that data file data is only loaded if
+   needed.  Also added 'null' grid as a fallback option, and support for 
+   making grids optional (prefix with '@' in +nadgrids). 
+
+ o Regenerated nad/epsg file with towgs84 parameters for non-greenwich prime 
+   meridians.
+
+ o Updated nad/esri file with better generated form from Paul Ramsey.
+
+ o Various bug fixes. 
 
 
 4.4.6 Release Notes
