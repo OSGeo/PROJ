@@ -25,7 +25,4 @@ EXPORTS
 	pj_compare_datums	  @22
 	pj_apply_gridshift	  @23
 	pj_datum_transform        @24
-
-
-
-
+	pj_set_searchpath         @25
