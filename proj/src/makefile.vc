@@ -23,7 +23,7 @@ azimuthal = \
 conic = \
 	PJ_aea.obj PJ_bipc.obj PJ_bonne.obj PJ_eqdc.obj \
 	PJ_imw_p.obj PJ_lcc.obj PJ_mpoly.obj PJ_poly.obj \
-	PJ_rpoly.obj PJ_sconics.obj
+	PJ_rpoly.obj PJ_sconics.obj PJ_lcca.obj
 
 cylinder = \
 	PJ_cass.obj PJ_cc.obj PJ_cea.obj PJ_eqc.obj \
