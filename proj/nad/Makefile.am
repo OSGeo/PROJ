@@ -2,7 +2,7 @@ pkgdata_DATA = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist \
 			proj_def.dat test27 test83 world epsg
 
 EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist \
-			proj_def.dat test27 test83 world
+			proj_def.dat test27 test83 world epsg
 
 install-data-local:
 	@if [ -f conus.lla ] ; then \
