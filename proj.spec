@@ -1,4 +1,4 @@
-%define PACKAGE_NAME PROJ
+%define PACKAGE_NAME proj
 %define PACKAGE_VERSION 4.4.8
 %define PACKAGE_URL http://www.remotesensing.org/proj/
 %define _prefix /usr
