@@ -301,6 +301,11 @@ int main(int argc, char **argv) {
                     char *str;
 
                     for (lp = pj_list ; lp->id ; ++lp) {
+                        if( strcmp(lp->id,"latlong") == 0 
+                            || strcmp(lp->id,"longlat") == 0 
+                            || strcmp(lp->id,"geocent") == 0 )
+                            continue;
+
                         (void)printf("%s : ", lp->id);
                         if (do_long)  /* possibly multiline description */
                             (void)puts(*lp->descr);
