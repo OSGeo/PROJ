@@ -76,7 +76,7 @@ bin_PROGRAMS = proj nad2nad nad2bin geod cs2cs
 
 INCLUDES = -DPROJ_LIB=\"$(pkgdatadir)\"
 
-include_HEADERS = projects.h nad_list.h
+include_HEADERS = projects.h nad_list.h proj_api.h
 
 EXTRA_DIST = makefile.vc proj.def
 

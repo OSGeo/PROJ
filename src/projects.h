@@ -2,7 +2,7 @@
  * $Id$
  *
  * Project:  PROJ.4
- * Purpose:  Primary include file for PROJ.4 library.
+ * Purpose:  Primary (private) include file for PROJ.4 library.
  * Author:   Gerald Evenden
  *
  ******************************************************************************
@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.9  2001/04/06 01:24:13  warmerda
+ * Introduced proj_api.h as a public interface for PROJ.4
+ *
  * Revision 1.8  2001/04/05 04:24:10  warmerda
  * added prototypes for new functions, and PJ_VERSION
  *
@@ -48,15 +51,12 @@
 
 /* standard inclusions */
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/* Try to update this every version! */
-
-#define PJ_VERSION 443
 
 #ifndef NULL
 #  define NULL	0
@@ -90,8 +90,6 @@ extern double hypot(double, double);
 #define FORTPI		0.78539816339744833
 #define PI		3.14159265358979323846
 #define TWOPI		6.2831853071795864769
-#define RAD_TO_DEG	57.29577951308232
-#define DEG_TO_RAD	.0174532925199432958
 
 /* environment parameter name */
 #ifndef PROJ_LIB
@@ -121,7 +119,7 @@ extern double hypot(double, double);
 
 #define USE_PROJUV 
 
-typedef struct { double u, v; }	projUV;
+typedef struct { double u, v; } projUV;
 typedef struct { double r, i; }	COMPLEX;
 
 #ifndef PJ_LIB__
@@ -131,9 +129,6 @@ typedef struct { double r, i; }	COMPLEX;
 typedef struct { double x, y; }     XY;
 typedef struct { double lam, phi; } LP;
 #endif
-
-	extern int		/* global error return code */
-pj_errno;
 
 typedef union { double  f; int  i; char *s; } PVALUE;
 
@@ -214,6 +209,9 @@ typedef struct PJconsts {
 PROJ_PARMS__
 #endif /* end of optional extensions */
 } PJ;
+
+/* public API */
+#include "proj_api.h"
 
 /* Generate pj_list external or make list from include file */
 #ifndef PJ_LIST_H
@@ -305,35 +303,11 @@ double *pj_authset(double);
 double pj_authlat(double, double *);
 COMPLEX pj_zpoly1(COMPLEX, COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, COMPLEX *, int, COMPLEX *);
+FILE *pj_open_lib(char *, char *);
+
 int pj_deriv(LP, double, PJ *, struct DERIVS *);
 int pj_factors(LP, PJ *, double, struct FACTORS *);
-XY pj_fwd(LP, PJ *);
-LP pj_inv(XY, PJ *);
-int pj_transform( PJ *src, PJ *dst, long point_count, int point_offset,
-                  double *x, double *y, double *z );
-int pj_datum_transform( PJ *src, PJ *dst, long point_count, int point_offset,
-                        double *x, double *y, double *z );
-int pj_geocentric_to_geodetic( double a, double ra,
-                               long point_count, int point_offset,
-                               double *x, double *y, double *z );
-int pj_geodetic_to_geocentric( double a, double ra,
-                               long point_count, int point_offset,
-                               double *x, double *y, double *z );
-int pj_compare_datums( PJ *srcdefn, PJ *dstdefn );
-int pj_apply_gridshift( const char *, int, 
-                        long point_count, int point_offset,
-                        double *x, double *y, double *z );
-void pj_deallocate_grids();
-int pj_is_latlong(PJ *);
-                         
-void pj_pr_list(PJ *);
-void pj_free(PJ *);
-PJ *pj_init(int, char **);
-PJ *pj_init_plus(const char *);
-PJ *pj_latlong_from_proj( PJ *);
-void *pj_malloc(size_t);
-void pj_dalloc(void *);
-char *pj_strerrno(int);
+
 /* Approximation structures and procedures */
 typedef struct {	/* Chebyshev or Power series structure */
 	projUV a, b;		/* power series range for evaluation */
