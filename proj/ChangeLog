@@ -1,3 +1,8 @@
+2001-08-23  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/epsg: fixed all LCC projections.  The parameters were badly
+	mixed up.
+
 2001-08-11  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/proj.c: Generate an error message if +proj=latlong is used with
