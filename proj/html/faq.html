@@ -104,6 +104,37 @@ include expanding the definition of +datum clause. <p>
 
 </ol>
 
+<!-------------------------------------------------------------------------->
+
+<h2>How do I use EPSG coordinate system codes with PROJ.4?</h2>
+
+There is somewhat imperfect translation between 2d geographic and
+projected coordinate system codes and PROJ.4 descriptions of the
+coordinate system available in the <tt>epsg</tt> definition file that
+normally lives in the <tt>proj/nad</tt> directory.  If installed (it is
+installed by default on Unix), it is possible to use EPSG numbers like this:
+
+<code>
+% cs2cs -v +init=epsg:26711
+# ---- From Coordinate System ----
+#Universal Transverse Mercator (UTM)
+#       Cyl, Sph
+#       zone= south
+# +init=epsg:26711 +proj=utm +zone=11 +ellps=clrk66 +datum=NAD27 +units=m
+# +no_defs +nadgrids=conus,ntv1_can.dat
+#--- following specified but NOT used
+# +ellps=clrk66
+# ---- To Coordinate System ----
+#Lat/long (Geodetic)
+#
+# +proj=latlong +datum=NAD27 +ellps=clrk66 +nadgrids=conus,ntv1_can.dat
+</code>
+
+The <tt>proj/nad/epsg</tt> file can be browsed and searched in a text editor 
+for coordinate systems.  There are known to be problems with some coordinate
+systems, and any coordinate systems with odd axes, a non-greenwich prime
+meridian or other quirkyness are unlikely to work properly.  Caveat Emptor!<p>
+
 
 <!-------------------------------------------------------------------------->
 
