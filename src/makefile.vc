@@ -47,7 +47,7 @@ support = \
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
 PROJEXE_SRC	=	proj.c gen_cheb.c p_series.c
 GEODEXE_SRC	=	geod.c geod_set.c geod_for.c geod_inv.c emess.c
-CFLAGS	=	-I.
+CFLAGS	=	-I. -DPROJ_LIB=\"C:/PROJ/\"
 
 default:	proj.lib
 
