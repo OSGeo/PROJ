@@ -240,6 +240,7 @@ uninstall-am: uninstall-info-am uninstall-pkgdataDATA
 
 
 install-data-local:
+	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
 	@if [ -f conus.lla ] ; then \
 	  for x in *.lla ; do \
 	    DEST=$(pkgdatadir)/`basename $$x .lla`; \

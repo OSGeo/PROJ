@@ -756,10 +756,10 @@ uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS \
 
 
 install-exec-local:
-	rm -f $(DESTDIR)$(bindir)/invproj
-	ln -s $(DESTDIR)$(bindir)/proj $(DESTDIR)$(bindir)/invproj
-	rm -f $(DESTDIR)$(bindir)/invgeod
-	ln -s $(DESTDIR)$(bindir)/geod $(DESTDIR)$(bindir)/invgeod
+	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)
+	(cd $(DESTDIR)$(bindir); ln -s proj$(EXEEXT) invproj$(EXEEXT))
+	rm -f $(DESTDIR)$(bindir)/invgeod$(EXEEXT)
+	(cd $(DESTDIR)$(bindir); ln -s geod$(EXEEXT) invgeod$(EXEEXT))
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
