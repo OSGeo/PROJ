@@ -1,3 +1,7 @@
+2001-02-07  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Cleaned up various warnings when compiled with -Wall.
+
 2001-02-03  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Added cs2cs.1 man page, and minor updates to nad2nad.1 and proj.1.
