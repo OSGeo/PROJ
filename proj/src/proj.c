@@ -246,231 +246,243 @@ vprocess(FILE *fid) {
 }
 
 int main(int argc, char **argv) {
-	char *arg, **eargv = argv, *pargv[MAX_PARGS], **iargv = argv;
-	FILE *fid;
-	int pargc = 0, iargc = argc, eargc = 0, c, mon = 0;
+    char *arg, **eargv = argv, *pargv[MAX_PARGS], **iargv = argv;
+    FILE *fid;
+    int pargc = 0, iargc = argc, eargc = 0, c, mon = 0;
 
-	if (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR))
-		++emess_dat.Prog_name;
-	else emess_dat.Prog_name = *argv;
-	inverse = ! strncmp(emess_dat.Prog_name, "inv", 3);
-	if (argc <= 1 ) {
-		(void)fprintf(stderr, usage, pj_release, emess_dat.Prog_name);
-		exit (0);
-	}
-		/* process run line arguments */
-	while (--argc > 0) { /* collect run line arguments */
-		if(**++argv == '-') for(arg = *argv;;) {
-			switch(*++arg) {
-			case '\0': /* position of "stdin" */
-				if (arg[-1] == '-') eargv[eargc++] = "-";
-				break;
-			case 'b': /* binary I/O */
-				bin_in = bin_out = 1;
-				continue;
-			case 'v': /* monitor dump of initialization */
-				mon = 1;
-				continue;
-			case 'i': /* input binary */
-				bin_in = 1;
-				continue;
-			case 'o': /* output binary */
-				bin_out = 1;
-				continue;
-			case 'I': /* alt. method to spec inverse */
-				inverse = 1;
-				continue;
-			case 'E': /* echo ascii input to ascii output */
-				echoin = 1;
-				continue;
-			case 'V': /* very verbose processing mode */
-				very_verby = 1;
-				mon = 1;
-			case 'S': /* compute scale factors */
-				dofactors = 1;
-				continue;
-			case 't': /* set col. one char */
-				if (arg[1]) tag = *++arg;
-				else emess(1,"missing -t col. 1 tag");
-				continue;
-			case 'l': /* list projections, ellipses or units */
-				if (!arg[1] || arg[1] == 'p' || arg[1] == 'P') {
-					/* list projections */
-					struct PJ_LIST *lp;
-					int do_long = arg[1] == 'P', c;
-					char *str;
+    if (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR))
+        ++emess_dat.Prog_name;
+    else emess_dat.Prog_name = *argv;
+    inverse = ! strncmp(emess_dat.Prog_name, "inv", 3);
+    if (argc <= 1 ) {
+        (void)fprintf(stderr, usage, pj_release, emess_dat.Prog_name);
+        exit (0);
+    }
+    /* process run line arguments */
+    while (--argc > 0) { /* collect run line arguments */
+        if(**++argv == '-') for(arg = *argv;;) {
+            switch(*++arg) {
+              case '\0': /* position of "stdin" */
+                if (arg[-1] == '-') eargv[eargc++] = "-";
+                break;
+              case 'b': /* binary I/O */
+                bin_in = bin_out = 1;
+                continue;
+              case 'v': /* monitor dump of initialization */
+                mon = 1;
+                continue;
+              case 'i': /* input binary */
+                bin_in = 1;
+                continue;
+              case 'o': /* output binary */
+                bin_out = 1;
+                continue;
+              case 'I': /* alt. method to spec inverse */
+                inverse = 1;
+                continue;
+              case 'E': /* echo ascii input to ascii output */
+                echoin = 1;
+                continue;
+              case 'V': /* very verbose processing mode */
+                very_verby = 1;
+                mon = 1;
+              case 'S': /* compute scale factors */
+                dofactors = 1;
+                continue;
+              case 't': /* set col. one char */
+                if (arg[1]) tag = *++arg;
+                else emess(1,"missing -t col. 1 tag");
+                continue;
+              case 'l': /* list projections, ellipses or units */
+                if (!arg[1] || arg[1] == 'p' || arg[1] == 'P') {
+                    /* list projections */
+                    struct PJ_LIST *lp;
+                    int do_long = arg[1] == 'P', c;
+                    char *str;
 
-					for (lp = pj_list ; lp->id ; ++lp) {
-						(void)printf("%s : ", lp->id);
-						if (do_long)  /* possibly multiline description */
-							(void)puts(*lp->descr);
-						else { /* first line, only */
-							str = *lp->descr;
-							while ((c = *str++) && c != '\n')
-								putchar(c);
-							putchar('\n');
-						}
-					}
-				} else if (arg[1] == '=') { /* list projection 'descr' */
-					struct PJ_LIST *lp;
-
-					arg += 2;
-					for (lp = pj_list ; lp->id ; ++lp)
-						if (!strcmp(lp->id, arg)) {
-							(void)printf("%9s : %s\n", lp->id, *lp->descr);
-							break;
-						}
-				} else if (arg[1] == 'e') { /* list ellipses */
-					struct PJ_ELLPS *le;
-
-					for (le = pj_ellps; le->id ; ++le)
-						(void)printf("%9s %-16s %-16s %s\n",
-							le->id, le->major, le->ell, le->name);
-				} else if (arg[1] == 'u') { /* list units */
-					struct PJ_UNITS *lu;
-
-					for (lu = pj_units; lu->id ; ++lu)
-						(void)printf("%12s %-20s %s\n",
-							lu->id, lu->to_meter, lu->name);
-				} else
-					emess(1,"invalid list option: l%c",arg[1]);
-				exit(0);
-				continue; /* artificial */
-			case 'e': /* error line alternative */
-				if (--argc <= 0)
-noargument:			   emess(1,"missing argument for -%c",*arg);
-				oterr = *++argv;
-				continue;
-			case 'T': /* generate Chebyshev coefficients */
-				if (--argc <= 0) goto noargument;
-				cheby_str = *++argv;
-				continue;
-			case 'm': /* cartesian multiplier */
-				if (--argc <= 0) goto noargument;
-				postscale = 1;
-				if (!strncmp("1/",*++argv,2) || 
-				    !strncmp("1:",*argv,2)) {
-					if((fscale = atof((*argv)+2)) == 0.)
-						goto badscale;
-					fscale = 1. / fscale;
-				} else
-					if ((fscale = atof(*argv)) == 0.) {
-badscale:
-					      emess(1,"invalid scale argument");
-					}
-				continue;
-			case 'W': /* specify seconds precision */
-			case 'w': /* -W for constant field width */
-				if ((c = arg[1]) != 0 && isdigit(c)) {
-					set_rtodms(c - '0', *arg == 'W');
-					++arg;
-				} else
-				    emess(1,"-W argument missing or non-digit");
-				continue;
-			case 'f': /* alternate output format degrees or xy */
-				if (--argc <= 0) goto noargument;
-				oform = *++argv;
-				continue;
-			case 'r': /* reverse input */
-				reversein = 1;
-				continue;
-			case 's': /* reverse output */
-				reverseout = 1;
-				continue;
-			default:
-				emess(1, "invalid option: -%c",*arg);
-				break;
-			}
-			break;
-		} else if (**argv == '+') { /* + argument */
-			if (pargc < MAX_PARGS)
-				pargv[pargc++] = *argv + 1;
-			else
-				emess(1,"overflowed + argument table");
-		} else /* assumed to be input file name(s) */
-			eargv[eargc++] = *argv;
-	}
-	if (eargc == 0 && !cheby_str) /* if no specific files force sysin */
-		eargv[eargc++] = "-";
-	else if (eargc > 0 && cheby_str) /* warning */
-		emess(4, "data files when generating Chebychev prohibited");
-	/* done with parameter and control input */
-	if (inverse && postscale) {
-		prescale = 1;
-		postscale = 0;
-		fscale = 1./fscale;
-	}
-	if (!(Proj = pj_init(pargc, pargv)))
-		emess(3,"projection initialization failure\ncause: %s",
-			pj_strerrno(pj_errno));
-	if (inverse) {
-		if (!Proj->inv)
-			emess(3,"inverse projection not available");
-		proj = pj_inv;
-	} else
-		proj = pj_fwd;
-	if (cheby_str) {
-		extern void gen_cheb(int, projUV(*)(), char *, PJ *, int, char **);
-
-		gen_cheb(inverse, int_proj, cheby_str, Proj, iargc, iargv);
-		exit(0);
-	}
-	/* set input formating control */
-	if (mon) {
-		pj_pr_list(Proj);
-		if (very_verby) {
-			(void)printf("#Final Earth figure: ");
-			if (Proj->es) {
-				(void)printf("ellipsoid\n#  Major axis (a): ");
-				(void)printf(oform ? oform : "%.3f", Proj->a);
-				(void)printf("\n#  1/flattening: %.6f\n",
-					1./(1. - sqrt(1. - Proj->es)));
-				(void)printf("#  squared eccentricity: %.12f\n", Proj->es);
-			} else {
-				(void)printf("sphere\n#  Radius: ");
-				(void)printf(oform ? oform : "%.3f", Proj->a);
-				(void)putchar('\n');
-			}
-		}
-	}
-	if (inverse)
-		informat = strtod;
-	else {
-		informat = dmstor;
-		if (!oform)
-			oform = "%.2f";
-	}
-
-        if (bin_out)
-        {
-            SET_BINARY_MODE(stdout);
-        }
-
-	/* process input file list */
-	for ( ; eargc-- ; ++eargv) {
-		if (**eargv == '-') {
-			fid = stdin;
-			emess_dat.File_name = "<stdin>";
-
-                        if (bin_in)
-                        {
-                            SET_BINARY_MODE(stdin);
+                    for (lp = pj_list ; lp->id ; ++lp) {
+                        (void)printf("%s : ", lp->id);
+                        if (do_long)  /* possibly multiline description */
+                            (void)puts(*lp->descr);
+                        else { /* first line, only */
+                            str = *lp->descr;
+                            while ((c = *str++) && c != '\n')
+                                putchar(c);
+                            putchar('\n');
                         }
+                    }
+                } else if (arg[1] == '=') { /* list projection 'descr' */
+                    struct PJ_LIST *lp;
 
-		} else {
-			if ((fid = fopen(*eargv, "rb")) == NULL) {
-				emess(-2, *eargv, "input file");
-				continue;
-			}
-			emess_dat.File_name = *eargv;
-		}
-		emess_dat.File_line = 0;
-		if (very_verby)
-			vprocess(fid);
-		else
-			process(fid);
-		(void)fclose(fid);
-		emess_dat.File_name = 0;
-	}
-	exit(0); /* normal completion */
+                    arg += 2;
+                    for (lp = pj_list ; lp->id ; ++lp)
+                        if (!strcmp(lp->id, arg)) {
+                            (void)printf("%9s : %s\n", lp->id, *lp->descr);
+                            break;
+                        }
+                } else if (arg[1] == 'e') { /* list ellipses */
+                    struct PJ_ELLPS *le;
+
+                    for (le = pj_ellps; le->id ; ++le)
+                        (void)printf("%9s %-16s %-16s %s\n",
+                                     le->id, le->major, le->ell, le->name);
+                } else if (arg[1] == 'u') { /* list units */
+                    struct PJ_UNITS *lu;
+
+                    for (lu = pj_units; lu->id ; ++lu)
+                        (void)printf("%12s %-20s %s\n",
+                                     lu->id, lu->to_meter, lu->name);
+                } else if (arg[1] == 'd') { /* list datums */
+                    struct PJ_DATUMS *ld;
+
+                    printf("__datum_id__ __ellipse___ __definition/comments______________________________\n" );
+                    for (ld = pj_datums; ld->id ; ++ld)
+                    {
+                        printf("%12s %-12s %-30s\n",
+                               ld->id, ld->ellipse_id, ld->defn);
+                        if( ld->comments != NULL && strlen(ld->comments) > 0 )
+                            printf( "%25s %s\n", " ", ld->comments );
+                    }
+                } else
+                    emess(1,"invalid list option: l%c",arg[1]);
+                exit(0);
+                continue; /* artificial */
+              case 'e': /* error line alternative */
+                if (--argc <= 0)
+                    noargument:			   
+                emess(1,"missing argument for -%c",*arg);
+                oterr = *++argv;
+                continue;
+              case 'T': /* generate Chebyshev coefficients */
+                if (--argc <= 0) goto noargument;
+                cheby_str = *++argv;
+                continue;
+              case 'm': /* cartesian multiplier */
+                if (--argc <= 0) goto noargument;
+                postscale = 1;
+                if (!strncmp("1/",*++argv,2) || 
+                    !strncmp("1:",*argv,2)) {
+                    if((fscale = atof((*argv)+2)) == 0.)
+                        goto badscale;
+                    fscale = 1. / fscale;
+                } else
+                    if ((fscale = atof(*argv)) == 0.) {
+                      badscale:
+                        emess(1,"invalid scale argument");
+                    }
+                continue;
+              case 'W': /* specify seconds precision */
+              case 'w': /* -W for constant field width */
+                if ((c = arg[1]) != 0 && isdigit(c)) {
+                    set_rtodms(c - '0', *arg == 'W');
+                    ++arg;
+                } else
+                    emess(1,"-W argument missing or non-digit");
+                continue;
+              case 'f': /* alternate output format degrees or xy */
+                if (--argc <= 0) goto noargument;
+                oform = *++argv;
+                continue;
+              case 'r': /* reverse input */
+                reversein = 1;
+                continue;
+              case 's': /* reverse output */
+                reverseout = 1;
+                continue;
+              default:
+                emess(1, "invalid option: -%c",*arg);
+                break;
+            }
+            break;
+        } else if (**argv == '+') { /* + argument */
+            if (pargc < MAX_PARGS)
+                pargv[pargc++] = *argv + 1;
+            else
+                emess(1,"overflowed + argument table");
+        } else /* assumed to be input file name(s) */
+            eargv[eargc++] = *argv;
+    }
+    if (eargc == 0 && !cheby_str) /* if no specific files force sysin */
+        eargv[eargc++] = "-";
+    else if (eargc > 0 && cheby_str) /* warning */
+        emess(4, "data files when generating Chebychev prohibited");
+    /* done with parameter and control input */
+    if (inverse && postscale) {
+        prescale = 1;
+        postscale = 0;
+        fscale = 1./fscale;
+    }
+    if (!(Proj = pj_init(pargc, pargv)))
+        emess(3,"projection initialization failure\ncause: %s",
+              pj_strerrno(pj_errno));
+    if (inverse) {
+        if (!Proj->inv)
+            emess(3,"inverse projection not available");
+        proj = pj_inv;
+    } else
+        proj = pj_fwd;
+    if (cheby_str) {
+        extern void gen_cheb(int, projUV(*)(), char *, PJ *, int, char **);
+
+        gen_cheb(inverse, int_proj, cheby_str, Proj, iargc, iargv);
+        exit(0);
+    }
+    /* set input formating control */
+    if (mon) {
+        pj_pr_list(Proj);
+        if (very_verby) {
+            (void)printf("#Final Earth figure: ");
+            if (Proj->es) {
+                (void)printf("ellipsoid\n#  Major axis (a): ");
+                (void)printf(oform ? oform : "%.3f", Proj->a);
+                (void)printf("\n#  1/flattening: %.6f\n",
+                             1./(1. - sqrt(1. - Proj->es)));
+                (void)printf("#  squared eccentricity: %.12f\n", Proj->es);
+            } else {
+                (void)printf("sphere\n#  Radius: ");
+                (void)printf(oform ? oform : "%.3f", Proj->a);
+                (void)putchar('\n');
+            }
+        }
+    }
+    if (inverse)
+        informat = strtod;
+    else {
+        informat = dmstor;
+        if (!oform)
+            oform = "%.2f";
+    }
+
+    if (bin_out)
+    {
+        SET_BINARY_MODE(stdout);
+    }
+
+    /* process input file list */
+    for ( ; eargc-- ; ++eargv) {
+        if (**eargv == '-') {
+            fid = stdin;
+            emess_dat.File_name = "<stdin>";
+
+            if (bin_in)
+            {
+                SET_BINARY_MODE(stdin);
+            }
+
+        } else {
+            if ((fid = fopen(*eargv, "rb")) == NULL) {
+                emess(-2, *eargv, "input file");
+                continue;
+            }
+            emess_dat.File_name = *eargv;
+        }
+        emess_dat.File_line = 0;
+        if (very_verby)
+            vprocess(fid);
+        else
+            process(fid);
+        (void)fclose(fid);
+        emess_dat.File_name = 0;
+    }
+    exit(0); /* normal completion */
 }
