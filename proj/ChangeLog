@@ -5,6 +5,10 @@ Rel. 4.4.9 2004-10-29
 
 	* Preparing 4.4.9 release.
 
+	* src/nad_cvt.c: Fixed problem with domai of tb.lam that caused
+	failure of eastern hemisphere locations to transform with null
+	grid (which is world sized).
+
 2004-10-28  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/makefile.vc: Changed to build executables against a proj.dll
