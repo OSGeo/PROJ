@@ -11,6 +11,11 @@ PROJ_LIB_DIR=C:/PROJ/NAD
 OPTFLAGS=	/nologo /Ox 
 #OPTFLAGS=	/nologo /Zi /Fdproj.pdb
 
+# Set the version number for the DLL.  Normally we leave this blank since
+# we want software that is dynamically loading the DLL to have no problem
+# with version numbers.
+VERSION=
+
 azimuthal = \
 	PJ_aeqd.obj PJ_gnom.obj PJ_laea.obj PJ_mod_ster.obj \
 	PJ_nsper.obj PJ_nzmg.obj PJ_ortho.obj PJ_stere.obj
@@ -61,18 +66,19 @@ LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
 PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
 CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
 GEODEXE_OBJ	= geod.obj geod_set.obj geod_for.obj geod_inv.obj emess.obj
+PROJ_DLL 	= proj$(VERSION).dll
 CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" $(OPTFLAGS)
 
 default:	all
 
-all:            proj.lib proj.dll proj.exe cs2cs.exe geod.exe nad2nad.exe
+all:            proj.lib $(PROJ_DLL) proj.exe cs2cs.exe geod.exe nad2nad.exe
 
 proj.lib:	$(LIBOBJ)
 	if exist proj.lib del proj.lib
 	lib /out:proj.lib $(LIBOBJ)
 
-proj.dll:	$(LIBOBJ)
-	link /debug /dll /def:proj.def /out:proj.dll /implib:proj_i.lib \
+$(PROJ_DLL):	$(LIBOBJ)
+	link /debug /dll /def:proj.def /out:$(PROJ_DLL) /implib:proj_i.lib \
 			$(LIBOBJ)
 
 proj.exe:	$(PROJEXE_OBJ) proj.lib
