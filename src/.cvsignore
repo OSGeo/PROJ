@@ -1,0 +1,10 @@
+*.lo
+*.la
+.libs
+.deps
+nad2nad
+nad2bin
+proj
+geod
+stamp-h*
+proj_config.h
