@@ -48,11 +48,12 @@ LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
 PROJEXE_SRC	=	proj.c gen_cheb.c p_series.c
 CS2CSEXE_SRC	=	cs2cs.c gen_cheb.c p_series.c
 GEODEXE_SRC	=	geod.c geod_set.c geod_for.c geod_inv.c emess.c
-CFLAGS	=	-I. -DPROJ_LIB=\"C:/PROJ/\"
+NAD2NAD_SRC	=	nad2nad.c
+CFLAGS	=	/nologo -I. -DPROJ_LIB=\"C:/PROJ/\"
 
 default:	all
 
-all:            proj.lib proj.dll proj.exe cs2cs.exe geod.exe
+all:            proj.lib proj.dll proj.exe cs2cs.exe geod.exe nad2nad.exe
 
 proj.lib:	$(LIBOBJ)
 	if exist proj.lib del proj.lib
@@ -63,13 +64,34 @@ proj.dll:	$(LIBOBJ)
 			$(LIBOBJ)
 
 proj.exe:	$(PROJEXE_SRC) proj.lib
-	cl -I. $(PROJEXE_SRC) proj.lib
+	cl $(CFLAGFS) $(PROJEXE_SRC) proj.lib
 
 cs2cs.exe:	$(CS2CSEXE_SRC) proj.lib
-	cl -I. $(CS2CSEXE_SRC) proj.lib
+	cl $(CFLAGS) $(CS2CSEXE_SRC) proj.lib
 
 geod.exe:	$(GEODEXE_SRC) proj.lib
-	cl -I. $(GEODEXE_SRC) proj.lib
+	cl $(CFLAGS) $(GEODEXE_SRC) proj.lib
+
+nad2nad.exe:	$(NAD2NAD_SRC) proj.lib
+	cl $(CFLAGS) -I. $(NAD2NAD_SRC) proj.lib
+
+nad2bin.exe:	nad2bin.c proj.lib
+	cl $(CFLAGS) -I. nad2bin.c proj.lib
+
+nadshift:	nad2bin.exe
+	cd ..\nad
+	..\src\nad2bin.exe < conus.lla conus
+	..\src\nad2bin.exe < MD.lla MD
+	..\src\nad2bin.exe < TN.lla TN
+	..\src\nad2bin.exe < WI.lla WI
+	..\src\nad2bin.exe < WO.lla WO
+	..\src\nad2bin.exe < alaska.lla alaska
+	..\src\nad2bin.exe < hawaii.lla hawaii
+	..\src\nad2bin.exe < prvi.lla prvi
+	..\src\nad2bin.exe < stgeorge.lla stgeorge
+	..\src\nad2bin.exe < stlrnc.lla stlrnc
+	..\src\nad2bin.exe < stpaul.lla stpaul
+	cd ..\src
 
 clean:
 	del *.obj *.lib *.dll
