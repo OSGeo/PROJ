@@ -20,6 +20,11 @@ EXPORTS
 	pj_dalloc                 @17
         pj_is_geocent             @18
         pj_get_release            @19
+	pj_malloc		  @20
+	pj_pr_list		  @21
+	pj_compare_datums	  @22
+	pj_apply_gridshift	  @23
+	pj_datum_transform        @24
 
 
 
