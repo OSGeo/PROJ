@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.9  2004/04/15 13:56:24  warmerda
+ * added pj_get_release
+ *
  * Revision 1.8  2003/03/31 14:52:38  warmerda
  * updated to 4.4.7
  *
@@ -121,6 +124,7 @@ void *pj_malloc(size_t);
 void pj_dalloc(void *);
 char *pj_strerrno(int);
 int *pj_get_errno_ref();
+const char *pj_get_release();
 
 #ifdef __cplusplus
 }
