@@ -64,6 +64,11 @@
  *    ----              -----------
  *    25-02-97          Original Code
  *
+ * $Log$
+ * Revision 1.3  2002/01/08 15:04:08  warmerda
+ * The latitude clamping fix from September in Convert_Geodetic_To_Geocentric
+ * was botched.  Fixed up now.
+ *
  */
 
 
@@ -195,7 +200,7 @@ long Convert_Geodetic_To_Geocentric (double Latitude,
   */
   if( Latitude < -PI_OVER_2 && Latitude > -1.001 * PI_OVER_2 )
       Latitude = -PI_OVER_2;
-  else if( Latitude > -PI_OVER_2 && Latitude < 1.001 * PI_OVER_2 )
+  else if( Latitude > PI_OVER_2 && Latitude < 1.001 * PI_OVER_2 )
       Latitude = PI_OVER_2;
   else if ((Latitude < -PI_OVER_2) || (Latitude > PI_OVER_2))
   { /* Latitude out of range */
