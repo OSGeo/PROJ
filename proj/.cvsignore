@@ -1,3 +1,5 @@
 config.log
 config.guess
 config.status
+config.cache
+Makefile
