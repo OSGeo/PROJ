@@ -3,6 +3,10 @@ Rel. 4.4.3 2001/04/20
 	
 2001-04-20  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* Don't install test files in /usr/local/share/proj.
+
+	* Made WGS84 the default in proj_def.dat
+
 	* nad/test27,test83: Use -b flag for diff to avoid differences on
 	Windows due to CR/LF issues.
 
@@ -10,8 +14,6 @@ Rel. 4.4.3 2001/04/20
 
 	* src/pj_init.c: call pj_open_lib() with mode of "rt" to ensure
 	correct handling of def files on DOS based systems.
-
-2001-04-20  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Updated for 4.4.3 release (pj_release.c, Makefile.am, etc).
 
