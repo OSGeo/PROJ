@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.3  2001/04/04 21:13:21  warmerda
+ * do arcsecond/radian and ppm datum parm transformation in pj_set_datum()
+ *
  * Revision 1.2  2001/04/04 16:08:08  warmerda
  * rewrote 7 param datum shift to match EPSG:9606, now works with example
  *
@@ -51,16 +54,13 @@
 #define SRS_WGS84_ESQUARED 0.006694379990
 #endif
 
-/* SEC_TO_RAD = Pi/180/3600 */
-#define SEC_TO_RAD 4.84813681109535993589914102357e-6
-
 #define Dx_BF (defn->datum_params[0])
 #define Dy_BF (defn->datum_params[1])
 #define Dz_BF (defn->datum_params[2])
-#define Rx_BF (defn->datum_params[3] * SEC_TO_RAD)
-#define Ry_BF (defn->datum_params[4] * SEC_TO_RAD)
-#define Rz_BF (defn->datum_params[5] * SEC_TO_RAD)
-#define M_BF  (1 + defn->datum_params[6] * 0.000001)
+#define Rx_BF (defn->datum_params[3])
+#define Ry_BF (defn->datum_params[4])
+#define Rz_BF (defn->datum_params[5])
+#define M_BF  (defn->datum_params[6])
 
 /************************************************************************/
 /*                            pj_transform()                            */

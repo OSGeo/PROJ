@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.2  2001/04/04 21:13:21  warmerda
+ * do arcsecond/radian and ppm datum parm transformation in pj_set_datum()
+ *
  * Revision 1.1  2000/07/06 23:32:27  warmerda
  * New
  *
@@ -35,6 +38,9 @@
 
 #include <projects.h>
 #include <string.h>
+
+/* SEC_TO_RAD = Pi/180/3600 */
+#define SEC_TO_RAD 4.84813681109535993589914102357e-6
 
 /************************************************************************/
 /*                            pj_datum_set()                            */
@@ -120,7 +126,17 @@ int pj_datum_set(paralist *pl, PJ *projdef)
             || projdef->datum_params[4] != 0.0 
             || projdef->datum_params[5] != 0.0 
             || projdef->datum_params[6] != 0.0 )
+        {
             projdef->datum_type = PJD_7PARAM;
+
+            /* transform from arc seconds to radians */
+            projdef->datum_params[3] *= SEC_TO_RAD;
+            projdef->datum_params[4] *= SEC_TO_RAD;
+            projdef->datum_params[5] *= SEC_TO_RAD;
+            /* transform from parts per million to scaling factor */
+            projdef->datum_params[6] = 
+                (projdef->datum_params[6]/1000000.0) + 1;
+        }
         else 
             projdef->datum_type = PJD_3PARAM;
 
