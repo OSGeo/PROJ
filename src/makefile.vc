@@ -42,10 +42,11 @@ support = \
 	pj_zpoly1.obj rtodms.obj vector1.obj pj_release.obj \
 	geocent.obj pj_transform.obj pj_datum_set.obj pj_datums.obj \
 	pj_apply_gridshift.obj emess.obj nad_cvt.obj nad_init.obj \
-	nad_intr.obj 
+	nad_intr.obj strtod.obj
 
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
-EXESRC	=	proj.c gen_cheb.c p_series.c
+PROJEXE_SRC	=	proj.c gen_cheb.c p_series.c
+GEODEXE_SRC	=	geod.c geod_set.c geod_for.c geod_inv.c emess.c
 CFLAGS	=	-I.
 
 default:	proj.lib
@@ -60,8 +61,11 @@ proj.dll:	$(LIBOBJ)
 	link /debug /dll /def:proj.def /out:proj.dll /implib:proj_i.lib \
 			$(LIBOBJ)
 
-proj.exe:	$(EXESRC) proj.lib
-	cl -I. $(EXESRC) proj.lib
+proj.exe:	$(PROJEXE_SRC) proj.lib
+	cl -I. $(PROJEXE_SRC) proj.lib
+
+geod.exe:	$(GEODEXE_SRC) proj.lib
+	cl -I. $(GEODEXE_SRC) proj.lib
 
 clean:
 	del *.obj *.lib *.dll
