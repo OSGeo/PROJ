@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.2  2001/02/03 18:36:55  warmerda
+ * removed some unavailable options from usage string
+ *
  * Revision 1.1  2000/07/06 23:32:27  warmerda
  * New
  *
@@ -56,7 +59,7 @@ tag = '#';	/* beginning of line tag character */
 *oform = (char *)0,	/* output format for x-y or decimal degrees */
 *oterr = "*\t*",	/* output line for unprojectable input */
 *usage =
-"%s\nusage: %s [ -beEfiIlorstvwW [args] ] [ +opts[=arg] ]\n"
+"%s\nusage: %s [ -eEfIlrstvwW [args] ] [ +opts[=arg] ]\n"
 "                   [+to [+opts[=arg] [ files ]\n";
 
 static struct FACTORS facs;
