@@ -43,14 +43,14 @@ support = \
 
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
 EXESRC	=	proj.c gen_cheb.c p_series.c emess.c 
-CFLAGS	=	-I.
+CFLAGS	=	-I. /nologo
 
 default:	proj.lib
 
 all:            proj.lib proj.dll proj.exe
 
 proj.lib:	$(LIBOBJ)
-	del proj.lib
+	if exist proj.lib del proj.lib
 	lib /out:proj.lib $(LIBOBJ)
 
 proj.dll:	$(LIBOBJ)
@@ -61,5 +61,8 @@ proj.exe:	$(EXESRC) proj.lib
 	cl -I. $(EXESRC) proj.lib
 
 clean:
-	del *.obj *.lib *.dll
-	del *.pdb *.exp
+	-del *.obj 
+	-del *.lib 
+	-del *.dll
+	-del *.pdb 
+	-del *.exp
