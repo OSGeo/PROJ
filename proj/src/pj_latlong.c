@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.2  2000/07/07 06:04:23  warmerda
+ * added longlat alias
+ *
  * Revision 1.1  2000/07/06 23:32:27  warmerda
  * New
  *
@@ -39,6 +42,7 @@
 #define PJ_LIB__
 #include	<projects.h>
 PROJ_HEAD(latlong, "Lat/long (Geodetic)")  "\n\t";
+PROJ_HEAD(longlat, "Lat/long (Geodetic)")  "\n\t";
 
 FORWARD(forward);
 
@@ -53,7 +57,15 @@ INVERSE(inverse);
         return lp;
 }
 FREEUP; if (P) pj_dalloc(P); }
+
 ENTRY0(latlong)
+        P->is_latlong = 1;
+        P->x0 = 0.0;
+        P->y0 = 0.0;
+	P->inv = inverse; P->fwd = forward;
+ENDENTRY(P)
+
+ENTRY0(longlat)
         P->is_latlong = 1;
         P->x0 = 0.0;
         P->y0 = 0.0;
