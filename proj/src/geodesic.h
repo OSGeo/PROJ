@@ -6,9 +6,13 @@ static char GEODESIC_H_ID[] = "@(#)geodesic.h	4.3	95/08/19	GIE	REL";
 extern "C" {
 #endif
 
-extern double dmstor();
-double proj_strtod(const char *, char **);
-struct geodesic {
+#ifndef _IN_GEOD_SET
+#  define GEOD_EXTERN extern
+#else
+#  define GEOD_EXTERN
+#endif
+
+GEOD_EXTERN struct geodesic {
 	double	A;
 	double	LAM1, PHI1, ALPHA12;
 	double	LAM2, PHI2, ALPHA21;
@@ -33,13 +37,13 @@ struct geodesic {
 # define f64	GEODESIC.FLAT64
 # define ellipse GEODESIC.ELLIPSE
 
-	int
-n_alpha, n_S;
-	double
-to_meter, fr_meter, del_alpha;
+    
+GEOD_EXTERN int n_alpha, n_S;
+GEOD_EXTERN double to_meter, fr_meter, del_alpha;
+	
 void geod_set(int, char **);
 void geod_for(void);
-void geod_prefor(void);
+void geod_pre(void);
 void geod_inv(void);
 
 #ifdef __cplusplus

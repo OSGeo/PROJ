@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.6  2002/07/08 02:32:05  warmerda
+ * ensure clean C++ builds
+ *
  * Revision 1.5  2002/04/30 16:26:07  warmerda
  * trip newlines of ctable id field
  *
@@ -45,6 +48,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
+#include <string.h>
 
 static int  byte_order_test = 1;
 #define IS_LSB	(((unsigned char *) (&byte_order_test))[0] == 1)
@@ -92,7 +96,7 @@ static void local_order( unsigned char *data, int word_size, int word_count )
 static struct CTABLE *nad_load_ntv1( FILE * fid )
 
 {
-    char	header[176];
+    unsigned char header[176];
     struct CTABLE *ct;
     LP		ur;
     double	*row_buf;

@@ -8,9 +8,9 @@ static const char SCCSID[]="@(#)emess.c	4.6	94/05/24	GIE	REL";
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
+#include <proj_api.h>
 #define EMESS_ROUTINE
 #include "emess.h"
-extern char const pj_release[];
 	void
 emess(int code, char *fmt, ...) {
 	va_list args;

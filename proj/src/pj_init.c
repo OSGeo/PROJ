@@ -91,7 +91,7 @@ pj_init_plus( const char *definition )
     PJ	        *result;
     
     /* make a copy that we can manipulate */
-    defn_copy = pj_malloc( strlen(definition)+1 );
+    defn_copy = (char *) pj_malloc( strlen(definition)+1 );
     strcpy( defn_copy, definition );
 
     /* split into arguments based on '+' and trim white space */
@@ -141,7 +141,7 @@ pj_init_plus( const char *definition )
 PJ *
 pj_init(int argc, char **argv) {
 	char *s, *name;
-	void *(*proj)(PJ *);
+	PJ *(*proj)(PJ *);
 	paralist *curr;
 	int i;
 	PJ *PIN = 0;
@@ -175,7 +175,7 @@ pj_init(int argc, char **argv) {
 	/* set defaults, unless inhibited */
 	if (!pj_param(start, "bno_defs").i)
 		curr = get_defaults(curr, name);
-	proj = pj_list[i].proj;
+	proj = (PJ *(*)(PJ *)) pj_list[i].proj;
 
 	/* allocate projection structure */
 	if (!(PIN = (*proj)(0))) goto bum_call;

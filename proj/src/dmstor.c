@@ -6,7 +6,7 @@ static const char SCCSID[]="@(#)dmstor.c	4.4	93/06/16	GIE	REL";
 #include <string.h>
 #include <ctype.h>
 
-static double proj_strtod(const char *nptr, char **endptr);
+static double proj_strtod(char *nptr, char **endptr);
 
 /* following should be sufficient for all but the rediculous */
 #define MAX_WORK 64
@@ -80,7 +80,7 @@ dmstor(const char *is, char **rs) {
 }
 
 static double
-proj_strtod(const char *nptr, char **endptr) 
+proj_strtod(char *nptr, char **endptr) 
 
 {
     char c, *cp = nptr;

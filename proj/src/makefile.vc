@@ -51,13 +51,13 @@ support = \
 	pj_zpoly1.obj rtodms.obj vector1.obj pj_release.obj \
 	geocent.obj pj_transform.obj pj_datum_set.obj pj_datums.obj \
 	pj_apply_gridshift.obj nad_cvt.obj nad_init.obj \
-	nad_intr.obj strtod.obj pj_utils.obj
+	nad_intr.obj pj_utils.obj
 
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
-PROJEXE_SRC	=	proj.c gen_cheb.c p_series.c emess.c
-CS2CSEXE_SRC	=	cs2cs.c gen_cheb.c p_series.c emess.c
-GEODEXE_SRC	=	geod.c geod_set.c geod_for.c geod_inv.c emess.c
-CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\"
+PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
+CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
+GEODEXE_OBJ	= geod.obj geod_set.obj geod_for.obj geod_inv.obj emess.obj
+CFLAGS	=	/nologo /TP -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\"
 
 default:	all
 
@@ -71,20 +71,20 @@ proj.dll:	$(LIBOBJ)
 	link /debug /dll /def:proj.def /out:proj.dll /implib:proj_i.lib \
 			$(LIBOBJ)
 
-proj.exe:	$(PROJEXE_SRC) proj.lib
-	cl $(CFLAGS) $(PROJEXE_SRC) proj.lib
+proj.exe:	$(PROJEXE_OBJ) proj.lib
+	cl $(PROJEXE_OBJ) proj.lib
 
-cs2cs.exe:	$(CS2CSEXE_SRC) proj.lib
-	cl $(CFLAGS) $(CS2CSEXE_SRC) proj.lib
+cs2cs.exe:	$(CS2CSEXE_OBJ) proj.lib
+	cl $(CS2CSEXE_OBJ) proj.lib
 
-geod.exe:	$(GEODEXE_SRC) proj.lib
-	cl $(CFLAGS) $(GEODEXE_SRC) proj.lib
+geod.exe:	$(GEODEXE_OBJ) proj.lib
+	cl $(GEODEXE_OBJ) proj.lib
 
-nad2nad.exe:	nad2nad.c emess.c proj.lib
-	cl $(CFLAGS) nad2nad.c emess.c proj.lib
+nad2nad.exe:	nad2nad.obj emess.obj proj.lib
+	cl nad2nad.obj emess.obj proj.lib
 
-nad2bin.exe:	nad2bin.c emess.c proj.lib
-	cl $(CFLAGS) nad2bin.c emess.c proj.lib
+nad2bin.exe:	nad2bin.obj emess.obj proj.lib
+	cl nad2bin.obj emess.obj proj.lib
 
 nadshift:	nad2bin.exe
 	cd ..\nad
