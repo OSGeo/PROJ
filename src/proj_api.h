@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.13  2004/10/30 02:33:47  fwarmerdam
+ * Updated release version.
+ *
  * Revision 1.12  2004/09/16 15:14:01  fwarmerdam
  * * src/pj_open_lib.c: added pj_set_searchpath() provided by Eric Miller.
  *
@@ -80,7 +83,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 448
+#define PJ_VERSION 449
 
 extern char const pj_release[]; /* global release id string */
 
