@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.2  2001/06/02 03:35:36  warmerda
+ * added pj_get_errno_ref()
+ *
  * Revision 1.1  2001/04/06 01:24:22  warmerda
  * New
  *
@@ -96,6 +99,7 @@ projPJ pj_latlong_from_proj( projPJ );
 void *pj_malloc(size_t);
 void pj_dalloc(void *);
 char *pj_strerrno(int);
+int *pj_get_errno_ref();
 
 #ifdef __cplusplus
 }

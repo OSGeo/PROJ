@@ -12,5 +12,7 @@ EXPORTS
         pj_init_plus              @9
         pj_latlong_from_proj      @10
         pj_is_latlong             @11
+	pj_get_errno_ref	  @12
+
 
 
