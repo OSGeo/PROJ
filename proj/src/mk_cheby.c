@@ -158,7 +158,7 @@ error:
 	}
 	T = 0;
 gohome:
-	freev2(w, nu);
+	freev2((void **) w, nu);
 	pj_dalloc(ncu);
 	return T;
 }

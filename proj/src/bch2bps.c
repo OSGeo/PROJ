@@ -85,7 +85,7 @@ cols(projUV **c, projUV **d, int nu, int nv) {
 	for (j = nu-1; j >= 1; --j)
 		subop(d[j], d[j-1], dd[j], nv);
 	submop(d[0], .5, c[0], dd[0], nv);
-	freev2(dd, nu);
+	freev2((void **) dd, nu);
 	pj_dalloc(sv);
 }
 	static void /* row adjust for range -1 to 1 to a to b */
@@ -138,6 +138,6 @@ bch2bps(projUV a, projUV b, projUV **c, int nu, int nv) {
 	/* do columns to power series */
 	cols(d, c, nu, nv);
 	colshft(a.u, b.u, c, nu, nv);
-	freev2(d, nu);
+	freev2((void **) d, nu);
 	return 1;
 }
