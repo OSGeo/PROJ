@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.14  2004/05/05 01:45:00  warmerda
+ * Make sword buffer larger so long +towgs84 parameters don't get split.
+ *
  * Revision 1.13  2003/09/16 03:46:21  warmerda
  * dont use default ellps if any earth model info is set: bug 386
  *
@@ -67,12 +70,12 @@ extern FILE *pj_open_lib(char *, char *);
 /************************************************************************/
 static paralist *
 get_opt(FILE *fid, char *name, paralist *next) {
-    char sword[52], *word = sword+1;
+    char sword[102], *word = sword+1;
     int first = 1, len, c;
 
     len = strlen(name);
     *sword = 't';
-    while (fscanf(fid, "%50s", word) == 1) {
+    while (fscanf(fid, "%100s", word) == 1) {
         if (*word == '#') /* skip comments */
             while((c = fgetc(fid)) != EOF && c != '\n') ;
         else if (*word == '<') { /* control name */
