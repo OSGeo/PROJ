@@ -74,6 +74,7 @@ VERSION = @VERSION@
 
 pkgdata_DATA = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist 			proj_def.dat test27 test83 world
 
+
 EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist 			proj_def.dat test27 test83 world
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -151,7 +152,7 @@ installcheck: installcheck-am
 install-exec-am:
 install-exec: install-exec-am
 
-install-data-am: install-pkgdataDATA
+install-data-am: install-pkgdataDATA install-data-local
 install-data: install-data-am
 
 install-am: all-am
@@ -197,11 +198,27 @@ maintainer-clean: maintainer-clean-am
 
 .PHONY: uninstall-pkgdataDATA install-pkgdataDATA tags distdir info-am \
 info dvi-am dvi check check-am installcheck-am installcheck \
-install-exec-am install-exec install-data-am install-data install-am \
-install uninstall-am uninstall all-redirect all-am all installdirs \
-mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+install-exec-am install-exec install-data-local install-data-am \
+install-data install-am install uninstall-am uninstall all-redirect \
+all-am all installdirs mostlyclean-generic distclean-generic \
+clean-generic maintainer-clean-generic clean mostlyclean distclean \
+maintainer-clean
 
+
+install-data-local:
+	@if [ -f conus.lla ] ; then \
+	  for x in *.lla ; do \
+	    DEST=$(pkgdatadir)/`basename $$x .lla`; \
+	    echo "../src/nad2bin $$DEST < $$x"; \
+	    ../src/nad2bin $$DEST < $$x ; \
+	    if [ $$? -ne 0 ] ; then \
+		echo "nad2bin failed to install $$DEST"; \
+		exit 1; \
+	    fi; \
+	  done; \
+	else \
+	  echo "nad2nad NADCON source files not present"; \
+	fi 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
