@@ -15,8 +15,7 @@ nad_init(char *name) {
 	size_t i;
 
 	errno = pj_errno = 0;
-	strcpy(fname, "nad2783/");
-	strcat(fname, name);
+	strcpy(fname, name);
 	if (!(fid = pj_open_lib(fname, "rb"))) {
 		pj_errno = errno;
 		return 0;
