@@ -1,3 +1,22 @@
+2000-07-06  Frank Warmerdam  <warmerda@cs46980-c>
+
+	* Fixed bug in nad_init() with path for datum shifting files.
+
+	* Implemented cs2cs program for transforming between coordinate systems
+	including datum shifts.
+
+	* Implemented proj=latlong pseudo-projection.
+
+	* Implemented pj_transform() to transform from one coordinate system
+	to another, including applying geocentric datum shifts, and NAD27
+	grid shifts.
+
+	* Implemented 3/7 parameter geocentric datum shift support.
+
+	* Added support for +datum, +towgs84, and +nadgrids parameters
+	when defining PJ's (for pj_init()).  Added datum_type, and datum_params
+	to PJ structure.
+
 2000-07-04  Frank Warmerdam  <warmerda@cs46980-c>
 
 	* Patched proj.c to handle binary io properly on Windows and DOS.
