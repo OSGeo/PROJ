@@ -104,11 +104,14 @@ Addition of computing scale factors and angular distortion added through
 
 -V option which verbosely lists projected point characteristics.
 
-Programmers may use projection library with calls to pj_init and
-pj_fwd and/or pj_inv.
+Programmers may use projection library with calls to pj_init,
+pj_fwd, pj_inv and pj_transform.
 
 Program nad2nad for conversion of data to and from NAD27 and NAD83
 datums.
+
+Program cs2cs for converting between coordinate systems, with optional
+datum translation.
 
 -------------------------------------------------------------
 
