@@ -1,3 +1,8 @@
+2000-09-22  Frank Warmerdam  <warmerda@cs46980-c>
+
+	* Cast args to freev2() in bch2bps.c, and mk_cheby.c to avoid errors
+	on the Cray.
+
 2000-09-21  Frank Warmerdam  <warmerda@cs46980-c>
 
 	* Added "sphere" to pj_ellps.c. 
