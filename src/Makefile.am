@@ -1,5 +1,7 @@
 bin_PROGRAMS =	proj nad2nad nad2bin geod
 
+INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\"
+
 include_HEADERS = projects.h
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c emess.c emess.h
