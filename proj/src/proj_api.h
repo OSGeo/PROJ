@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.10  2004/05/04 03:28:01  warmerda
+ * Updated version.
+ *
  * Revision 1.9  2004/04/15 13:56:24  warmerda
  * added pj_get_release
  *
@@ -70,7 +73,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 447
+#define PJ_VERSION 448
 
 extern char const pj_release[]; /* global release id string */
 
