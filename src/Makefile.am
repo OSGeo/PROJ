@@ -1,9 +1,9 @@
 bin_PROGRAMS =	proj nad2nad nad2bin geod
 
-proj_SOURCES = proj.c gen_cheb.c p_series.c emess.c
-nad2nad_SOURCES = nad2nad.c nad_cvt.c nad_init.c nad_intr.c emess.c
+proj_SOURCES = proj.c gen_cheb.c p_series.c emess.c emess.h
+nad2nad_SOURCES = nad2nad.c nad_cvt.c nad_init.c nad_intr.c emess.c nad_list.h
 nad2bin_SOURCES = nad2bin.c
-geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c emess.c
+geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c emess.c geodesic.h
 
 proj_LDADD = libproj.la
 nad2nad_LDADD = libproj.la
@@ -15,6 +15,7 @@ lib_LTLIBRARIES = libproj.la
 libproj_la_LDFLAGS = -version-info 0:0:0
 
 libproj_la_SOURCES = \
+	projects.h pj_list.h \
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c \
 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c \
