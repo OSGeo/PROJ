@@ -1,3 +1,8 @@
+2003-04-24  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/geod.c: Don't emit an error message after listing ellipsoids
+	or units, as per request from Dan Jacobson.
+
 2003-04-09  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* man/man1/{proj,cs2cs}.1: moved -m option from cs2cs.1 to
