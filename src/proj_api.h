@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.7  2002/12/14 20:14:35  warmerda
+ * added geocentric support
+ *
  * Revision 1.6  2002/06/11 18:08:25  warmerda
  * Added the pj_get_def() function
  *
@@ -103,6 +106,7 @@ int pj_apply_gridshift( const char *, int,
                         double *x, double *y, double *z );
 void pj_deallocate_grids();
 int pj_is_latlong(projPJ);
+int pj_is_geocent(projPJ);
 void pj_pr_list(projPJ);
 void pj_free(projPJ);
 void pj_set_finder( const char *(*)(const char *) );
