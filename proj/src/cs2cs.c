@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.5  2002/11/19 20:33:42  warmerda
+ * cleanup before exit to facilitate memory leak testing
+ *
  * Revision 1.4  2001/04/05 19:32:19  warmerda
  * use projPJ, and pj_is_latlong()
  *
@@ -408,5 +411,13 @@ int main(int argc, char **argv)
         fclose(fid);
         emess_dat.File_name = 0;
     }
+
+    if( fromProj != NULL )
+        pj_free( fromProj );
+    if( toProj != NULL )
+        pj_free( toProj );
+
+    pj_deallocate_grids();
+
     exit(0); /* normal completion */
 }
