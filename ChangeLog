@@ -1,3 +1,7 @@
+2000-12-15  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/makefile.vc: only delete proj.lib if it exists.
+
 2000-12-01  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Added proj.def to extra_dist in src/Makefile.am.
