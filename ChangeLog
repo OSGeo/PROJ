@@ -1,3 +1,9 @@
+2001-03-15  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_apply_gridshift.c: fixed bug in pj_load_nadgrids() which
+	would sometimes result in the load function failing because of a
+	buffer overrun in the grid list string.
+
 2001-03-14  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* added nad/epsg database of translations between EPSG PCS/GCS
