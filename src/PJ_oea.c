@@ -10,7 +10,7 @@ static const char SCCSID[]="@(#)PJ_oea.c	4.1	94/02/15	GIE	REL";
 #include	<projects.h>
 PROJ_HEAD(oea, "Oblated Equal Area") "\n\tMisc Sph\n\tn= m= theta=";
 FORWARD(s_forward); /* sphere */
-	double Az, hz, M, N, cp, sp, cl, shz;
+	double Az, M, N, cp, sp, cl, shz;
 
 	cp = cos(lp.phi);
 	sp = sin(lp.phi);
