@@ -4,7 +4,8 @@ static const char SCCSID[]="@(#)pj_ellps.c	4.6	95/08/25	GIE	REL";
 #endif
 #define PJ_ELLPS__
 #include "projects.h"
-	struct PJ_ELLPS
+
+C_NAMESPACE struct PJ_ELLPS
 pj_ellps[] = {
 "MERIT",	"a=6378137.0", "rf=298.257", "MERIT 1983",
 "SGS85",	"a=6378136.0", "rf=298.257",  "Soviet Geodetic System 85",

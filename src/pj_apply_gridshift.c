@@ -31,6 +31,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.4  2002/07/08 02:32:05  warmerda
+ * ensure clean C++ builds
+ *
  * Revision 1.3  2002/04/30 16:27:27  warmerda
  * improve debug output
  *
@@ -129,9 +132,10 @@ static struct CTABLE *pj_get_grid( const char *name )
 /* -------------------------------------------------------------------- */
     if( grid_count == 0 )
     {
-        grid_names = pj_malloc(sizeof(char *) * GRID_MAX);
+        grid_names = (char **) pj_malloc(sizeof(char *) * GRID_MAX);
         memset( grid_names, 0, sizeof(char *) * GRID_MAX );
-        grid_list = pj_malloc(sizeof(struct CTABLE *) * GRID_MAX );
+        grid_list = (struct CTABLE **)
+            pj_malloc(sizeof(struct CTABLE *) * GRID_MAX );
         memset( grid_list, 0, sizeof(struct CTABLE *) * GRID_MAX );
     }
     else if( grid_count >= GRID_MAX )

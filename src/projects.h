@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.12  2002/07/08 02:32:05  warmerda
+ * ensure clean C++ builds
+ *
  * Revision 1.11  2002/06/20 16:09:31  warmerda
  * removed strtod, reimplement non-GPL strtod cover within dmstor.c
  *
@@ -61,7 +64,10 @@
 #include <stdlib.h>
 
 #ifdef __cplusplus
+#define C_NAMESPACE extern "C"
 extern "C" {
+#else    
+#define C_NAMESPACE extern
 #endif
 
 #ifndef NULL
@@ -137,10 +143,11 @@ typedef struct { double lam, phi; } LP;
 #endif
 
 typedef union { double  f; int  i; char *s; } PVALUE;
-
+struct PJconsts;
+    
 struct PJ_LIST {
 	char	*id;		/* projection keyword */
-	void	*(*proj)();	/* projection entry point */
+	struct PJconsts	*(*proj)(struct PJconsts*);/* projection entry point */
 	char 	* const *descr;	/* description text */
 };
 struct PJ_ELLPS {
@@ -162,11 +169,13 @@ struct PJ_DATUMS {
     char    *comments; /* EPSG code, etc */
 };
 
+struct DERIVS {
+    double x_l, x_p; /* derivatives of x for lambda-phi */
+    double y_l, y_p; /* derivatives of y for lambda-phi */
+};
+    
 struct FACTORS {
-	struct DERIVS {
-		double x_l, x_p; /* derivatives of x for lambda-phi */
-		double y_l, y_p; /* derivatives of y for lambda-phi */
-	} der;
+	struct DERIVS der;
 	double h, k;	/* meridinal, parallel scales */
 	double omega, thetap;	/* angular distortion, theta prime */
 	double conv;	/* convergence */
@@ -224,7 +233,8 @@ PROJ_PARMS__
 extern struct PJ_LIST pj_list[];
 #else
 #define PROJ_HEAD(id, name) \
-	extern void *pj_##id(); extern char * const pj_s_##id;
+    struct PJconsts *pj_##id(struct PJconsts*); extern char * const pj_s_##id;
+    
 #ifndef lint
 #define DO_PJ_LIST_ID
 #endif
@@ -257,9 +267,9 @@ extern struct PJ_DATUMS pj_datums[];
 #ifdef PJ_LIB__
     /* repeatative projection code */
 #define PROJ_HEAD(id, name) static const char des_##id [] = name
-#define ENTRYA(name) const char * const pj_s_##name = des_##name; \
-	PJ *pj_##name(PJ *P) { if (!P) { \
-	if( (P = pj_malloc(sizeof(PJ))) != NULL) { \
+#define ENTRYA(name) C_NAMESPACE const char * const pj_s_##name = des_##name; \
+	C_NAMESPACE PJ *pj_##name(PJ *P) { if (!P) { \
+	if( (P = (PJ*) pj_malloc(sizeof(PJ))) != NULL) { \
 	P->pfree = freeup; P->fwd = 0; P->inv = 0; \
 	P->spc = 0; P->descr = des_##name;
 #define ENTRYX } return P; } else {
@@ -271,8 +281,8 @@ extern struct PJ_DATUMS pj_datums[];
 #define E_ERROR_0 { freeup(P); return(0); }
 #define F_ERROR { pj_errno = -20; return(xy); }
 #define I_ERROR { pj_errno = -20; return(lp); }
-#define FORWARD(name) static XY name(LP lp, PJ *P) { XY xy
-#define INVERSE(name) static LP name(XY xy, PJ *P) { LP lp
+#define FORWARD(name) static XY name(LP lp, PJ *P) { XY xy = {0.0,0.0}
+#define INVERSE(name) static LP name(XY xy, PJ *P) { LP lp = {0.0,0.0}
 #define FREEUP static void freeup(PJ *P) {
 #define SPECIAL(name) static void name(LP lp, PJ *P, struct FACTORS *fac)
 #endif
@@ -313,14 +323,16 @@ FILE *pj_open_lib(char *, char *);
 int pj_deriv(LP, double, PJ *, struct DERIVS *);
 int pj_factors(LP, PJ *, double, struct FACTORS *);
 
+struct PW_COEF {/* row coefficient structure */
+    int m;		/* number of c coefficients (=0 for none) */
+    double *c;	/* power coefficients */
+};
+ 
 /* Approximation structures and procedures */
 typedef struct {	/* Chebyshev or Power series structure */
 	projUV a, b;		/* power series range for evaluation */
 					/* or Chebyshev argument shift/scaling */
-	struct PW_COEF {/* row coefficient structure */
-		int m;		/* number of c coefficients (=0 for none) */
-		double *c;	/* power coefficients */
-	} *cu, *cv;
+	struct PW_COEF *cu, *cv;
 	int mu, mv;		/* maximum cu and cv index (+1 for count) */
 	int power;		/* != 0 if power series, else Chebyshev */
 } Tseries;
@@ -330,6 +342,7 @@ projUV bcheval(projUV, Tseries *);
 projUV biveval(projUV, Tseries *);
 void *vector1(int, int);
 void **vector2(int, int, int);
+void freev2(void **v, int nrows);
 int bchgen(projUV, projUV, int, int, projUV **, projUV(*)(projUV));
 int bch2bps(projUV, projUV, projUV **, int, int);
 /* nadcon related protos */

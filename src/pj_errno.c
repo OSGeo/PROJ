@@ -3,7 +3,9 @@
 static const char SCCSID[]="@(#)pj_errno.c	4.3	95/06/03	GIE	REL";
 #endif
 
-int pj_errno = 0;
+#include <projects.h>
+
+C_NAMESPACE int pj_errno = 0;
 
 /************************************************************************/
 /*                          pj_get_errno_ref()                          */

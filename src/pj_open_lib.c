@@ -32,7 +32,8 @@ void pj_set_finder( const char *(*new_finder)(const char *) )
 
 FILE *
 pj_open_lib(char *name, char *mode) {
-	char fname[MAX_PATH_FILENAME+1], *sysname;
+	char fname[MAX_PATH_FILENAME+1];
+        const char *sysname;
 	FILE *fid;
 	int n = 0;
 

@@ -7,7 +7,7 @@ static const char SCCSID[]="@(#)PJ_goode.c	4.1 94/02/15     GIE     REL";
 #define PJ_LIB__
 #include	<projects.h>
 PROJ_HEAD(goode, "Goode Homolosine") "\n\tPCyl, Sph.";
-	extern PJ
+	C_NAMESPACE PJ
 *pj_sinu(PJ *), *pj_moll(PJ *);
 #define Y_COR		0.05280
 #define PHI_LIM	.71093078197902358062

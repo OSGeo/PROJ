@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.3  2002/07/08 02:32:05  warmerda
+ * ensure clean C++ builds
+ *
  * Revision 1.2  2001/04/05 19:32:41  warmerda
  * added ntv1_can.dat to NAD27 list
  *
@@ -46,7 +49,7 @@
  * datum name for the comments if available. 
  */
 
-struct PJ_DATUMS pj_datums[] = {
+C_NAMESPACE struct PJ_DATUMS pj_datums[] = {
 /* id       definition                               ellipse  comments */
 /* --       ----------                               -------  -------- */
 "WGS84",    "towgs84=0,0,0", 		             "WGS84", "",

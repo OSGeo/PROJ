@@ -134,7 +134,7 @@ set_ops(char *s, struct IO_CON *io) {
 		case 5:
 			if (!(intag = strchr(intag, '=')) || *++intag == '\0')
 				emess(1,"hp missing name");
-			strcpy(io->hp = malloc(strlen(intag)+1), intag);
+			strcpy(io->hp = (char*)malloc(strlen(intag)+1), intag);
 			break;
 		case 6: io->bin = 1; break;
 		case 7: io->rev = 1; break;

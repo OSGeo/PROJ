@@ -7,16 +7,16 @@ static const char SCCSID[]="@(#)pj_param.c	4.4	93/06/12	GIE	REL";
 #include <string.h>
 	paralist * /* create parameter list entry */
 pj_mkparam(char *str) {
-	paralist *new;
+	paralist *newitem;
 
-	if (new = (paralist *)pj_malloc(sizeof(paralist) + strlen(str))) {
-		new->used = 0;
-		new->next = 0;
+	if (newitem = (paralist *)pj_malloc(sizeof(paralist) + strlen(str))) {
+		newitem->used = 0;
+		newitem->next = 0;
 		if (*str == '+')
 			++str;
-		(void)strcpy(new->param, str);
+		(void)strcpy(newitem->param, str);
 	}
-	return new;
+	return newitem;
 }
 
 /************************************************************************/

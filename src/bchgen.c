@@ -20,7 +20,7 @@ bchgen(projUV a, projUV b, int nu, int nv, projUV **f, projUV(*func)(projUV)) {
 				return(1);
 		}
 	}
-	if (!(c = vector1(nu, sizeof(projUV)))) return 1;
+	if (!(c = (projUV *) vector1(nu, sizeof(projUV)))) return 1;
 	fac = 2. / nu;
 	for ( j = 0; j < nv ; ++j) {
 		for ( i = 0; i < nu; ++i) {
@@ -38,7 +38,7 @@ bchgen(projUV a, projUV b, int nu, int nv, projUV **f, projUV(*func)(projUV)) {
 			f[i][j] = c[i];
 	}
 	pj_dalloc(c);
-	if (!(c = vector1(nv, sizeof(projUV)))) return 1;
+	if (!(c = (projUV*) vector1(nv, sizeof(projUV)))) return 1;
 	fac = 2. / nv;
 	for ( i = 0; i < nu; ++i) {
 		t = f[i];
