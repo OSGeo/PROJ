@@ -1,11 +1,43 @@
+/******************************************************************************
+ * $Id$
+ *
+ * Project:  PROJ.4
+ * Purpose:  Primary include file for PROJ.4 library.
+ * Author:   Gerald Evenden
+ *
+ ******************************************************************************
+ * Copyright (c) 2000, Frank Warmerdam
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ ******************************************************************************
+ *
+ * $Log$
+ * Revision 1.5  2000/07/06 23:36:47  warmerda
+ * added lots of datum related stuff
+ *
+ */
+
 /* General projections header file */
 #ifndef PROJECTS_H
 #define PROJECTS_H
 
-#ifndef lint
-static const char PROJECTS_H_ID[] = "@(#)projects.h	4.11	95/09/23	GIE	REL";
-#endif
-    /* standard inclusions */
+/* standard inclusions */
 #include <math.h>
 #include <stdlib.h>
 
@@ -13,7 +45,28 @@ static const char PROJECTS_H_ID[] = "@(#)projects.h	4.11	95/09/23	GIE	REL";
 extern "C" {
 #endif
 
-	/* maximum path/filename */
+#ifndef NULL
+#  define NULL	0
+#endif
+
+#ifndef FALSE
+#  define FALSE	0
+#endif
+
+#ifndef TRUE
+#  define TRUE	1
+#endif
+
+#ifndef MAX
+#  define MIN(a,b)      ((a<b) ? a : b)
+#  define MAX(a,b)      ((a>b) ? a : b)
+#endif
+
+#ifndef ABS
+#  define ABS(x)        ((x<0) ? (-1*(x)) : x)
+#endif
+
+    /* maximum path/filename */
 #ifndef MAX_PATH_FILENAME
 #define MAX_PATH_FILENAME 1024
 #endif
@@ -42,6 +95,16 @@ extern double hypot(double, double);
 #else
 #define DIR_CHAR '/'
 #endif
+
+/* datum_type values */
+#define PJD_UNKNOWN   0
+#define PJD_3PARAM    1   /* Molodensky */
+#define PJD_7PARAM    2   /* Molodensky */
+#define PJD_GRIDSHIFT 3
+#define PJD_WGS84     4   /* WGS84 (or anything considered equivelent) */
+
+/* datum system errors */
+#define PJD_ERR_GEOCENTRIC 100
 
 #define USE_PROJUV 
 
@@ -77,6 +140,14 @@ struct PJ_UNITS {
 	char	*to_meter;	/* multiply by value to get meters */
 	char	*name;	/* comments */
 };
+
+struct PJ_DATUMS {
+    char    *id;     /* datum keyword */
+    char    *defn;   /* ie. "to_wgs84=..." */
+    char    *ellipse_id; /* ie from ellipse table */
+    char    *comments; /* EPSG code, etc */
+};
+
 struct FACTORS {
 	struct DERIVS {
 		double x_l, x_p; /* derivatives of x for lambda-phi */
@@ -99,6 +170,8 @@ typedef struct ARG_list {
 	char used;
 	char param[1]; } paralist;
 	/* base projection data structure */
+
+
 typedef struct PJconsts {
 	XY  (*fwd)(LP, struct PJconsts *);
 	LP  (*inv)(XY, struct PJconsts *);
@@ -108,6 +181,7 @@ typedef struct PJconsts {
 	paralist *params;   /* parameter list */
 	int over;   /* over-range flag */
 	int geoc;   /* geocentric latitude flag */
+        int is_latlong; /* proj=latlong ... not really a projection at all */
 	double
 		a,  /* major axis or radius if es==0 */
 		e,  /* eccentricity */
@@ -119,6 +193,10 @@ typedef struct PJconsts {
 		x0, y0, /* easting and northing */
 		k0,	/* general scaling factor */
 		to_meter, fr_meter; /* cartesian scaling */
+
+        int     datum_type; /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
+        double  datum_params[7];
+        
 #ifdef PROJ_PARMS__
 PROJ_PARMS__
 #endif /* end of optional extensions */
@@ -153,6 +231,10 @@ extern struct PJ_ELLPS pj_ellps[];
 
 #ifndef PJ_UNITS__
 extern struct PJ_UNITS pj_units[];
+#endif
+
+#ifndef PJ_DATUMS__
+extern struct PJ_DATUMS pj_datums[];
 #endif
 
 #ifdef PJ_LIB__
@@ -196,6 +278,7 @@ double aacos(double), aasin(double), asqrt(double), aatan2(double, double);
 PVALUE pj_param(paralist *, char *);
 paralist *pj_mkparam(char *);
 int pj_ell_set(paralist *, double *, double *);
+int pj_datum_set(paralist *, PJ *);
 double *pj_enfn(double);
 double pj_mlfn(double, double, double, double *);
 double pj_inv_mlfn(double, double, double *);
@@ -212,6 +295,23 @@ int pj_deriv(LP, double, PJ *, struct DERIVS *);
 int pj_factors(LP, PJ *, double, struct FACTORS *);
 XY pj_fwd(LP, PJ *);
 LP pj_inv(XY, PJ *);
+int pj_transform( PJ *src, PJ *dst, long point_count, int point_offset,
+                  double *x, double *y, double *z );
+int pj_datum_transform( PJ *src, PJ *dst, long point_count, int point_offset,
+                        double *x, double *y, double *z );
+int pj_geocentric_to_geodetic( double a, double ra,
+                               long point_count, int point_offset,
+                               double *x, double *y, double *z );
+int pj_geodetic_to_geocentric( double a, double ra,
+                               long point_count, int point_offset,
+                               double *x, double *y, double *z );
+int pj_compare_datums( PJ *srcdefn, PJ *dstdefn );
+int pj_apply_gridshift( const char *, int, 
+                        long point_count, int point_offset,
+                        double *x, double *y, double *z );
+void pj_deallocate_grids();
+                         
+
 void pj_pr_list(PJ *);
 void pj_free(PJ *);
 PJ *pj_init(int, char **);
