@@ -27,7 +27,7 @@ libproj_la_SOURCES = \
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c \
 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c \
-	PJ_imw_p.c PJ_lcc.c PJ_mpoly.c PJ_poly.c \
+	PJ_imw_p.c PJ_krovak.c PJ_lcc.c PJ_mpoly.c PJ_poly.c \
 	PJ_rpoly.c PJ_sconics.c \
 	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c \
 	PJ_gall.c PJ_labrd.c PJ_lsat.c PJ_merc.c \
