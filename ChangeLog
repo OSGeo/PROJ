@@ -1,3 +1,8 @@
+2001-11-05  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/proj.def: added pj_strerrno and pj_errno as per request from
+	Bernhard Herzog.
+
 Rel. 4.4.4 2001/09/15
 -------------------------------------------------------------------------
 	
