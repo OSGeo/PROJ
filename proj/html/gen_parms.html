@@ -1,0 +1,85 @@
+<html>
+<head>
+<title>PROJ.4 - General Parameters</title>
+</head>
+<body BGCOLOR="#FFFFFF">
+<h1>PROJ.4 - General Parameters</h1>
+
+This document attempts to describe a variety of the PROJ.4 parameters
+which can be applied to all, or many coordinate system definitions.  This
+document does not attempt to describe the parameters particular to particular
+projection types.  Some of these can be found in the GeoTIFF 
+<a href="http://www.remotesensing.org/geotiff/proj_list/">Projections 
+Transform List</a>.  The definitative documentation for most parameters
+is Gerald's original documentation available from the main PROJ.4 page. <p>
+
+<h2><a name="towgs84">towgs84 - Datum transformation to WGS84</a></h2>
+
+Datum shifts can be approximated by 3 parameter spatial translations (in
+geocentric space), or 7 parameter shifts (translation + rotation + scaling). 
+The parameters to describe this can be described using the <b>towgs84</b> 
+parameter.<p>
+
+In the three parameter case, the three arguments are the translations to the
+geocentric location in meters.<p>
+
+For instance, the following demonstrates converting from the Greek GGRS87
+datum to WGS84.<p>
+
+<pre>
+% cs2cs +proj=latlong +ellps=GRS80 +towgs84=-199.87,74.79,246.62 \
+    +to +proj=latlong +datum=WGS84
+20 35
+20d0'5.467"E    35d0'9.575"N 8.570
+</pre>
+
+The EPSG database provides this example for transforming from WGS72 to WGS84
+using an approximated 7 parameter transformation.<p>
+<pre>
+% cs2cs +proj=latlong +ellps=WGS72 +towgs84=0,0,4.5,0,0,0.554,0.219 \
+    +to +proj=latlong +datum=WGS84
+4 55
+4d0'0.554"E     55d0'0.09"N 3.223
+</pre>
+
+The seven parameter case uses <i>delta_x</i>, <i>delta_y</i>, <i>delta_z</i>,
+<i>Rx - rotation X</i>, <i>Ry - rotation Y</i>, <i>Rz - rotation Z</i>, 
+<i>M_BF - Scaling</i>.  The three translation parameters are in meters as
+in the three parameter case.  The rotational parameters are not in physical
+units.  They are something like the sine of the rotational angle times the
+ellipoid axis length, but I don't know the exact details of how to derive
+these from a physical description of the rotation.   What I do know is that
+they match the parameters used for transformation method 9606 in the EPSG
+database.  The scaling is apparently the scale change in parts per million.<p>
+
+A more complete discussion of the 3 and 7 parameter transformations can be
+found in the EPSG database (trf_method's 9603 and 9606).  Within PROJ.4 
+the following calculations are used to apply the <b>towgs84</b> transformation
+(going to WGS84).  The x, y and z coordinates are in geocentric coordinates.
+
+Three parameter transformation (simple offsets):
+
+<pre>
+  x[io] = x[io] + defn->datum_params[0];
+  y[io] = y[io] + defn->datum_params[1];
+  z[io] = z[io] + defn->datum_params[2];
+</pre>
+
+Seven parameter transformation (translation, rotation and scaling):
+
+<pre>
+  #define Dx_BF (defn->datum_params[0])
+  #define Dy_BF (defn->datum_params[1])
+  #define Dz_BF (defn->datum_params[2])
+  #define Rx_BF (defn->datum_params[3])
+  #define Ry_BF (defn->datum_params[4])
+  #define Rz_BF (defn->datum_params[5])
+  #define M_BF  (defn->datum_params[6])
+
+  x_out = M_BF*(       x[io] - Rz_BF*y[io] + Ry_BF*z[io]) + Dx_BF;
+  y_out = M_BF*( Rz_BF*x[io] +       y[io] - Rx_BF*z[io]) + Dy_BF;
+  z_out = M_BF*(-Ry_BF*x[io] + Rx_BF*y[io] +       z[io]) + Dz_BF;
+</pre>
+
+</body>
+</html>
