@@ -52,6 +52,7 @@ pj_err_list[] = {
 	"|lat_1| == |lat_2|",				/* -42 */
 	"lat_0 is pi/2 from mean lat",			/* -43 */
 	"unparseable coordinate system definition",	/* -44 */
+	"geocentric transformation missing z or ellps",	/* -45 */
 };
 	char *
 pj_strerrno(int err) {
