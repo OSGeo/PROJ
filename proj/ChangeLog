@@ -1,3 +1,7 @@
+2000-09-21  Frank Warmerdam  <warmerda@cs46980-c>
+
+	* Added "sphere" to pj_ellps.c. 
+
 2000-07-06  Frank Warmerdam  <warmerda@cs46980-c>
 
 	* Fixed bug in nad_init() with path for datum shifting files.
