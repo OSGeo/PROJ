@@ -8,8 +8,12 @@
 PROJ_LIB_DIR=C:/PROJ/NAD
 
 # Uncomment the first for an optimized build, or the second for debug.
-OPTFLAGS=	/nologo /Ox 
-#OPTFLAGS=	/nologo /Zi /Fdproj.pdb
+OPTFLAGS=	/nologo /Ox /MD
+#OPTFLAGS=	/nologo /Zi /MD /Fdproj.pdb
+
+# Uncomment the first for linking exes against DLL or second for static
+EXE_PROJ =	proj_i.lib
+#EXE_PROJ =	proj.lib
 
 # Set the version number for the DLL.  Normally we leave this blank since
 # we want software that is dynamically loading the DLL to have no problem
@@ -72,30 +76,32 @@ CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" \
 
 default:	all
 
-all:            proj.lib $(PROJ_DLL) proj.exe cs2cs.exe geod.exe nad2nad.exe
+all:            proj.lib proj.exe cs2cs.exe geod.exe
 
 proj.lib:	$(LIBOBJ)
 	if exist proj.lib del proj.lib
 	lib /out:proj.lib $(LIBOBJ)
 
-$(PROJ_DLL):	$(LIBOBJ)
+$(PROJ_DLL):	proj_i.lib
+
+proj_i.lib:	$(LIBOBJ)
 	link /debug /dll /def:proj.def /out:$(PROJ_DLL) /implib:proj_i.lib \
 			$(LIBOBJ)
 
-proj.exe:	$(PROJEXE_OBJ) proj.lib
-	cl $(PROJEXE_OBJ) proj.lib
+proj.exe:	$(PROJEXE_OBJ) $(EXE_PROJ)
+	cl $(PROJEXE_OBJ) $(EXE_PROJ)
 
-cs2cs.exe:	$(CS2CSEXE_OBJ) proj.lib
-	cl $(CS2CSEXE_OBJ) proj.lib
+cs2cs.exe:	$(CS2CSEXE_OBJ) $(EXE_PROJ)
+	cl $(CS2CSEXE_OBJ) $(EXE_PROJ)
 
-geod.exe:	$(GEODEXE_OBJ) proj.lib
-	cl $(GEODEXE_OBJ) proj.lib
+geod.exe:	$(GEODEXE_OBJ) $(EXE_PROJ)
+	cl $(GEODEXE_OBJ) $(EXE_PROJ)
 
-nad2nad.exe:	nad2nad.obj emess.obj proj.lib
-	cl nad2nad.obj emess.obj proj.lib
+nad2nad.exe:	nad2nad.obj emess.obj $(EXE_PROJ)
+	cl nad2nad.obj emess.obj $(EXE_PROJ)
 
-nad2bin.exe:	nad2bin.obj emess.obj proj.lib
-	cl nad2bin.obj emess.obj proj.lib
+nad2bin.exe:	nad2bin.obj emess.obj $(EXE_PROJ)
+	cl nad2bin.obj emess.obj $(EXE_PROJ)
 
 nadshift:	nad2bin.exe
 	cd ..\nad
