@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.18  2004/04/15 13:56:45  warmerda
+ * changed PJD_ERR_GEOCENTRIC to -45
+ *
  * Revision 1.17  2003/03/17 18:56:34  warmerda
  * implement heirarchical NTv2 gridinfos
  *
@@ -144,7 +147,7 @@ extern double hypot(double, double);
 #define PJD_WGS84     4   /* WGS84 (or anything considered equivelent) */
 
 /* datum system errors */
-#define PJD_ERR_GEOCENTRIC 100
+#define PJD_ERR_GEOCENTRIC -45
 
 #define USE_PROJUV 
 
