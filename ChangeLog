@@ -1,3 +1,12 @@
+2004-10-28  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Makefile.am: added jniwrap make support.
+
+	* configure.in: various updates, including use of AC_MAINTAINER_MODE,
+	and setting version to 4.4.9.  Fixes annoying .so problem. 
+
+	* updated to latest libtoolish stuff. 
+
 2004-10-25  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* fixtimes.sh: Run this after a CVS checkout to setup times of
