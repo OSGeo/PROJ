@@ -31,6 +31,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.8  2003/03/20 21:29:41  warmerda
+ * Fixed bug in checking against grid bounds.
+ *
  * Revision 1.7  2003/03/17 19:45:23  warmerda
  * improved error handling
  *
@@ -100,8 +103,8 @@ int pj_apply_gridshift( const char *nadgrids, int inverse,
 
             /* skip tables that don't match our point at all.  */
             if( ct->ll.phi > input.phi || ct->ll.lam > input.lam
-                || ct->ll.phi + ct->lim.phi * ct->del.phi < input.phi
-                || ct->ll.lam + ct->lim.lam * ct->del.lam < input.lam )
+                || ct->ll.phi + (ct->lim.phi-1) * ct->del.phi < input.phi
+                || ct->ll.lam + (ct->lim.lam-1) * ct->del.lam < input.lam )
                 continue;
 
             /* If we have child nodes, check to see if any of them apply. */
@@ -114,8 +117,8 @@ int pj_apply_gridshift( const char *nadgrids, int inverse,
                     struct CTABLE *ct1 = child->ct;
 
                     if( ct1->ll.phi > input.phi || ct1->ll.lam > input.lam
-                        || ct1->ll.phi + ct1->lim.phi*ct1->del.phi < input.phi
-                        || ct1->ll.lam + ct1->lim.lam*ct1->del.lam < input.lam)
+                      || ct1->ll.phi+(ct1->lim.phi-1)*ct1->del.phi < input.phi
+                      || ct1->ll.lam+(ct1->lim.lam-1)*ct1->del.lam < input.lam)
                         continue;
 
                     break;
