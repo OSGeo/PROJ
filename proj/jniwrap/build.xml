@@ -11,7 +11,7 @@
    <!-- ******************************************* -->
    <!--     start everything (default target)       -->
    <!-- ******************************************* -->
-   <target name="compile" depends="start, do_javac, do_javah, do_make, do_make_help, jar_it">
+   <target name="compile" depends="start, do_javac, jar_it">
         <echo>Compilation finished...</echo>
    </target>
    
@@ -35,9 +35,13 @@
        </javac>
    </target>
     
+	
+
    <!-- ******************************************* -->
    <!--     execute javah for JNI headers           -->
    <!-- ******************************************* -->
+   <!-- needed if something if new native methods are added  -->
+	   <!-- ******************************************* -->
    <target name="do_javah" depends="do_javac">
        <echo>Creating jni headers...</echo>
        <exec dir="${build}" executable="javah" os="Linux">
@@ -65,9 +69,6 @@
       <jar destfile="${libs}/jproj.jar" basedir="${build}/">
           <manifest>
               <attribute name="Built-By" value="the jgrass idealists"/>
-    <!--               <section name="jgrass.gui.Main.class">      -->
-	<!-- 				  <attribute name="Sealed" value="false"/> -->
-    <!--               </section>                                  -->
           </manifest>
       </jar>
        <delete dir="${build}"/>
