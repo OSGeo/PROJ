@@ -1,5 +1,10 @@
 2000-09-22  Frank Warmerdam  <warmerda@cs46980-c>
 
+	* Update version to 4.4.2, in preparation for 4.4.2 release.
+
+	* Ensure makefile.vc is distributed, and mention windows building
+	in README.
+
 	* Cast args to freev2() in bch2bps.c, and mk_cheby.c to avoid errors
 	on the Cray.
 
