@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.4  2001/04/05 19:32:19  warmerda
+ * use projPJ, and pj_is_latlong()
+ *
  * Revision 1.3  2001/04/05 04:23:28  warmerda
  * use pj_latlong_from_proj
  *
@@ -51,7 +54,7 @@
 #define MAX_LINE 200
 #define MAX_PARGS 100
 
-static PJ   *fromProj, *toProj;
+static projPJ   fromProj, toProj;
 
 static int
 reversein = 0,	/* != 0 reverse input arguments */
@@ -134,7 +137,7 @@ static void process(FILE *fid)
         if (data.u == HUGE_VAL) /* error output */
             fputs(oterr, stdout);
 
-        else if (toProj->is_latlong && !oform) {	/*ascii DMS output */
+        else if (pj_is_latlong(toProj) && !oform) {	/*ascii DMS output */
             if (reverseout) {
                 fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
                 putchar('\t');
@@ -146,7 +149,7 @@ static void process(FILE *fid)
             }
 
         } else {	/* x-y or decimal degree ascii output */
-            if ( toProj->is_latlong ) {
+            if ( pj_is_latlong(toProj) ) {
                 data.v *= RAD_TO_DEG;
                 data.u *= RAD_TO_DEG;
             }
