@@ -1,20 +1,13 @@
     -------------------- P R O J . 4 --------------------
-                      @(#)README	4.11 95/09/24 GIE REL"
 
-This is Release 4.3 of cartographic projection software.
+This is Release 4.4 of cartographic projection software.
 
 PLEASE read the following information as well as READMEs in the src
 and nad directories.
 
-PLEASE send information on any problems encountered or general inquiries to
+For more information on PROJ.4 maintenance please see the web page at:
 
-	gie@kai.er.usgs.gov
-
-or call Gerald I. Evenden at (508)563-6766 or write to same at:
-
-	P.O. Box 1027
-	N. Falmouth, MA 02556-1027
-	USA
+  http://www.remotesensing.org/proj
 
    ---------------------------------------------------
 
