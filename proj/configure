@@ -422,7 +422,7 @@ SHELL=${CONFIG_SHELL-/bin/sh}
 
 # Identity of this package.
 PACKAGE_NAME='PROJ.4 Projections'
-PACKAGE_TARNAME='src/pj_init.c'
+PACKAGE_TARNAME='proj'
 PACKAGE_VERSION='4.4.9'
 PACKAGE_STRING='PROJ.4 Projections 4.4.9'
 PACKAGE_BUGREPORT='warmerdam@pobox.com'
@@ -1817,7 +1817,7 @@ fi
 
 
 # Define the identity of the package.
- PACKAGE='src/pj_init.c'
+ PACKAGE='proj'
  VERSION='4.4.9'
 
 
