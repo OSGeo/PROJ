@@ -13,6 +13,7 @@ projection types.  Some of these can be found in the GeoTIFF
 Transform List</a>.  The definitative documentation for most parameters
 is Gerald's original documentation available from the main PROJ.4 page. <p>
 
+<hr>
 <h2><a name="false_easting_northing">False Easting/Northing</a></h2>
 
 Virtually all coordinate systems allow for the presence of a false easting
@@ -20,6 +21,7 @@ Virtually all coordinate systems allow for the presence of a false easting
 meters even if the coordinate system is some other units.  Some coordinate
 systems (such as UTM) have implicit false easting and northing values.<p>
 
+<hr>
 <h2><a name="pm">pm - Prime Meridian</a></h2>
 
 A prime meridian may be declared indicating the offset between the prime
@@ -61,6 +63,7 @@ as the prime meridian. <p>
 3d41'16.48"E    0dN 0.000     <i>(output)</i>
 </pre>
 
+<hr>
 <h2><a name="towgs84">towgs84 - Datum transformation to WGS84</a></h2>
 
 Datum shifts can be approximated by 3 parameter spatial translations (in
@@ -133,6 +136,138 @@ Note that EPSG method 9607 (coordinate frame rotation) coefficients can be
 converted to EPSG method 9606 (position vector 7-parameter) supported by
 PROJ.4 by reversing the sign of the rotation vectors.  The methods are
 otherwise the same.<p>
+
+<hr>
+<h2><a name="nadgrids">nadgrids - Grid Based Datum Adjustments</a></h2>
+
+In many places (notably North America and Austrialia) national geodetic
+organizations provide grid shift files for converting between different
+datums, such as NAD27 to NAD83.  These grid shift files include a shift to 
+be applied at each grid location. Actually grid shifts are normally computed
+based on an interpolation between the containing four grid points.<p>
+
+PROJ.4 currently supports use of grid shift files for shifting between 
+datums and WGS84 under some circumstances.  The grid shift table formats are
+ctable (the binary format produced by the PROJ.4 nad2bin program), 
+NTv1 (the old Canadian format), and NTv2 (.gsb - the new Canadian and 
+Australian format).<p>
+
+Use of grid shifts is specified using the "nadgrids" keyword in a coordinate
+system definition.  For example:<p>
+
+<pre>
+% cs2cs +proj=latlong +ellps=clrk66 +nadgrids=ntv1_can.dat \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 << EOF
+-111 50 
+EOF
+111d0'2.952"W   50d0'0.111"N 0.000
+</pre>
+
+In this case the /usr/local/share/proj/ntv1_can.dat grid shift file
+was loaded, and used to get a grid shift value for the selected point. <p>
+
+It is possible to list multiple grid shift files, in which case each will be
+tried in turn till one is found that contains the point being transformed.<p>
+
+<pre>
+% cs2cs +proj=latlong +ellps=clrk66 \
+          +nadgrids=conus,alaska,hawaii,stgeorge,stlrnc,stpaul \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 << EOF
+-111 44
+EOF
+111d0'2.788"W   43d59'59.725"N 0.000
+</pre>
+
+<h3>Skipping Missing Grids</h3>
+
+The special prefix <b>@</b> may be prefixed to a grid to make it optional.  If
+it not found, the search will continue to the next grid.  Normally any
+grid not found will cause an error.  For instance, the following would
+use the ntv2_0.gsb file if available, otherwise it would fallback to using
+the ntv1_can.dat file. <p>
+
+<pre>
+% cs2cs +proj=latlong +ellps=clrk66 +nadgrids=@ntv2_0.gsb,ntv1_can.dat \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 << EOF
+-111 50 
+EOF
+111d0'3.006"W   50d0'0.103"N 0.000
+</pre>
+
+<h3>The null Grid</h3>
+
+A special <b>null</b> grid shift file is shift with releases after 4.4.6 (not
+inclusive).  This file provides a zero shift for the whole world.  It may
+be listed at the end of a nadgrids file list if you want a zero shift to
+be applied to points outside the valid region of all the other grids.  
+Normally if no grid is found that contains the point to be transformed an 
+error will occur.<p>
+
+<pre>
+% cs2cs +proj=latlong +ellps=clrk66 +nadgrids=conus,null \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 << EOF
+-111 45
+EOF
+111d0'3.006"W   50d0'0.103"N 0.000
+</pre>
+
+<pre>
+% cs2cs +proj=latlong +ellps=clrk66 +nadgrids=conus,null \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 << EOF
+-111 44
+-111 55
+EOF
+111d0'2.788"W   43d59'59.725"N 0.000
+111dW   55dN 0.000
+</pre>
+
+<h3>Downloading and Installing Grids</h3>
+
+The source distribution of PROJ.4 contains only the ntv1_can.dat file.  To 
+get the set of US grid shift files it is necessary to download an additional
+distribution of files from the PROJ.4 site, such as
+<a href="ftp://ftp.remotesensing.org/pub/proj/proj-nad27-1.1.tar.gz">
+proj-nad27-1.1.tar.gz</a>.  Overlay it on the PROJ.4 source distribution,
+and re-configure, compile and install.  The distributed ASCII .lla files
+are converted into binary (platform specific) files that are installed.
+On windows using the <tt>nmake /f makefile.vc nadshift</tt> command in
+the <tt>proj\src</tt> directory to build and install these files. <p>
+
+It appears we can't redistribute the Canadian NTv2 grid shift file freely, 
+though it is better than the NTv1 file.  However, end users can download it 
+for free from the NRCan web site at
+<a href="http://www.geod.emr.ca/index_e/products_e/software_e/ntv2_e.html">
+http://www.geod.emr.ca/index_e/products_e/software_e/ntv2_e.html</a>.  After
+downloading it, just dump it in the data directory with the other 
+installed data files (usually /usr/local/share/proj). <p>
+
+<h3>Caveats</h3>
+
+<ol>
+
+<li> Where grids overlap (such as conus and ntv1_can.dat for instance) the
+first found for a point will be used regardless of whether it is appropriate
+or not.  So, for instance, +nadgrids=ntv1_can.dat,conus would result in the
+canadian data being used for some areas in the northern United States even
+though the conus data is the approved data to use for the area.  Careful
+selection of files and file order is necessary.  In some cases border spanning
+datasets may need to be pre-segmented into Canadian and American points 
+so they can be properly grid shifted.<p>
+
+<li> There are additional grids for shifting between NAD83 and various
+HPGN versions of the NAD83 datum.  Use of these haven't been tried recently 
+so you may encounter problems.  The FL.lla, WO.lla, MD.lla, TN.lla and WI.lla
+are examples of high precision grid shifts.  Take care!<p>
+
+<li> Additional detail on the grid shift being applied can be found by
+setting the PROJ_DEBUG environment variable to a value.  This will result
+in output to stderr on what grid is used to shift points, the bounds of the
+various grids loaded and so forth.<p>
+
+<li> PROJ.4 always assumes that grids contain a shift <b>to</b> NAD83 
+(essentially WGS84).  Other types of grids might or might not be usable.<p>
+
+</ol>
 
 </body>
 </html>
