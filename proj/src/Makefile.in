@@ -96,7 +96,7 @@ lib_LTLIBRARIES = libproj.la
 
 libproj_la_LDFLAGS = -version-info 3:1:3
 
-libproj_la_SOURCES =  	projects.h pj_list.h 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c 	PJ_imw_p.c PJ_krovak.c PJ_lcc.c PJ_mpoly.c PJ_poly.c 	PJ_rpoly.c PJ_sconics.c 	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c 	PJ_gall.c PJ_labrd.c PJ_lsat.c PJ_merc.c 	PJ_mill.c PJ_ocea.c PJ_omerc.c PJ_somerc.c 	PJ_tcc.c PJ_tcea.c PJ_tmerc.c 	PJ_airy.c PJ_aitoff.c PJ_august.c PJ_bacon.c 	PJ_chamb.c PJ_hammer.c PJ_lagrng.c PJ_larr.c 	PJ_lask.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c 	PJ_tpeqd.c PJ_vandg.c PJ_vandg2.c PJ_vandg4.c 	PJ_wag7.c 	PJ_boggs.c PJ_collg.c PJ_crast.c PJ_denoy.c 	PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c 	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c 	PJ_gn_sinu.c PJ_goode.c PJ_hatano.c PJ_loxim.c 	PJ_mbt_fps.c PJ_mbtfpp.c PJ_mbtfpq.c PJ_moll.c 	PJ_nell.c PJ_nell_h.c PJ_putp2.c PJ_putp3.c 	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_robin.c 	PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c 	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_latlong.c 	aasincos.c adjlon.c bch2bps.c bchgen.c 	biveval.c dmstor.c mk_cheby.c pj_auth.c 	pj_deriv.c pj_ell_set.c pj_ellps.c pj_errno.c 	pj_factors.c pj_fwd.c pj_init.c pj_inv.c 	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c 	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c 	pj_zpoly1.c rtodms.c vector1.c pj_release.c 		nad_cvt.c nad_init.c nad_intr.c emess.c emess.h 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c 	geocent.c geocent.h pj_utils.c
+libproj_la_SOURCES =  	projects.h pj_list.h 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c 	PJ_imw_p.c PJ_krovak.c PJ_lcc.c PJ_mpoly.c PJ_poly.c 	PJ_rpoly.c PJ_sconics.c 	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c 	PJ_gall.c PJ_labrd.c PJ_lsat.c PJ_merc.c 	PJ_mill.c PJ_ocea.c PJ_omerc.c PJ_somerc.c 	PJ_tcc.c PJ_tcea.c PJ_tmerc.c 	PJ_airy.c PJ_aitoff.c PJ_august.c PJ_bacon.c 	PJ_chamb.c PJ_hammer.c PJ_lagrng.c PJ_larr.c 	PJ_lask.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c 	PJ_tpeqd.c PJ_vandg.c PJ_vandg2.c PJ_vandg4.c 	PJ_wag7.c 	PJ_boggs.c PJ_collg.c PJ_crast.c PJ_denoy.c 	PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c 	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c 	PJ_gn_sinu.c PJ_goode.c PJ_hatano.c PJ_loxim.c 	PJ_mbt_fps.c PJ_mbtfpp.c PJ_mbtfpq.c PJ_moll.c 	PJ_nell.c PJ_nell_h.c PJ_putp2.c PJ_putp3.c 	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_robin.c 	PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c 	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_latlong.c pj_geocent.c 	aasincos.c adjlon.c bch2bps.c bchgen.c 	biveval.c dmstor.c mk_cheby.c pj_auth.c 	pj_deriv.c pj_ell_set.c pj_ellps.c pj_errno.c 	pj_factors.c pj_fwd.c pj_init.c pj_inv.c 	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c 	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c 	pj_zpoly1.c rtodms.c vector1.c pj_release.c 		nad_cvt.c nad_init.c nad_intr.c emess.c emess.h 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c 	geocent.c geocent.h pj_utils.c
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = proj_config.h
@@ -124,15 +124,15 @@ PJ_fouc_s.lo PJ_gins8.lo PJ_gn_sinu.lo PJ_goode.lo PJ_hatano.lo \
 PJ_loxim.lo PJ_mbt_fps.lo PJ_mbtfpp.lo PJ_mbtfpq.lo PJ_moll.lo \
 PJ_nell.lo PJ_nell_h.lo PJ_putp2.lo PJ_putp3.lo PJ_putp4p.lo \
 PJ_putp5.lo PJ_putp6.lo PJ_robin.lo PJ_sts.lo PJ_urm5.lo PJ_urmfps.lo \
-PJ_wag2.lo PJ_wag3.lo PJ_wink1.lo PJ_wink2.lo pj_latlong.lo aasincos.lo \
-adjlon.lo bch2bps.lo bchgen.lo biveval.lo dmstor.lo mk_cheby.lo \
-pj_auth.lo pj_deriv.lo pj_ell_set.lo pj_ellps.lo pj_errno.lo \
-pj_factors.lo pj_fwd.lo pj_init.lo pj_inv.lo pj_list.lo pj_malloc.lo \
-pj_mlfn.lo pj_msfn.lo pj_open_lib.lo pj_param.lo pj_phi2.lo \
-pj_pr_list.lo pj_qsfn.lo pj_strerrno.lo pj_tsfn.lo pj_units.lo \
-pj_zpoly1.lo rtodms.lo vector1.lo pj_release.lo nad_cvt.lo nad_init.lo \
-nad_intr.lo emess.lo pj_apply_gridshift.lo pj_datums.lo pj_datum_set.lo \
-pj_transform.lo geocent.lo pj_utils.lo
+PJ_wag2.lo PJ_wag3.lo PJ_wink1.lo PJ_wink2.lo pj_latlong.lo \
+pj_geocent.lo aasincos.lo adjlon.lo bch2bps.lo bchgen.lo biveval.lo \
+dmstor.lo mk_cheby.lo pj_auth.lo pj_deriv.lo pj_ell_set.lo pj_ellps.lo \
+pj_errno.lo pj_factors.lo pj_fwd.lo pj_init.lo pj_inv.lo pj_list.lo \
+pj_malloc.lo pj_mlfn.lo pj_msfn.lo pj_open_lib.lo pj_param.lo \
+pj_phi2.lo pj_pr_list.lo pj_qsfn.lo pj_strerrno.lo pj_tsfn.lo \
+pj_units.lo pj_zpoly1.lo rtodms.lo vector1.lo pj_release.lo nad_cvt.lo \
+nad_init.lo nad_intr.lo emess.lo pj_apply_gridshift.lo pj_datums.lo \
+pj_datum_set.lo pj_transform.lo geocent.lo pj_utils.lo
 PROGRAMS =  $(bin_PROGRAMS)
 
 proj_OBJECTS =  proj.o gen_cheb.o p_series.o
@@ -193,13 +193,13 @@ DEP_FILES =  .deps/PJ_aea.P .deps/PJ_aeqd.P .deps/PJ_airy.P \
 .deps/nad_cvt.P .deps/nad_init.P .deps/nad_intr.P .deps/p_series.P \
 .deps/pj_apply_gridshift.P .deps/pj_auth.P .deps/pj_datum_set.P \
 .deps/pj_datums.P .deps/pj_deriv.P .deps/pj_ell_set.P .deps/pj_ellps.P \
-.deps/pj_errno.P .deps/pj_factors.P .deps/pj_fwd.P .deps/pj_init.P \
-.deps/pj_inv.P .deps/pj_latlong.P .deps/pj_list.P .deps/pj_malloc.P \
-.deps/pj_mlfn.P .deps/pj_msfn.P .deps/pj_open_lib.P .deps/pj_param.P \
-.deps/pj_phi2.P .deps/pj_pr_list.P .deps/pj_qsfn.P .deps/pj_release.P \
-.deps/pj_strerrno.P .deps/pj_transform.P .deps/pj_tsfn.P \
-.deps/pj_units.P .deps/pj_utils.P .deps/pj_zpoly1.P .deps/proj.P \
-.deps/rtodms.P .deps/vector1.P
+.deps/pj_errno.P .deps/pj_factors.P .deps/pj_fwd.P .deps/pj_geocent.P \
+.deps/pj_init.P .deps/pj_inv.P .deps/pj_latlong.P .deps/pj_list.P \
+.deps/pj_malloc.P .deps/pj_mlfn.P .deps/pj_msfn.P .deps/pj_open_lib.P \
+.deps/pj_param.P .deps/pj_phi2.P .deps/pj_pr_list.P .deps/pj_qsfn.P \
+.deps/pj_release.P .deps/pj_strerrno.P .deps/pj_transform.P \
+.deps/pj_tsfn.P .deps/pj_units.P .deps/pj_utils.P .deps/pj_zpoly1.P \
+.deps/proj.P .deps/rtodms.P .deps/vector1.P
 SOURCES = $(libproj_la_SOURCES) $(proj_SOURCES) $(nad2nad_SOURCES) $(nad2bin_SOURCES) $(geod_SOURCES) $(cs2cs_SOURCES)
 OBJECTS = $(libproj_la_OBJECTS) $(proj_OBJECTS) $(nad2nad_OBJECTS) $(nad2bin_OBJECTS) $(geod_OBJECTS) $(cs2cs_OBJECTS)
 
