@@ -1,0 +1,65 @@
+azimuthal = \
+	PJ_aeqd.obj PJ_gnom.obj PJ_laea.obj PJ_mod_ster.obj \
+	PJ_nsper.obj PJ_nzmg.obj PJ_ortho.obj PJ_stere.obj
+
+conic = \
+	PJ_aea.obj PJ_bipc.obj PJ_bonne.obj PJ_eqdc.obj \
+	PJ_imw_p.obj PJ_lcc.obj PJ_mpoly.obj PJ_poly.obj \
+	PJ_rpoly.obj PJ_sconics.obj
+
+cylinder = \
+	PJ_cass.obj PJ_cc.obj PJ_cea.obj PJ_eqc.obj \
+	PJ_gall.obj PJ_labrd.obj PJ_lsat.obj PJ_merc.obj \
+	PJ_mill.obj PJ_ocea.obj PJ_omerc.obj PJ_somerc.obj \
+	PJ_tcc.obj PJ_tcea.obj PJ_tmerc.obj
+
+misc = \
+	PJ_airy.obj PJ_aitoff.obj PJ_august.obj PJ_bacon.obj \
+	PJ_chamb.obj PJ_hammer.obj PJ_lagrng.obj PJ_larr.obj \
+	PJ_lask.obj PJ_nocol.obj PJ_ob_tran.obj PJ_oea.obj \
+	PJ_tpeqd.obj PJ_vandg.obj PJ_vandg2.obj PJ_vandg4.obj \
+	PJ_wag7.obj
+
+pseudo = \
+	PJ_boggs.obj PJ_collg.obj PJ_crast.obj PJ_denoy.obj \
+	PJ_eck1.obj PJ_eck2.obj PJ_eck3.obj PJ_eck4.obj \
+	PJ_eck5.obj PJ_fahey.obj PJ_fouc_s.obj PJ_gins8.obj \
+	PJ_gn_sinu.obj PJ_goode.obj PJ_hatano.obj PJ_loxim.obj \
+	PJ_mbt_fps.obj PJ_mbtfpp.obj PJ_mbtfpq.obj PJ_moll.obj \
+	PJ_nell.obj PJ_nell_h.obj PJ_putp2.obj PJ_putp3.obj \
+	PJ_putp4p.obj PJ_putp5.obj PJ_putp6.obj PJ_robin.obj \
+	PJ_sts.obj PJ_urm5.obj PJ_urmfps.obj PJ_wag2.obj \
+	PJ_wag3.obj PJ_wink1.obj PJ_wink2.obj
+
+support = \
+	aasincos.obj adjlon.obj bch2bps.obj bchgen.obj \
+	biveval.obj dmstor.obj mk_cheby.obj pj_auth.obj \
+	pj_deriv.obj pj_ell_set.obj pj_ellps.obj pj_errno.obj \
+	pj_factors.obj pj_fwd.obj pj_init.obj pj_inv.obj \
+	pj_list.obj pj_malloc.obj pj_mlfn.obj pj_msfn.obj \
+	pj_open_lib.obj pj_param.obj pj_phi2.obj pj_pr_list.obj \
+	pj_qsfn.obj pj_strerrno.obj pj_tsfn.obj pj_units.obj \
+	pj_zpoly1.obj rtodms.obj vector1.obj pj_release.obj
+
+LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
+EXESRC	=	proj.c gen_cheb.c p_series.c emess.c 
+CFLAGS	=	-I.
+
+default:	proj.lib
+
+all:            proj.lib proj.dll proj.exe
+
+proj.lib:	$(LIBOBJ)
+	del proj.lib
+	lib /out:proj.lib $(LIBOBJ)
+
+proj.dll:	$(LIBOBJ)
+	link /debug /dll /def:proj.def /out:proj.dll /implib:proj_i.lib \
+			$(LIBOBJ)
+
+proj.exe:	$(EXESRC) proj.lib
+	cl -I. $(EXESRC) proj.lib
+
+clean:
+	del *.obj *.lib *.dll
+	del *.pdb *.exp
