@@ -1,3 +1,8 @@
+2000-04-04  Frank Warmerdam  <warmerda@rommel.atlsci.com>
+
+	* Patch from Craig Bruce (cbruce@cubewerx.com) for PJ_ortho.c
+	to make INVERSE() work well for points near zero.
+
 2000-03-29  Frank Warmerdam  <warmerda@cs46980-c>
 
 	* Added hard links for invproj->proj and invgeod->geod in 
