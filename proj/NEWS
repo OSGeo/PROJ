@@ -1,0 +1,23 @@
+
+
+4.4.6 Release Notes
+-------------------
+
+ o Incorporated new lcca (Lambert Conformal Conic Alternate) projection from
+   Gerald.
+
+ o Updated 'espg' translation file for EPSG 6.2.2 with better support for
+   prime meridians. 
+
+ o Added Prime Meridians via +pm command switch to cs2cs (and pj_transform).
+
+ o Fixed bug with 7 parameter transforms. 
+
+ o Added 'esri' pseudo-epsg coordinate system file. 
+
+ o Cleanup so that PROJ.4 compiles clean as C++ code.
+
+ o Added pj_get_def() to expand definitions of stuff like +init clauses.
+
+ o Added a Krovak implementation (proj=krov).  Note this may change again
+   in the next release. 
