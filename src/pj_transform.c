@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.5  2002/12/01 19:25:26  warmerda
+ * applied fix for 7 param shift in pj_geocentric_from_wgs84, see bug 194
+ *
  * Revision 1.4  2002/02/15 14:30:36  warmerda
  * provide default Z array if none passed in in pj_datum_transform()
  *
@@ -333,15 +336,15 @@ int pj_geocentric_from_wgs84( PJ *defn,
         for( i = 0; i < point_count; i++ )
         {
             long io = i * point_offset;
-            double x_out, y_out, z_out;
+            double x_tmp, y_tmp, z_tmp;
 
-            x_out = M_BF*(       x[io] + Rz_BF*y[io] - Ry_BF*z[io]) - Dx_BF;
-            y_out = M_BF*(-Rz_BF*x[io] +       y[io] + Rx_BF*z[io]) - Dy_BF;
-            z_out = M_BF*( Ry_BF*x[io] - Rx_BF*y[io] +       z[io]) - Dz_BF;
+            x_tmp = (x[io] - Dx_BF) / M_BF;
+            y_tmp = (y[io] - Dy_BF) / M_BF;
+            z_tmp = (z[io] - Dz_BF) / M_BF;
 
-            x[io] = x_out;
-            y[io] = y_out;
-            z[io] = z_out;
+            x[io] =        x_tmp + Rz_BF*y_tmp - Ry_BF*z_tmp;
+            y[io] = -Rz_BF*x_tmp +       y_tmp + Rx_BF*z_tmp;
+            z[io] =  Ry_BF*x_tmp - Rx_BF*y_tmp +       z_tmp;
         }
     }
 
