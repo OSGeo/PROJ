@@ -27,32 +27,34 @@
 
 6) Tag the release with a command like "cvs tag proj_4_4_3".
 
-7) Do a "make dist-all" in the proj root directory.  After some grinding
-   this should result in files like proj-4.4.3.tar.gz and proj-4.4.3.zip
-   being created.  These are full source distributions. 
+7) Update NEWS file with summary of release changes.
 
-8) Put these in the proj ftp area on ftp.remotesensing.org.  This can be
-   done via scp using a command like the following.
-
-     scp proj-4.4.3.{tar.gz,zip} remotesensing.org:/ftp/remotesensing/pub/proj
-
-9) Update html/index.html to link to the new release tar/zip files.  When
-   committed this updates the web page on remotesensing.org.
-
-10) Announce the new release on the PROJ.4 mailing lists.  If the release
-   is particularly significant in terms of features it might also be 
-   announced in comp.infosystems.gis, os-remotesensing@remotesensing.org, 
-   and freegis-list@intevation.de.  
-
-11) Issue a new release report on Freshmeat.  
-
-   http://freshmeat.net/projects/proj.4/
-
-12) Update the proj.spec file for the new version:
+8) Update the proj.spec file for the new version:
     - PACKAGE_VERSION
     - Source0
     - %setup line
     - rm -rf line
+
+9) Update html/index.html to link to the new release tar/zip files.  When
+   committed this updates the web page on remotesensing.org.
+
+10) Do a "make dist-all" in the proj root directory.  After some grinding
+   this should result in files like proj-4.4.3.tar.gz and proj-4.4.3.zip
+   being created.  These are full source distributions. 
+
+11) Put these in the proj ftp area on ftp.remotesensing.org.  This can be
+   done via scp using a command like the following.
+
+     scp proj-4.4.3.{tar.gz,zip} remotesensing.org:/ftp/remotesensing/pub/proj
+
+12) Announce the new release on the PROJ.4 mailing lists.  If the release
+   is particularly significant in terms of features it might also be 
+   announced in comp.infosystems.gis, os-remotesensing@remotesensing.org, 
+   and freegis-list@intevation.de.  
+
+13) Issue a new release report on Freshmeat.  
+
+   http://freshmeat.net/projects/proj.4/
 
 NOTES:
 
