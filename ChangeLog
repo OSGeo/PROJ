@@ -1,7 +1,14 @@
-
 Rel. 4.4.8 2004-05-04
 -------------------------------------------------------------------------
 	
+2004-05-04  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* 4.4.8 release re-issued. 
+
+	* nad/epsg: regenerated with prime meridian problems corrected.
+	
+	http://bugzilla.remotesensing.org/show_bug.cgi?id=510
+
 2004-05-03  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Preparing 4.4.8 release.
