@@ -28,7 +28,8 @@
 	and near-hangs when adjusting very large numbers. 
 	http://bugzilla.remotesensing.org/show_bug.cgi?id=27
 
-========================== PROJ 4.4.2 Release ================================
+Rel. 4.4.2 2000/09/22
+-------------------------------------------------------------------------
 	
 2000-09-22  Frank Warmerdam  <warmerda@cs46980-c>
 
