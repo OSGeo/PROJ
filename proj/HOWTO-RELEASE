@@ -4,9 +4,9 @@
 
 1) Update the version number in configure.in (in AM_INIT_AUTOMAKE()).
 
-2) Update the version number in projects.h (#define PJ_VERSION).
+2) Update the version number in proj_api.h (#define PJ_VERSION).
 
-3) Update the version number, and date in src/pj_version.c.
+3) Update the version number, and date in src/pj_release.c.
 
 4) Update the version number in the -version-info definition in 
    src/Makefile.am.  It consists of "current:revision:age". 
