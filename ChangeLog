@@ -1,9 +1,9 @@
 2003-03-31  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* Prepare 4.4.7 Release.
+
 	* nad/esri: incorporated Paul Ramsey's update.  ESRI specific 
 	coordinate systems in nad/esri.extra.
-
-	* Prepare 4.4.7 Release.
 
 	* nad/epsg: Regenerated with towgs84 parameters properly generated
 	for non-greenwich prime meridians. 
