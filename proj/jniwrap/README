@@ -1,0 +1,209 @@
+   -------------------- J P R O J . 4 --------------------
+
+This is the first release of a JNI wrap of the main proj4 functions.
+
+PLEASE read the following information.
+
+For more information on the JPROJ4 maintenance please contact me through the 
+web page at:
+
+		http://www.hydrologis.com
+
+   ---------------------------------------------------
+
+
+
+Compilation:
+-------------
+
+With the right flag during configuration time (see ./configure --help), the 
+native part of the jproj lib is compiled inside the main proj library and the 
+java part is automatically built into the jproj.jar library. 
+
+The java part on it's own part is compiled by running ant inside the "jniwrap" folder. 
+This will compile the classes and archive them in a jar library.
+This applies to Linux, Macos and Windows (and virtually to every system 
+supporting java).
+
+
+Requirements:
+-------------
+
+Beyond the ones already put by proj, you need:
+- j2sdk, the java standard development kit
+- ant, to run the build
+- doxygen for the documentation generation
+
+
+Documentation:
+--------------
+
+The documentation is held inside the code and can be retrieved by running
+doxygen inside the folder jniwrap. This will create the html format 
+documentation inside of jniwrap/docs
+
+
+License:
+--------
+
+GPL
+
+
+Authors:
+--------
+
+Andrea Antonello (andrea.antonello@hydrologis.com)
+
+
+Usage & a fast example:
+-----------------------
+
+The jproj.jar is all is needed to implement proj support in java applications.
+The whole job is done by the proj4, so there are just a couple of functions that 
+be used.
+
+The best way is to see everything through an example.
+In the following example we read projection informations and data from a file 
+and then transform the data and query the information.
+
+________________________________________________________________________________
+First step:
+create a text file, let's say test.txt, with the following in it:
+srcProj: +proj=latlong +datum=WGS84
+destProj: +init=epsg:32632
+rows: 1
+46        11    194.0
+
+
+This contains info about a source and destination projection, the number of data 
+triplets and then the data (in this case just one point)
+
+
+________________________________________________________________________________
+Step two:
+create a test code. Simply copy the following into a file called Main.java. The 
+code is commented to see what we are doing:
+
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.LinkedHashMap;
+
+import org.proj4.Proj4;
+import org.proj4.ProjectionData;
+
+
+public class Main
+{
+
+  public static void main(String[] args) throws IOException
+  {
+    // print out the usage if no argument was given
+    if (args.length < 1)
+    {
+      System.out.println();
+      System.out.println("Usage:      Proj datafile");
+      System.out.println();
+      System.exit(0);
+    }
+
+    // now the input file is going to be read
+    BufferedReader br = new BufferedReader(new InputStreamReader(
+        new FileInputStream(new File(args[0]))));
+    LinkedHashMap mapHeader = new LinkedHashMap();
+    // read the header
+    String line = null;
+    for (int i = 0; i < 3; i++)
+    {
+      if ((line = br.readLine()) != null)
+      {
+        String[] header = line.split(":", 2);
+        if (header.length <= 2)
+        {
+          mapHeader.put(header[0].trim(), header[1].trim());
+        }
+        else
+        {
+          System.out.println("Wrong file format");
+          System.exit(0);
+        }
+      }
+    }
+    // with what you see above, the header was read
+    
+    // now I can define the number of rows of data triplets
+    int rows = new Integer((String) mapHeader.get("rows")).intValue();
+    
+    double[][] testCoord = new double[rows][2];
+    double[] testValues = new double[rows];
+    System.out.println("Source coordinates and values:");
+
+    // start reading the data
+    for (int i = 0; i < rows; i++)
+    {
+      if ((line = br.readLine()) != null)
+      {
+        String[] values = line.split(" +");
+        if (values.length == 3)
+        {
+          testCoord[i][0] = new Double(values[0].trim()).doubleValue();
+          testCoord[i][1] = new Double(values[1].trim()).doubleValue();
+          testValues[i] = new Double(values[2].trim()).doubleValue();
+          System.out.println("x = " + testCoord[i][0] + " y = "
+              + testCoord[i][1] + " z = " + testValues[i]);
+        }
+        else
+        {
+          System.out.println("Wrong file format or empty line found");
+        }
+      }
+    }
+
+    // create the dataset
+    // this is necessary to be able to transform
+    ProjectionData dataTP = new ProjectionData(testCoord, testValues);
+
+    // here we go with the instantiation of the proj4 object
+    Proj4 testProjection = new Proj4((String) mapHeader.get("srcProj"),
+        (String) mapHeader.get("destProj"));
+
+    // the instantiation of the proj4 object instantiated also the projection 
+    // objects for source and destination projection
+    // therefore we can already print the projection infos:
+    testProjection.printSrcProjInfo();
+    testProjection.printDestProjInfo();
+
+    // and transform, passing as parameter the created dataset:
+    testProjection.transform(dataTP, 1, 1);
+    
+    // if we need the parameters as Hashmap for a later use:
+    LinkedHashMap testMap = testProjection.getSrcProjInfo();
+    
+    // and let us print them to screen to see them
+    System.out.println();
+    System.out.println("Proj as a Hashmap");
+    System.out.println("******************************************************");
+    System.out.println(testMap.toString());
+
+  }
+
+}
+
+
+________________________________________________________________________________
+Step three
+compile the Main code:
+we assume that proj was compiled with the right flag to support jproj.
+Therefore we have a library called jproj.jar.
+Thus we compile the Main.java with the command:
+
+javac -classpath <path to the jar library>/jproj.jar Main.java
+
+and execute the created test case with:
+
+java -cp .:<path to the jar library>/jproj.jar -Djava.library.path=<path to the libproj, if needed> Main test.txt
+
+That's it, enjoy!
