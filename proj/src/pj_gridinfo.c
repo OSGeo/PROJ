@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.2  2003/03/17 18:56:34  warmerda
+ * implement heirarchical NTv2 gridinfos
+ *
  * Revision 1.1  2003/03/15 06:01:18  warmerda
  * New
  *
@@ -89,6 +92,17 @@ void pj_gridinfo_free( PJ_GRIDINFO *gi )
     if( gi == NULL )
         return;
 
+    if( gi->child != NULL )
+    {
+        PJ_GRIDINFO *child, *next;
+
+        for( child = gi->child; child != NULL; child=next)
+        {
+            next=child->next;
+            pj_gridinfo_free( child );
+        }
+    }
+
     if( gi->ct != NULL )
         nad_free( gi->ct );
     
@@ -118,7 +132,24 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
 /*      no real reason not to support delayed loading for it as well.   */
 /* -------------------------------------------------------------------- */
     if( strcmp(gi->format,"ctable") == 0 )
-        return 0;
+    {
+        FILE *fid;
+        int result;
+
+        fid = pj_open_lib( gi->filename, "rb" );
+        
+        if( fid == NULL )
+        {
+            pj_errno = -38;
+            return 0;
+        }
+
+        result = nad_ctable_load( gi->ct, fid );
+
+        fclose( fid );
+
+        return result;
+    }
 
 /* -------------------------------------------------------------------- */
 /*      NTv1 format.                                                    */
@@ -198,9 +229,14 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
 /* -------------------------------------------------------------------- */
     else if( strcmp(gi->format,"ntv2") == 0 )
     {
-        double	*row_buf;
+        float	*row_buf;
         int	row;
         FILE *fid;
+
+        if( getenv("PROJ_DEBUG") != NULL )
+        {
+            fprintf( stderr, "NTv2 - loading grid %s\n", gi->ct->id );
+        }
 
         fid = pj_open_lib( gi->filename, "rb" );
         
@@ -212,7 +248,7 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
 
         fseek( fid, gi->grid_offset, SEEK_SET );
 
-        row_buf = (double *) pj_malloc(gi->ct->lim.lam * sizeof(double) * 4);
+        row_buf = (float *) pj_malloc(gi->ct->lim.lam * sizeof(float) * 4);
         gi->ct->cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
         if( row_buf == NULL || gi->ct->cvs == NULL )
         {
@@ -237,7 +273,7 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
             }
 
             if( !IS_LSB )
-                swap_words( (unsigned char *) row_buf, 8, 
+                swap_words( (unsigned char *) row_buf, 4, 
                             gi->ct->lim.lam*4 );
 
             /* convert seconds to radians */
@@ -375,13 +411,19 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
         ct->lim.lam = (int) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
         ct->lim.phi = (int) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
 
+        if( getenv("PROJ_DEBUG") != NULL )
+            fprintf( stderr, 
+                     "NTv2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
+                     ct->id, 
+                     ct->lim.lam, ct->lim.phi,
+                     ct->ll.lam/3600.0, ct->ll.phi/3600.0,
+                     ur.lam/3600.0, ur.phi/3600.0 );
+
         ct->ll.lam *= DEG_TO_RAD/3600.0;
         ct->ll.phi *= DEG_TO_RAD/3600.0;
         ct->del.lam *= DEG_TO_RAD/3600.0;
         ct->del.phi *= DEG_TO_RAD/3600.0;
 
-        printf( "NTv2 Bounds (%s): LL=(%.12g,%.12g)\n",
-                ct->id, ct->ll.lam, ct->ll.phi );
         memcpy( &gs_count, header + 8 + 16*10, 4 );
         if( gs_count != ct->lim.lam * ct->lim.phi )
         {
@@ -397,29 +439,66 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
 
 /* -------------------------------------------------------------------- */
 /*      Create a new gridinfo for this if we aren't processing the      */
-/*      1st subfile, and add it to the list.                            */
+/*      1st subfile, and initialize our grid info.                      */
 /* -------------------------------------------------------------------- */
         if( subfile == 0 )
             gi = gilist;
         else
         {
-            PJ_GRIDINFO *lnk;
-
             gi = (PJ_GRIDINFO *) pj_malloc(sizeof(PJ_GRIDINFO));
             memset( gi, 0, sizeof(PJ_GRIDINFO) );
     
             gi->gridname = strdup( gilist->gridname );
             gi->filename = strdup( gilist->filename );
             gi->next = NULL;
-
-            for( lnk = gilist; lnk->next != NULL; lnk = lnk->next ) {}
-
-            lnk->next = gi;
         }
 
         gi->ct = ct;
         gi->format = "ntv2";
         gi->grid_offset = ftell( fid );
+
+/* -------------------------------------------------------------------- */
+/*      Attach to the correct list or sublist.                          */
+/* -------------------------------------------------------------------- */
+        if( strncmp(header+24,"NONE",4) == 0 )
+        {
+            if( gi != gilist )
+            {
+                PJ_GRIDINFO *lnk;
+
+                for( lnk = gilist; lnk->next != NULL; lnk = lnk->next ) {}
+                lnk->next = gi;
+            }
+        }
+
+        else
+        {
+            PJ_GRIDINFO *lnk;
+            PJ_GRIDINFO *gp = gilist;
+            
+            while( gp != NULL && strncmp(gp->ct->id,header+24,8) != 0 )
+                gp = gp->next;
+
+            if( gp == NULL )
+            {
+                if( getenv("PROJ_DEBUG") != NULL )
+                    fprintf( stderr, "pj_gridinfo_init_ntv2(): "
+                             "failed to find parent %8.8s for %.\n", 
+                             header+24, gi->ct->id );
+
+                for( lnk = gp; lnk->next != NULL; lnk = lnk->next ) {}
+                lnk->next = gi;
+            }
+            else if( gp->child == NULL )
+            {
+                gp->child = gi;
+            }
+            else
+            {
+                for( lnk = gp->child; lnk->next != NULL; lnk = lnk->next ) {}
+                lnk->next = gi;
+            }
+        }
 
 /* -------------------------------------------------------------------- */
 /*      Seek past the data.                                             */
@@ -498,14 +577,17 @@ static int pj_gridinfo_init_ntv1( FILE * fid, PJ_GRIDINFO *gi )
     ct->lim.lam = (int) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
     ct->lim.phi = (int) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
 
+    if( getenv("PROJ_DEBUG") != NULL )
+        fprintf( stderr, 
+                 "NTv1 %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
+                 ct->lim.lam, ct->lim.phi,
+                 ct->ll.lam, ct->ll.phi, ur.lam, ur.phi );
+
     ct->ll.lam *= DEG_TO_RAD;
     ct->ll.phi *= DEG_TO_RAD;
     ct->del.lam *= DEG_TO_RAD;
     ct->del.phi *= DEG_TO_RAD;
     ct->cvs = NULL;
-
-    printf( "NTv1 Bounds: LL=(%.12g,%.12g)\n",
-            ct->ll.lam, ct->ll.phi );
 
     gi->ct = ct;
     gi->grid_offset = ftell( fid );
@@ -588,7 +670,7 @@ PJ_GRIDINFO *pj_gridinfo_init( const char *gridname )
     
     else
     {
-        struct CTABLE *ct = nad_load_ctable( fp );
+        struct CTABLE *ct = nad_ctable_init( fp );
 
         gilist->format = "ctable";
         gilist->ct = ct;

@@ -31,6 +31,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.6  2003/03/17 18:56:34  warmerda
+ * implement heirarchical NTv2 gridinfos
+ *
  * Revision 1.5  2003/03/15 06:02:02  warmerda
  * preliminary NTv2 support, major restructure of datum shifting
  *
@@ -66,6 +69,7 @@ int pj_apply_gridshift( const char *nadgrids, int inverse,
     int grid_count = 0;
     PJ_GRIDINFO   **tables = pj_gridlist_from_nadgrids( nadgrids, &grid_count);
     int  i;
+    int debug_flag = getenv( "PROJ_DEBUG" ) != NULL;
 
     if( tables == NULL || grid_count == 0 )
         return pj_errno;
@@ -82,7 +86,8 @@ int pj_apply_gridshift( const char *nadgrids, int inverse,
         /* keep trying till we find a table that works */
         for( itable = 0; itable < grid_count; itable++ )
         {
-            struct CTABLE *ct = tables[itable]->ct;
+            PJ_GRIDINFO *gi = tables[itable];
+            struct CTABLE *ct = gi->ct;
             
             /* skip tables that don't match our point at all.  */
             if( ct->ll.phi > input.phi || ct->ll.lam > input.lam
@@ -90,22 +95,58 @@ int pj_apply_gridshift( const char *nadgrids, int inverse,
                 || ct->ll.lam + ct->lim.lam * ct->del.lam < input.lam )
                 continue;
 
+            /* If we have child nodes, check to see if any of them apply. */
+            if( gi->child != NULL )
+            {
+                PJ_GRIDINFO *child;
+
+                for( child = gi->child; child != NULL; child = child->next )
+                {
+                    struct CTABLE *ct1 = child->ct;
+
+                    if( ct1->ll.phi > input.phi || ct1->ll.lam > input.lam
+                        || ct1->ll.phi + ct1->lim.phi*ct1->del.phi < input.phi
+                        || ct1->ll.lam + ct1->lim.lam*ct1->del.lam < input.lam)
+                        continue;
+
+                    break;
+                }
+
+                /* we found a more refined child node to use */
+                if( child != NULL )
+                {
+                    gi = child;
+                    ct = child->ct;
+                }
+            }
+
             /* load the grid shift info if we don't have it. */
-            if( tables[itable]->ct->cvs == NULL 
-                && !pj_gridinfo_load( tables[itable] ) )
+            if( ct->cvs == NULL && !pj_gridinfo_load( gi ) )
             {
                 pj_errno = -38;
                 return pj_errno;
             }
             
-            output = nad_cvt( input, inverse, tables[itable]->ct );
+            output = nad_cvt( input, inverse, ct );
             if( output.lam != HUGE_VAL )
+            {
+                if( debug_flag )
+                {
+                    static int debug_count = 0;
+
+                    if( debug_count < 20 )
+                        fprintf( stderr,
+                                 "pj_apply_gridshift(): used %s\n",
+                                 ct->id );
+                }
+
                 break;
+            }
         }
 
         if( output.lam == HUGE_VAL )
         {
-            if( getenv( "PROJ_DEBUG" ) != NULL )
+            if( debug_flag )
             {
                 fprintf( stderr, 
                          "pj_apply_gridshift(): failed to find a grid shift table for\n"

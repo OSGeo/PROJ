@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.17  2003/03/17 18:56:34  warmerda
+ * implement heirarchical NTv2 gridinfos
+ *
  * Revision 1.16  2003/03/15 06:02:02  warmerda
  * preliminary NTv2 support, major restructure of datum shifting
  *
@@ -333,6 +336,7 @@ typedef struct _pj_gi {
     struct CTABLE *ct;
 
     struct _pj_gi *next;
+    struct _pj_gi *child;
 } PJ_GRIDINFO;
 
 /* procedure prototypes */
@@ -390,7 +394,8 @@ int bch2bps(projUV, projUV, projUV **, int, int);
 LP nad_intr(LP, struct CTABLE *);
 LP nad_cvt(LP, int, struct CTABLE *);
 struct CTABLE *nad_init(char *);
-struct CTABLE *nad_load_ctable( FILE * fid );
+struct CTABLE *nad_ctable_init( FILE * fid );
+int nad_ctable_load( struct CTABLE *, FILE * fid );
 void nad_free(struct CTABLE *);
 
 /* higher level handling of datum grid shift files */
