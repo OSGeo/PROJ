@@ -16,4 +16,5 @@ AC_CHECK_LIB(m,exp,,,)
 dnl We check for headers
 AC_HEADER_STDC
 
-AC_OUTPUT(Makefile src/Makefile man/Makefile man/man1/Makefile man/man3/Makefile)
+AC_OUTPUT(Makefile src/Makefile man/Makefile man/man1/Makefile \
+	man/man3/Makefile nad/Makefile)

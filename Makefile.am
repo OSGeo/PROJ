@@ -1,2 +1,3 @@
-SUBDIRS	=	src man
+SUBDIRS	=	src man nad
 
+AUTOMAKE_OPTIONS =	dist-zip
