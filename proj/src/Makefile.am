@@ -1,15 +1,17 @@
-bin_PROGRAMS =	proj nad2nad nad2bin geod
+bin_PROGRAMS =	proj nad2nad nad2bin geod cs2cs
 
 INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\"
 
 include_HEADERS = projects.h nad_list.h
 
-proj_SOURCES = proj.c gen_cheb.c p_series.c emess.c emess.h
+proj_SOURCES = proj.c gen_cheb.c p_series.c
+cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
 nad2nad_SOURCES = nad2nad.c 
 nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c emess.c geodesic.h
 
 proj_LDADD = libproj.la
+cs2cs_LDADD = libproj.la
 nad2nad_LDADD = libproj.la
 nad2bin_LDADD = libproj.la
 geod_LDADD = libproj.la
@@ -42,7 +44,7 @@ libproj_la_SOURCES = \
 	PJ_nell.c PJ_nell_h.c PJ_putp2.c PJ_putp3.c \
 	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_robin.c \
 	PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c \
-	PJ_wag3.c PJ_wink1.c PJ_wink2.c \
+	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_latlong.c \
 	aasincos.c adjlon.c bch2bps.c bchgen.c \
 	biveval.c dmstor.c mk_cheby.c pj_auth.c \
 	pj_deriv.c pj_ell_set.c pj_ellps.c pj_errno.c \
@@ -52,7 +54,8 @@ libproj_la_SOURCES = \
 	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c \
 	pj_zpoly1.c rtodms.c vector1.c pj_release.c \
 	\
-	nad_cvt.c nad_init.c nad_intr.c emess.c
+	nad_cvt.c nad_init.c nad_intr.c emess.c pj_apply_gridshift.c \
+	pj_datums.c pj_datum_set.c pj_transform.c geocent.c 
 
 
 install-exec-local:
