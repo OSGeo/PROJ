@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.4  2002/12/09 16:01:02  warmerda
+ * added prime meridian support
+ *
  * Revision 1.3  2002/07/08 02:32:05  warmerda
  * ensure clean C++ builds
  *
@@ -61,3 +64,25 @@ C_NAMESPACE struct PJ_DATUMS pj_datums[] = {
 				"North_American_Datum_1927",
 NULL,       NULL,                                    NULL,    NULL 
 };
+
+C_NAMESPACE struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
+    /* id        definition                         */
+    /* --        ----------                         */
+    "greenwich", "0dE",
+    "lisbon",    "9d07'54.862\"W",
+    "paris",     "2d20'14.025\"E",
+    "bogota",    "74d04'51.3\"E",
+    "madrid",    "3d41'16.48\"W",
+    "rome",      "12d27'8.4\"E",
+    "bern",      "7d26'22.5\"E",
+    "jakarta",   "106d48'27.79\"E",
+    "ferro",     "17d40'W",
+    "brussels",  "4d22'4.71\"E",
+    "stockholm", "18d3'29.8\"E",
+    "athens",    "23d42'58.815\"E",
+    "oslo",      "10d43'22.5\"E",
+    NULL,        NULL 
+};
+    
+
+

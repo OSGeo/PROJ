@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.13  2002/12/09 16:01:02  warmerda
+ * added prime meridian support
+ *
  * Revision 1.12  2002/07/08 02:32:05  warmerda
  * ensure clean C++ builds
  *
@@ -169,6 +172,11 @@ struct PJ_DATUMS {
     char    *comments; /* EPSG code, etc */
 };
 
+struct PJ_PRIME_MERIDIANS {
+    char    *id;     /* prime meridian keyword */
+    char    *defn;   /* offset from greenwich in DMS format. */
+};
+
 struct DERIVS {
     double x_l, x_p; /* derivatives of x for lambda-phi */
     double y_l, y_p; /* derivatives of y for lambda-phi */
@@ -219,6 +227,7 @@ typedef struct PJconsts {
 
         int     datum_type; /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
         double  datum_params[7];
+        double  from_greenwich; /* prime meridian offset (in radians) */
         
 #ifdef PROJ_PARMS__
 PROJ_PARMS__
@@ -262,6 +271,7 @@ extern struct PJ_UNITS pj_units[];
 
 #ifndef PJ_DATUMS__
 extern struct PJ_DATUMS pj_datums[];
+extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #endif
 
 #ifdef PJ_LIB__
@@ -306,6 +316,8 @@ PVALUE pj_param(paralist *, char *);
 paralist *pj_mkparam(char *);
 int pj_ell_set(paralist *, double *, double *);
 int pj_datum_set(paralist *, PJ *);
+int pj_prime_meridian_set(paralist *, PJ *);
+int pj_angular_units_set(paralist *, PJ *);
 double *pj_enfn(double);
 double pj_mlfn(double, double, double, double *);
 double pj_inv_mlfn(double, double, double *);

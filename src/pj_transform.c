@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.6  2002/12/09 16:01:02  warmerda
+ * added prime meridian support
+ *
  * Revision 1.5  2002/12/01 19:25:26  warmerda
  * applied fix for 7 param shift in pj_geocentric_from_wgs84, see bug 194
  *
@@ -111,6 +114,15 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             y[point_offset*i] = geodetic_loc.v;
         }
     }
+/* -------------------------------------------------------------------- */
+/*      But if they are already lat long, adjust for the prime          */
+/*      meridian if there is one in effect.                             */
+/* -------------------------------------------------------------------- */
+    else if( srcdefn->from_greenwich != 0.0 )
+    {
+        for( i = 0; i < point_count; i++ )
+            x[point_offset*i] += srcdefn->from_greenwich;
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Convert datums if needed, and possible.                         */
@@ -141,6 +153,16 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             y[point_offset*i] = projected_loc.v;
         }
     }
+/* -------------------------------------------------------------------- */
+/*      But if they are staying lat long, adjust for the prime          */
+/*      meridian if there is one in effect.                             */
+/* -------------------------------------------------------------------- */
+    else if( dstdefn->from_greenwich != 0.0 )
+    {
+        for( i = 0; i < point_count; i++ )
+            x[point_offset*i] -= dstdefn->from_greenwich;
+    }
+
 
     return 0;
 }
