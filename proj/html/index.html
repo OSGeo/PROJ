@@ -91,26 +91,32 @@ be viewed</a> in BugZilla.<p>
 <!---------------------------------------------------------------------------->
 <h2>Plans</h2>
 
-I (<a href="http://pobox.com/~warmerdam/">Frank Warmerdam</a> - 
-<a href="mailto:warmerdam@pobox.com">warmerdam@pobox.com</a>) 
-have been using PROJ.4 for a number
-of projects of mine.  PROJ.4 has been without maintenance for nearly five
-years now since Gerald Evenden retired.  I have been in contact with him, and
-he has indicated no interest in actively maintaining PROJ.4.<p>
-
-It is my intention for this version (here at remotesensing.org) to be the
-new official version of PROJ.4.  So far I have redone the makefiles and
-configuration mechanism to use automake, autoconf and libtool.  As well as 
-couple of portability fixes have been incorporated.<p>
-
-It is my hope to involve the 
+PROJ.4 is in active use by 
 <a href="http://hgeo02.geog.uni-hannover.de/grass/">GRASS</a>, 
 <a href="http://mapserver.gis.umn.edu/">MapServer</a>, 
-and <a href="http://ogdi.sourceforge.net/">OGDI</a> 
-communities all of which use some version of PROJ.4 though in some cases
-with substantial changes.  I am also using PROJ.4 in my own projects, including
-using it as the basis of <a href="http://www.opengis.org/">OpenGIS</a> inspired
-coordinate transform services.<p>
+<a href="http://ogdi.sourceforge.net/">OGDI</a> 
+<a href="http://gdal.velocet.ca/projects/opengis/ogrhtml/osr_tutorial.html">
+OGRCoordinateTransformation</a> as well as various other projects (please
+let me know about other projects using PROJ.4!).<p>
+
+Since work started on the PROJ.4.4.x series of releases, various bux fixes
+have been incorporated, and the build system has been overhauled to use 
+autoconf/libtool.  Support has also been added for 3 and 7 parameter datum
+shifts, the <b>PJ*</b> structure now also carries datum information and
+<b>PJ*</b> can be considered a full coordinate system (geographic coordinate
+systems are also now supported with the <b>+proj=latlong</b> 
+pseudo-projection).  The new <b>cs2cs</b> program performs a similar function
+to the <b>proj</b> program, but transforming from any one coordinate system
+to another.  The new <b>pj_transform()</b> is used to access the extended
+coordinate system to coordinate system transformation with datum shifting.
+A mapping file (<b>epsg</b>) has also been introduced mapping most EPSG (
+<a href="http://www.epsg.org">www.epsg.org</a>) coordinate systems to 
+PROJ.4 format.<p>
+
+Future plans for PROJ.4 will hopefully include better online documentation,
+refinement of datum shifting support, splitting of projects.h into public
+and private components  and extension of the external programming API
+for greater convenience in handling coordinate systems from applications.<p>
 
 If you are a user of PROJ.4, and/or are interested in contributing please
 drop me a line and join the mailing list. <p>
@@ -118,12 +124,10 @@ drop me a line and join the mailing list. <p>
 <!---------------------------------------------------------------------------->
 <h2>License</h2>
 
-I have tentatively placed PROJ.4 under an MIT license.  I believe this to
+PROJ.4 has been placed under an MIT license.  I believe this to
 be as close as possible to public domain while satisfying those who say that
 a copyright notice is required in some countries.  The COPYING file read as
-follows:
-
-<pre>
+follows:<p>
 
 All source, data files and other contents of the PROJ.4 package are 
 available under the following terms.  Note that the PROJ 4.3 and earlier
@@ -131,11 +135,12 @@ was "public domain" as is common with US government work, but apparently
 this is not a well defined legal term in many countries.  I am placing 
 everything under the following MIT style license because I believe it is
 effectively the same as public domain, allowing anyone to use the code as
-they wish, including making proprietary derivatives. 
+they wish, including making proprietary derivatives. <p>
 
 Though I have put my own name as copyright holder, I don't mean to imply
-I did the work.  Essentially all work was done by Gerald Evenden. 
+I did the work.  Essentially all work was done by Gerald Evenden. <p>
 
+<pre>
  --------------
 
  Copyright (c) 2000, Frank Warmerdam
