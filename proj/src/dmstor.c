@@ -6,6 +6,8 @@ static const char SCCSID[]="@(#)dmstor.c	4.4	93/06/16	GIE	REL";
 #include <string.h>
 #include <ctype.h>
 
+static double proj_strtod(const char *nptr, char **endptr);
+
 /* following should be sufficient for all but the rediculous */
 #define MAX_WORK 64
 	static const char
@@ -76,3 +78,34 @@ dmstor(const char *is, char **rs) {
 		*rs = (char *)is + (s - work);
 	return v;
 }
+
+static double
+proj_strtod(const char *nptr, char **endptr) 
+
+{
+    char c, *cp = nptr;
+    double result;
+
+    /*
+     * Scan for characters which cause problems with VC++ strtod()
+     */
+    while ((c = *cp) != '\0') {
+        if (c == 'd' || c == 'D') {
+
+            /*
+             * Found one, so NUL it out, call strtod(),
+             * then restore it and return
+             */
+            *cp = '\0';
+            result = strtod(nptr, endptr);
+            *cp = c;
+            return result;
+        }
+        ++cp;
+    }
+
+    /* no offending characters, just handle normally */
+
+    return strtod(nptr, endptr);
+}
+

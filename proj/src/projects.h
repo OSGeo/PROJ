@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.11  2002/06/20 16:09:31  warmerda
+ * removed strtod, reimplement non-GPL strtod cover within dmstor.c
+ *
  * Revision 1.10  2002/06/13 14:06:49  warmerda
  * Removed incorrect labelling of 3PARAM and 7PARAM as Molodensky.
  *
@@ -285,7 +288,6 @@ struct CTABLE {
 };
 	/* procedure prototypes */
 double dmstor(const char *, char **);
-double proj_strtod( const char *, char ** );
 void set_rtodms(int, int);
 char *rtodms(char *, double, int, int);
 double adjlon(double);
