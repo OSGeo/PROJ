@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.4  2002/12/15 22:31:04  warmerda
+ * handle lon_0, k, and prime meridian properly
+ *
  * Revision 1.3  2002/12/15 00:13:30  warmerda
  * lat_0 may now be set by user, but still defaults to 49d30N
  *
@@ -50,6 +53,31 @@ PJ_CVSID("$Id$");
 
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Sph.";
 
+/**
+   NOTES: According to EPSG the full Krovak projection method should have
+          the following parameters.  Within PROJ.4 the azimuth, and pseudo
+          standard parallel are hardcoded in the algorithm and can't be 
+          altered from outside.  The others all have defaults to match the
+          common usage with Krovak projection.
+
+  lat_0 = latitude of centre of the projection
+         
+  lon_0 = longitude of centre of the projection
+  
+  ** = azimuth (true) of the centre line passing through the centre of the projection
+
+  ** = latitude of pseudo standard parallel
+   
+  k  = scale factor on the pseudo standard parallel
+  
+  x_0 = False Easting of the centre of the projection at the apex of the cone
+  
+  y_0 = False Northing of the centre of the projection at the apex of the cone
+
+ **/
+
+
+
 FORWARD(s_forward); /* spheroid */
 /* calculate xy from lat/lon */
 
@@ -58,7 +86,7 @@ FORWARD(s_forward); /* spheroid */
 
 /* Constants, identical to inverse transform function */
 	double s45, s90, e2, e, alfa, uq, u0, g, k, k1, n0, ro0, ad, a, s0, n;
-	double gfi, u, fi0, lon17, lon42, lamdd, deltav, s, d, eps, ro;
+	double gfi, u, fi0, lon17, lamdd, deltav, s, d, eps, ro;
 
 
 	s45 = 0.785398163397448;    /* 45° */
@@ -83,7 +111,7 @@ FORWARD(s_forward); /* spheroid */
 
 	k = tan( u0 / 2. + s45) / pow  (tan(fi0 / 2. + s45) , alfa) * g;
 
-	k1 = 0.9999;
+	k1 = P->k0;
 	n0 = a * sqrt(1. - e2) / (1. - e2 * pow(sin(fi0), 2));
 	s0 = 1.37008346281555;       /* Latitude of pseudo standard parallel 78° 30'00" N */
 	n = sin(s0);
@@ -97,10 +125,7 @@ FORWARD(s_forward); /* spheroid */
 
 	u= 2. * (atan(k * pow( tan(lp.phi / 2. + s45), alfa) / gfi)-s45);
 
-	lon17 = 0.308341501185665;  /* Longitude of Ferro is 17° 40'00" West of Greenwich */
-	lon42 = 0.74176493209759;   /* Longitude of Origin 42° 30'00" East of Ferro */
-	lamdd = lp.lam + lon17;
-	deltav = alfa * (lon42 - lamdd);
+	deltav = - lp.lam * alfa;
 
 	s = asin(cos(ad) * sin(u) + sin(ad) * cos(u) * cos(deltav));
 	d = asin(cos(u) * sin(deltav) / cos(s));
@@ -135,7 +160,7 @@ INVERSE(s_inverse); /* spheroid */
 
 /* Constants, identisch wie in der Umkehrfunktion */
 	double s45, s90, fi0, e2, e, alfa, uq, u0, g, k, k1, n0, ro0, ad, a, s0, n;
-	double u, l24, lamdd, deltav, s, d, eps, ro, fi1, xy0;
+	double u, l24, lamdd, deltav, s, d, eps, ro, fi1, xy0, lon17;
 	int ok;
 
 	s45 = 0.785398163397448;    /* 45° */
@@ -160,7 +185,7 @@ INVERSE(s_inverse); /* spheroid */
 
 	k = tan( u0 / 2. + s45) / pow  (tan(fi0 / 2. + s45) , alfa) * g;
 
-	k1 = 0.9999;
+	k1 = P->k0;
 	n0 = a * sqrt(1. - e2) / (1. - e2 * pow(sin(fi0), 2));
 	s0 = 1.37008346281555;       /* Latitude of pseudo standard parallel 78° 30'00" N */
 	n = sin(s0);
@@ -182,8 +207,7 @@ INVERSE(s_inverse); /* spheroid */
 	u = asin(cos(ad) * sin(s) - sin(ad) * cos(s) * cos(d));
 	deltav = asin(cos(s) * sin(d) / cos(u));
 
-	l24 = 0.433423430911925;   /* DU(2, 24, 50, 0.) */
-	lp.lam = l24 - deltav / alfa;
+	lp.lam = P->lam0 - deltav / alfa;
 
 /* ITERATION FOR lp.phi */
    fi1 = u;
@@ -201,6 +225,8 @@ INVERSE(s_inverse); /* spheroid */
 
    }
    while (ok==0);
+
+   lp.lam -= P->lam0;
 
    return (lp);
 }
@@ -223,8 +249,20 @@ ENTRY0(krovak)
 	if (!pj_param(P->params, "tlat_0").i)
             P->phi0 = 0.863937979737193; 
 
+        /* if center long is not set use 42d30'E of Ferro - 17d40' for Ferro */
+        /* that will correspond to using longitudes relative to greenwich    */
+        /* as input and output, instead of lat/long relative to Ferro */
+	if (!pj_param(P->params, "tlon_0").i)
+            P->lam0 = 0.7417649320975901 - 0.308341501185665;
+; 
+
+        /* if scale not set default to 0.9999 */
+	if (!pj_param(P->params, "tk").i)
+            P->k0 = 0.9999;
+
 	/* always the same */
         P->inv = s_inverse; 
 	P->fwd = s_forward;
 
 ENDENTRY(P)
+
