@@ -51,3 +51,9 @@ pj_ellps[] = {
 "sphere",   "a=6370997.0",  "b=6370997.0", "Normal Sphere (r=6370997)",
 0,0,0,0
 };
+
+struct PJ_ELLPS *pj_get_ellps_ref()
+
+{
+    return pj_ellps;
+}

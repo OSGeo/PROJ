@@ -6,3 +6,9 @@ static const char SCCSID[]="@(#)pj_list.c	4.6	94/02/15	GIE	REL";
 */
 #define PJ_LIST_H "pj_list.h"
 #include "projects.h"
+
+struct PJ_LIST  *pj_get_list_ref()
+
+{
+    return pj_list;
+}

@@ -32,3 +32,9 @@ pj_units[] = {
 	"ind-ch",	"20.11669506",	"Indian Chain",
 (char *)0, (char *)0, (char *)0
 };
+
+struct PJ_UNITS *pj_get_units_ref()
+
+{
+    return pj_units;
+}
