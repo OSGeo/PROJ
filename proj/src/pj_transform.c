@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.9  2003/03/26 16:52:30  warmerda
+ * added check that an inverse transformation func exists
+ *
  * Revision 1.8  2002/12/14 20:35:43  warmerda
  * implement units support for geocentric coordinates
  *
@@ -129,6 +132,17 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 /* -------------------------------------------------------------------- */
     else if( !srcdefn->is_latlong )
     {
+        if( srcdefn->inv == NULL )
+        {
+            pj_errno = -17; /* this isn't correct, we need a no inverse err */
+            if( getenv( "PROJ_DEBUG" ) != NULL )
+            {
+                fprintf( stderr, 
+                       "pj_transform(): source projection not invertable\n" );
+            }
+            return pj_errno;
+        }
+
         for( i = 0; i < point_count; i++ )
         {
             XY         projected_loc;
