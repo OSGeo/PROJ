@@ -28,6 +28,10 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.11  2004/07/28 23:23:49  warmerda
+ * Changed ra to es in declarations for pj_geocentric_to_geodetic()
+ * and pj_geodetic_to_geocentric() as suggested by Britton Kerin.
+ *
  * Revision 1.10  2004/05/04 03:28:01  warmerda
  * Updated version.
  *
@@ -103,10 +107,10 @@ int pj_transform( projPJ src, projPJ dst, long point_count, int point_offset,
                   double *x, double *y, double *z );
 int pj_datum_transform( projPJ src, projPJ dst, long point_count, int point_offset,
                         double *x, double *y, double *z );
-int pj_geocentric_to_geodetic( double a, double ra,
+int pj_geocentric_to_geodetic( double a, double es,
                                long point_count, int point_offset,
                                double *x, double *y, double *z );
-int pj_geodetic_to_geocentric( double a, double ra,
+int pj_geodetic_to_geocentric( double a, double es,
                                long point_count, int point_offset,
                                double *x, double *y, double *z );
 int pj_compare_datums( projPJ srcdefn, projPJ dstdefn );
