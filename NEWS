@@ -1,3 +1,25 @@
+4.4.8 Release Notes
+-------------------
+
+ o Updated epsg file to EPSG 6.5, added other.extra pseudo-EPSG WMS definitions
+
+ o Made significant fixes to prime meridian support. 
+ 
+ o Substantially change pj_datum_transform(), so it and pj_transform() will
+   work between coordinate systems with different ellipsoids but no datum
+   shift information (assume +towgs84=0,0,0). 
+
+ o Added pj_get_release() function.
+
+ o Ensure pj_transform() will try to transform all points in provided list if 
+   even some might transform properly.  
+
+ o Improved the accuracy of Geocentric_To_Geodetic() via an iterative
+   solution.  
+
+ o Various other bug fixes. 
+
+
 4.4.7 Release Notes
 -------------------
 
