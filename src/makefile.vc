@@ -7,6 +7,10 @@
 #
 PROJ_LIB_DIR=C:/PROJ/NAD
 
+# Uncomment the first for an optimized build, or the second for debug.
+OPTFLAGS=	/nologo /Ox 
+#OPTFLAGS=	/nologo /Zi /Fdproj.pdb
+
 azimuthal = \
 	PJ_aeqd.obj PJ_gnom.obj PJ_laea.obj PJ_mod_ster.obj \
 	PJ_nsper.obj PJ_nzmg.obj PJ_ortho.obj PJ_stere.obj
@@ -57,7 +61,7 @@ LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
 PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
 CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
 GEODEXE_OBJ	= geod.obj geod_set.obj geod_for.obj geod_inv.obj emess.obj
-CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\"
+CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" $(OPTFLAGS)
 
 default:	all
 
