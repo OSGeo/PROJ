@@ -48,7 +48,6 @@ LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
 PROJEXE_SRC	=	proj.c gen_cheb.c p_series.c
 CS2CSEXE_SRC	=	cs2cs.c gen_cheb.c p_series.c
 GEODEXE_SRC	=	geod.c geod_set.c geod_for.c geod_inv.c emess.c
-NAD2NAD_SRC	=	nad2nad.c
 CFLAGS	=	/nologo -I. -DPROJ_LIB=\"C:/PROJ/\"
 
 default:	all
@@ -64,7 +63,7 @@ proj.dll:	$(LIBOBJ)
 			$(LIBOBJ)
 
 proj.exe:	$(PROJEXE_SRC) proj.lib
-	cl $(CFLAGFS) $(PROJEXE_SRC) proj.lib
+	cl $(CFLAGS) $(PROJEXE_SRC) proj.lib
 
 cs2cs.exe:	$(CS2CSEXE_SRC) proj.lib
 	cl $(CFLAGS) $(CS2CSEXE_SRC) proj.lib
@@ -72,11 +71,11 @@ cs2cs.exe:	$(CS2CSEXE_SRC) proj.lib
 geod.exe:	$(GEODEXE_SRC) proj.lib
 	cl $(CFLAGS) $(GEODEXE_SRC) proj.lib
 
-nad2nad.exe:	$(NAD2NAD_SRC) proj.lib
-	cl $(CFLAGS) -I. $(NAD2NAD_SRC) proj.lib
+nad2nad.exe:	nad2nad.c proj.lib
+	cl $(CFLAGS) nad2nad.c proj.lib
 
 nad2bin.exe:	nad2bin.c proj.lib
-	cl $(CFLAGS) -I. nad2bin.c proj.lib
+	cl $(CFLAGS) nad2bin.c proj.lib
 
 nadshift:	nad2bin.exe
 	cd ..\nad
