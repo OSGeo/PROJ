@@ -18,6 +18,24 @@ pj_mkparam(char *str) {
 	}
 	return new;
 }
+
+/************************************************************************/
+/*                              pj_param()                              */
+/*                                                                      */
+/*      Test for presence or get parameter value.  The first            */
+/*      character in `opt' is a parameter type which can take the       */
+/*      values:                                                         */
+/*                                                                      */
+/*       `t' - test for presence, return TRUE/FALSE in PVALUE.i         */
+/*       `i' - integer value returned in PVALUE.i                       */
+/*       `d' - simple valued real input returned in PVALUE.f            */
+/*       `r' - degrees (DMS translation applied), returned as           */
+/*             radians in PVALUE.f                                      */
+/*       `s' - string returned in PVALUE.s                              */
+/*       `b' - test for t/T/f/F, return in PVALUE.i                     */
+/*                                                                      */
+/************************************************************************/
+
 	PVALUE /* test for presence or get parameter value */
 pj_param(paralist *pl, char *opt) {
 	int type;
