@@ -124,7 +124,6 @@ INVERSE(e_guam_inv); /* Guam elliptical */
 }
 INVERSE(e_inverse); /* elliptical */
 	double c, Az, cosAz, A, B, D, E, F, psi, t;
-	int i;
 
 	if ((c = hypot(xy.x, xy.y)) < EPS10) {
 		lp.phi = P->phi0;

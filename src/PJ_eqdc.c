@@ -23,7 +23,7 @@ FORWARD(e_forward); /* sphere & ellipsoid */
 	return (xy);
 }
 INVERSE(e_inverse); /* sphere & ellipsoid */
-	if (P->rho = hypot(xy.x, xy.y = P->rho0 - xy.y)) {
+	if ((P->rho = hypot(xy.x, xy.y = P->rho0 - xy.y)) != 0.0 ) {
 		if (P->n < 0.) {
 			P->rho = -P->rho;
 			xy.x = -xy.x;
@@ -62,7 +62,7 @@ ENTRY1(eqdc, en)
 	P->n = sinphi = sin(P->phi1);
 	cosphi = cos(P->phi1);
 	secant = fabs(P->phi1 - P->phi2) >= EPS10;
-	if (P->ellips = P->es > 0.) {
+	if( (P->ellips = (P->es > 0.)) ) {
 		double ml1, m1;
 
 		m1 = pj_msfn(sinphi, cosphi, P->es);

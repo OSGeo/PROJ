@@ -11,7 +11,7 @@ PROJ_HEAD(wintri, "Winkel Tripel") "\n\tMisc Sph\n\tlat_1";
 FORWARD(s_forward); /* spheroid */
 	double c, d;
 
-	if (d = acos(cos(lp.phi) * cos(c = 0.5 * lp.lam))) { /* basic Aitoff */
+	if((d = acos(cos(lp.phi) * cos(c = 0.5 * lp.lam)))) {/* basic Aitoff */
 		xy.x = 2. * d * cos(lp.phi) * sin(c) * (xy.y = 1. / sin(d));
 		xy.y *= d * sin(lp.phi);
 	} else
@@ -36,8 +36,10 @@ ENDENTRY(setup(P))
 ENTRY0(wintri)
 	P->mode = 1;
 	if (pj_param(P->params, "tlat_1").i)
+        {
 		if ((P->cosphi1 = cos(pj_param(P->params, "rlat_1").f)) == 0.)
 			E_ERROR(-22)
+        }
 	else /* 50d28' or acos(2/pi) */
 		P->cosphi1 = 0.636619772367581343;
 ENDENTRY(setup(P))

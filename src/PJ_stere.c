@@ -28,7 +28,7 @@ ssfn_(double phit, double sinphi, double eccen) {
 	   pow((1. - sinphi) / (1. + sinphi), .5 * eccen));
 }
 FORWARD(e_forward); /* ellipsoid */
-	double coslam, sinlam, sinX, cosX, X, A, sinphi;
+	double coslam, sinlam, sinX=0.0, cosX=0.0, X, A, sinphi;
 
 	coslam = cos(lp.lam);
 	sinlam = sin(lp.lam);
@@ -92,7 +92,7 @@ oblcon:
 	return (xy);
 }
 INVERSE(e_inverse); /* ellipsoid */
-	double cosphi, sinphi, tp, phi_l, rho, halfe, halfpi;
+	double cosphi, sinphi, tp=0.0, phi_l=0.0, rho, halfe=0.0, halfpi=0.0;
 	int i;
 
 	rho = hypot(xy.x, xy.y);

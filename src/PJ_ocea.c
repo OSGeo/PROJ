@@ -40,7 +40,7 @@ INVERSE(s_inverse); /* spheroid */
 }
 FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(ocea)
-	double phi_0, phi_1, phi_2, lam_1, lam_2, lonz, alpha;
+	double phi_0=0.0, phi_1, phi_2, lam_1, lam_2, lonz, alpha;
 
 	P->rok = P->a / P->k0;
 	P->rtk = P->a * P->k0;
