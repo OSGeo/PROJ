@@ -1,5 +1,9 @@
 *.lo
 *.la
+proj.dll
+*.lib
+*.pdb
+*.exp
 .libs
 .deps
 nad2nad
