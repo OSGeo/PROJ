@@ -25,7 +25,7 @@ PROJ_HEAD(laea, "Lambert Azimuthal Equal Area") "\n\tAzi, Sph&Ell";
 #define EQUIT	2
 #define OBLIQ	3
 FORWARD(e_forward); /* ellipsoid */
-	double coslam, sinlam, sinphi, q, sinb, cosb, b;
+	double coslam, sinlam, sinphi, q, sinb=0.0, cosb=0.0, b=0.0;
 
 	coslam = cos(lp.lam);
 	sinlam = sin(lp.lam);
@@ -105,7 +105,7 @@ oblcon:
 	return (xy);
 }
 INVERSE(e_inverse); /* ellipsoid */
-	double cCe, sCe, q, rho, ab;
+	double cCe, sCe, q, rho, ab=0.0;
 
 	switch (P->mode) {
 	case EQUIT:
@@ -146,7 +146,7 @@ INVERSE(e_inverse); /* ellipsoid */
 	return (lp);
 }
 INVERSE(s_inverse); /* spheroid */
-	double  cosz, rh, sinz;
+	double  cosz=0.0, rh, sinz=0.0;
 
 	rh = hypot(xy.x, xy.y);
 	if ((lp.phi = rh * .5 ) > 1.) I_ERROR;

@@ -81,7 +81,7 @@ ENTRY0(omerc)
 	int azi;
 
 	P->rot	= pj_param(P->params, "bno_rot").i == 0;
-	if (azi	= pj_param(P->params, "talpha").i) {
+	if( (azi	= pj_param(P->params, "talpha").i) != 0.0) {
 		P->lamc	= pj_param(P->params, "rlonc").f;
 		P->alpha	= pj_param(P->params, "ralpha").f;
 		if ( fabs(P->alpha) <= TOL ||

@@ -1,5 +1,5 @@
 #ifndef lint
-static char SCCSID[]="@(#)PJ_ob_tran.c	4.1	94/02/15	GIE	REL";
+static const char SCCSID[]="@(#)PJ_ob_tran.c	4.1	94/02/15	GIE	REL";
 #endif
 #define PROJ_PARMS__ \
 	struct PJconsts *link; \
@@ -16,6 +16,8 @@ PROJ_HEAD(ob_tran, "General Oblique Transformation") "\n\tMisc Sph"
 FORWARD(o_forward); /* spheroid */
 	double coslam, sinphi, cosphi;
 
+        (void) xy;
+
 	coslam = cos(lp.lam);
 	sinphi = sin(lp.phi);
 	cosphi = cos(lp.phi);
@@ -26,6 +28,8 @@ FORWARD(o_forward); /* spheroid */
 }
 FORWARD(t_forward); /* spheroid */
 	double cosphi, coslam;
+
+        (void) xy;
 
 	cosphi = cos(lp.phi);
 	coslam = cos(lp.lam);

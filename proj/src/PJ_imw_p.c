@@ -95,7 +95,7 @@ INVERSE(e_inverse); /* ellipsoid */
 }
 	static void
 xy(PJ *P, double phi, double *x, double *y, double *sp, double *R) {
-	double t, F;
+	double F;
 
 	*sp = sin(phi);
 	*R = 1./(tan(phi) * sqrt(1. - P->es * *sp * *sp ));
@@ -109,7 +109,7 @@ ENTRY1(imw_p, en)
 	int i;
 
 	if (!(P->en = pj_enfn(P->es))) E_ERROR_0;
-	if (i = phi12(P, &del, &sig))
+	if( (i = phi12(P, &del, &sig)) != 0)
 		E_ERROR(i);
 	if (P->phi_2 < P->phi_1) { /* make sure P->phi_1 most southerly */
 		del = P->phi_1;

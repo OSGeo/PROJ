@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.7  2001/02/07 17:55:05  warmerda
+ * Cleaned up various warnings when compiled with -Wall.
+ *
  * Revision 1.6  2000/11/30 03:37:22  warmerda
  * use proj_strtod() in dmstor()
  *
@@ -245,7 +248,7 @@ extern struct PJ_DATUMS pj_datums[];
 #define PROJ_HEAD(id, name) static const char des_##id [] = name
 #define ENTRYA(name) const char * const pj_s_##name = des_##name; \
 	PJ *pj_##name(PJ *P) { if (!P) { \
-	if (P = pj_malloc(sizeof(PJ))) { \
+	if( (P = pj_malloc(sizeof(PJ))) != NULL) { \
 	P->pfree = freeup; P->fwd = 0; P->inv = 0; \
 	P->spc = 0; P->descr = des_##name;
 #define ENTRYX } return P; } else {
