@@ -45,7 +45,7 @@ LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
 EXESRC	=	proj.c gen_cheb.c p_series.c emess.c 
 CFLAGS	=	-I. /nologo
 
-default:	proj.lib proj.dll
+default:	all
 
 all:            proj.lib proj.dll proj.exe
 
