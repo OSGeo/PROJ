@@ -1,3 +1,6 @@
+Rel. 4.4.3 2001/04/20
+-------------------------------------------------------------------------
+	
 2001-04-05  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Introduce proj_api.h as a public include file with projects.h
