@@ -1,5 +1,7 @@
 2002-04-30  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* html/faq.html: new
+
 	* src/pj_apply_gridshift.c,pj_open_lib.c,nad_init.c: try to improve
 	debug output when datum shifting fails.
 
