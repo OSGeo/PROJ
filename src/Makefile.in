@@ -537,10 +537,10 @@ maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
 install-exec-local:
-	rm -f $(bindir)/invproj
-	ln $(bindir)/proj $(bindir)/invproj
-	rm -f $(bindir)/invgeod
-	ln $(bindir)/geod $(bindir)/invgeod
+	rm -f $(DESTDIR)$(bindir)/invproj
+	ln $(DESTDIR)$(bindir)/proj $(DESTDIR)$(bindir)/invproj
+	rm -f $(DESTDIR)$(bindir)/invgeod
+	ln $(DESTDIR)$(bindir)/geod $(DESTDIR)$(bindir)/invgeod
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
