@@ -31,6 +31,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.2  2001/03/15 16:57:55  warmerda
+ * fixed intermittent problem in pj_load_nadgrids()
+ *
  * Revision 1.1  2000/07/06 23:32:27  warmerda
  * New
  *
@@ -187,7 +190,7 @@ static struct CTABLE **pj_load_nadgrids( const char *nadgrids )
 /* -------------------------------------------------------------------- */
 /*      Loop processing names out of nadgrids one at a time.            */
 /* -------------------------------------------------------------------- */
-    for( s = nadgrids; *s != '\0'; s++ )
+    for( s = nadgrids; *s != '\0'; )
     {
         int   end_char;
         char  name[128];
@@ -208,6 +211,7 @@ static struct CTABLE **pj_load_nadgrids( const char *nadgrids )
         s += end_char;
         if( *s == ',' )
             s++;
+
 
         last_nadgrids_list[nadgrids_count] = pj_get_grid( name );
         if( last_nadgrids_list[nadgrids_count] == NULL )
