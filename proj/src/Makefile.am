@@ -62,7 +62,7 @@ libproj_la_SOURCES = \
 
 
 install-exec-local:
-	rm -f $(DESTDIR)$(bindir)/invproj
-	ln -s $(DESTDIR)$(bindir)/proj $(DESTDIR)$(bindir)/invproj
-	rm -f $(DESTDIR)$(bindir)/invgeod
-	ln -s $(DESTDIR)$(bindir)/geod $(DESTDIR)$(bindir)/invgeod
+	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)
+	(cd $(DESTDIR)$(bindir); ln -s proj$(EXEEXT) invproj$(EXEEXT))
+	rm -f $(DESTDIR)$(bindir)/invgeod$(EXEEXT)
+	(cd $(DESTDIR)$(bindir); ln -s geod$(EXEEXT) invgeod$(EXEEXT))
