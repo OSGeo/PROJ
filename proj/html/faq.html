@@ -1,0 +1,116 @@
+<html>
+<head>
+<title>PROJ.4 - Frequently Asked Questions</title>
+</head>
+<body BGCOLOR="#FFFFFF">
+<h1>PROJ.4 - Frequently Asked Questions</h1>
+
+<!-------------------------------------------------------------------------->
+
+<h2>Where can I find the list of projections and their arguments?</h2>
+
+There is no simple single location to find all the required information. The
+PostScript/PDF documents listed on the <a href="index.html">main</a> PROJ.4
+page under documentation are the authoritative source but projections and
+options are spread over several documents in a form more related to their
+order of implementation than anything else.<pp>
+
+The <b>proj</b> command
+itself can report the list of projections using the <tt>-lp,</tt> option, 
+the list of ellipsoids with the <tt>-le</tt> option, the list of units with
+the <tt>-lu</tt> option, and the list of built-in datums with the <tt>-ld</tt>
+option.<p>
+
+The <a href="http://www.remotesensing.org/geotiff/proj_list/">GeoTIFF 
+Projections Pages</a> include most of the common PROJ.4 projections, and
+a definition of the projection specific options for each.<p>
+
+<!-------------------------------------------------------------------------->
+
+<h2>How do I do datum shifts between NAD27 and NAD83?</h2>
+
+While the <b>nad2nad</b> program can be used in some cases, the <b>cs2cs</b>
+is now the preferred mechanism.   The following example demonstrates using
+the default shift parameters for NAD27 to NAD83:<p>
+
+<code>
+% cs2cs +proj=latlong +datum=NAD27 +to +proj=latlong +datum=NAD83 
+-117 30
+</code>
+
+producing:
+
+<code>
+117d0'2.901"W   30d0'0.407"N 0.000
+</code>
+
+In order for datum shifting to work properly the various grid shift files
+must be available.  See below.<p>
+
+<!-------------------------------------------------------------------------->
+
+<h2>How do I build/configure PROJ.4 to support datum shifting.</h2>
+
+After downloading and unpacking the PROJ.4 source, also download and unpack
+the set of datum shift files.  This would be a file like
+<a href="ftp://ftp.remotesensing.org/pub/proj/proj-nad27-1.1.tar.gz">
+ftp://ftp.remotesensing.org/pub/proj/proj-nad27-1.1.tar.gz</a>.  This
+file should be unpacked <i>within</i> the <tt>proj/nad</tt> directory.
+Then proceed with the configuration, build and install.  This will ensure
+that the build system knows about the grid shift files, and applies the
+ascii to binary preprocessing step.<p>
+
+On Windows the extra <tt>nadshift</tt> target must be used.  For instance
+<tt>nmake /f makefile.vc nadshift</tt> in the <tt>proj/src</tt> directory.
+<p>
+
+A default build and install on Unix will normally build knowledge of the
+directory where the grid shift files are installed into the PROJ.4 library
+(usually /usr/local/share/proj).  On Windows the library is normally built
+thinking that C:\PROJ\NAD is the installed directory for the grid shift files.
+If the built in concept of the PROJ.4 data directory is incorrect, the PROJ_LIB
+environment can be defined with the correct directory.<p>
+
+<!-------------------------------------------------------------------------->
+
+<h2>How do I debug problems with NAD27/NAD83 datum shifting?</h2>
+
+<ol>
+<li> Try a datum shifting operation in relative isolation, such as with the
+cs2cs command listed above.  Do you get reasonable results?  If not it is
+likely the grid shift files aren't being found.  Perhaps you need to define
+PROJ_LIB? 
+
+<li> The cs2cs command and the underlying pj_transform() API know how to 
+do a grid shift as part of a more complex coordinate transformation; however,
+it is imperative that both the source and destination coordinate system be
+defined with appropriate datum information.  That means that implicitly or
+explicitly there must be a +datum= clause, a +nadgrids= clause or
+a +towgs84= clause.  For instance "cs2cs +proj=latlong +datum=NAD27 +to 
++proj=latlong +ellps=WGS84" won't work because defining the output coordinate 
+system as using the ellipse WGS84 isn't the same as defining it to use the
+datum WGS84 (use +datum=WGS84).  If either the input or output are not 
+identified as having a datum, the datum shifting (and ellipsoid change) step
+is just quietly skipped!<p>
+
+<li> The PROJ_DEBUG environment can be defined to force extra output from
+the PROJ.4 library to stderr (the text console normally) with information on
+what data files are being opened and in some cases why a transformation fails.
+Note that PROJ_DEBUG support is not yet very mature in the PROJ.4 library.<p>
+
+<li> The "-v" flag to cs2cs can be useful in establishing more detail on 
+what parameters being used internally for a coordinate system.  This will
+include expanding the definition of +datum clause. <p>
+
+</ol>
+
+
+<!-------------------------------------------------------------------------->
+
+<hr>
+
+Requests to add items to the frequently asked questions list 
+<a href="http://bugzilla.remotesensing.org/enter_bug.cgi?product=PROJ.4">
+can be entered</a> in bugzilla.<p>
+</body>
+</html>
