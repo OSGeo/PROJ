@@ -4,6 +4,8 @@ INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\"
 
 include_HEADERS = projects.h nad_list.h
 
+EXTRA_DIST = makefile.vc
+
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
 nad2nad_SOURCES = nad2nad.c 
