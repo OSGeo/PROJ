@@ -57,7 +57,7 @@ LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
 PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
 CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
 GEODEXE_OBJ	= geod.obj geod_set.obj geod_for.obj geod_inv.obj emess.obj
-CFLAGS	=	/nologo /TP -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\"
+CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\"
 
 default:	all
 
