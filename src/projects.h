@@ -8,6 +8,11 @@ static const char PROJECTS_H_ID[] = "@(#)projects.h	4.11	95/09/23	GIE	REL";
     /* standard inclusions */
 #include <math.h>
 #include <stdlib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 	/* maximum path/filename */
 #ifndef MAX_PATH_FILENAME
 #define MAX_PATH_FILENAME 1024
@@ -236,5 +241,9 @@ LP nad_cvt(LP, int, struct CTABLE *);
 struct CTABLE *nad_init(char *);
 void nad_free(struct CTABLE *);
 extern char const pj_release[];
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* end of basic projections header */
