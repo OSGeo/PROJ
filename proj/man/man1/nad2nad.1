@@ -23,7 +23,8 @@ America Datum 1927 (NAD27) and North American Datum 1983.
 .B nad2nad
 can optionally process both State Plane Coordinate System (SPCS) and
 Universal Transverse Mercator (UTM) grid data as well
-as geographic data for both input and output.
+as geographic data for both input and output.  This can also be 
+accomplished with the \fIcs2cs\fR program.
 .PP
 The following control parameters can appear in any order:
 .TP
@@ -183,6 +184,8 @@ coordinates in meters or feet.
 Any data after the two input values are echoed after the two
 output data values.
 .SH SEE ALSO
+.B cs2cs(1U), proj(1U),
+.br
 .I "Cartographic Projection Procedures for the UNIX Environment\(emA User's Manual,"
 (Evenden, 1990, Open-file report 90\-284).
 .SH HOME PAGE
