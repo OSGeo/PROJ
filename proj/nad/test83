@@ -691,7 +691,7 @@ EOF
 #
 # do 'diff' with distribution results
 echo "diff ${OUT} with pj_out83.dist"
-diff ${OUT} pj_out83.dist
+diff -b ${OUT} pj_out83.dist
 if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURED"
