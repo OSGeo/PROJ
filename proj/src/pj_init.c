@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.11  2003/06/09 21:23:16  warmerda
+ * ensure start is initialized at very beginning of pj_init()
+ *
  * Revision 1.10  2003/03/16 16:38:24  warmerda
  * Modified get_opt() to terminate reading the definition when a new
  * definition (a word starting with '<') is encountered, in addition to when
@@ -204,6 +207,7 @@ pj_init(int argc, char **argv) {
 	PJ *PIN = 0;
 
 	errno = pj_errno = 0;
+        start = NULL;
 
 	/* put arguments into internal linked list */
 	if (argc <= 0) { pj_errno = -1; goto bum_call; }
