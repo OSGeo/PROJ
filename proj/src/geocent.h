@@ -93,7 +93,7 @@ extern "C" {
 #endif
 
 
-  long Set_Geocentric_Parameters (double a, 
+  long pj_Set_Geocentric_Parameters (double a, 
                                   double b);
 /*
  * The function Set_Geocentric_Parameters receives the ellipsoid parameters
@@ -104,7 +104,7 @@ extern "C" {
  */
 
 
-  void Get_Geocentric_Parameters (double *a, 
+  void pj_Get_Geocentric_Parameters (double *a, 
                                   double *b);
 /*
  * The function Get_Geocentric_Parameters returns the ellipsoid parameters
@@ -115,7 +115,7 @@ extern "C" {
  */
 
 
-  long Convert_Geodetic_To_Geocentric (double Latitude,
+  long pj_Convert_Geodetic_To_Geocentric (double Latitude,
                                        double Longitude,
                                        double Height,
                                        double *X,
@@ -136,7 +136,7 @@ extern "C" {
  */
 
 
-  void Convert_Geocentric_To_Geodetic (double X,
+  void pj_Convert_Geocentric_To_Geodetic (double X,
                                        double Y, 
                                        double Z,
                                        double *Latitude,
