@@ -71,6 +71,8 @@ RANLIB = @RANLIB@
 VERSION = @VERSION@
 
 man_MANS = pj_init.3
+
+EXTRA_DIST = $(man_MANS)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../src/proj_config.h
 CONFIG_CLEAN_FILES = 
