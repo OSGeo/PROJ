@@ -1,7 +1,11 @@
 2003-03-25  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/cs2cs.c: modified so that -f formats are used for Z as well as
+	x and y values.  
+	As per http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=169056
+
 	* src/man/man1/cs2cs.1: removed -V flag ... it is not supported.
-	As per http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=181998
+	As per http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=162331
 
 2003-03-17  Frank Warmerdam  <warmerdam@pobox.com>
 
