@@ -1,3 +1,11 @@
+2002-07-07  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/*.c, src/*.h, src/makefile.vc: *Many* changes to support
+	compiling all of the PROJ.4 source as C++ source.  Add /TP to CFLAGS
+	in makefile.vc to test this on Windows.  projects.h, and proj_api.h 
+	attempt to export all externally visible functions with C linkage but
+	all code should now compile as C++.  Currently only tested with VC++ 6.
+
 2002-06-11  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_pr_list.c, proj.def, proj_api.h: Added the pj_get_def()
