@@ -73,6 +73,63 @@ get_init(paralist *next, char *name) {
 }
 
 /************************************************************************/
+/*                            pj_init_plus()                            */
+/*                                                                      */
+/*      Same as pj_init() except it takes one argument string with      */
+/*      individual arguments preceeded by '+', such as "+proj=utm       */
+/*      +zone=11 +ellps=WGS84".                                         */
+/************************************************************************/
+
+PJ *
+pj_init_plus( const char *definition )
+
+{
+#define MAX_ARG 200
+    char	*argv[MAX_ARG];
+    char	*defn_copy;
+    int		argc = 0, i;
+    PJ	        *result;
+    
+    /* make a copy that we can manipulate */
+    defn_copy = pj_malloc( strlen(definition)+1 );
+    strcpy( defn_copy, definition );
+
+    /* split into arguments based on '+' and trim white space */
+
+    for( i = 0; defn_copy[i] != '\0'; i++ )
+    {
+        switch( defn_copy[i] )
+        {
+          case '+':
+            if( argc+1 == MAX_ARG )
+            {
+                pj_errno = -44;
+                return NULL;
+            }
+
+            argv[argc++] = defn_copy + i + 1;
+            break;
+
+          case ' ':
+          case '\t':
+          case '\n':
+            defn_copy[i] = '\0';
+            break;
+
+          default:
+            /* do nothing */
+        }
+    }
+
+    /* perform actual initialization */
+    result = pj_init( argc, argv );
+
+    pj_dalloc( defn_copy );
+
+    return result;
+}
+
+/************************************************************************/
 /*                              pj_init()                               */
 /*                                                                      */
 /*      Main entry point for initialing a PJ projections                */
