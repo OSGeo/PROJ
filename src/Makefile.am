@@ -10,7 +10,7 @@ proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
 nad2nad_SOURCES = nad2nad.c 
 nad2bin_SOURCES = nad2bin.c
-geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c emess.c geodesic.h
+geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c geodesic.h
 
 proj_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
@@ -37,7 +37,7 @@ libproj_la_SOURCES = \
 	PJ_chamb.c PJ_hammer.c PJ_lagrng.c PJ_larr.c \
 	PJ_lask.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c \
 	PJ_tpeqd.c PJ_vandg.c PJ_vandg2.c PJ_vandg4.c \
-	PJ_wag7.c \
+	PJ_wag7.c PJ_lcca.c \
 	PJ_boggs.c PJ_collg.c PJ_crast.c PJ_denoy.c \
 	PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c \
 	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c \
