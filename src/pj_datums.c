@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.6  2003/02/06 03:37:52  warmerda
+ * Fixed typo in madrid prime meridian value.
+ *
  * Revision 1.5  2003/01/15 14:34:55  warmerda
  * Added some datums as suggested by GRASS team
  *
@@ -79,7 +82,7 @@ C_NAMESPACE struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
     "lisbon",    "9d07'54.862\"W",
     "paris",     "2d20'14.025\"E",
     "bogota",    "74d04'51.3\"E",
-    "madrid",    "3d41'16.48\"W",
+    "madrid",    "3d41'16.58\"W",
     "rome",      "12d27'8.4\"E",
     "bern",      "7d26'22.5\"E",
     "jakarta",   "106d48'27.79\"E",
