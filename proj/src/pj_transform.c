@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.8  2002/12/14 20:35:43  warmerda
+ * implement units support for geocentric coordinates
+ *
  * Revision 1.7  2002/12/14 20:14:35  warmerda
  * added geocentric support
  *
@@ -108,6 +111,15 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             return PJD_ERR_GEOCENTRIC;
         }
 
+        if( srcdefn->to_meter != 1.0 )
+        {
+            for( i = 0; i < point_count; i++ )
+            {
+                x[point_offset*i] *= srcdefn->to_meter;
+                y[point_offset*i] *= srcdefn->to_meter;
+            }
+        }
+
         pj_geocentric_to_geodetic( srcdefn->a, srcdefn->es,
                                    point_count, point_offset, x, y, z );
     }
@@ -163,6 +175,15 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 
         pj_geodetic_to_geocentric( dstdefn->a, dstdefn->es,
                                    point_count, point_offset, x, y, z );
+
+        if( dstdefn->fr_meter != 1.0 )
+        {
+            for( i = 0; i < point_count; i++ )
+            {
+                x[point_offset*i] *= dstdefn->fr_meter;
+                y[point_offset*i] *= dstdefn->fr_meter;
+            }
+        }
     }
 
 /* -------------------------------------------------------------------- */
