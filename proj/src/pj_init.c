@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.12  2003/08/21 02:15:59  warmerda
+ * improve MAX_ARG checking
+ *
  * Revision 1.11  2003/06/09 21:23:16  warmerda
  * ensure start is initialized at very beginning of pj_init()
  *
@@ -161,13 +164,16 @@ pj_init_plus( const char *definition )
         switch( defn_copy[i] )
         {
           case '+':
-            if( argc+1 == MAX_ARG )
+            if( i == 0 || defn_copy[i-1] == '\0' )
             {
-                pj_errno = -44;
-                return NULL;
+                if( argc+1 == MAX_ARG )
+                {
+                    pj_errno = -44;
+                    return NULL;
+                }
+                
+                argv[argc++] = defn_copy + i + 1;
             }
-
-            argv[argc++] = defn_copy + i + 1;
             break;
 
           case ' ':
