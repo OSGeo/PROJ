@@ -11,6 +11,14 @@ proj_def.dat --- basic default file used by proj.
 
 epsg    --- Translation of EPSG GCS/PCS codes into PROJ.4 via init= mechanism.
 
+epsg-deprecated --- EPSG definitions that have been deprecated. They are
+                not part of 'epsg' anymore, but may have been delivered
+		with earlier versions of 'epsg'.
+		Thus, they might occur e.g. in WMS (Web Mapping Services)
+		running with old EPSG definitions.
+		This file is not complete at all - it contains just
+		definitions that were individually reported.
+
 nad27   --- North American Datum 1927 for "init=" definition of
 			State Plane Coordinate Systems (SPCS).
 
