@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.3  2003/03/17 19:44:45  warmerda
+ * improved debugging, reduce header read size
+ *
  * Revision 1.2  2003/03/17 18:56:34  warmerda
  * implement heirarchical NTv2 gridinfos
  *
@@ -611,7 +614,7 @@ PJ_GRIDINFO *pj_gridinfo_init( const char *gridname )
     char 	fname[MAX_PATH_FILENAME+1];
     PJ_GRIDINFO *gilist;
     FILE 	*fp;
-    char	header[512];
+    char	header[160];
 
     errno = pj_errno = 0;
 
@@ -674,6 +677,15 @@ PJ_GRIDINFO *pj_gridinfo_init( const char *gridname )
 
         gilist->format = "ctable";
         gilist->ct = ct;
+
+        if( getenv("PROJ_DEBUG") != NULL )
+            fprintf( stderr, 
+                     "Ctable %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
+                     ct->id, 
+                     ct->lim.lam, ct->lim.phi,
+                     ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
+                     (ct->ll.lam + ct->lim.lam*ct->del.lam) * RAD_TO_DEG, 
+                     (ct->ll.phi + ct->lim.phi*ct->del.lam) * RAD_TO_DEG );
     }
 
     fclose(fp);
