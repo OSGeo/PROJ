@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 extern double dmstor();
+double proj_strtod(const char *, char **);
 struct geodesic {
 	double	A;
 	double	LAM1, PHI1, ALPHA12;
