@@ -33,10 +33,10 @@ writable by the installer.
 
 After executing configure, execute:
 
-	sh install
+	make
+        make install
 
-The install script will create, if necessary, all required sub-
-directories.
+The install target will create, if necessary, all required sub-directories.
 
 Windows Build
 -------------
