@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.10  2003/08/21 02:09:06  warmerda
+ * added a bunch of HUGE_VAL checking
+ *
  * Revision 1.9  2003/03/26 16:52:30  warmerda
  * added check that an inverse transformation func exists
  *
@@ -123,9 +126,12 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             }
         }
 
-        pj_geocentric_to_geodetic( srcdefn->a, srcdefn->es,
-                                   point_count, point_offset, x, y, z );
+        if( pj_geocentric_to_geodetic( srcdefn->a, srcdefn->es,
+                                       point_count, point_offset, 
+                                       x, y, z ) != 0) 
+            return pj_errno;
     }
+
 /* -------------------------------------------------------------------- */
 /*      Transform source points to lat/long, if they aren't             */
 /*      already.                                                        */
@@ -151,6 +157,9 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             projected_loc.u = x[point_offset*i];
             projected_loc.v = y[point_offset*i];
 
+            if( projected_loc.u == HUGE_VAL )
+                continue;
+
             geodetic_loc = pj_inv( projected_loc, srcdefn );
             if( pj_errno != 0 )
                 return pj_errno;
@@ -166,7 +175,10 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     else if( srcdefn->from_greenwich != 0.0 )
     {
         for( i = 0; i < point_count; i++ )
-            x[point_offset*i] += srcdefn->from_greenwich;
+        {
+            if( x[point_offset*i] != HUGE_VAL )
+                x[point_offset*i] += srcdefn->from_greenwich;
+        }
     }
 
 /* -------------------------------------------------------------------- */
@@ -194,8 +206,11 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
         {
             for( i = 0; i < point_count; i++ )
             {
-                x[point_offset*i] *= dstdefn->fr_meter;
-                y[point_offset*i] *= dstdefn->fr_meter;
+                if( x[point_offset*i] != HUGE_VAL )
+                {
+                    x[point_offset*i] *= dstdefn->fr_meter;
+                    y[point_offset*i] *= dstdefn->fr_meter;
+                }
             }
         }
     }
@@ -214,6 +229,9 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             geodetic_loc.u = x[point_offset*i];
             geodetic_loc.v = y[point_offset*i];
 
+            if( geodetic_loc.u == HUGE_VAL )
+                continue;
+
             projected_loc = pj_fwd( geodetic_loc, dstdefn );
             if( pj_errno != 0 )
                 return pj_errno;
@@ -229,7 +247,10 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     else if( dstdefn->from_greenwich != 0.0 )
     {
         for( i = 0; i < point_count; i++ )
-            x[point_offset*i] -= dstdefn->from_greenwich;
+        {
+            if( x[point_offset*i] != HUGE_VAL )
+                x[point_offset*i] -= dstdefn->from_greenwich;
+        }
     }
 
 
@@ -300,6 +321,9 @@ int pj_geocentric_to_geodetic( double a, double es,
     for( i = 0; i < point_count; i++ )
     {
         long io = i * point_offset;
+
+        if( x[io] == HUGE_VAL )
+            continue;
 
         Convert_Geocentric_To_Geodetic( x[io], y[io], z[io], 
                                         y+io, x+io, z+io );
@@ -373,6 +397,9 @@ int pj_geocentric_to_wgs84( PJ *defn,
         {
             long io = i * point_offset;
             
+            if( x[io] == HUGE_VAL )
+                continue;
+
             x[io] = x[io] + defn->datum_params[0];
             y[io] = y[io] + defn->datum_params[1];
             z[io] = z[io] + defn->datum_params[2];
@@ -384,6 +411,9 @@ int pj_geocentric_to_wgs84( PJ *defn,
         {
             long io = i * point_offset;
             double x_out, y_out, z_out;
+
+            if( x[io] == HUGE_VAL )
+                continue;
 
             x_out = M_BF*(       x[io] - Rz_BF*y[io] + Ry_BF*z[io]) + Dx_BF;
             y_out = M_BF*( Rz_BF*x[io] +       y[io] - Rx_BF*z[io]) + Dy_BF;
@@ -416,6 +446,9 @@ int pj_geocentric_from_wgs84( PJ *defn,
         for( i = 0; i < point_count; i++ )
         {
             long io = i * point_offset;
+
+            if( x[io] == HUGE_VAL )
+                continue;
             
             x[io] = x[io] - defn->datum_params[0];
             y[io] = y[io] - defn->datum_params[1];
@@ -428,6 +461,9 @@ int pj_geocentric_from_wgs84( PJ *defn,
         {
             long io = i * point_offset;
             double x_tmp, y_tmp, z_tmp;
+
+            if( x[io] == HUGE_VAL )
+                continue;
 
             x_tmp = (x[io] - Dx_BF) / M_BF;
             y_tmp = (y[io] - Dy_BF) / M_BF;
