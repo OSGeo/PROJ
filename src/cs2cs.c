@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.3  2001/04/05 04:23:28  warmerda
+ * use pj_latlong_from_proj
+ *
  * Revision 1.2  2001/02/03 18:36:55  warmerda
  * removed some unavailable options from usage string
  *
@@ -311,24 +314,6 @@ int main(int argc, char **argv)
         eargv[eargc++] = "-";
 
     /* 
-     * If no to projection is provided, generate a latlong equivelent to
-     * the from projection.
-     */
-    if( to_argc == 0 )
-    {
-        to_argv[to_argc++] = "proj=latlong";
-        for( i = 0; i < from_argc; i++ )
-        {
-            if( strncmp(from_argv[i],"a=",2) == 0 
-                || strncmp(from_argv[i],"b=",2) == 0 
-                || strncmp(from_argv[i],"ra=",3) == 0 
-                || strncmp(from_argv[i],"ellps=",6) == 0 
-                || strncmp(from_argv[i],"datum=",6) == 0 )
-                to_argv[to_argc++] = from_argv[i];
-        }
-    }
-
-    /* 
      * If the user has requested inverse, then just reverse the
      * coordinate systems.
      */
@@ -361,7 +346,20 @@ int main(int argc, char **argv)
               pj_strerrno(pj_errno));
     }
 
-    if (!(toProj = pj_init(to_argc, to_argv)))
+    if( to_argc == 0 )
+    {
+        if (!(toProj = pj_latlong_from_proj( fromProj )))
+        {
+            printf( "Using to definition: " );
+            for( i = 0; i < to_argc; i++ )
+                printf( "%s ", to_argv[i] );
+            printf( "\n" );
+            
+            emess(3,"projection initialization failure\ncause: %s",
+                  pj_strerrno(pj_errno));
+        }   
+    }
+    else if (!(toProj = pj_init(to_argc, to_argv)))
     {
         printf( "Using to definition: " );
         for( i = 0; i < to_argc; i++ )
