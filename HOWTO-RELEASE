@@ -37,14 +37,18 @@
 
      scp proj-4.4.3.{tar.gz,zip} remotesensing.org:/ftp/remotesensing/pub/proj
 
-9) Announce the new release on the PROJ.4 mailing lists.  If the release
+9) Update html/index.html to link to the new release tar/zip files.  When
+   committed this updates the web page on remotesensing.org.
+
+10) Announce the new release on the PROJ.4 mailing lists.  If the release
    is particularly significant in terms of features it might also be 
    announced in comp.infosystems.gis, os-remotesensing@remotesensing.org, 
    and freegis-list@intevation.de.  
 
-10) Issue a new release report on Freshmeat.  
+11) Issue a new release report on Freshmeat.  
 
    http://freshmeat.net/projects/proj.4/
+
 
 
 NOTES:
