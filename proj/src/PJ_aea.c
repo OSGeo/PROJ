@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.4  2003/08/18 15:21:23  warmerda
+ * fixed initialization of en variable
+ *
  * Revision 1.3  2002/12/14 19:27:06  warmerda
  * updated header
  *
@@ -158,11 +161,11 @@ setup(PJ *P) {
 	P->inv = e_inverse; P->fwd = e_forward;
 	return P;
 }
-ENTRY0(aea)
+ENTRY1(aea,en)
 	P->phi1 = pj_param(P->params, "rlat_1").f;
 	P->phi2 = pj_param(P->params, "rlat_2").f;
 ENDENTRY(setup(P))
-ENTRY0(leac)
+ENTRY1(leac,en)
 	P->phi2 = pj_param(P->params, "rlat_1").f;
 	P->phi1 = pj_param(P->params, "bsouth").i ? - HALFPI: HALFPI;
 ENDENTRY(setup(P))
