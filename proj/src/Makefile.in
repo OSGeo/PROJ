@@ -302,7 +302,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 INCLUDES = -DPROJ_LIB=\"$(pkgdatadir)\"
-include_HEADERS = projects.h nad_list.h proj_api.h
+include_HEADERS = projects.h nad_list.h proj_api.h org_proj4_Projections.h
 EXTRA_DIST = makefile.vc proj.def
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
