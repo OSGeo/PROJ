@@ -1,3 +1,9 @@
+2000-11-29  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Changed strtod() to proj_strtod() in strtod.c, and make use
+	of it in dmstor() to avoid having stuff like "5d10" interpreted
+	as exponential notation on MSVC.
+
 2000-11-18  Frank Warmerdam  <warmerda@cs46980-c>
 
 	* Patch from Craig Bruce to adjlon.c to avoid wrong results, 
