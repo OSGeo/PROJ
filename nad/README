@@ -56,3 +56,6 @@ MD.lla.Z    --- Maryland
 TN.lla.Z    --- Tennessee
 WI.lla.Z    --- Wisconsin
 WO.lla.Z    --- Washington, Oregon, N. California
+
+	Other grid shift files
+ntv1_can.dat	--- Canadian NTv1 grid shift file (NAD27-->NAD83)
