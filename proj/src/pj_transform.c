@@ -30,6 +30,15 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.11  2004/01/24 09:37:19  warmerda
+ * pj_transform() will no longer return an error code if any of the points are
+ * transformable.  In this case the application is expected to check for
+ * HUGE_VAL to identify failed points.
+ * As part of the implementation, I added a list of pj_errno values that
+ * are transient (ie per-point) rather than indicating global failure for the
+ * coordinate system definition.  We use this in deciding which pj_fwd and
+ * pj_inv error codes are really fatal and should be reported.
+ *
  * Revision 1.10  2003/08/21 02:09:06  warmerda
  * added a bunch of HUGE_VAL checking
  *
@@ -84,6 +93,25 @@ PJ_CVSID("$Id$");
 #define Ry_BF (defn->datum_params[4])
 #define Rz_BF (defn->datum_params[5])
 #define M_BF  (defn->datum_params[6])
+
+/* 
+** This table is intended to indicate for any given error code in 
+** the range 0 to -44, whether that error will occur for all locations (ie.
+** it is a problem with the coordinate system as a whole) in which case the
+** value would be 0, or if the problem is with the point being transformed
+** in which case the value is 1. 
+**
+** At some point we might want to move this array in with the error message
+** list or something, but while experimenting with it this should be fine. 
+*/
+
+static int transient_error[45] = {
+    /*             0  1  2  3  4  5  6  7  8  9   */
+    /* 0 to 9 */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    /* 10 to 19 */ 0, 0, 0, 0, 1, 1, 0, 1, 1, 1,  
+    /* 20 to 29 */ 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 
+    /* 30 to 39 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 
+    /* 40 to 44 */ 0, 0, 0, 0, 0 };
 
 /************************************************************************/
 /*                            pj_transform()                            */
@@ -162,7 +190,16 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 
             geodetic_loc = pj_inv( projected_loc, srcdefn );
             if( pj_errno != 0 )
-                return pj_errno;
+            {
+                if( pj_errno > 0 || pj_errno < -44 || point_count == 1
+                    || transient_error[-pj_errno] == 0 )
+                    return pj_errno;
+                else
+                {
+                    geodetic_loc.u = HUGE_VAL;
+                    geodetic_loc.v = HUGE_VAL;
+                }
+            }
 
             x[point_offset*i] = geodetic_loc.u;
             y[point_offset*i] = geodetic_loc.v;
@@ -234,7 +271,16 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 
             projected_loc = pj_fwd( geodetic_loc, dstdefn );
             if( pj_errno != 0 )
-                return pj_errno;
+            {
+                if( pj_errno > 0 || pj_errno < -44 || point_count == 1
+                    || transient_error[-pj_errno] == 0 )
+                    return pj_errno;
+                else
+                {
+                    projected_loc.u = HUGE_VAL;
+                    projected_loc.v = HUGE_VAL;
+                }
+            }
 
             x[point_offset*i] = projected_loc.u;
             y[point_offset*i] = projected_loc.v;
