@@ -1,5 +1,8 @@
 2000-03-27  Frank Warmerdam  <warmerda@cs46980-c>
 
+	* At the suggestion of John Evans, I have rolled the nad conversion
+	functions into the core library.
+
 	* Updated COPYING file to MIT style license.  Added man_proj.html
 	in html directory.
 
