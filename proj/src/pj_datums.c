@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.5  2003/01/15 14:34:55  warmerda
+ * Added some datums as suggested by GRASS team
+ *
  * Revision 1.4  2002/12/09 16:01:02  warmerda
  * added prime meridian support
  *
@@ -62,6 +65,10 @@ C_NAMESPACE struct PJ_DATUMS pj_datums[] = {
 				"North_American_Datum_1983",
 "NAD27",    "nadgrids=conus,ntv1_can.dat",           "clrk66", 
 				"North_American_Datum_1927",
+"potsdam",  "towgs84=606.0,23.0,413.0",  "bessel",  "Potsdam Rauenberg 1950 DHDN",
+"carthage",  "towgs84=-263.0,6.0,431.0",  "clark80",  "Carthage 1934 Tunisia",
+"hermannskogel", "towgs84=653.0,-212.0,449.0",  "bessel",  "Hermannskogel",
+"ire65",  "towgs84=482.530,-130.596,564.557,-1.042,-0.214,-0.631,8.15",  "modif_airy",  "Ireland 1965",
 NULL,       NULL,                                    NULL,    NULL 
 };
 
