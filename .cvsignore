@@ -1,2 +1,3 @@
-config.*
-
+config.log
+config.guess
+config.status
