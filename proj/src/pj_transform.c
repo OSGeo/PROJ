@@ -30,6 +30,13 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.12  2004/05/03 19:45:23  warmerda
+ * Altered so that raw ellpses are treated as a essentially having a
+ * +towgs84=0,0,0 specification so ellpisoid shifts are applied.
+ * Fixed so that prime meridian shifts are applied if the coordinate system is
+ * not lat/long (ie. if it is projected).  This fixes:
+ * http://bugzilla.remotesensing.org/show_bug.cgi?id=510
+ *
  * Revision 1.11  2004/01/24 09:37:19  warmerda
  * pj_transform() will no longer return an error code if any of the points are
  * transformable.  In this case the application is expected to check for
@@ -209,7 +216,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 /*      But if they are already lat long, adjust for the prime          */
 /*      meridian if there is one in effect.                             */
 /* -------------------------------------------------------------------- */
-    else if( srcdefn->from_greenwich != 0.0 )
+    if( srcdefn->from_greenwich != 0.0 )
     {
         for( i = 0; i < point_count; i++ )
         {
@@ -224,6 +231,20 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     if( pj_datum_transform( srcdefn, dstdefn, point_count, point_offset, 
                             x, y, z ) != 0 )
         return pj_errno;
+
+/* -------------------------------------------------------------------- */
+/*      But if they are staying lat long, adjust for the prime          */
+/*      meridian if there is one in effect.                             */
+/* -------------------------------------------------------------------- */
+    if( dstdefn->from_greenwich != 0.0 )
+    {
+        for( i = 0; i < point_count; i++ )
+        {
+            if( x[point_offset*i] != HUGE_VAL )
+                x[point_offset*i] -= dstdefn->from_greenwich;
+        }
+    }
+
 
 /* -------------------------------------------------------------------- */
 /*      Transform destination latlong to geocentric if required.        */
@@ -286,19 +307,6 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             y[point_offset*i] = projected_loc.v;
         }
     }
-/* -------------------------------------------------------------------- */
-/*      But if they are staying lat long, adjust for the prime          */
-/*      meridian if there is one in effect.                             */
-/* -------------------------------------------------------------------- */
-    else if( dstdefn->from_greenwich != 0.0 )
-    {
-        for( i = 0; i < point_count; i++ )
-        {
-            if( x[point_offset*i] != HUGE_VAL )
-                x[point_offset*i] -= dstdefn->from_greenwich;
-        }
-    }
-
 
     return 0;
 }
@@ -586,7 +594,8 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /* ==================================================================== */
 /*      Do we need to go through geocentric coordinates?                */
 /* ==================================================================== */
-    if( srcdefn->datum_type == PJD_3PARAM 
+    if( src_es != dst_es || src_a != dst_a
+        || srcdefn->datum_type == PJD_3PARAM 
         || srcdefn->datum_type == PJD_7PARAM
         || dstdefn->datum_type == PJD_3PARAM 
         || dstdefn->datum_type == PJD_7PARAM)
@@ -601,12 +610,16 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /* -------------------------------------------------------------------- */
 /*      Convert between datums.                                         */
 /* -------------------------------------------------------------------- */
-        if( srcdefn->datum_type != PJD_UNKNOWN
-            && dstdefn->datum_type != PJD_UNKNOWN )
+        if( srcdefn->datum_type == PJD_3PARAM 
+            || srcdefn->datum_type == PJD_7PARAM )
         {
             pj_geocentric_to_wgs84( srcdefn, point_count, point_offset,x,y,z);
             CHECK_RETURN;
+        }
 
+        if( dstdefn->datum_type == PJD_3PARAM 
+            || dstdefn->datum_type == PJD_7PARAM )
+        {
             pj_geocentric_from_wgs84( dstdefn, point_count,point_offset,x,y,z);
             CHECK_RETURN;
         }
