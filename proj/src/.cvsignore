@@ -8,3 +8,5 @@ proj
 geod
 stamp-h*
 proj_config.h
+cs2cs
+Makefile
