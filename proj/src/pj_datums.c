@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.2  2001/04/05 19:32:41  warmerda
+ * added ntv1_can.dat to NAD27 list
+ *
  * Revision 1.1  2000/07/06 23:32:27  warmerda
  * New
  *
@@ -51,7 +54,7 @@ struct PJ_DATUMS pj_datums[] = {
 				"Greek_Geodetic_Reference_System_1987",
 "NAD83",    "towgs84=0,0,0",                         "GRS80", 
 				"North_American_Datum_1983",
-"NAD27",    "nadgrids=conus",                        "clrk66", 
+"NAD27",    "nadgrids=conus,ntv1_can.dat",           "clrk66", 
 				"North_American_Datum_1927",
 NULL,       NULL,                                    NULL,    NULL 
 };
