@@ -255,7 +255,7 @@ int main(int argc, char **argv) {
     else emess_dat.Prog_name = *argv;
     inverse = ! strncmp(emess_dat.Prog_name, "inv", 3);
     if (argc <= 1 ) {
-        (void)fprintf(stderr, usage, pj_release, emess_dat.Prog_name);
+        (void)fprintf(stderr, usage, pj_get_release(), emess_dat.Prog_name);
         exit (0);
     }
     /* process run line arguments */
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
                     int do_long = arg[1] == 'P', c;
                     char *str;
 
-                    for (lp = pj_list ; lp->id ; ++lp) {
+                    for (lp = pj_get_list_ref() ; lp->id ; ++lp) {
                         if( strcmp(lp->id,"latlong") == 0 
                             || strcmp(lp->id,"longlat") == 0 
                             || strcmp(lp->id,"geocent") == 0 )
@@ -320,7 +320,7 @@ int main(int argc, char **argv) {
                     struct PJ_LIST *lp;
 
                     arg += 2;
-                    for (lp = pj_list ; lp->id ; ++lp)
+                    for (lp = pj_get_list_ref(); lp->id ; ++lp)
                         if (!strcmp(lp->id, arg)) {
                             (void)printf("%9s : %s\n", lp->id, *lp->descr);
                             break;
@@ -328,20 +328,20 @@ int main(int argc, char **argv) {
                 } else if (arg[1] == 'e') { /* list ellipses */
                     struct PJ_ELLPS *le;
 
-                    for (le = pj_ellps; le->id ; ++le)
+                    for (le = pj_get_ellps_ref(); le->id ; ++le)
                         (void)printf("%9s %-16s %-16s %s\n",
                                      le->id, le->major, le->ell, le->name);
                 } else if (arg[1] == 'u') { /* list units */
                     struct PJ_UNITS *lu;
 
-                    for (lu = pj_units; lu->id ; ++lu)
+                    for (lu = pj_get_units_ref(); lu->id ; ++lu)
                         (void)printf("%12s %-20s %s\n",
                                      lu->id, lu->to_meter, lu->name);
                 } else if (arg[1] == 'd') { /* list datums */
                     struct PJ_DATUMS *ld;
 
                     printf("__datum_id__ __ellipse___ __definition/comments______________________________\n" );
-                    for (ld = pj_datums; ld->id ; ++ld)
+                    for (ld = pj_get_datums_ref(); ld->id ; ++ld)
                     {
                         printf("%12s %-12s %-30s\n",
                                ld->id, ld->ellipse_id, ld->defn);

@@ -18,7 +18,8 @@ emess(int code, char *fmt, ...) {
 	va_start(args, fmt);
 	/* prefix program name, if given */
 	if (fmt != NULL)
-		(void)fprintf(stderr,"%s\n<%s>: ",pj_release,emess_dat.Prog_name);
+		(void)fprintf(stderr,"%s\n<%s>: ",pj_get_release(),
+                              emess_dat.Prog_name);
 	/* print file name and line, if given */
 	if (emess_dat.File_name != NULL && *emess_dat.File_name) {
 		(void)fprintf(stderr,"while processing file: %s", emess_dat.File_name);
