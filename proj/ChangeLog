@@ -1,3 +1,7 @@
+2000-12-01  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Added proj.def to extra_dist in src/Makefile.am.
+
 2000-11-29  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Changed strtod() to proj_strtod() in strtod.c, and make use
