@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.16  2003/03/15 06:02:02  warmerda
+ * preliminary NTv2 support, major restructure of datum shifting
+ *
  * Revision 1.15  2002/12/14 20:35:15  warmerda
  * fix C_NAMESPACE warning issue with C_NAMESPACE_VAR for variables
  *
@@ -309,6 +312,7 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #define MAX_TAB_ID 80
 typedef struct { float lam, phi; } FLP;
 typedef struct { int lam, phi; } ILP;
+
 struct CTABLE {
 	char id[MAX_TAB_ID]; /* ascii info */
 	LP ll;      /* lower left corner coordinates */
@@ -316,7 +320,22 @@ struct CTABLE {
 	ILP lim;    /* limits of conversion matrix */
 	FLP *cvs;   /* conversion matrix */
 };
-	/* procedure prototypes */
+
+typedef struct _pj_gi {
+    char *gridname;   /* identifying name of grid, eg "conus" or ntv2_0.gsb */
+    char *filename;   /* full path to filename */
+    
+    const char *format; /* format of this grid, ie "ctable", "ntv1", 
+                           "ntv2" or "missing". */
+
+    int   grid_offset; /* offset in file, for delayed loading */
+
+    struct CTABLE *ct;
+
+    struct _pj_gi *next;
+} PJ_GRIDINFO;
+
+/* procedure prototypes */
 double dmstor(const char *, char **);
 void set_rtodms(int, int);
 char *rtodms(char *, double, int, int);
@@ -371,7 +390,18 @@ int bch2bps(projUV, projUV, projUV **, int, int);
 LP nad_intr(LP, struct CTABLE *);
 LP nad_cvt(LP, int, struct CTABLE *);
 struct CTABLE *nad_init(char *);
+struct CTABLE *nad_load_ctable( FILE * fid );
 void nad_free(struct CTABLE *);
+
+/* higher level handling of datum grid shift files */
+
+PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *, int * );
+void pj_deallocate_grids();
+
+PJ_GRIDINFO *pj_gridinfo_init( const char * );
+int pj_gridinfo_load( PJ_GRIDINFO * );
+void pj_gridinfo_free( PJ_GRIDINFO * );
+
 extern char const pj_release[];
 
 #ifndef DISABLE_CVSID

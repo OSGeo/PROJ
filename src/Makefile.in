@@ -143,7 +143,7 @@ libproj_la_SOURCES = \
 	\
 	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \
 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
-	geocent.c geocent.h pj_utils.c
+	geocent.c geocent.h pj_utils.c pj_gridinfo.c pj_gridlist.c
 
 subdir = src
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -178,7 +178,8 @@ am_libproj_la_OBJECTS = PJ_aeqd.lo PJ_gnom.lo PJ_laea.lo PJ_mod_ster.lo \
 	pj_units.lo pj_zpoly1.lo rtodms.lo vector1.lo pj_release.lo \
 	nad_cvt.lo nad_init.lo nad_intr.lo emess.lo \
 	pj_apply_gridshift.lo pj_datums.lo pj_datum_set.lo \
-	pj_transform.lo geocent.lo pj_utils.lo
+	pj_transform.lo geocent.lo pj_utils.lo pj_gridinfo.lo \
+	pj_gridlist.lo
 libproj_la_OBJECTS = $(am_libproj_la_OBJECTS)
 bin_PROGRAMS = proj$(EXEEXT) nad2nad$(EXEEXT) nad2bin$(EXEEXT) \
 	geod$(EXEEXT) cs2cs$(EXEEXT)
@@ -274,10 +275,12 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/pj_ell_set.Plo ./$(DEPDIR)/pj_ellps.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/pj_errno.Plo ./$(DEPDIR)/pj_factors.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/pj_fwd.Plo ./$(DEPDIR)/pj_geocent.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/pj_init.Plo ./$(DEPDIR)/pj_inv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/pj_latlong.Plo ./$(DEPDIR)/pj_list.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/pj_malloc.Plo ./$(DEPDIR)/pj_mlfn.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/pj_msfn.Plo ./$(DEPDIR)/pj_open_lib.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pj_gridinfo.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pj_gridlist.Plo ./$(DEPDIR)/pj_init.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pj_inv.Plo ./$(DEPDIR)/pj_latlong.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pj_list.Plo ./$(DEPDIR)/pj_malloc.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pj_mlfn.Plo ./$(DEPDIR)/pj_msfn.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pj_open_lib.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/pj_param.Plo ./$(DEPDIR)/pj_phi2.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/pj_pr_list.Plo ./$(DEPDIR)/pj_qsfn.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/pj_release.Plo \
@@ -530,6 +533,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_factors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_fwd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_geocent.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_gridinfo.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_gridlist.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_init.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_inv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_latlong.Plo@am__quote@
