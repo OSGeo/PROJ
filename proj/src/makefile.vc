@@ -18,7 +18,7 @@ misc = \
 	PJ_chamb.obj PJ_hammer.obj PJ_lagrng.obj PJ_larr.obj \
 	PJ_lask.obj PJ_nocol.obj PJ_ob_tran.obj PJ_oea.obj \
 	PJ_tpeqd.obj PJ_vandg.obj PJ_vandg2.obj PJ_vandg4.obj \
-	PJ_wag7.obj
+	PJ_wag7.obj pj_latlong.obj
 
 pseudo = \
 	PJ_boggs.obj PJ_collg.obj PJ_crast.obj PJ_denoy.obj \
@@ -39,18 +39,20 @@ support = \
 	pj_list.obj pj_malloc.obj pj_mlfn.obj pj_msfn.obj \
 	pj_open_lib.obj pj_param.obj pj_phi2.obj pj_pr_list.obj \
 	pj_qsfn.obj pj_strerrno.obj pj_tsfn.obj pj_units.obj \
-	pj_zpoly1.obj rtodms.obj vector1.obj pj_release.obj
+	pj_zpoly1.obj rtodms.obj vector1.obj pj_release.obj \
+	geocent.obj pj_transform.obj pj_datum_set.obj pj_datums.obj \
+	pj_apply_gridshift.obj emess.obj
 
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
-EXESRC	=	proj.c gen_cheb.c p_series.c emess.c 
-CFLAGS	=	-I. /nologo
+EXESRC	=	proj.c gen_cheb.c p_series.c
+CFLAGS	=	-I.
 
-default:	all
+default:	proj.lib
 
 all:            proj.lib proj.dll proj.exe
 
 proj.lib:	$(LIBOBJ)
-	if exist proj.lib del proj.lib
+	del proj.lib
 	lib /out:proj.lib $(LIBOBJ)
 
 proj.dll:	$(LIBOBJ)
@@ -61,8 +63,5 @@ proj.exe:	$(EXESRC) proj.lib
 	cl -I. $(EXESRC) proj.lib
 
 clean:
-	-del *.obj 
-	-del *.lib 
-	-del *.dll
-	-del *.pdb 
-	-del *.exp
+	del *.obj *.lib *.dll
+	del *.pdb *.exp
