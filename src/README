@@ -1,0 +1,73 @@
+             Installation README --- @(#)README	4.4 94/10/05 GIE REL"
+
+At the current time, installation only performed to PROJ.4 directory and
+information not transfered via normal "install(1)" function because of
+the diversity of system variations.
+
+There are occasional errors encountered with "ranlib."  Makefile tests
+for presence in either /bin or /usr/bin and will execute.  Even if found,
+some systems choke.  Such choking is ignored with no apparent ill results.
+
+As an alternative to editing the head of the Makefile, the following can
+be used on the run line:
+
+For Suns without vendor ANSI C compiler, use GNU's gcc and
+	make install CC=gcc COMP='-O -DNO_STRERRNO'
+Apparently the name max is missing from gcc includes and the Sun
+library does not include the ANSI strerrno function.
+
+For DEC Ultrix: (brain damaged strtod implementation)
+	make install STRTOD='$L(strtod.o)'
+The DEC people just can't seem to forget the dinosaur FORTRAN.
+Ignore compiler warnings about "unimplemented const."
+
+For Dell SVR4 issue 2.2 do
+	make install
+
+For Data General:
+	make install COMP='-O -ansi'
+Ranlib in system but execution denied(?)---error ignored.
+
+If repeatative compilations or linkages are expected, it is better
+to edit these flags into the beginning of the Makefile after saving
+a copy of the original.
+
+Check /usr/include/math.h for prototype of hypot.  If missing it is
+probably not in libm.a and it is necessary to use supplied version.
+
+	make install HYPOT='$L(hypot.o)'
+		or
+	make install HYPOT='$L(hypot.o)' STRTOD='$L(strtod.o)'
+
+To check for brain damaged versions of strtod try the following after
+using the local system's version (default):
+
+proj +proj=poly +ellps=clrk66 +no_defs <<EOF
+3.5 33.25
+3d30 33d15
+EOF
+
+Both geographic coordinates should produce the same cartesian result.
+If not, then it is almost a certainty that libc.a has a version modified
+to accept d | D as an alternative to e | E.  This "extension" to ANSI
+specifications causes untold grief.  Use the ANSI compliant GNU version
+included.
+
+The default installation library is set at /usr/local/lib even though
+actual transfer of files not made.  To set to an alternative library
+use LIB=<library path> on the make run-line or edit Makefile.
+
+To truely install:
+
+	BIN=<favorite executable area?
+	LIB=<basic library area, same as in Makefile's>
+	INC=<include file area>
+	cp proj $BIN
+	ln ${BIN}/proj ${BIN}/invproj
+	cp geod $BIN
+	cp proj_def.dat $LIB/proj
+	cp libproj.a $LIB
+	cp projects.h $INC
+	cd ../nad
+	cp nad27 $LIB/proj
+	cp nad83 $LIB/proj
