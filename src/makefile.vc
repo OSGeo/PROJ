@@ -18,7 +18,7 @@ EXE_PROJ =	proj_i.lib
 # Set the version number for the DLL.  Normally we leave this blank since
 # we want software that is dynamically loading the DLL to have no problem
 # with version numbers.
-VERSION=
+VERSION=_fw
 
 azimuthal = \
 	PJ_aeqd.obj PJ_gnom.obj PJ_laea.obj PJ_mod_ster.obj \
@@ -116,6 +116,7 @@ nadshift:	nad2bin.exe
 	..\src\nad2bin.exe < stgeorge.lla stgeorge
 	..\src\nad2bin.exe < stlrnc.lla stlrnc
 	..\src\nad2bin.exe < stpaul.lla stpaul
+	..\src\nad2bin.exe < null.lla null
 	cd ..\src
 
 clean:
