@@ -83,7 +83,7 @@ am_libproj_la_OBJECTS = PJ_aeqd.lo PJ_gnom.lo PJ_laea.lo \
 	vector1.lo pj_release.lo pj_gauss.lo nad_cvt.lo nad_init.lo \
 	nad_intr.lo emess.lo pj_apply_gridshift.lo pj_datums.lo \
 	pj_datum_set.lo pj_transform.lo geocent.lo pj_utils.lo \
-	pj_gridinfo.lo pj_gridlist.lo
+	pj_gridinfo.lo pj_gridlist.lo jniproj.lo
 libproj_la_OBJECTS = $(am_libproj_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
@@ -161,10 +161,10 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/gen_cheb.Po ./$(DEPDIR)/geocent.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/geod.Po ./$(DEPDIR)/geod_for.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/geod_inv.Po ./$(DEPDIR)/geod_set.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/mk_cheby.Plo ./$(DEPDIR)/nad2bin.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/nad2nad.Po ./$(DEPDIR)/nad_cvt.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/nad_init.Plo ./$(DEPDIR)/nad_intr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/p_series.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/jniproj.Plo ./$(DEPDIR)/mk_cheby.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/nad2bin.Po ./$(DEPDIR)/nad2nad.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/nad_cvt.Plo ./$(DEPDIR)/nad_init.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/nad_intr.Plo ./$(DEPDIR)/p_series.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/pj_apply_gridshift.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/pj_auth.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/pj_datum_set.Plo \
@@ -352,7 +352,8 @@ libproj_la_SOURCES = \
 	\
 	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \
 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
-	geocent.c geocent.h pj_utils.c pj_gridinfo.c pj_gridlist.c
+	geocent.c geocent.h pj_utils.c pj_gridinfo.c pj_gridlist.c \
+	jniproj.c
 
 all: proj_config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -587,6 +588,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geod_for.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geod_inv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geod_set.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jniproj.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_cheby.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad2bin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad2nad.Po@am__quote@
