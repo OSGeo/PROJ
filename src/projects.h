@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.10  2002/06/13 14:06:49  warmerda
+ * Removed incorrect labelling of 3PARAM and 7PARAM as Molodensky.
+ *
  * Revision 1.9  2001/04/06 01:24:13  warmerda
  * Introduced proj_api.h as a public interface for PROJ.4
  *
@@ -109,8 +112,8 @@ extern double hypot(double, double);
 
 /* datum_type values */
 #define PJD_UNKNOWN   0
-#define PJD_3PARAM    1   /* Molodensky */
-#define PJD_7PARAM    2   /* Molodensky */
+#define PJD_3PARAM    1   
+#define PJD_7PARAM    2   
 #define PJD_GRIDSHIFT 3
 #define PJD_WGS84     4   /* WGS84 (or anything considered equivelent) */
 
