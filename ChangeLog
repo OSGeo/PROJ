@@ -87,6 +87,9 @@ Rel. 4.4.2 2000/09/22
 	* Added hard links for invproj->proj and invgeod->geod in 
 	src/Makefile.{am,in}.
 
+Rel. 4.4.1 2000/03/27
+-------------------------------------------------------------------------
+	
 2000-03-27  Frank Warmerdam  <warmerda@cs46980-c>
 
 	* Issued V4.4.1 Release.
