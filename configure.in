@@ -16,5 +16,34 @@ AC_CHECK_LIB(m,exp,,,)
 dnl We check for headers
 AC_HEADER_STDC
 
+dnl ---------------------------------------------------------------------------
+dnl Check for JNI support.
+dnl ---------------------------------------------------------------------------
+
+AC_CHECKING(whether to enable Java/JNI support)
+
+AC_ARG_WITH(jni,
+[  --with-jni              Include Java/JNI support],,)
+
+if test "$with_jni" = "yes" ; then
+
+  JNI_ENABLED=1
+
+  AC_DEFINE(JNI_ENABLED,1,[Enabled for Java/JNI Support])
+
+  AC_MSG_RESULT([enabled])
+
+elif test -n "$with_jni" -a "$with_jni" != "no" ; then
+
+  THREAD_FLAG=-DCPL_MULTIPROC_PTHREAD
+  THREAD_LIB="$with_threads"  
+
+  AC_MSG_RESULT([disabled])
+
+else
+  AC_MSG_RESULT([disabled])
+fi
+
+
 AC_OUTPUT(Makefile src/Makefile man/Makefile man/man1/Makefile \
 	man/man3/Makefile nad/Makefile)
