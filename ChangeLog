@@ -1,3 +1,8 @@
+2004-02-19  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/other.extra: updated from some WKT definition Daniel got from
+	CubeWerx.
+
 2004-01-24  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_transform.c: Ensure pj_transform() will try to transform all
