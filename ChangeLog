@@ -1,3 +1,8 @@
+2004-01-24  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_transform.c: Ensure pj_transform() will try to transform all
+	points in provided list if even some might transform properly.  
+
 2003-08-18  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/PJ_aea.c: fixed initialization of en variable.
