@@ -1614,7 +1614,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=proj
- VERSION=4.4.6
+ VERSION=4.4.7
 
 
 cat >>confdefs.h <<_ACEOF

@@ -20,7 +20,7 @@ geod_LDADD = libproj.la
 
 lib_LTLIBRARIES = libproj.la
 
-libproj_la_LDFLAGS = -version-info 4:0:4
+libproj_la_LDFLAGS = -version-info 4:1:4
 
 libproj_la_SOURCES = \
 	projects.h pj_list.h \

@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.8  2003/03/31 14:52:38  warmerda
+ * updated to 4.4.7
+ *
  * Revision 1.7  2002/12/14 20:14:35  warmerda
  * added geocentric support
  *
@@ -64,7 +67,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 446
+#define PJ_VERSION 447
 
 extern char const pj_release[]; /* global release id string */
 
