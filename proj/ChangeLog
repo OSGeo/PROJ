@@ -1,3 +1,9 @@
+2003-06-27  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_init.c: changed tokenizing in pj_init_plus() so that if
+	a value has an exponent with a plus sign this won't trigger a brand
+	new token.  See bug 355 in bugzilla.
+
 2003-06-09  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_init.c: ensure start is initialized at the very beginning
