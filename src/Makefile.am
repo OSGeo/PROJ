@@ -1,5 +1,7 @@
 bin_PROGRAMS =	proj nad2nad nad2bin geod
 
+include_HEADERS = projects.h
+
 proj_SOURCES = proj.c gen_cheb.c p_series.c emess.c emess.h
 nad2nad_SOURCES = nad2nad.c nad_cvt.c nad_init.c nad_intr.c emess.c nad_list.h
 nad2bin_SOURCES = nad2bin.c
