@@ -701,7 +701,7 @@ fi
 
 PACKAGE=proj
 
-VERSION=4.4.2
+VERSION=4.4.3
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
