@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.15  2002/12/14 20:35:15  warmerda
+ * fix C_NAMESPACE warning issue with C_NAMESPACE_VAR for variables
+ *
  * Revision 1.14  2002/12/14 20:16:21  warmerda
  * added geocentric support, and PJ_CVSID
  *
@@ -71,9 +74,11 @@
 
 #ifdef __cplusplus
 #define C_NAMESPACE extern "C"
+#define C_NAMESPACE_VAR extern "C"
 extern "C" {
 #else    
 #define C_NAMESPACE extern
+#define C_NAMESPACE_VAR
 #endif
 
 #ifndef NULL
@@ -281,7 +286,8 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #ifdef PJ_LIB__
     /* repeatative projection code */
 #define PROJ_HEAD(id, name) static const char des_##id [] = name
-#define ENTRYA(name) C_NAMESPACE const char * const pj_s_##name = des_##name; \
+#define ENTRYA(name) \
+        C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
 	C_NAMESPACE PJ *pj_##name(PJ *P) { if (!P) { \
 	if( (P = (PJ*) pj_malloc(sizeof(PJ))) != NULL) { \
 	P->pfree = freeup; P->fwd = 0; P->inv = 0; \
