@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.7  2003/03/17 21:37:22  warmerda
+ * make NAD27 grids optional, added alaska and ntv2
+ *
  * Revision 1.6  2003/02/06 03:37:52  warmerda
  * Fixed typo in madrid prime meridian value.
  *
@@ -66,7 +69,8 @@ C_NAMESPACE struct PJ_DATUMS pj_datums[] = {
 				"Greek_Geodetic_Reference_System_1987",
 "NAD83",    "towgs84=0,0,0",                         "GRS80", 
 				"North_American_Datum_1983",
-"NAD27",    "nadgrids=conus,ntv1_can.dat",           "clrk66", 
+"NAD27",    "nadgrids=@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat",           
+                                                     "clrk66", 
 				"North_American_Datum_1927",
 "potsdam",  "towgs84=606.0,23.0,413.0",  "bessel",  "Potsdam Rauenberg 1950 DHDN",
 "carthage",  "towgs84=-263.0,6.0,431.0",  "clark80",  "Carthage 1934 Tunisia",
