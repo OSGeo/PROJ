@@ -85,7 +85,7 @@ value for both return values.
 causes the input coordinates to be copied to the output line
 prior to printing the converted values.
 .TP
-.BI \-l "[p|P|=|e|u]" id
+.BI \-l "[p|P|=|e|u|d]" id
 List projection identifiers with
 .B \-l,
 .B \-lp
@@ -99,12 +99,15 @@ gives expanded description of projection
 List ellipsoid identifiers with
 .B \-le,
 that can be selected with
-.B +ellps
-or
+.B +ellps,
 .B \-lu
 list of cartesian to meter conversion factors
 that can be selected with
-.B +units.
+.B +units
+or
+.B \-ld
+list of datums that can be selected with 
+.B +datum.
 .TP
 .BI \-r
 This options reverses the order of the
@@ -131,22 +134,6 @@ scale factors to be listed between <> for each input point.
 For conformal projections meridinal and parallel scales factors
 will be equal and angular distortion zero.
 Equal area projections will have an area factor of 1.
-.TP
-.BI \-m " mult"
-The cartesian data may be scaled by the
-.I mult
-parameter.
-When processing data in a forward projection mode the
-cartesian output values are multiplied by
-.I mult
-otherwise the input cartesian values are divided by
-.I mult
-before inverse projection.
-If the first two characters of
-.I mult
-are 1/ or 1: then the reciprocal value of
-.I mult
-is employed.
 .TP
 .BI \-f " format"
 .I Format
@@ -228,7 +215,8 @@ file.
 The environment parameter
 .B PROJ_LIB
 establishes the default directory for a file reference without
-an absolute path.
+an absolute path.  This is also used for supporting files like
+datum shift files.
 .PP
 One or more
 .I files
@@ -268,7 +256,23 @@ The x\-y output data will appear as three lines of:
 .RS 5
  \f(CW460769.27	5011648.45
 .RE
+.SH OTHER PROGRAMS
+.PP
+The \fIproj\fR program is limited to converting between geographic and
+projection coordinates within one datum.
+.PP
+The \fIcs2cs\fR program operates
+similarly, but allows translation between any pair of definable coordinate
+systems, including support for datum translation.
+.PP
+The \fInad2nad\fR program provides for translation between NAD27 and NAD83
+(also available in \fRcs2cs\fI) in a convenient manner. 
+.PP 
+The \fIgeod\fR program provides the ability to compute geodetic (Great
+Circle) computations.
 .SH SEE ALSO
+.B cs2cs(1U), nad2nad(1U), geod(1U),
+.br
 .I "Cartographic Projection Procedures for the UNIX Environment\(emA User's Manual,"
 (Evenden, 1990, Open-file report 90\-284).
 .br
