@@ -54,7 +54,7 @@ default:	proj.lib
 all:            proj.lib proj.dll proj.exe
 
 proj.lib:	$(LIBOBJ)
-	del proj.lib
+	if exist proj.lib del proj.lib
 	lib /out:proj.lib $(LIBOBJ)
 
 proj.dll:	$(LIBOBJ)
