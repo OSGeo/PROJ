@@ -1,127 +1,497 @@
-# SCCSID--- @(#)Makefile.in	4.8	94/02/27	GIE	REL"
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-prefix = /usr/local
-exec_prefix = $(prefix)
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-CC = @CC@
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
 
 INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
 
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+AS = @AS@
+CC = @CC@
+DLLTOOL = @DLLTOOL@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
+MAKEINFO = @MAKEINFO@
+OBJDUMP = @OBJDUMP@
+PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
+VERSION = @VERSION@
 
-DEFS = @DEFS@
+bin_PROGRAMS = proj nad2nad nad2bin geod
 
+proj_SOURCES = proj.c gen_cheb.c p_series.c emess.c
+nad2nad_SOURCES = nad2nad.c nad_cvt.c nad_init.c nad_intr.c emess.c
+nad2bin_SOURCES = nad2bin.c
+geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c emess.c
+
+proj_LDADD = libproj.la
+nad2nad_LDADD = libproj.la
+nad2bin_LDADD = libproj.la
+geod_LDADD = libproj.la
+
+lib_LTLIBRARIES = libproj.la
+
+libproj_la_LDFLAGS = -version-info 0:0:0
+
+libproj_la_SOURCES =  	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c 	PJ_imw_p.c PJ_lcc.c PJ_mpoly.c PJ_poly.c 	PJ_rpoly.c PJ_sconics.c 	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c 	PJ_gall.c PJ_labrd.c PJ_lsat.c PJ_merc.c 	PJ_mill.c PJ_ocea.c PJ_omerc.c PJ_somerc.c 	PJ_tcc.c PJ_tcea.c PJ_tmerc.c 	PJ_airy.c PJ_aitoff.c PJ_august.c PJ_bacon.c 	PJ_chamb.c PJ_hammer.c PJ_lagrng.c PJ_larr.c 	PJ_lask.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c 	PJ_tpeqd.c PJ_vandg.c PJ_vandg2.c PJ_vandg4.c 	PJ_wag7.c 	PJ_boggs.c PJ_collg.c PJ_crast.c PJ_denoy.c 	PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c 	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c 	PJ_gn_sinu.c PJ_goode.c PJ_hatano.c PJ_loxim.c 	PJ_mbt_fps.c PJ_mbtfpp.c PJ_mbtfpq.c PJ_moll.c 	PJ_nell.c PJ_nell_h.c PJ_putp2.c PJ_putp3.c 	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_robin.c 	PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c 	PJ_wag3.c PJ_wink1.c PJ_wink2.c 	aasincos.c adjlon.c bch2bps.c bchgen.c 	biveval.c dmstor.c mk_cheby.c pj_auth.c 	pj_deriv.c pj_ell_set.c pj_ellps.c pj_errno.c 	pj_factors.c pj_fwd.c pj_init.c pj_inv.c 	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c 	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c 	pj_zpoly1.c rtodms.c vector1.c pj_release.c
+
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = proj_config.h
+CONFIG_CLEAN_FILES = 
+LTLIBRARIES =  $(lib_LTLIBRARIES)
+
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I.
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
+libproj_la_LIBADD = 
+libproj_la_OBJECTS =  PJ_aeqd.lo PJ_gnom.lo PJ_laea.lo PJ_mod_ster.lo \
+PJ_nsper.lo PJ_nzmg.lo PJ_ortho.lo PJ_stere.lo PJ_aea.lo PJ_bipc.lo \
+PJ_bonne.lo PJ_eqdc.lo PJ_imw_p.lo PJ_lcc.lo PJ_mpoly.lo PJ_poly.lo \
+PJ_rpoly.lo PJ_sconics.lo PJ_cass.lo PJ_cc.lo PJ_cea.lo PJ_eqc.lo \
+PJ_gall.lo PJ_labrd.lo PJ_lsat.lo PJ_merc.lo PJ_mill.lo PJ_ocea.lo \
+PJ_omerc.lo PJ_somerc.lo PJ_tcc.lo PJ_tcea.lo PJ_tmerc.lo PJ_airy.lo \
+PJ_aitoff.lo PJ_august.lo PJ_bacon.lo PJ_chamb.lo PJ_hammer.lo \
+PJ_lagrng.lo PJ_larr.lo PJ_lask.lo PJ_nocol.lo PJ_ob_tran.lo PJ_oea.lo \
+PJ_tpeqd.lo PJ_vandg.lo PJ_vandg2.lo PJ_vandg4.lo PJ_wag7.lo \
+PJ_boggs.lo PJ_collg.lo PJ_crast.lo PJ_denoy.lo PJ_eck1.lo PJ_eck2.lo \
+PJ_eck3.lo PJ_eck4.lo PJ_eck5.lo PJ_fahey.lo PJ_fouc_s.lo PJ_gins8.lo \
+PJ_gn_sinu.lo PJ_goode.lo PJ_hatano.lo PJ_loxim.lo PJ_mbt_fps.lo \
+PJ_mbtfpp.lo PJ_mbtfpq.lo PJ_moll.lo PJ_nell.lo PJ_nell_h.lo \
+PJ_putp2.lo PJ_putp3.lo PJ_putp4p.lo PJ_putp5.lo PJ_putp6.lo \
+PJ_robin.lo PJ_sts.lo PJ_urm5.lo PJ_urmfps.lo PJ_wag2.lo PJ_wag3.lo \
+PJ_wink1.lo PJ_wink2.lo aasincos.lo adjlon.lo bch2bps.lo bchgen.lo \
+biveval.lo dmstor.lo mk_cheby.lo pj_auth.lo pj_deriv.lo pj_ell_set.lo \
+pj_ellps.lo pj_errno.lo pj_factors.lo pj_fwd.lo pj_init.lo pj_inv.lo \
+pj_list.lo pj_malloc.lo pj_mlfn.lo pj_msfn.lo pj_open_lib.lo \
+pj_param.lo pj_phi2.lo pj_pr_list.lo pj_qsfn.lo pj_strerrno.lo \
+pj_tsfn.lo pj_units.lo pj_zpoly1.lo rtodms.lo vector1.lo pj_release.lo
+PROGRAMS =  $(bin_PROGRAMS)
 
-PJ_ADDL = @PJ_ADDL@
+proj_OBJECTS =  proj.o gen_cheb.o p_series.o emess.o
+proj_DEPENDENCIES =  libproj.la
+proj_LDFLAGS = 
+nad2nad_OBJECTS =  nad2nad.o nad_cvt.o nad_init.o nad_intr.o emess.o
+nad2nad_DEPENDENCIES =  libproj.la
+nad2nad_LDFLAGS = 
+nad2bin_OBJECTS =  nad2bin.o
+nad2bin_DEPENDENCIES =  libproj.la
+nad2bin_LDFLAGS = 
+geod_OBJECTS =  geod.o geod_set.o geod_for.o geod_inv.o emess.o
+geod_DEPENDENCIES =  libproj.la
+geod_LDFLAGS = 
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  README ./stamp-h.in Makefile.am Makefile.in \
+proj_config.h.in
 
-LIB_DIR_NAME = @LIB_DIR@
 
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
-incdir = $(exec_prefix)/include
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-LDEF = -DPROJ_LIB=\"$(libdir)/$(LIB_DIR_NAME)\"
+TAR = gtar
+GZIP_ENV = --best
+DEP_FILES =  .deps/PJ_aea.P .deps/PJ_aeqd.P .deps/PJ_airy.P \
+.deps/PJ_aitoff.P .deps/PJ_august.P .deps/PJ_bacon.P .deps/PJ_bipc.P \
+.deps/PJ_boggs.P .deps/PJ_bonne.P .deps/PJ_cass.P .deps/PJ_cc.P \
+.deps/PJ_cea.P .deps/PJ_chamb.P .deps/PJ_collg.P .deps/PJ_crast.P \
+.deps/PJ_denoy.P .deps/PJ_eck1.P .deps/PJ_eck2.P .deps/PJ_eck3.P \
+.deps/PJ_eck4.P .deps/PJ_eck5.P .deps/PJ_eqc.P .deps/PJ_eqdc.P \
+.deps/PJ_fahey.P .deps/PJ_fouc_s.P .deps/PJ_gall.P .deps/PJ_gins8.P \
+.deps/PJ_gn_sinu.P .deps/PJ_gnom.P .deps/PJ_goode.P .deps/PJ_hammer.P \
+.deps/PJ_hatano.P .deps/PJ_imw_p.P .deps/PJ_labrd.P .deps/PJ_laea.P \
+.deps/PJ_lagrng.P .deps/PJ_larr.P .deps/PJ_lask.P .deps/PJ_lcc.P \
+.deps/PJ_loxim.P .deps/PJ_lsat.P .deps/PJ_mbt_fps.P .deps/PJ_mbtfpp.P \
+.deps/PJ_mbtfpq.P .deps/PJ_merc.P .deps/PJ_mill.P .deps/PJ_mod_ster.P \
+.deps/PJ_moll.P .deps/PJ_mpoly.P .deps/PJ_nell.P .deps/PJ_nell_h.P \
+.deps/PJ_nocol.P .deps/PJ_nsper.P .deps/PJ_nzmg.P .deps/PJ_ob_tran.P \
+.deps/PJ_ocea.P .deps/PJ_oea.P .deps/PJ_omerc.P .deps/PJ_ortho.P \
+.deps/PJ_poly.P .deps/PJ_putp2.P .deps/PJ_putp3.P .deps/PJ_putp4p.P \
+.deps/PJ_putp5.P .deps/PJ_putp6.P .deps/PJ_robin.P .deps/PJ_rpoly.P \
+.deps/PJ_sconics.P .deps/PJ_somerc.P .deps/PJ_stere.P .deps/PJ_sts.P \
+.deps/PJ_tcc.P .deps/PJ_tcea.P .deps/PJ_tmerc.P .deps/PJ_tpeqd.P \
+.deps/PJ_urm5.P .deps/PJ_urmfps.P .deps/PJ_vandg.P .deps/PJ_vandg2.P \
+.deps/PJ_vandg4.P .deps/PJ_wag2.P .deps/PJ_wag3.P .deps/PJ_wag7.P \
+.deps/PJ_wink1.P .deps/PJ_wink2.P .deps/aasincos.P .deps/adjlon.P \
+.deps/bch2bps.P .deps/bchgen.P .deps/biveval.P .deps/dmstor.P \
+.deps/emess.P .deps/gen_cheb.P .deps/geod.P .deps/geod_for.P \
+.deps/geod_inv.P .deps/geod_set.P .deps/mk_cheby.P .deps/nad2bin.P \
+.deps/nad2nad.P .deps/nad_cvt.P .deps/nad_init.P .deps/nad_intr.P \
+.deps/p_series.P .deps/pj_auth.P .deps/pj_deriv.P .deps/pj_ell_set.P \
+.deps/pj_ellps.P .deps/pj_errno.P .deps/pj_factors.P .deps/pj_fwd.P \
+.deps/pj_init.P .deps/pj_inv.P .deps/pj_list.P .deps/pj_malloc.P \
+.deps/pj_mlfn.P .deps/pj_msfn.P .deps/pj_open_lib.P .deps/pj_param.P \
+.deps/pj_phi2.P .deps/pj_pr_list.P .deps/pj_qsfn.P .deps/pj_release.P \
+.deps/pj_strerrno.P .deps/pj_tsfn.P .deps/pj_units.P .deps/pj_zpoly1.P \
+.deps/proj.P .deps/rtodms.P .deps/vector1.P
+SOURCES = $(libproj_la_SOURCES) $(proj_SOURCES) $(nad2nad_SOURCES) $(nad2bin_SOURCES) $(geod_SOURCES)
+OBJECTS = $(libproj_la_OBJECTS) $(proj_OBJECTS) $(nad2nad_OBJECTS) $(nad2bin_OBJECTS) $(geod_OBJECTS)
 
-CFLAGS = -O -I./ $(DEFS) $(LDEF)
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .S .c .lo .o .s
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile
 
-SHELL = /bin/sh
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
-L = libproj.a
 
-.PRECIOUS: $L
+proj_config.h: stamp-h
+	@if test ! -f $@; then \
+		rm -f stamp-h; \
+		$(MAKE) stamp-h; \
+	else :; fi
+stamp-h: $(srcdir)/proj_config.h.in $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES= CONFIG_HEADERS=src/proj_config.h \
+	     $(SHELL) ./config.status
+	@echo timestamp > stamp-h 2> /dev/null
+$(srcdir)/proj_config.h.in: $(srcdir)/stamp-h.in
+	@if test ! -f $@; then \
+		rm -f $(srcdir)/stamp-h.in; \
+		$(MAKE) $(srcdir)/stamp-h.in; \
+	else :; fi
+$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOHEADER)
+	@echo timestamp > $(srcdir)/stamp-h.in 2> /dev/null
 
-azimuthal = \
-	$L(PJ_aeqd.o) $L(PJ_gnom.o) $L(PJ_laea.o) $L(PJ_mod_ster.o) \
-	$L(PJ_nsper.o) $L(PJ_nzmg.o) $L(PJ_ortho.o) $L(PJ_stere.o)
+mostlyclean-hdr:
 
-conic = \
-	$L(PJ_aea.o) $L(PJ_bipc.o) $L(PJ_bonne.o) $L(PJ_eqdc.o) \
-	$L(PJ_imw_p.o) $L(PJ_lcc.o) $L(PJ_mpoly.o) $L(PJ_poly.o) \
-	$L(PJ_rpoly.o) $L(PJ_sconics.o)
+clean-hdr:
 
-cylinder = \
-	$L(PJ_cass.o) $L(PJ_cc.o) $L(PJ_cea.o) $L(PJ_eqc.o) \
-	$L(PJ_gall.o) $L(PJ_labrd.o) $L(PJ_lsat.o) $L(PJ_merc.o) \
-	$L(PJ_mill.o) $L(PJ_ocea.o) $L(PJ_omerc.o) $L(PJ_somerc.o) \
-	$L(PJ_tcc.o) $L(PJ_tcea.o) $L(PJ_tmerc.o)
+distclean-hdr:
+	-rm -f proj_config.h
 
-misc = \
-	$L(PJ_airy.o) $L(PJ_aitoff.o) $L(PJ_august.o) $L(PJ_bacon.o) \
-	$L(PJ_chamb.o) $L(PJ_hammer.o) $L(PJ_lagrng.o) $L(PJ_larr.o) \
-	$L(PJ_lask.o) $L(PJ_nocol.o) $L(PJ_ob_tran.o) $L(PJ_oea.o) \
-	$L(PJ_tpeqd.o) $L(PJ_vandg.o) $L(PJ_vandg2.o) $L(PJ_vandg4.o) \
-	$L(PJ_wag7.o)
+maintainer-clean-hdr:
 
-pseudo = \
-	$L(PJ_boggs.o) $L(PJ_collg.o) $L(PJ_crast.o) $L(PJ_denoy.o) \
-	$L(PJ_eck1.o) $L(PJ_eck2.o) $L(PJ_eck3.o) $L(PJ_eck4.o) \
-	$L(PJ_eck5.o) $L(PJ_fahey.o) $L(PJ_fouc_s.o) $L(PJ_gins8.o) \
-	$L(PJ_gn_sinu.o) $L(PJ_goode.o) $L(PJ_hatano.o) $L(PJ_loxim.o) \
-	$L(PJ_mbt_fps.o) $L(PJ_mbtfpp.o) $L(PJ_mbtfpq.o) $L(PJ_moll.o) \
-	$L(PJ_nell.o) $L(PJ_nell_h.o) $L(PJ_putp2.o) $L(PJ_putp3.o) \
-	$L(PJ_putp4p.o) $L(PJ_putp5.o) $L(PJ_putp6.o) $L(PJ_robin.o) \
-	$L(PJ_sts.o) $L(PJ_urm5.o) $L(PJ_urmfps.o) $L(PJ_wag2.o) \
-	$L(PJ_wag3.o) $L(PJ_wink1.o) $L(PJ_wink2.o)
+mostlyclean-libLTLIBRARIES:
 
-support = \
-	$L(aasincos.o) $L(adjlon.o) $L(bch2bps.o) $L(bchgen.o) \
-	$L(biveval.o) $L(dmstor.o) $L(mk_cheby.o) $L(pj_auth.o) \
-	$L(pj_deriv.o) $L(pj_ell_set.o) $L(pj_ellps.o) $L(pj_errno.o) \
-	$L(pj_factors.o) $L(pj_fwd.o) $L(pj_init.o) $L(pj_inv.o) \
-	$L(pj_list.o) $L(pj_malloc.o) $L(pj_mlfn.o) $L(pj_msfn.o) \
-	$L(pj_open_lib.o) $L(pj_param.o) $L(pj_phi2.o) $L(pj_pr_list.o) \
-	$L(pj_qsfn.o) $L(pj_strerrno.o) $L(pj_tsfn.o) $L(pj_units.o) \
-	$L(pj_zpoly1.o) $L(rtodms.o) $L(vector1.o)
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
 
-LLIST = $(azimuthal) $(conic) $(cylinder) $(misc) $(pseudo) $(support)
+distclean-libLTLIBRARIES:
 
-# Second part of export Makefile
-# SCCSID--- @(#)Make.2	4.7	95/09/23	GIE	REL"
+maintainer-clean-libLTLIBRARIES:
 
-all: @PROGS@
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
 
-PROJ.o = proj.o gen_cheb.o p_series.o emess.o
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
 
-proj:	$(PROJ.o) $L
-	$(CC) -o $@ $(PROJ.o) $L $(LIBS)
+.s.o:
+	$(COMPILE) -c $<
 
-NAD2NAD.o = nad2nad.o nad_cvt.o nad_init.o nad_intr.o emess.o
+.S.o:
+	$(COMPILE) -c $<
 
-nad2nad:	$(NAD2NAD.o) $L
-	$(CC) -o $@ $(NAD2NAD.o) $L $(LIBS)
+mostlyclean-compile:
+	-rm -f *.o core *.core
 
-nad2nad: nad_list.h
+clean-compile:
 
-nad2bin:	nad2bin.o
-	$(CC) -o $@ nad2bin.o $(LIBS)
+distclean-compile:
+	-rm -f *.tab.c
 
-RLIB = $L(pj_release.o)
+maintainer-clean-compile:
 
-libproj:	$(RLIB) $(LLIST) $(PJ_ADDL)
-	$(RANLIB) $L
+.s.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
 
-GEOD.o = geod.o geod_set.o geod_for.o geod_inv.o emess.o
+.S.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
 
-geod:	$(GEOD.o) $L
-	$(CC) -o $@ $(GEOD.o) $L $(LIBS)
+mostlyclean-libtool:
+	-rm -f *.lo
 
-install:	all
-	cp proj geod nad2nad $(bindir)
-	chmod 755 $(bindir)/proj $(bindir)/geod $(bindir)/nad2nad
-	cp projects.h $(incdir)
-	chmod 644 $(incdir)/projects.h
-	cp libproj.a $(libdir)
-	chmod 644 $(libdir)/libproj.a
-	$(RANLIB) $(libdir)/libproj.a
+clean-libtool:
+	-rm -rf .libs _libs
 
-clean:
-	/bin/rm -f core *.o
+distclean-libtool:
 
-$(GEOD.o): geodesic.h
+maintainer-clean-libtool:
 
-$(RLIB) : projects.h pj_list.h
+libproj.la: $(libproj_la_OBJECTS) $(libproj_la_DEPENDENCIES)
+	$(LINK) -rpath $(libdir) $(libproj_la_LDFLAGS) $(libproj_la_OBJECTS) $(libproj_la_LIBADD) $(LIBS)
 
-nad2nad.o geod.o proj.o: emess.h projects.h
+mostlyclean-binPROGRAMS:
 
-nad2bin.o: projects.h
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+distclean-binPROGRAMS:
+
+maintainer-clean-binPROGRAMS:
+
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	  else :; fi; \
+	done
+
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	done
+
+proj: $(proj_OBJECTS) $(proj_DEPENDENCIES)
+	@rm -f proj
+	$(LINK) $(proj_LDFLAGS) $(proj_OBJECTS) $(proj_LDADD) $(LIBS)
+
+nad2nad: $(nad2nad_OBJECTS) $(nad2nad_DEPENDENCIES)
+	@rm -f nad2nad
+	$(LINK) $(nad2nad_LDFLAGS) $(nad2nad_OBJECTS) $(nad2nad_LDADD) $(LIBS)
+
+nad2bin: $(nad2bin_OBJECTS) $(nad2bin_DEPENDENCIES)
+	@rm -f nad2bin
+	$(LINK) $(nad2bin_LDFLAGS) $(nad2bin_OBJECTS) $(nad2bin_LDADD) $(LIBS)
+
+geod: $(geod_OBJECTS) $(geod_DEPENDENCIES)
+	@rm -f geod
+	$(LINK) $(geod_LDFLAGS) $(geod_OBJECTS) $(geod_LDADD) $(LIBS)
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES) proj_config.h.in $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)proj_config.h.in$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags proj_config.h.in $$unique $(LISP) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = src
+
+distdir: $(DISTFILES)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(top_distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu src/Makefile
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+
+DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+
+-include $(DEP_FILES)
+
+mostlyclean-depend:
+
+clean-depend:
+
+distclean-depend:
+	-rm -rf .deps
+
+maintainer-clean-depend:
+
+%.o: %.c
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.c
+	@echo '$(LTCOMPILE) -c $<'; \
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+all-recursive-am: proj_config.h
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+
+install-exec-am: install-libLTLIBRARIES install-binPROGRAMS
+install-exec: install-exec-am
+
+install-data-am:
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am: uninstall-libLTLIBRARIES uninstall-binPROGRAMS
+uninstall: uninstall-am
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) proj_config.h
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+	$(mkinstalldirs)  $(DESTDIR)$(libdir) $(DESTDIR)$(bindir)
+
+
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-hdr mostlyclean-libLTLIBRARIES \
+		mostlyclean-compile mostlyclean-libtool \
+		mostlyclean-binPROGRAMS mostlyclean-tags \
+		mostlyclean-depend mostlyclean-generic
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-hdr clean-libLTLIBRARIES clean-compile clean-libtool \
+		clean-binPROGRAMS clean-tags clean-depend clean-generic \
+		mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-hdr distclean-libLTLIBRARIES distclean-compile \
+		distclean-libtool distclean-binPROGRAMS distclean-tags \
+		distclean-depend distclean-generic clean-am
+	-rm -f libtool
+
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-hdr \
+		maintainer-clean-libLTLIBRARIES \
+		maintainer-clean-compile maintainer-clean-libtool \
+		maintainer-clean-binPROGRAMS maintainer-clean-tags \
+		maintainer-clean-depend maintainer-clean-generic \
+		distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+
+.PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
+mostlyclean-libLTLIBRARIES distclean-libLTLIBRARIES \
+clean-libLTLIBRARIES maintainer-clean-libLTLIBRARIES \
+uninstall-libLTLIBRARIES install-libLTLIBRARIES mostlyclean-compile \
+distclean-compile clean-compile maintainer-clean-compile \
+mostlyclean-libtool distclean-libtool clean-libtool \
+maintainer-clean-libtool mostlyclean-binPROGRAMS distclean-binPROGRAMS \
+clean-binPROGRAMS maintainer-clean-binPROGRAMS uninstall-binPROGRAMS \
+install-binPROGRAMS tags mostlyclean-tags distclean-tags clean-tags \
+maintainer-clean-tags distdir mostlyclean-depend distclean-depend \
+clean-depend maintainer-clean-depend info-am info dvi-am dvi check \
+check-am installcheck-am installcheck all-recursive-am install-exec-am \
+install-exec install-data-am install-data install-am install \
+uninstall-am uninstall all-redirect all-am all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:
