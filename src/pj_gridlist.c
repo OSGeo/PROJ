@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.3  2003/03/18 16:26:58  warmerda
+ * clear error if missing file is not required
+ *
  * Revision 1.2  2003/03/17 19:45:47  warmerda
  * support '@' marker for optional grids
  *
@@ -239,6 +242,8 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
             pj_errno = -38;
             return NULL;
         }
+        else
+            pj_errno = 0;
     }
 
     if( last_nadgrids_count > 0 )
