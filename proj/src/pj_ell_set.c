@@ -12,7 +12,7 @@ static const char SCCSID[]="@(#)pj_ell_set.c	4.5	93/06/12	GIE	REL";
 	int /* initialize geographic shape parameters */
 pj_ell_set(paralist *pl, double *a, double *es) {
 	int i;
-	double b, e;
+	double b=0.0, e;
 	char *name;
 	paralist *start = 0, *curr;
 
