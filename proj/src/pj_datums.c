@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.8  2003/03/28 14:29:28  warmerda
+ * Fixed ire65 definition ... use mod_airy, not modif_airy.
+ *
  * Revision 1.7  2003/03/17 21:37:22  warmerda
  * make NAD27 grids optional, added alaska and ntv2
  *
@@ -75,7 +78,7 @@ C_NAMESPACE struct PJ_DATUMS pj_datums[] = {
 "potsdam",  "towgs84=606.0,23.0,413.0",  "bessel",  "Potsdam Rauenberg 1950 DHDN",
 "carthage",  "towgs84=-263.0,6.0,431.0",  "clark80",  "Carthage 1934 Tunisia",
 "hermannskogel", "towgs84=653.0,-212.0,449.0",  "bessel",  "Hermannskogel",
-"ire65",  "towgs84=482.530,-130.596,564.557,-1.042,-0.214,-0.631,8.15",  "modif_airy",  "Ireland 1965",
+"ire65",  "towgs84=482.530,-130.596,564.557,-1.042,-0.214,-0.631,8.15",  "mod_airy",  "Ireland 1965",
 NULL,       NULL,                                    NULL,    NULL 
 };
 
