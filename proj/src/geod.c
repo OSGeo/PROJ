@@ -2,11 +2,11 @@
 static const char SCCSID[]="@(#)geod.c	4.8	95/09/23	GIE	REL";
 #endif
 /* <<<< Geodesic filter program >>>> */
-# include "projects.h"
+# include <ctype.h>
 # include <stdio.h>
+# include "projects.h"
 # include "geodesic.h"
 # include "emess.h"
-# include <ctype.h>
 # include <string.h>
 
 # define MAXLINE 200
@@ -125,12 +125,11 @@ process(FILE *fid) {
 		(void)fputs(s, stdout);
 	}
 }
-    static char
-*pargv[MAX_PARGS];
-	static int
-pargc = 0;
-	void
-main(int argc, char **argv) {
+
+static char *pargv[MAX_PARGS];
+static int   pargc = 0;
+
+int main(int argc, char **argv) {
 	char *arg, **eargv = argv, *strnchr();
 	FILE *fid;
 	static int eargc = 0, c;
