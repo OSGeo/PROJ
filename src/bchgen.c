@@ -4,9 +4,9 @@ static const char SCCSID[]="@(#)bchgen.c	4.5	94/03/22	GIE	REL";
 #endif
 #include <projects.h>
 	int
-bchgen(UV a, UV b, int nu, int nv, UV **f, UV(*func)(UV)) {
+bchgen(projUV a, projUV b, int nu, int nv, projUV **f, projUV(*func)(projUV)) {
 	int i, j, k;
-	UV arg, *t, bma, bpa, *c;
+	projUV arg, *t, bma, bpa, *c;
 	double d, fac;
 
 	bma.u = 0.5 * (b.u - a.u); bma.v = 0.5 * (b.v - a.v);
@@ -20,7 +20,7 @@ bchgen(UV a, UV b, int nu, int nv, UV **f, UV(*func)(UV)) {
 				return(1);
 		}
 	}
-	if (!(c = vector1(nu, sizeof(UV)))) return 1;
+	if (!(c = vector1(nu, sizeof(projUV)))) return 1;
 	fac = 2. / nu;
 	for ( j = 0; j < nv ; ++j) {
 		for ( i = 0; i < nu; ++i) {
@@ -38,7 +38,7 @@ bchgen(UV a, UV b, int nu, int nv, UV **f, UV(*func)(UV)) {
 			f[i][j] = c[i];
 	}
 	pj_dalloc(c);
-	if (!(c = vector1(nv, sizeof(UV)))) return 1;
+	if (!(c = vector1(nv, sizeof(projUV)))) return 1;
 	fac = 2. / nv;
 	for ( i = 0; i < nu; ++i) {
 		t = f[i];

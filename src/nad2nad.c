@@ -144,12 +144,12 @@ set_ops(char *s, struct IO_CON *io) {
 	static void
 process(FILE *fid) {
 	char line[MAX_LINE], *s, t, pline[100];
-	UV val;
+	projUV val;
 	double tmp;
 
 	for (;;) {
 		if (input.bin)
-			fread(&val, sizeof(UV), 1, fid);
+			fread(&val, sizeof(projUV), 1, fid);
 		else if (s = fgets(line, MAX_LINE, fid)) {
 			if (*s == tag) {
 				fputs(line, stdout);
@@ -188,7 +188,7 @@ process(FILE *fid) {
 			val.v = tmp;
 		}
 		if (output.bin)
-			(void)fwrite(&val, sizeof(UV), 1, stdout);
+			(void)fwrite(&val, sizeof(projUV), 1, stdout);
 		else {
 			if (echoin) {
 				t = *s;

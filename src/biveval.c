@@ -4,7 +4,7 @@ static const char SCCSID[]="@(#)biveval.c	4.4	93/06/12	GIE	REL";
 #endif
 # include <projects.h>
 # define NEAR_ONE	1.00001
-	static UV
+	static projUV
 w2, w;
 	static double /* basic bivariate Chebyshev evaluation */
 ceval(C, n) struct PW_COEF *C; {
@@ -33,9 +33,9 @@ ceval(C, n) struct PW_COEF *C; {
 	} else
 		return (w.u * d - dd);
 }
-	UV /* bivariate Chebyshev polynomial entry point */
-bcheval(UV in, Tseries *T) {
-	UV out;
+	projUV /* bivariate Chebyshev polynomial entry point */
+bcheval(projUV in, Tseries *T) {
+	projUV out;
 		/* scale to +-1 */
  	w.u = ( in.u + in.u - T->a.u ) * T->b.u;
  	w.v = ( in.v + in.v - T->a.v ) * T->b.v;
@@ -50,9 +50,9 @@ bcheval(UV in, Tseries *T) {
 	}
 	return out;
 }
-	UV /* bivariate power polynomial entry point */
-bpseval(UV in, Tseries *T) {
-	UV out;
+	projUV /* bivariate power polynomial entry point */
+bpseval(projUV in, Tseries *T) {
+	projUV out;
 	double *c, row;
 	int i, m;
 
@@ -77,7 +77,7 @@ bpseval(UV in, Tseries *T) {
 	}
 	return out;
 }
-	UV /* general entry point selecting evaluation mode */
-biveval(UV in, Tseries *T) {
+	projUV /* general entry point selecting evaluation mode */
+biveval(projUV in, Tseries *T) {
 	return (T->power ? bpseval(in, T) : bcheval(in, T));
 }

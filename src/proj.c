@@ -15,8 +15,8 @@ static const char SCCSID[]="@(#)proj.c	4.12	95/09/23	GIE	REL";
 #define PJ_INVERS(P) (P->inv ? 1 : 0)
 	static PJ
 *Proj;
-	static UV
-(*proj)(UV, PJ *);
+	static projUV
+(*proj)(projUV, PJ *);
 	static int
 reversein = 0,	/* != 0 reverse input arguments */
 reverseout = 0,	/* != 0 reverse output arguments */
@@ -41,8 +41,8 @@ facs;
 	static double
 (*informat)(const char *, char **),	/* input data deformatter function */
 fscale = 0.;	/* cartesian scale factor */
-	static UV
-int_proj(data) UV data; {
+	static projUV
+int_proj(data) projUV data; {
 	if (prescale) { data.u *= fscale; data.v *= fscale; }
 	data = (*proj)(data, Proj);
 	if (postscale && data.u != HUGE_VAL)
@@ -52,12 +52,12 @@ int_proj(data) UV data; {
 	static void	/* file processing function */
 process(FILE *fid) {
 	char line[MAX_LINE+3], *s, pline[40];
-	UV data;
+	projUV data;
 
 	for (;;) {
 		++emess_dat.File_line;
 		if (bin_in) {	/* binary input */
-			if (fread(&data, sizeof(UV), 1, fid) != 1)
+			if (fread(&data, sizeof(projUV), 1, fid) != 1)
 				break;
 		} else {	/* ascii input */
 			if (!(s = fgets(line, MAX_LINE, fid)))
@@ -103,7 +103,7 @@ process(FILE *fid) {
 				{ data.u *= fscale; data.v *= fscale; }
 		}
 		if (bin_out) { /* binary output */
-			(void)fwrite(&data, sizeof(UV), 1, stdout);
+			(void)fwrite(&data, sizeof(projUV), 1, stdout);
 			continue;
 		} else if (data.u == HUGE_VAL) /* error output */
 			(void)fputs(oterr, stdout);
@@ -143,7 +143,7 @@ process(FILE *fid) {
 	static void	/* file processing function --- verbosely */
 vprocess(FILE *fid) {
 	char line[MAX_LINE+3], *s, pline[40];
-	UV dat_ll, dat_xy;
+	projUV dat_ll, dat_xy;
 	int linvers;
 
 	if (!oform)
@@ -400,7 +400,7 @@ badscale:
 	} else
 		proj = pj_fwd;
 	if (cheby_str) {
-		extern void gen_cheb(int, UV(*)(), char *, PJ *, int, char **);
+		extern void gen_cheb(int, projUV(*)(), char *, PJ *, int, char **);
 
 		gen_cheb(inverse, int_proj, cheby_str, Proj, iargc, iargv);
 		exit(0);

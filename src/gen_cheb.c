@@ -12,10 +12,10 @@ static const char SCCSID[]="@(#)gen_cheb.c	4.9	95/09/23	GIE	REL";
 #define COEF_LINE_MAX 60
 #endif
 	void
-gen_cheb(int inverse, UV (*proj)(), char *s, PJ *P, int iargc, char **iargv) {
+gen_cheb(int inverse, projUV (*proj)(), char *s, PJ *P, int iargc, char **iargv) {
 	int NU = 15, NV = 15, i, res = -1, errin = 0, pwr;
 	char *arg, fmt[15];
-	UV low, upp, resid;
+	projUV low, upp, resid;
 	Tseries *F;
 	extern void p_series(Tseries *, FILE *, char *);
 	double (*input)();
