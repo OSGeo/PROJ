@@ -1,4 +1,21 @@
+Rel. 4.4.8 2004-05-04
+-------------------------------------------------------------------------
+	
 2004-05-03  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_datums.c: added nzgd49 datum definition
+
+	http://bugzilla.remotesensing.org/show_bug.cgi?id=339
+
+	* nad/epsg: updated to EPSG 6.5.
+
+	* src/pj_transform.c: fixed so that raw ellipsoids are handled
+	in datum shifting as if they had a +towgs84=0,0,0.
+
+	* src/pj_transform.c: Fixed so that prime meridian offsets are
+	applied even if the coordinate system is not lat/long.
+
+	http://bugzilla.remotesensing.org/show_bug.cgi?id=510
 
 	* src/geocent.c: Updated Geocentric_To_Geodetic computation to 	be 
 	iterative to reduce error as per Wenzel, H.-G.(1985): Hochauflösende 
@@ -58,6 +75,9 @@
 	* nad/Makefile.am: added DESTDIR in three missing places as per
 	bug report from Peter Galbraith - proj debian package manager.
 
+Rel. 4.4.7 2003-03-31
+-------------------------------------------------------------------------
+	
 2003-03-31  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Prepare 4.4.7 Release.
