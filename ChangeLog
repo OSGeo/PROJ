@@ -1,7 +1,10 @@
+
 Rel. 4.4.8 2004-05-04
 -------------------------------------------------------------------------
 	
 2004-05-03  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Preparing 4.4.8 release.
 
 	* src/pj_datums.c: added nzgd49 datum definition
 
