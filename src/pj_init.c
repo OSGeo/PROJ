@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.16  2004/09/08 15:23:37  warmerda
+ * added new error for unknown prime meridians
+ *
  * Revision 1.15  2004/05/05 01:45:41  warmerda
  * Made sword even longer.
  *
@@ -347,11 +350,11 @@ pj_init(int argc, char **argv) {
             }
             
             if( value == NULL 
-                && dmstor(name,&next_str) != 0.0 
+                && (dmstor(name,&next_str) != 0.0  || *name == '0')
                 && *next_str == '\0' )
                 value = name;
 
-            if (!value) { pj_errno = -7; goto bum_call; }
+            if (!value) { pj_errno = -46; goto bum_call; }
             PIN->from_greenwich = dmstor(value,NULL);
 	}
         else
