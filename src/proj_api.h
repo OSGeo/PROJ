@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.4  2001/09/15 22:55:28  warmerda
+ * final prep for 4.4.4 release
+ *
  * Revision 1.3  2001/08/23 20:25:55  warmerda
  * added pj_set_finder function
  *
@@ -52,7 +55,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 443
+#define PJ_VERSION 444
 
 extern char const pj_release[]; /* global release id string */
 

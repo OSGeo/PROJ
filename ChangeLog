@@ -1,3 +1,6 @@
+Rel. 4.4.4 2001/09/15
+-------------------------------------------------------------------------
+	
 2001-09-15  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/geocent.c: I have modified the Convert_Geodetic_To_Geocentric() 
@@ -6,6 +9,9 @@
 	they will be auto-wrapped by sin() and cos(). 
 
 	See http://bugzilla.remotesensing.org/show_bug.cgi?id=17
+
+	* nad/epsg: commited new updates with fixed units for us state plane
+	zones in feet, as reported by Marc-Andre.
 
 2001-08-23  Frank Warmerdam  <warmerdam@pobox.com>
 
