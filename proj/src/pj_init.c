@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.13  2003/09/16 03:46:21  warmerda
+ * dont use default ellps if any earth model info is set: bug 386
+ *
  * Revision 1.12  2003/08/21 02:15:59  warmerda
  * improve MAX_ARG checking
  *
@@ -81,9 +84,15 @@ get_opt(FILE *fid, char *name, paralist *next) {
                 break;
             }
         } else if (!first && !pj_param(start, sword).i) {
-            /* don't default ellipse if datum is set */
+            /* don't default ellipse if datum, ellps or any earth model
+               information is set. */
             if( strncmp(word,"ellps=",6) != 0 
-                || !pj_param(start, "tdatum").i )
+                || (!pj_param(start, "tdatum").i 
+                    && !pj_param(start, "tellps").i 
+                    && !pj_param(start, "ta").i 
+                    && !pj_param(start, "tb").i 
+                    && !pj_param(start, "trf").i 
+                    && !pj_param(start, "tf").i) )
             {
                 next = next->next = pj_mkparam(word);
             }
