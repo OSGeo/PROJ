@@ -1,3 +1,8 @@
+2004-09-14  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_pr_list.c: Ensure unused parameters are not included 
+	in the returned string (provided by Eric Miller). 
+
 2004-05-17  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* proj.spec: Change PACKAGE_NAME from "PROJ" to "proj".

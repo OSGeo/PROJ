@@ -68,6 +68,11 @@ char *pj_get_def( PJ *P, int options )
 
     for (t = P->params; t; t = t->next)
     {
+        /* skip unused parameters ... mostly appended defaults and stuff */
+        if (!t->used)
+            continue;
+
+        /* grow the resulting string if needed */
         l = strlen(t->param) + 1;
         if( strlen(definition) + l + 5 > def_max )
         {
@@ -80,6 +85,7 @@ char *pj_get_def( PJ *P, int options )
             definition = def2;
         }
 
+        /* append this parameter */
         strcat( definition, " +" );
         strcat( definition, t->param );
     }
