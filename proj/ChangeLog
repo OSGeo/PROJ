@@ -1,3 +1,14 @@
+2001-04-05  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* cs2cs.c: use pj_latlong_from_proj()
+
+	* pj_init.c: added pj_init_plus().
+
+	* pj_utils.c: new with pj_is_latlong(), and pj_latlong_from_proj()
+	functions.
+
+	* pj_strerror.c: added error -43.
+
 2001-04-04  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* rewrote 7 param datum shift to match EPSG:9606, now works with 
