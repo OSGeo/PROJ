@@ -33,19 +33,22 @@ While the <b>nad2nad</b> program can be used in some cases, the <b>cs2cs</b>
 is now the preferred mechanism.   The following example demonstrates using
 the default shift parameters for NAD27 to NAD83:<p>
 
-<code>
+<pre>
 % cs2cs +proj=latlong +datum=NAD27 +to +proj=latlong +datum=NAD83 
 -117 30
-</code>
+</pre>
+<p>
 
-producing:
+producing:<p>
 
-<code>
+<pre>
 117d0'2.901"W   30d0'0.407"N 0.000
-</code>
+</pre>
 
+<p>
 In order for datum shifting to work properly the various grid shift files
-must be available.  See below.<p>
+must be available.  See below.  More details are available in the 
+<a href="gen_parms.html#nadgrids">General Parameters</a> document.<p>
 
 <!-------------------------------------------------------------------------->
 
