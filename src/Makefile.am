@@ -25,7 +25,7 @@ libproj_la_LDFLAGS = -version-info 4:2:4
 libproj_la_SOURCES = \
 	projects.h pj_list.h \
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
-	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c \
+	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c PJ_sterea.c \
 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c \
 	PJ_imw_p.c PJ_krovak.c PJ_lcc.c PJ_mpoly.c PJ_poly.c \
 	PJ_rpoly.c PJ_sconics.c \
@@ -37,7 +37,7 @@ libproj_la_SOURCES = \
 	PJ_chamb.c PJ_hammer.c PJ_lagrng.c PJ_larr.c \
 	PJ_lask.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c \
 	PJ_tpeqd.c PJ_vandg.c PJ_vandg2.c PJ_vandg4.c \
-	PJ_wag7.c PJ_lcca.c \
+	PJ_wag7.c PJ_lcca.c PJ_geos.c \
 	PJ_boggs.c PJ_collg.c PJ_crast.c PJ_denoy.c \
 	PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c \
 	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c \
@@ -54,7 +54,7 @@ libproj_la_SOURCES = \
 	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c \
 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c \
 	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c \
-	pj_zpoly1.c rtodms.c vector1.c pj_release.c \
+	pj_zpoly1.c rtodms.c vector1.c pj_release.c pj_gauss.c \
 	\
 	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \
 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
