@@ -1,5 +1,7 @@
 2000-03-27  Frank Warmerdam  <warmerda@cs46980-c>
 
+	* Re-added install target for NADCON data files when available.
+
 	* At the suggestion of John Evans, I have rolled the nad conversion
 	functions into the core library.
 
