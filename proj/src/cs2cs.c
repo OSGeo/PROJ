@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.7  2003/03/25 17:53:13  warmerda
+ * modified so that -f formats are used for Z as well
+ *
  * Revision 1.6  2002/12/09 16:01:02  warmerda
  * added prime meridian support
  *
@@ -169,7 +172,10 @@ static void process(FILE *fid)
         }
 
         putchar(' ');
-        printf( "%.3f", z );
+        if( oform != NULL )
+            printf( oform, z );
+        else
+            printf( "%.3f", z );
         fputs("\n", stdout );
     }
 }
