@@ -30,6 +30,13 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.10  2003/03/16 16:38:24  warmerda
+ * Modified get_opt() to terminate reading the definition when a new
+ * definition (a word starting with '<') is encountered, in addition to when
+ * the definition terminator '<>' is encountered, so that unterminated
+ * definitions like those in the distributed esri file will work properly.
+ * http://bugzilla.remotesensing.org/show_bug.cgi?id=302
+ *
  * Revision 1.9  2002/12/14 20:15:02  warmerda
  * added geocentric support, updated headers
  *
@@ -51,31 +58,35 @@ extern FILE *pj_open_lib(char *, char *);
 /************************************************************************/
 static paralist *
 get_opt(FILE *fid, char *name, paralist *next) {
-	char sword[52], *word = sword+1;
-	int first = 1, len, c;
+    char sword[52], *word = sword+1;
+    int first = 1, len, c;
 
-	len = strlen(name);
-	*sword = 't';
-	while (fscanf(fid, "%50s", word) == 1)
-		if (*word == '#') /* skip comments */
-			while((c = fgetc(fid)) != EOF && c != '\n') ;
-		else if (*word == '<') { /* control name */
-			if (first && !strncmp(name, word + 1, len)
-				&& word[len + 1] == '>')
-				first = 0;
-			else if (!first && word[1] == '>')
-				break;
-		} else if (!first && !pj_param(start, sword).i) {
-                        /* don't default ellipse if datum is set */
-                        if( strncmp(word,"ellps=",6) != 0 
-                            || !pj_param(start, "tdatum").i )
-                        {
-                            next = next->next = pj_mkparam(word);
-                        }
-                }
-	if (errno == 25)
-		errno = 0;
-	return next;
+    len = strlen(name);
+    *sword = 't';
+    while (fscanf(fid, "%50s", word) == 1) {
+        if (*word == '#') /* skip comments */
+            while((c = fgetc(fid)) != EOF && c != '\n') ;
+        else if (*word == '<') { /* control name */
+            if (first && !strncmp(name, word + 1, len)
+                && word[len + 1] == '>')
+                first = 0;
+            else if (!first && *word == '<') {
+                while((c = fgetc(fid)) != EOF && c != '\n') ;
+                break;
+            }
+        } else if (!first && !pj_param(start, sword).i) {
+            /* don't default ellipse if datum is set */
+            if( strncmp(word,"ellps=",6) != 0 
+                || !pj_param(start, "tdatum").i )
+            {
+                next = next->next = pj_mkparam(word);
+            }
+        }
+    }
+
+    if (errno == 25)
+        errno = 0;
+    return next;
 }
 
 /************************************************************************/
