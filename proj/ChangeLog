@@ -1,3 +1,9 @@
+2004-05-12  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/epsg: update translation for potsdam datum. 
+
+	http://bugzilla.remotesensing.org/show_bug.cgi?id=566
+
 2004-05-04  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_init.c: Made sword[] larger in get_opt() so long +towgs84
