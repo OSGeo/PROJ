@@ -1,3 +1,9 @@
+2000-11-18  Frank Warmerdam  <warmerda@cs46980-c>
+
+	* Patch from Craig Bruce to adjlon.c to avoid wrong results, 
+	and near-hangs when adjusting very large numbers. 
+	http://bugzilla.remotesensing.org/show_bug.cgi?id=27
+
 2000-09-22  Frank Warmerdam  <warmerda@cs46980-c>
 
 	* Fixed src/Makefile.am install-exec-local target, and added
