@@ -1,5 +1,11 @@
 2003-03-28  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* config.guess, config.sub: updated from 
+	ftp://ftp.gnu.org/pub/gnu/config/ in order to resolve Debian build
+	problems on MIPS architecture. 
+	
+	http://bugs.debian.org/cgi-bin/bugreport.cgi?archive=no&bug=186586
+
 	* src/pj_datums.c: fixed ire65 definition to refer to mod_airy, not
 	modif_airy as per:
 	http://bugzilla.remotesensing.org/show_bug.cgi?id=312
