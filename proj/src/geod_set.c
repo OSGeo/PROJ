@@ -28,11 +28,11 @@ geod_set(int argc, char **argv) {
 	/* set units */
 	if (name = pj_param(start, "sunits").s) {
 		char *s;
-
-		for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
+                struct PJ_UNITS *unit_list = pj_get_units_ref();
+		for (i = 0; (s = unit_list[i].id) && strcmp(name, s) ; ++i) ;
 		if (!s)
 			emess(1,"%s unknown unit conversion id", name);
-		fr_meter = 1. / (to_meter = atof(pj_units[i].to_meter));
+		fr_meter = 1. / (to_meter = atof(unit_list[i].to_meter));
 	} else
 		to_meter = fr_meter = 1.;
 	if (ellipse = es != 0.) {
