@@ -1,3 +1,8 @@
+2002-04-30  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_apply_gridshift.c,pj_open_lib.c,nad_init.c: try to improve
+	debug output when datum shifting fails.
+
 2002-04-16  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_list.c,src/PJ_krovak.c: Incorporated support for Krovak
