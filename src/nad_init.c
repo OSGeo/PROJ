@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.8  2003/03/17 18:56:01  warmerda
+ * implement delayed loading of ctable format files
+ *
  * Revision 1.7  2003/03/15 06:02:02  warmerda
  * preliminary NTv2 support, major restructure of datum shifting
  *
@@ -54,15 +57,41 @@
 #include <string.h>
 
 /************************************************************************/
-/*                          nad_load_ctable()                           */
+/*                          nad_ctable_load()                           */
 /*                                                                      */
-/*      Load a datum shift file already in "CTABLE" format.             */
+/*      Load the data portion of a ctable formatted grid.               */
 /************************************************************************/
 
-struct CTABLE *nad_load_ctable( FILE * fid )
+int nad_ctable_load( struct CTABLE *ct, FILE *fid )
+
+{
+    int  a_size;
+
+    fseek( fid, sizeof(struct CTABLE), SEEK_SET );
+
+    /* read all the actual shift values */
+    a_size = ct->lim.lam * ct->lim.phi;
+    ct->cvs = (FLP *) pj_malloc(sizeof(FLP) * a_size);
+    if( ct->cvs == NULL 
+        || fread(ct->cvs, sizeof(FLP), a_size, fid) != a_size )
+    {
+        pj_errno = -38;
+        return 0;
+    }
+
+    return 1;
+} 
+
+/************************************************************************/
+/*                          nad_ctable_init()                           */
+/*                                                                      */
+/*      Read the header portion of a "ctable" format grid.              */
+/************************************************************************/
+
+struct CTABLE *nad_ctable_init( FILE * fid )
 {
     struct CTABLE *ct;
-    int		a_size, id_end;
+    int		id_end;
 
     /* read the table header */
     ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
@@ -90,16 +119,7 @@ struct CTABLE *nad_load_ctable( FILE * fid )
             break;
     }
 
-    /* read all the actual shift values */
-    a_size = ct->lim.lam * ct->lim.phi;
-    ct->cvs = (FLP *) pj_malloc(sizeof(FLP) * a_size);
-    if( ct->cvs == NULL 
-        || fread(ct->cvs, sizeof(FLP), a_size, fid) != a_size )
-    {
-        nad_free( ct );
-        pj_errno = -38;
-        return NULL;
-    }
+    ct->cvs = NULL;
 
     return ct;
 }
@@ -128,7 +148,15 @@ struct CTABLE *nad_init(char *name)
         return 0;
     }
     
-    ct = nad_load_ctable( fid );
+    ct = nad_ctable_init( fid );
+    if( ct != NULL )
+    {
+        if( !nad_ctable_load( ct, fid ) )
+        {
+            nad_free( ct );
+            ct = NULL;
+        }
+    }
 
     fclose(fid);
     return ct;
