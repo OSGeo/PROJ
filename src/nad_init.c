@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.5  2002/04/30 16:26:07  warmerda
+ * trip newlines of ctable id field
+ *
  * Revision 1.4  2001/08/17 17:28:37  warmerda
  * removed use of emess()
  *
@@ -210,8 +213,9 @@ static struct CTABLE *nad_load_ntv1( FILE * fid )
 static struct CTABLE *nad_load_ctable( FILE * fid )
 {
     struct CTABLE *ct;
-    int		a_size;
+    int		a_size, id_end;
 
+    /* read the table header */
     ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
     if( ct == NULL 
         || fread( ct, sizeof(struct CTABLE), 1, fid ) != 1 )
@@ -220,6 +224,7 @@ static struct CTABLE *nad_load_ctable( FILE * fid )
         return NULL;
     }
 
+    /* do some minimal validation to ensure the structure isn't corrupt */
     if( ct->lim.lam < 1 || ct->lim.lam > 100000 
         || ct->lim.phi < 1 || ct->lim.phi > 100000 )
     {
@@ -227,6 +232,16 @@ static struct CTABLE *nad_load_ctable( FILE * fid )
         return NULL;
     }
     
+    /* trim white space and newlines off id */
+    for( id_end = strlen(ct->id)-1; id_end > 0; id_end-- )
+    {
+        if( ct->id[id_end] == '\n' || ct->id[id_end] == ' ' )
+            ct->id[id_end] = '\0';
+        else
+            break;
+    }
+
+    /* read all the actual shift values */
     a_size = ct->lim.lam * ct->lim.phi;
     ct->cvs = (FLP *) pj_malloc(sizeof(FLP) * a_size);
     if( ct->cvs == NULL 
