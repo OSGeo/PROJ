@@ -114,7 +114,7 @@ coordinate system available in the <tt>epsg</tt> definition file that
 normally lives in the <tt>proj/nad</tt> directory.  If installed (it is
 installed by default on Unix), it is possible to use EPSG numbers like this:
 
-<code>
+<pre>
 % cs2cs -v +init=epsg:26711
 # ---- From Coordinate System ----
 #Universal Transverse Mercator (UTM)
@@ -128,7 +128,7 @@ installed by default on Unix), it is possible to use EPSG numbers like this:
 #Lat/long (Geodetic)
 #
 # +proj=latlong +datum=NAD27 +ellps=clrk66 +nadgrids=conus,ntv1_can.dat
-</code>
+</pre>
 
 The <tt>proj/nad/epsg</tt> file can be browsed and searched in a text editor 
 for coordinate systems.  There are known to be problems with some coordinate
