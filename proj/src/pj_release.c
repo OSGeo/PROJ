@@ -3,4 +3,4 @@
 static const char SCCSID[]="@(#)pj_release.c	4.5 95/09/23 GIE REL";
 #endif
 
-char const pj_release[]="Rel. 4.4.0, 21 March 2000";
+char const pj_release[]="Rel. 4.4.1, 1 April 2000";
