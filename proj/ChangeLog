@@ -1,5 +1,10 @@
 2003-03-17  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/pj_datums.c: changed NAD27 definition to make everything
+	optional, and to include alaska, and ntv2_0.gsb. 
+	
+	nadgrids=@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat
+
 	* src/pj_grid*, src/pj_apply_gridshift.c, src/nad_init.c: Lots of
 	changes introducing the PJ_GRIDINFO structure, support for skippable
 	grids ('@' prefix), delayed grid data loading and support for NTv2
