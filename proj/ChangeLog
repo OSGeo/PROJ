@@ -1,3 +1,10 @@
+2002-05-30  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/geod/{geod.c,geod_for.c,geod_inv.c,geod_set.c,geodesic.h}:
+	Renamed a, S and f to geod_a, geod_S and geod_f to slightly reduce
+	the horrible naming conflict situations with geodesic.h. 
+	   http://bugzilla.remotesensing.org/show_bug.cgi?id=148
+
 2002-04-30  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* html/faq.html: new
