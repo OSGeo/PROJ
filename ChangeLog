@@ -1,5 +1,13 @@
 2004-10-28  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/makefile.vc: Changed to build executables against a proj.dll
+	by default.  
+
+	* proj.def: added lots of methods, including some private ones used
+	only by proj.c, and geod.c.
+
+	* Added pj_get_*_ref() accessors for all the definition lists. 
+
 	* Makefile.am: added jniwrap make support.
 
 	* configure.in: various updates, including use of AC_MAINTAINER_MODE,
