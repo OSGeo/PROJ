@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.20  2004/10/20 17:04:29  fwarmerdam
+ * added geos, sterea and supporting gauss code from libproj4
+ *
  * Revision 1.19  2004/08/31 22:57:11  warmerda
  * Don't re-declare hypot() on win32 as it will conflict with math.h as per
  * http://bugzilla.remotesensing.org/show_bug.cgi?id=495
@@ -416,6 +419,10 @@ void pj_deallocate_grids();
 PJ_GRIDINFO *pj_gridinfo_init( const char * );
 int pj_gridinfo_load( PJ_GRIDINFO * );
 void pj_gridinfo_free( PJ_GRIDINFO * );
+
+void *pj_gauss_ini(double, double, double *,double *);
+LP pj_gauss(LP, const void *);
+LP pj_inv_gauss(LP, const void *);
 
 extern char const pj_release[];
 
