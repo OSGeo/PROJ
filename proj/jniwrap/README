@@ -22,13 +22,16 @@ using the java native interface.
 Compilation:
 -------------
 
-With the right flag during configuration time (see ./configure --help), the 
-native part of the jproj lib is compiled inside the main proj library and the 
-java part is automatically built into the jproj.jar library. 
+To complile the native part, configure has to be run like this:
+CFLAGS=-Iinclude2 ./configure --with-jni=include1
+where
+include1 = folder in which the header file jni.h resides (usually $JAVA_HOME/include)
+include2 = folder in which the header file jni_md.h resides (usually $JAVA_HOME/include/linux or whatever)
 
-The java part as standalone is compiled by running ant inside the "jniwrap" folder. 
+
+The java part is compiled by running ant inside the "jniwrap" folder. 
 This will compile the classes and archive them in a jar library.
-This applies to Linux, Macos and Windows (and virtually to every system 
+It applies to Linux, Macos and Windows (and virtually to every system 
 supporting java).
 
 

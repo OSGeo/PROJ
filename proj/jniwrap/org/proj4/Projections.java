@@ -84,7 +84,7 @@ public abstract class Projections
 
   static
   {
-    System.loadLibrary("jproj");
+    System.loadLibrary("proj");
   }
 
   /**
