@@ -1,8 +1,38 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_aeqd.c	4.3	94/11/03	GIE	REL";
-#endif
-#define EPS10 1.e-10
-#define TOL 1.e-14
+/******************************************************************************
+ * $Id$
+ *
+ * Project:  PROJ.4
+ * Purpose:  Implementation of the aeqd (Azimuthal Equidistant) projection.
+ * Author:   Gerald Evenden
+ *
+ ******************************************************************************
+ * Copyright (c) 1995, Gerald Evenden
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ ******************************************************************************
+ *
+ * $Log$
+ * Revision 1.3  2002/12/14 19:27:06  warmerda
+ * updated header
+ *
+ */
+
 #define PROJ_PARMS__ \
 	double	sinph0; \
 	double	cosph0; \
@@ -15,7 +45,14 @@ static const char SCCSID[]="@(#)PJ_aeqd.c	4.3	94/11/03	GIE	REL";
 	int		mode;
 #define PJ_LIB__
 #include	<projects.h>
+
+PJ_CVSID("$Id$");
+
 PROJ_HEAD(aeqd, "Azimuthal Equidistant") "\n\tAzi, Sph&Ell\n\tlat_0 guam";
+
+#define EPS10 1.e-10
+#define TOL 1.e-14
+
 #define N_POLE	0
 #define S_POLE 1
 #define EQUIT	2
