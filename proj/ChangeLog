@@ -1,0 +1,294 @@
+2000-03-21  Frank Warmerdam  <warmerda@rommel.atlsci.com>
+
+	* Wrote new configure.in, and use automake to generate makefiles.
+
+	* Reorganize ChangeLog, and start work on 4.4.
+
+Rel. 4.3.2 94/10/30 Base-line
+-------------------------------------------------------------------------
+
+95/4/27
+	Corrected rf factor for GRS67.
+	Thanks to: Peter Shih tyshih@cc.nctu.edu.tw
+
+95/6/3
+	Gave an initializing value for pj_errno.  Someone's compiler ignored
+	the whole module because nothing happened(!!!).
+	Thanks to: Mark Crispin <MRC@Panda.COM>.
+
+95/7/6
+	Corrected function pj_inv_mlfn for improper derivative code.
+	Previous computations not in error but convergence was slower.
+	Thanks to: Tony Fisher fisher@minster.york.ac.uk.
+
+95/8/8
+	Added Swiss Oblique Mercator projection.  CH1903 Swiss grid system
+	parameters added to nad/world.  <CH1903> added to nad/world file
+	and N-somerc.ps.Z added to documentation notes.
+	Thanks to: Daniel Ebneter, ebneter@iap.unibe.ch.
+
+95/9/5
+	Changed declaration of "char c" to "int c" to more properly monitor
+	error return value in pj_init.c.
+	Thanks to: Alejo Hausner (ah@cs.princeton.edu)
+
+95/9/10
+	Some minor file/internal name changes to facilitate xport to primative
+	systems.  Documented entries unchanged.
+
+Rel. 4.3.1 94/2/16 Base-line
+-------------------------------------------------------------------------
+
+94/6/2
+	Transverse Mercator, spherical inverse fixed.  Misplaced parenthsis.
+
+94/10/5
+	Dropped dependency on FILENAME_MAX---too poorly defined in both
+	POSIX and ANSI standards.  Adopted MAX_PATH_FILENAME which is
+	set to 1024 (should be enough for most cases).  This should solve
+	problem with HP installations.
+
+94/10/29
+	Problems with ellipsoidal for of azimuthal equidistant (PJ_aeqd.c).
+	Some discrepancies remain on comparison with Snyder's examples
+	but felt due to his use of TI calculator.  Procedure should be
+	replaced with better geodesic routine.
+
+94/10/29
+	Corrected and added examples to geod.1 documentation.
+
+94/10/30
+	Added mkdir in nad/install otherwise nad2783 install may fail.
+
+Rel. 4.3 94/2/16 Base-line
+-------------------------------------------------------------------------
+
+94/3/13
+	Equidistant Conic forced es to 0, thus previous ellipsoid usage flawed.
+
+	Correction to sign of convergence angle and other details in
+	pj_factors.c.
+
+	Lambert Conf. conic corrected for +lat_0=90.
+
+	Convergence sign in pj_factors.c corrected to conform to Bomford's
+	definition.  Also procedure corrected for usage when projection
+	returns some of its own factors.
+
+94/3/17
+	Added procedure pj_phi12 to support library.  It gets and checks
+	standard parallels for some of the conics.
+
+	Added SPECIAL entry to conics Lambert, Albers and Equidistant.
+
+	Corrected nad/install.in test so as to only look for conus.lla.Z
+	as test for installation of NADCON datum matricies.
+
+94/3/19
+	Problems with MAPGEN's mapdef choking on call to proj.  Fixed
+	with PROJ.4.3-patch-01.
+
+94/3/22
+	Bumb mode of handling memory allocation for 2D arrays, so that
+	execution of -L may not work on some systems.  Interim corrections
+	distributed with PROJ.4.3-patch-02.
+
+	Patched Make.2 to properly use $(LIBS).  Not in patch.
+
+	Apple's Unix libc has problems---no strerror and no %n in ?format.
+
+94/5/22
+	Added several simple conics but not totally verified.
+
+	Corrected proj.c so that resultant earth figure comments in -V
+	are prefixed with # and do not blow *mapdef*.
+
+	Releasing current code without documentation on new conics pending
+	communications with Snyder on their veracity.  Release mainly to
+	clean up patches.
+
+Rel. 4.2.2 93/9/30 Base-line
+-------------------------------------------------------------------------
+
+93/11/14
+	1. Minor change to projects.h to correct prototype.
+	2. Changes to pj_init.c regarding ignoring failure to open
+	   proj_def.dat.
+	3. Alternate method of initializing automatic array.
+
+93/11/16
+	DOS distribution.
+
+93/11/28
+	Added "Final" figure line to begining of -V option ouput.  Allows
+	user to see results of +ellps and +R_V, etc. arguments.  "Feature,"
+	not an error.  Mod to proj.c.
+
+93/12/03
+	Removed non-ANSI usage of errno from PJ_laea.
+	Added test for previous definition of NULL in strtod.c.
+
+93/12/12
+	Made aatan2 (compensates for 0,0 args) global.
+
+93/12/30
+	Removed proj "error" message at end of -l option list.
+
+94/1
+	Major revision to projection structure to facilitate maintenance.
+	Introduced PROJ_HEAD macro that is defined in several ways
+	dependent upon use.  Allows generation of pj_list table from
+	`grep'ed projection files.  Structure PJ now contains pointer
+	to const string giving ascii description of projection.  Limited
+	application projection list much easier to generate with this system.
+
+	Many new pseudocylindrical projections added as well as a few new
+	miscellaneous projections.  Total projection count now 110.
+
+Rel. 4.2.1 93/9/30 Base-line
+-------------------------------------------------------------------------
+
+93/10/3
+	Geod incorrectly computed some forward values when geodesic on the
+	merdian.
+
+93/11/2
+	Projection stere fails for polar cases because of 0 lat_ts.  Fixed
+	by testing for lat_ts specification and setting to 90 degrees when
+	lat_ts not specified.  UPS not affected.
+
+93/11/5
+	Inverse polar stereographic also failed on 0 x xor y.  Corrected.
+
+93/11/10
+	Changed "install" to include "plain" system type for systems that
+	do not require special consideration.
+
+Rel. 4.2 93/8/25 Base-line
+-------------------------------------------------------------------------
+
+93/9/13
+	Improved bch2bps.c code.  Old code not in error.
+	Still problems with DEC native C compiler.
+
+93/9/28
+	Modified install script for DEC entry, forcing gcc for compilation.
+
+93/9/29
+	Problem with due South forward in geod.  Current version will not
+	be fixed as it is to be replaced with Vincente algorithm.
+
+93/9/30
+	Two corrections in src/Makefile.
+
+Rel. 4.1.3 93/4/15 Base-line
+-------------------------------------------------------------------------
+
+93/5/22
+	Extensively revised Chebychev approximation procedures and added
+	conversion to power series.
+
+93/6/8
+	Changed type of pj_param, plus mods to some other internal procedures.
+
+93/6/13
+	Modified pj_factors.  Principle mod was that calling program must
+	provide base for structure FACTORS.  Additional mods reflect
+	optional analytic input from projection modules (see next entry).
+
+	Modified base of PJ structure for projections to supply analytic
+	values of partial derivatives, scale factors and/or convergence
+	when formulary available.
+
+	Added -V option for proj so as to provide more complete, verbose
+	analysis of projection characteristics at selected geographic or
+	cartesian point.
+
+93/6/14
+	Pj_errno given its own module and projects.h declares it external.
+	To cover ANSI standards related to global variable.  SG linker should
+	stop complaining.
+
+93/7/15
+	Several additions and a couple of minor corrections to elliptical
+	tables.
+
+93/8/4
+	PJ_ocea.c error in applying k0.
+
+93/8/19
+	Minor general corrections.
+	Added nadcon conversion procedures and nad2nad program.
+	Projects.h modified to reflect nadcon prototypes and stuctures.
+	pj_open_lib extracted from pj_init and made global for use in nad_init.
+
+93/8/25
+	Corrected pj_open_lib open for both binary and text modes.  Mostly
+	for brain damaged DOS.  Also affected calls in pj_init.c and nad_init.c
+
+	Installs and other scripts updated.
+
+Rel. 4.1.2 93/4/4 Base-line
+-------------------------------------------------------------------------
+
+93/4/8
+	Corrected pj_inv so that errno and pj_errno are reset on entry.
+
+93/4/14
+	Added elliptical forms to Azimuthal Equidistant (aeqd).
+
+93/4/15
+	Corrected positive error return to negative in PJ_lcc.c .
+
+	Added Indian units conversions to pj_units.
+
+Rel. 4.1.1 93/3/26 Base-line
+-------------------------------------------------------------------------
+
+93/4/2
+	gen_cheby.c - added <stdio.h> header.
+
+93/4/3-4
+	gen_cheby.c, projects.h - corrected gen_cheby argument declarations
+		related to 'proj' argument and prototype.  Often signalled
+		warnings, but still managed to execute OK.
+	
+	pj_init.c - local function get_init had insufficient storage
+		defined for copy of file name and id.  Added id define.
+		Strncat replaced with correct strncpy (amazingly did not
+		cause problems except of one system).
+
+	Proj now compiles on DOS Microsoft 5.0 C compiler.  MS suffers
+		same brain-damage as DEC, so requires local strtod function.
+
+	pj_strerrno prototype added to projects.h
+
+	DOS option in strtod.c for MS C's lack of standard macros in neaders.
+
+Rel. 4.1 93/3/8 Base-line --- @(#)CHANGE-LOG	4.14 95/09/23 GIE REL
+-------------------------------------------------------------------------
+93/3/20
+	pj_init -- added +k_0 as alternative to +k so as to match documentation.
+
+93/3/21
+	Laborde projection added.  Primarily for Madagascar grid.
+	Considered BETA at moment until info obtained to give adequate
+	documentation.
+
+93/3/26
+	Oblique Mercator modified to allow processing of Malasian Grid.
+	+no_uoff and +rot_conv options added.
+
+93/3/26
+	Corrected text in Interim Report:
+	p. 12 - +phi's changed to +lat's
+	p. 12 - added updated Oblique Mercator documentation
+
+Unresolved:
+
+Reports of errno 25 persist.  Do not know what platform.  Reviewed
+	code and can't see problem.
+Unknown platform has problem with pj_errno global and linker storage
+	allocation.  Seems similar to SG problem that was over come with 
+	-common switch.
+
