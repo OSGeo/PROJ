@@ -1,6 +1,11 @@
 #ifndef lint
 static char GEODESIC_H_ID[] = "@(#)geodesic.h	4.3	95/08/19	GIE	REL";
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern double dmstor();
 struct geodesic {
 	double	A;
@@ -33,3 +38,7 @@ void geod_set(int, char **);
 void geod_for(void);
 void geod_prefor(void);
 void geod_inv(void);
+
+#ifdef __cplusplus
+}
+#endif
