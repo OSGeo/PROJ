@@ -30,6 +30,11 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.14  2004/11/05 06:05:11  fwarmerdam
+ * Fixed pj_geocentric_to_geodetic() to not try and process HUGE_VAL values
+ * (those that have failed some previous transform step).  Related to bug:5B
+ *     http://bugzilla.remotesensing.org/show_bug.cgi?id=642
+ *
  * Revision 1.13  2004/10/25 15:34:36  fwarmerdam
  * make names of geodetic funcs from geotrans unique
  *
@@ -341,8 +346,11 @@ int pj_geodetic_to_geocentric( double a, double es,
     {
         long io = i * point_offset;
 
+        if( x[io] == HUGE_VAL  )
+            continue;
+
         if( pj_Convert_Geodetic_To_Geocentric( y[io], x[io], z[io], 
-                                            x+io, y+io, z+io ) != 0 )
+                                               x+io, y+io, z+io ) != 0 )
         {
             pj_errno = PJD_ERR_GEOCENTRIC;
             return PJD_ERR_GEOCENTRIC;
