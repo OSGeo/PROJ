@@ -10,6 +10,16 @@ static const char SCCSID[]="@(#)proj.c	4.12	95/09/23	GIE	REL";
 #include "projects.h"
 #include "emess.h"
 
+/* TK 1999-02-13 */
+#if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__WIN32__)
+#  include <fcntl.h>
+#  include <io.h>
+#  define SET_BINARY_MODE(file) setmode(fileno(file), O_BINARY)
+#else
+#  define SET_BINARY_MODE(file)
+#endif
+/* ! TK 1999-02-13 */
+
 #define MAX_LINE 200
 #define MAX_PARGS 100
 #define PJ_INVERS(P) (P->inv ? 1 : 0)
@@ -234,8 +244,8 @@ vprocess(FILE *fid) {
 			facs.a, facs.b);
 	}
 }
-	void
-main(int argc, char **argv) {
+
+int main(int argc, char **argv) {
 	char *arg, **eargv = argv, *pargv[MAX_PARGS], **iargv = argv;
 	FILE *fid;
 	int pargc = 0, iargc = argc, eargc = 0, c, mon = 0;
@@ -430,13 +440,25 @@ badscale:
 		if (!oform)
 			oform = "%.2f";
 	}
+
+        if (bin_out)
+        {
+            SET_BINARY_MODE(stdout);
+        }
+
 	/* process input file list */
 	for ( ; eargc-- ; ++eargv) {
 		if (**eargv == '-') {
 			fid = stdin;
 			emess_dat.File_name = "<stdin>";
+
+                        if (bin_in)
+                        {
+                            SET_BINARY_MODE(stdin);
+                        }
+
 		} else {
-			if ((fid = fopen(*eargv, "r")) == NULL) {
+			if ((fid = fopen(*eargv, "rb")) == NULL) {
 				emess(-2, *eargv, "input file");
 				continue;
 			}
