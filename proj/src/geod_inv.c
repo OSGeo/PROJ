@@ -20,7 +20,7 @@ geod_inv(void) {
 	dthm = .5 * (th2 - th1);
 	dlamm = .5 * ( dlam = adjlon(lam2 - lam1) );
 	if (fabs(dlam) < DTOL && fabs(dthm) < DTOL) {
-		al12 =  al21 = S = 0.;
+		al12 =  al21 = geod_S = 0.;
 		return;
 	}
 	sindlamm = sin(dlamm);
@@ -42,14 +42,14 @@ geod_inv(void) {
 		D = 4. * T * T;
 		A = D * E;
 		B = D + D;
-		S = a * sind * (T - f4 * (T * X - Y) +
+		geod_S = geod_a * sind * (T - f4 * (T * X - Y) +
 			f64 * (X * (A + (T - .5 * (A - E)) * X) -
 			Y * (B + E * Y) + D * X * Y));
 		tandlammp = tan(.5 * (dlam - .25 * (Y + Y - E * (4. - X)) *
 			(f2 * T + f64 * (32. * T - (20. * T - A)
 			* X - (B + 4.) * Y)) * tan(dlam)));
 	} else {
-		S = a * d;
+		geod_S = geod_a * d;
 		tandlammp = tan(dlamm);
 	}
 	u = atan2(sindthm , (tandlammp * costhm));
