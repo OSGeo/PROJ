@@ -415,6 +415,13 @@ int main(int argc, char **argv) {
     if (!(Proj = pj_init(pargc, pargv)))
         emess(3,"projection initialization failure\ncause: %s",
               pj_strerrno(pj_errno));
+
+    if( pj_is_latlong( Proj ) )
+    {
+        emess( 3, "+proj=latlong unsuitable for use with proj program." );
+        exit( 0 );
+    }
+
     if (inverse) {
         if (!Proj->inv)
             emess(3,"inverse projection not available");
