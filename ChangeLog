@@ -1,3 +1,10 @@
+2004-11-05  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_transform.c: Fixed pj_geocentric_to_geodetic() to not try 
+	and process HUGE_VAL values (those that have failed some previous 
+	transform step).  Related to bug:
+	  http://bugzilla.remotesensing.org/show_bug.cgi?id=642
+
 2004-10-30  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Improved --with-jni support in configure to allow specification
