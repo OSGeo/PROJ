@@ -1,4 +1,11 @@
+2000-03-29  Frank Warmerdam  <warmerda@cs46980-c>
+
+	* Added hard links for invproj->proj and invgeod->geod in 
+	src/Makefile.{am,in}.
+
 2000-03-27  Frank Warmerdam  <warmerda@cs46980-c>
+
+	* Issued V4.4.1 Release.
 
 	* Re-added install target for NADCON data files when available.
 
@@ -16,6 +23,8 @@
 
 	* Wrote new configure.in, and use automake to generate makefiles.
 
+	* Renamed UV to projUV to avoid conflicts on windows.
+	
 	* Reorganize ChangeLog, and start work on 4.4.
 
 Rel. 4.3.2 94/10/30 Base-line
