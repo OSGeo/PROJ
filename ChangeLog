@@ -1,7 +1,18 @@
+Rel. 4.4.5 2002/01/09
+-------------------------------------------------------------------------
+	
+2002-01-09  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/geocent.c: Fixed serious bug in Convert_Geodetic_To_Geocentric()
+	that essentially ruins all datum shifting (except NAD tables).  This
+	bug was introduced just in time for the PROJ 4.4.4 release.
+
+
 2001-11-05  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/proj.def: added pj_strerrno and pj_errno as per request from
 	Bernhard Herzog.
+
 
 Rel. 4.4.4 2001/09/15
 -------------------------------------------------------------------------
