@@ -1,3 +1,13 @@
+2004-05-03  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/geocent.c: Updated Geocentric_To_Geodetic computation to 	be 
+	iterative to reduce error as per Wenzel, H.-G.(1985): Hochauflösende 
+	Kugelfunktionsmodelle für das Gravitationspotential der Erde. Wiss. 
+	Arb. Univ. Hannover Nr. 137, p. 130-131.  Fix adapted to geocent.c and
+	submitted by Lothar Gorling.
+
+	http://bugzilla.remotesensing.org/show_bug.cgi?id=563
+
 2004-04-15  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/makefile.vc: Define HAVE_STRERROR.
