@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.6  2004/10/30 04:03:03  fwarmerdam
+ * fixed reported information in ctable debug message
+ *
  * Revision 1.5  2003/08/20 13:23:58  warmerda
  * Avoid unsigned char / char casting issues for VC++.
  *
@@ -685,8 +688,8 @@ PJ_GRIDINFO *pj_gridinfo_init( const char *gridname )
                      ct->id, 
                      ct->lim.lam, ct->lim.phi,
                      ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
-                     (ct->ll.lam + ct->lim.lam*ct->del.lam) * RAD_TO_DEG, 
-                     (ct->ll.phi + ct->lim.phi*ct->del.lam) * RAD_TO_DEG );
+                     (ct->ll.lam + (ct->lim.lam-1)*ct->del.lam) * RAD_TO_DEG, 
+                     (ct->ll.phi + (ct->lim.phi-1)*ct->del.phi) * RAD_TO_DEG );
     }
 
     fclose(fp);
