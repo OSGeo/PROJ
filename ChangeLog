@@ -1,3 +1,8 @@
+2002-04-16  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_list.c,src/PJ_krovak.c: Incorporated support for Krovak
+	projection as per submission by Thomas Fleming and Markus Neteler.
+
 2002-03-01  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/geod.c: Moved ctype.h up to avoid compile failure on MacOS X.
