@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.9  2004/05/04 01:15:21  warmerda
+ * Added NZGD49 datum - see bug 339
+ *
  * Revision 1.8  2003/03/28 14:29:28  warmerda
  * Fixed ire65 definition ... use mod_airy, not modif_airy.
  *
@@ -79,6 +82,7 @@ C_NAMESPACE struct PJ_DATUMS pj_datums[] = {
 "carthage",  "towgs84=-263.0,6.0,431.0",  "clark80",  "Carthage 1934 Tunisia",
 "hermannskogel", "towgs84=653.0,-212.0,449.0",  "bessel",  "Hermannskogel",
 "ire65",  "towgs84=482.530,-130.596,564.557,-1.042,-0.214,-0.631,8.15",  "mod_airy",  "Ireland 1965",
+"nzgd49",    "towgs84=59.47,-5.04,187.44,0.47,-0.1,1.024,-4.5993", "intl", "New Zealand Geodetic Datum 1949",
 NULL,       NULL,                                    NULL,    NULL 
 };
 
