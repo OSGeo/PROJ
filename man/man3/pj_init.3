@@ -17,9 +17,9 @@ pj_free \- de-initialize projection
 
 PJ *pj_init(int argc, char **argv)
 
-UV pj_fwd(UV val, PJ *proj)
+projUV pj_fwd(projUV val, PJ *proj)
 
-UV pj_inv(UV val, PJ *proj)
+projUV pj_inv(projUV val, PJ *proj)
 
 void pj_free(PJ *proj)
 
@@ -37,10 +37,10 @@ address is returned otherwise a NULL value.
 Once initialization is performed either forward or inverse
 projections can be performed with the returned value of \fBpj_init\fR
 used as the argument \fBproj\fR.
-The argument structure \fBUV\fR values \fBu\fR and \fBv\fR contain
+The argument structure \fBprojUV\fR values \fBu\fR and \fBv\fR contain
 respective longitude and latitude or x and y.
 Latitude and longitude are in radians.
-If a projection operation fails, both elements of \fBUV\fR are
+If a projection operation fails, both elements of \fBprojUV\fR are
 set to HUGE_VAL (defined in \fImath.h\fR).
 
 \fBNote:\fR all projections have a forward mode, but some do not have
@@ -59,7 +59,7 @@ cartesian values in meters:
 #include <projects.h>
 main(int argc, char **argv) {
 	char *args[] = { "proj=merc", "ellps=clrk66", "lat_ts=33" };
-	UV p;
+	projUV p;
 	PJ *pj;
 
 	if (!(pj = pj_init(3, args)))
