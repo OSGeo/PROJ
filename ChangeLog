@@ -1,3 +1,11 @@
+2003-03-03  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Incorporate src/PJ_lcca.c, the new "alternate" LCC implementation
+	provided by Gerald for some old maps.  See his site for details.
+
+	* Rebuild dependent files with automake 1.6.3, libtool 1.4.2 and 
+	autoconf 2.53.  
+
 2003-01-15  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_datums.c: added some datums as suggested by the GRASS team.
