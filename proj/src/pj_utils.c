@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.2  2002/04/30 17:01:51  warmerda
+ * Removed printf() statement.
+ *
  * Revision 1.1  2001/04/05 04:22:46  warmerda
  * New
  *
@@ -143,8 +146,6 @@ PJ *pj_latlong_from_proj( PJ *pj_in )
     if( pj_param(pj_in->params, "tR_lat_g").i )
         sprintf( defn+strlen(defn), " +R_lat_g=%s", 
                  pj_param(pj_in->params,"sR_lat_g").s );
-
-    printf( "pj_latlong_from_proj->%s\n", defn );
 
     return pj_init_plus( defn );
 }
