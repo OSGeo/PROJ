@@ -70,7 +70,9 @@ PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
 
-SUBDIRS = src man
+SUBDIRS = src man nad
+
+AUTOMAKE_OPTIONS = dist-zip
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ./src/proj_config.h
@@ -220,9 +222,14 @@ dist: distdir
 	-chmod -R a+r $(distdir)
 	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
 	-rm -rf $(distdir)
+dist-zip: distdir
+	-chmod -R a+r $(distdir)
+	zip -rq $(distdir).zip $(distdir)
+	-rm -rf $(distdir)
 dist-all: distdir
 	-chmod -R a+r $(distdir)
 	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	zip -rq $(distdir).zip $(distdir)
 	-rm -rf $(distdir)
 distdir: $(DISTFILES)
 	-rm -rf $(distdir)
