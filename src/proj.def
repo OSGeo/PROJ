@@ -1,5 +1,5 @@
 LIBRARY   PROJ
-VERSION   1.1
+VERSION   1.2
 EXPORTS
 	pj_init		@1
 	pj_fwd		@2
@@ -16,5 +16,8 @@ EXPORTS
 	pj_set_finder             @13
 	pj_strerrno		  @14
 	pj_errno                  @15
+	pj_get_def		  @16
+	pj_dalloc                 @17
+
 
 

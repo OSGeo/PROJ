@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.6  2002/06/11 18:08:25  warmerda
+ * Added the pj_get_def() function
+ *
  * Revision 1.5  2002/01/09 14:36:22  warmerda
  * updated to 4.4.5
  *
@@ -58,7 +61,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 445
+#define PJ_VERSION 446
 
 extern char const pj_release[]; /* global release id string */
 
@@ -105,6 +108,7 @@ void pj_free(projPJ);
 void pj_set_finder( const char *(*)(const char *) );
 projPJ pj_init(int, char **);
 projPJ pj_init_plus(const char *);
+char *pj_get_def(projPJ, int);
 projPJ pj_latlong_from_proj( projPJ );
 void *pj_malloc(size_t);
 void pj_dalloc(void *);
