@@ -19,7 +19,7 @@ geod_set(int argc, char **argv) {
 		else
 			start = curr = pj_mkparam(argv[i]);
 	/* set elliptical parameters */
-	if (pj_ell_set(start, &a, &es)) emess(1,"ellipse setup failure");
+	if (pj_ell_set(start, &geod_a, &es)) emess(1,"ellipse setup failure");
 	/* set units */
 	if (name = pj_param(start, "sunits").s) {
 		char *s;
@@ -32,13 +32,13 @@ geod_set(int argc, char **argv) {
 		to_meter = fr_meter = 1.;
 	if (ellipse = es != 0.) {
 		onef = sqrt(1. - es);
-		f = 1 - onef;
-		f2 = f/2;
-		f4 = f/4;
-		f64 = f*f/64;
+		geod_f = 1 - onef;
+		f2 = geod_f/2;
+		f4 = geod_f/4;
+		f64 = geod_f*geod_f/64;
 	} else {
 		onef = 1.;
-		f = f2 = f4 = f64 = 0.;
+		geod_f = f2 = f4 = f64 = 0.;
 	}
 	/* check if line or arc mode */
 	if (pj_param(start, "tlat_1").i) {
@@ -51,7 +51,7 @@ geod_set(int argc, char **argv) {
 			lam2 = pj_param(start, "rlon_2").f;
 			geod_inv();
 			geod_pre();
-		} else if (S = pj_param(start, "dS").f) {
+		} else if (geod_S = pj_param(start, "dS").f) {
 			al12 = pj_param(start, "rA").f;
 			geod_pre();
 			geod_for();
@@ -60,7 +60,7 @@ geod_set(int argc, char **argv) {
 			if (!(del_alpha = pj_param(start, "rdel_A").f))
 				emess(1,"del azimuth == 0");
 		} else if (del_S = fabs(pj_param(start, "ddel_S").f)) {
-			n_S = S / del_S + .5;
+			n_S = geod_S / del_S + .5;
 		} else if ((n_S = pj_param(start, "in_S").i) <= 0)
 			emess(1,"no interval divisor selected");
 	}

@@ -52,7 +52,7 @@ do_geod(void) {
 	phil = phi2;
 	laml = lam2;
 	printLL(phi1, lam1); putchar('\n');
-	for ( S = del_S = S / n_S; --n_S; S += del_S) {
+	for ( geod_S = del_S = geod_S / n_S; --n_S; geod_S += del_S) {
 		geod_for();
 		printLL(phi2, lam2); putchar('\n');
 	}
@@ -84,7 +84,7 @@ process(FILE *fid) {
 			geod_inv();
 		} else {
 			al12 = dmstor(s, &s);
-			S = strtod(s, &s) * to_meter;
+			geod_S = strtod(s, &s) * to_meter;
 			geod_pre();
 			geod_for();
 		}
@@ -99,21 +99,21 @@ process(FILE *fid) {
 			if (oform) {
 				(void)printf(oform, al12 * RAD_TO_DEG); TAB;
 				(void)printf(oform, al21 * RAD_TO_DEG); TAB;
-				(void)printf(osform, S * fr_meter);
+				(void)printf(osform, geod_S * fr_meter);
 			}  else {
 				(void)fputs(rtodms(pline, al12, 0, 0), stdout); TAB;
 				(void)fputs(rtodms(pline, al21, 0, 0), stdout); TAB;
-				(void)printf(osform, S * fr_meter);
+				(void)printf(osform, geod_S * fr_meter);
 			}
 		} else if (inverse)
 			if (oform) {
 				(void)printf(oform, al12 * RAD_TO_DEG); TAB;
 				(void)printf(oform, al21 * RAD_TO_DEG); TAB;
-				(void)printf(osform, S * fr_meter);
+				(void)printf(osform, geod_S * fr_meter);
 			} else {
 				(void)fputs(rtodms(pline, al12, 0, 0), stdout); TAB;
 				(void)fputs(rtodms(pline, al21, 0, 0), stdout); TAB;
-				(void)printf(osform, S * fr_meter);
+				(void)printf(osform, geod_S * fr_meter);
 			}
 		else {
 			printLL(phi2, lam2); TAB;
