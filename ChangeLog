@@ -1,5 +1,7 @@
 2000-03-21  Frank Warmerdam  <warmerda@rommel.atlsci.com>
 
+	* Converted to use libtool.
+
 	* Wrote new configure.in, and use automake to generate makefiles.
 
 	* Reorganize ChangeLog, and start work on 4.4.
