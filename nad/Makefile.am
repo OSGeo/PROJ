@@ -18,3 +18,9 @@ install-data-local:
 	else \
 	  echo "nad2nad NADCON source files not present"; \
 	fi 
+	@if [ -f ntv1_can.dat ] ; then \
+	  echo $(INSTALL_DATA) ntv1_can.dat $(pkgdatadir)/ntv1_can.dat; \
+	  $(INSTALL_DATA) ntv1_can.dat $(pkgdatadir)/ntv1_can.dat; \
+	fi
+
+

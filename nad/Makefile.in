@@ -219,6 +219,10 @@ install-data-local:
 	else \
 	  echo "nad2nad NADCON source files not present"; \
 	fi 
+	@if [ -f ntv1_can.dat ] ; then \
+	  echo $(INSTALL_DATA) ntv1_can.dat $(pkgdatadir)/ntv1_can.dat; \
+	  $(INSTALL_DATA) ntv1_can.dat $(pkgdatadir)/ntv1_can.dat; \
+	fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
