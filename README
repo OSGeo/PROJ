@@ -38,6 +38,26 @@ After executing configure, execute:
 The install script will create, if necessary, all required sub-
 directories.
 
+Windows Build
+-------------
+
+PROJ.4 can be built with Microsoft Visual C/C++ using the makefile.vc
+in the src directory. 
+
+eg. 
+C:\> cd proj\src
+C>\PROJ\SRC> nmake /f makefile.vc all
+
+Note that you have to have the VC++ environment variables, and path
+setup properly.  This may involve running the VCVARS32.BAT script out
+of the Visual C++ tree.  
+
+The makefile.vc builds proj.exe, proj.dll and proj.lib. 
+
+It should also be possible to build using the Unix instructions
+and Cygwin32, but this hasn't been tested recently. 
+
+
    ---------------------------------------------------
 
 Distribution files and format.
