@@ -43,6 +43,8 @@ extern double hypot(double, double);
 #define DIR_CHAR '/'
 #endif
 
+#define USE_PROJUV 
+
 typedef struct { double u, v; }	projUV;
 typedef struct { double r, i; }	COMPLEX;
 
