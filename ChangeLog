@@ -1,3 +1,8 @@
+2004-10-30  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Improved --with-jni support in configure to allow specification
+	of an include directory.  
+
 Rel. 4.4.9 2004-10-29
 -------------------------------------------------------------------------
 	
