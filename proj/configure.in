@@ -26,22 +26,55 @@ dnl ---------------------------------------------------------------------------
 dnl Check for JNI support.
 dnl ---------------------------------------------------------------------------
 
-AC_CHECKING(whether to enable Java/JNI support)
+JNI_INCLUDE=
+export JNI_INCLUDE
 
 AC_ARG_WITH(jni,
-[  --with-jni              Include Java/JNI support],,)
+[  --with-jni=dir          Include Java/JNI support, add optional include dir],,)
 
 if test "$with_jni" = "yes" ; then
 
-  JNI_ENABLED=1
+  AC_DEFINE(JNI_ENABLED,1,[Enabled for Java/JNI Support])
 
+  AC_MSG_CHECKING(whether to enable Java/JNI support)
+
+  AC_MSG_RESULT([enabled])
+
+elif test "$with_jni" != "no" -a "$with_jni" != "" ; then
+
+  AC_MSG_CHECKING(whether to enable Java/JNI support)
+
+  if test \! -r "$with_jni/jni.h" ; then
+    AC_MSG_ERROR(Did not find $with_jni/jni.h)
+  fi
+   
   AC_DEFINE(JNI_ENABLED,1,[Enabled for Java/JNI Support])
 
   AC_MSG_RESULT([enabled])
 
+  JNI_INCLUDE="-I$with_jni"
+
+elif test "$with_jni" = "" ; then
+  AC_CHECK_HEADERS(jni.h)
+
+  AC_MSG_CHECKING(whether to enable Java/JNI support)
+
+  if test "$ac_cv_header_jni_h" = "no" ; then   
+    AC_MSG_RESULT([disabled])
+  else
+    AC_MSG_RESULT([enabled])
+    AC_DEFINE(JNI_ENABLED,1,[Enabled for Java/JNI Support])
+  fi
+
 else
+  AC_MSG_CHECKING(whether to enable Java/JNI support)
+
   AC_MSG_RESULT([disabled])
 fi
+
+AC_SUBST(JNI_INCLUDE,$JNI_INCLUDE)
+
+
 
 
 AC_OUTPUT(Makefile src/Makefile man/Makefile man/man1/Makefile \

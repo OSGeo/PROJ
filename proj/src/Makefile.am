@@ -1,6 +1,6 @@
 bin_PROGRAMS =	proj nad2nad nad2bin geod cs2cs
 
-INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\"
+INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\" @JNI_INCLUDE@
 
 include_HEADERS = projects.h nad_list.h proj_api.h org_proj4_Projections.h
 
