@@ -56,8 +56,9 @@ libproj_la_SOURCES = \
 	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c \
 	pj_zpoly1.c rtodms.c vector1.c pj_release.c \
 	\
-	nad_cvt.c nad_init.c nad_intr.c emess.c pj_apply_gridshift.c \
-	pj_datums.c pj_datum_set.c pj_transform.c geocent.c 
+	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \
+	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
+	geocent.c geocent.h
 
 
 install-exec-local:
