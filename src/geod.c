@@ -177,22 +177,20 @@ noargument:		   emess(1,"missing argument for -%c",*arg);
 				continue;
 			case 'l':
 				if (!arg[1] || arg[1] == 'e') { /* list of ellipsoids */
-					struct PJ_ELLPS *le;
-	
-					for (le = pj_ellps; le->id ; ++le)
-						(void)printf("%9s %-16s %-16s %s\n",
-						le->id, le->major, le->ell, le->name);
-				 		emess(1,"invalid list option: l%c",arg[1]);
-							emess(1,"-l[p|e] terminates program");
+                                    struct PJ_ELLPS *le;
+                                    
+                                    for (le = pj_ellps; le->id ; ++le)
+                                        (void)printf("%9s %-16s %-16s %s\n",
+                                                     le->id, le->major, le->ell, le->name);
 				} else if (arg[1] == 'u') { /* list of units */
-					struct PJ_UNITS *lu;
-
-					for (lu = pj_units; lu->id ; ++lu)
-						(void)printf("%12s %-20s %s\n",
-				 			lu->id, lu->to_meter, lu->name);
+                                    struct PJ_UNITS *lu;
+                                    
+                                    for (lu = pj_units; lu->id ; ++lu)
+                                        (void)printf("%12s %-20s %s\n",
+                                                     lu->id, lu->to_meter, lu->name);
 				} else
-					emess(1,"invalid list option: l%c",arg[1]);
-				emess(1,"will not proceed after display list option");
+                                    emess(1,"invalid list option: l%c",arg[1]);
+                                exit( 0 );
 			case 'p': /* output azimuths as positive */
 				pos_azi = 1;
 				continue;
