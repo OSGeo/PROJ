@@ -439,7 +439,8 @@ installcheck: installcheck-am
 all-recursive-am: proj_config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
-install-exec-am: install-libLTLIBRARIES install-binPROGRAMS
+install-exec-am: install-libLTLIBRARIES install-binPROGRAMS \
+		install-exec-local
 install-exec: install-exec-am
 
 install-data-am: install-includeHEADERS
@@ -512,12 +513,16 @@ install-binPROGRAMS uninstall-includeHEADERS install-includeHEADERS \
 tags mostlyclean-tags distclean-tags clean-tags maintainer-clean-tags \
 distdir mostlyclean-depend distclean-depend clean-depend \
 maintainer-clean-depend info-am info dvi-am dvi check check-am \
-installcheck-am installcheck all-recursive-am install-exec-am \
-install-exec install-data-am install-data install-am install \
-uninstall-am uninstall all-redirect all-am all installdirs \
+installcheck-am installcheck all-recursive-am install-exec-local \
+install-exec-am install-exec install-data-am install-data install-am \
+install uninstall-am uninstall all-redirect all-am all installdirs \
 mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
+
+install-exec-local:
+	ln $(bindir)/proj $(bindir)/invproj
+	ln $(bindir)/geod $(bindir)/invgeod
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
