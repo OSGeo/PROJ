@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.8  2001/04/05 04:24:10  warmerda
+ * added prototypes for new functions, and PJ_VERSION
+ *
  * Revision 1.7  2001/02/07 17:55:05  warmerda
  * Cleaned up various warnings when compiled with -Wall.
  *
@@ -50,6 +53,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Try to update this every version! */
+
+#define PJ_VERSION 443
 
 #ifndef NULL
 #  define NULL	0
@@ -317,11 +324,13 @@ int pj_apply_gridshift( const char *, int,
                         long point_count, int point_offset,
                         double *x, double *y, double *z );
 void pj_deallocate_grids();
+int pj_is_latlong(PJ *);
                          
-
 void pj_pr_list(PJ *);
 void pj_free(PJ *);
 PJ *pj_init(int, char **);
+PJ *pj_init_plus(const char *);
+PJ *pj_latlong_from_proj( PJ *);
 void *pj_malloc(size_t);
 void pj_dalloc(void *);
 char *pj_strerrno(int);
