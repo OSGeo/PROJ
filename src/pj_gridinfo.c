@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.4  2003/03/19 03:36:41  warmerda
+ * Fixed so swap_words() works when it should.
+ *
  * Revision 1.3  2003/03/17 19:44:45  warmerda
  * improved debugging, reduce header read size
  *
@@ -60,28 +63,22 @@ static int  byte_order_test = 1;
 static void swap_words( unsigned char *data, int word_size, int word_count )
 
 {
-    /* We only need to do work on LSB machines.  Perhaps we should 
-       convert the data files into LSB order to cut workload! */
+    int	word;
 
-    if( IS_LSB )
+    for( word = 0; word < word_count; word++ )
     {
-        int	word;
-
-        for( word = 0; word < word_count; word++ )
+        int	i;
+        
+        for( i = 0; i < word_size/2; i++ )
         {
-            int	i;
-
-            for( i = 0; i < word_size/2; i++ )
-            {
-                int	t;
-
-                t = data[i];
-                data[i] = data[word_size-i-1];
-                data[word_size-i-1] = t;
-            }
-
-            data += word_size;
+            int	t;
+            
+            t = data[i];
+            data[i] = data[word_size-i-1];
+            data[word_size-i-1] = t;
         }
+        
+        data += word_size;
     }
 }
 
