@@ -129,6 +129,11 @@ Seven parameter transformation (translation, rotation and scaling):
   z_out = M_BF*(-Ry_BF*x[io] + Rx_BF*y[io] +       z[io]) + Dz_BF;
 </pre>
 
+Note that EPSG method 9607 (coordinate frame rotation) coefficients can be 
+converted to EPSG method 9606 (position vector 7-parameter) supported by
+PROJ.4 by reversing the sign of the rotation vectors.  The methods are
+otherwise the same.<p>
+
 </body>
 </html>
 
