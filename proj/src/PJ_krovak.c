@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.3  2002/12/15 00:13:30  warmerda
+ * lat_0 may now be set by user, but still defaults to 49d30N
+ *
  * Revision 1.2  2002/12/14 19:35:21  warmerda
  * updated headers
  *
@@ -54,13 +57,13 @@ FORWARD(s_forward); /* spheroid */
 	char tmp[16];
 
 /* Constants, identical to inverse transform function */
-	double s45, s90, fi0, e2, e, alfa, uq, u0, g, k, k1, n0, ro0, ad, a, s0, n;
-	double gfi, u, lon17, lon42, lamdd, deltav, s, d, eps, ro;
+	double s45, s90, e2, e, alfa, uq, u0, g, k, k1, n0, ro0, ad, a, s0, n;
+	double gfi, u, fi0, lon17, lon42, lamdd, deltav, s, d, eps, ro;
 
 
 	s45 = 0.785398163397448;    /* 45° */
 	s90 = 2 * s45;
-	fi0 = 0.863937979737193;    /* Latitude of projection centre 49°30' */
+	fi0 = P->phi0;    /* Latitude of projection centre 49° 30' */
 
    /* Ellipsoid is used as Parameter in for.c and inv.c, therefore a must 
       be set to 1 here.
@@ -137,7 +140,7 @@ INVERSE(s_inverse); /* spheroid */
 
 	s45 = 0.785398163397448;    /* 45° */
 	s90 = 2 * s45;
-	fi0 = 0.863937979737193;    /* Latitude of projection centre 49° 30' */
+	fi0 = P->phi0;    /* Latitude of projection centre 49° 30' */
 
 
    /* Ellipsoid is used as Parameter in for.c and inv.c, therefore a must 
@@ -215,6 +218,10 @@ ENTRY0(krovak)
 	/* we want Bessel as fixed ellipsoid */
 	P->a = 6377397.155;
 	P->e = sqrt(P->es = 0.006674372230614);
+
+        /* if latitude of projection center is not set, use 49d30'N */
+	if (!pj_param(P->params, "tlat_0").i)
+            P->phi0 = 0.863937979737193; 
 
 	/* always the same */
         P->inv = s_inverse; 
