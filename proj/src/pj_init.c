@@ -141,7 +141,7 @@ pj_init(int argc, char **argv) {
         if( PIN->datum_type == PJD_3PARAM 
             && PIN->datum_params[0] == 0.0
             && PIN->datum_params[1] == 0.0
-            && PIN->datum_params[1] == 0.0
+            && PIN->datum_params[2] == 0.0
             && PIN->a == 6378137.0
             && ABS(PIN->es - 0.006694379990) < 0.000000000050 )/*WGS84/GRS80*/
         {

@@ -1,3 +1,7 @@
+2001-01-25  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Fixed pj_init() check for WGS84 match as per Bart Adriaanse bug rep.
+
 2000-12-15  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/makefile.vc: only delete proj.lib if it exists.
