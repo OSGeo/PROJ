@@ -9,4 +9,8 @@ EXPORTS
         pj_geocentric_to_geodetic @6
         pj_geodetic_to_geocentric @7
         pj_deallocate_grids       @8
+        pj_init_plus              @9
+        pj_latlong_from_proj      @10
+        pj_is_latlong             @11
+
 
