@@ -77,7 +77,14 @@ bpseval(projUV in, Tseries *T) {
 	}
 	return out;
 }
-	projUV /* general entry point selecting evaluation mode */
+
+projUV /* general entry point selecting evaluation mode */
 biveval(projUV in, Tseries *T) {
-	return (T->power ? bpseval(in, T) : bcheval(in, T));
+
+    if (T->power) {
+        return bpseval(in, T);
+    } else {
+        return bcheval(in, T);
+    }
 }
+
