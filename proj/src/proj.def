@@ -5,7 +5,7 @@ EXPORTS
 	pj_fwd		@2
 	pj_inv		@3
 	pj_free		@4
-	pj_translate	@5
+	pj_transform	@5
         pj_geocentric_to_geodetic @6
         pj_geodetic_to_geocentric @7
         pj_deallocate_grids       @8
