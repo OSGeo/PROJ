@@ -135,6 +135,22 @@ For conformal projections meridinal and parallel scales factors
 will be equal and angular distortion zero.
 Equal area projections will have an area factor of 1.
 .TP
+.BI \-m " mult"
+The cartesian data may be scaled by the
+.I mult
+parameter.
+When processing data in a forward projection mode the
+cartesian output values are multiplied by
+.I mult
+otherwise the input cartesian values are divided by
+.I mult
+before inverse projection.
+If the first two characters of
+.I mult
+are 1/ or 1: then the reciprocal value of
+.I mult
+is employed.
+.TP
 .BI \-f " format"
 .I Format
 is a

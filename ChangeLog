@@ -1,5 +1,8 @@
 2003-04-09  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* man/man1/{proj,cs2cs}.1: moved -m option from cs2cs.1 to
+	proj.1 since it is only supported by proj.
+
 	* nad/Makefile.am: added DESTDIR in three missing places as per
 	bug report from Peter Galbraith - proj debian package manager.
 
