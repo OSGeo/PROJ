@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.21  2004/10/28 16:08:13  fwarmerdam
+ * added pj_get_*_ref() accessors
+ *
  * Revision 1.20  2004/10/20 17:04:29  fwarmerdam
  * added geos, sterea and supporting gauss code from libproj4
  *
@@ -426,6 +429,12 @@ LP pj_inv_gauss(LP, const void *);
 
 extern char const pj_release[];
 
+struct PJ_ELLPS *pj_get_ellps_ref( void );
+struct PJ_DATUMS *pj_get_datums_ref( void );
+struct PJ_UNITS *pj_get_units_ref( void );
+struct PJ_LIST  *pj_get_list_ref( void );
+struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
+ 
 #ifndef DISABLE_CVSID
 #  define PJ_CVSID(string)     static char pj_cvsid[] = string; \
 static char *cvsid_aw() { return( cvsid_aw() ? ((char *) NULL) : pj_cvsid ); }

@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.10  2004/10/28 16:07:55  fwarmerdam
+ * added pj_get_*_ref() accessors
+ *
  * Revision 1.9  2004/05/04 01:15:21  warmerda
  * Added NZGD49 datum - see bug 339
  *
@@ -86,6 +89,12 @@ C_NAMESPACE struct PJ_DATUMS pj_datums[] = {
 NULL,       NULL,                                    NULL,    NULL 
 };
 
+struct PJ_DATUMS *pj_get_datums_ref()
+
+{
+    return pj_datums;
+}
+
 C_NAMESPACE struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
     /* id        definition                         */
     /* --        ----------                         */
@@ -104,6 +113,10 @@ C_NAMESPACE struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
     "oslo",      "10d43'22.5\"E",
     NULL,        NULL 
 };
-    
 
+struct PJ_PRIME_MERIDIANS *pj_get_prime_meridians_ref()
+
+{
+    return pj_prime_meridians;
+}
 
