@@ -18,7 +18,7 @@ VERSION=
 
 azimuthal = \
 	PJ_aeqd.obj PJ_gnom.obj PJ_laea.obj PJ_mod_ster.obj \
-	PJ_nsper.obj PJ_nzmg.obj PJ_ortho.obj PJ_stere.obj
+	PJ_nsper.obj PJ_nzmg.obj PJ_ortho.obj PJ_stere.obj PJ_sterea.obj
 
 conic = \
 	PJ_aea.obj PJ_bipc.obj PJ_bonne.obj PJ_eqdc.obj \
@@ -29,7 +29,7 @@ cylinder = \
 	PJ_cass.obj PJ_cc.obj PJ_cea.obj PJ_eqc.obj \
 	PJ_gall.obj PJ_labrd.obj PJ_lsat.obj PJ_merc.obj \
 	PJ_mill.obj PJ_ocea.obj PJ_omerc.obj PJ_somerc.obj \
-	PJ_tcc.obj PJ_tcea.obj PJ_tmerc.obj
+	PJ_tcc.obj PJ_tcea.obj PJ_tmerc.obj PJ_gauss.obj
 
 misc = \
 	PJ_airy.obj PJ_aitoff.obj PJ_august.obj PJ_bacon.obj \
@@ -50,7 +50,7 @@ pseudo = \
 	PJ_wag3.obj PJ_wink1.obj PJ_wink2.obj
 
 support = \
-	aasincos.obj adjlon.obj bch2bps.obj bchgen.obj \
+	aasincos.obj adjlon.obj bch2bps.obj bchgen.obj pj_gauss.obj \
 	biveval.obj dmstor.obj mk_cheby.obj pj_auth.obj \
 	pj_deriv.obj pj_ell_set.obj pj_ellps.obj pj_errno.obj \
 	pj_factors.obj pj_fwd.obj pj_init.obj pj_inv.obj \
