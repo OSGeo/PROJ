@@ -5,7 +5,7 @@
  * Purpose:  Perform overall coordinate system to coordinate system 
  *           transformations (pj_transform() function) including reprojection
  *           and datum shifting.
- * Author:   Frank Warmerdam, warmerda@home.com
+ * Author:   Frank Warmerdam, warmerdam@pobox.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.7  2002/12/14 20:14:35  warmerda
+ * added geocentric support
+ *
  * Revision 1.6  2002/12/09 16:01:02  warmerda
  * added prime meridian support
  *
@@ -54,6 +57,8 @@
 #include <string.h>
 #include <math.h>
 #include "geocent.h"
+
+PJ_CVSID("$Id$");
 
 #ifndef SRS_WGS84_SEMIMAJOR
 #define SRS_WGS84_SEMIMAJOR 6378137.0
@@ -93,10 +98,24 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
         point_offset = 1;
 
 /* -------------------------------------------------------------------- */
+/*      Transform geocentric source coordinates to lat/long.            */
+/* -------------------------------------------------------------------- */
+    if( srcdefn->is_geocent )
+    {
+        if( z == NULL )
+        {
+            pj_errno = PJD_ERR_GEOCENTRIC;
+            return PJD_ERR_GEOCENTRIC;
+        }
+
+        pj_geocentric_to_geodetic( srcdefn->a, srcdefn->es,
+                                   point_count, point_offset, x, y, z );
+    }
+/* -------------------------------------------------------------------- */
 /*      Transform source points to lat/long, if they aren't             */
 /*      already.                                                        */
 /* -------------------------------------------------------------------- */
-    if( !srcdefn->is_latlong )
+    else if( !srcdefn->is_latlong )
     {
         for( i = 0; i < point_count; i++ )
         {
@@ -132,10 +151,25 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
         return pj_errno;
 
 /* -------------------------------------------------------------------- */
+/*      Transform destination latlong to geocentric if required.        */
+/* -------------------------------------------------------------------- */
+    if( dstdefn->is_geocent )
+    {
+        if( z == NULL )
+        {
+            pj_errno = PJD_ERR_GEOCENTRIC;
+            return PJD_ERR_GEOCENTRIC;
+        }
+
+        pj_geodetic_to_geocentric( dstdefn->a, dstdefn->es,
+                                   point_count, point_offset, x, y, z );
+    }
+
+/* -------------------------------------------------------------------- */
 /*      Transform destination points to projection coordinates, if      */
 /*      desired.                                                        */
 /* -------------------------------------------------------------------- */
-    if( !dstdefn->is_latlong )
+    else if( !dstdefn->is_latlong )
     {
         for( i = 0; i < point_count; i++ )
         {
