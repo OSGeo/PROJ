@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.14  2002/12/14 20:16:21  warmerda
+ * added geocentric support, and PJ_CVSID
+ *
  * Revision 1.13  2002/12/09 16:01:02  warmerda
  * added prime meridian support
  *
@@ -213,6 +216,7 @@ typedef struct PJconsts {
 	int over;   /* over-range flag */
 	int geoc;   /* geocentric latitude flag */
         int is_latlong; /* proj=latlong ... not really a projection at all */
+        int is_geocent; /* proj=geocent ... not really a projection at all */
 	double
 		a,  /* major axis or radius if es==0 */
 		e,  /* eccentricity */
@@ -363,6 +367,13 @@ LP nad_cvt(LP, int, struct CTABLE *);
 struct CTABLE *nad_init(char *);
 void nad_free(struct CTABLE *);
 extern char const pj_release[];
+
+#ifndef DISABLE_CVSID
+#  define PJ_CVSID(string)     static char pj_cvsid[] = string; \
+static char *cvsid_aw() { return( cvsid_aw() ? ((char *) NULL) : pj_cvsid ); }
+#else
+#  define PJ_CVSID(string)
+#endif
 
 #ifdef __cplusplus
 }
