@@ -79,10 +79,13 @@ environment can be defined with the correct directory.<p>
 <h2>How do I debug problems with NAD27/NAD83 datum shifting?</h2>
 
 <ol>
+<li> Verify that you have the binary files (eg. /usr/local/share/proj/conus)
+installed on your system.  If not, see the previous question.
+<p>
 <li> Try a datum shifting operation in relative isolation, such as with the
 cs2cs command listed above.  Do you get reasonable results?  If not it is
 likely the grid shift files aren't being found.  Perhaps you need to define
-PROJ_LIB? 
+PROJ_LIB? <p>
 
 <li> The cs2cs command and the underlying pj_transform() API know how to 
 do a grid shift as part of a more complex coordinate transformation; however,
