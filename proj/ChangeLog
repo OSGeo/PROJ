@@ -1,3 +1,7 @@
+2004-05-17  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* proj.spec: Change PACKAGE_NAME from "PROJ" to "proj".
+
 2004-05-12  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* nad/epsg: update translation for potsdam datum. 
