@@ -1,5 +1,8 @@
 2001-04-05  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* Introduce proj_api.h as a public include file with projects.h
+	now intended to be private.
+
 	* pj_datums.c: added ntv1_can.dat to list for NAD27 datum.
 
 	* nad_init(): added support for loading NTv1 style datum shift files.
