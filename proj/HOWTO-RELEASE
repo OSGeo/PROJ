@@ -6,7 +6,9 @@
 
 2) Update the version number in projects.h (#define PJ_VERSION).
 
-3) Update the version number in the -version-info definition in 
+3) Update the version number, and date in src/pj_version.c.
+
+4) Update the version number in the -version-info definition in 
    src/Makefile.am.  It consists of "current:revision:age". 
 
    - If the library source code has changed at all since the last update, 
@@ -21,26 +23,26 @@
    - If any interfaces have been removed since the last public release, then 
      set age to 0. 
 
-4) Add a note to the ChangeLog that a new release is being issued, and what
+5) Add a note to the ChangeLog that a new release is being issued, and what
    the release number is.
 
-5) Tag the release with a command like "cvs tag proj_4_4_3".
+6) Tag the release with a command like "cvs tag proj_4_4_3".
 
-6) Do a "make dist-all" in the proj root directory.  After some grinding
+7) Do a "make dist-all" in the proj root directory.  After some grinding
    this should result in files like proj-4.4.3.tar.gz and proj-4.4.3.zip
    being created.  These are full source distributions. 
 
-7) Put these in the proj ftp area on ftp.remotesensing.org.  This can be
+8) Put these in the proj ftp area on ftp.remotesensing.org.  This can be
    done via scp using a command like the following.
 
      scp proj-4.4.3.{tar.gz,zip} remotesensing.org:/ftp/remotesensing/pub/proj
 
-8) Announce the new release on the PROJ.4 mailing lists.  If the release
+9) Announce the new release on the PROJ.4 mailing lists.  If the release
    is particularly significant in terms of features it might also be 
    announced in comp.infosystems.gis, os-remotesensing@remotesensing.org, 
    and freegis-list@intevation.de.  
 
-9) Issue a new release report on Freshmeat.  
+10) Issue a new release report on Freshmeat.  
 
    http://freshmeat.net/projects/proj.4/
 
