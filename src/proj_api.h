@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.12  2004/09/16 15:14:01  fwarmerdam
+ * * src/pj_open_lib.c: added pj_set_searchpath() provided by Eric Miller.
+ *
  * Revision 1.11  2004/07/28 23:23:49  warmerda
  * Changed ra to es in declarations for pj_geocentric_to_geodetic()
  * and pj_geodetic_to_geocentric() as suggested by Britton Kerin.
@@ -123,6 +126,7 @@ int pj_is_geocent(projPJ);
 void pj_pr_list(projPJ);
 void pj_free(projPJ);
 void pj_set_finder( const char *(*)(const char *) );
+void pj_set_searchpath ( int count, const char **path );
 projPJ pj_init(int, char **);
 projPJ pj_init_plus(const char *);
 char *pj_get_def(projPJ, int);

@@ -1,3 +1,7 @@
+2004-09-16  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_open_lib.c: added pj_set_searchpath() provided by Eric Miller.
+
 2004-09-14  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_pr_list.c: Ensure unused parameters are not included 
