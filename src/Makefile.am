@@ -55,3 +55,6 @@ libproj_la_SOURCES = \
 	nad_cvt.c nad_init.c nad_intr.c emess.c
 
 
+install-exec-local:
+	ln $(bindir)/proj $(bindir)/invproj
+	ln $(bindir)/geod $(bindir)/invgeod
