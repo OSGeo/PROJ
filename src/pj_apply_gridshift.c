@@ -31,6 +31,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.3  2002/04/30 16:27:27  warmerda
+ * improve debug output
+ *
  * Revision 1.2  2001/03/15 16:57:55  warmerda
  * fixed intermittent problem in pj_load_nadgrids()
  *
@@ -215,7 +218,10 @@ static struct CTABLE **pj_load_nadgrids( const char *nadgrids )
 
         last_nadgrids_list[nadgrids_count] = pj_get_grid( name );
         if( last_nadgrids_list[nadgrids_count] == NULL )
+        {
+            pj_errno = -38;
             return NULL;
+        }
 
         nadgrids_count++;
     }
@@ -259,6 +265,17 @@ int pj_apply_gridshift( const char *nadgrids, int inverse,
 
         if( output.lam == HUGE_VAL )
         {
+            if( getenv( "PROJ_DEBUG" ) != NULL )
+            {
+                fprintf( stderr, 
+                         "pj_apply_gridshift(): failed to find a grid shift table for\n"
+                         "                      location (%.7fdW,%.7fdN)\n",
+                         x[io] * RAD_TO_DEG, 
+                         y[io] * RAD_TO_DEG );
+                fprintf( stderr, 
+                         "   tried: %s\n", nadgrids );
+            }
+        
             pj_errno = -38;
             return pj_errno;
         }

@@ -66,11 +66,13 @@ pj_open_lib(char *name, char *mode) {
 	} else /* just try it bare bones */
 		sysname = name;
 
-        if( getenv( "PROJ_DEBUG" ) != NULL )
-            fprintf( stderr, "pj_open_lib(%s): call fopen(%s).\n",
-                     name, sysname);
-        
 	if (fid = fopen(sysname, mode))
 		errno = 0;
+
+        if( getenv( "PROJ_DEBUG" ) != NULL )
+            fprintf( stderr, "pj_open_lib(%s): call fopen(%s) - %s\n",
+                     name, sysname,
+                     fid == NULL ? "failed" : "succeeded" );
+        
 	return(fid);
 }
