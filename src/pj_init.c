@@ -43,7 +43,7 @@ get_opt(FILE *fid, char *name, paralist *next) {
 get_defaults(paralist *next, char *name) {
 	FILE *fid;
 
-	if (fid = pj_open_lib("proj_def.dat", "r")) {
+	if (fid = pj_open_lib("proj_def.dat", "rt")) {
 		next = get_opt(fid, "general", next);
 		rewind(fid);
 		next = get_opt(fid, name, next);
@@ -62,7 +62,7 @@ get_init(paralist *next, char *name) {
 	if (opt = strrchr(fname, ':'))
 		*opt++ = '\0';
 	else { pj_errno = -3; return(0); }
-	if (fid = pj_open_lib(fname, "r"))
+	if (fid = pj_open_lib(fname, "rt"))
 		next = get_opt(fid, opt, next);
 	else
 		return(0);
