@@ -1,3 +1,22 @@
+4.4.9 Release Notes
+-------------------
+
+ o Win32 build uses proj.dll by default now. 
+
+ o Added accessor functions for the datums, ellps, prime_meridians, units and
+   main projection definition lists so they can be used on windows where 
+   data objects exported from the DLL don't work easily.
+
+ o Added JNI (Java Native Interface) support within the jniwrap directory, 
+   and some supporting entry points directly in the proj dll/so.   See
+   --with-jni configure switch, and jniwrap/README. 
+
+ o Added the proj=stereoa and proj=geos projections, incorporated from
+   Gerald's libproj4.
+
+ o A few other bug fixes.
+
+
 4.4.8 Release Notes
 -------------------
 
