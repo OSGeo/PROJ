@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([PROJ.4 Projections], 4.4.9, [warmerdam@pobox.com], src/pj_init.c)
+AC_INIT([PROJ.4 Projections], 4.4.9, [warmerdam@pobox.com], proj)
 AC_LANG(C)
 
 
