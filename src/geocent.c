@@ -65,6 +65,9 @@
  *    25-02-97          Original Code
  *
  * $Log$
+ * Revision 1.5  2004/10/25 15:34:36  fwarmerdam
+ * make names of geodetic funcs from geotrans unique
+ *
  * Revision 1.4  2004/05/03 16:28:01  warmerda
  * Apply iterative solution to geocentric_to_geodetic as suggestion from
  * Lothar Gorling.
@@ -125,8 +128,8 @@ double Geocent_ep2 = 0.00673949675658690300; /* 2nd eccentricity squared */
  */
 
 
-long Set_Geocentric_Parameters (double a, 
-                                double b) 
+long pj_Set_Geocentric_Parameters (double a, double b) 
+
 { /* BEGIN Set_Geocentric_Parameters */
 /*
  * The function Set_Geocentric_Parameters receives the ellipsoid parameters
@@ -156,7 +159,7 @@ long Set_Geocentric_Parameters (double a,
 } /* END OF Set_Geocentric_Parameters */
 
 
-void Get_Geocentric_Parameters (double *a, 
+void pj_Get_Geocentric_Parameters (double *a, 
                                 double *b)
 { /* BEGIN Get_Geocentric_Parameters */
 /*
@@ -172,7 +175,7 @@ void Get_Geocentric_Parameters (double *a,
 } /* END OF Get_Geocentric_Parameters */
 
 
-long Convert_Geodetic_To_Geocentric (double Latitude,
+long pj_Convert_Geodetic_To_Geocentric (double Latitude,
                                      double Longitude,
                                      double Height,
                                      double *X,
@@ -243,7 +246,7 @@ long Convert_Geodetic_To_Geocentric (double Latitude,
 
 #define USE_ITERATIVE_METHOD
 
-void Convert_Geocentric_To_Geodetic (double X,
+void pj_Convert_Geocentric_To_Geodetic (double X,
                                      double Y, 
                                      double Z,
                                      double *Latitude,

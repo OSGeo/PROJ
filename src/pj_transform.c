@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.13  2004/10/25 15:34:36  fwarmerdam
+ * make names of geodetic funcs from geotrans unique
+ *
  * Revision 1.12  2004/05/03 19:45:23  warmerda
  * Altered so that raw ellpses are treated as a essentially having a
  * +towgs84=0,0,0 specification so ellpisoid shifts are applied.
@@ -328,7 +331,7 @@ int pj_geodetic_to_geocentric( double a, double es,
     else
         b = a * sqrt(1-es);
 
-    if( Set_Geocentric_Parameters( a, b ) != 0 )
+    if( pj_Set_Geocentric_Parameters( a, b ) != 0 )
     {
         pj_errno = PJD_ERR_GEOCENTRIC;
         return pj_errno;
@@ -338,7 +341,7 @@ int pj_geodetic_to_geocentric( double a, double es,
     {
         long io = i * point_offset;
 
-        if( Convert_Geodetic_To_Geocentric( y[io], x[io], z[io], 
+        if( pj_Convert_Geodetic_To_Geocentric( y[io], x[io], z[io], 
                                             x+io, y+io, z+io ) != 0 )
         {
             pj_errno = PJD_ERR_GEOCENTRIC;
@@ -366,7 +369,7 @@ int pj_geocentric_to_geodetic( double a, double es,
     else
         b = a * sqrt(1-es);
 
-    if( Set_Geocentric_Parameters( a, b ) != 0 )
+    if( pj_Set_Geocentric_Parameters( a, b ) != 0 )
     {
         pj_errno = PJD_ERR_GEOCENTRIC;
         return pj_errno;
@@ -379,7 +382,7 @@ int pj_geocentric_to_geodetic( double a, double es,
         if( x[io] == HUGE_VAL )
             continue;
 
-        Convert_Geocentric_To_Geodetic( x[io], y[io], z[io], 
+        pj_Convert_Geocentric_To_Geodetic( x[io], y[io], z[io], 
                                         y+io, x+io, z+io );
     }
 
