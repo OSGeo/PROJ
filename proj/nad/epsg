@@ -169,7 +169,7 @@
 # FD58 / Iraq zone
 # Unable to translate coordinate system into PROJ.4 format.
 # Estonian Coordinate System of 1992
-<3300> +proj=lcc +lat_1=57.517553931 +lat_2=24.000000000 +lat_0=59.333333333 +lon_0=58.000000000 +x_0=500000.000 +y_0=6375000.000 +ellps=GRS80 +units=m  no_defs <>
+<3300> +proj=lcc +lat_1=59.333333333 +lat_2=58.000000000 +lat_0=57.517553931 +lon_0=24.000000000 +x_0=500000.000 +y_0=6375000.000 +ellps=GRS80 +units=m  no_defs <>
 # PSD93 / UTM zone 39N
 <3439> +proj=utm +zone=39 +ellps=clrk80 +units=m  no_defs <>
 # PSD93 / UTM zone 40N
@@ -187,9 +187,9 @@
 # Puerto Rico / UTM zone 20N
 <3920> +proj=utm +zone=20 +ellps=clrk66 +units=m  no_defs <>
 # Puerto Rico State Plane CS of 1927
-<3991> +proj=lcc +lat_1=17.833333333 +lat_2=-66.433333333 +lat_0=18.433333333 +lon_0=18.033333333 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +units=m  no_defs <>
+<3991> +proj=lcc +lat_1=18.433333333 +lat_2=18.033333333 +lat_0=17.833333333 +lon_0=-66.433333333 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +units=m  no_defs <>
 # Puerto Rico / St. Croix
-<3992> +proj=lcc +lat_1=17.833333333 +lat_2=-66.433333333 +lat_0=18.433333333 +lon_0=18.033333333 +x_0=152400.305 +y_0=30480.061 +ellps=clrk66 +units=m  no_defs <>
+<3992> +proj=lcc +lat_1=18.433333333 +lat_2=18.033333333 +lat_0=17.833333333 +lon_0=-66.433333333 +x_0=152400.305 +y_0=30480.061 +ellps=clrk66 +units=m  no_defs <>
 # Unknown datum based upon ellipsoid 7001
 <4001> +proj=longlat +ellps=airy  no_defs <>
 # Unknown datum based upon ellipsoid 7002
@@ -899,7 +899,7 @@
 # Beijing 1954 / Gauss-Kruger 23N
 <21483> +proj=tmerc +lat_0=0.000000000 +lon_0=135.000000000 +k=1.000000 +x_0=500000.000 +y_0=0.000 +ellps=krass +units=m  no_defs <>
 # Belge 1950 (Brussels) / Belge Lambert 50
-<21500> +proj=lcc +lat_1=90.000000000 +lat_2=0.000000000 +lat_0=49.833333333 +lon_0=51.166666667 +x_0=150000.000 +y_0=5400000.000 +ellps=intl +units=m  no_defs <>
+<21500> +proj=lcc +lat_1=49.833333333 +lat_2=51.166666667 +lat_0=90.000000000 +lon_0=0.000000000 +x_0=150000.000 +y_0=5400000.000 +ellps=intl +units=m  no_defs <>
 # Bern 1898 (Bern) / LV03C
 <21780> +proj=omerc +lat_0=46.952405556 +lonc=0.000000000 +alpha=90.000000000 +k=1.000000000 +x_0=0.000 +y_0=0.000 +ellps=bessel +units=m  no_defs <>
 # CH1903 / LV03
@@ -1295,21 +1295,21 @@
 # NAD27 / Alaska zone 9
 <26739> +proj=tmerc +lat_0=54.000000000 +lon_0=-170.000000000 +k=0.999900 +x_0=182880.366 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Alaska zone 10
-<26740> +proj=lcc +lat_1=51.000000000 +lat_2=-176.000000000 +lat_0=53.833333333 +lon_0=51.833333333 +x_0=914401.829 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26740> +proj=lcc +lat_1=53.833333333 +lat_2=51.833333333 +lat_0=51.000000000 +lon_0=-176.000000000 +x_0=914401.829 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / California zone I
-<26741> +proj=lcc +lat_1=39.333333333 +lat_2=-122.000000000 +lat_0=41.666666667 +lon_0=40.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26741> +proj=lcc +lat_1=41.666666667 +lat_2=40.000000000 +lat_0=39.333333333 +lon_0=-122.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / California zone II
-<26742> +proj=lcc +lat_1=37.666666667 +lat_2=-122.000000000 +lat_0=39.833333333 +lon_0=38.333333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26742> +proj=lcc +lat_1=39.833333333 +lat_2=38.333333333 +lat_0=37.666666667 +lon_0=-122.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / California zone III
-<26743> +proj=lcc +lat_1=36.500000000 +lat_2=-120.500000000 +lat_0=38.433333333 +lon_0=37.066666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26743> +proj=lcc +lat_1=38.433333333 +lat_2=37.066666667 +lat_0=36.500000000 +lon_0=-120.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / California zone IV
-<26744> +proj=lcc +lat_1=35.333333333 +lat_2=-119.000000000 +lat_0=37.250000000 +lon_0=36.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26744> +proj=lcc +lat_1=37.250000000 +lat_2=36.000000000 +lat_0=35.333333333 +lon_0=-119.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / California zone V
-<26745> +proj=lcc +lat_1=33.500000000 +lat_2=-118.000000000 +lat_0=35.466666667 +lon_0=34.033333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26745> +proj=lcc +lat_1=35.466666667 +lat_2=34.033333333 +lat_0=33.500000000 +lon_0=-118.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / California zone VI
-<26746> +proj=lcc +lat_1=32.166666667 +lat_2=-116.250000000 +lat_0=33.883333333 +lon_0=32.783333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26746> +proj=lcc +lat_1=33.883333333 +lat_2=32.783333333 +lat_0=32.166666667 +lon_0=-116.250000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / California zone VII
-<26747> +proj=lcc +lat_1=34.133333333 +lat_2=-118.333333333 +lat_0=34.416666667 +lon_0=33.866666667 +x_0=1276106.451 +y_0=127079.525 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26747> +proj=lcc +lat_1=34.416666667 +lat_2=33.866666667 +lat_0=34.133333333 +lon_0=-118.333333333 +x_0=1276106.451 +y_0=127079.525 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Arizona East
 <26748> +proj=tmerc +lat_0=31.000000000 +lon_0=-110.166666667 +k=0.999900 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Arizona Central
@@ -1317,17 +1317,17 @@
 # NAD27 / Arizona West
 <26750> +proj=tmerc +lat_0=31.000000000 +lon_0=-113.750000000 +k=0.999933 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Arkansas North
-<26751> +proj=lcc +lat_1=34.333333333 +lat_2=-92.000000000 +lat_0=36.233333333 +lon_0=34.933333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26751> +proj=lcc +lat_1=36.233333333 +lat_2=34.933333333 +lat_0=34.333333333 +lon_0=-92.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Arkansas South
-<26752> +proj=lcc +lat_1=32.666666667 +lat_2=-92.000000000 +lat_0=34.766666667 +lon_0=33.300000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26752> +proj=lcc +lat_1=34.766666667 +lat_2=33.300000000 +lat_0=32.666666667 +lon_0=-92.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Colorado North
-<26753> +proj=lcc +lat_1=39.333333333 +lat_2=-105.500000000 +lat_0=39.716666667 +lon_0=40.783333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26753> +proj=lcc +lat_1=39.716666667 +lat_2=40.783333333 +lat_0=39.333333333 +lon_0=-105.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Colorado Central
-<26754> +proj=lcc +lat_1=37.833333333 +lat_2=-105.500000000 +lat_0=39.750000000 +lon_0=38.450000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26754> +proj=lcc +lat_1=39.750000000 +lat_2=38.450000000 +lat_0=37.833333333 +lon_0=-105.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Colorado South
-<26755> +proj=lcc +lat_1=36.666666667 +lat_2=-105.500000000 +lat_0=38.433333333 +lon_0=37.233333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26755> +proj=lcc +lat_1=38.433333333 +lat_2=37.233333333 +lat_0=36.666666667 +lon_0=-105.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Connecticut
-<26756> +proj=lcc +lat_1=40.833333333 +lat_2=-72.750000000 +lat_0=41.866666667 +lon_0=41.200000000 +x_0=182880.366 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26756> +proj=lcc +lat_1=41.866666667 +lat_2=41.200000000 +lat_0=40.833333333 +lon_0=-72.750000000 +x_0=182880.366 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Delaware
 <26757> +proj=tmerc +lat_0=38.000000000 +lon_0=-75.416666667 +k=0.999995 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Florida East
@@ -1335,7 +1335,7 @@
 # NAD27 / Florida West
 <26759> +proj=tmerc +lat_0=24.333333333 +lon_0=-82.000000000 +k=0.999941 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Florida North
-<26760> +proj=lcc +lat_1=29.000000000 +lat_2=-84.500000000 +lat_0=30.750000000 +lon_0=29.583333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26760> +proj=lcc +lat_1=30.750000000 +lat_2=29.583333333 +lat_0=29.000000000 +lon_0=-84.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Georgia East
 <26766> +proj=tmerc +lat_0=30.000000000 +lon_0=-82.166666667 +k=0.999900 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Georgia West
@@ -1355,37 +1355,37 @@
 # NAD27 / Indiana West
 <26774> +proj=tmerc +lat_0=37.500000000 +lon_0=-87.083333333 +k=0.999967 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Iowa North
-<26775> +proj=lcc +lat_1=41.500000000 +lat_2=-93.500000000 +lat_0=43.266666667 +lon_0=42.066666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26775> +proj=lcc +lat_1=43.266666667 +lat_2=42.066666667 +lat_0=41.500000000 +lon_0=-93.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Iowa South
-<26776> +proj=lcc +lat_1=40.000000000 +lat_2=-93.500000000 +lat_0=41.783333333 +lon_0=40.616666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26776> +proj=lcc +lat_1=41.783333333 +lat_2=40.616666667 +lat_0=40.000000000 +lon_0=-93.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Kansas North
-<26777> +proj=lcc +lat_1=38.333333333 +lat_2=-98.000000000 +lat_0=39.783333333 +lon_0=38.716666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26777> +proj=lcc +lat_1=39.783333333 +lat_2=38.716666667 +lat_0=38.333333333 +lon_0=-98.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Kansas South
-<26778> +proj=lcc +lat_1=36.666666667 +lat_2=-98.500000000 +lat_0=38.566666667 +lon_0=37.266666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26778> +proj=lcc +lat_1=38.566666667 +lat_2=37.266666667 +lat_0=36.666666667 +lon_0=-98.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Kentucky North
-<26779> +proj=lcc +lat_1=37.500000000 +lat_2=-84.250000000 +lat_0=37.966666667 +lon_0=38.966666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26779> +proj=lcc +lat_1=37.966666667 +lat_2=38.966666667 +lat_0=37.500000000 +lon_0=-84.250000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Kentucky South
-<26780> +proj=lcc +lat_1=36.333333333 +lat_2=-85.750000000 +lat_0=36.733333333 +lon_0=37.933333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26780> +proj=lcc +lat_1=36.733333333 +lat_2=37.933333333 +lat_0=36.333333333 +lon_0=-85.750000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Louisiana North
-<26781> +proj=lcc +lat_1=30.666666667 +lat_2=-92.500000000 +lat_0=31.166666667 +lon_0=32.666666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26781> +proj=lcc +lat_1=31.166666667 +lat_2=32.666666667 +lat_0=30.666666667 +lon_0=-92.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Louisiana South
-<26782> +proj=lcc +lat_1=28.666666667 +lat_2=-91.333333333 +lat_0=29.300000000 +lon_0=30.700000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26782> +proj=lcc +lat_1=29.300000000 +lat_2=30.700000000 +lat_0=28.666666667 +lon_0=-91.333333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Maine East
 <26783> +proj=tmerc +lat_0=43.833333333 +lon_0=-68.500000000 +k=0.999900 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Maine West
 <26784> +proj=tmerc +lat_0=42.833333333 +lon_0=-70.166666667 +k=0.999967 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Maryland
-<26785> +proj=lcc +lat_1=37.833333333 +lat_2=-77.000000000 +lat_0=38.300000000 +lon_0=39.450000000 +x_0=243840.488 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26785> +proj=lcc +lat_1=38.300000000 +lat_2=39.450000000 +lat_0=37.833333333 +lon_0=-77.000000000 +x_0=243840.488 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Massachusetts Mainland
-<26786> +proj=lcc +lat_1=41.000000000 +lat_2=-71.500000000 +lat_0=41.716666667 +lon_0=42.683333333 +x_0=182880.366 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26786> +proj=lcc +lat_1=41.716666667 +lat_2=42.683333333 +lat_0=41.000000000 +lon_0=-71.500000000 +x_0=182880.366 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Massachusetts Island
-<26787> +proj=lcc +lat_1=41.000000000 +lat_2=-70.500000000 +lat_0=41.283333333 +lon_0=41.483333333 +x_0=60960.122 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26787> +proj=lcc +lat_1=41.283333333 +lat_2=41.483333333 +lat_0=41.000000000 +lon_0=-70.500000000 +x_0=60960.122 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Minnesota North
-<26791> +proj=lcc +lat_1=46.500000000 +lat_2=-93.100000000 +lat_0=47.033333333 +lon_0=48.633333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26791> +proj=lcc +lat_1=47.033333333 +lat_2=48.633333333 +lat_0=46.500000000 +lon_0=-93.100000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Minnesota Central
-<26792> +proj=lcc +lat_1=45.000000000 +lat_2=-94.250000000 +lat_0=45.616666667 +lon_0=47.050000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26792> +proj=lcc +lat_1=45.616666667 +lat_2=47.050000000 +lat_0=45.000000000 +lon_0=-94.250000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Minnesota South
-<26793> +proj=lcc +lat_1=43.000000000 +lat_2=-94.000000000 +lat_0=43.783333333 +lon_0=45.216666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<26793> +proj=lcc +lat_1=43.783333333 +lat_2=45.216666667 +lat_0=43.000000000 +lon_0=-94.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Mississippi East
 <26794> +proj=tmerc +lat_0=29.666666667 +lon_0=-88.833333333 +k=0.999960 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Mississippi West
@@ -1403,11 +1403,11 @@
 # NAD Michigan / Michigan West
 <26803> +proj=tmerc +lat_0=41.500000000 +lon_0=-88.750000000 +k=0.999909 +x_0=152400.305 +y_0=0.000 +a=6378450.048 +b=6356826.621 +units=m  no_defs <>
 # NAD Michigan / Michigan North
-<26811> +proj=lcc +lat_1=44.783333333 +lat_2=-87.000000000 +lat_0=45.483333333 +lon_0=47.083333333 +x_0=609601.219 +y_0=0.000 +a=6378450.048 +b=6356826.621 +units=m  no_defs <>
+<26811> +proj=lcc +lat_1=45.483333333 +lat_2=47.083333333 +lat_0=44.783333333 +lon_0=-87.000000000 +x_0=609601.219 +y_0=0.000 +a=6378450.048 +b=6356826.621 +units=m  no_defs <>
 # NAD Michigan / Michigan Central
-<26812> +proj=lcc +lat_1=43.316666667 +lat_2=-84.333333333 +lat_0=44.183333333 +lon_0=45.700000000 +x_0=609601.219 +y_0=0.000 +a=6378450.048 +b=6356826.621 +units=m  no_defs <>
+<26812> +proj=lcc +lat_1=44.183333333 +lat_2=45.700000000 +lat_0=43.316666667 +lon_0=-84.333333333 +x_0=609601.219 +y_0=0.000 +a=6378450.048 +b=6356826.621 +units=m  no_defs <>
 # NAD Michigan / Michigan South
-<26813> +proj=lcc +lat_1=41.500000000 +lat_2=-84.333333333 +lat_0=42.100000000 +lon_0=43.666666667 +x_0=609601.219 +y_0=0.000 +a=6378450.048 +b=6356826.621 +units=m  no_defs <>
+<26813> +proj=lcc +lat_1=42.100000000 +lat_2=43.666666667 +lat_0=41.500000000 +lon_0=-84.333333333 +x_0=609601.219 +y_0=0.000 +a=6378450.048 +b=6356826.621 +units=m  no_defs <>
 # NAD83 / UTM zone 3N
 <26903> +proj=utm +zone=3 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / UTM zone 4N
@@ -1473,19 +1473,19 @@
 # NAD83 / Alaska zone 9
 <26939> +proj=tmerc +lat_0=54.000000000 +lon_0=-170.000000000 +k=0.999900 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Alaska zone 10
-<26940> +proj=lcc +lat_1=51.000000000 +lat_2=-176.000000000 +lat_0=53.833333333 +lon_0=51.833333333 +x_0=1000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26940> +proj=lcc +lat_1=53.833333333 +lat_2=51.833333333 +lat_0=51.000000000 +lon_0=-176.000000000 +x_0=1000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / California zone 1
-<26941> +proj=lcc +lat_1=39.333333333 +lat_2=-122.000000000 +lat_0=41.666666667 +lon_0=40.000000000 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26941> +proj=lcc +lat_1=41.666666667 +lat_2=40.000000000 +lat_0=39.333333333 +lon_0=-122.000000000 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / California zone 2
-<26942> +proj=lcc +lat_1=37.666666667 +lat_2=-122.000000000 +lat_0=39.833333333 +lon_0=38.333333333 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26942> +proj=lcc +lat_1=39.833333333 +lat_2=38.333333333 +lat_0=37.666666667 +lon_0=-122.000000000 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / California zone 3
-<26943> +proj=lcc +lat_1=36.500000000 +lat_2=-120.500000000 +lat_0=38.433333333 +lon_0=37.066666667 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26943> +proj=lcc +lat_1=38.433333333 +lat_2=37.066666667 +lat_0=36.500000000 +lon_0=-120.500000000 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / California zone 4
-<26944> +proj=lcc +lat_1=35.333333333 +lat_2=-119.000000000 +lat_0=37.250000000 +lon_0=36.000000000 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26944> +proj=lcc +lat_1=37.250000000 +lat_2=36.000000000 +lat_0=35.333333333 +lon_0=-119.000000000 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / California zone 5
-<26945> +proj=lcc +lat_1=33.500000000 +lat_2=-118.000000000 +lat_0=35.466666667 +lon_0=34.033333333 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26945> +proj=lcc +lat_1=35.466666667 +lat_2=34.033333333 +lat_0=33.500000000 +lon_0=-118.000000000 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / California zone 6
-<26946> +proj=lcc +lat_1=32.166666667 +lat_2=-116.250000000 +lat_0=33.883333333 +lon_0=32.783333333 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26946> +proj=lcc +lat_1=33.883333333 +lat_2=32.783333333 +lat_0=32.166666667 +lon_0=-116.250000000 +x_0=2000000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Arizona  East
 <26948> +proj=tmerc +lat_0=31.000000000 +lon_0=-110.166666667 +k=0.999900 +x_0=213360.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Arizona Central
@@ -1493,17 +1493,17 @@
 # NAD83 / Arizona West
 <26950> +proj=tmerc +lat_0=31.000000000 +lon_0=-113.750000000 +k=0.999933 +x_0=213360.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Arkansas North
-<26951> +proj=lcc +lat_1=34.333333333 +lat_2=-92.000000000 +lat_0=36.233333333 +lon_0=34.933333333 +x_0=400000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26951> +proj=lcc +lat_1=36.233333333 +lat_2=34.933333333 +lat_0=34.333333333 +lon_0=-92.000000000 +x_0=400000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Arkansas South
-<26952> +proj=lcc +lat_1=32.666666667 +lat_2=-92.000000000 +lat_0=34.766666667 +lon_0=33.300000000 +x_0=400000.000 +y_0=400000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26952> +proj=lcc +lat_1=34.766666667 +lat_2=33.300000000 +lat_0=32.666666667 +lon_0=-92.000000000 +x_0=400000.000 +y_0=400000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Colorado North
-<26953> +proj=lcc +lat_1=39.333333333 +lat_2=-105.500000000 +lat_0=40.783333333 +lon_0=39.716666667 +x_0=914401.829 +y_0=304800.610 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26953> +proj=lcc +lat_1=40.783333333 +lat_2=39.716666667 +lat_0=39.333333333 +lon_0=-105.500000000 +x_0=914401.829 +y_0=304800.610 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Colorado Central
-<26954> +proj=lcc +lat_1=37.833333333 +lat_2=-105.500000000 +lat_0=39.750000000 +lon_0=38.450000000 +x_0=914401.829 +y_0=304800.610 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26954> +proj=lcc +lat_1=39.750000000 +lat_2=38.450000000 +lat_0=37.833333333 +lon_0=-105.500000000 +x_0=914401.829 +y_0=304800.610 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Colorado South
-<26955> +proj=lcc +lat_1=36.666666667 +lat_2=-105.500000000 +lat_0=38.433333333 +lon_0=37.233333333 +x_0=914401.829 +y_0=304800.610 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26955> +proj=lcc +lat_1=38.433333333 +lat_2=37.233333333 +lat_0=36.666666667 +lon_0=-105.500000000 +x_0=914401.829 +y_0=304800.610 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Connecticut
-<26956> +proj=lcc +lat_1=40.833333333 +lat_2=-72.750000000 +lat_0=41.866666667 +lon_0=41.200000000 +x_0=304800.610 +y_0=152400.305 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26956> +proj=lcc +lat_1=41.866666667 +lat_2=41.200000000 +lat_0=40.833333333 +lon_0=-72.750000000 +x_0=304800.610 +y_0=152400.305 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Delaware
 <26957> +proj=tmerc +lat_0=38.000000000 +lon_0=-75.416666667 +k=0.999995 +x_0=200000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Florida  East
@@ -1511,7 +1511,7 @@
 # NAD83 / Florida  West
 <26959> +proj=tmerc +lat_0=24.333333333 +lon_0=-82.000000000 +k=0.999941 +x_0=200000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Florida North
-<26960> +proj=lcc +lat_1=29.000000000 +lat_2=-84.500000000 +lat_0=30.750000000 +lon_0=29.583333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26960> +proj=lcc +lat_1=30.750000000 +lat_2=29.583333333 +lat_0=29.000000000 +lon_0=-84.500000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Hawaii  zone 1
 <26961> +proj=tmerc +lat_0=18.833333333 +lon_0=-155.500000000 +k=0.999967 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Hawaii  zone 2
@@ -1541,43 +1541,43 @@
 # NAD83 / Indiana  West
 <26974> +proj=tmerc +lat_0=37.500000000 +lon_0=-87.083333333 +k=0.999967 +x_0=900000.000 +y_0=250000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Iowa North
-<26975> +proj=lcc +lat_1=41.500000000 +lat_2=-93.500000000 +lat_0=43.266666667 +lon_0=42.066666667 +x_0=1500000.000 +y_0=1000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26975> +proj=lcc +lat_1=43.266666667 +lat_2=42.066666667 +lat_0=41.500000000 +lon_0=-93.500000000 +x_0=1500000.000 +y_0=1000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Iowa South
-<26976> +proj=lcc +lat_1=40.000000000 +lat_2=-93.500000000 +lat_0=41.783333333 +lon_0=40.616666667 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26976> +proj=lcc +lat_1=41.783333333 +lat_2=40.616666667 +lat_0=40.000000000 +lon_0=-93.500000000 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Kansas North
-<26977> +proj=lcc +lat_1=38.333333333 +lat_2=-98.000000000 +lat_0=39.783333333 +lon_0=38.716666667 +x_0=400000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26977> +proj=lcc +lat_1=39.783333333 +lat_2=38.716666667 +lat_0=38.333333333 +lon_0=-98.000000000 +x_0=400000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Kansas South
-<26978> +proj=lcc +lat_1=36.666666667 +lat_2=-98.500000000 +lat_0=38.566666667 +lon_0=37.266666667 +x_0=400000.000 +y_0=400000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26978> +proj=lcc +lat_1=38.566666667 +lat_2=37.266666667 +lat_0=36.666666667 +lon_0=-98.500000000 +x_0=400000.000 +y_0=400000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Kentucky North
-<26979> +proj=lcc +lat_1=37.500000000 +lat_2=-84.250000000 +lat_0=37.966666667 +lon_0=37.966666667 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26979> +proj=lcc +lat_1=37.966666667 +lat_2=37.966666667 +lat_0=37.500000000 +lon_0=-84.250000000 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Kentucky South
-<26980> +proj=lcc +lat_1=36.333333333 +lat_2=-85.750000000 +lat_0=37.933333333 +lon_0=36.733333333 +x_0=500000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26980> +proj=lcc +lat_1=37.933333333 +lat_2=36.733333333 +lat_0=36.333333333 +lon_0=-85.750000000 +x_0=500000.000 +y_0=500000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Louisiana North
-<26981> +proj=lcc +lat_1=30.500000000 +lat_2=-92.500000000 +lat_0=32.666666667 +lon_0=31.166666667 +x_0=1000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26981> +proj=lcc +lat_1=32.666666667 +lat_2=31.166666667 +lat_0=30.500000000 +lon_0=-92.500000000 +x_0=1000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Louisiana South
-<26982> +proj=lcc +lat_1=28.500000000 +lat_2=-91.333333333 +lat_0=30.700000000 +lon_0=29.300000000 +x_0=1000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26982> +proj=lcc +lat_1=30.700000000 +lat_2=29.300000000 +lat_0=28.500000000 +lon_0=-91.333333333 +x_0=1000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Maine  East
 <26983> +proj=tmerc +lat_0=43.666666667 +lon_0=-68.500000000 +k=0.999900 +x_0=300000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Maine  West
 <26984> +proj=tmerc +lat_0=42.833333333 +lon_0=-70.166666667 +k=0.999967 +x_0=900000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Maryland
-<26985> +proj=lcc +lat_1=37.666666667 +lat_2=-77.000000000 +lat_0=39.450000000 +lon_0=38.300000000 +x_0=400000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26985> +proj=lcc +lat_1=39.450000000 +lat_2=38.300000000 +lat_0=37.666666667 +lon_0=-77.000000000 +x_0=400000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Massachusetts Mainland
-<26986> +proj=lcc +lat_1=41.000000000 +lat_2=-71.500000000 +lat_0=42.683333333 +lon_0=41.716666667 +x_0=200000.000 +y_0=750000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26986> +proj=lcc +lat_1=42.683333333 +lat_2=41.716666667 +lat_0=41.000000000 +lon_0=-71.500000000 +x_0=200000.000 +y_0=750000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Massachusetts Island
-<26987> +proj=lcc +lat_1=41.000000000 +lat_2=-70.500000000 +lat_0=41.483333333 +lon_0=41.283333333 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26987> +proj=lcc +lat_1=41.483333333 +lat_2=41.283333333 +lat_0=41.000000000 +lon_0=-70.500000000 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Michigan North
-<26988> +proj=lcc +lat_1=44.783333333 +lat_2=-87.000000000 +lat_0=47.083333333 +lon_0=45.483333333 +x_0=8000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26988> +proj=lcc +lat_1=47.083333333 +lat_2=45.483333333 +lat_0=44.783333333 +lon_0=-87.000000000 +x_0=8000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Michigan Central
-<26989> +proj=lcc +lat_1=43.316666667 +lat_2=-84.366666667 +lat_0=45.700000000 +lon_0=44.183333333 +x_0=6000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26989> +proj=lcc +lat_1=45.700000000 +lat_2=44.183333333 +lat_0=43.316666667 +lon_0=-84.366666667 +x_0=6000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Michigan South
-<26990> +proj=lcc +lat_1=41.500000000 +lat_2=-84.366666667 +lat_0=43.666666667 +lon_0=42.100000000 +x_0=4000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26990> +proj=lcc +lat_1=43.666666667 +lat_2=42.100000000 +lat_0=41.500000000 +lon_0=-84.366666667 +x_0=4000000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Minnesota North
-<26991> +proj=lcc +lat_1=46.500000000 +lat_2=-93.100000000 +lat_0=48.633333333 +lon_0=47.033333333 +x_0=800000.000 +y_0=100000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26991> +proj=lcc +lat_1=48.633333333 +lat_2=47.033333333 +lat_0=46.500000000 +lon_0=-93.100000000 +x_0=800000.000 +y_0=100000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Minnesota Central
-<26992> +proj=lcc +lat_1=45.000000000 +lat_2=-94.250000000 +lat_0=47.050000000 +lon_0=45.616666667 +x_0=800000.000 +y_0=100000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26992> +proj=lcc +lat_1=47.050000000 +lat_2=45.616666667 +lat_0=45.000000000 +lon_0=-94.250000000 +x_0=800000.000 +y_0=100000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Minnesota South
-<26993> +proj=lcc +lat_1=43.000000000 +lat_2=-94.000000000 +lat_0=45.216666667 +lon_0=43.783333333 +x_0=800000.000 +y_0=100000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<26993> +proj=lcc +lat_1=45.216666667 +lat_2=43.783333333 +lat_0=43.000000000 +lon_0=-94.000000000 +x_0=800000.000 +y_0=100000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Mississippi East
 <26994> +proj=tmerc +lat_0=29.500000000 +lon_0=-88.833333333 +k=0.999950 +x_0=300000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Mississippi West
@@ -1953,9 +1953,9 @@
 # MGI / M34
 <31296> +proj=tmerc +lat_0=0.000000000 +lon_0=16.333333333 +k=1.000000 +x_0=750000.000 +y_0=0.000 +ellps=bessel +towgs84=682,-203,480,0,0,0,0 +units=m  no_defs <>
 # MGI / Austria Lambert
-<31297> +proj=lcc +lat_1=13.333333333 +lat_2=47.500000000 +lat_0=49.000000000 +lon_0=46.000000000 +x_0=400000.000 +y_0=400000.000 +ellps=bessel +towgs84=682,-203,480,0,0,0,0 +units=m  no_defs <>
+<31297> +proj=lcc +lat_1=49.000000000 +lat_2=46.000000000 +lat_0=13.333333333 +lon_0=47.500000000 +x_0=400000.000 +y_0=400000.000 +ellps=bessel +towgs84=682,-203,480,0,0,0,0 +units=m  no_defs <>
 # Belge 1972 / Belge Lambert 72
-<31300> +proj=lcc +lat_1=90.000000000 +lat_2=4.356939722 +lat_0=49.833333333 +lon_0=51.166666667 +x_0=150000.013 +y_0=5400088.438 +ellps=intl +units=m  no_defs <>
+<31300> +proj=lcc +lat_1=49.833333333 +lat_2=51.166666667 +lat_0=90.000000000 +lon_0=4.356939722 +x_0=150000.013 +y_0=5400088.438 +ellps=intl +units=m  no_defs <>
 # DHDN / Germany zone 1
 <31491> +proj=tmerc +lat_0=0.000000000 +lon_0=3.000000000 +k=1.000000 +x_0=1500000.000 +y_0=0.000 +ellps=bessel +units=m  no_defs <>
 # DHDN / Germany zone 2
@@ -1977,15 +1977,15 @@
 # KUDAMS / KTM
 <31900> +proj=tmerc +lat_0=0.000000000 +lon_0=48.000000000 +k=0.999600 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +units=m  no_defs <>
 # NAD27 / Montana North
-<32001> +proj=lcc +lat_1=47.000000000 +lat_2=-109.500000000 +lat_0=48.716666667 +lon_0=47.850000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32001> +proj=lcc +lat_1=48.716666667 +lat_2=47.850000000 +lat_0=47.000000000 +lon_0=-109.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Montana Central
-<32002> +proj=lcc +lat_1=45.833333333 +lat_2=-109.500000000 +lat_0=47.883333333 +lon_0=46.450000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32002> +proj=lcc +lat_1=47.883333333 +lat_2=46.450000000 +lat_0=45.833333333 +lon_0=-109.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Montana South
-<32003> +proj=lcc +lat_1=44.000000000 +lat_2=-109.500000000 +lat_0=46.400000000 +lon_0=44.866666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32003> +proj=lcc +lat_1=46.400000000 +lat_2=44.866666667 +lat_0=44.000000000 +lon_0=-109.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Nebraska North
-<32005> +proj=lcc +lat_1=41.333333333 +lat_2=-100.000000000 +lat_0=41.850000000 +lon_0=42.816666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32005> +proj=lcc +lat_1=41.850000000 +lat_2=42.816666667 +lat_0=41.333333333 +lon_0=-100.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Nebraska South
-<32006> +proj=lcc +lat_1=39.666666667 +lat_2=-99.500000000 +lat_0=40.283333333 +lon_0=41.716666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32006> +proj=lcc +lat_1=40.283333333 +lat_2=41.716666667 +lat_0=39.666666667 +lon_0=-99.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Nevada East
 <32007> +proj=tmerc +lat_0=34.750000000 +lon_0=-115.583333333 +k=0.999900 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Nevada Central
@@ -2009,77 +2009,77 @@
 # NAD27 / New York West
 <32017> +proj=tmerc +lat_0=40.000000000 +lon_0=-78.583333333 +k=0.999938 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / New York Long Island
-<32018> +proj=lcc +lat_1=40.500000000 +lat_2=-74.000000000 +lat_0=41.033333333 +lon_0=40.666666667 +x_0=304800.610 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32018> +proj=lcc +lat_1=41.033333333 +lat_2=40.666666667 +lat_0=40.500000000 +lon_0=-74.000000000 +x_0=304800.610 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / North Carolina
-<32019> +proj=lcc +lat_1=33.750000000 +lat_2=-79.000000000 +lat_0=34.333333333 +lon_0=36.166666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32019> +proj=lcc +lat_1=34.333333333 +lat_2=36.166666667 +lat_0=33.750000000 +lon_0=-79.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / North Dakota North
-<32020> +proj=lcc +lat_1=47.000000000 +lat_2=-100.500000000 +lat_0=47.433333333 +lon_0=48.733333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32020> +proj=lcc +lat_1=47.433333333 +lat_2=48.733333333 +lat_0=47.000000000 +lon_0=-100.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / North Dakota South
-<32021> +proj=lcc +lat_1=45.666666667 +lat_2=-100.500000000 +lat_0=46.183333333 +lon_0=47.483333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32021> +proj=lcc +lat_1=46.183333333 +lat_2=47.483333333 +lat_0=45.666666667 +lon_0=-100.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Ohio North
-<32022> +proj=lcc +lat_1=39.666666667 +lat_2=-82.500000000 +lat_0=40.433333333 +lon_0=41.700000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32022> +proj=lcc +lat_1=40.433333333 +lat_2=41.700000000 +lat_0=39.666666667 +lon_0=-82.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Ohio South
-<32023> +proj=lcc +lat_1=38.000000000 +lat_2=-82.500000000 +lat_0=38.733333333 +lon_0=40.033333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32023> +proj=lcc +lat_1=38.733333333 +lat_2=40.033333333 +lat_0=38.000000000 +lon_0=-82.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Oklahoma North
-<32024> +proj=lcc +lat_1=35.000000000 +lat_2=-98.000000000 +lat_0=35.566666667 +lon_0=36.766666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32024> +proj=lcc +lat_1=35.566666667 +lat_2=36.766666667 +lat_0=35.000000000 +lon_0=-98.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Oklahoma South
-<32025> +proj=lcc +lat_1=33.333333333 +lat_2=-98.000000000 +lat_0=33.933333333 +lon_0=35.233333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32025> +proj=lcc +lat_1=33.933333333 +lat_2=35.233333333 +lat_0=33.333333333 +lon_0=-98.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Oregon North
-<32026> +proj=lcc +lat_1=43.666666667 +lat_2=-120.500000000 +lat_0=44.333333333 +lon_0=46.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32026> +proj=lcc +lat_1=44.333333333 +lat_2=46.000000000 +lat_0=43.666666667 +lon_0=-120.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Oregon South
-<32027> +proj=lcc +lat_1=41.666666667 +lat_2=-120.500000000 +lat_0=42.333333333 +lon_0=44.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32027> +proj=lcc +lat_1=42.333333333 +lat_2=44.000000000 +lat_0=41.666666667 +lon_0=-120.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Pennsylvania North
-<32028> +proj=lcc +lat_1=40.166666667 +lat_2=-77.750000000 +lat_0=40.883333333 +lon_0=41.950000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32028> +proj=lcc +lat_1=40.883333333 +lat_2=41.950000000 +lat_0=40.166666667 +lon_0=-77.750000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Pennsylvania South
-<32029> +proj=lcc +lat_1=39.333333333 +lat_2=-77.750000000 +lat_0=39.933333333 +lon_0=40.800000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32029> +proj=lcc +lat_1=39.933333333 +lat_2=40.800000000 +lat_0=39.333333333 +lon_0=-77.750000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Rhode Island
 <32030> +proj=tmerc +lat_0=41.083333333 +lon_0=-71.500000000 +k=0.999994 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / South Carolina North
-<32031> +proj=lcc +lat_1=33.000000000 +lat_2=-81.000000000 +lat_0=33.766666667 +lon_0=34.966666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32031> +proj=lcc +lat_1=33.766666667 +lat_2=34.966666667 +lat_0=33.000000000 +lon_0=-81.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / South Carolina South
-<32033> +proj=lcc +lat_1=31.833333333 +lat_2=-81.000000000 +lat_0=32.333333333 +lon_0=33.666666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32033> +proj=lcc +lat_1=32.333333333 +lat_2=33.666666667 +lat_0=31.833333333 +lon_0=-81.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / South Dakota North
-<32034> +proj=lcc +lat_1=43.833333333 +lat_2=-100.000000000 +lat_0=44.416666667 +lon_0=45.683333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32034> +proj=lcc +lat_1=44.416666667 +lat_2=45.683333333 +lat_0=43.833333333 +lon_0=-100.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / South Dakota South
-<32035> +proj=lcc +lat_1=42.333333333 +lat_2=-100.333333333 +lat_0=42.833333333 +lon_0=44.400000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32035> +proj=lcc +lat_1=42.833333333 +lat_2=44.400000000 +lat_0=42.333333333 +lon_0=-100.333333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Tennessee
-<32036> +proj=lcc +lat_1=34.666666667 +lat_2=-86.000000000 +lat_0=35.250000000 +lon_0=36.416666667 +x_0=30480.061 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32036> +proj=lcc +lat_1=35.250000000 +lat_2=36.416666667 +lat_0=34.666666667 +lon_0=-86.000000000 +x_0=30480.061 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Texas North
-<32037> +proj=lcc +lat_1=34.000000000 +lat_2=-101.500000000 +lat_0=34.650000000 +lon_0=36.183333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32037> +proj=lcc +lat_1=34.650000000 +lat_2=36.183333333 +lat_0=34.000000000 +lon_0=-101.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Texas North Central
-<32038> +proj=lcc +lat_1=31.666666667 +lat_2=-97.500000000 +lat_0=32.133333333 +lon_0=33.966666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32038> +proj=lcc +lat_1=32.133333333 +lat_2=33.966666667 +lat_0=31.666666667 +lon_0=-97.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Texas Central
-<32039> +proj=lcc +lat_1=29.666666667 +lat_2=-100.333333333 +lat_0=30.116666667 +lon_0=31.883333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32039> +proj=lcc +lat_1=30.116666667 +lat_2=31.883333333 +lat_0=29.666666667 +lon_0=-100.333333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Texas South Central
-<32040> +proj=lcc +lat_1=27.833333333 +lat_2=-99.000000000 +lat_0=28.383333333 +lon_0=30.283333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32040> +proj=lcc +lat_1=28.383333333 +lat_2=30.283333333 +lat_0=27.833333333 +lon_0=-99.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Texas South
-<32041> +proj=lcc +lat_1=25.666666667 +lat_2=-98.500000000 +lat_0=26.166666667 +lon_0=27.833333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32041> +proj=lcc +lat_1=26.166666667 +lat_2=27.833333333 +lat_0=25.666666667 +lon_0=-98.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Utah North
-<32042> +proj=lcc +lat_1=40.333333333 +lat_2=-111.500000000 +lat_0=40.716666667 +lon_0=41.783333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32042> +proj=lcc +lat_1=40.716666667 +lat_2=41.783333333 +lat_0=40.333333333 +lon_0=-111.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Utah Central
-<32043> +proj=lcc +lat_1=38.333333333 +lat_2=-111.500000000 +lat_0=39.016666667 +lon_0=40.650000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32043> +proj=lcc +lat_1=39.016666667 +lat_2=40.650000000 +lat_0=38.333333333 +lon_0=-111.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Utah South
-<32044> +proj=lcc +lat_1=36.666666667 +lat_2=-111.500000000 +lat_0=37.216666667 +lon_0=38.350000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32044> +proj=lcc +lat_1=37.216666667 +lat_2=38.350000000 +lat_0=36.666666667 +lon_0=-111.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Vermont
 <32045> +proj=tmerc +lat_0=42.500000000 +lon_0=-72.500000000 +k=0.999964 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Virginia North
-<32046> +proj=lcc +lat_1=37.666666667 +lat_2=-78.500000000 +lat_0=38.033333333 +lon_0=39.200000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32046> +proj=lcc +lat_1=38.033333333 +lat_2=39.200000000 +lat_0=37.666666667 +lon_0=-78.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Virginia South
-<32047> +proj=lcc +lat_1=36.333333333 +lat_2=-78.500000000 +lat_0=36.766666667 +lon_0=37.966666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32047> +proj=lcc +lat_1=36.766666667 +lat_2=37.966666667 +lat_0=36.333333333 +lon_0=-78.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Washington North
-<32048> +proj=lcc +lat_1=47.000000000 +lat_2=-120.833333333 +lat_0=47.500000000 +lon_0=48.733333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32048> +proj=lcc +lat_1=47.500000000 +lat_2=48.733333333 +lat_0=47.000000000 +lon_0=-120.833333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Washington South
-<32049> +proj=lcc +lat_1=45.333333333 +lat_2=-120.500000000 +lat_0=45.833333333 +lon_0=47.333333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32049> +proj=lcc +lat_1=45.833333333 +lat_2=47.333333333 +lat_0=45.333333333 +lon_0=-120.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / West Virginia North
-<32050> +proj=lcc +lat_1=38.500000000 +lat_2=-79.500000000 +lat_0=39.000000000 +lon_0=40.250000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32050> +proj=lcc +lat_1=39.000000000 +lat_2=40.250000000 +lat_0=38.500000000 +lon_0=-79.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / West Virginia South
-<32051> +proj=lcc +lat_1=37.000000000 +lat_2=-81.000000000 +lat_0=37.483333333 +lon_0=38.883333333 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32051> +proj=lcc +lat_1=37.483333333 +lat_2=38.883333333 +lat_0=37.000000000 +lon_0=-81.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Wisconsin North
-<32052> +proj=lcc +lat_1=45.166666667 +lat_2=-90.000000000 +lat_0=45.566666667 +lon_0=46.766666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32052> +proj=lcc +lat_1=45.566666667 +lat_2=46.766666667 +lat_0=45.166666667 +lon_0=-90.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Wisconsin Central
-<32053> +proj=lcc +lat_1=43.833333333 +lat_2=-90.000000000 +lat_0=44.250000000 +lon_0=45.500000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32053> +proj=lcc +lat_1=44.250000000 +lat_2=45.500000000 +lat_0=43.833333333 +lon_0=-90.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Wisconsin South
-<32054> +proj=lcc +lat_1=42.000000000 +lat_2=-90.000000000 +lat_0=42.733333333 +lon_0=44.066666667 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
+<32054> +proj=lcc +lat_1=42.733333333 +lat_2=44.066666667 +lat_0=42.000000000 +lon_0=-90.000000000 +x_0=609601.219 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Wyoming East
 <32055> +proj=tmerc +lat_0=40.666666667 +lon_0=-105.166666667 +k=0.999941 +x_0=152400.305 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD27 / Wyoming East Central
@@ -2113,9 +2113,9 @@
 # NAD27 / MTM zone 6
 <32086> +proj=tmerc +lat_0=0.000000000 +lon_0=-67.500000000 +k=0.999900 +x_0=304800.000 +y_0=0.000 +ellps=clrk66 +datum=NAD27 +units=m  no_defs <>
 # NAD83 / Montana
-<32100> +proj=lcc +lat_1=44.250000000 +lat_2=-109.500000000 +lat_0=49.000000000 +lon_0=45.000000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32100> +proj=lcc +lat_1=49.000000000 +lat_2=45.000000000 +lat_0=44.250000000 +lon_0=-109.500000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Nebraska
-<32104> +proj=lcc +lat_1=39.833333333 +lat_2=-100.000000000 +lat_0=43.000000000 +lon_0=40.000000000 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32104> +proj=lcc +lat_1=43.000000000 +lat_2=40.000000000 +lat_0=39.833333333 +lon_0=-100.000000000 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Nevada  East
 <32107> +proj=tmerc +lat_0=34.750000000 +lon_0=-115.583333333 +k=0.999900 +x_0=200000.000 +y_0=8000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Nevada Central
@@ -2139,75 +2139,75 @@
 # NAD83 / New York  West
 <32117> +proj=tmerc +lat_0=40.000000000 +lon_0=-78.583333333 +k=0.999938 +x_0=350000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / New York Long Island
-<32118> +proj=lcc +lat_1=40.166666667 +lat_2=-74.000000000 +lat_0=41.033333333 +lon_0=40.666666667 +x_0=300000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32118> +proj=lcc +lat_1=41.033333333 +lat_2=40.666666667 +lat_0=40.166666667 +lon_0=-74.000000000 +x_0=300000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / North Carolina
-<32119> +proj=lcc +lat_1=33.750000000 +lat_2=-79.000000000 +lat_0=36.166666667 +lon_0=34.333333333 +x_0=609601.220 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32119> +proj=lcc +lat_1=36.166666667 +lat_2=34.333333333 +lat_0=33.750000000 +lon_0=-79.000000000 +x_0=609601.220 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / North Dakota North
-<32120> +proj=lcc +lat_1=47.000000000 +lat_2=-100.500000000 +lat_0=48.733333333 +lon_0=47.433333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32120> +proj=lcc +lat_1=48.733333333 +lat_2=47.433333333 +lat_0=47.000000000 +lon_0=-100.500000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / North Dakota South
-<32121> +proj=lcc +lat_1=45.666666667 +lat_2=-100.500000000 +lat_0=47.483333333 +lon_0=46.183333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32121> +proj=lcc +lat_1=47.483333333 +lat_2=46.183333333 +lat_0=45.666666667 +lon_0=-100.500000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Ohio North
-<32122> +proj=lcc +lat_1=39.666666667 +lat_2=-82.500000000 +lat_0=41.700000000 +lon_0=40.433333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32122> +proj=lcc +lat_1=41.700000000 +lat_2=40.433333333 +lat_0=39.666666667 +lon_0=-82.500000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Ohio South
-<32123> +proj=lcc +lat_1=38.000000000 +lat_2=-82.500000000 +lat_0=40.033333333 +lon_0=38.733333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32123> +proj=lcc +lat_1=40.033333333 +lat_2=38.733333333 +lat_0=38.000000000 +lon_0=-82.500000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Oklahoma North
-<32124> +proj=lcc +lat_1=35.000000000 +lat_2=-98.000000000 +lat_0=36.766666667 +lon_0=35.566666667 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32124> +proj=lcc +lat_1=36.766666667 +lat_2=35.566666667 +lat_0=35.000000000 +lon_0=-98.000000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Oklahoma South
-<32125> +proj=lcc +lat_1=33.333333333 +lat_2=-98.000000000 +lat_0=35.233333333 +lon_0=33.933333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32125> +proj=lcc +lat_1=35.233333333 +lat_2=33.933333333 +lat_0=33.333333333 +lon_0=-98.000000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Oregon North
-<32126> +proj=lcc +lat_1=43.666666667 +lat_2=-120.500000000 +lat_0=46.000000000 +lon_0=44.333333333 +x_0=2500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32126> +proj=lcc +lat_1=46.000000000 +lat_2=44.333333333 +lat_0=43.666666667 +lon_0=-120.500000000 +x_0=2500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Oregon South
-<32127> +proj=lcc +lat_1=41.666666667 +lat_2=-120.500000000 +lat_0=44.000000000 +lon_0=42.333333333 +x_0=1500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32127> +proj=lcc +lat_1=44.000000000 +lat_2=42.333333333 +lat_0=41.666666667 +lon_0=-120.500000000 +x_0=1500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Pennsylvania North
-<32128> +proj=lcc +lat_1=40.166666667 +lat_2=-77.750000000 +lat_0=41.950000000 +lon_0=40.883333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32128> +proj=lcc +lat_1=41.950000000 +lat_2=40.883333333 +lat_0=40.166666667 +lon_0=-77.750000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Pennsylvania South
-<32129> +proj=lcc +lat_1=39.333333333 +lat_2=-77.750000000 +lat_0=40.966666667 +lon_0=39.933333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32129> +proj=lcc +lat_1=40.966666667 +lat_2=39.933333333 +lat_0=39.333333333 +lon_0=-77.750000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Rhode Island
 <32130> +proj=tmerc +lat_0=41.083333333 +lon_0=-71.500000000 +k=0.999994 +x_0=100000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / South Carolina
-<32133> +proj=lcc +lat_1=31.833333333 +lat_2=-81.000000000 +lat_0=34.833333333 +lon_0=32.500000000 +x_0=609600.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32133> +proj=lcc +lat_1=34.833333333 +lat_2=32.500000000 +lat_0=31.833333333 +lon_0=-81.000000000 +x_0=609600.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / South Dakota North
-<32134> +proj=lcc +lat_1=43.833333333 +lat_2=-100.000000000 +lat_0=45.683333333 +lon_0=44.416666667 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32134> +proj=lcc +lat_1=45.683333333 +lat_2=44.416666667 +lat_0=43.833333333 +lon_0=-100.000000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / South Dakota South
-<32135> +proj=lcc +lat_1=42.333333333 +lat_2=-100.333333333 +lat_0=44.400000000 +lon_0=42.833333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32135> +proj=lcc +lat_1=44.400000000 +lat_2=42.833333333 +lat_0=42.333333333 +lon_0=-100.333333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Tennessee
-<32136> +proj=lcc +lat_1=34.333333333 +lat_2=-86.000000000 +lat_0=36.416666667 +lon_0=35.250000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32136> +proj=lcc +lat_1=36.416666667 +lat_2=35.250000000 +lat_0=34.333333333 +lon_0=-86.000000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Texas North
-<32137> +proj=lcc +lat_1=34.000000000 +lat_2=-101.500000000 +lat_0=36.183333333 +lon_0=34.650000000 +x_0=200000.000 +y_0=1000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32137> +proj=lcc +lat_1=36.183333333 +lat_2=34.650000000 +lat_0=34.000000000 +lon_0=-101.500000000 +x_0=200000.000 +y_0=1000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Texas North Central
-<32138> +proj=lcc +lat_1=31.666666667 +lat_2=-98.500000000 +lat_0=33.966666667 +lon_0=32.133333333 +x_0=600000.000 +y_0=2000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32138> +proj=lcc +lat_1=33.966666667 +lat_2=32.133333333 +lat_0=31.666666667 +lon_0=-98.500000000 +x_0=600000.000 +y_0=2000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Texas Central
-<32139> +proj=lcc +lat_1=29.666666667 +lat_2=-100.333333333 +lat_0=31.883333333 +lon_0=30.116666667 +x_0=700000.000 +y_0=3000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32139> +proj=lcc +lat_1=31.883333333 +lat_2=30.116666667 +lat_0=29.666666667 +lon_0=-100.333333333 +x_0=700000.000 +y_0=3000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Texas South Central
-<32140> +proj=lcc +lat_1=27.833333333 +lat_2=-99.000000000 +lat_0=30.283333333 +lon_0=28.383333333 +x_0=600000.000 +y_0=4000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32140> +proj=lcc +lat_1=30.283333333 +lat_2=28.383333333 +lat_0=27.833333333 +lon_0=-99.000000000 +x_0=600000.000 +y_0=4000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Texas South
-<32141> +proj=lcc +lat_1=25.666666667 +lat_2=-98.500000000 +lat_0=27.833333333 +lon_0=26.166666667 +x_0=300000.000 +y_0=5000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32141> +proj=lcc +lat_1=27.833333333 +lat_2=26.166666667 +lat_0=25.666666667 +lon_0=-98.500000000 +x_0=300000.000 +y_0=5000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Utah North
-<32142> +proj=lcc +lat_1=40.333333333 +lat_2=-111.500000000 +lat_0=41.783333333 +lon_0=40.716666667 +x_0=500000.000 +y_0=1000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32142> +proj=lcc +lat_1=41.783333333 +lat_2=40.716666667 +lat_0=40.333333333 +lon_0=-111.500000000 +x_0=500000.000 +y_0=1000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Utah Central
-<32143> +proj=lcc +lat_1=38.333333333 +lat_2=-111.500000000 +lat_0=40.650000000 +lon_0=39.016666667 +x_0=500000.000 +y_0=2000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32143> +proj=lcc +lat_1=40.650000000 +lat_2=39.016666667 +lat_0=38.333333333 +lon_0=-111.500000000 +x_0=500000.000 +y_0=2000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Utah South
-<32144> +proj=lcc +lat_1=36.666666667 +lat_2=-111.500000000 +lat_0=38.350000000 +lon_0=37.216666667 +x_0=500000.000 +y_0=3000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32144> +proj=lcc +lat_1=38.350000000 +lat_2=37.216666667 +lat_0=36.666666667 +lon_0=-111.500000000 +x_0=500000.000 +y_0=3000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Vermont
 <32145> +proj=tmerc +lat_0=42.500000000 +lon_0=-72.500000000 +k=0.999964 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Virginia North
-<32146> +proj=lcc +lat_1=37.666666667 +lat_2=-78.500000000 +lat_0=39.200000000 +lon_0=38.033333333 +x_0=3500000.000 +y_0=2000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32146> +proj=lcc +lat_1=39.200000000 +lat_2=38.033333333 +lat_0=37.666666667 +lon_0=-78.500000000 +x_0=3500000.000 +y_0=2000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Virginia South
-<32147> +proj=lcc +lat_1=36.333333333 +lat_2=-78.500000000 +lat_0=37.966666667 +lon_0=36.766666667 +x_0=3500000.000 +y_0=1000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32147> +proj=lcc +lat_1=37.966666667 +lat_2=36.766666667 +lat_0=36.333333333 +lon_0=-78.500000000 +x_0=3500000.000 +y_0=1000000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Washington North
-<32148> +proj=lcc +lat_1=47.000000000 +lat_2=-120.833333333 +lat_0=48.733333333 +lon_0=47.500000000 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32148> +proj=lcc +lat_1=48.733333333 +lat_2=47.500000000 +lat_0=47.000000000 +lon_0=-120.833333333 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Washington South
-<32149> +proj=lcc +lat_1=45.333333333 +lat_2=-120.500000000 +lat_0=47.333333333 +lon_0=45.833333333 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32149> +proj=lcc +lat_1=47.333333333 +lat_2=45.833333333 +lat_0=45.333333333 +lon_0=-120.500000000 +x_0=500000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / West Virginia North
-<32150> +proj=lcc +lat_1=38.500000000 +lat_2=-79.500000000 +lat_0=40.250000000 +lon_0=39.000000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32150> +proj=lcc +lat_1=40.250000000 +lat_2=39.000000000 +lat_0=38.500000000 +lon_0=-79.500000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / West Virginia South
-<32151> +proj=lcc +lat_1=37.000000000 +lat_2=-81.000000000 +lat_0=38.883333333 +lon_0=37.483333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32151> +proj=lcc +lat_1=38.883333333 +lat_2=37.483333333 +lat_0=37.000000000 +lon_0=-81.000000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Wisconsin North
-<32152> +proj=lcc +lat_1=45.166666667 +lat_2=-90.000000000 +lat_0=46.766666667 +lon_0=45.566666667 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32152> +proj=lcc +lat_1=46.766666667 +lat_2=45.566666667 +lat_0=45.166666667 +lon_0=-90.000000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Wisconsin Central
-<32153> +proj=lcc +lat_1=43.833333333 +lat_2=-90.000000000 +lat_0=45.500000000 +lon_0=44.250000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32153> +proj=lcc +lat_1=45.500000000 +lat_2=44.250000000 +lat_0=43.833333333 +lon_0=-90.000000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Wisconsin South
-<32154> +proj=lcc +lat_1=42.000000000 +lat_2=-90.000000000 +lat_0=44.066666667 +lon_0=42.733333333 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32154> +proj=lcc +lat_1=44.066666667 +lat_2=42.733333333 +lat_0=42.000000000 +lon_0=-90.000000000 +x_0=600000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Wyoming East
 <32155> +proj=tmerc +lat_0=40.500000000 +lon_0=-105.166666667 +k=0.999938 +x_0=200000.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Wyoming East Central
@@ -2217,7 +2217,7 @@
 # NAD83 / Wyoming West
 <32158> +proj=tmerc +lat_0=40.500000000 +lon_0=-110.083333333 +k=0.999938 +x_0=800000.000 +y_0=100000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Puerto Rico & Virgin Is.
-<32161> +proj=lcc +lat_1=17.833333333 +lat_2=-66.433333333 +lat_0=18.433333333 +lon_0=18.033333333 +x_0=200000.000 +y_0=200000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32161> +proj=lcc +lat_1=18.433333333 +lat_2=18.033333333 +lat_0=17.833333333 +lon_0=-66.433333333 +x_0=200000.000 +y_0=200000.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / SCoPQ zone 2
 <32180> +proj=tmerc +lat_0=0.000000000 +lon_0=-55.500000000 +k=0.999900 +x_0=304800.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / MTM zone 1
@@ -2255,7 +2255,7 @@
 # NAD83 / MTM zone 17
 <32197> +proj=tmerc +lat_0=0.000000000 +lon_0=-96.000000000 +k=0.999900 +x_0=304800.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # NAD83 / Quebec Lambert
-<32198> +proj=lcc +lat_1=44.000000000 +lat_2=-68.500000000 +lat_0=60.000000000 +lon_0=46.000000000 +x_0=0.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
+<32198> +proj=lcc +lat_1=60.000000000 +lat_2=46.000000000 +lat_0=44.000000000 +lon_0=-68.500000000 +x_0=0.000 +y_0=0.000 +ellps=GRS80 +datum=NAD83 +units=m  no_defs <>
 # WGS 72 / UTM zone 1N
 <32201> +proj=utm +zone=1 +ellps=WGS72 +units=m  no_defs <>
 # WGS 72 / UTM zone 2N
