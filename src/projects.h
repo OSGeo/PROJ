@@ -28,6 +28,10 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.19  2004/08/31 22:57:11  warmerda
+ * Don't re-declare hypot() on win32 as it will conflict with math.h as per
+ * http://bugzilla.remotesensing.org/show_bug.cgi?id=495
+ *
  * Revision 1.18  2004/04/15 13:56:45  warmerda
  * changed PJD_ERR_GEOCENTRIC to -45
  *
@@ -116,7 +120,10 @@ extern "C" {
 #define MAX_PATH_FILENAME 1024
 #endif
 	/* prototype hypot for systems where absent */
+#ifndef _WIN32
 extern double hypot(double, double);
+#endif
+
 	/* some useful constants */
 #define HALFPI		1.5707963267948966
 #define FORTPI		0.78539816339744833
