@@ -1,17 +1,55 @@
-/* projection initialization and closure */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_init.c	4.13   95/09/05 GIE REL";
-#endif
+/******************************************************************************
+ * $Id$
+ *
+ * Project:  PROJ.4
+ * Purpose:  Initialize projection object from string definition.  Includes
+ *           pj_init(), pj_init_plus() and pj_free() function.
+ * Author:   Gerald Evenden, Frank Warmerdam <warmerdam@pobox.com>
+ *
+ ******************************************************************************
+ * Copyright (c) 1995, Gerald Evenden
+ * Copyright (c) 2002, Frank Warmerdam <warmerdam@pobox.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ ******************************************************************************
+ *
+ * $Log$
+ * Revision 1.9  2002/12/14 20:15:02  warmerda
+ * added geocentric support, updated headers
+ *
+ */
+
 #define PJ_LIB__
 #include <projects.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-	static paralist
-*start;
+
+PJ_CVSID("$Id$");
+
+static paralist *start;
 extern FILE *pj_open_lib(char *, char *);
 
-	static paralist *
+/************************************************************************/
+/*                              get_opt()                               */
+/************************************************************************/
+static paralist *
 get_opt(FILE *fid, char *name, paralist *next) {
 	char sword[52], *word = sword+1;
 	int first = 1, len, c;
@@ -39,7 +77,11 @@ get_opt(FILE *fid, char *name, paralist *next) {
 		errno = 0;
 	return next;
 }
-	static paralist *
+
+/************************************************************************/
+/*                            get_defaults()                            */
+/************************************************************************/
+static paralist *
 get_defaults(paralist *next, char *name) {
 	FILE *fid;
 
@@ -53,7 +95,11 @@ get_defaults(paralist *next, char *name) {
 		errno = 0; /* don't care if can't open file */
 	return next;
 }
-	static paralist *
+
+/************************************************************************/
+/*                              get_init()                              */
+/************************************************************************/
+static paralist *
 get_init(paralist *next, char *name) {
 	char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *opt;
 	FILE *fid;
@@ -181,6 +227,7 @@ pj_init(int argc, char **argv) {
 	if (!(PIN = (*proj)(0))) goto bum_call;
 	PIN->params = start;
         PIN->is_latlong = 0;
+        PIN->is_geocent = 0;
 
         /* set datum parameters */
         if (pj_datum_set(start, PIN)) goto bum_call;
