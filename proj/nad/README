@@ -9,6 +9,8 @@ README  --- This file
 
 proj_def.dat --- basic default file used by proj.
 
+epsg    --- Translation of EPSG GCS/PCS codes into PROJ.4 via init= mechanism.
+
 nad27   --- North American Datum 1927 for "init=" definition of
 			State Plane Coordinate Systems (SPCS).
 
