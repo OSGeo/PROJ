@@ -49,7 +49,11 @@
 
    http://freshmeat.net/projects/proj.4/
 
-
+12) Update the proj.spec file for the new version:
+    - PACKAGE_VERSION
+    - Source0
+    - %setup line
+    - rm -rf line
 
 NOTES:
 
