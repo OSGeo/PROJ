@@ -1,26 +1,41 @@
-#ifndef lint
-static const char SCCSID[]="@(#)strtod.c	4.5	93/12/03	GIE	REL";
-#endif
-/* THIS CODE HAS BEEN MODIFIED from the distribution made by the FSF.
-** However, "licensing" and header information are retained.
-*/
-/* Copyright (C) 1991, 1992 Free Software Foundation, Inc.
-This file is part of the GNU C Library.
-
-The GNU C Library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Library General Public License as
-published by the Free Software Foundation; either version 2 of the
-License, or (at your option) any later version.
-
-The GNU C Library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Library General Public License for more details.
-
-You should have received a copy of the GNU Library General Public
-License along with the GNU C Library; see the file COPYING.LIB.  If
-not, write to the Free Software Foundation, Inc., 675 Mass Ave,
-Cambridge, MA 02139, USA.  */
+/******************************************************************************
+ * $Id$
+ *
+ * Project:  PROJ.4
+ * Purpose:  strtod() substitute.  This is used because the strtod() on
+ *           some platforms (notably the Microsoft VC++ strtod()) chooses
+ *           to interprete values such as "15d10" as expontial values causing
+ *           severe problems for dmstor(). 
+ * Author:   Free Software Foundation.
+ *
+ ******************************************************************************
+ * THIS CODE HAS BEEN MODIFIED from the distribution made by the FSF.
+ * However, "licensing" and header information are retained.
+ *
+ * Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+ * This file is part of the GNU C Library.
+ *
+ * The GNU C Library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * The GNU C Library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with the GNU C Library; see the file COPYING.LIB.  If
+ * not, write to the Free Software Foundation, Inc., 675 Mass Ave,
+ * Cambridge, MA 02139, USA.
+ ******************************************************************************
+ *
+ * $Log$
+ * Revision 1.2  2000/11/30 03:37:22  warmerda
+ * use proj_strtod() in dmstor()
+ *
+ */
 
 #include <errno.h>
 #include <float.h>
@@ -28,6 +43,7 @@ Cambridge, MA 02139, USA.  */
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
 /* Convert NPTR to a double.  If ENDPTR is not NULL, a pointer to the
    character after the last one used in the number is put in *ENDPTR.  */
 #ifdef DOS
@@ -36,8 +52,9 @@ typedef int wchar_t;
 #define NULL 0
 #endif
 #endif
-	double
-strtod(const char *nptr, char **endptr) {
+
+double
+proj_strtod(const char *nptr, char **endptr) {
 	const char *s;
 	short int	sign;
 	/* The number so far.  */

@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.6  2000/11/30 03:37:22  warmerda
+ * use proj_strtod() in dmstor()
+ *
  * Revision 1.5  2000/07/06 23:36:47  warmerda
  * added lots of datum related stuff
  *
@@ -270,7 +273,8 @@ struct CTABLE {
 	FLP *cvs;   /* conversion matrix */
 };
 	/* procedure prototypes */
-double  dmstor(const char *, char **);
+double dmstor(const char *, char **);
+double proj_strtod( const char *, char ** );
 void set_rtodms(int, int);
 char *rtodms(char *, double, int, int);
 double adjlon(double);

@@ -36,7 +36,7 @@ dmstor(const char *is, char **rs) {
 	else sign = '+';
 	for (v = 0., nl = 0 ; nl < 3 ; nl = n + 1 ) {
 		if (!(isdigit(*s) || *s == '.')) break;
-		if ((tv = strtod(s, &s)) == HUGE_VAL)
+		if ((tv = proj_strtod(s, &s)) == HUGE_VAL)
 			return tv;
 		switch (*s) {
 		case 'D': case 'd':
