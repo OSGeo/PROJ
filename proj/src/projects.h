@@ -38,12 +38,12 @@ extern double hypot(double, double);
 #define DIR_CHAR '/'
 #endif
 
-typedef struct { double u, v; }	UV;
+typedef struct { double u, v; }	projUV;
 typedef struct { double r, i; }	COMPLEX;
 
 #ifndef PJ_LIB__
-#define XY UV
-#define LP UV
+#define XY projUV
+#define LP projUV
 #else
 typedef struct { double x, y; }     XY;
 typedef struct { double lam, phi; } LP;
@@ -213,7 +213,7 @@ void pj_dalloc(void *);
 char *pj_strerrno(int);
 /* Approximation structures and procedures */
 typedef struct {	/* Chebyshev or Power series structure */
-	UV a, b;		/* power series range for evaluation */
+	projUV a, b;		/* power series range for evaluation */
 					/* or Chebyshev argument shift/scaling */
 	struct PW_COEF {/* row coefficient structure */
 		int m;		/* number of c coefficients (=0 for none) */
@@ -222,14 +222,14 @@ typedef struct {	/* Chebyshev or Power series structure */
 	int mu, mv;		/* maximum cu and cv index (+1 for count) */
 	int power;		/* != 0 if power series, else Chebyshev */
 } Tseries;
-Tseries *mk_cheby(UV, UV, double, UV *, UV (*)(UV), int, int, int);
-UV bpseval(UV, Tseries *);
-UV bcheval(UV, Tseries *);
-UV biveval(UV, Tseries *);
+Tseries *mk_cheby(projUV, projUV, double, projUV *, projUV (*)(projUV), int, int, int);
+projUV bpseval(projUV, Tseries *);
+projUV bcheval(projUV, Tseries *);
+projUV biveval(projUV, Tseries *);
 void *vector1(int, int);
 void **vector2(int, int, int);
-int bchgen(UV, UV, int, int, UV **, UV(*)(UV));
-int bch2bps(UV, UV, UV **, int, int);
+int bchgen(projUV, projUV, int, int, projUV **, projUV(*)(projUV));
+int bch2bps(projUV, projUV, projUV **, int, int);
 /* nadcon related protos */
 LP nad_intr(LP, struct CTABLE *);
 LP nad_cvt(LP, int, struct CTABLE *);

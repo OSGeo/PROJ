@@ -5,40 +5,40 @@ static const char SCCSID[]="@(#)bch2bps.c	4.5	94/03/22	GIE	REL";
 #include <projects.h>
 /* basic support procedures */
 	static void /* clear vector to zero */
-clear(UV *p, int n) { static const UV c = {0., 0.}; while (n--) *p++ = c; }
+clear(projUV *p, int n) { static const projUV c = {0., 0.}; while (n--) *p++ = c; }
 	static void /* clear matrix rows to zero */
-bclear(UV **p, int n, int m) { while (n--) clear(*p++, m); }
+bclear(projUV **p, int n, int m) { while (n--) clear(*p++, m); }
 	static void /* move vector */
-bmove(UV *a, UV *b, int n) { while (n--) *a++ = *b++; }
+bmove(projUV *a, projUV *b, int n) { while (n--) *a++ = *b++; }
 	static void /* a <- m * b - c */
-submop(UV *a, double m, UV *b, UV *c, int n) {
+submop(projUV *a, double m, projUV *b, projUV *c, int n) {
 	while (n--) {
 		a->u = m * b->u - c->u;
 		a++->v = m * b++->v - c++->v;
 	}
 }
 	static void /* a <- b - c */
-subop(UV *a, UV *b, UV *c, int n) {
+subop(projUV *a, projUV *b, projUV *c, int n) {
 	while (n--) {
 		a->u = b->u - c->u;
 		a++->v = b++->v - c++->v;
 	}
 }
 	static void /* multiply vector a by scalar m */
-dmult(UV *a, double m, int n) { while(n--) { a->u *= m; a->v *= m; ++a; } }
+dmult(projUV *a, double m, int n) { while(n--) { a->u *= m; a->v *= m; ++a; } }
 	static void /* row adjust a[] <- a[] - m * b[] */
-dadd(UV *a, UV *b, double m, int n) {
+dadd(projUV *a, projUV *b, double m, int n) {
 	while(n--) {
 		a->u -= m * b->u;
 		a++->v -= m * b++->v;
 	}
 }
 	static void /* convert row to pover series */
-rows(UV *c, UV *d, int n) {
-	UV sv, *dd;
+rows(projUV *c, projUV *d, int n) {
+	projUV sv, *dd;
 	int j, k;
 
-	dd = (UV *)vector1(n-1, sizeof(UV));
+	dd = (projUV *)vector1(n-1, sizeof(projUV));
 	sv.u = sv.v = 0.;
 	for (j = 0; j < n; ++j) d[j] = dd[j] = sv;
 	d[0] = c[n-1];
@@ -63,12 +63,12 @@ rows(UV *c, UV *d, int n) {
 	pj_dalloc(dd);
 }
 	static void /* convert columns to power series */
-cols(UV **c, UV **d, int nu, int nv) {
-	UV *sv, **dd;
+cols(projUV **c, projUV **d, int nu, int nv) {
+	projUV *sv, **dd;
 	int j, k;
 
-	dd = (UV **)vector2(nu, nv, sizeof(UV));
-	sv = (UV *)vector1(nv, sizeof(UV));
+	dd = (projUV **)vector2(nu, nv, sizeof(projUV));
+	sv = (projUV *)vector1(nv, sizeof(projUV));
 	bclear(d, nu, nv);
 	bclear(dd, nu, nv);
 	bmove(d[0], c[nu-1], nv);
@@ -89,7 +89,7 @@ cols(UV **c, UV **d, int nu, int nv) {
 	pj_dalloc(sv);
 }
 	static void /* row adjust for range -1 to 1 to a to b */
-rowshft(double a, double b, UV *d, int n) {
+rowshft(double a, double b, projUV *d, int n) {
 	int k, j;
 	double fac, cnst;
 
@@ -108,7 +108,7 @@ rowshft(double a, double b, UV *d, int n) {
 		}
 }
 	static void /* column adjust for range -1 to 1 to a to b */
-colshft(double a, double b, UV **d, int n, int m) {
+colshft(double a, double b, projUV **d, int n, int m) {
 	int k, j;
 	double fac, cnst;
 
@@ -124,11 +124,11 @@ colshft(double a, double b, UV **d, int n, int m) {
 			dadd(d[k], d[k+1], cnst, m);
 }
 	int /* entry point */
-bch2bps(UV a, UV b, UV **c, int nu, int nv) {
-	UV **d;
+bch2bps(projUV a, projUV b, projUV **c, int nu, int nv) {
+	projUV **d;
 	int i;
 
-	if (nu < 1 || nv < 1 || !(d = (UV **)vector2(nu, nv, sizeof(UV))))
+	if (nu < 1 || nv < 1 || !(d = (projUV **)vector2(nu, nv, sizeof(projUV))))
 		return 0;
 	/* do rows to power series */
 	for (i = 0; i < nu; ++i) {
