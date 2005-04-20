@@ -1,3 +1,9 @@
+2005-04-20  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* pj_apply_gridshift.c: Fixed problem that was resulted in points
+	after the first apparently succeeding to shift when a gridshift
+	file wasn't found.  Bug 834.
+
 2004-11-05  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_transform.c: Fixed pj_geocentric_to_geodetic() to not try 
