@@ -153,6 +153,25 @@ Their use is more fully described in the
 
 <!-------------------------------------------------------------------------->
 
+<h2>Does PROJ.4 work in different international numeric locales?</h2>
+
+No.  PROJ.4 makes extensive use of sprintf() and atof() internally to translate
+numeric values.  If a locale is in effect that modifies formatting of 
+numbers, altering the role of commas and periods in numbers, then PROJ.4
+will not work.  This problem is common in some European locales.<p>
+
+On unix-like platforms, this problem can be avoided by forcing the use
+of the default numeric locale by setting the LC_NUMERIC environment variable
+to C. <p>
+
+eg.
+<pre>
+$ export LC_NUMERIC=C
+$ proj ...
+</pre>
+
+<!-------------------------------------------------------------------------->
+
 <hr>
 
 Requests to add items to the frequently asked questions list 
