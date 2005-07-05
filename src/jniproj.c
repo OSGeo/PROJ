@@ -57,17 +57,7 @@ JNIEXPORT void JNICALL Java_org_proj4_Projections_transform
 	double *ycoord = (* env) -> GetDoubleArrayElements(env, secondcoord, NULL); 
 	double *zcoord = (* env) -> GetDoubleArrayElements(env, values, NULL); 
 
-	jint sizeofdata = (*env)->GetArrayLength(env, firstcoord);
-	for(i = 0;i<sizeofdata;i++)
-	{
-		pj_transform( src_pj, dst_pj, pcount,poffset, xcoord, ycoord, zcoord);
-		xcoord++;
-		ycoord++;
-		zcoord++;
-	}
-	xcoord = xcoord - sizeofdata;
-	ycoord = ycoord - sizeofdata;
-	zcoord = zcoord - sizeofdata;
+        pj_transform( src_pj, dst_pj, pcount,poffset, xcoord, ycoord, zcoord);
 
 	(* env)->ReleaseDoubleArrayElements(env,firstcoord,(jdouble *) xcoord,JNI_COMMIT);
 	(* env)->ReleaseDoubleArrayElements(env,secondcoord,(jdouble *) ycoord,JNI_COMMIT);
