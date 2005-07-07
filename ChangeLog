@@ -1,5 +1,7 @@
 2005-07-06  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* nad/Makefile.am: added .gsb installation logic to capture nz file.
+
 	* pj_gridinfo.c: fixed debug format string per:
 	http://bugzilla.remotesensing.org/show_bug.cgi?id=886
 
