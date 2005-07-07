@@ -151,7 +151,7 @@ target_alias = @target_alias@
 pkgdata_DATA = GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri
 EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
 			proj_def.dat test27 test83 world epsg esri \
-			testvarious testntv2
+			testvarious testntv2 ntv2_out.dist
 
 all: all-am
 
@@ -350,10 +350,12 @@ install-data-local:
 	else \
 	  echo "nad2nad NADCON source files not present"; \
 	fi 
-	@if [ -f ntv1_can.dat ] ; then \
-	  echo $(INSTALL_DATA) ntv1_can.dat $(DESTDIR)$(pkgdatadir)/ntv1_can.dat; \
-	  $(INSTALL_DATA) ntv1_can.dat $(DESTDIR)$(pkgdatadir)/ntv1_can.dat; \
-	fi
+	@for gridfile in *.gsb ntv1_can.dat dummy ; do \
+	  if test "$$gridfile" != "dummy" -a -f "$$gridfile" ; then \
+	    echo $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/$$gridfile; \
+	    $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/$$gridfile; \
+          fi; \
+	done
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

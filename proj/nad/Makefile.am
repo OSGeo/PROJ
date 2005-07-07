@@ -19,9 +19,11 @@ install-data-local:
 	else \
 	  echo "nad2nad NADCON source files not present"; \
 	fi 
-	@if [ -f ntv1_can.dat ] ; then \
-	  echo $(INSTALL_DATA) ntv1_can.dat $(DESTDIR)$(pkgdatadir)/ntv1_can.dat; \
-	  $(INSTALL_DATA) ntv1_can.dat $(DESTDIR)$(pkgdatadir)/ntv1_can.dat; \
-	fi
+	@for gridfile in *.gsb ntv1_can.dat dummy ; do \
+	  if test "$$gridfile" != "dummy" -a -f "$$gridfile" ; then \
+	    echo $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/$$gridfile; \
+	    $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/$$gridfile; \
+          fi; \
+	done
 
 
