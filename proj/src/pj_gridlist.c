@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.4  2005/11/01 05:56:13  fwarmerdam
+ * improved error handling if gridcount is zero
+ *
  * Revision 1.3  2003/03/18 16:26:58  warmerda
  * clear error if missing file is not required
  *
@@ -189,6 +192,9 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
         && strcmp(nadgrids,last_nadgrids) == 0 )
     {
         *grid_count = last_nadgrids_count;
+        if( *grid_count == 0 )
+            pj_errno = -38;
+
         return last_nadgrids_list;
     }
 
