@@ -96,12 +96,8 @@ using an approximated 7 parameter transformation.<p>
 The seven parameter case uses <i>delta_x</i>, <i>delta_y</i>, <i>delta_z</i>,
 <i>Rx - rotation X</i>, <i>Ry - rotation Y</i>, <i>Rz - rotation Z</i>, 
 <i>M_BF - Scaling</i>.  The three translation parameters are in meters as
-in the three parameter case.  The rotational parameters are not in physical
-units.  They are something like the sine of the rotational angle times the
-ellipoid axis length, but I don't know the exact details of how to derive
-these from a physical description of the rotation.   What I do know is that
-they match the parameters used for transformation method 9606 in the EPSG
-database.  The scaling is apparently the scale change in parts per million.<p>
+in the three parameter case.  The rotational parameters are in seconds of
+arc.  The scaling is apparently the scale change in parts per million.<p>
 
 A more complete discussion of the 3 and 7 parameter transformations can be
 found in the EPSG database (trf_method's 9603 and 9606).  Within PROJ.4 
