@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.15  2005/12/04 14:47:37  fwarmerdam
+ * use symbolic names as per patch from Martin Vermeer
+ *
  * Revision 1.14  2004/11/05 06:05:11  fwarmerdam
  * Fixed pj_geocentric_to_geodetic() to not try and process HUGE_VAL values
  * (those that have failed some previous transform step).  Related to bug:5B
@@ -465,9 +468,9 @@ int pj_geocentric_to_wgs84( PJ *defn,
             if( x[io] == HUGE_VAL )
                 continue;
 
-            x[io] = x[io] + defn->datum_params[0];
-            y[io] = y[io] + defn->datum_params[1];
-            z[io] = z[io] + defn->datum_params[2];
+            x[io] = x[io] + Dx_BF;
+            y[io] = y[io] + Dy_BF;
+            z[io] = z[io] + Dz_BF;
         }
     }
     else if( defn->datum_type == PJD_7PARAM )
@@ -515,9 +518,9 @@ int pj_geocentric_from_wgs84( PJ *defn,
             if( x[io] == HUGE_VAL )
                 continue;
             
-            x[io] = x[io] - defn->datum_params[0];
-            y[io] = y[io] - defn->datum_params[1];
-            z[io] = z[io] - defn->datum_params[2];
+            x[io] = x[io] - Dx_BF;
+            y[io] = y[io] - Dy_BF;
+            z[io] = z[io] - Dz_BF;
         }
     }
     else if( defn->datum_type == PJD_7PARAM )
@@ -593,13 +596,13 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
         CHECK_RETURN;
 
         src_a = SRS_WGS84_SEMIMAJOR;
-        src_es = 0.006694379990;
+        src_es = SRS_WGS84_ESQUARED;
     }
 
     if( dstdefn->datum_type == PJD_GRIDSHIFT )
     {
         dst_a = SRS_WGS84_SEMIMAJOR;
-        dst_es = 0.006694379990;
+        dst_es = SRS_WGS84_ESQUARED;
     }
         
 /* ==================================================================== */
