@@ -9,10 +9,10 @@ install-data-local:
 	@if [ -f conus.lla ] ; then \
 	  for x in *.lla ; do \
 	    DEST=$(DESTDIR)$(pkgdatadir)/`basename $$x .lla`; \
-	    echo "../src/nad2bin $$DEST < $$x"; \
-	    ../src/nad2bin $$DEST < $$x ; \
+	    echo "../src/nad2bin$(EXEEXT) $$DEST < $$x"; \
+	    ../src/nad2bin$(EXEEXT) $$DEST < $$x ; \
 	    if [ $$? -ne 0 ] ; then \
-		echo "nad2bin failed to install $$DEST"; \
+		echo "nad2bin$(EXEEXT) failed to install $$DEST"; \
 		exit 1; \
 	    fi; \
 	  done; \
