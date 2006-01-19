@@ -144,7 +144,7 @@
 	no_defs <>
 <irish> # Irish Transverse Mercator Grid
 	proj=tmerc ellps=mod_airy lat_0=53d30'N lon_0=8W
-	x_0=200000 y_0=-250000 k_0=1.000035
+	x_0=200000 y_0=250000 k_0=1.000035
 	no_defs <>
 <neiez> # Netherlands East Indies Equitorial Zone
 	proj=merc ellps=bessel lon_0=110E
