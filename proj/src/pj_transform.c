@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.16  2006/02/17 02:26:14  fwarmerdam
+ * ERANGE/EDOM treated as transient errors
+ *
  * Revision 1.15  2005/12/04 14:47:37  fwarmerdam
  * use symbolic names as per patch from Martin Vermeer
  *
@@ -209,8 +212,9 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             geodetic_loc = pj_inv( projected_loc, srcdefn );
             if( pj_errno != 0 )
             {
-                if( pj_errno > 0 || pj_errno < -44 || point_count == 1
-                    || transient_error[-pj_errno] == 0 )
+                if( (pj_errno != 33 /*EDOM*/ && pj_errno != 34 /*ERANGE*/ )
+                    && (pj_errno > 0 || pj_errno < -44 || point_count == 1
+                        || transient_error[-pj_errno] == 0 ) )
                     return pj_errno;
                 else
                 {
@@ -304,8 +308,9 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             projected_loc = pj_fwd( geodetic_loc, dstdefn );
             if( pj_errno != 0 )
             {
-                if( pj_errno > 0 || pj_errno < -44 || point_count == 1
-                    || transient_error[-pj_errno] == 0 )
+                if( (pj_errno != 33 /*EDOM*/ && pj_errno != 34 /*ERANGE*/ )
+                    && (pj_errno > 0 || pj_errno < -44 || point_count == 1
+                        || transient_error[-pj_errno] == 0 ) )
                     return pj_errno;
                 else
                 {
