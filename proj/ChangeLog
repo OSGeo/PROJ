@@ -1,3 +1,8 @@
+2006-03-20  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_transform.c: Return error -14 (latitude or longitude
+	exceeds bounds) for failed geodetic to geocentric (lat out of +-90).
+
 2006-03-10  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* nad/epsg: updated to EPSG 6.9.
