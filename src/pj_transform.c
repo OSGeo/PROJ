@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.17  2006/03/20 17:54:34  fwarmerdam
+ * pj_geodetic_to_geocentric returns -14 now for lat out of range
+ *
  * Revision 1.16  2006/02/17 02:26:14  fwarmerdam
  * ERANGE/EDOM treated as transient errors
  *
@@ -360,8 +363,8 @@ int pj_geodetic_to_geocentric( double a, double es,
         if( pj_Convert_Geodetic_To_Geocentric( y[io], x[io], z[io], 
                                                x+io, y+io, z+io ) != 0 )
         {
-            pj_errno = PJD_ERR_GEOCENTRIC;
-            return PJD_ERR_GEOCENTRIC;
+            pj_errno = -14;
+            return -14;
         }
     }
 
