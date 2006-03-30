@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.9  2006/03/30 14:35:09  fwarmerdam
+ * bug 1145: avoid warnings on VC8.
+ *
  * Revision 1.8  2004/10/28 16:05:37  fwarmerdam
  * avoid using global variables from DLL
  *
@@ -54,13 +57,12 @@
  * New
  *
  */
-
+#include "projects.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
-#include "projects.h"
 #include "emess.h"
 
 #define MAX_LINE 200
