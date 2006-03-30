@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.5  2006/03/30 01:22:48  fwarmerdam
+ * Removed win32 only debug hack.
+ *
  * Revision 1.4  2002/12/15 22:31:04  warmerda
  * handle lon_0, k, and prime meridian properly
  *
@@ -135,20 +138,6 @@ FORWARD(s_forward); /* spheroid */
    /* x and y are reverted! */
 	xy.y = ro * cos(eps) / a;
 	xy.x = ro * sin(eps) / a;
-
-#ifdef DEBUG
-	strcpy(errmess,"a: ");
-	strcpy(tmp,"        ");
-	ltoa((long)(a*1000000000),tmp,10);
-	strcat(errmess,tmp);
-	strcat(errmess,"e2: ");
-	strcpy(tmp,"        ");
-	ltoa((long)(e2*1000000000),tmp,10);
-	strcat(errmess,tmp);
-
-	MessageBox(NULL, errmess, NULL, 0);
-#endif
-
 
 	return (xy);
 }
