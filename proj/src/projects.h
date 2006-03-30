@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.22  2006/03/30 14:35:09  fwarmerdam
+ * bug 1145: avoid warnings on VC8.
+ *
  * Revision 1.21  2004/10/28 16:08:13  fwarmerdam
  * added pj_get_*_ref() accessors
  *
@@ -85,6 +88,15 @@
 /* General projections header file */
 #ifndef PROJECTS_H
 #define PROJECTS_H
+
+#ifdef _MSC_VER
+#  ifndef _CRT_SECURE_NO_DEPRECATE
+#    define _CRT_SECURE_NO_DEPRECATE
+#  endif
+#  ifndef _CRT_NONSTDC_NO_DEPRECATE
+#    define _CRT_NONSTDC_NO_DEPRECATE
+#  endif
+#endif
 
 /* standard inclusions */
 #include <math.h>
