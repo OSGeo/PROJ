@@ -4,7 +4,7 @@
 
  o Microsoft Visual Studio 8 compatibility changes. 
  
- o Upgraded to EPSG 4.9 database. 
+ o Upgraded to EPSG 6.9 database. 
 
  o Several bug fixes to pj_transform() to handle transient errors properly.
 
