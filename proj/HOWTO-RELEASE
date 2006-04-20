@@ -36,7 +36,7 @@
 8) Update html/index.html to link to the new release tar/zip files.  When
    committed this updates the web page on remotesensing.org.
 
-9) Tag the release with a command like "cvs tag proj_4_4_3".
+9) Tag the release with a command like "cvs tag -F proj_4_4_3".
 
 10) Do a "make dist-all" in the proj root directory.  After some grinding
    this should result in files like proj-4.4.3.tar.gz and proj-4.4.3.zip
