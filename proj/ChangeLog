@@ -1,6 +1,10 @@
-Rel. 4.5.0 2006-04-19
+Rel. 4.5.0 2006-04-20
 -------------------------------------------------------------------------
 	
+2006-04-20  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Fixed direction of Bogota meridian (west not east).
+
 2006-04-19  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Preparing 4.5.0 release.
