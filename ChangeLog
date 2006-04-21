@@ -1,6 +1,11 @@
-Rel. 4.5.0 2006-04-20
+Rel. 4.5.0 2006-04-21
 -------------------------------------------------------------------------
 	
+2006-04-21  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/epsg: Upgraded using GDAL 1.3.2 with prime meridian fixes,
+	and reporting of deprecated PCSes. 
+
 2006-04-20  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Fixed direction of Bogota meridian (west not east).
