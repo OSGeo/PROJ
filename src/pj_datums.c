@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.12  2006/04/21 02:46:10  fwarmerdam
+ * fixed bogota direction
+ *
  * Revision 1.11  2005/11/08 15:25:40  fwarmerdam
  * added OSGB36 transformation
  *
@@ -105,7 +108,7 @@ C_NAMESPACE struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
     "greenwich", "0dE",
     "lisbon",    "9d07'54.862\"W",
     "paris",     "2d20'14.025\"E",
-    "bogota",    "74d04'51.3\"E",
+    "bogota",    "74d04'51.3\"W",
     "madrid",    "3d41'16.58\"W",
     "rome",      "12d27'8.4\"E",
     "bern",      "7d26'22.5\"E",
