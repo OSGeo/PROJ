@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.18  2006/05/01 21:13:54  fwarmerdam
+ * make out of range errors in geodetic to geocentric a transient error
+ *
  * Revision 1.17  2006/03/20 17:54:34  fwarmerdam
  * pj_geodetic_to_geocentric returns -14 now for lat out of range
  *
@@ -342,6 +345,8 @@ int pj_geodetic_to_geocentric( double a, double es,
     double b;
     int    i;
 
+    pj_errno = 0;
+
     if( es == 0.0 )
         b = a;
     else
@@ -364,11 +369,12 @@ int pj_geodetic_to_geocentric( double a, double es,
                                                x+io, y+io, z+io ) != 0 )
         {
             pj_errno = -14;
-            return -14;
+            x[io] = y[io] = HUGE_VAL;
+            /* but keep processing points! */
         }
     }
 
-    return 0;
+    return pj_errno;
 }
 
 /************************************************************************/
@@ -591,7 +597,7 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
         z_is_temp = TRUE;
     }
 
-#define CHECK_RETURN {if( pj_errno != 0 ) { if( z_is_temp ) pj_dalloc(z); return pj_errno; }}
+#define CHECK_RETURN {if( pj_errno != 0 && (pj_errno > 0 || transient_error[-pj_errno] == 0) ) { if( z_is_temp ) pj_dalloc(z); return pj_errno; }}
 
 /* -------------------------------------------------------------------- */
 /*	If this datum requires grid shifts, then apply it to geodetic   */
