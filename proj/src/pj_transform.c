@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.19  2006/05/10 19:23:47  fwarmerdam
+ * Don't apply to_meter in pj_transform() if the value is HUGE_VAL.
+ *
  * Revision 1.18  2006/05/01 21:13:54  fwarmerdam
  * make out of range errors in geodetic to geocentric a transient error
  *
@@ -176,8 +179,11 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
         {
             for( i = 0; i < point_count; i++ )
             {
-                x[point_offset*i] *= srcdefn->to_meter;
-                y[point_offset*i] *= srcdefn->to_meter;
+                if( x[point_offset*i] != HUGE_VAL )
+                {
+                    x[point_offset*i] *= srcdefn->to_meter;
+                    y[point_offset*i] *= srcdefn->to_meter;
+                }
             }
         }
 
