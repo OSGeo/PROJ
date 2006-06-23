@@ -1,3 +1,7 @@
+2006-06-23  Andrey Kiselev  <dron@ak4719.spb.edu>
+
+	* src/PJ_eqdc.c: Do not call pj_enfn() twice avoiding memory leak.
+
 2006-05-01  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_transform.c: Ensure that out-of-range lat/long values in 
