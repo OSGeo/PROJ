@@ -1,8 +1,10 @@
-pkgdata_DATA = GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri
+pkgdata_DATA = GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri \
+		esri.extra other.extra
 
 EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
 			proj_def.dat test27 test83 world epsg esri \
-			testvarious testntv2 ntv2_out.dist
+			testvarious testntv2 ntv2_out.dist \
+			esri.extra other.extra
 
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
