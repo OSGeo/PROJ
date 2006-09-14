@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.6  2006/09/14 13:10:50  fwarmerdam
+ * Add +czech flag to control reversal of signs (bug 1133,147)
+ *
  * Revision 1.5  2006/03/30 01:22:48  fwarmerdam
  * Removed win32 only debug hack.
  *
@@ -139,6 +142,12 @@ FORWARD(s_forward); /* spheroid */
 	xy.y = ro * cos(eps) / a;
 	xy.x = ro * sin(eps) / a;
 
+        if( !pj_param(P -> params, "tczech").i )
+	  {
+	    xy.y *= -1.0;
+	    xy.x *= -1.0;
+	  }
+
 	return (xy);
 }
 
@@ -187,6 +196,12 @@ INVERSE(s_inverse); /* spheroid */
 	xy0=xy.x;
 	xy.x=xy.y;
 	xy.y=xy0;
+
+        if( !pj_param(P -> params, "tczech").i )
+	  {
+	    xy.x *= -1.0;
+	    xy.y *= -1.0;
+	  }
 
 	ro = sqrt(xy.x * xy.x + xy.y * xy.y);
 	eps = atan2(xy.y, xy.x);
