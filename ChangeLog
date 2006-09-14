@@ -1,3 +1,10 @@
+2006-09-14  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/PJ_krovak.c: Add +czech flag to apply non-useful sign reversal
+	that someone once apparently thought was a good idea.  By default work
+	like folks want.  Contributed by Martin Landa and Radim Blazek. 
+	Bug 1133, and 147.
+
 2006-07-07  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Added esri.extra and other.extra to distributed and installed files
