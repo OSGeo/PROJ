@@ -1,3 +1,8 @@
+2006-09-22  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_init.c: removed static "start" variable to resolve
+	thread-safety problems (bug 1283).
+
 2006-09-14  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Produce 4.5.0beta2 release.
