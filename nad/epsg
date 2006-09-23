@@ -10,7 +10,7 @@
 <4005> +proj=longlat +a=6377492.018 +b=6356173.508712696 +no_defs  <>
 # Unknown datum based upon the Bessel Namibia ellipsoid
 <4006> +proj=longlat +ellps=bess_nam +no_defs  <>
-# Unknown datum based upon the Clarke 1858 ellipsoid
+# unnamed ellipse
 <4007> +proj=longlat +a=6378293.645208759 +b=6356617.987679838 +no_defs  <>
 # Unknown datum based upon the Clarke 1866 ellipsoid
 <4008> +proj=longlat +ellps=clrk66 +no_defs  <>
@@ -91,7 +91,7 @@
 # Samboja
 <4125> +proj=longlat +ellps=bessel +towgs84=-404.78,685.68,45.47,0,0,0,0 +no_defs  <>
 # LKS94 (ETRS89)
-<4126> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
+<4126> +proj=longlat +ellps=GRS80 +no_defs  <>
 # Tete
 <4127> +proj=longlat +ellps=clrk66 +no_defs  <>
 # Madzansua
@@ -152,7 +152,7 @@
 <4155> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-83,37,124,0,0,0,0 +no_defs  <>
 # S-JTSK
 <4156> +proj=longlat +ellps=bessel +no_defs  <>
-# Mount Dillon
+# unnamed ellipse
 <4157> +proj=longlat +a=6378293.645208759 +b=6356617.987679838 +no_defs  <>
 # Naparima 1955
 <4158> +proj=longlat +ellps=intl +no_defs  <>
@@ -217,7 +217,7 @@
 # Albanian 1987
 <4191> +proj=longlat +ellps=krass +no_defs  <>
 # Douala 1948
-<4192> +proj=longlat +ellps=intl +no_defs  <>
+<4192> +proj=longlat +ellps=intl +towgs84=-206.1,-174.7,-87.7,0,0,0,0 +no_defs  <>
 # Manoca 1962
 <4193> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-70.9,-151.8,-41.4,0,0,0,0 +no_defs  <>
 # Qornoq 1927
@@ -320,7 +320,7 @@
 <4243> +proj=longlat +a=6377299.36559538 +b=6356098.357204817 +no_defs  <>
 # Kandawala
 <4244> +proj=longlat +a=6377276.345 +b=6356075.413140239 +towgs84=-97,787,86,0,0,0,0 +no_defs  <>
-# Kertau
+# Kertau 1968
 <4245> +proj=longlat +a=6377304.063 +b=6356103.038993155 +towgs84=-11,851,5,0,0,0,0 +no_defs  <>
 # KOC
 <4246> +proj=longlat +ellps=clrk80 +towgs84=-294.7,-200.1,525.5,0,0,0,0 +no_defs  <>
@@ -432,7 +432,7 @@
 <4300> +proj=longlat +a=6377340.189 +b=6356034.447938534 +no_defs  <>
 # Tokyo
 <4301> +proj=longlat +ellps=bessel +no_defs  <>
-# Trinidad 1903
+# unnamed ellipse
 <4302> +proj=longlat +a=6378293.645208759 +b=6356617.987679838 +no_defs  <>
 # TC(1948)
 <4303> +proj=longlat +ellps=helmert +no_defs  <>
@@ -561,7 +561,7 @@
 # ST71 Belep
 <4643> +proj=longlat +ellps=intl +towgs84=-480.26,-438.32,-643.429,16.3119,20.1721,-4.0349,-111.7 +no_defs  <>
 # NEA74 Noumea
-<4644> +proj=longlat +ellps=intl +towgs84=-166.207,-154.777,254.831,-37.5444,7.7011,-10.2025,-30.8598 +no_defs  <>
+<4644> +proj=longlat +ellps=intl +no_defs  <>
 # RGNC 1991
 <4645> +proj=longlat +ellps=intl +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # Grand Comoros
@@ -591,7 +591,7 @@
 # ED79
 <4668> +proj=longlat +ellps=intl +towgs84=-86,-98,-119,0,0,0,0 +no_defs  <>
 # LKS94
-<4669> +proj=longlat +ellps=GRS80 +no_defs  <>
+<4669> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # IGM95
 <4670> +proj=longlat +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # Voirol 1879
@@ -601,7 +601,7 @@
 # CI1979
 <4673> +proj=longlat +ellps=intl +towgs84=174.05,-25.49,112.57,-0,-0,0.554,0.2263 +no_defs  <>
 # SIRGAS 2000
-<4674> +proj=longlat +ellps=GRS80 +no_defs  <>
+<4674> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # Guam 1963
 <4675> +proj=longlat +ellps=clrk66 +towgs84=-100,-248,259,0,0,0,0 +no_defs  <>
 # Vientiane 1982
@@ -611,7 +611,7 @@
 # Lao 1997
 <4678> +proj=longlat +ellps=krass +towgs84=44.585,-131.212,-39.544,0,0,0,0 +no_defs  <>
 # Jouik 1961
-<4679> +proj=longlat +ellps=clrk80 +no_defs  <>
+<4679> +proj=longlat +ellps=clrk80 +towgs84=-80.01,253.26,291.19,0,0,0,0 +no_defs  <>
 # Nouakchott 1965
 <4680> +proj=longlat +ellps=clrk80 +towgs84=124.5,-63.5,-281,0,0,0,0 +no_defs  <>
 # Mauritania 1999
@@ -650,8 +650,14 @@
 <4697> +proj=longlat +ellps=clrk80 +no_defs  <>
 # IGN 1962 Kerguelen
 <4698> +proj=longlat +ellps=intl +towgs84=145,-187,103,0,0,0,0 +no_defs  <>
+# Le Pouce 1934
+<4699> +proj=longlat +ellps=clrk80 +towgs84=-770.1,158.4,-498.2,0,0,0,0 +no_defs  <>
+# IGN Astro 1960
+<4700> +proj=longlat +ellps=clrk80 +no_defs  <>
 # IGCB 1955
 <4701> +proj=longlat +ellps=clrk80 +towgs84=-79.9,-158,-168.9,0,0,0,0 +no_defs  <>
+# Mauritania 1999
+<4702> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # Mhast 1951
 <4703> +proj=longlat +ellps=clrk80 +no_defs  <>
 # Mhast (onshore)
@@ -689,7 +695,7 @@
 # Fiji 1986
 <4720> +proj=longlat +ellps=WGS72 +no_defs  <>
 # Fiji 1956
-<4721> +proj=longlat +ellps=intl +no_defs  <>
+<4721> +proj=longlat +ellps=intl +towgs84=265.025,384.929,-194.046,0,0,0,0 +no_defs  <>
 # South Georgia 1968
 <4722> +proj=longlat +ellps=intl +towgs84=-794,119,-298,0,0,0,0 +no_defs  <>
 # Grand Cayman 1959
@@ -722,10 +728,38 @@
 <4736> +proj=longlat +ellps=clrk80 +towgs84=260,12,-147,0,0,0,0 +no_defs  <>
 # Korea 2000
 <4737> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
-# Hong Kong 1963
+# unnamed ellipse
 <4738> +proj=longlat +a=6378293.645208759 +b=6356617.987679838 +no_defs  <>
 # Hong Kong 1963(67)
 <4739> +proj=longlat +ellps=intl +towgs84=-156,-271,-189,0,0,0,0 +no_defs  <>
+# PZ-90
+<4740> +proj=longlat +a=6378136 +b=6356751.361745712 +towgs84=0,0,1.5,-0,-0,0.076,0 +no_defs  <>
+# FD54
+<4741> +proj=longlat +ellps=intl +no_defs  <>
+# GDM2000
+<4742> +proj=longlat +ellps=GRS80 +no_defs  <>
+# Karbala 1979 (Polservice)
+<4743> +proj=longlat +ellps=clrk80 +towgs84=84.1,-320.1,218.7,0,0,0,0 +no_defs  <>
+# Nahrwan 1934
+<4744> +proj=longlat +ellps=clrk80 +no_defs  <>
+# RD/83
+<4745> +proj=longlat +ellps=bessel +no_defs  <>
+# PD/83
+<4746> +proj=longlat +ellps=bessel +no_defs  <>
+# GR96
+<4747> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
+# Vanua Levu 1915
+<4748> +proj=longlat +a=6378306.3696 +b=6356571.996 +towgs84=51,391,-36,0,0,0,0 +no_defs  <>
+# RGNC91-93
+<4749> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
+# ST87 Ouvea
+<4750> +proj=longlat +ellps=WGS84 +towgs84=-56.263,16.136,-22.856,0,0,0,0 +no_defs  <>
+# Kertau (RSO)
+<4751> +proj=longlat +a=6377295.664 +b=6356094.667915204 +no_defs  <>
+# Viti Levu 1912
+<4752> +proj=longlat +a=6378306.3696 +b=6356571.996 +towgs84=51,391,-36,0,0,0,0 +no_defs  <>
+# fk89
+<4753> +proj=longlat +ellps=intl +no_defs  <>
 # Bern 1898 (Bern)
 <4801> +proj=longlat +ellps=bessel +pm=bern +no_defs  <>
 # Bogota 1975 (Bogota)
@@ -1128,14 +1162,6 @@
 <2170> +proj=tmerc +lat_0=0 +lon_0=15 +k=0.999900 +x_0=500000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
 # Pulkovo 1942(58) / Poland zone I (deprecated)
 <2171> +proj=sterea +lat_0=50.625 +lon_0=21.08333333333333 +k=0.999800 +x_0=4637000 +y_0=5647000 +ellps=krass +towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84 +units=m +no_defs  <>
-# Pulkovo 1942(58) / Poland zone II
-<2172> +proj=sterea +lat_0=53.00194444444445 +lon_0=21.50277777777778 +k=0.999800 +x_0=4603000 +y_0=5806000 +ellps=krass +towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84 +units=m +no_defs  <>
-# Pulkovo 1942(58) / Poland zone III
-<2173> +proj=sterea +lat_0=53.58333333333334 +lon_0=17.00833333333333 +k=0.999800 +x_0=3501000 +y_0=5999000 +ellps=krass +towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84 +units=m +no_defs  <>
-# Pulkovo 1942(58) / Poland zone IV
-<2174> +proj=sterea +lat_0=51.67083333333333 +lon_0=16.67222222222222 +k=0.999800 +x_0=3703000 +y_0=5627000 +ellps=krass +towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84 +units=m +no_defs  <>
-# Pulkovo 1942(58) / Poland zone V
-<2175> +proj=tmerc +lat_0=0 +lon_0=18.95833333333333 +k=0.999983 +x_0=237000 +y_0=-4700000 +ellps=krass +towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84 +units=m +no_defs  <>
 # ETRS89 / Poland CS2000 zone 5
 <2176> +proj=tmerc +lat_0=0 +lon_0=15 +k=0.999923 +x_0=5500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
 # ETRS89 / Poland CS2000 zone 6
@@ -1199,7 +1225,7 @@
 # ETRS89 / TM 30 NE
 <2213> +proj=tmerc +lat_0=0 +lon_0=30 +k=0.999600 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
 # Douala 1948 / AOF west (deprecated)
-<2214> +proj=tmerc +lat_0=0 +lon_0=10.5 +k=0.999000 +x_0=1000000 +y_0=1000000 +ellps=intl +units=m +no_defs  <>
+<2214> +proj=tmerc +lat_0=0 +lon_0=10.5 +k=0.999000 +x_0=1000000 +y_0=1000000 +ellps=intl +towgs84=-206.1,-174.7,-87.7,0,0,0,0 +units=m +no_defs  <>
 # Manoca 1962 / UTM zone 32N
 <2215> +proj=utm +zone=32 +a=6378249.2 +b=6356515 +towgs84=-70.9,-151.8,-41.4,0,0,0,0 +units=m +no_defs  <>
 # Qornoq 1927 / UTM zone 22N
@@ -1365,22 +1391,22 @@
 # Ammassalik 1958 / Greenland zone 7 east
 # Unable to translate coordinate system EPSG:2296 into PROJ.4 format.
 #
-# Qornoq 1927 / Greenland zone 1 east
+# Qornoq 1927 / Greenland zone 1 east (deprecated)
 # Unable to translate coordinate system EPSG:2297 into PROJ.4 format.
 #
-# Qornoq 1927 / Greenland zone 2 east
+# Qornoq 1927 / Greenland zone 2 east (deprecated)
 # Unable to translate coordinate system EPSG:2298 into PROJ.4 format.
 #
 # Qornoq 1927 / Greenland zone 2 west
 # Unable to translate coordinate system EPSG:2299 into PROJ.4 format.
 #
-# Qornoq 1927 / Greenland zone 3 east
+# Qornoq 1927 / Greenland zone 3 east (deprecated)
 # Unable to translate coordinate system EPSG:2300 into PROJ.4 format.
 #
 # Qornoq 1927 / Greenland zone 3 west
 # Unable to translate coordinate system EPSG:2301 into PROJ.4 format.
 #
-# Qornoq 1927 / Greenland zone 4 east
+# Qornoq 1927 / Greenland zone 4 east (deprecated)
 # Unable to translate coordinate system EPSG:2302 into PROJ.4 format.
 #
 # Qornoq 1927 / Greenland zone 4 west
@@ -1936,7 +1962,7 @@
 <2575> +proj=tmerc +lat_0=0 +lon_0=174 +k=1.000000 +x_0=58500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
 # Pulkovo 1942 / 3-degree Gauss-Kruger zone 59
 <2576> +proj=tmerc +lat_0=0 +lon_0=177 +k=1.000000 +x_0=59500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
-# Pulkovo 1942 / 3-degree Gauss-Kruger zone 60
+# Pulkovo 1942 / 3-degree Gauss-Kruger zone 60 (deprecated)
 <2577> +proj=tmerc +lat_0=0 +lon_0=180 +k=1.000000 +x_0=60000000 +y_0=0 +ellps=krass +units=m +no_defs  <>
 # Pulkovo 1942 / 3-degree Gauss-Kruger zone 61
 <2578> +proj=tmerc +lat_0=0 +lon_0=-177 +k=1.000000 +x_0=61500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
@@ -1983,7 +2009,7 @@
 # Pulkovo 1942 / 3-degree Gauss-Kruger CM 72E
 <2599> +proj=tmerc +lat_0=0 +lon_0=72 +k=1.000000 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
 # Lietuvos Koordinoei Sistema 1994 (deprecated)
-<2600> +proj=tmerc +lat_0=0 +lon_0=24 +k=0.999800 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+<2600> +proj=tmerc +lat_0=0 +lon_0=24 +k=0.999800 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # Pulkovo 1942 / 3-degree Gauss-Kruger CM 75E
 <2601> +proj=tmerc +lat_0=0 +lon_0=75 +k=1.000000 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
 # Pulkovo 1942 / 3-degree Gauss-Kruger CM 78E
@@ -2170,7 +2196,7 @@
 <2692> +proj=tmerc +lat_0=0 +lon_0=174 +k=1.000000 +x_0=58500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
 # Pulkovo 1995 / 3-degree Gauss-Kruger zone 59
 <2693> +proj=tmerc +lat_0=0 +lon_0=177 +k=1.000000 +x_0=59500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
-# Pulkovo 1995 / 3-degree Gauss-Kruger zone 60
+# Pulkovo 1995 / 3-degree Gauss-Kruger zone 60 (deprecated)
 <2694> +proj=tmerc +lat_0=0 +lon_0=180 +k=1.000000 +x_0=60000000 +y_0=0 +ellps=krass +units=m +no_defs  <>
 # Pulkovo 1995 / 3-degree Gauss-Kruger zone 61
 <2695> +proj=tmerc +lat_0=0 +lon_0=-177 +k=1.000000 +x_0=61500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
@@ -2651,7 +2677,7 @@
 # Segara / UTM zone 50S
 <2933> +proj=utm +zone=50 +south +ellps=bessel +units=m +no_defs  <>
 # Segara (Jakarta) / NEIEZ (deprecated)
-<2934> +proj=merc +lat_ts=0 +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +pm=jakarta +units=m +no_defs  <>
+<2934> +proj=merc +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +pm=jakarta +units=m +no_defs  <>
 # Pulkovo 1942 / CS63 zone A1
 <2935> +proj=tmerc +lat_0=0.1166666666666667 +lon_0=41.53333333333333 +k=1.000000 +x_0=1300000 +y_0=0 +ellps=krass +units=m +no_defs  <>
 # Pulkovo 1942 / CS63 zone A2
@@ -2747,9 +2773,9 @@
 <2981> +proj=utm +zone=58 +south +ellps=intl +units=m +no_defs  <>
 # IGN72 Grand Terre / UTM zone 58S (deprecated)
 <2982> +proj=utm +zone=58 +south +ellps=intl +units=m +no_defs  <>
-# ST87 Ouvea / UTM zone 58S
+# ST87 Ouvea / UTM zone 58S (deprecated)
 <2983> +proj=utm +zone=58 +south +ellps=intl +towgs84=-122.383,-188.696,103.344,3.5107,-4.9668,-5.7047,4.4798 +units=m +no_defs  <>
-# RGNC 1991 / Lambert New Caledonia
+# RGNC 1991 / Lambert New Caledonia (deprecated)
 <2984> +proj=lcc +lat_1=-20.66666666666667 +lat_2=-22.33333333333333 +lat_0=-21.5 +lon_0=166 +x_0=400000 +y_0=300000 +ellps=intl +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # Petrels 1972 / Terre Adelie Polar Stereographic
 # Unable to translate coordinate system EPSG:2985 into PROJ.4 format.
@@ -2780,15 +2806,15 @@
 # ST71 Belep / UTM zone 58S
 <2997> +proj=utm +zone=58 +south +ellps=intl +towgs84=-480.26,-438.32,-643.429,16.3119,20.1721,-4.0349,-111.7 +units=m +no_defs  <>
 # NEA74 Noumea / UTM zone 58S
-<2998> +proj=utm +zone=58 +south +ellps=intl +towgs84=-166.207,-154.777,254.831,-37.5444,7.7011,-10.2025,-30.8598 +units=m +no_defs  <>
+<2998> +proj=utm +zone=58 +south +ellps=intl +units=m +no_defs  <>
 # Grand Comoros / UTM zone 38S
 <2999> +proj=utm +zone=38 +south +ellps=intl +units=m +no_defs  <>
 # Segara / NEIEZ
-<3000> +proj=merc +lat_ts=0 +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m +no_defs  <>
+<3000> +proj=merc +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m +no_defs  <>
 # Batavia / NEIEZ
-<3001> +proj=merc +lat_ts=0 +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m +no_defs  <>
+<3001> +proj=merc +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m +no_defs  <>
 # Makassar / NEIEZ
-<3002> +proj=merc +lat_ts=0 +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +towgs84=-587.8,519.75,145.76,0,0,0,0 +units=m +no_defs  <>
+<3002> +proj=merc +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +towgs84=-587.8,519.75,145.76,0,0,0,0 +units=m +no_defs  <>
 # Monte Mario / Italy zone 1
 <3003> +proj=tmerc +lat_0=0 +lon_0=9 +k=0.999600 +x_0=1500000 +y_0=0 +ellps=intl +units=m +no_defs  <>
 # Monte Mario / Italy zone 2
@@ -2991,11 +3017,11 @@
 <3101> +proj=utm +zone=55 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # American Samoa 1962 / American Samoa Lambert
 <3102> +proj=lcc +lat_1=-14.26666666666667 +lat_0=-14.26666666666667 +lon_0=-170 +k_0=1 +x_0=152400.3048006096 +y_0=95169.31165862332 +ellps=clrk66 +towgs84=-115,118,426,0,0,0,0 +to_meter=0.3048006096012192 +no_defs  <>
-# Mauritania 1999 / UTM zone 28N
+# Mauritania 1999 / UTM zone 28N (deprecated)
 <3103> +proj=utm +zone=28 +ellps=clrk80 +units=m +no_defs  <>
-# Mauritania 1999 / UTM zone 29N
+# Mauritania 1999 / UTM zone 29N (deprecated)
 <3104> +proj=utm +zone=29 +ellps=clrk80 +units=m +no_defs  <>
-# Mauritania 1999 / UTM zone 30N
+# Mauritania 1999 / UTM zone 30N (deprecated)
 <3105> +proj=utm +zone=30 +ellps=clrk80 +units=m +no_defs  <>
 # Gulshan 303 / Bangladesh Transverse Mercator
 <3106> +proj=tmerc +lat_0=0 +lon_0=90 +k=0.999600 +x_0=500000 +y_0=0 +a=6377276.345 +b=6356075.413140239 +units=m +no_defs  <>
@@ -3024,7 +3050,7 @@
 # MAGNA-SIRGAS / Colombia East zone
 <3118> +proj=tmerc +lat_0=4.596200416666666 +lon_0=-68.07750791666666 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # Douala 1948 / AEF west
-<3119> +proj=tmerc +lat_0=0 +lon_0=10.5 +k=0.999000 +x_0=1000000 +y_0=1000000 +ellps=intl +units=m +no_defs  <>
+<3119> +proj=tmerc +lat_0=0 +lon_0=10.5 +k=0.999000 +x_0=1000000 +y_0=1000000 +ellps=intl +towgs84=-206.1,-174.7,-87.7,0,0,0,0 +units=m +no_defs  <>
 # Pulkovo 1942(58) / Poland zone I
 <3120> +proj=sterea +lat_0=50.625 +lon_0=21.08333333333333 +k=0.999800 +x_0=4637000 +y_0=5467000 +ellps=krass +towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84 +units=m +no_defs  <>
 # PRS92 / Philippines zone 1
@@ -3063,12 +3089,106 @@
 <3137> +proj=tmerc +lat_0=0 +lon_0=30 +k=1.000000 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
 # ETRS89 / ETRS-GK31FIN
 <3138> +proj=tmerc +lat_0=0 +lon_0=31 +k=1.000000 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# Vanua Levu 1915 / Vanua Levu Grid
+# Unable to translate coordinate system EPSG:3139 into PROJ.4 format.
+#
+# Viti Levu 1912 / Viti Levu Grid
+<3140> +proj=cass +lat_0=-18 +lon_0=178 +x_0=109435.392 +y_0=141622.272 +a=6378306.3696 +b=6356571.996 +towgs84=51,391,-36,0,0,0,0 +to_meter=0.201168 +no_defs  <>
+# Fiji 1956 / UTM zone 60S
+<3141> +proj=utm +zone=60 +south +ellps=intl +towgs84=265.025,384.929,-194.046,0,0,0,0 +units=m +no_defs  <>
+# Fiji 1956 / UTM zone 1S
+<3142> +proj=utm +zone=1 +south +ellps=intl +towgs84=265.025,384.929,-194.046,0,0,0,0 +units=m +no_defs  <>
+# Fiji 1986 / Fiji Map Grid
+<3143> +proj=tmerc +lat_0=-17 +lon_0=178.75 +k=0.999850 +x_0=2000000 +y_0=4000000 +ellps=WGS72 +units=m +no_defs  <>
+# FD54 / Faroe Lambert
+# Unable to translate coordinate system EPSG:3144 into PROJ.4 format.
+#
+# ETRS89 / Faroe Lambert
+# Unable to translate coordinate system EPSG:3145 into PROJ.4 format.
+#
+# Pulkovo 1942 / 3-degree Gauss-Kruger zone 6
+<3146> +proj=tmerc +lat_0=0 +lon_0=18 +k=1.000000 +x_0=6500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
+# Pulkovo 1942 / 3-degree Gauss-Kruger CM 18E
+<3147> +proj=tmerc +lat_0=0 +lon_0=18 +k=1.000000 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
 # Indian 1960 / UTM zone 48N
 <3148> +proj=utm +zone=48 +a=6377276.345 +b=6356075.413140239 +units=m +no_defs  <>
 # Indian 1960 / UTM zone 49N
 <3149> +proj=utm +zone=49 +a=6377276.345 +b=6356075.413140239 +units=m +no_defs  <>
+# Pulkovo 1995 / 3-degree Gauss-Kruger zone 6
+<3150> +proj=tmerc +lat_0=0 +lon_0=18 +k=1.000000 +x_0=6500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
+# Pulkovo 1995 / 3-degree Gauss-Kruger CM 18E
+<3151> +proj=tmerc +lat_0=0 +lon_0=18 +k=1.000000 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
+# ST74
+<3152> +proj=tmerc +lat_0=0 +lon_0=18.05779 +k=0.999994 +x_0=100178.1808 +y_0=-6500614.7836 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / BC Albers
+<3153> +proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS) / UTM zone 7N
+<3154> +proj=utm +zone=7 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS) / UTM zone 8N
+<3155> +proj=utm +zone=8 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS) / UTM zone 9N
+<3156> +proj=utm +zone=9 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS) / UTM zone 10N
+<3157> +proj=utm +zone=10 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS) / UTM zone 14N
+<3158> +proj=utm +zone=14 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS) / UTM zone 15N
+<3159> +proj=utm +zone=15 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS) / UTM zone 16N
+<3160> +proj=utm +zone=16 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83 / Ontario MNR Lambert
+<3161> +proj=lcc +lat_1=44.5 +lat_2=53.5 +lat_0=0 +lon_0=-85 +x_0=930000 +y_0=6430000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
+# NAD83(CSRS) / Ontario MNR Lambert
+<3162> +proj=lcc +lat_1=44.5 +lat_2=53.5 +lat_0=0 +lon_0=-85 +x_0=930000 +y_0=6430000 +ellps=GRS80 +units=m +no_defs  <>
+# RGNC91-93 / Lambert New Caledonia
+<3163> +proj=lcc +lat_1=-20.66666666666667 +lat_2=-22.33333333333333 +lat_0=-21.5 +lon_0=166 +x_0=400000 +y_0=300000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# ST87 Ouvea / UTM zone 58S
+<3164> +proj=utm +zone=58 +south +ellps=WGS84 +towgs84=-56.263,16.136,-22.856,0,0,0,0 +units=m +no_defs  <>
+# NEA74 Noumea / Noumea Lambert
+<3165> +proj=lcc +lat_1=-22.24469175 +lat_2=-22.29469175 +lat_0=-22.26969175 +lon_0=166.44242575 +x_0=0.66 +y_0=1.02 +ellps=intl +units=m +no_defs  <>
+# NEA74 Noumea / Noumea Lambert 2
+<3166> +proj=lcc +lat_1=-22.24472222222222 +lat_2=-22.29472222222222 +lat_0=-22.26972222222222 +lon_0=166.4425 +x_0=8.313000000000001 +y_0=-2.354 +ellps=intl +units=m +no_defs  <>
+# Kertau (RSO) / R.S.O. Malaya (ch)
+<3167> +proj=omerc +lat_0=4 +lonc=102.25 +alpha=323.0257905 +k=0.99984 +x_0=40000 +y_0=0 +a=6377295.664 +b=6356094.667915204 +to_meter=20.116756 +no_defs  <>
+# Kertau (RSO) / R.S.O. Malaya (m)
+<3168> +proj=omerc +lat_0=4 +lonc=102.25 +alpha=323.0257905 +k=0.99984 +x_0=804670.24 +y_0=0 +a=6377295.664 +b=6356094.667915204 +units=m +no_defs  <>
+# RGNC91-93 / UTM zone 57S
+<3169> +proj=utm +zone=57 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# RGNC91-93 / UTM zone 58S
+<3170> +proj=utm +zone=58 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# RGNC91-93 / UTM zone 59S
+<3171> +proj=utm +zone=59 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# IGN53 Mare / UTM zone 59S
+<3172> +proj=utm +zone=59 +south +ellps=intl +units=m +no_defs  <>
+# fk89 / Faroe Lambert FK89
+# Unable to translate coordinate system EPSG:3173 into PROJ.4 format.
+#
 # Indian 1960 / TM 106 NE
 <3176> +proj=tmerc +lat_0=0 +lon_0=106 +k=0.999600 +x_0=500000 +y_0=0 +a=6377276.345 +b=6356075.413140239 +units=m +no_defs  <>
+# GR96 / UTM zone 18N
+<3178> +proj=utm +zone=18 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / UTM zone 19N
+<3179> +proj=utm +zone=19 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / UTM zone 20N
+<3180> +proj=utm +zone=20 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / UTM zone 21N
+<3181> +proj=utm +zone=21 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / UTM zone 22N
+<3182> +proj=utm +zone=22 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / UTM zone 23N
+<3183> +proj=utm +zone=23 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / UTM zone 24N
+<3184> +proj=utm +zone=24 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / UTM zone 25N
+<3185> +proj=utm +zone=25 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / UTM zone 26N
+<3186> +proj=utm +zone=26 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / UTM zone 27N
+<3187> +proj=utm +zone=27 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / UTM zone 28N
+<3188> +proj=utm +zone=28 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / UTM zone 29N
+<3189> +proj=utm +zone=29 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # FD58 / Iraq zone
 <3200> +proj=lcc +lat_1=32.5 +lat_0=32.5 +lon_0=45 +k_0=0.9987864078000001 +x_0=1500000 +y_0=1166200 +ellps=clrk80 +units=m +no_defs  <>
 # WGS 84 / SCAR IMW SP19-20
@@ -3338,6 +3458,8 @@
 <3335> +proj=tmerc +lat_0=0 +lon_0=27 +k=1.000000 +x_0=5500000 +y_0=0 +ellps=krass +towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84 +units=m +no_defs  <>
 # IGN 1962 Kerguelen / UTM zone 42S
 <3336> +proj=utm +zone=42 +south +ellps=intl +towgs84=145,-187,103,0,0,0,0 +units=m +no_defs  <>
+# Le Pouce 1934 / Mauritius Grid
+<3337> +proj=lcc +lat_1=-20.19506944444445 +lat_0=-20.19506944444445 +lon_0=57.52182777777778 +k_0=1 +x_0=1000000 +y_0=1000000 +ellps=clrk80 +towgs84=-770.1,158.4,-498.2,0,0,0,0 +units=m +no_defs  <>
 # IGCB 1955 / Congo TM zone 12
 <3339> +proj=tmerc +lat_0=0 +lon_0=12 +k=0.999900 +x_0=500000 +y_0=10000000 +ellps=clrk80 +towgs84=-79.9,-158,-168.9,0,0,0,0 +units=m +no_defs  <>
 # IGCB 1955 / Congo TM zone 14
@@ -3346,14 +3468,20 @@
 <3341> +proj=tmerc +lat_0=0 +lon_0=16 +k=0.999900 +x_0=500000 +y_0=10000000 +ellps=clrk80 +towgs84=-79.9,-158,-168.9,0,0,0,0 +units=m +no_defs  <>
 # IGCB 1955 / UTM zone 33S
 <3342> +proj=utm +zone=33 +south +ellps=clrk80 +towgs84=-79.9,-158,-168.9,0,0,0,0 +units=m +no_defs  <>
+# Mauritania 1999 / UTM zone 28N
+<3343> +proj=utm +zone=28 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# Mauritania 1999 / UTM zone 29N
+<3344> +proj=utm +zone=29 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# Mauritania 1999 / UTM zone 30N
+<3345> +proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # LKS94 / Lithuania TM
-<3346> +proj=tmerc +lat_0=0 +lon_0=24 +k=0.999800 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+<3346> +proj=tmerc +lat_0=0 +lon_0=24 +k=0.999800 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # NAD83 / Statistics Canada Lambert
 <3347> +proj=lcc +lat_1=49 +lat_2=77 +lat_0=63.390675 +lon_0=-91.86666666666666 +x_0=6200000 +y_0=3000000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
 # NAD83(CSRS) / Statistics Canada Lambert
 <3348> +proj=lcc +lat_1=49 +lat_2=77 +lat_0=63.390675 +lon_0=-91.86666666666666 +x_0=6200000 +y_0=3000000 +ellps=GRS80 +units=m +no_defs  <>
 # WGS 84 / PDC Mercator
-<3349> +proj=merc +lat_ts=0 +lon_0=-150 +k=1.000000 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs  <>
+<3349> +proj=merc +lon_0=-150 +k=1.000000 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs  <>
 # Pulkovo 1942 / CS63 zone C0
 <3350> +proj=tmerc +lat_0=0.1 +lon_0=21.95 +k=1.000000 +x_0=250000 +y_0=0 +ellps=krass +units=m +no_defs  <>
 # Pulkovo 1942 / CS63 zone C1
@@ -3388,6 +3516,80 @@
 <3365> +proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +to_meter=0.3048006096012192 +no_defs  <>
 # Hong Kong 1963 Grid System
 <3366> +proj=cass +lat_0=22.31213333333334 +lon_0=114.1785555555556 +x_0=40243.57775604237 +y_0=19069.93351512578 +a=6378293.645208759 +b=6356617.987679838 +units=m +no_defs  <>
+# IGN Astro 1960 / UTM zone 28N
+<3367> +proj=utm +zone=28 +ellps=clrk80 +units=m +no_defs  <>
+# IGN Astro 1960 / UTM zone 29N
+<3368> +proj=utm +zone=29 +ellps=clrk80 +units=m +no_defs  <>
+# IGN Astro 1960 / UTM zone 30N
+<3369> +proj=utm +zone=30 +ellps=clrk80 +units=m +no_defs  <>
+# NAD27 / UTM zone 59N
+<3370> +proj=utm +zone=59 +ellps=clrk66 +datum=NAD27 +units=m +no_defs  <>
+# NAD27 / UTM zone 60N
+<3371> +proj=utm +zone=60 +ellps=clrk66 +datum=NAD27 +units=m +no_defs  <>
+# NAD83 / UTM zone 59N
+<3372> +proj=utm +zone=59 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
+# NAD83 / UTM zone 60N
+<3373> +proj=utm +zone=60 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
+# FD54 / UTM zone 29N
+<3374> +proj=utm +zone=29 +ellps=intl +units=m +no_defs  <>
+# GDM2000 / Peninsula RSO
+<3375> +proj=omerc +lat_0=4 +lonc=102.25 +alpha=323.0257964666666 +k=0.99984 +x_0=804671 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# GDM2000 / East Malaysia BRSO
+<3376> +proj=omerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# GDM2000 / Johor Grid
+<3377> +proj=cass +lat_0=2.121679744444445 +lon_0=103.4279362361111 +x_0=-14810.562 +y_0=8758.32 +ellps=GRS80 +units=m +no_defs  <>
+# GDM2000 / Sembilan and Melaka Grid
+<3378> +proj=cass +lat_0=2.682347636111111 +lon_0=101.9749050416667 +x_0=3673.785 +y_0=-4240.573 +ellps=GRS80 +units=m +no_defs  <>
+# GDM2000 / PahangGrid
+<3379> +proj=cass +lat_0=3.769388088888889 +lon_0=102.3682989833333 +x_0=-7368.228 +y_0=6485.858 +ellps=GRS80 +units=m +no_defs  <>
+# GDM2000 / Selangor Grid
+<3380> +proj=cass +lat_0=3.68464905 +lon_0=101.3891079138889 +x_0=-34836.161 +y_0=56464.049 +ellps=GRS80 +units=m +no_defs  <>
+# GDM2000 / Terengganu Grid
+<3381> +proj=cass +lat_0=4.9762852 +lon_0=103.070275625 +x_0=19594.245 +y_0=3371.895 +ellps=GRS80 +units=m +no_defs  <>
+# GDM2000 / Pinang Grid
+<3382> +proj=cass +lat_0=5.421517541666667 +lon_0=100.3443769638889 +x_0=-23.414 +y_0=62.283 +ellps=GRS80 +units=m +no_defs  <>
+# GDM2000 / Kedah and Perlis Grid
+<3383> +proj=cass +lat_0=5.964672713888889 +lon_0=100.6363711111111 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# GDM2000 / Perak Grid
+<3384> +proj=cass +lat_0=4.859063022222222 +lon_0=100.8154105861111 +x_0=-1.769 +y_0=133454.779 +ellps=GRS80 +units=m +no_defs  <>
+# GDM2000 / Kelantan Grid
+<3385> +proj=cass +lat_0=5.972543658333334 +lon_0=102.2952416694444 +x_0=13227.851 +y_0=8739.894 +ellps=GRS80 +units=m +no_defs  <>
+# KKJ / Finland zone 0
+<3386> +proj=tmerc +lat_0=0 +lon_0=18 +k=1.000000 +x_0=500000 +y_0=0 +ellps=intl +units=m +no_defs  <>
+# KKJ / Finland zone 5
+<3387> +proj=tmerc +lat_0=0 +lon_0=33 +k=1.000000 +x_0=5500000 +y_0=0 +ellps=intl +units=m +no_defs  <>
+# Pulkovo 1942 / Caspian Sea Mercator
+<3388> +proj=merc +lon_0=51 +k=1.000000 +x_0=0 +y_0=0 +ellps=krass +units=m +no_defs  <>
+# Pulkovo 1942 / 3-degree Gauss-Kruger zone 60
+<3389> +proj=tmerc +lat_0=0 +lon_0=180 +k=1.000000 +x_0=60500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
+# Pulkovo 1995 / 3-degree Gauss-Kruger zone 60
+<3390> +proj=tmerc +lat_0=0 +lon_0=180 +k=1.000000 +x_0=60500000 +y_0=0 +ellps=krass +units=m +no_defs  <>
+# Karbala 1979 (Polservice) / UTM zone 37N
+<3391> +proj=utm +zone=37 +ellps=clrk80 +towgs84=84.1,-320.1,218.7,0,0,0,0 +units=m +no_defs  <>
+# Karbala 1979 (Polservice) / UTM zone 38N
+<3392> +proj=utm +zone=38 +ellps=clrk80 +towgs84=84.1,-320.1,218.7,0,0,0,0 +units=m +no_defs  <>
+# Karbala 1979 (Polservice) / UTM zone 39N
+<3393> +proj=utm +zone=39 +ellps=clrk80 +towgs84=84.1,-320.1,218.7,0,0,0,0 +units=m +no_defs  <>
+# Nahrwan 1934 / Iraq zone
+<3394> +proj=lcc +lat_1=32.5 +lat_0=32.5 +lon_0=45 +k_0=0.9987864078000001 +x_0=1500000 +y_0=1166200 +ellps=clrk80 +units=m +no_defs  <>
+# WGS 84 / World Mercator
+<3395> +proj=merc +lon_0=0 +k=1.000000 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs  <>
+# PD/83 / 3-degree Gauss zone 3
+<3396> +proj=tmerc +lat_0=0 +lon_0=9 +k=1.000000 +x_0=3500000 +y_0=0 +ellps=bessel +units=m +no_defs  <>
+# PD/83 / 3-degree Gauss zone 4
+<3397> +proj=tmerc +lat_0=0 +lon_0=12 +k=1.000000 +x_0=4500000 +y_0=0 +ellps=bessel +units=m +no_defs  <>
+# RD/83 / 3-degree Gauss zone 4
+<3398> +proj=tmerc +lat_0=0 +lon_0=12 +k=1.000000 +x_0=4500000 +y_0=0 +ellps=bessel +units=m +no_defs  <>
+# RD/83 / 3-degree Gauss zone 5
+<3399> +proj=tmerc +lat_0=0 +lon_0=15 +k=1.000000 +x_0=5500000 +y_0=0 +ellps=bessel +units=m +no_defs  <>
+# NAD83 / Alberta 10-TM (Forest)
+<3400> +proj=tmerc +lat_0=0 +lon_0=-115 +k=0.999200 +x_0=500000 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
+# NAD83 / Alberta 10-TM (Resource)
+<3401> +proj=tmerc +lat_0=0 +lon_0=-115 +k=0.999200 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
+# NAD83(CSRS) / Alberta 10-TM (Forest)
+<3402> +proj=tmerc +lat_0=0 +lon_0=-115 +k=0.999200 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS) / Alberta 10-TM (Resource)
+<3403> +proj=tmerc +lat_0=0 +lon_0=-115 +k=0.999200 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
 # PSD93 / UTM zone 39N
 <3439> +proj=utm +zone=39 +ellps=clrk80 +units=m +no_defs  <>
 # PSD93 / UTM zone 40N
@@ -3624,7 +3826,7 @@
 # Arc 1960 / UTM zone 37N
 <21097> +proj=utm +zone=37 +ellps=clrk80 +units=m +no_defs  <>
 # Batavia (Jakarta) / NEIEZ (deprecated)
-<21100> +proj=merc +lat_ts=0 +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +pm=jakarta +units=m +no_defs  <>
+<21100> +proj=merc +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +pm=jakarta +units=m +no_defs  <>
 # Batavia / UTM zone 48S
 <21148> +proj=utm +zone=48 +south +ellps=bessel +units=m +no_defs  <>
 # Batavia / UTM zone 49S
@@ -3980,13 +4182,13 @@
 <24382> +proj=lcc +lat_1=26 +lat_0=26 +lon_0=90 +k_0=0.99878641 +x_0=2743195.592233322 +y_0=914398.5307444407 +a=6377299.36559538 +b=6356098.357204817 +to_meter=0.9143985307444408 +no_defs  <>
 # Kalianpur 1975 / India zone IV
 <24383> +proj=lcc +lat_1=12 +lat_0=12 +lon_0=80 +k_0=0.99878641 +x_0=2743195.5 +y_0=914398.5 +a=6377299.151 +b=6356098.145120132 +towgs84=295,736,257,0,0,0,0 +units=m +no_defs  <>
-# Kertau / Singapore Grid
+# Kertau 1968 / Singapore Grid
 <24500> +proj=cass +lat_0=1.287646666666667 +lon_0=103.8530022222222 +x_0=30000 +y_0=30000 +a=6377304.063 +b=6356103.038993155 +towgs84=-11,851,5,0,0,0,0 +units=m +no_defs  <>
-# Kertau / UTM zone 47N
+# Kertau 1968 / UTM zone 47N
 <24547> +proj=utm +zone=47 +a=6377304.063 +b=6356103.038993155 +towgs84=-11,851,5,0,0,0,0 +units=m +no_defs  <>
-# Kertau / UTM zone 48N
+# Kertau 1968 / UTM zone 48N
 <24548> +proj=utm +zone=48 +a=6377304.063 +b=6356103.038993155 +towgs84=-11,851,5,0,0,0,0 +units=m +no_defs  <>
-# Kertau / R.S.O. Malaya (ch)
+# Kertau / R.S.O. Malaya (ch) (deprecated)
 <24571> +proj=omerc +lat_0=4 +lonc=102.25 +alpha=323.0257905 +k=0.99984 +x_0=804671.2997750348 +y_0=0 +a=6377304.063 +b=6356103.038993155 +towgs84=-11,851,5,0,0,0,0 +to_meter=20.11678249437587 +no_defs  <>
 # KOC Lambert
 <24600> +proj=lcc +lat_1=32.5 +lat_0=32.5 +lon_0=45 +k_0=0.9987864078000001 +x_0=1500000 +y_0=1166200 +ellps=clrk80 +towgs84=-294.7,-200.1,525.5,0,0,0,0 +units=m +no_defs  <>
@@ -4039,7 +4241,7 @@
 # Luzon 1911 / Philippines zone V
 <25395> +proj=tmerc +lat_0=0 +lon_0=125 +k=0.999950 +x_0=500000 +y_0=0 +ellps=clrk66 +units=m +no_defs  <>
 # Makassar (Jakarta) / NEIEZ (deprecated)
-<25700> +proj=merc +lat_ts=0 +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +towgs84=-587.8,519.75,145.76,0,0,0,0 +pm=jakarta +units=m +no_defs  <>
+<25700> +proj=merc +lon_0=110 +k=0.997000 +x_0=3900000 +y_0=900000 +ellps=bessel +towgs84=-587.8,519.75,145.76,0,0,0,0 +pm=jakarta +units=m +no_defs  <>
 # ETRS89 / UTM zone 28N
 <25828> +proj=utm +zone=28 +ellps=GRS80 +units=m +no_defs  <>
 # ETRS89 / UTM zone 29N
@@ -4098,6 +4300,10 @@
 <26632> +proj=utm +zone=32 +a=6378249.2 +b=6356515 +units=m +no_defs  <>
 # M'poraloko / UTM zone 32S
 <26692> +proj=utm +zone=32 +south +a=6378249.2 +b=6356515 +units=m +no_defs  <>
+# NAD27 / UTM zone 1N
+<26701> +proj=utm +zone=1 +ellps=clrk66 +datum=NAD27 +units=m +no_defs  <>
+# NAD27 / UTM zone 2N
+<26702> +proj=utm +zone=2 +ellps=clrk66 +datum=NAD27 +units=m +no_defs  <>
 # NAD27 / UTM zone 3N
 <26703> +proj=utm +zone=3 +ellps=clrk66 +datum=NAD27 +units=m +no_defs  <>
 # NAD27 / UTM zone 4N
@@ -4276,6 +4482,10 @@
 <26812> +proj=lcc +lat_1=44.18333333333333 +lat_2=45.7 +lat_0=43.31666666666667 +lon_0=-84.33333333333333 +x_0=609601.2192024384 +y_0=0 +a=6378450.047548896 +b=6356826.621488444 +to_meter=0.3048006096012192 +no_defs  <>
 # NAD Michigan / Michigan South
 <26813> +proj=lcc +lat_1=42.1 +lat_2=43.66666666666666 +lat_0=41.5 +lon_0=-84.33333333333333 +x_0=609601.2192024384 +y_0=0 +a=6378450.047548896 +b=6356826.621488444 +to_meter=0.3048006096012192 +no_defs  <>
+# NAD83 / UTM zone 1N
+<26901> +proj=utm +zone=1 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
+# NAD83 / UTM zone 2N
+<26902> +proj=utm +zone=2 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
 # NAD83 / UTM zone 3N
 <26903> +proj=utm +zone=3 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
 # NAD83 / UTM zone 4N
@@ -4456,6 +4666,8 @@
 <26997> +proj=tmerc +lat_0=35.83333333333334 +lon_0=-92.5 +k=0.999933 +x_0=500000 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
 # NAD83 / Missouri West
 <26998> +proj=tmerc +lat_0=36.16666666666666 +lon_0=-94.5 +k=0.999941 +x_0=850000 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
+# Nahrwan 1967 / UTM zone 37N
+<27037> +proj=utm +zone=37 +ellps=clrk80 +units=m +no_defs  <>
 # Nahrwan 1967 / UTM zone 38N
 <27038> +proj=utm +zone=38 +ellps=clrk80 +units=m +no_defs  <>
 # Nahrwan 1967 / UTM zone 39N
@@ -5032,36 +5244,48 @@
 <31900> +proj=tmerc +lat_0=0 +lon_0=48 +k=0.999600 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
 # KUDAMS / KTM
 <31901> +proj=tmerc +lat_0=0 +lon_0=48 +k=1.000000 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# SIRGAS 2000 / UTM zone 11N
+<31965> +proj=utm +zone=11 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# SIRGAS 2000 / UTM zone 12N
+<31966> +proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# SIRGAS 2000 / UTM zone 13N
+<31967> +proj=utm +zone=13 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# SIRGAS 2000 / UTM zone 14N
+<31968> +proj=utm +zone=14 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# SIRGAS 2000 / UTM zone 15N
+<31969> +proj=utm +zone=15 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# SIRGAS 2000 / UTM zone 16N
+<31970> +proj=utm +zone=16 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 17N
-<31971> +proj=utm +zone=17 +ellps=GRS80 +units=m +no_defs  <>
+<31971> +proj=utm +zone=17 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 18N
-<31972> +proj=utm +zone=18 +ellps=GRS80 +units=m +no_defs  <>
+<31972> +proj=utm +zone=18 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 19N
-<31973> +proj=utm +zone=19 +ellps=GRS80 +units=m +no_defs  <>
+<31973> +proj=utm +zone=19 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 20N
-<31974> +proj=utm +zone=20 +ellps=GRS80 +units=m +no_defs  <>
+<31974> +proj=utm +zone=20 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 21N
-<31975> +proj=utm +zone=21 +ellps=GRS80 +units=m +no_defs  <>
+<31975> +proj=utm +zone=21 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 22N
-<31976> +proj=utm +zone=22 +ellps=GRS80 +units=m +no_defs  <>
+<31976> +proj=utm +zone=22 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 17S
-<31977> +proj=utm +zone=17 +south +ellps=GRS80 +units=m +no_defs  <>
+<31977> +proj=utm +zone=17 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 18S
-<31978> +proj=utm +zone=18 +south +ellps=GRS80 +units=m +no_defs  <>
+<31978> +proj=utm +zone=18 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 19S
-<31979> +proj=utm +zone=19 +south +ellps=GRS80 +units=m +no_defs  <>
+<31979> +proj=utm +zone=19 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 20S
-<31980> +proj=utm +zone=20 +south +ellps=GRS80 +units=m +no_defs  <>
+<31980> +proj=utm +zone=20 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 21S
-<31981> +proj=utm +zone=21 +south +ellps=GRS80 +units=m +no_defs  <>
+<31981> +proj=utm +zone=21 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 22S
-<31982> +proj=utm +zone=22 +south +ellps=GRS80 +units=m +no_defs  <>
+<31982> +proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 23S
-<31983> +proj=utm +zone=23 +south +ellps=GRS80 +units=m +no_defs  <>
+<31983> +proj=utm +zone=23 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 24S
-<31984> +proj=utm +zone=24 +south +ellps=GRS80 +units=m +no_defs  <>
+<31984> +proj=utm +zone=24 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS 2000 / UTM zone 25S
-<31985> +proj=utm +zone=25 +south +ellps=GRS80 +units=m +no_defs  <>
+<31985> +proj=utm +zone=25 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS / UTM zone 17N
 <31986> +proj=utm +zone=17 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SIRGAS / UTM zone 18N
@@ -5238,6 +5462,8 @@
 <32086> +proj=tmerc +lat_0=0 +lon_0=-67.5 +k=0.999900 +x_0=304800 +y_0=0 +ellps=clrk66 +datum=NAD27 +units=m +no_defs  <>
 # NAD27 / Quebec Lambert
 <32098> +proj=lcc +lat_1=60 +lat_2=46 +lat_0=44 +lon_0=-68.5 +x_0=0 +y_0=0 +ellps=clrk66 +datum=NAD27 +units=m +no_defs  <>
+# NAD27 / Louisiana Offshore
+<32099> +proj=lcc +lat_1=27.83333333333333 +lat_2=26.16666666666667 +lat_0=25.66666666666667 +lon_0=-91.33333333333333 +x_0=609601.2192024384 +y_0=0 +ellps=clrk66 +datum=NAD27 +to_meter=0.3048006096012192 +no_defs  <>
 # NAD83 / Montana
 <32100> +proj=lcc +lat_1=49 +lat_2=45 +lat_0=44.25 +lon_0=-109.5 +x_0=600000 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
 # NAD83 / Nebraska
@@ -5344,6 +5570,14 @@
 <32158> +proj=tmerc +lat_0=40.5 +lon_0=-110.0833333333333 +k=0.999938 +x_0=800000 +y_0=100000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
 # NAD83 / Puerto Rico & Virgin Is.
 <32161> +proj=lcc +lat_1=18.43333333333333 +lat_2=18.03333333333333 +lat_0=17.83333333333333 +lon_0=-66.43333333333334 +x_0=200000 +y_0=200000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
+# NAD83 / BLM 14N (ftUS)
+<32164> +proj=tmerc +lat_0=0 +lon_0=-99 +k=0.999600 +x_0=500000.001016002 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs  <>
+# NAD83 / BLM 15N (ftUS)
+<32165> +proj=tmerc +lat_0=0 +lon_0=-93 +k=0.999600 +x_0=500000.001016002 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs  <>
+# NAD83 / BLM 16N (ftUS)
+<32166> +proj=tmerc +lat_0=0 +lon_0=-87 +k=0.999600 +x_0=500000.001016002 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs  <>
+# NAD83 / BLM 17N (ftUS)
+<32167> +proj=tmerc +lat_0=0 +lon_0=-81 +k=0.999600 +x_0=500000.001016002 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs  <>
 # NAD83 / SCoPQ zone 2
 <32180> +proj=tmerc +lat_0=0 +lon_0=-55.5 +k=0.999900 +x_0=304800 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
 # NAD83 / MTM zone 1
@@ -5382,6 +5616,8 @@
 <32197> +proj=tmerc +lat_0=0 +lon_0=-96 +k=0.999900 +x_0=304800 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
 # NAD83 / Quebec Lambert
 <32198> +proj=lcc +lat_1=60 +lat_2=46 +lat_0=44 +lon_0=-68.5 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
+# NAD83 / Louisiana Offshore
+<32199> +proj=lcc +lat_1=27.83333333333333 +lat_2=26.16666666666667 +lat_0=25.5 +lon_0=-91.33333333333333 +x_0=1000000 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs  <>
 # WGS 72 / UTM zone 1N
 <32201> +proj=utm +zone=1 +ellps=WGS72 +units=m +no_defs  <>
 # WGS 72 / UTM zone 2N
@@ -5989,6 +6225,14 @@
 <32661> +proj=stere +lat_0=90 +lat_ts=90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 +ellps=WGS84 +datum=WGS84 +units=m +no_defs  <>
 # WGS 84 / Plate Carree
 <32662> +proj=eqc +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / BLM 14N (ftUS)
+<32664> +proj=tmerc +lat_0=0 +lon_0=-99 +k=0.999600 +x_0=500000.001016002 +y_0=0 +ellps=WGS84 +datum=WGS84 +to_meter=0.3048006096012192 +no_defs  <>
+# WGS 84 / BLM 15N (ftUS)
+<32665> +proj=tmerc +lat_0=0 +lon_0=-93 +k=0.999600 +x_0=500000.001016002 +y_0=0 +ellps=WGS84 +datum=WGS84 +to_meter=0.3048006096012192 +no_defs  <>
+# WGS 84 / BLM 16N (ftUS)
+<32666> +proj=tmerc +lat_0=0 +lon_0=-87 +k=0.999600 +x_0=500000.001016002 +y_0=0 +ellps=WGS84 +datum=WGS84 +to_meter=0.3048006096012192 +no_defs  <>
+# WGS 84 / BLM 17N (ftUS)
+<32667> +proj=tmerc +lat_0=0 +lon_0=-81 +k=0.999600 +x_0=500000.001016002 +y_0=0 +ellps=WGS84 +datum=WGS84 +to_meter=0.3048006096012192 +no_defs  <>
 # WGS 84 / UTM grid system (southern hemisphere)
 # Unable to translate coordinate system EPSG:32700 into PROJ.4 format.
 #
