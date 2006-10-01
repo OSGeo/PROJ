@@ -1,3 +1,6 @@
+*~
+*.manifest
+*.swp
 config.log
 config.guess
 config.status
