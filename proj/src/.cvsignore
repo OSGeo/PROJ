@@ -1,3 +1,4 @@
+*~
 *.lo
 *.la
 proj.dll
@@ -7,6 +8,8 @@ proj.dll
 *.opt
 .libs
 .deps
+*.manifest
+*.swp
 nad2nad
 nad2bin
 proj
