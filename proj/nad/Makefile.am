@@ -29,3 +29,7 @@ install-data-local:
 	done
 
 
+test:
+	./test27
+	./test83
+	./testvarious

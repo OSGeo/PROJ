@@ -368,6 +368,11 @@ install-data-local:
 	    $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/$$gridfile; \
           fi; \
 	done
+
+test:
+	./test27
+	./test83
+	./testvarious
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

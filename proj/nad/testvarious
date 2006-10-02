@@ -150,8 +150,10 @@ if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURED"
 	echo "test file ${OUT} saved"
+	exit 100
 else
 	echo "TEST OK"
 	echo "test file ${OUT} removed"
 	/bin/rm -f ${OUT}
+	exit 0
 fi
