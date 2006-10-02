@@ -1,3 +1,7 @@
+2006-10-01  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/Makefile.am: added test target.
+
 2006-09-23  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* nad/epsg: upgraded to EPSG 6.11
