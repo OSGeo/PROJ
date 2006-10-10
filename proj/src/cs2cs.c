@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.10  2006/10/10 15:24:05  fwarmerdam
+ *  Increase MAX_LINE to 1000 per request from Dan Scheirer.
+ *
  * Revision 1.9  2006/03/30 14:35:09  fwarmerdam
  * bug 1145: avoid warnings on VC8.
  *
@@ -65,7 +68,7 @@
 #include <math.h>
 #include "emess.h"
 
-#define MAX_LINE 200
+#define MAX_LINE 1000
 #define MAX_PARGS 100
 
 static projPJ   fromProj, toProj;
