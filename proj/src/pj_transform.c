@@ -30,6 +30,10 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.20  2006/10/12 21:04:39  fwarmerdam
+ * Added experimental +lon_wrap argument to set a "center point" for
+ * longitude wrapping of longitude values coming out of pj_transform().
+ *
  * Revision 1.19  2006/05/10 19:23:47  fwarmerdam
  * Don't apply to_meter in pj_transform() if the value is HUGE_VAL.
  *
@@ -333,6 +337,24 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 
             x[point_offset*i] = projected_loc.u;
             y[point_offset*i] = projected_loc.v;
+        }
+    }
+
+/* -------------------------------------------------------------------- */
+/*      If a wrapping center other than 0 is provided, rewrap around    */
+/*      the suggested center (for latlong coordinate systems only).     */
+/* -------------------------------------------------------------------- */
+    else if( dstdefn->is_latlong && dstdefn->long_wrap_center != 0 )
+    {
+        for( i = 0; i < point_count; i++ )
+        {
+            if( x[point_offset*i] == HUGE_VAL )
+                continue;
+
+            while( x[point_offset*i] < dstdefn->long_wrap_center - HALFPI )
+                x[point_offset*i] += PI;
+            while( x[point_offset*i] > dstdefn->long_wrap_center + HALFPI )
+                x[point_offset*i] -= PI;
         }
     }
 

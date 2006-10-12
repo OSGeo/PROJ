@@ -1,3 +1,8 @@
+2006-10-12  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Added experimental +lon_wrap argument to set a "center point" for 
+	longitude wrapping of longitude values coming out of pj_transform().
+
 2006-10-10  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/proj.c,nad2nad.c,cs2cs.c: Increase MAX_LINE to 1000 per
