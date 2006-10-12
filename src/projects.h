@@ -28,6 +28,10 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.23  2006/10/12 21:04:39  fwarmerdam
+ * Added experimental +lon_wrap argument to set a "center point" for
+ * longitude wrapping of longitude values coming out of pj_transform().
+ *
  * Revision 1.22  2006/03/30 14:35:09  fwarmerdam
  * bug 1145: avoid warnings on VC8.
  *
@@ -271,6 +275,7 @@ typedef struct PJconsts {
         int     datum_type; /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
         double  datum_params[7];
         double  from_greenwich; /* prime meridian offset (in radians) */
+        double  long_wrap_center; /* 0.0 for -180 to 180, actually in radians*/
         
 #ifdef PROJ_PARMS__
 PROJ_PARMS__

@@ -30,6 +30,10 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.18  2006/10/12 21:04:39  fwarmerdam
+ * Added experimental +lon_wrap argument to set a "center point" for
+ * longitude wrapping of longitude values coming out of pj_transform().
+ *
  * Revision 1.17  2006/09/22 23:06:24  fwarmerdam
  * remote static start variable in pj_init (bug 1283)
  *
@@ -270,6 +274,7 @@ pj_init(int argc, char **argv) {
 	PIN->params = start;
         PIN->is_latlong = 0;
         PIN->is_geocent = 0;
+        PIN->long_wrap_center = 0.0;
 
         /* set datum parameters */
         if (pj_datum_set(start, PIN)) goto bum_call;
@@ -299,6 +304,9 @@ pj_init(int argc, char **argv) {
 
 	/* over-ranging flag */
 	PIN->over = pj_param(start, "bover").i;
+
+	/* longitude center for wrapping */
+	PIN->long_wrap_center = pj_param(start, "rlon_wrap").f;
 
 	/* central meridian */
 	PIN->lam0=pj_param(start, "rlon_0").f;
