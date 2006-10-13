@@ -1,3 +1,14 @@
+# Executables paths passed to test scripts
+EXEPATH = $(top_srcdir)/src
+PROJEXE = $(EXEPATH)/proj
+CS2CSEXE = $(EXEPATH)/cs2cs
+
+# PROJ.4 test scripts
+TEST27 = ./test27
+TEST83 = ./test83
+TESTNTV2 = ./testntv2
+TESTVARIOUS = ./testvarious
+
 pkgdata_DATA = GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri \
 		esri.extra other.extra
 
@@ -28,8 +39,11 @@ install-data-local:
           fi; \
 	done
 
+check-local:
+	$(TEST27) $(PROJEXE)
+	$(TEST83) $(PROJEXE)
+	$(TESTNTV2) $(CS2CSEXE)
+	$(TESTVARIOUS) $(CS2CSEXE)
 
-test:
-	./test27
-	./test83
-	./testvarious
+clean-local:
+	$(RM) $(TEST_DB)

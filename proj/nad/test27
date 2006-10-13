@@ -1,14 +1,35 @@
 :
 # Script to test most of the SPCS zones.
-#
 # This script generated from execution of NMD's program l176, where
 #   the second pair of numbers are respective easting and northing output.
 #
 # Proj will vary in the .001ft range with projections using Transverse
 #   Mercator due to greater precision of meridinal distance function.
 #
+EXE=$1
+
+usage()
+{
+    echo "Usage: ${0} <path to 'proj' program>" 
+    echo
+    exit 1
+}
+
+if test -z "${EXE}"; then
+    echo "*** ERROR: Missing path to 'proj' program."
+    usage
+else
+    if test ! -x ${EXE}; then
+        echo "*** ERROR: Can not find '${EXE}' program!"
+        exit 1
+    fi
+fi
+
+echo "============================================"
+echo "Running ${0} using ${EXE}:"
+echo "============================================"
+
 OUT=proj_out27
-EXE=../src/proj
 INIT_FILE=./nad27
 #
 echo "doing tests into file ${OUT}, please wait"
@@ -816,10 +837,12 @@ if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURED"
 	echo "test file ${OUT} saved"
+    echo
 	exit 100
 else
 	echo "TEST OK"
 	echo "test file ${OUT} removed"
+    echo
 	/bin/rm -f ${OUT}
 	exit 0
 fi
