@@ -2,8 +2,31 @@
 # Script to do some testing of various transformation.
 #
 #
+EXE=$1
+
+usage()
+{
+    echo "Usage: ${0} <path to 'cs2cs' program>" 
+    echo
+    exit 1
+}
+
+if test -z "${EXE}"; then
+    echo "*** ERROR: Missing path to 'cs2cs' program."
+    usage
+else
+    if test ! -x ${EXE}; then
+        echo "*** ERROR: Can not find '${EXE}' program!"
+        exit 1
+    fi
+fi
+
+echo "============================================"
+echo "Running ${0} using ${EXE}:"
+echo "============================================"
+
 OUT=td_out
-EXE=../src/cs2cs
+#EXE=../src/cs2cs
 #
 echo "doing tests into file ${OUT}, please wait"
 rm -f ${OUT}
@@ -150,10 +173,12 @@ if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURED"
 	echo "test file ${OUT} saved"
+    echo
 	exit 100
 else
 	echo "TEST OK"
 	echo "test file ${OUT} removed"
+    echo
 	/bin/rm -f ${OUT}
 	exit 0
 fi
