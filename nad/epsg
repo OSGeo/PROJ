@@ -137,7 +137,7 @@
 # Hartebeesthoek94
 <4148> +proj=longlat +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # CH1903
-<4149> +proj=longlat +ellps=bessel +no_defs  <>
+<4149> +proj=longlat +ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +no_defs  <>
 # CH1903+
 <4150> +proj=longlat +ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +no_defs  <>
 # CHTRF95
@@ -3950,7 +3950,7 @@
 # Bern 1898 (Bern) / LV03C
 <21780> +proj=somerc +lat_0=46.95240555555556 +lon_0=0 +x_0=0 +y_0=0 +ellps=bessel +pm=bern +units=m +no_defs  <>
 # CH1903 / LV03
-<21781> +proj=somerc +lat_0=46.95240555555556 +lon_0=7.439583333333333 +x_0=600000 +y_0=200000 +ellps=bessel +units=m +no_defs  <>
+<21781> +proj=somerc +lat_0=46.95240555555556 +lon_0=7.439583333333333 +x_0=600000 +y_0=200000 +ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / UTM zone 17N (deprecated)
 <21817> +proj=utm +zone=17 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / UTM zone 18N
