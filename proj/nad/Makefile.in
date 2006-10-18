@@ -157,6 +157,17 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+
+# Executables paths passed to test scripts
+EXEPATH = $(top_srcdir)/src
+PROJEXE = $(EXEPATH)/proj
+CS2CSEXE = $(EXEPATH)/cs2cs
+
+# PROJ.4 test scripts
+TEST27 = ./test27
+TEST83 = ./test83
+TESTNTV2 = ./testntv2
+TESTVARIOUS = ./testvarious
 pkgdata_DATA = GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri \
 		esri.extra other.extra
 
@@ -259,6 +270,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
@@ -291,7 +303,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-am
 	-rm -f Makefile
@@ -335,16 +347,16 @@ ps-am:
 
 uninstall-am: uninstall-info-am uninstall-pkgdataDATA
 
-.PHONY: all all-am check check-am clean clean-generic clean-libtool \
-	distclean distclean-generic distclean-libtool distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-data-local install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-pkgdataDATA install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am uninstall uninstall-am uninstall-info-am \
-	uninstall-pkgdataDATA
+.PHONY: all all-am check check-am check-local clean clean-generic \
+	clean-libtool clean-local distclean distclean-generic \
+	distclean-libtool distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am \
+	install-data-local install-exec install-exec-am install-info \
+	install-info-am install-man install-pkgdataDATA install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
+	uninstall-info-am uninstall-pkgdataDATA
 
 
 install-data-local:
@@ -369,10 +381,14 @@ install-data-local:
           fi; \
 	done
 
-test:
-	./test27
-	./test83
-	./testvarious
+check-local:
+	$(TEST27) $(PROJEXE)
+	$(TEST83) $(PROJEXE)
+	$(TESTNTV2) $(CS2CSEXE)
+	$(TESTVARIOUS) $(CS2CSEXE)
+
+clean-local:
+	$(RM) $(TEST_DB)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
