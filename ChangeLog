@@ -1,3 +1,8 @@
+2006-10-17  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/epsg: Regenerated from EPSG 6.11.1 with a few other
+	fixes (datum shift values) from several bug reports.
+
 2006-10-12  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Added experimental +lon_wrap argument to set a "center point" for 
