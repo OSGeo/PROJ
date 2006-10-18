@@ -4,11 +4,16 @@
 
  o Microsoft Visual Studio 8 compatibility changes. 
  
- o Upgraded to EPSG 6.9 database. 
+ o Upgraded to EPSG 6.11.1 database. 
 
  o Several bug fixes to pj_transform() to handle transient errors properly.
 
- o Fix Krovak projection.
+ o Fix Krovak projection (include +czech flag)
+
+ o Added Roussilhe Stereographic projection from libproj4 (proj=rouss).
+
+ o Added experimental +lon_wrap flag for alternate pj_transform() longitude
+   wrapping behavior on output.
 
 
 4.4.9 Release Notes
