@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.24  2006/10/18 04:34:03  fwarmerdam
+ * added mlist functions from libproj4
+ *
  * Revision 1.23  2006/10/12 21:04:39  fwarmerdam
  * Added experimental +lon_wrap argument to set a "center point" for
  * longitude wrapping of longitude values coming out of pj_transform().
@@ -440,6 +443,9 @@ PJ_GRIDINFO *pj_gridinfo_init( const char * );
 int pj_gridinfo_load( PJ_GRIDINFO * );
 void pj_gridinfo_free( PJ_GRIDINFO * );
 
+void *proj_mdist_ini(double);
+double proj_mdist(double, double, double, const void *);
+double proj_inv_mdist(double, const void *);
 void *pj_gauss_ini(double, double, double *,double *);
 LP pj_gauss(LP, const void *);
 LP pj_inv_gauss(LP, const void *);
