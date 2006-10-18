@@ -1,4 +1,11 @@
+2006-10-18  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Preparing 4.5.0 beta4 release.
+
 2006-10-17  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/proj_mdist.c, proj_rouss.c: Incorporated these from libproj4
+	for http://bugzilla.remotesensing.org/show_bug.cgi?id=967.
 
 	* nad/epsg: Regenerated from EPSG 6.11.1 with a few other
 	fixes (datum shift values) from several bug reports.
