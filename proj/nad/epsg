@@ -10,7 +10,7 @@
 <4005> +proj=longlat +a=6377492.018 +b=6356173.508712696 +no_defs  <>
 # Unknown datum based upon the Bessel Namibia ellipsoid
 <4006> +proj=longlat +ellps=bess_nam +no_defs  <>
-# unnamed ellipse
+# Unknown datum based upon the Clarke 1858 ellipsoid
 <4007> +proj=longlat +a=6378293.645208759 +b=6356617.987679838 +no_defs  <>
 # Unknown datum based upon the Clarke 1866 ellipsoid
 <4008> +proj=longlat +ellps=clrk66 +no_defs  <>
@@ -152,7 +152,7 @@
 <4155> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-83,37,124,0,0,0,0 +no_defs  <>
 # S-JTSK
 <4156> +proj=longlat +ellps=bessel +no_defs  <>
-# unnamed ellipse
+# Mount Dillon
 <4157> +proj=longlat +a=6378293.645208759 +b=6356617.987679838 +no_defs  <>
 # Naparima 1955
 <4158> +proj=longlat +ellps=intl +no_defs  <>
@@ -267,7 +267,7 @@
 # Bermuda 1957
 <4216> +proj=longlat +ellps=clrk66 +towgs84=-73,213,296,0,0,0,0 +no_defs  <>
 # Bogota 1975
-<4218> +proj=longlat +ellps=intl +no_defs  <>
+<4218> +proj=longlat +ellps=intl +towgs84=307,304,-318,0,0,0,0 +no_defs  <>
 # Bukit Rimpah
 <4219> +proj=longlat +ellps=bessel +towgs84=-384,664,-48,0,0,0,0 +no_defs  <>
 # Camacupa
@@ -409,7 +409,7 @@
 # Loma Quintana
 <4288> +proj=longlat +ellps=intl +no_defs  <>
 # Amersfoort
-<4289> +proj=longlat +ellps=bessel +no_defs  <>
+<4289> +proj=longlat +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +no_defs  <>
 # SAD69
 <4291> +proj=longlat +ellps=GRS67 +no_defs  <>
 # Sapper Hill 1943
@@ -432,7 +432,7 @@
 <4300> +proj=longlat +a=6377340.189 +b=6356034.447938534 +no_defs  <>
 # Tokyo
 <4301> +proj=longlat +ellps=bessel +no_defs  <>
-# unnamed ellipse
+# Trinidad 1903
 <4302> +proj=longlat +a=6378293.645208759 +b=6356617.987679838 +no_defs  <>
 # TC(1948)
 <4303> +proj=longlat +ellps=helmert +no_defs  <>
@@ -728,7 +728,7 @@
 <4736> +proj=longlat +ellps=clrk80 +towgs84=260,12,-147,0,0,0,0 +no_defs  <>
 # Korea 2000
 <4737> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
-# unnamed ellipse
+# Hong Kong 1963
 <4738> +proj=longlat +a=6378293.645208759 +b=6356617.987679838 +no_defs  <>
 # Hong Kong 1963(67)
 <4739> +proj=longlat +ellps=intl +towgs84=-156,-271,-189,0,0,0,0 +no_defs  <>
@@ -760,6 +760,12 @@
 <4752> +proj=longlat +a=6378306.3696 +b=6356571.996 +towgs84=51,391,-36,0,0,0,0 +no_defs  <>
 # fk89
 <4753> +proj=longlat +ellps=intl +no_defs  <>
+# LGD2006
+<4754> +proj=longlat +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +no_defs  <>
+# DGN95
+<4755> +proj=longlat +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
+# VN-2000
+<4756> +proj=longlat +ellps=WGS84 +no_defs  <>
 # Bern 1898 (Bern)
 <4801> +proj=longlat +ellps=bessel +pm=bern +no_defs  <>
 # Bogota 1975 (Bogota)
@@ -3148,9 +3154,9 @@
 <3165> +proj=lcc +lat_1=-22.24469175 +lat_2=-22.29469175 +lat_0=-22.26969175 +lon_0=166.44242575 +x_0=0.66 +y_0=1.02 +ellps=intl +units=m +no_defs  <>
 # NEA74 Noumea / Noumea Lambert 2
 <3166> +proj=lcc +lat_1=-22.24472222222222 +lat_2=-22.29472222222222 +lat_0=-22.26972222222222 +lon_0=166.4425 +x_0=8.313000000000001 +y_0=-2.354 +ellps=intl +units=m +no_defs  <>
-# Kertau (RSO) / R.S.O. Malaya (ch)
+# Kertau (RSO) / RSO Malaya (ch)
 <3167> +proj=omerc +lat_0=4 +lonc=102.25 +alpha=323.0257905 +k=0.99984 +x_0=40000 +y_0=0 +a=6377295.664 +b=6356094.667915204 +to_meter=20.116756 +no_defs  <>
-# Kertau (RSO) / R.S.O. Malaya (m)
+# Kertau (RSO) / RSO Malaya (m)
 <3168> +proj=omerc +lat_0=4 +lonc=102.25 +alpha=323.0257905 +k=0.99984 +x_0=804670.24 +y_0=0 +a=6377295.664 +b=6356094.667915204 +units=m +no_defs  <>
 # RGNC91-93 / UTM zone 57S
 <3169> +proj=utm +zone=57 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
@@ -3165,6 +3171,8 @@
 #
 # Indian 1960 / TM 106 NE
 <3176> +proj=tmerc +lat_0=0 +lon_0=106 +k=0.999600 +x_0=500000 +y_0=0 +a=6377276.345 +b=6356075.413140239 +units=m +no_defs  <>
+# LGD2006 / Libya TM
+<3177> +proj=tmerc +lat_0=0 +lon_0=17 +k=0.996500 +x_0=1000000 +y_0=0 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
 # GR96 / UTM zone 18N
 <3178> +proj=utm +zone=18 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # GR96 / UTM zone 19N
@@ -3189,8 +3197,34 @@
 <3188> +proj=utm +zone=28 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # GR96 / UTM zone 29N
 <3189> +proj=utm +zone=29 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / Libya TM zone 5
+<3190> +proj=tmerc +lat_0=0 +lon_0=9 +k=0.999950 +x_0=200000 +y_0=0 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / Libya TM zone 6
+<3191> +proj=tmerc +lat_0=0 +lon_0=11 +k=0.999950 +x_0=200000 +y_0=0 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / Libya TM zone 7
+<3192> +proj=tmerc +lat_0=0 +lon_0=13 +k=0.999950 +x_0=200000 +y_0=0 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / Libya TM zone 8
+<3193> +proj=tmerc +lat_0=0 +lon_0=15 +k=0.999950 +x_0=200000 +y_0=0 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / Libya TM zone 9
+<3194> +proj=tmerc +lat_0=0 +lon_0=17 +k=0.999950 +x_0=200000 +y_0=0 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / Libya TM zone 10
+<3195> +proj=tmerc +lat_0=0 +lon_0=19 +k=0.999950 +x_0=200000 +y_0=0 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / Libya TM zone 11
+<3196> +proj=tmerc +lat_0=0 +lon_0=21 +k=0.999950 +x_0=200000 +y_0=0 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / Libya TM zone 12
+<3197> +proj=tmerc +lat_0=0 +lon_0=23 +k=0.999950 +x_0=200000 +y_0=0 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / Libya TM zone 13
+<3198> +proj=tmerc +lat_0=0 +lon_0=25 +k=0.999950 +x_0=200000 +y_0=0 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / UTM zone 32N
+<3199> +proj=utm +zone=32 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
 # FD58 / Iraq zone
 <3200> +proj=lcc +lat_1=32.5 +lat_0=32.5 +lon_0=45 +k_0=0.9987864078000001 +x_0=1500000 +y_0=1166200 +ellps=clrk80 +units=m +no_defs  <>
+# LGD2006 / UTM zone 33N
+<3201> +proj=utm +zone=33 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / UTM zone 34N
+<3202> +proj=utm +zone=34 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
+# LGD2006 / UTM zone 35N
+<3203> +proj=utm +zone=35 +ellps=intl +towgs84=-208.406,-109.878,-2.5764,0,0,0,0 +units=m +no_defs  <>
 # WGS 84 / SCAR IMW SP19-20
 <3204> +proj=lcc +lat_1=-60.66666666666666 +lat_2=-63.33333333333334 +lat_0=-90 +lon_0=-66 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs  <>
 # WGS 84 / SCAR IMW SP21-22
@@ -3500,7 +3534,7 @@
 <3357> +proj=utm +zone=17 +ellps=clrk66 +units=m +no_defs  <>
 # NAD83(HARN) / North Carolina
 <3358> +proj=lcc +lat_1=36.16666666666666 +lat_2=34.33333333333334 +lat_0=33.75 +lon_0=-79 +x_0=609601.22 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
-# NAD83(HARN) / North Carolina (ftUS)
+# NAD83(HARN) / North Carolina (ftUS) (deprecated)
 <3359> +proj=lcc +lat_1=36.16666666666666 +lat_2=34.33333333333334 +lat_0=33.75 +lon_0=-79 +x_0=609601.2192024385 +y_0=0 +ellps=GRS80 +to_meter=0.3048 +no_defs  <>
 # NAD83(HARN) / South Carolina
 <3360> +proj=lcc +lat_1=34.83333333333334 +lat_2=32.5 +lat_0=31.83333333333333 +lon_0=-81 +x_0=609600 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
@@ -3514,7 +3548,7 @@
 <3364> +proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
 # NAD83(HARN) / Pennsylvania South (ftUS)
 <3365> +proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +to_meter=0.3048006096012192 +no_defs  <>
-# Hong Kong 1963 Grid System
+# Hong Kong 1963 Grid System (deprecated)
 <3366> +proj=cass +lat_0=22.31213333333334 +lon_0=114.1785555555556 +x_0=40243.57775604237 +y_0=19069.93351512578 +a=6378293.645208759 +b=6356617.987679838 +units=m +no_defs  <>
 # IGN Astro 1960 / UTM zone 28N
 <3367> +proj=utm +zone=28 +ellps=clrk80 +units=m +no_defs  <>
@@ -3590,6 +3624,14 @@
 <3402> +proj=tmerc +lat_0=0 +lon_0=-115 +k=0.999200 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
 # NAD83(CSRS) / Alberta 10-TM (Resource)
 <3403> +proj=tmerc +lat_0=0 +lon_0=-115 +k=0.999200 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(HARN) / North Carolina (ftUS)
+<3404> +proj=lcc +lat_1=36.16666666666666 +lat_2=34.33333333333334 +lat_0=33.75 +lon_0=-79 +x_0=609601.2192024384 +y_0=0 +ellps=GRS80 +to_meter=0.3048006096012192 +no_defs  <>
+# VN-2000 / UTM zone 48N
+<3405> +proj=utm +zone=48 +ellps=WGS84 +units=m +no_defs  <>
+# VN-2000 / UTM zone 49N
+<3406> +proj=utm +zone=49 +ellps=WGS84 +units=m +no_defs  <>
+# Hong Kong 1963 Grid System
+<3407> +proj=cass +lat_0=22.31213333333334 +lon_0=114.1785555555556 +x_0=40243.57775604237 +y_0=19069.93351512578 +a=6378293.645208759 +b=6356617.987679838 +to_meter=0.3047972654 +no_defs  <>
 # PSD93 / UTM zone 39N
 <3439> +proj=utm +zone=39 +ellps=clrk80 +units=m +no_defs  <>
 # PSD93 / UTM zone 40N
@@ -3910,25 +3952,25 @@
 # CH1903 / LV03
 <21781> +proj=somerc +lat_0=46.95240555555556 +lon_0=7.439583333333333 +x_0=600000 +y_0=200000 +ellps=bessel +units=m +no_defs  <>
 # Bogota 1975 / UTM zone 17N (deprecated)
-<21817> +proj=utm +zone=17 +ellps=intl +units=m +no_defs  <>
+<21817> +proj=utm +zone=17 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / UTM zone 18N
-<21818> +proj=utm +zone=18 +ellps=intl +units=m +no_defs  <>
+<21818> +proj=utm +zone=18 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / Colombia West zone (deprecated)
-<21891> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-77.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +units=m +no_defs  <>
+<21891> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-77.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / Colombia Bogota zone (deprecated)
-<21892> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-74.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +units=m +no_defs  <>
+<21892> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-74.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / Colombia East Central zone (deprecated)
-<21893> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-71.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +units=m +no_defs  <>
+<21893> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-71.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / Colombia East (deprecated)
-<21894> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-68.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +units=m +no_defs  <>
+<21894> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-68.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / Colombia West zone
-<21896> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-77.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +units=m +no_defs  <>
+<21896> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-77.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / Colombia Bogota zone
-<21897> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-74.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +units=m +no_defs  <>
+<21897> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-74.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / Colombia East Central zone
-<21898> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-71.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +units=m +no_defs  <>
+<21898> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-71.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / Colombia East
-<21899> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-68.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +units=m +no_defs  <>
+<21899> +proj=tmerc +lat_0=4.599047222222222 +lon_0=-68.08091666666667 +k=1.000000 +x_0=1000000 +y_0=1000000 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Camacupa / UTM zone 32S
 <22032> +proj=utm +zone=32 +south +ellps=clrk80 +units=m +no_defs  <>
 # Camacupa / UTM zone 33S
@@ -4100,6 +4142,36 @@
 <23852> +proj=utm +zone=52 +a=6378160 +b=6356774.50408554 +units=m +no_defs  <>
 # ID74 / UTM zone 53N (deprecated)
 <23853> +proj=utm +zone=53 +a=6378160 +b=6356774.50408554 +units=m +no_defs  <>
+# DGN95 / UTM zone 46N
+<23866> +proj=utm +zone=46 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 47N
+<23867> +proj=utm +zone=47 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 48N
+<23868> +proj=utm +zone=48 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 49N
+<23869> +proj=utm +zone=49 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 50N
+<23870> +proj=utm +zone=50 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 51N
+<23871> +proj=utm +zone=51 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 52N
+<23872> +proj=utm +zone=52 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 47S
+<23877> +proj=utm +zone=47 +south +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 48S
+<23878> +proj=utm +zone=48 +south +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 49S
+<23879> +proj=utm +zone=49 +south +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 50S
+<23880> +proj=utm +zone=50 +south +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 51S
+<23881> +proj=utm +zone=51 +south +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 52S
+<23882> +proj=utm +zone=52 +south +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 53S
+<23883> +proj=utm +zone=53 +south +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# DGN95 / UTM zone 54S
+<23884> +proj=utm +zone=54 +south +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # ID74 / UTM zone 46S (deprecated)
 <23886> +proj=utm +zone=46 +south +a=6378160 +b=6356774.50408554 +units=m +no_defs  <>
 # ID74 / UTM zone 47S
@@ -4957,9 +5029,9 @@
 # Qatar 1974 / Qatar National Grid
 <28600> +proj=tmerc +lat_0=24.45 +lon_0=51.21666666666667 +k=0.999990 +x_0=200000 +y_0=300000 +ellps=intl +units=m +no_defs  <>
 # Amersfoort / RD Old
-<28991> +proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=0 +y_0=0 +ellps=bessel +units=m +no_defs  <>
+<28991> +proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=0 +y_0=0 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs  <>
 # Amersfoort / RD New
-<28992> +proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +no_defs  <>
+<28992> +proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs  <>
 # SAD69 / Brazil Polyconic (deprecated)
 <29100> +proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS67 +units=m +no_defs  <>
 # SAD69 / Brazil Polyconic
@@ -5064,11 +5136,11 @@
 <29849> +proj=utm +zone=49 +ellps=evrstSS +units=m +no_defs  <>
 # Timbalai 1948 / UTM zone 50N
 <29850> +proj=utm +zone=50 +ellps=evrstSS +units=m +no_defs  <>
-# Timbalai 1948 / R.S.O. Borneo (ch)
+# Timbalai 1948 / RSO Borneo (ch)
 <29871> +proj=omerc +lat_0=4 +lonc=115 +alpha=53.31582047222222 +k=0.99984 +x_0=590476.8714630401 +y_0=442857.653094361 +ellps=evrstSS +to_meter=20.11676512155263 +no_defs  <>
-# Timbalai 1948 / R.S.O. Borneo (ft)
+# Timbalai 1948 / RSO Borneo (ft)
 <29872> +proj=omerc +lat_0=4 +lonc=115 +alpha=53.31582047222222 +k=0.99984 +x_0=590476.8727431979 +y_0=442857.6545573985 +ellps=evrstSS +to_meter=0.3047994715386762 +no_defs  <>
-# Timbalai 1948 / R.S.O. Borneo (m)
+# Timbalai 1948 / RSO Borneo (m)
 <29873> +proj=omerc +lat_0=4 +lonc=115 +alpha=53.31582047222222 +k=0.99984 +x_0=590476.87 +y_0=442857.65 +ellps=evrstSS +units=m +no_defs  <>
 # TM65 / Irish National Grid (deprecated)
 <29900> +proj=tmerc +lat_0=53.5 +lon_0=-8 +k=1.000035 +x_0=200000 +y_0=250000 +a=6377340.189 +b=6356034.447938534 +units=m +no_defs  <>
