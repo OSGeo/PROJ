@@ -22,7 +22,8 @@ VERSION=
 
 azimuthal = \
 	PJ_aeqd.obj PJ_gnom.obj PJ_laea.obj PJ_mod_ster.obj \
-	PJ_nsper.obj PJ_nzmg.obj PJ_ortho.obj PJ_stere.obj PJ_sterea.obj
+	PJ_nsper.obj PJ_nzmg.obj PJ_ortho.obj PJ_stere.obj PJ_sterea.obj \
+	proj_rouss.obj
 
 conic = \
 	PJ_aea.obj PJ_bipc.obj PJ_bonne.obj PJ_eqdc.obj \
@@ -64,7 +65,8 @@ support = \
 	pj_zpoly1.obj rtodms.obj vector1.obj pj_release.obj \
 	geocent.obj pj_transform.obj pj_datum_set.obj pj_datums.obj \
 	pj_apply_gridshift.obj nad_cvt.obj nad_init.obj \
-	nad_intr.obj pj_utils.obj pj_gridlist.obj pj_gridinfo.obj
+	nad_intr.obj pj_utils.obj pj_gridlist.obj pj_gridinfo.obj \
+	proj_mdist.obj
 
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
 PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
