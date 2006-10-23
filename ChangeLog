@@ -1,3 +1,7 @@
+2006-10-22  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Prepare for 4.5.0 final release.
+
 2006-10-18  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* nad/epsg: added polish zones (2172-2175) manually per request from
