@@ -53,7 +53,9 @@ rtodms(char *s, double r, int pos, int neg) {
 	sec = fmod(r / RES, 60.);
 	r = floor(r / RES60);
 	min = fmod(r, 60.);
-	deg = r / 60.;
+        r = floor(r / 60.);
+        deg = r;
+
 	if (dolong)
 		(void)sprintf(ss,format,deg,min,sec,sign);
 	else if (sec) {
