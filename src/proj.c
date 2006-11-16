@@ -2,12 +2,12 @@
 #ifndef lint
 static const char SCCSID[]="@(#)proj.c	4.12	95/09/23	GIE	REL";
 #endif
+#include "projects.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
-#include "projects.h"
 #include "emess.h"
 
 /* TK 1999-02-13 */
