@@ -5,7 +5,7 @@
 # be adjusted.  It is also possible to leave this, and define the
 # PROJ_LIB environment variable to point to the NAD directory.
 #
-PROJ_LIB_DIR=C:/PROJ/NAD
+PROJ_LIB_DIR=D:/dev/proj/_cvs/proj/nad
 
 # Uncomment the first for an optimized build, or the second for debug.
 OPTFLAGS=	/nologo /Ox /MD
