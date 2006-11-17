@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.5  2006/11/17 22:16:30  mloskot
+ * Uploaded PROJ.4 port for Windows CE.
+ *
  * Revision 1.4  2005/11/01 05:56:13  fwarmerdam
  * improved error handling if gridcount is zero
  *
@@ -48,7 +51,16 @@
 #include <projects.h>
 #include <string.h>
 #include <math.h>
-#include <assert.h>
+
+#ifdef _WIN32_WCE
+/* assert.h includes all Windows API headers and causes 'LP' name clash.
+ * Here assert we disable assert() for Windows CE.
+ * TODO - mloskot: re-implement porting friendly assert
+ */
+# define assert(exp)	((void)0)
+#else
+# include <assert.h>
+#endif /* _WIN32_WCE */
 
 static PJ_GRIDINFO *grid_list = NULL;
 

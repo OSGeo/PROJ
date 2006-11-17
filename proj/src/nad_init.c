@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.9  2006/11/17 22:16:30  mloskot
+ * Uploaded PROJ.4 port for Windows CE.
+ *
  * Revision 1.8  2003/03/17 18:56:01  warmerda
  * implement delayed loading of ctable format files
  *
@@ -53,8 +56,17 @@
 #include <projects.h>
 #include <stdio.h>
 #include <errno.h>
-#include <assert.h>
 #include <string.h>
+
+#ifdef _WIN32_WCE
+/* assert.h includes all Windows API headers and causes 'LP' name clash.
+ * Here assert we disable assert() for Windows CE.
+ * TODO - mloskot: re-implement porting friendly assert
+ */
+# define assert(exp)	((void)0)
+#else
+# include <assert.h>
+#endif /* _WIN32_WCE */
 
 /************************************************************************/
 /*                          nad_ctable_load()                           */

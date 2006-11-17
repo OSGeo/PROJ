@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.25  2006/11/17 22:16:30  mloskot
+ * Uploaded PROJ.4 port for Windows CE.
+ *
  * Revision 1.24  2006/10/18 04:34:03  fwarmerdam
  * added mlist functions from libproj4
  *
@@ -147,6 +150,15 @@ extern "C" {
 	/* prototype hypot for systems where absent */
 #ifndef _WIN32
 extern double hypot(double, double);
+#endif
+
+#ifdef _WIN32_WCE
+#  include <wce_stdlib.h>
+#  include <wce_stdio.h>
+#  define rewind wceex_rewind
+#  define getenv wceex_getenv
+#  define strdup _strdup
+#  define hypot _hypot
 #endif
 
 	/* some useful constants */
