@@ -31,6 +31,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.7  2006/11/17 22:16:30  mloskot
+ * Uploaded PROJ.4 port for Windows CE.
+ *
  * Revision 1.6  2004/09/16 15:14:01  fwarmerdam
  * * src/pj_open_lib.c: added pj_set_searchpath() provided by Eric Miller.
  *
@@ -111,6 +114,8 @@ pj_open_lib(char *name, char *mode) {
     int n = 0;
     int i;
 
+#ifndef _WIN32_WCE
+
     /* check if ~/name */
     if (*name == '~' && name[1] == DIR_CHAR)
         if (sysname = getenv("HOME")) {
@@ -163,4 +168,7 @@ pj_open_lib(char *name, char *mode) {
                  fid == NULL ? "failed" : "succeeded" );
 
     return(fid);
+#else
+    return NULL;
+#endif /* _WIN32_WCE */
 }
