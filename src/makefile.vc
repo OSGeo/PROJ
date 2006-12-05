@@ -1,3 +1,8 @@
+# $Id$
+#
+# makefile.vc - builds PROJ.4 library with Visual C++
+#
+
 #
 # Set the following to the directory where the PROJ distribution 
 # data files (ie, the contents of ..\NAD).  The following assumes
@@ -5,7 +10,7 @@
 # be adjusted.  It is also possible to leave this, and define the
 # PROJ_LIB environment variable to point to the NAD directory.
 #
-PROJ_LIB_DIR=D:/dev/proj/_cvs/proj/nad
+PROJ_LIB_DIR=C:/PROJ/NAD
 
 # Uncomment the first for an optimized build, or the second for debug.
 OPTFLAGS=	/nologo /Ox /MD
@@ -73,12 +78,20 @@ PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
 CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
 GEODEXE_OBJ	= geod.obj geod_set.obj geod_for.obj geod_inv.obj emess.obj
 PROJ_DLL 	= proj$(VERSION).dll
+PROJ_EXE    = proj.exe
+CS2CS_EXE   = cs2cs.exe
+GEOD_EXE    = geod.exe
+NAD2NAD_EXE = nad2nad.exe
+NAD2BIN_EXE = nad2bin.exe
+
 CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" \
 		-DHAVE_STRERROR=1 $(OPTFLAGS)
 
 default:	all
 
-all:            proj.lib proj.exe cs2cs.exe geod.exe
+all: proj.lib $(PROJ_EXE) $(CS2CS_EXE) $(GEOD_EXE)
+
+# Disabled: $(NAD2NAD_EXE) $(NAD2BIN_EXE)
 
 proj.lib:	$(LIBOBJ)
 	if exist proj.lib del proj.lib
@@ -89,20 +102,24 @@ $(PROJ_DLL):	proj_i.lib
 proj_i.lib:	$(LIBOBJ)
 	link /debug /dll /def:proj.def /out:$(PROJ_DLL) /implib:proj_i.lib \
 			$(LIBOBJ)
+    if exist $(PROJ_DLL).manifest mt -manifest $(PROJ_DLL).manifest -outputresource:$(PROJ_DLL);2
 
-proj.exe:	$(PROJEXE_OBJ) $(EXE_PROJ)
+$(PROJ_EXE):	$(PROJEXE_OBJ) $(EXE_PROJ)
 	cl $(PROJEXE_OBJ) $(EXE_PROJ)
+    if exist $(PROJ_EXE).manifest mt -manifest $(PROJ_EXE).manifest -outputresource:$(PROJ_EXE);1
 
-cs2cs.exe:	$(CS2CSEXE_OBJ) $(EXE_PROJ)
+$(CS2CS_EXE):	$(CS2CSEXE_OBJ) $(EXE_PROJ)
 	cl $(CS2CSEXE_OBJ) $(EXE_PROJ)
+    if exist $(CS2CS_EXE).manifest mt -manifest $(CS2CS_EXE).manifest -outputresource:$(CS2CS_EXE);1
 
-geod.exe:	$(GEODEXE_OBJ) $(EXE_PROJ)
+$(GEOD_EXE):	$(GEODEXE_OBJ) $(EXE_PROJ)
 	cl $(GEODEXE_OBJ) $(EXE_PROJ)
+    if exist $(GEOD_EXE).manifest mt -manifest $(GEOD_EXE).manifest -outputresource:$(GEOD_EXE);1
 
-nad2nad.exe:	nad2nad.obj emess.obj $(EXE_PROJ)
+$(NAD2NAD_EXE):	nad2nad.obj emess.obj $(EXE_PROJ)
 	cl nad2nad.obj emess.obj $(EXE_PROJ)
 
-nad2bin.exe:	nad2bin.obj emess.obj $(EXE_PROJ)
+$(NAD2BIN_EXE):	nad2bin.obj emess.obj $(EXE_PROJ)
 	cl nad2bin.obj emess.obj $(EXE_PROJ)
 
 nadshift:	nad2bin.exe
@@ -122,5 +139,10 @@ nadshift:	nad2bin.exe
 	cd ..\src
 
 clean:
-	del *.obj *.lib *.dll
-	del *.pdb *.exp
+	del *.dll
+	del *.exe
+	del *.exp
+	del *.manifest
+	del *.lib
+	del *.obj
+	del *.pdb
