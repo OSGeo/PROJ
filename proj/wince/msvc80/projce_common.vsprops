@@ -10,6 +10,6 @@
 	/>
 	<UserMacro
 		Name="WCELIBCEX_DIR"
-		Value="D:\dev\wcelibcex\_svn\wcelibcex\trunk\src"
+		Value="C:\dev\wcelibcex-1.0\src"
 	/>
 </VisualStudioPropertySheet>
