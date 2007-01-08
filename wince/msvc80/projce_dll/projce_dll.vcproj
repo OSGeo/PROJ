@@ -69,15 +69,15 @@
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
 				AdditionalDependencies="ccrtrtti.lib"
-				OutputFile="$(OutDir)/projced.dll"
+				OutputFile="$(OutDir)/proj.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				ModuleDefinitionFile="..\..\..\src\proj.def"
 				DelayLoadDLLs="$(NOINHERIT)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/projce_dll.pdb"
+				ProgramDatabaseFile="$(OutDir)/proj_dll.pdb"
 				SubSystem="0"
-				ImportLibrary="$(OutDir)/projced_i.lib"
+				ImportLibrary="$(OutDir)/proj_i.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -153,13 +153,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.01"
-				OutputFile="$(OutDir)/projced.dll"
+				OutputFile="$(OutDir)/proj.dll"
 				LinkIncremental="2"
 				DelayLoadDLLs="$(NOINHERIT)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/projce_dll.pdb"
 				SubSystem="0"
-				ImportLibrary="$(OutDir)/projced_i.lib"
+				ImportLibrary="$(OutDir)/proj_i.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -235,7 +235,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
-				OutputFile="$(OutDir)/projce.dll"
+				OutputFile="$(OutDir)/proj.dll"
 				LinkIncremental="1"
 				ModuleDefinitionFile="..\..\..\src\proj.def"
 				DelayLoadDLLs="$(NOINHERIT)"
@@ -244,7 +244,7 @@
 				SubSystem="0"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="$(OutDir)/projce_i.lib"
+				ImportLibrary="$(OutDir)/proj_i.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -319,7 +319,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions=" /subsystem:windowsce,5.01"
-				OutputFile="$(OutDir)/projce.dll"
+				OutputFile="$(OutDir)/proj.dll"
 				LinkIncremental="1"
 				DelayLoadDLLs="$(NOINHERIT)"
 				GenerateDebugInformation="true"
@@ -327,7 +327,7 @@
 				SubSystem="0"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="$(OutDir)/projce_i.lib"
+				ImportLibrary="$(OutDir)/proj_i.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -425,10 +425,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\src\hypot.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\src\jniproj.c"
 					>
 				</File>
 				<File
