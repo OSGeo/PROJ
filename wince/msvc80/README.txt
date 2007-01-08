@@ -1,3 +1,4 @@
+$Id$
 -------------------------------------------------------------------------------
 PROJ.4 port for Windows CE
 Author: Mateusz Loskot (mateusz@loskot.net)
@@ -24,6 +25,8 @@ porting Windows/Unix libraries to Windows CE and can be downloaded
 directly from Subversion repository:
 
 svn co https://wcelibcex.svn.sourceforge.net/svnroot/wcelibcex/trunk/ wcelibcex
+
+or as a source distribution package - wcelibcex-1.0.zip - from Download link.
 
 Next, you will find project file of static library for Visual C+ 2005
 located in wcelibcex/msvc80.
@@ -58,16 +61,12 @@ projce.lib  - Release configuration
 
 4.2 projce_dll.sln - Dynamic-link library
 
-- Debug configuration
+proj_i.lib - import library
+proj.dll - dynamic-link library
 
-projced_i.lib - import library
-projced_i.dll - dynamic-link library
-
-- Release configuration
-
-projce_i.lib - import library
-projce_i.dll - dynamic-link library
-
+NOTE: There is no 'ced' or 'ce' token in DLL binaries names.
+      This is intentional and don't change it.
+      GDAL requires PROJ.4 DLL named as proj.dll.
 
 -----------------------------------
 Notes
