@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.3  2007/01/31 06:41:01  fwarmerdam
+ * dont parse more datum parameters than we have room for in datum_params[]
+ *
  * Revision 1.2  2001/04/04 21:13:21  warmerda
  * do arcsecond/radian and ppm datum parm transformation in pj_set_datum()
  *
@@ -113,7 +116,7 @@ int pj_datum_set(paralist *pl, PJ *projdef)
 
         /* parse out the parameters */
         s = towgs84;
-        for( s = towgs84; *s != '\0'; ) 
+        for( s = towgs84; *s != '\0' && parm_count < (sizeof(projdef->datum_params) / sizeof(double)); ) 
         {
             projdef->datum_params[parm_count++] = atof(s);
             while( *s != '\0' && *s != ',' )
