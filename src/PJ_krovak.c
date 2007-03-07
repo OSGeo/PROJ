@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.8  2007/03/07 17:28:08  fwarmerdam
+ * Make it reasonably clear that this is ellipsoidal in the code.
+ *
  * Revision 1.7  2007/03/07 17:25:34  fwarmerdam
  * report krovak as ellipsoidal, not spherical
  *
@@ -87,7 +90,7 @@ PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
 
 
 
-FORWARD(s_forward); /* spheroid */
+FORWARD(e_forward); /* ellipsoid */
 /* calculate xy from lat/lon */
 
 	char errmess[255];
@@ -156,7 +159,7 @@ FORWARD(s_forward); /* spheroid */
 
 
 
-INVERSE(s_inverse); /* spheroid */
+INVERSE(e_inverse); /* ellipsoid */
 	/* calculate lat/lon from xy */
 
 /* Constants, identisch wie in der Umkehrfunktion */
@@ -268,8 +271,8 @@ ENTRY0(krovak)
             P->k0 = 0.9999;
 
 	/* always the same */
-        P->inv = s_inverse; 
-	P->fwd = s_forward;
+        P->inv = e_inverse; 
+	P->fwd = e_forward;
 
 ENDENTRY(P)
 
