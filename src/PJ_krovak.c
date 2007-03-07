@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.7  2007/03/07 17:25:34  fwarmerdam
+ * report krovak as ellipsoidal, not spherical
+ *
  * Revision 1.6  2006/09/14 13:10:50  fwarmerdam
  * Add +czech flag to control reversal of signs (bug 1133,147)
  *
@@ -57,7 +60,7 @@
 
 PJ_CVSID("$Id$");	
 
-PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Sph.";
+PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
 
 /**
    NOTES: According to EPSG the full Krovak projection method should have
