@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.9  2007/03/07 17:32:32  fwarmerdam
+ * remove orphan semicolon.
+ *
  * Revision 1.8  2007/03/07 17:28:08  fwarmerdam
  * Make it reasonably clear that this is ellipsoidal in the code.
  *
@@ -264,7 +267,6 @@ ENTRY0(krovak)
         /* as input and output, instead of lat/long relative to Ferro */
 	if (!pj_param(P->params, "tlon_0").i)
             P->lam0 = 0.7417649320975901 - 0.308341501185665;
-; 
 
         /* if scale not set default to 0.9999 */
 	if (!pj_param(P->params, "tk").i)
