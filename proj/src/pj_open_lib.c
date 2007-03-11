@@ -31,6 +31,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.8  2007/03/11 17:03:18  fwarmerdam
+ * support drive letter prefixes on win32 and related fixes (bug 1499)
+ *
  * Revision 1.7  2006/11/17 22:16:30  mloskot
  * Uploaded PROJ.4 port for Windows CE.
  *
@@ -113,11 +116,16 @@ pj_open_lib(char *name, char *mode) {
     FILE *fid;
     int n = 0;
     int i;
+#ifdef WIN32
+    static const char dir_chars[] = "/\\";
+#else
+    static const char dir_chars[] = "/";
+#endif
 
 #ifndef _WIN32_WCE
 
     /* check if ~/name */
-    if (*name == '~' && name[1] == DIR_CHAR)
+    if (*name == '~' && strchr(dir_chars,name[1]) )
         if (sysname = getenv("HOME")) {
             (void)strcpy(fname, sysname);
             fname[n = strlen(fname)] = DIR_CHAR;
@@ -128,8 +136,10 @@ pj_open_lib(char *name, char *mode) {
             return NULL;
 
     /* or fixed path: /name, ./name or ../name */
-    else if (*name == DIR_CHAR || (*name == '.' && name[1] == DIR_CHAR) ||
-             (!strncmp(name, "..", 2) && name[2] == DIR_CHAR) )
+    else if (strchr(dir_chars,*name)
+             || (*name == '.' && strchr(dir_chars,name[1])) 
+             || (!strncmp(name, "..", 2) && strchr(dir_chars,name[2]))
+             || (name[1] == ':' && strchr(dir_chars,name[2])) )
         sysname = name;
 
     /* or try to use application provided file finder */
