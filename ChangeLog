@@ -1,3 +1,10 @@
+2007-03-11  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/projects.h: Ensure that WIN32 is defined on win32 systems.
+	
+	* src/pj_open_lib.c: support drive letter prefixes on absolute
+	paths.  Support either \ or / as a dir delimeter on windows (bug 1499)
+
 2007-03-07  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/PJ_krovak.c: info string change to report ellipsoidal instead

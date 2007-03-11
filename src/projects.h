@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.26  2007/03/11 17:03:18  fwarmerdam
+ * support drive letter prefixes on win32 and related fixes (bug 1499)
+ *
  * Revision 1.25  2006/11/17 22:16:30  mloskot
  * Uploaded PROJ.4 port for Windows CE.
  *
@@ -176,8 +179,17 @@ extern double hypot(double, double);
 #define ID_TAG_MAX 50
 #endif
 
+/* Use WIN32 as a standard windows 32 bit declaration */
+#if defined(_WIN32) && !defined(WIN32) && !defined(_WIN32_WCE)
+#  define WIN32
+#endif
+
+#if defined(_WINDOWS) && !defined(WIN32) && !defined(_WIN32_WCE)
+#  define WIN32
+#endif
+
 /* directory delimiter for DOS support */
-#ifdef DOS
+#ifdef WIN32
 #define DIR_CHAR '\\'
 #else
 #define DIR_CHAR '/'
