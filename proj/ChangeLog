@@ -1,3 +1,7 @@
+2007-03-12  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_utils.c: Removed duplicate appending of towgs84 parameter.
+
 2007-03-11  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/projects.h: Ensure that WIN32 is defined on win32 systems.
