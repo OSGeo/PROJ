@@ -75,7 +75,6 @@ ENTRY1(sinu, en)
 	if (!(P->en = pj_enfn(P->es)))
 		E_ERROR_0;
 	if (P->es) {
-		P->en = pj_enfn(P->es);
 		P->inv = e_inverse;
 		P->fwd = e_forward;
 	} else {
