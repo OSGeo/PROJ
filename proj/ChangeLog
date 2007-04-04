@@ -1,3 +1,7 @@
+2007-04-04  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/PJ_laea.c: Fix memory leak of apa field.
+
 2007-04-03  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/PJ_gn_sinu.c: remove duplicate call to pj_enfn() (bug #1536)
