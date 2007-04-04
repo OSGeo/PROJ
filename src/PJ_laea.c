@@ -179,8 +179,14 @@ INVERSE(s_inverse); /* spheroid */
 		0. : atan2(xy.x, xy.y);
 	return (lp);
 }
-FREEUP; if (P) pj_dalloc(P); }
-ENTRY0(laea)
+FREEUP;
+    if (P) {
+		if (P->apa)
+			pj_dalloc(P->apa);
+		pj_dalloc(P);
+	}
+}
+ENTRY1(laea,apa)
 	double t;
 
 	if (fabs((t = fabs(P->phi0)) - HALFPI) < EPS10)
