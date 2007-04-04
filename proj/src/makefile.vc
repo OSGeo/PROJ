@@ -102,19 +102,19 @@ $(PROJ_DLL):	proj_i.lib
 proj_i.lib:	$(LIBOBJ)
 	link /debug /dll /def:proj.def /out:$(PROJ_DLL) /implib:proj_i.lib \
 			$(LIBOBJ)
-    if exist $(PROJ_DLL).manifest mt -manifest $(PROJ_DLL).manifest -outputresource:$(PROJ_DLL);2
+	if exist $(PROJ_DLL).manifest mt -manifest $(PROJ_DLL).manifest -outputresource:$(PROJ_DLL);2
 
 $(PROJ_EXE):	$(PROJEXE_OBJ) $(EXE_PROJ)
 	cl $(PROJEXE_OBJ) $(EXE_PROJ)
-    if exist $(PROJ_EXE).manifest mt -manifest $(PROJ_EXE).manifest -outputresource:$(PROJ_EXE);1
+	if exist $(PROJ_EXE).manifest mt -manifest $(PROJ_EXE).manifest -outputresource:$(PROJ_EXE);1
 
 $(CS2CS_EXE):	$(CS2CSEXE_OBJ) $(EXE_PROJ)
 	cl $(CS2CSEXE_OBJ) $(EXE_PROJ)
-    if exist $(CS2CS_EXE).manifest mt -manifest $(CS2CS_EXE).manifest -outputresource:$(CS2CS_EXE);1
+	if exist $(CS2CS_EXE).manifest mt -manifest $(CS2CS_EXE).manifest -outputresource:$(CS2CS_EXE);1
 
 $(GEOD_EXE):	$(GEODEXE_OBJ) $(EXE_PROJ)
 	cl $(GEODEXE_OBJ) $(EXE_PROJ)
-    if exist $(GEOD_EXE).manifest mt -manifest $(GEOD_EXE).manifest -outputresource:$(GEOD_EXE);1
+	if exist $(GEOD_EXE).manifest mt -manifest $(GEOD_EXE).manifest -outputresource:$(GEOD_EXE);1
 
 $(NAD2NAD_EXE):	nad2nad.obj emess.obj $(EXE_PROJ)
 	cl nad2nad.obj emess.obj $(EXE_PROJ)
