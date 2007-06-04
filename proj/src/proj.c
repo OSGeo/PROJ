@@ -496,5 +496,7 @@ int main(int argc, char **argv) {
         (void)fclose(fid);
         emess_dat.File_name = 0;
     }
+    if( Proj )
+        pj_free(Proj);
     exit(0); /* normal completion */
 }

@@ -1,3 +1,7 @@
+2007-06-04  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/proj.c: pj_free() the definition to simplify leak testing.
+
 2007-04-04  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/PJ_laea.c: Fix memory leak of apa field.
