@@ -31,6 +31,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.9  2007/07/06 14:58:03  fwarmerdam
+ * improve searchpath clearning with pj_set_searchpath()
+ *
  * Revision 1.8  2007/03/11 17:03:18  fwarmerdam
  * support drive letter prefixes on win32 and related fixes (bug 1499)
  *
@@ -77,7 +80,8 @@ void pj_set_finder( const char *(*new_finder)(const char *) )
 /*                         pj_set_searchpath()                          */
 /*                                                                      */
 /*      Path control for callers that can't practically provide         */
-/*      pj_set_finder() style callbacks.                                */
+/*      pj_set_finder() style callbacks.  Call with (0,NULL) as args    */
+/*      to clear the searchpath set.                                    */
 /************************************************************************/
 
 void pj_set_searchpath ( int count, const char **path )
@@ -95,13 +99,16 @@ void pj_set_searchpath ( int count, const char **path )
         search_path = NULL;
     }
 
-    search_path = pj_malloc(sizeof *search_path * count);
-    for (i = 0; i < count; i++)
+    if( count > 0 )
     {
-        search_path[i] = pj_malloc(strlen(path[i]) + 1);
-        strcpy(search_path[i], path[i]);
+        search_path = pj_malloc(sizeof *search_path * count);
+        for (i = 0; i < count; i++)
+        {
+            search_path[i] = pj_malloc(strlen(path[i]) + 1);
+            strcpy(search_path[i], path[i]);
+        }
     }
-
+        
     path_count = count;
 }
 
