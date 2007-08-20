@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.15  2007/08/20 13:40:06  fwarmerdam
+ * avoid warnings in c++ for some prototypes
+ *
  * Revision 1.14  2006/04/20 04:19:59  fwarmerdam
  * updated version
  *
@@ -126,7 +129,7 @@ int pj_compare_datums( projPJ srcdefn, projPJ dstdefn );
 int pj_apply_gridshift( const char *, int, 
                         long point_count, int point_offset,
                         double *x, double *y, double *z );
-void pj_deallocate_grids();
+void pj_deallocate_grids(void);
 int pj_is_latlong(projPJ);
 int pj_is_geocent(projPJ);
 void pj_pr_list(projPJ);
@@ -140,8 +143,8 @@ projPJ pj_latlong_from_proj( projPJ );
 void *pj_malloc(size_t);
 void pj_dalloc(void *);
 char *pj_strerrno(int);
-int *pj_get_errno_ref();
-const char *pj_get_release();
+int *pj_get_errno_ref(void);
+const char *pj_get_release(void);
 
 #ifdef __cplusplus
 }
