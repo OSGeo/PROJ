@@ -1,3 +1,8 @@
+2007-09-11  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/nad_init.c: Improve error recovery if ctable datum shift files
+	fails to load.
+
 2007-08-20  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/proj_api.h: include void in arg list for prototypes with no

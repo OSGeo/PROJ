@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.10  2007/09/11 20:16:33  fwarmerdam
+ *  Improve error recovery if ctable datum shift files fails to load.
+ *
  * Revision 1.9  2006/11/17 22:16:30  mloskot
  * Uploaded PROJ.4 port for Windows CE.
  *
@@ -87,6 +90,15 @@ int nad_ctable_load( struct CTABLE *ct, FILE *fid )
     if( ct->cvs == NULL 
         || fread(ct->cvs, sizeof(FLP), a_size, fid) != a_size )
     {
+        pj_dalloc( ct->cvs );
+        ct->cvs = NULL;
+
+        if( getenv("PROJ_DEBUG") != NULL )
+        {
+            fprintf( stderr, 
+            "ctable loading failed on fread() - binary incompatible?\n" );
+        }
+
         pj_errno = -38;
         return 0;
     }
