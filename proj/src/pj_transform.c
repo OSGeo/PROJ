@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.21  2007/09/11 20:19:36  fwarmerdam
+ * avoid use of static variables to make reentrant
+ *
  * Revision 1.20  2006/10/12 21:04:39  fwarmerdam
  * Added experimental +lon_wrap argument to set a "center point" for
  * longitude wrapping of longitude values coming out of pj_transform().
@@ -372,6 +375,7 @@ int pj_geodetic_to_geocentric( double a, double es,
 {
     double b;
     int    i;
+    GeocentricInfo gi;
 
     pj_errno = 0;
 
@@ -380,7 +384,7 @@ int pj_geodetic_to_geocentric( double a, double es,
     else
         b = a * sqrt(1-es);
 
-    if( pj_Set_Geocentric_Parameters( a, b ) != 0 )
+    if( pj_Set_Geocentric_Parameters( &gi, a, b ) != 0 )
     {
         pj_errno = PJD_ERR_GEOCENTRIC;
         return pj_errno;
@@ -393,7 +397,7 @@ int pj_geodetic_to_geocentric( double a, double es,
         if( x[io] == HUGE_VAL  )
             continue;
 
-        if( pj_Convert_Geodetic_To_Geocentric( y[io], x[io], z[io], 
+        if( pj_Convert_Geodetic_To_Geocentric( &gi, y[io], x[io], z[io], 
                                                x+io, y+io, z+io ) != 0 )
         {
             pj_errno = -14;
@@ -416,13 +420,14 @@ int pj_geocentric_to_geodetic( double a, double es,
 {
     double b;
     int    i;
+    GeocentricInfo gi;
 
     if( es == 0.0 )
         b = a;
     else
         b = a * sqrt(1-es);
 
-    if( pj_Set_Geocentric_Parameters( a, b ) != 0 )
+    if( pj_Set_Geocentric_Parameters( &gi, a, b ) != 0 )
     {
         pj_errno = PJD_ERR_GEOCENTRIC;
         return pj_errno;
@@ -435,8 +440,8 @@ int pj_geocentric_to_geodetic( double a, double es,
         if( x[io] == HUGE_VAL )
             continue;
 
-        pj_Convert_Geocentric_To_Geodetic( x[io], y[io], z[io], 
-                                        y+io, x+io, z+io );
+        pj_Convert_Geocentric_To_Geodetic( &gi, x[io], y[io], z[io], 
+                                           y+io, x+io, z+io );
     }
 
     return 0;

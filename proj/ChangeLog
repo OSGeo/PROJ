@@ -1,5 +1,8 @@
 2007-09-11  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/gencent.c/h, src/pj_transform.c: Restructure so geocentric code
+	does not use static variables - reentrancy fix.
+
 	* src/nad_init.c: Improve error recovery if ctable datum shift files
 	fails to load.
 

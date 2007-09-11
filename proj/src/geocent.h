@@ -92,9 +92,21 @@
 extern "C" {
 #endif
 
+typedef struct 
+{
+    double Geocent_a;        /* Semi-major axis of ellipsoid in meters */
+    double Geocent_b;        /* Semi-minor axis of ellipsoid           */
+    double Geocent_a2;       /* Square of semi-major axis */
+    double Geocent_b2;       /* Square of semi-minor axis */
+    double Geocent_e2;       /* Eccentricity squared  */
+    double Geocent_ep2;      /* 2nd eccentricity squared */
+} GeocentricInfo;
 
-  long pj_Set_Geocentric_Parameters (double a, 
-                                  double b);
+void pj_Init_Geocentric( GeocentricInfo *gi );
+long pj_Set_Geocentric_Parameters( GeocentricInfo *gi, 
+                                   double a, 
+                                   double b);
+
 /*
  * The function Set_Geocentric_Parameters receives the ellipsoid parameters
  * as inputs and sets the corresponding state variables.
@@ -104,8 +116,10 @@ extern "C" {
  */
 
 
-  void pj_Get_Geocentric_Parameters (double *a, 
-                                  double *b);
+void pj_Get_Geocentric_Parameters ( GeocentricInfo *gi,
+                                    double *a, 
+                                    double *b);
+
 /*
  * The function Get_Geocentric_Parameters returns the ellipsoid parameters
  * to be used in geocentric coordinate conversions.
@@ -115,12 +129,13 @@ extern "C" {
  */
 
 
-  long pj_Convert_Geodetic_To_Geocentric (double Latitude,
-                                       double Longitude,
-                                       double Height,
-                                       double *X,
-                                       double *Y,
-                                       double *Z);
+long pj_Convert_Geodetic_To_Geocentric ( GeocentricInfo *gi,
+                                         double Latitude,
+                                         double Longitude,
+                                         double Height,
+                                         double *X,
+                                         double *Y,
+                                         double *Z);
 /*
  * The function Convert_Geodetic_To_Geocentric converts geodetic coordinates
  * (latitude, longitude, and height) to geocentric coordinates (X, Y, Z),
@@ -136,12 +151,13 @@ extern "C" {
  */
 
 
-  void pj_Convert_Geocentric_To_Geodetic (double X,
-                                       double Y, 
-                                       double Z,
-                                       double *Latitude,
-                                       double *Longitude,
-                                       double *Height);
+void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
+                                        double X,
+                                        double Y, 
+                                        double Z,
+                                        double *Latitude,
+                                        double *Longitude,
+                                        double *Height);
 /*
  * The function Convert_Geocentric_To_Geodetic converts geocentric
  * coordinates (X, Y, Z) to geodetic coordinates (latitude, longitude, 
