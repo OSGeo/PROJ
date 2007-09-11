@@ -65,6 +65,9 @@
  *    25-02-97          Original Code
  *
  * $Log$
+ * Revision 1.7  2007/09/11 20:19:36  fwarmerdam
+ * avoid use of static variables to make reentrant
+ *
  * Revision 1.6  2006/01/12 22:29:01  fwarmerdam
  * make geocent.c globals static to avoid conflicts
  *
@@ -109,29 +112,11 @@
 
 /***************************************************************************/
 /*
- *                              GLOBAL DECLARATIONS
- */
-/* Ellipsoid parameters, default to WGS 84 */
-static double Geocent_a = 6378137.0;     /* Semi-major axis of ellipsoid in meters */
-static double Geocent_b = 6356752.3142;  /* Semi-minor axis of ellipsoid           */
-
-static double Geocent_a2 = 40680631590769.0;        /* Square of semi-major axis */
-static double Geocent_b2 = 40408299984087.05;       /* Square of semi-minor axis */
-static double Geocent_e2 = 0.0066943799901413800;   /* Eccentricity squared  */
-static double Geocent_ep2 = 0.00673949675658690300; /* 2nd eccentricity squared */
-/*
- * These state variables are for optimization purposes.  The only function
- * that should modify them is Set_Geocentric_Parameters.
- */
-
-
-/***************************************************************************/
-/*
  *                              FUNCTIONS     
  */
 
 
-long pj_Set_Geocentric_Parameters (double a, double b) 
+long pj_Set_Geocentric_Parameters (GeocentricInfo *gi, double a, double b) 
 
 { /* BEGIN Set_Geocentric_Parameters */
 /*
@@ -141,29 +126,30 @@ long pj_Set_Geocentric_Parameters (double a, double b)
  *    a  : Semi-major axis, in meters.          (input)
  *    b  : Semi-minor axis, in meters.          (input)
  */
-  long Error_Code = GEOCENT_NO_ERROR;
+    long Error_Code = GEOCENT_NO_ERROR;
 
-  if (a <= 0.0)
-    Error_Code |= GEOCENT_A_ERROR;
-  if (b <= 0.0)
-    Error_Code |= GEOCENT_B_ERROR;
-  if (a < b)
-    Error_Code |= GEOCENT_A_LESS_B_ERROR;
-  if (!Error_Code)
-  {
-    Geocent_a = a;
-    Geocent_b = b;
-    Geocent_a2 = a * a;
-    Geocent_b2 = b * b;
-    Geocent_e2 = (Geocent_a2 - Geocent_b2) / Geocent_a2;
-    Geocent_ep2 = (Geocent_a2 - Geocent_b2) / Geocent_b2;
-  }
-  return (Error_Code);
+    if (a <= 0.0)
+        Error_Code |= GEOCENT_A_ERROR;
+    if (b <= 0.0)
+        Error_Code |= GEOCENT_B_ERROR;
+    if (a < b)
+        Error_Code |= GEOCENT_A_LESS_B_ERROR;
+    if (!Error_Code)
+    {
+        gi->Geocent_a = a;
+        gi->Geocent_b = b;
+        gi->Geocent_a2 = a * a;
+        gi->Geocent_b2 = b * b;
+        gi->Geocent_e2 = (gi->Geocent_a2 - gi->Geocent_b2) / gi->Geocent_a2;
+        gi->Geocent_ep2 = (gi->Geocent_a2 - gi->Geocent_b2) / gi->Geocent_b2;
+    }
+    return (Error_Code);
 } /* END OF Set_Geocentric_Parameters */
 
 
-void pj_Get_Geocentric_Parameters (double *a, 
-                                double *b)
+void pj_Get_Geocentric_Parameters (GeocentricInfo *gi,
+                                   double *a, 
+                                   double *b)
 { /* BEGIN Get_Geocentric_Parameters */
 /*
  * The function Get_Geocentric_Parameters returns the ellipsoid parameters
@@ -173,17 +159,18 @@ void pj_Get_Geocentric_Parameters (double *a,
  *    b  : Semi-minor axis, in meters.          (output)
  */
 
-  *a = Geocent_a;
-  *b = Geocent_b;
+    *a = gi->Geocent_a;
+    *b = gi->Geocent_b;
 } /* END OF Get_Geocentric_Parameters */
 
 
-long pj_Convert_Geodetic_To_Geocentric (double Latitude,
-                                     double Longitude,
-                                     double Height,
-                                     double *X,
-                                     double *Y,
-                                     double *Z) 
+long pj_Convert_Geodetic_To_Geocentric (GeocentricInfo *gi,
+                                        double Latitude,
+                                        double Longitude,
+                                        double Height,
+                                        double *X,
+                                        double *Y,
+                                        double *Z) 
 { /* BEGIN Convert_Geodetic_To_Geocentric */
 /*
  * The function Convert_Geodetic_To_Geocentric converts geodetic coordinates
@@ -225,10 +212,10 @@ long pj_Convert_Geodetic_To_Geocentric (double Latitude,
     Sin_Lat = sin(Latitude);
     Cos_Lat = cos(Latitude);
     Sin2_Lat = Sin_Lat * Sin_Lat;
-    Rn = Geocent_a / (sqrt(1.0e0 - Geocent_e2 * Sin2_Lat));
+    Rn = gi->Geocent_a / (sqrt(1.0e0 - gi->Geocent_e2 * Sin2_Lat));
     *X = (Rn + Height) * Cos_Lat * cos(Longitude);
     *Y = (Rn + Height) * Cos_Lat * sin(Longitude);
-    *Z = ((Rn * (1 - Geocent_e2)) + Height) * Sin_Lat;
+    *Z = ((Rn * (1 - gi->Geocent_e2)) + Height) * Sin_Lat;
 
   }
   return (Error_Code);
@@ -249,12 +236,13 @@ long pj_Convert_Geodetic_To_Geocentric (double Latitude,
 
 #define USE_ITERATIVE_METHOD
 
-void pj_Convert_Geocentric_To_Geodetic (double X,
-                                     double Y, 
-                                     double Z,
-                                     double *Latitude,
-                                     double *Longitude,
-                                     double *Height)
+void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
+                                        double X,
+                                        double Y, 
+                                        double Z,
+                                        double *Latitude,
+                                        double *Longitude,
+                                        double *Height)
 { /* BEGIN Convert_Geocentric_To_Geodetic */
 #if !defined(USE_ITERATIVE_METHOD)
 /*
@@ -321,12 +309,12 @@ void pj_Convert_Geocentric_To_Geodetic (double X,
     Sin_B0 = T0 / S0;
     Cos_B0 = W / S0;
     Sin3_B0 = Sin_B0 * Sin_B0 * Sin_B0;
-    T1 = Z + Geocent_b * Geocent_ep2 * Sin3_B0;
-    Sum = W - Geocent_a * Geocent_e2 * Cos_B0 * Cos_B0 * Cos_B0;
+    T1 = Z + gi->Geocent_b * gi->Geocent_ep2 * Sin3_B0;
+    Sum = W - gi->Geocent_a * gi->Geocent_e2 * Cos_B0 * Cos_B0 * Cos_B0;
     S1 = sqrt(T1*T1 + Sum * Sum);
     Sin_p1 = T1 / S1;
     Cos_p1 = Sum / S1;
-    Rn = Geocent_a / sqrt(1.0 - Geocent_e2 * Sin_p1 * Sin_p1);
+    Rn = gi->Geocent_a / sqrt(1.0 - gi->Geocent_e2 * Sin_p1 * Sin_p1);
     if (Cos_p1 >= COS_67P5)
     {
         *Height = W / Cos_p1 - Rn;
@@ -337,7 +325,7 @@ void pj_Convert_Geocentric_To_Geodetic (double X,
     }
     else
     {
-        *Height = Z / Sin_p1 + Rn * (Geocent_e2 - 1.0);
+        *Height = Z / Sin_p1 + Rn * (gi->Geocent_e2 - 1.0);
     }
     if (At_Pole == FALSE)
     {
@@ -401,7 +389,7 @@ void pj_Convert_Geocentric_To_Geodetic (double X,
     RR = sqrt(X*X+Y*Y+Z*Z);
 
 /*	special cases for latitude and longitude */
-    if (P/Geocent_a < genau) {
+    if (P/gi->Geocent_a < genau) {
 
 /*  special case, if P=0. (X=0., Y=0.) */
         At_Pole = TRUE;
@@ -409,9 +397,9 @@ void pj_Convert_Geocentric_To_Geodetic (double X,
 
 /*  if (X,Y,Z)=(0.,0.,0.) then Height becomes semi-minor axis
  *  of ellipsoid (=center of mass), Latitude becomes PI/2 */
-        if (RR/Geocent_a < genau) {
+        if (RR/gi->Geocent_a < genau) {
             *Latitude = PI_OVER_2;
-            *Height   = -Geocent_b;
+            *Height   = -gi->Geocent_b;
             return ;
 
         }
@@ -433,8 +421,8 @@ void pj_Convert_Geocentric_To_Geodetic (double X,
  */
     CT = Z/RR;
     ST = P/RR;
-    RX = 1.0/sqrt(1.0-Geocent_e2*(2.0-Geocent_e2)*ST*ST);
-    CPHI0 = ST*(1.0-Geocent_e2)*RX;
+    RX = 1.0/sqrt(1.0-gi->Geocent_e2*(2.0-gi->Geocent_e2)*ST*ST);
+    CPHI0 = ST*(1.0-gi->Geocent_e2)*RX;
     SPHI0 = CT*RX;
     iter = 0;
 
@@ -443,12 +431,12 @@ void pj_Convert_Geocentric_To_Geodetic (double X,
     do
     {
         iter++;
-        RN = Geocent_a/sqrt(1.0-Geocent_e2*SPHI0*SPHI0);
+        RN = gi->Geocent_a/sqrt(1.0-gi->Geocent_e2*SPHI0*SPHI0);
 
 /*  ellipsoidal (geodetic) height */
-        *Height = P*CPHI0+Z*SPHI0-RN*(1.0-Geocent_e2*SPHI0*SPHI0);
+        *Height = P*CPHI0+Z*SPHI0-RN*(1.0-gi->Geocent_e2*SPHI0*SPHI0);
 
-        RK = Geocent_e2*RN/(RN+*Height);
+        RK = gi->Geocent_e2*RN/(RN+*Height);
         RX = 1.0/sqrt(1.0-RK*(2.0-RK)*ST*ST);
         CPHI = ST*(1.0-RK)*RX;
         SPHI = CT*RX;
