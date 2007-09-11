@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.22  2007/09/11 20:32:25  fwarmerdam
+ * mark the transient error array const
+ *
  * Revision 1.21  2007/09/11 20:19:36  fwarmerdam
  * avoid use of static variables to make reentrant
  *
@@ -142,7 +145,7 @@ PJ_CVSID("$Id$");
 ** list or something, but while experimenting with it this should be fine. 
 */
 
-static int transient_error[45] = {
+static const int transient_error[45] = {
     /*             0  1  2  3  4  5  6  7  8  9   */
     /* 0 to 9 */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     /* 10 to 19 */ 0, 0, 0, 0, 1, 1, 0, 1, 1, 1,  
