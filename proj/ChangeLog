@@ -1,3 +1,20 @@
+2007-11-25  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* pj_transform.c: Do ellipsoid comparisons using the _orig ellipse
+	values rather than the adjusted one.  Use these original values for
+	any conversion to/from geocentric coordinates. 
+
+	Also, only do pj_datum_transform if neither the source nor destination 
+	is PJD_UNKNOWN.  This means we will no longer attempt via-geocentric 
+	adjustments for coordinate systems lacking a datum definition (having 
+	only an ellipsoid.
+
+	* projects.h, pj_init.c: added a_orig and es_orig values in the PJ
+	structure so we can distinguish between the originally requested 
+	ellipsoid, and the ellipsoid after adjustment for spherical projections
+
+	Todays changes courtesy of bug 1602. 
+
 2007-09-28  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* nad/esri.extra: Add "900913" code for google mercator.

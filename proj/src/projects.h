@@ -28,6 +28,15 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.27  2007/11/26 00:21:59  fwarmerdam
+ * Modified PJ structure to hold a_orig, es_orig, ellipsoid definition before
+ * adjustment for spherical projections.
+ * Modified pj_datum_transform() to use the original ellipsoid parameters,
+ * not the ones adjusted for spherical projections.
+ * Modified pj_datum_transform() to not attempt any datum shift via
+ * geocentric coordinates if the source *or* destination are raw ellipsoids
+ * (ie. PJD_UNKNOWN).  All per PROJ bug #1602, GDAL bug #2025.
+ *
  * Revision 1.26  2007/03/11 17:03:18  fwarmerdam
  * support drive letter prefixes on win32 and related fixes (bug 1499)
  *
@@ -289,8 +298,10 @@ typedef struct PJconsts {
         int is_geocent; /* proj=geocent ... not really a projection at all */
 	double
 		a,  /* major axis or radius if es==0 */
-		e,  /* eccentricity */
+                a_orig, /* major axis before any +proj related adjustment */
 		es, /* e ^ 2 */
+                es_orig, /* es before any +proj related adjustment */
+		e,  /* eccentricity */
 		ra, /* 1/A */
 		one_es, /* 1 - e^2 */
 		rone_es, /* 1/one_es */
@@ -298,7 +309,7 @@ typedef struct PJconsts {
 		x0, y0, /* easting and northing */
 		k0,	/* general scaling factor */
 		to_meter, fr_meter; /* cartesian scaling */
-
+    
         int     datum_type; /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
         double  datum_params[7];
         double  from_greenwich; /* prime meridian offset (in radians) */

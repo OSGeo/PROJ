@@ -30,6 +30,15 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.23  2007/11/26 00:21:59  fwarmerdam
+ * Modified PJ structure to hold a_orig, es_orig, ellipsoid definition before
+ * adjustment for spherical projections.
+ * Modified pj_datum_transform() to use the original ellipsoid parameters,
+ * not the ones adjusted for spherical projections.
+ * Modified pj_datum_transform() to not attempt any datum shift via
+ * geocentric coordinates if the source *or* destination are raw ellipsoids
+ * (ie. PJD_UNKNOWN).  All per PROJ bug #1602, GDAL bug #2025.
+ *
  * Revision 1.22  2007/09/11 20:32:25  fwarmerdam
  * mark the transient error array const
  *
@@ -197,7 +206,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             }
         }
 
-        if( pj_geocentric_to_geodetic( srcdefn->a, srcdefn->es,
+        if( pj_geocentric_to_geodetic( srcdefn->a_orig, srcdefn->es_orig,
                                        point_count, point_offset, 
                                        x, y, z ) != 0) 
             return pj_errno;
@@ -294,7 +303,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             return PJD_ERR_GEOCENTRIC;
         }
 
-        pj_geodetic_to_geocentric( dstdefn->a, dstdefn->es,
+        pj_geodetic_to_geocentric( dstdefn->a_orig, dstdefn->es_orig,
                                    point_count, point_offset, x, y, z );
 
         if( dstdefn->fr_meter != 1.0 )
@@ -464,8 +473,8 @@ int pj_compare_datums( PJ *srcdefn, PJ *dstdefn )
     {
         return 0;
     }
-    else if( srcdefn->a != dstdefn->a 
-             || ABS(srcdefn->es - dstdefn->es) > 0.000000000050 )
+    else if( srcdefn->a_orig != dstdefn->a_orig 
+             || ABS(srcdefn->es_orig - dstdefn->es_orig) > 0.000000000050 )
     {
         /* the tolerence for es is to ensure that GRS80 and WGS84 are
            considered identical */
@@ -598,6 +607,10 @@ int pj_geocentric_from_wgs84( PJ *defn,
 
 /************************************************************************/
 /*                         pj_datum_transform()                         */
+/*                                                                      */
+/*      The input should be long/lat/z coordinates in radians in the    */
+/*      source datum, and the output should be long/lat/z               */
+/*      coordinates in radians in the destination datum.                */
 /************************************************************************/
 
 int pj_datum_transform( PJ *srcdefn, PJ *dstdefn, 
@@ -611,16 +624,26 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
     pj_errno = 0;
 
 /* -------------------------------------------------------------------- */
+/*      We cannot do any meaningful datum transformation if either      */
+/*      the source or destination are of an unknown datum type          */
+/*      (ie. only a +ellps declaration, no +datum).  This is new        */
+/*      behavior for PROJ 4.6.0.                                        */
+/* -------------------------------------------------------------------- */
+    if( srcdefn->datum_type == PJD_UNKNOWN
+        || dstdefn->datum_type == PJD_UNKNOWN )
+        return 0;
+
+/* -------------------------------------------------------------------- */
 /*      Short cut if the datums are identical.                          */
 /* -------------------------------------------------------------------- */
     if( pj_compare_datums( srcdefn, dstdefn ) )
         return 0;
 
-    src_a = srcdefn->a;
-    src_es = srcdefn->es;
+    src_a = srcdefn->a_orig;
+    src_es = srcdefn->es_orig;
 
-    dst_a = dstdefn->a;
-    dst_es = dstdefn->es;
+    dst_a = dstdefn->a_orig;
+    dst_es = dstdefn->es_orig;
 
 /* -------------------------------------------------------------------- */
 /*      Create a temporary Z array if one is not provided.              */
