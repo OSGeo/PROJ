@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.4  2007/11/29 21:06:50  fwarmerdam
+ * make sure we only look for 7 parameters
+ *
  * Revision 1.3  2007/01/31 06:41:01  fwarmerdam
  * dont parse more datum parameters than we have room for in datum_params[]
  *
@@ -116,7 +119,7 @@ int pj_datum_set(paralist *pl, PJ *projdef)
 
         /* parse out the parameters */
         s = towgs84;
-        for( s = towgs84; *s != '\0' && parm_count < (sizeof(projdef->datum_params) / sizeof(double)); ) 
+        for( s = towgs84; *s != '\0' && parm_count < 7; ) 
         {
             projdef->datum_params[parm_count++] = atof(s);
             while( *s != '\0' && *s != ',' )
