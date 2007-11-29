@@ -1,4 +1,25 @@
+4.6.0 Release Notes
+-------------------
 
+ o MAJOR: Rework pj_transform() to avoid applying ellipsoid to ellipsoid
+   transformations as a datum shift when no datum info is available.
+
+ o Avoid applying "change of ellipsoid" during datum shifting based on
+   ellipsoids getting changed to spheres for spherical projections.
+
+ o Upgrade to EPSG 6.13
+ 
+ o Added "900913" "Google Mercator" code in nad/esri.extra.
+
+ o Avoid some static variable based multi-threading problems. 
+
+ o Improve error recovery if ctable style datum shift grid fails to load.
+
+ o Support drive letters properly in PROJ_LIB paths for win32.
+ 
+ o Fix occasional problem with DMS parsing. 
+
+   
 4.5.0 Release Notes
 -------------------
 

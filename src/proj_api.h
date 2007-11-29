@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.16  2007/11/29 21:07:49  fwarmerdam
+ * prepare for 4.6.0 release
+ *
  * Revision 1.15  2007/08/20 13:40:06  fwarmerdam
  * avoid warnings in c++ for some prototypes
  *
@@ -89,7 +92,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 450
+#define PJ_VERSION 460
 
 extern char const pj_release[]; /* global release id string */
 

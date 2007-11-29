@@ -1,5 +1,7 @@
 2007-11-29  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* Prepare 4.6.0beta1 release.
+
 	* nad/epsg: Upgrade to EPSG 6.13
 
 2007-11-25  Frank Warmerdam  <warmerdam@pobox.com>
