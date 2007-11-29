@@ -1,3 +1,7 @@
+2007-11-29  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/epsg: Upgrade to EPSG 6.13
+
 2007-11-25  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* pj_transform.c: Do ellipsoid comparisons using the _orig ellipse
