@@ -42,8 +42,9 @@ install-data-local:
 check-local:
 	$(TEST27) $(PROJEXE)
 	$(TEST83) $(PROJEXE)
-	$(TESTNTV2) $(CS2CSEXE)
 	$(TESTVARIOUS) $(CS2CSEXE)
+
+#	$(TESTNTV2) $(CS2CSEXE)
 
 clean-local:
 	$(RM) $(TEST_DB)
