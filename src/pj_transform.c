@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.24  2007/12/03 15:48:20  fwarmerdam
+ * Improve WGS84 ES precision to avoid unnecesary transformation (#1531)
+ *
  * Revision 1.23  2007/11/26 00:21:59  fwarmerdam
  * Modified PJ structure to hold a_orig, es_orig, ellipsoid definition before
  * adjustment for spherical projections.
@@ -132,7 +135,7 @@ PJ_CVSID("$Id$");
 #endif
 
 #ifndef SRS_WGS84_ESQUARED
-#define SRS_WGS84_ESQUARED 0.006694379990
+#define SRS_WGS84_ESQUARED 0.0066943799901413165
 #endif
 
 #define Dx_BF (defn->datum_params[0])
