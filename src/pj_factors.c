@@ -20,15 +20,16 @@ pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 		return 1;
 	} else { /* proceed */
 		errno = pj_errno = 0;
-		if (fabs(t) <= EPS) /* adjust to pi/2 */
-			lp.phi = lp.phi < 0. ? -HALFPI : HALFPI;
+		if (h < EPS)
+			h = DEFAULT_H;
+		if (fabs(lp.phi) > (HALFPI - h)) 
+                /* adjust to value around pi/2 where derived still exists*/
+		        lp.phi = lp.phi < 0. ? (-HALFPI+h) : (HALFPI-h);
 		else if (P->geoc)
 			lp.phi = atan(P->rone_es * tan(lp.phi));
 		lp.lam -= P->lam0;	/* compute del lp.lam */
 		if (!P->over)
 			lp.lam = adjlon(lp.lam); /* adjust del longitude */
-		if (h <= 0.)
-			h = DEFAULT_H;
 		if (P->spc)	/* get what projection analytic values */
 			P->spc(lp, P, fac);
 		if (((fac->code & (IS_ANAL_XL_YL+IS_ANAL_XP_YP)) !=
