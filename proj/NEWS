@@ -19,6 +19,10 @@
  
  o Fix occasional problem with DMS parsing. 
 
+ o Removed non-functional mpoly projection.
+
+ o add lonlat, and latlon as aliases for longlat. 
+
    
 4.5.0 Release Notes
 -------------------
