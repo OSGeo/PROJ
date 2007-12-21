@@ -1,3 +1,7 @@
+2007-12-21  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Prepare 4.6.0 final release.
+
 2007-12-21  Andrey Kiselv  <dron@ak4719.spb.edu>
 
 	* PJ_wag3.c: Added missed "lat_ts" parameter to projection description
