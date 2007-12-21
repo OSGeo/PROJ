@@ -1,3 +1,8 @@
+2007-12-21  Andrey Kiselv  <dron@ak4719.spb.edu>
+
+	* PJ_wag3.c: Added missed "lat_ts" parameter to projection description
+	string.
+
 2007-12-20  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* pj_list.h, Makefile.am, PJ_mpoly.c: Removed mpoly projection.  It
