@@ -30,6 +30,8 @@ world   --- Proj specifications for several international grid systems.
 
 nad.lst --- Reference list of SPCS States and NGS datum identifiers
 
+IGNF    --- Translation of French Mapping Agency codes into PROJ.4 via init= mechanism.
+
 nad2bin.c   --- C program to convert above ASCII files into binary
 				files usable by program nad2nad.  Compiled and used in
 				install script only.
@@ -67,3 +69,4 @@ WO.lla.Z    --- Washington, Oregon, N. California
 
 	Other grid shift files
 ntv1_can.dat	--- Canadian NTv1 grid shift file (NAD27-->NAD83)
+ntf_r93.gsb	--- French NTv2 grid shift file (NTF-->RGF93)
