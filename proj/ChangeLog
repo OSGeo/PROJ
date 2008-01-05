@@ -1,3 +1,14 @@
+2008-01-05  IGNF  <didier.richard@ign.fr>
+
+	* PJ_eqr.c: src/PJ_eqr.c added. src/pj_list.h modified (added eqr).
+	src/Makefile.am, src/makefile.vc modified (added PJ_eqr.c and al).
+	* PJ_glabsgm.c: src/PJ_glabsgm.c added. src/pj_list.h modified (added glabsgm).
+	src/Makefile.am, src/makefile.vc modified (added PJ_glabgsm.c and al).
+	* IGNF catalogue: nad/IGNF added. nad/ntf_r93.gsb added, nad/Makefile.am
+	modified (added IGNF, ntf_r93.gsb little endian release)
+	nad/README modified (added IGNF, ntf_r93.gsb).
+	ChangeLog
+
 2007-12-21  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* Prepare 4.6.0 final release.
