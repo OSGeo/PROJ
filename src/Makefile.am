@@ -29,7 +29,7 @@ libproj_la_SOURCES = \
 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c \
 	PJ_imw_p.c PJ_krovak.c PJ_lcc.c PJ_poly.c \
 	PJ_rpoly.c PJ_sconics.c proj_rouss.c \
-	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c \
+	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c PJ_eqr.c \
 	PJ_gall.c PJ_labrd.c PJ_lsat.c PJ_merc.c \
 	PJ_mill.c PJ_ocea.c PJ_omerc.c PJ_somerc.c \
 	PJ_tcc.c PJ_tcea.c PJ_tmerc.c \
@@ -40,7 +40,7 @@ libproj_la_SOURCES = \
 	PJ_wag7.c PJ_lcca.c PJ_geos.c \
 	PJ_boggs.c PJ_collg.c PJ_crast.c PJ_denoy.c \
 	PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c \
-	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c \
+	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c PJ_glabsgm.c \
 	PJ_gn_sinu.c PJ_goode.c PJ_hatano.c PJ_loxim.c \
 	PJ_mbt_fps.c PJ_mbtfpp.c PJ_mbtfpq.c PJ_moll.c \
 	PJ_nell.c PJ_nell_h.c PJ_putp2.c PJ_putp3.c \
