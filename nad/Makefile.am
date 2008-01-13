@@ -8,6 +8,7 @@ TEST27 = ./test27
 TEST83 = ./test83
 TESTNTV2 = ./testntv2
 TESTVARIOUS = ./testvarious
+TESTIGN = ./testIGNF
 
 pkgdata_DATA = GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri \
 		esri.extra other.extra \
@@ -17,7 +18,7 @@ EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
 			proj_def.dat test27 test83 world epsg esri \
 			testvarious testntv2 ntv2_out.dist \
 			esri.extra other.extra \
-			IGNF ntf_r93.gsb
+			IGNF ntf_r93.gsb testIGNF proj_outIGNF.dist
 
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
@@ -47,6 +48,7 @@ check-local:
 	$(TESTVARIOUS) $(CS2CSEXE)
 
 #	$(TESTNTV2) $(CS2CSEXE)
+#	$(TESTIGNF) $(CS2CSEXE)
 
 clean-local:
 	$(RM) $(TEST_DB)
