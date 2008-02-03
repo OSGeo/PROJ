@@ -62,15 +62,15 @@ am_libproj_la_OBJECTS = PJ_aeqd.lo PJ_gnom.lo PJ_laea.lo \
 	PJ_sterea.lo PJ_aea.lo PJ_bipc.lo PJ_bonne.lo PJ_eqdc.lo \
 	PJ_imw_p.lo PJ_krovak.lo PJ_lcc.lo PJ_poly.lo PJ_rpoly.lo \
 	PJ_sconics.lo proj_rouss.lo PJ_cass.lo PJ_cc.lo PJ_cea.lo \
-	PJ_eqc.lo PJ_eqr.lo PJ_gall.lo PJ_labrd.lo PJ_lsat.lo \
-	PJ_merc.lo PJ_mill.lo PJ_ocea.lo PJ_omerc.lo PJ_somerc.lo \
-	PJ_tcc.lo PJ_tcea.lo PJ_tmerc.lo PJ_airy.lo PJ_aitoff.lo \
-	PJ_august.lo PJ_bacon.lo PJ_chamb.lo PJ_hammer.lo PJ_lagrng.lo \
-	PJ_larr.lo PJ_lask.lo PJ_nocol.lo PJ_ob_tran.lo PJ_oea.lo \
-	PJ_tpeqd.lo PJ_vandg.lo PJ_vandg2.lo PJ_vandg4.lo PJ_wag7.lo \
-	PJ_lcca.lo PJ_geos.lo PJ_boggs.lo PJ_collg.lo PJ_crast.lo \
-	PJ_denoy.lo PJ_eck1.lo PJ_eck2.lo PJ_eck3.lo PJ_eck4.lo \
-	PJ_eck5.lo PJ_fahey.lo PJ_fouc_s.lo PJ_gins8.lo PJ_glabsgm.lo \
+	PJ_eqc.lo PJ_gall.lo PJ_labrd.lo PJ_lsat.lo PJ_merc.lo \
+	PJ_mill.lo PJ_ocea.lo PJ_omerc.lo PJ_somerc.lo PJ_tcc.lo \
+	PJ_tcea.lo PJ_tmerc.lo PJ_airy.lo PJ_aitoff.lo PJ_august.lo \
+	PJ_bacon.lo PJ_chamb.lo PJ_hammer.lo PJ_lagrng.lo PJ_larr.lo \
+	PJ_lask.lo PJ_nocol.lo PJ_ob_tran.lo PJ_oea.lo PJ_tpeqd.lo \
+	PJ_vandg.lo PJ_vandg2.lo PJ_vandg4.lo PJ_wag7.lo PJ_lcca.lo \
+	PJ_geos.lo PJ_boggs.lo PJ_collg.lo PJ_crast.lo PJ_denoy.lo \
+	PJ_eck1.lo PJ_eck2.lo PJ_eck3.lo PJ_eck4.lo PJ_eck5.lo \
+	PJ_fahey.lo PJ_fouc_s.lo PJ_gins8.lo PJ_glabsgm.lo \
 	PJ_gn_sinu.lo PJ_goode.lo PJ_hatano.lo PJ_loxim.lo \
 	PJ_mbt_fps.lo PJ_mbtfpp.lo PJ_mbtfpq.lo PJ_moll.lo PJ_nell.lo \
 	PJ_nell_h.lo PJ_putp2.lo PJ_putp3.lo PJ_putp4p.lo PJ_putp5.lo \
@@ -261,7 +261,7 @@ libproj_la_SOURCES = \
 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c \
 	PJ_imw_p.c PJ_krovak.c PJ_lcc.c PJ_poly.c \
 	PJ_rpoly.c PJ_sconics.c proj_rouss.c \
-	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c PJ_eqr.c \
+	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c \
 	PJ_gall.c PJ_labrd.c PJ_lsat.c PJ_merc.c \
 	PJ_mill.c PJ_ocea.c PJ_omerc.c PJ_somerc.c \
 	PJ_tcc.c PJ_tcea.c PJ_tmerc.c \
@@ -446,7 +446,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_eck5.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_eqc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_eqdc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_eqr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_fahey.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_fouc_s.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_gall.Plo@am__quote@
