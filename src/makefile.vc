@@ -2,28 +2,7 @@
 #
 # makefile.vc - builds PROJ.4 library with Visual C++
 #
-
-#
-# Set the following to the directory where the PROJ distribution 
-# data files (ie, the contents of ..\NAD).  The following assumes
-# the PROJ distribution is unpacked as C:\PROJ, which generally must
-# be adjusted.  It is also possible to leave this, and define the
-# PROJ_LIB environment variable to point to the NAD directory.
-#
-PROJ_LIB_DIR=C:/PROJ/NAD
-
-# Uncomment the first for an optimized build, or the second for debug.
-OPTFLAGS=	/nologo /Ox /MD
-#OPTFLAGS=	/nologo /Zi /MD /Fdproj.pdb
-
-# Uncomment the first for linking exes against DLL or second for static
-EXE_PROJ =	proj_i.lib
-#EXE_PROJ =	proj.lib
-
-# Set the version number for the DLL.  Normally we leave this blank since
-# we want software that is dynamically loading the DLL to have no problem
-# with version numbers.
-VERSION=
+!INCLUDE ..\nmake.opt
 
 azimuthal = \
 	PJ_aeqd.obj PJ_gnom.obj PJ_laea.obj PJ_mod_ster.obj \
@@ -89,9 +68,9 @@ CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" \
 
 default:	all
 
-all: proj.lib $(PROJ_EXE) $(CS2CS_EXE) $(GEOD_EXE)
+all: proj.lib $(PROJ_EXE) $(CS2CS_EXE) $(GEOD_EXE) $(NAD2BIN_EXE)
 
-# Disabled: $(NAD2NAD_EXE) $(NAD2BIN_EXE)
+# Disabled: $(NAD2NAD_EXE)
 
 proj.lib:	$(LIBOBJ)
 	if exist proj.lib del proj.lib
@@ -146,3 +125,15 @@ clean:
 	del *.lib
 	del *.obj
 	del *.pdb
+
+install: all
+	-mkdir $(INSTDIR)
+	-mkdir $(INSTDIR)\bin
+	-mkdir $(INSTDIR)\share
+	-mkdir $(INSTDIR)\lib
+	-mkdir $(INSTDIR)\include
+	copy *.exe $(INSTDIR)\bin
+	copy *.dll $(INSTDIR)\bin
+	copy *.lib $(INSTDIR)\lib
+	copy proj_api.h $(INSTDIR)\include
+	

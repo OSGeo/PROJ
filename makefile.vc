@@ -8,19 +8,24 @@
 MAKE = nmake
 RM = -del
 
-default:    src_dir
-
-src_dir:
+default:    
 	cd src
+	$(MAKE) /f makefile.vc
+	cd ..\nad
 	$(MAKE) /f makefile.vc
 	cd ..
 
 clean:	
 	cd src
 	$(MAKE) /f makefile.vc clean
-	$(RM) *.exe
-	$(RM) *.ilk
-	$(RM) *.manifest
-	$(RM) *.pdb
+	cd ..\nad
+	$(MAKE) /f makefile.vc clean
+	cd ..
+
+install:
+	cd src
+	$(MAKE) /f makefile.vc install
+	cd ..\nad
+	$(MAKE) /f makefile.vc install-all
 	cd ..
 
