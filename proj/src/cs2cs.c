@@ -29,6 +29,9 @@
  ******************************************************************************
  *
  * $Log$
+ * Revision 1.11  2008/04/24 16:50:39  fwarmerdam
+ * implement extra text passthrough per email on list for cs2cs
+ *
  * Revision 1.10  2006/10/10 15:24:05  fwarmerdam
  *  Increase MAX_LINE to 1000 per request from Dan Scheirer.
  *
@@ -184,7 +187,10 @@ static void process(FILE *fid)
             printf( oform, z );
         else
             printf( "%.3f", z );
-        fputs("\n", stdout );
+        if( s )
+            printf( "%s", s );
+        else
+            printf( "\n" );
     }
 }
 
