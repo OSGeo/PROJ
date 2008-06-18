@@ -24,6 +24,21 @@ PROJ_HEAD(utm, "Universal Transverse Mercator (UTM)")
 FORWARD(e_forward); /* ellipse */
 	double al, als, n, cosphi, sinphi, t;
 
+        /*
+         * Fail if our longitude is more than 90 degrees from the 
+         * central meridian since the results are essentially garbage. 
+         * Is error -20 really an appropriate return value?
+         * 
+         *  http://trac.osgeo.org/proj/ticket/5
+         */
+        if( lp.lam < -HALFPI || lp.lam > HALFPI )
+        {
+            xy.x = HUGE_VAL;
+            xy.y = HUGE_VAL;
+            pj_errno = -14;
+            return xy;
+        }
+
 	sinphi = sin(lp.phi); cosphi = cos(lp.phi);
 	t = fabs(cosphi) > 1e-10 ? sinphi/cosphi : 0.;
 	t *= t;
@@ -46,6 +61,21 @@ FORWARD(e_forward); /* ellipse */
 }
 FORWARD(s_forward); /* sphere */
 	double b, cosphi;
+
+        /*
+         * Fail if our longitude is more than 90 degrees from the 
+         * central meridian since the results are essentially garbage. 
+         * Is error -20 really an appropriate return value?
+         * 
+         *  http://trac.osgeo.org/proj/ticket/5
+         */
+        if( lp.lam < -HALFPI || lp.lam > HALFPI )
+        {
+            xy.x = HUGE_VAL;
+            xy.y = HUGE_VAL;
+            pj_errno = -14;
+            return xy;
+        }
 
 	b = (cosphi = cos(lp.phi)) * sin(lp.lam);
 	if (fabs(fabs(b) - 1.) <= EPS10) F_ERROR;
