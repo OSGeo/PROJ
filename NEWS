@@ -1,3 +1,26 @@
+4.6.1 Release Notes
+-------------------
+
+ o Upgraded to EPSG 6.17 version for nad/epsg.  Also corrected the precision
+   problem introduced in the last version.
+
+ o Added logic for tmerc projection to fail rather than return crazy results
+   if more than 90 degrees away from the central meridian (#5).  This change
+   may only be temporary till a more comprehensive solution is found.
+
+ o Fixed handling of extra text in cs2cs.  
+
+ o Renamed INSTALL to INSTALL.TXT.
+ 
+ o The eqc projection has been generalized to include a latitude of origin.
+
+ o Added the glabsgm (Gauss Laborde / Sphere Geometric Mean) projection
+ 
+ o nad/IGNF init catalogue created.
+
+ o added the ntf_r93.gsb datum shift file.
+
+ 
 4.6.0 Release Notes
 -------------------
 

@@ -1,5 +1,7 @@
 2008-07-21  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* Prepare 4.6.1 release.
+
 	* nad/epsg: regenerated from EPSG 6.17.  This should also correct the
 	odd precision problems in the last version or two caused by GDAL 
 	numeric processing issues.
