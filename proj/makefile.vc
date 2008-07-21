@@ -22,7 +22,7 @@ clean:
 	$(MAKE) /f makefile.vc clean
 	cd ..
 
-install:
+install-all:
 	cd src
 	$(MAKE) /f makefile.vc install
 	cd ..\nad
