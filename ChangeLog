@@ -2,6 +2,11 @@
 
 	* Prepare 4.6.1 release.
 
+	* rename INSTALL.TXT to INSTALL since the damn distribution generator
+	won't stand for the alternate naming.  Change makefile.vc to use 
+	install-all target instead of install.  What are the chances anyone 
+	will think of trying that?  Not high.
+
 	* nad/epsg: regenerated from EPSG 6.17.  This should also correct the
 	odd precision problems in the last version or two caused by GDAL 
 	numeric processing issues.
