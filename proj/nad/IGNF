@@ -296,7 +296,7 @@
 # W [RANGI47U6S]
 # W [RANGI59U6S]
 # W [RANGI68U6S]
-<REUN47GAUSSL> +title=Reunion Gauss Laborde +proj=glabsgm +towgs84=789.5240,-626.4860,-89.9040,0.6006,76.7946,-10.5788,-32.324100 +a=6378388.0000 +rf=297.0000000000000 +lat_0=-21.116666667 +lon_0=55.533333333 +k_0=1.00000000 +x_0=160000.000 +y_0=50000.000 +units=m +no_defs <>
+<REUN47GAUSSL> +title=Reunion Gauss Laborde +proj=stmerc +towgs84=789.5240,-626.4860,-89.9040,0.6006,76.7946,-10.5788,-32.324100 +a=6378388.0000 +rf=297.0000000000000 +lat_0=-21.116666667 +lon_0=55.533333333 +k_0=1.00000000 +x_0=160000.000 +y_0=50000.000 +units=m +no_defs <>
 <RGF93CC42> +title=Projection conique conforme Zone 1 +proj=lcc +towgs84=0.0000,0.0000,0.0000 +a=6378137.0000 +rf=298.2572221010000 +lat_0=42.000000000 +lon_0=3.000000000 +lat_1=41.250000000 +lat_2=42.750000000 +x_0=1700000.000 +y_0=1200000.000 +units=m +no_defs <>
 <RGF93CC43> +title=Projection conique conforme Zone 2 +proj=lcc +towgs84=0.0000,0.0000,0.0000 +a=6378137.0000 +rf=298.2572221010000 +lat_0=43.000000000 +lon_0=3.000000000 +lat_1=42.250000000 +lat_2=43.750000000 +x_0=1700000.000 +y_0=2200000.000 +units=m +no_defs <>
 <RGF93CC44> +title=Projection conique conforme Zone 3 +proj=lcc +towgs84=0.0000,0.0000,0.0000 +a=6378137.0000 +rf=298.2572221010000 +lat_0=44.000000000 +lon_0=3.000000000 +lat_1=43.250000000 +lat_2=44.750000000 +x_0=1700000.000 +y_0=3200000.000 +units=m +no_defs <>
