@@ -70,7 +70,7 @@ am_libproj_la_OBJECTS = PJ_aeqd.lo PJ_gnom.lo PJ_laea.lo \
 	PJ_vandg.lo PJ_vandg2.lo PJ_vandg4.lo PJ_wag7.lo PJ_lcca.lo \
 	PJ_geos.lo PJ_boggs.lo PJ_collg.lo PJ_crast.lo PJ_denoy.lo \
 	PJ_eck1.lo PJ_eck2.lo PJ_eck3.lo PJ_eck4.lo PJ_eck5.lo \
-	PJ_fahey.lo PJ_fouc_s.lo PJ_gins8.lo PJ_glabsgm.lo \
+	PJ_fahey.lo PJ_fouc_s.lo PJ_gins8.lo PJ_stmerc.lo \
 	PJ_gn_sinu.lo PJ_goode.lo PJ_hatano.lo PJ_loxim.lo \
 	PJ_mbt_fps.lo PJ_mbtfpp.lo PJ_mbtfpq.lo PJ_moll.lo PJ_nell.lo \
 	PJ_nell_h.lo PJ_putp2.lo PJ_putp3.lo PJ_putp4p.lo PJ_putp5.lo \
@@ -272,7 +272,7 @@ libproj_la_SOURCES = \
 	PJ_wag7.c PJ_lcca.c PJ_geos.c \
 	PJ_boggs.c PJ_collg.c PJ_crast.c PJ_denoy.c \
 	PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c \
-	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c PJ_glabsgm.c \
+	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c PJ_stmerc.c \
 	PJ_gn_sinu.c PJ_goode.c PJ_hatano.c PJ_loxim.c \
 	PJ_mbt_fps.c PJ_mbtfpp.c PJ_mbtfpq.c PJ_moll.c \
 	PJ_nell.c PJ_nell_h.c PJ_putp2.c PJ_putp3.c \
@@ -451,7 +451,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_gall.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_geos.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_gins8.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_glabsgm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_stmerc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_gn_sinu.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_gnom.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_goode.Plo@am__quote@
