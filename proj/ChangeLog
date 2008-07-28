@@ -1,8 +1,8 @@
-2008-07-25 IGNF <didier.richard@ign.fr>
+2008-07-28 IGNF <didier.richard@ign.fr>
 
 	* PJ_glabsgm.c : refactoring for better understanding of the projection's
 	formula.
-	* copy of PJ_glabsgm.c to PJ_stmerc.c and make changes accordingly in src
+	* copy of PJ_glabsgm.c to PJ_gstmerc.c and make changes accordingly in src
 	and nad directories.
 
 2008-07-21  Frank Warmerdam  <warmerdam@pobox.com>

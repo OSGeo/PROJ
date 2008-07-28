@@ -1,5 +1,5 @@
 #ifndef lint
-static const char SCCSID[]="@(#)PJ_stmerc.c	4.5	07/09/24	???	???";
+static const char SCCSID[]="@(#)PJ_gstmerc.c	4.6	08/07/28	DGR	IGN";
 #endif
 #define PROJ_PARMS__ \
 	double lamc;\
@@ -12,7 +12,7 @@ static const char SCCSID[]="@(#)PJ_stmerc.c	4.5	07/09/24	???	???";
 
 #define PJ_LIB__
 # include	<projects.h>
-PROJ_HEAD(stmerc, "Simplified Transverse Mercator (Schreiber, Gauss-Laborde)")
+PROJ_HEAD(gstmerc, "Gauss-Schreiber Transverse Mercator (aka Gauss-Laborde Reunion)")
 	"\n\tCyl, Sph&Ell\n\tlat_0= lon_0= k_0=";
 FORWARD(s_forward); /* spheroid */
 	double L, Ls, sinLs1, Ls1;
@@ -34,7 +34,7 @@ INVERSE(s_inverse); /* spheroid */
 	return (lp);
 }
 FREEUP; if (P) pj_dalloc(P); }
-ENTRY0(stmerc)
+ENTRY0(gstmerc)
     P->n1= sqrt(1.0+P->es*pow(cos(P->phi0),4.0)/(1.0-P->es));
     P->phic= asin(sin(P->phi0)/P->n1);
     P->c=       log(pj_tsfn(-1.0*P->phic,0.0,0.0))
