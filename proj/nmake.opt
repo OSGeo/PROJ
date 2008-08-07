@@ -1,3 +1,6 @@
+# Directory tree where PROJ will be installed.
+INSTDIR=C:\PROJ
+
 #
 # Set the following to the directory where the PROJ distribution 
 # data files (ie, the contents of ..\NAD).  The following assumes
@@ -5,10 +8,7 @@
 # be adjusted.  It is also possible to leave this, and define the
 # PROJ_LIB environment variable to point to the NAD directory.
 #
-PROJ_LIB_DIR=C:/PROJ/SHARE
-
-# Directory tree where PROJ will be installed.
-INSTDIR=C:\PROJ
+PROJ_LIB_DIR=$(INSTDIR)/SHARE
 
 # Uncomment the first for an optimized build, or the second for debug.
 OPTFLAGS=	/nologo /Ox /MD

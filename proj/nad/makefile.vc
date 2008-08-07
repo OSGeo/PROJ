@@ -23,12 +23,12 @@ clean:
 	-for %f in ( $(OLD_GRIDS) ) do del %f
 
 install-nadgrids:
-	for %f in ( $(OLD_GRIDS) ) do copy %f $(INSTDIR)\share
+	for %f in ( $(OLD_GRIDS) ) do copy %f $(PROJ_LIB_DIR)
 
 install-all: 
 	-mkdir $(INSTDIR)
-	-mkdir $(INSTDIR)\share
-	for %f in ( $(OTHER_FILES) ) do copy %f $(INSTDIR)\share
+	-mkdir $(PROJ_LIB_DIR)
+	for %f in ( $(OTHER_FILES) ) do copy %f $(PROJ_LIB_DIR)
 	if exist conus $(MAKE) /f makefile.vc install-nadgrids
-	-copy *.gsb $(INSTDIR)\share
-	-copy ntv1_can.dat $(INSTDIR)\share
+	-copy *.gsb $(PROJ_LIB_DIR)
+	-copy ntv1_can.dat $(PROJ_LIB_DIR)
