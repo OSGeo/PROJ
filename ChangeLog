@@ -1,3 +1,8 @@
+2008-08-07  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nmake.opt, nad/makefile.vc: Make sure we use PROJ_LIB_DIR when
+	installing nad directory support files on windows.
+
 2008-07-28 IGNF <didier.richard@ign.fr>
 
 	* PJ_glabsgm.c : refactoring for better understanding of the projection's
