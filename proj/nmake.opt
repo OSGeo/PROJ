@@ -8,7 +8,7 @@ INSTDIR=C:\PROJ
 # be adjusted.  It is also possible to leave this, and define the
 # PROJ_LIB environment variable to point to the NAD directory.
 #
-PROJ_LIB_DIR=$(INSTDIR)/SHARE
+PROJ_LIB_DIR=$(INSTDIR)\SHARE
 
 # Uncomment the first for an optimized build, or the second for debug.
 OPTFLAGS=	/nologo /Ox /MD
