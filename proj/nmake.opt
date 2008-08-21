@@ -11,7 +11,7 @@ INSTDIR=C:\PROJ
 PROJ_LIB_DIR=$(INSTDIR)\SHARE
 
 # Uncomment the first for an optimized build, or the second for debug.
-OPTFLAGS=	/nologo /Ox /MD
+OPTFLAGS=	/nologo /Ox /Op /MD
 #OPTFLAGS=	/nologo /Zi /MD /Fdproj.pdb
 
 # Uncomment the first for linking exes against DLL or second for static

@@ -1,3 +1,10 @@
+2008-08-21  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/td_out.dist: backed out erroneous changes in 4.6.0 that lost 
+	datum shifts with grid shift files.  Added stere (#12) test. 
+
+	* nmake.opt: Added /Op to avoid stere errors per ticket #12.
+
 2008-08-07  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* nmake.opt, nad/makefile.vc: Make sure we use PROJ_LIB_DIR when
