@@ -14,11 +14,17 @@
  
  o The eqc projection has been generalized to include a latitude of origin.
 
- o Added the glabsgm (Gauss Laborde / Sphere Geometric Mean) projection
+ o Added the glabsgm (Gauss Laborde / Sphere Geometric Mean) projection,
+   and gstmerc variation.
  
  o nad/IGNF init catalogue created.
 
  o added the ntf_r93.gsb datum shift file.
+
+ o Add /Op in nmake.opt compile options to avoid VC7 optimization bug (#12)
+
+ o Fix testvarious test script so it works properly when grid files available
+ 
 
  
 4.6.0 Release Notes
