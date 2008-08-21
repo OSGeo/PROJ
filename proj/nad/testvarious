@@ -164,6 +164,15 @@ EOF
 #0d00'00.000"W 90d00'00.000"N 0.0
 #EOF
 #
+echo "##############################################################" >> ${OUT}
+echo "Test stere projection (re: win32 ticket 12)" >> ${OUT}
+#
+$EXE +proj=latlong +datum=WGS84 \
+ +to +proj=stere +lat_0=90 +lon_0=0 +lat_ts=70 +datum=WGS84 \
+ -E >>${OUT} <<EOF
+105 40
+EOF
+#
 ##############################################################################
 # Done! 
 # do 'diff' with distribution results
