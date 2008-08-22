@@ -179,6 +179,7 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = src man nad jniwrap
+EXTRA_DIST = makefile.vc nmake.opt
 AUTOMAKE_OPTIONS = dist-zip
 all: all-recursive
 
