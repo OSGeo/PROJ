@@ -1,6 +1,7 @@
 *~
 *.manifest
 *.swp
+autom4te.cache
 config.log
 config.guess
 config.status
