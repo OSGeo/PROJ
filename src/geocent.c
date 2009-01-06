@@ -64,25 +64,6 @@
  *    ----              -----------
  *    25-02-97          Original Code
  *
- * $Log$
- * Revision 1.7  2007/09/11 20:19:36  fwarmerdam
- * avoid use of static variables to make reentrant
- *
- * Revision 1.6  2006/01/12 22:29:01  fwarmerdam
- * make geocent.c globals static to avoid conflicts
- *
- * Revision 1.5  2004/10/25 15:34:36  fwarmerdam
- * make names of geodetic funcs from geotrans unique
- *
- * Revision 1.4  2004/05/03 16:28:01  warmerda
- * Apply iterative solution to geocentric_to_geodetic as suggestion from
- * Lothar Gorling.
- * http://bugzilla.remotesensing.org/show_bug.cgi?id=563
- *
- * Revision 1.3  2002/01/08 15:04:08  warmerda
- * The latitude clamping fix from September in Convert_Geodetic_To_Geocentric
- * was botched.  Fixed up now.
- *
  */
 
 

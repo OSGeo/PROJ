@@ -27,13 +27,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.1  2002/12/14 20:13:21  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 #include <projects.h>

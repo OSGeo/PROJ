@@ -121,12 +121,3 @@ proj_inv_mdist(double dist, const void *b) {
 	pj_errno = -17;
 	return phi;
 }
-/* Revision Log:
-** $Log$
-** Revision 1.1  2006/10/18 05:21:31  fwarmerdam
-** New
-**
-** Revision 3.1  2006/01/11 01:38:18  gie
-** Initial
-**
-*/

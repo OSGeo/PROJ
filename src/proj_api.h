@@ -25,62 +25,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.17  2008/07/21 20:47:09  fwarmerdam
- * prepare 4.6.1 release
- *
- * Revision 1.16  2007/11/29 21:07:49  fwarmerdam
- * prepare for 4.6.0 release
- *
- * Revision 1.15  2007/08/20 13:40:06  fwarmerdam
- * avoid warnings in c++ for some prototypes
- *
- * Revision 1.14  2006/04/20 04:19:59  fwarmerdam
- * updated version
- *
- * Revision 1.13  2004/10/30 02:33:47  fwarmerdam
- * Updated release version.
- *
- * Revision 1.12  2004/09/16 15:14:01  fwarmerdam
- * * src/pj_open_lib.c: added pj_set_searchpath() provided by Eric Miller.
- *
- * Revision 1.11  2004/07/28 23:23:49  warmerda
- * Changed ra to es in declarations for pj_geocentric_to_geodetic()
- * and pj_geodetic_to_geocentric() as suggested by Britton Kerin.
- *
- * Revision 1.10  2004/05/04 03:28:01  warmerda
- * Updated version.
- *
- * Revision 1.9  2004/04/15 13:56:24  warmerda
- * added pj_get_release
- *
- * Revision 1.8  2003/03/31 14:52:38  warmerda
- * updated to 4.4.7
- *
- * Revision 1.7  2002/12/14 20:14:35  warmerda
- * added geocentric support
- *
- * Revision 1.6  2002/06/11 18:08:25  warmerda
- * Added the pj_get_def() function
- *
- * Revision 1.5  2002/01/09 14:36:22  warmerda
- * updated to 4.4.5
- *
- * Revision 1.4  2001/09/15 22:55:28  warmerda
- * final prep for 4.4.4 release
- *
- * Revision 1.3  2001/08/23 20:25:55  warmerda
- * added pj_set_finder function
- *
- * Revision 1.2  2001/06/02 03:35:36  warmerda
- * added pj_get_errno_ref()
- *
- * Revision 1.1  2001/04/06 01:24:22  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 /* General projections header file */
 #ifndef PROJ_API_H

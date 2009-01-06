@@ -25,22 +25,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.4  2007/11/29 21:06:50  fwarmerdam
- * make sure we only look for 7 parameters
- *
- * Revision 1.3  2007/01/31 06:41:01  fwarmerdam
- * dont parse more datum parameters than we have room for in datum_params[]
- *
- * Revision 1.2  2001/04/04 21:13:21  warmerda
- * do arcsecond/radian and ppm datum parm transformation in pj_set_datum()
- *
- * Revision 1.1  2000/07/06 23:32:27  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 #include <projects.h>
 #include <string.h>

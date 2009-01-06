@@ -28,25 +28,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.9  2007/07/06 14:58:03  fwarmerdam
- * improve searchpath clearning with pj_set_searchpath()
- *
- * Revision 1.8  2007/03/11 17:03:18  fwarmerdam
- * support drive letter prefixes on win32 and related fixes (bug 1499)
- *
- * Revision 1.7  2006/11/17 22:16:30  mloskot
- * Uploaded PROJ.4 port for Windows CE.
- *
- * Revision 1.6  2004/09/16 15:14:01  fwarmerdam
- * * src/pj_open_lib.c: added pj_set_searchpath() provided by Eric Miller.
- *
- * Revision 1.5  2002/12/14 20:15:30  warmerda
- * updated headers
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 #include <projects.h>

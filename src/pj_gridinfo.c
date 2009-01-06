@@ -26,35 +26,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.8  2006/11/17 22:16:30  mloskot
- * Uploaded PROJ.4 port for Windows CE.
- *
- * Revision 1.7  2005/07/07 00:16:03  fwarmerdam
- * Fixed debug fprintf syntax per:
- * http://bugzilla.remotesensing.org/show_bug.cgi?id=886
- *
- * Revision 1.6  2004/10/30 04:03:03  fwarmerdam
- * fixed reported information in ctable debug message
- *
- * Revision 1.5  2003/08/20 13:23:58  warmerda
- * Avoid unsigned char / char casting issues for VC++.
- *
- * Revision 1.4  2003/03/19 03:36:41  warmerda
- * Fixed so swap_words() works when it should.
- *
- * Revision 1.3  2003/03/17 19:44:45  warmerda
- * improved debugging, reduce header read size
- *
- * Revision 1.2  2003/03/17 18:56:34  warmerda
- * implement heirarchical NTv2 gridinfos
- *
- * Revision 1.1  2003/03/15 06:01:18  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 

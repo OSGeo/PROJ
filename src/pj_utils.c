@@ -26,26 +26,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.5  2007/03/12 14:05:35  fwarmerdam
- * Removed duplicate towgs84 definition code.
- *
- * Revision 1.4  2005/07/06 14:04:09  fwarmerdam
- * Improved precision of es encoding for pj_latlong_from_proj() per:
- *   http://bugzilla.remotesensing.org/show_bug.cgi?id=881
- *
- * Revision 1.3  2002/12/14 20:14:00  warmerda
- * added pj_is_geocent, added +pm support to pj_get_def
- *
- * Revision 1.2  2002/04/30 17:01:51  warmerda
- * Removed printf() statement.
- *
- * Revision 1.1  2001/04/05 04:22:46  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 

@@ -25,13 +25,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.3  2005/07/05 16:31:48  fwarmerdam
- * Added standard headers.
- *
- */
+ *****************************************************************************/
 
 /*!
 * \file jniproj.c

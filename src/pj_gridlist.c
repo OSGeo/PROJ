@@ -26,25 +26,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.5  2006/11/17 22:16:30  mloskot
- * Uploaded PROJ.4 port for Windows CE.
- *
- * Revision 1.4  2005/11/01 05:56:13  fwarmerdam
- * improved error handling if gridcount is zero
- *
- * Revision 1.3  2003/03/18 16:26:58  warmerda
- * clear error if missing file is not required
- *
- * Revision 1.2  2003/03/17 19:45:47  warmerda
- * support '@' marker for optional grids
- *
- * Revision 1.1  2003/03/15 06:01:18  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 
