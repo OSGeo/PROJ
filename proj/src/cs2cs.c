@@ -26,43 +26,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.11  2008/04/24 16:50:39  fwarmerdam
- * implement extra text passthrough per email on list for cs2cs
- *
- * Revision 1.10  2006/10/10 15:24:05  fwarmerdam
- *  Increase MAX_LINE to 1000 per request from Dan Scheirer.
- *
- * Revision 1.9  2006/03/30 14:35:09  fwarmerdam
- * bug 1145: avoid warnings on VC8.
- *
- * Revision 1.8  2004/10/28 16:05:37  fwarmerdam
- * avoid using global variables from DLL
- *
- * Revision 1.7  2003/03/25 17:53:13  warmerda
- * modified so that -f formats are used for Z as well
- *
- * Revision 1.6  2002/12/09 16:01:02  warmerda
- * added prime meridian support
- *
- * Revision 1.5  2002/11/19 20:33:42  warmerda
- * cleanup before exit to facilitate memory leak testing
- *
- * Revision 1.4  2001/04/05 19:32:19  warmerda
- * use projPJ, and pj_is_latlong()
- *
- * Revision 1.3  2001/04/05 04:23:28  warmerda
- * use pj_latlong_from_proj
- *
- * Revision 1.2  2001/02/03 18:36:55  warmerda
- * removed some unavailable options from usage string
- *
- * Revision 1.1  2000/07/06 23:32:27  warmerda
- * New
- *
- */
+ *****************************************************************************/
+
 #include "projects.h"
 #include <stdio.h>
 #include <stdlib.h>

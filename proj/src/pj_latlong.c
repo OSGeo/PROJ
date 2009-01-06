@@ -5,7 +5,7 @@
  * Purpose:  Stub projection implementation for lat/long coordinates. We 
  *           don't actually change the coordinates, but we want proj=latlong
  *           to act sort of like a projection.
- * Author:   Frank Warmerdam, warmerda@home.com
+ * Author:   Frank Warmerdam, warmerdam@pobox.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
@@ -27,19 +27,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.3  2007/11/30 20:02:31  fwarmerdam
- * add latlon and lonlat aliases
- *
- * Revision 1.2  2000/07/07 06:04:23  warmerda
- * added longlat alias
- *
- * Revision 1.1  2000/07/06 23:32:27  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 /* very loosely based upon DMA code by Bradford W. Drew */
 #define PJ_LIB__

@@ -140,18 +140,3 @@ ENTRY0(geos)
 		P->fwd = s_forward;
 	}
 ENDENTRY(P)
-/*
-** $Log$
-** Revision 1.2  2005/02/04 19:27:58  fwarmerdam
-** Added link to reference info.
-**
-** Revision 1.1  2004/10/20 17:04:00  fwarmerdam
-** New
-**
-** Revision 1.2  2004/07/14 18:08:57  gie
-** corrected P->phi_0 to P->phi0
-**
-** Revision 1.1  2004/07/12 17:58:25  gie
-** Initial revision
-**
-*/

@@ -27,54 +27,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.19  2007/11/26 00:21:59  fwarmerdam
- * Modified PJ structure to hold a_orig, es_orig, ellipsoid definition before
- * adjustment for spherical projections.
- * Modified pj_datum_transform() to use the original ellipsoid parameters,
- * not the ones adjusted for spherical projections.
- * Modified pj_datum_transform() to not attempt any datum shift via
- * geocentric coordinates if the source *or* destination are raw ellipsoids
- * (ie. PJD_UNKNOWN).  All per PROJ bug #1602, GDAL bug #2025.
- *
- * Revision 1.18  2006/10/12 21:04:39  fwarmerdam
- * Added experimental +lon_wrap argument to set a "center point" for
- * longitude wrapping of longitude values coming out of pj_transform().
- *
- * Revision 1.17  2006/09/22 23:06:24  fwarmerdam
- * remote static start variable in pj_init (bug 1283)
- *
- * Revision 1.16  2004/09/08 15:23:37  warmerda
- * added new error for unknown prime meridians
- *
- * Revision 1.15  2004/05/05 01:45:41  warmerda
- * Made sword even longer.
- *
- * Revision 1.14  2004/05/05 01:45:00  warmerda
- * Make sword buffer larger so long +towgs84 parameters don't get split.
- *
- * Revision 1.13  2003/09/16 03:46:21  warmerda
- * dont use default ellps if any earth model info is set: bug 386
- *
- * Revision 1.12  2003/08/21 02:15:59  warmerda
- * improve MAX_ARG checking
- *
- * Revision 1.11  2003/06/09 21:23:16  warmerda
- * ensure start is initialized at very beginning of pj_init()
- *
- * Revision 1.10  2003/03/16 16:38:24  warmerda
- * Modified get_opt() to terminate reading the definition when a new
- * definition (a word starting with '<') is encountered, in addition to when
- * the definition terminator '<>' is encountered, so that unterminated
- * definitions like those in the distributed esri file will work properly.
- * http://bugzilla.remotesensing.org/show_bug.cgi?id=302
- *
- * Revision 1.9  2002/12/14 20:15:02  warmerda
- * added geocentric support, updated headers
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 #include <projects.h>

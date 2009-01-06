@@ -25,34 +25,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.10  2007/09/11 20:16:33  fwarmerdam
- *  Improve error recovery if ctable datum shift files fails to load.
- *
- * Revision 1.9  2006/11/17 22:16:30  mloskot
- * Uploaded PROJ.4 port for Windows CE.
- *
- * Revision 1.8  2003/03/17 18:56:01  warmerda
- * implement delayed loading of ctable format files
- *
- * Revision 1.7  2003/03/15 06:02:02  warmerda
- * preliminary NTv2 support, major restructure of datum shifting
- *
- * Revision 1.6  2002/07/08 02:32:05  warmerda
- * ensure clean C++ builds
- *
- * Revision 1.5  2002/04/30 16:26:07  warmerda
- * trip newlines of ctable id field
- *
- * Revision 1.4  2001/08/17 17:28:37  warmerda
- * removed use of emess()
- *
- * Revision 1.3  2001/04/05 19:31:54  warmerda
- * substantially reorganized and added NTv1 support
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 

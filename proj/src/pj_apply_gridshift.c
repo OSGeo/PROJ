@@ -28,34 +28,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log$
- * Revision 1.8  2003/03/20 21:29:41  warmerda
- * Fixed bug in checking against grid bounds.
- *
- * Revision 1.7  2003/03/17 19:45:23  warmerda
- * improved error handling
- *
- * Revision 1.6  2003/03/17 18:56:34  warmerda
- * implement heirarchical NTv2 gridinfos
- *
- * Revision 1.5  2003/03/15 06:02:02  warmerda
- * preliminary NTv2 support, major restructure of datum shifting
- *
- * Revision 1.4  2002/07/08 02:32:05  warmerda
- * ensure clean C++ builds
- *
- * Revision 1.3  2002/04/30 16:27:27  warmerda
- * improve debug output
- *
- * Revision 1.2  2001/03/15 16:57:55  warmerda
- * fixed intermittent problem in pj_load_nadgrids()
- *
- * Revision 1.1  2000/07/06 23:32:27  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 

@@ -80,18 +80,3 @@ ENTRY0(sterea)
 	P->inv = e_inverse;
 	P->fwd = e_forward;
 ENDENTRY(P)
-/*
-** $Log$
-** Revision 1.1  2004/10/20 17:04:00  fwarmerdam
-** New
-**
-** Revision 2.3  2004/04/07 17:18:32  gie
-** corrected comment stamp
-**
-** Revision 2.2  2003/08/05 00:15:09  gie
-** corrected 0 rho on inverse.
-**
-** Revision 2.1  2003/03/28 01:46:02  gie
-** Initial
-**
-*/

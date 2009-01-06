@@ -92,16 +92,3 @@ pj_inv_gauss(LP slp, const void *en) {
 		pj_errno = -17;
 	return (elp);
 }
-/* Revision Log:
-** $Log$
-** Revision 1.1  2004/10/20 17:04:00  fwarmerdam
-** New
-**
-** Revision 2.2  2004/03/15 16:07:42  gie
-** removed es from init structure
-**
-** Revision 2.1  2003/03/28 01:44:30  gie
-** Initial
-**
-*/
-
