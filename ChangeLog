@@ -1,3 +1,8 @@
+2009-01-23  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/biveval.c: Avoid use of static variables which interfere with
+	re-entrancy (#24)" 
+
 2009-01-05  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src: Removed CVS log messages from various files since they are
