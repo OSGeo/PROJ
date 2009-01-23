@@ -4,9 +4,7 @@ static const char SCCSID[]="@(#)biveval.c	4.4	93/06/12	GIE	REL";
 #endif
 # include <projects.h>
 # define NEAR_ONE	1.00001
-	static projUV
-w2, w;
-static double ceval(struct PW_COEF *C, int n) {
+static double ceval(struct PW_COEF *C, int n, projUV w, projUV w2) {
 	double d=0, dd=0, vd, vdd, tmp, *c;
 	int j;
 
@@ -34,6 +32,7 @@ static double ceval(struct PW_COEF *C, int n) {
 }
 	projUV /* bivariate Chebyshev polynomial entry point */
 bcheval(projUV in, Tseries *T) {
+        projUV w2, w;
 	projUV out;
 		/* scale to +-1 */
  	w.u = ( in.u + in.u - T->a.u ) * T->b.u;
@@ -44,8 +43,8 @@ bcheval(projUV in, Tseries *T) {
 	} else { /* double evaluation */
 		w2.u = w.u + w.u;
 		w2.v = w.v + w.v;
-		out.u = ceval(T->cu, T->mu);
-		out.v = ceval(T->cv, T->mv);
+                out.u = ceval(T->cu, T->mu, w, w2);
+                out.v = ceval(T->cv, T->mv, w, w2);
 	}
 	return out;
 }
