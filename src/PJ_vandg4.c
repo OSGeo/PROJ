@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_vandg4.c	4.1	94/02/15	GIE	REL";
-#endif
 #define PJ_LIB__
 #include	<projects.h>
 PROJ_HEAD(vandg4, "van der Grinten IV") "\n\tMisc Sph, no inv.";

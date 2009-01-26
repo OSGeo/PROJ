@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_somerc.c	4.1	95/08/09	GIE	REL";
-#endif
 #define PROJ_PARMS__ \
 	double	K, c, hlf_e, kR, cosp0, sinp0;
 #define PJ_LIB__

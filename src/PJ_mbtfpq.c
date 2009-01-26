@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_mbtfpq.c	4.1 94/02/15     GIE     REL";
-#endif
 #define PJ_LIB__
 #include	<projects.h>
 PROJ_HEAD(mbtfpq, "McBryde-Thomas Flat-Polar Quartic") "\n\tCyl., Sph.";

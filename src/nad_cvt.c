@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)nad_cvt.c	4.3   95/09/23 GIE REL";
-#endif
 #define PJ_LIB__
 #include <projects.h>
 #define MAX_TRY 9

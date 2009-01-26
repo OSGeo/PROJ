@@ -1,7 +1,4 @@
 /* generates 'T' option output */
-#ifndef lint
-static const char SCCSID[]="@(#)gen_cheb.c	4.9	95/09/23	GIE	REL";
-#endif
 #define PJ_LIB__
 #include "projects.h"
 #include <stdio.h>

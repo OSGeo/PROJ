@@ -1,7 +1,4 @@
 /* put parameters in linked list and retrieve */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_param.c	4.4	93/06/12	GIE	REL";
-#endif
 #include <projects.h>
 #include <stdio.h>
 #include <string.h>

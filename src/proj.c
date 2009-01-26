@@ -1,7 +1,4 @@
 /* <<<< Cartographic projection filter program >>>> */
-#ifndef lint
-static const char SCCSID[]="@(#)proj.c	4.12	95/09/23	GIE	REL";
-#endif
 #include "projects.h"
 #include <stdio.h>
 #include <stdlib.h>

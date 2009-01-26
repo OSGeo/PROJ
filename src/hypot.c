@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)hypot.c	4.4	93/06/12	GIE	REL";
-#endif
 /* hypot - sqrt(x * x + y * y)
 **
 **	Because this was omitted from the ANSI standards, this version

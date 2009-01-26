@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_mod_ster.c	4.1	94/02/15	GIE	REL";
-#endif
 /* based upon Snyder and Linck, USGS-NMD */
 #define PROJ_PARMS__ \
     COMPLEX	*zcoeff; \

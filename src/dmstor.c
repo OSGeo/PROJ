@@ -1,7 +1,4 @@
 /* Convert DMS string to radians */
-#ifndef lint
-static const char SCCSID[]="@(#)dmstor.c	4.4	93/06/16	GIE	REL";
-#endif
 #include <projects.h>
 #include <string.h>
 #include <ctype.h>

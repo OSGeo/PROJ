@@ -1,7 +1,4 @@
 /* <<<< North American Datum Transfer Program >>>> */
-#ifndef lint
-static const char SCCSID[]="@(#)nad2nad.c	4.5	94/02/15	GIE	REL";
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>

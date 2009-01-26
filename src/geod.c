@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)geod.c	4.8	95/09/23	GIE	REL";
-#endif
 /* <<<< Geodesic filter program >>>> */
 # include "projects.h"
 # include "geodesic.h"

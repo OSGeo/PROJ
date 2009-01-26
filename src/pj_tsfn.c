@@ -1,7 +1,4 @@
 /* determine small t */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_tsfn.c	4.3	93/06/12	GIE	REL";
-#endif
 #include <math.h>
 #include <projects.h>
 #define HALFPI		1.5707963267948966

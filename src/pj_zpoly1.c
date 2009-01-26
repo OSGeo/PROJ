@@ -1,7 +1,4 @@
 /* evaluate complex polynomial */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_zpoly1.c	4.3	93/06/12	GIE	REL";
-#endif
 #include <projects.h>
 /* note: coefficients are always from C_1 to C_n
 **	i.e. C_0 == (0., 0)

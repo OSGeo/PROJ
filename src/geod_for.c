@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)geod_for.c	4.6	95/09/23	GIE	REL";
-#endif
 # include "projects.h"
 # include "geodesic.h"
 # define MERI_TOL 1e-9

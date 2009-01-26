@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_chamb.c	4.1	94/02/15	GIE	REL";
-#endif
 typedef struct { double r, Az; } VECT;
 #define PROJ_PARMS__ \
 	struct { /* control point data */ \

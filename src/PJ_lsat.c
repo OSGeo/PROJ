@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_lsat.c	4.1	94/02/15	GIE	REL";
-#endif
 /* based upon Snyder and Linck, USGS-NMD */
 #define PROJ_PARMS__ \
     double a2, a4, b, c1, c3; \

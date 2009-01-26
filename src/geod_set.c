@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)geod_set.c	4.8	95/09/23	GIE	REL";
-#endif
 
 #define _IN_GEOD_SET
 
