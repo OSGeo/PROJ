@@ -48,7 +48,7 @@ libproj_la_SOURCES = \
 	PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c \
 	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_latlong.c pj_geocent.c \
 	aasincos.c adjlon.c bch2bps.c bchgen.c \
-	dmstor.c mk_cheby.c pj_auth.c \
+	biveval.c dmstor.c mk_cheby.c pj_auth.c \
 	pj_deriv.c pj_ell_set.c pj_ellps.c pj_errno.c \
 	pj_factors.c pj_fwd.c pj_init.c pj_inv.c \
 	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c proj_mdist.c \
