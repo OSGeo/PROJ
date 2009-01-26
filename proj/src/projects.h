@@ -373,6 +373,9 @@ typedef struct {	/* Chebyshev or Power series structure */
 	int power;		/* != 0 if power series, else Chebyshev */
 } Tseries;
 Tseries *mk_cheby(projUV, projUV, double, projUV *, projUV (*)(projUV), int, int, int);
+projUV bpseval(projUV, Tseries *);
+projUV bcheval(projUV, Tseries *);
+projUV biveval(projUV, Tseries *);
 void *vector1(int, int);
 void **vector2(int, int, int);
 void freev2(void **v, int nrows);
