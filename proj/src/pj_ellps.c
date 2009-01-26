@@ -1,7 +1,4 @@
 /* definition of standard geoids */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_ellps.c	4.6	95/08/25	GIE	REL";
-#endif
 #define PJ_ELLPS__
 #include "projects.h"
 

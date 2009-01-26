@@ -1,7 +1,4 @@
 /* print row coefficients of Tseries structure */
-#ifndef lint
-static const char SCCSID[]="@(#)p_series.c	4.6	95/08/19	GIE	REL";
-#endif
 #include "projects.h"
 #include <stdio.h>
 #include <string.h>

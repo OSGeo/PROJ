@@ -1,7 +1,4 @@
 /* Convert bivariate ASCII NAD27 to NAD83 tables to binary structure */
-#ifndef lint
-static const char SCCSID[]="@(#)nad2bin.c	4.2 93/08/25 GIE REL";
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #define PJ_LIB__

@@ -1,7 +1,4 @@
 /* set ellipsoid parameters a and es */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_ell_set.c	4.5	93/06/12	GIE	REL";
-#endif
 #include <projects.h>
 #include <string.h>
 #define SIXTH .1666666666666666667 /* 1/6 */

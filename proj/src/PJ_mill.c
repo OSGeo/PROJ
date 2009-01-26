@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_mill.c	4.1	94/02/15	GIE	REL";
-#endif
 #define PJ_LIB__
 # include	<projects.h>
 PROJ_HEAD(mill, "Miller Cylindrical") "\n\tCyl, Sph";

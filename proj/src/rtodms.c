@@ -1,7 +1,4 @@
 /* Convert radian argument to DMS ascii format */
-#ifndef lint
-static const char SCCSID[]="@(#)rtodms.c	4.3	93/06/12	GIE	REL";
-#endif
 #include <projects.h>
 #include <stdio.h>
 #include <string.h>

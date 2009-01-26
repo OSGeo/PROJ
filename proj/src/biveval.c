@@ -1,7 +1,4 @@
 /* procedures for evaluating Tseries */
-#ifndef lint
-static const char SCCSID[]="@(#)biveval.c	4.4	93/06/12	GIE	REL";
-#endif
 # include <projects.h>
 # define NEAR_ONE	1.00001
 static double ceval(struct PW_COEF *C, int n, projUV w, projUV w2) {

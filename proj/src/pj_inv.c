@@ -1,7 +1,4 @@
 /* general inverse projection */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_inv.c	4.5	93/06/12	GIE	REL";
-#endif
 #define PJ_LIB__
 #include <projects.h>
 #include <errno.h>

@@ -1,7 +1,4 @@
 /* make storage for one and two dimensional matricies */
-#ifndef lint
-static const char SCCSID[]="@(#)vector1.c	4.4	94/03/22	GIE	REL";
-#endif
 #include <stdlib.h>
 #include <projects.h>
 	void * /* one dimension array */

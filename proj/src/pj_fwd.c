@@ -1,7 +1,4 @@
 /* general forward projection */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_fwd.c	4.4	93/06/12	GIE	REL";
-#endif
 #define PJ_LIB__
 #include <projects.h>
 #include <errno.h>

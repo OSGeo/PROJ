@@ -1,7 +1,4 @@
 /* dervative of (*P->fwd) projection */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_deriv.c	4.4	93/06/12	GIE	REL";
-#endif
 #define PJ_LIB__
 #include "projects.h"
 	int

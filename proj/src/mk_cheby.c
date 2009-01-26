@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)mk_cheby.c	4.5	94/03/22	GIE	REL";
-#endif
 #include <projects.h>
 	static void /* sum coefficients less than res */
 eval(projUV **w, int nu, int nv, double res, projUV *resid) {

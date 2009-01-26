@@ -1,7 +1,4 @@
 /* determine latitude from authalic latitude */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_auth.c	4.3	93/06/12	GIE	REL";
-#endif
 #include <projects.h>
 # define P00 .33333333333333333333
 # define P01 .17222222222222222222

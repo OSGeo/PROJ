@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_omerc.c	4.2	95/01/01	GIE	REL";
-#endif
 #define PROJ_PARMS__ \
 	double	alpha, lamc, lam1, phi1, lam2, phi2, Gamma, al, bl, el, \
 		singam, cosgam, sinrot, cosrot, u_0; \

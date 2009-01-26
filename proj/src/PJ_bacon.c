@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_bacon.c	4.1	94/02/15	GIE	REL";
-#endif
 # define HLFPI2	2.46740110027233965467
 # define EPS	1e-10
 #define PROJ_PARMS__ \

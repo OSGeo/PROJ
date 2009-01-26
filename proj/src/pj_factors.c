@@ -1,7 +1,4 @@
 /* projection scale factors */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_factors.c	4.9	94/03/17	GIE	REL";
-#endif
 #define PJ_LIB__
 #include <projects.h>
 #include <errno.h>

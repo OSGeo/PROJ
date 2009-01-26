@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_vandg2.c	4.1	94/02/15	GIE	REL";
-#endif
 # define TOL	1e-10
 # define TWORPI	0.63661977236758134308
 #define PROJ_PARMS__ \

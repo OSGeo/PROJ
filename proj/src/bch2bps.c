@@ -1,7 +1,4 @@
 /* convert bivariate w Chebyshev series to w Power series */
-#ifndef lint
-static const char SCCSID[]="@(#)bch2bps.c	4.5	94/03/22	GIE	REL";
-#endif
 #include <projects.h>
 /* basic support procedures */
 	static void /* clear vector to zero */
