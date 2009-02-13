@@ -1,0 +1,154 @@
+/*! \mainpage PROJ.4 Programmer's Manual
+
+<h2>PROJ.4 Programmer's Manual</h2>
+
+<a href="http://trac.osgeo.org/proj/">PROJ.4 - Cartographic Projections Library</a>
+
+
+<h3>DESCRIPTION</h3>
+
+Procedure pj_init selects and initializes a cartographic projection with its
+argument control parameters.  Argc is the number of elements in the array of
+control strings argv that each contain individual cartographic control keyword
+assignments (+ proj arguments).  The list must contain at least the
+proj=projection and Earth's radius or elliptical parameters.  If the
+initialization of the projection is successful a valid address is returned
+otherwise a NULL value.
+
+The pj_init_plus function operates similarly to pj_init but takes a single
+string containing the definition, with each parameter prefixed with a plus sign.
+ For example "+proj=utm +zone=11 +ellps=WGS84".
+
+Once initialization is performed either forward or inverse projections can be
+performed with the returned value of pj_init used as the argument proj. The
+argument structure projUV values u and v contain respective longitude and
+latitude or x and y. Latitude and longitude are in radians.  If a projection
+operation fails, both elements of projUV are set to HUGE_VAL (defined in
+math.h).
+
+Note: all projections have a forward mode, but some do not have an inverse
+projection. If the projection does not have an inverse the projPJ structure element
+inv will be NULL.
+
+The pj_transform function may be used to transform points between the two
+provided coordinate systems. In addition to converting between cartographic 
+projection coordinates and geographic coordinates, this function also takes care
+of datum shifts if possible between the source and destination coordinate
+system.  Unlike pj_fwd and pj_inv it is also allowable for the coordinate system
+definitions (projPJ *) to be geographic coordinate systems (defined as
++proj=latlong). The x, y and z arrays contain the input values of the points,
+and are replaced with the output values. The function returns zero on success,
+or the error number (also in pj_errno) on failure.
+
+Memory associated with the projection may be freed with pj_free.
+
+
+<h3>EXAMPLE</h3>
+
+The  following program reads latitude and longitude
+values in decimal degress, performs  Mercator
+projection with a Clarke 1866 ellipsoid and
+a 33° latitude of true scale and prints the projected
+cartesian values in meters:
+
+\verbatim
+       #include <proj_api.h>
+
+       main(int argc, char **argv) {
+            char *args[] = { "proj=merc", "ellps=clrk66", "lat_ts=33" };
+            projUV p;
+            projPJ pj;
+
+            if (!(pj = pj_init(3, args)))
+               exit(1);
+            while (scanf("%lf %lf", &p.v, &p.u) == 2) {
+               p.u *= DEG_TO_RAD;
+               p.v *= DEG_TO_RAD;
+               p = pj_fwd(p, pj);
+               printf("%.2f\t%.2f\n", p.u, p.v);
+            }
+            exit(0);
+       }
+\endverbatim
+
+<h3>API Functions</h3>
+
+XY pj_fwd( LP lp, PJ *P );
+
+LP pj_inv( XY xy, PJ *P );
+
+int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset, double *x, double *y, double *z );
+
+int pj_datum_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset, double *x, double *y, double *z );
+
+int pj_compare_datums( PJ *srcdefn, PJ *dstdefn );
+
+int pj_geocentric_to_geodetic( double a, double es, long point_count, int point_offset, double *x, double *y, double *z );
+
+int pj_geodetic_to_geocentric( double a, double es, long point_count, int point_offset, double *x, double *y, double *z );
+
+int pj_apply_gridshift( const char *nadgrids, int inverse, long point_count, int point_offset, double *x, double *y, double *z  );
+
+void pj_deallocate_grids( void );
+
+int pj_is_latlong( PJ *pj );
+
+int pj_is_geocent( PJ *pj );
+
+void pj_pr_list( PJ *P );
+
+void pj_set_finder( const char *(*new_finder)(const char *) );
+
+void pj_set_searchpath ( int count, const char **path );
+
+projPJ pj_init(int, char **);
+
+projPJ pj_init_plus(const char *);
+
+char *pj_get_def( projPJ, int );
+
+projPJ pj_latlong_from_proj( PJ *pj_in );
+
+void *pj_malloc( size_t );
+
+void pj_dalloc( void * );
+
+void pj_free( PJ *P );
+
+char *pj_strerrno( int );
+
+int *pj_get_errno_ref( void );
+
+const char *pj_get_release( void );
+
+
+<h3>SEE ALSO</h3>
+
+<h3>Documentation</h3>
+<ul>
+<li><a href="http://pubs.er.usgs.gov/usgspubs/pp/pp1395">Snyder, 1987: Map projections; a working manual</a>.
+</li>
+<li><a href="http://www.asprs.org/resources/GRIDS/">Grids &amp; Datums</a>: Clifford J. Mugnier's columns in PE&amp;RS.
+</li>
+<li><a href="http://www.mapref.org">MapRef</a>: Assorted general information on projections, and related topics.
+</li>
+<li><a href="http://earth-info.nga.mil/GandG/publications/index.htm">NGA Publications on Geodesy</a>.
+</li>
+<li><a href="http://www.progonos.com/furuti/MapProj/CartIndex/cartIndex.html">Map projections</a>: An introduction to cartography emphasizing map projections: their properties, applications and basic mathematics.
+</li>
+<li><a href="http://www.galleryofmapprojections.com/">Paul B. Anderson's Map Projections Site</a>.
+</li>
+</ul>
+
+<h3>Software</h3>
+<ul>
+<li><a href="http://ftp.dfg.ca.gov/Public/BDB/Tools/proj4/proj_api.zip">PROJ.4 VB Wrappers</a> from Eric G. Miller.</li>
+<li><a href="http://www.proj4js.org/">PROJ4JS</a> - Javascript projections implementation.</li>
+<li><a href="http://gmt.soest.hawaii.edu/">GMT</a> - Generic Mapping Tools, includes reprojection services.</li>
+<li><a href="http://edc.usgs.gov/pub/software/gctpc/">GCTPC</a>: The other widely used projection package from the USGS.</li>
+<li><a href="http://earth-info.nga.mil/GandG/geotrans/index.htm">Geotrans</a>: a projections and datum shift program from NIMA/NGA.</li>
+<li><a href="http://www.jhlabs.com/java/maps/proj/">JHLabs Java Map Projection Library</a>: Loosely derived from PROJ.4 with similar syntax.</li>
+<li><a href="http://geotools.org/">GeoTools</a>: GeoTools is a Java GIS library that includes sophisticated projections support.</li>
+</ul>
+
+*/
