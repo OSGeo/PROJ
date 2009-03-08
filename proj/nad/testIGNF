@@ -5,6 +5,9 @@
 # Real points locations are found in proj_outIGNF.dist-real
 # while distribution results are found in proj_outIGNF.dist
 #
+# 2009-03-08 :  the null grid (nad2bin < null.lla null) MUST
+#               be around otherwise the LAMBE to LAMB93
+#               transformations will be wrong and vice-versa
 EXE=$1
 
 usage()
