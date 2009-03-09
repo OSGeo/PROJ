@@ -59,7 +59,7 @@ libproj_la_SOURCES = \
 	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \
 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
 	geocent.c geocent.h pj_utils.c pj_gridinfo.c pj_gridlist.c \
-	jniproj.c
+	jniproj.c pj_mutex.c pj_initcache.c
 
 
 install-exec-local:

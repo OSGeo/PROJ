@@ -106,8 +106,27 @@ static paralist *
 get_init(paralist **start, paralist *next, char *name) {
 	char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *opt;
 	FILE *fid;
+	paralist *init_items = NULL;
+	const paralist *orig_next = next;
 
 	(void)strncpy(fname, name, MAX_PATH_FILENAME + ID_TAG_MAX + 1);
+	
+	/* 
+	** Search for file/key pair in cache 
+	*/
+	
+	init_items = pj_search_initcache( name );
+	if( init_items != NULL )
+	  {
+	    next->next = init_items;
+	    while( next->next != NULL )
+	      next = next->next;
+	    return next;
+	  }
+
+	/*
+	** Otherwise we try to open the file and search for it.
+	*/
 	if (opt = strrchr(fname, ':'))
 		*opt++ = '\0';
 	else { pj_errno = -3; return(0); }
@@ -118,6 +137,14 @@ get_init(paralist **start, paralist *next, char *name) {
 	(void)fclose(fid);
 	if (errno == 25)
 		errno = 0; /* unknown problem with some sys errno<-25 */
+
+	/* 
+	** If we seem to have gotten a result, insert it into the 
+	** init file cache.
+	*/
+	if( next != NULL && next != orig_next )
+	  pj_insert_initcache( name, orig_next->next );
+
 	return next;
 }
 
