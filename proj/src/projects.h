@@ -342,6 +342,12 @@ int pj_ell_set(paralist *, double *, double *);
 int pj_datum_set(paralist *, PJ *);
 int pj_prime_meridian_set(paralist *, PJ *);
 int pj_angular_units_set(paralist *, PJ *);
+
+paralist *pj_clone_paralist( const paralist* );
+void pj_clear_initcache(void);
+paralist*pj_search_initcache( const char *filekey );
+void pj_insert_initcache( const char *filekey, const paralist *list);
+
 double *pj_enfn(double);
 double pj_mlfn(double, double, double, double *);
 double pj_inv_mlfn(double, double, double *);
@@ -397,6 +403,9 @@ void pj_deallocate_grids();
 PJ_GRIDINFO *pj_gridinfo_init( const char * );
 int pj_gridinfo_load( PJ_GRIDINFO * );
 void pj_gridinfo_free( PJ_GRIDINFO * );
+
+void pj_acquire_lock(void);
+void pj_release_lock(void);
 
 void *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
