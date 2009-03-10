@@ -1,6 +1,8 @@
 2009-03-10  Howard Butler <hobu.inc@gmail.com>
 	* autogen.sh: Use autogen.sh from libLAS for wider
         platform (OSX, Solaris) compatibility
+	* config.guess config.log: remove autoconf temporary
+	files
 
 2009-03-10  Mateusz Loskot  <mateusz@loskot.net>
 
