@@ -1,39 +1,42 @@
 #!/bin/sh
+# $Id$
 #
-# Run this to generate all the initial makefiles, etc.
+# Autotools boostrapping script
 #
-
-PROJECT="PROJ.4"
-
-(autoconf --version) < /dev/null > /dev/null 2>&1 || {
-	echo "*** ERROR: GNU Autoconf is required to build $PROJECT."
-    exit 1
+giveup()
+{
+        echo
+        echo "  Something went wrong, giving up!"
+        echo
+        exit 1
 }
 
-(libtool --version) < /dev/null > /dev/null 2>&1 || {
-	echo "*** ERROR: GNU Libtool is required to build $PROJECT."
-    exit 1
-}
+OSTYPE=`uname -s`
 
-(automake --version) < /dev/null > /dev/null 2>&1 || {
-	echo "*** ERROR: GNU Automake is required to build $PROJECT."
-    exit 1
-}
+for libtoolize in glibtoolize libtoolize; do
+    LIBTOOLIZE=`which $libtoolize 2>/dev/null`
+    if test "$LIBTOOLIZE"; then
+        break;
+    fi
+done
 
-(aclocal --version) < /dev/null > /dev/null 2>&1 || {
-	echo "*** ERROR: aclocal program from GNU Automake package is required to build $PROJECT."
-    exit 1
-}
+#AMFLAGS="--add-missing --copy --force-missing"
+AMFLAGS="--add-missing --copy"
+if test "$OSTYPE" = "IRIX" -o "$OSTYPE" = "IRIX64"; then
+   AMFLAGS=$AMFLAGS" --include-deps";
+fi
 
-echo "Running aclocal..."
-aclocal
-echo "Running libtoolize..."
-libtoolize --force --copy
-echo "Running automake..."
-automake --add-missing --copy
-echo "Running autoconf..."
-autoconf
+echo "Running aclocal"
+aclocal || giveup
+#echo "Running autoheader"
+#autoheader || giveup
+echo "Running libtoolize"
+$LIBTOOLIZE --force --copy || giveup
+echo "Running automake"
+automake $AMFLAGS # || giveup
+echo "Running autoconf"
+autoconf || giveup
 
-echo
-echo "Type './configure' to generate Makefile files for $PROJECT."
-echo "or './configure --help' to list possible options."
+echo "======================================"
+echo "Now you are ready to run './configure'"
+echo "======================================"
