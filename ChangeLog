@@ -1,3 +1,7 @@
+2009-03-10  Mateusz Loskot  <mateusz@loskot.net>
+
+	* makefile.vc: Added new files pj_mutex.c, pj_initcache.c.
+
 2009-03-09  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* pj_init.c, pj_mutex.c, pj_initcache.c: Introduced in-memory caching
