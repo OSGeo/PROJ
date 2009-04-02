@@ -222,8 +222,8 @@ process(FILE *fid) {
 		}
 	}
 }
-	void
-main(int argc, char **argv) {
+
+int main(int argc, char **argv) {
 	char *arg, **eargv = argv, work[MAX_PARGS];
 	FILE *fid;
 	int eargc = 0, c;

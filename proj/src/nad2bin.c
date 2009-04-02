@@ -6,8 +6,8 @@
 #define U_SEC_TO_RAD 4.848136811095359935899141023e-12
 	static char
 *usage = "<ASCII_dist_table local_bin_table";
-	void
-main(int argc, char **argv) {
+
+int main(int argc, char **argv) {
 	struct CTABLE ct;
 	FLP *p, t;
 	size_t tsize;

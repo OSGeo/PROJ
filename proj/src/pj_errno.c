@@ -2,7 +2,7 @@
 
 #include <projects.h>
 
-C_NAMESPACE int pj_errno = 0;
+C_NAMESPACE_VAR int pj_errno = 0;
 
 /************************************************************************/
 /*                          pj_get_errno_ref()                          */
