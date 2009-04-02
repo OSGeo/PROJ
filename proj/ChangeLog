@@ -1,5 +1,10 @@
 2009-04-02  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* nad/Makefile.am: Changes to ensure grid shift files are processed
+	before running check-local, and to use the local grid shift files
+	if available, and to avoid testvarious if grid shift files are
+	not available.
+
 	* src: Fix various warnings. 
 
 2009-03-11  Frank Warmerdam  <warmerdam@pobox.com>
