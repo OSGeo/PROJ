@@ -42,6 +42,7 @@
 
 #ifdef JNI_ENABLED
 
+#include <string.h>
 #include "projects.h"
 #include "org_proj4_Projections.h"
 #include <jni.h>

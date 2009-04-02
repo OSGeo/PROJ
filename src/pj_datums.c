@@ -37,7 +37,7 @@
  * datum name for the comments if available. 
  */
 
-C_NAMESPACE struct PJ_DATUMS pj_datums[] = {
+C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[] = {
 /* id       definition                               ellipse  comments */
 /* --       ----------                               -------  -------- */
 "WGS84",    "towgs84=0,0,0", 		             "WGS84", "",
@@ -63,7 +63,7 @@ struct PJ_DATUMS *pj_get_datums_ref()
     return pj_datums;
 }
 
-C_NAMESPACE struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
+C_NAMESPACE_VAR struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
     /* id        definition                         */
     /* --        ----------                         */
     "greenwich", "0dE",
