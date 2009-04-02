@@ -21,7 +21,16 @@ EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
 		IGNF testIGNF proj_outIGNF.dist \
 		makefile.vc
 
-install-data-local:
+process-nad2bin:
+	@if [ -f conus.lla -a ! -f conus ] ; then \
+	  for x in *.lla ; do \
+	    DEST=`basename $$x .lla`; \
+	    echo "../src/nad2bin$(EXEEXT) $$DEST < $$x"; \
+	    ../src/nad2bin$(EXEEXT) $$DEST < $$x ; \
+	  done; \
+	fi 
+	
+install-data-local: process-nad2bin
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
 	@if [ -f conus.lla ] ; then \
 	  for x in *.lla ; do \
@@ -43,10 +52,13 @@ install-data-local:
           fi; \
 	done
 
-check-local:
+check-local: process-nad2bin
 	$(TEST27) $(PROJEXE)
 	$(TEST83) $(PROJEXE)
-	$(TESTVARIOUS) $(CS2CSEXE)
+	@if [ -f conus ] ; then \
+	  export PROJ_LIB=. ; \
+	  $(TESTVARIOUS) $(CS2CSEXE) ; \
+	fi
 
 #	$(TESTNTV2) $(CS2CSEXE)
 #	$(TESTIGNF) $(CS2CSEXE)
