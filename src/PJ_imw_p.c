@@ -33,7 +33,7 @@ loc_for(LP lp, PJ *P, double *yc) {
 		xy.x = lp.lam;
 		xy.y = 0.;
 	} else {
-		double xa, ya, xb, yb, xc, yc, D, B, m, sp, t, R, C;
+		double xa, ya, xb, yb, xc, D, B, m, sp, t, R, C;
 
 		sp = sin(lp.phi);
 		m = pj_mlfn(lp.phi, sp, cos(lp.phi), P->en);
@@ -53,14 +53,14 @@ loc_for(LP lp, PJ *P, double *yc) {
 		}
 		if (P->mode > 0) {
 			xc = lp.lam;
-			yc = 0.;
+			*yc = 0.;
 		} else {
 			t = lp.lam * P->sphi_1;
 			xc = P->R_1 * sin(t);
-			yc = P->R_1 * (1. - cos(t));
+			*yc = P->R_1 * (1. - cos(t));
 		}
-		D = (xb - xc)/(yb - yc);
-		B = xc + D * (C + R - yc);
+		D = (xb - xc)/(yb - *yc);
+		B = xc + D * (C + R - *yc);
 		xy.x = D * sqrt(R * R * (1 + D * D) - B * B);
 		if (lp.phi > 0)
 			xy.x = - xy.x;
