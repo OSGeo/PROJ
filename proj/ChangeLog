@@ -1,3 +1,7 @@
+2009-05-18  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/PJ_sts.c: Remove duplicate division o lp.phi by P->C_p (#40).
+
 2009-05-13  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/PJ_imw_p.c: Correct handling of yc in loc_for() (#39).
