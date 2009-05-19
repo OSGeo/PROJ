@@ -1,5 +1,6 @@
 :
-# Script to do some testing of various transformation.
+# Script to do some testing of various transformation that do not depend
+# on datum files.
 #
 #
 EXE=$1
@@ -25,48 +26,11 @@ echo "============================================"
 echo "Running ${0} using ${EXE}:"
 echo "============================================"
 
-OUT=td_out
+OUT=tv_out
 #EXE=../src/cs2cs
 #
 echo "doing tests into file ${OUT}, please wait"
 rm -f ${OUT}
-#
-echo "##############################################################" >> ${OUT}
-echo 1st through ntv1, 2nd through conus >> ${OUT}
-#
-$EXE +proj=latlong +ellps=clrk66 +nadgrids=ntv1_can.dat,conus \
- +to +proj=latlong +datum=NAD83 \
- -E >>${OUT} <<EOF
-111d00'00.000"W 44d00'00.000"N 0.0
-111d00'00.000"W 39d00'00.000"N 0.0
-EOF
-
-echo "##############################################################" >> ${OUT}
-echo As above, but without ntv1 everything goes through conus file. >> ${OUT}
-#
-$EXE +proj=latlong +ellps=clrk66 +nadgrids=conus \
- +to +proj=latlong +datum=NAD83 \
- -E >>${OUT} <<EOF
-111d00'00.000"W 44d00'00.000"N 0.0
-111d00'00.000"W 39d00'00.000"N 0.0
-EOF
-
-echo "##############################################################" >> ${OUT}
-echo Test MD used where available >> ${OUT}
-#
-$EXE +proj=latlong +ellps=clrk66 +nadgrids=MD,conus \
- +to +proj=latlong +datum=NAD83 \
- -E >>${OUT} <<EOF
-79d58'00.000"W 37d02'00.000"N 0.0
-79d58'00.000"W 36d58'00.000"N 0.0
-EOF
-#
-$EXE +proj=latlong +ellps=clrk66 +nadgrids=conus \
- +to +proj=latlong +datum=NAD83 \
- -E >>${OUT} <<EOF
-79d58'00.000"W 37d02'00.000"N 0.0
-79d58'00.000"W 36d58'00.000"N 0.0
-EOF
 #
 echo "##############################################################" >> ${OUT}
 echo Test raw ellipse to raw ellipse >> ${OUT}
@@ -171,6 +135,20 @@ $EXE +proj=latlong +datum=WGS84 \
  +to +proj=stere +lat_0=90 +lon_0=0 +lat_ts=70 +datum=WGS84 \
  -E >>${OUT} <<EOF
 105 40
+EOF
+#
+echo "##############################################################" >> ${OUT}
+echo "Test sts projection (re: ticket 12)" >> ${OUT}
+#
+$EXE +proj=latlong +ellps=WGS84 \
+ +to +proj=kav5 +ellps=WGS84 +units=m \
+ -E >>${OUT} <<EOF
+4.897000 52.371000
+EOF
+$EXE +proj=kav5 +ellps=WGS84 +units=m \
+ +to +proj=latlong +ellps=WGS84 \
+ -E >>${OUT} <<EOF
+383646.088858 5997047.888175
 EOF
 #
 ##############################################################################
