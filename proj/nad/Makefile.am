@@ -8,6 +8,7 @@ TEST27 = ./test27
 TEST83 = ./test83
 TESTNTV2 = ./testntv2
 TESTVARIOUS = ./testvarious
+TESTDATUMFILE = ./testdatumfile
 TESTIGN = ./testIGNF
 
 pkgdata_DATA = GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri \
@@ -15,8 +16,8 @@ pkgdata_DATA = GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri \
 		IGNF
 
 EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
-		proj_def.dat test27 test83 world epsg esri \
-		testvarious testntv2 ntv2_out.dist \
+		proj_def.dat test27 test83 world epsg esri tv_out.dist \
+		testvarious testdatumfile testntv2 ntv2_out.dist \
 		esri.extra other.extra \
 		IGNF testIGNF proj_outIGNF.dist \
 		makefile.vc
@@ -55,9 +56,10 @@ install-data-local: process-nad2bin
 check-local: process-nad2bin
 	$(TEST27) $(PROJEXE)
 	$(TEST83) $(PROJEXE)
+	$(TESTVARIOUS) $(CS2CSEXE) ; \
 	@if [ -f conus ] ; then \
 	  export PROJ_LIB=. ; \
-	  $(TESTVARIOUS) $(CS2CSEXE) ; \
+	  $(TESTDATUMFILE) $(CS2CSEXE) ; \
 	fi
 
 #	$(TESTNTV2) $(CS2CSEXE)
