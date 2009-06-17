@@ -56,7 +56,7 @@ install-data-local: process-nad2bin
 check-local: process-nad2bin
 	$(TEST27) $(PROJEXE)
 	$(TEST83) $(PROJEXE)
-	$(TESTVARIOUS) $(CS2CSEXE) ; \
+	$(TESTVARIOUS) $(CS2CSEXE)
 	@if [ -f conus ] ; then \
 	  export PROJ_LIB=. ; \
 	  $(TESTDATUMFILE) $(CS2CSEXE) ; \

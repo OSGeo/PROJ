@@ -96,6 +96,7 @@ LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+MUTEX_SETTING = @MUTEX_SETTING@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -171,7 +172,8 @@ CS2CSEXE = $(EXEPATH)/cs2cs
 TEST27 = ./test27
 TEST83 = ./test83
 TESTNTV2 = ./testntv2
-TESTVARIOUS = ./testdatumfile
+TESTVARIOUS = ./testvarious
+TESTDATUMFILE = ./testdatumfile
 TESTIGN = ./testIGNF
 pkgdata_DATA = GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri \
 		esri.extra other.extra \
@@ -408,10 +410,10 @@ install-data-local: process-nad2bin
 check-local: process-nad2bin
 	$(TEST27) $(PROJEXE)
 	$(TEST83) $(PROJEXE)
-	$(TESTVARIOUS) $(CS2CSEXE) ; \
+	$(TESTVARIOUS) $(CS2CSEXE)
 	@if [ -f conus ] ; then \
 	  export PROJ_LIB=. ; \
-	  $(TESTVARIOUS) $(CS2CSEXE) ; \
+	  $(TESTDATUMFILE) $(CS2CSEXE) ; \
 	fi
 
 #	$(TESTNTV2) $(CS2CSEXE)

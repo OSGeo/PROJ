@@ -74,8 +74,25 @@ fi
 
 AC_SUBST(JNI_INCLUDE,$JNI_INCLUDE)
 
+dnl ---------------------------------------------------------------------------
+dnl Provide a mechanism to disable real mutex support (if lacking win32 or
+dnl posix mutexes for instance).
+dnl ---------------------------------------------------------------------------
 
+AC_ARG_WITH([mutex],
+	    AS_HELP_STRING([--without-mutex],
+	       [Disable real mutex locks (lacking pthreads)]),,)
 
+AC_MSG_CHECKING([for mutexes])
+if test "$with_mutex" = yes -o x"$with_mutex" = x ; then
+    MUTEX_SETTING=pthread
+    AC_MSG_RESULT([enabled, pthread])
+else
+    MUTEX_SETTING=stub
+    AC_MSG_RESULT([disabled by user])
+fi
+
+AC_SUBST(MUTEX_SETTING,$MUTEX_SETTING)
 
 AC_OUTPUT(Makefile src/Makefile man/Makefile man/man1/Makefile \
 	man/man3/Makefile nad/Makefile \
