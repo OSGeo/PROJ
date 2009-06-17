@@ -1,5 +1,7 @@
 2009-06-16  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* README: Update windows build instructions (#30).
+
 	* nad/epsg: Upgraded to EPSG 7.1. 
 
 2009-05-19  Frank Warmerdam  <warmerdam@pobox.com>
