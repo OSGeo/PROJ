@@ -44,14 +44,16 @@ Windows Build
 -------------
 
 PROJ.4 can be built with Microsoft Visual C/C++ using the makefile.vc
-in the src directory.  First edit the PROJ\SRC\makefile.vc and modify
-the PROJ_LIB_DIR value at the top to point to the NAD subdirectory 
-of wherever you put the PROJ tree.  If you unpacked it as C:\PROJ it
-can remain unchanged.  The use the makefile.vc to build the software:
+in the PROJ directory.  First edit the PROJ\nmake.opt and modify
+the INSTDIR value at the top to point to the directory where
+the PROJ tree shall be installed. If you want to install into
+C:\PROJ, it can remain unchanged.
+Then use the makefile.vc to build the software:
 
 eg. 
-C:\> cd proj\src
-C>\PROJ\SRC> nmake /f makefile.vc all
+C:\> cd proj
+C:\PROJ> nmake /f makefile.vc
+C:\PROJ> nmake /f makefile.vc install-all
 
 Note that you have to have the VC++ environment variables, and path
 setup properly.  This may involve running the VCVARS32.BAT script out
