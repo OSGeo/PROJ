@@ -979,7 +979,7 @@
 # Unable to translate coordinate system EPSG:2055 into PROJ.4 format.
 #
 # CH1903+ / LV95
-<2056> +proj=somerc +lat_0=46.95240555555556 +lon_0=7.439583333333333 +x_0=2600000 +y_0=1200000 +ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +units=m +no_defs  <>
+<2056> +proj=somerc +lat_0=46.95240555555556 +lon_0=7.439583333333333 +k_0=1 +x_0=2600000 +y_0=1200000 +ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +units=m +no_defs  <>
 # Rassadiran / Nakhl e Taqi
 <2057> +proj=omerc +lat_0=27.51882880555555 +lonc=52.60353916666667 +alpha=0.5716611944444444 +k=0.999895934 +x_0=658377.437 +y_0=3044969.194 +ellps=intl +towgs84=-133.63,-157.5,-158.62,0,0,0,0 +units=m +no_defs  <>
 # ED50(ED77) / UTM zone 38N
@@ -4970,11 +4970,11 @@
 # Belge 1950 (Brussels) / Belge Lambert 50
 <21500> +proj=lcc +lat_1=49.83333333333334 +lat_2=51.16666666666666 +lat_0=90 +lon_0=0 +x_0=150000 +y_0=5400000 +ellps=intl +pm=brussels +units=m +no_defs  <>
 # Bern 1898 (Bern) / LV03C
-<21780> +proj=somerc +lat_0=46.95240555555556 +lon_0=0 +x_0=0 +y_0=0 +ellps=bessel +pm=bern +units=m +no_defs  <>
+<21780> +proj=somerc +lat_0=46.95240555555556 +lon_0=0 +k_0=1 +x_0=0 +y_0=0 +ellps=bessel +pm=bern +units=m +no_defs  <>
 # CH1903 / LV03
-<21781> +proj=somerc +lat_0=46.95240555555556 +lon_0=7.439583333333333 +x_0=600000 +y_0=200000 +ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +units=m +no_defs  <>
+<21781> +proj=somerc +lat_0=46.95240555555556 +lon_0=7.439583333333333 +k_0=1 +x_0=600000 +y_0=200000 +ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +units=m +no_defs  <>
 # CH1903 / LV03C-G
-<21782> +proj=somerc +lat_0=46.95240555555556 +lon_0=7.439583333333333 +x_0=0 +y_0=0 +ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +units=m +no_defs  <>
+<21782> +proj=somerc +lat_0=46.95240555555556 +lon_0=7.439583333333333 +k_0=1 +x_0=0 +y_0=0 +ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / UTM zone 17N (deprecated)
 <21817> +proj=utm +zone=17 +ellps=intl +towgs84=307,304,-318,0,0,0,0 +units=m +no_defs  <>
 # Bogota 1975 / UTM zone 18N
@@ -5149,7 +5149,7 @@
 # Garoua / UTM zone 33N (deprecated)
 <23433> +proj=utm +zone=33 +a=6378249.2 +b=6356515 +units=m +no_defs  <>
 # HD72 / EOV
-<23700> +proj=somerc +lat_0=47.14439372222222 +lon_0=19.04857177777778 +x_0=650000 +y_0=200000 +ellps=GRS67 +units=m +no_defs  <>
+<23700> +proj=somerc +lat_0=47.14439372222222 +lon_0=19.04857177777778 +k_0=0.99993 +x_0=650000 +y_0=200000 +ellps=GRS67 +units=m +no_defs  <>
 # DGN95 / Indonesia TM-3 zone 46.2
 <23830> +proj=tmerc +lat_0=0 +lon_0=94.5 +k=0.9999 +x_0=200000 +y_0=1500000 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # DGN95 / Indonesia TM-3 zone 47.1
