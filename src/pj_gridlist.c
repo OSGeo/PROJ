@@ -182,6 +182,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
     pj_errno = 0;
     *grid_count = 0;
 
+    pj_acquire_lock();
     if( last_nadgrids != NULL 
         && strcmp(nadgrids,last_nadgrids) == 0 )
     {
@@ -189,7 +190,9 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
         if( *grid_count == 0 )
             pj_errno = -38;
 
-        return last_nadgrids_list;
+        PJ_GRIDINFO **ret = last_nadgrids_list;
+        pj_release_lock();
+        return ret;
     }
 
 /* -------------------------------------------------------------------- */
@@ -227,6 +230,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
         if( end_char > sizeof(name) )
         {
             pj_errno = -38;
+            pj_release_lock();
             return NULL;
         }
         
@@ -240,6 +244,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
         if( !pj_gridlist_merge_gridfile( name ) && required )
         {
             pj_errno = -38;
+            pj_release_lock();
             return NULL;
         }
         else
@@ -249,8 +254,13 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
     if( last_nadgrids_count > 0 )
     {
         *grid_count = last_nadgrids_count;
-        return last_nadgrids_list;
+        PJ_GRIDINFO **ret = last_nadgrids_list;
+        pj_release_lock();
+        return ret;
     }
     else
+    {
+        pj_release_lock();
         return NULL;
+    }
 }
