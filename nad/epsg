@@ -11,7 +11,7 @@
 # Unknown datum based upon the Airy 1830 ellipsoid
 <4001> +proj=longlat +ellps=airy +no_defs  <>
 # Unknown datum based upon the Airy Modified 1849 ellipsoid
-<4002> +proj=longlat +a=6377340.189 +b=6356034.447938534 +no_defs  <>
+<4002> +proj=longlat +ellps=mod_airy +no_defs  <>
 # Unknown datum based upon the Australian National Spheroid
 <4003> +proj=longlat +ellps=aust_SA +no_defs  <>
 # Unknown datum based upon the Bessel 1841 ellipsoid
@@ -105,7 +105,7 @@
 # Greek
 <4120> +proj=longlat +ellps=bessel +no_defs  <>
 # GGRS87
-<4121> +proj=longlat +ellps=GRS80 +towgs84=-199.87,74.79,246.62,0,0,0,0 +no_defs  <>
+<4121> +proj=longlat +ellps=GRS80 +datum=GGRS87 +no_defs  <>
 # ATS77
 <4122> +proj=longlat +a=6378135 +b=6356750.304921594 +no_defs  <>
 # KKJ
@@ -301,7 +301,7 @@
 # Cape
 <4222> +proj=longlat +a=6378249.145 +b=6356514.966398753 +no_defs  <>
 # Carthage
-<4223> +proj=longlat +a=6378249.2 +b=6356515 +no_defs  <>
+<4223> +proj=longlat +a=6378249.2 +b=6356515 +datum=carthage +no_defs  <>
 # Chua
 <4224> +proj=longlat +ellps=intl +no_defs  <>
 # Corrego Alegre
@@ -451,9 +451,9 @@
 # Timbalai 1948
 <4298> +proj=longlat +ellps=evrstSS +no_defs  <>
 # TM65
-<4299> +proj=longlat +a=6377340.189 +b=6356034.447938534 +no_defs  <>
+<4299> +proj=longlat +ellps=mod_airy +datum=ire65 +no_defs  <>
 # TM75
-<4300> +proj=longlat +a=6377340.189 +b=6356034.447938534 +no_defs  <>
+<4300> +proj=longlat +ellps=mod_airy +no_defs  <>
 # Tokyo
 <4301> +proj=longlat +ellps=bessel +no_defs  <>
 # Trinidad 1903
@@ -475,7 +475,7 @@
 # Zanderij
 <4311> +proj=longlat +ellps=intl +towgs84=-265,120,-358,0,0,0,0 +no_defs  <>
 # MGI
-<4312> +proj=longlat +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +no_defs  <>
+<4312> +proj=longlat +ellps=bessel +datum=hermannskogel +no_defs  <>
 # Belge 1972
 <4313> +proj=longlat +ellps=intl +towgs84=106.869,-52.2978,103.724,-0.33657,0.456955,-1.84218,1 +no_defs  <>
 # DHDN
@@ -1043,7 +1043,7 @@
 # ELD79 / TM 12 NE
 <2087> +proj=tmerc +lat_0=0 +lon_0=12 +k=0.9996 +x_0=500000 +y_0=0 +ellps=intl +units=m +no_defs  <>
 # Carthage / TM 11 NE
-<2088> +proj=tmerc +lat_0=0 +lon_0=11 +k=0.9996 +x_0=500000 +y_0=0 +a=6378249.2 +b=6356515 +units=m +no_defs  <>
+<2088> +proj=tmerc +lat_0=0 +lon_0=11 +k=0.9996 +x_0=500000 +y_0=0 +a=6378249.2 +b=6356515 +datum=carthage +units=m +no_defs  <>
 # Yemen NGN96 / UTM zone 38N
 <2089> +proj=utm +zone=38 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # Yemen NGN96 / UTM zone 39N
@@ -1067,7 +1067,7 @@
 # Qatar 1948 / Qatar Grid
 <2099> +proj=cass +lat_0=25.38236111111111 +lon_0=50.76138888888889 +x_0=100000 +y_0=100000 +ellps=helmert +units=m +no_defs  <>
 # GGRS87 / Greek Grid
-<2100> +proj=tmerc +lat_0=0 +lon_0=24 +k=0.9996 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=-199.87,74.79,246.62,0,0,0,0 +units=m +no_defs  <>
+<2100> +proj=tmerc +lat_0=0 +lon_0=24 +k=0.9996 +x_0=500000 +y_0=0 +ellps=GRS80 +datum=GGRS87 +units=m +no_defs  <>
 # Lake / Maracaibo Grid M1
 <2101> +proj=lcc +lat_1=10.16666666666667 +lat_0=10.16666666666667 +lon_0=-71.60561777777777 +k_0=1 +x_0=0 +y_0=-52684.972 +ellps=intl +units=m +no_defs  <>
 # Lake / Maracaibo Grid
@@ -1207,7 +1207,7 @@
 # Luxembourg 1930 / Gauss
 <2169> +proj=tmerc +lat_0=49.83333333333334 +lon_0=6.166666666666667 +k=1 +x_0=80000 +y_0=100000 +ellps=intl +towgs84=-193,13.7,-39.3,-0.41,-2.933,2.688,0.43 +units=m +no_defs  <>
 # MGI / Slovenia Grid (deprecated)
-<2170> +proj=tmerc +lat_0=0 +lon_0=15 +k=0.9999 +x_0=500000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<2170> +proj=tmerc +lat_0=0 +lon_0=15 +k=0.9999 +x_0=500000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # Pulkovo 1942(58) / Poland zone I (deprecated)
 <2171> +proj=sterea +lat_0=50.625 +lon_0=21.08333333333333 +k=0.9998 +x_0=4637000 +y_0=5647000 +ellps=krass +units=m +no_defs  <>
 # Pulkovo 1942(58) / Poland zone II
@@ -4443,11 +4443,11 @@
 # Pitcairn 1967 / UTM zone 9S
 <3784> +proj=utm +zone=9 +south +ellps=intl +towgs84=185,165,42,0,0,0,0 +units=m +no_defs  <>
 # Popular Visualisation CRS / Mercator (deprecated)
-<3785> +proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=6378137 +b=6378137 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+<3785> +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs <>
 # World Equidistant Cylindrical (Sphere) (deprecated)
 <3786> +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +a=6371007 +b=6371007 +units=m +no_defs  <>
 # MGI / Slovene National Grid (deprecated)
-<3787> +proj=tmerc +lat_0=0 +lon_0=15 +k=0.9999 +x_0=500000 +y_0=-5000000 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<3787> +proj=tmerc +lat_0=0 +lon_0=15 +k=0.9999 +x_0=500000 +y_0=-5000000 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # NZGD2000 / Auckland Islands TM 2000
 <3788> +proj=tmerc +lat_0=0 +lon_0=166 +k=1 +x_0=3500000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # NZGD2000 / Campbell Island TM 2000
@@ -4539,8 +4539,7 @@
 # County ST74
 <3854> +proj=tmerc +lat_0=0 +lon_0=18.05787 +k=0.99999506 +x_0=100182.7406 +y_0=-6500620.1207 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # WGS 84 / Pseudo-Mercator
-# Unable to translate coordinate system EPSG:3857 into PROJ.4 format.
-#
+<3857> +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs <>
 # IGRS / UTM zone 37N
 <3890> +proj=utm +zone=37 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # IGRS / UTM zone 38N
@@ -5085,11 +5084,11 @@
 # Unable to translate coordinate system EPSG:22300 into PROJ.4 format.
 #
 # Carthage / UTM zone 32N
-<22332> +proj=utm +zone=32 +a=6378249.2 +b=6356515 +units=m +no_defs  <>
+<22332> +proj=utm +zone=32 +a=6378249.2 +b=6356515 +datum=carthage +units=m +no_defs  <>
 # Carthage / Nord Tunisie
-<22391> +proj=lcc +lat_1=36 +lat_0=36 +lon_0=9.9 +k_0=0.999625544 +x_0=500000 +y_0=300000 +a=6378249.2 +b=6356515 +units=m +no_defs  <>
+<22391> +proj=lcc +lat_1=36 +lat_0=36 +lon_0=9.9 +k_0=0.999625544 +x_0=500000 +y_0=300000 +a=6378249.2 +b=6356515 +datum=carthage +units=m +no_defs  <>
 # Carthage / Sud Tunisie
-<22392> +proj=lcc +lat_1=33.3 +lat_0=33.3 +lon_0=9.9 +k_0=0.999625769 +x_0=500000 +y_0=300000 +a=6378249.2 +b=6356515 +units=m +no_defs  <>
+<22392> +proj=lcc +lat_1=33.3 +lat_0=33.3 +lon_0=9.9 +k_0=0.999625769 +x_0=500000 +y_0=300000 +a=6378249.2 +b=6356515 +datum=carthage +units=m +no_defs  <>
 # Corrego Alegre / UTM zone 21S
 <22521> +proj=utm +zone=21 +south +ellps=intl +towgs84=-206,172,-6,0,0,0,0 +units=m +no_defs  <>
 # Corrego Alegre / UTM zone 22S
@@ -6320,13 +6319,13 @@
 # Timbalai 1948 / RSO Borneo (m)
 <29873> +proj=omerc +lat_0=4 +lonc=115 +alpha=53.31582047222222 +k=0.99984 +x_0=590476.87 +y_0=442857.65 +ellps=evrstSS +units=m +no_defs  <>
 # TM65 / Irish National Grid (deprecated)
-<29900> +proj=tmerc +lat_0=53.5 +lon_0=-8 +k=1.000035 +x_0=200000 +y_0=250000 +a=6377340.189 +b=6356034.447938534 +units=m +no_defs  <>
+<29900> +proj=tmerc +lat_0=53.5 +lon_0=-8 +k=1.000035 +x_0=200000 +y_0=250000 +ellps=mod_airy +datum=ire65 +units=m +no_defs  <>
 # OSNI 1952 / Irish National Grid
 <29901> +proj=tmerc +lat_0=53.5 +lon_0=-8 +k=1 +x_0=200000 +y_0=250000 +ellps=airy +towgs84=482.5,-130.6,564.6,-1.042,-0.214,-0.631,8.15 +units=m +no_defs  <>
 # TM65 / Irish Grid
-<29902> +proj=tmerc +lat_0=53.5 +lon_0=-8 +k=1.000035 +x_0=200000 +y_0=250000 +a=6377340.189 +b=6356034.447938534 +units=m +no_defs  <>
+<29902> +proj=tmerc +lat_0=53.5 +lon_0=-8 +k=1.000035 +x_0=200000 +y_0=250000 +ellps=mod_airy +datum=ire65 +units=m +no_defs  <>
 # TM75 / Irish Grid
-<29903> +proj=tmerc +lat_0=53.5 +lon_0=-8 +k=1.000035 +x_0=200000 +y_0=250000 +a=6377340.189 +b=6356034.447938534 +units=m +no_defs  <>
+<29903> +proj=tmerc +lat_0=53.5 +lon_0=-8 +k=1.000035 +x_0=200000 +y_0=250000 +ellps=mod_airy +units=m +no_defs  <>
 # Tokyo / Japan Plane Rectangular CS I
 <30161> +proj=tmerc +lat_0=33 +lon_0=129.5 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel +units=m +no_defs  <>
 # Tokyo / Japan Plane Rectangular CS II
@@ -6410,35 +6409,35 @@
 # MGI (Ferro) / Austria GK East Zone
 <31253> +proj=tmerc +lat_0=0 +lon_0=34 +k=1 +x_0=0 +y_0=-5000000 +ellps=bessel +pm=ferro +units=m +no_defs  <>
 # MGI / Austria GK West
-<31254> +proj=tmerc +lat_0=0 +lon_0=10.33333333333333 +k=1 +x_0=0 +y_0=-5000000 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31254> +proj=tmerc +lat_0=0 +lon_0=10.33333333333333 +k=1 +x_0=0 +y_0=-5000000 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Austria GK Central
-<31255> +proj=tmerc +lat_0=0 +lon_0=13.33333333333333 +k=1 +x_0=0 +y_0=-5000000 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31255> +proj=tmerc +lat_0=0 +lon_0=13.33333333333333 +k=1 +x_0=0 +y_0=-5000000 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Austria GK East
-<31256> +proj=tmerc +lat_0=0 +lon_0=16.33333333333333 +k=1 +x_0=0 +y_0=-5000000 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31256> +proj=tmerc +lat_0=0 +lon_0=16.33333333333333 +k=1 +x_0=0 +y_0=-5000000 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Austria GK M28
-<31257> +proj=tmerc +lat_0=0 +lon_0=10.33333333333333 +k=1 +x_0=150000 +y_0=-5000000 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31257> +proj=tmerc +lat_0=0 +lon_0=10.33333333333333 +k=1 +x_0=150000 +y_0=-5000000 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Austria GK M31
-<31258> +proj=tmerc +lat_0=0 +lon_0=13.33333333333333 +k=1 +x_0=450000 +y_0=-5000000 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31258> +proj=tmerc +lat_0=0 +lon_0=13.33333333333333 +k=1 +x_0=450000 +y_0=-5000000 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Austria GK M34
-<31259> +proj=tmerc +lat_0=0 +lon_0=16.33333333333333 +k=1 +x_0=750000 +y_0=-5000000 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31259> +proj=tmerc +lat_0=0 +lon_0=16.33333333333333 +k=1 +x_0=750000 +y_0=-5000000 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / 3-degree Gauss zone 5 (deprecated)
-<31265> +proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=5500000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31265> +proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=5500000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / 3-degree Gauss zone 6 (deprecated)
-<31266> +proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=6500000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31266> +proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=6500000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / 3-degree Gauss zone 7 (deprecated)
-<31267> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=7500000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31267> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=7500000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / 3-degree Gauss zone 8 (deprecated)
-<31268> +proj=tmerc +lat_0=0 +lon_0=24 +k=1 +x_0=8500000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31268> +proj=tmerc +lat_0=0 +lon_0=24 +k=1 +x_0=8500000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Balkans zone 5 (deprecated)
-<31275> +proj=tmerc +lat_0=0 +lon_0=15 +k=0.9999 +x_0=5500000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31275> +proj=tmerc +lat_0=0 +lon_0=15 +k=0.9999 +x_0=5500000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Balkans zone 6 (deprecated)
-<31276> +proj=tmerc +lat_0=0 +lon_0=18 +k=0.9999 +x_0=6500000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31276> +proj=tmerc +lat_0=0 +lon_0=18 +k=0.9999 +x_0=6500000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Balkans zone 7 (deprecated)
-<31277> +proj=tmerc +lat_0=0 +lon_0=21 +k=0.9999 +x_0=7500000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31277> +proj=tmerc +lat_0=0 +lon_0=21 +k=0.9999 +x_0=7500000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Balkans zone 8 (deprecated)
-<31278> +proj=tmerc +lat_0=0 +lon_0=21 +k=0.9999 +x_0=7500000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31278> +proj=tmerc +lat_0=0 +lon_0=21 +k=0.9999 +x_0=7500000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Balkans zone 8 (deprecated)
-<31279> +proj=tmerc +lat_0=0 +lon_0=24 +k=0.9999 +x_0=8500000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31279> +proj=tmerc +lat_0=0 +lon_0=24 +k=0.9999 +x_0=8500000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI (Ferro) / Austria West Zone
 <31281> +proj=tmerc +lat_0=0 +lon_0=28 +k=1 +x_0=0 +y_0=0 +ellps=bessel +pm=ferro +units=m +no_defs  <>
 # MGI (Ferro) / Austria Central Zone
@@ -6446,13 +6445,13 @@
 # MGI (Ferro) / Austria East Zone
 <31283> +proj=tmerc +lat_0=0 +lon_0=34 +k=1 +x_0=0 +y_0=0 +ellps=bessel +pm=ferro +units=m +no_defs  <>
 # MGI / Austria M28
-<31284> +proj=tmerc +lat_0=0 +lon_0=10.33333333333333 +k=1 +x_0=150000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31284> +proj=tmerc +lat_0=0 +lon_0=10.33333333333333 +k=1 +x_0=150000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Austria M31
-<31285> +proj=tmerc +lat_0=0 +lon_0=13.33333333333333 +k=1 +x_0=450000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31285> +proj=tmerc +lat_0=0 +lon_0=13.33333333333333 +k=1 +x_0=450000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Austria M34
-<31286> +proj=tmerc +lat_0=0 +lon_0=16.33333333333333 +k=1 +x_0=750000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31286> +proj=tmerc +lat_0=0 +lon_0=16.33333333333333 +k=1 +x_0=750000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Austria Lambert
-<31287> +proj=lcc +lat_1=49 +lat_2=46 +lat_0=47.5 +lon_0=13.33333333333333 +x_0=400000 +y_0=400000 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31287> +proj=lcc +lat_1=49 +lat_2=46 +lat_0=47.5 +lon_0=13.33333333333333 +x_0=400000 +y_0=400000 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI (Ferro) / M28
 <31288> +proj=tmerc +lat_0=0 +lon_0=28 +k=1 +x_0=150000 +y_0=0 +ellps=bessel +pm=ferro +units=m +no_defs  <>
 # MGI (Ferro) / M31
@@ -6466,13 +6465,13 @@
 # MGI (Ferro) / Austria East Zone (deprecated)
 <31293> +proj=tmerc +lat_0=0 +lon_0=34 +k=1 +x_0=0 +y_0=0 +ellps=bessel +pm=ferro +units=m +no_defs  <>
 # MGI / M28 (deprecated)
-<31294> +proj=tmerc +lat_0=0 +lon_0=10.33333333333333 +k=1 +x_0=150000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31294> +proj=tmerc +lat_0=0 +lon_0=10.33333333333333 +k=1 +x_0=150000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / M31 (deprecated)
-<31295> +proj=tmerc +lat_0=0 +lon_0=13.33333333333333 +k=1 +x_0=450000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31295> +proj=tmerc +lat_0=0 +lon_0=13.33333333333333 +k=1 +x_0=450000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / M34 (deprecated)
-<31296> +proj=tmerc +lat_0=0 +lon_0=16.33333333333333 +k=1 +x_0=750000 +y_0=0 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31296> +proj=tmerc +lat_0=0 +lon_0=16.33333333333333 +k=1 +x_0=750000 +y_0=0 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # MGI / Austria Lambert (deprecated)
-<31297> +proj=lcc +lat_1=49 +lat_2=46 +lat_0=47.5 +lon_0=13.33333333333333 +x_0=400000 +y_0=400000 +ellps=bessel +towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232 +units=m +no_defs  <>
+<31297> +proj=lcc +lat_1=49 +lat_2=46 +lat_0=47.5 +lon_0=13.33333333333333 +x_0=400000 +y_0=400000 +ellps=bessel +datum=hermannskogel +units=m +no_defs  <>
 # Belge 1972 / Belge Lambert 72
 <31300> +proj=lcc +lat_1=49.83333333333334 +lat_2=51.16666666666666 +lat_0=90 +lon_0=4.356939722222222 +x_0=150000.01256 +y_0=5400088.4378 +ellps=intl +towgs84=106.869,-52.2978,103.724,-0.33657,0.456955,-1.84218,1 +units=m +no_defs  <>
 # Belge 1972 / Belgian Lambert 72
