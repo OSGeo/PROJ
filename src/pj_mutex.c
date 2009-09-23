@@ -27,13 +27,21 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#include <projects.h>
+#include <proj_api.h>
 
+#ifndef _WIN32
 PJ_CVSID("$Id: pj_transform.c 1504 2009-01-06 02:11:57Z warmerdam $");
+#endif
+
+#ifdef _WIN32
+#  define MUTEX_win32
+#endif
 
 #if !defined(MUTEX_stub) && !defined(MUTEX_pthread) && !defined(MUTEX_win32)
 #  define MUTEX_stub
 #endif
+
+static void pj_init_lock();
 
 /************************************************************************/
 /* ==================================================================== */
@@ -74,7 +82,7 @@ void pj_cleanup_lock()
 /*                            pj_init_lock()                            */
 /************************************************************************/
 
-void pj_init_lock()
+static void pj_init_lock()
 
 {
 }
@@ -126,7 +134,7 @@ void pj_cleanup_lock()
 /*                            pj_init_lock()                            */
 /************************************************************************/
 
-void pj_init_lock()
+static void pj_init_lock()
 
 {
 }
@@ -189,12 +197,12 @@ void pj_cleanup_lock()
 /*                            pj_init_lock()                            */
 /************************************************************************/
 
-void pj_init_lock()
+static void pj_init_lock()
 
 {
     if( mutex_lock == NULL )
         mutex_lock = CreateMutex( NULL, TRUE, NULL );
 }
 
-#endif // def MUTEX_pthread
+#endif // def MUTEX_win32
 

@@ -96,6 +96,9 @@ void pj_dalloc(void *);
 char *pj_strerrno(int);
 int *pj_get_errno_ref(void);
 const char *pj_get_release(void);
+void pj_acquire_lock(void);
+void pj_release_lock(void);
+void pj_cleanup_lock(void);
 
 #ifdef __cplusplus
 }
