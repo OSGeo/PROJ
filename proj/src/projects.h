@@ -404,9 +404,6 @@ PJ_GRIDINFO *pj_gridinfo_init( const char * );
 int pj_gridinfo_load( PJ_GRIDINFO * );
 void pj_gridinfo_free( PJ_GRIDINFO * );
 
-void pj_acquire_lock(void);
-void pj_release_lock(void);
-
 void *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
 double proj_inv_mdist(double, const void *);
