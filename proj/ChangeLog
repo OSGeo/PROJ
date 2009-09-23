@@ -1,3 +1,8 @@
+2009-09-23  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/ntf_r93.gsb: set mime-type to binary so it isn't corrupted on 
+	windows systems.
+
 2009-06-17  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_mutex.c: Implement win32 and pthread mutex support.
