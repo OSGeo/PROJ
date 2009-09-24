@@ -2,6 +2,8 @@
 
 	* Preparing for 4.7.0 release.
 
+	* nad/makefile.vc: do not attempt to install ntf_r93.gsb by default.
+
 	* src/pj_init.c: Temporarily set locale to "C" to avoid locale
 	specific number parsing (#49).
 
