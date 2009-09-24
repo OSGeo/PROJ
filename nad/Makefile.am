@@ -61,9 +61,14 @@ check-local: process-nad2bin
 	  export PROJ_LIB=. ; \
 	  $(TESTDATUMFILE) $(CS2CSEXE) ; \
 	fi
-
-#	$(TESTNTV2) $(CS2CSEXE)
-#	$(TESTIGNF) $(CS2CSEXE)
+	@if [ -f ntf_r93.gsb ] ; then \
+	  export PROJ_LIB=. ; \
+	  $(TESTIGN) $(CS2CSEXE) ; \
+	fi
+	@if [ -f ntv2_0.gsb ] ; then \
+	  export PROJ_LIB=. ; \
+	  $(TESTNTV2) $(CS2CSEXE) ; \
+	fi
 
 clean-local:
 	$(RM) $(TEST_DB)
