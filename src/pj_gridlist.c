@@ -186,11 +186,11 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
     if( last_nadgrids != NULL 
         && strcmp(nadgrids,last_nadgrids) == 0 )
     {
+        PJ_GRIDINFO **ret = last_nadgrids_list;
         *grid_count = last_nadgrids_count;
         if( *grid_count == 0 )
             pj_errno = -38;
 
-        PJ_GRIDINFO **ret = last_nadgrids_list;
         pj_release_lock();
         return ret;
     }
@@ -253,8 +253,8 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
 
     if( last_nadgrids_count > 0 )
     {
-        *grid_count = last_nadgrids_count;
         PJ_GRIDINFO **ret = last_nadgrids_list;
+        *grid_count = last_nadgrids_count;
         pj_release_lock();
         return ret;
     }
