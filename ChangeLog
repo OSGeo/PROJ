@@ -1,5 +1,8 @@
 2009-09-23  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/pj_init.c: Temporarily set locale to "C" to avoid locale
+	specific number parsing (#49).
+
 	* src/pj_rho.c: move rho out of structure, threadsafety issue (#41).
 
 	* nmake.opt: improve comments (#50).

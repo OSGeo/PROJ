@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <locale.h>
 
 PJ_CVSID("$Id$");
 
@@ -225,9 +226,13 @@ pj_init(int argc, char **argv) {
 	paralist *curr;
 	int i;
 	PJ *PIN = 0;
+        const char *old_locale;
 
 	errno = pj_errno = 0;
         start = NULL;
+
+        old_locale = setlocale(LC_NUMERIC, NULL); 
+        setlocale(LC_NUMERIC,"C");
 
 	/* put arguments into internal linked list */
 	if (argc <= 0) { pj_errno = -1; goto bum_call; }
@@ -377,6 +382,8 @@ bum_call: /* cleanup error return */
 			}
 		PIN = 0;
 	}
+        setlocale(LC_NUMERIC,old_locale);
+
 	return PIN;
 }
 
