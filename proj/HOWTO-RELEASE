@@ -1,7 +1,7 @@
 	Preparing a PROJ.4 Release
 	==========================
 
-1) Update the version number in configure.in (in AM_INIT_AUTOMAKE()).
+1) Update the version number in configure.in (in AC_INIT()).
 
 2) Update the version number in proj_api.h (#define PJ_VERSION).
 

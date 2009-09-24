@@ -1,5 +1,7 @@
 2009-09-23  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* Preparing for 4.7.0 release.
+
 	* src/pj_init.c: Temporarily set locale to "C" to avoid locale
 	specific number parsing (#49).
 

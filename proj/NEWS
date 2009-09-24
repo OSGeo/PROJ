@@ -1,3 +1,16 @@
+4.7.0 Release Notes
+-------------------
+
+ o Added in memory caching of init file search results for substantial
+   acceleration in some application environments (like MapServer). 
+
+ o Regenerated nad/epsg init file with EPSG 7.1 database, including new
+   support for Google Mercator (EPSG:3857).
+
+ o Various thread safety improvements, including preliminary support for
+   a mutex lock around some operations, like grid loading.
+
+
 4.6.1 Release Notes
 -------------------
 
