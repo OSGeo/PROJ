@@ -35,7 +35,15 @@
     - %setup line
     - rm -rf line
 
-9) Tag the release with a command like "cvs tag -F proj_4_4_3".
+8) If this is a major release, prepare a branch. 
+
+   svn copy https://svn.osgeo.org/metacrs/proj/trunk \
+            https://svn.osgeo.org/metacrs/proj/branches/4.7
+
+9) Tag the release set in SVN 
+
+   svn copy https://svn.osgeo.org/metacrs/proj/branches/4.7 \
+            https://svn.osgeo.org/metacrs/proj/tags/4.7.0
 
 10) Do a "make dist-all" in the proj root directory.  After some grinding
    this should result in files like proj-4.4.3.tar.gz and proj-4.4.3.zip
@@ -44,7 +52,7 @@
 11) Put these in the proj ftp area on ftp.remotesensing.org.  This can be
    done via scp using a command like the following.
 
-     scp proj-4.4.3.{tar.gz,zip} frankw@upload.osgeo.org:/osgeo/download/proj
+     scp proj-4.4.3.{tar.gz,zip} warmerdam@upload.osgeo.org:/osgeo/download/proj
 
 12) Announce the new release on the PROJ.4 and MetaCRS mailing lists. 
 
