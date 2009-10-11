@@ -8,6 +8,8 @@
 # 2009-03-08 :  the null grid (nad2bin < null.lla null) MUST
 #               be around otherwise the LAMBE to LAMB93
 #               transformations will be wrong and vice-versa
+# 2009-10-04 :  addition of NTFG to RGF93G test to check if
+#               the gsb grid is still ok
 EXE=$1
 
 usage()
@@ -38,6 +40,10 @@ RES="-f %.3f"
 echo "doing tests into file ${OUT}, please wait"
 #
 rm -f ${OUT}
+echo "+init=${INIT_FILE}:NTFG +to +init=${INIT_FILE}:RGF93G" >>${OUT}
+$EXE +init=${INIT_FILE}:NTFG +to +init=${INIT_FILE}:RGF93G -E >>${OUT} <<EOF
+ 3.300866856 43.4477976569 0.0000
+EOF
 echo "+init=${INIT_FILE}:LAMBE +to +init=${INIT_FILE}:LAMB93" >>${OUT}
 $EXE +init=${INIT_FILE}:LAMBE +to +init=${INIT_FILE}:LAMB93 -E $RES >>${OUT} <<EOF
  600000.0000 2600545.4523  0.0000
