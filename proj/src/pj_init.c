@@ -268,6 +268,7 @@ pj_init(int argc, char **argv) {
 	PIN->params = start;
         PIN->is_latlong = 0;
         PIN->is_geocent = 0;
+        PIN->is_long_wrap_set = 0;
         PIN->long_wrap_center = 0.0;
 
         /* set datum parameters */
@@ -303,7 +304,9 @@ pj_init(int argc, char **argv) {
 	PIN->over = pj_param(start, "bover").i;
 
 	/* longitude center for wrapping */
-	PIN->long_wrap_center = pj_param(start, "rlon_wrap").f;
+ 	PIN->is_long_wrap_set = pj_param(start, "tlon_wrap").i;
+ 	if (PIN->is_long_wrap_set)
+ 		PIN->long_wrap_center = pj_param(start, "rlon_wrap").f;
 
 	/* central meridian */
 	PIN->lam0=pj_param(start, "rlon_0").f;

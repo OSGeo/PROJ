@@ -268,17 +268,17 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 /*      If a wrapping center other than 0 is provided, rewrap around    */
 /*      the suggested center (for latlong coordinate systems only).     */
 /* -------------------------------------------------------------------- */
-    else if( dstdefn->is_latlong && dstdefn->long_wrap_center != 0 )
+    else if( dstdefn->is_latlong && dstdefn->is_long_wrap_set )
     {
         for( i = 0; i < point_count; i++ )
         {
             if( x[point_offset*i] == HUGE_VAL )
                 continue;
 
-            while( x[point_offset*i] < dstdefn->long_wrap_center - HALFPI )
-                x[point_offset*i] += PI;
-            while( x[point_offset*i] > dstdefn->long_wrap_center + HALFPI )
-                x[point_offset*i] -= PI;
+            while( x[point_offset*i] < dstdefn->long_wrap_center - PI )
+                x[point_offset*i] += TWOPI;
+            while( x[point_offset*i] > dstdefn->long_wrap_center + PI )
+                x[point_offset*i] -= TWOPI;
         }
     }
 
