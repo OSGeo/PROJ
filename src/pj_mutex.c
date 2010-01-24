@@ -37,8 +37,10 @@ PJ_CVSID("$Id: pj_transform.c 1504 2009-01-06 02:11:57Z warmerdam $");
 #include <proj_api.h>
 #endif
 
-#ifdef _WIN32
+/* on win32 we always use win32 mutexes, even if pthreads are available */
+#if defined(_WIN32) && !defined(MUTEX_stub)
 #  define MUTEX_win32
+#  undef  MUTEX_pthread
 #endif
 
 #if !defined(MUTEX_stub) && !defined(MUTEX_pthread) && !defined(MUTEX_win32)
