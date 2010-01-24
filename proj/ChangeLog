@@ -1,5 +1,8 @@
 2010-01-25  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/pj_mutex.c: avoid conflict between pthread and win32 mutex
+	implementations on unix-like build environments on windows. (#56)
+
 	* src/pj_init,src/projects.h,src/pj_transform.c,nad/testvarious:
 	Correct seriously broken +lon_wrap implementation.  (#62)
 
