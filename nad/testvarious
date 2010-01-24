@@ -82,6 +82,22 @@ $EXE +proj=latlong +datum=WGS84 +pm=greenwich  \
 EOF
 #
 echo "##############################################################" >> ${OUT}
+echo Test support for the lon_wrap switch. >> ${OUT}
+#
+$EXE +proj=latlong +datum=WGS84  \
+ +to +proj=latlong +datum=WGS84 +lon_wrap=180 \
+ -E >>${OUT} <<EOF
+1d00'00.000"W 10d00'00.000"N 0.0
+0d00'00.000"W 10d00'00.000"N 0.0
+0d00'00.000"E 10d00'00.000"N 0.0
+1d00'00.000"E 45d00'00.000"N 0.0
+179d00'00.000"E 45d00'00.000"N 0.0
+181d00'00.000"E 45d00'00.000"N 0.0
+350d00'00.000"E 45d00'00.000"N 0.0
+370d00'00.000"E 45d00'00.000"N 0.0
+EOF
+#
+echo "##############################################################" >> ${OUT}
 echo Test simple prime meridian handling within a projection. >> ${OUT}
 #
 $EXE +proj=utm +zone=11 +datum=WGS84 +pm=3 \

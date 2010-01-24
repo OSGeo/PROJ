@@ -234,6 +234,7 @@ typedef struct PJconsts {
         double  datum_params[7];
         double  from_greenwich; /* prime meridian offset (in radians) */
         double  long_wrap_center; /* 0.0 for -180 to 180, actually in radians*/
+        int     is_long_wrap_set;
         
 #ifdef PROJ_PARMS__
 PROJ_PARMS__
