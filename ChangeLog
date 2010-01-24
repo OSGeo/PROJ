@@ -1,3 +1,8 @@
+2010-01-25  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_mutex.c: fix creation of mutex on win32 to be in
+	unacquired state in pj_init_lock to avoid an extra reference. (#63)
+
 2009-10-19  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* nad/ntf_r93.gsb: updated with file from IGN (#52).
