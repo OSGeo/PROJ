@@ -1,166 +1,190 @@
+/*
+** Copyright (c) 2003, 2006   Gerald I. Evenden
+*/
+/*
+** Permission is hereby granted, free of charge, to any person obtaining
+** a copy of this software and associated documentation files (the
+** "Software"), to deal in the Software without restriction, including
+** without limitation the rights to use, copy, modify, merge, publish,
+** distribute, sublicense, and/or sell copies of the Software, and to
+** permit persons to whom the Software is furnished to do so, subject to
+** the following conditions:
+**
+** The above copyright notice and this permission notice shall be
+** included in all copies or substantial portions of the Software.
+**
+** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+** MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+** IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+** CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+** SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 #define PROJ_PARMS__ \
-	double	alpha, lamc, lam1, phi1, lam2, phi2, Gamma, al, bl, el, \
-		singam, cosgam, sinrot, cosrot, u_0; \
-	int		ellips, rot;
+	double	A, B, E, AB, ArB, BrA, rB, singam, cosgam, sinrot, cosrot; \
+	double  v_pole_n, v_pole_s, u_0; \
+	int no_rot;
 #define PJ_LIB__
-#include	<projects.h>
+#include <projects.h>
+
 PROJ_HEAD(omerc, "Oblique Mercator")
-	"\n\tCyl, Sph&Ell\n\t no_rot rot_conv no_uoff and\n\t"
-"alpha= lonc= or\n\t lon_1= lat_1= lon_2= lat_2=";
+	"\n\tCyl, Sph&Ell no_rot\n\t"
+"alpha= [gamma=] [no_off] lonc= or\n\t lon_1= lat_1= lon_2= lat_2=";
 #define TOL	1.e-7
 #define EPS	1.e-10
-#define TSFN0(x)	tan(.5 * (HALFPI - (x)))
-FORWARD(e_forward); /* ellipsoid & spheroid */
-	double  con, q, s, ul, us, vl, vs;
 
-	vl = sin(P->bl * lp.lam);
-	if (fabs(fabs(lp.phi) - HALFPI) <= EPS) {
-		ul = lp.phi < 0. ? -P->singam : P->singam;
-		us = P->al * lp.phi / P->bl;
+FORWARD(e_forward); /* ellipsoid */
+	double  Q, S, T, U, V, temp, u, v;
+
+	if (fabs(fabs(lp.phi) - HALFPI) > EPS) {
+		Q = P->E / pow(pj_tsfn(lp.phi, sin(lp.phi), P->e), P->B);
+		temp = 1. / Q;
+		S = .5 * (Q - temp);
+		T = .5 * (Q + temp);
+		V = sin(P->B * lp.lam);
+		U = (S * P->singam - V * P->cosgam) / T;
+		if (fabs(fabs(U) - 1.0) < EPS)
+			F_ERROR;
+		v = 0.5 * P->ArB * log((1. - U)/(1. + U));
+		temp = cos(P->B * lp.lam);
+		u = (fabs(temp) < TOL) ? P->AB * lp.lam :
+			P->ArB * atan2((S * P->cosgam + V * P->singam) , temp); 
 	} else {
-		q = P->el / (P->ellips ? pow(pj_tsfn(lp.phi, sin(lp.phi), P->e), P->bl)
-			: TSFN0(lp.phi));
-		s = .5 * (q - 1. / q);
-		ul = 2. * (s * P->singam - vl * P->cosgam) / (q + 1. / q);
-		con = cos(P->bl * lp.lam);
-		if (fabs(con) >= TOL) {
-			us = P->al * atan((s * P->cosgam + vl * P->singam) / con) / P->bl;
-			if (con < 0.)
-				us += PI * P->al / P->bl;
-		} else
-			us = P->al * P->bl * lp.lam;
+		v = lp.phi > 0 ? P->v_pole_n : P->v_pole_s;
+		u = P->ArB * lp.phi;
 	}
-	if (fabs(fabs(ul) - 1.) <= EPS) F_ERROR;
-	vs = .5 * P->al * log((1. - ul) / (1. + ul)) / P->bl;
-	us -= P->u_0;
-	if (! P->rot) {
-		xy.x = us;
-		xy.y = vs;
+	if (P->no_rot) {
+		xy.x = u;
+		xy.y = v;
 	} else {
-		xy.x = vs * P->cosrot + us * P->sinrot;
-		xy.y = us * P->cosrot - vs * P->sinrot;
+		u -= P->u_0;
+		xy.x = v * P->cosrot + u * P->sinrot;
+		xy.y = u * P->cosrot - v * P->sinrot;
 	}
 	return (xy);
 }
-INVERSE(e_inverse); /* ellipsoid & spheroid */
-	double  q, s, ul, us, vl, vs;
+INVERSE(e_inverse); /* ellipsoid */
+	double  u, v, Qp, Sp, Tp, Vp, Up;
 
-	if (! P->rot) {
-		us = xy.x;
-		vs = xy.y;
+	if (P->no_rot) {
+		v = xy.y;
+		u = xy.x;
 	} else {
-		vs = xy.x * P->cosrot - xy.y * P->sinrot;
-		us = xy.y * P->cosrot + xy.x * P->sinrot;
+		v = xy.x * P->cosrot - xy.y * P->sinrot;
+		u = xy.y * P->cosrot + xy.x * P->sinrot + P->u_0;
 	}
-	us += P->u_0;
-	q = exp(- P->bl * vs / P->al);
-	s = .5 * (q - 1. / q);
-	vl = sin(P->bl * us / P->al);
-	ul = 2. * (vl * P->cosgam + s * P->singam) / (q + 1. / q);
-	if (fabs(fabs(ul) - 1.) < EPS) {
+	Qp = exp(- P->BrA * v);
+	Sp = .5 * (Qp - 1. / Qp);
+	Tp = .5 * (Qp + 1. / Qp);
+	Vp = sin(P->BrA * u);
+	Up = (Vp * P->cosgam + Sp * P->singam) / Tp;
+	if (fabs(fabs(Up) - 1.) < EPS) {
 		lp.lam = 0.;
-		lp.phi = ul < 0. ? -HALFPI : HALFPI;
+		lp.phi = Up < 0. ? -HALFPI : HALFPI;
 	} else {
-		lp.phi = P->el / sqrt((1. + ul) / (1. - ul));
-		if (P->ellips) {
-			if ((lp.phi = pj_phi2(pow(lp.phi, 1. / P->bl), P->e)) == HUGE_VAL)
-				I_ERROR;
-		} else
-			lp.phi = HALFPI - 2. * atan(lp.phi);
-		lp.lam = - atan2((s * P->cosgam -
-			vl * P->singam), cos(P->bl * us / P->al)) / P->bl;
+		lp.phi = P->E / sqrt((1. + Up) / (1. - Up));
+		if ((lp.phi = pj_phi2(pow(lp.phi, 1. / P->B), P->e)) == HUGE_VAL)
+			I_ERROR;
+		lp.lam = - P->rB * atan2((Sp * P->cosgam -
+			Vp * P->singam), cos(P->BrA * u));
 	}
 	return (lp);
 }
 FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(omerc)
-	double con, com, cosph0, d, f, h, l, sinph0, p, j;
-	int azi;
+	double con, com, cosph0, D, F, H, L, sinph0, p, J, gamma,
+		gamma0, lamc, lam1, lam2, phi1, phi2, alpha_c;
+	int alp, gam, no_off = 0;
 
-	P->rot	= pj_param(P->params, "bno_rot").i == 0;
-	if( (azi	= pj_param(P->params, "talpha").i) != 0.0) {
-		P->lamc	= pj_param(P->params, "rlonc").f;
-		P->alpha	= pj_param(P->params, "ralpha").f;
-		if ( fabs(P->alpha) <= TOL ||
-			fabs(fabs(P->phi0) - HALFPI) <= TOL ||
-			fabs(fabs(P->alpha) - HALFPI) <= TOL)
-			E_ERROR(-32);
+	P->no_rot = pj_param(P->params, "tno_rot").i;
+	if (alp = pj_param(P->params, "talpha").i)
+		alpha_c = pj_param(P->params, "ralpha").f;
+	if (gam = pj_param(P->params, "tgamma").i)
+		gamma = pj_param(P->params, "rgamma").f;
+	if (alp || gam) {
+		lamc	= pj_param(P->params, "rlonc").f;
+		no_off = pj_param(P->params, "tno_off").i;
 	} else {
-		P->lam1	= pj_param(P->params, "rlon_1").f;
-		P->phi1	= pj_param(P->params, "rlat_1").f;
-		P->lam2	= pj_param(P->params, "rlon_2").f;
-		P->phi2	= pj_param(P->params, "rlat_2").f;
-		if (fabs(P->phi1 - P->phi2) <= TOL ||
-			(con = fabs(P->phi1)) <= TOL ||
+		lam1 = pj_param(P->params, "rlon_1").f;
+		phi1 = pj_param(P->params, "rlat_1").f;
+		lam2 = pj_param(P->params, "rlon_2").f;
+		phi2 = pj_param(P->params, "rlat_2").f;
+		if (fabs(phi1 - phi2) <= TOL ||
+			(con = fabs(phi1)) <= TOL ||
 			fabs(con - HALFPI) <= TOL ||
 			fabs(fabs(P->phi0) - HALFPI) <= TOL ||
-			fabs(fabs(P->phi2) - HALFPI) <= TOL) E_ERROR(-33);
+			fabs(fabs(phi2) - HALFPI) <= TOL) E_ERROR(-33);
 	}
-	com = (P->ellips = P->es > 0.) ? sqrt(P->one_es) : 1.;
+	com = sqrt(P->one_es);
 	if (fabs(P->phi0) > EPS) {
 		sinph0 = sin(P->phi0);
 		cosph0 = cos(P->phi0);
-		if (P->ellips) {
-			con = 1. - P->es * sinph0 * sinph0;
-			P->bl = cosph0 * cosph0;
-			P->bl = sqrt(1. + P->es * P->bl * P->bl / P->one_es);
-			P->al = P->bl * P->k0 * com / con;
-			d = P->bl * com / (cosph0 * sqrt(con));
-		} else {
-			P->bl = 1.;
-			P->al = P->k0;
-			d = 1. / cosph0;
-		}
-		if ((f = d * d - 1.) <= 0.)
-			f = 0.;
+		con = 1. - P->es * sinph0 * sinph0;
+		P->B = cosph0 * cosph0;
+		P->B = sqrt(1. + P->es * P->B * P->B / P->one_es);
+		P->A = P->B * P->k0 * com / con;
+		D = P->B * com / (cosph0 * sqrt(con));
+		if ((F = D * D - 1.) <= 0.)
+			F = 0.;
 		else {
-			f = sqrt(f);
+			F = sqrt(F);
 			if (P->phi0 < 0.)
-				f = -f;
+				F = -F;
 		}
-		P->el = f += d;
-		if (P->ellips)	P->el *= pow(pj_tsfn(P->phi0, sinph0, P->e), P->bl);
-		else		P->el *= TSFN0(P->phi0);
+		P->E = F += D;
+		P->E *= pow(pj_tsfn(P->phi0, sinph0, P->e), P->B);
 	} else {
-		P->bl = 1. / com;
-		P->al = P->k0;
-		P->el = d = f = 1.;
+		P->B = 1. / com;
+		P->A = P->k0;
+		P->E = D = F = 1.;
 	}
-	if (azi) {
-		P->Gamma = asin(sin(P->alpha) / d);
-		P->lam0 = P->lamc - asin((.5 * (f - 1. / f)) *
-		   tan(P->Gamma)) / P->bl;
+	if (alp || gam) {
+		if (alp) {
+			gamma0 = asin(sin(alpha_c) / D);
+			if (!gam)
+				gamma = alpha_c;
+		} else
+			alpha_c = asin(D*sin(gamma0 = gamma));
+		if ((con = fabs(alpha_c)) <= TOL ||
+			fabs(con - PI) <= TOL ||
+			fabs(fabs(P->phi0) - HALFPI) <= TOL)
+			E_ERROR(-32);
+		P->lam0 = lamc - asin(.5 * (F - 1. / F) *
+		   tan(gamma0)) / P->B;
 	} else {
-		if (P->ellips) {
-			h = pow(pj_tsfn(P->phi1, sin(P->phi1), P->e), P->bl);
-			l = pow(pj_tsfn(P->phi2, sin(P->phi2), P->e), P->bl);
-		} else {
-			h = TSFN0(P->phi1);
-			l = TSFN0(P->phi2);
-		}
-		f = P->el / h;
-		p = (l - h) / (l + h);
-		j = P->el * P->el;
-		j = (j - l * h) / (j + l * h);
-		if ((con = P->lam1 - P->lam2) < -PI)
-			P->lam2 -= TWOPI;
+		H = pow(pj_tsfn(phi1, sin(phi1), P->e), P->B);
+		L = pow(pj_tsfn(phi2, sin(phi2), P->e), P->B);
+		F = P->E / H;
+		p = (L - H) / (L + H);
+		J = P->E * P->E;
+		J = (J - L * H) / (J + L * H);
+		if ((con = lam1 - lam2) < -PI)
+			lam2 -= TWOPI;
 		else if (con > PI)
-			P->lam2 += TWOPI;
-		P->lam0 = adjlon(.5 * (P->lam1 + P->lam2) - atan(
-		   j * tan(.5 * P->bl * (P->lam1 - P->lam2)) / p) / P->bl);
-		P->Gamma = atan(2. * sin(P->bl * adjlon(P->lam1 - P->lam0)) /
-		   (f - 1. / f));
-		P->alpha = asin(d * sin(P->Gamma));
+			lam2 += TWOPI;
+		P->lam0 = adjlon(.5 * (lam1 + lam2) - atan(
+		   J * tan(.5 * P->B * (lam1 - lam2)) / p) / P->B);
+		gamma0 = atan(2. * sin(P->B * adjlon(lam1 - P->lam0)) /
+		   (F - 1. / F));
+		gamma = alpha_c = asin(D * sin(gamma0));
 	}
-	P->singam = sin(P->Gamma);
-	P->cosgam = cos(P->Gamma);
-	f = pj_param(P->params, "brot_conv").i ? P->Gamma : P->alpha;
-	P->sinrot = sin(f);
-	P->cosrot = cos(f);
-	P->u_0 = pj_param(P->params, "bno_uoff").i ? 0. :
-		fabs(P->al * atan(sqrt(d * d - 1.) / P->cosrot) / P->bl);
-	if (P->phi0 < 0.)
-		P->u_0 = - P->u_0;
+	P->singam = sin(gamma0);
+	P->cosgam = cos(gamma0);
+	P->sinrot = sin(gamma);
+	P->cosrot = cos(gamma);
+	P->BrA = 1. / (P->ArB = P->A * (P->rB = 1. / P->B));
+	P->AB = P->A * P->B;
+	if (no_off)
+		P->u_0 = 0;
+	else {
+		P->u_0 = fabs(P->ArB * atan2(sqrt(D * D - 1.), cos(alpha_c)));
+		if (P->phi0 < 0.)
+			P->u_0 = - P->u_0;
+	}
+	F = 0.5 * gamma0;
+	P->v_pole_n = P->ArB * log(tan(FORTPI - F));
+	P->v_pole_s = P->ArB * log(tan(FORTPI + F));
 	P->inv = e_inverse;
 	P->fwd = e_forward;
 ENDENTRY(P)

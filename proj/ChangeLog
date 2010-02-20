@@ -1,3 +1,7 @@
+2010-02-20  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/PJ_omerc.c: wholesale update from libproj4.3 (20081120) (#62)
+
 2010-01-25  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_mutex.c: avoid conflict between pthread and win32 mutex
