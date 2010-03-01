@@ -52,6 +52,7 @@ pj_err_list[] = {
 	"unparseable coordinate system definition",	/* -44 */
 	"geocentric transformation missing z or ellps",	/* -45 */
 	"unknown prime meridian conversion id",		/* -46 */
+	"illegal axis orientation combination",		/* -47 */
 };
 	char *
 pj_strerrno(int err) 
