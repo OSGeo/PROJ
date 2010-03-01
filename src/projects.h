@@ -131,8 +131,9 @@ extern double hypot(double, double);
 #define PJD_GRIDSHIFT 3
 #define PJD_WGS84     4   /* WGS84 (or anything considered equivelent) */
 
-/* datum system errors */
-#define PJD_ERR_GEOCENTRIC -45
+/* library errors */
+#define PJD_ERR_GEOCENTRIC          -45
+#define PJD_ERR_AXIS                -47
 
 #define USE_PROJUV 
 
@@ -235,6 +236,7 @@ typedef struct PJconsts {
         double  from_greenwich; /* prime meridian offset (in radians) */
         double  long_wrap_center; /* 0.0 for -180 to 180, actually in radians*/
         int     is_long_wrap_set;
+        char    axis[4];
         
 #ifdef PROJ_PARMS__
 PROJ_PARMS__

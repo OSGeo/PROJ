@@ -36,6 +36,10 @@
 
 PJ_CVSID("$Id$");
 
+static int pj_adjust_axis( const char *axis, int denormalize_flag,
+                           long point_count, int point_offset, 
+                           double *x, double *y, double *z );
+
 #ifndef SRS_WGS84_SEMIMAJOR
 #define SRS_WGS84_SEMIMAJOR 6378137.0
 #endif
@@ -63,13 +67,13 @@ PJ_CVSID("$Id$");
 ** list or something, but while experimenting with it this should be fine. 
 */
 
-static const int transient_error[45] = {
+static const int transient_error[50] = {
     /*             0  1  2  3  4  5  6  7  8  9   */
     /* 0 to 9 */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     /* 10 to 19 */ 0, 0, 0, 0, 1, 1, 0, 1, 1, 1,  
     /* 20 to 29 */ 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 
     /* 30 to 39 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 
-    /* 40 to 44 */ 0, 0, 0, 0, 0 };
+    /* 40 to 49 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 /************************************************************************/
 /*                            pj_transform()                            */
@@ -91,6 +95,20 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 
     if( point_offset == 0 )
         point_offset = 1;
+
+/* -------------------------------------------------------------------- */
+/*      Transform unusual input coordinate axis orientation to          */
+/*      standard form if needed.                                        */
+/* -------------------------------------------------------------------- */
+    if( strcmp(srcdefn->axis,"enu") != 0 )
+    {
+        int err;
+
+        err = pj_adjust_axis( srcdefn->axis, 0, point_count, point_offset, 
+                              x, y, z );
+        if( err != 0 )
+            return err;
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Transform geocentric source coordinates to lat/long.            */
@@ -280,6 +298,20 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             while( x[point_offset*i] > dstdefn->long_wrap_center + PI )
                 x[point_offset*i] -= TWOPI;
         }
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Transform normalized axes into unusual output coordinate axis   */
+/*      orientation if needed.                                          */
+/* -------------------------------------------------------------------- */
+    if( strcmp(dstdefn->axis,"enu") != 0 )
+    {
+        int err;
+
+        err = pj_adjust_axis( dstdefn->axis, 1, point_count, point_offset, 
+                              x, y, z );
+        if( err != 0 )
+            return err;
     }
 
     return 0;
@@ -641,6 +673,110 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
     if( z_is_temp )
         pj_dalloc( z );
 
+    return 0;
+}
+
+/************************************************************************/
+/*                           pj_adjust_axis()                           */
+/*                                                                      */
+/*      Normalize or de-normalized the x/y/z axes.  The normal form     */
+/*      is "enu" (easting, northing, up).                               */
+/************************************************************************/
+static int pj_adjust_axis( const char *axis, int denormalize_flag,
+                           long point_count, int point_offset, 
+                           double *x, double *y, double *z )
+
+{
+    double x_in, y_in, z_in = 0.0;
+    int i, i_axis;
+
+    if( !denormalize_flag )
+    {
+        for( i = 0; i < point_count; i++ )
+        {
+            x_in = x[point_offset*i];
+            y_in = y[point_offset*i];
+            if( z )
+                z_in = z[point_offset*i];
+     
+            for( i_axis = 0; i_axis < 3; i_axis++ )
+            {
+                double value;
+
+                if( i_axis == 0 )
+                    value = x_in;
+                else if( i_axis == 1 )
+                    value = y_in;
+                else
+                    value = z_in;
+                
+                switch( axis[i_axis] )
+                {
+                  case 'e':
+                    x[point_offset*i] = value; break;
+                  case 'w':
+                    x[point_offset*i] = -value; break;
+                  case 'n':
+                    y[point_offset*i] = value; break;
+                  case 's':
+                    y[point_offset*i] = -value; break;
+                  case 'u':
+                    if( z ) z[point_offset*i] = value; break;
+                  case 'd':
+                    if( z ) z[point_offset*i] = -value; break;
+                  default:
+                    pj_errno = PJD_ERR_AXIS;
+                    return PJD_ERR_AXIS;
+                }
+            } /* i_axis */
+        } /* i (point) */
+    }
+
+    else /* denormalize */
+    {
+        for( i = 0; i < point_count; i++ )
+        {
+            x_in = x[point_offset*i];
+            y_in = y[point_offset*i];
+            if( z )
+                z_in = z[point_offset*i];
+     
+            for( i_axis = 0; i_axis < 3; i_axis++ )
+            {
+                double *target;
+
+                if( i_axis == 2 && z == NULL )
+                    continue;
+
+                if( i_axis == 0 )
+                    target = x;
+                else if( i_axis == 1 )
+                    target = y;
+                else
+                    target = z;
+                
+                switch( axis[i_axis] )
+                {
+                  case 'e':
+                    target[point_offset*i] = x_in; break;
+                  case 'w':
+                    target[point_offset*i] = -x_in; break;
+                  case 'n':
+                    target[point_offset*i] = y_in; break;
+                  case 's':
+                    target[point_offset*i] = -y_in; break;
+                  case 'u':
+                    target[point_offset*i] = z_in; break;
+                  case 'd':
+                    target[point_offset*i] = -z_in; break;
+                  default:
+                    pj_errno = PJD_ERR_AXIS;
+                    return PJD_ERR_AXIS;
+                }
+            } /* i_axis */
+        } /* i (point) */
+    }
+    
     return 0;
 }
 

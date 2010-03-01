@@ -270,6 +270,7 @@ pj_init(int argc, char **argv) {
         PIN->is_geocent = 0;
         PIN->is_long_wrap_set = 0;
         PIN->long_wrap_center = 0.0;
+        strcpy( PIN->axis, "enu" );
 
         /* set datum parameters */
         if (pj_datum_set(start, PIN)) goto bum_call;
@@ -304,6 +305,33 @@ pj_init(int argc, char **argv) {
 	PIN->over = pj_param(start, "bover").i;
 
 	/* longitude center for wrapping */
+ 	PIN->is_long_wrap_set = pj_param(start, "tlon_wrap").i;
+ 	if (PIN->is_long_wrap_set)
+ 		PIN->long_wrap_center = pj_param(start, "rlon_wrap").f;
+
+	/* axis orientation */
+        if( (pj_param(start,"saxis").s) != NULL )
+        {
+            static const char *axis_legal = "ewnsud";
+            const char *axis_arg = pj_param(start,"saxis").s;
+            if( strlen(axis_arg) != 3 )
+            {
+                pj_errno = PJD_ERR_AXIS;
+                goto bum_call;
+            }
+
+            if( strchr( axis_legal, axis_arg[0] ) == NULL
+                || strchr( axis_legal, axis_arg[1] ) == NULL
+                || (axis_arg[2] && strchr( axis_legal, axis_arg[1] ) == NULL))
+            {
+                pj_errno = PJD_ERR_AXIS;
+                goto bum_call;
+            }
+
+            /* it would be nice to validate we don't have on axis repeated */
+            strcpy( PIN->axis, axis_arg );
+        }
+
  	PIN->is_long_wrap_set = pj_param(start, "tlon_wrap").i;
  	if (PIN->is_long_wrap_set)
  		PIN->long_wrap_center = pj_param(start, "rlon_wrap").f;

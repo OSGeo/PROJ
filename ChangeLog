@@ -1,5 +1,8 @@
 2010-02-28  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/pj_init.c, src/pj_transform.c: added support for +axis setting
+	to control axis orientation (#18).
+
 	* nad/epsg: Regenerated from EPSG 7.4.1 with the big datum selection
 	upgrade.
 
