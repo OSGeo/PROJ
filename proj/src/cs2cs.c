@@ -116,6 +116,7 @@ static void process(FILE *fid)
             {
                 data.u = HUGE_VAL;
                 data.v = HUGE_VAL;
+                emess(-3,"pj_transform(): %s", pj_strerrno(pj_errno));
             }
         }
 

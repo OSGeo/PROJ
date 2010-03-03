@@ -136,7 +136,7 @@ int pj_apply_gridshift( const char *nadgrids, int inverse,
                          "   tried: %s\n", nadgrids );
             }
         
-            pj_errno = -38;
+            pj_errno = PJD_ERR_GRID_AREA;
             return pj_errno;
         }
         else

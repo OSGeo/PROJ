@@ -1,3 +1,15 @@
+2010-03-03  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/*: fix a variety of warnings when -Wall is used.  Mostly 
+	unused variables, and use of assignment results in an if statement
+	without extra brackets. 
+
+	* src/*: treat most grid shift errors as not-transient, with the
+	exception of not having a grid shift file for the area of interest.
+	This is done by adding a new error code for no grid shift file for
+	target area.  Also ensure that cs2cs reports pj_transform() errors
+	via emess so we have a chance of seeing the error message.
+	
 2010-02-28  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_init.c, src/pj_transform.c: added support for +axis setting
