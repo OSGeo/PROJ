@@ -22,7 +22,7 @@ fSp(double S, double C) {
 	return(1. + 3.* S * S * C);
 }
 FORWARD(e_forward); /* ellipsoid */
-	double S, S3, r, dr;
+	double S, r, dr;
 	
 	S = pj_mlfn(lp.phi, sin(lp.phi), cos(lp.phi), P->en) - P->M0;
 	dr = fS(S, P->C);

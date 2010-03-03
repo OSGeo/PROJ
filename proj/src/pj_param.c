@@ -6,7 +6,7 @@
 pj_mkparam(char *str) {
 	paralist *newitem;
 
-	if (newitem = (paralist *)pj_malloc(sizeof(paralist) + strlen(str))) {
+	if((newitem = (paralist *)pj_malloc(sizeof(paralist) + strlen(str))) != NULL) {
 		newitem->used = 0;
 		newitem->next = 0;
 		if (*str == '+')

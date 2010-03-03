@@ -138,12 +138,14 @@ process(FILE *fid) {
 			}
 		}
 		if (dofactors) /* print scale factor data */
+                {
 			if (!facs_bad)
 				(void)printf("\t<%g %g %g %g %g %g>",
 					facs.h, facs.k, facs.s,
 					facs.omega * RAD_TO_DEG, facs.a, facs.b);
 			else
 				(void)fputs("\t<* * * * * *>", stdout);
+                }
 		(void)fputs(bin_in ? "\n" : s, stdout);
 	}
 }
@@ -247,7 +249,7 @@ int main(int argc, char **argv) {
     FILE *fid;
     int pargc = 0, iargc = argc, eargc = 0, c, mon = 0;
 
-    if (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR))
+    if ( (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != NULL)
         ++emess_dat.Prog_name;
     else emess_dat.Prog_name = *argv;
     inverse = ! strncmp(emess_dat.Prog_name, "inv", 3);

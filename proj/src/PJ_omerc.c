@@ -98,9 +98,9 @@ ENTRY0(omerc)
 	int alp, gam, no_off = 0;
 
 	P->no_rot = pj_param(P->params, "tno_rot").i;
-	if (alp = pj_param(P->params, "talpha").i)
+        if ((alp = pj_param(P->params, "talpha").i) != 0)
 		alpha_c = pj_param(P->params, "ralpha").f;
-	if (gam = pj_param(P->params, "tgamma").i)
+        if ((gam = pj_param(P->params, "tgamma").i) != 0)
 		gamma = pj_param(P->params, "rgamma").f;
 	if (alp || gam) {
 		lamc	= pj_param(P->params, "rlonc").f;

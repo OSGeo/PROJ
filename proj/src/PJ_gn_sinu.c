@@ -52,8 +52,6 @@ FORWARD(s_forward); /* sphere */
 	return (xy);
 }
 INVERSE(s_inverse); /* sphere */
-	double s;
-
 	xy.y /= P->C_y;
 	lp.phi = P->m ? aasin((P->m * xy.y + sin(xy.y)) / P->n) :
 		( P->n != 1. ? aasin(sin(xy.y) / P->n) : xy.y );

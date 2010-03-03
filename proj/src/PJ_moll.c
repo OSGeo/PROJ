@@ -27,8 +27,6 @@ FORWARD(s_forward); /* spheroid */
 	return (xy);
 }
 INVERSE(s_inverse); /* spheroid */
-	double th, s;
-
 	lp.phi = aasin(xy.y / P->C_y);
 	lp.lam = xy.x / (P->C_x * cos(lp.phi));
 	lp.phi += lp.phi;

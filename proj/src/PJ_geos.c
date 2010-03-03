@@ -79,7 +79,7 @@ FORWARD(e_forward); /* ellipsoid */
 	return (xy);
 }
 INVERSE(s_inverse); /* spheroid */
-	double Vx, Vy, Vz, a, b, c, det, k;
+	double Vx, Vy, Vz, a, b, det, k;
 
 /* Setting three components of vector from satellite to position.*/
 	Vx = -1.0;
@@ -100,7 +100,7 @@ INVERSE(s_inverse); /* spheroid */
 	return (lp);
 }
 INVERSE(e_inverse); /* ellipsoid */
-	double Vx, Vy, Vz, a, b, c, det, k;
+	double Vx, Vy, Vz, a, b, det, k;
 
 /* Setting three components of vector from satellite to position.*/
 	Vx = -1.0;

@@ -21,7 +21,7 @@ pj_ell_set(paralist *pl, double *a, double *es) {
 	else { /* probable elliptical figure */
 
 		/* check if ellps present and temporarily append its values to pl */
-		if (name = pj_param(pl, "sellps").s) {
+                if ((name = pj_param(pl, "sellps").s) != NULL) {
 			char *s;
 
 			for (start = pl; start && start->next ; start = start->next) ;

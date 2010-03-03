@@ -89,7 +89,7 @@ static paralist *
 get_defaults(paralist **start, paralist *next, char *name) {
 	FILE *fid;
 
-	if (fid = pj_open_lib("proj_def.dat", "rt")) {
+	if ( (fid = pj_open_lib("proj_def.dat", "rt")) != NULL) {
 		next = get_opt(start, fid, "general", next);
 		rewind(fid);
 		next = get_opt(start, fid, name, next);
@@ -128,10 +128,10 @@ get_init(paralist **start, paralist *next, char *name) {
 	/*
 	** Otherwise we try to open the file and search for it.
 	*/
-	if (opt = strrchr(fname, ':'))
+	if ((opt = strrchr(fname, ':')) != NULL)
 		*opt++ = '\0';
 	else { pj_errno = -3; return(0); }
-	if (fid = pj_open_lib(fname, "rt"))
+	if ( (fid = pj_open_lib(fname, "rt")) != NULL)
 		next = get_opt(start, fid, opt, next);
 	else
 		return(0);
@@ -360,7 +360,7 @@ pj_init(int argc, char **argv) {
 
 	/* set units */
 	s = 0;
-	if (name = pj_param(start, "sunits").s) { 
+	if ((name = pj_param(start, "sunits").s) != NULL) { 
 		for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
 		if (!s) { pj_errno = -7; goto bum_call; }
 		s = pj_units[i].to_meter;
@@ -375,7 +375,7 @@ pj_init(int argc, char **argv) {
 
 	/* prime meridian */
 	s = 0;
-	if (name = pj_param(start, "spm").s) { 
+	if ((name = pj_param(start, "spm").s) != NULL) { 
             const char *value = NULL;
             char *next_str = NULL;
 
