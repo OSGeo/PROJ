@@ -115,7 +115,7 @@ pj_open_lib(char *name, char *mode) {
 
     /* check if ~/name */
     if (*name == '~' && strchr(dir_chars,name[1]) )
-        if (sysname = getenv("HOME")) {
+        if ((sysname = getenv("HOME")) != NULL) {
             (void)strcpy(fname, sysname);
             fname[n = strlen(fname)] = DIR_CHAR;
             fname[++n] = '\0';
@@ -145,7 +145,7 @@ pj_open_lib(char *name, char *mode) {
     } else /* just try it bare bones */
         sysname = name;
 
-    if (fid = fopen(sysname, mode))
+    if ((fid = fopen(sysname, mode)) != NULL)
         errno = 0;
 
     /* If none of those work and we have a search path, try it */

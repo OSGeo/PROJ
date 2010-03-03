@@ -69,12 +69,9 @@ PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
 FORWARD(e_forward); /* ellipsoid */
 /* calculate xy from lat/lon */
 
-	char errmess[255];
-	char tmp[16];
-
 /* Constants, identical to inverse transform function */
 	double s45, s90, e2, e, alfa, uq, u0, g, k, k1, n0, ro0, ad, a, s0, n;
-	double gfi, u, fi0, lon17, lamdd, deltav, s, d, eps, ro;
+	double gfi, u, fi0, deltav, s, d, eps, ro;
 
 
 	s45 = 0.785398163397448;    /* 45° */
@@ -140,7 +137,7 @@ INVERSE(e_inverse); /* ellipsoid */
 
 /* Constants, identisch wie in der Umkehrfunktion */
 	double s45, s90, fi0, e2, e, alfa, uq, u0, g, k, k1, n0, ro0, ad, a, s0, n;
-	double u, l24, lamdd, deltav, s, d, eps, ro, fi1, xy0, lon17;
+	double u, deltav, s, d, eps, ro, fi1, xy0;
 	int ok;
 
 	s45 = 0.785398163397448;    /* 45° */
