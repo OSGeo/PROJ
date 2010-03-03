@@ -134,6 +134,7 @@ extern double hypot(double, double);
 /* library errors */
 #define PJD_ERR_GEOCENTRIC          -45
 #define PJD_ERR_AXIS                -47
+#define PJD_ERR_GRID_AREA           -48
 
 #define USE_PROJUV 
 

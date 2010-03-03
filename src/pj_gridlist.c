@@ -94,7 +94,7 @@ void pj_deallocate_grids()
 static int pj_gridlist_merge_gridfile( const char *gridname )
 
 {
-    int i, got_match=0;
+    int got_match=0;
     PJ_GRIDINFO *this_grid, *tail = NULL;
 
 /* -------------------------------------------------------------------- */
