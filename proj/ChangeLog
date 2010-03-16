@@ -1,5 +1,10 @@
 2010-03-16  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/pj_transform.c, src/pj_init.c, src/projects.h, src/pj_gridlist.c,
+	src/pj_apply_gridshit.c: rework the translation of nadgrids parameters
+	into a list of gridshift files to avoid use of static "lastnadgrids"
+	information which screws up multithreading.  Changes the PJ structure.
+
 	* src/multistresstest.c: new harnass for multithreaded testing.
 
 2010-03-03  Frank Warmerdam  <warmerdam@pobox.com>

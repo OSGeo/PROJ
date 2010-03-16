@@ -89,6 +89,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 
 {
     long      i;
+    int       err;
 
     pj_errno = 0;
 
@@ -132,10 +133,11 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             }
         }
 
-        if( pj_geocentric_to_geodetic( srcdefn->a_orig, srcdefn->es_orig,
-                                       point_count, point_offset, 
-                                       x, y, z ) != 0) 
-            return pj_errno;
+        err = pj_geocentric_to_geodetic( srcdefn->a_orig, srcdefn->es_orig,
+                                         point_count, point_offset, 
+                                         x, y, z );
+        if( err != 0 )
+            return err;
     }
 
 /* -------------------------------------------------------------------- */
@@ -152,7 +154,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
                 fprintf( stderr, 
                        "pj_transform(): source projection not invertable\n" );
             }
-            return pj_errno;
+            return -17;
         }
 
         for( i = 0; i < point_count; i++ )
@@ -604,8 +606,7 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /* -------------------------------------------------------------------- */
     if( srcdefn->datum_type == PJD_GRIDSHIFT )
     {
-        pj_apply_gridshift( pj_param(srcdefn->params,"snadgrids").s, 0, 
-                            point_count, point_offset, x, y, z );
+        pj_apply_gridshift_2( srcdefn, 0, point_count, point_offset, x, y, z );
         CHECK_RETURN;
 
         src_a = SRS_WGS84_SEMIMAJOR;
@@ -664,8 +665,7 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /* -------------------------------------------------------------------- */
     if( dstdefn->datum_type == PJD_GRIDSHIFT )
     {
-        pj_apply_gridshift( pj_param(dstdefn->params,"snadgrids").s, 1,
-                            point_count, point_offset, x, y, z );
+        pj_apply_gridshift_2( dstdefn, 1, point_count, point_offset, x, y, z );
         CHECK_RETURN;
     }
 
