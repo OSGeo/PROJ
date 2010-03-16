@@ -271,6 +271,8 @@ pj_init(int argc, char **argv) {
         PIN->is_long_wrap_set = 0;
         PIN->long_wrap_center = 0.0;
         strcpy( PIN->axis, "enu" );
+        PIN->gridlist = NULL;
+        PIN->gridlist_count = 0;
 
         /* set datum parameters */
         if (pj_datum_set(start, PIN)) goto bum_call;
@@ -438,6 +440,10 @@ pj_free(PJ *P) {
 			n = t->next;
 			pj_dalloc(t);
 		}
+
+                /* free array of grid pointers if we have one */
+                if( P->gridlist != NULL )
+                    pj_dalloc( P->gridlist );
 
 		/* free projection parameters */
 		P->pfree(P);

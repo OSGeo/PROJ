@@ -46,13 +46,6 @@
 
 static PJ_GRIDINFO *grid_list = NULL;
 
-/* used only by pj_load_nadgrids() and pj_deallocate_grids() */
-
-static int           last_nadgrids_max = 0;
-static int           last_nadgrids_count = 0;
-static PJ_GRIDINFO **last_nadgrids_list = NULL;
-static char         *last_nadgrids = NULL;
-
 /************************************************************************/
 /*                        pj_deallocate_grids()                         */
 /*                                                                      */
@@ -70,18 +63,6 @@ void pj_deallocate_grids()
 
         pj_gridinfo_free( item );
     }
-
-    if( last_nadgrids != NULL )
-    {
-        pj_dalloc( last_nadgrids );
-        last_nadgrids = NULL;
-
-        pj_dalloc( last_nadgrids_list );
-        last_nadgrids_list = NULL;
-
-        last_nadgrids_count = 0;
-        last_nadgrids_max = 0;
-    }
 }
 
 /************************************************************************/
@@ -91,7 +72,10 @@ void pj_deallocate_grids()
 /*      last_nadgrids_list.                                             */
 /************************************************************************/
 
-static int pj_gridlist_merge_gridfile( const char *gridname )
+static int pj_gridlist_merge_gridfile( const char *gridname,
+                                       PJ_GRIDINFO ***p_gridlist,
+                                       int *p_gridcount, 
+                                       int *p_gridmax )
 
 {
     int got_match=0;
@@ -113,26 +97,26 @@ static int pj_gridlist_merge_gridfile( const char *gridname )
                 return 0;
 
             /* do we need to grow the list? */
-            if( last_nadgrids_count >= last_nadgrids_max - 2 )
+            if( *p_gridcount >= *p_gridmax - 2 )
             {
                 PJ_GRIDINFO **new_list;
-                int new_max = last_nadgrids_max + 20;
+                int new_max = *p_gridmax + 20;
 
                 new_list = (PJ_GRIDINFO **) pj_malloc(sizeof(void*) * new_max);
-                if( last_nadgrids_list != NULL )
+                if( *p_gridlist != NULL )
                 {
-                    memcpy( new_list, last_nadgrids_list, 
-                            sizeof(void*) * last_nadgrids_max );
-                    pj_dalloc( last_nadgrids_list );
+                    memcpy( new_list, *p_gridlist,
+                            sizeof(void*) * (*p_gridmax) );
+                    pj_dalloc( *p_gridlist );
                 }
 
-                last_nadgrids_list = new_list;
-                last_nadgrids_max = new_max;
+                *p_gridlist = new_list;
+                *p_gridmax = new_max;
             }
 
             /* add to the list */
-            last_nadgrids_list[last_nadgrids_count++] = this_grid;
-            last_nadgrids_list[last_nadgrids_count] = NULL;
+            (*p_gridlist)[(*p_gridcount)++] = this_grid;
+            (*p_gridlist)[*p_gridcount] = NULL;
         }
 
         tail = this_grid;
@@ -161,7 +145,8 @@ static int pj_gridlist_merge_gridfile( const char *gridname )
 /* -------------------------------------------------------------------- */
 /*      Recurse to add the grid now that it is loaded.                  */
 /* -------------------------------------------------------------------- */
-    return pj_gridlist_merge_gridfile( gridname );
+    return pj_gridlist_merge_gridfile( gridname, p_gridlist, 
+                                       p_gridcount, p_gridmax );
 }
 
 /************************************************************************/
@@ -178,35 +163,13 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
 
 {
     const char *s;
+    PJ_GRIDINFO **gridlist = NULL;
+    int grid_max = 0;
 
     pj_errno = 0;
     *grid_count = 0;
 
     pj_acquire_lock();
-    if( last_nadgrids != NULL 
-        && strcmp(nadgrids,last_nadgrids) == 0 )
-    {
-        PJ_GRIDINFO **ret = last_nadgrids_list;
-        *grid_count = last_nadgrids_count;
-        if( *grid_count == 0 )
-            pj_errno = -38;
-
-        pj_release_lock();
-        return ret;
-    }
-
-/* -------------------------------------------------------------------- */
-/*      Free old one, if any, and make space for new list.              */
-/* -------------------------------------------------------------------- */
-    if( last_nadgrids != NULL )
-    {
-        pj_dalloc(last_nadgrids);
-    }
-    
-    last_nadgrids = (char *) pj_malloc(strlen(nadgrids)+1);
-    strcpy( last_nadgrids, nadgrids );
-
-    last_nadgrids_count = 0;
 
 /* -------------------------------------------------------------------- */
 /*      Loop processing names out of nadgrids one at a time.            */
@@ -241,7 +204,9 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
         if( *s == ',' )
             s++;
 
-        if( !pj_gridlist_merge_gridfile( name ) && required )
+        if( !pj_gridlist_merge_gridfile( name, &gridlist, grid_count, 
+                                         &grid_max) 
+            && required )
         {
             pj_errno = -38;
             pj_release_lock();
@@ -251,16 +216,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
             pj_errno = 0;
     }
 
-    if( last_nadgrids_count > 0 )
-    {
-        PJ_GRIDINFO **ret = last_nadgrids_list;
-        *grid_count = last_nadgrids_count;
-        pj_release_lock();
-        return ret;
-    }
-    else
-    {
-        pj_release_lock();
-        return NULL;
-    }
+    pj_release_lock();
+
+    return gridlist;
 }

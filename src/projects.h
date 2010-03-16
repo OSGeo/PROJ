@@ -234,6 +234,8 @@ typedef struct PJconsts {
     
         int     datum_type; /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
         double  datum_params[7];
+        struct _pj_gi **gridlist;
+        int     gridlist_count;
         double  from_greenwich; /* prime meridian offset (in radians) */
         double  long_wrap_center; /* 0.0 for -180 to 180, actually in radians*/
         int     is_long_wrap_set;
@@ -400,6 +402,13 @@ int nad_ctable_load( struct CTABLE *, FILE * fid );
 void nad_free(struct CTABLE *);
 
 /* higher level handling of datum grid shift files */
+
+int pj_apply_gridshift_2( PJ *defn, int inverse, 
+                          long point_count, int point_offset,
+                          double *x, double *y, double *z );
+int pj_apply_gridshift_3( PJ_GRIDINFO **gridlist, int gridlist_count,
+                          int inverse, long point_count, int point_offset,
+                          double *x, double *y, double *z );
 
 PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *, int * );
 void pj_deallocate_grids();
