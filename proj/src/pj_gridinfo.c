@@ -291,6 +291,46 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
         return 1;
     }
 
+/* -------------------------------------------------------------------- */
+/*      GTX format.                                                     */
+/* -------------------------------------------------------------------- */
+    else if( strcmp(gi->format,"gtx") == 0 )
+    {
+        int   words = gi->ct->lim.lam * gi->ct->lim.phi;
+        FILE *fid;
+
+        fid = pj_open_lib( gi->filename, "rb" );
+        
+        if( fid == NULL )
+        {
+            pj_errno = -38;
+            return 0;
+        }
+
+        fseek( fid, gi->grid_offset, SEEK_SET );
+
+        gi->ct->cvs = (FLP *) pj_malloc(words*sizeof(float));
+        if( gi->ct->cvs == NULL )
+        {
+            pj_errno = -38;
+            return 0;
+        }
+        
+        if( fread( gi->ct->cvs, sizeof(float), words, fid ) != words )
+        {
+            pj_dalloc( gi->ct->cvs );
+            gi->ct->cvs = NULL;
+            pj_errno = -38;
+            return 0;
+        }
+
+        if( IS_LSB )
+            swap_words( (char *) gi->ct->cvs, 4, words );
+
+        fclose( fid );
+        return 1;
+    }
+
     else
     {
         return 0;
@@ -592,6 +632,97 @@ static int pj_gridinfo_init_ntv1( FILE * fid, PJ_GRIDINFO *gi )
 }
 
 /************************************************************************/
+/*                       pj_gridinfo_init_gtx()                         */
+/*                                                                      */
+/*      Load a NOAA .gtx vertical datum shift file.                     */
+/************************************************************************/
+
+static int pj_gridinfo_init_gtx( FILE * fid, PJ_GRIDINFO *gi )
+
+{
+    unsigned char header[40];
+    struct CTABLE *ct;
+    double      xorigin,yorigin,xstep,ystep;
+    int         rows, columns;
+
+    assert( sizeof(int) == 4 );
+    assert( sizeof(double) == 8 );
+    if( sizeof(int) != 4 || sizeof(double) != 8 )
+    {
+        fprintf( stderr, 
+                 "basic types of inappropraiate size in nad_load_gtx()\n" );
+        pj_errno = -38;
+        return 0;
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Read the header.                                                */
+/* -------------------------------------------------------------------- */
+    if( fread( header, sizeof(header), 1, fid ) != 1 )
+    {
+        pj_errno = -38;
+        return 0;
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Regularize fields of interest and extract.                      */
+/* -------------------------------------------------------------------- */
+    if( IS_LSB )
+    {
+        swap_words( header+0, 8, 4 );
+        swap_words( header+32, 4, 2 );
+    }
+
+    memcpy( &yorigin, header+0, 8 );
+    memcpy( &xorigin, header+8, 8 );
+    memcpy( &ystep, header+16, 8 );
+    memcpy( &xstep, header+24, 8 );
+
+    memcpy( &rows, header+32, 4 );
+    memcpy( &columns, header+36, 4 );
+
+    if( xorigin < -360 || xorigin > 360 
+        || yorigin < -90 || yorigin > 90 )
+    {
+        pj_errno = -38;
+        printf("gtx file header has invalid extents, corrupt?\n");
+        return 0;
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Fill in CTABLE structure.                                       */
+/* -------------------------------------------------------------------- */
+    ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
+    strcpy( ct->id, "GTX Vertical Grid Shift File" );
+
+    ct->ll.lam = xorigin;
+    ct->ll.phi = yorigin;
+    ct->del.lam = xstep;
+    ct->del.phi = ystep;
+    ct->lim.lam = columns;
+    ct->lim.phi = rows;
+
+    if( getenv("PROJ_DEBUG") != NULL )
+        fprintf( stderr, 
+                 "GTX %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
+                 ct->lim.lam, ct->lim.phi,
+                 ct->ll.lam, ct->ll.phi, 
+                 ct->ll.lam + columns*xstep, ct->ll.phi + rows*ystep);
+
+    ct->ll.lam *= DEG_TO_RAD;
+    ct->ll.phi *= DEG_TO_RAD;
+    ct->del.lam *= DEG_TO_RAD;
+    ct->del.phi *= DEG_TO_RAD;
+    ct->cvs = NULL;
+
+    gi->ct = ct;
+    gi->grid_offset = 40;
+    gi->format = "gtx";
+
+    return 1;
+}
+
+/************************************************************************/
 /*                          pj_gridinfo_init()                          */
 /*                                                                      */
 /*      Open and parse header details from a datum gridshift file       */
@@ -662,7 +793,14 @@ PJ_GRIDINFO *pj_gridinfo_init( const char *gridname )
     {
         pj_gridinfo_init_ntv2( fp, gilist );
     }
-    
+
+    else if( strlen(gridname) > 4 
+             && (strcmp(gridname+strlen(gridname)-3,"gtx") == 0 
+                 || strcmp(gridname+strlen(gridname)-3,"GTX") == 0) )
+    {
+        pj_gridinfo_init_gtx( fp, gilist );
+    }
+
     else
     {
         struct CTABLE *ct = nad_ctable_init( fp );

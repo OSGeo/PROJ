@@ -200,12 +200,38 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     }
 
 /* -------------------------------------------------------------------- */
+/*      Do we need to translate from geoid to ellipsoidal vertical      */
+/*      datum?                                                          */
+/* -------------------------------------------------------------------- */
+    if( srcdefn->has_geoid_vgrids )
+    {
+        if( !pj_apply_vgridshift( srcdefn, "sgeoidgrids", 
+                                  &(srcdefn->vgridlist_geoid), 
+                                  &(srcdefn->vgridlist_geoid_count),
+                                  0, point_count, point_offset, x, y, z ) )
+            return pj_errno;
+    }
+        
+/* -------------------------------------------------------------------- */
 /*      Convert datums if needed, and possible.                         */
 /* -------------------------------------------------------------------- */
     if( pj_datum_transform( srcdefn, dstdefn, point_count, point_offset, 
                             x, y, z ) != 0 )
         return pj_errno;
 
+/* -------------------------------------------------------------------- */
+/*      Do we need to translate from geoid to ellipsoidal vertical      */
+/*      datum?                                                          */
+/* -------------------------------------------------------------------- */
+    if( dstdefn->has_geoid_vgrids )
+    {
+        if( !pj_apply_vgridshift( dstdefn, "sgeoidgrids", 
+                                  &(dstdefn->vgridlist_geoid), 
+                                  &(dstdefn->vgridlist_geoid_count),
+                                  0, point_count, point_offset, x, y, z ) )
+            return pj_errno;
+    }
+        
 /* -------------------------------------------------------------------- */
 /*      But if they are staying lat long, adjust for the prime          */
 /*      meridian if there is one in effect.                             */
@@ -618,7 +644,7 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
         dst_a = SRS_WGS84_SEMIMAJOR;
         dst_es = SRS_WGS84_ESQUARED;
     }
-        
+
 /* ==================================================================== */
 /*      Do we need to go through geocentric coordinates?                */
 /* ==================================================================== */

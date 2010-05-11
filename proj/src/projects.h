@@ -236,6 +236,11 @@ typedef struct PJconsts {
         double  datum_params[7];
         struct _pj_gi **gridlist;
         int     gridlist_count;
+
+        int     has_geoid_vgrids;
+        struct _pj_gi **vgridlist_geoid;
+        int     vgridlist_geoid_count;
+
         double  from_greenwich; /* prime meridian offset (in radians) */
         double  long_wrap_center; /* 0.0 for -180 to 180, actually in radians*/
         int     is_long_wrap_set;
@@ -342,7 +347,7 @@ void set_rtodms(int, int);
 char *rtodms(char *, double, int, int);
 double adjlon(double);
 double aacos(double), aasin(double), asqrt(double), aatan2(double, double);
-PVALUE pj_param(paralist *, char *);
+PVALUE pj_param(paralist *, const char *);
 paralist *pj_mkparam(char *);
 int pj_ell_set(paralist *, double *, double *);
 int pj_datum_set(paralist *, PJ *);

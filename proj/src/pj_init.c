@@ -271,8 +271,12 @@ pj_init(int argc, char **argv) {
         PIN->is_long_wrap_set = 0;
         PIN->long_wrap_center = 0.0;
         strcpy( PIN->axis, "enu" );
+
         PIN->gridlist = NULL;
         PIN->gridlist_count = 0;
+
+        PIN->vgridlist_geoid = NULL;
+        PIN->vgridlist_geoid_count = 0;
 
         /* set datum parameters */
         if (pj_datum_set(start, PIN)) goto bum_call;
@@ -305,6 +309,9 @@ pj_init(int argc, char **argv) {
 
 	/* over-ranging flag */
 	PIN->over = pj_param(start, "bover").i;
+
+	/* longitude center for wrapping */
+ 	PIN->has_geoid_vgrids = pj_param(start, "tgeoidgrids").i;
 
 	/* longitude center for wrapping */
  	PIN->is_long_wrap_set = pj_param(start, "tlon_wrap").i;
