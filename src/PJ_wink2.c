@@ -29,6 +29,6 @@ FORWARD(s_forward); /* spheroid */
 }
 FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(wink2)
-	P->cosphi1 = cos(pj_param(P->params, "rlat_1").f);
+	P->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f);
 	P->es = 0.; P->inv = 0; P->fwd = s_forward;
 ENDENTRY(P)

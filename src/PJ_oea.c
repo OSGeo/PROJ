@@ -13,9 +13,9 @@ FORWARD(s_forward); /* sphere */
 	sp = sin(lp.phi);
 	cl = cos(lp.lam);
 	Az = aatan2(cp * sin(lp.lam), P->cp0 * sp - P->sp0 * cp * cl) + P->theta;
-	shz = sin(0.5 * aacos(P->sp0 * sp + P->cp0 * cp * cl));
-	M = aasin(shz * sin(Az));
-	N = aasin(shz * cos(Az) * cos(M) / cos(M * P->two_r_m));
+	shz = sin(0.5 * aacos(P->ctx, P->sp0 * sp + P->cp0 * cp * cl));
+	M = aasin(P->ctx, shz * sin(Az));
+	N = aasin(P->ctx, shz * cos(Az) * cos(M) / cos(M * P->two_r_m));
 	xy.y = P->n * sin(N * P->two_r_n);
 	xy.x = P->m * sin(M * P->two_r_m) * cos(N) / cos(N * P->two_r_n);
 	return (xy);
@@ -23,26 +23,26 @@ FORWARD(s_forward); /* sphere */
 INVERSE(s_inverse); /* sphere */
 	double N, M, xp, yp, z, Az, cz, sz, cAz;
 
-	N = P->hn * aasin(xy.y * P->rn);
-	M = P->hm * aasin(xy.x * P->rm * cos(N * P->two_r_n) / cos(N));
+	N = P->hn * aasin(P->ctx,xy.y * P->rn);
+	M = P->hm * aasin(P->ctx,xy.x * P->rm * cos(N * P->two_r_n) / cos(N));
 	xp = 2. * sin(M);
 	yp = 2. * sin(N) * cos(M * P->two_r_m) / cos(M);
 	cAz = cos(Az = aatan2(xp, yp) - P->theta);
-	z = 2. * aasin(0.5 * hypot(xp, yp));
+	z = 2. * aasin(P->ctx, 0.5 * hypot(xp, yp));
 	sz = sin(z);
 	cz = cos(z);
-	lp.phi = aasin(P->sp0 * cz + P->cp0 * sz * cAz);
+	lp.phi = aasin(P->ctx, P->sp0 * cz + P->cp0 * sz * cAz);
 	lp.lam = aatan2(sz * sin(Az),
 		P->cp0 * cz - P->sp0 * sz * cAz);
 	return (lp);
 }
 FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(oea)
-	if (((P->n = pj_param(P->params, "dn").f) <= 0.) ||
-		((P->m = pj_param(P->params, "dm").f) <= 0.))
+	if (((P->n = pj_param(P->ctx, P->params, "dn").f) <= 0.) ||
+		((P->m = pj_param(P->ctx, P->params, "dm").f) <= 0.))
 		E_ERROR(-39)
 	else {
-		P->theta = pj_param(P->params, "rtheta").f;
+		P->theta = pj_param(P->ctx, P->params, "rtheta").f;
 		P->sp0 = sin(P->phi0);
 		P->cp0 = cos(P->phi0);
 		P->rn = 1./ P->n;

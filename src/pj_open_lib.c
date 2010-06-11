@@ -166,6 +166,9 @@ pj_open_lib(projCtx ctx, char *name, char *mode) {
             name, sysname,
             fid == NULL ? "failed" : "succeeded" );
 
+    if( ctx->last_errno == 0 && errno != 0 )
+        pj_ctx_set_errno( ctx, errno );
+
     return(fid);
 #else
     return NULL;

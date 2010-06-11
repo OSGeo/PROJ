@@ -34,7 +34,7 @@ INVERSE(e_inverse); /* ellipsoid & spheroid */
 			xy.y = -xy.y;
 		}
 		if (P->ellips) {
-			if ((lp.phi = pj_phi2(pow(rho / P->c, 1./P->n), P->e))
+			if ((lp.phi = pj_phi2(P->ctx, pow(rho / P->c, 1./P->n), P->e))
 				== HUGE_VAL)
 				I_ERROR;
 		} else
@@ -64,12 +64,12 @@ ENTRY0(lcc)
 	double cosphi, sinphi;
 	int secant;
 
-	P->phi1 = pj_param(P->params, "rlat_1").f;
-	if (pj_param(P->params, "tlat_2").i)
-		P->phi2 = pj_param(P->params, "rlat_2").f;
+	P->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
+	if (pj_param(P->ctx, P->params, "tlat_2").i)
+		P->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
 	else {
 		P->phi2 = P->phi1;
-		if (!pj_param(P->params, "tlat_0").i)
+		if (!pj_param(P->ctx, P->params, "tlat_0").i)
 			P->phi0 = P->phi1;
 	}
 	if (fabs(P->phi1 + P->phi2) < EPS10) E_ERROR(-21);

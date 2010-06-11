@@ -226,12 +226,12 @@ setup(PJ *P) { /* general initialization */
 	return P;
 }
 ENTRY0(stere)
-	P->phits = pj_param(P->params, "tlat_ts").i ?
-		P->phits = pj_param(P->params, "rlat_ts").f : HALFPI;
+	P->phits = pj_param(P->ctx, P->params, "tlat_ts").i ?
+		P->phits = pj_param(P->ctx, P->params, "rlat_ts").f : HALFPI;
 ENDENTRY(setup(P))
 ENTRY0(ups)
 	/* International Ellipsoid */
-	P->phi0 = pj_param(P->params, "bsouth").i ? - HALFPI: HALFPI;
+	P->phi0 = pj_param(P->ctx, P->params, "bsouth").i ? - HALFPI: HALFPI;
 	if (!P->es) E_ERROR(-34);
 	P->k0 = .994;
 	P->x0 = 2000000.;

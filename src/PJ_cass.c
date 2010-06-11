@@ -40,7 +40,7 @@ FORWARD(s_forward); /* spheroid */
 INVERSE(e_inverse); /* ellipsoid */
 	double ph1;
 
-	ph1 = pj_inv_mlfn(P->m0 + xy.y, P->es, P->en);
+	ph1 = pj_inv_mlfn(P->ctx, P->m0 + xy.y, P->es, P->en);
 	P->tn = tan(ph1); P->t = P->tn * P->tn;
 	P->n = sin(ph1);
 	P->r = 1. / (1. - P->es * P->n * P->n);

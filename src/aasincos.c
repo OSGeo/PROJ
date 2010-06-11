@@ -3,24 +3,26 @@
 #define ONE_TOL	 1.00000000000001
 #define TOL	0.000000001
 #define ATOL 1e-50
-	double
-aasin(double v) {
-	double av;
 
+	double
+aasin(projCtx ctx,double v) {
+	double av;
+        
 	if ((av = fabs(v)) >= 1.) {
 		if (av > ONE_TOL)
-			pj_errno = -19;
+                        pj_ctx_set_errno( ctx, -19 );
 		return (v < 0. ? -HALFPI : HALFPI);
 	}
 	return asin(v);
 }
+
 	double
-aacos(double v) {
+aacos(projCtx ctx, double v) {
 	double av;
 
 	if ((av = fabs(v)) >= 1.) {
 		if (av > ONE_TOL)
-			pj_errno = -19;
+                        pj_ctx_set_errno( ctx, -19 );
 		return (v < 0. ? PI : 0.);
 	}
 	return acos(v);

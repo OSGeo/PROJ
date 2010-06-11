@@ -15,12 +15,12 @@ FORWARD(s_forward); /* spheroid */
 }
 FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(hammer)
-	if (pj_param(P->params, "tW").i) {
-		if ((P->w = fabs(pj_param(P->params, "dW").f)) <= 0.) E_ERROR(-27);
+	if (pj_param(P->ctx, P->params, "tW").i) {
+		if ((P->w = fabs(pj_param(P->ctx, P->params, "dW").f)) <= 0.) E_ERROR(-27);
 	} else
 		P->w = .5;
-	if (pj_param(P->params, "tM").i) {
-		if ((P->m = fabs(pj_param(P->params, "dM").f)) <= 0.) E_ERROR(-27);
+	if (pj_param(P->ctx, P->params, "tM").i) {
+		if ((P->m = fabs(pj_param(P->ctx, P->params, "dM").f)) <= 0.) E_ERROR(-27);
 	} else
 		P->m = 1.;
 	P->rm = 1. / P->m;

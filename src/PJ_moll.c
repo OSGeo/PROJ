@@ -27,10 +27,10 @@ FORWARD(s_forward); /* spheroid */
 	return (xy);
 }
 INVERSE(s_inverse); /* spheroid */
-	lp.phi = aasin(xy.y / P->C_y);
+	lp.phi = aasin(P->ctx, xy.y / P->C_y);
 	lp.lam = xy.x / (P->C_x * cos(lp.phi));
 	lp.phi += lp.phi;
-	lp.phi = aasin((lp.phi + sin(lp.phi)) / P->C_p);
+	lp.phi = aasin(P->ctx, (lp.phi + sin(lp.phi)) / P->C_p);
 	return (lp);
 }
 FREEUP; if (P) pj_dalloc(P); }

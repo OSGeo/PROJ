@@ -194,7 +194,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
 
         if( end_char > sizeof(name) )
         {
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             pj_release_lock();
             return NULL;
         }
@@ -210,7 +210,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
                                          &grid_max) 
             && required )
         {
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             pj_release_lock();
             return NULL;
         }

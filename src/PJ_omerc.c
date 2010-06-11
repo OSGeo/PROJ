@@ -84,7 +84,7 @@ INVERSE(e_inverse); /* ellipsoid */
 		lp.phi = Up < 0. ? -HALFPI : HALFPI;
 	} else {
 		lp.phi = P->E / sqrt((1. + Up) / (1. - Up));
-		if ((lp.phi = pj_phi2(pow(lp.phi, 1. / P->B), P->e)) == HUGE_VAL)
+		if ((lp.phi = pj_phi2(P->ctx, pow(lp.phi, 1. / P->B), P->e)) == HUGE_VAL)
 			I_ERROR;
 		lp.lam = - P->rB * atan2((Sp * P->cosgam -
 			Vp * P->singam), cos(P->BrA * u));
@@ -97,19 +97,19 @@ ENTRY0(omerc)
 		gamma0, lamc, lam1, lam2, phi1, phi2, alpha_c;
 	int alp, gam, no_off = 0;
 
-	P->no_rot = pj_param(P->params, "tno_rot").i;
-        if ((alp = pj_param(P->params, "talpha").i) != 0)
-		alpha_c = pj_param(P->params, "ralpha").f;
-        if ((gam = pj_param(P->params, "tgamma").i) != 0)
-		gamma = pj_param(P->params, "rgamma").f;
+	P->no_rot = pj_param(P->ctx, P->params, "tno_rot").i;
+        if ((alp = pj_param(P->ctx, P->params, "talpha").i) != 0)
+		alpha_c = pj_param(P->ctx, P->params, "ralpha").f;
+        if ((gam = pj_param(P->ctx, P->params, "tgamma").i) != 0)
+		gamma = pj_param(P->ctx, P->params, "rgamma").f;
 	if (alp || gam) {
-		lamc	= pj_param(P->params, "rlonc").f;
-		no_off = pj_param(P->params, "tno_off").i;
+		lamc	= pj_param(P->ctx, P->params, "rlonc").f;
+		no_off = pj_param(P->ctx, P->params, "tno_off").i;
 	} else {
-		lam1 = pj_param(P->params, "rlon_1").f;
-		phi1 = pj_param(P->params, "rlat_1").f;
-		lam2 = pj_param(P->params, "rlon_2").f;
-		phi2 = pj_param(P->params, "rlat_2").f;
+		lam1 = pj_param(P->ctx, P->params, "rlon_1").f;
+		phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
+		lam2 = pj_param(P->ctx, P->params, "rlon_2").f;
+		phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
 		if (fabs(phi1 - phi2) <= TOL ||
 			(con = fabs(phi1)) <= TOL ||
 			fabs(con - HALFPI) <= TOL ||

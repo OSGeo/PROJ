@@ -86,8 +86,8 @@ FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(labrd)
 	double Az, sinp, R, N, t;
 
-	P->rot	= pj_param(P->params, "bno_rot").i == 0;
-	Az = pj_param(P->params, "razi").f;
+	P->rot	= pj_param(P->ctx, P->params, "bno_rot").i == 0;
+	Az = pj_param(P->ctx, P->params, "razi").f;
 	sinp = sin(P->phi0);
 	t = 1. - P->es * sinp * sinp;
 	N = 1. / sqrt(t);

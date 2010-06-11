@@ -23,7 +23,7 @@ geod_set(int argc, char **argv) {
 	/* set elliptical parameters */
 	if (pj_ell_set(pj_get_default_ctx(),start, &geod_a, &es)) emess(1,"ellipse setup failure");
 	/* set units */
-	if (name = pj_param(start, "sunits").s) {
+	if (name = pj_param(NULL,start, "sunits").s) {
 		char *s;
                 struct PJ_UNITS *unit_list = pj_get_units_ref();
 		for (i = 0; (s = unit_list[i].id) && strcmp(name, s) ; ++i) ;
@@ -43,27 +43,27 @@ geod_set(int argc, char **argv) {
 		geod_f = f2 = f4 = f64 = 0.;
 	}
 	/* check if line or arc mode */
-	if (pj_param(start, "tlat_1").i) {
+	if (pj_param(NULL,start, "tlat_1").i) {
 		double del_S;
 #undef f
-		phi1 = pj_param(start, "rlat_1").f;
-		lam1 = pj_param(start, "rlon_1").f;
-		if (pj_param(start, "tlat_2").i) {
-			phi2 = pj_param(start, "rlat_2").f;
-			lam2 = pj_param(start, "rlon_2").f;
+		phi1 = pj_param(NULL,start, "rlat_1").f;
+		lam1 = pj_param(NULL,start, "rlon_1").f;
+		if (pj_param(NULL,start, "tlat_2").i) {
+			phi2 = pj_param(NULL,start, "rlat_2").f;
+			lam2 = pj_param(NULL,start, "rlon_2").f;
 			geod_inv();
 			geod_pre();
-		} else if (geod_S = pj_param(start, "dS").f) {
-			al12 = pj_param(start, "rA").f;
+		} else if (geod_S = pj_param(NULL,start, "dS").f) {
+			al12 = pj_param(NULL,start, "rA").f;
 			geod_pre();
 			geod_for();
 		} else emess(1,"incomplete geodesic/arc info");
-		if ((n_alpha = pj_param(start, "in_A").i) > 0) {
-			if (!(del_alpha = pj_param(start, "rdel_A").f))
+		if ((n_alpha = pj_param(NULL,start, "in_A").i) > 0) {
+			if (!(del_alpha = pj_param(NULL,start, "rdel_A").f))
 				emess(1,"del azimuth == 0");
-		} else if (del_S = fabs(pj_param(start, "ddel_S").f)) {
+		} else if (del_S = fabs(pj_param(NULL,start, "ddel_S").f)) {
 			n_S = geod_S / del_S + .5;
-		} else if ((n_S = pj_param(start, "in_S").i) <= 0)
+		} else if ((n_S = pj_param(NULL,start, "in_S").i) <= 0)
 			emess(1,"no interval divisor selected");
 	}
 	/* free up linked list */

@@ -16,7 +16,7 @@ INVERSE(s_inverse); /* spheroid */
 }
 FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(eqc)
-	if ((P->rc = cos(pj_param(P->params, "rlat_ts").f)) <= 0.) E_ERROR(-24);
+	if ((P->rc = cos(pj_param(P->ctx, P->params, "rlat_ts").f)) <= 0.) E_ERROR(-24);
 	P->inv = s_inverse;
 	P->fwd = s_forward;
 	P->es = 0.;

@@ -66,9 +66,9 @@ ENTRY0(aitoff)
 ENDENTRY(setup(P))
 ENTRY0(wintri)
 	P->mode = 1;
-	if (pj_param(P->params, "tlat_1").i)
+	if (pj_param(P->ctx, P->params, "tlat_1").i)
         {
-		if ((P->cosphi1 = cos(pj_param(P->params, "rlat_1").f)) == 0.)
+		if ((P->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f)) == 0.)
 			E_ERROR(-22)
         }
 	else /* 50d28' or acos(2/pi) */

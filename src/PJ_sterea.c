@@ -42,7 +42,7 @@ PROJ_HEAD(sterea, "Oblique Stereographic Alternative")
 FORWARD(e_forward); /* ellipsoid */
 	double cosc, sinc, cosl, k;
 
-	lp = pj_gauss(lp, P->en);
+	lp = pj_gauss(P->ctx, lp, P->en);
 	sinc = sin(lp.phi);
 	cosc = cos(lp.phi);
 	cosl = cos(lp.lam);
@@ -67,7 +67,7 @@ INVERSE(e_inverse); /* ellipsoid */
 		lp.phi = P->phic0;
 		lp.lam = 0.;
 	}
-	return(pj_inv_gauss(lp, P->en));
+	return(pj_inv_gauss(P->ctx, lp, P->en));
 }
 FREEUP; if (P) { if (P->en) free(P->en); free(P); } }
 ENTRY0(sterea)

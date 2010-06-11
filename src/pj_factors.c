@@ -13,7 +13,7 @@ pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 
 	/* check for forward and latitude or longitude overange */
 	if ((t = fabs(lp.phi)-HALFPI) > EPS || fabs(lp.lam) > 10.) {
-                pj_ctx_set_errno( P->ctx->last_errno, -14);
+                pj_ctx_set_errno( P->ctx, -14);
 		return 1;
 	} else { /* proceed */
 		errno = pj_errno = 0;
@@ -72,7 +72,7 @@ pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 		fac->s = (fac->der.y_p * fac->der.x_l - fac->der.x_p * fac->der.y_l) *
 			r / cosphi;
 		/* meridian-parallel angle theta prime */
-		fac->thetap = aasin(fac->s / (fac->h * fac->k));
+		fac->thetap = aasin(P->ctx,fac->s / (fac->h * fac->k));
 		/* Tissot ellips axis */
 		t = fac->k * fac->k + fac->h * fac->h;
 		fac->a = sqrt(t + 2. * fac->s);
@@ -80,7 +80,7 @@ pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 		fac->b = 0.5 * (fac->a - t);
 		fac->a = 0.5 * (fac->a + t);
 		/* omega */
-		fac->omega = 2. * aasin((fac->a - fac->b)/(fac->a + fac->b));
+		fac->omega = 2. * aasin(P->ctx,(fac->a - fac->b)/(fac->a + fac->b));
 	}
 	return 0;
 }

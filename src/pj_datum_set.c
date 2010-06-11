@@ -54,7 +54,7 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
 /*      definition will last into the pj_ell_set() function called      */
 /*      after this one.                                                 */
 /* -------------------------------------------------------------------- */
-    if( (name = pj_param(pl,"sdatum").s) != NULL )
+    if( (name = pj_param(ctx, pl,"sdatum").s) != NULL )
     {
         paralist *curr;
         const char *s;
@@ -84,7 +84,7 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
 /* -------------------------------------------------------------------- */
 /*      Check for nadgrids parameter.                                   */
 /* -------------------------------------------------------------------- */
-    if( (nadgrids = pj_param(pl,"snadgrids").s) != NULL )
+    if( (nadgrids = pj_param(ctx, pl,"snadgrids").s) != NULL )
     {
         /* We don't actually save the value separately.  It will continue
            to exist int he param list for use in pj_apply_gridshift.c */
@@ -95,7 +95,7 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
 /* -------------------------------------------------------------------- */
 /*      Check for towgs84 parameter.                                    */
 /* -------------------------------------------------------------------- */
-    else if( (towgs84 = pj_param(pl,"stowgs84").s) != NULL )
+    else if( (towgs84 = pj_param(ctx, pl,"stowgs84").s) != NULL )
     {
         int    parm_count = 0;
         const char *s;

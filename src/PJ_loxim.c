@@ -33,7 +33,7 @@ INVERSE(s_inverse); /* spheroid */
 }
 FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(loxim);
-	P->phi1 = pj_param(P->params, "rlat_1").f;
+	P->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
 	if ((P->cosphi1 = cos(P->phi1)) < EPS) E_ERROR(-22);
 	P->tanphi1 = tan(FORTPI + 0.5 * P->phi1);
 	P->inv = s_inverse; P->fwd = s_forward;

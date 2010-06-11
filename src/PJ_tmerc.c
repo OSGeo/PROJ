@@ -89,7 +89,7 @@ FORWARD(s_forward); /* sphere */
 INVERSE(e_inverse); /* ellipsoid */
 	double n, con, cosphi, d, ds, sinphi, t;
 
-	lp.phi = pj_inv_mlfn(P->ml0 + xy.y / P->k0, P->es, P->en);
+	lp.phi = pj_inv_mlfn(P->ctx, P->ml0 + xy.y / P->k0, P->es, P->en);
 	if (fabs(lp.phi) >= HALFPI) {
 		lp.phi = xy.y < 0. ? -HALFPI : HALFPI;
 		lp.lam = 0.;
@@ -157,10 +157,10 @@ ENTRY1(utm, en)
 	int zone;
 
 	if (!P->es) E_ERROR(-34);
-	P->y0 = pj_param(P->params, "bsouth").i ? 10000000. : 0.;
+	P->y0 = pj_param(P->ctx, P->params, "bsouth").i ? 10000000. : 0.;
 	P->x0 = 500000.;
-	if (pj_param(P->params, "tzone").i) /* zone input ? */
-		if ((zone = pj_param(P->params, "izone").i) > 0 && zone <= 60)
+	if (pj_param(P->ctx, P->params, "tzone").i) /* zone input ? */
+		if ((zone = pj_param(P->ctx, P->params, "izone").i) > 0 && zone <= 60)
 			--zone;
 		else
 			E_ERROR(-35)

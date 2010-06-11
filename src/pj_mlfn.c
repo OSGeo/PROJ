@@ -40,7 +40,7 @@ pj_mlfn(double phi, double sphi, double cphi, double *en) {
 		+ sphi*(en[3] + sphi*en[4]))));
 }
 	double
-pj_inv_mlfn(double arg, double es, double *en) {
+pj_inv_mlfn(projCtx ctx, double arg, double es, double *en) {
 	double s, t, phi, k = 1./(1.-es);
 	int i;
 
@@ -52,6 +52,6 @@ pj_inv_mlfn(double arg, double es, double *en) {
 		if (fabs(t) < EPS)
 			return phi;
 	}
-	pj_errno = -17;
+	pj_ctx_set_errno( ctx, -17 );
 	return phi;
 }

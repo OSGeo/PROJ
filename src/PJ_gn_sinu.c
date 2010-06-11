@@ -21,7 +21,7 @@ FORWARD(e_forward); /* ellipsoid */
 INVERSE(e_inverse); /* ellipsoid */
 	double s;
 
-	if ((s = fabs(lp.phi = pj_inv_mlfn(xy.y, P->es, P->en))) < HALFPI) {
+	if ((s = fabs(lp.phi = pj_inv_mlfn(P->ctx, xy.y, P->es, P->en))) < HALFPI) {
 		s = sin(lp.phi);
 		lp.lam = xy.x * sqrt(1. - P->es * s * s) / cos(lp.phi);
 	} else if ((s - EPS10) < HALFPI)
@@ -32,7 +32,7 @@ INVERSE(e_inverse); /* ellipsoid */
 /* General spherical sinusoidals */
 FORWARD(s_forward); /* sphere */
 	if (!P->m)
-		lp.phi = P->n != 1. ? aasin(P->n * sin(lp.phi)): lp.phi;
+		lp.phi = P->n != 1. ? aasin(P->ctx,P->n * sin(lp.phi)): lp.phi;
 	else {
 		double k, V;
 		int i;
@@ -53,8 +53,8 @@ FORWARD(s_forward); /* sphere */
 }
 INVERSE(s_inverse); /* sphere */
 	xy.y /= P->C_y;
-	lp.phi = P->m ? aasin((P->m * xy.y + sin(xy.y)) / P->n) :
-		( P->n != 1. ? aasin(sin(xy.y) / P->n) : xy.y );
+	lp.phi = P->m ? aasin(P->ctx,(P->m * xy.y + sin(xy.y)) / P->n) :
+		( P->n != 1. ? aasin(P->ctx,sin(xy.y) / P->n) : xy.y );
 	lp.lam = xy.x / (P->C_x * (P->m + cos(xy.y)));
 	return (lp);
 }
@@ -89,9 +89,9 @@ ENTRY1(mbtfps, en)
 	setup(P);
 ENDENTRY(P)
 ENTRY1(gn_sinu, en)
-	if (pj_param(P->params, "tn").i && pj_param(P->params, "tm").i) {
-		P->n = pj_param(P->params, "dn").f;
-		P->m = pj_param(P->params, "dm").f;
+	if (pj_param(P->ctx, P->params, "tn").i && pj_param(P->ctx, P->params, "tm").i) {
+		P->n = pj_param(P->ctx, P->params, "dn").f;
+		P->m = pj_param(P->ctx, P->params, "dm").f;
 	} else
 		E_ERROR(-99)
 	setup(P);

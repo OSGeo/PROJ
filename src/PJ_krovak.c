@@ -121,7 +121,7 @@ FORWARD(e_forward); /* ellipsoid */
 	xy.y = ro * cos(eps) / a;
 	xy.x = ro * sin(eps) / a;
 
-        if( !pj_param(P -> params, "tczech").i )
+        if( !pj_param(P->ctx, P->params, "tczech").i )
 	  {
 	    xy.y *= -1.0;
 	    xy.x *= -1.0;
@@ -176,7 +176,7 @@ INVERSE(e_inverse); /* ellipsoid */
 	xy.x=xy.y;
 	xy.y=xy0;
 
-        if( !pj_param(P -> params, "tczech").i )
+        if( !pj_param(P->ctx, P->params, "tczech").i )
 	  {
 	    xy.x *= -1.0;
 	    xy.y *= -1.0;
@@ -221,7 +221,7 @@ ENTRY0(krovak)
 	/* read some Parameters,
 	 * here Latitude Truescale */
 
-	ts = pj_param(P->params, "rlat_ts").f;
+	ts = pj_param(P->ctx, P->params, "rlat_ts").f;
 	P->C_x = ts;
 	
 	/* we want Bessel as fixed ellipsoid */
@@ -229,17 +229,17 @@ ENTRY0(krovak)
 	P->e = sqrt(P->es = 0.006674372230614);
 
         /* if latitude of projection center is not set, use 49d30'N */
-	if (!pj_param(P->params, "tlat_0").i)
+	if (!pj_param(P->ctx, P->params, "tlat_0").i)
             P->phi0 = 0.863937979737193; 
 
         /* if center long is not set use 42d30'E of Ferro - 17d40' for Ferro */
         /* that will correspond to using longitudes relative to greenwich    */
         /* as input and output, instead of lat/long relative to Ferro */
-	if (!pj_param(P->params, "tlon_0").i)
+	if (!pj_param(P->ctx, P->params, "tlon_0").i)
             P->lam0 = 0.7417649320975901 - 0.308341501185665;
 
         /* if scale not set default to 0.9999 */
-	if (!pj_param(P->params, "tk").i)
+	if (!pj_param(P->ctx, P->params, "tk").i)
             P->k0 = 0.9999;
 
 	/* always the same */

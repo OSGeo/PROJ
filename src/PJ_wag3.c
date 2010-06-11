@@ -18,7 +18,7 @@ FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(wag3)
 	double ts;
 
-	ts = pj_param(P->params, "rlat_ts").f;
+	ts = pj_param(P->ctx, P->params, "rlat_ts").f;
 	P->C_x = cos(ts) / cos(2.*ts/3.);
 	P->es = 0.; P->inv = s_inverse; P->fwd = s_forward;
 ENDENTRY(P)

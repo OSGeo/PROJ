@@ -42,7 +42,7 @@ PJ_CVSID("$Id$");
 /*                              get_opt()                               */
 /************************************************************************/
 static paralist *
-get_opt(paralist **start, FILE *fid, char *name, paralist *next) {
+get_opt(projCtx ctx, paralist **start, FILE *fid, char *name, paralist *next) {
     char sword[302], *word = sword+1;
     int first = 1, len, c;
 
@@ -59,16 +59,16 @@ get_opt(paralist **start, FILE *fid, char *name, paralist *next) {
                 while((c = fgetc(fid)) != EOF && c != '\n') ;
                 break;
             }
-        } else if (!first && !pj_param(*start, sword).i) {
+        } else if (!first && !pj_param(ctx, *start, sword).i) {
             /* don't default ellipse if datum, ellps or any earth model
                information is set. */
             if( strncmp(word,"ellps=",6) != 0 
-                || (!pj_param(*start, "tdatum").i 
-                    && !pj_param(*start, "tellps").i 
-                    && !pj_param(*start, "ta").i 
-                    && !pj_param(*start, "tb").i 
-                    && !pj_param(*start, "trf").i 
-                    && !pj_param(*start, "tf").i) )
+                || (!pj_param(ctx, *start, "tdatum").i 
+                    && !pj_param(ctx, *start, "tellps").i 
+                    && !pj_param(ctx, *start, "ta").i 
+                    && !pj_param(ctx, *start, "tb").i 
+                    && !pj_param(ctx, *start, "trf").i 
+                    && !pj_param(ctx, *start, "tf").i) )
             {
                 next = next->next = pj_mkparam(word);
             }
@@ -88,9 +88,9 @@ get_defaults(projCtx ctx, paralist **start, paralist *next, char *name) {
     FILE *fid;
 
     if ( (fid = pj_open_lib(ctx,"proj_def.dat", "rt")) != NULL) {
-        next = get_opt(start, fid, "general", next);
+        next = get_opt(ctx, start, fid, "general", next);
         rewind(fid);
-        next = get_opt(start, fid, name, next);
+        next = get_opt(ctx, start, fid, name, next);
         (void)fclose(fid);
     }
     if (errno)
@@ -131,7 +131,7 @@ get_init(projCtx ctx, paralist **start, paralist *next, char *name) {
     else { pj_ctx_set_errno(ctx,-3); return NULL; }
 
     if ( (fid = pj_open_lib(ctx,fname, "rt")) != NULL)
-        next = get_opt(start, fid, opt, next);
+        next = get_opt(ctx, start, fid, opt, next);
     else
         return NULL;
     (void)fclose(fid);
@@ -254,22 +254,22 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if (ctx->last_errno) goto bum_call;
 
     /* check if +init present */
-    if (pj_param(start, "tinit").i) {
+    if (pj_param(ctx, start, "tinit").i) {
         paralist *last = curr;
 
-        if (!(curr = get_init(ctx,&start, curr, pj_param(start, "sinit").s)))
+        if (!(curr = get_init(ctx,&start, curr, pj_param(ctx, start, "sinit").s)))
             goto bum_call;
         if (curr == last) { pj_ctx_set_errno( ctx, -2); goto bum_call; }
     }
 
     /* find projection selection */
-    if (!(name = pj_param(start, "sproj").s))
+    if (!(name = pj_param(ctx, start, "sproj").s))
     { pj_ctx_set_errno( ctx, -4 ); goto bum_call; }
     for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
     if (!s) { pj_ctx_set_errno( ctx, -5 ); goto bum_call; }
 
     /* set defaults, unless inhibited */
-    if (!pj_param(start, "bno_defs").i)
+    if (!pj_param(ctx, start, "bno_defs").i)
         curr = get_defaults(ctx,&start, curr, name);
     proj = (PJ *(*)(PJ *)) pj_list[i].proj;
 
@@ -316,24 +316,24 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     }
         
     /* set PIN->geoc coordinate system */
-    PIN->geoc = (PIN->es && pj_param(start, "bgeoc").i);
+    PIN->geoc = (PIN->es && pj_param(ctx, start, "bgeoc").i);
 
     /* over-ranging flag */
-    PIN->over = pj_param(start, "bover").i;
+    PIN->over = pj_param(ctx, start, "bover").i;
 
     /* longitude center for wrapping */
-    PIN->has_geoid_vgrids = pj_param(start, "tgeoidgrids").i;
+    PIN->has_geoid_vgrids = pj_param(ctx, start, "tgeoidgrids").i;
 
     /* longitude center for wrapping */
-    PIN->is_long_wrap_set = pj_param(start, "tlon_wrap").i;
+    PIN->is_long_wrap_set = pj_param(ctx, start, "tlon_wrap").i;
     if (PIN->is_long_wrap_set)
-        PIN->long_wrap_center = pj_param(start, "rlon_wrap").f;
+        PIN->long_wrap_center = pj_param(ctx, start, "rlon_wrap").f;
 
     /* axis orientation */
-    if( (pj_param(start,"saxis").s) != NULL )
+    if( (pj_param(ctx, start,"saxis").s) != NULL )
     {
         static const char *axis_legal = "ewnsud";
-        const char *axis_arg = pj_param(start,"saxis").s;
+        const char *axis_arg = pj_param(ctx, start,"saxis").s;
         if( strlen(axis_arg) != 3 )
         {
             pj_ctx_set_errno( ctx, PJD_ERR_AXIS );
@@ -352,25 +352,25 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         strcpy( PIN->axis, axis_arg );
     }
 
-    PIN->is_long_wrap_set = pj_param(start, "tlon_wrap").i;
+    PIN->is_long_wrap_set = pj_param(ctx, start, "tlon_wrap").i;
     if (PIN->is_long_wrap_set)
-        PIN->long_wrap_center = pj_param(start, "rlon_wrap").f;
+        PIN->long_wrap_center = pj_param(ctx, start, "rlon_wrap").f;
 
     /* central meridian */
-    PIN->lam0=pj_param(start, "rlon_0").f;
+    PIN->lam0=pj_param(ctx, start, "rlon_0").f;
 
     /* central latitude */
-    PIN->phi0 = pj_param(start, "rlat_0").f;
+    PIN->phi0 = pj_param(ctx, start, "rlat_0").f;
 
     /* false easting and northing */
-    PIN->x0 = pj_param(start, "dx_0").f;
-    PIN->y0 = pj_param(start, "dy_0").f;
+    PIN->x0 = pj_param(ctx, start, "dx_0").f;
+    PIN->y0 = pj_param(ctx, start, "dy_0").f;
 
     /* general scaling factor */
-    if (pj_param(start, "tk_0").i)
-        PIN->k0 = pj_param(start, "dk_0").f;
-    else if (pj_param(start, "tk").i)
-        PIN->k0 = pj_param(start, "dk").f;
+    if (pj_param(ctx, start, "tk_0").i)
+        PIN->k0 = pj_param(ctx, start, "dk_0").f;
+    else if (pj_param(ctx, start, "tk").i)
+        PIN->k0 = pj_param(ctx, start, "dk").f;
     else
         PIN->k0 = 1.;
     if (PIN->k0 <= 0.) {
@@ -380,12 +380,12 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* set units */
     s = 0;
-    if ((name = pj_param(start, "sunits").s) != NULL) { 
+    if ((name = pj_param(ctx, start, "sunits").s) != NULL) { 
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
         if (!s) { pj_ctx_set_errno( ctx, -7 ); goto bum_call; }
         s = pj_units[i].to_meter;
     }
-    if (s || (s = pj_param(start, "sto_meter").s)) {
+    if (s || (s = pj_param(ctx, start, "sto_meter").s)) {
         PIN->to_meter = strtod(s, &s);
         if (*s == '/') /* ratio number */
             PIN->to_meter /= strtod(++s, 0);
@@ -395,7 +395,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* prime meridian */
     s = 0;
-    if ((name = pj_param(start, "spm").s) != NULL) { 
+    if ((name = pj_param(ctx, start, "spm").s) != NULL) { 
         const char *value = NULL;
         char *next_str = NULL;
 
@@ -409,12 +409,12 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         }
             
         if( value == NULL 
-            && (dmstor(name,&next_str) != 0.0  || *name == '0')
+            && (dmstor_ctx(ctx,name,&next_str) != 0.0  || *name == '0')
             && *next_str == '\0' )
             value = name;
 
         if (!value) { pj_ctx_set_errno( ctx, -46 ); goto bum_call; }
-        PIN->from_greenwich = dmstor(value,NULL);
+        PIN->from_greenwich = dmstor_ctx(ctx,value,NULL);
     }
     else
         PIN->from_greenwich = 0.0;

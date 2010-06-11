@@ -13,12 +13,12 @@ PROJ_HEAD(imw_p, "International Map of the World Polyconic")
 phi12(PJ *P, double *del, double *sig) {
 	int err = 0;
 
-	if (!pj_param(P->params, "tlat_1").i ||
-		!pj_param(P->params, "tlat_2").i) {
+	if (!pj_param(P->ctx, P->params, "tlat_1").i ||
+		!pj_param(P->ctx, P->params, "tlat_2").i) {
 		err = -41;
 	} else {
-		P->phi_1 = pj_param(P->params, "rlat_1").f;
-		P->phi_2 = pj_param(P->params, "rlat_2").f;
+		P->phi_1 = pj_param(P->ctx, P->params, "rlat_1").f;
+		P->phi_2 = pj_param(P->ctx, P->params, "rlat_2").f;
 		*del = 0.5 * (P->phi_2 - P->phi_1);
 		*sig = 0.5 * (P->phi_2 + P->phi_1);
 		err = (fabs(*del) < EPS || fabs(*sig) < EPS) ? -42 : 0;
@@ -113,8 +113,8 @@ ENTRY1(imw_p, en)
 		P->phi_1 = P->phi_2;
 		P->phi_2 = del;
 	}
-	if (pj_param(P->params, "tlon_1").i)
-		P->lam_1 = pj_param(P->params, "rlon_1").f;
+	if (pj_param(P->ctx, P->params, "tlon_1").i)
+		P->lam_1 = pj_param(P->ctx, P->params, "rlon_1").f;
 	else { /* use predefined based upon latitude */
 		sig = fabs(sig * RAD_TO_DEG);
 		if (sig <= 60)		sig = 2.;
