@@ -324,7 +324,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         }
 
         if( IS_LSB )
-            swap_words( (char *) gi->ct->cvs, 4, words );
+            swap_words( (unsigned char *) gi->ct->cvs, 4, words );
 
         fclose( fid );
         return 1;
