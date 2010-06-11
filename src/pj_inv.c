@@ -10,13 +10,17 @@ pj_inv(XY xy, PJ *P) {
 	/* can't do as much preliminary checking as with forward */
 	if (xy.x == HUGE_VAL || xy.y == HUGE_VAL) {
 		lp.lam = lp.phi = HUGE_VAL;
-		pj_errno = -15;
+		pj_ctx_set_errno( P->ctx, -15);
+                return lp;
 	}
+
 	errno = pj_errno = 0;
+        P->ctx->last_errno = 0;
+
 	xy.x = (xy.x * P->to_meter - P->x0) * P->ra; /* descale and de-offset */
 	xy.y = (xy.y * P->to_meter - P->y0) * P->ra;
 	lp = (*P->inv)(xy, P); /* inverse project */
-	if (pj_errno || (pj_errno = errno))
+	if (P->ctx->last_errno )
 		lp.lam = lp.phi = HUGE_VAL;
 	else {
 		lp.lam += P->lam0; /* reduce from del lp.lam */

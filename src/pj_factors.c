@@ -13,10 +13,12 @@ pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 
 	/* check for forward and latitude or longitude overange */
 	if ((t = fabs(lp.phi)-HALFPI) > EPS || fabs(lp.lam) > 10.) {
-		pj_errno = -14;
+                pj_ctx_set_errno( P->ctx->last_errno, -14);
 		return 1;
 	} else { /* proceed */
 		errno = pj_errno = 0;
+                P->ctx->last_errno = 0;
+
 		if (h < EPS)
 			h = DEFAULT_H;
 		if (fabs(lp.phi) > (HALFPI - h)) 

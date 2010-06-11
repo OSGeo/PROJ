@@ -50,7 +50,7 @@
 /*      Load the data portion of a ctable formatted grid.               */
 /************************************************************************/
 
-int nad_ctable_load( struct CTABLE *ct, FILE *fid )
+int nad_ctable_load( projCtx ctx, struct CTABLE *ct, FILE *fid )
 
 {
     int  a_size;
@@ -72,7 +72,7 @@ int nad_ctable_load( struct CTABLE *ct, FILE *fid )
             "ctable loading failed on fread() - binary incompatible?\n" );
         }
 
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
 
@@ -85,7 +85,7 @@ int nad_ctable_load( struct CTABLE *ct, FILE *fid )
 /*      Read the header portion of a "ctable" format grid.              */
 /************************************************************************/
 
-struct CTABLE *nad_ctable_init( FILE * fid )
+struct CTABLE *nad_ctable_init( projCtx ctx, FILE * fid )
 {
     struct CTABLE *ct;
     int		id_end;
@@ -95,7 +95,7 @@ struct CTABLE *nad_ctable_init( FILE * fid )
     if( ct == NULL 
         || fread( ct, sizeof(struct CTABLE), 1, fid ) != 1 )
     {
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         return NULL;
     }
 
@@ -103,7 +103,7 @@ struct CTABLE *nad_ctable_init( FILE * fid )
     if( ct->lim.lam < 1 || ct->lim.lam > 100000 
         || ct->lim.phi < 1 || ct->lim.phi > 100000 )
     {
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         return NULL;
     }
     
@@ -127,27 +127,26 @@ struct CTABLE *nad_ctable_init( FILE * fid )
 /*      Read a datum shift file in any of the supported binary formats. */
 /************************************************************************/
 
-struct CTABLE *nad_init(char *name) 
+struct CTABLE *nad_init(projCtx ctx, char *name) 
 {
     char 	fname[MAX_PATH_FILENAME+1];
     struct CTABLE *ct;
     FILE 	*fid;
 
-    errno = pj_errno = 0;
+    ctx->last_errno = 0;
 
 /* -------------------------------------------------------------------- */
 /*      Open the file using the usual search rules.                     */
 /* -------------------------------------------------------------------- */
     strcpy(fname, name);
-    if (!(fid = pj_open_lib(fname, "rb"))) {
-        pj_errno = errno;
+    if (!(fid = pj_open_lib(ctx, fname, "rb"))) {
         return 0;
     }
     
-    ct = nad_ctable_init( fid );
+    ct = nad_ctable_init( ctx, fid );
     if( ct != NULL )
     {
-        if( !nad_ctable_load( ct, fid ) )
+        if( !nad_ctable_load( ctx, ct, fid ) )
         {
             nad_free( ct );
             ct = NULL;

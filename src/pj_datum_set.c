@@ -37,7 +37,7 @@
 /*                            pj_datum_set()                            */
 /************************************************************************/
 
-int pj_datum_set(paralist *pl, PJ *projdef)
+int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
 
 {
     const char *name, *towgs84, *nadgrids;
@@ -66,7 +66,7 @@ int pj_datum_set(paralist *pl, PJ *projdef)
         /* find the datum definition */
         for (i = 0; (s = pj_datums[i].id) && strcmp(name, s) ; ++i) {}
 
-        if (!s) { pj_errno = -9; return 1; }
+        if (!s) { pj_ctx_set_errno(ctx, -9); return 1; }
 
         if( pj_datums[i].ellipse_id && strlen(pj_datums[i].ellipse_id) > 0 )
         {

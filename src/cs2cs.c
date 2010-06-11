@@ -284,6 +284,10 @@ int main(int argc, char **argv)
               case 's': /* reverse output */
                 reverseout = 1;
                 continue;
+              case 'd': /* set debug level */
+                if (--argc <= 0) goto noargument;
+                pj_ctx_set_debug( pj_get_default_ctx(), atoi(*++argv));
+                continue;
               default:
                 emess(1, "invalid option: -%c",*arg);
                 break;

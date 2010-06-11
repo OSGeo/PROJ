@@ -124,6 +124,14 @@ extern double hypot(double, double);
 #define DIR_CHAR '/'
 #endif
 
+/* proj thread context */
+typedef struct {
+    int	    last_errno;
+    int     debug_level;
+    void    (*logger)(void *, int, const char *);
+    void    *app_data;
+} projCtx_t;
+
 /* datum_type values */
 #define PJD_UNKNOWN   0
 #define PJD_3PARAM    1   
@@ -208,6 +216,7 @@ typedef struct ARG_list {
 
 
 typedef struct PJconsts {
+    projCtx_t *ctx;
 	XY  (*fwd)(LP, struct PJconsts *);
 	LP  (*inv)(XY, struct PJconsts *);
 	void (*spc)(LP, struct PJconsts *, struct FACTORS *);
@@ -349,8 +358,8 @@ double adjlon(double);
 double aacos(double), aasin(double), asqrt(double), aatan2(double, double);
 PVALUE pj_param(paralist *, const char *);
 paralist *pj_mkparam(char *);
-int pj_ell_set(paralist *, double *, double *);
-int pj_datum_set(paralist *, PJ *);
+int pj_ell_set(projCtx ctx, paralist *, double *, double *);
+int pj_datum_set(projCtx,paralist *, PJ *);
 int pj_prime_meridian_set(paralist *, PJ *);
 int pj_angular_units_set(paralist *, PJ *);
 
@@ -371,7 +380,7 @@ double *pj_authset(double);
 double pj_authlat(double, double *);
 COMPLEX pj_zpoly1(COMPLEX, COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, COMPLEX *, int, COMPLEX *);
-FILE *pj_open_lib(char *, char *);
+FILE *pj_open_lib(projCtx, char *, char *);
 
 int pj_deriv(LP, double, PJ *, struct DERIVS *);
 int pj_factors(LP, PJ *, double, struct FACTORS *);
@@ -401,9 +410,9 @@ int bch2bps(projUV, projUV, projUV **, int, int);
 /* nadcon related protos */
 LP nad_intr(LP, struct CTABLE *);
 LP nad_cvt(LP, int, struct CTABLE *);
-struct CTABLE *nad_init(char *);
-struct CTABLE *nad_ctable_init( FILE * fid );
-int nad_ctable_load( struct CTABLE *, FILE * fid );
+struct CTABLE *nad_init(projCtx ctx, char *);
+struct CTABLE *nad_ctable_init( projCtx ctx, FILE * fid );
+int nad_ctable_load( projCtx ctx, struct CTABLE *, FILE * fid );
 void nad_free(struct CTABLE *);
 
 /* higher level handling of datum grid shift files */
@@ -411,16 +420,17 @@ void nad_free(struct CTABLE *);
 int pj_apply_gridshift_2( PJ *defn, int inverse, 
                           long point_count, int point_offset,
                           double *x, double *y, double *z );
-int pj_apply_gridshift_3( PJ_GRIDINFO **gridlist, int gridlist_count,
+int pj_apply_gridshift_3( projCtx ctx, 
+                          PJ_GRIDINFO **gridlist, int gridlist_count,
                           int inverse, long point_count, int point_offset,
                           double *x, double *y, double *z );
 
-PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *, int * );
+PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx, const char *, int * );
 void pj_deallocate_grids();
 
-PJ_GRIDINFO *pj_gridinfo_init( const char * );
-int pj_gridinfo_load( PJ_GRIDINFO * );
-void pj_gridinfo_free( PJ_GRIDINFO * );
+PJ_GRIDINFO *pj_gridinfo_init( projCtx, const char * );
+int pj_gridinfo_load( projCtx, PJ_GRIDINFO * );
+void pj_gridinfo_free( projCtx, PJ_GRIDINFO * );
 
 void *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);

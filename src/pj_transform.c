@@ -36,7 +36,7 @@
 
 PJ_CVSID("$Id$");
 
-static int pj_adjust_axis( const char *axis, int denormalize_flag,
+static int pj_adjust_axis( projCtx ctx, const char *axis, int denormalize_flag,
                            long point_count, int point_offset, 
                            double *x, double *y, double *z );
 
@@ -91,7 +91,8 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     long      i;
     int       err;
 
-    pj_errno = 0;
+    srcdefn->ctx->last_errno = 0;
+    dstdefn->ctx->last_errno = 0;
 
     if( point_offset == 0 )
         point_offset = 1;
@@ -104,8 +105,8 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     {
         int err;
 
-        err = pj_adjust_axis( srcdefn->axis, 0, point_count, point_offset, 
-                              x, y, z );
+        err = pj_adjust_axis( srcdefn->ctx, srcdefn->axis, 
+                              0, point_count, point_offset, x, y, z );
         if( err != 0 )
             return err;
     }
@@ -117,7 +118,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     {
         if( z == NULL )
         {
-            pj_errno = PJD_ERR_GEOCENTRIC;
+            pj_ctx_set_errno( pj_get_ctx(srcdefn), PJD_ERR_GEOCENTRIC);
             return PJD_ERR_GEOCENTRIC;
         }
 
@@ -148,12 +149,9 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     {
         if( srcdefn->inv == NULL )
         {
-            pj_errno = -17; /* this isn't correct, we need a no inverse err */
-            if( getenv( "PROJ_DEBUG" ) != NULL )
-            {
-                fprintf( stderr, 
-                       "pj_transform(): source projection not invertable\n" );
-            }
+            pj_ctx_set_errno( pj_get_ctx(srcdefn), -17 );
+            pj_log( pj_get_ctx(srcdefn), PJ_LOG_ERROR, 
+                    "pj_transform(): source projection not invertable" );
             return -17;
         }
 
@@ -169,12 +167,14 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
                 continue;
 
             geodetic_loc = pj_inv( projected_loc, srcdefn );
-            if( pj_errno != 0 )
+            if( srcdefn->ctx->last_errno != 0 )
             {
-                if( (pj_errno != 33 /*EDOM*/ && pj_errno != 34 /*ERANGE*/ )
-                    && (pj_errno > 0 || pj_errno < -44 || point_count == 1
-                        || transient_error[-pj_errno] == 0 ) )
-                    return pj_errno;
+                if( (srcdefn->ctx->last_errno != 33 /*EDOM*/ 
+                     && srcdefn->ctx->last_errno != 34 /*ERANGE*/ )
+                    && (srcdefn->ctx->last_errno > 0 
+                        || srcdefn->ctx->last_errno < -44 || point_count == 1
+                        || transient_error[-srcdefn->ctx->last_errno] == 0 ) )
+                    return srcdefn->ctx->last_errno;
                 else
                 {
                     geodetic_loc.u = HUGE_VAL;
@@ -209,7 +209,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
                                   &(srcdefn->vgridlist_geoid), 
                                   &(srcdefn->vgridlist_geoid_count),
                                   0, point_count, point_offset, x, y, z ) )
-            return pj_errno;
+            return pj_ctx_get_errno(srcdefn->ctx);
     }
         
 /* -------------------------------------------------------------------- */
@@ -217,7 +217,12 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 /* -------------------------------------------------------------------- */
     if( pj_datum_transform( srcdefn, dstdefn, point_count, point_offset, 
                             x, y, z ) != 0 )
-        return pj_errno;
+    {
+        if( srcdefn->ctx->last_errno != 0 )
+            return srcdefn->ctx->last_errno;
+        else
+            return dstdefn->ctx->last_errno;
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Do we need to translate from geoid to ellipsoidal vertical      */
@@ -229,7 +234,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
                                   &(dstdefn->vgridlist_geoid), 
                                   &(dstdefn->vgridlist_geoid_count),
                                   0, point_count, point_offset, x, y, z ) )
-            return pj_errno;
+            return dstdefn->ctx->last_errno;
     }
         
 /* -------------------------------------------------------------------- */
@@ -253,7 +258,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     {
         if( z == NULL )
         {
-            pj_errno = PJD_ERR_GEOCENTRIC;
+            pj_ctx_set_errno( dstdefn->ctx, PJD_ERR_GEOCENTRIC );
             return PJD_ERR_GEOCENTRIC;
         }
 
@@ -291,12 +296,14 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
                 continue;
 
             projected_loc = pj_fwd( geodetic_loc, dstdefn );
-            if( pj_errno != 0 )
+            if( dstdefn->ctx->last_errno != 0 )
             {
-                if( (pj_errno != 33 /*EDOM*/ && pj_errno != 34 /*ERANGE*/ )
-                    && (pj_errno > 0 || pj_errno < -44 || point_count == 1
-                        || transient_error[-pj_errno] == 0 ) )
-                    return pj_errno;
+                if( (dstdefn->ctx->last_errno != 33 /*EDOM*/ 
+                     && dstdefn->ctx->last_errno != 34 /*ERANGE*/ )
+                    && (dstdefn->ctx->last_errno > 0 
+                        || dstdefn->ctx->last_errno < -44 || point_count == 1
+                        || transient_error[-dstdefn->ctx->last_errno] == 0 ) )
+                    return dstdefn->ctx->last_errno;
                 else
                 {
                     projected_loc.u = HUGE_VAL;
@@ -335,8 +342,8 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     {
         int err;
 
-        err = pj_adjust_axis( dstdefn->axis, 1, point_count, point_offset, 
-                              x, y, z );
+        err = pj_adjust_axis( dstdefn->ctx, dstdefn->axis, 
+                              1, point_count, point_offset, x, y, z );
         if( err != 0 )
             return err;
     }
@@ -356,8 +363,7 @@ int pj_geodetic_to_geocentric( double a, double es,
     double b;
     int    i;
     GeocentricInfo gi;
-
-    pj_errno = 0;
+    int ret_errno = 0;
 
     if( es == 0.0 )
         b = a;
@@ -366,8 +372,7 @@ int pj_geodetic_to_geocentric( double a, double es,
 
     if( pj_Set_Geocentric_Parameters( &gi, a, b ) != 0 )
     {
-        pj_errno = PJD_ERR_GEOCENTRIC;
-        return pj_errno;
+        return PJD_ERR_GEOCENTRIC;
     }
 
     for( i = 0; i < point_count; i++ )
@@ -380,13 +385,13 @@ int pj_geodetic_to_geocentric( double a, double es,
         if( pj_Convert_Geodetic_To_Geocentric( &gi, y[io], x[io], z[io], 
                                                x+io, y+io, z+io ) != 0 )
         {
-            pj_errno = -14;
+            ret_errno = -14;
             x[io] = y[io] = HUGE_VAL;
             /* but keep processing points! */
         }
     }
 
-    return pj_errno;
+    return ret_errno;
 }
 
 /************************************************************************/
@@ -409,8 +414,7 @@ int pj_geocentric_to_geodetic( double a, double es,
 
     if( pj_Set_Geocentric_Parameters( &gi, a, b ) != 0 )
     {
-        pj_errno = PJD_ERR_GEOCENTRIC;
-        return pj_errno;
+        return PJD_ERR_GEOCENTRIC;
     }
 
     for( i = 0; i < point_count; i++ )
@@ -484,8 +488,6 @@ int pj_geocentric_to_wgs84( PJ *defn,
 {
     int       i;
 
-    pj_errno = 0;
-
     if( defn->datum_type == PJD_3PARAM )
     {
         for( i = 0; i < point_count; i++ )
@@ -533,8 +535,6 @@ int pj_geocentric_from_wgs84( PJ *defn,
 
 {
     int       i;
-
-    pj_errno = 0;
 
     if( defn->datum_type == PJD_3PARAM )
     {
@@ -589,8 +589,6 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
     double      src_a, src_es, dst_a, dst_es;
     int         z_is_temp = FALSE;
 
-    pj_errno = 0;
-
 /* -------------------------------------------------------------------- */
 /*      We cannot do any meaningful datum transformation if either      */
 /*      the source or destination are of an unknown datum type          */
@@ -624,7 +622,7 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
         z_is_temp = TRUE;
     }
 
-#define CHECK_RETURN {if( pj_errno != 0 && (pj_errno > 0 || transient_error[-pj_errno] == 0) ) { if( z_is_temp ) pj_dalloc(z); return pj_errno; }}
+#define CHECK_RETURN(defn) {if( defn->ctx->last_errno != 0 && (defn->ctx->last_errno > 0 || transient_error[-defn->ctx->last_errno] == 0) ) { if( z_is_temp ) pj_dalloc(z); return defn->ctx->last_errno; }}
 
 /* -------------------------------------------------------------------- */
 /*	If this datum requires grid shifts, then apply it to geodetic   */
@@ -633,7 +631,7 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
     if( srcdefn->datum_type == PJD_GRIDSHIFT )
     {
         pj_apply_gridshift_2( srcdefn, 0, point_count, point_offset, x, y, z );
-        CHECK_RETURN;
+        CHECK_RETURN(srcdefn);
 
         src_a = SRS_WGS84_SEMIMAJOR;
         src_es = SRS_WGS84_ESQUARED;
@@ -657,9 +655,10 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /* -------------------------------------------------------------------- */
 /*      Convert to geocentric coordinates.                              */
 /* -------------------------------------------------------------------- */
-        pj_geodetic_to_geocentric( src_a, src_es,
-                                   point_count, point_offset, x, y, z );
-        CHECK_RETURN;
+        srcdefn->ctx->last_errno = 
+            pj_geodetic_to_geocentric( src_a, src_es,
+                                       point_count, point_offset, x, y, z );
+        CHECK_RETURN(srcdefn);
 
 /* -------------------------------------------------------------------- */
 /*      Convert between datums.                                         */
@@ -668,22 +667,23 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
             || srcdefn->datum_type == PJD_7PARAM )
         {
             pj_geocentric_to_wgs84( srcdefn, point_count, point_offset,x,y,z);
-            CHECK_RETURN;
+            CHECK_RETURN(srcdefn);
         }
 
         if( dstdefn->datum_type == PJD_3PARAM 
             || dstdefn->datum_type == PJD_7PARAM )
         {
             pj_geocentric_from_wgs84( dstdefn, point_count,point_offset,x,y,z);
-            CHECK_RETURN;
+            CHECK_RETURN(dstdefn);
         }
 
 /* -------------------------------------------------------------------- */
 /*      Convert back to geodetic coordinates.                           */
 /* -------------------------------------------------------------------- */
-        pj_geocentric_to_geodetic( dst_a, dst_es,
-                                   point_count, point_offset, x, y, z );
-        CHECK_RETURN;
+        dstdefn->ctx->last_errno = 
+            pj_geocentric_to_geodetic( dst_a, dst_es,
+                                       point_count, point_offset, x, y, z );
+        CHECK_RETURN(dstdefn);
     }
 
 /* -------------------------------------------------------------------- */
@@ -692,7 +692,7 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
     if( dstdefn->datum_type == PJD_GRIDSHIFT )
     {
         pj_apply_gridshift_2( dstdefn, 1, point_count, point_offset, x, y, z );
-        CHECK_RETURN;
+        CHECK_RETURN(dstdefn);
     }
 
     if( z_is_temp )
@@ -707,7 +707,8 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /*      Normalize or de-normalized the x/y/z axes.  The normal form     */
 /*      is "enu" (easting, northing, up).                               */
 /************************************************************************/
-static int pj_adjust_axis( const char *axis, int denormalize_flag,
+static int pj_adjust_axis( projCtx ctx, 
+                           const char *axis, int denormalize_flag,
                            long point_count, int point_offset, 
                            double *x, double *y, double *z )
 
@@ -750,7 +751,7 @@ static int pj_adjust_axis( const char *axis, int denormalize_flag,
                   case 'd':
                     if( z ) z[point_offset*i] = -value; break;
                   default:
-                    pj_errno = PJD_ERR_AXIS;
+                    pj_ctx_set_errno( ctx, PJD_ERR_AXIS );
                     return PJD_ERR_AXIS;
                 }
             } /* i_axis */
@@ -795,7 +796,7 @@ static int pj_adjust_axis( const char *axis, int denormalize_flag,
                   case 'd':
                     target[point_offset*i] = -z_in; break;
                   default:
-                    pj_errno = PJD_ERR_AXIS;
+                    pj_ctx_set_errno( ctx, PJD_ERR_AXIS );
                     return PJD_ERR_AXIS;
                 }
             } /* i_axis */

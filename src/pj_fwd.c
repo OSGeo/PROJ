@@ -11,9 +11,12 @@ pj_fwd(LP lp, PJ *P) {
 	/* check for forward and latitude or longitude overange */
 	if ((t = fabs(lp.phi)-HALFPI) > EPS || fabs(lp.lam) > 10.) {
 		xy.x = xy.y = HUGE_VAL;
-		pj_errno = -14;
+		pj_ctx_set_errno( P->ctx, -14);
 	} else { /* proceed with projection */
-		errno = pj_errno = 0;
+                P->ctx->last_errno = 0;
+                pj_errno = 0;
+                errno = 0;
+
 		if (fabs(t) <= EPS)
 			lp.phi = lp.phi < 0. ? -HALFPI : HALFPI;
 		else if (P->geoc)
@@ -22,7 +25,7 @@ pj_fwd(LP lp, PJ *P) {
 		if (!P->over)
 			lp.lam = adjlon(lp.lam); /* adjust del longitude */
 		xy = (*P->fwd)(lp, P); /* project */
-		if (pj_errno || (pj_errno = errno))
+		if ( P->ctx->last_errno )
 			xy.x = xy.y = HUGE_VAL;
 		/* adjust for major axis and easting/northings */
 		else {

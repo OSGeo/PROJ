@@ -21,7 +21,7 @@ geod_set(int argc, char **argv) {
 		else
 			start = curr = pj_mkparam(argv[i]);
 	/* set elliptical parameters */
-	if (pj_ell_set(start, &geod_a, &es)) emess(1,"ellipse setup failure");
+	if (pj_ell_set(pj_get_default_ctx(),start, &geod_a, &es)) emess(1,"ellipse setup failure");
 	/* set units */
 	if (name = pj_param(start, "sunits").s) {
 		char *s;
