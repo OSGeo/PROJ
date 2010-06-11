@@ -15,7 +15,7 @@ FORWARD(s_forward); /* spheroid */
 	return (xy);
 }
 INVERSE(e_inverse); /* ellipsoid */
-	if ((lp.phi = pj_phi2(exp(- xy.y / P->k0), P->e)) == HUGE_VAL) I_ERROR;
+	if ((lp.phi = pj_phi2(P->ctx, exp(- xy.y / P->k0), P->e)) == HUGE_VAL) I_ERROR;
 	lp.lam = xy.x / P->k0;
 	return (lp);
 }
@@ -29,8 +29,8 @@ ENTRY0(merc)
 	double phits=0.0;
 	int is_phits;
 
-	if( (is_phits = pj_param(P->params, "tlat_ts").i) ) {
-		phits = fabs(pj_param(P->params, "rlat_ts").f);
+	if( (is_phits = pj_param(P->ctx, P->params, "tlat_ts").i) ) {
+		phits = fabs(pj_param(P->ctx, P->params, "rlat_ts").f);
 		if (phits >= HALFPI) E_ERROR(-24);
 	}
 	if (P->es) { /* ellipsoid */

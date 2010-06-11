@@ -21,7 +21,7 @@ FORWARD(o_forward); /* spheroid */
 	cosphi = cos(lp.phi);
 	lp.lam = adjlon(aatan2(cosphi * sin(lp.lam), P->sphip * cosphi * coslam +
 		P->cphip * sinphi) + P->lamp);
-	lp.phi = aasin(P->sphip * sinphi - P->cphip * cosphi * coslam);
+	lp.phi = aasin(P->ctx,P->sphip * sinphi - P->cphip * cosphi * coslam);
 	return (P->link->fwd(lp, P->link));
 }
 FORWARD(t_forward); /* spheroid */
@@ -32,7 +32,7 @@ FORWARD(t_forward); /* spheroid */
 	cosphi = cos(lp.phi);
 	coslam = cos(lp.lam);
 	lp.lam = adjlon(aatan2(cosphi * sin(lp.lam), sin(lp.phi)) + P->lamp);
-	lp.phi = aasin(- cosphi * coslam);
+	lp.phi = aasin(P->ctx, - cosphi * coslam);
 	return (P->link->fwd(lp, P->link));
 }
 INVERSE(o_inverse); /* spheroid */
@@ -43,7 +43,7 @@ INVERSE(o_inverse); /* spheroid */
 		coslam = cos(lp.lam -= P->lamp);
 		sinphi = sin(lp.phi);
 		cosphi = cos(lp.phi);
-		lp.phi = aasin(P->sphip * sinphi + P->cphip * cosphi * coslam);
+		lp.phi = aasin(P->ctx,P->sphip * sinphi + P->cphip * cosphi * coslam);
 		lp.lam = aatan2(cosphi * sin(lp.lam), P->sphip * cosphi * coslam -
 			P->cphip * sinphi);
 	}
@@ -57,7 +57,7 @@ INVERSE(t_inverse); /* spheroid */
 		cosphi = cos(lp.phi);
 		t = lp.lam - P->lamp;
 		lp.lam = aatan2(cosphi * sin(t), - sin(lp.phi));
-		lp.phi = aasin(cosphi * cos(t));
+		lp.phi = aasin(P->ctx,cosphi * cos(t));
 	}
 	return (lp);
 }
@@ -74,7 +74,7 @@ ENTRY1(ob_tran, link)
 	char *name, *s;
 
 	/* get name of projection to be translated */
-	if (!(name = pj_param(P->params, "so_proj").s)) E_ERROR(-26);
+	if (!(name = pj_param(P->ctx, P->params, "so_proj").s)) E_ERROR(-26);
 	for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
 	if (!s || !(P->link = (*pj_list[i].proj)(0))) E_ERROR(-37);
 	/* copy existing header into new */
@@ -97,12 +97,12 @@ ENTRY1(ob_tran, link)
 		freeup(P);
 		return 0;
 	}
-	if (pj_param(P->params, "to_alpha").i) {
+	if (pj_param(P->ctx, P->params, "to_alpha").i) {
 		double lamc, phic, alpha;
 
-		lamc	= pj_param(P->params, "ro_lon_c").f;
-		phic	= pj_param(P->params, "ro_lat_c").f;
-		alpha	= pj_param(P->params, "ro_alpha").f;
+		lamc	= pj_param(P->ctx, P->params, "ro_lon_c").f;
+		phic	= pj_param(P->ctx, P->params, "ro_lat_c").f;
+		alpha	= pj_param(P->ctx, P->params, "ro_alpha").f;
 /*
 		if (fabs(phic) <= TOL ||
 			fabs(fabs(phic) - HALFPI) <= TOL ||
@@ -111,17 +111,17 @@ ENTRY1(ob_tran, link)
 		if (fabs(fabs(phic) - HALFPI) <= TOL)
 			E_ERROR(-32);
 		P->lamp = lamc + aatan2(-cos(alpha), -sin(alpha) * sin(phic));
-		phip = aasin(cos(phic) * sin(alpha));
-	} else if (pj_param(P->params, "to_lat_p").i) { /* specified new pole */
-		P->lamp = pj_param(P->params, "ro_lon_p").f;
-		phip = pj_param(P->params, "ro_lat_p").f;
+		phip = aasin(P->ctx,cos(phic) * sin(alpha));
+	} else if (pj_param(P->ctx, P->params, "to_lat_p").i) { /* specified new pole */
+		P->lamp = pj_param(P->ctx, P->params, "ro_lon_p").f;
+		phip = pj_param(P->ctx, P->params, "ro_lat_p").f;
 	} else { /* specified new "equator" points */
 		double lam1, lam2, phi1, phi2, con;
 
-		lam1 = pj_param(P->params, "ro_lon_1").f;
-		phi1 = pj_param(P->params, "ro_lat_1").f;
-		lam2 = pj_param(P->params, "ro_lon_2").f;
-		phi2 = pj_param(P->params, "ro_lat_2").f;
+		lam1 = pj_param(P->ctx, P->params, "ro_lon_1").f;
+		phi1 = pj_param(P->ctx, P->params, "ro_lat_1").f;
+		lam2 = pj_param(P->ctx, P->params, "ro_lon_2").f;
+		phi2 = pj_param(P->ctx, P->params, "ro_lat_2").f;
 		if (fabs(phi1 - phi2) <= TOL ||
 			(con = fabs(phi1)) <= TOL ||
 			fabs(con - HALFPI) <= TOL ||

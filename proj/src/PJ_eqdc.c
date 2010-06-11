@@ -28,7 +28,7 @@ INVERSE(e_inverse); /* sphere & ellipsoid */
 		}
 		lp.phi = P->c - P->rho;
 		if (P->ellips)
-			lp.phi = pj_inv_mlfn(lp.phi, P->es, P->en);
+			lp.phi = pj_inv_mlfn(P->ctx, lp.phi, P->es, P->en);
 		lp.lam = atan2(xy.x, xy.y) / P->n;
 	} else {
 		lp.lam = 0.;
@@ -51,8 +51,8 @@ ENTRY1(eqdc, en)
 	double cosphi, sinphi;
 	int secant;
 
-	P->phi1 = pj_param(P->params, "rlat_1").f;
-	P->phi2 = pj_param(P->params, "rlat_2").f;
+	P->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
+	P->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
 	if (fabs(P->phi1 + P->phi2) < EPS10) E_ERROR(-21);
 	if (!(P->en = pj_enfn(P->es)))
 		E_ERROR_0;

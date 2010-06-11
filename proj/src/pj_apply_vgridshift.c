@@ -60,7 +60,7 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
     {
         *gridlist_p = 
             pj_gridlist_from_nadgrids( pj_get_ctx(defn), 
-                                       pj_param(defn->params,listname).s,
+                                       pj_param(defn->ctx,defn->params,listname).s,
                                        gridlist_count_p );
 
         if( *gridlist_p == NULL || *gridlist_count_p == 0 )

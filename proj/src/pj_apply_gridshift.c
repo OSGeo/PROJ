@@ -89,7 +89,7 @@ int pj_apply_gridshift_2( PJ *defn, int inverse,
     {
         defn->gridlist = 
             pj_gridlist_from_nadgrids( pj_get_ctx( defn ),
-                                       pj_param(defn->params,"snadgrids").s,
+                                       pj_param(defn->ctx, defn->params,"snadgrids").s,
                                        &(defn->gridlist_count) );
 
         if( defn->gridlist == NULL || defn->gridlist_count == 0 )

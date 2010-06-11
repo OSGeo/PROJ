@@ -14,8 +14,8 @@ FORWARD(e_forward);
 		+ P->K)) - HALFPI;
 	lamp = P->c * lp.lam;
 	cp = cos(phip);
-	phipp = aasin(P->cosp0 * sin(phip) - P->sinp0 * cp * cos(lamp));
-	lampp = aasin(cp * sin(lamp) / cos(phipp));
+	phipp = aasin(P->ctx,P->cosp0 * sin(phip) - P->sinp0 * cp * cos(lamp));
+	lampp = aasin(P->ctx,cp * sin(lamp) / cos(phipp));
 	xy.x = P->kR * lampp;
 	xy.y = P->kR * log(tan(FORTPI + 0.5 * phipp));
 	return (xy);
@@ -27,8 +27,8 @@ INVERSE(e_inverse); /* ellipsoid & spheroid */
 	phipp = 2. * (atan(exp(xy.y / P->kR)) - FORTPI);
 	lampp = xy.x / P->kR;
 	cp = cos(phipp);
-	phip = aasin(P->cosp0 * sin(phipp) + P->sinp0 * cp * cos(lampp));
-	lamp = aasin(cp * sin(lampp) / cos(phip));
+	phip = aasin(P->ctx,P->cosp0 * sin(phipp) + P->sinp0 * cp * cos(lampp));
+	lamp = aasin(P->ctx,cp * sin(lampp) / cos(phip));
 	con = (P->K - log(tan(FORTPI + 0.5 * phip)))/P->c;
 	for (i = NITER; i ; --i) {
 		esp = P->e * sin(phip);
@@ -55,7 +55,7 @@ ENTRY0(somerc)
 	cp *= cp;
 	P->c = sqrt(1 + P->es * cp * cp * P->rone_es);
 	sp = sin(P->phi0);
-	P->cosp0 = cos( phip0 = aasin(P->sinp0 = sp / P->c) );
+	P->cosp0 = cos( phip0 = aasin(P->ctx, P->sinp0 = sp / P->c) );
 	sp *= P->e;
 	P->K = log(tan(FORTPI + 0.5 * phip0)) - P->c * (
 		log(tan(FORTPI + 0.5 * P->phi0)) - P->hlf_e *

@@ -28,7 +28,7 @@ INVERSE(s_inverse); /* spheroid */
     sinC= sin((xy.y*P->a - P->YS)/P->n2)/cosh((xy.x*P->a - P->XS)/P->n2);
     LC= log(pj_tsfn(-1.0*asin(sinC),0.0,0.0));
     lp.lam= L/P->n1;
-    lp.phi= -1.0*pj_phi2(exp((LC-P->c)/P->n1),P->e);
+    lp.phi= -1.0*pj_phi2(P->ctx, exp((LC-P->c)/P->n1),P->e);
     /*fprintf(stderr,"inv:\nL      =%16.13f\nsinC   =%16.13f\nLC     =%16.13f\nXY(%16.4f,%16.4f)=LP(%16.13f,%16.13f)\n",L,sinC,LC,((xy.x/P->ra)+P->x0)/P->to_meter,((xy.y/P->ra)+P->y0)/P->to_meter,lp.lam+P->lam0,lp.phi);*/
 	return (lp);
 }

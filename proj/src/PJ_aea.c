@@ -153,10 +153,10 @@ setup(PJ *P) {
 	return P;
 }
 ENTRY1(aea,en)
-	P->phi1 = pj_param(P->params, "rlat_1").f;
-	P->phi2 = pj_param(P->params, "rlat_2").f;
+	P->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
+	P->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
 ENDENTRY(setup(P))
 ENTRY1(leac,en)
-	P->phi2 = pj_param(P->params, "rlat_1").f;
-	P->phi1 = pj_param(P->params, "bsouth").i ? - HALFPI: HALFPI;
+	P->phi2 = pj_param(P->ctx, P->params, "rlat_1").f;
+	P->phi1 = pj_param(P->ctx, P->params, "bsouth").i ? - HALFPI: HALFPI;
 ENDENTRY(setup(P))

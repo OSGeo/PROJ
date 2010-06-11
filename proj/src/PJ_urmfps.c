@@ -7,14 +7,14 @@ PROJ_HEAD(wag1, "Wagner I (Kavraisky VI)") "\n\tPCyl, Sph.";
 #define C_x 0.8773826753
 #define Cy 1.139753528477
 FORWARD(s_forward); /* sphere */
-	lp.phi = aasin(P->n * sin(lp.phi));
+	lp.phi = aasin(P->ctx,P->n * sin(lp.phi));
 	xy.x = C_x * lp.lam * cos(lp.phi);
 	xy.y = P->C_y * lp.phi;
 	return (xy);
 }
 INVERSE(s_inverse); /* sphere */
 	xy.y /= P->C_y;
-	lp.phi = aasin(sin(xy.y) / P->n);
+	lp.phi = aasin(P->ctx,sin(xy.y) / P->n);
 	lp.lam = xy.x / (C_x * cos(xy.y));
 	return (lp);
 }
@@ -28,8 +28,8 @@ setup(PJ *P) {
 	return P;
 }
 ENTRY0(urmfps)
-	if (pj_param(P->params, "tn").i) {
-		P->n = pj_param(P->params, "dn").f;
+	if (pj_param(P->ctx, P->params, "tn").i) {
+		P->n = pj_param(P->ctx, P->params, "dn").f;
 		if (P->n <= 0. || P->n > 1.)
 			E_ERROR(-40)
 	} else

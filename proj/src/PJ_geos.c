@@ -124,7 +124,7 @@ INVERSE(e_inverse); /* ellipsoid */
 }
 FREEUP; if (P) free(P); }
 ENTRY0(geos)
-	if ((P->h = pj_param(P->params, "dh").f) <= 0.) E_ERROR(-30);
+	if ((P->h = pj_param(P->ctx, P->params, "dh").f) <= 0.) E_ERROR(-30);
 	if (P->phi0) E_ERROR(-46);
 	P->radius_g = 1. + (P->radius_g_1 = P->h / P->a);
 	P->C  = P->radius_g * P->radius_g - 1.0;

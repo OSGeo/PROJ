@@ -6,7 +6,7 @@
 #define N_ITER 15
 
 	double
-pj_phi2(double ts, double e) {
+pj_phi2(projCtx ctx, double ts, double e) {
 	double eccnth, Phi, con, dphi;
 	int i;
 
@@ -20,6 +20,6 @@ pj_phi2(double ts, double e) {
 		Phi += dphi;
 	} while ( fabs(dphi) > TOL && --i);
 	if (i <= 0)
-		pj_errno = -18;
+		pj_ctx_set_errno( ctx, -18 );
 	return Phi;
 }

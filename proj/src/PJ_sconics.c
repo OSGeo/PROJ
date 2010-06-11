@@ -37,12 +37,12 @@ phi12(PJ *P, double *del) {
 	double p1, p2;
 	int err = 0;
 
-	if (!pj_param(P->params, "tlat_1").i ||
-		!pj_param(P->params, "tlat_2").i) {
+	if (!pj_param(P->ctx, P->params, "tlat_1").i ||
+		!pj_param(P->ctx, P->params, "tlat_2").i) {
 		err = -41;
 	} else {
-		p1 = pj_param(P->params, "rlat_1").f;
-		p2 = pj_param(P->params, "rlat_2").f;
+		p1 = pj_param(P->ctx, P->params, "rlat_1").f;
+		p2 = pj_param(P->ctx, P->params, "rlat_2").f;
 		*del = 0.5 * (p2 - p1);
 		P->sig = 0.5 * (p2 + p1);
 		err = (fabs(*del) < EPS || fabs(P->sig) < EPS) ? -42 : 0;

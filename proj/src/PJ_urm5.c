@@ -6,7 +6,7 @@ PROJ_HEAD(urm5, "Urmaev V") "\n\tPCyl., Sph.\n\tn= q= alphi=";
 FORWARD(s_forward); /* spheroid */
 	double t;
 
-	t = lp.phi = aasin(P->n * sin(lp.phi));
+	t = lp.phi = aasin(P->ctx,P->n * sin(lp.phi));
 	xy.x = P->m * lp.lam * cos(lp.phi);
 	t *= t;
 	xy.y = lp.phi * (1. + t * P->q3) * P->rmn;
@@ -16,9 +16,9 @@ FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(urm5)
 	double alpha, t;
 
-	P->n = pj_param(P->params, "dn").f;
-	P->q3 = pj_param(P->params, "dq").f / 3.;
-	alpha = pj_param(P->params, "ralpha").f;
+	P->n = pj_param(P->ctx, P->params, "dn").f;
+	P->q3 = pj_param(P->ctx, P->params, "dq").f / 3.;
+	alpha = pj_param(P->ctx, P->params, "ralpha").f;
 	t = P->n * sin(alpha);
 	P->m = cos(alpha) / sqrt(1. - t * t);
 	P->rmn = 1. / (P->m * P->n);

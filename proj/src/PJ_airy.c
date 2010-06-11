@@ -94,8 +94,8 @@ FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(airy)
 	double beta;
 
-	P->no_cut = pj_param(P->params, "bno_cut").i;
-	beta = 0.5 * (HALFPI - pj_param(P->params, "rlat_b").f);
+	P->no_cut = pj_param(P->ctx, P->params, "bno_cut").i;
+	beta = 0.5 * (HALFPI - pj_param(P->ctx, P->params, "rlat_b").f);
 	if (fabs(beta) < EPS)
 		P->Cb = -0.5;
 	else {

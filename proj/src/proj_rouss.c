@@ -61,7 +61,7 @@ INVERSE(e_inverse); /* ellipsoid */
 	s = P->s0 + y*(1.+y2*(-P->D2+P->D8*y2))+
 		x2*(-P->D1+y*(-P->D3+y*(-P->D5+y*(-P->D7+y*P->D11)))+
 		x2*(P->D4+y*(P->D6+y*P->D10)-x2*P->D9));
-	lp.phi=proj_inv_mdist(s, P->en);
+	lp.phi=proj_inv_mdist(P->ctx, s, P->en);
 	s = sin(lp.phi);
 	lp.lam=al * sqrt(1. - P->es * s * s)/cos(lp.phi);
 	return (lp);

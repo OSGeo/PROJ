@@ -27,7 +27,7 @@ INVERSE(s_inverse); /* spheroid */
 	double c;
 	
 	xy.y /= P->C_y;
-	c = cos(lp.phi = P->tan_mode ? atan(xy.y) : aasin(xy.y));
+	c = cos(lp.phi = P->tan_mode ? atan(xy.y) : aasin(P->ctx,xy.y));
 	lp.phi /= P->C_p;
 	lp.lam = xy.x / (P->C_x * cos(lp.phi));
 	if (P->tan_mode)

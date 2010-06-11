@@ -28,14 +28,14 @@ INVERSE(s_inverse); /* spheroid */
 		if (!i)
 			lp.phi = xy.y < 0. ? -HALFPI : HALFPI;
 	} else
-		lp.phi = aasin(xy.y);
+		lp.phi = aasin(P->ctx,xy.y);
 	V = cos(lp.phi);
 	lp.lam = xy.x * (P->n + P->n1 * V) / V;
 	return (lp);
 }
 FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(fouc_s)
-	P->n = pj_param(P->params, "dn").f;
+	P->n = pj_param(P->ctx, P->params, "dn").f;
 	if (P->n < 0. || P->n > 1.)
 		E_ERROR(-99)
 	P->n1 = 1. - P->n;

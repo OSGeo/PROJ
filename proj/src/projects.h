@@ -352,11 +352,12 @@ typedef struct _pj_gi {
 
 /* procedure prototypes */
 double dmstor(const char *, char **);
+double dmstor_ctx(projCtx ctx, const char *, char **);
 void set_rtodms(int, int);
 char *rtodms(char *, double, int, int);
 double adjlon(double);
-double aacos(double), aasin(double), asqrt(double), aatan2(double, double);
-PVALUE pj_param(paralist *, const char *);
+double aacos(projCtx,double), aasin(projCtx,double), asqrt(double), aatan2(double, double);
+PVALUE pj_param(projCtx ctx, paralist *, const char *);
 paralist *pj_mkparam(char *);
 int pj_ell_set(projCtx ctx, paralist *, double *, double *);
 int pj_datum_set(projCtx,paralist *, PJ *);
@@ -370,11 +371,11 @@ void pj_insert_initcache( const char *filekey, const paralist *list);
 
 double *pj_enfn(double);
 double pj_mlfn(double, double, double, double *);
-double pj_inv_mlfn(double, double, double *);
+double pj_inv_mlfn(projCtx, double, double, double *);
 double pj_qsfn(double, double, double);
 double pj_tsfn(double, double, double);
 double pj_msfn(double, double, double);
-double pj_phi2(double, double);
+double pj_phi2(projCtx, double, double);
 double pj_qsfn_(double, PJ *);
 double *pj_authset(double);
 double pj_authlat(double, double *);
@@ -434,10 +435,10 @@ void pj_gridinfo_free( projCtx, PJ_GRIDINFO * );
 
 void *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
-double proj_inv_mdist(double, const void *);
+double proj_inv_mdist(projCtx ctx, double, const void *);
 void *pj_gauss_ini(double, double, double *,double *);
-LP pj_gauss(LP, const void *);
-LP pj_inv_gauss(LP, const void *);
+LP pj_gauss(projCtx, LP, const void *);
+LP pj_inv_gauss(projCtx, LP, const void *);
 
 extern char const pj_release[];
 

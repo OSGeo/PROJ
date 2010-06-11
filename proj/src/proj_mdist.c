@@ -102,7 +102,7 @@ proj_mdist(double phi, double sphi, double cphi, const void *b) {
 	return(D + sc * sum);
 }
 	double
-proj_inv_mdist(double dist, const void *b) {
+proj_inv_mdist(projCtx ctx, double dist, const void *b) {
 	double s, t, phi, k;
 	int i;
 
@@ -118,6 +118,6 @@ proj_inv_mdist(double dist, const void *b) {
 			return phi;
 	}
 		/* convergence failed */
-	pj_errno = -17;
+	pj_ctx_set_errno(ctx, -17);
 	return phi;
 }

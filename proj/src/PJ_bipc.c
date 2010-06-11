@@ -125,7 +125,7 @@ INVERSE(s_inverse); /* spheroid */
 }
 FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(bipc)
-	P->noskew = pj_param(P->params, "bns").i;
+	P->noskew = pj_param(P->ctx, P->params, "bns").i;
 	P->inv = s_inverse;
 	P->fwd = s_forward;
 	P->es = 0.;

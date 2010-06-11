@@ -22,7 +22,7 @@ FORWARD(s_forward); /* spheroid */
 }
 INVERSE(s_inverse); /* spheroid */
 	lp.lam = 2. * xy.x / (1. + cos(xy.y));
-	lp.phi = aasin(0.5 * (xy.y + sin(xy.y)));
+	lp.phi = aasin(P->ctx,0.5 * (xy.y + sin(xy.y)));
 	return (lp);
 }
 FREEUP; if (P) pj_dalloc(P); }

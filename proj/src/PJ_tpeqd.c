@@ -10,8 +10,8 @@ FORWARD(s_forward); /* sphere */
 
 	sp = sin(lp.phi);
 	cp = cos(lp.phi);
-	z1 = aacos(P->sp1 * sp + P->cp1 * cp * cos(dl1 = lp.lam + P->dlam2));
-	z2 = aacos(P->sp2 * sp + P->cp2 * cp * cos(dl2 = lp.lam - P->dlam2));
+	z1 = aacos(P->ctx,P->sp1 * sp + P->cp1 * cp * cos(dl1 = lp.lam + P->dlam2));
+	z2 = aacos(P->ctx,P->sp2 * sp + P->cp2 * cp * cos(dl2 = lp.lam - P->dlam2));
 	z1 *= z1;
 	z2 *= z2;
 	xy.x = P->r2z0 * (t = z1 - z2);
@@ -29,13 +29,13 @@ INVERSE(s_inverse); /* sphere */
 	s = cz1 + cz2;
 	d = cz1 - cz2;
 	lp.lam = - atan2(d, (s * P->thz0));
-	lp.phi = aacos(hypot(P->thz0 * s, d) * P->rhshz0);
+	lp.phi = aacos(P->ctx,hypot(P->thz0 * s, d) * P->rhshz0);
 	if ( xy.y < 0. )
 		lp.phi = - lp.phi;
 	/* lam--phi now in system relative to P1--P2 base equator */
 	sp = sin(lp.phi);
 	cp = cos(lp.phi);
-	lp.phi = aasin(P->sa * sp + P->ca * cp * (s = cos(lp.lam -= P->lp)));
+	lp.phi = aasin(P->ctx,P->sa * sp + P->ca * cp * (s = cos(lp.lam -= P->lp)));
 	lp.lam = atan2(cp * sin(lp.lam), P->sa * cp * s - P->ca * sp) + P->lamc;
 	return lp;
 }
@@ -44,10 +44,10 @@ ENTRY0(tpeqd)
 	double lam_1, lam_2, phi_1, phi_2, A12, pp;
 
 	/* get control point locations */
-	phi_1 = pj_param(P->params, "rlat_1").f;
-	lam_1 = pj_param(P->params, "rlon_1").f;
-	phi_2 = pj_param(P->params, "rlat_2").f;
-	lam_2 = pj_param(P->params, "rlon_2").f;
+	phi_1 = pj_param(P->ctx, P->params, "rlat_1").f;
+	lam_1 = pj_param(P->ctx, P->params, "rlon_1").f;
+	phi_2 = pj_param(P->ctx, P->params, "rlat_2").f;
+	lam_2 = pj_param(P->ctx, P->params, "rlon_2").f;
 	if (phi_1 == phi_2 && lam_1 == lam_2) E_ERROR(-25);
 	P->lam0 = adjlon(0.5 * (lam_1 + lam_2));
 	P->dlam2 = adjlon(lam_2 - lam_1);
@@ -58,11 +58,11 @@ ENTRY0(tpeqd)
 	P->cs = P->cp1 * P->sp2;
 	P->sc = P->sp1 * P->cp2;
 	P->ccs = P->cp1 * P->cp2 * sin(P->dlam2);
-	P->z02 = aacos(P->sp1 * P->sp2 + P->cp1 * P->cp2 * cos(P->dlam2));
+	P->z02 = aacos(P->ctx,P->sp1 * P->sp2 + P->cp1 * P->cp2 * cos(P->dlam2));
 	P->hz0 = .5 * P->z02;
 	A12 = atan2(P->cp2 * sin(P->dlam2),
 		P->cp1 * P->sp2 - P->sp1 * P->cp2 * cos(P->dlam2));
-	P->ca = cos(pp = aasin(P->cp1 * sin(A12)));
+	P->ca = cos(pp = aasin(P->ctx,P->cp1 * sin(A12)));
 	P->sa = sin(pp);
 	P->lp = adjlon(atan2(P->cp1 * cos(A12), P->sp1) - P->hz0);
 	P->dlam2 *= .5;

@@ -32,7 +32,7 @@ INVERSE(s_inverse); /* spheroid */
 	lp.phi = xy.y / P->C_y;
 	r = sqrt(1. + lp.phi * lp.phi);
 	lp.lam = xy.x / (P->C_x * (P->D - r));
-	lp.phi = aasin( ( (P->A - r) * lp.phi - log(lp.phi + r) ) / P->B);
+	lp.phi = aasin( P->ctx, ( (P->A - r) * lp.phi - log(lp.phi + r) ) / P->B);
 	return (lp);
 }
 FREEUP; if (P) pj_dalloc(P); }

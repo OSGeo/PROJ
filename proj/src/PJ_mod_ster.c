@@ -60,7 +60,7 @@ INVERSE(e_inverse); /* ellipsoid */
 			lp.phi = P->phi0;
 			return lp;
 		}
-		chi = aasin(cosz * P->schio + p.i * sinz * P->cchio / rh);
+		chi = aasin(P->ctx, cosz * P->schio + p.i * sinz * P->cchio / rh);
 		phi = chi;
 		for (nn = 20; nn ;--nn) {
 			esphi = P->e * sin(phi);

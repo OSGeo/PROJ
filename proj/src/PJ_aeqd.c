@@ -87,7 +87,7 @@ FORWARD(e_forward); /* elliptical */
 		ct = cos(t); st = sin(t);
 		Az = atan2(sin(lp.lam) * ct, P->cosph0 * st - P->sinph0 * coslam * ct);
 		cA = cos(Az); sA = sin(Az);
-		s = aasin( fabs(sA) < TOL ?
+		s = aasin( P->ctx, fabs(sA) < TOL ?
 			(P->cosph0 * st - P->sinph0 * coslam * ct) / cA :
 			sin(lp.lam) * ct / sA );
 		H = P->He * cA;
@@ -147,7 +147,7 @@ INVERSE(e_guam_inv); /* Guam elliptical */
 	lp.phi = P->phi0;
 	for (i = 0; i < 3; ++i) {
 		t = P->e * sin(lp.phi);
-		lp.phi = pj_inv_mlfn(P->M1 + xy.y -
+		lp.phi = pj_inv_mlfn(P->ctx, P->M1 + xy.y -
 			x2 * tan(lp.phi) * (t = sqrt(1. - t * t)), P->es, P->en);
 	}
 	lp.lam = xy.x * t / cos(lp.phi);
@@ -170,8 +170,8 @@ INVERSE(e_inverse); /* elliptical */
 		D = c / P->N1;
 		E = D * (1. - D * D * (A * (1. + A) / 6. + B * (1. + 3.*A) * D / 24.));
 		F = 1. - E * E * (A / 2. + B * E / 6.);
-		psi = aasin(P->sinph0 * cos(E) + t * sin(E));
-		lp.lam = aasin(sin(Az) * sin(E) / cos(psi));
+		psi = aasin(P->ctx, P->sinph0 * cos(E) + t * sin(E));
+		lp.lam = aasin(P->ctx, sin(Az) * sin(E) / cos(psi));
 		if ((t = fabs(psi)) < EPS10)
 			lp.phi = 0.;
 		else if (fabs(t - HALFPI) < 0.)
@@ -180,7 +180,7 @@ INVERSE(e_inverse); /* elliptical */
 			lp.phi = atan((1. - P->es * F * P->sinph0 / sin(psi)) * tan(psi) /
 				P->one_es);
 	} else { /* Polar */
-		lp.phi = pj_inv_mlfn(P->mode == N_POLE ? P->Mp - c : P->Mp + c,
+		lp.phi = pj_inv_mlfn(P->ctx, P->mode == N_POLE ? P->Mp - c : P->Mp + c,
 			P->es, P->en);
 		lp.lam = atan2(xy.x, P->mode == N_POLE ? -xy.y : xy.y);
 	}
@@ -201,11 +201,11 @@ INVERSE(s_inverse); /* spherical */
 		sinc = sin(c_rh);
 		cosc = cos(c_rh);
 		if (P->mode == EQUIT) {
-			lp.phi = aasin(xy.y * sinc / c_rh);
+                        lp.phi = aasin(P->ctx, xy.y * sinc / c_rh);
 			xy.x *= sinc;
 			xy.y = cosc * c_rh;
 		} else {
-			lp.phi = aasin(cosc * P->sinph0 + xy.y * sinc * P->cosph0 /
+			lp.phi = aasin(P->ctx,cosc * P->sinph0 + xy.y * sinc * P->cosph0 /
 				c_rh);
 			xy.y = (cosc - P->sinph0 * sin(lp.phi)) * c_rh;
 			xy.x *= sinc * P->cosph0;
@@ -228,7 +228,7 @@ FREEUP;
 	}
 }
 ENTRY1(aeqd, en)
-	P->phi0 = pj_param(P->params, "rlat_0").f;
+	P->phi0 = pj_param(P->ctx, P->params, "rlat_0").f;
 	if (fabs(fabs(P->phi0) - HALFPI) < EPS10) {
 		P->mode = P->phi0 < 0. ? S_POLE : N_POLE;
 		P->sinph0 = P->phi0 < 0. ? -1. : 1.;
@@ -246,7 +246,7 @@ ENTRY1(aeqd, en)
 		P->inv = s_inverse; P->fwd = s_forward;
 	} else {
 		if (!(P->en = pj_enfn(P->es))) E_ERROR_0;
-		if (pj_param(P->params, "bguam").i) {
+		if (pj_param(P->ctx, P->params, "bguam").i) {
 			P->M1 = pj_mlfn(P->phi0, P->sinph0, P->cosph0, P->en);
 			P->inv = e_guam_inv; P->fwd = e_guam_fwd;
 		} else {

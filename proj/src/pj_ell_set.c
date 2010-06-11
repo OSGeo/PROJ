@@ -16,12 +16,12 @@ pj_ell_set(projCtx ctx, paralist *pl, double *a, double *es) {
 		/* check for varying forms of ellipsoid input */
 	*a = *es = 0.;
 	/* R takes precedence */
-	if (pj_param(pl, "tR").i)
-		*a = pj_param(pl, "dR").f;
+	if (pj_param(NULL, pl, "tR").i)
+		*a = pj_param(NULL,pl, "dR").f;
 	else { /* probable elliptical figure */
 
 		/* check if ellps present and temporarily append its values to pl */
-                if ((name = pj_param(pl, "sellps").s) != NULL) {
+                if ((name = pj_param(NULL,pl, "sellps").s) != NULL) {
 			char *s;
 
 			for (start = pl; start && start->next ; start = start->next) ;
@@ -31,50 +31,50 @@ pj_ell_set(projCtx ctx, paralist *pl, double *a, double *es) {
 			curr = curr->next = pj_mkparam(pj_ellps[i].major);
 			curr = curr->next = pj_mkparam(pj_ellps[i].ell);
 		}
-		*a = pj_param(pl, "da").f;
-		if (pj_param(pl, "tes").i) /* eccentricity squared */
-			*es = pj_param(pl, "des").f;
-		else if (pj_param(pl, "te").i) { /* eccentricity */
-			e = pj_param(pl, "de").f;
+		*a = pj_param(NULL,pl, "da").f;
+		if (pj_param(NULL,pl, "tes").i) /* eccentricity squared */
+			*es = pj_param(NULL,pl, "des").f;
+		else if (pj_param(NULL,pl, "te").i) { /* eccentricity */
+			e = pj_param(NULL,pl, "de").f;
 			*es = e * e;
-		} else if (pj_param(pl, "trf").i) { /* recip flattening */
-			*es = pj_param(pl, "drf").f;
+		} else if (pj_param(NULL,pl, "trf").i) { /* recip flattening */
+			*es = pj_param(NULL,pl, "drf").f;
 			if (!*es) {
 				pj_ctx_set_errno( ctx, -10);
 				goto bomb;
 			}
 			*es = 1./ *es;
 			*es = *es * (2. - *es);
-		} else if (pj_param(pl, "tf").i) { /* flattening */
-			*es = pj_param(pl, "df").f;
+		} else if (pj_param(NULL,pl, "tf").i) { /* flattening */
+			*es = pj_param(NULL,pl, "df").f;
 			*es = *es * (2. - *es);
-		} else if (pj_param(pl, "tb").i) { /* minor axis */
-			b = pj_param(pl, "db").f;
+		} else if (pj_param(NULL,pl, "tb").i) { /* minor axis */
+			b = pj_param(NULL,pl, "db").f;
 			*es = 1. - (b * b) / (*a * *a);
 		}     /* else *es == 0. and sphere of radius *a */
 		if (!b)
 			b = *a * sqrt(1. - *es);
 		/* following options turn ellipsoid into equivalent sphere */
-		if (pj_param(pl, "bR_A").i) { /* sphere--area of ellipsoid */
+		if (pj_param(NULL,pl, "bR_A").i) { /* sphere--area of ellipsoid */
 			*a *= 1. - *es * (SIXTH + *es * (RA4 + *es * RA6));
 			*es = 0.;
-		} else if (pj_param(pl, "bR_V").i) { /* sphere--vol. of ellipsoid */
+		} else if (pj_param(NULL,pl, "bR_V").i) { /* sphere--vol. of ellipsoid */
 			*a *= 1. - *es * (SIXTH + *es * (RV4 + *es * RV6));
 			*es = 0.;
-		} else if (pj_param(pl, "bR_a").i) { /* sphere--arithmetic mean */
+		} else if (pj_param(NULL,pl, "bR_a").i) { /* sphere--arithmetic mean */
 			*a = .5 * (*a + b);
 			*es = 0.;
-		} else if (pj_param(pl, "bR_g").i) { /* sphere--geometric mean */
+		} else if (pj_param(NULL,pl, "bR_g").i) { /* sphere--geometric mean */
 			*a = sqrt(*a * b);
 			*es = 0.;
-		} else if (pj_param(pl, "bR_h").i) { /* sphere--harmonic mean */
+		} else if (pj_param(NULL,pl, "bR_h").i) { /* sphere--harmonic mean */
 			*a = 2. * *a * b / (*a + b);
 			*es = 0.;
-		} else if ((i = pj_param(pl, "tR_lat_a").i) || /* sphere--arith. */
-			pj_param(pl, "tR_lat_g").i) { /* or geom. mean at latitude */
+		} else if ((i = pj_param(NULL,pl, "tR_lat_a").i) || /* sphere--arith. */
+			pj_param(NULL,pl, "tR_lat_g").i) { /* or geom. mean at latitude */
 			double tmp;
 
-			tmp = sin(pj_param(pl, i ? "rR_lat_a" : "rR_lat_g").f);
+			tmp = sin(pj_param(NULL,pl, i ? "rR_lat_a" : "rR_lat_g").f);
 			if (fabs(tmp) > HALFPI) {
                                 pj_ctx_set_errno(ctx,-11);
 				goto bomb;

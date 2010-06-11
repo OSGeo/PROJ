@@ -27,7 +27,7 @@ FORWARD(s_forward); /* spheroid */
 }
 FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(rpoly)
-	if ((P->mode = (P->phi1 = fabs(pj_param(P->params, "rlat_ts").f)) > EPS)) {
+	if ((P->mode = (P->phi1 = fabs(pj_param(P->ctx, P->params, "rlat_ts").f)) > EPS)) {
 		P->fxb = 0.5 * sin(P->phi1);
 		P->fxa = 0.5 / P->fxb;
 	}

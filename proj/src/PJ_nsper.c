@@ -115,7 +115,7 @@ INVERSE(s_inverse); /* spheroid */
 FREEUP; if (P) pj_dalloc(P); }
 	static PJ *
 setup(PJ *P) {
-	if ((P->height = pj_param(P->params, "dh").f) <= 0.) E_ERROR(-30);
+	if ((P->height = pj_param(P->ctx, P->params, "dh").f) <= 0.) E_ERROR(-30);
 	if (fabs(fabs(P->phi0) - HALFPI) < EPS10)
 		P->mode = P->phi0 < 0. ? S_POLE : N_POLE;
 	else if (fabs(P->phi0) < EPS10)
@@ -141,8 +141,8 @@ ENDENTRY(setup(P))
 ENTRY0(tpers)
 	double omega, gamma;
 
-	omega = pj_param(P->params, "dtilt").f * DEG_TO_RAD;
-	gamma = pj_param(P->params, "dazi").f * DEG_TO_RAD;
+	omega = pj_param(P->ctx, P->params, "dtilt").f * DEG_TO_RAD;
+	gamma = pj_param(P->ctx, P->params, "dazi").f * DEG_TO_RAD;
 	P->tilt = 1;
 	P->cg = cos(gamma); P->sg = sin(gamma);
 	P->cw = cos(omega); P->sw = sin(omega);

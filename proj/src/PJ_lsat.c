@@ -66,7 +66,7 @@ FORWARD(e_forward); /* ellipsoid */
 	}
 	if (l) {
 		sp = sin(lp.phi);
-		phidp = aasin((P->one_es * P->ca * sp - P->sa * cos(lp.phi) * 
+		phidp = aasin(P->ctx,(P->one_es * P->ca * sp - P->sa * cos(lp.phi) * 
 			sin(lamt)) / sqrt(1. - P->es * sp * sp));
 		tanph = log(tan(FORTPI + .5 * phidp));
 		sd = sin(lamdp);
@@ -116,7 +116,7 @@ INVERSE(e_inverse); /* ellipsoid */
 	lamt -= HALFPI * (1. - scl) * sl;
 	lp.lam = lamt - P->p22 * lamdp;
 	if (fabs(P->sa) < TOL)
-	    lp.phi = aasin(spp / sqrt(P->one_es * P->one_es + P->es * sppsq));
+	    lp.phi = aasin(P->ctx,spp / sqrt(P->one_es * P->one_es + P->es * sppsq));
 	else
 		lp.phi = atan((tan(lamdp) * cos(lamt) - P->ca * sin(lamt)) /
 			(P->one_es * P->sa));
@@ -127,9 +127,9 @@ ENTRY0(lsat)
     int land, path;
     double lam, alf, esc, ess;
 
-	land = pj_param(P->params, "ilsat").i;
+	land = pj_param(P->ctx, P->params, "ilsat").i;
 	if (land <= 0 || land > 5) E_ERROR(-28);
-	path = pj_param(P->params, "ipath").i;
+	path = pj_param(P->ctx, P->params, "ipath").i;
 	if (path <= 0 || path > (land <= 3 ? 251 : 233)) E_ERROR(-29);
 	if (land <= 3) {
 		P->lam0 = DEG_TO_RAD * 128.87 - TWOPI / 251. * path;

@@ -46,7 +46,7 @@ INVERSE(e_inverse); /* ellipsoid & spheroid */
 		if (fabs(dif) < DEL_TOL) break;
 	}
 	if (!i) I_ERROR
-	lp.phi = pj_inv_mlfn(S + P->M0, P->es, P->en);
+	lp.phi = pj_inv_mlfn(P->ctx, S + P->M0, P->es, P->en);
 	return (lp);
 }
 FREEUP; if (P) { if (P->en) pj_dalloc(P->en); pj_dalloc(P); } }
@@ -54,7 +54,7 @@ ENTRY0(lcca)
 	double s2p0, N0, R0, tan0, tan20;
 
 	if (!(P->en = pj_enfn(P->es))) E_ERROR_0;
-	if (!pj_param(P->params, "tlat_0").i) E_ERROR(50);
+	if (!pj_param(P->ctx, P->params, "tlat_0").i) E_ERROR(50);
 	if (P->phi0 == 0.) E_ERROR(51);
 	P->l = sin(P->phi0);
 	P->M0 = pj_mlfn(P->phi0, P->l, cos(P->phi0), P->en);
