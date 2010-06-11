@@ -7,7 +7,7 @@
 #define RV4 .06944444444444444444 /* 5/72 */
 #define RV6 .04243827160493827160 /* 55/1296 */
 	int /* initialize geographic shape parameters */
-pj_ell_set(paralist *pl, double *a, double *es) {
+pj_ell_set(projCtx ctx, paralist *pl, double *a, double *es) {
 	int i;
 	double b=0.0, e;
 	char *name;
@@ -27,7 +27,7 @@ pj_ell_set(paralist *pl, double *a, double *es) {
 			for (start = pl; start && start->next ; start = start->next) ;
 			curr = start;
 			for (i = 0; (s = pj_ellps[i].id) && strcmp(name, s) ; ++i) ;
-			if (!s) { pj_errno = -9; return 1; }
+			if (!s) { pj_ctx_set_errno( ctx, -9); return 1; }
 			curr = curr->next = pj_mkparam(pj_ellps[i].major);
 			curr = curr->next = pj_mkparam(pj_ellps[i].ell);
 		}
@@ -40,7 +40,7 @@ pj_ell_set(paralist *pl, double *a, double *es) {
 		} else if (pj_param(pl, "trf").i) { /* recip flattening */
 			*es = pj_param(pl, "drf").f;
 			if (!*es) {
-				pj_errno = -10;
+				pj_ctx_set_errno( ctx, -10);
 				goto bomb;
 			}
 			*es = 1./ *es;
@@ -76,7 +76,7 @@ pj_ell_set(paralist *pl, double *a, double *es) {
 
 			tmp = sin(pj_param(pl, i ? "rR_lat_a" : "rR_lat_g").f);
 			if (fabs(tmp) > HALFPI) {
-				pj_errno = -11;
+                                pj_ctx_set_errno(ctx,-11);
 				goto bomb;
 			}
 			tmp = 1. - *es * tmp * tmp;
@@ -90,13 +90,13 @@ bomb:
 			pj_dalloc(start->next);
 			start->next = 0;
 		}
-		if (pj_errno)
+		if (ctx->last_errno)
 			return 1;
 	}
 	/* some remaining checks */
 	if (*es < 0.)
-		{ pj_errno = -12; return 1; }
+        	{ pj_ctx_set_errno( ctx, -12); return 1; }
 	if (*a <= 0.)
-		{ pj_errno = -13; return 1; }
+        	{ pj_ctx_set_errno( ctx, -13); return 1; }
 	return 0;
 }

@@ -59,21 +59,22 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
     if( *gridlist_p == NULL )
     {
         *gridlist_p = 
-            pj_gridlist_from_nadgrids( pj_param(defn->params,listname).s,
+            pj_gridlist_from_nadgrids( pj_get_ctx(defn), 
+                                       pj_param(defn->params,listname).s,
                                        gridlist_count_p );
 
         if( *gridlist_p == NULL || *gridlist_count_p == 0 )
-            return pj_errno;
+            return defn->ctx->last_errno;
     }
      
     if( tables == NULL || *gridlist_count_p == 0 )
     {
-        pj_errno = -38;
+        pj_ctx_set_errno( defn->ctx, -38);
         return -38;
     }
 
     tables = *gridlist_p;
-    pj_errno = 0;
+    defn->ctx->last_errno = 0;
 
     for( i = 0; i < point_count; i++ )
     {
@@ -126,9 +127,9 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
             }
 
             /* load the grid shift info if we don't have it. */
-            if( ct->cvs == NULL && !pj_gridinfo_load( gi ) )
+            if( ct->cvs == NULL && !pj_gridinfo_load( pj_get_ctx(defn), gi ) )
             {
-                pj_errno = -38;
+                pj_ctx_set_errno( defn->ctx, -38 );
                 return -38;
             }
 
@@ -190,7 +191,7 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
                 fprintf( stderr, "\n" );
             }
                 
-            pj_errno = PJD_ERR_GRID_AREA;
+            pj_ctx_set_errno( defn->ctx, PJD_ERR_GRID_AREA );
             return PJD_ERR_GRID_AREA;
         }
     }

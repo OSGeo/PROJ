@@ -54,7 +54,7 @@ libproj_la_SOURCES = \
 	pj_factors.c pj_fwd.c pj_init.c pj_inv.c \
 	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c proj_mdist.c \
 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c \
-	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c \
+	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c pj_ctx.c pj_log.c \
 	pj_zpoly1.c rtodms.c vector1.c pj_release.c pj_gauss.c \
 	\
 	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \

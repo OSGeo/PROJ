@@ -99,7 +99,7 @@ void pj_set_searchpath ( int count, const char **path )
 /************************************************************************/
 
 FILE *
-pj_open_lib(char *name, char *mode) {
+pj_open_lib(projCtx ctx, char *name, char *mode) {
     char fname[MAX_PATH_FILENAME+1];
     const char *sysname;
     FILE *fid;
@@ -161,10 +161,10 @@ pj_open_lib(char *name, char *mode) {
             errno = 0;
     }
 
-    if( getenv( "PROJ_DEBUG" ) != NULL )
-        fprintf( stderr, "pj_open_lib(%s): call fopen(%s) - %s\n",
-                 name, sysname,
-                 fid == NULL ? "failed" : "succeeded" );
+    pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
+            "pj_open_lib(%s): call fopen(%s) - %s\n",
+            name, sysname,
+            fid == NULL ? "failed" : "succeeded" );
 
     return(fid);
 #else

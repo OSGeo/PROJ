@@ -108,7 +108,7 @@ PJ *pj_latlong_from_proj( PJ *pj_in )
     }
     else
     {
-        pj_errno = -13;
+        pj_ctx_set_errno( pj_in->ctx, -13 );
 
         return NULL;
     }
@@ -151,6 +151,6 @@ PJ *pj_latlong_from_proj( PJ *pj_in )
         sprintf( defn+strlen(defn), " +pm=%s", 
                  pj_param(pj_in->params,"spm").s );
 
-    return pj_init_plus( defn );
+    return pj_init_plus_ctx( pj_in->ctx, defn );
 }
 

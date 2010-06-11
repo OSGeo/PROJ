@@ -63,7 +63,7 @@ set_zone(int in, struct IO_CON *io) {
 
 	if (io->hp) {
 		io->t83 = 1;
-		if (!(htab = nad_init(io->hp)))
+		if (!(htab = nad_init(pj_get_default_ctx(), io->hp)))
 			emess(1,"hp datum file: %s, failed: %s", io->hp,
 				pj_strerrno(pj_errno));
 	}
@@ -98,7 +98,7 @@ setup() {
 	if (czone) {
 		if (!input.hp && !output.hp && input.t83 == output.t83)
 			emess(1,"identical datums");
-		if (!(ctab = nad_init(czone)))
+		if (!(ctab = nad_init(pj_get_default_ctx(), czone)))
 			emess(1,"datum file: %s, failed: %s", czone, pj_strerrno(pj_errno));
 	} else if (input.t83 != output.t83)
 		emess(1,"conversion region (-r) not specified");

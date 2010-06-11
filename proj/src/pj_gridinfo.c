@@ -80,7 +80,7 @@ static void swap_words( unsigned char *data, int word_size, int word_count )
 /*                          pj_gridinfo_free()                          */
 /************************************************************************/
 
-void pj_gridinfo_free( PJ_GRIDINFO *gi )
+void pj_gridinfo_free( projCtx ctx, PJ_GRIDINFO *gi )
 
 {
     if( gi == NULL )
@@ -93,7 +93,7 @@ void pj_gridinfo_free( PJ_GRIDINFO *gi )
         for( child = gi->child; child != NULL; child=next)
         {
             next=child->next;
-            pj_gridinfo_free( child );
+            pj_gridinfo_free( ctx, child );
         }
     }
 
@@ -115,7 +115,7 @@ void pj_gridinfo_free( PJ_GRIDINFO *gi )
 /*      stuff are loaded by pj_gridinfo_init().                         */
 /************************************************************************/
 
-int pj_gridinfo_load( PJ_GRIDINFO *gi )
+int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
 {
     if( gi == NULL || gi->ct == NULL )
@@ -130,15 +130,15 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
         FILE *fid;
         int result;
 
-        fid = pj_open_lib( gi->filename, "rb" );
+        fid = pj_open_lib( ctx, gi->filename, "rb" );
         
         if( fid == NULL )
         {
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
 
-        result = nad_ctable_load( gi->ct, fid );
+        result = nad_ctable_load( ctx, gi->ct, fid );
 
         fclose( fid );
 
@@ -158,11 +158,11 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
         int	row;
         FILE *fid;
 
-        fid = pj_open_lib( gi->filename, "rb" );
+        fid = pj_open_lib( ctx, gi->filename, "rb" );
         
         if( fid == NULL )
         {
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
 
@@ -172,7 +172,7 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
         gi->ct->cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
         if( row_buf == NULL || gi->ct->cvs == NULL )
         {
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
         
@@ -187,7 +187,7 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
             {
                 pj_dalloc( row_buf );
                 pj_dalloc( gi->ct->cvs );
-                pj_errno = -38;
+                pj_ctx_set_errno( ctx, -38 );
                 return 0;
             }
 
@@ -232,11 +232,11 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
             fprintf( stderr, "NTv2 - loading grid %s\n", gi->ct->id );
         }
 
-        fid = pj_open_lib( gi->filename, "rb" );
+        fid = pj_open_lib( ctx, gi->filename, "rb" );
         
         if( fid == NULL )
         {
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
 
@@ -246,7 +246,7 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
         gi->ct->cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
         if( row_buf == NULL || gi->ct->cvs == NULL )
         {
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
         
@@ -262,7 +262,7 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
                 pj_dalloc( row_buf );
                 pj_dalloc( gi->ct->cvs );
                 gi->ct->cvs = NULL;
-                pj_errno = -38;
+                pj_ctx_set_errno( ctx, -38 );
                 return 0;
             }
 
@@ -299,11 +299,11 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
         int   words = gi->ct->lim.lam * gi->ct->lim.phi;
         FILE *fid;
 
-        fid = pj_open_lib( gi->filename, "rb" );
+        fid = pj_open_lib( ctx, gi->filename, "rb" );
         
         if( fid == NULL )
         {
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
 
@@ -312,7 +312,7 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
         gi->ct->cvs = (FLP *) pj_malloc(words*sizeof(float));
         if( gi->ct->cvs == NULL )
         {
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
         
@@ -320,7 +320,6 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
         {
             pj_dalloc( gi->ct->cvs );
             gi->ct->cvs = NULL;
-            pj_errno = -38;
             return 0;
         }
 
@@ -343,7 +342,7 @@ int pj_gridinfo_load( PJ_GRIDINFO *gi )
 /*      Load a ntv2 (.gsb) file.                                        */
 /************************************************************************/
 
-static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
+static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
 
 {
     unsigned char header[11*16];
@@ -355,7 +354,7 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
     {
         fprintf( stderr, 
                  "basic types of inappropraiate size in pj_gridinfo_init_ntv2()\n" );
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
 
@@ -364,7 +363,7 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
 /* -------------------------------------------------------------------- */
     if( fread( header, sizeof(header), 1, fid ) != 1 )
     {
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
 
@@ -402,13 +401,13 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
 /* -------------------------------------------------------------------- */
         if( fread( header, sizeof(header), 1, fid ) != 1 )
         {
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
 
         if( strncmp((const char *) header,"SUB_NAME",8) != 0 )
         {
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
         
@@ -465,7 +464,7 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
                      "GS_COUNT(%d) does not match expected cells (%dx%d=%d)\n",
                      gs_count, ct->lim.lam, ct->lim.phi, 
                      ct->lim.lam * ct->lim.phi );
-            pj_errno = -38;
+            pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
 
@@ -550,7 +549,7 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
 /*      Load an NTv1 style Canadian grid shift file.                    */
 /************************************************************************/
 
-static int pj_gridinfo_init_ntv1( FILE * fid, PJ_GRIDINFO *gi )
+static int pj_gridinfo_init_ntv1( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
 
 {
     unsigned char header[176];
@@ -563,7 +562,7 @@ static int pj_gridinfo_init_ntv1( FILE * fid, PJ_GRIDINFO *gi )
     {
         fprintf( stderr, 
                  "basic types of inappropraiate size in nad_load_ntv1()\n" );
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
 
@@ -572,7 +571,7 @@ static int pj_gridinfo_init_ntv1( FILE * fid, PJ_GRIDINFO *gi )
 /* -------------------------------------------------------------------- */
     if( fread( header, sizeof(header), 1, fid ) != 1 )
     {
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
 
@@ -592,7 +591,7 @@ static int pj_gridinfo_init_ntv1( FILE * fid, PJ_GRIDINFO *gi )
 
     if( *((int *) (header+8)) != 12 )
     {
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         printf("NTv1 grid shift file has wrong record count, corrupt?\n");
         return 0;
     }
@@ -637,7 +636,7 @@ static int pj_gridinfo_init_ntv1( FILE * fid, PJ_GRIDINFO *gi )
 /*      Load a NOAA .gtx vertical datum shift file.                     */
 /************************************************************************/
 
-static int pj_gridinfo_init_gtx( FILE * fid, PJ_GRIDINFO *gi )
+static int pj_gridinfo_init_gtx( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
 
 {
     unsigned char header[40];
@@ -651,7 +650,7 @@ static int pj_gridinfo_init_gtx( FILE * fid, PJ_GRIDINFO *gi )
     {
         fprintf( stderr, 
                  "basic types of inappropraiate size in nad_load_gtx()\n" );
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
 
@@ -660,7 +659,7 @@ static int pj_gridinfo_init_gtx( FILE * fid, PJ_GRIDINFO *gi )
 /* -------------------------------------------------------------------- */
     if( fread( header, sizeof(header), 1, fid ) != 1 )
     {
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
 
@@ -684,7 +683,7 @@ static int pj_gridinfo_init_gtx( FILE * fid, PJ_GRIDINFO *gi )
     if( xorigin < -360 || xorigin > 360 
         || yorigin < -90 || yorigin > 90 )
     {
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         printf("gtx file header has invalid extents, corrupt?\n");
         return 0;
     }
@@ -731,7 +730,7 @@ static int pj_gridinfo_init_gtx( FILE * fid, PJ_GRIDINFO *gi )
 /*      applications.                                                   */
 /************************************************************************/
 
-PJ_GRIDINFO *pj_gridinfo_init( const char *gridname )
+PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 
 {
     char 	fname[MAX_PATH_FILENAME+1];
@@ -740,6 +739,7 @@ PJ_GRIDINFO *pj_gridinfo_init( const char *gridname )
     char	header[160];
 
     errno = pj_errno = 0;
+    ctx->last_errno = 0;
 
 /* -------------------------------------------------------------------- */
 /*      Initialize a GRIDINFO with stub info we would use if it         */
@@ -759,7 +759,7 @@ PJ_GRIDINFO *pj_gridinfo_init( const char *gridname )
 /*      Open the file using the usual search rules.                     */
 /* -------------------------------------------------------------------- */
     strcpy(fname, gridname);
-    if (!(fp = pj_open_lib(fname, "rb"))) {
+    if (!(fp = pj_open_lib(ctx, fname, "rb"))) {
         pj_errno = errno;
         return gilist;
     }
@@ -772,7 +772,7 @@ PJ_GRIDINFO *pj_gridinfo_init( const char *gridname )
     if( fread( header, sizeof(header), 1, fp ) != 1 )
     {
         fclose( fp );
-        pj_errno = -38;
+        pj_ctx_set_errno( ctx, -38 );
         return gilist;
     }
 
@@ -785,37 +785,36 @@ PJ_GRIDINFO *pj_gridinfo_init( const char *gridname )
         && strncmp(header + 96, "W GRID", 6) == 0 
         && strncmp(header + 144, "TO      NAD83   ", 16) == 0 )
     {
-        pj_gridinfo_init_ntv1( fp, gilist );
+        pj_gridinfo_init_ntv1( ctx, fp, gilist );
     }
     
     else if( strncmp(header + 0, "NUM_OREC", 8) == 0 
              && strncmp(header + 48, "GS_TYPE", 7) == 0 )
     {
-        pj_gridinfo_init_ntv2( fp, gilist );
+        pj_gridinfo_init_ntv2( ctx, fp, gilist );
     }
 
     else if( strlen(gridname) > 4 
              && (strcmp(gridname+strlen(gridname)-3,"gtx") == 0 
                  || strcmp(gridname+strlen(gridname)-3,"GTX") == 0) )
     {
-        pj_gridinfo_init_gtx( fp, gilist );
+        pj_gridinfo_init_gtx( ctx, fp, gilist );
     }
 
     else
     {
-        struct CTABLE *ct = nad_ctable_init( fp );
+        struct CTABLE *ct = nad_ctable_init( ctx, fp );
 
         gilist->format = "ctable";
         gilist->ct = ct;
 
-        if( getenv("PROJ_DEBUG") != NULL )
-            fprintf( stderr, 
-                     "Ctable %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
-                     ct->id, 
-                     ct->lim.lam, ct->lim.phi,
-                     ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
-                     (ct->ll.lam + (ct->lim.lam-1)*ct->del.lam) * RAD_TO_DEG, 
-                     (ct->ll.phi + (ct->lim.phi-1)*ct->del.phi) * RAD_TO_DEG );
+        pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
+                "Ctable %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
+                ct->id, 
+                ct->lim.lam, ct->lim.phi,
+                ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
+                (ct->ll.lam + (ct->lim.lam-1)*ct->del.lam) * RAD_TO_DEG, 
+                (ct->ll.phi + (ct->lim.phi-1)*ct->del.phi) * RAD_TO_DEG );
     }
 
     fclose(fp);

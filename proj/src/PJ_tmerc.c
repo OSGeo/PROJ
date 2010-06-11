@@ -32,7 +32,7 @@ FORWARD(e_forward); /* ellipse */
         {
             xy.x = HUGE_VAL;
             xy.y = HUGE_VAL;
-            pj_errno = -14;
+            pj_ctx_set_errno( P->ctx, -14 );
             return xy;
         }
 
@@ -70,7 +70,7 @@ FORWARD(s_forward); /* sphere */
         {
             xy.x = HUGE_VAL;
             xy.y = HUGE_VAL;
-            pj_errno = -14;
+            pj_ctx_set_errno( P->ctx, -14 );
             return xy;
         }
 

@@ -38,8 +38,6 @@
 
 PJ_CVSID("$Id$");
 
-extern FILE *pj_open_lib(char *, char *);
-
 /************************************************************************/
 /*                              get_opt()                               */
 /************************************************************************/
@@ -86,10 +84,10 @@ get_opt(paralist **start, FILE *fid, char *name, paralist *next) {
 /*                            get_defaults()                            */
 /************************************************************************/
 static paralist *
-get_defaults(paralist **start, paralist *next, char *name) {
+get_defaults(projCtx ctx, paralist **start, paralist *next, char *name) {
     FILE *fid;
 
-    if ( (fid = pj_open_lib("proj_def.dat", "rt")) != NULL) {
+    if ( (fid = pj_open_lib(ctx,"proj_def.dat", "rt")) != NULL) {
         next = get_opt(start, fid, "general", next);
         rewind(fid);
         next = get_opt(start, fid, name, next);
@@ -104,7 +102,7 @@ get_defaults(paralist **start, paralist *next, char *name) {
 /*                              get_init()                              */
 /************************************************************************/
 static paralist *
-get_init(paralist **start, paralist *next, char *name) {
+get_init(projCtx ctx, paralist **start, paralist *next, char *name) {
     char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *opt;
     FILE *fid;
     paralist *init_items = NULL;
@@ -130,11 +128,12 @@ get_init(paralist **start, paralist *next, char *name) {
     */
     if ((opt = strrchr(fname, ':')) != NULL)
         *opt++ = '\0';
-    else { pj_errno = -3; return(0); }
-    if ( (fid = pj_open_lib(fname, "rt")) != NULL)
+    else { pj_ctx_set_errno(ctx,-3); return NULL; }
+
+    if ( (fid = pj_open_lib(ctx,fname, "rt")) != NULL)
         next = get_opt(start, fid, opt, next);
     else
-        return(0);
+        return NULL;
     (void)fclose(fid);
     if (errno == 25)
         errno = 0; /* unknown problem with some sys errno<-25 */
@@ -161,11 +160,17 @@ PJ *
 pj_init_plus( const char *definition )
 
 {
+    return pj_init_plus_ctx( pj_get_default_ctx(), definition );
+}
+
+PJ *
+pj_init_plus_ctx( projCtx ctx, const char *definition )
+{
 #define MAX_ARG 200
     char	*argv[MAX_ARG];
     char	*defn_copy;
     int		argc = 0, i;
-    PJ	        *result;
+    PJ	    *result;
     
     /* make a copy that we can manipulate */
     defn_copy = (char *) pj_malloc( strlen(definition)+1 );
@@ -182,7 +187,7 @@ pj_init_plus( const char *definition )
             {
                 if( argc+1 == MAX_ARG )
                 {
-                    pj_errno = -44;
+                    pj_ctx_set_errno( ctx, -44 );
                     return NULL;
                 }
                 
@@ -202,7 +207,7 @@ pj_init_plus( const char *definition )
     }
 
     /* perform actual initialization */
-    result = pj_init( argc, argv );
+    result = pj_init_ctx( ctx, argc, argv );
 
     pj_dalloc( defn_copy );
 
@@ -220,6 +225,11 @@ pj_init_plus( const char *definition )
 
 PJ *
 pj_init(int argc, char **argv) {
+    return pj_init_ctx( pj_get_default_ctx(), argc, argv );
+}
+
+PJ *
+pj_init_ctx(projCtx ctx, int argc, char **argv) {
     char *s, *name;
     paralist *start = NULL;
     PJ *(*proj)(PJ *);
@@ -228,43 +238,44 @@ pj_init(int argc, char **argv) {
     PJ *PIN = 0;
     const char *old_locale;
 
-    errno = pj_errno = 0;
+    ctx->last_errno = 0;
     start = NULL;
 
     old_locale = setlocale(LC_NUMERIC, NULL); 
     setlocale(LC_NUMERIC,"C");
 
     /* put arguments into internal linked list */
-    if (argc <= 0) { pj_errno = -1; goto bum_call; }
+    if (argc <= 0) { pj_ctx_set_errno( ctx, -1 ); goto bum_call; }
     for (i = 0; i < argc; ++i)
         if (i)
             curr = curr->next = pj_mkparam(argv[i]);
         else
             start = curr = pj_mkparam(argv[i]);
-    if (pj_errno) goto bum_call;
+    if (ctx->last_errno) goto bum_call;
 
     /* check if +init present */
     if (pj_param(start, "tinit").i) {
         paralist *last = curr;
 
-        if (!(curr = get_init(&start, curr, pj_param(start, "sinit").s)))
+        if (!(curr = get_init(ctx,&start, curr, pj_param(start, "sinit").s)))
             goto bum_call;
-        if (curr == last) { pj_errno = -2; goto bum_call; }
+        if (curr == last) { pj_ctx_set_errno( ctx, -2); goto bum_call; }
     }
 
     /* find projection selection */
     if (!(name = pj_param(start, "sproj").s))
-    { pj_errno = -4; goto bum_call; }
+    { pj_ctx_set_errno( ctx, -4 ); goto bum_call; }
     for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
-    if (!s) { pj_errno = -5; goto bum_call; }
+    if (!s) { pj_ctx_set_errno( ctx, -5 ); goto bum_call; }
 
     /* set defaults, unless inhibited */
     if (!pj_param(start, "bno_defs").i)
-        curr = get_defaults(&start, curr, name);
+        curr = get_defaults(ctx,&start, curr, name);
     proj = (PJ *(*)(PJ *)) pj_list[i].proj;
 
     /* allocate projection structure */
     if (!(PIN = (*proj)(0))) goto bum_call;
+    PIN->ctx = ctx;
     PIN->params = start;
     PIN->is_latlong = 0;
     PIN->is_geocent = 0;
@@ -279,10 +290,10 @@ pj_init(int argc, char **argv) {
     PIN->vgridlist_geoid_count = 0;
 
     /* set datum parameters */
-    if (pj_datum_set(start, PIN)) goto bum_call;
+    if (pj_datum_set(ctx, start, PIN)) goto bum_call;
 
     /* set ellipsoid/sphere parameters */
-    if (pj_ell_set(start, &PIN->a, &PIN->es)) goto bum_call;
+    if (pj_ell_set(ctx, start, &PIN->a, &PIN->es)) goto bum_call;
 
     PIN->a_orig = PIN->a;
     PIN->es_orig = PIN->es;
@@ -290,7 +301,7 @@ pj_init(int argc, char **argv) {
     PIN->e = sqrt(PIN->es);
     PIN->ra = 1. / PIN->a;
     PIN->one_es = 1. - PIN->es;
-    if (PIN->one_es == 0.) { pj_errno = -6; goto bum_call; }
+    if (PIN->one_es == 0.) { pj_ctx_set_errno( ctx, -6 ); goto bum_call; }
     PIN->rone_es = 1./PIN->one_es;
 
     /* Now that we have ellipse information check for WGS84 datum */
@@ -325,7 +336,7 @@ pj_init(int argc, char **argv) {
         const char *axis_arg = pj_param(start,"saxis").s;
         if( strlen(axis_arg) != 3 )
         {
-            pj_errno = PJD_ERR_AXIS;
+            pj_ctx_set_errno( ctx, PJD_ERR_AXIS );
             goto bum_call;
         }
 
@@ -333,7 +344,7 @@ pj_init(int argc, char **argv) {
             || strchr( axis_legal, axis_arg[1] ) == NULL
             || (axis_arg[2] && strchr( axis_legal, axis_arg[1] ) == NULL))
         {
-            pj_errno = PJD_ERR_AXIS;
+            pj_ctx_set_errno( ctx, PJD_ERR_AXIS );
             goto bum_call;
         }
 
@@ -363,7 +374,7 @@ pj_init(int argc, char **argv) {
     else
         PIN->k0 = 1.;
     if (PIN->k0 <= 0.) {
-        pj_errno = -31;
+        pj_ctx_set_errno( ctx, -31 );
         goto bum_call;
     }
 
@@ -371,7 +382,7 @@ pj_init(int argc, char **argv) {
     s = 0;
     if ((name = pj_param(start, "sunits").s) != NULL) { 
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
-        if (!s) { pj_errno = -7; goto bum_call; }
+        if (!s) { pj_ctx_set_errno( ctx, -7 ); goto bum_call; }
         s = pj_units[i].to_meter;
     }
     if (s || (s = pj_param(start, "sto_meter").s)) {
@@ -402,17 +413,15 @@ pj_init(int argc, char **argv) {
             && *next_str == '\0' )
             value = name;
 
-        if (!value) { pj_errno = -46; goto bum_call; }
+        if (!value) { pj_ctx_set_errno( ctx, -46 ); goto bum_call; }
         PIN->from_greenwich = dmstor(value,NULL);
     }
     else
         PIN->from_greenwich = 0.0;
 
     /* projection specific initialization */
-    if (!(PIN = (*proj)(PIN)) || errno || pj_errno) {
+    if (!(PIN = (*proj)(PIN)) || ctx->last_errno) {
       bum_call: /* cleanup error return */
-        if (!pj_errno)
-            pj_errno = errno;
         if (PIN)
             pj_free(PIN);
         else
@@ -451,7 +460,7 @@ pj_free(PJ *P) {
         /* free array of grid pointers if we have one */
         if( P->gridlist != NULL )
             pj_dalloc( P->gridlist );
-
+        
         /* free projection parameters */
         P->pfree(P);
     }

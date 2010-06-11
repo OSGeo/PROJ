@@ -61,7 +61,7 @@ void pj_deallocate_grids()
         grid_list = grid_list->next;
         item->next = NULL;
 
-        pj_gridinfo_free( item );
+        pj_gridinfo_free( pj_get_default_ctx(), item );
     }
 }
 
@@ -72,7 +72,8 @@ void pj_deallocate_grids()
 /*      last_nadgrids_list.                                             */
 /************************************************************************/
 
-static int pj_gridlist_merge_gridfile( const char *gridname,
+static int pj_gridlist_merge_gridfile( projCtx ctx, 
+                                       const char *gridname,
                                        PJ_GRIDINFO ***p_gridlist,
                                        int *p_gridcount, 
                                        int *p_gridmax )
@@ -128,7 +129,7 @@ static int pj_gridlist_merge_gridfile( const char *gridname,
 /* -------------------------------------------------------------------- */
 /*      Try to load the named grid.                                     */
 /* -------------------------------------------------------------------- */
-    this_grid = pj_gridinfo_init( gridname );
+    this_grid = pj_gridinfo_init( ctx, gridname );
 
     if( this_grid == NULL )
     {
@@ -145,7 +146,7 @@ static int pj_gridlist_merge_gridfile( const char *gridname,
 /* -------------------------------------------------------------------- */
 /*      Recurse to add the grid now that it is loaded.                  */
 /* -------------------------------------------------------------------- */
-    return pj_gridlist_merge_gridfile( gridname, p_gridlist, 
+    return pj_gridlist_merge_gridfile( ctx, gridname, p_gridlist, 
                                        p_gridcount, p_gridmax );
 }
 
@@ -159,7 +160,8 @@ static int pj_gridlist_merge_gridfile( const char *gridname,
 /*      the cost of building the list of tables each time.              */
 /************************************************************************/
 
-PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
+PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids, 
+                                         int *grid_count)
 
 {
     const char *s;
@@ -204,7 +206,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
         if( *s == ',' )
             s++;
 
-        if( !pj_gridlist_merge_gridfile( name, &gridlist, grid_count, 
+        if( !pj_gridlist_merge_gridfile( ctx, name, &gridlist, grid_count, 
                                          &grid_max) 
             && required )
         {

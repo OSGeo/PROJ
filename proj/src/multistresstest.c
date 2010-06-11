@@ -32,9 +32,15 @@
 #include <unistd.h>
 #include "proj_api.h"
 
+#define num_threads    10
+#define num_iterations 100000
+#define reinit_every_iteration 0
+
 typedef struct {
     const char *src_def;
     const char *dst_def;
+
+    int     skip;
     
     double  src_x, src_y, src_z;
     double  dst_x, dst_y, dst_z;
@@ -58,22 +64,55 @@ TestItem test_list[] = {
         "+proj=merc +datum=potsdam",
         150000.0, 3000000.0, 0.0,
     },
-
-/* 
-** This test currentsly sets pj_errno and messes up the others.  It 
-** should be re-enabled when the pj_errno conflict is resolved.
-*/
-#ifdef notdef
     {
         "+proj=latlong +nadgrids=nzgd2kgrid0005.gsb",
         "+proj=latlong +datum=WGS84",
         150000.0, 3000000.0, 0.0,
     },
-#endif
     {
         "+proj=latlong +nadgrids=nzgd2kgrid0005.gsb",
         "+proj=latlong +datum=WGS84",
         170 * DEG_TO_RAD, -40 * DEG_TO_RAD, 0.0,
+    },
+    {
+        "+proj=latlong +ellps=GRS80 +towgs84=2,3,5",
+        "+proj=latlong +ellps=intl +towgs84=10,12,15",
+        170 * DEG_TO_RAD, -40 * DEG_TO_RAD, 0.0,
+    },
+    {
+        "+proj=eqc +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
+        "+proj=stere +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
+        150000.0, 250000.0, 0.0,
+    },
+    {
+        "+proj=cea +lat_ts=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
+        "+proj=merc +lon_0=12 +k=0.999 +x_0=100000 +y_0=200000 +datum=WGS84 ",
+        150000.0, 250000.0, 0.0,
+    },
+    {
+        "+proj=bonne +lat_1=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
+        "+proj=cass +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
+        150000.0, 250000.0, 0.0,
+    },
+    {
+        "+proj=nzmg +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
+        "+proj=gnom +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
+        150000.0, 250000.0, 0.0,
+    },
+    {
+        "+proj=ortho +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
+        "+proj=laea +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
+        150000.0, 250000.0, 0.0,
+    },
+    {
+        "+proj=aeqd +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
+        "+proj=eqdc +lat_1=20 +lat_2=5 +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
+        150000.0, 250000.0, 0.0,
+    },
+    {
+        "+proj=mill +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
+        "+proj=moll +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
+        150000.0, 250000.0, 0.0,
     },
     {
         "+init=epsg:3309",
@@ -97,22 +136,26 @@ static void *TestThread( void *pData )
 /*      Initialize coordinate system definitions.                       */
 /* -------------------------------------------------------------------- */
     projPJ *src_pj_list, *dst_pj_list;
+    projCtx ctx = pj_ctx_alloc();
+//    projCtx ctx = pj_get_default_ctx();
     
     src_pj_list = (projPJ *) calloc(test_count,sizeof(projPJ));
     dst_pj_list = (projPJ *) calloc(test_count,sizeof(projPJ));
                                 
+#if reinit_every_iteration == 0
     for( i = 0; i < test_count; i++ )
     {
         TestItem *test = test_list + i;
 
-        src_pj_list[i] = pj_init_plus( test->src_def );
-        dst_pj_list[i] = pj_init_plus( test->dst_def );
+        src_pj_list[i] = pj_init_plus_ctx( ctx, test->src_def );
+        dst_pj_list[i] = pj_init_plus_ctx( ctx, test->dst_def );
     }
+#endif
     
 /* -------------------------------------------------------------------- */
 /*      Perform tests - over and over.                                  */
 /* -------------------------------------------------------------------- */
-    int repeat_count = 100000, i_iter;
+    int repeat_count = num_iterations, i_iter;
     
     for( i_iter = 0; i_iter < repeat_count; i_iter++ )
     {
@@ -121,10 +164,18 @@ static void *TestThread( void *pData )
             TestItem *test = test_list + i;
             double x, y, z;
             int error;
+
+            if( test->skip )
+                continue;
             
             x = test->src_x;
             y = test->src_y;
             z = test->src_z;
+
+#if reinit_every_iteration == 1
+            src_pj_list[i] = pj_init_plus_ctx( ctx, test->src_def );
+            dst_pj_list[i] = pj_init_plus_ctx( ctx, test->dst_def );
+#endif
 
             error = pj_transform( src_pj_list[i], dst_pj_list[i], 1, 0, 
                                   &x, &y, &z );
@@ -144,8 +195,30 @@ static void *TestThread( void *pData )
                          x, y, z, 
                          test->dst_x, test->dst_y, test->dst_z );
             }
+
+#if reinit_every_iteration == 1
+            pj_free( src_pj_list[i] );
+            pj_free( dst_pj_list[i] );
+#endif
         }
     }
+
+/* -------------------------------------------------------------------- */
+/*      Cleanup                                                         */
+/* -------------------------------------------------------------------- */
+#if reinit_every_iteration == 0
+    for( i = 0; i < test_count; i++ )
+    {
+        TestItem *test = test_list + i;
+        pj_free( src_pj_list[i] );
+        pj_free( dst_pj_list[i] );
+    }
+#endif
+    
+    free( src_pj_list );
+    free( dst_pj_list );
+
+    pj_ctx_free( ctx );
 
     printf( "%d iterations of the %d tests complete in thread X\n", 
             repeat_count, test_count );
@@ -173,6 +246,20 @@ int main( int argc, char **argv )
 
         src_pj = pj_init_plus( test->src_def );
         dst_pj = pj_init_plus( test->dst_def );
+
+        if( src_pj == NULL )
+        {
+            printf( "Unable to translate:\n%s\n", test->src_def );
+            test->skip = 1;
+            continue;
+        }
+
+        if( dst_pj == NULL )
+        {
+            printf( "Unable to translate:\n%s\n", test->dst_def );
+            test->skip = 1;
+            continue;
+        }
         
         test->dst_x = test->src_x;
         test->dst_y = test->src_y;
@@ -185,6 +272,8 @@ int main( int argc, char **argv )
      
         pj_free( src_pj );
         pj_free( dst_pj );
+
+        test->skip = 0;
     }
 
     printf( "%d tests initialized.\n", test_count );
@@ -192,8 +281,6 @@ int main( int argc, char **argv )
 /* -------------------------------------------------------------------- */
 /*      Now launch a bunch of threads to repeat the tests.              */
 /* -------------------------------------------------------------------- */
-#define num_threads 2
-
     pthread_t ahThread[num_threads];
     pthread_attr_t hThreadAttr;
 
