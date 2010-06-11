@@ -39,3 +39,18 @@ EXPORTS
 	pj_param		  @37
 	pj_ell_set		  @38
 	pj_mkparam		  @39
+	pj_init_ctx		  @40
+	pj_init_plus_ctx	  @41
+	pj_get_default_ctx        @42
+	pj_get_ctx                @43
+	pj_set_ctx                @44
+	pj_ctx_alloc		  @45
+	pj_ctx_free		  @46
+	pj_ctx_get_errno	  @47
+	pj_ctx_set_errno          @48
+	pj_ctx_set_debug          @49
+	pj_ctx_set_logger         @50
+	pj_ctx_set_app_data       @51
+	pj_ctx_get_app_data       @52
+	pj_log 			  @53
+
