@@ -317,7 +317,7 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #define E_ERROR(err) { pj_errno = err; freeup(P); return(0); }
 #define E_ERROR_0 { freeup(P); return(0); }
 #define F_ERROR { pj_errno = -20; return(xy); }
-#define I_ERROR { pj_errno = -20; return(lp); }
+#define I_ERROR { pj_ctx_set_errno( P->ctx, -20); return(lp); }
 #define FORWARD(name) static XY name(LP lp, PJ *P) { XY xy = {0.0,0.0}
 #define INVERSE(name) static LP name(XY xy, PJ *P) { LP lp = {0.0,0.0}
 #define FREEUP static void freeup(PJ *P) {
