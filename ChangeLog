@@ -1,3 +1,8 @@
+2010-07-31  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/epsg: updated from GDAL.  Adds TMSO projection definitions,
+	and replaces all named datums with fully defined datums.
+
 2010-07-05  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/projects.h: I_ERROR macro must set context errno.  
