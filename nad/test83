@@ -17,13 +17,12 @@ usage()
 }
 
 if test -z "${EXE}"; then
-    echo "*** ERROR: Missing path to 'proj' program."
-    usage
-else
-    if test ! -x ${EXE}; then
-        echo "*** ERROR: Can not find '${EXE}' program!"
-        exit 1
-    fi
+    EXE=../src/cs2cs
+fi
+
+if test ! -x ${EXE}; then
+    echo "*** ERROR: Can not find '${EXE}' program!"
+    exit 1
 fi
 
 echo "============================================"
