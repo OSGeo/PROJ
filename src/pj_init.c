@@ -321,7 +321,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     /* over-ranging flag */
     PIN->over = pj_param(ctx, start, "bover").i;
 
-    /* longitude center for wrapping */
+    /* vertical datum geoid grids */
     PIN->has_geoid_vgrids = pj_param(ctx, start, "tgeoidgrids").i;
 
     /* longitude center for wrapping */
