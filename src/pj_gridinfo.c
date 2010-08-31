@@ -227,10 +227,8 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         int	row;
         FILE *fid;
 
-        if( getenv("PROJ_DEBUG") != NULL )
-        {
-            fprintf( stderr, "NTv2 - loading grid %s\n", gi->ct->id );
-        }
+        pj_log( ctx, PJ_LOG_DEBUG_MINOR, 
+                "NTv2 - loading grid %s", gi->ct->id );
 
         fid = pj_open_lib( ctx, gi->filename, "rb" );
         
@@ -352,8 +350,8 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
     assert( sizeof(double) == 8 );
     if( sizeof(int) != 4 || sizeof(double) != 8 )
     {
-        fprintf( stderr, 
-                 "basic types of inappropraiate size in pj_gridinfo_init_ntv2()\n" );
+        pj_log( ctx, PJ_LOG_ERROR,
+             "basic types of inappropraiate size in pj_gridinfo_init_ntv2()" );
         pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
@@ -444,14 +442,13 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
         ct->lim.lam = (int) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
         ct->lim.phi = (int) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
 
-        if( getenv("PROJ_DEBUG") != NULL )
-            fprintf( stderr, 
-                     "NTv2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
-                     ct->id, 
-                     ct->lim.lam, ct->lim.phi,
-                     ct->ll.lam/3600.0, ct->ll.phi/3600.0,
-                     ur.lam/3600.0, ur.phi/3600.0 );
-
+        pj_log( ctx, PJ_LOG_DEBUG_MINOR,
+                "NTv2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
+                ct->id, 
+                ct->lim.lam, ct->lim.phi,
+                ct->ll.lam/3600.0, ct->ll.phi/3600.0,
+                ur.lam/3600.0, ur.phi/3600.0 );
+        
         ct->ll.lam *= DEG_TO_RAD/3600.0;
         ct->ll.phi *= DEG_TO_RAD/3600.0;
         ct->del.lam *= DEG_TO_RAD/3600.0;
@@ -460,10 +457,10 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
         memcpy( &gs_count, header + 8 + 16*10, 4 );
         if( gs_count != ct->lim.lam * ct->lim.phi )
         {
-            fprintf( stderr, 
-                     "GS_COUNT(%d) does not match expected cells (%dx%d=%d)\n",
-                     gs_count, ct->lim.lam, ct->lim.phi, 
-                     ct->lim.lam * ct->lim.phi );
+            pj_log( ctx, PJ_LOG_ERROR,
+                    "GS_COUNT(%d) does not match expected cells (%dx%d=%d)\n",
+                    gs_count, ct->lim.lam, ct->lim.phi, 
+                    ct->lim.lam * ct->lim.phi );
             pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
@@ -515,10 +512,10 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
 
             if( gp == NULL )
             {
-                if( getenv("PROJ_DEBUG") != NULL )
-                    fprintf( stderr, "pj_gridinfo_init_ntv2(): "
-                             "failed to find parent %8.8s for %s.\n", 
-                             (const char *) header+24, gi->ct->id );
+                pj_log( ctx, PJ_LOG_ERROR,
+                        "pj_gridinfo_init_ntv2(): "
+                        "failed to find parent %8.8s for %s.\n", 
+                        (const char *) header+24, gi->ct->id );
 
                 for( lnk = gp; lnk->next != NULL; lnk = lnk->next ) {}
                 lnk->next = gi;
@@ -560,8 +557,8 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
     assert( sizeof(double) == 8 );
     if( sizeof(int) != 4 || sizeof(double) != 8 )
     {
-        fprintf( stderr, 
-                 "basic types of inappropraiate size in nad_load_ntv1()\n" );
+        pj_log( ctx, PJ_LOG_ERROR,
+                 "basic types of inappropraiate size in nad_load_ntv1()" );
         pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
@@ -591,8 +588,9 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
 
     if( *((int *) (header+8)) != 12 )
     {
+        pj_log( ctx, PJ_LOG_ERROR, 
+                "NTv1 grid shift file has wrong record count, corrupt?" );
         pj_ctx_set_errno( ctx, -38 );
-        printf("NTv1 grid shift file has wrong record count, corrupt?\n");
         return 0;
     }
 
@@ -611,11 +609,10 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
     ct->lim.lam = (int) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
     ct->lim.phi = (int) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
 
-    if( getenv("PROJ_DEBUG") != NULL )
-        fprintf( stderr, 
-                 "NTv1 %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
-                 ct->lim.lam, ct->lim.phi,
-                 ct->ll.lam, ct->ll.phi, ur.lam, ur.phi );
+    pj_log( ctx, PJ_LOG_DEBUG_MINOR,
+            "NTv1 %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)",
+            ct->lim.lam, ct->lim.phi,
+            ct->ll.lam, ct->ll.phi, ur.lam, ur.phi );
 
     ct->ll.lam *= DEG_TO_RAD;
     ct->ll.phi *= DEG_TO_RAD;
@@ -648,8 +645,8 @@ static int pj_gridinfo_init_gtx( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
     assert( sizeof(double) == 8 );
     if( sizeof(int) != 4 || sizeof(double) != 8 )
     {
-        fprintf( stderr, 
-                 "basic types of inappropraiate size in nad_load_gtx()\n" );
+        pj_log( ctx, PJ_LOG_ERROR,
+                "basic types of inappropraiate size in nad_load_gtx()" );
         pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
@@ -683,8 +680,9 @@ static int pj_gridinfo_init_gtx( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
     if( xorigin < -360 || xorigin > 360 
         || yorigin < -90 || yorigin > 90 )
     {
+        pj_log( ctx, PJ_LOG_ERROR, 
+                "gtx file header has invalid extents, corrupt?");
         pj_ctx_set_errno( ctx, -38 );
-        printf("gtx file header has invalid extents, corrupt?\n");
         return 0;
     }
 
@@ -701,13 +699,24 @@ static int pj_gridinfo_init_gtx( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
     ct->lim.lam = columns;
     ct->lim.phi = rows;
 
-    if( getenv("PROJ_DEBUG") != NULL )
-        fprintf( stderr, 
-                 "GTX %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
-                 ct->lim.lam, ct->lim.phi,
-                 ct->ll.lam, ct->ll.phi, 
-                 ct->ll.lam + columns*xstep, ct->ll.phi + rows*ystep);
+    /* some GTX files come in 0-360 and we shift them back into the
+       expected -180 to 180 range if possible.  This does not solve 
+       problems with grids spanning the dateline. */
+    if( ct->ll.lam >= 180.0 )
+        ct->ll.lam -= 360.0;
 
+    if( ct->ll.lam >= 0.0 && ct->ll.lam + ct->del.lam * ct->lim.lam > 180.0 )
+    {
+        pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
+                "This GTX spans the dateline!  This will cause problems." );
+    }
+
+    pj_log( ctx, PJ_LOG_DEBUG_MINOR,
+            "GTX %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)",
+            ct->lim.lam, ct->lim.phi,
+            ct->ll.lam, ct->ll.phi, 
+            ct->ll.lam + columns*xstep, ct->ll.phi + rows*ystep);
+    
     ct->ll.lam *= DEG_TO_RAD;
     ct->ll.phi *= DEG_TO_RAD;
     ct->del.lam *= DEG_TO_RAD;
