@@ -418,6 +418,12 @@ void nad_free(struct CTABLE *);
 
 /* higher level handling of datum grid shift files */
 
+int pj_apply_vgridshift( PJ *defn, const char *listname,
+                         PJ_GRIDINFO ***gridlist_p, 
+                         int *gridlist_count_p,
+                         int inverse, 
+                         long point_count, int point_offset,
+                         double *x, double *y, double *z );
 int pj_apply_gridshift_2( PJ *defn, int inverse, 
                           long point_count, int point_offset,
                           double *x, double *y, double *z );
