@@ -155,9 +155,9 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
             else
             {
                 if( inverse )
-                    z[io] += value;
-                else
                     z[io] -= value;
+                else
+                    z[io] += value;
             }
                 
             if( value != HUGE_VAL )
