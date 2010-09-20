@@ -52,7 +52,6 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
 
 {
     int  i;
-    int debug_flag = getenv( "PROJ_DEBUG" ) != NULL;
     static int debug_count = 0;
     PJ_GRIDINFO **tables;
 
@@ -67,7 +66,7 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
             return defn->ctx->last_errno;
     }
      
-    if( tables == NULL || *gridlist_count_p == 0 )
+    if( *gridlist_count_p == 0 )
     {
         pj_ctx_set_errno( defn->ctx, -38);
         return -38;
@@ -163,33 +162,41 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
                 
             if( value != HUGE_VAL )
             {
-                if( debug_flag && debug_count++ < 20 )
-                    fprintf( stderr,
-                             "pj_apply_gridshift(): used %s\n",
-                             ct->id );
+                if( debug_count++ < 20 )
+                    pj_log( defn->ctx, PJ_LOG_DEBUG_MINOR, 
+                            "pj_apply_gridshift(): used %s",
+                            ct->id );
                 break;
             }
         }
 
         if( value == HUGE_VAL )
         {
-            if( debug_flag )
+            char gridlist[3000];
+
+            pj_log( defn->ctx, PJ_LOG_DEBUG_MAJOR,
+                    "pj_apply_vgridshift(): failed to find a grid shift table for\n"
+                    "                       location (%.7fdW,%.7fdN)",
+                    x[io] * RAD_TO_DEG, 
+                    y[io] * RAD_TO_DEG );
+
+            gridlist[0] = '\0';
+            for( itable = 0; itable < *gridlist_count_p; itable++ )
             {
-                fprintf( stderr, 
-                         "pj_apply_vgridshift(): failed to find a grid shift table for\n"
-                         "                       location (%.7fdW,%.7fdN)\n",
-                         x[io] * RAD_TO_DEG, 
-                         y[io] * RAD_TO_DEG );
-                for( itable = 0; itable < *gridlist_count_p; itable++ )
+                PJ_GRIDINFO *gi = tables[itable];
+                if( strlen(gridlist) + strlen(gi->gridname) > sizeof(gridlist)-100 )
                 {
-                    PJ_GRIDINFO *gi = tables[itable];
-                    if( itable == 0 )
-                        fprintf( stderr, "   tried: %s", gi->gridname );
-                    else
-                        fprintf( stderr, ",%s", gi->gridname );
+                    strcat( gridlist, "..." );
+                    break;
                 }
-                fprintf( stderr, "\n" );
+
+                if( itable == 0 )
+                    sprintf( gridlist, "   tried: %s", gi->gridname );
+                else
+                    sprintf( gridlist+strlen(gridlist), ",%s", gi->gridname );
             }
+            pj_log( defn->ctx, PJ_LOG_DEBUG_MAJOR,
+                    "%s", gridlist );
                 
             pj_ctx_set_errno( defn->ctx, PJD_ERR_GRID_AREA );
             return PJD_ERR_GRID_AREA;
