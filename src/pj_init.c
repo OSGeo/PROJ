@@ -323,6 +323,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* vertical datum geoid grids */
     PIN->has_geoid_vgrids = pj_param(ctx, start, "tgeoidgrids").i;
+    if( PIN->has_geoid_vgrids ) // we need to mark it as used.
+        pj_param(ctx, start, "sgeoidgrids");
 
     /* longitude center for wrapping */
     PIN->is_long_wrap_set = pj_param(ctx, start, "tlon_wrap").i;
