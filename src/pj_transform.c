@@ -205,10 +205,10 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 /* -------------------------------------------------------------------- */
     if( srcdefn->has_geoid_vgrids )
     {
-        if( !pj_apply_vgridshift( srcdefn, "sgeoidgrids", 
-                                  &(srcdefn->vgridlist_geoid), 
-                                  &(srcdefn->vgridlist_geoid_count),
-                                  0, point_count, point_offset, x, y, z ) )
+        if( pj_apply_vgridshift( srcdefn, "sgeoidgrids", 
+                                 &(srcdefn->vgridlist_geoid), 
+                                 &(srcdefn->vgridlist_geoid_count),
+                                 0, point_count, point_offset, x, y, z ) != 0 )
             return pj_ctx_get_errno(srcdefn->ctx);
     }
         
@@ -230,10 +230,10 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 /* -------------------------------------------------------------------- */
     if( dstdefn->has_geoid_vgrids )
     {
-        if( !pj_apply_vgridshift( dstdefn, "sgeoidgrids", 
-                                  &(dstdefn->vgridlist_geoid), 
-                                  &(dstdefn->vgridlist_geoid_count),
-                                  0, point_count, point_offset, x, y, z ) )
+        if( pj_apply_vgridshift( dstdefn, "sgeoidgrids", 
+                                 &(dstdefn->vgridlist_geoid), 
+                                 &(dstdefn->vgridlist_geoid_count),
+                                 1, point_count, point_offset, x, y, z ) != 0 )
             return dstdefn->ctx->last_errno;
     }
         
