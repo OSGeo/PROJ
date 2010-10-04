@@ -13,7 +13,10 @@ pj_ell_set(projCtx ctx, paralist *pl, double *a, double *es) {
 	char *name;
 	paralist *start = 0, *curr;
 
-		/* check for varying forms of ellipsoid input */
+        /* clear any previous error */
+        pj_ctx_set_errno(ctx,0);
+
+        /* check for varying forms of ellipsoid input */
 	*a = *es = 0.;
 	/* R takes precedence */
 	if (pj_param(NULL, pl, "tR").i)
