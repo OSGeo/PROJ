@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 470
+#define PJ_VERSION 480
 
 extern char const pj_release[]; /* global release id string */
 
@@ -83,6 +83,7 @@ int pj_apply_gridshift( projCtx, const char *, int,
                         long point_count, int point_offset,
                         double *x, double *y, double *z );
 void pj_deallocate_grids(void);
+void pj_clear_initcache(void);
 int pj_is_latlong(projPJ);
 int pj_is_geocent(projPJ);
 void pj_pr_list(projPJ);

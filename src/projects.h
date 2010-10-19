@@ -365,7 +365,6 @@ int pj_prime_meridian_set(paralist *, PJ *);
 int pj_angular_units_set(paralist *, PJ *);
 
 paralist *pj_clone_paralist( const paralist* );
-void pj_clear_initcache(void);
 paralist*pj_search_initcache( const char *filekey );
 void pj_insert_initcache( const char *filekey, const paralist *list);
 
