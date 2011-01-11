@@ -1,3 +1,7 @@
+2011-01-11  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/PJ_goode.c: fix propogation of es and ctx to sub-projections.
+
 2010-10-19  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/proj_api.h, src/projects.h: move pj_clear_initcache() to public

@@ -39,6 +39,9 @@ ENTRY2(goode, sinu, moll)
 	P->es = 0.;
 	if (!(P->sinu = pj_sinu(0)) || !(P->moll = pj_moll(0)))
 		E_ERROR_0;
+	P->sinu->es = 0.;
+        P->sinu->ctx = P->ctx;
+        P->moll->ctx = P->ctx;
 	if (!(P->sinu = pj_sinu(P->sinu)) || !(P->moll = pj_moll(P->moll)))
 		E_ERROR_0;
 	P->fwd = s_forward;
