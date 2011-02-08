@@ -1,11 +1,11 @@
 /* determine latitude from authalic latitude */
 #include <projects.h>
-# define P00 .33333333333333333333
-# define P01 .17222222222222222222
-# define P02 .10257936507936507936
-# define P10 .06388888888888888888
-# define P11 .06640211640211640211
-# define P20 .01641501294219154443
+# define P00 .33333333333333333333 /*   1 /     3 */
+# define P01 .17222222222222222222 /*  31 /   180 */
+# define P02 .10257936507936507937 /* 517 /  5040 */
+# define P10 .06388888888888888888 /*  23 /   360 */
+# define P11 .06640211640211640212 /* 251 /  3780 */
+# define P20 .01677689594356261023 /* 761 / 45360 */
 #define APA_SIZE 3
 	double *
 pj_authset(double es) {
