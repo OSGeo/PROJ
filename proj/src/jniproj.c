@@ -124,7 +124,7 @@ JNIEXPORT jstring JNICALL Java_org_proj4_Projections_getProjInfo
 	if (!(pj = pj_init_plus(proj_def)))
 		exit(1);
 	
-	// put together all the info of the projection and free the pointer to pjdesc
+	/* put together all the info of the projection and free the pointer to pjdesc */
 	pjdesc = pj_get_def(pj, 0);
 	strcpy(info,pjdesc);
 	pj_dalloc(pjdesc);
@@ -160,7 +160,7 @@ JNIEXPORT jstring JNICALL Java_org_proj4_Projections_getEllipsInfo
 	if (!(pj = pj_init_plus(proj_def)))
 		exit(1);
 	
-	// put together all the info of the ellipsoid 
+	/* put together all the info of the ellipsoid  */
 /* 	sprintf(temp,"name: %s;", pj->descr); */
 	sprintf(temp,"name: not available;");
 	strcpy(ellipseinfo,temp);
