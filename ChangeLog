@@ -1,5 +1,7 @@
 2011-02-08  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/PJ_cea.c: Fix particular CEA case  (#94).
+
 	* src/pj_auth.c: correct precision of constants (#93)
 
 	* src/pj_init.c, pj_malloc.c, jniproj.c: avoid C++ comments (#92)
