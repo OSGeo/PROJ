@@ -1,3 +1,7 @@
+2011-02-10  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_gridinfo.c: fix debug bounds reported (#95).
+
 2011-02-08  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/PJ_cea.c: Fix particular CEA case  (#94).
