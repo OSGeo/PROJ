@@ -715,7 +715,7 @@ static int pj_gridinfo_init_gtx( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
             "GTX %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)",
             ct->lim.lam, ct->lim.phi,
             ct->ll.lam, ct->ll.phi, 
-            ct->ll.lam + columns*xstep, ct->ll.phi + rows*ystep);
+            ct->ll.lam + (columns-1)*xstep, ct->ll.phi + (rows-1)*ystep);
     
     ct->ll.lam *= DEG_TO_RAD;
     ct->ll.phi *= DEG_TO_RAD;
