@@ -3,7 +3,7 @@ bin_PROGRAMS =	proj nad2nad nad2bin geod cs2cs
 INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
-include_HEADERS = projects.h nad_list.h proj_api.h org_proj4_Projections.h
+include_HEADERS = proj_api.h org_proj4_Projections.h
 
 EXTRA_DIST = makefile.vc proj.def
 
@@ -38,7 +38,7 @@ libproj_la_SOURCES = \
 	PJ_chamb.c PJ_hammer.c PJ_lagrng.c PJ_larr.c \
 	PJ_lask.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c \
 	PJ_tpeqd.c PJ_vandg.c PJ_vandg2.c PJ_vandg4.c \
-	PJ_wag7.c PJ_lcca.c PJ_geos.c \
+	PJ_wag7.c PJ_lcca.c PJ_geos.c proj_etmerc.c \
 	PJ_boggs.c PJ_collg.c PJ_crast.c PJ_denoy.c \
 	PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c \
 	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c PJ_gstmerc.c \
