@@ -241,8 +241,9 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     ctx->last_errno = 0;
     start = NULL;
 
-    old_locale = setlocale(LC_NUMERIC, NULL); 
-    setlocale(LC_NUMERIC,"C");
+    old_locale = strdup(setlocale(LC_NUMERIC, NULL));
+    if( strcmp(old_locale,"C") != 0 )
+        setlocale(LC_NUMERIC,"C");
 
     /* put arguments into internal linked list */
     if (argc <= 0) { pj_ctx_set_errno( ctx, -1 ); goto bum_call; }
@@ -433,7 +434,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             }
         PIN = 0;
     }
-    setlocale(LC_NUMERIC,old_locale);
+
+    if( strcmp(old_locale,"C") != 0 )
+        setlocale(LC_NUMERIC,old_locale);
+    free( old_locale );
 
     return PIN;
 }
