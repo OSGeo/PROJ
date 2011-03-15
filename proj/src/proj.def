@@ -53,4 +53,4 @@ EXPORTS
 	pj_ctx_set_app_data       @51
 	pj_ctx_get_app_data       @52
 	pj_log 			  @53
-
+	pj_clear_initcache @54
