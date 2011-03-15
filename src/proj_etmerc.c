@@ -145,7 +145,7 @@ FORWARD(e_forward); /* ellipsoid */
 	Cn     = atan2(sin_Cn, cos_Ce*cos_Cn);
 	Ce     = atan2(sin_Ce*cos_Cn, hypot(sin_Cn, cos_Cn*cos_Ce));
 	/* compl. sph. N, E -> ell. norm. N, E */
-	Ce  = log(tan(M_PI_4 + Ce*0.5));
+	Ce  = log(tan(FORTPI + Ce*0.5));
 	Cn += clenS(P->gtu, 5, 2.*Cn, 2.*Ce, &dCn, &dCe);
 	Ce += dCe;
 	if (FABS(Ce) <= 2.623395162778) {
@@ -168,7 +168,7 @@ INVERSE(e_inverse); /* ellipsoid */
 	/* norm. N, E -> compl. sph. LAT, LNG */
 		Cn += clenS(P->utg, 5, 2.*Cn, 2.*Ce, &dCn, &dCe);
 		Ce += dCe;
-		Ce = 2.0*(atan(exp(Ce)) - M_PI_4);
+		Ce = 2.0*(atan(exp(Ce)) - FORTPI);
 		/* compl. sph. LAT -> Gaussian LAT, LNG */
 #ifdef _GNU_SOURCE
     	sincos(Cn, &sin_Cn, &cos_Cn);
