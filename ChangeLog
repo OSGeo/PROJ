@@ -1,3 +1,8 @@
+2011-03-28  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_gridlist.c: avoid possible buffer overflow.
+	https://bugs.meego.com/show_bug.cgi?id=14963
+
 2011-03-23  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_initcache.c: Fix reversed memcpy that causes a crash on the
