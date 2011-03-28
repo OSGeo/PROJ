@@ -192,7 +192,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
              s[end_char] != '\0' && s[end_char] != ','; 
              end_char++ ) {}
 
-        if( end_char > sizeof(name) )
+        if( end_char >= sizeof(name) )
         {
             pj_ctx_set_errno( ctx, -38 );
             pj_release_lock();
