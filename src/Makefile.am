@@ -42,7 +42,7 @@ libproj_la_SOURCES = \
 	PJ_boggs.c PJ_collg.c PJ_crast.c PJ_denoy.c \
 	PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c \
 	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c PJ_gstmerc.c \
-	PJ_gn_sinu.c PJ_goode.c PJ_hatano.c PJ_loxim.c \
+	PJ_gn_sinu.c PJ_goode.c PJ_igh.c PJ_hatano.c PJ_loxim.c \
 	PJ_mbt_fps.c PJ_mbtfpp.c PJ_mbtfpq.c PJ_moll.c \
 	PJ_nell.c PJ_nell_h.c PJ_putp2.c PJ_putp3.c \
 	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_robin.c \
