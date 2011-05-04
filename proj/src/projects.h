@@ -454,8 +454,12 @@ struct PJ_LIST  *pj_get_list_ref( void );
 struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
  
 #ifndef DISABLE_CVSID
-#  define PJ_CVSID(string)     static char pj_cvsid[] = string; \
-static char *cvsid_aw() { return( cvsid_aw() ? ((char *) NULL) : pj_cvsid ); }
+#  if defined(__GNUC__) && __GNUC__ >= 4
+#    define PJ_CVSID(string)     static char pj_cvsid[] __attribute__((used)) = string;
+#  else
+#    define PJ_CVSID(string)     static char pj_cvsid[] = string; \
+static char *cvsid_aw() { return( cvsid_aw() ? ((char *) NULL) : cpl_cvsid ); }
+#  endif
 #else
 #  define PJ_CVSID(string)
 #endif
