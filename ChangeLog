@@ -1,3 +1,8 @@
+2011-05-10  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/projects.h, src/pj_init.c, src/pj_transform.c: Implement
+	support for vto_meter and vunits vertical units transformation.
+
 2011-05-04  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/PJ_igh.c: Added goodes interrupted homolosine (#106).

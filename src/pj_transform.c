@@ -112,6 +112,15 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     }
 
 /* -------------------------------------------------------------------- */
+/*      Transform Z to meters if it isn't already.                      */
+/* -------------------------------------------------------------------- */
+    if( srcdefn->vto_meter != 1.0 && z != NULL )
+    {
+        for( i = 0; i < point_count; i++ )
+            z[point_offset*i] *= srcdefn->vto_meter;
+    }
+
+/* -------------------------------------------------------------------- */
 /*      Transform geocentric source coordinates to lat/long.            */
 /* -------------------------------------------------------------------- */
     if( srcdefn->is_geocent )
@@ -332,6 +341,15 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             while( x[point_offset*i] > dstdefn->long_wrap_center + PI )
                 x[point_offset*i] -= TWOPI;
         }
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Transform Z from meters if needed.                              */
+/* -------------------------------------------------------------------- */
+    if( dstdefn->vto_meter != 1.0 && z != NULL )
+    {
+        for( i = 0; i < point_count; i++ )
+            z[point_offset*i] *= dstdefn->vfr_meter;
     }
 
 /* -------------------------------------------------------------------- */

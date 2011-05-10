@@ -396,6 +396,21 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     } else
         PIN->to_meter = PIN->fr_meter = 1.;
 
+    /* set vertical units */
+    s = 0;
+    if ((name = pj_param(ctx, start, "svunits").s) != NULL) { 
+        for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
+        if (!s) { pj_ctx_set_errno( ctx, -7 ); goto bum_call; }
+        s = pj_units[i].to_meter;
+    }
+    if (s || (s = pj_param(ctx, start, "svto_meter").s)) {
+        PIN->vto_meter = strtod(s, &s);
+        if (*s == '/') /* ratio number */
+            PIN->vto_meter /= strtod(++s, 0);
+        PIN->vfr_meter = 1. / PIN->vto_meter;
+    } else
+        PIN->vto_meter = PIN->vfr_meter = 1.;
+
     /* prime meridian */
     s = 0;
     if ((name = pj_param(ctx, start, "spm").s) != NULL) { 
