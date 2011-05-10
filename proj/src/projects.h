@@ -249,6 +249,7 @@ typedef struct PJconsts {
         int     has_geoid_vgrids;
         struct _pj_gi **vgridlist_geoid;
         int     vgridlist_geoid_count;
+        double  vto_meter, vfr_meter;
 
         double  from_greenwich; /* prime meridian offset (in radians) */
         double  long_wrap_center; /* 0.0 for -180 to 180, actually in radians*/
