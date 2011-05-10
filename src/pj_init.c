@@ -408,8 +408,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         if (*s == '/') /* ratio number */
             PIN->vto_meter /= strtod(++s, 0);
         PIN->vfr_meter = 1. / PIN->vto_meter;
-    } else
-        PIN->vto_meter = PIN->vfr_meter = 1.;
+    } else {
+        PIN->vto_meter = PIN->to_meter;
+        PIN->vfr_meter = PIN->fr_meter;
+    }
 
     /* prime meridian */
     s = 0;
