@@ -458,7 +458,7 @@ struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
 #    define PJ_CVSID(string)     static char pj_cvsid[] __attribute__((used)) = string;
 #  else
 #    define PJ_CVSID(string)     static char pj_cvsid[] = string; \
-static char *cvsid_aw() { return( cvsid_aw() ? ((char *) NULL) : cpl_cvsid ); }
+static char *cvsid_aw() { return( cvsid_aw() ? ((char *) NULL) : pj_cvsid ); }
 #  endif
 #else
 #  define PJ_CVSID(string)

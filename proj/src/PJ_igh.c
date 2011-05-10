@@ -77,12 +77,13 @@ INVERSE(s_inverse); /* spheroid */
 
         if (z)
         {
+          int ok = 0;
+
           xy.x -= P->pj[z-1]->x0;
           xy.y -= P->pj[z-1]->y0;
           lp = P->pj[z-1]->inv(xy, P->pj[z-1]);
           lp.lam += P->pj[z-1]->lam0;
 
-          int ok = 0;
           switch (z) {
             case  1: ok = (lp.lam >= -d180-EPSLN && lp.lam <=  -d40+EPSLN) ||
                          ((lp.lam >=  -d40-EPSLN && lp.lam <=  -d10+EPSLN) &&
@@ -111,8 +112,9 @@ INVERSE(s_inverse); /* spheroid */
         if (!z) lp.phi = HUGE_VAL;
         return (lp);
 }
-FREEUP; int i;
+FREEUP;
         if (P) {
+                int i;
                 for (i = 0; i < 12; ++i)
                         if (P->pj[i]) free(P->pj[i]);
                 free(P);

@@ -32,7 +32,7 @@ pseudo = \
 	PJ_boggs.obj PJ_collg.obj PJ_crast.obj PJ_denoy.obj \
 	PJ_eck1.obj PJ_eck2.obj PJ_eck3.obj PJ_eck4.obj \
 	PJ_eck5.obj PJ_fahey.obj PJ_fouc_s.obj PJ_gins8.obj \
-	PJ_gn_sinu.obj PJ_goode.obj PJ_hatano.obj PJ_loxim.obj \
+	PJ_gn_sinu.obj PJ_goode.obj PJ_igh.obj PJ_hatano.obj PJ_loxim.obj \
 	PJ_mbt_fps.obj PJ_mbtfpp.obj PJ_mbtfpq.obj PJ_moll.obj \
 	PJ_nell.obj PJ_nell_h.obj PJ_putp2.obj PJ_putp3.obj \
 	PJ_putp4p.obj PJ_putp5.obj PJ_putp6.obj PJ_robin.obj \
