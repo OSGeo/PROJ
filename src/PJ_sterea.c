@@ -70,7 +70,10 @@ INVERSE(e_inverse); /* ellipsoid */
 	return(pj_inv_gauss(P->ctx, lp, P->en));
 }
 FREEUP; if (P) { if (P->en) free(P->en); free(P); } }
-ENTRY0(sterea)
+ENTRYA(sterea)
+
+        P->en=0; 
+ENTRYX
 	double R;
 
 	if (!(P->en = pj_gauss_ini(P->e, P->phi0, &(P->phic0), &R))) E_ERROR_0;
