@@ -1,3 +1,7 @@
+2011-05-20  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/PJ_sterea.c: ensure P->en is properly initialized (#109)
+
 2011-05-10  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/projects.h, src/pj_init.c, src/pj_transform.c: Implement
