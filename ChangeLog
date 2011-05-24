@@ -1,5 +1,8 @@
 2011-05-23  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* nad/esri.extra, nad/other.extra: moved 900913 definition from 
+	esri.extra to other.extra since it has nothing to do with esri. 
+
 	* nad/epsg: updated to EPSG 7.6.
 
 2011-05-20  Frank Warmerdam  <warmerdam@pobox.com>
