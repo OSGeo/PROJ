@@ -308,6 +308,7 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
         C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
 	C_NAMESPACE PJ *pj_##name(PJ *P) { if (!P) { \
 	if( (P = (PJ*) pj_malloc(sizeof(PJ))) != NULL) { \
+        memset( P, 0, sizeof(PJ) ); \
 	P->pfree = freeup; P->fwd = 0; P->inv = 0; \
 	P->spc = 0; P->descr = des_##name;
 #define ENTRYX } return P; } else {
