@@ -116,8 +116,8 @@ FREEUP;
         if (P) {
                 int i;
                 for (i = 0; i < 12; ++i)
-                        if (P->pj[i]) free(P->pj[i]);
-                free(P);
+                        if (P->pj[i]) pj_dalloc(P->pj[i]);
+                pj_dalloc(P);
         }
 }
 ENTRY0(igh)
