@@ -116,7 +116,10 @@ FREEUP;
         if (P) {
                 int i;
                 for (i = 0; i < 12; ++i)
-                        if (P->pj[i]) pj_dalloc(P->pj[i]);
+		{
+			if (P->pj[i]) 
+				(*(P->pj[i]->pfree))(P->pj[i]); 
+                }
                 pj_dalloc(P);
         }
 }
