@@ -345,7 +345,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
         if( strchr( axis_legal, axis_arg[0] ) == NULL
             || strchr( axis_legal, axis_arg[1] ) == NULL
-            || (axis_arg[2] && strchr( axis_legal, axis_arg[1] ) == NULL))
+            || strchr( axis_legal, axis_arg[2] ) == NULL)
         {
             pj_ctx_set_errno( ctx, PJD_ERR_AXIS );
             goto bum_call;
