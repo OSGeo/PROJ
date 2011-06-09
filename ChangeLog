@@ -1,5 +1,7 @@
 2011-06-09  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/PJ_robin.c: fix mistaken constant value (#113).
+
 	* src/pj_init.c: fix for +axis validation (#87)
 
 2011-05-31  Frank Warmerdam  <warmerdam@pobox.com>

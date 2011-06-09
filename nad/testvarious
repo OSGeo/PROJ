@@ -228,6 +228,16 @@ $EXE +proj=latlong +datum=WGS84 \
 15d4'42.357"E	14d48'56.372"N 0.000  
 EOF
 #
+echo "##############################################################" >> ${OUT}
+echo "Test robinson projection (#113)" >> ${OUT}
+#
+$EXE +proj=latlong +datum=WGS84 \
+ +to +proj=robin +datum=WGS84 \
+ -E >>${OUT} <<EOF
+-30 40 
+-35 45
+EOF
+#
 ##############################################################################
 # Done! 
 # do 'diff' with distribution results
