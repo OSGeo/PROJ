@@ -1,6 +1,10 @@
+2011-06-09  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_init.c: fix for +axis validation (#87)
+
 2011-05-31  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* src/PJ_igh.c: use pj_dalloc() instead of free() in FREEUP (#112).
+	* src/PJ_igh.c: use project free instead of free() in FREEUP (#112).
 
 	* src/projects.h: memset PJ structure to zeros after allocation to
 	avoid problems getting everything initialized properly (#112).
