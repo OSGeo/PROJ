@@ -4,6 +4,9 @@
 
 	* src/pj_init.c: fix for +axis validation (#87)
 
+	* nad/IGNF: addition/fix of Kerguelen, Amsterdam and St Paul, Terre Adélie,
+	INSPIRE CRSes in IGNF catalogue (#88)
+
 2011-05-31  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/PJ_igh.c: use project free instead of free() in FREEUP (#112).
