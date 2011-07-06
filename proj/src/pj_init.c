@@ -95,6 +95,8 @@ get_defaults(projCtx ctx, paralist **start, paralist *next, char *name) {
     }
     if (errno)
         errno = 0; /* don't care if can't open file */
+    ctx->last_errno = 0;
+    
     return next;
 }
 
