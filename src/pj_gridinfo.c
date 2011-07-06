@@ -769,6 +769,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 /* -------------------------------------------------------------------- */
     strcpy(fname, gridname);
     if (!(fp = pj_open_lib(ctx, fname, "rb"))) {
+        ctx->last_errno = 0; /* don't treat as a persistent error */
         return gilist;
     }
 
