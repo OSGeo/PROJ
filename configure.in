@@ -47,7 +47,7 @@ elif test "$with_jni" != "no" -a "$with_jni" != "" ; then
   if test \! -r "$with_jni/jni.h" ; then
     AC_MSG_ERROR(Did not find $with_jni/jni.h)
   fi
-   
+
   AC_DEFINE(JNI_ENABLED,1,[Enabled for Java/JNI Support])
 
   AC_MSG_RESULT([enabled])
@@ -59,7 +59,7 @@ elif test "$with_jni" = "" ; then
 
   AC_MSG_CHECKING(whether to enable Java/JNI support)
 
-  if test "$ac_cv_header_jni_h" = "no" ; then   
+  if test "$ac_cv_header_jni_h" = "no" ; then
     AC_MSG_RESULT([disabled])
   else
     AC_MSG_RESULT([enabled])
@@ -97,3 +97,5 @@ AC_SUBST(MUTEX_SETTING,$MUTEX_SETTING)
 AC_OUTPUT(Makefile src/Makefile man/Makefile man/man1/Makefile \
 	man/man3/Makefile nad/Makefile \
 	jniwrap/Makefile jniwrap/org/Makefile jniwrap/org/proj4/Makefile)
+
+AC_OUTPUT(proj.pc)
