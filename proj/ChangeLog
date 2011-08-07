@@ -1,5 +1,8 @@
 2011-08-07  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/pj_datums.c: Updated Potsdam (DHDN) towgs84 parameters to match
+	EPSG 7 parameter list for EPSG:4314 (#115).
+
 	* src/pj_mutex.c: alter name of core_lock to avoid conflict on AIX (#55)
 
 2011-07-23    <warmerdam@pobox.com>

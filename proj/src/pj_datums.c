@@ -48,7 +48,7 @@ C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[] = {
 "NAD27",    "nadgrids=@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat",           
                                                      "clrk66", 
 				"North_American_Datum_1927",
-"potsdam",  "towgs84=606.0,23.0,413.0",  "bessel",  "Potsdam Rauenberg 1950 DHDN",
+"potsdam",  "towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7",  "bessel",  "Potsdam Rauenberg 1950 DHDN",
 "carthage",  "towgs84=-263.0,6.0,431.0",  "clark80",  "Carthage 1934 Tunisia",
 "hermannskogel", "towgs84=653.0,-212.0,449.0",  "bessel",  "Hermannskogel",
 "ire65",  "towgs84=482.530,-130.596,564.557,-1.042,-0.214,-0.631,8.15",  "mod_airy",  "Ireland 1965",
