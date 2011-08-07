@@ -105,7 +105,7 @@ static void pj_init_lock()
 
 #include "pthread.h"
 
-static pthread_mutex_t core_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t pj_core_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /************************************************************************/
 /*                          pj_acquire_lock()                           */
@@ -115,7 +115,7 @@ static pthread_mutex_t core_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void pj_acquire_lock()
 {
-    pthread_mutex_lock( &core_lock);
+    pthread_mutex_lock( &pj_core_lock);
 }
 
 /************************************************************************/
@@ -126,7 +126,7 @@ void pj_acquire_lock()
 
 void pj_release_lock()
 {
-    pthread_mutex_unlock( &core_lock );
+    pthread_mutex_unlock( &pj_core_lock );
 }
 
 /************************************************************************/
