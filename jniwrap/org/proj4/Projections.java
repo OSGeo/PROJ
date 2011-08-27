@@ -2,7 +2,7 @@
 
  FILE:  Projections.java
 
- DESCRIPTION:  
+ DESCRIPTION:
 
  NOTES:  ---
  AUTHOR:          Antonello Andrea
@@ -14,27 +14,27 @@
  REVISION:  ---
  =====================================================================================*/
 
-/* 
- This library is free software; you can redistribute it and/or 
- modify it under the terms of the GNU Library General Public 
- License as published by the Free Software Foundation; either 
- version 2 of the License, or (at your option) any later version. 
+/*
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Library General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
 
- This library is distributed in the hope that it will be useful, 
- but WITHOUT ANY WARRANTY; without even the implied warranty of 
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
- Library General Public License for more details. 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Library General Public License for more details.
 
- You should have received a copy of the GNU Library General Public 
- License along with this library; if not, write to the Free 
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 
- USA 
+ You should have received a copy of the GNU Library General Public
+ License along with this library; if not, write to the Free
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ USA
 
- 1. Redistributions of source code must retain the above copyright   
- notice, this list of conditions and the following disclaimer.   
- 2. Redistributions in binary form must reproduce the above copyright   
- notice, this list of conditions and the following disclaimer in the   
- documentation and/or other materials provided with the distribution.   
+ 1. Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
  */
 package org.proj4;
 
@@ -42,7 +42,10 @@ import java.util.LinkedHashMap;
 
 /**
  * superclass of all the projections the main proj methods are held here
+ *
+ * @deprecated Replaced by {@link PJ}.
  */
+@Deprecated
 public abstract class Projections
 {
 
@@ -88,45 +91,58 @@ public abstract class Projections
   }
 
   /**
-   * get all the projection informations needed from the 
+   * get all the projection informations needed from the
    * projection code (reproduces pj_get_def() of the proj api)
-   * 
+   *
    * @param the  proj code or options
    * @return the info String
+   *
+   * @deprecated Replaced by {@link PJ#getDefinition()}.
    */
+  @Deprecated
   protected native String getProjInfo(String proj);
 
   /**
-   * get the ellipsoid parameters from the 
+   * get the ellipsoid parameters from the
    * projection code
-   * 
+   *
    * @param the  proj code or options
    * @return the info String
+   *
+   * @deprecated Replaced by {@link PJ#getSemiMajorAxis()}, {@link PJ#getSemiMinorAxis()},
+   *             {@link PJ#getEccentricitySquared()} and {@link PJ#getDefinition()}.
    */
+  @Deprecated
   protected native String getEllipsInfo(String proj);
 
   /**
    * native call to the reprojections routines of proj
-   * 
+   *
    * @param firstCoord array of x
    * @param secondCoord array of y
    * @param values array of z
    * @param srcCodeString source projection code or option
    * @param destCodeString destination projection code or option
-   * @param pointcount 
+   * @param pointcount
    * @param pointoffset
+   *
+   * @deprecated Replaced by {@link PJ#transform(PJ, int, double[], int, int)}.
    */
+  @Deprecated
   protected native void transform(double[] firstCoord, double[] secondCoord,
       double[] values, String srcCodeString, String destCodeString,
       long pointcount, int pointoffset);
 
   /**
    * public method to call the native getProjInfo
-   * 
-   * @return quoting the proj api:"Returns the PROJ.4 command string that 
-   * would produce this definition expanded as much as possible.  For 
+   *
+   * @return quoting the proj api:"Returns the PROJ.4 command string that
+   * would produce this definition expanded as much as possible.  For
    * instance, +init= calls and +datum= defintions would be expanded"
+   *
+   * @deprecated Replaced by {@link PJ#getDefinition()}.
    */
+  @Deprecated
   public String getProjInfo()
   {
     return getProjInfo(proj);
@@ -134,9 +150,13 @@ public abstract class Projections
 
   /**
    * public method to call the native getEllispdInfo
-   * 
+   *
    * @return the list of ellipsoid parameters
+   *
+   * @deprecated Replaced by {@link PJ#getSemiMajorAxis()}, {@link PJ#getSemiMinorAxis()},
+   *             {@link PJ#getEccentricitySquared()} and {@link PJ#getDefinition()}.
    */
+  @Deprecated
   public String getEllipseInfo()
   {
     return getEllipsInfo(proj);
@@ -144,7 +164,10 @@ public abstract class Projections
 
   /**
    * print to standard output the proj info in a nice format
+   *
+   * @deprecated Replaced by {@link PJ#toString()}.
    */
+  @Deprecated
   public void printProjInfo()
   {
     String projinfo = getProjInfo();
@@ -215,18 +238,22 @@ public abstract class Projections
    * if there is some operation to perform on the input data, this is
    * the right moment (ex. latlong from degree to radiant)
    * -> i.e. do whatever is needed
-   * 
+   *
    * @param dataTP
+   *
+   * @deprecated The conversion from degrees to radians is now performed directly by
+   *             {@link PJ#transform(PJ, int, double[], int, int)}.
    */
+  @Deprecated
   public abstract void prepareData(ProjectionData dataTP);
 
   /**
-   * do the transform. The srcProjection is passed to the destination proj and 
+   * do the transform. The srcProjection is passed to the destination proj and
    * the transformation takes place. Then the resulting transformed data
-   * are passed to the destProj, so that the destProj in case can take care of 
-   * final transformation of data (ex. if the destProj is latlong, the values 
+   * are passed to the destProj, so that the destProj in case can take care of
+   * final transformation of data (ex. if the destProj is latlong, the values
    * have to be set beck to degrees
-   * 
+   *
    * @param srcProj object holding the source projection
    * @param dataTP the data set
    * @param point_count
@@ -241,18 +268,26 @@ public abstract class Projections
 
   /**
    * this takes care that the reprojected data are in the correct format
-   * (ex. latlong has to be transformed back to radiant) 
-   * 
+   * (ex. latlong has to be transformed back to radiant)
+   *
    * @param dataTP the data set
+   *
+   * @deprecated The conversion from radians to degrees is now performed directly by
+   *             {@link PJ#transform(PJ, int, double[], int, int)}.
    */
+  @Deprecated
   public abstract void prepareTransformedData(ProjectionData dataTP);
 
   /**
    * transform latitude and longitude from degree to radiant format
-   * 
+   *
    * @param la
    * @param lo
+   *
+   * @deprecated The conversion from degrees to radians is now performed directly by
+   *             {@link PJ#transform(PJ, int, double[], int, int)}.
    */
+  @Deprecated
   protected void degreeToRadiant(double[] la, double[] lo)
   {
     for (int i = 0; i < la.length; i++)
@@ -264,10 +299,14 @@ public abstract class Projections
 
   /**
    * transform latitude and longitude from radiant to degree format
-   * 
+   *
    * @param la
    * @param lo
+   *
+   * @deprecated The conversion from radians to degrees is now performed directly by
+   *             {@link PJ#transform(PJ, int, double[], int, int)}.
    */
+  @Deprecated
   protected void radiantToDegree(double[] la, double[] lo)
   {
     for (int i = 0; i < la.length; i++)

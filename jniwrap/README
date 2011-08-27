@@ -1,81 +1,92 @@
    -------------------- J P R O J . 4 --------------------
 
-This is the first release of a JNI wrap of the main proj4 functions.
+This is the second release of JNI wrappers for the main proj4 functions.
 
 PLEASE read the following information.
 
-For more information regarding JPROJ4 please contact me through the 
-web page at:
+The first release of JNI wrappers were created by:
 
-		http://www.hydrologis.com
+                http://www.hydrologis.com
+
+For more information regarding the current release please see the web page at:
+
+                http://www.geoapi.org/geoapi-proj4/
 
    ---------------------------------------------------
 
 
-What is JPROJ4:
+What is "Proj.4 wrapper":
 -------------
 
-JPROJ is a small library of java classes that wrap a few proj functions by 
-using the java native interface. 
+"Proj.4 wrapper" is a small library of Java classes that wrap a few Proj.4 functions by
+using the Java Native Interface (JNI).
 
 
 Compilation:
 -------------
 
-To complile the native part, configure has to be run like this:
-CFLAGS=-Iinclude2 ./configure --with-jni=include1
+To compile the native part, configure has to be run in the proj directory like this:
+
+    CFLAGS=-Iinclude2 ./configure --with-jni=include1
+
 where
-include1 = folder in which the header file jni.h resides (usually $JAVA_HOME/include)
-include2 = folder in which the header file jni_md.h resides (usually $JAVA_HOME/include/linux or whatever)
+
+    include1 = folder in which the header file jni.h resides (usually $JAVA_HOME/include)
+    include2 = folder in which the header file jni_md.h resides (usually $JAVA_HOME/include/linux or whatever)
+
+On MacOS, those two folders are /System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home/include/
 
 
-The java part is compiled by running ant inside the "jniwrap" folder. 
+The java part is compiled by running ant inside the "jniwrap" folder.
 This will compile the classes and archive them in a jar library.
-It applies to Linux, Macos and Windows (and virtually to every system 
+It applies to Linux, Macos and Windows (and virtually to every system
 supporting java).
 
 
 Requirements:
 -------------
 
-Beyond the ones already put by proj, you need:
-- j2sdk, the java standard development kit
-- ant, to run the build
-- doxygen for the documentation generation
+Beyond the ones already put by Proj.4, you need:
+- JSE 1.5+, the Java standard development kit version 1.5 or above
+- Ant, to run the build
+- Doxygen for the documentation generation
 
 
 Documentation:
 --------------
 
 The documentation is held inside the code and can be retrieved by running
-doxygen inside the folder jniwrap. This will create the html format 
+doxygen inside the folder jniwrap. This will create the HTML format
 documentation inside of jniwrap/docs
 
-The standard way to achive this is to use an ant target: 
-ant do_make_help
+The standard way to achive this is to use an Ant target:
+
+    ant do_make_help
 
 
 License:
 --------
 
-GPL
+GPL for the first release
+Proj.4 license for the second release.
 
 
 Authors:
 --------
 
 Andrea Antonello (andrea.antonello@hydrologis.com)
+Martin Desruisseaux (martin.desruisseaux@geomatys.fr)
 
 
 Usage & a fast example:
 -----------------------
 
 The jproj.jar is all is needed to implement proj support in java applications.
-The whole job is done by the proj4, so there are just a couple of functions that 
+The whole job is done by the proj4, so there are just a couple of functions that
 be used.
 
 The best way is to see everything through an example.
-In the following example we read projection informations and data from a file 
+In the following example we read projection informations and data from a file
 and then transform the data and query the information.
 
 ________________________________________________________________________________
@@ -87,13 +98,13 @@ rows: 1
 46        11    194.0
 
 
-This contains info about a source and destination projection, the number of data 
+This contains info about a source and destination projection, the number of data
 triplets and then the data (in this case just one point)
 
 
 ________________________________________________________________________________
 Step two:
-create a test code. Simply copy the following into a file called Main.java. The 
+create a test code. Simply copy the following into a file called Main.java. The
 code is commented to see what we are doing:
 
 
@@ -145,10 +156,10 @@ public class Main
       }
     }
     // with what you see above, the header was read
-    
+
     // now I can define the number of rows of data triplets
     int rows = new Integer((String) mapHeader.get("rows")).intValue();
-    
+
     double[][] testCoord = new double[rows][2];
     double[] testValues = new double[rows];
     System.out.println("Source coordinates and values:");
@@ -182,7 +193,7 @@ public class Main
     Proj4 testProjection = new Proj4((String) mapHeader.get("srcProj"),
         (String) mapHeader.get("destProj"));
 
-    // the instantiation of the proj4 object instantiated also the projection 
+    // the instantiation of the proj4 object instantiated also the projection
     // objects for source and destination projection
     // therefore we can already print the projection infos:
     testProjection.printSrcProjInfo();
@@ -190,10 +201,10 @@ public class Main
 
     // and transform, passing as parameter the created dataset:
     testProjection.transform(dataTP, 1, 1);
-    
+
     // if we need the parameters as Hashmap for a later use:
     LinkedHashMap testMap = testProjection.getSrcProjInfo();
-    
+
     // and let us print them to screen to see them
     System.out.println();
     System.out.println("Proj as a Hashmap");

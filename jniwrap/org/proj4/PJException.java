@@ -25,7 +25,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- *****************************************************************************/
+ *****************************************************************************
+ * This file is a copy of a file developed in the GeoAPI "Proj.4 binding"
+ * module (http://www.geoapi.org/geoapi-proj4/index.html). If this file is
+ * modified, please consider synchronizing the changes with GeoAPI.
+ */
 package org.proj4;
 
 
