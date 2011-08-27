@@ -51,15 +51,33 @@
 
 PJ_CVSID("$Id$");
 
+/*
+ * TODO: There is some work that still need to be done in this file:
+ *
+ *  1) Every call to (*env)->GetStringUTFChars(...) shall have a corresponding call to
+ *     (*env)->ReleaseStringUTFChars(...).
+ *
+ *  2) Every call to (*env)->GetFoo(...) shall check for NULL return value.  If the return
+ *     value is NULL, than a java.lang.OutOfMemoryError has already been thrown in the JVM;
+ *     we just need to return from the C method after releasing allocated objects (if any).
+ *
+ *  3) If a Proj.4 method fails to execute, we should invoke (*env)->ThrowNew(...) instead
+ *     than exit(1) in order to throw an exception in the Java program instead than stopping
+ *     the JVM.
+ *
+ *  4) We should check the user arguments for null values or index out of bounds, and
+ *     throw the appropriate Java exception if an argument is invalid.
+ */
+
 /*!
  * \brief
- * executes reprojection 
- * 
+ * executes reprojection
+ *
  * JNI informations:
  * Class:     org_proj4_Projections
  * Method:    transform
  * Signature: ([D[D[DLjava/lang/String;Ljava/lang/String;JI)V
- * 
+ *
  *
  * \param env - parameter used by jni (see JNI specification)
  * \param parent - parameter used by jni (see JNI specification)
@@ -76,7 +94,7 @@ JNIEXPORT void JNICALL Java_org_proj4_Projections_transform
 {
 	int i;
 	projPJ src_pj, dst_pj;
-	char * srcproj_def = (char *) (*env)->GetStringUTFChars (env, src, 0); 
+	char * srcproj_def = (char *) (*env)->GetStringUTFChars (env, src, 0);
 	char * destproj_def = (char *) (*env)->GetStringUTFChars (env, dest, 0);
 
 	if (!(src_pj = pj_init_plus(srcproj_def)))
@@ -84,15 +102,15 @@ JNIEXPORT void JNICALL Java_org_proj4_Projections_transform
 	if (!(dst_pj = pj_init_plus(destproj_def)))
 		exit(1);
 
-	double *xcoord = (* env)-> GetDoubleArrayElements(env, firstcoord, NULL); 
-	double *ycoord = (* env) -> GetDoubleArrayElements(env, secondcoord, NULL); 
-	double *zcoord = (* env) -> GetDoubleArrayElements(env, values, NULL); 
+	double *xcoord = (* env)-> GetDoubleArrayElements(env, firstcoord, NULL);
+	double *ycoord = (* env) -> GetDoubleArrayElements(env, secondcoord, NULL);
+	double *zcoord = (* env) -> GetDoubleArrayElements(env, values, NULL);
 
         pj_transform( src_pj, dst_pj, pcount,poffset, xcoord, ycoord, zcoord);
 
-	(* env)->ReleaseDoubleArrayElements(env,firstcoord,(jdouble *) xcoord,JNI_COMMIT);
-	(* env)->ReleaseDoubleArrayElements(env,secondcoord,(jdouble *) ycoord,JNI_COMMIT);
-	(* env)->ReleaseDoubleArrayElements(env,values,(jdouble *) zcoord,JNI_COMMIT);
+	(* env)->ReleaseDoubleArrayElements(env,firstcoord,(jdouble *) xcoord, 0);
+	(* env)->ReleaseDoubleArrayElements(env,secondcoord,(jdouble *) ycoord, 0);
+	(* env)->ReleaseDoubleArrayElements(env,values,(jdouble *) zcoord, 0);
 
 	pj_free( src_pj );
 	pj_free( dst_pj );
@@ -101,12 +119,12 @@ JNIEXPORT void JNICALL Java_org_proj4_Projections_transform
 /*!
  * \brief
  * retrieves projection parameters
- * 
+ *
  * JNI informations:
  * Class:     org_proj4_Projections
  * Method:    getProjInfo
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
- * 
+ *
  *
  * \param env - parameter used by jni (see JNI specification)
  * \param parent - parameter used by jni (see JNI specification)
@@ -118,30 +136,30 @@ JNIEXPORT jstring JNICALL Java_org_proj4_Projections_getProjInfo
 	PJ *pj;
 	char * pjdesc;
 	char info[arraysize];
-	
+
 	char * proj_def = (char *) (*env)->GetStringUTFChars (env, projdefinition, 0);
-	
+
 	if (!(pj = pj_init_plus(proj_def)))
 		exit(1);
-	
+
 	/* put together all the info of the projection and free the pointer to pjdesc */
 	pjdesc = pj_get_def(pj, 0);
 	strcpy(info,pjdesc);
 	pj_dalloc(pjdesc);
-	
-	return (*env)->NewStringUTF(env,info); 
+
+	return (*env)->NewStringUTF(env,info);
 }
 
 
 /*!
  * \brief
  * retrieves ellipsoid parameters
- * 
+ *
  * JNI informations:
  * Class:     org_proj4_Projections
  * Method:    getEllipsInfo
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
- * 
+ *
  *
  * \param env - parameter used by jni (see JNI specification)
  * \param parent - parameter used by jni (see JNI specification)
@@ -154,12 +172,12 @@ JNIEXPORT jstring JNICALL Java_org_proj4_Projections_getEllipsInfo
 	char * pjdesc;
 	char ellipseinfo[arraysize];
 	char temp[50];
-	
+
 	char * proj_def = (char *) (*env)->GetStringUTFChars (env, projdefinition, 0);
-	
+
 	if (!(pj = pj_init_plus(proj_def)))
 		exit(1);
-	
+
 	/* put together all the info of the ellipsoid  */
 /* 	sprintf(temp,"name: %s;", pj->descr); */
 	sprintf(temp,"name: not available;");
@@ -191,7 +209,7 @@ JNIEXPORT jstring JNICALL Java_org_proj4_Projections_getEllipsInfo
 	sprintf(temp,"fr_meter: %lf;", pj->fr_meter);
 	strcat(ellipseinfo,temp);
 
-	return (*env)->NewStringUTF(env,ellipseinfo); 
+	return (*env)->NewStringUTF(env,ellipseinfo);
 }
 
 #endif
