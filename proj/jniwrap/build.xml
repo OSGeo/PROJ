@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="jproj" default="compile" basedir=".">
-   
+
    <!-- ******************************************* -->
    <!--     set the variables                       -->
    <!-- ******************************************* -->
@@ -14,7 +14,7 @@
    <target name="compile" depends="start, do_javac, jar_it">
         <echo>Compilation finished...</echo>
    </target>
-   
+
    <!-- ******************************************* -->
    <!--     create some begin stuff                 -->
    <!-- ******************************************* -->
@@ -25,7 +25,7 @@
         <mkdir dir="${build}"/>
         <mkdir dir="${libs}"/>
    </target>
-      
+
    <!-- ******************************************* -->
    <!--     execute javac compilation               -->
    <!-- ******************************************* -->
@@ -34,21 +34,21 @@
        <javac srcdir="${src}" destdir="${build}" debug="on">
        </javac>
    </target>
-    
-	
+
+
 
    <!-- ******************************************* -->
    <!--     execute javah for JNI headers           -->
    <!-- ******************************************* -->
-   <!-- needed if something if new native methods are added  -->
-	   <!-- ******************************************* -->
+   <!-- needed if new native methods are added      -->
+   <!-- ******************************************* -->
    <target name="do_javah" depends="do_javac">
        <echo>Creating jni headers...</echo>
        <exec dir="${build}" executable="javah" os="Linux">
-          <arg line="-jni -d ../native org.proj4.Projections"/>
+          <arg line="-jni -d ../native org.proj4.PJ"/>
        </exec>
    </target>
-   
+
    <!-- ******************************************* -->
    <!--     do the C part compilation through make  -->
    <!-- ******************************************* -->
@@ -58,11 +58,11 @@
           <arg line=""/>
        </exec>
    </target>
-   
+
    <!-- ******************************************* -->
    <!-- create binary package distribution with ant -->
    <!-- ******************************************* -->
-   
+
    <!-- this is not working properly by now -->
    <target name="jar_it">
      <delete file="${libs}/jproj.jar"/>
@@ -73,7 +73,7 @@
       </jar>
        <delete dir="${build}"/>
    </target>
-   
+
    <!-- ****************************************************** -->
    <!--     execute doxygen help file and source file creation -->
    <!-- ****************************************************** -->
