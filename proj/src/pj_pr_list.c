@@ -49,7 +49,7 @@ pj_pr_list(PJ *P) {
 /*                                                                      */
 /*      Returns the PROJ.4 command string that would produce this       */
 /*      definition expanded as much as possible.  For instance,         */
-/*      +init= calls and +datum= defintions would be expanded.          */
+/*      +init= calls and +datum= definitions would be expanded.         */
 /************************************************************************/
 
 char *pj_get_def( PJ *P, int options )

@@ -1,3 +1,7 @@
+2011-08-27  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* pj_pr_list.c, pj_sterrno.c: doc typo fixes from Martin.
+
 2011-08-07  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_datums.c: Updated Potsdam (DHDN) towgs84 parameters to match

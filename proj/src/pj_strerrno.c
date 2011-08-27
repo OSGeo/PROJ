@@ -22,7 +22,7 @@ pj_err_list[] = {
 	"latitude or longitude exceeded limits",	/* -14 */
 	"invalid x or y",				/* -15 */
 	"improperly formed DMS value",			/* -16 */
-	"non-convergent inverse meridinal dist",	/* -17 */
+	"non-convergent inverse meridional dist",	/* -17 */
 	"non-convergent inverse phi2",			/* -18 */
 	"acos/asin: |arg| >1.+1e-14",			/* -19 */
 	"tolerance condition error",			/* -20 */
