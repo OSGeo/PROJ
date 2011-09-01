@@ -19,7 +19,7 @@ What is "Proj.4 wrapper":
 -------------
 
 "Proj.4 wrapper" is a small library of Java classes that wrap a few Proj.4 functions by
-using the Java Native Interface (JNI).
+using the Java Native Interface (JNI). The main Java class is org.proj4.PJ.
 
 
 Compilation:
@@ -86,138 +86,34 @@ The whole job is done by the proj4, so there are just a couple of functions that
 be used.
 
 The best way is to see everything through an example.
-In the following example we read projection informations and data from a file
-and then transform the data and query the information.
+In the following example we create two Coordinate System and transform 3 points.
+The Coordinate System and the points are hard-coded for simplicity. Of course,
+real applications would read them from a file or other data source.
 
 ________________________________________________________________________________
-First step:
-create a text file, let's say test.txt, with the following in it:
-srcProj: +proj=latlong +datum=WGS84
-destProj: +init=epsg:32632
-rows: 1
-46        11    194.0
+import org.proj4.*;
+import java.util.Arrays;
 
 
-This contains info about a source and destination projection, the number of data
-triplets and then the data (in this case just one point)
-
-
-________________________________________________________________________________
-Step two:
-create a test code. Simply copy the following into a file called Main.java. The
-code is commented to see what we are doing:
-
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.LinkedHashMap;
-
-import org.proj4.Proj4;
-import org.proj4.ProjectionData;
-
-
-public class Main
-{
-
-  public static void main(String[] args) throws IOException
-  {
-    // print out the usage if no argument was given
-    if (args.length < 1)
-    {
-      System.out.println();
-      System.out.println("Usage:      Proj datafile");
-      System.out.println();
-      System.exit(0);
+/**
+ * Converts coordinates from EPSG:32632 (WGS 84 / UTM zone 32N) to WGS84,
+ * then prints the result to the standard output stream.
+ */
+public class Main {
+    public static void main(String[] args) throws PJException {
+        PJ sourcePJ = new PJ("+init=epsg:32632");           // (x,y) axis order
+        PJ targetPJ = new PJ("+proj=latlong +datum=WGS84"); // (λ,φ) axis order
+        double[] coordinates = {
+            500000,       0,   // First coordinate
+            400000,  100000,   // Second coordinate
+            600000, -100000    // Third coordinate
+        };
+        sourcePJ.transform(targetPJ, 2, coordinates, 0, 3);
+        System.out.println(Arrays.toString(coordinates));
     }
-
-    // now the input file is going to be read
-    BufferedReader br = new BufferedReader(new InputStreamReader(
-        new FileInputStream(new File(args[0]))));
-    LinkedHashMap mapHeader = new LinkedHashMap();
-    // read the header
-    String line = null;
-    for (int i = 0; i < 3; i++)
-    {
-      if ((line = br.readLine()) != null)
-      {
-        String[] header = line.split(":", 2);
-        if (header.length <= 2)
-        {
-          mapHeader.put(header[0].trim(), header[1].trim());
-        }
-        else
-        {
-          System.out.println("Wrong file format");
-          System.exit(0);
-        }
-      }
-    }
-    // with what you see above, the header was read
-
-    // now I can define the number of rows of data triplets
-    int rows = new Integer((String) mapHeader.get("rows")).intValue();
-
-    double[][] testCoord = new double[rows][2];
-    double[] testValues = new double[rows];
-    System.out.println("Source coordinates and values:");
-
-    // start reading the data
-    for (int i = 0; i < rows; i++)
-    {
-      if ((line = br.readLine()) != null)
-      {
-        String[] values = line.split(" +");
-        if (values.length == 3)
-        {
-          testCoord[i][0] = new Double(values[0].trim()).doubleValue();
-          testCoord[i][1] = new Double(values[1].trim()).doubleValue();
-          testValues[i] = new Double(values[2].trim()).doubleValue();
-          System.out.println("x = " + testCoord[i][0] + " y = "
-              + testCoord[i][1] + " z = " + testValues[i]);
-        }
-        else
-        {
-          System.out.println("Wrong file format or empty line found");
-        }
-      }
-    }
-
-    // create the dataset
-    // this is necessary to be able to transform
-    ProjectionData dataTP = new ProjectionData(testCoord, testValues);
-
-    // here we go with the instantiation of the proj4 object
-    Proj4 testProjection = new Proj4((String) mapHeader.get("srcProj"),
-        (String) mapHeader.get("destProj"));
-
-    // the instantiation of the proj4 object instantiated also the projection
-    // objects for source and destination projection
-    // therefore we can already print the projection infos:
-    testProjection.printSrcProjInfo();
-    testProjection.printDestProjInfo();
-
-    // and transform, passing as parameter the created dataset:
-    testProjection.transform(dataTP, 1, 1);
-
-    // if we need the parameters as Hashmap for a later use:
-    LinkedHashMap testMap = testProjection.getSrcProjInfo();
-
-    // and let us print them to screen to see them
-    System.out.println();
-    System.out.println("Proj as a Hashmap");
-    System.out.println("******************************************************");
-    System.out.println(testMap.toString());
-
-  }
-
 }
-
-
 ________________________________________________________________________________
-Step three
+
 compile the Main code:
 we assume that proj was compiled with the right flag to support jproj.
 Therefore we have a library called jproj.jar.
@@ -227,6 +123,6 @@ javac -classpath <path to the jar library>/jproj.jar Main.java
 
 and execute the created test case with:
 
-java -cp .:<path to the jar library>/jproj.jar -Djava.library.path=<path to the libproj, if needed> Main test.txt
+java -cp .:<path to the jar library>/jproj.jar -Djava.library.path=<path to the libproj, if needed> Main
 
 That's it, enjoy!
