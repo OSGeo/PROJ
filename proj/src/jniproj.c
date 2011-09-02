@@ -55,8 +55,8 @@
 #define PJ_FIELD_NAME "ptr"
 #define PJ_FIELD_TYPE "J"
 #define PJ_MAX_DIMENSION 100
-// The PJ_MAX_DIMENSION value appears also in quoted strings.
-// Please perform a search-and-replace if this value is changed.
+/* The PJ_MAX_DIMENSION value appears also in quoted strings.
+   Please perform a search-and-replace if this value is changed. */
 
 PJ_CVSID("$Id$");
 
@@ -106,7 +106,7 @@ JNIEXPORT jlong JNICALL Java_org_proj4_PJ_allocatePJ
   (JNIEnv *env, jclass class, jstring definition)
 {
     const char *def_utf = (*env)->GetStringUTFChars(env, definition, NULL);
-    if (!def_utf) return 0; // OutOfMemoryError already thrown.
+    if (!def_utf) return 0; /* OutOfMemoryError already thrown. */
     PJ *pj = pj_init_plus(def_utf);
     (*env)->ReleaseStringUTFChars(env, definition, def_utf);
     return (jlong) pj;
@@ -272,7 +272,7 @@ JNIEXPORT jcharArray JNICALL Java_org_proj4_PJ_getAxisDirections
         if (array) {
             jchar* axis = (*env)->GetCharArrayElements(env, array, NULL);
             if (axis) {
-                // Don't use memcp because the type may not be the same.
+                /* Don't use memcp because the type may not be the same. */
                 int i;
                 for (i=0; i<length; i++) {
                     axis[i] = pj->axis[i];
@@ -333,13 +333,13 @@ JNIEXPORT jdouble JNICALL Java_org_proj4_PJ_getLinearUnitToMetre
 void convertAngularOrdinates(PJ *pj, double* data, jint numPts, int dimension, double factor) {
     int dimToSkip;
     if (pj_is_latlong(pj)) {
-        // Convert only the 2 first ordinates and skip all the other dimensions.
+        /* Convert only the 2 first ordinates and skip all the other dimensions. */
         dimToSkip = dimension - 2;
     } else if (pj_is_geocent(pj)) {
-        // Convert only the 3 first ordinates and skip all the other dimensions.
+        /* Convert only the 3 first ordinates and skip all the other dimensions. */
         dimToSkip = dimension - 3;
     } else {
-        // Not a geographic or geocentric CRS: nothing to convert.
+        /* Not a geographic or geocentric CRS: nothing to convert. */
         return;
     }
     double *stop = data + dimension*numPts;
@@ -376,7 +376,7 @@ JNIEXPORT void JNICALL Java_org_proj4_PJ_transform
         if (c) (*env)->ThrowNew(env, c, "The target CRS and the coordinates array can not be null.");
         return;
     }
-    if (dimension < 2 || dimension > PJ_MAX_DIMENSION) { // Arbitrary upper value for catching potential misuse.
+    if (dimension < 2 || dimension > PJ_MAX_DIMENSION) { /* Arbitrary upper value for catching potential misuse. */
         jclass c = (*env)->FindClass(env, "java/lang/IllegalArgumentException");
         if (c) (*env)->ThrowNew(env, c, "Illegal dimension. Must be in the [2-100] range.");
         return;
@@ -389,11 +389,11 @@ JNIEXPORT void JNICALL Java_org_proj4_PJ_transform
     PJ *src_pj = getPJ(env, object);
     PJ *dst_pj = getPJ(env, target);
     if (src_pj && dst_pj) {
-        // Using GetPrimitiveArrayCritical/ReleasePrimitiveArrayCritical rather than
-        // GetDoubleArrayElements/ReleaseDoubleArrayElements increase the chances that
-        // the JVM returns direct reference to its internal array without copying data.
-        // However we must promise to run the "critical" code fast, to not make any
-        // system call that may wait for the JVM and to not invoke any other JNI method.
+        /* Using GetPrimitiveArrayCritical/ReleasePrimitiveArrayCritical rather than
+           GetDoubleArrayElements/ReleaseDoubleArrayElements increase the chances that
+           the JVM returns direct reference to its internal array without copying data.
+           However we must promise to run the "critical" code fast, to not make any
+           system call that may wait for the JVM and to not invoke any other JNI method. */
         double *data = (*env)->GetPrimitiveArrayCritical(env, coordinates, NULL);
         if (data) {
             double *x = data + offset;
@@ -458,11 +458,10 @@ JNIEXPORT void JNICALL Java_org_proj4_PJ_finalize
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*
+
+/* ===============================================================================================
+ *
  * Below this point are the previous JNI bindings that existed in the legacy org.proj4.Projections
  * class before the new bindings defined above. We keep those binding for now, but may remove them
  * in a future version. There is a few issues with the code below:
