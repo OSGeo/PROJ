@@ -1,3 +1,8 @@
+2011-09-28  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/epsg: Upgrade to EPSG 7.9.  Ideal datum selection rules also 
+	changed a bit upstream.
+
 2011-09-01  Martin Desruisseaux <martin.desruisseaux@geomatys.fr>
 
         * Updated jniwrap/build.xml Ant script and README file.
