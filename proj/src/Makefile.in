@@ -36,8 +36,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = proj$(EXEEXT) nad2nad$(EXEEXT) nad2bin$(EXEEXT) \
-	geod$(EXEEXT) cs2cs$(EXEEXT)
+bin_PROGRAMS = proj$(EXEEXT) nad2bin$(EXEEXT) geod$(EXEEXT) \
+	cs2cs$(EXEEXT)
 subdir = src
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/proj_config.h.in
@@ -121,9 +121,6 @@ geod_DEPENDENCIES = libproj.la
 am_nad2bin_OBJECTS = nad2bin.$(OBJEXT)
 nad2bin_OBJECTS = $(am_nad2bin_OBJECTS)
 nad2bin_DEPENDENCIES = libproj.la
-am_nad2nad_OBJECTS = nad2nad.$(OBJEXT)
-nad2nad_OBJECTS = $(am_nad2nad_OBJECTS)
-nad2nad_DEPENDENCIES = libproj.la
 am_proj_OBJECTS = proj.$(OBJEXT) gen_cheb.$(OBJEXT) p_series.$(OBJEXT)
 proj_OBJECTS = $(am_proj_OBJECTS)
 proj_DEPENDENCIES = libproj.la
@@ -141,9 +138,9 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libproj_la_SOURCES) $(cs2cs_SOURCES) $(geod_SOURCES) \
-	$(nad2bin_SOURCES) $(nad2nad_SOURCES) $(proj_SOURCES)
+	$(nad2bin_SOURCES) $(proj_SOURCES)
 DIST_SOURCES = $(libproj_la_SOURCES) $(cs2cs_SOURCES) $(geod_SOURCES) \
-	$(nad2bin_SOURCES) $(nad2nad_SOURCES) $(proj_SOURCES)
+	$(nad2bin_SOURCES) $(proj_SOURCES)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -271,12 +268,10 @@ include_HEADERS = proj_api.h org_proj4_Projections.h
 EXTRA_DIST = makefile.vc proj.def
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
-nad2nad_SOURCES = nad2nad.c 
 nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c geodesic.h
 proj_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
-nad2nad_LDADD = libproj.la
 nad2bin_LDADD = libproj.la
 geod_LDADD = libproj.la
 lib_LTLIBRARIES = libproj.la
@@ -457,9 +452,6 @@ geod$(EXEEXT): $(geod_OBJECTS) $(geod_DEPENDENCIES)
 nad2bin$(EXEEXT): $(nad2bin_OBJECTS) $(nad2bin_DEPENDENCIES) 
 	@rm -f nad2bin$(EXEEXT)
 	$(LINK) $(nad2bin_OBJECTS) $(nad2bin_LDADD) $(LIBS)
-nad2nad$(EXEEXT): $(nad2nad_OBJECTS) $(nad2nad_DEPENDENCIES) 
-	@rm -f nad2nad$(EXEEXT)
-	$(LINK) $(nad2nad_OBJECTS) $(nad2nad_LDADD) $(LIBS)
 proj$(EXEEXT): $(proj_OBJECTS) $(proj_DEPENDENCIES) 
 	@rm -f proj$(EXEEXT)
 	$(LINK) $(proj_OBJECTS) $(proj_LDADD) $(LIBS)
@@ -577,7 +569,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jniproj.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_cheby.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad2bin.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad2nad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad_cvt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad_init.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad_intr.Plo@am__quote@

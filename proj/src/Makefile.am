@@ -1,4 +1,4 @@
-bin_PROGRAMS =	proj nad2nad nad2bin geod cs2cs
+bin_PROGRAMS =	proj nad2bin geod cs2cs
 
 INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
@@ -9,13 +9,11 @@ EXTRA_DIST = makefile.vc proj.def
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
-nad2nad_SOURCES = nad2nad.c 
 nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c geodesic.h
 
 proj_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
-nad2nad_LDADD = libproj.la
 nad2bin_LDADD = libproj.la
 geod_LDADD = libproj.la
 

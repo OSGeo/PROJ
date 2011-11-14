@@ -1,5 +1,7 @@
 2011-11-13  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/nad2bin.c: Modified to write NTv2 format files.
+
 	* src/pj_init.c: avoid casting warning with old_locale.
 
 2011-09-28  Frank Warmerdam  <warmerdam@pobox.com>
