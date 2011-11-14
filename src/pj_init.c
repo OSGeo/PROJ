@@ -238,7 +238,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     paralist *curr;
     int i;
     PJ *PIN = 0;
-    const char *old_locale;
+    char *old_locale;
 
     ctx->last_errno = 0;
     start = NULL;
