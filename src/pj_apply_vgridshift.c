@@ -78,7 +78,7 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
     for( i = 0; i < point_count; i++ )
     {
         long io = i * point_offset;
-        LP   input, output;
+        LP   input;
         int  itable;
         double value = HUGE_VAL;
 
