@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
     long lam, laml, phi, phil;
     FILE *fp;
 
+    const char *format   = "ntv2";
     const char *GS_TYPE  = "SECONDS";
     const char *VERSION  = "";
     const char *SYSTEM_F = "NAD27";
@@ -103,158 +104,180 @@ int main(int argc, char **argv) {
     }
 
 /* ==================================================================== */
+/*      Write out the old ctable format - this is machine and byte      */
+/*      order specific.                                                 */
+/* ==================================================================== */
+    if( strcmp(format,"ctable") == 0 ) 
+    {
+	if (!(fp = fopen(argv[1], "wb"))) {
+            perror(argv[1]);
+            exit(2);
+	}
+	if (fwrite(&ct, sizeof(ct), 1, fp) != 1 ||
+            fwrite(ct.cvs, tsize, 1, fp) != 1) {
+            fprintf(stderr, "output failure\n");
+            exit(2);
+	}
+        fclose( fp );
+	exit(0); /* normal completion */
+    }
+
+/* ==================================================================== */
 /*      Write out the NTv2 format grid shift file.                      */
 /* ==================================================================== */
-    if (!(fp = fopen(argv[1], "wb"))) 
+    if( strcmp(format,"ntv2") == 0 ) 
     {
-        perror(argv[1]);
-        exit(2);
-    }
+        if (!(fp = fopen(argv[1], "wb"))) 
+        {
+            perror(argv[1]);
+            exit(2);
+        }
         
 /* -------------------------------------------------------------------- */
 /*      Write the file header.                                          */
 /* -------------------------------------------------------------------- */
-    {    
-        char achHeader[11*16];
+        {    
+            char achHeader[11*16];
 
-        memset( achHeader, 0, sizeof(achHeader) );
+            memset( achHeader, 0, sizeof(achHeader) );
         
-        memcpy( achHeader +  0*16, "NUM_OREC", 8 );
-        achHeader[ 0*16 + 8] = 0xb;
+            memcpy( achHeader +  0*16, "NUM_OREC", 8 );
+            achHeader[ 0*16 + 8] = 0xb;
 
-        memcpy( achHeader +  1*16, "NUM_SREC", 8 );
-        achHeader[ 1*16 + 8] = 0xb;
+            memcpy( achHeader +  1*16, "NUM_SREC", 8 );
+            achHeader[ 1*16 + 8] = 0xb;
 
-        memcpy( achHeader +  2*16, "NUM_FILE", 8 );
-        achHeader[ 2*16 + 8] = 0x1;
+            memcpy( achHeader +  2*16, "NUM_FILE", 8 );
+            achHeader[ 2*16 + 8] = 0x1;
 
-        memcpy( achHeader +  3*16, "GS_TYPE         ", 16 );
-        memcpy( achHeader +  3*16+8, GS_TYPE, MIN(16,strlen(GS_TYPE)) );
+            memcpy( achHeader +  3*16, "GS_TYPE         ", 16 );
+            memcpy( achHeader +  3*16+8, GS_TYPE, MIN(16,strlen(GS_TYPE)) );
 
-        memcpy( achHeader +  4*16, "VERSION         ", 16 );
-        memcpy( achHeader +  4*16+8, VERSION, MIN(16,strlen(VERSION)) );
+            memcpy( achHeader +  4*16, "VERSION         ", 16 );
+            memcpy( achHeader +  4*16+8, VERSION, MIN(16,strlen(VERSION)) );
 
-        memcpy( achHeader +  5*16, "SYSTEM_F        ", 16 );
-        memcpy( achHeader +  5*16+8, SYSTEM_F, MIN(16,strlen(SYSTEM_F)) );
+            memcpy( achHeader +  5*16, "SYSTEM_F        ", 16 );
+            memcpy( achHeader +  5*16+8, SYSTEM_F, MIN(16,strlen(SYSTEM_F)) );
 
-        memcpy( achHeader +  6*16, "SYSTEM_T        ", 16 );
-        memcpy( achHeader +  6*16+8, SYSTEM_T, MIN(16,strlen(SYSTEM_T)) );
+            memcpy( achHeader +  6*16, "SYSTEM_T        ", 16 );
+            memcpy( achHeader +  6*16+8, SYSTEM_T, MIN(16,strlen(SYSTEM_T)) );
 
-        memcpy( achHeader +  7*16, "MAJOR_F ", 8);
-        memcpy( achHeader +  8*16, "MINOR_F ", 8 );
-        memcpy( achHeader +  9*16, "MAJOR_T ", 8 );
-        memcpy( achHeader + 10*16, "MINOR_T ", 8 );
+            memcpy( achHeader +  7*16, "MAJOR_F ", 8);
+            memcpy( achHeader +  8*16, "MINOR_F ", 8 );
+            memcpy( achHeader +  9*16, "MAJOR_T ", 8 );
+            memcpy( achHeader + 10*16, "MINOR_T ", 8 );
 
-        fwrite( achHeader, 1, sizeof(achHeader), fp );
-    }
+            fwrite( achHeader, 1, sizeof(achHeader), fp );
+        }
         
 /* -------------------------------------------------------------------- */
 /*      Write the grid header.                                          */
 /* -------------------------------------------------------------------- */
-    {
-        unsigned char achHeader[11*16];
-        double dfValue;
-        int nGSCount = ct.lim.lam * ct.lim.phi;
-        LP ur;
-
-        ur.lam = ct.ll.lam + (ct.lim.lam-1) * ct.del.lam;
-        ur.phi = ct.ll.phi + (ct.lim.phi-1) * ct.del.phi;
-
-        assert( sizeof(nGSCount) == 4 );
-
-        memset( achHeader, 0, sizeof(achHeader) );
-
-        memcpy( achHeader +  0*16, "SUB_NAME        ", 16 );
-        memcpy( achHeader +  0*16+8, SUB_NAME, MIN(16,strlen(SUB_NAME)) );
-    
-        memcpy( achHeader +  1*16, "PARENT          ", 16 );
-        memcpy( achHeader +  1*16+8, "NONE", MIN(16,strlen("NONE")) );
-    
-        memcpy( achHeader +  2*16, "CREATED         ", 16 );
-        memcpy( achHeader +  2*16+8, CREATED, MIN(16,strlen(CREATED)) );
-    
-        memcpy( achHeader +  3*16, "UPDATED         ", 16 );
-        memcpy( achHeader +  3*16+8, UPDATED, MIN(16,strlen(UPDATED)) );
-
-        memcpy( achHeader +  4*16, "S_LAT   ", 8 );
-        dfValue = ct.ll.phi * 3600.0 / DEG_TO_RAD;
-        memcpy( achHeader +  4*16 + 8, &dfValue, 8 );
-
-        memcpy( achHeader +  5*16, "N_LAT   ", 8 );
-        dfValue = ur.phi * 3600.0 / DEG_TO_RAD;
-        memcpy( achHeader +  5*16 + 8, &dfValue, 8 );
-
-        memcpy( achHeader +  6*16, "E_LONG  ", 8 );
-        dfValue = -1 * ur.lam * 3600.0 / DEG_TO_RAD;
-        memcpy( achHeader +  6*16 + 8, &dfValue, 8 );
-
-        memcpy( achHeader +  7*16, "W_LONG  ", 8 );
-        dfValue = -1 * ct.ll.lam * 3600.0 / DEG_TO_RAD;
-        memcpy( achHeader +  7*16 + 8, &dfValue, 8 );
-
-        memcpy( achHeader +  8*16, "LAT_INC ", 8 );
-        dfValue = ct.del.phi * 3600.0 / DEG_TO_RAD;
-        memcpy( achHeader +  8*16 + 8, &dfValue, 8 );
-    
-        memcpy( achHeader +  9*16, "LONG_INC", 8 );
-        dfValue = ct.del.lam * 3600.0 / DEG_TO_RAD;
-        memcpy( achHeader +  9*16 + 8, &dfValue, 8 );
-    
-        memcpy( achHeader + 10*16, "GS_COUNT", 8 );
-        memcpy( achHeader + 10*16+8, &nGSCount, 4 );
-    
-        if( !IS_LSB ) 
         {
-            swap_words( achHeader +  4*16 + 8, 8, 1 );
-            swap_words( achHeader +  5*16 + 8, 8, 1 );
-            swap_words( achHeader +  6*16 + 8, 8, 1 );
-            swap_words( achHeader +  7*16 + 8, 8, 1 );
-            swap_words( achHeader +  8*16 + 8, 8, 1 );
-            swap_words( achHeader +  9*16 + 8, 8, 1 );
-            swap_words( achHeader + 10*16 + 8, 4, 1 );
-        }
+            unsigned char achHeader[11*16];
+            double dfValue;
+            int nGSCount = ct.lim.lam * ct.lim.phi;
+            LP ur;
 
-        fwrite( achHeader, 1, sizeof(achHeader), fp );
-    }
+            ur.lam = ct.ll.lam + (ct.lim.lam-1) * ct.del.lam;
+            ur.phi = ct.ll.phi + (ct.lim.phi-1) * ct.del.phi;
+
+            assert( sizeof(nGSCount) == 4 );
+
+            memset( achHeader, 0, sizeof(achHeader) );
+
+            memcpy( achHeader +  0*16, "SUB_NAME        ", 16 );
+            memcpy( achHeader +  0*16+8, SUB_NAME, MIN(16,strlen(SUB_NAME)) );
+    
+            memcpy( achHeader +  1*16, "PARENT          ", 16 );
+            memcpy( achHeader +  1*16+8, "NONE", MIN(16,strlen("NONE")) );
+    
+            memcpy( achHeader +  2*16, "CREATED         ", 16 );
+            memcpy( achHeader +  2*16+8, CREATED, MIN(16,strlen(CREATED)) );
+    
+            memcpy( achHeader +  3*16, "UPDATED         ", 16 );
+            memcpy( achHeader +  3*16+8, UPDATED, MIN(16,strlen(UPDATED)) );
+
+            memcpy( achHeader +  4*16, "S_LAT   ", 8 );
+            dfValue = ct.ll.phi * 3600.0 / DEG_TO_RAD;
+            memcpy( achHeader +  4*16 + 8, &dfValue, 8 );
+
+            memcpy( achHeader +  5*16, "N_LAT   ", 8 );
+            dfValue = ur.phi * 3600.0 / DEG_TO_RAD;
+            memcpy( achHeader +  5*16 + 8, &dfValue, 8 );
+
+            memcpy( achHeader +  6*16, "E_LONG  ", 8 );
+            dfValue = -1 * ur.lam * 3600.0 / DEG_TO_RAD;
+            memcpy( achHeader +  6*16 + 8, &dfValue, 8 );
+
+            memcpy( achHeader +  7*16, "W_LONG  ", 8 );
+            dfValue = -1 * ct.ll.lam * 3600.0 / DEG_TO_RAD;
+            memcpy( achHeader +  7*16 + 8, &dfValue, 8 );
+
+            memcpy( achHeader +  8*16, "LAT_INC ", 8 );
+            dfValue = ct.del.phi * 3600.0 / DEG_TO_RAD;
+            memcpy( achHeader +  8*16 + 8, &dfValue, 8 );
+    
+            memcpy( achHeader +  9*16, "LONG_INC", 8 );
+            dfValue = ct.del.lam * 3600.0 / DEG_TO_RAD;
+            memcpy( achHeader +  9*16 + 8, &dfValue, 8 );
+    
+            memcpy( achHeader + 10*16, "GS_COUNT", 8 );
+            memcpy( achHeader + 10*16+8, &nGSCount, 4 );
+    
+            if( !IS_LSB ) 
+            {
+                swap_words( achHeader +  4*16 + 8, 8, 1 );
+                swap_words( achHeader +  5*16 + 8, 8, 1 );
+                swap_words( achHeader +  6*16 + 8, 8, 1 );
+                swap_words( achHeader +  7*16 + 8, 8, 1 );
+                swap_words( achHeader +  8*16 + 8, 8, 1 );
+                swap_words( achHeader +  9*16 + 8, 8, 1 );
+                swap_words( achHeader + 10*16 + 8, 4, 1 );
+            }
+
+            fwrite( achHeader, 1, sizeof(achHeader), fp );
+        }
 
 /* -------------------------------------------------------------------- */
 /*      Write the actual grid cells.                                    */
 /* -------------------------------------------------------------------- */
-    {
-        float *row_buf;
-        int row;
-
-        row_buf = (float *) pj_malloc(ct.lim.lam * sizeof(float) * 4);
-        memset( row_buf, 0, sizeof(float)*4 );
-
-        for( row = 0; row < ct.lim.phi; row++ )
         {
-            int	    i;
+            float *row_buf;
+            int row;
 
-            for( i = 0; i < ct.lim.lam; i++ )
+            row_buf = (float *) pj_malloc(ct.lim.lam * sizeof(float) * 4);
+            memset( row_buf, 0, sizeof(float)*4 );
+
+            for( row = 0; row < ct.lim.phi; row++ )
             {
-                FLP *cvs = ct.cvs + (row) * ct.lim.lam
-                    + (ct.lim.lam - i - 1);
+                int	    i;
 
-                /* convert radians to seconds */
-                row_buf[i*4+0] = cvs->phi * (3600.0 / (PI/180.0));
-                row_buf[i*4+1] = cvs->lam * (3600.0 / (PI/180.0));
+                for( i = 0; i < ct.lim.lam; i++ )
+                {
+                    FLP *cvs = ct.cvs + (row) * ct.lim.lam
+                        + (ct.lim.lam - i - 1);
 
-                /* We leave the accuracy values as zero */
-            }
+                    /* convert radians to seconds */
+                    row_buf[i*4+0] = cvs->phi * (3600.0 / (PI/180.0));
+                    row_buf[i*4+1] = cvs->lam * (3600.0 / (PI/180.0));
 
-            if( !IS_LSB )
-                swap_words( (unsigned char *) row_buf, 4, ct.lim.lam * 4 );
+                    /* We leave the accuracy values as zero */
+                }
 
-            if( fwrite( row_buf, sizeof(float), ct.lim.lam*4, fp ) 
-                != 4 * ct.lim.lam )
-            {
-                perror( "write()" );
-                exit( 2 );
+                if( !IS_LSB )
+                    swap_words( (unsigned char *) row_buf, 4, ct.lim.lam * 4 );
+
+                if( fwrite( row_buf, sizeof(float), ct.lim.lam*4, fp ) 
+                    != 4 * ct.lim.lam )
+                {
+                    perror( "write()" );
+                    exit( 2 );
+                }
             }
         }
-    }
 
-    fclose( fp );
-    exit(0); /* normal completion */
+        fclose( fp );
+        exit(0); /* normal completion */
+    }
 }
