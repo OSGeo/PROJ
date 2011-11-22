@@ -416,6 +416,8 @@ LP nad_cvt(LP, int, struct CTABLE *);
 struct CTABLE *nad_init(projCtx ctx, char *);
 struct CTABLE *nad_ctable_init( projCtx ctx, FILE * fid );
 int nad_ctable_load( projCtx ctx, struct CTABLE *, FILE * fid );
+struct CTABLE *nad_ctable2_init( projCtx ctx, FILE * fid );
+int nad_ctable2_load( projCtx ctx, struct CTABLE *, FILE * fid );
 void nad_free(struct CTABLE *);
 
 /* higher level handling of datum grid shift files */

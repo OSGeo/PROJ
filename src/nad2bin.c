@@ -6,8 +6,6 @@
 #define PJ_LIB__
 #include <projects.h>
 #define U_SEC_TO_RAD 4.848136811095359935899141023e-12
-	static char
-*usage = "<ASCII_dist_table local_bin_table";
 
 /************************************************************************/
 /*                             swap_words()                             */
@@ -18,10 +16,11 @@
 static int  byte_order_test = 1;
 #define IS_LSB	(((unsigned char *) (&byte_order_test))[0] == 1)
 
-static void swap_words( unsigned char *data, int word_size, int word_count )
+static void swap_words( void *data_in, int word_size, int word_count )
 
 {
     int	word;
+    unsigned char *data = (unsigned char *) data_in;
 
     for( word = 0; word < word_count; word++ )
     {
@@ -41,6 +40,17 @@ static void swap_words( unsigned char *data, int word_size, int word_count )
 }
 
 /************************************************************************/
+/*                               Usage()                                */
+/************************************************************************/
+
+static void Usage()
+{
+    fprintf(stderr,
+            "usage: nad2bin [-f ctable/ctable2/ntv2] binary_output < ascii_source\n" );
+    exit(1);
+}
+
+/************************************************************************/
 /*                                main()                                */
 /************************************************************************/
 int main(int argc, char **argv) {
@@ -51,7 +61,9 @@ int main(int argc, char **argv) {
     long lam, laml, phi, phil;
     FILE *fp;
 
-    const char *format   = "ntv2";
+    const char *output_file = NULL;
+
+    const char *format   = "ctable2";
     const char *GS_TYPE  = "SECONDS";
     const char *VERSION  = "";
     const char *SYSTEM_F = "NAD27";
@@ -60,10 +72,27 @@ int main(int argc, char **argv) {
     const char *CREATED  = "";
     const char *UPDATED  = "";
 
-    if (argc != 2) {
-        fprintf(stderr,"usage: %s %s\n", argv[0], usage);
-        exit(1);
+/* ==================================================================== */
+/*      Process arguments.                                              */
+/* ==================================================================== */
+    for( i = 1; i < argc; i++ )
+    {
+        if( strcmp(argv[i],"-f") && i < argc-1 ) 
+        {
+            format = argv[++i];
+        }
+        else if( output_file == NULL )
+        {
+            output_file = argv[i];
+        }
+        else
+            Usage();
     }
+
+    if( output_file == NULL )
+        Usage();
+
+    fprintf( stdout, "Output Binary File Format: %s\n", format );
 
 /* ==================================================================== */
 /*      Read the ASCII Table                                            */
@@ -109,8 +138,8 @@ int main(int argc, char **argv) {
 /* ==================================================================== */
     if( strcmp(format,"ctable") == 0 ) 
     {
-	if (!(fp = fopen(argv[1], "wb"))) {
-            perror(argv[1]);
+	if (!(fp = fopen(output_file, "wb"))) {
+            perror(output_file);
             exit(2);
 	}
 	if (fwrite(&ct, sizeof(ct), 1, fp) != 1 ||
@@ -123,13 +152,62 @@ int main(int argc, char **argv) {
     }
 
 /* ==================================================================== */
+/*      Write out the old ctable format - this is machine and byte      */
+/*      order specific.                                                 */
+/* ==================================================================== */
+    if( strcmp(format,"ctable2") == 0 ) 
+    {
+        char header[160];
+
+	if (!(fp = fopen(output_file, "wb"))) {
+            perror(output_file);
+            exit(2);
+	}
+
+        assert( MAX_TAB_ID == 80 );
+        assert( sizeof(int) == 4 ); /* for ct.lim.lam/phi */
+
+        memset( header, 0, sizeof(header) );
+
+        memcpy( header +   0, "CTABLE V2.0     ", 16 );
+        memcpy( header +  16, ct.id, 80 );
+        memcpy( header +  96, &ct.ll.lam, 8 );
+        memcpy( header + 104, &ct.ll.phi, 8 );
+        memcpy( header + 112, &ct.del.lam, 8 );
+        memcpy( header + 120, &ct.del.phi, 8 );
+        memcpy( header + 128, &ct.lim.lam, 4 );
+        memcpy( header + 132, &ct.lim.phi, 4 );
+
+        /* force into LSB format */
+        if( !IS_LSB ) 
+        {
+            swap_words( header +  96, 8, 4 );
+            swap_words( header + 128, 4, 2 );
+            swap_words( ct.cvs, 4, ct.lim.lam * ct.lim.phi );
+        }
+
+        if( fwrite( header, sizeof(header), 1, fp ) != 1 ) {
+            perror( "fwrite" );
+            exit( 2 );
+        }
+
+	if (fwrite(ct.cvs, tsize, 1, fp) != 1) {
+            perror( "fwrite" );
+            exit(2);
+	}
+
+        fclose( fp );
+	exit(0); /* normal completion */
+    }
+
+/* ==================================================================== */
 /*      Write out the NTv2 format grid shift file.                      */
 /* ==================================================================== */
     if( strcmp(format,"ntv2") == 0 ) 
     {
-        if (!(fp = fopen(argv[1], "wb"))) 
+        if (!(fp = fopen(output_file, "wb"))) 
         {
-            perror(argv[1]);
+            perror(output_file);
             exit(2);
         }
         
@@ -266,7 +344,7 @@ int main(int argc, char **argv) {
                 }
 
                 if( !IS_LSB )
-                    swap_words( (unsigned char *) row_buf, 4, ct.lim.lam * 4 );
+                    swap_words( row_buf, 4, ct.lim.lam * 4 );
 
                 if( fwrite( row_buf, sizeof(float), ct.lim.lam*4, fp ) 
                     != 4 * ct.lim.lam )
@@ -280,4 +358,7 @@ int main(int argc, char **argv) {
         fclose( fp );
         exit(0); /* normal completion */
     }
+
+    fprintf( stderr, "Unsupported format, nothing written.\n" );
+    exit( 3 );
 }
