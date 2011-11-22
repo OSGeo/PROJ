@@ -122,8 +122,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         return 0;
 
 /* -------------------------------------------------------------------- */
-/*      ctable is currently loaded on initialization though there is    */
-/*      no real reason not to support delayed loading for it as well.   */
+/*      Original platform specific CTable format.                       */
 /* -------------------------------------------------------------------- */
     if( strcmp(gi->format,"ctable") == 0 )
     {
@@ -139,6 +138,29 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         }
 
         result = nad_ctable_load( ctx, gi->ct, fid );
+
+        fclose( fid );
+
+        return result;
+    }
+
+/* -------------------------------------------------------------------- */
+/*      CTable2 format.                                                 */
+/* -------------------------------------------------------------------- */
+    else if( strcmp(gi->format,"ctable2") == 0 )
+    {
+        FILE *fid;
+        int result;
+
+        fid = pj_open_lib( ctx, gi->filename, "rb" );
+        
+        if( fid == NULL )
+        {
+            pj_ctx_set_errno( ctx, -38 );
+            return 0;
+        }
+
+        result = nad_ctable2_load( ctx, gi->ct, fid );
 
         fclose( fid );
 
@@ -808,6 +830,22 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
                  || strcmp(gridname+strlen(gridname)-3,"GTX") == 0) )
     {
         pj_gridinfo_init_gtx( ctx, fp, gilist );
+    }
+
+    else if( strncmp(header+0,"CTABLE V2",9) == 0 )
+    {
+        struct CTABLE *ct = nad_ctable2_init( ctx, fp );
+
+        gilist->format = "ctable2";
+        gilist->ct = ct;
+
+        pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
+                "Ctable2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
+                ct->id, 
+                ct->lim.lam, ct->lim.phi,
+                ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
+                (ct->ll.lam + (ct->lim.lam-1)*ct->del.lam) * RAD_TO_DEG, 
+                (ct->ll.phi + (ct->lim.phi-1)*ct->del.phi) * RAD_TO_DEG );
     }
 
     else
