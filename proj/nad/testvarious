@@ -237,6 +237,64 @@ $EXE +proj=latlong +datum=WGS84 \
 -30 40 
 -35 45
 EOF
+echo "##############################################################" >> ${OUT}
+echo "Test forward projection on sphere" >> ${OUT}
+$EXE +proj=latlong +a=1 +lon_0=0 \
+ +to +proj=healpix +a=1 +lon_0=0  -f '%.'5'f' \
+ -E >>${OUT} <<EOF
+0 41.81031
+-90 0
+EOF
+echo "Test inverse projection on sphere" >> ${OUT}
+$EXE +proj=latlong +a=1 +lon_0=0 \
+ +to +proj=healpix +a=1 +lon_0=0  -f '%.'5'f' -I\
+ -E >>${OUT} <<EOF
+0 0.7853981633974483
+-1.5707963267948966 0
+EOF
+echo "Test forward projection on ellipsoid" >> ${OUT}
+$EXE +proj=latlong +a=1 +lon_0=0 +ellps=WGS84 \
+ +to +proj=healpix +a=1 +lon_0=0 +ellps=WGS84 -f '%.'5'f' \
+ -E >>${OUT} <<EOF
+0 41.937853904844985
+-90 0
+EOF
+echo "Test inverse projection on ellipsoid" >> ${OUT}
+$EXE +proj=latlong +a=1 +lon_0=0 +ellps=WGS84 \
+ +to +proj=healpix +a=1 +lon_0=0 +ellps=WGS84 -f '%.'5'f' -I\
+ -E >>${OUT} <<EOF
+0 0.7853981633974483
+-1.5707963267948966 0
+EOF
+echo "##############################################################" >> ${OUT}
+echo "Test forward projection on sphere" >> ${OUT}
+$EXE +proj=latlong +a=1 +lon_0=0 \
+ +to +proj=rhealpix +a=1 +lon_0=0 +npole=0 +spole=0 -f '%.'5'f' \
+ -E >>${OUT} <<EOF
+0 41.81031
+-90 0
+EOF
+echo "Test inverse projection on sphere" >> ${OUT}
+$EXE +proj=latlong +a=1 +lon_0=0 \
+ +to +proj=rhealpix +a=1 +lon_0=0 +npole=0 +spole=0 -f '%.'5'f' -I\
+ -E >>${OUT} <<EOF
+0 0.7853981633974483
+-1.5707963267948966 0
+EOF
+echo "Test forward projection on ellipsoid" >> ${OUT}
+$EXE +proj=latlong +a=1 +lon_0=0 +ellps=WGS84 \
+ +to +proj=rhealpix +a=1 +lon_0=0 +ellps=WGS84 +npole=0 +spole=0 -f '%.'5'f' \
+ -E >>${OUT} <<EOF
+0 41.937853904844985
+-90 0
+EOF
+echo "Test inverse projection on ellipsoid" >> ${OUT}
+$EXE +proj=latlong +a=1 +lon_0=0 +ellps=WGS84 \
+ +to +proj=rhealpix +a=1 +lon_0=0 -I +ellps=WGS84 +npole=0 +spole=0 -f '%.'5'f'\
+ -E >>${OUT} <<EOF
+0 0.7853981633974483
+-1.5707963267948966 0
+EOF
 #
 ##############################################################################
 # Done! 

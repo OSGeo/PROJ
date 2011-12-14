@@ -26,7 +26,8 @@ misc = \
 	PJ_chamb.obj PJ_hammer.obj PJ_lagrng.obj PJ_larr.obj \
 	PJ_lask.obj PJ_nocol.obj PJ_ob_tran.obj PJ_oea.obj \
 	PJ_tpeqd.obj PJ_vandg.obj PJ_vandg2.obj PJ_vandg4.obj \
-	PJ_wag7.obj pj_latlong.obj PJ_krovak.obj pj_geocent.obj
+	PJ_wag7.obj pj_latlong.obj PJ_krovak.obj pj_geocent.obj \
+	PJ_healpix.obj
 
 pseudo = \
 	PJ_boggs.obj PJ_collg.obj PJ_crast.obj PJ_denoy.obj \
