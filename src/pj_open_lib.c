@@ -161,13 +161,13 @@ pj_open_lib(projCtx ctx, char *name, char *mode) {
             errno = 0;
     }
 
+    if( ctx->last_errno == 0 && errno != 0 )
+        pj_ctx_set_errno( ctx, errno );
+
     pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
             "pj_open_lib(%s): call fopen(%s) - %s\n",
             name, sysname,
             fid == NULL ? "failed" : "succeeded" );
-
-    if( ctx->last_errno == 0 && errno != 0 )
-        pj_ctx_set_errno( ctx, errno );
 
     return(fid);
 #else
