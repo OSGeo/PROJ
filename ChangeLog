@@ -1,3 +1,8 @@
+2011-12-22  Frank Warmerdam  <warmerdam@google.com>
+
+	* src/pj_init.c; Only split arguments on pluses following spaces 
+	in pj_init_plus() (#132)
+
 2011-12-14  Frank Warmerdam  <warmerdam@google.com>
 
 	* src/pj_open_lib.c: make sure we check errno before logging messages (#131).

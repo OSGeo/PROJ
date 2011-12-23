@@ -171,7 +171,7 @@ pj_init_plus_ctx( projCtx ctx, const char *definition )
 #define MAX_ARG 200
     char	*argv[MAX_ARG];
     char	*defn_copy;
-    int		argc = 0, i;
+    int		argc = 0, i, blank_count = 0;
     PJ	    *result;
     
     /* make a copy that we can manipulate */
@@ -185,8 +185,15 @@ pj_init_plus_ctx( projCtx ctx, const char *definition )
         switch( defn_copy[i] )
         {
           case '+':
-            if( i == 0 || defn_copy[i-1] == '\0' )
+            if( i == 0 || defn_copy[i-1] == '\0' || blank_count > 0 )
             {
+                /* trim trailing spaces from the previous param */
+                if( blank_count > 0 )
+                {
+                    defn_copy[i - blank_count] = '\0';
+                    blank_count = 0;
+                }
+                
                 if( argc+1 == MAX_ARG )
                 {
                     pj_ctx_set_errno( ctx, -44 );
@@ -200,13 +207,20 @@ pj_init_plus_ctx( projCtx ctx, const char *definition )
           case ' ':
           case '\t':
           case '\n':
-            defn_copy[i] = '\0';
+            /* trim leading spaces from the current param */
+            if( i == 0 || defn_copy[i-1] == '\0' || argc == 0 || argv[argc-1] == defn_copy + i )
+                defn_copy[i] = '\0';
+            else
+                blank_count++;
             break;
 
           default:
-            /* do nothing */;
+            /* reset blank_count */
+            blank_count = 0;
         }
     }
+    /* trim trailing spaces from the last param */
+    defn_copy[i - blank_count] = '\0';
 
     /* perform actual initialization */
     result = pj_init_ctx( ctx, argc, argv );
