@@ -173,8 +173,8 @@ int nad_ctable2_load( projCtx ctx, struct CTABLE *ct, FILE *fid )
 
         if( getenv("PROJ_DEBUG") != NULL )
         {
-            fprintf( stderr, 
-            "ctable loading failed on fread() - binary incompatible?\n" );
+            fprintf( stderr,
+            "ctable2 loading failed on fread() - binary incompatible?\n" );
         }
 
         pj_ctx_set_errno( ctx, -38 );

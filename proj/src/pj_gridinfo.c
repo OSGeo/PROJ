@@ -832,7 +832,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
         pj_gridinfo_init_gtx( ctx, fp, gilist );
     }
 
-    else if( strncmp(header+0,"CTABLE V2",9) == 0 )
+    else if( strncmp(header + 0,"CTABLE V2",9) == 0 )
     {
         struct CTABLE *ct = nad_ctable2_init( ctx, fp );
 
