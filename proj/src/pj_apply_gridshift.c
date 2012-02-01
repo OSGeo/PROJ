@@ -140,11 +140,15 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **tables, int grid_count,
         {
             PJ_GRIDINFO *gi = tables[itable];
             struct CTABLE *ct = gi->ct;
+            double epsilon = (fabs(ct->del.phi)+fabs(ct->del.lam))/10000.0;
 
             /* skip tables that don't match our point at all.  */
-            if( ct->ll.phi > input.phi || ct->ll.lam > input.lam
-                || ct->ll.phi + (ct->lim.phi-1) * ct->del.phi < input.phi
-                || ct->ll.lam + (ct->lim.lam-1) * ct->del.lam < input.lam )
+            if( ct->ll.phi - epsilon > input.phi 
+                || ct->ll.lam - epsilon > input.lam
+                || (ct->ll.phi + (ct->lim.phi-1) * ct->del.phi + epsilon 
+                    < input.phi)
+                || (ct->ll.lam + (ct->lim.lam-1) * ct->del.lam + epsilon 
+                    < input.lam) )
                 continue;
 
             /* If we have child nodes, check to see if any of them apply. */
@@ -155,10 +159,15 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **tables, int grid_count,
                 for( child = gi->child; child != NULL; child = child->next )
                 {
                     struct CTABLE *ct1 = child->ct;
+                    double epsilon = 
+                        (fabs(ct1->del.phi)+fabs(ct1->del.lam))/10000.0;
 
-                    if( ct1->ll.phi > input.phi || ct1->ll.lam > input.lam
-                      || ct1->ll.phi+(ct1->lim.phi-1)*ct1->del.phi < input.phi
-                      || ct1->ll.lam+(ct1->lim.lam-1)*ct1->del.lam < input.lam)
+                    if( ct1->ll.phi - epsilon > input.phi 
+                        || ct1->ll.lam - epsilon > input.lam
+                        || (ct1->ll.phi+(ct1->lim.phi-1)*ct1->del.phi + epsilon 
+                            < input.phi)
+                        || (ct1->ll.lam+(ct1->lim.lam-1)*ct1->del.lam + epsilon 
+                            < input.lam) )
                         continue;
 
                     break;
