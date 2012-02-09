@@ -218,9 +218,23 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **tables, int grid_count,
                                 ",%s", gi->gridname );
                 }
             }
-                
-            pj_ctx_set_errno( ctx, PJD_ERR_GRID_AREA );
-            return PJD_ERR_GRID_AREA;
+
+            /* 
+             * We don't actually have any machinery currently to set the following
+             * macro, so this is mostly kept here to make it clear how we ought to 
+             * operate if we wanted to make it super clear that an error has occured
+             * when points are outside our available datum shift areas.  But if this
+             * is on, we will find that "low value" points on the fringes of some 
+             * datasets will completely fail causing lots of problems when it is more
+             * or less ok to just not apply a datum shift.  So rather than deal with
+             * that we just fallback to no shift. (see also bug #45).
+             */
+#ifdef ERR_GRID_AREA_TRANSIENT_SEVERE
+            y[io] = HUGE_VAL;
+            x[io] = HUGE_VAL;
+#else
+            /* leave x/y unshifted. */
+#endif
         }
         else
         {

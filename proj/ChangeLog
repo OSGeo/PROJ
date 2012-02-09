@@ -1,3 +1,9 @@
+2012-02-08  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_apply_gridshift.c: Ensure that one amoung many points
+	falling outside the grid areas will not cause the remainder to not
+	be datum shifted in a way that is hard to diagnose. (#45)
+
 2012-02-01  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_apply_gridshift.c: ensure we try to use grids as long as we
