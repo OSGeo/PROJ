@@ -154,3 +154,20 @@ PJ *pj_latlong_from_proj( PJ *pj_in )
     return pj_init_plus_ctx( pj_in->ctx, defn );
 }
 
+/************************************************************************/
+/*                        pj_get_spheroid_defn()                        */
+/*                                                                      */
+/*      Fetch the internal definition of the spheroid.  Note that       */
+/*      you can compute "b" from eccentricity_squared as:               */
+/*                                                                      */
+/*      b = a * sqrt(1 - es)                                            */
+/************************************************************************/
+
+void pj_get_spheroid_defn(projPJ defn, double *major_axis, double *eccentricity_squared)
+{
+	if ( major_axis )
+		*major_axis = defn->a;
+		
+	if ( eccentricity_squared )
+		*eccentricity_squared = defn->es;
+};
