@@ -146,7 +146,8 @@ double standardize_lat(double x){
  * @param testy the y-coordinate of the test point.
  * @return 1 if on or within the bounds of the polygon, and 0 otherwise.
  **/
-int pnpoly(int nvert, double vert[][nvert], double testx, double testy){
+static
+int pnpoly(int nvert, double vert[][2], double testx, double testy){
     
     int i,j,c = 0;
     int counter = 0;
@@ -200,7 +201,7 @@ int pnpoly(int nvert, double vert[][nvert], double testx, double testy){
  **/
 int in_image(double x, double y, int proj, int npole, int spole){
     if(proj == 0){
-	double healpixVertsJit[][18] = {
+	double healpixVertsJit[][2] = {
 	    {-1.0*PI-EPS    ,PI/4.0},
 	    {-3.0*PI/4.0    ,PI/2.0+EPS},
 	    {-1.0*PI/2.0    ,PI/4.0+EPS},
@@ -219,10 +220,11 @@ int in_image(double x, double y, int proj, int npole, int spole){
 	    {-1.0*PI/2.0    ,-1.0*PI/4.0-EPS},
 	    {-3.0*PI/4.0    ,-1.0*PI/2.0-EPS},
 	    {-1.0*PI-EPS    ,-1.0*PI/4.0}};
-	return pnpoly(18,healpixVertsJit,x,y);
+	return pnpoly((int)sizeof(healpixVertsJit)/sizeof(healpixVertsJit[0]),
+                  healpixVertsJit,x,y);
     }else{
 	// Used for calculating if a point is within the rHEALPix projection for sphere.
-	double rhealpixVertsJit[][12] = {
+	double rhealpixVertsJit[][2] = {
 	    {-1.0*PI-EPS			,PI/4.0+EPS},
 	    {-1.0*PI + npole*PI/2.0-EPS		,PI/4.0+EPS},
 	    {-1.0*PI + npole*PI/2.0-EPS		,3*PI/4.0+EPS},
@@ -235,7 +237,8 @@ int in_image(double x, double y, int proj, int npole, int spole){
 	    {-1.0*PI + spole*PI/2.0-EPS		,-3.0*PI/4.0-EPS},
 	    {-1.0*PI + spole*PI/2.0-EPS		,-1.0*PI/4.0-EPS},
 	    {-1.0*PI-EPS			,-1.0*PI/4.0-EPS}};
-	return pnpoly(12,rhealpixVertsJit,x,y);
+	return pnpoly((int)sizeof(rhealpixVertsJit)/sizeof(rhealpixVertsJit[0]),
+                  rhealpixVertsJit,x,y);
     }
 }
 /**
@@ -565,12 +568,12 @@ FORWARD(s_healpix_forward); /* spheroid */
     return healpix_sphere(lp, P);
 }
 INVERSE(e_healpix_inverse); /* ellipsoidal */
-    double bet;
+    double bet, x, y;
     P->a = P->ra;
 
     // Scale down to radius 1 sphere before checking x,y
-    double x = scale_number(xy.x,P->a,1);
-    double y = scale_number(xy.y,P->a,1);
+    x = scale_number(xy.x,P->a,1);
+    y = scale_number(xy.y,P->a,1);
     // check if the point is in the image
     if(in_image(x,y,0,0,0) == 0){
 	lp.lam = HUGE_VAL;
