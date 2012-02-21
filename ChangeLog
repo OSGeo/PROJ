@@ -1,5 +1,7 @@
 2012-02-20  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/nad2nad.c: completely removed as part of the ctable2 overhaul.
+
 	* src/cs2cs.c, src/pj_init.c, src/geod_set.c, src/nad2nad.c, src/geod.c:
 	Use parenthesis around assignments in if statements (#123).
 
