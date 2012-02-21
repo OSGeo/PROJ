@@ -25,7 +25,7 @@ libproj_la_SOURCES = \
 	projects.h pj_list.h \
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c PJ_sterea.c \
-	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c \
+	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c PJ_isea.c \
 	PJ_imw_p.c PJ_krovak.c PJ_lcc.c PJ_poly.c \
 	PJ_rpoly.c PJ_sconics.c proj_rouss.c \
 	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c \

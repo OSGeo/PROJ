@@ -38,7 +38,7 @@ pseudo = \
 	PJ_nell.obj PJ_nell_h.obj PJ_putp2.obj PJ_putp3.obj \
 	PJ_putp4p.obj PJ_putp5.obj PJ_putp6.obj PJ_robin.obj \
 	PJ_sts.obj PJ_urm5.obj PJ_urmfps.obj PJ_wag2.obj \
-	PJ_wag3.obj PJ_wink1.obj PJ_wink2.obj
+	PJ_wag3.obj PJ_wink1.obj PJ_wink2.obj PJ_isea.obj 
 
 support = \
 	aasincos.obj adjlon.obj bch2bps.obj bchgen.obj pj_gauss.obj \
