@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <float.h>
 
+#ifndef M_PI
+#  define M_PI 3.14159265358979323846
+#endif
+
 /*
  * Proj 4 provides its own entry points into
  * the code, so none of the library functions
