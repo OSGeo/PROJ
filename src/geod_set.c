@@ -23,7 +23,7 @@ geod_set(int argc, char **argv) {
 	/* set elliptical parameters */
 	if (pj_ell_set(pj_get_default_ctx(),start, &geod_a, &es)) emess(1,"ellipse setup failure");
 	/* set units */
-	if (name = pj_param(NULL,start, "sunits").s) {
+	if ((name = pj_param(NULL,start, "sunits").s) != NULL) {
 		char *s;
                 struct PJ_UNITS *unit_list = pj_get_units_ref();
 		for (i = 0; (s = unit_list[i].id) && strcmp(name, s) ; ++i) ;
@@ -32,7 +32,7 @@ geod_set(int argc, char **argv) {
 		fr_meter = 1. / (to_meter = atof(unit_list[i].to_meter));
 	} else
 		to_meter = fr_meter = 1.;
-	if (ellipse = es != 0.) {
+	if ((ellipse = es) != 0.) {
 		onef = sqrt(1. - es);
 		geod_f = 1 - onef;
 		f2 = geod_f/2;
@@ -53,7 +53,7 @@ geod_set(int argc, char **argv) {
 			lam2 = pj_param(NULL,start, "rlon_2").f;
 			geod_inv();
 			geod_pre();
-		} else if (geod_S = pj_param(NULL,start, "dS").f) {
+		} else if ((geod_S = pj_param(NULL,start, "dS").f) != 0.) {
 			al12 = pj_param(NULL,start, "rA").f;
 			geod_pre();
 			geod_for();
@@ -61,7 +61,7 @@ geod_set(int argc, char **argv) {
 		if ((n_alpha = pj_param(NULL,start, "in_A").i) > 0) {
 			if (!(del_alpha = pj_param(NULL,start, "rdel_A").f))
 				emess(1,"del azimuth == 0");
-		} else if (del_S = fabs(pj_param(NULL,start, "ddel_S").f)) {
+		} else if ((del_S = fabs(pj_param(NULL,start, "ddel_S").f)) != 0.) {
 			n_S = geod_S / del_S + .5;
 		} else if ((n_S = pj_param(NULL,start, "in_S").i) <= 0)
 			emess(1,"no interval divisor selected");

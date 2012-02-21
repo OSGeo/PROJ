@@ -108,7 +108,7 @@ set_ops(char *s, struct IO_CON *io) {
 	char *intag;
 	struct TAG_LIST *p;
 
-	for ( ; intag = strtok(s, " ,\t"); s = 0) {
+	for ( ; (intag = strtok(s, " ,\t")) != NULL; s = 0) {
 		for (p = ops_list; p->tag; ++p) {
 			if (!strncmp(intag, p->tag, strlen(p->tag)))
 				break;
@@ -147,7 +147,7 @@ process(FILE *fid) {
 	for (;;) {
 		if (input.bin)
 			fread(&val, sizeof(projUV), 1, fid);
-		else if (s = fgets(line, MAX_LINE, fid)) {
+		else if ((s = fgets(line, MAX_LINE, fid)) != NULL) {
 			if (*s == tag) {
 				fputs(line, stdout);
 				continue;
@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
 	FILE *fid;
 	int eargc = 0, c;
 
-	if (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR))
+	if ((emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != NULL)
 		++emess_dat.Prog_name;
 	else emess_dat.Prog_name = *argv;
 	if (argc <= 1 ) {

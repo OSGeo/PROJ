@@ -172,7 +172,7 @@ int main(int argc, char **argv)
     int from_argc=0, to_argc=0, iargc = argc, eargc = 0, c, mon = 0;
     int have_to_flag = 0, inverse = 0, i;
 
-    if (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR))
+    if ((emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != NULL)
         ++emess_dat.Prog_name;
     else emess_dat.Prog_name = *argv;
     inverse = ! strncmp(emess_dat.Prog_name, "inv", 3);

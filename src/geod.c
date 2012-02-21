@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
 	FILE *fid;
 	static int eargc = 0, c;
 
-	if (emess_dat.Prog_name = strrchr(*argv,'/')) ++emess_dat.Prog_name;
+	if ((emess_dat.Prog_name = strrchr(*argv,'/')) != NULL) ++emess_dat.Prog_name;
 	else emess_dat.Prog_name = *argv;
 	inverse = ! strncmp(emess_dat.Prog_name, "inv", 3);
 	if (argc <= 1 ) {
