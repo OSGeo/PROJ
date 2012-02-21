@@ -65,7 +65,7 @@ CS2CS_EXE   = cs2cs.exe
 GEOD_EXE    = geod.exe
 NAD2BIN_EXE = nad2bin.exe
 
-CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" \
+CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR_ESCAPED)\" \
 		-DHAVE_STRERROR=1 $(OPTFLAGS)
 
 default:	all
