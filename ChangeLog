@@ -1,5 +1,7 @@
 2012-02-20  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/nad2bin.c: improve io error checking (#140).
+
 	* src/PJ_healpix.c: fix windows build issues (#133)
 
 2012-02-15  Frank Warmerdam  <warmerdam@pobox.com>
