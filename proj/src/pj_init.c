@@ -470,7 +470,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     if( strcmp(old_locale,"C") != 0 )
         setlocale(LC_NUMERIC,old_locale);
-    free( old_locale );
+    free( (char*)old_locale );
 
     return PIN;
 }
