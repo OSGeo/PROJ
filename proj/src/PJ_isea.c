@@ -507,57 +507,6 @@ isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
 
 #define PRECISION 0.0000000000005
 
-/*
- * TODO rename to isea_coordtrans and take an struct pointer to the result
- * struct TODO remove function entirely.  we use the synder one. the only
- * difference is a 180 degree longitude rotation
- */
-ISEA_STATIC
-struct isea_geo
-coordtrans(struct isea_geo * newNPold, struct isea_geo * ptold, double lon0)
-{
-	double          cosptnewlat, cosptnewlon;
-	struct isea_geo ptnew;
-
-	cosptnewlat = sin(newNPold->lat) * sin(ptold->lat) +
-		cos(newNPold->lat) * cos(ptold->lat) * cos(newNPold->lon - ptold->lon);
-
-	if (cosptnewlat > 1.)
-		cosptnewlat = 1.0;
-	if (cosptnewlat < -1.)
-		cosptnewlat = -1.0;
-
-	ptnew.lat = acos(cosptnewlat);
-
-	if (fabs(ptnew.lat - 0.0) < PRECISION * 100000)
-		ptnew.lon = 0.0;
-	else if (fabs(ptnew.lat - M_PI) < PRECISION * 100000)
-		ptnew.lon = 0.0;
-	else {
-		cosptnewlon = (sin(ptold->lat) * cos(newNPold->lat) - cos(ptold->lat) *
-			       sin(newNPold->lat) * cos(newNPold->lon - ptold->lon)) / sin(ptnew.lat);
-		if (cosptnewlon > 1.)
-			cosptnewlon = 1.0;
-		if (cosptnewlon < -1.)
-			cosptnewlon = -1.0;
-
-		ptnew.lon = acos(cosptnewlon);
-
-		if ((ptold->lon - newNPold->lon) >= 0 && (ptold->lon - newNPold->lon) < 180)
-			ptnew.lon = -ptnew.lon + lon0;
-
-		else
-			ptnew.lon = ptnew.lon + lon0;
-
-		if (ptnew.lon > M_PI)
-			ptnew.lon -= 2 * M_PI;
-		if (ptnew.lon < -M_PI)
-			ptnew.lon += 2 * M_PI;
-	}
-	ptnew.lat = M_PI / 2 - ptnew.lat;
-	return ptnew;
-}
-
 /* formula from Snyder, Map Projections: A working manual, p31 */
 /*
  * old north pole at np in new coordinates
@@ -642,12 +591,6 @@ isea_ctran(struct isea_geo * np, struct isea_geo * pt, double lon0)
 #define ISEA_STD_LAT 1.01722196792335072101
 #define ISEA_STD_LON .19634954084936207740
 
-ISEA_STATIC
-struct isea_dgg isea_standard_dgg = {
-	20, 58.28252559, 11.25, 0.0,
-	6, 4, 0, 6, 1.0
-};
-
 /* fuller's at 5.2454 west, 2.3009 N, adjacent at 7.46658 deg */
 
 ISEA_STATIC
@@ -695,18 +638,6 @@ isea_orient_pole(struct isea_dgg * g)
 
 ISEA_STATIC
 int
-isea_orient_dymax(struct isea_dgg * g)
-{
-	if (!g)
-		return 0;
-	g->o_lat = 2.300882 * M_PI / 180.0;
-	g->o_lon = -5.24539 * M_PI / 180.0;
-	g->o_az = 7.46658 * M_PI / 180.0;
-	return 1;
-}
-
-ISEA_STATIC
-int
 isea_transform(struct isea_dgg * g, struct isea_geo * in,
 	       struct isea_pt * out)
 {
@@ -727,47 +658,6 @@ isea_transform(struct isea_dgg * g, struct isea_geo * in,
 }
 
 #define DOWNTRI(tri) (((tri - 1) / 5) % 2 == 1)
-
-/* get which triangle a point is in, assumes radius = 1.0 */
-ISEA_STATIC
-int isea_xy_triangle(struct isea_pt *p, double radius) {
-	double dist, test;
-	int tri, closest;
-	struct isea_pt tc, pt;
-	pt.x = p->x / radius;
-	pt.y = p->y / radius;
-
-	tc = isea_triangle_xy(1);
-	dist = (pt.x - tc.x) * (pt.x - tc.x) + (pt.y - tc.y) * (pt.y - tc.y);
-	closest = 1;
-
-	/* TODO just calculate it directly, no need to actually do all this
-	 * work
-	 */
-	for (tri = 2; tri <= 20; tri++) {
-		tc = isea_triangle_xy(tri);
-		test = (pt.x - tc.x) * (pt.x - tc.x) + (pt.y - tc.y) * (pt.y - tc.y);
-		if (test < dist) {
-			dist = test;
-			closest = tri;
-		}
-	}
-	return closest;
-}
-
-ISEA_STATIC
-int isea_projtri(struct isea_pt *xy, double radius) {
-	int tri;
-
-	tri = isea_xy_triangle(xy, radius);
-
-	xy->x /= radius;
-	xy->y /= radius;
-	xy->x += 0.5;
-	xy->y += 2.0 * .14433756729740644112;
-
-	return tri;
-}
 
 ISEA_STATIC
 void
@@ -802,12 +692,6 @@ int isea_tri_plane(int tri, struct isea_pt *pt, double radius) {
 	pt->y += tc.y;
 
 	return tri;
-}
-
-ISEA_STATIC
-int isea_projection(struct isea_dgg *g, double xin, double yin, double *xout,
-		double *yout) {
-	return 1;
 }
 
 /* convert projected triangle coords to quad xy coords, return quad number */
@@ -1178,7 +1062,7 @@ ENTRY0(isea)
         isea_grid_init(&P->dgg);
 
         P->dgg.output = ISEA_PLANE;
-/*		P->dgg.radius = P->a; /* otherwise defaults to 1 */
+/*		P->dgg.radius = P->a; / * otherwise defaults to 1 */
 	/* calling library will scale, I think */
 
 	opt = pj_param(P->ctx,P->params, "sorient").s;
