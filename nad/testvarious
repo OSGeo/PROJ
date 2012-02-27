@@ -295,6 +295,72 @@ $EXE +proj=latlong +a=1 +lon_0=0 +ellps=WGS84 \
 0 0.7853981633974483
 -1.5707963267948966 0
 EOF
+echo "##############################################################" >> ${OUT}
+echo "Test geos projection" >> ${OUT}
+echo "Test geos on a sphere" >> ${OUT}
+$EXE +proj=latlong +ellps=sphere \
+ +to +proj=geos +h=35785831.0 +lon_0=0 +ellps=sphere -E >>${OUT} <<EOF
+16d11'8" 58d35'31"
+-43d11'47" -22d54'30"
+18d25'26" -33d55'31"
+47d58'42" 29d22'11"
+EOF
+echo "Test geos on a ellipsoid" >> ${OUT}
+$EXE +proj=latlong +ellps=sphere \
+ +to +proj=geos +h=35785831.0 +lon_0=0 +ellps=WGS84 -E >>${OUT} <<EOF
+16d11'8" 58d35'31"
+-43d11'47" -22d54'30"
+18d25'26" -33d55'31"
+47d58'42" 29d22'11"
+EOF
+echo "Test inv geos on a sphere" >> ${OUT}
+$EXE +proj=latlong +ellps=sphere \
+ +to +proj=geos +h=35785831.0 +lon_0=0 +ellps=sphere -I -E >>${OUT} <<EOF
+849736.77 4960015.43
+-3780930.93 -2326595.36
+1608689.65 -3412115.56
+3825202.59 2885980.79
+EOF
+echo "Test inv geos on a ellipsoid" >> ${OUT}
+$EXE +proj=latlong +ellps=sphere \
+ +to +proj=geos +h=35785831.0 +lon_0=0 +ellps=WGS84 -I -E >>${OUT} <<EOF
+852862.53 4945122.70
+-3787026.57 -2314765.32
+1612331.00 -3397031.37
+3832522.65 2872185.29
+EOF
+echo "Test geos on a sphere with alternate sweep" >> ${OUT}
+$EXE +proj=latlong +ellps=sphere \
+ +to +proj=geos +h=35785831.0 +lon_0=0 +ellps=sphere +sweep=y -E >>${OUT} <<EOF
+16d11'8" 58d35'31"
+-43d11'47" -22d54'30"
+18d25'26" -33d55'31"
+47d58'42" 29d22'11"
+EOF
+echo "Test geos on a ellipsoid with alternate sweep" >> ${OUT}
+$EXE +proj=latlong +ellps=sphere \
+ +to +proj=geos +h=35785831.0 +lon_0=0 +ellps=WGS84 +sweep=y -E >>${OUT} <<EOF
+16d11'8" 58d35'31"
+-43d11'47" -22d54'30"
+18d25'26" -33d55'31"
+47d58'42" 29d22'11"
+EOF
+echo "Test inv geos on a sphere with alternate sweep" >> ${OUT}
+$EXE +proj=latlong +ellps=sphere \
+ +to +proj=geos +h=35785831.0 +lon_0=0 +ellps=sphere +sweep=y -I -E >>${OUT} <<EOF
+841586.28 4961396.21
+-3772913.22 -2339604.71
+1601377.77 -3415545.15
+3812722.89 2902474.62
+EOF
+echo "Test inv geos on a ellipsoid with alternate sweep" >> ${OUT}
+$EXE +proj=latlong +ellps=sphere \
+ +to +proj=geos +h=35785831.0 +lon_0=0 +ellps=WGS84 +sweep=y -I -E >>${OUT} <<EOF
+844731.03 4946509.59
+-3779077.27 -2327750.87
+1605067.15 -3400461.47
+3820138.08 2888664.15
+EOF
 #
 ##############################################################################
 # Done! 
