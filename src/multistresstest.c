@@ -33,19 +33,20 @@
 #include "proj_api.h"
 
 #define num_threads    10
-#define num_iterations 100000
+#define num_iterations 1000000
 #define reinit_every_iteration 0
 
 typedef struct {
     const char *src_def;
     const char *dst_def;
 
-    int     skip;
-    
     double  src_x, src_y, src_z;
     double  dst_x, dst_y, dst_z;
     
     int     dst_error;
+    int     skip;
+    
+
 } TestItem; 
 
 TestItem test_list[] = {
@@ -57,6 +58,11 @@ TestItem test_list[] = {
     {
         "+proj=utm +zone=11 +datum=NAD83",
         "+proj=latlong +datum=NAD27",
+        150000.0, 3000000.0, 0.0,  
+    },
+    {
+        "+proj=utm +zone=11 +datum=NAD83",
+        "+proj=latlong +nadgrids=@null +ellps=WGS84",
         150000.0, 3000000.0, 0.0,
     },
     {
@@ -209,7 +215,6 @@ static void *TestThread( void *pData )
 #if reinit_every_iteration == 0
     for( i = 0; i < test_count; i++ )
     {
-        TestItem *test = test_list + i;
         pj_free( src_pj_list[i] );
         pj_free( dst_pj_list[i] );
     }
@@ -224,6 +229,8 @@ static void *TestThread( void *pData )
             repeat_count, test_count );
 
     active_thread_count--;
+
+    return NULL;
 }
 
 /************************************************************************/
@@ -274,6 +281,10 @@ int main( int argc, char **argv )
         pj_free( dst_pj );
 
         test->skip = 0;
+
+#ifdef notdef
+        printf( "Test %d - output %.14g,%.14g,%g\n", i, test->dst_x, test->dst_y, test->dst_z );
+#endif
     }
 
     printf( "%d tests initialized.\n", test_count );
@@ -301,5 +312,6 @@ int main( int argc, char **argv )
         sleep( 1 );
 
     printf( "all tests complete.\n" );
-    
+
+    return 0;
 }

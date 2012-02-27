@@ -38,6 +38,7 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = proj$(EXEEXT) nad2bin$(EXEEXT) geod$(EXEEXT) \
 	cs2cs$(EXEEXT)
+EXTRA_PROGRAMS = multistresstest$(EXEEXT)
 subdir = src
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/proj_config.h.in
@@ -119,6 +120,9 @@ am_geod_OBJECTS = geod.$(OBJEXT) geod_set.$(OBJEXT) geod_for.$(OBJEXT) \
 	geod_inv.$(OBJEXT)
 geod_OBJECTS = $(am_geod_OBJECTS)
 geod_DEPENDENCIES = libproj.la
+am_multistresstest_OBJECTS = multistresstest.$(OBJEXT)
+multistresstest_OBJECTS = $(am_multistresstest_OBJECTS)
+multistresstest_DEPENDENCIES = libproj.la
 am_nad2bin_OBJECTS = nad2bin.$(OBJEXT)
 nad2bin_OBJECTS = $(am_nad2bin_OBJECTS)
 nad2bin_DEPENDENCIES = libproj.la
@@ -139,9 +143,9 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libproj_la_SOURCES) $(cs2cs_SOURCES) $(geod_SOURCES) \
-	$(nad2bin_SOURCES) $(proj_SOURCES)
+	$(multistresstest_SOURCES) $(nad2bin_SOURCES) $(proj_SOURCES)
 DIST_SOURCES = $(libproj_la_SOURCES) $(cs2cs_SOURCES) $(geod_SOURCES) \
-	$(nad2bin_SOURCES) $(proj_SOURCES)
+	$(multistresstest_SOURCES) $(nad2bin_SOURCES) $(proj_SOURCES)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -271,10 +275,12 @@ proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
 nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c geodesic.h
+multistresstest_SOURCES = multistresstest.c
 proj_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
 nad2bin_LDADD = libproj.la
 geod_LDADD = libproj.la
+multistresstest_LDADD = libproj.la -lpthread
 lib_LTLIBRARIES = libproj.la
 libproj_la_LDFLAGS = -no-undefined -version-info 7:0:7
 libproj_la_SOURCES = \
@@ -451,6 +457,9 @@ cs2cs$(EXEEXT): $(cs2cs_OBJECTS) $(cs2cs_DEPENDENCIES)
 geod$(EXEEXT): $(geod_OBJECTS) $(geod_DEPENDENCIES) 
 	@rm -f geod$(EXEEXT)
 	$(LINK) $(geod_OBJECTS) $(geod_LDADD) $(LIBS)
+multistresstest$(EXEEXT): $(multistresstest_OBJECTS) $(multistresstest_DEPENDENCIES) 
+	@rm -f multistresstest$(EXEEXT)
+	$(LINK) $(multistresstest_OBJECTS) $(multistresstest_LDADD) $(LIBS)
 nad2bin$(EXEEXT): $(nad2bin_OBJECTS) $(nad2bin_DEPENDENCIES) 
 	@rm -f nad2bin$(EXEEXT)
 	$(LINK) $(nad2bin_OBJECTS) $(nad2bin_LDADD) $(LIBS)
@@ -572,6 +581,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geod_set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jniproj.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_cheby.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multistresstest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad2bin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad_cvt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad_init.Plo@am__quote@
