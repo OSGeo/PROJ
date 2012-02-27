@@ -1,5 +1,7 @@
 2012-02-26  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* nad/CH: added swiss datum related definitions from strk (#145)
+
 	* src/Makefile.am, src/mutltistresstest.c: provide for building
 	multistresstest in the makefile, and slightly improve it. 
 
