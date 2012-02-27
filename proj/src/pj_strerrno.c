@@ -54,6 +54,7 @@ pj_err_list[] = {
 	"unknown prime meridian conversion id",		/* -46 */
 	"illegal axis orientation combination",		/* -47 */
 	"point not within available datum shift grids", /* -48 */
+	"invalid sweep axis, choose x or y",            /* -49 */
 };
 	char *
 pj_strerrno(int err) 

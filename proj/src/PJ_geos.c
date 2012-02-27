@@ -2,6 +2,7 @@
 ** libproj -- library of cartographic projections
 **
 ** Copyright (c) 2004   Gerald I. Evenden
+** Copyright (c) 2012   Martin Raspaud
 */
 static const char
 LIBPROJ_ID[] = "$Id$";
@@ -35,7 +36,9 @@ LIBPROJ_ID[] = "$Id$";
 	double  radius_p_inv2; \
 	double  radius_g; \
 	double  radius_g_1; \
-	double  C;
+	double  C; \
+        char *  sweep_axis; \
+        int     flip_axis;
 #define PJ_LIB__
 #include	<projects.h>
 
@@ -54,8 +57,16 @@ FORWARD(s_forward); /* spheroid */
 	if (((P->radius_g - Vx) * Vx - Vy * Vy - Vz * Vz) < 0.) F_ERROR;
 /* Calculation based on view angles from satellite.*/
 	tmp = P->radius_g - Vx;
-	xy.x = P->radius_g_1 * atan(Vy / tmp);
-	xy.y = P->radius_g_1 * atan(Vz / hypot(Vy, tmp));
+        if(P->flip_axis)
+          {
+            xy.x = P->radius_g_1 * atan(Vy / hypot(Vz, tmp));
+            xy.y = P->radius_g_1 * atan(Vz / tmp);
+          }
+        else
+          {
+            xy.x = P->radius_g_1 * atan(Vy / tmp);
+            xy.y = P->radius_g_1 * atan(Vz / hypot(Vy, tmp));
+          }
 	return (xy);
 }
 FORWARD(e_forward); /* ellipsoid */
@@ -74,8 +85,16 @@ FORWARD(e_forward); /* ellipsoid */
 		F_ERROR;
 /* Calculation based on view angles from satellite. */
 	tmp = P->radius_g - Vx;
-	xy.x = P->radius_g_1 * atan (Vy / tmp);
-	xy.y = P->radius_g_1 * atan (Vz / hypot (Vy, tmp));
+        if(P->flip_axis)
+          {
+            xy.x = P->radius_g_1 * atan (Vy / hypot (Vz, tmp));
+            xy.y = P->radius_g_1 * atan (Vz / tmp);
+          }
+        else
+          {
+            xy.x = P->radius_g_1 * atan (Vy / tmp);
+            xy.y = P->radius_g_1 * atan (Vz / hypot (Vy, tmp));
+          }
 	return (xy);
 }
 INVERSE(s_inverse); /* spheroid */
@@ -83,8 +102,16 @@ INVERSE(s_inverse); /* spheroid */
 
 /* Setting three components of vector from satellite to position.*/
 	Vx = -1.0;
-	Vy = tan (xy.x / (P->radius_g - 1.0));
-	Vz = tan (xy.y / (P->radius_g - 1.0)) * sqrt (1.0 + Vy * Vy);
+	if(P->flip_axis)
+          {
+            Vz = tan (xy.y / (P->radius_g - 1.0));
+            Vy = tan (xy.x / (P->radius_g - 1.0)) * sqrt (1.0 + Vz * Vz);
+          }
+        else
+          {
+            Vy = tan (xy.x / (P->radius_g - 1.0));
+            Vz = tan (xy.y / (P->radius_g - 1.0)) * sqrt (1.0 + Vy * Vy);
+          }
 /* Calculation of terms in cubic equation and determinant.*/
 	a   = Vy * Vy + Vz * Vz + Vx * Vx;
 	b   = 2 * P->radius_g * Vx;
@@ -104,8 +131,16 @@ INVERSE(e_inverse); /* ellipsoid */
 
 /* Setting three components of vector from satellite to position.*/
 	Vx = -1.0;
-	Vy = tan (xy.x / P->radius_g_1);
-	Vz = tan (xy.y / P->radius_g_1) * hypot(1.0, Vy);
+        if(P->flip_axis)
+          {
+            Vz = tan (xy.y / P->radius_g_1);
+            Vy = tan (xy.x / P->radius_g_1) * hypot(1.0, Vz);
+          }
+        else
+          {
+            Vy = tan (xy.x / P->radius_g_1);
+            Vz = tan (xy.y / P->radius_g_1) * hypot(1.0, Vy);
+          }
 /* Calculation of terms in cubic equation and determinant.*/
 	a = Vz / P->radius_p;
 	a   = Vy * Vy + a * a + Vx * Vx;
@@ -126,7 +161,22 @@ FREEUP; if (P) free(P); }
 ENTRY0(geos)
 	if ((P->h = pj_param(P->ctx, P->params, "dh").f) <= 0.) E_ERROR(-30);
 	if (P->phi0) E_ERROR(-46);
-	P->radius_g = 1. + (P->radius_g_1 = P->h / P->a);
+        P->sweep_axis = pj_param(P->ctx, P->params, "ssweep").s;
+        if (P->sweep_axis == NULL)
+          P->flip_axis = 0;
+        else
+          {
+            if (P->sweep_axis[1] != '\0' ||
+                (P->sweep_axis[0] != 'x' &&
+                 P->sweep_axis[0] != 'y'))
+              E_ERROR(-49);
+            if (P->sweep_axis[0] == 'y')
+              P->flip_axis = 1;
+            else
+              P->flip_axis = 0;
+          }
+        P->radius_g_1 = P->h / P->a;
+	P->radius_g = 1. + P->radius_g_1;
 	P->C  = P->radius_g * P->radius_g - 1.0;
 	if (P->es) {
 		P->radius_p      = sqrt (P->one_es);
