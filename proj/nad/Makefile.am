@@ -19,7 +19,7 @@ EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
 		proj_def.dat test27 test83 world epsg esri tv_out.dist \
 		testvarious testdatumfile testntv2 ntv2_out.dist \
 		esri.extra other.extra \
-		IGNF testIGNF proj_outIGNF.dist \
+		CH IGNF testIGNF proj_outIGNF.dist \
 		makefile.vc
 
 process-nad2bin:
@@ -30,7 +30,7 @@ process-nad2bin:
 	    ../src/nad2bin$(EXEEXT) $$DEST < $$x ; \
 	  done; \
 	fi 
-	
+
 install-data-local: process-nad2bin
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
 	@if [ -f conus.lla ] ; then \
