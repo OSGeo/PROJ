@@ -104,7 +104,11 @@ ENTRY0(omerc)
 		gamma = pj_param(P->ctx, P->params, "rgamma").f;
 	if (alp || gam) {
 		lamc	= pj_param(P->ctx, P->params, "rlonc").f;
-		no_off = pj_param(P->ctx, P->params, "tno_off").i;
+		no_off = 
+                    /* For libproj4 compatability */
+                    pj_param(P->ctx, P->params, "tno_off").i
+                    /* for backward compatibility */
+                    || pj_param(P->ctx, P->params, "tno_uoff").i;
 	} else {
 		lam1 = pj_param(P->ctx, P->params, "rlon_1").f;
 		phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
