@@ -227,7 +227,7 @@ setup(PJ *P) { /* general initialization */
 }
 ENTRY0(stere)
 	P->phits = pj_param(P->ctx, P->params, "tlat_ts").i ?
-		P->phits = pj_param(P->ctx, P->params, "rlat_ts").f : HALFPI;
+            pj_param(P->ctx, P->params, "rlat_ts").f : HALFPI;
 ENDENTRY(setup(P))
 ENTRY0(ups)
 	/* International Ellipsoid */
