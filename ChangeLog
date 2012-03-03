@@ -1,5 +1,7 @@
 2012-03-03  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/PJ_omerc.c: Support +no_uoff and +no_off  (#128)
+
 	* src/PJ_stere.c: Cleanup odd code construct (#147)
 
 2012-02-26  Frank Warmerdam  <warmerdam@pobox.com>
