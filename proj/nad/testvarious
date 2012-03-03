@@ -153,6 +153,15 @@ $EXE +proj=latlong +datum=WGS84 \
 EOF
 #
 echo "##############################################################" >> ${OUT}
+echo "Test stere without lat_ts (#147)" >> ${OUT}
+#
+$EXE +proj=latlong +datum=WGS84 \
+ +to +proj=stere +lat_0=40 +lon_0=10  +datum=WGS84 \
+ -E >>${OUT} <<EOF
+20 45
+EOF
+#
+echo "##############################################################" >> ${OUT}
 echo "Test sts projection (re: ticket 12)" >> ${OUT}
 #
 $EXE +proj=latlong +ellps=WGS84 \
