@@ -1,6 +1,8 @@
 4.8.0 Release Notes
 -------------------
 
+ o Added the Natural Earth projection.
+
  o Added HEALPIX, rHEALPIX and Icosahedral Snyder Equal Area projections.
 
  o nad2bin now produces "CTable2" format grid shift files by default which
