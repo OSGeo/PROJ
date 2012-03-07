@@ -1,5 +1,7 @@
 2012-03-06  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* nad/epsg: regenerate with +no_uoff for hotine oblique mercator (#104)
+
 	* src/PJ_sconics.c: Fix missing P->sig term in pconic forward
 	projection equation (#148).
 
