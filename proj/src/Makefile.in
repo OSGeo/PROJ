@@ -102,11 +102,11 @@ am_libproj_la_OBJECTS = PJ_aeqd.lo PJ_gnom.lo PJ_laea.lo \
 	pj_open_lib.lo pj_param.lo pj_phi2.lo pj_pr_list.lo pj_qsfn.lo \
 	pj_strerrno.lo pj_tsfn.lo pj_units.lo pj_ctx.lo pj_log.lo \
 	pj_zpoly1.lo rtodms.lo vector1.lo pj_release.lo pj_gauss.lo \
-	PJ_healpix.lo PJ_natearth.lo nad_cvt.lo nad_init.lo nad_intr.lo emess.lo \
-	pj_apply_gridshift.lo pj_datums.lo pj_datum_set.lo \
-	pj_transform.lo geocent.lo pj_utils.lo pj_gridinfo.lo \
-	pj_gridlist.lo jniproj.lo pj_mutex.lo pj_initcache.lo \
-	pj_apply_vgridshift.lo
+	PJ_healpix.lo PJ_natearth.lo nad_cvt.lo nad_init.lo \
+	nad_intr.lo emess.lo pj_apply_gridshift.lo pj_datums.lo \
+	pj_datum_set.lo pj_transform.lo geocent.lo pj_utils.lo \
+	pj_gridinfo.lo pj_gridlist.lo jniproj.lo pj_mutex.lo \
+	pj_initcache.lo pj_apply_vgridshift.lo
 libproj_la_OBJECTS = $(am_libproj_la_OBJECTS)
 libproj_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -528,6 +528,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_mill.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_mod_ster.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_moll.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_natearth.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_nell.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_nell_h.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_nocol.Plo@am__quote@
