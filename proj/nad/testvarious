@@ -402,6 +402,19 @@ $EXE +proj=latlong +a=1 +lon_0=0 \
 180.0 67.5 0 1.341974988462332E7 7400065.6562573705
 180.0 90.0 0 9591912.979377454 9062062.394736718
 EOF
+echo "##############################################################" >> ${OUT}
+echo "Test pconic (#148)" >> ${OUT}
+#
+$EXE +proj=latlong +datum=WGS84 \
+ +to +proj=pconic  +units=m +lat_1=20n +lat_2=60n +lon_0=60W +datum=WGS84 \
+ -E >>${OUT} <<EOF
+-70.4 -23.65
+EOF
+$EXE +proj=pconic  +units=m +lat_1=20n +lat_2=60n +lon_0=60W +datum=WGS84 \
+ +to +proj=latlong +datum=WGS84 \
+ -E >>${OUT} <<EOF
+-2240096.40 -6940342.15
+EOF
 ##############################################################################
 # Done! 
 # do 'diff' with distribution results

@@ -58,7 +58,7 @@ FORWARD(s_forward); /* spheroid */
 		rho = P->rho_c + tan(P->sig - lp.phi);
 		break;
 	case PCONIC:
-		rho = P->c2 * (P->c1 - tan(lp.phi));
+		rho = P->c2 * (P->c1 - tan(lp.phi - P->sig));
 		break;
 	default:
 		rho = P->rho_c - lp.phi;
