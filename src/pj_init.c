@@ -312,7 +312,7 @@ pj_init_plus_ctx( projCtx ctx, const char *definition )
     char	*argv[MAX_ARG];
     char	*defn_copy;
     int		argc = 0, i, blank_count = 0;
-    PJ	    *result;
+    PJ	    *result = NULL;
     
     /* make a copy that we can manipulate */
     defn_copy = (char *) pj_malloc( strlen(definition)+1 );
@@ -337,7 +337,7 @@ pj_init_plus_ctx( projCtx ctx, const char *definition )
                 if( argc+1 == MAX_ARG )
                 {
                     pj_ctx_set_errno( ctx, -44 );
-                    return NULL;
+                    goto bum_call;
                 }
                 
                 argv[argc++] = defn_copy + i + 1;
@@ -365,6 +365,7 @@ pj_init_plus_ctx( projCtx ctx, const char *definition )
     /* perform actual initialization */
     result = pj_init_ctx( ctx, argc, argv );
 
+bum_call:
     pj_dalloc( defn_copy );
 
     return result;
