@@ -8,6 +8,11 @@
  o nad2bin now produces "CTable2" format grid shift files by default which
    are platform independent.  
 
+ o nad2nad removed, use cs2cs for datum shift operations. 
+
+ o projects.h no longer installed as a public include file.  Please try to
+   only use proj_api.h. 
+
  o Add pj_get_spheroid_defn() accessor.
 
  o Added an alternate version of pj_init() that takes a projCtx (execution
@@ -27,6 +32,9 @@
  o Added support for the +axis= option for alternate axis orientations as
    part of a coordinate system (used for TM South Orientated support).
 
+ o +proj=omerc implementatioin replaced with code from libproj4.  +rot_conv
+   flag no longer works, and some coordinate systems (ie. Malaysian) will
+   need to use +gamma instead.  "epsg" init file updated accordingly.
    
 
 4.7.0 Release Notes
