@@ -1,8 +1,8 @@
-#! /bin/bash
+#! /bin/sh
 
 # libtool - Provide generalized library-building support services.
 # Generated automatically by config.status (proj) 4.8.0
-# Libtool was configured on host gdal65:
+# Libtool was configured on host gdal.mtv.corp.google.com:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -56,7 +56,7 @@ pic_mode=default
 fast_install=yes
 
 # Shell to use when invoking shell scripts.
-SHELL="/bin/bash"
+SHELL="/bin/sh"
 
 # An echo program that protects backslashes.
 ECHO="printf %s\\n"
@@ -93,7 +93,7 @@ NM="/usr/bin/nm -B"
 LN_S="ln -s"
 
 # What is the maximum length of a command?
-max_cmd_len=1572864
+max_cmd_len=3458764513820540925
 
 # Object file suffix (normally "o").
 objext=o
@@ -161,7 +161,7 @@ lock_old_archive_extraction=no
 LTCC="gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-g -Wall"
+LTCFLAGS="-g"
 
 # Take the output of nm and produce a listing of raw symbols and C names.
 global_symbol_pipe="sed -n -e 's/^.*[	 ]\\([ABCDGIRSTW][ABCDGIRSTW]*\\)[	 ][	 ]*\\([_A-Za-z][_A-Za-z0-9]*\\)\$/\\1 \\2 \\2/p' | sed '/ __gnu_lto/d'"
@@ -272,7 +272,7 @@ hardcode_into_libs=yes
 sys_lib_search_path_spec="/usr/lib/gcc/x86_64-linux-gnu/4.4.3 /usr/lib /lib /usr/lib/x86_64-linux-gnu "
 
 # Run-time system search path for libraries.
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/fglrx /usr/lib32/fglrx /usr/lib32/alsa-lib /usr/lib/alsa-lib /usr/local/lib /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/nvidia-current /usr/lib32/nvidia-current /usr/local/grass-6.4.2svn/lib /usr/lib32/alsa-lib /usr/lib/alsa-lib /usr/local/lib /usr/lib/opencryptoki /usr/lib/opencryptoki/stdll /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu "
 
 # Whether dlopen is supported.
 dlopen_support=unknown
