@@ -4,7 +4,7 @@ EXTRA_PROGRAMS = multistresstest
 INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
-include_HEADERS = proj_api.h org_proj4_Projections.h
+include_HEADERS = proj_api.h org_proj4_Projections.h org_proj4_PJ.h
 
 EXTRA_DIST = makefile.vc proj.def
 
