@@ -1,3 +1,7 @@
+2012-03-25  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/Makefile.am: Add org_proj4_PJ.h to files to distribute.
+
 2012-03-13  Frank Warmerdam  <warmerdam@google.com>
 
 	* src/projects.h, src/pj_list.c: avoid using #include directly on a
