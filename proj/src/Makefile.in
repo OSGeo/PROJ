@@ -269,7 +269,7 @@ top_srcdir = @top_srcdir@
 INCLUDES = -DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
-include_HEADERS = proj_api.h org_proj4_Projections.h
+include_HEADERS = proj_api.h org_proj4_Projections.h org_proj4_PJ.h
 EXTRA_DIST = makefile.vc proj.def
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
