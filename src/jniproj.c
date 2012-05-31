@@ -80,6 +80,27 @@ PJ *getPJ(JNIEnv *env, jobject object)
 
 /*!
  * \brief
+ * Internal method returning the java.lang.Double.NaN constant value.
+ * Efficiency is no a high concern for this particular method, because it
+ * is used mostly when the user wrongly attempt to use a disposed PJ object.
+ *
+ * \param  env - The JNI environment.
+ * \return The java.lang.Double.NaN constant value.
+ */
+jdouble javaNaN(JNIEnv *env)
+{
+    jclass c = (*env)->FindClass(env, "java/lang/Double");
+    if (c) { // Should never be NULL, but let be paranoiac.
+        jfieldID id = (*env)->GetStaticFieldID(env, c, "NaN", "D");
+        if (id) { // Should never be NULL, but let be paranoiac.
+            return (*env)->GetStaticDoubleField(env, c, id);
+        }
+    }
+    return 0.0; // Should never happen.
+}
+
+/*!
+ * \brief
  * Returns the Proj4 release number.
  *
  * \param  env   - The JNI environment.
@@ -218,7 +239,7 @@ JNIEXPORT jdouble JNICALL Java_org_proj4_PJ_getSemiMajorAxis
   (JNIEnv *env, jobject object)
 {
     PJ *pj = getPJ(env, object);
-    return pj ? pj->a_orig : NAN;
+    return pj ? pj->a_orig : javaNaN(env);
 }
 
 /*!
@@ -234,7 +255,7 @@ JNIEXPORT jdouble JNICALL Java_org_proj4_PJ_getSemiMinorAxis
   (JNIEnv *env, jobject object)
 {
     PJ *pj = getPJ(env, object);
-    if (!pj) return NAN;
+    if (!pj) return javaNaN(env);
     double a = pj->a_orig;
     return sqrt(a*a * (1.0 - pj->es_orig));
 }
@@ -251,7 +272,7 @@ JNIEXPORT jdouble JNICALL Java_org_proj4_PJ_getEccentricitySquared
   (JNIEnv *env, jobject object)
 {
     PJ *pj = getPJ(env, object);
-    return pj ? pj->es_orig : NAN;
+    return pj ? pj->es_orig : javaNaN(env);
 }
 
 /*!
@@ -297,7 +318,7 @@ JNIEXPORT jdouble JNICALL Java_org_proj4_PJ_getGreenwichLongitude
   (JNIEnv *env, jobject object)
 {
     PJ *pj = getPJ(env, object);
-    return (pj) ? (pj->from_greenwich)*(180/M_PI) : NAN;
+    return (pj) ? (pj->from_greenwich)*(180/M_PI) : javaNaN(env);
 }
 
 /*!
@@ -316,7 +337,7 @@ JNIEXPORT jdouble JNICALL Java_org_proj4_PJ_getLinearUnitToMetre
     if (pj) {
         return (vertical) ? pj->vto_meter : pj->to_meter;
     }
-    return NAN;
+    return javaNaN(env);
 }
 
 /*!

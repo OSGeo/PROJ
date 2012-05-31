@@ -1,3 +1,9 @@
+2012-05-31  Martin Desruisseaux <martin.desruisseaux@geomatys.fr>
+
+	* Replaced usages of NAN C/C++ constant by the java.lang.Double.NaN constant.
+	This was done because not all C/C++ compilers define the NAN constant, and for
+	making sure that the bits pattern is exactly the one expected by Java.
+
 2012-03-25  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/Makefile.am: Add org_proj4_PJ.h to files to distribute.
@@ -25,13 +31,13 @@
 
 2012-02-26  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* src/PJ_geos.c, nad/testvarious: Added GEOS +sweep and add GEOS 
+	* src/PJ_geos.c, nad/testvarious: Added GEOS +sweep and add GEOS
 	to the test suite (#146)
 
 	* nad/CH: added swiss datum related definitions from strk (#145)
 
 	* src/Makefile.am, src/mutltistresstest.c: provide for building
-	multistresstest in the makefile, and slightly improve it. 
+	multistresstest in the makefile, and slightly improve it.
 
 2012-02-25  Frank Warmerdam  <warmerdam@pobox.com>
 
@@ -39,7 +45,7 @@
 
 2012-02-20  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* Prepare 4.8.0 Beta1. 
+	* Prepare 4.8.0 Beta1.
 
 	* src/PJ_isea.c: Add Icosahedral Snyder Equal Area projection (#111)
 
@@ -65,7 +71,7 @@
 2012-02-01  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_apply_gridshift.c: ensure we try to use grids as long as we
-	are within epsilon of the edge (#141). 
+	are within epsilon of the edge (#141).
 
 2012-01-31  Frank Warmerdam  <warmerdam@pobox.com>
 
@@ -73,7 +79,7 @@
 
 2011-12-22  Frank Warmerdam  <warmerdam@google.com>
 
-	* src/pj_init.c; Only split arguments on pluses following spaces 
+	* src/pj_init.c; Only split arguments on pluses following spaces
 	in pj_init_plus() (#132)
 
 2011-12-14  Frank Warmerdam  <warmerdam@google.com>
@@ -83,7 +89,7 @@
 2011-12-13  Frank Warmerdam  <warmerdam@google.com>
 
 	* src/PJ_healpix.c, etc: added healpix support contributed by
-	Landcare in New Zealand. 
+	Landcare in New Zealand.
 
 2011-11-22  Frank Warmerdam  <warmerdam@pobox.com>
 
@@ -102,20 +108,20 @@
 
 2011-09-28  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* nad/epsg: Upgrade to EPSG 7.9.  Ideal datum selection rules also 
+	* nad/epsg: Upgrade to EPSG 7.9.  Ideal datum selection rules also
 	changed a bit upstream.
 
 2011-09-01  Martin Desruisseaux <martin.desruisseaux@geomatys.fr>
 
-        * Updated jniwrap/build.xml Ant script and README file.
+	* Updated jniwrap/build.xml Ant script and README file.
 
 2011-08-27  Martin Desruisseaux <martin.desruisseaux@geomatys.fr>
 
-        * Fixed some (but not all) memory leaks in org.proj4.Projections JNI bindings
+	* Fixed some (but not all) memory leaks in org.proj4.Projections JNI bindings
 
-        * Deprecated org.proj4.Projections JNI bindings
+	* Deprecated org.proj4.Projections JNI bindings
 
-        * Added org.proj4.PJ JNI bindings in replacement of org.proj4.Projections
+	* Added org.proj4.PJ JNI bindings in replacement of org.proj4.Projections
 
 2011-08-27  Frank Warmerdam  <warmerdam@pobox.com>
 
