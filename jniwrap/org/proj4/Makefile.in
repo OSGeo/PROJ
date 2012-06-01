@@ -162,9 +162,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = PJ.java PJException.java package-info.java \
-		LatLong.java Others.java Proj4Factory.java Proj4.java \
-		ProjectionData.java Projections.java
+EXTRA_DIST = PJ.java PJException.java package-info.java
 
 all: all-am
 
