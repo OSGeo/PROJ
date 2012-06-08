@@ -499,10 +499,11 @@ pj_free(PJ *P) {
         /* free array of grid pointers if we have one */
         if( P->gridlist != NULL )
             pj_dalloc( P->gridlist );
-        
+
+        if( P->vgridlist_geoid != NULL )
+            pj_dalloc( P->vgridlist_geoid );
+
         /* free projection parameters */
         P->pfree(P);
     }
 }
-
-
