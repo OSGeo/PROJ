@@ -144,6 +144,7 @@ typedef struct {
 #define PJD_ERR_GEOCENTRIC          -45
 #define PJD_ERR_AXIS                -47
 #define PJD_ERR_GRID_AREA           -48
+#define PJD_ERR_CATALOG             -49
 
 #define USE_PROJUV 
 
@@ -189,6 +190,13 @@ struct PJ_PRIME_MERIDIANS {
     char    *id;     /* prime meridian keyword */
     char    *defn;   /* offset from greenwich in DMS format. */
 };
+
+typedef struct {
+    double ll_long;      /* lower left corner coordinates (radians) */
+    double ll_lat;
+    double ur_long;      /* upper right corner coordinates (radians) */
+    double ur_lat; 
+} PJ_Region;
 
 struct DERIVS {
     double x_l, x_p; /* derivatives of x for lambda-phi */
@@ -256,7 +264,19 @@ typedef struct PJconsts {
         double  long_wrap_center; /* 0.0 for -180 to 180, actually in radians*/
         int     is_long_wrap_set;
         char    axis[4];
-        
+
+        /* New Datum Shift Grid Catalogs */
+        char   *catalog_name;
+        struct _PJ_GridCatalog *catalog;
+    
+        double   datum_date;
+    
+        struct _pj_gi *last_before_grid;
+        PJ_Region     last_before_region;
+
+        struct _pj_gi *last_after_grid;
+        PJ_Region     last_after_region;
+
 #ifdef PROJ_PARMS__
 PROJ_PARMS__
 #endif /* end of optional extensions */
@@ -347,6 +367,28 @@ typedef struct _pj_gi {
     struct _pj_gi *child;
 } PJ_GRIDINFO;
 
+typedef struct _PJ_GridCatalog {
+    PJ_Region region;
+    int  priority; /* higher used before lower */
+    double date; /* year.fraction */
+    char *definition; /* usually the gridname */
+
+    PJ_GRIDINFO  *gridinfo;
+    int available; /* 0=unknown, 1=true, -1=false */
+} PJ_GridCatalogEntry;
+
+typedef struct _pj_gc {
+    char *catalog_name;
+
+    PJ_Region region; /* maximum extent of catalog data */
+
+    int entry_count;
+    PJ_GridCatalogEntry *entries;
+
+    struct _pj_gc *next;
+} PJ_GridCatalog;
+
+
 /* procedure prototypes */
 double dmstor(const char *, char **);
 double dmstor_ctx(projCtx ctx, const char *, char **);
@@ -436,6 +478,24 @@ void pj_deallocate_grids();
 PJ_GRIDINFO *pj_gridinfo_init( projCtx, const char * );
 int pj_gridinfo_load( projCtx, PJ_GRIDINFO * );
 void pj_gridinfo_free( projCtx, PJ_GRIDINFO * );
+
+PJ_GridCatalog *pj_gc_findcatalog( projCtx, const char * );
+PJ_GridCatalog *pj_gc_readcatalog( projCtx, const char * );
+void pj_gc_unloadall( projCtx );
+int pj_gc_apply_gridshift( PJ *defn, int inverse, 
+                           long point_count, int point_offset,
+                           double *x, double *y, double *z );
+int pj_gc_apply_gridshift( PJ *defn, int inverse, 
+                           long point_count, int point_offset,
+                           double *x, double *y, double *z );
+
+PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx, 
+                             PJ_GridCatalog *catalog, int after, 
+                             LP location, double date,
+                             PJ_Region *optional_region,
+                             double *grid_date );
+
+double pj_gc_parsedate( projCtx, const char * );
 
 void *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
