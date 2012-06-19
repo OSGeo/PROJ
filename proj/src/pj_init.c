@@ -503,6 +503,9 @@ pj_free(PJ *P) {
         if( P->vgridlist_geoid != NULL )
             pj_dalloc( P->vgridlist_geoid );
 
+        if( P->catalog != NULL )
+            pj_dalloc( P->catalog );
+
         /* free projection parameters */
         P->pfree(P);
     }
