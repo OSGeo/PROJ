@@ -273,9 +273,11 @@ typedef struct PJconsts {
     
         struct _pj_gi *last_before_grid;
         PJ_Region     last_before_region;
+        double        last_before_date;
 
         struct _pj_gi *last_after_grid;
         PJ_Region     last_after_region;
+        double        last_after_date;
 
 #ifdef PROJ_PARMS__
 PROJ_PARMS__
@@ -367,7 +369,7 @@ typedef struct _pj_gi {
     struct _pj_gi *child;
 } PJ_GRIDINFO;
 
-typedef struct _PJ_GridCatalog {
+typedef struct {
     PJ_Region region;
     int  priority; /* higher used before lower */
     double date; /* year.fraction */
@@ -377,7 +379,7 @@ typedef struct _PJ_GridCatalog {
     int available; /* 0=unknown, 1=true, -1=false */
 } PJ_GridCatalogEntry;
 
-typedef struct _pj_gc {
+typedef struct _PJ_GridCatalog {
     char *catalog_name;
 
     PJ_Region region; /* maximum extent of catalog data */
@@ -385,7 +387,7 @@ typedef struct _pj_gc {
     int entry_count;
     PJ_GridCatalogEntry *entries;
 
-    struct _pj_gc *next;
+    struct _PJ_GridCatalog *next;
 } PJ_GridCatalog;
 
 

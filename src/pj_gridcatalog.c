@@ -31,6 +31,7 @@
 
 #include <projects.h>
 #include <string.h>
+#include <assert.h>
 
 static PJ_GridCatalog *grid_catalog_list = NULL;
 
@@ -112,18 +113,60 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
             return defn->ctx->last_errno;
     }
 
-    ctx->last_errno = 0;
+    defn->ctx->last_errno = 0;
 
     for( i = 0; i < point_count; i++ )
     {
         long io = i * point_offset;
-        LP   input, output;
+        LP   input, output_after, output_before;
         int  itable;
+        double mix_ratio;
 
         input.phi = y[io];
         input.lam = x[io];
-        output.phi = HUGE_VAL;
-        output.lam = HUGE_VAL;
+
+        /* make sure we have appropriate "after" shift file available */
+        if( defn->last_after_grid == NULL
+            || input.lam < defn->last_after_region.ll_long
+            || input.lam > defn->last_after_region.ur_long
+            || input.phi < defn->last_after_region.ll_lat
+            || input.phi > defn->last_after_region.ll_lat ) {
+            defn->last_after_grid = 
+                pj_gc_findgrid( defn->ctx, defn->catalog, 
+                                1, input, defn->datum_date, 
+                                &(defn->last_after_region), 
+                                &(defn->last_after_date));
+        }
+        PJ_GRIDINFO *gi = defn->last_after_grid;
+        assert( gi->child == NULL );
+
+        /* load the grid shift info if we don't have it. */
+        if( gi->ct->cvs == NULL && !pj_gridinfo_load( defn->ctx, gi ) )
+        {
+            pj_ctx_set_errno( defn->ctx, -38 );
+            return -38;
+        }
+            
+        output_after = nad_cvt( input, inverse, gi->ct );
+        if( output_after.lam == HUGE_VAL )
+        {
+            if( defn->ctx->debug_level >= PJ_LOG_DEBUG_MAJOR )
+            {
+                pj_log( defn->ctx, PJ_LOG_DEBUG_MAJOR,
+                        "pj_apply_gridshift(): failed to find a grid shift table for\n"
+                        "                      location (%.7fdW,%.7fdN)",
+                        x[io] * RAD_TO_DEG, 
+                        y[io] * RAD_TO_DEG );
+            }
+            continue;
+        }
+
+        if( defn->datum_date == 0.0 ) 
+        {
+            y[io] = output_after.phi;
+            x[io] = output_after.lam;
+            continue;
+        }
 
         /* make sure we have appropriate "before" shift file available */
         if( defn->last_before_grid == NULL
@@ -131,89 +174,108 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
             || input.lam > defn->last_before_region.ur_long
             || input.phi < defn->last_before_region.ll_lat
             || input.phi > defn->last_before_region.ll_lat ) {
-            defn->last_before_grid = pj_gc_findgrid(
-                defn->ctx, defn->catalog, 0, ll, 0.0, 
-                &(defn->last_before_region), NULL);
+            defn->last_before_grid = 
+                pj_gc_findgrid( defn->ctx, defn->catalog, 
+                                0, input, defn->datum_date, 
+                                &(defn->last_before_region), 
+                                &(defn->last_before_date));
         }
 
-        PJ_GRIDINFO *gi = defn->last_before_grid;
-        struct CTABLE *ct = gi->ct;
-        double epsilon = (fabs(ct->del.phi)+fabs(ct->del.lam))/10000.0;
-        
-        /* If we have child nodes, check to see if any of them apply. */
-        if( gi->child != NULL )
-        {
-            PJ_GRIDINFO *child;
-            
-            for( child = gi->child; child != NULL; child = child->next )
-            {
-                struct CTABLE *ct1 = child->ct;
-                double epsilon = 
-                    (fabs(ct1->del.phi)+fabs(ct1->del.lam))/10000.0;
-                
-                if( ct1->ll.phi - epsilon > input.phi 
-                    || ct1->ll.lam - epsilon > input.lam
-                    || (ct1->ll.phi+(ct1->lim.phi-1)*ct1->del.phi + epsilon 
-                        < input.phi)
-                    || (ct1->ll.lam+(ct1->lim.lam-1)*ct1->del.lam + epsilon 
-                        < input.lam) )
-                    continue;
-                
-                break;
-            }
-
-            /* we found a more refined child node to use */
-            if( child != NULL )
-            {
-                gi = child;
-                ct = child->ct;
-            }
-        }
+        gi = defn->last_before_grid;
+        assert( gi->child == NULL );
 
         /* load the grid shift info if we don't have it. */
-        if( ct->cvs == NULL && !pj_gridinfo_load( ctx, gi ) )
+        if( gi->ct->cvs == NULL && !pj_gridinfo_load( defn->ctx, gi ) )
         {
-            pj_ctx_set_errno( ctx, -38 );
+            pj_ctx_set_errno( defn->ctx, -38 );
             return -38;
         }
             
-        output = nad_cvt( input, inverse, ct );
-        if( output.lam != HUGE_VAL )
+        output_before = nad_cvt( input, inverse, gi->ct );
+        if( output_before.lam == HUGE_VAL )
         {
-            if( debug_count++ < 20 )
-                pj_log( ctx, PJ_LOG_DEBUG_MINOR,
-                        "pj_apply_gridshift(): used %s", ct->id );
-            break;
-        }
-
-
-        if( output.lam == HUGE_VAL )
-        {
-            if( ctx->debug_level >= PJ_LOG_DEBUG_MAJOR )
+            if( defn->ctx->debug_level >= PJ_LOG_DEBUG_MAJOR )
             {
-                pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
+                pj_log( defn->ctx, PJ_LOG_DEBUG_MAJOR,
                         "pj_apply_gridshift(): failed to find a grid shift table for\n"
                         "                      location (%.7fdW,%.7fdN)",
                         x[io] * RAD_TO_DEG, 
                         y[io] * RAD_TO_DEG );
-                for( itable = 0; itable < grid_count; itable++ )
-                {
-                    PJ_GRIDINFO *gi = tables[itable];
-                    if( itable == 0 )
-                        pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
-                                "   tried: %s", gi->gridname );
-                    else
-                        pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
-                                ",%s", gi->gridname );
-                }
             }
+            continue;
         }
-        else
-        {
-            y[io] = output.phi;
-            x[io] = output.lam;
-        }
+
+        mix_ratio = (defn->datum_date - defn->last_before_date) 
+            / (defn->last_after_date - defn->last_before_date);
+
+        y[io] = mix_ratio * output_after.phi 
+            + (1.0-mix_ratio) * output_before.phi;
+        x[io] = mix_ratio * output_after.lam 
+            + (1.0-mix_ratio) * output_before.lam;
     }
 
     return 0;
 }
+
+/************************************************************************/
+/*                           pj_c_findgrid()                            */
+/************************************************************************/
+
+PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx, PJ_GridCatalog *catalog, int after,
+                             LP location, double date,
+                             PJ_Region *optimal_region,
+                             double *grid_date ) 
+{
+    int iEntry;
+    PJ_GridCatalogEntry *entry = NULL;
+
+    for( iEntry = 0; iEntry < catalog->entry_count; iEntry++ ) 
+    {
+        entry = catalog->entries + iEntry;
+
+        if( (after && entry->date < date) 
+            || (!after && entry->date > date) )
+            continue;
+
+        if( location.lam < entry->region.ll_long
+            || location.lam > entry->region.ur_long
+            || location.phi < entry->region.ll_lat
+            || location.phi > entry->region.ur_lat )
+            continue;
+
+        if( entry->available == -1 )
+            continue;
+
+        break;
+    }
+
+    if( iEntry == catalog->entry_count )
+    {
+        if( grid_date )
+            *grid_date = 0.0;
+        if( optimal_region != NULL )
+            memset( optimal_region, 0, sizeof(PJ_Region));
+        return NULL;
+    }
+
+    if( grid_date )
+        *grid_date = entry->date;
+
+    if( optimal_region )
+    {
+        
+    }
+
+    if( entry->gridinfo == NULL )
+    {
+        PJ_GRIDINFO **gridlist = NULL;
+        int grid_count = 0;
+        gridlist = pj_gridlist_from_nadgrids( ctx, entry->definition, 
+                                              &grid_count);
+        if( grid_count == 1 )
+            entry->gridinfo = gridlist[0];
+    }
+    
+    return entry->gridinfo;
+}
+                             
