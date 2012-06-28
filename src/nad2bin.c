@@ -195,7 +195,7 @@ int main(int argc, char **argv) {
         {
             swap_words( header +  96, 8, 4 );
             swap_words( header + 128, 4, 2 );
-            swap_words( ct.cvs, 4, ct.lim.lam * ct.lim.phi );
+            swap_words( ct.cvs, 4, ct.lim.lam * 2 * ct.lim.phi );
         }
 
         if( fwrite( header, sizeof(header), 1, fp ) != 1 ) {
