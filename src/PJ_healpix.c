@@ -138,6 +138,30 @@ double standardize_lat(double x){
     return x;
 }
 /**
+ * Returns the index of the 2d array in rot.
+ * @param index range from -3 to 3.
+ * @return the index into the rot 3d array.
+ */
+static int get_rotate_index(int index){
+    switch(index){
+	case 0:
+	    return 0;
+	case 1:
+	    return 1;
+	case 2: 
+	    return 2;
+	case 3: 
+	    return 3;
+	case -1:
+	    return 4;
+	case -2:
+	    return 5;
+	case -3:
+	    return 6;
+    }
+    return 0;
+}
+/**
  * Calculates if the point lies on or within the polygon.
  * Very good explination of how this works: http://paulbourke.net/geometry/insidepoly/
  * @param nvert the number of vertices in the polygon.
@@ -369,7 +393,7 @@ static void dot_product(double a[2][2], double b[], double * ret){
     for(i = 0; i < length; i++){
 	ret[i] = 0;
 	for(j = 0; j < length; j++){
-	    ret[i] += a[i][j]*b[i];
+	    ret[i] += a[i][j]*b[j];
 	}
     }
 }
@@ -426,12 +450,12 @@ static CapMap get_cap(double x, double y, double R, int npole, int spole, int in
 	double eps;
 	if(y > R*PI/4.0){
 	    capmap.region = north;
-	    capmap.x = -1*R*3.0*PI/4.0 + npole*R*PI/2.0; 
+	    capmap.x = R*(-3.0*PI/4.0 + npole*PI/2.0); 
 	    capmap.y = R*PI/2.0;
 	    x = x - npole*R*PI/2.0;
 	}else if(y < -1*R*PI/4.0){
 	    capmap.region = south;
-	    capmap.x = -1*R*3.0*PI/4.0 + spole*R*PI/2; 
+	    capmap.x = R*(-3.0*PI/4.0 + spole*PI/2); 
 	    capmap.y = -1*R*PI/2.0;
 	    x = x - spole*R*PI/2.0;
 	}else{
@@ -444,23 +468,23 @@ static CapMap get_cap(double x, double y, double R, int npole, int spole, int in
 	eps = R*1e-15; // Kludge.  Fuzz to avoid some rounding errors.
 	if(capmap.region == north){
 	    if(y >= -1*x - R*PI/4.0 - eps && y < x + R*5.0*PI/4.0 - eps){
-		capmap.cn = 1;
+		capmap.cn = (npole + 1) % 4;
 	    }else if(y > -1*x -1*R*PI/4.0 + eps && y >= x + R*5.0*PI/4.0 - eps){
-		capmap.cn = 2;
+		capmap.cn = (npole + 2) % 4;
 	    }else if(y <= -1*x -1*R*PI/4.0 + eps && y > x + R*5.0*PI/4.0 + eps){
-		capmap.cn = 3;
+		capmap.cn = (npole + 3) % 4;
 	    }else{
-		capmap.cn = 0;
+		capmap.cn = npole;
 	    }
 	}else if(capmap.region == south){
 	    if(y <= x + R*PI/4.0 + eps && y > -1*x - R*5.0*PI/4 + eps){
-		capmap.cn = 1;
+		capmap.cn = (spole + 1) % 4;
 	    }else if(y < x + R*PI/4.0 - eps && y <= -1*x - R*5.0*PI/4.0 + eps){
-		capmap.cn = 2;
+		capmap.cn = (spole + 2) % 4;
 	    }else if(y >= x + R*PI/4.0 - eps && y < -1*x - R*5.0*PI/4.0 - eps){
-		capmap.cn = 3;
+		capmap.cn = (spole + 3) % 4;
 	    }else {
-		capmap.cn = 0;
+		capmap.cn = spole;
 	    }
 	}
 	return capmap;
@@ -505,53 +529,57 @@ static XY combine_caps(double x, double y, double R, int npole, int spole, int i
 	double c[2] = {capmap.x,capmap.y};
 	if(capmap.region == north){
 	    pole = npole;
-	    tmpRot = rot[capmap.cn];
-	    a[0] = R*-3.0*PI/4.0;
-	    a[1] = PI/2.0;
+	    a[0] = R * (-3.0*PI/4.0 + pole * PI/2);
+	    a[1] = R * (PI/2.0 + pole * 0);
+
+	    tmpRot = rot[get_rotate_index(capmap.cn - pole)];
+	    vector_sub(v,c,v_min_c);	
+	    dot_product(tmpRot,v_min_c,ret_dot);
+	    vector_add(ret_dot, a, vector);
+
 	}else {
 	    pole = spole;
-	    tmpRot = rot[capmap.cn+RFACTOR];
-	    a[0] = R*-3.0*PI/4.0;
-	    a[1] = PI/-2.0;
+	    a[0] = R * (-3.0*PI/4.0 + pole * PI/2);
+	    a[1] = R * (PI/-2.0 + pole * 0);
+
+	    tmpRot = rot[get_rotate_index(-1*(capmap.cn - pole))];
+	    vector_sub(v,c,v_min_c);	
+	    dot_product(tmpRot,v_min_c,ret_dot);
+
+	    vector_add(ret_dot, a, vector);
 	}
 
-	tmpVect[0] = R*pole*PI/2.0;
-	tmpVect[1] = 0;
-	// translate, rotate, then shift
-	vector_sub(v,c,v_min_c);	
-	dot_product(tmpRot,v_min_c,ret_dot);
-	vector_add(a,tmpVect,ret_add);
-	vector_add(ret_dot, ret_add, vector);
 	xy.x = vector[0];
 	xy.y = vector[1];
 	return xy;
     }else{
 	// compute inverse function.
 	// get the current position of rHEALPix polar squares
-	int pole = floor( (capmap.x + R*3.0*PI/4.0) / (R*PI/2.0));
-	double tmpVect[2] = {R*pole*PI/2.0,0};
-	double coord[2] = {x,y};
-	double (*tmpRot)[2];
 	int cn;
-	// translate polar square to position 0
-	vector_sub(coord,tmpVect,v);
+	int pole = 0;
+	double (*tmpRot)[2];
+	double c[2] = {capmap.x,capmap.y};
 	// disassemble
 	if(capmap.region == north){
-	    cn = capmap.cn + RFACTOR;
-	    a[0] = R*-3*PI/4.0;
-	    a[1] = PI/2.0;
+	    pole = npole;
+	    a[0] = R * (-3.0*PI/4.0 + capmap.cn * PI/2);
+	    a[1] = R * (PI/2.0 + capmap.cn * 0);
+
+	    tmpRot = rot[get_rotate_index(-1*(capmap.cn - pole))];
+	    vector_sub(v,c,v_min_c);	
+	    dot_product(tmpRot,v_min_c,ret_dot);
+	    vector_add(ret_dot, a, vector);
+
 	}else{
-	    cn = capmap.cn;
-	    a[0] = R*-3*PI/4.0;
-	    a[1] = PI/-2.0;
+	    pole = spole;
+	    a[0] = R * (-3.0*PI/4.0 + capmap.cn * PI/2);
+	    a[1] = R * (PI/-2.0 + capmap.cn * 0);
+
+	    tmpRot = rot[get_rotate_index(capmap.cn - pole)];
+	    vector_sub(v,c,v_min_c);	
+	    dot_product(tmpRot,v_min_c,ret_dot);
+	    vector_add(ret_dot, a, vector);
 	}
-	tmpVect[0] = R*capmap.cn*PI/2.0;
-	tmpVect[1] = 0;
-	// Math: Rotate Matrix * v-a + a + R*CN*{PI/2,0}
-	vector_sub(v,a,v_min_c);
-	dot_product(rot[cn],v_min_c,ret_dot);
-	vector_add(ret_dot,a,ret_add); 
-	vector_add(ret_add,tmpVect,vector);
 	xy.x = vector[0];
 	xy.y = vector[1];
 	return xy;
