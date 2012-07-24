@@ -121,6 +121,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
         LP   input, output_after, output_before;
         int  itable;
         double mix_ratio;
+        PJ_GRIDINFO *gi;
 
         input.phi = y[io];
         input.lam = x[io];
@@ -137,7 +138,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
                                 &(defn->last_after_region), 
                                 &(defn->last_after_date));
         }
-        PJ_GRIDINFO *gi = defn->last_after_grid;
+        gi = defn->last_after_grid;
         assert( gi->child == NULL );
 
         /* load the grid shift info if we don't have it. */

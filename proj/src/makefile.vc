@@ -50,8 +50,9 @@ support = \
 	pj_qsfn.obj pj_strerrno.obj pj_tsfn.obj pj_units.obj \
 	pj_zpoly1.obj rtodms.obj vector1.obj pj_release.obj \
 	geocent.obj pj_transform.obj pj_datum_set.obj pj_datums.obj \
-	pj_apply_gridshift.obj nad_cvt.obj nad_init.obj \
-	nad_intr.obj pj_utils.obj pj_gridlist.obj pj_gridinfo.obj \
+	pj_apply_gridshift.obj pj_gc_reader.obj pj_gridcatalog.obj \
+    nad_cvt.obj nad_init.obj nad_intr.obj \
+    pj_utils.obj pj_gridlist.obj pj_gridinfo.obj \
 	proj_mdist.obj pj_mutex.obj pj_initcache.obj \
 	pj_ctx.obj pj_log.obj pj_apply_vgridshift.obj
 
