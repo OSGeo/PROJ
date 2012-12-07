@@ -3,7 +3,7 @@
 
 #include <string.h>
 #include "projects.h"
-#include "geodesic.h"
+#include "geod_interface.h"
 #include "emess.h"
 	void
 geod_set(int argc, char **argv) {
@@ -32,16 +32,8 @@ geod_set(int argc, char **argv) {
 		fr_meter = 1. / (to_meter = atof(unit_list[i].to_meter));
 	} else
 		to_meter = fr_meter = 1.;
-	if ((ellipse = es) != 0.) {
-		onef = sqrt(1. - es);
-		geod_f = 1 - onef;
-		f2 = geod_f/2;
-		f4 = geod_f/4;
-		f64 = geod_f*geod_f/64;
-	} else {
-		onef = 1.;
-		geod_f = f2 = f4 = f64 = 0.;
-	}
+	geod_f = es/(1 + sqrt(1 - es));
+	geod_ini();
 	/* check if line or arc mode */
 	if (pj_param(NULL,start, "tlat_1").i) {
 		double del_S;

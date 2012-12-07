@@ -11,7 +11,8 @@ EXTRA_DIST = makefile.vc proj.def
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
 nad2bin_SOURCES = nad2bin.c
-geod_SOURCES = geod.c geod_set.c geod_for.c geod_inv.c geodesic.h
+geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h \
+	geodesic.c geodesic.h
 multistresstest_SOURCES = multistresstest.c
 
 proj_LDADD = libproj.la
