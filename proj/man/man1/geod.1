@@ -2,7 +2,7 @@
 .nr LL 5.5i
 .ad b
 .hy 1
-.TH GEOD 1 "2000/03/21 Rel. 4.4" 
+.TH GEOD 1 "2012/11/29 Rel. 4.8"
 .SH NAME
 geod \- direct geodesic computations
 .br
@@ -45,7 +45,7 @@ The following runline control parameters can appear in any order:
 .B \-I
 Specifies that the inverse geodesic computation is to be performed.
 May be used with execution of
-.B goed
+.B geod
 as an alternative to
 .B invgeod
 execution.
@@ -179,7 +179,7 @@ U.S. stature miles from Boston, MA, to Portland, OR:
 .RE
 which gives the results:
 .RS 5
- \f(CW-66d31'50.141"   75d39'13.083"   2587.504
+ \f(CW-66d31'50.141" 75d39'13.083" 2587.504
 .RE
 where the first two values are the
 azimuth from Boston to Portland, the back azimuth from Portland to
@@ -194,13 +194,14 @@ Portland's location by azimuth and distance:
 .RE
 which gives:
 .RS 5
- \f(CW45d31'0.003"N   123d40'59.985"W 75d39'13.094"\fR
+ \f(CW45d31'0.003"N 123d40'59.985"W 75d39'13.094"\fR
 .RE
 Note: lack of precision in the distance value compromises
 the precision of the Portland location.
 .SH SEE ALSO
-Thomas, P.D., 1970,
-.I "Spheroidal Geodesics, Reference Systems & Local Geometry:"
-U.S. Naval Oceanographic  Office, S-138.
+C. F. F. Karney,
+.I "Algorithms for Geodesics," J. Geodesy (2012);
+DOI: 10.1007/s00190-012-0578-z,
+http://geographiclib.sf.net/geod-addenda.html.
 .SH HOME PAGE
 http://www.remotesensing.org/proj
