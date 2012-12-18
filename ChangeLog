@@ -1,3 +1,8 @@
+2012-12-17  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_init.c: Recover gracefully if setlocale() returns NULL
+	like on Android (#204).
+
 2012-12-07  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/geod*: Replace geodesic implementation with one from
