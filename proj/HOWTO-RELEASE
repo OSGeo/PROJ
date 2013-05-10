@@ -22,7 +22,7 @@
    - If any interfaces have been removed since the last public release, then 
      set age to 0. 
 
-4.5) Run "autgen.sh" (hopefully on the same machine it was last run on)
+4.5) Run "autogen.sh" (hopefully on the same machine it was last run on)
 
 5) Add a note to the ChangeLog that a new release is being issued, and what
    the release number is.

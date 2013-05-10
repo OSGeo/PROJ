@@ -55,11 +55,12 @@ support = \
     pj_utils.obj pj_gridlist.obj pj_gridinfo.obj \
 	proj_mdist.obj pj_mutex.obj pj_initcache.obj \
 	pj_ctx.obj pj_log.obj pj_apply_vgridshift.obj
-
-LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc)
+geodesic = geodesic.obj
+LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc) \
+	$(geodesic)
 PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
 CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
-GEODEXE_OBJ	= geod.obj geod_set.obj geod_interface.obj geodesic.obj emess.obj
+GEODEXE_OBJ	= geod.obj geod_set.obj geod_interface.obj emess.obj
 PROJ_DLL 	= proj$(VERSION).dll
 PROJ_EXE    = proj.exe
 CS2CS_EXE   = cs2cs.exe
@@ -134,4 +135,5 @@ install: all
 	copy *.dll $(INSTDIR)\bin
 	copy *.lib $(INSTDIR)\lib
 	copy proj_api.h $(INSTDIR)\include
+	copy geodesic.h $(INSTDIR)\include
 	
