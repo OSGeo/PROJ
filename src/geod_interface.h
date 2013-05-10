@@ -27,8 +27,8 @@ GEOD_EXTERN struct geodesic {
 # define al21	GEODESIC.ALPHA21
 # define geod_S	GEODESIC.DIST
     
-GEOD_EXTERN struct Geodesic GlobalGeodesic;
-GEOD_EXTERN struct GeodesicLine GlobalGeodesicLine;
+GEOD_EXTERN struct geod_geodesic GlobalGeodesic;
+GEOD_EXTERN struct geod_geodesicline GlobalGeodesicLine;
 GEOD_EXTERN int n_alpha, n_S;
 GEOD_EXTERN double to_meter, fr_meter, del_alpha;
 	

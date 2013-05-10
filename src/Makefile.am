@@ -4,15 +4,14 @@ EXTRA_PROGRAMS = multistresstest
 INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
-include_HEADERS = proj_api.h org_proj4_Projections.h org_proj4_PJ.h
+include_HEADERS = proj_api.h org_proj4_Projections.h org_proj4_PJ.h geodesic.h
 
 EXTRA_DIST = makefile.vc proj.def
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
 nad2bin_SOURCES = nad2bin.c
-geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h \
-	geodesic.c geodesic.h
+geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h
 multistresstest_SOURCES = multistresstest.c
 
 proj_LDADD = libproj.la
@@ -64,8 +63,7 @@ libproj_la_SOURCES = \
 	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \
 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
 	geocent.c geocent.h pj_utils.c pj_gridinfo.c pj_gridlist.c \
-	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c
-
+	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c geodesic.c
 
 install-exec-local:
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)

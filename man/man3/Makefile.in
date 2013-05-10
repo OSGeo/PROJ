@@ -187,7 +187,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-man_MANS = pj_init.3
+man_MANS = pj_init.3 geodesic.3
 EXTRA_DIST = $(man_MANS)
 all: all-am
 

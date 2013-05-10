@@ -1,8 +1,8 @@
-.\" @(#)geod.1 - 1.1
-.nr LL 5.5i
+.\" @(#)geod.1
+.nr LL 6.5i
 .ad b
 .hy 1
-.TH GEOD 1 "2012/11/29 Rel. 4.8"
+.TH GEOD 1 "2013/02/27 Rel. 4.8"
 .SH NAME
 geod \- direct geodesic computations
 .br
@@ -171,7 +171,7 @@ and number of points to be determined.
 .RE
 .SH EXAMPLE
 The following script determines the geodesic azimuths and distance in
-U.S. stature miles from Boston, MA, to Portland, OR:
+U.S. statute miles from Boston, MA, to Portland, OR:
 .RS 5
  \f(CWgeod +ellps=clrk66 <<EOF -I +units=us-mi
  42d15'N 71d07'W 45d31'N 123d41'W
@@ -199,9 +199,19 @@ which gives:
 Note: lack of precision in the distance value compromises
 the precision of the Portland location.
 .SH SEE ALSO
-C. F. F. Karney,
-.I "Algorithms for Geodesics," J. Geodesy (2012);
-DOI: 10.1007/s00190-012-0578-z,
+.B geodesic(3)
+.br
+The \fBGeodSolve\fR utility in \fBGeographicLib\fR,
+http://geographiclib.sf.net.  With the \fB-E\fR option, this solves the
+geodesic problems in terms of elliptic integrals; the results are
+accurate for arbitrary \fIf\fR.
+.br
+C. F. F. Karney, \fIAlgorithms for Geodesics\fR,
+.br
+J. Geodesy \fB87\fR, 43-55 (2013);
+.br
+DOI: http://dx.doi.org/10.1007/s00190-012-0578-z,
+.br
 http://geographiclib.sf.net/geod-addenda.html.
 .SH HOME PAGE
-http://www.remotesensing.org/proj
+http://proj.osgeo.org
