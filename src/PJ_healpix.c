@@ -68,7 +68,7 @@ double rot[7][2][2] = ROT;
 /**
     NOTES:  Alex Raichev implemented the math in python and this is a port of his work.
 	    The healpix projection is a Lambert cylindrical equal-area projection for
-	    equaltorial latitudes and an interrupted Colignon projection for polar  
+	    equaltorial latitudes and an interrupted Colignon projection for polar
 	    latitudes.
  **/
 
@@ -77,7 +77,7 @@ double rot[7][2][2] = ROT;
  * @param v the parameter whose sign is returned.
  * @return 1 for positive number, -1 for negative, and 0 for zero.
  **/
-double sign (double v) {
+static double pj_sign (double v) {
     return v > 0 ? 1 : (v < 0 ? -1 : 0);
 }
 /**
@@ -286,7 +286,7 @@ double auth_lat(double phi, double e, int inverse){
 	double ratio = q/qp;
 	// Rounding errors
 	if( fabsl(ratio) > 1){
-	    ratio = sign(ratio);
+	    ratio = pj_sign(ratio);
 	}
 	return asin(ratio);
     }
@@ -316,7 +316,7 @@ XY healpix_sphere(LP lp, PJ *P){
 	}
 	lamc = -3*PI/4 + (PI/2)*cn;
 	xy.x = lamc + (lam - lamc) * sigma;
-	xy.y = sign(phi)*PI/4 * (2 - sigma);
+	xy.y = pj_sign(phi)*PI/4 * (2 - sigma);
     }
     xy.x = scale_number(xy.x,P->a,0);
     xy.y = scale_number(xy.y,P->a,0);
@@ -348,10 +348,10 @@ LP healpix_sphere_inv(XY xy, PJ *P){
 	xc = -3.0 * PI/4.0 + (PI/2.0)*cn;
 	tau = 2.0 - 4.0*fabsl(y)/PI;
 	lp.lam = xc + (x - xc)/tau;	
-	lp.phi = sign(y)*asin(1.0 - pow(tau , 2.0)/3.0);
+	lp.phi = pj_sign(y)*asin(1.0 - pow(tau , 2.0)/3.0);
     } else {
 	lp.lam = -1.0*PI - P->lam0;
-	lp.phi = sign(y)*PI/2.0;
+	lp.phi = pj_sign(y)*PI/2.0;
     }
     return (lp);
 }
