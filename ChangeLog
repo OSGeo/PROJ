@@ -1,3 +1,8 @@
+2013-06-19  Frank Warmerdam  <warmerdam@google.com>
+
+	* src/pj_mutex.c, configure.in: Ensure that the core mutex lock
+	is created in recursive mode.  Results in -lpthread being required.
+
 2013-06-18  Frank Warmerdam  <warmerdam@google.com>
 
 	* src/PJ_healpix.c: rename sign() to pj_sign() and make it static.  No

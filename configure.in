@@ -86,6 +86,7 @@ AC_ARG_WITH([mutex],
 AC_MSG_CHECKING([for mutexes])
 if test "$with_mutex" = yes -o x"$with_mutex" = x ; then
     MUTEX_SETTING=pthread
+    AC_CHECK_LIB(pthread,pthread_mutexattr_settype,,,)
     AC_MSG_RESULT([enabled, pthread])
 else
     MUTEX_SETTING=stub
