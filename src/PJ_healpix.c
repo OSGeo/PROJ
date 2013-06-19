@@ -173,7 +173,7 @@ static int get_rotate_index(int index){
 static
 int pnpoly(int nvert, double vert[][2], double testx, double testy){
     
-    int i,j,c = 0;
+    int i,c = 0;
     int counter = 0;
     double xinters;
     Point p1,p2;
@@ -276,9 +276,6 @@ int in_image(double x, double y, int proj, int npole, int spole){
  **/
 double auth_lat(double phi, double e, int inverse){
     if(inverse == 0){
-	double q_numerator = ((1.0 - pow(e,2.0)) * sin(phi));
-	double q_demonitor =  (1.0 - (pow(e*sin(phi),2.0)));
-	double q_subtractor =  - (1.0 - pow(e,2.0)) / (2.0*e) * log((1.0 - e*sin(phi)) / (1.0+e*sin(phi)));
 	double q = ((1.0 - pow(e,2.0)) * sin(phi)) / (1.0 - (pow(e*sin(phi),2.0))) - 
 	(1.0 - pow(e,2.0)) / (2.0*e) * log((1.0 - e*sin(phi)) / (1.0+e*sin(phi)));
 
@@ -446,7 +443,6 @@ static CapMap get_cap(double x, double y, double R, int npole, int spole, int in
 	}
 	return capmap;
     }else{
-	double c;
 	double eps;
 	if(y > R*PI/4.0){
 	    capmap.region = north;
@@ -509,10 +505,8 @@ static XY combine_caps(double x, double y, double R, int npole, int spole, int i
     double v[2];
     double a[2];
     double vector[2];
-    double tmpVect[2];
     double v_min_c[2];
     double ret_dot[2];
-    double ret_add[2];
     CapMap capmap = get_cap(x,y,R,npole,spole,inverse);
 
     if(capmap.region == equatorial){
@@ -555,7 +549,6 @@ static XY combine_caps(double x, double y, double R, int npole, int spole, int i
     }else{
 	// compute inverse function.
 	// get the current position of rHEALPix polar squares
-	int cn;
 	int pole = 0;
 	double (*tmpRot)[2];
 	double c[2] = {capmap.x,capmap.y};
@@ -586,6 +579,7 @@ static XY combine_caps(double x, double y, double R, int npole, int spole, int i
     }
 }
 FORWARD(e_healpix_forward); /* ellipsoidal */
+    (void) xy;
     //int r1[][2] = R1;
     double bet = auth_lat(lp.phi, P->e, 0);
     lp.phi = bet;
@@ -593,10 +587,11 @@ FORWARD(e_healpix_forward); /* ellipsoidal */
     return healpix_sphere(lp,P);
 }
 FORWARD(s_healpix_forward); /* spheroid */
+    (void) xy;
     return healpix_sphere(lp, P);
 }
 INVERSE(e_healpix_inverse); /* ellipsoidal */
-    double bet, x, y;
+    double x, y;
     P->a = P->ra;
 
     // Scale down to radius 1 sphere before checking x,y
