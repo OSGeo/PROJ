@@ -96,7 +96,9 @@ void pj_cleanup_lock()
 
 #include "pthread.h"
 
-static pthread_mutex_t pj_core_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t pj_precreated_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t pj_core_lock;
+static int pj_core_lock_created = 0;
 
 /************************************************************************/
 /*                          pj_acquire_lock()                           */
@@ -106,6 +108,25 @@ static pthread_mutex_t pj_core_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void pj_acquire_lock()
 {
+    if (!pj_core_lock_created) {
+        /*
+        ** We need to ensure the core mutex is created in recursive mode
+        ** and there is no portable way of doing that using automatic
+        ** initialization so we have pj_precreated_lock only for the purpose
+        ** of protecting the creation of the core lock.
+        */
+        pthread_mutexattr_t mutex_attr;
+
+        pthread_mutex_lock( &pj_precreated_lock);
+
+        pthread_mutexattr_init(&mutex_attr);
+        pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
+        pthread_mutex_init(&pj_core_lock, &mutex_attr);
+        pj_core_lock_created = 1;
+
+        pthread_mutex_unlock( &pj_precreated_lock );
+    }
+
     pthread_mutex_lock( &pj_core_lock);
 }
 
@@ -193,4 +214,3 @@ static void pj_init_lock()
 }
 
 #endif // def MUTEX_win32
-
