@@ -22,7 +22,7 @@ multistresstest_LDADD = libproj.la -lpthread
 
 lib_LTLIBRARIES = libproj.la
 
-libproj_la_LDFLAGS = -no-undefined -version-info 7:0:7
+libproj_la_LDFLAGS = -no-undefined -version-info 8:0:8
 
 libproj_la_SOURCES = \
 	projects.h pj_list.h \

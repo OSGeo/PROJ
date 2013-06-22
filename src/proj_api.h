@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 480
+#define PJ_VERSION 490
 
 extern char const pj_release[]; /* global release id string */
 
