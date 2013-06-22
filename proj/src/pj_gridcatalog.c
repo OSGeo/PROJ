@@ -119,7 +119,6 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
     {
         long io = i * point_offset;
         LP   input, output_after, output_before;
-        int  itable;
         double mix_ratio;
         PJ_GRIDINFO *gi;
 

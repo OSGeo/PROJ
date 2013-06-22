@@ -31,8 +31,9 @@
 
 #include <projects.h>
 #include <string.h>
+#include <ctype.h>
 
-static int pj_gc_readentry(projCtx ctx, PAFile fp, PJ_GridCatalogEntry *entry);
+static int pj_gc_readentry(projCtx ctx, PAFile fid, PJ_GridCatalogEntry *entry);
 static void pj_gc_sortcatalog( projCtx ctx, PJ_GridCatalog *catalog );
 
 /************************************************************************/
@@ -43,17 +44,17 @@ static void pj_gc_sortcatalog( projCtx ctx, PJ_GridCatalog *catalog );
 
 PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
 {
-    PAFile fp;
+    PAFile fid;
     PJ_GridCatalog *catalog;
-    int entry_max, err;
+    int entry_max;
     char line[302];
     
-    fp = pj_open_lib( ctx, (char *) catalog_name, "r" );
-    if (fp == NULL) 
+    fid = pj_open_lib( ctx, (char *) catalog_name, "r" );
+    if (fid == NULL) 
         return NULL;
 
     /* discard title line */
-    fgets(line, sizeof(line)-1, fp);
+    pj_ctx_fgets(ctx, line, sizeof(line)-1, fid);
 
     catalog = (PJ_GridCatalog *) calloc(1,sizeof(PJ_GridCatalog));
     if( !catalog )
@@ -65,7 +66,7 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
     catalog->entries = (PJ_GridCatalogEntry *) 
         malloc(entry_max * sizeof(PJ_GridCatalogEntry));
     
-    while( pj_gc_readentry( ctx, fp, 
+    while( pj_gc_readentry( ctx, fid, 
                             catalog->entries+catalog->entry_count) == 0)
     {
         catalog->entry_count++;
@@ -105,12 +106,12 @@ static void pj_gc_sortcatalog( projCtx ctx, PJ_GridCatalog *catalog )
 /*      token count.                                                    */
 /************************************************************************/
 
-static int pj_gc_read_csv_line( projCtx ctx, PAFile fp, 
+static int pj_gc_read_csv_line( projCtx ctx, PAFile fid, 
                                 char **tokens, int max_tokens ) 
 {
     char line[302];
    
-    while( fgets(line, sizeof(line)-1, fp) != NULL )
+    while( pj_ctx_fgets(ctx, line, sizeof(line)-1, fid) != NULL )
     {
         char *next = line;
         int token_count = 0;
@@ -180,7 +181,7 @@ double pj_gc_parsedate( projCtx ctx, const char *date_string )
 /*        gridname,ll_long,ll_lat,ur_long,ur_lat,priority,date          */
 /************************************************************************/
 
-static int pj_gc_readentry( projCtx ctx, PAFile fp, PJ_GridCatalogEntry *entry) 
+static int pj_gc_readentry(projCtx ctx, PAFile fid, PJ_GridCatalogEntry *entry) 
 {
 #define MAX_TOKENS 30
     char *tokens[MAX_TOKENS];
@@ -189,7 +190,7 @@ static int pj_gc_readentry( projCtx ctx, PAFile fp, PJ_GridCatalogEntry *entry)
 
     memset( entry, 0, sizeof(PJ_GridCatalogEntry) );
     
-    token_count = pj_gc_read_csv_line( ctx, fp, tokens, MAX_TOKENS );
+    token_count = pj_gc_read_csv_line( ctx, fid, tokens, MAX_TOKENS );
     if( token_count < 5 )
     {
         error = 1; /* TODO: need real error codes */
