@@ -283,7 +283,7 @@ nad2bin_LDADD = libproj.la
 geod_LDADD = libproj.la
 multistresstest_LDADD = libproj.la -lpthread
 lib_LTLIBRARIES = libproj.la
-libproj_la_LDFLAGS = -no-undefined -version-info 7:0:7
+libproj_la_LDFLAGS = -no-undefined -version-info 8:0:8
 libproj_la_SOURCES = \
 	projects.h pj_list.h \
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \

@@ -1,3 +1,20 @@
+4.9.0 Release Notes
+-------------------
+
+ o Implement new virtual file api (projFileAPI) so that all access to grid
+   shift and init files can be hooked.
+
+ o Replace geodesic implementation with one from Charles Karney and add a 
+   supported public interface (geod_interface.h).
+
+ o Upgraded to EPSG 8.0.
+
+ o Removed old (deprecated) Java bindings in favor of the new api introduced
+   in 4.8.0.
+
+ o Various bug fixes and cleanup.
+
+
 4.8.0 Release Notes
 -------------------
 

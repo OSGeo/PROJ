@@ -1,3 +1,12 @@
+2013-06-22  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Preparing 4.9.0 beta release.
+
+	* src/pj_fileapi.c, etc: Implement a virtual file api accessable
+	through the context for init file and grid shift file access.
+
+	* src/mk_cheby.c: reformat, add braces to avoid warnings.
+
 2013-06-19  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/PJ_healpix.c: correct various warnings about unused variables.
@@ -50,9 +59,10 @@
 
 2012-05-31  Martin Desruisseaux <martin.desruisseaux@geomatys.fr>
 
-	* Replaced usages of NAN C/C++ constant by the java.lang.Double.NaN constant.
-	This was done because not all C/C++ compilers define the NAN constant, and for
-	making sure that the bits pattern is exactly the one expected by Java.
+	* Replaced usages of NAN C/C++ constant by the java.lang.Double.NaN 
+	constant.  This was done because not all C/C++ compilers define the 
+	NAN constant, and for making sure that the bits pattern is exactly the 
+	one expected by Java.
 
 2012-03-25  Frank Warmerdam  <warmerdam@pobox.com>
 
