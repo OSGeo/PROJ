@@ -63,6 +63,16 @@ extern int pj_errno;	/* global error return code */
 #   define projLP       LP
 #endif
 
+/* file reading api, like stdio */
+typedef int *PAFile;
+typedef struct projFileAPI_t {
+    PAFile  (*FOpen)(projCtx ctx, const char *filename, const char *access);
+    size_t  (*FRead)(void *buffer, size_t size, size_t nmemb, PAFile file);
+    int     (*FSeek)(PAFile file, long offset, int whence);
+    long    (*FTell)(PAFile file);
+    void    (*FClose)(PAFile);
+} projFileAPI;
+
 /* procedure prototypes */
 
 projXY pj_fwd(projLP, projPJ);
@@ -117,6 +127,10 @@ void pj_ctx_set_debug( projCtx, int );
 void pj_ctx_set_logger( projCtx, void (*)(void *, int, const char *) );
 void pj_ctx_set_app_data( projCtx, void * );
 void *pj_ctx_get_app_data( projCtx );
+void pj_ctx_set_file( projCtx, projFileAPI *);
+projFileAPI *pj_ctx_get_fileapi( projCtx );
+
+projFileAPI *pj_get_default_fileapi();
 
 void pj_log( projCtx ctx, int level, const char *fmt, ... );
 void pj_stderr_logger( void *, int, const char * );

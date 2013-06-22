@@ -125,12 +125,15 @@ extern double hypot(double, double);
 #define DIR_CHAR '/'
 #endif
 
+struct projFileAPI_t;
+
 /* proj thread context */
 typedef struct {
     int	    last_errno;
     int     debug_level;
     void    (*logger)(void *, int, const char *);
     void    *app_data;
+    struct projFileAPI_t *fileapi;
 } projCtx_t;
 
 /* datum_type values */
@@ -390,6 +393,13 @@ typedef struct _PJ_GridCatalog {
     struct _PJ_GridCatalog *next;
 } PJ_GridCatalog;
 
+
+/* file api */
+PAFile pj_ctx_fopen(projCtx ctx, const char *filename, const char *access);
+size_t pj_ctx_fread(projCtx ctx, void *buffer, size_t size, size_t nmemb, PAFile file);
+int    pj_ctx_fseek(projCtx ctx, PAFile file, long offset, int whence);
+long   pj_ctx_ftell(projCtx ctx, PAFile file);
+void   pj_ctx_fclose(projCtx ctx, PAFile file);
 
 /* procedure prototypes */
 double dmstor(const char *, char **);
