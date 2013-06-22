@@ -1,5 +1,5 @@
 %define PACKAGE_NAME proj
-%define PACKAGE_VERSION 4.8.0
+%define PACKAGE_VERSION 4.9.0
 %define PACKAGE_URL http://trac.osgeo.org/proj
 %define _prefix /usr
 
@@ -7,7 +7,7 @@ Summary: Cartographic projection software
 Name: %PACKAGE_NAME
 Version: %PACKAGE_VERSION
 Release: 1
-Source0: proj-4.8.0.tar.gz
+Source0: proj-4.9.0.tar.gz
 Copyright: MIT License, Copyright (c) 2000, Frank Warmerdam
 Group: Applications/GIS
 Vendor: Intevation GmbH <http://intevation.net>
@@ -24,7 +24,7 @@ forward and inverse transformation of cartographic data to or from cartesian
 data with a wide range of selectable projection functions. 
 
 %prep
-%setup -D -n proj-4.8.0
+%setup -D -n proj-4.9.0
 %configure
 
 %build
@@ -35,7 +35,7 @@ rm -rf $RPM_BUILD_ROOT
 %makeinstall
 
 %clean
-rm -rf %{_builddir}/proj-4.8.0
+rm -rf %{_builddir}/proj-4.9.0
 rm -rf $RPM_BUILD_ROOT
 
 %files
