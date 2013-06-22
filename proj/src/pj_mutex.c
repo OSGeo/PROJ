@@ -47,8 +47,6 @@ PJ_CVSID("$Id: pj_transform.c 1504 2009-01-06 02:11:57Z warmerdam $");
 #  define MUTEX_stub
 #endif
 
-static void pj_init_lock();
-
 /************************************************************************/
 /* ==================================================================== */
 /*                      stub mutex implementation                       */
@@ -167,6 +165,17 @@ void pj_cleanup_lock()
 static HANDLE mutex_lock = NULL;
 
 /************************************************************************/
+/*                            pj_init_lock()                            */
+/************************************************************************/
+
+static void pj_init_lock()
+
+{
+    if( mutex_lock == NULL )
+        mutex_lock = CreateMutex( NULL, FALSE, NULL );
+}
+
+/************************************************************************/
 /*                          pj_acquire_lock()                           */
 /*                                                                      */
 /*      Acquire the PROJ.4 lock.                                        */
@@ -204,17 +213,6 @@ void pj_cleanup_lock()
         CloseHandle( mutex_lock );
         mutex_lock = NULL;
     }
-}
-
-/************************************************************************/
-/*                            pj_init_lock()                            */
-/************************************************************************/
-
-static void pj_init_lock()
-
-{
-    if( mutex_lock == NULL )
-        mutex_lock = CreateMutex( NULL, FALSE, NULL );
 }
 
 #endif // def MUTEX_win32
