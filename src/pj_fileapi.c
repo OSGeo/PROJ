@@ -165,3 +165,38 @@ void   pj_ctx_fclose(projCtx ctx, PAFile file)
 {
     ctx->fileapi->FClose(file);
 }
+
+/************************************************************************/
+/*                            pj_ctx_fgets()                            */
+/*                                                                      */
+/*      A not very optimal implementation of fgets on top of            */
+/*      fread().  If we end up using this a lot more care should be     */
+/*      taken.                                                          */
+/************************************************************************/
+
+char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file) 
+{
+    long start = pj_ctx_ftell(ctx, file);
+    size_t bytes_read;
+    int i;
+
+    line[size-1] = '\0';
+    bytes_read = pj_ctx_fread(ctx, line, 1, size-1, file);
+    if(bytes_read == 0)
+        return NULL;
+    if(bytes_read < size) 
+    {
+        line[bytes_read] = '\0';
+    }
+    
+    for( i = 0; i < size-2; i++) 
+    {
+        if (line[i] == '\n') 
+        {
+            line[i+1] = '\0';
+            pj_ctx_fseek(ctx, file, start + i + 1, SEEK_SET);
+            break;
+        }
+    }
+    return line;
+}
