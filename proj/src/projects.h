@@ -400,6 +400,7 @@ size_t pj_ctx_fread(projCtx ctx, void *buffer, size_t size, size_t nmemb, PAFile
 int    pj_ctx_fseek(projCtx ctx, PAFile file, long offset, int whence);
 long   pj_ctx_ftell(projCtx ctx, PAFile file);
 void   pj_ctx_fclose(projCtx ctx, PAFile file);
+char  *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file);
 
 /* procedure prototypes */
 double dmstor(const char *, char **);
