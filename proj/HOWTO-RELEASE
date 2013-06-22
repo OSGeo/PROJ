@@ -49,10 +49,11 @@
    this should result in files like proj-4.4.3.tar.gz and proj-4.4.3.zip
    being created.  These are full source distributions. 
 
-11) Put these in the proj ftp area on ftp.remotesensing.org.  This can be
-   done via scp using a command like the following.
+11) Put these in the proj ftp area on /osgeo/download/proj on 
+   download.osgeo.org.  This can be done via scp using a command like the 
+   following.
 
-     scp proj-4.4.3.{tar.gz,zip} warmerdam@upload.osgeo.org:/osgeo/download/proj
+  scp proj-4.4.3.{tar.gz,zip} warmerdam@download.osgeo.org:/osgeo/download/proj
 
 12) Announce the new release on the PROJ.4 and MetaCRS mailing lists. 
 
