@@ -98,11 +98,11 @@ void pj_set_searchpath ( int count, const char **path )
 /*                            pj_open_lib()                             */
 /************************************************************************/
 
-FILE *
+PAFile
 pj_open_lib(projCtx ctx, char *name, char *mode) {
     char fname[MAX_PATH_FILENAME+1];
     const char *sysname;
-    FILE *fid;
+    PAFile fid;
     int n = 0;
     int i;
 #ifdef WIN32
@@ -145,7 +145,7 @@ pj_open_lib(projCtx ctx, char *name, char *mode) {
     } else /* just try it bare bones */
         sysname = name;
 
-    if ((fid = fopen(sysname, mode)) != NULL)
+    if ((fid = pj_ctx_fopen(ctx, sysname, mode)) != NULL)
         errno = 0;
 
     /* If none of those work and we have a search path, try it */
@@ -155,7 +155,7 @@ pj_open_lib(projCtx ctx, char *name, char *mode) {
         {
             sprintf(fname, "%s%c%s", search_path[i], DIR_CHAR, name);
             sysname = fname;
-            fid = fopen (sysname, mode);
+            fid = pj_ctx_fopen(ctx, sysname, mode);
         }
         if (fid)
             errno = 0;

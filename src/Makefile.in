@@ -102,8 +102,8 @@ am_libproj_la_OBJECTS = PJ_aeqd.lo PJ_gnom.lo PJ_laea.lo \
 	pj_open_lib.lo pj_param.lo pj_phi2.lo pj_pr_list.lo pj_qsfn.lo \
 	pj_strerrno.lo pj_tsfn.lo pj_units.lo pj_ctx.lo pj_log.lo \
 	pj_zpoly1.lo rtodms.lo vector1.lo pj_release.lo pj_gauss.lo \
-	PJ_healpix.lo PJ_natearth.lo pj_gc_reader.lo pj_gridcatalog.lo \
-	nad_cvt.lo nad_init.lo nad_intr.lo emess.lo \
+	PJ_healpix.lo PJ_natearth.lo pj_fileapi.lo pj_gc_reader.lo \
+	pj_gridcatalog.lo nad_cvt.lo nad_init.lo nad_intr.lo emess.lo \
 	pj_apply_gridshift.lo pj_datums.lo pj_datum_set.lo \
 	pj_transform.lo geocent.lo pj_utils.lo pj_gridinfo.lo \
 	pj_gridlist.lo jniproj.lo pj_mutex.lo pj_initcache.lo \
@@ -317,7 +317,7 @@ libproj_la_SOURCES = \
 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c \
 	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c pj_ctx.c pj_log.c \
 	pj_zpoly1.c rtodms.c vector1.c pj_release.c pj_gauss.c \
-	PJ_healpix.c PJ_natearth.c \
+	PJ_healpix.c PJ_natearth.c pj_fileapi.c \
 	\
 	pj_gc_reader.c pj_gridcatalog.c \
 	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \
@@ -601,6 +601,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_ellps.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_errno.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_factors.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_fileapi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_fwd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_gauss.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_gc_reader.Plo@am__quote@

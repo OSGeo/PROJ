@@ -431,7 +431,7 @@ double *pj_authset(double);
 double pj_authlat(double, double *);
 COMPLEX pj_zpoly1(COMPLEX, COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, COMPLEX *, int, COMPLEX *);
-FILE *pj_open_lib(projCtx, char *, char *);
+PAFile pj_open_lib(projCtx, char *, char *);
 
 int pj_deriv(LP, double, PJ *, struct DERIVS *);
 int pj_factors(LP, PJ *, double, struct FACTORS *);
@@ -462,10 +462,10 @@ int bch2bps(projUV, projUV, projUV **, int, int);
 LP nad_intr(LP, struct CTABLE *);
 LP nad_cvt(LP, int, struct CTABLE *);
 struct CTABLE *nad_init(projCtx ctx, char *);
-struct CTABLE *nad_ctable_init( projCtx ctx, FILE * fid );
-int nad_ctable_load( projCtx ctx, struct CTABLE *, FILE * fid );
-struct CTABLE *nad_ctable2_init( projCtx ctx, FILE * fid );
-int nad_ctable2_load( projCtx ctx, struct CTABLE *, FILE * fid );
+struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid );
+int nad_ctable_load( projCtx ctx, struct CTABLE *, PAFile fid );
+struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid );
+int nad_ctable2_load( projCtx ctx, struct CTABLE *, PAFile fid );
 void nad_free(struct CTABLE *);
 
 /* higher level handling of datum grid shift files */

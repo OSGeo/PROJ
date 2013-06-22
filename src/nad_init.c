@@ -82,18 +82,18 @@ static void swap_words( void *data_in, int word_size, int word_count )
 /*      Load the data portion of a ctable formatted grid.               */
 /************************************************************************/
 
-int nad_ctable_load( projCtx ctx, struct CTABLE *ct, FILE *fid )
+int nad_ctable_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
 
 {
     int  a_size;
 
-    fseek( fid, sizeof(struct CTABLE), SEEK_SET );
+    pj_ctx_fseek( ctx, fid, sizeof(struct CTABLE), SEEK_SET );
 
     /* read all the actual shift values */
     a_size = ct->lim.lam * ct->lim.phi;
     ct->cvs = (FLP *) pj_malloc(sizeof(FLP) * a_size);
     if( ct->cvs == NULL 
-        || fread(ct->cvs, sizeof(FLP), a_size, fid) != a_size )
+        || pj_ctx_fread(ctx, ct->cvs, sizeof(FLP), a_size, fid) != a_size )
     {
         pj_dalloc( ct->cvs );
         ct->cvs = NULL;
@@ -113,7 +113,7 @@ int nad_ctable_load( projCtx ctx, struct CTABLE *ct, FILE *fid )
 /*      Read the header portion of a "ctable" format grid.              */
 /************************************************************************/
 
-struct CTABLE *nad_ctable_init( projCtx ctx, FILE * fid )
+struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid )
 {
     struct CTABLE *ct;
     int		id_end;
@@ -121,7 +121,7 @@ struct CTABLE *nad_ctable_init( projCtx ctx, FILE * fid )
     /* read the table header */
     ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
     if( ct == NULL 
-        || fread( ct, sizeof(struct CTABLE), 1, fid ) != 1 )
+        || pj_ctx_fread( ctx, ct, sizeof(struct CTABLE), 1, fid ) != 1 )
     {
         pj_ctx_set_errno( ctx, -38 );
         return NULL;
@@ -155,18 +155,18 @@ struct CTABLE *nad_ctable_init( projCtx ctx, FILE * fid )
 /*      Load the data portion of a ctable2 formatted grid.              */
 /************************************************************************/
 
-int nad_ctable2_load( projCtx ctx, struct CTABLE *ct, FILE *fid )
+int nad_ctable2_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
 
 {
     int  a_size;
 
-    fseek( fid, 160, SEEK_SET );
+    pj_ctx_fseek( ctx, fid, 160, SEEK_SET );
 
     /* read all the actual shift values */
     a_size = ct->lim.lam * ct->lim.phi;
     ct->cvs = (FLP *) pj_malloc(sizeof(FLP) * a_size);
     if( ct->cvs == NULL 
-        || fread(ct->cvs, sizeof(FLP), a_size, fid) != a_size )
+        || pj_ctx_fread(ctx, ct->cvs, sizeof(FLP), a_size, fid) != a_size )
     {
         pj_dalloc( ct->cvs );
         ct->cvs = NULL;
@@ -195,13 +195,13 @@ int nad_ctable2_load( projCtx ctx, struct CTABLE *ct, FILE *fid )
 /*      Read the header portion of a "ctable2" format grid.             */
 /************************************************************************/
 
-struct CTABLE *nad_ctable2_init( projCtx ctx, FILE * fid )
+struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid )
 {
     struct CTABLE *ct;
     int		id_end;
     char        header[160];
 
-    if( fread( header, sizeof(header), 1, fid ) != 1 )
+    if( pj_ctx_fread( ctx, header, sizeof(header), 1, fid ) != 1 )
     {
         pj_ctx_set_errno( ctx, -38 );
         return NULL;
@@ -268,7 +268,7 @@ struct CTABLE *nad_init(projCtx ctx, char *name)
 {
     char 	fname[MAX_PATH_FILENAME+1];
     struct CTABLE *ct;
-    FILE 	*fid;
+    PAFile      fid;
 
     ctx->last_errno = 0;
 
@@ -290,7 +290,7 @@ struct CTABLE *nad_init(projCtx ctx, char *name)
         }
     }
 
-    fclose(fid);
+    pj_ctx_fclose(ctx, fid);
     return ct;
 }
 

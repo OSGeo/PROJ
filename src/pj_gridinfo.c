@@ -126,7 +126,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 /* -------------------------------------------------------------------- */
     if( strcmp(gi->format,"ctable") == 0 )
     {
-        FILE *fid;
+        PAFile fid;
         int result;
 
         fid = pj_open_lib( ctx, gi->filename, "rb" );
@@ -139,7 +139,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
         result = nad_ctable_load( ctx, gi->ct, fid );
 
-        fclose( fid );
+        pj_ctx_fclose( ctx, fid );
 
         return result;
     }
@@ -149,7 +149,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 /* -------------------------------------------------------------------- */
     else if( strcmp(gi->format,"ctable2") == 0 )
     {
-        FILE *fid;
+        PAFile fid;
         int result;
 
         fid = pj_open_lib( ctx, gi->filename, "rb" );
@@ -162,7 +162,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
         result = nad_ctable2_load( ctx, gi->ct, fid );
 
-        fclose( fid );
+        pj_ctx_fclose( ctx, fid );
 
         return result;
     }
@@ -178,7 +178,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
     {
         double	*row_buf;
         int	row;
-        FILE *fid;
+        PAFile fid;
 
         fid = pj_open_lib( ctx, gi->filename, "rb" );
         
@@ -188,7 +188,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
             return 0;
         }
 
-        fseek( fid, gi->grid_offset, SEEK_SET );
+        pj_ctx_fseek( ctx, fid, gi->grid_offset, SEEK_SET );
 
         row_buf = (double *) pj_malloc(gi->ct->lim.lam * sizeof(double) * 2);
         gi->ct->cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
@@ -204,7 +204,8 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
             FLP     *cvs;
             double  *diff_seconds;
 
-            if( fread( row_buf, sizeof(double), gi->ct->lim.lam * 2, fid ) 
+            if( pj_ctx_fread( ctx, row_buf, 
+                              sizeof(double), gi->ct->lim.lam * 2, fid ) 
                 != 2 * gi->ct->lim.lam )
             {
                 pj_dalloc( row_buf );
@@ -231,7 +232,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
         pj_dalloc( row_buf );
 
-        fclose( fid );
+        pj_ctx_fclose( ctx, fid );
 
         return 1;
     }
@@ -247,7 +248,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
     {
         float	*row_buf;
         int	row;
-        FILE *fid;
+        PAFile fid;
 
         pj_log( ctx, PJ_LOG_DEBUG_MINOR, 
                 "NTv2 - loading grid %s", gi->ct->id );
@@ -260,7 +261,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
             return 0;
         }
 
-        fseek( fid, gi->grid_offset, SEEK_SET );
+        pj_ctx_fseek( ctx, fid, gi->grid_offset, SEEK_SET );
 
         row_buf = (float *) pj_malloc(gi->ct->lim.lam * sizeof(float) * 4);
         gi->ct->cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
@@ -276,7 +277,8 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
             FLP     *cvs;
             float   *diff_seconds;
 
-            if( fread( row_buf, sizeof(float), gi->ct->lim.lam*4, fid ) 
+            if( pj_ctx_fread( ctx, row_buf, sizeof(float), 
+                              gi->ct->lim.lam*4, fid ) 
                 != 4 * gi->ct->lim.lam )
             {
                 pj_dalloc( row_buf );
@@ -305,8 +307,8 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         }
 
         pj_dalloc( row_buf );
-
-        fclose( fid );
+        
+        pj_ctx_fclose( ctx, fid );
 
         return 1;
     }
@@ -317,7 +319,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
     else if( strcmp(gi->format,"gtx") == 0 )
     {
         int   words = gi->ct->lim.lam * gi->ct->lim.phi;
-        FILE *fid;
+        PAFile fid;
 
         fid = pj_open_lib( ctx, gi->filename, "rb" );
         
@@ -327,7 +329,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
             return 0;
         }
 
-        fseek( fid, gi->grid_offset, SEEK_SET );
+        pj_ctx_fseek( ctx, fid, gi->grid_offset, SEEK_SET );
 
         gi->ct->cvs = (FLP *) pj_malloc(words*sizeof(float));
         if( gi->ct->cvs == NULL )
@@ -336,7 +338,8 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
             return 0;
         }
         
-        if( fread( gi->ct->cvs, sizeof(float), words, fid ) != words )
+        if( pj_ctx_fread( ctx, gi->ct->cvs, sizeof(float), words, fid ) 
+            != words )
         {
             pj_dalloc( gi->ct->cvs );
             gi->ct->cvs = NULL;
@@ -346,7 +349,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         if( IS_LSB )
             swap_words( (unsigned char *) gi->ct->cvs, 4, words );
 
-        fclose( fid );
+        pj_ctx_fclose( ctx, fid );
         return 1;
     }
 
@@ -362,7 +365,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 /*      Load a ntv2 (.gsb) file.                                        */
 /************************************************************************/
 
-static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
+static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
 
 {
     unsigned char header[11*16];
@@ -381,7 +384,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
 /* -------------------------------------------------------------------- */
 /*      Read the overview header.                                       */
 /* -------------------------------------------------------------------- */
-    if( fread( header, sizeof(header), 1, fid ) != 1 )
+    if( pj_ctx_fread( ctx, header, sizeof(header), 1, fid ) != 1 )
     {
         pj_ctx_set_errno( ctx, -38 );
         return 0;
@@ -419,7 +422,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
 /* -------------------------------------------------------------------- */
 /*      Read header.                                                    */
 /* -------------------------------------------------------------------- */
-        if( fread( header, sizeof(header), 1, fid ) != 1 )
+        if( pj_ctx_fread( ctx, header, sizeof(header), 1, fid ) != 1 )
         {
             pj_ctx_set_errno( ctx, -38 );
             return 0;
@@ -507,7 +510,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
 
         gi->ct = ct;
         gi->format = "ntv2";
-        gi->grid_offset = ftell( fid );
+        gi->grid_offset = pj_ctx_ftell( ctx, fid );
 
 /* -------------------------------------------------------------------- */
 /*      Attach to the correct list or sublist.                          */
@@ -556,7 +559,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
 /* -------------------------------------------------------------------- */
 /*      Seek past the data.                                             */
 /* -------------------------------------------------------------------- */
-        fseek( fid, gs_count * 16, SEEK_CUR );
+        pj_ctx_fseek( ctx, fid, gs_count * 16, SEEK_CUR );
     }
 
     return 1;
@@ -568,7 +571,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
 /*      Load an NTv1 style Canadian grid shift file.                    */
 /************************************************************************/
 
-static int pj_gridinfo_init_ntv1( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
+static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
 
 {
     unsigned char header[176];
@@ -588,7 +591,7 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
 /* -------------------------------------------------------------------- */
 /*      Read the header.                                                */
 /* -------------------------------------------------------------------- */
-    if( fread( header, sizeof(header), 1, fid ) != 1 )
+    if( pj_ctx_fread( ctx, header, sizeof(header), 1, fid ) != 1 )
     {
         pj_ctx_set_errno( ctx, -38 );
         return 0;
@@ -643,7 +646,7 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
     ct->cvs = NULL;
 
     gi->ct = ct;
-    gi->grid_offset = ftell( fid );
+    gi->grid_offset = pj_ctx_ftell( ctx, fid );
     gi->format = "ntv1";
 
     return 1;
@@ -655,7 +658,7 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
 /*      Load a NOAA .gtx vertical datum shift file.                     */
 /************************************************************************/
 
-static int pj_gridinfo_init_gtx( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
+static int pj_gridinfo_init_gtx( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
 
 {
     unsigned char header[40];
@@ -676,7 +679,7 @@ static int pj_gridinfo_init_gtx( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
 /* -------------------------------------------------------------------- */
 /*      Read the header.                                                */
 /* -------------------------------------------------------------------- */
-    if( fread( header, sizeof(header), 1, fid ) != 1 )
+    if( pj_ctx_fread( ctx, header, sizeof(header), 1, fid ) != 1 )
     {
         pj_ctx_set_errno( ctx, -38 );
         return 0;
@@ -766,7 +769,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 {
     char 	fname[MAX_PATH_FILENAME+1];
     PJ_GRIDINFO *gilist;
-    FILE 	*fp;
+    PAFile 	fp;
     char	header[160];
 
     errno = pj_errno = 0;
@@ -800,14 +803,14 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 /* -------------------------------------------------------------------- */
 /*      Load a header, to determine the file type.                      */
 /* -------------------------------------------------------------------- */
-    if( fread( header, sizeof(header), 1, fp ) != 1 )
+    if( pj_ctx_fread( ctx, header, sizeof(header), 1, fp ) != 1 )
     {
-        fclose( fp );
+        pj_ctx_fclose( ctx, fp );
         pj_ctx_set_errno( ctx, -38 );
         return gilist;
     }
 
-    fseek( fp, SEEK_SET, 0 );
+    pj_ctx_fseek( ctx, fp, SEEK_SET, 0 );
 
 /* -------------------------------------------------------------------- */
 /*      Determine file type.                                            */
@@ -864,7 +867,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
                 (ct->ll.phi + (ct->lim.phi-1)*ct->del.phi) * RAD_TO_DEG );
     }
 
-    fclose(fp);
+    pj_ctx_fclose(ctx, fp);
 
     return gilist;
 }

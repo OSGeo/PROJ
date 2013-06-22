@@ -32,7 +32,7 @@
 #include <projects.h>
 #include <string.h>
 
-static int pj_gc_readentry( projCtx ctx, FILE *fp, PJ_GridCatalogEntry *entry );
+static int pj_gc_readentry(projCtx ctx, PAFile fp, PJ_GridCatalogEntry *entry);
 static void pj_gc_sortcatalog( projCtx ctx, PJ_GridCatalog *catalog );
 
 /************************************************************************/
@@ -43,7 +43,7 @@ static void pj_gc_sortcatalog( projCtx ctx, PJ_GridCatalog *catalog );
 
 PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
 {
-    FILE *fp;
+    PAFile fp;
     PJ_GridCatalog *catalog;
     int entry_max, err;
     char line[302];
@@ -105,7 +105,7 @@ static void pj_gc_sortcatalog( projCtx ctx, PJ_GridCatalog *catalog )
 /*      token count.                                                    */
 /************************************************************************/
 
-static int pj_gc_read_csv_line( projCtx ctx, FILE *fp, 
+static int pj_gc_read_csv_line( projCtx ctx, PAFile fp, 
                                 char **tokens, int max_tokens ) 
 {
     char line[302];
@@ -180,7 +180,7 @@ double pj_gc_parsedate( projCtx ctx, const char *date_string )
 /*        gridname,ll_long,ll_lat,ur_long,ur_lat,priority,date          */
 /************************************************************************/
 
-static int pj_gc_readentry( projCtx ctx, FILE *fp, PJ_GridCatalogEntry *entry ) 
+static int pj_gc_readentry( projCtx ctx, PAFile fp, PJ_GridCatalogEntry *entry) 
 {
 #define MAX_TOKENS 30
     char *tokens[MAX_TOKENS];
