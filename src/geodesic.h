@@ -116,7 +116,7 @@
  * http://geographiclib.sourceforge.net/
  *
  * This library was distributed with
- * <a href="../index.html">GeographicLib</a> 1.30.
+ * <a href="../index.html">GeographicLib</a> 1.31.
  **********************************************************************/
 
 #if !defined(GEODESIC_H)
@@ -127,7 +127,8 @@ extern "C" {
 #endif
 
   /**
-   * The struct containing information about the ellipsoid.
+   * The struct containing information about the ellipsoid.  This must be
+   * initialized by geod_init() before use.
    **********************************************************************/
   struct geod_geodesic {
     double a;                   /**< the equatorial radius */
@@ -139,7 +140,8 @@ extern "C" {
   };
 
   /**
-   * The struct containing information about a single geodesic.
+   * The struct containing information about a single geodesic.  This must be
+   * initialized by geod_lineinit() before use.
    **********************************************************************/
   struct geod_geodesicline {
     double lat1;                /**< the starting latitude */
@@ -182,17 +184,17 @@ extern "C" {
    * should be in the range [&minus;90&deg;, 90&deg;]; \e azi1 should be in the
    * range [&minus;540&deg;, 540&deg;).
    *
-   * The geod_mask values are
+   * The geod_mask values are [see geod_mask()]:
    * - \e caps |= GEOD_LATITUDE for the latitude \e lat2; this is
-   *   added automatically
-   * - \e caps |= GEOD_LONGITUDE for the latitude \e lon2
+   *   added automatically,
+   * - \e caps |= GEOD_LONGITUDE for the latitude \e lon2,
    * - \e caps |= GEOD_AZIMUTH for the latitude \e azi2; this is
-   *   added automatically
-   * - \e caps |= GEOD_DISTANCE for the distance \e s12
-   * - \e caps |= GEOD_REDUCEDLENGTH for the reduced length \e m12
+   *   added automatically,
+   * - \e caps |= GEOD_DISTANCE for the distance \e s12,
+   * - \e caps |= GEOD_REDUCEDLENGTH for the reduced length \e m12,
    * - \e caps |= GEOD_GEODESICSCALE for the geodesic scales \e M12
-   *   and \e M21
-   * - \e caps |= GEOD_AREA for the area \e S12
+   *   and \e M21,
+   * - \e caps |= GEOD_AREA for the area \e S12,
    * - \e caps |= GEOD_DISTANCE_IN permits the length of the
    *   geodesic to be given in terms of \e s12; without this capability the
    *   length can only be specified in terms of arc length.
@@ -226,11 +228,11 @@ extern "C" {
    * need some quantities computed.
    *
    * If either point is at a pole, the azimuth is defined by keeping the
-   * longitude fixed and writing \e lat = &plusmn;(90&deg; &minus; &epsilon;)
-   * and taking the limit &epsilon; &rarr; 0+.  An arc length greater that
-   * 180&deg; signifies a geodesic which is not a shortest path.  (For a
-   * prolate ellipsoid, an additional condition is necessary for a shortest
-   * path: the longitudinal extent must not exceed of 180&deg;.)
+   * longitude fixed, writing \e lat = &plusmn;(90&deg; &minus; &epsilon;), and
+   * taking the limit &epsilon; &rarr; 0+.  An arc length greater that 180&deg;
+   * signifies a geodesic which is not a shortest path.  (For a prolate
+   * ellipsoid, an additional condition is necessary for a shortest path: the
+   * longitudinal extent must not exceed of 180&deg;.)
    *
    * Example, determine the point 10000 km NE of JFK:
    @code
@@ -266,8 +268,8 @@ extern "C" {
    * not need some quantities computed.
    *
    * If either point is at a pole, the azimuth is defined by keeping the
-   * longitude fixed and writing \e lat = &plusmn;(90&deg; &minus; &epsilon;)
-   * and taking the limit &epsilon; &rarr; 0+.
+   * longitude fixed, writing \e lat = &plusmn;(90&deg; &minus; &epsilon;), and
+   * taking the limit &epsilon; &rarr; 0+.
    *
    * The solution to the inverse problem is found using Newton's method.  If
    * this fails to converge (this is very unlikely in geodetic applications
@@ -436,7 +438,6 @@ extern "C" {
    * @param[out] pS12 pointer to the area under the geodesic
    *   (meters<sup>2</sup>); requires that \e l was initialized with \e caps |=
    *   GEOD_AREA.
-
    * @return \e a12 arc length of between point 1 and point 2 (degrees).
    *
    * \e l must have been initialized with a call to geod_lineinit() with \e
@@ -514,7 +515,7 @@ extern "C" {
    * mask values for geod_geodesicline capabilities.
    **********************************************************************/
   enum geod_mask {
-    GEOD_NONE         = 0U,
+    GEOD_NONE         = 0U,                     /**< Calculate nothing */
     GEOD_LATITUDE     = 1U<<7  | 0U,            /**< Calculate latitude */
     GEOD_LONGITUDE    = 1U<<8  | 1U<<3,         /**< Calculate longitude */
     GEOD_AZIMUTH      = 1U<<9  | 0U,            /**< Calculate azimuth */

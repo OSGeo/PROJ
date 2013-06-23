@@ -195,6 +195,8 @@ static real InverseStart(const struct geod_geodesic* g,
                          real* psalp1, real* pcalp1,
                          /* Only updated if return val >= 0 */
                          real* psalp2, real* pcalp2,
+                         /* Only updated for short lines */
+                         real* pdnm,
                          /* Scratch areas of the right size */
                          real C1a[], real C2a[]);
 static real Lambda12(const struct geod_geodesic* g,
@@ -218,6 +220,8 @@ static void C1pf(real eps, real c[]);
 static real A2m1f(real eps);
 static void C2f(real eps, real c[]);
 static int transit(real lon1, real lon2);
+static void accini(real s[]);
+static void accadd(real s[], real y);
 
 /** @endcond */
 
@@ -234,8 +238,18 @@ void geod_init(struct geod_geodesic* g, real a, real f) {
            (g->e2 == 0 ? 1 :
             (g->e2 > 0 ? atanhx(sqrt(g->e2)) : atan(sqrt(-g->e2))) /
             sqrt(fabs(g->e2))))/2; /* authalic radius squared */
-  /* The sig12 threshold for "really short" */
-  g->etol2 = 0.01 * tol2 / maxx((real)(0.1), sqrt(fabs(g->e2)));
+  /* The sig12 threshold for "really short".  Using the auxiliary sphere
+   * solution with dnm computed at (bet1 + bet2) / 2, the relative error in the
+   * azimuth consistency check is sig12^2 * abs(f) * min(1, 1-f/2) / 2.  (Error
+   * measured for 1/100 < b/a < 100 and abs(f) >= 1/1000.  For a given f and
+   * sig12, the max error occurs for lines near the pole.  If the old rule for
+   * computing dnm = (dn1 + dn2)/2 is used, then the error increases by a
+   * factor of 2.)  Setting this equal to epsilon gives sig12 = etol2.  Here
+   * 0.1 is a safety factor (error decreased by 100) and max(0.001, abs(f))
+   * stops etol2 getting too large in the nearly spherical case. */
+  g->etol2 = 0.1 * tol2 /
+    sqrt( maxx((real)(0.001), fabs(g->f)) * minx((real)(1), 1 - g->f/2) / 2 );
+
   A3coeff(g);
   C3coeff(g);
   C4coeff(g);
@@ -716,14 +730,14 @@ real geod_geninverse(const struct geod_geodesic* g,
      * meridian and geodesic is neither meridional or equatorial. */
 
     /* Figure a starting point for Newton's method */
+    real dnm = 0;
     sig12 = InverseStart(g, sbet1, cbet1, dn1, sbet2, cbet2, dn2,
                          lam12,
-                         &salp1, &calp1, &salp2, &calp2,
+                         &salp1, &calp1, &salp2, &calp2, &dnm,
                          C1a, C2a);
 
     if (sig12 >= 0) {
-      /* Short lines (InverseStart sets salp2, calp2) */
-      real dnm = (dn1 + dn2) / 2;
+      /* Short lines (InverseStart sets salp2, calp2, dnm) */
       s12x = sig12 * g->b * dnm;
       m12x = sq(dnm) * g->b * sin(sig12 / dnm);
       if (outmask & GEOD_GEODESICSCALE)
@@ -1046,9 +1060,11 @@ real InverseStart(const struct geod_geodesic* g,
                   real* psalp1, real* pcalp1,
                   /* Only updated if return val >= 0 */
                   real* psalp2, real* pcalp2,
+                  /* Only updated for short lines */
+                  real* pdnm,
                   /* Scratch areas of the right size */
                   real C1a[], real C2a[]) {
-  real salp1 = 0, calp1 = 0, salp2 = 0, calp2 = 0;
+  real salp1 = 0, calp1 = 0, salp2 = 0, calp2 = 0, dnm = 0;
 
   /* Return a starting point for Newton's method in salp1 and calp1 (function
    * value is -1).  If Newton's method doesn't need to be used, return also
@@ -1076,11 +1092,17 @@ real InverseStart(const struct geod_geodesic* g,
   real sbet12a = sbet2 * cbet1 + cbet2 * sbet1;
 #endif
   boolx shortline = cbet12 >= 0 && sbet12 < (real)(0.5) &&
-    lam12 <= pi / 6;
-  real
-    omg12 = !shortline ? lam12 : lam12 / (g->f1 * (dn1 + dn2) / 2),
-    somg12 = sin(omg12), comg12 = cos(omg12);
-  real ssig12, csig12;
+    cbet2 * lam12 < (real)(0.5);
+  real omg12 = lam12, somg12, comg12, ssig12, csig12;
+  if (shortline) {
+    real sbetm2 = sq(sbet1 + sbet2);
+    /* sin((bet1+bet2)/2)^2
+     * =  (sbet1 + sbet2)^2 / ((sbet1 + sbet2)^2 + (cbet1 + cbet2)^2) */
+    sbetm2 /= sbetm2 + sq(cbet1 + cbet2);
+    dnm = sqrt(1 + g->ep2 * sbetm2);
+    omg12 /= g->f1 * dnm;
+  }
+  somg12 = sin(omg12); comg12 = cos(omg12);
 
   salp1 = cbet2 * somg12;
   calp1 = comg12 >= 0 ?
@@ -1093,7 +1115,8 @@ real InverseStart(const struct geod_geodesic* g,
   if (shortline && ssig12 < g->etol2) {
     /* really short lines */
     salp2 = cbet1 * somg12;
-    calp2 = sbet12 - cbet1 * sbet2 * sq(somg12) / (1 + comg12);
+    calp2 = sbet12 - cbet1 * sbet2 *
+      (comg12 >= 0 ? sq(somg12) / (1 + comg12) : 1 - comg12);
     SinCosNorm(&salp2, &calp2);
     /* Set return value */
     sig12 = atan2(ssig12, csig12);
@@ -1200,6 +1223,8 @@ real InverseStart(const struct geod_geodesic* g,
 
   *psalp1 = salp1;
   *pcalp1 = calp1;
+  if (shortline)
+    *pdnm = dnm;
   if (sig12 >= 0) {
     *psalp2 = salp2;
     *pcalp2 = calp2;
@@ -1492,28 +1517,45 @@ int transit(real lon1, real lon2) {
     (lon2 < 0 && lon1 >= 0 && lon12 < 0 ? -1 : 0);
 }
 
+void accini(real s[]) {
+  /* Initialize an accumulator; this is an array with two elements. */
+  s[0] = s[1] = 0;
+}
+
+void accadd(real s[], real y) {
+  /* Add y to an accumulator. */
+  real u, z = sumx(y, s[1], &u);
+  s[0] = sumx(z, s[0], &s[1]);
+  if (s[0] == 0)
+    s[0] = u;
+  else
+    s[1] = s[1] + u;
+}
+
 /** @endcond */
 
 void geod_polygonarea(const struct geod_geodesic* g,
                       real lats[], real lons[], int n,
                       real* pA, real* pP) {
   int i, crossings = 0;
-  real area0 = 4 * pi * g->c2, A = 0, P = 0;
+  real area0 = 4 * pi * g->c2, A[2], P[2];
+  accini(A); accini(P);
   for (i = 0; i < n; ++i) {
     real s12, S12;
     geod_geninverse(g, lats[i], lons[i], lats[(i + 1) % n], lons[(i + 1) % n],
                &s12, 0, 0, 0, 0, 0, &S12);
-    P += s12;
-    A -= S12; /* The minus sign is due to the counter-clockwise convention */
+    accadd(P, s12);
+    /* The minus sign is due to the counter-clockwise convention */
+    accadd(A, -S12);
     crossings += transit(lons[i], lons[(i + 1) % n]);
   }
   if (crossings & 1)
-    A += (A < 0 ? 1 : -1) * area0/2;
+    accadd(A, (A[0] < 0 ? 1 : -1) * area0/2);
   /* Put area in (-area0/2, area0/2] */
-  if (A > area0/2)
-    A -= area0;
-  else if (A <= -area0/2)
-    A += area0;
-  if (pA) *pA = A;
-  if (pP) *pP = P;
+  if (A[0] > area0/2)
+    accadd(A, -area0);
+  else if (A[0] <= -area0/2)
+    accadd(A, +area0);
+  if (pA) *pA = A[0];
+  if (pP) *pP = P[0];
 }
