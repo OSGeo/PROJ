@@ -127,7 +127,7 @@ void pj_ctx_set_debug( projCtx, int );
 void pj_ctx_set_logger( projCtx, void (*)(void *, int, const char *) );
 void pj_ctx_set_app_data( projCtx, void * );
 void *pj_ctx_get_app_data( projCtx );
-void pj_ctx_set_file( projCtx, projFileAPI *);
+void pj_ctx_set_fileapi( projCtx, projFileAPI *);
 projFileAPI *pj_ctx_get_fileapi( projCtx );
 
 projFileAPI *pj_get_default_fileapi();

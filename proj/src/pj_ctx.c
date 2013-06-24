@@ -177,4 +177,24 @@ void *pj_ctx_get_app_data( projCtx ctx )
     return ctx->app_data;
 }
 
+/************************************************************************/
+/*                         pj_ctx_set_fileapi()                         */
+/************************************************************************/
+
+void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
+
+{
+    ctx->fileapi = fileapi;
+}
+
+/************************************************************************/
+/*                         pj_ctx_get_fileapi()                         */
+/************************************************************************/
+
+projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
+
+{
+    return ctx->fileapi;
+}
+
 
