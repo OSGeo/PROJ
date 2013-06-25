@@ -390,14 +390,6 @@ typedef struct _PJ_GridCatalog {
 } PJ_GridCatalog;
 
 
-/* file api */
-PAFile pj_ctx_fopen(projCtx ctx, const char *filename, const char *access);
-size_t pj_ctx_fread(projCtx ctx, void *buffer, size_t size, size_t nmemb, PAFile file);
-int    pj_ctx_fseek(projCtx ctx, PAFile file, long offset, int whence);
-long   pj_ctx_ftell(projCtx ctx, PAFile file);
-void   pj_ctx_fclose(projCtx ctx, PAFile file);
-char  *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file);
-
 /* procedure prototypes */
 double dmstor(const char *, char **);
 double dmstor_ctx(projCtx ctx, const char *, char **);
@@ -428,7 +420,6 @@ double *pj_authset(double);
 double pj_authlat(double, double *);
 COMPLEX pj_zpoly1(COMPLEX, COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, COMPLEX *, int, COMPLEX *);
-PAFile pj_open_lib(projCtx, char *, char *);
 
 int pj_deriv(LP, double, PJ *, struct DERIVS *);
 int pj_factors(LP, PJ *, double, struct FACTORS *);

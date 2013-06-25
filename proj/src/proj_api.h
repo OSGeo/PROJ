@@ -130,10 +130,20 @@ void *pj_ctx_get_app_data( projCtx );
 void pj_ctx_set_fileapi( projCtx, projFileAPI *);
 projFileAPI *pj_ctx_get_fileapi( projCtx );
 
-projFileAPI *pj_get_default_fileapi();
-
 void pj_log( projCtx ctx, int level, const char *fmt, ... );
 void pj_stderr_logger( void *, int, const char * );
+
+/* file api */
+projFileAPI *pj_get_default_fileapi();
+
+PAFile pj_ctx_fopen(projCtx ctx, const char *filename, const char *access);
+size_t pj_ctx_fread(projCtx ctx, void *buffer, size_t size, size_t nmemb, PAFile file);
+int    pj_ctx_fseek(projCtx ctx, PAFile file, long offset, int whence);
+long   pj_ctx_ftell(projCtx ctx, PAFile file);
+void   pj_ctx_fclose(projCtx ctx, PAFile file);
+char  *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file);
+
+PAFile pj_open_lib(projCtx, char *, char *);
 
 #define PJ_LOG_NONE        0
 #define PJ_LOG_ERROR       1
