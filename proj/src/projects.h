@@ -100,10 +100,6 @@ extern double hypot(double, double);
 #define PI		3.14159265358979323846
 #define TWOPI		6.2831853071795864769
 
-/* environment parameter name */
-#ifndef PROJ_LIB
-#define PROJ_LIB "PROJ_LIB"
-#endif
 /* maximum tag id length for +init and default files */
 #ifndef ID_TAG_MAX
 #define ID_TAG_MAX 50
