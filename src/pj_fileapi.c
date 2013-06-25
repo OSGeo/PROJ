@@ -70,6 +70,7 @@ projFileAPI *pj_get_default_fileapi()
 static PAFile pj_stdio_fopen(projCtx ctx, const char *filename, 
                              const char *access)
 {
+    stdio_pafile *pafile;
     FILE *fp;
 
     fp = fopen(filename, access);
@@ -78,7 +79,7 @@ static PAFile pj_stdio_fopen(projCtx ctx, const char *filename,
         return NULL;
     }
 
-    stdio_pafile *pafile = (stdio_pafile *) malloc(sizeof(stdio_pafile));
+    pafile = (stdio_pafile *) malloc(sizeof(stdio_pafile));
     pafile->fp = fp;
     pafile->ctx = ctx;
     return (PAFile) pafile;
