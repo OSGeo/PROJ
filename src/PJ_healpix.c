@@ -579,9 +579,9 @@ static XY combine_caps(double x, double y, double R, int npole, int spole, int i
     }
 }
 FORWARD(e_healpix_forward); /* ellipsoidal */
-    (void) xy;
     //int r1[][2] = R1;
     double bet = auth_lat(lp.phi, P->e, 0);
+    (void) xy;
     lp.phi = bet;
     P->a = P->ra;
     return healpix_sphere(lp,P);
