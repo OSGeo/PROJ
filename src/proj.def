@@ -63,3 +63,12 @@ EXPORTS
 	geod_geninverse		@61
 	geod_inverse		@62
 	geod_polygonarea	@63
+	pj_get_spheroid_defn	@64
+	pj_get_default_fileapi  @65
+	pj_ctx_set_fileapi      @66
+	pj_ctx_get_fileapi      @67
+	pj_ctx_fopen            @68
+	pj_ctx_fread            @69
+	pj_ctx_ftell            @70
+	pj_ctx_fclose           @71
+	pj_open_lib             @72
