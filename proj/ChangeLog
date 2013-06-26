@@ -1,5 +1,7 @@
 2013-06-25  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/PJ_putp3.c: Fix putp3p usage line to remove "no inv" (#167).
+
 	* src/PJ_aitoff.c: note that aitoff and wintri projections have no
 	inverse (#160, #168).
 
