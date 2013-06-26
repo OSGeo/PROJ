@@ -1,5 +1,7 @@
 2013-06-25  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/multistresstest.c: add windows support (#199)
+
 	* src/pj_ctx.c: avoid race condition on setting of 
 	default_context_initialized. (#199)
 
