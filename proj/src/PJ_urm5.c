@@ -2,7 +2,7 @@
 	double m, rmn, q3, n;
 #define PJ_LIB__
 # include	<projects.h>
-PROJ_HEAD(urm5, "Urmaev V") "\n\tPCyl., Sph.\n\tn= q= alphi=";
+PROJ_HEAD(urm5, "Urmaev V") "\n\tPCyl., Sph., no inv.\n\tn= q= alpha=";
 FORWARD(s_forward); /* spheroid */
 	double t;
 
