@@ -1,5 +1,8 @@
 2013-06-25  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/PJ_aitoff.c: note that aitoff and wintri projections have no
+	inverse (#160, #168).
+
 	* src/PJ_urm5.c: Note that there is no inverse, fix spelling of alpha
 	in the short description (#169).
 
