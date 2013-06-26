@@ -99,7 +99,7 @@ void pj_set_searchpath ( int count, const char **path )
 /************************************************************************/
 
 PAFile
-pj_open_lib(projCtx ctx, char *name, char *mode) {
+pj_open_lib(projCtx ctx, const char *name, const char *mode) {
     char fname[MAX_PATH_FILENAME+1];
     const char *sysname;
     PAFile fid;

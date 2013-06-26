@@ -143,7 +143,7 @@ long   pj_ctx_ftell(projCtx ctx, PAFile file);
 void   pj_ctx_fclose(projCtx ctx, PAFile file);
 char  *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file);
 
-PAFile pj_open_lib(projCtx, char *, char *);
+PAFile pj_open_lib(projCtx, const char *, const char *);
 
 #define PJ_LOG_NONE        0
 #define PJ_LOG_ERROR       1
