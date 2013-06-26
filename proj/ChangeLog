@@ -1,3 +1,7 @@
+2013-06-26  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_open_lib.c: change filename and access args to const.
+
 2013-06-25  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* nad/Makefile.am: add CH to pkgdata_DATA (#145).
@@ -24,6 +28,8 @@
 	* install-sh: upgrade to support multiple files (#217)
 
 2013-06-24  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/projects.h, src/proj_api.h: move pj_open_lib() into proj_api.h.
 
 	* src/projects.h: Do not define PROJ_LIB to "PROJ_LIB".
 
