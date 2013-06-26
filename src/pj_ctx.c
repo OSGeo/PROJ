@@ -33,7 +33,7 @@
 PJ_CVSID("$Id$");
 
 static projCtx_t default_context;
-static int       default_context_initialized = 0;
+static volatile int       default_context_initialized = 0;
 
 /************************************************************************/
 /*                             pj_get_ctx()                             */
@@ -68,7 +68,6 @@ projCtx pj_get_default_ctx()
 
     if( !default_context_initialized )
     {
-        default_context_initialized = 1;
         default_context.last_errno = 0;
         default_context.debug_level = PJ_LOG_NONE;
         default_context.logger = pj_stderr_logger;
@@ -82,6 +81,7 @@ projCtx pj_get_default_ctx()
             else
                 default_context.debug_level = PJ_LOG_DEBUG_MINOR;
         }
+        default_context_initialized = 1;
     }
 
     pj_release_lock();
