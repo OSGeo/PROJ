@@ -50,8 +50,6 @@ typedef struct {
     
     int     dst_error;
     int     skip;
-    
-
 } TestItem; 
 
 TestItem test_list[] = {
@@ -148,8 +146,8 @@ static void TestThread()
 
 {
     int i, test_count = sizeof(test_list) / sizeof(TestItem); 
-	int repeat_count = num_iterations;
-	int i_iter;
+    int repeat_count = num_iterations;
+    int i_iter;
 
 /* -------------------------------------------------------------------- */
 /*      Initialize coordinate system definitions.                       */
@@ -182,7 +180,7 @@ static void TestThread()
             TestItem *test = test_list + i;
             double x, y, z;
             int error;
-			int skipTest = test->skip;
+            int skipTest = test->skip;
             
             x = test->src_x;
             y = test->src_y;
@@ -192,23 +190,23 @@ static void TestThread()
             src_pj_list[i] = pj_init_plus_ctx( ctx, test->src_def );
             dst_pj_list[i] = pj_init_plus_ctx( ctx, test->dst_def );
 
-			{
-				int skipTest = (src_pj_list[i] == NULL || dst_pj_list[i] == NULL);
+            {
+                int skipTest = (src_pj_list[i] == NULL || dst_pj_list[i] == NULL);
 			
-				if ( skipTest != test->skip )
-					fprintf( stderr, "Threaded projection initialization does not match unthreaded initialization\n" );
+                if ( skipTest != test->skip )
+                    fprintf( stderr, "Threaded projection initialization does not match unthreaded initialization\n" );
 
-				if (skipTest)
-				{
-					pj_free( src_pj_list[i] );
-					pj_free( dst_pj_list[i] );
-					continue;
-				}
-			}
+                if (skipTest)
+                {
+                    pj_free( src_pj_list[i] );
+                    pj_free( dst_pj_list[i] );
+                    continue;
+                }
+            }
 #endif
 
-			if ( test->skip )
-				continue;
+            if ( test->skip )
+                continue;
 
             error = pj_transform( src_pj_list[i], dst_pj_list[i], 1, 0, 
                                   &x, &y, &z );
@@ -259,28 +257,28 @@ static void TestThread()
 }
 
 #ifdef _WIN32
-	/************************************************************************/
-	/*                             WinTestThread()                        */
-	/************************************************************************/
+/************************************************************************/
+/*                             WinTestThread()                        */
+/************************************************************************/
 
-	static DWORD WINAPI WinTestThread( LPVOID lpParameter )
+static DWORD WINAPI WinTestThread( LPVOID lpParameter )
 
-	{
-		TestThread();
+{
+    TestThread();
 
-		return 0;
-	}
+    return 0;
+}
 
 #else
-	/************************************************************************/
-	/*                             PosixTestThread()                        */
-	/************************************************************************/
+/************************************************************************/
+/*                             PosixTestThread()                        */
+/************************************************************************/
 
-	static void *PosixTestThread( void *pData )
+static void *PosixTestThread( void *pData )
 
-	{
-		TestThread();
-	}
+{
+    TestThread();
+}
 #endif
 
 /************************************************************************/
