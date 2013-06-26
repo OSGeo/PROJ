@@ -36,8 +36,8 @@
 
 PJ_CVSID("$Id$");
 
-PROJ_HEAD(aitoff, "Aitoff") "\n\tMisc Sph";
-PROJ_HEAD(wintri, "Winkel Tripel") "\n\tMisc Sph\n\tlat_1";
+PROJ_HEAD(aitoff, "Aitoff") "\n\tMisc Sph, no inv.";
+PROJ_HEAD(wintri, "Winkel Tripel") "\n\tMisc Sph, no inv.\n\tlat_1";
 
 FORWARD(s_forward); /* spheroid */
 	double c, d;
