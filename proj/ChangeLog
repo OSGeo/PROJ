@@ -1,5 +1,7 @@
 2013-06-25  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/pj_ell_set.c: Ensure thread context is forwarded.
+
 	* src/multistresstest.c: add windows support (#199)
 
 	* src/pj_ctx.c: avoid race condition on setting of 
