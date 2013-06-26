@@ -28,9 +28,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
-#include <unistd.h>
 #include "proj_api.h"
+
+#ifdef _WIN32
+	#include <windows.h>
+#else
+	#include <pthread.h>
+	#include <unistd.h>
+#endif
 
 #define num_threads    10
 #define num_iterations 1000000
@@ -124,7 +129,13 @@ TestItem test_list[] = {
         "+init=epsg:3309",
         "+init=epsg:4326",
         150000.0, 30000.0, 0.0,
-    }
+    },
+	{
+		//Bad projection (invalid ellipsoid parameter +R_A=0)
+		"+proj=utm +zone=11 +datum=WGS84",
+		"+proj=merc +datum=potsdam +R_A=0",
+		150000.0, 3000000.0, 0.0,
+	}
 };
 
 static volatile int active_thread_count = 0;
@@ -133,10 +144,12 @@ static volatile int active_thread_count = 0;
 /*                             TestThread()                             */
 /************************************************************************/
 
-static void *TestThread( void *pData )
+static void TestThread()
 
 {
     int i, test_count = sizeof(test_list) / sizeof(TestItem); 
+	int repeat_count = num_iterations;
+	int i_iter;
 
 /* -------------------------------------------------------------------- */
 /*      Initialize coordinate system definitions.                       */
@@ -161,7 +174,6 @@ static void *TestThread( void *pData )
 /* -------------------------------------------------------------------- */
 /*      Perform tests - over and over.                                  */
 /* -------------------------------------------------------------------- */
-    int repeat_count = num_iterations, i_iter;
     
     for( i_iter = 0; i_iter < repeat_count; i_iter++ )
     {
@@ -170,9 +182,7 @@ static void *TestThread( void *pData )
             TestItem *test = test_list + i;
             double x, y, z;
             int error;
-
-            if( test->skip )
-                continue;
+			int skipTest = test->skip;
             
             x = test->src_x;
             y = test->src_y;
@@ -181,7 +191,24 @@ static void *TestThread( void *pData )
 #if reinit_every_iteration == 1
             src_pj_list[i] = pj_init_plus_ctx( ctx, test->src_def );
             dst_pj_list[i] = pj_init_plus_ctx( ctx, test->dst_def );
+
+			{
+				int skipTest = (src_pj_list[i] == NULL || dst_pj_list[i] == NULL);
+			
+				if ( skipTest != test->skip )
+					fprintf( stderr, "Threaded projection initialization does not match unthreaded initialization\n" );
+
+				if (skipTest)
+				{
+					pj_free( src_pj_list[i] );
+					pj_free( dst_pj_list[i] );
+					continue;
+				}
+			}
 #endif
+
+			if ( test->skip )
+				continue;
 
             error = pj_transform( src_pj_list[i], dst_pj_list[i], 1, 0, 
                                   &x, &y, &z );
@@ -229,9 +256,32 @@ static void *TestThread( void *pData )
             repeat_count, test_count );
 
     active_thread_count--;
-
-    return NULL;
 }
+
+#ifdef _WIN32
+	/************************************************************************/
+	/*                             WinTestThread()                        */
+	/************************************************************************/
+
+	static DWORD WINAPI WinTestThread( LPVOID lpParameter )
+
+	{
+		TestThread();
+
+		return 0;
+	}
+
+#else
+	/************************************************************************/
+	/*                             PosixTestThread()                        */
+	/************************************************************************/
+
+	static void *PosixTestThread( void *pData )
+
+	{
+		TestThread();
+	}
+#endif
 
 /************************************************************************/
 /*                                main()                                */
@@ -292,24 +342,51 @@ int main( int argc, char **argv )
 /* -------------------------------------------------------------------- */
 /*      Now launch a bunch of threads to repeat the tests.              */
 /* -------------------------------------------------------------------- */
-    pthread_t ahThread[num_threads];
-    pthread_attr_t hThreadAttr;
+#ifdef _WIN32
 
-    pthread_attr_init( &hThreadAttr );
-    pthread_attr_setdetachstate( &hThreadAttr, PTHREAD_CREATE_DETACHED );
+	{ //Scoped to workaround lack of c99 support in VS
+		HANDLE ahThread[num_threads];
 
-    for( i = 0; i < num_threads; i++ )
-    {
-        active_thread_count++;
-        
-        pthread_create( &(ahThread[i]), &hThreadAttr, 
-                        TestThread, NULL );
-    }
+		for( i = 0; i < num_threads; i++ )
+		{
+			active_thread_count++;
 
-    printf( "%d test threads launched.\n", num_threads );
-            
-    while( active_thread_count > 0 )				       
-        sleep( 1 );
+			ahThread[i] = CreateThread(NULL, 0, WinTestThread, NULL, 0, NULL);
+			
+			if (ahThread[i] == 0)
+			{
+				printf( "Thread creation failed.");
+				return 1;
+			}
+		}
+
+		printf( "%d test threads launched.\n", num_threads );
+
+		WaitForMultipleObjects(num_threads, ahThread, TRUE, INFINITE);
+	}
+
+#else
+
+	pthread_t ahThread[num_threads];
+	pthread_attr_t hThreadAttr;
+
+	pthread_attr_init( &hThreadAttr );
+	pthread_attr_setdetachstate( &hThreadAttr, PTHREAD_CREATE_DETACHED );
+
+	for( i = 0; i < num_threads; i++ )
+	{
+		active_thread_count++;
+
+		pthread_create( &(ahThread[i]), &hThreadAttr, 
+			TestThread, NULL );
+	}
+
+	printf( "%d test threads launched.\n", num_threads );
+
+	while( active_thread_count > 0 )				       
+		sleep( 1 );
+
+#endif
 
     printf( "all tests complete.\n" );
 
