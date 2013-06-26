@@ -1,5 +1,8 @@
 2013-06-25  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/pj_ctx.c: avoid race condition on setting of 
+	default_context_initialized. (#199)
+
 	* config.guess, config.sub: updated to newer versions (#208).
 
 	* src/proj.def: add pj_get_spheroid_defn to proj.def. (#214)
