@@ -415,6 +415,15 @@ $EXE +proj=pconic  +units=m +lat_1=20n +lat_2=60n +lon_0=60W +datum=WGS84 \
  -E >>${OUT} <<EOF
 -2240096.40 -6940342.15
 EOF
+echo "##############################################################" >> ${OUT}
+echo "Test laea" >> ${OUT}
+#
+$EXE -f '%.14f' \
+     +proj=laea +lat_0=45 +lon_0=-100 +units=m +datum=WGS84 +no_defs \
+ +to +proj=latlong +datum=WGS84 \
+ -E >>${OUT} <<EOF
+-6086629.0 4488761.0
+EOF
 ##############################################################################
 # Done! 
 # do 'diff' with distribution results
