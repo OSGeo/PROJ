@@ -245,6 +245,14 @@ $EXE +proj=latlong +datum=WGS84 \
  -E >>${OUT} <<EOF
 -30 40 
 -35 45
+20 40
+EOF
+$EXE +proj=robin +datum=WGS84 \
+ +to +proj=latlong +datum=WGS84 \
+ -E >>${OUT} <<EOF
+-2612095.95     4276351.58 0.00
+-2963455.42     4805073.65 0.00
+1741397.30      4276351.58 0.00
 EOF
 echo "##############################################################" >> ${OUT}
 echo "Test forward projection on sphere" >> ${OUT}
