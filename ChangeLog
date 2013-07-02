@@ -1,3 +1,11 @@
+2013-07-02  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* nad/testvarious, nad/tv_out.dist: add new robinson forward test,
+	and backwards tests.
+
+	* src/PJ_robin.c: Applied new coefficients supplied by Ed Campbell
+	pretty much on faith. (#113)
+
 2013-06-26  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/pj_open_lib.c: change filename and access args to const.
