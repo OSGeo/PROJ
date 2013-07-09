@@ -12,6 +12,8 @@
  o Removed old (deprecated) Java bindings in favor of the new api introduced
    in 4.8.0.
 
+ o Implement the calcofi (Cal Coop Ocean Fish Invest Lines/Stations) projection
+
  o Various bug fixes and cleanup.
 
 

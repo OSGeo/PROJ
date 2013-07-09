@@ -432,6 +432,23 @@ $EXE -f '%.14f' \
  -E >>${OUT} <<EOF
 -6086629.0 4488761.0
 EOF
+echo "##############################################################" >> ${OUT}
+echo "Test forward calcofi projection" >> ${OUT}
+$EXE +proj=latlong +ellps=clrk66 \
+ +to +proj=calcofi +ellps=clrk66 \
+ -E >>${OUT} <<EOF
+120d40'42.273"W	38d56'50.766"N
+121d9'W	34d9'N
+123d59'56.066"W	30d25'4.617"N
+EOF
+echo "Test inverse calcofi projection" >> ${OUT}
+$EXE +proj=calcofi +ellps=clrk66 \
+ +to +proj=longlat +ellps=clrk66 \
+ -E >>${OUT} <<EOF
+60 20
+80 60 
+90 120
+EOF
 ##############################################################################
 # Done! 
 # do 'diff' with distribution results
