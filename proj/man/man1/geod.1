@@ -1,8 +1,8 @@
 .\" @(#)geod.1
-.nr LL 6.5i
+.nr LL 7.0i
 .ad b
 .hy 1
-.TH GEOD 1 "2013/02/27 Rel. 4.8"
+.TH GEOD 1 "2013/07/11 Rel. 4.9.0"
 .SH NAME
 geod \- direct geodesic computations
 .br
@@ -38,9 +38,10 @@ perform geodesic (\(``Great Circle\('') computations for determining
 latitude, longitude and back azimuth of a terminus point
 given a initial point latitude, longitude, azimuth and distance (direct) or
 the forward and back azimuths and distance between an initial and
-terminus point latitudes and longitudes (inverse).
+terminus point latitudes and longitudes (inverse).  The results are
+accurate to round off for |\fIf\fR| < 1/50, where \fIf\fR is flattening.
 .PP
-The following runline control parameters can appear in any order:
+The following command-line options can appear in any order:
 .TP
 .B \-I
 Specifies that the inverse geodesic computation is to be performed.
@@ -93,13 +94,13 @@ DMS numbers between 0 and 360 degrees.  Also note -f.
 .PP
 The
 .B +args
-run-line arguments are associated with geodetic parameters
+command-line options are associated with geodetic parameters
 for specifying the ellipsoidal or sphere to use.
 See
 .B proj
 documentation for full list of these parameters and controls.
 The options are processed in left to right order
-from the run line.
+from the command line.
 Reentry of an option is ignored with the first occurrence assumed to
 be the desired value.
 .PP
@@ -200,18 +201,23 @@ Note: lack of precision in the distance value compromises
 the precision of the Portland location.
 .SH SEE ALSO
 .B geodesic(3)
-.br
-The \fBGeodSolve\fR utility in \fBGeographicLib\fR,
-http://geographiclib.sf.net.  With the \fB-E\fR option, this solves the
-geodesic problems in terms of elliptic integrals; the results are
-accurate for arbitrary \fIf\fR.
-.br
+.PP
+\fBGeographicLib\fR, http://geographiclib.sf.net
+.PP
+The \fBGeodSolve\fR utility in GeographicLib.  With the \fB-E\fR option,
+this solves the geodesic problems in terms of elliptic integrals; the
+results are accurate for arbitrary \fIf\fR.
+.PP
 C. F. F. Karney, \fIAlgorithms for Geodesics\fR,
 .br
 J. Geodesy \fB87\fR, 43-55 (2013);
 .br
-DOI: http://dx.doi.org/10.1007/s00190-012-0578-z,
+DOI: http://dx.doi.org/10.1007/s00190-012-0578-z
 .br
-http://geographiclib.sf.net/geod-addenda.html.
+http://geographiclib.sf.net/geod-addenda.html
+.PP
+The \fIonline geodesic bibliography\fR,
+.br
+http://geographiclib.sf.net/geodesic-papers/biblio.html
 .SH HOME PAGE
 http://proj.osgeo.org
