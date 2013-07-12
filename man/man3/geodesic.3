@@ -1,6 +1,6 @@
 .\" @(#)geodesic.3
-.nr LL 6.5i
-.TH GEODESIC 3 "2013/02/27 Rel. 4.8" 
+.nr LL 7.0i
+.TH GEODESIC 3 "2013/07/11 Rel. 4.9.0" 
 .ad b
 .hy 1
 .SH NAME
@@ -32,13 +32,13 @@ This library is a port of the geodesic routines in the C++ library,
 GeographicLib, to C.  It solves the direct and inverse geodesic problems
 on an ellipsoid of revolution.  In addition, the reduced length of a
 geodesic and the area between a geodesic and the equator can be
-computed.  The results are accurate to round off for |\fIf\fR| < 1/50.
-Note that the geodesic routines measure angles (latitudes, longitudes,
-and azimuths) in degrees, unlike the rest of the \fBproj\fR library,
-which uses radians.  The documentation for this library is included in
-geodesic.h.  A formatted version of the documentation is available at
-.br
-http://geographiclib.sf.net/html/C/index.html
+computed.  The results are accurate to round off for |\fIf\fR| < 1/50,
+where \fIf\fR is the flattening.  Note that the geodesic routines
+measure angles (latitudes, longitudes, and azimuths) in degrees, unlike
+the rest of the \fBproj\fR library, which uses radians.  The
+documentation for this library is included in geodesic.h.  A formatted
+version of the documentation is available at
+http://geographiclib.sf.net/1.32/C
 .SH EXAMPLE
 The following program reads in lines with the coordinates for two points
 in decimal degrees (\fIlat1\fR, \fIlon1\fR, \fIlat2\fR, \fIlon2\fR) and
@@ -70,18 +70,28 @@ int main() {
 .SH LIBRARY
 libproj.a \- library of projections and support procedures
 .SH SEE ALSO
+Full online documentation for \fBgeodesic(3)\fR,
+.br
+http://geographiclib.sf.net/1.32/C
+.PP
 .B geod(1)
-.br
-The \fBGeodesicExact\fR class in \fBGeographicLib\fR,
-http://geographiclib.sf.net.  This solves the geodesic problems in terms
-of elliptic integrals; the results are accurate for arbitrary \fIf\fR.
-.br
+.PP
+\fBGeographicLib\fR, http://geographiclib.sf.net
+.PP
+The \fBGeodesicExact\fR class in GeographicLib solves the geodesic
+problems in terms of elliptic integrals; the results are accurate for
+arbitrary \fIf\fR.
+.PP
 C. F. F. Karney, \fIAlgorithms for Geodesics\fR,
 .br
 J. Geodesy \fB87\fR, 43-55 (2013);
 .br
-DOI: http://dx.doi.org/10.1007/s00190-012-0578-z,
+DOI: http://dx.doi.org/10.1007/s00190-012-0578-z
 .br
-http://geographiclib.sf.net/geod-addenda.html.
+http://geographiclib.sf.net/geod-addenda.html
+.PP
+The \fIonline geodesic bibliography\fR,
+.br
+http://geographiclib.sf.net/geodesic-papers/biblio.html
 .SH HOME PAGE
 http://proj.osgeo.org

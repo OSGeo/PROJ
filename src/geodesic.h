@@ -27,8 +27,8 @@
  * - the direct problem -- given \e lat1, \e lon1, \e s12, and \e azi1,
  *   determine \e lat2, \e lon2, and \e azi2.  This is solved by the function
  *   geod_direct().
- * - the inverse problem -- given \e lat1, \e lon1, \e lat2, \e lon2, determine
- *   \e s12, \e azi1, and \e azi2.  This is solved by the function
+ * - the inverse problem -- given \e lat1, \e lon1, and \e lat2, \e lon2,
+ *   determine \e s12, \e azi1, and \e azi2.  This is solved by the function
  *   geod_inverse().
  *
  * The ellipsoid is specified by its equatorial radius \e a (typically in
@@ -97,30 +97,43 @@
  *   azi2] + [\e d, \e d], for arbitrary \e d.
  *
  * These routines are a simple transcription of the corresponding C++ classes
- * in <a href="http://geographiclib.sf.net"> GeographicLib</a>.  The
- * "class data" is represented by the structs geod_geodesic and
- * geod_geodesicline and these are passed as initial arguments to the member
- * functions.  (But note that the PolygonArea class has been replaced by a
- * simple function interface and the area computation does use the accurate
- * summing providing by the Accumulator class.)  Most of the internal comments
- * have been retained.  However, in the process of transcription some
- * documentation has been lost and the documentation for the C++ classes,
- * GeographicLib::Geodesic, GeographicLib::GeodesicLine, and
- * GeographicLib::PolygonArea, should be consulted.  The C++ code remains the
- * "reference implementation".  Think twice about restructuring the internals
- * of the C code since this may make porting fixes from the C++ code more
- * difficult.
+ * in <a href="http://geographiclib.sf.net"> GeographicLib</a>.  The "class
+ * data" is represented by the structs geod_geodesic, geod_geodesicline,
+ * geod_polygon and pointers to these objects are passed as initial arguments
+ * to the member functions.  Most of the internal comments have been retained.
+ * However, in the process of transcription some documentation has been lost
+ * and the documentation for the C++ classes, GeographicLib::Geodesic,
+ * GeographicLib::GeodesicLine, and GeographicLib::PolygonArea, should be
+ * consulted.  The C++ code remains the "reference implementation".  Think
+ * twice about restructuring the internals of the C code since this may make
+ * porting fixes from the C++ code more difficult.
  *
  * Copyright (c) Charles Karney (2012-2013) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * http://geographiclib.sourceforge.net/
  *
  * This library was distributed with
- * <a href="../index.html">GeographicLib</a> 1.31.
+ * <a href="../index.html">GeographicLib</a> 1.32.
  **********************************************************************/
 
 #if !defined(GEODESIC_H)
 #define GEODESIC_H 1
+
+/**
+ * The major version of the geodesic library.  (This tracks the version of
+ * GeographicLib.)
+ **********************************************************************/
+#define GEODESIC_VERSION_MAJOR 1
+/**
+ * The minor version of the geodesic library.  (This tracks the version of
+ * GeographicLib.)
+ **********************************************************************/
+#define GEODESIC_VERSION_MINOR 32
+/**
+ * The patch level of the geodesic library.  (This tracks the version of
+ * GeographicLib.)
+ **********************************************************************/
+#define GEODESIC_VERSION_PATCH 0
 
 #if defined(__cplusplus)
 extern "C" {
@@ -159,30 +172,50 @@ extern "C" {
   };
 
   /**
-   * Initialize a geod_geodesic object
+   * The struct for accumulating information about a geodesic polygon.  This is
+   * used for computing the perimeter and area of a polygon.  This must be
+   * initialized by geod_polygon_init() before use.
+   **********************************************************************/
+  struct geod_polygon {
+    double lat;                 /**< the current latitude */
+    double lon;                 /**< the current longitude */
+    /**< @cond SKIP */
+    double lat0;
+    double lon0;
+    double A[2];
+    double P[2];
+    int polyline;
+    int crossings;
+    /**< @endcond */
+    unsigned num;               /**< the number of points so far */
+  };
+
+  /**
+   * Initialize a geod_geodesic object.
    *
-   * @param[out] g the object to be initialized.
+   * @param[out] g a pointer to the object to be initialized.
    * @param[in] a the equatorial radius (meters).
    * @param[in] f the flattening.
    **********************************************************************/
   void geod_init(struct geod_geodesic* g, double a, double f);
 
   /**
-   * Initialize a geod_geodesicline object
+   * Initialize a geod_geodesicline object.
    *
-   * @param[out] l the object to be initialized.
-   * @param[in] g the geod_geodesic object specifying the ellipsoid.
+   * @param[out] l a pointer to the object to be initialized.
+   * @param[in] g a pointer to the geod_geodesic object specifying the
+   *   ellipsoid.
    * @param[in] lat1 latitude of point 1 (degrees).
    * @param[in] lon1 longitude of point 1 (degrees).
    * @param[in] azi1 azimuth at point 1 (degrees).
-   * @param[in] caps bitor'ed combination of geod_mask values specifying the
+   * @param[in] caps bitor'ed combination of geod_mask() values specifying the
    *   capabilities the geod_geodesicline object should possess, i.e., which
    *   quantities can be returned in calls to geod_position() and
    *   geod_genposition().
    *
    * \e g must have been initialized with a call to geod_init().  \e lat1
-   * should be in the range [&minus;90&deg;, 90&deg;]; \e azi1 should be in the
-   * range [&minus;540&deg;, 540&deg;).
+   * should be in the range [&minus;90&deg;, 90&deg;]; \e lon1 and \e azi1
+   * should be in the range [&minus;540&deg;, 540&deg;).
    *
    * The geod_mask values are [see geod_mask()]:
    * - \e caps |= GEOD_LATITUDE for the latitude \e lat2; this is
@@ -210,7 +243,8 @@ extern "C" {
   /**
    * Solve the direct geodesic problem.
    *
-   * @param[in] g the geod_geodesic object specifying the ellipsoid.
+   * @param[in] g a pointer to the geod_geodesic object specifying the
+   *   ellipsoid.
    * @param[in] lat1 latitude of point 1 (degrees).
    * @param[in] lon1 longitude of point 1 (degrees).
    * @param[in] azi1 azimuth at point 1 (degrees).
@@ -224,7 +258,7 @@ extern "C" {
    * should be in the range [&minus;90&deg;, 90&deg;]; \e lon1 and \e azi1
    * should be in the range [&minus;540&deg;, 540&deg;).  The values of \e lon2
    * and \e azi2 returned are in the range [&minus;180&deg;, 180&deg;).  Any of
-   * the "return" arguments plat2, etc., may be replaced by 0, if you do not
+   * the "return" arguments \e plat2, etc., may be replaced by 0, if you do not
    * need some quantities computed.
    *
    * If either point is at a pole, the azimuth is defined by keeping the
@@ -250,7 +284,8 @@ extern "C" {
   /**
    * Solve the inverse geodesic problem.
    *
-   * @param[in] g the geod_geodesic object specifying the ellipsoid.
+   * @param[in] g a pointer to the geod_geodesic object specifying the
+   *   ellipsoid.
    * @param[in] lat1 latitude of point 1 (degrees).
    * @param[in] lon1 longitude of point 1 (degrees).
    * @param[in] lat2 latitude of point 2 (degrees).
@@ -264,8 +299,8 @@ extern "C" {
    * and \e lat2 should be in the range [&minus;90&deg;, 90&deg;]; \e lon1 and
    * \e lon2 should be in the range [&minus;540&deg;, 540&deg;).  The values of
    * \e azi1 and \e azi2 returned are in the range [&minus;180&deg;, 180&deg;).
-   * Any of the "return" arguments ps12, etc., may be replaced by 0, if you do
-   * not need some quantities computed.
+   * Any of the "return" arguments \e ps12, etc., may be replaced by 0, if you
+   * do not need some quantities computed.
    *
    * If either point is at a pole, the azimuth is defined by keeping the
    * longitude fixed, writing \e lat = &plusmn;(90&deg; &minus; &epsilon;), and
@@ -292,18 +327,19 @@ extern "C" {
   /**
    * Compute the position along a geod_geodesicline.
    *
-   * @param[in] l the geod_geodesicline object specifying the geodesic line.
+   * @param[in] l a pointer to the geod_geodesicline object specifying the
+   *   geodesic line.
    * @param[in] s12 distance between point 1 and point 2 (meters); it can be
    *   negative.
    * @param[out] plat2 pointer to the latitude of point 2 (degrees).
    * @param[out] plon2 pointer to the longitude of point 2 (degrees); requires
-   *   that the \e was initialized with \e caps |= GEOD_LONGITUDE.
+   *   that \e l was initialized with \e caps |= GEOD_LONGITUDE.
    * @param[out] pazi2 pointer to the (forward) azimuth at point 2 (degrees).
    *
    * \e l must have been initialized with a call to geod_lineinit() with \e
    * caps |= GEOD_DISTANCE_IN.  The values of \e lon2 and \e azi2 returned are
    * in the range [&minus;180&deg;, 180&deg;).  Any of the "return" arguments
-   * plat2, etc., may be replaced by 0, if you do not need some quantities
+   * \e plat2, etc., may be replaced by 0, if you do not need some quantities
    * computed.
    *
    * Example, compute way points between JFK and Singapore Changi Airport
@@ -340,7 +376,8 @@ extern "C" {
   /**
    * The general direct geodesic problem.
    *
-   * @param[in] g the geod_geodesic object specifying the ellipsoid.
+   * @param[in] g a pointer to the geod_geodesic object specifying the
+   *   ellipsoid.
    * @param[in] lat1 latitude of point 1 (degrees).
    * @param[in] lon1 longitude of point 1 (degrees).
    * @param[in] azi1 azimuth at point 1 (degrees).
@@ -367,7 +404,7 @@ extern "C" {
    * should be in the range [&minus;90&deg;, 90&deg;]; \e lon1 and \e azi1
    * should be in the range [&minus;540&deg;, 540&deg;).  The function value \e
    * a12 equals \e s12_a12 is \e arcmode is non-zero.  Any of the "return"
-   * arguments plat2, etc., may be replaced by 0, if you do not need some
+   * arguments \e plat2, etc., may be replaced by 0, if you do not need some
    * quantities computed.
    **********************************************************************/
   double geod_gendirect(const struct geod_geodesic* g,
@@ -380,7 +417,8 @@ extern "C" {
   /**
    * The general inverse geodesic calculation.
    *
-   * @param[in] g the geod_geodesic object specifying the ellipsoid.
+   * @param[in] g a pointer to the geod_geodesic object specifying the
+   *   ellipsoid.
    * @param[in] lat1 latitude of point 1 (degrees).
    * @param[in] lon1 longitude of point 1 (degrees).
    * @param[in] lat2 latitude of point 2 (degrees).
@@ -401,7 +439,7 @@ extern "C" {
    * \e g must have been initialized with a call to geod_init().  \e lat1
    * and \e lat2 should be in the range [&minus;90&deg;, 90&deg;]; \e lon1 and
    * \e lon2 should be in the range [&minus;540&deg;, 540&deg;).  Any of the
-   * "return" arguments ps12, etc., may be replaced by 0, if you do not need
+   * "return" arguments \e ps12, etc., may be replaced by 0, if you do not need
    * some quantities computed.
    **********************************************************************/
   double geod_geninverse(const struct geod_geodesic* g,
@@ -413,7 +451,8 @@ extern "C" {
   /**
    * The general position function.
    *
-   * @param[in] l the geod_geodesicline object specifying the geodesic line.
+   * @param[in] l a pointer to the geod_geodesicline object specifying the
+   *   geodesic line.
    * @param[in] arcmode flag determining the meaning of the second parameter;
    *   if arcmode is 0, then \e l must have been initialized with \e caps |=
    *   GEOD_DISTANCE_IN.
@@ -443,11 +482,11 @@ extern "C" {
    * \e l must have been initialized with a call to geod_lineinit() with \e
    * caps |= GEOD_DISTANCE_IN.  The values of \e lon2 and \e azi2 returned are
    * in the range [&minus;180&deg;, 180&deg;).  Any of the "return" arguments
-   * plat2, etc., may be replaced by 0, if you do not need some quantities
+   * \e plat2, etc., may be replaced by 0, if you do not need some quantities
    * computed.  Requesting a value which \e l is not capable of computing is
    * not an error; the corresponding argument will not be altered.
    *
-   * Example, computer way points between JFK and Singapore Changi Airport
+   * Example, compute way points between JFK and Singapore Changi Airport
    * using geod_genposition().  In this example, the points are evenly space in
    * arc length (and so only approximately equally space in distance).  This is
    * faster than using geod_position() would be appropriate if drawing the path
@@ -476,9 +515,181 @@ extern "C" {
                           double* pS12);
 
   /**
-   * The area of a geodesic polygon.
+   * Initialize a geod_polygon object.
    *
-   * @param[in] g the geod_geodesic object specifying the ellipsoid.
+   * @param[out] p a pointer to the object to be initialized.
+   * @param[in] polylinep non-zero if a polyline instead of a polygon.
+   *
+   * If \e polylinep is zero, then the sequence of vertices and edges added by
+   * geod_polygon_addpoint() and geod_polygon_addedge() define a polygon and
+   * the perimeter and area are returned by geod_polygon_compute().  If \e
+   * polylinep is non-zero, then the vertices and edges define a polyline and
+   * only the perimeter is returned by geod_polygon_compute().
+   *
+   * An example of the use of this function is given in the documentation for
+   * geod_polygon_compute().
+   **********************************************************************/
+  void geod_polygon_init(struct geod_polygon* p, int polylinep);
+
+  /**
+   * Add a point to the polygon or polyline.
+   *
+   * @param[in] g a pointer to the geod_geodesic object specifying the
+   *   ellipsoid.
+   * @param[in,out] p a pointer to the geod_polygon object specifying the
+   *   polygon.
+   * @param[in] lat the latitude of the point (degrees).
+   * @param[in] lon the longitude of the point (degrees).
+   *
+   * \e g and \e p must have been initialized with calls to geod_init() and
+   * geod_polygon_init(), respectively.  The same \e g must be used for all the
+   * points and edges in a polygon.  \e lat should be in the range
+   * [&minus;90&deg;, 90&deg;] and \e lon should be in the range
+   * [&minus;540&deg;, 540&deg;).
+   *
+   * An example of the use of this function is given in the documentation for
+   * geod_polygon_compute().
+   **********************************************************************/
+  void geod_polygon_addpoint(const struct geod_geodesic* g,
+                             struct geod_polygon* p,
+                             double lat, double lon);
+
+  /**
+   * Add an edge to the polygon or polyline.
+   *
+   * @param[in] g a pointer to the geod_geodesic object specifying the
+   *   ellipsoid.
+   * @param[in,out] p a pointer to the geod_polygon object specifying the
+   *   polygon.
+   * @param[in] azi azimuth at current point (degrees).
+   * @param[in] s distance from current point to next point (meters).
+   *
+   * \e g and \e p must have been initialized with calls to geod_init() and
+   * geod_polygon_init(), respectively.  The same \e g must be used for all the
+   * points and edges in a polygon.  \e azi should be in the range
+   * [&minus;540&deg;, 540&deg;).  This does nothing if no points have been
+   * added yet.  The \e lat and \e lon fields of \e p give the location of
+   * the new vertex.
+   **********************************************************************/
+  void geod_polygon_addedge(const struct geod_geodesic* g,
+                            struct geod_polygon* p,
+                            double azi, double s);
+
+  /**
+   * Return the results for a polygon.
+   *
+   * @param[in] g a pointer to the geod_geodesic object specifying the
+   *   ellipsoid.
+   * @param[in] p a pointer to the geod_polygon object specifying the polygon.
+   * @param[in] reverse if non-zero then clockwise (instead of
+   *   counter-clockwise) traversal counts as a positive area.
+   * @param[in] sign if non-zero then return a signed result for the area if
+   *   the polygon is traversed in the "wrong" direction instead of returning
+   *   the area for the rest of the earth.
+   * @param[out] pA pointer to the area of the polygon (meters<sup>2</sup>);
+   *   only set if \e polyline is non-zero in the call to geod_polygon_init().
+   * @param[out] pP pointer to the perimeter of the polygon or length of the
+   *   polyline (meters).
+   * @return the number of points.
+   *
+   * Only simple polygons (which are not self-intersecting) are allowed.
+   * There's no need to "close" the polygon by repeating the first vertex.  Set
+   * \e pA or \e pP to zero, if you do not want the corresponding quantity
+   * returned.
+   *
+   * Example, compute the perimeter and area of the geodesic triangle with
+   * vertices (0&deg;N,0&deg;E), (0&deg;N,90&deg;E), (90&deg;N,0&deg;E).
+   @code
+   double A, P;
+   int n;
+   struct geod_geodesic g;
+   struct geod_polygon p;
+   geod_init(&g, 6378137, 1/298.257223563);
+   geod_polygon_init(&p, 0);
+
+   geod_polygon_addpoint(&g, &p,  0,  0);
+   geod_polygon_addpoint(&g, &p,  0, 90);
+   geod_polygon_addpoint(&g, &p, 90,  0);
+   n = geod_polygon_compute(&g, &p, 0, 1, &A, &P);
+   printf("%d %.8f %.3f\n", n, P, A);
+   @endcode
+   **********************************************************************/
+  unsigned geod_polygon_compute(const struct geod_geodesic* g,
+                                const struct geod_polygon* p,
+                                int reverse, int sign,
+                                double* pA, double* pP);
+
+  /**
+   * Return the results assuming a tentative final test point is added;
+   * however, the data for the test point is not saved.  This lets you report a
+   * running result for the perimeter and area as the user moves the mouse
+   * cursor.  Ordinary floating point arithmetic is used to accumulate the data
+   * for the test point; thus the area and perimeter returned are less accurate
+   * than if geod_polygon_addpoint() and geod_polygon_compute() are used.
+   *
+   * @param[in] g a pointer to the geod_geodesic object specifying the
+   *   ellipsoid.
+   * @param[in] p a pointer to the geod_polygon object specifying the polygon.
+   * @param[in] lat the latitude of the test point (degrees).
+   * @param[in] lon the longitude of the test point (degrees).
+   * @param[in] reverse if non-zero then clockwise (instead of
+   *   counter-clockwise) traversal counts as a positive area.
+   * @param[in] sign if non-zero then return a signed result for the area if
+   *   the polygon is traversed in the "wrong" direction instead of returning
+   *   the area for the rest of the earth.
+   * @param[out] pA pointer to the area of the polygon (meters<sup>2</sup>);
+   *   only set if \e polyline is non-zero in the call to geod_polygon_init().
+   * @param[out] pP pointer to the perimeter of the polygon or length of the
+   *   polyline (meters).
+   * @return the number of points.
+   *
+   * \e lat should be in the range [&minus;90&deg;, 90&deg;] and \e
+   * lon should be in the range [&minus;540&deg;, 540&deg;).
+   **********************************************************************/
+  unsigned geod_polygon_testpoint(const struct geod_geodesic* g,
+                                  const struct geod_polygon* p,
+                                  double lat, double lon,
+                                  int reverse, int sign,
+                                  double* pA, double* pP);
+
+  /**
+   * Return the results assuming a tentative final test point is added via an
+   * azimuth and distance; however, the data for the test point is not saved.
+   * This lets you report a running result for the perimeter and area as the
+   * user moves the mouse cursor.  Ordinary floating point arithmetic is used
+   * to accumulate the data for the test point; thus the area and perimeter
+   * returned are less accurate than if geod_polygon_addedge() and
+   * geod_polygon_compute() are used.
+   *
+   * @param[in] g a pointer to the geod_geodesic object specifying the
+   *   ellipsoid.
+   * @param[in] p a pointer to the geod_polygon object specifying the polygon.
+   * @param[in] azi azimuth at current point (degrees).
+   * @param[in] s distance from current point to final test point (meters).
+   * @param[in] reverse if non-zero then clockwise (instead of
+   *   counter-clockwise) traversal counts as a positive area.
+   * @param[in] sign if non-zero then return a signed result for the area if
+   *   the polygon is traversed in the "wrong" direction instead of returning
+   *   the area for the rest of the earth.
+   * @param[out] pA pointer to the area of the polygon (meters<sup>2</sup>);
+   *   only set if \e polyline is non-zero in the call to geod_polygon_init().
+   * @param[out] pP pointer to the perimeter of the polygon or length of the
+   *   polyline (meters).
+   * @return the number of points.
+   *
+   * \e azi should be in the range [&minus;540&deg;, 540&deg;).
+   **********************************************************************/
+  unsigned geod_polygon_testedge(const struct geod_geodesic* g,
+                                 const struct geod_polygon* p,
+                                 double azi, double s,
+                                 int reverse, int sign,
+                                 double* pA, double* pP);
+
+  /**
+   * A simple interface for computing the area of a geodesic polygon.
+   *
+   * @param[in] g a pointer to the geod_geodesic object specifying the
+   *   ellipsoid.
    * @param[in] lats an array of latitudes of the polygon vertices (degrees).
    * @param[in] lons an array of longitudes of the polygon vertices (degrees).
    * @param[in] n the number of vertices.
@@ -512,7 +723,7 @@ extern "C" {
                         double* pA, double* pP);
 
   /**
-   * mask values for geod_geodesicline capabilities.
+   * mask values for the the \e caps argument to geod_lineinit().
    **********************************************************************/
   enum geod_mask {
     GEOD_NONE         = 0U,                     /**< Calculate nothing */
