@@ -736,14 +736,14 @@
 <4721> +proj=longlat +ellps=intl +towgs84=265.025,384.929,-194.046,0,0,0,0 +no_defs  <>
 # South Georgia 1968
 <4722> +proj=longlat +ellps=intl +towgs84=-794,119,-298,0,0,0,0 +no_defs  <>
-# Grand Cayman 1959
-<4723> +proj=longlat +ellps=clrk66 +towgs84=67.8,106.1,138.8,0,0,0,0 +no_defs  <>
+# GCGD59
+<4723> +proj=longlat +ellps=clrk66 +towgs84=-179.483,-69.379,-27.584,-7.862,8.163,6.042,-13.925 +no_defs  <>
 # Diego Garcia 1969
 <4724> +proj=longlat +ellps=intl +towgs84=208,-435,-229,0,0,0,0 +no_defs  <>
 # Johnston Island 1961
 <4725> +proj=longlat +ellps=intl +towgs84=189,-79,-202,0,0,0,0 +no_defs  <>
-# Little Cayman 1961
-<4726> +proj=longlat +ellps=clrk66 +towgs84=42,124,147,0,0,0,0 +no_defs  <>
+# SIGD61
+<4726> +proj=longlat +ellps=clrk66 +towgs84=8.853,-52.644,180.304,-0.393,-2.323,2.96,-24.081 +no_defs  <>
 # Midway 1961
 <4727> +proj=longlat +ellps=intl +towgs84=403,-81,277,0,0,0,0 +no_defs  <>
 # Pico de las Nieves 1984
@@ -919,15 +919,19 @@
 # Corrego Alegre 1961
 <5524> +proj=longlat +ellps=intl +no_defs  <>
 # SAD69(96)
-<5527> +proj=longlat +ellps=aust_SA +no_defs  <>
+<5527> +proj=longlat +ellps=aust_SA +towgs84=-67.35,3.88,-38.22,0,0,0,0 +no_defs  <>
 # PNG94
 <5546> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
-# Ukraine 2000
+# UCS-2000
 <5561> +proj=longlat +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +no_defs  <>
 # FEH2010
 <5593> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # DB_REF
 <5681> +proj=longlat +ellps=bessel +no_defs  <>
+# TGD2005
+<5886> +proj=longlat +ellps=GRS80 +no_defs  <>
+# CIGD11
+<6135> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # Anguilla 1957 / British West Indies Grid
 <2000> +proj=tmerc +lat_0=0 +lon_0=-62 +k=0.9995000000000001 +x_0=400000 +y_0=0 +ellps=clrk80 +units=m +no_defs  <>
 # Antigua 1943 / British West Indies Grid
@@ -3646,10 +3650,10 @@
 <3354> +proj=utm +zone=32 +south +ellps=intl +units=m +no_defs  <>
 # Egypt Gulf of Suez S-650 TL / Red Belt
 <3355> +proj=tmerc +lat_0=30 +lon_0=31 +k=1 +x_0=615000 +y_0=810000 +ellps=helmert +towgs84=-146.21,112.63,4.05,0,0,0,0 +units=m +no_defs  <>
-# Grand Cayman 1959 / UTM zone 17N
-<3356> +proj=utm +zone=17 +ellps=clrk66 +towgs84=67.8,106.1,138.8,0,0,0,0 +units=m +no_defs  <>
-# Little Cayman 1961 / UTM zone 17N
-<3357> +proj=utm +zone=17 +ellps=clrk66 +towgs84=42,124,147,0,0,0,0 +units=m +no_defs  <>
+# Grand Cayman 1959 / UTM zone 17N (deprecated)
+<3356> +proj=utm +zone=17 +ellps=clrk66 +towgs84=-179.483,-69.379,-27.584,-7.862,8.163,6.042,-13.925 +units=m +no_defs  <>
+# Little Cayman 1961 / UTM zone 17N (deprecated)
+<3357> +proj=utm +zone=17 +ellps=clrk66 +towgs84=8.853,-52.644,180.304,-0.393,-2.323,2.96,-24.081 +units=m +no_defs  <>
 # NAD83(HARN) / North Carolina
 <3358> +proj=lcc +lat_1=36.16666666666666 +lat_2=34.33333333333334 +lat_0=33.75 +lon_0=-79 +x_0=609601.22 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # NAD83(HARN) / North Carolina (ftUS) (deprecated)
@@ -4849,7 +4853,7 @@
 <4467> +proj=utm +zone=21 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # RGM04 / UTM zone 38S
 <4471> +proj=utm +zone=38 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# Cadastre 1997 / UTM zone 38S
+# Cadastre 1997 / UTM zone 38S (deprecated)
 <4474> +proj=utm +zone=38 +south +ellps=intl +towgs84=-382,-59,-262,0,0,0,0 +units=m +no_defs  <>
 # Mexican Datum of 1993 / UTM zone 11N
 <4484> +proj=utm +zone=11 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
@@ -5493,17 +5497,17 @@
 # WGS 84 / Gabon TM 2011
 <5523> +proj=tmerc +lat_0=0 +lon_0=11.5 +k=0.9996 +x_0=1500000 +y_0=5500000 +datum=WGS84 +units=m +no_defs  <>
 # SAD69(96) / Brazil Polyconic
-<5530> +proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=aust_SA +units=m +no_defs  <>
+<5530> +proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=aust_SA +towgs84=-67.35,3.88,-38.22,0,0,0,0 +units=m +no_defs  <>
 # SAD69(96) / UTM zone 21S
-<5531> +proj=utm +zone=21 +south +ellps=aust_SA +units=m +no_defs  <>
+<5531> +proj=utm +zone=21 +south +ellps=aust_SA +towgs84=-67.35,3.88,-38.22,0,0,0,0 +units=m +no_defs  <>
 # SAD69(96) / UTM zone 22S (deprecated)
 <5532> +proj=utm +zone=22 +south +ellps=aust_SA +towgs84=-57,1,-41,0,0,0,0 +units=m +no_defs  <>
 # SAD69(96) / UTM zone 23S
-<5533> +proj=utm +zone=23 +south +ellps=aust_SA +units=m +no_defs  <>
+<5533> +proj=utm +zone=23 +south +ellps=aust_SA +towgs84=-67.35,3.88,-38.22,0,0,0,0 +units=m +no_defs  <>
 # SAD69(96) / UTM zone 24S
-<5534> +proj=utm +zone=24 +south +ellps=aust_SA +units=m +no_defs  <>
+<5534> +proj=utm +zone=24 +south +ellps=aust_SA +towgs84=-67.35,3.88,-38.22,0,0,0,0 +units=m +no_defs  <>
 # SAD69(96) / UTM zone 25S
-<5535> +proj=utm +zone=25 +south +ellps=aust_SA +units=m +no_defs  <>
+<5535> +proj=utm +zone=25 +south +ellps=aust_SA +towgs84=-67.35,3.88,-38.22,0,0,0,0 +units=m +no_defs  <>
 # Corrego Alegre 1961 / UTM zone 21S
 <5536> +proj=utm +zone=21 +south +ellps=intl +units=m +no_defs  <>
 # Corrego Alegre 1961 / UTM zone 22S
@@ -5520,49 +5524,49 @@
 <5552> +proj=utm +zone=56 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # Ocotepeque 1935 / Guatemala Norte
 <5559> +proj=lcc +lat_1=16.81666666666667 +lat_0=16.81666666666667 +lon_0=-90.33333333333333 +k_0=0.99992226 +x_0=500000 +y_0=292209.579 +ellps=clrk66 +towgs84=213.11,9.37,-74.95,0,0,0,0 +units=m +no_defs  <>
-# Ukraine 2000 / Gauss-Kruger zone 4
+# UCS-2000 / Gauss-Kruger zone 4
 <5562> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=4500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / Gauss-Kruger zone 5
+# UCS-2000 / Gauss-Kruger zone 5
 <5563> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=5500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / Gauss-Kruger zone 6
+# UCS-2000 / Gauss-Kruger zone 6
 <5564> +proj=tmerc +lat_0=0 +lon_0=33 +k=1 +x_0=6500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / Gauss-Kruger zone 7
+# UCS-2000 / Gauss-Kruger zone 7
 <5565> +proj=tmerc +lat_0=0 +lon_0=39 +k=1 +x_0=7500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / Gauss-Kruger CM 21E
+# UCS-2000 / Gauss-Kruger CM 21E
 <5566> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / Gauss-Kruger CM 27E
+# UCS-2000 / Gauss-Kruger CM 27E
 <5567> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / Gauss-Kruger CM 33E
+# UCS-2000 / Gauss-Kruger CM 33E
 <5568> +proj=tmerc +lat_0=0 +lon_0=33 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / Gauss-Kruger CM 39E
+# UCS-2000 / Gauss-Kruger CM 39E
 <5569> +proj=tmerc +lat_0=0 +lon_0=39 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger zone 7
+# UCS-2000 / 3-degree Gauss-Kruger zone 7
 <5570> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=7500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger zone 8
+# UCS-2000 / 3-degree Gauss-Kruger zone 8
 <5571> +proj=tmerc +lat_0=0 +lon_0=24 +k=1 +x_0=8500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger zone 9
+# UCS-2000 / 3-degree Gauss-Kruger zone 9
 <5572> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=9500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger zone 10
+# UCS-2000 / 3-degree Gauss-Kruger zone 10
 <5573> +proj=tmerc +lat_0=0 +lon_0=30 +k=1 +x_0=10500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger zone 11
+# UCS-2000 / 3-degree Gauss-Kruger zone 11
 <5574> +proj=tmerc +lat_0=0 +lon_0=33 +k=1 +x_0=11500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger zone 12
+# UCS-2000 / 3-degree Gauss-Kruger zone 12
 <5575> +proj=tmerc +lat_0=0 +lon_0=36 +k=1 +x_0=12500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger zone 13
+# UCS-2000 / 3-degree Gauss-Kruger zone 13
 <5576> +proj=tmerc +lat_0=0 +lon_0=39 +k=1 +x_0=13500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger CM 21E
+# UCS-2000 / 3-degree Gauss-Kruger CM 21E
 <5577> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger CM 24E
+# UCS-2000 / 3-degree Gauss-Kruger CM 24E
 <5578> +proj=tmerc +lat_0=0 +lon_0=24 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger CM 27E
+# UCS-2000 / 3-degree Gauss-Kruger CM 27E
 <5579> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger CM 30E
+# UCS-2000 / 3-degree Gauss-Kruger CM 30E
 <5580> +proj=tmerc +lat_0=0 +lon_0=30 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger CM 33E
+# UCS-2000 / 3-degree Gauss-Kruger CM 33E
 <5581> +proj=tmerc +lat_0=0 +lon_0=33 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger CM 36E
+# UCS-2000 / 3-degree Gauss-Kruger CM 36E
 <5582> +proj=tmerc +lat_0=0 +lon_0=36 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# Ukraine 2000 / 3-degree Gauss-Kruger CM 39E
+# UCS-2000 / 3-degree Gauss-Kruger CM 39E
 <5583> +proj=tmerc +lat_0=0 +lon_0=39 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
 # NAD27 / New Brunswick Stereographic (NAD27)
 <5588> +proj=sterea +lat_0=46.5 +lon_0=-66.5 +k=0.999912 +x_0=304800 +y_0=304800 +datum=NAD27 +units=ft +no_defs  <>
@@ -5690,7 +5694,219 @@
 # RGRDC 2005 / Congo TM zone 30
 <5844> +proj=tmerc +lat_0=0 +lon_0=30 +k=0.9999 +x_0=500000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SAD69(96) / UTM zone 22S
-<5858> +proj=utm +zone=22 +south +ellps=aust_SA +units=m +no_defs  <>
+<5858> +proj=utm +zone=22 +south +ellps=aust_SA +towgs84=-67.35,3.88,-38.22,0,0,0,0 +units=m +no_defs  <>
+# SAD69(96) / UTM zone 18S
+<5875> +proj=utm +zone=18 +south +ellps=aust_SA +towgs84=-67.35,3.88,-38.22,0,0,0,0 +units=m +no_defs  <>
+# SAD69(96) / UTM zone 19S
+<5876> +proj=utm +zone=19 +south +ellps=aust_SA +towgs84=-67.35,3.88,-38.22,0,0,0,0 +units=m +no_defs  <>
+# SAD69(96) / UTM zone 20S
+<5877> +proj=utm +zone=20 +south +ellps=aust_SA +towgs84=-67.35,3.88,-38.22,0,0,0,0 +units=m +no_defs  <>
+# Cadastre 1997 / UTM zone 38S
+<5879> +proj=utm +zone=38 +south +ellps=intl +towgs84=-381.788,-57.501,-256.673,0,0,0,0 +units=m +no_defs  <>
+# SIRGAS 2000 / Brazil Polyconic
+<5880> +proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# TGD2005 / Tonga Map Grid
+<5887> +proj=tmerc +lat_0=0 +lon_0=-177 +k=0.9996 +x_0=1500000 +y_0=5000000 +ellps=GRS80 +units=m +no_defs  <>
+# JAXA Snow Depth Polar Stereographic North
+<5890> +proj=stere +lat_0=90 +lat_ts=70 +lon_0=90 +k=1 +x_0=0 +y_0=0 +a=6378273 +b=6356889.449 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone A1
+<5921> +proj=lcc +lat_1=85 +lat_2=77 +lat_0=81.31722600000001 +lon_0=-111 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone A2
+<5922> +proj=lcc +lat_1=85 +lat_2=77 +lat_0=81.31722600000001 +lon_0=-39 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone A3
+<5923> +proj=lcc +lat_1=85 +lat_2=77 +lat_0=81.31722600000001 +lon_0=33 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone A4
+<5924> +proj=lcc +lat_1=85 +lat_2=77 +lat_0=81.31722600000001 +lon_0=105 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone A5
+<5925> +proj=lcc +lat_1=85 +lat_2=77 +lat_0=81.31722600000001 +lon_0=177 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone B1
+<5926> +proj=lcc +lat_1=77 +lat_2=69 +lat_0=73.15574086111111 +lon_0=-111 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone B2
+<5927> +proj=lcc +lat_1=77 +lat_2=69 +lat_0=73.15574086111111 +lon_0=-39 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone B3
+<5928> +proj=lcc +lat_1=77 +lat_2=69 +lat_0=73.15574086111111 +lon_0=33 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone B4
+<5929> +proj=lcc +lat_1=77 +lat_2=69 +lat_0=73.15574086111111 +lon_0=105 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone B5
+<5930> +proj=lcc +lat_1=77 +lat_2=69 +lat_0=73.15574086111111 +lon_0=177 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone C1
+<5931> +proj=lcc +lat_1=69 +lat_2=61 +lat_0=65.10127088888888 +lon_0=-111 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone C2
+<5932> +proj=lcc +lat_1=69 +lat_2=61 +lat_0=65.10127088888888 +lon_0=-39 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone C3
+<5933> +proj=lcc +lat_1=69 +lat_2=61 +lat_0=65.10127088888888 +lon_0=33 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone C4
+<5934> +proj=lcc +lat_1=69 +lat_2=61 +lat_0=65.10127088888888 +lon_0=105 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic Regional zone C5
+<5935> +proj=lcc +lat_1=69 +lat_2=61 +lat_0=65.10127088888888 +lon_0=177 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Alaska Polar Stereographic
+<5936> +proj=stere +lat_0=90 +lat_ts=90 +lon_0=-150 +k=0.994 +x_0=2000000 +y_0=2000000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Canada Polar Stereographic
+<5937> +proj=stere +lat_0=90 +lat_ts=90 +lon_0=-100 +k=0.994 +x_0=2000000 +y_0=2000000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Greenland Polar Stereographic
+<5938> +proj=stere +lat_0=90 +lat_ts=90 +lon_0=-33 +k=0.994 +x_0=2000000 +y_0=2000000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Norway Polar Stereographic
+<5939> +proj=stere +lat_0=90 +lat_ts=90 +lon_0=18 +k=0.994 +x_0=2000000 +y_0=2000000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Russia Polar Stereographic
+<5940> +proj=stere +lat_0=90 +lat_ts=90 +lon_0=105 +k=0.994 +x_0=2000000 +y_0=2000000 +datum=WGS84 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 1-25
+<6050> +proj=lcc +lat_1=87 +lat_2=83.66666666666667 +lat_0=85.43711833333333 +lon_0=-30 +x_0=25500000 +y_0=1500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 2-18
+<6051> +proj=lcc +lat_1=83.66666666666667 +lat_2=80.33333333333333 +lat_0=82.05842488888888 +lon_0=-52 +x_0=18500000 +y_0=2500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 2-20
+<6052> +proj=lcc +lat_1=83.66666666666667 +lat_2=80.33333333333333 +lat_0=82.05842488888888 +lon_0=-12 +x_0=20500000 +y_0=2500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 3-29
+<6053> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=-69 +x_0=29500000 +y_0=3500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 3-31
+<6054> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=-39 +x_0=31500000 +y_0=3500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 3-33
+<6055> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=-10 +x_0=33500000 +y_0=3500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 4-20
+<6056> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=-64 +x_0=20500000 +y_0=4500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 4-22
+<6057> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=-39 +x_0=22500000 +y_0=4500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 4-24
+<6058> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=-14 +x_0=24500000 +y_0=4500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 5-41
+<6059> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-62 +x_0=41500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 5-43
+<6060> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-42 +x_0=43500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 5-45
+<6061> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-22 +x_0=45500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 6-26
+<6062> +proj=lcc +lat_1=70.33333333333333 +lat_2=67 +lat_0=68.68747555555557 +lon_0=-56 +x_0=26500000 +y_0=6500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 6-28
+<6063> +proj=lcc +lat_1=70.33333333333333 +lat_2=67 +lat_0=68.68747555555557 +lon_0=-38 +x_0=28500000 +y_0=6500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 6-30
+<6064> +proj=lcc +lat_1=70.33333333333333 +lat_2=67 +lat_0=68.68747555555557 +lon_0=-20 +x_0=30500000 +y_0=6500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 7-11
+<6065> +proj=lcc +lat_1=67 +lat_2=63.66666666666666 +lat_0=65.35103930555555 +lon_0=-51 +x_0=11500000 +y_0=7500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 7-13
+<6066> +proj=lcc +lat_1=67 +lat_2=63.66666666666666 +lat_0=65.35103930555555 +lon_0=-34 +x_0=13500000 +y_0=7500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 8-20
+<6067> +proj=lcc +lat_1=63.66666666666666 +lat_2=60.33333333333334 +lat_0=62.01530688888889 +lon_0=-52 +x_0=20500000 +y_0=8500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GR96 / EPSG Arctic zone 8-22
+<6068> +proj=lcc +lat_1=63.66666666666666 +lat_2=60.33333333333334 +lat_0=62.01530688888889 +lon_0=-37 +x_0=22500000 +y_0=8500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# ETRS89 / EPSG Arctic zone 2-22
+<6069> +proj=lcc +lat_1=83.66666666666667 +lat_2=80.33333333333333 +lat_0=82.05842488888888 +lon_0=16 +x_0=22500000 +y_0=2500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# ETRS89 / EPSG Arctic zone 3-11
+<6070> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=21 +x_0=11500000 +y_0=3500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# ETRS89 / EPSG Arctic zone 4-26
+<6071> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=10 +x_0=26500000 +y_0=4500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# ETRS89 / EPSG Arctic zone 4-28
+<6072> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=34 +x_0=28500000 +y_0=4500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# ETRS89 / EPSG Arctic zone 5-11
+<6073> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=14 +x_0=11500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# ETRS89 / EPSG Arctic zone 5-13
+<6074> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=34 +x_0=13500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 2-24
+<6075> +proj=lcc +lat_1=83.66666666666667 +lat_2=80.33333333333333 +lat_0=82.05842488888888 +lon_0=53 +x_0=24500000 +y_0=2500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 2-26
+<6076> +proj=lcc +lat_1=83.66666666666667 +lat_2=80.33333333333333 +lat_0=82.05842488888888 +lon_0=93 +x_0=26500000 +y_0=2500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 3-13
+<6077> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=52 +x_0=13500000 +y_0=3500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 3-15
+<6078> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=83 +x_0=15500000 +y_0=3500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 3-17
+<6079> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=114 +x_0=17500000 +y_0=3500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 3-19
+<6080> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=145 +x_0=19500000 +y_0=3500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 4-30
+<6081> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=58 +x_0=30500000 +y_0=4500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 4-32
+<6082> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=82 +x_0=32500000 +y_0=4500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 4-34
+<6083> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=106 +x_0=34500000 +y_0=4500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 4-36
+<6084> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=130 +x_0=36500000 +y_0=4500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 4-38
+<6085> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=154 +x_0=38500000 +y_0=4500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 4-40
+<6086> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=179 +x_0=40500000 +y_0=4500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 5-15
+<6087> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=54 +x_0=15500000 +y_0=5500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 5-17
+<6088> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=74 +x_0=17500000 +y_0=5500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 5-19
+<6089> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=95 +x_0=19500000 +y_0=5500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 5-21
+<6090> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=116 +x_0=21500000 +y_0=5500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 5-23
+<6091> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=137 +x_0=23500000 +y_0=5500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 5-25
+<6092> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=158 +x_0=25500000 +y_0=5500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 5-27
+<6093> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=179 +x_0=27500000 +y_0=5500000 +datum=WGS84 +units=m +no_defs  <>
+# NAD83(NSRS2007) / EPSG Arctic zone 5-29
+<6094> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-163 +x_0=29500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(NSRS2007) / EPSG Arctic zone 5-31
+<6095> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-147 +x_0=31500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(NSRS2007) / EPSG Arctic zone 6-14
+<6096> +proj=lcc +lat_1=70.33333333333333 +lat_2=67 +lat_0=68.68747555555557 +lon_0=-165 +x_0=14500000 +y_0=6500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(NSRS2007) / EPSG Arctic zone 6-16
+<6097> +proj=lcc +lat_1=70.33333333333333 +lat_2=67 +lat_0=68.68747555555557 +lon_0=-147 +x_0=16500000 +y_0=6500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 1-23
+<6098> +proj=lcc +lat_1=87 +lat_2=83.66666666666667 +lat_0=85.43711833333333 +lon_0=-90 +x_0=23500000 +y_0=1500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 2-14
+<6099> +proj=lcc +lat_1=83.66666666666667 +lat_2=80.33333333333333 +lat_0=82.05842488888888 +lon_0=-115 +x_0=14500000 +y_0=2500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 2-16
+<6100> +proj=lcc +lat_1=83.66666666666667 +lat_2=80.33333333333333 +lat_0=82.05842488888888 +lon_0=-75 +x_0=16500000 +y_0=2500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 3-25
+<6101> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=-129 +x_0=25500000 +y_0=3500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 3-27
+<6102> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=-99 +x_0=27500000 +y_0=3500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 3-29
+<6103> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=-69 +x_0=29500000 +y_0=3500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 4-14
+<6104> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=-129 +x_0=14500000 +y_0=4500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 4-16
+<6105> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=-104 +x_0=16500000 +y_0=4500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 4-18
+<6106> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=-79 +x_0=18500000 +y_0=4500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 5-33
+<6107> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-131 +x_0=33500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 5-35
+<6108> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-111 +x_0=35500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 5-37
+<6109> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-91 +x_0=37500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 5-39
+<6110> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-71 +x_0=39500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 6-18
+<6111> +proj=lcc +lat_1=70.33333333333333 +lat_2=67 +lat_0=68.68747555555557 +lon_0=-132 +x_0=18500000 +y_0=6500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 6-20
+<6112> +proj=lcc +lat_1=70.33333333333333 +lat_2=67 +lat_0=68.68747555555557 +lon_0=-113 +x_0=20500000 +y_0=6500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 6-22
+<6113> +proj=lcc +lat_1=70.33333333333333 +lat_2=67 +lat_0=68.68747555555557 +lon_0=-94 +x_0=22500000 +y_0=6500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(CSRS) / EPSG Arctic zone 6-24
+<6114> +proj=lcc +lat_1=70.33333333333333 +lat_2=67 +lat_0=68.68747555555557 +lon_0=-75 +x_0=24500000 +y_0=6500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 1-27
+<6115> +proj=lcc +lat_1=87 +lat_2=83.66666666666667 +lat_0=85.43711833333333 +lon_0=30 +x_0=27500000 +y_0=1500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 1-29
+<6116> +proj=lcc +lat_1=87 +lat_2=83.66666666666667 +lat_0=85.43711833333333 +lon_0=90 +x_0=29500000 +y_0=1500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 1-31
+<6117> +proj=lcc +lat_1=87 +lat_2=83.66666666666667 +lat_0=85.43711833333333 +lon_0=150 +x_0=31500000 +y_0=1500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 1-21
+<6118> +proj=lcc +lat_1=87 +lat_2=83.66666666666667 +lat_0=85.43711833333333 +lon_0=-150 +x_0=21500000 +y_0=1500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 2-28
+<6119> +proj=lcc +lat_1=83.66666666666667 +lat_2=80.33333333333333 +lat_0=82.05842488888888 +lon_0=133 +x_0=28500000 +y_0=2500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 2-10
+<6120> +proj=lcc +lat_1=83.66666666666667 +lat_2=80.33333333333333 +lat_0=82.05842488888888 +lon_0=166 +x_0=10500000 +y_0=2500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 2-12
+<6121> +proj=lcc +lat_1=83.66666666666667 +lat_2=80.33333333333333 +lat_0=82.05842488888888 +lon_0=-154 +x_0=12500000 +y_0=2500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 3-21
+<6122> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=176 +x_0=21500000 +y_0=3500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 3-23
+<6123> +proj=lcc +lat_1=80.33333333333333 +lat_2=77 +lat_0=78.70733752777778 +lon_0=-153 +x_0=23500000 +y_0=3500000 +datum=WGS84 +units=m +no_defs  <>
+# WGS 84 / EPSG Arctic zone 4-12
+<6124> +proj=lcc +lat_1=77 +lat_2=73.66666666666667 +lat_0=75.36440330555556 +lon_0=-155 +x_0=12500000 +y_0=4500000 +datum=WGS84 +units=m +no_defs  <>
+# ETRS89 / EPSG Arctic zone 5-47
+<6125> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-5 +x_0=47500000 +y_0=5500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# Grand Cayman National Grid 1959
+<6128> +proj=utm +zone=17 +ellps=clrk66 +towgs84=-179.483,-69.379,-27.584,-7.862,8.163,6.042,-13.925 +units=ft +no_defs  <>
+# Sister Islands National Grid 1961
+<6129> +proj=utm +zone=17 +ellps=clrk66 +towgs84=8.853,-52.644,180.304,-0.393,-2.323,2.96,-24.081 +units=ft +no_defs  <>
+# Cayman Islands National Grid 2011
+<6141> +proj=lcc +lat_1=19.33333333333333 +lat_2=19.7 +lat_0=19.33333333333333 +lon_0=80.56666666666666 +x_0=899160 +y_0=579120 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=ft +no_defs  <>
 # Pulkovo 1995 / Gauss-Kruger zone 4
 <20004> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=4500000 +y_0=0 +ellps=krass +towgs84=24.47,-130.89,-81.56,-0,-0,0.13,-0.22 +units=m +no_defs  <>
 # Pulkovo 1995 / Gauss-Kruger zone 5
