@@ -247,11 +247,12 @@ LP healpix_sphere_inverse(XY xy) {
 	    lp.phi = asin(8.0*y/(3.0*PI));	
     } else if (fabsl(y) < PI/2.0) {
 	    double cn = floor(2.0*x/PI + 2.0);
+        double xc, tau;
 	    if (cn >= 4) {
 	        cn = 3;
 	    }
-	    double xc = -3.0*PI/4.0 + (PI/2.0)*cn;
-	    double tau = 2.0 - 4.0*fabsl(y)/PI;
+	    xc = -3.0*PI/4.0 + (PI/2.0)*cn;
+	    tau = 2.0 - 4.0*fabsl(y)/PI;
 	    lp.lam = xc + (x - xc)/tau;	
 	    lp.phi = pj_sign(y)*asin(1.0 - pow(tau , 2.0)/3.0);
     } else {
