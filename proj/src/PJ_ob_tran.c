@@ -80,6 +80,7 @@ ENTRY1(ob_tran, link)
 	/* copy existing header into new */
 	P->es = 0.; /* force to spherical */
 	P->link->params = P->params;
+        P->link->ctx = P->ctx;
 	P->link->over = P->over;
 	P->link->geoc = P->geoc;
 	P->link->a = P->a;
