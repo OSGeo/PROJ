@@ -9,6 +9,10 @@ AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 AM_CONFIG_HEADER(src/proj_config.h)
 
+dnl Enable as much warnings as possible
+AX_CFLAGS_WARN_ALL(C_WFLAGS)
+AC_SUBST(C_WFLAGS,$C_WFLAGS)
+
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
