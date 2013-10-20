@@ -390,6 +390,11 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     ctx->last_errno = 0;
     start = NULL;
 
+    /*
+    ** MS Visual Studio 2012+ may have problems in multithreaded cases
+    ** as discussed in this ticket:
+    ** http://trac.osgeo.org/proj/ticket/226
+    */
     old_locale = setlocale(LC_NUMERIC, NULL);
     if (old_locale != NULL) {
        if (strcmp(old_locale,"C") != 0) {
