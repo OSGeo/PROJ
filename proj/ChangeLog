@@ -1,5 +1,8 @@
 2013-10-20  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/Makefile.am: Given up on restricting access to projects.h, and
+	move it back into the list of files installed normally.
+
 	* configure.in: Add C_WFLAGS support, in particular use
 	-Wdeclaration-after-statement to warn about code that won't work
 	with MSVC (#224).
