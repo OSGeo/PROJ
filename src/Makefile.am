@@ -6,7 +6,8 @@ EXTRA_PROGRAMS = multistresstest
 INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
-include_HEADERS = proj_api.h org_proj4_Projections.h org_proj4_PJ.h geodesic.h
+include_HEADERS = proj_api.h projects.h geodesic.h \
+	org_proj4_Projections.h org_proj4_PJ.h
 
 EXTRA_DIST = makefile.vc proj.def
 
@@ -27,7 +28,7 @@ lib_LTLIBRARIES = libproj.la
 libproj_la_LDFLAGS = -no-undefined -version-info 8:0:8
 
 libproj_la_SOURCES = \
-	projects.h pj_list.h \
+	pj_list.h \
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c PJ_sterea.c \
 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c PJ_isea.c \
