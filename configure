@@ -663,6 +663,7 @@ CPPFLAGS
 LDFLAGS
 CFLAGS
 CC
+C_WFLAGS
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
@@ -2724,6 +2725,10 @@ fi
 
 
 ac_config_headers="$ac_config_headers src/proj_config.h"
+
+
+AX_CFLAGS_WARN_ALL(C_WFLAGS)
+C_WFLAGS=$C_WFLAGS
 
 
 ac_ext=c
