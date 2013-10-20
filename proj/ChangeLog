@@ -1,5 +1,9 @@
 2013-10-20  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* configure.in: Add C_WFLAGS support, in particular use
+	-Wdeclaration-after-statement to warn about code that won't work
+	with MSVC (#224).
+
 	* src/cs2cs.c: Support -I when there is no +to projection.
 
 	* src/PJ_ob_tran.c: Propogate ctx into sub-projection (#225).
