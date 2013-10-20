@@ -166,10 +166,9 @@ static void process(FILE *fid)
 
 int main(int argc, char **argv) 
 {
-    char *arg, **eargv = argv, *from_argv[MAX_PARGS], *to_argv[MAX_PARGS],
-        **iargv = argv;
+    char *arg, **eargv = argv, *from_argv[MAX_PARGS], *to_argv[MAX_PARGS];
     FILE *fid;
-    int from_argc=0, to_argc=0, iargc = argc, eargc = 0, c, mon = 0;
+    int from_argc=0, to_argc=0, eargc = 0, c, mon = 0;
     int have_to_flag = 0, inverse = 0, i;
 
     if ((emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != NULL)
@@ -340,7 +339,11 @@ int main(int argc, char **argv)
         to_argc = argcount;
     }
 
-    if (!(fromProj = pj_init(from_argc, from_argv)))
+    if( from_argc == 0 && to_argc != 0 )
+    {
+        /* we will generate the from proj as the latlong of the +to in a bit */
+    }
+    else if (!(fromProj = pj_init(from_argc, from_argv)))
     {
         printf( "Using from definition: " );
         for( i = 0; i < from_argc; i++ )
@@ -373,6 +376,20 @@ int main(int argc, char **argv)
 
         emess(3,"projection initialization failure\ncause: %s",
               pj_strerrno(pj_errno));
+    }
+
+    if( from_argc == 0 && toProj != NULL) 
+    {
+        if (!(fromProj = pj_latlong_from_proj( toProj )))
+        {
+            printf( "Using to definition: " );
+            for( i = 0; i < to_argc; i++ )
+                printf( "%s ", to_argv[i] );
+            printf( "\n" );
+            
+            emess(3,"projection initialization failure\ncause: %s",
+                  pj_strerrno(pj_errno));
+        }   
     }
 
     if (mon) {
