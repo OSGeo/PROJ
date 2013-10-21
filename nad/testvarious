@@ -528,6 +528,17 @@ $EXE -f '%.14f' \
  -E >>${OUT} <<EOF
 16.33 48.20
 EOF
+echo "##############################################################" >> ${OUT}
+echo "Test omerc sensitivity with locations 90d from origin(#114)" >> ${OUT}
+#
+$EXE -f '%.14f' \
+     +proj=latlong +ellps=WGS84 \
+ +to +proj=omerc +ellps=WGS84 +lon_1=62.581150 +lat_1=74.856102 \
+                 +lon_2=53.942810 +lat_2=74.905884 +units=km +no_rot +no_defs \
+ -E >>${OUT} <<EOF
+56.958381652832 72.8798
+56.9584 72.8798
+EOF
 ##############################################################################
 # Done! 
 # do 'diff' with distribution results
