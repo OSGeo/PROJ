@@ -1,3 +1,8 @@
+2013-10-21  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_datums.c: Switch to using EPSG:1618 COORD_OP_CODE to transform
+	hermannskogel to WGS84 (same as used to ETRS89) (#207).
+
 2013-10-20  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/Makefile.am: Given up on restricting access to projects.h, and
