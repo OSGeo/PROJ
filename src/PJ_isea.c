@@ -919,7 +919,6 @@ int isea_hex(struct isea_dgg *g, int tri,
 	struct isea_pt v;
 	int sidelength;
 	int d, i, x, y, quad;
-	double oddsl;
 
 	quad = isea_ptdi(g, tri, pt, &v);
 
@@ -934,8 +933,6 @@ int isea_hex(struct isea_dgg *g, int tri,
 	/* Aperture 3 odd resolutions */
 	if (g->aperture == 3 && g->resolution % 2 != 0) {
 		int offset = (int)(pow(3.0, g->resolution - 1) + 0.5);
-
-		oddsl = (pow(2.0, g->resolution) + 1.0) / 2.0;
 
 		d += offset * ((g->quad-1) % 5);
 		i += offset * ((g->quad-1) % 5);
@@ -979,13 +976,12 @@ ISEA_STATIC
 struct isea_pt
 isea_forward(struct isea_dgg *g, struct isea_geo *in)
 {
-	int             tri, downtri, quad;
+	int             tri, downtri;
 	struct isea_pt  out, coord;
 
 	tri = isea_transform(g, in, &out);
 
 	downtri = (((tri - 1) / 5) % 2 == 1);
-	quad = ((tri - 1) % 5) + ((tri - 1) / 10) * 5 + 1;
 
 	if (g->output == ISEA_PLANE) {
 		isea_tri_plane(tri, &out, g->radius);
