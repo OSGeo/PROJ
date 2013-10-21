@@ -539,6 +539,32 @@ $EXE -f '%.14f' \
 56.958381652832 72.8798
 56.9584 72.8798
 EOF
+echo "##############################################################" >> ${OUT}
+echo "Test omerc differences between poles (#190)" >> ${OUT}
+# First, north pole.
+$EXE -f '%.3f' \
+     +proj=latlong +ellps=WGS84 \
+ +to +proj=omerc +ellps=WGS84 +datum=WGS84 +no_rot \
+                 +lon_1=-27 +lat_1=70 +lon_2=-38 +lat_2=80 +lat_0=70 \
+ -E >>${OUT} <<EOF
+-27 70
+-27 80
+-27 89.9
+163 89.9
+163 80
+EOF
+# Again, for the south pole.
+$EXE -f '%.3f' \
+     +proj=latlong +ellps=WGS84 \
+ +to +proj=omerc +ellps=WGS84 +datum=WGS84 +no_rot \
+                 +lon_1=-27 +lat_1=-70 +lon_2=-38 +lat_2=-80 +lat_0=-70 \
+ -E >>${OUT} <<EOF
+-27 -70
+-27 -80
+-27 -89.9
+163 -89.9
+163 -80
+EOF
 ##############################################################################
 # Done! 
 # do 'diff' with distribution results
