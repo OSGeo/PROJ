@@ -519,6 +519,15 @@ $EXE -I +proj=ob_tran \
  -E >>${OUT} <<EOF
 10 20
 EOF
+echo "##############################################################" >> ${OUT}
+echo "Test MGI datum gives expected results (#207)" >> ${OUT}
+#
+$EXE -f '%.14f' \
+     +proj=latlong +datum=WGS84 \
+ +to +init=epsg:31284 \
+ -E >>${OUT} <<EOF
+16.33 48.20
+EOF
 ##############################################################################
 # Done! 
 # do 'diff' with distribution results
