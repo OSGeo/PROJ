@@ -96,8 +96,8 @@ INVERSE(e_inverse); /* ellipsoid */
 }
 FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(omerc)
-	double con, com, cosph0, D, F, H, L, sinph0, p, J, gamma,
-		gamma0, lamc, lam1, lam2, phi1, phi2, alpha_c;
+	double con, com, cosph0, D, F, H, L, sinph0, p, J, gamma=0,
+		gamma0, lamc=0, lam1=0, lam2=0, phi1=0, phi2=0, alpha_c;
 	int alp, gam, no_off = 0;
 
 	P->no_rot = pj_param(P->ctx, P->params, "tno_rot").i;
