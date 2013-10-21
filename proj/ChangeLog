@@ -1,5 +1,8 @@
 2013-10-21  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* src/PJ_omerc.c: Change handling of values nearly 90degrees away from
+	the origin (#114).
+
 	* src/pj_datums.c: Switch to using EPSG:1618 COORD_OP_CODE to transform
 	hermannskogel to WGS84 (same as used to ETRS89) (#207).
 

@@ -48,8 +48,11 @@ FORWARD(e_forward); /* ellipsoid */
 			F_ERROR;
 		v = 0.5 * P->ArB * log((1. - U)/(1. + U));
 		temp = cos(P->B * lp.lam);
-		u = (fabs(temp) < TOL) ? P->AB * lp.lam :
-			P->ArB * atan2((S * P->cosgam + V * P->singam) , temp); 
+                if(fabs(temp) < TOL) {
+                    u = P->A * lp.lam;
+                } else {
+                    u = P->ArB * atan2((S * P->cosgam + V * P->singam), temp);
+                }
 	} else {
 		v = lp.phi > 0 ? P->v_pole_n : P->v_pole_s;
 		u = P->ArB * lp.phi;
