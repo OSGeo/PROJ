@@ -7,12 +7,15 @@
  o Replace geodesic implementation with one from Charles Karney and add a 
    supported public interface (geod_interface.h).
 
- o Upgraded to EPSG 8.0.
+ o Upgraded to EPSG 8.2.
 
  o Removed old (deprecated) Java bindings in favor of the new api introduced
    in 4.8.0.
 
  o Implement the calcofi (Cal Coop Ocean Fish Invest Lines/Stations) projection
+
+ o Install projects.h again for applications that want access to internal
+   structures and functions despite the inherent fragility.
 
  o Various bug fixes and cleanup.
 
