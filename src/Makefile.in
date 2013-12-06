@@ -95,11 +95,11 @@ am_libproj_la_OBJECTS = PJ_aeqd.lo PJ_gnom.lo PJ_laea.lo \
 	PJ_gstmerc.lo PJ_gn_sinu.lo PJ_goode.lo PJ_igh.lo PJ_hatano.lo \
 	PJ_loxim.lo PJ_mbt_fps.lo PJ_mbtfpp.lo PJ_mbtfpq.lo PJ_moll.lo \
 	PJ_nell.lo PJ_nell_h.lo PJ_putp2.lo PJ_putp3.lo PJ_putp4p.lo \
-	PJ_putp5.lo PJ_putp6.lo PJ_robin.lo PJ_sts.lo PJ_urm5.lo \
-	PJ_urmfps.lo PJ_wag2.lo PJ_wag3.lo PJ_wink1.lo PJ_wink2.lo \
-	pj_latlong.lo pj_geocent.lo aasincos.lo adjlon.lo bch2bps.lo \
-	bchgen.lo biveval.lo dmstor.lo mk_cheby.lo pj_auth.lo \
-	pj_deriv.lo pj_ell_set.lo pj_ellps.lo pj_errno.lo \
+	PJ_putp5.lo PJ_putp6.lo PJ_qsc.lo PJ_robin.lo PJ_sts.lo \
+	PJ_urm5.lo PJ_urmfps.lo PJ_wag2.lo PJ_wag3.lo PJ_wink1.lo \
+	PJ_wink2.lo pj_latlong.lo pj_geocent.lo aasincos.lo adjlon.lo \
+	bch2bps.lo bchgen.lo biveval.lo dmstor.lo mk_cheby.lo \
+	pj_auth.lo pj_deriv.lo pj_ell_set.lo pj_ellps.lo pj_errno.lo \
 	pj_factors.lo pj_fwd.lo pj_init.lo pj_inv.lo pj_list.lo \
 	pj_malloc.lo pj_mlfn.lo pj_msfn.lo proj_mdist.lo \
 	pj_open_lib.lo pj_param.lo pj_phi2.lo pj_pr_list.lo pj_qsfn.lo \
@@ -313,7 +313,7 @@ libproj_la_SOURCES = \
 	PJ_gn_sinu.c PJ_goode.c PJ_igh.c PJ_hatano.c PJ_loxim.c \
 	PJ_mbt_fps.c PJ_mbtfpp.c PJ_mbtfpq.c PJ_moll.c \
 	PJ_nell.c PJ_nell_h.c PJ_putp2.c PJ_putp3.c \
-	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_robin.c \
+	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_qsc.c PJ_robin.c \
 	PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c \
 	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_latlong.c pj_geocent.c \
 	aasincos.c adjlon.c bch2bps.c bchgen.c \
@@ -555,6 +555,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_putp4p.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_putp5.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_putp6.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_qsc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_robin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_rpoly.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_sconics.Plo@am__quote@
