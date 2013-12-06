@@ -49,7 +49,7 @@ libproj_la_SOURCES = \
 	PJ_gn_sinu.c PJ_goode.c PJ_igh.c PJ_hatano.c PJ_loxim.c \
 	PJ_mbt_fps.c PJ_mbtfpp.c PJ_mbtfpq.c PJ_moll.c \
 	PJ_nell.c PJ_nell_h.c PJ_putp2.c PJ_putp3.c \
-	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_robin.c \
+	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_qsc.c PJ_robin.c \
 	PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c \
 	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_latlong.c pj_geocent.c \
 	aasincos.c adjlon.c bch2bps.c bchgen.c \
