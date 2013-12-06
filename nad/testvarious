@@ -565,6 +565,21 @@ $EXE -f '%.3f' \
 163 -89.9
 163 -80
 EOF
+echo "##############################################################" >> ${OUT}
+echo "Test qsc" >> ${OUT}
+#
+$EXE -f '%.13f' \
+     +proj=latlong +datum=WGS84 \
+ +to +proj=qsc +datum=WGS84 +no_defs \
+ -E >>${OUT} <<EOF
+13 -10
+EOF
+$EXE -f '%.13f' \
+     +proj=qsc +datum=WGS84 +no_defs \
+ +to +proj=latlong +datum=WGS84 \
+ -E >>${OUT} <<EOF
+2073986.94908809568733	-1680858.27222427958623
+EOF
 ##############################################################################
 # Done! 
 # do 'diff' with distribution results
