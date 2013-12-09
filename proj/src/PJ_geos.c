@@ -170,7 +170,7 @@ ENTRY0(geos)
                 (P->sweep_axis[0] != 'x' &&
                  P->sweep_axis[0] != 'y'))
               E_ERROR(-49);
-            if (P->sweep_axis[0] == 'y')
+            if (P->sweep_axis[0] == 'x')
               P->flip_axis = 1;
             else
               P->flip_axis = 0;
