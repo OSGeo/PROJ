@@ -580,6 +580,15 @@ $EXE -f '%.13f' \
  -E >>${OUT} <<EOF
 2073986.94908809568733	-1680858.27222427958623
 EOF
+echo "##############################################################" >> ${OUT}
+echo "Test bug 229" >> ${OUT}
+#
+$EXE -f '%.13f' \
+     +init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0 \
+ +to +proj=latlong +datum=WGS84 +no_defs \
+ -E >>${OUT} <<EOF
+13 -10
+EOF
 ##############################################################################
 # Done! 
 # do 'diff' with distribution results

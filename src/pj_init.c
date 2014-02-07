@@ -97,7 +97,8 @@ static const char *fill_buffer(pj_read_state *state, const char *last_char)
 /*                              get_opt()                               */
 /************************************************************************/
 static paralist *
-get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next) {
+get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
+        int *found_def) {
     pj_read_state *state = (pj_read_state*) calloc(1,sizeof(pj_read_state));
     char sword[302];
     int len;
@@ -107,6 +108,8 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next) {
     state->fid = fid;
     state->ctx = ctx;
     next_char = fill_buffer(state, NULL);
+    if(found_def)
+        *found_def = 0;
 
     len = strlen(name);
     *sword = 't';
@@ -150,6 +153,8 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next) {
                 /* skip past target word */
                 next_char += len + 1;
                 in_target = 1;
+                if(found_def)
+                    *found_def = 1;
             }
             else 
             {
@@ -221,9 +226,9 @@ get_defaults(projCtx ctx, paralist **start, paralist *next, char *name) {
     PAFile fid;
 
     if ( (fid = pj_open_lib(ctx,"proj_def.dat", "rt")) != NULL) {
-        next = get_opt(ctx, start, fid, "general", next);
+        next = get_opt(ctx, start, fid, "general", next, NULL);
         pj_ctx_fseek(ctx, fid, 0, SEEK_SET);
-        next = get_opt(ctx, start, fid, name, next);
+        next = get_opt(ctx, start, fid, name, next, NULL);
         pj_ctx_fclose(ctx, fid);
     }
     if (errno)
@@ -237,7 +242,8 @@ get_defaults(projCtx ctx, paralist **start, paralist *next, char *name) {
 /*                              get_init()                              */
 /************************************************************************/
 static paralist *
-get_init(projCtx ctx, paralist **start, paralist *next, char *name) {
+get_init(projCtx ctx, paralist **start, paralist *next, char *name,
+         int *found_def) {
     char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *opt;
     PAFile fid;
     paralist *init_items = NULL;
@@ -266,7 +272,7 @@ get_init(projCtx ctx, paralist **start, paralist *next, char *name) {
     else { pj_ctx_set_errno(ctx,-3); return NULL; }
 
     if ( (fid = pj_open_lib(ctx,fname, "rt")) != NULL)
-        next = get_opt(ctx, start, fid, opt, next);
+        next = get_opt(ctx, start, fid, opt, next, found_def);
     else
         return NULL;
     pj_ctx_fclose(ctx, fid);
@@ -416,10 +422,13 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     /* check if +init present */
     if (pj_param(ctx, start, "tinit").i) {
         paralist *last = curr;
+        int found_def = 0;
 
-        if (!(curr = get_init(ctx,&start, curr, pj_param(ctx, start, "sinit").s)))
+        if (!(curr = get_init(ctx,&start, curr,
+                              pj_param(ctx, start, "sinit").s,
+                              &found_def)))
             goto bum_call;
-        if (curr == last) { pj_ctx_set_errno( ctx, -2); goto bum_call; }
+        if (!found_def) { pj_ctx_set_errno( ctx, -2); goto bum_call; }
     }
 
     /* find projection selection */
