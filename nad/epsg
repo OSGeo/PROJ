@@ -502,7 +502,7 @@
 <4470> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # Cadastre 1997
 <4475> +proj=longlat +ellps=intl +towgs84=-381.788,-57.501,-256.673,0,0,0,0 +no_defs  <>
-# Mexican Datum of 1993
+# Mexico ITRF92
 <4483> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # China Geodetic Coordinate System 2000
 <4490> +proj=longlat +ellps=GRS80 +no_defs  <>
@@ -885,7 +885,7 @@
 # SLD99
 <5233> +proj=longlat +a=6377276.345 +b=6356075.41314024 +towgs84=-0.293,766.95,87.713,0.195704,1.69507,3.47302,-0.039338 +no_defs  <>
 # GDBD2009
-<5246> +proj=longlat +ellps=GRS80 +no_defs  <>
+<5246> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # TUREF
 <5252> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # DRUKREF 03
@@ -932,6 +932,20 @@
 <5886> +proj=longlat +ellps=GRS80 +no_defs  <>
 # CIGD11
 <6135> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
+# Nepal 1981
+<6207> +proj=longlat +a=6377276.345 +b=6356075.41314024 +towgs84=293.17,726.18,245.36,0,0,0,0 +no_defs  <>
+# NAD83(2011)
+<6318> +proj=longlat +ellps=GRS80 +no_defs  <>
+# NAD83(PA11)
+<6322> +proj=longlat +ellps=GRS80 +no_defs  <>
+# NAD83(MA11)
+<6325> +proj=longlat +ellps=GRS80 +no_defs  <>
+# Mexico ITRF2008
+<6365> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
+# JGD2011
+<6668> +proj=longlat +ellps=GRS80 +no_defs  <>
+# RDN2008
+<6706> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
 # Anguilla 1957 / British West Indies Grid
 <2000> +proj=tmerc +lat_0=0 +lon_0=-62 +k=0.9995000000000001 +x_0=400000 +y_0=0 +ellps=clrk80 +units=m +no_defs  <>
 # Antigua 1943 / British West Indies Grid
@@ -3772,37 +3786,37 @@
 <3415> +proj=lcc +lat_1=18 +lat_2=24 +lat_0=21 +lon_0=114 +x_0=500000 +y_0=500000 +ellps=WGS72 +towgs84=0,0,1.9,0,0,0.814,-0.38 +units=m +no_defs  <>
 # ETRS89 / Austria Lambert
 <3416> +proj=lcc +lat_1=49 +lat_2=46 +lat_0=47.5 +lon_0=13.33333333333333 +x_0=400000 +y_0=400000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# NAD83 / Iowa North (ft US)
+# NAD83 / Iowa North (ftUS)
 <3417> +proj=lcc +lat_1=43.26666666666667 +lat_2=42.06666666666667 +lat_0=41.5 +lon_0=-93.5 +x_0=1500000 +y_0=999999.9999898402 +datum=NAD83 +units=us-ft +no_defs  <>
-# NAD83 / Iowa South (ft US)
+# NAD83 / Iowa South (ftUS)
 <3418> +proj=lcc +lat_1=41.78333333333333 +lat_2=40.61666666666667 +lat_0=40 +lon_0=-93.5 +x_0=500000.00001016 +y_0=0 +datum=NAD83 +units=us-ft +no_defs  <>
-# NAD83 / Kansas North (ft US)
+# NAD83 / Kansas North (ftUS)
 <3419> +proj=lcc +lat_1=39.78333333333333 +lat_2=38.71666666666667 +lat_0=38.33333333333334 +lon_0=-98 +x_0=399999.99998984 +y_0=0 +datum=NAD83 +units=us-ft +no_defs  <>
-# NAD83 / Kansas South (ft US)
+# NAD83 / Kansas South (ftUS)
 <3420> +proj=lcc +lat_1=38.56666666666667 +lat_2=37.26666666666667 +lat_0=36.66666666666666 +lon_0=-98.5 +x_0=399999.99998984 +y_0=399999.99998984 +datum=NAD83 +units=us-ft +no_defs  <>
-# NAD83 / Nevada East (ft US)
+# NAD83 / Nevada East (ftUS)
 <3421> +proj=tmerc +lat_0=34.75 +lon_0=-115.5833333333333 +k=0.9999 +x_0=200000.00001016 +y_0=8000000.000010163 +datum=NAD83 +units=us-ft +no_defs  <>
-# NAD83 / Nevada Central (ft US)
+# NAD83 / Nevada Central (ftUS)
 <3422> +proj=tmerc +lat_0=34.75 +lon_0=-116.6666666666667 +k=0.9999 +x_0=500000.00001016 +y_0=6000000 +datum=NAD83 +units=us-ft +no_defs  <>
-# NAD83 / Nevada West (ft US)
+# NAD83 / Nevada West (ftUS)
 <3423> +proj=tmerc +lat_0=34.75 +lon_0=-118.5833333333333 +k=0.9999 +x_0=800000.0000101599 +y_0=3999999.99998984 +datum=NAD83 +units=us-ft +no_defs  <>
-# NAD83 / New Jersey (ft US)
+# NAD83 / New Jersey (ftUS)
 <3424> +proj=tmerc +lat_0=38.83333333333334 +lon_0=-74.5 +k=0.9999 +x_0=150000 +y_0=0 +datum=NAD83 +units=us-ft +no_defs  <>
-# NAD83(HARN) / Iowa North (ft US)
+# NAD83(HARN) / Iowa North (ftUS)
 <3425> +proj=lcc +lat_1=43.26666666666667 +lat_2=42.06666666666667 +lat_0=41.5 +lon_0=-93.5 +x_0=1500000 +y_0=999999.9999898402 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
-# NAD83(HARN) / Iowa South (ft US)
+# NAD83(HARN) / Iowa South (ftUS)
 <3426> +proj=lcc +lat_1=41.78333333333333 +lat_2=40.61666666666667 +lat_0=40 +lon_0=-93.5 +x_0=500000.00001016 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
-# NAD83(HARN) / Kansas North (ft US)
+# NAD83(HARN) / Kansas North (ftUS)
 <3427> +proj=lcc +lat_1=39.78333333333333 +lat_2=38.71666666666667 +lat_0=38.33333333333334 +lon_0=-98 +x_0=399999.99998984 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
-# NAD83(HARN) / Kansas South (ft US)
+# NAD83(HARN) / Kansas South (ftUS)
 <3428> +proj=lcc +lat_1=38.56666666666667 +lat_2=37.26666666666667 +lat_0=36.66666666666666 +lon_0=-98.5 +x_0=399999.99998984 +y_0=399999.99998984 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
-# NAD83(HARN) / Nevada East (ft US)
+# NAD83(HARN) / Nevada East (ftUS)
 <3429> +proj=tmerc +lat_0=34.75 +lon_0=-115.5833333333333 +k=0.9999 +x_0=200000.00001016 +y_0=8000000.000010163 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
-# NAD83(HARN) / Nevada Central (ft US)
+# NAD83(HARN) / Nevada Central (ftUS)
 <3430> +proj=tmerc +lat_0=34.75 +lon_0=-116.6666666666667 +k=0.9999 +x_0=500000.00001016 +y_0=6000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
-# NAD83(HARN) / Nevada West (ft US)
+# NAD83(HARN) / Nevada West (ftUS)
 <3431> +proj=tmerc +lat_0=34.75 +lon_0=-118.5833333333333 +k=0.9999 +x_0=800000.0000101599 +y_0=3999999.99998984 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
-# NAD83(HARN) / New Jersey (ft US)
+# NAD83(HARN) / New Jersey (ftUS)
 <3432> +proj=tmerc +lat_0=38.83333333333334 +lon_0=-74.5 +k=0.9999 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
 # NAD83 / Arkansas North (ftUS)
 <3433> +proj=lcc +lat_1=36.23333333333333 +lat_2=34.93333333333333 +lat_0=34.33333333333334 +lon_0=-92 +x_0=399999.99998984 +y_0=0 +datum=NAD83 +units=us-ft +no_defs  <>
@@ -4012,19 +4026,19 @@
 <3535> +proj=tmerc +lat_0=37.5 +lon_0=-87.08333333333333 +k=0.999966667 +x_0=900000 +y_0=249999.9998983998 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
 # NAD83(NSRS2007) / Iowa North
 <3536> +proj=lcc +lat_1=43.26666666666667 +lat_2=42.06666666666667 +lat_0=41.5 +lon_0=-93.5 +x_0=1500000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# NAD83(NSRS2007) / Iowa North (ft US)
+# NAD83(NSRS2007) / Iowa North (ftUS)
 <3537> +proj=lcc +lat_1=43.26666666666667 +lat_2=42.06666666666667 +lat_0=41.5 +lon_0=-93.5 +x_0=1500000 +y_0=999999.9999898402 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
 # NAD83(NSRS2007) / Iowa South
 <3538> +proj=lcc +lat_1=41.78333333333333 +lat_2=40.61666666666667 +lat_0=40 +lon_0=-93.5 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# NAD83(NSRS2007) / Iowa South (ft US)
+# NAD83(NSRS2007) / Iowa South (ftUS)
 <3539> +proj=lcc +lat_1=41.78333333333333 +lat_2=40.61666666666667 +lat_0=40 +lon_0=-93.5 +x_0=500000.00001016 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
 # NAD83(NSRS2007) / Kansas North
 <3540> +proj=lcc +lat_1=39.78333333333333 +lat_2=38.71666666666667 +lat_0=38.33333333333334 +lon_0=-98 +x_0=400000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# NAD83(NSRS2007) / Kansas North (ft US)
+# NAD83(NSRS2007) / Kansas North (ftUS)
 <3541> +proj=lcc +lat_1=39.78333333333333 +lat_2=38.71666666666667 +lat_0=38.33333333333334 +lon_0=-98 +x_0=399999.99998984 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
 # NAD83(NSRS2007) / Kansas South
 <3542> +proj=lcc +lat_1=38.56666666666667 +lat_2=37.26666666666667 +lat_0=36.66666666666666 +lon_0=-98.5 +x_0=400000 +y_0=400000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# NAD83(NSRS2007) / Kansas South (ft US)
+# NAD83(NSRS2007) / Kansas South (ftUS)
 <3543> +proj=lcc +lat_1=38.56666666666667 +lat_2=37.26666666666667 +lat_0=36.66666666666666 +lon_0=-98.5 +x_0=399999.99998984 +y_0=399999.99998984 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
 # NAD83(NSRS2007) / Kentucky North
 <3544> +proj=lcc +lat_1=37.96666666666667 +lat_2=38.96666666666667 +lat_0=37.5 +lon_0=-84.25 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
@@ -4154,15 +4168,15 @@
 <3606> +proj=lcc +lat_1=43 +lat_2=40 +lat_0=39.83333333333334 +lon_0=-100 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # NAD83(NSRS2007) / Nevada Central
 <3607> +proj=tmerc +lat_0=34.75 +lon_0=-116.6666666666667 +k=0.9999 +x_0=500000 +y_0=6000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# NAD83(NSRS2007) / Nevada Central (ft US)
+# NAD83(NSRS2007) / Nevada Central (ftUS)
 <3608> +proj=tmerc +lat_0=34.75 +lon_0=-116.6666666666667 +k=0.9999 +x_0=500000.00001016 +y_0=6000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
 # NAD83(NSRS2007) / Nevada East
 <3609> +proj=tmerc +lat_0=34.75 +lon_0=-115.5833333333333 +k=0.9999 +x_0=200000 +y_0=8000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# NAD83(NSRS2007) / Nevada East (ft US)
+# NAD83(NSRS2007) / Nevada East (ftUS)
 <3610> +proj=tmerc +lat_0=34.75 +lon_0=-115.5833333333333 +k=0.9999 +x_0=200000.00001016 +y_0=8000000.000010163 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
 # NAD83(NSRS2007) / Nevada West
 <3611> +proj=tmerc +lat_0=34.75 +lon_0=-118.5833333333333 +k=0.9999 +x_0=800000 +y_0=4000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# NAD83(NSRS2007) / Nevada West (ft US)
+# NAD83(NSRS2007) / Nevada West (ftUS)
 <3612> +proj=tmerc +lat_0=34.75 +lon_0=-118.5833333333333 +k=0.9999 +x_0=800000.0000101599 +y_0=3999999.99998984 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
 # NAD83(NSRS2007) / New Hampshire
 <3613> +proj=tmerc +lat_0=42.5 +lon_0=-71.66666666666667 +k=0.999966667 +x_0=300000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
@@ -4170,7 +4184,7 @@
 <3614> +proj=tmerc +lat_0=42.5 +lon_0=-71.66666666666667 +k=0.999966667 +x_0=300000.0000000001 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
 # NAD83(NSRS2007) / New Jersey
 <3615> +proj=tmerc +lat_0=38.83333333333334 +lon_0=-74.5 +k=0.9999 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# NAD83(NSRS2007) / New Jersey (ft US)
+# NAD83(NSRS2007) / New Jersey (ftUS)
 <3616> +proj=tmerc +lat_0=38.83333333333334 +lon_0=-74.5 +k=0.9999 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
 # NAD83(NSRS2007) / New Mexico Central
 <3617> +proj=tmerc +lat_0=31 +lon_0=-106.25 +k=0.9999 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
@@ -4855,17 +4869,17 @@
 <4471> +proj=utm +zone=38 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # Cadastre 1997 / UTM zone 38S (deprecated)
 <4474> +proj=utm +zone=38 +south +ellps=intl +towgs84=-382,-59,-262,0,0,0,0 +units=m +no_defs  <>
-# Mexican Datum of 1993 / UTM zone 11N
+# Mexico ITRF92 / UTM zone 11N
 <4484> +proj=utm +zone=11 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# Mexican Datum of 1993 / UTM zone 12N
+# Mexico ITRF92 / UTM zone 12N
 <4485> +proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# Mexican Datum of 1993 / UTM zone 13N
+# Mexico ITRF92 / UTM zone 13N
 <4486> +proj=utm +zone=13 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# Mexican Datum of 1993 / UTM zone 14N
+# Mexico ITRF92 / UTM zone 14N
 <4487> +proj=utm +zone=14 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# Mexican Datum of 1993 / UTM zone 15N
+# Mexico ITRF92 / UTM zone 15N
 <4488> +proj=utm +zone=15 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
-# Mexican Datum of 1993 / UTM zone 16N
+# Mexico ITRF92 / UTM zone 16N
 <4489> +proj=utm +zone=16 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # CGCS2000 / Gauss-Kruger zone 13
 <4491> +proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=13500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
@@ -5321,7 +5335,7 @@
 # ETRS89 / LCC Germany (E-N)
 <5243> +proj=lcc +lat_1=48.66666666666666 +lat_2=53.66666666666666 +lat_0=51 +lon_0=10.5 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # GDBD2009 / Brunei BRSO
-<5247> +proj=omerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +no_uoff +gamma=53.13010236111111 +ellps=GRS80 +units=m +no_defs  <>
+<5247> +proj=omerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +no_uoff +gamma=53.13010236111111 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # TUREF / TM27
 <5253> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # TUREF / TM30
@@ -5540,33 +5554,33 @@
 <5568> +proj=tmerc +lat_0=0 +lon_0=33 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
 # UCS-2000 / Gauss-Kruger CM 39E
 <5569> +proj=tmerc +lat_0=0 +lon_0=39 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger zone 7
+# UCS-2000 / 3-degree Gauss-Kruger zone 7 (deprecated)
 <5570> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=7500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger zone 8
+# UCS-2000 / 3-degree Gauss-Kruger zone 8 (deprecated)
 <5571> +proj=tmerc +lat_0=0 +lon_0=24 +k=1 +x_0=8500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger zone 9
+# UCS-2000 / 3-degree Gauss-Kruger zone 9 (deprecated)
 <5572> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=9500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger zone 10
+# UCS-2000 / 3-degree Gauss-Kruger zone 10 (deprecated)
 <5573> +proj=tmerc +lat_0=0 +lon_0=30 +k=1 +x_0=10500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger zone 11
+# UCS-2000 / 3-degree Gauss-Kruger zone 11 (deprecated)
 <5574> +proj=tmerc +lat_0=0 +lon_0=33 +k=1 +x_0=11500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger zone 12
+# UCS-2000 / 3-degree Gauss-Kruger zone 12 (deprecated)
 <5575> +proj=tmerc +lat_0=0 +lon_0=36 +k=1 +x_0=12500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger zone 13
+# UCS-2000 / 3-degree Gauss-Kruger zone 13 (deprecated)
 <5576> +proj=tmerc +lat_0=0 +lon_0=39 +k=1 +x_0=13500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger CM 21E
+# UCS-2000 / 3-degree Gauss-Kruger CM 21E (deprecated)
 <5577> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger CM 24E
+# UCS-2000 / 3-degree Gauss-Kruger CM 24E (deprecated)
 <5578> +proj=tmerc +lat_0=0 +lon_0=24 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger CM 27E
+# UCS-2000 / 3-degree Gauss-Kruger CM 27E (deprecated)
 <5579> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger CM 30E
+# UCS-2000 / 3-degree Gauss-Kruger CM 30E (deprecated)
 <5580> +proj=tmerc +lat_0=0 +lon_0=30 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger CM 33E
+# UCS-2000 / 3-degree Gauss-Kruger CM 33E (deprecated)
 <5581> +proj=tmerc +lat_0=0 +lon_0=33 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger CM 36E
+# UCS-2000 / 3-degree Gauss-Kruger CM 36E (deprecated)
 <5582> +proj=tmerc +lat_0=0 +lon_0=36 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
-# UCS-2000 / 3-degree Gauss-Kruger CM 39E
+# UCS-2000 / 3-degree Gauss-Kruger CM 39E (deprecated)
 <5583> +proj=tmerc +lat_0=0 +lon_0=39 +k=1 +x_0=500000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
 # NAD27 / New Brunswick Stereographic (NAD27)
 <5588> +proj=sterea +lat_0=46.5 +lon_0=-66.5 +k=0.999912 +x_0=304800 +y_0=304800 +datum=NAD27 +units=ft +no_defs  <>
@@ -5905,8 +5919,785 @@
 <6128> +proj=utm +zone=17 +ellps=clrk66 +towgs84=-179.483,-69.379,-27.584,-7.862,8.163,6.042,-13.925 +units=ft +no_defs  <>
 # Sister Islands National Grid 1961
 <6129> +proj=utm +zone=17 +ellps=clrk66 +towgs84=8.853,-52.644,180.304,-0.393,-2.323,2.96,-24.081 +units=ft +no_defs  <>
-# Cayman Islands National Grid 2011
+# Cayman Islands National Grid 2011 (deprecated)
 <6141> +proj=lcc +lat_1=19.33333333333333 +lat_2=19.7 +lat_0=19.33333333333333 +lon_0=80.56666666666666 +x_0=899160 +y_0=579120 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=ft +no_defs  <>
+# NAD27 / Michigan North
+# Unable to translate coordinate system EPSG:6200 into PROJ.4 format.
+#
+# NAD27 / Michigan Central
+# Unable to translate coordinate system EPSG:6201 into PROJ.4 format.
+#
+# NAD27 / Michigan South
+# Unable to translate coordinate system EPSG:6202 into PROJ.4 format.
+#
+# Macedonian State Coordinate System
+<6204> +proj=tmerc +lat_0=0 +lon_0=21 +k=0.9999 +x_0=500000 +y_0=0 +ellps=bessel +towgs84=682,-203,480,0,0,0,0 +units=m +no_defs  <>
+# SIRGAS 2000 / UTM zone 23N
+<6210> +proj=utm +zone=23 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# SIRGAS 2000 / UTM zone 24N
+<6211> +proj=utm +zone=24 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# MAGNA-SIRGAS / Arauca urban grid
+# Unable to translate coordinate system EPSG:6244 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Armenia urban grid
+# Unable to translate coordinate system EPSG:6245 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Barranquilla urban grid
+# Unable to translate coordinate system EPSG:6246 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Bogota urban grid
+# Unable to translate coordinate system EPSG:6247 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Bucaramanga urban grid
+# Unable to translate coordinate system EPSG:6248 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Cali urban grid
+# Unable to translate coordinate system EPSG:6249 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Cartagena urban grid
+# Unable to translate coordinate system EPSG:6250 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Cucuta urban grid
+# Unable to translate coordinate system EPSG:6251 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Florencia urban grid
+# Unable to translate coordinate system EPSG:6252 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Ibague urban grid
+# Unable to translate coordinate system EPSG:6253 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Inirida urban grid
+# Unable to translate coordinate system EPSG:6254 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Leticia urban grid
+# Unable to translate coordinate system EPSG:6255 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Manizales urban grid
+# Unable to translate coordinate system EPSG:6256 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Medellin urban grid
+# Unable to translate coordinate system EPSG:6257 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Mitu urban grid
+# Unable to translate coordinate system EPSG:6258 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Mocoa urban grid
+# Unable to translate coordinate system EPSG:6259 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Monteria urban grid
+# Unable to translate coordinate system EPSG:6260 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Neiva urban grid
+# Unable to translate coordinate system EPSG:6261 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Pasto urban grid
+# Unable to translate coordinate system EPSG:6262 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Pereira urban grid
+# Unable to translate coordinate system EPSG:6263 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Popayan urban grid
+# Unable to translate coordinate system EPSG:6264 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Puerto Carreno urban grid
+# Unable to translate coordinate system EPSG:6265 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Quibdo urban grid
+# Unable to translate coordinate system EPSG:6266 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Riohacha urban grid
+# Unable to translate coordinate system EPSG:6267 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / San Andres urban grid
+# Unable to translate coordinate system EPSG:6268 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / San Jose del Guaviare urban grid
+# Unable to translate coordinate system EPSG:6269 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Santa Marta urban grid
+# Unable to translate coordinate system EPSG:6270 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Sucre urban grid
+# Unable to translate coordinate system EPSG:6271 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Tunja urban grid
+# Unable to translate coordinate system EPSG:6272 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Valledupar urban grid
+# Unable to translate coordinate system EPSG:6273 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Villavicencio urban grid
+# Unable to translate coordinate system EPSG:6274 into PROJ.4 format.
+#
+# MAGNA-SIRGAS / Yopal urban grid
+# Unable to translate coordinate system EPSG:6275 into PROJ.4 format.
+#
+# Macedonia State Coordinate System zone 7
+<6316> +proj=tmerc +lat_0=0 +lon_0=21 +k=0.9999 +x_0=7500000 +y_0=0 +ellps=bessel +towgs84=682,-203,480,0,0,0,0 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 59N
+<6328> +proj=utm +zone=59 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 60N
+<6329> +proj=utm +zone=60 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 1N
+<6330> +proj=utm +zone=1 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 2N
+<6331> +proj=utm +zone=2 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 3N
+<6332> +proj=utm +zone=3 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 4N
+<6333> +proj=utm +zone=4 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 5N
+<6334> +proj=utm +zone=5 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 6N
+<6335> +proj=utm +zone=6 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 7N
+<6336> +proj=utm +zone=7 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 8N
+<6337> +proj=utm +zone=8 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 9N
+<6338> +proj=utm +zone=9 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 10N
+<6339> +proj=utm +zone=10 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 11N
+<6340> +proj=utm +zone=11 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 12N
+<6341> +proj=utm +zone=12 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 13N
+<6342> +proj=utm +zone=13 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 14N
+<6343> +proj=utm +zone=14 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 15N
+<6344> +proj=utm +zone=15 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 16N
+<6345> +proj=utm +zone=16 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 17N
+<6346> +proj=utm +zone=17 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 18N
+<6347> +proj=utm +zone=18 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / UTM zone 19N
+<6348> +proj=utm +zone=19 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Conus Albers
+<6350> +proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / EPSG Arctic zone 5-29
+<6351> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-163 +x_0=29500000 +y_0=5500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / EPSG Arctic zone 5-31
+<6352> +proj=lcc +lat_1=73.66666666666667 +lat_2=70.33333333333333 +lat_0=72.02500919444445 +lon_0=-147 +x_0=31500000 +y_0=5500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / EPSG Arctic zone 6-14
+<6353> +proj=lcc +lat_1=70.33333333333333 +lat_2=67 +lat_0=68.68747555555557 +lon_0=-165 +x_0=14500000 +y_0=6500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / EPSG Arctic zone 6-16
+<6354> +proj=lcc +lat_1=70.33333333333333 +lat_2=67 +lat_0=68.68747555555557 +lon_0=-147 +x_0=16500000 +y_0=6500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alabama East
+<6355> +proj=tmerc +lat_0=30.5 +lon_0=-85.83333333333333 +k=0.99996 +x_0=200000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alabama West
+<6356> +proj=tmerc +lat_0=30 +lon_0=-87.5 +k=0.999933333 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# Mexico ITRF92 / LCC
+<6362> +proj=lcc +lat_1=17.5 +lat_2=29.5 +lat_0=12 +lon_0=-102 +x_0=2500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# Mexico ITRF2008 / UTM zone 11N
+<6366> +proj=utm +zone=11 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# Mexico ITRF2008 / UTM zone 12N
+<6367> +proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# Mexico ITRF2008 / UTM zone 13N
+<6368> +proj=utm +zone=13 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# Mexico ITRF2008 / UTM zone 14N
+<6369> +proj=utm +zone=14 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# Mexico ITRF2008 / UTM zone 15N
+<6370> +proj=utm +zone=15 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# Mexico ITRF2008 / UTM zone 16N
+<6371> +proj=utm +zone=16 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# Mexico ITRF2008 / LCC
+<6372> +proj=lcc +lat_1=17.5 +lat_2=29.5 +lat_0=12 +lon_0=-102 +x_0=2500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# UCS-2000 / Ukraine TM zone 7
+<6381> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=300000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
+# UCS-2000 / Ukraine TM zone 8
+<6382> +proj=tmerc +lat_0=0 +lon_0=24 +k=1 +x_0=300000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
+# UCS-2000 / Ukraine TM zone 9
+<6383> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=300000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
+# UCS-2000 / Ukraine TM zone 10
+<6384> +proj=tmerc +lat_0=0 +lon_0=30 +k=1 +x_0=300000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
+# UCS-2000 / Ukraine TM zone 11
+<6385> +proj=tmerc +lat_0=0 +lon_0=33 +k=1 +x_0=300000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
+# UCS-2000 / Ukraine TM zone 12
+<6386> +proj=tmerc +lat_0=0 +lon_0=36 +k=1 +x_0=300000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
+# UCS-2000 / Ukraine TM zone 13
+<6387> +proj=tmerc +lat_0=0 +lon_0=39 +k=1 +x_0=300000 +y_0=0 +ellps=krass +towgs84=25,-141,-78.5,-0,0.35,0.736,0 +units=m +no_defs  <>
+# Cayman Islands National Grid 2011
+<6391> +proj=lcc +lat_1=19.33333333333333 +lat_2=19.7 +lat_0=19.33333333333333 +lon_0=-80.56666666666666 +x_0=899160 +y_0=579120 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=ft +no_defs  <>
+# NAD83(2011) / Alaska Albers
+<6393> +proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alaska zone 1
+<6394> +proj=omerc +lat_0=57 +lonc=-133.6666666666667 +alpha=323.1301023611111 +k=0.9999 +x_0=5000000 +y_0=-5000000 +no_uoff +gamma=323.1301023611111 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alaska zone 2
+<6395> +proj=tmerc +lat_0=54 +lon_0=-142 +k=0.9999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alaska zone 3
+<6396> +proj=tmerc +lat_0=54 +lon_0=-146 +k=0.9999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alaska zone 4
+<6397> +proj=tmerc +lat_0=54 +lon_0=-150 +k=0.9999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alaska zone 5
+<6398> +proj=tmerc +lat_0=54 +lon_0=-154 +k=0.9999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alaska zone 6
+<6399> +proj=tmerc +lat_0=54 +lon_0=-158 +k=0.9999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alaska zone 7
+<6400> +proj=tmerc +lat_0=54 +lon_0=-162 +k=0.9999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alaska zone 8
+<6401> +proj=tmerc +lat_0=54 +lon_0=-166 +k=0.9999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alaska zone 9
+<6402> +proj=tmerc +lat_0=54 +lon_0=-170 +k=0.9999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Alaska zone 10
+<6403> +proj=lcc +lat_1=53.83333333333334 +lat_2=51.83333333333334 +lat_0=51 +lon_0=-176 +x_0=1000000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Arizona Central
+<6404> +proj=tmerc +lat_0=31 +lon_0=-111.9166666666667 +k=0.9999 +x_0=213360 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Arizona Central (ft)
+<6405> +proj=tmerc +lat_0=31 +lon_0=-111.9166666666667 +k=0.9999 +x_0=213360 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Arizona East
+<6406> +proj=tmerc +lat_0=31 +lon_0=-110.1666666666667 +k=0.9999 +x_0=213360 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Arizona East (ft)
+<6407> +proj=tmerc +lat_0=31 +lon_0=-110.1666666666667 +k=0.9999 +x_0=213360 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Arizona West
+<6408> +proj=tmerc +lat_0=31 +lon_0=-113.75 +k=0.999933333 +x_0=213360 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Arizona West (ft)
+<6409> +proj=tmerc +lat_0=31 +lon_0=-113.75 +k=0.999933333 +x_0=213360 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Arkansas North
+<6410> +proj=lcc +lat_1=36.23333333333333 +lat_2=34.93333333333333 +lat_0=34.33333333333334 +lon_0=-92 +x_0=400000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Arkansas North (ftUS)
+<6411> +proj=lcc +lat_1=36.23333333333333 +lat_2=34.93333333333333 +lat_0=34.33333333333334 +lon_0=-92 +x_0=399999.99998984 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Arkansas South
+<6412> +proj=lcc +lat_1=34.76666666666667 +lat_2=33.3 +lat_0=32.66666666666666 +lon_0=-92 +x_0=400000 +y_0=400000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Arkansas South (ftUS)
+<6413> +proj=lcc +lat_1=34.76666666666667 +lat_2=33.3 +lat_0=32.66666666666666 +lon_0=-92 +x_0=399999.99998984 +y_0=399999.99998984 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / California Albers
+<6414> +proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / California zone 1
+<6415> +proj=lcc +lat_1=41.66666666666666 +lat_2=40 +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 +y_0=500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / California zone 1 (ftUS)
+<6416> +proj=lcc +lat_1=41.66666666666666 +lat_2=40 +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000.0001016 +y_0=500000.0001016001 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / California zone 2
+<6417> +proj=lcc +lat_1=39.83333333333334 +lat_2=38.33333333333334 +lat_0=37.66666666666666 +lon_0=-122 +x_0=2000000 +y_0=500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / California zone 2 (ftUS)
+<6418> +proj=lcc +lat_1=39.83333333333334 +lat_2=38.33333333333334 +lat_0=37.66666666666666 +lon_0=-122 +x_0=2000000.0001016 +y_0=500000.0001016001 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / California zone 3
+<6419> +proj=lcc +lat_1=38.43333333333333 +lat_2=37.06666666666667 +lat_0=36.5 +lon_0=-120.5 +x_0=2000000 +y_0=500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / California zone 3 (ftUS)
+<6420> +proj=lcc +lat_1=38.43333333333333 +lat_2=37.06666666666667 +lat_0=36.5 +lon_0=-120.5 +x_0=2000000.0001016 +y_0=500000.0001016001 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / California zone 4
+<6421> +proj=lcc +lat_1=37.25 +lat_2=36 +lat_0=35.33333333333334 +lon_0=-119 +x_0=2000000 +y_0=500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / California zone 4 (ftUS)
+<6422> +proj=lcc +lat_1=37.25 +lat_2=36 +lat_0=35.33333333333334 +lon_0=-119 +x_0=2000000.0001016 +y_0=500000.0001016001 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / California zone 5
+<6423> +proj=lcc +lat_1=35.46666666666667 +lat_2=34.03333333333333 +lat_0=33.5 +lon_0=-118 +x_0=2000000 +y_0=500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / California zone 5 (ftUS)
+<6424> +proj=lcc +lat_1=35.46666666666667 +lat_2=34.03333333333333 +lat_0=33.5 +lon_0=-118 +x_0=2000000.0001016 +y_0=500000.0001016001 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / California zone 6
+<6425> +proj=lcc +lat_1=33.88333333333333 +lat_2=32.78333333333333 +lat_0=32.16666666666666 +lon_0=-116.25 +x_0=2000000 +y_0=500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / California zone 6 (ftUS)
+<6426> +proj=lcc +lat_1=33.88333333333333 +lat_2=32.78333333333333 +lat_0=32.16666666666666 +lon_0=-116.25 +x_0=2000000.0001016 +y_0=500000.0001016001 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Colorado Central
+<6427> +proj=lcc +lat_1=39.75 +lat_2=38.45 +lat_0=37.83333333333334 +lon_0=-105.5 +x_0=914401.8289 +y_0=304800.6096 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Colorado Central (ftUS)
+<6428> +proj=lcc +lat_1=39.75 +lat_2=38.45 +lat_0=37.83333333333334 +lon_0=-105.5 +x_0=914401.8288036576 +y_0=304800.6096012192 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Colorado North
+<6429> +proj=lcc +lat_1=40.78333333333333 +lat_2=39.71666666666667 +lat_0=39.33333333333334 +lon_0=-105.5 +x_0=914401.8289 +y_0=304800.6096 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Colorado North (ftUS)
+<6430> +proj=lcc +lat_1=40.78333333333333 +lat_2=39.71666666666667 +lat_0=39.33333333333334 +lon_0=-105.5 +x_0=914401.8288036576 +y_0=304800.6096012192 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Colorado South
+<6431> +proj=lcc +lat_1=38.43333333333333 +lat_2=37.23333333333333 +lat_0=36.66666666666666 +lon_0=-105.5 +x_0=914401.8289 +y_0=304800.6096 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Colorado South (ftUS)
+<6432> +proj=lcc +lat_1=38.43333333333333 +lat_2=37.23333333333333 +lat_0=36.66666666666666 +lon_0=-105.5 +x_0=914401.8288036576 +y_0=304800.6096012192 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Connecticut
+<6433> +proj=lcc +lat_1=41.86666666666667 +lat_2=41.2 +lat_0=40.83333333333334 +lon_0=-72.75 +x_0=304800.6096 +y_0=152400.3048 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Connecticut (ftUS)
+<6434> +proj=lcc +lat_1=41.86666666666667 +lat_2=41.2 +lat_0=40.83333333333334 +lon_0=-72.75 +x_0=304800.6096012192 +y_0=152400.3048006096 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Delaware
+<6435> +proj=tmerc +lat_0=38 +lon_0=-75.41666666666667 +k=0.999995 +x_0=200000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Delaware (ftUS)
+<6436> +proj=tmerc +lat_0=38 +lon_0=-75.41666666666667 +k=0.999995 +x_0=200000.0001016002 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Florida East
+<6437> +proj=tmerc +lat_0=24.33333333333333 +lon_0=-81 +k=0.999941177 +x_0=200000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Florida East (ftUS)
+<6438> +proj=tmerc +lat_0=24.33333333333333 +lon_0=-81 +k=0.999941177 +x_0=200000.0001016002 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Florida GDL Albers
+<6439> +proj=aea +lat_1=24 +lat_2=31.5 +lat_0=24 +lon_0=-84 +x_0=400000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Florida North
+<6440> +proj=lcc +lat_1=30.75 +lat_2=29.58333333333333 +lat_0=29 +lon_0=-84.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Florida North (ftUS)
+<6441> +proj=lcc +lat_1=30.75 +lat_2=29.58333333333333 +lat_0=29 +lon_0=-84.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Florida West
+<6442> +proj=tmerc +lat_0=24.33333333333333 +lon_0=-82 +k=0.999941177 +x_0=200000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Florida West (ftUS)
+<6443> +proj=tmerc +lat_0=24.33333333333333 +lon_0=-82 +k=0.999941177 +x_0=200000.0001016002 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Georgia East
+<6444> +proj=tmerc +lat_0=30 +lon_0=-82.16666666666667 +k=0.9999 +x_0=200000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Georgia East (ftUS)
+<6445> +proj=tmerc +lat_0=30 +lon_0=-82.16666666666667 +k=0.9999 +x_0=200000.0001016002 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Georgia West
+<6446> +proj=tmerc +lat_0=30 +lon_0=-84.16666666666667 +k=0.9999 +x_0=700000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Georgia West (ftUS)
+<6447> +proj=tmerc +lat_0=30 +lon_0=-84.16666666666667 +k=0.9999 +x_0=699999.9998983998 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Idaho Central
+<6448> +proj=tmerc +lat_0=41.66666666666666 +lon_0=-114 +k=0.9999473679999999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Idaho Central (ftUS)
+<6449> +proj=tmerc +lat_0=41.66666666666666 +lon_0=-114 +k=0.9999473679999999 +x_0=500000.0001016001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Idaho East
+<6450> +proj=tmerc +lat_0=41.66666666666666 +lon_0=-112.1666666666667 +k=0.9999473679999999 +x_0=200000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Idaho East (ftUS)
+<6451> +proj=tmerc +lat_0=41.66666666666666 +lon_0=-112.1666666666667 +k=0.9999473679999999 +x_0=200000.0001016002 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Idaho West
+<6452> +proj=tmerc +lat_0=41.66666666666666 +lon_0=-115.75 +k=0.999933333 +x_0=800000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Idaho West (ftUS)
+<6453> +proj=tmerc +lat_0=41.66666666666666 +lon_0=-115.75 +k=0.999933333 +x_0=800000.0001016001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Illinois East
+<6454> +proj=tmerc +lat_0=36.66666666666666 +lon_0=-88.33333333333333 +k=0.9999749999999999 +x_0=300000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Illinois East (ftUS)
+<6455> +proj=tmerc +lat_0=36.66666666666666 +lon_0=-88.33333333333333 +k=0.9999749999999999 +x_0=300000.0000000001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Illinois West
+<6456> +proj=tmerc +lat_0=36.66666666666666 +lon_0=-90.16666666666667 +k=0.999941177 +x_0=700000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Illinois West (ftUS)
+<6457> +proj=tmerc +lat_0=36.66666666666666 +lon_0=-90.16666666666667 +k=0.999941177 +x_0=699999.9999898402 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Indiana East
+<6458> +proj=tmerc +lat_0=37.5 +lon_0=-85.66666666666667 +k=0.999966667 +x_0=100000 +y_0=250000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Indiana East (ftUS)
+<6459> +proj=tmerc +lat_0=37.5 +lon_0=-85.66666666666667 +k=0.999966667 +x_0=99999.99989839978 +y_0=249999.9998983998 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Indiana West
+<6460> +proj=tmerc +lat_0=37.5 +lon_0=-87.08333333333333 +k=0.999966667 +x_0=900000 +y_0=250000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Indiana West (ftUS)
+<6461> +proj=tmerc +lat_0=37.5 +lon_0=-87.08333333333333 +k=0.999966667 +x_0=900000 +y_0=249999.9998983998 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Iowa North
+<6462> +proj=lcc +lat_1=43.26666666666667 +lat_2=42.06666666666667 +lat_0=41.5 +lon_0=-93.5 +x_0=1500000 +y_0=1000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Iowa North (ftUS)
+<6463> +proj=lcc +lat_1=43.26666666666667 +lat_2=42.06666666666667 +lat_0=41.5 +lon_0=-93.5 +x_0=1500000 +y_0=999999.9999898402 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Iowa South
+<6464> +proj=lcc +lat_1=41.78333333333333 +lat_2=40.61666666666667 +lat_0=40 +lon_0=-93.5 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Iowa South (ftUS)
+<6465> +proj=lcc +lat_1=41.78333333333333 +lat_2=40.61666666666667 +lat_0=40 +lon_0=-93.5 +x_0=500000.00001016 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Kansas North
+<6466> +proj=lcc +lat_1=39.78333333333333 +lat_2=38.71666666666667 +lat_0=38.33333333333334 +lon_0=-98 +x_0=400000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Kansas North (ftUS)
+<6467> +proj=lcc +lat_1=39.78333333333333 +lat_2=38.71666666666667 +lat_0=38.33333333333334 +lon_0=-98 +x_0=399999.99998984 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Kansas South
+<6468> +proj=lcc +lat_1=38.56666666666667 +lat_2=37.26666666666667 +lat_0=36.66666666666666 +lon_0=-98.5 +x_0=400000 +y_0=400000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Kansas South (ftUS)
+<6469> +proj=lcc +lat_1=38.56666666666667 +lat_2=37.26666666666667 +lat_0=36.66666666666666 +lon_0=-98.5 +x_0=399999.99998984 +y_0=399999.99998984 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Kentucky North
+<6470> +proj=lcc +lat_1=37.96666666666667 +lat_2=38.96666666666667 +lat_0=37.5 +lon_0=-84.25 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Kentucky North (ftUS)
+<6471> +proj=lcc +lat_1=37.96666666666667 +lat_2=38.96666666666667 +lat_0=37.5 +lon_0=-84.25 +x_0=500000.0001016001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Kentucky Single Zone
+<6472> +proj=lcc +lat_1=37.08333333333334 +lat_2=38.66666666666666 +lat_0=36.33333333333334 +lon_0=-85.75 +x_0=1500000 +y_0=1000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Kentucky Single Zone (ftUS)
+<6473> +proj=lcc +lat_1=37.08333333333334 +lat_2=38.66666666666666 +lat_0=36.33333333333334 +lon_0=-85.75 +x_0=1500000 +y_0=999999.9998983998 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Kentucky South
+<6474> +proj=lcc +lat_1=37.93333333333333 +lat_2=36.73333333333333 +lat_0=36.33333333333334 +lon_0=-85.75 +x_0=500000 +y_0=500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Kentucky South (ftUS)
+<6475> +proj=lcc +lat_1=37.93333333333333 +lat_2=36.73333333333333 +lat_0=36.33333333333334 +lon_0=-85.75 +x_0=500000.0001016001 +y_0=500000.0001016001 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Louisiana North
+<6476> +proj=lcc +lat_1=32.66666666666666 +lat_2=31.16666666666667 +lat_0=30.5 +lon_0=-92.5 +x_0=1000000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Louisiana North (ftUS)
+<6477> +proj=lcc +lat_1=32.66666666666666 +lat_2=31.16666666666667 +lat_0=30.5 +lon_0=-92.5 +x_0=999999.9999898402 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Louisiana South
+<6478> +proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +x_0=1000000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Louisiana South (ftUS)
+<6479> +proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +x_0=999999.9999898402 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Maine CS2000 Central
+<6480> +proj=tmerc +lat_0=43.5 +lon_0=-69.125 +k=0.99998 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Maine CS2000 East
+<6481> +proj=tmerc +lat_0=43.83333333333334 +lon_0=-67.875 +k=0.99998 +x_0=700000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Maine CS2000 West
+<6482> +proj=tmerc +lat_0=42.83333333333334 +lon_0=-70.375 +k=0.99998 +x_0=300000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Maine East
+<6483> +proj=tmerc +lat_0=43.66666666666666 +lon_0=-68.5 +k=0.9999 +x_0=300000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Maine East (ftUS)
+<6484> +proj=tmerc +lat_0=43.66666666666666 +lon_0=-68.5 +k=0.9999 +x_0=300000.0000000001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Maine West
+<6485> +proj=tmerc +lat_0=42.83333333333334 +lon_0=-70.16666666666667 +k=0.999966667 +x_0=900000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Maine West (ftUS)
+<6486> +proj=tmerc +lat_0=42.83333333333334 +lon_0=-70.16666666666667 +k=0.999966667 +x_0=900000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Maryland
+<6487> +proj=lcc +lat_1=39.45 +lat_2=38.3 +lat_0=37.66666666666666 +lon_0=-77 +x_0=400000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Maryland (ftUS)
+<6488> +proj=lcc +lat_1=39.45 +lat_2=38.3 +lat_0=37.66666666666666 +lon_0=-77 +x_0=399999.9998983998 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Massachusetts Island
+<6489> +proj=lcc +lat_1=41.48333333333333 +lat_2=41.28333333333333 +lat_0=41 +lon_0=-70.5 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Massachusetts Island (ftUS)
+<6490> +proj=lcc +lat_1=41.48333333333333 +lat_2=41.28333333333333 +lat_0=41 +lon_0=-70.5 +x_0=500000.0001016001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Massachusetts Mainland
+<6491> +proj=lcc +lat_1=42.68333333333333 +lat_2=41.71666666666667 +lat_0=41 +lon_0=-71.5 +x_0=200000 +y_0=750000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Massachusetts Mainland (ftUS)
+<6492> +proj=lcc +lat_1=42.68333333333333 +lat_2=41.71666666666667 +lat_0=41 +lon_0=-71.5 +x_0=200000.0001016002 +y_0=750000 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Michigan Central
+<6493> +proj=lcc +lat_1=45.7 +lat_2=44.18333333333333 +lat_0=43.31666666666667 +lon_0=-84.36666666666666 +x_0=6000000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Michigan Central (ft)
+<6494> +proj=lcc +lat_1=45.7 +lat_2=44.18333333333333 +lat_0=43.31666666666667 +lon_0=-84.36666666666666 +x_0=5999999.999976001 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Michigan North
+<6495> +proj=lcc +lat_1=47.08333333333334 +lat_2=45.48333333333333 +lat_0=44.78333333333333 +lon_0=-87 +x_0=8000000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Michigan North (ft)
+<6496> +proj=lcc +lat_1=47.08333333333334 +lat_2=45.48333333333333 +lat_0=44.78333333333333 +lon_0=-87 +x_0=7999999.999968001 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Michigan Oblique Mercator
+<6497> +proj=omerc +lat_0=45.30916666666666 +lonc=-86 +alpha=337.25556 +k=0.9996 +x_0=2546731.496 +y_0=-4354009.816 +no_uoff +gamma=337.25556 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Michigan South
+<6498> +proj=lcc +lat_1=43.66666666666666 +lat_2=42.1 +lat_0=41.5 +lon_0=-84.36666666666666 +x_0=4000000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Michigan South (ft)
+<6499> +proj=lcc +lat_1=43.66666666666666 +lat_2=42.1 +lat_0=41.5 +lon_0=-84.36666666666666 +x_0=3999999.999984 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Minnesota Central
+<6500> +proj=lcc +lat_1=47.05 +lat_2=45.61666666666667 +lat_0=45 +lon_0=-94.25 +x_0=800000 +y_0=100000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Minnesota Central (ftUS)
+<6501> +proj=lcc +lat_1=47.05 +lat_2=45.61666666666667 +lat_0=45 +lon_0=-94.25 +x_0=800000.0000101599 +y_0=99999.99998983997 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Minnesota North
+<6502> +proj=lcc +lat_1=48.63333333333333 +lat_2=47.03333333333333 +lat_0=46.5 +lon_0=-93.09999999999999 +x_0=800000 +y_0=100000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Minnesota North (ftUS)
+<6503> +proj=lcc +lat_1=48.63333333333333 +lat_2=47.03333333333333 +lat_0=46.5 +lon_0=-93.09999999999999 +x_0=800000.0000101599 +y_0=99999.99998983997 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Minnesota South
+<6504> +proj=lcc +lat_1=45.21666666666667 +lat_2=43.78333333333333 +lat_0=43 +lon_0=-94 +x_0=800000 +y_0=100000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Minnesota South (ftUS)
+<6505> +proj=lcc +lat_1=45.21666666666667 +lat_2=43.78333333333333 +lat_0=43 +lon_0=-94 +x_0=800000.0000101599 +y_0=99999.99998983997 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Mississippi East
+<6506> +proj=tmerc +lat_0=29.5 +lon_0=-88.83333333333333 +k=0.99995 +x_0=300000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Mississippi East (ftUS)
+<6507> +proj=tmerc +lat_0=29.5 +lon_0=-88.83333333333333 +k=0.99995 +x_0=300000.0000000001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Mississippi TM
+<6508> +proj=tmerc +lat_0=32.5 +lon_0=-89.75 +k=0.9998335 +x_0=500000 +y_0=1300000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Mississippi West
+<6509> +proj=tmerc +lat_0=29.5 +lon_0=-90.33333333333333 +k=0.99995 +x_0=700000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Mississippi West (ftUS)
+<6510> +proj=tmerc +lat_0=29.5 +lon_0=-90.33333333333333 +k=0.99995 +x_0=699999.9998983998 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Missouri Central
+<6511> +proj=tmerc +lat_0=35.83333333333334 +lon_0=-92.5 +k=0.999933333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Missouri East
+<6512> +proj=tmerc +lat_0=35.83333333333334 +lon_0=-90.5 +k=0.999933333 +x_0=250000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Missouri West
+<6513> +proj=tmerc +lat_0=36.16666666666666 +lon_0=-94.5 +k=0.999941177 +x_0=850000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Montana
+<6514> +proj=lcc +lat_1=49 +lat_2=45 +lat_0=44.25 +lon_0=-109.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Montana (ft)
+<6515> +proj=lcc +lat_1=49 +lat_2=45 +lat_0=44.25 +lon_0=-109.5 +x_0=599999.9999976 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Nebraska
+<6516> +proj=lcc +lat_1=43 +lat_2=40 +lat_0=39.83333333333334 +lon_0=-100 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Nebraska (ftUS)
+<6517> +proj=lcc +lat_1=43 +lat_2=40 +lat_0=39.83333333333334 +lon_0=-100 +x_0=500000.00001016 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(2011) / Nevada Central
+<6518> +proj=tmerc +lat_0=34.75 +lon_0=-116.6666666666667 +k=0.9999 +x_0=500000 +y_0=6000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Nevada Central (ftUS)
+<6519> +proj=tmerc +lat_0=34.75 +lon_0=-116.6666666666667 +k=0.9999 +x_0=500000.00001016 +y_0=6000000 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Nevada East
+<6520> +proj=tmerc +lat_0=34.75 +lon_0=-115.5833333333333 +k=0.9999 +x_0=200000 +y_0=8000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Nevada East (ftUS)
+<6521> +proj=tmerc +lat_0=34.75 +lon_0=-115.5833333333333 +k=0.9999 +x_0=200000.00001016 +y_0=8000000.000010163 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Nevada West
+<6522> +proj=tmerc +lat_0=34.75 +lon_0=-118.5833333333333 +k=0.9999 +x_0=800000 +y_0=4000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Nevada West (ftUS)
+<6523> +proj=tmerc +lat_0=34.75 +lon_0=-118.5833333333333 +k=0.9999 +x_0=800000.0000101599 +y_0=3999999.99998984 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / New Hampshire
+<6524> +proj=tmerc +lat_0=42.5 +lon_0=-71.66666666666667 +k=0.999966667 +x_0=300000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / New Hampshire (ftUS)
+<6525> +proj=tmerc +lat_0=42.5 +lon_0=-71.66666666666667 +k=0.999966667 +x_0=300000.0000000001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / New Jersey
+<6526> +proj=tmerc +lat_0=38.83333333333334 +lon_0=-74.5 +k=0.9999 +x_0=150000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / New Jersey (ftUS)
+<6527> +proj=tmerc +lat_0=38.83333333333334 +lon_0=-74.5 +k=0.9999 +x_0=150000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / New Mexico Central
+<6528> +proj=tmerc +lat_0=31 +lon_0=-106.25 +k=0.9999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / New Mexico Central (ftUS)
+<6529> +proj=tmerc +lat_0=31 +lon_0=-106.25 +k=0.9999 +x_0=500000.0001016001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / New Mexico East
+<6530> +proj=tmerc +lat_0=31 +lon_0=-104.3333333333333 +k=0.999909091 +x_0=165000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / New Mexico East (ftUS)
+<6531> +proj=tmerc +lat_0=31 +lon_0=-104.3333333333333 +k=0.999909091 +x_0=165000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / New Mexico West
+<6532> +proj=tmerc +lat_0=31 +lon_0=-107.8333333333333 +k=0.999916667 +x_0=830000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / New Mexico West (ftUS)
+<6533> +proj=tmerc +lat_0=31 +lon_0=-107.8333333333333 +k=0.999916667 +x_0=830000.0001016001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / New York Central
+<6534> +proj=tmerc +lat_0=40 +lon_0=-76.58333333333333 +k=0.9999375 +x_0=250000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / New York Central (ftUS)
+<6535> +proj=tmerc +lat_0=40 +lon_0=-76.58333333333333 +k=0.9999375 +x_0=249999.9998983998 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / New York East
+<6536> +proj=tmerc +lat_0=38.83333333333334 +lon_0=-74.5 +k=0.9999 +x_0=150000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / New York East (ftUS)
+<6537> +proj=tmerc +lat_0=38.83333333333334 +lon_0=-74.5 +k=0.9999 +x_0=150000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / New York Long Island
+<6538> +proj=lcc +lat_1=41.03333333333333 +lat_2=40.66666666666666 +lat_0=40.16666666666666 +lon_0=-74 +x_0=300000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / New York Long Island (ftUS)
+<6539> +proj=lcc +lat_1=41.03333333333333 +lat_2=40.66666666666666 +lat_0=40.16666666666666 +lon_0=-74 +x_0=300000.0000000001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / New York West
+<6540> +proj=tmerc +lat_0=40 +lon_0=-78.58333333333333 +k=0.9999375 +x_0=350000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / New York West (ftUS)
+<6541> +proj=tmerc +lat_0=40 +lon_0=-78.58333333333333 +k=0.9999375 +x_0=350000.0001016001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / North Carolina
+<6542> +proj=lcc +lat_1=36.16666666666666 +lat_2=34.33333333333334 +lat_0=33.75 +lon_0=-79 +x_0=609601.22 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / North Carolina (ftUS)
+<6543> +proj=lcc +lat_1=36.16666666666666 +lat_2=34.33333333333334 +lat_0=33.75 +lon_0=-79 +x_0=609601.2192024384 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / North Dakota North
+<6544> +proj=lcc +lat_1=48.73333333333333 +lat_2=47.43333333333333 +lat_0=47 +lon_0=-100.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / North Dakota North (ft)
+<6545> +proj=lcc +lat_1=48.73333333333333 +lat_2=47.43333333333333 +lat_0=47 +lon_0=-100.5 +x_0=599999.9999976 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / North Dakota South
+<6546> +proj=lcc +lat_1=47.48333333333333 +lat_2=46.18333333333333 +lat_0=45.66666666666666 +lon_0=-100.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / North Dakota South (ft)
+<6547> +proj=lcc +lat_1=47.48333333333333 +lat_2=46.18333333333333 +lat_0=45.66666666666666 +lon_0=-100.5 +x_0=599999.9999976 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Ohio North
+<6548> +proj=lcc +lat_1=41.7 +lat_2=40.43333333333333 +lat_0=39.66666666666666 +lon_0=-82.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Ohio North (ftUS)
+<6549> +proj=lcc +lat_1=41.7 +lat_2=40.43333333333333 +lat_0=39.66666666666666 +lon_0=-82.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Ohio South
+<6550> +proj=lcc +lat_1=40.03333333333333 +lat_2=38.73333333333333 +lat_0=38 +lon_0=-82.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Ohio South (ftUS)
+<6551> +proj=lcc +lat_1=40.03333333333333 +lat_2=38.73333333333333 +lat_0=38 +lon_0=-82.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Oklahoma North
+<6552> +proj=lcc +lat_1=36.76666666666667 +lat_2=35.56666666666667 +lat_0=35 +lon_0=-98 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oklahoma North (ftUS)
+<6553> +proj=lcc +lat_1=36.76666666666667 +lat_2=35.56666666666667 +lat_0=35 +lon_0=-98 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Oklahoma South
+<6554> +proj=lcc +lat_1=35.23333333333333 +lat_2=33.93333333333333 +lat_0=33.33333333333334 +lon_0=-98 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oklahoma South (ftUS)
+<6555> +proj=lcc +lat_1=35.23333333333333 +lat_2=33.93333333333333 +lat_0=33.33333333333334 +lon_0=-98 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Oregon Lambert
+<6556> +proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=400000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Lambert (ft)
+<6557> +proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999984 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon North
+<6558> +proj=lcc +lat_1=46 +lat_2=44.33333333333334 +lat_0=43.66666666666666 +lon_0=-120.5 +x_0=2500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon North (ft)
+<6559> +proj=lcc +lat_1=46 +lat_2=44.33333333333334 +lat_0=43.66666666666666 +lon_0=-120.5 +x_0=2500000.0001424 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon South
+<6560> +proj=lcc +lat_1=44 +lat_2=42.33333333333334 +lat_0=41.66666666666666 +lon_0=-120.5 +x_0=1500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon South (ft)
+<6561> +proj=lcc +lat_1=44 +lat_2=42.33333333333334 +lat_0=41.66666666666666 +lon_0=-120.5 +x_0=1500000.0001464 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Pennsylvania North
+<6562> +proj=lcc +lat_1=41.95 +lat_2=40.88333333333333 +lat_0=40.16666666666666 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Pennsylvania North (ftUS)
+<6563> +proj=lcc +lat_1=41.95 +lat_2=40.88333333333333 +lat_0=40.16666666666666 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Pennsylvania South
+<6564> +proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Pennsylvania South (ftUS)
+<6565> +proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Puerto Rico and Virgin Is.
+<6566> +proj=lcc +lat_1=18.43333333333333 +lat_2=18.03333333333333 +lat_0=17.83333333333333 +lon_0=-66.43333333333334 +x_0=200000 +y_0=200000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Rhode Island
+<6567> +proj=tmerc +lat_0=41.08333333333334 +lon_0=-71.5 +k=0.99999375 +x_0=100000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Rhode Island (ftUS)
+<6568> +proj=tmerc +lat_0=41.08333333333334 +lon_0=-71.5 +k=0.99999375 +x_0=99999.99998983997 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / South Carolina
+<6569> +proj=lcc +lat_1=34.83333333333334 +lat_2=32.5 +lat_0=31.83333333333333 +lon_0=-81 +x_0=609600 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / South Carolina (ft)
+<6570> +proj=lcc +lat_1=34.83333333333334 +lat_2=32.5 +lat_0=31.83333333333333 +lon_0=-81 +x_0=609600 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / South Dakota North
+<6571> +proj=lcc +lat_1=45.68333333333333 +lat_2=44.41666666666666 +lat_0=43.83333333333334 +lon_0=-100 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / South Dakota North (ftUS)
+<6572> +proj=lcc +lat_1=45.68333333333333 +lat_2=44.41666666666666 +lat_0=43.83333333333334 +lon_0=-100 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / South Dakota South
+<6573> +proj=lcc +lat_1=44.4 +lat_2=42.83333333333334 +lat_0=42.33333333333334 +lon_0=-100.3333333333333 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / South Dakota South (ftUS)
+<6574> +proj=lcc +lat_1=44.4 +lat_2=42.83333333333334 +lat_0=42.33333333333334 +lon_0=-100.3333333333333 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Tennessee
+<6575> +proj=lcc +lat_1=36.41666666666666 +lat_2=35.25 +lat_0=34.33333333333334 +lon_0=-86 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Tennessee (ftUS)
+<6576> +proj=lcc +lat_1=36.41666666666666 +lat_2=35.25 +lat_0=34.33333333333334 +lon_0=-86 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Texas Central
+<6577> +proj=lcc +lat_1=31.88333333333333 +lat_2=30.11666666666667 +lat_0=29.66666666666667 +lon_0=-100.3333333333333 +x_0=700000 +y_0=3000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Texas Central (ftUS)
+<6578> +proj=lcc +lat_1=31.88333333333333 +lat_2=30.11666666666667 +lat_0=29.66666666666667 +lon_0=-100.3333333333333 +x_0=699999.9998983998 +y_0=3000000 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Texas Centric Albers Equal Area
+<6579> +proj=aea +lat_1=27.5 +lat_2=35 +lat_0=18 +lon_0=-100 +x_0=1500000 +y_0=6000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Texas Centric Lambert Conformal
+<6580> +proj=lcc +lat_1=27.5 +lat_2=35 +lat_0=18 +lon_0=-100 +x_0=1500000 +y_0=5000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Texas North
+<6581> +proj=lcc +lat_1=36.18333333333333 +lat_2=34.65 +lat_0=34 +lon_0=-101.5 +x_0=200000 +y_0=1000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Texas North (ftUS)
+<6582> +proj=lcc +lat_1=36.18333333333333 +lat_2=34.65 +lat_0=34 +lon_0=-101.5 +x_0=200000.0001016002 +y_0=999999.9998983998 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Texas North Central
+<6583> +proj=lcc +lat_1=33.96666666666667 +lat_2=32.13333333333333 +lat_0=31.66666666666667 +lon_0=-98.5 +x_0=600000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Texas North Central (ftUS)
+<6584> +proj=lcc +lat_1=33.96666666666667 +lat_2=32.13333333333333 +lat_0=31.66666666666667 +lon_0=-98.5 +x_0=600000 +y_0=2000000.0001016 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Texas South
+<6585> +proj=lcc +lat_1=27.83333333333333 +lat_2=26.16666666666667 +lat_0=25.66666666666667 +lon_0=-98.5 +x_0=300000 +y_0=5000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Texas South (ftUS)
+<6586> +proj=lcc +lat_1=27.83333333333333 +lat_2=26.16666666666667 +lat_0=25.66666666666667 +lon_0=-98.5 +x_0=300000.0000000001 +y_0=5000000.0001016 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Texas South Central
+<6587> +proj=lcc +lat_1=30.28333333333333 +lat_2=28.38333333333333 +lat_0=27.83333333333333 +lon_0=-99 +x_0=600000 +y_0=4000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Texas South Central (ftUS)
+<6588> +proj=lcc +lat_1=30.28333333333333 +lat_2=28.38333333333333 +lat_0=27.83333333333333 +lon_0=-99 +x_0=600000 +y_0=3999999.9998984 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Vermont
+<6589> +proj=tmerc +lat_0=42.5 +lon_0=-72.5 +k=0.999964286 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Vermont (ftUS)
+<6590> +proj=tmerc +lat_0=42.5 +lon_0=-72.5 +k=0.999964286 +x_0=500000.00001016 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Virginia Lambert
+<6591> +proj=lcc +lat_1=37 +lat_2=39.5 +lat_0=36 +lon_0=-79.5 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Virginia North
+<6592> +proj=lcc +lat_1=39.2 +lat_2=38.03333333333333 +lat_0=37.66666666666666 +lon_0=-78.5 +x_0=3500000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Virginia North (ftUS)
+<6593> +proj=lcc +lat_1=39.2 +lat_2=38.03333333333333 +lat_0=37.66666666666666 +lon_0=-78.5 +x_0=3500000.0001016 +y_0=2000000.0001016 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Virginia South
+<6594> +proj=lcc +lat_1=37.96666666666667 +lat_2=36.76666666666667 +lat_0=36.33333333333334 +lon_0=-78.5 +x_0=3500000 +y_0=1000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Virginia South (ftUS)
+<6595> +proj=lcc +lat_1=37.96666666666667 +lat_2=36.76666666666667 +lat_0=36.33333333333334 +lon_0=-78.5 +x_0=3500000.0001016 +y_0=999999.9998983998 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Washington North
+<6596> +proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Washington North (ftUS)
+<6597> +proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0001016001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Washington South
+<6598> +proj=lcc +lat_1=47.33333333333334 +lat_2=45.83333333333334 +lat_0=45.33333333333334 +lon_0=-120.5 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Washington South (ftUS)
+<6599> +proj=lcc +lat_1=47.33333333333334 +lat_2=45.83333333333334 +lat_0=45.33333333333334 +lon_0=-120.5 +x_0=500000.0001016001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / West Virginia North
+<6600> +proj=lcc +lat_1=40.25 +lat_2=39 +lat_0=38.5 +lon_0=-79.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / West Virginia North (ftUS)
+<6601> +proj=lcc +lat_1=40.25 +lat_2=39 +lat_0=38.5 +lon_0=-79.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / West Virginia South
+<6602> +proj=lcc +lat_1=38.88333333333333 +lat_2=37.48333333333333 +lat_0=37 +lon_0=-81 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / West Virginia South (ftUS)
+<6603> +proj=lcc +lat_1=38.88333333333333 +lat_2=37.48333333333333 +lat_0=37 +lon_0=-81 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Wisconsin Central
+<6604> +proj=lcc +lat_1=45.5 +lat_2=44.25 +lat_0=43.83333333333334 +lon_0=-90 +x_0=600000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(2011) / Wisconsin Central (ftUS)
+<6605> +proj=lcc +lat_1=45.5 +lat_2=44.25 +lat_0=43.83333333333334 +lon_0=-90 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Wisconsin North
+<6606> +proj=lcc +lat_1=46.76666666666667 +lat_2=45.56666666666667 +lat_0=45.16666666666666 +lon_0=-90 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Wisconsin North (ftUS)
+<6607> +proj=lcc +lat_1=46.76666666666667 +lat_2=45.56666666666667 +lat_0=45.16666666666666 +lon_0=-90 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Wisconsin South
+<6608> +proj=lcc +lat_1=44.06666666666667 +lat_2=42.73333333333333 +lat_0=42 +lon_0=-90 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Wisconsin South (ftUS)
+<6609> +proj=lcc +lat_1=44.06666666666667 +lat_2=42.73333333333333 +lat_0=42 +lon_0=-90 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Wisconsin Transverse Mercator
+<6610> +proj=tmerc +lat_0=0 +lon_0=-90 +k=0.9996 +x_0=520000 +y_0=-4480000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Wyoming East
+<6611> +proj=tmerc +lat_0=40.5 +lon_0=-105.1666666666667 +k=0.9999375 +x_0=200000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Wyoming East (ftUS)
+<6612> +proj=tmerc +lat_0=40.5 +lon_0=-105.1666666666667 +k=0.9999375 +x_0=200000.00001016 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Wyoming East Central
+<6613> +proj=tmerc +lat_0=40.5 +lon_0=-107.3333333333333 +k=0.9999375 +x_0=400000 +y_0=100000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Wyoming East Central (ftUS)
+<6614> +proj=tmerc +lat_0=40.5 +lon_0=-107.3333333333333 +k=0.9999375 +x_0=399999.99998984 +y_0=99999.99998983997 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Wyoming West
+<6615> +proj=tmerc +lat_0=40.5 +lon_0=-110.0833333333333 +k=0.9999375 +x_0=800000 +y_0=100000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Wyoming West (ftUS)
+<6616> +proj=tmerc +lat_0=40.5 +lon_0=-110.0833333333333 +k=0.9999375 +x_0=800000.0000101599 +y_0=99999.99998983997 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Wyoming West Central
+<6617> +proj=tmerc +lat_0=40.5 +lon_0=-108.75 +k=0.9999375 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Wyoming West Central (ftUS)
+<6618> +proj=tmerc +lat_0=40.5 +lon_0=-108.75 +k=0.9999375 +x_0=600000 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Utah Central
+<6619> +proj=lcc +lat_1=40.65 +lat_2=39.01666666666667 +lat_0=38.33333333333334 +lon_0=-111.5 +x_0=500000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Utah North
+<6620> +proj=lcc +lat_1=41.78333333333333 +lat_2=40.71666666666667 +lat_0=40.33333333333334 +lon_0=-111.5 +x_0=500000 +y_0=1000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Utah South
+<6621> +proj=lcc +lat_1=38.35 +lat_2=37.21666666666667 +lat_0=36.66666666666666 +lon_0=-111.5 +x_0=500000 +y_0=3000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS) / Quebec Lambert
+<6622> +proj=lcc +lat_1=60 +lat_2=46 +lat_0=44 +lon_0=-68.5 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83 / Quebec Albers
+<6623> +proj=aea +lat_1=60 +lat_2=46 +lat_0=44 +lon_0=-68.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs  <>
+# NAD83(CSRS) / Quebec Albers
+<6624> +proj=aea +lat_1=60 +lat_2=46 +lat_0=44 +lon_0=-68.5 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(2011) / Utah Central (ftUS)
+<6625> +proj=lcc +lat_1=40.65 +lat_2=39.01666666666667 +lat_0=38.33333333333334 +lon_0=-111.5 +x_0=500000.00001016 +y_0=2000000.00001016 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Utah North (ftUS)
+<6626> +proj=lcc +lat_1=41.78333333333333 +lat_2=40.71666666666667 +lat_0=40.33333333333334 +lon_0=-111.5 +x_0=500000.00001016 +y_0=999999.9999898402 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(2011) / Utah South (ftUS)
+<6627> +proj=lcc +lat_1=38.35 +lat_2=37.21666666666667 +lat_0=36.66666666666666 +lon_0=-111.5 +x_0=500000.00001016 +y_0=3000000 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(PA11) / Hawaii zone 1
+<6628> +proj=tmerc +lat_0=18.83333333333333 +lon_0=-155.5 +k=0.999966667 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(PA11) / Hawaii zone 2
+<6629> +proj=tmerc +lat_0=20.33333333333333 +lon_0=-156.6666666666667 +k=0.999966667 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(PA11) / Hawaii zone 3
+<6630> +proj=tmerc +lat_0=21.16666666666667 +lon_0=-158 +k=0.99999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(PA11) / Hawaii zone 4
+<6631> +proj=tmerc +lat_0=21.83333333333333 +lon_0=-159.5 +k=0.99999 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(PA11) / Hawaii zone 5
+<6632> +proj=tmerc +lat_0=21.66666666666667 +lon_0=-160.1666666666667 +k=1 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(PA11) / Hawaii zone 3 (ftUS)
+<6633> +proj=tmerc +lat_0=21.16666666666667 +lon_0=-158 +k=0.99999 +x_0=500000.00001016 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs  <>
+# NAD83(PA11) / UTM zone 4N
+<6634> +proj=utm +zone=4 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(PA11) / UTM zone 5N
+<6635> +proj=utm +zone=5 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(PA11) / UTM zone 2S
+<6636> +proj=utm +zone=2 +south +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(MA11) / Guam Map Grid
+<6637> +proj=tmerc +lat_0=13.5 +lon_0=144.75 +k=1 +x_0=100000 +y_0=200000 +ellps=GRS80 +units=m +no_defs  <>
+# Karbala 1979 / Iraq National Grid
+<6646> +proj=tmerc +lat_0=29.02626833333333 +lon_0=46.5 +k=0.9994 +x_0=800000 +y_0=0 +ellps=clrk80 +towgs84=70.995,-335.916,262.898,0,0,0,0 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS I
+<6669> +proj=tmerc +lat_0=33 +lon_0=129.5 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS II
+<6670> +proj=tmerc +lat_0=33 +lon_0=131 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS III
+<6671> +proj=tmerc +lat_0=36 +lon_0=132.1666666666667 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS IV
+<6672> +proj=tmerc +lat_0=33 +lon_0=133.5 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS V
+<6673> +proj=tmerc +lat_0=36 +lon_0=134.3333333333333 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS VI
+<6674> +proj=tmerc +lat_0=36 +lon_0=136 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS VII
+<6675> +proj=tmerc +lat_0=36 +lon_0=137.1666666666667 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS VIII
+<6676> +proj=tmerc +lat_0=36 +lon_0=138.5 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS IX
+<6677> +proj=tmerc +lat_0=36 +lon_0=139.8333333333333 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS X
+<6678> +proj=tmerc +lat_0=40 +lon_0=140.8333333333333 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS XI
+<6679> +proj=tmerc +lat_0=44 +lon_0=140.25 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS XII
+<6680> +proj=tmerc +lat_0=44 +lon_0=142.25 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS XIII
+<6681> +proj=tmerc +lat_0=44 +lon_0=144.25 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS XIV
+<6682> +proj=tmerc +lat_0=26 +lon_0=142 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS XV
+<6683> +proj=tmerc +lat_0=26 +lon_0=127.5 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS XVI
+<6684> +proj=tmerc +lat_0=26 +lon_0=124 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS XVII
+<6685> +proj=tmerc +lat_0=26 +lon_0=131 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS XVIII
+<6686> +proj=tmerc +lat_0=20 +lon_0=136 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / Japan Plane Rectangular CS XIX
+<6687> +proj=tmerc +lat_0=26 +lon_0=154 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / UTM zone 51N
+<6688> +proj=utm +zone=51 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / UTM zone 52N
+<6689> +proj=utm +zone=52 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / UTM zone 53N
+<6690> +proj=utm +zone=53 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / UTM zone 54N
+<6691> +proj=utm +zone=54 +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011 / UTM zone 55N
+<6692> +proj=utm +zone=55 +ellps=GRS80 +units=m +no_defs  <>
+# WGS 84 / TM 60 SW
+<6703> +proj=tmerc +lat_0=0 +lon_0=-60 +k=0.9996 +x_0=500000 +y_0=10000000 +datum=WGS84 +units=m +no_defs  <>
+# RDN2008 / TM32
+<6707> +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# RDN2008 / TM33
+<6708> +proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# RDN2008 / TM34
+<6709> +proj=utm +zone=34 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# WGS 84 / CIG92
+<6720> +proj=tmerc +lat_0=0 +lon_0=105.625 +k=1.000024 +x_0=50000 +y_0=1300000 +datum=WGS84 +units=m +no_defs  <>
+# GDA94 / CIG94
+<6721> +proj=tmerc +lat_0=0 +lon_0=105.625 +k=1.00002514 +x_0=50000 +y_0=1300000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# WGS 84 / CKIG92
+<6722> +proj=tmerc +lat_0=0 +lon_0=96.875 +k=1 +x_0=50000 +y_0=1400000 +datum=WGS84 +units=m +no_defs  <>
+# GDA94 / CKIG94
+<6723> +proj=tmerc +lat_0=0 +lon_0=96.875 +k=0.99999387 +x_0=50000 +y_0=1500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GDA94 / MGA zone 41
+<6732> +proj=utm +zone=41 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GDA94 / MGA zone 42
+<6733> +proj=utm +zone=42 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GDA94 / MGA zone 43
+<6734> +proj=utm +zone=43 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GDA94 / MGA zone 44
+<6735> +proj=utm +zone=44 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GDA94 / MGA zone 46
+<6736> +proj=utm +zone=46 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GDA94 / MGA zone 47
+<6737> +proj=utm +zone=47 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# GDA94 / MGA zone 59
+<6738> +proj=utm +zone=59 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# ETRS89 / Albania 2010
+<6870> +proj=tmerc +lat_0=0 +lon_0=20 +k=1 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# RDN2008 / Italy zone
+<6875> +proj=tmerc +lat_0=0 +lon_0=12 +k=0.9985000000000001 +x_0=7000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# RDN2008 / Zone 12
+<6876> +proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=3000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # Pulkovo 1995 / Gauss-Kruger zone 4
 <20004> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=4500000 +y_0=0 +ellps=krass +towgs84=24.47,-130.89,-81.56,-0,-0,0.13,-0.22 +units=m +no_defs  <>
 # Pulkovo 1995 / Gauss-Kruger zone 5
@@ -6824,11 +7615,11 @@
 <26802> +proj=tmerc +lat_0=41.5 +lon_0=-85.75 +k=0.999909091 +x_0=152400.3048006096 +y_0=0 +a=6378450.047548896 +b=6356826.621488444 +units=us-ft +no_defs  <>
 # NAD Michigan / Michigan West (deprecated)
 <26803> +proj=tmerc +lat_0=41.5 +lon_0=-88.75 +k=0.999909091 +x_0=152400.3048006096 +y_0=0 +a=6378450.047548896 +b=6356826.621488444 +units=us-ft +no_defs  <>
-# NAD Michigan / Michigan North
+# NAD Michigan / Michigan North (deprecated)
 <26811> +proj=lcc +lat_1=45.48333333333333 +lat_2=47.08333333333334 +lat_0=44.78333333333333 +lon_0=-87 +x_0=609601.2192024384 +y_0=0 +a=6378450.047548896 +b=6356826.621488444 +units=us-ft +no_defs  <>
-# NAD Michigan / Michigan Central
+# NAD Michigan / Michigan Central (deprecated)
 <26812> +proj=lcc +lat_1=44.18333333333333 +lat_2=45.7 +lat_0=43.31666666666667 +lon_0=-84.33333333333333 +x_0=609601.2192024384 +y_0=0 +a=6378450.047548896 +b=6356826.621488444 +units=us-ft +no_defs  <>
-# NAD Michigan / Michigan South
+# NAD Michigan / Michigan South (deprecated)
 <26813> +proj=lcc +lat_1=42.1 +lat_2=43.66666666666666 +lat_0=41.5 +lon_0=-84.33333333333333 +x_0=609601.2192024384 +y_0=0 +a=6378450.047548896 +b=6356826.621488444 +units=us-ft +no_defs  <>
 # NAD83 / Maine East (ftUS) (deprecated)
 <26814> +proj=tmerc +lat_0=43.66666666666666 +lon_0=-68.5 +k=0.9999 +x_0=300000 +y_0=0 +datum=NAD83 +units=m +no_defs  <>
@@ -7272,7 +8063,7 @@
 <28193> +proj=cass +lat_0=31.73409694444445 +lon_0=35.21208055555556 +x_0=170251.555 +y_0=1126867.909 +a=6378300.789 +b=6356566.435 +towgs84=-275.722,94.7824,340.894,-8.001,-4.42,-11.821,1 +units=m +no_defs  <>
 # Pointe Noire / UTM zone 32S
 <28232> +proj=utm +zone=32 +south +a=6378249.2 +b=6356515 +towgs84=-148,51,-291,0,0,0,0 +units=m +no_defs  <>
-# GDA94 / MGA zone 48 (deprecated)
+# GDA94 / MGA zone 48
 <28348> +proj=utm +zone=48 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # GDA94 / MGA zone 49
 <28349> +proj=utm +zone=49 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
@@ -8842,3 +9633,533 @@
 <32761> +proj=stere +lat_0=-90 +lat_ts=-90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 +datum=WGS84 +units=m +no_defs  <>
 # WGS 84 / TM 36 SE
 <32766> +proj=tmerc +lat_0=0 +lon_0=36 +k=0.9996 +x_0=500000 +y_0=10000000 +datum=WGS84 +units=m +no_defs  <>
+# TWD97
+<3822> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# IGRS
+<3887> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# MOLDREF99
+<4000> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RGRDC 2005
+<4039> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# SREF98
+<4073> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# REGCAN95
+<4079> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# WGS 84 (geocentric)
+<4328> +proj=geocent +datum=WGS84 +units=m +no_defs  <>
+# ITRF88 (geocentric)
+<4330> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF89 (geocentric)
+<4331> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF90 (geocentric)
+<4332> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF91 (geocentric)
+<4333> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF92 (geocentric)
+<4334> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF93 (geocentric)
+<4335> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF94 (geocentric)
+<4336> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF96 (geocentric)
+<4337> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF97 (geocentric)
+<4338> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Australian Antarctic (geocentric)
+<4340> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# EST97 (geocentric)
+<4342> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# CHTRF95 (geocentric)
+<4344> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ETRS89 (geocentric)
+<4346> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# GDA94 (geocentric)
+<4348> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Hartebeesthoek94 (geocentric)
+<4350> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# IRENET95 (geocentric)
+<4352> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# JGD2000 (geocentric)
+<4354> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# LKS94 (ETRS89) (geocentric)
+<4356> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Moznet (geocentric)
+<4358> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# NAD83(CSRS) (geocentric)
+<4360> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(HARN) (geocentric)
+<4362> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NZGD2000 (geocentric)
+<4364> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# POSGAR 98 (geocentric)
+<4366> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# REGVEN (geocentric)
+<4368> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RGF93 (geocentric)
+<4370> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RGFG95 (geocentric)
+<4372> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RGR92 (geocentric)
+<4374> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# SIRGAS (geocentric)
+<4376> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# SWEREF99 (geocentric)
+<4378> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Yemen NGN96 (geocentric)
+<4380> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# RGNC 1991 (geocentric)
+<4382> +proj=geocent +ellps=intl +units=m +no_defs  <>
+# RRAF 1991 (geocentric)
+<4384> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# ITRF2000 (geocentric)
+<4385> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ISN93 (geocentric)
+<4387> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# LKS92 (geocentric)
+<4389> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RGSPM06
+<4465> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RGM04
+<4468> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Cadastre 1997
+<4473> +proj=geocent +ellps=intl +units=m +no_defs  <>
+# China Geodetic Coordinate System 2000
+<4479> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Mexico ITRF92
+<4481> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RRAF 1991
+<4556> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Slovenia 1996
+<4882> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RSRGD2000
+<4884> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# BDA2000
+<4886> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# HTRS96
+<4888> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# WGS 66
+<4890> +proj=geocent +ellps=WGS66 +units=m +no_defs  <>
+# NAD83(NSRS2007)
+<4892> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# JAD2001
+<4894> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# ITRF2005
+<4896> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# DGN95
+<4897> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# LGD2006
+<4899> +proj=geocent +ellps=intl +units=m +no_defs  <>
+# RGNC91-93
+<4906> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# GR96
+<4908> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF88
+<4910> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF89
+<4911> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF90
+<4912> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF91
+<4913> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF92
+<4914> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF93
+<4915> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF94
+<4916> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF96
+<4917> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF97
+<4918> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF2000
+<4919> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# GDM2000
+<4920> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# PZ-90
+<4922> +proj=geocent +a=6378136 +b=6356751.361745712 +units=m +no_defs  <>
+# Mauritania 1999
+<4924> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Korea 2000
+<4926> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# POSGAR 94
+<4928> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# Australian Antarctic
+<4930> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# CHTRF95
+<4932> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# EST97
+<4934> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ETRS89
+<4936> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# GDA94
+<4938> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Hartebeesthoek94
+<4940> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# IRENET95
+<4942> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ISN93
+<4944> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# JGD2000
+<4946> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# LKS92
+<4948> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# LKS94
+<4950> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Moznet
+<4952> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# NAD83(CSRS)
+<4954> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(HARN)
+<4956> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NZGD2000
+<4958> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# POSGAR 98
+<4960> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# REGVEN
+<4962> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RGF93
+<4964> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RGFG95
+<4966> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RGNC 1991
+<4968> +proj=geocent +ellps=intl +units=m +no_defs  <>
+# RGR92
+<4970> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RRAF 1991
+<4972> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# SIRGAS 1995
+<4974> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# SWEREF99
+<4976> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# WGS 84
+<4978> +proj=geocent +datum=WGS84 +units=m +no_defs  <>
+# Yemen NGN96
+<4980> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# IGM95
+<4982> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# WGS 72
+<4984> +proj=geocent +ellps=WGS72 +units=m +no_defs  <>
+# WGS 72BE
+<4986> +proj=geocent +ellps=WGS72 +units=m +no_defs  <>
+# SIRGAS 2000
+<4988> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Lao 1993
+<4990> +proj=geocent +ellps=krass +units=m +no_defs  <>
+# Lao 1997
+<4992> +proj=geocent +ellps=krass +units=m +no_defs  <>
+# PRS92
+<4994> +proj=geocent +ellps=clrk66 +units=m +no_defs  <>
+# MAGNA-SIRGAS
+<4996> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RGPF
+<4998> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# PTRA08
+<5011> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# GDBD2009
+<5244> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# TUREF
+<5250> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# DRUKREF 03
+<5262> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ISN2004
+<5322> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ITRF2008
+<5332> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# POSGAR 2007
+<5341> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# MARGEN
+<5352> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# SIRGAS-Chile
+<5358> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# CR05
+<5363> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# MACARIO SOLIS
+<5368> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Peru96
+<5369> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# SIRGAS-ROU98
+<5379> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
+# SIRGAS_ES2007.8
+<5391> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RGAF09
+<5487> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# PNG94
+<5544> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# UCS-2000
+<5558> +proj=geocent +ellps=krass +units=m +no_defs  <>
+# FEH2010
+<5591> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# DB_REF
+<5828> +proj=geocent +ellps=bessel +units=m +no_defs  <>
+# TGD2005
+<5884> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# CIGD11
+<6133> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011)
+<6317> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(PA11)
+<6320> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(MA11)
+<6323> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Mexico ITRF2008
+<6363> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# JGD2011
+<6666> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# RDN2008
+<6704> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# KKJ / Finland Uniform Coordinate System + N60 height
+<3901> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=3500000 +y_0=0 +ellps=intl +towgs84=-96.062,-82.428,-121.753,4.801,0.345,-1.376,1.496 +units=m +vunits=m +no_defs  <>
+# ETRS89 / TM35FIN(N,E) + N60 height
+<3902> +proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / TM35FIN(N,E) + N2000 height
+<3903> +proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / DKTM1 + DVR90 height
+<4097> +proj=tmerc +lat_0=0 +lon_0=9 +k=0.99998 +x_0=200000 +y_0=-5000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / DKTM2 + DVR90 height
+<4098> +proj=tmerc +lat_0=0 +lon_0=10 +k=0.99998 +x_0=400000 +y_0=-5000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / DKTM3 + DVR90 height
+<4099> +proj=tmerc +lat_0=0 +lon_0=11.75 +k=0.99998 +x_0=600000 +y_0=-5000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / DKTM4 + DVR90 height
+<4100> +proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=800000 +y_0=-5000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / Faroe TM + FVR09 height
+<5318> +proj=tmerc +lat_0=0 +lon_0=-7 +k=0.999997 +x_0=200000 +y_0=-6000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# NAD83 + NAVD88 height
+<5498> +proj=longlat +datum=NAD83 +geoidgrids=g2012a_conus.gtx,g2012a_alaska.gtx,g2012a_guam.gtx,g2012a_hawaii.gtx,g2012a_puertorico.gtx,g2012a_samoa.gtx +vunits=m +no_defs  <>
+# NAD83(HARN) + NAVD88 height
+<5499> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +geoidgrids=g2012a_conus.gtx,g2012a_alaska.gtx,g2012a_guam.gtx,g2012a_hawaii.gtx,g2012a_puertorico.gtx,g2012a_samoa.gtx +vunits=m +no_defs  <>
+# NAD83(NSRS2007) + NAVD88 height
+<5500> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +geoidgrids=g2012a_conus.gtx,g2012a_alaska.gtx,g2012a_guam.gtx,g2012a_hawaii.gtx,g2012a_puertorico.gtx,g2012a_samoa.gtx +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 31N + DHHN92 height
+<5554> +proj=utm +zone=31 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 32N + DHHN92 height
+<5555> +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 33N + DHHN92 height
+<5556> +proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# FEH2010 / Fehmarnbelt TM + FCSVR10 height
+<5598> +proj=tmerc +lat_0=0 +lon_0=11.33333333333333 +k=1 +x_0=1000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 + RH2000 height
+<5628> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +vunits=m +no_defs  <>
+# RGF93 / Lambert-93 + NGF-IGN69 height
+<5698> +proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# RGF93 / Lambert-93 + NGF-IGN78 height
+<5699> +proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# NTF (Paris) / Lambert zone I + NGF-IGN69 height
+<5707> +proj=lcc +lat_1=49.50000000000001 +lat_0=49.50000000000001 +lon_0=0 +k_0=0.999877341 +x_0=600000 +y_0=1200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +vunits=m +no_defs  <>
+# NTF (Paris) / Lambert zone IV + NGF-IGN78 height
+<5708> +proj=lcc +lat_1=42.16500000000001 +lat_0=42.16500000000001 +lon_0=0 +k_0=0.99994471 +x_0=234.358 +y_0=4185861.369 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +vunits=m +no_defs  <>
+# DB_REF / 3-degree Gauss-Kruger zone 2 (E-N) + DHHN92 height
+<5832> +proj=tmerc +lat_0=0 +lon_0=6 +k=1 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +vunits=m +no_defs  <>
+# DB_REF / 3-degree Gauss-Kruger zone 3 (E-N) + DHHN92 height
+<5833> +proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +ellps=bessel +units=m +vunits=m +no_defs  <>
+# DB_REF / 3-degree Gauss-Kruger zone 4 (E-N) + DHHN92 height
+<5834> +proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +units=m +vunits=m +no_defs  <>
+# DB_REF / 3-degree Gauss-Kruger zone 5 (E-N) + DHHN92 height
+<5835> +proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=5500000 +y_0=0 +ellps=bessel +units=m +vunits=m +no_defs  <>
+# SWEREF99 TM + RH2000 height
+<5845> +proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 12 00 + RH2000 height
+<5846> +proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 13 30 + RH2000 height
+<5847> +proj=tmerc +lat_0=0 +lon_0=13.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 15 00 + RH2000 height
+<5848> +proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 16 30 + RH2000 height
+<5849> +proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 18 00 + RH2000 height
+<5850> +proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 14 15 + RH2000 height
+<5851> +proj=tmerc +lat_0=0 +lon_0=14.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 15 45 + RH2000 height
+<5852> +proj=tmerc +lat_0=0 +lon_0=15.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 17 15 + RH2000 height
+<5853> +proj=tmerc +lat_0=0 +lon_0=17.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 18 45 + RH2000 height
+<5854> +proj=tmerc +lat_0=0 +lon_0=18.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 20 15 + RH2000 height
+<5855> +proj=tmerc +lat_0=0 +lon_0=20.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 21 45 + RH2000 height
+<5856> +proj=tmerc +lat_0=0 +lon_0=21.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# SWEREF99 23 15 + RH2000 height
+<5857> +proj=tmerc +lat_0=0 +lon_0=23.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 + NN2000 height
+<5942> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 5 + NN2000 height
+<5945> +proj=tmerc +lat_0=58 +lon_0=5.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 6 + NN2000 height
+<5946> +proj=tmerc +lat_0=58 +lon_0=6.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 7 + NN2000 height
+<5947> +proj=tmerc +lat_0=58 +lon_0=7.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 8 + NN2000 height
+<5948> +proj=tmerc +lat_0=58 +lon_0=8.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 9 + NN2000 height
+<5949> +proj=tmerc +lat_0=58 +lon_0=9.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 10 + NN2000 height
+<5950> +proj=tmerc +lat_0=58 +lon_0=10.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 11 + NN2000 height
+<5951> +proj=tmerc +lat_0=58 +lon_0=11.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 12 + NN2000 height
+<5952> +proj=tmerc +lat_0=58 +lon_0=12.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 13 + NN2000 height
+<5953> +proj=tmerc +lat_0=58 +lon_0=13.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 14 + NN2000 height
+<5954> +proj=tmerc +lat_0=58 +lon_0=14.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 15 + NN2000 height
+<5955> +proj=tmerc +lat_0=58 +lon_0=15.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 16 + NN2000 height
+<5956> +proj=tmerc +lat_0=58 +lon_0=16.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 17 + NN2000 height
+<5957> +proj=tmerc +lat_0=58 +lon_0=17.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 18 + NN2000 height
+<5958> +proj=tmerc +lat_0=58 +lon_0=18.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 19 + NN2000 height
+<5959> +proj=tmerc +lat_0=58 +lon_0=19.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 20 + NN2000 height
+<5960> +proj=tmerc +lat_0=58 +lon_0=20.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 21 + NN2000 height
+<5961> +proj=tmerc +lat_0=58 +lon_0=21.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 22 + NN2000 height
+<5962> +proj=tmerc +lat_0=58 +lon_0=22.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 23 + NN2000 height
+<5963> +proj=tmerc +lat_0=58 +lon_0=23.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 24 + NN2000 height
+<5964> +proj=tmerc +lat_0=58 +lon_0=24.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 25 + NN2000 height
+<5965> +proj=tmerc +lat_0=58 +lon_0=25.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 26 + NN2000 height
+<5966> +proj=tmerc +lat_0=58 +lon_0=26.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 27 + NN2000 height
+<5967> +proj=tmerc +lat_0=58 +lon_0=27.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 28 + NN2000 height
+<5968> +proj=tmerc +lat_0=58 +lon_0=28.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 29 + NN2000 height
+<5969> +proj=tmerc +lat_0=58 +lon_0=29.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 30 + NN2000 height
+<5970> +proj=tmerc +lat_0=58 +lon_0=30.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 31 + NN2000 height
+<5971> +proj=utm +zone=31 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 32 + NN2000 height
+<5972> +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 33 + NN2000 height
+<5973> +proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 34 + NN2000 height
+<5974> +proj=utm +zone=34 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 35 + NN2000 height
+<5975> +proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 36 + NN2000 height
+<5976> +proj=utm +zone=36 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 + NN54 height
+<6144> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 5 + NN54 height
+<6145> +proj=tmerc +lat_0=58 +lon_0=5.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 6 + NN54 height
+<6146> +proj=tmerc +lat_0=58 +lon_0=6.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 7 + NN54 height
+<6147> +proj=tmerc +lat_0=58 +lon_0=7.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 8 + NN54 height
+<6148> +proj=tmerc +lat_0=58 +lon_0=8.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 9 + NN54 height
+<6149> +proj=tmerc +lat_0=58 +lon_0=9.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 10 + NN54 height
+<6150> +proj=tmerc +lat_0=58 +lon_0=10.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 11 + NN54 height
+<6151> +proj=tmerc +lat_0=58 +lon_0=11.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 12 + NN54 height
+<6152> +proj=tmerc +lat_0=58 +lon_0=12.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 13 + NN54 height
+<6153> +proj=tmerc +lat_0=58 +lon_0=13.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 14 + NN54 height
+<6154> +proj=tmerc +lat_0=58 +lon_0=14.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 15 + NN54 height
+<6155> +proj=tmerc +lat_0=58 +lon_0=15.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 16 + NN54 height
+<6156> +proj=tmerc +lat_0=58 +lon_0=16.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 17 + NN54 height
+<6157> +proj=tmerc +lat_0=58 +lon_0=17.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 18 + NN54 height
+<6158> +proj=tmerc +lat_0=58 +lon_0=18.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 19 + NN54 height
+<6159> +proj=tmerc +lat_0=58 +lon_0=19.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 20 + NN54 height
+<6160> +proj=tmerc +lat_0=58 +lon_0=20.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 21 + NN54 height
+<6161> +proj=tmerc +lat_0=58 +lon_0=21.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 22 + NN54 height
+<6162> +proj=tmerc +lat_0=58 +lon_0=22.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 23 + NN54 height
+<6163> +proj=tmerc +lat_0=58 +lon_0=23.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 24 + NN54 height
+<6164> +proj=tmerc +lat_0=58 +lon_0=24.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 25 + NN54 height
+<6165> +proj=tmerc +lat_0=58 +lon_0=25.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 26 + NN54 height
+<6166> +proj=tmerc +lat_0=58 +lon_0=26.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 27 + NN54 height
+<6167> +proj=tmerc +lat_0=58 +lon_0=27.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 28 + NN54 height
+<6168> +proj=tmerc +lat_0=58 +lon_0=28.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 29 + NN54 height
+<6169> +proj=tmerc +lat_0=58 +lon_0=29.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / NTM zone 30 + NN54 height
+<6170> +proj=tmerc +lat_0=58 +lon_0=30.5 +k=1 +x_0=100000 +y_0=1000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 31 + NN54 height
+<6171> +proj=utm +zone=31 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 32 + NN54 height
+<6172> +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 33 + NN54 height
+<6173> +proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 34 + NN54 height
+<6174> +proj=utm +zone=34 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 35 + NN54 height
+<6175> +proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 36 + NN54 height
+<6176> +proj=utm +zone=36 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# Belge 1972 / Belgian Lambert 72 + Ostend height
+<6190> +proj=lcc +lat_1=51.16666723333333 +lat_2=49.8333339 +lat_0=90 +lon_0=4.367486666666666 +x_0=150000.013 +y_0=5400088.438 +ellps=intl +towgs84=-106.869,52.2978,-103.724,0.3366,-0.457,1.8422,-1.2747 +units=m +vunits=m +no_defs  <>
+# NTF (Paris) + NGF IGN69 height
+<7400> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +vunits=m +no_defs  <>
+# NTF (Paris) / France II + NGF Lallemand
+<7401> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 +k_0=0.99987742 +x_0=600000 +y_0=2200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +vunits=m +no_defs  <>
+# NTF (Paris) / France II + NGF IGN69
+<7402> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 +k_0=0.99987742 +x_0=600000 +y_0=2200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +vunits=m +no_defs  <>
+# NTF (Paris) / France III + NGF IGN69
+<7403> +proj=lcc +lat_1=44.10000000000001 +lat_0=44.10000000000001 +lon_0=0 +k_0=0.999877499 +x_0=600000 +y_0=3200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +vunits=m +no_defs  <>
+# RT90 + RH70 height
+<7404> +proj=longlat +ellps=bessel +towgs84=414.1,41.3,603.1,-0.855,2.141,-7.023,0 +vunits=m +no_defs  <>
+# OSGB 1936 / British National Grid + ODN height
+<7405> +proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +datum=OSGB36 +units=m +vunits=m +no_defs  <>
+# NAD27 + NGVD29 height
+<7406> +proj=longlat +datum=NAD27 +vunits=us-ft +no_defs  <>
+# NAD27 / Texas North + NGVD29 height
+<7407> +proj=lcc +lat_1=34.65 +lat_2=36.18333333333333 +lat_0=34 +lon_0=-101.5 +x_0=609601.2192024384 +y_0=0 +datum=NAD27 +units=us-ft +vunits=us-ft +no_defs  <>
+# RD/NAP
+<7408> +proj=longlat +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +vunits=m +no_defs  <>
+# ETRS89 + EVRF2000 height
+<7409> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +vunits=m +no_defs  <>
+# PSHD93
+<7410> +proj=longlat +ellps=clrk80 +towgs84=-180.624,-225.516,173.919,-0.81,-1.898,8.336,16.7101 +vunits=m +no_defs  <>
+# NTF (Paris) / Lambert zone II + NGF Lallemand height
+<7411> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 +k_0=0.99987742 +x_0=600000 +y_0=2200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +vunits=m +no_defs  <>
+# NTF (Paris) / Lambert zone II + NGF IGN69
+<7412> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 +k_0=0.99987742 +x_0=600000 +y_0=2200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +vunits=m +no_defs  <>
+# NTF (Paris) / Lambert zone III + NGF IGN69
+<7413> +proj=lcc +lat_1=44.10000000000001 +lat_0=44.10000000000001 +lon_0=0 +k_0=0.999877499 +x_0=600000 +y_0=3200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +vunits=m +no_defs  <>
+# Tokyo + JSLD height
+<7414> +proj=longlat +ellps=bessel +towgs84=-146.414,507.337,680.507,0,0,0,0 +vunits=m +no_defs  <>
+# Amersfoort / RD New + NAP height
+<7415> +proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 32N + DVR90 height
+<7416> +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / UTM zone 33N + DVR90 height
+<7417> +proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / Kp2000 Jutland + DVR90 height
+<7418> +proj=tmerc +lat_0=0 +lon_0=9.5 +k=0.99995 +x_0=200000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / Kp2000 Zealand + DVR90 height
+<7419> +proj=tmerc +lat_0=0 +lon_0=12 +k=0.99995 +x_0=500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# ETRS89 / Kp2000 Bornholm + DVR90 height
+<7420> +proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=900000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# NTF (Paris) / Lambert zone II + NGF-IGN69 height
+<7421> +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 +k_0=0.99987742 +x_0=600000 +y_0=2200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +vunits=m +no_defs  <>
+# NTF (Paris) / Lambert zone III + NGF-IGN69 height
+<7422> +proj=lcc +lat_1=44.10000000000001 +lat_0=44.10000000000001 +lon_0=0 +k_0=0.999877499 +x_0=600000 +y_0=3200000 +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +units=m +vunits=m +no_defs  <>
+# ETRS89 + EVRF2007 height
+<7423> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +vunits=m +no_defs  <>
