@@ -112,6 +112,12 @@ ENTRY0(omerc)
                     pj_param(P->ctx, P->params, "tno_off").i
                     /* for backward compatibility */
                     || pj_param(P->ctx, P->params, "tno_uoff").i;
+        if( no_off )
+        {
+            /* Mark the parameter as used, so that the pj_get_def() return them */
+            pj_param(P->ctx, P->params, "sno_uoff");
+            pj_param(P->ctx, P->params, "sno_off");
+        }
 	} else {
 		lam1 = pj_param(P->ctx, P->params, "rlon_1").f;
 		phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
