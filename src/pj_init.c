@@ -261,6 +261,7 @@ get_init(projCtx ctx, paralist **start, paralist *next, char *name,
         next->next = init_items;
         while( next->next != NULL )
             next = next->next;
+        *found_def = 1;
         return next;
     }
 
