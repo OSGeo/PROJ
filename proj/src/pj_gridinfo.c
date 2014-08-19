@@ -118,8 +118,19 @@ void pj_gridinfo_free( projCtx ctx, PJ_GRIDINFO *gi )
 int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
 {
+    struct CTABLE ct_tmp;
+
     if( gi == NULL || gi->ct == NULL )
         return 0;
+    
+    pj_acquire_lock();
+    if( gi->ct->cvs != NULL )
+    {
+        pj_release_lock();
+        return 1;
+    }
+    
+    memcpy(&ct_tmp, gi->ct, sizeof(struct CTABLE));
 
 /* -------------------------------------------------------------------- */
 /*      Original platform specific CTable format.                       */
@@ -134,13 +145,17 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         if( fid == NULL )
         {
             pj_ctx_set_errno( ctx, -38 );
+            pj_release_lock();
             return 0;
         }
 
-        result = nad_ctable_load( ctx, gi->ct, fid );
+        result = nad_ctable_load( ctx, &ct_tmp, fid );
 
         pj_ctx_fclose( ctx, fid );
 
+        gi->ct->cvs = ct_tmp.cvs;
+        pj_release_lock();
+        
         return result;
     }
 
@@ -157,13 +172,17 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         if( fid == NULL )
         {
             pj_ctx_set_errno( ctx, -38 );
+            pj_release_lock();
             return 0;
         }
 
-        result = nad_ctable2_load( ctx, gi->ct, fid );
+        result = nad_ctable2_load( ctx, &ct_tmp, fid );
 
         pj_ctx_fclose( ctx, fid );
 
+        gi->ct->cvs = ct_tmp.cvs;
+        
+        pj_release_lock();
         return result;
     }
 
@@ -185,16 +204,18 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         if( fid == NULL )
         {
             pj_ctx_set_errno( ctx, -38 );
+            pj_release_lock();
             return 0;
         }
 
         pj_ctx_fseek( ctx, fid, gi->grid_offset, SEEK_SET );
 
         row_buf = (double *) pj_malloc(gi->ct->lim.lam * sizeof(double) * 2);
-        gi->ct->cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
-        if( row_buf == NULL || gi->ct->cvs == NULL )
+        ct_tmp.cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
+        if( row_buf == NULL || ct_tmp.cvs == NULL )
         {
             pj_ctx_set_errno( ctx, -38 );
+            pj_release_lock();
             return 0;
         }
         
@@ -209,7 +230,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
                 != 2 * gi->ct->lim.lam )
             {
                 pj_dalloc( row_buf );
-                pj_dalloc( gi->ct->cvs );
+                pj_dalloc( ct_tmp.cvs );
                 pj_ctx_set_errno( ctx, -38 );
                 return 0;
             }
@@ -222,7 +243,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
             for( i = 0; i < gi->ct->lim.lam; i++ )
             {
-                cvs = gi->ct->cvs + (row) * gi->ct->lim.lam
+                cvs = ct_tmp.cvs + (row) * gi->ct->lim.lam
                     + (gi->ct->lim.lam - i - 1);
 
                 cvs->phi = *(diff_seconds++) * ((PI/180.0) / 3600.0);
@@ -234,6 +255,9 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
         pj_ctx_fclose( ctx, fid );
 
+        gi->ct->cvs = ct_tmp.cvs;
+        pj_release_lock();
+        
         return 1;
     }
 
@@ -258,16 +282,18 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         if( fid == NULL )
         {
             pj_ctx_set_errno( ctx, -38 );
+            pj_release_lock();
             return 0;
         }
 
         pj_ctx_fseek( ctx, fid, gi->grid_offset, SEEK_SET );
 
         row_buf = (float *) pj_malloc(gi->ct->lim.lam * sizeof(float) * 4);
-        gi->ct->cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
-        if( row_buf == NULL || gi->ct->cvs == NULL )
+        ct_tmp.cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
+        if( row_buf == NULL || ct_tmp.cvs == NULL )
         {
             pj_ctx_set_errno( ctx, -38 );
+            pj_release_lock();
             return 0;
         }
         
@@ -282,9 +308,9 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
                 != 4 * gi->ct->lim.lam )
             {
                 pj_dalloc( row_buf );
-                pj_dalloc( gi->ct->cvs );
-                gi->ct->cvs = NULL;
+                pj_dalloc( ct_tmp.cvs );
                 pj_ctx_set_errno( ctx, -38 );
+                pj_release_lock();
                 return 0;
             }
 
@@ -297,7 +323,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
             for( i = 0; i < gi->ct->lim.lam; i++ )
             {
-                cvs = gi->ct->cvs + (row) * gi->ct->lim.lam
+                cvs = ct_tmp.cvs + (row) * gi->ct->lim.lam
                     + (gi->ct->lim.lam - i - 1);
 
                 cvs->phi = *(diff_seconds++) * ((PI/180.0) / 3600.0);
@@ -309,7 +335,10 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         pj_dalloc( row_buf );
         
         pj_ctx_fclose( ctx, fid );
+        
+        gi->ct->cvs = ct_tmp.cvs;
 
+        pj_release_lock();
         return 1;
     }
 
@@ -326,35 +355,40 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         if( fid == NULL )
         {
             pj_ctx_set_errno( ctx, -38 );
+            pj_release_lock();
             return 0;
         }
 
         pj_ctx_fseek( ctx, fid, gi->grid_offset, SEEK_SET );
 
-        gi->ct->cvs = (FLP *) pj_malloc(words*sizeof(float));
-        if( gi->ct->cvs == NULL )
+        ct_tmp.cvs = (FLP *) pj_malloc(words*sizeof(float));
+        if( ct_tmp.cvs == NULL )
         {
             pj_ctx_set_errno( ctx, -38 );
+            pj_release_lock();
             return 0;
         }
         
-        if( pj_ctx_fread( ctx, gi->ct->cvs, sizeof(float), words, fid ) 
+        if( pj_ctx_fread( ctx, ct_tmp.cvs, sizeof(float), words, fid ) 
             != words )
         {
-            pj_dalloc( gi->ct->cvs );
-            gi->ct->cvs = NULL;
+            pj_dalloc( ct_tmp.cvs );
+            pj_release_lock();
             return 0;
         }
 
         if( IS_LSB )
-            swap_words( (unsigned char *) gi->ct->cvs, 4, words );
+            swap_words( (unsigned char *) ct_tmp.cvs, 4, words );
 
         pj_ctx_fclose( ctx, fid );
+        gi->ct->cvs = ct_tmp.cvs;
+        pj_release_lock();
         return 1;
     }
 
     else
     {
+        pj_release_lock();
         return 0;
     }
 }
