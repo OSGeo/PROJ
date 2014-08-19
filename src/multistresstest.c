@@ -278,6 +278,7 @@ static void *PosixTestThread( void *pData )
 
 {
     TestThread();
+    return NULL;
 }
 #endif
 
@@ -364,7 +365,7 @@ int main( int argc, char **argv )
 	}
 
 #else
-
+    {
 	pthread_t ahThread[num_threads];
 	pthread_attr_t hThreadAttr;
 
@@ -376,14 +377,14 @@ int main( int argc, char **argv )
 		active_thread_count++;
 
 		pthread_create( &(ahThread[i]), &hThreadAttr, 
-			TestThread, NULL );
+			PosixTestThread, NULL );
 	}
 
 	printf( "%d test threads launched.\n", num_threads );
 
 	while( active_thread_count > 0 )				       
 		sleep( 1 );
-
+    }
 #endif
 
     printf( "all tests complete.\n" );
