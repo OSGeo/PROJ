@@ -23,7 +23,7 @@ EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
 		makefile.vc
 
 process-nad2bin:
-	@if [ -f conus.lla -a ! -f conus ] ; then \
+	@if [ -f null.lla -a ! -f null ] || [ -f conus.lla -a ! -f conus ] ; then \
 	  for x in *.lla ; do \
 	    DEST=`basename $$x .lla`; \
 	    echo "../src/nad2bin$(EXEEXT) $$DEST < $$x"; \
@@ -33,8 +33,7 @@ process-nad2bin:
 
 install-data-local: process-nad2bin
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
-	@if [ -f conus.lla ] ; then \
-	  for x in *.lla ; do \
+	@for x in *.lla ; do \
 	    DEST=$(DESTDIR)$(pkgdatadir)/`basename $$x .lla`; \
 	    echo "../src/nad2bin$(EXEEXT) $$DEST < $$x"; \
 	    ../src/nad2bin$(EXEEXT) $$DEST < $$x ; \
@@ -42,8 +41,8 @@ install-data-local: process-nad2bin
 		echo "nad2bin$(EXEEXT) failed to install $$DEST"; \
 		exit 1; \
 	    fi; \
-	  done; \
-	else \
+	done
+	@if [ ! -f conus.lla ] ; then \
 	  echo "nad2nad NADCON source files not present"; \
 	fi 
 	@for gridfile in *.gsb ntv1_can.dat dummy ; do \
@@ -56,7 +55,7 @@ install-data-local: process-nad2bin
 check-local: process-nad2bin
 	$(TEST27) $(PROJEXE)
 	$(TEST83) $(PROJEXE)
-	$(TESTVARIOUS) $(CS2CSEXE)
+	PROJ_LIB=. $(TESTVARIOUS) $(CS2CSEXE)
 	@if [ -f conus ] ; then \
 	  export PROJ_LIB=. ; \
 	  $(TESTDATUMFILE) $(CS2CSEXE) ; \
