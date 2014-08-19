@@ -1,3 +1,7 @@
+2014-19-08 Even Rouault <even.rouault@mines-paris.org>
+
+	* src/pj_gridinfo.c: Make pj_gridinfo_load() thread-safe (#228)
+
 2014-19-08 Howard Butler <hobu.inc@gmail.com>
 
 	* src/pj_init.c: apply fix specified in #229  -- pj_init_plus() with init
