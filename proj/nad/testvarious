@@ -339,35 +339,101 @@ $EXE +proj=latlong +a=5 +e=0.8 +r_a=4.3220011711888882\
 0.0 3.351278550178025
 0.0 -3.351278550178025
 EOF
+
+echo "##############################################################" >> ${OUT} 
+echo "Test rHEALPix forward projection on sphere north=0 south=0" >> ${OUT}
+$EXE +proj=latlong +R=5 \
+ +to +proj=rhealpix +R=5 +north_square=0 +south_square=0 -f '%.'5'f' \
+  -E >>${OUT} <<EOF
+-180 30.0
+-180 -25.714285714285715
+0 0
+60.0 41.809314895778598
+EOF
+
 echo "##############################################################" >> ${OUT}
-echo "Test forward projection on sphere" >> ${OUT}
-$EXE +proj=latlong +a=1 +lon_0=0 \
- +to +proj=rhealpix +a=1 +lon_0=0 +npole=0 +spole=0 -f '%.'5'f' \
- -E >>${OUT} <<EOF
-0 41.81031
--90 0
+echo "Test rHEALPix forward projection on sphere north=1 south=1" >> ${OUT}
+$EXE +proj=latlong +R=5 \
+ +to +proj=rhealpix +R=5 +north_square=1 +south_square=1 -f '%.'5'f' \
+  -E >>${OUT} <<EOF
+-180 30.0
+-180 -25.714285714285715
+0 0
+60.0 41.809314895778598
 EOF
-echo "Test inverse projection on sphere" >> ${OUT}
-$EXE +proj=latlong +a=1 +lon_0=0 \
- +to +proj=rhealpix +a=1 +lon_0=0 +npole=0 +spole=0 -f '%.'5'f' -I\
- -E >>${OUT} <<EOF
-0 0.7853981633974483
--1.5707963267948966 0
+
+echo "##############################################################" >> ${OUT}
+echo "Test rHEALPix inverse projection on sphere north=0 south=0" >> ${OUT}
+$EXE +proj=latlong +R=5 \
+ +to +proj=rhealpix +R=5 +north_square=0 +south_square=0 -f '%.'5'f' -I\
+  -E >>${OUT} <<EOF
+0.0 0.0
+0.0 3.9269908169872414
+0.0 -3.9269908169872414
+7.853981633974483 0.0
+-7.853981633974483 0.0
 EOF
-echo "Test forward projection on ellipsoid" >> ${OUT}
-$EXE +proj=latlong +a=1 +lon_0=0 +ellps=WGS84 \
- +to +proj=rhealpix +a=1 +lon_0=0 +ellps=WGS84 +npole=0 +spole=0 -f '%.'5'f' \
- -E >>${OUT} <<EOF
-0 41.937853904844985
--90 0
+
+echo "##############################################################" >> ${OUT}
+echo "Test rHEALPix inverse projection on sphere north=1 south=1" >> ${OUT}
+$EXE +proj=latlong +R=5 \
+ +to +proj=rhealpix +R=5 +north_square=1 +south_square=1 -f '%.'5'f' -I\
+  -E >>${OUT} <<EOF
+0.0 0.0
+0.0 3.9269908169872414
+0.0 -3.9269908169872414
+7.853981633974483 0.0
+-7.853981633974483 0.0
 EOF
-echo "Test inverse projection on ellipsoid" >> ${OUT}
-$EXE +proj=latlong +a=1 +lon_0=0 +ellps=WGS84 \
- +to +proj=rhealpix +a=1 +lon_0=0 -I +ellps=WGS84 +npole=0 +spole=0 -f '%.'5'f'\
- -E >>${OUT} <<EOF
-0 0.7853981633974483
--1.5707963267948966 0
+
+echo "##############################################################" >> ${OUT}
+echo "Test rHEALPix forward projection on ellipsoid north=0 south=0" >> ${OUT}
+$EXE +proj=latlong +a=5 +e=0.8 +r_a=4.3220011711888882\
+ +to +proj=rhealpix +a=5 +e=0.8 +r_a=4.3220011711888882 +north_square=0 +south_square=0 -f '%.'5'f' \
+  -E >>${OUT} <<EOF
+0 0
+0 41.810314895778596
+0 -41.810314895778596
+90.0 0
+-90.0 0
 EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test rHEALPix forward projection on ellipsoid north=1 south=1" >> ${OUT}
+$EXE +proj=latlong +a=5 +e=0.8 +r_a=4.3220011711888882\
+ +to +proj=rhealpix +a=5 +e=0.8 +r_a=4.3220011711888882 +north_square=1 +south_square=1 -f '%.'5'f' \
+  -E >>${OUT} <<EOF
+0 0
+0 41.810314895778596
+0 -41.810314895778596
+90.0 0
+-90.0 0
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test rHEALPix inverse projection on ellipsoid north=0 south=0" >> ${OUT}
+$EXE +proj=latlong +a=5 +e=0.8 +r_a=4.3220011711888882\
+ +to +proj=rhealpix +a=5 -I +e=0.8 +r_a=4.3220011711888882 +north_square=0 +south_square=0 -f '%.'5'f'\
+  -E >>${OUT} <<EOF
+0.0 0.0
+0.0 2.0547874222147415
+0.0 -2.0547874222147415
+6.788983564106746 0.0
+-6.788983564106746 0.0
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "Test rHEALPix inverse projection on ellipsoid north=1 south=1" >> ${OUT}
+$EXE +proj=latlong +a=5 +e=0.8 +r_a=4.3220011711888882\
+ +to +proj=rhealpix +a=5 -I +e=0.8 +r_a=4.3220011711888882 +north_square=1 +south_square=1 -f '%.'5'f'\
+ -E >>${OUT} <<EOF
+0.0 0.0
+0.0 2.0547874222147415
+0.0 -2.0547874222147415
+6.788983564106746 0.0
+-6.788983564106746 0.0
+EOF
+
 echo "##############################################################" >> ${OUT}
 echo "Test geos projection" >> ${OUT}
 echo "Test geos on a sphere" >> ${OUT}
