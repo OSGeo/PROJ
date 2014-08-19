@@ -1,3 +1,17 @@
+2014-19-08 Howard Butler <hobu.inc@gmail.com>
+
+	* src/pj_init.c: apply fix specified in #229  -- pj_init_plus() with init
+	and other parms fails in 4.9.0beta
+
+2014-06-06 Even Rouault <even.rouault@mines-paris.org>
+
+	* src/PJ_omerc.c: mark no_off/no_uoff as used for round-tripping
+	pj_init_ctxt()/pj_get_def() (#239)
+
+2014-05-14 Even Rouault <even.rouault@mines-paris.org>
+
+	* nad/epsg: Upgraded to EPSG 8.4
+
 2013-12-09  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* src/PJ_geos.c, testvarious: reverse sense of sweep flag. (#146)
