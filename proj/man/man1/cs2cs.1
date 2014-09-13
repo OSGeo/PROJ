@@ -157,14 +157,14 @@ when both input and output are ASCII all trailing portions
 of the input line are appended to the output line.
 .PP
 Input geographic data
-(longitude and latitude) must be in DMS format and input
+(longitude and latitude) must be in DMS or decimal degrees format and input
 cartesian data must be in units consistent with the ellipsoid
 major axis or sphere radius units.
-Output geographic coordinates will be in DMS
-(if the
-.B \-w
-switch is not employed) and precise to 0.001"
-with trailing, zero-valued minute-second fields deleted.
+Output geographic coordinates will normally be in DMS format (use 
+.B \-f %.12f 
+for decimal degrees with 12 decimal places), while
+projected (cartesian) coordinates will be in linear (meter, feet) units.
+
 .SH EXAMPLE
 The following script
 .RS 5
