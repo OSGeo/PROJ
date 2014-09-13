@@ -210,7 +210,7 @@ INVERSE(s_inverse); /* spherical */
 			xy.y = (cosc - P->sinph0 * sin(lp.phi)) * c_rh;
 			xy.x *= sinc * P->cosph0;
 		}
-		lp.lam = xy.y == 0. ? 0. : atan2(xy.x, xy.y);
+		lp.lam = atan2(xy.x, xy.y);
 	} else if (P->mode == N_POLE) {
 		lp.phi = HALFPI - c_rh;
 		lp.lam = atan2(xy.x, -xy.y);
