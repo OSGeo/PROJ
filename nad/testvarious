@@ -7,7 +7,7 @@ EXE=$1
 
 usage()
 {
-    echo "Usage: ${0} <path to 'cs2cs' program>" 
+    echo "Usage: ${0} <path to 'cs2cs' program>"
     echo
     exit 1
 }
@@ -131,8 +131,8 @@ EOF
 #echo "#############################################################" >> ${OUT}
 #echo Test conversion between geocentric latlong and geodetic latlong >> ${OUT}
 #
-# The +geoc flag does not currently work with pj_transform() so this is 
-# disabled. 
+# The +geoc flag does not currently work with pj_transform() so this is
+# disabled.
 #
 #$EXE +proj=latlong +datum=WGS84 +geoc \
 # +to +proj=latlong +datum=WGS84  \
@@ -192,10 +192,10 @@ $EXE +proj=etmerc +k=0.998 +lon_0=-20 +datum=WGS84 +x_0=10000 +y_0=20000 \
  +to +proj=latlong +datum=WGS84 \
  -E >>${OUT} <<EOF
 10000 20000
-500000 2000000  
-1000000 2000000  
-2000000 2000000  
-4000000 2000000  
+500000 2000000
+1000000 2000000
+2000000 2000000
+4000000 2000000
 EOF
 #
 echo "##############################################################" >> ${OUT}
@@ -205,10 +205,10 @@ $EXE +proj=latlong +datum=WGS84 \
  +to +proj=etmerc +k=0.998 +lon_0=-20 +datum=WGS84 +x_0=10000 +y_0=20000 \
  -E >>${OUT} <<EOF
 0dN 0.000
-15d22'16.108"W	17d52'53.478"N 0.000  
-10d40'55.532"W	17d42'48.526"N 0.000  
-1d32'21.33"W	17d3'47.233"N 0.000  
-15d4'42.357"E	14d48'56.372"N 0.000  
+15d22'16.108"W	17d52'53.478"N 0.000
+10d40'55.532"W	17d42'48.526"N 0.000
+1d32'21.33"W	17d3'47.233"N 0.000
+15d4'42.357"E	14d48'56.372"N 0.000
 EOF
 #
 echo "##############################################################" >> ${OUT}
@@ -218,10 +218,10 @@ $EXE +proj=tmerc +k=0.998 +lon_0=-20 +datum=WGS84 +x_0=10000 +y_0=20000 \
  +to +proj=latlong +datum=WGS84 \
  -E >>${OUT} <<EOF
 10000 20000
-500000 2000000  
-1000000 2000000  
-2000000 2000000  
-4000000 2000000  
+500000 2000000
+1000000 2000000
+2000000 2000000
+4000000 2000000
 EOF
 #
 echo "##############################################################" >> ${OUT}
@@ -231,10 +231,10 @@ $EXE +proj=latlong +datum=WGS84 \
  +to +proj=tmerc +k=0.998 +lon_0=-20 +datum=WGS84 +x_0=10000 +y_0=20000 \
  -E >>${OUT} <<EOF
 0dN 0.000
-15d22'16.108"W	17d52'53.478"N 0.000  
-10d40'55.532"W	17d42'48.526"N 0.000  
-1d32'21.33"W	17d3'47.233"N 0.000  
-15d4'42.357"E	14d48'56.372"N 0.000  
+15d22'16.108"W	17d52'53.478"N 0.000
+10d40'55.532"W	17d42'48.526"N 0.000
+1d32'21.33"W	17d3'47.233"N 0.000
+15d4'42.357"E	14d48'56.372"N 0.000
 EOF
 #
 echo "##############################################################" >> ${OUT}
@@ -243,7 +243,7 @@ echo "Test robinson projection (#113)" >> ${OUT}
 $EXE +proj=latlong +datum=WGS84 \
  +to +proj=robin +datum=WGS84 \
  -E >>${OUT} <<EOF
--30 40 
+-30 40
 -35 45
 20 40
 EOF
@@ -340,7 +340,7 @@ $EXE +proj=latlong +a=5 +e=0.8 +r_a=4.3220011711888882\
 0.0 -3.351278550178025
 EOF
 
-echo "##############################################################" >> ${OUT} 
+echo "##############################################################" >> ${OUT}
 echo "Test rHEALPix forward projection on sphere north=0 south=0" >> ${OUT}
 $EXE +proj=latlong +R=5 \
  +to +proj=rhealpix +R=5 +north_square=0 +south_square=0 -f '%.'5'f' \
@@ -548,7 +548,7 @@ EOF
 echo "##############################################################" >> ${OUT}
 echo "Test laea" >> ${OUT}
 #
-$EXE -f '%.14f' \
+$EXE -f '%.12f' \
      +proj=laea +lat_0=45 +lon_0=-100 +units=m +datum=WGS84 +no_defs \
  +to +proj=latlong +datum=WGS84 \
  -E >>${OUT} <<EOF
@@ -568,7 +568,7 @@ $EXE +proj=calcofi +ellps=clrk66 \
  +to +proj=longlat +ellps=clrk66 \
  -E >>${OUT} <<EOF
 60 20
-80 60 
+80 60
 90 120
 EOF
 echo "##############################################################" >> ${OUT}
@@ -664,7 +664,7 @@ $EXE -f '%.13f' \
 13 -10
 EOF
 ##############################################################################
-# Done! 
+# Done!
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
 diff -b ${OUT} ${OUT}.dist
