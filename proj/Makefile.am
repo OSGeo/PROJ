@@ -1,6 +1,6 @@
-SUBDIRS	=	src man nad jniwrap
+SUBDIRS	=	src man nad jniwrap cmake
 
-EXTRA_DIST = makefile.vc nmake.opt
+EXTRA_DIST = makefile.vc nmake.opt CMakeLists.txt
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = proj.pc

@@ -147,7 +147,6 @@ SET(SRC_LIBPROJ_CORE
         emess.c
         geocent.c
         geocent.h
-        hypot.c
         mk_cheby.c
         nad_cvt.c
         nad_init.c
@@ -204,7 +203,6 @@ set(HEADERS_LIBPROJ
         pj_list.h
         emess.h
         projects.h
-        nad_list.h
         proj_api.h
  )
 
