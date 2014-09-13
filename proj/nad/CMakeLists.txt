@@ -2,25 +2,25 @@
 # files containing dictionnary of useful projection
 #
 
-set(PROJ_DICTIONNARY proj_def.dat 
+set(PROJ_DICTIONNARY proj_def.dat
                      epsg
                      esri
                      world
                      esri.extra
                      other.extra
-                     IGNF 
+                     IGNF
                      nad27
                      GL27
                      nad83
                      nad.lst )
-                     
+
 #
 # gridshift file
-# 
+#
 
 file(GLOB GSB_FILES  *.gsb)
 set(GRIDSHIFT_FILES ${GSB_FILES})
-set(GRIDSHIFT_FILES ${GRIDSHIFT_FILES} 
+set(GRIDSHIFT_FILES ${GRIDSHIFT_FILES}
                      ntv1_can.dat)
 option(CONVERT_DATA "convert some ascii file to binary file for use in proj4" OFF)
 if(CONVERT_DATA AND nad2bin)
@@ -34,22 +34,18 @@ endif(CONVERT_DATA AND nad2bin)
 
 
 #
-#install 
+#install
 #
-set(ALL_DATA_FILE ${PROJ_DICTIONNARY} 
-                  ${GRIDSHIFT_FILES} 
+set(ALL_DATA_FILE ${PROJ_DICTIONNARY}
+                  ${GRIDSHIFT_FILES}
                   ${GEOID_FILES})
-if(NOT BUILD_FRAMEWORKS_AND_BUNDLE)                  
-        install(FILES ${ALL_DATA_FILE} 
-               DESTINATION ${DATADIR}
-               PERMISSIONS WORLD_READ WORLD_WRITE WORLD_EXECUTE)
-else()
-   set(PROJ_RESOURCES ${PROJ_RESOURCES} ${ALL_DATA_FILE})
-endif(NOT BUILD_FRAMEWORKS_AND_BUNDLE)
-               
+install(FILES ${ALL_DATA_FILE}
+       DESTINATION ${DATADIR}
+       PERMISSIONS WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+
 #
-# test 
-#              
+# test
+#
 set(CS2CS_BIN "cs2cs")
 set(PROJ_BIN "proj")
 proj_add_test_script_sh("test27" PROJ_BIN )
