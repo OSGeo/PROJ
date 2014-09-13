@@ -9,7 +9,9 @@ INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 include_HEADERS = proj_api.h projects.h geodesic.h \
 	org_proj4_Projections.h org_proj4_PJ.h
 
-EXTRA_DIST = makefile.vc proj.def
+EXTRA_DIST = makefile.vc proj.def bin_cs2cs.cmake \
+			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake \
+			 lib_proj.cmake CMakeLists.txt
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c

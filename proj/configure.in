@@ -99,7 +99,7 @@ fi
 
 AC_SUBST(MUTEX_SETTING,$MUTEX_SETTING)
 
-AC_OUTPUT(Makefile src/Makefile man/Makefile man/man1/Makefile \
+AC_OUTPUT(Makefile cmake/Makefile src/Makefile man/Makefile man/man1/Makefile \
 	man/man3/Makefile nad/Makefile \
 	jniwrap/Makefile jniwrap/org/Makefile jniwrap/org/proj4/Makefile)
 
