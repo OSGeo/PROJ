@@ -2,8 +2,7 @@
 # files containing dictionnary of useful projection
 #
 
-set(PROJ_DICTIONNARY proj_def.dat
-                     epsg
+set(PROJ_DICTIONARY  epsg
                      esri
                      world
                      esri.extra
@@ -21,7 +20,7 @@ set(PROJ_DICTIONNARY proj_def.dat
 file(GLOB GSB_FILES  *.gsb)
 set(GRIDSHIFT_FILES ${GSB_FILES})
 set(GRIDSHIFT_FILES ${GRIDSHIFT_FILES}
-                     ntv1_can.dat)
+                     )
 option(CONVERT_DATA "convert some ascii file to binary file for use in proj4" OFF)
 if(CONVERT_DATA AND nad2bin)
    message(ERROR " you need to compile nad2bin exe in order to convert data file" )
@@ -36,12 +35,11 @@ endif(CONVERT_DATA AND nad2bin)
 #
 #install
 #
-set(ALL_DATA_FILE ${PROJ_DICTIONNARY}
+set(ALL_DATA_FILE ${PROJ_DICTIONARY}
                   ${GRIDSHIFT_FILES}
                   ${GEOID_FILES})
 install(FILES ${ALL_DATA_FILE}
-       DESTINATION ${DATADIR}
-       PERMISSIONS WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+       DESTINATION ${DATADIR})
 
 #
 # test

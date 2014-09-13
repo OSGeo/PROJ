@@ -11,12 +11,12 @@ TESTVARIOUS = ./testvarious
 TESTDATUMFILE = ./testdatumfile
 TESTIGN = ./testIGNF
 
-pkgdata_DATA = GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri \
+pkgdata_DATA = GL27 nad.lst nad27 nad83 world epsg esri \
 		esri.extra other.extra \
 		CH IGNF
 
 EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
-		proj_def.dat test27 test83 world epsg esri tv_out.dist \
+		test27 test83 world epsg esri tv_out.dist \
 		testvarious testdatumfile testntv2 ntv2_out.dist \
 		esri.extra other.extra \
 		CH IGNF testIGNF proj_outIGNF.dist \
