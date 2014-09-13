@@ -1,3 +1,7 @@
+2014-19-13 Howard Butler <hobu.inc@gmail.com>
+	* pj_gridinfo.c: Don't crash when nad_ctable_init doesn't return
+	a ctx. #231
+
 2014-09-13  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* nad/epsg: Updated to EPSG 8.5
@@ -63,7 +67,7 @@
 
 2013-07-21  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* src/proj_etmerc.c: Fix two errors in the n**5 coefficients.  Add 
+	* src/proj_etmerc.c: Fix two errors in the n**5 coefficients.  Add
 	sixth order coefficients.  Fix rounding problems (#222)
 
 2013-07-19  Frank Warmerdam  <warmerdam@pobox.com>
@@ -72,7 +76,7 @@
 
 2013-07-12  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* src/geodesic.{c,h}: allow polygon vertices to be specified 
+	* src/geodesic.{c,h}: allow polygon vertices to be specified
 	incrementally for geodesic area (#221).
 
 2013-07-08  Frank Warmerdam  <warmerdam@pobox.com>
@@ -108,7 +112,7 @@
 
 	* src/multistresstest.c: add windows support (#199)
 
-	* src/pj_ctx.c: avoid race condition on setting of 
+	* src/pj_ctx.c: avoid race condition on setting of
 	default_context_initialized. (#199)
 
 	* config.guess, config.sub: updated to newer versions (#208).
@@ -186,9 +190,9 @@
 
 2012-05-31  Martin Desruisseaux <martin.desruisseaux@geomatys.fr>
 
-	* Replaced usages of NAN C/C++ constant by the java.lang.Double.NaN 
-	constant.  This was done because not all C/C++ compilers define the 
-	NAN constant, and for making sure that the bits pattern is exactly the 
+	* Replaced usages of NAN C/C++ constant by the java.lang.Double.NaN
+	constant.  This was done because not all C/C++ compilers define the
+	NAN constant, and for making sure that the bits pattern is exactly the
 	one expected by Java.
 
 2012-03-25  Frank Warmerdam  <warmerdam@pobox.com>
