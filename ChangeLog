@@ -1,3 +1,7 @@
+2014-09-13  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* Generate 4.9.0 release.
+
 2014-19-13 Howard Butler <hobu.inc@gmail.com>
 	* CMake: Implement CMake build system for proj.4 #243
 
