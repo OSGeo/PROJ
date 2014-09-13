@@ -1,0 +1,82 @@
+#################################################################################
+#
+# This file is part of CMake configuration for PROJ4 library (inspired from SOCI 
+# CMake,  Copyright (C) 2009-2010 Mateusz Loskot <mateusz@loskot.net> )
+#
+# Copyright (C) 2011 Nicolas David <nicolas.david@ign.fr>
+# Distributed under the MIT license
+#
+#################################################################################
+# General settings
+#################################################################################
+cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
+
+# proj4 is an ANSI C project
+project(PROJ4 C)
+set(PROJECT_INTERN_NAME PROJ)
+
+#################################################################################
+# PROJ4 CMake modules
+#################################################################################
+# Path to additional CMake modules
+set(CMAKE_MODULE_PATH ${PROJ4_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${PROJ4_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
+
+include(Proj4Utilities)
+
+message(STATUS "")
+colormsg(_HIBLUE_ "Configuring PROJ:")
+
+#################################################################################
+#PROJ version information
+#################################################################################
+include(Proj4Version)
+proj_version(MAJOR 4 MINOR 8 PATCH 0)
+
+#################################################################################
+# Build features and variants
+#################################################################################
+include(Proj4SystemInfo)
+include(Proj4Config)
+include(Proj4Mac)
+
+boost_report_value(PROJ_PLATFORM_NAME)
+boost_report_value(PROJ_COMPILER_NAME)
+
+option(PROJ4_TESTS "Enable build of collection of PROJ4 tests" ON)
+boost_report_value(PROJ4_TESTS)
+if(PROJ4_TESTS)
+    include(CTest)
+    enable_testing()
+endif(PROJ4_TESTS)
+include(Proj4Test)
+
+# Put the libaries and binaries that get built into directories at the
+# top of the build tree rather than in hard-to-find leaf
+# directories. This simplifies manual testing and the use of the build
+# tree rather than installed Boost libraries.
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+
+#################################################################################
+# Installation
+#################################################################################
+include(Proj4InstallPath)
+set(BINDIR "${DEFAULT_BINDIR}" CACHE PATH "The directory to install binaries into.")
+set(LIBDIR "${DEFAULT_LIBDIR}" CACHE PATH "The directory to install libraries into.")
+set(DATADIR "${DEFAULT_DATADIR}" CACHE PATH "The directory to install data files into.")
+set(DOCDIR "${DEFAULT_DOCDIR}" CACHE PATH "The directory to install doc files into.")
+set(INCLUDEDIR "${DEFAULT_INCLUDEDIR}" CACHE PATH "The directory to install includes into.")
+
+#################################################################################
+# Build configured components
+#################################################################################
+include_directories(${PROJ4_SOURCE_DIR}/src)
+
+message(STATUS "")
+add_subdirectory(nad)
+add_subdirectory(src)
+add_subdirectory(html)
+
