@@ -209,16 +209,16 @@ TESTNTV2 = ./testntv2
 TESTVARIOUS = ./testvarious
 TESTDATUMFILE = ./testdatumfile
 TESTIGN = ./testIGNF
-pkgdata_DATA = GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri \
+pkgdata_DATA = GL27 nad.lst nad27 nad83 world epsg esri \
 		esri.extra other.extra \
-		CH IGNF 
+		CH IGNF
 
 EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
-		proj_def.dat test27 test83 world epsg esri tv_out.dist \
+		test27 test83 world epsg esri tv_out.dist \
 		testvarious testdatumfile testntv2 ntv2_out.dist \
 		esri.extra other.extra \
 		CH IGNF testIGNF proj_outIGNF.dist \
-		makefile.vc
+		makefile.vc CMakeLists.txt
 
 all: all-am
 
@@ -441,7 +441,7 @@ process-nad2bin:
 	    echo "../src/nad2bin$(EXEEXT) $$DEST < $$x"; \
 	    ../src/nad2bin$(EXEEXT) $$DEST < $$x ; \
 	  done; \
-	fi 
+	fi
 
 install-data-local: process-nad2bin
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
@@ -456,7 +456,7 @@ install-data-local: process-nad2bin
 	done
 	@if [ ! -f conus.lla ] ; then \
 	  echo "nad2nad NADCON source files not present"; \
-	fi 
+	fi
 	@for gridfile in *.gsb ntv1_can.dat dummy ; do \
 	  if test "$$gridfile" != "dummy" -a -f "$$gridfile" ; then \
 	    echo $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/$$gridfile; \
