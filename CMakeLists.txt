@@ -1,6 +1,6 @@
 #################################################################################
 #
-# This file is part of CMake configuration for PROJ4 library (inspired from SOCI 
+# This file is part of CMake configuration for PROJ4 library (inspired from SOCI
 # CMake,  Copyright (C) 2009-2010 Mateusz Loskot <mateusz@loskot.net> )
 #
 # Copyright (C) 2011 Nicolas David <nicolas.david@ign.fr>
@@ -78,5 +78,4 @@ include_directories(${PROJ4_SOURCE_DIR}/src)
 message(STATUS "")
 add_subdirectory(nad)
 add_subdirectory(src)
-add_subdirectory(html)
 
