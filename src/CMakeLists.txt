@@ -3,10 +3,10 @@
 include(lib_proj.cmake)
 
 # configure executable build
-option(BUILD_CS2CS "Build cs2cs (coordinate systems to coordinate systems translation tool)" OFF)
-option(BUILD_PROJ "Build proj (cartographic projection tool : latlong <-> projected coordinates" OFF)
-option(BUILD_GEOD "Build geod (computation of geodesic lines)" OFF)
-option(BUILD_NAD2BIN "Build nad2bin (format conversion tool) " OFF)
+option(BUILD_CS2CS "Build cs2cs (coordinate systems to coordinate systems translation tool)" ON)
+option(BUILD_PROJ "Build proj (cartographic projection tool : latlong <-> projected coordinates" ON)
+option(BUILD_GEOD "Build geod (computation of geodesic lines)" ON)
+option(BUILD_NAD2BIN "Build nad2bin (format conversion tool) " ON)
 
 if(BUILD_CS2CS)
  include(bin_cs2cs.cmake)
