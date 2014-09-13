@@ -1,3 +1,7 @@
+2014-09-13  Frank Warmerdam  <warmerdam@pobox.com>
+
+	* src/pj_datums.c: fix spelling of clrk80 in carthage datum def (#245)
+
 2014-19-13 Howard Butler <hobu.inc@gmail.com>
 	* pj_gridinfo.c: Don't crash when nad_ctable_init doesn't return
 	a ctx. #231
