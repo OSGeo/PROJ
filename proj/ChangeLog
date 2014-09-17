@@ -1,5 +1,10 @@
 2014-09-16  Frank Warmerdam  <warmerdam@pobox.com>
 
+	* Generate 4.9.0 RC2. 
+
+	* nad/epsg: updated with Pulkova 1942(58) reverted, and vertical 
+	coordinate system names coming through properly.
+
 	* src/pj_gridinfo.c, pj_apply_vgridshift.c, pj_apply_gridshift.c:
 	Fix problems with NTv2 files with improper parent structure (#177).
 
