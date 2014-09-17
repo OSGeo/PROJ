@@ -41,7 +41,7 @@
  * TODO - mloskot: re-implement porting friendly assert
  */
 # define assert(exp)	((void)0)
-#else
+#else/
 # include <assert.h>
 #endif /* _WIN32_WCE */
 
@@ -396,11 +396,32 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 /************************************************************************/
 /*                       pj_gridinfo_init_ntv2()                        */
 /*                                                                      */
+/*      Seek a parent grid file by name from a grid list                */
+/************************************************************************/
+
+static PJ_GRIDINFO* pj_gridinfo_parent( PJ_GRIDINFO *gilist, 
+        const char *name, int length )
+{
+    while( gilist )
+    {
+        if( strncmp(gilist->ct->id,name,length) == 0 ) return gilist;
+        if( gilist->child )
+        {
+            PJ_GRIDINFO *parent=pj_gridinfo_parent( gilist->child, name, length );
+            if( parent ) return parent;
+        }
+        gilist=gilist->next;
+    }
+    return gilist;
+}
+
+/************************************************************************/
+/*                       pj_gridinfo_init_ntv2()                        */
+/*                                                                      */
 /*      Load a ntv2 (.gsb) file.                                        */
 /************************************************************************/
 
 static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
-
 {
     unsigned char header[11*16];
     int num_subfiles, subfile;
@@ -563,11 +584,8 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
         else
         {
             PJ_GRIDINFO *lnk;
-            PJ_GRIDINFO *gp = gilist;
-
-            while( gp != NULL
-                   && strncmp(gp->ct->id,(const char*)header+24,8) != 0 )
-                gp = gp->next;
+            PJ_GRIDINFO *gp = pj_gridinfo_parent(gilist,
+                                                 (const char*)header+24,8);
 
             if( gp == NULL )
             {
@@ -576,17 +594,20 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
                         "failed to find parent %8.8s for %s.\n",
                         (const char *) header+24, gi->ct->id );
 
-                for( lnk = gp; lnk->next != NULL; lnk = lnk->next ) {}
+                for( lnk = gilist; lnk->next != NULL; lnk = lnk->next ) {}
                 lnk->next = gi;
-            }
-            else if( gp->child == NULL )
-            {
-                gp->child = gi;
             }
             else
             {
-                for( lnk = gp->child; lnk->next != NULL; lnk = lnk->next ) {}
-                lnk->next = gi;
+                if( gp->child == NULL )
+                {
+                    gp->child = gi;
+                }
+                else
+                {
+                    for( lnk = gp->child; lnk->next != NULL; lnk = lnk->next ) {}
+                    lnk->next = gi;
+                }
             }
         }
 
