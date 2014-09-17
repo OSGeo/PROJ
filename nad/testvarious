@@ -681,6 +681,22 @@ $EXE -f '%.12f' \
  -E >>${OUT} <<EOF
 987122.4183302754536 -14429896.5395309105515
 EOF
+echo "##############################################################" >> ${OUT}
+echo "Test bug 245 (use +datum=carthage)" >> ${OUT}
+#
+$EXE -f '%.12f' \
+     +proj=longlat +datum=WGS84 +nodefs +to +proj=utm +zone=32 +datum=carthage +nodefs \
+ -E >>${OUT} <<EOF
+10 34
+EOF
+echo "##############################################################" >> ${OUT}
+echo "Test bug 245 (use expension of +datum=carthage)" >> ${OUT}
+#
+$EXE -f '%.12f' \
+     +proj=longlat +datum=WGS84 +nodefs +to +proj=utm +zone=32 +a=6378249.2 +b=6356515 +towgs84=-263.0,6.0,431.0 +nodefs \
+ -E >>${OUT} <<EOF
+10 34
+EOF
 ##############################################################################
 # Done!
 # do 'diff' with distribution results

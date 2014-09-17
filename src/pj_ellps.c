@@ -19,6 +19,7 @@ pj_ellps[] = {
 "bess_nam",	"a=6377483.865", "rf=299.1528128", "Bessel 1841 (Namibia)",
 "clrk66",	"a=6378206.4", "b=6356583.8", "Clarke 1866",
 "clrk80",	"a=6378249.145", "rf=293.4663", "Clarke 1880 mod.",
+"clrk80ign","a=6378249.2", "rf=293.4660212936269", "Clarke 1880 (IGN).",
 "CPM",  	"a=6375738.7", "rf=334.29", "Comm. des Poids et Mesures 1799",
 "delmbr",	"a=6376428.",  "rf=311.5", "Delambre 1810 (Belgium)",
 "engelis",	"a=6378136.05", "rf=298.2566", "Engelis 1985",
