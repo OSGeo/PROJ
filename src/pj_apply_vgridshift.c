@@ -101,7 +101,7 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
                 continue;
 
             /* If we have child nodes, check to see if any of them apply. */
-            if( gi->child != NULL )
+            while( gi->child != NULL )
             {
                 PJ_GRIDINFO *child;
 
@@ -117,12 +117,15 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
                     break;
                 }
 
-                /* we found a more refined child node to use */
-                if( child != NULL )
+                /* we didn't find a more refined child node to use, so go with current grid */
+                if( child == NULL )
                 {
-                    gi = child;
-                    ct = child->ct;
+                    break;
                 }
+
+                /* Otherwise let's try for childrens children .. */
+                gi = child;
+                ct = child->ct;
             }
 
             /* load the grid shift info if we don't have it. */
