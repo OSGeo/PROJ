@@ -1,4 +1,4 @@
-2014-19-08 Even Rouault <even.rouault@spatialys.com>
+2014-09-17 Even Rouault <even.rouault@spatialys.com>
 
 	* src/pj_datums.c, src/pj_ellps.c: Add clrk80ign ellipsoid and use it
 	in carthage datum def (#245)
