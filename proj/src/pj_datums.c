@@ -49,7 +49,7 @@ C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[] = {
                                                      "clrk66", 
 				"North_American_Datum_1927",
 "potsdam",  "towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7",  "bessel",  "Potsdam Rauenberg 1950 DHDN",
-"carthage",  "towgs84=-263.0,6.0,431.0",  "clrk80",  "Carthage 1934 Tunisia",
+"carthage",  "towgs84=-263.0,6.0,431.0",  "clrk80ign",  "Carthage 1934 Tunisia",
 "hermannskogel", "towgs84=577.326,90.129,463.919,5.137,1.474,5.297,2.4232",  "bessel",  "Hermannskogel",
 "ire65",  "towgs84=482.530,-130.596,564.557,-1.042,-0.214,-0.631,8.15",  "mod_airy",  "Ireland 1965",
 "nzgd49",    "towgs84=59.47,-5.04,187.44,0.47,-0.1,1.024,-4.5993", "intl", "New Zealand Geodetic Datum 1949",
