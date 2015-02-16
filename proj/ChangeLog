@@ -1,3 +1,7 @@
+2015-02-16 Howard Butler <howard@hobu.co>
+	* nad/Makefile.am nad/Makefile.in and others in nad/: Fix #247 to 
+	allow out-of-tree autoconf builds
+
 2014-09-17 Even Rouault <even.rouault@spatialys.com>
 
 	* src/pj_datums.c, src/pj_ellps.c: Add clrk80ign ellipsoid and use it
