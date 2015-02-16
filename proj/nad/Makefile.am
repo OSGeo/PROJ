@@ -1,15 +1,16 @@
 # Executables paths passed to test scripts
-EXEPATH = $(top_srcdir)/src
+NADPATH = $(top_srcdir)/nad
+EXEPATH = ../src
 PROJEXE = $(EXEPATH)/proj
 CS2CSEXE = $(EXEPATH)/cs2cs
 
 # PROJ.4 test scripts
-TEST27 = ./test27
-TEST83 = ./test83
-TESTNTV2 = ./testntv2
-TESTVARIOUS = ./testvarious
-TESTDATUMFILE = ./testdatumfile
-TESTIGN = ./testIGNF
+TEST27 = $(NADPATH)/test27
+TEST83 = $(NADPATH)/test83
+TESTNTV2 = $(NADPATH)/testntv2
+TESTVARIOUS = $(NADPATH)/testvarious
+TESTDATUMFILE = $(NADPATH)/testdatumfile
+TESTIGN = $(NADPATH)/testIGNF
 
 pkgdata_DATA = GL27 nad.lst nad27 nad83 world epsg esri \
 		esri.extra other.extra \
@@ -23,8 +24,8 @@ EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
 		makefile.vc CMakeLists.txt
 
 process-nad2bin:
-	@if [ -f null.lla -a ! -f null ] || [ -f conus.lla -a ! -f conus ] ; then \
-	  for x in *.lla ; do \
+	@if [ -f $(NADPATH)/null.lla -a ! -f null ] || [ -f $(NADPATH)/conus.lla -a ! -f conus ] ; then \
+	  for x in $(NADPATH)/*.lla ; do \
 	    DEST=`basename $$x .lla`; \
 	    echo "../src/nad2bin$(EXEEXT) $$DEST < $$x"; \
 	    ../src/nad2bin$(EXEEXT) $$DEST < $$x ; \
@@ -33,7 +34,7 @@ process-nad2bin:
 
 install-data-local: process-nad2bin
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
-	@for x in *.lla ; do \
+	@for x in $(NADPATH)/*.lla ; do \
 	    DEST=$(DESTDIR)$(pkgdatadir)/`basename $$x .lla`; \
 	    echo "../src/nad2bin$(EXEEXT) $$DEST < $$x"; \
 	    ../src/nad2bin$(EXEEXT) $$DEST < $$x ; \
@@ -42,17 +43,28 @@ install-data-local: process-nad2bin
 		exit 1; \
 	    fi; \
 	done
-	@if [ ! -f conus.lla ] ; then \
+	@if [ ! -f $(NADPATH)/conus.lla ] ; then \
 	  echo "nad2nad NADCON source files not present"; \
 	fi
-	@for gridfile in *.gsb ntv1_can.dat dummy ; do \
+	@for gridfile in $(NADPATH)/*.gsb $(NADPATH)/ntv1_can.dat dummy ; do \
 	  if test "$$gridfile" != "dummy" -a -f "$$gridfile" ; then \
-	    echo $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/$$gridfile; \
-	    $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/$$gridfile; \
+	    echo $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/`basename $$gridfile`; \
+	    $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/`basename $$gridfile`; \
           fi; \
 	done
 
 check-local: process-nad2bin
+# Check if we are doing an out-of-tree build
+	@if test ! -f epsg; then \
+	  for gridfile in $(NADPATH)/*.gsb $(NADPATH)/ntv1_can.dat dummy ; do \
+	    if test "$$gridfile" != "dummy" -a -f "$$gridfile" ; then \
+	      cp $$gridfile .; \
+	    fi; \
+	  done; \
+	  for gridfile in $(pkgdata_DATA); do \
+	    cp $(NADPATH)/$$gridfile .; \
+	  done; \
+	fi
 	$(TEST27) $(PROJEXE)
 	$(TEST83) $(PROJEXE)
 	PROJ_LIB=. $(TESTVARIOUS) $(CS2CSEXE)

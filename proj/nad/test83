@@ -7,6 +7,7 @@
 # Proj will vary in the .001ft range with projections using Transverse
 #   Mercator due to greater precision of meridinal distance function.
 #
+NAD_DIR=`dirname $0`
 EXE=$1
 
 usage()
@@ -30,7 +31,7 @@ echo "Running ${0} using ${EXE}:"
 echo "============================================"
 
 OUT=proj_out83
-INIT_FILE=./nad83
+INIT_FILE=${NAD_DIR}/nad83
 #
 echo "doing tests into file ${OUT}, please wait"
 #
@@ -712,7 +713,7 @@ EOF
 #
 # do 'diff' with distribution results
 echo "diff ${OUT} with pj_out83.dist"
-diff -b ${OUT} pj_out83.dist
+diff -b ${OUT} ${NAD_DIR}/pj_out83.dist
 if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURED"

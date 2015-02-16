@@ -3,6 +3,7 @@
 # files that are not always available.
 #
 #
+NAD_DIR=`dirname $0`
 EXE=$1
 
 usage()
@@ -97,7 +98,7 @@ EOF
 # Done! 
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
-diff -b ${OUT} ${OUT}.dist
+diff -b ${OUT} ${NAD_DIR}/${OUT}.dist
 if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURED"

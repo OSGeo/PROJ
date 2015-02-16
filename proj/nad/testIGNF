@@ -10,6 +10,7 @@
 #               transformations will be wrong and vice-versa
 # 2009-10-04 :  addition of NTFG to RGF93G test to check if
 #               the gsb grid is still ok
+NAD_DIR=`dirname $0`
 EXE=$1
 
 usage()
@@ -150,7 +151,7 @@ EOF
 #
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
-diff -b ${OUT} ${OUT}.dist
+diff -b ${OUT} ${NAD_DIR}/${OUT}.dist
 if [ $? -ne 0 ] ; then
 echo  ""
 echo "PROBLEMS HAVE OCCURED"
