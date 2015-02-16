@@ -405,8 +405,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     old_locale = setlocale(LC_NUMERIC, NULL);
     if (old_locale != NULL) {
        if (strcmp(old_locale,"C") != 0) {
-	  setlocale(LC_NUMERIC,"C");
 	  old_locale = strdup(old_locale);
+	  setlocale(LC_NUMERIC,"C");
        }else
 	  old_locale = NULL;
     }
