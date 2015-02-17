@@ -24,12 +24,12 @@ if(NOT USE_THREAD)
    add_definitions( -DMUTEX_stub)
 endif(NOT USE_THREAD)
 find_package(Threads QUIET)
-if(Threads_FOUND AND CMAKE_USE_WIN32_THREADS_INIT )
+if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_WIN32_THREADS_INIT )
    add_definitions( -DMUTEX_win32)
-endif(Threads_FOUND AND CMAKE_USE_WIN32_THREADS_INIT )
-if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT )
+endif(USE_THREAD AND Threads_FOUND AND CMAKE_USE_WIN32_THREADS_INIT )
+if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT )
    add_definitions( -DMUTEX_pthread)
-endif(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT )
+endif(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT )
 if(USE_THREAD AND NOT Threads_FOUND)
   message(FATAL_ERROR "No thread library found and thread/mutex support is required by USE_THREAD option")
 endif(USE_THREAD AND NOT Threads_FOUND)
@@ -170,7 +170,7 @@ SET(SRC_LIBPROJ_CORE
         pj_gridcatalog.c
         pj_gridinfo.c
         pj_gridlist.c
-        pj_healpix.c
+        PJ_healpix.c
         pj_init.c
         pj_initcache.c
         pj_inv.c
@@ -283,8 +283,13 @@ add_dependencies(${PROJ_CORE_TARGET} proj_config.h)
 ##############################################
 set(PROJ_LIBRARIES ${PROJ_CORE_TARGET} )
 if(UNIX AND BUILD_LIBPROJ_SHARED)
-    set(PROJ_LIBRARIES ${PROJ_LIBRARIES} m)
+    find_library(M_LIB m)
+    TARGET_LINK_LIBRARIES(${PROJ_CORE_TARGET} ${M_LIB})
 endif(UNIX AND BUILD_LIBPROJ_SHARED)
+if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT AND BUILD_LIBPROJ_SHARED)
+   TARGET_LINK_LIBRARIES(${PROJ_CORE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
+endif(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT AND BUILD_LIBPROJ_SHARED)
+
 
 ##############################################
 # install

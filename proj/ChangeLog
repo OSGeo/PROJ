@@ -1,6 +1,5 @@
-2015-02-16 Howard Butler <howard@hobu.co>
-	* src/PJ_aitoff.c: New Winkel Tripel Inverse #250
-	from Drazen Tutic
+2015-02-17 Howard Butler <howard@hobu.co>
+	* src/lib_proj.cmake CMakeLists: Fix #248 healpix compilation typo
 
 2015-02-16 Howard Butler <howard@hobu.co>
 	* src/pj_init.c: Fix #237 warning about initialization 
