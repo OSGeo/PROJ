@@ -204,6 +204,7 @@ set(HEADERS_LIBPROJ
         emess.h
         projects.h
         proj_api.h
+        proj_config.h
  )
 
 # Group source files for IDE source explorers (e.g. Visual Studio)
@@ -276,7 +277,6 @@ endif()
 set_target_properties(${PROJ_CORE_TARGET}
     PROPERTIES
     LINKER_LANGUAGE C)
-add_dependencies(${PROJ_CORE_TARGET} proj_config.h)
 
 ##############################################
 # Link properties
