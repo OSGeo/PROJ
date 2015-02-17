@@ -1,4 +1,10 @@
 2015-02-17 Howard Butler <howard@hobu.co>
+	* CMakeLists.txt cmake/policies.cmake src/lib_proj.cmake: #256 
+	CMake tweaks to shut off some noisy policies, fix installation 
+	of proj_config header, and shut off Framework building by 
+	default on OSX
+
+2015-02-17 Howard Butler <howard@hobu.co>
 	* src/lib_proj.cmake CMakeLists: Fix #248 healpix compilation typo
 
 2015-02-16 Howard Butler <howard@hobu.co>

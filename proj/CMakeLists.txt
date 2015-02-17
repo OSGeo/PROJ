@@ -31,7 +31,7 @@ colormsg(_HIBLUE_ "Configuring PROJ:")
 #PROJ version information
 #################################################################################
 include(Proj4Version)
-proj_version(MAJOR 4 MINOR 9 PATCH 1)
+proj_version(MAJOR 4 MINOR 9 PATCH 0)
 
 #################################################################################
 # Build features and variants
@@ -39,6 +39,7 @@ proj_version(MAJOR 4 MINOR 9 PATCH 1)
 include(Proj4SystemInfo)
 include(Proj4Config)
 include(Proj4Mac)
+include(policies)
 
 boost_report_value(PROJ_PLATFORM_NAME)
 boost_report_value(PROJ_COMPILER_NAME)
