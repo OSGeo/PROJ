@@ -8,7 +8,8 @@
 3) Update the version number, and date in src/pj_release.c.
 
 4) Update the version number in the -version-info definition in 
-   src/Makefile.am.  It consists of "current:revision:age". 
+   src/Makefile.am.  It consists of "current:revision:age".  Set 
+   the same in the PROJ_SOVERSION variable in CMakeLists.txt
 
    - If the library source code has changed at all since the last update, 
      then increment revision (c:r:a becomes c:r+1:a). 
