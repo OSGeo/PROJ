@@ -1,3 +1,24 @@
+4.9.1 Release Notes
+-------------------
+ 
+ o 4.9.0RC2 release was abandoned because it was not promoted in a 
+   timely fashion. Subsequent maintenance of tickets has continued, 
+   and a new 4.9.1 release was issued in its place.
+
+ o Implement inverse solution for Winkel Tripel from Drazan Tutic #250
+
+ o More CMake configuration tweaks. The CMake configuration is probably 
+   not at feature parity with the autotools builds at this point but it 
+   is converging #256
+ 
+ o Tweak initialization ordering around setlocal which may have caused
+   issues #237
+
+ o Support out-of-tree autoconf builds more completely #247
+
+ o Fix NaN handling by geod_inverse and geod_polygon_addedge #251 & #253
+
+
 4.9.0 Release Notes
 -------------------
 
