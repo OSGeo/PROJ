@@ -1,4 +1,8 @@
 2015-02-17 Howard Butler <howard@hobu.co>
+	* src/PJ_aitoff.c: #250 Inverse solution for Winkel Tripel 
+	from Drazan Tutic 
+
+2015-02-17 Howard Butler <howard@hobu.co>
 	* CMakeLists.txt cmake/policies.cmake src/lib_proj.cmake: #256 
 	CMake tweaks to shut off some noisy policies, fix installation 
 	of proj_config header, and shut off Framework building by 
