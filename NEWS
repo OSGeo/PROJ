@@ -24,6 +24,8 @@
 
  o Define default PROJ_LIB location for CMake compilation #261
 
+ o Fix Windows compilation on PJ_aitoff.c
+
 4.9.0 Release Notes
 -------------------
 
@@ -33,7 +35,7 @@
    shift and init files can be hooked.
 
  o Replace geodesic implementation with one from Charles Karney and add a 
-   supported public interface (geod_interface.h).
+   supported public interface (geodesic.h).
 
  o Upgraded to EPSG 8.5.
 
