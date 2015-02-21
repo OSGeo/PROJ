@@ -1,4 +1,10 @@
-2015-02-17 Howard Butler <howard@hobu.co>
+2015-02-20 Howard Butler <howard@hobu.co>
+	* CMakeLists.txt cmake/Proj4Mac.cmake 
+	man/CMakeLists.txt src/bin_cs2cs.cmake 
+	src/lib_proj.cmake: Adapt Charles Karney 
+	CMake patches for smoother build #258
+
+2015-02-20 Howard Butler <howard@hobu.co>
 	* config.guess config.sub: #257 update very old config.guess
 	and config.sub
 

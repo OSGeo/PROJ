@@ -9,6 +9,6 @@ if(WIN32)
 endif(WIN32)
 
 add_executable(cs2cs ${CS2CS_SRC} ${CS2CS_INCLUDE})
-target_link_libraries(cs2cs proj m)
+target_link_libraries(cs2cs ${PROJ_LIBRARIES})
 install(TARGETS cs2cs 
         RUNTIME DESTINATION ${BINDIR})

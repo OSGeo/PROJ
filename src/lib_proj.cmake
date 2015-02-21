@@ -204,7 +204,7 @@ set(HEADERS_LIBPROJ
         emess.h
         projects.h
         proj_api.h
-        proj_config.h
+        ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
  )
 
 # Group source files for IDE source explorers (e.g. Visual Studio)
@@ -259,7 +259,7 @@ if(WIN32)
   set_target_properties(${PROJ_CORE_TARGET}
     PROPERTIES
     OUTPUT_NAME "${PROJ_CORE_TARGET_OUTPUT_NAME}"
-    VERSION  ${ ${PROJECT_INTERN_NAME}_VERSION }
+    VERSION  ${${PROJECT_INTERN_NAME}_VERSION }
     CLEAN_DIRECT_OUTPUT 1)
 elseif(BUILD_FRAMEWORKS_AND_BUNDLE)
   set_target_properties(${PROJ_CORE_TARGET}
