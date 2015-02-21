@@ -41,7 +41,7 @@
  * TODO - mloskot: re-implement porting friendly assert
  */
 # define assert(exp)	((void)0)
-#else/
+#else
 # include <assert.h>
 #endif /* _WIN32_WCE */
 

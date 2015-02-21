@@ -1,4 +1,8 @@
 2015-02-21 Even Rouault <even.rouault@spatialys.com>
+	* src/pj_gridinfo.c: remove trailing / from preprocessor line
+	 (from Charles Karney)
+
+2015-02-21 Even Rouault <even.rouault@spatialys.com>
 	* src/PJ_aitoff.c: define M_PI and M_PI_2 (needed for Windows)
 	 (from Charles Karney)
 
