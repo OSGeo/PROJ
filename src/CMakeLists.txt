@@ -8,6 +8,20 @@ option(BUILD_PROJ "Build proj (cartographic projection tool : latlong <-> projec
 option(BUILD_GEOD "Build geod (computation of geodesic lines)" ON)
 option(BUILD_NAD2BIN "Build nad2bin (format conversion tool) " ON)
 
+if(NOT MSVC)
+  if (NOT APPLE)
+    # Use relative path so that package is relocatable
+    set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib")
+  else ()
+    set (CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+    # TO DO: cmake 2.8.12 introduces a way to make the install tree
+    # relocatable with OSX via
+    # (1) set(CMAKE_MACOSX_RPATH ON) and
+    # (2) setting the INSTALL_RPATH property on the executables to
+    # "@loader_path/../lib"
+  endif ()
+endif ()
+
 if(BUILD_CS2CS)
  include(bin_cs2cs.cmake)
 endif(BUILD_CS2CS)

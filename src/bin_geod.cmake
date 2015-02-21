@@ -1,6 +1,6 @@
 set(GEOD_SRC geod.c
-             geodesic.c geod_set.c geod_interface.c )
-set(GEOD_INCLUDE  geodesic.h geod_interface.h)
+             geod_set.c geod_interface.c )
+set(GEOD_INCLUDE geod_interface.h)
 
 source_group("Source Files\\Bin" FILES ${GEOD_SRC} ${GEOD_INCLUDE})
 
