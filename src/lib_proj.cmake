@@ -199,11 +199,16 @@ SET(SRC_LIBPROJ_CORE
         vector1.c
  )
 
-set(HEADERS_LIBPROJ
-        pj_list.h
-        emess.h
+set(HEADERS_LIBPROJ_INSTALL
         projects.h
         proj_api.h
+        geodesic.h
+)
+
+set(HEADERS_LIBPROJ
+        ${HEADERS_LIBPROJ_INSTALL}
+        pj_list.h
+        emess.h
         ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
  )
 
@@ -225,9 +230,9 @@ boost_report_value(JNI_SUPPORT)
 if(JNI_SUPPORT)
   set(SRC_LIBPROJ_CORE ${SRC_LIBPROJ_CORE}
                        jniproj.c )
-  set(HEADERS_LIBPROJ ${HEADERS_LIBPROJ}
-                        org_proj4_PJ.h
-                        org_proj4_Projections.h)
+  set(HEADERS_JNI org_proj4_PJ.h org_proj4_Projections.h)
+  set(HEADERS_LIBPROJ_INSTALL ${HEADERS_LIBPROJ_INSTALL} ${HEADERS_JNI})
+  set(HEADERS_LIBPROJ ${HEADERS_LIBPROJ} ${HEADERS_JNI})
   source_group("Source Files\\JNI" FILES ${SRC_LIBPROJ_JNI})
   add_definitions(-DJNI_ENABLED)
   include_directories( ${JNI_INCLUDE_DIRS})
@@ -301,7 +306,7 @@ install(TARGETS ${PROJ_CORE_TARGET}
         FRAMEWORK DESTINATION ${FRAMEWORKDIR})
 
 if(NOT BUILD_FRAMEWORKS_AND_BUNDLE)
-  install(FILES ${ALL_LIBPROJ_HEADERS}
+  install(FILES ${HEADERS_LIBPROJ_INSTALL}
         DESTINATION ${INCLUDEDIR})
 endif(NOT BUILD_FRAMEWORKS_AND_BUNDLE)
 

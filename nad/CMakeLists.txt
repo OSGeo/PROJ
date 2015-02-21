@@ -11,7 +11,8 @@ set(PROJ_DICTIONARY  epsg
                      nad27
                      GL27
                      nad83
-                     nad.lst )
+                     nad.lst
+                     CH )
 
 #
 # gridshift file
