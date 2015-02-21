@@ -32,7 +32,7 @@ colormsg(_HIBLUE_ "Configuring PROJ:")
 #################################################################################
 include(Proj4Version)
 proj_version(MAJOR 4 MINOR 9 PATCH 1)
-set(PROJ_SOVERSION "8.1.8")
+set(PROJ_SOVERSION "9.0.0")
 
 #################################################################################
 # Build features and variants
