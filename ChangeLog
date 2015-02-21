@@ -1,4 +1,8 @@
 2015-02-21 Even Rouault <even.rouault@spatialys.com>
+	* nad/Makefile.am: fix install target when no .lla files are in
+	nad subdirectory.
+
+2015-02-21 Even Rouault <even.rouault@spatialys.com>
 	* cmake/Makefile.am man/Makefile.am: install missing CMake support
 	files for dist-all target
 

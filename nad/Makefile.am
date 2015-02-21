@@ -34,7 +34,10 @@ process-nad2bin:
 
 install-data-local: process-nad2bin
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
-	@for x in $(NADPATH)/*.lla ; do \
+	@if [ ! -f $(NADPATH)/conus.lla ] ; then \
+	  echo "nad2nad NADCON source files not present"; \
+	else \
+	  for x in $(NADPATH)/*.lla ; do \
 	    DEST=$(DESTDIR)$(pkgdatadir)/`basename $$x .lla`; \
 	    echo "../src/nad2bin$(EXEEXT) $$DEST < $$x"; \
 	    ../src/nad2bin$(EXEEXT) $$DEST < $$x ; \
@@ -42,9 +45,7 @@ install-data-local: process-nad2bin
 		echo "nad2bin$(EXEEXT) failed to install $$DEST"; \
 		exit 1; \
 	    fi; \
-	done
-	@if [ ! -f $(NADPATH)/conus.lla ] ; then \
-	  echo "nad2nad NADCON source files not present"; \
+	  done; \
 	fi
 	@for gridfile in $(NADPATH)/*.gsb $(NADPATH)/ntv1_can.dat dummy ; do \
 	  if test "$$gridfile" != "dummy" -a -f "$$gridfile" ; then \
