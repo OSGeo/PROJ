@@ -1,4 +1,8 @@
 2015-02-21 Howard Butler <howard@hobu.co>
+	* cmake/Proj4Version.cmake src\lib_proj.cmake: Align 
+	SOVERSION CMake configuration with autotools #263
+
+2015-02-21 Howard Butler <howard@hobu.co>
 	* src/lib_proj.cmake: define PROJ_LIB as part 
 	of the compilation defines #261
 
