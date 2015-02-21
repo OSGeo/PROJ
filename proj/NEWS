@@ -26,6 +26,8 @@
 
  o Fix Windows compilation on PJ_aitoff.c
 
+ o Align CMake SOVERSION with autotools #263
+
 4.9.0 Release Notes
 -------------------
 

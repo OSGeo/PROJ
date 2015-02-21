@@ -32,27 +32,15 @@ macro(proj_version)
   set(${PROJECT_INTERN_NAME}_VERSION
     "${${PROJECT_INTERN_NAME}_VERSION_MAJOR}.${${PROJECT_INTERN_NAME}_VERSION_MINOR}.${${PROJECT_INTERN_NAME}_VERSION_PATCH}")
 
-  # Set SOVERSION based on major and minor
-  set(${PROJECT_INTERN_NAME}_SOVERSION
-    "${${PROJECT_INTERN_NAME}_VERSION_MAJOR}.${${PROJECT_INTERN_NAME}_VERSION_MINOR}")
-
   # Set ABI version string used to name binary output 
   # On Windows, ABI version is specified using binary file name suffix.
-  # On Unix, suffix ix empty and SOVERSION is used instead.
-  if (UNIX)
-    set(${PROJECT_INTERN_NAME}_ABI_VERSION ${${PROJECT_INTERN_NAME}_SOVERSION})
-  elseif(WIN32)
+  if(WIN32)
     set(${PROJECT_INTERN_NAME}_ABI_VERSION
       "${${PROJECT_INTERN_NAME}_VERSION_MAJOR}_${${PROJECT_INTERN_NAME}_VERSION_MINOR}")
-  else()
-    message(FATAL_ERROR "Ambiguous target platform with unknown ABI version scheme. Giving up.")
   endif()
 
   message(STATUS "")
   boost_report_value(${PROJECT_INTERN_NAME}_VERSION)
-  if(UNIX)
-    boost_report_value(${PROJECT_INTERN_NAME}_SOVERSION)
-  endif(UNIX)
   if(WIN32)
     boost_report_value(${PROJECT_INTERN_NAME}_ABI_VERSION)
   endif(WIN32)
