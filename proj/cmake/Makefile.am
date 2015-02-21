@@ -5,4 +5,5 @@ EXTRA_DIST = Proj4InstallPath.cmake \
 			Proj4Config.cmake \
 			Proj4Mac.cmake \
 			Proj4Test.cmake \
-			Proj4Version.cmake
+			Proj4Version.cmake \
+			policies.cmake

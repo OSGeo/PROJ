@@ -1,3 +1,7 @@
+2015-02-21 Even Rouault <even.rouault@spatialys.com>
+	* cmake/Makefile.am man/Makefile.am: install missing CMake support
+	files for dist-all target
+
 2015-02-20 Howard Butler <howard@hobu.co>
 	* CMakeLists.txt cmake/Proj4Mac.cmake 
 	man/CMakeLists.txt src/bin_cs2cs.cmake 
