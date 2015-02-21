@@ -1,4 +1,8 @@
 2015-02-21 Even Rouault <even.rouault@spatialys.com>
+	* src/lib_proj.cmake: remove space from variable name to
+	suppress policy warning. (from Charles Karney)
+
+2015-02-21 Even Rouault <even.rouault@spatialys.com>
 	* src/bin_nad2bin.cmake: backward test for nad2nad warning.
 	bad directory specified for emess (from Charles Karney)
 
