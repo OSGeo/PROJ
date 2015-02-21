@@ -22,6 +22,8 @@
  
  o Adapt Charles Karney's CMake patches for smoother build #258
 
+ o Define default PROJ_LIB location for CMake compilation #261
+
 4.9.0 Release Notes
 -------------------
 
