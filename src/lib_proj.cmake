@@ -218,6 +218,10 @@ source_group("Source Files\\Core" FILES ${SRC_LIBPROJ_CORE})
 source_group("Source Files\\PJ" FILES ${SRC_LIBPROJ_PJ})
 source_group("CMake Files" FILES CMakeLists.txt)
 
+
+# Embed PROJ_LIB data files location
+add_definitions(-DPROJ_LIB="${CMAKE_INSTALL_PREFIX}/${DATADIR}")
+
 #################################################
 ## java wrapping with jni
 #################################################

@@ -1,3 +1,7 @@
+2015-02-21 Howard Butler <howard@hobu.co>
+	* src/lib_proj.cmake: define PROJ_LIB as part 
+	of the compilation defines #261
+
 2015-02-21 Even Rouault <even.rouault@spatialys.com>
 	* src/lib_proj.cmake nad/CMakeLists.txt: cmake build: install
 	nad.lst, geodesic.h. But not emess.h and pj_list.h (from Charles Karney)
