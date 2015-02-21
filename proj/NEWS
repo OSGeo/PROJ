@@ -19,6 +19,8 @@
  o Fix NaN handling by geod_inverse and geod_polygon_addedge #251 & #253
 
  o Update config.sub and config.guess #257
+ 
+ o Adapt Charles Karney's CMake patches for smoother build #258
 
 4.9.0 Release Notes
 -------------------

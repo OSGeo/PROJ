@@ -16,7 +16,7 @@ set(PROJ_RESOURCES "" )
 
 if(APPLE)
    option(BUILD_FRAMEWORKS_AND_BUNDLE "if set to ON, build a library framework and application bundle,
-         otherwise install classical UNIX bin/lib" ON )
+       otherwise install classical UNIX bin/lib" OFF )
    set(DEFAULT_BINDIR ${BUNDLEDIR})
    boost_report_value(BUNDLEDIR)
    boost_report_value(PROJ_INSTALL_NAME_DIR)
