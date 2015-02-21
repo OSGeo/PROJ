@@ -145,8 +145,10 @@ SET(SRC_LIBPROJ_CORE
         biveval.c
         dmstor.c
         emess.c
+        emess.h
         geocent.c
         geocent.h
+        geodesic.c
         mk_cheby.c
         nad_cvt.c
         nad_init.c
@@ -176,6 +178,7 @@ SET(SRC_LIBPROJ_CORE
         pj_inv.c
         pj_latlong.c
         pj_list.c
+        pj_list.h
         pj_log.c
         pj_malloc.c
         pj_mlfn.c
@@ -197,20 +200,14 @@ SET(SRC_LIBPROJ_CORE
         proj_rouss.c
         rtodms.c
         vector1.c
+        ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
  )
 
-set(HEADERS_LIBPROJ_INSTALL
+set(HEADERS_LIBPROJ
         projects.h
         proj_api.h
         geodesic.h
 )
-
-set(HEADERS_LIBPROJ
-        ${HEADERS_LIBPROJ_INSTALL}
-        pj_list.h
-        emess.h
-        ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
- )
 
 # Group source files for IDE source explorers (e.g. Visual Studio)
 source_group("Header Files" FILES ${HEADERS_LIBPROJ})
@@ -234,9 +231,9 @@ boost_report_value(JNI_SUPPORT)
 if(JNI_SUPPORT)
   set(SRC_LIBPROJ_CORE ${SRC_LIBPROJ_CORE}
                        jniproj.c )
-  set(HEADERS_JNI org_proj4_PJ.h org_proj4_Projections.h)
-  set(HEADERS_LIBPROJ_INSTALL ${HEADERS_LIBPROJ_INSTALL} ${HEADERS_JNI})
-  set(HEADERS_LIBPROJ ${HEADERS_LIBPROJ} ${HEADERS_JNI})
+  set(HEADERS_LIBPROJ ${HEADERS_LIBPROJ}
+                        org_proj4_PJ.h
+                        org_proj4_Projections.h)
   source_group("Source Files\\JNI" FILES ${SRC_LIBPROJ_JNI})
   add_definitions(-DJNI_ENABLED)
   include_directories( ${JNI_INCLUDE_DIRS})
@@ -310,7 +307,7 @@ install(TARGETS ${PROJ_CORE_TARGET}
         FRAMEWORK DESTINATION ${FRAMEWORKDIR})
 
 if(NOT BUILD_FRAMEWORKS_AND_BUNDLE)
-  install(FILES ${HEADERS_LIBPROJ_INSTALL}
+  install(FILES ${ALL_LIBPROJ_HEADERS}
         DESTINATION ${INCLUDEDIR})
 endif(NOT BUILD_FRAMEWORKS_AND_BUNDLE)
 
