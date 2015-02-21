@@ -34,9 +34,7 @@ process-nad2bin:
 
 install-data-local: process-nad2bin
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
-	@if [ ! -f $(NADPATH)/conus.lla ] ; then \
-	  echo "nad2nad NADCON source files not present"; \
-	else \
+	@if [ -f $(NADPATH)/null.lla -a ! -f $(NADPATH)/null ] || [ -f $(NADPATH)/conus.lla -a ! -f $(NADPATH)/conus ] ; then \
 	  for x in $(NADPATH)/*.lla ; do \
 	    DEST=$(DESTDIR)$(pkgdatadir)/`basename $$x .lla`; \
 	    echo "../src/nad2bin$(EXEEXT) $$DEST < $$x"; \
@@ -46,8 +44,13 @@ install-data-local: process-nad2bin
 		exit 1; \
 	    fi; \
 	  done; \
+	else \
+	  echo "nad2nad NADCON source files not present"; \
 	fi
-	@for gridfile in $(NADPATH)/*.gsb $(NADPATH)/ntv1_can.dat dummy ; do \
+	@for gridfile in $(NADPATH)/*.gsb $(NADPATH)/ntv1_can.dat dummy \
+	                 $(NADPATH)/alaska $(NADPATH)/conus $(NADPATH)/hawaii $(NADPATH)/null \
+	                 $(NADPATH)/prvi $(NADPATH)/stgeorge $(NADPATH)/stlrnc $(NADPATH)/stpaul \
+	                 $(NADPATH)/FL $(NADPATH)/MD $(NADPATH)/TN $(NADPATH)/WI $(NADPATH)/WO; do \
 	  if test "$$gridfile" != "dummy" -a -f "$$gridfile" ; then \
 	    echo $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/`basename $$gridfile`; \
 	    $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/`basename $$gridfile`; \
