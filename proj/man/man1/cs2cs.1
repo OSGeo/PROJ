@@ -169,9 +169,9 @@ projected (cartesian) coordinates will be in linear (meter, feet) units.
 The following script
 .RS 5
  \f(CWcs2cs +proj=latlong +datum=NAD83 
-       +to +proj=utm +zone=10 +datum=NAD27 -r <<EOF
+       +to +proj=utm +zone=10 +datum=NAD27 \-r <<EOF
  45d15'33.1"	111.5W
- 45d15.551666667N	-111d30
+ 45d15.551666667N	\-111d30
  +45.25919444444	111d30'000w
  EOF\fR
 .RE
@@ -184,7 +184,7 @@ The x\-y output data will appear as three lines of:
  \f(CW1402285.99      5076292.42 0.000
 .RE
 .SH SEE ALSO
-.B proj(1U),
+.B proj(1),
 .br
 .I "Cartographic Projection Procedures for the UNIX Environment\(emA User's Manual,"
 (Evenden, 1990, Open-file report 90\-284).

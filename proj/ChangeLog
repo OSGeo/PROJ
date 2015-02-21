@@ -1,4 +1,8 @@
 2015-02-21 Even Rouault <even.rouault@spatialys.com>
+	* man/man1/proj.1 man/man1/cs2cs.1 man/man1/geod.1 man/man3/pj_init.3:
+	fix various issues (#259)
+
+2015-02-21 Even Rouault <even.rouault@spatialys.com>
 	* nad/Makefile.am: compatibility with proj-datumgrids-1.6RC1
 	(patch by sebastic, #249)
 
