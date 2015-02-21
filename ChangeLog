@@ -1,4 +1,8 @@
 2015-02-17 Howard Butler <howard@hobu.co>
+	* config.guess config.sub: #257 update very old config.guess
+	and config.sub
+
+2015-02-17 Howard Butler <howard@hobu.co>
 	* src/PJ_aitoff.c: #250 Inverse solution for Winkel Tripel 
 	from Drazan Tutic 
 
