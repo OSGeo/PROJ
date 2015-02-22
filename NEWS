@@ -31,6 +31,8 @@
  o Regenerate nad/epsg with GDAL r28536 to avoid precision loss in TOWGS84
    parameters, e.g. on Amersfoort / RD EPSG:4289 (#260)
 
+ o Add CMake project-config.cmake scripts (#264 from Charles Karney)
+
 4.9.0 Release Notes
 -------------------
 
