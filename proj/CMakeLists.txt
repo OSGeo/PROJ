@@ -32,7 +32,8 @@ colormsg(_HIBLUE_ "Configuring PROJ:")
 #################################################################################
 include(Proj4Version)
 proj_version(MAJOR 4 MINOR 9 PATCH 1)
-set(PROJ_SOVERSION "9.0.0")
+set(PROJ_API_VERSION "9")
+set(PROJ_BUILD_VERSION "9.0.0")
 
 #################################################################################
 # Build features and variants
@@ -44,6 +45,12 @@ include(policies)
 
 boost_report_value(PROJ_PLATFORM_NAME)
 boost_report_value(PROJ_COMPILER_NAME)
+
+# Set a default build type for single-configuration cmake generators if
+# no build type is set.
+if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  set (CMAKE_BUILD_TYPE Release)
+endif ()
 
 option(PROJ4_TESTS "Enable build of collection of PROJ4 tests" ON)
 boost_report_value(PROJ4_TESTS)
@@ -81,4 +88,5 @@ message(STATUS "")
 add_subdirectory(nad)
 add_subdirectory(src)
 add_subdirectory(man)
+add_subdirectory(cmake)
 
