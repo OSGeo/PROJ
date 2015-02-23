@@ -33,6 +33,7 @@
 
  o Add CMake project-config.cmake scripts (#264 from Charles Karney)
 
+
 4.9.0 Release Notes
 -------------------
 
@@ -56,6 +57,7 @@
 
  o Various bug fixes and cleanup.
 
+ o Added the CalCOFI pseudo-projection, #135
 
 4.8.0 Release Notes
 -------------------

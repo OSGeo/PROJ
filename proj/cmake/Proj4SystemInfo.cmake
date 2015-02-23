@@ -44,6 +44,12 @@ if(WIN32)
     if(MSVC_VERSION EQUAL 1600)
       set(PROJ_COMPILER_NAME "msvc-10.0") #Visual Studio 2010
     endif()
+    if(MSVC_VERSION EQUAL 1700)
+      set(PROJ_COMPILER_NAME "msvc-11.0") #Visual Studio 2012
+    endif()
+    if(MSVC_VERSION EQUAL 1800)
+      set(PROJ_COMPILER_NAME "msvc-12.0") #Visual Studio 2013
+    endif()
   endif(MSVC)
   
   if(MINGW)
