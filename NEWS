@@ -33,6 +33,7 @@
 
  o Add CMake project-config.cmake scripts (#264 from Charles Karney)
 
+ o Dial back test sensitivity #255
 
 4.9.0 Release Notes
 -------------------
