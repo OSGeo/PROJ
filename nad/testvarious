@@ -589,7 +589,7 @@ EOF
 echo "##############################################################" >> ${OUT}
 echo "Test MGI datum gives expected results (#207)" >> ${OUT}
 #
-$EXE -f '%.9f' \
+$EXE -f '%.7f' \
      +proj=latlong +datum=WGS84 \
  +to +init=epsg:31284 \
  -E >>${OUT} <<EOF
@@ -635,7 +635,7 @@ EOF
 echo "##############################################################" >> ${OUT}
 echo "Test qsc" >> ${OUT}
 #
-$EXE -f '%.13f' \
+$EXE -f '%.7f' \
      +proj=latlong +datum=WGS84 \
  +to +proj=qsc +datum=WGS84 +no_defs \
  -E >>${OUT} <<EOF
