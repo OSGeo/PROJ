@@ -1,16 +1,16 @@
-# Version checking for @PROJECT_INTERN_NAME@
+# Version checking for @PROJECT_NAME@
 
 set (PACKAGE_VERSION "@PROJ_VERSION@")
 set (PACKAGE_VERSION_MAJOR "@PROJ_VERSION_MAJOR@")
 set (PACKAGE_VERSION_MINOR "@PROJ_VERSION_MINOR@")
 set (PACKAGE_VERSION_PATCH "@PROJ_VERSION_PATCH@")
 
-if (NOT PACKAGE_FIND_NAME STREQUAL "@PROJECT_INTERN_NAME@")
+if (NOT PACKAGE_FIND_NAME STREQUAL "@PROJECT_NAME@")
   # Check package name (in particular, because of the way cmake finds
   # package config files, the capitalization could easily be "wrong").
   # This is necessary to ensure that the automatically generated
   # variables, e.g., <package>_FOUND, are consistently spelled.
-  set (REASON "package = @PROJECT_INTERN_NAME@, NOT ${PACKAGE_FIND_NAME}")
+  set (REASON "package = @PROJECT_NAME@, NOT ${PACKAGE_FIND_NAME}")
   set (PACKAGE_VERSION_UNSUITABLE TRUE)
 elseif (NOT (APPLE OR (NOT DEFINED CMAKE_SIZEOF_VOID_P) OR
       CMAKE_SIZEOF_VOID_P EQUAL @CMAKE_SIZEOF_VOID_P@))
