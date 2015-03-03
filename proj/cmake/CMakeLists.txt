@@ -3,14 +3,14 @@
 # path to the root from there.  (Note that the whole install tree can
 # be relocated.)
 if (NOT WIN32)
-  set (INSTALL_CMAKE_DIR "share/cmake/${PROJECT_INTERN_NAME}")
+  set (INSTALL_CMAKE_DIR "share/cmake/${PROJECT_NAME}")
   set (PROJECT_ROOT_DIR "../../..")
 else ()
   set (INSTALL_CMAKE_DIR "cmake")
   set (PROJECT_ROOT_DIR "..")
 endif ()
 
-string(TOLOWER "${PROJECT_INTERN_NAME}" PROJECT_NAME_LOWER)
+string(TOLOWER "${PROJECT_NAME}" PROJECT_NAME_LOWER)
 configure_file (project-config.cmake.in project-config.cmake @ONLY)
 configure_file (project-config-version.cmake.in
   project-config-version.cmake @ONLY)
