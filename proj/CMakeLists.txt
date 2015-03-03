@@ -52,6 +52,12 @@ if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release)
 endif ()
 
+if (MSVC OR CMAKE_CONFIGURATION_TYPES)
+  # For multi-config systems and for Visual Studio, the debug version of
+  # the library has _d appended.
+  set (CMAKE_DEBUG_POSTFIX _d)
+endif ()
+
 option(PROJ4_TESTS "Enable build of collection of PROJ4 tests" ON)
 boost_report_value(PROJ4_TESTS)
 if(PROJ4_TESTS)

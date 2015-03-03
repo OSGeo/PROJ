@@ -37,3 +37,9 @@ endif(BUILD_GEOD)
 if(BUILD_NAD2BIN)
   include(bin_nad2bin.cmake)
 endif(BUILD_NAD2BIN)
+
+if (MSVC OR CMAKE_CONFIGURATION_TYPES)
+  # Add _d suffix for your debug versions of the tools
+  set_target_properties (cs2cs binproj geod nad2bin PROPERTIES
+    DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+endif ()
