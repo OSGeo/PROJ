@@ -2,7 +2,7 @@
 
 # libtool - Provide generalized library-building support services.
 # Generated automatically by config.status (proj) 4.9.1
-# Libtool was configured on host greyhound-dev:
+# Libtool was configured on host vagrant-ubuntu-trusty-32:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -66,12 +66,12 @@ PATH_SEPARATOR=":"
 
 # The host system.
 host_alias=
-host=x86_64-unknown-linux-gnu
+host=i686-pc-linux-gnu
 host_os=linux-gnu
 
 # The build system.
 build_alias=
-build=x86_64-unknown-linux-gnu
+build=i686-pc-linux-gnu
 build_os=linux-gnu
 
 # A sed program that does not truncate output.
@@ -272,10 +272,10 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/usr/lib/gcc/x86_64-linux-gnu/4.8 /usr/lib/x86_64-linux-gnu /usr/lib /lib/x86_64-linux-gnu /lib "
+sys_lib_search_path_spec="/usr/lib/gcc/i686-linux-gnu/4.8 /usr/lib/i386-linux-gnu /usr/lib /lib/i386-linux-gnu /lib "
 
 # Run-time system search path for libraries.
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/x86_64-linux-gnu/libfakeroot /usr/local/lib /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu/mesa "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/i386-linux-gnu/libfakeroot /usr/lib/i386-linux-gnu/mesa /lib/i386-linux-gnu /usr/lib/i386-linux-gnu /lib/i686-linux-gnu /usr/lib/i686-linux-gnu /usr/local/lib "
 
 # Whether dlopen is supported.
 dlopen_support=unknown
@@ -292,7 +292,7 @@ striplib="strip --strip-unneeded"
 
 
 # The linker used to build libraries.
-LD="/usr/bin/ld -m elf_x86_64"
+LD="/usr/bin/ld"
 
 # How to create reloadable object files.
 reload_flag=" -r"
