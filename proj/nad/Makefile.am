@@ -9,6 +9,7 @@ TEST27 = $(NADPATH)/test27
 TEST83 = $(NADPATH)/test83
 TESTNTV2 = $(NADPATH)/testntv2
 TESTVARIOUS = $(NADPATH)/testvarious
+TESTFLAKY = $(NADPATH)/testflaky
 TESTDATUMFILE = $(NADPATH)/testdatumfile
 TESTIGN = $(NADPATH)/testIGNF
 
@@ -17,8 +18,8 @@ pkgdata_DATA = GL27 nad.lst nad27 nad83 world epsg esri \
 		CH IGNF
 
 EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
-		test27 test83 world epsg esri tv_out.dist \
-		testvarious testdatumfile testntv2 ntv2_out.dist \
+		test27 test83 world epsg esri tv_out.dist tf_out.dist \
+		testflaky testvarious testdatumfile testntv2 ntv2_out.dist \
 		esri.extra other.extra \
 		CH IGNF testIGNF proj_outIGNF.dist \
 		makefile.vc CMakeLists.txt
