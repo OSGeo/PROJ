@@ -13,7 +13,7 @@ TESTFLAKY = $(NADPATH)/testflaky
 TESTDATUMFILE = $(NADPATH)/testdatumfile
 TESTIGN = $(NADPATH)/testIGNF
 
-pkgdata_DATA = GL27 nad.lst nad27 nad83 world epsg esri \
+pkgdata_DATA = GL27 nad.lst proj_def.dat nad27 nad83 world epsg esri \
 		esri.extra other.extra \
 		CH IGNF
 
