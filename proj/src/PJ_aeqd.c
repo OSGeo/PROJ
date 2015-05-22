@@ -54,7 +54,7 @@ PROJ_HEAD(aeqd, "Azimuthal Equidistant") "\n\tAzi, Sph&Ell\n\tlat_0 guam";
 #define EQUIT	2
 #define OBLIQ	3
 
-struct geod_geodesic g;
+static struct geod_geodesic g;
 
 FORWARD(e_guam_fwd); /* Guam elliptical */
 	double  cosphi, sinphi, t;
@@ -69,8 +69,8 @@ FORWARD(e_guam_fwd); /* Guam elliptical */
 }
 FORWARD(e_forward); /* elliptical */
 	double  coslam, cosphi, sinphi, rho, s, H, H2, c, Az, t, ct, st, cA, sA;
-  double azi1, azi2, s12;
-  double lam1, phi1, lam2, phi2;
+	double azi1, azi2, s12;
+	double lam1, phi1, lam2, phi2;
 
 	coslam = cos(lp.lam);
 	cosphi = cos(lp.phi);
@@ -90,11 +90,11 @@ FORWARD(e_forward); /* elliptical */
 			break;
 		}
 
-    phi1 = P->phi0*RHO; lam1 = P->lam0*RHO; 
-    phi2 = lp.phi*RHO;  lam2 = (lp.lam+P->lam0)*RHO; 
+		phi1 = P->phi0*RHO; lam1 = P->lam0*RHO;
+		phi2 = lp.phi*RHO;  lam2 = (lp.lam+P->lam0)*RHO;
 
-    geod_inverse(&g, phi1, lam1, phi2, lam2, &s12, &azi1, &azi2);
-    azi1 /= RHO;
+		geod_inverse(&g, phi1, lam1, phi2, lam2, &s12, &azi1, &azi2);
+		azi1 /= RHO;
 		xy.x = s12 * sin(azi1) / P->a;
 		xy.y = s12 * cos(azi1) / P->a;
 		break;
@@ -116,7 +116,7 @@ FORWARD(s_forward); /* spherical */
 oblcon:
 		if (fabs(fabs(xy.y) - 1.) < TOL)
 			if (xy.y < 0.)
-				F_ERROR 
+				F_ERROR
 			else
 				xy.x = xy.y = 0.;
 		else {
@@ -154,7 +154,7 @@ INVERSE(e_guam_inv); /* Guam elliptical */
 }
 INVERSE(e_inverse); /* elliptical */
 	double c, Az, cosAz, A, B, D, E, F, psi, t;
-  double azi1, azi2, s12, x2, y2, lat1, lon1, lat2, lon2;
+	double azi1, azi2, s12, x2, y2, lat1, lon1, lat2, lon2;
 
 	if ((c = hypot(xy.x, xy.y)) < EPS10) {
 		lp.phi = P->phi0;
@@ -163,16 +163,16 @@ INVERSE(e_inverse); /* elliptical */
 	}
 	if (P->mode == OBLIQ || P->mode == EQUIT) {
 
-    x2 = xy.x * P->a;
-    y2 = xy.y * P->a;
-    lat1 = P->phi0 * RHO;
-    lon1 = P->lam0 * RHO;
-    azi1 = atan2(x2, y2) * RHO;
-    s12 = sqrt(x2 * x2 + y2 * y2);
-    geod_direct(&g, lat1, lon1, azi1, s12, &lat2, &lon2, &azi2);
-    lp.phi = lat2 / RHO;
-    lp.lam = lon2 / RHO;
-    lp.lam -= P->lam0;
+		x2 = xy.x * P->a;
+		y2 = xy.y * P->a;
+		lat1 = P->phi0 * RHO;
+		lon1 = P->lam0 * RHO;
+		azi1 = atan2(x2, y2) * RHO;
+		s12 = sqrt(x2 * x2 + y2 * y2);
+		geod_direct(&g, lat1, lon1, azi1, s12, &lat2, &lon2, &azi2);
+		lp.phi = lat2 / RHO;
+		lp.lam = lon2 / RHO;
+		lp.lam -= P->lam0;
 	} else { /* Polar */
 		lp.phi = pj_inv_mlfn(P->ctx, P->mode == N_POLE ? P->Mp - c : P->Mp + c,
 			P->es, P->en);
@@ -222,7 +222,7 @@ FREEUP;
 	}
 }
 ENTRY1(aeqd, en)
-  geod_init(&g, P->a, 1.-sqrt(P->one_es));
+	geod_init(&g, P->a, P->es / (1 + sqrt(P->one_es)));
 	P->phi0 = pj_param(P->ctx, P->params, "rlat_0").f;
 	if (fabs(fabs(P->phi0) - HALFPI) < EPS10) {
 		P->mode = P->phi0 < 0. ? S_POLE : N_POLE;
