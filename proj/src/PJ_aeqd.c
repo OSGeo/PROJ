@@ -36,10 +36,11 @@
 	double	Mp; \
 	double	He; \
 	double	G; \
-	int		mode;
+	int		mode; \
+	struct geod_geodesic g;
 #define PJ_LIB__
+#include	"geodesic.h"
 #include	<projects.h>
-#include "geodesic.h"
 
 PJ_CVSID("$Id$");
 
@@ -50,11 +51,9 @@ PROJ_HEAD(aeqd, "Azimuthal Equidistant") "\n\tAzi, Sph&Ell\n\tlat_0 guam";
 #define RHO 57.295779513082320876798154814105;
 
 #define N_POLE	0
-#define S_POLE 1
+#define S_POLE	1
 #define EQUIT	2
 #define OBLIQ	3
-
-static struct geod_geodesic g;
 
 FORWARD(e_guam_fwd); /* Guam elliptical */
 	double  cosphi, sinphi, t;
@@ -93,7 +92,7 @@ FORWARD(e_forward); /* elliptical */
 		phi1 = P->phi0*RHO; lam1 = P->lam0*RHO;
 		phi2 = lp.phi*RHO;  lam2 = (lp.lam+P->lam0)*RHO;
 
-		geod_inverse(&g, phi1, lam1, phi2, lam2, &s12, &azi1, &azi2);
+		geod_inverse(&P->g, phi1, lam1, phi2, lam2, &s12, &azi1, &azi2);
 		azi1 /= RHO;
 		xy.x = s12 * sin(azi1) / P->a;
 		xy.y = s12 * cos(azi1) / P->a;
@@ -169,7 +168,7 @@ INVERSE(e_inverse); /* elliptical */
 		lon1 = P->lam0 * RHO;
 		azi1 = atan2(x2, y2) * RHO;
 		s12 = sqrt(x2 * x2 + y2 * y2);
-		geod_direct(&g, lat1, lon1, azi1, s12, &lat2, &lon2, &azi2);
+		geod_direct(&P->g, lat1, lon1, azi1, s12, &lat2, &lon2, &azi2);
 		lp.phi = lat2 / RHO;
 		lp.lam = lon2 / RHO;
 		lp.lam -= P->lam0;
@@ -222,7 +221,7 @@ FREEUP;
 	}
 }
 ENTRY1(aeqd, en)
-	geod_init(&g, P->a, P->es / (1 + sqrt(P->one_es)));
+	geod_init(&P->g, P->a, P->es / (1 + sqrt(P->one_es)));
 	P->phi0 = pj_param(P->ctx, P->params, "rlat_0").f;
 	if (fabs(fabs(P->phi0) - HALFPI) < EPS10) {
 		P->mode = P->phi0 < 0. ? S_POLE : N_POLE;
