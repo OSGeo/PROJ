@@ -34,7 +34,6 @@
 #include <ctype.h>
 
 static int pj_gc_readentry(projCtx ctx, PAFile fid, PJ_GridCatalogEntry *entry);
-static void pj_gc_sortcatalog( projCtx ctx, PJ_GridCatalog *catalog );
 
 /************************************************************************/
 /*                         pj_gc_readcatalog()                          */
@@ -82,21 +81,7 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
         }
     }
 
-    pj_gc_sortcatalog( ctx, catalog );
-
     return catalog;
-}
-
-/************************************************************************/
-/*                         pj_gc_sortcatalog()                          */
-/*                                                                      */
-/*      Sort all the entries in ascending date and within a date in     */
-/*      descending priority order.                                      */
-/************************************************************************/
-
-static void pj_gc_sortcatalog( projCtx ctx, PJ_GridCatalog *catalog )
-
-{
 }
 
 /************************************************************************/
