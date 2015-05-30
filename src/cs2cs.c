@@ -53,7 +53,6 @@ tag = '#';	/* beginning of line tag character */
 "%s\nusage: %s [ -eEfIlrstvwW [args] ] [ +opts[=arg] ]\n"
 "                   [+to [+opts[=arg] [ files ]\n";
 
-static struct FACTORS facs;
 static double (*informat)(const char *, 
                           char **); /* input data deformatter function */
 

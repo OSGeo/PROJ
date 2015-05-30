@@ -976,12 +976,10 @@ ISEA_STATIC
 struct isea_pt
 isea_forward(struct isea_dgg *g, struct isea_geo *in)
 {
-	int             tri, downtri;
+	int             tri;
 	struct isea_pt  out, coord;
 
 	tri = isea_transform(g, in, &out);
-
-	downtri = (((tri - 1) / 5) % 2 == 1);
 
 	if (g->output == ISEA_PLANE) {
 		isea_tri_plane(tri, &out, g->radius);

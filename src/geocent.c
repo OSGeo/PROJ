@@ -362,10 +362,8 @@ void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
     double CPHI;     /* cos of searched geodetic latitude */
     double SPHI;     /* sin of searched geodetic latitude */
     double SDPHI;    /* end-criterium: addition-theorem of sin(Latitude(iter)-Latitude(iter-1)) */
-    int At_Pole;     /* indicates location is in polar region */
     int iter;        /* # of continous iteration, max. 30 is always enough (s.a.) */
 
-    At_Pole = FALSE;
     P = sqrt(X*X+Y*Y);
     RR = sqrt(X*X+Y*Y+Z*Z);
 
@@ -373,7 +371,6 @@ void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
     if (P/gi->Geocent_a < genau) {
 
 /*  special case, if P=0. (X=0., Y=0.) */
-        At_Pole = TRUE;
 	*Longitude = 0.;
 
 /*  if (X,Y,Z)=(0.,0.,0.) then Height becomes semi-minor axis

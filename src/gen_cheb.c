@@ -10,7 +10,7 @@
 #endif
 	void
 gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P, int iargc, char **iargv) {
-	int NU = 15, NV = 15, i, res = -1, errin = 0, pwr;
+	int NU = 15, NV = 15, res = -1, errin = 0, pwr;
 	char *arg, fmt[15];
 	projUV low, upp, resid;
 	Tseries *F;
@@ -33,7 +33,7 @@ gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P, int iargc, char **
 	if (iargc > 0) { /* proj execution audit trail */
 		int n = 0, L;
 
-		for( i = 0 ; iargc ; --iargc) {
+		for ( ; iargc ; --iargc) {
 			arg = *iargv++;
 			if (*arg != '+') {
 				if (!n) { putchar('#'); ++n; }

@@ -422,7 +422,6 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* check if +init present */
     if (pj_param(ctx, start, "tinit").i) {
-        paralist *last = curr;
         int found_def = 0;
 
         if (!(curr = get_init(ctx,&start, curr,

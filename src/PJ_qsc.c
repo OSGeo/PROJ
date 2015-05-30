@@ -109,7 +109,7 @@ FORWARD(e_forward);
         double sinlon, coslon;
         double q, r, s;
         double theta, phi;
-        double t, mu, nu;
+        double t, mu; /* nu; */
         int area;
 
         /* Convert the geodetic latitude to a geocentric latitude.
