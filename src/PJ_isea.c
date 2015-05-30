@@ -59,7 +59,7 @@ int hex_iso(struct hex *h) {
 }
 
 ISEA_STATIC
-int hexbin2(int horizontal, double width, double x, double y,
+int hexbin2(double width, double x, double y,
                 int *i, int *j) {
 	double z, rx, ry, rz;
 	double abs_dx, abs_dy, abs_dz;
@@ -735,7 +735,7 @@ isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt, struct isea_p
 	maxcoord = (int) (sidelength * 2.0 + 0.5);
 
 	v = *pt;
-	hexbin2(0, hexwidth, v.x, v.y, &h.x, &h.y);
+	hexbin2(hexwidth, v.x, v.y, &h.x, &h.y);
 	h.iso = 0;
 	hex_iso(&h);
 
@@ -813,7 +813,7 @@ isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt, struct isea_pt *di) 
 
 	v = *pt;
 	isea_rotate(&v, -30.0);
-	hexbin2(0, hexwidth, v.x, v.y, &h.x, &h.y);
+	hexbin2(hexwidth, v.x, v.y, &h.x, &h.y);
 	h.iso = 0;
 	hex_iso(&h);
 

@@ -6,6 +6,7 @@ PROJ_HEAD(nell, "Nell") "\n\tPCyl., Sph.";
 FORWARD(s_forward); /* spheroid */
 	double k, V;
 	int i;
+	(void) P;
 
 	k = 2. * sin(lp.phi);
 	V = lp.phi * lp.phi;

@@ -36,6 +36,7 @@ PROJ_HEAD(natearth, "Natural Earth") "\n\tPCyl., Sph.";
 
 FORWARD(s_forward); /* spheroid */
 	double phi2, phi4;
+	(void) P;
 
 	phi2 = lp.phi * lp.phi;
 	phi4 = phi2 * phi2;
@@ -45,6 +46,7 @@ FORWARD(s_forward); /* spheroid */
 }
 INVERSE(s_inverse); /* spheroid */
 	double yc, tol, y2, y4, f, fder;
+	(void) P;
 
         /* make sure y is inside valid range */
 	if (xy.y > MAX_Y) {

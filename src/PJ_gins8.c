@@ -6,6 +6,7 @@ PROJ_HEAD(gins8, "Ginsburg VIII (TsNIIGAiK)") "\n\tPCyl, Sph., no inv.";
 #define	C12 0.08333333333333333
 FORWARD(s_forward); /* spheroid */
 	double t = lp.phi * lp.phi;
+	(void) P;
 
 	xy.y = lp.phi * (1. + t * C12);
 	xy.x = lp.lam * (1. - Cp * t);

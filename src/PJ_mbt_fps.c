@@ -12,6 +12,7 @@ PROJ_HEAD(mbt_fps, "McBryde-Thomas Flat-Pole Sine (No. 2)") "\n\tCyl., Sph.";
 FORWARD(s_forward); /* spheroid */
 	double k, V, t;
 	int i;
+	(void) P;
 
 	k = C3 * sin(lp.phi);
 	for (i = MAX_ITER; i ; --i) {

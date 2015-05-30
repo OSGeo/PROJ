@@ -119,6 +119,7 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **tables, int grid_count,
 {
     int  i;
     static int debug_count = 0;
+    (void) z;
 
     if( tables == NULL || grid_count == 0 )
     {

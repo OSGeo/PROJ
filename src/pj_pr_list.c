@@ -59,6 +59,7 @@ char *pj_get_def( PJ *P, int options )
     int l;
     char *definition;
     int  def_max = 10;
+    (void) options;
 
     definition = (char *) pj_malloc(def_max);
     definition[0] = '\0';

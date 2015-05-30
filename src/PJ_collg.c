@@ -5,6 +5,7 @@ PROJ_HEAD(collg, "Collignon") "\n\tPCyl, Sph.";
 #define FYC	1.77245385090551602729
 #define ONEEPS	1.0000001
 FORWARD(s_forward); /* spheroid */
+	(void) P;
 	if ((xy.y = 1. - sin(lp.phi)) <= 0.)
 		xy.y = 0.;
 	else

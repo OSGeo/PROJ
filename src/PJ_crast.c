@@ -8,12 +8,14 @@ PROJ_HEAD(crast, "Craster Parabolic (Putnins P4)")
 #define RYM	0.32573500793527994772
 #define THIRD	0.333333333333333333
 FORWARD(s_forward); /* spheroid */
+	(void) P;
 	lp.phi *= THIRD;
 	xy.x = XM * lp.lam * (2. * cos(lp.phi + lp.phi) - 1.);
 	xy.y = YM * sin(lp.phi);
 	return (xy);
 }
 INVERSE(s_inverse); /* spheroid */
+	(void) P;
 	lp.phi = 3. * asin(xy.y * RYM);
 	lp.lam = xy.x * RXM / (2. * cos((lp.phi + lp.phi) * THIRD) - 1);
 	return (lp);

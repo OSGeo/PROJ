@@ -37,11 +37,13 @@ PJ_CVSID("$Id$");
 PROJ_HEAD(geocent, "Geocentric")  "\n\t";
 
 FORWARD(forward);
+	(void) P;
         xy.x = lp.lam;
         xy.y = lp.phi;
         return xy;
 }
 INVERSE(inverse);
+	(void) P;
         lp.phi = xy.y;
         lp.lam = xy.x;
         return lp;

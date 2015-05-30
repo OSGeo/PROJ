@@ -4,11 +4,13 @@ PROJ_HEAD(eck1, "Eckert I") "\n\tPCyl., Sph.";
 #define FC	.92131773192356127802
 #define RP	.31830988618379067154
 FORWARD(s_forward); /* spheroid */
+	(void) P;
 	xy.x = FC * lp.lam * (1. - RP * fabs(lp.phi));
 	xy.y = FC * lp.phi;
 	return (xy);
 }
 INVERSE(s_inverse); /* spheroid */
+	(void) P;
 	lp.phi = xy.y / FC;
 	lp.lam = xy.x / (FC * (1. - RP * fabs(lp.phi)));
 	return (lp);

@@ -6,11 +6,13 @@ PROJ_HEAD(eck5, "Eckert V") "\n\tPCyl, Sph.";
 #define YF	0.88202554344910296438
 #define RYF	1.13375401361911319568
 FORWARD(s_forward); /* spheroid */
+	(void) P;
 	xy.x = XF * (1. + cos(lp.phi)) * lp.lam;
 	xy.y = YF * lp.phi;
 	return (xy);
 }
 INVERSE(s_inverse); /* spheroid */
+	(void) P;
 	lp.lam = RXF * xy.x / (1. + cos( lp.phi = RYF * xy.y));
 	return (lp);
 }

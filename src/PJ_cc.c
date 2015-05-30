@@ -11,6 +11,7 @@ FORWARD(s_forward); /* spheroid */
 	return (xy);
 }
 INVERSE(s_inverse); /* spheroid */
+	(void) P;
 	lp.phi = atan(xy.y);
 	lp.lam = xy.x;
 	return (lp);

@@ -66,6 +66,7 @@ pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
 	LP
 pj_gauss(projCtx ctx, LP elp, const void *en) {
 	LP slp;
+	(void) ctx;
 
 	slp.phi = 2. * atan( EN->K *
 		pow(tan(.5 * elp.phi + FORTPI), EN->C) *

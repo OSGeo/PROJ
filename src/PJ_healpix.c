@@ -466,6 +466,7 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
     }
 }
 FORWARD(s_healpix_forward); /* sphere  */
+    (void) P;
     (void) xy;
     return healpix_sphere(lp);
 }

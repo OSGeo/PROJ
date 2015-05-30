@@ -8,6 +8,7 @@ PROJ_HEAD(mbtfpp, "McBride-Thomas Flat-Polar Parabolic") "\n\tCyl., Sph.";
 #define C13	.33333333333333333333
 #define ONEEPS	1.0000001
 FORWARD(s_forward); /* spheroid */
+	(void) P;
 	lp.phi = asin(CS * sin(lp.phi));
 	xy.x = FXC * lp.lam * (2. * cos(C23 * lp.phi) - 1.);
 	xy.y = FYC * sin(C13 * lp.phi);

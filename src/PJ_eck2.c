@@ -6,6 +6,7 @@ PROJ_HEAD(eck2, "Eckert II") "\n\tPCyl. Sph.";
 #define C13	0.33333333333333333333
 #define ONEEPS	1.0000001
 FORWARD(s_forward); /* spheroid */
+	(void) P;
 	xy.x = FXC * lp.lam * (xy.y = sqrt(4. - 3. * sin(fabs(lp.phi))));
 	xy.y = FYC * (2. - xy.y);
 	if ( lp.phi < 0.) xy.y = -xy.y;

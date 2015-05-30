@@ -4,6 +4,7 @@ PROJ_HEAD(august, "August Epicycloidal") "\n\tMisc Sph, no inv.";
 #define M 1.333333333333333
 FORWARD(s_forward); /* spheroid */
 	double t, c1, c, x1, x12, y1, y12;
+	(void) P;
 
 	t = tan(.5 * lp.phi);
 	c1 = sqrt(1. - t * t);

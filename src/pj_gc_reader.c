@@ -155,6 +155,8 @@ static int pj_gc_read_csv_line( projCtx ctx, PAFile fid,
 
 double pj_gc_parsedate( projCtx ctx, const char *date_string )
 {
+    (void) ctx;
+
     if( strlen(date_string) == 10 
         && date_string[4] == '-' && date_string[7] == '-' ) 
     {

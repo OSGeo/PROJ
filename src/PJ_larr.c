@@ -4,6 +4,7 @@
 PROJ_HEAD(larr, "Larrivee") "\n\tMisc Sph, no inv.";
 #define SIXTH .16666666666666666
 FORWARD(s_forward); /* sphere */
+	(void) P;
 	xy.x = 0.5 * lp.lam * (1. + sqrt(cos(lp.phi)));
 	xy.y = lp.phi / (cos(0.5 * lp.phi) * cos(SIXTH * lp.lam));
 	return (xy);

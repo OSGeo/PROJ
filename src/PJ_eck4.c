@@ -11,6 +11,7 @@ PROJ_HEAD(eck4, "Eckert IV") "\n\tPCyl, Sph.";
 FORWARD(s_forward); /* spheroid */
 	double p, V, s, c;
 	int i;
+	(void) P;
 
 	p = C_p * sin(lp.phi);
 	V = lp.phi * lp.phi;

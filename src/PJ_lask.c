@@ -14,6 +14,7 @@ PROJ_HEAD(lask, "Laskowski") "\n\tMisc Sph, no inv.";
 #define	b05	-0.0491032
 FORWARD(s_forward); /* sphere */
 	double l2, p2;
+	(void) P;
 
 	l2 = lp.lam * lp.lam;
 	p2 = lp.phi * lp.phi;
