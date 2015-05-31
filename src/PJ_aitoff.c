@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Implementation of the aitoff (Aitoff) and wintri (Winkel Tripel)
  *           projections.
@@ -40,8 +38,6 @@
 #ifndef M_PI_2
 #  define M_PI_2 1.57079632679489661923
 #endif
-
-PJ_CVSID("$Id$");
 
 PROJ_HEAD(aitoff, "Aitoff") "\n\tMisc Sph";
 PROJ_HEAD(wintri, "Winkel Tripel") "\n\tMisc Sph\n\tlat_1";

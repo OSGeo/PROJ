@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Load datum shift files into memory.
  * Author:   Frank Warmerdam, warmerdam@pobox.com

@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Java/JNI wrappers for PROJ.4 API.
  * Author:   Martin Desruisseaux

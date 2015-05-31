@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Implementation of the aea (Albers Equal Area) projection.
  * Author:   Gerald Evenden
@@ -42,8 +40,6 @@
 
 #define PJ_LIB__
 #include <projects.h>
-
-PJ_CVSID("$Id$");
 
 # define EPS10	1.e-10
 # define TOL7	1.e-7

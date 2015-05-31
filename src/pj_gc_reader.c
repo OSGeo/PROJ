@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Code to read a grid catalog from a .cvs file.
  * Author:   Frank Warmerdam, warmerdam@pobox.com

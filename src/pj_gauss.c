@@ -3,8 +3,6 @@
 **
 ** Copyright (c) 2003   Gerald I. Evenden
 */
-static const char
-LIBPROJ_ID[] = "$Id$";
 /*
 ** Permission is hereby granted, free of charge, to any person obtaining
 ** a copy of this software and associated documentation files (the

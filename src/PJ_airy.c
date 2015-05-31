@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Implementation of the airy (Airy) projection.
  * Author:   Gerald Evenden
@@ -36,8 +34,6 @@
 	int		no_cut;	/* do not cut at hemisphere limit */
 #define PJ_LIB__
 #include <projects.h>
-
-PJ_CVSID("$Id$");
 
 PROJ_HEAD(airy, "Airy") "\n\tMisc Sph, no inv.\n\tno_cut lat_b=";
 

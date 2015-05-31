@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Implementation of the aeqd (Azimuthal Equidistant) projection.
  * Author:   Gerald Evenden
@@ -39,8 +37,6 @@
 	int		mode;
 #define PJ_LIB__
 #include	<projects.h>
-
-PJ_CVSID("$Id$");
 
 PROJ_HEAD(aeqd, "Azimuthal Equidistant") "\n\tAzi, Sph&Ell\n\tlat_0 guam";
 

@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Implementation of the pj_ctx_* file api, and the default stdio
  *           based implementation.
@@ -30,8 +28,6 @@
 
 #include <projects.h>
 #include <string.h>
-
-PJ_CVSID("$Id$");
 
 static PAFile pj_stdio_fopen(projCtx ctx, const char *filename, 
                              const char *access);

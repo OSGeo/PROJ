@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Implementation of the projCtx thread context object.
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -29,8 +27,6 @@
 
 #include <projects.h>
 #include <string.h>
-
-PJ_CVSID("$Id$");
 
 static projCtx_t default_context;
 static volatile int       default_context_initialized = 0;

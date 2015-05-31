@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Initialize projection object from string definition.  Includes
  *           pj_init(), pj_init_plus() and pj_free() function.
@@ -36,8 +34,6 @@
 #include <errno.h>
 #include <locale.h>
 #include <ctype.h>
-
-PJ_CVSID("$Id$");
 
 typedef struct {
     projCtx ctx;

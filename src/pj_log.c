@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Implementation of pj_log() function.
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -30,8 +28,6 @@
 #include <projects.h>
 #include <string.h>
 #include <stdarg.h>
-
-PJ_CVSID("$Id$");
 
 /************************************************************************/
 /*                          pj_stderr_logger()                          */

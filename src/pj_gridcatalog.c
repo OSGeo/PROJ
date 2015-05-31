@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Code in support of grid catalogs
  * Author:   Frank Warmerdam, warmerdam@pobox.com

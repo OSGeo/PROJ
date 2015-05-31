@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Perform overall coordinate system to coordinate system 
  *           transformations (pj_transform() function) including reprojection
@@ -33,8 +31,6 @@
 #include <string.h>
 #include <math.h>
 #include "geocent.h"
-
-PJ_CVSID("$Id$");
 
 static int pj_adjust_axis( projCtx ctx, const char *axis, int denormalize_flag,
                            long point_count, int point_offset, 

@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Built in datum list.
  * Author:   Frank Warmerdam, warmerda@home.com

@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Apply datum definition to PJ structure from initialization string.
  * Author:   Frank Warmerdam, warmerda@home.com

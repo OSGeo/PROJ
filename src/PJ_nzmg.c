@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Implementation of the nzmg (New Zealand Map Grid) projection.
  *           Very loosely based upon DMA code by Bradford W. Drew
@@ -30,8 +28,6 @@
 
 #define PJ_LIB__
 #include	<projects.h>
-
-PJ_CVSID("$Id$");
 
 PROJ_HEAD(nzmg, "New Zealand Map Grid") "\n\tfixed Earth";
 

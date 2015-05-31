@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Mainline program sort of like ``proj'' for converting between
  *           two coordinate systems.

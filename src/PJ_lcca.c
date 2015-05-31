@@ -1,4 +1,3 @@
-static const char RCS_ID[] = "$Id$";
 /* PROJ.4 Cartographic Projection System 
 */
 #define MAX_ITER 10

@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Stub projection implementation for lat/long coordinates. We 
  *           don't actually change the coordinates, but we want proj=latlong
