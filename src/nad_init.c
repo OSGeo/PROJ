@@ -85,7 +85,7 @@ static void swap_words( void *data_in, int word_size, int word_count )
 int nad_ctable_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
 
 {
-    int  a_size;
+    size_t a_size;
 
     pj_ctx_fseek( ctx, fid, sizeof(struct CTABLE), SEEK_SET );
 
@@ -158,7 +158,7 @@ struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid )
 int nad_ctable2_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
 
 {
-    int  a_size;
+    size_t a_size;
 
     pj_ctx_fseek( ctx, fid, 160, SEEK_SET );
 

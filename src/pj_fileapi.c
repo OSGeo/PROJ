@@ -185,7 +185,7 @@ char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file)
     bytes_read = pj_ctx_fread(ctx, line, 1, size-1, file);
     if(bytes_read == 0)
         return NULL;
-    if(bytes_read < size) 
+    if(bytes_read < (size_t)size)
     {
         line[bytes_read] = '\0';
     }

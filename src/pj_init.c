@@ -54,7 +54,7 @@ typedef struct {
 static const char *fill_buffer(pj_read_state *state, const char *last_char)
 {
     size_t bytes_read;
-    int char_remaining, char_requested;
+    size_t char_remaining, char_requested;
 
 /* -------------------------------------------------------------------- */
 /*      Don't bother trying to read more if we are at eof, or if the    */
