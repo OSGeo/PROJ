@@ -55,7 +55,7 @@ do_geod(void) {
 	}
 	printLL(phil, laml); putchar('\n');
 }
-	void static	/* file processing function */
+	static void	/* file processing function */
 process(FILE *fid) {
 	char line[MAXLINE+3], *s;
 
