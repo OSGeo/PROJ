@@ -637,7 +637,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 void
 pj_free(PJ *P) {
     if (P) {
-        paralist *t = P->params, *n;
+        paralist *t, *n;
 
         /* free parameter list elements */
         for (t = P->params; t; t = n) {

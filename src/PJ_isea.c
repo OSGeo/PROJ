@@ -369,23 +369,14 @@ isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
 		center = icostriangles[i];
 
 		/* step 1 */
-#if 0
-		z = sph_distance(center.lon, center.lat, ll->lon, ll->lat);
-#else
 		z = acos(sin(center.lat) * sin(ll->lat)
 			 + cos(center.lat) * cos(ll->lat) * cos(ll->lon - center.lon));
-#endif
-
 		/* not on this triangle */
 		if (z > g + 0.000005) { /* TODO DBL_EPSILON */
 			continue;
 		}
-		Az = sph_azimuth(ll->lon, ll->lat, center.lon, center.lat);
 
-		Az = atan2(cos(ll->lat) * sin(ll->lon - center.lon),
-			   cos(center.lat) * sin(ll->lat)
-		- sin(center.lat) * cos(ll->lat) * cos(ll->lon - center.lon)
-			);
+		Az = sph_azimuth(center.lon, center.lat, ll->lon, ll->lat);
 
 		/* step 2 */
 

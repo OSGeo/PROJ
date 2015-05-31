@@ -116,7 +116,6 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
         memset( projdef->datum_params, 0, sizeof(double) * 7);
 
         /* parse out the parameters */
-        s = towgs84;
         for( s = towgs84; *s != '\0' && parm_count < 7; ) 
         {
             projdef->datum_params[parm_count++] = atof(s);
