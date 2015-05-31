@@ -50,7 +50,7 @@
 /************************************************************************/
 
 static int  byte_order_test = 1;
-#define IS_LSB	(((unsigned char *) (&byte_order_test))[0] == 1)
+#define IS_LSB	(1 == ((unsigned char *) (&byte_order_test))[0])
 
 static void swap_words( unsigned char *data, int word_size, int word_count )
 
