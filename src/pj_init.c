@@ -409,11 +409,11 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* put arguments into internal linked list */
     if (argc <= 0) { pj_ctx_set_errno( ctx, -1 ); goto bum_call; }
-    for (i = 0; i < argc; ++i)
-        if (i)
-            curr = curr->next = pj_mkparam(argv[i]);
-        else
-            start = curr = pj_mkparam(argv[i]);
+    start = curr = pj_mkparam(argv[0]);
+    for (i = 1; i < argc; ++i) {
+        curr->next = pj_mkparam(argv[i]);
+        curr = curr->next;
+    }
     if (ctx->last_errno) goto bum_call;
 
     /* check if +init present */

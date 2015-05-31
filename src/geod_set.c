@@ -15,11 +15,11 @@ geod_set(int argc, char **argv) {
     /* put arguments into internal linked list */
 	if (argc <= 0)
 		emess(1, "no arguments in initialization list");
-	for (i = 0; i < argc; ++i)
-		if (i)
-			curr = curr->next = pj_mkparam(argv[i]);
-		else
-			start = curr = pj_mkparam(argv[i]);
+	start = curr = pj_mkparam(argv[0]);
+	for (i = 1; i < argc; ++i) {
+		curr->next = pj_mkparam(argv[i]);
+		curr = curr->next;
+	}
 	/* set elliptical parameters */
 	if (pj_ell_set(pj_get_default_ctx(),start, &geod_a, &es)) emess(1,"ellipse setup failure");
 	/* set units */
