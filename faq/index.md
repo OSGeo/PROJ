@@ -7,7 +7,7 @@ keywords: faq, questions, problems, solutions
 
 # FAQ
 
-[Where can I find the list of projections and their arguments?](where-can-i-find-the-list-of-projections-and-their-arguments)
+[Where can I find the list of projections and their arguments?](#where-can-i-find-the-list-of-projections-and-their-arguments)
 
 Where can I find the list of projections and their arguments?
 -------------------------------------------------------------
