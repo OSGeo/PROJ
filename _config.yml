@@ -1,0 +1,11 @@
+name: PROJ.4 - Cartographic Projections Library
+markdown: kramdown
+highlighter: pygments
+timezone: GMT
+baseurl: http://proj.osgeo.org
+description: PROJ.4 is a C library for performing transformations between cartographic projections
+keywords: proj.4, proj, coordinate reference system, crs, srs, spatial reference, reproject
+exclude: [Makefile, README.md, setenv-ruby-gem.sh, LICENSE.md, CNAME]
+gems:
+- jekyll-mentions
+- jekyll-sitemap

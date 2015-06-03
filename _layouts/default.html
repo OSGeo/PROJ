@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <meta name="dcterms.language" title="ISO639-2" content="en" />
+    <meta name="dcterms.title" content="{{ page.title }}" />
+    <meta name="dcterms.description" content="{{ page.description }}" />
+    <meta name="dcterms.subject" content="{{ site.keywords}}, {{ page.keywords }}"/>
+
+    <title>{{ site.name }} | {{ page.title }}</title>
+
+    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/print.css" media="print">
+
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1><a title="PROJ.4" href="{{ site.baseurl }}">PROJ.4</a></h1>
+        <h2>Cartographic Projections Library</h2>
+
+        <section id="nav">
+          <a title="Docs" href="https://proj.readthedocs.org" class="btn">Docs</a>
+          <a title="Download" href="{{ site.baseurl }}/download" class="btn">Download</a>
+          <a rel="external" title="Wiki" href="https://github.com/OSGeo/proj.4/wiki" class="btn">Wiki</a>
+          <a rel="external" title="Issue Tracker" href="https://github.com/OSGeo/proj.4/issues" class="btn">Issue Tracker</a>
+          <a title="FAQ" href="{{ site.baseurl }}/faq" class="btn">FAQ</a>
+          <a rel="external" title="GitHub" href="https://github.com/OSGeo/proj.4" class="btn btn-github"><span class="icon"></span>GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      {{ content }}
+    </div>
+
+    <footer>
+      <div class="container">
+        <section id="footer">
+          <p><i><a title="The geo library everyone doesn't know they use" href="https://twitter.com/howardbutler/status/569577495688663040">The geo library everyone doesn't know they use</a>.</i></p>
+        </section>
+      </div>
+    </footer>
+  </body>
+</html>
