@@ -7,6 +7,9 @@ compiler:
   - gcc
   - clang
 
+before_install:
+ - sudo pip install git+git://github.com/tbonfort/cpp-coveralls.git@extensions
+
 install:
 # cmake build
   - mkdir build_cmake
@@ -47,9 +50,19 @@ install:
   - find /tmp/proj_autoconf_install_nad
   - make check
   - cd ..
+# autoconf build with grids and coverage
+  - CFLAGS="--coverage" LDFLAGS="-lgcov" ../configure
+  - make -j3
+  - cd src/.libs
+  - for i in ../*.c; do ln -s $i .; done
+  - cd ../..
+  - make check
 
 script:
   - echo "done"
+
+after_success:
+  - coveralls --extension .c
 
 notifications:
   #email:
