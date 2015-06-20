@@ -34,4 +34,3 @@ notifications:
     channels:
       - "irc.freenode.org#gdal"
     use_notice: true
-
