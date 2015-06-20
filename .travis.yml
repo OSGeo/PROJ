@@ -8,6 +8,7 @@ compiler:
   - clang
 
 install:
+# cmake build
   - mkdir build_cmake
   - cd build_cmake
   - cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
@@ -15,15 +16,37 @@ install:
   - make install
   - find /tmp/proj_cmake_install
   - cd ..
+# autoconf build
   - mkdir build_autoconf
   - cd build_autoconf
   - ../configure --prefix=/tmp/proj_autoconf_install
   - make -j3
   - make install
   - find /tmp/proj_autoconf_install
-
-script:
   - make check
+  - cd ..
+# Now with grids
+  - wget http://download.osgeo.org/proj/proj-datumgrid-1.5.zip
+  - cd nad
+  - unzip ../proj-datumgrid-1.5.zip
+  - cd ..
+# cmake build with grids
+  - mkdir build_cmake_nad
+  - cd build_cmake_nad
+  - cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install_nad
+  - make -j3
+  - make install
+  - find /tmp/proj_cmake_install_nad
+  - cd ..
+# autoconf build with grids
+  - mkdir build_autoconf_nad
+  - cd build_autoconf_nad
+  - ../configure --prefix=/tmp/proj_autoconf_install_nad
+  - make -j3
+  - make install
+  - find /tmp/proj_autoconf_install_nad
+  - make check
+  - cd ..
 
 notifications:
   #email:
