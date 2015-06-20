@@ -1,0 +1,37 @@
+# This is the config file for building proj.4 and running its test suite
+# with Travis-ci.org
+
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+install:
+  - mkdir build_cmake
+  - cd build_cmake
+  - cmake .. -DCMAKE_PREFIX_INSTALL=/tmp/proj_cmake_install
+  - make -j3
+  - make install
+  - find /tmp/proj_cmake_install
+  - cd ..
+  - mkdir build_autoconf
+  - cd build_autoconf
+  - ../configure --prefix=/tmp/proj_autoconf_install
+  - make -j3
+  - make install
+  - find /tmp/proj_autoconf_install
+
+script:
+  - make check
+
+notifications:
+  #email:
+  #  recipients:
+  #    - gdal-commits@lists.osgeo.org
+
+  irc:
+    channels:
+      - "irc.freenode.org#gdal"
+    use_notice: true
+
