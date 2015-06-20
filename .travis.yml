@@ -53,9 +53,8 @@ install:
 # autoconf build with grids and coverage
   - CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure
   - make -j3
-  - mv src/.libs/*.gc* src
-  - cd ../..
   - make check
+  - mv src/.libs/*.gc* src
 
 script:
   - echo "done"
