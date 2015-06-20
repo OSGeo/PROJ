@@ -48,7 +48,7 @@ PROJ_HEAD(aeqd, "Azimuthal Equidistant") "\n\tAzi, Sph&Ell\n\tlat_0 guam";
 
 #define EPS10 1.e-10
 #define TOL 1.e-14
-#define RHO 57.295779513082320876798154814105;
+#define RHO 57.295779513082320876798154814105
 
 #define N_POLE	0
 #define S_POLE	1
@@ -67,7 +67,7 @@ FORWARD(e_guam_fwd); /* Guam elliptical */
 	return (xy);
 }
 FORWARD(e_forward); /* elliptical */
-	double  coslam, cosphi, sinphi, rho, s, H, H2, c, Az, t, ct, st, cA, sA;
+	double  coslam, cosphi, sinphi, rho;
 	double azi1, azi2, s12;
 	double lam1, phi1, lam2, phi2;
 
@@ -152,7 +152,7 @@ INVERSE(e_guam_inv); /* Guam elliptical */
 	return (lp);
 }
 INVERSE(e_inverse); /* elliptical */
-	double c, Az, cosAz, A, B, D, E, F, psi, t;
+	double c;
 	double azi1, azi2, s12, x2, y2, lat1, lon1, lat2, lon2;
 
 	if ((c = hypot(xy.x, xy.y)) < EPS10) {
