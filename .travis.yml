@@ -51,7 +51,7 @@ install:
   - make check
   - cd ..
 # autoconf build with grids and coverage
-  - CFLAGS="--coverage" LDFLAGS="-lgcov" ../configure
+  - CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure
   - make -j3
   - cd src/.libs
   - for i in ../*.c; do ln -s $i .; done
