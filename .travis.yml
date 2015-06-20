@@ -28,7 +28,7 @@ install:
 # Now with grids
   - wget http://download.osgeo.org/proj/proj-datumgrid-1.5.zip
   - cd nad
-  - unzip ../proj-datumgrid-1.5.zip
+  - unzip -o ../proj-datumgrid-1.5.zip
   - cd ..
 # cmake build with grids
   - mkdir build_cmake_nad
