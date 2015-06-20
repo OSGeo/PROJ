@@ -48,6 +48,9 @@ install:
   - make check
   - cd ..
 
+script:
+  - echo "done"
+
 notifications:
   #email:
   #  recipients:
