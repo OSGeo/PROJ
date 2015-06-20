@@ -10,7 +10,7 @@ compiler:
 install:
   - mkdir build_cmake
   - cd build_cmake
-  - cmake .. -DCMAKE_PREFIX_INSTALL=/tmp/proj_cmake_install
+  - cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
   - make -j3
   - make install
   - find /tmp/proj_cmake_install
