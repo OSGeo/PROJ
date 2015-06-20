@@ -192,8 +192,6 @@ setup(PJ *P) { /* general initialization */
 			}
 			break;
 		case EQUIT:
-			P->akm1 = 2. * P->k0;
-			break;
 		case OBLIQ:
 			t = sin(P->phi0);
 			X = 2. * atan(ssfn_(P->phi0, t, P->e)) - HALFPI;
