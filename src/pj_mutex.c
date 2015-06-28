@@ -28,6 +28,11 @@
 
 /* projects.h and windows.h conflict - avoid this! */
 
+#if defined(MUTEX_pthread) && !defined(_XOPEN_SOURCE)
+// For pthread_mutexattr_settype
+#define _XOPEN_SOURCE 500
+#endif
+
 #ifndef _WIN32
 #include <projects.h>
 #else
