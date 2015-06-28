@@ -35,7 +35,9 @@ JNI_INCLUDE=
 export JNI_INCLUDE
 
 AC_ARG_WITH(jni,
-[  --with-jni=dir          Include Java/JNI support, add optional include dir],,)
+            [AS_HELP_STRING([--with-jni=dir],
+                            [Include Java/JNI support, add optional include dir])
+            ],,)
 
 if test "$with_jni" = "yes" ; then
 
