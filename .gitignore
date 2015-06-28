@@ -1,5 +1,6 @@
 *~
 Makefile
+Makefile.in
 CMakeFiles
 CMakeCache.txt
 CTestTestfile.cmake
