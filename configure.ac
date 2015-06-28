@@ -6,7 +6,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_LANG(C)
 
 AM_INIT_AUTOMAKE
-AM_MAINTAINER_MODE
 AM_CONFIG_HEADER(src/proj_config.h)
 
 dnl Enable as much warnings as possible
