@@ -112,7 +112,7 @@ AC_SUBST(MUTEX_SETTING,$MUTEX_SETTING)
 AC_SUBST(THREAD_LIB,$THREAD_LIB)
 
 AC_OUTPUT(Makefile cmake/Makefile src/Makefile man/Makefile man/man1/Makefile \
-	man/man3/Makefile nad/Makefile \
+	man/man3/Makefile nad/Makefile nad/install \
 	jniwrap/Makefile jniwrap/org/Makefile jniwrap/org/proj4/Makefile)
 
 AC_OUTPUT(proj.pc)

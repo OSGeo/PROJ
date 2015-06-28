@@ -10,12 +10,22 @@ cmake/project-config*.cmake
 
 /*.manifest
 /*.swp
+/aclocal.m4
 /autom4te.cache
+/config.cache
+/config.guess
 /config.log
 /config.status
-/config.cache
-/proj.pc
+/config.sub
+/configure
+/compile
+/depcomp
+/install-sh
+/libtool
+/ltmain.sh
+/missing
 /nbproject
+/proj.pc
 /bin
 /lib
 /DartConfiguration.tcl
@@ -25,7 +35,15 @@ cmake/project-config*.cmake
 /html/dl
 /html/robots.txt
 
+# m4
+/m4/libtool.m4
+/m4/ltoptions.m4
+/m4/ltsugar.m4
+/m4/ltversion.m4
+/m4/lt~obsolete.m4
+
 # nad
+/nad/install
 /nad/WI
 /nad/prvi
 /nad/WO
