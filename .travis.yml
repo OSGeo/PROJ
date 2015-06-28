@@ -11,6 +11,8 @@ before_install:
  - sudo pip install git+git://github.com/tbonfort/cpp-coveralls.git@extensions
 
 install:
+# prepare build files
+  - ./autogen.sh
 # cmake build
   - mkdir build_cmake
   - cd build_cmake
