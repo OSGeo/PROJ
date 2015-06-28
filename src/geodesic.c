@@ -1087,6 +1087,9 @@ real InverseStart(const struct geod_geodesic* g,
     /* bet12 = bet2 - bet1 in [0, pi); bet12a = bet2 + bet1 in (-pi, 0] */
     sbet12 = sbet2 * cbet1 - cbet2 * sbet1,
     cbet12 = cbet2 * cbet1 + sbet2 * sbet1;
+  boolx shortline = cbet12 >= 0 && sbet12 < (real)(0.5) &&
+    cbet2 * lam12 < (real)(0.5);
+  real omg12 = lam12, somg12, comg12, ssig12, csig12;
 #if defined(__GNUC__) && __GNUC__ == 4 &&       \
   (__GNUC_MINOR__ < 6 || defined(__MINGW32__))
   /* Volatile declaration needed to fix inverse cases
@@ -1104,9 +1107,6 @@ real InverseStart(const struct geod_geodesic* g,
 #else
   real sbet12a = sbet2 * cbet1 + cbet2 * sbet1;
 #endif
-  boolx shortline = cbet12 >= 0 && sbet12 < (real)(0.5) &&
-    cbet2 * lam12 < (real)(0.5);
-  real omg12 = lam12, somg12, comg12, ssig12, csig12;
   if (shortline) {
     real sbetm2 = sq(sbet1 + sbet2);
     /* sin((bet1+bet2)/2)^2
