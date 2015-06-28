@@ -3,8 +3,6 @@
 **
 ** Copyright (c) 2003   Gerald I. Evenden
 */
-static const char
-LIBPROJ_ID[] = "$Id$";
 /*
 ** Permission is hereby granted, free of charge, to any person obtaining
 ** a copy of this software and associated documentation files (the
@@ -66,6 +64,7 @@ pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
 	LP
 pj_gauss(projCtx ctx, LP elp, const void *en) {
 	LP slp;
+	(void) ctx;
 
 	slp.phi = 2. * atan( EN->K *
 		pow(tan(.5 * elp.phi + FORTPI), EN->C) *

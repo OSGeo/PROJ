@@ -11,7 +11,7 @@ pj_ell_set(projCtx ctx, paralist *pl, double *a, double *es) {
 	int i;
 	double b=0.0, e;
 	char *name;
-	paralist *start = 0, *curr;
+	paralist *start = 0;
 
         /* clear any previous error */
         pj_ctx_set_errno(ctx,0);
@@ -28,11 +28,10 @@ pj_ell_set(projCtx ctx, paralist *pl, double *a, double *es) {
 			char *s;
 
 			for (start = pl; start && start->next ; start = start->next) ;
-			curr = start;
 			for (i = 0; (s = pj_ellps[i].id) && strcmp(name, s) ; ++i) ;
 			if (!s) { pj_ctx_set_errno( ctx, -9); return 1; }
-			curr = curr->next = pj_mkparam(pj_ellps[i].major);
-			curr = curr->next = pj_mkparam(pj_ellps[i].ell);
+			start->next = pj_mkparam(pj_ellps[i].major);
+			start->next->next = pj_mkparam(pj_ellps[i].ell);
 		}
 		*a = pj_param(ctx,pl, "da").f;
 		if (pj_param(ctx,pl, "tes").i) /* eccentricity squared */

@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id: pj_apply_gridshift.c 1831 2010-03-16 12:44:36Z warmerdam $
- *
  * Project:  PROJ.4
  * Purpose:  Apply vertical datum shifts based on grid shift files, normally
  *           geoid grids mapping WGS84 to NAVD88 or something similar.

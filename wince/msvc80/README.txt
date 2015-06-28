@@ -1,4 +1,3 @@
-$Id$
 -------------------------------------------------------------------------------
 PROJ.4 port for Windows CE
 Author: Mateusz Loskot (mateusz@loskot.net)

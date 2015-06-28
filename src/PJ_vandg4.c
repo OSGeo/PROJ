@@ -5,6 +5,7 @@ PROJ_HEAD(vandg4, "van der Grinten IV") "\n\tMisc Sph, no inv.";
 #define TWORPI	0.63661977236758134308
 FORWARD(s_forward); /* spheroid */
 	double x1, t, bt, ct, ft, bt2, ct2, dt, dt2;
+	(void) P;
 
 	if (fabs(lp.phi) < TOL) {
 		xy.x = lp.lam;

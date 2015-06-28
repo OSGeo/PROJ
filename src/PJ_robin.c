@@ -69,6 +69,7 @@ static const struct COEFS Y[] = {
 FORWARD(s_forward); /* spheroid */
 	int i;
 	double dphi;
+	(void) P;
 
 	i = floor((dphi = fabs(lp.phi)) * C1);
 	if (i >= NODES) i = NODES - 1;

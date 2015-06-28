@@ -13,6 +13,7 @@ PROJ_HEAD(mbtfpq, "McBryde-Thomas Flat-Polar Quartic") "\n\tCyl., Sph.";
 FORWARD(s_forward); /* spheroid */
 	double th1, c;
 	int i;
+	(void) P;
 
 	c = C * sin(lp.phi);
 	for (i = NITER; i; --i) {

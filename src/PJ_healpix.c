@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id: PJ_healpix.c 1504 2011-10-18 14:58:57Z landcare $
- *
  * Project: PROJ.4
  * Purpose: Implementation of the HEALPix and rHEALPix projections.
  *          For background see <http://code.scenzgrid.org/index.php/p/scenzgrid-py/source/tree/master/docs/rhealpix_dggs.pdf>.
@@ -466,6 +464,7 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
     }
 }
 FORWARD(s_healpix_forward); /* sphere  */
+    (void) P;
     (void) xy;
     return healpix_sphere(lp);
 }

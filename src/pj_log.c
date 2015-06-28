@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Implementation of pj_log() function.
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -31,8 +29,6 @@
 #include <string.h>
 #include <stdarg.h>
 
-PJ_CVSID("$Id$");
-
 /************************************************************************/
 /*                          pj_stderr_logger()                          */
 /************************************************************************/
@@ -40,6 +36,8 @@ PJ_CVSID("$Id$");
 void pj_stderr_logger( void *app_data, int level, const char *msg )
 
 {
+    (void) app_data;
+    (void) level;
     fprintf( stderr, "%s\n", msg );
 }
 

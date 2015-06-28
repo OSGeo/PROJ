@@ -71,7 +71,7 @@ pj_strerrno(int err)
     }
 #endif
     else if (err < 0) {
-        int adjusted_err = - err - 1;
+        size_t adjusted_err = - err - 1;
         if (adjusted_err < (sizeof(pj_err_list) / sizeof(char *)))
             return(pj_err_list[adjusted_err]);
         else

@@ -359,7 +359,7 @@ int main(int argc, char **argv) {
                     swap_words( row_buf, 4, ct.lim.lam * 4 );
 
                 if( fwrite( row_buf, sizeof(float), ct.lim.lam*4, fp ) 
-                    != 4 * ct.lim.lam )
+                    != (size_t)( 4 * ct.lim.lam ) )
                 {
                     perror( "write()" );
                     exit( 2 );

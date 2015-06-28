@@ -4,8 +4,6 @@
 ** Copyright (c) 2004   Gerald I. Evenden
 ** Copyright (c) 2012   Martin Raspaud
 */
-static const char
-LIBPROJ_ID[] = "$Id$";
 /*
 ** See also (section 4.4.3.2):
 **   http://www.eumetsat.int/en/area4/msg/news/us_doc/cgms_03_26.pdf

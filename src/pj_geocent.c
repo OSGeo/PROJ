@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Stub projection for geocentric.  The transformation isn't
  *           really done here since this code is 2D.  The real transformation
@@ -32,16 +30,16 @@
 #define PJ_LIB__
 #include <projects.h>
 
-PJ_CVSID("$Id$");
-
 PROJ_HEAD(geocent, "Geocentric")  "\n\t";
 
 FORWARD(forward);
+	(void) P;
         xy.x = lp.lam;
         xy.y = lp.phi;
         return xy;
 }
 INVERSE(inverse);
+	(void) P;
         lp.phi = xy.y;
         lp.lam = xy.x;
         return lp;

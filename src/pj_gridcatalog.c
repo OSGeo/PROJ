@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Code in support of grid catalogs
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -43,8 +41,9 @@ static PJ_GridCatalog *grid_catalog_list = NULL;
 /************************************************************************/
 
 void pj_gc_unloadall( projCtx ctx )
-
 {
+    (void) ctx;
+
     while( grid_catalog_list != NULL )
     {
         int i;
@@ -105,6 +104,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
 
 {
     int i;
+    (void) z;
 
     if( defn->catalog == NULL ) 
     {

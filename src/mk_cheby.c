@@ -36,7 +36,7 @@ Tseries *
 mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(projUV), 
          int nu, int nv, int power) {
     int j, i, nru, nrv, *ncu, *ncv;
-    Tseries *T;
+    Tseries *T = NULL;
     projUV **w;
     double cutres;
 

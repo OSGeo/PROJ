@@ -17,6 +17,7 @@ PROJ_HEAD(hatano, "Hatano Asymmetrical Equal Area") "\n\tPCyl, Sph.";
 FORWARD(s_forward); /* spheroid */
 	double th1, c;
 	int i;
+	(void) P;
 
 	c = sin(lp.phi) * (lp.phi < 0. ? CS : CN);
 	for (i = NITER; i; --i) {

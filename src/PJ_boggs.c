@@ -11,6 +11,7 @@ PROJ_HEAD(boggs, "Boggs Eumorphic") "\n\tPCyl., no inv., Sph.";
 FORWARD(s_forward); /* spheroid */
 	double theta, th1, c;
 	int i;
+	(void) P;
 
 	theta = lp.phi;
 	if (fabs(fabs(lp.phi) - HALFPI) < EPS)

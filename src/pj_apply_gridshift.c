@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Apply datum shifts based on grid shift files (normally NAD27 to
  *           NAD83 or the reverse).  This module is responsible for keeping
@@ -119,6 +117,7 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **tables, int grid_count,
 {
     int  i;
     static int debug_count = 0;
+    (void) z;
 
     if( tables == NULL || grid_count == 0 )
     {

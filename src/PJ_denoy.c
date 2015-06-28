@@ -7,6 +7,7 @@ PROJ_HEAD(denoy, "Denoyer Semi-Elliptical") "\n\tPCyl., no inv., Sph.";
 #define D1	0.9
 #define D5	0.03
 FORWARD(s_forward); /* spheroid */
+	(void) P;
 	xy.y = lp.phi;
 	xy.x = lp.lam;
 	lp.lam = fabs(lp.lam);

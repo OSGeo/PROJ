@@ -105,11 +105,8 @@ qsc_shift_lon_origin(double lon, double offset) {
 /* Forward projection, ellipsoid */
 FORWARD(e_forward);
         double lat, lon;
-        double sinlat, coslat;
-        double sinlon, coslon;
-        double q, r, s;
         double theta, phi;
-        double t, mu, nu;
+        double t, mu; /* nu; */
         int area;
 
         /* Convert the geodetic latitude to a geocentric latitude.
@@ -127,35 +124,7 @@ FORWARD(e_forward);
          * directly from phi, lam. For the other faces, we must use
          * unit sphere cartesian coordinates as an intermediate step. */
         lon = lp.lam;
-        if (P->face != FACE_TOP && P->face != FACE_BOTTOM) {
-            if (P->face == FACE_RIGHT) {
-                lon = qsc_shift_lon_origin(lon, +HALFPI);
-            } else if (P->face == FACE_BACK) {
-                lon = qsc_shift_lon_origin(lon, +PI);
-            } else if (P->face == FACE_LEFT) {
-                lon = qsc_shift_lon_origin(lon, -HALFPI);
-            }
-            sinlat = sin(lat);
-            coslat = cos(lat);
-            sinlon = sin(lon);
-            coslon = cos(lon);
-            q = coslat * coslon;
-            r = coslat * sinlon;
-            s = sinlat;
-        }
-        if (P->face == FACE_FRONT) {
-            phi = acos(q);
-            theta = qsc_fwd_equat_face_theta(phi, s, r, &area);
-        } else if (P->face == FACE_RIGHT) {
-            phi = acos(r);
-            theta = qsc_fwd_equat_face_theta(phi, s, -q, &area);
-        } else if (P->face == FACE_BACK) {
-            phi = acos(-q);
-            theta = qsc_fwd_equat_face_theta(phi, s, -r, &area);
-        } else if (P->face == FACE_LEFT) {
-            phi = acos(-r);
-            theta = qsc_fwd_equat_face_theta(phi, s, q, &area);
-        } else if (P->face == FACE_TOP) {
+        if (P->face == FACE_TOP) {
             phi = HALFPI - lat;
             if (lon >= FORTPI && lon <= HALFPI + FORTPI) {
                 area = AREA_0;
@@ -170,7 +139,7 @@ FORWARD(e_forward);
                 area = AREA_3;
                 theta = lon;
             }
-        } else /* P->face == FACE_BOTTOM */ {
+        } else if (P->face == FACE_BOTTOM) {
             phi = HALFPI + lat;
             if (lon >= FORTPI && lon <= HALFPI + FORTPI) {
                 area = AREA_0;
@@ -184,6 +153,43 @@ FORWARD(e_forward);
             } else {
                 area = AREA_3;
                 theta = (lon > 0.0 ? -lon + PI : -lon - PI);
+            }
+        } else {
+            double q, r, s;
+            double sinlat, coslat;
+            double sinlon, coslon;
+
+            if (P->face == FACE_RIGHT) {
+                lon = qsc_shift_lon_origin(lon, +HALFPI);
+            } else if (P->face == FACE_BACK) {
+                lon = qsc_shift_lon_origin(lon, +PI);
+            } else if (P->face == FACE_LEFT) {
+                lon = qsc_shift_lon_origin(lon, -HALFPI);
+            }
+            sinlat = sin(lat);
+            coslat = cos(lat);
+            sinlon = sin(lon);
+            coslon = cos(lon);
+            q = coslat * coslon;
+            r = coslat * sinlon;
+            s = sinlat;
+
+            if (P->face == FACE_FRONT) {
+                phi = acos(q);
+                theta = qsc_fwd_equat_face_theta(phi, s, r, &area);
+            } else if (P->face == FACE_RIGHT) {
+                phi = acos(r);
+                theta = qsc_fwd_equat_face_theta(phi, s, -q, &area);
+            } else if (P->face == FACE_BACK) {
+                phi = acos(-q);
+                theta = qsc_fwd_equat_face_theta(phi, s, -r, &area);
+            } else if (P->face == FACE_LEFT) {
+                phi = acos(-r);
+                theta = qsc_fwd_equat_face_theta(phi, s, q, &area);
+            } else {
+                /* Impossible */
+                phi = theta = 0.0;
+                area = AREA_0;
             }
         }
 

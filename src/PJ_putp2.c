@@ -10,6 +10,7 @@ PROJ_HEAD(putp2, "Putnins P2") "\n\tPCyl., Sph.";
 FORWARD(s_forward); /* spheroid */
 	double p, c, s, V;
 	int i;
+	(void) P;
 
 	p = C_p * sin(lp.phi);
 	s = lp.phi * lp.phi;

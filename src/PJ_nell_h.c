@@ -4,6 +4,7 @@ PROJ_HEAD(nell_h, "Nell-Hammer") "\n\tPCyl., Sph.";
 #define NITER 9
 #define EPS 1e-7
 FORWARD(s_forward); /* spheroid */
+	(void) P;
 	xy.x = 0.5 * lp.lam * (1. + cos(lp.phi));
 	xy.y = 2.0 * (lp.phi - tan(0.5 *lp.phi));
 	return (xy);
@@ -11,6 +12,7 @@ FORWARD(s_forward); /* spheroid */
 INVERSE(s_inverse); /* spheroid */
 	double V, c, p;
 	int i;
+	(void) P;
 
 	p = 0.5 * xy.y;
 	for (i = NITER; i ; --i) {

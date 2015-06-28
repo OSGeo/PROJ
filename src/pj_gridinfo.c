@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Functions for handling individual PJ_GRIDINFO's.  Includes
  *           loaders for all formats but CTABLE (in nad_init.c).
@@ -52,7 +50,7 @@
 /************************************************************************/
 
 static int  byte_order_test = 1;
-#define IS_LSB	(((unsigned char *) (&byte_order_test))[0] == 1)
+#define IS_LSB	(1 == ((unsigned char *) (&byte_order_test))[0])
 
 static void swap_words( unsigned char *data, int word_size, int word_count )
 
@@ -227,7 +225,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
             if( pj_ctx_fread( ctx, row_buf,
                               sizeof(double), gi->ct->lim.lam * 2, fid )
-                != 2 * gi->ct->lim.lam )
+                != (size_t)( 2 * gi->ct->lim.lam ) )
             {
                 pj_dalloc( row_buf );
                 pj_dalloc( ct_tmp.cvs );
@@ -305,7 +303,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 
             if( pj_ctx_fread( ctx, row_buf, sizeof(float),
                               gi->ct->lim.lam*4, fid )
-                != 4 * gi->ct->lim.lam )
+                != (size_t)( 4 * gi->ct->lim.lam ) )
             {
                 pj_dalloc( row_buf );
                 pj_dalloc( ct_tmp.cvs );
@@ -370,7 +368,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         }
 
         if( pj_ctx_fread( ctx, ct_tmp.cvs, sizeof(float), words, fid )
-            != words )
+            != (size_t)words )
         {
             pj_dalloc( ct_tmp.cvs );
             pj_release_lock();

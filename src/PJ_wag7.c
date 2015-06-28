@@ -3,6 +3,7 @@
 PROJ_HEAD(wag7, "Wagner VII") "\n\tMisc Sph, no inv.";
 FORWARD(s_forward); /* sphere */
 	double theta, ct, D;
+	(void) P;
 
 	theta = asin(xy.y = 0.90630778703664996 * sin(lp.phi));
 	xy.x = 2.66723 * (ct = cos(theta)) * sin(lp.lam /= 3.);

@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 #
 # Autotools boostrapping script
 #

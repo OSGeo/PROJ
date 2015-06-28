@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Code to manage the list of currently loaded (cached) PJ_GRIDINFOs
  *           See pj_gridinfo.c for details of loading individual grids.
@@ -178,7 +176,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
 /* -------------------------------------------------------------------- */
     for( s = nadgrids; *s != '\0'; )
     {
-        int   end_char;
+        size_t end_char;
         int   required = 1;
         char  name[128];
 

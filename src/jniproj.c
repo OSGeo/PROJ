@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Java/JNI wrappers for PROJ.4 API.
  * Author:   Antonello Andrea
@@ -57,9 +55,6 @@
 #define PJ_MAX_DIMENSION 100
 /* The PJ_MAX_DIMENSION value appears also in quoted strings.
    Please perform a search-and-replace if this value is changed. */
-
-PJ_CVSID("$Id$");
-
 
 /*!
  * \brief

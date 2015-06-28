@@ -3,6 +3,8 @@
 PROJ_HEAD(nicol, "Nicolosi Globular") "\n\tMisc Sph, no inv.";
 #define EPS	1e-10
 FORWARD(s_forward); /* spheroid */
+	(void) P;
+
 	if (fabs(lp.lam) < EPS) {
 		xy.x = 0;
 		xy.y = lp.phi;

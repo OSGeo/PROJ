@@ -37,8 +37,6 @@
 #include <string.h>
 #include <stdio.h>
 
-PJ_CVSID("$Id$");	
-
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
 
 /**

@@ -1,6 +1,4 @@
 /******************************************************************************
- * $Id$
- *
  * Project:  PROJ.4
  * Purpose:  Primary (private) include file for PROJ.4 library.
  * Author:   Gerald Evenden
@@ -512,17 +510,6 @@ struct PJ_UNITS *pj_get_units_ref( void );
 struct PJ_LIST  *pj_get_list_ref( void );
 struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
  
-#ifndef DISABLE_CVSID
-#  if defined(__GNUC__) && __GNUC__ >= 4
-#    define PJ_CVSID(string)     static char pj_cvsid[] __attribute__((used)) = string;
-#  else
-#    define PJ_CVSID(string)     static char pj_cvsid[] = string; \
-static char *cvsid_aw() { return( cvsid_aw() ? ((char *) NULL) : pj_cvsid ); }
-#  endif
-#else
-#  define PJ_CVSID(string)
-#endif
-
 #ifdef __cplusplus
 }
 #endif
