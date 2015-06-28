@@ -40,7 +40,7 @@ FREEUP;
 	}
 }
 ENTRY1(cea, apa)
-	double t;
+	double t = 0.0;
 
 	if (pj_param(P->ctx, P->params, "tlat_ts").i) {
 		P->k0 = cos(t = pj_param(P->ctx, P->params, "rlat_ts").f);
