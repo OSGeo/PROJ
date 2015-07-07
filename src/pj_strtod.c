@@ -28,7 +28,11 @@
  ****************************************************************************/
 
 #include "projects.h"
+
+#ifndef _MSVC_VER
 #include "proj_config.h"
+#endif
+
 #include <stdlib.h>
 #include <locale.h>
 #include <errno.h>
