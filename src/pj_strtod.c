@@ -29,7 +29,7 @@
 
 #include "projects.h"
 
-#ifndef _MSVC_VER
+#ifndef _MSC_VER
 #include "proj_config.h"
 #endif
 
