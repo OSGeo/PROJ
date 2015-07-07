@@ -33,6 +33,7 @@
 #include <string.h>
 #include <math.h>
 #include "emess.h"
+#include <locale.h>
 
 #define MAX_LINE 1000
 #define MAX_PARGS 100
@@ -167,6 +168,12 @@ int main(int argc, char **argv)
     FILE *fid;
     int from_argc=0, to_argc=0, eargc = 0, c, mon = 0;
     int have_to_flag = 0, inverse = 0, i;
+    int use_env_locale = 0;
+
+    /* This is just to check that pj_init() is locale-safe */
+    /* Used by nad/testvarious */
+    if( getenv("PROJ_USE_ENV_LOCALE") != NULL )
+        use_env_locale = 1;
 
     if ((emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != NULL)
         ++emess_dat.Prog_name;
@@ -336,6 +343,12 @@ int main(int argc, char **argv)
         to_argc = argcount;
     }
 
+    if( use_env_locale )
+    {
+        /* Set locale from environment */
+        setlocale(LC_ALL, "");
+    }
+
     if( from_argc == 0 && to_argc != 0 )
     {
         /* we will generate the from proj as the latlong of the +to in a bit */
@@ -387,6 +400,12 @@ int main(int argc, char **argv)
             emess(3,"projection initialization failure\ncause: %s",
                   pj_strerrno(pj_errno));
         }   
+    }
+
+    if( use_env_locale )
+    {
+        /* Restore C locale to avoid issues in parsing/outputing numbers*/
+        setlocale(LC_ALL, "C");
     }
 
     if (mon) {

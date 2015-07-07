@@ -40,6 +40,10 @@ extern "C" {
 /* Try to update this every version! */
 #define PJ_VERSION 491
 
+/* pj_init() and similar functions can be used with a non-C locale */
+/* Can be detected too at runtime if the symbol pj_atof exists */
+#define PJ_LOCALE_SAFE 1
+
 extern char const pj_release[]; /* global release id string */
 
 #define RAD_TO_DEG	57.29577951308232

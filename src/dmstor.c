@@ -108,6 +108,6 @@ proj_strtod(char *nptr, char **endptr)
 
     /* no offending characters, just handle normally */
 
-    return strtod(nptr, endptr);
+    return pj_strtod(nptr, endptr);
 }
 

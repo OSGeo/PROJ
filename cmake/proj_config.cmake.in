@@ -10,6 +10,9 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #cmakedefine HAVE_LIBM 1
 
+/* Define to 1 if you have localeconv */
+#cmakedefine HAVE_LOCALECONV 1
+
 /* Define to 1 if you have the <memory.h> header file. */
 #cmakedefine HAVE_MEMORY_H 1
 

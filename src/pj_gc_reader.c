@@ -152,7 +152,7 @@ double pj_gc_parsedate( projCtx ctx, const char *date_string )
     }
     else 
     {
-        return atof(date_string);
+        return pj_atof(date_string);
     }
 }
 

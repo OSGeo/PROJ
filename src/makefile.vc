@@ -54,7 +54,9 @@ support = \
 	nad_cvt.obj nad_init.obj nad_intr.obj \
 	pj_utils.obj pj_gridlist.obj pj_gridinfo.obj \
 	proj_mdist.obj pj_mutex.obj pj_initcache.obj \
-	pj_ctx.obj pj_fileapi.obj pj_log.obj pj_apply_vgridshift.obj
+	pj_ctx.obj pj_fileapi.obj pj_log.obj pj_apply_vgridshift.obj \
+	pj_strtod.obj
+
 geodesic = geodesic.obj
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc) \
 	$(geodesic)
@@ -68,7 +70,7 @@ GEOD_EXE    = geod.exe
 NAD2BIN_EXE = nad2bin.exe
 
 CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" \
-		-DHAVE_STRERROR=1 $(OPTFLAGS)
+		-DHAVE_STRERROR=1 -DHAVE_LOCALECONV=1 $(OPTFLAGS)
 
 default:	all
 
