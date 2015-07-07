@@ -5,6 +5,8 @@ platform:
 environment:
   matrix:
 
+  - BUILD_TYPE: nmake
+
 # Does not work
 # VS 2008
 #  - BUILD_TYPE: cmake
@@ -22,7 +24,6 @@ environment:
   - BUILD_TYPE: cmake
     VS_VERSION: Visual Studio 12
 
-  - BUILD_TYPE: nmake
 
 shallow_clone: true
 
