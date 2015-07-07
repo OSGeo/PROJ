@@ -61,7 +61,7 @@ pj_param(projCtx ctx, paralist *pl, const char *opt) {
 			value.i = atoi(opt);
 			break;
 		case 'd':	/* simple real input */
-			value.f = atof(opt);
+			value.f = pj_atof(opt);
 			break;
 		case 'r':	/* degrees input */
 			value.f = dmstor_ctx(ctx, opt, 0);

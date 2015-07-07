@@ -26,6 +26,8 @@ AC_CHECK_LIB(m,exp,,,)
 dnl We check for headers
 AC_HEADER_STDC
 
+AC_CHECK_FUNC(localeconv, [AC_DEFINE(HAVE_LOCALECONV,1,[Define to 1 if you have localeconv])])
+
 dnl ---------------------------------------------------------------------------
 dnl Check for JNI support.
 dnl ---------------------------------------------------------------------------

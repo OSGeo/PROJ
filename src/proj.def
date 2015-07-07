@@ -72,3 +72,5 @@ EXPORTS
 	pj_ctx_ftell            @70
 	pj_ctx_fclose           @71
 	pj_open_lib             @72
+	pj_atof                 @73
+	pj_strtod               @74

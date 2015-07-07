@@ -509,7 +509,10 @@ struct PJ_DATUMS *pj_get_datums_ref( void );
 struct PJ_UNITS *pj_get_units_ref( void );
 struct PJ_LIST  *pj_get_list_ref( void );
 struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
- 
+
+double pj_atof( const char* nptr );
+double pj_strtod( const char *nptr, char **endptr );
+
 #ifdef __cplusplus
 }
 #endif

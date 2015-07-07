@@ -12477,6 +12477,14 @@ $as_echo "#define STDC_HEADERS 1" >>confdefs.h
 fi
 
 
+ac_fn_c_check_func "$LINENO" "localeconv" "ac_cv_func_localeconv"
+if test "x$ac_cv_func_localeconv" = xyes; then :
+
+$as_echo "#define HAVE_LOCALECONV 1" >>confdefs.h
+
+fi
+
+
 
 JNI_INCLUDE=
 export JNI_INCLUDE

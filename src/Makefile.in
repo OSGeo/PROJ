@@ -161,7 +161,8 @@ am_libproj_la_OBJECTS = PJ_aeqd.lo PJ_gnom.lo PJ_laea.lo \
 	nad_intr.lo emess.lo pj_apply_gridshift.lo pj_datums.lo \
 	pj_datum_set.lo pj_transform.lo geocent.lo pj_utils.lo \
 	pj_gridinfo.lo pj_gridlist.lo jniproj.lo pj_mutex.lo \
-	pj_initcache.lo pj_apply_vgridshift.lo geodesic.lo
+	pj_initcache.lo pj_apply_vgridshift.lo geodesic.lo \
+	pj_strtod.lo
 libproj_la_OBJECTS = $(am_libproj_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -440,7 +441,8 @@ libproj_la_SOURCES = \
 	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \
 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
 	geocent.c geocent.h pj_utils.c pj_gridinfo.c pj_gridlist.c \
-	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c geodesic.c
+	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c geodesic.c \
+	pj_strtod.c
 
 all: proj_config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -763,6 +765,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_qsfn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_release.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_strerrno.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_strtod.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_transform.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_tsfn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_units.Plo@am__quote@

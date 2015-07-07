@@ -200,6 +200,7 @@ SET(SRC_LIBPROJ_CORE
         proj_rouss.c
         rtodms.c
         vector1.c
+        pj_strtod.c
         ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
  )
 
@@ -213,6 +214,7 @@ set(HEADERS_LIBPROJ
 source_group("Header Files" FILES ${HEADERS_LIBPROJ})
 source_group("Source Files\\Core" FILES ${SRC_LIBPROJ_CORE})
 source_group("Source Files\\PJ" FILES ${SRC_LIBPROJ_PJ})
+include_directories( ${CMAKE_CURRENT_BINARY_DIR})
 source_group("CMake Files" FILES CMakeLists.txt)
 
 

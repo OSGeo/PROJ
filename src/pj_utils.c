@@ -101,8 +101,15 @@ PJ *pj_latlong_from_proj( PJ *pj_in )
             sprintf( defn+strlen(defn), " +f=%s", 
                      pj_param(pj_in->ctx,pj_in->params,"sf").s );
         else
-            sprintf( defn+strlen(defn), " +es=%.16g", 
-                     pj_in->es );
+        {
+            char* ptr = defn+strlen(defn);
+            sprintf( ptr, " +es=%.16g",  pj_in->es );
+            for(; *ptr; ptr++)
+            {
+                if( *ptr == ',' )
+                    *ptr = '.';
+            }
+        }
     }
     else
     {

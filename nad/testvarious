@@ -22,6 +22,16 @@ if test ! -x ${EXE}; then
     exit 1
 fi
 
+# Would be great to have a universale way of selecting a locale with
+# a decimal separator that is not '.'
+if command locale >/dev/null 2>/dev/null; then
+    if test `locale -a | grep fr_FR.utf8`; then
+        echo "Using locale with comma as decimal separator"
+        export LC_ALL=fr_FR.UTF-8
+        export PROJ_USE_ENV_LOCALE=1
+    fi
+fi
+
 echo "============================================"
 echo "Running ${0} using ${EXE}:"
 echo "============================================"

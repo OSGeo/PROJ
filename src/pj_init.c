@@ -32,7 +32,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <locale.h>
 #include <ctype.h>
 
 typedef struct {
@@ -389,24 +388,9 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     paralist *curr;
     int i;
     PJ *PIN = 0;
-    char *old_locale;
 
     ctx->last_errno = 0;
     start = NULL;
-
-    /*
-    ** MS Visual Studio 2012+ may have problems in multithreaded cases
-    ** as discussed in this ticket:
-    ** http://trac.osgeo.org/proj/ticket/226
-    */
-    old_locale = setlocale(LC_NUMERIC, NULL);
-    if (old_locale != NULL) {
-       if (strcmp(old_locale,"C") != 0) {
-	  old_locale = strdup(old_locale);
-	  setlocale(LC_NUMERIC,"C");
-       }else
-	  old_locale = NULL;
-    }
 
     /* put arguments into internal linked list */
     if (argc <= 0) { pj_ctx_set_errno( ctx, -1 ); goto bum_call; }
@@ -554,9 +538,9 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         s = pj_units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "sto_meter").s)) {
-        PIN->to_meter = strtod(s, &s);
+        PIN->to_meter = pj_strtod(s, &s);
         if (*s == '/') /* ratio number */
-            PIN->to_meter /= strtod(++s, 0);
+            PIN->to_meter /= pj_strtod(++s, 0);
         PIN->fr_meter = 1. / PIN->to_meter;
     } else
         PIN->to_meter = PIN->fr_meter = 1.;
@@ -569,9 +553,9 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         s = pj_units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "svto_meter").s)) {
-        PIN->vto_meter = strtod(s, &s);
+        PIN->vto_meter = pj_strtod(s, &s);
         if (*s == '/') /* ratio number */
-            PIN->vto_meter /= strtod(++s, 0);
+            PIN->vto_meter /= pj_strtod(++s, 0);
         PIN->vfr_meter = 1. / PIN->vto_meter;
     } else {
         PIN->vto_meter = PIN->to_meter;
@@ -615,11 +599,6 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
                 pj_dalloc(start);
             }
         PIN = 0;
-    }
-
-    if (old_locale != NULL) {
-       setlocale(LC_NUMERIC,old_locale);
-       free( (char*)old_locale );
     }
 
     return PIN;

@@ -1,3 +1,9 @@
+2015-07-27 Even Rouault <even.rouault@spatialys.com>
+	* : Remove setlocale() use in pj_init_ctx(), and replace uses of atof() &
+	strtod() by their locale safe variants pj_atof() and pj_strtod().
+	Proj versions from now advertize #define PJ_LOCALE_SAFE 1 in proj_api.h
+	and export pj_atof() & pj_strtod() (#226)
+
 2015-02-21 Even Rouault <even.rouault@spatialys.com>
 	* nad/epsg: regenerate nad/epsg with GDAL r28536 to avoid
 	precision loss in TOWGS84 parameters, e.g. on Amersfoort / RD
