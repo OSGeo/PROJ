@@ -15,14 +15,18 @@ int main(int argc, char* argv[])
 #include <assert.h>
 #include <unistd.h>
 
-volatile int go_on = 1;
+volatile int run = 0;
+volatile int started = 0;
 
 void* thread_main(void* unused)
 {
     projCtx p_proj_ctxt;
     projPJ p_WGS84_proj;
     projPJ p_OSGB36_proj;
-    
+
+    __sync_add_and_fetch(&started, 1);
+    while(run == 0);
+
     p_proj_ctxt=pj_ctx_alloc();
     p_WGS84_proj=pj_init_plus_ctx(p_proj_ctxt,"+proj=longlat "
             "+ellps=WGS84 +datum=WGS84 +no_defs");
@@ -30,7 +34,7 @@ void* thread_main(void* unused)
             "+proj=longlat +ellps=airy +datum=OSGB36 +nadgrids=OSTN02_NTv2.gsb "
             "+no_defs");
     
-    while(go_on)
+    while(run)
     {
         double x, y;
         int proj_ret;
@@ -61,9 +65,11 @@ int main(int argc, char* argv[])
 
     pthread_create(&tid1, &attr1, thread_main, NULL);
     pthread_create(&tid2, &attr2, thread_main, NULL);
+    while(started != 2);
+    run = 1;
     for(i=0;i<2;i++)
         sleep(1);
-    go_on = 0;
+    run = 0;
     return 0;
 }
 

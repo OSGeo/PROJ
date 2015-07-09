@@ -28,6 +28,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "proj_api.h"
 
 #ifdef _WIN32
@@ -39,7 +40,8 @@
 
 #define num_threads    10
 #define num_iterations 1000000
-#define reinit_every_iteration 0
+static int reinit_every_iteration=0;
+static int add_no_defs = 0;
 
 typedef struct {
     const char *src_def;
@@ -138,6 +140,19 @@ TestItem test_list[] = {
 
 static volatile int active_thread_count = 0;
 
+static projPJ* custom_pj_init_plus_ctx(projCtx ctx, const char* def)
+{
+    if( add_no_defs )
+    {
+        char szBuffer[256];
+        strcpy(szBuffer, def);
+        strcat(szBuffer, " +no_defs");
+        return pj_init_plus_ctx(ctx, szBuffer);
+    }
+    else
+        return pj_init_plus_ctx(ctx, def);
+}
+
 /************************************************************************/
 /*                             TestThread()                             */
 /************************************************************************/
@@ -159,15 +174,16 @@ static void TestThread()
     src_pj_list = (projPJ *) calloc(test_count,sizeof(projPJ));
     dst_pj_list = (projPJ *) calloc(test_count,sizeof(projPJ));
                                 
-#if reinit_every_iteration == 0
-    for( i = 0; i < test_count; i++ )
+    if(!reinit_every_iteration)
     {
-        TestItem *test = test_list + i;
+        for( i = 0; i < test_count; i++ )
+        {
+            TestItem *test = test_list + i;
 
-        src_pj_list[i] = pj_init_plus_ctx( ctx, test->src_def );
-        dst_pj_list[i] = pj_init_plus_ctx( ctx, test->dst_def );
+            src_pj_list[i] = custom_pj_init_plus_ctx( ctx, test->src_def );
+            dst_pj_list[i] = custom_pj_init_plus_ctx( ctx, test->dst_def );
+        }
     }
-#endif
     
 /* -------------------------------------------------------------------- */
 /*      Perform tests - over and over.                                  */
@@ -180,30 +196,30 @@ static void TestThread()
             TestItem *test = test_list + i;
             double x, y, z;
             int error;
-            int skipTest = test->skip;
-            
+
             x = test->src_x;
             y = test->src_y;
             z = test->src_z;
 
-#if reinit_every_iteration == 1
-            src_pj_list[i] = pj_init_plus_ctx( ctx, test->src_def );
-            dst_pj_list[i] = pj_init_plus_ctx( ctx, test->dst_def );
-
+            if( reinit_every_iteration )
             {
-                int skipTest = (src_pj_list[i] == NULL || dst_pj_list[i] == NULL);
-			
-                if ( skipTest != test->skip )
-                    fprintf( stderr, "Threaded projection initialization does not match unthreaded initialization\n" );
+                src_pj_list[i] = custom_pj_init_plus_ctx( ctx, test->src_def );
+                dst_pj_list[i] = custom_pj_init_plus_ctx( ctx, test->dst_def );
 
-                if (skipTest)
                 {
-                    pj_free( src_pj_list[i] );
-                    pj_free( dst_pj_list[i] );
-                    continue;
+                    int skipTest = (src_pj_list[i] == NULL || dst_pj_list[i] == NULL);
+                            
+                    if ( skipTest != test->skip )
+                        fprintf( stderr, "Threaded projection initialization does not match unthreaded initialization\n" );
+
+                    if (skipTest)
+                    {
+                        pj_free( src_pj_list[i] );
+                        pj_free( dst_pj_list[i] );
+                        continue;
+                    }
                 }
             }
-#endif
 
             if ( test->skip )
                 continue;
@@ -229,23 +245,25 @@ static void TestThread()
                          x-test->dst_x, y-test->dst_y, z-test->dst_z);
             }
 
-#if reinit_every_iteration == 1
-            pj_free( src_pj_list[i] );
-            pj_free( dst_pj_list[i] );
-#endif
+            if( reinit_every_iteration )
+            {
+                pj_free( src_pj_list[i] );
+                pj_free( dst_pj_list[i] );
+            }
         }
     }
 
 /* -------------------------------------------------------------------- */
 /*      Cleanup                                                         */
 /* -------------------------------------------------------------------- */
-#if reinit_every_iteration == 0
-    for( i = 0; i < test_count; i++ )
+    if( !reinit_every_iteration )
     {
-        pj_free( src_pj_list[i] );
-        pj_free( dst_pj_list[i] );
+        for( i = 0; i < test_count; i++ )
+        {
+            pj_free( src_pj_list[i] );
+            pj_free( dst_pj_list[i] );
+        }
     }
-#endif
     
     free( src_pj_list );
     free( dst_pj_list );
@@ -305,8 +323,8 @@ int do_main(void)
 
         projPJ src_pj, dst_pj;
 
-        src_pj = pj_init_plus( test->src_def );
-        dst_pj = pj_init_plus( test->dst_def );
+        src_pj = custom_pj_init_plus_ctx( pj_get_default_ctx(), test->src_def );
+        dst_pj = custom_pj_init_plus_ctx( pj_get_default_ctx(), test->dst_def );
 
         if( src_pj == NULL )
         {
@@ -400,14 +418,25 @@ int do_main(void)
 
 int main( int argc, char **argv )
 {
+    int i;
+    for(i=0;i<argc;i++)
+    {
+        if( strcmp(argv[i], "-reinit") == 0 )
+            reinit_every_iteration = 1;
+        else if( strcmp(argv[i], "-add_no_defs") == 0 )
+            add_no_defs = 1;
+    }
+
 #ifdef _WIN32
     /* This is an incredible weirdness but with mingw cross-compiler */
     /* 1. - b/a; where double a = 6378206.4; and double b = 6356583.8; */
     /* does not evaluate the same in the main thread or in a thread forked */
     /* by CreateThread(), so run the main in a thread... */
-    HANDLE thread = CreateThread(NULL, 0, do_main, NULL, 0, NULL);
-    WaitForSingleObject(thread, INFINITE);
-    CloseHandle( thread );
+    {
+        HANDLE thread = CreateThread(NULL, 0, do_main, NULL, 0, NULL);
+        WaitForSingleObject(thread, INFINITE);
+        CloseHandle( thread );
+    }
 #else
     do_main();
 #endif

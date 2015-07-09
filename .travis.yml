@@ -49,6 +49,11 @@ install:
   - make install
   - find /tmp/proj_autoconf_install_nad
   - make check
+  - cd src
+  - make multistresstest
+  - make test228
+  - cd ..
+  - PROJ_LIB=../nad src/multistresstest
   - cd ..
 # autoconf build with grids and coverage
   - CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure
