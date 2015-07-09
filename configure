@@ -635,6 +635,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+THREAD_LIB
 MUTEX_SETTING
 JNI_INCLUDE
 CPP
@@ -12575,8 +12576,52 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mutexes" >&5
 $as_echo_n "checking for mutexes... " >&6; }
+THREAD_LIB=""
 if test "$with_mutex" = yes -o x"$with_mutex" = x ; then
     MUTEX_SETTING=pthread
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_create in -lpthread" >&5
+$as_echo_n "checking for pthread_create in -lpthread... " >&6; }
+if ${ac_cv_lib_pthread_pthread_create+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpthread  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pthread_create ();
+int
+main ()
+{
+return pthread_create ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_pthread_pthread_create=yes
+else
+  ac_cv_lib_pthread_pthread_create=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pthread_pthread_create" >&5
+$as_echo "$ac_cv_lib_pthread_pthread_create" >&6; }
+if test "x$ac_cv_lib_pthread_pthread_create" = xyes; then :
+  PTHREAD_EXISTS=YES
+fi
+
+    if test -n "$PTHREAD_EXISTS" ; then
+        THREAD_LIB="-lpthread"
+    fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_mutexattr_settype in -lpthread" >&5
 $as_echo_n "checking for pthread_mutexattr_settype in -lpthread... " >&6; }
 if ${ac_cv_lib_pthread_pthread_mutexattr_settype+:} false; then :
@@ -12631,6 +12676,8 @@ $as_echo "disabled by user" >&6; }
 fi
 
 MUTEX_SETTING=$MUTEX_SETTING
+
+THREAD_LIB=$THREAD_LIB
 
 
 ac_config_files="$ac_config_files Makefile cmake/Makefile src/Makefile man/Makefile man/man1/Makefile man/man3/Makefile nad/Makefile jniwrap/Makefile jniwrap/org/Makefile jniwrap/org/proj4/Makefile"

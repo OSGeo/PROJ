@@ -24,8 +24,8 @@ proj_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
 nad2bin_LDADD = libproj.la
 geod_LDADD = libproj.la
-multistresstest_LDADD = libproj.la -lpthread
-test228_LDADD = libproj.la -lpthread
+multistresstest_LDADD = libproj.la @THREAD_LIB@
+test228_LDADD = libproj.la @THREAD_LIB@
 
 lib_LTLIBRARIES = libproj.la
 

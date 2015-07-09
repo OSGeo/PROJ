@@ -90,8 +90,13 @@ AC_ARG_WITH([mutex],
 	       [Disable real mutex locks (lacking pthreads)]),,)
 
 AC_MSG_CHECKING([for mutexes])
+THREAD_LIB=""
 if test "$with_mutex" = yes -o x"$with_mutex" = x ; then
     MUTEX_SETTING=pthread
+    AC_CHECK_LIB(pthread,pthread_create,PTHREAD_EXISTS=YES,,,)
+    if test -n "$PTHREAD_EXISTS" ; then
+        THREAD_LIB="-lpthread"
+    fi
     AC_CHECK_LIB(pthread,pthread_mutexattr_settype,,,)
     AC_MSG_RESULT([enabled, pthread])
 else
@@ -100,6 +105,7 @@ else
 fi
 
 AC_SUBST(MUTEX_SETTING,$MUTEX_SETTING)
+AC_SUBST(THREAD_LIB,$THREAD_LIB)
 
 AC_OUTPUT(Makefile cmake/Makefile src/Makefile man/Makefile man/man1/Makefile \
 	man/man3/Makefile nad/Makefile \

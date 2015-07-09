@@ -287,8 +287,11 @@ static void *PosixTestThread( void *pData )
 /************************************************************************/
 /*                                main()                                */
 /************************************************************************/
-int main( int argc, char **argv )
-
+#ifdef _WIN32
+static DWORD WINAPI do_main( LPVOID unused )
+#else
+int do_main(void)
+#endif
 {
 /* -------------------------------------------------------------------- */
 /*      Our first pass is to establish the correct answers for all      */
@@ -391,5 +394,22 @@ int main( int argc, char **argv )
 
     printf( "all tests complete.\n" );
 
+    return 0;
+}
+
+
+int main( int argc, char **argv )
+{
+#ifdef _WIN32
+    /* This is an incredible weirdness but with mingw cross-compiler */
+    /* 1. - b/a; where double a = 6378206.4; and double b = 6356583.8; */
+    /* does not evaluate the same in the main thread or in a thread forked */
+    /* by CreateThread(), so run the main in a thread... */
+    HANDLE thread = CreateThread(NULL, 0, do_main, NULL, 0, NULL);
+    WaitForSingleObject(thread, INFINITE);
+    CloseHandle( thread );
+#else
+    do_main();
+#endif
     return 0;
 }
