@@ -222,9 +222,11 @@ static void TestThread()
             {
                 fprintf( stderr, 
                          "Got %.15g,%.15g,%.15g\n"
-                         "Expected %.15g,%.15g,%.15g\n",
+                         "Expected %.15g,%.15g,%.15g\n"
+                         "Diff %.15g,%.15g,%.15g\n",
                          x, y, z, 
-                         test->dst_x, test->dst_y, test->dst_z );
+                         test->dst_x, test->dst_y, test->dst_z,
+                         x-test->dst_x, y-test->dst_y, z-test->dst_z);
             }
 
 #if reinit_every_iteration == 1

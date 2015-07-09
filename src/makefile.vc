@@ -63,11 +63,13 @@ LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc) \
 PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
 CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
 GEODEXE_OBJ	= geod.obj geod_set.obj geod_interface.obj emess.obj
+MULTISTRESSTEST_OBJ = multistresstest.obj
 PROJ_DLL 	= proj$(VERSION).dll
 PROJ_EXE    = proj.exe
 CS2CS_EXE   = cs2cs.exe
 GEOD_EXE    = geod.exe
 NAD2BIN_EXE = nad2bin.exe
+MULTISTRESSTEST_EXE = multistresstest.exe
 
 CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" \
 		-DHAVE_STRERROR=1 -DHAVE_LOCALECONV=1 $(OPTFLAGS)
@@ -101,6 +103,10 @@ $(GEOD_EXE):	$(GEODEXE_OBJ) $(EXE_PROJ)
 
 $(NAD2BIN_EXE):	nad2bin.obj emess.obj $(EXE_PROJ)
 	cl nad2bin.obj emess.obj $(EXE_PROJ)
+
+$(MULTISTRESSTEST_EXE): $(MULTISTRESSTEST_OBJ)
+	cl $(MULTISTRESSTEST_OBJ) $(EXE_PROJ)
+	if exist $(MULTISTRESSTEST_EXE).manifest mt -manifest $(MULTISTRESSTEST_EXE).manifest -outputresource:$(MULTISTRESSTEST_EXE);1
 
 nadshift:	nad2bin.exe
 	cd ..\nad
