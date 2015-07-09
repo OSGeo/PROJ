@@ -35,7 +35,8 @@ build_script:
   - if "%BUILD_TYPE%" == "nmake" nmake /f makefile.vc install-all
   - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" cd src
   - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" nmake /f makefile.vc multistresstest.exe
-  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" multistresstest.exe
+# Disabled for now as it scales badly
+#  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" multistresstest.exe
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
   - if "%BUILD_TYPE%" == "cmake" echo "%VS_FULL%"
