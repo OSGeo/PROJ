@@ -5,6 +5,8 @@ platform:
 environment:
   matrix:
 
+  - BUILD_TYPE: nmake
+
 # Does not work
 # VS 2008
 #  - BUILD_TYPE: cmake
@@ -22,8 +24,6 @@ environment:
   - BUILD_TYPE: cmake
     VS_VERSION: Visual Studio 12
 
-  - BUILD_TYPE: nmake
-
 shallow_clone: true
 
 build_script:
@@ -33,6 +33,9 @@ build_script:
   - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" call "%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" x86_amd64
   - if "%BUILD_TYPE%" == "nmake" nmake /f makefile.vc
   - if "%BUILD_TYPE%" == "nmake" nmake /f makefile.vc install-all
+  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" cd src
+  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" nmake /f makefile.vc multistresstest.exe
+  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" multistresstest.exe
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
   - if "%BUILD_TYPE%" == "cmake" echo "%VS_FULL%"
