@@ -1,0 +1,78 @@
+# This is the config file for building proj.4 and running its test suite
+# with Travis-ci.org
+
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+before_install:
+ - sudo pip install git+git://github.com/tbonfort/cpp-coveralls.git@extensions
+
+install:
+# cmake build
+  - mkdir build_cmake
+  - cd build_cmake
+  - cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
+  - make -j3
+  - make install
+  - find /tmp/proj_cmake_install
+  - cd ..
+# autoconf build
+  - mkdir build_autoconf
+  - cd build_autoconf
+  - ../configure --prefix=/tmp/proj_autoconf_install
+  - make -j3
+  - make install
+  - find /tmp/proj_autoconf_install
+  - make check
+  - cd ..
+# Now with grids
+  - wget http://download.osgeo.org/proj/proj-datumgrid-1.5.zip
+  - cd nad
+  - unzip -o ../proj-datumgrid-1.5.zip
+  - cd ..
+# cmake build with grids
+  - mkdir build_cmake_nad
+  - cd build_cmake_nad
+  - cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install_nad
+  - make -j3
+  - make install
+  - find /tmp/proj_cmake_install_nad
+  - cd ..
+# autoconf build with grids
+  - mkdir build_autoconf_nad
+  - cd build_autoconf_nad
+  - ../configure --prefix=/tmp/proj_autoconf_install_nad
+  - make -j3
+  - make install
+  - find /tmp/proj_autoconf_install_nad
+  - make check
+  - cd src
+  - make multistresstest
+  - make test228
+  - cd ..
+  - PROJ_LIB=../nad src/multistresstest
+  - cd ..
+# autoconf build with grids and coverage
+  - CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure
+  - make -j3
+  - make check
+  - mv src/.libs/*.gc* src
+
+script:
+  - echo "done"
+
+after_success:
+  - coveralls --extension .c
+
+notifications:
+  #email:
+  #  recipients:
+  #    - gdal-commits@lists.osgeo.org
+
+  irc:
+    channels:
+      - "irc.freenode.org#gdal"
+    use_notice: true
