@@ -82,7 +82,7 @@ subdir = .
 DIST_COMMON = INSTALL NEWS README AUTHORS ChangeLog \
 	$(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) mkinstalldirs \
-	$(srcdir)/proj.pc.in COPYING config.guess config.sub \
+	$(srcdir)/proj.pc.in COPYING compile config.guess config.sub \
 	depcomp install-sh missing ltmain.sh ltconfig
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_cflags_warn_all.m4 \
