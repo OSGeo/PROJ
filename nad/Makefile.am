@@ -17,11 +17,12 @@ pkgdata_DATA = GL27 nad.lst proj_def.dat nad27 nad83 world epsg esri \
 		esri.extra other.extra \
 		CH IGNF
 
-EXTRA_DIST = GL27 nad.lst proj_def.dat nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
+EXTRA_DIST = GL27 nad.lst nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
 		test27 test83 world epsg esri tv_out.dist tf_out.dist \
 		testflaky testvarious testdatumfile testntv2 ntv2_out.dist \
 		esri.extra other.extra \
 		CH IGNF testIGNF proj_outIGNF.dist \
+		null.lla ntf_r93.gsb nzgd2kgrid0005.gsb ntv1_can.dat \
 		makefile.vc CMakeLists.txt
 
 process-nad2bin:
