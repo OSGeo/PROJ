@@ -37,7 +37,13 @@ install:
   - make -j3
   - make install
   - make dist-all
-  - diff -Nur /tmp/proj_autoconf_install /tmp/proj_autoconf_install_from_dist_all
+  - CURRENT_PWD=`pwd`
+  - cd /tmp/proj_autoconf_install
+  - find | sort > /tmp/list_proj_autoconf_install.txt
+  - cd /tmp/proj_autoconf_install_from_dist_all
+  - find | sort > /tmp/list_proj_autoconf_install_from_dist_all.txt
+  - cd $CURRENT_PWD
+  - diff -u /tmp/proj_autoconf_install_from_dist_all.txt /tmp/list_proj_autoconf_install_from_dist_all.txt
   - cd ..
 #
   - cd ..
