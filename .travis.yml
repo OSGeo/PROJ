@@ -28,6 +28,24 @@ install:
   - make dist-all
   - find /tmp/proj_autoconf_install
   - make check
+# Check consistency of generated tarball
+  - TAR_FILENAME=`ls *.tar.gz`
+  - TAR_DIRECTORY=`basename $TAR_FILENAME .tar.gz`
+  - tar xvzf $TAR_FILENAME
+  - cd $TAR_DIRECTORY
+  - ./configure --prefix=/tmp/proj_autoconf_install_from_dist_all
+  - make -j3
+  - make install
+  - make dist-all
+  - CURRENT_PWD=`pwd`
+  - cd /tmp/proj_autoconf_install
+  - find | sort > /tmp/list_proj_autoconf_install.txt
+  - cd /tmp/proj_autoconf_install_from_dist_all
+  - find | sort > /tmp/list_proj_autoconf_install_from_dist_all.txt
+  - cd $CURRENT_PWD
+  - diff -u /tmp/list_proj_autoconf_install.txt /tmp/list_proj_autoconf_install_from_dist_all.txt
+  - cd ..
+#
   - cd ..
 # Now with grids
   - wget http://download.osgeo.org/proj/proj-datumgrid-1.5.zip
