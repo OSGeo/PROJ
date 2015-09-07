@@ -25,6 +25,7 @@ install:
   - ../configure --prefix=/tmp/proj_autoconf_install
   - make -j3
   - make install
+  - make dist-all
   - find /tmp/proj_autoconf_install
   - make check
   - cd ..
