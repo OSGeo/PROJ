@@ -43,7 +43,7 @@ install:
   - cd /tmp/proj_autoconf_install_from_dist_all
   - find | sort > /tmp/list_proj_autoconf_install_from_dist_all.txt
   - cd $CURRENT_PWD
-  - diff -u /tmp/proj_autoconf_install_from_dist_all.txt /tmp/list_proj_autoconf_install_from_dist_all.txt
+  - diff -u /tmp/list_proj_autoconf_install.txt /tmp/list_proj_autoconf_install_from_dist_all.txt
   - cd ..
 #
   - cd ..
