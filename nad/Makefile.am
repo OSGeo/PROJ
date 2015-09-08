@@ -15,8 +15,7 @@ TESTIGN = $(NADPATH)/testIGNF
 
 pkgdata_DATA = GL27 nad.lst proj_def.dat nad27 nad83 world epsg esri \
 		esri.extra other.extra \
-		CH IGNF testIGNF proj_outIGNF.dist \
-		makefile.vc CMakeLists.txt
+		CH IGNF
 
 EXTRA_DIST = GL27 nad.lst proj_def.dat nad27 nad83 pj_out27.dist pj_out83.dist td_out.dist \
 		test27 test83 world epsg esri tv_out.dist tf_out.dist \
