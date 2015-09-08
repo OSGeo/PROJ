@@ -30,16 +30,22 @@ file[s]
 ]
 file[s]
 .SH DESCRIPTION
-.I Geod
+.I geod
 (direct) and
 .I invgeod
 (inverse)
-perform geodesic (\*(lqGreat Circle\*(rq) computations for determining
+perform geodesic ("Great Circle") computations for determining
 latitude, longitude and back azimuth of a terminus point
 given a initial point latitude, longitude, azimuth and distance (direct) or
 the forward and back azimuths and distance between an initial and
 terminus point latitudes and longitudes (inverse).  The results are
 accurate to round off for |\fIf\fR| < 1/50, where \fIf\fR is flattening.
+.B invgeod
+may not be available on all platforms; in this case call
+.B geod
+with the
+.B \-I
+option.
 .PP
 The following command-line options can appear in any order:
 .TP
@@ -120,12 +126,11 @@ input for the inverse mode and respective forward and back
 azimuth from the initial and terminus points are output along
 with the distance between the points.
 .PP
-Input geographic coordinates
-(latitude and longitude) and azimuthal data must be in DMS format and input
-distance data must be in units consistent with the ellipsoid
-major axis or sphere radius units.
-Output geographic coordinates will be in DMS
-(if the
+Input geographic coordinates (latitude and longitude) and azimuthal data
+must be in decimal degrees or DMS format and input distance data must be
+in units consistent with the ellipsoid major axis or sphere radius
+units.  The latitude must lie in the range [-90d,90d].  Output
+geographic coordinates will be in DMS (if the
 .B \-f
 switch is not employed) to 0.001"
 with trailing, zero-valued minute-second fields deleted.
@@ -220,4 +225,4 @@ The \fIonline geodesic bibliography\fR,
 .br
 http://geographiclib.sf.net/geodesic-papers/biblio.html
 .SH HOME PAGE
-http://proj.osgeo.org
+https://github.com/OSGeo/proj.4/wiki
