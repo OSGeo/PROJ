@@ -1,8 +1,47 @@
+2015-05-25 Elliott Sales de Andrade <https://github.com/QuLogic>
+	* : Fix inverse stereo projection on an ellipsoid
+	https://github.com/OSGeo/proj.4/pull/277
+
+2015-09-08 Charles Karney <https://github.com/cffk>
+	* : Update Geodesic library from GeographicLib
+		* Improve accuracy of calculations by evaluating trigonometric
+		  functions more carefully and replacing the series for the reduced
+		  length with one with a smaller truncation error.
+		* The allowed ranges for longitudes and azimuths is now unlimited; it
+		  used to be [-540d, 540d).
+		* Enforce the restriction of latitude to [-90d, 90d] by returning NaNs
+		  if the latitude is outside this range.
+		* The inverse calculation sets s12 to zero for coincident points at
+		  pole (instead of returning a tiny quantity).
+		* This commit also includes a work-around for an inaccurate value for
+		  pi/180 in dmstor.c (see the definitions of DEG_IN and DEG_OUT in
+		  geod_interface.c).
+
+2015-09-06 Even Rouault <even.rouault@spatialys.com>
+	* re-add proj_def.dat which was missing from source distribution
+	https://github.com/OSGeo/proj.4/issues/274
+	https://github.com/OSGeo/proj.4/issues/296 and
+	https://github.com/OSGeo/proj.4/issues/297
+
+2015-06-01 Charles Karney <https://github.com/cffk>
+	Make PJ_aeqd.c use geodesics for inverse and forward projection
+	modification so that the geodesic structure is not global
+	https://github.com/OSGeo/proj.4/pull/281
+
 2015-07-27 Even Rouault <even.rouault@spatialys.com>
 	* : Remove setlocale() use in pj_init_ctx(), and replace uses of atof() &
 	strtod() by their locale safe variants pj_atof() and pj_strtod().
 	Proj versions from now advertize #define PJ_LOCALE_SAFE 1 in proj_api.h
 	and export pj_atof() & pj_strtod() (#226)
+
+2015-06-01 Charles Karney <https://github.com/cffk>
+	Make PJ_aeqd.c use geodesics for inverse and forward projection
+	modification so that the geodesic structure is not global
+	https://github.com/OSGeo/proj.4/pull/281
+
+2015-05-25 Elliott Sales de Andrade <https://github.com/QuLogic>
+	* : Fix inverse stereo projection on an ellipsoid
+	https://github.com/OSGeo/proj.4/pull/277
 
 2015-02-21 Even Rouault <even.rouault@spatialys.com>
 	* nad/epsg: regenerate nad/epsg with GDAL r28536 to avoid
@@ -10,11 +49,11 @@
 	EPSG:4289 (#260)
 
 2015-02-21 Howard Butler <howard@hobu.co>
-	* cmake/Proj4Version.cmake src\lib_proj.cmake: Align 
+	* cmake/Proj4Version.cmake src\lib_proj.cmake: Align
 	SOVERSION CMake configuration with autotools #263
 
 2015-02-21 Howard Butler <howard@hobu.co>
-	* src/lib_proj.cmake: define PROJ_LIB as part 
+	* src/lib_proj.cmake: define PROJ_LIB as part
 	of the compilation defines #261
 
 2015-02-21 Even Rouault <even.rouault@spatialys.com>
@@ -54,9 +93,9 @@
 	files for dist-all target
 
 2015-02-20 Howard Butler <howard@hobu.co>
-	* CMakeLists.txt cmake/Proj4Mac.cmake 
-	man/CMakeLists.txt src/bin_cs2cs.cmake 
-	src/lib_proj.cmake: Adapt Charles Karney 
+	* CMakeLists.txt cmake/Proj4Mac.cmake
+	man/CMakeLists.txt src/bin_cs2cs.cmake
+	src/lib_proj.cmake: Adapt Charles Karney
 	CMake patches for smoother build #258
 
 2015-02-20 Howard Butler <howard@hobu.co>
@@ -64,24 +103,24 @@
 	and config.sub
 
 2015-02-17 Howard Butler <howard@hobu.co>
-	* src/PJ_aitoff.c: #250 Inverse solution for Winkel Tripel 
-	from Drazan Tutic 
+	* src/PJ_aitoff.c: #250 Inverse solution for Winkel Tripel
+	from Drazan Tutic
 
 2015-02-17 Howard Butler <howard@hobu.co>
-	* CMakeLists.txt cmake/policies.cmake src/lib_proj.cmake: #256 
-	CMake tweaks to shut off some noisy policies, fix installation 
-	of proj_config header, and shut off Framework building by 
+	* CMakeLists.txt cmake/policies.cmake src/lib_proj.cmake: #256
+	CMake tweaks to shut off some noisy policies, fix installation
+	of proj_config header, and shut off Framework building by
 	default on OSX
 
 2015-02-17 Howard Butler <howard@hobu.co>
 	* src/lib_proj.cmake CMakeLists: Fix #248 healpix compilation typo
 
 2015-02-16 Howard Butler <howard@hobu.co>
-	* src/pj_init.c: Fix #237 warning about initialization 
+	* src/pj_init.c: Fix #237 warning about initialization
 	ordering due to setlocale
 
 2015-02-16 Howard Butler <howard@hobu.co>
-	* nad/Makefile.am nad/Makefile.in and others in nad/: Fix #247 to 
+	* nad/Makefile.am nad/Makefile.in and others in nad/: Fix #247 to
 	allow out-of-tree autoconf builds
 
 2014-09-17 Even Rouault <even.rouault@spatialys.com>
@@ -91,9 +130,9 @@
 
 2014-09-16  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* Generate 4.9.0 RC2. 
+	* Generate 4.9.0 RC2.
 
-	* nad/epsg: updated with Pulkova 1942(58) reverted, and vertical 
+	* nad/epsg: updated with Pulkova 1942(58) reverted, and vertical
 	coordinate system names coming through properly.
 
 	* src/pj_gridinfo.c, pj_apply_vgridshift.c, pj_apply_gridshift.c:

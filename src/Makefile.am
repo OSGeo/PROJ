@@ -29,7 +29,7 @@ test228_LDADD = libproj.la @THREAD_LIB@
 
 lib_LTLIBRARIES = libproj.la
 
-libproj_la_LDFLAGS = -no-undefined -version-info 9:0:0
+libproj_la_LDFLAGS = -no-undefined -version-info 10:0:1
 
 libproj_la_SOURCES = \
 	pj_list.h \
