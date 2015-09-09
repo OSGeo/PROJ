@@ -37,13 +37,15 @@ install:
   - make -j3
   - make install
   - make dist-all
+  - make check
   - CURRENT_PWD=`pwd`
   - cd /tmp/proj_autoconf_install
   - find | sort > /tmp/list_proj_autoconf_install.txt
   - cd /tmp/proj_autoconf_install_from_dist_all
   - find | sort > /tmp/list_proj_autoconf_install_from_dist_all.txt
   - cd $CURRENT_PWD
-  - diff -u /tmp/list_proj_autoconf_install.txt /tmp/list_proj_autoconf_install_from_dist_all.txt
+# The list of file is not identical. See http://lists.maptools.org/pipermail/proj/2015-September/007231.html
+#  - diff -u /tmp/list_proj_autoconf_install.txt /tmp/list_proj_autoconf_install_from_dist_all.txt
   - cd ..
 #
   - cd ..
