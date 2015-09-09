@@ -29,8 +29,12 @@ FORWARD(s_forward); /* spheroid */
 INVERSE(s_inverse); /* spheroid */
 	lp.phi = aasin(P->ctx, xy.y / P->C_y);
 	lp.lam = xy.x / (P->C_x * cos(lp.phi));
-	lp.phi += lp.phi;
-	lp.phi = aasin(P->ctx, (lp.phi + sin(lp.phi)) / P->C_p);
+        if (fabs(lp.lam) < PI) {
+            lp.phi += lp.phi;
+            lp.phi = aasin(P->ctx, (lp.phi + sin(lp.phi)) / P->C_p);
+        } else {
+            lp.lam = lp.phi = HUGE_VAL;
+        }
 	return (lp);
 }
 FREEUP; if (P) pj_dalloc(P); }
