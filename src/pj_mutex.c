@@ -33,6 +33,8 @@
 #define _XOPEN_SOURCE 500
 #endif
 
+#include "proj_config.h"
+
 #ifndef _WIN32
 #include <projects.h>
 #else
@@ -120,10 +122,10 @@ void pj_acquire_lock()
         pthread_mutex_lock( &pj_precreated_lock);
 
         pthread_mutexattr_init(&mutex_attr);
-#ifndef PTHREAD_MUTEX_RECURSIVE
-        pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE_NP);
-#else
+#ifdef HAVE_PTHREAD_MUTEX_RECURSIVE
         pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
+#else
+        pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE_NP);
 #endif
         pthread_mutex_init(&pj_core_lock, &mutex_attr);
         pj_core_lock_created = 1;
