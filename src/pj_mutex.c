@@ -33,9 +33,9 @@
 #define _XOPEN_SOURCE 500
 #endif
 
-#include "proj_config.h"
 
 #ifndef _WIN32
+#include "proj_config.h"
 #include <projects.h>
 #else
 #include <proj_api.h>
