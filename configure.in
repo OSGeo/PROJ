@@ -98,6 +98,10 @@ if test "$with_mutex" = yes -o x"$with_mutex" = x ; then
         THREAD_LIB="-lpthread"
     fi
     AC_CHECK_LIB(pthread,pthread_mutexattr_settype,,,)
+    AC_CHECK_DECL(PTHREAD_MUTEX_RECURSIVE,
+                  AC_DEFINE(HAVE_PTHREAD_MUTEX_RECURSIVE, [], [Define if your pthreads implementation have PTHREAD_MUTEX_RECURSIVE]),
+                  ,
+                  [#include <pthread.h>])
     AC_MSG_RESULT([enabled, pthread])
 else
     MUTEX_SETTING=stub
