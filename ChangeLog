@@ -1,6 +1,13 @@
-2015-05-25 Elliott Sales de Andrade <https://github.com/QuLogic>
-	* : Fix inverse stereo projection on an ellipsoid
-	https://github.com/OSGeo/proj.4/pull/277
+2015-09-10 Bas Couwenberg <https://github.com/sebastic>
+	* : Don't include files in proj dist, also included in proj-datumgrids
+	dist #301
+
+2015-09-10 Ture Pålsson <https://github.com/turepalsson>
+	* : PTHREAD_MUTEX_RECURSIVE detection issue on FreeBSD #303
+
+2015-09-10 Martin Raspaud <https://github.com/mraspaud>
+	* : Don't return values when doing inverse projections outside of the
+	mollweide map #304
 
 2015-09-08 Charles Karney <https://github.com/cffk>
 	* : Update Geodesic library from GeographicLib
@@ -23,10 +30,6 @@
 	https://github.com/OSGeo/proj.4/issues/296 and
 	https://github.com/OSGeo/proj.4/issues/297
 
-2015-06-01 Charles Karney <https://github.com/cffk>
-	Make PJ_aeqd.c use geodesics for inverse and forward projection
-	modification so that the geodesic structure is not global
-	https://github.com/OSGeo/proj.4/pull/281
 
 2015-07-27 Even Rouault <even.rouault@spatialys.com>
 	* : Remove setlocale() use in pj_init_ctx(), and replace uses of atof() &
