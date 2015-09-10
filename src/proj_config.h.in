@@ -21,6 +21,9 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define if your pthreads implementation have PTHREAD_MUTEX_RECURSIVE */
+#undef HAVE_PTHREAD_MUTEX_RECURSIVE
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
