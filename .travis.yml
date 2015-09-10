@@ -3,6 +3,8 @@
 
 language: c
 
+sudo: false
+
 compiler:
   - gcc
   - clang
