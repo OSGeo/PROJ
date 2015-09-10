@@ -13,6 +13,8 @@ before_install:
  - pip install --user cpp-coveralls
 
 install:
+# prepare build files
+  - ./autogen.sh
 # cmake build
   - mkdir build_cmake
   - cd build_cmake

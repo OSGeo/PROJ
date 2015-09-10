@@ -27,8 +27,8 @@ fi
 
 echo "Running aclocal"
 aclocal -I ./m4 || giveup
-#echo "Running autoheader"
-#autoheader || giveup
+echo "Running autoheader"
+autoheader || giveup
 echo "Running libtoolize"
 $LIBTOOLIZE --force --copy || giveup
 echo "Running automake"

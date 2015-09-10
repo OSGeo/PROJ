@@ -6,7 +6,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_LANG(C)
 
 AM_INIT_AUTOMAKE
-AM_MAINTAINER_MODE
 AM_CONFIG_HEADER(src/proj_config.h)
 
 dnl Enable as much warnings as possible
@@ -36,7 +35,9 @@ JNI_INCLUDE=
 export JNI_INCLUDE
 
 AC_ARG_WITH(jni,
-[  --with-jni=dir          Include Java/JNI support, add optional include dir],,)
+            [AS_HELP_STRING([--with-jni=dir],
+                            [Include Java/JNI support, add optional include dir])
+            ],,)
 
 if test "$with_jni" = "yes" ; then
 
@@ -111,8 +112,11 @@ fi
 AC_SUBST(MUTEX_SETTING,$MUTEX_SETTING)
 AC_SUBST(THREAD_LIB,$THREAD_LIB)
 
-AC_OUTPUT(Makefile cmake/Makefile src/Makefile man/Makefile man/man1/Makefile \
-	man/man3/Makefile nad/Makefile \
-	jniwrap/Makefile jniwrap/org/Makefile jniwrap/org/proj4/Makefile)
+AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile
+                 man/Makefile man/man1/Makefile man/man3/Makefile nad/Makefile
+                 jniwrap/Makefile jniwrap/org/Makefile jniwrap/org/proj4/Makefile])
+AC_CONFIG_FILES([nad/install], [chmod +x nad/install])
 
-AC_OUTPUT(proj.pc)
+AC_CONFIG_FILES([proj.pc])
+
+AC_OUTPUT
