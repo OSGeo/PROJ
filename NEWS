@@ -8,6 +8,8 @@
 
  o Remove setlocale() use in pj_init_ctx()
 
+ o Renamed PVALUE in pj_param.c to prevent clash with Windows
+
 4.9.1 Release Notes
 -------------------
 

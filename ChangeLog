@@ -1,3 +1,6 @@
+2015-09-10 sisyphus <https://github.com/sisyphus>
+	* : Rename PVALUE in pj_param.cto prevent Windows variable name clash
+
 2015-09-10 Bas Couwenberg <https://github.com/sebastic>
 	* : Don't include files in proj dist, also included in proj-datumgrids
 	dist #301
