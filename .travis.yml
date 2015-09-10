@@ -3,12 +3,14 @@
 
 language: c
 
+sudo: false
+
 compiler:
   - gcc
   - clang
 
 before_install:
- - sudo pip install git+git://github.com/tbonfort/cpp-coveralls.git@extensions
+ - pip install --user cpp-coveralls
 
 install:
 # cmake build
