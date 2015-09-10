@@ -43,6 +43,19 @@ include(Proj4Config)
 include(Proj4Mac)
 include(policies)
 
+#################################################################################
+# threading configuration
+#################################################################################
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+find_package (Threads)
+
+include(CheckIncludeFiles)
+include(CheckSymbolExists)
+CHECK_SYMBOL_EXISTS(PTHREAD_MUTEX_RECURSIVE pthread.h HAVE_PTHREAD_MUTEX_RECURSIVE_DEFN)
+if (HAVE_PTHREAD_MUTEX_RECURSIVE_DEFN)
+    add_definitions(-DHAVE_PTHREAD_MUTEX_RECURSIVE=1)
+endif()
+
 boost_report_value(PROJ_PLATFORM_NAME)
 boost_report_value(PROJ_COMPILER_NAME)
 
