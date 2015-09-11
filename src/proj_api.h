@@ -54,15 +54,18 @@ extern int pj_errno;	/* global error return code */
 
 #if !defined(PROJECTS_H)
     typedef struct { double u, v; } projUV;
+    typedef struct { double u, v, w; } projUVW;
     typedef void *projPJ;
     #define projXY projUV
     #define projLP projUV
+    #define projXYZ projUVW
     typedef void *projCtx;
 #else
     typedef PJ *projPJ;
     typedef projCtx_t *projCtx;
 #   define projXY	XY
 #   define projLP       LP
+#   define projXYZ      XYZ
 #endif
 
 /* file reading api, like stdio */
@@ -79,6 +82,9 @@ typedef struct projFileAPI_t {
 
 projXY pj_fwd(projLP, projPJ);
 projLP pj_inv(projXY, projPJ);
+
+projXYZ pj_fwd3d(projXYZ, projPJ);
+projXYZ pj_inv3d(projXYZ, projPJ);
 
 int pj_transform( projPJ src, projPJ dst, long point_count, int point_offset,
                   double *x, double *y, double *z );
