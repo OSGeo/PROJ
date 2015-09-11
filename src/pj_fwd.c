@@ -24,14 +24,23 @@ pj_fwd(LP lp, PJ *P) {
 		lp.lam -= P->lam0;	/* compute del lp.lam */
 		if (!P->over)
 			lp.lam = adjlon(lp.lam); /* adjust del longitude */
-		xy = (*P->fwd)(lp, P); /* project */
-		if ( P->ctx->last_errno )
+
+                //Check for NULL pointer
+                if (P->fwd != NULL)
+                {
+		    xy = (*P->fwd)(lp, P); /* project */
+		    if ( P->ctx->last_errno )
 			xy.x = xy.y = HUGE_VAL;
-		/* adjust for major axis and easting/northings */
-		else {
+		    /* adjust for major axis and easting/northings */
+		    else {
 			xy.x = P->fr_meter * (P->a * xy.x + P->x0);
 			xy.y = P->fr_meter * (P->a * xy.y + P->y0);
-		}
+		    }
+                }
+                else
+                {
+                    xy.x = xy.y = HUGE_VAL;
+                }
 	}
 	return xy;
 }

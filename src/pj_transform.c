@@ -152,7 +152,9 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 /* -------------------------------------------------------------------- */
     else if( !srcdefn->is_latlong )
     {
-        if( srcdefn->inv == NULL )
+
+        //Check first if projection is invertible.
+        if( (srcdefn->inv3d == NULL) && (srcdefn->inv == NULL))
         {
             pj_ctx_set_errno( pj_get_ctx(srcdefn), -17 );
             pj_log( pj_get_ctx(srcdefn), PJ_LOG_ERROR, 
@@ -160,35 +162,85 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             return -17;
         }
 
-        for( i = 0; i < point_count; i++ )
+        //If invertible - First try inv3d if defined
+        if (srcdefn->inv3d != NULL)
         {
-            XY         projected_loc;
-            LP	       geodetic_loc;
-
-            projected_loc.u = x[point_offset*i];
-            projected_loc.v = y[point_offset*i];
-
-            if( projected_loc.u == HUGE_VAL )
-                continue;
-
-            geodetic_loc = pj_inv( projected_loc, srcdefn );
-            if( srcdefn->ctx->last_errno != 0 )
+            //Three dimensions must be defined
+            if ( z == NULL)
             {
-                if( (srcdefn->ctx->last_errno != 33 /*EDOM*/ 
-                     && srcdefn->ctx->last_errno != 34 /*ERANGE*/ )
-                    && (srcdefn->ctx->last_errno > 0 
-                        || srcdefn->ctx->last_errno < -44 || point_count == 1
-                        || transient_error[-srcdefn->ctx->last_errno] == 0 ) )
-                    return srcdefn->ctx->last_errno;
-                else
-                {
-                    geodetic_loc.u = HUGE_VAL;
-                    geodetic_loc.v = HUGE_VAL;
-                }
+                pj_ctx_set_errno( pj_get_ctx(srcdefn), PJD_ERR_GEOCENTRIC);
+                return PJD_ERR_GEOCENTRIC;
             }
 
-            x[point_offset*i] = geodetic_loc.u;
-            y[point_offset*i] = geodetic_loc.v;
+            for (i=0; i < point_count; i++)
+            {
+                XYZ projected_loc;
+                XYZ geodetic_loc;
+
+                projected_loc.u = x[point_offset*i];
+                projected_loc.v = y[point_offset*i];
+                projected_loc.w = z[point_offset*i];
+
+                if (projected_loc.u == HUGE_VAL)
+                    continue;
+
+                geodetic_loc = pj_inv3d(projected_loc, srcdefn);
+                if( srcdefn->ctx->last_errno != 0 )
+                {
+                    if( (srcdefn->ctx->last_errno != 33 /*EDOM*/ 
+                         && srcdefn->ctx->last_errno != 34 /*ERANGE*/ )
+                        && (srcdefn->ctx->last_errno > 0 
+                            || srcdefn->ctx->last_errno < -44 || point_count == 1
+                            || transient_error[-srcdefn->ctx->last_errno] == 0 ) )
+                        return srcdefn->ctx->last_errno;
+                    else
+                    {
+                        geodetic_loc.u = HUGE_VAL;
+                        geodetic_loc.v = HUGE_VAL;
+                        geodetic_loc.w = HUGE_VAL;
+                    }
+                }
+
+                x[point_offset*i] = geodetic_loc.u;
+                y[point_offset*i] = geodetic_loc.v;
+                z[point_offset*i] = geodetic_loc.w;
+
+            }
+
+        }
+        else
+        {
+            //Fallback to the original PROJ.4 API 2d inversion- inv 
+            for( i = 0; i < point_count; i++ )
+            {
+                XY         projected_loc;
+                LP	       geodetic_loc;
+
+                projected_loc.u = x[point_offset*i];
+                projected_loc.v = y[point_offset*i];
+
+                if( projected_loc.u == HUGE_VAL )
+                    continue;
+
+                geodetic_loc = pj_inv( projected_loc, srcdefn );
+                if( srcdefn->ctx->last_errno != 0 )
+                {
+                    if( (srcdefn->ctx->last_errno != 33 /*EDOM*/ 
+                         && srcdefn->ctx->last_errno != 34 /*ERANGE*/ )
+                        && (srcdefn->ctx->last_errno > 0 
+                            || srcdefn->ctx->last_errno < -44 || point_count == 1
+                            || transient_error[-srcdefn->ctx->last_errno] == 0 ) )
+                        return srcdefn->ctx->last_errno;
+                    else
+                    {
+                        geodetic_loc.u = HUGE_VAL;
+                        geodetic_loc.v = HUGE_VAL;
+                    }
+                }
+
+                x[point_offset*i] = geodetic_loc.u;
+                y[point_offset*i] = geodetic_loc.v;
+            }
         }
     }
 /* -------------------------------------------------------------------- */
@@ -289,35 +341,76 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 /* -------------------------------------------------------------------- */
     else if( !dstdefn->is_latlong )
     {
-        for( i = 0; i < point_count; i++ )
+
+        if( dstdefn->fwd3d != NULL)
         {
-            XY         projected_loc;
-            LP	       geodetic_loc;
-
-            geodetic_loc.u = x[point_offset*i];
-            geodetic_loc.v = y[point_offset*i];
-
-            if( geodetic_loc.u == HUGE_VAL )
-                continue;
-
-            projected_loc = pj_fwd( geodetic_loc, dstdefn );
-            if( dstdefn->ctx->last_errno != 0 )
+            for( i = 0; i < point_count; i++ )
             {
-                if( (dstdefn->ctx->last_errno != 33 /*EDOM*/ 
-                     && dstdefn->ctx->last_errno != 34 /*ERANGE*/ )
-                    && (dstdefn->ctx->last_errno > 0 
-                        || dstdefn->ctx->last_errno < -44 || point_count == 1
-                        || transient_error[-dstdefn->ctx->last_errno] == 0 ) )
-                    return dstdefn->ctx->last_errno;
-                else
+                XYZ projected_loc;
+                LPZ geodetic_loc;
+                
+                geodetic_loc.u = x[point_offset*i];
+                geodetic_loc.v = y[point_offset*i];
+                geodetic_loc.w = z[point_offset*i];
+
+                if (geodetic_loc.u == HUGE_VAL)
+                    continue;
+
+                projected_loc = pj_fwd3d( geodetic_loc, dstdefn);
+                if( dstdefn->ctx->last_errno != 0 )
                 {
-                    projected_loc.u = HUGE_VAL;
-                    projected_loc.v = HUGE_VAL;
-                }
+                    if( (dstdefn->ctx->last_errno != 33 /*EDOM*/ 
+                         && dstdefn->ctx->last_errno != 34 /*ERANGE*/ )
+                        && (dstdefn->ctx->last_errno > 0 
+                            || dstdefn->ctx->last_errno < -44 || point_count == 1
+                            || transient_error[-dstdefn->ctx->last_errno] == 0 ) )
+                        return dstdefn->ctx->last_errno;
+                    else
+                    {
+                        projected_loc.u = HUGE_VAL;
+                        projected_loc.v = HUGE_VAL;
+                        projected_loc.w = HUGE_VAL;
+                    }
+                }   
+
+                x[point_offset*i] = projected_loc.u;
+                y[point_offset*i] = projected_loc.v;
+                z[point_offset*i] = projected_loc.w;
             }
 
-            x[point_offset*i] = projected_loc.u;
-            y[point_offset*i] = projected_loc.v;
+        }
+        else
+        {
+            for( i = 0; i < point_count; i++ )
+            {
+                XY         projected_loc;
+                LP	       geodetic_loc;
+
+                geodetic_loc.u = x[point_offset*i];
+                geodetic_loc.v = y[point_offset*i];
+
+                if( geodetic_loc.u == HUGE_VAL )
+                    continue;
+
+                projected_loc = pj_fwd( geodetic_loc, dstdefn );
+                if( dstdefn->ctx->last_errno != 0 )
+                {
+                    if( (dstdefn->ctx->last_errno != 33 /*EDOM*/ 
+                         && dstdefn->ctx->last_errno != 34 /*ERANGE*/ )
+                        && (dstdefn->ctx->last_errno > 0 
+                            || dstdefn->ctx->last_errno < -44 || point_count == 1
+                            || transient_error[-dstdefn->ctx->last_errno] == 0 ) )
+                        return dstdefn->ctx->last_errno;
+                    else
+                    {
+                        projected_loc.u = HUGE_VAL;
+                        projected_loc.v = HUGE_VAL;
+                    }
+                }   
+
+                x[point_offset*i] = projected_loc.u;
+                y[point_offset*i] = projected_loc.v;
+            }
         }
     }
 
