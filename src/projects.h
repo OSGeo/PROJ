@@ -341,7 +341,9 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #define E_ERROR(err) { pj_ctx_set_errno( P->ctx, err); freeup(P); return(0); }
 #define E_ERROR_0 { freeup(P); return(0); }
 #define F_ERROR { pj_ctx_set_errno( P->ctx, -20); return(xy); }
+#define F3_ERROR { pj_ctx_set_errno( P->ctx, -20); return(xyz); }
 #define I_ERROR { pj_ctx_set_errno( P->ctx, -20); return(lp); }
+#define I3_ERROR { pj_ctx_set_errno( P->ctx, -20); return(lpz); }
 #define FORWARD(name) static XY name(LP lp, PJ *P) { XY xy = {0.0,0.0}
 #define INVERSE(name) static LP name(XY xy, PJ *P) { LP lp = {0.0,0.0}
 #define FORWARD3D(name) static XYZ name(LPZ lpz, PJ *P) {XYZ xyz = {0.0, 0.0, 0.0}
