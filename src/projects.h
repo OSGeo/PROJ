@@ -153,10 +153,12 @@ typedef struct { double u, v, w; } projUVW;
 #define XY projUV
 #define LP projUV
 #define XYZ projUVW
+#define LPZ projUVW
 #else
 typedef struct { double x, y; }     XY;
 typedef struct { double lam, phi; } LP;
 typedef struct { double x, y, z; } XYZ;
+typedef struct { double lam, phi, z; } LPZ;
 #endif
 
 typedef union { double  f; int  i; char *s; } PROJVALUE;
@@ -228,8 +230,8 @@ typedef struct PJconsts {
     projCtx_t *ctx;
 	XY  (*fwd)(LP, struct PJconsts *);
 	LP  (*inv)(XY, struct PJconsts *);
-        XYZ (*fwd3d)(XYZ, struct PJconsts *);
-        XYZ (*inv3d)(XYZ, struct PJconsts *); 
+        XYZ (*fwd3d)(LPZ, struct PJconsts *);
+        LPZ (*inv3d)(XYZ, struct PJconsts *); 
 	void (*spc)(LP, struct PJconsts *, struct FACTORS *);
 	void (*pfree)(struct PJconsts *);
 	const char *descr;
@@ -342,8 +344,8 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #define I_ERROR { pj_ctx_set_errno( P->ctx, -20); return(lp); }
 #define FORWARD(name) static XY name(LP lp, PJ *P) { XY xy = {0.0,0.0}
 #define INVERSE(name) static LP name(XY xy, PJ *P) { LP lp = {0.0,0.0}
-#define FORWARD3D(name) static XYZ name(XYZ xyz, PJ *P) {XYZ uvw = {0.0, 0.0, 0.0}
-#define INVERSE3D(name) static XYZ name(XYZ uvw, PJ *P) {XYZ xyz = {0.0, 0.0, 0.0}
+#define FORWARD3D(name) static XYZ name(LPZ lpz, PJ *P) {XYZ xyz = {0.0, 0.0, 0.0}
+#define INVERSE3D(name) static LPZ name(XYZ xyz, PJ *P) {LPZ lpz = {0.0, 0.0, 0.0}
 #define FREEUP static void freeup(PJ *P) {
 #define SPECIAL(name) static void name(LP lp, PJ *P, struct FACTORS *fac)
 #endif

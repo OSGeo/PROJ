@@ -54,12 +54,12 @@ libproj_la_SOURCES = \
 	PJ_mbt_fps.c PJ_mbtfpp.c PJ_mbtfpq.c PJ_moll.c \
 	PJ_nell.c PJ_nell_h.c PJ_putp2.c PJ_putp3.c \
 	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_qsc.c PJ_robin.c \
-	PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c \
+	PJ_sch.c PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c \
 	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_latlong.c pj_geocent.c \
 	aasincos.c adjlon.c bch2bps.c bchgen.c \
 	biveval.c dmstor.c mk_cheby.c pj_auth.c \
 	pj_deriv.c pj_ell_set.c pj_ellps.c pj_errno.c \
-	pj_factors.c pj_fwd.c pj_init.c pj_inv.c \
+	pj_factors.c pj_fwd.c pj_init.c pj_inv.c pj_fwd3d.c pj_inv3d.c\
 	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c proj_mdist.c \
 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c \
 	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c pj_ctx.c pj_log.c \
