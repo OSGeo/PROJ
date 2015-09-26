@@ -237,7 +237,7 @@
 				</File>
         <File RelativePath="..\..\..\src\pj_inv.c">
                                 </File>
-        <File RelativePath="..\..\..\src\pj_inv2d.c">
+        <File RelativePath="..\..\..\src\pj_inv3d.c">
                                 </File>
         <File RelativePath="..\..\..\src\PJ_krovak.c">
 				</File>
