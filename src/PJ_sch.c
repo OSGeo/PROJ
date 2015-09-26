@@ -1,10 +1,26 @@
-/*
-** Author : Piyush Agram
-** This code is in the public domain and implements the SCH coordinate system first developed at JPL.
-** For details of the SCH coordinate system, see
-**  1. Hensley. Scott. SCH Coordinates and various transformations. June 15, 2000.  
-**  2. Buckley, Sean Monroe. Radar interferometry measurement of land subsidence. 2000. PhD Thesis. UT Austin. (Appendix) 
-*/
+/******************************************************************************
+ * $Id$
+ *
+ * Project:  SCH Coordinate system
+ * Purpose:  Implementation of SCH Coordinate system
+ * References : 
+ *      1. Hensley. Scott. SCH Coordinates and various transformations. June 15, 2000.  
+ *      2. Buckley, Sean Monroe. Radar interferometry measurement of land subsidence. 2000..
+ *         PhD Thesis. UT Austin. (Appendix)
+ *      3. Hensley, Scott, Elaine Chapin, and T. Michel. "Improved processing of AIRSAR
+ *         data based on the GeoSAR processor." Airsar earth science and applications
+ *         workshop, March. 2002.
+ *
+ * Author:   Piyush Agram
+ *
+ * NOTE:  The SCH coordinate system is a sensor aligned coordinate system 
+ * developed at JPL for radar mapping missions. Details pertaining to the 
+ * coordinate system have been release in the public domain (see references above).
+ * This code is just another implementation of the coordinate system that conforms
+ * to the PROJ.4 conventions and uses the details presented in these publicly
+ * available documents. All credit for the development of the coordinate
+ * system and its use should be directed towards the original developers.
+ ******************************************************************************/
 
 
 #include "geocent.h"
