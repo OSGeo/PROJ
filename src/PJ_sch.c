@@ -11,17 +11,24 @@
  *         data based on the GeoSAR processor." Airsar earth science and applications
  *         workshop, March. 2002.
  *
- * Author:   Piyush Agram
+ * Author:   Piyush Agram (piyush.shanker@gmail.com)
  *
  * NOTE:  The SCH coordinate system is a sensor aligned coordinate system 
  * developed at JPL for radar mapping missions. Details pertaining to the 
  * coordinate system have been release in the public domain (see references above).
- * This code is just another implementation of the coordinate system that conforms
- * to the PROJ.4 conventions and uses the details presented in these publicly
- * available documents. All credit for the development of the coordinate
- * system and its use should be directed towards the original developers.
- ******************************************************************************/
-
+ * This code is an independent implementation of the SCH coordinate system
+ * that conforms to the PROJ.4 conventions and uses the details presented in these
+ * publicly released documents. All credit for the development of the coordinate
+ * system and its use should be directed towards the original developers at JPL.
+ ******************************************************************************
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ ****************************************************************************/
 
 #include "geocent.h"
 
