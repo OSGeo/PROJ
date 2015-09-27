@@ -9,7 +9,7 @@
  *         PhD Thesis. UT Austin. (Appendix)
  *      3. Hensley, Scott, Elaine Chapin, and T. Michel. "Improved processing of AIRSAR
  *         data based on the GeoSAR processor." Airsar earth science and applications
- *         workshop, March. 2002.
+ *         workshop, March. 2002. (http://airsar.jpl.nasa.gov/documents/workshop2002/papers/T3.pdf)
  *
  * Author:   Piyush Agram (piyush.shanker@gmail.com)
  *
@@ -49,7 +49,6 @@
 PROJ_HEAD(sch, "Spherical Cross-track Height") "\n\tMisc\n\tplat_0 = ,plon_0 = , phdg_0 = ,[h_0 = ]";
 
 INVERSE3D(inverse3d);
-        (void) P;
         double temp[3];
         double pxyz[3];
 
@@ -89,8 +88,6 @@ INVERSE3D(inverse3d);
 }
 
 FORWARD3D(forward3d);
-        (void) P;
-
         double temp[3];
         double pxyz[3];
 
