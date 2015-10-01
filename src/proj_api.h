@@ -46,8 +46,8 @@ extern "C" {
 
 extern char const pj_release[]; /* global release id string */
 
-#define RAD_TO_DEG	57.29577951308232
-#define DEG_TO_RAD	.0174532925199432958
+#define RAD_TO_DEG	57.295779513082321
+#define DEG_TO_RAD	.017453292519943296
 
 
 extern int pj_errno;	/* global error return code */

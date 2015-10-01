@@ -44,7 +44,6 @@ PROJ_HEAD(aeqd, "Azimuthal Equidistant") "\n\tAzi, Sph&Ell\n\tlat_0 guam";
 
 #define EPS10 1.e-10
 #define TOL 1.e-14
-#define RHO 57.295779513082320876798154814105
 
 #define N_POLE	0
 #define S_POLE	1
@@ -85,11 +84,11 @@ FORWARD(e_forward); /* elliptical */
 			break;
 		}
 
-		phi1 = P->phi0*RHO; lam1 = P->lam0*RHO;
-		phi2 = lp.phi*RHO;  lam2 = (lp.lam+P->lam0)*RHO;
+		phi1 = P->phi0 / DEG_TO_RAD; lam1 = P->lam0 / DEG_TO_RAD;
+		phi2 = lp.phi / DEG_TO_RAD;  lam2 = (lp.lam+P->lam0) / DEG_TO_RAD;
 
 		geod_inverse(&P->g, phi1, lam1, phi2, lam2, &s12, &azi1, &azi2);
-		azi1 /= RHO;
+		azi1 *= DEG_TO_RAD;
 		xy.x = s12 * sin(azi1) / P->a;
 		xy.y = s12 * cos(azi1) / P->a;
 		break;
@@ -160,13 +159,13 @@ INVERSE(e_inverse); /* elliptical */
 
 		x2 = xy.x * P->a;
 		y2 = xy.y * P->a;
-		lat1 = P->phi0 * RHO;
-		lon1 = P->lam0 * RHO;
-		azi1 = atan2(x2, y2) * RHO;
+		lat1 = P->phi0 / DEG_TO_RAD;
+		lon1 = P->lam0 / DEG_TO_RAD;
+		azi1 = atan2(x2, y2) / DEG_TO_RAD;
 		s12 = sqrt(x2 * x2 + y2 * y2);
 		geod_direct(&P->g, lat1, lon1, azi1, s12, &lat2, &lon2, &azi2);
-		lp.phi = lat2 / RHO;
-		lp.lam = lon2 / RHO;
+		lp.phi = lat2 * DEG_TO_RAD;
+		lp.lam = lon2 * DEG_TO_RAD;
 		lp.lam -= P->lam0;
 	} else { /* Polar */
 		lp.phi = pj_inv_mlfn(P->ctx, P->mode == N_POLE ? P->Mp - c : P->Mp + c,
