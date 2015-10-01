@@ -31,9 +31,9 @@ colormsg(_HIBLUE_ "Configuring PROJ:")
 #PROJ version information
 #################################################################################
 include(Proj4Version)
-proj_version(MAJOR 4 MINOR 9 PATCH 1)
-set(PROJ_API_VERSION "9")
-set(PROJ_BUILD_VERSION "9.0.0")
+proj_version(MAJOR 4 MINOR 9 PATCH 2)
+set(PROJ_API_VERSION "10")
+set(PROJ_BUILD_VERSION "10.0.0")
 
 #################################################################################
 # Build features and variants
@@ -42,6 +42,19 @@ include(Proj4SystemInfo)
 include(Proj4Config)
 include(Proj4Mac)
 include(policies)
+
+#################################################################################
+# threading configuration
+#################################################################################
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+find_package (Threads)
+
+include(CheckIncludeFiles)
+include(CheckSymbolExists)
+CHECK_SYMBOL_EXISTS(PTHREAD_MUTEX_RECURSIVE pthread.h HAVE_PTHREAD_MUTEX_RECURSIVE_DEFN)
+if (HAVE_PTHREAD_MUTEX_RECURSIVE_DEFN)
+    add_definitions(-DHAVE_PTHREAD_MUTEX_RECURSIVE=1)
+endif()
 
 boost_report_value(PROJ_PLATFORM_NAME)
 boost_report_value(PROJ_COMPILER_NAME)

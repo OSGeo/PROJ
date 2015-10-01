@@ -3,7 +3,7 @@ AM_CFLAGS = @C_WFLAGS@
 bin_PROGRAMS =	proj nad2bin geod cs2cs
 EXTRA_PROGRAMS = multistresstest test228
 
-INCLUDES =	-DPROJ_LIB=\"$(pkgdatadir)\" \
+AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
 include_HEADERS = proj_api.h projects.h geodesic.h \
@@ -29,7 +29,7 @@ test228_LDADD = libproj.la @THREAD_LIB@
 
 lib_LTLIBRARIES = libproj.la
 
-libproj_la_LDFLAGS = -no-undefined -version-info 9:0:0
+libproj_la_LDFLAGS = -no-undefined -version-info 10:0:0
 
 libproj_la_SOURCES = \
 	pj_list.h \

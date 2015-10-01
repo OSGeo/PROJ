@@ -1,5 +1,5 @@
 :
-# Script to do some testing of flakey transformation that do not depend
+# Script to do some testing of flaky transformation that do not depend
 # on datum files.
 #
 #

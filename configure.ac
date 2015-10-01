@@ -1,12 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([PROJ.4 Projections], 4.9.1, [warmerdam@pobox.com], proj)
+AC_INIT([PROJ.4 Projections], 4.9.2, [warmerdam@pobox.com], proj)
 AC_CONFIG_MACRO_DIR([m4])
 AC_LANG(C)
 
 AM_INIT_AUTOMAKE
-AM_MAINTAINER_MODE
 AM_CONFIG_HEADER(src/proj_config.h)
 
 dnl Enable as much warnings as possible
@@ -36,7 +35,9 @@ JNI_INCLUDE=
 export JNI_INCLUDE
 
 AC_ARG_WITH(jni,
-[  --with-jni=dir          Include Java/JNI support, add optional include dir],,)
+            [AS_HELP_STRING([--with-jni=dir],
+                            [Include Java/JNI support, add optional include dir])
+            ],,)
 
 if test "$with_jni" = "yes" ; then
 
@@ -98,6 +99,10 @@ if test "$with_mutex" = yes -o x"$with_mutex" = x ; then
         THREAD_LIB="-lpthread"
     fi
     AC_CHECK_LIB(pthread,pthread_mutexattr_settype,,,)
+    AC_CHECK_DECL(PTHREAD_MUTEX_RECURSIVE,
+                  AC_DEFINE(HAVE_PTHREAD_MUTEX_RECURSIVE, [], [Define if your pthreads implementation have PTHREAD_MUTEX_RECURSIVE]),
+                  ,
+                  [#include <pthread.h>])
     AC_MSG_RESULT([enabled, pthread])
 else
     MUTEX_SETTING=stub
@@ -107,8 +112,11 @@ fi
 AC_SUBST(MUTEX_SETTING,$MUTEX_SETTING)
 AC_SUBST(THREAD_LIB,$THREAD_LIB)
 
-AC_OUTPUT(Makefile cmake/Makefile src/Makefile man/Makefile man/man1/Makefile \
-	man/man3/Makefile nad/Makefile \
-	jniwrap/Makefile jniwrap/org/Makefile jniwrap/org/proj4/Makefile)
+AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile
+                 man/Makefile man/man1/Makefile man/man3/Makefile nad/Makefile
+                 jniwrap/Makefile jniwrap/org/Makefile jniwrap/org/proj4/Makefile])
+AC_CONFIG_FILES([nad/install], [chmod +x nad/install])
 
-AC_OUTPUT(proj.pc)
+AC_CONFIG_FILES([proj.pc])
+
+AC_OUTPUT

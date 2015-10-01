@@ -12,6 +12,7 @@ set(PROJ_DICTIONARY  epsg
                      GL27
                      nad83
                      nad.lst
+                     proj_def.dat
                      CH )
 
 #
