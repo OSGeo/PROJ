@@ -10,7 +10,7 @@
 	static double
 RES = 1000.,
 RES60 = 60000.,
-CONV = 206264806.24709635515796003417;
+CONV = 206264806.24709635516;
 	static char
 format[50] = "%dd%d'%.3f\"%c";
 	static int
