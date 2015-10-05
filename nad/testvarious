@@ -656,7 +656,7 @@ EOF
 echo "##############################################################" >> ${OUT}
 echo "Test bug 244 " >> ${OUT}
 #
-$EXE -f '%.9f' \
+$EXE -f '%.8f' \
      +init=epsg:4326 \
      +to +proj=aeqd +lon_0=130.0 +lat_0=40.0 +a=6378137 +b=6378137 +units=m +no_defs \
  -E >>${OUT} <<EOF
@@ -665,7 +665,7 @@ EOF
 echo "##############################################################" >> ${OUT}
 echo "Test bug 244 (2)" >> ${OUT}
 #
-$EXE -f '%.12f' \
+$EXE -f '%.11f' \
      +proj=aeqd +lon_0=130.0 +lat_0=40.0 +a=6378137 +b=6378137 +units=m +no_defs \
      +to +init=epsg:4326 \
  -E >>${OUT} <<EOF
