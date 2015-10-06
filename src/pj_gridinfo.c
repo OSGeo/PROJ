@@ -397,7 +397,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 /*      Seek a parent grid file by name from a grid list                */
 /************************************************************************/
 
-static PJ_GRIDINFO* pj_gridinfo_parent( PJ_GRIDINFO *gilist, 
+static PJ_GRIDINFO* pj_gridinfo_parent( PJ_GRIDINFO *gilist,
         const char *name, int length )
 {
     while( gilist )
@@ -862,6 +862,9 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
         pj_ctx_set_errno( ctx, -38 );
         return gilist;
     }
+
+    /* some files may be smaller that sizeof(header), eg 160, so */
+    ctx->last_errno = 0; /* don't treat as a persistent error */
 
     pj_ctx_fseek( ctx, fp, SEEK_SET, 0 );
 
