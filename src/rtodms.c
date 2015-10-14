@@ -57,13 +57,15 @@ rtodms(char *s, double r, int pos, int neg) {
 		(void)sprintf(ss,format,deg,min,sec,sign);
 	else if (sec) {
 		char *p, *q;
+		/* double prime + pos/neg suffix (if included) + NUL */
+		size_t suffix_len = sign ? 3 : 2;
 
 		(void)sprintf(ss,format,deg,min,sec,sign);
-		for (q = p = ss + strlen(ss) - (sign ? 3 : 2); *p == '0'; --p) ;
+		for (q = p = ss + strlen(ss) - suffix_len; *p == '0'; --p) ;
 		if (*p != '.')
 			++p;
 		if (++q != p)
-			(void)strcpy(p, q);
+			(void)memmove(p, q, suffix_len);
 	} else if (min)
 		(void)sprintf(ss,"%dd%d'%c",deg,min,sign);
 	else
