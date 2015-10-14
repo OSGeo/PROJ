@@ -9,6 +9,15 @@ compiler:
   - gcc
   - clang
 
+os:
+  - linux
+  - osx
+
+matrix:
+  exclude:
+    - os: osx
+      compiler: gcc
+
 before_install:
  - pip install --user cpp-coveralls
 
@@ -81,7 +90,11 @@ install:
   - PROJ_LIB=../nad src/multistresstest
   - cd ..
 # autoconf build with grids and coverage
-  - CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure
+  - if [ $TRAVIS_OS_NAME == "osx" ]; then
+      CFLAGS="--coverage" ./configure;
+    else
+      CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure;
+    fi
   - make -j3
   - make check
   - mv src/.libs/*.gc* src
