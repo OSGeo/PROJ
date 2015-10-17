@@ -5,9 +5,9 @@ AC_INIT([PROJ.4 Projections], 4.9.2, [warmerdam@pobox.com], proj)
 AC_CONFIG_MACRO_DIR([m4])
 AC_LANG(C)
 
+AC_CONFIG_AUX_DIR([.])
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(src/proj_config.h)
-AC_CONFIG_AUX_DIR([.])
 
 dnl Enable as much warnings as possible
 AX_CFLAGS_WARN_ALL(C_WFLAGS)
