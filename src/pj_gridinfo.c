@@ -858,13 +858,9 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 /* -------------------------------------------------------------------- */
     if( pj_ctx_fread( ctx, header, sizeof(header), 1, fp ) != 1 )
     {
-        pj_ctx_fclose( ctx, fp );
-        pj_ctx_set_errno( ctx, -38 );
-        return gilist;
+        /* some files may be smaller that sizeof(header), eg 160, so */
+        ctx->last_errno = 0; /* don't treat as a persistent error */
     }
-
-    /* some files may be smaller that sizeof(header), eg 160, so */
-    ctx->last_errno = 0; /* don't treat as a persistent error */
 
     pj_ctx_fseek( ctx, fp, SEEK_SET, 0 );
 
