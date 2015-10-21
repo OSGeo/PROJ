@@ -24,9 +24,9 @@ misc = \
 	PJ_airy.obj PJ_aitoff.obj PJ_august.obj PJ_bacon.obj \
 	PJ_chamb.obj PJ_hammer.obj PJ_lagrng.obj PJ_larr.obj \
 	PJ_lask.obj PJ_nocol.obj PJ_ob_tran.obj PJ_oea.obj \
-	PJ_tpeqd.obj PJ_vandg.obj PJ_vandg2.obj PJ_vandg4.obj \
-	PJ_wag7.obj pj_latlong.obj PJ_krovak.obj pj_geocent.obj \
-	PJ_healpix.obj PJ_natearth.obj PJ_qsc.obj
+	PJ_sch.obj PJ_tpeqd.obj PJ_vandg.obj PJ_vandg2.obj \
+        PJ_vandg4.obj PJ_wag7.obj pj_latlong.obj PJ_krovak.obj \
+        pj_geocent.obj PJ_healpix.obj PJ_natearth.obj PJ_qsc.obj
 
 pseudo = \
 	PJ_boggs.obj PJ_collg.obj PJ_crast.obj PJ_denoy.obj \
@@ -45,6 +45,7 @@ support = \
 	biveval.obj dmstor.obj mk_cheby.obj pj_auth.obj \
 	pj_deriv.obj pj_ell_set.obj pj_ellps.obj pj_errno.obj \
 	pj_factors.obj pj_fwd.obj pj_init.obj pj_inv.obj \
+        pj_fwd3d.obj pj_inv3d.obj \
 	pj_list.obj pj_malloc.obj pj_mlfn.obj pj_msfn.obj \
 	pj_open_lib.obj pj_param.obj pj_phi2.obj pj_pr_list.obj \
 	pj_qsfn.obj pj_strerrno.obj pj_tsfn.obj pj_units.obj \

@@ -74,3 +74,5 @@ EXPORTS
 	pj_open_lib             @72
 	pj_atof                 @73
 	pj_strtod               @74
+        pj_fwd3d                @75
+        pj_inv3d                @76
