@@ -316,7 +316,7 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #endif
 
 #ifdef PJ_LIB__
-    /* repeatative projection code */
+    /* repetitive projection code */
 #define PROJ_HEAD(id, name) static const char des_##id [] = name
 #define ENTRYA(name) \
         C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
