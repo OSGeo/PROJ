@@ -52,6 +52,8 @@
 
 PROJ_HEAD(etmerc, "Extended Transverse Mercator")
     "\n\tCyl, Sph\n\tlat_ts=(0)\nlat_0=(0)";
+PROJ_HEAD(utm, "Universal Transverse Mercator (UTM)")
+	"\n\tCyl, Sph\n\tzone= south";
 
 #define PROJ_ETMERC_ORDER 6
 
@@ -211,7 +213,8 @@ INVERSE(e_inverse); /* ellipsoid */
 
 FREEUP; if (P) free(P); }
 
-ENTRY0(etmerc)
+	static PJ *
+setup(PJ *P) { /* general initialization */
     double f, n, np, Z;
 
     if (P->es <= 0) E_ERROR(-34);
@@ -286,4 +289,30 @@ ENTRY0(etmerc)
     P->Zb  = - P->Qn*(Z + clens(P->gtu, PROJ_ETMERC_ORDER, 2*Z));
     P->inv = e_inverse;
     P->fwd = e_forward;
-ENDENTRY(P)
+	return P;
+}
+
+ENTRY0(etmerc)
+ENDENTRY(setup(P))
+
+/* utm uses etmerc for the underlying projection */
+ENTRY0(utm)
+	int zone;
+
+	if (!P->es) E_ERROR(-34);
+	P->y0 = pj_param(P->ctx, P->params, "bsouth").i ? 10000000. : 0.;
+	P->x0 = 500000.;
+	if (pj_param(P->ctx, P->params, "tzone").i) /* zone input ? */
+		if ((zone = pj_param(P->ctx, P->params, "izone").i) > 0 && zone <= 60)
+			--zone;
+		else
+			E_ERROR(-35)
+	else /* nearest central meridian input */
+		if ((zone = floor((adjlon(P->lam0) + PI) * 30. / PI)) < 0)
+			zone = 0;
+		else if (zone >= 60)
+			zone = 59;
+	P->lam0 = (zone + .5) * PI / 30. - PI;
+	P->k0 = 0.9996;
+	P->phi0 = 0.;
+ENDENTRY(setup(P))

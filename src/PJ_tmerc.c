@@ -5,8 +5,6 @@
 #define PJ_LIB__
 #include	<projects.h>
 PROJ_HEAD(tmerc, "Transverse Mercator") "\n\tCyl, Sph&Ell";
-PROJ_HEAD(utm, "Universal Transverse Mercator (UTM)")
-	"\n\tCyl, Sph\n\tzone= south";
 #define EPS10	1.e-10
 #define aks0	P->esp
 #define aks5	P->ml0
@@ -152,24 +150,4 @@ setup(PJ *P) { /* general initialization */
 	return P;
 }
 ENTRY1(tmerc, en)
-ENDENTRY(setup(P))
-ENTRY1(utm, en)
-	int zone;
-
-	if (!P->es) E_ERROR(-34);
-	P->y0 = pj_param(P->ctx, P->params, "bsouth").i ? 10000000. : 0.;
-	P->x0 = 500000.;
-	if (pj_param(P->ctx, P->params, "tzone").i) /* zone input ? */
-		if ((zone = pj_param(P->ctx, P->params, "izone").i) > 0 && zone <= 60)
-			--zone;
-		else
-			E_ERROR(-35)
-	else /* nearest central meridian input */
-		if ((zone = floor((adjlon(P->lam0) + PI) * 30. / PI)) < 0)
-			zone = 0;
-		else if (zone >= 60)
-			zone = 59;
-	P->lam0 = (zone + .5) * PI / 30. - PI;
-	P->k0 = 0.9996;
-	P->phi0 = 0.;
 ENDENTRY(setup(P))

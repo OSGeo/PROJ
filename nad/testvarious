@@ -675,19 +675,36 @@ echo "##############################################################" >> ${OUT}
 echo "Test bug 245 (use +datum=carthage)" >> ${OUT}
 #
 $EXE -f '%.7f' \
-     +proj=longlat +datum=WGS84 +nodefs +to +proj=utm +zone=32 +datum=carthage +nodefs \
+     +proj=longlat +datum=WGS84 +no_defs +to +proj=utm +zone=32 +datum=carthage +no_defs \
  -E >>${OUT} <<EOF
 10 34
 EOF
 echo "##############################################################" >> ${OUT}
-echo "Test bug 245 (use expension of +datum=carthage)" >> ${OUT}
+echo "Test bug 245 (use expansion of +datum=carthage)" >> ${OUT}
 #
 $EXE -f '%.7f' \
-     +proj=longlat +datum=WGS84 +nodefs +to +proj=utm +zone=32 +a=6378249.2 +b=6356515 +towgs84=-263.0,6.0,431.0 +nodefs \
+     +proj=longlat +datum=WGS84 +no_defs +to +proj=utm +zone=32 +a=6378249.2 +b=6356515 +towgs84=-263.0,6.0,431.0 +no_defs \
  -E >>${OUT} <<EOF
 10 34
 EOF
 ##############################################################################
+echo "##############################################################" >> ${OUT}
+echo "Test issue #316 (switch utm to use etmerc)" >> ${OUT}
+#
+$EXE -f '%.6f' \
+     +proj=latlong +datum=WGS84 +no_defs +to +proj=utm +zone=35 +datum=WGS84 +no_defs \
+ -E >>${OUT} <<EOF
+0 83
+EOF
+##############################################################################
+echo "##############################################################" >> ${OUT}
+echo "Test issue #316 (switch utm to use etmerc)" >> ${OUT}
+#
+$EXE -f '%.6f' \
+     +proj=latlong +datum=WGS84 +no_defs +to +proj=etmerc +datum=WGS84 +no_defs +k=0.9996 +lon_0=27 +x_0=500000 -f %.6f \
+ -E >>${OUT} <<EOF
+0 83
+EOF
 # Done!
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
