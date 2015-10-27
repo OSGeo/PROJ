@@ -731,6 +731,28 @@ $EXE -f '%.6f' \
  -E >>${OUT} <<EOF
 0 83
 EOF
+##############################################################################
+echo  "##############################################################" >> ${OUT}
+echo  "Test nzmg forward projection" >> ${OUT}
+#
+$EXE -f '%.7f' \
+    +proj=latlong +datum=WGS84 +to \
+    +proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 +y_0=6023150 +ellps=WGS84 +units=m +no_defs \
+ -E >> ${OUT} <<EOF
+175. -40. 0.
+EOF
+##############################################################################
+echo  "##############################################################" >> ${OUT}
+echo  "Test nzmg inverse projection" >> ${OUT}
+#
+$EXE -f '%.7f' \
+    +proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 +y_0=6023150 +ellps=WGS84 +units=m +no_defs +to \
+    +proj=latlong +datum=WGS84 \
+ -E >> ${OUT} <<EOF
+2680778.57267967 6132228.07645127 0.
+EOF
+
+
 # Done!
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
