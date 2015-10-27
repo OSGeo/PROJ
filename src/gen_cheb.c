@@ -18,10 +18,10 @@ gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P, int iargc, char **
 	double (*input)(const char *, char **);
 
 	input = inverse ? strtod : dmstor;
-	if (*s) low.u = input(s, &s); else ++errin;
-	if (*s == ',') upp.u = input(s+1, &s); else ++errin;
-	if (*s == ',') low.v = input(s+1, &s); else ++errin;
-	if (*s == ',') upp.v = input(s+1, &s); else ++errin;
+	if (*s) low.u = input(s, &s); else { low.u = 0; ++errin; }
+	if (*s == ',') upp.u = input(s+1, &s); else { upp.u = 0; ++errin; }
+	if (*s == ',') low.v = input(s+1, &s); else { low.v = 0; ++errin; }
+	if (*s == ',') upp.v = input(s+1, &s); else { upp.v = 0; ++errin; }
 	if (errin)
 		emess(16,"null or absent -T parameters");
 	if (*s == ',') if (*++s != ',') res = strtol(s, &s, 10);
