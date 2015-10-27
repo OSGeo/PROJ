@@ -687,6 +687,32 @@ $EXE -f '%.7f' \
  -E >>${OUT} <<EOF
 10 34
 EOF
+echo  "##############################################################" >> ${OUT}
+echo  "Test SCH forward projection" >> ${OUT}
+#
+$EXE -f '%.7f' \
+    +proj=latlong +datum=WGS84 +to +proj=sch +datum=WGS84 +plat_0=30.0 +plon_0=45.0 \
+    +phdg_0=-12.0 +nodefs \
+ -E >> ${OUT} <<EOF
+0.0 0.0
+0.0 90.0
+45.0 45.0
+45.1 44.9
+44.9 45.1
+30.0 45.0
+EOF
+echo  "##############################################################" >> ${OUT}
+echo  "Test SCH inverse projection" >> ${OUT}
+#
+$EXE -f '%.7f' \
+    +proj=sch +datum=WGS84 +plat_0=30.0 +plon_0=45.0 +phdg_0=-12.0 +nodefs +to \
+    +proj=latlong +datum=WGS84 \
+ -E >> ${OUT} <<EOF
+0. 0.
+0. 1000.
+1000. 0.
+1000. 1000.
+EOF
 ##############################################################################
 echo "##############################################################" >> ${OUT}
 echo "Test issue #316 (switch utm to use etmerc)" >> ${OUT}

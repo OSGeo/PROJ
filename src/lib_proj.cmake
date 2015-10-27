@@ -115,6 +115,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_qsc.c
         PJ_robin.c
         PJ_rpoly.c
+        PJ_sch.c
         PJ_sconics.c
         PJ_somerc.c
         PJ_sterea.c
@@ -166,6 +167,7 @@ SET(SRC_LIBPROJ_CORE
         pj_errno.c
         pj_factors.c
         pj_fwd.c
+        pj_fwd3d.c
         pj_gauss.c
         pj_gc_reader.c
         pj_geocent.c
@@ -176,6 +178,7 @@ SET(SRC_LIBPROJ_CORE
         pj_init.c
         pj_initcache.c
         pj_inv.c
+        pj_inv3d.c
         pj_latlong.c
         pj_list.c
         pj_list.h
