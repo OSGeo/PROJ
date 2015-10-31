@@ -79,8 +79,8 @@ INVERSE3D(inverse3d);
                 temp, temp+1, temp+2);
 
 
-        lpz.lam = temp[0] ;
-        lpz.phi = temp[1] ;
+        lpz.lam = temp[1] ;
+        lpz.phi = temp[0] ;
         lpz.z = temp[2];
 
 //        printf("INVERSE: \n");
@@ -93,10 +93,12 @@ FORWARD3D(forward3d);
         double temp[3];
         double pxyz[3];
 
+
         //Convert lat lon to geocentric coordinates
-        if( pj_Convert_Geodetic_To_Geocentric( &(P->elp_0), lpz.lam, lpz.phi, lpz.z,
+        if( pj_Convert_Geodetic_To_Geocentric( &(P->elp_0), lpz.phi, lpz.lam, lpz.z,
                     temp, temp+1, temp+2 ) != 0 )
             F3_ERROR;
+
 
         //Adjust for offset
         temp[0] -= P->xyzoff[0];
@@ -112,6 +114,7 @@ FORWARD3D(forward3d);
         //Convert to local lat,lon
         pj_Convert_Geocentric_To_Geodetic( &(P->sph), pxyz[0], pxyz[1], pxyz[2],
                 temp, temp+1, temp+2);
+
 
         //Scale by radius
         xyz.x = temp[1] * P->rcurv / P->a;
