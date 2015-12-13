@@ -2,7 +2,7 @@
 	double w; \
 	double m, rm;
 #define PJ_LIB__
-# define EPS 1.0e-10
+#define EPS 1.0e-10
 # include	<projects.h>
 PROJ_HEAD(hammer, "Hammer & Eckert-Greifendorff")
 	"\n\tMisc Sph, \n\tW= M=";
@@ -23,7 +23,7 @@ INVERSE(s_inverse); /* spheroid */
 		pj_errno = -14;
 	} else {
 		lp.lam = aatan2(P->w * xy.x * z,2. * z * z - 1)/P->w;
-		p.phi = aasin(P->ctx,z * xy.y);
+		lp.phi = aasin(P->ctx,z * xy.y);
 	}
 	return (lp);
 }
