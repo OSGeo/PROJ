@@ -266,6 +266,22 @@ $EXE +proj=robin +datum=WGS84 \
 1741397.30      4276351.58 0.00
 EOF
 echo "##############################################################" >> ${OUT}
+echo "Test hammer projection (pull request #329)" >> ${OUT}
+$EXE +proj=latlong +datum=WGS84 \
+ +to +proj=hammer  +datum=WGS84 \
+ -E >>${OUT} <<EOF
+-30 40
+-35 45
+20 40
+EOF
+$EXE +proj=hammer  +datum=WGS84 \
+ +to +proj=latlong +datum=WGS84 \
+ -E >>${OUT} <<EOF
+-2711575.08	4395506.62 0.00
+-2964412.70	4929091.33 0.00
+1811748.54	4377349.50 0.00
+EOF
+echo "##############################################################" >> ${OUT}
 echo "Test healpix forward projection on sphere" >> ${OUT}
 $EXE +proj=latlong +a=1 +lon_0=0 \
  +to +proj=healpix +a=1 +lon_0=0  -f '%.'5'f' \
