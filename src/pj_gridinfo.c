@@ -312,7 +312,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
                 return 0;
             }
 
-            if( !IS_LSB )
+            if( gi->must_swap )
                 swap_words( (unsigned char *) row_buf, 4,
                             gi->ct->lim.lam*4 );
 
@@ -392,7 +392,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 }
 
 /************************************************************************/
-/*                       pj_gridinfo_init_ntv2()                        */
+/*                        pj_gridinfo_parent()                          */
 /*                                                                      */
 /*      Seek a parent grid file by name from a grid list                */
 /************************************************************************/
@@ -423,6 +423,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
 {
     unsigned char header[11*16];
     int num_subfiles, subfile;
+    int must_swap;
 
     assert( sizeof(int) == 4 );
     assert( sizeof(double) == 8 );
@@ -442,11 +443,16 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
         pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
+    
+    if( header[8] == 11 )
+        must_swap = !IS_LSB;
+    else
+        must_swap = IS_LSB;
 
 /* -------------------------------------------------------------------- */
 /*      Byte swap interesting fields if needed.                         */
 /* -------------------------------------------------------------------- */
-    if( !IS_LSB )
+    if( must_swap )
     {
         swap_words( header+8, 4, 1 );
         swap_words( header+8+16, 4, 1 );
@@ -490,7 +496,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
 /* -------------------------------------------------------------------- */
 /*      Byte swap interesting fields if needed.                         */
 /* -------------------------------------------------------------------- */
-        if( !IS_LSB )
+        if( must_swap )
         {
             swap_words( header+8+16*4, 8, 1 );
             swap_words( header+8+16*5, 8, 1 );
@@ -561,6 +567,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
             gi->next = NULL;
         }
 
+        gi->must_swap = must_swap;
         gi->ct = ct;
         gi->format = "ntv2";
         gi->grid_offset = pj_ctx_ftell( ctx, fid );
