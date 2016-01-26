@@ -177,9 +177,9 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
     for( s = nadgrids; *s != '\0'; )
     {
         size_t end_char;
-        int   required = 1;
-        int   max_path_length = 1024;
-        char  name[max_path_length];
+        int required = 1;
+        const int max_path_length = 1024;
+        char name[max_path_length];
 
         if( *s == '@' )
         {
