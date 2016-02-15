@@ -38,7 +38,7 @@ measure angles (latitudes, longitudes, and azimuths) in degrees, unlike
 the rest of the \fBproj\fR library, which uses radians.  The
 documentation for this library is included in geodesic.h.  A formatted
 version of the documentation is available at
-http://geographiclib.sf.net/1.44/C
+http://geographiclib.sf.net/1.46/C
 .SH EXAMPLE
 The following program reads in lines with the coordinates for two points
 in decimal degrees (\fIlat1\fR, \fIlon1\fR, \fIlat2\fR, \fIlon2\fR) and
@@ -57,7 +57,7 @@ int main() {
   struct geod_geodesic g;
 
   geod_init(&g, a, f);
-  while (scanf("%lf %lf %lf %lf\en",
+  while (scanf("%lf %lf %lf %lf",
                &lat1, &lon1, &lat2, &lon2) == 4) {
     geod_inverse(&g, lat1, lon1, lat2, lon2,
                  &s12, &azi1, &azi2);
@@ -72,7 +72,7 @@ libproj.a \- library of projections and support procedures
 .SH SEE ALSO
 Full online documentation for \fBgeodesic(3)\fR,
 .br
-http://geographiclib.sf.net/1.44/C
+http://geographiclib.sf.net/1.46/C
 .PP
 .B geod(1)
 .PP
@@ -90,8 +90,12 @@ DOI: http://dx.doi.org/10.1007/s00190-012-0578-z
 .br
 http://geographiclib.sf.net/geod-addenda.html
 .PP
-The \fIonline geodesic bibliography\fR,
+\fIA geodesic bibliography\fR,
 .br
 http://geographiclib.sf.net/geodesic-papers/biblio.html
+.PP
+The Wikipedia page, \fIGeodesics on an ellipsoid\fR,
+.br
+https://en.wikipedia.org/wiki/Geodesics_on_an_ellipsoid
 .SH HOME PAGE
 https://github.com/OSGeo/proj.4/wiki

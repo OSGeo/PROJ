@@ -32,6 +32,7 @@ endif(BUILD_PROJ)
 
 if(BUILD_GEOD)
   include(bin_geod.cmake)
+  include(bin_geodtest.cmake)
 endif(BUILD_GEOD)
 
 if(BUILD_NAD2BIN)
