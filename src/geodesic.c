@@ -187,8 +187,9 @@ static real AngDiff(real x, real y, real* e) {
 
 static real AngRound(real x) {
   const real z = 1/(real)(16);
+  volatile real y;
   if (x == 0) return 0;
-  volatile real y = fabs(x);
+  y = fabs(x);
   /* The compiler mustn't "simplify" z - (z - y) to y */
   y = y < z ? z - (z - y) : y;
   return x < 0 ? -y : y;
@@ -413,8 +414,8 @@ static void geod_lineinit_int(struct geod_geodesicline* l,
 void geod_lineinit(struct geod_geodesicline* l,
                    const struct geod_geodesic* g,
                    real lat1, real lon1, real azi1, unsigned caps) {
-  azi1 = AngNormalize(azi1);
   real salp1, calp1;
+  azi1 = AngNormalize(azi1);
   /* Guard against underflow in salp0 */
   sincosdx(AngRound(azi1), &salp1, &calp1);
   geod_lineinit_int(l, g, lat1, lon1, azi1, salp1, calp1, caps);
