@@ -1,23 +1,38 @@
 .\" @(#)geodesic.3
 .nr LL 7.0i
-.TH GEODESIC 3 "2014/12/17 Rel. 4.9.3"
+.TH GEODESIC 3 "2016/02/16 Rel. 4.9.3"
 .ad b
 .hy 1
 .SH NAME
 .B geod_init
 \- initialize an ellipsoid
 .br
-.B geod_lineinit
-\- initialize a geodesic line
-.br
-.B geod_position
-\- a position on a geodesic line
-.br
-.B geod_direct
+.B geod_direct geod_gendirect
 \- the direct geodesic problem
 .br
-.B geod_inverse
+.B geod_inverse geod_geninverse
 \- the inverse geodesic problem
+.br
+.B geod_lineinit geod_directline geod_gendirectline geod_inverseline
+\- initialize a geodesic line
+.br
+.B geod_setdistance geod_gensetdistance
+\- set distance to reference point
+.br
+.B geod_position geod_genposition
+\- a position on a geodesic line
+.br
+.B geod_polygon_init
+\- initialize a polygon
+.br
+.B geod_addpoint geod_addedge
+\- add to a polygon
+.br
+.B geod_polygon_compute geod_polygon_testpoint geod_polygon_testedge
+\- compute properties of polygon
+.br
+.B geod_polygon_clear
+\- clear polygon
 .br
 .B geod_polygonarea
 \- the area of a polygon
