@@ -54,7 +54,7 @@ geod_set(int argc, char **argv) {
 			if (!(del_alpha = pj_param(NULL,start, "rdel_A").f))
 				emess(1,"del azimuth == 0");
 		} else if ((del_S = fabs(pj_param(NULL,start, "ddel_S").f)) != 0.) {
-			n_S = geod_S / del_S + .5;
+			n_S = (int)(geod_S / del_S + .5);
 		} else if ((n_S = pj_param(NULL,start, "in_S").i) <= 0)
 			emess(1,"no interval divisor selected");
 	}
