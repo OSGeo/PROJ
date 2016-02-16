@@ -308,7 +308,7 @@ ENTRY0(utm)
 		else
 			E_ERROR(-35)
 	else /* nearest central meridian input */
-		if ((zone = floor((adjlon(P->lam0) + PI) * 30. / PI)) < 0)
+		if ((zone = (int)(floor((adjlon(P->lam0) + PI) * 30. / PI))) < 0)
 			zone = 0;
 		else if (zone >= 60)
 			zone = 59;
