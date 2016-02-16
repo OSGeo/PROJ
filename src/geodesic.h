@@ -132,7 +132,7 @@
  * The patch level of the geodesic library.  (This tracks the version of
  * GeographicLib.)
  **********************************************************************/
-#define GEODESIC_VERSION_PATCH 0
+#define GEODESIC_VERSION_PATCH 1
 
 /**
  * Pack the version components into a single integer.  Users should not rely on
