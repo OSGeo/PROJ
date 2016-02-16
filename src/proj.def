@@ -75,10 +75,16 @@ EXPORTS
 	geod_direct		@73
 	geod_geninverse		@74
 	geod_inverse		@75
-	geod_polygon_init	@76
-	geod_polygon_addedge	@77
-	geod_polygon_addpoint	@78
-	geod_polygon_compute	@79
-	geod_polygon_testedge	@80
-	geod_polygon_testpoint	@81
-	geod_polygonarea	@82
+	geod_gensetdistance	@76
+	geod_setdistance	@77
+	geod_gendirectline	@78
+	geod_directline		@79
+	geod_inverseline	@80
+	geod_polygon_init	@81
+	geod_polygon_addedge	@82
+	geod_polygon_addpoint	@83
+	geod_polygon_compute	@84
+	geod_polygon_testedge	@85
+	geod_polygon_testpoint	@86
+	geod_polygon_clear	@87
+	geod_polygonarea	@88
