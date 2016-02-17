@@ -64,15 +64,27 @@ EXPORTS
 	geod_inverse		@62
 	geod_polygonarea	@63
 	pj_get_spheroid_defn	@64
-	pj_get_default_fileapi  @65
-	pj_ctx_set_fileapi      @66
-	pj_ctx_get_fileapi      @67
-	pj_ctx_fopen            @68
-	pj_ctx_fread            @69
-	pj_ctx_ftell            @70
-	pj_ctx_fclose           @71
-	pj_open_lib             @72
-	pj_atof                 @73
-	pj_strtod               @74
-        pj_fwd3d                @75
-        pj_inv3d                @76
+	pj_get_default_fileapi	@65
+	pj_ctx_set_fileapi	@66
+	pj_ctx_get_fileapi	@67
+	pj_ctx_fopen		@68
+	pj_ctx_fread		@69
+	pj_ctx_ftell		@70
+	pj_ctx_fclose		@71
+	pj_open_lib		@72
+	pj_atof			@73
+	pj_strtod		@74
+	pj_fwd3d		@75
+	pj_inv3d		@76
+	geod_gensetdistance	@77
+	geod_setdistance	@78
+	geod_gendirectline	@79
+	geod_directline		@80
+	geod_inverseline	@81
+	geod_polygon_init	@82
+	geod_polygon_addedge	@83
+	geod_polygon_addpoint	@84
+	geod_polygon_compute	@85
+	geod_polygon_testedge	@86
+	geod_polygon_testpoint	@87
+	geod_polygon_clear	@88

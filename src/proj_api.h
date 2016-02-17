@@ -38,7 +38,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 492
+#define PJ_VERSION 493
 
 /* pj_init() and similar functions can be used with a non-C locale */
 /* Can be detected too at runtime if the symbol pj_atof exists */
