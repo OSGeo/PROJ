@@ -1,9 +1,13 @@
-<HTML><HEAD><TITLE>Manpage of PROJ</TITLE>
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of PROJ</TITLE>
 </HEAD><BODY>
 <H1>PROJ</H1>
+Section: User Commands  (1)<BR>Updated: 2000/03/21 Rel. 4.4<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
 
-Section: User Commands  (1), Updated: 2000/03/21 Rel. 4.4<BR>
-
+<A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
 proj - forward cartographic projection filter
@@ -122,7 +126,7 @@ value for both return values.
 <DD>
 causes the input coordinates to be copied to the output line
 prior to printing the converted values.
-<DT><B>-l</B><I>[p|P|=|e|u]</I><B>id</B>
+<DT><B>-l</B><I>[p|P|=|e|u|d]</I><B>id</B>
 
 <DD>
 List projection identifiers with
@@ -145,14 +149,19 @@ List ellipsoid identifiers with
 <B>-le,</B>
 
 that can be selected with
-<B>+ellps</B>
+<B>+ellps,</B>
 
-or
 <B>-lu</B>
 
 list of cartesian to meter conversion factors
 that can be selected with
-<B>+units.</B>
+<B>+units</B>
+
+or
+<B>-ld</B>
+
+list of datums that can be selected with 
+<B>+datum.</B>
 
 <DT><B>-r</B>
 
@@ -222,8 +231,6 @@ is a
 format string to control the form of the output values.
 For inverse projections, the output will be in degrees when this option
 is employed.
-If a format is specified for inverse projection the
-output data will be in decimal degrees.
 The default format is &quot;%.2f&quot; for forward projection and DMS
 for inverse.
 <DT><B>-[w|W]</B><I>n</I>
@@ -292,7 +299,7 @@ and
 
 specify maximum degree of the polynomials (default: 15).
 See also:
-<B><A HREF="http://localhost/cgi-bin/man/man2html?1+fproj">fproj</A>(1).</B>
+<B><A HREF="../man1/fproj.1.html">fproj</A>(1).</B>
 
 </DL>
 <P>
@@ -302,13 +309,13 @@ The
 
 run-line arguments are associated with cartographic parameters
 and usage varies with projection and for a complete description see
-<I>Cartographic Projection Procedures for the UNIX Environment---A User's Manual )</I>
+<I>Cartographic Projection Procedures for the UNIX Environment---A User's Manual</I>
 
 and supplementary documentation for Release 4.
 <P>
 
 Additional projection control parameters may be contained in two
-auxilliary control files:
+auxiliary control files:
 the first is optionally referenced with the
 <B>+init=</B><I>file:id</I>
 
@@ -322,7 +329,8 @@ The environment parameter
 <B>PROJ_LIB</B>
 
 establishes the default directory for a file reference without
-an absolute path.
+an absolute path.  This is also used for supporting files like
+datum shift files.
 <P>
 
 One or more
@@ -355,7 +363,7 @@ with trailing, zero-valued minute-second fields deleted.
 
 The following script
 <DL COMPACT><DT><DD>
-<BR>&nbsp;<TT>proj&nbsp;+proj=utm&nbsp;+lon_0=112w&nbsp;-r&nbsp;&lt;&lt;EOF
+<BR>&nbsp;<TT>proj&nbsp;+proj=utm&nbsp;+lon_0=112w&nbsp;+ellps=clrk66&nbsp;-r&nbsp;&lt;&lt;EOF
 <BR>&nbsp;45d15'33.1&quot;<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>111.5W<BR>
 <BR>&nbsp;45d15.551666667N<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-111d30<BR>
 <BR>&nbsp;+45.25919444444<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>111d30'000w<BR>
@@ -372,7 +380,27 @@ The x-y output data will appear as three lines of:
 </DL>
 
 </TT><A NAME="lbAF">&nbsp;</A>
+<H2>OTHER PROGRAMS</H2>
+
+<P>
+
+The <I>proj</I> program is limited to converting between geographic and
+projection coordinates within one datum.
+<P>
+
+The <I>cs2cs</I> program operates
+similarly, but allows translation between any pair of definable coordinate
+systems, including support for datum translation.
+<P>
+
+The <I>geod</I> program provides the ability to compute geodesic (Great
+Circle) computations.
+<A NAME="lbAG">&nbsp;</A>
 <H2>SEE ALSO</H2>
+
+<B><A HREF="../man1/cs2cs.1.html">cs2cs</A>(1), <A HREF="../man1/geod.1.html">geod</A>(1), <A HREF="../man3/pj_init.3.html">pj_init</A>(3),</B>
+
+<BR>
 
 <I>Cartographic Projection Procedures for the UNIX Environment---A User's Manual,</I>
 
@@ -387,16 +415,16 @@ USGS Bulletin 1532).
 
 <I>Map Projections---A Working Manual</I>
 
-(Synder, 1988, USGS Prof. Paper 1395).
+(Snyder, 1988, USGS Prof. Paper 1395).
 <BR>
 
 <I>An Album of Map Projections</I>
 
 (Snyder &amp; Voxland, 1989, USGS Prof. Paper 1453).
-<A NAME="lbAG">&nbsp;</A>
+<A NAME="lbAH">&nbsp;</A>
 <H2>HOME PAGE</H2>
 
-<A HREF="http://www.remotesensing.org/proj">http://www.remotesensing.org/proj</A>
+<A HREF="https://github.com/OSGeo/proj.4/wiki">https://github.com/OSGeo/proj.4/wiki</A>
 <P>
 
 <HR>
@@ -406,13 +434,14 @@ USGS Bulletin 1532).
 <DT><A HREF="#lbAC">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAD">DESCRIPTION</A><DD>
 <DT><A HREF="#lbAE">EXAMPLE</A><DD>
-<DT><A HREF="#lbAF">SEE ALSO</A><DD>
-<DT><A HREF="#lbAG">HOME PAGE</A><DD>
+<DT><A HREF="#lbAF">OTHER PROGRAMS</A><DD>
+<DT><A HREF="#lbAG">SEE ALSO</A><DD>
+<DT><A HREF="#lbAH">HOME PAGE</A><DD>
 </DL>
 <HR>
 This document was created by
-<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
 using the manual pages.<BR>
-Time: 15:44:01 GMT, March 27, 2000
+Time: 20:44:57 GMT, February 18, 2016
 </BODY>
 </HTML>
