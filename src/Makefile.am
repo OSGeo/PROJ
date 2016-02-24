@@ -39,7 +39,7 @@ libproj_la_SOURCES = \
 	PJ_imw_p.c PJ_krovak.c PJ_lcc.c PJ_poly.c \
 	PJ_rpoly.c PJ_sconics.c proj_rouss.c \
 	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c \
-	PJ_gall.c PJ_labrd.c PJ_lsat.c PJ_merc.c \
+	PJ_gall.c PJ_labrd.c PJ_lsat.c PJ_misrsom.c PJ_merc.c \
 	PJ_mill.c PJ_ocea.c PJ_omerc.c PJ_somerc.c \
 	PJ_tcc.c PJ_tcea.c PJ_tmerc.c \
 	PJ_airy.c PJ_aitoff.c PJ_august.c PJ_bacon.c \
