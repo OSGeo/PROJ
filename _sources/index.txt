@@ -33,6 +33,7 @@ Documentation
    license
    htpd
    threads
+   parameters
 
 
 
