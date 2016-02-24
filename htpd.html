@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>HTPD &mdash; proj.4 4.9.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootswatch-3.3.4/paper/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '4.9.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="proj.4 4.9.3 documentation" href="index.html" />
+    <link rel="prev" title="License" href="license.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          proj.4</a>
+        <span class="navbar-text navbar-version pull-left"><b>4.9.3</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="download.html">Download</a></li>
+                <li><a href="https://github.com/OSGeo/proj.4">GitHub</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Docs <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="download.html#current-release">Current Release</a></li>
+<li class="toctree-l2"><a class="reference internal" href="download.html#past-releases">Past Releases</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#where-can-i-find-the-list-of-projections-and-their-arguments">Where can I find the list of projections and their arguments?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-build-configure-proj-4-to-support-datum-shifting">How do I build/configure PROJ.4 to support datum shifting?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-debug-problems-with-nad27-nad83-datum-shifting">How do I debug problems with NAD27/NAD83 datum shifting?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-use-epsg-coordinate-system-codes-with-proj-4">How do I use EPSG coordinate system codes with PROJ.4?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-use-3-parameter-and-7-parameter-datum-shifting">How do I use 3 parameter and 7 parameter datum shifting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#does-proj-4-work-in-different-international-numeric-locales">Does PROJ.4 work in different international numeric locales?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#changing-ellipsoid-why-can-t-i-convert-from-wgs84-to-google-earth-virtual-globe-mercator">Changing Ellipsoid / Why can&#8217;t I convert from WGS84 to Google Earth / Virtual Globe Mercator?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#why-do-i-get-different-results-with-4-5-0-and-4-6-0">Why do I get different results with 4.5.0 and 4.6.0?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-calculate-distances-directions-on-the-surface-of-the-earth">How do I calculate distances/directions on the surface of the earth?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-is-the-healpix-projection-and-how-can-i-use-it">What is the HEALPix projection and how can I use it?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-is-the-rhealpix-projection-and-how-can-i-use-it">What is the rHEALPix projection and how can I use it?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-options-does-proj-4-allow-for-the-shape-of-the-earth-geodesy">What options does proj.4 allow for the shape of the Earth (geodesy)?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-if-i-want-a-spherical-earth">What if I want a spherical Earth?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars">How do I change the radius of the Earth?  How do I use proj.4 for work on Mars?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-do-false-eastings-and-false-northings">How do I do False Eastings and False Northings?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic Calculations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#id1">Geodesic Calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#terminology">Terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#the-math">The Math</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#the-history">The History</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Grids</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grids.html#us-canadian-french-and-new-zealand">US, Canadian, French and New Zealand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grids.html#switzerland">Switzerland</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grids.html#non-free-grids">Non-Free Grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grids.html#harn">HARN</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">HTPD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getting-and-building-htdp">Getting and building HTDP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-crs2crs2grid-py">Getting crs2crs2grid.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Here <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">HTPD</a><ul>
+<li><a class="reference internal" href="#getting-and-building-htdp">Getting and building HTDP</a></li>
+<li><a class="reference internal" href="#getting-crs2crs2grid-py">Getting crs2crs2grid.py</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="license.html" title="Previous Chapter: License"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; License</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      
+  <div class="section" id="htpd">
+<span id="id1"></span><h1>HTPD<a class="headerlink" href="#htpd" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#htpd" id="id2">HTPD</a><ul>
+<li><a class="reference internal" href="#getting-and-building-htdp" id="id3">Getting and building HTDP</a></li>
+<li><a class="reference internal" href="#getting-crs2crs2grid-py" id="id4">Getting crs2crs2grid.py</a></li>
+<li><a class="reference internal" href="#usage" id="id5">Usage</a></li>
+<li><a class="reference internal" href="#see-also" id="id6">See Also</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>This page documents use of the <cite>crs2crs2grid.py</cite> script and the HTDP
+(Horizontal Time Dependent Positioning) grid shift modelling program from
+NGS/NOAA to produce PROJ.4 compatible grid shift files for fine grade
+conversions between various NAD83 epochs and WGS84.  Traditionally PROJ.4 has
+treated NAD83 and WGS84 as equivalent and failed to distinguish between
+different epochs or realizations of those datums.  At the scales of much
+mapping this is adequate but as interest grows in high resolution imagery and
+other high resolution mapping this is inadequate.  Also, as the North American
+crust drifts over time the displacement between NAD83 and WGS84 grows (more
+than one foot over the last two decades).</p>
+<div class="section" id="getting-and-building-htdp">
+<h2>Getting and building HTDP<a class="headerlink" href="#getting-and-building-htdp" title="Permalink to this headline">¶</a></h2>
+<p>The HTDP modelling program is in written FORTRAN.  The source and documentation
+can be found on the HTDP page at <a class="reference external" href="http://www.ngs.noaa.gov/TOOLS/Htdp/Htdp.shtml">http://www.ngs.noaa.gov/TOOLS/Htdp/Htdp.shtml</a></p>
+<p>On linux systems it will be necessary to install <cite>gfortran</cite> or some FORTRAN
+compiler.  For ubuntu something like the following should work.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>apt-get install gfortran
+</pre></div>
+</div>
+<p>To compile the program do something like the following to produce the binary &#8220;htdp&#8221; from the source code.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>gfortran htdp.for -o htdp
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-crs2crs2grid-py">
+<h2>Getting crs2crs2grid.py<a class="headerlink" href="#getting-crs2crs2grid-py" title="Permalink to this headline">¶</a></h2>
+<p>The <cite>crs2crs2grid.py</cite> script can be found at
+<a class="reference external" href="https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/crs2crs2grid.py">https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/crs2crs2grid.py</a></p>
+<p>It depends on having the GDAL Python bindings operational.  If they are not
+available you will get an error something like the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>Traceback (most recent call last):
+  File &quot;./crs2crs2grid.py&quot;, line 37, in &lt;module&gt;
+    from osgeo import gdal, gdal_array, osr
+ImportError: No module named osgeo
+</pre></div>
+</div>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span>   crs2crs2grid.py
+           &lt;src_crs_id&gt; &lt;src_crs_date&gt; &lt;dst_crs_id&gt; &lt;dst_crs_year&gt;
+           [-griddef &lt;ul_lon&gt; &lt;ul_lat&gt; &lt;ll_lon&gt; &lt;ll_lat&gt; &lt;lon_count&gt; &lt;lat_count&gt;]
+           [-htdp &lt;path_to_exe&gt;] [-wrkdir &lt;dirpath&gt;] [-kwf]
+           -o &lt;output_grid_name&gt;
+
+-griddef: by default the following values for roughly the continental USA
+          at a six minute step size are used:
+          -127 50 -66 25 251 611
+-kwf: keep working files in the working directory for review.
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span>crs2crs2grid.py 29 2002.0 8 2002.0 -o nad83_2002.ct2
+</pre></div>
+</div>
+<p>The goal of <cite>crs2crs2grid.py</cite> is to produce a grid shift file for a designated
+region.  The region is defined using the <cite>-griddef</cite> switch.  When missing a
+continental US region is used.  The script creates a set of sample points for
+the grid definition, runs the &#8220;htdp&#8221; program against it and then parses the
+resulting points and computes a point by point shift to encode into the final
+grid shift file.  By default it is assumed the <cite>htdp</cite> program will be in the
+executable path.  If not, please provide the path to the executable using the
+<cite>-htdp</cite> switch.</p>
+<p>The <cite>htdp</cite> program supports transformations between many CRSes and for each (or
+most?) of them you need to provide a date at which the CRS is fixed.  The full
+set of CRS Ids available in the HTDP program are:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span> 1...NAD_83(2011) (North America tectonic plate fixed)
+ 29...NAD_83(CORS96)  (NAD_83(2011) will be used)
+ 30...NAD_83(2007)    (NAD_83(2011) will be used)
+ 2...NAD_83(PA11) (Pacific tectonic plate fixed)
+ 31...NAD_83(PACP00)  (NAD 83(PA11) will be used)
+ 3...NAD_83(MA11) (Mariana tectonic plate fixed)
+ 32...NAD_83(MARP00)  (NAD_83(MA11) will be used)
+
+ 4...WGS_72                             16...ITRF92
+ 5...WGS_84(transit) = NAD_83(2011)     17...ITRF93
+ 6...WGS_84(G730) = ITRF92              18...ITRF94 = ITRF96
+ 7...WGS_84(G873) = ITRF96              19...ITRF96
+ 8...WGS_84(G1150) = ITRF2000           20...ITRF97
+ 9...PNEOS_90 = ITRF90                  21...IGS97 = ITRF97
+10...NEOS_90 = ITRF90                   22...ITRF2000
+11...SIO/MIT_92 = ITRF91                23...IGS00 = ITRF2000
+12...ITRF88                             24...IGb00 = ITRF2000
+13...ITRF89                             25...ITRF2005
+14...ITRF90                             26...IGS05 = ITRF2005
+15...ITRF91                             27...ITRF2008
+                                        28...IGS08 = ITRF2008
+</pre></div>
+</div>
+<p>The typical use case is mapping from NAD83 on a particular date to WGS84 on
+some date.  In this case the source CRS Id &#8220;29&#8221; (NAD_83(CORS96)) and the
+destination CRS Id is &#8220;8 (WGS_84(G1150)).  It is also necessary to select the
+source and destination date (epoch).  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>crs2crs2grid.py 29 2002.0 8 2002.0 -o nad83_2002.ct2
+</pre></div>
+</div>
+<p>The output is a CTable2 format grid shift file suitable for use with PROJ.4
+(4.8.0 or newer).  It might be utilized something like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=GRS80 +nadgrids=./nad83_2002.ct2 +to +proj=latlong +datum=WGS84
+</pre></div>
+</div>
+</div>
+<div class="section" id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://www.ngs.noaa.gov/TOOLS/Htdp/Htdp.shtml">http://www.ngs.noaa.gov/TOOLS/Htdp/Htdp.shtml</a> - NGS/NOAA page about the HTDP
+model and program.  Source for the HTDP program can be downloaded from here.</li>
+</ul>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+    <div class="footer">
+        <div class="container">
+                    &copy;  1992-2016, Gerald Evenden, Frank Warmerdam, and others
+                        Gerald Evenden,
+                        <a href="https://github.com/warmerdam">Frank Warmerdam</a>,
+                        and
+                        <a href="https://github.com/OSGeo/proj.4/graphs/contributors">others</a>,
+        </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Grids &mdash; proj.4 4.9.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootswatch-3.3.4/paper/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '4.9.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="proj.4 4.9.3 documentation" href="index.html" />
+    <link rel="next" title="License" href="license.html" />
+    <link rel="prev" title="Geodesic Calculations" href="geodesic.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          proj.4</a>
+        <span class="navbar-text navbar-version pull-left"><b>4.9.3</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="download.html">Download</a></li>
+                <li><a href="https://github.com/OSGeo/proj.4">GitHub</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Docs <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="download.html#current-release">Current Release</a></li>
+<li class="toctree-l2"><a class="reference internal" href="download.html#past-releases">Past Releases</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#where-can-i-find-the-list-of-projections-and-their-arguments">Where can I find the list of projections and their arguments?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-build-configure-proj-4-to-support-datum-shifting">How do I build/configure PROJ.4 to support datum shifting?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-debug-problems-with-nad27-nad83-datum-shifting">How do I debug problems with NAD27/NAD83 datum shifting?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-use-epsg-coordinate-system-codes-with-proj-4">How do I use EPSG coordinate system codes with PROJ.4?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-use-3-parameter-and-7-parameter-datum-shifting">How do I use 3 parameter and 7 parameter datum shifting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#does-proj-4-work-in-different-international-numeric-locales">Does PROJ.4 work in different international numeric locales?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#changing-ellipsoid-why-can-t-i-convert-from-wgs84-to-google-earth-virtual-globe-mercator">Changing Ellipsoid / Why can&#8217;t I convert from WGS84 to Google Earth / Virtual Globe Mercator?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#why-do-i-get-different-results-with-4-5-0-and-4-6-0">Why do I get different results with 4.5.0 and 4.6.0?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-calculate-distances-directions-on-the-surface-of-the-earth">How do I calculate distances/directions on the surface of the earth?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-is-the-healpix-projection-and-how-can-i-use-it">What is the HEALPix projection and how can I use it?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-is-the-rhealpix-projection-and-how-can-i-use-it">What is the rHEALPix projection and how can I use it?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-options-does-proj-4-allow-for-the-shape-of-the-earth-geodesy">What options does proj.4 allow for the shape of the Earth (geodesy)?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-if-i-want-a-spherical-earth">What if I want a spherical Earth?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars">How do I change the radius of the Earth?  How do I use proj.4 for work on Mars?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-do-false-eastings-and-false-northings">How do I do False Eastings and False Northings?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic Calculations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#id1">Geodesic Calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#terminology">Terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#the-math">The Math</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#the-history">The History</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Grids</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#us-canadian-french-and-new-zealand">US, Canadian, French and New Zealand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#switzerland">Switzerland</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#harn">HARN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#htdp">HTDP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#non-free-grids">Non-Free Grids</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="htpd.html">HTPD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="htpd.html#getting-and-building-htdp">Getting and building HTDP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htpd.html#getting-crs2crs2grid-py">Getting crs2crs2grid.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htpd.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htpd.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Here <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">Grids</a><ul>
+<li><a class="reference internal" href="#us-canadian-french-and-new-zealand">US, Canadian, French and New Zealand</a></li>
+<li><a class="reference internal" href="#switzerland">Switzerland</a></li>
+<li><a class="reference internal" href="#harn">HARN</a></li>
+<li><a class="reference internal" href="#htdp">HTDP</a></li>
+<li><a class="reference internal" href="#non-free-grids">Non-Free Grids</a><ul>
+<li><a class="reference internal" href="#canada-ntv2-0">Canada NTv2.0</a></li>
+<li><a class="reference internal" href="#australia">Australia</a></li>
+<li><a class="reference internal" href="#canada">Canada</a></li>
+<li><a class="reference internal" href="#germany">Germany</a></li>
+<li><a class="reference internal" href="#great-britain">Great Britain</a></li>
+<li><a class="reference internal" href="#austria">Austria</a></li>
+<li><a class="reference internal" href="#spain">Spain</a></li>
+<li><a class="reference internal" href="#portugal">Portugal</a></li>
+<li><a class="reference internal" href="#brazil">Brazil</a></li>
+<li><a class="reference internal" href="#south-africa">South Africa</a></li>
+<li><a class="reference internal" href="#netherlands">Netherlands</a></li>
+<li><a class="reference internal" href="#hungary">Hungary</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="geodesic.html" title="Previous Chapter: Geodesic Calculations"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Geodesic Calc...</span>
+    </a>
+  </li>
+  <li>
+    <a href="license.html" title="Next Chapter: License"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">License &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      
+  <div class="section" id="grids">
+<span id="id1"></span><h1>Grids<a class="headerlink" href="#grids" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#grids" id="id2">Grids</a><ul>
+<li><a class="reference internal" href="#us-canadian-french-and-new-zealand" id="id3">US, Canadian, French and New Zealand</a></li>
+<li><a class="reference internal" href="#switzerland" id="id4">Switzerland</a></li>
+<li><a class="reference internal" href="#harn" id="id5">HARN</a></li>
+<li><a class="reference internal" href="#htdp" id="id6">HTDP</a></li>
+<li><a class="reference internal" href="#non-free-grids" id="id7">Non-Free Grids</a><ul>
+<li><a class="reference internal" href="#canada-ntv2-0" id="id8">Canada NTv2.0</a></li>
+<li><a class="reference internal" href="#australia" id="id9">Australia</a></li>
+<li><a class="reference internal" href="#canada" id="id10">Canada</a></li>
+<li><a class="reference internal" href="#germany" id="id11">Germany</a></li>
+<li><a class="reference internal" href="#great-britain" id="id12">Great Britain</a></li>
+<li><a class="reference internal" href="#austria" id="id13">Austria</a></li>
+<li><a class="reference internal" href="#spain" id="id14">Spain</a></li>
+<li><a class="reference internal" href="#portugal" id="id15">Portugal</a></li>
+<li><a class="reference internal" href="#brazil" id="id16">Brazil</a></li>
+<li><a class="reference internal" href="#south-africa" id="id17">South Africa</a></li>
+<li><a class="reference internal" href="#netherlands" id="id18">Netherlands</a></li>
+<li><a class="reference internal" href="#hungary" id="id19">Hungary</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<p>Grid files are important for shifting and transforming between datums</p>
+<div class="section" id="us-canadian-french-and-new-zealand">
+<h2>US, Canadian, French and New Zealand<a class="headerlink" href="#us-canadian-french-and-new-zealand" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://download.osgeo.org/proj/proj-datumgrid-1.5.zip">http://download.osgeo.org/proj/proj-datumgrid-1.5.zip</a>: US, Canadian, French
+and New Zealand datum shift grids - unzip in the <cite>nad</cite> directory before
+configuring to add NAD27/NAD83 and NZGD49 datum conversion</li>
+</ul>
+</div>
+<div class="section" id="switzerland">
+<h2>Switzerland<a class="headerlink" href="#switzerland" title="Permalink to this headline">¶</a></h2>
+<p>Background in ticket [#145](<a class="reference external" href="https://github.com/OSGeo/proj.4/issues/145">https://github.com/OSGeo/proj.4/issues/145</a>)</p>
+<p>We basically have two shift grids available. An official here:</p>
+<p><a class="reference external" href="http://www.swisstopo.admin.ch/internet/swisstopo/en/home/topics/survey/lv03-lv95/chenyx06/distortion_grids.html">Swiss CHENyx06 dataset in NTv2 format</a></p>
+<p>And a derived in a temporary location which is probably going to disappear soon.</p>
+<p>Main problem seems to be there&#8217;s no mention of distributivity of the grid from
+the official website.  It just tells: &#8220;you can use freely&#8221;.  The &#8220;contact&#8221; link
+is also broken, but maybe someone could make a phone call to ask for rephrasing
+that.</p>
+</div>
+<div class="section" id="harn">
+<h2>HARN<a class="headerlink" href="#harn" title="Permalink to this headline">¶</a></h2>
+<p>With the support of <a class="reference external" href="http://www.i-cubed.com">i-cubed</a>, Frank Warmerdam has
+written tools to translate the HPGN grids from NOAA/NGS from <code class="docutils literal"><span class="pre">.los/.las</span></code> format
+into NTv2 format for convenient use with PROJ.4.  This project included
+implementing a <a class="reference external" href="https://github.com/OSGeo/gdal/tree/trunk/gdal/frmts/raw/loslasdataset.cpp">.los/.las reader</a>
+for GDAL, and an <a class="reference external" href="https://github.com/OSGeo/gdal/tree/trunk/gdal/frmts/raw/ntv2dataset.cpp">NTv2 reader/writer</a>.
+Also, a script to do the bulk translation was implemented in
+<a class="reference external" href="https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/loslas2ntv2.py">https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/loslas2ntv2.py</a>.
+The command to do the translation was:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">loslas2ntv2</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">auto</span> <span class="o">*</span><span class="n">hpgn</span><span class="o">.</span><span class="n">los</span>
+</pre></div>
+</div>
+<p>As GDAL uses NAD83/WGS84 as a pivot datum, the sense of the HPGN datum shift offsets were negated to map from HPGN to NAD83 instead of the other way.  The files can be used with PROJ.4 like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +datum=NAD83
+      +to +proj=latlong +nadgrids=./azhpgn.gsb +ellps=GRS80
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span># input:
+-112 34
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span># output:
+111d59&#39;59.996&quot;W 34d0&#39;0.006&quot;N -0.000
+</pre></div>
+</div>
+<p>This was confirmed against the <a class="reference external" href="http://www.ngs.noaa.gov/cgi-bin/nadcon2.prl">NGS HPGN calculator</a>.</p>
+<p>The grids are available at <a class="reference external" href="http://download.osgeo.org/proj/hpgn_ntv2.zip">http://download.osgeo.org/proj/hpgn_ntv2.zip</a></p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="htpd.html#htpd"><span>HTPD</span></a> describes similar grid shifting</p>
+</div>
+</div>
+<div class="section" id="htdp">
+<h2>HTDP<a class="headerlink" href="#htdp" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="htpd.html#htpd"><span>HTPD</span></a> describes the situation with HTDP grids based on NOAA/NGS HTDP Model.</p>
+</div>
+<div class="section" id="non-free-grids">
+<h2>Non-Free Grids<a class="headerlink" href="#non-free-grids" title="Permalink to this headline">¶</a></h2>
+<p>Not all grid shift files have licensing that allows them to be freely
+distributed, but can be obtained by users through free and legal methods.</p>
+<div class="section" id="canada-ntv2-0">
+<h3>Canada NTv2.0<a class="headerlink" href="#canada-ntv2-0" title="Permalink to this headline">¶</a></h3>
+<p>Although NTv1 grid shifts are provided freely with PROJ.4, the higher-quality
+NTv2.0 file needs to be downloaded from Natural Resources Canada. More info:
+<a class="reference external" href="http://www.geod.nrcan.gc.ca/tools-outils/ntv2_e.php">http://www.geod.nrcan.gc.ca/tools-outils/ntv2_e.php</a>.</p>
+<p>Procedure:</p>
+<ol class="arabic">
+<li><p class="first">Visit the [NTv2](<a class="reference external" href="http://webapp.geod.nrcan.gc.ca/geod/tools-outils/applications.php?locale=en#ntv2">http://webapp.geod.nrcan.gc.ca/geod/tools-outils/applications.php?locale=en#ntv2</a>), and register/login</p>
+</li>
+<li><p class="first">Follow the Download NTv2 link near the bottom of the page.</p>
+</li>
+<li><p class="first">Unzip <cite>ntv2_100325.zip</cite> (or similar), and move the grid shift file <cite>NTV2_0.GSB</cite> to the proj directory (be sure to change the name to lowercase for consistency)
+* e.g.: <cite>mv NTV2_0.GSB /usr/local/share/proj/ntv2_0.gsb</cite></p>
+</li>
+<li><dl class="first docutils">
+<dt>Test it using:</dt>
+<dd><div class="first highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=clrk66 +nadgrids=@ntv2_0.gsb +to +proj=latlong +ellps=GRS80 +datum=NAD83
+-111 50
+</pre></div>
+</div>
+<div class="last highlight-python"><div class="highlight"><pre><span></span>111d0&#39;3.006&quot;W   50d0&#39;0.103&quot;N 0.000  # correct answer
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ol>
+</div>
+<div class="section" id="australia">
+<h3>Australia<a class="headerlink" href="#australia" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://www.icsm.gov.au/gda/tech.html">Geocentric Datum of Australia AGD66/AGD84</a></p>
+</div>
+<div class="section" id="canada">
+<h3>Canada<a class="headerlink" href="#canada" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://open.canada.ca/data/en/dataset/b3534942-31ea-59cf-bcc3-f8dc4875081a">Canadian NTv2 grid shift binary</a> for NAD27 &lt;=&gt; NAD83.</p>
+</div>
+<div class="section" id="germany">
+<h3>Germany<a class="headerlink" href="#germany" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://crs.bkg.bund.de/crseu/crs/descrtrans/BeTA/de_dhdn2etrs_beta.php">German BeTA2007 DHDN GK3 =&gt; ETRS89/UTM</a></p>
+</div>
+<div class="section" id="great-britain">
+<h3>Great Britain<a class="headerlink" href="#great-britain" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://www.ordnancesurvey.co.uk/business-and-government/help-and-support/navigation-technology/os-net/ostn02-ntv2-format.html">Great Britain&#8217;s OSTN02_NTv2: OSGB 1936 =&gt; ETRS89</a></p>
+</div>
+<div class="section" id="austria">
+<h3>Austria<a class="headerlink" href="#austria" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://www.bev.gv.at/portal/page?_pageid=713,2204753&amp;_dad=portal&amp;_schema=PORTAL">Austrian Grid</a> for MGI</p>
+</div>
+<div class="section" id="spain">
+<h3>Spain<a class="headerlink" href="#spain" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://www.ign.es/ign/layoutIn/herramientas.do#DATUM">Spanish grids</a> for ED50.</p>
+</div>
+<div class="section" id="portugal">
+<h3>Portugal<a class="headerlink" href="#portugal" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://www.fc.up.pt/pessoas/jagoncal/coordenadas/index.htm">Portuguese grids</a> for ED50, Lisbon 1890, Lisbon 1937 and Datum 73</p>
+</div>
+<div class="section" id="brazil">
+<h3>Brazil<a class="headerlink" href="#brazil" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://www.ibge.gov.br/home/geociencias/geodesia/param_transf/default_param_transf.shtm">Brazilian grids</a> for datums Corrego Alegre 1961, Corrego Alegre 1970-72, SAD69 and SAD69(96)</p>
+</div>
+<div class="section" id="south-africa">
+<h3>South Africa<a class="headerlink" href="#south-africa" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://eepublishers.co.za/article/datum-transformations-using-the-ntv2-grid.html">South African grid</a> (Cape to Hartebeesthoek94 or WGS84)</p>
+</div>
+<div class="section" id="netherlands">
+<h3>Netherlands<a class="headerlink" href="#netherlands" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://www.kadaster.nl/web/Themas/Registraties/Rijksdriehoeksmeting/Transformatie-van-coordinaten.htm)(Registrationrequiredbeforedownload">Dutch grid</a></p>
+</div>
+<div class="section" id="hungary">
+<h3>Hungary<a class="headerlink" href="#hungary" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://github.com/OSGeoLabBp/eov2etrs/">Hungarian grid</a> ETRS89 - HD72/EOV (epsg:23700), both horizontal and elevation grids</p>
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+    <div class="footer">
+        <div class="container">
+                    &copy;  1992-2016, Gerald Evenden, Frank Warmerdam, and others
+                        Gerald Evenden,
+                        <a href="https://github.com/warmerdam">Frank Warmerdam</a>,
+                        and
+                        <a href="https://github.com/OSGeo/proj.4/graphs/contributors">others</a>,
+        </div>
+    </div>
+  </body>
+</html>
