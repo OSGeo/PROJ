@@ -85,3 +85,5 @@ cmake/project-config*.cmake
 /src/cs2cs
 /src/multistresstest
 /src/test228
+
+/docs/build

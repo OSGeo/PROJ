@@ -4,6 +4,7 @@
 1) Update the version number in configure.in (in AC_INIT()).
 
    1a) Update the version number in PROJ_BUILD_VERSION in CMakeLists.txt
+   1b) Update the version number in doc/source/conf.py
 
 2) Update the version number in proj_api.h (#define PJ_VERSION).
 
