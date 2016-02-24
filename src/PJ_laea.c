@@ -115,10 +115,10 @@ INVERSE(e_inverse); /* ellipsoid */
 		cCe = cos(sCe = 2. * asin(.5 * rho / P->rq));
 		xy.x *= (sCe = sin(sCe));
 		if (P->mode == OBLIQ) {
-			q = P->qp * (ab = cCe * P->sinb1 + xy.y * sCe * P->cosb1 / rho);
+			ab = cCe * P->sinb1 + xy.y * sCe * P->cosb1 / rho;
 			xy.y = rho * P->cosb1 * cCe - xy.y * P->sinb1 * sCe;
 		} else {
-			q = P->qp * (ab = xy.y * sCe / rho);
+			ab = xy.y * sCe / rho;
 			xy.y = rho * cCe;
 		}
 		break;
