@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Download &mdash; proj.4 4.9.3 documentation</title>
+    <title>Threads &mdash; proj.4 4.9.3 documentation</title>
     
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -31,8 +31,6 @@
     <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="top" title="proj.4 4.9.3 documentation" href="index.html" />
-    <link rel="next" title="FAQ" href="faq.html" />
-    <link rel="prev" title="proj.4" href="index.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -58,7 +56,7 @@
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="#">Download</a></li>
+                <li><a href="download.html">Download</a></li>
                 <li><a href="https://github.com/OSGeo/proj.4">GitHub</a></li>
             
             
@@ -70,10 +68,10 @@
      href="index.html">Docs <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
-      aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">Download</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#current-release">Current Release</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#past-releases">Past Releases</a></li>
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="download.html#current-release">Current Release</a></li>
+<li class="toctree-l2"><a class="reference internal" href="download.html#past-releases">Past Releases</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a><ul>
@@ -130,9 +128,10 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">Download</a><ul>
-<li><a class="reference internal" href="#current-release">Current Release</a></li>
-<li><a class="reference internal" href="#past-releases">Past Releases</a></li>
+<li><a class="reference internal" href="#">Threads</a><ul>
+<li><a class="reference internal" href="#key-thread-safety-issues">Key Thread Safety Issues</a></li>
+<li><a class="reference internal" href="#projctx">projCtx</a></li>
+<li><a class="reference internal" href="#src-multistresstest-c">src/multistresstest.c</a></li>
 </ul>
 </li>
 </ul>
@@ -143,14 +142,6 @@
             
               
                 
-  <li>
-    <a href="index.html" title="Previous Chapter: proj.4"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; proj.4</span>
-    </a>
-  </li>
-  <li>
-    <a href="faq.html" title="Next Chapter: FAQ"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">FAQ &raquo;</span>
-    </a>
-  </li>
               
             
             
@@ -178,19 +169,73 @@
   <div class="row">
     <div class="col-md-12">
       
-  <div class="section" id="download">
-<span id="id1"></span><h1>Download<a class="headerlink" href="#download" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="current-release">
-<h2>Current Release<a class="headerlink" href="#current-release" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="threads">
+<span id="id1"></span><h1>Threads<a class="headerlink" href="#threads" title="Permalink to this headline">¶</a></h1>
+<p>This page is about efforts to make PROJ.4 thread safe.</p>
+<div class="section" id="key-thread-safety-issues">
+<h2>Key Thread Safety Issues<a class="headerlink" href="#key-thread-safety-issues" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><strong>2015-09-13</strong> <a class="reference external" href="http://download.osgeo.org/proj/proj-4.9.2.tar.gz">proj-4.9.2.tar.gz</a> <a class="reference external" href="http://lists.maptools.org/pipermail/proj/2015-September/007270.html">Release Notes</a> (<a class="reference external" href="http://download.osgeo.org/proj/proj-4.9.2.tar.gz.md5">md5</a>)</li>
+<li>the global pj_errno variable is shared between threads and makes it
+essentially impossible to handle errors safely.  Being addressed with the
+introduction of the projCtx execution context.</li>
+<li>the datum shift using grid files uses globally shared lists of loaded grid
+information. Access to this has been made safe in 4.7.0 with the introduction
+of a proj.4 mutex used to protect access to these memory structures (see
+pj_mutex.c).</li>
 </ul>
 </div>
-<div class="section" id="past-releases">
-<h2>Past Releases<a class="headerlink" href="#past-releases" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><strong>2015-03-04</strong> <a class="reference external" href="http://download.osgeo.org/proj/proj-4.9.1.tar.gz">proj-4.9.1.tar.gz</a></li>
-</ul>
+<div class="section" id="projctx">
+<h2>projCtx<a class="headerlink" href="#projctx" title="Permalink to this headline">¶</a></h2>
+<p>Primarily in order to avoid having pj_errno as a global variable, a &#8220;thread
+context&#8221; structure has been introduced into a variation of the PROJ.4 API for
+the 4.8.0 release.  The pj_init() and pj_init_plus() functions now have context
+variations called pj_init_ctx() and pj_init_plus_ctx() which take a projections
+context.</p>
+<p>The projections context can be created with pj_ctx_alloc(), and there is a
+global default context used when one is not provided by the application.  There
+is a <a href="#id2"><span class="problematic" id="id3">pj_ctx_</span></a> set of functions to create, manipulate, query, and destroy
+contexts.  The contexts are also used now to handle setting debugging mode, and
+to hold an error reporting function for textual error and debug messages.   The
+API looks like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>projPJ pj_init_ctx( projCtx, int, char ** );
+projPJ pj_init_plus_ctx( projCtx, const char * );
+
+projCtx pj_get_default_ctx(void);
+projCtx pj_get_ctx( projPJ );
+void pj_set_ctx( projPJ, projCtx );
+projCtx pj_ctx_alloc(void);
+void    pj_ctx_free( projCtx );
+int pj_ctx_get_errno( projCtx );
+void pj_ctx_set_errno( projCtx, int );
+void pj_ctx_set_debug( projCtx, int );
+void pj_ctx_set_logger( projCtx, void (*)(void *, int, const char *) );
+void pj_ctx_set_app_data( projCtx, void * );
+void *pj_ctx_get_app_data( projCtx );
+</pre></div>
+</div>
+<p>Multithreaded applications are now expected to create a projCtx per thread
+using pj_ctx_alloc().  The context&#8217;s error handlers, and app data may be
+modified if desired, but at the very least each context has an internal error
+value accessed with pj_ctx_get_errno() as opposed to looking at pj_errno.</p>
+<p>Note that pj_errno continues to exist, and it is set by pj_ctx_set_errno() (as
+well as setting the context specific error number), but pj_errno still suffers
+from the global shared problem between threads and should not be used by
+multithreaded applications.</p>
+<p>Note that pj_init_ctx(), and pj_init_plus_ctx() will assign the projCtx to the
+created projPJ object.  Functions like pj_transform(), pj_fwd() and pj_inv()
+will use the context of the projPJ for error reporting.</p>
+</div>
+<div class="section" id="src-multistresstest-c">
+<h2>src/multistresstest.c<a class="headerlink" href="#src-multistresstest-c" title="Permalink to this headline">¶</a></h2>
+<p>A small multi-threaded test program has been written (src/multistresstest.c)
+for testing multithreaded use of PROJ.4.  It performs a series of reprojections
+to setup a table expected results, and then it does them many times in several
+threads to confirm that the results are consistent.  At this time this program
+is not part of the builds but it can be built on linux like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>gcc -g multistresstest.c .libs/libproj.so -lpthread -o multistresstest
+./multistresstest
+</pre></div>
+</div>
 </div>
 </div>
 

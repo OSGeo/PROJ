@@ -1,0 +1,631 @@
+
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Parameters &mdash; proj.4 4.9.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootswatch-3.3.4/paper/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '4.9.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="proj.4 4.9.3 documentation" href="index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          proj.4</a>
+        <span class="navbar-text navbar-version pull-left"><b>4.9.3</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="download.html">Download</a></li>
+                <li><a href="https://github.com/OSGeo/proj.4">GitHub</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Docs <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="download.html#current-release">Current Release</a></li>
+<li class="toctree-l2"><a class="reference internal" href="download.html#past-releases">Past Releases</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#where-can-i-find-the-list-of-projections-and-their-arguments">Where can I find the list of projections and their arguments?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-build-configure-proj-4-to-support-datum-shifting">How do I build/configure PROJ.4 to support datum shifting?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-debug-problems-with-nad27-nad83-datum-shifting">How do I debug problems with NAD27/NAD83 datum shifting?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-use-epsg-coordinate-system-codes-with-proj-4">How do I use EPSG coordinate system codes with PROJ.4?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-use-3-parameter-and-7-parameter-datum-shifting">How do I use 3 parameter and 7 parameter datum shifting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#does-proj-4-work-in-different-international-numeric-locales">Does PROJ.4 work in different international numeric locales?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#changing-ellipsoid-why-can-t-i-convert-from-wgs84-to-google-earth-virtual-globe-mercator">Changing Ellipsoid / Why can&#8217;t I convert from WGS84 to Google Earth / Virtual Globe Mercator?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#why-do-i-get-different-results-with-4-5-0-and-4-6-0">Why do I get different results with 4.5.0 and 4.6.0?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-calculate-distances-directions-on-the-surface-of-the-earth">How do I calculate distances/directions on the surface of the earth?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-is-the-healpix-projection-and-how-can-i-use-it">What is the HEALPix projection and how can I use it?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-is-the-rhealpix-projection-and-how-can-i-use-it">What is the rHEALPix projection and how can I use it?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-options-does-proj-4-allow-for-the-shape-of-the-earth-geodesy">What options does proj.4 allow for the shape of the Earth (geodesy)?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#what-if-i-want-a-spherical-earth">What if I want a spherical Earth?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars">How do I change the radius of the Earth?  How do I use proj.4 for work on Mars?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-do-false-eastings-and-false-northings">How do I do False Eastings and False Northings?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic Calculations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#id1">Geodesic Calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#terminology">Terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#the-math">The Math</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geodesic.html#the-history">The History</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Grids</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grids.html#us-canadian-french-and-new-zealand">US, Canadian, French and New Zealand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grids.html#switzerland">Switzerland</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grids.html#harn">HARN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grids.html#htdp">HTDP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grids.html#non-free-grids">Non-Free Grids</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="htpd.html">HTPD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="htpd.html#getting-and-building-htdp">Getting and building HTDP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htpd.html#getting-crs2crs2grid-py">Getting crs2crs2grid.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htpd.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htpd.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Here <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">Parameters</a><ul>
+<li><a class="reference internal" href="#parameter-list">Parameter list</a></li>
+<li><a class="reference internal" href="#units">Units</a></li>
+<li><a class="reference internal" href="#vertical-units">Vertical Units</a></li>
+<li><a class="reference internal" href="#false-easting-northing">False Easting/Northing</a></li>
+<li><a class="reference internal" href="#lon-wrap-over-longitude-wrapping">lon_wrap, over - Longitude Wrapping</a></li>
+<li><a class="reference internal" href="#pm-prime-meridian">pm - Prime Meridian</a></li>
+<li><a class="reference internal" href="#towgs84-datum-transformation-to-wgs84">towgs84 - Datum transformation to WGS84</a></li>
+<li><a class="reference internal" href="#nadgrids-grid-based-datum-adjustments">nadgrids - Grid Based Datum Adjustments</a><ul>
+<li><a class="reference internal" href="#skipping-missing-grids">Skipping Missing Grids</a></li>
+<li><a class="reference internal" href="#the-null-grid">The null Grid</a></li>
+<li><a class="reference internal" href="#downloading-and-installing-grids">Downloading and Installing Grids</a></li>
+<li><a class="reference internal" href="#caveats">Caveats</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#axis-orientation">Axis orientation</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      
+  <div class="section" id="parameters">
+<span id="id1"></span><h1>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body">Micah Cochran</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Contact:</th><td class="field-body"><a class="reference external" href="http://github.com/micahcochran">http://github.com/micahcochran</a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Date:</th><td class="field-body">01/28/2016</td>
+</tr>
+</tbody>
+</table>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#parameters" id="id2">Parameters</a><ul>
+<li><a class="reference internal" href="#parameter-list" id="id3">Parameter list</a></li>
+<li><a class="reference internal" href="#units" id="id4">Units</a></li>
+<li><a class="reference internal" href="#vertical-units" id="id5">Vertical Units</a></li>
+<li><a class="reference internal" href="#false-easting-northing" id="id6">False Easting/Northing</a></li>
+<li><a class="reference internal" href="#lon-wrap-over-longitude-wrapping" id="id7">lon_wrap, over - Longitude Wrapping</a></li>
+<li><a class="reference internal" href="#pm-prime-meridian" id="id8">pm - Prime Meridian</a></li>
+<li><a class="reference internal" href="#towgs84-datum-transformation-to-wgs84" id="id9">towgs84 - Datum transformation to WGS84</a></li>
+<li><a class="reference internal" href="#nadgrids-grid-based-datum-adjustments" id="id10">nadgrids - Grid Based Datum Adjustments</a><ul>
+<li><a class="reference internal" href="#skipping-missing-grids" id="id11">Skipping Missing Grids</a></li>
+<li><a class="reference internal" href="#the-null-grid" id="id12">The null Grid</a></li>
+<li><a class="reference internal" href="#downloading-and-installing-grids" id="id13">Downloading and Installing Grids</a></li>
+<li><a class="reference internal" href="#caveats" id="id14">Caveats</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#axis-orientation" id="id15">Axis orientation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>This document attempts to describe a variety of the PROJ.4 parameters which can
+be applied to all, or many coordinate system definitions.  This document does
+not attempt to describe the parameters particular to particular projection
+types.  Some of these can be found in the GeoTIFF <a class="reference external" href="http://www.remotesensing.org/geotiff/proj_list/">Projections Transform List</a>.  The definitive
+documentation for most parameters is Gerald&#8217;s original documentation available
+from the main PROJ.4 page.</p>
+<div class="section" id="parameter-list">
+<h2>Parameter list<a class="headerlink" href="#parameter-list" title="Permalink to this headline">¶</a></h2>
+<p>Common parameters:</p>
+<p>(this PROJ.4 distribution including <cite>cs2cs</cite> and datum support)</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>+a         Semimajor radius of the ellipsoid axis
++alpha     ? Used with Oblique Mercator and possibly a few others
++axis      Axis orientation (new in 4.8.0)
++b         Semiminor radius of the ellipsoid axis
++datum     Datum name (see `proj -ld`)
++ellps     Ellipsoid name (see `proj -le`)
++k         Scaling factor (old name)
++k_0       Scaling factor (new name)
++lat_0     Latitude of origin
++lat_1     Latitude of first standard parallel
++lat_2     Latitude of second standard parallel
++lat_ts    Latitude of true scale
++lon_0     Central meridian
++lonc      ? Longitude used with Oblique Mercator and possibly a few others
++lon_wrap  Center longitude to use for wrapping (see below)
++nadgrids  Filename of NTv2 grid file to use for datum transforms (see below)
++no_defs   Don&#39;t use the /usr/share/proj/proj_def.dat defaults file
++over      Allow longitude output outside -180 to 180 range, disables wrapping (see below)
++pm        Alternate prime meridian (typically a city name, see below)
++proj      Projection name (see `proj -l`)
++south     Denotes southern hemisphere UTM zone
++to_meter  Multiplier to convert map units to 1.0m
++towgs84   3 or 7 term datum transform parameters (see below)
++units     meters, US survey feet, etc.
++vto_meter vertical conversion to meters.
++vunits    vertical units.
++x_0       False easting
++y_0       False northing
++zone      UTM zone
+</pre></div>
+</div>
+<p>Extended list provided by Gerald Evenden &#8220;grepped out of the RCS directory&#8221;.</p>
+<p>(libproj4 by G.E.; no datum support)</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>+a         Semimajor radius of the ellipsoid axis
++alpha     ? Used with Oblique Mercator and possibly a few others
++azi
++b         Semiminor radius of the ellipsoid axis
++belgium
++beta
++czech
++e         Eccentricity of the ellipsoid = sqrt(1 - b^2/a^2) = sqrt( f*(2-f) )
++ellps     Ellipsoid name (see `proj -le`)
++es        Eccentricity of the ellipsoid squared
++f         Flattening of the ellipsoid = 1-sqrt(1-e^2) (often presented as an inverse, e.g. 1/298)
++geoc
++guam
++h
++k         Scaling factor (old name)
++K
++k_0       Scaling factor (new name)
++lat_0     Latitude of origin
++lat_1     Latitude of first standard parallel
++lat_2     Latitude of second standard parallel
++lat_b
++lat_t
++lat_ts    Latitude of true scale
++lon_0     Central meridian
++lon_1
++lon_2
++lonc      ? Longitude used with Oblique Mercator and possibly a few others
++lsat
++m
++M
++n
++no_cut
++no_off
++no_rot
++ns
++o_alpha
++o_lat_1
++o_lat_2
++o_lat_c
++o_lat_p
++o_lon_1
++o_lon_2
++o_lon_c
++o_lon_p
++o_proj
++over
++p
++path
++proj      Projection name (see `proj -l`)
++q
++R
++R_a
++R_A       Compute radius such that the area of the sphere is the same as the area of the ellipsoid
++rf        Reciprocal of the ellipsoid flattening term (e.g. 298)
++R_g
++R_h
++R_lat_a
++R_lat_g
++rot
++R_V
++s
++south     Denotes southern hemisphere UTM zone
++sym
++t
++theta
++tilt
++to_meter  Multiplier to convert map units to 1.0m
++units     meters, US survey feet, etc.
++vopt
++W
++westo
++x_0       False easting
++y_0       False northing
++zone      UTM zone
+</pre></div>
+</div>
+<p>See GE&#8217;s <a class="reference external" href="http://members.verizon.net/~gerald.evenden/proj4/manual.pdf">libproj4
+manual</a> for
+further details (<a class="reference external" href="http://web.archive.org/web/20080807155507/http://members.verizon.net/~gerald.evenden/proj4/manual.pdf">copy in wayback machine</a>).</p>
+<p>Further details for projection at <a class="reference external" href="http://www.remotesensing.org/geotiff/proj_list/">http://www.remotesensing.org/geotiff/proj_list/</a></p>
+</div>
+<div class="section" id="units">
+<h2>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h2>
+<p>Horizontal units can be specified using the +units= keyword with a symbolic
+name for a unit (ie. us-ft).  Alternatively the translation to meters can be
+specified with the +to_meter keyword (ie. 0.304800609601219 for US feet).  The
+<code class="docutils literal"><span class="pre">-lu</span></code> argument to cs2cs or proj can be used to list symbolic unit names.  The
+default unit is degrees.</p>
+</div>
+<div class="section" id="vertical-units">
+<h2>Vertical Units<a class="headerlink" href="#vertical-units" title="Permalink to this headline">¶</a></h2>
+<p>Vertical (Z) units can be specified using the <code class="docutils literal"><span class="pre">+vunits=</span></code> keyword with a
+symbolic name for a unit (ie. <code class="docutils literal"><span class="pre">us-ft</span></code>).  Alternatively the translation to
+meters can be specified with the <code class="docutils literal"><span class="pre">+vto_meter</span></code> keyword (ie. 0.304800609601219
+for US feet).  The <code class="docutils literal"><span class="pre">-lu</span></code> argument to cs2cs or proj can be used to list symbolic
+unit names.  If no vertical units are specified, the vertical units will
+default to be the same as the horizontal coordinates.</p>
+<p>Note that vertical unit transformations are only supported in pj_transform()
+and programs built on that such as cs2cs.  The low level projections functions
+pj_fwd() and pj_inv() and programs using them directly such as proj do not
+handle vertical units at all.</p>
+</div>
+<div class="section" id="false-easting-northing">
+<h2>False Easting/Northing<a class="headerlink" href="#false-easting-northing" title="Permalink to this headline">¶</a></h2>
+<p>Virtually all coordinate systems allow for the presence of a false easting
+(<code class="docutils literal"><span class="pre">+x_0</span></code>) and northing (<code class="docutils literal"><span class="pre">+y_0</span></code>).  Note that these values are always expressed in
+meters even if the coordinate system is some other units.  Some coordinate
+systems (such as UTM) have implicit false easting and northing values.</p>
+</div>
+<div class="section" id="lon-wrap-over-longitude-wrapping">
+<h2>lon_wrap, over - Longitude Wrapping<a class="headerlink" href="#lon-wrap-over-longitude-wrapping" title="Permalink to this headline">¶</a></h2>
+<p>By default PROJ.4 wraps output longitudes in the range -180 to 180.  The +over
+switch can be used to disable the default wrapping which is done at a low level
+- in <code class="docutils literal"><span class="pre">pj_inv()</span></code>.  This is particularly useful with projections like eqc where
+it would desirable for X values past -20000000 (roughly) to continue past
+-180 instead of wrapping to +180.</p>
+<p>The <code class="docutils literal"><span class="pre">+lon_wrap</span></code> option can be used to provide an alternative means of doing
+longitude wrapping within <code class="docutils literal"><span class="pre">pj_transform()</span></code>.  The argument to this option is a
+center longitude.  So <code class="docutils literal"><span class="pre">+lon_wrap=180</span></code> means wrap longitudes in the range 0 to
+360.  Note that <code class="docutils literal"><span class="pre">+over</span></code> does <strong>not</strong> disable <code class="docutils literal"><span class="pre">+lon_wrap</span></code>.</p>
+</div>
+<div class="section" id="pm-prime-meridian">
+<h2>pm - Prime Meridian<a class="headerlink" href="#pm-prime-meridian" title="Permalink to this headline">¶</a></h2>
+<p>A prime meridian may be declared indicating the offset between the prime
+meridian of the declared coordinate system and that of greenwich.  A prime
+meridian is clared using the &#8220;pm&#8221; parameter, and may be assigned a symbolic
+name, or the longitude of the alternative prime meridian relative to greenwich.</p>
+<p>Currently prime meridian declarations are only utilized by the
+<code class="docutils literal"><span class="pre">pj_transform()</span></code> API call, not the <code class="docutils literal"><span class="pre">pj_inv()</span></code> and <code class="docutils literal"><span class="pre">pj_fwd()</span></code> calls.
+Consequently the user utility <code class="docutils literal"><span class="pre">cs2cs</span></code> does honour prime meridians but the
+proj user utility ignores them.</p>
+<p>The following predeclared prime meridian names are supported.  These can be
+listed using the cs2cs argument -lm.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>greenwich 0dE
+   lisbon 9d07&#39;54.862&quot;W
+    paris 2d20&#39;14.025&quot;E
+   bogota 74d04&#39;51.3&quot;E
+   madrid 3d41&#39;16.48&quot;W
+     rome 12d27&#39;8.4&quot;E
+     bern 7d26&#39;22.5&quot;E
+  jakarta 106d48&#39;27.79&quot;E
+    ferro 17d40&#39;W
+ brussels 4d22&#39;4.71&quot;E
+stockholm 18d3&#39;29.8&quot;E
+   athens 23d42&#39;58.815&quot;E
+     oslo 10d43&#39;22.5&quot;E
+</pre></div>
+</div>
+<p>Example of use.  The location <code class="docutils literal"><span class="pre">long=0</span></code>, <code class="docutils literal"><span class="pre">lat=0</span></code> in the greenwich based lat/long
+coordinates is translated to lat/long coordinates with Madrid as the prime
+meridian.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +datum=WGS84 +to +proj=latlong +datum=WGS84 +pm=madrid
+0 0                           &lt;i&gt;(input)&lt;/i&gt;
+3d41&#39;16.48&quot;E    0dN 0.000     &lt;i&gt;(output)&lt;/i&gt;
+</pre></div>
+</div>
+</div>
+<div class="section" id="towgs84-datum-transformation-to-wgs84">
+<h2>towgs84 - Datum transformation to WGS84<a class="headerlink" href="#towgs84-datum-transformation-to-wgs84" title="Permalink to this headline">¶</a></h2>
+<p>Datum shifts can be approximated by 3 parameter spatial translations (in
+geocentric space), or 7 parameter shifts (translation + rotation + scaling).
+The parameters to describe this can be described using the towgs84 parameter.</p>
+<p>In the three parameter case, the three arguments are the translations to the
+geocentric location in meters.</p>
+<p>For instance, the following demonstrates converting from the Greek GGRS87 datum
+to WGS84.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=GRS80 +towgs84=-199.87,74.79,246.62
+    +to +proj=latlong +datum=WGS84
+20 35
+20d0&#39;5.467&quot;E    35d0&#39;9.575&quot;N 8.570
+</pre></div>
+</div>
+<p>The EPSG database provides this example for transforming from WGS72 to WGS84
+using an approximated 7 parameter transformation.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=WGS72 +towgs84=0,0,4.5,0,0,0.554,0.219 \
+    +to +proj=latlong +datum=WGS84
+4 55
+4d0&#39;0.554&quot;E     55d0&#39;0.09&quot;N 3.223
+</pre></div>
+</div>
+<p>The seven parameter case uses <code class="docutils literal"><span class="pre">delta_x</span></code>, <code class="docutils literal"><span class="pre">delta_y</span></code>, <code class="docutils literal"><span class="pre">delta_z</span></code>, <code class="docutils literal"><span class="pre">Rx</span> <span class="pre">-</span>
+<span class="pre">rotation</span> <span class="pre">X</span></code>, <code class="docutils literal"><span class="pre">Ry</span> <span class="pre">-</span> <span class="pre">rotation</span> <span class="pre">Y</span></code>, <code class="docutils literal"><span class="pre">Rz</span> <span class="pre">-</span> <span class="pre">rotation</span> <span class="pre">Z</span></code>, <code class="docutils literal"><span class="pre">M_BF</span> <span class="pre">-</span> <span class="pre">Scaling</span></code>.
+The three translation parameters are in meters as in the three parameter case.
+The rotational parameters are in seconds of arc.  The scaling is apparently the
+scale change in parts per million.</p>
+<p>A more complete discussion of the 3 and 7 parameter transformations can be
+found in the EPSG database (trf_method&#8217;s 9603 and 9606).  Within PROJ.4 the
+following calculations are used to apply the <code class="docutils literal"><span class="pre">towgs84</span></code> transformation (going
+to WGS84).  The x, y and z coordinates are in geocentric coordinates.</p>
+<p>Three parameter transformation (simple offsets):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>x[io] = x[io] + defn-&gt;datum_params[0];
+y[io] = y[io] + defn-&gt;datum_params[1];
+z[io] = z[io] + defn-&gt;datum_params[2];
+</pre></div>
+</div>
+<p>Seven parameter transformation (translation, rotation and scaling):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#define Dx_BF (defn-&gt;datum_params[0])</span>
+<span class="c1">#define Dy_BF (defn-&gt;datum_params[1])</span>
+<span class="c1">#define Dz_BF (defn-&gt;datum_params[2])</span>
+<span class="c1">#define Rx_BF (defn-&gt;datum_params[3])</span>
+<span class="c1">#define Ry_BF (defn-&gt;datum_params[4])</span>
+<span class="c1">#define Rz_BF (defn-&gt;datum_params[5])</span>
+<span class="c1">#define M_BF  (defn-&gt;datum_params[6])</span>
+
+<span class="n">x_out</span> <span class="o">=</span> <span class="n">M_BF</span><span class="o">*</span><span class="p">(</span>       <span class="n">x</span><span class="p">[</span><span class="n">io</span><span class="p">]</span> <span class="o">-</span> <span class="n">Rz_BF</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">io</span><span class="p">]</span> <span class="o">+</span> <span class="n">Ry_BF</span><span class="o">*</span><span class="n">z</span><span class="p">[</span><span class="n">io</span><span class="p">])</span> <span class="o">+</span> <span class="n">Dx_BF</span><span class="p">;</span>
+<span class="n">y_out</span> <span class="o">=</span> <span class="n">M_BF</span><span class="o">*</span><span class="p">(</span> <span class="n">Rz_BF</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">io</span><span class="p">]</span> <span class="o">+</span>       <span class="n">y</span><span class="p">[</span><span class="n">io</span><span class="p">]</span> <span class="o">-</span> <span class="n">Rx_BF</span><span class="o">*</span><span class="n">z</span><span class="p">[</span><span class="n">io</span><span class="p">])</span> <span class="o">+</span> <span class="n">Dy_BF</span><span class="p">;</span>
+<span class="n">z_out</span> <span class="o">=</span> <span class="n">M_BF</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="n">Ry_BF</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">io</span><span class="p">]</span> <span class="o">+</span> <span class="n">Rx_BF</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">io</span><span class="p">]</span> <span class="o">+</span>       <span class="n">z</span><span class="p">[</span><span class="n">io</span><span class="p">])</span> <span class="o">+</span> <span class="n">Dz_BF</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Note that EPSG method 9607 (coordinate frame rotation) coefficients can be
+converted to EPSG method 9606 (position vector 7-parameter) supported by PROJ.4
+by reversing the sign of the rotation vectors.  The methods are otherwise the
+same.</p>
+</div>
+<div class="section" id="nadgrids-grid-based-datum-adjustments">
+<h2>nadgrids - Grid Based Datum Adjustments<a class="headerlink" href="#nadgrids-grid-based-datum-adjustments" title="Permalink to this headline">¶</a></h2>
+<p>In many places (notably North America and Austrialia) national geodetic
+organizations provide grid shift files for converting between different datums,
+such as NAD27 to NAD83.  These grid shift files include a shift to be applied
+at each grid location. Actually grid shifts are normally computed based on an
+interpolation between the containing four grid points.</p>
+<p>PROJ.4 currently supports use of grid shift files for shifting between datums
+and WGS84 under some circumstances.  The grid shift table formats are ctable
+(the binary format produced by the PROJ.4 <code class="docutils literal"><span class="pre">nad2bin</span></code> program), NTv1 (the old
+Canadian format), and NTv2 (<code class="docutils literal"><span class="pre">.gsb</span></code> - the new Canadian and Australian format).</p>
+<p>Use of grid shifts is specified using the <code class="docutils literal"><span class="pre">nadgrids</span></code> keyword in a coordinate
+system definition.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>% cs2cs +proj=latlong +ellps=clrk66 +nadgrids=ntv1_can.dat \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 &lt;&lt; EOF
+-111 50
+EOF
+111d0&#39;2.952&quot;W   50d0&#39;0.111&quot;N 0.000
+</pre></div>
+</div>
+<p>In this case the <code class="docutils literal"><span class="pre">/usr/local/share/proj/ntv1_can.dat</span></code> grid shift file was
+loaded, and used to get a grid shift value for the selected point.</p>
+<p>It is possible to list multiple grid shift files, in which case each will be
+tried in turn till one is found that contains the point being transformed.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=clrk66 \
+          +nadgrids=conus,alaska,hawaii,stgeorge,stlrnc,stpaul \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 &lt;&lt; EOF
+-111 44
+EOF
+111d0&#39;2.788&quot;W   43d59&#39;59.725&quot;N 0.000
+</pre></div>
+</div>
+<div class="section" id="skipping-missing-grids">
+<h3>Skipping Missing Grids<a class="headerlink" href="#skipping-missing-grids" title="Permalink to this headline">¶</a></h3>
+<p>The special prefix <code class="docutils literal"><span class="pre">&#64;</span></code> may be prefixed to a grid to make it optional.  If it
+not found, the search will continue to the next grid.  Normally any grid not
+found will cause an error.  For instance, the following would use the
+<code class="docutils literal"><span class="pre">ntv2_0.gsb</span></code> file if available (see [[NonFreeGrids]]), otherwise it would
+fallback to using the <code class="docutils literal"><span class="pre">ntv1_can.dat</span></code> file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=clrk66 +nadgrids=@ntv2_0.gsb,ntv1_can.dat \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 &lt;&lt; EOF
+-111 50
+EOF
+111d0&#39;3.006&quot;W   50d0&#39;0.103&quot;N 0.000
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-null-grid">
+<h3>The null Grid<a class="headerlink" href="#the-null-grid" title="Permalink to this headline">¶</a></h3>
+<p>A special <code class="docutils literal"><span class="pre">null</span></code> grid shift file is shift with releases after 4.4.6 (not
+inclusive).  This file provides a zero shift for the whole world.  It may be
+listed at the end of a nadgrids file list if you want a zero shift to be
+applied to points outside the valid region of all the other grids.  Normally if
+no grid is found that contains the point to be transformed an error will occur.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=clrk66 +nadgrids=conus,null \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 &lt;&lt; EOF
+-111 45
+EOF
+111d0&#39;3.006&quot;W   50d0&#39;0.103&quot;N 0.000
+
+cs2cs +proj=latlong +ellps=clrk66 +nadgrids=conus,null \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 &lt;&lt; EOF
+-111 44
+-111 55
+EOF
+111d0&#39;2.788&quot;W   43d59&#39;59.725&quot;N 0.000
+111dW   55dN 0.000
+</pre></div>
+</div>
+</div>
+<div class="section" id="downloading-and-installing-grids">
+<h3>Downloading and Installing Grids<a class="headerlink" href="#downloading-and-installing-grids" title="Permalink to this headline">¶</a></h3>
+<p>The source distribution of PROJ.4 contains only the ntv1_can.dat file.  To get
+the set of US grid shift files it is necessary to download an additional
+distribution of files from the PROJ.4 site, such as
+<a class="reference external" href="ftp://ftp.remotesensing.org/pub/proj/proj-nad27-1.1.tar.gz">ftp://ftp.remotesensing.org/pub/proj/proj-nad27-1.1.tar.gz</a>.  Overlay it on the
+PROJ.4 source distribution, and re-configure, compile and install.  The
+distributed ASCII .lla files are converted into binary (platform specific)
+files that are installed.  On windows using the nmake /f makefile.vc nadshift
+command in the projsrc directory to build and install these files.</p>
+<p>It appears we can&#8217;t redistribute the Canadian NTv2 grid shift file freely,
+though it is better than the NTv1 file.  However, end users can download it for
+free from the <a class="reference external" href="http://www.geod.nrcan.gc.ca/tools-outils/ntv2_e.php">NRCan web site</a>.  After downloading
+it, just dump it in the data directory with the other installed data files
+(usually <cite>/usr/local/share/proj</cite>). See [[NonFreeGrids]] for details.</p>
+</div>
+<div class="section" id="caveats">
+<h3>Caveats<a class="headerlink" href="#caveats" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Where grids overlap (such as conus and ntv1_can.dat for instance) the first
+found for a point will be used regardless of whether it is appropriate or
+not.  So, for instance, <code class="docutils literal"><span class="pre">`+nadgrids=ntv1_can.dat`</span></code>,conus would result in
+the Canadian data being used for some areas in the northern United States
+even though the conus data is the approved data to use for the area.
+Careful selection of files and file order is necessary.  In some cases
+border spanning datasets may need to be pre-segmented into Canadian and
+American points so they can be properly grid shifted</li>
+<li>There are additional grids for shifting between NAD83 and various HPGN
+versions of the NAD83 datum.  Use of these haven&#8217;t been tried recently so
+you may encounter problems.  The FL.lla, WO.lla, MD.lla, TN.lla and WI.lla
+are examples of high precision grid shifts.  Take care!</li>
+<li>Additional detail on the grid shift being applied can be found by setting
+the PROJ_DEBUG environment variable to a value.  This will result in output
+to stderr on what grid is used to shift points, the bounds of the various
+grids loaded and so forth</li>
+<li>PROJ.4 always assumes that grids contain a shift <strong>to</strong>  NAD83 (essentially
+WGS84).  Other types of grids might or might not be usable</li>
+</ul>
+</div>
+</div>
+<div class="section" id="axis-orientation">
+<h2>Axis orientation<a class="headerlink" href="#axis-orientation" title="Permalink to this headline">¶</a></h2>
+<p>Starting in PROJ 4.8.0, the +axis argument can be used to control the axis
+orientation of the coordinate system.  The default orientation is &#8220;easting,
+northing, up&#8221; but directions can be flipped, or axes flipped using combinations
+of the axes in the +axis switch.  The values are:</p>
+<ul class="simple">
+<li>&#8220;e&#8221; - Easting</li>
+<li>&#8220;w&#8221; - Westing</li>
+<li>&#8220;n&#8221; - Northing</li>
+<li>&#8220;s&#8221; - Southing</li>
+<li>&#8220;u&#8221; - Up</li>
+<li>&#8220;d&#8221; - Down</li>
+</ul>
+<p>They can be combined in +axis in forms like:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">+axis=enu</span></code> - the default easting, northing, elevation.</li>
+<li><code class="docutils literal"><span class="pre">+axis=neu</span></code> - northing, easting, up - useful for &#8220;lat/long&#8221; geographic
+coordinates, or south orientated transverse mercator.</li>
+<li><code class="docutils literal"><span class="pre">+axis=wnu</span></code> - westing, northing, up - some planetary coordinate systems
+have &#8220;west positive&#8221; coordinate systems</li>
+</ul>
+<p>Note that the <code class="docutils literal"><span class="pre">+axis</span></code> argument only applies to coordinate transformations done
+through <code class="docutils literal"><span class="pre">pj_transform()</span></code> (so it works with <code class="docutils literal"><span class="pre">cs2cs</span></code>, but not with the proj
+commandline program).</p>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+    <div class="footer">
+        <div class="container">
+                    &copy;  1992-2016, Gerald Evenden, Frank Warmerdam, and others
+                        Gerald Evenden,
+                        <a href="https://github.com/warmerdam">Frank Warmerdam</a>,
+                        and
+                        <a href="https://github.com/OSGeo/proj.4/graphs/contributors">others</a>,
+        </div>
+    </div>
+  </body>
+</html>
