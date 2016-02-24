@@ -88,6 +88,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_lcc.c
         PJ_loxim.c
         PJ_lsat.c
+        PJ_misrsom.c
         PJ_mbt_fps.c
         PJ_mbtfpp.c
         PJ_mbtfpq.c
