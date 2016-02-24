@@ -107,5 +107,6 @@ message(STATUS "")
 add_subdirectory(nad)
 add_subdirectory(src)
 add_subdirectory(man)
+add_subdirectory(html)
 add_subdirectory(cmake)
 
