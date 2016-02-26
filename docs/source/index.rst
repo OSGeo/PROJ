@@ -32,6 +32,8 @@ Documentation
    grids
    license
    htpd
+   threads
+   parameters
 
 
 
