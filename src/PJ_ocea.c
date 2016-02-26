@@ -42,19 +42,25 @@ ENTRY0(ocea)
 	P->rok = P->a / P->k0;
 	P->rtk = P->a * P->k0;
 	if ( pj_param(P->ctx, P->params, "talpha").i) {
+		/*Define Pole of oblique transformation from 1 point & 1 azimuth*/
 		alpha	= pj_param(P->ctx, P->params, "ralpha").f;
 		lonz = pj_param(P->ctx, P->params, "rlonc").f;
+		/*Equation 9-8 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
 		P->singam = atan(-cos(alpha)/(-sin(phi_0) * sin(alpha))) + lonz;
+		/*Equation 9-7 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
 		P->sinphi = asin(cos(phi_0) * sin(alpha));
 	} else {
+		/*Define Pole of oblique transformation from 2 points*/
 		phi_1 = pj_param(P->ctx, P->params, "rlat_1").f;
 		phi_2 = pj_param(P->ctx, P->params, "rlat_2").f;
 		lam_1 = pj_param(P->ctx, P->params, "rlon_1").f;
 		lam_2 = pj_param(P->ctx, P->params, "rlon_2").f;
+		/*Equation 9-1 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
 		P->singam = atan2(cos(phi_1) * sin(phi_2) * cos(lam_1) -
 			sin(phi_1) * cos(phi_2) * cos(lam_2),
 			sin(phi_1) * cos(phi_2) * sin(lam_2) -
 			cos(phi_1) * sin(phi_2) * sin(lam_1) );
+		/*Equation 9-2 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
 		P->sinphi = atan(-cos(P->singam - lam_1) / tan(phi_1));
 	}
 	P->lam0 = P->singam + HALFPI;
