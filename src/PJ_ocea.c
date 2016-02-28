@@ -41,6 +41,7 @@ ENTRY0(ocea)
 
 	P->rok = P->a / P->k0;
 	P->rtk = P->a * P->k0;
+	/*If the keyword "alpha" is found in the sentence then use 1point+1azimuth*/
 	if ( pj_param(P->ctx, P->params, "talpha").i) {
 		/*Define Pole of oblique transformation from 1 point & 1 azimuth*/
 		alpha	= pj_param(P->ctx, P->params, "ralpha").f;
@@ -49,6 +50,7 @@ ENTRY0(ocea)
 		P->singam = atan(-cos(alpha)/(-sin(phi_0) * sin(alpha))) + lonz;
 		/*Equation 9-7 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
 		P->sinphi = asin(cos(phi_0) * sin(alpha));
+	/*If the keyword "alpha" is NOT found in the sentence then use 2points*/
 	} else {
 		/*Define Pole of oblique transformation from 2 points*/
 		phi_1 = pj_param(P->ctx, P->params, "rlat_1").f;
