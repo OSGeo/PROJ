@@ -767,6 +767,26 @@ $EXE -f '%.7f' \
  -E >> ${OUT} <<EOF
 2680778.57267967 6132228.07645127 0.
 EOF
+##############################################################################
+echo  "##############################################################" >> ${OUT}
+echo  "Test misrsom forward projection" >> ${OUT}
+#
+$EXE -f '%.7f' \
+    +proj=latlong +datum=WGS84 +no_defs +to \
+    +proj=misrsom +path=41 +ellps=WGS84 +units=m \
+ -E >> ${OUT} <<EOF
+48.64966165540372 66.2263195368941 0.
+EOF
+##############################################################################
+echo  "##############################################################" >> ${OUT}
+echo  "Test misrsom inverse projection" >> ${OUT}
+#
+$EXE -f '%.7f' \
+    +proj=misrsom +path=41 +ellps=WGS84 +units=m +no_defs +to \
+    +proj=latlong +datum=WGS84 -f '%0.7f' \
+ -E >> ${OUT} <<EOF
+7461300.0 528000.0 0.0
+EOF
 
 
 # Done!
