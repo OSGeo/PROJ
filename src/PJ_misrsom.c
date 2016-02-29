@@ -6,9 +6,9 @@
  * The code is identical to that of Landsat SOM (PJ_lsat.c) with the following
  * parameter changes:
  *
- *   ascending longitude = 98.30382 degrees
+ *   inclination angle = 98.30382 degrees
  *   period of revolution = 98.88 minutes
- *   inclination angle = 129.3056 degrees - (360 / 233) * path_number
+ *   ascending longitude = 129.3056 degrees - (360 / 233) * path_number
  *
  * and the following code change:
  *
