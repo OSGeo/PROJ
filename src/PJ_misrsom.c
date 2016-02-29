@@ -1,3 +1,24 @@
+/******************************************************************************
+ * This implements Space Qblique Mercator (SOM) projection, used by the
+ * Multi-angle Imaging SpectroRadiometer (MISR) products, from the NASA EOS Terra
+ * platform.
+ *
+ * The code is identical to that of Landsat SOM (PJ_lsat.c) with the following
+ * parameter changes:
+ *
+ *   ascending longitude = 98.30382 degrees
+ *   period of revolution = 98.88 minutes
+ *   inclination angle = 129.3056 degrees - (360 / 233) * path_number
+ *
+ * and the following code change:
+ *
+ *   P->rlm = PI * (1. / 248. + .5161290322580645);
+ *
+ * changed to:
+ *
+ *   P->rlm = 0
+ *
+ *****************************************************************************/
 /* based upon Snyder and Linck, USGS-NMD */
 #define PROJ_PARMS__ \
     double a2, a4, b, c1, c3; \
