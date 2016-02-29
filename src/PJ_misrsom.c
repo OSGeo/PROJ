@@ -1,5 +1,5 @@
 /******************************************************************************
- * This implements Space Qblique Mercator (SOM) projection, used by the
+ * This implements Space Oblique Mercator (SOM) projection, used by the
  * Multi-angle Imaging SpectroRadiometer (MISR) products, from the NASA EOS Terra
  * platform.
  *
