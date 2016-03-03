@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'proj.4'
-copyright = u'1992-2016, Gerald Evenden, Frank Warmerdam, and others'
+copyright = u'1986?-2016'
 author = u'Gerald Evenden'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -214,7 +214,7 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-#html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = '%d %b %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.

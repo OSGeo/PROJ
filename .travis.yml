@@ -3,23 +3,23 @@
 
 language: c
 
-sudo: false
+services:
+    docker
 
 compiler:
   - gcc
-  - clang
+#  - clang
 
 os:
   - linux
-  - osx
+#  - osx
 
 matrix:
   exclude:
     - os: osx
       compiler: gcc
 
-before_install:
- - pip install --user cpp-coveralls
+before_install: ./travis/before_install.sh
 
 install:
 # prepare build files
@@ -104,6 +104,9 @@ script:
 
 after_success:
   - coveralls --extension .c
+  - echo "$TRAVIS_SECURE_ENV_VARS"
+  - sh -c "./travis/build_docs.sh"
+  - sh -c 'if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "master"; then echo "publish website"; ./travis/add_deploy_key.sh; ./travis/deploy_website.sh $TRAVIS_BUILD_DIR/docs/build /tmp; fi'
 
 notifications:
   #email:
