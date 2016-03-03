@@ -4,6 +4,11 @@
 proj.4
 ******************************************************************************
 
+proj.4 is a standard Unix filter function which converts geographic longitude
+and latitude coordinates into cartesian coordinates (and vice versa), and it is
+a C API for software developers to include coordinate transformation in their
+own software.
+
 
 =============  ================================================================
  Platform                Test Status and Coverage
