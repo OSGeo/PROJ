@@ -37,7 +37,18 @@
 extern "C" {
 #endif
 
-/* Try to update this every version! */
+/*
+ * This version number should be updated with every release!  The format of
+ * PJ_VERSION is
+ *
+ * * Before version 4.10.0: PJ_VERSION=MNP where M, N, and P are the major,
+ *   minor, and patch numbers; e.g., PJ_VERSION=493 for version 4.9.3.
+ *
+ * * Version 4.10.0 and later: PJ_VERSION=MMMNNNPP later where MMM, NNN, PP
+ *   are the major, minor, and patch numbers (the minor and patch numbers
+ *   are padded with leading zeros if necessary); e.g., PJ_VERSION=401000
+ *   for version 4.10.0.
+ */
 #define PJ_VERSION 493
 
 /* pj_init() and similar functions can be used with a non-C locale */
