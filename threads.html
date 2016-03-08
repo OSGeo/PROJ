@@ -74,6 +74,7 @@
 <li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="download.html#current-release">Current Release</a></li>
 <li class="toctree-l2"><a class="reference internal" href="download.html#past-releases">Past Releases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="download.html#binaries">Binaries</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a><ul>
@@ -199,6 +200,17 @@
       
   <div class="section" id="threads">
 <span id="id1"></span><h1>Threads<a class="headerlink" href="#threads" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#threads" id="id2">Threads</a><ul>
+<li><a class="reference internal" href="#key-thread-safety-issues" id="id3">Key Thread Safety Issues</a></li>
+<li><a class="reference internal" href="#projctx" id="id4">projCtx</a></li>
+<li><a class="reference internal" href="#src-multistresstest-c" id="id5">src/multistresstest.c</a></li>
+</ul>
+</li>
+</ul>
+</div>
 <p>This page is about efforts to make PROJ.4 thread safe.</p>
 <div class="section" id="key-thread-safety-issues">
 <h2>Key Thread Safety Issues<a class="headerlink" href="#key-thread-safety-issues" title="Permalink to this headline">¶</a></h2>
@@ -221,7 +233,7 @@ variations called pj_init_ctx() and pj_init_plus_ctx() which take a projections
 context.</p>
 <p>The projections context can be created with pj_ctx_alloc(), and there is a
 global default context used when one is not provided by the application.  There
-is a <a href="#id2"><span class="problematic" id="id3">pj_ctx_</span></a> set of functions to create, manipulate, query, and destroy
+is a <a href="#id6"><span class="problematic" id="id7">pj_ctx_</span></a> set of functions to create, manipulate, query, and destroy
 contexts.  The contexts are also used now to handle setting debugging mode, and
 to hold an error reporting function for textual error and debug messages.   The
 API looks like:</p>
@@ -280,7 +292,7 @@ is not part of the builds but it can be built on linux like:</p>
                         and
                         <a href="https://github.com/OSGeo/proj.4/graphs/contributors">others</a>,
                 Last updated
-                    on 07 Mar 2016.
+                    on 08 Mar 2016.
         </div>
     </div>
   </body>
