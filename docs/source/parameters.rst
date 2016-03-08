@@ -4,8 +4,6 @@
 Parameters
 ================================================================================
 
-:Author: Micah Cochran
-:Contact: http://github.com/micahcochran
 :Date: 01/28/2016
 
 .. contents:: Contents
