@@ -4645,7 +4645,7 @@
 # Pulkovo 1942(83) / 3-degree Gauss-Kruger zone 8 (deprecated)
 <3843> +proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=6500000 +y_0=0 +ellps=krass +towgs84=26,-121,-78,0,0,0,0 +units=m +no_defs  <>
 # Pulkovo 1942(58) / Stereo70
-<3844> +proj=sterea +lat_0=46 +lon_0=25 +k=0.99975 +x_0=500000 +y_0=500000 +ellps=krass +towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84 +units=m +no_defs  <>
+<3844> +proj=sterea +lat_0=46 +lon_0=25 +k=0.99975 +x_0=500000 +y_0=500000 +ellps=krass +towgs84=2.329,-147.042,-92.08,0.309,0.325,0.497,5.69 +units=m +no_defs  <>
 # SWEREF99 / RT90 7.5 gon V emulation
 <3845> +proj=tmerc +lat_0=0 +lon_0=11.30625 +k=1.000006 +x_0=1500025.141 +y_0=-667.282 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # SWEREF99 / RT90 5 gon V emulation
