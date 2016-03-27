@@ -16,7 +16,7 @@ conic = \
 cylinder = \
 	PJ_cass.obj PJ_cc.obj PJ_cea.obj PJ_eqc.obj \
 	PJ_gall.obj PJ_labrd.obj PJ_lsat.obj PJ_misrsom.obj PJ_merc.obj \
-	PJ_mill.obj PJ_ocea.obj PJ_omerc.obj PJ_somerc.obj \
+	PJ_mill.obj PJ_ocea.obj PJ_omerc.obj PJ_patterson.obj PJ_somerc.obj \
 	PJ_tcc.obj PJ_tcea.obj PJ_tmerc.obj PJ_geos.obj \
 	PJ_gstmerc.obj proj_etmerc.obj 
 
