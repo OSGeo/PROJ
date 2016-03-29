@@ -9331,23 +9331,23 @@
 # Belge 1972 / Belgian Lambert 72
 <31370> +proj=lcc +lat_1=51.16666723333333 +lat_2=49.8333339 +lat_0=90 +lon_0=4.367486666666666 +x_0=150000.013 +y_0=5400088.438 +ellps=intl +towgs84=-106.8686,52.2978,-103.7239,0.3366,-0.457,1.8422,-1.2747 +units=m +no_defs  <>
 # DHDN / 3-degree Gauss zone 1 (deprecated)
-<31461> +proj=tmerc +lat_0=0 +lon_0=3 +k=1 +x_0=1500000 +y_0=0 +datum=potsdam +units=m +no_defs  <>
+<31461> +proj=tmerc +lat_0=0 +lon_0=3 +k=1 +x_0=1500000 +y_0=0 +datum=potsdam +units=m +nadgrids=BETA2007.gsb +no_defs  <>
 # DHDN / 3-degree Gauss zone 2 (deprecated)
-<31462> +proj=tmerc +lat_0=0 +lon_0=6 +k=1 +x_0=2500000 +y_0=0 +datum=potsdam +units=m +no_defs  <>
+<31462> +proj=tmerc +lat_0=0 +lon_0=6 +k=1 +x_0=2500000 +y_0=0 +datum=potsdam +units=m +nadgrids=BETA2007.gsb +no_defs  <>
 # DHDN / 3-degree Gauss zone 3 (deprecated)
-<31463> +proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +datum=potsdam +units=m +no_defs  <>
+<31463> +proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +datum=potsdam +units=m +nadgrids=BETA2007.gsb +no_defs  <>
 # DHDN / 3-degree Gauss zone 4 (deprecated)
-<31464> +proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +datum=potsdam +units=m +no_defs  <>
+<31464> +proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +datum=potsdam +units=m +nadgrids=BETA2007.gsb +no_defs  <>
 # DHDN / 3-degree Gauss zone 5 (deprecated)
-<31465> +proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=5500000 +y_0=0 +datum=potsdam +units=m +no_defs  <>
+<31465> +proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=5500000 +y_0=0 +datum=potsdam +units=m +nadgrids=BETA2007.gsb +no_defs  <>
 # DHDN / 3-degree Gauss-Kruger zone 2
-<31466> +proj=tmerc +lat_0=0 +lon_0=6 +k=1 +x_0=2500000 +y_0=0 +datum=potsdam +units=m +no_defs  <>
+<31466> +proj=tmerc +lat_0=0 +lon_0=6 +k=1 +x_0=2500000 +y_0=0 +datum=potsdam +units=m +nadgrids=BETA2007.gsb +no_defs  <>
 # DHDN / 3-degree Gauss-Kruger zone 3
-<31467> +proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +datum=potsdam +units=m +no_defs  <>
+<31467> +proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +datum=potsdam +units=m +nadgrids=BETA2007.gsb +no_defs  <>
 # DHDN / 3-degree Gauss-Kruger zone 4
-<31468> +proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +datum=potsdam +units=m +no_defs  <>
+<31468> +proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +datum=potsdam +units=m +nadgrids=BETA2007.gsb +no_defs  <>
 # DHDN / 3-degree Gauss-Kruger zone 5
-<31469> +proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=5500000 +y_0=0 +datum=potsdam +units=m +no_defs  <>
+<31469> +proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=5500000 +y_0=0 +datum=potsdam +units=m +nadgrids=BETA2007.gsb +no_defs  <>
 # Conakry 1905 / UTM zone 28N
 <31528> +proj=utm +zone=28 +a=6378249.2 +b=6356515 +towgs84=-23,259,-9,0,0,0,0 +units=m +no_defs  <>
 # Conakry 1905 / UTM zone 29N
