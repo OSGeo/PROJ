@@ -7,7 +7,6 @@ PROJ_HEAD(boggs, "Boggs Eumorphic") "\n\tPCyl., no inv., Sph.";
 # define FXC	2.00276
 # define FXC2	1.11072
 # define FYC	0.49931
-# define FYC2	1.41421356237309504880
 FORWARD(s_forward); /* spheroid */
 	double theta, th1, c;
 	int i;
@@ -26,7 +25,7 @@ FORWARD(s_forward); /* spheroid */
 		theta *= 0.5;
 		xy.x = FXC * lp.lam / (1. / cos(lp.phi) + FXC2 / cos(theta));
 	}
-	xy.y = FYC * (lp.phi + FYC2 * sin(theta));
+	xy.y = FYC * (lp.phi + SQRT_TWO * sin(theta));
 	return (xy);
 }
 FREEUP; if (P) pj_dalloc(P); }

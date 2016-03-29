@@ -5,7 +5,6 @@
 PROJ_HEAD(wink2, "Winkel II") "\n\tPCyl., Sph., no inv.\n\tlat_1=";
 #define MAX_ITER    10
 #define LOOP_TOL    1e-7
-#define TWO_D_PI 0.636619772367581343
 FORWARD(s_forward); /* spheroid */
 	double k, V;
 	int i;

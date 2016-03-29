@@ -2,7 +2,6 @@
 #include	<projects.h>
 PROJ_HEAD(vandg4, "van der Grinten IV") "\n\tMisc Sph, no inv.";
 #define TOL	1e-10
-#define TWORPI	0.63661977236758134308
 FORWARD(s_forward); /* spheroid */
 	double x1, t, bt, ct, ft, bt2, ct2, dt, dt2;
 	(void) P;
@@ -14,12 +13,12 @@ FORWARD(s_forward); /* spheroid */
 		xy.x = 0.;
 		xy.y = lp.phi;
 	} else {
-		bt = fabs(TWORPI * lp.phi);
+		bt = fabs(TWO_D_PI * lp.phi);
 		bt2 = bt * bt;
 		ct = 0.5 * (bt * (8. - bt * (2. + bt2)) - 5.)
 			/ (bt2 * (bt - 1.));
 		ct2 = ct * ct;
-		dt = TWORPI * lp.lam;
+		dt = TWO_D_PI * lp.lam;
 		dt = dt + 1. / dt;
 		dt = sqrt(dt * dt - 4.);
 		if ((fabs(lp.lam) - HALFPI) < 0.) dt = -dt;

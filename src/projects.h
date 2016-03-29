@@ -93,10 +93,16 @@ extern double hypot(double, double);
 #endif
 
 	/* some useful constants */
-#define HALFPI		1.5707963267948966
-#define FORTPI		0.78539816339744833
-#define PI		3.14159265358979323846
-#define TWOPI		6.2831853071795864769
+#define FORTPI         0.78539816339744830961   /* pi/4 */
+#define HALFPI         1.57079632679489661923   /* pi/2 */
+#define PI             3.14159265358979323846   /* pi */
+#define PI_HALFPI      4.71238898038468985766   /* 1.5*pi */
+#define TWOPI          6.28318530717958647693   /* 2*pi */
+#define TWOPI_HALFPI   7.85398163397448309616   /* 2.5*pi */
+
+#define TWO_D_PI       0.63661977236758134308   /* 2/pi */
+
+#define SQRT_TWO       1.41421356237309504880   /* sqrt(2) */
 
 /* maximum tag id length for +init and default files */
 #ifndef ID_TAG_MAX

@@ -32,13 +32,6 @@
 #define PJ_LIB__
 #include <projects.h>
 
-#ifndef M_PI
-#  define M_PI 3.14159265358979323846
-#endif
-#ifndef M_PI_2
-#  define M_PI_2 1.57079632679489661923
-#endif
-
 PROJ_HEAD(aitoff, "Aitoff") "\n\tMisc Sph";
 PROJ_HEAD(wintri, "Winkel Tripel") "\n\tMisc Sph\n\tlat_1";
 
@@ -111,13 +104,13 @@ INVERSE(s_inverse); /* sphere */
 			f1 -= xy.x; f2 -= xy.y;
 			dl = (f2 * f1p - f1 * f2p) / (dp = f1p * f2l - f2p * f1l);
 			dp = (f1 * f2l - f2 * f1l) / dp;
-			while (dl > M_PI) dl -= M_PI; /* set to interval [-M_PI, M_PI]  */
-			while (dl < -M_PI) dl += M_PI; /* set to interval [-M_PI, M_PI]  */
+			while (dl > PI) dl -= PI; /* set to interval [-PI, PI]  */
+			while (dl < -PI) dl += PI; /* set to interval [-PI, PI]  */
 			lp.phi -= dp;	lp.lam -= dl;
 		} while ((fabs(dp) > EPSILON || fabs(dl) > EPSILON) && (iter++ < MAXITER));
-		if (lp.phi > M_PI_2) lp.phi -= 2.*(lp.phi-M_PI_2); /* correct if symmetrical solution for Aitoff */ 
-		if (lp.phi < -M_PI_2) lp.phi -= 2.*(lp.phi+M_PI_2); /* correct if symmetrical solution for Aitoff */ 
-		if ((fabs(fabs(lp.phi) - M_PI_2) < EPSILON) && (!P->mode)) lp.lam = 0.; /* if pole in Aitoff, return longitude of 0 */ 
+		if (lp.phi > HALFPI) lp.phi -= 2.*(lp.phi-HALFPI); /* correct if symmetrical solution for Aitoff */
+		if (lp.phi < -HALFPI) lp.phi -= 2.*(lp.phi+HALFPI); /* correct if symmetrical solution for Aitoff */
+		if ((fabs(fabs(lp.phi) - HALFPI) < EPSILON) && (!P->mode)) lp.lam = 0.; /* if pole in Aitoff, return longitude of 0 */
 
 		/* calculate x,y coordinates with solution obtained */
 		if((D = acos(cos(lp.phi) * cos(C = 0.5 * lp.lam)))) {/* Aitoff */

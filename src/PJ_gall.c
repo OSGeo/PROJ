@@ -4,7 +4,6 @@ PROJ_HEAD(gall, "Gall (Gall Stereographic)") "\n\tCyl, Sph";
 #define YF	1.70710678118654752440
 #define XF	0.70710678118654752440
 #define RYF	0.58578643762690495119
-#define RXF	1.41421356237309504880
 FORWARD(s_forward); /* spheroid */
 	(void) P;
 	xy.x = XF * lp.lam;
@@ -13,7 +12,7 @@ FORWARD(s_forward); /* spheroid */
 }
 INVERSE(s_inverse); /* spheroid */
 	(void) P;
-	lp.lam = RXF * xy.x;
+	lp.lam = SQRT_TWO * xy.x;
 	lp.phi = 2. * atan(xy.y * RYF);
 	return (lp);
 }
