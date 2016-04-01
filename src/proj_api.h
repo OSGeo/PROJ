@@ -130,6 +130,8 @@ char *pj_get_def(projPJ, int);
 projPJ pj_latlong_from_proj( projPJ );
 void *pj_malloc(size_t);
 void pj_dalloc(void *);
+void *pj_calloc (size_t n, size_t size);
+void *pj_dealloc (void *ptr);
 char *pj_strerrno(int);
 int *pj_get_errno_ref(void);
 const char *pj_get_release(void);
