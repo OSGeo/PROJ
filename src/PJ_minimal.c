@@ -193,6 +193,7 @@ PJ *pj_projection_specific_setup_minimal (PJ *P) {
 	if (0==P->es) {
 		P->fwd = s_forward;
 		P->inv = s_inverse;
+        return P;
     }
 
     /* Otherwise it's ellipsoidal */
