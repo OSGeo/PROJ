@@ -103,6 +103,7 @@ PJ *PROJECTION(cass) {
 	if (0==P->es) {
 		P->inv = s_inverse;
 		P->fwd = s_forward;
+        return P;
     }
 
     /* Otherwise it's ellipsoidal */
