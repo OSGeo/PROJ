@@ -55,6 +55,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_cea.c
         PJ_chamb.c
         PJ_collg.c
+        PJ_comill.c
         PJ_crast.c
         PJ_denoy.c
         PJ_eck1.c
@@ -97,6 +98,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_mod_ster.c
         PJ_moll.c
         PJ_natearth.c
+        PJ_natearth2.c
         PJ_nell.c
         PJ_nell_h.c
         PJ_nocol.c

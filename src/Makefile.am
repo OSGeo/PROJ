@@ -47,7 +47,7 @@ libproj_la_SOURCES = \
 	PJ_lask.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c \
 	PJ_tpeqd.c PJ_vandg.c PJ_vandg2.c PJ_vandg4.c \
 	PJ_wag7.c PJ_lcca.c PJ_geos.c proj_etmerc.c \
-	PJ_boggs.c PJ_collg.c PJ_crast.c PJ_denoy.c \
+	PJ_boggs.c PJ_collg.c PJ_comill.c PJ_crast.c PJ_denoy.c \
 	PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c \
 	PJ_eck5.c PJ_fahey.c PJ_fouc_s.c PJ_gins8.c PJ_gstmerc.c \
 	PJ_gn_sinu.c PJ_goode.c PJ_igh.c PJ_hatano.c PJ_loxim.c \
@@ -64,7 +64,7 @@ libproj_la_SOURCES = \
 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c \
 	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c pj_ctx.c pj_log.c \
 	pj_zpoly1.c rtodms.c vector1.c pj_release.c pj_gauss.c \
-	PJ_healpix.c PJ_natearth.c PJ_calcofi.c pj_fileapi.c \
+	PJ_healpix.c PJ_natearth.c PJ_natearth2.c PJ_calcofi.c pj_fileapi.c \
 	\
 	pj_gc_reader.c pj_gridcatalog.c \
 	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \
