@@ -508,7 +508,7 @@ $EXE +proj=latlong +ellps=sphere \
 EOF
 #
 echo "##############################################################" >> ${OUT}
-echo "Test the natural earth projection" >> ${OUT}
+echo "Test the Natural Earth Projection" >> ${OUT}
 $EXE +proj=latlong +a=1 +lon_0=0 \
  +to +proj=natearth +a=6371008.7714 +b=6371008.7714 -f '%.'7'f' \
  -E >>${OUT} <<EOF
@@ -539,7 +539,7 @@ $EXE +proj=latlong +a=1 +lon_0=0 \
 180.0 90.0 0 9591912.979377454 9062062.394736718
 EOF
 echo "##############################################################" >> ${OUT}
-echo "Test the natural earth II projection" >> ${OUT}
+echo "Test the Natural Earth II Projection" >> ${OUT}
 $EXE +proj=latlong +a=1 +lon_0=0 \
  +to +proj=natearth2 +a=6371008.7714 +b=6371008.7714 -f '%.'7'f' \
  -E >>${OUT} <<EOF
