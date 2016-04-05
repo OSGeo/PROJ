@@ -229,7 +229,7 @@ typedef struct ARG_list {
 #ifdef PJ_LIB__
     /* we need this forward declaration in order to be able to add a
        pointer to struct opaque to the typedef struct PJconsts below */
-    struct opaque;
+    struct pj_opaque;
 #endif
 
 typedef struct PJconsts {
@@ -290,7 +290,7 @@ typedef struct PJconsts {
         double        last_after_date;
 
 #ifdef PJ_LIB__
-        struct opaque *opaq;
+        struct pj_opaque *opaque;
 #endif
 
 #ifdef PROJ_PARMS__
@@ -379,6 +379,24 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
 PJ *pj_projection_specific_setup_##name (PJ *P)
 
 #endif
+
+
+int pj_generic_selftest (
+    char *e_args,
+    char *s_args,
+    double tolerance_xy,
+    double tolerance_lp,
+    int n_fwd,
+    int n_inv,
+    LP *fwd_in,
+    XY *e_fwd_expect,
+    XY *s_fwd_expect,
+    XY *inv_in,
+    LP *e_inv_expect,
+    LP *s_inv_expect
+);
+
+
 
 
 #define MAX_TAB_ID 80

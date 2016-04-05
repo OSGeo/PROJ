@@ -11,7 +11,7 @@ PROJ_HEAD(cass, "Cassini") "\n\tCyl, Sph&Ell";
 # define C5	.06666666666666666666
 
 
-struct opaque {
+struct pj_opaque {
     /* These are the only opaque members actually initialized */
 	double *en;
 	double m0;
@@ -32,17 +32,17 @@ struct opaque {
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
-    struct opaque *O = P->opaq;
-	xy.y = pj_mlfn(lp.phi, O->n = sin(lp.phi), O->c = cos(lp.phi), O->en);
-	O->n = 1./sqrt(1. - P->es * O->n * O->n);
-	O->tn = tan(lp.phi); O->t = O->tn * O->tn;
-	O->a1 = lp.lam * O->c;
-	O->c *= P->es * O->c / (1 - P->es);
-	O->a2 = O->a1 * O->a1;
-	xy.x = O->n * O->a1 * (1. - O->a2 * O->t *
-		(C1 - (8. - O->t + 8. * O->c) * O->a2 * C2));
-	xy.y -= O->m0 - O->n * O->tn * O->a2 *
-		(.5 + (5. - O->t + 6. * O->c) * O->a2 * C3);
+    struct pj_opaque *Q = P->opaque;
+	xy.y = pj_mlfn(lp.phi, Q->n = sin(lp.phi), Q->c = cos(lp.phi), Q->en);
+	Q->n = 1./sqrt(1. - P->es * Q->n * Q->n);
+	Q->tn = tan(lp.phi); Q->t = Q->tn * Q->tn;
+	Q->a1 = lp.lam * Q->c;
+	Q->c *= P->es * Q->c / (1 - P->es);
+	Q->a2 = Q->a1 * Q->a1;
+	xy.x = Q->n * Q->a1 * (1. - Q->a2 * Q->t *
+		(C1 - (8. - Q->t + 8. * Q->c) * Q->a2 * C2));
+	xy.y -= Q->m0 - Q->n * Q->tn * Q->a2 *
+		(.5 + (5. - Q->t + 6. * Q->c) * Q->a2 * C3);
 	return xy;
 }
 
@@ -57,45 +57,48 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 
 static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     LP lp = {0.0,0.0};
-    struct opaque *O = P->opaq;
+    struct pj_opaque *Q = P->opaque;
 	double ph1;
 
-	ph1 = pj_inv_mlfn(P->ctx, O->m0 + xy.y, P->es, O->en);
-	O->tn = tan(ph1); O->t = O->tn * O->tn;
-	O->n = sin(ph1);
-	O->r = 1. / (1. - P->es * O->n * O->n);
-	O->n = sqrt(O->r);
-	O->r *= (1. - P->es) * O->n;
-	O->dd = xy.x / O->n;
-	O->d2 = O->dd * O->dd;
-	lp.phi = ph1 - (O->n * O->tn / O->r) * O->d2 *
-		(.5 - (1. + 3. * O->t) * O->d2 * C3);
-	lp.lam = O->dd * (1. + O->t * O->d2 *
-		(-C4 + (1. + 3. * O->t) * O->d2 * C5)) / cos(ph1);
+	ph1 = pj_inv_mlfn(P->ctx, Q->m0 + xy.y, P->es, Q->en);
+	Q->tn = tan(ph1); Q->t = Q->tn * Q->tn;
+	Q->n = sin(ph1);
+	Q->r = 1. / (1. - P->es * Q->n * Q->n);
+	Q->n = sqrt(Q->r);
+	Q->r *= (1. - P->es) * Q->n;
+	Q->dd = xy.x / Q->n;
+	Q->d2 = Q->dd * Q->dd;
+	lp.phi = ph1 - (Q->n * Q->tn / Q->r) * Q->d2 *
+		(.5 - (1. + 3. * Q->t) * Q->d2 * C3);
+	lp.lam = Q->dd * (1. + Q->t * Q->d2 *
+		(-C4 + (1. + 3. * Q->t) * Q->d2 * C5)) / cos(ph1);
 	return lp;
 }
 
 
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
-	lp.phi = asin(sin(P->opaq->dd = xy.y + P->phi0) * cos(xy.x));
-	lp.lam = atan2(tan(xy.x), cos(P->opaq->dd));
+	lp.phi = asin(sin(P->opaque->dd = xy.y + P->phi0) * cos(xy.x));
+	lp.lam = atan2(tan(xy.x), cos(P->opaque->dd));
 	return lp;
 }
 
 
-static void freeup(PJ *P) {                             /* Destructor */
+static void *freeup_new(PJ *P) {                        /* Destructor */
 	if (0==P)
-        return;
-    if (0==P->opaq) {
-        pj_dealloc (P);
-        return;
-    }
-	pj_dealloc(P->opaq->en);
-    pj_dealloc(P->opaq);
-    pj_dealloc(P);
+        return 0;
+    if (0==P->opaque)
+        return pj_dealloc (P);
+
+	pj_dealloc(P->opaque->en);
+    pj_dealloc(P->opaque);
+    return pj_dealloc(P);
 }
 
+static void freeup(PJ *P) {                             /* Destructor */
+    freeup_new (P);
+    return;
+}
 
 PJ *PROJECTION(cass) {
 
@@ -107,19 +110,19 @@ PJ *PROJECTION(cass) {
     }
 
     /* Otherwise it's ellipsoidal */
-    P->opaq = pj_calloc (1, sizeof (struct opaque));
-    if (0==P->opaq) {
+    P->opaque = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==P->opaque) {
         freeup (P);
         return 0;
     }
 
-    P->opaq->en = pj_enfn(P->es);
-	if (0==P->opaq->en) {
+    P->opaque->en = pj_enfn(P->es);
+	if (0==P->opaque->en) {
         freeup (P);
         return 0;
     }
 
-	P->opaq->m0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), P->opaq->en);
+	P->opaque->m0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), P->opaque->en);
 	P->inv = e_inverse;
 	P->fwd = e_forward;
 

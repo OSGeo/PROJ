@@ -168,6 +168,9 @@ char  *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file);
 
 PAFile pj_open_lib(projCtx, const char *, const char *);
 
+int pj_run_selftests (int verbosity);
+
+
 #define PJ_LOG_NONE        0
 #define PJ_LOG_ERROR       1
 #define PJ_LOG_DEBUG_MAJOR 2

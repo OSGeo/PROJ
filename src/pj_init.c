@@ -661,5 +661,5 @@ pj_free(PJ *P) {
 void pj_prepare (PJ *P, const char *description, void (*freeup)(struct PJconsts *), size_t sizeof_struct_opaque) {
     P->descr = description;
     P->pfree = freeup;
-    P->opaq  = pj_calloc (1, sizeof_struct_opaque);
+    P->opaque  = pj_calloc (1, sizeof_struct_opaque);
 }
