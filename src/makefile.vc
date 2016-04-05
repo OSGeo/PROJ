@@ -18,7 +18,7 @@ cylinder = \
 	PJ_gall.obj PJ_labrd.obj PJ_lsat.obj PJ_misrsom.obj PJ_merc.obj \
 	PJ_mill.obj PJ_ocea.obj PJ_omerc.obj PJ_patterson.obj PJ_somerc.obj \
 	PJ_tcc.obj PJ_tcea.obj PJ_tmerc.obj PJ_geos.obj \
-	PJ_gstmerc.obj proj_etmerc.obj 
+	PJ_gstmerc.obj proj_etmerc.obj
 
 misc = \
 	PJ_airy.obj PJ_aitoff.obj PJ_august.obj PJ_bacon.obj \
@@ -38,18 +38,18 @@ pseudo = \
 	PJ_putp4p.obj PJ_putp5.obj PJ_putp6.obj PJ_robin.obj \
 	PJ_sts.obj PJ_urm5.obj PJ_urmfps.obj PJ_wag2.obj \
 	PJ_wag3.obj PJ_wink1.obj PJ_wink2.obj PJ_isea.obj \
-	PJ_calcofi.obj 
+	PJ_calcofi.obj
 
 support = \
 	aasincos.obj adjlon.obj bch2bps.obj bchgen.obj pj_gauss.obj \
 	biveval.obj dmstor.obj mk_cheby.obj pj_auth.obj \
 	pj_deriv.obj pj_ell_set.obj pj_ellps.obj pj_errno.obj \
-	pj_factors.obj pj_fwd.obj pj_init.obj pj_inv.obj \
-        pj_fwd3d.obj pj_inv3d.obj \
+	pj_factors.obj pj_fwd.obj pj_generic_selftest.obj pj_init.obj \
+	pj_inv.obj pj_fwd3d.obj pj_inv3d.obj \
 	pj_list.obj pj_malloc.obj pj_mlfn.obj pj_msfn.obj \
 	pj_open_lib.obj pj_param.obj pj_phi2.obj pj_pr_list.obj \
-	pj_qsfn.obj pj_strerrno.obj pj_tsfn.obj pj_units.obj \
-	pj_zpoly1.obj rtodms.obj vector1.obj pj_release.obj \
+	pj_qsfn.obj pj_run_selftests.obj pj_strerrno.obj pj_tsfn.obj \
+	pj_units.obj pj_zpoly1.obj rtodms.obj vector1.obj pj_release.obj \
 	geocent.obj pj_transform.obj pj_datum_set.obj pj_datums.obj \
 	pj_apply_gridshift.obj pj_gc_reader.obj pj_gridcatalog.obj \
 	nad_cvt.obj nad_init.obj nad_intr.obj \
@@ -146,4 +146,4 @@ install: all
 	copy proj_api.h $(INSTDIR)\include
 	copy projects.h $(INSTDIR)\include
 	copy geodesic.h $(INSTDIR)\include
-	
+
