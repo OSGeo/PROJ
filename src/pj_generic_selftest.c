@@ -81,18 +81,13 @@ Returns 0 if all data agree to within the accuracy specified in
 
     PJ *P;
 
-puts ("testing");
     if (e_args) {
-
- puts ("e_args");
- puts (e_args);
-
         P = pj_init_plus(e_args);
         if (0==P)
             return 2;
 
         /* Test forward ellipsoidal */
-        if (e_fwd_expect) { puts ("e_fwd");
+        if (e_fwd_expect) {
             for (i = 0; i < n_fwd; i++)
                 if (deviates_xy (e_fwd_expect[i], pj_fwd_deg ( fwd_in[i], P ), tolerance_xy))
                     break;
@@ -101,7 +96,7 @@ puts ("testing");
         }
 
         /* Test inverse ellipsoidal */
-        if (e_inv_expect)  { puts ("e_inv");
+        if (e_inv_expect)  {
             for (i = 0; i < n_inv; i++)
                 if (deviates_lp (e_inv_expect[i], pj_inv ( inv_in[i], P ), tolerance_lp))
                     break;
@@ -114,14 +109,12 @@ puts ("testing");
 
 
     if (s_args) {
- puts ("s_args");
- puts (s_args);
         P = pj_init_plus(s_args);
         if (0==P)
             return 3;
 
         /* Test forward spherical */
-        if (s_fwd_expect)  { puts ("s_fwd");
+        if (s_fwd_expect)  {
             for (i = 0; i < n_fwd; i++)
                 if (deviates_xy (s_fwd_expect[i], pj_fwd_deg ( fwd_in[i], P ), tolerance_xy))
                     break;
@@ -130,7 +123,7 @@ puts ("testing");
         }
 
         /* Test inverse spherical */
-        if (s_inv_expect)  { puts ("s_inv");
+        if (s_inv_expect)  {
             for (i = 0; i < n_inv; i++)
                 if (deviates_lp (s_inv_expect[i], pj_inv ( inv_in[i], P ), tolerance_lp))
                     break;

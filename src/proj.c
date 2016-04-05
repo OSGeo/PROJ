@@ -269,6 +269,7 @@ int main(int argc, char **argv) {
                 continue;
               case 'C': /* Check - run internal regression tests */
                 pj_run_selftests (very_verby);
+                return 0;
                 continue;
               case 'v': /* monitor dump of initialization */
                 mon = 1;

@@ -225,7 +225,7 @@ int pj_aea_selftest (void) {
     double tolerance_xy = 1e-7;
 
     char e_args[] = {"+proj=aea   +ellps=GRS80  +lat_1=0 +lat_2=2"};
-    char s_args[] = {"+proj=aea   +ellps=GRS80  +lat_1=0 +lat_2=2"};
+    char s_args[] = {"+proj=aea   +a=6400000    +lat_1=0 +lat_2=2"};
 
     LP fwd_in[] = {
         { 2, 1},
@@ -285,7 +285,7 @@ int pj_leac_selftest (void) {
     double tolerance_xy = 1e-7;
 
     char e_args[] = {"+proj=leac   +ellps=GRS80  +lat_1=0 +lat_2=2"};
-    char s_args[] = {"+proj=leac   +ellps=GRS80  +lat_1=0 +lat_2=2"};
+    char s_args[] = {"+proj=leac   +a=6400000    +lat_1=0 +lat_2=2"};
 
     LP fwd_in[] = {
         { 2, 1},
