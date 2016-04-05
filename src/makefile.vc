@@ -14,7 +14,7 @@ conic = \
 	PJ_rpoly.obj PJ_sconics.obj PJ_lcca.obj
 
 cylinder = \
-	PJ_cass.obj PJ_cc.obj PJ_cea.obj PJ_eqc.obj \
+	PJ_cass.obj PJ_cc.obj PJ_cea.obj PJ_comill.obj PJ_eqc.obj \
 	PJ_gall.obj PJ_labrd.obj PJ_lsat.obj PJ_misrsom.obj PJ_merc.obj \
 	PJ_mill.obj PJ_ocea.obj PJ_omerc.obj PJ_patterson.obj PJ_somerc.obj \
 	PJ_tcc.obj PJ_tcea.obj PJ_tmerc.obj PJ_geos.obj \
@@ -26,7 +26,7 @@ misc = \
 	PJ_lask.obj PJ_nocol.obj PJ_ob_tran.obj PJ_oea.obj \
 	PJ_sch.obj PJ_tpeqd.obj PJ_vandg.obj PJ_vandg2.obj \
         PJ_vandg4.obj PJ_wag7.obj pj_latlong.obj PJ_krovak.obj \
-        pj_geocent.obj PJ_healpix.obj PJ_natearth.obj PJ_qsc.obj
+        pj_geocent.obj PJ_healpix.obj PJ_natearth.obj PJ_natearth2.obj PJ_qsc.obj
 
 pseudo = \
 	PJ_boggs.obj PJ_collg.obj PJ_crast.obj PJ_denoy.obj \
