@@ -313,7 +313,7 @@ JNIEXPORT jdouble JNICALL Java_org_proj4_PJ_getGreenwichLongitude
   (JNIEnv *env, jobject object)
 {
     PJ *pj = getPJ(env, object);
-    return (pj) ? (pj->from_greenwich)*(180/M_PI) : javaNaN(env);
+    return (pj) ? (pj->from_greenwich)*(180/PI) : javaNaN(env);
 }
 
 /*!
@@ -415,9 +415,9 @@ JNIEXPORT void JNICALL Java_org_proj4_PJ_transform
             double *x = data + offset;
             double *y = x + 1;
             double *z = (dimension >= 3) ? y+1 : NULL;
-            convertAngularOrdinates(src_pj, x, numPts, dimension, M_PI/180);
+            convertAngularOrdinates(src_pj, x, numPts, dimension, PI/180);
             int err = pj_transform(src_pj, dst_pj, numPts, dimension, x, y, z);
-            convertAngularOrdinates(dst_pj, x, numPts, dimension, 180/M_PI);
+            convertAngularOrdinates(dst_pj, x, numPts, dimension, 180/PI);
             (*env)->ReleasePrimitiveArrayCritical(env, coordinates, data, 0);
             if (err) {
                 jclass c = (*env)->FindClass(env, "org/proj4/PJException");

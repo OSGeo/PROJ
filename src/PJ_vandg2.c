@@ -1,5 +1,4 @@
 # define TOL	1e-10
-# define TWORPI	0.63661977236758134308
 #define PROJ_PARMS__ \
 	int	vdg3;
 #define PJ_LIB__
@@ -9,7 +8,7 @@ PROJ_HEAD(vandg3, "van der Grinten III") "\n\tMisc Sph, no inv.";
 FORWARD(s_forward); /* spheroid */
 	double x1, at, bt, ct;
 
-	bt = fabs(TWORPI * lp.phi);
+	bt = fabs(TWO_D_PI * lp.phi);
 	if ((ct = 1. - bt * bt) < 0.)
 		ct = 0.;
 	else

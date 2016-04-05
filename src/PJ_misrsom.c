@@ -28,8 +28,6 @@
 PROJ_HEAD(misrsom, "Space oblique for MISR")
         "\n\tCyl, Sph&Ell\n\tpath=";
 #define TOL 1e-7
-#define PI_HALFPI 4.71238898038468985766
-#define TWOPI_HALFPI 7.85398163397448309610
 
 static void
 seraz0(double lam, double mult, PJ *P) {
