@@ -428,7 +428,6 @@ int pj_ob_tran_selftest (void) {return 0;}
 int pj_ocea_selftest (void) {return 0;}
 int pj_oea_selftest (void) {return 0;}
 int pj_omerc_selftest (void) {return 0;}
-int pj_ortel_selftest (void) {return 0;}
 int pj_ortho_selftest (void) {return 0;}
 int pj_pconic_selftest (void) {return 0;}
 int pj_poly_selftest (void) {return 0;}
