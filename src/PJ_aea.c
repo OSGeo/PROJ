@@ -211,13 +211,13 @@ PJ *PROJECTION(leac) {
     P->descr = des_leac;
 	Q->phi2 = pj_param(P->ctx, P->params, "rlat_1").f;
 	Q->phi1 = pj_param(P->ctx, P->params, "bsouth").i ? - HALFPI: HALFPI;
-    setup(P);
+    setup (P);
     return P;
 }
 
 
 #ifdef PJ_OMIT_SELFTEST
-int pj_aea_selftest (void) {return 0;}
+int pj_aea_selftest (void) {return 10000;}
 #else
 
 int pj_aea_selftest (void) {
@@ -277,7 +277,7 @@ int pj_aea_selftest (void) {
 
 
 #ifdef PJ_OMIT_SELFTEST
-int pj_leac_selftest (void) {return 0;}
+int pj_leac_selftest (void) {return 10000;}
 #else
 
 int pj_leac_selftest (void) {
@@ -346,136 +346,143 @@ int pj_leac_selftest (void) {
                           SELFTEST STUBS
 ************************************************************************
 
-Preliminary selftest stubs temporarily placed here, and removed as real
-selftest functions are added to the projection source files
+Selftest stubs temporarily placed here.
+
+To be removed as real selftest functions are added to the projection
+source files
 
 ***********************************************************************/
 
-int pj_aeqd_selftest (void) {return 0;}
-int pj_alsk_selftest (void) {return 0;}
+int pj_aeqd_selftest     (void)     {return 10000;}
+int pj_alsk_selftest     (void)     {return 10000;}
 
-int pj_calcofi_selftest (void) {return 0;}
-int pj_cass_selftest (void) {return 0;}
-int pj_cc_selftest (void) {return 0;}
-int pj_cea_selftest (void) {return 0;}
-int pj_chamb_selftest (void) {return 0;}
-int pj_collg_selftest (void) {return 0;}
-int pj_crast_selftest (void) {return 0;}
-int pj_denoy_selftest (void) {return 0;}
-int pj_eck1_selftest (void) {return 0;}
-int pj_eck2_selftest (void) {return 0;}
-int pj_eck3_selftest (void) {return 0;}
-int pj_eck4_selftest (void) {return 0;}
-int pj_eck5_selftest (void) {return 0;}
-int pj_eck6_selftest (void) {return 0;}
-int pj_eqc_selftest (void) {return 0;}
-int pj_eqdc_selftest (void) {return 0;}
-int pj_euler_selftest (void) {return 0;}
-int pj_etmerc_selftest (void) {return 0;}
-int pj_fahey_selftest (void) {return 0;}
-int pj_fouc_selftest (void) {return 0;}
-int pj_fouc_s_selftest (void) {return 0;}
-int pj_gall_selftest (void) {return 0;}
-int pj_geos_selftest (void) {return 0;}
-int pj_gins8_selftest (void) {return 0;}
-int pj_gn_sinu_selftest (void) {return 0;}
-int pj_gnom_selftest (void) {return 0;}
-int pj_goode_selftest (void) {return 0;}
-int pj_gs48_selftest (void) {return 0;}
-int pj_gs50_selftest (void) {return 0;}
-int pj_hammer_selftest (void) {return 0;}
-int pj_hatano_selftest (void) {return 0;}
-int pj_healpix_selftest (void) {return 0;}
-int pj_rhealpix_selftest (void) {return 0;}
-int pj_igh_selftest (void) {return 0;}
-int pj_imw_p_selftest (void) {return 0;}
-int pj_isea_selftest (void) {return 0;}
-int pj_kav5_selftest (void) {return 0;}
-int pj_kav7_selftest (void) {return 0;}
-int pj_krovak_selftest (void) {return 0;}
-int pj_labrd_selftest (void) {return 0;}
-int pj_laea_selftest (void) {return 0;}
-int pj_lagrng_selftest (void) {return 0;}
-int pj_larr_selftest (void) {return 0;}
-int pj_lask_selftest (void) {return 0;}
-int pj_lonlat_selftest (void) {return 0;}
-int pj_latlon_selftest (void) {return 0;}
-int pj_lcc_selftest (void) {return 0;}
-int pj_lcca_selftest (void) {return 0;}
+int pj_calcofi_selftest  (void)     {return 10000;}
+int pj_cass_selftest     (void)     {return 10000;}
+int pj_cc_selftest       (void)     {return 10000;}
+int pj_cea_selftest      (void)     {return 10000;}
+int pj_chamb_selftest    (void)     {return 10000;}
+int pj_collg_selftest    (void)     {return 10000;}
+int pj_comill_selftest   (void)     {return 10000;}
+int pj_crast_selftest    (void)     {return 10000;}
+int pj_denoy_selftest    (void)     {return 10000;}
+int pj_eck1_selftest     (void)     {return 10000;}
+int pj_eck2_selftest     (void)     {return 10000;}
+int pj_eck3_selftest     (void)     {return 10000;}
+int pj_eck4_selftest     (void)     {return 10000;}
+int pj_eck5_selftest     (void)     {return 10000;}
+int pj_eck6_selftest     (void)     {return 10000;}
+int pj_eqc_selftest (void) {return 10000;}
+int pj_eqdc_selftest (void) {return 10000;}
+int pj_euler_selftest (void) {return 10000;}
+int pj_etmerc_selftest (void) {return 10000;}
+int pj_fahey_selftest (void) {return 10000;}
+int pj_fouc_selftest (void) {return 10000;}
+int pj_fouc_s_selftest (void) {return 10000;}
+int pj_gall_selftest (void) {return 10000;}
+int pj_geos_selftest (void) {return 10000;}
+int pj_geocent_selftest (void) {return 10000;}
+int pj_gins8_selftest (void) {return 10000;}
+int pj_gn_sinu_selftest (void) {return 10000;}
+int pj_gnom_selftest (void) {return 10000;}
+int pj_goode_selftest (void) {return 10000;}
+int pj_gs48_selftest (void) {return 10000;}
+int pj_gs50_selftest (void) {return 10000;}
+int pj_hammer_selftest (void) {return 10000;}
+int pj_hatano_selftest (void) {return 10000;}
+int pj_healpix_selftest (void) {return 10000;}
+int pj_rhealpix_selftest (void) {return 10000;}
+int pj_igh_selftest (void) {return 10000;}
+int pj_imw_p_selftest (void) {return 10000;}
+int pj_isea_selftest (void) {return 10000;}
+int pj_kav5_selftest (void) {return 10000;}
+int pj_kav7_selftest (void) {return 10000;}
+int pj_krovak_selftest (void) {return 10000;}
+int pj_labrd_selftest (void) {return 10000;}
+int pj_laea_selftest (void) {return 10000;}
+int pj_lagrng_selftest (void) {return 10000;}
+int pj_larr_selftest (void) {return 10000;}
+int pj_lask_selftest (void) {return 10000;}
+int pj_latlon_selftest (void) {return 10000;}
+int pj_latlong_selftest (void) {return 10000;}
+int pj_lonlat_selftest (void) {return 10000;}
+int pj_longlat_selftest (void) {return 10000;}
+int pj_lcc_selftest (void) {return 10000;}
+int pj_lcca_selftest (void) {return 10000;}
 
-int pj_lee_os_selftest (void) {return 0;}
-int pj_loxim_selftest (void) {return 0;}
-int pj_lsat_selftest (void) {return 0;}
-int pj_mbt_s_selftest (void) {return 0;}
-int pj_mbt_fps_selftest (void) {return 0;}
-int pj_mbtfpp_selftest (void) {return 0;}
-int pj_mbtfpq_selftest (void) {return 0;}
-int pj_mbtfps_selftest (void) {return 0;}
-int pj_merc_selftest (void) {return 0;}
-int pj_mil_os_selftest (void) {return 0;}
-int pj_mill_selftest (void) {return 0;}
-int pj_moll_selftest (void) {return 0;}
-int pj_murd1_selftest (void) {return 0;}
-int pj_murd2_selftest (void) {return 0;}
-int pj_murd3_selftest (void) {return 0;}
-int pj_natearth_selftest (void) {return 0;}
-int pj_nell_selftest (void) {return 0;}
-int pj_nell_h_selftest (void) {return 0;}
-int pj_nicol_selftest (void) {return 0;}
-int pj_nsper_selftest (void) {return 0;}
-int pj_nzmg_selftest (void) {return 0;}
-int pj_ob_tran_selftest (void) {return 0;}
-int pj_ocea_selftest (void) {return 0;}
-int pj_oea_selftest (void) {return 0;}
-int pj_omerc_selftest (void) {return 0;}
-int pj_ortho_selftest (void) {return 0;}
-int pj_pconic_selftest (void) {return 0;}
-int pj_poly_selftest (void) {return 0;}
-int pj_putp1_selftest (void) {return 0;}
-int pj_putp2_selftest (void) {return 0;}
-int pj_putp3_selftest (void) {return 0;}
-int pj_putp3p_selftest (void) {return 0;}
-int pj_putp4p_selftest (void) {return 0;}
-int pj_putp5_selftest (void) {return 0;}
-int pj_putp5p_selftest (void) {return 0;}
-int pj_putp6_selftest (void) {return 0;}
-int pj_putp6p_selftest (void) {return 0;}
-int pj_qua_aut_selftest (void) {return 0;}
-int pj_qsc_selftest (void) {return 0;}
-int pj_robin_selftest (void) {return 0;}
-int pj_rouss_selftest (void) {return 0;}
-int pj_rpoly_selftest (void) {return 0;}
-int pj_sch_selftest (void) {return 0;}
-int pj_sinu_selftest (void) {return 0;}
-int pj_somerc_selftest (void) {return 0;}
-int pj_stere_selftest (void) {return 0;}
-int pj_sterea_selftest (void) {return 0;}
-int pj_gstmerc_selftest (void) {return 0;}
-int pj_tcc_selftest (void) {return 0;}
-int pj_tcea_selftest (void) {return 0;}
-int pj_tissot_selftest (void) {return 0;}
-int pj_tmerc_selftest (void) {return 0;}
-int pj_tpeqd_selftest (void) {return 0;}
-int pj_tpers_selftest (void) {return 0;}
-int pj_ups_selftest (void) {return 0;}
-int pj_urm5_selftest (void) {return 0;}
-int pj_urmfps_selftest (void) {return 0;}
-int pj_utm_selftest (void) {return 0;}
-int pj_vandg_selftest (void) {return 0;}
-int pj_vandg2_selftest (void) {return 0;}
-int pj_vandg3_selftest (void) {return 0;}
-int pj_vandg4_selftest (void) {return 0;}
-int pj_vitk1_selftest (void) {return 0;}
-int pj_wag1_selftest (void) {return 0;}
-int pj_wag2_selftest (void) {return 0;}
-int pj_wag3_selftest (void) {return 0;}
-int pj_wag4_selftest (void) {return 0;}
-int pj_wag5_selftest (void) {return 0;}
-int pj_wag6_selftest (void) {return 0;}
-int pj_wag7_selftest (void) {return 0;}
-int pj_weren_selftest (void) {return 0;}
-int pj_wink1_selftest (void) {return 0;}
-int pj_wink2_selftest (void) {return 0;}
-
-
+int pj_lee_os_selftest (void) {return 10000;}
+int pj_loxim_selftest (void) {return 10000;}
+int pj_lsat_selftest (void) {return 10000;}
+int pj_mbt_s_selftest (void) {return 10000;}
+int pj_mbt_fps_selftest (void) {return 10000;}
+int pj_mbtfpp_selftest (void) {return 10000;}
+int pj_mbtfpq_selftest (void) {return 10000;}
+int pj_mbtfps_selftest (void) {return 10000;}
+int pj_merc_selftest (void) {return 10000;}
+int pj_mil_os_selftest (void) {return 10000;}
+int pj_mill_selftest (void) {return 10000;}
+int pj_misrsom_selftest (void) {return 10000;}
+int pj_moll_selftest (void) {return 10000;}
+int pj_murd1_selftest (void) {return 10000;}
+int pj_murd2_selftest (void) {return 10000;}
+int pj_murd3_selftest (void) {return 10000;}
+int pj_natearth_selftest (void) {return 10000;}
+int pj_natearth2_selftest (void) {return 10000;}
+int pj_nell_selftest (void) {return 10000;}
+int pj_nell_h_selftest (void) {return 10000;}
+int pj_nicol_selftest (void) {return 10000;}
+int pj_nsper_selftest (void) {return 10000;}
+int pj_nzmg_selftest (void) {return 10000;}
+int pj_ob_tran_selftest (void) {return 10000;}
+int pj_ocea_selftest (void) {return 10000;}
+int pj_oea_selftest (void) {return 10000;}
+int pj_omerc_selftest (void) {return 10000;}
+int pj_ortho_selftest (void) {return 10000;}
+int pj_patterson_selftest (void) {return 10000;}
+int pj_pconic_selftest (void) {return 10000;}
+int pj_poly_selftest (void) {return 10000;}
+int pj_putp1_selftest (void) {return 10000;}
+int pj_putp2_selftest (void) {return 10000;}
+int pj_putp3_selftest (void) {return 10000;}
+int pj_putp3p_selftest (void) {return 10000;}
+int pj_putp4p_selftest (void) {return 10000;}
+int pj_putp5_selftest (void) {return 10000;}
+int pj_putp5p_selftest (void) {return 10000;}
+int pj_putp6_selftest (void) {return 10000;}
+int pj_putp6p_selftest (void) {return 10000;}
+int pj_qua_aut_selftest (void) {return 10000;}
+int pj_qsc_selftest (void) {return 10000;}
+int pj_robin_selftest (void) {return 10000;}
+int pj_rouss_selftest (void) {return 10000;}
+int pj_rpoly_selftest (void) {return 10000;}
+int pj_sch_selftest (void) {return 10000;}
+int pj_sinu_selftest (void) {return 10000;}
+int pj_somerc_selftest (void) {return 10000;}
+int pj_stere_selftest (void) {return 10000;}
+int pj_sterea_selftest (void) {return 10000;}
+int pj_gstmerc_selftest (void) {return 10000;}
+int pj_tcc_selftest (void) {return 10000;}
+int pj_tcea_selftest (void) {return 10000;}
+int pj_tissot_selftest (void) {return 10000;}
+int pj_tmerc_selftest (void) {return 10000;}
+int pj_tpeqd_selftest (void) {return 10000;}
+int pj_tpers_selftest (void) {return 10000;}
+int pj_ups_selftest (void) {return 10000;}
+int pj_urm5_selftest (void) {return 10000;}
+int pj_urmfps_selftest (void) {return 10000;}
+int pj_utm_selftest (void) {return 10000;}
+int pj_vandg_selftest (void) {return 10000;}
+int pj_vandg2_selftest (void) {return 10000;}
+int pj_vandg3_selftest (void) {return 10000;}
+int pj_vandg4_selftest (void) {return 10000;}
+int pj_vitk1_selftest (void) {return 10000;}
+int pj_wag1_selftest (void) {return 10000;}
+int pj_wag2_selftest (void) {return 10000;}
+int pj_wag3_selftest (void) {return 10000;}
+int pj_wag4_selftest (void) {return 10000;}
+int pj_wag5_selftest (void) {return 10000;}
+int pj_wag6_selftest (void) {return 10000;}
+int pj_wag7_selftest (void) {return 10000;}
+int pj_weren_selftest (void) {return 10000;}
+int pj_wink1_selftest (void) {return 10000;}
+int pj_wink2_selftest (void) {return 10000;}
 #endif

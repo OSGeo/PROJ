@@ -169,6 +169,13 @@ struct PJ_LIST {
 	struct PJconsts	*(*proj)(struct PJconsts*);/* projection entry point */
 	char 	* const *descr;	/* description text */
 };
+
+/* Merging this into the PJ_LIST infrastructure is tempting, but may imply ABI breakage. Perhaps at next major version? */
+struct PJ_SELFTEST_LIST {
+    char    *id;                                /* projection keyword */
+    int     (* testfunc)(void);             /* projection entry point */
+};
+
 struct PJ_ELLPS {
 	char	*id;	/* ellipse keyword name */
 	char	*major;	/* a= value */
@@ -301,23 +308,15 @@ PROJ_PARMS__
 /* public API */
 #include "proj_api.h"
 
+
 /* Generate pj_list external or make list from include file */
+
 #ifndef USE_PJ_LIST_H
 extern struct PJ_LIST pj_list[];
-#else
-#define PROJ_HEAD(id, name) \
-    struct PJconsts *pj_##id(struct PJconsts*); extern char * const pj_s_##id;
-
-#include "pj_list.h"
-#undef PROJ_HEAD
-#define PROJ_HEAD(id, name) {#id, pj_##id, &pj_s_##id},
-	struct PJ_LIST
-pj_list[] = {
-#include "pj_list.h"
-		{0,     0,  0},
-	};
-#undef PROJ_HEAD
+extern struct PJ_SELFTEST_LIST pj_selftest_list[];
 #endif
+
+
 
 #ifndef PJ_ELLPS__
 extern struct PJ_ELLPS pj_ellps[];
@@ -571,6 +570,7 @@ struct PJ_ELLPS *pj_get_ellps_ref( void );
 struct PJ_DATUMS *pj_get_datums_ref( void );
 struct PJ_UNITS *pj_get_units_ref( void );
 struct PJ_LIST  *pj_get_list_ref( void );
+struct PJ_SELFTEST_LIST  *pj_get_selftest_list_ref ( void );
 struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
 
 double pj_atof( const char* nptr );
