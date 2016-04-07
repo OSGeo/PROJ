@@ -80,7 +80,7 @@ int pj_run_selftests (int verbosity) {
     run_one_test ("ortel",    pj_ortel_selftest,     verbosity, &n_ok, &n_ko);
     run_one_test ("boggs",    pj_boggs_selftest,     verbosity, &n_ok, &n_ko);
     run_one_test ("bonne",    pj_bonne_selftest,     verbosity, &n_ok, &n_ko);
-    run_one_test ("bipc",     pj_bipc_selftest,     verbosity, &n_ok, &n_ko);
+    run_one_test ("bipc",     pj_bipc_selftest,      verbosity, &n_ok, &n_ko);
 
     if (0==verbosity)
        printf ("Internal regression tests done. ");
