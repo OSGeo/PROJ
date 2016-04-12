@@ -359,7 +359,7 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #define INVERSE3D(name) static LPZ name(XYZ xyz, PJ *P) {LPZ lpz = {0.0, 0.0, 0.0}
 #define FREEUP static void freeup(PJ *P) {
 #define SPECIAL(name) static void name(LP lp, PJ *P, struct FACTORS *fac)
-
+#define ELLIPSOIDAL(P) ((P->es==0)? (FALSE): (TRUE))
 
 /* cleaned up alternative to most of the "repetitive projection code" macros */
 #define PROJECTION(name)                                     \

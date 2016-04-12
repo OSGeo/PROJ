@@ -356,9 +356,6 @@ source files
 int pj_aeqd_selftest     (void)     {return 10000;}
 int pj_alsk_selftest     (void)     {return 10000;}
 
-int pj_calcofi_selftest  (void)     {return 10000;}
-int pj_cass_selftest     (void)     {return 10000;}
-int pj_cc_selftest       (void)     {return 10000;}
 int pj_cea_selftest      (void)     {return 10000;}
 int pj_chamb_selftest    (void)     {return 10000;}
 int pj_collg_selftest    (void)     {return 10000;}
@@ -476,13 +473,8 @@ int pj_vandg3_selftest (void) {return 10000;}
 int pj_vandg4_selftest (void) {return 10000;}
 int pj_vitk1_selftest (void) {return 10000;}
 int pj_wag1_selftest (void) {return 10000;}
-int pj_wag2_selftest (void) {return 10000;}
-int pj_wag3_selftest (void) {return 10000;}
 int pj_wag4_selftest (void) {return 10000;}
 int pj_wag5_selftest (void) {return 10000;}
 int pj_wag6_selftest (void) {return 10000;}
-int pj_wag7_selftest (void) {return 10000;}
 int pj_weren_selftest (void) {return 10000;}
-int pj_wink1_selftest (void) {return 10000;}
-int pj_wink2_selftest (void) {return 10000;}
 #endif
