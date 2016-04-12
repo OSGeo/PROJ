@@ -145,11 +145,15 @@ static int deviates_xy (XY expected, XY got, double tolerance) {
 
     Determine whether two XYs deviate by more than <tolerance>.
 
+    The test material ("expected" values) may contain coordinates that
+    are indeterminate. For those cases, we test the other coordinate
+    only by forcing expected and actual ("got") coordinates to 0.
+
 ***********************************************************************/
-    if (HUGE_VAL== expected.x)
-        return 0;
-    if (HUGE_VAL== expected.y)
-        return 0;
+    if ((HUGE_VAL== expected.x) || (isnan (expected.x)))
+        expected.x = got.x = 0;
+    if ((HUGE_VAL== expected.y) || (isnan (expected.y)))
+        expected.y = got.y = 0;
     if (hypot ( expected.x - got.x, expected.y - got.y ) > tolerance)
         return 1;
     return 0;
@@ -169,10 +173,10 @@ static int deviates_lp (LP expected, LP got, double tolerance) {
     output from pj_inv)
 
 ***********************************************************************/
-    if (HUGE_VAL== expected.lam)
-        return 0;
-    if (HUGE_VAL== expected.phi)
-        return 0;
+    if ((HUGE_VAL== expected.lam) || (isnan (expected.lam)))
+        expected.lam = got.lam = 0;
+    if ((HUGE_VAL== expected.phi) || (isnan (expected.phi)))
+        expected.phi = got.phi = 0;
     if (hypot ( DEG_TO_RAD * expected.lam - got.lam, DEG_TO_RAD * expected.phi - got.phi ) > tolerance)
         return 1;
     return 0;
