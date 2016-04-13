@@ -357,7 +357,6 @@ int pj_aeqd_selftest     (void)     {return 10000;}
 int pj_alsk_selftest     (void)     {return 10000;}
 
 int pj_chamb_selftest    (void)     {return 10000;}
-int pj_collg_selftest    (void)     {return 10000;}
 int pj_comill_selftest   (void)     {return 10000;}
 int pj_crast_selftest    (void)     {return 10000;}
 int pj_denoy_selftest    (void)     {return 10000;}
