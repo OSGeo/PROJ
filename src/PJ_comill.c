@@ -25,6 +25,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
     double lat_sq;
 
+    (void) P;   /* silence unused parameter warnings */
+
     lat_sq = lp.phi * lp.phi;
     xy.x = lp.lam;
     xy.y = lp.phi * (K1 + lat_sq * (K2 + K3 * lat_sq));
@@ -34,7 +36,9 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
-    double yc, tol, y2, y4, f, fder;
+    double yc, tol, y2, f, fder;
+
+    (void) P;   /* silence unused parameter warnings */
 
     /* make sure y is inside valid range */
     if (xy.y > MAX_Y) {

@@ -56,7 +56,6 @@ int pj_crast_selftest (void) {
     double tolerance_lp = 1e-10;
     double tolerance_xy = 1e-7;
 
-    char e_args[] = {"+proj=crast   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
     char s_args[] = {"+proj=crast   +a=6400000    +lat_1=0.5 +lat_2=2"};
 
     LP fwd_in[] = {

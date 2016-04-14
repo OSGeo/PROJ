@@ -109,13 +109,13 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(chamb) {
+    int i, j;
+    char line[10];
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
 
-    int i, j;
-    char line[10];
 
     for (i = 0; i < 3; ++i) { /* get control point locations */
         (void)sprintf(line, "rlat_%d", i+1);
