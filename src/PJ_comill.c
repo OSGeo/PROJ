@@ -78,9 +78,6 @@ PJ *PROJECTION(comill) {
     P->inv = s_inverse;
     P->fwd = s_forward;
 
-    P->pfree = freeup;
-    P->descr = des_comill;
-
     return P;
 }
 

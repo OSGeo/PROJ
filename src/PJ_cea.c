@@ -72,8 +72,6 @@ PJ *PROJECTION(cea) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_cea;
     double t = 0.0;
 
     if (pj_param(P->ctx, P->params, "tlat_ts").i) {

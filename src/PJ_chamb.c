@@ -114,8 +114,6 @@ PJ *PROJECTION(chamb) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_chamb;
     int i, j;
     char line[10];
 
