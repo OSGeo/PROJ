@@ -366,7 +366,7 @@ int pj_eqc_selftest (void) {return 10000;}
 int pj_eqdc_selftest (void) {return 10000;}
 int pj_etmerc_selftest (void) {return 10000;}
 int pj_fahey_selftest (void) {return 10000;}
-int pj_fouc_selftest (void) {return 10000;}
+
 int pj_fouc_s_selftest (void) {return 10000;}
 int pj_gall_selftest (void) {return 10000;}
 int pj_geos_selftest (void) {return 10000;}
@@ -384,7 +384,7 @@ int pj_rhealpix_selftest (void) {return 10000;}
 int pj_igh_selftest (void) {return 10000;}
 int pj_imw_p_selftest (void) {return 10000;}
 int pj_isea_selftest (void) {return 10000;}
-int pj_kav5_selftest (void) {return 10000;}
+
 int pj_kav7_selftest (void) {return 10000;}
 int pj_krovak_selftest (void) {return 10000;}
 int pj_labrd_selftest (void) {return 10000;}
@@ -402,7 +402,7 @@ int pj_lcca_selftest (void) {return 10000;}
 int pj_lee_os_selftest (void) {return 10000;}
 int pj_loxim_selftest (void) {return 10000;}
 int pj_lsat_selftest (void) {return 10000;}
-int pj_mbt_s_selftest (void) {return 10000;}
+
 int pj_mbt_fps_selftest (void) {return 10000;}
 int pj_mbtfpp_selftest (void) {return 10000;}
 int pj_mbtfpq_selftest (void) {return 10000;}
@@ -435,19 +435,17 @@ int pj_putp5_selftest (void) {return 10000;}
 int pj_putp5p_selftest (void) {return 10000;}
 int pj_putp6_selftest (void) {return 10000;}
 int pj_putp6p_selftest (void) {return 10000;}
-int pj_qua_aut_selftest (void) {return 10000;}
+
 int pj_qsc_selftest (void) {return 10000;}
 int pj_robin_selftest (void) {return 10000;}
 int pj_rouss_selftest (void) {return 10000;}
 int pj_rpoly_selftest (void) {return 10000;}
 int pj_sch_selftest (void) {return 10000;}
 int pj_sinu_selftest (void) {return 10000;}
-int pj_somerc_selftest (void) {return 10000;}
-int pj_stere_selftest (void) {return 10000;}
-int pj_sterea_selftest (void) {return 10000;}
+
 int pj_gstmerc_selftest (void) {return 10000;}
 int pj_tpers_selftest (void) {return 10000;}
-int pj_ups_selftest (void) {return 10000;}
+
 int pj_utm_selftest (void) {return 10000;}
 int pj_vandg_selftest (void) {return 10000;}
 int pj_vandg2_selftest (void) {return 10000;}
