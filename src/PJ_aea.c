@@ -355,7 +355,6 @@ source files
 
 int pj_aeqd_selftest     (void)     {return 10000;}
 int pj_alsk_selftest     (void)     {return 10000;}
-int pj_eck3_selftest     (void)     {return 10000;}
 int pj_eck4_selftest     (void)     {return 10000;}
 int pj_eck5_selftest     (void)     {return 10000;}
 int pj_eck6_selftest     (void)     {return 10000;}
@@ -382,7 +381,6 @@ int pj_igh_selftest (void) {return 10000;}
 int pj_imw_p_selftest (void) {return 10000;}
 int pj_isea_selftest (void) {return 10000;}
 
-int pj_kav7_selftest (void) {return 10000;}
 int pj_krovak_selftest (void) {return 10000;}
 int pj_labrd_selftest (void) {return 10000;}
 int pj_laea_selftest (void) {return 10000;}
@@ -423,7 +421,6 @@ int pj_omerc_selftest (void) {return 10000;}
 int pj_ortho_selftest (void) {return 10000;}
 int pj_patterson_selftest (void) {return 10000;}
 int pj_poly_selftest (void) {return 10000;}
-int pj_putp1_selftest (void) {return 10000;}
 int pj_putp2_selftest (void) {return 10000;}
 int pj_putp3_selftest (void) {return 10000;}
 int pj_putp3p_selftest (void) {return 10000;}
@@ -450,6 +447,5 @@ int pj_vandg3_selftest (void) {return 10000;}
 int pj_vandg4_selftest (void) {return 10000;}
 int pj_wag4_selftest (void) {return 10000;}
 int pj_wag5_selftest (void) {return 10000;}
-int pj_wag6_selftest (void) {return 10000;}
 int pj_weren_selftest (void) {return 10000;}
 #endif
