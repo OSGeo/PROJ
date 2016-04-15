@@ -355,7 +355,6 @@ source files
 
 int pj_aeqd_selftest     (void)     {return 10000;}
 int pj_alsk_selftest     (void)     {return 10000;}
-int pj_eck4_selftest     (void)     {return 10000;}
 int pj_eck5_selftest     (void)     {return 10000;}
 int pj_eck6_selftest     (void)     {return 10000;}
 int pj_eqc_selftest (void) {return 10000;}
