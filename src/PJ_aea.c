@@ -359,7 +359,6 @@ int pj_eck6_selftest     (void)     {return 10000;}
 int pj_eqc_selftest (void) {return 10000;}
 int pj_eqdc_selftest (void) {return 10000;}
 int pj_etmerc_selftest (void) {return 10000;}
-int pj_fouc_s_selftest (void) {return 10000;}
 int pj_gall_selftest (void) {return 10000;}
 int pj_geos_selftest (void) {return 10000;}
 int pj_geocent_selftest (void) {return 10000;}
