@@ -360,7 +360,6 @@ int pj_eqc_selftest (void) {return 10000;}
 int pj_eqdc_selftest (void) {return 10000;}
 int pj_etmerc_selftest (void) {return 10000;}
 int pj_geocent_selftest (void) {return 10000;}
-int pj_gins8_selftest (void) {return 10000;}
 int pj_gn_sinu_selftest (void) {return 10000;}
 int pj_gnom_selftest (void) {return 10000;}
 int pj_goode_selftest (void) {return 10000;}
