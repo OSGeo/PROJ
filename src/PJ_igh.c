@@ -2,9 +2,9 @@
         struct PJconsts* pj[12]; \
         double dy0;
 #define PJ_LIB__
-#include	<projects.h>
+#include    <projects.h>
 PROJ_HEAD(igh, "Interrupted Goode Homolosine") "\n\tPCyl, Sph.";
-	C_NAMESPACE PJ
+    C_NAMESPACE PJ
 *pj_sinu(PJ *), *pj_moll(PJ *);
 
 static const double d4044118 = (40 + 44/60. + 11.8/3600.) * DEG_TO_RAD; // 40d 44' 11.8" [degrees]
@@ -116,9 +116,9 @@ FREEUP;
         if (P) {
                 int i;
                 for (i = 0; i < 12; ++i)
-		{
-			if (P->pj[i]) 
-				(*(P->pj[i]->pfree))(P->pj[i]); 
+        {
+            if (P->pj[i])
+                (*(P->pj[i]->pfree))(P->pj[i]);
                 }
                 pj_dalloc(P);
         }
@@ -149,7 +149,7 @@ ENTRY0(igh)
     if (!(P->pj[n-1] = pj_##proj(P->pj[n-1]))) E_ERROR_0; \
     P->pj[n-1]->x0 = x_0; \
     P->pj[n-1]->y0 = y_0; \
-    P->pj[n-1]->lam0 = lon_0; 
+    P->pj[n-1]->lam0 = lon_0;
 
         LP lp = { 0, d4044118 };
         XY xy1;
