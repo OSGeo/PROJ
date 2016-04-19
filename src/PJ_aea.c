@@ -361,7 +361,6 @@ int pj_etmerc_selftest (void) {return 10000;}
 int pj_geocent_selftest (void) {return 10000;}
 int pj_gs48_selftest (void) {return 10000;}
 int pj_gs50_selftest (void) {return 10000;}
-int pj_imw_p_selftest (void) {return 10000;}
 int pj_isea_selftest (void) {return 10000;}
 
 int pj_krovak_selftest (void) {return 10000;}
