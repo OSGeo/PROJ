@@ -28,16 +28,13 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *****************************************************************************/
-# define PROJ_PARMS__ \
-    int north_square; \
-    int south_square; \
-    double qp; \
-    double *apa;
 # define PJ_LIB__
-# include   <projects.h>
+# include <projects.h>
+
 PROJ_HEAD(healpix, "HEALPix") "\n\tSph., Ellps.";
 PROJ_HEAD(rhealpix, "rHEALPix") "\n\tSph., Ellps.\n\tnorth_square= south_square=";
-# include   <stdio.h>
+
+# include <stdio.h>
 /* Matrix for counterclockwise rotation by pi/2: */
 # define R1 {{ 0,-1},{ 1, 0}}
 /* Matrix for counterclockwise rotation by pi: */
@@ -50,15 +47,26 @@ PROJ_HEAD(rhealpix, "rHEALPix") "\n\tSph., Ellps.\n\tnorth_square= south_square=
 # define ROT {IDENT, R1, R2, R3, R3, R2, R1}
 /* Fuzz to handle rounding errors: */
 # define EPS 1e-15
+
+struct pj_opaque {
+    int north_square; \
+    int south_square; \
+    double qp; \
+    double *apa;
+};
+
 typedef struct {
     int cn; /* An integer 0--3 indicating the position of the polar cap. */
     double x, y;  /* Coordinates of the pole point (point of most extreme latitude on the polar caps). */
     enum Region {north, south, equatorial} region;
 } CapMap;
+
 typedef struct {
     double x, y;
 } Point;
+
 double rot[7][2][2] = ROT;
+
 
 /**
  * Returns the sign of the double.
@@ -68,6 +76,8 @@ double rot[7][2][2] = ROT;
 double pj_sign (double v) {
     return v > 0 ? 1 : (v < 0 ? -1 : 0);
 }
+
+
 /**
  * Return the index of the matrix in ROT.
  * @param index ranges from -3 to 3.
@@ -91,6 +101,8 @@ static int get_rotate_index(int index) {
     }
     return 0;
 }
+
+
 /**
  * Return 1 if point (testx, testy) lies in the interior of the polygon
  * determined by the vertices in vert, and return 0 otherwise.
@@ -103,6 +115,7 @@ static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
     int counter = 0;
     double xinters;
     Point p1, p2;
+
     /* Check for boundrary cases */
     for (i = 0; i < nvert; i++) {
         if (testx == vert[i][0] && testy == vert[i][1]) {
@@ -135,6 +148,8 @@ static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
     }
     return c;
 }
+
+
 /**
  * Return 1 if (x, y) lies in (the interior or boundary of) the image of the
  * HEALPix projection (in case proj=0) or in the image the rHEALPix projection
@@ -184,17 +199,21 @@ int in_image(double x, double y, int proj, int north_square, int south_square) {
                       sizeof(rhealpixVertsJit[0]), rhealpixVertsJit, x, y);
     }
 }
+
+
 /**
  * Return the authalic latitude of latitude alpha (if inverse=0) or
  * return the approximate latitude of authalic latitude alpha (if inverse=1).
  * P contains the relavent ellipsoid parameters.
  **/
 double auth_lat(PJ *P, double alpha, int inverse) {
+    struct pj_opaque *Q = P->opaque;
     if (inverse == 0) {
         /* Authalic latitude. */
         double q = pj_qsfn(sin(alpha), P->e, 1.0 - P->es);
-        double qp = P->qp;
+        double qp = Q->qp;
         double ratio = q/qp;
+
         if (fabsl(ratio) > 1) {
             /* Rounding error. */
             ratio = pj_sign(ratio);
@@ -202,9 +221,11 @@ double auth_lat(PJ *P, double alpha, int inverse) {
         return asin(ratio);
     } else {
         /* Approximation to inverse authalic latitude. */
-        return pj_authlat(alpha, P->apa);
+        return pj_authlat(alpha, Q->apa);
     }
 }
+
+
 /**
  * Return the HEALPix projection of the longitude-latitude point lp on
  * the unit sphere.
@@ -214,6 +235,7 @@ XY healpix_sphere(LP lp) {
     double phi = lp.phi;
     double phi0 = asin(2.0/3.0);
     XY xy;
+
     /* equatorial region */
     if ( fabsl(phi) <= phi0) {
         xy.x = lam;
@@ -231,6 +253,8 @@ XY healpix_sphere(LP lp) {
     }
     return xy;
 }
+
+
 /**
  * Return the inverse of healpix_sphere().
 **/
@@ -239,6 +263,7 @@ LP healpix_sphere_inverse(XY xy) {
     double x = xy.x;
     double y = xy.y;
     double y0 = PI/4.0;
+
     /* Equatorial region. */
     if (fabsl(y) <= y0) {
         lp.lam = x;
@@ -259,6 +284,8 @@ LP healpix_sphere_inverse(XY xy) {
     }
     return (lp);
 }
+
+
 /**
  * Return the vector sum a + b, where a and b are 2-dimensional vectors.
  * @param ret holds a + b.
@@ -269,6 +296,8 @@ static void vector_add(double a[2], double b[2], double *ret) {
         ret[i] = a[i] + b[i];
     }
 }
+
+
 /**
  * Return the vector difference a - b, where a and b are 2-dimensional vectors.
  * @param ret holds a - b.
@@ -279,6 +308,8 @@ static void vector_sub(double a[2], double b[2], double*ret) {
         ret[i] = a[i] - b[i];
     }
 }
+
+
 /**
  * Return the 2 x 1 matrix product a*b, where a is a 2 x 2 matrix and
  * b is a 2 x 1 matrix.
@@ -294,6 +325,8 @@ static void dot_product(double a[2][2], double b[2], double *ret) {
         }
     }
 }
+
+
 /**
  * Return the number of the polar cap, the pole point coordinates, and
  * the region that (x, y) lies in.
@@ -306,6 +339,7 @@ static CapMap get_cap(double x, double y, int north_square, int south_square,
                       int inverse) {
     CapMap capmap;
     double c;
+
     capmap.x = x;
     capmap.y = y;
     if (inverse == 0) {
@@ -383,6 +417,8 @@ static CapMap get_cap(double x, double y, int north_square, int south_square,
         return capmap;
     }
 }
+
+
 /**
  * Rearrange point (x, y) in the HEALPix projection by
  * combining the polar caps into two polar squares.
@@ -400,6 +436,7 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
     double vector[2];
     double v_min_c[2];
     double ret_dot[2];
+
     CapMap capmap = get_cap(x, y, north_square, south_square, inverse);
     if (capmap.region == equatorial) {
         xy.x = capmap.x;
@@ -463,17 +500,23 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
         return xy;
     }
 }
-FORWARD(s_healpix_forward); /* sphere  */
+
+
+static XY s_healpix_forward(LP lp, PJ *P) { /* sphere  */
     (void) P;
-    (void) xy;
     return healpix_sphere(lp);
 }
-FORWARD(e_healpix_forward); /* ellipsoid  */
-    (void) xy;
+
+
+static XY e_healpix_forward(LP lp, PJ *P) { /* ellipsoid  */
     lp.phi = auth_lat(P, lp.phi, 0);
     return healpix_sphere(lp);
 }
-INVERSE(s_healpix_inverse); /* sphere */
+
+
+static LP s_healpix_inverse(XY xy, PJ *P) { /* sphere */
+    LP lp = {0.0,0.0};
+
     /* Check whether (x, y) lies in the HEALPix image */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
         lp.lam = HUGE_VAL;
@@ -483,7 +526,11 @@ INVERSE(s_healpix_inverse); /* sphere */
     }
     return healpix_sphere_inverse(xy);
 }
-INVERSE(e_healpix_inverse); /* ellipsoid */
+
+
+static LP e_healpix_inverse(XY xy, PJ *P) { /* ellipsoid */
+    LP lp = {0.0,0.0};
+
     /* Check whether (x, y) lies in the HEALPix image. */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
         lp.lam = HUGE_VAL;
@@ -493,53 +540,90 @@ INVERSE(e_healpix_inverse); /* ellipsoid */
     }
     lp = healpix_sphere_inverse(xy);
     lp.phi = auth_lat(P, lp.phi, 1);
-    return (lp);
+    return lp;
 }
-FORWARD(s_rhealpix_forward); /* sphere */
-    xy = healpix_sphere(lp);
-    return combine_caps(xy.x, xy.y, P->north_square, P->south_square, 0);
+
+
+static XY s_rhealpix_forward(LP lp, PJ *P) { /* sphere */
+    struct pj_opaque *Q = P->opaque;
+
+    XY xy = healpix_sphere(lp);
+    return combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 0);
 }
-FORWARD(e_rhealpix_forward); /* ellipsoid */
+
+
+static XY e_rhealpix_forward(LP lp, PJ *P) { /* ellipsoid */
+    struct pj_opaque *Q = P->opaque;
+
     lp.phi = auth_lat(P, lp.phi, 0);
-    xy = healpix_sphere(lp);
-    return combine_caps(xy.x, xy.y, P->north_square, P->south_square, 0);
+    XY xy = healpix_sphere(lp);
+    return combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 0);
 }
-INVERSE(s_rhealpix_inverse); /* sphere */
+
+
+static LP s_rhealpix_inverse(XY xy, PJ *P) { /* sphere */
+    struct pj_opaque *Q = P->opaque;
+    LP lp = {0.0,0.0};
+
     /* Check whether (x, y) lies in the rHEALPix image. */
-    if (in_image(xy.x, xy.y, 1, P->north_square, P->south_square) == 0) {
+    if (in_image(xy.x, xy.y, 1, Q->north_square, Q->south_square) == 0) {
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
         pj_ctx_set_errno(P->ctx, -15);
         return lp;
     }
-    xy = combine_caps(xy.x, xy.y, P->north_square, P->south_square, 1);
+    xy = combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 1);
     return healpix_sphere_inverse(xy);
 }
-INVERSE(e_rhealpix_inverse); /* ellipsoid */
+
+
+static LP e_rhealpix_inverse(XY xy, PJ *P) { /* ellipsoid */
+    struct pj_opaque *Q = P->opaque;
+    LP lp = {0.0,0.0};
+
     /* Check whether (x, y) lies in the rHEALPix image. */
-    if (in_image(xy.x, xy.y, 1, P->north_square, P->south_square) == 0) {
+    if (in_image(xy.x, xy.y, 1, Q->north_square, Q->south_square) == 0) {
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
         pj_ctx_set_errno(P->ctx, -15);
         return lp;
     }
-    xy = combine_caps(xy.x, xy.y, P->north_square, P->south_square, 1);
+    xy = combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 1);
     lp = healpix_sphere_inverse(xy);
     lp.phi = auth_lat(P, lp.phi, 1);
     return lp;
 }
-FREEUP;
-    if (P) {
-        if (P->apa)
-            pj_dalloc(P->apa);
-        pj_dalloc(P);
-    }
+
+
+static void *freeup_new (PJ *P) {                       /* Destructor */
+    if (0==P)
+        return 0;
+    if (0==P->opaque)
+        return pj_dealloc (P);
+
+    if (P->opaque->apa)
+        pj_dealloc(P->opaque->apa);
+
+    pj_dealloc (P->opaque);
+    return pj_dealloc(P);
 }
-ENTRY1(healpix, apa)
+
+static void freeup (PJ *P) {
+    freeup_new (P);
+    return;
+}
+
+
+PJ *PROJECTION(healpix) {
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==Q)
+        return freeup_new (P);
+    P->opaque = Q;
+
     if (P->es) {
-        P->apa = pj_authset(P->es); /* For auth_lat(). */
-        P->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
-        P->a = P->a*sqrt(0.5*P->qp); /* Set P->a to authalic radius. */
+        Q->apa = pj_authset(P->es); /* For auth_lat(). */
+        Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
+        P->a = P->a*sqrt(0.5*Q->qp); /* Set P->a to authalic radius. */
         P->ra = 1.0/P->a;
         P->fwd = e_healpix_forward;
         P->inv = e_healpix_inverse;
@@ -547,21 +631,31 @@ ENTRY1(healpix, apa)
         P->fwd = s_healpix_forward;
         P->inv = s_healpix_inverse;
     }
-ENDENTRY(P)
-ENTRY1(rhealpix, apa)
-    P->north_square = pj_param(P->ctx, P->params,"inorth_square").i;
-    P->south_square = pj_param(P->ctx, P->params,"isouth_square").i;
+
+    return P;
+}
+
+
+PJ *PROJECTION(rhealpix) {
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==Q)
+        return freeup_new (P);
+    P->opaque = Q;
+
+    Q->north_square = pj_param(P->ctx, P->params,"inorth_square").i;
+    Q->south_square = pj_param(P->ctx, P->params,"isouth_square").i;
+
     /* Check for valid north_square and south_square inputs. */
-    if (P->north_square < 0 || P->north_square > 3) {
+    if (Q->north_square < 0 || Q->north_square > 3) {
         E_ERROR(-47);
     }
-    if (P->south_square < 0 || P->south_square > 3) {
+    if (Q->south_square < 0 || Q->south_square > 3) {
         E_ERROR(-47);
     }
     if (P->es) {
-        P->apa = pj_authset(P->es); /* For auth_lat(). */
-        P->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
-        P->a = P->a*sqrt(0.5*P->qp); /* Set P->a to authalic radius. */
+        Q->apa = pj_authset(P->es); /* For auth_lat(). */
+        Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
+        P->a = P->a*sqrt(0.5*Q->qp); /* Set P->a to authalic radius. */
         P->ra = 1.0/P->a;
         P->fwd = e_rhealpix_forward;
         P->inv = e_rhealpix_inverse;
@@ -569,4 +663,125 @@ ENTRY1(rhealpix, apa)
         P->fwd = s_rhealpix_forward;
         P->inv = s_rhealpix_inverse;
     }
-ENDENTRY(P)
+
+    return P;
+}
+
+
+#ifdef PJ_OMIT_SELFTEST
+int pj_healpix_selftest (void) {return 0;}
+#else
+
+int pj_healpix_selftest (void) {
+    double tolerance_lp = 1e-10;
+    double tolerance_xy = 1e-7;
+
+    char e_args[] = {"+proj=healpix   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
+    char s_args[] = {"+proj=healpix   +a=6400000    +lat_1=0.5 +lat_2=2"};
+
+    LP fwd_in[] = {
+        { 2, 1},
+        { 2,-1},
+        {-2, 1},
+        {-2,-1}
+    };
+
+    XY e_fwd_expect[] = {
+        { 222390.10394923863,  130406.58866448226},
+        { 222390.10394923863, -130406.58866448054},
+        {-222390.10394923863,  130406.58866448226},
+        {-222390.10394923863, -130406.58866448054},
+    };
+
+    XY s_fwd_expect[] = {
+        { 223402.14425527418,  131588.04444199943},
+        { 223402.14425527418, -131588.04444199943},
+        {-223402.14425527418,  131588.04444199943},
+        {-223402.14425527418, -131588.04444199943},
+    };
+
+    XY inv_in[] = {
+        { 200, 100},
+        { 200,-100},
+        {-200, 100},
+        {-200,-100}
+    };
+
+    LP e_inv_expect[] = {
+        { 0.0017986411845524453,  0.00076679453057823619},
+        { 0.0017986411845524453, -0.00076679453057823619},
+        {-0.0017986411845524453,  0.00076679453057823619},
+        {-0.0017986411845524453, -0.00076679453057823619},
+    };
+
+    LP s_inv_expect[] = {
+        { 0.0017904931097838226,  0.00075990887733981202},
+        { 0.0017904931097838226, -0.00075990887733981202},
+        {-0.0017904931097838226,  0.00075990887733981202},
+        {-0.0017904931097838226, -0.00075990887733981202},
+    };
+
+    return pj_generic_selftest (e_args, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, s_fwd_expect, inv_in, e_inv_expect, s_inv_expect);
+}
+
+
+#endif
+
+#ifdef PJ_OMIT_SELFTEST
+int pj_rhealpix_selftest (void) {return 0;}
+#else
+
+int pj_rhealpix_selftest (void) {
+    double tolerance_lp = 1e-10;
+    double tolerance_xy = 1e-7;
+
+    char e_args[] = {"+proj=rhealpix   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
+    char s_args[] = {"+proj=rhealpix   +a=6400000    +lat_1=0.5 +lat_2=2"};
+
+    LP fwd_in[] = {
+        { 2, 1},
+        { 2,-1},
+        {-2, 1},
+        {-2,-1}
+    };
+
+    XY e_fwd_expect[] = {
+        { 222390.10394923863,  130406.58866448226},
+        { 222390.10394923863, -130406.58866448054},
+        {-222390.10394923863,  130406.58866448226},
+        {-222390.10394923863, -130406.58866448054},
+    };
+
+    XY s_fwd_expect[] = {
+        { 223402.14425527418,  131588.04444199943},
+        { 223402.14425527418, -131588.04444199943},
+        {-223402.14425527418,  131588.04444199943},
+        {-223402.14425527418, -131588.04444199943},
+    };
+
+    XY inv_in[] = {
+        { 200, 100},
+        { 200,-100},
+        {-200, 100},
+        {-200,-100}
+    };
+
+    LP e_inv_expect[] = {
+        { 0.0017986411845524453,  0.00076679453057823619},
+        { 0.0017986411845524453, -0.00076679453057823619},
+        {-0.0017986411845524453,  0.00076679453057823619},
+        {-0.0017986411845524453, -0.00076679453057823619},
+    };
+
+    LP s_inv_expect[] = {
+        { 0.0017904931097838226,  0.00075990887733981202},
+        { 0.0017904931097838226, -0.00075990887733981202},
+        {-0.0017904931097838226,  0.00075990887733981202},
+        {-0.0017904931097838226, -0.00075990887733981202},
+    };
+
+    return pj_generic_selftest (e_args, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, s_fwd_expect, inv_in, e_inv_expect, s_inv_expect);
+}
+
+
+#endif
