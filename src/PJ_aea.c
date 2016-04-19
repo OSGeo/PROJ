@@ -423,7 +423,6 @@ int pj_rouss_selftest (void) {return 10000;}
 int pj_rpoly_selftest (void) {return 10000;}
 int pj_sch_selftest (void) {return 10000;}
 
-int pj_gstmerc_selftest (void) {return 10000;}
 int pj_tpers_selftest (void) {return 10000;}
 
 int pj_utm_selftest (void) {return 10000;}
