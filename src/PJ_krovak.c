@@ -29,15 +29,16 @@
  * SOFTWARE.
  *****************************************************************************/
 
-#define PROJ_PARMS__ \
-    double  C_x;
 #define PJ_LIB__
-
 #include <projects.h>
 #include <string.h>
 #include <stdio.h>
 
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
+
+struct pj_opaque {
+    double  C_x;
+};
 
 /**
    NOTES: According to EPSG the full Krovak projection method should have
@@ -63,11 +64,12 @@ PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
  **/
 
 
+static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
+    XY xy = {0.0,0.0};
+    struct pj_opaque *Q = P->opaque;
+    /* calculate xy from lat/lon */
 
-FORWARD(e_forward); /* ellipsoid */
-/* calculate xy from lat/lon */
-
-/* Constants, identical to inverse transform function */
+    /* Constants, identical to inverse transform function */
     double s45, s90, e2, e, alfa, uq, u0, g, k, k1, n0, ro0, ad, a, s0, n;
     double gfi, u, fi0, deltav, s, d, eps, ro;
 
@@ -76,11 +78,11 @@ FORWARD(e_forward); /* ellipsoid */
     s90 = 2 * s45;
     fi0 = P->phi0;    /* Latitude of projection centre 49deg 30' */
 
-   /* Ellipsoid is used as Parameter in for.c and inv.c, therefore a must
+    /* Ellipsoid is used as Parameter in for.c and inv.c, therefore a must
       be set to 1 here.
       Ellipsoid Bessel 1841 a = 6377397.155m 1/f = 299.1528128,
       e2=0.006674372230614;
-   */
+    */
     a =  1; /* 6377397.155; */
     /* e2 = P->es;*/       /* 0.006674372230614; */
     e2 = 0.006674372230614;
@@ -101,39 +103,38 @@ FORWARD(e_forward); /* ellipsoid */
     ro0 = k1 * n0 / tan(s0);
     ad = s90 - uq;
 
-/* Transformation */
+    /* Transformation */
+    gfi = pow ( ((1. + e * sin(lp.phi)) /
+                (1. - e * sin(lp.phi))) , (alfa * e / 2.));
 
-    gfi =pow ( ((1. + e * sin(lp.phi)) /
-               (1. - e * sin(lp.phi))) , (alfa * e / 2.));
-
-    u= 2. * (atan(k * pow( tan(lp.phi / 2. + s45), alfa) / gfi)-s45);
+    u = 2. * (atan(k * pow( tan(lp.phi / 2. + s45), alfa) / gfi)-s45);
 
     deltav = - lp.lam * alfa;
 
     s = asin(cos(ad) * sin(u) + sin(ad) * cos(u) * cos(deltav));
     d = asin(cos(u) * sin(deltav) / cos(s));
     eps = n * d;
-    ro = ro0 * pow(tan(s0 / 2. + s45) , n) / pow(tan(s / 2. + s45) , n)   ;
+    ro = ro0 * pow(tan(s0 / 2. + s45) , n) / pow(tan(s / 2. + s45) , n);
 
    /* x and y are reverted! */
     xy.y = ro * cos(eps) / a;
     xy.x = ro * sin(eps) / a;
 
-        if( !pj_param(P->ctx, P->params, "tczech").i )
-      {
+    if( !pj_param(P->ctx, P->params, "tczech").i ) {
         xy.y *= -1.0;
         xy.x *= -1.0;
-      }
+    }
 
-    return (xy);
+    return xy;
 }
 
 
-
-INVERSE(e_inverse); /* ellipsoid */
+static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+    LP lp = {0.0,0.0};
+    struct pj_opaque *Q = P->opaque;
     /* calculate lat/lon from xy */
 
-/* Constants, identisch wie in der Umkehrfunktion */
+    /* Constants, identisch wie in der Umkehrfunktion */
     double s45, s90, fi0, e2, e, alfa, uq, u0, g, k, k1, n0, ro0, ad, a, s0, n;
     double u, deltav, s, d, eps, ro, fi1, xy0;
     int ok;
@@ -168,17 +169,16 @@ INVERSE(e_inverse); /* ellipsoid */
     ad = s90 - uq;
 
 
-/* Transformation */
+    /* Transformation */
    /* revert y, x*/
-    xy0=xy.x;
-    xy.x=xy.y;
-    xy.y=xy0;
+    xy0 = xy.x;
+    xy.x = xy.y;
+    xy.y = xy0;
 
-        if( !pj_param(P->ctx, P->params, "tczech").i )
-      {
+    if( !pj_param(P->ctx, P->params, "tczech").i ) {
         xy.x *= -1.0;
         xy.y *= -1.0;
-      }
+    }
 
     ro = sqrt(xy.x * xy.x + xy.y * xy.y);
     eps = atan2(xy.y, xy.x);
@@ -190,37 +190,56 @@ INVERSE(e_inverse); /* ellipsoid */
 
     lp.lam = P->lam0 - deltav / alfa;
 
-/* ITERATION FOR lp.phi */
-   fi1 = u;
+    /* ITERATION FOR lp.phi */
+    fi1 = u;
 
-   ok = 0;
-   do
-   {
-    lp.phi = 2. * ( atan( pow( k, -1. / alfa)  *
-                            pow( tan(u / 2. + s45) , 1. / alfa)  *
-                            pow( (1. + e * sin(fi1)) / (1. - e * sin(fi1)) , e / 2.)
-                           )  - s45);
+    ok = 0;
+    do {
+        lp.phi = 2. * ( atan( pow( k, -1. / alfa)  *
+                              pow( tan(u / 2. + s45) , 1. / alfa)  *
+                              pow( (1. + e * sin(fi1)) / (1. - e * sin(fi1)) , e / 2.)
+                            )  - s45);
 
-      if (fabs(fi1 - lp.phi) < 0.000000000000001) ok=1;
-      fi1 = lp.phi;
-
-   }
-   while (ok==0);
+        if (fabs(fi1 - lp.phi) < 0.000000000000001) ok=1;
+        fi1 = lp.phi;
+   } while (ok==0);
 
    lp.lam -= P->lam0;
 
-   return (lp);
+   return lp;
 }
 
-FREEUP; if (P) pj_dalloc(P); }
 
-ENTRY0(krovak)
+static void *freeup_new (PJ *P) {                       /* Destructor */
+    if (0==P)
+        return 0;
+    if (0==P->opaque)
+        return pj_dealloc (P);
+
+    pj_dealloc (P->opaque);
+    return pj_dealloc(P);
+}
+
+static void freeup (PJ *P) {
+    freeup_new (P);
+    return;
+}
+
+
+PJ *PROJECTION(krovak) {
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==Q)
+        return freeup_new (P);
+    P->opaque = Q;
+
+    P->pfree = freeup;
+    P->descr = des_krovak;
     double ts;
     /* read some Parameters,
      * here Latitude Truescale */
 
     ts = pj_param(P->ctx, P->params, "rlat_ts").f;
-    P->C_x = ts;
+    Q->C_x = ts;
 
     /* we want Bessel as fixed ellipsoid */
     P->a = 6377397.155;
@@ -241,8 +260,53 @@ ENTRY0(krovak)
             P->k0 = 0.9999;
 
     /* always the same */
-        P->inv = e_inverse;
+    P->inv = e_inverse;
     P->fwd = e_forward;
 
-ENDENTRY(P)
+    return P;
+}
 
+
+#ifdef PJ_OMIT_SELFTEST
+int pj_krovak_selftest (void) {return 0;}
+#else
+
+int pj_krovak_selftest (void) {
+    double tolerance_lp = 1e-10;
+    double tolerance_xy = 1e-7;
+
+    char e_args[] = {"+proj=krovak   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
+
+    LP fwd_in[] = {
+        { 2, 1},
+        { 2,-1},
+        {-2, 1},
+        {-2,-1}
+    };
+
+    XY e_fwd_expect[] = {
+        {-3196535.2325636409,  -6617878.8675514441},
+        {-3260035.4405521089,  -6898873.6148780314},
+        {-3756305.3288691747,  -6478142.5615715114},
+        {-3831703.6585019818,  -6759107.1701553948},
+    };
+
+    XY inv_in[] = {
+        { 200, 100},
+        { 200,-100},
+        {-200, 100},
+        {-200,-100}
+    };
+
+    LP e_inv_expect[] = {
+        {24.836218918719162,  59.758403933233858},
+        {24.836315484509566,  59.756888425730189},
+        {24.830447747947495,  59.758403933233858},
+        {24.830351182157091,  59.756888425730189},
+    };
+
+    return pj_generic_selftest (e_args, 0, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, 0, inv_in, e_inv_expect, 0);
+}
+
+
+#endif
