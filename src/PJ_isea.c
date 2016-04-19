@@ -126,7 +126,7 @@ struct isea_dgg {
     int triangle; /* triangle of last transformed point */
     int quad; /* quad of last transformed point */
     unsigned long serial;
-};
+};
 
 struct isea_pt {
     double x, y;
@@ -1016,83 +1016,108 @@ isea_forward(struct isea_dgg *g, struct isea_geo *in)
  * Proj 4 integration code follows
  */
 
-#define PROJ_PARMS__ \
-    struct isea_dgg dgg;
-
 #define PJ_LIB__
 #include <projects.h>
 
 PROJ_HEAD(isea, "Icosahedral Snyder Equal Area") "\n\tSph";
 
-FORWARD(s_forward);
+struct pj_opaque {
+    struct isea_dgg dgg;
+};
+
+
+static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
+    XY xy = {0.0,0.0};
+    struct pj_opaque *Q = P->opaque;
     struct isea_pt out;
     struct isea_geo in;
 
     in.lon = lp.lam;
     in.lat = lp.phi;
 
-    out = isea_forward(&P->dgg, &in);
+    out = isea_forward(&Q->dgg, &in);
 
     xy.x = out.x;
     xy.y = out.y;
 
     return xy;
 }
-FREEUP; if (P) pj_dalloc(P); }
 
-ENTRY0(isea)
+
+static void *freeup_new (PJ *P) {                       /* Destructor */
+    if (0==P)
+        return 0;
+    if (0==P->opaque)
+        return pj_dealloc (P);
+
+    pj_dealloc (P->opaque);
+    return pj_dealloc(P);
+}
+
+static void freeup (PJ *P) {
+    freeup_new (P);
+    return;
+}
+
+
+PJ *PROJECTION(isea) {
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==Q)
+        return freeup_new (P);
+    P->opaque = Q;
+
     char *opt;
 
-        P->fwd = s_forward;
-        isea_grid_init(&P->dgg);
+    P->fwd = s_forward;
+    isea_grid_init(&Q->dgg);
 
-        P->dgg.output = ISEA_PLANE;
+    Q->dgg.output = ISEA_PLANE;
 /*      P->dgg.radius = P->a; / * otherwise defaults to 1 */
     /* calling library will scale, I think */
 
     opt = pj_param(P->ctx,P->params, "sorient").s;
     if (opt) {
         if (!strcmp(opt, "isea")) {
-            isea_orient_isea(&P->dgg);
+            isea_orient_isea(&Q->dgg);
         } else if (!strcmp(opt, "pole")) {
-            isea_orient_pole(&P->dgg);
+            isea_orient_pole(&Q->dgg);
         } else {
             E_ERROR(-34);
         }
     }
 
     if (pj_param(P->ctx,P->params, "tazi").i) {
-        P->dgg.o_az = pj_param(P->ctx,P->params, "razi").f;
+        Q->dgg.o_az = pj_param(P->ctx,P->params, "razi").f;
     }
 
     if (pj_param(P->ctx,P->params, "tlon_0").i) {
-        P->dgg.o_lon = pj_param(P->ctx,P->params, "rlon_0").f;
+        Q->dgg.o_lon = pj_param(P->ctx,P->params, "rlon_0").f;
     }
 
     if (pj_param(P->ctx,P->params, "tlat_0").i) {
-        P->dgg.o_lat = pj_param(P->ctx,P->params, "rlat_0").f;
+        Q->dgg.o_lat = pj_param(P->ctx,P->params, "rlat_0").f;
     }
 
     if (pj_param(P->ctx,P->params, "taperture").i) {
-        P->dgg.aperture = pj_param(P->ctx,P->params, "iaperture").i;
+        Q->dgg.aperture = pj_param(P->ctx,P->params, "iaperture").i;
     }
 
     if (pj_param(P->ctx,P->params, "tresolution").i) {
-        P->dgg.resolution = pj_param(P->ctx,P->params, "iresolution").i;
+        Q->dgg.resolution = pj_param(P->ctx,P->params, "iresolution").i;
     }
 
     opt = pj_param(P->ctx,P->params, "smode").s;
     if (opt) {
         if (!strcmp(opt, "plane")) {
-            P->dgg.output = ISEA_PLANE;
+            Q->dgg.output = ISEA_PLANE;
         } else if (!strcmp(opt, "di")) {
-            P->dgg.output = ISEA_Q2DI;
+            Q->dgg.output = ISEA_Q2DI;
         }
         else if (!strcmp(opt, "dd")) {
-            P->dgg.output = ISEA_Q2DD;
+            Q->dgg.output = ISEA_Q2DD;
         }
         else if (!strcmp(opt, "hex")) {
-            P->dgg.output = ISEA_HEX;
+            Q->dgg.output = ISEA_HEX;
         }
         else {
             /* TODO verify error code.  Possibly eliminate magic */
@@ -1101,19 +1126,51 @@ ENTRY0(isea)
     }
 
     if (pj_param(P->ctx,P->params, "trescale").i) {
-        P->dgg.radius = ISEA_SCALE;
+        Q->dgg.radius = ISEA_SCALE;
     }
 
     if (pj_param(P->ctx,P->params, "tresolution").i) {
-        P->dgg.resolution = pj_param(P->ctx,P->params, "iresolution").i;
+        Q->dgg.resolution = pj_param(P->ctx,P->params, "iresolution").i;
     } else {
-        P->dgg.resolution = 4;
+        Q->dgg.resolution = 4;
     }
 
     if (pj_param(P->ctx,P->params, "taperture").i) {
-        P->dgg.aperture = pj_param(P->ctx,P->params, "iaperture").i;
+        Q->dgg.aperture = pj_param(P->ctx,P->params, "iaperture").i;
     } else {
-        P->dgg.aperture = 3;
+        Q->dgg.aperture = 3;
     }
 
-ENDENTRY(P)
+    return P;
+}
+
+
+#ifdef PJ_OMIT_SELFTEST
+int pj_isea_selftest (void) {return 0;}
+#else
+
+int pj_isea_selftest (void) {
+    double tolerance_lp = 1e-10;
+    double tolerance_xy = 1e-7;
+
+    char s_args[] = {"+proj=isea   +a=6400000    +lat_1=0.5 +lat_2=2"};
+
+    LP fwd_in[] = {
+        { 2, 1},
+        { 2,-1},
+        {-2, 1},
+        {-2,-1}
+    };
+
+    XY s_fwd_expect[] = {
+        {-1097074.9480224741, 3442909.3090371834},
+        {-1097074.9482647954, 3233611.7285857084},
+        {-1575486.3536415542, 3442168.3420281881},
+        {-1575486.353880283,  3234352.6955947056},
+    };
+
+    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, 0, 0, 0);
+}
+
+
+#endif
