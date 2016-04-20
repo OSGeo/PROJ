@@ -355,24 +355,13 @@ source files
 
 int pj_aeqd_selftest     (void)     {return 10000;}
 int pj_alsk_selftest     (void)     {return 10000;}
-int pj_eck6_selftest     (void)     {return 10000;}
 int pj_eqc_selftest (void) {return 10000;}
 int pj_eqdc_selftest (void) {return 10000;}
 int pj_etmerc_selftest (void) {return 10000;}
 int pj_geocent_selftest (void) {return 10000;}
-int pj_gn_sinu_selftest (void) {return 10000;}
-int pj_goode_selftest (void) {return 10000;}
 int pj_gs48_selftest (void) {return 10000;}
 int pj_gs50_selftest (void) {return 10000;}
-int pj_hammer_selftest (void) {return 10000;}
-int pj_hatano_selftest (void) {return 10000;}
-int pj_healpix_selftest (void) {return 10000;}
-int pj_rhealpix_selftest (void) {return 10000;}
-int pj_igh_selftest (void) {return 10000;}
-int pj_imw_p_selftest (void) {return 10000;}
-int pj_isea_selftest (void) {return 10000;}
 
-int pj_krovak_selftest (void) {return 10000;}
 int pj_labrd_selftest (void) {return 10000;}
 int pj_laea_selftest (void) {return 10000;}
 int pj_lagrng_selftest (void) {return 10000;}
@@ -392,7 +381,6 @@ int pj_lsat_selftest (void) {return 10000;}
 int pj_mbt_fps_selftest (void) {return 10000;}
 int pj_mbtfpp_selftest (void) {return 10000;}
 int pj_mbtfpq_selftest (void) {return 10000;}
-int pj_mbtfps_selftest (void) {return 10000;}
 int pj_merc_selftest (void) {return 10000;}
 int pj_mil_os_selftest (void) {return 10000;}
 int pj_mill_selftest (void) {return 10000;}
@@ -426,9 +414,7 @@ int pj_robin_selftest (void) {return 10000;}
 int pj_rouss_selftest (void) {return 10000;}
 int pj_rpoly_selftest (void) {return 10000;}
 int pj_sch_selftest (void) {return 10000;}
-int pj_sinu_selftest (void) {return 10000;}
 
-int pj_gstmerc_selftest (void) {return 10000;}
 int pj_tpers_selftest (void) {return 10000;}
 
 int pj_utm_selftest (void) {return 10000;}
