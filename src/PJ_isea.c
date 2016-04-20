@@ -1061,12 +1061,12 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(isea) {
+    char *opt;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
 
-    char *opt;
 
     P->fwd = s_forward;
     isea_grid_init(&Q->dgg);

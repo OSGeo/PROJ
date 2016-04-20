@@ -66,7 +66,7 @@ struct pj_opaque {
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
-    struct pj_opaque *Q = P->opaque;
+
     /* calculate xy from lat/lon */
 
     /* Constants, identical to inverse transform function */
@@ -131,7 +131,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 
 static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     LP lp = {0.0,0.0};
-    struct pj_opaque *Q = P->opaque;
+
     /* calculate lat/lon from xy */
 
     /* Constants, identisch wie in der Umkehrfunktion */
@@ -227,6 +227,7 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(krovak) {
+    double ts;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
@@ -234,7 +235,7 @@ PJ *PROJECTION(krovak) {
 
     P->pfree = freeup;
     P->descr = des_krovak;
-    double ts;
+
     /* read some Parameters,
      * here Latitude Truescale */
 

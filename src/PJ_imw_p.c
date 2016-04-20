@@ -137,13 +137,12 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(imw_p) {
+    double del, sig, s, t, x1, x2, T2, y1, m1, m2, y2;
+    int i;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-
-    double del, sig, s, t, x1, x2, T2, y1, m1, m2, y2;
-    int i;
 
     if (!(Q->en = pj_enfn(P->es))) E_ERROR_0;
     if( (i = phi12(P, &del, &sig)) != 0)

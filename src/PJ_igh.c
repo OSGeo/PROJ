@@ -4,7 +4,14 @@
 PROJ_HEAD(igh, "Interrupted Goode Homolosine") "\n\tPCyl, Sph.";
 
 C_NAMESPACE PJ *pj_sinu(PJ *), *pj_moll(PJ *);
-static const double d4044118 = (40 + 44/60. + 11.8/3600.) * DEG_TO_RAD; // 40d 44' 11.8" [degrees]
+
+/* 40d 44' 11.8" [degrees] */
+/*
+static const double d4044118 = (40 + 44/60. + 11.8/3600.) * DEG_TO_RAD;
+has been replaced by this define, to eliminate portability issue:
+Initializer element not computable at load time
+*/
+#define d4044118 ((40 + 44/60. + 11.8/3600.) * DEG_TO_RAD)
 
 static const double d10  =  10 * DEG_TO_RAD;
 static const double d20  =  20 * DEG_TO_RAD;
@@ -19,7 +26,7 @@ static const double d140 = 140 * DEG_TO_RAD;
 static const double d160 = 160 * DEG_TO_RAD;
 static const double d180 = 180 * DEG_TO_RAD;
 
-static const double EPSLN = 1.e-10; // allow a little 'slack' on zone edge positions
+static const double EPSLN = 1.e-10; /* allow a little 'slack' on zone edge positions */
 
 struct pj_opaque {
     struct PJconsts* pj[12]; \
@@ -32,23 +39,23 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     struct pj_opaque *Q = P->opaque;
     int z;
 
-    if (lp.phi >=  d4044118) {          // 1|2
+    if (lp.phi >=  d4044118) {          /* 1|2 */
       z = (lp.lam <= -d40 ? 1: 2);
     }
-    else if (lp.phi >=  0) {            // 3|4
+    else if (lp.phi >=  0) {            /* 3|4 */
       z = (lp.lam <= -d40 ? 3: 4);
     }
-    else if (lp.phi >= -d4044118) {     // 5|6|7|8
-           if (lp.lam <= -d100) z =  5; // 5
-      else if (lp.lam <=  -d20) z =  6; // 6
-      else if (lp.lam <=   d80) z =  7; // 7
-      else z = 8;                       // 8
+    else if (lp.phi >= -d4044118) {     /* 5|6|7|8 */
+           if (lp.lam <= -d100) z =  5; /* 5 */
+      else if (lp.lam <=  -d20) z =  6; /* 6 */
+      else if (lp.lam <=   d80) z =  7; /* 7 */
+      else z = 8;                       /* 8 */
     }
-    else {                              // 9|10|11|12
-           if (lp.lam <= -d100) z =  9; // 9
-      else if (lp.lam <=  -d20) z = 10; // 10
-      else if (lp.lam <=   d80) z = 11; // 11
-      else z = 12;                      // 12
+    else {                              /* 9|10|11|12 */
+           if (lp.lam <= -d100) z =  9; /* 9 */
+      else if (lp.lam <=  -d20) z = 10; /* 10 */
+      else if (lp.lam <=   d80) z = 11; /* 11 */
+      else z = 12;                      /* 12 */
     }
 
     lp.lam -= Q->pj[z-1]->lam0;
@@ -63,26 +70,26 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
-    const double y90 = Q->dy0 + sqrt(2); // lt=90 corresponds to y=y0+sqrt(2)
+    const double y90 = Q->dy0 + sqrt(2); /* lt=90 corresponds to y=y0+sqrt(2) */
 
     int z = 0;
-    if (xy.y > y90+EPSLN || xy.y < -y90+EPSLN) // 0
+    if (xy.y > y90+EPSLN || xy.y < -y90+EPSLN) /* 0 */
       z = 0;
-    else if (xy.y >=  d4044118)       // 1|2
+    else if (xy.y >=  d4044118)       /* 1|2 */
       z = (xy.x <= -d40? 1: 2);
-    else if (xy.y >=  0)              // 3|4
+    else if (xy.y >=  0)              /* 3|4 */
       z = (xy.x <= -d40? 3: 4);
-    else if (xy.y >= -d4044118) {     // 5|6|7|8
-           if (xy.x <= -d100) z =  5; // 5
-      else if (xy.x <=  -d20) z =  6; // 6
-      else if (xy.x <=   d80) z =  7; // 7
-      else z = 8;                     // 8
+    else if (xy.y >= -d4044118) {     /* 5|6|7|8 */
+           if (xy.x <= -d100) z =  5; /* 5 */
+      else if (xy.x <=  -d20) z =  6; /* 6 */
+      else if (xy.x <=   d80) z =  7; /* 7 */
+      else z = 8;                     /* 8 */
     }
-    else {                            // 9|10|11|12
-           if (xy.x <= -d100) z =  9; // 9
-      else if (xy.x <=  -d20) z = 10; // 10
-      else if (xy.x <=   d80) z = 11; // 11
-      else z = 12;                    // 12
+    else {                            /* 9|10|11|12 */
+           if (xy.x <= -d100) z =  9; /* 9 */
+      else if (xy.x <=  -d20) z = 10; /* 10 */
+      else if (xy.x <=   d80) z = 11; /* 11 */
+      else z = 12;                    /* 12 */
     }
 
     if (z) {
@@ -113,7 +120,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         case 11: ok = (lp.lam >=  -d20-EPSLN && lp.lam <=   d80+EPSLN); break;
         case 12: ok = (lp.lam >=   d80-EPSLN && lp.lam <=  d180+EPSLN); break;
         }
-      z = (!ok? 0: z); // projectable?
+      z = (!ok? 0: z); /* projectable? */
     }
 
     if (!z) lp.lam = HUGE_VAL;
@@ -124,12 +131,12 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 
 static void *freeup_new (PJ *P) {                       /* Destructor */
+    int i;
     if (0==P)
         return 0;
     if (0==P->opaque)
         return pj_dealloc (P);
 
-    int i;
     for (i = 0; i < 12; ++i) {
         if (P->opaque->pj[i])
             pj_dealloc(P->opaque->pj[i]);
@@ -146,11 +153,6 @@ static void freeup (PJ *P) {
 }
 
 
-PJ *PROJECTION(igh) {
-    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
-    if (0==Q)
-        return freeup_new (P);
-    P->opaque = Q;
 
 /*
   Zones:
@@ -179,11 +181,17 @@ PJ *PROJECTION(igh) {
     Q->pj[n-1]->y0 = y_0; \
     Q->pj[n-1]->lam0 = lon_0;
 
-    LP lp = { 0, d4044118 };
-    XY xy1;
-    XY xy3;
 
-    // sinusoidal zones
+PJ *PROJECTION(igh) {
+    XY xy1, xy3;
+    LP lp = { 0, d4044118 };
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==Q)
+        return freeup_new (P);
+    P->opaque = Q;
+
+
+    /* sinusoidal zones */
     SETUP(3, sinu, -d100, 0, -d100);
     SETUP(4, sinu,   d30, 0,   d30);
     SETUP(5, sinu, -d160, 0, -d160);
@@ -191,18 +199,18 @@ PJ *PROJECTION(igh) {
     SETUP(7, sinu,   d20, 0,   d20);
     SETUP(8, sinu,  d140, 0,  d140);
 
-    // mollweide zones
+    /* mollweide zones */
     SETUP(1, moll, -d100, 0, -d100);
 
-    // y0 ?
-    xy1 = Q->pj[0]->fwd(lp, Q->pj[0]); // zone 1
-    xy3 = Q->pj[2]->fwd(lp, Q->pj[2]); // zone 3
-    // y0 + xy1.y = xy3.y for lt = 40d44'11.8"
+    /* y0 ? */
+    xy1 = Q->pj[0]->fwd(lp, Q->pj[0]); /* zone 1 */
+    xy3 = Q->pj[2]->fwd(lp, Q->pj[2]); /* zone 3 */
+    /* y0 + xy1.y = xy3.y for lt = 40d44'11.8" */
     Q->dy0 = xy3.y - xy1.y;
 
     Q->pj[0]->y0 = Q->dy0;
 
-    // mollweide zones (cont'd)
+    /* mollweide zones (cont'd) */
     SETUP( 2, moll,   d30,  Q->dy0,   d30);
     SETUP( 9, moll, -d160, -Q->dy0, -d160);
     SETUP(10, moll,  -d60, -Q->dy0,  -d60);

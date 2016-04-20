@@ -554,9 +554,9 @@ static XY s_rhealpix_forward(LP lp, PJ *P) { /* sphere */
 
 static XY e_rhealpix_forward(LP lp, PJ *P) { /* ellipsoid */
     struct pj_opaque *Q = P->opaque;
-
+    XY xy;
     lp.phi = auth_lat(P, lp.phi, 0);
-    XY xy = healpix_sphere(lp);
+    xy = healpix_sphere(lp);
     return combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 0);
 }
 
