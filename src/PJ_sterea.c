@@ -99,13 +99,14 @@ static void freeup (PJ *P) {
 PJ *PROJECTION(sterea) {
     double R;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
 
     Q->en = pj_gauss_ini(P->e, P->phi0, &(Q->phic0), &R);
-    if (0==P)
-        E_ERROR_0;
+    if (0==Q->en)
+        return freeup_new (P);
 
     Q->sinc0 = sin (Q->phic0);
     Q->cosc0 = cos (Q->phic0);
