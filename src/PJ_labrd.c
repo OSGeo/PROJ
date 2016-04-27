@@ -113,9 +113,6 @@ PJ *PROJECTION(labrd) {
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-
-    P->pfree = freeup;
-    P->descr = des_labrd;
     double Az, sinp, R, N, t;
 
     Q->rot  = pj_param(P->ctx, P->params, "bno_rot").i == 0;

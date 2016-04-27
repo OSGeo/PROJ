@@ -226,10 +226,8 @@ PJ *PROJECTION(laea) {
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-
-    P->pfree = freeup;
-    P->descr = des_laea;
     double t;
+
     t = fabs(P->phi0);
     if (fabs(t - HALFPI) < EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
