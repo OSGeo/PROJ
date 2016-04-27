@@ -362,7 +362,6 @@ int pj_geocent_selftest (void) {return 10000;}
 int pj_gs48_selftest (void) {return 10000;}
 int pj_gs50_selftest (void) {return 10000;}
 
-int pj_lask_selftest (void) {return 10000;}
 int pj_latlon_selftest (void) {return 10000;}
 int pj_latlong_selftest (void) {return 10000;}
 int pj_lonlat_selftest (void) {return 10000;}
