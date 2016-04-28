@@ -369,7 +369,6 @@ int pj_longlat_selftest (void) {return 10000;}
 
 int pj_lee_os_selftest (void) {return 10000;}
 
-int pj_mbtfpq_selftest (void) {return 10000;}
 int pj_merc_selftest (void) {return 10000;}
 int pj_mil_os_selftest (void) {return 10000;}
 int pj_mill_selftest (void) {return 10000;}
