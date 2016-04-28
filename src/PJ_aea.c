@@ -368,7 +368,6 @@ int pj_lonlat_selftest (void) {return 10000;}
 int pj_longlat_selftest (void) {return 10000;}
 
 int pj_lee_os_selftest (void) {return 10000;}
-int pj_lsat_selftest (void) {return 10000;}
 
 int pj_mbt_fps_selftest (void) {return 10000;}
 int pj_mbtfpp_selftest (void) {return 10000;}
