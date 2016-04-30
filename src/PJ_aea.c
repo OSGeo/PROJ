@@ -354,22 +354,16 @@ source files
 ***********************************************************************/
 
 int pj_aeqd_selftest     (void)     {return 10000;}
-int pj_alsk_selftest     (void)     {return 10000;}
 int pj_eqc_selftest (void) {return 10000;}
 int pj_eqdc_selftest (void) {return 10000;}
 int pj_etmerc_selftest (void) {return 10000;}
 int pj_geocent_selftest (void) {return 10000;}
-int pj_gs48_selftest (void) {return 10000;}
-int pj_gs50_selftest (void) {return 10000;}
 
 int pj_latlon_selftest (void) {return 10000;}
 int pj_latlong_selftest (void) {return 10000;}
 int pj_lonlat_selftest (void) {return 10000;}
 int pj_longlat_selftest (void) {return 10000;}
 
-int pj_lee_os_selftest (void) {return 10000;}
-
-int pj_mil_os_selftest (void) {return 10000;}
 int pj_moll_selftest (void) {return 10000;}
 int pj_natearth_selftest (void) {return 10000;}
 int pj_natearth2_selftest (void) {return 10000;}
