@@ -364,7 +364,6 @@ int pj_latlong_selftest (void) {return 10000;}
 int pj_lonlat_selftest (void) {return 10000;}
 int pj_longlat_selftest (void) {return 10000;}
 
-int pj_nsper_selftest (void) {return 10000;}
 int pj_nzmg_selftest (void) {return 10000;}
 int pj_ob_tran_selftest (void) {return 10000;}
 int pj_ocea_selftest (void) {return 10000;}
@@ -387,8 +386,6 @@ int pj_robin_selftest (void) {return 10000;}
 int pj_rouss_selftest (void) {return 10000;}
 int pj_rpoly_selftest (void) {return 10000;}
 int pj_sch_selftest (void) {return 10000;}
-
-int pj_tpers_selftest (void) {return 10000;}
 
 int pj_utm_selftest (void) {return 10000;}
 int pj_vandg_selftest (void) {return 10000;}
