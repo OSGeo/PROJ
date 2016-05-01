@@ -364,7 +364,6 @@ int pj_latlong_selftest (void) {return 10000;}
 int pj_lonlat_selftest (void) {return 10000;}
 int pj_longlat_selftest (void) {return 10000;}
 
-int pj_nell_h_selftest (void) {return 10000;}
 int pj_nicol_selftest (void) {return 10000;}
 int pj_nsper_selftest (void) {return 10000;}
 int pj_nzmg_selftest (void) {return 10000;}
