@@ -26,7 +26,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         xy.x += PI;
     xy.x *= Q->rtk;
     xy.y = Q->rok * (Q->sinphi * sin(lp.phi) - Q->cosphi * cos(lp.phi) * xy.y);
-    return (xy);
+    return xy;
 }
 
 
@@ -41,7 +41,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     lp.phi = asin(xy.y * Q->sinphi + t * Q->cosphi * (s = sin(xy.x)));
     lp.lam = atan2(t * Q->sinphi * s - xy.y * Q->cosphi,
         t * cos(xy.x));
-    return (lp);
+    return lp;
 }
 
 
