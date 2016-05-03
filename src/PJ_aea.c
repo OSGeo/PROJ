@@ -365,8 +365,6 @@ int pj_lonlat_selftest (void) {return 10000;}
 int pj_longlat_selftest (void) {return 10000;}
 
 int pj_ob_tran_selftest (void) {return 10000;}
-int pj_putp6_selftest (void) {return 10000;}
-int pj_putp6p_selftest (void) {return 10000;}
 
 int pj_qsc_selftest (void) {return 10000;}
 int pj_robin_selftest (void) {return 10000;}
