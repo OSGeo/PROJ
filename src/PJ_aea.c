@@ -365,7 +365,6 @@ int pj_lonlat_selftest (void) {return 10000;}
 int pj_longlat_selftest (void) {return 10000;}
 
 int pj_ob_tran_selftest (void) {return 10000;}
-int pj_putp4p_selftest (void) {return 10000;}
 int pj_putp5_selftest (void) {return 10000;}
 int pj_putp5p_selftest (void) {return 10000;}
 int pj_putp6_selftest (void) {return 10000;}
@@ -382,5 +381,4 @@ int pj_vandg_selftest (void) {return 10000;}
 int pj_vandg2_selftest (void) {return 10000;}
 int pj_vandg3_selftest (void) {return 10000;}
 int pj_vandg4_selftest (void) {return 10000;}
-int pj_weren_selftest (void) {return 10000;}
 #endif
