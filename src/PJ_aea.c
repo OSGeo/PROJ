@@ -354,8 +354,5 @@ source files
 ***********************************************************************/
 
 int pj_etmerc_selftest (void) {return 10000;}
-
-int pj_sch_selftest (void) {return 10000;}
-
 int pj_utm_selftest (void) {return 10000;}
 #endif
