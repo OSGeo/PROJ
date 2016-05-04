@@ -367,7 +367,5 @@ int pj_rouss_selftest (void) {return 10000;}
 int pj_sch_selftest (void) {return 10000;}
 
 int pj_utm_selftest (void) {return 10000;}
-int pj_vandg2_selftest (void) {return 10000;}
-int pj_vandg3_selftest (void) {return 10000;}
 int pj_vandg4_selftest (void) {return 10000;}
 #endif
