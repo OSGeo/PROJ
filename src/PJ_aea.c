@@ -354,7 +354,6 @@ source files
 ***********************************************************************/
 
 int pj_etmerc_selftest (void) {return 10000;}
-int pj_geocent_selftest (void) {return 10000;}
 
 int pj_latlon_selftest (void) {return 10000;}
 int pj_latlong_selftest (void) {return 10000;}
