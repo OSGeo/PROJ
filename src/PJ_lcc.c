@@ -65,7 +65,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     return lp;
 }
 
-SPECIAL(fac) {
+static void special(LP lp, PJ *P, struct FACTORS *fac) {
     struct pj_opaque *Q = P->opaque;
     double rho;
     if (fabs(fabs(lp.phi) - HALFPI) < EPS10) {
@@ -144,7 +144,7 @@ PJ *PROJECTION(lcc) {
 
     P->inv = e_inverse;
     P->fwd = e_forward;
-    P->spc = fac;
+    P->spc = special;
 
     return P;
 }
