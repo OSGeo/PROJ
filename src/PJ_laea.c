@@ -222,11 +222,11 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(laea) {
+    double t;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-    double t;
 
     t = fabs(P->phi0);
     if (fabs(t - HALFPI) < EPS10)

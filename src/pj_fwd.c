@@ -25,7 +25,7 @@ pj_fwd(LP lp, PJ *P) {
 		if (!P->over)
 			lp.lam = adjlon(lp.lam); /* adjust del longitude */
 
-                //Check for NULL pointer
+                /* Check for NULL pointer */
                 if (P->fwd != NULL)
                 {
 		    xy = (*P->fwd)(lp, P); /* project */

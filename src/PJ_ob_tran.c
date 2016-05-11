@@ -100,14 +100,14 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(ob_tran) {
+    int i;
+    double phip;
+    char *name, *s;
+
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-
-    int i;
-    double phip;
-    char *name, *s;
 
     /* get name of projection to be translated */
     if (!(name = pj_param(P->ctx, P->params, "so_proj").s)) E_ERROR(-26);

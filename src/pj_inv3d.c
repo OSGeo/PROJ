@@ -19,9 +19,9 @@ pj_inv3d(XYZ xyz, PJ *P) {
 
 	xyz.x = (xyz.x * P->to_meter - P->x0) * P->ra; /* descale and de-offset */
 	xyz.y = (xyz.y * P->to_meter - P->y0) * P->ra;
-        //z is not scaled since that is handled by vto_meter before we get here
-        
-        //Check for NULL pointer
+        /* z is not scaled since that is handled by vto_meter before we get here */
+
+        /* Check for NULL pointer */
         if (P->inv3d != NULL)
         {
 	    lpz = (*P->inv3d)(xyz, P); /* inverse project */
@@ -32,7 +32,7 @@ pj_inv3d(XYZ xyz, PJ *P) {
 		if (!P->over)
 			lpz.lam = adjlon(lpz.lam); /* adjust longitude to CM */
 
-                //This maybe redundant and never user
+                /* This may be redundant and never used */
 		if (P->geoc && fabs(fabs(lpz.phi)-HALFPI) > EPS)
 			lpz.phi = atan(P->one_es * tan(lpz.phi));
 	    }

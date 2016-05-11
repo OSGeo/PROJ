@@ -98,13 +98,14 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(lcc) {
+    double cosphi, sinphi;
+    int secant;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
 
-    double cosphi, sinphi;
-    int secant;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     if (pj_param(P->ctx, P->params, "tlat_2").i)

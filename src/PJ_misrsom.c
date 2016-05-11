@@ -175,13 +175,13 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(misrsom) {
+    int path;
+    double lam, alf, esc, ess;
+
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-
-    int path;
-    double lam, alf, esc, ess;
 
     path = pj_param(P->ctx, P->params, "ipath").i;
     if (path <= 0 || path > 233) E_ERROR(-29);

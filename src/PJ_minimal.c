@@ -127,7 +127,7 @@ PROJ_HEAD(minimal, "Minimal example (brief description goes here)");
 
 
 /* Projection specific elements for the PJ object */
-struct opaque {
+struct pj_opaque {
 	double a;
 	int b;
 };
@@ -155,7 +155,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     LP lp = {0.0,0.0};
     /* Actual ellipsoidal forward code goes here */
     lp.lam = xy.x - P->es;
-    lp.phi = xy.y - P->opaq->b;
+    lp.phi = xy.y - P->opaque->b;
 	return lp;
 }
 
@@ -164,7 +164,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
     /* Actual spheroidal forward code goes here */
     lp.lam = xy.x - P->es;
-    lp.phi = xy.y - P->opaq->b;
+    lp.phi = xy.y - P->opaque->b;
 	return lp;
 }
 
@@ -173,21 +173,21 @@ static void freeup(PJ *P) {                                    /* Destructor */
     if (P==0)
         return;
     /* Projection specific deallocation goes here */
-    pj_dealloc (P->opaq);
+    pj_dealloc (P->opaque);
     pj_dealloc (P);
     return;
 }
 
 
 PJ *pj_projection_specific_setup_minimal (PJ *P) {
-    pj_prepare (P, des_minimal, freeup, sizeof (struct opaque));
-    if (0==P->opaq) {
+    pj_prepare (P, des_minimal, freeup, sizeof (struct pj_opaque));
+    if (0==P->opaque) {
         freeup (P);
         return 0;
     }
 
-    P->opaq->a = 42.42;
-    P->opaq->b = 42;
+    P->opaque->a = 42.42;
+    P->opaque->b = 42;
 
     /* Spheroidal? */
 	if (0==P->es) {

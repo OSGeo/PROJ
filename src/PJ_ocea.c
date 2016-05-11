@@ -62,12 +62,12 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(ocea) {
+    double phi_0=0.0, phi_1, phi_2, lam_1, lam_2, lonz, alpha;
+
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-
-    double phi_0=0.0, phi_1, phi_2, lam_1, lam_2, lonz, alpha;
 
     Q->rok = P->a / P->k0;
     Q->rtk = P->a * P->k0;

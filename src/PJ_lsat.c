@@ -158,12 +158,12 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(lsat) {
+    int land, path;
+    double lam, alf, esc, ess;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-    int land, path;
-    double lam, alf, esc, ess;
 
     land = pj_param(P->ctx, P->params, "ilsat").i;
     if (land <= 0 || land > 5) E_ERROR(-28);

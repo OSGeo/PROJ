@@ -49,11 +49,11 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(lagrng) {
+    double phi1;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-    double phi1;
 
     Q->rw = pj_param(P->ctx, P->params, "dW").f;
     if (Q->rw <= 0) E_ERROR(-27);

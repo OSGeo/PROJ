@@ -180,12 +180,12 @@ PJ *PROJECTION(nsper) {
 
 
 PJ *PROJECTION(tpers) {
+    double omega, gamma;
+
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-
-    double omega, gamma;
 
     omega = pj_param(P->ctx, P->params, "dtilt").f * DEG_TO_RAD;
     gamma = pj_param(P->ctx, P->params, "dazi").f * DEG_TO_RAD;

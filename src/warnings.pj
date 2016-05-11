@@ -1,0 +1,72 @@
+PJ_healpix.c: In function 'in_image':
+PJ_healpix.c:187:13: warning: initializer element is not computable at load time [enabled by default]
+             {-1.0*PI + north_square*PI/2.0- EPS, PI/4.0 + EPS},
+             ^
+PJ_healpix.c:187:13: warning: initializer element is not computable at load time [enabled by default]
+PJ_healpix.c:188:13: warning: initializer element is not computable at load time [enabled by default]
+             {-1.0*PI + north_square*PI/2.0- EPS, 3*PI/4.0 + EPS},
+             ^
+PJ_healpix.c:188:13: warning: initializer element is not computable at load time [enabled by default]
+PJ_healpix.c:189:13: warning: initializer element is not computable at load time [enabled by default]
+             {-1.0*PI + (north_square + 1.0)*PI/2.0 + EPS, 3*PI/4.0 + EPS},
+             ^
+PJ_healpix.c:189:13: warning: initializer element is not computable at load time [enabled by default]
+PJ_healpix.c:190:13: warning: initializer element is not computable at load time [enabled by default]
+             {-1.0*PI + (north_square + 1.0)*PI/2.0 + EPS, PI/4.0 + EPS},
+             ^
+PJ_healpix.c:190:13: warning: initializer element is not computable at load time [enabled by default]
+PJ_healpix.c:193:13: warning: initializer element is not computable at load time [enabled by default]
+             {-1.0*PI + (south_square + 1.0)*PI/2.0 + EPS, -1.0*PI/4.0 - EPS},
+             ^
+PJ_healpix.c:193:13: warning: initializer element is not computable at load time [enabled by default]
+PJ_healpix.c:194:13: warning: initializer element is not computable at load time [enabled by default]
+             {-1.0*PI + (south_square + 1.0)*PI/2.0 + EPS, -3.0*PI/4.0 - EPS},
+             ^
+PJ_healpix.c:194:13: warning: initializer element is not computable at load time [enabled by default]
+PJ_healpix.c:195:13: warning: initializer element is not computable at load time [enabled by default]
+             {-1.0*PI + south_square*PI/2.0 - EPS, -3.0*PI/4.0 - EPS},
+             ^
+PJ_healpix.c:195:13: warning: initializer element is not computable at load time [enabled by default]
+PJ_healpix.c:196:13: warning: initializer element is not computable at load time [enabled by default]
+             {-1.0*PI + south_square*PI/2.0 - EPS, -1.0*PI/4.0 - EPS},
+             ^
+PJ_healpix.c:196:13: warning: initializer element is not computable at load time [enabled by default]
+PJ_healpix.c: In function 'combine_caps':
+PJ_healpix.c:453:9: warning: initializer element is not computable at load time [enabled by default]
+         double c[2] = {capmap.x, capmap.y};
+         ^
+PJ_healpix.c:453:9: warning: initializer element is not computable at load time [enabled by default]
+PJ_healpix.c:479:9: warning: initializer element is not computable at load time [enabled by default]
+         double c[2] = {capmap.x, capmap.y};
+         ^
+PJ_healpix.c:479:9: warning: initializer element is not computable at load time [enabled by default]
+PJ_minimal.c: In function 'e_inverse':
+PJ_minimal.c:158:22: error: 'PJ' has no member named 'opaq'
+     lp.phi = xy.y - P->opaq->b;
+                      ^
+PJ_minimal.c: In function 's_inverse':
+PJ_minimal.c:167:22: error: 'PJ' has no member named 'opaq'
+     lp.phi = xy.y - P->opaq->b;
+                      ^
+PJ_minimal.c: In function 'freeup':
+PJ_minimal.c:176:18: error: 'PJ' has no member named 'opaq'
+     pj_dealloc (P->opaq);
+                  ^
+PJ_minimal.c: In function 'pj_projection_specific_setup_minimal':
+PJ_minimal.c:184:13: error: 'PJ' has no member named 'opaq'
+     if (0==P->opaq) {
+             ^
+PJ_minimal.c:189:6: error: 'PJ' has no member named 'opaq'
+     P->opaq->a = 42.42;
+      ^
+PJ_minimal.c:190:6: error: 'PJ' has no member named 'opaq'
+     P->opaq->b = 42;
+      ^
+pj_mutex.c:89:8: warning: C++ style comments are not allowed in ISO C90 [enabled by default]
+ #endif // def MUTEX_stub
+        ^
+pj_mutex.c:89:8: warning: (this will be reported only once per input file) [enabled by default]
+pj_strtod.c:35:25: fatal error: proj_config.h: No such file or directory
+ #include "proj_config.h"
+                         ^
+compilation terminated.

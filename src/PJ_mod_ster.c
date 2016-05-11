@@ -85,7 +85,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     }
     if (nn) {
         lp.phi = phi;
-        lp.lam = atan2(p.r * sinz, rh * Q->cchio * cosz - p.i * 
+        lp.lam = atan2(p.r * sinz, rh * Q->cchio * cosz - p.i *
             Q->schio * sinz);
     } else
         lp.lam = lp.phi = HUGE_VAL;
@@ -129,16 +129,16 @@ static PJ *setup(PJ *P) { /* general initialization */
 
 /* Miller Oblated Stereographic */
 PJ *PROJECTION(mil_os) {
-    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
-    if (0==Q)
-        return freeup_new (P);
-    P->opaque = Q;
-
     static COMPLEX AB[] = {
         {0.924500, 0.},
         {0.,       0.},
         {0.019430, 0.}
     };
+
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==Q)
+        return freeup_new (P);
+    P->opaque = Q;
 
     Q->n = 2;
     P->lam0 = DEG_TO_RAD * 20.;
@@ -152,16 +152,16 @@ PJ *PROJECTION(mil_os) {
 
 /* Lee Oblated Stereographic */
 PJ *PROJECTION(lee_os) {
-    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
-    if (0==Q)
-        return freeup_new (P);
-    P->opaque = Q;
-
     static COMPLEX AB[] = {
         {0.721316,    0.},
         {0.,          0.},
         {-0.0088162, -0.00617325}
     };
+
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==Q)
+        return freeup_new (P);
+    P->opaque = Q;
 
     Q->n = 2;
     P->lam0 = DEG_TO_RAD * -165.;
@@ -174,11 +174,6 @@ PJ *PROJECTION(lee_os) {
 
 
 PJ *PROJECTION(gs48) {
-    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
-    if (0==Q)
-        return freeup_new (P);
-    P->opaque = Q;
-
     static COMPLEX /* 48 United States */
     AB[] = {
         {0.98879,   0.},
@@ -187,6 +182,11 @@ PJ *PROJECTION(gs48) {
         {0.,        0.},
         {0.075528,  0.}
     };
+
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==Q)
+        return freeup_new (P);
+    P->opaque = Q;
 
     Q->n = 4;
     P->lam0 = DEG_TO_RAD * -96.;
@@ -200,11 +200,6 @@ PJ *PROJECTION(gs48) {
 
 
 PJ *PROJECTION(alsk) {
-    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
-    if (0==Q)
-        return freeup_new (P);
-    P->opaque = Q;
-
     static COMPLEX  ABe[] = { /* Alaska ellipsoid */
         { .9945303, 0.},
         { .0052083, -.0027404},
@@ -223,6 +218,11 @@ PJ *PROJECTION(alsk) {
         { .3660976, -.2937382}
     };
 
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==Q)
+        return freeup_new (P);
+    P->opaque = Q;
+
     Q->n = 5;
     P->lam0 = DEG_TO_RAD * -152.;
     P->phi0 = DEG_TO_RAD * 64.;
@@ -240,11 +240,6 @@ PJ *PROJECTION(alsk) {
 
 
 PJ *PROJECTION(gs50) {
-    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
-    if (0==Q)
-        return freeup_new (P);
-    P->opaque = Q;
-
     static COMPLEX  ABe[] = { /* GS50 ellipsoid */
         { .9827497, 0.},
         { .0210669,  .0053804},
@@ -270,6 +265,11 @@ PJ *PROJECTION(gs50) {
         {-.0216473,  .0776645},
         {-.0225161,  .0853673}
     };
+
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==Q)
+        return freeup_new (P);
+    P->opaque = Q;
 
     Q->n = 9;
     P->lam0 = DEG_TO_RAD * -120.;

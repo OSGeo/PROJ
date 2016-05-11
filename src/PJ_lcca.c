@@ -83,11 +83,11 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(lcca) {
+    double s2p0, N0, R0, tan0;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-    double s2p0, N0, R0, tan0;
 
     (Q->en = pj_enfn(P->es));
     if (!Q->en) E_ERROR_0;

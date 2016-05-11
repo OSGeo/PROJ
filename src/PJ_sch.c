@@ -56,7 +56,7 @@ static LPZ inverse3d(XYZ xyz, PJ *P) {
     double temp[3];
     double pxyz[3];
 
-    //Local lat,lon using radius
+    /* Local lat,lon using radius */
     pxyz[0] = xyz.y * P->a / Q->rcurv;
     pxyz[1] = xyz.x * P->a / Q->rcurv;
     pxyz[2] = xyz.z;
@@ -65,17 +65,17 @@ static LPZ inverse3d(XYZ xyz, PJ *P) {
                 temp, temp+1, temp+2) != 0)
             I3_ERROR;
 
-    //Apply rotation
+    /* Apply rotation */
     pxyz[0] = Q->transMat[0] * temp[0] + Q->transMat[1] * temp[1] + Q->transMat[2] * temp[2];
     pxyz[1] = Q->transMat[3] * temp[0] + Q->transMat[4] * temp[1] + Q->transMat[5] * temp[2];
     pxyz[2] = Q->transMat[6] * temp[0] + Q->transMat[7] * temp[1] + Q->transMat[8] * temp[2];
 
-    //Apply offset
+    /* Apply offset */
     pxyz[0] += Q->xyzoff[0];
     pxyz[1] += Q->xyzoff[1];
     pxyz[2] += Q->xyzoff[2];
 
-    //Convert geocentric coordinates to lat lon
+    /* Convert geocentric coordinates to lat lon */
     pj_Convert_Geocentric_To_Geodetic( &(Q->elp_0), pxyz[0], pxyz[1], pxyz[2],
             temp, temp+1, temp+2);
 
@@ -84,9 +84,11 @@ static LPZ inverse3d(XYZ xyz, PJ *P) {
     lpz.phi = temp[0] ;
     lpz.z = temp[2];
 
-    // printf("INVERSE: \n");
-    // printf("XYZ: %f %f %f \n", xyz.x, xyz.y, xyz.z);
-    // printf("LPZ: %f %f %f \n", lpz.lam, lpz.phi, lpz.z);
+#if 0
+    printf("INVERSE: \n");
+    printf("XYZ: %f %f %f \n", xyz.x, xyz.y, xyz.z);
+    printf("LPZ: %f %f %f \n", lpz.lam, lpz.phi, lpz.z);
+#endif
     return lpz;
 }
 
@@ -97,37 +99,38 @@ static XYZ forward3d(LPZ lpz, PJ *P) {
     double pxyz[3];
 
 
-    //Convert lat lon to geocentric coordinates
+    /* Convert lat lon to geocentric coordinates */
     if( pj_Convert_Geodetic_To_Geocentric( &(Q->elp_0), lpz.phi, lpz.lam, lpz.z,
                 temp, temp+1, temp+2 ) != 0 )
         F3_ERROR;
 
 
-    //Adjust for offset
+    /* Adjust for offset */
     temp[0] -= Q->xyzoff[0];
     temp[1] -= Q->xyzoff[1];
     temp[2] -= Q->xyzoff[2];
 
 
-    //Apply rotation
+    /* Apply rotation */
     pxyz[0] = Q->transMat[0] * temp[0] + Q->transMat[3] * temp[1] + Q->transMat[6] * temp[2];
     pxyz[1] = Q->transMat[1] * temp[0] + Q->transMat[4] * temp[1] + Q->transMat[7] * temp[2];
     pxyz[2] = Q->transMat[2] * temp[0] + Q->transMat[5] * temp[1] + Q->transMat[8] * temp[2];
 
-    //Convert to local lat,lon
+    /* Convert to local lat,lon */
     pj_Convert_Geocentric_To_Geodetic( &(Q->sph), pxyz[0], pxyz[1], pxyz[2],
             temp, temp+1, temp+2);
 
 
-    //Scale by radius
+    /* Scale by radius */
     xyz.x = temp[1] * Q->rcurv / P->a;
     xyz.y = temp[0] * Q->rcurv / P->a;
     xyz.z = temp[2];
 
-    // printf("FORWARD: \n");
-    // printf("LPZ: %f %f %f \n", lpz.lam, lpz.phi, lpz.z);
-    // printf("XYZ: %f %f %f \n", xyz.x, xyz.y, xyz.z);
-
+#if 0
+    printf("FORWARD: \n");
+    printf("LPZ: %f %f %f \n", lpz.lam, lpz.phi, lpz.z);
+    printf("XYZ: %f %f %f \n", xyz.x, xyz.y, xyz.z);
+#endif
     return xyz;
 }
 
@@ -158,7 +161,7 @@ static PJ *setup(PJ *P) { /* general initialization */
 
     temp = P->a * sqrt(1.0 - P->es);
 
-    //Setup original geocentric system
+    /* Setup original geocentric system */
     if ( pj_Set_Geocentric_Parameters(&(Q->elp_0), P->a, temp) != 0)
             E_ERROR(-37);
 
@@ -167,7 +170,7 @@ static PJ *setup(PJ *P) { /* general initialization */
     clo = cos(Q->plon);
     slo = sin(Q->plon);
 
-    //Estimate the radius of curvature for given peg
+    /* Estimate the radius of curvature for given peg */
     temp = sqrt(1.0 - (P->es) * slt * slt);
     reast = (P->a)/temp;
     rnorth = (P->a) * (1.0 - (P->es))/pow(temp,3);
@@ -177,15 +180,17 @@ static PJ *setup(PJ *P) { /* general initialization */
 
     Q->rcurv = Q->h0 + (reast*rnorth)/(reast * chdg * chdg + rnorth * shdg * shdg);
 
-    // printf("North Radius: %f \n", rnorth);
-    // printf("East Radius: %f \n", reast);
-    // printf("Effective Radius: %f \n", Q->rcurv);
+#if 0
+    printf("North Radius: %f \n", rnorth);
+    printf("East Radius: %f \n", reast);
+    printf("Effective Radius: %f \n", Q->rcurv);
+#endif
 
-    //Set up local sphere at the given peg point
+    /* Set up local sphere at the given peg point */
     if ( pj_Set_Geocentric_Parameters(&(Q->sph), Q->rcurv, Q->rcurv) != 0)
         E_ERROR(-37);
 
-    //Set up the transformation matrices
+    /* Set up the transformation matrices */
     Q->transMat[0] = clt * clo;
     Q->transMat[1] = -shdg*slo - slt*clo * chdg;
     Q->transMat[2] =  slo*chdg - slt*clo*shdg;
@@ -208,8 +213,9 @@ static PJ *setup(PJ *P) { /* general initialization */
     Q->xyzoff[1] = pxyz[1] - (Q->rcurv) * clt * slo;
     Q->xyzoff[2] = pxyz[2] - (Q->rcurv) * slt;
 
-    // printf("Offset: %f %f %f \n", Q->xyzoff[0], Q->xyzoff[1], Q->xyzoff[2]);
-
+#if 0
+    printf("Offset: %f %f %f \n", Q->xyzoff[0], Q->xyzoff[1], Q->xyzoff[2]);
+#endif
 
     P->fwd3d = forward3d;
     P->inv3d = inverse3d;
@@ -225,33 +231,33 @@ PJ *PROJECTION(sch) {
 
     Q->h0 = 0.0;
 
-    //Check if peg latitude was defined
+    /* Check if peg latitude was defined */
     if (pj_param(P->ctx, P->params, "tplat_0").i)
         Q->plat = pj_param(P->ctx, P->params, "rplat_0").f;
     else
         E_ERROR(-37);
 
-    //Check if peg longitude was defined
+    /* Check if peg longitude was defined */
     if (pj_param(P->ctx, P->params, "tplon_0").i)
         Q->plon = pj_param(P->ctx, P->params, "rplon_0").f;
     else
         E_ERROR(-37);
 
-    //Check if peg latitude is defined
+    /* Check if peg latitude is defined */
     if (pj_param(P->ctx, P->params, "tphdg_0").i)
         Q->phdg = pj_param(P->ctx, P->params, "rphdg_0").f;
     else
         E_ERROR(-37);
 
 
-    //Check if average height was defined
-    //If so read it in
+    /* Check if average height was defined - If so read it in */
     if (pj_param(P->ctx, P->params, "th_0").i)
         Q->h0 = pj_param(P->ctx, P->params, "dh_0").f;
 
-    //Completed reading in the projection parameters
-    //printf("PSA: Lat = %f Lon = %f Hdg = %f \n", Q->plat, Q->plon, Q->phdg);
-
+    /* Completed reading in the projection parameters */
+#if 0
+    printf("PSA: Lat = %f Lon = %f Hdg = %f \n", Q->plat, Q->plon, Q->phdg);
+#endif
 
     return setup(P);
 }

@@ -109,11 +109,11 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(labrd) {
+    double Az, sinp, R, N, t;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-    double Az, sinp, R, N, t;
 
     Q->rot  = pj_param(P->ctx, P->params, "bno_rot").i == 0;
     Az = pj_param(P->ctx, P->params, "razi").f;
