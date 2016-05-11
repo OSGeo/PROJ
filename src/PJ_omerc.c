@@ -44,7 +44,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double S, T, U, V, W, temp, u, v;
 
     if (fabs(fabs(lp.phi) - HALFPI) > EPS) {
-        W = Q->E / pow(pj_tsfn(lp.phi, sin(lp.phi), Q->E), Q->B);
+        W = Q->E / pow(pj_tsfn(lp.phi, sin(lp.phi), P->e), Q->B);
         temp = 1. / W;
         S = .5 * (W - temp);
         T = .5 * (W + temp);
@@ -97,7 +97,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         lp.phi = Up < 0. ? -HALFPI : HALFPI;
     } else {
         lp.phi = Q->E / sqrt((1. + Up) / (1. - Up));
-        if ((lp.phi = pj_phi2(P->ctx, pow(lp.phi, 1. / Q->B), Q->E)) == HUGE_VAL)
+        if ((lp.phi = pj_phi2(P->ctx, pow(lp.phi, 1. / Q->B), P->e)) == HUGE_VAL)
             I_ERROR;
         lp.lam = - Q->rB * atan2((Sp * Q->cosgam -
             Vp * Q->singam), cos(Q->BrA * u));
@@ -123,14 +123,14 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(omerc) {
-    double con, com, cosph0, D, F, H, L, sinph0, p, J, gamma=0,
-        gamma0, lamc=0, lam1=0, lam2=0, phi1=0, phi2=0, alpha_c=0;
-    int alp, gam, no_off = 0;
-
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
+
+    double con, com, cosph0, D, F, H, L, sinph0, p, J, gamma=0,
+        gamma0, lamc=0, lam1=0, lam2=0, phi1=0, phi2=0, alpha_c=0;
+    int alp, gam, no_off = 0;
 
     Q->no_rot = pj_param(P->ctx, P->params, "tno_rot").i;
         if ((alp = pj_param(P->ctx, P->params, "talpha").i) != 0)
@@ -178,7 +178,7 @@ PJ *PROJECTION(omerc) {
                 F = -F;
         }
         Q->E = F += D;
-        Q->E *= pow(pj_tsfn(P->phi0, sinph0, Q->E), Q->B);
+        Q->E *= pow(pj_tsfn(P->phi0, sinph0, P->e), Q->B);
     } else {
         Q->B = 1. / com;
         Q->A = P->k0;
@@ -198,8 +198,8 @@ PJ *PROJECTION(omerc) {
         P->lam0 = lamc - asin(.5 * (F - 1. / F) *
            tan(gamma0)) / Q->B;
     } else {
-        H = pow(pj_tsfn(phi1, sin(phi1), Q->E), Q->B);
-        L = pow(pj_tsfn(phi2, sin(phi2), Q->E), Q->B);
+        H = pow(pj_tsfn(phi1, sin(phi1), P->e), Q->B);
+        L = pow(pj_tsfn(phi2, sin(phi2), P->e), Q->B);
         F = Q->E / H;
         p = (L - H) / (L + H);
         J = Q->E * Q->E;
