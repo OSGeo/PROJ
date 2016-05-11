@@ -1,4 +1,6 @@
 #include <proj_api.h>
+#include <stdio.h> /* for printf declaration */
+
 
 #ifdef _WIN32
 
@@ -33,7 +35,7 @@ void* thread_main(void* unused)
     p_OSGB36_proj=pj_init_plus_ctx(p_proj_ctxt,
             "+proj=longlat +ellps=airy +datum=OSGB36 +nadgrids=OSTN02_NTv2.gsb "
             "+no_defs");
-    
+
     while(run)
     {
         double x, y;

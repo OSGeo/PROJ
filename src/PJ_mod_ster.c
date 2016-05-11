@@ -8,7 +8,7 @@ PROJ_HEAD(gs48, "Mod. Stererographics of 48 U.S.") "\n\tAzi(mod)";
 PROJ_HEAD(alsk, "Mod. Stererographics of Alaska") "\n\tAzi(mod)";
 PROJ_HEAD(gs50, "Mod. Stererographics of 50 U.S.") "\n\tAzi(mod)";
 
-#define EPSLN 1e-10
+#define EPSLN 1e-12
 
 struct pj_opaque {
     COMPLEX *zcoeff; \
@@ -424,8 +424,10 @@ int pj_alsk_selftest (void) {return 0;}
 #else
 
 int pj_alsk_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
+
+    /* The standard test points are way outside the definition area bounds, hence we relax tolerances */
+    double tolerance_lp = 1e-7;
+    double tolerance_xy = 1e-4;
 
     char e_args[] = {"+proj=alsk   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
     char s_args[] = {"+proj=alsk   +a=6400000    +lat_1=0.5 +lat_2=2"};

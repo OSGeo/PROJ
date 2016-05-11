@@ -97,12 +97,12 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(rouss) {
+    double N0, es2, t, t2, R_R0_2, R_R0_4;
+
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-
-    double N0, es2, t, t2, R_R0_2, R_R0_4;
 
     if (!((Q->en = proj_mdist_ini(P->es))))
         E_ERROR_0;

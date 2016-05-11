@@ -189,7 +189,7 @@ int pj_ob_tran_selftest (void) {
     double tolerance_lp = 1e-10;
     double tolerance_xy = 1e-7;
 
-    char s_args[] = {"+proj=ob_tran +o_proj=latlon +o_lon_p=20 +o_lat_p=20 +lon_0=180"};
+    char s_args[] = {"+proj=ob_tran +a=6400000 +o_proj=latlon +o_lon_p=20 +o_lat_p=20 +lon_0=180"};
 
     LP fwd_in[] = {
         { 2, 1},
