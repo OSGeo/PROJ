@@ -98,7 +98,7 @@ install:
   - make -j3
   - make check
   - mv src/.libs/*.gc* src
-  - ./proj -VC
+  - ./src/proj -VC
 
 script:
   - echo "done"
