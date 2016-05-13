@@ -97,8 +97,8 @@ install:
     fi
   - make -j3
   - make check
-  - mv src/.libs/*.gc* src
   - ./src/proj -VC
+- mv src/.libs/*.gc* src
 
 script:
   - echo "done"
