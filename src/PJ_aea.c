@@ -331,3 +331,4 @@ int pj_leac_selftest (void) {
 
     return pj_generic_selftest (e_args, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, s_fwd_expect, inv_in, e_inv_expect, s_inv_expect);
 }
+#endif
