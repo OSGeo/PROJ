@@ -35,7 +35,6 @@
  *
  * Modified and used here by permission of Reference Networks
  * Division, Kort og Matrikelstyrelsen (KMS), Copenhagen, Denmark
- *
 */
 
 

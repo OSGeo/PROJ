@@ -331,28 +331,3 @@ int pj_leac_selftest (void) {
 
     return pj_generic_selftest (e_args, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, s_fwd_expect, inv_in, e_inv_expect, s_inv_expect);
 }
-
-
-
-
-
-
-
-
-
-
-
-/***********************************************************************
-                          SELFTEST STUBS
-************************************************************************
-
-Selftest stubs temporarily placed here.
-
-To be removed as real selftest functions are added to the projection
-source files
-
-***********************************************************************/
-
-int pj_etmerc_selftest (void) {return 10000;}
-int pj_utm_selftest (void) {return 10000;}
-#endif
