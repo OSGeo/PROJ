@@ -56,8 +56,6 @@ PJ *PROJECTION(bacon) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_bacon;
 	Q->bacn = 1;
 	Q->ortl = 0;
 	P->es = 0.;
@@ -72,8 +70,6 @@ PJ *PROJECTION(apian) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_apian;
 	Q->bacn = Q->ortl = 0;
 	P->es = 0.;
     P->fwd = s_forward;
@@ -87,8 +83,6 @@ PJ *PROJECTION(ortel) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_ortel;
 	Q->bacn = 0;
 	Q->ortl = 1;
 	P->es = 0.;

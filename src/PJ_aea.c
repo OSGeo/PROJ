@@ -191,9 +191,6 @@ PJ *PROJECTION(aea) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_aea;
-
 	Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
 	Q->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
     setup(P);
@@ -207,8 +204,6 @@ PJ *PROJECTION(leac) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_leac;
 	Q->phi2 = pj_param(P->ctx, P->params, "rlat_1").f;
 	Q->phi1 = pj_param(P->ctx, P->params, "bsouth").i ? - HALFPI: HALFPI;
     setup (P);

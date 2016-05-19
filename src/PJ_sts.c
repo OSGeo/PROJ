@@ -154,8 +154,6 @@ PJ *PROJECTION(kav5) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_kav5;
     return setup(P, 1.50488, 1.35439, 0);
 }
 

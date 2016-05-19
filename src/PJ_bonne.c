@@ -100,9 +100,6 @@ PJ *PROJECTION(bonne) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_bonne;
-
 	Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
 	if (fabs(Q->phi1) < EPS10) E_ERROR(-23);
 	if (P->es) {

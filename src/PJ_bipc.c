@@ -157,8 +157,6 @@ PJ *PROJECTION(bipc) {
     P->opaque = Q;
 
     Q->noskew = pj_param(P->ctx, P->params, "bns").i;
-    P->pfree = freeup;
-    P->descr = des_bipc;
     P->inv = s_inverse;
     P->fwd = s_forward;
     P->es = 0.;

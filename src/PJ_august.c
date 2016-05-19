@@ -37,8 +37,6 @@ PJ *PROJECTION(august) {
     P->inv = 0;
     P->fwd = s_forward;
     P->es = 0.;
-    P->pfree = freeup;
-    P->descr = des_august;
     return P;
 }
 

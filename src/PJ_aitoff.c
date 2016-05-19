@@ -184,8 +184,6 @@ PJ *PROJECTION(aitoff) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_aitoff;
 	Q->mode = 0;
     return setup(P);
 }
@@ -197,8 +195,6 @@ PJ *PROJECTION(wintri) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_wintri;
 	Q->mode = 1;
 	if (pj_param(P->ctx, P->params, "tlat_1").i) {
 		if ((Q->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f)) == 0.)

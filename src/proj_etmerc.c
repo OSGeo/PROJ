@@ -339,10 +339,7 @@ PJ *PROJECTION(etmerc) {
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-
-    P->pfree = freeup;
-    P->descr = des_etmerc;
-    return setup (P);
+   return setup (P);
 }
 
 
@@ -413,9 +410,6 @@ PJ *PROJECTION(utm) {
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-
-    P->pfree = freeup;
-    P->descr = des_utm;
 
 	if (!P->es)
         E_ERROR(-34);

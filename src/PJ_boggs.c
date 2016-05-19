@@ -47,8 +47,6 @@ static void freeup (PJ *P) {
 PJ *PROJECTION(boggs) {
     P->es = 0.;
     P->fwd = s_forward;
-    P->pfree = freeup;
-    P->descr = des_boggs;
     return P;
 }
 

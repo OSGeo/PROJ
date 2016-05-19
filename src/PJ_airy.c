@@ -123,8 +123,6 @@ PJ *PROJECTION(airy) {
         return freeup_new (P);
 
     P->opaque = Q;
-    P->pfree = freeup;
-    P->descr = des_airy;
 
 	Q->no_cut = pj_param(P->ctx, P->params, "bno_cut").i;
 	beta = 0.5 * (HALFPI - pj_param(P->ctx, P->params, "rlat_b").f);

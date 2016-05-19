@@ -73,8 +73,6 @@ PJ *PROJECTION(oea) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_oea;
 	if (((Q->n = pj_param(P->ctx, P->params, "dn").f) <= 0.) ||
 		((Q->m = pj_param(P->ctx, P->params, "dm").f) <= 0.))
 		E_ERROR(-39)

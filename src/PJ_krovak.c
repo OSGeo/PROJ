@@ -233,9 +233,6 @@ PJ *PROJECTION(krovak) {
         return freeup_new (P);
     P->opaque = Q;
 
-    P->pfree = freeup;
-    P->descr = des_krovak;
-
     /* read some Parameters,
      * here Latitude Truescale */
 
