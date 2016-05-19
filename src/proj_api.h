@@ -130,6 +130,8 @@ char *pj_get_def(projPJ, int);
 projPJ pj_latlong_from_proj( projPJ );
 void *pj_malloc(size_t);
 void pj_dalloc(void *);
+void *pj_calloc (size_t n, size_t size);
+void *pj_dealloc (void *ptr);
 char *pj_strerrno(int);
 int *pj_get_errno_ref(void);
 const char *pj_get_release(void);
@@ -165,6 +167,9 @@ void   pj_ctx_fclose(projCtx ctx, PAFile file);
 char  *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file);
 
 PAFile pj_open_lib(projCtx, const char *, const char *);
+
+int pj_run_selftests (int verbosity);
+
 
 #define PJ_LOG_NONE        0
 #define PJ_LOG_ERROR       1

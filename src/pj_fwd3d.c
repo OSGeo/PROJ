@@ -19,13 +19,13 @@ pj_fwd3d(LPZ lpz, PJ *P) {
 
 		if (fabs(t) <= EPS)
 			lpz.phi = lpz.phi < 0. ? -HALFPI : HALFPI;
-		else if (P->geoc)   //Maybe redundant and never used.
+		else if (P->geoc)   /* Maybe redundant and never used. */
 			lpz.phi = atan(P->rone_es * tan(lpz.phi));
 		lpz.lam -= P->lam0;	/* compute del lp.lam */
 		if (!P->over)
 			lpz.lam = adjlon(lpz.lam); /* adjust del longitude */
 
-                //Check for NULL pointer
+                /* Check for NULL pointer */
                 if (P->fwd3d != NULL)
                 {
 		    xyz = (*P->fwd3d)(lpz, P); /* project */
@@ -35,7 +35,7 @@ pj_fwd3d(LPZ lpz, PJ *P) {
 		    else {
 			xyz.x = P->fr_meter * (P->a * xyz.x + P->x0);
 			xyz.y = P->fr_meter * (P->a * xyz.y + P->y0);
-                        //z is not scaled since this handled by vto_meter outside
+                        /* z is not scaled since this handled by vto_meter outside */
 		    }
                 }
                 else

@@ -42,7 +42,7 @@ postscale = 0;
 *oform = (char *)0,	/* output format for x-y or decimal degrees */
 *oterr = "*\t*",	/* output line for unprojectable input */
 *usage =
-"%s\nusage: %s [ -beEfiIlormsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
+"%s\nusage: %s [ -bCeEfiIlormsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
 	static struct FACTORS
 facs;
 	static double
@@ -158,7 +158,7 @@ vprocess(FILE *fid) {
 	if (!oform)
 		oform = "%.3f";
 	if (bin_in || bin_out)
-		emess(1,"binary I/O not available in -V option");	
+		emess(1,"binary I/O not available in -V option");
 	for (;;) {
 		++emess_dat.File_line;
 		if (!(s = fgets(line, MAX_LINE, fid)))
@@ -267,6 +267,10 @@ int main(int argc, char **argv) {
               case 'b': /* binary I/O */
                 bin_in = bin_out = 1;
                 continue;
+              case 'C': /* Check - run internal regression tests */
+                pj_run_selftests (very_verby);
+                return 0;
+                continue;
               case 'v': /* monitor dump of initialization */
                 mon = 1;
                 continue;
@@ -300,8 +304,8 @@ int main(int argc, char **argv) {
                     char *str;
 
                     for (lp = pj_get_list_ref() ; lp->id ; ++lp) {
-                        if( strcmp(lp->id,"latlong") == 0 
-                            || strcmp(lp->id,"longlat") == 0 
+                        if( strcmp(lp->id,"latlong") == 0
+                            || strcmp(lp->id,"longlat") == 0
                             || strcmp(lp->id,"geocent") == 0 )
                             continue;
 
@@ -353,7 +357,7 @@ int main(int argc, char **argv) {
                 continue; /* artificial */
               case 'e': /* error line alternative */
                 if (--argc <= 0)
-                    noargument:			   
+                    noargument:
                 emess(1,"missing argument for -%c",*arg);
                 oterr = *++argv;
                 continue;
@@ -364,7 +368,7 @@ int main(int argc, char **argv) {
               case 'm': /* cartesian multiplier */
                 if (--argc <= 0) goto noargument;
                 postscale = 1;
-                if (!strncmp("1/",*++argv,2) || 
+                if (!strncmp("1/",*++argv,2) ||
                     !strncmp("1:",*argv,2)) {
                     if((fscale = atof((*argv)+2)) == 0.)
                         goto badscale;

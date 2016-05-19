@@ -2,7 +2,7 @@
 .nr LL 5.5i
 .ad b
 .hy 1
-.TH PROJ 1 "2000/03/21 Rel. 4.4" 
+.TH PROJ 1 "2000/03/21 Rel. 4.4"
 .SH NAME
 proj \- forward cartographic projection filter
 .br
@@ -10,7 +10,7 @@ invproj \- inverse cartographic projection filter
 .SH SYNOPSIS
 .B proj
 [
-.B \-bceEfiIlmorsStTvVwW
+.B \-bcCeEfiIlmorsStTvVwW
 [
 .I args
 ] ] [
@@ -20,7 +20,7 @@ file[s]
 .br
 .B invproj
 [
-.B \-bceEfiIlmorsStTwW
+.B \-bcCeEfiIlmorsStTwW
 [
 .I args
 ] ] [
@@ -51,6 +51,11 @@ process and allows bypassing formatting operations.
 .BI \-i
 Selects binary input only (see
 .B \-b option).
+.TP
+.BI \-C
+Check. Invoke all built in self tests and report.
+Get more verbose report by preceding with the
+.B \-V option).
 .TP
 .BI \-I
 alternate method to specify inverse projection.
@@ -106,7 +111,7 @@ that can be selected with
 .B +units
 or
 .B \-ld
-list of datums that can be selected with 
+list of datums that can be selected with
 .B +datum.
 .TP
 .BI \-r
@@ -278,7 +283,7 @@ projection coordinates within one datum.
 The \fIcs2cs\fR program operates
 similarly, but allows translation between any pair of definable coordinate
 systems, including support for datum translation.
-.PP 
+.PP
 The \fIgeod\fR program provides the ability to compute geodesic (Great
 Circle) computations.
 .SH SEE ALSO

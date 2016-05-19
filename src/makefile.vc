@@ -14,19 +14,19 @@ conic = \
 	PJ_rpoly.obj PJ_sconics.obj PJ_lcca.obj
 
 cylinder = \
-	PJ_cass.obj PJ_cc.obj PJ_cea.obj PJ_comill.obj PJ_eqc.obj \
+	PJ_cass.obj PJ_cc.obj PJ_cea.obj PJ_eqc.obj \
 	PJ_gall.obj PJ_labrd.obj PJ_lsat.obj PJ_misrsom.obj PJ_merc.obj \
 	PJ_mill.obj PJ_ocea.obj PJ_omerc.obj PJ_patterson.obj PJ_somerc.obj \
 	PJ_tcc.obj PJ_tcea.obj PJ_tmerc.obj PJ_geos.obj \
-	PJ_gstmerc.obj proj_etmerc.obj 
+	PJ_gstmerc.obj proj_etmerc.obj PJ_comill.obj
 
 misc = \
 	PJ_airy.obj PJ_aitoff.obj PJ_august.obj PJ_bacon.obj \
 	PJ_chamb.obj PJ_hammer.obj PJ_lagrng.obj PJ_larr.obj \
 	PJ_lask.obj PJ_nocol.obj PJ_ob_tran.obj PJ_oea.obj \
 	PJ_sch.obj PJ_tpeqd.obj PJ_vandg.obj PJ_vandg2.obj \
-        PJ_vandg4.obj PJ_wag7.obj pj_latlong.obj PJ_krovak.obj \
-        pj_geocent.obj PJ_healpix.obj PJ_natearth.obj PJ_natearth2.obj PJ_qsc.obj
+    PJ_vandg4.obj PJ_wag7.obj pj_latlong.obj PJ_krovak.obj \
+    pj_geocent.obj PJ_healpix.obj PJ_qsc.obj
 
 pseudo = \
 	PJ_boggs.obj PJ_collg.obj PJ_crast.obj PJ_denoy.obj \
@@ -38,14 +38,14 @@ pseudo = \
 	PJ_putp4p.obj PJ_putp5.obj PJ_putp6.obj PJ_robin.obj \
 	PJ_sts.obj PJ_urm5.obj PJ_urmfps.obj PJ_wag2.obj \
 	PJ_wag3.obj PJ_wink1.obj PJ_wink2.obj PJ_isea.obj \
-	PJ_calcofi.obj 
+	PJ_calcofi.obj PJ_natearth.obj PJ_natearth2.obj
 
 support = \
 	aasincos.obj adjlon.obj bch2bps.obj bchgen.obj pj_gauss.obj \
 	biveval.obj dmstor.obj mk_cheby.obj pj_auth.obj \
 	pj_deriv.obj pj_ell_set.obj pj_ellps.obj pj_errno.obj \
 	pj_factors.obj pj_fwd.obj pj_init.obj pj_inv.obj \
-        pj_fwd3d.obj pj_inv3d.obj \
+    pj_fwd3d.obj pj_inv3d.obj \
 	pj_list.obj pj_malloc.obj pj_mlfn.obj pj_msfn.obj \
 	pj_open_lib.obj pj_param.obj pj_phi2.obj pj_pr_list.obj \
 	pj_qsfn.obj pj_strerrno.obj pj_tsfn.obj pj_units.obj \
@@ -56,7 +56,7 @@ support = \
 	pj_utils.obj pj_gridlist.obj pj_gridinfo.obj \
 	proj_mdist.obj pj_mutex.obj pj_initcache.obj \
 	pj_ctx.obj pj_fileapi.obj pj_log.obj pj_apply_vgridshift.obj \
-	pj_strtod.obj
+	pj_strtod.obj pj_run_selftests.obj pj_generic_selftest.obj
 
 geodesic = geodesic.obj
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc) \
@@ -146,4 +146,4 @@ install: all
 	copy proj_api.h $(INSTDIR)\include
 	copy projects.h $(INSTDIR)\include
 	copy geodesic.h $(INSTDIR)\include
-	
+

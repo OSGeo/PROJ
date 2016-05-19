@@ -174,6 +174,7 @@ SET(SRC_LIBPROJ_CORE
         pj_fwd3d.c
         pj_gauss.c
         pj_gc_reader.c
+        pj_generic_selftest.c
         pj_geocent.c
         pj_gridcatalog.c
         pj_gridinfo.c
@@ -197,6 +198,7 @@ SET(SRC_LIBPROJ_CORE
         pj_pr_list.c
         pj_qsfn.c
         pj_release.c
+        pj_run_selftests.c
         pj_strerrno.c
         pj_transform.c
         pj_tsfn.c

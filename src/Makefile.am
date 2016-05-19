@@ -62,8 +62,9 @@ libproj_la_SOURCES = \
 	pj_factors.c pj_fwd.c pj_init.c pj_inv.c pj_fwd3d.c pj_inv3d.c\
 	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c proj_mdist.c \
 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c \
-	pj_qsfn.c pj_strerrno.c pj_tsfn.c pj_units.c pj_ctx.c pj_log.c \
-	pj_zpoly1.c rtodms.c vector1.c pj_release.c pj_gauss.c \
+	pj_qsfn.c pj_generic_selftest.c pj_run_selftests.c pj_strerrno.c \
+	pj_tsfn.c pj_units.c pj_ctx.c pj_log.c pj_zpoly1.c rtodms.c \
+	vector1.c pj_release.c pj_gauss.c \
 	PJ_healpix.c PJ_natearth.c PJ_natearth2.c PJ_calcofi.c pj_fileapi.c \
 	\
 	pj_gc_reader.c pj_gridcatalog.c \
