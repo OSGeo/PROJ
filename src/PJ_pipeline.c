@@ -21,35 +21,34 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 #define PJ_LIB__
 #include <projects.h>
 #include <assert.h>
+#include <stddef.h>
+#include <errno.h>
 PROJ_HEAD(pipeline, "Transformation pipeline manager");
-PROJ_HEAD(pipe_end, "Transformation pipeline sentinel");
+/*PROJ_HEAD(pipe_end, "Transformation pipeline sentinel");*/
 
 PROJ_HEAD(pipe_test1, "1st transformation pipeline proof-of-concept test function");
 PROJ_HEAD(pipe_test2, "2nd transformation pipeline proof-of-concept test function");
 
 
 /* Projection specific elements for the PJ object */
+#define PIPELINE_STACK_SIZE 100
 struct pj_opaque {
     double a;
     int b;
     int reversible;
+	int steps;
     int depth;
-    XYZ stack[100];
+    XYZ stack[PIPELINE_STACK_SIZE];
 };
-
-#if 0
-#define FORWARD3D(name) static XYZ name(LPZ lpz, PJ *P) {XYZ xyz = {0.0, 0.0, 0.0}
-#define INVERSE3D(name) static LPZ name(XYZ xyz, PJ *P) {LPZ lpz = {0.0, 0.0, 0.0}
-XYZ (*fwd3d)(LPZ, struct PJconsts *);
-LPZ (*inv3d)(XYZ, struct PJconsts *);
-#endif
 
 /* View one type as the other. Definitely a hack - perhaps even a kludge */
 #define ASXYZ(lpz) (*(XYZ *)(&lpz))
 #define ASLPZ(xyz) (*(LPZ *)(&xyz))
+#define ASXY(lp)   (*(XY  *)(&lp ))
+#define ASLP(xy)   (*(LP  *)(&xy ))
 
 
-static XYZ e_pipeline_3d (LPZ lpz, int direction, PJ *P) {   /* Ellipsoidal, forward */
+static XYZ pipeline_3d (LPZ lpz, int direction, PJ *P) {   /* Ellipsoidal, forward */
     XYZ xyz = {0.0, 0.0, 0.0};
     xyz.y = lpz.lam + P->es;
     xyz.x = lpz.phi + 42;
@@ -67,16 +66,58 @@ static XYZ e_pipeline_3d (LPZ lpz, int direction, PJ *P) {   /* Ellipsoidal, for
     return xyz;
 }
 
-static XYZ e_pipeline_forward_3d (LPZ lpz, PJ *P) {
-    return e_pipeline_3d (lpz, 0, P);
+static XYZ pipeline_forward_3d (LPZ lpz, PJ *P) {
+    return pipeline_3d (lpz, 0, P);
 }
 
-static LPZ e_pipeline_reverse_3d (XYZ xyz, PJ *P) {
-    xyz = e_pipeline_3d (ASLPZ(xyz), 1, P);
+static LPZ pipeline_reverse_3d (XYZ xyz, PJ *P) {
+    xyz = pipeline_3d (ASLPZ(xyz), 1, P);
     return ASLPZ(xyz);
 }
 
+static XY pipeline_forward (LP lp, PJ *P) {
+	LPZ lpz;
+	XYZ xyz;
+	XY xy;
 
+	lpz.lam = lp.lam;
+	lpz.phi = lp.phi;
+	lpz.z = 0;
+    xyz = pipeline_3d (lpz, 0, P);
+
+	xy.x = xyz.x;
+	xy.y = xyz.y;
+	return xy;
+}
+
+static LP pipeline_reverse (XY xy, PJ *P) {
+	LP lp;
+	XYZ xyz;
+
+	xyz.x = xy.x;
+	xyz.y = xy.y;
+	xyz.z = 0;
+    xyz = pipeline_3d (ASLPZ(xyz), 1, P);
+
+	lp.lam = xyz.x;
+	lp.phi = xyz.y;
+	return lp;
+}
+
+
+/* This one is just used as an indicator for end-of-pipe */
+static XY e_pipe_end_forward (LP lp, PJ *P) {
+	XY xy = {0,0};
+	if (P)
+        return ASXY(lp);
+	return xy;
+}
+
+static int is_end_of_pipe (PJ *P) {
+	if (P->fwd == e_pipe_end_forward)
+	    return 1;
+	return 0;
+}
 
 static void freeup(PJ *P) {                                    /* Destructor */
     if (P==0)
@@ -88,9 +129,12 @@ static void freeup(PJ *P) {                                    /* Destructor */
 }
 
 
-static void *pipeline_freeup_new (PJ *P) {              /* Destructor */
+static void *pipeline_freeup_new (PJ *P, int errlev) {         /* Destructor */
     if (0==P)
         return 0;
+
+	pj_ctx_set_errno (P->ctx, errlev);
+
     if (0==P->opaque)
         return pj_dealloc (P);
 
@@ -99,8 +143,58 @@ static void *pipeline_freeup_new (PJ *P) {              /* Destructor */
 }
 
 static void pipeline_freeup (PJ *P) {
-    pipeline_freeup_new (P);
+    pipeline_freeup_new (P, 0);
     return;
+}
+
+
+
+
+static PJ *pj_create_pipeline (PJ *P, size_t steps) {
+	PJ *pipeline;
+	size_t i;
+
+    /*  Room for the pipeline: An array of PJ (not of PJ *) */
+    pipeline = pj_calloc (steps + 2, sizeof(PJ));
+
+	/* First element is the pipeline manager herself */
+	pipeline[0] = *P;
+
+	/* Fill the rest of the pipeline with pipe_ends */
+	P->fwd = e_pipe_end_forward;
+	for (i = 1;  i < steps + 2;  i++)
+    	pipeline[i] = *P;
+
+    /* This is a shallow copy, so we just release P, without calling P->pfree */
+    pj_dealloc (P);
+
+	return pipeline;
+}
+
+static void pj_add_to_pipeline (PJ *pipeline, PJ *P) {
+    while (!is_end_of_pipe(pipeline))
+	    pipeline++;
+	pipeline[0] = *P;
+	pj_dealloc (P);
+}
+
+
+/* When asked for the inverse projection, we just swap functions */
+void swap_fwd_and_inv (PJ *P) {
+	XY  (*fwd)(LP, struct PJconsts *);
+	LP  (*inv)(XY, struct PJconsts *);
+    XYZ (*fwd3d)(LPZ, struct PJconsts *);
+    LPZ (*inv3d)(XYZ, struct PJconsts *);
+
+	fwd = P->fwd;
+	inv = P->inv;
+	P->fwd = (XY  (*)(LP, struct PJconsts *)) inv;
+	P->inv = (LP  (*)(XY, struct PJconsts *)) fwd;
+
+	fwd3d = P->fwd3d;
+	inv3d = P->inv3d;
+	P->fwd3d = (XYZ  (*)(LPZ, struct PJconsts *)) inv3d;
+	P->inv3d = (LPZ  (*)(XYZ, struct PJconsts *)) fwd3d;
 }
 
 
@@ -109,139 +203,118 @@ static void pipeline_freeup (PJ *P) {
 PJ *PROJECTION(pipeline) {
     paralist *L = P->params;
 
-    paralist *L_last = 0;
-    paralist *L_first = 0;
-    paralist *L_pipeline = 0;
+    paralist *L_last = 0;      /* Pointer to the last element of the paralist */
+    paralist *L_first = 0;     /* Pointer to the "+first" element */
+	paralist *L_last_arg = 0;  /* First arg not used in previous definition */
+	paralist *L_first_default_arg = 0;
+    paralist *L_pipeline = 0;  /* Pointer to the "+proj=pipeline" element */
 
     paralist *L_sentinel = 0;
-    paralist *L_restore = 0;
+    paralist *L_restore  = 0;
 
-    int i, number_of_steps = 0;
+    int i,  number_of_steps = 0;
 
-    PJ       *next_step = 0;
-    PJ     *all_steps  = 0;
+    PJ     *next_step = 0;
+    PJ     *pipeline  = 0;
 
+	P->fwd3d = pipeline_forward_3d;
+    P->inv3d = pipeline_reverse_3d;
+	P->fwd   = pipeline_forward;
+    P->inv   = pipeline_reverse;
+	P->pfree = pipeline_freeup;
 
-    P->fwd3d = e_pipeline_forward_3d;
-    P->inv3d = e_pipeline_reverse_3d;
-
-
-
-    /* This is a loop over all elements in the linked list of params */
+    /* Check syntax while looping over all elements in the linked list of params */
     for (L = L_last = P->params; L != 0; L = L->next) {
-
         L_last = L;
-        printf ("%s - %s\n", L->param, L_last->param);
 
         if (0==strcmp ("proj=pipeline", L->param)) {
             if (0 != L_first)
-                return pipeline_freeup_new (P); /* ERROR: +first before +proj=pipeline */
+                return pipeline_freeup_new (P, 51); /* ERROR: +first before +proj=pipeline */
             if (0 != L_pipeline)
-                return pipeline_freeup_new (P); /* ERROR: nested pipelines */
+                return pipeline_freeup_new (P, 52); /* ERROR: nested pipelines */
             L_pipeline = L;
         }
 
         if (0==strcmp ("first", L->param)) {
             if (0 != L_first)
-                return pipeline_freeup_new (P); /* ERROR: more than one +first */
+                return pipeline_freeup_new (P, 53); /* ERROR: more than one +first */
             L_first = L;
             number_of_steps++;
         }
 
         if (0==strcmp ("then", L->param)) {
             if (0 == L_first)
-                return pipeline_freeup_new (P); /* ERROR: +then precedes +first */
+                return pipeline_freeup_new (P, 54); /* ERROR: +then precedes +first */
             number_of_steps++;
         }
 
         if (0==strcmp ("to", L->param))
             break;
-
     }
+
+    if (L_first == 0)
+    	return pipeline_freeup_new (pipeline, 56);
 
     /* We add a sentinel at the end of the list to simplify indexing */
     L_sentinel = pj_mkparam ("then"); /* defined in pj_param.c */
     if (0==L_sentinel)
-        return pipeline_freeup_new (P);
+        return pipeline_freeup_new (P, ENOMEM);
     L_restore = L_last->next;
     L_last->next = L_sentinel;
 
-    printf ("first: %s, sentinel: %s\n", L_first->param, L_sentinel->param);
+    /*  Room for the pipeline: An array of PJ (note: NOT of PJ *) */
+    pipeline = pj_create_pipeline (P, number_of_steps);
 
-    /*  Room for the pipeline: An array of PJ (not of PJ *) */
-    all_steps = pj_calloc (number_of_steps + 2, sizeof(PJ));
+    L_first_default_arg = L_pipeline->next;
+	puts (L_first_default_arg->param);
+    L_last_arg = L_first;
+	puts (L_last_arg->param);
+	puts (L_last_arg->next->param);
 
-    /* This is a shallow copy, so we just release P, without calling P->pfree */
-    all_steps[0] = *P;
-    pj_dealloc (P);
-    P = 0;
-
-	/* TODO: allocate a pipe_end and fill the entire array with copies of it */
-
-    /* Now loop over all steps, building a new set of arguments for each init */
-    for (i = 0; i < number_of_steps; i++) {
-		paralist *L_start, *L_curr, *L_end;
-		int inverse;
+	/* Now loop over all steps, building a new set of arguments for each init */
+    for (i = 0;  i < number_of_steps;  i++) {
+		int inverse = 0, j;
 		#define MAX_ARG 200
 	    char  *argv[MAX_ARG];
 		int  argc = 0;
 
-		if (0==i)
-		    L_curr = (L_end = L_first->next);
-		else
-		    L_curr = L_curr->next;
-
-		if (0==L_curr)
-		    break;
-		printf ("curr: %p, start: %p\n", L_curr, L_start);
-
-        inverse = 0;
-		printf ("[ID = %d of %d]: %s %s\n", i, number_of_steps, L_curr->param, L_first->next->param);
-
 		/* Build a set of initialization args for the current step */
-		while (1) {
-            if (0 == strcmp ("then", L_curr->param)) {
-				L_end = L_curr;
-			    L_curr = L_pipeline->next;
-				if (0 == strcmp ("then", L_curr->param))
-				    break;
-			}
 
-			/* Through all default args? */
-			if (0 == strcmp ("first", L_curr->param))
-				break;
-            argv[argc++] = 	L_curr->param;
-			puts (L_curr->param);
-			if (0 == strcmp ("inv", L_curr->param))
-			    inverse = 1;
-			L_curr = L_curr->next;
-		}
+        /* First add the step specific args */
+		for (L = L_last_arg->next; (argc < MAX_ARG) && (0 != strcmp ("then", L->param)); L = L->next)
+			argv[argc++] = 	L->param;
 
-        puts ("honsekod");
-		next_step = pj_init_ctx(all_steps->ctx, argc, argv);
+        /* Tell the next step where to start fetching parameters */
+		L_last_arg = L;
+
+		/* Then add the default args */
+		for (L = L_first_default_arg; (argc < MAX_ARG) && (0 != strcmp ("first", L->param)); L = L->next)
+			argv[argc++] = 	L->param;
+		puts ("Absolut og default");
+		for (j = 0; j < argc; j++)
+		    puts (argv[j]);
+
+		next_step = pj_init_ctx(pipeline->ctx, argc, argv);
         if (0 == next_step)
-		    return pipeline_freeup_new (all_steps);
-		puts ("ulleurt");
+		    return pipeline_freeup_new (pipeline,  pipeline->ctx->last_errno);
 
-		if (inverse) {
-			/* TODO swap forward/inverse forward3d/inverse3d */
-		}
-		all_steps[i + 1] = *next_step;
-	    pj_dealloc (next_step);
-	    next_step = 0;
+		/* Were we asked to provide the inverse case? */
+		for (j = 0; j < argc; j++)
+    		if (0 == strcmp ("inv", argv[j]))
+			    inverse = 1;
 
+        /* Should probably check for existence of the inverse cases here? */
+		if (inverse)
+		    swap_fwd_and_inv (next_step);
+		pj_add_to_pipeline (pipeline, next_step);
     }
 
-
-    /* Clean up */
+	/* Clean up */
     L_last->next = L_restore;
     pj_dealloc (L_sentinel);
 
-
-
-    return all_steps;
+    return pipeline;
 }
-
 
 
 int pj_pipeline_selftest (void) {return 0;}
@@ -253,76 +326,4 @@ int pj_pipeline_selftest (void) {return 0;}
         phits = fabs(pj_param(P->ctx, P->params, "rlat_ts").f);
         if (phits >= HALFPI) E_ERROR(-24);
     }
-#endif
-
-#if 0
-PJ *pj_projection_specific_setup_minimal (PJ *P) {
-    pj_prepare (P, des_minimal, freeup, sizeof (struct pj_opaque));
-    if (0==P->opaque) {
-        freeup (P);
-        return 0;
-    }
-
-    P->opaque->a = 42.42;
-    P->opaque->b = 42;
-
-    /* Spheroidal? */
-    if (0==P->es) {
-        P->fwd = s_forward;
-        P->inv = s_inverse;
-        return P;
-    }
-
-    /* Otherwise it's ellipsoidal */
-    P->fwd = e_forward;
-    P->inv = e_inverse;
-
-    return P;
-}
-
-PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
-#undef PROJECTION
-#define PROJECTION(P, name)                                  \
-pj_projection_specific_setup_##name (PJ *P);                 \
-C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
-C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
-    if (P)                                                   \
-        return pj_projection_specific_setup_##name (P);      \
-    P = (PJ*) pj_calloc (1, sizeof(PJ));                     \
-    if (0==P)                                                \
-        return 0;                                            \
-    P->pfree = freeup;                                       \
-    P->descr = des_##name;                                   \
-    return P;                                                \
-}                                                            \
-PJ *pj_projection_specific_setup_##name (PJ *P)
-
-
-
-
-PJ *PROJECTION(B, merc) {
-    double phits=0.0;
-    int is_phits;
-
-    if( (is_phits = pj_param(B->ctx, B->params, "tlat_ts").i) ) {
-        phits = fabs(pj_param(B->ctx, B->params, "rlat_ts").f);
-        if (phits >= HALFPI) E_ERROR(-24);
-    }
-
-    if (B->es) { /* ellipsoid */
-        if (is_phits)
-            P->k0 = pj_msfn(sin(phits), cos(phits), P->es);
-        B->inv = e_inverse;
-        B->fwd = e_forward;
-    }
-
-    else { /* sphere */
-        if (is_phits)
-            B->k0 = cos(phits);
-        B->inv = s_inverse;
-        B->fwd = s_forward;
-    }
-
-    return B;
-}
 #endif
