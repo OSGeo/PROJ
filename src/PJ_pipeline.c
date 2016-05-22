@@ -24,97 +24,167 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 #include <stddef.h>
 #include <errno.h>
 PROJ_HEAD(pipeline, "Transformation pipeline manager");
-/*PROJ_HEAD(pipe_end, "Transformation pipeline sentinel");*/
 
 PROJ_HEAD(pipe_test1, "1st transformation pipeline proof-of-concept test function");
 PROJ_HEAD(pipe_test2, "2nd transformation pipeline proof-of-concept test function");
 
 
-/* Projection specific elements for the PJ object */
-#define PIPELINE_STACK_SIZE 100
-struct pj_opaque {
-    double a;
-    int b;
-    int reversible;
-	int steps;
-    int depth;
-    XYZ stack[PIPELINE_STACK_SIZE];
-};
-
 /* View one type as the other. Definitely a hack - perhaps even a kludge */
+/* Using a union would probably be more appropriate */
 #define ASXYZ(lpz) (*(XYZ *)(&lpz))
 #define ASLPZ(xyz) (*(LPZ *)(&xyz))
 #define ASXY(lp)   (*(XY  *)(&lp ))
 #define ASLP(xy)   (*(LP  *)(&xy ))
 
+/* Avoid explicit type-punning: Use a union */
+typedef union {
+    XYZ xyz;
+	LPZ lpz;
+	XY  xy;
+	LP  lp;
+} COORDINATE;
 
-static XYZ pipeline_3d (LPZ lpz, int direction, PJ *P) {   /* Ellipsoidal, forward */
-    XYZ xyz = {0.0, 0.0, 0.0};
-    xyz.y = lpz.lam + P->es;
-    xyz.x = lpz.phi + 42;
 
+/* Projection specific elements for the PJ object */
+#define PIPELINE_STACK_SIZE 100
+struct pj_opaque {
+    int reversible;
+	int steps;
+    int depth;
+    COORDINATE stack[PIPELINE_STACK_SIZE];
+};
+
+int show_coordinate (char *banner, COORDINATE point, int angular) {
+	int i = 0;
+	printf ("%s", banner);
+
+    if (angular) {
+	    i += printf("%12.9f", RAD_TO_DEG * point.xyz.x);
+		i += printf("%12.9f", RAD_TO_DEG * point.xyz.y);
+		i += printf("%12.4f\n", point.xyz.z);
+		return i;
+	}
+
+	i += printf("%15.4f", point.xyz.x);
+	i += printf("%15.4f", point.xyz.y);
+	i += printf("%15.4f\n", point.xyz.z);
+	return i;
+}
+
+/* Apply the most appropriate projection function. No-op if none appropriate */
+static COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
+	puts ("agurg");
+    /* Forward */
+	if (direction == 0) {
+		puts ("forward");
+		if (P->fwd3d)
+			point.xyz = P->fwd3d (point.lpz, P);
+		else if (P->fwd)
+			point.xy = P->fwd (point.lp, P);
+        return point;
+	}
+
+    /* Inverse */
+	puts ("inverse");
+	if (P->inv3d)
+		point.lpz = P->inv3d (point.xyz, P);
+	else if (P->inv)
+		point.lp = P->inv (point.xy, P);
+	return point;
+}
+
+/* The actual pipeline driver */
+static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P) {
+    int i, first, last, incr;
+	puts (P->descr);
+
+	if (direction == 0) {        /* Forward */
+		puts ("forward");
+		first = 1;
+		last  = P->opaque->steps + 1;
+		incr  = 1;
+	} else {                     /* Inverse */
+		puts ("inverse");
+		first = P->opaque->steps;
+        last  =  0;
+		incr  = -1;
+	}
+
+    printf ("interval: %d %d %d\n", first, last, incr);
+
+	for (i = first; i != last; i += incr) {
+		puts (P[0].descr);
+		puts (P[i].descr);
+
+		point = pj_apply_projection (point, direction, P + i);
+		show_coordinate ("p3d: ", point, 1);
+		if (P->opaque->depth < PIPELINE_STACK_SIZE)
+            P->opaque->stack[P->opaque->depth++] = point;
+	}
+
+	return point;
+
+#if 0
     /* Should never happen */
     if (direction && (0==P->opaque->reversible)) {
         pj_ctx_set_errno (P->ctx, -50); /* Pipeline not reversible */
-        return xyz;
+        return point;
     }
 
     if (direction)
         ASLPZ(xyz).lam = 4;
     else
         ASXYZ(ASLPZ(xyz)).y = 42;
-    return xyz;
+#endif
 }
 
 static XYZ pipeline_forward_3d (LPZ lpz, PJ *P) {
-    return pipeline_3d (lpz, 0, P);
+	COORDINATE point;
+	point.lpz = lpz;
+    point = pipeline_3d (point, 0, P);
+	return point.xyz;
 }
 
 static LPZ pipeline_reverse_3d (XYZ xyz, PJ *P) {
-    xyz = pipeline_3d (ASLPZ(xyz), 1, P);
-    return ASLPZ(xyz);
+	COORDINATE point;
+	point.xyz = xyz;
+    point = pipeline_3d (point, 1, P);
+    return point.lpz;
 }
 
 static XY pipeline_forward (LP lp, PJ *P) {
-	LPZ lpz;
-	XYZ xyz;
-	XY xy;
+	COORDINATE point;
+	point.lp = lp;
+	point.lpz.z = 0;
 
-	lpz.lam = lp.lam;
-	lpz.phi = lp.phi;
-	lpz.z = 0;
-    xyz = pipeline_3d (lpz, 0, P);
-
-	xy.x = xyz.x;
-	xy.y = xyz.y;
-	return xy;
+    point = pipeline_3d (point, 0, P);
+	return point.xy;
 }
 
 static LP pipeline_reverse (XY xy, PJ *P) {
-	LP lp;
-	XYZ xyz;
+	COORDINATE point;
+	point.xy = xy;
+	point.xyz.z = 0;
 
-	xyz.x = xy.x;
-	xyz.y = xy.y;
-	xyz.z = 0;
-    xyz = pipeline_3d (ASLPZ(xyz), 1, P);
-
-	lp.lam = xyz.x;
-	lp.phi = xyz.y;
-	return lp;
+    point = pipeline_3d (point, 1, P);
+	return point.lp;
 }
 
 
-/* This one is just used as an indicator for end-of-pipe */
-static XY e_pipe_end_forward (LP lp, PJ *P) {
-	XY xy = {0,0};
+/* Indicator with dummy functionality to silence compiler warnings */
+static XY pipe_end_indicator (LP lp, PJ *P) {
+	XY xy;
+
+    xy.x = lp.lam;
+	xy.y = lp.phi;
 	if (P)
-        return ASXY(lp);
+        return xy;
+	xy.x++;
 	return xy;
 }
 
 static int is_end_of_pipe (PJ *P) {
-	if (P->fwd == e_pipe_end_forward)
+	if (P->fwd == pipe_end_indicator)
 	    return 1;
 	return 0;
 }
@@ -129,7 +199,7 @@ static void freeup(PJ *P) {                                    /* Destructor */
 }
 
 
-static void *pipeline_freeup_new (PJ *P, int errlev) {         /* Destructor */
+static void *pipeline_freeup (PJ *P, int errlev) {         /* Destructor */
     if (0==P)
         return 0;
 
@@ -142,8 +212,10 @@ static void *pipeline_freeup_new (PJ *P, int errlev) {         /* Destructor */
     return pj_dealloc(P);
 }
 
-static void pipeline_freeup (PJ *P) {
-    pipeline_freeup_new (P, 0);
+
+/* Adapts pipeline_freeup to the format defined for the PJ object */
+static void pipeline_freeup_wrapper (PJ *P) {
+    pipeline_freeup (P, 0);
     return;
 }
 
@@ -157,15 +229,18 @@ static PJ *pj_create_pipeline (PJ *P, size_t steps) {
     /*  Room for the pipeline: An array of PJ (not of PJ *) */
     pipeline = pj_calloc (steps + 2, sizeof(PJ));
 
+	P->opaque->steps = steps;
+
 	/* First element is the pipeline manager herself */
 	pipeline[0] = *P;
 
 	/* Fill the rest of the pipeline with pipe_ends */
-	P->fwd = e_pipe_end_forward;
+	P->fwd = pipe_end_indicator;
 	for (i = 1;  i < steps + 2;  i++)
     	pipeline[i] = *P;
 
     /* This is a shallow copy, so we just release P, without calling P->pfree */
+	/* The actual deallocation will be done by pipeline_freeup */
     pj_dealloc (P);
 
 	return pipeline;
@@ -179,7 +254,7 @@ static void pj_add_to_pipeline (PJ *pipeline, PJ *P) {
 }
 
 
-/* When asked for the inverse projection, we just swap functions */
+/* When asked for the inverse projection, we just swap the functions */
 void swap_fwd_and_inv (PJ *P) {
 	XY  (*fwd)(LP, struct PJconsts *);
 	LP  (*inv)(XY, struct PJconsts *);
@@ -221,7 +296,11 @@ PJ *PROJECTION(pipeline) {
     P->inv3d = pipeline_reverse_3d;
 	P->fwd   = pipeline_forward;
     P->inv   = pipeline_reverse;
-	P->pfree = pipeline_freeup;
+	P->pfree = pipeline_freeup_wrapper;
+
+	P->opaque = pj_calloc (1, sizeof(struct pj_opaque));
+    if (0==P->opaque)
+	    return 0;
 
     /* Check syntax while looping over all elements in the linked list of params */
     for (L = L_last = P->params; L != 0; L = L->next) {
@@ -229,22 +308,22 @@ PJ *PROJECTION(pipeline) {
 
         if (0==strcmp ("proj=pipeline", L->param)) {
             if (0 != L_first)
-                return pipeline_freeup_new (P, 51); /* ERROR: +first before +proj=pipeline */
+                return pipeline_freeup (P, 51); /* ERROR: +first before +proj=pipeline */
             if (0 != L_pipeline)
-                return pipeline_freeup_new (P, 52); /* ERROR: nested pipelines */
+                return pipeline_freeup (P, 52); /* ERROR: nested pipelines */
             L_pipeline = L;
         }
 
         if (0==strcmp ("first", L->param)) {
             if (0 != L_first)
-                return pipeline_freeup_new (P, 53); /* ERROR: more than one +first */
+                return pipeline_freeup (P, 53); /* ERROR: more than one +first */
             L_first = L;
             number_of_steps++;
         }
 
         if (0==strcmp ("then", L->param)) {
             if (0 == L_first)
-                return pipeline_freeup_new (P, 54); /* ERROR: +then precedes +first */
+                return pipeline_freeup (P, 54); /* ERROR: +then precedes +first */
             number_of_steps++;
         }
 
@@ -253,12 +332,12 @@ PJ *PROJECTION(pipeline) {
     }
 
     if (L_first == 0)
-    	return pipeline_freeup_new (pipeline, 56);
+    	return pipeline_freeup (pipeline, 56);
 
     /* We add a sentinel at the end of the list to simplify indexing */
     L_sentinel = pj_mkparam ("then"); /* defined in pj_param.c */
     if (0==L_sentinel)
-        return pipeline_freeup_new (P, ENOMEM);
+        return pipeline_freeup (P, ENOMEM);
     L_restore = L_last->next;
     L_last->next = L_sentinel;
 
@@ -296,7 +375,7 @@ PJ *PROJECTION(pipeline) {
 
 		next_step = pj_init_ctx(pipeline->ctx, argc, argv);
         if (0 == next_step)
-		    return pipeline_freeup_new (pipeline,  pipeline->ctx->last_errno);
+		    return pipeline_freeup (pipeline,  pipeline->ctx->last_errno);
 
 		/* Were we asked to provide the inverse case? */
 		for (j = 0; j < argc; j++)
@@ -312,18 +391,8 @@ PJ *PROJECTION(pipeline) {
 	/* Clean up */
     L_last->next = L_restore;
     pj_dealloc (L_sentinel);
-
     return pipeline;
 }
 
-
+/* selftest stub */
 int pj_pipeline_selftest (void) {return 0;}
-
-
-
-#if 0
-    if ( (is_phits = pj_param(P->ctx, P->params, "tlat_ts").i) ) {
-        phits = fabs(pj_param(P->ctx, P->params, "rlat_ts").f);
-        if (phits >= HALFPI) E_ERROR(-24);
-    }
-#endif
