@@ -98,6 +98,7 @@ int main(int argc, char **argv) {
 /*      Read the ASCII Table                                            */
 /* ==================================================================== */
 
+    memset(ct.id,0,MAX_TAB_ID);
     if ( NULL == fgets(ct.id, MAX_TAB_ID, stdin) ) {
         perror("fgets");
         exit(1);
