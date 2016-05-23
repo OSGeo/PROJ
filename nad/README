@@ -70,3 +70,7 @@ WO.lla.Z    --- Washington, Oregon, N. California
 	Other grid shift files
 ntv1_can.dat	--- Canadian NTv1 grid shift file (NAD27-->NAD83)
 ntf_r93.gsb	--- French NTv2 grid shift file (NTF-->RGF93)
+BETA2007.gsb	--- German NTv2 grid shift file (DE_DHDN-->ETRS89) :
+					http://crs.bkg.bund.de/crseu/crs/descrtrans/BeTA/de_dhdn2etrs_beta.php
+					Confirmed with Uwe Schmitz <uwe.schmitz@bezreg-koeln.nrw.de> that free
+					redistribution is allowed and welcome.
