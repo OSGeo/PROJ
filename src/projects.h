@@ -137,6 +137,7 @@ typedef struct {
 #define PJD_GRIDSHIFT 3
 #define PJD_WGS84     4   /* WGS84 (or anything considered equivelent) */
 
+
 /* library errors */
 #define PJD_ERR_GEOCENTRIC          -45
 #define PJD_ERR_AXIS                -47

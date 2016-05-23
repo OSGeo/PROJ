@@ -23,7 +23,8 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 #include <assert.h>
 #include <stddef.h>
 #include <errno.h>
-PROJ_HEAD(pipeline, "Transformation pipeline manager");
+PROJ_HEAD(pipeline,         "Transformation pipeline manager");
+PROJ_HEAD(pipeline_angular, "Transformation pipeline manager, with angular output");
 
 PROJ_HEAD(pipe_test1, "1st transformation pipeline proof-of-concept test function");
 PROJ_HEAD(pipe_test2, "2nd transformation pipeline proof-of-concept test function");
@@ -251,6 +252,7 @@ void swap_fwd_and_inv (PJ *P) {
     XYZ (*fwd3d)(LPZ, PJ *);
     LPZ (*inv3d)(XYZ, PJ *);
 
+    /* Leads to some funky function casts, but they are stadards compliant */
     fwd = P->fwd;
     inv = P->inv;
     P->fwd = (XY  (*)(LP, PJ *)) inv;
@@ -268,16 +270,17 @@ void swap_fwd_and_inv (PJ *P) {
 PJ *PROJECTION(pipeline) {
     paralist *L = P->params;
 
-    paralist *L_last = 0;      /* Pointer to the last element of the paralist */
-    paralist *L_first = 0;     /* Pointer to the "+first" element */
-    paralist *L_last_arg = 0;  /* First arg not used in previous definition */
+    paralist *L_last = 0;       /* Pointer to the last element of the paralist */
+    paralist *L_first_step = 0; /* Pointer to the first "step" element */
+    paralist *L_last_arg = 0;   /* First arg not used in previous step definition */
     paralist *L_first_default_arg = 0;
-    paralist *L_pipeline = 0;  /* Pointer to the "+proj=pipeline" element */
+    paralist *L_pipeline = 0;   /* Pointer to the "+proj=pipeline" element */
 
     paralist *L_sentinel = 0;
     paralist *L_restore  = 0;
 
     int i,  number_of_steps = 0;
+	int inverse = 0;
 
     PJ     *next_step = 0;
     PJ     *pipeline  = 0;
@@ -298,7 +301,7 @@ PJ *PROJECTION(pipeline) {
 
         if (0==strcmp ("proj=pipeline", L->param)) {
             L->used = 1;
-            if (0 != L_first)
+            if (0 != L_first_step)
                 return pipeline_freeup (P, 51); /* ERROR: +first before +proj=pipeline */
             if (0 != L_pipeline)
                 return pipeline_freeup (P, 52); /* ERROR: nested pipelines */
@@ -308,15 +311,15 @@ PJ *PROJECTION(pipeline) {
 		if (0==strcmp ("step", L->param)) {
             L->used = 1;
 			number_of_steps++;
-            if (0 == L_first)
-                L_first = L;
+            if (0 == L_first_step)
+                L_first_step = L;
         }
 
         if (0==strcmp ("to", L->param))
             break;
     }
 
-    if (L_first == 0)
+    if (L_first_step == 0)
         return pipeline_freeup (pipeline, 56);
 
     /* We add a sentinel at the end of the list to simplify indexing */
@@ -331,17 +334,19 @@ PJ *PROJECTION(pipeline) {
 
     L_first_default_arg = L_pipeline->next;
     puts (L_first_default_arg->param);
-    L_last_arg = L_first;
+    L_last_arg = L_first_step;
     puts (L_last_arg->param);
     puts (L_last_arg->next->param);
 
     /* Now loop over all steps, building a new set of arguments for each init */
     for (i = 0;  i < number_of_steps;  i++) {
-        int inverse = 0, j;
+        int j;
         #define MAX_ARG 200
         char  *argv[MAX_ARG];
         int  argc = 0;
 
+        inverse = 0;
+		 
         /* Build a set of initialization args for the current step */
 
         /* First add the step specific args */
@@ -355,7 +360,7 @@ PJ *PROJECTION(pipeline) {
 
         /* Then add the default args */
         for (L = L_first_default_arg; (argc < MAX_ARG) && (0 != strcmp ("step", L->param)); L = L->next) {
-            argv[argc++] =     L->param;
+            argv[argc++] = L->param;
             L->used = 1;
         }
 
@@ -373,6 +378,10 @@ PJ *PROJECTION(pipeline) {
             swap_fwd_and_inv (next_step);
         pj_add_to_pipeline (pipeline, next_step);
     }
+
+    /* If last step is an inverse projection, we assume (for now) that output is angular */
+	if (inverse)
+	    pipeline[0].descr = des_pipeline_angular;
 
     /* Clean up */
     L_last->next = L_restore;
