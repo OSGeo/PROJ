@@ -64,6 +64,7 @@ static COORDINATE cart_3d (COORDINATE point, int direction, PJ *P) {
 	double X, Y, Z, LAM, PHI;
 	COORDINATE result = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
 
+puts ("CART_3D");
     if (direction == 0) {
         ret = pj_Convert_Geodetic_To_Geocentric (
 		    &(P->opaque->g),
@@ -111,6 +112,7 @@ static COORDINATE cart_3d (COORDINATE point, int direction, PJ *P) {
 static XYZ cart_forward_3d (LPZ lpz, PJ *P) {
     COORDINATE point;
     point.lpz = lpz;
+puts ("CART_FORWARD_3D");
     point = cart_3d (point, 0, P);
     return point.xyz;
 }
@@ -118,6 +120,7 @@ static XYZ cart_forward_3d (LPZ lpz, PJ *P) {
 static LPZ cart_reverse_3d (XYZ xyz, PJ *P) {
     COORDINATE point;
     point.xyz = xyz;
+puts ("CART_REVERSE_3D");
     point = cart_3d (point, 1, P);
     return point.lpz;
 }
@@ -126,8 +129,10 @@ static XY cart_forward (LP lp, PJ *P) {
     COORDINATE point;
     point.lp = lp;
     point.lpz.z = 0;
+puts ("CART_FORWARD");
 
     point = cart_3d (point, 0, P);
+puts ("CART_FORWARD");
     return point.xy;
 }
 
@@ -136,6 +141,7 @@ static LP cart_reverse (XY xy, PJ *P) {
     point.xy = xy;
     point.xyz.z = 0;
 
+puts ("CART_REVERSE");
     point = cart_3d (point, 1, P);
     return point.lp;
 }
@@ -169,20 +175,24 @@ static void freeup (PJ *P) {
 PJ *PROJECTION(cart) {
     int err;
 	double semiminor;
+	COORDINATE result = {{0,0,0}};
 
     P->fwd3d = cart_forward_3d;
     P->inv3d = cart_reverse_3d;
     P->fwd   = cart_forward;
     P->inv   = cart_reverse;
-
+puts ("CART");
     P->opaque = pj_calloc (1, sizeof(struct pj_opaque));
     if (0==P->opaque)
         return 0;
 		
     semiminor = P->a * sqrt (1 - P->es);
+printf("semiminor=%12.3f\n", semiminor);
 	err = pj_Set_Geocentric_Parameters (&(P->opaque->g), P->a, semiminor);
     if (GEOCENT_NO_ERROR != err)
 	    return cart_freeup (P, -6); /* the "e effectively==1" message, abused as generic geocentric error */
+puts ("CART OK");
+pj_show_coordinate ("ellp: ", result, 0);
 
     return P;
 }

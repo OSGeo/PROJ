@@ -7,6 +7,7 @@ static const char PJ_LIST_H_ID[] = "@(#)pj_list.h	4.5	95/08/09	GIE	REL";
 */
 PROJ_HEAD(pipeline, "Transformation pipeline manager")
 PROJ_HEAD(add,     "Add a constant to the given coordinate (3 parameter shift)")
+PROJ_HEAD(cart,    "Ellipsoidal-to-cartesian")
 
 
 

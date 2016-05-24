@@ -41,7 +41,7 @@ struct pj_opaque {
     COORDINATE stack[PIPELINE_STACK_SIZE];
 };
 
-int show_coordinate (char *banner, COORDINATE point, int angular) {
+int pj_show_coordinate (char *banner, COORDINATE point, int angular) {
     int i = 0;
     printf ("%s", banner);
 
@@ -91,10 +91,13 @@ static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P) {
         last_step  =  0;
         incr  = -1;
     }
+	
+	printf ("first: %d, last: %d, incr: %d\n", first_step, last_step, incr);
 
     for (i = first_step; i != last_step; i += incr) {
+puts ((P+i)->descr);
         point = pj_apply_projection (point, direction, P + i);
-        show_coordinate ("p3d: ", point, 1);
+        pj_show_coordinate ("p3d: ", point, 1);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
@@ -232,7 +235,7 @@ static void pj_add_to_pipeline (PJ *pipeline, PJ *P) {
 
 
 /* When asked for the inverse projection, we just swap the functions */
-void swap_fwd_and_inv (PJ *P) {
+static void swap_fwd_and_inv (PJ *P) {
     XY  (*fwd)(LP, PJ *);
     LP  (*inv)(XY, PJ *);
     XYZ (*fwd3d)(LPZ, PJ *);
@@ -360,14 +363,16 @@ PJ *PROJECTION(pipeline) {
                 inverse = 1;
 
         /* Should probably check for existence of the inverse cases here? */
-        if (inverse)
-            swap_fwd_and_inv (next_step);
+        if (inverse) {
+            swap_fwd_and_inv (next_step); puts("swapping");
+		} else puts ("not swapping");
         pj_add_to_pipeline (pipeline, next_step);
     }
 
     /* If last step is an inverse projection, we assume (for now) that output is angular */
     if (inverse)
         pipeline[0].descr = des_pipeline_angular;
+	printf ("Yes, its: %s\n", pipeline[0].descr);
 
     /* Clean up */
     L_last->next = L_restore;

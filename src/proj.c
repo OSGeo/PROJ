@@ -64,6 +64,7 @@ process(FILE *fid) {
 
 	if (0!=strstr (Proj->descr, "angular output"))
 	    angular_pipe = 1;
+		
 
 	for (;;) {
 		++emess_dat.File_line;
@@ -103,15 +104,16 @@ process(FILE *fid) {
 				putchar('\t');
 			}
 		}
-		if ((data.u != HUGE_VAL) && (angular_pipe==0)) {
+		if ((data.u != HUGE_VAL)) {
 			if (prescale) { data.u *= fscale; data.v *= fscale; }
-			if (dofactors && !inverse)
+			if (dofactors && (!inverse))
 				facs_bad = pj_factors(data, Proj, 0., &facs);
 			data = (*proj)(data, Proj);
-			if (dofactors && inverse)
+			if (dofactors && inverse && !angular_pipe)
 				facs_bad = pj_factors(data, Proj, 0., &facs);
 			if (postscale && data.u != HUGE_VAL)
 				{ data.u *= fscale; data.v *= fscale; }
+		    if (angular_pipe) {data.u /= Proj->a; data.v /= Proj->a;}
 		}
 		if (bin_out) { /* binary output */
 			(void)fwrite(&data, sizeof(projUV), 1, stdout);
@@ -129,7 +131,7 @@ process(FILE *fid) {
 				(void)fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
 			}
 		} else {	/* x-y or decimal degree ascii output */
-			if (angular_pipe || inverse) {
+			if (inverse) {
 				data.v *= RAD_TO_DEG;
 				data.u *= RAD_TO_DEG;
 			}
