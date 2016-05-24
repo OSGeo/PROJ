@@ -36,9 +36,6 @@
 
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
 
-struct pj_opaque {
-    double  C_x;
-};
 
 /**
    NOTES: According to EPSG the full Krovak projection method should have
@@ -213,10 +210,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 static void *freeup_new (PJ *P) {                       /* Destructor */
     if (0==P)
         return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
 
-    pj_dealloc (P->opaque);
     return pj_dealloc(P);
 }
 
@@ -227,33 +221,21 @@ static void freeup (PJ *P) {
 
 
 PJ *PROJECTION(krovak) {
-    double ts;
-    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
-    if (0==Q)
-        return freeup_new (P);
-    P->opaque = Q;
-
-    /* read some Parameters,
-     * here Latitude Truescale */
-
-    ts = pj_param(P->ctx, P->params, "rlat_ts").f;
-    Q->C_x = ts;
-
     /* we want Bessel as fixed ellipsoid */
     P->a = 6377397.155;
     P->e = sqrt(P->es = 0.006674372230614);
 
-        /* if latitude of projection center is not set, use 49d30'N */
+    /* if latitude of projection center is not set, use 49d30'N */
     if (!pj_param(P->ctx, P->params, "tlat_0").i)
             P->phi0 = 0.863937979737193;
 
-        /* if center long is not set use 42d30'E of Ferro - 17d40' for Ferro */
-        /* that will correspond to using longitudes relative to greenwich    */
-        /* as input and output, instead of lat/long relative to Ferro */
+    /* if center long is not set use 42d30'E of Ferro - 17d40' for Ferro */
+    /* that will correspond to using longitudes relative to greenwich    */
+    /* as input and output, instead of lat/long relative to Ferro */
     if (!pj_param(P->ctx, P->params, "tlon_0").i)
             P->lam0 = 0.7417649320975901 - 0.308341501185665;
 
-        /* if scale not set default to 0.9999 */
+    /* if scale not set default to 0.9999 */
     if (!pj_param(P->ctx, P->params, "tk").i)
             P->k0 = 0.9999;
 
