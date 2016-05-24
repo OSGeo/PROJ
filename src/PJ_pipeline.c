@@ -20,6 +20,8 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 
 #define PJ_LIB__
 #include <projects.h>
+#include <PJ_pipeline.h>
+
 #include <assert.h>
 #include <stddef.h>
 #include <errno.h>
@@ -28,22 +30,6 @@ PROJ_HEAD(pipeline_angular, "Transformation pipeline manager, with angular outpu
 
 PROJ_HEAD(pipe_test1, "1st transformation pipeline proof-of-concept test function");
 PROJ_HEAD(pipe_test2, "2nd transformation pipeline proof-of-concept test function");
-
-
-/* View one type as the other. Definitely a hack - perhaps even a kludge */
-/* Using a union is more appropriate (see below) */
-#define ASXYZ(lpz) (*(XYZ *)(&lpz))
-#define ASLPZ(xyz) (*(LPZ *)(&xyz))
-#define ASXY(lp)   (*(XY  *)(&lp ))
-#define ASLP(xy)   (*(LP  *)(&xy ))
-
-/* Avoid explicit type-punning: Use a union */
-typedef union {
-    XYZ xyz;
-    LPZ lpz;
-    XY  xy;
-    LP  lp;
-} COORDINATE;
 
 
 /* Projection specific elements for the PJ object */
@@ -73,7 +59,7 @@ int show_coordinate (char *banner, COORDINATE point, int angular) {
 }
 
 /* Apply the most appropriate projection function. No-op if none appropriate */
-static COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
+COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
     /* Forward */
     if (direction == 0) {
         if (P->fwd3d)
@@ -280,7 +266,7 @@ PJ *PROJECTION(pipeline) {
     paralist *L_restore  = 0;
 
     int i,  number_of_steps = 0;
-	int inverse = 0;
+    int inverse = 0;
 
     PJ     *next_step = 0;
     PJ     *pipeline  = 0;
@@ -308,9 +294,9 @@ PJ *PROJECTION(pipeline) {
             L_pipeline = L;
         }
 
-		if (0==strcmp ("step", L->param)) {
+        if (0==strcmp ("step", L->param)) {
             L->used = 1;
-			number_of_steps++;
+            number_of_steps++;
             if (0 == L_first_step)
                 L_first_step = L;
         }
@@ -346,7 +332,7 @@ PJ *PROJECTION(pipeline) {
         int  argc = 0;
 
         inverse = 0;
-		 
+
         /* Build a set of initialization args for the current step */
 
         /* First add the step specific args */
@@ -380,8 +366,8 @@ PJ *PROJECTION(pipeline) {
     }
 
     /* If last step is an inverse projection, we assume (for now) that output is angular */
-	if (inverse)
-	    pipeline[0].descr = des_pipeline_angular;
+    if (inverse)
+        pipeline[0].descr = des_pipeline_angular;
 
     /* Clean up */
     L_last->next = L_restore;
