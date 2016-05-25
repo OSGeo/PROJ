@@ -60,11 +60,6 @@ int_proj(projUV data) {
 process(FILE *fid) {
 	char line[MAX_LINE+3], *s, pline[40];
 	projUV data;
-	int angular_pipe = 0;
-
-	if (0!=strstr (Proj->descr, "angular output"))
-	    angular_pipe = 1;
-		
 
 	for (;;) {
 		++emess_dat.File_line;
@@ -104,23 +99,22 @@ process(FILE *fid) {
 				putchar('\t');
 			}
 		}
-		if ((data.u != HUGE_VAL)) {
+		if (data.u != HUGE_VAL) {
 			if (prescale) { data.u *= fscale; data.v *= fscale; }
-			if (dofactors && (!inverse))
+			if (dofactors && !inverse)
 				facs_bad = pj_factors(data, Proj, 0., &facs);
 			data = (*proj)(data, Proj);
-			if (dofactors && inverse && !angular_pipe)
+			if (dofactors && inverse)
 				facs_bad = pj_factors(data, Proj, 0., &facs);
 			if (postscale && data.u != HUGE_VAL)
 				{ data.u *= fscale; data.v *= fscale; }
-		    if (angular_pipe) {data.u /= Proj->a; data.v /= Proj->a;}
 		}
 		if (bin_out) { /* binary output */
 			(void)fwrite(&data, sizeof(projUV), 1, stdout);
 			continue;
 		} else if (data.u == HUGE_VAL) /* error output */
 			(void)fputs(oterr, stdout);
-		else if (angular_pipe || (inverse && !oform)) {	/*ascii DMS output */
+		else if (inverse && !oform) {	/*ascii DMS output */
 			if (reverseout) {
 				(void)fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
 				putchar('\t');

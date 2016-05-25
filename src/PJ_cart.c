@@ -112,7 +112,7 @@ puts ("CART_3D");
 static XYZ cart_forward_3d (LPZ lpz, PJ *P) {
     COORDINATE point;
     point.lpz = lpz;
-puts ("CART_FORWARD_3D");
+    pj_log( P->ctx, 5, "CART_FORWARD_3D");
     point = cart_3d (point, 0, P);
     return point.xyz;
 }
@@ -120,7 +120,7 @@ puts ("CART_FORWARD_3D");
 static LPZ cart_reverse_3d (XYZ xyz, PJ *P) {
     COORDINATE point;
     point.xyz = xyz;
-puts ("CART_REVERSE_3D");
+    pj_log( P->ctx, 5, "CART_REVERSE_3D");
     point = cart_3d (point, 1, P);
     return point.lpz;
 }
@@ -141,7 +141,7 @@ static LP cart_reverse (XY xy, PJ *P) {
     point.xy = xy;
     point.xyz.z = 0;
 
-puts ("CART_REVERSE");
+    pj_log( P->ctx, 1, "CART_REVERSE");
     point = cart_3d (point, 1, P);
     return point.lp;
 }

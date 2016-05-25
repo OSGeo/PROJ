@@ -92,12 +92,9 @@ static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P) {
         incr  = -1;
     }
 	
-	printf ("first: %d, last: %d, incr: %d\n", first_step, last_step, incr);
 
     for (i = first_step; i != last_step; i += incr) {
-puts ((P+i)->descr);
         point = pj_apply_projection (point, direction, P + i);
-        pj_show_coordinate ("p3d: ", point, 1);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
@@ -322,10 +319,7 @@ PJ *PROJECTION(pipeline) {
     pipeline = pj_create_pipeline (P, number_of_steps);
 
     L_first_default_arg = L_pipeline->next;
-    puts (L_first_default_arg->param);
     L_last_arg = L_first_step;
-    puts (L_last_arg->param);
-    puts (L_last_arg->next->param);
 
     /* Now loop over all steps, building a new set of arguments for each init */
     for (i = 0;  i < number_of_steps;  i++) {
@@ -363,16 +357,14 @@ PJ *PROJECTION(pipeline) {
                 inverse = 1;
 
         /* Should probably check for existence of the inverse cases here? */
-        if (inverse) {
-            swap_fwd_and_inv (next_step); puts("swapping");
-		} else puts ("not swapping");
+        if (inverse)
+            swap_fwd_and_inv (next_step);
         pj_add_to_pipeline (pipeline, next_step);
     }
 
     /* If last step is an inverse projection, we assume (for now) that output is angular */
     if (inverse)
         pipeline[0].descr = des_pipeline_angular;
-	printf ("Yes, its: %s\n", pipeline[0].descr);
 
     /* Clean up */
     L_last->next = L_restore;
