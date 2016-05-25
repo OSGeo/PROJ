@@ -17,6 +17,7 @@ from GIGS tests, which is a reformatting material provided by the
 International Association of Oil & Gas Producers.
 
 **Disclaimer**
+
 Whilst every effort has been made to ensure the accuracy of the information contained in this publication,
 neither the OGP nor any of its members past present or future warrants its accuracy or will, regardless
 of its or their negligence, assume liability for any foreseeable or unforeseeable use made thereof, which
@@ -30,6 +31,7 @@ the event of any conflict or contradiction between the provisions of this docume
 applicable laws shall prevail.
 
 **Copyright notice**
+
 The contents of these pages are © The International Association of Oil & Gas Producers. Permission
 is given to reproduce this report in whole or in part provided (i) that the copyright of OGP and (ii)
 the source are acknowledged. All other rights are reserved.” Any other use requires the prior written
@@ -42,7 +44,7 @@ courts of England and Wales.
 
 ## INSTALLING ##########################################################
 
- * Requires: Python 2.7 (currently not recommended) or 3.3+
+ * Requires: Python 3.3+  (2.7 will work but is not recommended)
  * pyproj (optional but highly recommended), this speeds up tests, makes
     results more precise but has the trade-off of making installation a
     little more compilated
@@ -51,48 +53,49 @@ courts of England and Wales.
 
 ### Installing pyproj ##################################################
 
- * Install `pip` if not installed, should already be installed on new versions 
-      (Python 2 >=2.7.9 or Python 3 >=3.4) or if using a virtual environment for python.
-      see https://pip.pypa.io/en/stable/installing/
-      Note: if you have Python 2.x and 3.x installed, python pip2 will be for 
-            Python 2.x and pip3 for Python 3.x.  pip could be an alias for either one.
- * Upgrade `pip` (possibly not needed)
+ 1) Install `pip` (usually `pip3`) if not installed, should already be installed on new Python 
+        versions (Python 3 >=3.4) or if using a virtual environment for python.
+        see https://pip.pypa.io/en/stable/installing/
+        * **Note**: if you have Python 2.x and 3.x installed,  `pip3` is for Python 3.x.
+            `pip` could be an alias for either one.
+ 2) Upgrade `pip` (possibly not needed)
         https://pip.pypa.io/en/stable/installing/#upgrading-pip
- * Install pyproj
-    - requires a C/C++ compiler be usuable by python
-    - repository version requires Cython to be installed, releases do not require this
+ 3) Install pyproj
+    * requires a C/C++ compiler be usuable by python
+    * repository version requires Cython to be installed, releases do not require this
+
 ```
          $ pip install cython
 ```
-    - install latest release
-        - set PROJ_DIR environment variable to an installed version of PROJ4
-          library.  This should have the directories include/ lib/ & 
+
+    * install latest release
+        * set PROJ_DIR environment variable to an installed version of PROJ4
+          library.  This should have the directories include/  lib/ & 
           share/proj/ underneath it.
-    - Linux  (default ./configure)
+
+    * installing on Linux  (default ./configure settings for PROJ.4)
+
 ```
-         $ sudo PROJ_DIR=/usr/local pip install pyproj
+         $ PROJ_DIR=/usr/local pip3 install pyproj
 ```
 
 ## Running Tests #######################################################
 
-This defaults to using pyproj package.
+When calling test_json.py it defaults to using pyproj driver.
 
 ```
     $ python test_json.py 5*.json
 ```
 
-If you don't want to use pyproj, switch to the cs2cs driver.
+There is a driver to directly use cs2cs instead of installing pyproj, but
+it is much slower and not recommended.
+
+Here is how you run the cs2cs driver:
 
 ```
     $ python test_json.py -d cs2cs -e path/to/repo/bin/cs2cs 5201.json
 ```
-Windows:
-```
-    C:\...> python test_json.py -e C:/osgeo4w/bin/cs2cs.exe -d cs2cs 5201.json
-```
 
-The cs2cs driver is slower, but provides the flexibility to test
-different cs2cs binaries.
 
 ## GIGS Test ###########################################################
 
@@ -108,7 +111,7 @@ projection itself.  It could point to problems with the provided model.
 
  * 5101 part 4 - Transverse Mercator
     - EPSG code will need to be redefined to make sure that etmerc version
-      is used, should be done before next release (4.9.3?)
+      is used, should be done before next release (4.9.3 / 4.10.0 ?)
     - Temporarily use test "5101.4-jhs-etmerc.json", perhaps remove file
       when etmerc/tmerc aliasing issue has been fixed.
  * 5102 part 2 -  Lambert Conic Conformal (1SP)
@@ -197,7 +200,7 @@ This is the computer time used for the process, not the actual run time.
 
 
 
-### Random Notes #######################################################
+## Random Notes #######################################################
 Roundtrip testing has been fixed, it now checks both resulting coordinates.
 
 Some tests in the 5100/5200 series have not been converted.  The most of

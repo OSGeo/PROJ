@@ -14,8 +14,10 @@
     [[16.36, 45.5], [439836.709, 20816.456]]
 ], 
     
-    "description": "Test 5105 (part 2), Oblique Mercator (variant B), v2-0_2011-06-28.", 
-    "projections": ["+init=epsg:4237", "+init=epsg:23700"], 
-    "tests": [{"tolerances": [5.555555555555555e-07, 0.05], "type": "conversion"}, 
-              {"times": 1000, "tolerances": [5.555555555555556e-08, 0.006], "type": "roundtrip"}]
+"description": "Test 5105 (part 2), Oblique Mercator (variant B), v2-0_2011-06-28.", 
+"projections": ["+init=epsg:4237", "+init=epsg:23700"], 
+"tests": [
+        {"tolerances": [5.555555555555555e-07, 0.05], "type": "conversion"}, 
+        {"times": 1000, "tolerances": [5.555555555555556e-08, 0.006], "type": "roundtrip"}
+    ]
 }

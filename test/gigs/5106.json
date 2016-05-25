@@ -29,7 +29,7 @@
 
 "projections": ["+init=epsg:4742", "+init=epsg:3376"], 
 "tests": [
-    {"tolerances": [5.555555555555555e-07, 0.05], "type": "conversion"}, 
-    {"times": 1000, "tolerances": [5.555555555555556e-08, 0.006], "type": "roundtrip"}
-]
+        {"tolerances": [5.555555555555555e-07, 0.05], "type": "conversion"}, 
+        {"times": 1000, "tolerances": [5.555555555555556e-08, 0.006], "type": "roundtrip"}
+    ]
 }
