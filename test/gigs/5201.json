@@ -1,5 +1,5 @@
 {
-"description" : "Test 5201, Geographic Geocentric conversions, v2.0_2011-09-28. (EPSG 4979 - WGS84 3d has been replaced with EPSG code 4326 WGS84 2d).  There is some height convergences for coordinates, so this will not work well for the current way the test framework is written.",
+"description" : "Test 5201, Geographic Geocentric conversions, v2.0_2011-09-28. (EPSG 4979 - WGS84 3d has been replaced with EPSG code 4326 WGS84 2d).",
 "projections" : [ "+init=epsg:4978", "+init=epsg:4326" ],
 
 "coordinates": [

@@ -44,10 +44,10 @@ courts of England and Wales.
 
 ## INSTALLING ##########################################################
 
- * Requires: Python 3.3+  (2.7 will work but is not recommended)
+ * Requires: Python 2.7 or 3.3+
  * pyproj (optional but highly recommended), this speeds up tests, makes
     results more precise but has the trade-off of making installation a
-    little more compilated
+    little more complicated.
 
 
 
@@ -76,7 +76,7 @@ courts of England and Wales.
     * installing on Linux  (default ./configure settings for PROJ.4)
 
 ```
-         $ PROJ_DIR=/usr/local pip3 install pyproj
+         $ PROJ_DIR=/usr/local pip install pyproj
 ```
 
 ## Running Tests #######################################################
@@ -130,24 +130,19 @@ concerning differences between Python 2.7 and Python 3.4 in testing, which
 needs to be pinpointed.
  
  * 5101 part 1 - Transverse Mercator
-    - cs2cs driver & Python 2.7 pyproj driver roundtrip tests fail with
-      very slight tolerance issues
+    - roundtrip tests fail with very slight tolerance issues
  * 5104 - Oblique stereographic
-    - cs2cs driver & Python 2.7 pyproj driver roundtrip tests fail with
-      very slight tolerance issues
+    - roundtrip tests fail with very slight tolerance issues
  * 5105 part 2 - Oblique Mercator (variant B)
-    - cs2cs driver & Python 2.7 pyproj driver roundtrip tests fail with
-      tolerance issues
+    - roundtrip tests fail with tolerance issues
  * 5106 - Hotline Oblique Mercator (variant A)
-    - cs2cs driver & Python 2.7 pyproj driver roundtrip tests fail with
-      very slight tolerance issues
+    - roundtrip tests fail with very slight tolerance issues
  * 5108 - Cassini-Soldner
-    - roundtrip tests seem to accumulate error
+    - roundtrip tests seem to accumulate errors
  * 5110 - Lambert Azimuthal Equal Area
     - roundtrip tests have some slight errors
  * 5111 part 1 - Mercator (variant A)
-    - cs2cs driver & Python 2.7 pyproj driver roundtrip tests fail with
-      very slight tolerance issues
+    - roundtrip tests fail with very slight tolerance issues
  * 5111 part 2 - Mercator (variant A)
  * 5203 part 1 - Position Vector 7-parameter transformation
     - most seem to be rounding errors.  Some results cross longitude

@@ -10,21 +10,19 @@
 
 #
 # == REQUIREMENTS ==
-#  - Python 2.7 (currently not recommended) or 3.3+
-#  - pyproj  (optional) - read TESTNOTES.md about
+#  - Python 2.7 or 3.3+
+#  - pyproj  (optional but highly recommended) - read TESTNOTES.md
 
 # == TODO list ==
-# * Why does Python 2.7 have some precision issues that do not seem to be
-#   present in Python 3.4?
-# * Need to define pyproj driver behavior when pyproj package isn't installed.
-# * possibly allow some tests to fail, not cause exit non-zero
-#    OR only call passing tests for unit testing
+# * Python 3 was not running all the test cases seemingly due to how it uses
+#   an iterable version of zip.  -- FIXED
 # * driver for proj4js (javascript)
 #     - could be written using nodejs using subprocess
 #     - could use PyExecJS (currently not advanced enough) or PyV8
 # * call cs2cs directly
-#      - NOW WORKING but 2 orders of magnitude slower than pyproj, and
+#      - WORKING but 2 orders of magnitude slower than pyproj, and
 #        potentially insecure shelling?
+
 
 import argparse
 import glob
@@ -48,6 +46,19 @@ except ImportError as e_pyproj:
 PY_MAJOR = sys.version_info[0]
 PY2 = (PY_MAJOR == 2)
 
+## Python 2/3 Compatibility code #######################################
+if PY_MAJOR >= 3:
+    # list-producing versions of the major Python iterating functions
+    # lzip acts like Python 2.x zip function.
+    # taken from Python-Future       http://python-future.org/
+    # future.utils.lzip()
+
+    def lzip(*args, **kwargs):
+        return list(zip(*args, **kwargs))
+
+else:
+    from __builtin__ import zip as lzip
+########################################################################
 
 def list_count_matches(coords, ex_coords, tolerance):
     """
@@ -152,7 +163,7 @@ class TransformRunner(object):
         total_matches, total_no_matches, success_code = 0, 0, 0
         for run in self.runs:
             if self.driver == 'pyproj':
-                trantst = TransformTestPyProj(run)
+                trantst = TransformTestPyProj(run, self.kwargs)
             elif self.driver == 'cs2cs':
                 trantst = TransformTestCs2cs(run, self.kwargs)
             else:
@@ -170,7 +181,7 @@ class TransformTestBase(object):
     """
     TransformTest common code for testing framework.
     """
-    def __init__(self, json_dict):
+    def __init__(self, json_dict, kwargs):
         """
         json_dict must dictonary from json
         """
@@ -186,8 +197,10 @@ class TransformTestBase(object):
         
         logging.info('Number of coordinate pairs to test: {0}'.format(len(json_dict['coordinates'])))
         
+        self.run_test_args = kwargs.get('test')
+
         # unpack coordinates
-        self.coords_left, self.coords_right = zip(*json_dict['coordinates'])
+        self.coords_left, self.coords_right = lzip(*json_dict['coordinates'])
         
         self.testobj = json_dict
         
@@ -246,7 +259,7 @@ class TransformTestBase(object):
 
         
         # return (results1[0] + results2[0], results1[1] + results2[1])
-        return tuple(sum(x) for x in zip(*results))
+        return tuple(sum(x) for x in lzip(*results))
 
 
     # TODO: I made this but, haven't tested it.  Is this useful?  (Currently, no. Not useful for GIGS.)
@@ -285,16 +298,26 @@ class TransformTestBase(object):
         main
         """
         matches, no_matches = 0, 0
-        
+
+        # convert to tuple
+        run_tests = self.run_test_args, 
+        if self.run_test_args is None:
+            run_tests = ('conversion', 'roundtrip')
+
+
         logging.info('Testing: {0}'.format(self.testobj['description']))
-        # run what tests need to be ran
+
         for test in self.testobj['tests']:
-            if test['type'] == 'conversion': # FIXME, why am I not being run?
+            m_res, nm_res = None, None
+            if test['type'] not in run_tests:
+                # skip test
+                continue 
+
+            if test['type'] == 'conversion':
                 m_res, nm_res = self.runner_conversion(**test)
             elif test['type'] == 'roundtrip':
                 m_res, nm_res = self.runner_roundtrip(**test)
             
-                
             if nm_res == 0:
                 logging.info("   {0}... All {1} match.".format(test['type'], m_res))
             else:
@@ -314,9 +337,9 @@ class TransformTestPyProj(TransformTestBase):
     """
     TransformTest uses pyproj to run tests.
     """
-    def __init__(self, json_dict):
+    def __init__(self, json_dict, kwargs):
         # call super class
-        TransformTestBase.__init__(self, json_dict)
+        TransformTestBase.__init__(self, json_dict, kwargs)
         
         # setup projections
         try:
@@ -336,7 +359,7 @@ class TransformTestPyProj(TransformTestBase):
     def driver_info(self):
         return 'pyproj {0}\nproj4 {1}\n'.format(pyproj.__version__, self.proj4_version())
 
-    # TODO: this is currently dead code, largely unneeded for the pyproj repo version as of 2016-05-24.
+    # TODO: this is currently dead code, unneeded for the pyproj repo version as of 2016-05-24.
     def proj4_version():
         """
         Gives the proj.4 library's version number. (requires pyproj to be installed)
@@ -359,26 +382,26 @@ class TransformTestPyProj(TransformTestBase):
         
         returns coordinate list
         """
-        # convert Python 3.x+ zip object to a list
-        if PY_MAJOR > 2 and isinstance(coords, zip):
-           coords = list(coords)
+        # # convert Python 3.x+ zip object to a list
+        # if PY_MAJOR > 2 and isinstance(coords, zip):
+        #   coords = list(coords)
          
         # are these coordinate triples?
         if len(coords[0]) == 3:
-            xi, yi, zi = zip(*coords)
+            xi, yi, zi = lzip(*coords)
             xo, yo, zo = pyproj.transform(proj_src, proj_dst, xi, yi, zi)
-            return zip(xo, yo, zo)
+            return lzip(xo, yo, zo)
         
         # assume list of coordinate pairs
-        xi, yi = zip(*coords)
+        xi, yi = lzip(*coords)
         xo, yo = pyproj.transform(proj_src, proj_dst, xi, yi)
-        return zip(xo, yo)
+        return lzip(xo, yo)
 
 
 class TransformTestCs2cs(TransformTestBase):
     def __init__(self, json_dict, kwargs):
         # call super class
-        TransformTestBase.__init__(self, json_dict)
+        TransformTestBase.__init__(self, json_dict, kwargs)
         
         # copy proj4 projection strings
         self.proj_left, self.proj_right = json_dict['projections']
@@ -458,11 +481,14 @@ class TransformTestCs2cs(TransformTestBase):
 if __name__ == '__main__':
 #    logging.basicConfig(level=logging.DEBUG)
     logging.basicConfig(level=logging.INFO)
-    
+
     parser = argparse.ArgumentParser(description='Test PROJ.4 using a JSON file.')
     parser.add_argument('-e', '--exe', \
                         help="executable with path default: 'cs2cs' (only needed for cs2cs driver)")
+
     parser.add_argument('-d', '--driver', default='pyproj', help='driver to test')
+
+    parser.add_argument('-t', '--test', help='only run these test types (valid values: conversion or roundtrip)') 
     
     # get json file names and/or glob patterns
     parser.add_argument('testnames_pat_json', nargs=argparse.REMAINDER, help='single filename or glob wildcard patern')
@@ -481,7 +507,7 @@ if __name__ == '__main__':
     match_results, nonmatch_results, success_code = 0, 0, 0
     for test_name in args.testnames_pat_json:
 #        print('TEST_NAME: {}'.format(test_name))
-        tratst = TransformRunner(test_name, driver=args.driver, exe=args.exe)
+        tratst = TransformRunner(test_name, driver=args.driver, exe=args.exe, test=args.test)
         m_res, nm_res, success_cd = tratst.dispatch()
         match_results += m_res
         nonmatch_results += nm_res
