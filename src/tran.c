@@ -47,7 +47,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25
 #include <math.h>
 
 
-struct buf { char *buf;  size_t size, n, comment_or_blank, format; } buf;
+struct buf { char *buf;  size_t size, n; int comment_or_blank, format; } buf;
 
 
 COORDINATE point_adjust (COORDINATE point, int E, int N) {
@@ -59,6 +59,11 @@ COORDINATE point_adjust (COORDINATE point, int E, int N) {
 
     if (0==E)
         return point;
+
+    if (E==127)
+        E = 'E';
+    if (N==127)
+        N = 'E';
 
     /* Traditional format: latitude/longitude */
     if ((E=='S') || (E=='N')) {
@@ -91,7 +96,7 @@ COORDINATE point_adjust (COORDINATE point, int E, int N) {
 
 COORDINATE parse_input_line (struct buf *buf) {
     COORDINATE point = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
-    char *p = buf->buf;
+    char *p = buf->buf, *q = 0;
     int d, m, dd, mm;
     double s, ss, ms, mmss, z;
     char E, N;
@@ -103,46 +108,59 @@ COORDINATE parse_input_line (struct buf *buf) {
         return point;
     }
 
+    /* Avoid stupid problem with postfix E (for East) being interpreted as exponential notation indicator */
+    q = strchr (buf->buf, 'E');
+    if (q)
+        *q = 127;
+
     /* First try DdM'S" */
-    if (9==sscanf (buf->buf, "%d%*[dD]%d'%lf\"%c%d%*[dD]%d'%lf\"%c%lf", &d, &m, &s, &E, &dd, &mm, &ss, &N, &z)) {
-        point.lpz.lam = (d  + (m  + s/60 ) / 60) * DEG_TO_RAD;
-        point.lpz.phi = (dd + (mm + ss/60) / 60) * DEG_TO_RAD;
+    if (9==sscanf (buf->buf, "%dd%d'%lf\"%c %dd%d'%lf\"%c %lf", &d, &m, &s, &E, &dd, &mm, &ss, &N, &z)) {
+        point.lpz.lam = (d  + (m  + s/60 ) / 60);
+        point.lpz.phi = (dd + (mm + ss/60) / 60);
         point.lpz.z   = z;
         buf->format = 1;
-        return point_adjust(point, E, N);
+        if (q)
+           *q = 'E';
+        return point_adjust (point, E, N);
     }
 
     /* Then try D:M:S with GeographicLib-style colon separators */
-    if (9==sscanf (buf->buf, "%d:%d:%lf%c%d:%d:%lf%c%lf", &d, &m, &s, &E, &dd, &mm, &ss, &N, &z)) {
-        point.lpz.lam = (d  + (m  + s/60 ) / 60) * DEG_TO_RAD;
-        point.lpz.phi = (dd + (mm + ss/60) / 60) * DEG_TO_RAD;
+    if (9==sscanf (buf->buf, "%d:%d:%lf%c %d:%d:%lf%c %lf", &d, &m, &s, &E, &dd, &mm, &ss, &N, &z)) {
+        point.lpz.lam = (d  + (m  + s/60 ) / 60);
+        point.lpz.phi = (dd + (mm + ss/60) / 60);
         point.lpz.z   = z;
         buf->format = 2;
+        if (q)
+            *q = 'E';
         return point_adjust(point, E, N);
     }
 
     /* Then try nautical DdM.mm' */
-    if (7==sscanf (buf->buf, "%d%*[dD]%lf'%c%d%*[dD]%lf'%c%lf", &d, &ms, &E, &dd, &mmss, &N, &z)) {
-        point.lpz.lam = (d  + ms / 60) * DEG_TO_RAD;
-        point.lpz.phi = (dd + mmss/60) * DEG_TO_RAD;
+    if (7==sscanf (buf->buf, "%dd%lf'%c %dd%lf'%c%lf", &d, &ms, &E, &dd, &mmss, &N, &z)) {
+        point.lpz.lam = (d  + ms / 60);
+        point.lpz.phi = (dd + mmss/60);
         point.lpz.z   = z;
         buf->format = 3;
+        if (q)
+            *q = 'E';
         return point_adjust(point, E, N);
     }
 
     /* Then try nautical D:M.mm with GeographicLib-style colon separators */
-    if (7==sscanf (buf->buf, "%d:%lf%c%d:%lf%c%lf", &d, &ms, &E, &dd, &mmss, &N, &z)) {
-        point.lpz.lam = (d  + ms / 60) * DEG_TO_RAD;
-        point.lpz.phi = (dd + mmss/60) * DEG_TO_RAD;
+    if (7==sscanf (buf->buf, "%d:%lf%c %d:%lf%c %lf", &d, &ms, &E, &dd, &mmss, &N, &z)) {
+        point.lpz.lam = (d  + ms / 60);
+        point.lpz.phi = (dd + mmss/60);
         point.lpz.z   = z;
         buf->format = 4;
+        if (q)
+            *q = 'E';
         return point_adjust(point, E, N);
     }
 
     /* Then try decimal degrees without northing/easting indicators */
-    if (3==sscanf (buf->buf, "%lf%lf%lf", &ms, &mmss, &z)) {
-        point.lpz.lam = ms   * DEG_TO_RAD;
-        point.lpz.phi = mmss * DEG_TO_RAD;
+    if (3==sscanf (buf->buf, "%lf %lf %lf", &ms, &mmss, &z)) {
+        point.lpz.lam = ms;
+        point.lpz.phi = mmss;
         point.lpz.z   = z;
         buf->format = 5;
         return point_adjust(point, 0, 0);
@@ -150,41 +168,36 @@ COORDINATE parse_input_line (struct buf *buf) {
 
     /* Finally try decimal degrees with northing/easting indicators */
     if (5==sscanf (buf->buf, "%lf%c%lf%c%lf", &ms, &E, &mmss, &N, &z)) {
-        point.lpz.lam = ms * DEG_TO_RAD;
-        point.lpz.phi = mmss * DEG_TO_RAD;
+        point.lpz.lam = ms;
+        point.lpz.phi = mmss;
         point.lpz.z   = z;
         buf->format = 6;
+        if (q)
+            *q = 'E';
         return point_adjust(point, E, N);
     }
-
     return point;
 }
 
 
-
-char *skip_3_columns (char *buf) {
+char *skip_columns (char *buf, int howmany) {
     int i;
-    for (i = 0;  i < 3;  i++) {
+    for (i = 0;  i < howmany;  i++) {
         while (isspace(*buf))
             buf++;
-        while (!isspace(*buf))
+        while ((0!=*buf) && !isspace(*buf))
             buf++;
     }
-
     return buf;
 }
 
 
-
 int main(int argc, char **argv) {
     PJ *P;
-
-    int i, j, k, first_file_arg;
-
+    int i, j, k, first_file_arg, direction;
     FILE *in = 0;
     struct buf buf = {0, 0, 0, 0, 0};
-    int angular_pipe = 0;
-
+    int angular_input = 1, angular_output = 0;
 
     /* Used in handling classic '-'-style options */
     char *opt_arg[256];
@@ -234,7 +247,6 @@ int main(int argc, char **argv) {
         }
     }
 
-
     /* Process all '+'-style options */
     for (i = i; i < argc; i++) {
         if ('+' != argv[i][0])
@@ -244,7 +256,6 @@ int main(int argc, char **argv) {
 
     first_file_arg = i;
 
-
     if (opt_arg[(int) 'v']) {
         char none[] = {"(set)"};
         for (i = 0;  i < 256; i++)
@@ -252,15 +263,23 @@ int main(int argc, char **argv) {
                 printf ("%c:  %s\n", i, argv[0]!=opt_arg[i]? opt_arg[i]: none);
     }
 
-
     P = pj_init (plus_argc, plus_argv);
     if (0==P)
         return 0*fputs ("Bad projection arguments", stderr);
 
-    if (0!=strstr (P->descr, "angular output"))
-        angular_pipe = 1;
+    direction = (opt_arg[(int) 'I'] != 0);
+    if (direction) {
+        angular_input = 0;
+        angular_output = 1;
+    }
 
-
+    if (pj_is_pipeline (P)) {
+        angular_input  = pj_pipeline_angular_input (P, direction);
+        angular_output = pj_pipeline_angular_output (P, direction);
+        if (opt_arg[(int) 'v'])
+            pj_pipeline_verbose (P);
+        pj_log_pipeline_steps (P, 5);
+    }
 
     /* Allocate input buffer */
     buf.buf = calloc (1, 10000);
@@ -268,6 +287,7 @@ int main(int argc, char **argv) {
         return 0*fputs ("Out of memory", stderr);
     buf.size = 10000;
 
+    /* Read stdin if no input file names specified */
     if (first_file_arg==argc)
         in = stdin;
 
@@ -281,10 +301,8 @@ int main(int argc, char **argv) {
                 in = stdin;
             else
                 in = fopen (argv[k], "rt");
-
-            /* Ignore non-existing files */
             if (0==in)
-                continue;
+                continue;    /* Ignore non-existing files */
         }
 
         /* Loop over all lines of the current file */
@@ -297,7 +315,6 @@ int main(int argc, char **argv) {
                 break;    /* continue with next file (if any) */
             }
 
-
             point = parse_input_line (&buf);
             if (HUGE_VAL==point.xyz.x) {
                 if (buf.comment_or_blank)
@@ -306,24 +323,27 @@ int main(int argc, char **argv) {
                 continue;
             }
 
-            point = pj_apply_projection (point, (opt_arg['I'] != 0), P);
-            pj_show_coordinate ("projected ", point, angular_pipe);
+            if (angular_input) {
+                point.lpz.lam *= DEG_TO_RAD;
+                point.lpz.phi *= DEG_TO_RAD;
+            }
 
-            p = skip_3_columns (buf.buf);
+            if (opt_arg[(int) 'v']) {
+                printf ("\nformat %d\n", buf.format);
+                pj_show_coordinate ("Input: ", point, angular_input);
+            }
+
+            point = pj_apply_projection (point, direction, P);
+            pj_show_coordinate (0, point, angular_output);
+            p = skip_columns (buf.buf, 3);
             puts(p);
-
         }
-
 
         if (stdin==in && k==argc)
             break;
 
-        if ((in != stdin) && (0 != in))
+        if ((in != stdin) && (in != 0))
             fclose(in);
-
     }
-
-
-
     return 0;
 }

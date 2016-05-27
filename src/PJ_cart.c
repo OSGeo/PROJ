@@ -1,6 +1,6 @@
 /******************************************************************************
  * Project:  PROJ.4
- * Purpose:  Convert between ellipsoidal, geodetic coordinates and 
+ * Purpose:  Convert between ellipsoidal, geodetic coordinates and
  *           cartesian, geocentric coordinates.
  *
  *           Formally, this functionality is also found in the PJ_geocent.c
@@ -64,7 +64,6 @@ static COORDINATE cart_3d (COORDINATE point, int direction, PJ *P) {
 	double X, Y, Z, LAM, PHI;
 	COORDINATE result = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
 
-puts ("CART_3D");
     if (direction == 0) {
         ret = pj_Convert_Geodetic_To_Geocentric (
 		    &(P->opaque->g),
@@ -80,14 +79,14 @@ puts ("CART_3D");
         if (GEOCENT_NO_ERROR != ret)
 	        return result;
 
-		result.xyz.x = X;
-		result.xyz.y = Y;
+		result.xyz.x = X / P->a;
+		result.xyz.y = Y / P->a;
 		result.xyz.z = Z;
-		pj_show_coordinate ("cart: ", result, 0);
 
 		return result;
 	}
 
+    pj_show_coordinate ("cart1: ", point, 1);
 	pj_Convert_Geocentric_To_Geodetic (
 	    &(P->opaque->g),
 		point.xyz.x,
@@ -97,12 +96,11 @@ puts ("CART_3D");
 		&LAM,
 		&Z
 	);
-		
-	result.lpz.lam = LAM;
-	result.lpz.phi = PHI;
-	result.lpz.z   =   Z;
-	pj_show_coordinate ("ellp: ", result, 0);
 
+	result.lpz.lam = LAM * P->a;
+	result.lpz.phi = PHI * P->a;
+	result.lpz.z   =   Z;
+pj_show_coordinate ("cart2: ", result, 1);
     return result;
 }
 
@@ -129,10 +127,8 @@ static XY cart_forward (LP lp, PJ *P) {
     COORDINATE point;
     point.lp = lp;
     point.lpz.z = 0;
-puts ("CART_FORWARD");
 
     point = cart_3d (point, 0, P);
-puts ("CART_FORWARD");
     return point.xy;
 }
 
@@ -141,7 +137,6 @@ static LP cart_reverse (XY xy, PJ *P) {
     point.xy = xy;
     point.xyz.z = 0;
 
-    pj_log( P->ctx, 1, "CART_REVERSE");
     point = cart_3d (point, 1, P);
     return point.lp;
 }
@@ -172,27 +167,133 @@ static void freeup (PJ *P) {
 
 
 
+
+/**************************************************************
+                  CARTESIAN TO ELLIPSOIDAL
+***************************************************************
+    This material follows:
+
+    Bernhard Hofmann-Wellenhof & Helmut Moritz:
+    Physical Geodesy, 2nd edition.
+    Springer, 2005.
+
+    chapter 5.6: Coordinate transformations
+    (HM, below)
+
+    and
+
+    Wikipedia: Geographic Coordinate Conversion,
+    https://en.m.wikipedia.org/wiki/Geographic_coordinate_conversion
+
+    (WP, below)
+
+**************************************************************/
+
+static double semiminor_axis (double a, double es) {
+    return a * sqrt (1 - es);
+}
+
+static double normal_radius_of_curvature (double a, double es, double phi) {
+    double s = sin(phi);
+    /* This is from WP.  HM formula 2-149 gives an a,b version */
+    return a / sqrt (1 - es*s*s);
+}
+
+
+/*********************************************************************/
+static double second_eccentricity_squared (double a, double es) {
+/**********************************************************************
+    Follows the definition, but uses the identity (a2-b2) = (a-b)(a+b)
+    for improved numerical precision.
+***********************************************************************/
+    double b = semiminor_axis (a, es);
+    return (a - b) * (a + b)  /  (b*b);
+}
+
+static XYZ cartesian (LPZ ellipsoidal,  PJ *P) {
+    double N, h, lam, phi, cosphi = cos(ellipsoidal.phi);
+    XYZ xyz;
+
+    pj_log_coordinate (P->ctx, 5, "Cartesian - input:  ", ellipsoidal, 1);
+
+    N   =  normal_radius_of_curvature(P->a, P->es, ellipsoidal.phi);
+
+    phi =  ellipsoidal.phi;
+    lam =  ellipsoidal.lam;
+    h   =  ellipsoidal.z;
+
+    /* HM formula 5-27 (z formula follows WP) */
+    xyz.x = (N + h) * cosphi * cos(lam);
+    xyz.y = (N + h) * cosphi * sin(lam);
+    xyz.z = (N * (1 - P->es) + h) * sin(phi);
+    pj_log_coordinate (P->ctx, 5, "Cartesian - output: ", xyz, 0);
+
+    /*********************************************************************/
+    /*                                                                   */
+    /* For historical reasons, in proj, plane coordinates are measured   */
+    /* in units of the semimajor axis. Since 3D handling is grafted on   */
+    /* later, this is not the case for heights. And even though this     */
+    /* coordinate really is 3D cartesian, the z-part looks like a height */
+    /* to proj. Hence, we have the somewhat unusual situation of having  */
+    /* a point coordinate with differing units between dimensions.       */
+    /*                                                                   */
+    /* The scaling and descaling is handled by the pj_fwd/inv functions. */
+    /*                                                                   */
+    /*********************************************************************/
+    xyz.x /= P->a;
+    xyz.y /= P->a;
+
+    return xyz;
+}
+
+
+static LPZ ellipsoidal (XYZ cartesian,  PJ *P) {
+    double N, b, p, theta, c, s, e2s;
+    LPZ lpz;
+
+    cartesian.x *= P->a;
+    cartesian.y *= P->a;
+
+    /* Perpendicular distance from point to Z-axis (HM eq. 5-28) */
+    p = hypot (cartesian.x, cartesian.y);
+
+    /* Ancillary ellipsoidal parameters */
+    b   =  semiminor_axis (P->a, P->es);
+    e2s =  second_eccentricity_squared (P->a,  P->es);
+
+    /* HM eq. (5-37) */
+    theta  =  atan2 (cartesian.z * P->a,  p * b);
+
+    /* HM eq. (5-36) */
+    c  =  cos(theta);
+    s  =  sin(theta);
+    lpz.phi  =  atan2 (cartesian.z + e2s*b*s*s*s,  p - P->es*P->a*c*c*c);
+    lpz.lam  =  atan2 (cartesian.y, cartesian.x);
+    N        =  normal_radius_of_curvature (P->a, P->es, lpz.phi);
+    lpz.z    =  p / cos (lpz.phi)  -  N;
+
+    pj_log_coordinate (P->ctx, 5, "Ellipsoidal - output: ", lpz, 0);
+    return lpz;
+}
+
+
 PJ *PROJECTION(cart) {
     int err;
 	double semiminor;
-	COORDINATE result = {{0,0,0}};
+    COORDINATE point = {{55 * DEG_TO_RAD, 12 * DEG_TO_RAD, 100}};
 
-    P->fwd3d = cart_forward_3d;
-    P->inv3d = cart_reverse_3d;
-    P->fwd   = cart_forward;
-    P->inv   = cart_reverse;
-puts ("CART");
-    P->opaque = pj_calloc (1, sizeof(struct pj_opaque));
+    P->fwd3d  =  cartesian;      /* cart_forward_3d; */
+    P->inv3d  =  ellipsoidal;    /* cart_reverse_3d; */
+    P->fwd    =  cart_forward;
+    P->inv    =  cart_reverse;
+    P->opaque =  pj_calloc (1, sizeof(struct pj_opaque));
     if (0==P->opaque)
         return 0;
-		
+
     semiminor = P->a * sqrt (1 - P->es);
-printf("semiminor=%12.3f\n", semiminor);
 	err = pj_Set_Geocentric_Parameters (&(P->opaque->g), P->a, semiminor);
     if (GEOCENT_NO_ERROR != err)
 	    return cart_freeup (P, -6); /* the "e effectively==1" message, abused as generic geocentric error */
-puts ("CART OK");
-pj_show_coordinate ("ellp: ", result, 0);
 
     return P;
 }

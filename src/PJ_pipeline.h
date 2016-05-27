@@ -68,6 +68,13 @@ COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P);
 /* For debugging etc. */
 int pj_show_coordinate (char *banner, COORDINATE point, int angular);
 
+int pj_is_pipeline (PJ *P);
+int pj_pipeline_angular_output (PJ *P, int direction);
+int pj_pipeline_angular_input (PJ *P, int direction);
+int pj_pipeline_verbose (PJ *P);
+int pj_pipeline_steps (PJ *P);
+void pj_log_pipeline_steps (PJ *P, int level);
+
 
 
 #ifdef __cplusplus

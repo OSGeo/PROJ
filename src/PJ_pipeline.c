@@ -49,9 +49,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 PROJ_HEAD(pipeline,         "Transformation pipeline manager");
 PROJ_HEAD(pipeline_angular, "Transformation pipeline manager, with angular output");
 
-PROJ_HEAD(pipe_test1, "1st transformation pipeline proof-of-concept test function");
-PROJ_HEAD(pipe_test2, "2nd transformation pipeline proof-of-concept test function");
-
 
 /* Projection specific elements for the PJ object */
 #define PIPELINE_STACK_SIZE 100
@@ -59,48 +56,96 @@ struct pj_opaque {
     int reversible;
     int steps;
     int depth;
+    int verbose;
+    int *reverse_step;
     COORDINATE stack[PIPELINE_STACK_SIZE];
 };
 
+
+static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P);
+static XYZ pipeline_forward_3d (LPZ lpz, PJ *P);
+static LPZ pipeline_reverse_3d (XYZ xyz, PJ *P);
+static XY pipeline_forward (LP lpz, PJ *P);
+static LP pipeline_reverse (XY xyz, PJ *P);
+
+
+void pj_log_coordinate (projCtx ctx, int level, const char *banner, COORDINATE point, int angular) {
+    double s = 1;
+    char empty[] = "";
+    char angular_fmt[] = {"%20.20s  %12.9f   %12.9f    %12.5f"};
+    char linear_fmt[]  = {"%20.20s  %15.5f   %15.5f    %15.5f"};
+    char *fmt = linear_fmt;
+
+    if (angular) {
+        fmt =  angular_fmt;
+        s   =  RAD_TO_DEG;
+    }
+
+    if (!banner)
+        banner = empty;
+
+    pj_log (ctx, level, fmt, banner, s*point.xyz.x, s*point.xyz.y, point.xyz.z);
+}
+
+
 int pj_show_coordinate (char *banner, COORDINATE point, int angular) {
     int i = 0;
-    printf ("%s", banner);
+    if (banner)
+        printf ("%s", banner);
 
     if (angular) {
         i += printf("%12.9f ", RAD_TO_DEG * point.xyz.x);
         i += printf("%12.9f ", RAD_TO_DEG * point.xyz.y);
-        i += printf("%12.4f\n", point.xyz.z);
+        i += printf("%12.4f",  point.xyz.z);
+        if (banner)
+            printf("\n");
         return i;
     }
 
     i += printf("%15.4f ", point.xyz.x);
     i += printf("%15.4f ", point.xyz.y);
-    i += printf("%15.4f\n", point.xyz.z);
+    i += printf("%15.4f",  point.xyz.z);
+    if (banner)
+        printf("\n");
     return i;
 }
 
+
+
 /* Apply the most appropriate projection function. No-op if none appropriate */
 COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
+
     /* Forward */
     if (direction == 0) {
+        /* run the pipeline directly: pj_fwd3d rejects on most input values */
+        if ((P->fwd3d==pipeline_forward_3d) || (P->fwd==pipeline_forward))
+            return pipeline_3d(point, 0, P);
+
+        /* Here come the real cases. We run these through the pj_fwd/inv wrappers, */
+        /* in order to get scaling correctly applied */
         if (P->fwd3d)
-            point.xyz = P->fwd3d (point.lpz, P);
+                point.xyz = pj_fwd3d (point.lpz, P);
         else if (P->fwd)
-            point.xy = P->fwd (point.lp, P);
+            point.xy = pj_fwd (point.lp, P);
         return point;
     }
 
     /* Inverse */
+    if ((P->inv3d==pipeline_reverse_3d) || (P->inv==pipeline_reverse))
+        return pipeline_3d(point, 1, P);
+
     if (P->inv3d)
-        point.lpz = P->inv3d (point.xyz, P);
+        point.lpz = pj_inv3d (point.xyz, P);
     else if (P->inv)
-        point.lp = P->inv (point.xy, P);
+        point.lp = pj_inv (point.xy, P);
     return point;
 }
 
+
+
 /* The actual pipeline driver */
 static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P) {
-    int i, first_step, last_step, incr;
+    int i, j, first_step, last_step, incr;
 
     /* semi-open interval: first_step is included, last_step excluded */
     if (direction == 0) {        /* Forward */
@@ -112,14 +157,21 @@ static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P) {
         last_step  =  0;
         incr  = -1;
     }
-	
+
 
     for (i = first_step; i != last_step; i += incr) {
-        point = pj_apply_projection (point, direction, P + i);
+        int d = direction;
+        if (P->opaque->reverse_step[i])
+            d = !d;
+        point = pj_apply_projection (point, d, P + i);
+        pj_log_coordinate (P->ctx, 5, (P + i)->descr, point, 0);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
+        if (P->opaque->verbose) for (j = 0;  j < P->opaque->depth; j++)
+            pj_log_coordinate (P->ctx, 7, "Stack: ", P->opaque->stack[j], 0);
     }
 
+    P->opaque->depth = 0;    /* Clear the stack */
     return point;
 
 #if 0
@@ -154,7 +206,6 @@ static XY pipeline_forward (LP lp, PJ *P) {
     COORDINATE point;
     point.lp = lp;
     point.lpz.z = 0;
-
     point = pipeline_3d (point, 0, P);
     return point.xy;
 }
@@ -163,9 +214,69 @@ static LP pipeline_reverse (XY xy, PJ *P) {
     COORDINATE point;
     point.xy = xy;
     point.xyz.z = 0;
-
     point = pipeline_3d (point, 1, P);
     return point.lp;
+}
+
+int pj_is_pipeline (PJ *P) {
+    if (0==P)
+        return 0;
+    if (P->fwd3d==pipeline_forward_3d)
+        return 1;
+    if (P->inv3d==pipeline_reverse_3d)
+        return 1;
+    if (P->fwd==pipeline_forward)
+        return 1;
+    if (P->inv==pipeline_reverse)
+        return 1;
+    return 0;
+}
+
+
+int pj_pipeline_verbose (PJ *P) {
+    if (!pj_is_pipeline (P))
+        return 0;
+    P->opaque->verbose = !P->opaque->verbose;
+    return P->opaque->verbose;
+}
+
+void pj_log_pipeline_steps (PJ *P, int level) {
+    int step;
+    if (0==P)
+        return;
+    if (0==pj_is_pipeline(P))
+        return;
+    pj_log (P->ctx, level, "PIPELINE STEPS");
+    for (step = 0;  step < pj_pipeline_steps(P)+1;  step++) {
+        char forward[] = {"(forward)"};
+        char inverse[] = {"(inverse)"};
+        char *direction = forward;
+        if (P->opaque->reverse_step[step]==1)
+            direction = inverse;
+        pj_log (P->ctx, level, "    step %d: %.15s %s", step, P[step].descr, direction);
+    }
+}
+
+int pj_pipeline_angular_output (PJ *P, int direction) {
+    if (!pj_is_pipeline (P))
+        return 0;
+    if (direction==0)  /* forward */
+        return P->opaque->reverse_step[P->opaque->steps];
+    return !P->opaque->reverse_step[1];
+}
+
+int pj_pipeline_angular_input (PJ *P, int direction) {
+    if (!pj_is_pipeline (P))
+        return 1;
+    if (direction==0)  /* forward */
+        return !P->opaque->reverse_step[1];
+    return P->opaque->reverse_step[P->opaque->steps];
+}
+
+int pj_pipeline_steps (PJ *P) {
+    if (!pj_is_pipeline (P))
+        return 0;
+        return P->opaque->steps;
 }
 
 
@@ -206,6 +317,7 @@ static void *pipeline_freeup (PJ *P, int errlev) {         /* Destructor */
     if (0==P->opaque)
         return pj_dealloc (P);
 
+    pj_dealloc (P->opaque->reverse_step);
     pj_dealloc (P->opaque);
     return pj_dealloc(P);
 }
@@ -228,6 +340,9 @@ static PJ *pj_create_pipeline (PJ *P, size_t steps) {
     pipeline = pj_calloc (steps + 2, sizeof(PJ));
 
     P->opaque->steps = steps;
+    P->opaque->reverse_step =  pj_calloc (steps + 2, sizeof(int));
+    if (0==P->opaque->reverse_step)
+        return pipeline_freeup (P, ENOMEM);
 
     /* First element is the pipeline manager herself */
     pipeline[0] = *P;
@@ -244,7 +359,7 @@ static PJ *pj_create_pipeline (PJ *P, size_t steps) {
     return pipeline;
 }
 
-static void pj_add_to_pipeline (PJ *pipeline, PJ *P) {
+static void pj_push_to_pipeline (PJ *pipeline, PJ *P) {
     while (!is_end_of_pipe(pipeline))
         pipeline++;
     pipeline[0] = *P;
@@ -252,7 +367,8 @@ static void pj_add_to_pipeline (PJ *pipeline, PJ *P) {
 }
 
 
-/* When asked for the inverse projection, we just swap the functions */
+#if 0
+/* When asked for the inverse projection, we USED TO just swap the functions (now using the reverse_step table) */
 static void swap_fwd_and_inv (PJ *P) {
     XY  (*fwd)(LP, PJ *);
     LP  (*inv)(XY, PJ *);
@@ -270,7 +386,7 @@ static void swap_fwd_and_inv (PJ *P) {
     P->fwd3d = (XYZ  (*)(LPZ, PJ *)) inv3d;
     P->inv3d = (LPZ  (*)(XYZ, PJ *)) fwd3d;
 }
-
+#endif
 
 
 
@@ -286,8 +402,7 @@ PJ *PROJECTION(pipeline) {
     paralist *L_sentinel = 0;
     paralist *L_restore  = 0;
 
-    int i,  number_of_steps = 0;
-    int inverse = 0;
+    int i,  number_of_steps = 0, inverse = 0;
 
     PJ     *next_step = 0;
     PJ     *pipeline  = 0;
@@ -349,8 +464,6 @@ PJ *PROJECTION(pipeline) {
         char  *argv[MAX_ARG];
         int  argc = 0;
 
-        inverse = 0;
-
         /* Build a set of initialization args for the current step */
 
         /* First add the step specific args */
@@ -373,14 +486,28 @@ PJ *PROJECTION(pipeline) {
             return pipeline_freeup (pipeline,  pipeline->ctx->last_errno);
 
         /* Were we asked to provide the inverse case? */
-        for (j = 0; j < argc; j++)
+        for (j = inverse = 0; j < argc; j++)
             if (0 == strcmp ("inv", argv[j]))
-                inverse = 1;
+                break;
+        if (j < argc)
+            inverse = 1;
 
         /* Should probably check for existence of the inverse cases here? */
-        if (inverse)
-            swap_fwd_and_inv (next_step);
-        pj_add_to_pipeline (pipeline, next_step);
+        pipeline->opaque->reverse_step[i+1] = inverse;
+
+        pj_push_to_pipeline (pipeline, next_step);
+
+        do {
+            char fwd[] = {"(forward)"};
+            char inv[] = {"(inverse)"};
+            char *direction = fwd;
+            if (inverse)
+                direction = inv;
+            pj_log (pipeline->ctx, 5, "pipeline step %d (%d args) %s:", i + 1, argc, direction);
+        } while (0);
+
+        for (j = 0; j < argc; j++)
+            pj_log (pipeline->ctx, 5, "    argv[%d]: %s", j, argv[j]);
     }
 
     /* If last step is an inverse projection, we assume (for now) that output is angular */
