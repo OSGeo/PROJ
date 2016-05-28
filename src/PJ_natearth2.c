@@ -25,7 +25,7 @@ PROJ_HEAD(natearth2, "Natural Earth 2") "\n\tPCyl., Sph.";
 #define C2 (11 * B2)
 #define C3 (13 * B3)
 #define EPS 1e-11
-#define MAX_Y (0.84719 * 0.535117535153096 * PI)
+#define MAX_Y (0.84719 * 0.535117535153096 * M_PI)
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

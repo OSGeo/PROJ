@@ -8,7 +8,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     (void) P;
 
     xy.x = lp.lam;
-    xy.y = log(tan(FORTPI + lp.phi * .4)) * 1.25;
+    xy.y = log(tan(M_FORTPI + lp.phi * .4)) * 1.25;
 
     return (xy);
 }
@@ -19,7 +19,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     (void) P;
 
     lp.lam = xy.x;
-    lp.phi = 2.5 * (atan(exp(.8 * xy.y)) - FORTPI);
+    lp.phi = 2.5 * (atan(exp(.8 * xy.y)) - M_FORTPI);
 
     return (lp);
 }

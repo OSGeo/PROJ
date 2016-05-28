@@ -27,7 +27,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
             break;
     }
     if (!i)
-        lp.phi = (lp.phi < 0.) ? -HALFPI : HALFPI;
+        lp.phi = (lp.phi < 0.) ? -M_HALFPI : M_HALFPI;
     else
         lp.phi *= 0.5;
     xy.x = Q->C_x * lp.lam * cos(lp.phi);
@@ -41,7 +41,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     struct pj_opaque *Q = P->opaque;
     lp.phi = aasin(P->ctx, xy.y / Q->C_y);
     lp.lam = xy.x / (Q->C_x * cos(lp.phi));
-        if (fabs(lp.lam) < PI) {
+        if (fabs(lp.lam) < M_PI) {
             lp.phi += lp.phi;
             lp.phi = aasin(P->ctx, (lp.phi + sin(lp.phi)) / Q->C_p);
         } else {
@@ -74,9 +74,9 @@ static PJ * setup(PJ *P, double p) {
 
     P->es = 0;
     sp = sin(p);
-    r = sqrt(TWOPI * sp / (p2 + sin(p2)));
+    r = sqrt(M_TWOPI * sp / (p2 + sin(p2)));
 
-    Q->C_x = 2. * r / PI;
+    Q->C_x = 2. * r / M_PI;
     Q->C_y = r / sp;
     Q->C_p = p2 + sin(p2);
 
@@ -92,7 +92,7 @@ PJ *PROJECTION(moll) {
         return freeup_new (P);
     P->opaque = Q;
 
-    return setup(P, HALFPI);
+    return setup(P, M_HALFPI);
 }
 
 
@@ -102,7 +102,7 @@ PJ *PROJECTION(wag4) {
         return freeup_new (P);
     P->opaque = Q;
 
-    return setup(P, PI/3.);
+    return setup(P, M_PI/3.);
 }
 
 PJ *PROJECTION(wag5) {

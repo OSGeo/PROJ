@@ -30,7 +30,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     if (fabs(lp.phi) >= 1.) {
         if (fabs(lp.phi) > ONEEPS)  I_ERROR
         else
-            lp.phi = lp.phi < 0. ? -HALFPI : HALFPI;
+            lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
     } else
         lp.phi = asin(lp.phi);
     if (xy.y < 0)

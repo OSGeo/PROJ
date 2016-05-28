@@ -46,7 +46,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         lp.lam = atan2(xy.x, xy.y) / Q->n;
     } else {
         lp.lam = 0.;
-        lp.phi = Q->n > 0. ? HALFPI : - HALFPI;
+        lp.phi = Q->n > 0. ? M_HALFPI : -M_HALFPI;
     }
     return lp;
 }

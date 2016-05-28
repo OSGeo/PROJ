@@ -17,7 +17,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     struct pj_opaque *Q = P->opaque;
     double v, c;
 
-    if (fabs(fabs(lp.phi) - HALFPI) < TOL) {
+    if (fabs(fabs(lp.phi) - M_HALFPI) < TOL) {
         xy.x = 0;
         xy.y = lp.phi < 0 ? -2. : 2.;
     } else {

@@ -82,7 +82,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 	case S_POLE:
 	case N_POLE:
 		lp.phi = fabs(Q->p_halfpi - lp.phi);
-		if (!Q->no_cut && (lp.phi - EPS) > HALFPI)
+		if (!Q->no_cut && (lp.phi - EPS) > M_HALFPI)
 			F_ERROR;
 		if ((lp.phi *= 0.5) > EPS) {
 			t = tan(lp.phi);
@@ -125,7 +125,7 @@ PJ *PROJECTION(airy) {
     P->opaque = Q;
 
 	Q->no_cut = pj_param(P->ctx, P->params, "bno_cut").i;
-	beta = 0.5 * (HALFPI - pj_param(P->ctx, P->params, "rlat_b").f);
+	beta = 0.5 * (M_HALFPI - pj_param(P->ctx, P->params, "rlat_b").f);
 	if (fabs(beta) < EPS)
 		Q->Cb = -0.5;
 	else {
@@ -133,12 +133,12 @@ PJ *PROJECTION(airy) {
 		Q->Cb *= Q->Cb * log(cos(beta));
 	}
 
-	if (fabs(fabs(P->phi0) - HALFPI) < EPS)
+	if (fabs(fabs(P->phi0) - M_HALFPI) < EPS)
 		if (P->phi0 < 0.) {
-			Q->p_halfpi = -HALFPI;
+			Q->p_halfpi = -M_HALFPI;
 			Q->mode = S_POLE;
 		} else {
-			Q->p_halfpi =  HALFPI;
+			Q->p_halfpi =  M_HALFPI;
 			Q->mode = N_POLE;
 		}
 	else {

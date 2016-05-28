@@ -40,7 +40,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
     if ((t = fabs(xy.y *= P->k0)) - EPS <= 1.) {
         if (t >= 1.)
-            lp.phi = xy.y < 0. ? -HALFPI : HALFPI;
+            lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
         else
             lp.phi = asin(xy.y);
         lp.lam = xy.x / P->k0;

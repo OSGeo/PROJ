@@ -6,8 +6,6 @@ PROJ_HEAD(lsat, "Space oblique for LANDSAT")
     "\n\tCyl, Sph&Ell\n\tlsat= path=";
 
 #define TOL 1e-7
-#define PI_HALFPI 4.71238898038468985766
-#define TWOPI_HALFPI 7.85398163397448309610
 
 struct pj_opaque {
     double a2, a4, b, c1, c3;
@@ -45,12 +43,12 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double lamt, xlam, sdsq, c, d, s, lamdp, phidp, lampp, tanph;
     double lamtp, cl, sd, sp, fac, sav, tanphi;
 
-    if (lp.phi > HALFPI)
-        lp.phi = HALFPI;
-    else if (lp.phi < -HALFPI)
-        lp.phi = -HALFPI;
+    if (lp.phi > M_HALFPI)
+        lp.phi = M_HALFPI;
+    else if (lp.phi < -M_HALFPI)
+        lp.phi = -M_HALFPI;
 
-    lampp = lp.phi >= 0. ? HALFPI : PI_HALFPI;
+    lampp = lp.phi >= 0. ? M_HALFPI : M_PI_HALFPI;
     tanphi = tan(lp.phi);
     for (nn = 0;;) {
         sav = lampp;
@@ -58,7 +56,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
         cl = cos(lamtp);
         if (fabs(cl) < TOL)
             lamtp -= TOL;
-        fac = lampp - sin(lampp) * (cl < 0. ? -HALFPI : HALFPI);
+        fac = lampp - sin(lampp) * (cl < 0. ? -M_HALFPI : M_HALFPI);
         for (l = 50; l; --l) {
             lamt = lp.lam + Q->p22 * sav;
             c = cos(lamt);
@@ -73,15 +71,15 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
         if (!l || ++nn >= 3 || (lamdp > Q->rlm && lamdp < Q->rlm2))
             break;
         if (lamdp <= Q->rlm)
-            lampp = TWOPI_HALFPI;
+            lampp = M_TWOPI_HALFPI;
         else if (lamdp >= Q->rlm2)
-            lampp = HALFPI;
+            lampp = M_HALFPI;
     }
     if (l) {
         sp = sin(lp.phi);
         phidp = aasin(P->ctx,(P->one_es * Q->ca * sp - Q->sa * cos(lp.phi) *
             sin(lamt)) / sqrt(1. - P->es * sp * sp));
-        tanph = log(tan(FORTPI + .5 * phidp));
+        tanph = log(tan(M_FORTPI + .5 * phidp));
         sd = sin(lamdp);
         sdsq = sd * sd;
         s = Q->p22 * Q->sa * cos(lamdp) * sqrt((1. + Q->t * sdsq)
@@ -118,7 +116,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     sl = sin(lamdp);
     fac = exp(sqrt(1. + s * s / Q->xj / Q->xj) * (xy.y -
         Q->c1 * sl - Q->c3 * sin(lamdp * 3.)));
-    phidp = 2. * (atan(fac) - FORTPI);
+    phidp = 2. * (atan(fac) - M_FORTPI);
     dd = sl * sl;
     if (fabs(cos(lamdp)) < TOL)
         lamdp -= TOL;
@@ -130,7 +128,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         * (1. + Q->u)));
     sl = lamt >= 0. ? 1. : -1.;
     scl = cos(lamdp) >= 0. ? 1. : -1;
-    lamt -= HALFPI * (1. - scl) * sl;
+    lamt -= M_HALFPI * (1. - scl) * sl;
     lp.lam = lamt - Q->p22 * lamdp;
     if (fabs(Q->sa) < TOL)
         lp.phi = aasin(P->ctx,spp / sqrt(P->one_es * P->one_es + P->es * sppsq));
@@ -170,11 +168,11 @@ PJ *PROJECTION(lsat) {
     path = pj_param(P->ctx, P->params, "ipath").i;
     if (path <= 0 || path > (land <= 3 ? 251 : 233)) E_ERROR(-29);
     if (land <= 3) {
-        P->lam0 = DEG_TO_RAD * 128.87 - TWOPI / 251. * path;
+        P->lam0 = DEG_TO_RAD * 128.87 - M_TWOPI / 251. * path;
         Q->p22 = 103.2669323;
         alf = DEG_TO_RAD * 99.092;
     } else {
-        P->lam0 = DEG_TO_RAD * 129.3 - TWOPI / 233. * path;
+        P->lam0 = DEG_TO_RAD * 129.3 - M_TWOPI / 233. * path;
         Q->p22 = 98.8841202;
         alf = DEG_TO_RAD * 98.2;
     }
@@ -191,8 +189,8 @@ PJ *PROJECTION(lsat) {
     Q->t = ess * (2. - P->es) * P->rone_es * P->rone_es;
     Q->u = esc * P->rone_es;
     Q->xj = P->one_es * P->one_es * P->one_es;
-    Q->rlm = PI * (1. / 248. + .5161290322580645);
-    Q->rlm2 = Q->rlm + TWOPI;
+    Q->rlm = M_PI * (1. / 248. + .5161290322580645);
+    Q->rlm2 = Q->rlm + M_TWOPI;
     Q->a2 = Q->a4 = Q->b = Q->c1 = Q->c3 = 0.;
     seraz0(0., 1., P);
     for (lam = 9.; lam <= 81.0001; lam += 18.)

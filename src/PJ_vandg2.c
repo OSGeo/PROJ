@@ -9,7 +9,6 @@ PROJ_HEAD(vandg2, "van der Grinten II") "\n\tMisc Sph, no inv.";
 PROJ_HEAD(vandg3, "van der Grinten III") "\n\tMisc Sph, no inv.";
 
 #define TOL    1e-10
-#define TWORPI 0.63661977236758134308
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
@@ -17,25 +16,25 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     struct pj_opaque *Q = P->opaque;
     double x1, at, bt, ct;
 
-    bt = fabs(TWORPI * lp.phi);
+    bt = fabs(M_TWO_D_PI * lp.phi);
     if ((ct = 1. - bt * bt) < 0.)
         ct = 0.;
     else
         ct = sqrt(ct);
     if (fabs(lp.lam) < TOL) {
         xy.x = 0.;
-        xy.y = PI * (lp.phi < 0. ? -bt : bt) / (1. + ct);
+        xy.y = M_PI * (lp.phi < 0. ? -bt : bt) / (1. + ct);
     } else {
-        at = 0.5 * fabs(PI / lp.lam - lp.lam / PI);
+        at = 0.5 * fabs(M_PI / lp.lam - lp.lam / M_PI);
         if (Q->vdg3) {
             x1 = bt / (1. + ct);
-            xy.x = PI * (sqrt(at * at + 1. - x1 * x1) - at);
-            xy.y = PI * x1;
+            xy.x = M_PI * (sqrt(at * at + 1. - x1 * x1) - at);
+            xy.y = M_PI * x1;
         } else {
             x1 = (ct * sqrt(1. + at * at) - at * ct * ct) /
                 (1. + at * at * bt * bt);
-            xy.x = PI * x1;
-            xy.y = PI * sqrt(1. - x1 * (x1 + 2. * at) + TOL);
+            xy.x = M_PI * x1;
+            xy.y = M_PI * sqrt(1. - x1 * (x1 + 2. * at) + TOL);
         }
         if ( lp.lam < 0.) xy.x = -xy.x;
         if ( lp.phi < 0.) xy.y = -xy.y;

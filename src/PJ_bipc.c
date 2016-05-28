@@ -39,8 +39,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     sphi = sin(lp.phi);
     cdlam = cos(sdlam = lamB - lp.lam);
     sdlam = sin(sdlam);
-    if (fabs(fabs(lp.phi) - HALFPI) < EPS10) {
-        Az = lp.phi < 0. ? PI : 0.;
+    if (fabs(fabs(lp.phi) - M_HALFPI) < EPS10) {
+        Az = lp.phi < 0. ? M_PI : 0.;
         tphi = HUGE_VAL;
     } else {
         tphi = sphi / cphi;

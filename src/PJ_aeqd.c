@@ -139,8 +139,8 @@ oblcon:
         lp.phi = -lp.phi;
         coslam = -coslam;
     case S_POLE:
-        if (fabs(lp.phi - HALFPI) < EPS10) F_ERROR;
-        xy.x = (xy.y = (HALFPI + lp.phi)) * sin(lp.lam);
+        if (fabs(lp.phi - M_HALFPI) < EPS10) F_ERROR;
+        xy.x = (xy.y = (M_HALFPI + lp.phi)) * sin(lp.lam);
         xy.y *= coslam;
         break;
     }
@@ -203,9 +203,9 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     struct pj_opaque *Q = P->opaque;
     double cosc, c_rh, sinc;
 
-    if ((c_rh = hypot(xy.x, xy.y)) > PI) {
-        if (c_rh - EPS10 > PI) I_ERROR;
-        c_rh = PI;
+    if ((c_rh = hypot(xy.x, xy.y)) > M_PI) {
+        if (c_rh - EPS10 > M_PI) I_ERROR;
+        c_rh = M_PI;
     } else if (c_rh < EPS10) {
         lp.phi = P->phi0;
         lp.lam = 0.;
@@ -226,10 +226,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         }
         lp.lam = xy.y == 0. ? 0. : atan2(xy.x, xy.y);
     } else if (Q->mode == N_POLE) {
-        lp.phi = HALFPI - c_rh;
+        lp.phi = M_HALFPI - c_rh;
         lp.lam = atan2(xy.x, -xy.y);
     } else {
-        lp.phi = c_rh - HALFPI;
+        lp.phi = c_rh - M_HALFPI;
         lp.lam = atan2(xy.x, xy.y);
     }
     return lp;
@@ -263,7 +263,7 @@ PJ *PROJECTION(aeqd) {
 
     geod_init(&Q->g, P->a, P->es / (1 + sqrt(P->one_es)));
     P->phi0 = pj_param(P->ctx, P->params, "rlat_0").f;
-    if (fabs(fabs(P->phi0) - HALFPI) < EPS10) {
+    if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) {
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
         Q->sinph0 = P->phi0 < 0. ? -1. : 1.;
         Q->cosph0 = 0.;
@@ -288,10 +288,10 @@ PJ *PROJECTION(aeqd) {
         } else {
             switch (Q->mode) {
             case N_POLE:
-                Q->Mp = pj_mlfn(HALFPI, 1., 0., Q->en);
+                Q->Mp = pj_mlfn(M_HALFPI, 1., 0., Q->en);
                 break;
             case S_POLE:
-                Q->Mp = pj_mlfn(-HALFPI, -1., 0., Q->en);
+                Q->Mp = pj_mlfn(-M_HALFPI, -1., 0., Q->en);
                 break;
             case EQUIT:
             case OBLIQ:

@@ -103,7 +103,7 @@ PJ *PROJECTION(tpeqd) {
 	Q->sa = sin(pp);
 	Q->lp = adjlon ( atan2 (Q->cp1 * cos(A12), Q->sp1) - Q->hz0);
 	Q->dlam2 *= .5;
-	Q->lamc = HALFPI - atan2(sin(A12) * Q->sp1, cos(A12)) - Q->dlam2;
+	Q->lamc = M_HALFPI - atan2(sin(A12) * Q->sp1, cos(A12)) - Q->dlam2;
 	Q->thz0 = tan (Q->hz0);
 	Q->rhshz0 = .5 / sin (Q->hz0);
 	Q->r2z0 = 0.5 / Q->z02;

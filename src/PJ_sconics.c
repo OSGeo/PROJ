@@ -169,7 +169,7 @@ static PJ *setup(PJ *P, int type) {
         Q->n = sin (Q->sig);
         Q->c2 = cos (del);
         Q->c1 = 1./tan (Q->sig);
-        if (fabs (del = P->phi0 - Q->sig) - EPS10 >= HALFPI)
+        if (fabs (del = P->phi0 - Q->sig) - EPS10 >= M_HALFPI)
             E_ERROR(-43);
         Q->rho_0 = Q->c2 * (Q->c1 - tan (del));
         break;

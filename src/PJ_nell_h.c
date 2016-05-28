@@ -32,7 +32,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
             break;
     }
     if (!i) {
-        lp.phi = p < 0. ? -HALFPI : HALFPI;
+        lp.phi = p < 0. ? -M_HALFPI : M_HALFPI;
         lp.lam = 2. * xy.x;
     } else
         lp.lam = 2. * xy.x / (1. + cos(lp.phi));

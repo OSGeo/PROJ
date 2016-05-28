@@ -30,7 +30,7 @@ pj_inv(XY xy, PJ *P) {
 		lp.lam += P->lam0; /* reduce from del lp.lam */
 		if (!P->over)
 			lp.lam = adjlon(lp.lam); /* adjust longitude to CM */
-		if (P->geoc && fabs(fabs(lp.phi)-HALFPI) > EPS)
+		if (P->geoc && fabs(fabs(lp.phi)-M_HALFPI) > EPS)
 			lp.phi = atan(P->one_es * tan(lp.phi));
 	    }
         }

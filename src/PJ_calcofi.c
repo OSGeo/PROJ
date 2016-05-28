@@ -46,7 +46,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     /* if the user has specified +lon_0 or +k0 for some reason,
     we're going to ignore it so that xy is consistent with point O */
     lp.lam = lp.lam + P->lam0;
-    if (fabs(fabs(lp.phi) - HALFPI) <= EPS10) F_ERROR;
+    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) F_ERROR;
     xy.x = lp.lam;
     xy.y = -log(pj_tsfn(lp.phi, sin(lp.phi), P->e)); /* Mercator transform xy*/
     oy = -log(pj_tsfn(PT_O_PHI, sin(PT_O_PHI), P->e));
@@ -74,14 +74,14 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     double l2;
     double ry;
     lp.lam = lp.lam + P->lam0;
-    if (fabs(fabs(lp.phi) - HALFPI) <= EPS10) F_ERROR;
+    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) F_ERROR;
     xy.x = lp.lam;
-    xy.y = log(tan(FORTPI + .5 * lp.phi));
-    oy = log(tan(FORTPI + .5 * PT_O_PHI));
+    xy.y = log(tan(M_FORTPI + .5 * lp.phi));
+    oy = log(tan(M_FORTPI + .5 * PT_O_PHI));
     l1 = (xy.y - oy) * tan(ROTATION_ANGLE);
     l2 = -xy.x - l1 + PT_O_LAMBDA;
     ry = l2 * cos(ROTATION_ANGLE) * sin(ROTATION_ANGLE) + xy.y;
-    ry = HALFPI - 2. * atan(exp(-ry));
+    ry = M_HALFPI - 2. * atan(exp(-ry));
     xy.x = PT_O_LINE - RAD_TO_DEG *
         (ry - PT_O_PHI) * DEG_TO_LINE / cos(ROTATION_ANGLE);
     xy.y = PT_O_STATION + RAD_TO_DEG *
@@ -131,9 +131,9 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     ry = PT_O_PHI - LINE_TO_RAD * (xy.x - PT_O_LINE) *
         cos(ROTATION_ANGLE);
     lp.phi = ry - STATION_TO_RAD * (xy.y - PT_O_STATION) * sin(ROTATION_ANGLE);
-    oymctr = log(tan(FORTPI + .5 * PT_O_PHI));
-    rymctr = log(tan(FORTPI + .5 * ry));
-    xymctr = log(tan(FORTPI + .5 * lp.phi));
+    oymctr = log(tan(M_FORTPI + .5 * PT_O_PHI));
+    rymctr = log(tan(M_FORTPI + .5 * ry));
+    xymctr = log(tan(M_FORTPI + .5 * lp.phi));
     l1 = (xymctr - oymctr) * tan(ROTATION_ANGLE);
     l2 = (rymctr - xymctr) / (cos(ROTATION_ANGLE) * sin(ROTATION_ANGLE));
     lp.lam = PT_O_LAMBDA - (l1 + l2);
