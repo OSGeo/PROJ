@@ -51,72 +51,12 @@
 PROJ_HEAD(cart,    "Geodetic/cartesian conversions");
 
 
-#if 0
-/* Projection specific elements for the PJ object */
-struct pj_opaque {
-    GeocentricInfo g;
-};
-
-
-
-
-static COORDINATE cart_3d (COORDINATE point, int direction, PJ *P) {
-    long ret;
-    double X, Y, Z, LAM, PHI;
-    COORDINATE result = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
-
-    if (direction == 0) {
-        ret = pj_Convert_Geodetic_To_Geocentric (
-            &(P->opaque->g),
-            point.lpz.phi,
-            point.lpz.lam,
-            point.lpz.z,
-            &X,
-            &Y,
-            &Z
-        );
-
-
-        if (GEOCENT_NO_ERROR != ret)
-            return result;
-
-        result.xyz.x = X / P->a;
-        result.xyz.y = Y / P->a;
-        result.xyz.z = Z;
-
-        return result;
-    }
-
-    pj_show_coordinate ("cart1: ", point, 1);
-    pj_Convert_Geocentric_To_Geodetic (
-        &(P->opaque->g),
-        point.xyz.x,
-        point.xyz.y,
-        point.xyz.z,
-        &PHI,
-        &LAM,
-        &Z
-    );
-
-    result.lpz.lam = LAM * P->a;
-    result.lpz.phi = PHI * P->a;
-    result.lpz.z   =   Z;
-pj_show_coordinate ("cart2: ", result, 1);
-    return result;
-}
-#endif
-
-
-
-
-
-
-
 static void *cart_freeup (PJ *P, int errlev) {         /* Destructor */
     if (0==P)
         return 0;
 
-    pj_ctx_set_errno (P->ctx, errlev);
+    if (0!=errlev)
+        pj_ctx_set_errno (P->ctx, errlev);
 
     if (0==P->opaque)
         return pj_dealloc (P);
@@ -126,14 +66,11 @@ static void *cart_freeup (PJ *P, int errlev) {         /* Destructor */
 }
 
 
-/* Adapts pipeline_freeup to the format defined for the PJ object */
+/* Adapts cart_freeup to the format defined for the PJ object */
 static void freeup (PJ *P) {
     cart_freeup (P, 0);
     return;
 }
-
-
-
 
 
 /**************************************************************
@@ -155,10 +92,9 @@ static void freeup (PJ *P) {
 
     (WP, below)
 
-    The code is probably not as robust at that in geocent.c,
-    since no checks for e.g. latitude = +/-90 is done (which,
-    making cos(phi) = 0, will trip up the computation of the
-    geodetic height-coordinate).
+    These routines are probably not as robust at those in
+    geocent.c, at least thay haven't been through as heavy
+    use as their geocent sisters.
 
 **************************************************************/
 
@@ -189,6 +125,7 @@ static double second_eccentricity_squared (double a, double es) {
 static XYZ cartesian (LPZ geodetic,  PJ *P) {
     double N, h, lam, phi, cosphi = cos(geodetic.phi);
     XYZ xyz;
+    COORDINATE log;
 
     N   =  normal_radius_of_curvature(P->a, P->es, geodetic.phi);
     phi =  geodetic.phi;
@@ -228,7 +165,6 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
     cartesian.x *= P->a;
     cartesian.y *= P->a;
     log.xyz = cartesian;
-    pj_log_coordinate (P->ctx, 5, "geodetic. Input: ", log, 0);
 
     /* Perpendicular distance from point to Z-axis (HM eq. 5-28) */
     p = hypot (cartesian.x, cartesian.y);
@@ -258,7 +194,6 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
     else
         lpz.z =  p / c  -  N;
 
-    /* pj_log_coordinate (P->ctx, 5, "Geodetic - output: ", lpz, 0); */
     return lpz;
 }
 

@@ -1,6 +1,7 @@
 /* general forward projection */
 #define PJ_LIB__
 #include <projects.h>
+#include <pj_pipeline.h>
 #include <errno.h>
 # define EPS 1.0e-12
 
@@ -12,6 +13,9 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
 
 	if (0==P->fwd3d)
     	return xyz_error;
+
+    if (pj_is_isomorphic (P))
+	    return  (*P->fwd3d)(lpz, P);
 
 	/* check for forward and latitude or longitude overange */
 	if ((t = fabs(lpz.phi)-HALFPI) > EPS || fabs(lpz.lam) > 10.) {
@@ -34,6 +38,7 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
 		lpz.lam = adjlon (lpz.lam); /* adjust del longitude */
 
     xyz = (*P->fwd3d)(lpz, P); /* project */
+
     if ( P->ctx->last_errno )
 		return xyz_error;
 

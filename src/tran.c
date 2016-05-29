@@ -272,6 +272,10 @@ int main(int argc, char **argv) {
         angular_input = 0;
         angular_output = 1;
     }
+    else {
+        angular_input = 1;
+        angular_output = 0;        
+    }
 
     if (pj_is_pipeline (P)) {
         angular_input  = pj_pipeline_angular_input (P, direction);

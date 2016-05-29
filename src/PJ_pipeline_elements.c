@@ -156,17 +156,18 @@ PJ *PROJECTION(add) {
     P->inv3d = add_reverse_3d;
     P->fwd   = add_forward;
     P->inv   = add_reverse;
+    pj_set_isomorphic (P);
 
     if ( (pj_param(P->ctx, P->params, "tx").i) ) {
-        xyz.x = pj_param(P->ctx, P->params, "rx").f;
+        xyz.x = pj_param(P->ctx, P->params, "dx").f;
     }
 
     if ( (pj_param(P->ctx, P->params, "ty").i) ) {
-        xyz.y = pj_param(P->ctx, P->params, "ry").f;
+        xyz.y = pj_param(P->ctx, P->params, "dy").f;
     }
 
     if ( (pj_param(P->ctx, P->params, "tz").i) ) {
-        xyz.z = pj_param(P->ctx, P->params, "rz").f;
+        xyz.z = pj_param(P->ctx, P->params, "dz").f;
     }
 
     Q->xyz = xyz;
@@ -284,31 +285,31 @@ PJ *PROJECTION(helmert) {
     P->inv   = helmert_reverse;
 
     if ( (pj_param(P->ctx, P->params, "tx").i) ) {
-        xyz.x = pj_param(P->ctx, P->params, "rx").f;
+        xyz.x = pj_param(P->ctx, P->params, "dx").f;
     }
 
     if ( (pj_param(P->ctx, P->params, "ty").i) ) {
-        xyz.y = pj_param(P->ctx, P->params, "ry").f;
+        xyz.y = pj_param(P->ctx, P->params, "dy").f;
     }
 
     if ( (pj_param(P->ctx, P->params, "tz").i) ) {
-        xyz.z = pj_param(P->ctx, P->params, "rz").f;
+        xyz.z = pj_param(P->ctx, P->params, "dz").f;
     }
 
     if ( (pj_param(P->ctx, P->params, "trx").i) ) {
-        opk.o = pj_param(P->ctx, P->params, "rrx").f * MAS_TO_RAD;
+        opk.o = pj_param(P->ctx, P->params, "drx").f * MAS_TO_RAD;
     }
 
     if ( (pj_param(P->ctx, P->params, "try").i) ) {
-        opk.p = pj_param(P->ctx, P->params, "rry").f * MAS_TO_RAD;
+        opk.p = pj_param(P->ctx, P->params, "dry").f * MAS_TO_RAD;
     }
 
     if ( (pj_param(P->ctx, P->params, "trz").i) ) {
-        opk.k = pj_param(P->ctx, P->params, "rrz").f * MAS_TO_RAD;
+        opk.k = pj_param(P->ctx, P->params, "drz").f * MAS_TO_RAD;
     }
 
     if ( (pj_param(P->ctx, P->params, "ts").i) ) {
-        scale = pj_param(P->ctx, P->params, "rs").f;
+        scale = pj_param(P->ctx, P->params, "ds").f;
     }
 
     Q->xyz = xyz;

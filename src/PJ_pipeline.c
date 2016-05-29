@@ -115,14 +115,18 @@ int pj_show_coordinate (char *banner, COORDINATE point, int angular) {
 /* Apply the most appropriate projection function. No-op if none appropriate */
 COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
 
+    /* i we´re at the beginning of the pipeline call it directly,
+       since pj_fwd3d rejects on most input values */
+    if (pj_is_pipeline(P))
+        return pipeline_3d(point, direction, P);
+
+
+    /* Here come the real cases. We run these through the pj_fwd/inv */
+    /* wrappers, in order to get scaling correctly applied */
+
     /* Forward */
     if (direction == 0) {
-        /* run the pipeline directly: pj_fwd3d rejects on most input values */
-        if ((P->fwd3d==pipeline_forward_3d) || (P->fwd==pipeline_forward))
-            return pipeline_3d(point, 0, P);
-
-        /* Here come the real cases. We run these through the pj_fwd/inv wrappers, */
-        /* in order to get scaling correctly applied */
+        puts ("FORWARD");
         if (P->fwd3d)
                 point.xyz = pj_fwd3d (point.lpz, P);
         else if (P->fwd)
@@ -131,15 +135,42 @@ COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
     }
 
     /* Inverse */
-    if ((P->inv3d==pipeline_reverse_3d) || (P->inv==pipeline_reverse))
-        return pipeline_3d(point, 1, P);
-
+    puts ("INVERSE");
     if (P->inv3d)
         point.lpz = pj_inv3d (point.xyz, P);
     else if (P->inv)
         point.lp = pj_inv (point.xy, P);
     return point;
 }
+
+
+
+
+/* Indicator with dummy functionality to silence compiler warnings */
+static XY isomorphic_indicator (LP lp, PJ *P) {
+    COORDINATE point = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
+
+    if (0==P)
+        return point.xy;
+    if (0==P->fwd3d)
+        return point.xy;
+
+    point.lp    = lp;
+    point.lpz.z = 0;
+    point.xyz = (*P->fwd3d) (point.lpz, P);
+}
+
+int pj_is_isomorphic (PJ *P) {
+    return (P->fwd == isomorphic_indicator);
+}
+
+int pj_set_isomorphic (PJ *P) {
+    if (0==P)
+        return 1;
+    P->fwd = isomorphic_indicator;
+    return 0;
+}
+
 
 
 
@@ -163,12 +194,16 @@ static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P) {
         int d = direction;
         if (P->opaque->reverse_step[i])
             d = !d;
+        if (i==first_step)
+            pj_log_coordinate (P->ctx, 5, "Input", point, !direction);
         point = pj_apply_projection (point, d, P + i);
-        pj_log_coordinate (P->ctx, 5, (P + i)->descr, point, 0);
+        pj_log_coordinate (P->ctx, 5, (P + i)->descr, point, d);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
-        if (P->opaque->verbose) for (j = 0;  j < P->opaque->depth; j++)
-            pj_log_coordinate (P->ctx, 7, "Stack: ", P->opaque->stack[j], 0);
+        if (P->opaque->verbose) for (j = 0;  j < P->opaque->depth; j++) {
+            pj_log_coordinate (P->ctx, 10, "Stack (linear): ",  P->opaque->stack[j], 0);
+            pj_log_coordinate (P->ctx, 10, "Stack (angular): ", P->opaque->stack[j], 1);
+        }
     }
 
     P->opaque->depth = 0;    /* Clear the stack */
@@ -424,7 +459,7 @@ PJ *PROJECTION(pipeline) {
         if (0==strcmp ("proj=pipeline", L->param)) {
             L->used = 1;
             if (0 != L_first_step)
-                return pipeline_freeup (P, 51); /* ERROR: +first before +proj=pipeline */
+                return pipeline_freeup (P, 51); /* ERROR: +step before +proj=pipeline */
             if (0 != L_pipeline)
                 return pipeline_freeup (P, 52); /* ERROR: nested pipelines */
             L_pipeline = L;
