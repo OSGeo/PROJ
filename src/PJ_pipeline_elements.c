@@ -47,63 +47,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-24
 PROJ_HEAD(add,     "Add a constant to the given coordinate (3 parameter shift)");
 
 
-
-
-
-
-
-
-
-
-
-static COORDINATE add_3d (COORDINATE point, int direction, PJ *P) {
-/*    long ret;
-	double X, Y, Z, LAM, PHI;
-	COORDINATE result = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
-	COORDINATE delta  = {{0, 0, 0}};
-*/
-    return point;
-}
-
-
-
-
-static XYZ add_forward_3d (LPZ lpz, PJ *P) {
-    COORDINATE point;
-    point.lpz = lpz;
-    point = add_3d (point, 0, P);
-    return point.xyz;
-}
-
-static LPZ add_reverse_3d (XYZ xyz, PJ *P) {
-    COORDINATE point;
-    point.xyz = xyz;
-    point = add_3d (point, 1, P);
-    return point.lpz;
-}
-
-static XY add_forward (LP lp, PJ *P) {
-    COORDINATE point;
-    point.lp = lp;
-    point.lpz.z = 0;
-
-    point = add_3d (point, 0, P);
-    return point.xy;
-}
-
-static LP add_reverse (XY xy, PJ *P) {
-    COORDINATE point;
-    point.xy = xy;
-    point.xyz.z = 0;
-
-    point = add_3d (point, 1, P);
-    return point.lp;
-}
-
-
-
-
-static void *add_freeup (PJ *P, int errlev) {         /* Destructor */
+static void *freeup_msg (PJ *P, int errlev) {         /* Destructor */
     if (0==P)
         return 0;
 
@@ -119,22 +63,110 @@ static void *add_freeup (PJ *P, int errlev) {         /* Destructor */
 
 /* Adapts pipeline_freeup to the format defined for the PJ object */
 static void freeup (PJ *P) {
-    add_freeup (P, 0);
+    freeup_msg (P, 0);
     return;
 }
 
 
 
 
+
+
+
+
+
+/* Projection specific elements for the "add" PJ object */
+struct pj_opaque_add { XYZ xyz; };
+
+static XYZ add_forward_3d (LPZ lpz, PJ *P) {
+    struct pj_opaque_add *Q = (struct pj_opaque_add *) P->opaque;
+    COORDINATE point;
+    point.lpz = lpz;
+    point.xyz.x += Q->xyz.x;
+    point.xyz.y += Q->xyz.y;
+    point.xyz.z += Q->xyz.z;
+    return point.xyz;
+}
+
+static LPZ add_reverse_3d (XYZ xyz, PJ *P) {
+    struct pj_opaque_add *Q = (struct pj_opaque_add *) P->opaque;
+    COORDINATE point;
+    point.xyz = xyz;
+    point.xyz.x -= Q->xyz.x;
+    point.xyz.y -= Q->xyz.y;
+    point.xyz.z -= Q->xyz.z;
+    return point.lpz;
+}
+
+static XY add_forward (LP lp, PJ *P) {
+    struct pj_opaque_add *Q = (struct pj_opaque_add *) P->opaque;
+    COORDINATE point;
+    point.lp = lp;
+    point.xy.x += Q->xyz.x;
+    point.xy.y += Q->xyz.y;
+    return point.xy;
+}
+
+static LP add_reverse (XY xy, PJ *P) {
+    struct pj_opaque_add *Q = (struct pj_opaque_add *) P->opaque;
+    COORDINATE point;
+    point.xy = xy;
+    point.xy.x -= Q->xyz.x;
+    point.xy.y -= Q->xyz.y;
+    return point.lp;
+}
+
+#if 0
+/* not used - left here as demo for how to do projection specific freeups */
+static void *freeup_msg_add (PJ *P, int errlev) {         /* Destructor */
+    if (0==P)
+        return 0;
+    pj_ctx_set_errno (P->ctx, errlev);
+
+    if (0==P->opaque)
+        return pj_dealloc (P);
+
+    /* projection specific deallocation goes here */
+
+    pj_dealloc (P->opaque);
+    return pj_dealloc(P);
+}
+
+
+/* Adapts pipeline_freeup to the format defined for the PJ object */
+static void freeup_msg_add (PJ *P) {
+    freeup_new_add (P, 0);
+    return;
+}
+#endif
+
+
 PJ *PROJECTION(add) {
+    XYZ xyz = {0, 0, 0};
+
+    struct pj_opaque_add *Q = pj_calloc (1, sizeof (struct pj_opaque_add));
+    if (0==Q)
+        return freeup_msg (P, ENOMEM);
+    P->opaque = (void *) Q;
 
     P->fwd3d = add_forward_3d;
     P->inv3d = add_reverse_3d;
     P->fwd   = add_forward;
     P->inv   = add_reverse;
 
-    P->opaque = 0;
+    if ( (pj_param(P->ctx, P->params, "tx").i) ) {
+        xyz.x = pj_param(P->ctx, P->params, "rx").f;
+    }
 
+    if ( (pj_param(P->ctx, P->params, "ty").i) ) {
+        xyz.y = pj_param(P->ctx, P->params, "ry").f;
+    }
+
+    if ( (pj_param(P->ctx, P->params, "tz").i) ) {
+        xyz.z = pj_param(P->ctx, P->params, "rz").f;
+    }
+
+    Q->xyz = xyz;
     return P;
 }
 

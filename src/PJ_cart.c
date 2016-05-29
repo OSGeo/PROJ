@@ -61,45 +61,45 @@ struct pj_opaque {
 
 static COORDINATE cart_3d (COORDINATE point, int direction, PJ *P) {
     long ret;
-	double X, Y, Z, LAM, PHI;
-	COORDINATE result = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
+    double X, Y, Z, LAM, PHI;
+    COORDINATE result = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
 
     if (direction == 0) {
         ret = pj_Convert_Geodetic_To_Geocentric (
-		    &(P->opaque->g),
-		    point.lpz.phi,
-		    point.lpz.lam,
-		    point.lpz.z,
+            &(P->opaque->g),
+            point.lpz.phi,
+            point.lpz.lam,
+            point.lpz.z,
             &X,
             &Y,
             &Z
-		);
+        );
 
 
         if (GEOCENT_NO_ERROR != ret)
-	        return result;
+            return result;
 
-		result.xyz.x = X / P->a;
-		result.xyz.y = Y / P->a;
-		result.xyz.z = Z;
+        result.xyz.x = X / P->a;
+        result.xyz.y = Y / P->a;
+        result.xyz.z = Z;
 
-		return result;
-	}
+        return result;
+    }
 
     pj_show_coordinate ("cart1: ", point, 1);
-	pj_Convert_Geocentric_To_Geodetic (
-	    &(P->opaque->g),
-		point.xyz.x,
-		point.xyz.y,
-		point.xyz.z,
-		&PHI,
-		&LAM,
-		&Z
-	);
+    pj_Convert_Geocentric_To_Geodetic (
+        &(P->opaque->g),
+        point.xyz.x,
+        point.xyz.y,
+        point.xyz.z,
+        &PHI,
+        &LAM,
+        &Z
+    );
 
-	result.lpz.lam = LAM * P->a;
-	result.lpz.phi = PHI * P->a;
-	result.lpz.z   =   Z;
+    result.lpz.lam = LAM * P->a;
+    result.lpz.phi = PHI * P->a;
+    result.lpz.z   =   Z;
 pj_show_coordinate ("cart2: ", result, 1);
     return result;
 }
@@ -169,7 +169,7 @@ static void freeup (PJ *P) {
 
 
 /**************************************************************
-                  CARTESIAN TO ELLIPSOIDAL
+                CARTESIAN / GEODETIC CONVERSIONS
 ***************************************************************
     This material follows:
 
@@ -186,6 +186,11 @@ static void freeup (PJ *P) {
     https://en.m.wikipedia.org/wiki/Geographic_coordinate_conversion
 
     (WP, below)
+
+    The code is probably not as robust at that in geocent.c,
+    since no checks for e.g. latitude = +/-90 is done (which,
+    making cos(phi) = 0, will trip up the computation of the
+    geodetic height-coordinate).
 
 **************************************************************/
 
@@ -210,23 +215,23 @@ static double second_eccentricity_squared (double a, double es) {
     return (a - b) * (a + b)  /  (b*b);
 }
 
-static XYZ cartesian (LPZ ellipsoidal,  PJ *P) {
-    double N, h, lam, phi, cosphi = cos(ellipsoidal.phi);
+static XYZ cartesian (LPZ geodetic,  PJ *P) {
+    double N, h, lam, phi, cosphi = cos(geodetic.phi);
     XYZ xyz;
 
-    pj_log_coordinate (P->ctx, 5, "Cartesian - input:  ", ellipsoidal, 1);
+    /* pj_log_coordinate (P->ctx, 5, "Cartesian - input:  ", geodetic, 1); */
 
-    N   =  normal_radius_of_curvature(P->a, P->es, ellipsoidal.phi);
+    N   =  normal_radius_of_curvature(P->a, P->es, geodetic.phi);
 
-    phi =  ellipsoidal.phi;
-    lam =  ellipsoidal.lam;
-    h   =  ellipsoidal.z;
+    phi =  geodetic.phi;
+    lam =  geodetic.lam;
+    h   =  geodetic.z;
 
     /* HM formula 5-27 (z formula follows WP) */
     xyz.x = (N + h) * cosphi * cos(lam);
     xyz.y = (N + h) * cosphi * sin(lam);
     xyz.z = (N * (1 - P->es) + h) * sin(phi);
-    pj_log_coordinate (P->ctx, 5, "Cartesian - output: ", xyz, 0);
+    /* pj_log_coordinate (P->ctx, 5, "Cartesian - output: ", xyz, 0); */
 
     /*********************************************************************/
     /*                                                                   */
@@ -247,7 +252,7 @@ static XYZ cartesian (LPZ ellipsoidal,  PJ *P) {
 }
 
 
-static LPZ ellipsoidal (XYZ cartesian,  PJ *P) {
+static LPZ geodetic (XYZ cartesian,  PJ *P) {
     double N, b, p, theta, c, s, e2s;
     LPZ lpz;
 
@@ -270,20 +275,20 @@ static LPZ ellipsoidal (XYZ cartesian,  PJ *P) {
     lpz.phi  =  atan2 (cartesian.z + e2s*b*s*s*s,  p - P->es*P->a*c*c*c);
     lpz.lam  =  atan2 (cartesian.y, cartesian.x);
     N        =  normal_radius_of_curvature (P->a, P->es, lpz.phi);
+    /* should switch to something more robust close to the poles */
     lpz.z    =  p / cos (lpz.phi)  -  N;
 
-    pj_log_coordinate (P->ctx, 5, "Ellipsoidal - output: ", lpz, 0);
+    /* pj_log_coordinate (P->ctx, 5, "Geodetic - output: ", lpz, 0); */
     return lpz;
 }
 
 
 PJ *PROJECTION(cart) {
     int err;
-	double semiminor;
-    COORDINATE point = {{55 * DEG_TO_RAD, 12 * DEG_TO_RAD, 100}};
+    double semiminor;
 
-    P->fwd3d  =  cartesian;      /* cart_forward_3d; */
-    P->inv3d  =  ellipsoidal;    /* cart_reverse_3d; */
+    P->fwd3d  =  cart_forward_3d;   /* or use cartesian; */
+    P->inv3d  =  cart_reverse_3d;   /* or use geodetic;  */
     P->fwd    =  cart_forward;
     P->inv    =  cart_reverse;
     P->opaque =  pj_calloc (1, sizeof(struct pj_opaque));
@@ -291,9 +296,9 @@ PJ *PROJECTION(cart) {
         return 0;
 
     semiminor = P->a * sqrt (1 - P->es);
-	err = pj_Set_Geocentric_Parameters (&(P->opaque->g), P->a, semiminor);
+    err = pj_Set_Geocentric_Parameters (&(P->opaque->g), P->a, semiminor);
     if (GEOCENT_NO_ERROR != err)
-	    return cart_freeup (P, -6); /* the "e effectively==1" message, abused as generic geocentric error */
+        return cart_freeup (P, -6); /* the "e effectively==1" message, abused as generic geocentric error */
 
     return P;
 }
