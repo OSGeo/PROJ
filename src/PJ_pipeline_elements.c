@@ -45,6 +45,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-24
 #include <stddef.h>
 #include <errno.h>
 PROJ_HEAD(add,     "Add a constant to the given coordinate (3 parameter shift)");
+PROJ_HEAD(helmert, "7 parameter Helmert shift");
 
 
 static void *freeup_msg (PJ *P, int errlev) {         /* Destructor */
@@ -66,6 +67,8 @@ static void freeup (PJ *P) {
     freeup_msg (P, 0);
     return;
 }
+
+
 
 
 
@@ -173,3 +176,147 @@ PJ *PROJECTION(add) {
 
 /* selftest stub */
 int pj_add_selftest (void) {return 0;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Projection specific elements for the "helmert" PJ object */
+struct pj_opaque_helmert {
+    XYZ xyz;
+    OPK opk;
+    double scale;
+};
+
+static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
+    COORDINATE point;
+    double X, Y, Z, rX, rY, rZ, scale;
+
+    scale = 1 + Q->scale * 1e-6;
+
+    X = lpz.lam;
+    Y = lpz.phi;
+    Z = lpz.z;
+
+    rX = Q->opk.o;
+    rY = Q->opk.p;
+    rZ = Q->opk.k;
+
+    point.xyz = Q->xyz;
+    point.xyz.x += scale * (      X   -   rZ * Y   +   rY * Z);
+    point.xyz.y += scale * ( rZ * X   +        Y   -   rX * Z);
+    point.xyz.z += scale * (-rY * X   +   rX * Y   +        Z);
+    return point.xyz;
+}
+
+static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
+    COORDINATE point;
+    double X, Y, Z, rX, rY, rZ, scale;
+
+    scale = 1 - Q->scale * 1e-6;
+
+    X = xyz.x;
+    Y = xyz.y;
+    Z = xyz.z;
+
+    rX = -Q->opk.o;
+    rY = -Q->opk.p;
+    rZ = -Q->opk.k;
+
+    point.xyz.x = -Q->xyz.x;
+    point.xyz.y = -Q->xyz.y;
+    point.xyz.z = -Q->xyz.z;
+
+    point.xyz.x += scale * (      X   -   rZ * Y   +   rY * Z);
+    point.xyz.y += scale * ( rZ * X   +        Y   -   rX * Z);
+    point.xyz.z += scale * (-rY * X   +   rX * Y   +        Z);
+
+    return point.lpz;
+}
+
+static XY helmert_forward (LP lp, PJ *P) {
+    COORDINATE point;
+    point.lp = lp;
+    point.lpz.z = 0;
+    point.xyz = helmert_forward_3d (point.lpz, P);
+    return point.xy;
+}
+
+static LP helmert_reverse (XY xy, PJ *P) {
+    COORDINATE point;
+    point.xy = xy;
+    point.xyz.z = 0;
+    point.lpz = helmert_reverse_3d (point.xyz, P);
+    return point.lp;
+}
+
+
+/* Milliarcsecond to radians */
+#define MAS_TO_RAD (DEG_TO_RAD / 3600000)
+
+
+PJ *PROJECTION(helmert) {
+    XYZ xyz = {0, 0, 0};
+    OPK opk = {0, 0, 0};
+    double scale = 0;
+
+    struct pj_opaque_helmert *Q = pj_calloc (1, sizeof (struct pj_opaque_helmert));
+    if (0==Q)
+        return freeup_msg (P, ENOMEM);
+    P->opaque = (void *) Q;
+
+    P->fwd3d = helmert_forward_3d;
+    P->inv3d = helmert_reverse_3d;
+    P->fwd   = helmert_forward;
+    P->inv   = helmert_reverse;
+
+    if ( (pj_param(P->ctx, P->params, "tx").i) ) {
+        xyz.x = pj_param(P->ctx, P->params, "rx").f;
+    }
+
+    if ( (pj_param(P->ctx, P->params, "ty").i) ) {
+        xyz.y = pj_param(P->ctx, P->params, "ry").f;
+    }
+
+    if ( (pj_param(P->ctx, P->params, "tz").i) ) {
+        xyz.z = pj_param(P->ctx, P->params, "rz").f;
+    }
+
+    if ( (pj_param(P->ctx, P->params, "trx").i) ) {
+        opk.o = pj_param(P->ctx, P->params, "rrx").f * MAS_TO_RAD;
+    }
+
+    if ( (pj_param(P->ctx, P->params, "try").i) ) {
+        opk.p = pj_param(P->ctx, P->params, "rry").f * MAS_TO_RAD;
+    }
+
+    if ( (pj_param(P->ctx, P->params, "trz").i) ) {
+        opk.k = pj_param(P->ctx, P->params, "rrz").f * MAS_TO_RAD;
+    }
+
+    if ( (pj_param(P->ctx, P->params, "ts").i) ) {
+        scale = pj_param(P->ctx, P->params, "rs").f;
+    }
+
+    Q->xyz = xyz;
+    Q->opk = opk;
+    Q->scale = scale;
+    return P;
+}
+
+
+/* selftest stub */
+int pj_helmert_selftest (void) {return 0;}

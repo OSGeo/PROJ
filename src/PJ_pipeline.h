@@ -53,10 +53,14 @@ extern "C" {
 #define ASXY(lp)   (*(XY  *)(&lp ))
 #define ASLP(xy)   (*(LP  *)(&xy ))
 
+/* Omega, Phi, Kappa: Rotations */
+typedef struct {double o, p, k;} OPK;
+
 /* Avoid explicit type-punning: Use a union */
 typedef union {
     XYZ xyz;
     LPZ lpz;
+    OPK opk;
     XY  xy;
     LP  lp;
 } COORDINATE;

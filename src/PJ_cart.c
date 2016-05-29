@@ -48,9 +48,10 @@
 #include <stddef.h>
 #include <math.h>
 #include <errno.h>
-PROJ_HEAD(cart,    "Ellipsoidal-to-cartesian");
+PROJ_HEAD(cart,    "Geodetic/cartesian conversions");
 
 
+#if 0
 /* Projection specific elements for the PJ object */
 struct pj_opaque {
     GeocentricInfo g;
@@ -103,43 +104,10 @@ static COORDINATE cart_3d (COORDINATE point, int direction, PJ *P) {
 pj_show_coordinate ("cart2: ", result, 1);
     return result;
 }
+#endif
 
 
 
-
-static XYZ cart_forward_3d (LPZ lpz, PJ *P) {
-    COORDINATE point;
-    point.lpz = lpz;
-    pj_log( P->ctx, 5, "CART_FORWARD_3D");
-    point = cart_3d (point, 0, P);
-    return point.xyz;
-}
-
-static LPZ cart_reverse_3d (XYZ xyz, PJ *P) {
-    COORDINATE point;
-    point.xyz = xyz;
-    pj_log( P->ctx, 5, "CART_REVERSE_3D");
-    point = cart_3d (point, 1, P);
-    return point.lpz;
-}
-
-static XY cart_forward (LP lp, PJ *P) {
-    COORDINATE point;
-    point.lp = lp;
-    point.lpz.z = 0;
-
-    point = cart_3d (point, 0, P);
-    return point.xy;
-}
-
-static LP cart_reverse (XY xy, PJ *P) {
-    COORDINATE point;
-    point.xy = xy;
-    point.xyz.z = 0;
-
-    point = cart_3d (point, 1, P);
-    return point.lp;
-}
 
 
 
@@ -200,6 +168,8 @@ static double semiminor_axis (double a, double es) {
 
 static double normal_radius_of_curvature (double a, double es, double phi) {
     double s = sin(phi);
+    if (es==0)
+        return a;
     /* This is from WP.  HM formula 2-149 gives an a,b version */
     return a / sqrt (1 - es*s*s);
 }
@@ -215,14 +185,12 @@ static double second_eccentricity_squared (double a, double es) {
     return (a - b) * (a + b)  /  (b*b);
 }
 
+
 static XYZ cartesian (LPZ geodetic,  PJ *P) {
     double N, h, lam, phi, cosphi = cos(geodetic.phi);
     XYZ xyz;
 
-    /* pj_log_coordinate (P->ctx, 5, "Cartesian - input:  ", geodetic, 1); */
-
     N   =  normal_radius_of_curvature(P->a, P->es, geodetic.phi);
-
     phi =  geodetic.phi;
     lam =  geodetic.lam;
     h   =  geodetic.z;
@@ -255,9 +223,12 @@ static XYZ cartesian (LPZ geodetic,  PJ *P) {
 static LPZ geodetic (XYZ cartesian,  PJ *P) {
     double N, b, p, theta, c, s, e2s;
     LPZ lpz;
+    COORDINATE log;
 
     cartesian.x *= P->a;
     cartesian.y *= P->a;
+    log.xyz = cartesian;
+    pj_log_coordinate (P->ctx, 5, "geodetic. Input: ", log, 0);
 
     /* Perpendicular distance from point to Z-axis (HM eq. 5-28) */
     p = hypot (cartesian.x, cartesian.y);
@@ -275,31 +246,51 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
     lpz.phi  =  atan2 (cartesian.z + e2s*b*s*s*s,  p - P->es*P->a*c*c*c);
     lpz.lam  =  atan2 (cartesian.y, cartesian.x);
     N        =  normal_radius_of_curvature (P->a, P->es, lpz.phi);
-    /* should switch to something more robust close to the poles */
-    lpz.z    =  p / cos (lpz.phi)  -  N;
+
+
+    c  =  cos(lpz.phi);
+    if (fabs(c) < 1e-3) {
+        /* poleward of 89.9427 deg, we avoid division by zero */
+        /* by computing the height as the cartesian z value   */
+        /* minus the semiminor axis length                    */
+        lpz.z =  cartesian.z - (cartesian.z > 0? b: -b);
+    }
+    else
+        lpz.z =  p / c  -  N;
 
     /* pj_log_coordinate (P->ctx, 5, "Geodetic - output: ", lpz, 0); */
     return lpz;
 }
 
 
-PJ *PROJECTION(cart) {
-    int err;
-    double semiminor;
+/* Meaningless... */
+static XY cart_forward (LP lp, PJ *P) {
+    COORDINATE point;
+    point.lp = lp;
+    point.lpz.z = 0;
 
-    P->fwd3d  =  cart_forward_3d;   /* or use cartesian; */
-    P->inv3d  =  cart_reverse_3d;   /* or use geodetic;  */
+    point.xyz = cartesian (point.lpz, P);
+    return point.xy;
+}
+
+/* Meaningless... */
+static LP cart_reverse (XY xy, PJ *P) {
+    COORDINATE point;
+    point.xy = xy;
+    point.xyz.z = 0;
+
+    point.lpz = geodetic (point.xyz, P);
+    return point.lp;
+}
+
+
+
+
+PJ *PROJECTION(cart) {
+    P->fwd3d  =  cartesian;  /* or use cart_forward_3d, but add scaling */
+    P->inv3d  =  geodetic;   /* or use cart_reverse_3d, but add scaling */
     P->fwd    =  cart_forward;
     P->inv    =  cart_reverse;
-    P->opaque =  pj_calloc (1, sizeof(struct pj_opaque));
-    if (0==P->opaque)
-        return 0;
-
-    semiminor = P->a * sqrt (1 - P->es);
-    err = pj_Set_Geocentric_Parameters (&(P->opaque->g), P->a, semiminor);
-    if (GEOCENT_NO_ERROR != err)
-        return cart_freeup (P, -6); /* the "e effectively==1" message, abused as generic geocentric error */
-
     return P;
 }
 
