@@ -101,7 +101,7 @@ extern double hypot(double, double);
 #define M_FORTPI         M_PI_4                   /* pi/4 */
 #define M_HALFPI         M_PI_2                   /* pi/2 */
 /* M_PI                                               pi */
-#define M_PI_HALFPI      4.71238898038468985766   /* 1.5*pi */
+#define M_PI_HALFPI      4.71238898038468985769   /* 1.5*pi */
 #define M_TWOPI      	 6.28318530717958647693   /* 2*pi */
 #define M_TWO_D_PI       M_2_PI                   /* 2/pi */
 #define M_TWOPI_HALFPI   7.85398163397448309616   /* 2.5*pi */
