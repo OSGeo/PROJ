@@ -119,30 +119,6 @@ static LP add_reverse (XY xy, PJ *P) {
     return point.lp;
 }
 
-#if 0
-/* not used - left here as demo for how to do projection specific freeups */
-static void *freeup_msg_add (PJ *P, int errlev) {         /* Destructor */
-    if (0==P)
-        return 0;
-    pj_ctx_set_errno (P->ctx, errlev);
-
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    /* projection specific deallocation goes here */
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-
-/* Adapts pipeline_freeup to the format defined for the PJ object */
-static void freeup_msg_add (PJ *P) {
-    freeup_new_add (P, 0);
-    return;
-}
-#endif
-
 
 PJ *PROJECTION(add) {
     XYZ xyz = {0, 0, 0};
@@ -177,13 +153,6 @@ PJ *PROJECTION(add) {
 
 /* selftest stub */
 int pj_add_selftest (void) {return 0;}
-
-
-
-
-
-
-
 
 
 
@@ -283,6 +252,7 @@ PJ *PROJECTION(helmert) {
     P->inv3d = helmert_reverse_3d;
     P->fwd   = helmert_forward;
     P->inv   = helmert_reverse;
+    pj_set_isomorphic (P);
 
     if ( (pj_param(P->ctx, P->params, "tx").i) ) {
         xyz.x = pj_param(P->ctx, P->params, "dx").f;

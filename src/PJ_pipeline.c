@@ -144,10 +144,44 @@ COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
 }
 
 
+/********************************************************************
 
+                  ISOMORPHIC TRANSFORMATIONS
 
-/* Indicator with dummy functionality to silence compiler warnings */
+*********************************************************************
+
+    In this context, an isomorphic transformation is a proj PJ
+    object returning the same kind of coordinates that it
+    receives, i.e. a transformation from angular to angular or
+    linear to linear coordinates.
+
+    The degrees-to-radians operation is an example of the former,
+    while the latter is typical for most of the datum shift
+    operations used in geodesy, e.g. the Helmert 7-parameter shift.
+
+    Isomorphic transformations trips up the pj_inv/pj_fwd
+    functions, which try to check input sanity and scale output to
+    internal proj units, under the assumption that if input is of
+    angular type, then output must be of linear (or vice versa).
+
+    Hence, to avoid having pj_inv/pj_fwd stomping on output (or
+    choking on input), we need a way to tell them that they should
+    accept whatever is being handed to them.
+
+    Ideally, this would be done by having a dedicated field in the
+    PJ struct, saying "this is an isomorphic transformation".
+
+    We do not have that currently (as of proj 4.9.x), and should
+    not change the ABI before 4.10, so for now we use this hack,
+    where a special function in the PJ->fwd slot, forwarding the
+    call to the corresponding PJ->fwd3D slot, is used as
+    indicator.
+
+*********************************************************************/
+
+/********************************************************************/
 static XY isomorphic_indicator (LP lp, PJ *P) {
+/********************************************************************/
     COORDINATE point = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
 
     if (0==P)
@@ -160,16 +194,27 @@ static XY isomorphic_indicator (LP lp, PJ *P) {
     point.xyz = (*P->fwd3d) (point.lpz, P);
 }
 
+
+/********************************************************************/
 int pj_is_isomorphic (PJ *P) {
+/********************************************************************/
     return (P->fwd == isomorphic_indicator);
 }
 
+
+/********************************************************************/
 int pj_set_isomorphic (PJ *P) {
+/********************************************************************/
     if (0==P)
         return 1;
     P->fwd = isomorphic_indicator;
     return 0;
 }
+/********************************************************************
+
+               END OF ISOMORPHIC TRANSFORMATIONS SECTION
+
+********************************************************************/
 
 
 
@@ -215,11 +260,6 @@ static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P) {
         pj_ctx_set_errno (P->ctx, -50); /* Pipeline not reversible */
         return point;
     }
-
-    if (direction)
-        ASLPZ(xyz).lam = 4;
-    else
-        ASXYZ(ASLPZ(xyz)).y = 42;
 #endif
 }
 

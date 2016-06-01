@@ -83,26 +83,53 @@ static void freeup (PJ *P) {
     Springer, 2005.
 
     chapter 5.6: Coordinate transformations
-    (HM, below)
+    (HM, below),
 
     and
 
     Wikipedia: Geographic Coordinate Conversion,
     https://en.m.wikipedia.org/wiki/Geographic_coordinate_conversion
 
-    (WP, below)
+    (WP, below).
+
+    The cartesian-to-geodetic conversion is based on Bowring's
+    celebrated method:
+
+    B. R. Bowring:
+    Transformation from spatial to geographical coordinates
+    Survey Review 23(181), pp. 323-327, 1976
+
+    (BB, below),
+
+    but could probably use some TLC from a newer and faster
+    algorithm:
+
+    Toshio Fukushima:
+    Transformation from Cartesian to Geodetic Coordinates
+    Accelerated by Halley’s Method
+    Journal of Geodesy, February 2006
+
+    (TF, below).
+
 
     These routines are probably not as robust at those in
     geocent.c, at least thay haven't been through as heavy
-    use as their geocent sisters.
+    use as their geocent sisters. Some care has been taken
+    to avoid singularities, but extreme cases (e.g. setting
+    es, the squared eccentricity, to 1), will cause havoc.
 
 **************************************************************/
 
+
+/*********************************************************************/
 static double semiminor_axis (double a, double es) {
+/*********************************************************************/
     return a * sqrt (1 - es);
 }
 
+/*********************************************************************/
 static double normal_radius_of_curvature (double a, double es, double phi) {
+/*********************************************************************/
     double s = sin(phi);
     if (es==0)
         return a;
@@ -114,18 +141,19 @@ static double normal_radius_of_curvature (double a, double es, double phi) {
 /*********************************************************************/
 static double second_eccentricity_squared (double a, double es) {
 /**********************************************************************
-    Follows the definition, but uses the identity (a2-b2) = (a-b)(a+b)
-    for improved numerical precision.
+    Follows the definition, e'2 = (a2-b2)/b2, but uses the identity
+    (a2-b2) = (a-b)(a+b), for improved numerical precision.
 ***********************************************************************/
     double b = semiminor_axis (a, es);
     return (a - b) * (a + b)  /  (b*b);
 }
 
 
+/*********************************************************************/
 static XYZ cartesian (LPZ geodetic,  PJ *P) {
+/*********************************************************************/
     double N, h, lam, phi, cosphi = cos(geodetic.phi);
     XYZ xyz;
-    COORDINATE log;
 
     N   =  normal_radius_of_curvature(P->a, P->es, geodetic.phi);
     phi =  geodetic.phi;
@@ -136,7 +164,6 @@ static XYZ cartesian (LPZ geodetic,  PJ *P) {
     xyz.x = (N + h) * cosphi * cos(lam);
     xyz.y = (N + h) * cosphi * sin(lam);
     xyz.z = (N * (1 - P->es) + h) * sin(phi);
-    /* pj_log_coordinate (P->ctx, 5, "Cartesian - output: ", xyz, 0); */
 
     /*********************************************************************/
     /*                                                                   */
@@ -157,10 +184,11 @@ static XYZ cartesian (LPZ geodetic,  PJ *P) {
 }
 
 
+/*********************************************************************/
 static LPZ geodetic (XYZ cartesian,  PJ *P) {
+/*********************************************************************/
     double N, b, p, theta, c, s, e2s;
     LPZ lpz;
-    COORDINATE log;
 
     cartesian.x *= P->a;
     cartesian.y *= P->a;
@@ -176,7 +204,7 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
     /* HM eq. (5-37) */
     theta  =  atan2 (cartesian.z * P->a,  p * b);
 
-    /* HM eq. (5-36) */
+    /* HM eq. (5-36) (from BB, 1976) */
     c  =  cos(theta);
     s  =  sin(theta);
     lpz.phi  =  atan2 (cartesian.z + e2s*b*s*s*s,  p - P->es*P->a*c*c*c);
@@ -198,7 +226,8 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
 }
 
 
-/* Meaningless... */
+
+/* Rather pointless, but... */
 static XY cart_forward (LP lp, PJ *P) {
     COORDINATE point;
     point.lp = lp;
@@ -208,7 +237,7 @@ static XY cart_forward (LP lp, PJ *P) {
     return point.xy;
 }
 
-/* Meaningless... */
+/* Rather pointless, but... */
 static LP cart_reverse (XY xy, PJ *P) {
     COORDINATE point;
     point.xy = xy;
@@ -220,8 +249,9 @@ static LP cart_reverse (XY xy, PJ *P) {
 
 
 
-
+/*********************************************************************/
 PJ *PROJECTION(cart) {
+/*********************************************************************/
     P->fwd3d  =  cartesian;  /* or use cart_forward_3d, but add scaling */
     P->inv3d  =  geodetic;   /* or use cart_reverse_3d, but add scaling */
     P->fwd    =  cart_forward;

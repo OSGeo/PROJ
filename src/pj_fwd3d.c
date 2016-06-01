@@ -5,10 +5,10 @@
 #include <errno.h>
 # define EPS 1.0e-12
 
-static XYZ xyz_error = {HUGE_VAL, HUGE_VAL, HUGE_VAL};
 
 XYZ pj_fwd3d(LPZ lpz, PJ *P) {
 	XYZ xyz;
+	XYZ xyz_error = {HUGE_VAL, HUGE_VAL, HUGE_VAL};
 	double t;
 
 	if (0==P->fwd3d)

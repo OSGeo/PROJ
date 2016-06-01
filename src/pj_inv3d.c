@@ -4,10 +4,10 @@
 #include <errno.h>
 # define EPS 1.0e-12
 
-static LPZ lpz_error = {HUGE_VAL, HUGE_VAL, HUGE_VAL};
 
 LPZ pj_inv3d(XYZ xyz, PJ *P) {
 	LPZ lpz;
+	LPZ lpz_error = {HUGE_VAL, HUGE_VAL, HUGE_VAL};
 
 	if (0==P->fwd3d)
     	return lpz_error;
@@ -17,9 +17,8 @@ LPZ pj_inv3d(XYZ xyz, PJ *P) {
 
 	/* can't do as much preliminary checking as with forward */
 	if (xyz.x == HUGE_VAL || xyz.y == HUGE_VAL || xyz.z == HUGE_VAL ) {
-		lpz.lam = lpz.phi = lpz.z = HUGE_VAL;
 		pj_ctx_set_errno( P->ctx, -15);
-                return lpz;
+        return lpz_error;
 	}
 
 	errno = pj_errno = 0;

@@ -53,17 +53,34 @@ extern "C" {
 #define ASXY(lp)   (*(XY  *)(&lp ))
 #define ASLP(xy)   (*(LP  *)(&xy ))
 
+
 /* Omega, Phi, Kappa: Rotations */
 typedef struct {double o, p, k;} OPK;
+
+/* Northing, Easting, and geodetic height */
+typedef struct {double n, e, h;} NEh;
+
+/* Northing, Easting, and orthometric height */
+typedef struct {double n, e, H;} NEH;
+
+/* Northing, Easting, and some kind of height */
+typedef struct {double n, e, z;} NEZ;
+
+/* Red, green and blue (e.g. for LiDAR colouring) */
+typedef struct {double r, g, b;} PJ_RGB;
 
 /* Avoid explicit type-punning: Use a union */
 typedef union {
     XYZ xyz;
     LPZ lpz;
     OPK opk;
+    NEh neh;
+    NEH neH;
+    NEZ nez;
+    PJ_RGB rgb;
     XY  xy;
     LP  lp;
-} COORDINATE;
+} COORDINATE;    /* or perhaps TRIPLET / PJ_TRIPLET? */
 
 
 /* Apply the most appropriate projection function. No-op if none appropriate */
