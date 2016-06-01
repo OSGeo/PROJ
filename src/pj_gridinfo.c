@@ -244,8 +244,8 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
                 cvs = ct_tmp.cvs + (row) * gi->ct->lim.lam
                     + (gi->ct->lim.lam - i - 1);
 
-                cvs->phi = *(diff_seconds++) * ((PI/180.0) / 3600.0);
-                cvs->lam = *(diff_seconds++) * ((PI/180.0) / 3600.0);
+                cvs->phi = *(diff_seconds++) * ((M_PI/180.0) / 3600.0);
+                cvs->lam = *(diff_seconds++) * ((M_PI/180.0) / 3600.0);
             }
         }
 
@@ -324,8 +324,8 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
                 cvs = ct_tmp.cvs + (row) * gi->ct->lim.lam
                     + (gi->ct->lim.lam - i - 1);
 
-                cvs->phi = *(diff_seconds++) * ((PI/180.0) / 3600.0);
-                cvs->lam = *(diff_seconds++) * ((PI/180.0) / 3600.0);
+                cvs->phi = *(diff_seconds++) * ((M_PI/180.0) / 3600.0);
+                cvs->lam = *(diff_seconds++) * ((M_PI/180.0) / 3600.0);
                 diff_seconds += 2; /* skip accuracy values */
             }
         }

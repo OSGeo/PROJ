@@ -18,14 +18,14 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 
     sp = P->e * sin (lp.phi);
     phip = 2.* atan ( exp ( Q->c * (
-        log (tan (FORTPI + 0.5 * lp.phi)) - Q->hlf_e * log ((1. + sp)/(1. - sp)))
-        + Q->K)) - HALFPI;
+        log (tan (M_FORTPI + 0.5 * lp.phi)) - Q->hlf_e * log ((1. + sp)/(1. - sp)))
+        + Q->K)) - M_HALFPI;
     lamp = Q->c * lp.lam;
     cp = cos(phip);
     phipp = aasin (P->ctx, Q->cosp0 * sin (phip) - Q->sinp0 * cp * cos (lamp));
     lampp = aasin (P->ctx, cp * sin (lamp) / cos (phipp));
     xy.x = Q->kR * lampp;
-    xy.y = Q->kR * log (tan (FORTPI + 0.5 * phipp));
+    xy.y = Q->kR * log (tan (M_FORTPI + 0.5 * phipp));
     return xy;
 }
 
@@ -36,15 +36,15 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     double phip, lamp, phipp, lampp, cp, esp, con, delp;
     int i;
 
-    phipp = 2. * (atan (exp (xy.y / Q->kR)) - FORTPI);
+    phipp = 2. * (atan (exp (xy.y / Q->kR)) - M_FORTPI);
     lampp = xy.x / Q->kR;
     cp = cos (phipp);
     phip = aasin (P->ctx, Q->cosp0 * sin (phipp) + Q->sinp0 * cp * cos (lampp));
     lamp = aasin (P->ctx, cp * sin (lampp) / cos (phip));
-    con = (Q->K - log (tan (FORTPI + 0.5 * phip)))/Q->c;
+    con = (Q->K - log (tan (M_FORTPI + 0.5 * phip)))/Q->c;
     for (i = NITER; i ; --i) {
         esp = P->e * sin(phip);
-        delp = (con + log(tan(FORTPI + 0.5 * phip)) - Q->hlf_e *
+        delp = (con + log(tan(M_FORTPI + 0.5 * phip)) - Q->hlf_e *
             log((1. + esp)/(1. - esp)) ) *
             (1. - esp * esp) * cos(phip) * P->rone_es;
         phip -= delp;
@@ -95,8 +95,8 @@ PJ *PROJECTION(somerc) {
     sp = sin (P->phi0);
     Q->cosp0 = cos( phip0 = aasin (P->ctx, Q->sinp0 = sp / Q->c) );
     sp *= P->e;
-    Q->K = log (tan (FORTPI + 0.5 * phip0)) - Q->c * (
-        log (tan (FORTPI + 0.5 * P->phi0)) - Q->hlf_e *
+    Q->K = log (tan (M_FORTPI + 0.5 * phip0)) - Q->c * (
+        log (tan (M_FORTPI + 0.5 * P->phi0)) - Q->hlf_e *
         log ((1. + sp) / (1. - sp)));
     Q->kR = P->k0 * sqrt(P->one_es) / (1. - sp * sp);
     P->inv = e_inverse;

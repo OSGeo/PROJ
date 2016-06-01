@@ -26,7 +26,7 @@ struct pj_opaque {
 
 static double ssfn_ (double phit, double sinphi, double eccen) {
     sinphi *= eccen;
-    return (tan (.5 * (HALFPI + phit)) *
+    return (tan (.5 * (M_HALFPI + phit)) *
        pow ((1. - sinphi) / (1. + sinphi), .5 * eccen));
 }
 
@@ -40,7 +40,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     sinlam = sin (lp.lam);
     sinphi = sin (lp.phi);
     if (Q->mode == OBLIQ || Q->mode == EQUIT) {
-        sinX = sin (X = 2. * atan(ssfn_(lp.phi, sinphi, P->e)) - HALFPI);
+        sinX = sin (X = 2. * atan(ssfn_(lp.phi, sinphi, P->e)) - M_HALFPI);
         cosX = cos (X);
     }
 
@@ -99,8 +99,8 @@ oblcon:
         coslam = - coslam;
         lp.phi = - lp.phi;
     case S_POLE:
-        if (fabs (lp.phi - HALFPI) < TOL) F_ERROR;
-        xy.x = sinlam * ( xy.y = Q->akm1 * tan (FORTPI + .5 * lp.phi) );
+        if (fabs (lp.phi - M_HALFPI) < TOL) F_ERROR;
+        xy.x = sinlam * ( xy.y = Q->akm1 * tan (M_FORTPI + .5 * lp.phi) );
         xy.y *= coslam;
         break;
     }
@@ -126,17 +126,17 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
                 else
             phi_l = asin (cosphi * Q->sinX1 + (xy.y * sinphi * Q->cosX1 / rho));
 
-        tp = tan (.5 * (HALFPI + phi_l));
+        tp = tan (.5 * (M_HALFPI + phi_l));
         xy.x *= sinphi;
         xy.y = rho * Q->cosX1 * cosphi - xy.y * Q->sinX1* sinphi;
-        halfpi = HALFPI;
+        halfpi = M_HALFPI;
         halfe = .5 * P->e;
         break;
     case N_POLE:
         xy.y = -xy.y;
     case S_POLE:
-        phi_l = HALFPI - 2. * atan (tp = - rho / Q->akm1);
-        halfpi = -HALFPI;
+        phi_l = M_HALFPI - 2. * atan (tp = - rho / Q->akm1);
+        halfpi = -M_HALFPI;
         halfe = -.5 * P->e;
         break;
     }
@@ -212,7 +212,7 @@ static PJ *setup(PJ *P) {                   /* general initialization */
     double t;
     struct pj_opaque *Q = P->opaque;
 
-    if (fabs ((t = fabs (P->phi0)) - HALFPI) < EPS10)
+    if (fabs ((t = fabs (P->phi0)) - M_HALFPI) < EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
     else
         Q->mode = t > EPS10 ? OBLIQ : EQUIT;
@@ -224,7 +224,7 @@ static PJ *setup(PJ *P) {                   /* general initialization */
         switch (Q->mode) {
         case N_POLE:
         case S_POLE:
-            if (fabs (Q->phits - HALFPI) < EPS10)
+            if (fabs (Q->phits - M_HALFPI) < EPS10)
                 Q->akm1 = 2. * P->k0 /
                    sqrt (pow (1+P->e,1+P->e) * pow (1-P->e,1-P->e));
             else {
@@ -237,7 +237,7 @@ static PJ *setup(PJ *P) {                   /* general initialization */
         case EQUIT:
         case OBLIQ:
             t = sin (P->phi0);
-            X = 2. * atan (ssfn_(P->phi0, t, P->e)) - HALFPI;
+            X = 2. * atan (ssfn_(P->phi0, t, P->e)) - M_HALFPI;
             t *= P->e;
             Q->akm1 = 2. * P->k0 * cos (P->phi0) / sqrt(1. - t * t);
             Q->sinX1 = sin (X);
@@ -256,8 +256,8 @@ static PJ *setup(PJ *P) {                   /* general initialization */
             break;
         case S_POLE:
         case N_POLE:
-            Q->akm1 = fabs (Q->phits - HALFPI) >= EPS10 ?
-               cos (Q->phits) / tan (FORTPI - .5 * Q->phits) :
+            Q->akm1 = fabs (Q->phits - M_HALFPI) >= EPS10 ?
+               cos (Q->phits) / tan (M_FORTPI - .5 * Q->phits) :
                2. * P->k0 ;
             break;
         }
@@ -276,7 +276,7 @@ PJ *PROJECTION(stere) {
     P->opaque = Q;
 
     Q->phits = pj_param (P->ctx, P->params, "tlat_ts").i ?
-               pj_param (P->ctx, P->params, "rlat_ts").f : HALFPI;
+               pj_param (P->ctx, P->params, "rlat_ts").f : M_HALFPI;
 
     return setup(P);
 }
@@ -289,12 +289,12 @@ PJ *PROJECTION(ups) {
     P->opaque = Q;
 
 	/* International Ellipsoid */
-	P->phi0 = pj_param(P->ctx, P->params, "bsouth").i ? - HALFPI: HALFPI;
+	P->phi0 = pj_param(P->ctx, P->params, "bsouth").i ? - M_HALFPI: M_HALFPI;
 	if (!P->es) E_ERROR(-34);
 	P->k0 = .994;
 	P->x0 = 2000000.;
 	P->y0 = 2000000.;
-	Q->phits = HALFPI;
+	Q->phits = M_HALFPI;
 	P->lam0 = 0.;
 
     return setup(P);

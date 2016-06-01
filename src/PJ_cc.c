@@ -7,7 +7,7 @@ PROJ_HEAD(cc, "Central Cylindrical") "\n\tCyl, Sph";
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
-	if (fabs (fabs(lp.phi) - HALFPI) <= EPS10) F_ERROR;
+	if (fabs (fabs(lp.phi) - M_HALFPI) <= EPS10) F_ERROR;
 	xy.x = lp.lam;
 	xy.y = tan(lp.phi);
 	return xy;

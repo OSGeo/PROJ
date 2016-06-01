@@ -16,10 +16,10 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double V1, V2, ps, sinps, cosps, sinps2, cosps2;
     double I1, I2, I3, I4, I5, I6, x2, y2, t;
 
-    V1 = Q->A * log( tan(FORTPI + .5 * lp.phi) );
+    V1 = Q->A * log( tan(M_FORTPI + .5 * lp.phi) );
     t = P->e * sin(lp.phi);
     V2 = .5 * P->e * Q->A * log ((1. + t)/(1. - t));
-    ps = 2. * (atan(exp(V1 - V2 + Q->C)) - FORTPI);
+    ps = 2. * (atan(exp(V1 - V2 + Q->C)) - M_FORTPI);
     I1 = ps - Q->p0s;
     cosps = cos(ps);    cosps2 = cosps * cosps;
     sinps = sin(ps);    sinps2 = sinps * sinps;
@@ -61,10 +61,10 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     ps = Q->p0s + xy.y / Q->kRg;
     pe = ps + P->phi0 - Q->p0s;
     for ( i = 20; i; --i) {
-        V1 = Q->A * log(tan(FORTPI + .5 * pe));
+        V1 = Q->A * log(tan(M_FORTPI + .5 * pe));
         tpe = P->e * sin(pe);
         V2 = .5 * P->e * Q->A * log((1. + tpe)/(1. - tpe));
-        t = ps - 2. * (atan(exp(V1 - V2 + Q->C)) - FORTPI);
+        t = ps - 2. * (atan(exp(V1 - V2 + Q->C)) - M_FORTPI);
         pe += t;
         if (fabs(t) < EPS)
             break;
@@ -126,8 +126,8 @@ PJ *PROJECTION(labrd) {
     Q->A = sinp / sin(Q->p0s);
     t = P->e * sinp;
     Q->C = .5 * P->e * Q->A * log((1. + t)/(1. - t)) +
-          - Q->A * log( tan(FORTPI + .5 * P->phi0))
-          + log( tan(FORTPI + .5 * Q->p0s));
+          - Q->A * log( tan(M_FORTPI + .5 * P->phi0))
+          + log( tan(M_FORTPI + .5 * Q->p0s));
     t = Az + Az;
     Q->Ca = (1. - cos(t)) * ( Q->Cb = 1. / (12. * Q->kRg * Q->kRg) );
     Q->Cb *= sin(t);

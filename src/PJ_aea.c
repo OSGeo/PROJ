@@ -107,15 +107,15 @@ static LP e_inverse (XY xy, PJ *P) {   /* Ellipsoid/spheroid, inverse */
 				if ((lp.phi = phi1_(lp.phi, P->e, P->one_es)) == HUGE_VAL)
 					I_ERROR
 			} else
-				lp.phi = lp.phi < 0. ? -HALFPI : HALFPI;
+				lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
 		} else if (fabs(lp.phi = (Q->c - lp.phi * lp.phi) / Q->n2) <= 1.)
 			lp.phi = asin(lp.phi);
 		else
-			lp.phi = lp.phi < 0. ? -HALFPI : HALFPI;
+			lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
 		lp.lam = atan2(xy.x, xy.y) / Q->n;
 	} else {
 		lp.lam = 0.;
-		lp.phi = Q->n > 0. ? HALFPI : - HALFPI;
+		lp.phi = Q->n > 0. ? M_HALFPI : - M_HALFPI;
 	}
 	return lp;
 }
@@ -205,7 +205,7 @@ PJ *PROJECTION(leac) {
     P->opaque = Q;
 
 	Q->phi2 = pj_param(P->ctx, P->params, "rlat_1").f;
-	Q->phi1 = pj_param(P->ctx, P->params, "bsouth").i ? - HALFPI: HALFPI;
+	Q->phi1 = pj_param(P->ctx, P->params, "bsouth").i ? - M_HALFPI: M_HALFPI;
     setup (P);
     return P;
 }

@@ -33,7 +33,7 @@ pj_inv3d(XYZ xyz, PJ *P) {
 			lpz.lam = adjlon(lpz.lam); /* adjust longitude to CM */
 
                 /* This may be redundant and never used */
-		if (P->geoc && fabs(fabs(lpz.phi)-HALFPI) > EPS)
+		if (P->geoc && fabs(fabs(lpz.phi)-M_HALFPI) > EPS)
 			lpz.phi = atan(P->one_es * tan(lpz.phi));
 	    }
         }

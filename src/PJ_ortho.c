@@ -36,7 +36,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 	case N_POLE:
 		coslam = - coslam;
 	case S_POLE:
-		if (fabs(lp.phi - P->phi0) - EPS10 > HALFPI) F_ERROR;
+		if (fabs(lp.phi - P->phi0) - EPS10 > M_HALFPI) F_ERROR;
 		xy.y = cosphi * coslam;
 		break;
 	}
@@ -78,13 +78,13 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
             xy.x *= sinc * Q->cosph0;
         sinchk:
             if (fabs(lp.phi) >= 1.)
-                lp.phi = lp.phi < 0. ? -HALFPI : HALFPI;
+                lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
             else
                 lp.phi = asin(lp.phi);
             break;
         }
         lp.lam = (xy.y == 0. && (Q->mode == OBLIQ || Q->mode == EQUIT))
-             ? (xy.x == 0. ? 0. : xy.x < 0. ? -HALFPI : HALFPI)
+             ? (xy.x == 0. ? 0. : xy.x < 0. ? -M_HALFPI : M_HALFPI)
                            : atan2(xy.x, xy.y);
     }
     return lp;
@@ -113,7 +113,7 @@ PJ *PROJECTION(ortho) {
         return freeup_new (P);
     P->opaque = Q;
 
-	if (fabs(fabs(P->phi0) - HALFPI) <= EPS10)
+	if (fabs(fabs(P->phi0) - M_HALFPI) <= EPS10)
 		Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
 	else if (fabs(P->phi0) > EPS10) {
 		Q->mode = OBLIQ;

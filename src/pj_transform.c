@@ -425,10 +425,10 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             if( x[point_offset*i] == HUGE_VAL )
                 continue;
 
-            while( x[point_offset*i] < dstdefn->long_wrap_center - PI )
-                x[point_offset*i] += TWOPI;
-            while( x[point_offset*i] > dstdefn->long_wrap_center + PI )
-                x[point_offset*i] -= TWOPI;
+            while( x[point_offset*i] < dstdefn->long_wrap_center - M_PI )
+                x[point_offset*i] += M_TWOPI;
+            while( x[point_offset*i] > dstdefn->long_wrap_center + M_PI )
+                x[point_offset*i] -= M_TWOPI;
         }
     }
 

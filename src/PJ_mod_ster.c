@@ -26,8 +26,8 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     sinlon = sin(lp.lam);
     coslon = cos(lp.lam);
     esphi = P->e * sin(lp.phi);
-    chi = 2. * atan(tan((HALFPI + lp.phi) * .5) *
-        pow((1. - esphi) / (1. + esphi), P->e * .5)) - HALFPI;
+    chi = 2. * atan(tan((M_HALFPI + lp.phi) * .5) *
+        pow((1. - esphi) / (1. + esphi), P->e * .5)) - M_HALFPI;
     schi = sin(chi);
     cchi = cos(chi);
     s = 2. / (1. + Q->schio * schi + Q->cchio * cchi * coslon);
@@ -76,8 +76,8 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         phi = chi;
         for (nn = 20; nn ;--nn) {
             esphi = P->e * sin(phi);
-            dphi = 2. * atan(tan((HALFPI + chi) * .5) *
-                pow((1. + esphi) / (1. - esphi), P->e * .5)) - HALFPI - phi;
+            dphi = 2. * atan(tan((M_HALFPI + chi) * .5) *
+                pow((1. + esphi) / (1. - esphi), P->e * .5)) - M_HALFPI - phi;
             phi += dphi;
             if (fabs(dphi) <= EPSLN)
                 break;
@@ -114,8 +114,8 @@ static PJ *setup(PJ *P) { /* general initialization */
 
     if (P->es) {
         esphi = P->e * sin(P->phi0);
-        chio = 2. * atan(tan((HALFPI + P->phi0) * .5) *
-            pow((1. - esphi) / (1. + esphi), P->e * .5)) - HALFPI;
+        chio = 2. * atan(tan((M_HALFPI + P->phi0) * .5) *
+            pow((1. - esphi) / (1. + esphi), P->e * .5)) - M_HALFPI;
     } else
         chio = P->phi0;
     Q->schio = sin(chio);

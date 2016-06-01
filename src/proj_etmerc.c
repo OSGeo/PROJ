@@ -421,11 +421,11 @@ PJ *PROJECTION(utm) {
 		else
 			E_ERROR(-35)
 	else /* nearest central meridian input */
-		if ((zone = (int)(floor ((adjlon (P->lam0) + PI) * 30. / PI))) < 0)
+		if ((zone = (int)(floor ((adjlon (P->lam0) + M_PI) * 30. / M_PI))) < 0)
 			zone = 0;
 		else if (zone >= 60)
 			zone = 59;
-	P->lam0 = (zone + .5) * PI / 30. - PI;
+	P->lam0 = (zone + .5) * M_PI / 30. - M_PI;
 	P->k0 = 0.9996;
 	P->phi0 = 0.;
 

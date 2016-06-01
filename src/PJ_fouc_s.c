@@ -38,7 +38,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
                 break;
         }
         if (!i)
-            lp.phi = xy.y < 0. ? -HALFPI : HALFPI;
+            lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
     } else
         lp.phi = aasin(P->ctx,xy.y);
     V = cos(lp.phi);

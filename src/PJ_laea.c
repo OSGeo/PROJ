@@ -47,11 +47,11 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
         b = 1. + cosb * coslam;
         break;
     case N_POLE:
-        b = HALFPI + lp.phi;
+        b = M_HALFPI + lp.phi;
         q = Q->qp - q;
         break;
     case S_POLE:
-        b = lp.phi - HALFPI;
+        b = lp.phi - M_HALFPI;
         q = Q->qp + q;
         break;
     }
@@ -108,7 +108,7 @@ oblcon:
         coslam = -coslam;
     case S_POLE:
         if (fabs(lp.phi + P->phi0) < EPS10) F_ERROR;
-        xy.y = FORTPI - lp.phi * .5;
+        xy.y = M_FORTPI - lp.phi * .5;
         xy.y = 2. * (Q->mode == S_POLE ? cos(xy.y) : sin(xy.y));
         xy.x = xy.y * sin(lp.lam);
         xy.y *= coslam;
@@ -192,10 +192,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         break;
     case N_POLE:
         xy.y = -xy.y;
-        lp.phi = HALFPI - lp.phi;
+        lp.phi = M_HALFPI - lp.phi;
         break;
     case S_POLE:
-        lp.phi -= HALFPI;
+        lp.phi -= M_HALFPI;
         break;
     }
     lp.lam = (xy.y == 0. && (Q->mode == EQUIT || Q->mode == OBLIQ)) ?
@@ -229,7 +229,7 @@ PJ *PROJECTION(laea) {
     P->opaque = Q;
 
     t = fabs(P->phi0);
-    if (fabs(t - HALFPI) < EPS10)
+    if (fabs(t - M_HALFPI) < EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
     else if (fabs(t) < EPS10)
         Q->mode = EQUIT;

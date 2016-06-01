@@ -45,7 +45,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         if (fabs(th) > ONETOL) {
             I_ERROR;
         } else {
-            th = th > 0. ? HALFPI : - HALFPI;
+            th = th > 0. ? M_HALFPI : - M_HALFPI;
         }
     } else {
         th = asin(th);
@@ -58,7 +58,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         if (fabs(lp.phi) > ONETOL) {
            I_ERROR;
         } else {
-            lp.phi = lp.phi > 0. ? HALFPI : - HALFPI;
+            lp.phi = lp.phi > 0. ? M_HALFPI : - M_HALFPI;
         }
     } else {
         lp.phi = asin(lp.phi);

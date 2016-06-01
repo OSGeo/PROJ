@@ -23,7 +23,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     t = cos(lp.lam);
     xy.x = atan((tan(lp.phi) * Q->cosphi + Q->sinphi * xy.y) / t);
     if (t < 0.)
-        xy.x += PI;
+        xy.x += M_PI;
     xy.x *= Q->rtk;
     xy.y = Q->rok * (Q->sinphi * sin(lp.phi) - Q->cosphi * cos(lp.phi) * xy.y);
     return xy;
@@ -95,7 +95,7 @@ PJ *PROJECTION(ocea) {
         /*Equation 9-2 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
         Q->sinphi = atan(-cos(Q->singam - lam_1) / tan(phi_1));
     }
-    P->lam0 = Q->singam + HALFPI;
+    P->lam0 = Q->singam + M_HALFPI;
     Q->cosphi = cos(Q->sinphi);
     Q->sinphi = sin(Q->sinphi);
     Q->cosgam = cos(Q->singam);
