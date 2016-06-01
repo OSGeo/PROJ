@@ -1,7 +1,7 @@
 /* general forward projection */
 #define PJ_LIB__
 #include <projects.h>
-#include <pj_pipeline.h>
+#include <PJ_pipeline.h>
 #include <errno.h>
 # define EPS 1.0e-12
 
