@@ -192,7 +192,6 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
 
     cartesian.x *= P->a;
     cartesian.y *= P->a;
-    log.xyz = cartesian;
 
     /* Perpendicular distance from point to Z-axis (HM eq. 5-28) */
     p = hypot (cartesian.x, cartesian.y);
