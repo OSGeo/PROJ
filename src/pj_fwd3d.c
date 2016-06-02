@@ -18,7 +18,7 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
 	    return  (*P->fwd3d)(lpz, P);
 
 	/* check for forward and latitude or longitude overange */
-	if ((t = fabs(lpz.phi)-HALFPI) > EPS || fabs(lpz.lam) > 10.) {
+	if ((t = fabs(lpz.phi)-M_HALFPI) > EPS || fabs(lpz.lam) > 10.) {
 		pj_ctx_set_errno( P->ctx, -14);
 		return xyz_error;
 	}
@@ -29,7 +29,7 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
     errno = 0;
 
 	if (fabs(t) <= EPS)
-		lpz.phi = lpz.phi < 0. ? -HALFPI : HALFPI;
+		lpz.phi = lpz.phi < 0. ? -M_HALFPI : M_HALFPI;
 	else if (P->geoc)   /* Maybe redundant and never used. */
 		lpz.phi = atan(P->rone_es * tan(lpz.phi));
 
