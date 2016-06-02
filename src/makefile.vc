@@ -97,8 +97,8 @@ $(PROJ_EXE):	$(PROJEXE_OBJ) $(EXE_PROJ)
 	cl $(PROJEXE_OBJ) $(EXE_PROJ)
 	if exist $(PROJ_EXE).manifest mt -manifest $(PROJ_EXE).manifest -outputresource:$(PROJ_EXE);1
 
-$(TRAN):	$(TRANEXE_OBJ) $(EXE_PROJ)
-	cl $(TRANEXE_OBJ) $(EXE_TRAN)
+$(TRAN_EXE):	$(TRANEXE_OBJ) $(EXE_PROJ)
+	cl $(TRANEXE_OBJ) $(EXE_PROJ)
 	if exist $(TRAN_EXE).manifest mt -manifest $(TRAN_EXE).manifest -outputresource:$(TRAN_EXE);1
 
 $(CS2CS_EXE):	$(CS2CSEXE_OBJ) $(EXE_PROJ)
