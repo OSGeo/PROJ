@@ -89,3 +89,4 @@ EXPORTS
     geod_polygon_testpoint          @87
     geod_polygon_clear              @88
     pj_run_selftests                @89
+    pj_is_isomorphic                @90
