@@ -50,7 +50,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_boggs.c
         PJ_bonne.c
         PJ_calcofi.c
-		PJ_cart.c
+        PJ_cart.c
         PJ_cass.c
         PJ_cc.c
         PJ_cea.c
@@ -112,7 +112,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_ortho.c
         PJ_patterson.c
         PJ_pipeline.c
-		PJ_pipeline_elements.c
+        PJ_pipeline_elements.c
         PJ_poly.c
         PJ_putp2.c
         PJ_putp3.c
@@ -220,7 +220,7 @@ set(HEADERS_LIBPROJ
         projects.h
         proj_api.h
         geodesic.h
-		PJ_pipeline.h
+        PJ_pipeline.h
 )
 
 # Group source files for IDE source explorers (e.g. Visual Studio)

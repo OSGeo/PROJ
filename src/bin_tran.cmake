@@ -14,4 +14,3 @@ set_target_properties(bintran
 target_link_libraries(bintran ${PROJ_LIBRARIES})
 install(TARGETS bintran 
         RUNTIME DESTINATION ${BINDIR})
-		
