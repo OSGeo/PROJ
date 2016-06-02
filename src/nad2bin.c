@@ -350,8 +350,8 @@ int main(int argc, char **argv) {
                         + (ct.lim.lam - i - 1);
 
                     /* convert radians to seconds */
-                    row_buf[i*4+0] = cvs->phi * (3600.0 / (PI/180.0));
-                    row_buf[i*4+1] = cvs->lam * (3600.0 / (PI/180.0));
+                    row_buf[i*4+0] = cvs->phi * (3600.0 / (M_PI/180.0));
+                    row_buf[i*4+1] = cvs->lam * (3600.0 / (M_PI/180.0));
 
                     /* We leave the accuracy values as zero */
                 }

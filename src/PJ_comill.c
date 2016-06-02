@@ -18,7 +18,7 @@ PROJ_HEAD(comill, "Compact Miller") "\n\tCyl., Sph.";
 #define C2 (3 * K2)
 #define C3 (5 * K3)
 #define EPS 1e-11
-#define MAX_Y (0.6000207669862655 * PI)
+#define MAX_Y (0.6000207669862655 * M_PI)
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

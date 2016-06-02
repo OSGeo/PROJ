@@ -144,7 +144,7 @@ PJ *PROJECTION(ob_tran) {
             fabs(fabs(phic) - HALFPI) <= TOL ||
             fabs(fabs(alpha) - HALFPI) <= TOL)
 */
-        if (fabs(fabs(phic) - HALFPI) <= TOL)
+        if (fabs(fabs(phic) - M_HALFPI) <= TOL)
             E_ERROR(-32);
         Q->lamp = lamc + aatan2(-cos(alpha), -sin(alpha) * sin(phic));
         phip = aasin(P->ctx,cos(phic) * sin(alpha));
@@ -160,8 +160,8 @@ PJ *PROJECTION(ob_tran) {
         phi2 = pj_param(P->ctx, P->params, "ro_lat_2").f;
         if (fabs(phi1 - phi2) <= TOL ||
             (con = fabs(phi1)) <= TOL ||
-            fabs(con - HALFPI) <= TOL ||
-            fabs(fabs(phi2) - HALFPI) <= TOL) E_ERROR(-33);
+            fabs(con - M_HALFPI) <= TOL ||
+            fabs(fabs(phi2) - M_HALFPI) <= TOL) E_ERROR(-33);
         Q->lamp = atan2(cos(phi1) * sin(phi2) * cos(lam1) -
             sin(phi1) * cos(phi2) * cos(lam2),
             sin(phi1) * cos(phi2) * sin(lam2) -

@@ -76,17 +76,17 @@ static double qsc_fwd_equat_face_theta(double phi, double y, double x, int *area
         theta = 0.0;
     } else {
         theta = atan2(y, x);
-        if (fabs(theta) <= FORTPI) {
+        if (fabs(theta) <= M_FORTPI) {
             *area = AREA_0;
-        } else if (theta > FORTPI && theta <= HALFPI + FORTPI) {
+        } else if (theta > M_FORTPI && theta <= M_HALFPI + M_FORTPI) {
             *area = AREA_1;
-            theta -= HALFPI;
-        } else if (theta > HALFPI + FORTPI || theta <= -(HALFPI + FORTPI)) {
+            theta -= M_HALFPI;
+        } else if (theta > M_HALFPI + M_FORTPI || theta <= -(M_HALFPI + M_FORTPI)) {
             *area = AREA_2;
-            theta = (theta >= 0.0 ? theta - PI : theta + PI);
+            theta = (theta >= 0.0 ? theta - M_PI : theta + M_PI);
         } else {
             *area = AREA_3;
-            theta += HALFPI;
+            theta += M_HALFPI;
         }
     }
     return theta;
@@ -95,10 +95,10 @@ static double qsc_fwd_equat_face_theta(double phi, double y, double x, int *area
 /* Helper function: shift the longitude. */
 static double qsc_shift_lon_origin(double lon, double offset) {
     double slon = lon + offset;
-    if (slon < -PI) {
-        slon += TWOPI;
-    } else if (slon > +PI) {
-        slon -= TWOPI;
+    if (slon < -M_PI) {
+        slon += M_TWOPI;
+    } else if (slon > +M_PI) {
+        slon -= M_TWOPI;
     }
     return slon;
 }
@@ -128,34 +128,34 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
      * unit sphere cartesian coordinates as an intermediate step. */
     lon = lp.lam;
     if (Q->face == FACE_TOP) {
-        phi = HALFPI - lat;
-        if (lon >= FORTPI && lon <= HALFPI + FORTPI) {
+        phi = M_HALFPI - lat;
+        if (lon >= M_FORTPI && lon <= M_HALFPI + M_FORTPI) {
             area = AREA_0;
-            theta = lon - HALFPI;
-        } else if (lon > HALFPI + FORTPI || lon <= -(HALFPI + FORTPI)) {
+            theta = lon - M_HALFPI;
+        } else if (lon > M_HALFPI + M_FORTPI || lon <= -(M_HALFPI + M_FORTPI)) {
             area = AREA_1;
-            theta = (lon > 0.0 ? lon - PI : lon + PI);
-        } else if (lon > -(HALFPI + FORTPI) && lon <= -FORTPI) {
+            theta = (lon > 0.0 ? lon - M_PI : lon + M_PI);
+        } else if (lon > -(M_HALFPI + M_FORTPI) && lon <= -M_FORTPI) {
             area = AREA_2;
-            theta = lon + HALFPI;
+            theta = lon + M_HALFPI;
         } else {
             area = AREA_3;
             theta = lon;
         }
     } else if (Q->face == FACE_BOTTOM) {
-        phi = HALFPI + lat;
-        if (lon >= FORTPI && lon <= HALFPI + FORTPI) {
+        phi = M_HALFPI + lat;
+        if (lon >= M_FORTPI && lon <= M_HALFPI + M_FORTPI) {
             area = AREA_0;
-            theta = -lon + HALFPI;
-        } else if (lon < FORTPI && lon >= -FORTPI) {
+            theta = -lon + M_HALFPI;
+        } else if (lon < M_FORTPI && lon >= -M_FORTPI) {
             area = AREA_1;
             theta = -lon;
-        } else if (lon < -FORTPI && lon >= -(HALFPI + FORTPI)) {
+        } else if (lon < -M_FORTPI && lon >= -(M_HALFPI + M_FORTPI)) {
             area = AREA_2;
-            theta = -lon - HALFPI;
+            theta = -lon - M_HALFPI;
         } else {
             area = AREA_3;
-            theta = (lon > 0.0 ? -lon + PI : -lon - PI);
+            theta = (lon > 0.0 ? -lon + M_PI : -lon - M_PI);
         }
     } else {
         double q, r, s;
@@ -163,11 +163,11 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
         double sinlon, coslon;
 
         if (Q->face == FACE_RIGHT) {
-            lon = qsc_shift_lon_origin(lon, +HALFPI);
+            lon = qsc_shift_lon_origin(lon, +M_HALFPI);
         } else if (Q->face == FACE_BACK) {
-            lon = qsc_shift_lon_origin(lon, +PI);
+            lon = qsc_shift_lon_origin(lon, +M_PI);
         } else if (Q->face == FACE_LEFT) {
-            lon = qsc_shift_lon_origin(lon, -HALFPI);
+            lon = qsc_shift_lon_origin(lon, -M_HALFPI);
         }
         sinlat = sin(lat);
         coslat = cos(lat);
@@ -199,17 +199,17 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     /* Compute mu and nu for the area of definition.
      * For mu, see Eq. (3-21) in [OL76], but note the typos:
      * compare with Eq. (3-14). For nu, see Eq. (3-38). */
-    mu = atan((12.0 / PI) * (theta + acos(sin(theta) * cos(FORTPI)) - HALFPI));
+    mu = atan((12.0 / M_PI) * (theta + acos(sin(theta) * cos(M_FORTPI)) - M_HALFPI));
     t = sqrt((1.0 - cos(phi)) / (cos(mu) * cos(mu)) / (1.0 - cos(atan(1.0 / cos(theta)))));
     /* nu = atan(t);        We don't really need nu, just t, see below. */
 
     /* Apply the result to the real area. */
     if (area == AREA_1) {
-        mu += HALFPI;
+        mu += M_HALFPI;
     } else if (area == AREA_2) {
-        mu += PI;
+        mu += M_PI;
     } else if (area == AREA_3) {
-        mu += HALFPI + PI;
+        mu += M_PI_HALFPI;
     }
 
     /* Now compute x, y from mu and nu */
@@ -236,13 +236,13 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         area = AREA_0;
     } else if (xy.y >= 0.0 && xy.y >= fabs(xy.x)) {
         area = AREA_1;
-        mu -= HALFPI;
+        mu -= M_HALFPI;
     } else if (xy.x < 0.0 && -xy.x >= fabs(xy.y)) {
         area = AREA_2;
-        mu = (mu < 0.0 ? mu + PI : mu - PI);
+        mu = (mu < 0.0 ? mu + M_PI : mu - M_PI);
     } else {
         area = AREA_3;
-        mu += HALFPI;
+        mu += M_HALFPI;
     }
 
     /* Compute phi and theta for the area of definition.
@@ -250,7 +250,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
      * good hints can be found here (as of 2011-12-14):
      * http://fits.gsfc.nasa.gov/fitsbits/saf.93/saf.9302
      * (search for "Message-Id: <9302181759.AA25477 at fits.cv.nrao.edu>") */
-    t = (PI / 12.0) * tan(mu);
+    t = (M_PI / 12.0) * tan(mu);
     tantheta = sin(t) / (cos(t) - (1.0 / sqrt(2.0)));
     theta = atan(tantheta);
     cosmu = cos(mu);
@@ -268,27 +268,27 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
      * as an intermediate step. */
     if (Q->face == FACE_TOP) {
         phi = acos(cosphi);
-        lp.phi = HALFPI - phi;
+        lp.phi = M_HALFPI - phi;
         if (area == AREA_0) {
-            lp.lam = theta + HALFPI;
+            lp.lam = theta + M_HALFPI;
         } else if (area == AREA_1) {
-            lp.lam = (theta < 0.0 ? theta + PI : theta - PI);
+            lp.lam = (theta < 0.0 ? theta + M_PI : theta - M_PI);
         } else if (area == AREA_2) {
-            lp.lam = theta - HALFPI;
+            lp.lam = theta - M_HALFPI;
         } else /* area == AREA_3 */ {
             lp.lam = theta;
         }
     } else if (Q->face == FACE_BOTTOM) {
         phi = acos(cosphi);
-        lp.phi = phi - HALFPI;
+        lp.phi = phi - M_HALFPI;
         if (area == AREA_0) {
-            lp.lam = -theta + HALFPI;
+            lp.lam = -theta + M_HALFPI;
         } else if (area == AREA_1) {
             lp.lam = -theta;
         } else if (area == AREA_2) {
-            lp.lam = -theta - HALFPI;
+            lp.lam = -theta - M_HALFPI;
         } else /* area == AREA_3 */ {
-            lp.lam = (theta < 0.0 ? -theta - PI : -theta + PI);
+            lp.lam = (theta < 0.0 ? -theta - M_PI : -theta + M_PI);
         }
     } else {
         /* Compute phi and lam via cartesian unit sphere coordinates. */
@@ -333,14 +333,14 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
             r = -t;
         }
         /* Now compute phi and lam from the unit sphere coordinates. */
-        lp.phi = acos(-s) - HALFPI;
+        lp.phi = acos(-s) - M_HALFPI;
         lp.lam = atan2(r, q);
         if (Q->face == FACE_RIGHT) {
-            lp.lam = qsc_shift_lon_origin(lp.lam, -HALFPI);
+            lp.lam = qsc_shift_lon_origin(lp.lam, -M_HALFPI);
         } else if (Q->face == FACE_BACK) {
-            lp.lam = qsc_shift_lon_origin(lp.lam, -PI);
+            lp.lam = qsc_shift_lon_origin(lp.lam, -M_PI);
         } else if (Q->face == FACE_LEFT) {
-            lp.lam = qsc_shift_lon_origin(lp.lam, +HALFPI);
+            lp.lam = qsc_shift_lon_origin(lp.lam, +M_HALFPI);
         }
     }
 
@@ -387,13 +387,13 @@ PJ *PROJECTION(qsc) {
     P->inv = e_inverse;
     P->fwd = e_forward;
     /* Determine the cube face from the center of projection. */
-    if (P->phi0 >= HALFPI - FORTPI / 2.0) {
+    if (P->phi0 >= M_HALFPI - M_FORTPI / 2.0) {
         Q->face = FACE_TOP;
-    } else if (P->phi0 <= -(HALFPI - FORTPI / 2.0)) {
+    } else if (P->phi0 <= -(M_HALFPI - M_FORTPI / 2.0)) {
         Q->face = FACE_BOTTOM;
-    } else if (fabs(P->lam0) <= FORTPI) {
+    } else if (fabs(P->lam0) <= M_FORTPI) {
         Q->face = FACE_FRONT;
-    } else if (fabs(P->lam0) <= HALFPI + FORTPI) {
+    } else if (fabs(P->lam0) <= M_HALFPI + M_FORTPI) {
         Q->face = (P->lam0 > 0.0 ? FACE_RIGHT : FACE_LEFT);
     } else {
         Q->face = FACE_BACK;

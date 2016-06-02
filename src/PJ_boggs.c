@@ -7,7 +7,6 @@ PROJ_HEAD(boggs, "Boggs Eumorphic") "\n\tPCyl., no inv., Sph.";
 # define FXC	2.00276
 # define FXC2	1.11072
 # define FYC	0.49931
-# define FYC2	1.41421356237309504880
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
@@ -17,10 +16,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 	(void) P;
 
 	theta = lp.phi;
-	if (fabs(fabs(lp.phi) - HALFPI) < EPS)
+	if (fabs(fabs(lp.phi) - M_HALFPI) < EPS)
 		xy.x = 0.;
 	else {
-		c = sin(theta) * PI;
+		c = sin(theta) * M_PI;
 		for (i = NITER; i; --i) {
 			theta -= th1 = (theta + sin(theta) - c) /
 				(1. + cos(theta));
@@ -29,7 +28,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 		theta *= 0.5;
 		xy.x = FXC * lp.lam / (1. / cos(lp.phi) + FXC2 / cos(theta));
 	}
-	xy.y = FYC * (lp.phi + FYC2 * sin(theta));
+	xy.y = FYC * (lp.phi + M_SQRT2 * sin(theta));
 	return (xy);
 }
 

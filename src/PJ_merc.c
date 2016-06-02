@@ -7,7 +7,7 @@ PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
-    if (fabs(fabs(lp.phi) - HALFPI) <= EPS10)
+    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10)
         F_ERROR;
     xy.x = P->k0 * lp.lam;
     xy.y = - P->k0 * log(pj_tsfn(lp.phi, sin(lp.phi), P->e));
@@ -17,10 +17,10 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
-    if (fabs(fabs(lp.phi) - HALFPI) <= EPS10)
+    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10)
         F_ERROR;
     xy.x = P->k0 * lp.lam;
-    xy.y = P->k0 * log(tan(FORTPI + .5 * lp.phi));
+    xy.y = P->k0 * log(tan(M_FORTPI + .5 * lp.phi));
     return xy;
 }
 
@@ -36,7 +36,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
-    lp.phi = HALFPI - 2. * atan(exp(-xy.y / P->k0));
+    lp.phi = M_HALFPI - 2. * atan(exp(-xy.y / P->k0));
     lp.lam = xy.x / P->k0;
     return lp;
 }
@@ -53,7 +53,7 @@ PJ *PROJECTION(merc) {
 
     if( (is_phits = pj_param(P->ctx, P->params, "tlat_ts").i) ) {
         phits = fabs(pj_param(P->ctx, P->params, "rlat_ts").f);
-        if (phits >= HALFPI) E_ERROR(-24);
+        if (phits >= M_HALFPI) E_ERROR(-24);
     }
 
     if (P->es) { /* ellipsoid */

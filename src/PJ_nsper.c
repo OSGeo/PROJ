@@ -146,7 +146,7 @@ static PJ *setup(PJ *P) {
     struct pj_opaque *Q = P->opaque;
 
     if ((Q->height = pj_param(P->ctx, P->params, "dh").f) <= 0.) E_ERROR(-30);
-    if (fabs(fabs(P->phi0) - HALFPI) < EPS10)
+    if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
     else if (fabs(P->phi0) < EPS10)
         Q->mode = EQUIT;

@@ -1,4 +1,4 @@
-# define HLFPI2	2.46740110027233965467
+# define HLFPI2	2.46740110027233965467      /* (pi/2)^2 */
 # define EPS	1e-10
 #define PJ_LIB__
 #include	<projects.h>
@@ -19,10 +19,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     struct pj_opaque *Q = P->opaque;
 	double ax, f;
 
-	xy.y = Q->bacn ? HALFPI * sin(lp.phi) : lp.phi;
+	xy.y = Q->bacn ? M_HALFPI * sin(lp.phi) : lp.phi;
 	if ((ax = fabs(lp.lam)) >= EPS) {
-		if (Q->ortl && ax >= HALFPI)
-			xy.x = sqrt(HLFPI2 - lp.phi * lp.phi + EPS) + ax - HALFPI;
+		if (Q->ortl && ax >= M_HALFPI)
+			xy.x = sqrt(HLFPI2 - lp.phi * lp.phi + EPS) + ax - M_HALFPI;
 		else {
 			f = 0.5 * (HLFPI2 / ax + ax);
 			xy.x = ax - f + sqrt(f * f - xy.y * xy.y);

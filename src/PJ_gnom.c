@@ -77,7 +77,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
             case OBLIQ:
                 lp.phi = cosz * Q->sinph0 + xy.y * sinz * Q->cosph0 / rh;
                 if (fabs(lp.phi) >= 1.)
-                    lp.phi = lp.phi > 0. ? HALFPI : - HALFPI;
+                    lp.phi = lp.phi > 0. ? M_HALFPI : - M_HALFPI;
                 else
                     lp.phi = asin(lp.phi);
                 xy.y = (cosz - Q->sinph0 * sin(lp.phi)) * rh;
@@ -86,17 +86,17 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
             case EQUIT:
                 lp.phi = xy.y * sinz / rh;
                 if (fabs(lp.phi) >= 1.)
-                    lp.phi = lp.phi > 0. ? HALFPI : - HALFPI;
+                    lp.phi = lp.phi > 0. ? M_HALFPI : - M_HALFPI;
                 else
                     lp.phi = asin(lp.phi);
                 xy.y = cosz * rh;
                 xy.x *= sinz;
                 break;
             case S_POLE:
-                lp.phi -= HALFPI;
+                lp.phi -= M_HALFPI;
                 break;
             case N_POLE:
-                lp.phi = HALFPI - lp.phi;
+                lp.phi = M_HALFPI - lp.phi;
                 xy.y = -xy.y;
                 break;
         }
@@ -129,7 +129,7 @@ PJ *PROJECTION(gnom) {
         return freeup_new (P);
     P->opaque = Q;
 
-    if (fabs(fabs(P->phi0) - HALFPI) < EPS10) {
+    if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) {
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
     } else if (fabs(P->phi0) < EPS10) {
         Q->mode = EQUIT;

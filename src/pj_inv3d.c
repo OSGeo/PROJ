@@ -26,6 +26,7 @@ LPZ pj_inv3d(XYZ xyz, PJ *P) {
 
 	xyz.x = (xyz.x * P->to_meter - P->x0) * P->ra; /* descale and de-offset */
 	xyz.y = (xyz.y * P->to_meter - P->y0) * P->ra;
+<<<<<<< HEAD
     /* z is not scaled since that is handled by vto_meter before we get here */
 
     lpz = (*P->inv3d)(xyz, P); /* inverse project */
@@ -41,5 +42,29 @@ LPZ pj_inv3d(XYZ xyz, PJ *P) {
 	if (P->geoc && fabs(fabs(lpz.phi)-HALFPI) > EPS)
 		lpz.phi = atan(P->one_es * tan(lpz.phi));
 
+=======
+        /* z is not scaled since that is handled by vto_meter before we get here */
+
+        /* Check for NULL pointer */
+        if (P->inv3d != NULL)
+        {
+	    lpz = (*P->inv3d)(xyz, P); /* inverse project */
+	    if (P->ctx->last_errno )
+		lpz.lam = lpz.phi = lpz.z = HUGE_VAL;
+	    else {
+		lpz.lam += P->lam0; /* reduce from del lp.lam */
+		if (!P->over)
+			lpz.lam = adjlon(lpz.lam); /* adjust longitude to CM */
+
+                /* This may be redundant and never used */
+		if (P->geoc && fabs(fabs(lpz.phi)-M_HALFPI) > EPS)
+			lpz.phi = atan(P->one_es * tan(lpz.phi));
+	    }
+        }
+        else
+        {
+            lpz.lam = lpz.phi = lpz.z = HUGE_VAL;
+        }
+>>>>>>> refs/remotes/OSGeo/master
 	return lpz;
 }

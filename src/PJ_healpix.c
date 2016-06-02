@@ -160,41 +160,41 @@ static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
 int in_image(double x, double y, int proj, int north_square, int south_square) {
     if (proj == 0) {
         double healpixVertsJit[][2] = {
-            {-1.0*PI- EPS, PI/4.0},
-            {-3.0*PI/4.0, PI/2.0 + EPS},
-            {-1.0*PI/2.0, PI/4.0 + EPS},
-            {-1.0*PI/4.0, PI/2.0 + EPS},
-            {0.0, PI/4.0 + EPS},
-            {PI/4.0, PI/2.0 + EPS},
-            {PI/2.0, PI/4.0 + EPS},
-            {3.0*PI/4.0, PI/2.0 + EPS},
-            {PI+ EPS, PI/4.0},
-            {PI+ EPS, -1.0*PI/4.0},
-            {3.0*PI/4.0, -1.0*PI/2.0 - EPS},
-            {PI/2.0, -1.0*PI/4.0 - EPS},
-            {PI/4.0, -1.0*PI/2.0 - EPS},
-            {0.0, -1.0*PI/4.0 - EPS},
-            {-1.0*PI/4.0, -1.0*PI/2.0 - EPS},
-            {-1.0*PI/2.0, -1.0*PI/4.0 - EPS},
-            {-3.0*PI/4.0, -1.0*PI/2.0 - EPS},
-            {-1.0*PI - EPS, -1.0*PI/4.0}
+            {-1.0*M_PI- EPS, M_PI/4.0},
+            {-3.0*M_PI/4.0, M_PI/2.0 + EPS},
+            {-1.0*M_PI/2.0, M_PI/4.0 + EPS},
+            {-1.0*M_PI/4.0, M_PI/2.0 + EPS},
+            {0.0, M_PI/4.0 + EPS},
+            {M_PI/4.0, M_PI/2.0 + EPS},
+            {M_PI/2.0, M_PI/4.0 + EPS},
+            {3.0*M_PI/4.0, M_PI/2.0 + EPS},
+            {M_PI+ EPS, M_PI/4.0},
+            {M_PI+ EPS, -1.0*M_PI/4.0},
+            {3.0*M_PI/4.0, -1.0*M_PI/2.0 - EPS},
+            {M_PI/2.0, -1.0*M_PI/4.0 - EPS},
+            {M_PI/4.0, -1.0*M_PI/2.0 - EPS},
+            {0.0, -1.0*M_PI/4.0 - EPS},
+            {-1.0*M_PI/4.0, -1.0*M_PI/2.0 - EPS},
+            {-1.0*M_PI/2.0, -1.0*M_PI/4.0 - EPS},
+            {-3.0*M_PI/4.0, -1.0*M_PI/2.0 - EPS},
+            {-1.0*M_PI - EPS, -1.0*M_PI/4.0}
         };
         return pnpoly((int)sizeof(healpixVertsJit)/
                       sizeof(healpixVertsJit[0]), healpixVertsJit, x, y);
     } else {
         double rhealpixVertsJit[][2] = {
-            {-1.0*PI - EPS, PI/4.0 + EPS},
-            {-1.0*PI + north_square*PI/2.0- EPS, PI/4.0 + EPS},
-            {-1.0*PI + north_square*PI/2.0- EPS, 3*PI/4.0 + EPS},
-            {-1.0*PI + (north_square + 1.0)*PI/2.0 + EPS, 3*PI/4.0 + EPS},
-            {-1.0*PI + (north_square + 1.0)*PI/2.0 + EPS, PI/4.0 + EPS},
-            {PI + EPS, PI/4.0 + EPS},
-            {PI + EPS, -1.0*PI/4.0 - EPS},
-            {-1.0*PI + (south_square + 1.0)*PI/2.0 + EPS, -1.0*PI/4.0 - EPS},
-            {-1.0*PI + (south_square + 1.0)*PI/2.0 + EPS, -3.0*PI/4.0 - EPS},
-            {-1.0*PI + south_square*PI/2.0 - EPS, -3.0*PI/4.0 - EPS},
-            {-1.0*PI + south_square*PI/2.0 - EPS, -1.0*PI/4.0 - EPS},
-            {-1.0*PI - EPS, -1.0*PI/4.0 - EPS}};
+            {-1.0*M_PI - EPS, M_PI/4.0 + EPS},
+            {-1.0*M_PI + north_square*M_PI/2.0- EPS, M_PI/4.0 + EPS},
+            {-1.0*M_PI + north_square*M_PI/2.0- EPS, 3*M_PI/4.0 + EPS},
+            {-1.0*M_PI + (north_square + 1.0)*M_PI/2.0 + EPS, 3*M_PI/4.0 + EPS},
+            {-1.0*M_PI + (north_square + 1.0)*M_PI/2.0 + EPS, M_PI/4.0 + EPS},
+            {M_PI + EPS, M_PI/4.0 + EPS},
+            {M_PI + EPS, -1.0*M_PI/4.0 - EPS},
+            {-1.0*M_PI + (south_square + 1.0)*M_PI/2.0 + EPS, -1.0*M_PI/4.0 - EPS},
+            {-1.0*M_PI + (south_square + 1.0)*M_PI/2.0 + EPS, -3.0*M_PI/4.0 - EPS},
+            {-1.0*M_PI + south_square*M_PI/2.0 - EPS, -3.0*M_PI/4.0 - EPS},
+            {-1.0*M_PI + south_square*M_PI/2.0 - EPS, -1.0*M_PI/4.0 - EPS},
+            {-1.0*M_PI - EPS, -1.0*M_PI/4.0 - EPS}};
         return pnpoly((int)sizeof(rhealpixVertsJit)/
                       sizeof(rhealpixVertsJit[0]), rhealpixVertsJit, x, y);
     }
@@ -239,17 +239,17 @@ XY healpix_sphere(LP lp) {
     /* equatorial region */
     if ( fabsl(phi) <= phi0) {
         xy.x = lam;
-        xy.y = 3.0*PI/8.0*sin(phi);
+        xy.y = 3.0*M_PI/8.0*sin(phi);
     } else {
         double lamc;
         double sigma = sqrt(3.0*(1 - fabsl(sin(phi))));
-        double cn = floor(2*lam / PI + 2);
+        double cn = floor(2*lam / M_PI + 2);
         if (cn >= 4) {
             cn = 3;
         }
-        lamc = -3*PI/4 + (PI/2)*cn;
+        lamc = -3*M_PI/4 + (M_PI/2)*cn;
         xy.x = lamc + (lam - lamc)*sigma;
-        xy.y = pj_sign(phi)*PI/4*(2 - sigma);
+        xy.y = pj_sign(phi)*M_PI/4*(2 - sigma);
     }
     return xy;
 }
@@ -262,25 +262,25 @@ LP healpix_sphere_inverse(XY xy) {
     LP lp;
     double x = xy.x;
     double y = xy.y;
-    double y0 = PI/4.0;
+    double y0 = M_PI/4.0;
 
     /* Equatorial region. */
     if (fabsl(y) <= y0) {
         lp.lam = x;
-        lp.phi = asin(8.0*y/(3.0*PI));
-    } else if (fabsl(y) < PI/2.0) {
-        double cn = floor(2.0*x/PI + 2.0);
+        lp.phi = asin(8.0*y/(3.0*M_PI));
+    } else if (fabsl(y) < M_PI/2.0) {
+        double cn = floor(2.0*x/M_PI + 2.0);
         double xc, tau;
         if (cn >= 4) {
             cn = 3;
         }
-        xc = -3.0*PI/4.0 + (PI/2.0)*cn;
-        tau = 2.0 - 4.0*fabsl(y)/PI;
+        xc = -3.0*M_PI/4.0 + (M_PI/2.0)*cn;
+        tau = 2.0 - 4.0*fabsl(y)/M_PI;
         lp.lam = xc + (x - xc)/tau;
         lp.phi = pj_sign(y)*asin(1.0 - pow(tau , 2.0)/3.0);
     } else {
-        lp.lam = -1.0*PI;
-        lp.phi = pj_sign(y)*PI/2.0;
+        lp.lam = -1.0*M_PI;
+        lp.phi = pj_sign(y)*M_PI/2.0;
     }
     return (lp);
 }
@@ -343,48 +343,48 @@ static CapMap get_cap(double x, double y, int north_square, int south_square,
     capmap.x = x;
     capmap.y = y;
     if (inverse == 0) {
-        if (y > PI/4.0) {
+        if (y > M_PI/4.0) {
             capmap.region = north;
-            c = PI/2.0;
-        } else if (y < -1*PI/4.0) {
+            c = M_PI/2.0;
+        } else if (y < -1*M_PI/4.0) {
             capmap.region = south;
-            c = -1*PI/2.0;
+            c = -1*M_PI/2.0;
         } else {
             capmap.region = equatorial;
             capmap.cn = 0;
             return capmap;
         }
         /* polar region */
-        if (x < -1*PI/2.0) {
+        if (x < -1*M_PI/2.0) {
             capmap.cn = 0;
-            capmap.x = (-1*3.0*PI/4.0);
+            capmap.x = (-1*3.0*M_PI/4.0);
             capmap.y = c;
-        } else if (x >= -1*PI/2.0 && x < 0) {
+        } else if (x >= -1*M_PI/2.0 && x < 0) {
             capmap.cn = 1;
-            capmap.x = -1*PI/4.0;
+            capmap.x = -1*M_PI/4.0;
             capmap.y = c;
-        } else if (x >= 0 && x < PI/2.0) {
+        } else if (x >= 0 && x < M_PI/2.0) {
             capmap.cn = 2;
-            capmap.x = PI/4.0;
+            capmap.x = M_PI/4.0;
             capmap.y = c;
         } else {
             capmap.cn = 3;
-            capmap.x = 3.0*PI/4.0;
+            capmap.x = 3.0*M_PI/4.0;
             capmap.y = c;
         }
         return capmap;
     } else {
         double eps;
-        if (y > PI/4.0) {
+        if (y > M_PI/4.0) {
             capmap.region = north;
-            capmap.x = (-3.0*PI/4.0 + north_square*PI/2.0);
-            capmap.y = PI/2.0;
-            x = x - north_square*PI/2.0;
-        } else if (y < -1*PI/4.0) {
+            capmap.x = (-3.0*M_PI/4.0 + north_square*M_PI/2.0);
+            capmap.y = M_PI/2.0;
+            x = x - north_square*M_PI/2.0;
+        } else if (y < -1*M_PI/4.0) {
             capmap.region = south;
-            capmap.x = (-3.0*PI/4.0 + south_square*PI/2);
-            capmap.y = -1*PI/2.0;
-            x = x - south_square*PI/2.0;
+            capmap.x = (-3.0*M_PI/4.0 + south_square*M_PI/2);
+            capmap.y = -1*M_PI/2.0;
+            x = x - south_square*M_PI/2.0;
         } else {
             capmap.region = equatorial;
             capmap.cn = 0;
@@ -394,21 +394,21 @@ static CapMap get_cap(double x, double y, int north_square, int south_square,
            x, y moves to when rHEALPix polar square is disassembled. */
         eps = 1e-15; /* Kludge.  Fuzz to avoid some rounding errors. */
         if (capmap.region == north) {
-            if (y >= -1*x - PI/4.0 - eps && y < x + 5.0*PI/4.0 - eps) {
+            if (y >= -1*x - M_PI/4.0 - eps && y < x + 5.0*M_PI/4.0 - eps) {
                 capmap.cn = (north_square + 1) % 4;
-            } else if (y > -1*x -1*PI/4.0 + eps && y >= x + 5.0*PI/4.0 - eps) {
+            } else if (y > -1*x -1*M_PI/4.0 + eps && y >= x + 5.0*M_PI/4.0 - eps) {
                 capmap.cn = (north_square + 2) % 4;
-            } else if (y <= -1*x -1*PI/4.0 + eps && y > x + 5.0*PI/4.0 + eps) {
+            } else if (y <= -1*x -1*M_PI/4.0 + eps && y > x + 5.0*M_PI/4.0 + eps) {
                 capmap.cn = (north_square + 3) % 4;
             } else {
                 capmap.cn = north_square;
             }
         } else if (capmap.region == south) {
-            if (y <= x + PI/4.0 + eps && y > -1*x - 5.0*PI/4 + eps) {
+            if (y <= x + M_PI/4.0 + eps && y > -1*x - 5.0*M_PI/4 + eps) {
                 capmap.cn = (south_square + 1) % 4;
-            } else if (y < x + PI/4.0 - eps && y <= -1*x - 5.0*PI/4.0 + eps) {
+            } else if (y < x + M_PI/4.0 - eps && y <= -1*x - 5.0*M_PI/4.0 + eps) {
                 capmap.cn = (south_square + 2) % 4;
-            } else if (y >= x + PI/4.0 - eps && y < -1*x - 5.0*PI/4.0 - eps) {
+            } else if (y >= x + M_PI/4.0 - eps && y < -1*x - 5.0*M_PI/4.0 - eps) {
                 capmap.cn = (south_square + 3) % 4;
             } else {
                 capmap.cn = south_square;
@@ -453,16 +453,16 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
         double c[2] = {capmap.x, capmap.y};
         if (capmap.region == north) {
             pole = north_square;
-            a[0] =  (-3.0*PI/4.0 + pole*PI/2);
-            a[1] =  (PI/2.0 + pole*0);
+            a[0] =  (-3.0*M_PI/4.0 + pole*M_PI/2);
+            a[1] =  (M_PI/2.0 + pole*0);
             tmpRot = rot[get_rotate_index(capmap.cn - pole)];
             vector_sub(v, c, v_min_c);
             dot_product(tmpRot, v_min_c, ret_dot);
             vector_add(ret_dot, a, vector);
         } else {
             pole = south_square;
-            a[0] =  (-3.0*PI/4.0 + pole*PI/2);
-            a[1] =  (PI/-2.0 + pole*0);
+            a[0] =  (-3.0*M_PI/4.0 + pole*M_PI/2);
+            a[1] =  (M_PI/-2.0 + pole*0);
             tmpRot = rot[get_rotate_index(-1*(capmap.cn - pole))];
             vector_sub(v, c, v_min_c);
             dot_product(tmpRot, v_min_c, ret_dot);
@@ -480,16 +480,16 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
         /* disassemble */
         if (capmap.region == north) {
             pole = north_square;
-            a[0] =  (-3.0*PI/4.0 + capmap.cn*PI/2);
-            a[1] =  (PI/2.0 + capmap.cn*0);
+            a[0] =  (-3.0*M_PI/4.0 + capmap.cn*M_PI/2);
+            a[1] =  (M_PI/2.0 + capmap.cn*0);
             tmpRot = rot[get_rotate_index(-1*(capmap.cn - pole))];
             vector_sub(v, c, v_min_c);
             dot_product(tmpRot, v_min_c, ret_dot);
             vector_add(ret_dot, a, vector);
         } else {
             pole = south_square;
-            a[0] =  (-3.0*PI/4.0 + capmap.cn*PI/2);
-            a[1] =  (PI/-2.0 + capmap.cn*0);
+            a[0] =  (-3.0*M_PI/4.0 + capmap.cn*M_PI/2);
+            a[1] =  (M_PI/-2.0 + capmap.cn*0);
             tmpRot = rot[get_rotate_index(capmap.cn - pole)];
             vector_sub(v, c, v_min_c);
             dot_product(tmpRot, v_min_c, ret_dot);

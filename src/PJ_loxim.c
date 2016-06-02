@@ -20,8 +20,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     if (fabs(xy.y) < EPS)
         xy.x = lp.lam * Q->cosphi1;
     else {
-        xy.x = FORTPI + 0.5 * lp.phi;
-        if (fabs(xy.x) < EPS || fabs(fabs(xy.x) - HALFPI) < EPS)
+        xy.x = M_FORTPI + 0.5 * lp.phi;
+        if (fabs(xy.x) < EPS || fabs(fabs(xy.x) - M_HALFPI) < EPS)
             xy.x = 0.;
         else
             xy.x = lp.lam * xy.y / log( tan(xy.x) / Q->tanphi1 );
@@ -38,8 +38,8 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     if (fabs(xy.y) < EPS) {
         lp.lam = xy.x / Q->cosphi1;
     } else {
-        lp.lam = FORTPI + 0.5 * lp.phi;
-        if (fabs(lp.lam) < EPS || fabs(fabs(lp.lam) - HALFPI) < EPS)
+        lp.lam = M_FORTPI + 0.5 * lp.phi;
+        if (fabs(lp.lam) < EPS || fabs(fabs(lp.lam) - M_HALFPI) < EPS)
             lp.lam = 0.;
         else
             lp.lam = xy.x * log( tan(lp.lam) / Q->tanphi1 ) / xy.y ;
@@ -75,7 +75,7 @@ PJ *PROJECTION(loxim) {
     if (Q->cosphi1 < EPS)
         E_ERROR(-22);
 
-    Q->tanphi1 = tan(FORTPI + 0.5 * Q->phi1);
+    Q->tanphi1 = tan(M_FORTPI + 0.5 * Q->phi1);
 
     P->inv = s_inverse;
     P->fwd = s_forward;

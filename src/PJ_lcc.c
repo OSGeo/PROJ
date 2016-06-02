@@ -21,12 +21,12 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     struct pj_opaque *Q = P->opaque;
     double rho;
 
-    if (fabs(fabs(lp.phi) - HALFPI) < EPS10) {
+    if (fabs(fabs(lp.phi) - M_HALFPI) < EPS10) {
         if ((lp.phi * Q->n) <= 0.) F_ERROR;
         rho = 0.;
     } else {
         rho = Q->c * (Q->ellips ? pow(pj_tsfn(lp.phi, sin(lp.phi),
-            P->e), Q->n) : pow(tan(FORTPI + .5 * lp.phi), -Q->n));
+            P->e), Q->n) : pow(tan(M_FORTPI + .5 * lp.phi), -Q->n));
     }
     lp.lam *= Q->n;
     xy.x = P->k0 * (rho * sin( lp.lam) );
@@ -56,11 +56,11 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
             if (lp.phi == HUGE_VAL)
                 I_ERROR;
         } else
-            lp.phi = 2. * atan(pow(Q->c / rho, 1./Q->n)) - HALFPI;
+            lp.phi = 2. * atan(pow(Q->c / rho, 1./Q->n)) - M_HALFPI;
         lp.lam = atan2(xy.x, xy.y) / Q->n;
     } else {
         lp.lam = 0.;
-        lp.phi = Q->n > 0. ? HALFPI : - HALFPI;
+        lp.phi = Q->n > 0. ? M_HALFPI : -M_HALFPI;
     }
     return lp;
 }
@@ -68,12 +68,12 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 static void special(LP lp, PJ *P, struct FACTORS *fac) {
     struct pj_opaque *Q = P->opaque;
     double rho;
-    if (fabs(fabs(lp.phi) - HALFPI) < EPS10) {
+    if (fabs(fabs(lp.phi) - M_HALFPI) < EPS10) {
         if ((lp.phi * Q->n) <= 0.) return;
         rho = 0.;
     } else
         rho = Q->c * (Q->ellips ? pow(pj_tsfn(lp.phi, sin(lp.phi),
-            P->e), Q->n) : pow(tan(FORTPI + .5 * lp.phi), -Q->n));
+            P->e), Q->n) : pow(tan(M_FORTPI + .5 * lp.phi), -Q->n));
     fac->code |= IS_ANAL_HK + IS_ANAL_CONV;
     fac->k = fac->h = P->k0 * Q->n * rho /
         pj_msfn(sin(lp.phi), cos(lp.phi), P->es);
@@ -131,16 +131,16 @@ PJ *PROJECTION(lcc) {
             Q->n /= log(ml1 / pj_tsfn(Q->phi2, sinphi, P->e));
         }
         Q->c = (Q->rho0 = m1 * pow(ml1, -Q->n) / Q->n);
-        Q->rho0 *= (fabs(fabs(P->phi0) - HALFPI) < EPS10) ? 0. :
+        Q->rho0 *= (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) ? 0. :
             pow(pj_tsfn(P->phi0, sin(P->phi0), P->e), Q->n);
     } else {
         if (secant)
             Q->n = log(cosphi / cos(Q->phi2)) /
-               log(tan(FORTPI + .5 * Q->phi2) /
-               tan(FORTPI + .5 * Q->phi1));
-        Q->c = cosphi * pow(tan(FORTPI + .5 * Q->phi1), Q->n) / Q->n;
-        Q->rho0 = (fabs(fabs(P->phi0) - HALFPI) < EPS10) ? 0. :
-            Q->c * pow(tan(FORTPI + .5 * P->phi0), -Q->n);
+               log(tan(M_FORTPI + .5 * Q->phi2) /
+               tan(M_FORTPI + .5 * Q->phi1));
+        Q->c = cosphi * pow(tan(M_FORTPI + .5 * Q->phi1), Q->n) / Q->n;
+        Q->rho0 = (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) ? 0. :
+            Q->c * pow(tan(M_FORTPI + .5 * P->phi0), -Q->n);
     }
 
     P->inv = e_inverse;

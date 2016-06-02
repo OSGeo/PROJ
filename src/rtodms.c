@@ -25,7 +25,7 @@ set_rtodms(int fract, int con_w) {
 		for (i = 0; i < fract; ++i)
 			RES *= 10.;
 		RES60 = RES * 60.;
-		CONV = 180. * 3600. * RES / PI;
+		CONV = 180. * 3600. * RES / M_PI;
 		if (! con_w)
 			(void)sprintf(format,"%%dd%%d'%%.%df\"%%c", fract);
 		else

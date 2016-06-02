@@ -7,7 +7,6 @@ struct pj_opaque { double	cosphi1; };
 
 #define MAX_ITER    10
 #define LOOP_TOL    1e-7
-#define TWO_D_PI 0.636619772367581343
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
@@ -15,8 +14,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 	double k, V;
 	int i;
 
-	xy.y = lp.phi * TWO_D_PI;
-	k = PI * sin (lp.phi);
+	xy.y = lp.phi * M_TWO_D_PI;
+	k = M_PI * sin (lp.phi);
 	lp.phi *= 1.8;
 	for (i = MAX_ITER; i ; --i) {
 		lp.phi -= V = (lp.phi + sin (lp.phi) - k) /
@@ -25,11 +24,11 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 			break;
 	}
 	if (!i)
-		lp.phi = (lp.phi < 0.) ? -HALFPI : HALFPI;
+		lp.phi = (lp.phi < 0.) ? -M_HALFPI : M_HALFPI;
 	else
 		lp.phi *= 0.5;
 	xy.x = 0.5 * lp.lam * (cos (lp.phi) + P->opaque->cosphi1);
-	xy.y = FORTPI * (sin (lp.phi) + xy.y);
+	xy.y = M_FORTPI * (sin (lp.phi) + xy.y);
 	return xy;
 }
 

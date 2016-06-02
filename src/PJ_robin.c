@@ -100,7 +100,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     if (lp.phi >= 1.) { /* simple pathologic cases */
         if (lp.phi > ONEEPS) I_ERROR
         else {
-            lp.phi = xy.y < 0. ? -HALFPI : HALFPI;
+            lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
             lp.lam /= X[NODES].c0;
         }
     } else { /* general problem */

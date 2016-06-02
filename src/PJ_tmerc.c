@@ -33,7 +33,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
      *
      *  http://trac.osgeo.org/proj/ticket/5
      */
-    if( lp.lam < -HALFPI || lp.lam > HALFPI ) {
+    if( lp.lam < -M_HALFPI || lp.lam > M_HALFPI ) {
         xy.x = HUGE_VAL;
         xy.y = HUGE_VAL;
         pj_ctx_set_errno( P->ctx, -14 );
@@ -74,7 +74,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
      *
      *  http://trac.osgeo.org/proj/ticket/5
      */
-    if( lp.lam < -HALFPI || lp.lam > HALFPI ) {
+    if( lp.lam < -M_HALFPI || lp.lam > M_HALFPI ) {
         xy.x = HUGE_VAL;
         xy.y = HUGE_VAL;
         pj_ctx_set_errno( P->ctx, -14 );
@@ -110,8 +110,8 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     double n, con, cosphi, d, ds, sinphi, t;
 
     lp.phi = pj_inv_mlfn(P->ctx, Q->ml0 + xy.y / P->k0, P->es, Q->en);
-    if (fabs(lp.phi) >= HALFPI) {
-        lp.phi = xy.y < 0. ? -HALFPI : HALFPI;
+    if (fabs(lp.phi) >= M_HALFPI) {
+        lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
         lp.lam = 0.;
     } else {
         sinphi = sin(lp.phi);

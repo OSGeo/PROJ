@@ -21,7 +21,7 @@ US, Canadian, French and New Zealand
 Switzerland
 --------------------------------------------------------------------------------
 
-Background in ticket [#145](https://github.com/OSGeo/proj.4/issues/145)
+Background in ticket `#145 <https://github.com/OSGeo/proj.4/issues/145>`__
 
 We basically have two shift grids available. An official here:
 
@@ -95,7 +95,7 @@ http://www.geod.nrcan.gc.ca/tools-outils/ntv2_e.php.
 
 Procedure:
 
-1. Visit the [NTv2](http://webapp.geod.nrcan.gc.ca/geod/tools-outils/applications.php?locale=en#ntv2), and register/login
+1. Visit the `NTv2 <http://webapp.geod.nrcan.gc.ca/geod/tools-outils/applications.php?locale=en#ntv2>`__, and register/login
 2. Follow the Download NTv2 link near the bottom of the page.
 3. Unzip `ntv2_100325.zip` (or similar), and move the grid shift file `NTV2_0.GSB` to the proj directory (be sure to change the name to lowercase for consistency)
    * e.g.: `mv NTV2_0.GSB /usr/local/share/proj/ntv2_0.gsb`
@@ -157,7 +157,7 @@ South Africa
 Netherlands
 ................................................................................
 
-`Dutch grid <https://www.kadaster.nl/web/Themas/Registraties/Rijksdriehoeksmeting/Transformatie-van-coordinaten.htm) (Registration required before download>`__
+`Dutch grid <https://www.kadaster.nl/web/Themas/Registraties/Rijksdriehoeksmeting/Transformatie-van-coordinaten.htm>`__ (Registration required before download)
 
 Hungary
 ................................................................................

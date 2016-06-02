@@ -49,8 +49,8 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 	rh = hypot(xy.x, xy.y = Q->cphi1 - xy.y);
 	lp.phi = Q->cphi1 + Q->phi1 - rh;
-	if (fabs(lp.phi) > HALFPI) I_ERROR;
-	if (fabs(fabs(lp.phi) - HALFPI) <= EPS10)
+	if (fabs(lp.phi) > M_HALFPI) I_ERROR;
+	if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10)
 		lp.lam = 0.;
 	else
 		lp.lam = rh * atan2(xy.x, xy.y) / cos(lp.phi);
@@ -65,11 +65,11 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 
 	rh = hypot(xy.x, xy.y = Q->am1 - xy.y);
 	lp.phi = pj_inv_mlfn(P->ctx, Q->am1 + Q->m1 - rh, P->es, Q->en);
-	if ((s = fabs(lp.phi)) < HALFPI) {
+	if ((s = fabs(lp.phi)) < M_HALFPI) {
 		s = sin(lp.phi);
 		lp.lam = rh * atan2(xy.x, xy.y) *
 		   sqrt(1. - P->es * s * s) / cos(lp.phi);
-	} else if (fabs(s - HALFPI) <= EPS10)
+	} else if (fabs(s - M_HALFPI) <= EPS10)
 		lp.lam = 0.;
 	else I_ERROR;
 	return lp;
@@ -110,7 +110,7 @@ PJ *PROJECTION(bonne) {
 		P->inv = e_inverse;
 		P->fwd = e_forward;
 	} else {
-		if (fabs(Q->phi1) + EPS10 >= HALFPI)
+		if (fabs(Q->phi1) + EPS10 >= M_HALFPI)
 			Q->cphi1 = 0.;
 		else
 			Q->cphi1 = 1. / tan(Q->phi1);

@@ -43,7 +43,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     struct pj_opaque *Q = P->opaque;
     double S, T, U, V, W, temp, u, v;
 
-    if (fabs(fabs(lp.phi) - HALFPI) > EPS) {
+    if (fabs(fabs(lp.phi) - M_HALFPI) > EPS) {
         W = Q->E / pow(pj_tsfn(lp.phi, sin(lp.phi), P->e), Q->B);
         temp = 1. / W;
         S = .5 * (W - temp);
@@ -94,7 +94,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     Up = (Vp * Q->cosgam + Sp * Q->singam) / Tp;
     if (fabs(fabs(Up) - 1.) < EPS) {
         lp.lam = 0.;
-        lp.phi = Up < 0. ? -HALFPI : HALFPI;
+        lp.phi = Up < 0. ? -M_HALFPI : M_HALFPI;
     } else {
         lp.phi = Q->E / sqrt((1. + Up) / (1. - Up));
         if ((lp.phi = pj_phi2(P->ctx, pow(lp.phi, 1. / Q->B), P->e)) == HUGE_VAL)
@@ -157,9 +157,9 @@ PJ *PROJECTION(omerc) {
         phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
         if (fabs(phi1 - phi2) <= TOL ||
             (con = fabs(phi1)) <= TOL ||
-            fabs(con - HALFPI) <= TOL ||
-            fabs(fabs(P->phi0) - HALFPI) <= TOL ||
-            fabs(fabs(phi2) - HALFPI) <= TOL) E_ERROR(-33);
+            fabs(con - M_HALFPI) <= TOL ||
+            fabs(fabs(P->phi0) - M_HALFPI) <= TOL ||
+            fabs(fabs(phi2) - M_HALFPI) <= TOL) E_ERROR(-33);
     }
     com = sqrt(P->one_es);
     if (fabs(P->phi0) > EPS) {
@@ -192,8 +192,8 @@ PJ *PROJECTION(omerc) {
         } else
             alpha_c = asin(D*sin(gamma0 = gamma));
         if ((con = fabs(alpha_c)) <= TOL ||
-            fabs(con - PI) <= TOL ||
-            fabs(fabs(P->phi0) - HALFPI) <= TOL)
+            fabs(con - M_PI) <= TOL ||
+            fabs(fabs(P->phi0) - M_HALFPI) <= TOL)
             E_ERROR(-32);
         P->lam0 = lamc - asin(.5 * (F - 1. / F) *
            tan(gamma0)) / Q->B;
@@ -204,10 +204,10 @@ PJ *PROJECTION(omerc) {
         p = (L - H) / (L + H);
         J = Q->E * Q->E;
         J = (J - L * H) / (J + L * H);
-        if ((con = lam1 - lam2) < -PI)
-            lam2 -= TWOPI;
-        else if (con > PI)
-            lam2 += TWOPI;
+        if ((con = lam1 - lam2) < -M_PI)
+            lam2 -= M_TWOPI;
+        else if (con > M_PI)
+            lam2 += M_TWOPI;
         P->lam0 = adjlon(.5 * (lam1 + lam2) - atan(
            J * tan(.5 * Q->B * (lam1 - lam2)) / p) / Q->B);
         gamma0 = atan(2. * sin(Q->B * adjlon(lam1 - P->lam0)) /
@@ -228,8 +228,8 @@ PJ *PROJECTION(omerc) {
             Q->u_0 = - Q->u_0;
     }
     F = 0.5 * gamma0;
-    Q->v_pole_n = Q->ArB * log(tan(FORTPI - F));
-    Q->v_pole_s = Q->ArB * log(tan(FORTPI + F));
+    Q->v_pole_n = Q->ArB * log(tan(M_FORTPI - F));
+    Q->v_pole_s = Q->ArB * log(tan(M_FORTPI + F));
     P->inv = e_inverse;
     P->fwd = e_forward;
 

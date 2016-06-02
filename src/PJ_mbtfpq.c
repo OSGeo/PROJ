@@ -39,15 +39,15 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     lp.phi = RYC * xy.y;
     if (fabs(lp.phi) > 1.) {
         if (fabs(lp.phi) > ONETOL)  I_ERROR
-        else if (lp.phi < 0.) { t = -1.; lp.phi = -PI; }
-        else { t = 1.; lp.phi = PI; }
+        else if (lp.phi < 0.) { t = -1.; lp.phi = -M_PI; }
+        else { t = 1.; lp.phi = M_PI; }
     } else
         lp.phi = 2. * asin(t = lp.phi);
     lp.lam = RXC * xy.x / (1. + 2. * cos(lp.phi)/cos(0.5 * lp.phi));
     lp.phi = RC * (t + sin(lp.phi));
     if (fabs(lp.phi) > 1.)
         if (fabs(lp.phi) > ONETOL)  I_ERROR
-        else            lp.phi = lp.phi < 0. ? -HALFPI : HALFPI;
+        else            lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
     else
         lp.phi = asin(lp.phi);
     return lp;

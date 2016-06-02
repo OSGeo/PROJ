@@ -30,10 +30,10 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     LP lp = {0.0,0.0};
     double s;
 
-    if ((s = fabs(lp.phi = pj_inv_mlfn(P->ctx, xy.y, P->es, P->opaque->en))) < HALFPI) {
+    if ((s = fabs(lp.phi = pj_inv_mlfn(P->ctx, xy.y, P->es, P->opaque->en))) < M_HALFPI) {
         s = sin(lp.phi);
         lp.lam = xy.x * sqrt(1. - P->es * s * s) / cos(lp.phi);
-    } else if ((s - EPS10) < HALFPI) {
+    } else if ((s - EPS10) < M_HALFPI) {
         lp.lam = 0.;
     } else {
         I_ERROR;
