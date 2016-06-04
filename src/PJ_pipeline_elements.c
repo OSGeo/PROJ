@@ -71,13 +71,6 @@ static void freeup (PJ *P) {
 
 
 
-
-
-
-
-
-
-
 /* Projection specific elements for the "add" PJ object */
 struct pj_opaque_add { XYZ xyz; };
 
@@ -167,12 +160,28 @@ struct pj_opaque_helmert {
     XYZ xyz;
     OPK opk;
     double scale;
+    double R[3][3];
 };
+
+
+/* Make the maths of the rotation operations somewhat more readable and textbook like */
+#define R00 Q->R[0][0]
+#define R01 Q->R[0][1]
+#define R02 Q->R[0][2]
+
+#define R10 Q->R[1][0]
+#define R11 Q->R[1][1]
+#define R12 Q->R[1][2]
+
+#define R20 Q->R[2][0]
+#define R21 Q->R[2][1]
+#define R22 Q->R[2][2]
+
 
 static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     COORDINATE point;
-    double X, Y, Z, rX, rY, rZ, scale;
+    double X, Y, Z, scale;
 
     scale = 1 + Q->scale * 1e-6;
 
@@ -180,21 +189,18 @@ static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
     Y = lpz.phi;
     Z = lpz.z;
 
-    rX = Q->opk.o;
-    rY = Q->opk.p;
-    rZ = Q->opk.k;
-
     point.xyz = Q->xyz;
-    point.xyz.x += scale * (      X   -   rZ * Y   +   rY * Z);
-    point.xyz.y += scale * ( rZ * X   +        Y   -   rX * Z);
-    point.xyz.z += scale * (-rY * X   +   rX * Y   +        Z);
+    point.xyz.x += scale * ( R00 * X  +   R01 * Y   +   R02 * Z);
+    point.xyz.y += scale * ( R10 * X  +   R11 * Y   +   R12 * Z);
+    point.xyz.z += scale * ( R20 * X  +   R21 * Y   +   R22 * Z);
+
     return point.xyz;
 }
 
 static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     COORDINATE point;
-    double X, Y, Z, rX, rY, rZ, scale;
+    double X, Y, Z, scale;
 
     scale = 1 - Q->scale * 1e-6;
 
@@ -202,17 +208,14 @@ static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
     Y = xyz.y;
     Z = xyz.z;
 
-    rX = -Q->opk.o;
-    rY = -Q->opk.p;
-    rZ = -Q->opk.k;
-
     point.xyz.x = -Q->xyz.x;
     point.xyz.y = -Q->xyz.y;
     point.xyz.z = -Q->xyz.z;
 
-    point.xyz.x += scale * (      X   -   rZ * Y   +   rY * Z);
-    point.xyz.y += scale * ( rZ * X   +        Y   -   rX * Z);
-    point.xyz.z += scale * (-rY * X   +   rX * Y   +        Z);
+    /* Transpose multiplication inverts the rotation */
+    point.xyz.x += scale * ( R00 * X  +   R10 * Y   +   R20 * Z);
+    point.xyz.y += scale * ( R01 * X  +   R11 * Y   +   R21 * Z);
+    point.xyz.z += scale * ( R02 * X  +   R12 * Y   +   R22 * Z);
 
     return point.lpz;
 }
@@ -237,11 +240,11 @@ static LP helmert_reverse (XY xy, PJ *P) {
 /* Milliarcsecond to radians */
 #define MAS_TO_RAD (DEG_TO_RAD / 3600000)
 
-
 PJ *PROJECTION(helmert) {
     XYZ xyz = {0, 0, 0};
     OPK opk = {0, 0, 0};
     double scale = 0;
+    int approximate = 0, transpose = 0;
 
     struct pj_opaque_helmert *Q = pj_calloc (1, sizeof (struct pj_opaque_helmert));
     if (0==Q)
@@ -282,9 +285,153 @@ PJ *PROJECTION(helmert) {
         scale = pj_param(P->ctx, P->params, "ds").f;
     }
 
+    /* use small angle approximations? */
+    if ( (pj_param(P->ctx, P->params, "tapprox").i) )
+        approximate = 1;
+
+    /* use "other" rotation sign convention? */
+    if ( (pj_param(P->ctx, P->params, "ttranspose").i) )
+        transpose = 1;
+
     Q->xyz = xyz;
     Q->opk = opk;
     Q->scale = scale;
+
+
+    /**************************************************************************
+
+        Build rotation matrix.
+        ----------------------
+
+        Here we rename rotation indices from omega, phi, kappa (opk), to
+        fi (i,e, phi), theta, psi (ftp), in order to reduce the mental agility
+        needed to implement the expression for the rotation matrix derived over
+        at https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions
+        
+        If the option "approximate" is set, small angle approximations are used:
+        The matrix elements are approximated by expanding the trigonometric
+        functions to linear order (i.e. cos(x) = 1, sin(x) = x), and discarding
+        products of second order.
+        
+        This was useful back when calculating by hand was the only option, but in
+        general, today, should be avoided because:
+        
+        1. It does not save much computation time, as the rotation matrix
+           is built only once, and probably used many times.
+           
+        2. The error induced may be too large for ultra high accuracy
+           applications: the Earth is huge and the linear error is
+           approximately the angular error multiplied by the Earth radius.
+        
+        However, in many cases the approximation is necessary, since it has
+        been used historically: Rotation angles from older published datum
+        shifts may actually be a least squares fit to the linearized rotation
+        approximation, hence actually not being valid for deriving the full
+        rotation matrix.
+        
+        So in order to fit historically derived coordinates, the access to
+        the approximate rotation matrix is necessary - at least in principle.
+
+        Also, when using any published datum transformation information one
+        should always check which convention (exact or approximate rotation
+        matrix) is expected, and whether the induced error for selecting
+        the opposite convention is acceptable.
+        
+        
+        Sign conventions
+        ----------------
+        
+        Take care: Two different sign conventions exist.
+        
+        Conceptually they relate to whether we rotate the coordinate system
+        or the "position vector" (the vector going from the coordinate system
+        origin to the point being transformed, i.e. the point coordinates
+        interpreted as vector coordinates).
+        
+        Switching between the "position vector" and "coordinate system"
+        conventions is simply a matter of switching the sign of the rotation
+        angles, which algebraically also translates into a transposition of
+        the rotation matrix.
+        
+        Hence, as geodetic constants should preferably be referred to exactly
+        as published, the "transpose" option provides the ability to switch
+        between the conventions.
+        
+        
+        Inverse transformation
+        ----------------------
+        
+        No matter what sign convention, the direction of the overall Helmert
+        transformation (i.e. offset, scale, and rotation), is reversed by
+        switching signs for *all* 7 parameters. Hence, the code for the inverse
+        transformation in helmert_reverse_3d, when compared to the forward code
+        in helmert_forward_3d, does 3 things:
+
+        1. reverses the sign of the scale
+        2. reverses the sign of the offset
+        3. does transpose multiplication.
+
+    ***************************************************************************/
+    do {
+        double  f,  t,  p;    /* phi/fi , theta, psi  */
+        double cf, ct, cp;    /* cos (fi, theta, psi) */
+        double sf, st, sp;    /* sin (fi, theta, psi) */
+
+        /* rename   (omega, phi, kappa)   to   (fi, theta, psi)   */
+        f = opk.o;
+        t = opk.p;
+        p = opk.k;
+
+        if (approximate) {
+            R00 =  1;
+            R01 =  p;
+            R02 = -t;
+
+            R10 = -p;
+            R11 =  1;
+            R12 =  f;
+
+            R20 =  t;
+            R21 = -f;
+            R22 =  1;
+            break;
+        }
+
+        cf = cos(f);
+        sf = sin(f);
+        ct = cos(t);
+        st = sin(t);
+        cp = cos(p);
+        sp = sin(p);
+
+
+        R00 = ct*cp;
+        R01 = cf*sp + sf*st*cp;
+        R02 = sf*sp - cf*st*cp;
+
+        R10 = -ct*sp;
+        R11 =  cf*cp - sf*st*sp;
+        R12 =  sf*cp + cf*st*sp;
+
+        R20 =  st;
+        R21 = -sf*ct;
+        R22 =  cf*ct;
+
+    } while (0);
+    
+
+    if (transpose) {
+        double r;
+        r = R01;    R01 = R10;    R10 = r;
+        r = R02;    R02 = R20;    R20 = r;
+        
+        r = R10;    R10 = R01;    R01 = r;
+        r = R12;    R12 = R21;    R21 = r;
+        
+        r = R20;    R20 = R02;    R02 = r;
+        r = R21;    R21 = R12;    R12 = r;
+    }
+
     return P;
 }
 
