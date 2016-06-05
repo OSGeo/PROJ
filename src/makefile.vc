@@ -39,7 +39,7 @@ pseudo = \
 	PJ_sts.obj PJ_urm5.obj PJ_urmfps.obj PJ_wag2.obj \
 	PJ_wag3.obj PJ_wink1.obj PJ_wink2.obj PJ_isea.obj \
 	PJ_calcofi.obj PJ_natearth.obj PJ_natearth2.obj\
-	PJ_cart.obj PJ_pipeline.obj PJ_pipeline_elements.obj
+	PJ_cart.obj PJ_pipeline.obj PJ_helmert.obj
 
 support = \
 	aasincos.obj adjlon.obj bch2bps.obj bchgen.obj pj_gauss.obj \
@@ -63,7 +63,7 @@ geodesic = geodesic.obj
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc) \
 	$(geodesic)
 PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
-TRANEXE_OBJ	= tran.obj emess.obj
+TRANEXE_OBJ	= tran.obj emess.obj PJ_pipeline.obj pj_malloc.obj
 CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
 GEODEXE_OBJ	= geod.obj geod_set.obj geod_interface.obj emess.obj
 MULTISTRESSTEST_OBJ = multistresstest.obj

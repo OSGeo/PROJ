@@ -77,6 +77,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_gstmerc.c
         PJ_hammer.c
         PJ_hatano.c
+        PJ_helmert.c
         PJ_igh.c
         PJ_isea.c
         PJ_imw_p.c
@@ -112,7 +113,6 @@ SET(SRC_LIBPROJ_PJ
         PJ_ortho.c
         PJ_patterson.c
         PJ_pipeline.c
-        PJ_pipeline_elements.c
         PJ_poly.c
         PJ_putp2.c
         PJ_putp3.c
