@@ -41,7 +41,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-24/25/28/30/06-02/03/04/05
 #define PJ_LIB__
 #include <projects.h>
 #include <geocent.h>
-#include <PJ_pipeline.h>
 #include <assert.h>
 #include <stddef.h>
 #include <errno.h>

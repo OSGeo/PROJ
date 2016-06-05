@@ -43,7 +43,6 @@
 #define PJ_LIB__
 #include <projects.h>
 #include <geocent.h>
-#include <PJ_pipeline.h>
 #include <assert.h>
 #include <stddef.h>
 #include <math.h>

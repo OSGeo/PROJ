@@ -60,11 +60,6 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-#if 0
-FREEUP; if (P) pj_dalloc(P); }
-#endif
-
-
 static void *freeup_new (PJ *P) {                       /* Destructor */
     if (0==P)
         return 0;

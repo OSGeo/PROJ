@@ -39,7 +39,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25
 
 #define PJ_LIB__
 #include <projects.h>
-#include <PJ_pipeline.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -247,8 +246,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    /* Process all '+'-style options */
-    for (i = i; i < argc; i++) {
+    /* Process all '+'-style options, starting from where '-'-style processing ended */
+    for (/* empty */; i < argc; i++) {
         if ('+' != argv[i][0])
             break;
         plus_argv[plus_argc++] = argv[i];

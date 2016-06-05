@@ -43,11 +43,6 @@ PROJ_HEAD(wintri, "Winkel Tripel") "\n\tMisc Sph\n\tlat_1";
 
 
 
-#if 0
-FORWARD(s_forward); /* spheroid */
-#endif
-
-
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
