@@ -1,18 +1,19 @@
 /***********************************************************************
 
-               Elemental datum shift operations
+             Helmert transformations, 3- and 7-parameter
 
-                 Thomas Knudsen, 2016-05-24
-
-************************************************************************
-
-**Elements**
-
-STUB CODE
+                    Thomas Knudsen, 2016-05-24
 
 ************************************************************************
 
-Thomas Knudsen, thokn@sdfe.dk, 2016-05-24
+  Implements 3- and 7-parameter Helmert transformations for 3D data.
+
+  Primarily useful for implementation of datum shifts in transformation
+  pipelines.
+
+************************************************************************
+
+Thomas Knudsen, thokn@sdfe.dk, 2016-05-24/25/28/30/06-02/03/04/05
 
 ************************************************************************
 * Copyright (c) 2016, Thomas Knudsen / SDFE
@@ -44,8 +45,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-24
 #include <assert.h>
 #include <stddef.h>
 #include <errno.h>
-PROJ_HEAD(add,     "Add a constant to the given coordinate (3 parameter shift)");
-PROJ_HEAD(helmert, "7 parameter Helmert shift");
+PROJ_HEAD(helmert, "3- and 7-parameter Helmert shift");
 
 
 static void *freeup_msg (PJ *P, int errlev) {         /* Destructor */
@@ -71,96 +71,17 @@ static void freeup (PJ *P) {
 
 
 
-/* Projection specific elements for the "add" PJ object */
-struct pj_opaque_add { XYZ xyz; };
 
-static XYZ add_forward_3d (LPZ lpz, PJ *P) {
-    struct pj_opaque_add *Q = (struct pj_opaque_add *) P->opaque;
-    COORDINATE point;
-    point.lpz = lpz;
-    point.xyz.x += Q->xyz.x;
-    point.xyz.y += Q->xyz.y;
-    point.xyz.z += Q->xyz.z;
-    return point.xyz;
-}
-
-static LPZ add_reverse_3d (XYZ xyz, PJ *P) {
-    struct pj_opaque_add *Q = (struct pj_opaque_add *) P->opaque;
-    COORDINATE point;
-    point.xyz = xyz;
-    point.xyz.x -= Q->xyz.x;
-    point.xyz.y -= Q->xyz.y;
-    point.xyz.z -= Q->xyz.z;
-    return point.lpz;
-}
-
-static XY add_forward (LP lp, PJ *P) {
-    struct pj_opaque_add *Q = (struct pj_opaque_add *) P->opaque;
-    COORDINATE point;
-    point.lp = lp;
-    point.xy.x += Q->xyz.x;
-    point.xy.y += Q->xyz.y;
-    return point.xy;
-}
-
-static LP add_reverse (XY xy, PJ *P) {
-    struct pj_opaque_add *Q = (struct pj_opaque_add *) P->opaque;
-    COORDINATE point;
-    point.xy = xy;
-    point.xy.x -= Q->xyz.x;
-    point.xy.y -= Q->xyz.y;
-    return point.lp;
-}
-
-
-PJ *PROJECTION(add) {
-    XYZ xyz = {0, 0, 0};
-
-    struct pj_opaque_add *Q = pj_calloc (1, sizeof (struct pj_opaque_add));
-    if (0==Q)
-        return freeup_msg (P, ENOMEM);
-    P->opaque = (void *) Q;
-
-    P->fwd3d = add_forward_3d;
-    P->inv3d = add_reverse_3d;
-    P->fwd   = add_forward;
-    P->inv   = add_reverse;
-    pj_set_isomorphic (P);
-
-    if ( (pj_param(P->ctx, P->params, "tx").i) ) {
-        xyz.x = pj_param(P->ctx, P->params, "dx").f;
-    }
-
-    if ( (pj_param(P->ctx, P->params, "ty").i) ) {
-        xyz.y = pj_param(P->ctx, P->params, "dy").f;
-    }
-
-    if ( (pj_param(P->ctx, P->params, "tz").i) ) {
-        xyz.z = pj_param(P->ctx, P->params, "dz").f;
-    }
-
-    Q->xyz = xyz;
-    return P;
-}
-
-
-/* selftest stub */
-int pj_add_selftest (void) {return 0;}
-
-
-
-
-
-
-
-
-
-/* Projection specific elements for the "helmert" PJ object */
+/***********************************************************************/
 struct pj_opaque_helmert {
+/************************************************************************
+    Projection specific elements for the "helmert" PJ object
+************************************************************************/
     XYZ xyz;
     OPK opk;
     double scale;
     double R[3][3];
+    int no_rotation;
 };
 
 
@@ -178,10 +99,19 @@ struct pj_opaque_helmert {
 #define R22 Q->R[2][2]
 
 
+/***********************************************************************/
 static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
+/***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     COORDINATE point;
     double X, Y, Z, scale;
+
+    if (Q->no_rotation) {
+        point.xyz.x = lpz.lam + Q->xyz.x;
+        point.xyz.y = lpz.phi + Q->xyz.y;
+        point.xyz.z = lpz.z   + Q->xyz.z;
+        return point.xyz;
+    }
 
     scale = 1 + Q->scale * 1e-6;
 
@@ -197,10 +127,20 @@ static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
     return point.xyz;
 }
 
+
+/***********************************************************************/
 static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
+/***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     COORDINATE point;
     double X, Y, Z, scale;
+
+    if (Q->no_rotation) {
+        point.xyz.x = xyz.x - Q->xyz.x;
+        point.xyz.y = xyz.y - Q->xyz.y;
+        point.xyz.z = xyz.z - Q->xyz.z;
+        return point.lpz;
+    }
 
     scale = 1 - Q->scale * 1e-6;
 
@@ -220,7 +160,10 @@ static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
     return point.lpz;
 }
 
+
+/***********************************************************************/
 static XY helmert_forward (LP lp, PJ *P) {
+/***********************************************************************/
     COORDINATE point;
     point.lp = lp;
     point.lpz.z = 0;
@@ -228,7 +171,10 @@ static XY helmert_forward (LP lp, PJ *P) {
     return point.xy;
 }
 
+
+/***********************************************************************/
 static LP helmert_reverse (XY xy, PJ *P) {
+/***********************************************************************/
     COORDINATE point;
     point.xy = xy;
     point.xyz.z = 0;
@@ -240,7 +186,10 @@ static LP helmert_reverse (XY xy, PJ *P) {
 /* Milliarcsecond to radians */
 #define MAS_TO_RAD (DEG_TO_RAD / 3600000)
 
+
+/***********************************************************************/
 PJ *PROJECTION(helmert) {
+/***********************************************************************/
     XYZ xyz = {0, 0, 0};
     OPK opk = {0, 0, 0};
     double scale = 0;
@@ -297,6 +246,11 @@ PJ *PROJECTION(helmert) {
     Q->opk = opk;
     Q->scale = scale;
 
+    if ((opk.o==0) && (opk.k==0) && (opk.k==0) && (scale==0)) {
+        Q->no_rotation = 1;
+        return P;
+    }
+
 
     /**************************************************************************
 
@@ -307,60 +261,60 @@ PJ *PROJECTION(helmert) {
         fi (i,e, phi), theta, psi (ftp), in order to reduce the mental agility
         needed to implement the expression for the rotation matrix derived over
         at https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions
-        
+
         If the option "approximate" is set, small angle approximations are used:
         The matrix elements are approximated by expanding the trigonometric
         functions to linear order (i.e. cos(x) = 1, sin(x) = x), and discarding
         products of second order.
-        
-        This was useful back when calculating by hand was the only option, but in
+
+        This was a useful back when calculating by hand was the only option, but in
         general, today, should be avoided because:
-        
+
         1. It does not save much computation time, as the rotation matrix
            is built only once, and probably used many times.
-           
+
         2. The error induced may be too large for ultra high accuracy
            applications: the Earth is huge and the linear error is
            approximately the angular error multiplied by the Earth radius.
-        
+
         However, in many cases the approximation is necessary, since it has
         been used historically: Rotation angles from older published datum
         shifts may actually be a least squares fit to the linearized rotation
-        approximation, hence actually not being valid for deriving the full
+        approximation, hence not being strictly valid for deriving the full
         rotation matrix.
-        
+
         So in order to fit historically derived coordinates, the access to
         the approximate rotation matrix is necessary - at least in principle.
 
-        Also, when using any published datum transformation information one
+        Also, when using any published datum transformation information, one
         should always check which convention (exact or approximate rotation
         matrix) is expected, and whether the induced error for selecting
         the opposite convention is acceptable.
-        
-        
+
+
         Sign conventions
         ----------------
-        
+
         Take care: Two different sign conventions exist.
-        
+
         Conceptually they relate to whether we rotate the coordinate system
         or the "position vector" (the vector going from the coordinate system
         origin to the point being transformed, i.e. the point coordinates
         interpreted as vector coordinates).
-        
+
         Switching between the "position vector" and "coordinate system"
         conventions is simply a matter of switching the sign of the rotation
         angles, which algebraically also translates into a transposition of
         the rotation matrix.
-        
+
         Hence, as geodetic constants should preferably be referred to exactly
         as published, the "transpose" option provides the ability to switch
         between the conventions.
-        
-        
+
+
         Inverse transformation
         ----------------------
-        
+
         No matter what sign convention, the direction of the overall Helmert
         transformation (i.e. offset, scale, and rotation), is reversed by
         switching signs for *all* 7 parameters. Hence, the code for the inverse
@@ -418,16 +372,16 @@ PJ *PROJECTION(helmert) {
         R22 =  cf*ct;
 
     } while (0);
-    
+
 
     if (transpose) {
         double r;
         r = R01;    R01 = R10;    R10 = r;
         r = R02;    R02 = R20;    R20 = r;
-        
+
         r = R10;    R10 = R01;    R01 = r;
         r = R12;    R12 = R21;    R21 = r;
-        
+
         r = R20;    R20 = R02;    R02 = r;
         r = R21;    R21 = R12;    R12 = r;
     }
