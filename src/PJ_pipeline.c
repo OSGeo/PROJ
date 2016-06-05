@@ -115,7 +115,7 @@ int pj_show_coordinate (char *banner, COORDINATE point, int angular) {
 /* Apply the most appropriate projection function. No-op if none appropriate */
 COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
 
-    /* i we´re at the beginning of the pipeline call it directly,
+    /* if we´re at the beginning of the pipeline call it directly,
        since pj_fwd3d rejects on most input values */
     if (pj_is_pipeline(P))
         return pipeline_3d(point, direction, P);
@@ -192,6 +192,7 @@ static XY isomorphic_indicator (LP lp, PJ *P) {
     point.lp    = lp;
     point.lpz.z = 0;
     point.xyz = (*P->fwd3d) (point.lpz, P);
+    return point.xy;
 }
 
 

@@ -74,9 +74,9 @@ libproj_la_SOURCES = \
 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
 	geocent.c geocent.h pj_utils.c pj_gridinfo.c pj_gridlist.c \
 	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c geodesic.c \
-	pj_strtod.c
+	pj_strtod.c \
 	\
-	PJ_pipeline.c PJ_helmert.c PJ_cart.c\
+	PJ_pipeline.c PJ_helmert.c PJ_cart.c
 
 install-exec-local:
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)
