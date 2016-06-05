@@ -389,5 +389,36 @@ PJ *PROJECTION(helmert) {
 }
 
 
-/* selftest stub */
-int pj_helmert_selftest (void) {return 0;}
+#ifdef PJ_OMIT_SELFTEST
+int pj_helmert_selftest (void) {return 0;}             /* selftest stub */
+#else
+
+static double dist (XYZ a, XYZ b) {
+    return hypot (hypot (a.x-b.x, a.y-b.y), a.z-b.z);
+}
+
+int pj_helmert_selftest (void) {
+    COORDINATE in = {{3565285.0000, 855949.0000, 5201383.0000}};
+    COORDINATE out;
+    XYZ expect = {3565285.41342351, 855948.67986759, 5201382.72939791};
+
+    PJ *P = pj_init_plus (
+                "+proj=helmert +ellps=GRS80"
+                " +x=0.67678  +y=0.65495 +z=-0.52827"
+                "+rx=-22.742 +ry=12.667 +rz=22.704   +s=-0.01070"
+            );
+            
+    if (0==P)
+        return 5;
+        
+    out.xyz = pj_fwd3d (in.lpz, P);
+    if (dist (out.xyz, expect) > 1e-5)
+        return 1;
+
+    out.lpz = pj_inv3d (out.xyz, P);
+    if (dist (out.xyz, in.xyz) > 1e-5)
+        return 2;
+    
+    return 0;
+}
+#endif

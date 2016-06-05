@@ -146,7 +146,7 @@ typedef struct {
 #define PJD_3PARAM    1
 #define PJD_7PARAM    2
 #define PJD_GRIDSHIFT 3
-#define PJD_WGS84     4   /* WGS84 (or anything considered equivelent) */
+#define PJD_WGS84     4   /* WGS84 (or anything considered equivalent) */
 
 
 /* library errors */
@@ -173,98 +173,27 @@ typedef struct { double x, y, z; } XYZ;
 typedef struct { double lam, phi, z; } LPZ;
 #endif
 
-typedef union { double  f; int  i; char *s; } PROJVALUE;
+
+/* Forward declarations and typedefs for stuff needed inside the PJ object */
 struct PJconsts;
-
-
-
-struct PJ_LIST {
-    char    *id;        /* projection keyword */
-    struct PJconsts *(*proj)(struct PJconsts*);/* projection entry point */
-    char    * const *descr; /* description text */
-};
-
-struct PJ_SELFTEST_LIST {
-    char    *id;                                /* projection keyword */
-    int     (* testfunc)(void);             /* projection entry point */
-};
-
-struct PJ_ELLPS {
-    char    *id;    /* ellipse keyword name */
-    char    *major; /* a= value */
-    char    *ell;   /* elliptical parameter */
-    char    *name;  /* comments */
-};
-struct PJ_UNITS {
-    char    *id;    /* units keyword */
-    char    *to_meter;  /* multiply by value to get meters */
-    char    *name;  /* comments */
-};
-
-struct PJ_DATUMS {
-    char    *id;     /* datum keyword */
-    char    *defn;   /* ie. "to_wgs84=..." */
-    char    *ellipse_id; /* ie from ellipse table */
-    char    *comments; /* EPSG code, etc */
-};
-
-struct PJ_PRIME_MERIDIANS {
-    char    *id;     /* prime meridian keyword */
-    char    *defn;   /* offset from greenwich in DMS format. */
-};
-
-typedef struct {
-    double ll_long;      /* lower left corner coordinates (radians) */
-    double ll_lat;
-    double ur_long;      /* upper right corner coordinates (radians) */
-    double ur_lat;
-} PJ_Region;
-
-struct DERIVS {
-    double x_l, x_p; /* derivatives of x for lambda-phi */
-    double y_l, y_p; /* derivatives of y for lambda-phi */
-};
-
-struct FACTORS {
-    struct DERIVS der;
-    double h, k;    /* meridinal, parallel scales */
-    double omega, thetap;   /* angular distortion, theta prime */
-    double conv;    /* convergence */
-    double s;       /* areal scale factor */
-    double a, b;    /* max-min scale error */
-    int code;       /* info as to analytics, see following */
-};
-
-
-#define IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
-#define IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
-#define IS_ANAL_HK  04      /* h and k analytic */
-#define IS_ANAL_CONV 010    /* convergence analytic */
-
-
-/* parameter list */
+struct pj_opaque;
 struct ARG_list;
-typedef struct ARG_list paralist;
-struct ARG_list {
-    paralist *next;
-    char used;
-    char param[1];    /* This probably should be [0] to be standards compliant? */
-};
+struct FACTORS;
+struct PJ_REGION_S;
+typedef struct PJ_REGION_S  PJ_Region;
+typedef struct ARG_list paralist;   /* parameter list */
+typedef struct PJconsts PJ;         /* the PJ object herself */
 
+struct PJ_REGION_S {
+    double ll_long;        /* lower left corner coordinates (radians) */
+    double ll_lat;
+    double ur_long;        /* upper right corner coordinates (radians) */
+    double ur_lat;
+};
 
 
 /* base projection data structure */
-
-
-/* we need this forward declaration in order to be able to add a
-   pointer to struct opaque to the typedef struct PJconsts below */
-struct pj_opaque;
-struct PJconsts;
-typedef struct PJconsts PJ;
-
-
 struct PJconsts {
-
 
     /*************************************************************************************
 
@@ -302,7 +231,8 @@ struct PJconsts {
     
         Despite YAGNI, we add a large number of ellipsoidal shape parameters, which
         are not yet set up in pj_init. They are, however, inexpensive to compute,
-        compared to the overall time taken for setting up the complex PJ object.
+        compared to the overall time taken for setting up the complex PJ object
+        (cf. e.g. https://en.wikipedia.org/wiki/Angular_eccentricity).
         
         But during single point projections it will often be a useful thing to have
         these readily available without having to recompute at every pj_fwd / pj_inv
@@ -425,11 +355,96 @@ struct PJconsts {
 
 
 
+
+
+/* Parameter list (a copy of the +proj=... etc. parameters) */
+struct ARG_list {
+    paralist *next;
+    char used;
+    char param[1];    /* This probably should be [0] to be fully standards compliant? */
+};
+
+
+
+typedef union { double  f; int  i; char *s; } PROJVALUE;
+
+
+struct PJ_SELFTEST_LIST {
+    char    *id;                 /* projection keyword */
+    int     (* testfunc)(void);  /* projection entry point */
+};
+
+struct PJ_ELLPS {
+    char    *id;           /* ellipse keyword name */
+    char    *major;        /* a= value */
+    char    *ell;          /* elliptical parameter */
+    char    *name;         /* comments */
+};
+struct PJ_UNITS {
+    char    *id;           /* units keyword */
+    char    *to_meter;     /* multiply by value to get meters */
+    char    *name;         /* comments */
+};
+
+struct PJ_DATUMS {
+    char    *id;           /* datum keyword */
+    char    *defn;         /* ie. "to_wgs84=..." */
+    char    *ellipse_id;   /* ie from ellipse table */
+    char    *comments;     /* EPSG code, etc */
+};
+
+struct PJ_PRIME_MERIDIANS {
+    char    *id;           /* prime meridian keyword */
+    char    *defn;         /* offset from greenwich in DMS format. */
+};
+
+
+struct DERIVS {
+    double x_l, x_p;       /* derivatives of x for lambda-phi */
+    double y_l, y_p;       /* derivatives of y for lambda-phi */
+};
+
+struct FACTORS {
+    struct DERIVS der;
+    double h, k;           /* meridional, parallel scales */
+    double omega, thetap;  /* angular distortion, theta prime */
+    double conv;           /* convergence */
+    double s;              /* areal scale factor */
+    double a, b;           /* max-min scale error */
+    int code;              /* info as to analytics, see following */
+};
+
+
+#define IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
+#define IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
+#define IS_ANAL_HK  04      /* h and k analytic */
+#define IS_ANAL_CONV 010    /* convergence analytic */
+
+
+
+
+
 /* public API */
 #include "proj_api.h"
 
 
+
+
+
+
+
+
+
+
+
 /* Generate pj_list external or make list from include file */
+
+struct PJ_LIST {
+    char    *id;                 /* projection keyword */
+    PJ *(*proj)(PJ *);           /* projection entry point */
+    char    * const *descr;      /* description text */
+};
+
 
 #ifndef USE_PJ_LIST_H
 extern struct PJ_LIST pj_list[];
