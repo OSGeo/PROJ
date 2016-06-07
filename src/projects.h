@@ -199,17 +199,35 @@ struct PJconsts {
 
                             G E N E R A L   C O N T E X T
 
+    **************************************************************************************
+	
+	    Need some description here - especially about the thread context...
+	
     **************************************************************************************/
 
     projCtx_t *ctx;
-    const char *descr;                 /* From pj_list.h or individual PJ_*.c file */
-    paralist *params;                  /* Parameter list */
+    const char *descr;             /* From pj_list.h or individual PJ_*.c file */
+    paralist *params;              /* Parameter list */
+    struct pj_opaque *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
 
 
     /*************************************************************************************
 
                           F U N C T I O N    P O I N T E R S
 
+    **************************************************************************************
+	
+	    For projection xxx, these are pointers to functions in the corresponding
+		PJ_xxx.c file.
+
+        pj_init() delegates the setup of these to pj_projection_specific_setup_xxx(),
+		a name which is currently hidden behind the magic curtain of the PROJECTION
+		macro.
+		
+		As the PROJ.4 de-macroization project expands its coverage, this will change,
+		and the setup functions for each projection will become more clearly visible
+		in the source code.
+	
     **************************************************************************************/
 
     XY  (*fwd)(LP,    PJ *);
@@ -348,8 +366,6 @@ struct PJconsts {
     PJ_Region     last_after_region;    /* Description needed */
     double        last_after_date;      /* Description needed */
 
-
-    struct pj_opaque *opaque;           /* Projection specific parameters, Defined in each PJ_*.c */
 };
 
 

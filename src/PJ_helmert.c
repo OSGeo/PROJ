@@ -13,7 +13,7 @@
 
 ************************************************************************
 
-Thomas Knudsen, thokn@sdfe.dk, 2016-05-24/25/28/30/06-02/03/04/05
+Thomas Knudsen, thokn@sdfe.dk, 2016-05-24/06-05
 
 ************************************************************************
 * Copyright (c) 2016, Thomas Knudsen / SDFE
@@ -45,6 +45,9 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-24/25/28/30/06-02/03/04/05
 #include <stddef.h>
 #include <errno.h>
 PROJ_HEAD(helmert, "3- and 7-parameter Helmert shift");
+
+
+int pj_show_coordinate (char *banner, COORDINATE point, int angular);        
 
 
 static void *freeup_msg (PJ *P, int errlev) {         /* Destructor */
@@ -85,17 +88,17 @@ struct pj_opaque_helmert {
 
 
 /* Make the maths of the rotation operations somewhat more readable and textbook like */
-#define R00 Q->R[0][0]
-#define R01 Q->R[0][1]
-#define R02 Q->R[0][2]
+#define R00 (Q->R[0][0])
+#define R01 (Q->R[0][1])
+#define R02 (Q->R[0][2])
 
-#define R10 Q->R[1][0]
-#define R11 Q->R[1][1]
-#define R12 Q->R[1][2]
+#define R10 (Q->R[1][0])
+#define R11 (Q->R[1][1])
+#define R12 (Q->R[1][2])
 
-#define R20 Q->R[2][0]
-#define R21 Q->R[2][1]
-#define R22 Q->R[2][2]
+#define R20 (Q->R[2][0])
+#define R21 (Q->R[2][1])
+#define R22 (Q->R[2][2])
 
 
 /***********************************************************************/
@@ -103,8 +106,8 @@ static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     COORDINATE point;
+    XYZ out;
     double X, Y, Z, scale;
-
     if (Q->no_rotation) {
         point.xyz.x = lpz.lam + Q->xyz.x;
         point.xyz.y = lpz.phi + Q->xyz.y;
@@ -118,10 +121,15 @@ static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
     Y = lpz.phi;
     Z = lpz.z;
 
-    point.xyz = Q->xyz;
-    point.xyz.x += scale * ( R00 * X  +   R01 * Y   +   R02 * Z);
-    point.xyz.y += scale * ( R10 * X  +   R11 * Y   +   R12 * Z);
-    point.xyz.z += scale * ( R20 * X  +   R21 * Y   +   R22 * Z);
+    point.lpz = lpz;
+
+    point.xyz.x = scale * ( R00 * X  +   R01 * Y   +   R02 * Z);
+    point.xyz.y = scale * ( R10 * X  +   R11 * Y   +   R12 * Z);
+    point.xyz.z = scale * ( R20 * X  +   R21 * Y   +   R22 * Z);
+    
+    point.xyz.x += Q->xyz.x;
+    point.xyz.y += Q->xyz.y;
+    point.xyz.z += Q->xyz.z;
 
     return point.xyz;
 }
@@ -134,28 +142,27 @@ static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
     COORDINATE point;
     double X, Y, Z, scale;
 
+    point.xyz = xyz;
+
     if (Q->no_rotation) {
-        point.xyz.x = xyz.x - Q->xyz.x;
-        point.xyz.y = xyz.y - Q->xyz.y;
-        point.xyz.z = xyz.z - Q->xyz.z;
+        point.xyz.x  =  xyz.x - Q->xyz.x;
+        point.xyz.y  =  xyz.y - Q->xyz.y;
+        point.xyz.z  =  xyz.z - Q->xyz.z;
         return point.lpz;
     }
 
-    scale = 1 - Q->scale * 1e-6;
+    scale = 1 + Q->scale * 1e-6;
 
-    X = xyz.x;
-    Y = xyz.y;
-    Z = xyz.z;
+    /* Unscale and deoffset */
+    X = (xyz.x - Q->xyz.x) / scale;
+    Y = (xyz.y - Q->xyz.y) / scale;
+    Z = (xyz.z - Q->xyz.z) / scale;
 
-    point.xyz.x = -Q->xyz.x;
-    point.xyz.y = -Q->xyz.y;
-    point.xyz.z = -Q->xyz.z;
-
-    /* Transpose multiplication inverts the rotation */
-    point.xyz.x += scale * ( R00 * X  +   R10 * Y   +   R20 * Z);
-    point.xyz.y += scale * ( R01 * X  +   R11 * Y   +   R21 * Z);
-    point.xyz.z += scale * ( R02 * X  +   R12 * Y   +   R22 * Z);
-
+    /* Inverse rotation through transpose multiplication */
+    point.xyz.x  =  ( R00 * X   +   R10 * Y   +   R20 * Z);
+    point.xyz.y  =  ( R01 * X   +   R11 * Y   +   R21 * Z);
+    point.xyz.z  =  ( R02 * X   +   R12 * Y   +   R22 * Z);
+    
     return point.lpz;
 }
 
@@ -163,7 +170,7 @@ static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
 /***********************************************************************/
 static XY helmert_forward (LP lp, PJ *P) {
 /***********************************************************************/
-    COORDINATE point;
+    COORDINATE point;   puts ("Helmert Forward");
     point.lp = lp;
     point.lpz.z = 0;
     point.xyz = helmert_forward_3d (point.lpz, P);
@@ -174,7 +181,7 @@ static XY helmert_forward (LP lp, PJ *P) {
 /***********************************************************************/
 static LP helmert_reverse (XY xy, PJ *P) {
 /***********************************************************************/
-    COORDINATE point;
+    COORDINATE point;   puts ("Helmert Reverse");
     point.xy = xy;
     point.xyz.z = 0;
     point.lpz = helmert_reverse_3d (point.xyz, P);
@@ -183,7 +190,7 @@ static LP helmert_reverse (XY xy, PJ *P) {
 
 
 /* Milliarcsecond to radians */
-#define MAS_TO_RAD (DEG_TO_RAD / 3600000)
+#define MAS_TO_RAD (DEG_TO_RAD / 3600000.0)
 
 
 /***********************************************************************/
@@ -205,47 +212,47 @@ PJ *PROJECTION(helmert) {
     P->inv   = helmert_reverse;
     pj_set_isomorphic (P);
 
-    if ( (pj_param(P->ctx, P->params, "tx").i) ) {
+    
+    /* Translations */
+    if ( (pj_param(P->ctx, P->params, "tx").i) )
         xyz.x = pj_param(P->ctx, P->params, "dx").f;
-    }
 
-    if ( (pj_param(P->ctx, P->params, "ty").i) ) {
+    if ( (pj_param(P->ctx, P->params, "ty").i) )
         xyz.y = pj_param(P->ctx, P->params, "dy").f;
-    }
 
-    if ( (pj_param(P->ctx, P->params, "tz").i) ) {
+    if ( (pj_param(P->ctx, P->params, "tz").i) )
         xyz.z = pj_param(P->ctx, P->params, "dz").f;
-    }
 
-    if ( (pj_param(P->ctx, P->params, "trx").i) ) {
+    
+    /* Rotations */
+    if ( (pj_param(P->ctx, P->params, "trx").i) )
         opk.o = pj_param(P->ctx, P->params, "drx").f * MAS_TO_RAD;
-    }
 
-    if ( (pj_param(P->ctx, P->params, "try").i) ) {
+    if ( (pj_param(P->ctx, P->params, "try").i) )
         opk.p = pj_param(P->ctx, P->params, "dry").f * MAS_TO_RAD;
-    }
 
-    if ( (pj_param(P->ctx, P->params, "trz").i) ) {
+    if ( (pj_param(P->ctx, P->params, "trz").i) )
         opk.k = pj_param(P->ctx, P->params, "drz").f * MAS_TO_RAD;
-    }
 
-    if ( (pj_param(P->ctx, P->params, "ts").i) ) {
+    
+    /* Scale */
+    if ( (pj_param(P->ctx, P->params, "ts").i) )
         scale = pj_param(P->ctx, P->params, "ds").f;
-    }
 
-    /* use small angle approximations? */
+    
+    /* Use small angle approximations? */
     if ( (pj_param(P->ctx, P->params, "tapprox").i) )
         approximate = 1;
 
-    /* use "other" rotation sign convention? */
+    /* Use "other" rotation sign convention? */
     if ( (pj_param(P->ctx, P->params, "ttranspose").i) )
         transpose = 1;
 
-    Q->xyz = xyz;
-    Q->opk = opk;
-    Q->scale = scale;
+    Q->xyz   =  xyz;
+    Q->opk   =  opk;
+    Q->scale =  scale;
 
-    if ((opk.o==0) && (opk.k==0) && (opk.k==0) && (scale==0)) {
+    if ((opk.o==0) && (opk.p==0) && (opk.k==0) && (scale==0)) {
         Q->no_rotation = 1;
         return P;
     }
@@ -288,7 +295,7 @@ PJ *PROJECTION(helmert) {
         Also, when using any published datum transformation information, one
         should always check which convention (exact or approximate rotation
         matrix) is expected, and whether the induced error for selecting
-        the opposite convention is acceptable.
+        the opposite convention is acceptable (which it often is).
 
 
         Sign conventions
@@ -309,20 +316,6 @@ PJ *PROJECTION(helmert) {
         Hence, as geodetic constants should preferably be referred to exactly
         as published, the "transpose" option provides the ability to switch
         between the conventions.
-
-
-        Inverse transformation
-        ----------------------
-
-        No matter what sign convention, the direction of the overall Helmert
-        transformation (i.e. offset, scale, and rotation), is reversed by
-        switching signs for *all* 7 parameters. Hence, the code for the inverse
-        transformation in helmert_reverse_3d, when compared to the forward code
-        in helmert_forward_3d, does 3 things:
-
-        1. reverses the sign of the scale
-        2. reverses the sign of the offset
-        3. does transpose multiplication.
 
     ***************************************************************************/
     do {
@@ -369,7 +362,8 @@ PJ *PROJECTION(helmert) {
         R20 =  st;
         R21 = -sf*ct;
         R22 =  cf*ct;
-
+        
+        
     } while (0);
 
 
@@ -377,48 +371,93 @@ PJ *PROJECTION(helmert) {
         double r;
         r = R01;    R01 = R10;    R10 = r;
         r = R02;    R02 = R20;    R20 = r;
-
-        r = R10;    R10 = R01;    R01 = r;
         r = R12;    R12 = R21;    R21 = r;
-
-        r = R20;    R20 = R02;    R02 = r;
-        r = R21;    R21 = R12;    R12 = r;
     }
 
     return P;
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
-int pj_helmert_selftest (void) {return 0;}             /* selftest stub */
-#else
 
+
+#ifdef PJ_OMIT_SELFTEST
+
+int pj_helmert_selftest (void) {return 0;}             /* self test stub */
+
+#else
+                                                       /* self test */
 static double dist (XYZ a, XYZ b) {
     return hypot (hypot (a.x-b.x, a.y-b.y), a.z-b.z);
 }
 
-int pj_helmert_selftest (void) {
-    COORDINATE in = {{3565285.0000, 855949.0000, 5201383.0000}};
-    COORDINATE out;
-    XYZ expect = {3565285.41342351, 855948.67986759, 5201382.72939791};
 
-    PJ *P = pj_init_plus (
-                "+proj=helmert +ellps=GRS80"
-                " +x=0.67678  +y=0.65495 +z=-0.52827"
-                "+rx=-22.742 +ry=12.667 +rz=22.704   +s=-0.01070"
-            );
-            
+
+static int test (char *args, COORDINATE in, COORDINATE expect) {
+    double d;
+    COORDINATE out; 
+    PJ *P = pj_init_plus (args);
+
     if (0==P)
         return 5;
-        
+
     out.xyz = pj_fwd3d (in.lpz, P);
-    if (dist (out.xyz, expect) > 1e-5)
+    d = dist (out.xyz, expect.xyz);
+#if 0
+    pj_show_coordinate ("in:              ", in, 0);
+    pj_show_coordinate ("fwd transformed: ", out, 0);
+    pj_show_coordinate ("expected:        ", expect, 0);
+    printf             ("distance [mm]:      %.8f\n\n", d*1000);
+#endif
+    if (d > 1e-4)
         return 1;
 
     out.lpz = pj_inv3d (out.xyz, P);
-    if (dist (out.xyz, in.xyz) > 1e-5)
+    d = dist (out.xyz, in.xyz);
+#if 0
+    pj_show_coordinate ("inv transformed: ", out, 0);
+    pj_show_coordinate ("in:              ", in, 0);
+    printf             ("roundtrip [nm]:     %.4g\n\n--\n\n", d*1e9);
+#endif
+    if (dist (out.xyz, in.xyz) > 1e-4)
         return 2;
     
     return 0;
 }
+
+
+
+int pj_helmert_selftest (void) {
+
+    /* This example is from 
+       Lotti Jivall:
+           Simplified transformations from ITRF2008/IGS08 to ETRS89 for maritime applications */
+    COORDINATE in1     = {{3565285.0000,     855949.0000,     5201383.0000}};
+    COORDINATE expect1 = {{3565285.41342351, 855948.67986759, 5201382.72939791}};
+    char args1[] = {
+        " +proj=helmert +ellps=GRS80"
+        " +x=0.67678  +y=0.65495 +z=-0.52827"
+        " +rx=-22.742 +ry=12.667 +rz=22.704   +s=-0.01070"
+    };
+
+
+
+    /* This example is a random point, transformed from ED50 to ETRS89 using KMStrans2 */
+    COORDINATE in2 =     {{3494994.3012, 1056601.9725, 5212382.1666}};
+    COORDINATE expect2 = {{3494909.84026368, 1056506.78938633, 5212265.66699761}};
+    char args2[] = {
+        " +proj=helmert +ellps=GRS80"
+        " +x=-81.0703 +y=-89.3603 +z=-115.7526"
+        " +rx=-484.88 +ry=-24.36  +rz=-413.21   +s=-0.540645"
+    };
+    char args2_norot[] = {
+        " +proj=helmert +ellps=GRS80 +approx"
+        " +x=81.0703 +y=89.3603 +z=115.7526"
+    };
+    int ret;    
+    
+    ret = test (args1, in1, expect1);   if (ret)  return ret;
+    ret = test (args2, in2, expect2);   if (ret)  return ret + 10;
+    return 0;
+}
+
 #endif

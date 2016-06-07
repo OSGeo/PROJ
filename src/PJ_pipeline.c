@@ -125,7 +125,6 @@ COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
 
     /* Forward */
     if (direction == 0) {
-        puts ("FORWARD");
         if (P->fwd3d)
                 point.xyz = pj_fwd3d (point.lpz, P);
         else if (P->fwd)
@@ -134,7 +133,6 @@ COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
     }
 
     /* Inverse */
-    puts ("INVERSE");
     if (P->inv3d)
         point.lpz = pj_inv3d (point.xyz, P);
     else if (P->inv)
