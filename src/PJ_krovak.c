@@ -239,8 +239,7 @@ int pj_krovak_selftest (void) {
     double tolerance_lp = 1e-10;
     double tolerance_xy = 1e-7;
 
-    /* No need to specify an ellipsoid as the projection is hard-coded to Bessel */
-    char e_args[] = {"+proj=krovak"};
+    char e_args[] = {"+proj=krovak +ellps=GRS80"};
 
     LP fwd_in[] = {
         { 2, 1},
