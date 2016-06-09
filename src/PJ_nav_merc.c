@@ -6,10 +6,6 @@ PROJ_HEAD(nav_merc, "Navionics Mercator") "\n\tEll\n\tlat_ts=";
 #define EPS10 1.e-10
 #define KC 1.00676429271698
 
-double pj_nav_tsfn(double phi, double sinphi, double e) {
-	sinphi *= e;
-	return (tan(M_FORTPI + ( phi * .5) ) * pow((1. - sinphi) / (1. + sinphi), .5 * e));
-}
         
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
