@@ -1,3 +1,37 @@
+/*
+ ***** Navionics Mercator ****************
+ * 
+ * (co)author pasquini.matteo@gmail.com, mpasquini@navionics.com
+ * 
+ * datum(barely speaking): 
+ * based on Hayford 1909  ellipsoid but geocentered.
+ * 
+ * attributes:
+ * 	- geocentered
+ * 	- a = 6378388
+ * 	- b = 6356912
+ * 	- (a/b)/a = 1/297.0
+ * 	- eccentricity = 0.081991889977 
+ * 	- KC = 1.00676429271698
+ * 
+ * orignal functions are in decimal degrees(instead radians)
+ * this implementation is(should be) the most precise in radians, 
+ * the first outside proprietary Navionics S.p.A. SDK
+ * 
+ * note the KC is a CONST value that substitute the P->e
+ * it have some similarity with PJ_merc and PJ_tsfn
+ * , all maths help are wellcome ...
+ * 
+ * This few lines represent a "small docs" 
+ * complete documentation is in .docx format, to not pollute this beautiful project 
+ * i prefer that you bother me throught email request.
+ * 
+ * this is my first piece of C in the real world.
+ *  
+ */
+
+
+
 #define PJ_LIB__
 #include <projects.h>
 
@@ -5,8 +39,6 @@ PROJ_HEAD(nav_merc, "Navionics Mercator") "\n\tEll\n\tlat_ts=";
 
 #define EPS10 1.e-10
 #define KC 1.00676429271698
-
-
 
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
