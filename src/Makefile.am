@@ -77,7 +77,7 @@ libproj_la_SOURCES = \
 	pj_strtod.c \
 	\
 	PJ_pipeline.c PJ_helmert.c PJ_cart.c \
-	pj_triplet
+	pj_triplet.c
 
 install-exec-local:
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)
