@@ -98,3 +98,4 @@ EXPORTS
     pj_pipeline_angular_output      @96
     pj_pipeline_angular_input       @97
     pj_is_pipeline                  @98
+    pj_triplet                      @99

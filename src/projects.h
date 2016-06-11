@@ -752,25 +752,6 @@ double pj_strtod( const char *nptr, char **endptr );
 
 
 #ifdef PJ_LIB__
-#if 0
-/* Avoid explicit type-punning: Use a union */
-typedef union {
-    XYZ xyz;
-    LPZ lpz;
-    OPK opk;
-    NEh neh;
-    NEH neH;
-    NEZ nez;
-    XY  xy;
-    LP  lp;
-} COORDINATE;    /* or perhaps TRIPLET / PJ_TRIPLET? */
-
-
-
-/* For debugging etc. */
-int pj_show_coordinate (char *banner, COORDINATE point, int angular);
-void pj_log_coordinate (projCtx ctx, int level, const char *banner, COORDINATE point, int angular);
-#endif
 
 int pj_set_isomorphic (PJ *P);
 int pj_is_isomorphic (PJ *P);
