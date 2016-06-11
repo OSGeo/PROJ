@@ -204,6 +204,7 @@ SET(SRC_LIBPROJ_CORE
         pj_run_selftests.c
         pj_strerrno.c
         pj_transform.c
+		pj_triplet.c
         pj_tsfn.c
         pj_units.c
         pj_utils.c
@@ -220,7 +221,7 @@ set(HEADERS_LIBPROJ
         projects.h
         proj_api.h
         geodesic.h
-        PJ_pipeline.h
+        proj.h
 )
 
 # Group source files for IDE source explorers (e.g. Visual Studio)

@@ -227,7 +227,7 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
 
 /* Rather pointless, but... */
 static XY cart_forward (LP lp, PJ *P) {
-    COORDINATE point;
+    TRIPLET point;
     point.lp = lp;
     point.lpz.z = 0;
 
@@ -237,7 +237,7 @@ static XY cart_forward (LP lp, PJ *P) {
 
 /* Rather pointless, but... */
 static LP cart_reverse (XY xy, PJ *P) {
-    COORDINATE point;
+    TRIPLET point;
     point.xy = xy;
     point.xyz.z = 0;
 

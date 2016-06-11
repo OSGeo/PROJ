@@ -49,8 +49,8 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25
 struct buf { char *buf;  size_t size, n; int comment_or_blank, format; } buf;
 
 
-COORDINATE point_adjust (COORDINATE point, int E, int N) {
-    COORDINATE error = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
+TRIPLET point_adjust (TRIPLET point, int E, int N) {
+    TRIPLET error = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
     double swap;
 
     if (HUGE_VAL==point.xyz.x)
@@ -93,8 +93,8 @@ COORDINATE point_adjust (COORDINATE point, int E, int N) {
 }
 
 
-COORDINATE parse_input_line (struct buf *buf) {
-    COORDINATE point = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
+TRIPLET parse_input_line (struct buf *buf) {
+    TRIPLET point = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
     char *p = buf->buf, *q = 0;
     int d, m, dd, mm;
     double s, ss, ms, mmss, z;
@@ -264,7 +264,7 @@ int main(int argc, char **argv) {
 
     P = pj_init (plus_argc, plus_argv);
     if (0==P)
-        return 0*fputs ("Bad projection arguments", stderr);
+        return 0*fputs ("Bad projection arguments\n", stderr);
 
     direction = (opt_arg[(int) 'I'] != 0);
     if (direction) {
@@ -310,7 +310,7 @@ int main(int argc, char **argv) {
 
         /* Loop over all lines of the current file */
         while ((ret = fgets (buf.buf, buf.size, in))) {
-            COORDINATE point;
+            TRIPLET point;
             char *p;
             lineno++;
             if ((0==ret) || (0==strchr(buf.buf, '\n') ) ){
@@ -333,11 +333,15 @@ int main(int argc, char **argv) {
 
             if (opt_arg[(int) 'v']) {
                 printf ("\nformat %d\n", buf.format);
-                pj_show_coordinate ("Input: ", point, angular_input);
+                pj_show_triplet (stdout, "Input: ", point);
             }
 
             point = pj_apply_projection (point, direction, P);
-            pj_show_coordinate (0, point, angular_output);
+            if (angular_output) {
+                point.lpz.lam *= RAD_TO_DEG;
+                point.lpz.phi *= RAD_TO_DEG;
+            }
+            pj_show_triplet (stdout, 0, point);
             p = skip_columns (buf.buf, 3);
             puts(p);
         }

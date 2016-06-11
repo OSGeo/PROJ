@@ -57,18 +57,18 @@ struct pj_opaque {
     int depth;
     int verbose;
     int *reverse_step;
-    COORDINATE stack[PIPELINE_STACK_SIZE];
+    TRIPLET stack[PIPELINE_STACK_SIZE];
 };
 
 
-static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P);
+static TRIPLET pipeline_3d (TRIPLET point, int direction, PJ *P);
 static XYZ pipeline_forward_3d (LPZ lpz, PJ *P);
 static LPZ pipeline_reverse_3d (XYZ xyz, PJ *P);
 static XY pipeline_forward (LP lpz, PJ *P);
 static LP pipeline_reverse (XY xyz, PJ *P);
 
 
-void pj_log_coordinate (projCtx ctx, int level, const char *banner, COORDINATE point, int angular) {
+void pj_log_triplet (projCtx ctx, int level, const char *banner, TRIPLET point, int angular) {
     double s = 1;
     char empty[] = "";
     char angular_fmt[] = {"%20.20s  %12.9f   %12.9f    %12.5f"};
@@ -87,32 +87,9 @@ void pj_log_coordinate (projCtx ctx, int level, const char *banner, COORDINATE p
 }
 
 
-int pj_show_coordinate (char *banner, COORDINATE point, int angular) {
-    int i = 0;
-    if (banner)
-        printf ("%s", banner);
-
-    if (angular) {
-        i += printf("%12.9f ", RAD_TO_DEG * point.xyz.x);
-        i += printf("%12.9f ", RAD_TO_DEG * point.xyz.y);
-        i += printf("%12.4f",  point.xyz.z);
-        if (banner)
-            printf("\n");
-        return i;
-    }
-
-    i += printf("%15.4f ", point.xyz.x);
-    i += printf("%15.4f ", point.xyz.y);
-    i += printf("%15.4f",  point.xyz.z);
-    if (banner)
-        printf("\n");
-    return i;
-}
-
-
 
 /* Apply the most appropriate projection function. No-op if none appropriate */
-COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
+TRIPLET pj_apply_projection (TRIPLET point, int direction, PJ *P) {
 
     /* if we´re at the beginning of the pipeline call it directly,
        since pj_fwd3d rejects on most input values */
@@ -179,7 +156,7 @@ COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P) {
 /********************************************************************/
 static XY isomorphic_indicator (LP lp, PJ *P) {
 /********************************************************************/
-    COORDINATE point = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
+    TRIPLET point = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
 
     if (0==P)
         return point.xy;
@@ -218,7 +195,7 @@ int pj_set_isomorphic (PJ *P) {
 
 
 /* The actual pipeline driver */
-static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P) {
+static TRIPLET pipeline_3d (TRIPLET point, int direction, PJ *P) {
     int i, j, first_step, last_step, incr;
 
     /* semi-open interval: first_step is included, last_step excluded */
@@ -238,14 +215,14 @@ static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P) {
         if (P->opaque->reverse_step[i])
             d = !d;
         if (i==first_step)
-            pj_log_coordinate (P->ctx, 5, "Input", point, !direction);
+            pj_log_triplet (P->ctx, 5, "Input", point, !direction);
         point = pj_apply_projection (point, d, P + i);
-        pj_log_coordinate (P->ctx, 5, (P + i)->descr, point, d);
+        pj_log_triplet (P->ctx, 5, (P + i)->descr, point, d);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
         if (P->opaque->verbose) for (j = 0;  j < P->opaque->depth; j++) {
-            pj_log_coordinate (P->ctx, 10, "Stack (linear): ",  P->opaque->stack[j], 0);
-            pj_log_coordinate (P->ctx, 10, "Stack (angular): ", P->opaque->stack[j], 1);
+            pj_log_triplet (P->ctx, 10, "Stack (linear): ",  P->opaque->stack[j], 0);
+            pj_log_triplet (P->ctx, 10, "Stack (angular): ", P->opaque->stack[j], 1);
         }
     }
 
@@ -262,21 +239,21 @@ static COORDINATE pipeline_3d (COORDINATE point, int direction, PJ *P) {
 }
 
 static XYZ pipeline_forward_3d (LPZ lpz, PJ *P) {
-    COORDINATE point;
+    TRIPLET point;
     point.lpz = lpz;
     point = pipeline_3d (point, 0, P);
     return point.xyz;
 }
 
 static LPZ pipeline_reverse_3d (XYZ xyz, PJ *P) {
-    COORDINATE point;
+    TRIPLET point;
     point.xyz = xyz;
     point = pipeline_3d (point, 1, P);
     return point.lpz;
 }
 
 static XY pipeline_forward (LP lp, PJ *P) {
-    COORDINATE point;
+    TRIPLET point;
     point.lp = lp;
     point.lpz.z = 0;
     point = pipeline_3d (point, 0, P);
@@ -284,7 +261,7 @@ static XY pipeline_forward (LP lp, PJ *P) {
 }
 
 static LP pipeline_reverse (XY xy, PJ *P) {
-    COORDINATE point;
+    TRIPLET point;
     point.xy = xy;
     point.xyz.z = 0;
     point = pipeline_3d (point, 1, P);

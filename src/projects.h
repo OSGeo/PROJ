@@ -155,23 +155,34 @@ typedef struct {
 #define PJD_ERR_GRID_AREA           -48
 #define PJD_ERR_CATALOG             -49
 
-#define USE_PROJUV
 
-typedef struct { double u, v; } projUV;
-typedef struct { double r, i; } COMPLEX;
+typedef struct { double r, i; }    COMPLEX;
+typedef struct { double u, v; }    projUV;
 typedef struct { double u, v, w; } projUVW;
 
+
+
+/* If user explicitly includes proj.h, before projects.h, then avoid implicit type-punning */
+#ifndef PROJ_H
 #ifndef PJ_LIB__
 #define XY projUV
 #define LP projUV
 #define XYZ projUVW
 #define LPZ projUVW
+
+/* Yes, this is ridiculous, but a consequence of an old and bad decision about implicit type-punning through preprocessor abuse */
+typedef struct { double u, v; }        UV;
+typedef struct { double u, v, w; }     UVW;
+
 #else
-typedef struct { double x, y; }     XY;
-typedef struct { double lam, phi; } LP;
-typedef struct { double x, y, z; } XYZ;
+typedef struct { double x, y; }        XY;
+typedef struct { double x, y, z; }     XYZ;
+typedef struct { double lam, phi; }    LP;
 typedef struct { double lam, phi, z; } LPZ;
-#endif
+typedef struct { double u, v; }        UV;
+typedef struct { double u, v, w; }     UVW;
+#endif  /* ndef PJ_LIB__ */
+#endif  /* ndef PROJ_H   */
 
 
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
@@ -182,7 +193,14 @@ struct FACTORS;
 struct PJ_REGION_S;
 typedef struct PJ_REGION_S  PJ_Region;
 typedef struct ARG_list paralist;   /* parameter list */
+enum pj_io_units {
+    PJ_IO_UNITS_CLASSIC = 0,   /* LEFT: Radians     RIGHT: Scaled meters */
+    PJ_IO_UNITS_METERS  = 1,   /* Meters  */
+    PJ_IO_UNITS_RADIANS = 2    /* Radians */
+};
+#ifndef PROJ_H
 typedef struct PJconsts PJ;         /* the PJ object herself */
+#endif
 
 struct PJ_REGION_S {
     double ll_long;        /* lower left corner coordinates (radians) */
@@ -301,11 +319,13 @@ struct PJconsts {
 
     **************************************************************************************/
 
-    int     over;                      /* Over-range flag */
-    int     geoc;                      /* Geocentric latitude flag */
-    int     is_latlong;                /* proj=latlong ... not really a projection at all */
-    int     is_geocent;                /* proj=geocent ... not really a projection at all */
-    int     left, right;               /* Flags for input/output coordinate types */
+    int  over;                      /* Over-range flag */
+    int  geoc;                      /* Geocentric latitude flag */
+    int  is_latlong;                /* proj=latlong ... not really a projection at all */
+    int  is_geocent;                /* proj=geocent ... not really a projection at all */
+
+    enum pj_io_units left;          /* Flags for input/output coordinate types */
+    enum pj_io_units right;
 
 
     /*************************************************************************************
@@ -439,8 +459,10 @@ struct FACTORS {
 
 
 
+/* simplified api */
+#include "proj.h"
 
-/* public API */
+/* classic public API */
 #include "proj_api.h"
 
 
@@ -730,21 +752,7 @@ double pj_strtod( const char *nptr, char **endptr );
 
 
 #ifdef PJ_LIB__
-/* Omega, Phi, Kappa: Rotations */
-typedef struct {double o, p, k;} OPK;
-
-/* Northing, Easting, and geodetic height */
-typedef struct {double n, e, h;} NEh;
-
-/* Northing, Easting, and orthometric height */
-typedef struct {double n, e, H;} NEH;
-
-/* Northing, Easting, and some kind of height */
-typedef struct {double n, e, z;} NEZ;
-
-/* Red, green and blue (e.g. for LiDAR colouring) */
-typedef struct {double r, g, b;} PJ_RGB;
-
+#if 0
 /* Avoid explicit type-punning: Use a union */
 typedef union {
     XYZ xyz;
@@ -753,18 +761,16 @@ typedef union {
     NEh neh;
     NEH neH;
     NEZ nez;
-    PJ_RGB rgb;
     XY  xy;
     LP  lp;
 } COORDINATE;    /* or perhaps TRIPLET / PJ_TRIPLET? */
 
 
-/* Apply the most appropriate projection function. No-op if none appropriate */
-COORDINATE pj_apply_projection (COORDINATE point, int direction, PJ *P);
 
 /* For debugging etc. */
 int pj_show_coordinate (char *banner, COORDINATE point, int angular);
 void pj_log_coordinate (projCtx ctx, int level, const char *banner, COORDINATE point, int angular);
+#endif
 
 int pj_set_isomorphic (PJ *P);
 int pj_is_isomorphic (PJ *P);
@@ -774,6 +780,7 @@ int pj_pipeline_angular_input (PJ *P, int direction);
 int pj_pipeline_verbose (PJ *P);
 int pj_pipeline_steps (PJ *P);
 void pj_log_pipeline_steps (PJ *P, int level);
+
 #endif
 
 

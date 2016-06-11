@@ -47,14 +47,13 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-24/06-05
 PROJ_HEAD(helmert, "3- and 7-parameter Helmert shift");
 
 
-int pj_show_coordinate (char *banner, COORDINATE point, int angular);        
-
 
 static void *freeup_msg (PJ *P, int errlev) {         /* Destructor */
     if (0==P)
         return 0;
-
-    pj_ctx_set_errno (P->ctx, errlev);
+    
+	if (0!=P->ctx)
+        pj_ctx_set_errno (P->ctx, errlev);
 
     if (0==P->opaque)
         return pj_dealloc (P);
@@ -105,8 +104,7 @@ struct pj_opaque_helmert {
 static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    COORDINATE point;
-    XYZ out;
+    TRIPLET point;
     double X, Y, Z, scale;
     if (Q->no_rotation) {
         point.xyz.x = lpz.lam + Q->xyz.x;
@@ -139,7 +137,7 @@ static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
 static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    COORDINATE point;
+    TRIPLET point;
     double X, Y, Z, scale;
 
     point.xyz = xyz;
@@ -170,7 +168,7 @@ static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
 /***********************************************************************/
 static XY helmert_forward (LP lp, PJ *P) {
 /***********************************************************************/
-    COORDINATE point;   puts ("Helmert Forward");
+    TRIPLET point;
     point.lp = lp;
     point.lpz.z = 0;
     point.xyz = helmert_forward_3d (point.lpz, P);
@@ -181,7 +179,7 @@ static XY helmert_forward (LP lp, PJ *P) {
 /***********************************************************************/
 static LP helmert_reverse (XY xy, PJ *P) {
 /***********************************************************************/
-    COORDINATE point;   puts ("Helmert Reverse");
+    TRIPLET point;
     point.xy = xy;
     point.xyz.z = 0;
     point.lpz = helmert_reverse_3d (point.xyz, P);
@@ -392,9 +390,9 @@ static double dist (XYZ a, XYZ b) {
 
 
 
-static int test (char *args, COORDINATE in, COORDINATE expect) {
+static int test (char *args, TRIPLET in, TRIPLET expect) {
     double d;
-    COORDINATE out; 
+    TRIPLET out; 
     PJ *P = pj_init_plus (args);
 
     if (0==P)
@@ -402,22 +400,11 @@ static int test (char *args, COORDINATE in, COORDINATE expect) {
 
     out.xyz = pj_fwd3d (in.lpz, P);
     d = dist (out.xyz, expect.xyz);
-#if 0
-    pj_show_coordinate ("in:              ", in, 0);
-    pj_show_coordinate ("fwd transformed: ", out, 0);
-    pj_show_coordinate ("expected:        ", expect, 0);
-    printf             ("distance [mm]:      %.8f\n\n", d*1000);
-#endif
     if (d > 1e-4)
         return 1;
 
     out.lpz = pj_inv3d (out.xyz, P);
     d = dist (out.xyz, in.xyz);
-#if 0
-    pj_show_coordinate ("inv transformed: ", out, 0);
-    pj_show_coordinate ("in:              ", in, 0);
-    printf             ("roundtrip [nm]:     %.4g\n\n--\n\n", d*1e9);
-#endif
     if (dist (out.xyz, in.xyz) > 1e-4)
         return 2;
     
@@ -431,27 +418,22 @@ int pj_helmert_selftest (void) {
     /* This example is from 
        Lotti Jivall:
            Simplified transformations from ITRF2008/IGS08 to ETRS89 for maritime applications */
-    COORDINATE in1     = {{3565285.0000,     855949.0000,     5201383.0000}};
-    COORDINATE expect1 = {{3565285.41342351, 855948.67986759, 5201382.72939791}};
+    TRIPLET in1     = {{3565285.0000,     855949.0000,     5201383.0000}};
+    TRIPLET expect1 = {{3565285.41342351, 855948.67986759, 5201382.72939791}};
     char args1[] = {
         " +proj=helmert +ellps=GRS80"
-        " +x=0.67678  +y=0.65495 +z=-0.52827"
-        " +rx=-22.742 +ry=12.667 +rz=22.704   +s=-0.01070"
+        "     +x=0.67678  +y=0.65495 +z=-0.52827"
+        "    +rx=-22.742 +ry=12.667 +rz=22.704   +s=-0.01070"
     };
-
 
 
     /* This example is a random point, transformed from ED50 to ETRS89 using KMStrans2 */
-    COORDINATE in2 =     {{3494994.3012, 1056601.9725, 5212382.1666}};
-    COORDINATE expect2 = {{3494909.84026368, 1056506.78938633, 5212265.66699761}};
+    TRIPLET in2 =     {{3494994.3012, 1056601.9725, 5212382.1666}};
+    TRIPLET expect2 = {{3494909.84026368, 1056506.78938633, 5212265.66699761}};
     char args2[] = {
         " +proj=helmert +ellps=GRS80"
-        " +x=-81.0703 +y=-89.3603 +z=-115.7526"
+        "  +x=-81.0703 +y=-89.3603 +z=-115.7526"
         " +rx=-484.88 +ry=-24.36  +rz=-413.21   +s=-0.540645"
-    };
-    char args2_norot[] = {
-        " +proj=helmert +ellps=GRS80 +approx"
-        " +x=81.0703 +y=89.3603 +z=115.7526"
     };
     int ret;    
     
