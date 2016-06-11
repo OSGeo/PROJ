@@ -91,10 +91,10 @@ EXPORTS
     pj_run_selftests                @89
     pj_is_isomorphic                @90
     pj_apply_projection             @91
-    pj_show_coordinate              @92
-    pj_log_pipeline_steps           @93
-    pj_pipeline_verbose             @94
-    pj_pipeline_angular_output      @95
-    pj_pipeline_angular_input       @96
-    pj_is_pipeline                  @97
-    
+    pj_apply                        @92
+    pj_show_triplet                 @93
+    pj_log_pipeline_steps           @94
+    pj_pipeline_verbose             @95
+    pj_pipeline_angular_output      @96
+    pj_pipeline_angular_input       @97
+    pj_is_pipeline                  @98
