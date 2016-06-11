@@ -31,8 +31,14 @@
 
 
 
-const TRIPLET trip_null = {{0,0,0}};
-const TRIPLET trip_huge = {{HUGE_VAL,HUGE_VAL,HUGE_VAL}};
+TRIPLET pj_triplet (double x, double y, double z){
+    TRIPLET t;
+	t.xyz.x = x;
+	t.xyz.y = y;
+	t.xyz.z = z;
+	return t;
+}
+
 
 
 /* Direction: "+1" forward, "-1" reverse, 0: roundtrip precision check (not fully done) */
@@ -59,7 +65,7 @@ TRIPLET pj_apply (PJ *P, int direction, TRIPLET point) {
 	        pj_ctx_set_errno (P->ctx, EINVAL);
 	}
 
-    return trip_huge;
+    return pj_triplet (HUGE_VAL,HUGE_VAL,HUGE_VAL);
 }
 
 

@@ -68,6 +68,7 @@ TRIPLET pj_apply_projection (TRIPLET point, int direction, PJ *P);
 
 int pj_show_triplet (FILE *stream, const char *banner, TRIPLET point);
 
+TRIPLET pj_triplet (double x, double y, double z);
 
 void pj_free(PJ *P);
 
@@ -137,9 +138,6 @@ union TRIPLET {
 
 
 extern int pj_errno;                    /* global error return code */
-
-extern const TRIPLET trip_null;
-extern const TRIPLET trip_huge;
 
 
 

@@ -50,8 +50,10 @@ struct buf { char *buf;  size_t size, n; int comment_or_blank, format; } buf;
 
 
 TRIPLET point_adjust (TRIPLET point, int E, int N) {
-    TRIPLET error = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
+    TRIPLET error;
     double swap;
+    
+	error = pj_triplet(HUGE_VAL, HUGE_VAL, HUGE_VAL);
 
     if (HUGE_VAL==point.xyz.x)
         return point;
@@ -94,12 +96,13 @@ TRIPLET point_adjust (TRIPLET point, int E, int N) {
 
 
 TRIPLET parse_input_line (struct buf *buf) {
-    TRIPLET point = {{HUGE_VAL, HUGE_VAL, HUGE_VAL}};
+    TRIPLET point;
     char *p = buf->buf, *q = 0;
     int d, m, dd, mm;
     double s, ss, ms, mmss, z;
     char E, N;
 
+	point = pj_triplet(HUGE_VAL, HUGE_VAL, HUGE_VAL);
     for (buf->comment_or_blank = 0; isspace(*p); p++)
         ;
     if (('#' == *p) || (0==*p)) {
