@@ -381,7 +381,7 @@ int pj_gs48_selftest (void) {return 0;}
 
 int pj_gs48_selftest (void) {
     double tolerance_lp = 1e-12;
-    double tolerance_xy = 1e-12;
+    double tolerance_xy = 1e-8;
 
     char s_args[] = {"+proj=gs48 +a=6370997"};
 
@@ -428,7 +428,7 @@ int pj_alsk_selftest (void) {
 
     /* The standard test points are way outside the definition area bounds, hence we relax tolerances */
     double tolerance_lp = 1e-12;
-    double tolerance_xy = 1e-12;
+    double tolerance_xy = 1e-8;
 
     char e_args[] = {"+proj=alsk +ellps=clrk66"};
     char s_args[] = {"+proj=alsk +a=6370997"};
