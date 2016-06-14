@@ -38,6 +38,13 @@
 #  endif
 #endif
 
+/* enable predefined math constants M_* for MS Visual Studio workaround */
+#ifdef _MSC_VER
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+#endif
+
 /* standard inclusions */
 #include <math.h>
 #include <stdio.h>
@@ -91,11 +98,6 @@ extern double hypot(double, double);
 #  define getenv wceex_getenv
 #  define strdup _strdup
 #  define hypot _hypot
-#endif
-
-/* enable predefined math constants M_* for MS Visual Studio workaround */
-#ifdef _MSC_VER
-#define _USE_MATH_DEFINES
 #endif
 
 /* some more useful math constants and aliases */

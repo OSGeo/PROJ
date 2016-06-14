@@ -78,16 +78,16 @@ void pj_free(PJ *P);
 typedef struct {double o, p, k;}  OPK;
 
 /* Northing, Easting, and geodetic height */
-typedef struct {double n, e, h;}  NEh;
-typedef struct {double n, e, h;}  ENh;
+typedef struct {double e, n, h;}  NEh;
+typedef struct {double e, n, h;}  ENh;
 
 /* Northing, Easting, and orthometric height */
-typedef struct {double n, e, H;}  NEH;
-typedef struct {double n, e, H;}  ENH;
+typedef struct {double e, n, H;}  NEH;
+typedef struct {double e, n, H;}  ENH;
 
 /* Northing, Easting, and some kind of height */
-typedef struct {double n, e, z;}  NEZ;
-typedef struct {double n, e, z;}  ENZ;
+typedef struct {double e, n, z;}  NEZ;
+typedef struct {double e, n, z;}  ENZ;
 
 /* Red, green and blue (e.g. for LiDAR colouring) */
 typedef struct {double r, g, b;}  TRIPLET_RGB;
