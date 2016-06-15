@@ -94,7 +94,7 @@ int pj_nav_merc_selftest (void) {
     double tolerance_lp = 1e-10;
     double tolerance_xy = 1e-7;
 
-    char e_args[] = {" -w6 +proj=nav_merc +a=6378388.0 +rf=297"};
+    char e_args[] = {" -w6 +proj=nav_merc +ellps=intl"};
 
     LP fwd_in[] = {
         { 950594.539, 5968306.230 },
