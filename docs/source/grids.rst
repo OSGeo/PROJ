@@ -25,7 +25,7 @@ Background in ticket `#145 <https://github.com/OSGeo/proj.4/issues/145>`__
 
 We basically have two shift grids available. An official here:
 
-`Swiss CHENyx06 dataset in NTv2 format <http://www.swisstopo.admin.ch/internet/swisstopo/en/home/topics/survey/lv03-lv95/chenyx06/distortion_grids.html>`__
+`Swiss CHENyx06 dataset in NTv2 format <https://shop.swisstopo.admin.ch/en/products/geo_software/GIS_info>`__
 
 And a derived in a temporary location which is probably going to disappear soon.
 
