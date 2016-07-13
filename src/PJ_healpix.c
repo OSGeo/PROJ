@@ -49,9 +49,9 @@ PROJ_HEAD(rhealpix, "rHEALPix") "\n\tSph., Ellps.\n\tnorth_square= south_square=
 # define EPS 1e-15
 
 struct pj_opaque {
-    int north_square; \
-    int south_square; \
-    double qp; \
+    int north_square;
+    int south_square;
+    double qp;
     double *apa;
 };
 
@@ -61,12 +61,7 @@ typedef struct {
     enum Region {north, south, equatorial} region;
 } CapMap;
 
-typedef struct {
-    double x, y;
-} Point;
-
 double rot[7][2][2] = ROT;
-
 
 /**
  * Returns the sign of the double.
@@ -114,7 +109,7 @@ static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
     int i, c = 0;
     int counter = 0;
     double xinters;
-    Point p1, p2;
+    XY p1, p2;
 
     /* Check for boundrary cases */
     for (i = 0; i < nvert; i++) {
@@ -122,25 +117,25 @@ static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
             return 1;
         }
     }
+
     p1.x = vert[0][0];
     p1.y = vert[0][1];
+
     for (i = 1; i < nvert; i++) {
         p2.x = vert[i % nvert][0];
         p2.y = vert[i % nvert][1];
-        if (testy > MIN(p1.y, p2.y)) {
-            if (testy <= MAX(p1.y, p2.y)) {
-                if (testx <= MAX(p1.x, p2.x)) {
-                    if (p1.y != p2.y) {
-                        xinters = (testy-p1.y)*(p2.x-p1.x)/(p2.y-p1.y)+p1.x;
-                        if (p1.x == p2.x || testx <= xinters) {
-                            counter++;
-                        }
-                    }
-                }
-            }
+        if (testy > MIN(p1.y, p2.y)  &&
+            testy <= MAX(p1.y, p2.y) &&
+            testx <= MAX(p1.x, p2.x) &&
+            p1.y != p2.y)
+        {
+            xinters = (testy-p1.y)*(p2.x-p1.x)/(p2.y-p1.y)+p1.x;
+            if (p1.x == p2.x || testx <= xinters)
+                counter++;
         }
         p1 = p2;
     }
+
     if (counter % 2 == 0) {
         return 0;
     } else {
@@ -160,24 +155,24 @@ static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
 int in_image(double x, double y, int proj, int north_square, int south_square) {
     if (proj == 0) {
         double healpixVertsJit[][2] = {
-            {-1.0*M_PI - EPS, M_FORTPI},
-            {-3.0*M_FORTPI, M_HALFPI + EPS},
-            {-1.0*M_HALFPI, M_FORTPI + EPS},
-            {-1.0*M_FORTPI, M_HALFPI + EPS},
-            {0.0, M_FORTPI + EPS},
-            {M_FORTPI, M_HALFPI + EPS},
-            {M_HALFPI, M_FORTPI + EPS},
-            {3.0*M_FORTPI, M_HALFPI + EPS},
-            {M_PI + EPS, M_FORTPI},
-            {M_PI + EPS, -M_FORTPI},
-            {3.0*M_FORTPI, -1.0*M_HALFPI - EPS},
-            {M_HALFPI, -1.0*M_FORTPI - EPS},
-            {M_FORTPI, -1.0*M_HALFPI - EPS},
-            {0.0, -1.0*M_FORTPI - EPS},
-            {-1.0*M_FORTPI, -1.0*M_HALFPI - EPS},
-            {-1.0*M_HALFPI, -1.0*M_FORTPI - EPS},
-            {-3.0*M_FORTPI, -1.0*M_HALFPI - EPS},
-            {-1.0*M_PI - EPS, -1.0*M_FORTPI}
+            {-M_PI - EPS,  M_FORTPI},
+            {-3*M_FORTPI,  M_HALFPI + EPS},
+            {-M_HALFPI,    M_FORTPI + EPS},
+            {-M_FORTPI,    M_HALFPI + EPS},
+            {0.0,          M_FORTPI + EPS},
+            {M_FORTPI,     M_HALFPI + EPS},
+            {M_HALFPI,     M_FORTPI + EPS},
+            {3*M_FORTPI,   M_HALFPI + EPS},
+            {M_PI + EPS,   M_FORTPI},
+            {M_PI + EPS,  -M_FORTPI},
+            {3*M_FORTPI,  -M_HALFPI - EPS},
+            {M_HALFPI,    -M_FORTPI - EPS},
+            {M_FORTPI,    -M_HALFPI - EPS},
+            {0.0,         -M_FORTPI - EPS},
+            {-M_FORTPI,   -M_HALFPI - EPS},
+            {-M_HALFPI,   -M_FORTPI - EPS},
+            {-3*M_FORTPI, -M_HALFPI - EPS},
+            {-M_PI - EPS, -M_FORTPI}
         };
         return pnpoly((int)sizeof(healpixVertsJit)/
                       sizeof(healpixVertsJit[0]), healpixVertsJit, x, y);
@@ -187,32 +182,35 @@ int in_image(double x, double y, int proj, int north_square, int south_square) {
          * 'initializer element is not computable at load time'.
          * Before C99 this was not allowed and to keep as portable as
          * possible we do it the C89 way here.
+         * We need to assign the array this way because the input is
+         * dynamic (north_square and south_square vars are unknow at
+         * compile time).
          **/
         double rhealpixVertsJit[12][2];
-        rhealpixVertsJit[0][0]  = -1.0*M_PI - EPS;
-        rhealpixVertsJit[0][1]  = M_FORTPI + EPS;
-        rhealpixVertsJit[1][0]  = -1.0*M_PI + north_square*M_HALFPI- EPS;
-        rhealpixVertsJit[1][1]  = M_FORTPI + EPS;
-        rhealpixVertsJit[2][0]  = -1.0*M_PI + north_square*M_HALFPI- EPS;
-        rhealpixVertsJit[2][1]  = 3*M_FORTPI + EPS;
-        rhealpixVertsJit[3][0]  = -1.0*M_PI + (north_square + 1.0)*M_HALFPI + EPS;
-        rhealpixVertsJit[3][1]  = 3*M_FORTPI + EPS;
-        rhealpixVertsJit[4][0]  = -1.0*M_PI + (north_square + 1.0)*M_HALFPI + EPS;
-        rhealpixVertsJit[4][1]  = M_FORTPI + EPS;
-        rhealpixVertsJit[5][0]  = M_PI + EPS;
-        rhealpixVertsJit[5][1]  = M_FORTPI + EPS;
-        rhealpixVertsJit[6][0]  = M_PI + EPS;
-        rhealpixVertsJit[6][1]  = -1.0*M_FORTPI - EPS;
-        rhealpixVertsJit[7][0]  = -1.0*M_PI + (south_square + 1.0)*M_HALFPI + EPS;
-        rhealpixVertsJit[7][1]  = -1.0*M_FORTPI - EPS;
-        rhealpixVertsJit[8][0]  = -1.0*M_PI + (south_square + 1.0)*M_HALFPI + EPS;
-        rhealpixVertsJit[8][1]  = -3.0*M_FORTPI - EPS;
-        rhealpixVertsJit[9][0]  = -1.0*M_PI + south_square*M_HALFPI - EPS;
-        rhealpixVertsJit[9][1]  = -3.0*M_FORTPI - EPS;
-        rhealpixVertsJit[10][0] = -1.0*M_PI + south_square*M_HALFPI - EPS;
-        rhealpixVertsJit[10][1] = -1.0*M_FORTPI - EPS;
-        rhealpixVertsJit[11][0] = -1.0*M_PI - EPS;
-        rhealpixVertsJit[11][1] = -1.0*M_FORTPI - EPS;
+        rhealpixVertsJit[0][0]  = -M_PI - EPS;
+        rhealpixVertsJit[0][1]  =  M_FORTPI + EPS;
+        rhealpixVertsJit[1][0]  = -M_PI + north_square*M_HALFPI- EPS;
+        rhealpixVertsJit[1][1]  =  M_FORTPI + EPS;
+        rhealpixVertsJit[2][0]  = -M_PI + north_square*M_HALFPI- EPS;
+        rhealpixVertsJit[2][1]  =  3*M_FORTPI + EPS;
+        rhealpixVertsJit[3][0]  = -M_PI + (north_square + 1.0)*M_HALFPI + EPS;
+        rhealpixVertsJit[3][1]  =  3*M_FORTPI + EPS;
+        rhealpixVertsJit[4][0]  = -M_PI + (north_square + 1.0)*M_HALFPI + EPS;
+        rhealpixVertsJit[4][1]  =  M_FORTPI + EPS;
+        rhealpixVertsJit[5][0]  =  M_PI + EPS;
+        rhealpixVertsJit[5][1]  =  M_FORTPI + EPS;
+        rhealpixVertsJit[6][0]  =  M_PI + EPS;
+        rhealpixVertsJit[6][1]  = -M_FORTPI - EPS;
+        rhealpixVertsJit[7][0]  = -M_PI + (south_square + 1.0)*M_HALFPI + EPS;
+        rhealpixVertsJit[7][1]  = -M_FORTPI - EPS;
+        rhealpixVertsJit[8][0]  = -M_PI + (south_square + 1.0)*M_HALFPI + EPS;
+        rhealpixVertsJit[8][1]  = -3*M_FORTPI - EPS;
+        rhealpixVertsJit[9][0]  = -M_PI + south_square*M_HALFPI - EPS;
+        rhealpixVertsJit[9][1]  = -3*M_FORTPI - EPS;
+        rhealpixVertsJit[10][0] = -M_PI + south_square*M_HALFPI - EPS;
+        rhealpixVertsJit[10][1] = -M_FORTPI - EPS;
+        rhealpixVertsJit[11][0] = -M_PI - EPS;
+        rhealpixVertsJit[11][1] = -M_FORTPI - EPS;
 
         return pnpoly((int)sizeof(rhealpixVertsJit)/
                       sizeof(rhealpixVertsJit[0]), rhealpixVertsJit, x, y);
@@ -258,10 +256,10 @@ XY healpix_sphere(LP lp) {
     /* equatorial region */
     if ( fabsl(phi) <= phi0) {
         xy.x = lam;
-        xy.y = 3.0*M_PI/8.0*sin(phi);
+        xy.y = 3*M_PI/8*sin(phi);
     } else {
         double lamc;
-        double sigma = sqrt(3.0*(1 - fabsl(sin(phi))));
+        double sigma = sqrt(3*(1 - fabsl(sin(phi))));
         double cn = floor(2*lam / M_PI + 2);
         if (cn >= 4) {
             cn = 3;
@@ -286,19 +284,19 @@ LP healpix_sphere_inverse(XY xy) {
     /* Equatorial region. */
     if (fabsl(y) <= y0) {
         lp.lam = x;
-        lp.phi = asin(8.0*y/(3.0*M_PI));
+        lp.phi = asin(8*y/(3*M_PI));
     } else if (fabsl(y) < M_HALFPI) {
-        double cn = floor(2.0*x/M_PI + 2.0);
+        double cn = floor(2*x/M_PI + 2);
         double xc, tau;
         if (cn >= 4) {
             cn = 3;
         }
-        xc = -3.0*M_FORTPI + M_HALFPI*cn;
-        tau = 2.0 - 4.0*fabsl(y)/M_PI;
+        xc = -3*M_FORTPI + M_HALFPI*cn;
+        tau = 2.0 - 4*fabsl(y)/M_PI;
         lp.lam = xc + (x - xc)/tau;
-        lp.phi = pj_sign(y)*asin(1.0 - pow(tau , 2.0)/3.0);
+        lp.phi = pj_sign(y)*asin(1.0 - pow(tau, 2)/3.0);
     } else {
-        lp.lam = -1.0*M_PI;
+        lp.lam = -M_PI;
         lp.phi = pj_sign(y)*M_HALFPI;
     }
     return (lp);
@@ -365,22 +363,22 @@ static CapMap get_cap(double x, double y, int north_square, int south_square,
         if (y > M_FORTPI) {
             capmap.region = north;
             c = M_HALFPI;
-        } else if (y < -1*M_FORTPI) {
+        } else if (y < -M_FORTPI) {
             capmap.region = south;
-            c = -1*M_HALFPI;
+            c = -M_HALFPI;
         } else {
             capmap.region = equatorial;
             capmap.cn = 0;
             return capmap;
         }
         /* polar region */
-        if (x < -1*M_HALFPI) {
+        if (x < -M_HALFPI) {
             capmap.cn = 0;
-            capmap.x = (-1*3.0*M_FORTPI);
+            capmap.x = (-3*M_FORTPI);
             capmap.y = c;
-        } else if (x >= -1*M_HALFPI && x < 0) {
+        } else if (x >= -M_HALFPI && x < 0) {
             capmap.cn = 1;
-            capmap.x = -1*M_FORTPI;
+            capmap.x = -M_FORTPI;
             capmap.y = c;
         } else if (x >= 0 && x < M_HALFPI) {
             capmap.cn = 2;
@@ -388,21 +386,19 @@ static CapMap get_cap(double x, double y, int north_square, int south_square,
             capmap.y = c;
         } else {
             capmap.cn = 3;
-            capmap.x = 3.0*M_FORTPI;
+            capmap.x = 3*M_FORTPI;
             capmap.y = c;
         }
-        return capmap;
     } else {
-        double eps;
         if (y > M_FORTPI) {
             capmap.region = north;
-            capmap.x = (-3.0*M_FORTPI + north_square*M_HALFPI);
+            capmap.x = -3*M_FORTPI + north_square*M_HALFPI;
             capmap.y = M_HALFPI;
             x = x - north_square*M_HALFPI;
-        } else if (y < -1*M_FORTPI) {
+        } else if (y < -M_FORTPI) {
             capmap.region = south;
-            capmap.x = (-3.0*M_FORTPI + south_square*M_HALFPI);
-            capmap.y = -1*M_HALFPI;
+            capmap.x = -3*M_FORTPI + south_square*M_HALFPI;
+            capmap.y = -M_HALFPI;
             x = x - south_square*M_HALFPI;
         } else {
             capmap.region = equatorial;
@@ -411,30 +407,29 @@ static CapMap get_cap(double x, double y, int north_square, int south_square,
         }
         /* Polar Region, find the HEALPix polar cap number that
            x, y moves to when rHEALPix polar square is disassembled. */
-        eps = 1e-15; /* Kludge.  Fuzz to avoid some rounding errors. */
         if (capmap.region == north) {
-            if (y >= -1*x - M_FORTPI - eps && y < x + 5.0*M_FORTPI - eps) {
+            if (y >= -x - M_FORTPI - EPS && y < x + 5*M_FORTPI - EPS) {
                 capmap.cn = (north_square + 1) % 4;
-            } else if (y > -1*x -1*M_FORTPI + eps && y >= x + 5.0*M_FORTPI - eps) {
+            } else if (y > -x -M_FORTPI + EPS && y >= x + 5*M_FORTPI - EPS) {
                 capmap.cn = (north_square + 2) % 4;
-            } else if (y <= -1*x -1*M_FORTPI + eps && y > x + 5.0*M_FORTPI + eps) {
+            } else if (y <= -x -M_FORTPI + EPS && y > x + 5*M_FORTPI + EPS) {
                 capmap.cn = (north_square + 3) % 4;
             } else {
                 capmap.cn = north_square;
             }
         } else if (capmap.region == south) {
-            if (y <= x + M_FORTPI + eps && y > -1*x - 5.0*M_FORTPI + eps) {
+            if (y <= x + M_FORTPI + EPS && y > -x - 5*M_FORTPI + EPS) {
                 capmap.cn = (south_square + 1) % 4;
-            } else if (y < x + M_FORTPI - eps && y <= -1*x - 5.0*M_FORTPI + eps) {
+            } else if (y < x + M_FORTPI - EPS && y <= -x - 5*M_FORTPI + EPS) {
                 capmap.cn = (south_square + 2) % 4;
-            } else if (y >= x + M_FORTPI - eps && y < -1*x - 5.0*M_FORTPI - eps) {
+            } else if (y >= x + M_FORTPI - EPS && y < -x - 5*M_FORTPI - EPS) {
                 capmap.cn = (south_square + 3) % 4;
             } else {
                 capmap.cn = south_square;
             }
         }
-        return capmap;
     }
+    return capmap;
 }
 
 
@@ -472,7 +467,7 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
     if (inverse == 0) {
         /* Rotate (x, y) about its polar cap tip and then translate it to
            north_square or south_square. */
-        a[0] =  -3.0*M_FORTPI + pole*M_HALFPI;
+        a[0] =  -3*M_FORTPI + pole*M_HALFPI;
         a[1] =  M_HALFPI;
         if (capmap.region == north) {
             pole = north_square;
@@ -484,7 +479,7 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
     } else {
         /* Inverse function.
          Unrotate (x, y) and then translate it back. */
-        a[0] = -3.0*M_FORTPI + capmap.cn*M_HALFPI;
+        a[0] = -3*M_FORTPI + capmap.cn*M_HALFPI;
         a[1] = M_HALFPI;
         /* disassemble */
         if (capmap.region == north) {
@@ -519,12 +514,9 @@ static XY e_healpix_forward(LP lp, PJ *P) { /* ellipsoid  */
 
 
 static LP s_healpix_inverse(XY xy, PJ *P) { /* sphere */
-    LP lp = {0.0,0.0};
-
     /* Check whether (x, y) lies in the HEALPix image */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
-        lp.lam = HUGE_VAL;
-        lp.phi = HUGE_VAL;
+        LP lp = {HUGE_VAL, HUGE_VAL};
         pj_ctx_set_errno(P->ctx, -15);
         return lp;
     }
@@ -567,12 +559,10 @@ static XY e_rhealpix_forward(LP lp, PJ *P) { /* ellipsoid */
 
 static LP s_rhealpix_inverse(XY xy, PJ *P) { /* sphere */
     struct pj_opaque *Q = P->opaque;
-    LP lp = {0.0,0.0};
 
     /* Check whether (x, y) lies in the rHEALPix image. */
     if (in_image(xy.x, xy.y, 1, Q->north_square, Q->south_square) == 0) {
-        lp.lam = HUGE_VAL;
-        lp.phi = HUGE_VAL;
+        LP lp = {HUGE_VAL, HUGE_VAL};
         pj_ctx_set_errno(P->ctx, -15);
         return lp;
     }
