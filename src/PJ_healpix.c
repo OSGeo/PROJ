@@ -162,8 +162,8 @@ int in_image(double x, double y, int proj, int north_square, int south_square) {
         double healpixVertsJit[][2] = {
             {-1.0*M_PI - EPS, M_FORTPI},
             {-3.0*M_FORTPI, M_HALFPI + EPS},
-            {M_HALFPI, M_FORTPI + EPS},
-            {M_FORTPI, M_HALFPI + EPS},
+            {-1.0*M_HALFPI, M_FORTPI + EPS},
+            {-1.0*M_FORTPI, M_HALFPI + EPS},
             {0.0, M_FORTPI + EPS},
             {M_FORTPI, M_HALFPI + EPS},
             {M_HALFPI, M_FORTPI + EPS},
@@ -192,7 +192,7 @@ int in_image(double x, double y, int proj, int north_square, int south_square) {
         rhealpixVertsJit[0][0]  = -1.0*M_PI - EPS;
         rhealpixVertsJit[0][1]  = M_FORTPI + EPS;
         rhealpixVertsJit[1][0]  = -1.0*M_PI + north_square*M_HALFPI- EPS;
-        rhealpixVertsJit[1][2]  = M_FORTPI + EPS;
+        rhealpixVertsJit[1][1]  = M_FORTPI + EPS;
         rhealpixVertsJit[2][0]  = -1.0*M_PI + north_square*M_HALFPI- EPS;
         rhealpixVertsJit[2][1]  = 3*M_FORTPI + EPS;
         rhealpixVertsJit[3][0]  = -1.0*M_PI + (north_square + 1.0)*M_HALFPI + EPS;
@@ -266,7 +266,7 @@ XY healpix_sphere(LP lp) {
         if (cn >= 4) {
             cn = 3;
         }
-        lamc = -3*M_FORTPI + (M_HALFPI)*cn;
+        lamc = -3*M_FORTPI + M_HALFPI*cn;
         xy.x = lamc + (lam - lamc)*sigma;
         xy.y = pj_sign(phi)*M_FORTPI*(2 - sigma);
     }
@@ -293,7 +293,7 @@ LP healpix_sphere_inverse(XY xy) {
         if (cn >= 4) {
             cn = 3;
         }
-        xc = -3.0*M_FORTPI + (M_HALFPI)*cn;
+        xc = -3.0*M_FORTPI + M_HALFPI*cn;
         tau = 2.0 - 4.0*fabsl(y)/M_PI;
         lp.lam = xc + (x - xc)/tau;
         lp.phi = pj_sign(y)*asin(1.0 - pow(tau , 2.0)/3.0);
