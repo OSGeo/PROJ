@@ -5,6 +5,13 @@ static const char PJ_LIST_H_ID[] = "@(#)pj_list.h	4.5	95/08/09	GIE	REL";
 **
 ** Copy this file and retain only appropriate lines for subset list
 */
+
+PROJ_HEAD(pipeline, "Transformation pipeline manager")
+PROJ_HEAD(helmert, "3- and 7-parameter Helmert shift")
+PROJ_HEAD(cart,    "Ellipsoidal-to-cartesian")
+
+
+
 PROJ_HEAD(aea, "Albers Equal Area")
 PROJ_HEAD(aeqd, "Azimuthal Equidistant")
 PROJ_HEAD(airy, "Airy")
@@ -147,4 +154,3 @@ PROJ_HEAD(weren, "Werenskiold I")
 PROJ_HEAD(wink1, "Winkel I")
 PROJ_HEAD(wink2, "Winkel II")
 PROJ_HEAD(wintri, "Winkel Tripel")
-

@@ -7,6 +7,7 @@ option(BUILD_CS2CS "Build cs2cs (coordinate systems to coordinate systems transl
 option(BUILD_PROJ "Build proj (cartographic projection tool : latlong <-> projected coordinates" ON)
 option(BUILD_GEOD "Build geod (computation of geodesic lines)" ON)
 option(BUILD_NAD2BIN "Build nad2bin (format conversion tool) " ON)
+option(BUILD_TRAN "Build tran (geodetic transformation tool) " ON)
 
 if(NOT MSVC)
   if (NOT APPLE)
@@ -38,6 +39,10 @@ endif(BUILD_GEOD)
 if(BUILD_NAD2BIN)
   include(bin_nad2bin.cmake)
 endif(BUILD_NAD2BIN)
+
+if(BUILD_TRAN)
+  include(bin_tran.cmake)
+endif(BUILD_TRAN)
 
 if (MSVC OR CMAKE_CONFIGURATION_TYPES)
   # Add _d suffix for your debug versions of the tools

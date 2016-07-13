@@ -1,22 +1,23 @@
 AM_CFLAGS = @C_WFLAGS@
 
-bin_PROGRAMS =	proj nad2bin geod cs2cs
+bin_PROGRAMS =	proj nad2bin geod cs2cs tran
 EXTRA_PROGRAMS = multistresstest test228
 
 AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
-include_HEADERS = proj_api.h projects.h geodesic.h \
+include_HEADERS = proj_api.h projects.h geodesic.h proj.h\
 	org_proj4_Projections.h org_proj4_PJ.h
 
 EXTRA_DIST = makefile.vc proj.def bin_cs2cs.cmake \
 			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake \
-			 lib_proj.cmake CMakeLists.txt
+			 bin_tran.cmake lib_proj.cmake CMakeLists.txt
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
 nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h
+tran_SOURCES = tran.c
 multistresstest_SOURCES = multistresstest.c
 test228_SOURCES = test228.c
 
@@ -24,6 +25,7 @@ proj_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
 nad2bin_LDADD = libproj.la
 geod_LDADD = libproj.la
+tran_LDADD = libproj.la
 multistresstest_LDADD = libproj.la @THREAD_LIB@
 test228_LDADD = libproj.la @THREAD_LIB@
 
@@ -72,7 +74,10 @@ libproj_la_SOURCES = \
 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
 	geocent.c geocent.h pj_utils.c pj_gridinfo.c pj_gridlist.c \
 	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c geodesic.c \
-	pj_strtod.c
+	pj_strtod.c \
+	\
+	PJ_pipeline.c PJ_helmert.c PJ_cart.c \
+	pj_triplet.c
 
 install-exec-local:
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)

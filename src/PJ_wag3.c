@@ -16,11 +16,6 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-#if 0
-INVERSE(s_inverse); /* spheroid */
-#endif
-
-
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
 	lp.phi = xy.y;

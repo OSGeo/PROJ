@@ -38,7 +38,8 @@ pseudo = \
 	PJ_putp4p.obj PJ_putp5.obj PJ_putp6.obj PJ_robin.obj \
 	PJ_sts.obj PJ_urm5.obj PJ_urmfps.obj PJ_wag2.obj \
 	PJ_wag3.obj PJ_wink1.obj PJ_wink2.obj PJ_isea.obj \
-	PJ_calcofi.obj PJ_natearth.obj PJ_natearth2.obj
+	PJ_calcofi.obj PJ_natearth.obj PJ_natearth2.obj\
+	PJ_cart.obj PJ_pipeline.obj PJ_helmert.obj
 
 support = \
 	aasincos.obj adjlon.obj bch2bps.obj bchgen.obj pj_gauss.obj \
@@ -56,17 +57,20 @@ support = \
 	pj_utils.obj pj_gridlist.obj pj_gridinfo.obj \
 	proj_mdist.obj pj_mutex.obj pj_initcache.obj \
 	pj_ctx.obj pj_fileapi.obj pj_log.obj pj_apply_vgridshift.obj \
-	pj_strtod.obj pj_run_selftests.obj pj_generic_selftest.obj
+	pj_strtod.obj pj_run_selftests.obj pj_generic_selftest.obj \
+	pj_triplet.obj
 
 geodesic = geodesic.obj
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc) \
 	$(geodesic)
 PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
+TRANEXE_OBJ	= tran.obj emess.obj PJ_pipeline.obj pj_malloc.obj
 CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
 GEODEXE_OBJ	= geod.obj geod_set.obj geod_interface.obj emess.obj
 MULTISTRESSTEST_OBJ = multistresstest.obj
 PROJ_DLL 	= proj$(VERSION).dll
 PROJ_EXE    = proj.exe
+TRAN_EXE    = tran.exe
 CS2CS_EXE   = cs2cs.exe
 GEOD_EXE    = geod.exe
 NAD2BIN_EXE = nad2bin.exe
@@ -77,7 +81,7 @@ CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" \
 
 default:	all
 
-all: proj.lib $(PROJ_EXE) $(CS2CS_EXE) $(GEOD_EXE) $(NAD2BIN_EXE)
+all: proj.lib $(PROJ_EXE) $(TRAN_EXE) $(CS2CS_EXE) $(GEOD_EXE) $(NAD2BIN_EXE)
 
 proj.lib:	$(LIBOBJ)
 	if exist proj.lib del proj.lib
@@ -93,6 +97,10 @@ proj_i.lib:	$(LIBOBJ)
 $(PROJ_EXE):	$(PROJEXE_OBJ) $(EXE_PROJ)
 	cl $(PROJEXE_OBJ) $(EXE_PROJ)
 	if exist $(PROJ_EXE).manifest mt -manifest $(PROJ_EXE).manifest -outputresource:$(PROJ_EXE);1
+
+$(TRAN_EXE):	$(TRANEXE_OBJ) $(EXE_PROJ)
+	cl $(TRANEXE_OBJ) $(EXE_PROJ)
+	if exist $(TRAN_EXE).manifest mt -manifest $(TRAN_EXE).manifest -outputresource:$(TRAN_EXE);1
 
 $(CS2CS_EXE):	$(CS2CSEXE_OBJ) $(EXE_PROJ)
 	cl $(CS2CSEXE_OBJ) $(EXE_PROJ)

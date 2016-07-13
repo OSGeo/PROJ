@@ -20,44 +20,49 @@
 #define MAX_LINE 1000
 #define MAX_PARGS 100
 #define PJ_INVERS(P) (P->inv ? 1 : 0)
-	static PJ
-*Proj;
-	static projUV
-(*proj)(projUV, PJ *);
-	static int
-reversein = 0,	/* != 0 reverse input arguments */
-reverseout = 0,	/* != 0 reverse output arguments */
-bin_in = 0,	/* != 0 then binary input */
-bin_out = 0,	/* != 0 then binary output */
-echoin = 0,	/* echo input data to output line */
-tag = '#',	/* beginning of line tag character */
-inverse = 0,	/* != 0 then inverse projection */
-prescale = 0,	/* != 0 apply cartesian scale factor */
-dofactors = 0,	/* determine scale factors */
-facs_bad = 0,	/* return condition from pj_factors */
-very_verby = 0, /* very verbose mode */
-postscale = 0;
-	static char
-*cheby_str,		/* string controlling Chebychev evaluation */
-*oform = (char *)0,	/* output format for x-y or decimal degrees */
-*oterr = "*\t*",	/* output line for unprojectable input */
-*usage =
-"%s\nusage: %s [ -bCeEfiIlormsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
-	static struct FACTORS
-facs;
-	static double
-(*informat)(const char *, char **),	/* input data deformatter function */
-fscale = 0.;	/* cartesian scale factor */
-	static projUV
-int_proj(projUV data) {
+
+static PJ *Proj;
+static projUV (*proj)(projUV, PJ *);
+static int
+    reversein = 0,	/* != 0 reverse input arguments */
+    reverseout = 0,	/* != 0 reverse output arguments */
+	bin_in = 0,	/* != 0 then binary input */
+	bin_out = 0,	/* != 0 then binary output */
+	echoin = 0,	/* echo input data to output line */
+	tag = '#',	/* beginning of line tag character */
+	inverse = 0,	/* != 0 then inverse projection */
+	prescale = 0,	/* != 0 apply cartesian scale factor */
+	dofactors = 0,	/* determine scale factors */
+	facs_bad = 0,	/* return condition from pj_factors */
+	very_verby = 0, /* very verbose mode */
+	postscale = 0;
+
+static char
+	*cheby_str,		/* string controlling Chebychev evaluation */
+	*oform = (char *)0,	/* output format for x-y or decimal degrees */
+	*oterr = "*\t*",	/* output line for unprojectable input */
+	*usage =
+	"%s\nusage: %s [ -bCeEfiIlormsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
+
+static struct FACTORS
+    facs;
+
+static double
+    (*informat)(const char *, char **),	/* input data deformatter function */
+    fscale = 0.;	                    /* cartesian scale factor */
+
+static projUV int_proj(projUV data) {
 	if (prescale) { data.u *= fscale; data.v *= fscale; }
 	data = (*proj)(data, Proj);
 	if (postscale && data.u != HUGE_VAL)
 		{ data.u *= fscale; data.v *= fscale; }
 	return(data);
 }
-	static void	/* file processing function */
-process(FILE *fid) {
+
+
+
+
+static void	process(FILE *fid) {        /* file processing function */
 	char line[MAX_LINE+3], *s, pline[40];
 	projUV data;
 
@@ -149,8 +154,12 @@ process(FILE *fid) {
 		(void)fputs(bin_in ? "\n" : s, stdout);
 	}
 }
-	static void	/* file processing function --- verbosely */
-vprocess(FILE *fid) {
+
+
+
+
+
+static void	vprocess(FILE *fid) {    /* file processing function --- verbosely */
 	char line[MAX_LINE+3], *s, pline[40];
 	projUV dat_ll, dat_xy;
 	int linvers;
@@ -243,6 +252,10 @@ vprocess(FILE *fid) {
 			facs.a, facs.b);
 	}
 }
+
+
+
+
 
 int main(int argc, char **argv) {
     char *arg, **eargv = argv, *pargv[MAX_PARGS], **iargv = argv;

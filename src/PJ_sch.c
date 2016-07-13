@@ -84,11 +84,6 @@ static LPZ inverse3d(XYZ xyz, PJ *P) {
     lpz.phi = temp[0] ;
     lpz.z = temp[2];
 
-#if 0
-    printf("INVERSE: \n");
-    printf("XYZ: %f %f %f \n", xyz.x, xyz.y, xyz.z);
-    printf("LPZ: %f %f %f \n", lpz.lam, lpz.phi, lpz.z);
-#endif
     return lpz;
 }
 
@@ -126,11 +121,6 @@ static XYZ forward3d(LPZ lpz, PJ *P) {
     xyz.y = temp[0] * Q->rcurv / P->a;
     xyz.z = temp[2];
 
-#if 0
-    printf("FORWARD: \n");
-    printf("LPZ: %f %f %f \n", lpz.lam, lpz.phi, lpz.z);
-    printf("XYZ: %f %f %f \n", xyz.x, xyz.y, xyz.z);
-#endif
     return xyz;
 }
 

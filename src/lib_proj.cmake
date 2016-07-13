@@ -50,6 +50,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_boggs.c
         PJ_bonne.c
         PJ_calcofi.c
+        PJ_cart.c
         PJ_cass.c
         PJ_cc.c
         PJ_cea.c
@@ -76,6 +77,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_gstmerc.c
         PJ_hammer.c
         PJ_hatano.c
+        PJ_helmert.c
         PJ_igh.c
         PJ_isea.c
         PJ_imw_p.c
@@ -110,6 +112,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_omerc.c
         PJ_ortho.c
         PJ_patterson.c
+        PJ_pipeline.c
         PJ_poly.c
         PJ_putp2.c
         PJ_putp3.c
@@ -201,6 +204,7 @@ SET(SRC_LIBPROJ_CORE
         pj_run_selftests.c
         pj_strerrno.c
         pj_transform.c
+		pj_triplet.c
         pj_tsfn.c
         pj_units.c
         pj_utils.c
@@ -217,6 +221,7 @@ set(HEADERS_LIBPROJ
         projects.h
         proj_api.h
         geodesic.h
+        proj.h
 )
 
 # Group source files for IDE source explorers (e.g. Visual Studio)
@@ -333,7 +338,3 @@ boost_report_value(PROJ_CORE_TARGET)
 boost_report_value(PROJ_CORE_TARGET_OUTPUT_NAME)
 boost_report_value(PROJ_LIBRARY_TYPE)
 boost_report_value(PROJ_LIBRARIES)
-
-
-
-
