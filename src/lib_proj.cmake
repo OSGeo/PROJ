@@ -127,6 +127,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_sts.c
         PJ_tcc.c
         PJ_tcea.c
+        PJ_times.c
         PJ_tmerc.c
         PJ_tpeqd.c
         PJ_urm5.c
