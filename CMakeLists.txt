@@ -32,8 +32,8 @@ colormsg(_HIBLUE_ "Configuring PROJ:")
 #################################################################################
 include(Proj4Version)
 proj_version(MAJOR 4 MINOR 9 PATCH 3)
-set(PROJ_API_VERSION "11")
-set(PROJ_BUILD_VERSION "11.0.0")
+set(PROJ_API_VERSION "12")
+set(PROJ_BUILD_VERSION "12.0.0")
 
 #################################################################################
 # Build features and variants
