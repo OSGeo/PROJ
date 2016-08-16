@@ -3275,7 +3275,7 @@
 # Unable to translate coordinate system EPSG:3139 into PROJ.4 format.
 #
 # Viti Levu 1912 / Viti Levu Grid
-<3140> +proj=cass +lat_0=-18 +lon_0=178 +x_0=109435.392 +y_0=141622.272 +a=6378306.3696 +b=6356571.996 +towgs84=98,390,-22,0,0,0,0 +to_meter=0.201168 +no_defs  <>
+<3140> +proj=cass +lat_0=-18 +lon_0=178 +x_0=109435.392 +y_0=141622.272 +a=6378306.3696 +b=6356571.996 +towgs84=98,390,-22,0,0,0,0 +units=link +no_defs  <>
 # Fiji 1956 / UTM zone 60S
 <3141> +proj=utm +zone=60 +south +ellps=intl +towgs84=265.025,384.929,-194.046,0,0,0,0 +units=m +no_defs  <>
 # Fiji 1956 / UTM zone 1S
@@ -4569,7 +4569,7 @@
 # Pitcairn 1967 / UTM zone 9S
 <3784> +proj=utm +zone=9 +south +ellps=intl +towgs84=185,165,42,0,0,0,0 +units=m +no_defs  <>
 # Popular Visualisation CRS / Mercator (deprecated)
-<3785> +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs <>
+<3785> +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs <>
 # World Equidistant Cylindrical (Sphere) (deprecated)
 <3786> +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +a=6371007 +b=6371007 +units=m +no_defs  <>
 # MGI / Slovene National Grid (deprecated)
@@ -4665,7 +4665,7 @@
 # County ST74
 <3854> +proj=tmerc +lat_0=0 +lon_0=18.05787 +k=0.99999506 +x_0=100182.7406 +y_0=-6500620.1207 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # WGS 84 / Pseudo-Mercator
-<3857> +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs <>
+<3857> +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs <>
 # ETRS89 / GK19FIN
 <3873> +proj=tmerc +lat_0=0 +lon_0=19 +k=1 +x_0=19500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # ETRS89 / GK20FIN
