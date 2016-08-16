@@ -11,12 +11,12 @@ include_HEADERS = proj_api.h projects.h geodesic.h \
 
 EXTRA_DIST = makefile.vc proj.def bin_cs2cs.cmake \
 			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake \
-			 lib_proj.cmake CMakeLists.txt
+			 lib_proj.cmake CMakeLists.txt bin_geodtest.cmake
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
 nad2bin_SOURCES = nad2bin.c
-geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h
+geod_SOURCES = geod.c geodtest.c geod_set.c geod_interface.c geod_interface.h
 multistresstest_SOURCES = multistresstest.c
 test228_SOURCES = test228.c
 
