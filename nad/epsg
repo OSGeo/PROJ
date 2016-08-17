@@ -992,6 +992,9 @@
 <7139> +proj=longlat +ellps=WGS84 +no_defs  <>
 # ONGD14
 <7373> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
+# Unknown
+# Unable to translate coordinate system EPSG:7686 into PROJ.4 format.
+#
 # Anguilla 1957 / British West Indies Grid
 <2000> +proj=tmerc +lat_0=0 +lon_0=-62 +k=0.9995000000000001 +x_0=400000 +y_0=0 +ellps=clrk80 +units=m +no_defs  <>
 # Antigua 1943 / British West Indies Grid
@@ -7548,6 +7551,21 @@
 <7644> +proj=lcc +lat_1=44.11394404583334 +lat_0=44.11394404583334 +lon_0=-89.24166666666667 +k_0=1.0000392096 +x_0=120091.4401828804 +y_0=45069.7588011176 +ellps=GRS80 +units=us-ft +no_defs  <>
 # NAD83(2011) / WISCRS Wood (ftUS)
 <7645> +proj=lcc +lat_1=44.36259546944444 +lat_0=44.36259546944444 +lon_0=-90 +k_0=1.0000421209 +x_0=208483.6172720346 +y_0=134589.7539243078 +ellps=GRS80 +units=us-ft +no_defs  <>
+# Unknown
+# Unable to translate coordinate system EPSG:7692 into PROJ.4 format.
+#
+# Unknown
+# Unable to translate coordinate system EPSG:7693 into PROJ.4 format.
+#
+# Unknown
+# Unable to translate coordinate system EPSG:7694 into PROJ.4 format.
+#
+# Unknown
+# Unable to translate coordinate system EPSG:7695 into PROJ.4 format.
+#
+# Unknown
+# Unable to translate coordinate system EPSG:7696 into PROJ.4 format.
+#
 # Pulkovo 1995 / Gauss-Kruger zone 4
 <20004> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=4500000 +y_0=0 +ellps=krass +towgs84=24.47,-130.89,-81.56,0,0,0.13,-0.22 +units=m +no_defs  <>
 # Pulkovo 1995 / Gauss-Kruger zone 5
@@ -10778,6 +10796,9 @@
 <7137> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
 # ONGD14
 <7371> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# Unknown
+# Unable to translate coordinate system EPSG:7684 into PROJ.4 format.
+#
 # KKJ / Finland Uniform Coordinate System + N60 height
 <3901> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=3500000 +y_0=0 +ellps=intl +towgs84=-96.062,-82.428,-121.753,4.801,0.345,-1.376,1.496 +units=m +vunits=m +no_defs  <>
 # ETRS89 / TM35FIN(N,E) + N60 height
