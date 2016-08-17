@@ -935,7 +935,7 @@
 # Nepal 1981
 <6207> +proj=longlat +a=6377276.345 +b=6356075.41314024 +towgs84=293.17,726.18,245.36,0,0,0,0 +no_defs  <>
 # CGRS93
-<6311> +proj=longlat +ellps=WGS84 +towgs84=8.846,-4.394,-1.122,0.00237,0.146528,-0.130428,0.783926 +no_defs  <>
+<6311> +proj=longlat +ellps=WGS84 +towgs84=8.846,-4.394,-1.122,-0.00237,-0.146528,0.130428,0.783926 +no_defs  <>
 # NAD83(2011)
 <6318> +proj=longlat +ellps=GRS80 +no_defs  <>
 # NAD83(PA11)
@@ -992,9 +992,8 @@
 <7139> +proj=longlat +ellps=WGS84 +no_defs  <>
 # ONGD14
 <7373> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
-# Unknown
-# Unable to translate coordinate system EPSG:7686 into PROJ.4 format.
-#
+# Kyrg-06
+<7686> +proj=longlat +ellps=GRS80 +no_defs  <>
 # Anguilla 1957 / British West Indies Grid
 <2000> +proj=tmerc +lat_0=0 +lon_0=-62 +k=0.9995000000000001 +x_0=400000 +y_0=0 +ellps=clrk80 +units=m +no_defs  <>
 # Antigua 1943 / British West Indies Grid
@@ -6102,7 +6101,7 @@
 # NAD83(CORS96) / Puerto Rico and Virgin Is.
 <6307> +proj=lcc +lat_1=18.43333333333333 +lat_2=18.03333333333333 +lat_0=17.83333333333333 +lon_0=-66.43333333333334 +x_0=200000 +y_0=200000 +ellps=GRS80 +units=m +no_defs  <>
 # CGRS93 / Cyprus Local Transverse Mercator
-<6312> +proj=tmerc +lat_0=0 +lon_0=33 +k=0.99995 +x_0=200000 +y_0=-3500000 +ellps=WGS84 +towgs84=8.846,-4.394,-1.122,0.00237,0.146528,-0.130428,0.783926 +units=m +no_defs  <>
+<6312> +proj=tmerc +lat_0=0 +lon_0=33 +k=0.99995 +x_0=200000 +y_0=-3500000 +ellps=WGS84 +towgs84=8.846,-4.394,-1.122,-0.00237,-0.146528,0.130428,0.783926 +units=m +no_defs  <>
 # Macedonia State Coordinate System zone 7
 <6316> +proj=tmerc +lat_0=0 +lon_0=21 +k=0.9999 +x_0=7500000 +y_0=0 +ellps=bessel +towgs84=682,-203,480,0,0,0,0 +units=m +no_defs  <>
 # NAD83(2011) / UTM zone 59N
@@ -7551,21 +7550,16 @@
 <7644> +proj=lcc +lat_1=44.11394404583334 +lat_0=44.11394404583334 +lon_0=-89.24166666666667 +k_0=1.0000392096 +x_0=120091.4401828804 +y_0=45069.7588011176 +ellps=GRS80 +units=us-ft +no_defs  <>
 # NAD83(2011) / WISCRS Wood (ftUS)
 <7645> +proj=lcc +lat_1=44.36259546944444 +lat_0=44.36259546944444 +lon_0=-90 +k_0=1.0000421209 +x_0=208483.6172720346 +y_0=134589.7539243078 +ellps=GRS80 +units=us-ft +no_defs  <>
-# Unknown
-# Unable to translate coordinate system EPSG:7692 into PROJ.4 format.
-#
-# Unknown
-# Unable to translate coordinate system EPSG:7693 into PROJ.4 format.
-#
-# Unknown
-# Unable to translate coordinate system EPSG:7694 into PROJ.4 format.
-#
-# Unknown
-# Unable to translate coordinate system EPSG:7695 into PROJ.4 format.
-#
-# Unknown
-# Unable to translate coordinate system EPSG:7696 into PROJ.4 format.
-#
+# Kyrg-06 / zone 1
+<7692> +proj=tmerc +lat_0=0 +lon_0=68.51666666666667 +k=1 +x_0=1300000 +y_0=14743.5 +ellps=GRS80 +units=m +no_defs  <>
+# Kyrg-06 / zone 2
+<7693> +proj=tmerc +lat_0=0 +lon_0=71.51666666666667 +k=1 +x_0=2300000 +y_0=14743.5 +ellps=GRS80 +units=m +no_defs  <>
+# Kyrg-06 / zone 3
+<7694> +proj=tmerc +lat_0=0 +lon_0=74.51666666666667 +k=1 +x_0=3300000 +y_0=14743.5 +ellps=GRS80 +units=m +no_defs  <>
+# Kyrg-06 / zone 4
+<7695> +proj=tmerc +lat_0=0 +lon_0=77.51666666666667 +k=1 +x_0=4300000 +y_0=14743.5 +ellps=GRS80 +units=m +no_defs  <>
+# Kyrg-06 / zone 5
+<7696> +proj=tmerc +lat_0=0 +lon_0=80.51666666666667 +k=1 +x_0=5300000 +y_0=14743.5 +ellps=GRS80 +units=m +no_defs  <>
 # Pulkovo 1995 / Gauss-Kruger zone 4
 <20004> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=4500000 +y_0=0 +ellps=krass +towgs84=24.47,-130.89,-81.56,0,0,0.13,-0.22 +units=m +no_defs  <>
 # Pulkovo 1995 / Gauss-Kruger zone 5
@@ -10796,9 +10790,8 @@
 <7137> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
 # ONGD14
 <7371> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
-# Unknown
-# Unable to translate coordinate system EPSG:7684 into PROJ.4 format.
-#
+# Kyrg-06
+<7684> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
 # KKJ / Finland Uniform Coordinate System + N60 height
 <3901> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=3500000 +y_0=0 +ellps=intl +towgs84=-96.062,-82.428,-121.753,4.801,0.345,-1.376,1.496 +units=m +vunits=m +no_defs  <>
 # ETRS89 / TM35FIN(N,E) + N60 height
