@@ -126,7 +126,7 @@ struct isea_dgg {
     int triangle; /* triangle of last transformed point */
     int quad; /* quad of last transformed point */
     unsigned long serial;
-};
+};
 
 struct isea_pt {
     double x, y;
