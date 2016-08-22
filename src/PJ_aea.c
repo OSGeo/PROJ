@@ -211,7 +211,7 @@ PJ *PROJECTION(leac) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_aea_selftest (void) {return 10000;}
 #else
 
@@ -271,7 +271,7 @@ int pj_aea_selftest (void) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_leac_selftest (void) {return 10000;}
 #else
 

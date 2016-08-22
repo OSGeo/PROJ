@@ -43,7 +43,7 @@ PJ *PROJECTION(wag2) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_wag2_selftest (void) {return 0;}
 #else
 

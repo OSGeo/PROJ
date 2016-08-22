@@ -348,7 +348,7 @@ PJ *PROJECTION(etmerc) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_etmerc_selftest (void) {return 0;}
 #else
 
@@ -433,7 +433,7 @@ PJ *PROJECTION(utm) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_utm_selftest (void) {return 0;}
 #else
 

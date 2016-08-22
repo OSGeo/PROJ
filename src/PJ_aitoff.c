@@ -200,7 +200,7 @@ PJ *PROJECTION(wintri) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_aitoff_selftest (void) {return 0;}
 #else
 
@@ -248,7 +248,7 @@ int pj_aitoff_selftest (void) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_wintri_selftest (void) {return 0;}
 #else
 

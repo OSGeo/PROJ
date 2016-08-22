@@ -87,7 +87,7 @@ PJ *PROJECTION(weren) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_putp4p_selftest (void) {return 0;}
 #else
 
@@ -132,7 +132,7 @@ int pj_putp4p_selftest (void) {
 #endif
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_weren_selftest (void) {return 0;}
 #else
 

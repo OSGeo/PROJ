@@ -132,7 +132,7 @@ PJ *PROJECTION(nzmg) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_nzmg_selftest (void) {return 0;}
 #else
 

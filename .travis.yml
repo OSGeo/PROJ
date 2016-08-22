@@ -91,9 +91,9 @@ install:
   - cd ..
 # autoconf build with grids and coverage
   - if [ $TRAVIS_OS_NAME == "osx" ]; then
-      CFLAGS="--coverage" ./configure;
+      CFLAGS="-DPJ_SELFTEST --coverage" ./configure;
     else
-      CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure;
+      CFLAGS="-DPJ_SELFTEST --coverage" LDFLAGS="-lgcov" ./configure;
     fi
   - make -j3
   - make check

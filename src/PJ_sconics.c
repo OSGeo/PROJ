@@ -223,7 +223,7 @@ PJ *PROJECTION(vitk1) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_euler_selftest (void) {return 0;}
 #else
 
@@ -287,7 +287,7 @@ int pj_euler_selftest (void) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_murd1_selftest (void) {return 0;}
 #else
 
@@ -359,7 +359,7 @@ int pj_murd1_selftest (void) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_murd2_selftest (void) {return 0;}
 #else
 
@@ -427,7 +427,7 @@ int pj_murd2_selftest (void) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_murd3_selftest (void) {return 0;}
 #else
 
@@ -496,7 +496,7 @@ int pj_murd3_selftest (void) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_pconic_selftest (void) {return 0;}
 #else
 
@@ -569,7 +569,7 @@ int pj_pconic_selftest (void) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_tissot_selftest (void) {return 0;}
 #else
 
@@ -635,7 +635,7 @@ int pj_tissot_selftest (void) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_vitk1_selftest (void) {return 0;}
 #else
 

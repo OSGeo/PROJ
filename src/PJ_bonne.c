@@ -121,7 +121,7 @@ PJ *PROJECTION(bonne) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_bonne_selftest (void) {return 0;}
 #else
 int pj_bonne_selftest (void) {

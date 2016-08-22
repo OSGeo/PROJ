@@ -87,7 +87,7 @@ PJ *PROJECTION(fouc) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_fouc_selftest (void) {return 0;}
 #else
 int pj_fouc_selftest (void) {
@@ -158,7 +158,7 @@ PJ *PROJECTION(kav5) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_kav5_selftest (void) {return 0;}
 #else
 int pj_kav5_selftest (void) {
@@ -226,7 +226,7 @@ PJ *PROJECTION(qua_aut) {
     return setup(P, 2., 2., 0);
 }
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_qua_aut_selftest (void) {return 0;}
 #else
 int pj_qua_aut_selftest (void) {
@@ -294,7 +294,7 @@ PJ *PROJECTION(mbt_s) {
     return setup(P, 1.48875, 1.36509, 0);
 }
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_mbt_s_selftest (void) {return 0;}
 #else
 int pj_mbt_s_selftest (void) {

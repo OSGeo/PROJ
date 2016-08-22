@@ -123,7 +123,7 @@ PJ *PROJECTION(wag5) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_moll_selftest (void) {return 0;}
 #else
 
@@ -167,7 +167,7 @@ int pj_moll_selftest (void) {
 #endif
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_wag4_selftest (void) {return 0;}
 #else
 
@@ -210,7 +210,7 @@ int pj_wag4_selftest (void) {
 
 #endif
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_wag5_selftest (void) {return 0;}
 #else
 

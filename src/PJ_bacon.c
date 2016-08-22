@@ -91,7 +91,7 @@ PJ *PROJECTION(ortel) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_bacon_selftest (void) {return 0;}
 #else
 int pj_bacon_selftest (void) {
@@ -121,7 +121,7 @@ int pj_bacon_selftest (void) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_apian_selftest (void) {return 0;}
 #else
 int pj_apian_selftest (void) {
@@ -151,7 +151,7 @@ int pj_apian_selftest (void) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_ortel_selftest (void) {return 0;}
 #else
 int pj_ortel_selftest (void) {
