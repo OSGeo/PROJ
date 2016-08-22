@@ -278,7 +278,7 @@ PJ *PROJECTION(laea) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_laea_selftest (void) {return 0;}
 #else
 

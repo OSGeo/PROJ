@@ -301,7 +301,7 @@ PJ *PROJECTION(ups) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_stere_selftest (void) {return 0;}
 #else
 
@@ -364,7 +364,7 @@ int pj_stere_selftest (void) {
 
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_ups_selftest (void) {return 0;}
 #else
 

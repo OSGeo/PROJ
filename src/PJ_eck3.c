@@ -117,7 +117,7 @@ PJ *PROJECTION(putp1) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_eck3_selftest (void) {return 0;}
 #else
 
@@ -161,7 +161,7 @@ int pj_eck3_selftest (void) {
 
 #endif
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_kav7_selftest (void) {return 0;}
 #else
 
@@ -205,7 +205,7 @@ int pj_kav7_selftest (void) {
 
 #endif
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_wag6_selftest (void) {return 0;}
 #else
 
@@ -250,7 +250,7 @@ int pj_wag6_selftest (void) {
 #endif
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_putp1_selftest (void) {return 0;}
 #else
 

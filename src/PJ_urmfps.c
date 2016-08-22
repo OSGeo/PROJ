@@ -81,7 +81,7 @@ PJ *PROJECTION(wag1) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_urmfps_selftest (void) {return 0;}
 #else
 int pj_urmfps_selftest (void) {
@@ -123,7 +123,7 @@ int pj_urmfps_selftest (void) {
 #endif
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_wag1_selftest (void) {return 0;}
 #else
 int pj_wag1_selftest (void) {

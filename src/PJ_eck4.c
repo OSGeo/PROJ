@@ -72,7 +72,7 @@ PJ *PROJECTION(eck4) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_eck4_selftest (void) {return 0;}
 #else
 

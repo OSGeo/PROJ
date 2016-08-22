@@ -662,7 +662,7 @@ PJ *PROJECTION(rhealpix) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_healpix_selftest (void) {return 0;}
 #else
 
@@ -721,7 +721,7 @@ int pj_healpix_selftest (void) {
 
 #endif
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_rhealpix_selftest (void) {return 0;}
 #else
 

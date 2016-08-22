@@ -48,7 +48,7 @@ PJ *PROJECTION(eck5) {
     return P;
 }
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_eck5_selftest (void) {return 0;}
 #else
 

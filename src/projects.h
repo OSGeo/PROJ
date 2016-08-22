@@ -36,6 +36,8 @@
 #  ifndef _CRT_NONSTDC_NO_DEPRECATE
 #    define _CRT_NONSTDC_NO_DEPRECATE
 #  endif
+/* enable predefined math constants M_* for MS Visual Studio workaround */
+#  define _USE_MATH_DEFINES
 #endif
 
 /* standard inclusions */
@@ -91,11 +93,6 @@ extern double hypot(double, double);
 #  define getenv wceex_getenv
 #  define strdup _strdup
 #  define hypot _hypot
-#endif
-
-/* enable predefined math constants M_* for MS Visual Studio workaround */
-#ifdef _MSC_VER
-#define _USE_MATH_DEFINES
 #endif
 
 /* If we still haven't got M_PI*, we rely on our own defines.

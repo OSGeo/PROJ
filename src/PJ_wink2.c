@@ -63,7 +63,7 @@ PJ *PROJECTION(wink2) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_wink2_selftest (void) {return 0;}
 #else
 

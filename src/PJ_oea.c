@@ -95,7 +95,7 @@ PJ *PROJECTION(oea) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_oea_selftest (void) {return 0;}
 #else
 
