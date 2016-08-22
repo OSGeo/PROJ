@@ -53,4 +53,3 @@ struct PJ_LIST  *pj_get_list_ref (void) {
 struct PJ_SELFTEST_LIST  *pj_get_selftest_list_ref (void) {
     return pj_selftest_list;
 }
-

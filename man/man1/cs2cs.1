@@ -2,7 +2,7 @@
 .nr LL 5.5i
 .ad b
 .hy 1
-.TH CS2CS 1 "2000/03/21 Rel. 4.4" 
+.TH CS2CS 1 "2000/03/21 Rel. 4.4"
 .SH NAME
 cs2cs \- cartographic coordinate system filter
 .SH SYNOPSIS
@@ -21,7 +21,7 @@ file[s]
 .I Cs2cs
 performs transformation between the source and destination cartographic
 coordinate system on a set of input points.  The coordinate system
-transformation can include translation between projected and geographic 
+transformation can include translation between projected and geographic
 coordinates as well as the application of datum shifts.
 .PP
 The following control parameters can appear in any order:
@@ -75,7 +75,7 @@ that can be selected with
 .B +units
 or
 .B \-ld
-list of datums that can be selected with 
+list of datums that can be selected with
 .B +datum.
 .TP
 .BI \-r
@@ -121,13 +121,13 @@ and supplementary documentation for Release 4.
 .PP
 The \fIcs2cs\fR program requires two coordinate system definitions.  The
 first (or primary is defined based on all projection parameters not
-appearing after the \fB+to\fR argument.  All projection parameters 
+appearing after the \fB+to\fR argument.  All projection parameters
 appearing after the \fB+to\fR argument are considered the definition
 of the second coordinate system.  If there is no second coordinate system
 defined, a geographic coordinate system based on the datum and ellipsoid of
 the source coordinate system is assumed.  Note that the source and destination
 coordinate system can both be projections, both be geographic, or one of
-each and may have the same or different datums.  
+each and may have the same or different datums.
 .PP
 Additional projection control parameters may be contained in two
 auxiliary control files:
@@ -160,15 +160,15 @@ Input geographic data
 (longitude and latitude) must be in DMS or decimal degrees format and input
 cartesian data must be in units consistent with the ellipsoid
 major axis or sphere radius units.
-Output geographic coordinates will normally be in DMS format (use 
-.B \-f %.12f 
+Output geographic coordinates will normally be in DMS format (use
+.B \-f %.12f
 for decimal degrees with 12 decimal places), while
 projected (cartesian) coordinates will be in linear (meter, feet) units.
 
 .SH EXAMPLE
 The following script
 .RS 5
- \f(CWcs2cs +proj=latlong +datum=NAD83 
+ \f(CWcs2cs +proj=latlong +datum=NAD83
        +to +proj=utm +zone=10 +datum=NAD27 \-r <<EOF
  45d15'33.1"	111.5W
  45d15.551666667N	\-111d30

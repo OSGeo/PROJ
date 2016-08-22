@@ -443,7 +443,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
         pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
-    
+
     if( header[8] == 11 )
         must_swap = !IS_LSB;
     else

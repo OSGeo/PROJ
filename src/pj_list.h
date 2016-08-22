@@ -147,4 +147,3 @@ PROJ_HEAD(weren, "Werenskiold I")
 PROJ_HEAD(wink1, "Winkel I")
 PROJ_HEAD(wink2, "Winkel II")
 PROJ_HEAD(wintri, "Winkel Tripel")
-
