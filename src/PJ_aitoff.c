@@ -121,8 +121,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 			f1 -= xy.x; f2 -= xy.y;
 			dl = (f2 * f1p - f1 * f2p) / (dp = f1p * f2l - f2p * f1l);
 			dp = (f1 * f2l - f2 * f1l) / dp;
-			while (dl > M_PI) dl -= M_PI; /* set to interval [-M_PI, M_PI]  */
-			while (dl < -M_PI) dl += M_PI; /* set to interval [-M_PI, M_PI]  */
+			dl = fmod(dl, M_PI); /* set to interval [-M_PI, M_PI] */
 			lp.phi -= dp;	lp.lam -= dl;
 		} while ((fabs(dp) > EPSILON || fabs(dl) > EPSILON) && (iter++ < MAXITER));
 		if (lp.phi > M_PI_2) lp.phi -= 2.*(lp.phi-M_PI_2); /* correct if symmetrical solution for Aitoff */
