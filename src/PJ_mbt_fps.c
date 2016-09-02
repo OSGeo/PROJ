@@ -67,7 +67,7 @@ PJ *PROJECTION(mbt_fps) {
     return P;
 }
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_mbt_fps_selftest (void) {return 0;}
 #else
 

@@ -126,7 +126,7 @@ struct isea_dgg {
     int triangle; /* triangle of last transformed point */
     int quad; /* quad of last transformed point */
     unsigned long serial;
-};
+};
 
 struct isea_pt {
     double x, y;
@@ -1145,7 +1145,7 @@ PJ *PROJECTION(isea) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_isea_selftest (void) {return 0;}
 #else
 

@@ -48,7 +48,7 @@ static void run_one_test (const char *mnemonic, int (testfunc)(void), int verbos
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_run_selftests (int verbosity) {
     printf ("This version of libproj is not configured for internal regression tests.\n");
     return 0;

@@ -287,7 +287,7 @@ PJ *PROJECTION(gs50) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_mil_os_selftest (void) {return 0;}
 #else
 
@@ -331,7 +331,7 @@ int pj_mil_os_selftest (void) {
 #endif
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_lee_os_selftest (void) {return 0;}
 #else
 
@@ -375,7 +375,7 @@ int pj_lee_os_selftest (void) {
 #endif
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_gs48_selftest (void) {return 0;}
 #else
 
@@ -420,7 +420,7 @@ int pj_gs48_selftest (void) {
 #endif
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_alsk_selftest (void) {return 0;}
 #else
 
@@ -481,7 +481,7 @@ int pj_alsk_selftest (void) {
 #endif
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_gs50_selftest (void) {return 0;}
 #else
 

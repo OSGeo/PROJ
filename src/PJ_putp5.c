@@ -84,7 +84,7 @@ PJ *PROJECTION(putp5p) {
     return P;
 }
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_putp5_selftest (void) {return 0;}
 #else
 
@@ -128,7 +128,7 @@ int pj_putp5_selftest (void) {
 #endif
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_putp5p_selftest (void) {return 0;}
 #else
 

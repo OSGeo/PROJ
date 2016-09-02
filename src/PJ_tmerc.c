@@ -195,7 +195,7 @@ PJ *PROJECTION(tmerc) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_tmerc_selftest (void) {return 0;}
 #else
 int pj_tmerc_selftest (void) {

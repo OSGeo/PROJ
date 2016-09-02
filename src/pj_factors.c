@@ -21,7 +21,7 @@ pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 
 		if (h < EPS)
 			h = DEFAULT_H;
-		if (fabs(lp.phi) > (M_HALFPI - h)) 
+		if (fabs(lp.phi) > (M_HALFPI - h))
                 /* adjust to value around pi/2 where derived still exists*/
 		        lp.phi = lp.phi < 0. ? (-M_HALFPI+h) : (M_HALFPI-h);
 		else if (P->geoc)

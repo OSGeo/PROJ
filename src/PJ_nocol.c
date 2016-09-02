@@ -65,7 +65,7 @@ PJ *PROJECTION(nicol) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_nicol_selftest (void) {return 0;}
 #else
 

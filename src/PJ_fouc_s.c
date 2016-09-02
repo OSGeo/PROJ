@@ -81,7 +81,7 @@ PJ *PROJECTION(fouc_s) {
 }
 
 
-#ifdef PJ_OMIT_SELFTEST
+#ifndef PJ_SELFTEST
 int pj_fouc_s_selftest (void) {return 0;}
 #else
 
