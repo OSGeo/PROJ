@@ -12,7 +12,7 @@ Marinus of Tyre was attributed this equirectangular projection :
 
 .. math::
 
-   x = \lambda cos \phi1 
+   x = (\lambda - \lambda0) cos \phi0 
 
 .. math::
 
@@ -20,14 +20,13 @@ Marinus of Tyre was attributed this equirectangular projection :
 
 .. math::
 
-   \phi0 = the center of the map
-   \phi1 = standard parallels where the scale of the projection is true 
+   (\phi0, \lambda0) = the center of the map
 
 Reverse operation :
 
 .. math::
 
-   \lambda = x / cos \phi1
+   \lambda = x / cos \phi0 + \lambda0
 
 .. math::
 
@@ -35,6 +34,5 @@ Reverse operation :
 
 .. math::
 
-   \phi0 = the center of the map
-   \phi1 = standard parallels where the scale of the projection is true
+   (\phi0, \lambda0) = the center of the map
 
