@@ -12,16 +12,18 @@ Download
 Current Release
 --------------------------------------------------------------------------------
 
-* **2015-09-13** `proj-4.9.2.tar.gz`_ `Release Notes`_ (`md5`_)
+* **2016-09-02** `proj-4.9.3.tar.gz`_ `Release Notes`_ (`md5`_)
 
 Past Releases
 --------------------------------------------------------------------------------
 
+* **2015-09-13** `proj-4.9.2.tar.gz`_
 * **2015-03-04** `proj-4.9.1.tar.gz`_
 
 .. _`proj-4.9.1.tar.gz`: http://download.osgeo.org/proj/proj-4.9.1.tar.gz
 .. _`proj-4.9.2.tar.gz`: http://download.osgeo.org/proj/proj-4.9.2.tar.gz
-.. _`md5`: http://download.osgeo.org/proj/proj-4.9.2.tar.gz.md5
+.. _`proj-4.9.2.tar.gz`: http://download.osgeo.org/proj/proj-4.9.3.tar.gz
+.. _`md5`: http://download.osgeo.org/proj/proj-4.9.3.tar.gz.md5
 .. _`Release Notes`: http://lists.maptools.org/pipermail/proj/2015-September/007270.html
 
 Binaries
@@ -36,6 +38,14 @@ Linux
 * `pkgsrc <http://pkgsrc.se/misc/proj pkgsrc package>`__
 * `Delphi <http://www.triplexware.huckfinn.de/geogfix.html#proj>`__
 
+Docker
+................................................................................
+
+A `Docker`_ image with just Proj.4 binaries and a full compliment of grid shift
+files is available on `DockerHub`:
+
+.. _`Docker`: https://docker.org
+.. _`DockerHub`: https://hub.docker.com/r/osgeo/proj.4/
 
 Windows
 ................................................................................

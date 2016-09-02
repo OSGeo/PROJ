@@ -1,128 +1,94 @@
 
+
 <!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Parameters &mdash; proj.4 4.9.3 documentation</title>
+  
 
+  
+  
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  
+
+  
+  
     
-    <title>Parameters &mdash; proj.4 4.9.3 documentation</title>
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="proj.4 4.9.3 documentation" href="index.html"/>
+        <link rel="next" title="Projections" href="projections/index.html"/>
+        <link rel="prev" title="Threads" href="threads.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
     
-    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootswatch-3.3.4/paper/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '4.9.3',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.4/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="top" title="proj.4 4.9.3 documentation" href="index.html" />
-    <link rel="prev" title="Threads" href="threads.html" />
-<meta charset='utf-8'>
-<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
-<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
-<meta name="apple-mobile-web-app-capable" content="yes">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
 
-  </head>
-  <body role="document">
+          
+            <a href="index.html" class="icon icon-home"> proj.4
+          
 
-  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="index.html">
-          proj.4</a>
-        <span class="navbar-text navbar-version pull-left"><b>4.9.3</b></span>
-      </div>
+          
+          </a>
 
-        <div class="collapse navbar-collapse nav-collapse">
-          <ul class="nav navbar-nav">
-            
-                <li><a href="download.html">Download</a></li>
-                <li><a href="https://github.com/OSGeo/proj.4">GitHub</a></li>
+          
             
             
-              <li class="dropdown globaltoc-container">
-  <a role="button"
-     id="dLabelGlobalToc"
-     data-toggle="dropdown"
-     data-target="#"
-     href="index.html">Docs <b class="caret"></b></a>
-  <ul class="dropdown-menu globaltoc"
-      role="menu"
-      aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="download.html#current-release">Current Release</a></li>
-<li class="toctree-l2"><a class="reference internal" href="download.html#past-releases">Past Releases</a></li>
-<li class="toctree-l2"><a class="reference internal" href="download.html#binaries">Binaries</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#where-can-i-find-the-list-of-projections-and-their-arguments">Where can I find the list of projections and their arguments?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-build-configure-proj-4-to-support-datum-shifting">How do I build/configure PROJ.4 to support datum shifting?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-debug-problems-with-nad27-nad83-datum-shifting">How do I debug problems with NAD27/NAD83 datum shifting?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-use-epsg-coordinate-system-codes-with-proj-4">How do I use EPSG coordinate system codes with PROJ.4?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-use-3-parameter-and-7-parameter-datum-shifting">How do I use 3 parameter and 7 parameter datum shifting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#does-proj-4-work-in-different-international-numeric-locales">Does PROJ.4 work in different international numeric locales?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#changing-ellipsoid-why-can-t-i-convert-from-wgs84-to-google-earth-virtual-globe-mercator">Changing Ellipsoid / Why can&#8217;t I convert from WGS84 to Google Earth / Virtual Globe Mercator?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#why-do-i-get-different-results-with-4-5-0-and-4-6-0">Why do I get different results with 4.5.0 and 4.6.0?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-calculate-distances-directions-on-the-surface-of-the-earth">How do I calculate distances/directions on the surface of the earth?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#what-is-the-healpix-projection-and-how-can-i-use-it">What is the HEALPix projection and how can I use it?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#what-is-the-rhealpix-projection-and-how-can-i-use-it">What is the rHEALPix projection and how can I use it?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#what-options-does-proj-4-allow-for-the-shape-of-the-earth-geodesy">What options does proj.4 allow for the shape of the Earth (geodesy)?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#what-if-i-want-a-spherical-earth">What if I want a spherical Earth?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars">How do I change the radius of the Earth?  How do I use proj.4 for work on Mars?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-do-false-eastings-and-false-northings">How do I do False Eastings and False Northings?</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic Calculations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="geodesic.html#id1">Geodesic Calculations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="geodesic.html#terminology">Terminology</a></li>
-<li class="toctree-l2"><a class="reference internal" href="geodesic.html#the-math">The Math</a></li>
-<li class="toctree-l2"><a class="reference internal" href="geodesic.html#the-history">The History</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="grids.html">Grids</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="grids.html#us-canadian-french-and-new-zealand">US, Canadian, French and New Zealand</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grids.html#switzerland">Switzerland</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grids.html#harn">HARN</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grids.html#htdp">HTDP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grids.html#non-free-grids">Non-Free Grids</a></li>
-</ul>
-</li>
+              <div class="version">
+                4.9.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic Calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="htpd.html">HTPD</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="htpd.html#getting-and-building-htdp">Getting and building HTDP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="htpd.html#getting-crs2crs2grid-py">Getting crs2crs2grid.py</a></li>
-<li class="toctree-l2"><a class="reference internal" href="htpd.html#usage">Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="htpd.html#see-also">See Also</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="threads.html">Threads</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="threads.html#key-thread-safety-issues">Key Thread Safety Issues</a></li>
-<li class="toctree-l2"><a class="reference internal" href="threads.html#projctx">projCtx</a></li>
-<li class="toctree-l2"><a class="reference internal" href="threads.html#src-multistresstest-c">src/multistresstest.c</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="htpd.html">HTPD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="threads.html">Threads</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Parameters</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#parameter-list">Parameter list</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#units">Units</a></li>
@@ -131,80 +97,59 @@
 <li class="toctree-l2"><a class="reference internal" href="#lon-wrap-over-longitude-wrapping">lon_wrap, over - Longitude Wrapping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pm-prime-meridian">pm - Prime Meridian</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#towgs84-datum-transformation-to-wgs84">towgs84 - Datum transformation to WGS84</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#nadgrids-grid-based-datum-adjustments">nadgrids - Grid Based Datum Adjustments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nadgrids-grid-based-datum-adjustments">nadgrids - Grid Based Datum Adjustments</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#skipping-missing-grids">Skipping Missing Grids</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-null-grid">The null Grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#downloading-and-installing-grids">Downloading and Installing Grids</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#caveats">Caveats</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#axis-orientation">Axis orientation</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="projections/index.html">Projections</a></li>
 </ul>
-</ul>
-</li>
-              
-                <li class="dropdown">
-  <a role="button"
-     id="dLabelLocalToc"
-     data-toggle="dropdown"
-     data-target="#"
-     href="#">Here <b class="caret"></b></a>
-  <ul class="dropdown-menu localtoc"
-      role="menu"
-      aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">Parameters</a><ul>
-<li><a class="reference internal" href="#parameter-list">Parameter list</a></li>
-<li><a class="reference internal" href="#units">Units</a></li>
-<li><a class="reference internal" href="#vertical-units">Vertical Units</a></li>
-<li><a class="reference internal" href="#false-easting-northing">False Easting/Northing</a></li>
-<li><a class="reference internal" href="#lon-wrap-over-longitude-wrapping">lon_wrap, over - Longitude Wrapping</a></li>
-<li><a class="reference internal" href="#pm-prime-meridian">pm - Prime Meridian</a></li>
-<li><a class="reference internal" href="#towgs84-datum-transformation-to-wgs84">towgs84 - Datum transformation to WGS84</a></li>
-<li><a class="reference internal" href="#nadgrids-grid-based-datum-adjustments">nadgrids - Grid Based Datum Adjustments</a><ul>
-<li><a class="reference internal" href="#skipping-missing-grids">Skipping Missing Grids</a></li>
-<li><a class="reference internal" href="#the-null-grid">The null Grid</a></li>
-<li><a class="reference internal" href="#downloading-and-installing-grids">Downloading and Installing Grids</a></li>
-<li><a class="reference internal" href="#caveats">Caveats</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#axis-orientation">Axis orientation</a></li>
-</ul>
-</li>
-</ul>
-</ul>
-</li>
-              
-            
-            
-              
-                
-  <li>
-    <a href="threads.html" title="Previous Chapter: Threads"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Threads</span>
-    </a>
-  </li>
-              
-            
-            
-            
-            
-              <li class="hidden-sm"></li>
-            
-          </ul>
 
-          
             
-<form class="navbar-form navbar-right" action="search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
           
         </div>
-    </div>
-  </div>
+      </div>
+    </nav>
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-12 content">
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
       
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">proj.4</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Parameters</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
   <div class="section" id="parameters">
 <span id="id1"></span><h1>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h1>
 <table class="docutils field-list" frame="void" rules="none">
@@ -634,20 +579,73 @@ commandline program).</p>
 </div>
 
 
-    </div>
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-  </div>
-</div>
-    <div class="footer">
-        <div class="container">
-                    &copy;  1986?-2016
-                        Gerald Evenden,
-                        <a href="https://github.com/warmerdam">Frank Warmerdam</a>,
-                        and
-                        <a href="https://github.com/OSGeo/proj.4/graphs/contributors">others</a>,
-                Last updated
-                    on 01 Sep 2016.
-        </div>
+        <a href="projections/index.html" class="btn btn-neutral float-right" title="Projections" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="threads.html" class="btn btn-neutral" title="Threads" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
-  </body>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1986?-2016.
+      Last updated on 02 Sep 2016.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'4.9.3',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>
