@@ -16,9 +16,25 @@ Marinus of Tyre was attributed this equirectangular projection :
 
 .. math::
 
-   y = \phi
+   y = \phi - \phi0
 
 .. math::
 
+   \phi0 = the center of the map
    \phi1 = standard parallels where the scale of the projection is true 
+
+Reverse operation :
+
+.. math::
+
+   \lambda = x / cos \phi1
+
+.. math::
+
+   \phi = y + \phi0
+
+.. math::
+
+   \phi0 = the center of the map
+   \phi1 = standard parallels where the scale of the projection is true
 
