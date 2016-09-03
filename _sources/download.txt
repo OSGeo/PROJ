@@ -22,7 +22,7 @@ Past Releases
 
 .. _`proj-4.9.1.tar.gz`: http://download.osgeo.org/proj/proj-4.9.1.tar.gz
 .. _`proj-4.9.2.tar.gz`: http://download.osgeo.org/proj/proj-4.9.2.tar.gz
-.. _`proj-4.9.2.tar.gz`: http://download.osgeo.org/proj/proj-4.9.3.tar.gz
+.. _`proj-4.9.3.tar.gz`: http://download.osgeo.org/proj/proj-4.9.3.tar.gz
 .. _`md5`: http://download.osgeo.org/proj/proj-4.9.3.tar.gz.md5
 .. _`Release Notes`: http://lists.maptools.org/pipermail/proj/2015-September/007270.html
 
