@@ -1,3 +1,20 @@
+4.9.3 Release Notes
+-------------------
+
+ o UTM now uses etmerc, following NGA recommendations.  Tests adjusted
+   for tiny changes in values.
+
+ o new projections: Times, Natural Earth II, Compact Miller, Patterson
+   Cylindrical, and inverse for Hammer and Eckert-Greifendorff.
+
+ o runtime self tests are now opt-in instead of opt-out
+
+ o math constants moved to projects.h
+
+ o bugfixes
+
+ o New (optional) runtime self tests added to proj
+
 4.9.2 Release Notes
 -------------------
 
