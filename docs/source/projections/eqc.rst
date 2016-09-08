@@ -12,11 +12,11 @@ The simplist of all projections. Standard parallels (0° when omitted) may be sp
 
 .. math::
 
-   x = \lambda cos \phi_{ts}
+   x = \lambda \cos \phi_{ts}
 
 .. math::
 
-   y = \phi
+   y = \phi - \phi_0
 
 Reverse operation :
 
@@ -26,5 +26,5 @@ Reverse operation :
 
 .. math::
 
-   \phi = y
+   \phi = y + \phi_0
 
