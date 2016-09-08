@@ -24,6 +24,6 @@ the sinusoidal projections. Parameter :math:`n=n` is the weighting factor where
     \end {array}
 
 For the inverse, the Newton-Raphson method can be used to determine
-:math:`\phi` from the equation for :math:`y` above. As :math:`n -> 0` and
-:math:`\phi -> \pi/2`, convergence is slow but for :math:`n = 0`, :math:`\phi =
+:math:`\phi` from the equation for :math:`y` above. As :math:`n \rightarrow 0` and
+:math:`\phi \rightarrow \pi/2`, convergence is slow but for :math:`n = 0`, :math:`\phi =
 \sin^1y`
