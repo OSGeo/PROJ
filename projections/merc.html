@@ -159,7 +159,16 @@
 <li class="toctree-l2"><a class="reference internal" href="mbtfpp.html">McBride-Thomas Flat-Polar Parabolic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mbtfpq.html">McBryde-Thomas Flat-Polar Quartic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mbtfps.html">McBryde-Thomas Flat-Polar Sinusoidal</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Mercator</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Mercator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mathematical-definition">Mathematical definition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spherical-form">Spherical form</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#elliptical-form">Elliptical form</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="mil_os.html">Miller Oblated Stereographic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mill.html">Miller Cylindrical</a></li>
 <li class="toctree-l2"><a class="reference internal" href="moll.html">Mollweide</a></li>
@@ -273,7 +282,103 @@
             
   <div class="section" id="mercator">
 <span id="merc"></span><h1>Mercator<a class="headerlink" href="#mercator" title="Permalink to this headline">¶</a></h1>
+<p>The Mercator projection is a cylindrical map projection that origins from the 15th
+century. It is widely recognized as the first regularly used map projection.
+The projection is conformal which makes it suitable for navigational purposes.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Classification</strong></td>
+<td>Conformal cylindrical</td>
+</tr>
+<tr class="row-even"><td><strong>Available forms</strong></td>
+<td>Forward and inverse, spherical and elliptical projection</td>
+</tr>
+<tr class="row-odd"><td><strong>Defined area</strong></td>
+<td>Global, but best used near the equator</td>
+</tr>
+<tr class="row-even"><td><strong>Implemented by</strong></td>
+<td>Gerald I. Evenden</td>
+</tr>
+<tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
+</tr>
+<tr class="row-even"><td><cite>+lat_ts</cite></td>
+<td>Latitude of true scale. Defaults to 0.</td>
+</tr>
+</tbody>
+</table>
 <a class="reference internal image-reference" href="../_images/merc.png"><img alt="Mercator" src="../_images/merc.png" style="width: 1200.0px; height: 900.0px;" /></a>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>Applications should be limited to equatorial regions, but is frequently
+used for navigational charts with latitude of true scale (<code class="docutils literal"><span class="pre">+lat_ts</span></code>) specified within
+or near chart&#8217;s boundaries.
+Often inappropriately used for world maps since the regions near the poles
+cannot be shown [0].</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 56.35 12.32 | proj +proj=merc +lat_ts=56.5
+3470306.37  759599.90
+</pre></div>
+</div>
+</div>
+<div class="section" id="mathematical-definition">
+<h2>Mathematical definition<a class="headerlink" href="#mathematical-definition" title="Permalink to this headline">¶</a></h2>
+<p>The formulas describing the Mercator projection are all taken from G. Evenden&#8217;s libproj manuals [1].</p>
+<div class="section" id="spherical-form">
+<h3>Spherical form<a class="headerlink" href="#spherical-form" title="Permalink to this headline">¶</a></h3>
+<p>For the spherical form of the projection we introduce the scaling factor:</p>
+<div class="math">
+\[k_0 = \cos \phi_{ts}\]</div>
+<div class="section" id="forward-projection">
+<h4>Forward projection<a class="headerlink" href="#forward-projection" title="Permalink to this headline">¶</a></h4>
+<div class="math">
+\[x = k_0 \lambda\]</div>
+<div class="math">
+\[y = k_0 \ln \tan \left(\frac{\pi}{4} + \frac{\phi}{2} \right)\]</div>
+</div>
+<div class="section" id="inverse-projection">
+<h4>Inverse projection<a class="headerlink" href="#inverse-projection" title="Permalink to this headline">¶</a></h4>
+<div class="math">
+\[\lambda = x / k_0\]</div>
+<div class="math">
+\[\phi = \pi/2 - 2 \arctan \left[ \exp \left( -y/k_0 \right) \right]\]</div>
+</div>
+</div>
+<div class="section" id="elliptical-form">
+<h3>Elliptical form<a class="headerlink" href="#elliptical-form" title="Permalink to this headline">¶</a></h3>
+<p>For the elliptical form of the projection we introduce the scaling factor:</p>
+<div class="math">
+\[k_0 = m\left( \phi_ts \right)\]</div>
+<p>where <span class="math">\(m\left(\phi\right)\)</span> is the parallel radius at lattitude <span class="math">\(\phi\)</span>.</p>
+<p>We also use the Isometric Latitude kernel function <span class="math">\(t()\)</span>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">m() and t() should be described properly on a seperate page about the theory of projections on the ellipsoid.</p>
+</div>
+<div class="section" id="id1">
+<h4>Forward projection<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<div class="math">
+\[x = k_0 \lambda\]</div>
+<div class="math">
+\[y = k_0 \ln t \left( \phi \right)\]</div>
+</div>
+<div class="section" id="id2">
+<h4>Inverse projection<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<div class="math">
+\[\lambda = x / k_0\]</div>
+<div class="math">
+\[\phi = t^{-1}\left[ \exp \left( -y/k_0 \right) \right]\]</div>
+</div>
+</div>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p>[0] Evenden, G. I., 1995, Cartograpic Projection Procedures for the UNIX Environment - A User&#8217;s Manual.</p>
+<p>[1] Evenden, G. I., 2005, libproj4: A Comprehensive Library of Cartographic Projection Functions (Preliminary Draft).</p>
+</div>
 </div>
 
 
