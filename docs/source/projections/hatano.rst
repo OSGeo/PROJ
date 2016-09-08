@@ -8,7 +8,6 @@ Hatano Asymmetrical Equal Area
    :scale: 50%
    :alt:   Hatano Asymmetrical Equal Area
 
-
 :term:`Pseudocylindrical Projection`
 
 .. note::
