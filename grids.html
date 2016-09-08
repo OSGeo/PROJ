@@ -85,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="download.html">Download</a></li>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic Calculations</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Grids</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Grids</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#us-canadian-french-and-new-zealand">US, Canadian, French and New Zealand</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#switzerland">Switzerland</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#harn">HARN</a></li>
@@ -213,32 +213,32 @@ for GDAL, and an <a class="reference external" href="https://github.com/OSGeo/gd
 Also, a script to do the bulk translation was implemented in
 <a class="reference external" href="https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/loslas2ntv2.py">https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/loslas2ntv2.py</a>.
 The command to do the translation was:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">loslas2ntv2</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">auto</span> <span class="o">*</span><span class="n">hpgn</span><span class="o">.</span><span class="n">los</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">loslas2ntv2</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">auto</span> <span class="o">*</span><span class="n">hpgn</span><span class="o">.</span><span class="n">los</span>
 </pre></div>
 </div>
 <p>As GDAL uses NAD83/WGS84 as a pivot datum, the sense of the HPGN datum shift offsets were negated to map from HPGN to NAD83 instead of the other way.  The files can be used with PROJ.4 like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +datum=NAD83
-      +to +proj=latlong +nadgrids=./azhpgn.gsb +ellps=GRS80
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span>
+      <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=./</span><span class="n">azhpgn</span><span class="o">.</span><span class="n">gsb</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span># input:
--112 34
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># input:</span>
+<span class="o">-</span><span class="mi">112</span> <span class="mi">34</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span></span># output:
-111d59&#39;59.996&quot;W 34d0&#39;0.006&quot;N -0.000
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># output:</span>
+<span class="mi">111</span><span class="n">d59</span><span class="s1">&#39;59.996&quot;W 34d0&#39;</span><span class="mf">0.006</span><span class="s2">&quot;N -0.000</span>
 </pre></div>
 </div>
 <p>This was confirmed against the <a class="reference external" href="http://www.ngs.noaa.gov/cgi-bin/nadcon2.prl">NGS HPGN calculator</a>.</p>
 <p>The grids are available at <a class="reference external" href="http://download.osgeo.org/proj/hpgn_ntv2.zip">http://download.osgeo.org/proj/hpgn_ntv2.zip</a></p>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="htpd.html#htpd"><span>HTPD</span></a> describes similar grid shifting</p>
+<p class="last"><a class="reference internal" href="htpd.html#htpd"><span class="std std-ref">HTPD</span></a> describes similar grid shifting</p>
 </div>
 </div>
 <div class="section" id="htdp">
 <h2>HTDP<a class="headerlink" href="#htdp" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="htpd.html#htpd"><span>HTPD</span></a> describes the situation with HTDP grids based on NOAA/NGS HTDP Model.</p>
+<p><a class="reference internal" href="htpd.html#htpd"><span class="std std-ref">HTPD</span></a> describes the situation with HTDP grids based on NOAA/NGS HTDP Model.</p>
 </div>
 <div class="section" id="non-free-grids">
 <h2>Non-Free Grids<a class="headerlink" href="#non-free-grids" title="Permalink to this headline">¶</a></h2>
@@ -260,11 +260,11 @@ NTv2.0 file needs to be downloaded from Natural Resources Canada. More info:
 </li>
 <li><dl class="first docutils">
 <dt>Test it using:</dt>
-<dd><div class="first highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=clrk66 +nadgrids=@ntv2_0.gsb +to +proj=latlong +ellps=GRS80 +datum=NAD83
--111 50
+<dd><div class="first highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=</span><span class="nd">@ntv2_0</span><span class="o">.</span><span class="n">gsb</span> <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span>
+<span class="o">-</span><span class="mi">111</span> <span class="mi">50</span>
 </pre></div>
 </div>
-<div class="last highlight-python"><div class="highlight"><pre><span></span>111d0&#39;3.006&quot;W   50d0&#39;0.103&quot;N 0.000  # correct answer
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="mi">111</span><span class="n">d0</span><span class="s1">&#39;3.006&quot;W   50d0&#39;</span><span class="mf">0.103</span><span class="s2">&quot;N 0.000  # correct answer</span>
 </pre></div>
 </div>
 </dd>

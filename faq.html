@@ -83,7 +83,7 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="download.html">Download</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">FAQ</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">FAQ</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#where-can-i-find-the-list-of-projections-and-their-arguments">Where can I find the list of projections and their arguments?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-do-i-build-configure-proj-4-to-support-datum-shifting">How do I build/configure PROJ.4 to support datum shifting?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-do-i-debug-problems-with-nad27-nad83-datum-shifting">How do I debug problems with NAD27/NAD83 datum shifting?</a></li>
@@ -195,11 +195,11 @@ projection specific options for each.</p>
 <p>While the &#8216;&#8217;&#8216;nad2nad&#8217;&#8216;&#8217; program can be used in some cases, the &#8216;&#8217;&#8216;cs2cs&#8217;&#8216;&#8217; is
 now the preferred mechanism.   The following example demonstrates using the
 default shift parameters for NAD27 to NAD83:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>% cs2cs +proj=latlong +datum=NAD27 +to +proj=latlong +datum=NAD83 -117 30
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD27</span> <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span> <span class="o">-</span><span class="mi">117</span> <span class="mi">30</span>
 </pre></div>
 </div>
 <p>producing:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>117d0&#39;2.901&quot;W   30d0&#39;0.407&quot;N 0.000
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">117</span><span class="n">d0</span><span class="s1">&#39;2.901&quot;W   30d0&#39;</span><span class="mf">0.407</span><span class="s2">&quot;N 0.000</span>
 </pre></div>
 </div>
 <p>In order for datum shifting to work properly the various grid shift files must
@@ -209,7 +209,7 @@ be available.  See below.  More details are available in the
 <div class="section" id="how-do-i-build-configure-proj-4-to-support-datum-shifting">
 <h2>How do I build/configure PROJ.4 to support datum shifting?<a class="headerlink" href="#how-do-i-build-configure-proj-4-to-support-datum-shifting" title="Permalink to this headline">¶</a></h2>
 <p>After downloading and unpacking the PROJ.4 source, also download and unpack the
-set of datum shift files.  See <a class="reference internal" href="download.html#download"><span>Download</span></a> for instructions how to fetch
+set of datum shift files.  See <a class="reference internal" href="download.html#download"><span class="std std-ref">Download</span></a> for instructions how to fetch
 and install these files</p>
 <p>On Windows the extra nadshift target must be used.  For instance
 <code class="docutils literal"><span class="pre">nmake</span> <span class="pre">/f</span> <span class="pre">makefile.vc</span> <span class="pre">nadshift</span></code> in the <code class="docutils literal"><span class="pre">proj/src</span></code> directory.</p>
@@ -247,8 +247,8 @@ change) step is just quietly skipped!</p>
 from the PROJ.4 library to stderr (the text console normally) with
 information on what data files are being opened and in some cases why a
 transformation fails.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>export PROJ_DEBUG=ON
-cs2cs ...
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">PROJ_DEBUG</span><span class="o">=</span><span class="n">ON</span>
+<span class="n">cs2cs</span> <span class="o">...</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -269,19 +269,19 @@ coordinate system codes and PROJ.4 descriptions of the coordinate system
 available in the epsg definition file that normally lives in the proj/nad
 directory.  If installed (it is installed by default on Unix), it is possible
 to use EPSG numbers like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>% cs2cs -v +init=epsg:26711
-# ---- From Coordinate System ----
-#Universal Transverse Mercator (UTM)
-#       Cyl, Sph
-#       zone= south
-# +init=epsg:26711 +proj=utm +zone=11 +ellps=clrk66 +datum=NAD27 +units=m
-# +no_defs +nadgrids=conus,ntv1_can.dat
-#--- following specified but NOT used
-# +ellps=clrk66
-# ---- To Coordinate System ----
-#Lat/long (Geodetic)
-#
-# +proj=latlong +datum=NAD27 +ellps=clrk66 +nadgrids=conus,ntv1_can.dat
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">cs2cs</span> <span class="o">-</span><span class="n">v</span> <span class="o">+</span><span class="n">init</span><span class="o">=</span><span class="n">epsg</span><span class="p">:</span><span class="mi">26711</span>
+<span class="c1"># ---- From Coordinate System ----</span>
+<span class="c1">#Universal Transverse Mercator (UTM)</span>
+<span class="c1">#       Cyl, Sph</span>
+<span class="c1">#       zone= south</span>
+<span class="c1"># +init=epsg:26711 +proj=utm +zone=11 +ellps=clrk66 +datum=NAD27 +units=m</span>
+<span class="c1"># +no_defs +nadgrids=conus,ntv1_can.dat</span>
+<span class="c1">#--- following specified but NOT used</span>
+<span class="c1"># +ellps=clrk66</span>
+<span class="c1"># ---- To Coordinate System ----</span>
+<span class="c1">#Lat/long (Geodetic)</span>
+<span class="c1">#</span>
+<span class="c1"># +proj=latlong +datum=NAD27 +ellps=clrk66 +nadgrids=conus,ntv1_can.dat</span>
 </pre></div>
 </div>
 <p>The proj/nad/epsg file can be browsed and searched in a text editor for
@@ -304,7 +304,7 @@ altering the role of commas and periods in numbers, then PROJ.4 will not work.
 This problem is common in some European locales.</p>
 <p>On unix-like platforms, this problem can be avoided by forcing the use of the
 default numeric locale by setting the LC_NUMERIC environment variable to C.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>$ export LC_NUMERIC=C
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ export LC_NUMERIC=C
 $ proj ...
 </pre></div>
 </div>
@@ -320,14 +320,14 @@ using the API.  Command line tools may still have issues.</p>
 <p>The coordinate system definition for Google Earth, and Virtual Globe Mercator
 is as follows, which uses a sphere as the earth model for the Mercator
 projection.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0
-     +x_0=0.0 +y_0=0 +k=1.0 +units=m +no_defs
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">6378137</span> <span class="o">+</span><span class="n">b</span><span class="o">=</span><span class="mi">6378137</span> <span class="o">+</span><span class="n">lat_ts</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mf">0.0</span>
+     <span class="o">+</span><span class="n">x_0</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">y_0</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">k</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">+</span><span class="n">units</span><span class="o">=</span><span class="n">m</span> <span class="o">+</span><span class="n">no_defs</span>
 </pre></div>
 </div>
 <p>But, if you do something like:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +datum=WGS84
-    +to +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0
-                   +x_0=0.0 +y_0=0 +k=1.0 +units=m +no_defs
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">WGS84</span>
+    <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">6378137</span> <span class="o">+</span><span class="n">b</span><span class="o">=</span><span class="mi">6378137</span> <span class="o">+</span><span class="n">lat_ts</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mf">0.0</span>
+                   <span class="o">+</span><span class="n">x_0</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">y_0</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">k</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">+</span><span class="n">units</span><span class="o">=</span><span class="n">m</span> <span class="o">+</span><span class="n">no_defs</span>
 </pre></div>
 </div>
 <p>to convert between WGS84 and mercator on the sphere there will be substantial
@@ -341,9 +341,9 @@ coordinate systems.  The solution is to &#8220;trick&#8221; PROJ.4 into applying
 to the lat/long values when going to (and through) WGS84.  This can be
 accomplished by asking PROJ to use a null grid shift file for switching from
 your spherical lat/long coordinates to WGS84.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +datum=WGS84 \
-    +to +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 \
-    +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">WGS84</span> \
+    <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">6378137</span> <span class="o">+</span><span class="n">b</span><span class="o">=</span><span class="mi">6378137</span> <span class="o">+</span><span class="n">lat_ts</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mf">0.0</span> \
+    <span class="o">+</span><span class="n">x_0</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">y_0</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">k</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">+</span><span class="n">units</span><span class="o">=</span><span class="n">m</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=</span><span class="nd">@null</span> <span class="o">+</span><span class="n">no_defs</span>
 </pre></div>
 </div>
 <p>Note the strategic addition of <a class="reference external" href="mailto:+nadgrids=&#37;&#52;&#48;null">+nadgrids=<span>&#64;</span>null</a> to the spherical projection
@@ -355,8 +355,8 @@ EPSG:3785 and EPSG:900913.  When using this coordinate system with GDAL/OGR it
 is helpful to include the +wktext so the exact proj.4 string will be preserved
 in the WKT representation (otherwise key parameters like <cite>+nadgrids=&#64;null</cite> will
 be dropped):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0
-           +units=m +nadgrids=@null +wktext  +no_defs
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">6378137</span> <span class="o">+</span><span class="n">b</span><span class="o">=</span><span class="mi">6378137</span> <span class="o">+</span><span class="n">lat_ts</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">x_0</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">y_0</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">k</span><span class="o">=</span><span class="mf">1.0</span>
+           <span class="o">+</span><span class="n">units</span><span class="o">=</span><span class="n">m</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=</span><span class="nd">@null</span> <span class="o">+</span><span class="n">wktext</span>  <span class="o">+</span><span class="n">no_defs</span>
 </pre></div>
 </div>
 </div>
@@ -394,13 +394,13 @@ horizontal parallels.  HEALPix provides a mapping in which points of equal
 latitude and equally spaced longitude are mapped to points of equal latitude
 and equally spaced longitude with the module of the polar interruptions. ||</p>
 <p>To run a forward HEALPix projection on a unit sphere model, use the following command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>proj +proj=healpix +lon_0=0 +a=1 -E &lt;&lt;EOF
-0 0
-EOF
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">healpix</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">E</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
+<span class="mi">0</span> <span class="mi">0</span>
+<span class="n">EOF</span>
 </pre></div>
 </div>
 <p>Output of the above command.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>0 0 0.00 0.00
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">0</span> <span class="mi">0</span> <span class="mf">0.00</span> <span class="mf">0.00</span>
 </pre></div>
 </div>
 </div>
@@ -416,14 +416,14 @@ across the x-axis which is a noval approach for the rHEALPix projection.  The
 initial intention of using rHEALPix in the Spatial Computation Engine Science
 Collaboration Environment (SCENZGrid).</p>
 <p>To run a inverse rHEALPix projection on a WGS84 ellipsoidal model, use the following command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>proj +proj=rhealpix -f &#39;%.2f&#39; -I +lon_0=0 +a=1 +ellps=WGS84 +npole=0 +spole=0 -E &lt;&lt;EOF
-0 0.7853981633974483
-EOF
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">rhealpix</span> <span class="o">-</span><span class="n">f</span> <span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">-</span><span class="n">I</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">WGS84</span> <span class="o">+</span><span class="n">npole</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">spole</span><span class="o">=</span><span class="mi">0</span> <span class="o">-</span><span class="n">E</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
+<span class="mi">0</span> <span class="mf">0.7853981633974483</span>
+<span class="n">EOF</span>
 </pre></div>
 </div>
 <p>Where spole and npole are integers from the range of 0 to 3 inclusive and represent the positions of the north polar and south polar squares.</p>
 <p>Output of above command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>0 0.7853981633974483 0.00 41.94
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">0</span> <span class="mf">0.7853981633974483</span> <span class="mf">0.00</span> <span class="mf">41.94</span>
 </pre></div>
 </div>
 </div>
@@ -442,7 +442,7 @@ for the radius used in this case.</p>
 <h2>How do I change the radius of the Earth?  How do I use proj.4 for work on Mars?<a class="headerlink" href="#how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars" title="Permalink to this headline">¶</a></h2>
 <p>You can supply explicit values for the semi minor and semi major axes instead
 of using the symbolic &#8220;sphere&#8221; value.  Eg, if the radius were 2000000m:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>+proj=laea +lon_0=-40.000000 +lat_0=74.000000 +x_0=1000000 +y_0=1700000 +a=2000000 +b=2000000&quot;
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">laea</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=-</span><span class="mf">40.000000</span> <span class="o">+</span><span class="n">lat_0</span><span class="o">=</span><span class="mf">74.000000</span> <span class="o">+</span><span class="n">x_0</span><span class="o">=</span><span class="mi">1000000</span> <span class="o">+</span><span class="n">y_0</span><span class="o">=</span><span class="mi">1700000</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">2000000</span> <span class="o">+</span><span class="n">b</span><span class="o">=</span><span class="mi">2000000</span><span class="s2">&quot;</span>
 </pre></div>
 </div>
 </div>

@@ -88,7 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="grids.html">Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="htpd.html">HTPD</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Threads</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Threads</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#key-thread-safety-issues">Key Thread Safety Issues</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#projctx">projCtx</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#src-multistresstest-c">src/multistresstest.c</a></li>
@@ -177,20 +177,20 @@ is a <a href="#id6"><span class="problematic" id="id7">pj_ctx_</span></a> set of
 contexts.  The contexts are also used now to handle setting debugging mode, and
 to hold an error reporting function for textual error and debug messages.   The
 API looks like:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>projPJ pj_init_ctx( projCtx, int, char ** );
-projPJ pj_init_plus_ctx( projCtx, const char * );
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">projPJ</span> <span class="n">pj_init_ctx</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">char</span> <span class="o">**</span> <span class="p">);</span>
+<span class="n">projPJ</span> <span class="n">pj_init_plus_ctx</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span> <span class="p">);</span>
 
-projCtx pj_get_default_ctx(void);
-projCtx pj_get_ctx( projPJ );
-void pj_set_ctx( projPJ, projCtx );
-projCtx pj_ctx_alloc(void);
-void    pj_ctx_free( projCtx );
-int pj_ctx_get_errno( projCtx );
-void pj_ctx_set_errno( projCtx, int );
-void pj_ctx_set_debug( projCtx, int );
-void pj_ctx_set_logger( projCtx, void (*)(void *, int, const char *) );
-void pj_ctx_set_app_data( projCtx, void * );
-void *pj_ctx_get_app_data( projCtx );
+<span class="n">projCtx</span> <span class="n">pj_get_default_ctx</span><span class="p">(</span><span class="n">void</span><span class="p">);</span>
+<span class="n">projCtx</span> <span class="n">pj_get_ctx</span><span class="p">(</span> <span class="n">projPJ</span> <span class="p">);</span>
+<span class="n">void</span> <span class="n">pj_set_ctx</span><span class="p">(</span> <span class="n">projPJ</span><span class="p">,</span> <span class="n">projCtx</span> <span class="p">);</span>
+<span class="n">projCtx</span> <span class="n">pj_ctx_alloc</span><span class="p">(</span><span class="n">void</span><span class="p">);</span>
+<span class="n">void</span>    <span class="n">pj_ctx_free</span><span class="p">(</span> <span class="n">projCtx</span> <span class="p">);</span>
+<span class="nb">int</span> <span class="n">pj_ctx_get_errno</span><span class="p">(</span> <span class="n">projCtx</span> <span class="p">);</span>
+<span class="n">void</span> <span class="n">pj_ctx_set_errno</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="nb">int</span> <span class="p">);</span>
+<span class="n">void</span> <span class="n">pj_ctx_set_debug</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="nb">int</span> <span class="p">);</span>
+<span class="n">void</span> <span class="n">pj_ctx_set_logger</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="n">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="n">void</span> <span class="o">*</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="p">)</span> <span class="p">);</span>
+<span class="n">void</span> <span class="n">pj_ctx_set_app_data</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="n">void</span> <span class="o">*</span> <span class="p">);</span>
+<span class="n">void</span> <span class="o">*</span><span class="n">pj_ctx_get_app_data</span><span class="p">(</span> <span class="n">projCtx</span> <span class="p">);</span>
 </pre></div>
 </div>
 <p>Multithreaded applications are now expected to create a projCtx per thread
@@ -212,8 +212,8 @@ for testing multithreaded use of PROJ.4.  It performs a series of reprojections
 to setup a table expected results, and then it does them many times in several
 threads to confirm that the results are consistent.  At this time this program
 is not part of the builds but it can be built on linux like:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>gcc -g multistresstest.c .libs/libproj.so -lpthread -o multistresstest
-./multistresstest
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gcc</span> <span class="o">-</span><span class="n">g</span> <span class="n">multistresstest</span><span class="o">.</span><span class="n">c</span> <span class="o">.</span><span class="n">libs</span><span class="o">/</span><span class="n">libproj</span><span class="o">.</span><span class="n">so</span> <span class="o">-</span><span class="n">lpthread</span> <span class="o">-</span><span class="n">o</span> <span class="n">multistresstest</span>
+<span class="o">./</span><span class="n">multistresstest</span>
 </pre></div>
 </div>
 </div>
