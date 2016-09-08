@@ -8,6 +8,12 @@ Hatano Asymmetrical Equal Area
    :scale: 50%
    :alt:   Hatano Asymmetrical Equal Area
 
+:term:`Pseudocylindrical Projection`
+
+.. note::
+
+    If the ``+syn`` option is selected, the symmetric form of this projection is
+    used. Otherwise the asymmetric form is used by default.
 
 .. math::
 
