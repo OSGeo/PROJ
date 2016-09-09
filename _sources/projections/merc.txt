@@ -121,6 +121,12 @@ Inverse projection
 
     \phi = t^{-1}\left[ \exp \left( -y/k_0 \right) \right]
 
+Further reading
+###############
+
+#. `Wikipedia <https://en.wikipedia.org/wiki/Mercator_projection>`_
+#. `Wolfram Mathworld <http://mathworld.wolfram.com/MercatorProjection.html>`_
+
 
 References
 ##########
