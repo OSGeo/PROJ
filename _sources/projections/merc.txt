@@ -37,7 +37,7 @@ Applications should be limited to equatorial regions, but is frequently
 used for navigational charts with latitude of true scale (``+lat_ts``) specified within
 or near chart's boundaries.
 Often inappropriately used for world maps since the regions near the poles
-cannot be shown [0].
+cannot be shown [Evenden1995]_.
 
 
 Example::
@@ -49,7 +49,7 @@ Example::
 Mathematical definition
 #######################
 
-The formulas describing the Mercator projection are all taken from G. Evenden's libproj manuals [1].
+The formulas describing the Mercator projection are all taken from G. Evenden's libproj manuals [Evenden2005]_.
 
 Spherical form
 **************
@@ -128,8 +128,3 @@ Further reading
 #. `Wolfram Mathworld <http://mathworld.wolfram.com/MercatorProjection.html>`_
 
 
-References
-##########
-[0] Evenden, G. I., 1995, Cartograpic Projection Procedures for the UNIX Environment - A User's Manual.
-
-[1] Evenden, G. I., 2005, libproj4: A Comprehensive Library of Cartographic Projection Functions (Preliminary Draft).
