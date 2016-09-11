@@ -41,6 +41,7 @@ Documentation
    parameters
    projections/index
    glossary
+   references
 
 
 
