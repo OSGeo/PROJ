@@ -308,7 +308,10 @@ The projection is conformal which makes it suitable for navigational purposes.</
 <tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
 </tr>
 <tr class="row-even"><td><cite>+lat_ts</cite></td>
-<td>Latitude of true scale. Defaults to 0.</td>
+<td>Latitude of true scale. Defaults to 0.0</td>
+</tr>
+<tr class="row-odd"><td><cite>+k_0</cite></td>
+<td>Scaling factor. Defaults to 1.0</td>
 </tr>
 </tbody>
 </table>
@@ -320,11 +323,18 @@ used for navigational charts with latitude of true scale (<code class="docutils 
 or near chart&#8217;s boundaries.
 Often inappropriately used for world maps since the regions near the poles
 cannot be shown <a class="reference internal" href="../references.html#evenden1995" id="id1">[Evenden1995]</a>.</p>
-<p>Example:</p>
+<p>Example using latitude of true scale:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 56.35 12.32 | proj +proj=merc +lat_ts=56.5
-3470306.37  759599.90
+3470306.37    759599.90
 </pre></div>
 </div>
+<p>Example using scaling factor:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="mf">56.35</span> <span class="mf">12.32</span> <span class="o">|</span> <span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span> <span class="o">+</span><span class="n">k_0</span><span class="o">=</span><span class="mi">2</span>
+<span class="mf">12545706.61</span>     <span class="mf">2746073.80</span>
+</pre></div>
+</div>
+<p>Note that <code class="docutils literal"><span class="pre">+lat_ts</span></code> and <code class="docutils literal"><span class="pre">+k_0</span></code> are mutually excusive.
+If used together, <code class="docutils literal"><span class="pre">+lat_ts</span></code> takes precedence over <code class="docutils literal"><span class="pre">+k_0</span></code>.</p>
 </div>
 <div class="section" id="mathematical-definition">
 <h2>Mathematical definition<a class="headerlink" href="#mathematical-definition" title="Permalink to this headline">¶</a></h2>
@@ -405,7 +415,7 @@ cannot be shown <a class="reference internal" href="../references.html#evenden19
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 11 Sep 2016.
+      Last updated on 12 Sep 2016.
 
     </p>
   </div>
