@@ -20,7 +20,9 @@ The projection is conformal which makes it suitable for navigational purposes.
 +---------------------+----------------------------------------------------------+
 | **Options**                                                                    |
 +---------------------+----------------------------------------------------------+
-| `+lat_ts`           | Latitude of true scale. Defaults to 0.                   |
+| `+lat_ts`           | Latitude of true scale. Defaults to 0.0                  |
++---------------------+----------------------------------------------------------+
+| `+k_0`              | Scaling factor. Defaults to 1.0                          |
 +---------------------+----------------------------------------------------------+
 
 
@@ -40,11 +42,19 @@ Often inappropriately used for world maps since the regions near the poles
 cannot be shown [Evenden1995]_.
 
 
-Example::
+Example using latitude of true scale::
 
     $ echo 56.35 12.32 | proj +proj=merc +lat_ts=56.5
-    3470306.37	759599.90
+    3470306.37    759599.90
 
+Example using scaling factor::
+
+    echo 56.35 12.32 | proj +proj=merc +k_0=2
+    12545706.61     2746073.80
+
+
+Note that ``+lat_ts`` and ``+k_0`` are mutually excusive.
+If used together, ``+lat_ts`` takes precedence over ``+k_0``.
 
 Mathematical definition
 #######################
