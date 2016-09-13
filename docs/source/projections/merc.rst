@@ -78,7 +78,7 @@ Forward projection
 
 .. math::
 
-    y = k_0 \ln \tan \left(\frac{\pi}{4} + \frac{\phi}{2} \right)
+    y = k_0 \ln \left[ \tan \left(\frac{\pi}{4} + \frac{\phi}{2} \right) \right]
 
 
 Inverse projection
@@ -86,11 +86,11 @@ Inverse projection
 
 .. math::
 
-    \lambda = x / k_0
+    \lambda = \frac{x}{k_0}
 
 .. math::
 
-    \phi = \pi/2 - 2 \arctan \left[ \exp \left( -y/k_0 \right) \right]
+    \phi = \frac{\pi}{2} - 2 \arctan \left[ e^{-y/k_0} \right]
 
 
 Elliptical form
@@ -125,11 +125,11 @@ Inverse projection
 
 .. math::
 
-    \lambda = x / k_0
+    \lambda = \frac{x}{k_0}
 
 .. math::
 
-    \phi = t^{-1}\left[ \exp \left( -y/k_0 \right) \right]
+    \phi = t^{-1}\left[ e^{ -y/k_0 } \right]
 
 Further reading
 ###############
