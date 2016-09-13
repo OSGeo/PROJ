@@ -349,14 +349,14 @@ If used together, <code class="docutils literal"><span class="pre">+lat_ts</span
 <div class="math">
 \[x = k_0 \lambda\]</div>
 <div class="math">
-\[y = k_0 \ln \tan \left(\frac{\pi}{4} + \frac{\phi}{2} \right)\]</div>
+\[y = k_0 \ln \left[ \tan \left(\frac{\pi}{4} + \frac{\phi}{2} \right) \right]\]</div>
 </div>
 <div class="section" id="inverse-projection">
 <h4>Inverse projection<a class="headerlink" href="#inverse-projection" title="Permalink to this headline">¶</a></h4>
 <div class="math">
-\[\lambda = x / k_0\]</div>
+\[\lambda = \frac{x}{k_0}\]</div>
 <div class="math">
-\[\phi = \pi/2 - 2 \arctan \left[ \exp \left( -y/k_0 \right) \right]\]</div>
+\[\phi = \frac{\pi}{2} - 2 \arctan \left[ e^{-y/k_0} \right]\]</div>
 </div>
 </div>
 <div class="section" id="elliptical-form">
@@ -380,9 +380,9 @@ If used together, <code class="docutils literal"><span class="pre">+lat_ts</span
 <div class="section" id="id4">
 <h4>Inverse projection<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
 <div class="math">
-\[\lambda = x / k_0\]</div>
+\[\lambda = \frac{x}{k_0}\]</div>
 <div class="math">
-\[\phi = t^{-1}\left[ \exp \left( -y/k_0 \right) \right]\]</div>
+\[\phi = t^{-1}\left[ e^{ -y/k_0 } \right]\]</div>
 </div>
 </div>
 </div>
@@ -415,7 +415,7 @@ If used together, <code class="docutils literal"><span class="pre">+lat_ts</span
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 12 Sep 2016.
+      Last updated on 13 Sep 2016.
 
     </p>
   </div>
