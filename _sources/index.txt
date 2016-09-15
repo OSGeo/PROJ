@@ -33,14 +33,15 @@ Documentation
 
    download
    faq
+   apps/index
+   projections/index
+   parameters
    geodesic
    grids
-   license
    htpd
    threads
-   parameters
-   projections/index
    glossary
+   license
    references
 
 
