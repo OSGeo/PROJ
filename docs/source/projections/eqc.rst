@@ -61,7 +61,7 @@ Example using EPSG 32662 (WGS84 Plate Carrée)::
     $ echo 2 47 | proj +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
     222638.98       5232016.07
 
-Example using Plate Carrée projection with shorelines : 30° graticule and central meridian 90°W.::
+Example using Plate Carrée projection with shorelines : 30° graticule and central meridian 90°W::
 
     $ echo -88 30 | proj +proj=eqc +lat_ts=30 +lat_0=90w
     -8483684.61     13358338.90
@@ -71,8 +71,10 @@ Mathematical definition
 #######################
 
 The formulas describing the Equidistant Cylindrical projection are all taken from proj4 sources.
-:math:`lat_ts` is the latitude of true scale, that mean the standard parallels where the scale of the projection is true.
-:math:`lat_0` is the latitude of origin that match the center of the map.
+
+:math:`phi_{ts}` is the latitude of true scale, that mean the standard parallels where the scale of the projection is true. It can be set with "lat_ts".
+
+:math:`phi_0` is the latitude of origin that match the center of the map. It can be set with "lat_0".
 
 
 Forward projection
