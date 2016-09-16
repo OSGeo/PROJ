@@ -1,10 +1,10 @@
 .. _eqc:
 
 ********************************************************************************
-Equidistant Cylindrical (Plate Caree)
+Equidistant Cylindrical (Plate Carrée)
 ********************************************************************************
 
-The simplist of all projections. Standard parallels (0° when omitted) may be specified that determine latitude of true scale (k=h=1).
+The simplest of all projections. Standard parallels (0° when omitted) may be specified that determine latitude of true scale (k=h=1).
 
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Conformal cylindrical                                    |
@@ -13,18 +13,18 @@ The simplist of all projections. Standard parallels (0° when omitted) may be sp
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global, but best used near the equator                   |
 +---------------------+----------------------------------------------------------+
-| **Implemented by**  | Marinus of Tyre                                          |
+| **Implemented by**  | Gerald I. Evenden                                        |
 +---------------------+----------------------------------------------------------+
 | **Options**                                                                    |
 +---------------------+----------------------------------------------------------+
 | `+lat_ts`           | Latitude of true scale. Defaults to 0.0                  |
 +---------------------+----------------------------------------------------------+
-| `+lat_0`            | Center of the map                                        |
+| `+lat_0`            | Center of the map : latitude of origin                   |
 +---------------------+----------------------------------------------------------+
 
 .. image:: ./images/eqc.png
    :scale: 50%
-   :alt:   Equidistant Cylindrical (Plate Caree)  
+   :alt:   Equidistant Cylindrical (Plate Carrée)  
 
 Usage
 ########
@@ -36,35 +36,44 @@ The following table gives special cases of the cylindrical equidistant projectio
 +---------------------------------------------------------+--------------------------+
 | Projection Name                                         | (lat ts=) :math:`\phi_0` |
 +---------------------------------------------------------+--------------------------+
-| Plain/Plane Chart                                       | 0◦                       |
+| Plain/Plane Chart                                       | 0°                       |
 +---------------------------------------------------------+--------------------------+
-| Simple Cylindrical                                      | 0◦                       |
+| Simple Cylindrical                                      | 0°                       |
 +---------------------------------------------------------+--------------------------+
-| Plate Carrée                                            | 0◦                       |
+| Plate Carrée                                            | 0°                       |
 +---------------------------------------------------------+--------------------------+
-| Ronald Miller—minimum overall scale distortion          | 37°30'                   |
+| Ronald Miller—minimum overall scale distortion          | 37°30′                   |
 +---------------------------------------------------------+--------------------------+
-| E.Grafarend and A. Niermann                             | 42◦                      |
+| E.Grafarend and A.Niermann                              | 42°                      |
 +---------------------------------------------------------+--------------------------+
-| Ronald Miller—minimum continental scale distortion      | 43°30'                   |
+| Ronald Miller—minimum continental scale distortion      | 43°30′                   |
 +---------------------------------------------------------+--------------------------+
-| Gall Isographic                                         | 45◦                      |
+| Gall Isographic                                         | 45°                      |
 +---------------------------------------------------------+--------------------------+
-| Ronald Miller Equirectagular                            | 50◦30'                   |
+| Ronald Miller Equirectangular                           | 50°30′                   |
 +---------------------------------------------------------+--------------------------+
-| E.Gradarend and A. Niermann minimum linear distortion   | 61°7'                    |
+| E.Grafarend and A.Niermann minimum linear distortion    | 61°7′                    |
 +---------------------------------------------------------+--------------------------+
 
 
-Example using latitude of true scale::
+Example using EPSG 32662 (WGS84 Plate Carrée)::
 
-    $ echo 2 1 | proj +proj=eqc +a=6400000 +lat_1=0.5 +lat_2=2
-    223402.14       111701.07
+    $ echo 2 47 | proj +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
+    222638.98       5232016.07
+
+Example using Plate Carrée projection with shorelines : 30° graticule and central meridian 90°W.::
+
+    $ echo -88 30 | proj +proj=eqc +lat_ts=30 +lat_0=90w
+    -8483684.61     13358338.90
+
 
 Mathematical definition
 #######################
 
 The formulas describing the Equidistant Cylindrical projection are all taken from proj4 sources.
+:math:`lat_ts` is the latitude of true scale, that mean the standard parallels where the scale of the projection is true.
+:math:`lat_0` is the latitude of origin that match the center of the map.
+
 
 Forward projection
 ==================
