@@ -33,7 +33,7 @@ context.
 
 The projections context can be created with pj_ctx_alloc(), and there is a
 global default context used when one is not provided by the application.  There
-is a pj_ctx_ set of functions to create, manipulate, query, and destroy
+is a pj_ctx\_ set of functions to create, manipulate, query, and destroy
 contexts.  The contexts are also used now to handle setting debugging mode, and
 to hold an error reporting function for textual error and debug messages.   The
 API looks like:
