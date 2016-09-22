@@ -39,7 +39,7 @@ Documentation
    geodesic
    grids
    htpd
-   threads
+   development/index
    glossary
    license
    references
