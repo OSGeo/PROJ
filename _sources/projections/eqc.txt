@@ -24,14 +24,14 @@ The simplest of all projections. Standard parallels (0° when omitted) may be sp
 
 .. image:: ./images/eqc.png
    :scale: 50%
-   :alt:   Equidistant Cylindrical (Plate Carrée)  
+   :alt:   Equidistant Cylindrical (Plate Carrée)
 
 Usage
 ########
 
 Because of the distortions introduced by this projection, it has little use in navigation or cadastral mapping and finds its main use in thematic mapping. In particular, the plate carrée has become a standard for global raster datasets, such as Celestia and NASA World Wind, because of the particularly simple relationship between the position of an image pixel on the map and its corresponding geographic location on Earth.
 
-The following table gives special cases of the cylindrical equidistant projection. 
+The following table gives special cases of the cylindrical equidistant projection.
 
 +---------------------------------------------------------+--------------------------+
 | Projection Name                                         | (lat ts=) :math:`\phi_0` |
@@ -61,7 +61,7 @@ Example using EPSG 32662 (WGS84 Plate Carrée)::
     $ echo 2 47 | proj +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
     222638.98       5232016.07
 
-Example using Plate Carrée projection with shorelines : 30° graticule and central meridian 90°W::
+Example using Plate Carrée projection with true scale at latitude 30° and central meridian 90°W::
 
     $ echo -88 30 | proj +proj=eqc +lat_ts=30 +lat_0=90w
     -8483684.61     13358338.90
@@ -72,9 +72,9 @@ Mathematical definition
 
 The formulas describing the Equidistant Cylindrical projection are all taken from proj4 sources.
 
-:math:`phi_{ts}` is the latitude of true scale, that mean the standard parallels where the scale of the projection is true. It can be set with "lat_ts".
+:math:`\phi_{ts}` is the latitude of true scale, that mean the standard parallels where the scale of the projection is true. It can be set with ``+lat_ts``.
 
-:math:`phi_0` is the latitude of origin that match the center of the map. It can be set with "lat_0".
+:math:`\phi_0` is the latitude of origin that match the center of the map. It can be set with ``+lat_0``.
 
 
 Forward projection

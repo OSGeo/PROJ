@@ -362,7 +362,7 @@
 222638.98       5232016.07
 </pre></div>
 </div>
-<p>Example using Plate Carrée projection with shorelines : 30° graticule and central meridian 90°W:</p>
+<p>Example using Plate Carrée projection with true scale at latitude 30° and central meridian 90°W:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>$ echo -88 30 | proj +proj=eqc +lat_ts=30 +lat_0=90w
 -8483684.61     13358338.90
 </pre></div>
@@ -371,8 +371,8 @@
 <div class="section" id="mathematical-definition">
 <h2>Mathematical definition<a class="headerlink" href="#mathematical-definition" title="Permalink to this headline">¶</a></h2>
 <p>The formulas describing the Equidistant Cylindrical projection are all taken from proj4 sources.</p>
-<p><span class="math">\(phi_{ts}\)</span> is the latitude of true scale, that mean the standard parallels where the scale of the projection is true. It can be set with &#8220;lat_ts&#8221;.</p>
-<p><span class="math">\(phi_0\)</span> is the latitude of origin that match the center of the map. It can be set with &#8220;lat_0&#8221;.</p>
+<p><span class="math">\(\phi_{ts}\)</span> is the latitude of true scale, that mean the standard parallels where the scale of the projection is true. It can be set with <code class="docutils literal"><span class="pre">+lat_ts</span></code>.</p>
+<p><span class="math">\(\phi_0\)</span> is the latitude of origin that match the center of the map. It can be set with <code class="docutils literal"><span class="pre">+lat_0</span></code>.</p>
 <div class="section" id="forward-projection">
 <h3>Forward projection<a class="headerlink" href="#forward-projection" title="Permalink to this headline">¶</a></h3>
 <div class="math">
