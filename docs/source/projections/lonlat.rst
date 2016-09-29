@@ -4,7 +4,3 @@
 Lat/long (Geodetic)
 ********************************************************************************
 
-.. image:: ./images/lonlat.png
-   :scale: 50%
-   :alt:   Lat/long (Geodetic)  
-

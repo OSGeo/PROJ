@@ -4,7 +4,3 @@
 Lat/long (Geodetic alias)
 ********************************************************************************
 
-.. image:: ./images/latlon.png
-   :scale: 50%
-   :alt:   Lat/long (Geodetic alias)  
-
