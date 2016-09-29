@@ -9,9 +9,13 @@ struct pj_opaque {
 };
 
 PROJ_HEAD(rpoly, "Rectangular Polyconic")
-    "\n\tConic, Sph., no inv.\n\tlat_ts=";
+    "\n\tConic, Sph\n\tlat_ts=";
 
+#define TOL	1e-10
 #define EPS 1e-9
+#define CONV	1e-10
+#define N_ITER	10
+
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
@@ -31,6 +35,35 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         xy.y = lp.phi - P->phi0 + (1. - cos(fa)) * xy.y;
     }
     return xy;
+}
+
+
+static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
+    LP lp = {0.0,0.0};
+    struct pj_opaque *Q = P->opaque;
+    double B, dphi, tp;
+    int i;
+
+    if (fabs(xy.y = P->phi0 + xy.y) <= TOL) {
+        lp.lam = xy.x;
+        lp.phi = 0.;
+    } else {
+        lp.phi = xy.y;
+        B = xy.x * xy.x + xy.y * xy.y;
+        i = N_ITER;
+        do {
+            tp = tan(lp.phi);
+            lp.phi -= (dphi = (xy.y * (lp.phi * tp + 1.) - lp.phi -
+                .5 * (lp.phi * lp.phi + B) * tp) /
+                ((lp.phi - xy.y) / tp - 1.));
+        } while (fabs(dphi) > CONV && --i);
+        if (! i) I_ERROR;
+
+        tp = tan(lp.phi);
+        lp.lam = 2. * tan(asin(xy.x * tp) * 0.5) / sin(lp.phi);
+    }
+
+    return lp;
 }
 
 
@@ -63,7 +96,8 @@ PJ *PROJECTION(rpoly) {
     }
     P->es = 0.;
     P->fwd = s_forward;
-
+    P->inv = s_inverse;
+    
     return P;
 }
 
