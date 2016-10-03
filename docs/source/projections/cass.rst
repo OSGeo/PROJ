@@ -17,7 +17,7 @@ Although the Cassini projection has been largely replaced by the Transverse Merc
 +---------------------+-------------------------------------------------------------------------+
 | **Options**                                                                                   |
 +---------------------+-------------------------------------------------------------------------+
-| `+lat_0`            | Center of the map : latitude of origin                                  |
+| `+lat_0`            | Latitude of origin (Default to 0)                                       |
 +---------------------+-------------------------------------------------------------------------+
 
 .. image:: ./images/cass.png
@@ -25,9 +25,9 @@ Although the Cassini projection has been largely replaced by the Transverse Merc
    :alt:   Cassini  
 
 Usage
-########
+#####
 
-There has been little usage of the spherical version of the Cassini, but the ellipsoidal Cassini-Soldner version was adopted by the Ordnance Survey for the official survey of Great Britain during the second half of the 19th century (Steers, 1970, p. 229). Many of these maps were prepared at a  scale of 1:2,500. The Cassini-Soldner was also used for the detailed mapping of many German states during the same period. 
+There has been little usage of the spherical version of the Cassini, but the ellipsoidal Cassini-Soldner version was adopted by the Ordnance Survey for the official survey of Great Britain during the second half of the 19th century :ref:`[Steers1970]<further-reading>`. Many of these maps were prepared at a  scale of 1:2,500. The Cassini-Soldner was also used for the detailed mapping of many German states during the same period. 
 
 
 Example using EPSG 30200 (Trinidad 1903, units in clarke's links)::
@@ -46,7 +46,7 @@ Mathematical definition
 
 The formulas describing the Cassini projection are all taken from proj4 sources.
 
-:math:`\phi_0` is the latitude of origin that match the center of the map. It can be set with ``+lat_0``.
+:math:`\phi_0` is the latitude of origin that match the center of the map (default to 0). It can be set with ``+lat_0``.
 
 
 Spherical form
@@ -57,11 +57,12 @@ Forward projection
 
 .. math::
 
-  x = \arcsin(\cos(\phi) * \sin(\lambda))
+  x = \arcsin(\cos(\phi)  \sin(\lambda))
 
 .. math::
 
-  y = \arctan(\tan(\phi), \cos(\lambda)) - \phi_0
+  \DeclareMathOperator{\arctantwo}{arctan2}
+  y = \arctantwo(\tan(\phi), \cos(\lambda)) - \phi_0
 
 Inverse projection
 ------------------
@@ -105,7 +106,7 @@ Forward projection
 
   y = M(\phi) - M(\phi_0) + N \tan(\phi)(\frac{A^2}{2} + (5-T+6C)\frac{A^4}{24})
 
-and M() is the meridinial distance function.
+and M() is the meridionial distance function.
 
 Inverse projection
 ------------------
@@ -114,7 +115,9 @@ Inverse projection
 
   \phi' = M^{-1}(M(\phi_0)+y)
 
-if :math:`\phi' = \frac{\pi}{2}` then :math:`\phi=\phi'` and :math:`\lambda=0` otherwise evaluate T and N above using :math:`\phi'` and
+if :math:`\phi' = \frac{\pi}{2}` then :math:`\phi=\phi'` and :math:`\lambda=0`
+
+otherwise evaluate T and N above using :math:`\phi'` and
 
 .. math::
 
@@ -130,8 +133,9 @@ if :math:`\phi' = \frac{\pi}{2}` then :math:`\phi=\phi'` and :math:`\lambda=0` o
 
 .. math::
 
-  \lambda = (D - T\frac{D^3}{3} + (1+3T)T\frac{D^5}{15})/cos \phi'
+  \lambda = \frac{(D - T\frac{D^3}{3} + (1+3T)T\frac{D^5}{15})}{\cos \phi'}
 
+.. _further-reading:
 
 Further reading
 ###############
@@ -139,4 +143,4 @@ Further reading
 #. `Wikipedia <https://en.wikipedia.org/wiki/Equirectangular_projection>`_
 #. `John P. Snyder, Map projections—a working manual <https://epic.awi.de/39585/1/USGS_Bulletin_1532.pdf>`_
 #. `EPSG, POSC literature pertaining to Coordinate Conversions and Transformations including Formulas  <http://www.ihsenergy.com/epsg/guid7.pdf>`_
-
+#. `[Steers1970] Steers, J.A., 1970, An introduction to the study of map projections (15th ed.): London, Univ. London Press, p. 229`
