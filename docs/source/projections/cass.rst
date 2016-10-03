@@ -27,7 +27,7 @@ Although the Cassini projection has been largely replaced by the Transverse Merc
 Usage
 #####
 
-There has been little usage of the spherical version of the Cassini, but the ellipsoidal Cassini-Soldner version was adopted by the Ordnance Survey for the official survey of Great Britain during the second half of the 19th century :ref:`[Steers1970]<further-reading>`. Many of these maps were prepared at a  scale of 1:2,500. The Cassini-Soldner was also used for the detailed mapping of many German states during the same period. 
+There has been little usage of the spherical version of the Cassini, but the ellipsoidal Cassini-Soldner version was adopted by the Ordnance Survey for the official survey of Great Britain during the second half of the 19th century [Steers1970]_. Many of these maps were prepared at a scale of 1:2,500. The Cassini-Soldner was also used for the detailed mapping of many German states during the same period. 
 
 
 Example using EPSG 30200 (Trinidad 1903, units in clarke's links)::
@@ -143,4 +143,3 @@ Further reading
 #. `Wikipedia <https://en.wikipedia.org/wiki/Equirectangular_projection>`_
 #. `John P. Snyder, Map projections—a working manual <https://epic.awi.de/39585/1/USGS_Bulletin_1532.pdf>`_
 #. `EPSG, POSC literature pertaining to Coordinate Conversions and Transformations including Formulas  <http://www.ihsenergy.com/epsg/guid7.pdf>`_
-#. `[Steers1970] Steers, J.A., 1970, An introduction to the study of map projections (15th ed.): London, Univ. London Press, p. 229`
