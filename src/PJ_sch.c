@@ -48,7 +48,7 @@ struct pj_opaque {
     GeocentricInfo elp_0;
 };
 
-PROJ_HEAD(sch, "Spherical Cross-track Height") "\n\tMisc\n\tplat_0 = ,plon_0 = , phdg_0 = ,[h_0 = ]";
+PROJ_HEAD(sch, "Spherical Cross-track Height") "\n\tMisc\n\tplat_0= plon_0= phdg_0= [h_0=]";
 
 static LPZ inverse3d(XYZ xyz, PJ *P) {
     LPZ lpz = {0.0, 0.0, 0.0};
