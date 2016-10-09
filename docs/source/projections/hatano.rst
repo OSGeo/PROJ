@@ -10,7 +10,7 @@ Hatano Asymmetrical Equal Area
 +---------------------+----------------------------------------------------------+
 | **Classification**  | :term:`Pseudocylindrical Projection`                     |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward                                                  |
+| **Available forms** | Forward and inverse, spherical projection                |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global, but best between standard parallels              |
 +---------------------+----------------------------------------------------------+
