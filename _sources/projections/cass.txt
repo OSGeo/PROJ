@@ -22,17 +22,17 @@ Although the Cassini projection has been largely replaced by the Transverse Merc
 
 .. image:: ./images/cass.png
    :scale: 50%
-   :alt:   Cassini  
+   :alt:   Cassini
 
 Usage
 #####
 
-There has been little usage of the spherical version of the Cassini, but the ellipsoidal Cassini-Soldner version was adopted by the Ordnance Survey for the official survey of Great Britain during the second half of the 19th century [Steers1970]_. Many of these maps were prepared at a scale of 1:2,500. The Cassini-Soldner was also used for the detailed mapping of many German states during the same period. 
+There has been little usage of the spherical version of the Cassini, but the ellipsoidal Cassini-Soldner version was adopted by the Ordnance Survey for the official survey of Great Britain during the second half of the 19th century [Steers1970]_. Many of these maps were prepared at a scale of 1:2,500. The Cassini-Soldner was also used for the detailed mapping of many German states during the same period.
 
 
 Example using EPSG 30200 (Trinidad 1903, units in clarke's links)::
 
-    $ echo 0.17453293 -1.08210414 | proj +proj=cass +lat_0=10.44166666666667 +lon_0=-61.33333333333334 +x_0=86501.46392051999 +y_0=65379.0134283 +a=6378293.645208759 +b=6356617.987679838 +to_meter=0.201166195164 +no_defs 
+    $ echo 0.17453293 -1.08210414 | proj +proj=cass +lat_0=10.44166666666667 +lon_0=-61.33333333333334 +x_0=86501.46392051999 +y_0=65379.0134283 +a=6378293.645208759 +b=6356617.987679838 +to_meter=0.201166195164 +no_defs
     66644.94	82536.22
 
 Example using EPSG 3068 (Soldner Berlin)::
@@ -141,5 +141,5 @@ Further reading
 ###############
 
 #. `Wikipedia <https://en.wikipedia.org/wiki/Equirectangular_projection>`_
-#. `John P. Snyder, Map projections—a working manual <https://epic.awi.de/39585/1/USGS_Bulletin_1532.pdf>`_
+#. [Snyder1987]_
 #. `EPSG, POSC literature pertaining to Coordinate Conversions and Transformations including Formulas  <http://www.ihsenergy.com/epsg/guid7.pdf>`_
