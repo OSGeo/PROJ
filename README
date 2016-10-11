@@ -1,15 +1,13 @@
    -------------------- P R O J . 4 --------------------
 
-This is Release 4.4 of cartographic projection software.
+PROJ.4 is a cartographic projection software.
 
 PLEASE read the following information as well as READMEs in the src
 and nad directories.
 
 For more information on PROJ.4 maintenance please see the web page at:
 
-  http://www.remotesensing.org/proj
-                or
-  http://proj.maptools.org/
+  http://proj4.org/
 
    ---------------------------------------------------
 
