@@ -8,7 +8,7 @@ Name: %PACKAGE_NAME
 Version: %PACKAGE_VERSION
 Release: 1
 Source0: proj-4.9.3.tar.gz
-Licence: MIT, Copyright (c) 2000, Frank Warmerdam
+License: MIT, Copyright (c) 2000, Frank Warmerdam
 Group: Applications/GIS
 Vendor: Intevation GmbH <http://intevation.net>
 Distribution: FreeGIS CD
