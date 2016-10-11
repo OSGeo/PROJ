@@ -119,7 +119,7 @@ C code
 
 From Gerald Evenden: a library of the converted NGS Vincenty geodesic procedure
 and an application program, 'geodesic'.  In the case of a spherical earth
-[Snyder1987]_'s preferred equations are used.
+Snyder's preferred equations are used.
 
 * http://article.gmane.org/gmane.comp.gis.proj-4.devel/3588/
 
