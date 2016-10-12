@@ -215,6 +215,9 @@ struct PJ_REGION_S {
 };
 
 
+#include "proj.h"  /* Need this for sizeof(OBSERVATION) */
+
+
 /* base projection data structure */
 struct PJconsts {
 
@@ -224,7 +227,7 @@ struct PJconsts {
 
     **************************************************************************************
 
-	    Need some description here - especially about the thread context...
+        TODO: Need some description here - especially about the thread context...
 
     **************************************************************************************/
 
@@ -240,16 +243,12 @@ struct PJconsts {
 
     **************************************************************************************
 
-	    For projection xxx, these are pointers to functions in the corresponding
-		PJ_xxx.c file.
+        For projection xxx, these are pointers to functions in the corresponding
+        PJ_xxx.c file.
 
         pj_init() delegates the setup of these to pj_projection_specific_setup_xxx(),
-		a name which is currently hidden behind the magic curtain of the PROJECTION
-		macro.
-
-		As the PROJ.4 de-macroization project expands its coverage, this will change,
-		and the setup functions for each projection will become more clearly visible
-		in the source code.
+        a name which is currently hidden behind the magic curtain of the PROJECTION
+        macro.
 
     **************************************************************************************/
 
@@ -257,6 +256,8 @@ struct PJconsts {
     LP  (*inv)(XY,    PJ *);
     XYZ (*fwd3d)(LPZ, PJ *);
     LPZ (*inv3d)(XYZ, PJ *);
+    OBSERVATION (*fwdobs)(OBSERVATION, PJ *);
+    OBSERVATION (*invobs)(OBSERVATION, PJ *);
 
     void (*spc)(LP, PJ *, struct FACTORS *);
 
@@ -364,32 +365,32 @@ struct PJconsts {
 
     int     datum_type;                /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
     double  datum_params[7];           /* Parameters for 3PARAM and 7PARAM */
-    struct _pj_gi **gridlist;          /* Description needed */
+    struct _pj_gi **gridlist;          /* TODO: Description needed */
     int     gridlist_count;
 
-    int     has_geoid_vgrids;          /* Description needed */
-    struct _pj_gi **vgridlist_geoid;   /* Description needed */
+    int     has_geoid_vgrids;          /* TODO: Description needed */
+    struct _pj_gi **vgridlist_geoid;   /* TODO: Description needed */
     int     vgridlist_geoid_count;
 
     double  from_greenwich;            /* prime meridian offset (in radians) */
     double  long_wrap_center;          /* 0.0 for -180 to 180, actually in radians*/
     int     is_long_wrap_set;
-    char    axis[4];                   /* Description needed */
+    char    axis[4];                   /* TODO: Description needed */
 
 
     /* New Datum Shift Grid Catalogs */
     char   *catalog_name;
     struct _PJ_GridCatalog *catalog;
 
-    double  datum_date;                 /* Description needed */
+    double  datum_date;                 /* TODO: Description needed */
 
-    struct _pj_gi *last_before_grid;    /* Description needed */
-    PJ_Region     last_before_region;   /* Description needed */
-    double        last_before_date;     /* Description needed */
+    struct _pj_gi *last_before_grid;    /* TODO: Description needed */
+    PJ_Region     last_before_region;   /* TODO: Description needed */
+    double        last_before_date;     /* TODO: Description needed */
 
-    struct _pj_gi *last_after_grid;     /* Description needed */
-    PJ_Region     last_after_region;    /* Description needed */
-    double        last_after_date;      /* Description needed */
+    struct _pj_gi *last_after_grid;     /* TODO: Description needed */
+    PJ_Region     last_after_region;    /* TODO: Description needed */
+    double        last_after_date;      /* TODO: Description needed */
 
 };
 
@@ -464,10 +465,6 @@ struct FACTORS {
 
 
 
-/* simplified api
-#include "proj.h"
-*/
-
 /* classic public API */
 #include "proj_api.h"
 
@@ -507,9 +504,6 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 
 
 #ifdef PJ_LIB__
-/* repetitive projection code (most of them eliminated now) */
-/* Will follow up with another project eliminating the last ones */
-
 #define PROJ_HEAD(id, name) static const char des_##id [] = name
 
 #define E_ERROR(err) { pj_ctx_set_errno( P->ctx, err); freeup(P); return(0); }
@@ -519,7 +513,6 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #define I_ERROR { pj_ctx_set_errno( P->ctx, -20); return(lp); }
 #define I3_ERROR { pj_ctx_set_errno( P->ctx, -20); return(lpz); }
 
-/* cleaned up alternative to most of the "repetitive projection code" macros */
 #define PROJECTION(name)                                     \
 pj_projection_specific_setup_##name (PJ *P);                 \
 C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
@@ -534,8 +527,7 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     return P;                                                \
 }                                                            \
 PJ *pj_projection_specific_setup_##name (PJ *P)
-
-#endif
+#endif /* def PJ_LIB__ */
 
 
 int pj_generic_selftest (
