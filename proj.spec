@@ -15,7 +15,7 @@ Distribution: FreeGIS CD
 
 BuildRoot: %{_builddir}/%{name}-root
 Prefix: %{_prefix}
-
+BuildRequires: libtool
 Conflicts: PROJ.4
 
 %description
@@ -28,6 +28,7 @@ data with a wide range of selectable projection functions.
 %configure
 
 %build
+%{_builddir}/%{name}-%{version}/autogen.sh
 make
 
 %install
