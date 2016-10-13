@@ -137,30 +137,6 @@ extern double hypot(double, double);
 #define DIR_CHAR '/'
 #endif
 
-struct projFileAPI_t;
-
-/* proj thread context */
-typedef struct {
-    int     last_errno;
-    int     debug_level;
-    void    (*logger)(void *, int, const char *);
-    void    *app_data;
-    struct projFileAPI_t *fileapi;
-} projCtx_t;
-
-/* datum_type values */
-#define PJD_UNKNOWN   0
-#define PJD_3PARAM    1
-#define PJD_7PARAM    2
-#define PJD_GRIDSHIFT 3
-#define PJD_WGS84     4   /* WGS84 (or anything considered equivelent) */
-
-/* library errors */
-#define PJD_ERR_GEOCENTRIC          -45
-#define PJD_ERR_AXIS                -47
-#define PJD_ERR_GRID_AREA           -48
-#define PJD_ERR_CATALOG             -49
-
 #define USE_PROJUV
 
 typedef struct { double u, v; } projUV;
@@ -216,6 +192,8 @@ struct PJ_REGION_S {
 
 
 #include "proj.h"  /* Need this for sizeof(OBSERVATION) */
+struct projCtx_t;
+typedef struct projCtx_t projCtx_t;
 
 
 /* base projection data structure */
@@ -262,7 +240,6 @@ struct PJconsts {
     void (*spc)(LP, PJ *, struct FACTORS *);
 
     void (*pfree)(PJ *);
-
 
 
     /*************************************************************************************
@@ -318,7 +295,6 @@ struct PJconsts {
     double  es_orig, a_orig;           /* es and a before any +proj related adjustment */
 
 
-
     /*************************************************************************************
 
                           C O O R D I N A T E   H A N D L I N G
@@ -344,7 +320,6 @@ struct PJconsts {
     double  x0, y0;                    /* false easting and northing */
 
 
-
     /*************************************************************************************
 
                                     S C A L I N G
@@ -354,7 +329,6 @@ struct PJconsts {
     double  k0;                        /* General scaling factor - e.g. the 0.9996 of UTM */
     double  to_meter, fr_meter;        /* Plane coordinate scaling. Internal unit [m] */
     double  vto_meter, vfr_meter;      /* Vertical scaling. Internal unit [m] */
-
 
 
     /*************************************************************************************
@@ -377,7 +351,6 @@ struct PJconsts {
     int     is_long_wrap_set;
     char    axis[4];                   /* TODO: Description needed */
 
-
     /* New Datum Shift Grid Catalogs */
     char   *catalog_name;
     struct _PJ_GridCatalog *catalog;
@@ -391,7 +364,6 @@ struct PJconsts {
     struct _pj_gi *last_after_grid;     /* TODO: Description needed */
     PJ_Region     last_after_region;    /* TODO: Description needed */
     double        last_after_date;      /* TODO: Description needed */
-
 };
 
 
@@ -403,7 +375,7 @@ struct PJconsts {
 struct ARG_list {
     paralist *next;
     char used;
-    char param[1];    /* This probably should be [0] to be fully standards compliant? */
+    char param[1];
 };
 
 
@@ -462,12 +434,32 @@ struct FACTORS {
 #define IS_ANAL_HK  04      /* h and k analytic */
 #define IS_ANAL_CONV 010    /* convergence analytic */
 
+/* datum_type values */
+#define PJD_UNKNOWN   0
+#define PJD_3PARAM    1
+#define PJD_7PARAM    2
+#define PJD_GRIDSHIFT 3
+#define PJD_WGS84     4   /* WGS84 (or anything considered equivelent) */
 
+/* library errors */
+#define PJD_ERR_GEOCENTRIC          -45
+#define PJD_ERR_AXIS                -47
+#define PJD_ERR_GRID_AREA           -48
+#define PJD_ERR_CATALOG             -49
 
+struct projFileAPI_t;
+
+/* proj thread context */
+struct projCtx_t {
+    int     last_errno;
+    int     debug_level;
+    void    (*logger)(void *, int, const char *);
+    void    *app_data;
+    struct projFileAPI_t *fileapi;
+};
 
 /* classic public API */
 #include "proj_api.h"
-
 
 
 /* Generate pj_list external or make list from include file */

@@ -60,7 +60,9 @@ support = \
 
 pipeline = \
 	pj_observation.obj
+
 geodesic = geodesic.obj
+
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc) \
 	$(geodesic) $(pipeline)
 PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj

@@ -72,7 +72,23 @@ extern "C" {
     while still having direct access to PJ object internals)
 ******************************************************************************/
 
+/* Data type for generic geodetic observations */
+struct OBSERVATION;
+typedef struct OBSERVATION OBSERVATION;
+
+/* Data type for generic geodetic 3D data */
+union PJ_TRIPLET;
+typedef union PJ_TRIPLET PJ_TRIPLET;
+
+/* Data type for generic geodetic 3D data plus epoch information */
+union PJ_SPATIOTEMPORAL;
+typedef union PJ_SPATIOTEMPORAL PJ_SPATIOTEMPORAL;
+
 #ifndef PROJECTS_H
+/* Data type for projection/transformation information */
+struct PJconsts;
+typedef struct PJconsts PJ;         /* the PJ object herself */
+
 /* Omega, Phi, Kappa: Rotations */
 typedef struct {double o, p, k;}  OPK;
 
@@ -101,24 +117,7 @@ typedef struct { double   N,   z,  e; }  PJ_ANC_GEOIDAL;
 
 /* Ellipsoidal parameters */
 typedef struct { double   a,   f; }  PJ_ANC_ELLIPSOIDAL;
-
-/* Data type for projection/transformation information */
-struct PJconsts;
-typedef struct PJconsts PJ;         /* the PJ object herself */
 #endif  /* ndef PROJECTS_H */
-
-/* Data type for generic geodetic 3D data */
-union PJ_TRIPLET;
-typedef union PJ_TRIPLET PJ_TRIPLET;
-
-/* Data type for generic geodetic 3D data plus epoch information */
-union PJ_SPATIOTEMPORAL;
-typedef union PJ_SPATIOTEMPORAL PJ_SPATIOTEMPORAL;
-
-/* Data type for generic geodetic observations */
-struct OBSERVATION;
-typedef struct OBSERVATION OBSERVATION;
-
 
 union PJ_SPATIOTEMPORAL {
 #ifndef PROJECTS_H
@@ -165,21 +164,31 @@ struct OBSERVATION {
 
 
 #ifndef PROJECTS_H
+/* Apply transformation to observation - in forward or inverse direction */
 OBSERVATION pj_apply (PJ *P, int direction, OBSERVATION obs);
 
 /* Direction: "+" forward, "-" reverse, 0: roundtrip precision check */
-enum pj_apply_direction {PJ_APPLY_FWD = -1, PJ_APPLY_ROUNDTRIP = 0, PJ_APPLY_INV = 1};
+enum pj_apply_direction {
+    PJ_APPLY_FWD = -1,
+    PJ_APPLY_ROUNDTRIP = 0,
+    PJ_APPLY_INV = 1
+};
 
 int pj_show_triplet (FILE *stream, const char *banner, PJ_TRIPLET point);
 
+/* Constructor for the OBSERVATION object */
 OBSERVATION pj_observation (
     double x, double y, double z, double t,
     double o, double p, double k,
     int id, unsigned int flags
 );
 
+#ifndef TODEG
 #define TODEG(rad)  ((rad)*180/M_PI)
+#endif
+#ifndef TORAD
 #define TORAD(deg)  ((deg)*M_PI/180)
+#endif
 
 extern int pj_errno;                    /* global error return code */
 void pj_free(PJ *P);

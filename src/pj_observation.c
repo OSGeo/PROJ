@@ -31,9 +31,9 @@
 
 /* Constructor for the OBSERVATION object */
 OBSERVATION pj_observation (
-	double x, double y, double z, double t,
-	double o, double p, double k,
-	int id, unsigned int flags
+    double x, double y, double z, double t,
+    double o, double p, double k,
+    int id, unsigned int flags
 ) {
     OBSERVATION g;
     g.coo.xyzt.x = x;
@@ -45,7 +45,7 @@ OBSERVATION pj_observation (
     g.anc.opk.k  = k;
     g.id         = id;
     g.flags      = flags;
-	return g;
+    return g;
 }
 
 
@@ -54,24 +54,24 @@ OBSERVATION pj_apply (PJ *P, int direction, OBSERVATION obs) {
     double  d;
     OBSERVATION o;
 
-	switch (direction) {
-	    case 1:
+    switch (direction) {
+        case 1:
             obs.coo.xyz  =  pj_fwd3d (obs.coo.lpz, P);
-			return obs;
+            return obs;
         case -1:
             obs.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
-			return obs;
-		case 0:
+            return obs;
+        case 0:
             o.coo.xyz = pj_fwd3d (obs.coo.lpz, P);
             o.coo.lpz = pj_inv3d (o.coo.xyz, P);
 
-		    /* Should add "both ways" here */
-		    d = hypot (hypot (o.coo.v[0] - obs.coo.v[0], o.coo.v[1] - obs.coo.v[1]), o.coo.v[2] - obs.coo.v[2]);
-		    obs.coo.v[0] = obs.coo.v[1] = obs.coo.v[2] = d;
-			return obs;
-		default:
-	        pj_ctx_set_errno (P->ctx, EINVAL);
-	}
+            /* Should add "both ways" here */
+            d = hypot (hypot (o.coo.v[0] - obs.coo.v[0], o.coo.v[1] - obs.coo.v[1]), o.coo.v[2] - obs.coo.v[2]);
+            obs.coo.v[0] = obs.coo.v[1] = obs.coo.v[2] = d;
+            return obs;
+        default:
+            pj_ctx_set_errno (P->ctx, EINVAL);
+    }
 
     return pj_observation (HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,0,0);
 }
