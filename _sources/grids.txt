@@ -127,6 +127,9 @@ Germany
 Great Britain
 ................................................................................
 
+
+`Great Britain's OSTN15_NTv2: OSGB 1936 => ETRS89 <https://www.ordnancesurvey.co.uk/docs/gps/OSTN15_NTv2.zip>`__
+
 `Great Britain's OSTN02_NTv2: OSGB 1936 => ETRS89 <http://www.ordnancesurvey.co.uk/business-and-government/help-and-support/navigation-technology/os-net/ostn02-ntv2-format.html>`__
 
 Austria
