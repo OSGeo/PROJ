@@ -96,7 +96,8 @@ Extended list provided by Gerald Evenden "grepped out of the RCS directory".
     +M
     +n
     +no_cut
-    +no_off
+    +no_off    No offset. If present, do not offset origin to center of projection. Only used in Oblique Mercator projection.
+    +no_uoff   Backwards compatible version of +no_off.
     +no_rot
     +ns
     +o_alpha
