@@ -126,7 +126,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
             ds * FC4 * (5. + t * (3. - 9. *  n) + n * (1. - 4 * n) -
             ds * FC6 * (61. + t * (90. - 252. * n +
                 45. * t) + 46. * n
-           - ds * FC8 * (1385. + t * (3633. + t * (4095. + 1574. * t)) )
+           - ds * FC8 * (1385. + t * (3633. + t * (4095. + 1575. * t)) )
             )));
         lp.lam = d*(FC1 -
             ds*FC3*( 1. + 2.*t + n -
