@@ -69,6 +69,10 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         cosz = cos(z);
         lp.lam = P->lam0;
         if (fabs(rh) <= EPSLN) {
+            /* if we end up here input coordinates were (0,0).
+             * pj_inv() adds P->lam0 to lp.lam, this way we are
+             * sure to get the correct offset */
+            lp.lam = 0.0;
             lp.phi = P->phi0;
             return lp;
         }
