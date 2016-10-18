@@ -191,10 +191,6 @@ PJ *PROJECTION(omerc) {
                 gamma = alpha_c;
         } else
             alpha_c = asin(D*sin(gamma0 = gamma));
-        if ((con = fabs(alpha_c)) <= TOL ||
-            fabs(con - M_PI) <= TOL ||
-            fabs(fabs(P->phi0) - M_HALFPI) <= TOL)
-            E_ERROR(-32);
         P->lam0 = lamc - asin(.5 * (F - 1. / F) *
            tan(gamma0)) / Q->B;
     } else {
