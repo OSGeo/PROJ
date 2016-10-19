@@ -219,7 +219,7 @@ PJ *PROJECTION(omerc) {
     if (no_off)
         Q->u_0 = 0;
     else {
-        Q->u_0 = fabs(Q->ArB * atan2(sqrt(D * D - 1.), cos(alpha_c)));
+        Q->u_0 = fabs(Q->ArB * atan(sqrt(D * D - 1.) / cos(alpha_c)));
         if (P->phi0 < 0.)
             Q->u_0 = - Q->u_0;
     }
