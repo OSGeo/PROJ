@@ -18,8 +18,9 @@ LP pj_inv(XY xy, PJ *P) {
     errno = pj_errno = 0;
     P->ctx->last_errno = 0;
 
-    xy.x = (xy.x * P->to_meter - P->x0 * P->to_meter) * P->ra; /* descale and de-offset */
-    xy.y = (xy.y * P->to_meter - P->y0 * P->to_meter) * P->ra;
+    /* descale and de-offset */
+    xy.x = (xy.x * P->to_meter - P->x0) * P->ra;
+    xy.y = (xy.y * P->to_meter - P->y0) * P->ra;
 
     /* Check for NULL pointer */
     if (P->inv != NULL) {
