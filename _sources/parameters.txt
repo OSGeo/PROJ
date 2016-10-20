@@ -152,8 +152,11 @@ Units
 Horizontal units can be specified using the +units= keyword with a symbolic
 name for a unit (ie. us-ft).  Alternatively the translation to meters can be
 specified with the +to_meter keyword (ie. 0.304800609601219 for US feet).  The
-``-lu`` argument to cs2cs or proj can be used to list symbolic unit names.  The
-default unit is degrees.
+``-lu`` argument to cs2cs or proj can be used to list symbolic unit names.
+The default unit for projected coordinates is the meter.
+A few special projections deviate from this behaviour, most notably the
+latlong pseudo-projection that returns degrees.
+
 
 Vertical Units
 --------------------------------------------------------------------------------

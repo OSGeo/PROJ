@@ -316,8 +316,10 @@ further details (<a class="reference external" href="http://web.archive.org/web/
 <p>Horizontal units can be specified using the +units= keyword with a symbolic
 name for a unit (ie. us-ft).  Alternatively the translation to meters can be
 specified with the +to_meter keyword (ie. 0.304800609601219 for US feet).  The
-<code class="docutils literal"><span class="pre">-lu</span></code> argument to cs2cs or proj can be used to list symbolic unit names.  The
-default unit is degrees.</p>
+<code class="docutils literal"><span class="pre">-lu</span></code> argument to cs2cs or proj can be used to list symbolic unit names.
+The default unit for projected coordinates is the meter.
+A few special projections deviate from this behaviour, most notably the
+latlong pseudo-projection that returns degrees.</p>
 </div>
 <div class="section" id="vertical-units">
 <h2>Vertical Units<a class="headerlink" href="#vertical-units" title="Permalink to this headline">¶</a></h2>
@@ -602,7 +604,7 @@ commandline program).</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 19 Oct 2016.
+      Last updated on 20 Oct 2016.
 
     </p>
   </div>
