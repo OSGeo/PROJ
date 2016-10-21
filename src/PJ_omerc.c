@@ -191,10 +191,6 @@ PJ *PROJECTION(omerc) {
                 gamma = alpha_c;
         } else
             alpha_c = asin(D*sin(gamma0 = gamma));
-        if ((con = fabs(alpha_c)) <= TOL ||
-            fabs(con - M_PI) <= TOL ||
-            fabs(fabs(P->phi0) - M_HALFPI) <= TOL)
-            E_ERROR(-32);
         P->lam0 = lamc - asin(.5 * (F - 1. / F) *
            tan(gamma0)) / Q->B;
     } else {
@@ -223,7 +219,7 @@ PJ *PROJECTION(omerc) {
     if (no_off)
         Q->u_0 = 0;
     else {
-        Q->u_0 = fabs(Q->ArB * atan2(sqrt(D * D - 1.), cos(alpha_c)));
+        Q->u_0 = fabs(Q->ArB * atan(sqrt(D * D - 1.) / cos(alpha_c)));
         if (P->phi0 < 0.)
             Q->u_0 = - Q->u_0;
     }

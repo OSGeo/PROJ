@@ -231,7 +231,7 @@ double auth_lat(PJ *P, double alpha, int inverse) {
         double qp = Q->qp;
         double ratio = q/qp;
 
-        if (fabsl(ratio) > 1) {
+        if (fabs(ratio) > 1) {
             /* Rounding error. */
             ratio = pj_sign(ratio);
         }
@@ -254,12 +254,12 @@ XY healpix_sphere(LP lp) {
     XY xy;
 
     /* equatorial region */
-    if ( fabsl(phi) <= phi0) {
+    if ( fabs(phi) <= phi0) {
         xy.x = lam;
         xy.y = 3*M_PI/8*sin(phi);
     } else {
         double lamc;
-        double sigma = sqrt(3*(1 - fabsl(sin(phi))));
+        double sigma = sqrt(3*(1 - fabs(sin(phi))));
         double cn = floor(2*lam / M_PI + 2);
         if (cn >= 4) {
             cn = 3;
@@ -282,17 +282,17 @@ LP healpix_sphere_inverse(XY xy) {
     double y0 = M_FORTPI;
 
     /* Equatorial region. */
-    if (fabsl(y) <= y0) {
+    if (fabs(y) <= y0) {
         lp.lam = x;
         lp.phi = asin(8*y/(3*M_PI));
-    } else if (fabsl(y) < M_HALFPI) {
+    } else if (fabs(y) < M_HALFPI) {
         double cn = floor(2*x/M_PI + 2);
         double xc, tau;
         if (cn >= 4) {
             cn = 3;
         }
         xc = -3*M_FORTPI + M_HALFPI*cn;
-        tau = 2.0 - 4*fabsl(y)/M_PI;
+        tau = 2.0 - 4*fabs(y)/M_PI;
         lp.lam = xc + (x - xc)/tau;
         lp.phi = pj_sign(y)*asin(1.0 - pow(tau, 2)/3.0);
     } else {
