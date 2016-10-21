@@ -431,7 +431,7 @@ struct FACTORS {
 
 #define IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
 #define IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
-#define IS_ANAL_HK  04      /* h and k analytic */
+#define IS_ANAL_HK    04    /* h and k analytic */
 #define IS_ANAL_CONV 010    /* convergence analytic */
 
 /* datum_type values */
