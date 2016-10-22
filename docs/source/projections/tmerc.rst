@@ -72,6 +72,8 @@ The formulas describing the Transverse Mercator are all taken from proj4 sources
 
 :math:`k_0` is the scale factor at the natural origin (on the central meridian). It can be set with ``+k_0``.
 
+:math:`M(\phi)` is the meridianal distance.
+
 Spherical form
 **************
 
@@ -100,15 +102,91 @@ Inverse projection
 
 .. math::
 
+  x' = \frac{x}{k_0}
+
+.. math::
+
   \phi = \arcsin(\frac{\sin D}{\cosh x'})
 
 .. math::
 
   \lambda = \arctan(\frac{\sinh x'}{\cos D})
 
+
+Elliptical form
+***************
+
+Forward projection
+==================
+
 .. math::
 
-  x' = \frac{x}{k_0}
+  N = \frac{k_0}{(1 - e^2 \sin^2\phi)^{1/2}}
+
+.. math::
+
+  R = \frac{k_0(1-e^2)}{(1-e^2 \sin^2\phi)^{3/2}}
+
+.. math::
+
+  t = \tan(\phi)
+
+.. math::
+
+  \eta = \frac{e^2}{1-e^2}cos^2\phi
+
+.. math::
+
+  x &= k_0 \lambda \cos \phi \\ 
+    &+ \frac{k_0 \lambda^3 \cos^3\phi}{3!}(1-t^2+\eta^2) \\
+    &+ \frac{k_0 \lambda^5 \cos^5\phi}{5!}(5-18t^2+t^4+14\eta^2-58t^2\eta^2) \\
+    &+\frac{k_0 \lambda^7 \cos^7\phi}{7!}(61-479t^2+179t^4-t^6)
+
+.. math::
+
+  y &= M(\phi) \\
+    &+ \frac{k_0 \lambda^2 \sin(\phi) \cos \phi}{2!} \\
+    &+ \frac{k_0 \lambda^4 \sin(\phi) \cos^3\phi}{4!}(5-t^2+9\eta^2+4\eta^4) \\
+    &+ \frac{k_0 \lambda^6 \sin(\phi) \cos^5\phi}{6!}(61-58t^2+t^4+270\eta^2-330t^2\eta^2) \\
+    &+ \frac{k_0 \lambda^8 \sin(\phi) \cos^7\phi}{8!}(1385-3111t^2+543t^4-t^6)
+
+Inverse projection
+==================
+
+.. math::
+
+  \phi_1 = M^-1(y)
+
+.. math::
+
+  N_1 = \frac{k_0}{1 - e^2 \sin^2\phi_1)^{1/2}}
+
+.. math::
+
+  R_1 = \frac{k_0(1-e^2)}{(1-e^2 \sin^2\phi_1)^{3/2}}
+
+.. math::
+
+  t_1 = \tan(\phi_1)
+
+.. math::
+
+  \eta_1 = \frac{e^2}{1-e^2}cos^2\phi_1
+
+.. math::
+
+  \phi &= \phi_1 \\
+       &- \frac{t_1 x^2}{2! R_1 N_1} \\
+       &+ \frac{t_1 x^4}{4! R_1 N_1^3}(5+3t_1^2+\eta_1^2-4\eta_1^4-9\eta_1^2t_1^2) \\
+       &- \frac{t_1 x^6}{6! R_1 N_1^5}(61+90t_1^2+46\eta_1^2+45t_1^4-252t_1^2\eta_1^2) \\
+       &+ \frac{t_1 x^8}{8! R_1 N_1^7}(1385+3633t_1^2+4095t_1^4+1575t_1^6)
+
+.. math::
+
+  \lambda &= \frac{x}{\cos \phi N_1} \\
+          &- \frac{x^3}{3! \cos \phi N_1^3}(1+2t_1^2+\eta_1^2) \\
+          &+ \frac{x^5}{5! \cos \phi N_1^5}(5+6\eta_1^2+28t_1^2-3\eta_1^2+8t_1^2\eta_1^2) \\
+          &- \frac{x^7}{7! \cos \phi N_1^7}(61+662t_1^2+1320t_1^4+720t_1^6)
 
 Further reading
 ###############
