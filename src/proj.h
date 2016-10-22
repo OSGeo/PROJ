@@ -112,6 +112,9 @@ typedef struct { double lam, phi,  z; }  LPZ;
 
 /* Ancillary pairs and triplets for geodetic computations */
 
+/* Degrees, minutes, and seconds */
+typedef struct { double d, m,  s; }  DMS;
+
 /* Geoid undulation and deflections of the vertical */
 typedef struct { double   N,   z,  e; }  PJ_ANC_GEOIDAL;
 
@@ -184,10 +187,10 @@ OBSERVATION pj_observation (
 );
 
 #ifndef TODEG
-#define TODEG(rad)  ((rad)*180/M_PI)
+#define TODEG(rad)  ((rad)*180.0/M_PI)
 #endif
 #ifndef TORAD
-#define TORAD(deg)  ((deg)*M_PI/180)
+#define TORAD(deg)  ((deg)*M_PI/180.0)
 #endif
 
 extern int pj_errno;                    /* global error return code */
