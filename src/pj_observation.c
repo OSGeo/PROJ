@@ -1,6 +1,6 @@
 /******************************************************************************
  * Project:  PROJ.4
- * Purpose:  Implement some service routines for the OBSERVATION generic
+ * Purpose:  Implement some service routines for the PJ_OBSERVATION generic
  *           geodetic data type
  * Author:   Thomas Knudsen,  thokn@sdfe.dk,  2016-06-09/2016-10-11
  *
@@ -30,12 +30,12 @@
 
 
 /* Constructor for the OBSERVATION object */
-OBSERVATION pj_observation (
+PJ_OBSERVATION pj_observation (
     double x, double y, double z, double t,
     double o, double p, double k,
     int id, unsigned int flags
 ) {
-    OBSERVATION g;
+    PJ_OBSERVATION g;
     g.coo.xyzt.x = x;
     g.coo.xyzt.y = y;
     g.coo.xyzt.z = z;
@@ -50,9 +50,9 @@ OBSERVATION pj_observation (
 
 
 /* Direction: "+1" forward, "-1" reverse, 0: roundtrip precision check (not fully done) */
-OBSERVATION pj_apply (PJ *P, int direction, OBSERVATION obs) {
+PJ_OBSERVATION pj_apply (PJ *P, int direction, PJ_OBSERVATION obs) {
     double  d;
-    OBSERVATION o;
+    PJ_OBSERVATION o;
 
     switch (direction) {
         case 1:
@@ -80,12 +80,12 @@ OBSERVATION pj_apply (PJ *P, int direction, OBSERVATION obs) {
 int pj_show_triplet (FILE *stream, const char *banner, PJ_TRIPLET point) {
     int i = 0;
     if (banner)
-        fprintf (stream, "%s", banner);
+        i += fprintf (stream, "%s", banner);
 
     i += fprintf(stream,  "%16.10f ", point.xyz.x);
     i += fprintf(stream,  "%16.10f ", point.xyz.y);
     i += fprintf(stream,  "%16.4f",   point.xyz.z);
     if (banner)
-        i +=     fprintf(stream, "\n");
+        i += fprintf(stream, "\n");
     return i;
 }

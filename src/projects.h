@@ -234,8 +234,8 @@ struct PJconsts {
     LP  (*inv)(XY,    PJ *);
     XYZ (*fwd3d)(LPZ, PJ *);
     LPZ (*inv3d)(XYZ, PJ *);
-    OBSERVATION (*fwdobs)(OBSERVATION, PJ *);
-    OBSERVATION (*invobs)(OBSERVATION, PJ *);
+    PJ_OBSERVATION (*fwdobs)(PJ_OBSERVATION, PJ *);
+    PJ_OBSERVATION (*invobs)(PJ_OBSERVATION, PJ *);
 
     void (*spc)(LP, PJ *, struct FACTORS *);
 

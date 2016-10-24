@@ -73,8 +73,8 @@ extern "C" {
 ******************************************************************************/
 
 /* Data type for generic geodetic observations */
-struct OBSERVATION;
-typedef struct OBSERVATION OBSERVATION;
+struct PJ_OBSERVATION;
+typedef struct PJ_OBSERVATION PJ_OBSERVATION;
 
 /* Data type for generic geodetic 3D data */
 union PJ_TRIPLET;
@@ -90,16 +90,16 @@ struct PJconsts;
 typedef struct PJconsts PJ;         /* the PJ object herself */
 
 /* Omega, Phi, Kappa: Rotations */
-typedef struct {double o, p, k;}  OPK;
+typedef struct {double o, p, k;}  PJ_OPK;
 
 /* Easting, Northing, and some kind of height (orthometric or ellipsoidal) */
-typedef struct {double e, n, h;}  ENH;
+typedef struct {double e, n, h;}  PJ_ENH;
 
 /* Geodetic spatiotemporal coordinate types */
-typedef struct { double   x,   y,  z, t; }  XYZT;
-typedef struct { double   e,   n,  h, t; }  ENHT;
-typedef struct { double   u,   v,  w, t; }  UVWT;
-typedef struct { double lam, phi,  z, t; }  LPZT;
+typedef struct { double   x,   y,  z, t; }  PJ_XYZT;
+typedef struct { double   e,   n,  h, t; }  PJ_ENHT;
+typedef struct { double   u,   v,  w, t; }  PJ_UVWT;
+typedef struct { double lam, phi,  z, t; }  PJ_LPZT;
 
 /* Classic proj.4 pair/triplet types */
 typedef struct { double   u,   v; }  UV;
@@ -113,22 +113,22 @@ typedef struct { double lam, phi,  z; }  LPZ;
 /* Ancillary pairs and triplets for geodetic computations */
 
 /* Degrees, minutes, and seconds */
-typedef struct { double d, m,  s; }  DMS;
+typedef struct { double d, m,  s; }  PJ_DMS;
 
-/* Geoid undulation and deflections of the vertical */
-typedef struct { double   N,   z,  e; }  PJ_ANC_GEOIDAL;
+/* Geoid undulation (N) and deflections of the vertical (z, e) */
+typedef struct { double   N,   z,  e; }  PJ_NZE;
 
 /* Ellipsoidal parameters */
-typedef struct { double   a,   f; }  PJ_ANC_ELLIPSOIDAL;
+typedef struct { double   a,   f; }  PJ_AF;
 #endif  /* ndef PROJECTS_H */
 
 union PJ_SPATIOTEMPORAL {
 #ifndef PROJECTS_H
-    XYZT xyzt;
-    UVWT uvwt;
-    ENHT enht;
-    LPZT lpzt;
-    ENH  enh;
+    PJ_XYZT xyzt;
+    PJ_UVWT uvwt;
+    PJ_ENHT enht;
+    PJ_LPZT lpzt;
+    PJ_ENH  enh;
 #endif
     double v[4]; /* Who cares - it's just a vector! */
     XYZ  xyz;
@@ -144,10 +144,10 @@ union PJ_SPATIOTEMPORAL {
 /* Avoid preprocessor renaming and implicit type-punning: Use a union to make it explicit */
 union PJ_TRIPLET {
 #ifndef PROJECTS_H
-    OPK    opk;
-    ENH    enh;
-    PJ_ANC_GEOIDAL     nze;
-    PJ_ANC_ELLIPSOIDAL ell;
+    PJ_OPK  opk;
+    PJ_ENH  enh;
+    PJ_NZE  nze;
+    PJ_AF   af;
 #endif
     double v[3]; /* Who cares - it's just a vector! */
     XYZ    xyz;
@@ -158,17 +158,17 @@ union PJ_TRIPLET {
     UV     uv;
 };
 
-struct OBSERVATION {
-    PJ_SPATIOTEMPORAL coo;
-    PJ_TRIPLET anc;
-    int id;
-    unsigned int flags;
+struct PJ_OBSERVATION {
+    PJ_SPATIOTEMPORAL coo;  /* coordinate data */
+    PJ_TRIPLET anc;         /* ancillary data */
+    int id;                 /* integer ancillary data - e.g. observation number, EPSG code... */
+    unsigned int flags;     /* additional data, intended for flags */
 };
 
 
 #ifndef PROJECTS_H
 /* Apply transformation to observation - in forward or inverse direction */
-OBSERVATION pj_apply (PJ *P, int direction, OBSERVATION obs);
+PJ_OBSERVATION pj_apply (PJ *P, int direction, PJ_OBSERVATION obs);
 
 /* Direction: "+" forward, "-" reverse, 0: roundtrip precision check */
 enum pj_apply_direction {
@@ -180,7 +180,7 @@ enum pj_apply_direction {
 int pj_show_triplet (FILE *stream, const char *banner, PJ_TRIPLET point);
 
 /* Constructor for the OBSERVATION object */
-OBSERVATION pj_observation (
+PJ_OBSERVATION pj_observation (
     double x, double y, double z, double t,
     double o, double p, double k,
     int id, unsigned int flags
@@ -193,10 +193,7 @@ OBSERVATION pj_observation (
 #define TORAD(deg)  ((deg)*M_PI/180.0)
 #endif
 
-extern int pj_errno;                    /* global error return code */
-void pj_free(PJ *P);
-PJ *pj_init_plus(const char *init_string);
-#endif
+#endif /* ndef PROJECTS_H */
 
 
 #ifdef __cplusplus
