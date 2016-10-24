@@ -49,10 +49,7 @@ PJ_OBSERVATION pj_observation (
 }
 
 
-/* Direction: "+1" forward, "-1" reverse, 0: roundtrip precision check (not fully done) */
-PJ_OBSERVATION pj_apply (PJ *P, int direction, PJ_OBSERVATION obs) {
-    double  d;
-    PJ_OBSERVATION o;
+PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs) {
 
     switch (direction) {
         case 1:
@@ -62,18 +59,42 @@ PJ_OBSERVATION pj_apply (PJ *P, int direction, PJ_OBSERVATION obs) {
             obs.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
             return obs;
         case 0:
-            o.coo.xyz = pj_fwd3d (obs.coo.lpz, P);
-            o.coo.lpz = pj_inv3d (o.coo.xyz, P);
-
-            /* Should add "both ways" here */
-            d = hypot (hypot (o.coo.v[0] - obs.coo.v[0], o.coo.v[1] - obs.coo.v[1]), o.coo.v[2] - obs.coo.v[2]);
-            obs.coo.v[0] = obs.coo.v[1] = obs.coo.v[2] = d;
             return obs;
         default:
             pj_ctx_set_errno (P->ctx, EINVAL);
     }
 
     return pj_observation (HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,0,0);
+}
+
+
+/* initial attempt, following a suggestion by Kristian Evers */
+    double  d;
+    PJ_OBSERVATION o;
+
+    /* multiple roundtrips not supported yet */
+        pj_ctx_set_errno (P->ctx, EINVAL);
+        return HUGE_VAL;
+    }
+
+    switch (direction) {
+        case 1:
+            o.coo.xyz  =  pj_fwd3d (obs.coo.lpz, P);
+            break;
+        case -1:
+            o.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
+            break;
+        default:
+            pj_ctx_set_errno (P->ctx, EINVAL);
+            return HUGE_VAL;
+    }
+
+    o.coo.xyz = pj_fwd3d (obs.coo.lpz, P);
+    o.coo.lpz = pj_inv3d (o.coo.xyz, P);
+
+    /* Should add "both ways" here */
+    d = hypot (hypot (o.coo.v[0] - obs.coo.v[0], o.coo.v[1] - obs.coo.v[1]), o.coo.v[2] - obs.coo.v[2]);
+    return d;
 }
 
 
