@@ -60,13 +60,13 @@ extern "C" {
 
 /******************************************************************************
     proj.h is included by projects.h in order to determine the size of the
-    OBSERVATION object.
+    PJ_OBSERVATION object.
 
     In order to stomp as little as possible on the traditional proj.4 name
     space, proj.h is littered with inclusion guards, leaving only the minimum
     possible implementation when included from projects.h
 
-    The OBSERVATION object is fully defined if proj.h is included alone or
+    The PJ_OBSERVATION object is fully defined if proj.h is included alone or
     in connection with *but before* projects.h (the latter may be needed in
     some cases, where it is necessary to access this "bare essentials" API,
     while still having direct access to PJ object internals)
@@ -167,15 +167,20 @@ struct PJ_OBSERVATION {
 
 
 #ifndef PROJECTS_H
-/* Apply transformation to observation - in forward or inverse direction */
-PJ_OBSERVATION pj_apply (PJ *P, int direction, PJ_OBSERVATION obs);
 
-/* Direction: "+" forward, "-" reverse, 0: roundtrip precision check */
-enum pj_apply_direction {
-    PJ_APPLY_FWD = -1,
-    PJ_APPLY_ROUNDTRIP = 0,
-    PJ_APPLY_INV = 1
+/* Direction: "+" forward, "-" reverse, 0: do nothing */
+enum pj_direction {
+    PJ_FWD = -1,
+    PJ_IDENT = 0,
+    PJ_INV = 1
 };
+
+/* Apply transformation to observation - in forward or inverse direction */
+PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs);
+
+/* Measure internal consistency - in forward or inverse direction */
+double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs);
+
 
 int pj_show_triplet (FILE *stream, const char *banner, PJ_TRIPLET point);
 

@@ -69,10 +69,12 @@ PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs)
 
 
 /* initial attempt, following a suggestion by Kristian Evers */
+double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs) {
     double  d;
     PJ_OBSERVATION o;
 
     /* multiple roundtrips not supported yet */
+    if (n > 1) {
         pj_ctx_set_errno (P->ctx, EINVAL);
         return HUGE_VAL;
     }

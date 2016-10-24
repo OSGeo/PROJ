@@ -191,7 +191,7 @@ struct PJ_REGION_S {
 };
 
 
-#include "proj.h"  /* Need this for sizeof(OBSERVATION) */
+#include "proj.h"  /* Need this for sizeof(PJ_OBSERVATION) */
 struct projCtx_t;
 typedef struct projCtx_t projCtx_t;
 
