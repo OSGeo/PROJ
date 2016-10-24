@@ -89,3 +89,7 @@ EXPORTS
     geod_polygon_testpoint          @87
     geod_polygon_clear              @88
     pj_run_selftests                @89
+    pj_observation                  @90
+    pj_show_triplet                 @91
+    pj_apply                        @92
+    
