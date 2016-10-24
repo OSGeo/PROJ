@@ -166,13 +166,14 @@ struct PJ_OBSERVATION {
 };
 
 
+
 #ifndef PROJECTS_H
 
 /* Direction: "+" forward, "-" reverse, 0: do nothing */
 enum pj_direction {
-    PJ_FWD = -1,
-    PJ_IDENT = 0,
-    PJ_INV = 1
+    PJ_FWD   = -1,
+    PJ_IDENT =  0,
+    PJ_INV   =  1
 };
 
 /* Apply transformation to observation - in forward or inverse direction */
