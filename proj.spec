@@ -25,10 +25,10 @@ data with a wide range of selectable projection functions.
 
 %prep
 %setup -D -n proj-4.9.3
+%{_builddir}/%{name}-%{version}/autogen.sh
 %configure
 
 %build
-%{_builddir}/%{name}-%{version}/autogen.sh
 make
 
 %install
