@@ -1,7 +1,7 @@
 .. _tmerc:
 
 ********************************************************************************
-Transverse Mercator (Gauss-Kruger)
+Transverse Mercator
 ********************************************************************************
 
 The transverse Mercator projection in its various forms is the most widely used projected coordinate system for world topographical and offshore mapping.
@@ -66,7 +66,7 @@ Example using Gauss Boaga on Italy area (EPSG:3004) ::
 Mathematical definition
 #######################
 
-The formulas describing the Transverse Mercator are all taken from proj4 sources.
+The formulas describing the Transverse Mercator are all taken from Evenden's formula.
 
 :math:`\phi_0` is the latitude of origin that match the center of the map. It can be set with ``+lat_0``.
 
