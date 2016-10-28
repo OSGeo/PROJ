@@ -81,7 +81,7 @@ HTDP
 :ref:`htpd` describes the situation with HTDP grids based on NOAA/NGS HTDP Model.
 
 Hungary
-................................................................................
+--------------------------------------------------------------------------------
 
 `Hungarian grid <https://github.com/OSGeoLabBp/eov2etrs/>`__ ETRS89 - HD72/EOV (epsg:23700), both horizontal and elevation grids
 
