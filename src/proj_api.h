@@ -49,19 +49,20 @@ extern "C" {
  *   are padded with leading zeros if necessary); e.g., PJ_VERSION=401000
  *   for version 4.10.0.
  */
+#ifndef PROJ_H
 #define PJ_VERSION 493
+#endif /* ndef PROJ_H */
 
 /* pj_init() and similar functions can be used with a non-C locale */
 /* Can be detected too at runtime if the symbol pj_atof exists */
 #define PJ_LOCALE_SAFE 1
 
 extern char const pj_release[]; /* global release id string */
+extern int pj_errno;	/* global error return code */
 
 #define RAD_TO_DEG	57.295779513082321
 #define DEG_TO_RAD	.017453292519943296
 
-
-extern int pj_errno;	/* global error return code */
 
 #if !defined(PROJECTS_H)
     typedef struct { double u, v; } projUV;
@@ -71,7 +72,9 @@ extern int pj_errno;	/* global error return code */
     #define projLP projUV
     #define projXYZ projUVW
     #define projLPZ projUVW
+#ifndef PROJ_H
     typedef void *projCtx;
+#endif /* ndef PROJ_H */
 #else
     typedef PJ *projPJ;
     typedef projCtx_t *projCtx;
@@ -139,6 +142,10 @@ void pj_acquire_lock(void);
 void pj_release_lock(void);
 void pj_cleanup_lock(void);
 
+int pj_run_selftests (int verbosity);
+
+
+#ifndef PROJ_H
 projCtx pj_get_default_ctx(void);
 projCtx pj_get_ctx( projPJ );
 void pj_set_ctx( projPJ, projCtx );
@@ -168,17 +175,16 @@ char  *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file);
 
 PAFile pj_open_lib(projCtx, const char *, const char *);
 
-int pj_run_selftests (int verbosity);
 
 
 #define PJ_LOG_NONE        0
 #define PJ_LOG_ERROR       1
 #define PJ_LOG_DEBUG_MAJOR 2
 #define PJ_LOG_DEBUG_MINOR 3
+#endif /* ndef PROJ_H */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* ndef PROJ_API_H */
-

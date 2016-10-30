@@ -25,6 +25,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
+#define PJ_OBSERVATION_C
 #include <proj.h>
 #include <projects.h>
 
@@ -49,22 +50,77 @@ PJ_OBSERVATION pj_observation (
 }
 
 
+const PJ_OBSERVATION pj_observation_error = {
+    {{HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL}},
+    {{HUGE_VAL,HUGE_VAL,HUGE_VAL}},
+    0, 0
+};
+
+const PJ_OBSERVATION pj_observation_null = {
+    {{0, 0, 0, 0}},
+    {{0, 0, 0}},
+    0, 0
+};
+
+PJ_OBSERVATION pj_fwdobs (PJ_OBSERVATION obs, PJ *P) {
+#if 0
+    if (0!=P->fwdobs) {
+        obs  =  pj_fwdobs (obs, P);
+        return obs;
+    }
+#endif
+    if (0!=P->fwd3d) {
+        obs.coo.xyz  =  pj_fwd3d (obs.coo.lpz, P);
+        return obs;
+    }
+    if (0!=P->fwd) {
+        obs.coo.xy  =  pj_fwd (obs.coo.lp, P);
+        return obs;
+    }
+    pj_ctx_set_errno (P->ctx, EINVAL);
+    return pj_observation_error;
+}
+
+PJ_OBSERVATION pj_invobs (PJ_OBSERVATION obs, PJ *P) {
+#if 0
+    if (0!=P->invobs) {
+        obs  =  pj_invobs (obs, P);
+        return obs;
+    }
+#endif
+    if (0!=P->inv3d) {
+        obs.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
+        return obs;
+    }
+    if (0!=P->inv) {
+        obs.coo.lp  =  pj_inv (obs.coo.xy, P);
+        return obs;
+    }
+    pj_ctx_set_errno (P->ctx, EINVAL);
+    return pj_observation_error;
+}
+
+
+
+
 PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs) {
 
+    if (0==P)
+        return pj_observation_error;
+
     switch (direction) {
-        case 1:
-            obs.coo.xyz  =  pj_fwd3d (obs.coo.lpz, P);
-            return obs;
-        case -1:
-            obs.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
-            return obs;
+        case PJ_FWD:
+            return pj_fwdobs (obs, P);
+        case PJ_INV:
+            return  pj_invobs (obs, P);
         case 0:
             return obs;
         default:
-            pj_ctx_set_errno (P->ctx, EINVAL);
+            break;
     }
 
-    return pj_observation (HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL,0,0);
+    pj_ctx_set_errno (P->ctx, EINVAL);
+    return pj_observation_error;
 }
 
 
@@ -111,4 +167,26 @@ int pj_show_triplet (FILE *stream, const char *banner, PJ_TRIPLET point) {
     if (banner)
         i += fprintf(stream, "\n");
     return i;
+}
+
+PJ *pj_pj (PJ_CONTEXT *ctx, char *definition) {
+    if (0==ctx)
+        return pj_init_plus_ctx (pj_get_default_ctx(), definition);
+    return pj_init_plus_ctx (ctx, definition);
+}
+
+PJ *pj_pj_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
+    return pj_init_ctx (ctx, argc, argv);
+}
+
+PJ_CONTEXT *pj_ctx (PJ *P) {
+    if (0==P)
+        return pj_get_default_ctx ();
+    return pj_get_ctx (P);
+}
+
+void pj_ctx_set (PJ *P, PJ_CONTEXT *ctx) {
+    if (0==P)
+        return;
+    return pj_set_ctx (P, ctx);
 }
