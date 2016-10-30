@@ -25,9 +25,32 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+
+
+ /*
+  * This version number should be updated with every release!  The format of
+  * PJ_VERSION is
+  *
+  * * Before version 4.10.0: PJ_VERSION=MNP where M, N, and P are the major,
+  *   minor, and patch numbers; e.g., PJ_VERSION=493 for version 4.9.3.
+  *
+  * * Version 4.10.0 and later: PJ_VERSION=MMMNNNPP later where MMM, NNN, PP
+  *   are the major, minor, and patch numbers (the minor and patch numbers
+  *   are padded with leading zeros if necessary); e.g., PJ_VERSION=401000
+  *   for version 4.10.0.
+  */
+ #ifndef PJ_VERSION
+ #define PJ_VERSION 493
+ #endif
+
+
+/* If we're not asked for PJ_VERSION only, give them everything */
+#ifndef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
+
 /* General projections header file */
 #ifndef PROJ_API_H
 #define PROJ_API_H
+
 
 /* standard inclusions */
 #include <math.h>
@@ -36,22 +59,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/*
- * This version number should be updated with every release!  The format of
- * PJ_VERSION is
- *
- * * Before version 4.10.0: PJ_VERSION=MNP where M, N, and P are the major,
- *   minor, and patch numbers; e.g., PJ_VERSION=493 for version 4.9.3.
- *
- * * Version 4.10.0 and later: PJ_VERSION=MMMNNNPP later where MMM, NNN, PP
- *   are the major, minor, and patch numbers (the minor and patch numbers
- *   are padded with leading zeros if necessary); e.g., PJ_VERSION=401000
- *   for version 4.10.0.
- */
-#ifndef PROJ_H
-#define PJ_VERSION 493
-#endif /* ndef PROJ_H */
 
 /* pj_init() and similar functions can be used with a non-C locale */
 /* Can be detected too at runtime if the symbol pj_atof exists */
@@ -64,7 +71,10 @@ extern int pj_errno;	/* global error return code */
 #define DEG_TO_RAD	.017453292519943296
 
 
-#if !defined(PROJECTS_H)
+#ifndef PROJ_H_ATEND
+
+#ifndef PROJECTS_H
+    /* i.e. proj_api invoked as primary API */
     typedef struct { double u, v; } projUV;
     typedef struct { double u, v, w; } projUVW;
     typedef void *projPJ;
@@ -72,9 +82,7 @@ extern int pj_errno;	/* global error return code */
     #define projLP projUV
     #define projXYZ projUVW
     #define projLPZ projUVW
-#ifndef PROJ_H
     typedef void *projCtx;
-#endif /* ndef PROJ_H */
 #else
     typedef PJ *projPJ;
     typedef projCtx_t *projCtx;
@@ -84,6 +92,20 @@ extern int pj_errno;	/* global error return code */
 #   define projLPZ      LPZ
 #endif
 
+projCtx pj_get_default_ctx(void);
+projCtx pj_get_ctx( projPJ );
+
+
+/* procedure prototypes */
+
+projXY pj_fwd(projLP, projPJ);
+projLP pj_inv(projXY, projPJ);
+
+projXYZ pj_fwd3d(projLPZ, projPJ);
+projLPZ pj_inv3d(projXYZ, projPJ);
+
+/* If included *after* proj.h finishes, we have alternative names */
+#ifndef PROJ_H_ATEND
 /* file reading api, like stdio */
 typedef int *PAFile;
 typedef struct projFileAPI_t {
@@ -93,14 +115,7 @@ typedef struct projFileAPI_t {
     long    (*FTell)(PAFile file);
     void    (*FClose)(PAFile);
 } projFileAPI;
-
-/* procedure prototypes */
-
-projXY pj_fwd(projLP, projPJ);
-projLP pj_inv(projXY, projPJ);
-
-projXYZ pj_fwd3d(projLPZ, projPJ);
-projLPZ pj_inv3d(projXYZ, projPJ);
+#endif /* ndef PROJ_H_ATEND */
 
 int pj_transform( projPJ src, projPJ dst, long point_count, int point_offset,
                   double *x, double *y, double *z );
@@ -131,6 +146,7 @@ projPJ pj_init_ctx( projCtx, int, char ** );
 projPJ pj_init_plus_ctx( projCtx, const char * );
 char *pj_get_def(projPJ, int);
 projPJ pj_latlong_from_proj( projPJ );
+#endif /* ndef PROJ_H_ATEND */
 void *pj_malloc(size_t);
 void pj_dalloc(void *);
 void *pj_calloc (size_t n, size_t size);
@@ -145,9 +161,8 @@ void pj_cleanup_lock(void);
 int pj_run_selftests (int verbosity);
 
 
-#ifndef PROJ_H
-projCtx pj_get_default_ctx(void);
-projCtx pj_get_ctx( projPJ );
+#ifndef PROJ_H_ATEND
+
 void pj_set_ctx( projPJ, projCtx );
 projCtx pj_ctx_alloc(void);
 void    pj_ctx_free( projCtx );
@@ -181,10 +196,22 @@ PAFile pj_open_lib(projCtx, const char *, const char *);
 #define PJ_LOG_ERROR       1
 #define PJ_LOG_DEBUG_MAJOR 2
 #define PJ_LOG_DEBUG_MINOR 3
-#endif /* ndef PROJ_H */
+#endif /* ndef PROJ_H_ATEND */
 
 #ifdef __cplusplus
 }
 #endif
 
+/* proj.h needs to know if proj_api.h has been included at top level (i.e. not through projects.h) */
+#ifndef PROJECTS_H
+#ifndef PROJ_API_H_ATEND
+#define PROJ_API_H_ATEND
+#endif
+#endif
+
+#ifdef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
+#undef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
+#endif
+
 #endif /* ndef PROJ_API_H */
+#endif /* ndef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY */

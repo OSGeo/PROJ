@@ -33,6 +33,7 @@
  *           explicitly visible.
  *
  *           Hence, projCtx has been replaced by PJ_CONTEXT *.
+ *           and    projPJ  has been replaced by PJ *
  *
  *           SECOND, I try to eliminate cases of information hiding implemented
  *           by redefining data types to void pointers.
@@ -47,12 +48,12 @@
  *           PJ_CONTEXT data type exists, and handle pointers to that data type
  *           without having any idea about its internals.
  *
- *           (obviously, in this example, struct projCtx_t should also be moved
- *           to struct pj_ctx some day...)
+ *           (obviously, in this example, struct projCtx_t should also be
+ *           renamed struct pj_ctx some day...)
  *
  *           THIRD, I try to eliminate implicit type punning. Hence this API
- *           introduces the OBSERVATION data type, for generic coordinate and
- *           ancillary data handling.
+ *           introduces the PJ_OBSERVATION data type, for generic coordinate and
+ *           handling of ancillary data.
  *
  *           It includes the PJ_SPATIOTEMPORAL and PJ_TRIPLET unions
  *           making it possible to make explicit the previously used
@@ -62,7 +63,7 @@
  *           The bare essentials API presented here follows the PROJ.4
  *           convention of sailing the coordinate to be reprojected, up on
  *           the stack ("call by value"), and symmetrically returning the
- *           result on the stack. Although the OBSERVATION object is 4 times
+ *           result on the stack. Although the PJ_OBSERVATION object is 4 times
  *           as large as the traditional XY and LP objects, timing results
  *           have shown the overhead to be very reasonable.
  *
@@ -101,6 +102,26 @@
 #include <string.h>
 #include <errno.h>
 
+/******************************************************************************
+    proj.h is included by projects.h in order to determine the size of the
+    PJ_OBSERVATION object. When included by projects.h, inclusion guards
+    ensure that only a minimal implementation being the same size as the fully
+    defined one, but stomping as little as possible on the traditional proj.4
+    name space by excluding the details.
+
+    The PJ_OBSERVATION object is fully defined if proj.h is included alone or
+    in connection with *but before* projects.h (the latter may be needed in
+    some cases, where it is necessary to access this "bare essentials" API,
+    while still having direct access to PJ object internals)
+******************************************************************************/
+#ifdef PROJECTS_H_ATEND
+#error "proj.h must be included before projects.h"
+#endif
+#ifdef PROJ_API_H_ATEND
+#error "proj.h must be included before proj_api.h"
+#endif
+
+
 
 #ifdef PROJECTS_H
 #ifndef PROJ_H
@@ -134,6 +155,8 @@ typedef struct PJ_OBSERVATION PJ_OBSERVATION;
 
 
 
+
+
 #ifndef PROJECTS_H
 #ifndef PROJ_H
 #define PROJ_H
@@ -142,18 +165,11 @@ extern "C" {
 #endif
 
 
-/******************************************************************************
-    proj.h is included by projects.h in order to determine the size of the
-    PJ_OBSERVATION object. When included by projects.h, inclusion guards
-    ensure that only a minimal implementation being the same size as the fully
-    defined one, but stomping as little as possible on the traditional proj.4
-    name space by excluding the details.
+/* Need access to PJ_VERSION */
+#define PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
+#include <proj_api.h>
+#undef  PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
 
-    The PJ_OBSERVATION object is fully defined if proj.h is included alone or
-    in connection with *but before* projects.h (the latter may be needed in
-    some cases, where it is necessary to access this "bare essentials" API,
-    while still having direct access to PJ object internals)
-******************************************************************************/
 
 /* first forward declare everything needed */
 
@@ -204,8 +220,8 @@ typedef struct { double lam, phi,  z; }  LPZ;
 /* Degrees, minutes, and seconds */
 typedef struct { double d, m,  s; }  PJ_DMS;
 
-/* Geoid undulation (N) and deflections of the vertical (z, e) */
-typedef struct { double   z,  e, N; }  PJ_ZEN;
+/* Geoid undulation (N) and deflections of the vertical (eta, zeta) */
+typedef struct { double   e,  z, N; }  PJ_EZN;
 
 /* Ellipsoidal parameters */
 typedef struct { double   a,   f; }  PJ_AF;
@@ -231,7 +247,7 @@ union PJ_SPATIOTEMPORAL {
 union PJ_TRIPLET {
     PJ_OPK  opk;
     PJ_ENH  enh;
-    PJ_ZEN  zen;
+    PJ_EZN  ezn;
     PJ_AF   af;
     double v[3]; /* Who cares - it's just a vector! */
     XYZ    xyz;
@@ -264,16 +280,9 @@ double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION ob
 
 int pj_show_triplet (FILE *stream, const char *banner, PJ_TRIPLET point);
 
-PJ *pj_pj (PJ_CONTEXT *ctx, char *definition);
-PJ *pj_pj_argv (PJ_CONTEXT *ctx, int argc, char **argv);
-
-
-/* Initializer for the OBSERVATION object */
-PJ_OBSERVATION pj_observation (
-    double x, double y, double z, double t,
-    double o, double p, double k,
-    int id, unsigned int flags
-);
+PJ *pj_create (PJ_CONTEXT *ctx, const char *definition);
+PJ *pj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
+void pj_free(PJ *P);
 
 #ifndef PJ_OBSERVATION_C
 extern const PJ_OBSERVATION pj_observation_error;
@@ -291,10 +300,6 @@ extern const PJ_OBSERVATION pj_observation_null;
 
 
 /* This is mostly a direct copy of (parts of) the proj_api header, but with cleaned up name space */
-
-#define PJ_VERSION 493
-
-
 PJ_CONTEXT *pj_ctx (PJ *P);
 PJ_CONTEXT *pj_ctx_alloc(void);
 
@@ -342,13 +347,14 @@ void pj_stderr_logger (void *, int, const char *);
 #define PJ_LOG_DEBUG_MINOR 3
 
 
-
-
-
-
-
 #ifdef __cplusplus
 }
 #endif
+
+#ifndef PROJ_H_ATEND
+#define PROJ_H_ATEND
+#endif
+
+
 #endif /* ndef PROJ_H */
 #endif /* ndef PROJECTS_H */

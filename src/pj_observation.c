@@ -28,31 +28,26 @@
 #define PJ_OBSERVATION_C
 #include <proj.h>
 #include <projects.h>
+#include <float.h>
+#include <math.h>
 
+/* Need some prototypes from proj_api.h */
+PJ_CONTEXT *pj_get_default_ctx(void);
+PJ_CONTEXT *pj_get_ctx(PJ *);
 
-/* Constructor for the OBSERVATION object */
-PJ_OBSERVATION pj_observation (
-    double x, double y, double z, double t,
-    double o, double p, double k,
-    int id, unsigned int flags
-) {
-    PJ_OBSERVATION g;
-    g.coo.xyzt.x = x;
-    g.coo.xyzt.y = y;
-    g.coo.xyzt.z = z;
-    g.coo.xyzt.t = t;
-    g.anc.opk.o  = o;
-    g.anc.opk.p  = p;
-    g.anc.opk.k  = k;
-    g.id         = id;
-    g.flags      = flags;
-    return g;
-}
+XY pj_fwd(LP, PJ *);
+LP pj_inv(XY, PJ *);
+
+XYZ pj_fwd3d(LPZ, PJ *);
+LPZ pj_inv3d(XYZ, PJ *);
+PJ *pj_init_ctx(PJ_CONTEXT *, int, char ** );
+PJ *pj_init_plus_ctx(PJ_CONTEXT *, const char * );
 
 
 const PJ_OBSERVATION pj_observation_error = {
-    {{HUGE_VAL,HUGE_VAL,HUGE_VAL,HUGE_VAL}},
-    {{HUGE_VAL,HUGE_VAL,HUGE_VAL}},
+    /* Cannot use HUGE_VAL here: MSVC misimplements HUGE_VAL as something that is not compile time constant */
+    {{DBL_MAX,DBL_MAX,DBL_MAX,DBL_MAX}},
+    {{DBL_MAX,DBL_MAX,DBL_MAX}},
     0, 0
 };
 
@@ -63,12 +58,6 @@ const PJ_OBSERVATION pj_observation_null = {
 };
 
 PJ_OBSERVATION pj_fwdobs (PJ_OBSERVATION obs, PJ *P) {
-#if 0
-    if (0!=P->fwdobs) {
-        obs  =  pj_fwdobs (obs, P);
-        return obs;
-    }
-#endif
     if (0!=P->fwd3d) {
         obs.coo.xyz  =  pj_fwd3d (obs.coo.lpz, P);
         return obs;
@@ -82,12 +71,6 @@ PJ_OBSERVATION pj_fwdobs (PJ_OBSERVATION obs, PJ *P) {
 }
 
 PJ_OBSERVATION pj_invobs (PJ_OBSERVATION obs, PJ *P) {
-#if 0
-    if (0!=P->invobs) {
-        obs  =  pj_invobs (obs, P);
-        return obs;
-    }
-#endif
     if (0!=P->inv3d) {
         obs.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
         return obs;
@@ -169,24 +152,25 @@ int pj_show_triplet (FILE *stream, const char *banner, PJ_TRIPLET point) {
     return i;
 }
 
-PJ *pj_pj (PJ_CONTEXT *ctx, char *definition) {
+PJ *pj_create (PJ_CONTEXT *ctx, const char *definition) {
     if (0==ctx)
-        return pj_init_plus_ctx (pj_get_default_ctx(), definition);
+        return pj_init_plus_ctx (pj_ctx(0), definition);
     return pj_init_plus_ctx (ctx, definition);
 }
 
-PJ *pj_pj_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
+PJ *pj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
     return pj_init_ctx (ctx, argc, argv);
 }
 
 PJ_CONTEXT *pj_ctx (PJ *P) {
     if (0==P)
-        return pj_get_default_ctx ();
+        return pj_get_ctx (P);
     return pj_get_ctx (P);
 }
 
 void pj_ctx_set (PJ *P, PJ_CONTEXT *ctx) {
     if (0==P)
         return;
-    return pj_set_ctx (P, ctx);
+    pj_set_ctx (P, ctx);
+    return;
 }

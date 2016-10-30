@@ -1,6 +1,7 @@
 /* Tiny test of an evolving new API. Thomas Knudsen, 2016-10-30 */
 
 #include <proj.h>
+#include <projects.h>
 
 int main (void) {
     PJ *p;
@@ -8,7 +9,7 @@ int main (void) {
     int err;
 
     /* pj_pj plays the role of the pj_init family */
-    p = pj_pj (0, "+ellps=GRS80 +proj=utm +zone=32");
+    p = pj_create (0, "+ellps=GRS80 +proj=utm +zone=32");
     if (0==p)
         return puts ("Oops"), 0;
 
@@ -35,5 +36,7 @@ int main (void) {
     printf ("%15.9f %15.9f\n", a.coo.lpz.lam, a.coo.lpz.phi);
     err = pj_ctx_get_errno (pj_ctx (p));
     printf ("pj_ctx_errno: %d\n", err);
+
+    pj_free (p);
     return 0;
 }
