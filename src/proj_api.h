@@ -71,7 +71,6 @@ extern int pj_errno;	/* global error return code */
 #define DEG_TO_RAD	.017453292519943296
 
 
-#ifndef PROJ_H_ATEND
 
 #ifndef PROJECTS_H
     /* i.e. proj_api invoked as primary API */
@@ -105,7 +104,6 @@ projXYZ pj_fwd3d(projLPZ, projPJ);
 projLPZ pj_inv3d(projXYZ, projPJ);
 
 /* If included *after* proj.h finishes, we have alternative names */
-#ifndef PROJ_H_ATEND
 /* file reading api, like stdio */
 typedef int *PAFile;
 typedef struct projFileAPI_t {
@@ -115,7 +113,6 @@ typedef struct projFileAPI_t {
     long    (*FTell)(PAFile file);
     void    (*FClose)(PAFile);
 } projFileAPI;
-#endif /* ndef PROJ_H_ATEND */
 
 int pj_transform( projPJ src, projPJ dst, long point_count, int point_offset,
                   double *x, double *y, double *z );
@@ -161,7 +158,6 @@ void pj_cleanup_lock(void);
 int pj_run_selftests (int verbosity);
 
 
-#ifndef PROJ_H_ATEND
 
 void pj_set_ctx( projPJ, projCtx );
 projCtx pj_ctx_alloc(void);
@@ -212,6 +208,3 @@ PAFile pj_open_lib(projCtx, const char *, const char *);
 #ifdef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
 #undef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
 #endif
-
-#endif /* ndef PROJ_API_H */
-#endif /* ndef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY */

@@ -138,39 +138,42 @@ double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION ob
     return d;
 }
 
-
-int pj_show_triplet (FILE *stream, const char *banner, PJ_TRIPLET point) {
-    int i = 0;
-    if (banner)
-        i += fprintf (stream, "%s", banner);
-
-    i += fprintf(stream,  "%16.10f ", point.xyz.x);
-    i += fprintf(stream,  "%16.10f ", point.xyz.y);
-    i += fprintf(stream,  "%16.4f",   point.xyz.z);
-    if (banner)
-        i += fprintf(stream, "\n");
-    return i;
+PJ *pj_create (const char *definition) {
+    return pj_init_plus (definition);
 }
 
-PJ *pj_create (PJ_CONTEXT *ctx, const char *definition) {
-    if (0==ctx)
-        return pj_init_plus_ctx (pj_ctx(0), definition);
-    return pj_init_plus_ctx (ctx, definition);
+PJ *pj_create_argv (int argc, char **argv) {
+    return pj_init (argc, argv);
 }
 
-PJ *pj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
-    return pj_init_ctx (ctx, argc, argv);
+
+int pj_error (PJ *P) {
+    return pj_ctx_get_errno (pj_get_ctx(P));
 }
 
-PJ_CONTEXT *pj_ctx (PJ *P) {
-    if (0==P)
-        return pj_get_ctx (P);
-    return pj_get_ctx (P);
-}
-
-void pj_ctx_set (PJ *P, PJ_CONTEXT *ctx) {
-    if (0==P)
-        return;
+int pj_context_create (PJ *P) {
+    PJ_CONTEXT *ctx = pj_ctx_alloc ();
+    if (0==ctx) {
+        pj_ctx_set_errno (pj_get_ctx(P), ENOMEM);
+        return 1;
+    }
     pj_set_ctx (P, ctx);
-    return;
+    return 0;
+}
+
+void pj_context_modify (PJ *P, int err, int dbg, void (*log)(void *, int, const char *), void *app, void *api) {
+    PJ_CONTEXT *ctx = pj_get_ctx(P);
+    ctx->last_errno  = err;
+    ctx->debug_level = dbg;
+    if (0!=log)
+        ctx->logger = log;
+    if (0!=app)
+        ctx->app_data = app;
+    if (0!=api)
+        ctx->fileapi = api;
+}
+
+void pj_context_free (PJ *P) {
+    pj_ctx_free (pj_get_ctx (P));
+    pj_set_ctx (P, pj_get_default_ctx ());
 }

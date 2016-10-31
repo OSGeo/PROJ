@@ -144,7 +144,7 @@ typedef struct { double r, i; } COMPLEX;
 typedef struct { double u, v, w; } projUVW;
 
 /* If user explicitly includes proj.h, before projects.h, then avoid implicit type-punning */
-#ifndef PROJ_H_ATEND
+#ifndef PROJ_H
 #ifndef PJ_LIB__
 #define XY projUV
 #define LP projUV
@@ -163,7 +163,7 @@ typedef struct { double lam, phi, z; } LPZ;
 typedef struct { double u, v; }        UV;
 typedef struct { double u, v, w; }     UVW;
 #endif  /* ndef PJ_LIB__ */
-#endif  /* ndef PROJ_H_ATEND   */
+#endif  /* ndef PROJ_H   */
 
 
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
@@ -179,7 +179,7 @@ enum pj_io_units {
     PJ_IO_UNITS_METERS  = 1,   /* Meters  */
     PJ_IO_UNITS_RADIANS = 2    /* Radians */
 };
-#ifndef PROJ_H_ATEND
+#ifndef PROJ_H
 typedef struct PJconsts PJ;         /* the PJ object herself */
 #endif
 
@@ -190,15 +190,9 @@ struct PJ_REGION_S {
     double ur_lat;
 };
 
-
-#ifdef PROJ_H_ATEND
-#define PJ_CONTEXT_WHATEVER PJ_CONTEXT
-#else
 #include "proj.h"  /* Need this for sizeof(PJ_OBSERVATION) */
 struct projCtx_t;
 typedef struct projCtx_t projCtx_t;
-#define PJ_CONTEXT_WHATEVER projCtx_t
-#endif /* ndef PROJ_H_ATEND */
 
 /* base projection data structure */
 struct PJconsts {
@@ -213,7 +207,7 @@ struct PJconsts {
 
     **************************************************************************************/
 
-    PJ_CONTEXT_WHATEVER *ctx;
+    projCtx_t *ctx;
     const char *descr;             /* From pj_list.h or individual PJ_*.c file */
     paralist *params;              /* Parameter list */
     struct pj_opaque *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
@@ -592,11 +586,6 @@ typedef struct _PJ_GridCatalog {
 
     struct _PJ_GridCatalog *next;
 } PJ_GridCatalog;
-
-#ifdef PROJ_H_ATEND
-#define projCtx PJ_CONTEXT *
-#define PAFile PJ_FILE
-#endif
 
 /* procedure prototypes */
 double dmstor(const char *, char **);

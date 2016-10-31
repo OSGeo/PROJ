@@ -67,6 +67,14 @@
  *           as large as the traditional XY and LP objects, timing results
  *           have shown the overhead to be very reasonable.
  *
+ *           In its current incarnation, the API is focused on compactness:
+ *           Currently it consists of only nine functions.
+ *
+ *           Hence, due to the proj_ctx subsystem being little used, it has
+ *           been replaced by a tiny set of 3 functions, making it possible,
+ *           but not very convenient, to do almost everything possible with
+ *           the original ctx API.
+ *
  *           See pj_proj_test.c for an example of how to use the API.
  *
  * Author:   Thomas Knudsen, <thokn@sdfe.dk>
@@ -114,13 +122,6 @@
     some cases, where it is necessary to access this "bare essentials" API,
     while still having direct access to PJ object internals)
 ******************************************************************************/
-#ifdef PROJECTS_H_ATEND
-#error "proj.h must be included before projects.h"
-#endif
-#ifdef PROJ_API_H_ATEND
-#error "proj.h must be included before proj_api.h"
-#endif
-
 
 
 #ifdef PROJECTS_H
@@ -192,7 +193,9 @@ typedef struct PJconsts PJ;         /* the PJ object herself */
 /* The context type - properly namespaced synonym for projCtx */
 struct projCtx_t;
 typedef struct projCtx_t PJ_CONTEXT;
-
+typedef int *PJ_FILE;
+struct pj_fileapi;
+typedef struct pj_fileapi PJ_FILEAPI;
 
 /* Omega, Phi, Kappa: Rotations */
 typedef struct {double o, p, k;}  PJ_OPK;
@@ -265,24 +268,29 @@ struct PJ_OBSERVATION {
     unsigned int flags;     /* additional data, intended for flags */
 };
 
-/* Direction: "+" forward, "-" reverse, 0: do nothing */
-enum pj_direction {
-    PJ_FWD   =  1,
-    PJ_IDENT =  0,
-    PJ_INV   = -1
-};
+/* Manage the transformation definition object PJ */
+PJ  *pj_create (const char *definition);
+PJ  *pj_create_argv (int argc, char **argv);
+void pj_free (PJ *P);
+int  pj_error (PJ *P);
 
 /* Apply transformation to observation - in forward or inverse direction */
+enum pj_direction {
+    PJ_FWD   =  1,   /* Forward    */
+    PJ_IDENT =  0,   /* Do nothing */
+    PJ_INV   = -1    /* Inverse    */
+};
 PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs);
 
 /* Measure internal consistency - in forward or inverse direction */
 double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs);
 
-int pj_show_triplet (FILE *stream, const char *banner, PJ_TRIPLET point);
 
-PJ *pj_create (PJ_CONTEXT *ctx, const char *definition);
-PJ *pj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
-void pj_free(PJ *P);
+/* Low level functionality for handling thread contexts */
+int  pj_context_create (PJ *P);
+void pj_context_modify (PJ *P, int err, int dbg, void (*log)(void *, int, const char *), void *app, void *api);
+void pj_context_free (PJ *P);
+
 
 #ifndef PJ_OBSERVATION_C
 extern const PJ_OBSERVATION pj_observation_error;
@@ -295,56 +303,6 @@ extern const PJ_OBSERVATION pj_observation_null;
 #ifndef TORAD
 #define TORAD(deg)  ((deg)*M_PI/180.0)
 #endif
-
-
-
-
-/* This is mostly a direct copy of (parts of) the proj_api header, but with cleaned up name space */
-PJ_CONTEXT *pj_ctx (PJ *P);
-PJ_CONTEXT *pj_ctx_alloc(void);
-
-void  pj_set_ctx (PJ *, PJ_CONTEXT *);
-void  pj_ctx_free (PJ_CONTEXT *);
-int   pj_ctx_get_errno (PJ_CONTEXT *);
-void  pj_ctx_set_errno (PJ_CONTEXT *, int);
-void  pj_ctx_set_debug (PJ_CONTEXT *, int);
-void  pj_ctx_set_logger (PJ_CONTEXT *, void (*)(void *, int, const char *));
-void  pj_ctx_set_app_data (PJ_CONTEXT *, void * );
-void *pj_ctx_get_app_data (PJ_CONTEXT *);
-
-/* file reading api, like stdio */
-typedef int *PJ_FILE;
-struct pj_fileapi;
-typedef struct pj_fileapi PJ_FILEAPI;
-struct pj_fileapi {
-    PJ_FILE  (*fopen)(PJ_CONTEXT *ctx, const char *filename, const char *access);
-    size_t   (*fread)(void *buffer, size_t size, size_t nmemb, PJ_FILE *file);
-    int      (*fseek)(PJ_FILE *file, long offset, int whence);
-    long     (*ftell)(PJ_FILE *file);
-    void     (*fclose)(PJ_FILE *file);
-};
-
-void        pj_ctx_set_fileapi (PJ_CONTEXT *, PJ_FILEAPI *);
-PJ_FILEAPI *pj_ctx_get_fileapi (PJ_CONTEXT *);
-PJ_FILEAPI *pj_get_default_fileapi();
-
-PJ_FILE  pj_ctx_fopen  (PJ_CONTEXT *ctx, const char *filename, const char *access);
-size_t   pj_ctx_fread  (PJ_CONTEXT *ctx, void *buffer, size_t size, size_t nmemb, PJ_FILE file);
-int      pj_ctx_fseek  (PJ_CONTEXT *ctx, PJ_FILE *file, long offset, int whence);
-long     pj_ctx_ftell  (PJ_CONTEXT *ctx, PJ_FILE *file);
-void     pj_ctx_fclose (PJ_CONTEXT *ctx, PJ_FILE *file);
-char    *pj_ctx_fgets  (PJ_CONTEXT *ctx, char *line, int size, PJ_FILE *file);
-
-PJ_FILE  pj_open_lib(PJ_CONTEXT *, const char *, const char *);
-
-
-/* Logging API */
-void pj_log (PJ_CONTEXT *ctx, int level, const char *fmt, ... );
-void pj_stderr_logger (void *, int, const char *);
-#define PJ_LOG_NONE        0
-#define PJ_LOG_ERROR       1
-#define PJ_LOG_DEBUG_MAJOR 2
-#define PJ_LOG_DEBUG_MINOR 3
 
 
 #ifdef __cplusplus

@@ -89,14 +89,13 @@ EXPORTS
     geod_polygon_testpoint          @87
     geod_polygon_clear              @88
     pj_run_selftests                @89
-    pj_observation                  @90
-    pj_show_triplet                 @91
-    pj_apply                        @92
-    pj_fwdobs                       @93
-    pj_invobs                       @94
-    pj_roundtrip                    @95
-    pj_pj                           @96
-    pj_pj_argv                      @97
-    pj_roundtrip                    @98
-    pj_ctx                          @99
-    pj_ctx_set                     @100
+    pj_error                        @90
+    pj_context_create               @91
+    pj_context_modify               @92
+    pj_context_free                 @93
+    pj_apply                        @94
+    pj_fwdobs                       @95
+    pj_invobs                       @96
+    pj_roundtrip                    @97
+    pj_create                       @98
+    pj_create_argv                  @99
