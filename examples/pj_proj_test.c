@@ -1,6 +1,7 @@
 /* Tiny test of an evolving new API. Thomas Knudsen, 2016-10-30 */
 /* gcc -pedantic -W -Wall -Wextra -I../src -o pj_proj_test pj_proj_test.c -L../../../build/proj.4/lib -lproj_4_9 */
 #include <proj.h>
+#include <float.h>
 
 int main (void) {
     PJ *p;
@@ -32,7 +33,8 @@ int main (void) {
 
     /* Invalid projection */
     a = pj_apply (p, 42, a);
-    printf ("%15.9f %15.9f\n", a.coo.lpz.lam, a.coo.lpz.phi);
+    if (a.coo.lpz.lam!=DBL_MAX)
+        printf ("%15.9f %15.9f\n", a.coo.lpz.lam, a.coo.lpz.phi);
     err = pj_error (p);
     printf ("pj_ctx_errno: %d\n", err);
 
@@ -55,9 +57,10 @@ int main (void) {
     printf ("%15.9f %15.9f %15.9f\n", b.coo.xyz.x, b.coo.xyz.y, b.coo.xyz.z);
 
     /* Roundtrip */
-    dist = pj_roundtrip (p, PJ_INV, 1, a);
-    printf ("Roundtrip deviation (nm): %15.9f\n", 1e9*dist);
-
+    dist = pj_roundtrip (p, PJ_FWD, 10000, a);
+    printf ("Roundtrip deviation, fwd (nm): %15.9f\n", dist*1e9*1e5);
+    dist = pj_roundtrip (p, PJ_INV, 10000, b);
+    printf ("Roundtrip deviation, inv (nm): %15.9f\n", dist*1e9);
 
     /* Inverse projection */
     b = pj_apply (p, PJ_INV, b);

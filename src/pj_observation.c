@@ -107,33 +107,38 @@ PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs)
 }
 
 
-/* initial attempt, following a suggestion by Kristian Evers */
 double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs) {
+    int i;
     double  d;
-    PJ_OBSERVATION o;
+    PJ_OBSERVATION o, u;
 
-    /* multiple roundtrips not supported yet */
-    if (n > 1) {
+    if (0==P)
+        return HUGE_VAL;
+
+    if (n < 1) {
         pj_ctx_set_errno (P->ctx, EINVAL);
         return HUGE_VAL;
     }
 
-    switch (direction) {
-        case 1:
-            o.coo.xyz  =  pj_fwd3d (obs.coo.lpz, P);
-            break;
-        case -1:
-            o.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
-            break;
-        default:
-            pj_ctx_set_errno (P->ctx, EINVAL);
-            return HUGE_VAL;
+    o.coo = obs.coo;
+
+
+    for (i = 0;  i < n;  i++) {
+        switch (direction) {
+            case PJ_FWD:
+                u.coo.xyz  =  pj_fwd3d (o.coo.lpz, P);
+                o.coo.lpz  =  pj_inv3d (u.coo.xyz, P);
+                break;
+            case PJ_INV:
+                u.coo.lpz  =  pj_inv3d (o.coo.xyz, P);
+                o.coo.xyz  =  pj_fwd3d (u.coo.lpz, P);
+                break;
+            default:
+                pj_ctx_set_errno (P->ctx, EINVAL);
+                return HUGE_VAL;
+        }
     }
 
-    o.coo.xyz = pj_fwd3d (obs.coo.lpz, P);
-    o.coo.lpz = pj_inv3d (o.coo.xyz, P);
-
-    /* Should add "both ways" here */
     d = hypot (hypot (o.coo.v[0] - obs.coo.v[0], o.coo.v[1] - obs.coo.v[1]), o.coo.v[2] - obs.coo.v[2]);
     return d;
 }
