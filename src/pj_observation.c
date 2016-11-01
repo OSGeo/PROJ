@@ -31,18 +31,6 @@
 #include <float.h>
 #include <math.h>
 
-/* Need some prototypes from proj_api.h */
-PJ_CONTEXT *pj_get_default_ctx(void);
-PJ_CONTEXT *pj_get_ctx(PJ *);
-
-XY pj_fwd(LP, PJ *);
-LP pj_inv(XY, PJ *);
-
-XYZ pj_fwd3d(LPZ, PJ *);
-LPZ pj_inv3d(XYZ, PJ *);
-PJ *pj_init_ctx(PJ_CONTEXT *, int, char ** );
-PJ *pj_init_plus_ctx(PJ_CONTEXT *, const char * );
-
 
 const PJ_OBSERVATION pj_observation_error = {
     /* Cannot use HUGE_VAL here: MSVC misimplements HUGE_VAL as something that is not compile time constant */
@@ -51,11 +39,25 @@ const PJ_OBSERVATION pj_observation_error = {
     0, 0
 };
 
+
 const PJ_OBSERVATION pj_observation_null = {
     {{0, 0, 0, 0}},
     {{0, 0, 0}},
     0, 0
 };
+
+
+double pj_obs_dist_2d (PJ_OBSERVATION a, PJ_OBSERVATION b) {
+    double *A = a.coo.v, *B = b.coo.v;
+    return hypot (A[0] - B[0],  A[1] - B[1]);
+}
+
+
+double pj_obs_dist_3d (PJ_OBSERVATION a, PJ_OBSERVATION b) {
+    double *A = a.coo.v, *B = b.coo.v;
+    return hypot (hypot (A[0] - B[0],  A[1] - B[1]),  A[2] - B[2]);
+}
+
 
 PJ_OBSERVATION pj_fwdobs (PJ_OBSERVATION obs, PJ *P) {
     if (0!=P->fwd3d) {
@@ -70,6 +72,7 @@ PJ_OBSERVATION pj_fwdobs (PJ_OBSERVATION obs, PJ *P) {
     return pj_observation_error;
 }
 
+
 PJ_OBSERVATION pj_invobs (PJ_OBSERVATION obs, PJ *P) {
     if (0!=P->inv3d) {
         obs.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
@@ -82,8 +85,6 @@ PJ_OBSERVATION pj_invobs (PJ_OBSERVATION obs, PJ *P) {
     pj_ctx_set_errno (P->ctx, EINVAL);
     return pj_observation_error;
 }
-
-
 
 
 PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs) {
@@ -109,7 +110,6 @@ PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs)
 
 double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs) {
     int i;
-    double  d;
     PJ_OBSERVATION o, u;
 
     if (0==P)
@@ -121,7 +121,6 @@ double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION ob
     }
 
     o.coo = obs.coo;
-
 
     for (i = 0;  i < n;  i++) {
         switch (direction) {
@@ -139,9 +138,9 @@ double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION ob
         }
     }
 
-    d = hypot (hypot (o.coo.v[0] - obs.coo.v[0], o.coo.v[1] - obs.coo.v[1]), o.coo.v[2] - obs.coo.v[2]);
-    return d;
+    return pj_obs_dist_3d (o, obs);
 }
+
 
 PJ *pj_create (const char *definition) {
     return pj_init_plus (definition);
@@ -151,7 +150,6 @@ PJ *pj_create_argv (int argc, char **argv) {
     return pj_init (argc, argv);
 }
 
-
 int pj_error (PJ *P) {
     return pj_ctx_get_errno (pj_get_ctx(P));
 }
@@ -159,15 +157,19 @@ int pj_error (PJ *P) {
 int pj_context_create (PJ *P) {
     PJ_CONTEXT *ctx = pj_ctx_alloc ();
     if (0==ctx) {
-        pj_ctx_set_errno (pj_get_ctx(P), ENOMEM);
+        pj_ctx_set_errno (pj_get_ctx (P), ENOMEM);
         return 1;
     }
     pj_set_ctx (P, ctx);
     return 0;
 }
 
+void pj_context_inherit (PJ *mother, PJ *daughter) {
+    pj_set_ctx (daughter, pj_get_ctx (mother));
+}
+
 void pj_context_modify (PJ *P, int err, int dbg, void (*log)(void *, int, const char *), void *app, void *api) {
-    PJ_CONTEXT *ctx = pj_get_ctx(P);
+    PJ_CONTEXT *ctx = pj_get_ctx (P);
     ctx->last_errno  = err;
     ctx->debug_level = dbg;
     if (0!=log)

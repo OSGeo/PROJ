@@ -36,7 +36,7 @@ int main (void) {
     if (a.coo.lpz.lam!=DBL_MAX)
         printf ("%15.9f %15.9f\n", a.coo.lpz.lam, a.coo.lpz.phi);
     err = pj_error (p);
-    printf ("pj_ctx_errno: %d\n", err);
+    printf ("pj_error: %d\n", err);
 
     pj_free (p);
 
