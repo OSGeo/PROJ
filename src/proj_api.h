@@ -114,6 +114,10 @@ typedef struct projFileAPI_t {
     void    (*FClose)(PAFile);
 } projFileAPI;
 
+/* Minimum support for fileapi, properly namespaced */
+struct pj_fileapi;
+typedef struct pj_fileapi PJ_FILEAPI;
+
 int pj_transform( projPJ src, projPJ dst, long point_count, int point_offset,
                   double *x, double *y, double *z );
 int pj_datum_transform( projPJ src, projPJ dst, long point_count, int point_offset,

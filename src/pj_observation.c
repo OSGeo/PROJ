@@ -52,7 +52,6 @@ double pj_obs_dist_2d (PJ_OBSERVATION a, PJ_OBSERVATION b) {
     return hypot (A[0] - B[0],  A[1] - B[1]);
 }
 
-
 double pj_obs_dist_3d (PJ_OBSERVATION a, PJ_OBSERVATION b) {
     double *A = a.coo.v, *B = b.coo.v;
     return hypot (hypot (A[0] - B[0],  A[1] - B[1]),  A[2] - B[2]);
@@ -68,7 +67,7 @@ PJ_OBSERVATION pj_fwdobs (PJ_OBSERVATION obs, PJ *P) {
         obs.coo.xy  =  pj_fwd (obs.coo.lp, P);
         return obs;
     }
-    pj_ctx_set_errno (P->ctx, EINVAL);
+    pj_error_set (P, EINVAL);
     return pj_observation_error;
 }
 
@@ -82,7 +81,7 @@ PJ_OBSERVATION pj_invobs (PJ_OBSERVATION obs, PJ *P) {
         obs.coo.lp  =  pj_inv (obs.coo.xy, P);
         return obs;
     }
-    pj_ctx_set_errno (P->ctx, EINVAL);
+    pj_error_set (P, EINVAL);
     return pj_observation_error;
 }
 
@@ -103,7 +102,7 @@ PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs)
             break;
     }
 
-    pj_ctx_set_errno (P->ctx, EINVAL);
+    pj_error_set (P, EINVAL);
     return pj_observation_error;
 }
 
@@ -116,7 +115,7 @@ double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION ob
         return HUGE_VAL;
 
     if (n < 1) {
-        pj_ctx_set_errno (P->ctx, EINVAL);
+        pj_error_set (P, EINVAL);
         return HUGE_VAL;
     }
 
@@ -133,7 +132,7 @@ double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION ob
                 o.coo.xyz  =  pj_fwd3d (u.coo.lpz, P);
                 break;
             default:
-                pj_ctx_set_errno (P->ctx, EINVAL);
+                pj_error_set (P, EINVAL);
                 return HUGE_VAL;
         }
     }
@@ -154,12 +153,34 @@ int pj_error (PJ *P) {
     return pj_ctx_get_errno (pj_get_ctx(P));
 }
 
-int pj_context_create (PJ *P) {
+/* From here: Minimum viable support for contexts */
+void pj_error_set (PJ *P, int err) {
+    pj_ctx_set_errno (pj_get_ctx(P), err);
+}
+
+void pj_debug_set (PJ *P, int debuglevel) {
+    PJ_CONTEXT *ctx = pj_get_ctx (P);
+    ctx->debug_level = debuglevel;
+}
+
+void pj_log_set (PJ *P, void (*log)(void *, int, const char *)) {
+    PJ_CONTEXT *ctx = pj_get_ctx (P);
+    if (0!=log)
+        ctx->logger = log;
+}
+
+void pj_app_data_set (PJ *P, void *app_data) {
+    PJ_CONTEXT *ctx = pj_get_ctx (P);
+    ctx->app_data = app_data;
+}
+
+int pj_context_renew (PJ *P) {
     PJ_CONTEXT *ctx = pj_ctx_alloc ();
     if (0==ctx) {
-        pj_ctx_set_errno (pj_get_ctx (P), ENOMEM);
+        pj_error_set (P, ENOMEM);
         return 1;
     }
+
     pj_set_ctx (P, ctx);
     return 0;
 }
@@ -168,19 +189,15 @@ void pj_context_inherit (PJ *mother, PJ *daughter) {
     pj_set_ctx (daughter, pj_get_ctx (mother));
 }
 
-void pj_context_modify (PJ *P, int err, int dbg, void (*log)(void *, int, const char *), void *app, void *api) {
-    PJ_CONTEXT *ctx = pj_get_ctx (P);
-    ctx->last_errno  = err;
-    ctx->debug_level = dbg;
-    if (0!=log)
-        ctx->logger = log;
-    if (0!=app)
-        ctx->app_data = app;
-    if (0!=api)
-        ctx->fileapi = api;
-}
-
 void pj_context_free (PJ *P) {
     pj_ctx_free (pj_get_ctx (P));
     pj_set_ctx (P, pj_get_default_ctx ());
+}
+
+
+
+/* Minimum support for fileapi */
+void pj_fileapi_set (PJ *P, void *fileapi) {
+    PJ_CONTEXT *ctx = pj_get_ctx (P);
+    ctx->fileapi = (projFileAPI *) fileapi;
 }

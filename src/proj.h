@@ -190,13 +190,6 @@ typedef union PJ_SPATIOTEMPORAL PJ_SPATIOTEMPORAL;
 struct PJconsts;
 typedef struct PJconsts PJ;         /* the PJ object herself */
 
-/* The context type - properly namespaced synonym for projCtx */
-struct projCtx_t;
-typedef struct projCtx_t PJ_CONTEXT;
-typedef int *PJ_FILE;
-struct pj_fileapi;
-typedef struct pj_fileapi PJ_FILEAPI;
-
 /* Omega, Phi, Kappa: Rotations */
 typedef struct {double o, p, k;}  PJ_OPK;
 
@@ -268,11 +261,20 @@ struct PJ_OBSERVATION {
     unsigned int flags;     /* additional data, intended for flags */
 };
 
+/* The context type - properly namespaced synonym for projCtx */
+struct projCtx_t;
+typedef struct projCtx_t PJ_CONTEXT;
+typedef int *PJ_FILE;
+
+
+
 /* Manage the transformation definition object PJ */
 PJ  *pj_create (const char *definition);
 PJ  *pj_create_argv (int argc, char **argv);
 void pj_free (PJ *P);
 int  pj_error (PJ *P);
+void pj_error_set (PJ *P, int err);
+
 
 /* Apply transformation to observation - in forward or inverse direction */
 enum pj_direction {
@@ -283,13 +285,21 @@ enum pj_direction {
 PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs);
 
 /* Measure internal consistency - in forward or inverse direction */
-double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs);
+double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs);
 
 
 /* Low level functionality for handling thread contexts */
-int  pj_context_create (PJ *P);
-void pj_context_modify (PJ *P, int err, int dbg, void (*log)(void *, int, const char *), void *app, void *api);
-void pj_context_free (PJ *P);
+int  pj_context_create  (PJ *P);
+
+void pj_error_set (PJ *P, int err);
+void pj_debug_set (PJ *P, int debuglevel);
+void pj_log_set (PJ *P, void (*log)(void *, int, const char *));
+void pj_app_data_set (PJ *P, void *app_data);
+void pj_context_inherit (PJ *mother, PJ *daughter);
+void pj_context_free    (PJ *P);
+
+/* Minimum support for fileapi, properly namespaced */
+void pj_fileapi_set (PJ *P, void *fileapi);
 
 
 #ifndef PJ_OBSERVATION_C
