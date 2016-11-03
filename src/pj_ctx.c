@@ -192,5 +192,3 @@ projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
 {
     return ctx->fileapi;
 }
-
-

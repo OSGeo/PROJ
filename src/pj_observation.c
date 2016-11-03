@@ -46,6 +46,8 @@ const PJ_OBSERVATION pj_observation_null = {
     0, 0
 };
 
+const PJ *pj_shutdown = (PJ *) &pj_shutdown;
+
 
 double pj_obs_dist_2d (PJ_OBSERVATION a, PJ_OBSERVATION b) {
     double *A = a.coo.v, *B = b.coo.v;
@@ -87,7 +89,6 @@ PJ_OBSERVATION pj_invobs (PJ_OBSERVATION obs, PJ *P) {
 
 
 PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs) {
-
     if (0==P)
         return pj_observation_error;
 
@@ -96,7 +97,7 @@ PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs)
             return pj_fwdobs (obs, P);
         case PJ_INV:
             return  pj_invobs (obs, P);
-        case 0:
+        case PJ_IDENT:
             return obs;
         default:
             break;
@@ -107,7 +108,8 @@ PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs)
 }
 
 
-double pj_roundtrip(PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs) {
+/* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
+double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs) {
     int i;
     PJ_OBSERVATION o, u;
 
@@ -158,22 +160,25 @@ void pj_error_set (PJ *P, int err) {
     pj_ctx_set_errno (pj_get_ctx(P), err);
 }
 
-void pj_debug_set (PJ *P, int debuglevel) {
-    PJ_CONTEXT *ctx = pj_get_ctx (P);
+/* Set debug level 0-3. Higher number means more debug info. 0 turns it off */
+void pj_debug_set (PJ *P, enum pj_debug_level debuglevel) {
+    PJ_CONTEXT *ctx;
+    if (0==P)
+        ctx = pj_get_default_ctx();
+    else
+        ctx = pj_get_ctx (P);
     ctx->debug_level = debuglevel;
 }
 
-void pj_log_set (PJ *P, void (*log)(void *, int, const char *)) {
+/* Put a new logging function into P's context. The opaque object app_data is passed as first arg at each call to the logger */
+void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *)) {
     PJ_CONTEXT *ctx = pj_get_ctx (P);
+    ctx->app_data = app_data;
     if (0!=log)
         ctx->logger = log;
 }
 
-void pj_app_data_set (PJ *P, void *app_data) {
-    PJ_CONTEXT *ctx = pj_get_ctx (P);
-    ctx->app_data = app_data;
-}
-
+/* Move P to a new context - initially a copy of the default context */
 int pj_context_renew (PJ *P) {
     PJ_CONTEXT *ctx = pj_ctx_alloc ();
     if (0==ctx) {
@@ -185,18 +190,36 @@ int pj_context_renew (PJ *P) {
     return 0;
 }
 
+/* Make sure daughter lives in same context as mother */
 void pj_context_inherit (PJ *mother, PJ *daughter) {
     pj_set_ctx (daughter, pj_get_ctx (mother));
 }
 
-void pj_context_free (PJ *P) {
-    pj_ctx_free (pj_get_ctx (P));
-    pj_set_ctx (P, pj_get_default_ctx ());
+
+void pj_context_free (const PJ *P) {
+    PJ_CONTEXT *ctx;
+
+    if (0==P)
+        return;
+
+    /* During shutdown it should be OK to free the default context - but this needs more work */
+    if (pj_shutdown==P) {
+        /* The obvious solution "pj_ctx_free (pj_get_default_ctx ())" fails */
+        return;
+    }
+
+    ctx = pj_get_ctx ((PJ *) P);
+
+    /* Otherwise, trying to free the default context is a no-op */
+    if (pj_get_default_ctx ()==ctx)
+        return;
+
+    /* The common (?) case: free the context and move the PJ to the default context */
+    pj_ctx_free (ctx);
+    pj_set_ctx ((PJ *) P, pj_get_default_ctx ());
 }
 
-
-
-/* Minimum support for fileapi */
+/* Minimum support for fileapi - which may never have been used... */
 void pj_fileapi_set (PJ *P, void *fileapi) {
     PJ_CONTEXT *ctx = pj_get_ctx (P);
     ctx->fileapi = (projFileAPI *) fileapi;

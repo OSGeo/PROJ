@@ -105,6 +105,9 @@
 #endif
 #include <math.h>
 
+#include <float.h>
+#include <limits.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -152,8 +155,6 @@ typedef struct PJ_OBSERVATION PJ_OBSERVATION;
 #endif /* ndef PROJ_H_MINIMAL */
 #endif /* ndef PROJ_H */
 #endif /* def PROJECTS_H */
-
-
 
 
 
@@ -267,14 +268,30 @@ typedef struct projCtx_t PJ_CONTEXT;
 typedef int *PJ_FILE;
 
 
-
 /* Manage the transformation definition object PJ */
 PJ  *pj_create (const char *definition);
 PJ  *pj_create_argv (int argc, char **argv);
 void pj_free (PJ *P);
 int  pj_error (PJ *P);
-void pj_error_set (PJ *P, int err);
 
+/* High level functionality for handling thread contexts */
+enum pj_debug_level {
+    PJ_LOG_NONE  = 0,
+    PJ_LOG_ERROR = 1,
+    PJ_LOG_DEBUG_MAJOR = 2,
+    PJ_LOG_DEBUG_MINOR = 3
+};
+void pj_debug_set (PJ *P, enum pj_debug_level debuglevel);
+void pj_error_set (PJ *P, int err);
+void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *));
+
+/* Lower level functionality for handling thread contexts */
+int  pj_context_renew (PJ *P);
+void pj_context_inherit (PJ *mother, PJ *daughter);
+void pj_context_free    (const PJ *P);
+
+/* Lowest level: Minimum support for fileapi */
+void pj_fileapi_set (PJ *P, void *fileapi);
 
 /* Apply transformation to observation - in forward or inverse direction */
 enum pj_direction {
@@ -288,23 +305,10 @@ PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs)
 double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs);
 
 
-/* Low level functionality for handling thread contexts */
-int  pj_context_create  (PJ *P);
-
-void pj_error_set (PJ *P, int err);
-void pj_debug_set (PJ *P, int debuglevel);
-void pj_log_set (PJ *P, void (*log)(void *, int, const char *));
-void pj_app_data_set (PJ *P, void *app_data);
-void pj_context_inherit (PJ *mother, PJ *daughter);
-void pj_context_free    (PJ *P);
-
-/* Minimum support for fileapi, properly namespaced */
-void pj_fileapi_set (PJ *P, void *fileapi);
-
-
 #ifndef PJ_OBSERVATION_C
 extern const PJ_OBSERVATION pj_observation_error;
 extern const PJ_OBSERVATION pj_observation_null;
+extern const PJ *pj_shutdown;
 #endif
 
 #ifndef TODEG

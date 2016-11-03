@@ -1,7 +1,46 @@
-/* Tiny test of an evolving new API. Thomas Knudsen, 2016-10-30 */
-/* gcc -pedantic -W -Wall -Wextra -I../src -o pj_proj_test pj_proj_test.c -L../../../build/proj.4/lib -lproj_4_9 */
+/*******************************************************************************
+    Tiny test of an evolving new API, demonstrating simple examples of
+    2D and 3D transformations.
+
+    The main transformation setup object is PJ, well known from the two
+    former proj APIs (projects.h and proj_api.h)
+
+    The main data object PJ_OBSERVATION is new, but encapsulates the older
+    LP, XY etc. objects in a framework for storing a 3D observation taken at
+    a 4D point in space-time, and including some additional metadata (e.g.
+    a serial number or an epsg code).
+
+    PJ_OBSERVATION uses unions to enforce explicit statement of what kind of
+    coordinates are expected at a given spot in the code.
+
+    The primary elements of the API are:
+
+    pj_create (char *desc):
+        Create a new PJ object from a text description.
+    pj_apply (PJ *P, int direction, PJ_OBSERVATION obs):
+        Forward or inverse transformation of obs.
+    pj_error (PJ *P):
+        Check error status of P.
+    pj_free (PJ *P):
+        Clean up when done with the transformation object.
+
+    These 4 functions should cover most of the common use cases. Additional
+    functionality for handling thread contexts are provided by the functions
+    pj_debug_set,  pj_error_set,  pj_log_set,  pj_context_renew,
+    pj_context_inherit,    pj_context_free,    pj_fileapi_set.
+
+    The proj thread contexts have not seen widespread use, so one of the
+    intentions with this new API is to make them less visible on the API
+    surface: Contexts do not have a life by themselves, they are only
+    visible through their associated PJs, and the number of functions
+    supporting them is limited.
+
+    Compilation example:
+    gcc -pedantic -W -Wall -Wextra -I../src -o pj_proj_test pj_proj_test.c -L../../../build/proj.4/lib -lproj_4_9
+
+    Thomas Knudsen, 2016-10-30/11-03
+*******************************************************************************/
 #include <proj.h>
-#include <float.h>
 
 int main (void) {
     PJ *p;
@@ -9,7 +48,11 @@ int main (void) {
     int err;
     double dist;
 
-    p = pj_create ("+ellps=GRS80 +proj=utm +zone=32");
+    /* Log everything libproj offers to log for you */
+    pj_debug_set (0, PJ_LOG_DEBUG_MINOR);
+
+    /* An utm projection on the GRS80 ellipsoid */
+    p = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
     if (0==p)
         return puts ("Oops"), 0;
 
@@ -21,15 +64,15 @@ int main (void) {
 
     /* Forward projection */
     b = pj_apply (p, PJ_FWD, a);
-    printf ("%15.9f %15.9f\n", b.coo.enh.e, b.coo.enh.n);
+    printf ("FWD:   %15.9f %15.9f\n", b.coo.enh.e, b.coo.enh.n);
 
     /* Inverse projection */
     a = pj_apply (p, PJ_INV, b);
-    printf ("%15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
+    printf ("INV:   %15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
 
     /* Null projection */
     a = pj_apply (p, PJ_IDENT, a);
-    printf ("%15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
+    printf ("IDENT: %15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
 
     /* Invalid projection */
     a = pj_apply (p, 42, a);
@@ -38,11 +81,11 @@ int main (void) {
     err = pj_error (p);
     printf ("pj_error: %d\n", err);
 
+    /* Clean up */
     pj_free (p);
 
-
-
-    p = pj_create ("+ellps=GRS80 +proj=cart");
+    /* Now do some */
+    p = pj_create ("+proj=cart +ellps=GRS80");
     if (0==p)
         return puts ("Oops"), 0;
 
@@ -52,19 +95,29 @@ int main (void) {
     a.coo.lpz.phi = TORAD(55);
     a.coo.lpz.z   = 100;
 
-    /* Forward projection */
+    /* Forward projection: 3D-Cartesian-to-Ellipsoidal */
     b = pj_apply (p, PJ_FWD, a);
-    printf ("%15.9f %15.9f %15.9f\n", b.coo.xyz.x, b.coo.xyz.y, b.coo.xyz.z);
+    printf ("FWD:   %15.9f %15.9f %15.9f\n", b.coo.xyz.x, b.coo.xyz.y, b.coo.xyz.z);
 
-    /* Roundtrip */
+    /* Check roundtrip precision for 10000 iterations each way */
     dist = pj_roundtrip (p, PJ_FWD, 10000, a);
     printf ("Roundtrip deviation, fwd (nm): %15.9f\n", dist*1e9*1e5);
     dist = pj_roundtrip (p, PJ_INV, 10000, b);
     printf ("Roundtrip deviation, inv (nm): %15.9f\n", dist*1e9);
 
-    /* Inverse projection */
+    /* Inverse projection: Ellipsoidal-to-3D-Cartesian */
     b = pj_apply (p, PJ_INV, b);
-    printf ("%15.9f %15.9f %15.9f\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi), b.coo.lpz.z);
+    printf ("INV:   %15.9f %15.9f %15.9f\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi), b.coo.lpz.z);
+
+    /* Move p to another context */
+    pj_context_renew (p);
+    b = pj_apply (p, PJ_FWD, b);
+    printf ("CTX1:  %15.9f %15.9f %15.9f\n", b.coo.xyz.x, b.coo.xyz.y, b.coo.xyz.z);
+
+    /* Move it back to the default context */
+    pj_context_free (p);
+    b = pj_apply (p, PJ_INV, b);
+    printf ("CTX0:  %15.9f %15.9f %15.9f\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi), b.coo.lpz.z);
 
     pj_free (p);
     return 0;
