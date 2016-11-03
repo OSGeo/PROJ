@@ -11,4 +11,4 @@ References
 
 .. [Steers1970] Steers, J.A., 1970, An introduction to the study of map projections (15th ed.): London, Univ. London Press, p. 229
 
-.. [Snyder1926] Synder, J.P., 1926, `Map Projections - A working Manual <http://eaps.mit.edu/12.114/Map_projections_a_working_manual.pdf>`_
+.. [Snyder1987] Snyder. John P. 1987. `Map Projections - A Working Manual <https://github.com/OSGeo/proj.4/blob/master/docs/old/USGS-Snyder-Map-Projections-A-Working-Manual-1987.pdf>`__. US. Geological Survey professional paper; 1395.

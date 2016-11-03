@@ -6,7 +6,7 @@ EXTRA_PROGRAMS = multistresstest test228
 AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
-include_HEADERS = proj_api.h projects.h geodesic.h \
+include_HEADERS = proj.h proj_api.h projects.h geodesic.h \
 	org_proj4_Projections.h org_proj4_PJ.h
 
 EXTRA_DIST = makefile.vc proj.def bin_cs2cs.cmake \
@@ -72,7 +72,9 @@ libproj_la_SOURCES = \
 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
 	geocent.c geocent.h pj_utils.c pj_gridinfo.c pj_gridlist.c \
 	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c geodesic.c \
-	pj_strtod.c
+	pj_strtod.c \
+	\
+	pj_observation.c
 
 install-exec-local:
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)
