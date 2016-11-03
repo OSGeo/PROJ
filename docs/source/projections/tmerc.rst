@@ -66,7 +66,7 @@ Example using Gauss Boaga on Italy area (EPSG:3004) ::
 Mathematical definition
 #######################
 
-The formulas describing the Transverse Mercator are all taken from Evenden's formula.
+The formulas describing the Transverse Mercator are all taken from Evenden's [Evenden2005]_.
 
 :math:`\phi_0` is the latitude of origin that match the center of the map. It can be set with ``+lat_0``.
 
