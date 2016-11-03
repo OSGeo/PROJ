@@ -90,7 +90,7 @@ PJ_OBSERVATION pj_invobs (PJ_OBSERVATION obs, PJ *P) {
 
 PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs) {
     if (0==P)
-        return pj_observation_error;
+        return obs;
 
     switch (direction) {
         case PJ_FWD:
