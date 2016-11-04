@@ -44,7 +44,7 @@ Example using EPSG 3068 (Soldner Berlin)::
 Mathematical definition
 #######################
 
-The formulas describing the Cassini projection are all taken from proj4 sources.
+The formulas describing the Cassini projection are taken from Snyder's [Snyder1987]_.
 
 :math:`\phi_0` is the latitude of origin that match the center of the map (default to 0). It can be set with ``+lat_0``.
 
