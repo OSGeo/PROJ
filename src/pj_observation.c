@@ -1,8 +1,15 @@
 /******************************************************************************
  * Project:  PROJ.4
- * Purpose:  Implement some service routines for the PJ_OBSERVATION generic
- *           geodetic data type
- * Author:   Thomas Knudsen,  thokn@sdfe.dk,  2016-06-09/2016-10-11
+ * Purpose:  Implement a (currently minimalistic) proj API based primarily
+ *           on the PJ_OBSERVATION generic geodetic data type.
+ *
+ *           proj thread contexts have not seen widespread use, so one of the
+ *           intentions with this new API is to make them less visible on the
+ *           API surface: Contexts do not have a life by themselves, they are
+ *           visible only through their associated PJs, and the number of
+ *           functions supporting them is limited.
+ *
+ * Author:   Thomas Knudsen,  thokn@sdfe.dk,  2016-06-09/2016-11-06
  *
  ******************************************************************************
  * Copyright (c) 2016, Thomas Knudsen/SDFE
@@ -32,28 +39,33 @@
 #include <math.h>
 
 
+/* Used as return value in case of errors */
 const PJ_OBSERVATION pj_observation_error = {
     /* Cannot use HUGE_VAL here: MSVC misimplements HUGE_VAL as something that is not compile time constant */
-    {{DBL_MAX,DBL_MAX,DBL_MAX,DBL_MAX}},
-    {{DBL_MAX,DBL_MAX,DBL_MAX}},
+/*    {{DBL_MAX,DBL_MAX,DBL_MAX,DBL_MAX}},
+    {{DBL_MAX,DBL_MAX,DBL_MAX}},*/
+    {{1.0/0.0,1.0/0.0,1.0/0.0,1.0/0.0}},
+    {{1.0/0.0,1.0/0.0,1.0/0.0}},
     0, 0
 };
 
-
+/* Used for zero-initializing new objects */
 const PJ_OBSERVATION pj_observation_null = {
     {{0, 0, 0, 0}},
     {{0, 0, 0}},
     0, 0
 };
 
+/* Magic object signaling proj system shutdown mode to routines taking a PJ * arg */
 const PJ *pj_shutdown = (PJ *) &pj_shutdown;
 
-
+/* Euclidean distance between two 2D coordinates stored in PJ_OBSERVATIONs */
 double pj_obs_dist_2d (PJ_OBSERVATION a, PJ_OBSERVATION b) {
     double *A = a.coo.v, *B = b.coo.v;
     return hypot (A[0] - B[0],  A[1] - B[1]);
 }
 
+/* Euclidean distance between two 3D coordinates stored in PJ_OBSERVATIONs */
 double pj_obs_dist_3d (PJ_OBSERVATION a, PJ_OBSERVATION b) {
     double *A = a.coo.v, *B = b.coo.v;
     return hypot (hypot (A[0] - B[0],  A[1] - B[1]),  A[2] - B[2]);
@@ -88,6 +100,7 @@ PJ_OBSERVATION pj_invobs (PJ_OBSERVATION obs, PJ *P) {
 }
 
 
+/* Apply the transformation P to the observation obs */
 PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs) {
     if (0==P)
         return obs;
@@ -147,18 +160,26 @@ PJ *pj_create (const char *definition) {
     return pj_init_plus (definition);
 }
 
+
 PJ *pj_create_argv (int argc, char **argv) {
     return pj_init (argc, argv);
 }
+
+
+/* From here: Minimum viable support for contexts. The first four functions   */
+/* relate to error reporting, debugging, and logging, hence being generically */
+/* useful. The remaining is a compact implementation of the more low level    */
+/* proj_api.h thread contexts, which may or may not be useful  */
 
 int pj_error (PJ *P) {
     return pj_ctx_get_errno (pj_get_ctx(P));
 }
 
-/* From here: Minimum viable support for contexts */
+
 void pj_error_set (PJ *P, int err) {
     pj_ctx_set_errno (pj_get_ctx(P), err);
 }
+
 
 /* Set debug level 0-3. Higher number means more debug info. 0 turns it off */
 void pj_debug_set (PJ *P, enum pj_debug_level debuglevel) {
@@ -170,6 +191,7 @@ void pj_debug_set (PJ *P, enum pj_debug_level debuglevel) {
     ctx->debug_level = debuglevel;
 }
 
+
 /* Put a new logging function into P's context. The opaque object app_data is passed as first arg at each call to the logger */
 void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *)) {
     PJ_CONTEXT *ctx = pj_get_ctx (P);
@@ -177,6 +199,7 @@ void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *)) 
     if (0!=log)
         ctx->logger = log;
 }
+
 
 /* Move P to a new context - initially a copy of the default context */
 int pj_context_renew (PJ *P) {
@@ -190,7 +213,7 @@ int pj_context_renew (PJ *P) {
     return 0;
 }
 
-/* Make sure daughter lives in same context as mother */
+/* Move daughter to mother's context */
 void pj_context_inherit (PJ *mother, PJ *daughter) {
     pj_set_ctx (daughter, pj_get_ctx (mother));
 }
@@ -218,6 +241,7 @@ void pj_context_free (const PJ *P) {
     pj_ctx_free (ctx);
     pj_set_ctx ((PJ *) P, pj_get_default_ctx ());
 }
+
 
 /* Minimum support for fileapi - which may never have been used... */
 void pj_fileapi_set (PJ *P, void *fileapi) {

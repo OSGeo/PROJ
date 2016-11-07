@@ -126,7 +126,20 @@
     while still having direct access to PJ object internals)
 ******************************************************************************/
 
+#ifdef PROJECTS_H
+#ifdef PROJECTS_H_ATEND
+/* #error is either supported or a syntax error - either way serves the purpose of failing noisily */
+#error proj.h must be included before projects.h
+#endif
+#endif
+#ifdef PROJ_API_H
+#ifdef PROJ_API_H_ATEND
+#error proj.h must be included before proj_api.h
+#endif
+#endif
 
+
+/* Minimum version to let projects.h know the sizeof(PJ_OBSERVATION) */
 #ifdef PROJECTS_H
 #ifndef PROJ_H
 #ifndef PROJ_H_MINIMAL
@@ -134,7 +147,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Minimum version to let projects.h know the sizeof(PJ_OBSERVATION) */
 union PJ_SPATIOTEMPORAL { double u[4]; double v[4]; };
 union PJ_TRIPLET        { double u[3]; double v[3]; };
 
@@ -159,6 +171,7 @@ typedef struct PJ_OBSERVATION PJ_OBSERVATION;
 
 
 
+/* Full version */
 #ifndef PROJECTS_H
 #ifndef PROJ_H
 #define PROJ_H

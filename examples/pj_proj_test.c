@@ -57,7 +57,7 @@ int main (void) {
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
-    a = b = pj_observation_null;
+    a = pj_observation_null;
     /* a.coo.lp: The coordinate part of a, interpreted as a classic LP pair */
     a.coo.lp.lam = TORAD(12);
     a.coo.lp.phi = TORAD(55);
@@ -84,7 +84,7 @@ int main (void) {
     /* Clean up */
     pj_free (p);
 
-    /* Now do some */
+    /* Now do some 3D transformations */
     p = pj_create ("+proj=cart +ellps=GRS80");
     if (0==p)
         return puts ("Oops"), 0;
