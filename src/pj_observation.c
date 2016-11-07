@@ -42,10 +42,8 @@
 /* Used as return value in case of errors */
 const PJ_OBSERVATION pj_observation_error = {
     /* Cannot use HUGE_VAL here: MSVC misimplements HUGE_VAL as something that is not compile time constant */
-/*    {{DBL_MAX,DBL_MAX,DBL_MAX,DBL_MAX}},
-    {{DBL_MAX,DBL_MAX,DBL_MAX}},*/
-    {{1.0/0.0,1.0/0.0,1.0/0.0,1.0/0.0}},
-    {{1.0/0.0,1.0/0.0,1.0/0.0}},
+    {{DBL_MAX,DBL_MAX,DBL_MAX,DBL_MAX}},
+    {{DBL_MAX,DBL_MAX,DBL_MAX}},
     0, 0
 };
 
