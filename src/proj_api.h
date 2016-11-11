@@ -45,20 +45,23 @@
 
 
 /* If we're not asked for PJ_VERSION only, give them everything */
-#ifndef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
+#ifdef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
+#undef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
+#else
 
 /* General projections header file */
 #ifndef PROJ_API_H
 #define PROJ_API_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 /* standard inclusions */
 #include <math.h>
 #include <stdlib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* pj_init() and similar functions can be used with a non-C locale */
 /* Can be detected too at runtime if the symbol pj_atof exists */
@@ -71,8 +74,30 @@ extern int pj_errno;	/* global error return code */
 #define DEG_TO_RAD	.017453292519943296
 
 
+#if defined(PROJECTS_H) || defined(PROJ_H)
+#define PROJ_API_H_NOT_INVOKED_AS_PRIMARY_API
+#endif
 
-#ifndef PROJECTS_H
+
+
+#ifndef PROJ_H
+/* In proj.h these macros are replaced by the enumeration pj_debug_level */
+#define PJ_LOG_NONE        0
+#define PJ_LOG_ERROR       1
+#define PJ_LOG_DEBUG_MAJOR 2
+#define PJ_LOG_DEBUG_MINOR 3
+#endif
+
+
+#ifdef PROJ_API_H_NOT_INVOKED_AS_PRIMARY_API
+    /* These make the function declarations below conform with classic proj */
+    typedef PJ *projPJ;          /* projPJ is a pointer to PJ */
+    typedef projCtx_t *projCtx;  /* projCtx is a pointer to projCtx_t */
+#   define projXY	    XY
+#   define projLP       LP
+#   define projXYZ      XYZ
+#   define projLPZ      LPZ
+#else
     /* i.e. proj_api invoked as primary API */
     typedef struct { double u, v; } projUV;
     typedef struct { double u, v, w; } projUVW;
@@ -82,26 +107,10 @@ extern int pj_errno;	/* global error return code */
     #define projXYZ projUVW
     #define projLPZ projUVW
     typedef void *projCtx;
-#else
-    typedef PJ *projPJ;
-    typedef projCtx_t *projCtx;
-#   define projXY	XY
-#   define projLP       LP
-#   define projXYZ      XYZ
-#   define projLPZ      LPZ
 #endif
 
-projCtx pj_get_default_ctx(void);
-projCtx pj_get_ctx( projPJ );
 
 
-/* procedure prototypes */
-
-projXY pj_fwd(projLP, projPJ);
-projLP pj_inv(projXY, projPJ);
-
-projXYZ pj_fwd3d(projLPZ, projPJ);
-projLPZ pj_inv3d(projXYZ, projPJ);
 
 /* If included *after* proj.h finishes, we have alternative names */
 /* file reading api, like stdio */
@@ -114,9 +123,19 @@ typedef struct projFileAPI_t {
     void    (*FClose)(PAFile);
 } projFileAPI;
 
-/* Minimum support for fileapi, properly namespaced */
-struct pj_fileapi;
-typedef struct pj_fileapi PJ_FILEAPI;
+
+
+/* procedure prototypes */
+
+projCtx pj_get_default_ctx(void);
+projCtx pj_get_ctx( projPJ );
+
+projXY pj_fwd(projLP, projPJ);
+projLP pj_inv(projXY, projPJ);
+
+projXYZ pj_fwd3d(projLPZ, projPJ);
+projLPZ pj_inv3d(projXYZ, projPJ);
+
 
 int pj_transform( projPJ src, projPJ dst, long point_count, int point_offset,
                   double *x, double *y, double *z );
@@ -147,7 +166,8 @@ projPJ pj_init_ctx( projCtx, int, char ** );
 projPJ pj_init_plus_ctx( projCtx, const char * );
 char *pj_get_def(projPJ, int);
 projPJ pj_latlong_from_proj( projPJ );
-#endif /* ndef PROJ_H_ATEND */
+
+
 void *pj_malloc(size_t);
 void pj_dalloc(void *);
 void *pj_calloc (size_t n, size_t size);
@@ -160,8 +180,6 @@ void pj_release_lock(void);
 void pj_cleanup_lock(void);
 
 int pj_run_selftests (int verbosity);
-
-
 
 void pj_set_ctx( projPJ, projCtx );
 projCtx pj_ctx_alloc(void);
@@ -191,24 +209,9 @@ char  *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file);
 PAFile pj_open_lib(projCtx, const char *, const char *);
 
 
-
-#define PJ_LOG_NONE        0
-#define PJ_LOG_ERROR       1
-#define PJ_LOG_DEBUG_MAJOR 2
-#define PJ_LOG_DEBUG_MINOR 3
-#endif /* ndef PROJ_H_ATEND */
-
 #ifdef __cplusplus
 }
 #endif
 
-/* proj.h needs to know if proj_api.h has been included at top level (i.e. not through projects.h) */
-#ifndef PROJECTS_H
-#ifndef PROJ_API_H_ATEND
-#define PROJ_API_H_ATEND
-#endif
-#endif
-
-#ifdef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
-#undef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
-#endif
+#endif /* ndef PROJ_API_H */
+#endif /* def PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY... else */

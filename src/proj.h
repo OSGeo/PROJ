@@ -119,67 +119,13 @@
 #include <string.h>
 #include <errno.h>
 
-/******************************************************************************
-    proj.h is included by projects.h in order to determine the size of the
-    PJ_OBS object. When included by projects.h, inclusion guards
-    ensure that only a minimal implementation being the same size as the fully
-    defined one, but stomping as little as possible on the traditional proj.4
-    name space by excluding the details.
-
-    The PJ_OBS object is fully defined if proj.h is included alone or
-    in connection with *but before* projects.h (the latter may be needed in
-    some cases, where it is necessary to access this "bare essentials" API,
-    while still having direct access to PJ object internals)
-******************************************************************************/
-
 #ifdef PROJECTS_H
-#ifdef PROJECTS_H_ATEND
-/* #error is either supported or a syntax error - either way serves the purpose of failing noisily */
 #error proj.h must be included before projects.h
 #endif
-#endif
 #ifdef PROJ_API_H
-#ifdef PROJ_API_H_ATEND
 #error proj.h must be included before proj_api.h
 #endif
-#endif
 
-
-/* Minimum version to let projects.h know the sizeof(PJ_OBS) */
-#ifdef PROJECTS_H
-#ifndef PROJ_H
-#ifndef PROJ_H_MINIMAL
-#define PROJ_H_MINIMAL
-#ifdef __cplusplus
-extern "C" {
-#endif
-/* In physics, an event is a point in 4D space-time: a spatiotemporal coordinate */
-union PJ_COORD    { double u[4]; double v[4]; };
-union PJ_TRIPLET  { double u[3]; double v[3]; };
-
-typedef union PJ_COORD PJ_COORD;
-typedef union PJ_TRIPLET PJ_TRIPLET;
-
-struct PJ_OBS {
-    PJ_COORD coo;  /* coordinate data */
-    PJ_TRIPLET anc;         /* ancillary data */
-    int id;                 /* integer ancillary data - e.g. observation number, EPSG code... */
-    unsigned int flags;     /* additional data, intended for flags */
-};
-
-typedef struct PJ_OBS PJ_OBS;
-#ifdef __cplusplus
-}
-#endif
-#endif /* ndef PROJ_H_MINIMAL */
-#endif /* ndef PROJ_H */
-#endif /* def PROJECTS_H */
-
-
-
-
-/* Full version */
-#ifndef PROJECTS_H
 #ifndef PROJ_H
 #define PROJ_H
 #ifdef __cplusplus
@@ -187,7 +133,7 @@ extern "C" {
 #endif
 
 
-/* Need access to PJ_VERSION */
+/* We need to access the PJ_VERSION symbol from proj_api.h */
 #define PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
 #include <proj_api.h>
 #undef  PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
@@ -343,10 +289,4 @@ extern const PJ *pj_shutdown;
 }
 #endif
 
-#ifndef PROJ_H_ATEND
-#define PROJ_H_ATEND
-#endif
-
-
 #endif /* ndef PROJ_H */
-#endif /* ndef PROJECTS_H */
