@@ -52,18 +52,24 @@
  *           renamed struct pj_ctx some day...)
  *
  *           THIRD, I try to eliminate implicit type punning. Hence this API
- *           introduces the PJ_OBSERVATION data type, for generic coordinate and
- *           handling of ancillary data.
+ *           introduces the PJ_OBS ("observation") data type, for generic
+ *           coordinate and handling of ancillary data.
  *
- *           It includes the PJ_SPATIOTEMPORAL and PJ_TRIPLET unions
- *           making it possible to make explicit the previously used
- *           "implicit type punning", where a XY is turned into a LP by
- *           re#defining both as UV, behind the back of the user.
+ *           It includes the PJ_COORD and PJ_TRIPLET unions making it possible
+ *           to make explicit the previously used "implicit type punning", where
+ *           a XY is turned into a LP by re#defining both as UV, behind the back
+ *           of the user.
+ *
+ *           The PJ_COORD union is used for storing 1D, 2D, 3D and 4D coordinates.
+ *           The PJ_TRIPLET union is used for storing any set of up to 3 related
+ *           observations. At the application code level, the names of these
+ *           unions will usually not be used - they will only be accessed via
+ *           their tag names in the PJ_OBS data type.
  *
  *           The bare essentials API presented here follows the PROJ.4
  *           convention of sailing the coordinate to be reprojected, up on
  *           the stack ("call by value"), and symmetrically returning the
- *           result on the stack. Although the PJ_OBSERVATION object is 4 times
+ *           result on the stack. Although the PJ_OBS object is 4 times
  *           as large as the traditional XY and LP objects, timing results
  *           have shown the overhead to be very reasonable.
  *
@@ -94,7 +100,7 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO COORD SHALL
  * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
@@ -115,12 +121,12 @@
 
 /******************************************************************************
     proj.h is included by projects.h in order to determine the size of the
-    PJ_OBSERVATION object. When included by projects.h, inclusion guards
+    PJ_OBS object. When included by projects.h, inclusion guards
     ensure that only a minimal implementation being the same size as the fully
     defined one, but stomping as little as possible on the traditional proj.4
     name space by excluding the details.
 
-    The PJ_OBSERVATION object is fully defined if proj.h is included alone or
+    The PJ_OBS object is fully defined if proj.h is included alone or
     in connection with *but before* projects.h (the latter may be needed in
     some cases, where it is necessary to access this "bare essentials" API,
     while still having direct access to PJ object internals)
@@ -139,7 +145,7 @@
 #endif
 
 
-/* Minimum version to let projects.h know the sizeof(PJ_OBSERVATION) */
+/* Minimum version to let projects.h know the sizeof(PJ_OBS) */
 #ifdef PROJECTS_H
 #ifndef PROJ_H
 #ifndef PROJ_H_MINIMAL
@@ -147,20 +153,21 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-union PJ_SPATIOTEMPORAL { double u[4]; double v[4]; };
-union PJ_TRIPLET        { double u[3]; double v[3]; };
+/* In physics, an event is a point in 4D space-time: a spatiotemporal coordinate */
+union PJ_COORD    { double u[4]; double v[4]; };
+union PJ_TRIPLET  { double u[3]; double v[3]; };
 
-typedef union PJ_SPATIOTEMPORAL PJ_SPATIOTEMPORAL;
+typedef union PJ_COORD PJ_COORD;
 typedef union PJ_TRIPLET PJ_TRIPLET;
 
-struct PJ_OBSERVATION {
-    PJ_SPATIOTEMPORAL coo;  /* coordinate data */
+struct PJ_OBS {
+    PJ_COORD coo;  /* coordinate data */
     PJ_TRIPLET anc;         /* ancillary data */
     int id;                 /* integer ancillary data - e.g. observation number, EPSG code... */
     unsigned int flags;     /* additional data, intended for flags */
 };
 
-typedef struct PJ_OBSERVATION PJ_OBSERVATION;
+typedef struct PJ_OBS PJ_OBS;
 #ifdef __cplusplus
 }
 #endif
@@ -189,16 +196,16 @@ extern "C" {
 /* first forward declare everything needed */
 
 /* Data type for generic geodetic observations */
-struct PJ_OBSERVATION;
-typedef struct PJ_OBSERVATION PJ_OBSERVATION;
+struct PJ_OBS;
+typedef struct PJ_OBS PJ_OBS;
 
 /* Data type for generic geodetic 3D data */
 union PJ_TRIPLET;
 typedef union PJ_TRIPLET PJ_TRIPLET;
 
 /* Data type for generic geodetic 3D data plus epoch information */
-union PJ_SPATIOTEMPORAL;
-typedef union PJ_SPATIOTEMPORAL PJ_SPATIOTEMPORAL;
+union PJ_COORD;
+typedef union PJ_COORD PJ_COORD;
 
 /* Data type for projection/transformation information */
 struct PJconsts;
@@ -236,7 +243,7 @@ typedef struct { double   e,  z, N; }  PJ_EZN;
 /* Ellipsoidal parameters */
 typedef struct { double   a,   f; }  PJ_AF;
 
-union PJ_SPATIOTEMPORAL {
+union PJ_COORD {
     PJ_XYZT xyzt;
     PJ_UVWT uvwt;
     PJ_ENHT enht;
@@ -268,8 +275,8 @@ union PJ_TRIPLET {
     UV     uv;
 };
 
-struct PJ_OBSERVATION {
-    PJ_SPATIOTEMPORAL coo;  /* coordinate data */
+struct PJ_OBS {
+    PJ_COORD coo;  /* coordinate data */
     PJ_TRIPLET anc;         /* ancillary data */
     int id;                 /* integer ancillary data - e.g. observation number, EPSG code... */
     unsigned int flags;     /* additional data, intended for flags */
@@ -312,15 +319,15 @@ enum pj_direction {
     PJ_IDENT =  0,   /* Do nothing */
     PJ_INV   = -1    /* Inverse    */
 };
-PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs);
+PJ_OBS pj_apply (PJ *P, enum pj_direction direction, PJ_OBS obs);
 
 /* Measure internal consistency - in forward or inverse direction */
-double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs);
+double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs);
 
 
-#ifndef PJ_OBSERVATION_C
-extern const PJ_OBSERVATION pj_observation_error;
-extern const PJ_OBSERVATION pj_observation_null;
+#ifndef PJ_OBS_C
+extern const PJ_OBS pj_obs_error;
+extern const PJ_OBS pj_obs_null;
 extern const PJ *pj_shutdown;
 #endif
 

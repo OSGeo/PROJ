@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project:  PROJ.4
  * Purpose:  Implement a (currently minimalistic) proj API based primarily
- *           on the PJ_OBSERVATION generic geodetic data type.
+ *           on the PJ_OBS generic geodetic data type.
  *
  *           proj thread contexts have not seen widespread use, so one of the
  *           intentions with this new API is to make them less visible on the
@@ -32,7 +32,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-#define PJ_OBSERVATION_C
+#define PJ_OBS_C
 #include <proj.h>
 #include <projects.h>
 #include <float.h>
@@ -40,7 +40,7 @@
 
 
 /* Used as return value in case of errors */
-const PJ_OBSERVATION pj_observation_error = {
+const PJ_OBS pj_obs_error = {
     /* Cannot use HUGE_VAL here: MSVC misimplements HUGE_VAL as something that is not compile time constant */
     {{DBL_MAX,DBL_MAX,DBL_MAX,DBL_MAX}},
     {{DBL_MAX,DBL_MAX,DBL_MAX}},
@@ -48,7 +48,7 @@ const PJ_OBSERVATION pj_observation_error = {
 };
 
 /* Used for zero-initializing new objects */
-const PJ_OBSERVATION pj_observation_null = {
+const PJ_OBS pj_obs_null = {
     {{0, 0, 0, 0}},
     {{0, 0, 0}},
     0, 0
@@ -57,20 +57,20 @@ const PJ_OBSERVATION pj_observation_null = {
 /* Magic object signaling proj system shutdown mode to routines taking a PJ * arg */
 const PJ *pj_shutdown = (PJ *) &pj_shutdown;
 
-/* Euclidean distance between two 2D coordinates stored in PJ_OBSERVATIONs */
-double pj_obs_dist_2d (PJ_OBSERVATION a, PJ_OBSERVATION b) {
+/* Euclidean distance between two 2D coordinates stored in PJ_OBSs */
+double pj_obs_dist_2d (PJ_OBS a, PJ_OBS b) {
     double *A = a.coo.v, *B = b.coo.v;
     return hypot (A[0] - B[0],  A[1] - B[1]);
 }
 
-/* Euclidean distance between two 3D coordinates stored in PJ_OBSERVATIONs */
-double pj_obs_dist_3d (PJ_OBSERVATION a, PJ_OBSERVATION b) {
+/* Euclidean distance between two 3D coordinates stored in PJ_OBSs */
+double pj_obs_dist_3d (PJ_OBS a, PJ_OBS b) {
     double *A = a.coo.v, *B = b.coo.v;
     return hypot (hypot (A[0] - B[0],  A[1] - B[1]),  A[2] - B[2]);
 }
 
 
-PJ_OBSERVATION pj_fwdobs (PJ_OBSERVATION obs, PJ *P) {
+PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
     if (0!=P->fwd3d) {
         obs.coo.xyz  =  pj_fwd3d (obs.coo.lpz, P);
         return obs;
@@ -80,11 +80,11 @@ PJ_OBSERVATION pj_fwdobs (PJ_OBSERVATION obs, PJ *P) {
         return obs;
     }
     pj_error_set (P, EINVAL);
-    return pj_observation_error;
+    return pj_obs_error;
 }
 
 
-PJ_OBSERVATION pj_invobs (PJ_OBSERVATION obs, PJ *P) {
+PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
     if (0!=P->inv3d) {
         obs.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
         return obs;
@@ -94,12 +94,12 @@ PJ_OBSERVATION pj_invobs (PJ_OBSERVATION obs, PJ *P) {
         return obs;
     }
     pj_error_set (P, EINVAL);
-    return pj_observation_error;
+    return pj_obs_error;
 }
 
 
 /* Apply the transformation P to the observation obs */
-PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs) {
+PJ_OBS pj_apply (PJ *P, enum pj_direction direction, PJ_OBS obs) {
     if (0==P)
         return obs;
 
@@ -115,14 +115,14 @@ PJ_OBSERVATION pj_apply (PJ *P, enum pj_direction direction, PJ_OBSERVATION obs)
     }
 
     pj_error_set (P, EINVAL);
-    return pj_observation_error;
+    return pj_obs_error;
 }
 
 
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
-double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBSERVATION obs) {
+double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs) {
     int i;
-    PJ_OBSERVATION o, u;
+    PJ_OBS o, u;
 
     if (0==P)
         return HUGE_VAL;

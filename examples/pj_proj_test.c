@@ -5,19 +5,19 @@
     The main transformation setup object is PJ, well known from the two
     former proj APIs (projects.h and proj_api.h)
 
-    The main data object PJ_OBSERVATION is new, but encapsulates the older
+    The main data object PJ_OBS is new, but encapsulates the older
     LP, XY etc. objects in a framework for storing a 3D observation taken at
     a 4D point in space-time, and including some additional metadata (e.g.
     a serial number or an epsg code).
 
-    PJ_OBSERVATION uses unions to enforce explicit statement of what kind of
+    PJ_OBS uses unions to enforce explicit statement of what kind of
     coordinates are expected at a given spot in the code.
 
     The primary elements of the API are:
 
     pj_create (char *desc):
         Create a new PJ object from a text description.
-    pj_apply (PJ *P, int direction, PJ_OBSERVATION obs):
+    pj_apply (PJ *P, int direction, PJ_OBS obs):
         Forward or inverse transformation of obs.
     pj_error (PJ *P):
         Check error status of P.
@@ -42,9 +42,10 @@
 *******************************************************************************/
 #include <proj.h>
 
+
 int main (void) {
     PJ *p;
-    PJ_OBSERVATION a, b;
+    PJ_OBS a, b;
     int err;
     double dist;
 
@@ -57,7 +58,7 @@ int main (void) {
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
-    a = pj_observation_null;
+    a = pj_obs_null;
     /* a.coo.lp: The coordinate part of a, interpreted as a classic LP pair */
     a.coo.lp.lam = TORAD(12);
     a.coo.lp.phi = TORAD(55);
@@ -90,7 +91,7 @@ int main (void) {
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
-    a = b = pj_observation_null;
+    a = b = pj_obs_null;
     a.coo.lpz.lam = TORAD(12);
     a.coo.lpz.phi = TORAD(55);
     a.coo.lpz.z   = 100;

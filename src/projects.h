@@ -168,6 +168,7 @@ typedef struct { double u, v, w; }     UVW;
 
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
 struct PJconsts;
+struct PJ_OBS;
 struct pj_opaque;
 struct ARG_list;
 struct FACTORS;
@@ -181,6 +182,7 @@ enum pj_io_units {
 };
 #ifndef PROJ_H
 typedef struct PJconsts PJ;         /* the PJ object herself */
+typedef struct PJ_OBS PJ_OBS;
 #endif
 
 struct PJ_REGION_S {
@@ -191,7 +193,6 @@ struct PJ_REGION_S {
 };
 
 
-#include "proj.h"  /* Need this for sizeof(PJ_OBSERVATION) */
 struct projCtx_t;
 typedef struct projCtx_t projCtx_t;
 
@@ -229,12 +230,13 @@ struct PJconsts {
 
     **************************************************************************************/
 
+
     XY  (*fwd)(LP,    PJ *);
     LP  (*inv)(XY,    PJ *);
     XYZ (*fwd3d)(LPZ, PJ *);
     LPZ (*inv3d)(XYZ, PJ *);
-    PJ_OBSERVATION (*fwdobs)(PJ_OBSERVATION, PJ *);
-    PJ_OBSERVATION (*invobs)(PJ_OBSERVATION, PJ *);
+    PJ_OBS (*fwdobs)(PJ_OBS, PJ *);
+    PJ_OBS (*invobs)(PJ_OBS, PJ *);
 
     void (*spc)(LP, PJ *, struct FACTORS *);
 
