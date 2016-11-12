@@ -45,10 +45,7 @@
 
 
 /* If we're not asked for PJ_VERSION only, give them everything */
-#ifdef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
-#undef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
-#else
-
+#ifndef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
 /* General projections header file */
 #ifndef PROJ_API_H
 #define PROJ_API_H
@@ -214,4 +211,4 @@ PAFile pj_open_lib(projCtx, const char *, const char *);
 #endif
 
 #endif /* ndef PROJ_API_H */
-#endif /* def PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY... else */
+#endif /* ndef PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY */
