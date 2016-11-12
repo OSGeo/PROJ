@@ -75,6 +75,13 @@ int main (void) {
     a = pj_apply (p, PJ_IDENT, a);
     printf ("IDENT: %15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
 
+    /* Forward again, to get two linear items for comparison */
+    a = pj_apply (p, PJ_FWD, a);
+    printf ("FWD:   %15.9f %15.9f\n", b.coo.enh.e, b.coo.enh.n);
+
+    dist = pj_obs_dist_2d (a, b);
+    printf ("Roundtrip deviation, (nm): %15.9f\n", dist*1e9);
+
     /* Invalid projection */
     a = pj_apply (p, 42, a);
     if (a.coo.lpz.lam!=DBL_MAX)

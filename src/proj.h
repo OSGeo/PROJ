@@ -270,6 +270,13 @@ PJ_OBS pj_apply (PJ *P, enum pj_direction direction, PJ_OBS obs);
 /* Measure internal consistency - in forward or inverse direction */
 double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs);
 
+/* Euclidean distance between two 2D coordinates stored in PJ_OBSs */
+double pj_obs_dist_2d (PJ_OBS a, PJ_OBS b);
+
+/* Euclidean distance between two 3D coordinates stored in PJ_OBSs */
+double pj_obs_dist_3d (PJ_OBS a, PJ_OBS b);
+
+
 
 #ifndef PJ_OBS_C
 extern const PJ_OBS pj_obs_error;

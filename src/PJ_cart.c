@@ -209,7 +209,7 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
 
 
 
-/* Rather pointless, but... */
+/* In effect, 2 cartesian coordinates of a point on the ellipsoid. Rather pointless, but... */
 static XY cart_forward (LP lp, PJ *P) {
     PJ_TRIPLET point;
     point.lp = lp;
@@ -219,7 +219,7 @@ static XY cart_forward (LP lp, PJ *P) {
     return point.xy;
 }
 
-/* Rather pointless, but... */
+/* And the other way round. Still rather pointless, but... */
 static LP cart_reverse (XY xy, PJ *P) {
     PJ_TRIPLET point;
     point.xy = xy;
@@ -234,8 +234,8 @@ static LP cart_reverse (XY xy, PJ *P) {
 /*********************************************************************/
 PJ *PROJECTION(cart) {
 /*********************************************************************/
-    P->fwd3d  =  cartesian;  /* or use cart_forward_3d, but add scaling */
-    P->inv3d  =  geodetic;   /* or use cart_reverse_3d, but add scaling */
+    P->fwd3d  =  cartesian;
+    P->inv3d  =  geodetic;
     P->fwd    =  cart_forward;
     P->inv    =  cart_reverse;
     return P;
@@ -245,9 +245,92 @@ PJ *PROJECTION(cart) {
 /* selftest stub */
 int pj_cart_selftest (void) {return 0;}
 #else
+/* Testing quite a bit of the pj_obs_api as a side effect (inspired by pj_obs_api_test.c) */
 int pj_cart_selftest (void) {
-    /* char e_args[] = {"+proj=cart   +ellps=GRS80"}; */
-    /* char s_args[] = {"+proj=cart   +a=6400000"};   */
+    PJ *p;
+    PJ_OBS a, b;
+    int err;
+    double dist;
+
+    /* Log everything libproj offers to log for you */
+    pj_debug_set (0, PJ_LOG_DEBUG_MINOR);
+
+    /* An utm projection on the GRS80 ellipsoid */
+    p = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
+    if (0==p)
+        return 1;
+
+    /* Turn off logging */
+    pj_debug_set (0, PJ_LOG_NONE);
+
+    /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
+    a = pj_obs_null;
+    /* a.coo.lp: The coordinate part of a, interpreted as a classic LP pair */
+    a.coo.lp.lam = TORAD(12);
+    a.coo.lp.phi = TORAD(55);
+
+    /* Forward projection */
+    b = pj_apply (p, PJ_FWD, a);
+
+    /* Inverse projection */
+    a = pj_apply (p, PJ_INV, b);
+
+    /* Null projection */
+    a = pj_apply (p, PJ_IDENT, a);
+
+    /* Forward again, to get two linear items for comparison */
+    a = pj_apply (p, PJ_INV, a);
+
+    dist = pj_obs_dist_2d (a, b);
+    if (dist > 2e-9)
+        return 2;
+
+    /* Invalid projection */
+    a = pj_apply (p, 42, a);
+    if (a.coo.lpz.lam!=DBL_MAX)
+        return 3;
+    err = pj_error (p);
+    if (0==err)
+        return 4;
+
+    /* Clear error */
+    pj_error_set (p, 0);
+
+    /* Clean up */
+    pj_free (p);
+
+    /* Now do some 3D transformations */
+    p = pj_create ("+proj=cart +ellps=GRS80");
+    if (0==p)
+        return 5;
+
+    /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
+    a = b = pj_obs_null;
+    a.coo.lpz.lam = TORAD(12);
+    a.coo.lpz.phi = TORAD(55);
+    a.coo.lpz.z   = 100;
+
+    /* Forward projection: 3D-Cartesian-to-Ellipsoidal */
+    b = pj_apply (p, PJ_FWD, a);
+
+    /* Check roundtrip precision for 10000 iterations each way */
+    dist = pj_roundtrip (p, PJ_FWD, 10000, a);
+    dist = pj_roundtrip (p, PJ_INV, 10000, b);
+    if (dist > 2e-9)
+        return 6;
+
+    /* Inverse projection: Ellipsoidal-to-3D-Cartesian */
+    b = pj_apply (p, PJ_INV, b);
+
+    /* Move p to another context */
+    pj_context_renew (p);
+    b = pj_apply (p, PJ_FWD, b);
+
+    /* Move it back to the default context */
+    pj_context_free (p);
+    b = pj_apply (p, PJ_INV, b);
+
+    pj_free (p);
     return 0;
 }
 #endif
