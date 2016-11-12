@@ -59,7 +59,7 @@ support = \
 	pj_strtod.obj pj_run_selftests.obj pj_generic_selftest.obj
 
 pipeline = \
-	pj_observation.obj
+	pj_obs_api.obj PJ_cart.obj
 
 geodesic = geodesic.obj
 
