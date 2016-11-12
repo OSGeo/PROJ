@@ -279,7 +279,7 @@ int pj_cart_selftest (void) {
     a = pj_apply (p, PJ_IDENT, a);
 
     /* Forward again, to get two linear items for comparison */
-    a = pj_apply (p, PJ_INV, a);
+    a = pj_apply (p, PJ_FWD, a);
 
     dist = pj_obs_dist_2d (a, b);
     if (dist > 2e-9)
