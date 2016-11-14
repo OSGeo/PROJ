@@ -138,6 +138,8 @@ extern "C" {
 #include <proj_api.h>
 #undef  PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
 
+extern char const pj_release[]; /* global release id string */
+extern int        pj_errno;     /* global error return code */
 
 /* first forward declare everything needed */
 
@@ -189,13 +191,14 @@ typedef struct { double   e,  z, N; }  PJ_EZN;
 /* Ellipsoidal parameters */
 typedef struct { double   a,   f; }  PJ_AF;
 
+/* Avoid preprocessor renaming and implicit type-punning: Use unions to make it explicit */
 union PJ_COORD {
     PJ_XYZT xyzt;
     PJ_UVWT uvwt;
     PJ_ENHT enht;
     PJ_LPZT lpzt;
     PJ_ENH  enh;
-    double v[4]; /* Who cares - it's just a vector! */
+    double v[4]; /* It's just a vector */
     XYZ  xyz;
     UVW  uvw;
     LPZ  lpz;
@@ -204,21 +207,27 @@ union PJ_COORD {
     LP   lp;
 };
 
-
-
-/* Avoid preprocessor renaming and implicit type-punning: Use a union to make it explicit */
 union PJ_TRIPLET {
     PJ_OPK  opk;
     PJ_ENH  enh;
     PJ_EZN  ezn;
-    PJ_AF   af;
-    double v[3]; /* Who cares - it's just a vector! */
+    PJ_DMS  dms;
+    double v[3]; /* It's just a vector */
     XYZ    xyz;
     LPZ    lpz;
     UVW    uvw;
     XY     xy;
     LP     lp;
     UV     uv;
+    PJ_AF  af;
+};
+
+union PJ_PAIR {
+    XY     xy;
+    LP     lp;
+    UV     uv;
+    PJ_AF  af;
+    double v[2]; /* It's really just a vector! */
 };
 
 struct PJ_OBS {
@@ -270,12 +279,11 @@ PJ_OBS pj_apply (PJ *P, enum pj_direction direction, PJ_OBS obs);
 /* Measure internal consistency - in forward or inverse direction */
 double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs);
 
-/* Euclidean distance between two 2D coordinates stored in PJ_OBSs */
-double pj_obs_dist_2d (PJ_OBS a, PJ_OBS b);
+/* Euclidean distance between two points with linear 2D coordinates */
+double pj_xy_dist (XY a, XY b);
 
-/* Euclidean distance between two 3D coordinates stored in PJ_OBSs */
-double pj_obs_dist_3d (PJ_OBS a, PJ_OBS b);
-
+/* Euclidean distance between two points with linear 3D coordinates */
+double pj_xyz_dist (XYZ a, XYZ b);
 
 
 #ifndef PJ_OBS_C

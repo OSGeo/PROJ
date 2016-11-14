@@ -64,11 +64,8 @@ extern "C" {
 /* Can be detected too at runtime if the symbol pj_atof exists */
 #define PJ_LOCALE_SAFE 1
 
-extern char const pj_release[]; /* global release id string */
-extern int pj_errno;	/* global error return code */
-
-#define RAD_TO_DEG	57.295779513082321
-#define DEG_TO_RAD	.017453292519943296
+#define RAD_TO_DEG    57.295779513082321
+#define DEG_TO_RAD   .017453292519943296
 
 
 #if defined(PROJECTS_H) || defined(PROJ_H)
@@ -78,6 +75,9 @@ extern int pj_errno;	/* global error return code */
 
 
 #ifndef PROJ_H
+extern char const pj_release[]; /* global release id string */
+extern int pj_errno;    /* global error return code */
+
 /* In proj.h these macros are replaced by the enumeration pj_debug_level */
 #define PJ_LOG_NONE        0
 #define PJ_LOG_ERROR       1
@@ -90,7 +90,7 @@ extern int pj_errno;	/* global error return code */
     /* These make the function declarations below conform with classic proj */
     typedef PJ *projPJ;          /* projPJ is a pointer to PJ */
     typedef projCtx_t *projCtx;  /* projCtx is a pointer to projCtx_t */
-#   define projXY	    XY
+#   define projXY        XY
 #   define projLP       LP
 #   define projXYZ      XYZ
 #   define projLPZ      LPZ
@@ -105,8 +105,6 @@ extern int pj_errno;	/* global error return code */
     #define projLPZ projUVW
     typedef void *projCtx;
 #endif
-
-
 
 
 /* If included *after* proj.h finishes, we have alternative names */

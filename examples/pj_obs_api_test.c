@@ -46,6 +46,7 @@
 int main (void) {
     PJ *p;
     PJ_OBS a, b;
+    char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
     int err;
     double dist;
 
@@ -54,6 +55,14 @@ int main (void) {
 
     /* An utm projection on the GRS80 ellipsoid */
     p = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
+    if (0==p)
+        return puts ("Oops"), 0;
+
+    /* Clean up */
+    pj_free (p);
+
+    /* Same projection, now using argc/argv style initialization */
+    p = pj_create_argv (3, args);
     if (0==p)
         return puts ("Oops"), 0;
 
@@ -79,7 +88,11 @@ int main (void) {
     a = pj_apply (p, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f\n", b.coo.enh.e, b.coo.enh.n);
 
-    dist = pj_obs_dist_2d (a, b);
+    dist = pj_xy_dist (a.coo.xy, b.coo.xy);
+    printf ("Roundtrip deviation, (nm): %15.9f\n", dist*1e9);
+
+    /* should be identical - checking whether null-init is done */
+    dist = pj_xyz_dist (a.coo.xyz, b.coo.xyz);
     printf ("Roundtrip deviation, (nm): %15.9f\n", dist*1e9);
 
     /* Invalid projection */

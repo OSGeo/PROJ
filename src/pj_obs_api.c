@@ -57,16 +57,14 @@ const PJ_OBS pj_obs_null = {
 /* Magic object signaling proj system shutdown mode to routines taking a PJ * arg */
 const PJ *pj_shutdown = (PJ *) &pj_shutdown;
 
-/* Euclidean distance between two 2D coordinates stored in PJ_OBSs */
-double pj_obs_dist_2d (PJ_OBS a, PJ_OBS b) {
-    double *A = a.coo.v, *B = b.coo.v;
-    return hypot (A[0] - B[0],  A[1] - B[1]);
+/* Euclidean distance between two points with linear 2D coordinates */
+double pj_xy_dist (XY a, XY b) {
+    return hypot (a.x - b.x, a.y - b.y);
 }
 
-/* Euclidean distance between two 3D coordinates stored in PJ_OBSs */
-double pj_obs_dist_3d (PJ_OBS a, PJ_OBS b) {
-    double *A = a.coo.v, *B = b.coo.v;
-    return hypot (hypot (A[0] - B[0],  A[1] - B[1]),  A[2] - B[2]);
+/* Euclidean distance between two points with linear 3D coordinates */
+double pj_xyz_dist (XYZ a, XYZ b) {
+    return hypot (hypot (a.x - b.x, a.y - b.y), a.z - b.z);
 }
 
 
@@ -150,7 +148,7 @@ double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs) {
         }
     }
 
-    return pj_obs_dist_3d (o, obs);
+    return pj_xyz_dist (o.coo.xyz, obs.coo.xyz);
 }
 
 
