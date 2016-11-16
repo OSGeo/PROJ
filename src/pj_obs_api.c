@@ -69,6 +69,10 @@ double pj_xyz_dist (XYZ a, XYZ b) {
 
 
 PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
+    if (0!=P->fwdobs) {
+        obs  =  P->fwdobs (obs, P);
+        return obs;
+    }
     if (0!=P->fwd3d) {
         obs.coo.xyz  =  pj_fwd3d (obs.coo.lpz, P);
         return obs;
@@ -83,6 +87,10 @@ PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
 
 
 PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
+    if (0!=P->invobs) {
+        obs  =  P->invobs (obs, P);
+        return obs;
+    }
     if (0!=P->inv3d) {
         obs.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
         return obs;

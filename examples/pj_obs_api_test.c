@@ -49,9 +49,10 @@ int main (void) {
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
     int err;
     double dist;
+    XY cph_utm32;
 
     /* Log everything libproj offers to log for you */
-    pj_debug_set (0, PJ_LOG_DEBUG_MINOR);
+    pj_debug_set (0, PJ_LOG_TRACE);
 
     /* An utm projection on the GRS80 ellipsoid */
     p = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
@@ -75,6 +76,7 @@ int main (void) {
     /* Forward projection */
     b = pj_apply (p, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f\n", b.coo.enh.e, b.coo.enh.n);
+    cph_utm32 = b.coo.xy;
 
     /* Inverse projection */
     a = pj_apply (p, PJ_INV, b);
@@ -141,5 +143,81 @@ int main (void) {
     printf ("CTX0:  %15.9f %15.9f %15.9f\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi), b.coo.lpz.z);
 
     pj_free (p);
+
+    /***************************************************************************
+
+                  P I P E L I N E   T E S T S
+
+    ****************************************************************************
+
+
+    ***************************************************************************/
+
+    /* forward-reverse geo->utm->geo */
+    p = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm +step +proj=utm +inv");
+    if (0==p)
+        return puts ("Oops"), 0;
+    /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
+    a = b = pj_obs_null;
+    a.coo.lpz.lam = TORAD(12);
+    a.coo.lpz.phi = TORAD(55);
+    a.coo.lpz.z   = 100;
+    printf ("PRE:   %15.9f %15.9f\n", a.coo.lpz.lam, a.coo.lpz.phi);
+
+    /* Forward projection */
+    b = pj_apply (p, PJ_FWD, a);
+    printf ("FWD:   %15.9f %15.9f\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi));
+
+    /* Inverse projection */
+    a = pj_apply (p, PJ_INV, b);
+    printf ("INV:   %15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
+
+    pj_free (p);
+
+
+    /* And now the back-to-back situation utm->geo->utm */
+    p = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm +inv +step +proj=utm");
+    if (0==p)
+        return puts ("Oops"), 0;
+
+    /* zero initialize everything, then set (easting, northing) to utm(12, 55) */
+    a = b = pj_obs_null;
+    a.coo.xy = cph_utm32;
+    printf ("PRE:   %15.9f %15.9f\n", a.coo.xy.x, a.coo.xy.y);
+
+    /* Forward projection */
+    b = pj_apply (p, PJ_FWD, a);
+    printf ("FWD:   %15.9f %15.9f\n", b.coo.xy.x, b.coo.xy.y);
+
+    /* Inverse projection */
+    a = pj_apply (p, PJ_INV, b);
+    printf ("INV:   %15.9f %15.9f\n", a.coo.xy.x, a.coo.xy.y);
+
+    pj_free (p);
+
+
+
+    /* Finally testing a corner case: A rather pointless one-step pipeline geo->utm */
+    p = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm");
+    if (0==p)
+        return puts ("Oops"), 0;
+
+    /* zero initialize everything, then set (easting, northing) to utm(12, 55) */
+    a = b = pj_obs_null;
+    a.coo.lpz.lam = TORAD(12);
+    a.coo.lpz.phi = TORAD(55);
+    printf ("PRE:   %15.9f %15.9f\n", TODEG(a.coo.lp.lam), TODEG(a.coo.lp.phi));
+    printf ("EXP:   %15.9f %15.9f\n", cph_utm32.x, cph_utm32.y);
+
+    /* Forward projection */
+    b = pj_apply (p, PJ_FWD, a);
+    printf ("FWD:   %15.9f %15.9f\n", b.coo.xy.x, b.coo.xy.y);
+
+    /* Inverse projection */
+    a = pj_apply (p, PJ_INV, b);
+    printf ("INV:   %15.9f %15.9f\n", TODEG(a.coo.lp.lam), TODEG(a.coo.lp.phi));
+
+    pj_free (p);
+
     return 0;
 }

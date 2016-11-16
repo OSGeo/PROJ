@@ -59,6 +59,7 @@ struct pj_opaque {
     int *omit_forward;
     int *omit_inverse;
     PJ_OBS stack[PIPELINE_STACK_SIZE];
+    PJ **pipeline;
 };
 
 
@@ -115,17 +116,6 @@ static LP     pipeline_reverse (XY xyz, PJ *P);
 *********************************************************************/
 
 
-/********************************************************************/
-int pj_is_isomorphic (PJ *P) {
-/********************************************************************/
-    if (P->left==PJ_IO_UNITS_CLASSIC)
-        return 0;
-    if (P->left==P->right)
-        return 1;
-    return 0;
-}
-
-
 
 
 static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
@@ -139,9 +129,9 @@ static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
         if (P->opaque->omit_forward[i])
             continue;
         if (P->opaque->reverse_step[i])
-            point = pj_apply (P + i, PJ_INV, point);
+            point = pj_apply (P->opaque->pipeline[i], PJ_INV, point);
         else
-            point = pj_apply (P + i, PJ_FWD, point);
+            point = pj_apply (P->opaque->pipeline[i], PJ_FWD, point);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
@@ -161,9 +151,9 @@ static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
         if (P->opaque->omit_inverse[i])
             continue;
         if (P->opaque->reverse_step[i])
-            point = pj_apply (P + i, PJ_FWD, point);
+            point = pj_apply (P->opaque->pipeline[i], PJ_FWD, point);
         else
-            point = pj_apply (P + i, PJ_INV, point);
+            point = pj_apply (P->opaque->pipeline[i], PJ_INV, point);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
@@ -172,6 +162,8 @@ static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
     return point;
 }
 
+
+/* Delegate the work to pipeline_forward_obs() */
 static XYZ pipeline_forward_3d (LPZ lpz, PJ *P) {
     PJ_OBS point = pj_obs_null;
     point.coo.lpz = lpz;
@@ -179,6 +171,7 @@ static XYZ pipeline_forward_3d (LPZ lpz, PJ *P) {
     return point.coo.xyz;
 }
 
+/* Delegate the work to pipeline_reverse_obs() */
 static LPZ pipeline_reverse_3d (XYZ xyz, PJ *P) {
     PJ_OBS point = pj_obs_null;
     point.coo.xyz = xyz;
@@ -211,17 +204,22 @@ static void freeup(PJ *P) {                                    /* Destructor */
 
 
 static void *pipeline_freeup (PJ *P, int errlev) {         /* Destructor */
+    int i;
     if (0==P)
         return 0;
 
-    pj_ctx_set_errno (P->ctx, errlev);
+    pj_error_set (P, errlev);
 
     if (0==P->opaque)
         return pj_dealloc (P);
 
+    for (i = 0;  i < P->opaque->steps; i++)
+        pj_free (P->opaque->pipeline[i+1]);
+
     pj_dealloc (P->opaque->reverse_step);
     pj_dealloc (P->opaque->omit_forward);
     pj_dealloc (P->opaque->omit_inverse);
+    pj_dealloc (P->opaque->pipeline);
 
     pj_dealloc (P->opaque);
     return pj_dealloc(P);
@@ -234,60 +232,29 @@ static void pipeline_freeup_wrapper (PJ *P) {
     return;
 }
 
-/* Indicator function with just enough dummy functionality to silence compiler warnings */
-static XY pipe_end_indicator (LP lp, PJ *P) {
-    XY xy;
-
-    xy.x = lp.lam;
-    xy.y = lp.phi;
-    if (P)
-        return xy;
-    xy.x++;
-    return xy;
-}
-
 
 static PJ *pj_create_pipeline (PJ *P, size_t steps) {
-    PJ *pipeline;
-    size_t i;
 
-    /*  Room for the pipeline: An array of PJ (not of PJ *) */
-    pipeline = pj_calloc (steps + 2, sizeof(PJ));
+    /* Room for the pipeline: An array of PJ * with room for sentinels at both ends */
+    P->opaque->pipeline = pj_calloc (steps + 2, sizeof(PJ *));
+    if (0==P->opaque->pipeline)
+        return 0;
 
     P->opaque->steps = steps;
+
     P->opaque->reverse_step =  pj_calloc (steps + 2, sizeof(int));
     if (0==P->opaque->reverse_step)
-        return pipeline_freeup (P, ENOMEM);
+        return 0;
 
     P->opaque->omit_forward =  pj_calloc (steps + 2, sizeof(int));
     if (0==P->opaque->omit_forward)
-        return pipeline_freeup (P, ENOMEM);
+        return 0;
 
     P->opaque->omit_inverse =  pj_calloc (steps + 2, sizeof(int));
     if (0==P->opaque->omit_inverse)
-        return pipeline_freeup (P, ENOMEM);
+        return 0;
 
-    /* First element is the pipeline manager herself */
-    *pipeline = *P;
-
-    /* Fill the rest of the pipeline with pipe_ends */
-    P->fwd = pipe_end_indicator;
-    for (i = 1;  i < steps + 2;  i++)
-        pipeline[i] = *P;
-
-    /* This is a shallow copy, so we just release P, without calling P->pfree */
-    /* The actual deallocation will be done by pipeline_freeup */
-    pj_dealloc (P);
-
-    return pipeline;
-}
-
-
-static void pj_push_to_pipeline (PJ *pipeline, PJ *P) {
-    while (pipeline->fwd != pipe_end_indicator)
-        pipeline++;
-    *pipeline = *P;
-    pj_dealloc (P);
+    return P;
 }
 
 /* count the number of args in pipeline definition */
@@ -308,22 +275,17 @@ char **argv_params (paralist *params) {
     argv = pj_calloc (argc_params (params), sizeof (char *));
     if (0==argv)
         return 0;
-    for (; params != 0; params = params->next) {
+    for (; params != 0; params = params->next)
         argv[argc++] = params->param;
-        puts (argv[argc - 1]);
-    }
     argv[argc++] = argv_sentinel;
     return argv;
 }
 
 
 PJ *PROJECTION(pipeline) {
-
     int i, nsteps = 0, argc;
-    int i_pipeline = -1, i_first_step = -1, i_next_step, i_current_step;
+    int i_pipeline = -1, i_first_step = -1, i_current_step;
     char **argv, **current_argv;
-
-    PJ     *pipeline  = 0;
 
     P->fwdobs =  pipeline_forward_obs;
     P->invobs =  pipeline_reverse_obs;
@@ -341,39 +303,46 @@ PJ *PROJECTION(pipeline) {
     argv = argv_params (P->params);
     if (0==argv)
         return pipeline_freeup (P, ENOMEM);
+
+    /* The elements of current_argv are not used - we just use argv_params */
+    /* as allocator for a "large enough" container needed later            */
     current_argv = argv_params (P->params);
     if (0==current_argv)
         return pipeline_freeup (P, ENOMEM);
 
     /* Do some syntactic sanity checking */
-    for (i = 0, i_next_step = argc - 1;  i < argc;  i++) {
+    for (i = 0;  i < argc;  i++) {
         if (0==strcmp ("step", argv[i])) {
-            if (-1==i_pipeline)
-                return pipeline_freeup (P, 51); /* ERROR: +step before +proj=pipeline */
-            nsteps++;
-            switch (nsteps) {
-                case 1:
-                    i_first_step = i;
-                    break;
-                case 2:
-                    if (i_next_step == argc - 1)
-                        i_next_step = i;
-                    break;
+            if (-1==i_pipeline) {
+                pj_log_error (P, "Pipeline: +step before +proj=pipeline");
+                return pipeline_freeup (P, 51);
             }
+            if (0==nsteps)
+                i_first_step = i;
+            nsteps++;
+            continue;
         }
+
         if (0==strcmp ("proj=pipeline", argv[i])) {
-            if (-1 != i_pipeline)
+            if (-1 != i_pipeline) {
+                pj_log_error (P, "Pipeline: Nesting invalid");
                 return pipeline_freeup (P, 52); /* ERROR: nested pipelines */
+            }
             i_pipeline = i;
         }
     }
+    nsteps--; /* Last instance of +step is just a sentinel */
+    P->opaque->steps = nsteps;
+
     if (-1==i_pipeline)
         return pipeline_freeup (P, 50); /* ERROR: no pipeline def */
+
     if (0==nsteps)
         return pipeline_freeup (P, 50); /* ERROR: no pipeline def */
 
-    /*  Room for the pipeline: An array of PJ (note: NOT of PJ *) */
-    pipeline = pj_create_pipeline (P, nsteps);
+    /* Make room for the pipeline and execution indicators */
+    if (0==pj_create_pipeline (P, nsteps))
+        return pipeline_freeup (P, ENOMEM);
 
     /* Now loop over all steps, building a new set of arguments for each init */
     for (i_current_step = i_first_step, i = 0;  i < nsteps;  i++) {
@@ -381,7 +350,8 @@ PJ *PROJECTION(pipeline) {
         int  current_argc = 0;
         PJ     *next_step = 0;
 
-        /* Build a set of initialization args for the current step */
+        /* Build a set of setup args for the current step */
+        pj_log_trace (P, "Pipeline: Building arg list for step no. %d", i);
 
         /* First add the step specific args */
         for (j = i_current_step + 1;  0 != strcmp ("step", argv[j]); j++)
@@ -396,24 +366,83 @@ PJ *PROJECTION(pipeline) {
         /* Finally handle non-symmetric steps and inverted steps */
         for (j = 0;  j < current_argc; j++) {
             if (0==strcmp("omit_inv", current_argv[j])) {
-                pipeline->opaque->omit_inverse[i+1] = 1;
-                pipeline->opaque->omit_forward[i+1] = 0;
+                P->opaque->omit_inverse[i+1] = 1;
+                P->opaque->omit_forward[i+1] = 0;
             }
             if (0==strcmp("omit_fwd", current_argv[j])) {
-                pipeline->opaque->omit_inverse[i+1] = 0;
-                pipeline->opaque->omit_forward[i+1] = 1;
+                P->opaque->omit_inverse[i+1] = 0;
+                P->opaque->omit_forward[i+1] = 1;
             }
             if (0==strcmp("inv", current_argv[j]))
-                pipeline->opaque->reverse_step[i+1] = 1;
+                P->opaque->reverse_step[i+1] = 1;
         }
 
+        pj_log_trace (P, "Pipeline: init - %s, %d", current_argv[0], current_argc);
+        for (j = 1;  j < current_argc; j++)
+            pj_log_trace (P, "    %s", current_argv[j]);
+
         next_step = pj_init (current_argc, current_argv);
-        if (0==next_step)
+        pj_log_trace (P, "Pipeline: Step %d at %p", i, next_step);
+        if (0==next_step) {
+            pj_log_error (P, "Pipeline: Bad step definition: %s", current_argv[0]);
             return pipeline_freeup (P, 50); /* ERROR: bad pipeline def */
-        pj_push_to_pipeline (pipeline, next_step);
+        }
+        P->opaque->pipeline[i+1] = next_step;
+        pj_log_trace (P, "Pipeline:    step done");
     }
 
-    return pipeline;
+    pj_log_trace (P, "Pipeline: %d steps built. Determining i/o characteristics", nsteps);
+
+    /* Determine forward input (= reverse output) data type */
+
+    /* First locate the first forward-active pipeline step */
+    for (i = 0;  i < nsteps;  i++)
+        if (0==P->opaque->omit_forward[i+1])
+            break;
+    if (i==nsteps) {
+        pj_log_error (P, "Pipeline: No forward steps");
+        return pipeline_freeup (P, 50);
+    }
+
+    if (P->opaque->reverse_step[i + 1])
+        P->left = P->opaque->pipeline[i + 1]->right;
+    else
+        P->left = P->opaque->pipeline[i + 1]->left;
+
+    if (P->left==PJ_IO_UNITS_CLASSIC) {
+        if (P->opaque->reverse_step[i + 1])
+            P->left = PJ_IO_UNITS_METERS;
+        else
+            P->left = PJ_IO_UNITS_RADIANS;
+    }
+
+    /* Now, correspondingly determine forward output (= reverse input) data type */
+
+    /* First locate the last reverse-active pipeline step */
+    for (i = nsteps - 1;  i >= 0;  i--)
+        if (0==P->opaque->omit_inverse[i+1])
+            break;
+    if (i==-1) {
+        pj_log (pj_get_ctx (P), PJ_LOG_ERROR, "Pipeline: No reverse steps");
+        return pipeline_freeup (P, 50);
+    }
+
+    if (P->opaque->reverse_step[i + 1])
+        P->right = P->opaque->pipeline[i + 1]->left;
+    else
+        P->right = P->opaque->pipeline[i + 1]->right;
+
+    if (P->right==PJ_IO_UNITS_CLASSIC) {
+        if (P->opaque->reverse_step[i + 1])
+            P->right = PJ_IO_UNITS_RADIANS;
+        else
+            P->right = PJ_IO_UNITS_METERS;
+    }
+    pj_log_trace (P, "Pipeline: Units - left: [%s], right: [%s]\n",
+        P->left ==PJ_IO_UNITS_RADIANS? "angular": "linear",
+        P->right==PJ_IO_UNITS_RADIANS? "angular": "linear");
+
+    return P;
 }
 
 /* selftest stub */

@@ -103,3 +103,9 @@ EXPORTS
     pj_context_inherit             @101
     pj_context_free                @102
     pj_fileapi_set                 @103
+    pj_log_error                   @104
+    pj_log_debug                   @105
+    pj_log_trace                   @106
+    pj_xy_dist                     @107
+    pj_xyz_dist                    @108
+    
