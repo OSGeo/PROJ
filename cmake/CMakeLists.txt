@@ -23,7 +23,12 @@ install (FILES
   DESTINATION "${INSTALL_CMAKE_DIR}"
   RENAME "${PROJECT_NAME_LOWER}-config-version.cmake")
 # Make information about the cmake targets (the library and the tools)
-# available.
+# available. Targets without namespace are provided for compatibility
+# with other and older projects but will be removed in a future release.
 install (EXPORT targets
+  NAMESPACE ${PROJECT_NAME}::
   FILE ${PROJECT_NAME_LOWER}-targets.cmake
+  DESTINATION "${INSTALL_CMAKE_DIR}")
+install (EXPORT targets
+  FILE ${PROJECT_NAME_LOWER}-deprecated-targets.cmake
   DESTINATION "${INSTALL_CMAKE_DIR}")
