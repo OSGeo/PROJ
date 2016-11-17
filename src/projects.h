@@ -274,6 +274,7 @@ struct PJconsts {
 
     /* The eccentricities */
 
+    double  alpha;                     /* angular eccentricity */
     double  e;                         /* first  eccentricity */
     double  es;                        /* first  eccentricity squared */
     double  e2;                        /* second eccentricity */
