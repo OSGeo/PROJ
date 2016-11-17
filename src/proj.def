@@ -92,7 +92,7 @@ EXPORTS
     pj_error                        @90
     pj_create                       @91
     pj_create_argv                  @92
-    pj_apply                        @93
+    pj_trans                        @93
     pj_fwdobs                       @94
     pj_invobs                       @95
     pj_roundtrip                    @96
@@ -106,6 +106,6 @@ EXPORTS
     pj_log_error                   @104
     pj_log_debug                   @105
     pj_log_trace                   @106
-    pj_xy_dist                     @107
-    pj_xyz_dist                    @108
-    
+    pj_lp_dist                     @107
+    pj_xy_dist                     @108
+    pj_xyz_dist                    @109

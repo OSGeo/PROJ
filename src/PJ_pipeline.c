@@ -129,9 +129,9 @@ static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
         if (P->opaque->omit_forward[i])
             continue;
         if (P->opaque->reverse_step[i])
-            point = pj_apply (P->opaque->pipeline[i], PJ_INV, point);
+            point = pj_trans (P->opaque->pipeline[i], PJ_INV, point);
         else
-            point = pj_apply (P->opaque->pipeline[i], PJ_FWD, point);
+            point = pj_trans (P->opaque->pipeline[i], PJ_FWD, point);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
@@ -151,9 +151,9 @@ static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
         if (P->opaque->omit_inverse[i])
             continue;
         if (P->opaque->reverse_step[i])
-            point = pj_apply (P->opaque->pipeline[i], PJ_FWD, point);
+            point = pj_trans (P->opaque->pipeline[i], PJ_FWD, point);
         else
-            point = pj_apply (P->opaque->pipeline[i], PJ_INV, point);
+            point = pj_trans (P->opaque->pipeline[i], PJ_INV, point);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }

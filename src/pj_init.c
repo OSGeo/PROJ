@@ -29,6 +29,7 @@
 
 #define PJ_LIB__
 #include <projects.h>
+#include <geodesic.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -588,6 +589,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     else
         PIN->from_greenwich = 0.0;
 
+    PIN->geod = pj_calloc (1, sizeof (struct geod_geodesic));
+    if (0!=PIN->geod)
+        geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
+
     /* projection specific initialization */
     if (!(PIN = (*proj)(PIN)) || ctx->last_errno) {
       bum_call: /* cleanup error return */
@@ -634,6 +639,9 @@ pj_free(PJ *P) {
 
         if( P->catalog != NULL )
             pj_dalloc( P->catalog );
+
+        if( P->geod != NULL )
+            pj_dalloc( P->geod );
 
         /* free projection parameters */
         P->pfree(P);

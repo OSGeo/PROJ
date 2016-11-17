@@ -283,10 +283,13 @@ enum pj_direction {
     PJ_IDENT =  0,   /* Do nothing */
     PJ_INV   = -1    /* Inverse    */
 };
-PJ_OBS pj_apply (PJ *P, enum pj_direction direction, PJ_OBS obs);
+PJ_OBS pj_trans (PJ *P, enum pj_direction direction, PJ_OBS obs);
 
 /* Measure internal consistency - in forward or inverse direction */
 double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs);
+
+/* Geodesic distance between two points with angular 2D coordinates */
+double pj_lp_dist (PJ *P, LP a, LP b);
 
 /* Euclidean distance between two points with linear 2D coordinates */
 double pj_xy_dist (XY a, XY b);

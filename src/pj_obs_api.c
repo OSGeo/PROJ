@@ -35,6 +35,7 @@
 #define PJ_OBS_C
 #include <proj.h>
 #include <projects.h>
+#include <geodesic.h>
 #include <float.h>
 #include <math.h>
 
@@ -56,6 +57,14 @@ const PJ_OBS pj_obs_null = {
 
 /* Magic object signaling proj system shutdown mode to routines taking a PJ * arg */
 const PJ *pj_shutdown = (PJ *) &pj_shutdown;
+
+/* Geodesic distance between two points with angular 2D coordinates */
+double pj_lp_dist (PJ *P, LP a, LP b) {
+    double s12, azi1, azi2;
+    /* Note: the geodesic code takes arguments in degrees */
+    geod_inverse (P->geod, TODEG(a.phi), TODEG(a.lam), TODEG(b.phi), TODEG(b.lam), &s12, &azi1, &azi2);
+    return s12;
+}
 
 /* Euclidean distance between two points with linear 2D coordinates */
 double pj_xy_dist (XY a, XY b) {
@@ -105,7 +114,7 @@ PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
 
 
 /* Apply the transformation P to the observation obs */
-PJ_OBS pj_apply (PJ *P, enum pj_direction direction, PJ_OBS obs) {
+PJ_OBS pj_trans (PJ *P, enum pj_direction direction, PJ_OBS obs) {
     if (0==P)
         return obs;
 

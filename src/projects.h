@@ -169,6 +169,7 @@ typedef struct { double u, v, w; }     UVW;
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
 struct PJconsts;
 struct PJ_OBS;
+struct geod_geodesic;
 struct pj_opaque;
 struct ARG_list;
 struct FACTORS;
@@ -212,6 +213,7 @@ struct PJconsts {
     projCtx_t *ctx;
     const char *descr;             /* From pj_list.h or individual PJ_*.c file */
     paralist *params;              /* Parameter list */
+    struct geod_geodesic *geod;    /* For geodesic computations */
     struct pj_opaque *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
 
 

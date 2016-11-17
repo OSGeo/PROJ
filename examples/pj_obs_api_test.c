@@ -17,7 +17,7 @@
 
     pj_create (char *desc):
         Create a new PJ object from a text description.
-    pj_apply (PJ *P, int direction, PJ_OBS obs):
+    pj_trans (PJ *P, int direction, PJ_OBS obs):
         Forward or inverse transformation of obs.
     pj_error (PJ *P):
         Check error status of P.
@@ -41,6 +41,8 @@
     Thomas Knudsen, 2016-10-30/11-03
 *******************************************************************************/
 #include <proj.h>
+
+
 
 
 int main (void) {
@@ -74,20 +76,20 @@ int main (void) {
     a.coo.lp.phi = TORAD(55);
 
     /* Forward projection */
-    b = pj_apply (p, PJ_FWD, a);
+    b = pj_trans (p, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f\n", b.coo.enh.e, b.coo.enh.n);
     cph_utm32 = b.coo.xy;
 
     /* Inverse projection */
-    a = pj_apply (p, PJ_INV, b);
+    a = pj_trans (p, PJ_INV, b);
     printf ("INV:   %15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
 
     /* Null projection */
-    a = pj_apply (p, PJ_IDENT, a);
+    a = pj_trans (p, PJ_IDENT, a);
     printf ("IDENT: %15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
 
     /* Forward again, to get two linear items for comparison */
-    a = pj_apply (p, PJ_FWD, a);
+    a = pj_trans (p, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f\n", b.coo.enh.e, b.coo.enh.n);
 
     dist = pj_xy_dist (a.coo.xy, b.coo.xy);
@@ -97,8 +99,9 @@ int main (void) {
     dist = pj_xyz_dist (a.coo.xyz, b.coo.xyz);
     printf ("Roundtrip deviation, (nm): %15.9f\n", dist*1e9);
 
+
     /* Invalid projection */
-    a = pj_apply (p, 42, a);
+    a = pj_trans (p, 42, a);
     if (a.coo.lpz.lam!=DBL_MAX)
         printf ("%15.9f %15.9f\n", a.coo.lpz.lam, a.coo.lpz.phi);
     err = pj_error (p);
@@ -119,7 +122,7 @@ int main (void) {
     a.coo.lpz.z   = 100;
 
     /* Forward projection: 3D-Cartesian-to-Ellipsoidal */
-    b = pj_apply (p, PJ_FWD, a);
+    b = pj_trans (p, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f %15.9f\n", b.coo.xyz.x, b.coo.xyz.y, b.coo.xyz.z);
 
     /* Check roundtrip precision for 10000 iterations each way */
@@ -129,17 +132,17 @@ int main (void) {
     printf ("Roundtrip deviation, inv (nm): %15.9f\n", dist*1e9);
 
     /* Inverse projection: Ellipsoidal-to-3D-Cartesian */
-    b = pj_apply (p, PJ_INV, b);
+    b = pj_trans (p, PJ_INV, b);
     printf ("INV:   %15.9f %15.9f %15.9f\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi), b.coo.lpz.z);
 
     /* Move p to another context */
     pj_context_renew (p);
-    b = pj_apply (p, PJ_FWD, b);
+    b = pj_trans (p, PJ_FWD, b);
     printf ("CTX1:  %15.9f %15.9f %15.9f\n", b.coo.xyz.x, b.coo.xyz.y, b.coo.xyz.z);
 
     /* Move it back to the default context */
     pj_context_free (p);
-    b = pj_apply (p, PJ_INV, b);
+    b = pj_trans (p, PJ_INV, b);
     printf ("CTX0:  %15.9f %15.9f %15.9f\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi), b.coo.lpz.z);
 
     pj_free (p);
@@ -165,11 +168,11 @@ int main (void) {
     printf ("PRE:   %15.9f %15.9f\n", a.coo.lpz.lam, a.coo.lpz.phi);
 
     /* Forward projection */
-    b = pj_apply (p, PJ_FWD, a);
+    b = pj_trans (p, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi));
 
     /* Inverse projection */
-    a = pj_apply (p, PJ_INV, b);
+    a = pj_trans (p, PJ_INV, b);
     printf ("INV:   %15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
 
     pj_free (p);
@@ -186,11 +189,11 @@ int main (void) {
     printf ("PRE:   %15.9f %15.9f\n", a.coo.xy.x, a.coo.xy.y);
 
     /* Forward projection */
-    b = pj_apply (p, PJ_FWD, a);
+    b = pj_trans (p, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f\n", b.coo.xy.x, b.coo.xy.y);
 
     /* Inverse projection */
-    a = pj_apply (p, PJ_INV, b);
+    a = pj_trans (p, PJ_INV, b);
     printf ("INV:   %15.9f %15.9f\n", a.coo.xy.x, a.coo.xy.y);
 
     pj_free (p);
@@ -210,12 +213,24 @@ int main (void) {
     printf ("EXP:   %15.9f %15.9f\n", cph_utm32.x, cph_utm32.y);
 
     /* Forward projection */
-    b = pj_apply (p, PJ_FWD, a);
+    b = pj_trans (p, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f\n", b.coo.xy.x, b.coo.xy.y);
 
     /* Inverse projection */
-    a = pj_apply (p, PJ_INV, b);
+    a = pj_trans (p, PJ_INV, b);
     printf ("INV:   %15.9f %15.9f\n", TODEG(a.coo.lp.lam), TODEG(a.coo.lp.phi));
+
+
+    /* Geodesic distance between two points with angular 2D coordinates */
+    a = b = pj_obs_null;
+    a.coo.lp.lam = TORAD(12);
+    a.coo.lp.phi = TORAD(55);
+    b.coo.lp.lam = TORAD(12);
+    b.coo.lp.phi = TORAD(56);
+
+    dist = pj_lp_dist (p, a.coo.lp, b.coo.lp);
+    printf ("GEODESIC:   %15.9f\n", dist);
+
 
     pj_free (p);
 
