@@ -78,7 +78,7 @@ extern "C" {
 extern char const pj_release[]; /* global release id string */
 extern int pj_errno;    /* global error return code */
 
-/* In proj.h these macros are replaced by the enumeration pj_debug_level */
+/* In proj.h these macros are replaced by the enumeration pj_log_level */
 #define PJ_LOG_NONE        0
 #define PJ_LOG_ERROR       1
 #define PJ_LOG_DEBUG_MAJOR 2

@@ -96,7 +96,7 @@ EXPORTS
     pj_fwdobs                       @94
     pj_invobs                       @95
     pj_roundtrip                    @96
-    pj_debug_set                    @97
+    pj_log_level                    @97
     pj_error_set                    @98
     pj_log_set                      @99
     pj_context_renew               @100

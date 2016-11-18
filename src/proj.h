@@ -227,14 +227,14 @@ union PJ_PAIR {
     LP     lp;
     UV     uv;
     PJ_AF  af;
-    double v[2]; /* It's really just a vector! */
+    double v[2]; /* Yes - It's really just a vector! */
 };
 
 struct PJ_OBS {
-    PJ_COORD coo;  /* coordinate data */
-    PJ_TRIPLET anc;         /* ancillary data */
-    int id;                 /* integer ancillary data - e.g. observation number, EPSG code... */
-    unsigned int flags;     /* additional data, intended for flags */
+    PJ_COORD coo;        /* coordinate data */
+    PJ_TRIPLET anc;      /* ancillary data */
+    int id;              /* integer ancillary data - e.g. observation number, EPSG code... */
+    unsigned int flags;  /* additional data, intended for flags */
 };
 
 /* The context type - properly namespaced synonym for projCtx */
@@ -249,33 +249,6 @@ PJ  *pj_create_argv (int argc, char **argv);
 void pj_free (PJ *P);
 int  pj_error (PJ *P);
 
-/* High level functionality for handling thread contexts */
-enum pj_debug_level {
-    PJ_LOG_NONE  = 0,
-    PJ_LOG_ERROR = 1,
-    PJ_LOG_DEBUG = 2,
-    PJ_LOG_TRACE = 3,
-    PJ_LOG_DEBUG_MAJOR = 2,
-    PJ_LOG_DEBUG_MINOR = 3
-};
-
-void pj_log_error (PJ *P, const char *fmt, ...);
-void pj_log_debug (PJ *P, const char *fmt, ...);
-void pj_log_trace (PJ *P, const char *fmt, ...);
-
-
-
-void pj_debug_set (PJ *P, enum pj_debug_level debuglevel);
-void pj_error_set (PJ *P, int err);
-void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *));
-
-/* Lower level functionality for handling thread contexts */
-int  pj_context_renew (PJ *P);
-void pj_context_inherit (PJ *mother, PJ *daughter);
-void pj_context_free    (const PJ *P);
-
-/* Lowest level: Minimum support for fileapi */
-void pj_fileapi_set (PJ *P, void *fileapi);
 
 /* Apply transformation to observation - in forward or inverse direction */
 enum pj_direction {
@@ -310,6 +283,42 @@ extern const PJ *pj_shutdown;
 #ifndef TORAD
 #define TORAD(deg)  ((deg)*M_PI/180.0)
 #endif
+
+
+
+
+
+
+
+/* High level functionality for handling thread contexts */
+enum pj_log_level {
+    PJ_LOG_NONE  = 0,
+    PJ_LOG_ERROR = 1,
+    PJ_LOG_DEBUG = 2,
+    PJ_LOG_TRACE = 3,
+    PJ_LOG_TELL  = 4,
+    PJ_LOG_DEBUG_MAJOR = 2, /* for proj_api.h compatibility */
+    PJ_LOG_DEBUG_MINOR = 3  /* for proj_api.h compatibility */
+};
+
+/* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
+enum pj_log_level pj_log_level (PJ *P, enum pj_log_level log_level);
+
+void pj_log_error (PJ *P, const char *fmt, ...);
+void pj_log_debug (PJ *P, const char *fmt, ...);
+void pj_log_trace (PJ *P, const char *fmt, ...);
+
+
+void pj_error_set (PJ *P, int err);
+void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *));
+
+/* Lower level functionality for handling thread contexts */
+int  pj_context_renew (PJ *P);
+void pj_context_inherit (PJ *mother, PJ *daughter);
+void pj_context_free    (const PJ *P);
+
+/* Lowest level: Minimum support for fileapi */
+void pj_fileapi_set (PJ *P, void *fileapi);
 
 
 #ifdef __cplusplus

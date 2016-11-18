@@ -445,5 +445,103 @@ PJ *PROJECTION(pipeline) {
     return P;
 }
 
+#ifndef PJ_SELFTEST
 /* selftest stub */
 int pj_pipeline_selftest (void) {return 0;}
+#else
+
+int pj_pipeline_selftest (void) {
+    PJ *P;
+    PJ_OBS a, b;
+    XY cph_utm32 = {691875.63214,  6098907.82501};
+    double dist;
+
+    /* forward-reverse geo->utm->geo */
+    P = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm +step +proj=utm +inv");
+    if (0==P)
+        return 1000;
+    /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 0) */
+    a = b = pj_obs_null;
+    a.coo.lpz.lam = TORAD(12);
+    a.coo.lpz.phi = TORAD(55);
+    a.coo.lpz.z   = 0;
+
+    /* Forward projection */
+    b = pj_trans (P, PJ_FWD, a);
+    if (pj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
+        return 1001;
+
+    /* Inverse projection (still same result: pipeline is symmetrical) */
+    a = pj_trans (P, PJ_INV, b);
+    if (pj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
+        return 1002;
+
+    pj_free (P);
+
+    /* And now the back-to-back situation utm->geo->utm */
+    P = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm +inv +step +proj=utm");
+    if (0==P)
+        return 2000;
+
+    /* zero initialize everything, then set (easting, northing) to utm(12, 55) */
+    a = b = pj_obs_null;
+    a.coo.xy = cph_utm32;
+
+    /* Forward projection */
+    b = pj_trans (P, PJ_FWD, a);
+    if (pj_xy_dist (a.coo.xy, b.coo.xy) > 1e-4)
+        return 2001;
+
+    /* Inverse projection */
+    a = pj_trans (P, PJ_INV, b);
+    if (pj_xy_dist (a.coo.xy, b.coo.xy) > 1e-4)
+        return 2001;
+    if (pj_xyz_dist (a.coo.xyz, b.coo.xyz) > 1e-4)
+        return 2002;
+
+    pj_free (P);
+
+
+    /* Finally testing a corner case: A rather pointless one-step pipeline geo->utm */
+    P = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm");
+    if (0==P)
+        return 3000;
+
+    a = b = pj_obs_null;
+    a.coo.lpz.lam = TORAD(12);
+    a.coo.lpz.phi = TORAD(55);
+
+    /* Forward projection */
+    b = pj_trans (P, PJ_FWD, a);
+    if (pj_xy_dist (cph_utm32, b.coo.xy) > 1e-4)
+        return 3001;
+
+    /* Inverse projection */
+    b = pj_trans (P, PJ_INV, b);
+    if (pj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
+        return 3002;
+
+
+    /* Since we use pj_lp_dist to determine success above, we should also test that it works */
+
+    /* Geodesic distance between two points with angular 2D coordinates */
+    a.coo.lp.lam = TORAD(12);
+    a.coo.lp.phi = TORAD(60);
+    b.coo.lp.lam = TORAD(12);
+    b.coo.lp.phi = TORAD(61);
+    dist = pj_lp_dist (P, a.coo.lp, b.coo.lp);
+    if (fabs (111420.727870234 - dist) > 1e-4)
+        return 4001;
+
+    a.coo.lp.lam = TORAD(12);
+    a.coo.lp.phi = TORAD(0.);
+    b.coo.lp.lam = TORAD(12);
+    b.coo.lp.phi = TORAD(1.);
+    dist = pj_lp_dist (P, a.coo.lp, b.coo.lp);
+    if (fabs (110574.388554153 - dist) > 1e-4)
+        return 4002;
+
+    pj_free (P);
+    return 0;
+}
+#endif

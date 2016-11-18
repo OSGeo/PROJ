@@ -194,14 +194,19 @@ void pj_error_set (PJ *P, int err) {
 }
 
 
-/* Set debug level 0-3. Higher number means more debug info. 0 turns it off */
-void pj_debug_set (PJ *P, enum pj_debug_level debuglevel) {
+/* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
+enum pj_log_level pj_log_level (PJ *P, enum pj_log_level log_level) {
+    enum pj_log_level previous;
     PJ_CONTEXT *ctx;
     if (0==P)
         ctx = pj_get_default_ctx();
     else
         ctx = pj_get_ctx (P);
-    ctx->debug_level = debuglevel;
+    previous = ctx->debug_level;
+    if (PJ_LOG_TELL==log_level)
+        return previous;
+    ctx->debug_level = log_level;
+    return previous;
 }
 
 

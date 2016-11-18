@@ -42,6 +42,7 @@
 *******************************************************************************/
 #include <proj.h>
 
+int pj_pipeline_selftest (void);
 
 
 
@@ -54,7 +55,7 @@ int main (void) {
     XY cph_utm32;
 
     /* Log everything libproj offers to log for you */
-    pj_debug_set (0, PJ_LOG_TRACE);
+    pj_log_level (0, PJ_LOG_TRACE);
 
     /* An utm projection on the GRS80 ellipsoid */
     P = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
@@ -238,6 +239,6 @@ int main (void) {
 
 
     pj_free (P);
-
+    pj_pipeline_selftest ();
     return 0;
 }

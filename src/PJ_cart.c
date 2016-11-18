@@ -251,17 +251,27 @@ int pj_cart_selftest (void) {
     PJ_OBS a, b;
     int err;
     double dist;
+    char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
+
 
     /* Log everything libproj offers to log for you */
-    pj_debug_set (0, PJ_LOG_DEBUG_MINOR);
+    pj_log_level (0, PJ_LOG_TRACE);
 
     /* An utm projection on the GRS80 ellipsoid */
     p = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
     if (0==p)
         return 1;
 
+    /* Clean up */
+    pj_free (P);
+
+    /* Same projection, now using argc/argv style initialization */
+    P = pj_create_argv (3, args);
+    if (0==P)
+        return puts ("Oops"), 0;
+
     /* Turn off logging */
-    pj_debug_set (0, PJ_LOG_NONE);
+    pj_log_level (0, PJ_LOG_NONE);
 
     /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
     a = pj_obs_null;
