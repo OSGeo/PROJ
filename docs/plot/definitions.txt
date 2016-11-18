@@ -32,7 +32,7 @@
 +proj=fouc
 +proj=fouc_s
 +proj=gall
-+proj=geos +h=1
++proj=geos +h=35785831.0 +lon_0=120 +sweep=y
 +proj=gins8
 +proj=gn_sinu +m=2 +n=3
 +proj=gnom
