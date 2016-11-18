@@ -280,23 +280,23 @@ int pj_cart_selftest (void) {
     a.coo.lp.phi = TORAD(55);
 
     /* Forward projection */
-    b = pj_apply (p, PJ_FWD, a);
+    b = pj_trans (p, PJ_FWD, a);
 
     /* Inverse projection */
-    a = pj_apply (p, PJ_INV, b);
+    a = pj_trans (p, PJ_INV, b);
 
     /* Null projection */
-    a = pj_apply (p, PJ_IDENT, a);
+    a = pj_trans (p, PJ_IDENT, a);
 
     /* Forward again, to get two linear items for comparison */
-    a = pj_apply (p, PJ_FWD, a);
+    a = pj_trans (p, PJ_FWD, a);
 
     dist = pj_obs_dist_2d (a, b);
     if (dist > 2e-9)
         return 2;
 
     /* Invalid projection */
-    a = pj_apply (p, 42, a);
+    a = pj_trans (p, 42, a);
     if (a.coo.lpz.lam!=DBL_MAX)
         return 3;
     err = pj_error (p);
@@ -321,7 +321,7 @@ int pj_cart_selftest (void) {
     a.coo.lpz.z   = 100;
 
     /* Forward projection: 3D-Cartesian-to-Ellipsoidal */
-    b = pj_apply (p, PJ_FWD, a);
+    b = pj_trans (p, PJ_FWD, a);
 
     /* Check roundtrip precision for 10000 iterations each way */
     dist = pj_roundtrip (p, PJ_FWD, 10000, a);
@@ -330,15 +330,15 @@ int pj_cart_selftest (void) {
         return 6;
 
     /* Inverse projection: Ellipsoidal-to-3D-Cartesian */
-    b = pj_apply (p, PJ_INV, b);
+    b = pj_trans (p, PJ_INV, b);
 
     /* Move p to another context */
     pj_context_renew (p);
-    b = pj_apply (p, PJ_FWD, b);
+    b = pj_trans (p, PJ_FWD, b);
 
     /* Move it back to the default context */
     pj_context_free (p);
-    b = pj_apply (p, PJ_INV, b);
+    b = pj_trans (p, PJ_INV, b);
 
     pj_free (p);
     return 0;
