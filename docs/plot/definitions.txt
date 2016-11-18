@@ -113,7 +113,7 @@
 +proj=tissot +lat_1=60 +lat_2=65
 +proj=tmerc
 +proj=tpeqd +lat_1=60 +lat_2=65
-+proj=tpers +h=2
++proj=tpers +h=5500000 +lat_0=40
 +proj=ups
 +proj=urm5
 +proj=urmfps +n=0.5
