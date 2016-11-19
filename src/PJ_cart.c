@@ -197,8 +197,9 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
     c  =  cos(lpz.phi);
     if (fabs(c) < 1e-6) {
         /* poleward of 89.99994 deg, we avoid division by zero */
-        /* by computing the height as the cartesian z value   */
-        /* minus the semiminor axis length                    */
+        /* by computing the height as the cartesian z value    */
+        /* minus the semiminor axis length                     */
+        /* (potential improvement: approx. by 2nd order poly)  */
         lpz.z = cartesian.z - (cartesian.z > 0? b: -b);
     }
     else

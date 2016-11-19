@@ -1,22 +1,78 @@
-/***********************************************************************
+/*******************************************************************************
 
-               Transformation pipeline manager
+                       Transformation pipeline manager
 
-                 Thomas Knudsen, 2016-05-20/2016-11-14
+                    Thomas Knudsen, 2016-05-20/2016-11-20
 
-************************************************************************
+********************************************************************************
 
-**The Problem**
+    Geodetic transformations are typically organized in a number of
+    steps. For example, a datum shift could be carried out through
+    these steps:
 
-**The Solution**
+    1. Convert (latitude, longitude, ellipsoidal height) to
+       3D geocentric cartesian coordinates (X, Y, Z)
+    2. Transform the (X, Y, Z) coordinates to the new datum, using a
+       7 parameter Helmert transformation.
+    3. Convert (X, Y, Z) back to (latitude, longitude, ellipsoidal height)
 
-**The hack...:**
+    If the height system used is orthometric, rather than ellipsoidal,
+    another step is needed at each end of the process:
 
-************************************************************************
+    1. Add the local geoid undulation (N) to the orthometric height
+       to obtain the ellipsoidal (i.e. geometric) height.
+    2. Convert (latitude, longitude, ellipsoidal height) to
+       3D geocentric cartesian coordinates (X, Y, Z)
+    3. Transform the (X, Y, Z) coordinates to the new datum, using a
+       7 parameter Helmert transformation.
+    4. Convert (X, Y, Z) back to (latitude, longitude, ellipsoidal height)
+    5. Subtract the local geoid undulation (N) from the ellipsoidal height
+       to obtain the orthometric height.
+
+    Additional steps can be added for e.g. change of vertical datum, so the
+    list can grow fairly long. None of the steps are, however, particularly
+    complex, and data flow is strictly from top to bottom.
+
+    Hence, in principle, the first example above could be implemented using
+    Unix pipelines:
+
+    cat my_coordinates | geographic_to_xyz | helmert | xyz_to_geographic > my_transformed_coordinates
+
+    in the grand tradition of Software Tools [1].
+
+    The proj pipeline driver implements a similar concept: Stringing together
+    a number of steps, feeding the output of one step to the input of the next.
+
+    It is a very powerful concept, that increases the range of relevance of the
+    proj.4 system substantially. It is, however, not a particularly intrusive
+    addition to the code base: The implementation is by and large completed by
+    adding an extra projection called "pipeline" (i.e. this file), which
+    handles all business.
+
+    Syntactically, the pipeline system introduces the "+step" keyword (which
+    indicates the start of each transformation step), the "+omit_fwd" and
+    "+omit_inv" keywords (which indicate that a given transformation step
+    should be omitted when the pipeline is executed in forward, resp. inverse
+    direction), and reintroduces the +inv keyword (indicating that a given
+    transformation step should run in reverse, i.e. forward, when the pipeline
+    is executed in inverse direction, and vice versa).
+
+    Hence, the first transformation example above, can be implemented as:
+
+    +proj=pipeline +step proj=cart +step proj=helmert <ARGS> +step proj=cart +inv
+
+    Where <ARGS> indicate the Helmert arguments: 3 translations (+x=..., +y=...,
+    +z=...), 3 rotations (+rx=..., +ry=..., +rz=...) and a scale factor (+s=...).
+    Following geodetic conventions, the rotations are given in Milliarcseconds,
+    and the scale factor is given as parts-per-million.
+
+    [1] B. W. Kernighan & P. J. Plauger: Software tools. Addison-Wesley, 1976, 338 pp.
+
+********************************************************************************
 
 Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 
-************************************************************************
+********************************************************************************
 * Copyright (c) 2016, Thomas Knudsen / SDFE
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,7 +93,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
 *
-***********************************************************************/
+********************************************************************************/
 
 #define PJ_LIB__
 #include <proj.h>
@@ -315,7 +371,7 @@ PJ *PROJECTION(pipeline) {
         if (0==strcmp ("step", argv[i])) {
             if (-1==i_pipeline) {
                 pj_log_error (P, "Pipeline: +step before +proj=pipeline");
-                return pipeline_freeup (P, 51);
+                return pipeline_freeup (P, -50);
             }
             if (0==nsteps)
                 i_first_step = i;
@@ -326,7 +382,7 @@ PJ *PROJECTION(pipeline) {
         if (0==strcmp ("proj=pipeline", argv[i])) {
             if (-1 != i_pipeline) {
                 pj_log_error (P, "Pipeline: Nesting invalid");
-                return pipeline_freeup (P, 52); /* ERROR: nested pipelines */
+                return pipeline_freeup (P, -50); /* ERROR: nested pipelines */
             }
             i_pipeline = i;
         }
@@ -335,10 +391,10 @@ PJ *PROJECTION(pipeline) {
     P->opaque->steps = nsteps;
 
     if (-1==i_pipeline)
-        return pipeline_freeup (P, 50); /* ERROR: no pipeline def */
+        return pipeline_freeup (P, -50); /* ERROR: no pipeline def */
 
     if (0==nsteps)
-        return pipeline_freeup (P, 50); /* ERROR: no pipeline def */
+        return pipeline_freeup (P, -50); /* ERROR: no pipeline def */
 
     /* Make room for the pipeline and execution indicators */
     if (0==pj_create_pipeline (P, nsteps))
@@ -385,7 +441,7 @@ PJ *PROJECTION(pipeline) {
         pj_log_trace (P, "Pipeline: Step %d at %p", i, next_step);
         if (0==next_step) {
             pj_log_error (P, "Pipeline: Bad step definition: %s", current_argv[0]);
-            return pipeline_freeup (P, 50); /* ERROR: bad pipeline def */
+            return pipeline_freeup (P, -50); /* ERROR: bad pipeline def */
         }
         P->opaque->pipeline[i+1] = next_step;
         pj_log_trace (P, "Pipeline:    step done");
@@ -401,7 +457,7 @@ PJ *PROJECTION(pipeline) {
             break;
     if (i==nsteps) {
         pj_log_error (P, "Pipeline: No forward steps");
-        return pipeline_freeup (P, 50);
+        return pipeline_freeup (P, -50);
     }
 
     if (P->opaque->reverse_step[i + 1])
@@ -424,7 +480,7 @@ PJ *PROJECTION(pipeline) {
             break;
     if (i==-1) {
         pj_log (pj_get_ctx (P), PJ_LOG_ERROR, "Pipeline: No reverse steps");
-        return pipeline_freeup (P, 50);
+        return pipeline_freeup (P, -50);
     }
 
     if (P->opaque->reverse_step[i + 1])
