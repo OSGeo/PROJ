@@ -29,6 +29,7 @@
 
 #define PJ_LIB__
 #include <projects.h>
+#include <geodesic.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -448,11 +449,41 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PIN->a_orig = PIN->a;
     PIN->es_orig = PIN->es;
 
-    PIN->e = sqrt(PIN->es);
+    /* Compute some ancillary ellipsoidal parameters */
+
+    PIN->e = sqrt(PIN->es);      /* eccentricity */
+    PIN->alpha = asin (PIN->e);  /* angular eccentricity */
+
+    /* second eccentricity */
+    PIN->e2  = tan (PIN->alpha);
+    PIN->e2s = PIN->e2 * PIN->e2;
+
+    /* third eccentricity */
+    PIN->e3    = sin (PIN->alpha) / sqrt(2 - sin (PIN->alpha)*sin (PIN->alpha));
+    PIN->e3s = PIN->e3 * PIN->e3;
+
+    /* flattening */
+    PIN->f  = 1 - cos (PIN->alpha);   /* = 1 - sqrt (1 - PIN->es); */
+    PIN->rf = PIN->f? 1/PIN->f: HUGE_VAL;
+
+    /* second flattening */
+    PIN->f2 = 1/cos (PIN->alpha) - 1;
+    PIN->rf = PIN->f2? 1/PIN->f2: HUGE_VAL;
+
+    /* third flattening */
+    PIN->n  = pow (tan (PIN->alpha/2), 2);
+    PIN->rn = PIN->n? 1/PIN->n: HUGE_VAL;
+
+    /* ...and a few more */
+    PIN->b  = (1 - PIN->f)*PIN->a;
+    PIN->rb = 1. / PIN->b;
     PIN->ra = 1. / PIN->a;
+
     PIN->one_es = 1. - PIN->es;
     if (PIN->one_es == 0.) { pj_ctx_set_errno( ctx, -6 ); goto bum_call; }
     PIN->rone_es = 1./PIN->one_es;
+
+
 
     /* Now that we have ellipse information check for WGS84 datum */
     if( PIN->datum_type == PJD_3PARAM
@@ -588,6 +619,11 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     else
         PIN->from_greenwich = 0.0;
 
+    /* Private object for the geodesic functions */
+    PIN->geod = pj_calloc (1, sizeof (struct geod_geodesic));
+    if (0!=PIN->geod)
+        geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
+
     /* projection specific initialization */
     if (!(PIN = (*proj)(PIN)) || ctx->last_errno) {
       bum_call: /* cleanup error return */
@@ -634,6 +670,9 @@ pj_free(PJ *P) {
 
         if( P->catalog != NULL )
             pj_dalloc( P->catalog );
+
+        if( P->geod != NULL )
+            pj_dalloc( P->geod );
 
         /* free projection parameters */
         P->pfree(P);

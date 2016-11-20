@@ -111,6 +111,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_omerc.c
         PJ_ortho.c
         PJ_patterson.c
+        PJ_pipeline.c
         PJ_poly.c
         PJ_putp2.c
         PJ_putp3.c

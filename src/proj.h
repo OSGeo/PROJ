@@ -138,6 +138,8 @@ extern "C" {
 #include <proj_api.h>
 #undef  PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
 
+extern char const pj_release[]; /* global release id string */
+extern int        pj_errno;     /* global error return code */
 
 /* first forward declare everything needed */
 
@@ -189,13 +191,14 @@ typedef struct { double   e,  z, N; }  PJ_EZN;
 /* Ellipsoidal parameters */
 typedef struct { double   a,   f; }  PJ_AF;
 
+/* Avoid preprocessor renaming and implicit type-punning: Use unions to make it explicit */
 union PJ_COORD {
     PJ_XYZT xyzt;
     PJ_UVWT uvwt;
     PJ_ENHT enht;
     PJ_LPZT lpzt;
     PJ_ENH  enh;
-    double v[4]; /* Who cares - it's just a vector! */
+    double v[4]; /* It's just a vector */
     XYZ  xyz;
     UVW  uvw;
     LPZ  lpz;
@@ -204,28 +207,34 @@ union PJ_COORD {
     LP   lp;
 };
 
-
-
-/* Avoid preprocessor renaming and implicit type-punning: Use a union to make it explicit */
 union PJ_TRIPLET {
     PJ_OPK  opk;
     PJ_ENH  enh;
     PJ_EZN  ezn;
-    PJ_AF   af;
-    double v[3]; /* Who cares - it's just a vector! */
+    PJ_DMS  dms;
+    double v[3]; /* It's just a vector */
     XYZ    xyz;
     LPZ    lpz;
     UVW    uvw;
     XY     xy;
     LP     lp;
     UV     uv;
+    PJ_AF  af;
+};
+
+union PJ_PAIR {
+    XY     xy;
+    LP     lp;
+    UV     uv;
+    PJ_AF  af;
+    double v[2]; /* Yes - It's really just a vector! */
 };
 
 struct PJ_OBS {
-    PJ_COORD coo;  /* coordinate data */
-    PJ_TRIPLET anc;         /* ancillary data */
-    int id;                 /* integer ancillary data - e.g. observation number, EPSG code... */
-    unsigned int flags;     /* additional data, intended for flags */
+    PJ_COORD coo;        /* coordinate data */
+    PJ_TRIPLET anc;      /* ancillary data */
+    int id;              /* integer ancillary data - e.g. observation number, EPSG code... */
+    unsigned int flags;  /* additional data, intended for flags */
 };
 
 /* The context type - properly namespaced synonym for projCtx */
@@ -240,24 +249,6 @@ PJ  *pj_create_argv (int argc, char **argv);
 void pj_free (PJ *P);
 int  pj_error (PJ *P);
 
-/* High level functionality for handling thread contexts */
-enum pj_debug_level {
-    PJ_LOG_NONE  = 0,
-    PJ_LOG_ERROR = 1,
-    PJ_LOG_DEBUG_MAJOR = 2,
-    PJ_LOG_DEBUG_MINOR = 3
-};
-void pj_debug_set (PJ *P, enum pj_debug_level debuglevel);
-void pj_error_set (PJ *P, int err);
-void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *));
-
-/* Lower level functionality for handling thread contexts */
-int  pj_context_renew (PJ *P);
-void pj_context_inherit (PJ *mother, PJ *daughter);
-void pj_context_free    (const PJ *P);
-
-/* Lowest level: Minimum support for fileapi */
-void pj_fileapi_set (PJ *P, void *fileapi);
 
 /* Apply transformation to observation - in forward or inverse direction */
 enum pj_direction {
@@ -265,17 +256,19 @@ enum pj_direction {
     PJ_IDENT =  0,   /* Do nothing */
     PJ_INV   = -1    /* Inverse    */
 };
-PJ_OBS pj_apply (PJ *P, enum pj_direction direction, PJ_OBS obs);
+PJ_OBS pj_trans (PJ *P, enum pj_direction direction, PJ_OBS obs);
 
 /* Measure internal consistency - in forward or inverse direction */
 double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs);
 
-/* Euclidean distance between two 2D coordinates stored in PJ_OBSs */
-double pj_obs_dist_2d (PJ_OBS a, PJ_OBS b);
+/* Geodesic distance between two points with angular 2D coordinates */
+double pj_lp_dist (PJ *P, LP a, LP b);
 
-/* Euclidean distance between two 3D coordinates stored in PJ_OBSs */
-double pj_obs_dist_3d (PJ_OBS a, PJ_OBS b);
+/* Euclidean distance between two points with linear 2D coordinates */
+double pj_xy_dist (XY a, XY b);
 
+/* Euclidean distance between two points with linear 3D coordinates */
+double pj_xyz_dist (XYZ a, XYZ b);
 
 
 #ifndef PJ_OBS_C
@@ -290,6 +283,42 @@ extern const PJ *pj_shutdown;
 #ifndef TORAD
 #define TORAD(deg)  ((deg)*M_PI/180.0)
 #endif
+
+
+
+
+
+
+
+/* High level functionality for handling thread contexts */
+enum pj_log_level {
+    PJ_LOG_NONE  = 0,
+    PJ_LOG_ERROR = 1,
+    PJ_LOG_DEBUG = 2,
+    PJ_LOG_TRACE = 3,
+    PJ_LOG_TELL  = 4,
+    PJ_LOG_DEBUG_MAJOR = 2, /* for proj_api.h compatibility */
+    PJ_LOG_DEBUG_MINOR = 3  /* for proj_api.h compatibility */
+};
+
+/* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
+enum pj_log_level pj_log_level (PJ *P, enum pj_log_level log_level);
+
+void pj_log_error (PJ *P, const char *fmt, ...);
+void pj_log_debug (PJ *P, const char *fmt, ...);
+void pj_log_trace (PJ *P, const char *fmt, ...);
+
+
+void pj_error_set (PJ *P, int err);
+void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *));
+
+/* Lower level functionality for handling thread contexts */
+int  pj_context_renew (PJ *P);
+void pj_context_inherit (PJ *mother, PJ *daughter);
+void pj_context_free    (const PJ *P);
+
+/* Lowest level: Minimum support for fileapi */
+void pj_fileapi_set (PJ *P, void *fileapi);
 
 
 #ifdef __cplusplus
