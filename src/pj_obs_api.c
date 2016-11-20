@@ -35,6 +35,7 @@
 #define PJ_OBS_C
 #include <proj.h>
 #include <projects.h>
+#include <geodesic.h>
 #include <float.h>
 #include <math.h>
 
@@ -57,20 +58,30 @@ const PJ_OBS pj_obs_null = {
 /* Magic object signaling proj system shutdown mode to routines taking a PJ * arg */
 const PJ *pj_shutdown = (PJ *) &pj_shutdown;
 
-/* Euclidean distance between two 2D coordinates stored in PJ_OBSs */
-double pj_obs_dist_2d (PJ_OBS a, PJ_OBS b) {
-    double *A = a.coo.v, *B = b.coo.v;
-    return hypot (A[0] - B[0],  A[1] - B[1]);
+/* Geodesic distance between two points with angular 2D coordinates */
+double pj_lp_dist (PJ *P, LP a, LP b) {
+    double s12, azi1, azi2;
+    /* Note: the geodesic code takes arguments in degrees */
+    geod_inverse (P->geod, TODEG(a.phi), TODEG(a.lam), TODEG(b.phi), TODEG(b.lam), &s12, &azi1, &azi2);
+    return s12;
 }
 
-/* Euclidean distance between two 3D coordinates stored in PJ_OBSs */
-double pj_obs_dist_3d (PJ_OBS a, PJ_OBS b) {
-    double *A = a.coo.v, *B = b.coo.v;
-    return hypot (hypot (A[0] - B[0],  A[1] - B[1]),  A[2] - B[2]);
+/* Euclidean distance between two points with linear 2D coordinates */
+double pj_xy_dist (XY a, XY b) {
+    return hypot (a.x - b.x, a.y - b.y);
+}
+
+/* Euclidean distance between two points with linear 3D coordinates */
+double pj_xyz_dist (XYZ a, XYZ b) {
+    return hypot (hypot (a.x - b.x, a.y - b.y), a.z - b.z);
 }
 
 
 PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
+    if (0!=P->fwdobs) {
+        obs  =  P->fwdobs (obs, P);
+        return obs;
+    }
     if (0!=P->fwd3d) {
         obs.coo.xyz  =  pj_fwd3d (obs.coo.lpz, P);
         return obs;
@@ -85,6 +96,10 @@ PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
 
 
 PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
+    if (0!=P->invobs) {
+        obs  =  P->invobs (obs, P);
+        return obs;
+    }
     if (0!=P->inv3d) {
         obs.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
         return obs;
@@ -99,7 +114,7 @@ PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
 
 
 /* Apply the transformation P to the observation obs */
-PJ_OBS pj_apply (PJ *P, enum pj_direction direction, PJ_OBS obs) {
+PJ_OBS pj_trans (PJ *P, enum pj_direction direction, PJ_OBS obs) {
     if (0==P)
         return obs;
 
@@ -150,7 +165,7 @@ double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs) {
         }
     }
 
-    return pj_obs_dist_3d (o, obs);
+    return pj_xyz_dist (o.coo.xyz, obs.coo.xyz);
 }
 
 
@@ -179,14 +194,19 @@ void pj_error_set (PJ *P, int err) {
 }
 
 
-/* Set debug level 0-3. Higher number means more debug info. 0 turns it off */
-void pj_debug_set (PJ *P, enum pj_debug_level debuglevel) {
+/* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
+enum pj_log_level pj_log_level (PJ *P, enum pj_log_level log_level) {
+    enum pj_log_level previous;
     PJ_CONTEXT *ctx;
     if (0==P)
         ctx = pj_get_default_ctx();
     else
         ctx = pj_get_ctx (P);
-    ctx->debug_level = debuglevel;
+    previous = ctx->debug_level;
+    if (PJ_LOG_TELL==log_level)
+        return previous;
+    ctx->debug_level = log_level;
+    return previous;
 }
 
 
