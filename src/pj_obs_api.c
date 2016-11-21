@@ -90,7 +90,7 @@ PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
         obs.coo.xy  =  pj_fwd (obs.coo.lp, P);
         return obs;
     }
-    pj_error_set (P, EINVAL);
+    pj_err_level (P, EINVAL);
     return pj_obs_error;
 }
 
@@ -108,7 +108,7 @@ PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
         obs.coo.lp  =  pj_inv (obs.coo.xy, P);
         return obs;
     }
-    pj_error_set (P, EINVAL);
+    pj_err_level (P, EINVAL);
     return pj_obs_error;
 }
 
@@ -129,7 +129,7 @@ PJ_OBS pj_trans (PJ *P, enum pj_direction direction, PJ_OBS obs) {
             break;
     }
 
-    pj_error_set (P, EINVAL);
+    pj_err_level (P, EINVAL);
     return pj_obs_error;
 }
 
@@ -143,7 +143,7 @@ double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs) {
         return HUGE_VAL;
 
     if (n < 1) {
-        pj_error_set (P, EINVAL);
+        pj_err_level (P, EINVAL);
         return HUGE_VAL;
     }
 
@@ -160,7 +160,7 @@ double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs) {
                 o.coo.xyz  =  pj_fwd3d (u.coo.lpz, P);
                 break;
             default:
-                pj_error_set (P, EINVAL);
+                pj_err_level (P, EINVAL);
                 return HUGE_VAL;
         }
     }
@@ -184,14 +184,21 @@ PJ *pj_create_argv (int argc, char **argv) {
 /* useful. The remaining is a compact implementation of the more low level    */
 /* proj_api.h thread contexts, which may or may not be useful  */
 
-int pj_error (PJ *P) {
-    return pj_ctx_get_errno (pj_get_ctx(P));
+/* Set error level 0-3, or query current level */
+int pj_err_level (PJ *P, int err_level) {
+    int previous;
+    PJ_CONTEXT *ctx;
+    if (0==P)
+        ctx = pj_get_default_ctx();
+    else
+        ctx = pj_get_ctx (P);
+    previous = pj_ctx_get_errno (pj_get_ctx(P));
+    if (PJ_ERR_TELL==err_level)
+        return previous;
+    pj_ctx_set_errno (pj_get_ctx(P), err_level);
+    return previous;
 }
 
-
-void pj_error_set (PJ *P, int err) {
-    pj_ctx_set_errno (pj_get_ctx(P), err);
-}
 
 
 /* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
@@ -211,7 +218,7 @@ enum pj_log_level pj_log_level (PJ *P, enum pj_log_level log_level) {
 
 
 /* Put a new logging function into P's context. The opaque object app_data is passed as first arg at each call to the logger */
-void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *)) {
+void pj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *)) {
     PJ_CONTEXT *ctx = pj_get_ctx (P);
     ctx->app_data = app_data;
     if (0!=log)
@@ -223,7 +230,7 @@ void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *)) 
 int pj_context_renew (PJ *P) {
     PJ_CONTEXT *ctx = pj_ctx_alloc ();
     if (0==ctx) {
-        pj_error_set (P, ENOMEM);
+        pj_err_level (P, ENOMEM);
         return 1;
     }
 

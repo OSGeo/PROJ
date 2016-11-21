@@ -264,7 +264,7 @@ static void *pipeline_freeup (PJ *P, int errlev) {         /* Destructor */
     if (0==P)
         return 0;
 
-    pj_error_set (P, errlev);
+    pj_err_level (P, errlev);
 
     if (0==P->opaque)
         return pj_dealloc (P);
@@ -313,8 +313,9 @@ static PJ *pj_create_pipeline (PJ *P, size_t steps) {
     return P;
 }
 
+
 /* count the number of args in pipeline definition */
-size_t argc_params (paralist *params) {
+static size_t argc_params (paralist *params) {
     size_t argc = 0;
     for (; params != 0; params = params->next)
         argc++;
@@ -325,15 +326,15 @@ size_t argc_params (paralist *params) {
 static char argv_sentinel[5] = "step";
 
 /* turn paralist int argc/argv style argument list */
-char **argv_params (paralist *params) {
+static char **argv_params (paralist *params, size_t argc) {
     char **argv;
-    size_t argc = 0;
-    argv = pj_calloc (argc_params (params), sizeof (char *));
+    size_t i = 0;
+    argv = pj_calloc (argc, sizeof (char *));
     if (0==argv)
         return 0;
     for (; params != 0; params = params->next)
-        argv[argc++] = params->param;
-    argv[argc++] = argv_sentinel;
+        argv[i++] = params->param;
+    argv[i++] = argv_sentinel;
     return argv;
 }
 
@@ -356,13 +357,11 @@ PJ *PROJECTION(pipeline) {
         return 0;
 
     argc = argc_params (P->params);
-    argv = argv_params (P->params);
+    argv = argv_params (P->params, argc);
     if (0==argv)
         return pipeline_freeup (P, ENOMEM);
 
-    /* The elements of current_argv are not used - we just use argv_params */
-    /* as allocator for a "large enough" container needed later            */
-    current_argv = argv_params (P->params);
+    current_argv = pj_calloc (argc, sizeof (char *));
     if (0==current_argv)
         return pipeline_freeup (P, ENOMEM);
 

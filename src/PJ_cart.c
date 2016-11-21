@@ -103,13 +103,6 @@ static void freeup (PJ *P) {
     return;
 }
 
-
-/*********************************************************************/
-static double semiminor_axis (double a, double es) {
-/*********************************************************************/
-    return a * sqrt (1 - es);
-}
-
 /*********************************************************************/
 static double normal_radius_of_curvature (double a, double es, double phi) {
 /*********************************************************************/
@@ -118,17 +111,6 @@ static double normal_radius_of_curvature (double a, double es, double phi) {
         return a;
     /* This is from WP.  HM formula 2-149 gives an a,b version */
     return a / sqrt (1 - es*s*s);
-}
-
-
-/*********************************************************************/
-static double second_eccentricity_squared (double a, double es) {
-/**********************************************************************
-    Follows the definition, e'2 = (a2-b2)/b2, but uses the identity
-    (a2-b2) = (a-b)(a+b), for improved numerical precision.
-***********************************************************************/
-    double b = semiminor_axis (a, es);
-    return (a - b) * (a + b)  /  (b*b);
 }
 
 
@@ -180,8 +162,8 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
     p = hypot (cartesian.x, cartesian.y);
 
     /* Ancillary ellipsoidal parameters */
-    b   =  semiminor_axis (P->a, P->es);
-    e2s =  second_eccentricity_squared (P->a,  P->es);
+    b   =  P->b;
+    e2s =  P->e2s;
 
     /* HM eq. (5-37) */
     theta  =  atan2 (cartesian.z * P->a,  p * b);
@@ -269,7 +251,7 @@ int pj_cart_selftest (void) {
     /* Same projection, now using argc/argv style initialization */
     P = pj_create_argv (3, args);
     if (0==P)
-        return puts ("Oops"), 0;
+        return 2;
 
     /* Turn off logging */
     pj_log_level (0, PJ_LOG_NONE);
@@ -294,18 +276,18 @@ int pj_cart_selftest (void) {
 
     dist = pj_xy_dist (a.coo.xy, b.coo.xy);
     if (dist > 2e-9)
-        return 2;
+        return 3;
 
     /* Invalid projection */
     a = pj_trans (P, 42, a);
     if (a.coo.lpz.lam!=DBL_MAX)
-        return 3;
-    err = pj_error (P);
-    if (0==err)
         return 4;
+    err = pj_err_level (P, PJ_ERR_TELL);
+    if (0==err)
+        return 5;
 
     /* Clear error */
-    pj_error_set (P, 0);
+    pj_err_level (P, 0);
 
     /* Clean up */
     pj_free (P);
@@ -313,7 +295,7 @@ int pj_cart_selftest (void) {
     /* Now do some 3D transformations */
     P = pj_create ("+proj=cart +ellps=GRS80");
     if (0==P)
-        return 5;
+        return 6;
 
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
     a = b = pj_obs_null;
@@ -328,7 +310,7 @@ int pj_cart_selftest (void) {
     dist = pj_roundtrip (P, PJ_FWD, 10000, a);
     dist = pj_roundtrip (P, PJ_INV, 10000, b);
     if (dist > 2e-9)
-        return 6;
+        return 7;
 
     /* Inverse projection: Ellipsoidal-to-3D-Cartesian */
     b = pj_trans (P, PJ_INV, b);

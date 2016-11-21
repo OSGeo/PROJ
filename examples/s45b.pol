@@ -1,0 +1,161 @@
+################################################################################
+#
+#  Horner polynomial evaluation demo data
+#
+################################################################################
+#
+#  These are the polynomial coefficients used for transforming to and from
+#  the Danish legacy system s45b "System 45 Bornholm"
+#
+################################################################################
+
+<s45b>
+
+proj=utm
+zone=32
+ellps=GRS80
+
+# tc32_ed50 -> utm32_ed50 : Bornholm
+
+deg=4
+
+# ttu_n and ttu_e are based on static double C_ttu_b[]
+# m_lim_gen:  0.086  red  = 0      OBS   =    852
+# m = 1.38 cm my_loss =    +2  y_enp = +10.5
+# m = 1.44 cm mx_loss =    +2  x_enp = +10.4
+# static  double ttu_n[]
+
+fwd_u=\
+# Poly NORTH :: e-degree =  0  : n-degree =  0..4
+    6.1258112678e+06,\
+    9.9999971567e-01,\
+    1.5372750011e-10,\
+    5.9300860915e-15,\
+    2.2609497633e-19,\
+
+# Poly NORTH :: e-degree =  1  : n-degree =  0..3
+    4.3188227445e-05,\
+    2.8225130416e-10,\
+    7.8740007114e-16,\
+   -1.7453997279e-19,\
+
+# Poly NORTH :: e-degree =  2  : n-degree =  0..2
+    1.6877465415e-10,\
+   -1.1234649773e-14,\
+   -1.7042333358e-18,\
+
+# Poly NORTH :: e-degree =  3  : n-degree =  0..1
+   -7.9303467953e-15,\
+   -5.2906832535e-19,\
+
+# Poly NORTH :: e-degree =  4  : n-degree =  0
+    3.9984284847e-19
+
+# tcy    6125810.306769
+
+
+
+
+# static  double utt_e[]
+fwd_v=\
+# Poly EAST  :: n-degree =  0  : e-degree =  0..4
+    8.7760527928e+05,\
+    1.0000024735e+00,\
+   -2.8817540032e-10,\
+   -5.5627059451e-15,\
+    1.5543637570e-18,\
+
+# Poly EAST  :: n-degree =  1  : e-degree =  0..3
+    4.1357152105e-05,\
+   -4.2114813612e-11,\
+   -2.8523713454e-14,\
+    1.9109017837e-18,\
+
+# Poly EAST  :: n-degree =  2  : e-degree =  0..2
+   -3.3616407783e-10,\
+   -2.4382678126e-14,\
+    2.0245020199e-18,\
+
+# Poly EAST  :: n-degree =  3  : e-degree =  0..1
+   -1.2441377565e-15,\
+   -5.3885232238e-19,\
+
+# Poly EAST  :: n-degree =  4  : e-degree =  0
+    1.0167203661e-18
+
+# tcx     877605.760036
+
+
+# utt_n and utt_e are based on static  double C_utt_b[]
+# utm32_ed50 -> tc32_ed50 : Bornholm
+# m_lim_gen:  0.086  red  = 0      OBS   =    852
+# m = 1.38 cm my_loss =    +2  y_enp = +10.8
+# m = 1.44 cm mx_loss =    +2  x_enp = +10.7
+# static  double utt_n[]
+
+inv_u=\
+# Poly NORTH :: e-degree =  0  : n-degree =  4
+    6.1258103208e+06,\
+    1.0000002826e+00,\
+   -1.5372762184e-10,\
+   -5.9304261011e-15,\
+   -2.2612705361e-19,\
+
+# Poly NORTH :: e-degree =  1  : n-degree =  3
+   -4.3188331419e-05,\
+   -2.8225549995e-10,\
+   -7.8529116371e-16,\
+    1.7476576773e-19,\
+
+# Poly NORTH :: e-degree =  2  : n-degree =  2
+   -1.6875687989e-10,\
+    1.1236475299e-14,\
+    1.7042518057e-18,\
+
+# Poly NORTH :: e-degree =  3  : n-degree =  1
+    7.9300735257e-15,\
+    5.2881862699e-19,\
+
+# Poly NORTH :: e-degree =  4  : n-degree =  0
+   -3.9990736798e-19
+
+# tcy    6125811.281773
+
+
+
+# static  double utt_e[]
+inv_v=\
+# Poly EAST  :: n-degree =  0  : e-degree =  0..4
+    8.7760527928e+05,\
+    1.0000024735e+00,\
+   -2.8817540032e-10,\
+   -5.5627059451e-15,\
+    1.5543637570e-18,\
+
+# Poly EAST  :: n-degree =  1  : e-degree =  3
+    4.1357152105e-05,\
+   -4.2114813612e-11,\
+   -2.8523713454e-14,\
+    1.9109017837e-18,\
+
+# Poly EAST  :: n-degree =  2  : e-degree =  2
+   -3.3616407783e-10,\
+   -2.4382678126e-14,\
+    2.0245020199e-18,\
+
+# Poly EAST  :: n-degree =  3  : e-degree =  1
+   -1.2441377565e-15,\
+   -5.3885232238e-19,\
+
+# Poly EAST  :: n-degree =  4  : e-degree =  0
+    1.0167203661e-18
+
+# tcx     877605.760036
+
+# UV tuut_b_origin_fwd = {877605.269066, 6125810.306769};
+# UV tuut_b_origin_inv = {877605.760036, 6125811.281773};
+
+fwd_origin=877605.269066,6125810.306769
+inv_origin=877605.760036,6125811.281773
+
+<>

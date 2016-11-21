@@ -301,16 +301,18 @@ enum pj_log_level {
     PJ_LOG_DEBUG_MINOR = 3  /* for proj_api.h compatibility */
 };
 
+/* Set or read error level */
+#define PJ_ERR_TELL -56789
+int pj_err_level (PJ *P, int err_level);
+
 /* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
 enum pj_log_level pj_log_level (PJ *P, enum pj_log_level log_level);
 
 void pj_log_error (PJ *P, const char *fmt, ...);
 void pj_log_debug (PJ *P, const char *fmt, ...);
 void pj_log_trace (PJ *P, const char *fmt, ...);
+void pj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *));
 
-
-void pj_error_set (PJ *P, int err);
-void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *));
 
 /* Lower level functionality for handling thread contexts */
 int  pj_context_renew (PJ *P);
