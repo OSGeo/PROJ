@@ -152,12 +152,12 @@ double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs) {
     for (i = 0;  i < n;  i++) {
         switch (direction) {
             case PJ_FWD:
-                u.coo.xyz  =  pj_fwd3d (o.coo.lpz, P);
-                o.coo.lpz  =  pj_inv3d (u.coo.xyz, P);
+                u  =  pj_fwdobs (o, P);
+                o  =  pj_invobs (u, P);
                 break;
             case PJ_INV:
-                u.coo.lpz  =  pj_inv3d (o.coo.xyz, P);
-                o.coo.xyz  =  pj_fwd3d (u.coo.lpz, P);
+                u  =  pj_invobs (o, P);
+                o  =  pj_fwdobs (u, P);
                 break;
             default:
                 pj_err_level (P, EINVAL);
@@ -192,10 +192,10 @@ int pj_err_level (PJ *P, int err_level) {
         ctx = pj_get_default_ctx();
     else
         ctx = pj_get_ctx (P);
-    previous = pj_ctx_get_errno (pj_get_ctx(P));
+    previous = pj_ctx_get_errno (ctx);
     if (PJ_ERR_TELL==err_level)
         return previous;
-    pj_ctx_set_errno (pj_get_ctx(P), err_level);
+    pj_ctx_set_errno (ctx, err_level);
     return previous;
 }
 

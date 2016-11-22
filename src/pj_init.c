@@ -38,7 +38,7 @@
 typedef struct {
     projCtx ctx;
     PAFile fid;
-    char buffer[65536];
+    char buffer[65537];
     int buffer_filled;
     int at_eof;
 } pj_read_state;
@@ -125,7 +125,8 @@ static paralist *
 get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
         int *found_def) {
     pj_read_state *state = (pj_read_state*) calloc(1,sizeof(pj_read_state));
-    char sword[302];
+    char sword[65537];
+    char *pipeline;
     int len;
     int in_target = 0;
     const char *next_char = NULL;
@@ -216,8 +217,11 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
             strncpy(sword+1, start_of_word, word_len);
             sword[word_len+1] = '\0';
 
-            /* do not override existing parameter value of same name */
-            if (!pj_param(ctx, *start, sword).i) {
+            /* do not override existing parameter value of same name - unless in pipeline definition */
+            pipeline = pj_param(ctx, *start, "sproj").s;
+            if (pipeline && strcmp (pipeline, "pipeline"))
+                pipeline = 0;
+            if (pipeline || !pj_param(ctx, *start, sword).i) {
                 /* don't default ellipse if datum, ellps or any earth model
                    information is set. */
                 if( strncmp(sword+1,"ellps=",6) != 0
@@ -231,7 +235,6 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
                     next = next->next = pj_mkparam(sword+1);
                 }
             }
-
         }
         else
         {
@@ -424,6 +427,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PJ *(*proj)(PJ *);
     paralist *curr;
     int i;
+    int defer_init_expansion = 0;
     PJ *PIN = 0;
 
     ctx->last_errno = 0;
@@ -439,9 +443,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if (ctx->last_errno) goto bum_call;
 
     /* check if +init present */
-    if (pj_param(ctx, start, "tinit").i) {
+    if (pj_param(ctx, start, "tinit").i && ! defer_init_expansion) {
         int found_def = 0;
-
+        /* avoid expanding additional inits (as could happen in a pipeline) */
+        defer_init_expansion = 1;
         if (!(curr = get_init(ctx,&start, curr,
                               pj_param(ctx, start, "sinit").s,
                               &found_def)))
@@ -480,7 +485,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if (pj_datum_set(ctx, start, PIN)) goto bum_call;
 
     /* set ellipsoid/sphere parameters */
-    if (pj_ell_set(ctx, start, &PIN->a, &PIN->es)) goto bum_call;
+    if (pj_ell_set(ctx, start, &PIN->a, &PIN->es)) {
+        pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
+        goto bum_call;
+    }
 
     PIN->a_orig = PIN->a;
     PIN->es_orig = PIN->es;

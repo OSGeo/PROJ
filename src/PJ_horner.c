@@ -148,6 +148,81 @@ struct horner {
 #define horner_number_of_coefficients(order) \
             (((order + 1)*(order + 2)/2))
 
+static int     horner_degree_u (int order, int index);
+static int     horner_degree_v (int order, int index);
+static int     horner_index (int order, int degree_u, int degree_v);
+
+
+/***************************************************************************/
+static int horner_index (int order, int degree_1, int degree_2) {
+/****************************************************************************
+
+    Returns the index of the polynomial coefficient, C, for the element
+
+              C * pow (c_1, degree_2) * pow (c_2, degree_2),
+
+    given that degree_1 > -1, degree_2 > -1,  degree_1 + degree_2 <= order.
+
+    Otherwise returns -1 and sets errno to EDOM.
+
+    The range of the index is [0 : (order + 1) * (order + 2) / 2 - 1].
+
+    A very important thing to note  is that the order of the coordinates
+    c_1 and c_2 depend on the polynomium:
+
+    For the fwd and inv polynomia for the "u" coordinate,
+    u is first (degree_1), v is second (degree_2).
+    For the fwd and inv polynomia for the "v" coordinate,
+    v is first (degree_1), u is second (degree_2).
+
+****************************************************************************/
+
+    if ( (degree_1 < 0)  ||  (degree_2 < 0)  ||  (degree_1 + degree_2 > order) ) {
+        errno = EDOM;
+        return -1;
+    }
+
+    return (   horner_number_of_coefficients(order) - 1
+             - (order - degree_1)*(order - degree_1 + 1)/2
+             - (order - degree_1 - degree_2));
+}
+
+#define index_u(h, u, v) horner_index (h->order, u, v)
+#define index_v(h, u, v) horner_index (h->order, v, u)
+
+
+static int horner_degree_u (int order, int index) {
+    int n = horner_number_of_coefficients(order);
+    int i, j;
+    if ((order < 0) || (index >= n)) {
+        errno = EDOM;
+        return -1;
+    }
+    for (i = 0; i <= order; i++)
+        for (j = 0; j <= order - i; j++)
+            if (index == horner_index (order, i, j))
+                return i;
+    return -1;
+}
+
+
+static int horner_degree_v (int order, int index) {
+    int n = horner_number_of_coefficients(order);
+    int i, j;
+    if ((order < 0) || (index >= n)) {
+        errno = EDOM;
+        return -1;
+    }
+    for (i = 0; i <= order; i++)
+        for (j = 0; j <= order - i; j++)
+            if (index == horner_index (order, i, j))
+                return j;
+    return -1;
+}
+
+
+
+
 
 
 static void horner_free (HORNER *h) {
@@ -175,7 +250,10 @@ static HORNER *horner_alloc (size_t order) {
     h->inv_u = pj_calloc (n, sizeof(double));
     h->inv_v = pj_calloc (n, sizeof(double));
 
-    if (h->fwd_u && h->fwd_v && h->inv_u && h->inv_v)
+    h->fwd_origin = pj_calloc (1, sizeof(UV));
+    h->inv_origin = pj_calloc (1, sizeof(UV));
+
+    if (h->fwd_u && h->fwd_v && h->inv_u && h->inv_v && h->fwd_origin && h->inv_origin)
         return h;
 
     /* safe, since all pointers are null-initialized (by calloc) */
@@ -280,8 +358,8 @@ summing the tiny high order elements first.
             E = n*E + v;
         }
 
-        position.u = E;
-        position.v = N;
+        position.u = N;
+        position.v = E;
     }
 
     return position;
@@ -292,12 +370,12 @@ summing the tiny high order elements first.
 
 
 static PJ_OBS horner_forward_obs (PJ_OBS point, PJ *P) {
-    (void) P;
+    point.coo.uv = horner ((HORNER *) P->opaque, 1, point.coo.uv);
     return point;
 }
 
 static PJ_OBS horner_reverse_obs (PJ_OBS point, PJ *P) {
-    (void) P;
+    point.coo.uv = horner ((HORNER *) P->opaque, -1, point.coo.uv);
     return point;
 }
 
@@ -355,27 +433,24 @@ static void freeup (PJ *P) {
 }
 
 
-static int parse_coefs (PJ *P, double *coefs, char *param, int degree) {
+static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
     char buf[20], *init, *next;
-    int i, n;
+    int i;
     sprintf (buf, "t%s", param);
     if (0==pj_param (P->ctx, P->params, buf).i)
         return 0;
     sprintf (buf, "s%s", param);
     init = pj_param(P->ctx, P->params, buf).s;
 
-    n = horner_number_of_coefficients (degree);
-
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < ncoefs; i++) {
         if (i > 0) {
             if (','!=*next) {
-                pj_log_error (P, "Horner: Malformed polynomium set %s. need %d coefs", param, n);
+                pj_log_error (P, "Horner: Malformed polynomium set %s. need %d coefs", param, ncoefs);
                 return 0;
             }
             init = ++next;
         }
-        printf ("parse[%2.2d]: %s\n", i, init);
-        coefs[i] = strtod (init, &next);
+        coefs[i] = pj_strtod (init, &next);
     }
     return 1;
 }
@@ -384,7 +459,7 @@ static int parse_coefs (PJ *P, double *coefs, char *param, int degree) {
 /*********************************************************************/
 PJ *PROJECTION(horner) {
 /*********************************************************************/
-    int   degree = 0;
+    int   degree = 0, i, n;
     HORNER *Q;
     P->fwdobs  =  horner_forward_obs;
     P->invobs  =  horner_reverse_obs;
@@ -393,30 +468,52 @@ PJ *PROJECTION(horner) {
     P->fwd     =  0;
     P->inv     =  0;
 
+    /* Polynomial degree specified? */
     if (pj_param (P->ctx, P->params, "tdeg").i) /* degree specified? */
 		degree = pj_param(P->ctx, P->params, "ideg").i;
-    else
+    else {
+        pj_log_debug (P, "Horner: Need to specify polynomial degree, (+deg=n)");
         return horner_freeup (P);
+    }
 
     Q = horner_alloc (degree);
     P->opaque = (void *) Q;
 
-    /* degree specified? */
-    if (pj_param (P->ctx, P->params, "tdeg").i)
-		degree = pj_param(P->ctx, P->params, "ideg").i;
-    else {
-        pj_log_error (P, "Horner: Must specify polynomial degree (+deg=N)");
-        return horner_freeup (P);
-    }
+    n = horner_number_of_coefficients (degree);
 
-    if (0==parse_coefs (P, Q->fwd_u, "fwd_u", degree))
+    if (0==parse_coefs (P, Q->fwd_u, "fwd_u", n))
         return horner_freeup (P);
-    if (0==parse_coefs (P, Q->fwd_v, "fwd_v", degree))
+    if (0==parse_coefs (P, Q->fwd_v, "fwd_v", n))
         return horner_freeup (P);
-    if (0==parse_coefs (P, Q->inv_u, "inv_u", degree))
+    if (0==parse_coefs (P, Q->inv_u, "inv_u", n))
         return horner_freeup (P);
-    if (0==parse_coefs (P, Q->inv_v, "inv_v", degree))
+    if (0==parse_coefs (P, Q->inv_v, "inv_v", n))
         return horner_freeup (P);
+
+    if (0==parse_coefs (P, (double *)(Q->fwd_origin), "fwd_origin", 2))
+        return horner_freeup (P);
+    if (0==parse_coefs (P, (double *)(Q->inv_origin), "inv_origin", 2))
+        return horner_freeup (P);
+    if (0==parse_coefs (P, &Q->range, "range", 1))
+        Q->range = 500000;
+
+
+    for (i = 0; i < n; i++)
+        printf (
+            "%2.2d (%2.2d %2.2d) %20.15g %20.15g %20.15g %20.15g\n",
+             i, horner_degree_u(degree, i), horner_degree_v(degree, i),
+             Q->fwd_u[i], Q->fwd_v[i], Q->inv_u[i], Q->inv_v[i]
+        );
+    /* ######################### */
+    printf ("fwd_origin: %20.15g  %20.15g\n", Q->fwd_origin->u, Q->fwd_origin->v);
+    printf ("inv_origin: %20.15g  %20.15g\n", Q->inv_origin->u, Q->inv_origin->v);
+    printf ("range: %20.15g\n", Q->range);
+
+    for (i = 0; i < horner_number_of_coefficients(2); i++)
+        printf ("%2.2d %2.2d %2.2d\n",
+            i, horner_degree_u(2, i), horner_degree_v(2, i)
+        );
+    /* ######################### */
 
     return P;
 }
@@ -532,78 +629,6 @@ HORNER tuut_b = {4, 15, 500000.0,   ttu_e, ttu_n, utt_e, utt_n,   &tuut_b_origin
 
 
 
-
-static int     horner_degree_u (int order, int index);
-static int     horner_degree_v (int order, int index);
-static int     horner_index (int order, int degree_u, int degree_v);
-
-
-/***************************************************************************/
-static int horner_index (int order, int degree_1, int degree_2) {
-/****************************************************************************
-
-    Returns the index of the polynomial coefficient, C, for the element
-
-              C * pow (c_1, degree_2) * pow (c_2, degree_2),
-
-    given that degree_1 > -1, degree_2 > -1,  degree_1 + degree_2 <= order.
-
-    Otherwise returns -1 and sets errno to EDOM.
-
-    The range of the index is [0 : (order + 1) * (order + 2) / 2 - 1].
-
-    A very important thing to note  is that the order of the coordinates
-    c_1 and c_2 depend on the polynomium:
-
-    For the fwd and inv polynomia for the "u" coordinate,
-    u is first (degree_1), v is second (degree_2).
-    For the fwd and inv polynomia for the "v" coordinate,
-    v is first (degree_1), u is second (degree_2).
-
-****************************************************************************/
-
-    if ( (degree_1 < 0)  ||  (degree_2 < 0)  ||  (degree_1 + degree_2 > order) ) {
-        errno = EDOM;
-        return -1;
-    }
-
-    return (   horner_number_of_coefficients(order) - 1
-             - (order - degree_1)*(order - degree_1 + 1)/2
-             - (order - degree_1 - degree_2));
-}
-
-#define index_u(h, u, v) horner_index (h->order, u, v)
-#define index_v(h, u, v) horner_index (h->order, v, u)
-
-
-static int horner_degree_u (int order, int index) {
-    int n = horner_number_of_coefficients(order);
-    int i, j;
-    if ((order < 0) || (index >= n)) {
-        errno = EDOM;
-        return -1;
-    }
-    for (i = 0; i <= order; i++)
-        for (j = 0; j <= order - i; j++)
-            if (index == horner_index (order, i, j))
-                return i;
-    return -1;
-}
-
-
-static int horner_degree_v (int order, int index) {
-    int n = horner_number_of_coefficients(order);
-    int i, j;
-    if ((order < 0) || (index >= n)) {
-        errno = EDOM;
-        return -1;
-    }
-    for (i = 0; i <= order; i++)
-        for (j = 0; j <= order - i; j++)
-            if (index == horner_index (order, i, j))
-                return j;
-    return -1;
-}
 
 
 

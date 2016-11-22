@@ -365,7 +365,7 @@ PJ *PROJECTION(pipeline) {
     if (0==current_argv)
         return pipeline_freeup (P, ENOMEM);
 
-    /* Do some syntactic sanity checking */
+    /* Do some syntactical sanity checking */
     for (i = 0;  i < argc;  i++) {
         if (0==strcmp ("step", argv[i])) {
             if (-1==i_pipeline) {
