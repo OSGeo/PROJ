@@ -10,27 +10,36 @@
 ################################################################################
 
 <s45b>
-proj=pipeline ellps=GRS80 zone=32
+proj=pipeline
 
-step  init=./s45b.pol:s45b_tc32
+step  coll=00 init=./s45b.pol:s45b_tc32
 
-step  init=./s45b.pol:tc32_utm32
+step  coll=01 init=./s45b.pol:tc32_utm32
+
+step  coll=02 proj=utm inv ellps=intl zone=32
+step  coll=03 proj=cart    ellps=intl
+#step  coll=04 proj=helmert ellps=GRS80
+#      x=-81.0703 y=-89.3603 z=-115.7526
+#     rx=-484.88 ry=-24.36  rz=-413.21   s=-0.540645
+#step  coll=05 proj=cart inv ellps=GRS80
+#step  coll=06 proj=utm ellps=GRS80
+
 
 
 
 ################################################################################
 #
-#                         S 4 5 B    <->    T C 3 2
+#                          S 4 5 B    ->    T C 3 2
 #
 ################################################################################
 <s45b_tc32>
 
 proj=horner
 ellps=intl
-range=1e100
+range=500000
 
-inv_origin=51779.260103,47022.563745
-fwd_origin=878354.943082,6125305.175366
+fwd_origin=47022.563745,51779.260103
+inv_origin=878354.943082,6125305.175366
 deg=6
 
 
@@ -40,7 +49,11 @@ deg=6
 # m = 1.51 cm my_loss =    +3  y_enp = +8.4
 # m = 1.53 cm mx_loss =    +4  x_enp = +8.4
 
-fwd_u=\
+#  mht C_ttb er
+# fwd-inv ombyttet ifht original Poder/Engsager-kode
+# For at opnå at to fwd transform fører fra s45b->tc32->utm32 (->ETRS89)
+
+inv_v=\
 # Poly NORTH :: e-degree =  0  : n-degree =  6
     5.1779004699e+04,\
     9.9508320295e-01,\
@@ -85,7 +98,7 @@ fwd_u=\
 
 # tcy    6125305.175366
 
-fwd_v=\
+inv_u=\
 # Poly EAST  :: n-degree =  0  : e-degree =  6
     4.7022495967e+04,\
    -9.9508282498e-01,\
@@ -137,7 +150,7 @@ fwd_v=\
 # m = 1.50 cm my_loss =    +3  y_enp = +8.5
 # m = 1.54 cm mx_loss =    +4  x_enp = +8.3
 
-inv_u=\
+fwd_v=\
 # Poly NORTH :: e-degree =  0  : n-degree =  6
     6.1253054245e+06,\
     9.9778251908e-01,\
@@ -182,7 +195,7 @@ inv_u=\
 
 # tcy      51779.260103,
 
-inv_v=\
+fwd_u=\
 # Poly EAST  :: n-degree =  0  : e-degree =  6
     8.7835485387e+05,\
    -9.9778289691e-01,\
@@ -233,7 +246,7 @@ inv_v=\
 
 ################################################################################
 #
-#                        T C 3 2    <->    U T M 3 2
+#                        T C 3 2    ->    U T M 3 2
 #
 ################################################################################
 
@@ -241,12 +254,11 @@ inv_v=\
 
 proj=horner
 ellps=intl
-range=1e100
+range=500000
 
 
 fwd_origin=877605.269066,6125810.306769
 inv_origin=877605.760036,6125811.281773
-
 
 
 # tc32_ed50 -> utm32_ed50 : Bornholm
@@ -259,7 +271,7 @@ deg=4
 # m = 1.44 cm mx_loss =    +2  x_enp = +10.4
 # static  double ttu_n[]
 
-fwd_u=\
+fwd_v=\
 # Poly NORTH :: e-degree =  0  : n-degree =  0..4
     6.1258112678e+06,\
     9.9999971567e-01,\
@@ -289,33 +301,32 @@ fwd_u=\
 
 
 
-
-# static  double utt_e[]
-fwd_v=\
+# static  double ttu_e[]
+fwd_u=\
 # Poly EAST  :: n-degree =  0  : e-degree =  0..4
-    8.7760527928e+05,\
-    1.0000024735e+00,\
-   -2.8817540032e-10,\
-   -5.5627059451e-15,\
-    1.5543637570e-18,\
+    8.7760574982e+05,\
+    9.9999752475e-01,\
+    2.8817299305e-10,\
+    5.5641310680e-15,\
+   -1.5544700949e-18,\
 
-# Poly EAST  :: n-degree =  1  : e-degree =  0..3
-    4.1357152105e-05,\
-   -4.2114813612e-11,\
-   -2.8523713454e-14,\
-    1.9109017837e-18,\
+# Poly EAST  :: n-degree =  1  : e-degree =  3
+   -4.1357045890e-05,\
+    4.2106213519e-11,\
+    2.8525551629e-14,\
+   -1.9107771273e-18,\
 
-# Poly EAST  :: n-degree =  2  : e-degree =  0..2
-   -3.3616407783e-10,\
-   -2.4382678126e-14,\
-    2.0245020199e-18,\
+# Poly EAST  :: n-degree =  2  : e-degree =  2
+    3.3615590093e-10,\
+    2.4380247154e-14,\
+   -2.0241230315e-18,\
 
-# Poly EAST  :: n-degree =  3  : e-degree =  0..1
-   -1.2441377565e-15,\
-   -5.3885232238e-19,\
+# Poly EAST  :: n-degree =  3  : e-degree =  1
+    1.2429019719e-15,\
+    5.3886155968e-19,\
 
 # Poly EAST  :: n-degree =  4  : e-degree =  0
-    1.0167203661e-18
+   -1.0167505000e-18
 
 # tcx     877605.760036
 
@@ -327,7 +338,7 @@ fwd_v=\
 # m = 1.44 cm mx_loss =    +2  x_enp = +10.7
 # static  double utt_n[]
 
-inv_u=\
+inv_v=\
 # Poly NORTH :: e-degree =  0  : n-degree =  4
     6.1258103208e+06,\
     1.0000002826e+00,\
@@ -357,8 +368,9 @@ inv_u=\
 
 
 
+
 # static  double utt_e[]
-inv_v=\
+inv_u=\
 # Poly EAST  :: n-degree =  0  : e-degree =  0..4
     8.7760527928e+05,\
     1.0000024735e+00,\
@@ -366,18 +378,18 @@ inv_v=\
    -5.5627059451e-15,\
     1.5543637570e-18,\
 
-# Poly EAST  :: n-degree =  1  : e-degree =  3
+# Poly EAST  :: n-degree =  1  : e-degree =  0..3
     4.1357152105e-05,\
    -4.2114813612e-11,\
    -2.8523713454e-14,\
     1.9109017837e-18,\
 
-# Poly EAST  :: n-degree =  2  : e-degree =  2
+# Poly EAST  :: n-degree =  2  : e-degree =  0..2
    -3.3616407783e-10,\
    -2.4382678126e-14,\
     2.0245020199e-18,\
 
-# Poly EAST  :: n-degree =  3  : e-degree =  1
+# Poly EAST  :: n-degree =  3  : e-degree =  0..1
    -1.2441377565e-15,\
    -5.3885232238e-19,\
 
@@ -385,6 +397,5 @@ inv_v=\
     1.0167203661e-18
 
 # tcx     877605.760036
-
 
 <>

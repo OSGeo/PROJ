@@ -271,7 +271,7 @@ double pj_xy_dist (XY a, XY b);
 double pj_xyz_dist (XYZ a, XYZ b);
 
 
-#ifndef PJ_OBS_C
+#ifndef PJ_OBS_API_C
 extern const PJ_OBS pj_obs_error;
 extern const PJ_OBS pj_obs_null;
 extern const PJ *pj_shutdown;

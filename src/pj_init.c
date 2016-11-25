@@ -508,11 +508,11 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* flattening */
     PIN->f  = 1 - cos (PIN->alpha);   /* = 1 - sqrt (1 - PIN->es); */
-    PIN->rf = PIN->f? 1/PIN->f: HUGE_VAL;
+    PIN->rf = PIN->f? 1.0/PIN->f: HUGE_VAL;
 
     /* second flattening */
-    PIN->f2 = 1/cos (PIN->alpha) - 1;
-    PIN->rf = PIN->f2? 1/PIN->f2: HUGE_VAL;
+    PIN->f2  = 1/cos (PIN->alpha) - 1;
+    PIN->rf2 = PIN->f2? 1/PIN->f2: HUGE_VAL;
 
     /* third flattening */
     PIN->n  = pow (tan (PIN->alpha/2), 2);

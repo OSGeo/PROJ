@@ -32,7 +32,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-#define PJ_OBS_C
+#define PJ_OBS_API_C
 #include <proj.h>
 #include <projects.h>
 #include <geodesic.h>

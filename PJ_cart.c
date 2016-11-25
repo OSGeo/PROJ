@@ -130,6 +130,21 @@ static XYZ cartesian (LPZ geodetic,  PJ *P) {
     xyz.y = (N + h) * cosphi * sin(lam);
     xyz.z = (N * (1 - P->es) + h) * sin(phi);
 
+    /*********************************************************************/
+    /*                                                                   */
+    /* For historical reasons, in proj, plane coordinates are measured   */
+    /* in units of the semimajor axis. Since 3D handling is grafted on   */
+    /* later, this is not the case for heights. And even though this     */
+    /* coordinate really is 3D cartesian, the z-part looks like a height */
+    /* to proj. Hence, we have the somewhat unusual situation of having  */
+    /* a point coordinate with differing units between dimensions.       */
+    /*                                                                   */
+    /* The scaling and descaling is handled by the pj_fwd/inv functions. */
+    /*                                                                   */
+    /*********************************************************************/
+    xyz.x /= P->a;
+    xyz.y /= P->a;
+
     return xyz;
 }
 
@@ -139,6 +154,9 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
 /*********************************************************************/
     double N, b, p, theta, c, s, e2s;
     LPZ lpz;
+
+    cartesian.x *= P->a;
+    cartesian.y *= P->a;
 
     /* Perpendicular distance from point to Z-axis (HM eq. 5-28) */
     p = hypot (cartesian.x, cartesian.y);
@@ -203,8 +221,6 @@ PJ *PROJECTION(cart) {
     P->inv3d  =  geodetic;
     P->fwd    =  cart_forward;
     P->inv    =  cart_reverse;
-    P->left   =  PJ_IO_UNITS_RADIANS;
-    P->right  =  PJ_IO_UNITS_METERS;
     return P;
 }
 

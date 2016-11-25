@@ -114,6 +114,8 @@ struct pj_opaque {
     int *reverse_step;
     int *omit_forward;
     int *omit_inverse;
+    char **argv;
+    char **current_argv;
     PJ_OBS stack[PIPELINE_STACK_SIZE];
     PJ **pipeline;
 };
@@ -175,13 +177,16 @@ static LP     pipeline_reverse (XY xyz, PJ *P);
 
 
 static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
-    int i, first_step, last_step, incr;
+    int i, first_step, last_step;
 
     first_step = 1;
     last_step  = P->opaque->steps + 1;
-    incr  = 1;
 
-    for (i = first_step; i != last_step; i += incr) {
+    for (i = first_step;  i != last_step;  i++) {
+        pj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %.4f %.4f",
+            i-first_step, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
+            P->opaque->pipeline[i]->a, P->opaque->pipeline[i]->rf
+        );
         if (P->opaque->omit_forward[i])
             continue;
         if (P->opaque->reverse_step[i])
@@ -191,19 +196,23 @@ static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
+    pj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
 
     P->opaque->depth = 0;    /* Clear the stack */
     return point;
 }
 
+
 static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
-    int i, first_step, last_step, incr;
+    int i, first_step, last_step;
 
     first_step = P->opaque->steps;
     last_step  =  0;
-    incr  = -1;
-
-    for (i = first_step; i != last_step; i += incr) {
+    for (i = first_step;  i != last_step;  i--) {
+        pj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %.4f %.4f",
+            i, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
+            P->opaque->pipeline[i]->a, P->opaque->pipeline[i]->rf
+        );
         if (P->opaque->omit_inverse[i])
             continue;
         if (P->opaque->reverse_step[i])
@@ -213,6 +222,7 @@ static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
+    pj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
 
     P->opaque->depth = 0;    /* Clear the stack */
     return point;
@@ -275,6 +285,8 @@ static void *pipeline_freeup (PJ *P, int errlev) {         /* Destructor */
     pj_dealloc (P->opaque->reverse_step);
     pj_dealloc (P->opaque->omit_forward);
     pj_dealloc (P->opaque->omit_inverse);
+    pj_dealloc (P->opaque->argv);
+    pj_dealloc (P->opaque->current_argv);
     pj_dealloc (P->opaque->pipeline);
 
     pj_dealloc (P->opaque);
@@ -357,11 +369,11 @@ PJ *PROJECTION(pipeline) {
         return 0;
 
     argc = argc_params (P->params);
-    argv = argv_params (P->params, argc);
+    P->opaque->argv = argv = argv_params (P->params, argc);
     if (0==argv)
         return pipeline_freeup (P, ENOMEM);
 
-    current_argv = pj_calloc (argc, sizeof (char *));
+    P->opaque->current_argv = current_argv = pj_calloc (argc, sizeof (char *));
     if (0==current_argv)
         return pipeline_freeup (P, ENOMEM);
 
