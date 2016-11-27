@@ -50,23 +50,98 @@ int die_func (const char *file, int line, const char *msg, int retcode) {
 int main (int argc, char **argv) {
     PJ *P;
     paralist *params;
-    PJ_OBS a, b;
+    PJ_OBS a, b, c, e;
     double dist;
 
+
+    /* (55,12,100) -> (x,y,z), ed50, fra KMStrans2 */
+    const PJ_OBS cph_ed50 = {
+        {{3586701.0962,  762376.8528,  5201571.5773, 0}},
+        {{0, 0, 0}},  0, 0
+    };
+
+    /* (55,12,100) -> (x,y,z)ETRS89, fra KMStrans2 */
+    const PJ_OBS cph_etrs89 = {
+        {{3586525.7611,  762339.5841,  5201465.4383, 0}},
+        {{0, 0, 0}},  0, 0
+    };
+
+    /* (55,12,100) -> (x,y,z)ed50 -> (x,y,z)ETRS89, fra KMStrans2 */
+    const PJ_OBS cph_etrs89_from_ed50 = {
+        {{3586617.3023,  762282.2356, 5201454.2643, 0}},
+        {{0, 0, 0}},  0, 0
+    };
+
     /* Log everything libproj offers to log for you */
-    pj_log_level (0, PJ_LOG_TRACE);
+    pj_log_level (0, PJ_LOG_NONE);
 
     /* shut up some irrelevant compiler warnings */
     horner_silence (0);
 
+    if ((argc > 1) && (0==strcmp("no-op", argv[1])))
+        exit (0);
+    P = pj_create ("+proj=cart +ellps=GRS80");
+
+    a = b = c = e = pj_obs_null;
+    a.coo.lpz.lam =  TORAD(12);
+    a.coo.lpz.phi =  TORAD(55);
+    a.coo.lpz.z   =  100;
+
+    e  =  cph_etrs89;
+
+    banner ("CART");
+    b = pj_trans (P, PJ_FWD, a);
+    printf ("INI:   %20.15g %20.15g %20.15g\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi), a.coo.lpz.z);
+    printf ("FWD:   %20.15g %20.15g %20.15g\n", b.coo.xyz.x, b.coo.xyz.y, b.coo.xyz.z);
+    printf ("EXP:   %20.15g %20.15g %20.15g\n", e.coo.xyz.x, e.coo.xyz.y, e.coo.xyz.z);
+    printf ("dist [mm] = %f\n", 1000 * pj_xyz_dist (e.coo.xyz,b.coo.xyz));
+    b = pj_trans (P, PJ_INV, b);
+    printf ("INV:   %20.15g %20.15g %20.15g\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi), b.coo.lpz.z);
+    printf ("dist [mm] = %f\n", 1000 * pj_xy_dist (a.coo.xy,b.coo.xy));
+
+    /* Now transform to etrs89 */
+    b = cph_ed50;
+
+    /* (55,12,100) -> (X,Y,Z) -> ed50, fra KMStrans2 */
+    e = cph_etrs89_from_ed50;
+
+    banner ("HELMERT");
+    P = pj_create ("+proj=helmert +approx"
+            "  +x=-81.0703 +y=-89.3603 +z=-115.7526"
+            " +rx=-484.88 +ry=-24.36  +rz=-413.21   +s=-0.540645"
+        );
+
+    if (0==P)
+        exit ((puts ("Oops"), 1));
+
+    printf ("dist, abs [mm] = %f\n", 1000 * pj_xyz_dist (e.coo.xyz,b.coo.xyz));
+
+    /* b = pj_trans (P, PJ_FWD, b); */
+    b.coo.xyz = P->fwd3d(b.coo.lpz, P);
+
+    printf ("FWD:   %20.15g %20.15g %20.15g\n", b.coo.xyz.x, b.coo.xyz.y, b.coo.xyz.z);
+    printf ("EXP:   %20.15g %20.15g %20.15g\n", e.coo.xyz.x, e.coo.xyz.y, e.coo.xyz.z);
+    printf ("dist [mm] = %f\n", 1000 * pj_xyz_dist (e.coo.xyz,b.coo.xyz));
+    pj_free (P);
+
+    banner ("UTM");
+    a.coo.lpz.lam =  TORAD(12);
+    a.coo.lpz.phi =  TORAD(55);
+    a.coo.lpz.z   =  100;
+    P = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
+    if (0==P)
+        die ("bad UTM", 0);
+    dist = pj_roundtrip (P, PJ_FWD, 10000, a);
+    printf ("Roundtrip deviation, fwd (nm): %15.9f\n", dist*1e9);
+    pj_free (P);
+
+
     /* The "System 45 Bornholm" */
     banner ("pipeline");
+    pj_log_level (0, PJ_LOG_NONE);
     P = pj_create ("+init=./s45b.pol:s45b");
     if (0==P)
         return die ("Oops", 0);
-    params = P->params;
-    for (; params != 0; params = params->next)
-        printf("%s\n", params->param);
 
     printf ("error level %d\n", pj_err_level (P, PJ_ERR_TELL));
     a = b = pj_obs_null;
@@ -87,9 +162,9 @@ int main (int argc, char **argv) {
     printf ("Roundtrip deviation, fwd (mm): %15.9f\n", dist*1000);
 #endif
     pj_free (P);
-    a = b = pj_obs_null;
 
 
+exit(0);
 
 
 

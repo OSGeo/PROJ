@@ -34,16 +34,18 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
     if (P->ctx->last_errno)
         return err;
 
-    /* reduce from del lp.lam */
-    lpz.lam += P->lam0;
+    if ((P->left==PJ_IO_UNITS_CLASSIC)||(P->left==PJ_IO_UNITS_RADIANS)) {
+        /* reduce from del lp.lam */
+        lpz.lam += P->lam0;
 
-     /* adjust longitude to central meridian */
-    if (!P->over)
-        lpz.lam = adjlon(lpz.lam);
+         /* adjust longitude to central meridian */
+        if (!P->over)
+            lpz.lam = adjlon(lpz.lam);
 
-    /* This may be redundant and never used */
-    if (P->geoc && fabs(fabs(lpz.phi)-M_HALFPI) > EPS)
-        lpz.phi = atan(P->one_es * tan(lpz.phi));
+        /* This may be redundant and never used */
+        if (P->geoc && fabs(fabs(lpz.phi)-M_HALFPI) > EPS)
+            lpz.phi = atan(P->one_es * tan(lpz.phi));
+    }
 
     return lpz;
 }

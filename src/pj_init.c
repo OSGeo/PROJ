@@ -234,6 +234,8 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
                 {
                     next = next->next = pj_mkparam(sword+1);
                 }
+                else
+                    next = next->next = pj_mkparam(sword+1);
             }
         }
         else

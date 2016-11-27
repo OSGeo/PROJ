@@ -183,10 +183,11 @@ static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
     last_step  = P->opaque->steps + 1;
 
     for (i = first_step;  i != last_step;  i++) {
-        pj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %.4f %.4f",
+        pj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %20.20s",
             i-first_step, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
-            P->opaque->pipeline[i]->a, P->opaque->pipeline[i]->rf
+            P->opaque->pipeline[i]->descr
         );
+
         if (P->opaque->omit_forward[i])
             continue;
         if (P->opaque->reverse_step[i])
@@ -210,7 +211,7 @@ static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
     last_step  =  0;
     for (i = first_step;  i != last_step;  i--) {
         pj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %.4f %.4f",
-            i, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
+            i - 1, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
             P->opaque->pipeline[i]->a, P->opaque->pipeline[i]->rf
         );
         if (P->opaque->omit_inverse[i])
@@ -335,9 +336,9 @@ static size_t argc_params (paralist *params) {
 }
 
 /* Sentinel for argument list */
-static char argv_sentinel[5] = "step";
+static char argv_sentinel[] = "step";
 
-/* turn paralist int argc/argv style argument list */
+/* turn paralist into argc/argv style argument list */
 static char **argv_params (paralist *params, size_t argc) {
     char **argv;
     size_t i = 0;

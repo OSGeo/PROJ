@@ -221,9 +221,6 @@ int pj_cart_selftest (void) {
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
 
 
-    /* Log everything libproj offers to log for you */
-    pj_log_level (0, PJ_LOG_TRACE);
-
     /* An utm projection on the GRS80 ellipsoid */
     P = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
     if (0==P)

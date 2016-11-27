@@ -268,9 +268,8 @@ PJ *PROJECTION(helmert) {
     if (pj_param (P->ctx, P->params, "ts").i)
         scale = pj_param (P->ctx, P->params, "ds").f;
 
-
     /* Use small angle approximations? */
-    if (pj_param (P->ctx, P->params, "tapprox").i)
+    if (pj_param (P->ctx, P->params, "bapprox").i)
         approximate = 1;
 
     /* Use "other" rotation sign convention? */
@@ -392,6 +391,31 @@ PJ *PROJECTION(helmert) {
         R21 = -sf*ct;
         R22 =  cf*ct;
 
+    /*
+        For comparison: Description from Engsager/Poder implementation
+        in set_dtm_1.c (trlib)
+
+        DATUM SHIFT:
+        TO = scale * ROTZ * ROTY * ROTX * FROM + TRANSLA
+
+             ( cz sz 0)         (cy 0 -sy)         (1   0  0)
+        ROTZ=(-sz cz 0),   ROTY=(0  1   0),   ROTX=(0  cx sx)
+             (  0  0 1)         (sy 0  cy)         (0 -sx cx)
+
+        trp->r11  =  cos_ry*cos_rz;
+        trp->r12  =  cos_rx*sin_rz + sin_rx*sin_ry*cos_rz;
+        trp->r13  =  sin_rx*sin_rz - cos_rx*sin_ry*cos_rz;
+
+        trp->r21  = -cos_ry*sin_rz;
+        trp->r22  =  cos_rx*cos_rz - sin_rx*sin_ry*sin_rz;
+        trp->r23  =  sin_rx*cos_rz + cos_rx*sin_ry*sin_rz;
+
+        trp->r31  =  sin_ry;
+        trp->r32  = -sin_rx*cos_ry;
+        trp->r33  =  cos_rx*cos_ry;
+
+        trp->scale = 1.0 + scale;
+    */
 
     } while (0);
 
@@ -428,7 +452,7 @@ static int test (char *args, PJ_TRIPLET in, PJ_TRIPLET expect) {
         return 1;
 
     out.lpz = pj_inv3d (out.xyz, P);
-    if (pj_lp_dist (P, out.lp, in.lp) > 1e-4)
+    if (pj_xyz_dist (out.xyz, in.xyz) > 1e-4)
         return 2;
 
     return 0;

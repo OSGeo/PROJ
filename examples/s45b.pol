@@ -12,17 +12,18 @@
 <s45b>
 proj=pipeline
 
-step  coll=00 init=./s45b.pol:s45b_tc32
+step  init=./s45b.pol:s45b_tc32
+# step  init=./s45b.pol:tc32_utm32
 
-step  coll=01 init=./s45b.pol:tc32_utm32
+step  proj=utm inv   ellps=intl zone=32
+step  proj=cart      ellps=intl
 
-step  coll=02 proj=utm inv ellps=intl zone=32
-step  coll=03 proj=cart    ellps=intl
-#step  coll=04 proj=helmert ellps=GRS80
-#      x=-81.0703 y=-89.3603 z=-115.7526
-#     rx=-484.88 ry=-24.36  rz=-413.21   s=-0.540645
-#step  coll=05 proj=cart inv ellps=GRS80
-#step  coll=06 proj=utm ellps=GRS80
+step  proj=helmert ellps=GRS80
+      x=-81.0703 y=-89.3603 z=-115.7526
+     rx=-484.88 ry=-24.36  rz=-413.21   s=-0.540645
+
+step  proj=cart inv ellps=GRS80
+step  proj=utm ellps=GRS80  zone=32
 
 
 
