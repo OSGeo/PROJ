@@ -20,10 +20,11 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
 
     P->ctx->last_errno = errno = pj_errno = 0;
 
-    /* descale and de-offset */
-    /* z is not scaled since that is handled by vto_meter before we get here */
+    /* de-scale and de-offset */
+    /* z is not de-scaled since that is handled by vto_meter before we get here */
     xyz.x = (xyz.x * P->to_meter - P->x0);
     xyz.y = (xyz.y * P->to_meter - P->y0);
+    /* Classic proj.4 functions expect plane coordinates in units of the semimajor axis */
     if (P->right==PJ_IO_UNITS_CLASSIC) {
         xyz.x /= P->a;
         xyz.y /= P->a;

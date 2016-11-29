@@ -49,16 +49,18 @@
 	to enable more generic enjoyment of an interesting piece of
 	ingenious geodetic code - simplistic and enigmatic at the same time.
 
-
  **********************************************************************
 
 	The material included here was written by Knud Poder, starting
-	around 1960, Karsten Engsager, starting around 1970, and Thomas
-	Knudsen, starting around 2005.
+	around 1960, Karsten Engsager, starting around 1970. It was
+    originally written in Algol 60, later (1980s) reimplemented in C.
+
+    The HORNER data type interface, and the organization as a header
+    library was implemented by Thomas Knudsen, starting around 2015.
 
  ***********************************************************************
  *
- * The gen_pol routine comes with this legal statement (The ISC/OpenBSD):
+ * The gen_pol routine comes with this legal statement (ISC/OpenBSD):
  *
  * Copyright (c) 2011, National Survey and Cadastre, Denmark
  * (Kort- og Matrikelstyrelsen), kms@kms.dk
@@ -103,6 +105,13 @@
  *****************************************************************************/
 
 
+ #ifndef MORNER_H
+ #define HORNER_H
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+
+
 
 #if defined(PROJ_H) || defined(PROJECTS_H)
 #define horner_dealloc(x) pj_dealloc(x)
@@ -114,8 +123,6 @@ typedef struct {double u,v;} UV;
 #endif
 
 static const UV uv_error = {DBL_MAX, DBL_MAX};
-
-
 
 struct horner;
 typedef struct horner HORNER;
@@ -146,6 +153,7 @@ static int     horner_degree_u (int order, int index);
 static int     horner_degree_v (int order, int index);
 static int     horner_index (int order, int degree_u, int degree_v);
 
+#ifndef HORNER_HEADER_ONLY
 
 /***************************************************************************/
 static int horner_index (int order, int degree_1, int degree_2) {
@@ -170,7 +178,6 @@ static int horner_index (int order, int degree_1, int degree_2) {
     v is first (degree_1), u is second (degree_2).
 
 ****************************************************************************/
-
     if ( (degree_1 < 0)  ||  (degree_2 < 0)  ||  (degree_1 + degree_2 > order) ) {
         errno = EDOM;
         return -1;
@@ -363,8 +370,11 @@ summing the tiny high order elements first.
 
 
 
-/* useless function that silences coompiler warnings about unused stuff */
+/**********************************************************************/
 static int horner_silence (int i) {
+/***********************************************************************
+  useless function that silences coompiler warnings about unused stuff
+***********************************************************************/
     HORNER *Q;
     if (i==0)
         return i;
@@ -766,3 +776,12 @@ int gen_pol(double *C_f, double *C_r, double N_in, double E_in, double *Nout, do
   };
 
 #endif /* HORNER_TEST_ORIGINAL_GEN_POL_CODE */
+
+
+#endif /* ndef HORNER_HEADER_ONLY */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* ndef HORNER_H */

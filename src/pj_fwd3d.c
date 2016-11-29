@@ -15,6 +15,7 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
 
     P->ctx->last_errno = pj_errno = errno = 0;
 
+    /* Check input coordinates if angular */
     if ((P->left==PJ_IO_UNITS_CLASSIC)||(P->left==PJ_IO_UNITS_RADIANS)) {
 
         /* check for forward and latitude or longitude overange */
@@ -39,14 +40,16 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
     if ( P->ctx->last_errno )
         return err;
 
-    /* adjust for major axis and easting/northings */
-    /* z is not scaled since this handled by vto_meter outside */
+    /* Classic proj.4 functions return plane coordinates in units of the semimajor axis */
     if (P->right==PJ_IO_UNITS_CLASSIC) {
         xyz.x *= P->a;
         xyz.y *= P->a;
     }
+
+    /* Handle false eastings/northings and non-metric linear units */
     xyz.x = P->fr_meter * (xyz.x + P->x0);
     xyz.y = P->fr_meter * (xyz.y + P->y0);
+    /* z is not scaled since this is handled by vto_meter outside */
 
     return xyz;
 }
