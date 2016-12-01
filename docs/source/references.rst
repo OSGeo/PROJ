@@ -11,6 +11,8 @@ References
 
 .. [Steers1970] Steers, J.A., 1970, An introduction to the study of map projections (15th ed.): London, Univ. London Press, p. 229
 
+.. [Snyder1926] Snyder, 1926, Flattening the Earth, Chicago and London, The university of Chicago press
+
 .. [Snyder1987] Snyder. John P. 1987. `Map Projections - A Working Manual <https://github.com/OSGeo/proj.4/blob/master/docs/old/USGS-Snyder-Map-Projections-A-Working-Manual-1987.pdf>`_. US. Geological Survey professional paper; 1395.
 
 .. [EberHewitt1979] Eber, L.E., and R.P. Hewitt. 1979. `Conversion algorithms for the CALCOFI station grid <http://www.calcofi.org/publications/calcofireports/v20/Vol_20_Eber___Hewitt.pdf>`__. California Cooperative Oceanic Fisheries Investigations Reports 20:135-137.
