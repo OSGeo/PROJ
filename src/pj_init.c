@@ -35,10 +35,12 @@
 #include <errno.h>
 #include <ctype.h>
 
+/* Maximum size of files using the "escape carriage return" feature */
+#define MAX_CR_ESCAPE 65537
 typedef struct {
     projCtx ctx;
     PAFile fid;
-    char buffer[65537];
+    char buffer[MAX_CR_ESCAPE];
     int buffer_filled;
     int at_eof;
 } pj_read_state;
@@ -92,22 +94,23 @@ static const char *fill_buffer(pj_read_state *state, const char *last_char)
     r = state->buffer;
     w = state->buffer;
     while (*r) {
+        /* Escaped newline? */
         while ((r[0]=='\\')  &&  ((r[1]=='\n') || (r[1]=='\r'))) {
             r += 2;
             while (isspace (*r))
                 r++;
-        }
-        /* we also skip comments immediately after an escaped newline */
-        while (*r=='#') {
-            while( *r && *r != '\n' )
-                r++;
-            while (isspace (*r))
-                r++;
-            /* Reaching end of buffer while skipping continuation comment is currently an error */
-            if (0==*r) {
-                pj_ctx_set_errno (state->ctx, -2);
-                pj_log (state->ctx, PJ_LOG_ERROR, "init file too big");
-                return 0;
+            /* we also skip comments immediately after an escaped newline */
+            while (*r=='#') {
+                while( *r && (*r != '\n') )
+                    r++;
+                while (isspace (*r))
+                    r++;
+                /* Reaching end of buffer while skipping continuation comment is currently an error */
+                if (0==*r) {
+                    pj_ctx_set_errno (state->ctx, -2);
+                    pj_log (state->ctx, PJ_LOG_ERROR, "init file too big");
+                    return 0;
+                }
             }
         }
         *w++ = *r++;
@@ -125,12 +128,11 @@ static paralist *
 get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
         int *found_def) {
     pj_read_state *state = (pj_read_state*) calloc(1,sizeof(pj_read_state));
-    char sword[65537];
+    char sword[MAX_CR_ESCAPE];
     char *pipeline;
     int len;
     int in_target = 0;
     const char *next_char = NULL;
-
     state->fid = fid;
     state->ctx = ctx;
     next_char = fill_buffer(state, NULL);

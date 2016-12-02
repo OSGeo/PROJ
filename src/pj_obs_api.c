@@ -40,16 +40,18 @@
 #include <math.h>
 
 
-/* Used as return value in case of errors */
-const PJ_OBS pj_obs_error = {
-    /* Cannot use HUGE_VAL here: MSVC misimplements HUGE_VAL as something that is not compile time constant */
+/* Objects used as return value in case of errors */
+/* Cannot use HUGE_VAL here: MSVC misimplements HUGE_VAL as something that is not compile time constant */
+const PJ_COORD pj_coo_error = {{DBL_MAX,DBL_MAX,DBL_MAX,DBL_MAX}};
+const PJ_OBS   pj_obs_error = {
     {{DBL_MAX,DBL_MAX,DBL_MAX,DBL_MAX}},
     {{DBL_MAX,DBL_MAX,DBL_MAX}},
     0, 0
 };
 
 /* Used for zero-initializing new objects */
-const PJ_OBS pj_obs_null = {
+const PJ_COORD pj_coo_null = {{0, 0, 0, 0}};
+const PJ_OBS   pj_obs_null = {
     {{0, 0, 0, 0}},
     {{0, 0, 0}},
     0, 0
