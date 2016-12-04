@@ -239,7 +239,7 @@ int pj_krovak_selftest (void) {
     double tolerance_lp = 1e-10;
     double tolerance_xy = 1e-7;
 
-    char e_args[] = {"+proj=krovak +ellps=GRS80"};
+    char e_args[] = {"+proj=krovak +ellps=GRS80  +no_defs"};
 
     LP fwd_in[] = {
         { 2, 1},
