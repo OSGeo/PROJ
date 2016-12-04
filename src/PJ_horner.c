@@ -108,7 +108,7 @@
 #include <stddef.h>
 #include <math.h>
 #include <errno.h>
-#include <horner.h>
+#include "horner.h"
 PROJ_HEAD(horner,    "Horner polynomial evaluation");
 
 
