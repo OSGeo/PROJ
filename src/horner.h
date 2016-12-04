@@ -105,7 +105,7 @@
  *****************************************************************************/
 
 
- #ifndef MORNER_H
+ #ifndef HORNER_H
  #define HORNER_H
  #ifdef __cplusplus
  extern "C" {
