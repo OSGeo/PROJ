@@ -147,6 +147,7 @@ install: all
 	copy *.exe $(INSTDIR)\bin
 	copy *.dll $(INSTDIR)\bin
 	copy *.lib $(INSTDIR)\lib
+	copy proj.h     $(INSTDIR)\include
 	copy proj_api.h $(INSTDIR)\include
 	copy projects.h $(INSTDIR)\include
 	copy geodesic.h $(INSTDIR)\include
