@@ -283,8 +283,8 @@ $EXE +proj=hammer  +datum=WGS84 \
 EOF
 echo "##############################################################" >> ${OUT}
 echo "Test healpix forward projection on sphere" >> ${OUT}
-$EXE +proj=latlong +a=1 +lon_0=0 \
- +to +proj=healpix +a=1 +lon_0=0  -f '%.'5'f' \
+$EXE +proj=latlong +R=1 +lon_0=0 \
+ +to +proj=healpix +R=1 +lon_0=0  -f '%.'5'f' \
  -E >>${OUT} <<EOF
 0 41.81031
 -90 0
