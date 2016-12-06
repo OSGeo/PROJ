@@ -22,9 +22,11 @@ LP pj_inv(XY xy, PJ *P) {
     xy.y = (xy.y * P->to_meter - P->y0);
 
     /* Classic proj.4 functions expect plane coordinates in units of the semimajor axis */
+    /* Multiplying by ra, rather than dividing by a because the CALCOFI projection      */
+    /* stomps on a and hence depends on this */
     if (P->right==PJ_IO_UNITS_CLASSIC) {
-        xy.x /= P->a;
-        xy.y /= P->a;
+        xy.x *= P->ra;
+        xy.y *= P->ra;
     }
 
     /* Do inverse transformation */

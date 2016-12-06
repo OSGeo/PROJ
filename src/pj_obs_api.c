@@ -181,7 +181,7 @@ PJ *pj_create_argv (int argc, char **argv) {
 }
 
 
-/* From here: Minimum viable support for contexts. The first four functions   */
+/* Below: Minimum viable support for contexts. The first four functions   */
 /* relate to error reporting, debugging, and logging, hence being generically */
 /* useful. The remaining is a compact implementation of the more low level    */
 /* proj_api.h thread contexts, which may or may not be useful  */
@@ -200,7 +200,6 @@ int pj_err_level (PJ *P, int err_level) {
     pj_ctx_set_errno (ctx, err_level);
     return previous;
 }
-
 
 
 /* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
@@ -239,6 +238,7 @@ int pj_context_renew (PJ *P) {
     pj_set_ctx (P, ctx);
     return 0;
 }
+
 
 /* Move daughter to mother's context */
 void pj_context_inherit (PJ *mother, PJ *daughter) {

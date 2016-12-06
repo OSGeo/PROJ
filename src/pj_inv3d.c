@@ -25,9 +25,11 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
     xyz.x = (xyz.x * P->to_meter - P->x0);
     xyz.y = (xyz.y * P->to_meter - P->y0);
     /* Classic proj.4 functions expect plane coordinates in units of the semimajor axis */
+    /* Multiplying by ra, rather than dividing by a because the CALCOFI projection      */
+    /* stomps on a and hence depends on this */
     if (P->right==PJ_IO_UNITS_CLASSIC) {
-        xyz.x /= P->a;
-        xyz.y /= P->a;
+        xyz.x *= P->ra;
+        xyz.y *= P->ra;
     }
 
     /* Do inverse transformation */
