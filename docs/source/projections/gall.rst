@@ -4,7 +4,8 @@
 Gall (Gall Stereographic)
 ********************************************************************************
 
-The Gall stereographic projection, presented by James Gall in 1855, is a cylindrical projection. It is neither equal-area nor conformal but instead tries to balance the distortion inherent in any projection.
+The Gall stereographic projection, presented by James Gall in 1855, is a cylindrical projection.
+It is neither equal-area nor conformal but instead tries to balance the distortion inherent in any projection.
 
 +---------------------+--------------------------------------------------------------------------------+
 | **Classification**  | Transverse and oblique cylindrical                                             |
@@ -15,7 +16,7 @@ The Gall stereographic projection, presented by James Gall in 1855, is a cylindr
 +---------------------+--------------------------------------------------------------------------------+
 | **Implemented by**  | Gerald I. Evenden                                                              |
 +---------------------+--------------------------------------------------------------------------------+
-| **Options**                                                                                          |
+| **Options**         | No special options for this projection                                         |
 +---------------------+--------------------------------------------------------------------------------+
 
 
@@ -26,7 +27,13 @@ The Gall stereographic projection, presented by James Gall in 1855, is a cylindr
 Usage
 #####
 
-The need for a world map which avoids some of the scale exaggeration of the Mercator projection has led to some commonly used cylindrical modifications, as well as to other modifications which are not cylindrical. The earliest common cylindrical example was developed by James Gall of Edinburgh about 1855 (Gall, 1885, p. 119-123). His meridians are equally spaced, but the parallels are spaced at increasing intervals away from the Equator. The parallels of latitude are actually projected onto a cylinder wrapped about the sphere, but cutting it at lats. 45° N. and S., the point of perspective being a point on the Equator opposite the meridian being projected. It is used in several British atlases, but seldom in the United States. The Gall projection is neither conformal nor equal-area, but has a blend of various features. Unlike the Mercator, the Gall shows the poles as lines running across the top and bottom of the map.
+The need for a world map which avoids some of the scale exaggeration of the Mercator projection has led to some commonly used cylindrical modifications, as well as to other modifications which are not cylindrical.
+The earliest common cylindrical example was developed by James Gall of Edinburgh about 1855 (Gall, 1885, p. 119-123).
+His meridians are equally spaced, but the parallels are spaced at increasing intervals away from the Equator.
+The parallels of latitude are actually projected onto a cylinder wrapped about the sphere, but cutting it at lats. 45° N. and S., the point of perspective being a point on the Equator opposite the meridian being projected.
+It is used in several British atlases, but seldom in the United States.
+The Gall projection is neither conformal nor equal-area, but has a blend of various features.
+Unlike the Mercator, the Gall shows the poles as lines running across the top and bottom of the map.
 
 
 Example using Gall Stereographical  ::
