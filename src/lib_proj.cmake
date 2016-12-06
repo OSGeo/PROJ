@@ -36,7 +36,7 @@ endif(USE_THREAD AND NOT Threads_FOUND)
 
 
 ##############################################
-### librairie source list and include_list ###
+###  library source list and include_list  ###
 ##############################################
 SET(SRC_LIBPROJ_PJ
         nad_init.c
@@ -50,6 +50,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_boggs.c
         PJ_bonne.c
         PJ_calcofi.c
+        PJ_cart.c
         PJ_cass.c
         PJ_cc.c
         PJ_cea.c
@@ -110,6 +111,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_omerc.c
         PJ_ortho.c
         PJ_patterson.c
+        PJ_pipeline.c
         PJ_poly.c
         PJ_putp2.c
         PJ_putp3.c
@@ -193,6 +195,7 @@ SET(SRC_LIBPROJ_CORE
         pj_mlfn.c
         pj_msfn.c
         pj_mutex.c
+        pj_obs_api.c
         pj_open_lib.c
         pj_param.c
         pj_phi2.c
@@ -217,6 +220,7 @@ SET(SRC_LIBPROJ_CORE
 set(HEADERS_LIBPROJ
         projects.h
         proj_api.h
+        proj.h
         geodesic.h
 )
 
@@ -334,7 +338,3 @@ boost_report_value(PROJ_CORE_TARGET)
 boost_report_value(PROJ_CORE_TARGET_OUTPUT_NAME)
 boost_report_value(PROJ_LIBRARY_TYPE)
 boost_report_value(PROJ_LIBRARIES)
-
-
-
-

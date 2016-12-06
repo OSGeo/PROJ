@@ -32,7 +32,7 @@
 +proj=fouc
 +proj=fouc_s
 +proj=gall
-+proj=geos +h=1
++proj=geos +h=35785831.0 +lon_0=120 +sweep=y
 +proj=gins8
 +proj=gn_sinu +m=2 +n=3
 +proj=gnom
@@ -113,7 +113,7 @@
 +proj=tissot +lat_1=60 +lat_2=65
 +proj=tmerc
 +proj=tpeqd +lat_1=60 +lat_2=65
-+proj=tpers +h=2
++proj=tpers +h=5500000 +lat_0=40
 +proj=ups
 +proj=urm5
 +proj=urmfps +n=0.5

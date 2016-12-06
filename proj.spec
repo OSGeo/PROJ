@@ -8,14 +8,14 @@ Name: %PACKAGE_NAME
 Version: %PACKAGE_VERSION
 Release: 1
 Source0: proj-4.9.3.tar.gz
-Copyright: MIT License, Copyright (c) 2000, Frank Warmerdam
+License: MIT, Copyright (c) 2000, Frank Warmerdam
 Group: Applications/GIS
 Vendor: Intevation GmbH <http://intevation.net>
 Distribution: FreeGIS CD
 
 BuildRoot: %{_builddir}/%{name}-root
 Prefix: %{_prefix}
-
+BuildRequires: libtool
 Conflicts: PROJ.4
 
 %description
@@ -25,6 +25,7 @@ data with a wide range of selectable projection functions.
 
 %prep
 %setup -D -n proj-4.9.3
+%{_builddir}/%{name}-%{version}/autogen.sh
 %configure
 
 %build

@@ -58,9 +58,13 @@ support = \
 	pj_ctx.obj pj_fileapi.obj pj_log.obj pj_apply_vgridshift.obj \
 	pj_strtod.obj pj_run_selftests.obj pj_generic_selftest.obj
 
+pipeline = \
+	pj_obs_api.obj PJ_cart.obj PJ_pipeline.obj
+
 geodesic = geodesic.obj
+
 LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc) \
-	$(geodesic)
+	$(geodesic) $(pipeline)
 PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
 CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
 GEODEXE_OBJ	= geod.obj geod_set.obj geod_interface.obj emess.obj
@@ -146,4 +150,3 @@ install: all
 	copy proj_api.h $(INSTDIR)\include
 	copy projects.h $(INSTDIR)\include
 	copy geodesic.h $(INSTDIR)\include
-

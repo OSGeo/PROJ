@@ -37,7 +37,9 @@
 #    define _CRT_NONSTDC_NO_DEPRECATE
 #  endif
 /* enable predefined math constants M_* for MS Visual Studio workaround */
-#  define _USE_MATH_DEFINES
+#  ifndef _USE_MATH_DEFINES
+#     define _USE_MATH_DEFINES
+#  endif
 #endif
 
 /* standard inclusions */
@@ -135,16 +137,306 @@ extern double hypot(double, double);
 #define DIR_CHAR '/'
 #endif
 
-struct projFileAPI_t;
+#define USE_PROJUV
 
-/* proj thread context */
-typedef struct {
-    int     last_errno;
-    int     debug_level;
-    void    (*logger)(void *, int, const char *);
-    void    *app_data;
-    struct projFileAPI_t *fileapi;
-} projCtx_t;
+typedef struct { double u, v; } projUV;
+typedef struct { double r, i; } COMPLEX;
+typedef struct { double u, v, w; } projUVW;
+
+/* If user explicitly includes proj.h, before projects.h, then avoid implicit type-punning */
+#ifndef PROJ_H
+#ifndef PJ_LIB__
+#define XY projUV
+#define LP projUV
+#define XYZ projUVW
+#define LPZ projUVW
+
+/* Yes, this is ridiculous, but a consequence of an old and bad decision about implicit type-punning through preprocessor abuse */
+typedef struct { double u, v; }        UV;
+typedef struct { double u, v, w; }     UVW;
+
+#else
+typedef struct { double x, y; }        XY;
+typedef struct { double x, y, z; }     XYZ;
+typedef struct { double lam, phi; }    LP;
+typedef struct { double lam, phi, z; } LPZ;
+typedef struct { double u, v; }        UV;
+typedef struct { double u, v, w; }     UVW;
+#endif  /* ndef PJ_LIB__ */
+#endif  /* ndef PROJ_H   */
+
+
+/* Forward declarations and typedefs for stuff needed inside the PJ object */
+struct PJconsts;
+struct PJ_OBS;
+struct geod_geodesic;
+struct pj_opaque;
+struct ARG_list;
+struct FACTORS;
+struct PJ_REGION_S;
+typedef struct PJ_REGION_S  PJ_Region;
+typedef struct ARG_list paralist;   /* parameter list */
+enum pj_io_units {
+    PJ_IO_UNITS_CLASSIC = 0,   /* LEFT: Radians     RIGHT: Scaled meters */
+    PJ_IO_UNITS_METERS  = 1,   /* Meters  */
+    PJ_IO_UNITS_RADIANS = 2    /* Radians */
+};
+#ifndef PROJ_H
+typedef struct PJconsts PJ;         /* the PJ object herself */
+typedef struct PJ_OBS PJ_OBS;
+#endif
+
+struct PJ_REGION_S {
+    double ll_long;        /* lower left corner coordinates (radians) */
+    double ll_lat;
+    double ur_long;        /* upper right corner coordinates (radians) */
+    double ur_lat;
+};
+
+
+struct projCtx_t;
+typedef struct projCtx_t projCtx_t;
+
+/* base projection data structure */
+struct PJconsts {
+
+    /*************************************************************************************
+
+                            G E N E R A L   C O N T E X T
+
+    **************************************************************************************
+
+        TODO: Need some description here - especially about the thread context...
+
+    **************************************************************************************/
+
+    projCtx_t *ctx;
+    const char *descr;             /* From pj_list.h or individual PJ_*.c file */
+    paralist *params;              /* Parameter list */
+    struct geod_geodesic *geod;    /* For geodesic computations */
+    struct pj_opaque *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
+
+
+    /*************************************************************************************
+
+                          F U N C T I O N    P O I N T E R S
+
+    **************************************************************************************
+
+        For projection xxx, these are pointers to functions in the corresponding
+        PJ_xxx.c file.
+
+        pj_init() delegates the setup of these to pj_projection_specific_setup_xxx(),
+        a name which is currently hidden behind the magic curtain of the PROJECTION
+        macro.
+
+    **************************************************************************************/
+
+
+    XY  (*fwd)(LP,    PJ *);
+    LP  (*inv)(XY,    PJ *);
+    XYZ (*fwd3d)(LPZ, PJ *);
+    LPZ (*inv3d)(XYZ, PJ *);
+    PJ_OBS (*fwdobs)(PJ_OBS, PJ *);
+    PJ_OBS (*invobs)(PJ_OBS, PJ *);
+
+    void (*spc)(LP, PJ *, struct FACTORS *);
+
+    void (*pfree)(PJ *);
+
+
+    /*************************************************************************************
+
+                          E L L I P S O I D     P A R A M E T E R S
+
+    **************************************************************************************
+
+        Despite YAGNI, we add a large number of ellipsoidal shape parameters, which
+        are not yet set up in pj_init. They are, however, inexpensive to compute,
+        compared to the overall time taken for setting up the complex PJ object
+        (cf. e.g. https://en.wikipedia.org/wiki/Angular_eccentricity).
+
+        But during single point projections it will often be a useful thing to have
+        these readily available without having to recompute at every pj_fwd / pj_inv
+        call.
+
+        With this wide selection, we should be ready for quite a number of geodetic
+        algorithms, without having to incur further ABI breakage.
+
+    **************************************************************************************/
+
+    /* The linear parameters */
+
+    double  a;                         /* semimajor axis (radius if eccentricity==0) */
+    double  b;                         /* semiminor axis */
+    double  ra;                        /* 1/a */
+    double  rb;                        /* 1/b */
+
+    /* The eccentricities */
+
+    double  alpha;                     /* angular eccentricity */
+    double  e;                         /* first  eccentricity */
+    double  es;                        /* first  eccentricity squared */
+    double  e2;                        /* second eccentricity */
+    double  e2s;                       /* second eccentricity squared */
+    double  e3;                        /* third  eccentricity */
+    double  e3s;                       /* third  eccentricity squared */
+    double  one_es;                    /* 1 - e^2 */
+    double  rone_es;                   /* 1/one_es */
+
+
+    /* The flattenings */
+    double  f;                         /* first  flattening */
+    double  f2;                        /* second flattening */
+    double  n;                         /* third  flattening */
+    double  rf;                        /* 1/f  */
+    double  rf2;                       /* 1/f2 */
+    double  rn;                        /* 1/n  */
+
+    /* This one's for GRS80 */
+    double  J;                         /* "Dynamic form factor" */
+
+    double  es_orig, a_orig;           /* es and a before any +proj related adjustment */
+
+
+    /*************************************************************************************
+
+                          C O O R D I N A T E   H A N D L I N G
+
+    **************************************************************************************/
+
+    int  over;                      /* Over-range flag */
+    int  geoc;                      /* Geocentric latitude flag */
+    int  is_latlong;                /* proj=latlong ... not really a projection at all */
+    int  is_geocent;                /* proj=geocent ... not really a projection at all */
+
+    enum pj_io_units left;          /* Flags for input/output coordinate types */
+    enum pj_io_units right;
+
+
+    /*************************************************************************************
+
+                       C A R T O G R A P H I C       O F F S E T S
+
+    **************************************************************************************/
+
+    double  lam0, phi0;                /* central longitude, latitude */
+    double  x0, y0;                    /* false easting and northing */
+
+
+    /*************************************************************************************
+
+                                    S C A L I N G
+
+    **************************************************************************************/
+
+    double  k0;                        /* General scaling factor - e.g. the 0.9996 of UTM */
+    double  to_meter, fr_meter;        /* Plane coordinate scaling. Internal unit [m] */
+    double  vto_meter, vfr_meter;      /* Vertical scaling. Internal unit [m] */
+
+
+    /*************************************************************************************
+
+                  D A T U M S   A N D   H E I G H T   S Y S T E M S
+
+    **************************************************************************************/
+
+    int     datum_type;                /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
+    double  datum_params[7];           /* Parameters for 3PARAM and 7PARAM */
+    struct _pj_gi **gridlist;          /* TODO: Description needed */
+    int     gridlist_count;
+
+    int     has_geoid_vgrids;          /* TODO: Description needed */
+    struct _pj_gi **vgridlist_geoid;   /* TODO: Description needed */
+    int     vgridlist_geoid_count;
+
+    double  from_greenwich;            /* prime meridian offset (in radians) */
+    double  long_wrap_center;          /* 0.0 for -180 to 180, actually in radians*/
+    int     is_long_wrap_set;
+    char    axis[4];                   /* TODO: Description needed */
+
+    /* New Datum Shift Grid Catalogs */
+    char   *catalog_name;
+    struct _PJ_GridCatalog *catalog;
+
+    double  datum_date;                 /* TODO: Description needed */
+
+    struct _pj_gi *last_before_grid;    /* TODO: Description needed */
+    PJ_Region     last_before_region;   /* TODO: Description needed */
+    double        last_before_date;     /* TODO: Description needed */
+
+    struct _pj_gi *last_after_grid;     /* TODO: Description needed */
+    PJ_Region     last_after_region;    /* TODO: Description needed */
+    double        last_after_date;      /* TODO: Description needed */
+};
+
+
+
+
+
+
+/* Parameter list (a copy of the +proj=... etc. parameters) */
+struct ARG_list {
+    paralist *next;
+    char used;
+    char param[1];
+};
+
+
+
+typedef union { double  f; int  i; char *s; } PROJVALUE;
+
+
+struct PJ_SELFTEST_LIST {
+    char    *id;                 /* projection keyword */
+    int     (* testfunc)(void);  /* projection entry point */
+};
+
+struct PJ_ELLPS {
+    char    *id;           /* ellipse keyword name */
+    char    *major;        /* a= value */
+    char    *ell;          /* elliptical parameter */
+    char    *name;         /* comments */
+};
+struct PJ_UNITS {
+    char    *id;           /* units keyword */
+    char    *to_meter;     /* multiply by value to get meters */
+    char    *name;         /* comments */
+};
+
+struct PJ_DATUMS {
+    char    *id;           /* datum keyword */
+    char    *defn;         /* ie. "to_wgs84=..." */
+    char    *ellipse_id;   /* ie from ellipse table */
+    char    *comments;     /* EPSG code, etc */
+};
+
+struct PJ_PRIME_MERIDIANS {
+    char    *id;           /* prime meridian keyword */
+    char    *defn;         /* offset from greenwich in DMS format. */
+};
+
+
+struct DERIVS {
+    double x_l, x_p;       /* derivatives of x for lambda-phi */
+    double y_l, y_p;       /* derivatives of y for lambda-phi */
+};
+
+struct FACTORS {
+    struct DERIVS der;
+    double h, k;           /* meridional, parallel scales */
+    double omega, thetap;  /* angular distortion, theta prime */
+    double conv;           /* convergence */
+    double s;              /* areal scale factor */
+    double a, b;           /* max-min scale error */
+    int code;              /* info as to analytics, see following */
+};
+
+
+#define IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
+#define IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
+#define IS_ANAL_HK    04    /* h and k analytic */
+#define IS_ANAL_CONV 010    /* convergence analytic */
 
 /* datum_type values */
 #define PJD_UNKNOWN   0
@@ -159,174 +451,29 @@ typedef struct {
 #define PJD_ERR_GRID_AREA           -48
 #define PJD_ERR_CATALOG             -49
 
-#define USE_PROJUV
+struct projFileAPI_t;
 
-typedef struct { double u, v; } projUV;
-typedef struct { double r, i; } COMPLEX;
-typedef struct { double u, v, w; } projUVW;
-
-#ifndef PJ_LIB__
-#define XY projUV
-#define LP projUV
-#define XYZ projUVW
-#define LPZ projUVW
-#else
-typedef struct { double x, y; }     XY;
-typedef struct { double lam, phi; } LP;
-typedef struct { double x, y, z; } XYZ;
-typedef struct { double lam, phi, z; } LPZ;
-#endif
-
-typedef union { double  f; int  i; char *s; } PROJVALUE;
-struct PJconsts;
-
-struct PJ_LIST {
-    char             *id;                         /* projection keyword */
-    struct PJconsts  *(*proj)(struct PJconsts*);  /* projection entry point */
-    char * const     *descr;                      /* description text */
+/* proj thread context */
+struct projCtx_t {
+    int     last_errno;
+    int     debug_level;
+    void    (*logger)(void *, int, const char *);
+    void    *app_data;
+    struct projFileAPI_t *fileapi;
 };
 
-/* Merging this into the PJ_LIST infrastructure is tempting, but may imply ABI breakage. Perhaps at next major version? */
-struct PJ_SELFTEST_LIST {
-    char    *id;                    /* projection keyword */
-    int     (* testfunc)(void);     /* projection entry point */
-};
-
-struct PJ_ELLPS {
-    char    *id;        /* ellipse keyword name */
-    char    *major;     /* a= value */
-    char    *ell;       /* elliptical parameter */
-    char    *name;      /* comments */
-};
-struct PJ_UNITS {
-    char    *id;        /* units keyword */
-    char    *to_meter;  /* multiply by value to get meters */
-    char    *name;      /* comments */
-};
-
-struct PJ_DATUMS {
-    char    *id;        /* datum keyword */
-    char    *defn;      /* ie. "to_wgs84=..." */
-    char    *ellipse_id;/* ie from ellipse table */
-    char    *comments;  /* EPSG code, etc */
-};
-
-struct PJ_PRIME_MERIDIANS {
-    char    *id;        /* prime meridian keyword */
-    char    *defn;      /* offset from greenwich in DMS format. */
-};
-
-typedef struct {
-    double ll_long;      /* lower left corner coordinates (radians) */
-    double ll_lat;
-    double ur_long;      /* upper right corner coordinates (radians) */
-    double ur_lat;
-} PJ_Region;
-
-struct DERIVS {
-    double x_l, x_p;    /* derivatives of x for lambda-phi */
-    double y_l, y_p;    /* derivatives of y for lambda-phi */
-};
-
-struct FACTORS {
-    struct DERIVS der;
-    double h, k;        /* meridinal, parallel scales */
-    double omega, thetap;   /* angular distortion, theta prime */
-    double conv;        /* convergence */
-    double s;           /* areal scale factor */
-    double a, b;        /* max-min scale error */
-    int code;           /* info as to analytics, see following */
-};
-
-#define IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
-#define IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
-#define IS_ANAL_HK    04    /* h and k analytic */
-#define IS_ANAL_CONV 010    /* convergence analytic */
-
-/* parameter list struct */
-typedef struct ARG_list {
-    struct ARG_list *next;
-    char used;
-    char param[1]; } paralist;
-
-/* base projection data structure */
-#ifdef PJ_LIB__
-    /* we need this forward declaration in order to be able to add a
-       pointer to struct opaque to the typedef struct PJconsts below */
-    struct pj_opaque;
-#endif
-
-typedef struct PJconsts {
-    projCtx_t *ctx;
-    XY  (*fwd)(LP, struct PJconsts *);
-    LP  (*inv)(XY, struct PJconsts *);
-    XYZ (*fwd3d)(LPZ, struct PJconsts *);
-    LPZ (*inv3d)(XYZ, struct PJconsts *);
-    void (*spc)(LP, struct PJconsts *, struct FACTORS *);
-    void (*pfree)(struct PJconsts *);
-
-    const char *descr;
-    paralist *params;           /* parameter list */
-    int over;                   /* over-range flag */
-    int geoc;                   /* geocentric latitude flag */
-    int is_latlong;             /* proj=latlong ... not really a projection at all */
-    int is_geocent;             /* proj=geocent ... not really a projection at all */
-    double a;                   /* major axis or radius if es==0 */
-    double a_orig;              /* major axis before any +proj related adjustment */
-    double es;                  /* e ^ 2 */
-    double es_orig;             /* es before any +proj related adjustment */
-    double e;                   /* eccentricity */
-    double ra;                  /* 1/A */
-    double one_es;              /* 1 - e^2 */
-    double rone_es;             /* 1/one_es */
-    double lam0, phi0;          /* central longitude, latitude */
-    double x0, y0;              /* easting and northing */
-    double k0;                  /* general scaling factor */
-    double to_meter, fr_meter;  /* cartesian scaling */
-
-    int     datum_type;         /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
-    double  datum_params[7];
-    struct _pj_gi **gridlist;
-    int     gridlist_count;
-
-    int     has_geoid_vgrids;
-    struct _pj_gi **vgridlist_geoid;
-    int     vgridlist_geoid_count;
-    double  vto_meter, vfr_meter;
-
-    double  from_greenwich;     /* prime meridian offset (in radians) */
-    double  long_wrap_center;   /* 0.0 for -180 to 180, actually in radians*/
-    int     is_long_wrap_set;
-    char    axis[4];
-
-    /* New Datum Shift Grid Catalogs */
-    char   *catalog_name;
-    struct _PJ_GridCatalog *catalog;
-
-    double   datum_date;
-
-    struct _pj_gi *last_before_grid;
-    PJ_Region     last_before_region;
-    double        last_before_date;
-
-    struct _pj_gi *last_after_grid;
-    PJ_Region     last_after_region;
-    double        last_after_date;
-
-#ifdef PJ_LIB__
-        struct pj_opaque *opaque;
-#endif
-
-#ifdef PROJ_PARMS__
-PROJ_PARMS__
-#endif /* end of optional extensions */
-} PJ;
-
-/* public API */
+/* classic public API */
 #include "proj_api.h"
 
 
 /* Generate pj_list external or make list from include file */
+
+struct PJ_LIST {
+    char    *id;                 /* projection keyword */
+    PJ *(*proj)(PJ *);           /* projection entry point */
+    char    * const *descr;      /* description text */
+};
+
 
 #ifndef USE_PJ_LIST_H
 extern struct PJ_LIST pj_list[];
@@ -348,37 +495,20 @@ extern struct PJ_DATUMS pj_datums[];
 extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #endif
 
+
+
+
+
 #ifdef PJ_LIB__
-/* repetitive projection code */
 #define PROJ_HEAD(id, name) static const char des_##id [] = name
-#define ENTRYA(name) \
-    C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
-    C_NAMESPACE PJ *pj_##name(PJ *P) { if (!P) { \
-    if( (P = (PJ*) pj_malloc(sizeof(PJ))) != NULL) { \
-        memset( P, 0, sizeof(PJ) ); \
-    P->pfree = freeup; P->fwd = 0; P->inv = 0; \
-        P->fwd3d = 0; P->inv3d = 0; \
-    P->spc = 0; P->descr = des_##name;
-#define ENTRYX } return P; } else {
-#define ENTRY0(name) ENTRYA(name) ENTRYX
-#define ENTRY1(name, a) ENTRYA(name) P->a = 0; ENTRYX
-#define ENTRY2(name, a, b) ENTRYA(name) P->a = 0; P->b = 0; ENTRYX
-#define ENDENTRY(p) } return (p); }
+
 #define E_ERROR(err) { pj_ctx_set_errno( P->ctx, err); freeup(P); return(0); }
 #define E_ERROR_0 { freeup(P); return(0); }
 #define F_ERROR { pj_ctx_set_errno( P->ctx, -20); return(xy); }
 #define F3_ERROR { pj_ctx_set_errno( P->ctx, -20); return(xyz); }
 #define I_ERROR { pj_ctx_set_errno( P->ctx, -20); return(lp); }
 #define I3_ERROR { pj_ctx_set_errno( P->ctx, -20); return(lpz); }
-#define FORWARD(name) static XY name(LP lp, PJ *P) { XY xy = {0.0,0.0}
-#define INVERSE(name) static LP name(XY xy, PJ *P) { LP lp = {0.0,0.0}
-#define FORWARD3D(name) static XYZ name(LPZ lpz, PJ *P) {XYZ xyz = {0.0, 0.0, 0.0}
-#define INVERSE3D(name) static LPZ name(XYZ xyz, PJ *P) {LPZ lpz = {0.0, 0.0, 0.0}
-#define FREEUP static void freeup(PJ *P) {
-#define SPECIAL(name) static void name(LP lp, PJ *P, struct FACTORS *fac)
-#define ELLIPSOIDAL(P) ((P->es==0)? (FALSE): (TRUE))
 
-/* cleaned up alternative to most of the "repetitive projection code" macros */
 #define PROJECTION(name)                                     \
 pj_projection_specific_setup_##name (PJ *P);                 \
 C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
@@ -393,8 +523,7 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     return P;                                                \
 }                                                            \
 PJ *pj_projection_specific_setup_##name (PJ *P)
-
-#endif
+#endif /* def PJ_LIB__ */
 
 
 int pj_generic_selftest (
@@ -464,36 +593,39 @@ typedef struct _PJ_GridCatalog {
     struct _PJ_GridCatalog *next;
 } PJ_GridCatalog;
 
-
 /* procedure prototypes */
 double dmstor(const char *, char **);
 double dmstor_ctx(projCtx ctx, const char *, char **);
-void set_rtodms(int, int);
-char *rtodms(char *, double, int, int);
+void   set_rtodms(int, int);
+char  *rtodms(char *, double, int, int);
 double adjlon(double);
 double aacos(projCtx,double), aasin(projCtx,double), asqrt(double), aatan2(double, double);
+
 PROJVALUE pj_param(projCtx ctx, paralist *, const char *);
 paralist *pj_mkparam(char *);
+
 int pj_ell_set(projCtx ctx, paralist *, double *, double *);
 int pj_datum_set(projCtx,paralist *, PJ *);
 int pj_prime_meridian_set(paralist *, PJ *);
 int pj_angular_units_set(paralist *, PJ *);
+
 void pj_prepare (PJ *P, const char *description, void (*freeup)(struct PJconsts *), size_t sizeof_struct_opaque);
 
 paralist *pj_clone_paralist( const paralist* );
-paralist*pj_search_initcache( const char *filekey );
-void pj_insert_initcache( const char *filekey, const paralist *list);
+paralist *pj_search_initcache( const char *filekey );
+void      pj_insert_initcache( const char *filekey, const paralist *list);
 
 double *pj_enfn(double);
-double pj_mlfn(double, double, double, double *);
-double pj_inv_mlfn(projCtx, double, double, double *);
-double pj_qsfn(double, double, double);
-double pj_tsfn(double, double, double);
-double pj_msfn(double, double, double);
-double pj_phi2(projCtx, double, double);
-double pj_qsfn_(double, PJ *);
+double  pj_mlfn(double, double, double, double *);
+double  pj_inv_mlfn(projCtx, double, double, double *);
+double  pj_qsfn(double, double, double);
+double  pj_tsfn(double, double, double);
+double  pj_msfn(double, double, double);
+double  pj_phi2(projCtx, double, double);
+double  pj_qsfn_(double, PJ *);
 double *pj_authset(double);
-double pj_authlat(double, double *);
+double  pj_authlat(double, double *);
+
 COMPLEX pj_zpoly1(COMPLEX, COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, COMPLEX *, int, COMPLEX *);
 
@@ -513,25 +645,26 @@ typedef struct {    /* Chebyshev or Power series structure */
     int mu, mv;     /* maximum cu and cv index (+1 for count) */
     int power;      /* != 0 if power series, else Chebyshev */
 } Tseries;
+
 Tseries *mk_cheby(projUV, projUV, double, projUV *, projUV (*)(projUV), int, int, int);
-projUV bpseval(projUV, Tseries *);
-projUV bcheval(projUV, Tseries *);
-projUV biveval(projUV, Tseries *);
-void *vector1(int, int);
-void **vector2(int, int, int);
-void freev2(void **v, int nrows);
-int bchgen(projUV, projUV, int, int, projUV **, projUV(*)(projUV));
-int bch2bps(projUV, projUV, projUV **, int, int);
+projUV   bpseval(projUV, Tseries *);
+projUV   bcheval(projUV, Tseries *);
+projUV   biveval(projUV, Tseries *);
+void    *vector1(int, int);
+void   **vector2(int, int, int);
+void     freev2(void **v, int nrows);
+int      bchgen(projUV, projUV, int, int, projUV **, projUV(*)(projUV));
+int      bch2bps(projUV, projUV, projUV **, int, int);
 
 /* nadcon related protos */
-LP nad_intr(LP, struct CTABLE *);
-LP nad_cvt(LP, int, struct CTABLE *);
+LP             nad_intr(LP, struct CTABLE *);
+LP             nad_cvt(LP, int, struct CTABLE *);
 struct CTABLE *nad_init(projCtx ctx, char *);
 struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid );
-int nad_ctable_load( projCtx ctx, struct CTABLE *, PAFile fid );
+int            nad_ctable_load( projCtx ctx, struct CTABLE *, PAFile fid );
 struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid );
-int nad_ctable2_load( projCtx ctx, struct CTABLE *, PAFile fid );
-void nad_free(struct CTABLE *);
+int            nad_ctable2_load( projCtx ctx, struct CTABLE *, PAFile fid );
+void           nad_free(struct CTABLE *);
 
 /* higher level handling of datum grid shift files */
 
@@ -553,8 +686,8 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx, const char *, int * );
 void pj_deallocate_grids();
 
 PJ_GRIDINFO *pj_gridinfo_init( projCtx, const char * );
-int pj_gridinfo_load( projCtx, PJ_GRIDINFO * );
-void pj_gridinfo_free( projCtx, PJ_GRIDINFO * );
+int          pj_gridinfo_load( projCtx, PJ_GRIDINFO * );
+void         pj_gridinfo_free( projCtx, PJ_GRIDINFO * );
 
 PJ_GridCatalog *pj_gc_findcatalog( projCtx, const char * );
 PJ_GridCatalog *pj_gc_readcatalog( projCtx, const char * );
@@ -574,27 +707,31 @@ PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx,
 
 double pj_gc_parsedate( projCtx, const char * );
 
-void *proj_mdist_ini(double);
+void  *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
 double proj_inv_mdist(projCtx ctx, double, const void *);
-void *pj_gauss_ini(double, double, double *,double *);
-LP pj_gauss(projCtx, LP, const void *);
-LP pj_inv_gauss(projCtx, LP, const void *);
+void  *pj_gauss_ini(double, double, double *,double *);
+LP     pj_gauss(projCtx, LP, const void *);
+LP     pj_inv_gauss(projCtx, LP, const void *);
 
 extern char const pj_release[];
 
-struct PJ_ELLPS *pj_get_ellps_ref( void );
-struct PJ_DATUMS *pj_get_datums_ref( void );
-struct PJ_UNITS *pj_get_units_ref( void );
-struct PJ_LIST  *pj_get_list_ref( void );
-struct PJ_SELFTEST_LIST  *pj_get_selftest_list_ref ( void );
+struct PJ_ELLPS            *pj_get_ellps_ref( void );
+struct PJ_DATUMS           *pj_get_datums_ref( void );
+struct PJ_UNITS            *pj_get_units_ref( void );
+struct PJ_LIST             *pj_get_list_ref( void );
+struct PJ_SELFTEST_LIST    *pj_get_selftest_list_ref ( void );
 struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
 
 double pj_atof( const char* nptr );
 double pj_strtod( const char *nptr, char **endptr );
+void   pj_freeup_plain (PJ *P);
 
 #ifdef __cplusplus
 }
 #endif
 
+#ifndef PROJECTS_H_ATEND
+#define PROJECTS_H_ATEND
+#endif
 #endif /* end of basic projections header */

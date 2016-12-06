@@ -18,7 +18,6 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
     double t;
-
     xy.y = sin(lp.lam);
     t = cos(lp.lam);
     xy.x = atan((tan(lp.phi) * Q->cosphi + Q->sinphi * xy.y) / t);
@@ -69,8 +68,8 @@ PJ *PROJECTION(ocea) {
         return freeup_new (P);
     P->opaque = Q;
 
-    Q->rok = P->a / P->k0;
-    Q->rtk = P->a * P->k0;
+    Q->rok = 1. / P->k0;
+    Q->rtk = P->k0;
     /*If the keyword "alpha" is found in the sentence then use 1point+1azimuth*/
     if ( pj_param(P->ctx, P->params, "talpha").i) {
         /*Define Pole of oblique transformation from 1 point & 1 azimuth*/
@@ -92,6 +91,11 @@ PJ *PROJECTION(ocea) {
             sin(phi_1) * cos(phi_2) * cos(lam_2),
             sin(phi_1) * cos(phi_2) * sin(lam_2) -
             cos(phi_1) * sin(phi_2) * sin(lam_1) );
+
+        /* take care of P->lam0 wrap-around when +lam_1=-90*/
+        if (lam_1 == -M_HALFPI)
+            Q->singam = -Q->singam;
+
         /*Equation 9-2 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
         Q->sinphi = atan(-cos(Q->singam - lam_1) / tan(phi_1));
     }
@@ -126,10 +130,10 @@ int pj_ocea_selftest (void) {
     };
 
     XY s_fwd_expect[] = {
-        {127964312562778.156,  1429265667691.05786},
-        {129394957619297.641,  1429265667691.06812},
-        {127964312562778.188, -1429265667691.0498},
-        {129394957619297.688, -1429265667691.03955},
+        {19994423.837934087962,  223322.760576727800},
+        {20217962.128015257418,  223322.760576729401},
+        {19994423.837934091687, -223322.760576726549},
+        {20217962.128015264869, -223322.760576724948},
     };
 
     XY inv_in[] = {
@@ -140,10 +144,10 @@ int pj_ocea_selftest (void) {
     };
 
     LP s_inv_expect[] = {
-        { 179.999999999860108,  2.79764548403721305e-10},
-        {-179.999999999860108,  2.7976454840372327e-10},
-        { 179.999999999860108, -2.7976454840372327e-10},
-        {-179.999999999860108, -2.79764548403721305e-10},
+        { 179.999104753445,  0.001790493110},
+        {-179.999104753445,  0.001790493110},
+        { 179.999104753445, -0.001790493110},
+        {-179.999104753445, -0.001790493110},
     };
 
     return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
