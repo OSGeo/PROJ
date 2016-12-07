@@ -118,7 +118,15 @@
 <li class="toctree-l2"><a class="reference internal" href="fahey.html">Fahey</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fouc.html">Foucaut</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fouc_s.html">Foucaut Sinusoidal</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Gall (Gall Stereographic)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Gall (Gall Stereographic)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mathematical-definition">Mathematical definition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spherical-form">Spherical form</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#further-reading">Further reading</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="geos.html">Geostationary Satellite View</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gins8.html">Ginsburg VIII (TsNIIGAiK)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gn_sinu.html">General Sinusoidal Series</a></li>
@@ -276,7 +284,80 @@
             
   <div class="section" id="gall-gall-stereographic">
 <span id="gall"></span><h1>Gall (Gall Stereographic)<a class="headerlink" href="#gall-gall-stereographic" title="Permalink to this headline">¶</a></h1>
+<p>The Gall stereographic projection, presented by James Gall in 1855, is a cylindrical projection.
+It is neither equal-area nor conformal but instead tries to balance the distortion inherent in any projection.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="79%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Classification</strong></td>
+<td>Transverse and oblique cylindrical</td>
+</tr>
+<tr class="row-even"><td><strong>Available forms</strong></td>
+<td>Forward and inverse, Spherical</td>
+</tr>
+<tr class="row-odd"><td><strong>Defined area</strong></td>
+<td>Global</td>
+</tr>
+<tr class="row-even"><td><strong>Implemented by</strong></td>
+<td>Gerald I. Evenden</td>
+</tr>
+<tr class="row-odd"><td><strong>Options</strong></td>
+<td>No special options for this projection</td>
+</tr>
+</tbody>
+</table>
 <a class="reference internal image-reference" href="../_images/gall.png"><img alt="Gall (Gall Stereographic)" src="../_images/gall.png" style="width: 1200.0px; height: 900.0px;" /></a>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>The need for a world map which avoids some of the scale exaggeration of the Mercator projection has led to some commonly used cylindrical modifications, as well as to other modifications which are not cylindrical.
+The earliest common cylindrical example was developed by James Gall of Edinburgh about 1855 (Gall, 1885, p. 119-123).
+His meridians are equally spaced, but the parallels are spaced at increasing intervals away from the Equator.
+The parallels of latitude are actually projected onto a cylinder wrapped about the sphere, but cutting it at lats. 45° N. and S., the point of perspective being a point on the Equator opposite the meridian being projected.
+It is used in several British atlases, but seldom in the United States.
+The Gall projection is neither conformal nor equal-area, but has a blend of various features.
+Unlike the Mercator, the Gall shows the poles as lines running across the top and bottom of the map.</p>
+<p>Example using Gall Stereographical</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 9 51 | proj +proj=gall +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
+708432.90   5193386.36
+</pre></div>
+</div>
+<p>Example using Gall Stereographical (Central meridian 90°W)</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 9 51 | proj +proj=gall +lon_0=90w +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
+7792761.91  5193386.36
+</pre></div>
+</div>
+</div>
+<div class="section" id="mathematical-definition">
+<h2>Mathematical definition<a class="headerlink" href="#mathematical-definition" title="Permalink to this headline">¶</a></h2>
+<p>The formulas describing the Gall Stereographical are all taken from Snyder&#8217;s <a class="reference internal" href="../references.html#snyder1993" id="id1">[Snyder1993]</a>.</p>
+<div class="section" id="spherical-form">
+<h3>Spherical form<a class="headerlink" href="#spherical-form" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="forward-projection">
+<h4>Forward projection<a class="headerlink" href="#forward-projection" title="Permalink to this headline">¶</a></h4>
+<div class="math">
+\[x = \frac{\lambda}{\sqrt{2}}\]</div>
+<div class="math">
+\[y = (1+\frac{\sqrt{2}}{2}) \tan(\phi/2)\]</div>
+</div>
+<div class="section" id="inverse-projection">
+<h4>Inverse projection<a class="headerlink" href="#inverse-projection" title="Permalink to this headline">¶</a></h4>
+<div class="math">
+\[\phi = 2 \arctan( \frac{y}{1+\frac{\sqrt{2}}{2}} )\]</div>
+<div class="math">
+\[\lambda = \sqrt{2} x\]</div>
+</div>
+</div>
+</div>
+<div class="section" id="further-reading">
+<h2>Further reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><a class="reference external" href="https://en.wikipedia.org/wiki/Gall_stereographic_projection">Wikipedia</a></li>
+<li><a class="reference external" href="http://sites.lsa.umich.edu/zhukov/wp-content/uploads/sites/140/2014/08/projection-procedures.pdf">Cartographic Projection Procedures for the UNIX Environment-A User&#8217;s Manual</a></li>
+</ol>
+</div>
 </div>
 
 
@@ -299,7 +380,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 20 Nov 2016.
+      Last updated on 07 Dec 2016.
 
     </p>
   </div>
