@@ -74,7 +74,7 @@ libproj_la_SOURCES = \
 	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c geodesic.c \
 	pj_strtod.c \
 	\
-	pj_observation.c
+	pj_obs_api.c PJ_cart.c PJ_pipeline.c
 
 install-exec-local:
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)
