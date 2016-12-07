@@ -49,7 +49,7 @@ Example using Gall Stereographical (Central meridian 90°W) ::
 Mathematical definition
 #######################
 
-The formulas describing the Gall Stereographical are all taken from Snyder's [Snyder1926]_.
+The formulas describing the Gall Stereographical are all taken from Snyder's [Snyder1993]_.
 
 Spherical form
 **************
