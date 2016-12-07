@@ -29,7 +29,8 @@ The simplest of all projections. Standard parallels (0° when omitted) may be sp
 Usage
 ########
 
-Because of the distortions introduced by this projection, it has little use in navigation or cadastral mapping and finds its main use in thematic mapping. In particular, the plate carrée has become a standard for global raster datasets, such as Celestia and NASA World Wind, because of the particularly simple relationship between the position of an image pixel on the map and its corresponding geographic location on Earth.
+Because of the distortions introduced by this projection, it has little use in navigation or cadastral mapping and finds its main use in thematic mapping.
+In particular, the plate carrée has become a standard for global raster datasets, such as Celestia and NASA World Wind, because of the particularly simple relationship between the position of an image pixel on the map and its corresponding geographic location on Earth.
 
 The following table gives special cases of the cylindrical equidistant projection.
 
