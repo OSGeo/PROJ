@@ -229,7 +229,7 @@ int pj_horner_selftest (void) {
     /*    TC32 -> UTM32"    */
     P = pj_create ("+init=./examples/s45b.pol:tc32_utm32");
     if (0==P)
-        P = pj_create ("+init=../examples/s45b.pol:tc32_utm32");
+        P = pj_create ("+init=..\\examples\\s45b.pol:tc32_utm32");
     if (0==P)
         return 10;
 
@@ -249,7 +249,7 @@ int pj_horner_selftest (void) {
     /* The "System 45 Bornholm" */
     P = pj_create ("+init=./examples/s45b.pol:s45b_tc32");
     if (0==P)
-        P = pj_create ("+init=../examples/s45b.pol:s45b_tc32");
+        P = pj_create ("+init=..\\examples\\s45b.pol:s45b_tc32");
     if (0==P)
         return 20;
 
