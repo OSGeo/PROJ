@@ -7,9 +7,14 @@
 /* inverse projection entry */
 LP pj_inv(XY xy, PJ *P) {
     LP lp;
-    static const LP err = {HUGE_VAL, HUGE_VAL};
+    LP err;
+
+    /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
+    lp.lam = lp.phi = HUGE_VAL;
+
     if (0==P->inv)
         return err;
+
     /* can't do as much preliminary checking as with forward */
     if (xy.x == HUGE_VAL || xy.y == HUGE_VAL) {
         pj_ctx_set_errno( P->ctx, -15);

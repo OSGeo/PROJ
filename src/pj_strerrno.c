@@ -82,4 +82,5 @@ char *pj_strerrno(int err) {
             return note;
         }
     }
+    return 0;
 }

@@ -7,11 +7,14 @@
 
 XYZ pj_fwd3d(LPZ lpz, PJ *P) {
     XYZ xyz;
-    static const XYZ err = {HUGE_VAL, HUGE_VAL, HUGE_VAL};
+    XYZ err;
     double t;
 
     if (0==P->fwd3d)
         return err;
+
+    /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
+    err.x = err.y = err.z = HUGE_VAL;
 
     P->ctx->last_errno = pj_errno = errno = 0;
 

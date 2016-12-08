@@ -6,11 +6,14 @@
 	XY /* forward projection entry */
 pj_fwd(LP lp, PJ *P) {
 	XY xy;
-    static const XY err = {HUGE_VAL, HUGE_VAL};
+    XY err;
     double t;
 
     if (0==P->fwd)
         return err;
+
+    /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
+    err.x = err.y = HUGE_VAL;
 
     P->ctx->last_errno = pj_errno = errno = 0;
 

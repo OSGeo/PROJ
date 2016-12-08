@@ -220,219 +220,50 @@ PJ *PROJECTION(horner) {
 /* selftest stub */
 int pj_horner_selftest (void) {return 0;}
 #else
-
-
-
-
-/* ttu_n and ttu_e are based on static double C_ttu_b[] */
-static  double ttu_n[] = {
-    /* tc32_ed50 -> utm32_ed50 : Bornholm */
-    /* m_lim_gen:  0.086  red  = 0      OBS   =    852   */
-    /* m = 1.38 cm my_loss =    +2  y_enp = +10.5 */
-    /* m = 1.44 cm mx_loss =    +2  x_enp = +10.4 */
-
-    /*deg  4.0,*/
-    /*Poly NORTH :: e-degree =  0  : n-degree =  4 */
-    /*  0*/   6.1258112678e+06,   9.9999971567e-01,   1.5372750011e-10,
-    /*  3*/   5.9300860915e-15,   2.2609497633e-19,
-
-    /*Poly NORTH :: e-degree =  1  : n-degree =  3 */
-    /*  5*/   4.3188227445e-05,   2.8225130416e-10,   7.8740007114e-16,
-    /*  8*/  -1.7453997279e-19,
-
-    /*Poly NORTH :: e-degree =  2  : n-degree =  2 */
-    /*  9*/   1.6877465415e-10,  -1.1234649773e-14,  -1.7042333358e-18,
-    /*Poly NORTH :: e-degree =  3  : n-degree =  1 */
-    /* 12*/  -7.9303467953e-15,  -5.2906832535e-19,
-    /*Poly NORTH :: e-degree =  4  : n-degree =  0 */
-    /* 14*/   3.9984284847e-19,
-
-    /*tcy    6125810.306769, */
-};
-
-static  double ttu_e[] = {
-    /*Poly EAST  :: n-degree =  0  : e-degree =  4 */
-    /*  0*/   8.7760574982e+05,   9.9999752475e-01,   2.8817299305e-10,
-    /*  3*/   5.5641310680e-15,  -1.5544700949e-18,
-
-    /*Poly EAST  :: n-degree =  1  : e-degree =  3 */
-    /*  5*/  -4.1357045890e-05,   4.2106213519e-11,   2.8525551629e-14,
-    /*  8*/  -1.9107771273e-18,
-
-    /*Poly EAST  :: n-degree =  2  : e-degree =  2 */
-    /*  9*/   3.3615590093e-10,   2.4380247154e-14,  -2.0241230315e-18,
-    /*Poly EAST  :: n-degree =  3  : e-degree =  1 */
-    /* 12*/   1.2429019719e-15,   5.3886155968e-19,
-    /*Poly EAST  :: n-degree =  4  : e-degree =  0 */
-    /* 14*/  -1.0167505000e-18,
-
-    /* tcx     877605.269066 */
-  };
-
-
-/* utt_n and utt_e are based on static  double C_utt_b[] */
-static  double utt_n[] = {
-    /* utm32_ed50 -> tc32_ed50 : Bornholm */
-    /* m_lim_gen:  0.086  red  = 0      OBS   =    852   */
-    /* m = 1.38 cm my_loss =    +2  y_enp = +10.8 */
-    /* m = 1.44 cm mx_loss =    +2  x_enp = +10.7 */
-
-    /*deg  4.0,*/
-    /*Poly NORTH :: e-degree =  0  : n-degree =  4 */
-    /*  0*/   6.1258103208e+06,   1.0000002826e+00,  -1.5372762184e-10,
-    /*  3*/  -5.9304261011e-15,  -2.2612705361e-19,
-
-    /*Poly NORTH :: e-degree =  1  : n-degree =  3 */
-    /*  5*/  -4.3188331419e-05,  -2.8225549995e-10,  -7.8529116371e-16,
-    /*  8*/   1.7476576773e-19,
-
-    /*Poly NORTH :: e-degree =  2  : n-degree =  2 */
-    /*  9*/  -1.6875687989e-10,   1.1236475299e-14,   1.7042518057e-18,
-    /*Poly NORTH :: e-degree =  3  : n-degree =  1 */
-    /* 12*/   7.9300735257e-15,   5.2881862699e-19,
-    /*Poly NORTH :: e-degree =  4  : n-degree =  0 */
-    /* 14*/  -3.9990736798e-19,
-
-    /*tcy    6125811.281773,*/
-};
-
-static  double utt_e[] = {
-    /*Poly EAST  :: n-degree =  0  : e-degree =  4 */
-    /*  0*/   8.7760527928e+05,   1.0000024735e+00,  -2.8817540032e-10,
-    /*  3*/  -5.5627059451e-15,   1.5543637570e-18,
-
-    /*Poly EAST  :: n-degree =  1  : e-degree =  3 */
-    /*  5*/   4.1357152105e-05,  -4.2114813612e-11,  -2.8523713454e-14,
-    /*  8*/   1.9109017837e-18,
-
-    /*Poly EAST  :: n-degree =  2  : e-degree =  2 */
-    /*  9*/  -3.3616407783e-10,  -2.4382678126e-14,   2.0245020199e-18,
-    /*Poly EAST  :: n-degree =  3  : e-degree =  1 */
-    /* 12*/  -1.2441377565e-15,  -5.3885232238e-19,
-    /*Poly EAST  :: n-degree =  4  : e-degree =  0 */
-    /* 14*/   1.0167203661e-18,
-
-    /*tcx     877605.760036 */
-};
-
-UV tuut_b_origin_fwd = {877605.269066, 6125810.306769};
-UV tuut_b_origin_inv = {877605.760036, 6125811.281773};
-HORNER tuut_b = {4, 15, 500000.0,   ttu_e, ttu_n, utt_e, utt_n,   &tuut_b_origin_fwd, &tuut_b_origin_inv};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Testing quite a bit of the pj_obs_api as a side effect (inspired by pj_obs_api_test.c) */
 int pj_horner_selftest (void) {
     PJ *P;
     PJ_OBS a, b;
-    int err;
     double dist;
-    char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
 
-
-    /* Log everything libproj offers to log for you */
-    pj_log_level (0, PJ_LOG_TRACE);
-
-    /* An utm projection on the GRS80 ellipsoid */
-    P = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
+    /* The TC32 for "System 45 Bornholm" */
+    /*    TC32 -> UTM32"    */
+    P = pj_create ("+init=../examples/s45b.pol:tc32_utm32");
     if (0==P)
-        return 1;
+        return 10;
 
-    /* Clean up */
-    pj_free (P);
-
-    /* Same projection, now using argc/argv style initialization */
-    P = pj_create_argv (3, args);
-    if (0==P)
-        return 2;
-
-    /* Turn off logging */
-    pj_log_level (0, PJ_LOG_NONE);
-
-    /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
-    a = pj_obs_null;
-    /* a.coo.lp: The coordinate part of a, interpreted as a classic LP pair */
-    a.coo.lp.lam = TORAD(12);
-    a.coo.lp.phi = TORAD(55);
+    a = b = pj_obs_null;
+    a.coo.uv.v = 6125305.4245;
+    a.coo.uv.u =  878354.8539;
 
     /* Forward projection */
     b = pj_trans (P, PJ_FWD, a);
+    b = pj_trans (P, PJ_INV, b);
 
-    /* Inverse projection */
-    a = pj_trans (P, PJ_INV, b);
+    /* Check roundtrip precision for 1 iteration each way */
+    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    if (dist > 0.01)
+        return 1;
 
-    /* Null projection */
-    a = pj_trans (P, PJ_IDENT, a);
-
-    /* Forward again, to get two linear items for comparison */
-    a = pj_trans (P, PJ_FWD, a);
-
-    dist = pj_xy_dist (a.coo.xy, b.coo.xy);
-    if (dist > 2e-9)
-        return 3;
-
-    /* Invalid projection */
-    a = pj_trans (P, 42, a);
-    if (a.coo.lpz.lam!=DBL_MAX)
-        return 4;
-    err = pj_err_level (P, PJ_ERR_TELL);
-    if (0==err)
-        return 5;
-
-    /* Clear error */
-    pj_err_level (P, 0);
-
-    /* Clean up */
-    pj_free (P);
-
-    /* Now do some 3D transformations */
-    P = pj_create ("+proj=cart +ellps=GRS80");
+    /* The "System 45 Bornholm" */
+    P = pj_create ("+init=../examples/s45b.pol:s45b_tc32");
     if (0==P)
-        return 6;
+        return 20;
 
-    /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
     a = b = pj_obs_null;
-    a.coo.lpz.lam = TORAD(12);
-    a.coo.lpz.phi = TORAD(55);
-    a.coo.lpz.z   = 100;
+    a.coo.uv.u =   47022.563745;
+    a.coo.uv.v =   51779.260103;
 
-    /* Forward projection: 3D-Cartesian-to-Ellipsoidal */
+    /* Forward projection */
     b = pj_trans (P, PJ_FWD, a);
-
-    /* Check roundtrip precision for 10000 iterations each way */
-    dist = pj_roundtrip (P, PJ_FWD, 10000, a);
-    dist = pj_roundtrip (P, PJ_INV, 10000, b);
-    if (dist > 2e-9)
-        return 7;
-
-    /* Inverse projection: Ellipsoidal-to-3D-Cartesian */
     b = pj_trans (P, PJ_INV, b);
 
-    /* Move p to another context */
-    pj_context_renew (P);
-    b = pj_trans (P, PJ_FWD, b);
-
-    /* Move it back to the default context */
-    pj_context_free (P);
-    b = pj_trans (P, PJ_INV, b);
-
+    /* Check roundtrip precision for 1 iteration each way */
+    dist = pj_roundtrip (P, PJ_FWD, 1, a);
     pj_free (P);
+
+    if (dist > 0.01)
+        return 1;
+
     return 0;
 }
 #endif
