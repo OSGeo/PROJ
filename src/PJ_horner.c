@@ -220,6 +220,21 @@ PJ *PROJECTION(horner) {
 /* selftest stub */
 int pj_horner_selftest (void) {return 0;}
 #else
+
+char *tc32_utm32 = {
+    "+proj=horner"
+    "+ellps=intl"
+    "+range=500000"
+    "+fwd_origin=877605.269066,6125810.306769"
+    "+inv_origin=877605.760036,6125811.281773"
+    "+deg=4"
+    "+fwd_v=6.1258112678e+06,9.9999971567e-01,1.5372750011e-10,5.9300860915e-15,2.2609497633e-19,4.3188227445e-05,2.8225130416e-10,7.8740007114e-16,-1.7453997279e-19,1.6877465415e-10,-1.1234649773e-14,-1.7042333358e-18,-7.9303467953e-15,-5.2906832535e-19,3.9984284847e-19"
+    "+fwd_u=8.7760574982e+05,9.9999752475e-01,2.8817299305e-10,5.5641310680e-15,-1.5544700949e-18,-4.1357045890e-05,4.2106213519e-11,2.8525551629e-14,-1.9107771273e-18,3.3615590093e-10,2.4380247154e-14,-2.0241230315e-18,1.2429019719e-15,5.3886155968e-19,-1.0167505000e-18"
+    "+inv_v=6.1258103208e+06,1.0000002826e+00,-1.5372762184e-10,-5.9304261011e-15,-2.2612705361e-19,-4.3188331419e-05,-2.8225549995e-10,-7.8529116371e-16,1.7476576773e-19,-1.6875687989e-10,1.1236475299e-14,1.7042518057e-18,7.9300735257e-15,5.2881862699e-19,-3.9990736798e-19"
+    "+inv_u=8.7760527928e+05,1.0000024735e+00,-2.8817540032e-10,-5.5627059451e-15,1.5543637570e-18,4.1357152105e-05,-4.2114813612e-11,-2.8523713454e-14,1.9109017837e-18,-3.3616407783e-10,-2.4382678126e-14,2.0245020199e-18,-1.2441377565e-15,-5.3885232238e-19,1.0167203661e-18"
+};
+
+
 int pj_horner_selftest (void) {
     PJ *P;
     PJ_OBS a, b;
@@ -227,9 +242,7 @@ int pj_horner_selftest (void) {
 
     /* The TC32 for "System 45 Bornholm" */
     /*    TC32 -> UTM32"    */
-    P = pj_create ("+init=./examples/s45b.pol:tc32_utm32");
-    if (0==P)
-        P = pj_create ("+init=..\\examples\\s45b.pol:tc32_utm32");
+    P = pj_create (tc32_utm32);
     if (0==P)
         return 10;
 
@@ -245,29 +258,6 @@ int pj_horner_selftest (void) {
     dist = pj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 0.01)
         return 1;
-
-    /* The "System 45 Bornholm" */
-    P = pj_create ("+init=./examples/s45b.pol:s45b_tc32");
-    if (0==P)
-        P = pj_create ("+init=..\\examples\\s45b.pol:s45b_tc32");
-    if (0==P)
-        return 20;
-
-    a = b = pj_obs_null;
-    a.coo.uv.u =   47022.563745;
-    a.coo.uv.v =   51779.260103;
-
-    /* Forward projection */
-    b = pj_trans (P, PJ_FWD, a);
-    b = pj_trans (P, PJ_INV, b);
-
-    /* Check roundtrip precision for 1 iteration each way */
-    dist = pj_roundtrip (P, PJ_FWD, 1, a);
-    pj_free (P);
-
-    if (dist > 0.01)
-        return 1;
-
     return 0;
 }
 #endif
