@@ -290,7 +290,7 @@ get_init(projCtx ctx, paralist **start, paralist *next, char *name,
 /*                            pj_init_plus()                            */
 /*                                                                      */
 /*      Same as pj_init() except it takes one argument string with      */
-/*      individual arguments preceeded by '+', such as "+proj=utm       */
+/*      individual arguments preceded by '+', such as "+proj=utm       */
 /*      +zone=11 +ellps=WGS84".                                         */
 /************************************************************************/
 

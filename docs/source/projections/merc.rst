@@ -102,12 +102,12 @@ For the elliptical form of the projection we introduce the scaling factor:
 
     k_0 = m\left( \phi_ts \right)
 
-where :math:`m\left(\phi\right)` is the parallel radius at lattitude :math:`\phi`.
+where :math:`m\left(\phi\right)` is the parallel radius at latitude :math:`\phi`.
 
 We also use the Isometric Latitude kernel function :math:`t()`.
 
 .. note::
-    m() and t() should be described properly on a seperate page about the theory of projections on the ellipsoid.
+    m() and t() should be described properly on a separate page about the theory of projections on the ellipsoid.
 
 Forward projection
 ==================

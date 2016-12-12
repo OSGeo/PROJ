@@ -1,7 +1,7 @@
 ## TEST JSON ###########################################################
 
-This is the testing framework that uses JSON formated files that tests
-PROJ.4 using Geospatial Integrity of Geoscience Sofware (GIGS) calculations.  
+This is the testing framework that uses JSON formatted files that tests
+PROJ.4 using Geospatial Integrity of Geoscience Software (GIGS) calculations.  
 This could be used as a framework for testing projections from other
 sources.
 
@@ -61,7 +61,7 @@ courts of England and Wales.
  2) Upgrade `pip` (possibly not needed)
         https://pip.pypa.io/en/stable/installing/#upgrading-pip
  3) Install pyproj
-    * requires a C/C++ compiler be usuable by python
+    * requires a C/C++ compiler be usable by python
     * repository version requires Cython to be installed, releases do not require this
 
 ```

@@ -122,7 +122,7 @@ def match_func(cor, exc, tolerance):
 
 # parse multiple tests and call TransformTest
 # TODO: needs some awareness of the driver, so driver_info function in
-#       TranformTest classes can be called, could allow a dummy instance of
+#       TransformTest classes can be called, could allow a dummy instance of
 #       Driver and move all the initization code to another function?  Or allow
 #       dipatch function to check if everything is in order do a transform.
 #       Not an elegant solution.
@@ -131,7 +131,7 @@ class TransformRunner(object):
         """
         fn_pattern - file name or file name pattern (example "*.json")
         driver - this is the type of driver to run
-        kwargs - parameters passed to the respective driver TransfromTest class
+        kwargs - parameters passed to the respective driver TransformTest class
         """
         self.driver = driver
         json_input = []

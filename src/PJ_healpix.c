@@ -183,7 +183,7 @@ int in_image(double x, double y, int proj, int north_square, int south_square) {
          * Before C99 this was not allowed and to keep as portable as
          * possible we do it the C89 way here.
          * We need to assign the array this way because the input is
-         * dynamic (north_square and south_square vars are unknow at
+         * dynamic (north_square and south_square vars are unknown at
          * compile time).
          **/
         double rhealpixVertsJit[12][2];
@@ -221,7 +221,7 @@ int in_image(double x, double y, int proj, int north_square, int south_square) {
 /**
  * Return the authalic latitude of latitude alpha (if inverse=0) or
  * return the approximate latitude of authalic latitude alpha (if inverse=1).
- * P contains the relavent ellipsoid parameters.
+ * P contains the relevant ellipsoid parameters.
  **/
 double auth_lat(PJ *P, double alpha, int inverse) {
     struct pj_opaque *Q = P->opaque;

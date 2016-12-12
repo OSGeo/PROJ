@@ -448,7 +448,7 @@ extern "C" {
    *
    * This function sets point 3 of the geod_geodesicline to correspond to point
    * 2 of the direct geodesic problem.  See geod_lineinit() for more
-   * informaion.
+   * information.
    **********************************************************************/
   void geod_directline(struct geod_geodesicline* l,
                        const struct geod_geodesic* g,
@@ -478,7 +478,7 @@ extern "C" {
    *
    * This function sets point 3 of the geod_geodesicline to correspond to point
    * 2 of the direct geodesic problem.  See geod_lineinit() for more
-   * informaion.
+   * information.
    **********************************************************************/
   void geod_gendirectline(struct geod_geodesicline* l,
                           const struct geod_geodesic* g,
@@ -504,7 +504,7 @@ extern "C" {
    *
    * This function sets point 3 of the geod_geodesicline to correspond to point
    * 2 of the inverse geodesic problem.  See geod_lineinit() for more
-   * informaion.
+   * information.
    **********************************************************************/
   void geod_inverseline(struct geod_geodesicline* l,
                        const struct geod_geodesic* g,

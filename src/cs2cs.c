@@ -404,7 +404,7 @@ int main(int argc, char **argv)
 
     if( use_env_locale )
     {
-        /* Restore C locale to avoid issues in parsing/outputing numbers*/
+        /* Restore C locale to avoid issues in parsing/outputting numbers*/
         setlocale(LC_ALL, "C");
     }
 
@@ -415,7 +415,7 @@ int main(int argc, char **argv)
         pj_pr_list(toProj);
     }
 
-    /* set input formating control */
+    /* set input formatting control */
     if( !fromProj->is_latlong )
         informat = strtod;
     else {

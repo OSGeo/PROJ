@@ -146,7 +146,7 @@
 	proj=tmerc ellps=mod_airy lat_0=53d30'N lon_0=8W
 	x_0=200000 y_0=250000 k_0=1.000035
 	no_defs <>
-<neiez> # Netherlands East Indies Equitorial Zone
+<neiez> # Netherlands East Indies Equatorial Zone
 	proj=merc ellps=bessel lon_0=110E
 	x_0=3900000 y_0=900000 k_0=0.997
 	no_defs <>
@@ -176,12 +176,12 @@
 	no_defs <>
 # Gauss Krueger Grid for Germany
 # 
-# The first figure of the easting is lon_0 devided by 3
+# The first figure of the easting is lon_0 divided by 3
 # ( 2 for 6d0E, 3 for 9d0E, 4 for 12d0E)
 # For translations you have to remove this first figure
 # and convert northings and eastings from km to meter .
-# The other way round, devide by 1000 and add the figure.
-# I made 3 entrys for the officially used grids in Germany
+# The other way round, divide by 1000 and add the figure.
+# I made 3 entries for the officially used grids in Germany
 # 
 #
 # Und nochmal in deutsch :

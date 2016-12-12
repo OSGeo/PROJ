@@ -140,7 +140,7 @@ PJ *PROJECTION(omerc) {
     if (alp || gam) {
         lamc    = pj_param(P->ctx, P->params, "rlonc").f;
         no_off =
-                    /* For libproj4 compatability */
+                    /* For libproj4 compatibility */
                     pj_param(P->ctx, P->params, "tno_off").i
                     /* for backward compatibility */
                     || pj_param(P->ctx, P->params, "tno_uoff").i;

@@ -5,7 +5,7 @@
 
 static double proj_strtod(char *nptr, char **endptr);
 
-/* following should be sufficient for all but the rediculous */
+/* following should be sufficient for all but the ridiculous */
 #define MAX_WORK 64
 	static const char
 *sym = "NnEeSsWw";

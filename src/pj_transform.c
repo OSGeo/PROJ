@@ -555,7 +555,7 @@ int pj_compare_datums( PJ *srcdefn, PJ *dstdefn )
     else if( srcdefn->a_orig != dstdefn->a_orig
              || ABS(srcdefn->es_orig - dstdefn->es_orig) > 0.000000000050 )
     {
-        /* the tolerence for es is to ensure that GRS80 and WGS84 are
+        /* the tolerance for es is to ensure that GRS80 and WGS84 are
            considered identical */
         return 0;
     }

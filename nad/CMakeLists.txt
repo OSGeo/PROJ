@@ -1,5 +1,5 @@
 #
-# files containing dictionnary of useful projection
+# files containing dictionary of useful projection
 #
 
 set(PROJ_DICTIONARY  epsg

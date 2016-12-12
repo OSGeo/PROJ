@@ -320,7 +320,7 @@ void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
 * das Gravitationspotential der Erde. Wiss. Arb. Univ. Hannover
 * Nr. 137, p. 130-131.
 
-* Programmed by GGA- Leibniz-Institue of Applied Geophysics
+* Programmed by GGA- Leibniz-Institute of Applied Geophysics
 *               Stilleweg 2
 *               D-30655 Hannover
 *               Federal Republic of Germany
@@ -344,7 +344,7 @@ void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
 * (e.g. -6300000.m),	algorithm needs about 15 steps.
 */
 
-/* local defintions and variables */
+/* local definitions and variables */
 /* end-criterium of loop, accuracy of sin(Latitude) */
 #define genau   1.E-12
 #define genau2  (genau*genau)
@@ -362,7 +362,7 @@ void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
     double CPHI;     /* cos of searched geodetic latitude */
     double SPHI;     /* sin of searched geodetic latitude */
     double SDPHI;    /* end-criterium: addition-theorem of sin(Latitude(iter)-Latitude(iter-1)) */
-    int iter;        /* # of continous iteration, max. 30 is always enough (s.a.) */
+    int iter;        /* # of continuous iteration, max. 30 is always enough (s.a.) */
 
     P = sqrt(X*X+Y*Y);
     RR = sqrt(X*X+Y*Y+Z*Z);
@@ -389,7 +389,7 @@ void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
     }
 
 /* --------------------------------------------------------------
- * Following iterative algorithm was developped by
+ * Following iterative algorithm was developed by
  * "Institut für Erdmessung", University of Hannover, July 1988.
  * Internet: www.ife.uni-hannover.de
  * Iterative computation of CPHI,SPHI and Height.

@@ -101,7 +101,7 @@ echo "diff ${OUT} with ${OUT}.dist"
 diff -b ${OUT} ${NAD_DIR}/${OUT}.dist
 if [ $? -ne 0 ] ; then
 	echo  ""
-	echo "PROBLEMS HAVE OCCURED"
+	echo "PROBLEMS HAVE OCCURRED"
 	echo "test file ${OUT} saved"
     echo
 	exit 100
