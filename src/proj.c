@@ -441,7 +441,7 @@ int main(int argc, char **argv) {
         gen_cheb(inverse, int_proj, cheby_str, Proj, iargc, iargv);
         exit(0);
     }
-    /* set input formating control */
+    /* set input formatting control */
     if (mon) {
         pj_pr_list(Proj);
         if (very_verby) {

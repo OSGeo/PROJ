@@ -92,7 +92,7 @@ static int pj_gridlist_merge_gridfile( projCtx ctx,
         {
             got_match = 1;
 
-            /* dont add to the list if it is invalid. */
+            /* don't add to the list if it is invalid. */
             if( this_grid->ct == NULL )
                 return 0;
 

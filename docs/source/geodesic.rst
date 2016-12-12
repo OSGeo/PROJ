@@ -101,7 +101,7 @@ Thaddeus Vincenty's method, April 1975
 
 For a very good procedure to calculate inter point distances see:
 
-http://www.ngs.noaa.gov/PC_PROD/Inv_Fwd/ (Fortan code, DOS executables, and an online app)
+http://www.ngs.noaa.gov/PC_PROD/Inv_Fwd/ (Fortran code, DOS executables, and an online app)
 
 and algorithm details published in: `Vincenty, T. (1975) <http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf>`__
 
@@ -142,7 +142,7 @@ PROJ.4 - geod program
 
 
 The PROJ.4 [wiki:man_geod geod] program can be used for great circle distances
-on an ellipsoid.  As of proj verion 4.9.0, this uses a translation of
+on an ellipsoid.  As of proj version 4.9.0, this uses a translation of
 GeographicLib::Geodesic (see below) into C.  The underlying geodesic
 calculation API is exposed as part of the PROJ.4 library (via the geodesic.h
 header).  Prior to version 4.9.0, the algorithm documented here was used:

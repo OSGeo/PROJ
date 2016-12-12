@@ -163,7 +163,7 @@ default numeric locale by setting the LC_NUMERIC environment variable to C.
 .. note::
 
     NOTE: Per ticket #49, in PROJ 4.7.0 and later pj_init() operates with locale
-    overriden to "C" to avoid most locale specific processing for applications
+    overridden to "C" to avoid most locale specific processing for applications
     using the API.  Command line tools may still have issues.
 
 Changing Ellipsoid / Why can't I convert from WGS84 to Google Earth / Virtual Globe Mercator?

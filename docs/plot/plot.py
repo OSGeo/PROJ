@@ -76,7 +76,7 @@ def meridian(lon, lat_min, lat_max):
 
 def parallel(lat, lon_min, lon_max):
     '''
-    Calculate parallell coordinates.
+    Calculate parallel coordinates.
     '''
     coords = np.zeros((N_POINTS, 2))
     coords[:, 0] = np.linspace(lon_min, lon_max, N_POINTS)

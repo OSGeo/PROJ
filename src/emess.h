@@ -6,7 +6,7 @@ struct EMESS {
 	char	*File_name,	/* input file name */
 			*Prog_name;	/* name of program */
 	int		File_line;	/* approximate line read
-							where error occured */
+							where error occurred */
 };
 
 #ifdef EMESS_ROUTINE	/* use type */

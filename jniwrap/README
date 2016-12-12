@@ -59,7 +59,7 @@ The documentation is held inside the code and can be retrieved by running
 doxygen inside the folder jniwrap. This will create the HTML format
 documentation inside of jniwrap/docs
 
-The standard way to achive this is to use an Ant target:
+The standard way to achieve this is to use an Ant target:
 
     ant do_make_help
 

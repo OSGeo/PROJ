@@ -485,15 +485,15 @@ isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
     exit(EXIT_FAILURE);
 
     /* not reached */
-    return 0;       /* supresses a warning */
+    return 0;       /* suppresses a warning */
 }
 
 /*
- * return the new coordinates of any point in orginal coordinate system.
- * Define a point (newNPold) in orginal coordinate system as the North Pole in
+ * return the new coordinates of any point in original coordinate system.
+ * Define a point (newNPold) in original coordinate system as the North Pole in
  * new coordinate system, and the great circle connect the original and new
  * North Pole as the lon0 longitude in new coordinate system, given any point
- * in orginal coordinate system, this function return the new coordinates.
+ * in original coordinate system, this function return the new coordinates.
  */
 
 #define PRECISION 0.0000000000005

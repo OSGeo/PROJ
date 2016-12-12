@@ -443,7 +443,7 @@ struct FACTORS {
 #define PJD_3PARAM    1
 #define PJD_7PARAM    2
 #define PJD_GRIDSHIFT 3
-#define PJD_WGS84     4   /* WGS84 (or anything considered equivelent) */
+#define PJD_WGS84     4   /* WGS84 (or anything considered equivalent) */
 
 /* library errors */
 #define PJD_ERR_GEOCENTRIC          -45

@@ -35,7 +35,7 @@
 /************************************************************************/
 /*                        pj_apply_vgridshift()                         */
 /*                                                                      */
-/*      This implmentation takes uses the gridlist from a coordinate    */
+/*      This implementation takes uses the gridlist from a coordinate    */
 /*      system definition.  If the gridlist has not yet been            */
 /*      populated in the coordinate system definition we set it up      */
 /*      now.                                                            */

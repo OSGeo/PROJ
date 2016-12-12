@@ -72,7 +72,7 @@ int pj_apply_gridshift( projCtx ctx, const char *nadgrids, int inverse,
 /************************************************************************/
 /*                        pj_apply_gridshift_2()                        */
 /*                                                                      */
-/*      This implmentation takes uses the gridlist from a coordinate    */
+/*      This implementation takes uses the gridlist from a coordinate    */
 /*      system definition.  If the gridlist has not yet been            */
 /*      populated in the coordinate system definition we set it up      */
 /*      now.                                                            */
@@ -228,7 +228,7 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **tables, int grid_count,
              * We don't actually have any machinery currently to set the 
              * following macro, so this is mostly kept here to make it clear 
              * how we ought to operate if we wanted to make it super clear 
-             * that an error has occured when points are outside our available
+             * that an error has occurred when points are outside our available
              * datum shift areas.  But if this is on, we will find that "low 
              * value" points on the fringes of some datasets will completely 
              * fail causing lots of problems when it is more or less ok to 

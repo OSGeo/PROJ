@@ -88,7 +88,7 @@ if(PROJ4_TESTS)
 endif(PROJ4_TESTS)
 include(Proj4Test)
 
-# Put the libaries and binaries that get built into directories at the
+# Put the libraries and binaries that get built into directories at the
 # top of the build tree rather than in hard-to-find leaf
 # directories. This simplifies manual testing and the use of the build
 # tree rather than installed Boost libraries.

@@ -454,7 +454,7 @@ JNIEXPORT jstring JNICALL Java_org_proj4_PJ_getLastError
  * This method will also set the Java "ptr" final field to 0 as a safety. In theory we are not
  * supposed to change the value of a final field. But no Java code should use this field, and
  * the PJ object is being garbage collected anyway. We set the field to 0 as a safety in case
- * some user invoked the finalize() method explicitely despite our warning in the Javadoc to
+ * some user invoked the finalize() method explicitly despite our warning in the Javadoc to
  * never do such thing.
  *
  * \param env    - The JNI environment.

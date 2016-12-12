@@ -37,7 +37,7 @@ package org.proj4;
  * Proj.4 library. This class is the only place where such native methods are defined.
  * <p>
  * In the Proj.4 library, the {@code PJ} structure aggregates in a single place information usually
- * splitted in many different ISO 19111 interfaces: {@link org.opengis.referencing.datum.Ellipsoid},
+ * split in many different ISO 19111 interfaces: {@link org.opengis.referencing.datum.Ellipsoid},
  * {@link org.opengis.referencing.datum.Datum}, {@link org.opengis.referencing.datum.PrimeMeridian},
  * {@link org.opengis.referencing.cs.CoordinateSystem}, {@link org.opengis.referencing.crs.CoordinateReferenceSystem}
  * and their sub-interfaces. The relationship with the GeoAPI methods is indicated in the
@@ -285,7 +285,7 @@ public class PJ {
     /**
      * Deallocates the native PJ data structure. This method can be invoked only by the garbage
      * collector, and must be invoked exactly once (no more, no less).
-     * <strong>NEVER INVOKE THIS METHOD EXPLICITELY, NEVER OVERRIDE</strong>.
+     * <strong>NEVER INVOKE THIS METHOD EXPLICITLY, NEVER OVERRIDE</strong>.
      */
     @Override
     protected final native void finalize();

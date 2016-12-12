@@ -835,7 +835,7 @@ echo "diff ${OUT} with pj_out27.dist"
 diff -b ${OUT} ${NAD_DIR}/pj_out27.dist
 if [ $? -ne 0 ] ; then
 	echo  ""
-	echo "PROBLEMS HAVE OCCURED"
+	echo "PROBLEMS HAVE OCCURRED"
 	echo "test file ${OUT} saved"
     echo
 	exit 100

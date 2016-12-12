@@ -47,7 +47,7 @@ pj_out27    --- Comparison files for above test procedures.
 pj_out83
 
 The following NADCON conversion files are distributed in separate,
-uncompressed distibution file(s).
+uncompressed distribution file(s).
 
        Ascii source (in delta format) of grid data to convert geographic
 	   coordinates from NAD27 to NAD83

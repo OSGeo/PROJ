@@ -94,7 +94,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 	if ((fabs(xy.x) < EPSILON) && (fabs(xy.y) < EPSILON )) { lp.phi = 0.; lp.lam = 0.; return lp; }
 
-	/* intial values for Newton-Raphson method */
+	/* initial values for Newton-Raphson method */
 	lp.phi = xy.y; lp.lam = xy.x;
 	do {
 		iter = 0;
