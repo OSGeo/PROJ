@@ -79,6 +79,8 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     (void) P;
 
     i = floor((dphi = fabs(lp.phi)) * C1);
+    if( i < 0 )
+        F_ERROR;
     if (i >= NODES) i = NODES - 1;
     dphi = RAD_TO_DEG * (dphi - RC1 * i);
     xy.x = V(X[i], dphi) * FXC * lp.lam;
@@ -105,7 +107,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         }
     } else { /* general problem */
         /* in Y space, reduce to table interval */
-        for (i = floor(lp.phi * NODES);;) {
+        i = floor(lp.phi * NODES);
+        if( i < 0 || i >= NODES )
+            I_ERROR;
+        for (;;) {
             if (Y[i].c0 > lp.phi) --i;
             else if (Y[i+1].c0 <= lp.phi) ++i;
             else break;
