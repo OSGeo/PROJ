@@ -30,6 +30,14 @@
 #include <projects.h>
 
 
+#ifndef PJ_SELFTEST
+int pj_run_selftests (int verbosity) {
+    printf ("This version of libproj is not configured for internal regression tests.\n");
+    return 0;
+}
+#else
+
+
 static void run_one_test (const char *mnemonic, int (testfunc)(void), int verbosity, int *n_ok, int *n_ko, int *n_stubs) {
     int ret = testfunc ();
     switch (ret) {
@@ -46,14 +54,6 @@ static void run_one_test (const char *mnemonic, int (testfunc)(void), int verbos
     }
     return;
 }
-
-
-#ifndef PJ_SELFTEST
-int pj_run_selftests (int verbosity) {
-    printf ("This version of libproj is not configured for internal regression tests.\n");
-    return 0;
-}
-#else
 
 
 int pj_run_selftests (int verbosity) {
