@@ -8,11 +8,14 @@ Download
    :depth: 3
    :backlinks: none
 
+Release Notes
+--------------------------------------------------------------------------------
+* `NEWS <https://github.com/OSGeo/proj.4/blob/master/NEWS>`_ 
 
 Current Release
 --------------------------------------------------------------------------------
 
-* **2016-09-02** `proj-4.9.3.tar.gz`_ `Release Notes`_ (`md5`_)
+* **2016-09-02** `proj-4.9.3.tar.gz`_ (`md5`_)
 
 Past Releases
 --------------------------------------------------------------------------------
@@ -24,7 +27,6 @@ Past Releases
 .. _`proj-4.9.2.tar.gz`: http://download.osgeo.org/proj/proj-4.9.2.tar.gz
 .. _`proj-4.9.3.tar.gz`: http://download.osgeo.org/proj/proj-4.9.3.tar.gz
 .. _`md5`: http://download.osgeo.org/proj/proj-4.9.3.tar.gz.md5
-.. _`Release Notes`: http://lists.maptools.org/pipermail/proj/2015-September/007270.html
 
 Binaries
 --------------------------------------------------------------------------------
