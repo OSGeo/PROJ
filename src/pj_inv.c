@@ -10,7 +10,7 @@ LP pj_inv(XY xy, PJ *P) {
     LP err;
 
     /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
-    lp.lam = lp.phi = HUGE_VAL;
+    err.lam = err.phi = HUGE_VAL;
 
     if (0==P->inv)
         return err;

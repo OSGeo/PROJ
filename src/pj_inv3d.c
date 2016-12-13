@@ -10,7 +10,7 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
     LPZ err;
 
     /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
-    lpz.lam = lpz.phi = lpz.z = HUGE_VAL;
+    err.lam = err.phi = err.z = HUGE_VAL;
 
     if (0==P->inv3d)
         return err;

@@ -108,3 +108,5 @@ EXPORTS
     pj_lp_dist                     @106
     pj_xy_dist                     @107
     pj_xyz_dist                    @108
+    pj_coo_error                   @109
+    pj_obs_error                   @110

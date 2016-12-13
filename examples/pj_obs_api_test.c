@@ -69,7 +69,7 @@ int main (void) {
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
-    a = pj_obs_null;
+    a = pj_obs_null ();
     /* a.coo.lp: The coordinate part of a, interpreted as a classic LP pair */
     a.coo.lp.lam = TORAD(12);
     a.coo.lp.phi = TORAD(55);
@@ -114,7 +114,7 @@ int main (void) {
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
-    a = b = pj_obs_null;
+    a = b = pj_obs_null ();
     a.coo.lpz.lam = TORAD(12);
     a.coo.lpz.phi = TORAD(55);
     a.coo.lpz.z   = 100;
@@ -160,7 +160,7 @@ int main (void) {
     if (0==P)
         return puts ("Oops"), 0;
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
-    a = b = pj_obs_null;
+    a = b = pj_obs_null ();
     a.coo.lpz.lam = TORAD(12);
     a.coo.lpz.phi = TORAD(55);
     a.coo.lpz.z   = 100;
@@ -186,7 +186,7 @@ int main (void) {
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (easting, northing) to utm(12, 55) */
-    a = b = pj_obs_null;
+    a = b = pj_obs_null ();
     a.coo.xy = cph_utm32;
     printf ("PRE:   %15.9f %15.9f\n", a.coo.xy.x, a.coo.xy.y);
 
@@ -208,7 +208,7 @@ int main (void) {
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (easting, northing) to utm(12, 55) */
-    a = b = pj_obs_null;
+    a = b = pj_obs_null ();
     a.coo.lpz.lam = TORAD(12);
     a.coo.lpz.phi = TORAD(55);
     printf ("PRE:   %15.9f %15.9f\n", TODEG(a.coo.lp.lam), TODEG(a.coo.lp.phi));

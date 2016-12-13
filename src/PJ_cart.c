@@ -88,6 +88,16 @@ PROJ_HEAD(cart,    "Geodetic/cartesian conversions");
 
     (TF, below).
 
+    Close to the poles, we avoid singularities by switching to an
+    approximation requiring knowledge of the geocentric radius
+    at the given latitude. For this, we use an adaptation of the
+    formula given in:
+
+    Wikipedia: Earth Radius
+    https://en.wikipedia.org/wiki/Earth_radius#Radius_at_a_given_geodetic_latitude
+    (Derivation and commentary at http://gis.stackexchange.com/questions/20200/how-do-you-compute-the-earths-radius-at-a-given-geodetic-latitude)
+
+    (WP2, below)
 
     These routines are probably not as robust at those in
     geocent.c, at least thay haven't been through as heavy
@@ -111,6 +121,13 @@ static double normal_radius_of_curvature (double a, double es, double phi) {
         return a;
     /* This is from WP.  HM formula 2-149 gives an a,b version */
     return a / sqrt (1 - es*s*s);
+}
+
+/*********************************************************************/
+static double geocentric_radius (double a, double b, double phi) {
+/*********************************************************************/
+    /* This is from WP2, but uses hypot() for potentially better numerical robustness */
+    return hypot (a*a*cos (phi), b*b*sin(phi)) / hypot (a*cos(phi), b*sin(phi));
 }
 
 
@@ -160,11 +177,12 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
 
     c  =  cos(lpz.phi);
     if (fabs(c) < 1e-6) {
-        /* poleward of 89.99994 deg, we avoid division by zero */
-        /* by computing the height as the cartesian z value    */
-        /* minus the semiminor axis length                     */
-        /* (potential improvement: approx. by 2nd order poly)  */
-        lpz.z = cartesian.z - (cartesian.z > 0? b: -b);
+        /* poleward of 89.99994 deg, we avoid division by zero   */
+        /* by computing the height as the cartesian z value      */
+        /* minus the geocentric radius of the Earth at the given */
+        /* latitude                                              */
+        double r = geocentric_radius (P->a, b, lpz.phi);
+        lpz.z = fabs (cartesian.z) - r;
     }
     else
         lpz.z =  p / c  -  N;
@@ -261,7 +279,7 @@ int pj_cart_selftest (void) {
 
     /* Invalid projection */
     a = pj_trans (P, 42, a);
-    if (a.coo.lpz.lam!=DBL_MAX)
+    if (a.coo.lpz.lam!=HUGE_VAL)
         return 4;
     err = pj_err_level (P, PJ_ERR_TELL);
     if (0==err)
@@ -293,7 +311,30 @@ int pj_cart_selftest (void) {
     if (dist > 2e-9)
         return 7;
 
-    /* Inverse projection: Ellipsoidal-to-3D-Cartesian */
+
+    /* Test at the North Pole */
+    a = b = pj_obs_null;
+    a.coo.lpz.lam = TORAD(0);
+    a.coo.lpz.phi = TORAD(90);
+    a.coo.lpz.z   = 100;
+
+    /* Forward projection: Ellipsoidal-to-3D-Cartesian */
+    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    if (dist > 1e-12)
+        return 8;
+
+    /* Test at the South Pole */
+    a = b = pj_obs_null;
+    a.coo.lpz.lam = TORAD(0);
+    a.coo.lpz.phi = TORAD(-90);
+    a.coo.lpz.z   = 100;
+
+    /* Forward projection: Ellipsoidal-to-3D-Cartesian */
+    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    if (dist > 1e-12)
+        return 9;
+
+    /* Inverse projection: 3D-Cartesian-to-Ellipsoidal */
     b = pj_trans (P, PJ_INV, b);
 
     /* Move p to another context */

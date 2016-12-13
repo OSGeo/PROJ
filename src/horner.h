@@ -122,8 +122,6 @@
 typedef struct {double u,v;} UV;
 #endif
 
-static const UV uv_error = {DBL_MAX, DBL_MAX};
-
 struct horner;
 typedef struct horner HORNER;
 static UV      horner (const HORNER *transformation, int direction, UV position);
@@ -307,6 +305,8 @@ summing the tiny high order elements first.
     double *tcx, *tcy;                        /* Coefficient pointers */
     double  range; /* Equivalent to the gen_pol's FLOATLIMIT constant */
     double  n, e;
+    UV uv_error;
+    uv_error.u = uv_error.v = HUGE_VAL;
 
     if (0==transformation)
         return uv_error;
@@ -376,8 +376,10 @@ static int horner_silence (int i) {
   useless function that silences coompiler warnings about unused stuff
 ***********************************************************************/
     HORNER *Q;
+    UV uv_error;
     if (i==0)
         return i;
+    uv_error.u = uv_error.v = HUGE_VAL;
     horner(0, 1, uv_error);
     Q = horner_alloc (2);
     if (Q)

@@ -272,9 +272,10 @@ double pj_xyz_dist (XYZ a, XYZ b);
 
 
 #ifndef PJ_OBS_API_C
-extern const PJ_COORD pj_coo_error;
+/* Part of MSVC workaround: Make pj_*_null look function-like for symmetry with pj_*_error */
+#define pj_coo_null(x) pj_coo_null
+#define pj_obs_null(x) pj_obs_null
 extern const PJ_COORD pj_coo_null;
-extern const PJ_OBS   pj_obs_error;
 extern const PJ_OBS   pj_obs_null;
 extern const PJ      *pj_shutdown;
 #endif

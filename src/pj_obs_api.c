@@ -40,15 +40,6 @@
 #include <math.h>
 
 
-/* Objects used as return value in case of errors */
-/* Cannot use HUGE_VAL here: MSVC misimplements HUGE_VAL as something that is not compile time constant */
-const PJ_COORD pj_coo_error = {{DBL_MAX,DBL_MAX,DBL_MAX,DBL_MAX}};
-const PJ_OBS   pj_obs_error = {
-    {{DBL_MAX,DBL_MAX,DBL_MAX,DBL_MAX}},
-    {{DBL_MAX,DBL_MAX,DBL_MAX}},
-    0, 0
-};
-
 /* Used for zero-initializing new objects */
 const PJ_COORD pj_coo_null = {{0, 0, 0, 0}};
 const PJ_OBS   pj_obs_null = {
@@ -79,6 +70,23 @@ double pj_xyz_dist (XYZ a, XYZ b) {
 }
 
 
+/* Work around non-constness of MSVC HUGE_VAL by providing functions rather than constants */
+PJ_COORD pj_coo_error (void) {
+    PJ_COORD c;
+    c.v[0] = c.v[1] = c.v[2] = c.v[3] = HUGE_VAL;
+    return c;
+}
+
+PJ_OBS pj_obs_error (void) {
+    PJ_OBS obs;
+    obs.coo = pj_coo_error ();
+    obs.anc.v[0] = obs.anc.v[1] = obs.anc.v[2] = HUGE_VAL;
+    obs.id = obs.flags = 0;
+    return obs;
+}
+
+
+
 PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
     if (0!=P->fwdobs) {
         obs  =  P->fwdobs (obs, P);
@@ -93,7 +101,7 @@ PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
         return obs;
     }
     pj_err_level (P, EINVAL);
-    return pj_obs_error;
+    return pj_obs_error ();
 }
 
 
@@ -111,7 +119,7 @@ PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
         return obs;
     }
     pj_err_level (P, EINVAL);
-    return pj_obs_error;
+    return pj_obs_error ();
 }
 
 
@@ -132,7 +140,7 @@ PJ_OBS pj_trans (PJ *P, enum pj_direction direction, PJ_OBS obs) {
     }
 
     pj_err_level (P, EINVAL);
-    return pj_obs_error;
+    return pj_obs_error ();
 }
 
 
