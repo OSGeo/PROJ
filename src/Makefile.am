@@ -6,7 +6,7 @@ EXTRA_PROGRAMS = multistresstest test228
 AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
-include_HEADERS = proj.h proj_api.h projects.h geodesic.h horner.h \
+include_HEADERS = proj.h proj_api.h projects.h geodesic.h \
 	org_proj4_Projections.h org_proj4_PJ.h
 
 EXTRA_DIST = makefile.vc proj.def bin_cs2cs.cmake \
