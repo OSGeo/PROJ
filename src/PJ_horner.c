@@ -5,9 +5,8 @@
 #include <stddef.h>
 #include <math.h>
 #include <errno.h>
-#include "horner.h"
 PROJ_HEAD(horner,    "Horner polynomial evaluation");
-
+#define HORNER_SILENCE
 
 /* The next few hundred lines comprises a direct cut-and-paste from the horner.h header library */
 
