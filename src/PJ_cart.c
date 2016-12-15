@@ -88,6 +88,16 @@ PROJ_HEAD(cart,    "Geodetic/cartesian conversions");
 
     (TF, below).
 
+    Close to the poles, we avoid singularities by switching to an
+    approximation requiring knowledge of the geocentric radius
+    at the given latitude. For this, we use an adaptation of the
+    formula given in:
+
+    Wikipedia: Earth Radius
+    https://en.wikipedia.org/wiki/Earth_radius#Radius_at_a_given_geodetic_latitude
+    (Derivation and commentary at http://gis.stackexchange.com/questions/20200/how-do-you-compute-the-earths-radius-at-a-given-geodetic-latitude)
+
+    (WP2, below)
 
     These routines are probably not as robust at those in
     geocent.c, at least thay haven't been through as heavy
@@ -103,13 +113,6 @@ static void freeup (PJ *P) {
     return;
 }
 
-
-/*********************************************************************/
-static double semiminor_axis (double a, double es) {
-/*********************************************************************/
-    return a * sqrt (1 - es);
-}
-
 /*********************************************************************/
 static double normal_radius_of_curvature (double a, double es, double phi) {
 /*********************************************************************/
@@ -120,15 +123,11 @@ static double normal_radius_of_curvature (double a, double es, double phi) {
     return a / sqrt (1 - es*s*s);
 }
 
-
 /*********************************************************************/
-static double second_eccentricity_squared (double a, double es) {
-/**********************************************************************
-    Follows the definition, e'2 = (a2-b2)/b2, but uses the identity
-    (a2-b2) = (a-b)(a+b), for improved numerical precision.
-***********************************************************************/
-    double b = semiminor_axis (a, es);
-    return (a - b) * (a + b)  /  (b*b);
+static double geocentric_radius (double a, double b, double phi) {
+/*********************************************************************/
+    /* This is from WP2, but uses hypot() for potentially better numerical robustness */
+    return hypot (a*a*cos (phi), b*b*sin(phi)) / hypot (a*cos(phi), b*sin(phi));
 }
 
 
@@ -148,21 +147,6 @@ static XYZ cartesian (LPZ geodetic,  PJ *P) {
     xyz.y = (N + h) * cosphi * sin(lam);
     xyz.z = (N * (1 - P->es) + h) * sin(phi);
 
-    /*********************************************************************/
-    /*                                                                   */
-    /* For historical reasons, in proj, plane coordinates are measured   */
-    /* in units of the semimajor axis. Since 3D handling is grafted on   */
-    /* later, this is not the case for heights. And even though this     */
-    /* coordinate really is 3D cartesian, the z-part looks like a height */
-    /* to proj. Hence, we have the somewhat unusual situation of having  */
-    /* a point coordinate with differing units between dimensions.       */
-    /*                                                                   */
-    /* The scaling and descaling is handled by the pj_fwd/inv functions. */
-    /*                                                                   */
-    /*********************************************************************/
-    xyz.x /= P->a;
-    xyz.y /= P->a;
-
     return xyz;
 }
 
@@ -173,15 +157,12 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
     double N, b, p, theta, c, s, e2s;
     LPZ lpz;
 
-    cartesian.x *= P->a;
-    cartesian.y *= P->a;
-
     /* Perpendicular distance from point to Z-axis (HM eq. 5-28) */
     p = hypot (cartesian.x, cartesian.y);
 
     /* Ancillary ellipsoidal parameters */
-    b   =  semiminor_axis (P->a, P->es);
-    e2s =  second_eccentricity_squared (P->a,  P->es);
+    b   =  P->b;
+    e2s =  P->e2s;
 
     /* HM eq. (5-37) */
     theta  =  atan2 (cartesian.z * P->a,  p * b);
@@ -196,11 +177,12 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
 
     c  =  cos(lpz.phi);
     if (fabs(c) < 1e-6) {
-        /* poleward of 89.99994 deg, we avoid division by zero */
-        /* by computing the height as the cartesian z value    */
-        /* minus the semiminor axis length                     */
-        /* (potential improvement: approx. by 2nd order poly)  */
-        lpz.z = cartesian.z - (cartesian.z > 0? b: -b);
+        /* poleward of 89.99994 deg, we avoid division by zero   */
+        /* by computing the height as the cartesian z value      */
+        /* minus the geocentric radius of the Earth at the given */
+        /* latitude                                              */
+        double r = geocentric_radius (P->a, b, lpz.phi);
+        lpz.z = fabs (cartesian.z) - r;
     }
     else
         lpz.z =  p / c  -  N;
@@ -239,6 +221,8 @@ PJ *PROJECTION(cart) {
     P->inv3d  =  geodetic;
     P->fwd    =  cart_forward;
     P->inv    =  cart_reverse;
+    P->left   =  PJ_IO_UNITS_RADIANS;
+    P->right  =  PJ_IO_UNITS_METERS;
     return P;
 }
 
@@ -255,9 +239,6 @@ int pj_cart_selftest (void) {
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
 
 
-    /* Log everything libproj offers to log for you */
-    pj_log_level (0, PJ_LOG_TRACE);
-
     /* An utm projection on the GRS80 ellipsoid */
     P = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
     if (0==P)
@@ -269,7 +250,7 @@ int pj_cart_selftest (void) {
     /* Same projection, now using argc/argv style initialization */
     P = pj_create_argv (3, args);
     if (0==P)
-        return puts ("Oops"), 0;
+        return 2;
 
     /* Turn off logging */
     pj_log_level (0, PJ_LOG_NONE);
@@ -294,18 +275,18 @@ int pj_cart_selftest (void) {
 
     dist = pj_xy_dist (a.coo.xy, b.coo.xy);
     if (dist > 2e-9)
-        return 2;
+        return 3;
 
     /* Invalid projection */
     a = pj_trans (P, 42, a);
-    if (a.coo.lpz.lam!=DBL_MAX)
-        return 3;
-    err = pj_error (P);
-    if (0==err)
+    if (a.coo.lpz.lam!=HUGE_VAL)
         return 4;
+    err = pj_err_level (P, PJ_ERR_TELL);
+    if (0==err)
+        return 5;
 
     /* Clear error */
-    pj_error_set (P, 0);
+    pj_err_level (P, 0);
 
     /* Clean up */
     pj_free (P);
@@ -313,7 +294,7 @@ int pj_cart_selftest (void) {
     /* Now do some 3D transformations */
     P = pj_create ("+proj=cart +ellps=GRS80");
     if (0==P)
-        return 5;
+        return 6;
 
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
     a = b = pj_obs_null;
@@ -328,9 +309,32 @@ int pj_cart_selftest (void) {
     dist = pj_roundtrip (P, PJ_FWD, 10000, a);
     dist = pj_roundtrip (P, PJ_INV, 10000, b);
     if (dist > 2e-9)
-        return 6;
+        return 7;
 
-    /* Inverse projection: Ellipsoidal-to-3D-Cartesian */
+
+    /* Test at the North Pole */
+    a = b = pj_obs_null;
+    a.coo.lpz.lam = TORAD(0);
+    a.coo.lpz.phi = TORAD(90);
+    a.coo.lpz.z   = 100;
+
+    /* Forward projection: Ellipsoidal-to-3D-Cartesian */
+    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    if (dist > 1e-12)
+        return 8;
+
+    /* Test at the South Pole */
+    a = b = pj_obs_null;
+    a.coo.lpz.lam = TORAD(0);
+    a.coo.lpz.phi = TORAD(-90);
+    a.coo.lpz.z   = 100;
+
+    /* Forward projection: Ellipsoidal-to-3D-Cartesian */
+    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    if (dist > 1e-12)
+        return 9;
+
+    /* Inverse projection: 3D-Cartesian-to-Ellipsoidal */
     b = pj_trans (P, PJ_INV, b);
 
     /* Move p to another context */

@@ -89,23 +89,24 @@ EXPORTS
     geod_polygon_testpoint          @87
     geod_polygon_clear              @88
     pj_run_selftests                @89
-    pj_error                        @90
-    pj_create                       @91
-    pj_create_argv                  @92
-    pj_trans                        @93
-    pj_fwdobs                       @94
-    pj_invobs                       @95
-    pj_roundtrip                    @96
-    pj_log_level                    @97
-    pj_error_set                    @98
-    pj_log_set                      @99
-    pj_context_renew               @100
-    pj_context_inherit             @101
-    pj_context_free                @102
-    pj_fileapi_set                 @103
-    pj_log_error                   @104
-    pj_log_debug                   @105
-    pj_log_trace                   @106
-    pj_lp_dist                     @107
-    pj_xy_dist                     @108
-    pj_xyz_dist                    @109
+    pj_create                       @90
+    pj_create_argv                  @91
+    pj_trans                        @92
+    pj_fwdobs                       @93
+    pj_invobs                       @94
+    pj_roundtrip                    @95
+    pj_log_level                    @96
+    pj_err_level                    @97
+    pj_log_func                     @98
+    pj_context_renew                @99
+    pj_context_inherit             @100
+    pj_context_free                @101
+    pj_fileapi_set                 @102
+    pj_log_error                   @103
+    pj_log_debug                   @104
+    pj_log_trace                   @105
+    pj_lp_dist                     @106
+    pj_xy_dist                     @107
+    pj_xyz_dist                    @108
+    pj_coo_error                   @109
+    pj_obs_error                   @110

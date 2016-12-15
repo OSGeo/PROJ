@@ -44,8 +44,6 @@
 
 int pj_pipeline_selftest (void);
 
-
-
 int main (void) {
     PJ *P;
     PJ_OBS a, b;
@@ -71,7 +69,7 @@ int main (void) {
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
-    a = pj_obs_null;
+    a = pj_obs_null ();
     /* a.coo.lp: The coordinate part of a, interpreted as a classic LP pair */
     a.coo.lp.lam = TORAD(12);
     a.coo.lp.phi = TORAD(55);
@@ -100,13 +98,12 @@ int main (void) {
     dist = pj_xyz_dist (a.coo.xyz, b.coo.xyz);
     printf ("Roundtrip deviation, (nm): %15.9f\n", dist*1e9);
 
-
     /* Invalid projection */
     a = pj_trans (P, 42, a);
     if (a.coo.lpz.lam!=DBL_MAX)
         printf ("%15.9f %15.9f\n", a.coo.lpz.lam, a.coo.lpz.phi);
-    err = pj_error (P);
-    printf ("pj_error: %d\n", err);
+    err = pj_err_level (P, PJ_ERR_TELL);
+    printf ("pj_err_level: %d\n", err);
 
     /* Clean up */
     pj_free (P);
@@ -117,7 +114,7 @@ int main (void) {
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
-    a = b = pj_obs_null;
+    a = b = pj_obs_null ();
     a.coo.lpz.lam = TORAD(12);
     a.coo.lpz.phi = TORAD(55);
     a.coo.lpz.z   = 100;
@@ -152,17 +149,18 @@ int main (void) {
 
                   P I P E L I N E   T E S T S
 
-    ****************************************************************************
-
-
     ***************************************************************************/
 
     /* forward-reverse geo->utm->geo */
-    P = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm +step +proj=utm +inv");
+    P = pj_create (
+            "+proj=pipeline +ellps=GRS80 +zone=32 +step "
+            "+proj=utm +step "
+            "+proj=utm +inv"
+        );
     if (0==P)
         return puts ("Oops"), 0;
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
-    a = b = pj_obs_null;
+    a = b = pj_obs_null ();
     a.coo.lpz.lam = TORAD(12);
     a.coo.lpz.phi = TORAD(55);
     a.coo.lpz.z   = 100;
@@ -180,12 +178,15 @@ int main (void) {
 
 
     /* And now the back-to-back situation utm->geo->utm */
-    P = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm +inv +step +proj=utm");
+    P = pj_create (
+        "+proj=pipeline +ellps=GRS80 +zone=32 +step "
+        "+proj=utm +inv +step "
+        "+proj=utm");
     if (0==P)
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (easting, northing) to utm(12, 55) */
-    a = b = pj_obs_null;
+    a = b = pj_obs_null ();
     a.coo.xy = cph_utm32;
     printf ("PRE:   %15.9f %15.9f\n", a.coo.xy.x, a.coo.xy.y);
 
@@ -207,7 +208,7 @@ int main (void) {
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (easting, northing) to utm(12, 55) */
-    a = b = pj_obs_null;
+    a = b = pj_obs_null ();
     a.coo.lpz.lam = TORAD(12);
     a.coo.lpz.phi = TORAD(55);
     printf ("PRE:   %15.9f %15.9f\n", TODEG(a.coo.lp.lam), TODEG(a.coo.lp.phi));
@@ -220,7 +221,6 @@ int main (void) {
     /* Inverse projection */
     a = pj_trans (P, PJ_INV, b);
     printf ("INV:   %15.9f %15.9f\n", TODEG(a.coo.lp.lam), TODEG(a.coo.lp.phi));
-
 
     /* Geodesic distance between two points with angular 2D coordinates */
     a.coo.lp.lam = TORAD(12);
@@ -236,7 +236,6 @@ int main (void) {
     b.coo.lp.phi = TORAD(1.);
     dist = pj_lp_dist (P, a.coo.lp, b.coo.lp);
     printf ("1 deg at Equator:   %15.9f\n", dist);
-
 
     pj_free (P);
     pj_pipeline_selftest ();

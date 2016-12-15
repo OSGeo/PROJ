@@ -59,7 +59,7 @@ support = \
 	pj_strtod.obj pj_run_selftests.obj pj_generic_selftest.obj
 
 pipeline = \
-	pj_obs_api.obj PJ_cart.obj PJ_pipeline.obj
+	pj_obs_api.obj PJ_cart.obj PJ_pipeline.obj PJ_horner.obj PJ_helmert.obj
 
 geodesic = geodesic.obj
 
@@ -147,6 +147,7 @@ install: all
 	copy *.exe $(INSTDIR)\bin
 	copy *.dll $(INSTDIR)\bin
 	copy *.lib $(INSTDIR)\lib
+	copy proj.h     $(INSTDIR)\include
 	copy proj_api.h $(INSTDIR)\include
 	copy projects.h $(INSTDIR)\include
 	copy geodesic.h $(INSTDIR)\include

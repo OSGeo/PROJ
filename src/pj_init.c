@@ -35,10 +35,12 @@
 #include <errno.h>
 #include <ctype.h>
 
+/* Maximum size of files using the "escape carriage return" feature */
+#define MAX_CR_ESCAPE 65537
 typedef struct {
     projCtx ctx;
     PAFile fid;
-    char buffer[8193];
+    char buffer[MAX_CR_ESCAPE];
     int buffer_filled;
     int at_eof;
 } pj_read_state;
@@ -51,6 +53,7 @@ static const char *fill_buffer(pj_read_state *state, const char *last_char)
 {
     size_t bytes_read;
     size_t char_remaining, char_requested;
+    char   *r, *w;
 
 /* -------------------------------------------------------------------- */
 /*      Don't bother trying to read more if we are at eof, or if the    */
@@ -85,7 +88,36 @@ static const char *fill_buffer(pj_read_state *state, const char *last_char)
         state->buffer[state->buffer_filled + bytes_read] = '\0';
     }
 
-    state->buffer_filled += bytes_read;
+/* -------------------------------------------------------------------- */
+/*      Line continuations: skip whitespace after escaped newlines      */
+/* -------------------------------------------------------------------- */
+    r = state->buffer;
+    w = state->buffer;
+    while (*r) {
+        /* Escaped newline? */
+        while ((r[0]=='\\')  &&  ((r[1]=='\n') || (r[1]=='\r'))) {
+            r += 2;
+            while (isspace (*r))
+                r++;
+            /* we also skip comments immediately after an escaped newline */
+            while (*r=='#') {
+                while( *r && (*r != '\n') )
+                    r++;
+                while (isspace (*r))
+                    r++;
+                /* Reaching end of buffer while skipping continuation comment is currently an error */
+                if (0==*r) {
+                    pj_ctx_set_errno (state->ctx, -2);
+                    pj_log (state->ctx, PJ_LOG_ERROR, "init file too big");
+                    return 0;
+                }
+            }
+        }
+        *w++ = *r++;
+    }
+    *w = 0;
+    state->buffer_filled += (bytes_read - (r-w));
+
     return last_char;
 }
 
@@ -96,11 +128,11 @@ static paralist *
 get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
         int *found_def) {
     pj_read_state *state = (pj_read_state*) calloc(1,sizeof(pj_read_state));
-    char sword[302];
+    char sword[MAX_CR_ESCAPE];
+    char *pipeline;
     int len;
     int in_target = 0;
     const char *next_char = NULL;
-
     state->fid = fid;
     state->ctx = ctx;
     next_char = fill_buffer(state, NULL);
@@ -109,6 +141,9 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
 
     len = strlen(name);
     *sword = 't';
+
+    if (0==next_char)
+        return 0;
 
     /* loop till we find our target keyword */
     while (*next_char)
@@ -120,6 +155,8 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
             next_char++;
 
         next_char = fill_buffer(state, next_char);
+        if (0==next_char)
+            return 0;
 
         /* for comments, skip past end of line. */
         if( *next_char == '#' )
@@ -128,6 +165,8 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
                 next_char++;
 
             next_char = fill_buffer(state, next_char);
+            if (0==next_char)
+                return 0;
             if (*next_char == '\n')
                 next_char++;
             if (*next_char == '\r')
@@ -171,7 +210,7 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
             }
 
             /* capture parameter */
-            while( *next_char && !isspace(*next_char) )
+            while ( *next_char && !isspace(*next_char) )
             {
                 next_char++;
                 word_len++;
@@ -180,8 +219,11 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
             strncpy(sword+1, start_of_word, word_len);
             sword[word_len+1] = '\0';
 
-            /* do not override existing parameter value of same name */
-            if (!pj_param(ctx, *start, sword).i) {
+            /* do not override existing parameter value of same name - unless in pipeline definition */
+            pipeline = pj_param(ctx, *start, "sproj").s;
+            if (pipeline && strcmp (pipeline, "pipeline"))
+                pipeline = 0;
+            if (pipeline || !pj_param(ctx, *start, sword).i) {
                 /* don't default ellipse if datum, ellps or any earth model
                    information is set. */
                 if( strncmp(sword+1,"ellps=",6) != 0
@@ -194,8 +236,9 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
                 {
                     next = next->next = pj_mkparam(sword+1);
                 }
+                else
+                    next = next->next = pj_mkparam(sword+1);
             }
-
         }
         else
         {
@@ -388,6 +431,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PJ *(*proj)(PJ *);
     paralist *curr;
     int i;
+    int defer_init_expansion = 0;
     PJ *PIN = 0;
 
     ctx->last_errno = 0;
@@ -403,9 +447,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if (ctx->last_errno) goto bum_call;
 
     /* check if +init present */
-    if (pj_param(ctx, start, "tinit").i) {
+    if (pj_param(ctx, start, "tinit").i && ! defer_init_expansion) {
         int found_def = 0;
-
+        /* avoid expanding additional inits (as could happen in a pipeline) */
+        defer_init_expansion = 1;
         if (!(curr = get_init(ctx,&start, curr,
                               pj_param(ctx, start, "sinit").s,
                               &found_def)))
@@ -444,7 +489,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if (pj_datum_set(ctx, start, PIN)) goto bum_call;
 
     /* set ellipsoid/sphere parameters */
-    if (pj_ell_set(ctx, start, &PIN->a, &PIN->es)) goto bum_call;
+    if (pj_ell_set(ctx, start, &PIN->a, &PIN->es)) {
+        pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
+        goto bum_call;
+    }
 
     PIN->a_orig = PIN->a;
     PIN->es_orig = PIN->es;
@@ -464,11 +512,11 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* flattening */
     PIN->f  = 1 - cos (PIN->alpha);   /* = 1 - sqrt (1 - PIN->es); */
-    PIN->rf = PIN->f? 1/PIN->f: HUGE_VAL;
+    PIN->rf = PIN->f? 1.0/PIN->f: HUGE_VAL;
 
     /* second flattening */
-    PIN->f2 = 1/cos (PIN->alpha) - 1;
-    PIN->rf = PIN->f2? 1/PIN->f2: HUGE_VAL;
+    PIN->f2  = 1/cos (PIN->alpha) - 1;
+    PIN->rf2 = PIN->f2? 1/PIN->f2: HUGE_VAL;
 
     /* third flattening */
     PIN->n  = pow (tan (PIN->alpha/2), 2);

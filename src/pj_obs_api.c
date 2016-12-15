@@ -32,7 +32,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-#define PJ_OBS_C
+#define PJ_OBS_API_C
 #include <proj.h>
 #include <projects.h>
 #include <geodesic.h>
@@ -40,16 +40,9 @@
 #include <math.h>
 
 
-/* Used as return value in case of errors */
-const PJ_OBS pj_obs_error = {
-    /* Cannot use HUGE_VAL here: MSVC misimplements HUGE_VAL as something that is not compile time constant */
-    {{DBL_MAX,DBL_MAX,DBL_MAX,DBL_MAX}},
-    {{DBL_MAX,DBL_MAX,DBL_MAX}},
-    0, 0
-};
-
 /* Used for zero-initializing new objects */
-const PJ_OBS pj_obs_null = {
+const PJ_COORD pj_coo_null = {{0, 0, 0, 0}};
+const PJ_OBS   pj_obs_null = {
     {{0, 0, 0, 0}},
     {{0, 0, 0}},
     0, 0
@@ -77,6 +70,23 @@ double pj_xyz_dist (XYZ a, XYZ b) {
 }
 
 
+/* Work around non-constness of MSVC HUGE_VAL by providing functions rather than constants */
+PJ_COORD pj_coo_error (void) {
+    PJ_COORD c;
+    c.v[0] = c.v[1] = c.v[2] = c.v[3] = HUGE_VAL;
+    return c;
+}
+
+PJ_OBS pj_obs_error (void) {
+    PJ_OBS obs;
+    obs.coo = pj_coo_error ();
+    obs.anc.v[0] = obs.anc.v[1] = obs.anc.v[2] = HUGE_VAL;
+    obs.id = obs.flags = 0;
+    return obs;
+}
+
+
+
 PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
     if (0!=P->fwdobs) {
         obs  =  P->fwdobs (obs, P);
@@ -90,8 +100,8 @@ PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
         obs.coo.xy  =  pj_fwd (obs.coo.lp, P);
         return obs;
     }
-    pj_error_set (P, EINVAL);
-    return pj_obs_error;
+    pj_err_level (P, EINVAL);
+    return pj_obs_error ();
 }
 
 
@@ -108,8 +118,8 @@ PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
         obs.coo.lp  =  pj_inv (obs.coo.xy, P);
         return obs;
     }
-    pj_error_set (P, EINVAL);
-    return pj_obs_error;
+    pj_err_level (P, EINVAL);
+    return pj_obs_error ();
 }
 
 
@@ -129,8 +139,8 @@ PJ_OBS pj_trans (PJ *P, enum pj_direction direction, PJ_OBS obs) {
             break;
     }
 
-    pj_error_set (P, EINVAL);
-    return pj_obs_error;
+    pj_err_level (P, EINVAL);
+    return pj_obs_error ();
 }
 
 
@@ -143,7 +153,7 @@ double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs) {
         return HUGE_VAL;
 
     if (n < 1) {
-        pj_error_set (P, EINVAL);
+        pj_err_level (P, EINVAL);
         return HUGE_VAL;
     }
 
@@ -152,15 +162,15 @@ double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs) {
     for (i = 0;  i < n;  i++) {
         switch (direction) {
             case PJ_FWD:
-                u.coo.xyz  =  pj_fwd3d (o.coo.lpz, P);
-                o.coo.lpz  =  pj_inv3d (u.coo.xyz, P);
+                u  =  pj_fwdobs (o, P);
+                o  =  pj_invobs (u, P);
                 break;
             case PJ_INV:
-                u.coo.lpz  =  pj_inv3d (o.coo.xyz, P);
-                o.coo.xyz  =  pj_fwd3d (u.coo.lpz, P);
+                u  =  pj_invobs (o, P);
+                o  =  pj_fwdobs (u, P);
                 break;
             default:
-                pj_error_set (P, EINVAL);
+                pj_err_level (P, EINVAL);
                 return HUGE_VAL;
         }
     }
@@ -179,18 +189,24 @@ PJ *pj_create_argv (int argc, char **argv) {
 }
 
 
-/* From here: Minimum viable support for contexts. The first four functions   */
+/* Below: Minimum viable support for contexts. The first four functions   */
 /* relate to error reporting, debugging, and logging, hence being generically */
 /* useful. The remaining is a compact implementation of the more low level    */
 /* proj_api.h thread contexts, which may or may not be useful  */
 
-int pj_error (PJ *P) {
-    return pj_ctx_get_errno (pj_get_ctx(P));
-}
-
-
-void pj_error_set (PJ *P, int err) {
-    pj_ctx_set_errno (pj_get_ctx(P), err);
+/* Set error level 0-3, or query current level */
+int pj_err_level (PJ *P, int err_level) {
+    int previous;
+    PJ_CONTEXT *ctx;
+    if (0==P)
+        ctx = pj_get_default_ctx();
+    else
+        ctx = pj_get_ctx (P);
+    previous = pj_ctx_get_errno (ctx);
+    if (PJ_ERR_TELL==err_level)
+        return previous;
+    pj_ctx_set_errno (ctx, err_level);
+    return previous;
 }
 
 
@@ -211,7 +227,7 @@ enum pj_log_level pj_log_level (PJ *P, enum pj_log_level log_level) {
 
 
 /* Put a new logging function into P's context. The opaque object app_data is passed as first arg at each call to the logger */
-void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *)) {
+void pj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *)) {
     PJ_CONTEXT *ctx = pj_get_ctx (P);
     ctx->app_data = app_data;
     if (0!=log)
@@ -223,13 +239,14 @@ void pj_log_set (PJ *P, void *app_data, void (*log)(void *, int, const char *)) 
 int pj_context_renew (PJ *P) {
     PJ_CONTEXT *ctx = pj_ctx_alloc ();
     if (0==ctx) {
-        pj_error_set (P, ENOMEM);
+        pj_err_level (P, ENOMEM);
         return 1;
     }
 
     pj_set_ctx (P, ctx);
     return 0;
 }
+
 
 /* Move daughter to mother's context */
 void pj_context_inherit (PJ *mother, PJ *daughter) {

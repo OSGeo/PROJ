@@ -77,6 +77,8 @@ SET(SRC_LIBPROJ_PJ
         PJ_gstmerc.c
         PJ_hammer.c
         PJ_hatano.c
+        PJ_helmert.c
+        PJ_horner.c
         PJ_igh.c
         PJ_isea.c
         PJ_imw_p.c

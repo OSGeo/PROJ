@@ -23,13 +23,13 @@ pj_mkparam(char *str) {
 /*      character in `opt' is a parameter type which can take the       */
 /*      values:                                                         */
 /*                                                                      */
-/*       `t' - test for presence, return TRUE/FALSE in PROJVALUE.i         */
-/*       `i' - integer value returned in PROJVALUE.i                       */
-/*       `d' - simple valued real input returned in PROJVALUE.f            */
+/*       `t' - test for presence, return TRUE/FALSE in PROJVALUE.i      */
+/*       `i' - integer value returned in PROJVALUE.i                    */
+/*       `d' - simple valued real input returned in PROJVALUE.f         */
 /*       `r' - degrees (DMS translation applied), returned as           */
-/*             radians in PROJVALUE.f                                      */
-/*       `s' - string returned in PROJVALUE.s                              */
-/*       `b' - test for t/T/f/F, return in PROJVALUE.i                     */
+/*             radians in PROJVALUE.f                                   */
+/*       `s' - string returned in PROJVALUE.s                           */
+/*       `b' - test for t/T/f/F, return in PROJVALUE.i                  */
 /*                                                                      */
 /************************************************************************/
 

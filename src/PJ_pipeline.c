@@ -114,6 +114,8 @@ struct pj_opaque {
     int *reverse_step;
     int *omit_forward;
     int *omit_inverse;
+    char **argv;
+    char **current_argv;
     PJ_OBS stack[PIPELINE_STACK_SIZE];
     PJ **pipeline;
 };
@@ -175,13 +177,17 @@ static LP     pipeline_reverse (XY xyz, PJ *P);
 
 
 static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
-    int i, first_step, last_step, incr;
+    int i, first_step, last_step;
 
     first_step = 1;
     last_step  = P->opaque->steps + 1;
-    incr  = 1;
 
-    for (i = first_step; i != last_step; i += incr) {
+    for (i = first_step;  i != last_step;  i++) {
+        pj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %20.20s",
+            i-first_step, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
+            P->opaque->pipeline[i]->descr
+        );
+
         if (P->opaque->omit_forward[i])
             continue;
         if (P->opaque->reverse_step[i])
@@ -191,19 +197,23 @@ static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
+    pj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
 
     P->opaque->depth = 0;    /* Clear the stack */
     return point;
 }
 
+
 static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
-    int i, first_step, last_step, incr;
+    int i, first_step, last_step;
 
     first_step = P->opaque->steps;
     last_step  =  0;
-    incr  = -1;
-
-    for (i = first_step; i != last_step; i += incr) {
+    for (i = first_step;  i != last_step;  i--) {
+        pj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %.4f %.4f",
+            i - 1, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
+            P->opaque->pipeline[i]->a, P->opaque->pipeline[i]->rf
+        );
         if (P->opaque->omit_inverse[i])
             continue;
         if (P->opaque->reverse_step[i])
@@ -213,6 +223,7 @@ static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
+    pj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
 
     P->opaque->depth = 0;    /* Clear the stack */
     return point;
@@ -264,7 +275,7 @@ static void *pipeline_freeup (PJ *P, int errlev) {         /* Destructor */
     if (0==P)
         return 0;
 
-    pj_error_set (P, errlev);
+    pj_err_level (P, errlev);
 
     if (0==P->opaque)
         return pj_dealloc (P);
@@ -275,6 +286,8 @@ static void *pipeline_freeup (PJ *P, int errlev) {         /* Destructor */
     pj_dealloc (P->opaque->reverse_step);
     pj_dealloc (P->opaque->omit_forward);
     pj_dealloc (P->opaque->omit_inverse);
+    pj_dealloc (P->opaque->argv);
+    pj_dealloc (P->opaque->current_argv);
     pj_dealloc (P->opaque->pipeline);
 
     pj_dealloc (P->opaque);
@@ -313,8 +326,9 @@ static PJ *pj_create_pipeline (PJ *P, size_t steps) {
     return P;
 }
 
+
 /* count the number of args in pipeline definition */
-size_t argc_params (paralist *params) {
+static size_t argc_params (paralist *params) {
     size_t argc = 0;
     for (; params != 0; params = params->next)
         argc++;
@@ -322,18 +336,18 @@ size_t argc_params (paralist *params) {
 }
 
 /* Sentinel for argument list */
-static char argv_sentinel[5] = "step";
+static char argv_sentinel[] = "step";
 
-/* turn paralist int argc/argv style argument list */
-char **argv_params (paralist *params) {
+/* turn paralist into argc/argv style argument list */
+static char **argv_params (paralist *params, size_t argc) {
     char **argv;
-    size_t argc = 0;
-    argv = pj_calloc (argc_params (params), sizeof (char *));
+    size_t i = 0;
+    argv = pj_calloc (argc, sizeof (char *));
     if (0==argv)
         return 0;
     for (; params != 0; params = params->next)
-        argv[argc++] = params->param;
-    argv[argc++] = argv_sentinel;
+        argv[i++] = params->param;
+    argv[i++] = argv_sentinel;
     return argv;
 }
 
@@ -356,17 +370,15 @@ PJ *PROJECTION(pipeline) {
         return 0;
 
     argc = argc_params (P->params);
-    argv = argv_params (P->params);
+    P->opaque->argv = argv = argv_params (P->params, argc);
     if (0==argv)
         return pipeline_freeup (P, ENOMEM);
 
-    /* The elements of current_argv are not used - we just use argv_params */
-    /* as allocator for a "large enough" container needed later            */
-    current_argv = argv_params (P->params);
+    P->opaque->current_argv = current_argv = pj_calloc (argc, sizeof (char *));
     if (0==current_argv)
         return pipeline_freeup (P, ENOMEM);
 
-    /* Do some syntactic sanity checking */
+    /* Do some syntactical sanity checking */
     for (i = 0;  i < argc;  i++) {
         if (0==strcmp ("step", argv[i])) {
             if (-1==i_pipeline) {
