@@ -24,23 +24,29 @@ endif ()
 
 if(BUILD_CS2CS)
  include(bin_cs2cs.cmake)
+ set(BIN_TARGETS ${BIN_TARGETS} cs2cs)
 endif(BUILD_CS2CS)
 
 if(BUILD_PROJ)
   include(bin_proj.cmake)
+  set(BIN_TARGETS ${BIN_TARGETS} binproj)
 endif(BUILD_PROJ)
 
 if(BUILD_GEOD)
   include(bin_geod.cmake)
   include(bin_geodtest.cmake)
+  set(BIN_TARGETS ${BIN_TARGETS} geod)
 endif(BUILD_GEOD)
 
 if(BUILD_NAD2BIN)
   include(bin_nad2bin.cmake)
+  set(BIN_TARGETS ${BIN_TARGETS} nad2bin)
 endif(BUILD_NAD2BIN)
 
 if (MSVC OR CMAKE_CONFIGURATION_TYPES)
-  # Add _d suffix for your debug versions of the tools
-  set_target_properties (cs2cs binproj geod nad2bin PROPERTIES
-    DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+  if(BIN_TARGETS)
+    # Add _d suffix for your debug versions of the tools
+    set_target_properties (${BIN_TARGETS} PROPERTIES
+      DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+  endif(BIN_TARGETS)
 endif ()
