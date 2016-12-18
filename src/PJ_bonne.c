@@ -129,7 +129,7 @@ int pj_bonne_selftest (void) {
     double tolerance_xy = 1e-7;
 
     char e_args[] = {"+proj=bonne   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
-    char s_args[] = {"+proj=bonne   +a=6400000    +lat_1=0.5 +lat_2=2"};
+    char s_args[] = {"+proj=bonne   +R=6400000    +lat_1=0.5 +lat_2=2"};
 
     LP fwd_in[] = {
         { 2, 1},

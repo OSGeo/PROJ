@@ -105,7 +105,7 @@ int pj_cea_selftest (void) {
     double tolerance_xy = 1e-7;
 
     char e_args[] = {"+proj=cea   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
-    char s_args[] = {"+proj=cea   +a=6400000    +lat_1=0.5 +lat_2=2"};
+    char s_args[] = {"+proj=cea   +R=6400000    +lat_1=0.5 +lat_2=2"};
 
     LP fwd_in[] = {
         { 2, 1},

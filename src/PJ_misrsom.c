@@ -230,7 +230,7 @@ int pj_misrsom_selftest (void) {
     double tolerance_xy = 1e-7;
 
     char e_args[] = {"+proj=misrsom   +ellps=GRS80  +lat_1=0.5 +lat_2=2 +path=1"};
-    char s_args[] = {"+proj=misrsom   +a=6400000    +lat_1=0.5 +lat_2=2 +path=1"};
+    char s_args[] = {"+proj=misrsom   +R=6400000    +lat_1=0.5 +lat_2=2 +path=1"};
 
     LP fwd_in[] = {
         { 2, 1},

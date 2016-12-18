@@ -420,7 +420,7 @@ int pj_qsc_selftest (void) {
     double tolerance_xy = 1e-7;
 
     char e_args[] = {"+proj=qsc   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
-    char s_args[] = {"+proj=qsc   +a=6400000    +lat_1=0.5 +lat_2=2"};
+    char s_args[] = {"+proj=qsc   +R=6400000    +lat_1=0.5 +lat_2=2"};
 
     LP fwd_in[] = {
         { 2, 1},

@@ -248,7 +248,7 @@ int pj_geos_selftest (void) {
     double tolerance_xy = 1e-7;
 
     char e_args[] = {"+proj=geos   +ellps=GRS80  +lat_1=0.5 +lat_2=2 +h=35785831"};
-    char s_args[] = {"+proj=geos   +a=6400000    +lat_1=0.5 +lat_2=2 +h=35785831"};
+    char s_args[] = {"+proj=geos   +R=6400000    +lat_1=0.5 +lat_2=2 +h=35785831"};
 
     LP fwd_in[] = {
         { 2, 1},
