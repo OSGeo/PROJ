@@ -276,7 +276,50 @@
             
   <div class="section" id="tilted-perspective">
 <span id="tpers"></span><h1>Tilted perspective<a class="headerlink" href="#tilted-perspective" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Classification</strong></td>
+<td>Azimuthal</td>
+</tr>
+<tr class="row-even"><td><strong>Available forms</strong></td>
+<td>Forward and inverse, spherical projection</td>
+</tr>
+<tr class="row-odd"><td><strong>Defined area</strong></td>
+<td>Global</td>
+</tr>
+<tr class="row-even"><td><strong>Implemented by</strong></td>
+<td>Gerald I. Evenden</td>
+</tr>
+<tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
+</tr>
+<tr class="row-even"><td><cite>+h</cite></td>
+<td>Height (in meters) above the surface. Required.</td>
+</tr>
+<tr class="row-odd"><td><cite>+azi</cite></td>
+<td>Bearing (in degrees) from due north.</td>
+</tr>
+<tr class="row-even"><td><cite>+tilt</cite></td>
+<td>Angle (in degrees) away from nadir.</td>
+</tr>
+<tr class="row-odd"><td><cite>+lat_0</cite></td>
+<td>Latitude (in degrees) of the view position.</td>
+</tr>
+<tr class="row-even"><td><cite>+lon_0</cite></td>
+<td>Longitude (in degrees) of the view position.</td>
+</tr>
+</tbody>
+</table>
 <a class="reference internal image-reference" href="../_images/tpers.png"><img alt="Tilted perspective" src="../_images/tpers.png" style="width: 1200.0px; height: 900.0px;" /></a>
+<p>Tilted Perspective is similar to <a class="reference internal" href="nsper.html#nsper"><span class="std std-ref">Near-sided perspective</span></a> (<code class="docutils literal"><span class="pre">nsper</span></code>) in that it simulates a
+perspective view from a hight. Where <code class="docutils literal"><span class="pre">nsper</span></code> projects onto a plane tangent to
+the surface, Tilted Perspective orients the plane towards the direction of the
+view. Thus, extra parameters azi and tilt are required beyond <cite>nsper`</cite>&#8216;s <code class="docutils literal"><span class="pre">h</span></code>.
+As with <code class="docutils literal"><span class="pre">nsper</span></code>, <code class="docutils literal"><span class="pre">lat_0</span></code> &amp; <code class="docutils literal"><span class="pre">lon_0</span></code> are also required
+for satellite position.</p>
 </div>
 
 
@@ -299,7 +342,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 15 Dec 2016.
+      Last updated on 18 Dec 2016.
 
     </p>
   </div>

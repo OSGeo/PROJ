@@ -185,7 +185,11 @@
 <li class="toctree-l2"><a class="reference internal" href="putp6.html">Putnins P6</a></li>
 <li class="toctree-l2"><a class="reference internal" href="putp6p.html">Putnins P6&#8217;</a></li>
 <li class="toctree-l2"><a class="reference internal" href="qua_aut.html">Quartic Authalic</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Quadrilateralized Spherical Cube</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Quadrilateralized Spherical Cube</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#further-reading">Further reading</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="robin.html">Robinson</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rouss.html">Roussilhe Stereographic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rpoly.html">Rectangular Polyconic</a></li>
@@ -276,7 +280,154 @@
             
   <div class="section" id="quadrilateralized-spherical-cube">
 <span id="qsc"></span><h1>Quadrilateralized Spherical Cube<a class="headerlink" href="#quadrilateralized-spherical-cube" title="Permalink to this headline">¶</a></h1>
-<a class="reference internal image-reference" href="../_images/qsc.png"><img alt="Quadrilateralized Spherical Cube" src="../_images/qsc.png" style="width: 1200.0px; height: 900.0px;" /></a>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Classification</strong></td>
+<td>Azimuthal</td>
+</tr>
+<tr class="row-even"><td><strong>Available forms</strong></td>
+<td>Forward and inverse, elliptical projection</td>
+</tr>
+<tr class="row-odd"><td><strong>Defined area</strong></td>
+<td>Global</td>
+</tr>
+<tr class="row-even"><td><strong>Implemented by</strong></td>
+<td>Martin Lambers</td>
+</tr>
+<tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
+</tr>
+<tr class="row-even"><td><cite>+lat_0</cite></td>
+<td>Latitude (in degrees) of the view position.</td>
+</tr>
+<tr class="row-odd"><td><cite>+lon_0</cite></td>
+<td>Longitude (in degrees) of the view position.</td>
+</tr>
+</tbody>
+</table>
+<p>The purpose of the Quadrilateralized Spherical Cube (QSC) projection is to project
+a sphere surface onto the six sides of a cube:</p>
+<a class="reference internal image-reference" href="../_images/qsc_concept.jpg"><img alt="Quadrilateralized Spherical Cube" class="align-center" src="../_images/qsc_concept.jpg" style="width: 467.0px; height: 443.5px;" /></a>
+<p>For this purpose, other alternatives can be used, notably <a class="reference internal" href="gnom.html#gnom"><span class="std std-ref">Gnomonic</span></a> or
+<a class="reference internal" href="healpix.html#healpix"><span class="std std-ref">HEALPix</span></a>. However, QSC projection has the following favorable properties:</p>
+<p>It is an equal-area projection, and at the same time introduces only limited angular
+distortions. It treats all cube sides equally, i.e. it does not use different
+projections for polar areas and equatorial areas. These properties make QSC
+projection a good choice for planetary-scale terrain rendering. Map data can be
+organized in quadtree structures for each cube side. See <a class="reference internal" href="../references.html#lamberskolb2012" id="id1">[LambersKolb2012]</a> for an example.</p>
+<p>The QSC projection was introduced by <a class="reference internal" href="../references.html#oneillaubscher1976" id="id2">[ONeilLaubscher1976]</a>,
+building on previous work by <a class="reference internal" href="../references.html#chanoneil1975" id="id3">[ChanONeil1975]</a>. For clarity: The
+earlier QSC variant described in <a class="reference internal" href="../references.html#chanoneil1975" id="id4">[ChanONeil1975]</a> became known as the COBE QSC since it
+was used by the NASA Cosmic Background Explorer (COBE) project; it is an approximately
+equal-area projection and is not the same as the QSC projection.</p>
+<p>See also <a class="reference internal" href="../references.html#calabrettagreisen2002" id="id5">[CalabrettaGreisen2002]</a> Sec. 5.6.2 and 5.6.3 for a description of both and
+some analysis.</p>
+<p>In this implementation, the QSC projection projects onto one side of a circumscribed
+cube. The cube side is selected by choosing one of the following six projection centers:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="56%" />
+<col width="44%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">+lat_0=0</span> <span class="pre">+lon_0=0</span></code></td>
+<td>front cube side</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">+lat_0=0</span> <span class="pre">+lon_0=90</span></code></td>
+<td>right cube side</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">+lat_0=0</span> <span class="pre">+lon_0=180</span></code></td>
+<td>back cube side</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">+lat_0=0</span> <span class="pre">+lon_0=-90</span></code></td>
+<td>left cube side</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">+lat_0=90</span></code></td>
+<td>top cube side</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">+lat_0=-90</span></code></td>
+<td>bottom cube side</td>
+</tr>
+</tbody>
+</table>
+<p>Furthermore, this implementation allows the projection to be applied to ellipsoids.
+A preceding shift to a sphere is performed automatically; see <a class="reference internal" href="../references.html#lamberskolb2012" id="id6">[LambersKolb2012]</a> for details.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>The following example uses QSC projection via GDAL to create the six cube side
+maps from a world map for the WGS84 ellipsoid:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84  +lat_0=0 +lon_0=0&quot;</span>        \
+    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
+    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">frontside</span><span class="o">.</span><span class="n">tiff</span>
+
+<span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=0 +lon_0=90&quot;</span>        \
+    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
+    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">rightside</span><span class="o">.</span><span class="n">tiff</span>
+
+<span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=0 +lon_0=180&quot;</span>       \
+    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
+    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">backside</span><span class="o">.</span><span class="n">tiff</span>
+
+<span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=0 +lon_0=-90&quot;</span>       \
+    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
+    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">leftside</span><span class="o">.</span><span class="n">tiff</span>
+
+<span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=90 +lon_0=0&quot;</span>        \
+    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
+    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">topside</span><span class="o">.</span><span class="n">tiff</span>
+
+<span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=-90 +lon_0=0&quot;</span>       \
+    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
+    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">bottomside</span><span class="o">.</span><span class="n">tiff</span>
+</pre></div>
+</div>
+<p>Explanation:</p>
+<ul class="simple">
+<li>QSC projection is selected with <code class="docutils literal"><span class="pre">+wktext</span> <span class="pre">+proj=qsc</span></code>.</li>
+<li>The WGS84 ellipsoid is specified with <code class="docutils literal"><span class="pre">+ellps=WGS84</span></code>.</li>
+<li>The cube side is selected with <code class="docutils literal"><span class="pre">+lat_0=...</span> <span class="pre">+lon_0=...</span></code>.</li>
+<li>The <code class="docutils literal"><span class="pre">-wo</span></code> options are necessary for GDAL to avoid holes in the output maps.</li>
+<li>The <code class="docutils literal"><span class="pre">-te</span></code> option limits the extends of the output map to the major axis diameter
+(from -radius to +radius in both x and y direction). These are the dimensions of one side
+of the circumscribing cube.</li>
+</ul>
+<p>The resulting images can be layed out in a grid like below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="27%" />
+<col width="25%" />
+<col width="24%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>&nbsp;</td>
+<td><a class="reference internal" href="../_images/qsc_topside.jpg"><img alt="Top side" class="align-middle" src="../_images/qsc_topside.jpg" style="width: 128.0px; height: 128.0px;" /></a></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../_images/qsc_leftside.jpg"><img alt="Left side" class="align-middle" src="../_images/qsc_leftside.jpg" style="width: 128.0px; height: 128.0px;" /></a></td>
+<td><a class="reference internal" href="../_images/qsc_frontside.jpg"><img alt="Front side" class="align-middle" src="../_images/qsc_frontside.jpg" style="width: 128.0px; height: 128.0px;" /></a></td>
+<td><a class="reference internal" href="../_images/qsc_rightside.jpg"><img alt="Right side" class="align-middle" src="../_images/qsc_rightside.jpg" style="width: 128.0px; height: 128.0px;" /></a></td>
+<td><a class="reference internal" href="../_images/qsc_backside.jpg"><img alt="Back side" class="align-middle" src="../_images/qsc_backside.jpg" style="width: 128.0px; height: 128.0px;" /></a></td>
+</tr>
+<tr class="row-odd"><td>&nbsp;</td>
+<td><a class="reference internal" href="../_images/qsc_bottomside.jpg"><img alt="Bottom side" class="align-middle" src="../_images/qsc_bottomside.jpg" style="width: 128.0px; height: 128.0px;" /></a></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="further-reading">
+<h2>Further reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><a class="reference external" href="https://en.wikipedia.org/wiki/Quadrilateralized_spherical_cube">Wikipedia</a></li>
+<li><a class="reference external" href="https://lambda.gsfc.nasa.gov/product/cobe/skymap_info_new.cfm">NASA</a></li>
+</ol>
+</div>
 </div>
 
 
@@ -299,7 +450,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 15 Dec 2016.
+      Last updated on 18 Dec 2016.
 
     </p>
   </div>

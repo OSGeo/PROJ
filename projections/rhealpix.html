@@ -129,7 +129,11 @@
 <li class="toctree-l2"><a class="reference internal" href="hammer.html">Hammer &amp; Eckert-Greifendorff</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hatano.html">Hatano Asymmetrical Equal Area</a></li>
 <li class="toctree-l2"><a class="reference internal" href="healpix.html">HEALPix</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">rHEALPix</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">rHEALPix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#further-reading">Further reading</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="igh.html">Interrupted Goode Homolosine</a></li>
 <li class="toctree-l2"><a class="reference internal" href="imw_p.html">International Map of the World Polyconic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="isea.html">Icosahedral Snyder Equal Area</a></li>
@@ -276,7 +280,61 @@
             
   <div class="section" id="rhealpix">
 <span id="id1"></span><h1>rHEALPix<a class="headerlink" href="#rhealpix" title="Permalink to this headline">¶</a></h1>
-<a class="reference internal image-reference" href="../_images/rhealpix1.png"><img alt="rHEALPix" src="../_images/rhealpix1.png" style="width: 1200.0px; height: 900.0px;" /></a>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Classification</strong></td>
+<td>Mixed</td>
+</tr>
+<tr class="row-even"><td><strong>Available forms</strong></td>
+<td>Forward and inverse, spherical and elliptical projection</td>
+</tr>
+<tr class="row-odd"><td><strong>Defined area</strong></td>
+<td>Global</td>
+</tr>
+<tr class="row-even"><td><strong>Implemented by</strong></td>
+<td>Alex Raichev and Michael Speth</td>
+</tr>
+<tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
+</tr>
+<tr class="row-even"><td><cite>+north_square</cite></td>
+<td>Position of the north polar square.
+Valid inputs are 0&#8211;3. Defaults to 0.</td>
+</tr>
+<tr class="row-odd"><td><cite>+south_square</cite></td>
+<td>Position of the south polar square.
+Valid inputs are 0&#8211;3. Defaults to 0.</td>
+</tr>
+</tbody>
+</table>
+<a class="reference internal image-reference" href="../_images/rhealpix1.png"><img alt="rHEALPix" src="../_images/rhealpix1.png" style="width: 621.0px; height: 455.25px;" /></a>
+<p>rHEALPix is a projection based on the HEALPix projection. The implementation of
+rHEALPix uses the HEALPix projection. The rHEALPix combines the peaks of the
+HEALPix into a square. The square&#8217;s position can be translated and rotated across
+the x-axis which is a noval approach for the rHEALPix projection. The initial
+intention of using rHEALPix in the Spatial Computation Engine Science Collaboration
+Environment (SCENZGrid).</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>To run a rHEALPix projection on a WGS84 ellipsoidal model, use the following
+command:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">rhealpix</span> <span class="o">-</span><span class="n">f</span> <span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">WGS84</span> <span class="o">+</span><span class="n">south_square</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">north_square</span><span class="o">=</span><span class="mi">2</span>  <span class="o">-</span><span class="n">E</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
+<span class="o">&gt;</span> <span class="mi">55</span> <span class="mi">12</span>
+<span class="o">&gt;</span> <span class="n">EOF</span>
+<span class="mi">55</span> <span class="mi">12</span>   <span class="mf">6115727.86</span>  <span class="mf">1553840.13</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="further-reading">
+<h2>Further reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://healpix.jpl.nasa.gov/">NASA</a></li>
+<li><a class="reference external" href="https://en.wikipedia.org/wiki/HEALPix">Wikipedia</a></li>
+</ol>
+</div>
 </div>
 
 
@@ -299,7 +357,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 15 Dec 2016.
+      Last updated on 18 Dec 2016.
 
     </p>
   </div>

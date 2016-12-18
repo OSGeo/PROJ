@@ -119,7 +119,13 @@
 <li class="toctree-l2"><a class="reference internal" href="fouc.html">Foucaut</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fouc_s.html">Foucaut Sinusoidal</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gall.html">Gall (Gall Stereographic)</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Geostationary Satellite View</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Geostationary Satellite View</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#note-on-sweep-angle">Note on sweep angle</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="gins8.html">Ginsburg VIII (TsNIIGAiK)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gn_sinu.html">General Sinusoidal Series</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gnom.html">Gnomonic</a></li>
@@ -276,7 +282,72 @@
             
   <div class="section" id="geostationary-satellite-view">
 <span id="geos"></span><h1>Geostationary Satellite View<a class="headerlink" href="#geostationary-satellite-view" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Classification</strong></td>
+<td>Azimuthal</td>
+</tr>
+<tr class="row-even"><td><strong>Available forms</strong></td>
+<td>Forward and inverse, spherical and elliptical projection</td>
+</tr>
+<tr class="row-odd"><td><strong>Defined area</strong></td>
+<td>Global</td>
+</tr>
+<tr class="row-even"><td><strong>Implemented by</strong></td>
+<td>Gerald I. Evenden and Martin Raspaud$</td>
+</tr>
+<tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
+</tr>
+<tr class="row-even"><td><cite>+h</cite></td>
+<td>Satellite height above earth. Required.</td>
+</tr>
+<tr class="row-odd"><td><cite>+sweep</cite></td>
+<td>Sweep angle axis of the viewing instrument.
+Valid options are <code class="docutils literal"><span class="pre">x</span></code> and <code class="docutils literal"><span class="pre">y</span></code>. Defaults to <code class="docutils literal"><span class="pre">y</span></code>.</td>
+</tr>
+<tr class="row-even"><td><cite>+lon_0</cite></td>
+<td>Subsatellite longitude point.</td>
+</tr>
+</tbody>
+</table>
 <a class="reference internal image-reference" href="../_images/geos.png"><img alt="Geostationary Satellite View" src="../_images/geos.png" style="width: 1200.0px; height: 900.0px;" /></a>
+<p>The geos projection pictures how a geostationary satellite scans the earth at regular
+scanning angle intervals.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>In order to project using the geos projection you can do the following:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">geos</span> <span class="o">+</span><span class="n">h</span><span class="o">=</span><span class="mf">35785831.0</span>
+</pre></div>
+</div>
+<p>The required argument <code class="docutils literal"><span class="pre">h</span></code> is the viewing point (satellite position) height above
+the earth.</p>
+<p>The projection coordinate relate to the scanning angle by the following simple
+relation:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">scanning_angle</span> <span class="p">(</span><span class="n">radians</span><span class="p">)</span> <span class="o">=</span> <span class="n">projection_coordinate</span> <span class="o">/</span> <span class="n">h</span>
+</pre></div>
+</div>
+<div class="section" id="note-on-sweep-angle">
+<h3>Note on sweep angle<a class="headerlink" href="#note-on-sweep-angle" title="Permalink to this headline">¶</a></h3>
+<p>The viewing instrument on-board geostationary satellites described by this
+projection have a two-axis gimbal viewing geometry. This means that the different
+scanning positions are obtained by rotating the gimbal along a N/S axis (or <code class="docutils literal"><span class="pre">y</span></code>)
+and a E/W axis (or <code class="docutils literal"><span class="pre">x</span></code>).</p>
+<a class="reference internal image-reference" href="../_images/geos_sweep.svg"><img alt="Gimbal geometry" src="../_images/geos_sweep.svg" /></a>
+<p>In the image above, the outer-gimbal axis, or sweep-angle axis, is the N/S axis (<code class="docutils literal"><span class="pre">y</span></code>)
+while the inner-gimbal axis, or fixed-angle axis, is the E/W axis (<code class="docutils literal"><span class="pre">x</span></code>).</p>
+<p>This example represents the scanning geometry of the Meteosat series satellite.
+However, the GOES satellite series use the opposite scanning geometry, with the
+E/W axis (<code class="docutils literal"><span class="pre">x</span></code>) as the sweep-angle axis, and the N/S (<code class="docutils literal"><span class="pre">y</span></code>) as the fixed-angle axis.</p>
+<p>The sweep argument is used to tell proj.4 which on which axis the outer-gimbal
+is rotating. The possible values are x or y, y being the default. Thus, the
+scanning geometry of the Meteosat series satellite should take sweep as x, and
+GOES should take sweep as y.</p>
+</div>
+</div>
 </div>
 
 
@@ -299,7 +370,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 15 Dec 2016.
+      Last updated on 18 Dec 2016.
 
     </p>
   </div>

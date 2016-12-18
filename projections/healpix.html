@@ -128,7 +128,11 @@
 <li class="toctree-l2"><a class="reference internal" href="gs50.html">Mod. Stererographics of 50 U.S.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hammer.html">Hammer &amp; Eckert-Greifendorff</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hatano.html">Hatano Asymmetrical Equal Area</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">HEALPix</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">HEALPix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#further-reading">Further reading</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="rhealpix.html">rHEALPix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="igh.html">Interrupted Goode Homolosine</a></li>
 <li class="toctree-l2"><a class="reference internal" href="imw_p.html">International Map of the World Polyconic</a></li>
@@ -276,7 +280,58 @@
             
   <div class="section" id="healpix">
 <span id="id1"></span><h1>HEALPix<a class="headerlink" href="#healpix" title="Permalink to this headline">¶</a></h1>
-<a class="reference internal image-reference" href="../_images/healpix1.png"><img alt="HEALPix" src="../_images/healpix1.png" style="width: 1200.0px; height: 900.0px;" /></a>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Classification</strong></td>
+<td>Mixed</td>
+</tr>
+<tr class="row-even"><td><strong>Available forms</strong></td>
+<td>Forward and inverse, spherical and elliptical projection</td>
+</tr>
+<tr class="row-odd"><td><strong>Defined area</strong></td>
+<td>Global</td>
+</tr>
+<tr class="row-even"><td><strong>Implemented by</strong></td>
+<td>Alex Raichev and Michael Speth</td>
+</tr>
+<tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
+</tr>
+<tr class="row-even"><td colspan="2"><cite>No special options for this projection</cite></td>
+</tr>
+</tbody>
+</table>
+<a class="reference internal image-reference" href="../_images/healpix1.png"><img alt="HEALPix" src="../_images/healpix1.png" style="width: 613.5px; height: 325.5px;" /></a>
+<p>The HEALPix projection is area preserving and can be used with a spherical and
+ellipsoidal model. It was initially developed for mapping cosmic background
+microwave radiation. The image below is the graphical representation of the
+mapping and consists of eight isomorphic triangular interrupted map graticules.
+The north and south contains four in which straight meridians converge polewards
+to a point and unequally spaced horizontal parallels. HEALPix provides a mapping
+in which points of equal latitude and equally spaced longitude are mapped to points
+of equal latitude and equally spaced longitude with the module of the polar
+interruptions.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>To run a forward HEALPix projection on a unit sphere model, use the following command:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">healpix</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">E</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
+<span class="mi">0</span> <span class="mi">0</span>
+<span class="n">EOF</span>
+<span class="c1"># output</span>
+<span class="mi">0</span> <span class="mi">0</span> <span class="mf">0.00</span> <span class="mf">0.00</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="further-reading">
+<h2>Further reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://healpix.jpl.nasa.gov/">NASA</a></li>
+<li><a class="reference external" href="https://en.wikipedia.org/wiki/HEALPix">Wikipedia</a></li>
+</ol>
+</div>
 </div>
 
 
@@ -299,7 +354,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 15 Dec 2016.
+      Last updated on 18 Dec 2016.
 
     </p>
   </div>
