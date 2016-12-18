@@ -109,7 +109,7 @@ Explanation:
   of the circumscribing cube.
 
 
-The resulting images can be layed out in a grid like below.
+The resulting images can be laid out in a grid like below.
 
 
 .. |topside| image:: ../../images/qsc_topside.jpg
