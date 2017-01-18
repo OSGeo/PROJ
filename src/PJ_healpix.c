@@ -671,7 +671,7 @@ int pj_healpix_selftest (void) {
     double tolerance_xy = 1e-7;
 
     char e_args[] = {"+proj=healpix   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
-    char s_args[] = {"+proj=healpix   +a=6400000    +lat_1=0.5 +lat_2=2"};
+    char s_args[] = {"+proj=healpix   +R=6400000    +lat_1=0.5 +lat_2=2"};
 
     LP fwd_in[] = {
         { 2, 1},
@@ -730,7 +730,7 @@ int pj_rhealpix_selftest (void) {
     double tolerance_xy = 1e-7;
 
     char e_args[] = {"+proj=rhealpix   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
-    char s_args[] = {"+proj=rhealpix   +a=6400000    +lat_1=0.5 +lat_2=2"};
+    char s_args[] = {"+proj=rhealpix   +R=6400000    +lat_1=0.5 +lat_2=2"};
 
     LP fwd_in[] = {
         { 2, 1},

@@ -310,7 +310,7 @@ int pj_stere_selftest (void) {
     double tolerance_xy = 1e-7;
 
     char e_args[] = {"+proj=stere   +ellps=GRS80  +lat_1=0.5 +lat_2=2 +n=0.5"};
-    char s_args[] = {"+proj=stere   +a=6400000    +lat_1=0.5 +lat_2=2 +n=0.5"};
+    char s_args[] = {"+proj=stere   +R=6400000    +lat_1=0.5 +lat_2=2 +n=0.5"};
 
     LP fwd_in[] = {
         { 2, 1},

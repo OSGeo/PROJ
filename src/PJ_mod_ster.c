@@ -299,7 +299,7 @@ int pj_mil_os_selftest (void) {
     double tolerance_lp = 1e-10;
     double tolerance_xy = 1e-7;
 
-    char s_args[] = {"+proj=mil_os   +a=6400000    +lat_1=0.5 +lat_2=2"};
+    char s_args[] = {"+proj=mil_os   +R=6400000    +lat_1=0.5 +lat_2=2"};
 
     LP fwd_in[] = {
         { 2, 1},
@@ -343,7 +343,7 @@ int pj_lee_os_selftest (void) {
     double tolerance_lp = 1e-10;
     double tolerance_xy = 1e-7;
 
-    char s_args[] = {"+proj=lee_os   +a=6400000    +lat_1=0.5 +lat_2=2"};
+    char s_args[] = {"+proj=lee_os   +R=6400000    +lat_1=0.5 +lat_2=2"};
 
     LP fwd_in[] = {
         { 2, 1},
@@ -387,7 +387,7 @@ int pj_gs48_selftest (void) {
     double tolerance_lp = 1e-12;
     double tolerance_xy = 1e-8;
 
-    char s_args[] = {"+proj=gs48 +a=6370997"};
+    char s_args[] = {"+proj=gs48 +R=6370997"};
 
     /* All latitudes and longitudes within the continental US */
     LP fwd_in[] = {
@@ -435,7 +435,7 @@ int pj_alsk_selftest (void) {
     double tolerance_xy = 1e-8;
 
     char e_args[] = {"+proj=alsk +ellps=clrk66"};
-    char s_args[] = {"+proj=alsk +a=6370997"};
+    char s_args[] = {"+proj=alsk +R=6370997"};
 
     LP fwd_in[] = {
         {-160.0, 55.0},
@@ -494,7 +494,7 @@ int pj_gs50_selftest (void) {
     double tolerance_xy = 1e-8;
 
     char e_args[] = {"+proj=gs50 +ellps=clrk66"};
-    char s_args[] = {"+proj=gs50 +a=6370997"};
+    char s_args[] = {"+proj=gs50 +R=6370997"};
 
     LP fwd_in[] = {
         {-160.0, 65.0},

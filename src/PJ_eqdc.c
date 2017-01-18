@@ -139,7 +139,7 @@ int pj_eqdc_selftest (void) {
     double tolerance_xy = 1e-7;
 
     char e_args[] = {"+proj=eqdc   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
-    char s_args[] = {"+proj=eqdc   +a=6400000    +lat_1=0.5 +lat_2=2"};
+    char s_args[] = {"+proj=eqdc   +R=6400000    +lat_1=0.5 +lat_2=2"};
 
     LP fwd_in[] = {
         { 2, 1},

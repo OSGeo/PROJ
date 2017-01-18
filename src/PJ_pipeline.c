@@ -525,7 +525,7 @@ int pj_pipeline_selftest (void) {
     double dist;
 
     /* forward-reverse geo->utm->geo */
-    P = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm +step +proj=utm +inv");
+    P = pj_create ("+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +step +proj=utm +ellps=GRS80 +inv");
     if (0==P)
         return 1000;
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 0) */
@@ -547,7 +547,7 @@ int pj_pipeline_selftest (void) {
     pj_free (P);
 
     /* And now the back-to-back situation utm->geo->utm */
-    P = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm +inv +step +proj=utm");
+    P = pj_create ("+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +inv +step +proj=utm +ellps=GRS80");
     if (0==P)
         return 2000;
 
@@ -571,9 +571,10 @@ int pj_pipeline_selftest (void) {
 
 
     /* Finally testing a corner case: A rather pointless one-step pipeline geo->utm */
-    P = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm");
+    P = pj_create ("+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 ");
     if (0==P)
         return 3000;
+
 
     a = b = pj_obs_null;
     a.coo.lpz.lam = TORAD(12);
