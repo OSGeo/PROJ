@@ -4,10 +4,10 @@
 proj.4
 ******************************************************************************
 
-proj.4 is a standard Unix filter function which converts geographic longitude
+proj.4 is a standard UNIX filter function which converts geographic longitude
 and latitude coordinates into cartesian coordinates (and vice versa), and it is
 a C API for software developers to include coordinate transformation in their
-own software.
+own software. proj.4 is maintained on `GitHub <http://github.com/OSGeo/proj.4/>`_.
 
 
 =============  ================================================================
