@@ -10,7 +10,7 @@ The latitude is scaled by a factor of :math:`\frac{4}{5}`, projected according t
 +---------------------+--------------------------------------------------------------------------------+
 | **Classification**  | Neither conformal nor equal area cylindrical                                   |
 +---------------------+--------------------------------------------------------------------------------+
-| **Available forms** | Forward and inverse Spherical                                                  |
+| **Available forms** | Forward and inverse spherical                                                  |
 +---------------------+--------------------------------------------------------------------------------+
 | **Defined area**    | Global, but best used near the equator                                         |
 +---------------------+--------------------------------------------------------------------------------+
@@ -41,8 +41,6 @@ Mathematical definition
 
 The formulas describing the Miller projection are all taken from Snyder's manuals [Snyder1987]_.
 
-Spherical form
-**************
 
 Forward projection
 ==================
