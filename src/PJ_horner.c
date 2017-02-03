@@ -7,9 +7,12 @@
 #include <errno.h>
 
 PROJ_HEAD(horner,    "Horner polynomial evaluation");
-#define HORNER_SILENCE
 
-/* The next few hundred lines comprises a direct cut-and-paste from the horner.h header library */
+/* make horner.h interface with proj's memory management */
+#define horner_dealloc(x) pj_dealloc(x)
+#define horner_calloc(n,x) pj_calloc(n,x)
+
+/* The next few hundred lines is mostly cut-and-paste from the horner.h header library */
 
 /***********************************************************************
 
@@ -24,7 +27,7 @@ PROJ_HEAD(horner,    "Horner polynomial evaluation");
 
     The original Poder/Engsager gen_pol implementation (where
     the polynomial degree and two sets of polynomial coefficients
-    are packed together in one compound array, handled via a simple
+    are packed together in one compound array, handled via a plain
     double pointer) is compelling and "true to the code history":
 
     It has a beautiful classical 1960s ring to it, not unlike the
@@ -39,7 +42,7 @@ PROJ_HEAD(horner,    "Horner polynomial evaluation");
 
     Also, since adding metadata and improving maintainability
     of the code are among the implied goals of a current SDFE/DTU Space
-	project, the material in this file introduces a version with a more
+	project, the material in this file introduces a version with a
 	more modern (or at least 1990s) look, introducing a "double 2D
 	polynomial" data type, HORNER.
 
@@ -55,13 +58,6 @@ PROJ_HEAD(horner,    "Horner polynomial evaluation");
     the original gen_pol implementation - although not including the
 	famous "Poder dual autocheck" in all its enigmatic elegance.
 
-	The original code has, however, been included in the conditionally
-	compiled TEST-section.
-
-	This is partially for validation of the revised version, partially
-	to enable more generic enjoyment of an interesting piece of
-	ingenious geodetic code - simplistic and enigmatic at the same time.
-
  **********************************************************************
 
 	The material included here was written by Knud Poder, starting
@@ -73,29 +69,7 @@ PROJ_HEAD(horner,    "Horner polynomial evaluation");
 
  ***********************************************************************
  *
- * The gen_pol routine comes with this legal statement (ISC/OpenBSD):
- *
- * Copyright (c) 2011, National Survey and Cadastre, Denmark
- * (Kort- og Matrikelstyrelsen), kms@kms.dk
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *
- *
- *******************************************************************************
- *
- * The remaining parts are...
- *
- * Copyright (c) 2016, Thomas Knudsen / Karsten Engsager / SDFE http://www.sdfe.dk
+ * Copyright (c) 2016, SDFE http://www.sdfe.dk / Thomas Knudsen / Karsten Engsager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -118,23 +92,9 @@ PROJ_HEAD(horner,    "Horner polynomial evaluation");
  *****************************************************************************/
 
 
- #ifndef HORNER_H
- #define HORNER_H
-
-
-
-#if defined(PROJ_H) || defined(PROJECTS_H)
-#define horner_dealloc(x) pj_dealloc(x)
-#define horner_calloc(n,x) pj_calloc(n,x)
-#else
-#define horner_dealloc(x) free(x)
-#define horner_calloc(n,x) calloc(n,x)
-typedef struct {double u,v;} UV;
-#endif
-
 struct horner;
 typedef struct horner HORNER;
-static UV      horner (const HORNER *transformation, int direction, UV position);
+static UV      horner (const HORNER *transformation, enum pj_direction, UV position);
 static HORNER *horner_alloc (size_t order, int complex_polynomia);
 static void    horner_free (HORNER *h);
 
@@ -159,80 +119,6 @@ struct horner {
 /* e.g. degree = 2: a + bx + cy + dxx + eyy + fxy, i.e. 6 coefficients */
 #define horner_number_of_coefficients(order) \
             (((order + 1)*(order + 2)/2))
-
-static int     horner_degree_u (int order, int index);
-static int     horner_degree_v (int order, int index);
-static int     horner_index (int order, int degree_u, int degree_v);
-
-#ifndef HORNER_HEADER_ONLY
-
-/***************************************************************************/
-static int horner_index (int order, int degree_1, int degree_2) {
-/****************************************************************************
-
-    Returns the index of the polynomial coefficient, C, for the element
-
-              C * pow (c_1, degree_2) * pow (c_2, degree_2),
-
-    given that degree_1 > -1, degree_2 > -1,  degree_1 + degree_2 <= order.
-
-    Otherwise returns -1 and sets errno to EDOM.
-
-    The range of the index is [0 : (order + 1) * (order + 2) / 2 - 1].
-
-    A very important thing to note  is that the order of the coordinates
-    c_1 and c_2 depend on the polynomium:
-
-    For the fwd and inv polynomia for the "u" coordinate,
-    u is first (degree_1), v is second (degree_2).
-    For the fwd and inv polynomia for the "v" coordinate,
-    v is first (degree_1), u is second (degree_2).
-
-****************************************************************************/
-    if ( (degree_1 < 0)  ||  (degree_2 < 0)  ||  (degree_1 + degree_2 > order) ) {
-        errno = EDOM;
-        return -1;
-    }
-
-    return (   horner_number_of_coefficients(order) - 1
-             - (order - degree_1)*(order - degree_1 + 1)/2
-             - (order - degree_1 - degree_2));
-}
-
-#define index_u(h, u, v) horner_index (h->order, u, v)
-#define index_v(h, u, v) horner_index (h->order, v, u)
-
-
-static int horner_degree_u (int order, int index) {
-    int n = horner_number_of_coefficients(order);
-    int i, j;
-    if ((order < 0) || (index >= n)) {
-        errno = EDOM;
-        return -1;
-    }
-    for (i = 0; i <= order; i++)
-        for (j = 0; j <= order - i; j++)
-            if (index == horner_index (order, i, j))
-                return i;
-    return -1;
-}
-
-
-static int horner_degree_v (int order, int index) {
-    int n = horner_number_of_coefficients(order);
-    int i, j;
-    if ((order < 0) || (index >= n)) {
-        errno = EDOM;
-        return -1;
-    }
-    for (i = 0; i <= order; i++)
-        for (j = 0; j <= order - i; j++)
-            if (index == horner_index (order, i, j))
-                return j;
-    return -1;
-}
-
-
 
 
 static void horner_free (HORNER *h) {
@@ -290,7 +176,7 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
 
 
 /**********************************************************************/
-static UV horner (const HORNER *transformation, int direction, UV position) {
+static UV horner (const HORNER *transformation, enum pj_direction direction, UV position) {
 /***********************************************************************
 
 A reimplementation of the classic Engsager/Poder 2D Horner polynomial
@@ -396,31 +282,6 @@ summing the tiny high order elements first.
 }
 
 
-#ifdef HORNER_SILENCE
-/**********************************************************************/
-static int horner_silence (int i) {
-/***********************************************************************
-  useless function that silences coompiler warnings about unused stuff
-***********************************************************************/
-    HORNER *Q;
-    UV uv_error;
-    if (i==0)
-        return i;
-    uv_error.u = uv_error.v = HUGE_VAL;
-    horner(0, 1, uv_error);
-    Q = horner_alloc (2, 0);
-    if (Q)
-        horner_free (Q);
-    if (horner_degree_u (2,1))
-        return horner_degree_v (2,1);
-    return i;
-}
-#endif /* def HORNER_SILENCE */
-#endif /* ndef HORNER_HEADER_ONLY */
-
-#endif /* ndef HORNER_H */
-
-
 
 
 
@@ -440,7 +301,7 @@ static PJ_OBS horner_reverse_obs (PJ_OBS point, PJ *P) {
 
 
 /**********************************************************************/
-static UV complex_horner (const HORNER *transformation, int direction, UV position) {
+static UV complex_horner (const HORNER *transformation, enum pj_direction direction, UV position) {
 /***********************************************************************
 
 A reimplementation of a classic Engsager/Poder Horner complex
@@ -509,12 +370,12 @@ polynomial evaluation engine.
 
 
 static PJ_OBS complex_horner_forward_obs (PJ_OBS point, PJ *P) {
-    point.coo.uv = complex_horner ((HORNER *) P->opaque, 1, point.coo.uv);
+    point.coo.uv = complex_horner ((HORNER *) P->opaque, PJ_FWD, point.coo.uv);
     return point;
 }
 
 static PJ_OBS complex_horner_reverse_obs (PJ_OBS point, PJ *P) {
-    point.coo.uv = complex_horner ((HORNER *) P->opaque, -1, point.coo.uv);
+    point.coo.uv = complex_horner ((HORNER *) P->opaque, PJ_INV, point.coo.uv);
     return point;
 }
 
@@ -577,8 +438,6 @@ PJ *PROJECTION(horner) {
     P->fwd     =  0;
     P->inv     =  0;
     P->left    =  P->right  =  PJ_IO_UNITS_METERS;
-    /* silence a few compiler warnings */
-    horner_silence (0);
 
     /* Polynomial degree specified? */
     if (pj_param (P->ctx, P->params, "tdeg").i) /* degree specified? */
