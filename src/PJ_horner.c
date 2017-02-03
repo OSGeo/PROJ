@@ -226,10 +226,10 @@ summing the tiny high order elements first.
 
     /* Check for valid value of direction (-1, 0, 1) */
     switch (direction) {
-        case 0:    /*  no-op  */
+        case PJ_IDENT:    /*  no-op  */
             return position;
-        case  1:   /* forward */
-        case -1:   /* inverse */
+        case PJ_FWD:   /* forward */
+        case PJ_INV:   /* inverse */
             break;
         default:   /* invalid */
             errno = EINVAL;
@@ -241,7 +241,7 @@ summing the tiny high order elements first.
     range =  transformation->range;
 
 
-    if (direction==1) {                                   /* forward */
+    if (direction==PJ_FWD) {                              /* forward */
         tcx = transformation->fwd_u + sz;
         tcy = transformation->fwd_v + sz;
         e   = position.u - transformation->fwd_origin->u;
@@ -322,10 +322,10 @@ polynomial evaluation engine.
 
     /* Check for valid value of direction (-1, 0, 1) */
     switch (direction) {
-        case 0:    /*  no-op  */
+        case PJ_IDENT:    /*  no-op  */
             return position;
-        case  1:   /* forward */
-        case -1:   /* inverse */
+        case PJ_FWD:   /* forward */
+        case PJ_INV:   /* inverse */
             break;
         default:   /* invalid */
             errno = EINVAL;
@@ -336,7 +336,7 @@ polynomial evaluation engine.
     sz    =  2*transformation->order + 2;
     range =  transformation->range;
 
-    if (direction==1) {                                   /* forward */
+    if (direction==PJ_FWD) {                              /* forward */
         cb =  transformation->fwd_c;
         c  =  cb + sz;
         e  =  position.u - transformation->fwd_origin->u;
