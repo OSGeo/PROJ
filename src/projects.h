@@ -105,6 +105,12 @@ extern double hypot(double, double);
 #define M_PI            3.14159265358979310
 #define M_PI_2          1.57079632679489660
 #define M_PI_4          0.78539816339744828
+#define M_2_PI          0.63661977236758134308
+#endif
+
+/* M_SQRT2 might be missing */
+#ifndef M_SQRT2
+#define M_SQRT2         1.41421356237309504880
 #endif
 
 /* some more useful math constants and aliases */
