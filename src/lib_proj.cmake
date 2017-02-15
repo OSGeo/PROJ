@@ -139,6 +139,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_vandg.c
         PJ_vandg2.c
         PJ_vandg4.c
+        PJ_vgridshift.c
         PJ_wag2.c
         PJ_wag3.c
         PJ_wag7.c
