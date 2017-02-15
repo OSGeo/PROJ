@@ -4,10 +4,10 @@
  *
  * This an implementation in C of the geodesic algorithms described in
  * - C. F. F. Karney,
- *   <a href="https://dx.doi.org/10.1007/s00190-012-0578-z">
+ *   <a href="https://doi.org/10.1007/s00190-012-0578-z">
  *   Algorithms for geodesics</a>,
  *   J. Geodesy <b>87</b>, 43--55 (2013);
- *   DOI: <a href="https://dx.doi.org/10.1007/s00190-012-0578-z">
+ *   DOI: <a href="https://doi.org/10.1007/s00190-012-0578-z">
  *   10.1007/s00190-012-0578-z</a>;
  *   addenda: <a href="http://geographiclib.sourceforge.net/geod-addenda.html">
  *   geod-addenda.html</a>.
@@ -112,7 +112,7 @@
  * http://geographiclib.sourceforge.net/
  *
  * This library was distributed with
- * <a href="../index.html">GeographicLib</a> 1.46.
+ * <a href="../index.html">GeographicLib</a> 1.47.
  **********************************************************************/
 
 #if !defined(GEODESIC_H)
@@ -127,12 +127,12 @@
  * The minor version of the geodesic library.  (This tracks the version of
  * GeographicLib.)
  **********************************************************************/
-#define GEODESIC_VERSION_MINOR 46
+#define GEODESIC_VERSION_MINOR 47
 /**
  * The patch level of the geodesic library.  (This tracks the version of
  * GeographicLib.)
  **********************************************************************/
-#define GEODESIC_VERSION_PATCH 1
+#define GEODESIC_VERSION_PATCH 0
 
 /**
  * Pack the version components into a single integer.  Users should not rely on
