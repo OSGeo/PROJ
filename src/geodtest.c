@@ -4,7 +4,7 @@
  *
  * Run these tests by configuring with cmake and running "make test".
  *
- * Copyright (c) Charles Karney (2015-2016) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2015-2017) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * http://geographiclib.sourceforge.net/
  **********************************************************************/
@@ -630,6 +630,26 @@ void polylength(const struct geod_geodesic* g, double points[][2], int N,
   geod_polygon_compute(g, &p, 0, 1, 0, perimeter);
 }
 
+int GeodSolve74() {
+  /* Check fix for inaccurate areas, bug introduced in v1.46, fixed
+     2015-10-16. */
+  double a12, s12, azi1, azi2, m12, M12, M21, S12;
+  struct geod_geodesic g;
+  int result = 0;
+  geod_init(&g, wgs84_a, wgs84_f);
+  a12 = geod_geninverse(&g, 54.1589, 15.3872, 54.1591, 15.3877,
+                        &s12, &azi1, &azi2, &m12, &M12, &M21, &S12);
+  result += assertEquals(azi1, 55.723110355, 5e-9);
+  result += assertEquals(azi2, 55.723515675, 5e-9);
+  result += assertEquals(s12,  39.527686385, 5e-9);
+  result += assertEquals(a12,   0.000355495, 5e-9);
+  result += assertEquals(m12,  39.527686385, 5e-9);
+  result += assertEquals(M12,   0.999999995, 5e-9);
+  result += assertEquals(M21,   0.999999995, 5e-9);
+  result += assertEquals(S12, 286698586.30197, 5e-4);
+  return result;
+}
+
 int Planimeter0() {
   /* Check fix for pole-encircling bug found 2011-03-16 */
   double pa[4][2] = {{89, 0}, {89, 90}, {89, 180}, {89, 270}};
@@ -757,6 +777,7 @@ int main() {
   if ((i = GeodSolve67())) {++n; printf("GeodSolve67 fail: %d\n", i);}
   if ((i = GeodSolve71())) {++n; printf("GeodSolve71 fail: %d\n", i);}
   if ((i = GeodSolve73())) {++n; printf("GeodSolve73 fail: %d\n", i);}
+  if ((i = GeodSolve74())) {++n; printf("GeodSolve74 fail: %d\n", i);}
   if ((i = Planimeter0())) {++n; printf("Planimeter0 fail: %d\n", i);}
   if ((i = Planimeter5())) {++n; printf("Planimeter5 fail: %d\n", i);}
   if ((i = Planimeter6())) {++n; printf("Planimeter6 fail: %d\n", i);}

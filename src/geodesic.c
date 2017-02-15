@@ -13,12 +13,12 @@
  *   C. F. F. Karney,
  *   Algorithms for geodesics,
  *   J. Geodesy <b>87</b>, 43--55 (2013);
- *   https://dx.doi.org/10.1007/s00190-012-0578-z
+ *   https://doi.org/10.1007/s00190-012-0578-z
  *   Addenda: http://geographiclib.sourceforge.net/geod-addenda.html
  *
  * See the comments in geodesic.h for documentation.
  *
- * Copyright (c) Charles Karney (2012-2016) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2012-2017) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * http://geographiclib.sourceforge.net/
  */
@@ -274,7 +274,7 @@ static real Lambda12(const struct geod_geodesic* g,
                      real* pssig1, real* pcsig1,
                      real* pssig2, real* pcsig2,
                      real* peps,
-                     real* psomg12, real* pcomg12,
+                     real* pgomg12,
                      boolx diffp, real* pdlam12,
                      /* Scratch area of the right size */
                      real Ca[]);
@@ -786,7 +786,7 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
 
     /* sig12 = sig2 - sig1 */
     sig12 = atan2(maxx((real)(0), csig1 * ssig2 - ssig1 * csig2),
-                  csig1 * csig2 + ssig1 * ssig2);
+                                  csig1 * csig2 + ssig1 * ssig2);
     Lengths(g, g->n, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2,
             cbet1, cbet2, &s12x, &m12x, 0,
             outmask & GEOD_GEODESICSCALE ? &M12 : 0,
@@ -858,7 +858,7 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
        * value of alp1 is then further from the solution) or if the new
        * estimate of alp1 lies outside (0,pi); in this case, the new starting
        * guess is taken to be (alp1a + alp1b) / 2. */
-      real ssig1 = 0, csig1 = 0, ssig2 = 0, csig2 = 0, eps = 0;
+      real ssig1 = 0, csig1 = 0, ssig2 = 0, csig2 = 0, eps = 0, domg12 = 0;
       unsigned numit = 0;
       /* Bracketing range */
       real salp1a = tiny, calp1a = 1, salp1b = tiny, calp1b = -1;
@@ -870,7 +870,7 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
           v = Lambda12(g, sbet1, cbet1, dn1, sbet2, cbet2, dn2, salp1, calp1,
                         slam12, clam12,
                         &salp2, &calp2, &sig12, &ssig1, &csig1, &ssig2, &csig2,
-                        &eps, &somg12, &comg12, numit < maxit1, &dv, Ca);
+                        &eps, &domg12, numit < maxit1, &dv, Ca);
         /* 2 * tol0 is approximately 1 ulp for a number in [0, pi]. */
         /* Reversed test to allow escape with NaNs */
         if (tripb || !(fabs(v) >= (tripn ? 8 : 1) * tol0)) break;
@@ -918,6 +918,12 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
       m12x *= g->b;
       s12x *= g->b;
       a12 = sig12 / degree;
+      if (outmask & GEOD_AREA) {
+        /* omg12 = lam12 - domg12 */
+        real sdomg12 = sin(domg12), cdomg12 = cos(domg12);
+        somg12 = slam12 * cdomg12 - clam12 * sdomg12;
+        comg12 = clam12 * cdomg12 + slam12 * sdomg12;
+      }
     }
   }
 
@@ -953,11 +959,8 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
       /* Avoid problems with indeterminate sig1, sig2 on equator */
       S12 = 0;
 
-    if (!meridian) {
-      if (somg12 > 1) {
-        somg12 = sin(omg12); comg12 = cos(omg12);
-      } else
-        norm2(&somg12, &comg12);
+    if (!meridian && somg12 > 1) {
+      somg12 = sin(omg12); comg12 = cos(omg12);
     }
 
     if (!meridian &&
@@ -1385,15 +1388,15 @@ real Lambda12(const struct geod_geodesic* g,
               real* pssig1, real* pcsig1,
               real* pssig2, real* pcsig2,
               real* peps,
-              real* psomg12, real* pcomg12,
+              real* pdomg12,
               boolx diffp, real* pdlam12,
               /* Scratch area of the right size */
               real Ca[]) {
   real salp2 = 0, calp2 = 0, sig12 = 0,
     ssig1 = 0, csig1 = 0, ssig2 = 0, csig2 = 0, eps = 0,
-    somg12 = 0, comg12 = 0, dlam12 = 0;
+    domg12 = 0, dlam12 = 0;
   real salp0, calp0;
-  real somg1, comg1, somg2, comg2, lam12;
+  real somg1, comg1, somg2, comg2, somg12, comg12, lam12;
   real B312, eta, k2;
 
   if (sbet1 == 0 && calp1 == 0)
@@ -1436,7 +1439,7 @@ real Lambda12(const struct geod_geodesic* g,
 
   /* sig12 = sig2 - sig1, limit to [0, pi] */
   sig12 = atan2(maxx((real)(0), csig1 * ssig2 - ssig1 * csig2),
-                csig1 * csig2 + ssig1 * ssig2);
+                                csig1 * csig2 + ssig1 * ssig2);
 
   /* omg12 = omg2 - omg1, limit to [0, pi] */
   somg12 = maxx((real)(0), comg1 * somg2 - somg1 * comg2);
@@ -1449,7 +1452,8 @@ real Lambda12(const struct geod_geodesic* g,
   C3f(g, eps, Ca);
   B312 = (SinCosSeries(TRUE, ssig2, csig2, Ca, nC3-1) -
           SinCosSeries(TRUE, ssig1, csig1, Ca, nC3-1));
-  lam12 = eta - g->f * A3f(g, eps) * salp0 * (sig12 + B312);
+  domg12 = -g->f * A3f(g, eps) * salp0 * (sig12 + B312);
+  lam12 = eta + domg12;
 
   if (diffp) {
     if (calp2 == 0)
@@ -1469,8 +1473,7 @@ real Lambda12(const struct geod_geodesic* g,
   *pssig2 = ssig2;
   *pcsig2 = csig2;
   *peps = eps;
-  *psomg12 = somg12;
-  *pcomg12 = comg12;
+  *pdomg12 = domg12;
   if (diffp)
     *pdlam12 = dlam12;
 
@@ -1484,7 +1487,7 @@ real A3f(const struct geod_geodesic* g, real eps) {
 
 void C3f(const struct geod_geodesic* g, real eps, real c[]) {
   /* Evaluate C3 coeffs
-   * Elements c[1] through c[nC3 - 1] are set */
+   * Elements c[1] thru c[nC3 - 1] are set */
   real mult = 1;
   int o = 0, l;
   for (l = 1; l < nC3; ++l) {   /* l is index of C3[l] */
@@ -1497,7 +1500,7 @@ void C3f(const struct geod_geodesic* g, real eps, real c[]) {
 
 void C4f(const struct geod_geodesic* g, real eps, real c[]) {
   /* Evaluate C4 coeffs
-   * Elements c[0] through c[nC4 - 1] are set */
+   * Elements c[0] thru c[nC4 - 1] are set */
   real mult = 1;
   int o = 0, l;
   for (l = 0; l < nC4; ++l) {   /* l is index of C4[l] */
