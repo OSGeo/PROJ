@@ -78,6 +78,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_hammer.c
         PJ_hatano.c
         PJ_helmert.c
+        PJ_hgridshift.c
         PJ_horner.c
         PJ_igh.c
         PJ_isea.c

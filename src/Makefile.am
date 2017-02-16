@@ -75,7 +75,7 @@ libproj_la_SOURCES = \
 	pj_strtod.c \
 	\
 	pj_obs_api.c PJ_cart.c PJ_pipeline.c PJ_horner.c PJ_helmert.c \
-	PJ_vgridshift.c
+	PJ_vgridshift.c PJ_hgridshift.c
 
 install-exec-local:
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)
