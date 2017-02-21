@@ -908,57 +908,12 @@ ISEA_STATIC
 int isea_hex(struct isea_dgg *g, int tri,
         struct isea_pt *pt, struct isea_pt *hex) {
     struct isea_pt v;
-    int sidelength;
-    int d, i, x, y, quad;
+    int quad;
 
     quad = isea_ptdi(g, tri, pt, &v);
 
     hex->x = ((int)v.x << 4) + quad;
     hex->y = v.y;
-
-    return 1;
-
-    d = v.x;
-    i = v.y;
-
-    /* Aperture 3 odd resolutions */
-    if (g->aperture == 3 && g->resolution % 2 != 0) {
-        int offset = (int)(pow(3.0, g->resolution - 1) + 0.5);
-
-        d += offset * ((g->quad-1) % 5);
-        i += offset * ((g->quad-1) % 5);
-
-        if (quad == 0) {
-            d = 0;
-            i = offset;
-        } else if (quad == 11) {
-            d = 2 * offset;
-            i = 0;
-        } else if (quad > 5) {
-            d += offset;
-        }
-
-        x = (2*d - i) /3;
-        y = (2*i - d) /3;
-
-        hex->x = x + offset / 3;
-        hex->y = y + 2 * offset / 3;
-        return 1;
-    }
-
-    /* aperture 3 even resolutions and aperture 4 */
-    sidelength = (int) (pow(g->aperture, g->resolution / 2.0) + 0.5);
-    if (g->quad == 0) {
-        hex->x = 0;
-        hex->y = sidelength;
-    } else if (g->quad == 11) {
-        hex->x = sidelength * 2;
-        hex->y = 0;
-    } else {
-        hex->x = d + sidelength * ((g->quad-1) % 5);
-        if (g->quad > 5) hex->x += sidelength;
-        hex->y = i + sidelength * ((g->quad-1) % 5);
-    }
 
     return 1;
 }
