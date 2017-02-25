@@ -846,17 +846,25 @@ static int pj_adjust_axis( projCtx ctx,
                 switch( axis[i_axis] )
                 {
                   case 'e':
-                    x[point_offset*i] = value; break;
+                    x[point_offset*i] = value;
+                    break;
                   case 'w':
-                    x[point_offset*i] = -value; break;
+                    x[point_offset*i] = -value;
+                    break;
                   case 'n':
-                    y[point_offset*i] = value; break;
+                    y[point_offset*i] = value;
+                    break;
                   case 's':
-                    y[point_offset*i] = -value; break;
+                    y[point_offset*i] = -value;
+                    break;
                   case 'u':
-                    if( z ) z[point_offset*i] = value; break;
+                    if( z )
+                        z[point_offset*i] = value;
+                    break;
                   case 'd':
-                    if( z ) z[point_offset*i] = -value; break;
+                    if( z )
+                        z[point_offset*i] = -value;
+                    break;
                   default:
                     pj_ctx_set_errno( ctx, PJD_ERR_AXIS );
                     return PJD_ERR_AXIS;

@@ -35,6 +35,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 		break;
 	case N_POLE:
 		coslam = - coslam;
+                /*-fallthrough*/
 	case S_POLE:
 		if (fabs(lp.phi - P->phi0) - EPS10 > M_HALFPI) F_ERROR;
 		xy.y = cosphi * coslam;

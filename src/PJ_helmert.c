@@ -57,7 +57,7 @@ static void *freeup_msg (PJ *P, int errlev) {         /* Destructor */
     if (0==P)
         return 0;
 
-	if (0!=P->ctx)
+    if (0!=P->ctx)
         pj_ctx_set_errno (P->ctx, errlev);
 
     if (0==P->opaque)

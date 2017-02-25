@@ -63,6 +63,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         break;
     case N_POLE:
         coslam = - coslam;
+        /*-fallthrough*/
     case S_POLE:
         xy.y *= cosphi * coslam;
         break;

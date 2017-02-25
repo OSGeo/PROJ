@@ -106,6 +106,7 @@ oblcon:
         break;
     case N_POLE:
         coslam = -coslam;
+        /*-fallthrough*/
     case S_POLE:
         if (fabs(lp.phi + P->phi0) < EPS10) F_ERROR;
         xy.y = M_FORTPI - lp.phi * .5;
@@ -148,6 +149,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         break;
     case N_POLE:
         xy.y = -xy.y;
+        /*-fallthrough*/
     case S_POLE:
         q = (xy.x * xy.x + xy.y * xy.y);
         if (!q) {

@@ -82,6 +82,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     switch (Q->mode) {
     case N_POLE:
         coslam = - coslam;
+        /*-fallthrough*/
     case S_POLE:
         xy.x = (rho = fabs(Q->Mp - pj_mlfn(lp.phi, sinphi, cosphi, Q->en))) *
             sin(lp.lam);
@@ -138,6 +139,7 @@ oblcon:
     case N_POLE:
         lp.phi = -lp.phi;
         coslam = -coslam;
+        /*-fallthrough*/
     case S_POLE:
         if (fabs(lp.phi - M_HALFPI) < EPS10) F_ERROR;
         xy.x = (xy.y = (M_HALFPI + lp.phi)) * sin(lp.lam);

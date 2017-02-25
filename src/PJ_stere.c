@@ -62,6 +62,7 @@ xmul:
         lp.phi = -lp.phi;
         coslam = - coslam;
         sinphi = -sinphi;
+        /*-fallthrough*/
     case N_POLE:
         xy.x = Q->akm1 * pj_tsfn (lp.phi, sinphi, P->e);
         xy.y = - xy.x * coslam;
@@ -98,6 +99,7 @@ oblcon:
     case N_POLE:
         coslam = - coslam;
         lp.phi = - lp.phi;
+        /*-fallthrough*/
     case S_POLE:
         if (fabs (lp.phi - M_HALFPI) < TOL) F_ERROR;
         xy.x = sinlam * ( xy.y = Q->akm1 * tan (M_FORTPI + .5 * lp.phi) );
@@ -134,6 +136,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         break;
     case N_POLE:
         xy.y = -xy.y;
+        /*-fallthrough*/
     case S_POLE:
         phi_l = M_HALFPI - 2. * atan (tp = - rho / Q->akm1);
         halfpi = -M_HALFPI;
@@ -183,6 +186,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         break;
     case N_POLE:
         xy.y = -xy.y;
+        /*-fallthrough*/
     case S_POLE:
         if (fabs (rh) <= EPS10)
             lp.phi = P->phi0;
@@ -251,6 +255,7 @@ static PJ *setup(PJ *P) {                   /* general initialization */
         case OBLIQ:
             sinph0 = sin (P->phi0);
             cosph0 = cos (P->phi0);
+            /*-fallthrough*/
         case EQUIT:
             Q->akm1 = 2. * P->k0;
             break;

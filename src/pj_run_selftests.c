@@ -32,6 +32,7 @@
 
 #ifndef PJ_SELFTEST
 int pj_run_selftests (int verbosity) {
+    (void)verbosity;
     printf ("This version of libproj is not configured for internal regression tests.\n");
     return 0;
 }
