@@ -288,6 +288,7 @@ int main(int argc, char **argv) {
               case 'V': /* very verbose processing mode */
                 very_verby = 1;
                 mon = 1;
+                continue;
               case 'S': /* compute scale factors */
                 dofactors = 1;
                 continue;
