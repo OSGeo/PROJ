@@ -75,9 +75,12 @@ int hexbin2(double width, double x, double y,
 
     z = -x - y;
 
-    ix = rx = floor(x + 0.5);
-    iy = ry = floor(y + 0.5);
-    iz = rz = floor(z + 0.5);
+    rx = floor(x + 0.5);
+    ix = (int)rx;
+    ry = floor(y + 0.5);
+    iy = (int)ry;
+    rz = floor(z + 0.5);
+    iz = (int)rz;
 
     s = ix + iy + iz;
 
@@ -892,7 +895,7 @@ int isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
         sn += 2;
     } else {
         sidelength = (int) (pow(g->aperture, g->resolution / 2.0) + 0.5);
-        sn = (quad - 1) * hexes + sidelength * di->x + di->y + 2;
+        sn = (int) ((quad - 1) * hexes + sidelength * di->x + di->y + 2);
     }
 
     g->serial = sn;
@@ -918,8 +921,8 @@ int isea_hex(struct isea_dgg *g, int tri,
 
     return 1;
 
-    d = v.x;
-    i = v.y;
+    d = (int)v.x;
+    i = (int)v.y;
 
     /* Aperture 3 odd resolutions */
     if (g->aperture == 3 && g->resolution % 2 != 0) {

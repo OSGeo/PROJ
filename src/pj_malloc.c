@@ -115,7 +115,7 @@ pointer" to signal an error in a multi level allocation:
 
 
 /*****************************************************************************/
-void *pj_freeup_msg_plain (PJ *P, int errlev) {         /* Destructor */
+static void *pj_freeup_msg_plain (PJ *P, int errlev) {         /* Destructor */
 /*****************************************************************************
     Does memory deallocation for "plain" PJ objects, i.e. that vast majority
     of PJs where the opaque object does not contain any additionally

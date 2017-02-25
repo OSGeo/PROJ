@@ -68,7 +68,7 @@ double rot[7][2][2] = ROT;
  * @param v the parameter whose sign is returned.
  * @return 1 for positive number, -1 for negative, and 0 for zero.
  **/
-double pj_sign (double v) {
+static double pj_sign (double v) {
     return v > 0 ? 1 : (v < 0 ? -1 : 0);
 }
 
@@ -152,7 +152,8 @@ static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
  * @param north_square the position of the north polar square (rHEALPix only)
  * @param south_square the position of the south polar square (rHEALPix only)
  **/
-int in_image(double x, double y, int proj, int north_square, int south_square) {
+static int in_image(double x, double y, int proj, int north_square,
+                    int south_square) {
     if (proj == 0) {
         double healpixVertsJit[][2] = {
             {-M_PI - EPS,  M_FORTPI},
@@ -223,7 +224,7 @@ int in_image(double x, double y, int proj, int north_square, int south_square) {
  * return the approximate latitude of authalic latitude alpha (if inverse=1).
  * P contains the relevant ellipsoid parameters.
  **/
-double auth_lat(PJ *P, double alpha, int inverse) {
+static double auth_lat(PJ *P, double alpha, int inverse) {
     struct pj_opaque *Q = P->opaque;
     if (inverse == 0) {
         /* Authalic latitude. */
@@ -247,7 +248,7 @@ double auth_lat(PJ *P, double alpha, int inverse) {
  * Return the HEALPix projection of the longitude-latitude point lp on
  * the unit sphere.
 **/
-XY healpix_sphere(LP lp) {
+static XY healpix_sphere(LP lp) {
     double lam = lp.lam;
     double phi = lp.phi;
     double phi0 = asin(2.0/3.0);
@@ -275,7 +276,7 @@ XY healpix_sphere(LP lp) {
 /**
  * Return the inverse of healpix_sphere().
 **/
-LP healpix_sphere_inverse(XY xy) {
+static LP healpix_sphere_inverse(XY xy) {
     LP lp;
     double x = xy.x;
     double y = xy.y;

@@ -85,7 +85,6 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 
 {
     long      i;
-    int       err;
 
     srcdefn->ctx->last_errno = 0;
     dstdefn->ctx->last_errno = 0;
@@ -121,6 +120,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 /* -------------------------------------------------------------------- */
     if( srcdefn->is_geocent )
     {
+        int err;
         if( z == NULL )
         {
             pj_ctx_set_errno( pj_get_ctx(srcdefn), PJD_ERR_GEOCENTRIC);
@@ -588,6 +588,7 @@ int pj_compare_datums( PJ *srcdefn, PJ *dstdefn )
 /*                       pj_geocentic_to_wgs84()                        */
 /************************************************************************/
 
+static
 int pj_geocentric_to_wgs84( PJ *defn,
                             long point_count, int point_offset,
                             double *x, double *y, double *z )
@@ -636,6 +637,7 @@ int pj_geocentric_to_wgs84( PJ *defn,
 /*                      pj_geocentic_from_wgs84()                       */
 /************************************************************************/
 
+static
 int pj_geocentric_from_wgs84( PJ *defn,
                               long point_count, int point_offset,
                               double *x, double *y, double *z )

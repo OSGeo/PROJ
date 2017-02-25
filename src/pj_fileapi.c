@@ -54,7 +54,7 @@ typedef struct {
 /*                       pj_get_default_fileapi()                       */
 /************************************************************************/
 
-projFileAPI *pj_get_default_fileapi() 
+projFileAPI *pj_get_default_fileapi(void) 
 {
     return &default_fileapi;
 }

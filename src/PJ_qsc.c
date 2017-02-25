@@ -292,7 +292,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         }
     } else {
         /* Compute phi and lam via cartesian unit sphere coordinates. */
-        double q, r, s, t;
+        double q, r, s;
         q = cosphi;
         t = q * q;
         if (t >= 1.0) {

@@ -166,7 +166,7 @@ int main(int argc, char **argv)
 {
     char *arg, **eargv = argv, *from_argv[MAX_PARGS], *to_argv[MAX_PARGS];
     FILE *fid;
-    int from_argc=0, to_argc=0, eargc = 0, c, mon = 0;
+    int from_argc=0, to_argc=0, eargc = 0, mon = 0;
     int have_to_flag = 0, inverse = 0, i;
     int use_env_locale = 0;
 
@@ -271,12 +271,15 @@ int main(int argc, char **argv)
                 continue;
               case 'W': /* specify seconds precision */
               case 'w': /* -W for constant field width */
-                if ((c = arg[1]) != 0 && isdigit(c)) {
+              {
+                char c = arg[1];
+                if (c != 0 && isdigit(c)) {
                     set_rtodms(c - '0', *arg == 'W');
                     ++arg;
                 } else
                     emess(1,"-W argument missing or non-digit");
                 continue;
+              }
               case 'f': /* alternate output format degrees or xy */
                 if (--argc <= 0) goto noargument;
                 oform = *++argv;
@@ -331,8 +334,6 @@ int main(int argc, char **argv)
         
         for( i = 0; i < MAX_PARGS; i++ )
         {
-            char *arg;
-
             arg = from_argv[i];
             from_argv[i] = to_argv[i];
             to_argv[i] = arg;

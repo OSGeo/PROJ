@@ -451,6 +451,10 @@ PJ *PROJECTION(horner) {
 		complex_horner = 1;
 
     Q = horner_alloc (degree, complex_horner);
+    if (Q == 0)
+    {
+        return horner_freeup (P);
+    }
     P->opaque = (void *) Q;
 
     if (complex_horner) {

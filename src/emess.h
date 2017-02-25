@@ -21,8 +21,9 @@ extern char *sys_errlist[];
 #else	/* for for calling procedures */
 
 extern struct EMESS emess_dat;
-void emess(int, char *, ...);
 
 #endif /* use type */
+
+void emess(int, char *, ...);
 
 #endif /* end EMESS_H */

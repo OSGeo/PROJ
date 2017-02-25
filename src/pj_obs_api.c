@@ -71,13 +71,13 @@ double pj_xyz_dist (XYZ a, XYZ b) {
 
 
 /* Work around non-constness of MSVC HUGE_VAL by providing functions rather than constants */
-PJ_COORD pj_coo_error (void) {
+static PJ_COORD pj_coo_error (void) {
     PJ_COORD c;
     c.v[0] = c.v[1] = c.v[2] = c.v[3] = HUGE_VAL;
     return c;
 }
 
-PJ_OBS pj_obs_error (void) {
+static PJ_OBS pj_obs_error (void) {
     PJ_OBS obs;
     obs.coo = pj_coo_error ();
     obs.anc.v[0] = obs.anc.v[1] = obs.anc.v[2] = HUGE_VAL;
@@ -87,7 +87,7 @@ PJ_OBS pj_obs_error (void) {
 
 
 
-PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
+static PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
     if (0!=P->fwdobs) {
         obs  =  P->fwdobs (obs, P);
         return obs;
@@ -105,7 +105,7 @@ PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
 }
 
 
-PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
+static PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
     if (0!=P->invobs) {
         obs  =  P->invobs (obs, P);
         return obs;

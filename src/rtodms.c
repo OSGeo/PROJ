@@ -49,9 +49,9 @@ rtodms(char *s, double r, int pos, int neg) {
 	r = floor(r * CONV + .5);
 	sec = fmod(r / RES, 60.);
 	r = floor(r / RES60);
-	min = fmod(r, 60.);
-        r = floor(r / 60.);
-        deg = r;
+	min = (int)fmod(r, 60.);
+	r = floor(r / 60.);
+	deg = (int)r;
 
 	if (dolong)
 		(void)sprintf(ss,format,deg,min,sec,sign);

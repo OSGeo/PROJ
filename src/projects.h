@@ -512,6 +512,8 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #define PROJECTION(name)                                     \
 pj_projection_specific_setup_##name (PJ *P);                 \
 C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
+C_NAMESPACE PJ *pj_##name (PJ *P);                           \
+int pj_ ## name ## _selftest (void);                         \
 C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     if (P)                                                   \
         return pj_projection_specific_setup_##name (P);      \

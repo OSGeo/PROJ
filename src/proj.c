@@ -247,7 +247,7 @@ vprocess(FILE *fid) {
 int main(int argc, char **argv) {
     char *arg, **eargv = argv, *pargv[MAX_PARGS], **iargv = argv;
     FILE *fid;
-    int pargc = 0, iargc = argc, eargc = 0, c, mon = 0;
+    int pargc = 0, iargc = argc, eargc = 0, mon = 0;
 
     if ( (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != NULL)
         ++emess_dat.Prog_name;
@@ -381,12 +381,15 @@ int main(int argc, char **argv) {
                 continue;
               case 'W': /* specify seconds precision */
               case 'w': /* -W for constant field width */
-                if ((c = arg[1]) != 0 && isdigit(c)) {
+              {
+                int c = arg[1];
+                if (c != 0 && isdigit(c)) {
                     set_rtodms(c - '0', *arg == 'W');
                     ++arg;
                 } else
                     emess(1,"-W argument missing or non-digit");
                 continue;
+              }
               case 'f': /* alternate output format degrees or xy */
                 if (--argc <= 0) goto noargument;
                 oform = *++argv;
