@@ -95,7 +95,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     LP lp = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
     XY t;
-    double yc;
+    double yc = 0.0;
 
     lp.phi = Q->phi_2;
     lp.lam = xy.x / cos(lp.phi);
