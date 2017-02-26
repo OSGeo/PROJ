@@ -90,6 +90,7 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
             struct CTABLE *ct = gi->ct;
             double grid_x, grid_y;
             int    grid_ix, grid_iy;
+            int    grid_ix2, grid_iy2;
             float  *cvs;
 
             /* skip tables that don't match our point at all.  */
@@ -141,14 +142,21 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
             grid_x -= grid_ix;
             grid_y -= grid_iy;
 
+            grid_ix2 = grid_ix + 1;
+            if( grid_ix2 >= ct->lim.lam )
+                grid_ix2 = ct->lim.lam - 1;
+            grid_iy2 = grid_iy + 1;
+            if( grid_iy2 >= ct->lim.phi )
+                grid_iy2 = ct->lim.phi - 1;
+
             cvs = (float *) ct->cvs;
-            value = cvs[grid_ix + grid_iy * ct->lim.lam] 
+            value = cvs[grid_ix + grid_iy * ct->lim.lam]
                 * (1.0-grid_x) * (1.0-grid_y)
-                + cvs[grid_ix + 1 + grid_iy * ct->lim.lam] 
+                + cvs[grid_ix2 + grid_iy * ct->lim.lam]
                 * (grid_x) * (1.0-grid_y)
-                + cvs[grid_ix + (grid_iy+1) * ct->lim.lam] 
+                + cvs[grid_ix + grid_iy2 * ct->lim.lam]
                 * (1.0-grid_x) * (grid_y)
-                + cvs[grid_ix + 1 + (grid_iy+1) * ct->lim.lam] 
+                + cvs[grid_ix2 + grid_iy2 * ct->lim.lam]
                 * (grid_x) * (grid_y);
 
             /* nodata?  */
