@@ -3,7 +3,7 @@
  * Purpose:  Memory management for proj.4.
  *           This version includes an implementation of generic destructors,
  *           for memory deallocation for the large majority of PJ-objects
- *           that do not allocate anything alse than the PJ-object itself,
+ *           that do not allocate anything else than the PJ-object itself,
  *           and its associated opaque object - i.e. no additional malloc'ed
  *           memory inside the opaque object.
  *

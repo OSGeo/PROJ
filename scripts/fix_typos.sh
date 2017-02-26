@@ -51,4 +51,4 @@ WORDS_WHITE_LIST="metres,als,lsat,twon,ang"
 
 python3 fix_typos/codespell/codespell.py -w -i 3 -q 2 -S $EXCLUDED_FILES \
     -x scripts/typos_whitelist.txt --words-white-list=$WORDS_WHITE_LIST \
-    -D fix_typos/gdal_dict.txt  .
+    -D fix_typos/gdal_dict.txt  ./src ./docs ./cmake ./examples

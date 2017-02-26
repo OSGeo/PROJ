@@ -1487,7 +1487,7 @@ real A3f(const struct geod_geodesic* g, real eps) {
 
 void C3f(const struct geod_geodesic* g, real eps, real c[]) {
   /* Evaluate C3 coeffs
-   * Elements c[1] thru c[nC3 - 1] are set */
+   * Elements c[1] through c[nC3 - 1] are set */
   real mult = 1;
   int o = 0, l;
   for (l = 1; l < nC3; ++l) {   /* l is index of C3[l] */
@@ -1500,7 +1500,7 @@ void C3f(const struct geod_geodesic* g, real eps, real c[]) {
 
 void C4f(const struct geod_geodesic* g, real eps, real c[]) {
   /* Evaluate C4 coeffs
-   * Elements c[0] thru c[nC4 - 1] are set */
+   * Elements c[0] through c[nC4 - 1] are set */
   real mult = 1;
   int o = 0, l;
   for (l = 0; l < nC4; ++l) {   /* l is index of C4[l] */
