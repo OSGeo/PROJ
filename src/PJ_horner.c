@@ -134,7 +134,7 @@ static void horner_free (HORNER *h) {
 
 static HORNER *horner_alloc (size_t order, int complex_polynomia) {
     /* size_t is unsigned, so we need not check for order > 0 */
-    int n = horner_number_of_coefficients(order);
+    int n = (int)horner_number_of_coefficients(order);
     int polynomia_ok = 0;
     HORNER *h = horner_calloc (1, sizeof (HORNER));
 
@@ -142,8 +142,8 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
         return 0;
 
     if (complex_polynomia)
-        n = 2*order + 2;
-    h->order = order;
+        n = 2*(int)order + 2;
+    h->order = (int)order;
     h->coefs = n;
 
     if (complex_polynomia) {

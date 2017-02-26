@@ -45,7 +45,7 @@ pj_param(projCtx ctx, paralist *pl, const char *opt) {
 
 	type = *opt++;
 	/* simple linear lookup */
-	l = strlen(opt);
+	l = (int)strlen(opt);
 	while (pl && !(!strncmp(pl->param, opt, l) &&
 	  (!pl->param[l] || pl->param[l] == '=')))
 		pl = pl->next;

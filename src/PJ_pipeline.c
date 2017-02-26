@@ -309,7 +309,7 @@ static PJ *pj_create_pipeline (PJ *P, size_t steps) {
     if (0==P->opaque->pipeline)
         return 0;
 
-    P->opaque->steps = steps;
+    P->opaque->steps = (int)steps;
 
     P->opaque->reverse_step =  pj_calloc (steps + 2, sizeof(int));
     if (0==P->opaque->reverse_step)
@@ -369,7 +369,7 @@ PJ *PROJECTION(pipeline) {
     if (0==P->opaque)
         return 0;
 
-    argc = argc_params (P->params);
+    argc = (int)argc_params (P->params);
     P->opaque->argv = argv = argv_params (P->params, argc);
     if (0==argv)
         return pipeline_freeup (P, ENOMEM);

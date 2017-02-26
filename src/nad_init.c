@@ -134,7 +134,7 @@ struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid )
     }
     
     /* trim white space and newlines off id */
-    for( id_end = strlen(ct->id)-1; id_end > 0; id_end-- )
+    for( id_end = (int)strlen(ct->id)-1; id_end > 0; id_end-- )
     {
         if( ct->id[id_end] == '\n' || ct->id[id_end] == ' ' )
             ct->id[id_end] = '\0';
@@ -181,7 +181,7 @@ int nad_ctable2_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
 
     if( !IS_LSB )
     {
-        swap_words( ct->cvs, 4, a_size * 2 );
+        swap_words( ct->cvs, 4, (int)a_size * 2 );
     }
 
     return 1;
@@ -243,7 +243,7 @@ struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid )
     }
     
     /* trim white space and newlines off id */
-    for( id_end = strlen(ct->id)-1; id_end > 0; id_end-- )
+    for( id_end = (int)strlen(ct->id)-1; id_end > 0; id_end-- )
     {
         if( ct->id[id_end] == '\n' || ct->id[id_end] == ' ' )
             ct->id[id_end] = '\0';

@@ -73,7 +73,7 @@ static const char *fill_buffer(pj_read_state *state, const char *last_char)
 /*      Move the existing data to the start of the buffer.              */
 /* -------------------------------------------------------------------- */
     memmove(state->buffer, last_char, char_remaining);
-    state->buffer_filled = char_remaining;
+    state->buffer_filled = (int)char_remaining;
     last_char = state->buffer;
 
 /* -------------------------------------------------------------------- */
@@ -116,7 +116,7 @@ static const char *fill_buffer(pj_read_state *state, const char *last_char)
         *w++ = *r++;
     }
     *w = 0;
-    state->buffer_filled += (bytes_read - (r-w));
+    state->buffer_filled += (int)(bytes_read - (r-w));
 
     return last_char;
 }
@@ -139,7 +139,7 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
     if(found_def)
         *found_def = 0;
 
-    len = strlen(name);
+    len = (int)strlen(name);
     *sword = 't';
 
     if (0==next_char)
