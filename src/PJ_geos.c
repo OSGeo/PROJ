@@ -204,7 +204,7 @@ PJ *PROJECTION(geos) {
 
     if ((Q->h = pj_param(P->ctx, P->params, "dh").f) <= 0.) E_ERROR(-30);
 
-    if (P->phi0) E_ERROR(-46);
+    if (P->phi0 != 0.0) E_ERROR(-46);
 
     Q->sweep_axis = pj_param(P->ctx, P->params, "ssweep").s;
     if (Q->sweep_axis == NULL)
@@ -223,7 +223,7 @@ PJ *PROJECTION(geos) {
     Q->radius_g_1 = Q->h / P->a;
     Q->radius_g = 1. + Q->radius_g_1;
     Q->C  = Q->radius_g * Q->radius_g - 1.0;
-    if (P->es) {
+    if (P->es != 0.0) {
         Q->radius_p      = sqrt (P->one_es);
         Q->radius_p2     = P->one_es;
         Q->radius_p_inv2 = P->rone_es;

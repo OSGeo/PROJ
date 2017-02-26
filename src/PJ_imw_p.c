@@ -37,7 +37,7 @@ static XY loc_for(LP lp, PJ *P, double *yc) {
     struct pj_opaque *Q = P->opaque;
     XY xy;
 
-    if (! lp.phi) {
+    if (lp.phi == 0.0) {
         xy.x = lp.lam;
         xy.y = 0.;
     } else {
@@ -162,13 +162,15 @@ PJ *PROJECTION(imw_p) {
         Q->lam_1 = sig * DEG_TO_RAD;
     }
     Q->mode = 0;
-    if (Q->phi_1) xy(P, Q->phi_1, &x1, &y1, &Q->sphi_1, &Q->R_1);
+    if (Q->phi_1 != 0.0)
+        xy(P, Q->phi_1, &x1, &y1, &Q->sphi_1, &Q->R_1);
     else {
         Q->mode = 1;
         y1 = 0.;
         x1 = Q->lam_1;
     }
-    if (Q->phi_2) xy(P, Q->phi_2, &x2, &T2, &Q->sphi_2, &Q->R_2);
+    if (Q->phi_2 != 0.0)
+        xy(P, Q->phi_2, &x2, &T2, &Q->sphi_2, &Q->R_2);
     else {
         Q->mode = -1;
         T2 = 0.;

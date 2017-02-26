@@ -450,7 +450,7 @@ int main(int argc, char **argv) {
         pj_pr_list(Proj);
         if (very_verby) {
             (void)printf("#Final Earth figure: ");
-            if (Proj->es) {
+            if (Proj->es != 0.0) {
                 (void)printf("ellipsoid\n#  Major axis (a): ");
                 (void)printf(oform ? oform : "%.3f", Proj->a);
                 (void)printf("\n#  1/flattening: %.6f\n",

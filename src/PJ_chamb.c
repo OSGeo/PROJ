@@ -59,7 +59,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     for (i = 0; i < 3; ++i) { /* dist/azimiths from control */
         v[i] = vect(P->ctx, lp.phi - Q->c[i].phi, Q->c[i].cosphi, Q->c[i].sinphi,
             cosphi, sinphi, lp.lam - Q->c[i].lam);
-        if ( ! v[i].r)
+        if (v[i].r == 0.0)
             break;
         v[i].Az = adjlon(v[i].Az - Q->c[i].v.Az);
     }
@@ -130,7 +130,7 @@ PJ *PROJECTION(chamb) {
         j = i == 2 ? 0 : i + 1;
         Q->c[i].v = vect(P->ctx,Q->c[j].phi - Q->c[i].phi, Q->c[i].cosphi, Q->c[i].sinphi,
             Q->c[j].cosphi, Q->c[j].sinphi, Q->c[j].lam - Q->c[i].lam);
-        if (! Q->c[i].v.r) E_ERROR(-25);
+        if (Q->c[i].v.r == 0.0) E_ERROR(-25);
         /* co-linearity problem ignored for now */
     }
     Q->beta_0 = lc(P->ctx,Q->c[0].v.r, Q->c[2].v.r, Q->c[1].v.r);

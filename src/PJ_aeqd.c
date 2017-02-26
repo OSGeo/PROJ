@@ -278,7 +278,7 @@ PJ *PROJECTION(aeqd) {
         Q->sinph0 = sin(P->phi0);
         Q->cosph0 = cos(P->phi0);
     }
-    if (! P->es) {
+    if (P->es == 0.0) {
         P->inv = s_inverse;
         P->fwd = s_forward;
     } else {

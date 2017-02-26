@@ -116,7 +116,7 @@ static PJ *setup(PJ *P) { /* general initialization */
     struct pj_opaque *Q = P->opaque;
     double esphi, chio;
 
-    if (P->es) {
+    if (P->es != 0.0) {
         esphi = P->e * sin(P->phi0);
         chio = 2. * atan(tan((M_HALFPI + P->phi0) * .5) *
             pow((1. - esphi) / (1. + esphi), P->e * .5)) - M_HALFPI;
@@ -230,7 +230,7 @@ PJ *PROJECTION(alsk) {
     Q->n = 5;
     P->lam0 = DEG_TO_RAD * -152.;
     P->phi0 = DEG_TO_RAD * 64.;
-    if (P->es) { /* fixed ellipsoid/sphere */
+    if (P->es != 0.0) { /* fixed ellipsoid/sphere */
         Q->zcoeff = ABe;
         P->a = 6378206.4;
         P->e = sqrt(P->es = 0.00676866);
@@ -278,7 +278,7 @@ PJ *PROJECTION(gs50) {
     Q->n = 9;
     P->lam0 = DEG_TO_RAD * -120.;
     P->phi0 = DEG_TO_RAD * 45.;
-    if (P->es) { /* fixed ellipsoid/sphere */
+    if (P->es != 0.0) { /* fixed ellipsoid/sphere */
         Q->zcoeff = ABe;
         P->a = 6378206.4;
         P->e = sqrt(P->es = 0.00676866);

@@ -150,7 +150,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     /* Make sure that phi is on the correct hemisphere when false northing is used */
     if (xy.y < 0. && -lp.phi+P->phi0 < 0.0) lp.phi = -lp.phi;
 
-    lp.lam = (g || h) ? atan2 (g, h) : 0.;
+    lp.lam = (g != 0.0 || h != 0.0) ? atan2 (g, h) : 0.;
     return lp;
 }
 
@@ -172,7 +172,7 @@ static void freeup (PJ *P) {
 
 static PJ *setup(PJ *P) {                   /* general initialization */
     struct pj_opaque *Q = P->opaque;
-    if (P->es) {
+    if (P->es != 0.0) {
         if (!(Q->en = pj_enfn(P->es)))
             E_ERROR_0;
         Q->ml0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), Q->en);

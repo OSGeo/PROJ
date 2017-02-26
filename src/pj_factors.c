@@ -47,7 +47,7 @@ pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 		if (!(fac->code & IS_ANAL_HK)) {
 			fac->h = hypot(fac->der.x_p, fac->der.y_p);
 			fac->k = hypot(fac->der.x_l, fac->der.y_l) / cosphi;
-			if (P->es) {
+			if (P->es != 0.0) {
 				t = sin(lp.phi);
 				t = 1. - P->es * t * t;
 				n = sqrt(t);
@@ -56,7 +56,7 @@ pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 				r = t * t / P->one_es;
 			} else
 				r = 1.;
-		} else if (P->es) {
+		} else if (P->es != 0.0) {
 			r = sin(lp.phi);
 			r = 1. - P->es * r * r;
 			r = r * r / P->one_es;

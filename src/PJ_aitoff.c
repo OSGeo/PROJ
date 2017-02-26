@@ -53,7 +53,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     struct pj_opaque *Q = P->opaque;
 	double c, d;
 
-	if((d = acos(cos(lp.phi) * cos(c = 0.5 * lp.lam)))) {/* basic Aitoff */
+	if((d = acos(cos(lp.phi) * cos(c = 0.5 * lp.lam))) != 0.0) {/* basic Aitoff */
 		xy.x = 2. * d * cos(lp.phi) * sin(c) * (xy.y = 1. / sin(d));
 		xy.y *= d * sin(lp.phi);
 	} else
@@ -129,7 +129,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 		if ((fabs(fabs(lp.phi) - M_PI_2) < EPSILON) && (!Q->mode)) lp.lam = 0.; /* if pole in Aitoff, return longitude of 0 */
 
 		/* calculate x,y coordinates with solution obtained */
-		if((D = acos(cos(lp.phi) * cos(C = 0.5 * lp.lam)))) {/* Aitoff */
+		if((D = acos(cos(lp.phi) * cos(C = 0.5 * lp.lam))) != 0.0) {/* Aitoff */
 			x = 2. * D * cos(lp.phi) * sin(C) * (y = 1. / sin(D));
 			y *= D * sin(lp.phi);
 		} else

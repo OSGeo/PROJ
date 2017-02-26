@@ -512,15 +512,15 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* flattening */
     PIN->f  = 1 - cos (PIN->alpha);   /* = 1 - sqrt (1 - PIN->es); */
-    PIN->rf = PIN->f? 1.0/PIN->f: HUGE_VAL;
+    PIN->rf = PIN->f != 0.0 ? 1.0/PIN->f: HUGE_VAL;
 
     /* second flattening */
     PIN->f2  = 1/cos (PIN->alpha) - 1;
-    PIN->rf2 = PIN->f2? 1/PIN->f2: HUGE_VAL;
+    PIN->rf2 = PIN->f2 != 0.0 ? 1/PIN->f2: HUGE_VAL;
 
     /* third flattening */
     PIN->n  = pow (tan (PIN->alpha/2), 2);
-    PIN->rn = PIN->n? 1/PIN->n: HUGE_VAL;
+    PIN->rn = PIN->n != 0.0 ? 1/PIN->n: HUGE_VAL;
 
     /* ...and a few more */
     PIN->b  = (1 - PIN->f)*PIN->a;
@@ -545,7 +545,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     }
 
     /* set PIN->geoc coordinate system */
-    PIN->geoc = (PIN->es && pj_param(ctx, start, "bgeoc").i);
+    PIN->geoc = (PIN->es != 0.0 && pj_param(ctx, start, "bgeoc").i);
 
     /* over-ranging flag */
     PIN->over = pj_param(ctx, start, "bover").i;

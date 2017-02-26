@@ -64,7 +64,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 
     xy.x /= P->k0;
     xy.y /= P->k0;
-    if ( (rho = hypot (xy.x, xy.y)) ) {
+    if ( (rho = hypot (xy.x, xy.y)) != 0.0 ) {
         c = 2. * atan2 (rho, Q->R2);
         sinc = sin (c);
         cosc = cos (c);

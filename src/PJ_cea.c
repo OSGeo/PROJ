@@ -79,7 +79,7 @@ PJ *PROJECTION(cea) {
             E_ERROR(-24);
         }
     }
-    if (P->es) {
+    if (P->es != 0.0) {
         t = sin(t);
         P->k0 /= sqrt(1. - P->es * t * t);
         P->e = sqrt(P->es);

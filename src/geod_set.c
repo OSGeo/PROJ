@@ -51,7 +51,7 @@ geod_set(int argc, char **argv) {
 			geod_for();
 		} else emess(1,"incomplete geodesic/arc info");
 		if ((n_alpha = pj_param(NULL,start, "in_A").i) > 0) {
-			if (!(del_alpha = pj_param(NULL,start, "rdel_A").f))
+			if ((del_alpha = pj_param(NULL,start, "rdel_A").f) == 0.0)
 				emess(1,"del azimuth == 0");
 		} else if ((del_S = fabs(pj_param(NULL,start, "ddel_S").f)) != 0.) {
 			n_S = (int)(geod_S / del_S + .5);

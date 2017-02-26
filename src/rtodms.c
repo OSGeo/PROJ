@@ -55,7 +55,7 @@ rtodms(char *s, double r, int pos, int neg) {
 
 	if (dolong)
 		(void)sprintf(ss,format,deg,min,sec,sign);
-	else if (sec) {
+	else if (sec != 0.0) {
 		char *p, *q;
 		/* double prime + pos/neg suffix (if included) + NUL */
 		size_t suffix_len = sign ? 3 : 2;

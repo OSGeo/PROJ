@@ -142,7 +142,7 @@ PJ *PROJECTION(poly) {
         return freeup_new (P);
     P->opaque = Q;
 
-	if (P->es) {
+	if (P->es != 0.0) {
 		if (!(Q->en = pj_enfn(P->es))) E_ERROR_0;
 		Q->ml0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), Q->en);
 		P->inv = e_inverse;
