@@ -22,6 +22,7 @@ static void seraz0(double lam, double mult, PJ *P) {
     s = Q->p22 * Q->sa * cos(lam) * sqrt((1. + Q->t * sdsq)
         / ((1. + Q->w * sdsq) * (1. + Q->q * sdsq)));
 
+    d__1 = 1. + Q->q * sdsq;
     h = sqrt((1. + Q->q * sdsq) / (1. + Q->w * sdsq)) * ((1. + Q->w * sdsq)
         / (d__1 * d__1) - Q->p22 * Q->ca);
 
