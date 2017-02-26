@@ -127,7 +127,7 @@ static char *pargv[MAX_PARGS];
 static int   pargc = 0;
 
 int main(int argc, char **argv) {
-	char *arg, **eargv = argv, *strnchr();
+	char *arg, **eargv = argv;
 	FILE *fid;
 	static int eargc = 0, c;
 

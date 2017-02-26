@@ -153,7 +153,7 @@ oblcon:
 static LP e_guam_inv(XY xy, PJ *P) { /* Guam elliptical */
     LP lp = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
-    double x2, t;
+    double x2, t = 0.0;
     int i;
 
     x2 = 0.5 * xy.x * xy.x;

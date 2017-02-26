@@ -100,7 +100,7 @@ static void process(FILE *fid)
         if (!*s && (s > line)) --s; /* assumed we gobbled \n */
 
         if ( echoin) {
-            int t;
+            char t;
             t = *s;
             *s = '\0';
             (void)fputs(line, stdout);

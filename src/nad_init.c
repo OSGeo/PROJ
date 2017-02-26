@@ -63,7 +63,7 @@ static void swap_words( void *data_in, int word_size, int word_count )
         
         for( i = 0; i < word_size/2; i++ )
         {
-            int	t;
+            unsigned char	t;
             
             t = data[i];
             data[i] = data[word_size-i-1];

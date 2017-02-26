@@ -106,7 +106,7 @@ static int get_rotate_index(int index) {
  * @param vert the (x, y)-coordinates of the polygon's vertices
  **/
 static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
-    int i, c = 0;
+    int i;
     int counter = 0;
     double xinters;
     XY p1, p2;
@@ -141,7 +141,6 @@ static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
     } else {
         return 1;
     }
-    return c;
 }
 
 
@@ -517,7 +516,9 @@ static XY e_healpix_forward(LP lp, PJ *P) { /* ellipsoid  */
 static LP s_healpix_inverse(XY xy, PJ *P) { /* sphere */
     /* Check whether (x, y) lies in the HEALPix image */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
-        LP lp = {HUGE_VAL, HUGE_VAL};
+        LP lp;
+        lp.lam = HUGE_VAL;
+        lp.phi = HUGE_VAL;
         pj_ctx_set_errno(P->ctx, -15);
         return lp;
     }
@@ -563,7 +564,9 @@ static LP s_rhealpix_inverse(XY xy, PJ *P) { /* sphere */
 
     /* Check whether (x, y) lies in the rHEALPix image. */
     if (in_image(xy.x, xy.y, 1, Q->north_square, Q->south_square) == 0) {
-        LP lp = {HUGE_VAL, HUGE_VAL};
+        LP lp;
+        lp.lam = HUGE_VAL;
+        lp.phi = HUGE_VAL;
         pj_ctx_set_errno(P->ctx, -15);
         return lp;
     }

@@ -12,6 +12,7 @@
 /* FIXME: put the declaration in a header. Also used in proj.c */
 void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
               int iargc, char **iargv);
+extern void p_series(Tseries *, FILE *, char *);
 
 void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
               int iargc, char **iargv) {
@@ -19,7 +20,6 @@ void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
 	char *arg, fmt[15];
 	projUV low, upp, resid;
 	Tseries *F;
-	extern void p_series(Tseries *, FILE *, char *);
 	double (*input)(const char *, char **);
 
 	input = inverse ? strtod : dmstor;

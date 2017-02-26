@@ -11,6 +11,11 @@ pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 	struct DERIVS der;
 	double cosphi, t, n, r;
 
+        der.x_l = 0.0;
+        der.x_p = 0.0;
+        der.y_l = 0.0;
+        der.y_p = 0.0;
+
 	/* check for forward and latitude or longitude overange */
 	if ((t = fabs(lp.phi)-M_HALFPI) > EPS || fabs(lp.lam) > 10.) {
                 pj_ctx_set_errno( P->ctx, -14);

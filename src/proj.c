@@ -20,6 +20,10 @@
 #define MAX_LINE 1000
 #define MAX_PARGS 100
 #define PJ_INVERS(P) (P->inv ? 1 : 0)
+
+extern void gen_cheb(int, projUV(*)(projUV), char *, PJ *, int, char **);
+
+
 	static PJ
 *Proj;
 	static projUV
@@ -58,7 +62,7 @@ int_proj(projUV data) {
 }
 	static void	/* file processing function */
 process(FILE *fid) {
-	char line[MAX_LINE+3], *s, pline[40];
+	char line[MAX_LINE+3], *s = 0, pline[40];
 	projUV data;
 
 	for (;;) {
@@ -91,7 +95,7 @@ process(FILE *fid) {
 				data.u = HUGE_VAL;
 			if (!*s && (s > line)) --s; /* assumed we gobbled \n */
 			if (!bin_out && echoin) {
-				int t;
+				char t;
 				t = *s;
 				*s = '\0';
 				(void)fputs(line, stdout);
@@ -440,8 +444,6 @@ int main(int argc, char **argv) {
     } else
         proj = pj_fwd;
     if (cheby_str) {
-        extern void gen_cheb(int, projUV(*)(projUV), char *, PJ *, int, char **);
-
         gen_cheb(inverse, int_proj, cheby_str, Proj, iargc, iargv);
         exit(0);
     }

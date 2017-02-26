@@ -346,7 +346,7 @@ PJ *PROJECTION(helmert) {
         between the conventions.
 
     ***************************************************************************/
-    do {
+    {
         double  f,  t,  p;    /* phi/fi , theta, psi  */
         double cf, ct, cp;    /* cos (fi, theta, psi) */
         double sf, st, sp;    /* sin (fi, theta, psi) */
@@ -368,28 +368,29 @@ PJ *PROJECTION(helmert) {
             R20 =  t;
             R21 = -f;
             R22 =  1;
-            break;
         }
+        else {
+            cf = cos(f);
+            sf = sin(f);
+            ct = cos(t);
+            st = sin(t);
+            cp = cos(p);
+            sp = sin(p);
 
-        cf = cos(f);
-        sf = sin(f);
-        ct = cos(t);
-        st = sin(t);
-        cp = cos(p);
-        sp = sin(p);
 
+            R00 = ct*cp;
+            R01 = cf*sp + sf*st*cp;
+            R02 = sf*sp - cf*st*cp;
 
-        R00 = ct*cp;
-        R01 = cf*sp + sf*st*cp;
-        R02 = sf*sp - cf*st*cp;
+            R10 = -ct*sp;
+            R11 =  cf*cp - sf*st*sp;
+            R12 =  sf*cp + cf*st*sp;
 
-        R10 = -ct*sp;
-        R11 =  cf*cp - sf*st*sp;
-        R12 =  sf*cp + cf*st*sp;
-
-        R20 =  st;
-        R21 = -sf*ct;
-        R22 =  cf*ct;
+            R20 =  st;
+            R21 = -sf*ct;
+            R22 =  cf*ct;
+        }
+    }
 
     /*
         For comparison: Description from Engsager/Poder implementation
@@ -416,8 +417,6 @@ PJ *PROJECTION(helmert) {
 
         trp->scale = 1.0 + scale;
     */
-
-    } while (0);
 
 
     if (transpose) {

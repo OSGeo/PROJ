@@ -317,6 +317,12 @@ sph_azimuth(double f_lon, double f_lat, double t_lon, double t_lat)
     return az;
 }
 
+#ifdef _MSC_VER
+#pragma warning( push )
+/* disable unreachable code warning for return 0 */
+#pragma warning( disable : 4702 )
+#endif
+
 /* coord needs to be in radians */
 ISEA_STATIC
 int
@@ -490,6 +496,10 @@ isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
     /* not reached */
     return 0;       /* suppresses a warning */
 }
+
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 
 /*
  * return the new coordinates of any point in original coordinate system.
@@ -911,8 +921,11 @@ ISEA_STATIC
 int isea_hex(struct isea_dgg *g, int tri,
         struct isea_pt *pt, struct isea_pt *hex) {
     struct isea_pt v;
+#ifdef FIXME
     int sidelength;
-    int d, i, x, y, quad;
+    int d, i, x, y;
+#endif
+    int quad;
 
     quad = isea_ptdi(g, tri, pt, &v);
 
@@ -920,7 +933,7 @@ int isea_hex(struct isea_dgg *g, int tri,
     hex->y = v.y;
 
     return 1;
-
+#ifdef FIXME
     d = (int)v.x;
     i = (int)v.y;
 
@@ -964,6 +977,7 @@ int isea_hex(struct isea_dgg *g, int tri,
     }
 
     return 1;
+#endif
 }
 
 ISEA_STATIC

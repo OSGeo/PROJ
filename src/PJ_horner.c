@@ -396,7 +396,7 @@ static void freeup (PJ *P) {
 
 
 static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
-    char *buf, *init, *next;
+    char *buf, *init, *next = 0;
     int i;
 
     buf = pj_calloc (strlen (param) + 2, sizeof(char));
@@ -414,7 +414,7 @@ static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
 
     for (i = 0; i < ncoefs; i++) {
         if (i > 0) {
-            if (','!=*next) {
+            if ( next == 0 || ','!=*next) {
                 pj_log_error (P, "Horner: Malformed polynomium set %s. need %d coefs", param, ncoefs);
                 return 0;
             }
