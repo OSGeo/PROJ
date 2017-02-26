@@ -59,83 +59,115 @@ TestItem test_list[] = {
         "+proj=utm +zone=11 +datum=WGS84",
         "+proj=latlong +datum=WGS84",
         150000.0, 3000000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=utm +zone=11 +datum=NAD83",
         "+proj=latlong +datum=NAD27",
-        150000.0, 3000000.0, 0.0,  
+        150000.0, 3000000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=utm +zone=11 +datum=NAD83",
         "+proj=latlong +nadgrids=@null +ellps=WGS84",
         150000.0, 3000000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=utm +zone=11 +datum=WGS84",
         "+proj=merc +datum=potsdam",
         150000.0, 3000000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=latlong +nadgrids=nzgd2kgrid0005.gsb",
         "+proj=latlong +datum=WGS84",
         150000.0, 3000000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=latlong +nadgrids=nzgd2kgrid0005.gsb",
         "+proj=latlong +datum=WGS84",
         170 * DEG_TO_RAD, -40 * DEG_TO_RAD, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=latlong +ellps=GRS80 +towgs84=2,3,5",
         "+proj=latlong +ellps=intl +towgs84=10,12,15",
         170 * DEG_TO_RAD, -40 * DEG_TO_RAD, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=eqc +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
         "+proj=stere +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
         150000.0, 250000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=cea +lat_ts=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=merc +lon_0=12 +k=0.999 +x_0=100000 +y_0=200000 +datum=WGS84 ",
         150000.0, 250000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=bonne +lat_1=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=cass +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
         150000.0, 250000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=nzmg +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=gnom +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
         150000.0, 250000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=ortho +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=laea +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
         150000.0, 250000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=aeqd +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=eqdc +lat_1=20 +lat_2=5 +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
         150000.0, 250000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+proj=mill +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=moll +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
         150000.0, 250000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
     {
         "+init=epsg:3309",
         "+init=epsg:4326",
         150000.0, 30000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
     },
-	{
-		//Bad projection (invalid ellipsoid parameter +R_A=0)
-		"+proj=utm +zone=11 +datum=WGS84",
-		"+proj=merc +datum=potsdam +R_A=0",
-		150000.0, 3000000.0, 0.0,
-	}
+    {
+        //Bad projection (invalid ellipsoid parameter +R_A=0)
+        "+proj=utm +zone=11 +datum=WGS84",
+        "+proj=merc +datum=potsdam +R_A=0",
+        150000.0, 3000000.0, 0.0,
+        0.0, 0.0, 0.0,
+        0, 0
+    }
 };
 
 static volatile int active_thread_count = 0;
@@ -297,6 +329,7 @@ static DWORD WINAPI WinTestThread( LPVOID lpParameter )
 static void *PosixTestThread( void *pData )
 
 {
+    (void)pData;
     TestThread();
     return NULL;
 }
@@ -308,7 +341,7 @@ static void *PosixTestThread( void *pData )
 #ifdef _WIN32
 static DWORD WINAPI do_main( LPVOID unused )
 #else
-int do_main(void)
+static int do_main(void)
 #endif
 {
 /* -------------------------------------------------------------------- */
