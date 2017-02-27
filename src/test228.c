@@ -57,15 +57,12 @@ static void* thread_main(void* unused)
     return NULL;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     int i;
 
     pthread_t tid1, tid2;
     pthread_attr_t attr1, attr2;
-
-    (void)argc;
-    (void)argv;
 
     pthread_attr_init(&attr1);
     pthread_attr_init(&attr2);
