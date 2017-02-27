@@ -28,7 +28,7 @@ static void swap_words( void *data_in, int word_size, int word_count )
         
         for( i = 0; i < word_size/2; i++ )
         {
-            int	t;
+            unsigned char	t;
             
             t = data[i];
             data[i] = data[word_size-i-1];
@@ -127,16 +127,16 @@ int main(int argc, char **argv) {
             fprintf(stderr,"format check on row\n");
             exit(1);
         }
-        t.lam = laml * U_SEC_TO_RAD;
-        t.phi = phil * U_SEC_TO_RAD;
+        t.lam = (float) (laml * U_SEC_TO_RAD);
+        t.phi = (float) (phil * U_SEC_TO_RAD);
         *p++ = t;
         for (j = 1; j < ct.lim.lam; ++j) {
             if ( EOF == scanf("%ld %ld", &lam, &phi) ) {
                 perror("scanf on column");
                 exit(1);
             }
-            t.lam = (laml += lam) * U_SEC_TO_RAD;
-            t.phi = (phil += phi) * U_SEC_TO_RAD;
+            t.lam = (float) ((laml += lam) * U_SEC_TO_RAD);
+            t.phi = (float) ((phil += phi) * U_SEC_TO_RAD);
             *p++ = t;
         }
     }
@@ -342,16 +342,14 @@ int main(int argc, char **argv) {
 
             for( row = 0; row < ct.lim.phi; row++ )
             {
-                int	    i;
-
                 for( i = 0; i < ct.lim.lam; i++ )
                 {
                     FLP *cvs = ct.cvs + (row) * ct.lim.lam
                         + (ct.lim.lam - i - 1);
 
                     /* convert radians to seconds */
-                    row_buf[i*4+0] = cvs->phi * (3600.0 / (M_PI/180.0));
-                    row_buf[i*4+1] = cvs->lam * (3600.0 / (M_PI/180.0));
+                    row_buf[i*4+0] = (float) (cvs->phi * (3600.0 / (M_PI/180.0)));
+                    row_buf[i*4+1] = (float) (cvs->lam * (3600.0 / (M_PI/180.0)));
 
                     /* We leave the accuracy values as zero */
                 }

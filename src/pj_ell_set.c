@@ -45,7 +45,7 @@ int pj_ell_set(projCtx ctx, paralist *pl, double *a, double *es) {
             *es = e * e;
         } else if (pj_param(ctx,pl, "trf").i) { /* recip flattening */
             *es = pj_param(ctx,pl, "drf").f;
-            if (!*es) {
+            if (*es == 0.0) {
                 pj_ctx_set_errno( ctx, -10);
                 goto bomb;
             }
@@ -58,7 +58,7 @@ int pj_ell_set(projCtx ctx, paralist *pl, double *a, double *es) {
             b = pj_param(ctx,pl, "db").f;
             *es = 1. - (b * b) / (*a * *a);
         }     /* else *es == 0. and sphere of radius *a */
-        if (!b)
+        if (b == 0.0)
             b = *a * sqrt(1. - *es);
         /* following options turn ellipsoid into equivalent sphere */
         if (pj_param(ctx,pl, "bR_A").i) { /* sphere--area of ellipsoid */

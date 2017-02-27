@@ -83,9 +83,9 @@ mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(projUV),
             for (j = 0; j < nu; ++j) {
                 ncu[j] = ncv[j] = 0; /* clear column maxes */
                 for (s = w[j], i = 0; i < nv; ++i, ++s) {
-                    if (s->u)
+                    if (s->u != 0.0)
                         ncu[j] = i + 1;	/* update column max */
-                    if (s->v)
+                    if (s->v != 0.0)
                         ncv[j] = i + 1;
                 }
                 if (ncu[j]) nru = j + 1;	/* update row max */

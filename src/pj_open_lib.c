@@ -113,7 +113,7 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
     if (*name == '~' && strchr(dir_chars,name[1]) )
         if ((sysname = getenv("HOME")) != NULL) {
             (void)strcpy(fname, sysname);
-            fname[n = strlen(fname)] = DIR_CHAR;
+            fname[n = (int)strlen(fname)] = DIR_CHAR;
             fname[++n] = '\0';
             (void)strcpy(fname+n, name + 1);
             sysname = fname;
@@ -134,7 +134,7 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
     /* or is environment PROJ_LIB defined */
     else if ((sysname = getenv("PROJ_LIB")) || (sysname = proj_lib_name)) {
         (void)strcpy(fname, sysname);
-        fname[n = strlen(fname)] = DIR_CHAR;
+        fname[n = (int)strlen(fname)] = DIR_CHAR;
         fname[++n] = '\0';
         (void)strcpy(fname+n, name);
         sysname = fname;

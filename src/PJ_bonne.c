@@ -102,7 +102,7 @@ PJ *PROJECTION(bonne) {
 
 	Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
 	if (fabs(Q->phi1) < EPS10) E_ERROR(-23);
-	if (P->es) {
+	if (P->es != 0.0) {
 		Q->en = pj_enfn(P->es);
 		Q->m1 = pj_mlfn(Q->phi1, Q->am1 = sin(Q->phi1),
 			c = cos(Q->phi1), Q->en);

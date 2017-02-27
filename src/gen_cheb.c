@@ -8,13 +8,18 @@
 #ifndef COEF_LINE_MAX
 #define COEF_LINE_MAX 60
 #endif
-	void
-gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P, int iargc, char **iargv) {
+
+/* FIXME: put the declaration in a header. Also used in proj.c */
+void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
+              int iargc, char **iargv);
+extern void p_series(Tseries *, FILE *, char *);
+
+void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
+              int iargc, char **iargv) {
 	int NU = 15, NV = 15, res = -1, errin = 0, pwr;
 	char *arg, fmt[15];
 	projUV low, upp, resid;
 	Tseries *F;
-	extern void p_series(Tseries *, FILE *, char *);
 	double (*input)(const char *, char **);
 
 	input = inverse ? strtod : dmstor;

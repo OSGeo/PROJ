@@ -20,11 +20,12 @@ int main(int argc, char* argv[])
 volatile int run = 0;
 volatile int started = 0;
 
-void* thread_main(void* unused)
+static void* thread_main(void* unused)
 {
     projCtx p_proj_ctxt;
     projPJ p_WGS84_proj;
     projPJ p_OSGB36_proj;
+    (void)unused;
 
     __sync_add_and_fetch(&started, 1);
     while(run == 0);
@@ -59,8 +60,12 @@ void* thread_main(void* unused)
 int main(int argc, char* argv[])
 {
     int i;
+
     pthread_t tid1, tid2;
     pthread_attr_t attr1, attr2;
+
+    (void)argc;
+    (void)argv;
 
     pthread_attr_init(&attr1);
     pthread_attr_init(&attr2);

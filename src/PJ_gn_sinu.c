@@ -47,7 +47,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
 
-    if (!Q->m)
+    if (Q->m == 0.0)
         lp.phi = Q->n != 1. ? aasin(P->ctx,Q->n * sin(lp.phi)): lp.phi;
     else {
         double k, V;
@@ -75,7 +75,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     struct pj_opaque *Q = P->opaque;
 
     xy.y /= Q->C_y;
-    lp.phi = Q->m ? aasin(P->ctx,(Q->m * xy.y + sin(xy.y)) / Q->n) :
+    lp.phi = (Q->m != 0.0) ? aasin(P->ctx,(Q->m * xy.y + sin(xy.y)) / Q->n) :
         ( Q->n != 1. ? aasin(P->ctx,sin(xy.y) / Q->n) : xy.y );
     lp.lam = xy.x / (Q->C_x * (Q->m + cos(xy.y)));
     return lp;
@@ -122,7 +122,7 @@ PJ *PROJECTION(sinu) {
     if (!(Q->en = pj_enfn(P->es)))
         E_ERROR_0;
 
-    if (P->es) {
+    if (P->es != 0.0) {
         P->inv = e_inverse;
         P->fwd = e_forward;
     } else {

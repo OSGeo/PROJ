@@ -5,8 +5,6 @@ platform:
 environment:
   matrix:
 
-  - BUILD_TYPE: nmake
-
 # Does not work
 # VS 2008
 #  - BUILD_TYPE: cmake
@@ -24,6 +22,8 @@ environment:
   - BUILD_TYPE: cmake
     VS_VERSION: Visual Studio 12
 
+  - BUILD_TYPE: nmake
+
 shallow_clone: true
 
 build_script:
@@ -40,7 +40,8 @@ build_script:
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
   - if "%BUILD_TYPE%" == "cmake" echo "%VS_FULL%"
-  - if "%BUILD_TYPE%" == "cmake" cmake -G "%VS_FULL%" . -DSELFTEST=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=../bin -DBUILD_LIBPROJ_SHARED=ON
+# warning C4706: assignment within conditional expression
+  - if "%BUILD_TYPE%" == "cmake" cmake -G "%VS_FULL%" . -DSELFTEST=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=../bin -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/W4 /wd4706 /WX /D_CRT_SECURE_NO_WARNINGS"
   - if "%BUILD_TYPE%" == "cmake" cmake --build . --config Release
 
 test_script:

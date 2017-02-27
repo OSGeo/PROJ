@@ -411,7 +411,7 @@ PJ *PROJECTION(utm) {
         return freeup_new (P);
     P->opaque = Q;
 
-	if (!P->es)
+	if (P->es == 0.0)
         E_ERROR(-34);
 	P->y0 = pj_param (P->ctx, P->params, "bsouth").i ? 10000000. : 0.;
 	P->x0 = 500000.;

@@ -162,7 +162,7 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **tables, int grid_count,
                 for( child = gi->child; child != NULL; child = child->next )
                 {
                     struct CTABLE *ct1 = child->ct;
-                    double epsilon = 
+                    epsilon = 
                         (fabs(ct1->del.phi)+fabs(ct1->del.lam))/10000.0;
 
                     if( ct1->ll.phi - epsilon > input.phi 

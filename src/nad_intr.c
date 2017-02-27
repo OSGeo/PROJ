@@ -10,8 +10,8 @@ nad_intr(LP t, struct CTABLE *ct) {
 	long index;
 	int in;
 
-	indx.lam = floor(t.lam /= ct->del.lam);
-	indx.phi = floor(t.phi /= ct->del.phi);
+	indx.lam = (int)floor(t.lam /= ct->del.lam);
+	indx.phi = (int)floor(t.phi /= ct->del.phi);
 	frct.lam = t.lam - indx.lam;
 	frct.phi = t.phi - indx.phi;
 	val.lam = val.phi = HUGE_VAL;

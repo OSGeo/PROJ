@@ -29,7 +29,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     double V;
     int i;
 
-    if (Q->n) {
+    if (Q->n != 0.0) {
         lp.phi = xy.y;
         for (i = MAX_ITER; i ; --i) {
             lp.phi -= V = (Q->n * lp.phi + Q->n1 * sin(lp.phi) - xy.y ) /

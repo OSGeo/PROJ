@@ -94,7 +94,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
-    double t, r, rp, rl, al, z, fAz, Az, s, c, Av;
+    double t, r, rp, rl, al, z = 0.0, fAz, Az, s, c, Av;
     int neg, i;
 
     if (Q->noskew) {

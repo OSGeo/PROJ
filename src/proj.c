@@ -20,6 +20,10 @@
 #define MAX_LINE 1000
 #define MAX_PARGS 100
 #define PJ_INVERS(P) (P->inv ? 1 : 0)
+
+extern void gen_cheb(int, projUV(*)(projUV), char *, PJ *, int, char **);
+
+
 	static PJ
 *Proj;
 	static projUV
@@ -58,7 +62,7 @@ int_proj(projUV data) {
 }
 	static void	/* file processing function */
 process(FILE *fid) {
-	char line[MAX_LINE+3], *s, pline[40];
+	char line[MAX_LINE+3], *s = 0, pline[40];
 	projUV data;
 
 	for (;;) {
@@ -91,7 +95,7 @@ process(FILE *fid) {
 				data.u = HUGE_VAL;
 			if (!*s && (s > line)) --s; /* assumed we gobbled \n */
 			if (!bin_out && echoin) {
-				int t;
+				char t;
 				t = *s;
 				*s = '\0';
 				(void)fputs(line, stdout);
@@ -247,7 +251,7 @@ vprocess(FILE *fid) {
 int main(int argc, char **argv) {
     char *arg, **eargv = argv, *pargv[MAX_PARGS], **iargv = argv;
     FILE *fid;
-    int pargc = 0, iargc = argc, eargc = 0, c, mon = 0;
+    int pargc = 0, iargc = argc, eargc = 0, mon = 0;
 
     if ( (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != NULL)
         ++emess_dat.Prog_name;
@@ -381,12 +385,15 @@ int main(int argc, char **argv) {
                 continue;
               case 'W': /* specify seconds precision */
               case 'w': /* -W for constant field width */
-                if ((c = arg[1]) != 0 && isdigit(c)) {
+              {
+                int c = arg[1];
+                if (c != 0 && isdigit(c)) {
                     set_rtodms(c - '0', *arg == 'W');
                     ++arg;
                 } else
                     emess(1,"-W argument missing or non-digit");
                 continue;
+              }
               case 'f': /* alternate output format degrees or xy */
                 if (--argc <= 0) goto noargument;
                 oform = *++argv;
@@ -437,8 +444,6 @@ int main(int argc, char **argv) {
     } else
         proj = pj_fwd;
     if (cheby_str) {
-        extern void gen_cheb(int, projUV(*)(projUV), char *, PJ *, int, char **);
-
         gen_cheb(inverse, int_proj, cheby_str, Proj, iargc, iargv);
         exit(0);
     }
@@ -447,7 +452,7 @@ int main(int argc, char **argv) {
         pj_pr_list(Proj);
         if (very_verby) {
             (void)printf("#Final Earth figure: ");
-            if (Proj->es) {
+            if (Proj->es != 0.0) {
                 (void)printf("ellipsoid\n#  Major axis (a): ");
                 (void)printf(oform ? oform : "%.3f", Proj->a);
                 (void)printf("\n#  1/flattening: %.6f\n",

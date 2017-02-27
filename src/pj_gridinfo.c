@@ -63,7 +63,7 @@ static void swap_words( unsigned char *data, int word_size, int word_count )
 
         for( i = 0; i < word_size/2; i++ )
         {
-            int	t;
+            unsigned char	t;
 
             t = data[i];
             data[i] = data[word_size-i-1];
@@ -244,8 +244,8 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
                 cvs = ct_tmp.cvs + (row) * gi->ct->lim.lam
                     + (gi->ct->lim.lam - i - 1);
 
-                cvs->phi = *(diff_seconds++) * ((M_PI/180.0) / 3600.0);
-                cvs->lam = *(diff_seconds++) * ((M_PI/180.0) / 3600.0);
+                cvs->phi = (float) (*(diff_seconds++) * ((M_PI/180.0) / 3600.0));
+                cvs->lam = (float) (*(diff_seconds++) * ((M_PI/180.0) / 3600.0));
             }
         }
 
@@ -324,8 +324,8 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
                 cvs = ct_tmp.cvs + (row) * gi->ct->lim.lam
                     + (gi->ct->lim.lam - i - 1);
 
-                cvs->phi = *(diff_seconds++) * ((M_PI/180.0) / 3600.0);
-                cvs->lam = *(diff_seconds++) * ((M_PI/180.0) / 3600.0);
+                cvs->phi = (float) (*(diff_seconds++) * ((M_PI/180.0) / 3600.0));
+                cvs->lam = (float) (*(diff_seconds++) * ((M_PI/180.0) / 3600.0));
                 diff_seconds += 2; /* skip accuracy values */
             }
         }
@@ -427,7 +427,15 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
 
     assert( sizeof(int) == 4 );
     assert( sizeof(double) == 8 );
+#ifdef _MSC_VER
+#pragma warning( push )
+/* disable conditional expression is constant */
+#pragma warning( disable : 4127 )
+#endif
     if( sizeof(int) != 4 || sizeof(double) != 8 )
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
     {
         pj_log( ctx, PJ_LOG_ERROR,
              "basic types of inappropraiate size in pj_gridinfo_init_ntv2()" );
@@ -640,7 +648,15 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
 
     assert( sizeof(int) == 4 );
     assert( sizeof(double) == 8 );
+#ifdef _MSC_VER
+#pragma warning( push )
+/* disable conditional expression is constant */
+#pragma warning( disable : 4127 )
+#endif
     if( sizeof(int) != 4 || sizeof(double) != 8 )
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
     {
         pj_log( ctx, PJ_LOG_ERROR,
                  "basic types of inappropraiate size in nad_load_ntv1()" );
@@ -728,7 +744,15 @@ static int pj_gridinfo_init_gtx( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
 
     assert( sizeof(int) == 4 );
     assert( sizeof(double) == 8 );
+#ifdef _MSC_VER
+#pragma warning( push )
+/* disable conditional expression is constant */
+#pragma warning( disable : 4127 )
+#endif
     if( sizeof(int) != 4 || sizeof(double) != 8 )
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
     {
         pj_log( ctx, PJ_LOG_ERROR,
                 "basic types of inappropraiate size in nad_load_gtx()" );

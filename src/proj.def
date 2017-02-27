@@ -92,8 +92,6 @@ EXPORTS
     pj_create                       @90
     pj_create_argv                  @91
     pj_trans                        @92
-    pj_fwdobs                       @93
-    pj_invobs                       @94
     pj_roundtrip                    @95
     pj_log_level                    @96
     pj_err_level                    @97
@@ -108,5 +106,3 @@ EXPORTS
     pj_lp_dist                     @106
     pj_xy_dist                     @107
     pj_xyz_dist                    @108
-    pj_coo_error                   @109
-    pj_obs_error                   @110

@@ -73,7 +73,7 @@ static const char *fill_buffer(pj_read_state *state, const char *last_char)
 /*      Move the existing data to the start of the buffer.              */
 /* -------------------------------------------------------------------- */
     memmove(state->buffer, last_char, char_remaining);
-    state->buffer_filled = char_remaining;
+    state->buffer_filled = (int)char_remaining;
     last_char = state->buffer;
 
 /* -------------------------------------------------------------------- */
@@ -116,7 +116,7 @@ static const char *fill_buffer(pj_read_state *state, const char *last_char)
         *w++ = *r++;
     }
     *w = 0;
-    state->buffer_filled += (bytes_read - (r-w));
+    state->buffer_filled += (int)(bytes_read - (r-w));
 
     return last_char;
 }
@@ -139,7 +139,7 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
     if(found_def)
         *found_def = 0;
 
-    len = strlen(name);
+    len = (int)strlen(name);
     *sword = 't';
 
     if (0==next_char)
@@ -512,15 +512,15 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* flattening */
     PIN->f  = 1 - cos (PIN->alpha);   /* = 1 - sqrt (1 - PIN->es); */
-    PIN->rf = PIN->f? 1.0/PIN->f: HUGE_VAL;
+    PIN->rf = PIN->f != 0.0 ? 1.0/PIN->f: HUGE_VAL;
 
     /* second flattening */
     PIN->f2  = 1/cos (PIN->alpha) - 1;
-    PIN->rf2 = PIN->f2? 1/PIN->f2: HUGE_VAL;
+    PIN->rf2 = PIN->f2 != 0.0 ? 1/PIN->f2: HUGE_VAL;
 
     /* third flattening */
     PIN->n  = pow (tan (PIN->alpha/2), 2);
-    PIN->rn = PIN->n? 1/PIN->n: HUGE_VAL;
+    PIN->rn = PIN->n != 0.0 ? 1/PIN->n: HUGE_VAL;
 
     /* ...and a few more */
     PIN->b  = (1 - PIN->f)*PIN->a;
@@ -545,7 +545,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     }
 
     /* set PIN->geoc coordinate system */
-    PIN->geoc = (PIN->es && pj_param(ctx, start, "bgeoc").i);
+    PIN->geoc = (PIN->es != 0.0 && pj_param(ctx, start, "bgeoc").i);
 
     /* over-ranging flag */
     PIN->over = pj_param(ctx, start, "bover").i;

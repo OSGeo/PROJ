@@ -155,7 +155,7 @@ static void freeup (PJ *P) {
 PJ *PROJECTION(calcofi) {
     P->opaque = 0;
 
-    if (P->es) { /* ellipsoid */
+    if (P->es != 0.0) { /* ellipsoid */
         P->inv = e_inverse;
         P->fwd = e_forward;
     } else { /* sphere */

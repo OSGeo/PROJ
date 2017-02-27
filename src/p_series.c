@@ -4,8 +4,11 @@
 #include <string.h>
 #define NF 20 /* length of final format string */
 #define CUT 60 /* check length of line */
-	void
-p_series(Tseries *T, FILE *file, char *fmt) {
+
+/* FIXME: put the declaration in a header. Also used in gen_cheb.c */
+void p_series(Tseries *T, FILE *file, char *fmt);
+
+void p_series(Tseries *T, FILE *file, char *fmt) {
 	int i, j, n, L;
 	char format[NF+1];
 

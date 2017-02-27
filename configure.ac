@@ -21,7 +21,10 @@ AC_PROG_MAKE_SET
 AM_PROG_LIBTOOL
 
 dnl Checks for libraries.
+save_CFLAGS="$CFLAGS"
+CFLAGS=`echo "$CFLAGS" | sed "s/-Werror/ /"`
 AC_CHECK_LIB(m,exp,,,)
+CFLAGS="$save_CFLAGS"
 
 dnl We check for headers
 AC_HEADER_STDC

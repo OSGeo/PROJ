@@ -222,7 +222,7 @@ static PJ *setup(PJ *P) {                   /* general initialization */
         Q->mode = t > EPS10 ? OBLIQ : EQUIT;
     Q->phits = fabs (Q->phits);
 
-    if (P->es) {
+    if (P->es != 0.0) {
         double X;
 
         switch (Q->mode) {
@@ -295,7 +295,7 @@ PJ *PROJECTION(ups) {
 
 	/* International Ellipsoid */
 	P->phi0 = pj_param(P->ctx, P->params, "bsouth").i ? - M_HALFPI: M_HALFPI;
-	if (!P->es) E_ERROR(-34);
+	if (P->es == 0.0) E_ERROR(-34);
 	P->k0 = .994;
 	P->x0 = 2000000.;
 	P->y0 = 2000000.;

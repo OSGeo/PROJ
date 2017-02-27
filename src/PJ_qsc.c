@@ -115,7 +115,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     /* Convert the geodetic latitude to a geocentric latitude.
      * This corresponds to the shift from the ellipsoid to the sphere
      * described in [LK12]. */
-    if (P->es) {
+    if (P->es != 0.0) {
         lat = atan(Q->one_minus_f_squared * tan(lp.phi));
     } else {
         lat = lp.phi;
@@ -292,7 +292,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         }
     } else {
         /* Compute phi and lam via cartesian unit sphere coordinates. */
-        double q, r, s, t;
+        double q, r, s;
         q = cosphi;
         t = q * q;
         if (t >= 1.0) {
@@ -346,7 +346,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 
     /* Apply the shift from the sphere to the ellipsoid as described
      * in [LK12]. */
-    if (P->es) {
+    if (P->es != 0.0) {
         int invert_sign;
         double tanphi, xa;
         invert_sign = (lp.phi < 0.0 ? 1 : 0);
@@ -400,7 +400,7 @@ PJ *PROJECTION(qsc) {
     }
     /* Fill in useful values for the ellipsoid <-> sphere shift
      * described in [LK12]. */
-    if (P->es) {
+    if (P->es != 0.0) {
         Q->a_squared = P->a * P->a;
         Q->b = P->a * sqrt(1.0 - P->es);
         Q->one_minus_f = 1.0 - (P->a - Q->b) / P->a;

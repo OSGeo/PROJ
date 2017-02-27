@@ -56,7 +56,7 @@ PJ *PROJECTION(merc) {
         if (phits >= M_HALFPI) E_ERROR(-24);
     }
 
-    if (P->es) { /* ellipsoid */
+    if (P->es != 0.0) { /* ellipsoid */
         if (is_phits)
             P->k0 = pj_msfn(sin(phits), cos(phits), P->es);
         P->inv = e_inverse;

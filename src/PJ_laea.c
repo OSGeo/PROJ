@@ -152,7 +152,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         /*-fallthrough*/
     case S_POLE:
         q = (xy.x * xy.x + xy.y * xy.y);
-        if (!q) {
+        if (q == 0.0) {
             lp.lam = 0.;
             lp.phi = P->phi0;
             return (lp);
@@ -237,7 +237,7 @@ PJ *PROJECTION(laea) {
         Q->mode = EQUIT;
     else
         Q->mode = OBLIQ;
-    if (P->es) {
+    if (P->es != 0.0) {
         double sinphi;
 
         P->e = sqrt(P->es);

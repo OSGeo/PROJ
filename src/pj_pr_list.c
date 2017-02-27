@@ -11,7 +11,7 @@ pr_list(PJ *P, int not_used) {
 	(void)putchar('#');
 	for (t = P->params; t; t = t->next)
 		if ((!not_used && t->used) || (not_used && !t->used)) {
-			l = strlen(t->param) + 1;
+			l = (int)strlen(t->param) + 1;
 			if (n + l > LINE_LEN) {
 				(void)fputs("\n#", stdout);
 				n = 2;
@@ -71,7 +71,7 @@ char *pj_get_def( PJ *P, int options )
             continue;
 
         /* grow the resulting string if needed */
-        l = strlen(t->param) + 1;
+        l = (int)strlen(t->param) + 1;
         if( strlen(definition) + l + 5 > def_max )
         {
             char *def2;

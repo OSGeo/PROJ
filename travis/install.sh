@@ -88,6 +88,7 @@ mkdir share
 ln -s nad share/proj
 pwd
   # install pyproj
+export CFLAGS=
 PROJ_DIR=`pwd` pip3 install -v --user pyproj
 
 cd test/gigs

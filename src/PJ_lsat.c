@@ -22,6 +22,7 @@ static void seraz0(double lam, double mult, PJ *P) {
     s = Q->p22 * Q->sa * cos(lam) * sqrt((1. + Q->t * sdsq)
         / ((1. + Q->w * sdsq) * (1. + Q->q * sdsq)));
 
+    d__1 = 1. + Q->q * sdsq;
     h = sqrt((1. + Q->q * sdsq) / (1. + Q->w * sdsq)) * ((1. + Q->w * sdsq)
         / (d__1 * d__1) - Q->p22 * Q->ca);
 
@@ -40,7 +41,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
     int l, nn;
-    double lamt, xlam, sdsq, c, d, s, lamdp, phidp, lampp, tanph;
+    double lamt = 0.0, xlam, sdsq, c, d, s, lamdp = 0.0, phidp, lampp, tanph;
     double lamtp, cl, sd, sp, fac, sav, tanphi;
 
     if (lp.phi > M_HALFPI)

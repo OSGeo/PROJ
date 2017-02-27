@@ -25,6 +25,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#include "proj.h"
 #include <projects.h>
 #include <string.h>
 #include <stdarg.h>

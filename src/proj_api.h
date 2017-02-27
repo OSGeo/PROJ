@@ -192,7 +192,7 @@ void pj_log( projCtx ctx, int level, const char *fmt, ... );
 void pj_stderr_logger( void *, int, const char * );
 
 /* file api */
-projFileAPI *pj_get_default_fileapi();
+projFileAPI *pj_get_default_fileapi(void);
 
 PAFile pj_ctx_fopen(projCtx ctx, const char *filename, const char *access);
 size_t pj_ctx_fread(projCtx ctx, void *buffer, size_t size, size_t nmemb, PAFile file);

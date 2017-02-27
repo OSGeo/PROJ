@@ -153,7 +153,7 @@ oblcon:
 static LP e_guam_inv(XY xy, PJ *P) { /* Guam elliptical */
     LP lp = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
-    double x2, t;
+    double x2, t = 0.0;
     int i;
 
     x2 = 0.5 * xy.x * xy.x;
@@ -278,7 +278,7 @@ PJ *PROJECTION(aeqd) {
         Q->sinph0 = sin(P->phi0);
         Q->cosph0 = cos(P->phi0);
     }
-    if (! P->es) {
+    if (P->es == 0.0) {
         P->inv = s_inverse;
         P->fwd = s_forward;
     } else {
