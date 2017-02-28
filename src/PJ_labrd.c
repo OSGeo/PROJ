@@ -46,7 +46,10 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     LP lp = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
-    double x2, y2, V1, V2, V3, V4, t, t2, ps, pe, tpe, s;
+    /* t = 0.0 optimization is to avoid a false positive cppcheck warning */
+    /* (cppcheck git beaf29c15867984aa3c2a15cf15bd7576ccde2b3). Might no */
+    /* longer be necessary with later versions. */
+    double x2, y2, V1, V2, V3, V4, t = 0.0, t2, ps, pe, tpe, s;
     double I7, I8, I9, I10, I11, d, Re;
     int i;
 
@@ -60,6 +63,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     xy.y +=   Q->Cb * V1 - Q->Ca * V2 - Q->Cd * V3 + Q->Cc * V4;
     ps = Q->p0s + xy.y / Q->kRg;
     pe = ps + P->phi0 - Q->p0s;
+
     for ( i = 20; i; --i) {
         V1 = Q->A * log(tan(M_FORTPI + .5 * pe));
         tpe = P->e * sin(pe);

@@ -75,7 +75,9 @@ PJ *PROJECTION(oea) {
 
 	if (((Q->n = pj_param(P->ctx, P->params, "dn").f) <= 0.) ||
 		((Q->m = pj_param(P->ctx, P->params, "dm").f) <= 0.))
+        {
 		E_ERROR(-39)
+        }
 	else {
 		Q->theta = pj_param(P->ctx, P->params, "rtheta").f;
 		Q->sp0 = sin(P->phi0);

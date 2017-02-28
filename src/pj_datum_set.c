@@ -71,7 +71,10 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
             char	entry[100];
             
             strcpy( entry, "ellps=" );
-            strncat( entry, pj_datums[i].ellipse_id, 80 );
+            strncpy( entry + strlen(entry), pj_datums[i].ellipse_id,
+                     sizeof(entry) - 1 - strlen(entry) );
+            entry[ sizeof(entry) - 1 ] = '\0';
+
             curr = curr->next = pj_mkparam(entry);
         }
         

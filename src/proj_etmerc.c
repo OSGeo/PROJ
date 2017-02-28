@@ -416,15 +416,21 @@ PJ *PROJECTION(utm) {
 	P->y0 = pj_param (P->ctx, P->params, "bsouth").i ? 10000000. : 0.;
 	P->x0 = 500000.;
 	if (pj_param (P->ctx, P->params, "tzone").i) /* zone input ? */
-		if ((zone = pj_param(P->ctx, P->params, "izone").i) > 0 && zone <= 60)
+	{
+		zone = pj_param(P->ctx, P->params, "izone").i;
+		if (zone > 0 && zone <= 60)
 			--zone;
 		else
 			E_ERROR(-35)
+	}
 	else /* nearest central meridian input */
-		if ((zone = (int)(floor ((adjlon (P->lam0) + M_PI) * 30. / M_PI))) < 0)
+	{
+		zone = (int)(floor ((adjlon (P->lam0) + M_PI) * 30. / M_PI));
+		if (zone < 0)
 			zone = 0;
 		else if (zone >= 60)
 			zone = 59;
+	}
 	P->lam0 = (zone + .5) * M_PI / 30. - M_PI;
 	P->k0 = 0.9996;
 	P->phi0 = 0.;

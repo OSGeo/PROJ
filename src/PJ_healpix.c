@@ -446,7 +446,6 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
                        int inverse) {
     XY xy;
     double v[2];
-    double a[2];
     double c[2];
     double vector[2];
     double v_min_c[2];
@@ -467,8 +466,7 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
     if (inverse == 0) {
         /* Rotate (x, y) about its polar cap tip and then translate it to
            north_square or south_square. */
-        a[0] =  -3*M_FORTPI + pole*M_HALFPI;
-        a[1] =  M_HALFPI;
+
         if (capmap.region == north) {
             pole = north_square;
             tmpRot = rot[get_rotate_index(capmap.cn - pole)];
@@ -479,8 +477,7 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
     } else {
         /* Inverse function.
          Unrotate (x, y) and then translate it back. */
-        a[0] = -3*M_FORTPI + capmap.cn*M_HALFPI;
-        a[1] = M_HALFPI;
+
         /* disassemble */
         if (capmap.region == north) {
             pole = north_square;
@@ -493,7 +490,14 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
 
     vector_sub(v, c, v_min_c);
     dot_product(tmpRot, v_min_c, ret_dot);
-    vector_add(ret_dot, a, vector);
+    {
+        double a[2];
+        /* Workaround cppcheck git issue */
+        double* pa = a;
+        pa[0] = -3*M_FORTPI + ((inverse == 0) ? 0 : capmap.cn) *M_HALFPI;
+        pa[1] = M_HALFPI;
+        vector_add(ret_dot, a, vector);
+    }
 
     xy.x = vector[0];
     xy.y = vector[1];

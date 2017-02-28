@@ -70,12 +70,21 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
         
         if( catalog->entry_count == entry_max ) 
         {
+            PJ_GridCatalogEntry* new_entries;
             entry_max = entry_max * 2;
-            catalog->entries = (PJ_GridCatalogEntry *) 
+            new_entries = (PJ_GridCatalogEntry *) 
                 realloc(catalog->entries, 
                         entry_max * sizeof(PJ_GridCatalogEntry));
-            if (catalog->entries == NULL )
+            if (new_entries == NULL )
+            {
+                int i;
+                for( i = 0; i < catalog->entry_count; i++ )
+                    free( catalog->entries[i].definition );
+                free( catalog->catalog_name );
+                free( catalog );
                 return NULL;
+            }
+            catalog->entries = new_entries;
         }
     }
 
@@ -184,8 +193,6 @@ static int pj_gc_readentry(projCtx ctx, PAFile fid, PJ_GridCatalogEntry *entry)
     }
     else
     {
-        memset( entry, 0, sizeof(PJ_GridCatalogEntry));
-        
         entry->definition = strdup( tokens[0] );
         entry->region.ll_long = dmstor_ctx( ctx, tokens[1], NULL );
         entry->region.ll_lat = dmstor_ctx( ctx, tokens[2], NULL );
