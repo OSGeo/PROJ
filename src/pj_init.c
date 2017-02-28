@@ -288,7 +288,8 @@ get_init(projCtx ctx, paralist **start, paralist *next, char *name,
     paralist *init_items = NULL;
     const paralist *orig_next = next;
 
-    (void)strncpy(fname, name, MAX_PATH_FILENAME + ID_TAG_MAX + 1);
+    (void)strncpy(fname, name, sizeof(fname)-2);
+    fname[sizeof(fname)-2] = '\0';
 
     /*
     ** Search for file/key pair in cache

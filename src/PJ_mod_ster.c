@@ -46,7 +46,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     struct pj_opaque *Q = P->opaque;
     int nn;
     COMPLEX p, fxy, fpxy, dp;
-    double den, rh = 0.0, z, sinz = 0.0, cosz = 0.0, chi, phi = 0.0, dphi, esphi;
+    double den, rh = 0.0, z, sinz = 0.0, cosz = 0.0, chi, phi = 0.0, esphi;
 
     p.r = xy.x;
     p.i = xy.y;
@@ -79,6 +79,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         chi = aasin(P->ctx, cosz * Q->schio + p.i * sinz * Q->cchio / rh);
         phi = chi;
         for (nn = 20; nn ;--nn) {
+            double dphi;
             esphi = P->e * sin(phi);
             dphi = 2. * atan(tan((M_HALFPI + chi) * .5) *
                 pow((1. + esphi) / (1. - esphi), P->e * .5)) - M_HALFPI - phi;

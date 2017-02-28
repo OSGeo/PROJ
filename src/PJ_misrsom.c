@@ -60,21 +60,28 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     struct pj_opaque *Q = P->opaque;
     int l, nn;
     double lamt = 0.0, xlam, sdsq, c, d, s, lamdp = 0.0, phidp, lampp, tanph;
-    double lamtp, cl, sd, sp, fac, sav, tanphi;
+    double lamtp, cl, sd, sp, sav, tanphi;
 
     if (lp.phi > M_HALFPI)
         lp.phi = M_HALFPI;
     else if (lp.phi < -M_HALFPI)
         lp.phi = -M_HALFPI;
-    lampp = lp.phi >= 0. ? M_HALFPI : M_PI_HALFPI;
+    if (lp.phi >= 0. )
+        lampp = M_HALFPI;
+    else
+        lampp = M_PI_HALFPI;
     tanphi = tan(lp.phi);
     for (nn = 0;;) {
+            double fac;
             sav = lampp;
             lamtp = lp.lam + Q->p22 * lampp;
             cl = cos(lamtp);
             if (fabs(cl) < TOL)
                 lamtp -= TOL;
-            fac = lampp - sin(lampp) * (cl < 0. ? -M_HALFPI : M_HALFPI);
+            if( cl < 0 )
+                fac = lampp + sin(lampp) * M_HALFPI;
+            else
+                fac = lampp - sin(lampp) * M_HALFPI;
             for (l = 50; l; --l) {
                     lamt = lp.lam + Q->p22 * sav;
                     if (fabs(c = cos(lamt)) < TOL)
