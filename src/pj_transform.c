@@ -282,7 +282,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     }
 
 /* -------------------------------------------------------------------- */
-/*      Do we need to translate from geoid to ellipsoidal vertical      */
+/*      Do we need to translate from ellipsoidal to geoid vertical      */
 /*      datum?                                                          */
 /* -------------------------------------------------------------------- */
     if( dstdefn->has_geoid_vgrids && z != NULL )
