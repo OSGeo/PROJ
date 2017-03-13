@@ -29,7 +29,7 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
         pj_apply_gridshift_3( P->ctx, P->gridlist,
-                              P->gridlist_count, 0, 1, 0,
+                              P->gridlist_count, 1, 1, 0,
                               &point.xyz.x, &point.xyz.y, &point.xyz.z );
     }
 
@@ -45,7 +45,7 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
         pj_apply_gridshift_3( P->ctx, P->gridlist,
-                              P->gridlist_count, 1, 1, 0,
+                              P->gridlist_count, 0, 1, 0,
                               &point.xyz.x, &point.xyz.y, &point.xyz.z );
     }
 
