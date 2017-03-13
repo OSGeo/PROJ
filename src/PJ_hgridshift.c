@@ -104,16 +104,23 @@ int pj_hgridshift_selftest (void) {return 0;}
 #else
 int pj_hgridshift_selftest (void) {
     PJ *P;
-    PJ_OBS a;
+    PJ_OBS expect, a, b;
     double dist;
 
-    /* Since the nzgd2kgrid0005.gsb grid is not part of the
-     * basic PROJ.4 distribution we only include it as an
-     * optional grid in the test. The test is fairly useless
-     * if the grid isn't found, but at least it won't fail
-     * because of a missing file */
-    P = pj_create ("+proj=hgridshift +grids=@nzgd2kgrid0005.gsb +ellps=GRS80");
+    /* fail on purpose: +grids parameter it mandatory*/
+    P = pj_create("+proj=hgridshift");
+    if (0!=P)
+        return 99;
+
+    /* fail on purpose: open non-existing grid */
+    P = pj_create("+proj=hgridshift +grids=nonexistinggrid.gsb");
+    if (0!=P)
+        return 999;
+
+
+    P = pj_create ("+proj=hgridshift +grids=nzgd2kgrid0005.gsb +ellps=GRS80");
     if (0==P)
+        /* very likely the grid is missing */
         return 10;
 
     a = pj_obs_null;
@@ -123,6 +130,13 @@ int pj_hgridshift_selftest (void) {
     dist = pj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 0.00000001)
         return 1;
+
+    expect.coo.lpz.lam = TORAD(172.999892181021551);
+    expect.coo.lpz.phi = TORAD(-45.001620431954613);
+    b = pj_trans(P, PJ_FWD, a);
+    if (pj_xy_dist(expect.coo.xy, b.coo.xy) > 1e-4)
+        return 2;
+
 
     pj_free(P);
 

@@ -31,7 +31,7 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
         pj_apply_vgridshift( P, "sgrids",
                              &(P->vgridlist_geoid),
                              &(P->vgridlist_geoid_count),
-                             0, 1, 0,
+                             1, 1, 0,
                              &point.xyz.x, &point.xyz.y, &point.xyz.z );
     }
 
@@ -49,7 +49,7 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
         pj_apply_vgridshift( P, "sgrids",
                              &(P->vgridlist_geoid),
                              &(P->vgridlist_geoid_count),
-                             1, 1, 0,
+                             0, 1, 0,
                              &point.xyz.x, &point.xyz.y, &point.xyz.z );
     }
 
@@ -107,15 +107,22 @@ int pj_vgridshift_selftest (void) {return 0;}
 #else
 int pj_vgridshift_selftest (void) {
     PJ *P;
-    PJ_OBS a;
+    PJ_OBS expect, a, b;
     double dist;
 
-    /* Since the egm96 grid is not part of the basic PROJ.4 distribution we
-     * only include it as a optional grid in the test.
-     * The test is fairly useless if the grid isn't found, but at least it
-     * won't fail because of a missing file */
-    P = pj_create ("+proj=vgridshift +grids=@egm96_15.gtx +ellps=GRS80");
+    /* fail on purpose: +grids parameter it mandatory*/
+    P = pj_create("+proj=vgridshift");
+    if (0!=P)
+        return 99;
+
+    /* fail on purpose: open non-existing grid */
+    P = pj_create("+proj=vgridshift +grids=nonexistinggrid.gtx");
+    if (0!=P)
+        return 999;
+
+    P = pj_create ("+proj=vgridshift +grids=egm96_15.gtx +ellps=GRS80");
     if (0==P)
+        /* most likely the grid wasn't found */
         return 10;
 
     a = pj_obs_null;
@@ -125,6 +132,13 @@ int pj_vgridshift_selftest (void) {
     dist = pj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 0.00000001)
         return 1;
+
+    expect = a;
+    expect.coo.lpz.z   = -36.021305084228515625;
+    b = pj_trans(P, PJ_FWD, a);
+    if (pj_xyz_dist(expect.coo.xyz, b.coo.xyz) > 1e-10)
+        return 2;
+
 
     pj_free(P);
 
