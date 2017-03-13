@@ -47,6 +47,8 @@ wget http://download.osgeo.org/proj/proj-datumgrid-1.6.zip
 cd nad
 unzip -o ../proj-datumgrid-1.6.zip
 wget http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
+GRIDDIR=`pwd`
+echo $GRIDDIR
 cd ..
 # cmake build with grids
 mkdir build_cmake_nad
@@ -78,7 +80,7 @@ if [ $TRAVIS_OS_NAME == "osx" ]; then
     fi
 make -j3
 make check
-PROJ_LIB=../nad ./src/proj -VC
+PROJ_LIB=$GRIDDIR ./src/proj -VC
   
 # install & run the working GIGS test
   # create locations that pyproj understands
