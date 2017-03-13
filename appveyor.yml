@@ -46,8 +46,8 @@ build_script:
 
 test_script:
   - echo test_script
-  - if "%BUILD_TYPE%" == "nmake" set PROJDIR=C:\PROJ\bin
-  - if "%BUILD_TYPE%" == "cmake" set PROJDIR= C:\projects\proj-4\bin
+  - if "%BUILD_TYPE%" == "nmake" set PROJDIR=C:\PROJ
+  - if "%BUILD_TYPE%" == "cmake" set PROJDIR= C:\projects\proj-4
   - cd %PROJDIR%\nad
   - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.6.zip
   - curl -O http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
