@@ -51,7 +51,7 @@ test_script:
   - cd %PROJDIR%\nad
   - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.6.zip
   - curl -O http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
-  - 7z e proj-datumgrid-1.6.zip
+  - 7z e -aoa -y proj-datumgrid-1.6.zip
   - cd %PROJDIR%\bin
   - echo "Contents of current directory:"
   - dir
