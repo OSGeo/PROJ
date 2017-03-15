@@ -160,6 +160,11 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
     if( ctx->last_errno == 0 && errno != 0 )
         pj_ctx_set_errno( ctx, errno );
 
+    /* WARNING: GDAL in alg/gdalapplyverticalshiftgrid.cpp relies on the */
+    /* fact that we emit a log message with this debug level and with */
+    /* a string that has "fopen(full_path)" in it ! */
+    /* This is messy I know, and we should likely have a proper API to do */
+    /* that */
     pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
             "pj_open_lib(%s): call fopen(%s) - %s\n",
             name, sysname,
