@@ -202,7 +202,8 @@ void   pj_ctx_fclose(projCtx ctx, PAFile file);
 char  *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file);
 
 PAFile pj_open_lib(projCtx, const char *, const char *);
-
+int pj_find_file(projCtx ctx, const char *short_filename,
+                 char* out_full_filename, size_t out_full_filename_size);
 
 #ifdef __cplusplus
 }

@@ -106,3 +106,4 @@ EXPORTS
     pj_lp_dist                     @106
     pj_xy_dist                     @107
     pj_xyz_dist                    @108
+    pj_find_file                   @109
