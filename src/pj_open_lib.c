@@ -91,11 +91,12 @@ void pj_set_searchpath ( int count, const char **path )
 }
 
 /************************************************************************/
-/*                            pj_open_lib()                             */
+/*                          pj_open_lib_ex()                            */
 /************************************************************************/
 
-PAFile
-pj_open_lib(projCtx ctx, const char *name, const char *mode) {
+static PAFile
+pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
+               char* out_full_filename, size_t out_full_filename_size) {
     char fname[MAX_PATH_FILENAME+1];
     const char *sysname;
     PAFile fid;
@@ -108,6 +109,9 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
 #endif
 
 #ifndef _WIN32_WCE
+
+    if( out_full_filename != NULL && out_full_filename_size > 0 )
+        out_full_filename[0] = '\0';
 
     /* check if ~/name */
     if (*name == '~' && strchr(dir_chars,name[1]) )
@@ -142,7 +146,14 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
         sysname = name;
 
     if ((fid = pj_ctx_fopen(ctx, sysname, mode)) != NULL)
+    {
+        if( out_full_filename != NULL && out_full_filename_size > 0 )
+        {
+            strncpy(out_full_filename, sysname, out_full_filename_size);
+            out_full_filename[out_full_filename_size-1] = '\0';
+        }
         errno = 0;
+    }
 
     /* If none of those work and we have a search path, try it */
     if (!fid && path_count > 0)
@@ -154,17 +165,19 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
             fid = pj_ctx_fopen(ctx, sysname, mode);
         }
         if (fid)
+        {
+            if( out_full_filename != NULL && out_full_filename_size > 0 )
+            {
+                strncpy(out_full_filename, sysname, out_full_filename_size);
+                out_full_filename[out_full_filename_size-1] = '\0';
+            }
             errno = 0;
+        }
     }
 
     if( ctx->last_errno == 0 && errno != 0 )
         pj_ctx_set_errno( ctx, errno );
 
-    /* WARNING: GDAL in alg/gdalapplyverticalshiftgrid.cpp relies on the */
-    /* fact that we emit a log message with this debug level and with */
-    /* a string that has "fopen(full_path)" in it ! */
-    /* This is messy I know, and we should likely have a proper API to do */
-    /* that */
     pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
             "pj_open_lib(%s): call fopen(%s) - %s\n",
             name, sysname,
@@ -174,4 +187,41 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
 #else
     return NULL;
 #endif /* _WIN32_WCE */
+}
+
+/************************************************************************/
+/*                            pj_open_lib()                             */
+/************************************************************************/
+
+PAFile
+pj_open_lib(projCtx ctx, const char *name, const char *mode) {
+    return pj_open_lib_ex(ctx, name, mode, NULL, 0);
+}
+
+/************************************************************************/
+/*                           pj_find_file()                             */
+/************************************************************************/
+
+/** Returns the full filename corresponding to a proj resource file specified
+ *  as a short filename.
+ * 
+ * @param ctx context.
+ * @param short_filename short filename (e.g. egm96_15.gtx)
+ * @param out_full_filename output buffer, of size out_full_filename_size, that
+ *                          will receive the full filename on success.
+ *                          Will be zero-terminated.
+ * @param out_full_filename_size size of out_full_filename.
+ * @return 1 if the file was found, 0 otherwise.
+ */
+int pj_find_file(projCtx ctx, const char *short_filename,
+                 char* out_full_filename, size_t out_full_filename_size)
+{
+    PAFile f = pj_open_lib_ex(ctx, short_filename, "rb", out_full_filename,
+                              out_full_filename_size);
+    if( f != NULL )
+    {
+        pj_ctx_fclose(ctx, f);
+        return 1;
+    }
+    return 0;
 }
