@@ -120,9 +120,9 @@ int pj_vgridshift_selftest (void) {
     if (0!=P)
         return 999;
 
+    /* Failure most likely means the grid is missing */
     P = pj_create ("+proj=vgridshift +grids=egm96_15.gtx +ellps=GRS80");
     if (0==P)
-        /* most likely the grid wasn't found */
         return 10;
 
     a = pj_obs_null;

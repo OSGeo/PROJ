@@ -107,7 +107,7 @@ int pj_hgridshift_selftest (void) {
     PJ_OBS expect, a, b;
     double dist;
 
-    /* fail on purpose: +grids parameter it mandatory*/
+    /* fail on purpose: +grids parameter is mandatory*/
     P = pj_create("+proj=hgridshift");
     if (0!=P)
         return 99;
@@ -118,9 +118,9 @@ int pj_hgridshift_selftest (void) {
         return 999;
 
 
+    /* Failure most likely means the grid is missing */
     P = pj_create ("+proj=hgridshift +grids=nzgd2kgrid0005.gsb +ellps=GRS80");
     if (0==P)
-        /* very likely the grid is missing */
         return 10;
 
     a = pj_obs_null;
