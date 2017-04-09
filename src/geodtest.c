@@ -6,7 +6,7 @@
  *
  * Copyright (c) Charles Karney (2015-2017) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
- * http://geographiclib.sourceforge.net/
+ * https://geographiclib.sourceforge.io/
  **********************************************************************/
 
 /** @cond SKIP */
@@ -254,7 +254,7 @@ static int GeodSolve5() {
   result += assertEquals(lat2, 90, 0.5e-5);
   if (lon2 < 0) {
     result += assertEquals(lon2, -150, 0.5e-5);
-    result += assertEquals(azi2, -180, 0.5e-5);
+    result += assertEquals(fabs(azi2), 180, 0.5e-5);
   } else {
     result += assertEquals(lon2, 30, 0.5e-5);
     result += assertEquals(azi2, 0, 0.5e-5);
@@ -340,7 +340,7 @@ static int GeodSolve14() {
   struct geod_geodesic g;
   int result = 0;
   {
-    double minus1 = -1.0;
+    double minus1 = -1;
     nan = sqrt(minus1);
   }
   geod_init(&g, wgs84_a, wgs84_f);
@@ -434,11 +434,11 @@ static int GeodSolve33() {
   result += assertEquals(s12, 19980862, 0.5);
   geod_inverse(&g, 0, 0, 0, 180, &s12, &azi1, &azi2);
   result += assertEquals(azi1, 0.00000, 0.5e-5);
-  result += assertEquals(azi2, -180.00000, 0.5e-5);
+  result += assertEquals(fabs(azi2), 180.00000, 0.5e-5);
   result += assertEquals(s12, 20003931, 0.5);
   geod_inverse(&g, 0, 0, 1, 180, &s12, &azi1, &azi2);
   result += assertEquals(azi1, 0.00000, 0.5e-5);
-  result += assertEquals(azi2, -180.00000, 0.5e-5);
+  result += assertEquals(fabs(azi2), 180.00000, 0.5e-5);
   result += assertEquals(s12, 19893357, 0.5);
   geod_init(&g, 6.4e6, 0);
   geod_inverse(&g, 0, 0, 0, 179, &s12, &azi1, &azi2);
@@ -447,11 +447,11 @@ static int GeodSolve33() {
   result += assertEquals(s12, 19994492, 0.5);
   geod_inverse(&g, 0, 0, 0, 180, &s12, &azi1, &azi2);
   result += assertEquals(azi1, 0.00000, 0.5e-5);
-  result += assertEquals(azi2, -180.00000, 0.5e-5);
+  result += assertEquals(fabs(azi2), 180.00000, 0.5e-5);
   result += assertEquals(s12, 20106193, 0.5);
   geod_inverse(&g, 0, 0, 1, 180, &s12, &azi1, &azi2);
   result += assertEquals(azi1, 0.00000, 0.5e-5);
-  result += assertEquals(azi2, -180.00000, 0.5e-5);
+  result += assertEquals(fabs(azi2), 180.00000, 0.5e-5);
   result += assertEquals(s12, 19994492, 0.5);
   geod_init(&g, 6.4e6, -1/300.0);
   geod_inverse(&g, 0, 0, 0, 179, &s12, &azi1, &azi2);
@@ -468,7 +468,7 @@ static int GeodSolve33() {
   result += assertEquals(s12, 20082617, 0.5);
   geod_inverse(&g, 0, 0, 1, 180, &s12, &azi1, &azi2);
   result += assertEquals(azi1, 0.00000, 0.5e-5);
-  result += assertEquals(azi2, -180.00000, 0.5e-5);
+  result += assertEquals(fabs(azi2), 180.00000, 0.5e-5);
   result += assertEquals(s12, 20027270, 0.5);
 
   return result;
@@ -481,7 +481,7 @@ static int GeodSolve55() {
   struct geod_geodesic g;
   int result = 0;
   {
-    double minus1 = -1.0;
+    double minus1 = -1;
     nan = sqrt(minus1);
   }
   geod_init(&g, wgs84_a, wgs84_f);
@@ -521,12 +521,12 @@ static int GeodSolve61() {
                  &lat2, &lon2, &azi2, 0, 0, 0, 0, 0);
   result += assertEquals(lat2, 45.30632, 0.5e-5);
   result += assertEquals(lon2, -180, 0.5e-5);
-  result += assertEquals(azi2, -180, 0.5e-5);
+  result += assertEquals(fabs(azi2), 180, 0.5e-5);
   geod_inverseline(&l, &g, 45, 0, 80, -0.000000000000000003, 0);
   geod_genposition(&l, flags, 1e7, &lat2, &lon2, &azi2, 0, 0, 0, 0, 0);
   result += assertEquals(lat2, 45.30632, 0.5e-5);
   result += assertEquals(lon2, -180, 0.5e-5);
-  result += assertEquals(azi2, -180, 0.5e-5);
+  result += assertEquals(fabs(azi2), 180, 0.5e-5);
   return result;
 }
 
@@ -545,7 +545,7 @@ static int GeodSolve65() {
                          &lat2, &lon2, &azi2, &s12, &m12, &M12, &M21, &S12);
   result += assertEquals(lat2, -60.23169, 0.5e-5);
   result += assertEquals(lon2, -0.00000, 0.5e-5);
-  result += assertEquals(azi2, -180.00000, 0.5e-5);
+  result += assertEquals(fabs(azi2), 180.00000, 0.5e-5);
   result += assertEquals(s12, 10000000, 0.5);
   result += assertEquals(a12, 90.06544, 0.5e-5);
   result += assertEquals(m12, 6363636, 0.5);

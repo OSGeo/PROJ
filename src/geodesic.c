@@ -14,13 +14,13 @@
  *   Algorithms for geodesics,
  *   J. Geodesy <b>87</b>, 43--55 (2013);
  *   https://doi.org/10.1007/s00190-012-0578-z
- *   Addenda: http://geographiclib.sourceforge.net/geod-addenda.html
+ *   Addenda: https://geographiclib.sourceforge.io/geod-addenda.html
  *
  * See the comments in geodesic.h for documentation.
  *
  * Copyright (c) Charles Karney (2012-2017) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
- * http://geographiclib.sourceforge.net/
+ * https://geographiclib.sourceforge.io/
  */
 
 #include "geodesic.h"
@@ -86,8 +86,8 @@ static void Init() {
     xthresh = 1000 * tol2;
     degree = pi/180;
     {
-        double minus1 = -1.0;
-        NaN = sqrt(minus1);
+      real minus1 = -1;
+      NaN = sqrt(minus1);
     }
     init = 1;
   }
@@ -171,21 +171,21 @@ static void norm2(real* sinx, real* cosx) {
 
 static real AngNormalize(real x) {
   x = fmod(x, (real)(360));
-  return x < -180 ? x + 360 : (x < 180 ? x : x - 360);
+  return x <= -180 ? x + 360 : (x <= 180 ? x : x - 360);
 }
 
 static real LatFix(real x)
 { return fabs(x) > 90 ? NaN : x; }
 
 static real AngDiff(real x, real y, real* e) {
-  real t, d = - AngNormalize(sumx(AngNormalize(x), AngNormalize(-y), &t));
-  /* Here y - x = d - t (mod 360), exactly, where d is in (-180,180] and
+  real t, d = AngNormalize(sumx(AngNormalize(-x), AngNormalize(y), &t));
+  /* Here y - x = d + t (mod 360), exactly, where d is in (-180,180] and
    * abs(t) <= eps (eps = 2^-45 for doubles).  The only case where the
    * addition of t takes the result outside the range (-180,180] is d = 180
-   * and t < 0.  The case, d = -180 + eps, t = eps, can't happen, since
+   * and t > 0.  The case, d = -180 + eps, t = -eps, can't happen, since
    * sum would have returned the exact result in such a case (i.e., given t
    * = 0). */
-  return sumx(d == 180 && t < 0 ? -180 : d, -t, e);
+  return sumx(d == 180 && t > 0 ? -180 : d, t, e);
 }
 
 static real AngRound(real x) {
@@ -210,11 +210,12 @@ static void sincosdx(real x, real* sinx, real* cosx) {
   /* Possibly could call the gnu extension sincos */
   s = sin(r); c = cos(r);
   switch ((unsigned)q & 3U) {
-  case 0U: *sinx =     s; *cosx =     c; break;
-  case 1U: *sinx =     c; *cosx = 0 - s; break;
-  case 2U: *sinx = 0 - s; *cosx = 0 - c; break;
-  default: *sinx = 0 - c; *cosx =     s; break; /* case 3U */
+  case 0U: *sinx =  s; *cosx =  c; break;
+  case 1U: *sinx =  c; *cosx = -s; break;
+  case 2U: *sinx = -s; *cosx = -c; break;
+  default: *sinx = -c; *cosx =  s; break; /* case 3U */
   }
+  if (x) { *sinx += (real)(0); *cosx += (real)(0); }
 }
 
 static real atan2dx(real y, real x) {
@@ -233,7 +234,7 @@ static real atan2dx(real y, real x) {
      *
      *   case 0: ang = 0 + ang; break;
      */
-  case 1: ang = (y > 0 ? 180 : -180) - ang; break;
+  case 1: ang = (y >= 0 ? 180 : -180) - ang; break;
   case 2: ang =  90 - ang; break;
   case 3: ang = -90 + ang; break;
   }
@@ -1752,8 +1753,8 @@ int transit(real lon1, real lon2) {
   lon1 = AngNormalize(lon1);
   lon2 = AngNormalize(lon2);
   lon12 = AngDiff(lon1, lon2, 0);
-  return lon1 < 0 && lon2 >= 0 && lon12 > 0 ? 1 :
-    (lon2 < 0 && lon1 >= 0 && lon12 < 0 ? -1 : 0);
+  return lon1 <= 0 && lon2 > 0 && lon12 > 0 ? 1 :
+    (lon2 <= 0 && lon1 > 0 && lon12 < 0 ? -1 : 0);
 }
 
 int transitdirect(real lon1, real lon2) {
@@ -1816,7 +1817,7 @@ void geod_polygon_addpoint(const struct geod_geodesic* g,
     p->lat0 = p->lat = lat;
     p->lon0 = p->lon = lon;
   } else {
-    real s12, S12;
+    real s12, S12 = 0;       /* Initialize S12 to stop Visual Studio warning */
     geod_geninverse(g, p->lat, p->lon, lat, lon,
                     &s12, 0, 0, 0, 0, 0, p->polyline ? 0 : &S12);
     accadd(p->P, s12);
@@ -1833,7 +1834,7 @@ void geod_polygon_addedge(const struct geod_geodesic* g,
                           struct geod_polygon* p,
                           real azi, real s) {
   if (p->num) {                 /* Do nothing is num is zero */
-    real lat, lon, S12;
+    real lat, lon, S12 = 0;  /* Initialize S12 to stop Visual Studio warning */
     geod_gendirect(g, p->lat, p->lon, azi, GEOD_LONG_UNROLL, s,
                    &lat, &lon, 0,
                    0, 0, 0, 0, p->polyline ? 0 : &S12);
@@ -1908,7 +1909,7 @@ unsigned geod_polygon_testpoint(const struct geod_geodesic* g,
   tempsum = p->polyline ? 0 : p->A[0];
   crossings = p->crossings;
   for (i = 0; i < (p->polyline ? 1 : 2); ++i) {
-    real s12, S12;
+    real s12, S12 = 0;       /* Initialize S12 to stop Visual Studio warning */
     geod_geninverse(g,
                     i == 0 ? p->lat  : lat, i == 0 ? p->lon  : lon,
                     i != 0 ? p->lat0 : lat, i != 0 ? p->lon0 : lon,
