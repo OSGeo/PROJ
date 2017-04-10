@@ -9,7 +9,7 @@
  *   J. Geodesy <b>87</b>, 43--55 (2013);
  *   DOI: <a href="https://doi.org/10.1007/s00190-012-0578-z">
  *   10.1007/s00190-012-0578-z</a>;
- *   addenda: <a href="http://geographiclib.sourceforge.net/geod-addenda.html">
+ *   addenda: <a href="https://geographiclib.sourceforge.io/geod-addenda.html">
  *   geod-addenda.html</a>.
  * .
  * The principal advantages of these algorithms over previous ones (e.g.,
@@ -96,7 +96,7 @@
  *   [\e d, \e d], for arbitrary \e d.
  *
  * These routines are a simple transcription of the corresponding C++ classes
- * in <a href="http://geographiclib.sourceforge.net"> GeographicLib</a>.  The
+ * in <a href="https://geographiclib.sourceforge.io"> GeographicLib</a>.  The
  * "class data" is represented by the structs geod_geodesic, geod_geodesicline,
  * geod_polygon and pointers to these objects are passed as initial arguments
  * to the member functions.  Most of the internal comments have been retained.
@@ -107,12 +107,12 @@
  * twice about restructuring the internals of the C code since this may make
  * porting fixes from the C++ code more difficult.
  *
- * Copyright (c) Charles Karney (2012-2016) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2012-2017) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
- * http://geographiclib.sourceforge.net/
+ * https://geographiclib.sourceforge.io/
  *
  * This library was distributed with
- * <a href="../index.html">GeographicLib</a> 1.47.
+ * <a href="../index.html">GeographicLib</a> 1.48.
  **********************************************************************/
 
 #if !defined(GEODESIC_H)
@@ -127,12 +127,12 @@
  * The minor version of the geodesic library.  (This tracks the version of
  * GeographicLib.)
  **********************************************************************/
-#define GEODESIC_VERSION_MINOR 47
+#define GEODESIC_VERSION_MINOR 48
 /**
  * The patch level of the geodesic library.  (This tracks the version of
  * GeographicLib.)
  **********************************************************************/
-#define GEODESIC_VERSION_PATCH 0
+#define GEODESIC_VERSION_PATCH 1
 
 /**
  * Pack the version components into a single integer.  Users should not rely on
@@ -242,7 +242,7 @@ extern "C" {
    *
    * \e g must have been initialized with a call to geod_init().  \e lat1
    * should be in the range [&minus;90&deg;, 90&deg;].  The values of \e lon2
-   * and \e azi2 returned are in the range [&minus;180&deg;, 180&deg;).  Any of
+   * and \e azi2 returned are in the range [&minus;180&deg;, 180&deg;].  Any of
    * the "return" arguments \e plat2, etc., may be replaced by 0, if you do not
    * need some quantities computed.
    *
@@ -327,7 +327,7 @@ extern "C" {
    *
    * \e g must have been initialized with a call to geod_init().  \e lat1 and
    * \e lat2 should be in the range [&minus;90&deg;, 90&deg;].  The values of
-   * \e azi1 and \e azi2 returned are in the range [&minus;180&deg;, 180&deg;).
+   * \e azi1 and \e azi2 returned are in the range [&minus;180&deg;, 180&deg;].
    * Any of the "return" arguments, \e ps12, etc., may be replaced by 0, if you
    * do not need some quantities computed.
    *
@@ -525,7 +525,7 @@ extern "C" {
    *
    * \e l must have been initialized with a call, e.g., to geod_lineinit(),
    * with \e caps |= GEOD_DISTANCE_IN.  The values of \e lon2 and \e azi2
-   * returned are in the range [&minus;180&deg;, 180&deg;).  Any of the
+   * returned are in the range [&minus;180&deg;, 180&deg;].  Any of the
    * "return" arguments \e plat2, etc., may be replaced by 0, if you do not
    * need some quantities computed.
    *
@@ -594,7 +594,7 @@ extern "C" {
    *
    * \e l must have been initialized with a call to geod_lineinit() with \e
    * caps |= GEOD_DISTANCE_IN.  The value \e azi2 returned is in the range
-   * [&minus;180&deg;, 180&deg;).  Any of the "return" arguments \e plat2,
+   * [&minus;180&deg;, 180&deg;].  Any of the "return" arguments \e plat2,
    * etc., may be replaced by 0, if you do not need some quantities
    * computed.  Requesting a value which \e l is not capable of computing
    * is not an error; the corresponding argument will not be altered.
