@@ -215,7 +215,7 @@ static void sincosdx(real x, real* sinx, real* cosx) {
   case 2U: *sinx = -s; *cosx = -c; break;
   default: *sinx = -c; *cosx =  s; break; /* case 3U */
   }
-  if (x) { *sinx += (real)(0); *cosx += (real)(0); }
+  if (x != 0) { *sinx += (real)(0); *cosx += (real)(0); }
 }
 
 static real atan2dx(real y, real x) {
