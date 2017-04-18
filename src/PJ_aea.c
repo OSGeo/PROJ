@@ -193,8 +193,7 @@ PJ *PROJECTION(aea) {
 
 	Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
 	Q->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
-    setup(P);
-    return P;
+    return setup(P);
 }
 
 
@@ -206,8 +205,7 @@ PJ *PROJECTION(leac) {
 
 	Q->phi2 = pj_param(P->ctx, P->params, "rlat_1").f;
 	Q->phi1 = pj_param(P->ctx, P->params, "bsouth").i ? - M_HALFPI: M_HALFPI;
-    setup (P);
-    return P;
+    return setup(P);
 }
 
 
