@@ -252,9 +252,6 @@ int pj_cart_selftest (void) {
     if (0==P)
         return 2;
 
-    /* Turn off logging */
-    pj_log_level (0, PJ_LOG_NONE);
-
     /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
     a = pj_obs_null;
     /* a.coo.lp: The coordinate part of a, interpreted as a classic LP pair */
