@@ -215,7 +215,7 @@ vprocess(FILE *fid) {
 		}
 		if (!*s && (s > line)) --s; /* assumed we gobbled \n */
 		if (pj_factors(dat_ll, Proj, 0., &facs)) {
-			emess(-1,"failed to conpute factors\n\n");
+			emess(-1,"failed to compute factors\n\n");
 			continue;
 		}
 		if (*s != '\n')
