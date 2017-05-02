@@ -350,7 +350,7 @@ static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     PJ_TRIPLET point;
-    double X, Y, Z, scale, dt;
+    double X, Y, Z, scale;
 
     if (Q->no_rotation) {
         point.xyz.x = lpz.lam + Q->xyz.x;
@@ -384,7 +384,7 @@ static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     PJ_TRIPLET point;
-    double X, Y, Z, scale, dt;
+    double X, Y, Z, scale;
 
     point.xyz = xyz;
 
@@ -644,7 +644,8 @@ int pj_helmert_selftest (void) {
        matrix is updated when necessary. Test coordinates from GNSStrans. */
     XYZ expect4a = {3370658.18890, 711877.42370, 5349787.12430};
     XYZ expect4b = {3370658.18087, 711877.42750, 5349787.12648};
-    PJ_OBS in4 = {{3370658.378, 711877.314, 5349787.086, 2017.0}}, out;
+    PJ_OBS in4 = {{{3370658.378, 711877.314, 5349787.086, 2017.0}}, {{ 0, 0, 0}}, 0, 0};
+    PJ_OBS out;
 
     PJ *helmert = pj_create(
         " +proj=helmert"
