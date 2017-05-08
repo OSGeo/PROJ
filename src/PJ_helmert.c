@@ -16,7 +16,7 @@
 
 Thomas Knudsen, thokn@sdfe.dk, 2016-05-24/06-05
 Kristian Evers, kreve@sdfe.dk, 2017-05-01
-Last update: 2017-05-01
+Last update: 2017-05-08
 
 ************************************************************************
 * Copyright (c) 2016, Thomas Knudsen / SDFE
@@ -148,14 +148,16 @@ static void update_parameters(PJ *P) {
     Q->scale = Q->scale_0 + Q->dscale * dt;
 
     /* debugging output */
-    pj_log_trace(P, "Transformation parameters for observation epoch %g:", Q->t_obs);
-    pj_log_trace(P, "x: %g", Q->xyz.x);
-    pj_log_trace(P, "y: %g", Q->xyz.y);
-    pj_log_trace(P, "z: %g", Q->xyz.z);
-    pj_log_trace(P, "s: %g", Q->scale*1e-6);
-    pj_log_trace(P, "rx: %g", Q->opk.o);
-    pj_log_trace(P, "ry: %g", Q->opk.p);
-    pj_log_trace(P, "rz: %g", Q->opk.k);
+    if (pj_err_level(P, PJ_ERR_TELL) >= PJ_LOG_TRACE) {
+        pj_log_trace(P, "Transformation parameters for observation epoch %g:", Q->t_obs);
+        pj_log_trace(P, "x: %g", Q->xyz.x);
+        pj_log_trace(P, "y: %g", Q->xyz.y);
+        pj_log_trace(P, "z: %g", Q->xyz.z);
+        pj_log_trace(P, "s: %g", Q->scale*1e-6);
+        pj_log_trace(P, "rx: %g", Q->opk.o);
+        pj_log_trace(P, "ry: %g", Q->opk.p);
+        pj_log_trace(P, "rz: %g", Q->opk.k);
+    }
     return;
 }
 
@@ -303,10 +305,12 @@ static void build_rot_matrix(PJ *P) {
     }
 
     /* some debugging output */
-    pj_log_trace(P, "Rotation Matrix:");
-    pj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R00, R01, R02);
-    pj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R10, R11, R12);
-    pj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R20, R21, R22);
+    if (pj_err_level(P, PJ_ERR_TELL) >= PJ_LOG_TRACE) {
+        pj_log_trace(P, "Rotation Matrix:");
+        pj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R00, R01, R02);
+        pj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R10, R11, R12);
+        pj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R20, R21, R22);
+    }
 
     return;
 }
@@ -538,15 +542,17 @@ PJ *PROJECTION(helmert) {
     Q->scale  =  Q->scale_0;
 
     /* Let's help with debugging */
-    pj_log_debug(P, "Helmert parameters:");
-    pj_log_debug(P, "x=  % 3.5f  y=  % 3.5f  z=  % 3.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
-    pj_log_debug(P, "rx= % 3.5f  ry= % 3.5f  rz= % 3.5f",
-            Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD, Q->opk.k / ARCSEC_TO_RAD);
-    pj_log_debug(P, "s=% 3.5f  approximate=% d  transpose=% d",
-            Q->scale, Q->approximate, Q->transpose);
-    pj_log_debug(P, "dx= % 3.5f  dy= % 3.5f  dz= % 3.5f", Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
-    pj_log_debug(P, "drx=% 3.5f  dry=% 3.5f  drz=% 3.5f", Q->dopk.o, Q->dopk.p, Q->dopk.k);
-    pj_log_debug(P, "ds=% 3.5f  epoch=% 5.5f  tobs=% 5.5f", Q->dscale, Q->epoch, Q->t_obs);
+    if (pj_err_level(P, PJ_ERR_TELL) >= PJ_LOG_DEBUG) {
+        pj_log_debug(P, "Helmert parameters:");
+        pj_log_debug(P, "x=  % 3.5f  y=  % 3.5f  z=  % 3.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
+        pj_log_debug(P, "rx= % 3.5f  ry= % 3.5f  rz= % 3.5f",
+                Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD, Q->opk.k / ARCSEC_TO_RAD);
+        pj_log_debug(P, "s=% 3.5f  approximate=% d  transpose=% d",
+                Q->scale, Q->approximate, Q->transpose);
+        pj_log_debug(P, "dx= % 3.5f  dy= % 3.5f  dz= % 3.5f", Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
+        pj_log_debug(P, "drx=% 3.5f  dry=% 3.5f  drz=% 3.5f", Q->dopk.o, Q->dopk.p, Q->dopk.k);
+        pj_log_debug(P, "ds=% 3.5f  epoch=% 5.5f  tobs=% 5.5f", Q->dscale, Q->epoch, Q->t_obs);
+    }
 
     if ((Q->opk.o==0) && (Q->opk.p==0) && (Q->opk.k==0) && (Q->scale==0)) {
         Q->no_rotation = 1;
