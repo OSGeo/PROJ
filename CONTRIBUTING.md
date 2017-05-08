@@ -14,7 +14,7 @@ has the ability to contribute to PROJ.4. Here's a few suggestion on how:
 
 In the following sections you can find some guidelines on how to contribute.
 As PROJ.4 is managed on GitHub most contributions require that you have a GitHub
-user. Familiarity with [issues](https://guides.github.com/features/issues/) and
+account. Familiarity with [issues](https://guides.github.com/features/issues/) and
 the [GitHub Flow](https://guides.github.com/introduction/flow/) is an advantage.
 
 ## Help a fellow PROJ.4 user
@@ -59,7 +59,9 @@ Got an idea for a new feature in PROJ.4? Submit a thorough description of the ne
 feature in the [issue tracker](https://github.com/OSGeo/proj.4/issues). Please
 include any technical documents that can help the developer make the new feature a
 reality. An example of this could be a publicly available academic paper that
-describes a new projection.
+describes a new projection. Also, including a numerical test case will make it
+much easier to verify that an implementation of your requested feature actually
+works as you expect.
 
 Note that not all feature requests are accepted.
 
@@ -71,7 +73,7 @@ The website is generated with [Sphinx](http://www.sphinx-doc.org/en/stable/). Co
 to the documentation should be made as [Pull Requests](https://github.com/OSGeo/proj.4/pulls)
 on GitHub.
 
-If you intend to document on of PROJ.4's supported projections please use the
+If you intend to document one of PROJ.4's supported projections please use the
 [Mercator projection](http://proj4.org/projections/merc.html) as a template.
 
 
@@ -108,10 +110,11 @@ Fixes #123.
 ### Coding conventions
 
 #### Programming language
-PROJ.4 is developed strictly in ANSI C.
+PROJ.4 is developed strictly in ANSI C 89.
 
 #### Coding style
 We don't enforce any particular coding style, but please try to keep it as simple as possible.
+If improving existing code, please try to conform with the style of the locally surrounding code.
 
 #### Whitespace
 Throughout the PROJ.4 code base you will see differing whitespace use.
@@ -127,6 +130,48 @@ files are prefixed with lower-case `pj_`. Some file deviate from this pattern, m
 back to the very early releases of PROJ.4. New contributions should follow the pj-prefix pattern.
 Unless there are obvious reasons not to.
 
+#### Legalese
+Commiters are the front line gatekeepers to keep the code base clear of improperly contributed code.
+It is important to the PROJ.4 users, developers and the OSGeo foundation to avoid contributing any
+code to the project without it being clearly licensed under the project license.
+
+Generally speaking the key issues are that those providing code to be included in the repository
+understand that the code will be released under the MIT/X license, and that the person providing
+the code has the right to contribute the code. For the commiter themselves understanding about
+the license is hopefully clear. For other contributors, the commiter should verify the understanding
+unless the commiter is very comfortable that the contributor understands the license (for
+instance frequent contributors).
+
+If the contribution was developed on behalf of an employer (on work time, as part of a work project,
+etc) then it is important that an appropriate representative of the employer understand that the
+code will be contributed under the MIT/X license. The arrangement should be cleared with an
+authorized supervisor/manager, etc.
+
+The code should be developed by the contributor, or the code should be from a source which can be
+rightfully contributed such as from the public domain, or from an open source project under a
+compatible license.
+
+All unusual situations need to be discussed and/or documented.
+
+Commiters should adhere to the following guidelines, and may be personally legally liable for
+improperly contributing code to the source repository:
+
+* Make sure the contributor (and possibly employer) is aware of the contribution terms.
+* Code coming from a source other than the contributor (such as adapted from another project)
+  should be clearly marked as to the original source, copyright holders, license terms and so forth.
+  This information can be in the file headers, but should also be added to the project licensing
+  file if not exactly matching normal project licensing (COPYING).
+* Existing copyright headers and license text should never be stripped from a file. If a copyright
+  holder wishes to give up copyright they must do so in writing to the foundation before copyright
+  messages are removed. If license terms are changed it has to be by agreement (written in email is
+  ok) of the copyright holders.
+* Code with licenses requiring credit, or disclosure to users should be added to COPYING.
+* When substantial contributions are added to a file (such as substantial patches) the
+  author/contributor should be added to the list of copyright holders for the file.
+* If there is uncertainty about whether a change is proper to contribute to the code base, please
+  seek more information from the project steering committee, or the foundation legal counsel.
+
+
 ## Additional Resources
 
 * [General GitHub documentation](http://help.github.com/)
@@ -134,4 +179,6 @@ Unless there are obvious reasons not to.
 
 ## Acknowledgements
 
-The _code contribution_ sectino of this CONTRIBUTING file is inspired by[PDAL's](https://github.com/PDAL/PDAL/blob/master/CONTRIBUTING.md).
+The _code contribution_ section of this CONTRIBUTING file is inspired by
+[PDAL's](https://github.com/PDAL/PDAL/blob/master/CONTRIBUTING.md) and the _legalese_ section is
+modified from [GDAL contributer guidelines](https://trac.osgeo.org/gdal/wiki/rfc3_commiters)
