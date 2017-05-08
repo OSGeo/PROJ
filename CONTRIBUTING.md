@@ -175,7 +175,7 @@ improperly contributing code to the source repository:
 ## Additional Resources
 
 * [General GitHub documentation](http://help.github.com/)
-* [GitHub pull request documentation](http://help.github.com/send-pull-requests/)
+* [GitHub pull request documentation](https://help.github.com/articles/about-pull-requests/)
 
 ## Acknowledgements
 
