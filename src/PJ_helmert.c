@@ -1,12 +1,12 @@
 /***********************************************************************
 
-             Helmert transformations, 3- and 7-parameter
+           Helmert transformations, 3-, 4-, 7- and 14-parameter
 
                     Thomas Knudsen, 2016-05-24
 
 ************************************************************************
 
-  Implements 3-, 7- and 14-parameter Helmert transformations for 3D
+  Implements 3-, 4-, 7- and 14-parameter Helmert transformations for 3D
   data.
 
   Primarily useful for implementation of datum shifts in transformation
@@ -48,7 +48,7 @@ Last update: 2017-05-08
 #include <assert.h>
 #include <stddef.h>
 #include <errno.h>
-PROJ_HEAD(helmert, "3-, 7- and 14-parameter Helmert shift");
+PROJ_HEAD(helmert, "3-, 4-, 7- and 14-parameter Helmert shift");
 
 static XYZ helmert_forward_3d (LPZ lpz, PJ *P);
 static LPZ helmert_reverse_3d (XYZ xyz, PJ *P);
@@ -91,9 +91,12 @@ struct pj_opaque_helmert {
     double scale;
     double scale_0;
     double dscale;
+    double theta;
+    double theta_0;
+    double dtheta;
     double R[3][3];
     double epoch, t_obs;
-    int no_rotation, approximate, transpose;
+    int no_rotation, approximate, transpose, fourparam;
 };
 
 
@@ -147,6 +150,8 @@ static void update_parameters(PJ *P) {
 
     Q->scale = Q->scale_0 + Q->dscale * dt;
 
+    Q->theta = Q->theta_0 + Q->dtheta * dt;
+
     /* debugging output */
     if (pj_err_level(P, PJ_ERR_TELL) >= PJ_LOG_TRACE) {
         pj_log_trace(P, "Transformation parameters for observation epoch %g:", Q->t_obs);
@@ -157,6 +162,7 @@ static void update_parameters(PJ *P) {
         pj_log_trace(P, "rx: %g", Q->opk.o);
         pj_log_trace(P, "ry: %g", Q->opk.p);
         pj_log_trace(P, "rz: %g", Q->opk.k);
+        pj_log_trace(P, "theta: %g", Q->theta);
     }
     return;
 }
@@ -320,20 +326,20 @@ static void build_rot_matrix(PJ *P) {
 
 /***********************************************************************/
 static XY helmert_forward (LP lp, PJ *P) {
-/************************************************************************
-
-    The 2D implementation is a slightly silly stop-gap, returning a
-    2D sub-space of the 3D transformation.
-
-    In order to follow the "principle of least astonishment", the 2D
-    interface should provide an implementation of the 4 parameter
-    2D Helmert shift.
-
-************************************************************************/
+/***********************************************************************/
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     PJ_TRIPLET point;
+    double x, y, cr, sr;
     point.lp = lp;
-    point.lpz.z = 0;
-    point.xyz = helmert_forward_3d (point.lpz, P);
+
+    cr = cos(Q->theta) * Q->scale;
+    sr = sin(Q->theta) * Q->scale;
+    x = point.xy.x;
+    y = point.xy.y;
+
+    point.xy.x =  cr*x + sr*y + Q->xyz_0.x;
+    point.xy.y = -sr*x + cr*y + Q->xyz_0.y;
+
     return point.xy;
 }
 
@@ -341,10 +347,19 @@ static XY helmert_forward (LP lp, PJ *P) {
 /***********************************************************************/
 static LP helmert_reverse (XY xy, PJ *P) {
 /***********************************************************************/
+    struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     PJ_TRIPLET point;
+    double x, y, sr, cr;
     point.xy = xy;
-    point.xyz.z = 0;
-    point.lpz = helmert_reverse_3d (point.xyz, P);
+
+    cr = cos(Q->theta) / Q->scale;
+    sr = sin(Q->theta) / Q->scale;
+    x = point.xy.x - Q->xyz_0.x;
+    y = point.xy.y - Q->xyz_0.y;
+
+    point.xy.x =  x*cr - y*sr;
+    point.xy.y =  x*sr + y*cr;
+
     return point.lp;
 }
 
@@ -355,6 +370,13 @@ static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     PJ_TRIPLET point;
     double X, Y, Z, scale;
+
+    point.lpz = lpz;
+
+    if (Q->fourparam) {
+        point.xy = helmert_forward(point.lp, P);
+        return point.xyz;
+    }
 
     if (Q->no_rotation) {
         point.xyz.x = lpz.lam + Q->xyz.x;
@@ -369,7 +391,6 @@ static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
     Y = lpz.phi;
     Z = lpz.z;
 
-    point.lpz = lpz;
 
     point.xyz.x = scale * ( R00 * X  +   R01 * Y   +   R02 * Z);
     point.xyz.y = scale * ( R10 * X  +   R11 * Y   +   R12 * Z);
@@ -391,6 +412,11 @@ static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
     double X, Y, Z, scale;
 
     point.xyz = xyz;
+
+    if (Q->fourparam) {
+        point.lp = helmert_reverse(point.xy, P);
+        return point.lpz;
+    }
 
     if (Q->no_rotation) {
         point.xyz.x  =  xyz.x - Q->xyz.x;
@@ -490,6 +516,10 @@ PJ *PROJECTION(helmert) {
     if (pj_param (P->ctx, P->params, "trz").i)
         Q->opk_0.k = pj_param (P->ctx, P->params, "drz").f * ARCSEC_TO_RAD;
 
+    if (pj_param (P->ctx, P->params, "ttheta").i) {
+        Q->theta_0 = pj_param (P->ctx, P->params, "dtheta").f * ARCSEC_TO_RAD;
+        Q->fourparam = 1;
+    }
 
     /* Scale */
     if (pj_param (P->ctx, P->params, "ts").i)
@@ -516,6 +546,8 @@ PJ *PROJECTION(helmert) {
     if (pj_param (P->ctx, P->params, "tdrz").i)
         Q->dopk.k = pj_param (P->ctx, P->params, "ddrz").f * ARCSEC_TO_RAD;
 
+    if (pj_param (P->ctx, P->params, "tdtheta").i)
+        Q->dtheta = pj_param (P->ctx, P->params, "ddtheta").f * ARCSEC_TO_RAD;
 
     /* Scale rate */
     if (pj_param (P->ctx, P->params, "tds").i)
@@ -540,6 +572,7 @@ PJ *PROJECTION(helmert) {
     Q->xyz    =  Q->xyz_0;
     Q->opk    =  Q->opk_0;
     Q->scale  =  Q->scale_0;
+    Q->theta  =  Q->theta_0;
 
     /* Let's help with debugging */
     if (pj_err_level(P, PJ_ERR_TELL) >= PJ_LOG_DEBUG) {
@@ -574,7 +607,7 @@ int pj_helmert_selftest (void) {return 0;}
 #else
 
 
-static int test (char *args, PJ_TRIPLET in, PJ_TRIPLET expect) {
+static int test (char *args, PJ_TRIPLET in, PJ_TRIPLET expect, double tol) {
     PJ_TRIPLET out;
     PJ *P = pj_init_plus (args);
 
@@ -582,7 +615,7 @@ static int test (char *args, PJ_TRIPLET in, PJ_TRIPLET expect) {
         return 5;
 
     out.xyz = pj_fwd3d (in.lpz, P);
-    if (pj_xyz_dist (out.xyz, expect.xyz) > 1e-4) {
+    if (pj_xyz_dist (out.xyz, expect.xyz) > tol) {
         pj_log_error(P, "Tolerance of forward calculation not met");
         pj_log_error(P, "  Expect: %10.10f, %10.10f, %10.10f", expect.xyz.x, expect.xyz.y, expect.xyz.z);
         pj_log_error(P, "  Out:    %10.10f, %10.10f, %10.10f", out.xyz.x, out.xyz.y, out.xyz.z);
@@ -591,7 +624,7 @@ static int test (char *args, PJ_TRIPLET in, PJ_TRIPLET expect) {
     }
 
     out.lpz = pj_inv3d (out.xyz, P);
-    if (pj_xyz_dist (out.xyz, in.xyz) > 1e-4) {
+    if (pj_xyz_dist (out.xyz, in.xyz) > tol) {
         pj_log_error(P, "Tolerance of inverse calculation not met");
         pj_log_error(P, "  In:  %10.10f, %10.10f, %10.10f", in.xyz.x, in.xyz.y, in.xyz.z);
         pj_log_error(P, "  Out: %10.10f, %10.10f, %10.10f", out.xyz.x, out.xyz.y, out.xyz.z);
@@ -662,11 +695,23 @@ int pj_helmert_selftest (void) {
         " +epoch=1988.0 +transpose"
     );
 
+    /* This example is from "A mathematical relationship between NAD27 and NAD83 (91)
+       State Plane coordinates in Southeastern Wisconsin":
 
-    /* Run tests 1-3 */
-    ret = test (args1, in1, expect1);   if (ret)  return ret;
-    ret = test (args2, in2, expect2);   if (ret)  return ret + 10;
-    ret = test (args3, in3, expect3);   if (ret)  return ret + 20;
+            http://www.sewrpc.org/SEWRPCFiles/Publications/TechRep/tr-034-Mathematical-Relationship-Between-NAD27-and-NAD83-91-State-Plane-Coordinates-Southeastern-Wisconsin.pdf
+
+       The test data is taken from p. 29. Here we are using point 203 and converting it
+       from NAD27 (ft) -> NAD83 (m). The paper reports a difference of 0.0014 m from measured
+       to computed coordinates, hence the test tolerance is set accordingly. */
+    PJ_TRIPLET in5 = {{2546506.957, 542256.609, 0}};
+    PJ_TRIPLET expect5 = {{766563.675, 165282.277, 0}};
+    char args5[] = " +proj=helmert +x=-9597.3572 +y=.6112 +s=0.304794780637 +theta=-1.244048";
+
+    /* Run tests 1-3 & 5 */
+    ret = test (args1, in1, expect1, 1e-4);   if (ret)  return ret;
+    ret = test (args2, in2, expect2, 1e-4);   if (ret)  return ret + 10;
+    ret = test (args3, in3, expect3, 1e-4);   if (ret)  return ret + 20;
+    ret = test (args5, in5, expect5, 0.001);  if (ret) return ret + 40;
 
     /* Run test 4 */
     out = pj_trans(helmert, PJ_FWD, in4);
@@ -685,7 +730,6 @@ int pj_helmert_selftest (void) {
         pj_log_error(helmert, "  Out: %10.10f, %10.10f, %10.10f", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
         return 32;
     }
-
     pj_free(helmert);
 
     return 0;
