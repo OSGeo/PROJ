@@ -1,13 +1,14 @@
 /***********************************************************************
 
-           Helmert transformations, 3-, 4-, 7- and 14-parameter
+             3-, 4-and 7-parameter shifts, and their 6-, 8-
+                and 14-parameter kinematic counterparts.
 
                     Thomas Knudsen, 2016-05-24
 
 ************************************************************************
 
-  Implements 3-, 4-, 7- and 14-parameter Helmert transformations for 3D
-  data.
+  Implements 3(6)-, 4(8) and 7(14)-parameter Helmert transformations for
+  3D data.
 
   Primarily useful for implementation of datum shifts in transformation
   pipelines.
@@ -16,7 +17,7 @@
 
 Thomas Knudsen, thokn@sdfe.dk, 2016-05-24/06-05
 Kristian Evers, kreve@sdfe.dk, 2017-05-01
-Last update: 2017-05-08
+Last update: 2017-05-15
 
 ************************************************************************
 * Copyright (c) 2016, Thomas Knudsen / SDFE
@@ -48,7 +49,7 @@ Last update: 2017-05-08
 #include <assert.h>
 #include <stddef.h>
 #include <errno.h>
-PROJ_HEAD(helmert, "3-, 4-, 7- and 14-parameter Helmert shift");
+PROJ_HEAD(helmert, "3(6)-, 4(8)- and 7(14)-parameter Helmert shift");
 
 static XYZ helmert_forward_3d (LPZ lpz, PJ *P);
 static LPZ helmert_reverse_3d (XYZ xyz, PJ *P);
