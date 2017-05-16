@@ -37,8 +37,13 @@ PJ *PROJECTION(urm5) {
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
-
-    Q->n  = pj_param(P->ctx, P->params, "dn").f;
+    
+    if (pj_param(P->ctx, P->params, "tn").i) {
+        Q->n = pj_param(P->ctx, P->params, "dn").f;
+        if (Q->n <= 0. || Q->n > 1.)
+            E_ERROR(-40)
+    } else
+        E_ERROR(-40)
     Q->q3 = pj_param(P->ctx, P->params, "dq").f / 3.;
     alpha = pj_param(P->ctx, P->params, "ralpha").f;
     t = Q->n * sin (alpha);
@@ -60,7 +65,7 @@ int pj_urm5_selftest (void) {
     double tolerance_lp = 1e-10;
     double tolerance_xy = 1e-7;
 
-    char s_args[] = {"+proj=urm5   +a=6400000    +lat_1=0.5 +lat_2=2"};
+    char s_args[] = {"+proj=urm5   +a=6400000    +lat_1=0.5 +lat_2=2 +n=0.5"};
 
     LP fwd_in[] = {
         { 2, 1},
