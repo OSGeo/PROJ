@@ -135,6 +135,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_times.c
         PJ_tmerc.c
         PJ_tpeqd.c
+        PJ_unitconvert.c
         PJ_urm5.c
         PJ_urmfps.c
         PJ_vandg.c
