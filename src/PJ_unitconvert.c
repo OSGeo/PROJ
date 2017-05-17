@@ -484,5 +484,6 @@ int pj_unitconvert_selftest (void) {
 
     return 0;
 
-#endif
 }
+
+#endif
