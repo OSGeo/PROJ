@@ -174,9 +174,9 @@ static double mjd_to_gps_week(double mjd) {
 }
 
 struct TIME_UNITS time_units[] = {
+    {"mjd",         mjd_to_mjd,         mjd_to_mjd,         "Modified julian date"},
     {"decimalyear", decimalyear_to_mjd, mjd_to_decimalyear, "Decimal year"},
     {"gps_week",    gps_week_to_mjd,    mjd_to_gps_week,    "GPS Week"},
-    {"mjd",         mjd_to_mjd,         mjd_to_mjd,         "Modified julian date"},
     {NULL,          NULL,               NULL,               NULL}
 };
 
@@ -284,13 +284,14 @@ static PJ_OBS forward_obs(PJ_OBS obs, PJ *P) {
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
     PJ_OBS out;
-    double mjd;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
     out.coo.xyz = forward_3d(obs.coo.lpz, P);
 
-    mjd = time_units[Q->t_in_id].t_in( obs.coo.xyzt.t );
-    out.coo.xyzt.t = time_units[Q->t_out_id].t_out(mjd);
+    if (Q->t_in_id >= 0)
+        out.coo.xyzt.t = time_units[Q->t_in_id].t_in( obs.coo.xyzt.t );
+    if (Q->t_out_id >= 0)
+        out.coo.xyzt.t = time_units[Q->t_out_id].t_out( out.coo.xyzt.t );
 
     return out;
 }
@@ -303,13 +304,14 @@ static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
     PJ_OBS out;
-    double mjd;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
     out.coo.lpz = reverse_3d(obs.coo.xyz, P);
 
-    mjd = time_units[Q->t_out_id].t_in(obs.coo.xyzt.t);
-    out.coo.xyzt.t = time_units[Q->t_in_id].t_out(mjd);
+    if (Q->t_in_id >= 0)
+        out.coo.xyzt.t = time_units[Q->t_out_id].t_in( obs.coo.xyzt.t );
+    if (Q->t_out_id >= 0)
+        out.coo.xyzt.t = time_units[Q->t_in_id].t_out( out.coo.xyzt.t );
 
     return out;
 }
@@ -335,6 +337,10 @@ PJ *PROJECTION(unitconvert) {
 
     P->left  = PJ_IO_UNITS_RADIANS;
     P->right = PJ_IO_UNITS_RADIANS;
+
+    /* if no time input/output unit is specified we can skip them */
+    Q->t_in_id = -1;
+    Q->t_out_id = -1;
 
     if ((name = pj_param (P->ctx, P->params, "sxy_in").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
