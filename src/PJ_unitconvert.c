@@ -111,7 +111,7 @@ static double decimalyear_to_mjd(double decimalyear) {
 /***********************************************************************
     Epoch of modified julian date is 1858-11-16 00:00
 ************************************************************************/
-    int year = floor(decimalyear);
+    int year = (int)floor(decimalyear);
     double fractional_year = decimalyear - year;
     double mjd = (year - 1859)*365 + 14 + 31;
     mjd += fractional_year*days_in_year(year);
@@ -319,12 +319,12 @@ static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
 PJ *PROJECTION(unitconvert) {
 /***********************************************************************/
     struct pj_opaque_unitconvert *Q = pj_calloc (1, sizeof (struct pj_opaque_unitconvert));
+    char *s, *name;
+    int i;
+
     if (0==Q)
         return freeup_msg (P, ENOMEM);
     P->opaque = (void *) Q;
-
-    char *s, *name;
-    int i;
 
     P->fwdobs = forward_obs;
     P->invobs = reverse_obs;
