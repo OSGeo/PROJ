@@ -408,6 +408,7 @@ struct PJ_UNITS {
     char    *id;           /* units keyword */
     char    *to_meter;     /* multiply by value to get meters */
     char    *name;         /* comments */
+    double   factor;       /* to_meter factor in actual numbers */
 };
 
 struct PJ_DATUMS {

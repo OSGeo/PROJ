@@ -60,7 +60,7 @@ support = \
 
 pipeline = \
 	pj_obs_api.obj PJ_cart.obj PJ_pipeline.obj PJ_horner.obj PJ_helmert.obj \
-	PJ_vgridshift.obj PJ_hgridshift.obj
+	PJ_vgridshift.obj PJ_hgridshift.obj PJ_unitconvert.obj
 
 geodesic = geodesic.obj
 
