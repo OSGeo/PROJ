@@ -668,11 +668,6 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     else
         PIN->from_greenwich = 0.0;
 
-    /* Private object for the geodesic functions */
-    PIN->geod = pj_calloc (1, sizeof (struct geod_geodesic));
-    if (0!=PIN->geod)
-        geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
-
     /* projection specific initialization */
     if (!(PIN = (*proj)(PIN)) || ctx->last_errno) {
       bum_call: /* cleanup error return */
@@ -684,6 +679,12 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
                 pj_dalloc(start);
             }
         PIN = 0;
+    }
+    else {
+        /* Private object for the geodesic functions */
+        PIN->geod = pj_calloc (1, sizeof (struct geod_geodesic));
+        if (0!=PIN->geod)
+            geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
     }
 
     return PIN;

@@ -28,13 +28,8 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 	return lp;
 }
 
-
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    return pj_dealloc(P);
-}
-
 static void freeup (PJ *P) {
-    freeup_new (P);
+    pj_freeup_plain (P);
     return;
 }
 
@@ -43,7 +38,10 @@ PJ *PROJECTION(wag3) {
 	double ts;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+    {
+        freeup(P);
+        return 0;
+    }
     P->opaque = Q;
 
 	ts = pj_param (P->ctx, P->params, "rlat_ts").f;
