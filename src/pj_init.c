@@ -559,7 +559,16 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     /* longitude center for wrapping */
     PIN->is_long_wrap_set = pj_param(ctx, start, "tlon_wrap").i;
     if (PIN->is_long_wrap_set)
+    {
         PIN->long_wrap_center = pj_param(ctx, start, "rlon_wrap").f;
+        /* Don't accept excessive values otherwise we might perform badly */
+        /* when correcting longitudes around it */
+        if( !(fabs(PIN->long_wrap_center) < 10 * M_TWOPI) )
+        {
+            pj_ctx_set_errno( ctx, -14 );
+            goto bum_call;
+        }
+    }
 
     /* axis orientation */
     if( (pj_param(ctx, start,"saxis").s) != NULL )
@@ -583,10 +592,6 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         /* it would be nice to validate we don't have on axis repeated */
         strcpy( PIN->axis, axis_arg );
     }
-
-    PIN->is_long_wrap_set = pj_param(ctx, start, "tlon_wrap").i;
-    if (PIN->is_long_wrap_set)
-        PIN->long_wrap_center = pj_param(ctx, start, "rlon_wrap").f;
 
     /* central meridian */
     PIN->lam0=pj_param(ctx, start, "rlon_0").f;
