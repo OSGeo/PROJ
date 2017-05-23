@@ -74,6 +74,10 @@ int pj_ell_set(projCtx ctx, paralist *pl, double *a, double *es) {
             *a = sqrt(*a * b);
             *es = 0.;
         } else if (pj_param(ctx,pl, "bR_h").i) { /* sphere--harmonic mean */
+            if ( (*a + b) == 0.0) {
+                pj_ctx_set_errno(ctx, -20);
+                goto bomb;
+            }
             *a = 2. * *a * b / (*a + b);
             *es = 0.;
         } else if ((i = pj_param(ctx,pl, "tR_lat_a").i) || /* sphere--arith. */
