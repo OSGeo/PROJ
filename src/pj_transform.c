@@ -344,6 +344,13 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 
         if( dstdefn->fwd3d != NULL)
         {
+            /* Three dimensions must be defined */
+            if ( z == NULL)
+            {
+                pj_ctx_set_errno( pj_get_ctx(dstdefn), PJD_ERR_GEOCENTRIC);
+                return PJD_ERR_GEOCENTRIC;
+            }
+
             for( i = 0; i < point_count; i++ )
             {
                 XYZ projected_loc;
