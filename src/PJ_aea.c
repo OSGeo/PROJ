@@ -165,6 +165,8 @@ static PJ *setup(PJ *P) {
             cosphi = cos(Q->phi2);
             m2 = pj_msfn(sinphi, cosphi, P->es);
             ml2 = pj_qsfn(sinphi, P->e, P->one_es);
+            if (ml2 == ml1)
+                return NULL;
             Q->n = (m1 * m1 - m2 * m2) / (ml2 - ml1);
         }
         Q->ec = 1. - .5 * P->one_es * log((1. - P->e) /
