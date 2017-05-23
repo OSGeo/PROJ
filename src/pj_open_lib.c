@@ -116,6 +116,10 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
     /* check if ~/name */
     if (*name == '~' && strchr(dir_chars,name[1]) )
         if ((sysname = getenv("HOME")) != NULL) {
+            if( strlen(sysname) + 1 + strlen(name) + 1 > sizeof(fname) )
+            {
+                return NULL;
+            }
             (void)strcpy(fname, sysname);
             fname[n = (int)strlen(fname)] = DIR_CHAR;
             fname[++n] = '\0';
@@ -137,6 +141,10 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
 
     /* or is environment PROJ_LIB defined */
     else if ((sysname = getenv("PROJ_LIB")) || (sysname = proj_lib_name)) {
+        if( strlen(sysname) + 1 + strlen(name) + 1 > sizeof(fname) )
+        {
+            return NULL;
+        }
         (void)strcpy(fname, sysname);
         fname[n = (int)strlen(fname)] = DIR_CHAR;
         fname[++n] = '\0';
@@ -160,9 +168,12 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
     {
         for (i = 0; fid == NULL && i < path_count; i++)
         {
-            sprintf(fname, "%s%c%s", search_path[i], DIR_CHAR, name);
-            sysname = fname;
-            fid = pj_ctx_fopen(ctx, sysname, mode);
+            if( strlen(search_path[i]) + 1 + strlen(name) + 1 <= sizeof(fname) )
+            {
+                sprintf(fname, "%s%c%s", search_path[i], DIR_CHAR, name);
+                sysname = fname;
+                fid = pj_ctx_fopen(ctx, sysname, mode);
+            }
         }
         if (fid)
         {
