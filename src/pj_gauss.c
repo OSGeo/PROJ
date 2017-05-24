@@ -29,65 +29,68 @@
 #define MAX_ITER 20
 
 struct GAUSS {
-	double C;
-	double K;
-	double e;
-	double ratexp;
+    double C;
+    double K;
+    double e;
+    double ratexp;
 };
 #define EN ((struct GAUSS *)en)
 #define DEL_TOL 1e-14
-	static double
-srat(double esinp, double exp) {
-	return(pow((1.-esinp)/(1.+esinp), exp));
+
+static double srat(double esinp, double exp) {
+    return(pow((1.-esinp)/(1.+esinp), exp));
 }
 
-	void *
-pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
-	double sphi, cphi, es;
-	struct GAUSS *en;
+void *pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
+    double sphi, cphi, es;
+    struct GAUSS *en;
 
-	if ((en = (struct GAUSS *)malloc(sizeof(struct GAUSS))) == NULL)
-		return (NULL);
-	es = e * e;
-	EN->e = e;
-	sphi = sin(phi0);
-	cphi = cos(phi0);  cphi *= cphi;
-	*rc = sqrt(1. - es) / (1. - es * sphi * sphi);
-	EN->C = sqrt(1. + es * cphi * cphi / (1. - es));
-	*chi = asin(sphi / EN->C);
-	EN->ratexp = 0.5 * EN->C * e;
-	EN->K = tan(.5 * *chi + M_FORTPI) / (
-		pow(tan(.5 * phi0 + M_FORTPI), EN->C) *
-		srat(EN->e * sphi, EN->ratexp)  );
-	return ((void *)en);
+    if ((en = (struct GAUSS *)malloc(sizeof(struct GAUSS))) == NULL)
+        return (NULL);
+    es = e * e;
+    EN->e = e;
+    sphi = sin(phi0);
+    cphi = cos(phi0);  cphi *= cphi;
+    *rc = sqrt(1. - es) / (1. - es * sphi * sphi);
+    EN->C = sqrt(1. + es * cphi * cphi / (1. - es));
+    if (en->C == 0.0) {
+        free(en);
+        return NULL;
+    }
+    *chi = asin(sphi / EN->C);
+    EN->ratexp = 0.5 * EN->C * e;
+    EN->K = tan(.5 * *chi + M_FORTPI) / (
+        pow(tan(.5 * phi0 + M_FORTPI), EN->C) *
+        srat(EN->e * sphi, EN->ratexp)  );
+    return ((void *)en);
 }
-	LP
-pj_gauss(projCtx ctx, LP elp, const void *en) {
-	LP slp;
-	(void) ctx;
 
-	slp.phi = 2. * atan( EN->K *
-		pow(tan(.5 * elp.phi + M_FORTPI), EN->C) *
-		srat(EN->e * sin(elp.phi), EN->ratexp) ) - M_HALFPI;
-	slp.lam = EN->C * (elp.lam);
-	return(slp);
+LP pj_gauss(projCtx ctx, LP elp, const void *en) {
+    LP slp;
+    (void) ctx;
+
+    slp.phi = 2. * atan( EN->K *
+        pow(tan(.5 * elp.phi + M_FORTPI), EN->C) *
+        srat(EN->e * sin(elp.phi), EN->ratexp) ) - M_HALFPI;
+    slp.lam = EN->C * (elp.lam);
+    return(slp);
 }
-	LP
-pj_inv_gauss(projCtx ctx, LP slp, const void *en) {
-	LP elp;
-	double num;
-	int i;
 
-	elp.lam = slp.lam / EN->C;
-	num = pow(tan(.5 * slp.phi + M_FORTPI)/EN->K, 1./EN->C);
-	for (i = MAX_ITER; i; --i) {
-		elp.phi = 2. * atan(num * srat(EN->e * sin(slp.phi), -.5 * EN->e))
-			- M_HALFPI;
-		if (fabs(elp.phi - slp.phi) < DEL_TOL) break;
-			slp.phi = elp.phi;
-	}	
-	/* convergence failed */
-	if (!i)
-		pj_ctx_set_errno( ctx, -17 );
-	return (elp);
+LP pj_inv_gauss(projCtx ctx, LP slp, const void *en) {
+    LP elp;
+    double num;
+    int i;
+
+    elp.lam = slp.lam / EN->C;
+    num = pow(tan(.5 * slp.phi + M_FORTPI)/EN->K, 1./EN->C);
+    for (i = MAX_ITER; i; --i) {
+        elp.phi = 2. * atan(num * srat(EN->e * sin(slp.phi), -.5 * EN->e))
+            - M_HALFPI;
+        if (fabs(elp.phi - slp.phi) < DEL_TOL) break;
+            slp.phi = elp.phi;
+    }
+    /* convergence failed */
+    if (!i)
+        pj_ctx_set_errno( ctx, -17 );
+    return (elp);
 }
