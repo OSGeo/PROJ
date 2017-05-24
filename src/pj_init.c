@@ -626,6 +626,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         PIN->to_meter = pj_strtod(s, &s);
         if (*s == '/') /* ratio number */
             PIN->to_meter /= pj_strtod(++s, 0);
+        if (PIN->to_meter <= 0.0) {
+            pj_ctx_set_errno( ctx, -51);
+            goto bum_call;
+        }
         PIN->fr_meter = 1. / PIN->to_meter;
     } else
         PIN->to_meter = PIN->fr_meter = 1.;
@@ -641,6 +645,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         PIN->vto_meter = pj_strtod(s, &s);
         if (*s == '/') /* ratio number */
             PIN->vto_meter /= pj_strtod(++s, 0);
+        if (PIN->vto_meter <= 0.0) {
+            pj_ctx_set_errno( ctx, -51);
+            goto bum_call;
+        }
         PIN->vfr_meter = 1. / PIN->vto_meter;
     } else {
         PIN->vto_meter = PIN->to_meter;

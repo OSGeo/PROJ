@@ -34,7 +34,7 @@ static double ssfn_ (double phit, double sinphi, double eccen) {
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
-    double coslam, sinlam, sinX = 0.0, cosX = 0.0, X, A, sinphi;
+    double coslam, sinlam, sinX = 0.0, cosX = 0.0, X, A = 0.0, sinphi;
 
     coslam = cos (lp.lam);
     sinlam = sin (lp.lam);
@@ -52,8 +52,13 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
         goto xmul; /* but why not just  xy.x = A * cosX; break;  ? */
 
     case EQUIT:
-        A = Q->akm1 / (1. + cosX * coslam);
-        xy.y = A * sinX;
+        /* avoid zero division */
+        if (1. + cosX * coslam == 0.0) {
+            xy.y = HUGE_VAL;
+        } else {
+            A = Q->akm1 / (1. + cosX * coslam);
+            xy.y = A * sinX;
+        }
 xmul:
         xy.x = A * cosX;
         break;

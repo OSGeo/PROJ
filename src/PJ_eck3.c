@@ -24,9 +24,14 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
+    double denominator;
 
     lp.phi = xy.y / Q->C_y;
-    lp.lam = xy.x / (Q->C_x * (Q->A + asqrt(1. - Q->B * lp.phi * lp.phi)));
+    denominator = (Q->C_x * (Q->A + asqrt(1. - Q->B * lp.phi * lp.phi)));
+    if ( denominator == 0.0)
+        lp.lam = HUGE_VAL;
+    else
+        lp.lam = xy.x / denominator;
     return lp;
 }
 

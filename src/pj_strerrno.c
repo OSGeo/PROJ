@@ -56,6 +56,7 @@ pj_err_list[] = {
     "point not within available datum shift grids",                    /* -48 */
     "invalid sweep axis, choose x or y",                               /* -49 */
     "malformed pipeline",                                              /* -50 */
+    "unit conversion factor must be > 0",                              /* -51 */
 };
 
 char *pj_strerrno(int err) {

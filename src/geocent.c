@@ -414,6 +414,11 @@ void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
 /*  ellipsoidal (geodetic) height */
         *Height = P*CPHI0+Z*SPHI0-RN*(1.0-gi->Geocent_e2*SPHI0*SPHI0);
 
+        /* avoid zero division */
+        if (RN+*Height==0.0) {
+            *Latitude = 0.0;
+            return;
+        }
         RK = gi->Geocent_e2*RN/(RN+*Height);
         RX = 1.0/sqrt(1.0-RK*(2.0-RK)*ST*ST);
         CPHI = ST*(1.0-RK)*RX;
