@@ -563,6 +563,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         PIN->long_wrap_center = pj_param(ctx, start, "rlon_wrap").f;
         /* Don't accept excessive values otherwise we might perform badly */
         /* when correcting longitudes around it */
+        /* The test is written this way to error on long_wrap_center "=" NaN */
         if( !(fabs(PIN->long_wrap_center) < 10 * M_TWOPI) )
         {
             pj_ctx_set_errno( ctx, -14 );
