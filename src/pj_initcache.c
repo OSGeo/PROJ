@@ -150,14 +150,20 @@ void pj_insert_initcache( const char *filekey, const paralist *list )
         cache_alloc = cache_alloc * 2 + 15;
 
         cache_key_new = (char **) pj_malloc(sizeof(char*) * cache_alloc);
-        memcpy( cache_key_new, cache_key, sizeof(char*) * cache_count);
+        if( cache_key && cache_count )
+        {
+            memcpy( cache_key_new, cache_key, sizeof(char*) * cache_count);
+        }
         pj_dalloc( cache_key );
         cache_key = cache_key_new;
 
         cache_paralist_new = (paralist **) 
             pj_malloc(sizeof(paralist*) * cache_alloc);
-        memcpy( cache_paralist_new, cache_paralist, 
-                sizeof(paralist*) * cache_count );
+        if( cache_paralist && cache_count )
+        {
+            memcpy( cache_paralist_new, cache_paralist,
+                    sizeof(paralist*) * cache_count );
+        }
         pj_dalloc( cache_paralist );
         cache_paralist = cache_paralist_new;
     }
