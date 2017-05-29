@@ -86,7 +86,7 @@ static void *freeup_new (PJ *P) {                       /* Destructor */
         return pj_dealloc (P);
 
     if (P->opaque->link)
-        pj_dealloc (P->opaque->link);
+        P->opaque->link->pfree(P->opaque->link);
 
     pj_dealloc (P->opaque);
     return pj_dealloc(P);
