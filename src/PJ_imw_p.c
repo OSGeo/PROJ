@@ -96,6 +96,8 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     struct pj_opaque *Q = P->opaque;
     XY t;
     double yc = 0.0;
+    int i = 0;
+    const int N_MAX_ITER = 1000; /* Arbitrarily choosen number... */
 
     lp.phi = Q->phi_2;
     lp.lam = xy.x / cos(lp.phi);
@@ -103,7 +105,14 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         t = loc_for(lp, P, &yc);
         lp.phi = ((lp.phi - Q->phi_1) * (xy.y - yc) / (t.y - yc)) + Q->phi_1;
         lp.lam = lp.lam * xy.x / t.x;
-    } while (fabs(t.x - xy.x) > TOL || fabs(t.y - xy.y) > TOL);
+        i ++;
+    } while (i < N_MAX_ITER &&
+             (fabs(t.x - xy.x) > TOL || fabs(t.y - xy.y) > TOL));
+
+    if( i == N_MAX_ITER )
+    {
+        lp.lam = lp.phi = HUGE_VAL;
+    }
 
     return lp;
 }
@@ -126,6 +135,8 @@ static void *freeup_new (PJ *P) {              /* Destructor */
     if (0==P->opaque)
         return pj_dealloc (P);
 
+    if( P->opaque->en )
+        pj_dealloc (P->opaque->en);
     pj_dealloc (P->opaque);
     return pj_dealloc(P);
 }
