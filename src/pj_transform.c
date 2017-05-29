@@ -588,8 +588,12 @@ int pj_compare_datums( PJ *srcdefn, PJ *dstdefn )
     }
     else if( srcdefn->datum_type == PJD_GRIDSHIFT )
     {
-        return strcmp( pj_param(srcdefn->ctx, srcdefn->params,"snadgrids").s,
-                       pj_param(dstdefn->ctx, dstdefn->params,"snadgrids").s ) == 0;
+        const char* srcnadgrids =
+            pj_param(srcdefn->ctx, srcdefn->params,"snadgrids").s;
+        const char* dstnadgrids =
+            pj_param(dstdefn->ctx, dstdefn->params,"snadgrids").s;
+        return srcnadgrids != 0 && dstnadgrids != 0 &&
+               strcmp( srcnadgrids, dstnadgrids ) == 0;
     }
     else
         return 1;
