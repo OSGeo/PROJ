@@ -55,7 +55,10 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
 
     catalog = (PJ_GridCatalog *) calloc(1,sizeof(PJ_GridCatalog));
     if( !catalog )
+    {
+        pj_ctx_fclose(ctx, fid);
         return NULL;
+    }
     
     catalog->catalog_name = strdup(catalog_name);
     
@@ -82,11 +85,14 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
                     free( catalog->entries[i].definition );
                 free( catalog->catalog_name );
                 free( catalog );
+                pj_ctx_fclose(ctx, fid);
                 return NULL;
             }
             catalog->entries = new_entries;
         }
     }
+
+    pj_ctx_fclose(ctx, fid);
 
     return catalog;
 }

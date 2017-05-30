@@ -735,8 +735,11 @@ pj_free(PJ *P) {
         if( P->catalog_name != NULL )
             pj_dalloc( P->catalog_name );
 
-        if( P->catalog != NULL )
-            pj_dalloc( P->catalog );
+        /* We used to call pj_dalloc( P->catalog ), but this will leak */
+        /* memory. The safe way to clear catalog and grid is to call */
+        /* pj_gc_unloadall(pj_get_default_ctx()); and pj_deallocate_grids(); */
+        /* TODO: we should probably have a public pj_cleanup() method to do all */
+        /* that */
 
         if( P->geod != NULL )
             pj_dalloc( P->geod );

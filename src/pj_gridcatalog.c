@@ -56,6 +56,7 @@ void pj_gc_unloadall( projCtx ctx )
             free( catalog->entries[i].definition );
         }
         free( catalog->entries );
+        free( catalog->catalog_name );
         free( catalog );
     }
 }
@@ -136,6 +137,11 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
                                 1, input, defn->datum_date, 
                                 &(defn->last_after_region), 
                                 &(defn->last_after_date));
+            if( defn->last_after_grid == NULL )
+            {
+                pj_ctx_set_errno( defn->ctx, -38 );
+                return -38;
+            }
         }
         gi = defn->last_after_grid;
         assert( gi->child == NULL );
@@ -179,6 +185,11 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
                                 0, input, defn->datum_date, 
                                 &(defn->last_before_region), 
                                 &(defn->last_before_date));
+            if( defn->last_before_grid == NULL )
+            {
+                pj_ctx_set_errno( defn->ctx, -38 );
+                return -38;
+            }
         }
 
         gi = defn->last_before_grid;
