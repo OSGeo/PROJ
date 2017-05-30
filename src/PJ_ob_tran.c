@@ -111,6 +111,8 @@ PJ *PROJECTION(ob_tran) {
 
     /* get name of projection to be translated */
     if (!(name = pj_param(P->ctx, P->params, "so_proj").s)) E_ERROR(-26);
+    /* avoid endless recursion */
+    if( strcmp(name, "ob_tran") == 0 ) E_ERROR(-37);
     for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
     if (!s || !(Q->link = (*pj_list[i].proj)(0))) E_ERROR(-37);
     /* copy existing header into new */
