@@ -133,6 +133,9 @@ PJ *PROJECTION(ob_tran) {
     if (!(Q->link = pj_list[i].proj(Q->link))) {
         return freeup_new(P);
     }
+    if( Q->link->fwd == 0 ) {
+        return freeup_new(P);
+    }
     if (pj_param(P->ctx, P->params, "to_alpha").i) {
         double lamc, phic, alpha;
 
