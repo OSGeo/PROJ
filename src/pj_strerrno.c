@@ -57,6 +57,7 @@ pj_err_list[] = {
     "invalid sweep axis, choose x or y",                               /* -49 */
     "malformed pipeline",                                              /* -50 */
     "unit conversion factor must be > 0",                              /* -51 */
+    "invalid scale",                                                   /* -52 */
 };
 
 char *pj_strerrno(int err) {
