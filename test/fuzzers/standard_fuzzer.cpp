@@ -101,8 +101,26 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
         pj_deallocate_grids();
         return 0;
     }
-    double x = 0, y = 0;
-    if( sscanf(third_line, "%lf %lf", &x, &y) != 2 )
+    double x = 0, y = 0, z = 9;
+    bool from_binary = false;
+    bool has_z = false;
+    if( strncmp(third_line, "BINARY_2D:", strlen("BINARY_2D:")) == 0 &&
+        third_line - first_line + strlen("BINARY_2D:") + 2 * sizeof(double) <= len )
+    {
+        from_binary = true;
+        memcpy(&x, third_line + strlen("BINARY_2D:"), sizeof(double));
+        memcpy(&y, third_line + strlen("BINARY_2D:") + sizeof(double), sizeof(double));
+    }
+    else if( strncmp(third_line, "BINARY_3D:", strlen("BINARY_3D:")) == 0 &&
+             third_line - first_line + strlen("BINARY_3D:") + 3 * sizeof(double) <= len )
+    {
+        from_binary = true;
+        has_z = true;
+        memcpy(&x, third_line + strlen("BINARY_3D:"), sizeof(double));
+        memcpy(&y, third_line + strlen("BINARY_3D:") + sizeof(double), sizeof(double));
+        memcpy(&z, third_line + strlen("BINARY_3D:") + 2 * sizeof(double), sizeof(double));
+    }
+    else if( sscanf(third_line, "%lf %lf", &x, &y) != 2 )
     {
         free(buf_dup);
         pj_free(pj_src);
@@ -114,9 +132,20 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
 #ifdef STANDALONE
     fprintf(stderr, "src=%s\n", first_line);
     fprintf(stderr, "dst=%s\n", second_line);
-    fprintf(stderr, "coord=%s\n", third_line);
+    if( from_binary )
+    {
+        if( has_z )
+            fprintf(stderr, "coord (from binary)=%.18g %.18g %.18g\n", x, y, z);
+        else
+            fprintf(stderr, "coord (from binary)=%.18g %.18g\n", x, y);
+    }
+    else
+        fprintf(stderr, "coord=%s\n", third_line);
 #endif
-    pj_transform( pj_src, pj_dst, 1, 0, &x, &y, NULL );
+    if( has_z )
+        pj_transform( pj_src, pj_dst, 1, 0, &x, &y, &z );
+    else
+        pj_transform( pj_src, pj_dst, 1, 0, &x, &y, NULL );
     free(buf_dup);
     pj_free(pj_src);
     pj_free(pj_dst);
@@ -133,7 +162,23 @@ int main(int argc, char* argv[])
     {
         const char str[] =
             "+proj=longlat +datum=WGS84 +nodefs\n+proj=longlat +datum=WGS84 +nodefs\n2 49";
-        return LLVMFuzzerTestOneInput((const uint8_t*)(str), sizeof(str));
+        int ret = LLVMFuzzerTestOneInput((const uint8_t*)(str), sizeof(str) - 1);
+        if( ret )
+            return ret;
+
+        const char str2[] =
+            "+proj=longlat +datum=WGS84 +nodefs\n+proj=longlat +datum=WGS84 +nodefs\nBINARY_2D:\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xFF\xFF";
+        ret = LLVMFuzzerTestOneInput((const uint8_t*)(str2), sizeof(str2) - 1);
+        if( ret )
+            return ret;
+
+        const char str3[] =
+            "+proj=longlat +datum=WGS84 +nodefs\n+proj=longlat +datum=WGS84 +nodefs\nBINARY_3D:\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xFF\xFF\x00\x00\x00\x00\x00\x00\x00\x00";
+        ret = LLVMFuzzerTestOneInput((const uint8_t*)(str3), sizeof(str3) - 1);
+        if( ret )
+            return ret;
+
+        return 0;
     }
     else
     {
