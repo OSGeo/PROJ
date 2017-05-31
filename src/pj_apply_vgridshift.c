@@ -77,14 +77,18 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
     {
         long io = i * point_offset;
         LP   input;
-        int  itable;
+        int  itable = 0;
         double value = HUGE_VAL;
 
         input.phi = y[io];
         input.lam = x[io];
 
+        /* do not deal with NaN coordinates */
+        if( input.phi != input.phi || input.lam != input.lam )
+            itable = *gridlist_count_p;
+
         /* keep trying till we find a table that works */
-        for( itable = 0; itable < *gridlist_count_p; itable++ )
+        for( ; itable < *gridlist_count_p; itable++ )
         {
             PJ_GRIDINFO *gi = tables[itable];
             struct CTABLE *ct = gi->ct;
