@@ -520,12 +520,15 @@ PJ *PROJECTION(helmert) {
     if (pj_param (P->ctx, P->params, "ttheta").i) {
         Q->theta_0 = pj_param (P->ctx, P->params, "dtheta").f * ARCSEC_TO_RAD;
         Q->fourparam = 1;
+        Q->scale_0 = 1.0; /* default scale for the 4-param shift */
     }
 
     /* Scale */
-    if (pj_param (P->ctx, P->params, "ts").i)
+    if (pj_param (P->ctx, P->params, "ts").i) {
         Q->scale_0 = pj_param (P->ctx, P->params, "ds").f;
-
+        if (pj_param (P->ctx, P->params, "ttheta").i && Q->scale_0 == 0.0)
+            return freeup_msg(P, -PJD_ERR_INVALID_SCALE);
+    }
 
     /* Translation rates */
     if (pj_param(P->ctx, P->params, "tdx").i)
