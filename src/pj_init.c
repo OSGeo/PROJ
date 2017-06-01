@@ -682,26 +682,57 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     else
         PIN->from_greenwich = 0.0;
 
+    /* Private object for the geodesic functions */
+    PIN->geod = pj_calloc (1, sizeof (struct geod_geodesic));
+    if (0!=PIN->geod)
+        geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
+
     /* projection specific initialization */
-    if (!(PIN = (*proj)(PIN)) || ctx->last_errno) {
-      bum_call: /* cleanup error return */
+    {
+        /* Backup those variables so that we can clean them in case
+         * (*proj)(PIN) fails */
+        void* gridlist = PIN->gridlist;
+        void* vgridlist_geoid = PIN->vgridlist_geoid;
+        void* catalog_name = PIN->catalog_name;
+        void* geod = PIN->geod;
+        if (!(PIN = (*proj)(PIN)) || ctx->last_errno) {
+            if (PIN)
+                pj_free(PIN);
+            else {
+                for ( ; start; start = curr) {
+                    curr = start->next;
+                    pj_dalloc(start);
+                }
+                if( gridlist )
+                    pj_dalloc( gridlist );
+                if( vgridlist_geoid )
+                    pj_dalloc( vgridlist_geoid );
+                if( catalog_name )
+                    pj_dalloc( catalog_name );
+                if( geod )
+                    pj_dalloc( geod );
+            }
+            PIN = 0;
+        }
+    }
+
+    return PIN;
+
+bum_call: /* cleanup error return */
+    {
         if (PIN)
+        {
             pj_free(PIN);
-        else
+        }
+        else {
             for ( ; start; start = curr) {
                 curr = start->next;
                 pj_dalloc(start);
             }
-        PIN = 0;
-    }
-    else {
-        /* Private object for the geodesic functions */
-        PIN->geod = pj_calloc (1, sizeof (struct geod_geodesic));
-        if (0!=PIN->geod)
-            geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
+        }
+        return 0;
     }
 
-    return PIN;
 }
 
 /************************************************************************/

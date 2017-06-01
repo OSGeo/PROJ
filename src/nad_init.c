@@ -122,6 +122,7 @@ struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid )
         || pj_ctx_fread( ctx, ct, sizeof(struct CTABLE), 1, fid ) != 1 )
     {
         pj_ctx_set_errno( ctx, -38 );
+        pj_dalloc( ct );
         return NULL;
     }
 
@@ -130,6 +131,7 @@ struct CTABLE *nad_ctable_init( projCtx ctx, PAFile fid )
         || ct->lim.phi < 1 || ct->lim.phi > 100000 )
     {
         pj_ctx_set_errno( ctx, -38 );
+        pj_dalloc( ct );
         return NULL;
     }
     
