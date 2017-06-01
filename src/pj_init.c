@@ -701,6 +701,19 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
     }
 
+    /* load gridlist */
+    if (pj_param(ctx, PIN->params,"snadgrids").s != 0) {
+      PIN->gridlist = pj_gridlist_from_nadgrids( ctx, 
+        pj_param(ctx, PIN->params,"snadgrids").s, 
+        &(PIN->gridlist_count) );
+    }
+
+    if (PIN->has_geoid_vgrids) {
+      PIN->vgridlist_geoid = pj_gridlist_from_nadgrids( ctx,
+        pj_param(ctx, PIN->params,"sgeoidgrids").s,
+        &(PIN->vgridlist_geoid_count) );
+    }    
+
     return PIN;
 }
 
