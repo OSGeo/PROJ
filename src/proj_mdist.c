@@ -38,7 +38,6 @@ struct MDIST {
 	double E;
 	double b[1];
 };
-#define B ((struct MDIST *)b)
 	void *
 proj_mdist_ini(double es) {
 	double numf, numfi, twon1, denf, denfi, ens, T, twon;
@@ -88,28 +87,30 @@ proj_mdist_ini(double es) {
 	return (b);
 }
 	double
-proj_mdist(double phi, double sphi, double cphi, const void *b) {
+proj_mdist(double phi, double sphi, double cphi, const void *data) {
+	struct MDIST *b = (struct MDIST *)data;
 	double sc, sum, sphi2, D;
 	int i;
 
 	sc = sphi * cphi;
 	sphi2 = sphi * sphi;
-	D = phi * B->E - B->es * sc / sqrt(1. - B->es * sphi2);
-	sum = B->b[i = B->nb];
-	while (i) sum = B->b[--i] + sphi2 * sum;
+	D = phi * b->E - b->es * sc / sqrt(1. - b->es * sphi2);
+	sum = b->b[i = b->nb];
+	while (i) sum = b->b[--i] + sphi2 * sum;
 	return(D + sc * sum);
 }
 	double
-proj_inv_mdist(projCtx ctx, double dist, const void *b) {
+proj_inv_mdist(projCtx ctx, double dist, const void *data) {
+	struct MDIST *b = (struct MDIST *)data;
 	double s, t, phi, k;
 	int i;
 
-	k = 1./(1.- B->es);
+	k = 1./(1.- b->es);
 	i = MAX_ITER;
 	phi = dist;
 	while ( i-- ) {
 		s = sin(phi);
-		t = 1. - B->es * s * s;
+		t = 1. - b->es * s * s;
 		phi -= t = (proj_mdist(phi, s, cos(phi), b) - dist) *
 			(t * sqrt(t)) * k;
 		if (fabs(t) < TOL) /* that is no change */

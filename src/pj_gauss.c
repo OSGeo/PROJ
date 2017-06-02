@@ -34,7 +34,6 @@ struct GAUSS {
     double e;
     double ratexp;
 };
-#define EN ((struct GAUSS *)en)
 #define DEL_TOL 1e-14
 
 static double srat(double esinp, double exp) {
@@ -48,43 +47,45 @@ void *pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
     if ((en = (struct GAUSS *)malloc(sizeof(struct GAUSS))) == NULL)
         return (NULL);
     es = e * e;
-    EN->e = e;
+    en->e = e;
     sphi = sin(phi0);
     cphi = cos(phi0);  cphi *= cphi;
     *rc = sqrt(1. - es) / (1. - es * sphi * sphi);
-    EN->C = sqrt(1. + es * cphi * cphi / (1. - es));
+    en->C = sqrt(1. + es * cphi * cphi / (1. - es));
     if (en->C == 0.0) {
         free(en);
         return NULL;
     }
-    *chi = asin(sphi / EN->C);
-    EN->ratexp = 0.5 * EN->C * e;
-    EN->K = tan(.5 * *chi + M_FORTPI) / (
-        pow(tan(.5 * phi0 + M_FORTPI), EN->C) *
-        srat(EN->e * sphi, EN->ratexp)  );
+    *chi = asin(sphi / en->C);
+    en->ratexp = 0.5 * en->C * e;
+    en->K = tan(.5 * *chi + M_FORTPI) / (
+        pow(tan(.5 * phi0 + M_FORTPI), en->C) *
+        srat(en->e * sphi, en->ratexp)  );
     return ((void *)en);
 }
 
-LP pj_gauss(projCtx ctx, LP elp, const void *en) {
+LP pj_gauss(projCtx ctx, LP elp, const void *data) {
+    struct GAUSS *en = (struct GAUSS *)data;
     LP slp;
     (void) ctx;
 
-    slp.phi = 2. * atan( EN->K *
-        pow(tan(.5 * elp.phi + M_FORTPI), EN->C) *
-        srat(EN->e * sin(elp.phi), EN->ratexp) ) - M_HALFPI;
-    slp.lam = EN->C * (elp.lam);
+    slp.phi = 2. * atan( en->K *
+        pow(tan(.5 * elp.phi + M_FORTPI), en->C) *
+        srat(en->e * sin(elp.phi), en->ratexp) ) - M_HALFPI;
+    slp.lam = en->C * (elp.lam);
     return(slp);
 }
 
-LP pj_inv_gauss(projCtx ctx, LP slp, const void *en) {
+LP pj_inv_gauss(projCtx ctx, LP slp, const void *data) {
+    struct GAUSS *en = (struct GAUSS *)data;
     LP elp;
     double num;
     int i;
 
-    elp.lam = slp.lam / EN->C;
-    num = pow(tan(.5 * slp.phi + M_FORTPI)/EN->K, 1./EN->C);
+    elp.lam = slp.lam / en->C;
+    num = pow(tan(.5 * slp.phi + M_FORTPI)/en->K, 1./en->C);
     for (i = MAX_ITER; i; --i) {
-        elp.phi = 2. * atan(num * srat(EN->e * sin(slp.phi), -.5 * EN->e))
+        elp.phi = 2. * atan(num * srat(en->e * sin(slp.phi), -.5 * en->e))
             - M_HALFPI;
         if (fabs(elp.phi - slp.phi) < DEL_TOL) break;
             slp.phi = elp.phi;
