@@ -82,6 +82,21 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
+static void *freeup_msg (PJ *P, int errlev) {         /* Destructor */
+    if (0==P)
+        return 0;
+
+    if (0!=P->ctx)
+        pj_ctx_set_errno (P->ctx, errlev);
+
+    if (0==P->opaque)
+        return pj_dealloc (P);
+
+    pj_dealloc (P->opaque);
+    return pj_dealloc(P);
+}
+
+
 static void *freeup_new (PJ *P) {              /* Destructor */
     if (0==P)
         return 0;
@@ -120,7 +135,7 @@ PJ *PROJECTION(sinu) {
     P->opaque = Q;
 
     if (!(Q->en = pj_enfn(P->es)))
-        E_ERROR_0;
+        return freeup_new(P);
 
     if (P->es != 0.0) {
         P->inv = e_inverse;
@@ -171,8 +186,10 @@ PJ *PROJECTION(gn_sinu) {
     if (pj_param(P->ctx, P->params, "tn").i && pj_param(P->ctx, P->params, "tm").i) {
         Q->n = pj_param(P->ctx, P->params, "dn").f;
         Q->m = pj_param(P->ctx, P->params, "dm").f;
+        if (Q->n < 0 || Q->m < 0)
+            return freeup_msg(P, PJD_ERR_INVALID_M_OR_N);
     } else
-        E_ERROR(-99)
+        return freeup_msg(P, PJD_ERR_INVALID_M_OR_N);
 
     setup(P);
 
