@@ -453,6 +453,7 @@ struct FACTORS {
 #define PJD_WGS84     4   /* WGS84 (or anything considered equivalent) */
 
 /* library errors */
+#define PJD_ERR_INVALID_M_OR_N      -39
 #define PJD_ERR_GEOCENTRIC          -45
 #define PJD_ERR_AXIS                -47
 #define PJD_ERR_GRID_AREA           -48
