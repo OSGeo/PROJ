@@ -103,6 +103,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_moll.c
         PJ_natearth.c
         PJ_natearth2.c
+	PJ_nav_merc.c
         PJ_nell.c
         PJ_nell_h.c
         PJ_nocol.c
