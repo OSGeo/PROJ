@@ -26,4 +26,5 @@ install (FILES
 # available.
 install (EXPORT targets
   FILE ${PROJECT_NAME_LOWER}-targets.cmake
-  DESTINATION "${INSTALL_CMAKE_DIR}")
+  DESTINATION "${INSTALL_CMAKE_DIR}"
+  NAMESPACE ${PROJECT_NAME}::)
