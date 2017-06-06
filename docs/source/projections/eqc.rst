@@ -4,7 +4,8 @@
 Equidistant Cylindrical (Plate Carrée)
 ********************************************************************************
 
-The simplest of all projections. Standard parallels (0° when omitted) may be specified that determine latitude of true scale (k=h=1).
+The simplest of all projections.
+Standard parallels (0° when omitted) may be specified that determine latitude of true scale (k=h=1).
 
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Conformal cylindrical                                    |
