@@ -22,6 +22,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 
 
 static void *freeup_new (PJ *P) {                       /* Destructor */
+    if (0==P)
+        return 0;
+    if (P->opaque)
+        pj_dealloc (P->opaque);
     return pj_dealloc(P);
 }
 
