@@ -86,6 +86,8 @@ PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
 #define S90 1.570796326794896  /* 90 deg */
 #define UQ  1.04216856380474   /* DU(2, 59, 42, 42.69689) */
 #define S0  1.37008346281555   /* Latitude of pseudo standard parallel 78deg 30'00" N */
+/* Not sure at all of the appropriate number for MAX_ITER... */
+#define MAX_ITER 100
 
 struct pj_opaque {
     double alpha;
@@ -129,7 +131,7 @@ static LP e_inverse (XY xy, PJ *P) {                /* Ellipsoidal, inverse */
     LP lp = {0.0,0.0};
 
     double u, deltav, s, d, eps, rho, fi1, xy0;
-    int ok;
+    int i;
 
     xy0 = xy.x;
     xy.x = xy.y;
@@ -152,16 +154,18 @@ static LP e_inverse (XY xy, PJ *P) {                /* Ellipsoidal, inverse */
     /* ITERATION FOR lp.phi */
     fi1 = u;
 
-    ok = 0;
-    do {
+    for (i = MAX_ITER; i ; --i) {
         lp.phi = 2. * ( atan( pow( Q->k, -1. / Q->alpha)  *
                               pow( tan(u / 2. + S45) , 1. / Q->alpha)  *
                               pow( (1. + P->e * sin(fi1)) / (1. - P->e * sin(fi1)) , P->e / 2.)
                             )  - S45);
 
-        if (fabs(fi1 - lp.phi) < EPS) ok=1;
+        if (fabs(fi1 - lp.phi) < EPS)
+            break;
         fi1 = lp.phi;
-   } while (ok==0);
+    }
+    if( i == 0 )
+        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
 
    lp.lam -= P->lam0;
 
