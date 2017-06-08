@@ -58,6 +58,7 @@ pj_err_list[] = {
     "malformed pipeline",                                              /* -50 */
     "unit conversion factor must be > 0",                              /* -51 */
     "invalid scale",                                                   /* -52 */
+    "non-convergent computation",                                      /* -53 */
 };
 
 char *pj_strerrno(int err) {

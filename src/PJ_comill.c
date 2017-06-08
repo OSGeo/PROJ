@@ -19,7 +19,8 @@ PROJ_HEAD(comill, "Compact Miller") "\n\tCyl., Sph.";
 #define C3 (5 * K3)
 #define EPS 1e-11
 #define MAX_Y (0.6000207669862655 * M_PI)
-
+/* Not sure at all of the appropriate number for MAX_ITER... */
+#define MAX_ITER 100
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
@@ -37,6 +38,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
     double yc, tol, y2, f, fder;
+    int i;
 
     (void) P;   /* silence unused parameter warnings */
 
@@ -49,7 +51,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
     /* latitude */
     yc = xy.y;
-    for (;;) { /* Newton-Raphson */
+    for (i = MAX_ITER; i ; --i) { /* Newton-Raphson */
         y2 = yc * yc;
         f = (yc * (K1 + y2 * (K2 + K3 * y2))) - xy.y;
         fder = C1 + y2 * (C2 + C3 * y2);
@@ -58,6 +60,8 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
             break;
         }
     }
+    if( i == 0 )
+        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
     lp.phi = yc;
 
     /* longitude */

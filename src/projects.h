@@ -459,6 +459,7 @@ struct FACTORS {
 #define PJD_ERR_GRID_AREA           -48
 #define PJD_ERR_CATALOG             -49
 #define PJD_ERR_INVALID_SCALE       -52
+#define PJD_ERR_NON_CONVERGENT      -53
 
 struct projFileAPI_t;
 
