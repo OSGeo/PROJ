@@ -141,7 +141,11 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 	/* if too far from given values of x,y, repeat with better approximation of phi,lam */
 	} while (((fabs(xy.x-x) > EPSILON) || (fabs(xy.y-y) > EPSILON)) && (round++ < MAXROUND));
 
-	if (iter == MAXITER && round == MAXROUND) fprintf(stderr, "Warning: Accuracy of 1e-12 not reached. Last increments: dlat=%e and dlon=%e\n", dp, dl);
+	if (iter == MAXITER && round == MAXROUND)
+        {
+            pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+            /* fprintf(stderr, "Warning: Accuracy of 1e-12 not reached. Last increments: dlat=%e and dlon=%e\n", dp, dl); */
+        }
 
 	return lp;
 }

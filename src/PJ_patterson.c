@@ -53,6 +53,8 @@ PROJ_HEAD(patterson, "Patterson Cylindrical") "\n\tCyl.";
 #define C4 (9.0 * K4)
 #define EPS11 1.0e-11
 #define MAX_Y 1.790857183
+/* Not sure at all of the appropriate number for MAX_ITER... */
+#define MAX_ITER 100
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
@@ -71,6 +73,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
     double yc, tol, y2, f, fder;
+    int i;
     (void) P;
 
     yc = xy.y;
@@ -82,7 +85,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         xy.y = -MAX_Y;
     }
 
-    for (;;) { /* Newton-Raphson */
+    for (i = MAX_ITER; i ; --i) { /* Newton-Raphson */
         y2 = yc * yc;
         f = (yc * (K1 + y2 * y2 * (K2 + y2 * (K3 + K4 * y2)))) - xy.y;
         fder = C1 + y2 * y2 * (C2 + y2 * (C3 + C4 * y2));
@@ -91,6 +94,8 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
             break;
         }
     }
+    if( i == 0 )
+        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
     lp.phi = yc;
 
     /* longitude */

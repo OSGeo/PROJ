@@ -70,7 +70,8 @@ static const struct COEFS Y[] = {
 #define NODES   18
 #define ONEEPS  1.000001
 #define EPS 1e-8
-
+/* Not sure at all of the appropriate number for MAX_ITER... */
+#define MAX_ITER 100
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
@@ -96,6 +97,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     int i;
     double t, t1;
     struct COEFS T;
+    int iters;
 
     lp.lam = xy.x / FXC;
     lp.phi = fabs(xy.y / FYC);
@@ -120,11 +122,13 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         t = 5. * (lp.phi - T.c0)/(Y[i+1].c0 - T.c0);
         /* make into root */
         T.c0 = (float)(T.c0 - lp.phi);
-        for (;;) { /* Newton-Raphson reduction */
+        for (iters = MAX_ITER; iters ; --iters) { /* Newton-Raphson */
             t -= t1 = V(T,t) / DV(T,t);
             if (fabs(t1) < EPS)
                 break;
         }
+        if( iters == 0 )
+            pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
         lp.phi = (5 * i + t) * DEG_TO_RAD;
         if (xy.y < 0.) lp.phi = -lp.phi;
         lp.lam /= V(X[i], t);

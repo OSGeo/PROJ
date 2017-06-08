@@ -26,6 +26,8 @@ PROJ_HEAD(natearth2, "Natural Earth 2") "\n\tPCyl., Sph.";
 #define C3 (13 * B3)
 #define EPS 1e-11
 #define MAX_Y (0.84719 * 0.535117535153096 * M_PI)
+/* Not sure at all of the appropriate number for MAX_ITER... */
+#define MAX_ITER 100
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
@@ -46,6 +48,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
     double yc, tol, y2, y4, y6, f, fder;
+    int i;
     (void) P;
 
     /* make sure y is inside valid range */
@@ -57,7 +60,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
     /* latitude */
     yc = xy.y;
-    for (;;) { /* Newton-Raphson */
+    for (i = MAX_ITER; i ; --i) { /* Newton-Raphson */
         y2 = yc * yc;
         y4 = y2 * y2;
         f = (yc * (B0 + y4 * y4 * (B1 + B2 * y2 + B3 * y4))) - xy.y;
@@ -67,6 +70,8 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
             break;
         }
     }
+    if( i == 0 )
+        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
     lp.phi = yc;
 
     /* longitude */
