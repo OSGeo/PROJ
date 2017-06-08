@@ -209,6 +209,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
                                          &grid_max) 
             && required )
         {
+            pj_dalloc( gridlist );
             pj_ctx_set_errno( ctx, -38 );
             pj_release_lock();
             return NULL;
