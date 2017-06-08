@@ -139,7 +139,7 @@ static void *freeup_new (PJ *P) {                       /* Destructor */
 
     for (i = 0; i < 12; ++i) {
         if (P->opaque->pj[i])
-            pj_dealloc(P->opaque->pj[i]);
+            P->opaque->pj[i]->pfree(P->opaque->pj[i]);
     }
 
     pj_dealloc (P->opaque);
