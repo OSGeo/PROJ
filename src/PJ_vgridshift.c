@@ -29,8 +29,8 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
         pj_apply_vgridshift( P, "sgrids",
-                             &(P->vgridlist_geoid),
-                             &(P->vgridlist_geoid_count),
+                             &(P->gridlist),
+                             &(P->gridlist_count),
                              1, 1, 0,
                              &point.xyz.x, &point.xyz.y, &point.xyz.z );
     }
@@ -47,8 +47,8 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
         pj_apply_vgridshift( P, "sgrids",
-                             &(P->vgridlist_geoid),
-                             &(P->vgridlist_geoid_count),
+                             &(P->gridlist),
+                             &(P->gridlist_count),
                              0, 1, 0,
                              &point.xyz.x, &point.xyz.y, &point.xyz.z );
     }
@@ -84,6 +84,8 @@ PJ *PROJECTION(vgridshift) {
     /* Was gridlist compiled properly? */
     if ( pj_ctx_get_errno(P->ctx) ) {
         pj_log_error(P, "vgridshift: could not find required grid(s).");
+        pj_dalloc(P->gridlist);
+        P->gridlist = NULL;
         return freeup_msg(P, -38);
     }
 

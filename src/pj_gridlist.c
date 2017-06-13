@@ -193,6 +193,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
 
         if( end_char >= sizeof(name) )
         {
+            pj_dalloc( gridlist );
             pj_ctx_set_errno( ctx, -38 );
             pj_release_lock();
             return NULL;
