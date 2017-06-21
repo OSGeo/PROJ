@@ -72,7 +72,7 @@ int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 
         /* convergence */
         if (!(fac->code & IS_ANAL_CONV)) {
-            fac->conv = - atan2(fac->der.y_l, fac->der.x_l);
+            fac->conv = - atan2(fac->der.x_p, fac->der.y_p);
             if (fac->code & IS_ANAL_XL_YL)
                 fac->code |= IS_ANAL_CONV;
         }

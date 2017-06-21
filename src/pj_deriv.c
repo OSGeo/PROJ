@@ -17,8 +17,8 @@ int pj_deriv(LP lp, double h, PJ *P, struct DERIVS *der) {
 
     der->x_l = t.x;
     der->y_p = t.y;
-    der->x_p = -t.x;
-    der->y_l = -t.y;
+    der->x_p = t.x;
+    der->y_l = t.y;
     lp.phi -= h;
     if (fabs(lp.phi) > M_HALFPI)
         return 1;
@@ -29,8 +29,8 @@ int pj_deriv(LP lp, double h, PJ *P, struct DERIVS *der) {
 
     der->x_l += t.x;
     der->y_p -= t.y;
-    der->x_p += t.x;
-    der->y_l -= t.y;
+    der->x_p -= t.x;
+    der->y_l += t.y;
     lp.lam -= h;
     t = (*P->fwd)(lp, P);
     if (t.x == HUGE_VAL)
@@ -38,8 +38,8 @@ int pj_deriv(LP lp, double h, PJ *P, struct DERIVS *der) {
 
     der->x_l -= t.x;
     der->y_p -= t.y;
-    der->x_p += t.x;
-    der->y_l += t.y;
+    der->x_p -= t.x;
+    der->y_l -= t.y;
     lp.phi += h;
     t = (*P->fwd)(lp, P);
     if (t.x == HUGE_VAL)
@@ -47,8 +47,8 @@ int pj_deriv(LP lp, double h, PJ *P, struct DERIVS *der) {
 
     der->x_l -= t.x;
     der->y_p += t.y;
-    der->x_p -= t.x;
-    der->y_l += t.y;
+    der->x_p += t.x;
+    der->y_l -= t.y;
     der->x_l /= (h += h);
     der->y_p /= h;
     der->x_p /= h;
