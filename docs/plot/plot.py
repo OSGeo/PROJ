@@ -166,8 +166,8 @@ def project_xy(x, y, proj_string):
     '''
     Wrapper for project() that works with shapely.ops.transform().
     '''
-    a = project(zip(x, y), proj_string)
-    return zip(*a)
+    a = project(np.column_stack((x, y)), proj_string)
+    return a.T
 
 
 def meridian(lon, lat_min, lat_max):
@@ -227,8 +227,7 @@ def plotproj(plotdef, data, outdir):
     '''
     Plot map.
     '''
-    fig = plt.figure()
-    axes = fig.add_subplot(111)
+    fig, axes = plt.subplots()
 
     bounds = (plotdef['lonmin'], plotdef['latmin'], plotdef['lonmax'], plotdef['latmax'])
     for geom in data.filter(bbox=bounds):
@@ -244,9 +243,7 @@ def plotproj(plotdef, data, outdir):
 
         if plotdef['type'] == 'poly':
             if isinstance(temp_pol, MultiPolygon):
-                polys = []
-                for polygon in temp_pol:
-                    polys.append(resample_polygon(polygon))
+                polys = [resample_polygon(polygon) for polygon in temp_pol]
                 pol = MultiPolygon(polys)
             else:
                 pol = resample_polygon(temp_pol)
@@ -261,16 +258,18 @@ def plotproj(plotdef, data, outdir):
             axes.add_patch(patch)
         else:
             x, y = proj_geom.xy
-            plt.plot(x, y, color=COLOR_COAST, linewidth=0.5)
+            axes.plot(x, y, color=COLOR_COAST, linewidth=0.5)
 
     # Plot frame
-    frame = []
-    frame.append(parallel(plotdef['latmin'], plotdef['lonmin'], plotdef['lonmax']))
-    frame.append(parallel(plotdef['latmax'], plotdef['lonmin'], plotdef['lonmax']))
+    frame = [
+        parallel(plotdef['latmin'], plotdef['lonmin'], plotdef['lonmax']),
+        parallel(plotdef['latmax'], plotdef['lonmin'], plotdef['lonmax']),
+    ]
     for line in frame:
         line = project(line, plotdef['projstring'])
-        x, y = zip(*line)
-        plt.plot(x, y, '-k')
+        x = line[:, 0]
+        y = line[:, 1]
+        axes.plot(x, y, '-k')
 
     graticule = build_graticule(
         plotdef['lonmin'],
@@ -282,8 +281,9 @@ def plotproj(plotdef, data, outdir):
     # Plot graticule
     for feature in graticule:
         feature = project(feature, plotdef['projstring'])
-        x, y = zip(*feature)
-        plt.plot(x, y, color=COLOR_GRAT, linewidth=0.4)
+        x = feature[:, 0]
+        y = feature[:, 1]
+        axes.plot(x, y, color=COLOR_GRAT, linewidth=0.4)
 
     axes.axis('off')
     font = {
@@ -292,12 +292,12 @@ def plotproj(plotdef, data, outdir):
         'style': 'italic',
         'size': 12
     }
-    plt.suptitle(plotdef['projstring'], fontdict=font)
+    fig.suptitle(plotdef['projstring'], fontdict=font)
 
-    plt.autoscale(tight=True)
+    axes.autoscale(tight=True)
     if not os.path.exists(outdir):
         os.makedirs(outdir)
-    plt.savefig(outdir + '/' + plotdef['filename'], dpi=300)
+    fig.savefig(outdir + '/' + plotdef['filename'], dpi=300)
 
     # Clean up
     fig = None
