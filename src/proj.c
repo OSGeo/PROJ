@@ -209,8 +209,10 @@ vprocess(FILE *fid) {
 			dat_xy = pj_fwd(dat_ll, Proj);
 			if (postscale) { dat_xy.u *= fscale; dat_xy.v *= fscale; }
 		}
-		if (pj_errno) {
-			emess(-1, pj_strerrno(pj_errno));
+		/* For some reason pj_errno does not work as expected in some   */
+		/* versions of Visual Studio, so using pj_get_errno_ref instead */
+		if (*pj_get_errno_ref()) {
+			emess(-1, pj_strerrno(*pj_get_errno_ref()));
 			continue;
 		}
 		if (!*s && (s > line)) --s; /* assumed we gobbled \n */
