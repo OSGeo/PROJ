@@ -132,7 +132,32 @@ def interp_coords(coords, tol):
     return xy.T
 
 
-def project(coordinates, proj_string, in_radians=False):
+def start_proj(proj_string):
+    '''
+    Start a projection process.
+
+    Coordinates can be projected by writing binary values to stdin and reading
+    the result from stdout.
+
+    Input:
+    ------
+        proj_string:        Definition of output projection
+
+    Out:
+    ----
+        subprocess.Popen:   Process to do projection with.
+    '''
+
+    # set up cmd call. -b for binary in/out, -u for unbuffered output
+    args = [PROJ, '-b', '-u']
+    args.extend(proj_string.split(' '))
+
+    proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            env={'PROJ_LIB': os.path.abspath(PROJ_LIB)})
+    return proc
+
+
+def project(coordinates, proc, in_radians=False):
     '''
     Project geographical coordinates
 
@@ -140,7 +165,7 @@ def project(coordinates, proj_string, in_radians=False):
     ------
         coordinates:        numpy ndarray of size (N,2) and type double.
                             longitude, latitude
-        proj_string:        Definition of output projection
+        proc:               Projection process
 
     Out:
     ----
@@ -153,23 +178,25 @@ def project(coordinates, proj_string, in_radians=False):
         coordinates = np.deg2rad(coordinates)
     coordinates = coordinates.astype(np.double, copy=False)
 
-    # set up cmd call. -b for binary in/out
-    args = [PROJ, '-b']
-    args.extend(proj_string.split(' '))
-
-    proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                            env={'PROJ_LIB': os.path.abspath(PROJ_LIB)})
-    stdout, _ = proc.communicate(coordinates.tobytes(order='C'))
+    data = coordinates.tobytes(order='C')
+    stdout = b''
+    # proc.communicate takes care of any buffering, but if we write manually,
+    # we need to be sure not to overflow the buffers.
+    for i in range(0, len(data), 4096):
+        indata = data[i:i + 4096]
+        proc.stdin.write(indata)
+        proc.stdin.flush()
+        stdout += proc.stdout.read(len(indata))
 
     out = np.frombuffer(stdout, dtype=np.double)
     return np.reshape(out, (-1, 2))
 
 
-def project_xy(x, y, proj_string):
+def project_xy(x, y, proc):
     '''
     Wrapper for project() that works with shapely.ops.transform().
     '''
-    a = project(np.column_stack((x, y)), proj_string)
+    a = project(np.column_stack((x, y)), proc)
     return a.T
 
 
@@ -232,6 +259,8 @@ def plotproj(plotdef, data, outdir):
     '''
     fig, axes = plt.subplots()
 
+    proc = start_proj(plotdef['projstring'])
+
     bounds = (plotdef['lonmin'], plotdef['latmin'], plotdef['lonmax'], plotdef['latmax'])
     for geom in data.filter(bbox=bounds):
         temp_pol = shape(geom['geometry'])
@@ -253,7 +282,7 @@ def plotproj(plotdef, data, outdir):
         else:
             pol = temp_pol
 
-        trans = functools.partial(project_xy, proj_string=plotdef['projstring'])
+        trans = functools.partial(project_xy, proc=proc)
         proj_geom = transform(trans, pol)
 
         if plotdef['type'] == 'poly':
@@ -269,7 +298,7 @@ def plotproj(plotdef, data, outdir):
         parallel(plotdef['latmax'], plotdef['lonmin'], plotdef['lonmax']),
     ]
     for line in frame:
-        line = project(line, plotdef['projstring'])
+        line = project(line, proc)
         x = line[:, 0]
         y = line[:, 1]
         axes.plot(x, y, '-k')
@@ -283,7 +312,7 @@ def plotproj(plotdef, data, outdir):
 
     # Plot graticule
     for feature in graticule:
-        feature = project(feature, plotdef['projstring'])
+        feature = project(feature, proc)
         x = feature[:, 0]
         y = feature[:, 1]
         axes.plot(x, y, color=COLOR_GRAT, linewidth=0.4)
@@ -308,6 +337,7 @@ def plotproj(plotdef, data, outdir):
     axes = None
     del axes
     plt.close()
+    proc.terminate()
 
 
 def main():
