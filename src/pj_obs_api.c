@@ -36,50 +36,61 @@
 #include <proj.h>
 #include <projects.h>
 #include <geodesic.h>
+
 #include <float.h>
 #include <math.h>
+#include <stdarg.h>
 
 
 /* Used for zero-initializing new objects */
-const PJ_COORD pj_coo_null = {{0, 0, 0, 0}};
-const PJ_OBS   pj_obs_null = {
+const PJ_COORD proj_coord_null = {{0, 0, 0, 0}};
+const PJ_OBS   proj_obs_null = {
     {{0, 0, 0, 0}},
     {{0, 0, 0}},
     0, 0
 };
 
 /* Magic object signaling proj system shutdown mode to routines taking a PJ * arg */
-const PJ *pj_shutdown = (PJ *) &pj_shutdown;
+const PJ *proj_shutdown = (PJ *) &proj_shutdown;
+
+PJ_COORD proj_coord (double x, double y, double z, double t) {
+    PJ_COORD res;
+    res.v[0] = x;
+    res.v[1] = y;
+    res.v[2] = z;
+    res.v[3] = t;
+    return res;
+}
 
 /* Geodesic distance between two points with angular 2D coordinates */
-double pj_lp_dist (PJ *P, LP a, LP b) {
+double proj_lp_dist (PJ *P, LP a, LP b) {
     double s12, azi1, azi2;
     /* Note: the geodesic code takes arguments in degrees */
-    geod_inverse (P->geod, TODEG(a.phi), TODEG(a.lam), TODEG(b.phi), TODEG(b.lam), &s12, &azi1, &azi2);
+    geod_inverse (P->geod, PJ_TODEG(a.phi), PJ_TODEG(a.lam), PJ_TODEG(b.phi), PJ_TODEG(b.lam), &s12, &azi1, &azi2);
     return s12;
 }
 
 /* Euclidean distance between two points with linear 2D coordinates */
-double pj_xy_dist (XY a, XY b) {
+double proj_xy_dist (XY a, XY b) {
     return hypot (a.x - b.x, a.y - b.y);
 }
 
 /* Euclidean distance between two points with linear 3D coordinates */
-double pj_xyz_dist (XYZ a, XYZ b) {
+double proj_xyz_dist (XYZ a, XYZ b) {
     return hypot (hypot (a.x - b.x, a.y - b.y), a.z - b.z);
 }
 
 
 /* Work around non-constness of MSVC HUGE_VAL by providing functions rather than constants */
-static PJ_COORD pj_coo_error (void) {
+static PJ_COORD proj_coord_error (void) {
     PJ_COORD c;
     c.v[0] = c.v[1] = c.v[2] = c.v[3] = HUGE_VAL;
     return c;
 }
 
-static PJ_OBS pj_obs_error (void) {
+static PJ_OBS proj_obs_error (void) {
     PJ_OBS obs;
-    obs.coo = pj_coo_error ();
+    obs.coo = proj_coord_error ();
     obs.anc.v[0] = obs.anc.v[1] = obs.anc.v[2] = HUGE_VAL;
     obs.id = obs.flags = 0;
     return obs;
@@ -100,8 +111,8 @@ static PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
         obs.coo.xy  =  pj_fwd (obs.coo.lp, P);
         return obs;
     }
-    pj_err_level (P, EINVAL);
-    return pj_obs_error ();
+    proj_err_level (P, EINVAL);
+    return proj_obs_error ();
 }
 
 
@@ -118,13 +129,54 @@ static PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
         obs.coo.lp  =  pj_inv (obs.coo.xy, P);
         return obs;
     }
-    pj_err_level (P, EINVAL);
-    return pj_obs_error ();
+    proj_err_level (P, EINVAL);
+    return proj_obs_error ();
+}
+
+
+
+static PJ_COORD pj_fwdcoord (PJ_COORD coo, PJ *P) {
+    if (0!=P->fwdobs) {
+        PJ_OBS obs = proj_obs_null;
+        obs.coo = coo;
+        obs  =  P->fwdobs (obs, P);
+        return obs.coo;
+    }
+    if (0!=P->fwd3d) {
+        coo.xyz  =  pj_fwd3d (coo.lpz, P);
+        return coo;
+    }
+    if (0!=P->fwd) {
+        coo.xy  =  pj_fwd (coo.lp, P);
+        return coo;
+    }
+    proj_err_level (P, EINVAL);
+    return proj_coord_error ();
+}
+
+
+static PJ_COORD pj_invcoord (PJ_COORD coo, PJ *P) {
+    if (0!=P->invobs) {
+        PJ_OBS obs = proj_obs_null;
+        obs.coo = coo;
+        obs  =  P->invobs (obs, P);
+        return obs.coo;
+    }
+    if (0!=P->inv3d) {
+        coo.lpz  =  pj_inv3d (coo.xyz, P);
+        return coo;
+    }
+    if (0!=P->inv) {
+        coo.lp  =  pj_inv (coo.xy, P);
+        return coo;
+    }
+    proj_err_level (P, EINVAL);
+    return proj_coord_error ();
 }
 
 
 /* Apply the transformation P to the observation obs */
-PJ_OBS pj_trans (PJ *P, enum pj_direction direction, PJ_OBS obs) {
+PJ_OBS proj_trans_obs (PJ *P, enum proj_direction direction, PJ_OBS obs) {
     if (0==P)
         return obs;
 
@@ -139,13 +191,13 @@ PJ_OBS pj_trans (PJ *P, enum pj_direction direction, PJ_OBS obs) {
             break;
     }
 
-    pj_err_level (P, EINVAL);
-    return pj_obs_error ();
+    proj_err_level (P, EINVAL);
+    return proj_obs_error ();
 }
 
 
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
-double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs) {
+double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs) {
     int i;
     PJ_OBS o, u;
 
@@ -153,7 +205,7 @@ double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs) {
         return HUGE_VAL;
 
     if (n < 1) {
-        pj_err_level (P, EINVAL);
+        proj_err_level (P, EINVAL);
         return HUGE_VAL;
     }
 
@@ -170,24 +222,31 @@ double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs) {
                 o  =  pj_fwdobs (u, P);
                 break;
             default:
-                pj_err_level (P, EINVAL);
+                proj_err_level (P, EINVAL);
                 return HUGE_VAL;
         }
     }
 
-    return pj_xyz_dist (o.coo.xyz, obs.coo.xyz);
+    return proj_xyz_dist (o.coo.xyz, obs.coo.xyz);
 }
 
 
-PJ *pj_create (const char *definition) {
-    return pj_init_plus (definition);
+PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
+    if (0==ctx)
+        ctx = pj_get_default_ctx ();
+    return pj_init_plus_ctx (ctx, definition);
 }
 
-
-PJ *pj_create_argv (int argc, char **argv) {
-    return pj_init (argc, argv);
+PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
+    if (0==ctx)
+        ctx = pj_get_default_ctx ();
+    return pj_init_ctx (ctx, argc, argv);
 }
 
+PJ *proj_destroy (PJ *P) {
+    pj_free (P);
+    return 0;
+}
 
 /* Below: Minimum viable support for contexts. The first four functions   */
 /* relate to error reporting, debugging, and logging, hence being generically */
@@ -195,7 +254,7 @@ PJ *pj_create_argv (int argc, char **argv) {
 /* proj_api.h thread contexts, which may or may not be useful  */
 
 /* Set error level 0-3, or query current level */
-int pj_err_level (PJ *P, int err_level) {
+int proj_err_level (PJ *P, int err_level) {
     int previous;
     PJ_CONTEXT *ctx;
     if (0==P)
@@ -211,8 +270,8 @@ int pj_err_level (PJ *P, int err_level) {
 
 
 /* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
-enum pj_log_level pj_log_level (PJ *P, enum pj_log_level log_level) {
-    enum pj_log_level previous;
+enum proj_log_level proj_log_level (PJ *P, enum proj_log_level log_level) {
+    enum proj_log_level previous;
     PJ_CONTEXT *ctx;
     if (0==P)
         ctx = pj_get_default_ctx();
@@ -226,8 +285,37 @@ enum pj_log_level pj_log_level (PJ *P, enum pj_log_level log_level) {
 }
 
 
+
+
+
+/*  logging  */
+
+/* pj_vlog resides in pj_log.c and relates to pj_log as vsprintf relates to sprintf */
+void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args );
+
+void proj_log_error (PJ *P, const char *fmt, ...) {
+    va_list args;
+    va_start( args, fmt );
+    pj_vlog (pj_get_ctx (P), PJ_LOG_ERROR , fmt, args);
+    va_end( args );
+}
+
+void proj_log_debug (PJ *P, const char *fmt, ...) {
+    va_list args;
+    va_start( args, fmt );
+    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MAJOR , fmt, args);
+    va_end( args );
+}
+
+void proj_log_trace (PJ *P, const char *fmt, ...) {
+    va_list args;
+    va_start( args, fmt );
+    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MINOR , fmt, args);
+    va_end( args );
+}
+
 /* Put a new logging function into P's context. The opaque object app_data is passed as first arg at each call to the logger */
-void pj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *)) {
+void proj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *)) {
     PJ_CONTEXT *ctx = pj_get_ctx (P);
     ctx->app_data = app_data;
     if (0!=log)
@@ -235,51 +323,57 @@ void pj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *))
 }
 
 
-/* Move P to a new context - initially a copy of the default context */
-int pj_context_renew (PJ *P) {
-    PJ_CONTEXT *ctx = pj_ctx_alloc ();
-    if (0==ctx) {
-        pj_err_level (P, ENOMEM);
-        return 1;
-    }
-
+/* Move P to a new context - or to the default context i 0 is specified */
+void proj_context_set (PJ *P, PJ_CONTEXT *ctx) {
+    if (0==ctx)
+        ctx = pj_get_default_ctx ();
     pj_set_ctx (P, ctx);
-    return 0;
+    return;
 }
 
 
-/* Move daughter to mother's context */
-void pj_context_inherit (PJ *mother, PJ *daughter) {
-    pj_set_ctx (daughter, pj_get_ctx (mother));
-}
-
-
-void pj_context_free (const PJ *P) {
+/* Create a new context - or provide a pointer to the default context */
+/* Prepared for more elaborate sscanf style setup syntax */
+PJ_CONTEXT *proj_context_create (char *setup, ...) {
     PJ_CONTEXT *ctx;
+    va_list args;
 
-    if (0==P)
+    /* The classic single threaded, backwards compatible way */
+    if (0==setup)
+        return pj_get_default_ctx ();
+
+    /* Simplest multi threaded way: ctx is just a container for pj_errno */
+    ctx = pj_ctx_alloc ();
+    if (0==ctx)
+        return 0;
+    if (0==strcmp(setup, ""))
+        return ctx;
+
+    /* Multi threaded with thread specific logging */
+    va_start (args, setup);
+    if (0==strcmp(setup, "log"))
+        ctx->logger = va_arg (args, void (*)(void *, int, const char *));
+
+    /* Additional thread specific setup goes here */
+    va_end (args);
+    return  ctx;
+}
+
+
+void proj_context_destroy (PJ_CONTEXT *ctx) {
+    if (0==ctx)
         return;
 
-    /* During shutdown it should be OK to free the default context - but this needs more work */
-    if (pj_shutdown==P) {
-        /* The obvious solution "pj_ctx_free (pj_get_default_ctx ())" fails */
-        return;
-    }
-
-    ctx = pj_get_ctx ((PJ *) P);
-
-    /* Otherwise, trying to free the default context is a no-op */
+    /* Trying to free the default context is a no-op */
     if (pj_get_default_ctx ()==ctx)
         return;
 
-    /* The common (?) case: free the context and move the PJ to the default context */
     pj_ctx_free (ctx);
-    pj_set_ctx ((PJ *) P, pj_get_default_ctx ());
 }
 
 
 /* Minimum support for fileapi - which may never have been used... */
-void pj_fileapi_set (PJ *P, void *fileapi) {
+void proj_fileapi_set (PJ *P, void *fileapi) {
     PJ_CONTEXT *ctx = pj_get_ctx (P);
     ctx->fileapi = (projFileAPI *) fileapi;
 }

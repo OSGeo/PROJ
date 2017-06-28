@@ -73,7 +73,7 @@ static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
 PJ *PROJECTION(vgridshift) {
 
    if (!pj_param(P->ctx, P->params, "tgrids").i) {
-        pj_log_error(P, "vgridshift: +grids parameter missing.");
+        proj_log_error(P, "vgridshift: +grids parameter missing.");
         return freeup_msg(P, -1);
     }
 
@@ -83,7 +83,7 @@ PJ *PROJECTION(vgridshift) {
 
     /* Was gridlist compiled properly? */
     if ( pj_ctx_get_errno(P->ctx) ) {
-        pj_log_error(P, "vgridshift: could not find required grid(s).");
+        proj_log_error(P, "vgridshift: could not find required grid(s).");
         pj_dalloc(P->gridlist);
         P->gridlist = NULL;
         return freeup_msg(P, -38);
@@ -113,32 +113,32 @@ int pj_vgridshift_selftest (void) {
     double dist;
 
     /* fail on purpose: +grids parameter it mandatory*/
-    P = pj_create("+proj=vgridshift");
+    P = proj_create(0, "+proj=vgridshift");
     if (0!=P)
         return 99;
 
     /* fail on purpose: open non-existing grid */
-    P = pj_create("+proj=vgridshift +grids=nonexistinggrid.gtx");
+    P = proj_create(0, "+proj=vgridshift +grids=nonexistinggrid.gtx");
     if (0!=P)
         return 999;
 
     /* Failure most likely means the grid is missing */
-    P = pj_create ("+proj=vgridshift +grids=egm96_15.gtx +ellps=GRS80");
+    P = proj_create (0, "+proj=vgridshift +grids=egm96_15.gtx +ellps=GRS80");
     if (0==P)
         return 10;
 
-    a = pj_obs_null;
-    a.coo.lpz.lam = TORAD(12.5);
-    a.coo.lpz.phi = TORAD(55.5);
+    a = proj_obs_null;
+    a.coo.lpz.lam = PJ_TORAD(12.5);
+    a.coo.lpz.phi = PJ_TORAD(55.5);
 
-    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 0.00000001)
         return 1;
 
     expect = a;
     expect.coo.lpz.z   = -36.021305084228515625;
-    b = pj_trans(P, PJ_FWD, a);
-    if (pj_xyz_dist(expect.coo.xyz, b.coo.xyz) > 1e-10)
+    b = proj_trans(P, PJ_FWD, a);
+    if (proj_xyz_dist(expect.coo.xyz, b.coo.xyz) > 1e-10)
         return 2;
 
 

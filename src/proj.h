@@ -14,7 +14,7 @@
  *
  *           This is an evolving attempt at creating a re-rationalized API
  *           with primary design goals focused on sanitizing the namespaces.
- *           Hence, all symbols exposed are being moved to the pj_ namespace,
+ *           Hence, all symbols exposed are being moved to the proj_ namespace,
  *           while all data types are being moved to the PJ_ namespace.
  *
  *           Please note that this API is *orthogonal* to  the previous APIs:
@@ -49,7 +49,8 @@
  *           without having any idea about its internals.
  *
  *           (obviously, in this example, struct projCtx_t should also be
- *           renamed struct pj_ctx some day...)
+ *           renamed struct pj_ctx some day, but for backwards compatibility
+ *           it remains as-is for now).
  *
  *           THIRD, I try to eliminate implicit type punning. Hence this API
  *           introduces the PJ_OBS ("observation") data type, for generic
@@ -73,20 +74,28 @@
  *           as large as the traditional XY and LP objects, timing results
  *           have shown the overhead to be very reasonable.
  *
- *           In its current incarnation, the API is focused on compactness:
- *           Currently it consists of only nine functions.
+ *           Contexts and thread safety
+ *           --------------------------
  *
- *           Hence, due to the proj_ctx subsystem being little used, it has
- *           been replaced by a tiny set of 3 functions, making it possible,
- *           but not very convenient, to do almost everything possible with
- *           the original ctx API.
+ *           After a year of experiments (and previous experience from the
+ *           trlib transformation library) it has become clear that the
+ *           context subsystem is unavoidable in a multi-threaded world.
+ *           Hence, instead of hiding it away, we move it into the limelight,
+ *           highly recommending (but not formally requiring) the bracketing
+ *           with calls to proj_context_create(...)/proj_context_destroy() of
+ *           any code block calling PROJ.4 functions.
  *
- *           See pj_proj_test.c for an example of how to use the API.
+ *           Legacy single threaded code need not do anything, but *may*
+ *           implement a bit of future compatibility by using the backward
+ *           compatible call proj_context_create(0), which will not create
+ *           a new context, but simply provide a pointer to the default one.
+ *
+ *           See pj_obs_api_test.c for an example of how to use the API.
  *
  * Author:   Thomas Knudsen, <thokn@sdfe.dk>
  *
  ******************************************************************************
- * Copyright (c) 2016, Thomas Knudsen / SDFE
+ * Copyright (c) 2016, 2017, Thomas Knudsen / SDFE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -116,6 +125,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <errno.h>
 
@@ -182,6 +192,9 @@ typedef struct { double lam, phi,  z; }  LPZ;
 
 /* Ancillary pairs and triplets for geodetic computations */
 
+/* easting and northing */
+typedef struct { double   e, n; }  PJ_EN;
+
 /* Degrees, minutes, and seconds */
 typedef struct { double d, m,  s; }  PJ_DMS;
 
@@ -198,6 +211,7 @@ union PJ_COORD {
     PJ_ENHT enht;
     PJ_LPZT lpzt;
     PJ_ENH  enh;
+    PJ_EN   en;
     double v[4]; /* It's just a vector */
     XYZ  xyz;
     UVW  uvw;
@@ -227,6 +241,7 @@ union PJ_PAIR {
     LP     lp;
     UV     uv;
     PJ_AF  af;
+    PJ_EN  en;
     double v[2]; /* Yes - It's really just a vector! */
 };
 
@@ -243,58 +258,79 @@ typedef struct projCtx_t PJ_CONTEXT;
 typedef int *PJ_FILE;
 
 
+/* Functionality for handling thread contexts */
+PJ_CONTEXT *proj_context_create (char *setup, ...);
+void proj_context_set (PJ *P, PJ_CONTEXT *ctx);
+void proj_context_inherit (PJ *parent, PJ *child);
+void proj_context_destroy    (PJ_CONTEXT *ctx);
+
+
 /* Manage the transformation definition object PJ */
-PJ  *pj_create (const char *definition);
-PJ  *pj_create_argv (int argc, char **argv);
-void pj_free (PJ *P);
+PJ  *proj_create (PJ_CONTEXT *ctx, const char *definition);
+PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
+PJ  *proj_create_pipeline (PJ_CONTEXT *ctx, const char *def_left, const char *def_right);
+PJ  *proj_destroy (PJ *P);
 int  pj_error (PJ *P);
 
 
 /* Apply transformation to observation - in forward or inverse direction */
-enum pj_direction {
+enum proj_direction {
     PJ_FWD   =  1,   /* Forward    */
     PJ_IDENT =  0,   /* Do nothing */
     PJ_INV   = -1    /* Inverse    */
 };
-PJ_OBS pj_trans (PJ *P, enum pj_direction direction, PJ_OBS obs);
+
+#define proj_trans proj_trans_obs
+PJ_OBS   proj_trans_obs   (PJ *P, enum proj_direction direction, PJ_OBS obs);
+PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coord);
+
+int proj_trans_batch (
+    PJ *P, enum proj_direction direction, 
+    size_t n, size_t stride,
+    unsigned int flags,
+    double *x, double *y, double *z, double *t
+);
+
+int proj_trans_obs_batch   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
+int proj_trans_coord_batch (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
+
+
+
+PJ_COORD proj_coord (double x, double y, double z, double t);
 
 /* Measure internal consistency - in forward or inverse direction */
-double pj_roundtrip (PJ *P, enum pj_direction direction, int n, PJ_OBS obs);
+double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs);
 
 /* Geodesic distance between two points with angular 2D coordinates */
-double pj_lp_dist (PJ *P, LP a, LP b);
+double proj_lp_dist (PJ *P, LP a, LP b);
 
 /* Euclidean distance between two points with linear 2D coordinates */
-double pj_xy_dist (XY a, XY b);
+double proj_xy_dist (XY a, XY b);
 
 /* Euclidean distance between two points with linear 3D coordinates */
-double pj_xyz_dist (XYZ a, XYZ b);
+double proj_xyz_dist (XYZ a, XYZ b);
 
 
 #ifndef PJ_OBS_API_C
-/* Part of MSVC workaround: Make pj_*_null look function-like for symmetry with pj_*_error */
-#define pj_coo_null(x) pj_coo_null
-#define pj_obs_null(x) pj_obs_null
-extern const PJ_COORD pj_coo_null;
-extern const PJ_OBS   pj_obs_null;
-extern const PJ      *pj_shutdown;
+/* Part of MSVC workaround: Make proj_*_null look function-like for symmetry with proj_*_error */
+#define proj_coord_null(x) proj_coord_null
+#define proj_obs_null(x) proj_obs_null
+extern const PJ_COORD proj_coord_null;
+extern const PJ_OBS   proj_obs_null;
+extern const PJ      *proj_shutdown;
 #endif
 
-#ifndef TODEG
-#define TODEG(rad)  ((rad)*180.0/M_PI)
+#ifndef PJ_TODEG
+#define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
 #endif
-#ifndef TORAD
-#define TORAD(deg)  ((deg)*M_PI/180.0)
+#ifndef PJ_TORAD
+#define PJ_TORAD(deg)  ((deg)*M_PI/180.0)
 #endif
-
-
-
-
 
 
 
 /* High level functionality for handling thread contexts */
-enum pj_log_level {
+enum proj_log_level {
     PJ_LOG_NONE  = 0,
     PJ_LOG_ERROR = 1,
     PJ_LOG_DEBUG = 2,
@@ -306,24 +342,19 @@ enum pj_log_level {
 
 /* Set or read error level */
 #define PJ_ERR_TELL -56789
-int pj_err_level (PJ *P, int err_level);
+int proj_err_level (PJ *P, int err_level);
 
 /* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
-enum pj_log_level pj_log_level (PJ *P, enum pj_log_level log_level);
+enum proj_log_level proj_log_level (PJ *P, enum proj_log_level log_level);
 
-void pj_log_error (PJ *P, const char *fmt, ...);
-void pj_log_debug (PJ *P, const char *fmt, ...);
-void pj_log_trace (PJ *P, const char *fmt, ...);
-void pj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *));
+void proj_log_error (PJ *P, const char *fmt, ...);
+void proj_log_debug (PJ *P, const char *fmt, ...);
+void proj_log_trace (PJ *P, const char *fmt, ...);
+void proj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *));
 
-
-/* Lower level functionality for handling thread contexts */
-int  pj_context_renew (PJ *P);
-void pj_context_inherit (PJ *mother, PJ *daughter);
-void pj_context_free    (const PJ *P);
 
 /* Lowest level: Minimum support for fileapi */
-void pj_fileapi_set (PJ *P, void *fileapi);
+void proj_fileapi_set (PJ *P, void *fileapi);
 
 
 #ifdef __cplusplus

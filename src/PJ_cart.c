@@ -232,117 +232,126 @@ int pj_cart_selftest (void) {return 0;}
 #else
 /* Testing quite a bit of the pj_obs_api as a side effect (inspired by pj_obs_api_test.c) */
 int pj_cart_selftest (void) {
+    PJ_CONTEXT *ctx;
     PJ *P;
     PJ_OBS a, b;
     int err;
     double dist;
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
 
-
     /* An utm projection on the GRS80 ellipsoid */
-    P = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
+    P = proj_create (0, "+proj=utm +zone=32 +ellps=GRS80");
     if (0==P)
         return 1;
 
     /* Clean up */
-    pj_free (P);
+    proj_destroy (P);
 
     /* Same projection, now using argc/argv style initialization */
-    P = pj_create_argv (3, args);
+    P = proj_create_argv (0, 3, args);
     if (0==P)
         return 2;
 
     /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
-    a = pj_obs_null;
+    a = proj_obs_null;
     /* a.coo.lp: The coordinate part of a, interpreted as a classic LP pair */
-    a.coo.lp.lam = TORAD(12);
-    a.coo.lp.phi = TORAD(55);
+    a.coo.lp.lam = PJ_TORAD(12);
+    a.coo.lp.phi = PJ_TORAD(55);
 
     /* Forward projection */
-    b = pj_trans (P, PJ_FWD, a);
+    b = proj_trans (P, PJ_FWD, a);
 
     /* Inverse projection */
-    a = pj_trans (P, PJ_INV, b);
+    a = proj_trans (P, PJ_INV, b);
 
     /* Null projection */
-    a = pj_trans (P, PJ_IDENT, a);
+    a = proj_trans (P, PJ_IDENT, a);
 
     /* Forward again, to get two linear items for comparison */
-    a = pj_trans (P, PJ_FWD, a);
+    a = proj_trans (P, PJ_FWD, a);
 
-    dist = pj_xy_dist (a.coo.xy, b.coo.xy);
+    dist = proj_xy_dist (a.coo.xy, b.coo.xy);
     if (dist > 2e-9)
         return 3;
 
     /* Invalid projection */
-    a = pj_trans (P, 42, a);
+    a = proj_trans (P, 42, a);
     if (a.coo.lpz.lam!=HUGE_VAL)
         return 4;
-    err = pj_err_level (P, PJ_ERR_TELL);
+    err = proj_err_level (P, PJ_ERR_TELL);
     if (0==err)
         return 5;
 
     /* Clear error */
-    pj_err_level (P, 0);
+    proj_err_level (P, 0);
 
     /* Clean up */
-    pj_free (P);
+    proj_destroy (P);
 
     /* Now do some 3D transformations */
-    P = pj_create ("+proj=cart +ellps=GRS80");
+    P = proj_create (0, "+proj=cart +ellps=GRS80");
     if (0==P)
         return 6;
 
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
-    a = b = pj_obs_null;
-    a.coo.lpz.lam = TORAD(12);
-    a.coo.lpz.phi = TORAD(55);
+    a = b = proj_obs_null;
+    a.coo.lpz.lam = PJ_TORAD(12);
+    a.coo.lpz.phi = PJ_TORAD(55);
     a.coo.lpz.z   = 100;
 
     /* Forward projection: 3D-Cartesian-to-Ellipsoidal */
-    b = pj_trans (P, PJ_FWD, a);
+    b = proj_trans (P, PJ_FWD, a);
 
     /* Check roundtrip precision for 10000 iterations each way */
-    dist = pj_roundtrip (P, PJ_FWD, 10000, a);
-    dist = pj_roundtrip (P, PJ_INV, 10000, b);
+    dist = proj_roundtrip (P, PJ_FWD, 10000, a);
+    dist = proj_roundtrip (P, PJ_INV, 10000, b);
     if (dist > 2e-9)
         return 7;
 
 
     /* Test at the North Pole */
-    a = b = pj_obs_null;
-    a.coo.lpz.lam = TORAD(0);
-    a.coo.lpz.phi = TORAD(90);
+    a = b = proj_obs_null;
+    a.coo.lpz.lam = PJ_TORAD(0);
+    a.coo.lpz.phi = PJ_TORAD(90);
     a.coo.lpz.z   = 100;
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
-    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 1e-12)
         return 8;
 
     /* Test at the South Pole */
-    a = b = pj_obs_null;
-    a.coo.lpz.lam = TORAD(0);
-    a.coo.lpz.phi = TORAD(-90);
+    a = b = proj_obs_null;
+    a.coo.lpz.lam = PJ_TORAD(0);
+    a.coo.lpz.phi = PJ_TORAD(-90);
     a.coo.lpz.z   = 100;
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
-    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 1e-12)
         return 9;
 
     /* Inverse projection: 3D-Cartesian-to-Ellipsoidal */
-    b = pj_trans (P, PJ_INV, b);
+    b = proj_trans (P, PJ_INV, b);
 
     /* Move p to another context */
-    pj_context_renew (P);
-    b = pj_trans (P, PJ_FWD, b);
+    ctx = proj_context_create ("");
+    if (ctx==pj_get_default_ctx())
+        return 10;
+    proj_context_set (P, ctx);
+    if (ctx != P->ctx)
+        return 11;
+    b = proj_trans (P, PJ_FWD, b);
 
     /* Move it back to the default context */
-    pj_context_free (P);
-    b = pj_trans (P, PJ_INV, b);
+    proj_context_set (P, 0);
+    if (pj_get_default_ctx() != P->ctx)
+        return 12;
+    proj_context_destroy (ctx);
 
-    pj_free (P);
+    /* We go on with the work - now back on the default context */
+    b = proj_trans (P, PJ_INV, b);
+    proj_destroy (P);
     return 0;
 }
 #endif

@@ -45,6 +45,7 @@
 int pj_pipeline_selftest (void);
 
 int main (void) {
+    PJ_CONTEXT *C, *D;
     PJ *P;
     PJ_OBS a, b;
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
@@ -52,133 +53,147 @@ int main (void) {
     double dist;
     XY cph_utm32;
 
+    /* Get ready for PROJ.4-ing */
+    C = proj_context_create(0);
+
     /* Log everything libproj offers to log for you */
-    pj_log_level (0, PJ_LOG_TRACE);
+    proj_log_level (0, PJ_LOG_TRACE);
 
     /* An utm projection on the GRS80 ellipsoid */
-    P = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
+    P = proj_create (C, "+proj=utm +zone=32 +ellps=GRS80");
     if (0==P)
         return puts ("Oops"), 0;
 
     /* Clean up */
-    pj_free (P);
+    proj_destroy (P);
 
     /* Same projection, now using argc/argv style initialization */
-    P = pj_create_argv (3, args);
+    P = proj_create_argv (3, args);
     if (0==P)
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
-    a = pj_obs_null ();
+    a = proj_obs_null ();
     /* a.coo.lp: The coordinate part of a, interpreted as a classic LP pair */
-    a.coo.lp.lam = TORAD(12);
-    a.coo.lp.phi = TORAD(55);
+    a.coo.lp.lam = PJ_TORAD(12);
+    a.coo.lp.phi = PJ_TORAD(55);
 
     /* Forward projection */
-    b = pj_trans (P, PJ_FWD, a);
+    b = proj_trans (P, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f\n", b.coo.enh.e, b.coo.enh.n);
     cph_utm32 = b.coo.xy;
 
     /* Inverse projection */
-    a = pj_trans (P, PJ_INV, b);
+    a = proj_trans (P, PJ_INV, b);
     printf ("INV:   %15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
 
     /* Null projection */
-    a = pj_trans (P, PJ_IDENT, a);
+    a = proj_trans (P, PJ_IDENT, a);
     printf ("IDENT: %15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
 
     /* Forward again, to get two linear items for comparison */
-    a = pj_trans (P, PJ_FWD, a);
+    a = proj_trans (P, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f\n", b.coo.enh.e, b.coo.enh.n);
 
-    dist = pj_xy_dist (a.coo.xy, b.coo.xy);
+    dist = proj_xy_dist (a.coo.xy, b.coo.xy);
     printf ("Roundtrip deviation, (nm): %15.9f\n", dist*1e9);
 
     /* should be identical - checking whether null-init is done */
-    dist = pj_xyz_dist (a.coo.xyz, b.coo.xyz);
+    dist = proj_xyz_dist (a.coo.xyz, b.coo.xyz);
     printf ("Roundtrip deviation, (nm): %15.9f\n", dist*1e9);
 
     /* Invalid projection */
-    a = pj_trans (P, 42, a);
+    a = proj_trans (P, 42, a);
     if (a.coo.lpz.lam!=DBL_MAX)
         printf ("%15.9f %15.9f\n", a.coo.lpz.lam, a.coo.lpz.phi);
     err = pj_err_level (P, PJ_ERR_TELL);
     printf ("pj_err_level: %d\n", err);
 
     /* Clean up */
-    pj_free (P);
+    proj_destroy (P);
 
     /* Now do some 3D transformations */
-    P = pj_create ("+proj=cart +ellps=GRS80");
+    P = proj_create (C, "+proj=cart +ellps=GRS80");
     if (0==P)
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
-    a = b = pj_obs_null ();
-    a.coo.lpz.lam = TORAD(12);
-    a.coo.lpz.phi = TORAD(55);
+    a = b = proj_obs_null ();
+    a.coo.lpz.lam = PJ_TORAD(12);
+    a.coo.lpz.phi = PJ_TORAD(55);
     a.coo.lpz.z   = 100;
 
     /* Forward projection: 3D-Cartesian-to-Ellipsoidal */
-    b = pj_trans (P, PJ_FWD, a);
+    b = proj_trans (P, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f %15.9f\n", b.coo.xyz.x, b.coo.xyz.y, b.coo.xyz.z);
 
     /* Check roundtrip precision for 10000 iterations each way */
-    dist = pj_roundtrip (P, PJ_FWD, 10000, a);
+    dist = proj_roundtrip (P, PJ_FWD, 10000, a);
     printf ("Roundtrip deviation, fwd (nm): %15.9f\n", dist*1e9*1e5);
-    dist = pj_roundtrip (P, PJ_INV, 10000, b);
+    dist = proj_roundtrip (P, PJ_INV, 10000, b);
     printf ("Roundtrip deviation, inv (nm): %15.9f\n", dist*1e9);
 
     /* Inverse projection: Ellipsoidal-to-3D-Cartesian */
-    b = pj_trans (P, PJ_INV, b);
-    printf ("INV:   %15.9f %15.9f %15.9f\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi), b.coo.lpz.z);
+    b = proj_trans (P, PJ_INV, b);
+    printf ("INV:   %15.9f %15.9f %15.9f\n", PJ_TODEG(b.coo.lpz.lam), PJ_TODEG(b.coo.lpz.phi), b.coo.lpz.z);
 
     /* Move p to another context */
-    pj_context_renew (P);
-    b = pj_trans (P, PJ_FWD, b);
+    D = proj_context_create ("");
+    if (0==D)
+        return puts ("Oops"), 0;
+    proj_context_set (P, D);
+
+    /* Go on in the new context*/
+    b = proj_trans (P, PJ_FWD, b);
     printf ("CTX1:  %15.9f %15.9f %15.9f\n", b.coo.xyz.x, b.coo.xyz.y, b.coo.xyz.z);
 
-    /* Move it back to the default context */
-    pj_context_free (P);
+    
+    /* move it to the default context */
+    proj_context_set (P, 0);
     b = pj_trans (P, PJ_INV, b);
-    printf ("CTX0:  %15.9f %15.9f %15.9f\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi), b.coo.lpz.z);
+    printf ("CTX0:  %15.9f %15.9f %15.9f\n", PJ_TODEG(b.coo.lpz.lam), PJ_TODEG(b.coo.lpz.phi), b.coo.lpz.z);
 
-    pj_free (P);
+    proj_destroy (P);
+    proj_context_destroy (D);
+    proj_context_destroy (C);
 
     /***************************************************************************
 
                   P I P E L I N E   T E S T S
 
     ***************************************************************************/
+    C = proj_context_create (0);
 
     /* forward-reverse geo->utm->geo */
-    P = pj_create (
+    P = proj_create (
+            C,
             "+proj=pipeline +ellps=GRS80 +zone=32 +step "
             "+proj=utm +step "
             "+proj=utm +inv"
         );
     if (0==P)
         return puts ("Oops"), 0;
+
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
     a = b = pj_obs_null ();
-    a.coo.lpz.lam = TORAD(12);
-    a.coo.lpz.phi = TORAD(55);
+    a.coo.lpz.lam = PJ_TORAD(12);
+    a.coo.lpz.phi = PJ_TORAD(55);
     a.coo.lpz.z   = 100;
     printf ("PRE:   %15.9f %15.9f\n", a.coo.lpz.lam, a.coo.lpz.phi);
 
     /* Forward projection */
-    b = pj_trans (P, PJ_FWD, a);
-    printf ("FWD:   %15.9f %15.9f\n", TODEG(b.coo.lpz.lam), TODEG(b.coo.lpz.phi));
+    b = proj_trans (P, PJ_FWD, a);
+    printf ("FWD:   %15.9f %15.9f\n", PJ_TODEG(b.coo.lpz.lam), PJ_TODEG(b.coo.lpz.phi));
 
     /* Inverse projection */
-    a = pj_trans (P, PJ_INV, b);
-    printf ("INV:   %15.9f %15.9f\n", TODEG(a.coo.lpz.lam), TODEG(a.coo.lpz.phi));
+    a = proj_trans (P, PJ_INV, b);
+    printf ("INV:   %15.9f %15.9f\n", PJ_TODEG(a.coo.lpz.lam), PJ_TODEG(a.coo.lpz.phi));
 
-    pj_free (P);
-
+    proj_destroy (P);
 
     /* And now the back-to-back situation utm->geo->utm */
     P = pj_create (
+        C,
         "+proj=pipeline +ellps=GRS80 +zone=32 +step "
         "+proj=utm +inv +step "
         "+proj=utm");
@@ -191,53 +206,53 @@ int main (void) {
     printf ("PRE:   %15.9f %15.9f\n", a.coo.xy.x, a.coo.xy.y);
 
     /* Forward projection */
-    b = pj_trans (P, PJ_FWD, a);
+    b = proj_trans (P, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f\n", b.coo.xy.x, b.coo.xy.y);
 
     /* Inverse projection */
-    a = pj_trans (P, PJ_INV, b);
+    a = proj_trans (P, PJ_INV, b);
     printf ("INV:   %15.9f %15.9f\n", a.coo.xy.x, a.coo.xy.y);
 
-    pj_free (P);
-
+    proj_destroy (P);
 
 
     /* Finally testing a corner case: A rather pointless one-step pipeline geo->utm */
-    P = pj_create ("+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm");
+    P = proj_create (C, "+proj=pipeline +ellps=GRS80 +zone=32 +step +proj=utm");
     if (0==P)
         return puts ("Oops"), 0;
 
     /* zero initialize everything, then set (easting, northing) to utm(12, 55) */
-    a = b = pj_obs_null ();
-    a.coo.lpz.lam = TORAD(12);
-    a.coo.lpz.phi = TORAD(55);
-    printf ("PRE:   %15.9f %15.9f\n", TODEG(a.coo.lp.lam), TODEG(a.coo.lp.phi));
+    a = b = proj_obs_null ();
+    a.coo.lpz.lam = PJ_TORAD(12);
+    a.coo.lpz.phi = PJ_TORAD(55);
+    printf ("PRE:   %15.9f %15.9f\n", PJ_TODEG(a.coo.lp.lam), PJ_TODEG(a.coo.lp.phi));
     printf ("EXP:   %15.9f %15.9f\n", cph_utm32.x, cph_utm32.y);
 
     /* Forward projection */
-    b = pj_trans (P, PJ_FWD, a);
+    b = proj_trans (P, PJ_FWD, a);
     printf ("FWD:   %15.9f %15.9f\n", b.coo.xy.x, b.coo.xy.y);
 
     /* Inverse projection */
-    a = pj_trans (P, PJ_INV, b);
-    printf ("INV:   %15.9f %15.9f\n", TODEG(a.coo.lp.lam), TODEG(a.coo.lp.phi));
+    a = proj_trans (P, PJ_INV, b);
+    printf ("INV:   %15.9f %15.9f\n", PJ_TODEG(a.coo.lp.lam), PJ_TODEG(a.coo.lp.phi));
 
     /* Geodesic distance between two points with angular 2D coordinates */
-    a.coo.lp.lam = TORAD(12);
-    a.coo.lp.phi = TORAD(60);
-    b.coo.lp.lam = TORAD(12);
-    b.coo.lp.phi = TORAD(61);
-    dist = pj_lp_dist (P, a.coo.lp, b.coo.lp);
+    a.coo.lp.lam = PJ_TORAD(12);
+    a.coo.lp.phi = PJ_TORAD(60);
+    b.coo.lp.lam = PJ_TORAD(12);
+    b.coo.lp.phi = PJ_TORAD(61);
+    dist = proj_lp_dist (P, a.coo.lp, b.coo.lp);
     printf ("1 deg at 60N:   %15.9f\n", dist);
 
-    a.coo.lp.lam = TORAD(12);
-    a.coo.lp.phi = TORAD(0.);
-    b.coo.lp.lam = TORAD(12);
-    b.coo.lp.phi = TORAD(1.);
-    dist = pj_lp_dist (P, a.coo.lp, b.coo.lp);
+    a.coo.lp.lam = PJ_TORAD(12);
+    a.coo.lp.phi = PJ_TORAD(0.);
+    b.coo.lp.lam = PJ_TORAD(12);
+    b.coo.lp.phi = PJ_TORAD(1.);
+    dist = proj_lp_dist (P, a.coo.lp, b.coo.lp);
     printf ("1 deg at Equator:   %15.9f\n", dist);
 
-    pj_free (P);
+    proj_destroy (P);
     pj_pipeline_selftest ();
+    proj_context_destroy (C);
     return 0;
 }

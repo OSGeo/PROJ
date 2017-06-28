@@ -183,7 +183,7 @@ static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
     last_step  = P->opaque->steps + 1;
 
     for (i = first_step;  i != last_step;  i++) {
-        pj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %20.20s",
+        proj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %20.20s",
             i-first_step, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
             P->opaque->pipeline[i]->descr
         );
@@ -191,13 +191,13 @@ static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
         if (P->opaque->omit_forward[i])
             continue;
         if (P->opaque->reverse_step[i])
-            point = pj_trans (P->opaque->pipeline[i], PJ_INV, point);
+            point = proj_trans (P->opaque->pipeline[i], PJ_INV, point);
         else
-            point = pj_trans (P->opaque->pipeline[i], PJ_FWD, point);
+            point = proj_trans (P->opaque->pipeline[i], PJ_FWD, point);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
-    pj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
+    proj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
 
     P->opaque->depth = 0;    /* Clear the stack */
     return point;
@@ -210,20 +210,20 @@ static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
     first_step = P->opaque->steps;
     last_step  =  0;
     for (i = first_step;  i != last_step;  i--) {
-        pj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %.4f %.4f",
+        proj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %.4f %.4f",
             i - 1, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
             P->opaque->pipeline[i]->a, P->opaque->pipeline[i]->rf
         );
         if (P->opaque->omit_inverse[i])
             continue;
         if (P->opaque->reverse_step[i])
-            point = pj_trans (P->opaque->pipeline[i], PJ_FWD, point);
+            point = proj_trans (P->opaque->pipeline[i], PJ_FWD, point);
         else
-            point = pj_trans (P->opaque->pipeline[i], PJ_INV, point);
+            point = proj_trans (P->opaque->pipeline[i], PJ_INV, point);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
-    pj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
+    proj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
 
     P->opaque->depth = 0;    /* Clear the stack */
     return point;
@@ -232,7 +232,7 @@ static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
 
 /* Delegate the work to pipeline_forward_obs() */
 static XYZ pipeline_forward_3d (LPZ lpz, PJ *P) {
-    PJ_OBS point = pj_obs_null;
+    PJ_OBS point = proj_obs_null;
     point.coo.lpz = lpz;
     point = pipeline_forward_obs (point, P);
     return point.coo.xyz;
@@ -240,21 +240,21 @@ static XYZ pipeline_forward_3d (LPZ lpz, PJ *P) {
 
 /* Delegate the work to pipeline_reverse_obs() */
 static LPZ pipeline_reverse_3d (XYZ xyz, PJ *P) {
-    PJ_OBS point = pj_obs_null;
+    PJ_OBS point = proj_obs_null;
     point.coo.xyz = xyz;
     point = pipeline_reverse_obs (point, P);
     return point.coo.lpz;
 }
 
 static XY pipeline_forward (LP lp, PJ *P) {
-    PJ_OBS point = pj_obs_null;
+    PJ_OBS point = proj_obs_null;
     point.coo.lp = lp;
     point = pipeline_forward_obs (point, P);
     return point.coo.xy;
 }
 
 static LP pipeline_reverse (XY xy, PJ *P) {
-    PJ_OBS point = pj_obs_null;
+    PJ_OBS point = proj_obs_null;
     point.coo.xy = xy;
     point = pipeline_reverse_obs (point, P);
     return point.coo.lp;
@@ -275,7 +275,7 @@ static void *pipeline_freeup (PJ *P, int errlev) {         /* Destructor */
     if (0==P)
         return 0;
 
-    pj_err_level (P, errlev);
+    proj_err_level (P, errlev);
 
     if (0==P->opaque)
         return pj_dealloc (P);
@@ -382,7 +382,7 @@ PJ *PROJECTION(pipeline) {
     for (i = 0;  i < argc;  i++) {
         if (0==strcmp ("step", argv[i])) {
             if (-1==i_pipeline) {
-                pj_log_error (P, "Pipeline: +step before +proj=pipeline");
+                proj_log_error (P, "Pipeline: +step before +proj=pipeline");
                 return pipeline_freeup (P, -50);
             }
             if (0==nsteps)
@@ -393,7 +393,7 @@ PJ *PROJECTION(pipeline) {
 
         if (0==strcmp ("proj=pipeline", argv[i])) {
             if (-1 != i_pipeline) {
-                pj_log_error (P, "Pipeline: Nesting invalid");
+                proj_log_error (P, "Pipeline: Nesting invalid");
                 return pipeline_freeup (P, -50); /* ERROR: nested pipelines */
             }
             i_pipeline = i;
@@ -419,7 +419,7 @@ PJ *PROJECTION(pipeline) {
         PJ     *next_step = 0;
 
         /* Build a set of setup args for the current step */
-        pj_log_trace (P, "Pipeline: Building arg list for step no. %d", i);
+        proj_log_trace (P, "Pipeline: Building arg list for step no. %d", i);
 
         /* First add the step specific args */
         for (j = i_current_step + 1;  0 != strcmp ("step", argv[j]); j++)
@@ -445,21 +445,21 @@ PJ *PROJECTION(pipeline) {
                 P->opaque->reverse_step[i+1] = 1;
         }
 
-        pj_log_trace (P, "Pipeline: init - %s, %d", current_argv[0], current_argc);
+        proj_log_trace (P, "Pipeline: init - %s, %d", current_argv[0], current_argc);
         for (j = 1;  j < current_argc; j++)
-            pj_log_trace (P, "    %s", current_argv[j]);
+            proj_log_trace (P, "    %s", current_argv[j]);
 
         next_step = pj_init (current_argc, current_argv);
-        pj_log_trace (P, "Pipeline: Step %d at %p", i, next_step);
+        proj_log_trace (P, "Pipeline: Step %d at %p", i, next_step);
         if (0==next_step) {
-            pj_log_error (P, "Pipeline: Bad step definition: %s", current_argv[0]);
+            proj_log_error (P, "Pipeline: Bad step definition: %s", current_argv[0]);
             return pipeline_freeup (P, -50); /* ERROR: bad pipeline def */
         }
         P->opaque->pipeline[i+1] = next_step;
-        pj_log_trace (P, "Pipeline:    step done");
+        proj_log_trace (P, "Pipeline:    step done");
     }
 
-    pj_log_trace (P, "Pipeline: %d steps built. Determining i/o characteristics", nsteps);
+    proj_log_trace (P, "Pipeline: %d steps built. Determining i/o characteristics", nsteps);
 
     /* Determine forward input (= reverse output) data type */
 
@@ -468,7 +468,7 @@ PJ *PROJECTION(pipeline) {
         if (0==P->opaque->omit_forward[i+1])
             break;
     if (i==nsteps) {
-        pj_log_error (P, "Pipeline: No forward steps");
+        proj_log_error (P, "Pipeline: No forward steps");
         return pipeline_freeup (P, -50);
     }
 
@@ -491,7 +491,7 @@ PJ *PROJECTION(pipeline) {
         if (0==P->opaque->omit_inverse[i+1])
             break;
     if (i==-1) {
-        pj_log (pj_get_ctx (P), PJ_LOG_ERROR, "Pipeline: No reverse steps");
+        proj_log_error (P, "Pipeline: No reverse steps");
         return pipeline_freeup (P, -50);
     }
 
@@ -506,7 +506,7 @@ PJ *PROJECTION(pipeline) {
         else
             P->right = PJ_IO_UNITS_METERS;
     }
-    pj_log_trace (P, "Pipeline: Units - left: [%s], right: [%s]\n",
+    proj_log_trace (P, "Pipeline: Units - left: [%s], right: [%s]\n",
         P->left ==PJ_IO_UNITS_RADIANS? "angular": "linear",
         P->right==PJ_IO_UNITS_RADIANS? "angular": "linear");
 
@@ -525,92 +525,92 @@ int pj_pipeline_selftest (void) {
     double dist;
 
     /* forward-reverse geo->utm->geo */
-    P = pj_create ("+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +step +proj=utm +ellps=GRS80 +inv");
+    P = proj_create (0, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +step +proj=utm +ellps=GRS80 +inv");
     if (0==P)
         return 1000;
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 0) */
-    a = b = pj_obs_null;
-    a.coo.lpz.lam = TORAD(12);
-    a.coo.lpz.phi = TORAD(55);
+    a = b = proj_obs_null;
+    a.coo.lpz.lam = PJ_TORAD(12);
+    a.coo.lpz.phi = PJ_TORAD(55);
     a.coo.lpz.z   = 0;
 
     /* Forward projection */
-    b = pj_trans (P, PJ_FWD, a);
-    if (pj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
+    b = proj_trans (P, PJ_FWD, a);
+    if (proj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
         return 1001;
 
     /* Inverse projection (still same result: pipeline is symmetrical) */
-    a = pj_trans (P, PJ_INV, b);
-    if (pj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
+    a = proj_trans (P, PJ_INV, b);
+    if (proj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
         return 1002;
 
-    pj_free (P);
+    proj_destroy (P);
 
     /* And now the back-to-back situation utm->geo->utm */
-    P = pj_create ("+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +inv +step +proj=utm +ellps=GRS80");
+    P = proj_create (0, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +inv +step +proj=utm +ellps=GRS80");
     if (0==P)
         return 2000;
 
     /* zero initialize everything, then set (easting, northing) to utm(12, 55) */
-    a = b = pj_obs_null;
+    a = b = proj_obs_null;
     a.coo.xy = cph_utm32;
 
     /* Forward projection */
-    b = pj_trans (P, PJ_FWD, a);
-    if (pj_xy_dist (a.coo.xy, b.coo.xy) > 1e-4)
+    b = proj_trans (P, PJ_FWD, a);
+    if (proj_xy_dist (a.coo.xy, b.coo.xy) > 1e-4)
         return 2001;
 
     /* Inverse projection */
-    a = pj_trans (P, PJ_INV, b);
-    if (pj_xy_dist (a.coo.xy, b.coo.xy) > 1e-4)
+    a = proj_trans (P, PJ_INV, b);
+    if (proj_xy_dist (a.coo.xy, b.coo.xy) > 1e-4)
         return 2001;
-    if (pj_xyz_dist (a.coo.xyz, b.coo.xyz) > 1e-4)
+    if (proj_xyz_dist (a.coo.xyz, b.coo.xyz) > 1e-4)
         return 2002;
 
-    pj_free (P);
+    proj_destroy (P);
 
 
     /* Finally testing a corner case: A rather pointless one-step pipeline geo->utm */
-    P = pj_create ("+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 ");
+    P = proj_create (0, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 ");
     if (0==P)
         return 3000;
 
 
-    a = b = pj_obs_null;
-    a.coo.lpz.lam = TORAD(12);
-    a.coo.lpz.phi = TORAD(55);
+    a = b = proj_obs_null;
+    a.coo.lpz.lam = PJ_TORAD(12);
+    a.coo.lpz.phi = PJ_TORAD(55);
 
     /* Forward projection */
-    b = pj_trans (P, PJ_FWD, a);
-    if (pj_xy_dist (cph_utm32, b.coo.xy) > 1e-4)
+    b = proj_trans (P, PJ_FWD, a);
+    if (proj_xy_dist (cph_utm32, b.coo.xy) > 1e-4)
         return 3001;
 
     /* Inverse projection */
-    b = pj_trans (P, PJ_INV, b);
-    if (pj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
+    b = proj_trans (P, PJ_INV, b);
+    if (proj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
         return 3002;
 
 
     /* Since we use pj_lp_dist to determine success above, we should also test that it works */
 
     /* Geodesic distance between two points with angular 2D coordinates */
-    a.coo.lp.lam = TORAD(12);
-    a.coo.lp.phi = TORAD(60);
-    b.coo.lp.lam = TORAD(12);
-    b.coo.lp.phi = TORAD(61);
-    dist = pj_lp_dist (P, a.coo.lp, b.coo.lp);
+    a.coo.lp.lam = PJ_TORAD(12);
+    a.coo.lp.phi = PJ_TORAD(60);
+    b.coo.lp.lam = PJ_TORAD(12);
+    b.coo.lp.phi = PJ_TORAD(61);
+    dist = proj_lp_dist (P, a.coo.lp, b.coo.lp);
     if (fabs (111420.727870234 - dist) > 1e-4)
         return 4001;
 
-    a.coo.lp.lam = TORAD(12);
-    a.coo.lp.phi = TORAD(0.);
-    b.coo.lp.lam = TORAD(12);
-    b.coo.lp.phi = TORAD(1.);
-    dist = pj_lp_dist (P, a.coo.lp, b.coo.lp);
+    a.coo.lp.lam = PJ_TORAD(12);
+    a.coo.lp.phi = PJ_TORAD(0.);
+    b.coo.lp.lam = PJ_TORAD(12);
+    b.coo.lp.phi = PJ_TORAD(1.);
+    dist = proj_lp_dist (P, a.coo.lp, b.coo.lp);
     if (fabs (110574.388554153 - dist) > 1e-4)
         return 4002;
 
-    pj_free (P);
+    proj_destroy (P);
     return 0;
 }
 #endif

@@ -70,7 +70,7 @@ static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
 PJ *PROJECTION(hgridshift) {
 
     if (!pj_param(P->ctx, P->params, "tgrids").i) {
-        pj_log_error(P, "hgridshift: +grids parameter missing.");
+        proj_log_error(P, "hgridshift: +grids parameter missing.");
         return freeup_msg(P, -1);
     }
 
@@ -80,7 +80,7 @@ PJ *PROJECTION(hgridshift) {
 
     /* Was gridlist compiled properly? */
     if ( pj_ctx_get_errno(P->ctx) ) {
-        pj_log_error(P, "hgridshift: could not find required grid(s).");
+        proj_log_error(P, "hgridshift: could not find required grid(s).");
         return freeup_msg(P, -38);
     }
 
@@ -108,38 +108,36 @@ int pj_hgridshift_selftest (void) {
     double dist;
 
     /* fail on purpose: +grids parameter is mandatory*/
-    P = pj_create("+proj=hgridshift");
+    P = proj_create(0, "+proj=hgridshift");
     if (0!=P)
         return 99;
 
     /* fail on purpose: open non-existing grid */
-    P = pj_create("+proj=hgridshift +grids=nonexistinggrid.gsb");
+    P = proj_create(0, "+proj=hgridshift +grids=nonexistinggrid.gsb");
     if (0!=P)
         return 999;
 
 
     /* Failure most likely means the grid is missing */
-    P = pj_create ("+proj=hgridshift +grids=nzgd2kgrid0005.gsb +ellps=GRS80");
+    P = proj_create (0, "+proj=hgridshift +grids=nzgd2kgrid0005.gsb +ellps=GRS80");
     if (0==P)
         return 10;
 
-    a = pj_obs_null;
-    a.coo.lpz.lam = TORAD(173);
-    a.coo.lpz.phi = TORAD(-45);
+    a = proj_obs_null;
+    a.coo.lpz.lam = PJ_TORAD(173);
+    a.coo.lpz.phi = PJ_TORAD(-45);
 
-    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 0.00000001)
         return 1;
 
-    expect.coo.lpz.lam = TORAD(172.999892181021551);
-    expect.coo.lpz.phi = TORAD(-45.001620431954613);
-    b = pj_trans(P, PJ_FWD, a);
-    if (pj_xy_dist(expect.coo.xy, b.coo.xy) > 1e-4)
+    expect.coo.lpz.lam = PJ_TORAD(172.999892181021551);
+    expect.coo.lpz.phi = PJ_TORAD(-45.001620431954613);
+    b = proj_trans(P, PJ_FWD, a);
+    if (proj_xy_dist(expect.coo.xy, b.coo.xy) > 1e-4)
         return 2;
 
-
-    pj_free(P);
-
+    proj_destroy(P);
     return 0;
 }
 #endif
