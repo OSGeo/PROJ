@@ -9,6 +9,10 @@ For more information on PROJ.4 maintenance please see the web page at:
 
   http://proj4.org/
 
+PROJ.4 mailing list can be found at:
+
+  http://lists.maptools.org/mailman/listinfo/proj
+
    ---------------------------------------------------
 
 Installation:
@@ -48,19 +52,19 @@ the PROJ tree shall be installed. If you want to install into
 C:\PROJ, it can remain unchanged.
 Then use the makefile.vc to build the software:
 
-eg. 
+eg.
 C:\> cd proj
 C:\PROJ> nmake /f makefile.vc
 C:\PROJ> nmake /f makefile.vc install-all
 
 Note that you have to have the VC++ environment variables, and path
 setup properly.  This may involve running the VCVARS32.BAT script out
-of the Visual C++ tree.  
+of the Visual C++ tree.
 
-The makefile.vc builds proj.exe, proj.dll and proj.lib. 
+The makefile.vc builds proj.exe, proj.dll and proj.lib.
 
 It should also be possible to build using the Unix instructions
-and Cygwin32, but this hasn't been tested recently. 
+and Cygwin32, but this hasn't been tested recently.
 
 
    ---------------------------------------------------
