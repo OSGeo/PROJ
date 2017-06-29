@@ -25,6 +25,7 @@ Coverage       |coverals|
 .. |coverals| image:: https://coveralls.io/repos/OSGeo/proj.4/badge.svg?branch=master
                     :target: https://coveralls.io/r/OSGeo/proj.4?branch=master
 
+
 Documentation
 =================
 
@@ -44,9 +45,10 @@ Documentation
    license
    references
 
+Mailing List
+================================================================================
 
-
-
+The Proj.4 mailing list can be found at http://lists.maptools.org/mailman/listinfo/proj
 
 Indices and tables
 ==================
