@@ -11,12 +11,8 @@ Wagner II
 
 .. math::
 
-    \begin{array}
-
     x &= 0.92483 \lambda \cos \theta
 
     y &= 1.38725\theta
 
     \sin \theta &= 0.88022 \sin(0.8855\phi)
-
-    \end {array}
