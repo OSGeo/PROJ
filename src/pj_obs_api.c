@@ -378,7 +378,7 @@ PJ_CONTEXT *proj_context_create (char *setup, ...) {
     /* Multi threaded with thread specific logging */
     va_start (args, setup);
     if (0==strcmp(setup, "log"))
-        ctx->logger = va_arg (args, void (*)(void *, int, const char *));
+        ctx->logger = va_arg (args, (void (*)(void *, int, const char *)));
 
     /* Additional thread specific setup goes here */
     va_end (args);
