@@ -15,13 +15,9 @@ the sinusoidal projections. Parameter :math:`n=n` is the weighting factor where
 
 .. math::
 
-    \begin{array}
-
     x &= \lambda \cos \phi / (n + (1 - n) \ cos \phi)
 
     y &= n \phi + (1 - n) \sin \phi
-
-    \end {array}
 
 For the inverse, the Newton-Raphson method can be used to determine
 :math:`\phi` from the equation for :math:`y` above. As :math:`n \rightarrow 0` and

@@ -11,12 +11,8 @@ Eckert I
 
 .. math::
 
-    \begin{array}
-
     x &= 2 \sqrt{2/3\pi} \lambda (1- |\phi|/\pi)
 
     y &= 2 \sqrt{2/3\pi}\phi
-
-    \end {array}
 
 
