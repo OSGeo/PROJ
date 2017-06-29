@@ -136,6 +136,8 @@ static PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
 
 
 static PJ_COORD pj_fwdcoord (PJ_COORD coo, PJ *P) {
+    if (0!=P->fwdcoord)
+        return P->fwdcoord (coo, P);
     if (0!=P->fwdobs) {
         PJ_OBS obs = proj_obs_null;
         obs.coo = coo;
@@ -156,6 +158,8 @@ static PJ_COORD pj_fwdcoord (PJ_COORD coo, PJ *P) {
 
 
 static PJ_COORD pj_invcoord (PJ_COORD coo, PJ *P) {
+    if (0!=P->invcoord)
+        return P->invcoord (coo, P);
     if (0!=P->invobs) {
         PJ_OBS obs = proj_obs_null;
         obs.coo = coo;
@@ -175,7 +179,7 @@ static PJ_COORD pj_invcoord (PJ_COORD coo, PJ *P) {
 }
 
 
-/* Apply the transformation P to the observation obs */
+/* Apply the transformation P to the coordinate coo */
 PJ_OBS proj_trans_obs (PJ *P, enum proj_direction direction, PJ_OBS obs) {
     if (0==P)
         return obs;
@@ -193,6 +197,28 @@ PJ_OBS proj_trans_obs (PJ *P, enum proj_direction direction, PJ_OBS obs) {
 
     proj_err_level (P, EINVAL);
     return proj_obs_error ();
+}
+
+
+
+/* Apply the transformation P to the coordinate coo */
+PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coo) {
+    if (0==P)
+        return coo;
+
+    switch (direction) {
+        case PJ_FWD:
+            return pj_fwdcoord (coo, P);
+        case PJ_INV:
+            return  pj_invcoord (coo, P);
+        case PJ_IDENT:
+            return coo;
+        default:
+            break;
+    }
+
+    proj_err_level (P, EINVAL);
+    return proj_coord_error ();
 }
 
 

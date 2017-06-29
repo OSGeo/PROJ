@@ -175,6 +175,7 @@ typedef struct { double u, v, w; }     UVW;
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
 struct PJconsts;
 struct PJ_OBS;
+union  PJ_COORD;
 struct geod_geodesic;
 struct pj_opaque;
 struct ARG_list;
@@ -190,6 +191,7 @@ enum pj_io_units {
 #ifndef PROJ_H
 typedef struct PJconsts PJ;         /* the PJ object herself */
 typedef struct PJ_OBS PJ_OBS;
+typedef union  PJ_COORD PJ_COORD;
 #endif
 
 struct PJ_REGION_S {
@@ -245,6 +247,8 @@ struct PJconsts {
     LPZ (*inv3d)(XYZ, PJ *);
     PJ_OBS (*fwdobs)(PJ_OBS, PJ *);
     PJ_OBS (*invobs)(PJ_OBS, PJ *);
+    PJ_COORD (*fwdcoord)(PJ_COORD, PJ *);
+    PJ_COORD (*invcoord)(PJ_COORD, PJ *);
 
     void (*spc)(LP, PJ *, struct FACTORS *);
 
