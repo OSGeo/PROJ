@@ -207,6 +207,10 @@ htmlhelp_basename = 'proj4doc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
+
+preamble = r"""
+"""
+
 latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').
 #'papersize': 'letterpaper',
@@ -215,7 +219,8 @@ latex_elements = {
 #'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-#'preamble': '',
+'preamble': preamble,
+'inputenc':'\usepackage[utf8x]{inputenc}'
 
 # Latex figure (float) alignment
 #'figure_align': 'htbp',

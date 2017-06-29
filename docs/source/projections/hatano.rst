@@ -40,8 +40,6 @@ Forward
 
 .. math::
 
-   \begin{array}
-
    x &= 0.85\lambda \cos \theta
 
    y &= C_y \sin \theta
@@ -51,8 +49,6 @@ Forward
    P'(\theta) &= 2(1 + \cos 2\theta)
 
    \theta_0 &= 2\phi
-
-   \end{array}
 
 
 ====================================  ==================  ===================
