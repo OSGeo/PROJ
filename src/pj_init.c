@@ -432,7 +432,6 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PJ *(*proj)(PJ *);
     paralist *curr;
     int i;
-    int defer_init_expansion = 0;
     PJ *PIN = 0;
 
     ctx->last_errno = 0;
@@ -443,21 +442,25 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     start = curr = pj_mkparam(argv[0]);
     for (i = 1; i < argc; ++i) {
         curr->next = pj_mkparam(argv[i]);
-        curr = curr->next;
+
+        /* check if +init present */
+        if (pj_param(ctx, curr, "tinit").i) {
+            int found_def = 0;
+
+            curr = get_init(ctx, &curr, curr->next, pj_param(ctx, curr, "sinit").s, &found_def);
+            if (!curr)
+                goto bum_call;
+
+            if (!found_def) {
+                pj_ctx_set_errno( ctx, -2);
+                goto bum_call;
+            }
+        } else {
+            curr = curr->next;
+        }
     }
     if (ctx->last_errno) goto bum_call;
 
-    /* check if +init present */
-    if (pj_param(ctx, start, "tinit").i && ! defer_init_expansion) {
-        int found_def = 0;
-        /* avoid expanding additional inits (as could happen in a pipeline) */
-        defer_init_expansion = 1;
-        if (!(curr = get_init(ctx,&start, curr,
-                              pj_param(ctx, start, "sinit").s,
-                              &found_def)))
-            goto bum_call;
-        if (!found_def) { pj_ctx_set_errno( ctx, -2); goto bum_call; }
-    }
 
     /* find projection selection */
     if (!(name = pj_param(ctx, start, "sproj").s))
