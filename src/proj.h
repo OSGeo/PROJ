@@ -305,8 +305,8 @@ int proj_trans_coord_batch (PJ *P, enum proj_direction direction, size_t n, PJ_C
 /* these are not constructors, but initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);
 PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
-PJ_COORD proj_coord_error ();
-PJ_OBS   proj_obs_error ();
+PJ_COORD proj_coord_error (void);
+PJ_OBS   proj_obs_error (void);
 
 
 /* Measure internal consistency - in forward or inverse direction */

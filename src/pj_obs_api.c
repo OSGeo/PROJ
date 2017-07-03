@@ -286,7 +286,6 @@ int proj_errno (PJ *P) {
 
 
 void proj_errno_set (PJ *P, int err) {
-    PJ_CONTEXT *ctx;
     if (0==P) {
         errno = EINVAL;
         return;
