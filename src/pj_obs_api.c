@@ -82,13 +82,13 @@ double proj_xyz_dist (XYZ a, XYZ b) {
 
 
 /* Work around non-constness of MSVC HUGE_VAL by providing functions rather than constants */
-static PJ_COORD proj_coord_error (void) {
+PJ_COORD proj_coord_error (void) {
     PJ_COORD c;
     c.v[0] = c.v[1] = c.v[2] = c.v[3] = HUGE_VAL;
     return c;
 }
 
-static PJ_OBS proj_obs_error (void) {
+PJ_OBS proj_obs_error (void) {
     PJ_OBS obs;
     obs.coo = proj_coord_error ();
     obs.anc.v[0] = obs.anc.v[1] = obs.anc.v[2] = HUGE_VAL;
@@ -111,7 +111,7 @@ static PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
         obs.coo.xy  =  pj_fwd (obs.coo.lp, P);
         return obs;
     }
-    proj_err_level (P, EINVAL);
+    proj_errno_set (P, EINVAL);
     return proj_obs_error ();
 }
 
@@ -129,7 +129,7 @@ static PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
         obs.coo.lp  =  pj_inv (obs.coo.xy, P);
         return obs;
     }
-    proj_err_level (P, EINVAL);
+    proj_errno_set (P, EINVAL);
     return proj_obs_error ();
 }
 
@@ -152,7 +152,7 @@ static PJ_COORD pj_fwdcoord (PJ_COORD coo, PJ *P) {
         coo.xy  =  pj_fwd (coo.lp, P);
         return coo;
     }
-    proj_err_level (P, EINVAL);
+    proj_errno_set (P, EINVAL);
     return proj_coord_error ();
 }
 
@@ -174,7 +174,7 @@ static PJ_COORD pj_invcoord (PJ_COORD coo, PJ *P) {
         coo.lp  =  pj_inv (coo.xy, P);
         return coo;
     }
-    proj_err_level (P, EINVAL);
+    proj_errno_set (P, EINVAL);
     return proj_coord_error ();
 }
 
@@ -195,7 +195,7 @@ PJ_OBS proj_trans_obs (PJ *P, enum proj_direction direction, PJ_OBS obs) {
             break;
     }
 
-    proj_err_level (P, EINVAL);
+    proj_errno_set (P, EINVAL);
     return proj_obs_error ();
 }
 
@@ -217,7 +217,7 @@ PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coo) {
             break;
     }
 
-    proj_err_level (P, EINVAL);
+    proj_errno_set (P, EINVAL);
     return proj_coord_error ();
 }
 
@@ -231,7 +231,7 @@ double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs) 
         return HUGE_VAL;
 
     if (n < 1) {
-        proj_err_level (P, EINVAL);
+        proj_errno_set (P, EINVAL);
         return HUGE_VAL;
     }
 
@@ -248,7 +248,7 @@ double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs) 
                 o  =  pj_fwdobs (u, P);
                 break;
             default:
-                proj_err_level (P, EINVAL);
+                proj_errno_set (P, EINVAL);
                 return HUGE_VAL;
         }
     }
@@ -274,43 +274,104 @@ PJ *proj_destroy (PJ *P) {
     return 0;
 }
 
-/* Below: Minimum viable support for contexts. The first four functions   */
-/* relate to error reporting, debugging, and logging, hence being generically */
-/* useful. The remaining is a compact implementation of the more low level    */
-/* proj_api.h thread contexts, which may or may not be useful  */
-
-/* Set error level 0-3, or query current level */
-int proj_err_level (PJ *P, int err_level) {
-    int previous;
+/* for now we return the thread local error level. This may change as OBS_API error reporting matures */
+int proj_errno (PJ *P) {
     PJ_CONTEXT *ctx;
     if (0==P)
         ctx = pj_get_default_ctx();
     else
         ctx = pj_get_ctx (P);
-    previous = pj_ctx_get_errno (ctx);
-    if (PJ_ERR_TELL==err_level)
-        return previous;
-    pj_ctx_set_errno (ctx, err_level);
-    return previous;
+    return pj_ctx_get_errno (ctx);
 }
 
 
-/* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
-enum proj_log_level proj_log_level (PJ *P, enum proj_log_level log_level) {
-    enum proj_log_level previous;
+void proj_errno_set (PJ *P, int err) {
     PJ_CONTEXT *ctx;
-    if (0==P)
+    if (0==P) {
+        errno = EINVAL;
+        return;
+    }
+    /* set local error level */
+    P->last_errno = err;
+    /* and let it bubble up */
+    proj_context_errno_set (pj_get_ctx (P), err);
+}
+
+
+
+
+
+/* Create a new context - or provide a pointer to the default context */
+PJ_CONTEXT *proj_context_create (int multithreaded) {
+    /* Single threaded */
+    if (0==multithreaded)
+        return pj_get_default_ctx ();
+    return pj_ctx_alloc ();
+}
+
+
+void proj_context_errno_set (PJ_CONTEXT *ctx, int err) {
+    if (0==ctx)
         ctx = pj_get_default_ctx();
+    ctx->last_errno = err;
+    if (0==err)
+        return;
+
+    /* consider not bubbling transient errors to the errno level */
+    errno = err;
+    /* pj_errno should really disappear from the OBS_API */
+    pj_errno = err;
+}
+
+
+/* Move P to a new context - or to the default context i 0 is specified */
+void proj_context_set (PJ *P, PJ_CONTEXT *ctx) {
+    if (0==ctx)
+        ctx = pj_get_default_ctx ();
+    pj_set_ctx (P, ctx);
+    return;
+}
+
+void proj_context_inherit (PJ *parent, PJ *child) {
+    if (0==parent)
+        pj_set_ctx (child, pj_get_default_ctx());
     else
-        ctx = pj_get_ctx (P);
+        pj_set_ctx (child, pj_get_ctx(parent));
+    return;
+}
+
+
+void proj_context_destroy (PJ_CONTEXT *ctx) {
+    if (0==ctx)
+        return;
+
+    /* Trying to free the default context is a no-op */
+    if (pj_get_default_ctx ()==ctx)
+        return;
+
+    pj_ctx_free (ctx);
+}
+
+
+
+
+
+
+/* stuff below is *not* considered API, and will be moved to an "internal plumbing toolset" */
+
+/* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
+enum proj_log_level proj_log_level (PJ_CONTEXT *ctx, enum proj_log_level log_level) {
+    enum proj_log_level previous;
+    if (0==ctx)
+        ctx = pj_get_default_ctx();
+    if (0==ctx)
+        return PJ_LOG_TELL;
     previous = ctx->debug_level;
     if (PJ_LOG_TELL==log_level)
         return previous;
     ctx->debug_level = log_level;
     return previous;
 }
-
-
 
 
 
@@ -341,65 +402,12 @@ void proj_log_trace (PJ *P, const char *fmt, ...) {
 }
 
 /* Put a new logging function into P's context. The opaque object app_data is passed as first arg at each call to the logger */
-void proj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *)) {
-    PJ_CONTEXT *ctx = pj_get_ctx (P);
+void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log) {
+    if (0==ctx)
+        pj_get_default_ctx ();
+    if (0==ctx)
+        return;
     ctx->app_data = app_data;
     if (0!=log)
         ctx->logger = log;
-}
-
-
-/* Move P to a new context - or to the default context i 0 is specified */
-void proj_context_set (PJ *P, PJ_CONTEXT *ctx) {
-    if (0==ctx)
-        ctx = pj_get_default_ctx ();
-    pj_set_ctx (P, ctx);
-    return;
-}
-
-
-/* Create a new context - or provide a pointer to the default context */
-/* Prepared for more elaborate sscanf style setup syntax */
-PJ_CONTEXT *proj_context_create (char *setup, ...) {
-    PJ_CONTEXT *ctx;
-    va_list args;
-
-    /* The classic single threaded, backwards compatible way */
-    if (0==setup)
-        return pj_get_default_ctx ();
-
-    /* Simplest multi threaded way: ctx is just a container for pj_errno */
-    ctx = pj_ctx_alloc ();
-    if (0==ctx)
-        return 0;
-    if (0==strcmp(setup, ""))
-        return ctx;
-
-    /* Multi threaded with thread specific logging */
-    va_start (args, setup);
-    if (0==strcmp(setup, "log"))
-        ctx->logger = va_arg (args, void (*)(void *, int, const char *));
-
-    /* Additional thread specific setup goes here */
-    va_end (args);
-    return  ctx;
-}
-
-
-void proj_context_destroy (PJ_CONTEXT *ctx) {
-    if (0==ctx)
-        return;
-
-    /* Trying to free the default context is a no-op */
-    if (pj_get_default_ctx ()==ctx)
-        return;
-
-    pj_ctx_free (ctx);
-}
-
-
-/* Minimum support for fileapi - which may never have been used... */
-void proj_fileapi_set (PJ *P, void *fileapi) {
-    PJ_CONTEXT *ctx = pj_get_ctx (P);
-    ctx->fileapi = (projFileAPI *) fileapi;
 }

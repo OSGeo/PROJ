@@ -551,13 +551,13 @@ int pj_horner_selftest (void) {
     c.coo.uv.u =  620000.0000;
 
     /* Forward projection */
-    b = proj_trans (P, PJ_FWD, a);
+    b = proj_trans_obs (P, PJ_FWD, a);
     dist = proj_xy_dist (b.coo.xy, c.coo.xy);
     if (dist > 0.001)
         return 2;
 
     /* Inverse projection */
-    b = proj_trans (P, PJ_INV, c);
+    b = proj_trans_obs (P, PJ_INV, c);
     dist = proj_xy_dist (b.coo.xy, a.coo.xy);
     if (dist > 0.001)
         return 3;

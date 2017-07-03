@@ -255,11 +255,14 @@ struct PJ_OBS {
 /* The context type - properly namespaced synonym for projCtx */
 struct projCtx_t;
 typedef struct projCtx_t PJ_CONTEXT;
-typedef int *PJ_FILE;
+
+
+
+/* A P I */
 
 
 /* Functionality for handling thread contexts */
-PJ_CONTEXT *proj_context_create (char *setup, ...);
+PJ_CONTEXT *proj_context_create (int multithreaded);
 void proj_context_set (PJ *P, PJ_CONTEXT *ctx);
 void proj_context_inherit (PJ *parent, PJ *child);
 void proj_context_destroy    (PJ_CONTEXT *ctx);
@@ -268,9 +271,8 @@ void proj_context_destroy    (PJ_CONTEXT *ctx);
 /* Manage the transformation definition object PJ */
 PJ  *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
-PJ  *proj_create_pipeline (PJ_CONTEXT *ctx, const char *def_left, const char *def_right);
+PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *def_from, const char *def_to);
 PJ  *proj_destroy (PJ *P);
-int  pj_error (PJ *P);
 
 
 /* Apply transformation to observation - in forward or inverse direction */
@@ -280,7 +282,13 @@ enum proj_direction {
     PJ_INV   = -1    /* Inverse    */
 };
 
-#define proj_trans proj_trans_obs
+enum proj_trans_batch_const_arrays {
+    PJ_X_CONST = 1,
+    PJ_Y_CONST = 2,
+    PJ_Z_CONST = 4,
+    PJ_T_CONST = 8
+};
+
 PJ_OBS   proj_trans_obs   (PJ *P, enum proj_direction direction, PJ_OBS obs);
 PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coord);
 
@@ -294,9 +302,12 @@ int proj_trans_batch (
 int proj_trans_obs_batch   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
 int proj_trans_coord_batch (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
 
-
-
+/* these are not constructors, but initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);
+PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
+PJ_COORD proj_coord_error ();
+PJ_OBS   proj_obs_error ();
+
 
 /* Measure internal consistency - in forward or inverse direction */
 double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs);
@@ -312,13 +323,14 @@ double proj_xyz_dist (XYZ a, XYZ b);
 
 
 #ifndef PJ_OBS_API_C
-/* Part of MSVC workaround: Make proj_*_null look function-like for symmetry with proj_*_error */
-#define proj_coord_null(x) proj_coord_null
-#define proj_obs_null(x) proj_obs_null
 extern const PJ_COORD proj_coord_null;
 extern const PJ_OBS   proj_obs_null;
 extern const PJ      *proj_shutdown;
 #endif
+/* Part of MSVC workaround: Make proj_*_null look function-like for symmetry with proj_*_error */
+#define proj_coord_null(x) proj_coord_null
+#define proj_obs_null(x) proj_obs_null
+
 
 #ifndef PJ_TODEG
 #define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
@@ -328,6 +340,17 @@ extern const PJ      *proj_shutdown;
 #endif
 
 
+/* Set or read error level */
+int  proj_errno (PJ *P);
+void proj_errno_set (PJ *P, int err);
+void proj_context_errno_set (PJ_CONTEXT *ctx, int err);
+
+
+
+
+
+
+/* stuff below is *not* considered API, and will be moved to an "internal plumbing toolset" */
 
 /* High level functionality for handling thread contexts */
 enum proj_log_level {
@@ -340,17 +363,15 @@ enum proj_log_level {
     PJ_LOG_DEBUG_MINOR = 3  /* for proj_api.h compatibility */
 };
 
-/* Set or read error level */
-#define PJ_ERR_TELL -56789
-int proj_err_level (PJ *P, int err_level);
-
 /* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
-enum proj_log_level proj_log_level (PJ *P, enum proj_log_level log_level);
+enum proj_log_level proj_log_level (PJ_CONTEXT *ctx, enum proj_log_level log_level);
+typedef void (*PJ_LOG_FUNCTION)(void *, int, const char *);
 
 void proj_log_error (PJ *P, const char *fmt, ...);
 void proj_log_debug (PJ *P, const char *fmt, ...);
 void proj_log_trace (PJ *P, const char *fmt, ...);
-void proj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *));
+/*void proj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *));*/
+void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log);
 
 
 /* Lowest level: Minimum support for fileapi */

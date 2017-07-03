@@ -137,7 +137,7 @@ int pj_vgridshift_selftest (void) {
 
     expect = a;
     expect.coo.lpz.z   = -36.021305084228515625;
-    b = proj_trans(P, PJ_FWD, a);
+    b = proj_trans_obs(P, PJ_FWD, a);
     if (proj_xyz_dist(expect.coo.xyz, b.coo.xyz) > 1e-10)
         return 2;
 

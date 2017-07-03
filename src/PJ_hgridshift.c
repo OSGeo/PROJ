@@ -133,7 +133,7 @@ int pj_hgridshift_selftest (void) {
 
     expect.coo.lpz.lam = PJ_TORAD(172.999892181021551);
     expect.coo.lpz.phi = PJ_TORAD(-45.001620431954613);
-    b = proj_trans(P, PJ_FWD, a);
+    b = proj_trans_obs(P, PJ_FWD, a);
     if (proj_xy_dist(expect.coo.xy, b.coo.xy) > 1e-4)
         return 2;
 

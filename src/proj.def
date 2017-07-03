@@ -89,21 +89,36 @@ EXPORTS
     geod_polygon_testpoint          @87
     geod_polygon_clear              @88
     pj_run_selftests                @89
+
     proj_create                     @90
     proj_create_argv                @91
-    proj_trans                      @92
+    proj_destroy                    @92
+
+    proj_trans_obs                  @93
+    proj_trans_coord                @94
     proj_roundtrip                  @95
-    proj_log_level                  @96
-    proj_err_level                  @97
-    proj_log_func                   @98
-    proj_context_renew              @99
-    proj_context_inherit           @100
-    proj_context_free              @101
-    proj_fileapi_set               @102
-    proj_log_error                 @103
-    proj_log_debug                 @104
-    proj_log_trace                 @105
+
+    proj_coord                      @96
+    proj_coord_error                @97
+    proj_obs_error                  @98
+
+    proj_errno                      @99
+    proj_errno_set                 @100
+    proj_context_errno_set         @101
+
+    proj_context_create            @102
+    proj_context_set               @103
+    proj_context_inherit           @104
+    proj_context_destroy           @105
+
     proj_lp_dist                   @106
     proj_xy_dist                   @107
     proj_xyz_dist                  @108
-    pj_find_file                   @109
+
+    proj_log_level                 @109
+    proj_log_func                  @110
+    proj_log_error                 @111
+    proj_log_debug                 @112
+    proj_log_trace                 @113
+
+    pj_find_file                   @114

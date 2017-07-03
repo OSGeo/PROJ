@@ -191,9 +191,9 @@ static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
         if (P->opaque->omit_forward[i])
             continue;
         if (P->opaque->reverse_step[i])
-            point = proj_trans (P->opaque->pipeline[i], PJ_INV, point);
+            point = proj_trans_obs (P->opaque->pipeline[i], PJ_INV, point);
         else
-            point = proj_trans (P->opaque->pipeline[i], PJ_FWD, point);
+            point = proj_trans_obs (P->opaque->pipeline[i], PJ_FWD, point);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
@@ -217,9 +217,9 @@ static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
         if (P->opaque->omit_inverse[i])
             continue;
         if (P->opaque->reverse_step[i])
-            point = proj_trans (P->opaque->pipeline[i], PJ_FWD, point);
+            point = proj_trans_obs (P->opaque->pipeline[i], PJ_FWD, point);
         else
-            point = proj_trans (P->opaque->pipeline[i], PJ_INV, point);
+            point = proj_trans_obs (P->opaque->pipeline[i], PJ_INV, point);
         if (P->opaque->depth < PIPELINE_STACK_SIZE)
             P->opaque->stack[P->opaque->depth++] = point;
     }
@@ -275,7 +275,8 @@ static void *pipeline_freeup (PJ *P, int errlev) {         /* Destructor */
     if (0==P)
         return 0;
 
-    proj_err_level (P, errlev);
+    if (errlev)
+        proj_errno_set (P, errlev);
 
     if (0==P->opaque)
         return pj_dealloc (P);
@@ -535,12 +536,12 @@ int pj_pipeline_selftest (void) {
     a.coo.lpz.z   = 0;
 
     /* Forward projection */
-    b = proj_trans (P, PJ_FWD, a);
+    b = proj_trans_obs (P, PJ_FWD, a);
     if (proj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
         return 1001;
 
     /* Inverse projection (still same result: pipeline is symmetrical) */
-    a = proj_trans (P, PJ_INV, b);
+    a = proj_trans_obs (P, PJ_INV, b);
     if (proj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
         return 1002;
 
@@ -556,12 +557,12 @@ int pj_pipeline_selftest (void) {
     a.coo.xy = cph_utm32;
 
     /* Forward projection */
-    b = proj_trans (P, PJ_FWD, a);
+    b = proj_trans_obs (P, PJ_FWD, a);
     if (proj_xy_dist (a.coo.xy, b.coo.xy) > 1e-4)
         return 2001;
 
     /* Inverse projection */
-    a = proj_trans (P, PJ_INV, b);
+    a = proj_trans_obs (P, PJ_INV, b);
     if (proj_xy_dist (a.coo.xy, b.coo.xy) > 1e-4)
         return 2001;
     if (proj_xyz_dist (a.coo.xyz, b.coo.xyz) > 1e-4)
@@ -581,12 +582,12 @@ int pj_pipeline_selftest (void) {
     a.coo.lpz.phi = PJ_TORAD(55);
 
     /* Forward projection */
-    b = proj_trans (P, PJ_FWD, a);
+    b = proj_trans_obs (P, PJ_FWD, a);
     if (proj_xy_dist (cph_utm32, b.coo.xy) > 1e-4)
         return 3001;
 
     /* Inverse projection */
-    b = proj_trans (P, PJ_INV, b);
+    b = proj_trans_obs (P, PJ_INV, b);
     if (proj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
         return 3002;
 

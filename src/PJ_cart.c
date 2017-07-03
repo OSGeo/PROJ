@@ -259,31 +259,34 @@ int pj_cart_selftest (void) {
     a.coo.lp.phi = PJ_TORAD(55);
 
     /* Forward projection */
-    b = proj_trans (P, PJ_FWD, a);
+    b = proj_trans_obs (P, PJ_FWD, a);
 
     /* Inverse projection */
-    a = proj_trans (P, PJ_INV, b);
+    a = proj_trans_obs (P, PJ_INV, b);
 
     /* Null projection */
-    a = proj_trans (P, PJ_IDENT, a);
+    a = proj_trans_obs (P, PJ_IDENT, a);
 
     /* Forward again, to get two linear items for comparison */
-    a = proj_trans (P, PJ_FWD, a);
+    a = proj_trans_obs (P, PJ_FWD, a);
 
     dist = proj_xy_dist (a.coo.xy, b.coo.xy);
     if (dist > 2e-9)
         return 3;
 
+    /* Clear any previous error */
+    proj_errno_set (P, 0);
+
     /* Invalid projection */
-    a = proj_trans (P, 42, a);
+    a = proj_trans_obs (P, 42, a);
     if (a.coo.lpz.lam!=HUGE_VAL)
         return 4;
-    err = proj_err_level (P, PJ_ERR_TELL);
+    err = proj_errno (P);
     if (0==err)
         return 5;
 
-    /* Clear error */
-    proj_err_level (P, 0);
+    /* Clear error again */
+    proj_errno_set (P, 0);
 
     /* Clean up */
     proj_destroy (P);
@@ -300,7 +303,7 @@ int pj_cart_selftest (void) {
     a.coo.lpz.z   = 100;
 
     /* Forward projection: 3D-Cartesian-to-Ellipsoidal */
-    b = proj_trans (P, PJ_FWD, a);
+    b = proj_trans_obs (P, PJ_FWD, a);
 
     /* Check roundtrip precision for 10000 iterations each way */
     dist = proj_roundtrip (P, PJ_FWD, 10000, a);
@@ -332,16 +335,16 @@ int pj_cart_selftest (void) {
         return 9;
 
     /* Inverse projection: 3D-Cartesian-to-Ellipsoidal */
-    b = proj_trans (P, PJ_INV, b);
+    b = proj_trans_obs (P, PJ_INV, b);
 
     /* Move p to another context */
-    ctx = proj_context_create ("");
+    ctx = proj_context_create (1);
     if (ctx==pj_get_default_ctx())
         return 10;
     proj_context_set (P, ctx);
     if (ctx != P->ctx)
         return 11;
-    b = proj_trans (P, PJ_FWD, b);
+    b = proj_trans_obs (P, PJ_FWD, b);
 
     /* Move it back to the default context */
     proj_context_set (P, 0);
@@ -350,7 +353,7 @@ int pj_cart_selftest (void) {
     proj_context_destroy (ctx);
 
     /* We go on with the work - now back on the default context */
-    b = proj_trans (P, PJ_INV, b);
+    b = proj_trans_obs (P, PJ_INV, b);
     proj_destroy (P);
     return 0;
 }

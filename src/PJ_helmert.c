@@ -154,7 +154,7 @@ static void update_parameters(PJ *P) {
     Q->theta = Q->theta_0 + Q->dtheta * dt;
 
     /* debugging output */
-    if (proj_err_level(P, PJ_ERR_TELL) >= PJ_LOG_TRACE) {
+    if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
         proj_log_trace(P, "Transformation parameters for observation epoch %g:", Q->t_obs);
         proj_log_trace(P, "x: %g", Q->xyz.x);
         proj_log_trace(P, "y: %g", Q->xyz.y);
@@ -312,7 +312,7 @@ static void build_rot_matrix(PJ *P) {
     }
 
     /* some debugging output */
-    if (proj_err_level(P, PJ_ERR_TELL) >= PJ_LOG_TRACE) {
+    if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
         proj_log_trace(P, "Rotation Matrix:");
         proj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R00, R01, R02);
         proj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R10, R11, R12);
@@ -579,7 +579,7 @@ PJ *PROJECTION(helmert) {
     Q->theta  =  Q->theta_0;
 
     /* Let's help with debugging */
-    if (proj_err_level(P, PJ_ERR_TELL) >= PJ_LOG_DEBUG) {
+    if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
         proj_log_debug(P, "Helmert parameters:");
         proj_log_debug(P, "x=  % 3.5f  y=  % 3.5f  z=  % 3.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
         proj_log_debug(P, "rx= % 3.5f  ry= % 3.5f  rz= % 3.5f",
@@ -722,7 +722,7 @@ int pj_helmert_selftest (void) {
     ret = test (args5, in5, expect5, 0.001);  if (ret) return ret + 40;
 
     /* Run test 4 */
-    out = proj_trans (helmert, PJ_FWD, in4);
+    out = proj_trans_obs (helmert, PJ_FWD, in4);
     if (proj_xyz_dist (out.coo.xyz, expect4a) > 1e-4) {
         proj_log_error(helmert, "Tolerance of test 4a not met!");
         proj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.coo.xyz.x, in4.coo.xyz.y, in4.coo.xyz.z);
@@ -731,7 +731,7 @@ int pj_helmert_selftest (void) {
     }
 
     in4.coo.xyzt.t = 2018.0;
-    out = proj_trans (helmert, PJ_FWD, in4);
+    out = proj_trans_obs (helmert, PJ_FWD, in4);
     if (proj_xyz_dist (out.coo.xyz, expect4b) > 1e-4) {
         proj_log_error(helmert, "Tolerance of test 4b not met!");
         proj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.coo.xyz.x, in4.coo.xyz.y, in4.coo.xyz.z);
