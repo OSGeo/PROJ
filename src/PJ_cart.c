@@ -235,7 +235,8 @@ int pj_cart_selftest (void) {
     PJ_CONTEXT *ctx;
     PJ *P;
     PJ_OBS a, b, obs[2];
-    int err, n;
+    int err;
+    size_t n, sz;
     double dist, h, t;
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
 
@@ -366,13 +367,19 @@ int pj_cart_selftest (void) {
 
     obs[0].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
     obs[1].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
+    sz = sizeof (PJ_OBS);
 
     /* Forward projection */
     a = proj_trans_obs (P, PJ_FWD, obs[0]);
     b = proj_trans_obs (P, PJ_FWD, obs[1]);
 
-    n = proj_transform (P, PJ_FWD, sizeof(PJ_OBS), 
-        &(obs[0].coo.lpz.lam), 2, &(obs[0].coo.lpz.phi), 2, &(obs[0].coo.lpz.z), 2, 0,0);
+    n = proj_transform (
+        P, PJ_FWD, 
+        &(obs[0].coo.lpz.lam), sz, 2,
+        &(obs[0].coo.lpz.phi), sz, 2,
+        &(obs[0].coo.lpz.z),   sz, 2, 
+        0,                     sz, 0
+    );
     if (2!=n)
         return 14;
     if (a.coo.lpz.lam != obs[0].coo.lpz.lam)  return 15;
@@ -387,8 +394,13 @@ int pj_cart_selftest (void) {
     obs[1].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
     h = 27;
     t = 33;
-    n = proj_transform (P, PJ_FWD, sizeof(PJ_OBS), 
-        &(obs[0].coo.lpz.lam), 2, &(obs[0].coo.lpz.phi), 2, &h, 1, &t,1);
+    n = proj_transform (
+        P, PJ_FWD, 
+        &(obs[0].coo.lpz.lam), sz, 2,
+        &(obs[0].coo.lpz.phi), sz, 2,
+        &h,                     0, 1, 
+        &t,                     0, 1
+    );
     if (2!=n)
         return 21;
     if (a.coo.lpz.lam != obs[0].coo.lpz.lam)  return 22;
@@ -398,9 +410,9 @@ int pj_cart_selftest (void) {
     if (b.coo.lpz.phi != obs[1].coo.lpz.phi)  return 26;
     if (50            != obs[1].coo.lpz.z)    return 27; /* NOTE: unchanged */
     if (50==h) return 28;
+
     /* Clean up */
     proj_destroy (P);
-
 
     return 0;
 }

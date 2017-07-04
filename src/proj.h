@@ -287,14 +287,13 @@ PJ_OBS   proj_trans_obs   (PJ *P, enum proj_direction direction, PJ_OBS obs);
 PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coord);
 
 
-int proj_transform (
+size_t proj_transform (
     PJ *P,
     enum proj_direction direction,
-    size_t stride,
-    double *x, size_t nx,
-    double *y, size_t ny,
-    double *z, size_t nz,
-    double *t, size_t nt
+    double *x, size_t sx, size_t nx,
+    double *y, size_t sy, size_t ny,
+    double *z, size_t sz, size_t nz,
+    double *t, size_t st, size_t nt
 );
 
 

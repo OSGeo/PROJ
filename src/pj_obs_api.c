@@ -268,14 +268,13 @@ PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coo) {
 
 
 /*************************************************************************************/
-int proj_transform (
+size_t proj_transform (
     PJ *P,
     enum proj_direction direction,
-    size_t stride,
-    double *x, size_t nx,
-    double *y, size_t ny,
-    double *z, size_t nz,
-    double *t, size_t nt
+    double *x, size_t sx, size_t nx,
+    double *y, size_t sy, size_t ny,
+    double *z, size_t sz, size_t nz,
+    double *t, size_t st, size_t nt
 ) {
 /**************************************************************************************
 
@@ -288,27 +287,42 @@ int proj_transform (
         3. of length one, i.e. a constant, which will be treated as a fully
            populated array of that constant value
 
-    The stride represents the step length, in bytes, between consecutive elements
-    of the array, the idea being that proj_transform can handle transformation of
-    a large class of application specific data structures, without necessarily
-    understanding the structure format, as in:
+    The strides, sx, sy, sz, st, represent the step length, in bytes, between
+    consecutive elements of the corresponding array. This makes it possible for
+    proj_transform to handle transformation of a large class of application
+    specific data structures, without necessarily understanding the data structure
+    format, as in:
 
         typedef struct {double x, y; int quality_level; char surveyor_name[134];} XYQS;
         XYQS survey[345];
         double height = 23.45;
         PJ *P = {...};
+        size_t stride = sizeof (XYQS);
         ...
         proj_transform (
             P, PJ_INV, sizeof(XYQS),
-            &(survey[0].x), 345,     (*  We have 345 eastings  *)
-            &(survey[0].y), 345,     (*  ...and 345 northings. *)
-            &height, 1,              (*  The height is the constant  23.45 m *)
-            0, 0                     (*  and the time is the constant 0.00 s *)
+            &(survey[0].x), stride, 345,  (*  We have 345 eastings  *)
+            &(survey[0].y), stride, 345,  (*  ...and 345 northings. *)
+            &height, 1,                   (*  The height is the constant  23.45 m *)
+            0, 0                          (*  and the time is the constant 0.00 s *)
         );
 
     This is similar to the inner workings of the pj_transform function, but the
-    idea of the stride has been generalized to work for any size of basic unit,
-    not just a number of doubles.
+    stride functionality has been generalized to work for any size of basic unit,
+    not just a fixed number of doubles.
+
+    In most cases, the stride will be identical for x, y,z, and t, since they will
+    typically be either individual arrays (stride = sizeof(double)), or strided
+    views into an array of application specific data structures (stride = sizeof (...)).
+    
+    But in order to support cases where x, y, z, and t come from heterogeneous
+    sources, individual strides, sx, sy, sz, st, are used.
+
+    Caveat: Since proj_transform does its work *in place*, this means that even the
+    supposedly constants (i.e. length 1 arrays) will return from the call in altered
+    state. Hence, remember to reinitialize between repeated calls.
+
+    Return value: Number of transformations completed.
 
 **************************************************************************************/
     PJ_COORD coord;
@@ -354,13 +368,12 @@ int proj_transform (
             return 0;
     }
 
-
-    /* Arrays of length==0 are broadcast as the constant 0     */
-    /* Arrays of length==1 are broadcast as their single value */
+    /* Arrays of length==0 are broadcast as the constant 0               */
+    /* Arrays of length==1 are broadcast as their single value           */
     /* Arrays of length >1 are iterated over (for the first nmin values) */
-    /* The slightly convolved incremental indexing is used due */
-    /* to the stride, which may be any size supported by the platform */
-    for (i = 0; i < nmin; i++) {
+    /* The slightly convolved incremental indexing is used due           */
+    /* to the stride, which may be any size supported by the platform    */
+    for (i = 0;  i < nmin;  i++) {
         coord.xyzt.x = *x;
         coord.xyzt.y = *y;
         coord.xyzt.z = *z;
@@ -374,24 +387,24 @@ int proj_transform (
         /* in all full length cases, we overwrite the input with the output */
         if (nx > 1)  {
             *x = coord.xyzt.x;
-            x =  (double *) ( ((char *) x) + stride);
+            x =  (double *) ( ((char *) x) + sx);
         }
         if (ny > 1)  {
             *y = coord.xyzt.y;
-            y =  (double *) ( ((char *) y) + stride);
+            y =  (double *) ( ((char *) y) + sy);
         }
         if (nz > 1)  {
             *z = coord.xyzt.z;
-            z =  (double *) ( ((char *) z) + stride);
+            z =  (double *) ( ((char *) z) + sz);
         }
         if (nt > 1)  {
             *t = coord.xyzt.t;
-            t =  (double *) ( ((char *) t) + stride);
+            t =  (double *) ( ((char *) t) + st);
         }
     }
     /* Last time around, we update the length 1 cases with their transformed alter egos */
-    /* ... or would we rather not? Then what about the nmin==1 case? */
-    /* perhaps signalling the non-array case by setting stride to 0? */
+    /* ... or would we rather not? Then what about the nmin==1 case?                    */
+    /* perhaps signalling the non-array case by setting all strides to 0?               */
     if (nx==1)
         *x = coord.xyzt.x;
     if (ny==1)
@@ -403,8 +416,6 @@ int proj_transform (
     
     return i;
 }
-
-
 
 
 
@@ -427,14 +438,14 @@ PJ *proj_destroy (PJ *P) {
     return 0;
 }
 
-/* for now we return the thread local error level. This may change as OBS_API error reporting matures */
+/* For now, if PJ itself is clean, we return the thread local error level. */
+/* This may change as OBS_API error reporting matures */
 int proj_errno (PJ *P) {
-    PJ_CONTEXT *ctx;
     if (0==P)
-        ctx = pj_get_default_ctx();
-    else
-        ctx = pj_get_ctx (P);
-    return pj_ctx_get_errno (ctx);
+        return pj_ctx_get_errno (pj_get_default_ctx ());
+    if (0 != P->last_errno)
+        return P->last_errno;
+    return pj_ctx_get_errno (pj_get_ctx (P));
 }
 
 
