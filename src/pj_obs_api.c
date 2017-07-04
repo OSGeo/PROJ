@@ -324,7 +324,7 @@ size_t proj_transform (
     Return value: Number of transformations completed.
 
 **************************************************************************************/
-    PJ_COORD coord;
+    PJ_COORD coord = proj_coord_null;
     size_t i, nmin;
     double null_broadcast = 0;
     if (0==P)
