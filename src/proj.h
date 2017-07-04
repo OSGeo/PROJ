@@ -116,7 +116,9 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 #ifdef _MSC_VER
+#ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
+#endif
 #endif
 #include <math.h>    /* For M_PI */
 #include <stddef.h>  /* For size_t */
@@ -334,7 +336,6 @@ extern const PJ      *proj_shutdown;
 /* Set or read error level */
 int  proj_errno (PJ *P);
 void proj_errno_set (PJ *P, int err);
-void proj_context_errno_set (PJ_CONTEXT *ctx, int err);
 
 
 
@@ -342,6 +343,8 @@ void proj_context_errno_set (PJ_CONTEXT *ctx, int err);
 
 
 /* stuff below is *not* considered API, and will be moved to an "internal plumbing toolset" */
+
+void proj_context_errno_set (PJ_CONTEXT *ctx, int err);
 
 /* High level functionality for handling thread contexts */
 enum proj_log_level {

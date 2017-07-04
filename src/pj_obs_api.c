@@ -472,20 +472,6 @@ PJ_CONTEXT *proj_context_create (int multithreaded) {
 }
 
 
-void proj_context_errno_set (PJ_CONTEXT *ctx, int err) {
-    if (0==ctx)
-        ctx = pj_get_default_ctx();
-    ctx->last_errno = err;
-    if (0==err)
-        return;
-
-    /* consider not bubbling transient errors to the errno level */
-    errno = err;
-    /* pj_errno should really disappear from the OBS_API */
-    pj_errno = err;
-}
-
-
 /* Move P to a new context - or to the default context i 0 is specified */
 void proj_context_set (PJ *P, PJ_CONTEXT *ctx) {
     if (0==ctx)
@@ -521,6 +507,24 @@ void proj_context_destroy (PJ_CONTEXT *ctx) {
 
 /* stuff below is *not* considered API, and will be moved to an "internal plumbing toolset" */
 #include <stdarg.h>
+
+
+
+
+void proj_context_errno_set (PJ_CONTEXT *ctx, int err) {
+    if (0==ctx)
+        ctx = pj_get_default_ctx();
+    ctx->last_errno = err;
+    if (0==err)
+        return;
+
+    /* consider not bubbling transient errors to the errno level */
+    errno = err;
+    /* pj_errno should really disappear from the OBS_API */
+    pj_errno = err;
+}
+
+
 
 /* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
 enum proj_log_level proj_log_level (PJ_CONTEXT *ctx, enum proj_log_level log_level) {
