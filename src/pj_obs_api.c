@@ -37,9 +37,8 @@
 #include <projects.h>
 #include <geodesic.h>
 
-#include <float.h>
-#include <math.h>
-#include <stdarg.h>
+#include <stddef.h>
+#include <errno.h>
 
 
 static PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P);
@@ -521,6 +520,7 @@ void proj_context_destroy (PJ_CONTEXT *ctx) {
 
 
 /* stuff below is *not* considered API, and will be moved to an "internal plumbing toolset" */
+#include <stdarg.h>
 
 /* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
 enum proj_log_level proj_log_level (PJ_CONTEXT *ctx, enum proj_log_level log_level) {

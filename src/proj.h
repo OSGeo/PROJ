@@ -118,16 +118,9 @@
 #ifdef _MSC_VER
 #define _USE_MATH_DEFINES
 #endif
-#include <math.h>
+#include <math.h>    /* For M_PI */
+#include <stddef.h>  /* For size_t */
 
-#include <float.h>
-#include <limits.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
 
 #ifdef PROJECTS_H
 #error proj.h must be included before projects.h
