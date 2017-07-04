@@ -282,25 +282,24 @@ enum proj_direction {
     PJ_INV   = -1    /* Inverse    */
 };
 
-enum proj_trans_batch_const_arrays {
-    PJ_X_CONST = 1,
-    PJ_Y_CONST = 2,
-    PJ_Z_CONST = 4,
-    PJ_T_CONST = 8
-};
 
 PJ_OBS   proj_trans_obs   (PJ *P, enum proj_direction direction, PJ_OBS obs);
 PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coord);
 
-int proj_trans_batch (
-    PJ *P, enum proj_direction direction, 
-    size_t n, size_t stride,
-    unsigned int flags,
-    double *x, double *y, double *z, double *t
+
+int proj_transform (
+    PJ *P,
+    enum proj_direction direction,
+    size_t stride,
+    double *x, size_t nx,
+    double *y, size_t ny,
+    double *z, size_t nz,
+    double *t, size_t nt
 );
 
-int proj_trans_obs_batch   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
-int proj_trans_coord_batch (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
+
+int proj_transform_obs   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
+int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
 
 /* these are not constructors, but initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);

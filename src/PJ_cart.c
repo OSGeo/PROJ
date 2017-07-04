@@ -234,9 +234,9 @@ int pj_cart_selftest (void) {return 0;}
 int pj_cart_selftest (void) {
     PJ_CONTEXT *ctx;
     PJ *P;
-    PJ_OBS a, b;
-    int err;
-    double dist;
+    PJ_OBS a, b, obs[2];
+    int err, n;
+    double dist, h, t;
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
 
     /* An utm projection on the GRS80 ellipsoid */
@@ -355,6 +355,53 @@ int pj_cart_selftest (void) {
     /* We go on with the work - now back on the default context */
     b = proj_trans_obs (P, PJ_INV, b);
     proj_destroy (P);
+
+
+    /* Testing the proj_transform nightmare */
+
+    /* An utm projection on the GRS80 ellipsoid */
+    P = proj_create (0, "+proj=utm +zone=32 +ellps=GRS80");
+    if (0==P)
+        return 13;
+
+    obs[0].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
+    obs[1].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
+
+    /* Forward projection */
+    a = proj_trans_obs (P, PJ_FWD, obs[0]);
+    b = proj_trans_obs (P, PJ_FWD, obs[1]);
+
+    n = proj_transform (P, PJ_FWD, sizeof(PJ_OBS), 
+        &(obs[0].coo.lpz.lam), 2, &(obs[0].coo.lpz.phi), 2, &(obs[0].coo.lpz.z), 2, 0,0);
+    if (2!=n)
+        return 14;
+    if (a.coo.lpz.lam != obs[0].coo.lpz.lam)  return 15;
+    if (a.coo.lpz.phi != obs[0].coo.lpz.phi)  return 16;
+    if (a.coo.lpz.z   != obs[0].coo.lpz.z)    return 17;
+    if (b.coo.lpz.lam != obs[1].coo.lpz.lam)  return 18;
+    if (b.coo.lpz.phi != obs[1].coo.lpz.phi)  return 19;
+    if (b.coo.lpz.z   != obs[1].coo.lpz.z)    return 20;
+
+    /* now test the case of constant z */
+    obs[0].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
+    obs[1].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
+    h = 27;
+    t = 33;
+    n = proj_transform (P, PJ_FWD, sizeof(PJ_OBS), 
+        &(obs[0].coo.lpz.lam), 2, &(obs[0].coo.lpz.phi), 2, &h, 1, &t,1);
+    if (2!=n)
+        return 21;
+    if (a.coo.lpz.lam != obs[0].coo.lpz.lam)  return 22;
+    if (a.coo.lpz.phi != obs[0].coo.lpz.phi)  return 23;
+    if (45            != obs[0].coo.lpz.z)    return 24;
+    if (b.coo.lpz.lam != obs[1].coo.lpz.lam)  return 25;
+    if (b.coo.lpz.phi != obs[1].coo.lpz.phi)  return 26;
+    if (50            != obs[1].coo.lpz.z)    return 27; /* NOTE: unchanged */
+    if (50==h) return 28;
+    /* Clean up */
+    proj_destroy (P);
+
+
     return 0;
 }
 #endif

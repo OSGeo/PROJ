@@ -42,6 +42,12 @@
 #include <stdarg.h>
 
 
+static PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P);
+static PJ_OBS pj_invobs (PJ_OBS obs, PJ *P);
+static PJ_COORD pj_fwdcoord (PJ_COORD coo, PJ *P);
+static PJ_COORD pj_invcoord (PJ_COORD coo, PJ *P);
+
+
 /* Used for zero-initializing new objects */
 const PJ_COORD proj_coord_null = {{0, 0, 0, 0}};
 const PJ_OBS   proj_obs_null = {
@@ -79,6 +85,44 @@ double proj_xy_dist (XY a, XY b) {
 double proj_xyz_dist (XYZ a, XYZ b) {
     return hypot (hypot (a.x - b.x, a.y - b.y), a.z - b.z);
 }
+
+
+
+/* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
+double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs) {
+    int i;
+    PJ_OBS o, u;
+
+    if (0==P)
+        return HUGE_VAL;
+
+    if (n < 1) {
+        proj_errno_set (P, EINVAL);
+        return HUGE_VAL;
+    }
+
+    o.coo = obs.coo;
+
+    for (i = 0;  i < n;  i++) {
+        switch (direction) {
+            case PJ_FWD:
+                u  =  pj_fwdobs (o, P);
+                o  =  pj_invobs (u, P);
+                break;
+            case PJ_INV:
+                u  =  pj_invobs (o, P);
+                o  =  pj_fwdobs (u, P);
+                break;
+            default:
+                proj_errno_set (P, EINVAL);
+                return HUGE_VAL;
+        }
+    }
+
+    return proj_xyz_dist (o.coo.xyz, obs.coo.xyz);
+}
+
+
 
 
 /* Work around non-constness of MSVC HUGE_VAL by providing functions rather than constants */
@@ -222,39 +266,148 @@ PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coo) {
 }
 
 
-/* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
-double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs) {
-    int i;
-    PJ_OBS o, u;
 
+/*************************************************************************************/
+int proj_transform (
+    PJ *P,
+    enum proj_direction direction,
+    size_t stride,
+    double *x, size_t nx,
+    double *y, size_t ny,
+    double *z, size_t nz,
+    double *t, size_t nt
+) {
+/**************************************************************************************
+
+    Transform a series of coordinates, where the individual coordinate dimension
+    may be represented by an array that is either
+
+        1. fully populated
+        2. a null pointer and/or a length of zero, which will be treated as a
+           fully populated array of zeroes
+        3. of length one, i.e. a constant, which will be treated as a fully
+           populated array of that constant value
+
+    The stride represents the step length, in bytes, between consecutive elements
+    of the array, the idea being that proj_transform can handle transformation of
+    a large class of application specific data structures, without necessarily
+    understanding the structure format, as in:
+
+        typedef struct {double x, y; int quality_level; char surveyor_name[134];} XYQS;
+        XYQS survey[345];
+        double height = 23.45;
+        PJ *P = {...};
+        ...
+        proj_transform (
+            P, PJ_INV, sizeof(XYQS),
+            &(survey[0].x), 345,     (*  We have 345 eastings  *)
+            &(survey[0].y), 345,     (*  ...and 345 northings. *)
+            &height, 1,              (*  The height is the constant  23.45 m *)
+            0, 0                     (*  and the time is the constant 0.00 s *)
+        );
+
+    This is similar to the inner workings of the pj_transform function, but the
+    idea of the stride has been generalized to work for any size of basic unit,
+    not just a number of doubles.
+
+**************************************************************************************/
+    PJ_COORD coord;
+    size_t i, nmin;
+    double null_broadcast = 0;
     if (0==P)
-        return HUGE_VAL;
+        return 0;
 
-    if (n < 1) {
-        proj_errno_set (P, EINVAL);
-        return HUGE_VAL;
+    /* ignore lengths of null arrays */
+    if (0==x) nx = 0;
+    if (0==y) ny = 0;
+    if (0==z) nz = 0;
+    if (0==t) nt = 0;
+
+    /* and make the nullities point to some real world memory for broadcasting nulls */
+    if (0==nx) x = &null_broadcast;
+    if (0==ny) y = &null_broadcast;
+    if (0==nz) z = &null_broadcast;
+    if (0==nt) t = &null_broadcast;
+    
+    /* nothing to do? */
+    if (0==nx+ny+nz+nt)
+        return 0;
+
+    /* arrays of length 1 are constants, which we broadcast along the longer arrays */
+    /* so we need to find the length of the shortest non-unity array to figure out  */
+    /* how many coordinate pairs we must transform */
+    nmin = (nx > 1)? nx: (ny > 1)? ny: (nz > 1)? nz: (nt > 1)? nt: 1;
+    if ((nx > 1) && (nx < nmin))  nmin = nx;
+    if ((ny > 1) && (ny < nmin))  nmin = ny;
+    if ((nz > 1) && (nz < nmin))  nmin = nz;
+    if ((nt > 1) && (nt < nmin))  nmin = nt;
+
+    /* Check validity of direction flag */
+    switch (direction) {
+        case PJ_FWD:
+        case PJ_INV:
+            break;
+        case PJ_IDENT:
+            return nmin;
+        default:
+            proj_errno_set (P, EINVAL);
+            return 0;
     }
 
-    o.coo = obs.coo;
 
-    for (i = 0;  i < n;  i++) {
-        switch (direction) {
-            case PJ_FWD:
-                u  =  pj_fwdobs (o, P);
-                o  =  pj_invobs (u, P);
-                break;
-            case PJ_INV:
-                u  =  pj_invobs (o, P);
-                o  =  pj_fwdobs (u, P);
-                break;
-            default:
-                proj_errno_set (P, EINVAL);
-                return HUGE_VAL;
+    /* Arrays of length==0 are broadcast as the constant 0     */
+    /* Arrays of length==1 are broadcast as their single value */
+    /* Arrays of length >1 are iterated over (for the first nmin values) */
+    /* The slightly convolved incremental indexing is used due */
+    /* to the stride, which may be any size supported by the platform */
+    for (i = 0; i < nmin; i++) {
+        coord.xyzt.x = *x;
+        coord.xyzt.y = *y;
+        coord.xyzt.z = *z;
+        coord.xyzt.t = *t;
+
+        if (PJ_FWD==direction)
+            coord = pj_fwdcoord (coord, P);
+        else
+            coord = pj_invcoord (coord, P);
+
+        /* in all full length cases, we overwrite the input with the output */
+        if (nx > 1)  {
+            *x = coord.xyzt.x;
+            x =  (double *) ( ((char *) x) + stride);
+        }
+        if (ny > 1)  {
+            *y = coord.xyzt.y;
+            y =  (double *) ( ((char *) y) + stride);
+        }
+        if (nz > 1)  {
+            *z = coord.xyzt.z;
+            z =  (double *) ( ((char *) z) + stride);
+        }
+        if (nt > 1)  {
+            *t = coord.xyzt.t;
+            t =  (double *) ( ((char *) t) + stride);
         }
     }
-
-    return proj_xyz_dist (o.coo.xyz, obs.coo.xyz);
+    /* Last time around, we update the length 1 cases with their transformed alter egos */
+    /* ... or would we rather not? Then what about the nmin==1 case? */
+    /* perhaps signalling the non-array case by setting stride to 0? */
+    if (nx==1)
+        *x = coord.xyzt.x;
+    if (ny==1)
+        *y = coord.xyzt.y;
+    if (nz==1)
+        *z = coord.xyzt.z;
+    if (nt==1)
+        *t = coord.xyzt.t;
+    
+    return i;
 }
+
+
+
+
+
 
 
 PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
