@@ -202,7 +202,7 @@ Returns a new coordinate system definition which is the geographic
 coordinate (lat/long) system underlying ``pj_in``.
 
 pj_set_finder
-============
+==============
 
 ::
 

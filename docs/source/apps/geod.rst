@@ -13,7 +13,7 @@ back  azimuth  of  a terminus point given a initial point latitude,
 longitude, azimuth and distance (direct) or  the  forward
 and  back azimuths and distance between an initial and terminus
 point latitudes and  longitudes  (inverse).   The  results  are
-accurate  to  round  off for |f| < 1/50, where f is flattening.
+accurate  to  round  off for :math:`|f| < 1/50`, where f is flattening.
 
 
 ``invgeod`` may not be available on all  platforms;  in  this  case

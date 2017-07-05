@@ -11,6 +11,7 @@ git checkout gh-pages
 
 cd $builddir/html
 cp -rf * $destdir/proj4docs
+cp $builddir/latex/proj4.pdf $destdir/proj4docs
 
 cd $destdir/proj4docs
 git config user.email "proj4bot@proj4.bot"

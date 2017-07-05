@@ -63,8 +63,7 @@ Forward projection
 
 .. math::
 
-  \DeclareMathOperator{\arctantwo}{arctan2}
-  y = \arctantwo(\tan(\phi), \cos(\lambda)) - \phi_0
+  y = \arctan2(\tan(\phi), \cos(\lambda)) - \phi_0
 
 Inverse projection
 ------------------
@@ -75,8 +74,7 @@ Inverse projection
 
 .. math::
 
-  \DeclareMathOperator{\arctantwo}{arctan2}
-  \lambda = \arctantwo(\tan(x), \cos(y+\phi_0))
+  \lambda = \arctan2(\tan(x), \cos(y+\phi_0))
 
 Elliptical form
 ===============

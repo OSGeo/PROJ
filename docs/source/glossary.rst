@@ -12,13 +12,9 @@ Glossary
 
         .. math::
 
-            \begin {array}
-
             x &= f(\lambda,\phi)
 
             y &= g(\phi)
-
-            \end {array}
 
         where the parallels of latitude are straight lines, like cylindrical
         projections, but the meridians are curved toward the center as they
