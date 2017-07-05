@@ -281,8 +281,7 @@ get_defaults(projCtx ctx, paralist **start, paralist *next, char *name) {
 /*                              get_init()                              */
 /************************************************************************/
 static paralist *
-get_init(projCtx ctx, paralist **start, paralist *next, char *name,
-         int *found_def) {
+get_init(projCtx ctx, paralist **start, paralist *next, char *name, int *found_def) {
     char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *opt;
     PAFile fid;
     paralist *init_items = NULL;
@@ -316,6 +315,7 @@ get_init(projCtx ctx, paralist **start, paralist *next, char *name,
         next = get_opt(ctx, start, fid, opt, next, found_def);
     else
         return NULL;
+
     pj_ctx_fclose(ctx, fid);
     if (errno == 25)
         errno = 0; /* unknown problem with some sys errno<-25 */
@@ -432,37 +432,62 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PJ *(*proj)(PJ *);
     paralist *curr;
     int i;
-    int defer_init_expansion = 0;
+    int found_def = 0;
     PJ *PIN = 0;
 
     ctx->last_errno = 0;
     start = NULL;
 
     /* put arguments into internal linked list */
-    if (argc <= 0) { pj_ctx_set_errno( ctx, -1 ); goto bum_call; }
+    if (argc <= 0) {
+        pj_ctx_set_errno( ctx, -1 );
+        goto bum_call;
+    }
+
     start = curr = pj_mkparam(argv[0]);
+
+    /* build parameter list and expand +init's. Does not take care of a single +init. */
     for (i = 1; i < argc; ++i) {
         curr->next = pj_mkparam(argv[i]);
-        curr = curr->next;
+
+        /* check if +init present */
+        if (pj_param(ctx, curr, "tinit").i) {
+            found_def = 0;
+            curr = get_init(ctx, &curr, curr->next, pj_param(ctx, curr, "sinit").s, &found_def);
+            if (!curr)
+                goto bum_call;
+
+            if (!found_def) {
+                pj_ctx_set_errno( ctx, -2);
+                goto bum_call;
+            }
+        } else {
+            curr = curr->next;
+        }
     }
+
+    /* in cae the parameter list only consist of a +init parameter
+       it is expanded here (will not be handled in the above loop). */
+    if (pj_param(ctx, start, "tinit").i && argc == 1) {
+        found_def = 0;
+        curr = get_init(ctx, &start, curr, pj_param(ctx, start, "sinit").s, &found_def);
+        if (!curr)
+            goto bum_call;
+        if (!found_def) {
+            pj_ctx_set_errno( ctx, -2);
+            goto bum_call;
+        }
+    }
+
     if (ctx->last_errno) goto bum_call;
 
-    /* check if +init present */
-    if (pj_param(ctx, start, "tinit").i && ! defer_init_expansion) {
-        int found_def = 0;
-        /* avoid expanding additional inits (as could happen in a pipeline) */
-        defer_init_expansion = 1;
-        if (!(curr = get_init(ctx,&start, curr,
-                              pj_param(ctx, start, "sinit").s,
-                              &found_def)))
-            goto bum_call;
-        if (!found_def) { pj_ctx_set_errno( ctx, -2); goto bum_call; }
-    }
-
     /* find projection selection */
-    if (!(name = pj_param(ctx, start, "sproj").s))
-    { pj_ctx_set_errno( ctx, -4 ); goto bum_call; }
+    if (!(name = pj_param(ctx, start, "sproj").s)) {
+        pj_ctx_set_errno( ctx, -4 );
+        goto bum_call;
+    }
     for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
+
     if (!s) { pj_ctx_set_errno( ctx, -5 ); goto bum_call; }
 
     /* set defaults, unless inhibited */
