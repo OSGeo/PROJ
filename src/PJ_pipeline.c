@@ -614,7 +614,7 @@ int pj_pipeline_selftest (void) {
     proj_destroy (P);
 
     /* test a pipeline with several +init steps */
-    P = pj_create(
+    P = proj_create(
         "+proj=pipeline "
         "+step +init=epsg:25832 +inv "
         "+step +init=epsg:25833  "
@@ -627,8 +627,8 @@ int pj_pipeline_selftest (void) {
     a.coo.xy.x =  700000.0;
     a.coo.xy.y = 6000000.0;
 
-    b = pj_trans(P, PJ_FWD, a);
-    dist = pj_xy_dist(a.coo.xy, b.coo.xy);
+    b = proj_trans(P, PJ_FWD, a);
+    dist = proj_xy_dist(a.coo.xy, b.coo.xy);
     if (dist > 1e-7)
         return 5001;
 
