@@ -156,7 +156,7 @@ process(FILE *fid) {
 	static void	/* file processing function --- verbosely */
 vprocess(FILE *fid) {
 	char line[MAX_LINE+3], *s, pline[40];
-	projUV dat_ll, dat_xy;
+	projUV dat_ll, dat_xy, temp;
 	int linvers;
 
 	if (!oform)
@@ -198,6 +198,12 @@ vprocess(FILE *fid) {
 				continue;
 			}
 			if (prescale) { dat_xy.u *= fscale; dat_xy.v *= fscale; }
+			if (reversein) {
+				temp.u = dat_xy.u;
+				temp.v = dat_xy.v;
+				dat_xy.u = temp.v;
+				dat_xy.v = temp.u;
+			}
 			dat_ll = pj_inv(dat_xy, Proj);
 		} else {
 			dat_ll.u = dmstor(s, &s);
@@ -205,6 +211,12 @@ vprocess(FILE *fid) {
 			if (dat_ll.u == HUGE_VAL || dat_ll.v == HUGE_VAL) {
 				emess(-1,"lon-lat input conversion failure\n");
 				continue;
+			}
+			if (reversein) {
+				temp.u = dat_ll.u;
+				temp.v = dat_ll.v;
+				dat_ll.u = temp.v;
+				dat_ll.v = temp.u;
 			}
 			dat_xy = pj_fwd(dat_ll, Proj);
 			if (postscale) { dat_xy.u *= fscale; dat_xy.v *= fscale; }
