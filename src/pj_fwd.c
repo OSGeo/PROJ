@@ -1,21 +1,21 @@
 /* general forward projection */
 #define PJ_LIB__
+#include <proj.h>
 #include <projects.h>
-#include <errno.h>
 # define EPS 1.0e-12
 	XY /* forward projection entry */
 pj_fwd(LP lp, PJ *P) {
 	XY xy;
     XY err;
     double t;
+    int last_errno;
 
     /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
     err.x = err.y = HUGE_VAL;
 
     if (0==P->fwd)
         return err;
-
-    P->ctx->last_errno = pj_errno = errno = 0;
+    last_errno = proj_errno_reset (P);
 
     /* Check input coordinates if angular */
     if ((P->left==PJ_IO_UNITS_CLASSIC)||(P->left==PJ_IO_UNITS_RADIANS)) {
@@ -39,7 +39,7 @@ pj_fwd(LP lp, PJ *P) {
 
     /* Do the transformation */
     xy = (*P->fwd)(lp, P);
-    if ( P->ctx->last_errno )
+    if ( proj_errno (P) )
         return err;
 
     /* Classic proj.4 functions return plane coordinates in units of the semimajor axis */
@@ -53,5 +53,6 @@ pj_fwd(LP lp, PJ *P) {
     xy.y = P->fr_meter * (xy.y + P->y0);
     /* z is not scaled since this is handled by vto_meter outside */
 
+    proj_errno_restore (P, last_errno);
     return xy;
 }

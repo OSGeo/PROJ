@@ -144,7 +144,6 @@ extern "C" {
 #undef  PROJ_API_INCLUDED_FOR_PJ_VERSION_ONLY
 
 extern char const pj_release[]; /* global release id string */
-extern int        pj_errno;     /* global error return code */
 
 /* first forward declare everything needed */
 
@@ -258,8 +257,6 @@ typedef struct projCtx_t PJ_CONTEXT;
 
 /* Functionality for handling thread contexts */
 PJ_CONTEXT *proj_context_create (int multithreaded);
-void proj_context_set (PJ *P, PJ_CONTEXT *ctx);
-void proj_context_inherit (PJ *parent, PJ *child);
 void proj_context_destroy    (PJ_CONTEXT *ctx);
 
 
@@ -298,8 +295,6 @@ int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COO
 /* these are not constructors, but initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);
 PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
-PJ_COORD proj_coord_error (void);
-PJ_OBS   proj_obs_error (void);
 
 
 /* Measure internal consistency - in forward or inverse direction */
@@ -315,15 +310,6 @@ double proj_xy_dist (XY a, XY b);
 double proj_xyz_dist (XYZ a, XYZ b);
 
 
-#ifndef PJ_OBS_API_C
-extern const PJ_COORD proj_coord_null;
-extern const PJ_OBS   proj_obs_null;
-extern const PJ      *proj_shutdown;
-#endif
-/* Part of MSVC workaround: Make proj_*_null look function-like for symmetry with proj_*_error */
-#define proj_coord_null(x) proj_coord_null
-#define proj_obs_null(x) proj_obs_null
-
 
 #ifndef PJ_TODEG
 #define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
@@ -335,16 +321,33 @@ extern const PJ      *proj_shutdown;
 
 /* Set or read error level */
 int  proj_errno (PJ *P);
+int  proj_errno_reset (PJ *P);
 void proj_errno_set (PJ *P, int err);
-
+/* reduce some mental impedance in the canonical reset/restore use case */
+#define proj_errno_restore(P, err) proj_errno_set ((P), (err))
 
 
 
 
 
 /* stuff below is *not* considered API, and will be moved to an "internal plumbing toolset" */
+PJ_COORD proj_coord_error (void);
+PJ_OBS   proj_obs_error (void);
+#ifndef PJ_OBS_API_C
+extern const PJ_COORD proj_coord_null;
+extern const PJ_OBS   proj_obs_null;
+extern const PJ      *proj_shutdown;
+#endif
+/* Part of MSVC workaround: Make proj_*_null look function-like for symmetry with proj_*_error */
+#define proj_coord_null(x) proj_coord_null
+#define proj_obs_null(x) proj_obs_null
+
+
+
 
 void proj_context_errno_set (PJ_CONTEXT *ctx, int err);
+void proj_context_set (PJ *P, PJ_CONTEXT *ctx);
+void proj_context_inherit (PJ *parent, PJ *child);
 
 /* High level functionality for handling thread contexts */
 enum proj_log_level {

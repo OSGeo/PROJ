@@ -447,19 +447,72 @@ int proj_errno (PJ *P) {
     return pj_ctx_get_errno (pj_get_ctx (P));
 }
 
-
+/*****************************************************************************/
 void proj_errno_set (PJ *P, int err) {
+/******************************************************************************
+    Sets errno in the PJ, and bubbles it up to the context and pj_errno levels
+    through the low level pj_ctx interface.
+
+    Has a synonym defined in proj.h: proj_errno_restore (P, err), but perhaps
+    the naming should be the other way round, since the errno reset/restore
+    paradigm will probably be the primary mode of operation.
+
+    See usage example under proj_errno_reset ()
+******************************************************************************/
     if (0==P) {
         errno = EINVAL;
         return;
     }
+
+    /* Use proj_errno_reset to explicitly clear the error status */
+    if (0==err)
+        return;
+
     /* set local error level */
     P->last_errno = err;
     /* and let it bubble up */
     proj_context_errno_set (pj_get_ctx (P), err);
+    errno = err;
+    return;
 }
 
 
+/*****************************************************************************/
+int proj_errno_reset (PJ *P) {
+/******************************************************************************
+    Clears errno in the PJ, and bubbles it up to the context and
+    pj_errno levels through the low level pj_ctx interface.
+    
+    Returns the previous value of the errno, for convenient reset/restore
+    operations:
+
+    void foo (PJ *P) {
+        int last_errno = proj_errno_reset (P);
+        
+        do_something_with_P (P);
+
+        (* failure - keep latest error status *)
+        if (proj_errno(P))
+            return;
+        (* restore previous error status *)
+        proj_errno_restore (P, last_errno);
+        return;
+    }
+******************************************************************************/
+    int last_errno;
+    if (0==P) {
+        errno = EINVAL;
+        return EINVAL;
+    }
+    last_errno = proj_errno (P);
+
+    /* set local error level */
+    P->last_errno = 0;
+    /* and let it bubble up */
+    pj_ctx_set_errno (pj_get_ctx (P), 0);
+    errno = 0;
+    return last_errno;
+}
 
 
 
@@ -493,7 +546,7 @@ void proj_context_destroy (PJ_CONTEXT *ctx) {
     if (0==ctx)
         return;
 
-    /* Trying to free the default context is a no-op */
+    /* Trying to free the default context is a no-op (since it is statically allocated) */
     if (pj_get_default_ctx ()==ctx)
         return;
 
@@ -514,14 +567,8 @@ void proj_context_destroy (PJ_CONTEXT *ctx) {
 void proj_context_errno_set (PJ_CONTEXT *ctx, int err) {
     if (0==ctx)
         ctx = pj_get_default_ctx();
-    ctx->last_errno = err;
-    if (0==err)
-        return;
-
-    /* consider not bubbling transient errors to the errno level */
-    errno = err;
-    /* pj_errno should really disappear from the OBS_API */
-    pj_errno = err;
+    pj_ctx_set_errno (ctx, err);
+    return;
 }
 
 
