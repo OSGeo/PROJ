@@ -43,7 +43,7 @@ Last update: 2017-05-15
 ***********************************************************************/
 
 #define PJ_LIB__
-#include <proj_internal.h>
+#include "proj_internal.h"
 #include <projects.h>
 #include <geocent.h>
 #include <assert.h>

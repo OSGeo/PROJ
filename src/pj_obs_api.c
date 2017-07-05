@@ -33,7 +33,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 #define PJ_OBS_API_C
-#include <proj_internal.h>
+#include "proj_internal.h"
 #include <projects.h>
 #include <geodesic.h>
 

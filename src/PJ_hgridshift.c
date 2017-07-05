@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include <proj_internal.h>
+#include "proj_internal.h"
 #include <projects.h>
 
 PROJ_HEAD(hgridshift, "Horizontal grid shift");

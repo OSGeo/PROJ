@@ -28,7 +28,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 #define PJ_INTERNAL_C
-#include <proj_internal.h>
+#include "proj_internal.h"
 #include <projects.h>
 #include <geodesic.h>
 
