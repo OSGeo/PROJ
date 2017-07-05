@@ -65,7 +65,7 @@ Last update: 2017-05-16
 
 #define PJ_LIB__
 #include <time.h>
-#include <proj.h>
+#include <proj_internal.h>
 #include <projects.h>
 #include <errno.h>
 

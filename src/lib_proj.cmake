@@ -201,6 +201,7 @@ SET(SRC_LIBPROJ_CORE
         pj_msfn.c
         pj_mutex.c
         pj_obs_api.c
+        pj_internal.c
         pj_open_lib.c
         pj_param.c
         pj_phi2.c

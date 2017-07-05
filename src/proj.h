@@ -310,7 +310,6 @@ double proj_xy_dist (XY a, XY b);
 double proj_xyz_dist (XYZ a, XYZ b);
 
 
-
 #ifndef PJ_TODEG
 #define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
 #endif
@@ -325,54 +324,6 @@ int  proj_errno_reset (PJ *P);
 void proj_errno_set (PJ *P, int err);
 /* reduce some mental impedance in the canonical reset/restore use case */
 #define proj_errno_restore(P, err) proj_errno_set ((P), (err))
-
-
-
-
-
-/* stuff below is *not* considered API, and will be moved to an "internal plumbing toolset" */
-PJ_COORD proj_coord_error (void);
-PJ_OBS   proj_obs_error (void);
-#ifndef PJ_OBS_API_C
-extern const PJ_COORD proj_coord_null;
-extern const PJ_OBS   proj_obs_null;
-extern const PJ      *proj_shutdown;
-#endif
-/* Part of MSVC workaround: Make proj_*_null look function-like for symmetry with proj_*_error */
-#define proj_coord_null(x) proj_coord_null
-#define proj_obs_null(x) proj_obs_null
-
-
-
-
-void proj_context_errno_set (PJ_CONTEXT *ctx, int err);
-void proj_context_set (PJ *P, PJ_CONTEXT *ctx);
-void proj_context_inherit (PJ *parent, PJ *child);
-
-/* High level functionality for handling thread contexts */
-enum proj_log_level {
-    PJ_LOG_NONE  = 0,
-    PJ_LOG_ERROR = 1,
-    PJ_LOG_DEBUG = 2,
-    PJ_LOG_TRACE = 3,
-    PJ_LOG_TELL  = 4,
-    PJ_LOG_DEBUG_MAJOR = 2, /* for proj_api.h compatibility */
-    PJ_LOG_DEBUG_MINOR = 3  /* for proj_api.h compatibility */
-};
-
-/* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
-enum proj_log_level proj_log_level (PJ_CONTEXT *ctx, enum proj_log_level log_level);
-typedef void (*PJ_LOG_FUNCTION)(void *, int, const char *);
-
-void proj_log_error (PJ *P, const char *fmt, ...);
-void proj_log_debug (PJ *P, const char *fmt, ...);
-void proj_log_trace (PJ *P, const char *fmt, ...);
-/*void proj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *));*/
-void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log);
-
-
-/* Lowest level: Minimum support for fileapi */
-void proj_fileapi_set (PJ *P, void *fileapi);
 
 
 #ifdef __cplusplus
