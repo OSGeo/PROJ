@@ -228,6 +228,7 @@ set(HEADERS_LIBPROJ
         proj_api.h
         proj.h
         geodesic.h
+        proj_internal.h
 )
 
 # Group source files for IDE source explorers (e.g. Visual Studio)
