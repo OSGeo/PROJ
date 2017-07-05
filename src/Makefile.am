@@ -32,7 +32,7 @@ lib_LTLIBRARIES = libproj.la
 libproj_la_LDFLAGS = -no-undefined -version-info 12:0:0
 
 libproj_la_SOURCES = \
-	pj_list.h \
+	pj_list.h proj_internal.h\
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c PJ_sterea.c \
 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c PJ_isea.c \
