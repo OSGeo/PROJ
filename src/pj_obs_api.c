@@ -425,16 +425,16 @@ void proj_context_destroy (PJ_CONTEXT *ctx) {
 }
 
 
-/* Return a fully expanded transformation definition - user responsibility to free() */
-char *proj_get_definition (PJ *P) {
+/* Build a fully expanded proj_create() compatible representation of P */
+char *proj_definition_create (PJ *P) {
     if (0==P)
         return 0;
     return pj_get_def(P, 0);
 }
 
-/* deallocate anything obtained from PROJ.4 */
-void *proj_buffer_free (void *buffer) {
-    return pj_dealloc (buffer);
+/* ...and get rid of it safely */
+void *proj_definition_destroy (char *definition) {
+    return pj_dealloc (definition);
 }
 
 

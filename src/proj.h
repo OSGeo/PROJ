@@ -334,10 +334,10 @@ void proj_errno_set (PJ *P, int err);
 int  proj_errno_reset (PJ *P);
 void proj_errno_restore (PJ *P, int err);
 
-char *proj_get_definition (PJ *P);
-
-/* deallocate anything obtained from PROJ.4 */
-void *proj_buffer_free (void *buffer);
+/* Build a fully expanded proj_create() compatible representation of P */
+char *proj_definition_create (PJ *P);
+/* ...and get rid of it safely */
+void *proj_definition_destroy (char *definition);
 
 
 /* These are trivial, and while occasionaly useful in real code, primarily here to       */
