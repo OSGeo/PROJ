@@ -286,7 +286,6 @@ void proj_context_destroy    (PJ_CONTEXT *ctx);
 /* Manage the transformation definition object PJ */
 PJ  *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
-PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *def_from, const char *def_to);
 PJ  *proj_destroy (PJ *P);
 
 
@@ -312,12 +311,8 @@ size_t proj_transform (
 );
 
 
-int proj_transform_obs   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
-int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
-
-/* these are not constructors, but initializers */
+/* not a constructor, but an initializer */
 PJ_COORD proj_coord (double x, double y, double z, double t);
-PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
 
 
 /* Measure internal consistency - in forward or inverse direction */
