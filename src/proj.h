@@ -335,10 +335,9 @@ double proj_xyz_dist (XYZ a, XYZ b);
 
 /* Set or read error level */
 int  proj_errno (PJ *P);
-int  proj_errno_reset (PJ *P);
 void proj_errno_set (PJ *P, int err);
-/* reduce some mental impedance in the canonical reset/restore use case */
-#define proj_errno_restore(P, err) proj_errno_set ((P), (err))
+int  proj_errno_reset (PJ *P);
+void proj_errno_restore (PJ *P, int err);
 
 /* These are trivial, and while occasionaly useful in real code, primarily here to       */
 /* simplify demo code, and in acknowledgement of the proj-internal discrepancy between   */

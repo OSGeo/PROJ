@@ -333,12 +333,6 @@ void proj_errno_set (PJ *P, int err) {
 /******************************************************************************
     Sets errno in the PJ, and bubbles it up to the context and pj_errno levels
     through the low level pj_ctx interface.
-
-    Has a synonym defined in proj.h: proj_errno_restore (P, err), but perhaps
-    the naming should be the other way round, since the errno reset/restore
-    paradigm will probably be the primary mode of operation.
-
-    See usage example under proj_errno_reset ()
 ******************************************************************************/
     if (0==P) {
         errno = EINVAL;
@@ -357,6 +351,22 @@ void proj_errno_set (PJ *P, int err) {
     return;
 }
 
+/*****************************************************************************/
+void proj_errno_restore (PJ *P, int err) {
+/******************************************************************************
+    Reduce some mental impedance in the canonical reset/restore use case:
+    Basically, proj_errno_restore() is a synonym for proj_errno_set(),
+    but the use cases are very different (_set: indicate an error to higher
+    level user code, _restore: pass previously set error indicators in case
+    of no errors at this level).
+
+    Hence, although the inner working is identical, we provide both options,
+    to avoid some rather confusing real world code.
+
+    See usage example under proj_errno_reset ()
+******************************************************************************/
+    proj_errno_set (P, err);
+}
 
 /*****************************************************************************/
 int proj_errno_reset (PJ *P) {
@@ -375,7 +385,7 @@ int proj_errno_reset (PJ *P) {
         (* failure - keep latest error status *)
         if (proj_errno(P))
             return;
-        (* restore previous error status *)
+        (* success - restore previous error status *)
         proj_errno_restore (P, last_errno);
         return;
     }
