@@ -433,8 +433,8 @@ char *proj_get_definition (PJ *P) {
 }
 
 /* deallocate anything obtained from PROJ.4 */
-void *proj_buffer_free (void *p) {
-    return pj_dealloc ((PJ *) p);
+void *proj_buffer_free (void *buffer) {
+    return pj_dealloc (buffer);
 }
 
 
