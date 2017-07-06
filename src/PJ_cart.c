@@ -251,7 +251,7 @@ int pj_cart_selftest (void) {
     arg_def = proj_get_definition (P);
     if (0!=strcmp(arg, arg_def))
         return 44;
-    free (arg_def);
+    proj_buffer_free (arg_def);
 
     /* Clean up */
     proj_destroy (P);

@@ -432,6 +432,11 @@ char *proj_get_definition (PJ *P) {
     return pj_get_def(P, 0);
 }
 
+/* deallocate anything obtained from PROJ.4 */
+void *proj_buffer_free (void *p) {
+    return pj_dealloc ((PJ *) p);
+}
+
 
 double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
 double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
