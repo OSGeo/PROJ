@@ -239,11 +239,19 @@ int pj_cart_selftest (void) {
     size_t n, sz;
     double dist, h, t;
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
+    char *arg = {" +proj=utm +zone=32 +ellps=GRS80"};
+    char *arg_def;
 
     /* An utm projection on the GRS80 ellipsoid */
-    P = proj_create (0, "+proj=utm +zone=32 +ellps=GRS80");
+    P = proj_create (0, arg);
     if (0==P)
         return 1;
+
+    /* note arg is handcrafted to go undisturbed through get def reconstruction */
+    arg_def = proj_get_definition (P);
+    if (0!=strcmp(arg, arg_def))
+        return 44;
+    free (arg_def);
 
     /* Clean up */
     proj_destroy (P);

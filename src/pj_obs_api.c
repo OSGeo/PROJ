@@ -33,8 +33,9 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 #define PJ_OBS_API_C
+#include <proj.h>
 #include "proj_internal.h"
-#include <projects.h>
+#include "projects.h"
 #include <geodesic.h>
 
 #include <stddef.h>
@@ -422,6 +423,15 @@ void proj_context_destroy (PJ_CONTEXT *ctx) {
 
     pj_ctx_free (ctx);
 }
+
+
+/* Return a fully expanded transformation definition - user responsibility to free() */
+char *proj_get_definition (PJ *P) {
+    if (0==P)
+        return 0;
+    return pj_get_def(P, 0);
+}
+
 
 double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
 double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}

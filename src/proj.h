@@ -339,6 +339,9 @@ void proj_errno_set (PJ *P, int err);
 int  proj_errno_reset (PJ *P);
 void proj_errno_restore (PJ *P, int err);
 
+char *proj_get_definition (PJ *P);
+
+
 /* These are trivial, and while occasionaly useful in real code, primarily here to       */
 /* simplify demo code, and in acknowledgement of the proj-internal discrepancy between   */
 /* angular units expected by classical proj, and by Charles Karney's geodesics subsystem */
