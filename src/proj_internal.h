@@ -26,6 +26,13 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#ifdef _MSC_VER
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+#endif
+#include <math.h>   /* For M_PI */
+
 #include <proj.h>
 
 #ifdef PROJECTS_H
@@ -40,6 +47,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+
+#ifndef PJ_TODEG
+#define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
+#endif
+#ifndef PJ_TORAD
+#define PJ_TORAD(deg)  ((deg)*M_PI/180.0)
+#endif
+
+
 
 PJ_COORD proj_coord_error (void);
 PJ_OBS   proj_obs_error (void);

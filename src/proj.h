@@ -115,12 +115,13 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
+/*
 #ifdef _MSC_VER
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
 #endif
 #endif
-#include <math.h>    /* For M_PI */
+#include <math.h>    For M_PI */
 #include <stddef.h>  /* For size_t */
 
 
@@ -256,7 +257,7 @@ typedef struct projCtx_t PJ_CONTEXT;
 
 
 /* Functionality for handling thread contexts */
-PJ_CONTEXT *proj_context_create (int multithreaded);
+PJ_CONTEXT *proj_context_create (void);
 void proj_context_destroy    (PJ_CONTEXT *ctx);
 
 
@@ -310,14 +311,6 @@ double proj_xy_dist (XY a, XY b);
 double proj_xyz_dist (XYZ a, XYZ b);
 
 
-#ifndef PJ_TODEG
-#define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
-#endif
-#ifndef PJ_TORAD
-#define PJ_TORAD(deg)  ((deg)*M_PI/180.0)
-#endif
-
-
 /* Set or read error level */
 int  proj_errno (PJ *P);
 int  proj_errno_reset (PJ *P);
@@ -325,6 +318,11 @@ void proj_errno_set (PJ *P, int err);
 /* reduce some mental impedance in the canonical reset/restore use case */
 #define proj_errno_restore(P, err) proj_errno_set ((P), (err))
 
+/* These are trivial, and while occasionaly useful in real code, primarily here to       */
+/* simplify demo code, and in acknowledgement of the proj-internal discrepancy between   */
+/* angular units expected by classical proj, and by Charles Karney's geodesics subsystem */
+double proj_torad (double angle_in_degrees);
+double proj_todeg (double angle_in_radians);
 
 #ifdef __cplusplus
 }

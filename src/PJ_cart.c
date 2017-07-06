@@ -339,7 +339,7 @@ int pj_cart_selftest (void) {
     b = proj_trans_obs (P, PJ_INV, b);
 
     /* Move p to another context */
-    ctx = proj_context_create (1);
+    ctx = proj_context_create ();
     if (ctx==pj_get_default_ctx())
         return 10;
     proj_context_set (P, ctx);

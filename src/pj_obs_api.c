@@ -397,20 +397,8 @@ int proj_errno_reset (PJ *P) {
 
 
 /* Create a new context - or provide a pointer to the default context */
-PJ_CONTEXT *proj_context_create (int multithreaded) {
-    /* Single threaded */
-    if (0==multithreaded)
-        return pj_get_default_ctx ();
+PJ_CONTEXT *proj_context_create (void) {
     return pj_ctx_alloc ();
-}
-
-
-/* Move P to a new context - or to the default context i 0 is specified */
-void proj_context_set (PJ *P, PJ_CONTEXT *ctx) {
-    if (0==ctx)
-        ctx = pj_get_default_ctx ();
-    pj_set_ctx (P, ctx);
-    return;
 }
 
 
@@ -424,3 +412,6 @@ void proj_context_destroy (PJ_CONTEXT *ctx) {
 
     pj_ctx_free (ctx);
 }
+
+double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
+double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
