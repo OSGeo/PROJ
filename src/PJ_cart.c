@@ -248,10 +248,10 @@ int pj_cart_selftest (void) {
         return 1;
 
     /* note arg is handcrafted to go undisturbed through get def reconstruction */
-    arg_def = proj_definition_create (P);
+    arg_def = proj_definition_retrieve (P);
     if (0!=strcmp(arg, arg_def))
         return 44;
-    proj_definition_destroy (arg_def);
+    proj_free (arg_def);
 
     /* Clean up */
     proj_destroy (P);

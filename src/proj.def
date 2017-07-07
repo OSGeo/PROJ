@@ -124,8 +124,8 @@ EXPORTS
     proj_log_debug                 @115
     proj_log_trace                 @116
 
-    proj_definition_create         @117
-    proj_definition_destroy        @118
+    proj_definition_retrieve       @117
+    proj_free                      @118
     proj_torad                     @119
     proj_todeg                     @120
 

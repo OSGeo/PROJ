@@ -426,15 +426,15 @@ void proj_context_destroy (PJ_CONTEXT *ctx) {
 
 
 /* Build a fully expanded proj_create() compatible representation of P */
-char *proj_definition_create (PJ *P) {
+char *proj_definition_retrieve (PJ *P) {
     if (0==P)
         return 0;
     return pj_get_def(P, 0);
 }
 
 /* ...and get rid of it safely */
-void *proj_definition_destroy (char *definition) {
-    return pj_dealloc (definition);
+void *proj_free (void *buffer) {
+    return pj_dealloc (buffer);
 }
 
 

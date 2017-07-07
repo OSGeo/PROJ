@@ -335,9 +335,9 @@ int  proj_errno_reset (PJ *P);
 void proj_errno_restore (PJ *P, int err);
 
 /* Build a fully expanded proj_create() compatible representation of P */
-char *proj_definition_create (PJ *P);
+char *proj_definition_retrieve (PJ *P);
 /* ...and get rid of it safely */
-void *proj_definition_destroy (char *definition);
+void *proj_free (void *buffer);
 
 
 /* These are trivial, and while occasionaly useful in real code, primarily here to       */
