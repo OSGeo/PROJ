@@ -59,6 +59,7 @@ pj_err_list[] = {
     "unit conversion factor must be > 0",                              /* -51 */
     "invalid scale",                                                   /* -52 */
     "non-convergent computation",                                      /* -53 */
+    "missing required arguments",                                      /* -54 */
 };
 
 char *pj_strerrno(int err) {

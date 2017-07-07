@@ -453,6 +453,7 @@ struct FACTORS {
 #define PJD_WGS84     4   /* WGS84 (or anything considered equivalent) */
 
 /* library errors */
+#define PJD_ERR_NO_ARGS              -1
 #define PJD_ERR_INVALID_M_OR_N      -39
 #define PJD_ERR_GEOCENTRIC          -45
 #define PJD_ERR_AXIS                -47
@@ -460,6 +461,7 @@ struct FACTORS {
 #define PJD_ERR_CATALOG             -49
 #define PJD_ERR_INVALID_SCALE       -52
 #define PJD_ERR_NON_CONVERGENT      -53
+#define PJD_ERR_MISSING_ARGS        -54
 
 struct projFileAPI_t;
 
