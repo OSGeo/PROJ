@@ -1,5 +1,6 @@
 /* general inverse projection */
 #define PJ_LIB__
+#include <proj.h>
 #include <projects.h>
 #include <errno.h>
 # define EPS 1.0e-12
@@ -8,6 +9,7 @@
 LP pj_inv(XY xy, PJ *P) {
     LP lp;
     LP err;
+    int last_errno;
 
     /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
     err.lam = err.phi = HUGE_VAL;
@@ -20,7 +22,8 @@ LP pj_inv(XY xy, PJ *P) {
         pj_ctx_set_errno( P->ctx, -15);
         return err;
     }
-    P->ctx->last_errno = errno = pj_errno = 0;
+
+    last_errno = proj_errno_reset (P);
 
     /* de-scale and de-offset */
     xy.x = (xy.x * P->to_meter - P->x0);
@@ -52,5 +55,6 @@ LP pj_inv(XY xy, PJ *P) {
             lp.phi = atan(P->one_es * tan(lp.phi));
     }
 
+    proj_errno_restore (P, last_errno);
     return lp;
 }

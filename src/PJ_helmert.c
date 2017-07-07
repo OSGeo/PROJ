@@ -43,7 +43,7 @@ Last update: 2017-05-15
 ***********************************************************************/
 
 #define PJ_LIB__
-#include <proj.h>
+#include "proj_internal.h"
 #include <projects.h>
 #include <geocent.h>
 #include <assert.h>
@@ -154,16 +154,16 @@ static void update_parameters(PJ *P) {
     Q->theta = Q->theta_0 + Q->dtheta * dt;
 
     /* debugging output */
-    if (pj_err_level(P, PJ_ERR_TELL) >= PJ_LOG_TRACE) {
-        pj_log_trace(P, "Transformation parameters for observation epoch %g:", Q->t_obs);
-        pj_log_trace(P, "x: %g", Q->xyz.x);
-        pj_log_trace(P, "y: %g", Q->xyz.y);
-        pj_log_trace(P, "z: %g", Q->xyz.z);
-        pj_log_trace(P, "s: %g", Q->scale*1e-6);
-        pj_log_trace(P, "rx: %g", Q->opk.o);
-        pj_log_trace(P, "ry: %g", Q->opk.p);
-        pj_log_trace(P, "rz: %g", Q->opk.k);
-        pj_log_trace(P, "theta: %g", Q->theta);
+    if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
+        proj_log_trace(P, "Transformation parameters for observation epoch %g:", Q->t_obs);
+        proj_log_trace(P, "x: %g", Q->xyz.x);
+        proj_log_trace(P, "y: %g", Q->xyz.y);
+        proj_log_trace(P, "z: %g", Q->xyz.z);
+        proj_log_trace(P, "s: %g", Q->scale*1e-6);
+        proj_log_trace(P, "rx: %g", Q->opk.o);
+        proj_log_trace(P, "ry: %g", Q->opk.p);
+        proj_log_trace(P, "rz: %g", Q->opk.k);
+        proj_log_trace(P, "theta: %g", Q->theta);
     }
     return;
 }
@@ -312,11 +312,11 @@ static void build_rot_matrix(PJ *P) {
     }
 
     /* some debugging output */
-    if (pj_err_level(P, PJ_ERR_TELL) >= PJ_LOG_TRACE) {
-        pj_log_trace(P, "Rotation Matrix:");
-        pj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R00, R01, R02);
-        pj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R10, R11, R12);
-        pj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R20, R21, R22);
+    if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
+        proj_log_trace(P, "Rotation Matrix:");
+        proj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R00, R01, R02);
+        proj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R10, R11, R12);
+        proj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R20, R21, R22);
     }
 
     return;
@@ -579,16 +579,16 @@ PJ *PROJECTION(helmert) {
     Q->theta  =  Q->theta_0;
 
     /* Let's help with debugging */
-    if (pj_err_level(P, PJ_ERR_TELL) >= PJ_LOG_DEBUG) {
-        pj_log_debug(P, "Helmert parameters:");
-        pj_log_debug(P, "x=  % 3.5f  y=  % 3.5f  z=  % 3.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
-        pj_log_debug(P, "rx= % 3.5f  ry= % 3.5f  rz= % 3.5f",
+    if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
+        proj_log_debug(P, "Helmert parameters:");
+        proj_log_debug(P, "x=  % 3.5f  y=  % 3.5f  z=  % 3.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
+        proj_log_debug(P, "rx= % 3.5f  ry= % 3.5f  rz= % 3.5f",
                 Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD, Q->opk.k / ARCSEC_TO_RAD);
-        pj_log_debug(P, "s=% 3.5f  approximate=% d  transpose=% d",
+        proj_log_debug(P, "s=% 3.5f  approximate=% d  transpose=% d",
                 Q->scale, Q->approximate, Q->transpose);
-        pj_log_debug(P, "dx= % 3.5f  dy= % 3.5f  dz= % 3.5f", Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
-        pj_log_debug(P, "drx=% 3.5f  dry=% 3.5f  drz=% 3.5f", Q->dopk.o, Q->dopk.p, Q->dopk.k);
-        pj_log_debug(P, "ds=% 3.5f  epoch=% 5.5f  tobs=% 5.5f", Q->dscale, Q->epoch, Q->t_obs);
+        proj_log_debug(P, "dx= % 3.5f  dy= % 3.5f  dz= % 3.5f", Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
+        proj_log_debug(P, "drx=% 3.5f  dry=% 3.5f  drz=% 3.5f", Q->dopk.o, Q->dopk.p, Q->dopk.k);
+        proj_log_debug(P, "ds=% 3.5f  epoch=% 5.5f  tobs=% 5.5f", Q->dscale, Q->epoch, Q->t_obs);
     }
 
     if ((Q->opk.o==0) && (Q->opk.p==0) && (Q->opk.k==0) && (Q->scale==0)) {
@@ -619,23 +619,26 @@ static int test (char *args, PJ_TRIPLET in, PJ_TRIPLET expect, double tol) {
         return 5;
 
     out.xyz = pj_fwd3d (in.lpz, P);
-    if (pj_xyz_dist (out.xyz, expect.xyz) > tol) {
-        pj_log_error(P, "Tolerance of forward calculation not met");
-        pj_log_error(P, "  Expect: %10.10f, %10.10f, %10.10f", expect.xyz.x, expect.xyz.y, expect.xyz.z);
-        pj_log_error(P, "  Out:    %10.10f, %10.10f, %10.10f", out.xyz.x, out.xyz.y, out.xyz.z);
-        pj_log_level(NULL, 0);
+    if (proj_xyz_dist (out.xyz, expect.xyz) > tol) {
+        proj_log_error(P, "Tolerance of forward calculation not met");
+        proj_log_error(P, "  Expect: %10.10f, %10.10f, %10.10f", expect.xyz.x, expect.xyz.y, expect.xyz.z);
+        proj_log_error(P, "  Out:    %10.10f, %10.10f, %10.10f", out.xyz.x, out.xyz.y, out.xyz.z);
+        proj_log_level(NULL, 0);
+        proj_destroy (P);
         return 1;
     }
 
     out.lpz = pj_inv3d (out.xyz, P);
-    if (pj_xyz_dist (out.xyz, in.xyz) > tol) {
-        pj_log_error(P, "Tolerance of inverse calculation not met");
-        pj_log_error(P, "  In:  %10.10f, %10.10f, %10.10f", in.xyz.x, in.xyz.y, in.xyz.z);
-        pj_log_error(P, "  Out: %10.10f, %10.10f, %10.10f", out.xyz.x, out.xyz.y, out.xyz.z);
-        pj_log_level(NULL, 0);
+    if (proj_xyz_dist (out.xyz, in.xyz) > tol) {
+        proj_log_error(P, "Tolerance of inverse calculation not met");
+        proj_log_error(P, "  In:  %10.10f, %10.10f, %10.10f", in.xyz.x, in.xyz.y, in.xyz.z);
+        proj_log_error(P, "  Out: %10.10f, %10.10f, %10.10f", out.xyz.x, out.xyz.y, out.xyz.z);
+        proj_log_level(NULL, 0);
+        proj_destroy (P);
         return 2;
     }
 
+    proj_destroy (P);
     return 0;
 }
 
@@ -675,7 +678,7 @@ int pj_helmert_selftest (void) {
     PJ_TRIPLET in3 = {{3370658.378, 711877.314, 5349787.086}}; /* ITRF2000@2017.0 */
     PJ_TRIPLET expect3 = {{3370658.18890, 711877.42370, 5349787.12430}}; /* ITRF93@2017.0 */
     char args3[] = {
-        " +proj=helmert"
+        " +proj=helmert +ellps=GRS80"
         " +x=0.0127 +y=0.0065 +z=-0.0209 +s=0.00195"
         " +rx=-0.00039 +ry=0.00080 +rz=-0.00114"
         " +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +ds=0.00001"
@@ -690,8 +693,9 @@ int pj_helmert_selftest (void) {
     PJ_OBS in4 = {{{3370658.378, 711877.314, 5349787.086, 2017.0}}, {{ 0, 0, 0}}, 0, 0};
     PJ_OBS out;
 
-    PJ *helmert = pj_create(
-        " +proj=helmert"
+    PJ *helmert = proj_create(
+        0, 
+        " +proj=helmert +ellps=GRS80"
         " +x=0.0127 +y=0.0065 +z=-0.0209 +s=0.00195"
         " +rx=-0.00039 +ry=0.00080 +rz=-0.00114"
         " +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +ds=0.00001"
@@ -709,7 +713,7 @@ int pj_helmert_selftest (void) {
        to computed coordinates, hence the test tolerance is set accordingly. */
     PJ_TRIPLET in5 = {{2546506.957, 542256.609, 0}};
     PJ_TRIPLET expect5 = {{766563.675, 165282.277, 0}};
-    char args5[] = " +proj=helmert +x=-9597.3572 +y=.6112 +s=0.304794780637 +theta=-1.244048";
+    char args5[] = " +proj=helmert +ellps=GRS80 +x=-9597.3572 +y=.6112 +s=0.304794780637 +theta=-1.244048";
 
     /* Run tests 1-3 & 5 */
     ret = test (args1, in1, expect1, 1e-4);   if (ret)  return ret;
@@ -718,24 +722,24 @@ int pj_helmert_selftest (void) {
     ret = test (args5, in5, expect5, 0.001);  if (ret) return ret + 40;
 
     /* Run test 4 */
-    out = pj_trans(helmert, PJ_FWD, in4);
-    if (pj_xyz_dist (out.coo.xyz, expect4a) > 1e-4) {
-        pj_log_error(helmert, "Tolerance of test 4a not met!");
-        pj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.coo.xyz.x, in4.coo.xyz.y, in4.coo.xyz.z);
-        pj_log_error(helmert, "  Out: %10.10f, %10.10f, %10.10f", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
+    out = proj_trans_obs (helmert, PJ_FWD, in4);
+    if (proj_xyz_dist (out.coo.xyz, expect4a) > 1e-4) {
+        proj_log_error(helmert, "Tolerance of test 4a not met!");
+        proj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.coo.xyz.x, in4.coo.xyz.y, in4.coo.xyz.z);
+        proj_log_error(helmert, "  Out: %10.10f, %10.10f, %10.10f", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
         return 31;
     }
 
     in4.coo.xyzt.t = 2018.0;
-    out = pj_trans(helmert, PJ_FWD, in4);
-    if (pj_xyz_dist (out.coo.xyz, expect4b) > 1e-4) {
-        pj_log_error(helmert, "Tolerance of test 4b not met!");
-        pj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.coo.xyz.x, in4.coo.xyz.y, in4.coo.xyz.z);
-        pj_log_error(helmert, "  Out: %10.10f, %10.10f, %10.10f", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
+    out = proj_trans_obs (helmert, PJ_FWD, in4);
+    if (proj_xyz_dist (out.coo.xyz, expect4b) > 1e-4) {
+        proj_log_error(helmert, "Tolerance of test 4b not met!");
+        proj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.coo.xyz.x, in4.coo.xyz.y, in4.coo.xyz.z);
+        proj_log_error(helmert, "  Out: %10.10f, %10.10f, %10.10f", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
         return 32;
     }
-    pj_free(helmert);
 
+    proj_destroy(helmert);
     return 0;
 }
 

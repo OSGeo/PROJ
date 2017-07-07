@@ -175,6 +175,7 @@ typedef struct { double u, v, w; }     UVW;
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
 struct PJconsts;
 struct PJ_OBS;
+union  PJ_COORD;
 struct geod_geodesic;
 struct pj_opaque;
 struct ARG_list;
@@ -190,6 +191,7 @@ enum pj_io_units {
 #ifndef PROJ_H
 typedef struct PJconsts PJ;         /* the PJ object herself */
 typedef struct PJ_OBS PJ_OBS;
+typedef union  PJ_COORD PJ_COORD;
 #endif
 
 struct PJ_REGION_S {
@@ -208,11 +210,12 @@ struct PJconsts {
 
     /*************************************************************************************
 
-                            G E N E R A L   C O N T E X T
+                         G E N E R A L   P A R A M E T E R   S T R U C T
 
     **************************************************************************************
 
         TODO: Need some description here - especially about the thread context...
+        This is the struct behind the PJ typedef
 
     **************************************************************************************/
 
@@ -245,10 +248,66 @@ struct PJconsts {
     LPZ (*inv3d)(XYZ, PJ *);
     PJ_OBS (*fwdobs)(PJ_OBS, PJ *);
     PJ_OBS (*invobs)(PJ_OBS, PJ *);
+    PJ_COORD (*fwdcoord)(PJ_COORD, PJ *);
+    PJ_COORD (*invcoord)(PJ_COORD, PJ *);
 
     void (*spc)(LP, PJ *, struct FACTORS *);
 
     void (*pfree)(PJ *);
+
+    /*************************************************************************************
+
+                              E R R O R   R E P O R T I N G
+
+    **************************************************************************************
+
+        Currently, we're doing error reporting through the context->last_errno indicator.
+
+        It is, however, not entirely sure this will be the right way to do it in all
+        cases: During allocation/initialization, it is certainly nice to have a higher
+        level error indicator, since we primarily signal "something went wrong", by
+        returning 0 from the pj_init family of functions - and with a null return we
+        cannot pass messages through internal state in the PJ object.
+
+        Historically, the errno variable has been used for that kind of messages, but
+        apparently, thread safety was added to PROJ.4 at a time where it was not clear
+        that errno is actually thread local.
+
+        Additionally, errno semantics has historically been misinterpreted in parts of
+        pj_init.c, a misinterpretation, that was mitigated by a hack in pj_malloc.c
+        some 15 years ago.
+
+        This PJ-local errno is a first step towards a more structured approach to
+        error reporting, being implemented in the OBS_API (cf. pj_obs_api.[ch]), and
+        related plumbing efforts.
+        
+        In due course this will let us get rid of the pj_malloc.c hack, and allow us
+        to introduce a more layered error reporting structure, where errors are
+        reported where they occur, and bubble up to the higher levels (context->errno,
+        then thread local errno), so the highest level indicate "something went wrong
+        somewhere", then the more localized ones can be used for pinpointing: 
+        
+        errno:               "something went wrong somewhere on this thread",
+        context->last_errno: "something went wrong in some PROJ.4 related code",
+        PJ->last_errno:      "It was in THIS PJ something went wrong",
+        pj_strerrno:         "This was what went wrong".
+
+        Which will be quite helpful, once fully implemented, especially for 
+        debugging complex transformation pipelines, while still maintaining backward
+        compatibility in the messaging system.
+
+        Note that there is even a global pj_errno, which is here and there accessed
+        without acquiring lock. This, and the practise of resetting the thread local
+        errno, should be given some consideration during the cleanup of the error
+        reporting system.
+
+        The name "last_errno", rather than "errno" is used partially for alignment
+        with the context->last_errno, partially because in a multithreaded environment,
+        errno is a macro, and spurious spaces turning "errno" into a separate token
+        will expose it to macro expansion, to the tune of much confusion and agony.
+
+    **************************************************************************************/
+    int last_errno;
 
 
     /*************************************************************************************
@@ -345,6 +404,11 @@ struct PJconsts {
 
                   D A T U M S   A N D   H E I G H T   S Y S T E M S
 
+    **************************************************************************************
+
+        It may be possible, and meaningful, to move the list parts of this up to the
+        PJ_CONTEXT level.
+
     **************************************************************************************/
 
     int     datum_type;                /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
@@ -374,9 +438,15 @@ struct PJconsts {
     struct _pj_gi *last_after_grid;     /* TODO: Description needed */
     PJ_Region     last_after_region;    /* TODO: Description needed */
     double        last_after_date;      /* TODO: Description needed */
+
+
+    /*************************************************************************************
+
+                 E N D   O F    G E N E R A L   P A R A M E T E R   S T R U C T
+
+    **************************************************************************************/
+
 };
-
-
 
 
 
@@ -387,7 +457,6 @@ struct ARG_list {
     char used;
     char param[1];
 };
-
 
 
 typedef union { double  f; int  i; char *s; } PROJVALUE;
@@ -404,6 +473,7 @@ struct PJ_ELLPS {
     char    *ell;          /* elliptical parameter */
     char    *name;         /* comments */
 };
+
 struct PJ_UNITS {
     char    *id;           /* units keyword */
     char    *to_meter;     /* multiply by value to get meters */
@@ -489,8 +559,6 @@ struct PJ_LIST {
 extern struct PJ_LIST pj_list[];
 extern struct PJ_SELFTEST_LIST pj_selftest_list[];
 #endif
-
-
 
 #ifndef PJ_ELLPS__
 extern struct PJ_ELLPS pj_ellps[];

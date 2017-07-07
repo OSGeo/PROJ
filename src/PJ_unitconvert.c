@@ -65,8 +65,9 @@ Last update: 2017-05-16
 
 #define PJ_LIB__
 #include <time.h>
-#include <proj.h>
+#include "proj_internal.h"
 #include <projects.h>
+#include <errno.h>
 
 PROJ_HEAD(unitconvert, "Unit conversion");
 
@@ -348,7 +349,7 @@ PJ *PROJECTION(unitconvert) {
         if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
 
         Q->xy_in_id = i;
-        pj_log_debug(P, "xy_in unit: %s", pj_units[i].name);
+        proj_log_debug(P, "xy_in unit: %s", pj_units[i].name);
     }
 
     if ((name = pj_param (P->ctx, P->params, "sxy_out").s) != NULL) {
@@ -357,7 +358,7 @@ PJ *PROJECTION(unitconvert) {
         if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
 
         Q->xy_out_id = i;
-        pj_log_debug(P, "xy_out unit: %s", pj_units[i].name);
+        proj_log_debug(P, "xy_out unit: %s", pj_units[i].name);
     }
 
     if ((name = pj_param (P->ctx, P->params, "sz_in").s) != NULL) {
@@ -366,7 +367,7 @@ PJ *PROJECTION(unitconvert) {
         if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
 
         Q->z_in_id = i;
-        pj_log_debug(P, "z_in unit: %s", pj_units[i].name);
+        proj_log_debug(P, "z_in unit: %s", pj_units[i].name);
     }
 
     if ((name = pj_param (P->ctx, P->params, "sz_out").s) != NULL) {
@@ -375,7 +376,7 @@ PJ *PROJECTION(unitconvert) {
         if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
 
         Q->z_out_id = i;
-        pj_log_debug(P, "z_out unit: %s", pj_units[i].name);
+        proj_log_debug(P, "z_out unit: %s", pj_units[i].name);
     }
 
 
@@ -385,7 +386,7 @@ PJ *PROJECTION(unitconvert) {
         if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
 
         Q->t_in_id = i;
-        pj_log_debug(P, "t_in unit: %s", time_units[i].name);
+        proj_log_debug(P, "t_in unit: %s", time_units[i].name);
     }
 
     s = 0;
@@ -395,7 +396,7 @@ PJ *PROJECTION(unitconvert) {
             return freeup_msg(P, -8); /* unknown unit conversion id */
         }
         Q->t_out_id = i;
-        pj_log_debug(P, "t_out unit: %s", time_units[i].name);
+        proj_log_debug(P, "t_out unit: %s", time_units[i].name);
     }
 
     return P;
@@ -409,7 +410,7 @@ int pj_unitconvert_selftest (void) {return 0;}
 
 static int test_time(char* args, double tol, double t_in, double t_exp) {
     PJ_OBS in, out;
-    PJ *P = pj_create(args);
+    PJ *P = proj_create(0, args);
     int ret = 0;
 
     if (P == 0)
@@ -417,46 +418,46 @@ static int test_time(char* args, double tol, double t_in, double t_exp) {
 
     in.coo.xyzt.t = t_in;
 
-    out = pj_trans(P, PJ_FWD, in);
+    out = proj_trans_obs(P, PJ_FWD, in);
     if (fabs(out.coo.xyzt.t - t_exp) > tol) {
-        pj_log_error(P, "out: %10.10g, expect: %10.10g", out.coo.xyzt.t, t_exp);
+        proj_log_error(P, "out: %10.10g, expect: %10.10g", out.coo.xyzt.t, t_exp);
         ret = 1;
     }
-    out = pj_trans(P, PJ_INV, out);
+    out = proj_trans_obs(P, PJ_INV, out);
     if (fabs(out.coo.xyzt.t - t_in) > tol) {
-        pj_log_error(P, "out: %10.10g, expect: %10.10g", out.coo.xyzt.t, t_in);
+        proj_log_error(P, "out: %10.10g, expect: %10.10g", out.coo.xyzt.t, t_in);
         ret = 2;
     }
     pj_free(P);
 
-    pj_log_level(NULL, 0);
+    proj_log_level(NULL, 0);
     return ret;
 }
 
 static int test_xyz(char* args, double tol, PJ_TRIPLET in, PJ_TRIPLET exp) {
     PJ_OBS out, obs_in;
-    PJ *P = pj_create(args);
+    PJ *P = proj_create(0, args);
     int ret = 0;
 
     if (P == 0)
         return 5;
 
     obs_in.coo.xyz = in.xyz;
-    out = pj_trans(P, PJ_FWD, obs_in);
-    if (pj_xyz_dist(out.coo.xyz, exp.xyz) > tol) {
+    out = proj_trans_obs(P, PJ_FWD, obs_in);
+    if (proj_xyz_dist(out.coo.xyz, exp.xyz) > tol) {
         printf("exp: %10.10g, %10.10g, %10.10g\n", exp.xyz.x, exp.xyz.y, exp.xyz.z);
         printf("out: %10.10g, %10.10g, %10.10g\n", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
         ret = 1;
     }
 
-    out = pj_trans(P, PJ_INV, out);
-    if (pj_xyz_dist(out.coo.xyz, in.xyz) > tol) {
+    out = proj_trans_obs(P, PJ_INV, out);
+    if (proj_xyz_dist(out.coo.xyz, in.xyz) > tol) {
         printf("exp: %g, %g, %g\n", in.xyz.x, in.xyz.y, in.xyz.z);
         printf("out: %g, %g, %g\n", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
         ret += 2;
     }
-    pj_free(P);
-    pj_log_level(NULL, 0);
+    proj_destroy(P);
+    proj_log_level(NULL, 0);
     return ret;
 }
 

@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include <proj.h>
+#include "proj_internal.h"
 #include <projects.h>
 #include <assert.h>
 #include <stddef.h>
@@ -94,7 +94,7 @@ PROJ_HEAD(horner,    "Horner polynomial evaluation");
 
 struct horner;
 typedef struct horner HORNER;
-static UV      horner (const HORNER *transformation, enum pj_direction, UV position);
+static UV      horner (const HORNER *transformation, enum proj_direction, UV position);
 static HORNER *horner_alloc (size_t order, int complex_polynomia);
 static void    horner_free (HORNER *h);
 
@@ -176,7 +176,7 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
 
 
 /**********************************************************************/
-static UV horner (const HORNER *transformation, enum pj_direction direction, UV position) {
+static UV horner (const HORNER *transformation, enum proj_direction direction, UV position) {
 /***********************************************************************
 
 A reimplementation of the classic Engsager/Poder 2D Horner polynomial
@@ -301,7 +301,7 @@ static PJ_OBS horner_reverse_obs (PJ_OBS point, PJ *P) {
 
 
 /**********************************************************************/
-static UV complex_horner (const HORNER *transformation, enum pj_direction direction, UV position) {
+static UV complex_horner (const HORNER *transformation, enum proj_direction direction, UV position) {
 /***********************************************************************
 
 A reimplementation of a classic Engsager/Poder Horner complex
@@ -401,7 +401,7 @@ static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
 
     buf = pj_calloc (strlen (param) + 2, sizeof(char));
     if (0==buf) {
-        pj_log_error (P, "Horner: Out of core");
+        proj_log_error (P, "Horner: Out of core");
         return 0;
     }
 
@@ -415,7 +415,7 @@ static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
     for (i = 0; i < ncoefs; i++) {
         if (i > 0) {
             if ( next == 0 || ','!=*next) {
-                pj_log_error (P, "Horner: Malformed polynomium set %s. need %d coefs", param, ncoefs);
+                proj_log_error (P, "Horner: Malformed polynomium set %s. need %d coefs", param, ncoefs);
                 return 0;
             }
             init = ++next;
@@ -443,7 +443,7 @@ PJ *PROJECTION(horner) {
     if (pj_param (P->ctx, P->params, "tdeg").i) /* degree specified? */
 		degree = pj_param(P->ctx, P->params, "ideg").i;
     else {
-        pj_log_debug (P, "Horner: Must specify polynomial degree, (+deg=n)");
+        proj_log_debug (P, "Horner: Must specify polynomial degree, (+deg=n)");
         return horner_freeup (P);
     }
 
@@ -525,48 +525,49 @@ int pj_horner_selftest (void) {
     double dist;
 
     /* Real polynonia relating the technical coordinate system TC32 to "System 45 Bornholm" */
-    P = pj_create (tc32_utm32);
+    P = proj_create (0, tc32_utm32);
     if (0==P)
         return 10;
 
-    a = b = pj_obs_null;
+    a = b = proj_obs_null;
     a.coo.uv.v = 6125305.4245;
     a.coo.uv.u =  878354.8539;
 
     /* Check roundtrip precision for 1 iteration each way, starting in forward direction */
-    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 0.01)
         return 1;
 
     /* The complex polynomial transformation between the "System Storebaelt" and utm32/ed50 */
-    P = pj_create (sb_utm32);
+    P = proj_create (0, sb_utm32);
     if (0==P)
         return 11;
 
     /* Test value: utm32_ed50(620000, 6130000) = sb_ed50(495136.8544, 6130821.2945) */
-    a = b = c = pj_obs_null;
+    a = b = c = proj_obs_null;
     a.coo.uv.v = 6130821.2945;
     a.coo.uv.u =  495136.8544;
     c.coo.uv.v = 6130000.0000;
     c.coo.uv.u =  620000.0000;
 
     /* Forward projection */
-    b = pj_trans (P, PJ_FWD, a);
-    dist = pj_xy_dist (b.coo.xy, c.coo.xy);
+    b = proj_trans_obs (P, PJ_FWD, a);
+    dist = proj_xy_dist (b.coo.xy, c.coo.xy);
     if (dist > 0.001)
         return 2;
 
     /* Inverse projection */
-    b = pj_trans (P, PJ_INV, c);
-    dist = pj_xy_dist (b.coo.xy, a.coo.xy);
+    b = proj_trans_obs (P, PJ_INV, c);
+    dist = proj_xy_dist (b.coo.xy, a.coo.xy);
     if (dist > 0.001)
         return 3;
 
     /* Check roundtrip precision for 1 iteration each way */
-    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 0.01)
         return 4;
 
+    proj_destroy(P);
     return 0;
 }
 #endif
