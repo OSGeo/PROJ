@@ -433,7 +433,7 @@ char *proj_definition_retrieve (PJ *P) {
 }
 
 /* ...and get rid of it safely */
-void *proj_free (void *buffer) {
+void *proj_release (void *buffer) {
     return pj_dealloc (buffer);
 }
 

@@ -125,7 +125,7 @@ EXPORTS
     proj_log_trace                 @116
 
     proj_definition_retrieve       @117
-    proj_free                      @118
+    proj_release                   @118
     proj_torad                     @119
     proj_todeg                     @120
 
