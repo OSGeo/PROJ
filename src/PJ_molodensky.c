@@ -43,8 +43,10 @@
 *
 ***********************************************************************/
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
-#include <projects.h>
+#include "proj_internal.h"
+#include "projects.h"
 
 PROJ_HEAD(molodensky, "Molodensky transform");
 
@@ -336,7 +338,7 @@ int pj_molodensky_selftest (void) {
     PJ *P;
 
     /* Test the abridged Molodensky first. Example from appendix 3 of Deakin (2004). */
-    P = pj_create(
+    P = proj_create(0,
         "+proj=molodensky +a=6378160 +rf=298.25 "
         "+da=-23 +df=-8.120449e-8 +dx=-134 +dy=-48 +dz=149 "
         "+abridged "
@@ -344,62 +346,62 @@ int pj_molodensky_selftest (void) {
     if (0==P)
         return 10;
 
-    in.coo.lpz.lam = TORAD(144.9667);
-    in.coo.lpz.phi = TORAD(-37.8);
+    in.coo.lpz.lam = PJ_TORAD(144.9667);
+    in.coo.lpz.phi = PJ_TORAD(-37.8);
     in.coo.lpz.z   = 50.0;
 
-    exp.coo.lpz.lam = TORAD(144.968);
-    exp.coo.lpz.phi = TORAD(-37.79848);
+    exp.coo.lpz.lam = PJ_TORAD(144.968);
+    exp.coo.lpz.phi = PJ_TORAD(-37.79848);
     exp.coo.lpz.z   = 46.378;
 
-    res = pj_trans(P, PJ_FWD, in);
+    res = proj_trans_obs(P, PJ_FWD, in);
 
-    if (pj_lp_dist(P, res.coo.lp, exp.coo.lp) > 2 ) { /* we don't expect much accurecy here... */
-        pj_free(P);
+    if (proj_lp_dist(P, res.coo.lp, exp.coo.lp) > 2 ) { /* we don't expect much accurecy here... */
+        proj_destroy(P);
         return 11;
     }
 
     /* let's try a roundtrip */
-    if (pj_roundtrip(P, PJ_FWD, 100, in) > 1) {
-        pj_free(P);
+    if (proj_roundtrip(P, PJ_FWD, 100, in) > 1) {
+        proj_destroy(P);
         return 12;
     }
 
     if (res.coo.lpz.z - exp.coo.lpz.z > 1e-3) {
-        pj_free(P);
+        proj_destroy(P);
         return 13;
     }
 
-    pj_free(P);
+    proj_destroy(P);
 
     /* Test the abridged Molodensky first. Example from appendix 3 of Deaking (2004). */
 
-    P = pj_create(
+    P = proj_create(0,
         "+proj=molodensky +a=6378160 +rf=298.25 "
         "+da=-23 +df=-8.120449e-8 +dx=-134 +dy=-48 +dz=149 "
     );
     if (0==P)
         return 20;
 
-    res = pj_trans(P, PJ_FWD, in);
+    res = proj_trans_obs(P, PJ_FWD, in);
 
-    if (pj_lp_dist(P, res.coo.lp, exp.coo.lp) > 2 ) { /* we don't expect much accurecy here... */
-        pj_free(P);
+    if (proj_lp_dist(P, res.coo.lp, exp.coo.lp) > 2 ) { /* we don't expect much accurecy here... */
+        proj_destroy(P);
         return 21;
     }
 
     /* let's try a roundtrip */
-    if (pj_roundtrip(P, PJ_FWD, 100, in) > 1) {
-        pj_free(P);
+    if (proj_roundtrip(P, PJ_FWD, 100, in) > 1) {
+        proj_destroy(P);
         return 22;
     }
 
     if (res.coo.lpz.z - exp.coo.lpz.z > 1e-3) {
-        pj_free(P);
+        proj_destroy(P);
         return 23;
     }
 
-    pj_free(P);
+    proj_destroy(P);
     return 0;
 }
 
