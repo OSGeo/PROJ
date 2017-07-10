@@ -101,6 +101,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_mill.c
         PJ_mod_ster.c
         PJ_moll.c
+        PJ_molodensky.c
         PJ_natearth.c
         PJ_natearth2.c
         PJ_nell.c
