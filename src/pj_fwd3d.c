@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <proj.h>
 #include <projects.h>
 #include <errno.h>
 # define EPS 1.0e-12
@@ -9,6 +10,7 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
     XYZ xyz;
     XYZ err;
     double t;
+    int last_errno;
 
     /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
     err.x = err.y = err.z = HUGE_VAL;
@@ -16,8 +18,7 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
     if (0==P->fwd3d)
         return err;
 
-
-    P->ctx->last_errno = pj_errno = errno = 0;
+    last_errno = proj_errno_reset(P);
 
     /* Check input coordinates if angular */
     if ((P->left==PJ_IO_UNITS_CLASSIC)||(P->left==PJ_IO_UNITS_RADIANS)) {
@@ -55,5 +56,6 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
     xyz.y = P->fr_meter * (xyz.y + P->y0);
     /* z is not scaled since this is handled by vto_meter outside */
 
+    proj_errno_restore (P, last_errno);
     return xyz;
 }

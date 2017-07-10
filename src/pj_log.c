@@ -45,9 +45,9 @@ void pj_stderr_logger( void *app_data, int level, const char *msg )
 /************************************************************************/
 /*                               pj_vlog()                              */
 /************************************************************************/
-
+void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args );
 /* Workhorse for the log functions - relates to pj_log as vsprintf relates to sprintf */
-static void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args )
+void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args )
 
 {
     char *msg_buf;
@@ -82,40 +82,5 @@ void pj_log( projCtx ctx, int level, const char *fmt, ... )
 
     va_start( args, fmt );
     pj_vlog( ctx, level, fmt, args );
-    va_end( args );
-}
-
-
-
-/************************************************************************/
-/*             logging functions for the proj.h/obs_api                 */
-/************************************************************************/
-
-void pj_log_error (PJ *P, const char *fmt, ...)
-
-{
-    va_list args;
-    va_start( args, fmt );
-    pj_vlog (pj_get_ctx (P), PJ_LOG_ERROR , fmt, args);
-    va_end( args );
-}
-
-
-void pj_log_debug (PJ *P, const char *fmt, ...)
-
-{
-    va_list args;
-    va_start( args, fmt );
-    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MAJOR , fmt, args);
-    va_end( args );
-}
-
-
-void pj_log_trace (PJ *P, const char *fmt, ...)
-
-{
-    va_list args;
-    va_start( args, fmt );
-    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MINOR , fmt, args);
     va_end( args );
 }

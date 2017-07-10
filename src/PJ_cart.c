@@ -41,7 +41,7 @@
  *****************************************************************************/
 
 #define PJ_LIB__
-#include <proj.h>
+#include "proj_internal.h"
 #include <projects.h>
 #include <assert.h>
 #include <stddef.h>
@@ -232,117 +232,196 @@ int pj_cart_selftest (void) {return 0;}
 #else
 /* Testing quite a bit of the pj_obs_api as a side effect (inspired by pj_obs_api_test.c) */
 int pj_cart_selftest (void) {
+    PJ_CONTEXT *ctx;
     PJ *P;
-    PJ_OBS a, b;
+    PJ_OBS a, b, obs[2];
     int err;
-    double dist;
+    size_t n, sz;
+    double dist, h, t;
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
-
+    char *arg = {" +proj=utm +zone=32 +ellps=GRS80"};
+    char *arg_def;
 
     /* An utm projection on the GRS80 ellipsoid */
-    P = pj_create ("+proj=utm +zone=32 +ellps=GRS80");
+    P = proj_create (0, arg);
     if (0==P)
         return 1;
 
+    /* note arg is handcrafted to go undisturbed through get def reconstruction */
+    arg_def = proj_definition_retrieve (P);
+    if (0!=strcmp(arg, arg_def))
+        return 44;
+    proj_release (arg_def);
+
     /* Clean up */
-    pj_free (P);
+    proj_destroy (P);
 
     /* Same projection, now using argc/argv style initialization */
-    P = pj_create_argv (3, args);
+    P = proj_create_argv (0, 3, args);
     if (0==P)
         return 2;
 
     /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
-    a = pj_obs_null;
+    a = proj_obs_null;
     /* a.coo.lp: The coordinate part of a, interpreted as a classic LP pair */
-    a.coo.lp.lam = TORAD(12);
-    a.coo.lp.phi = TORAD(55);
+    a.coo.lp.lam = PJ_TORAD(12);
+    a.coo.lp.phi = PJ_TORAD(55);
 
     /* Forward projection */
-    b = pj_trans (P, PJ_FWD, a);
+    b = proj_trans_obs (P, PJ_FWD, a);
 
     /* Inverse projection */
-    a = pj_trans (P, PJ_INV, b);
+    a = proj_trans_obs (P, PJ_INV, b);
 
     /* Null projection */
-    a = pj_trans (P, PJ_IDENT, a);
+    a = proj_trans_obs (P, PJ_IDENT, a);
 
     /* Forward again, to get two linear items for comparison */
-    a = pj_trans (P, PJ_FWD, a);
+    a = proj_trans_obs (P, PJ_FWD, a);
 
-    dist = pj_xy_dist (a.coo.xy, b.coo.xy);
+    dist = proj_xy_dist (a.coo.xy, b.coo.xy);
     if (dist > 2e-9)
         return 3;
 
+    /* Clear any previous error */
+    proj_errno_set (P, 0);
+
     /* Invalid projection */
-    a = pj_trans (P, 42, a);
+    a = proj_trans_obs (P, 42, a);
     if (a.coo.lpz.lam!=HUGE_VAL)
         return 4;
-    err = pj_err_level (P, PJ_ERR_TELL);
+    err = proj_errno (P);
     if (0==err)
         return 5;
 
-    /* Clear error */
-    pj_err_level (P, 0);
+    /* Clear error again */
+    proj_errno_set (P, 0);
 
     /* Clean up */
-    pj_free (P);
+    proj_destroy (P);
 
     /* Now do some 3D transformations */
-    P = pj_create ("+proj=cart +ellps=GRS80");
+    P = proj_create (0, "+proj=cart +ellps=GRS80");
     if (0==P)
         return 6;
 
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
-    a = b = pj_obs_null;
-    a.coo.lpz.lam = TORAD(12);
-    a.coo.lpz.phi = TORAD(55);
+    a = b = proj_obs_null;
+    a.coo.lpz.lam = PJ_TORAD(12);
+    a.coo.lpz.phi = PJ_TORAD(55);
     a.coo.lpz.z   = 100;
 
     /* Forward projection: 3D-Cartesian-to-Ellipsoidal */
-    b = pj_trans (P, PJ_FWD, a);
+    b = proj_trans_obs (P, PJ_FWD, a);
 
     /* Check roundtrip precision for 10000 iterations each way */
-    dist = pj_roundtrip (P, PJ_FWD, 10000, a);
-    dist = pj_roundtrip (P, PJ_INV, 10000, b);
+    dist = proj_roundtrip (P, PJ_FWD, 10000, a);
+    dist = proj_roundtrip (P, PJ_INV, 10000, b);
     if (dist > 2e-9)
         return 7;
 
 
     /* Test at the North Pole */
-    a = b = pj_obs_null;
-    a.coo.lpz.lam = TORAD(0);
-    a.coo.lpz.phi = TORAD(90);
+    a = b = proj_obs_null;
+    a.coo.lpz.lam = PJ_TORAD(0);
+    a.coo.lpz.phi = PJ_TORAD(90);
     a.coo.lpz.z   = 100;
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
-    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 1e-12)
         return 8;
 
     /* Test at the South Pole */
-    a = b = pj_obs_null;
-    a.coo.lpz.lam = TORAD(0);
-    a.coo.lpz.phi = TORAD(-90);
+    a = b = proj_obs_null;
+    a.coo.lpz.lam = PJ_TORAD(0);
+    a.coo.lpz.phi = PJ_TORAD(-90);
     a.coo.lpz.z   = 100;
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
-    dist = pj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 1e-12)
         return 9;
 
     /* Inverse projection: 3D-Cartesian-to-Ellipsoidal */
-    b = pj_trans (P, PJ_INV, b);
+    b = proj_trans_obs (P, PJ_INV, b);
 
     /* Move p to another context */
-    pj_context_renew (P);
-    b = pj_trans (P, PJ_FWD, b);
+    ctx = proj_context_create ();
+    if (ctx==pj_get_default_ctx())
+        return 10;
+    proj_context_set (P, ctx);
+    if (ctx != P->ctx)
+        return 11;
+    b = proj_trans_obs (P, PJ_FWD, b);
 
     /* Move it back to the default context */
-    pj_context_free (P);
-    b = pj_trans (P, PJ_INV, b);
+    proj_context_set (P, 0);
+    if (pj_get_default_ctx() != P->ctx)
+        return 12;
+    proj_context_destroy (ctx);
 
-    pj_free (P);
+    /* We go on with the work - now back on the default context */
+    b = proj_trans_obs (P, PJ_INV, b);
+    proj_destroy (P);
+
+
+    /* Testing the proj_transform nightmare */
+
+    /* An utm projection on the GRS80 ellipsoid */
+    P = proj_create (0, "+proj=utm +zone=32 +ellps=GRS80");
+    if (0==P)
+        return 13;
+
+    obs[0].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
+    obs[1].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
+    sz = sizeof (PJ_OBS);
+
+    /* Forward projection */
+    a = proj_trans_obs (P, PJ_FWD, obs[0]);
+    b = proj_trans_obs (P, PJ_FWD, obs[1]);
+
+    n = proj_transform (
+        P, PJ_FWD, 
+        &(obs[0].coo.lpz.lam), sz, 2,
+        &(obs[0].coo.lpz.phi), sz, 2,
+        &(obs[0].coo.lpz.z),   sz, 2, 
+        0,                     sz, 0
+    );
+    if (2!=n)
+        return 14;
+    if (a.coo.lpz.lam != obs[0].coo.lpz.lam)  return 15;
+    if (a.coo.lpz.phi != obs[0].coo.lpz.phi)  return 16;
+    if (a.coo.lpz.z   != obs[0].coo.lpz.z)    return 17;
+    if (b.coo.lpz.lam != obs[1].coo.lpz.lam)  return 18;
+    if (b.coo.lpz.phi != obs[1].coo.lpz.phi)  return 19;
+    if (b.coo.lpz.z   != obs[1].coo.lpz.z)    return 20;
+
+    /* now test the case of constant z */
+    obs[0].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
+    obs[1].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
+    h = 27;
+    t = 33;
+    n = proj_transform (
+        P, PJ_FWD, 
+        &(obs[0].coo.lpz.lam), sz, 2,
+        &(obs[0].coo.lpz.phi), sz, 2,
+        &h,                     0, 1, 
+        &t,                     0, 1
+    );
+    if (2!=n)
+        return 21;
+    if (a.coo.lpz.lam != obs[0].coo.lpz.lam)  return 22;
+    if (a.coo.lpz.phi != obs[0].coo.lpz.phi)  return 23;
+    if (45            != obs[0].coo.lpz.z)    return 24;
+    if (b.coo.lpz.lam != obs[1].coo.lpz.lam)  return 25;
+    if (b.coo.lpz.phi != obs[1].coo.lpz.phi)  return 26;
+    if (50            != obs[1].coo.lpz.z)    return 27; /* NOTE: unchanged */
+    if (50==h) return 28;
+
+    /* Clean up */
+    proj_destroy (P);
+
     return 0;
 }
 #endif

@@ -60,8 +60,13 @@ void pj_set_ctx( projPJ pj, projCtx ctx )
 projCtx pj_get_default_ctx()
 
 {
+    /* If already initialized, don't bother locking */
+    if( default_context_initialized )
+        return &default_context;
+
     pj_acquire_lock();
 
+    /* Ask again, since it may have been initialized in another thread */
     if( !default_context_initialized )
     {
         default_context.last_errno = 0;

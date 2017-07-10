@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <proj.h>
 #include <projects.h>
 #include <errno.h>
 # define EPS 1.0e-12
@@ -8,6 +9,7 @@
 LPZ pj_inv3d (XYZ xyz, PJ *P) {
     LPZ lpz;
     LPZ err;
+    int last_errno;
 
     /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
     err.lam = err.phi = err.z = HUGE_VAL;
@@ -21,7 +23,7 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
         return err;
     }
 
-    P->ctx->last_errno = errno = pj_errno = 0;
+    last_errno = proj_errno_reset (P);
 
     /* de-scale and de-offset */
     /* z is not de-scaled since that is handled by vto_meter before we get here */
@@ -53,5 +55,6 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
             lpz.phi = atan(P->one_es * tan(lpz.phi));
     }
 
+    proj_errno_restore (P, last_errno);
     return lpz;
 }
