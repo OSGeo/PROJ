@@ -286,6 +286,7 @@ void proj_context_destroy    (PJ_CONTEXT *ctx);
 /* Manage the transformation definition object PJ */
 PJ  *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
+PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to);
 PJ  *proj_destroy (PJ *P);
 
 

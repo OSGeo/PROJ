@@ -422,6 +422,29 @@ int pj_cart_selftest (void) {
     /* Clean up */
     proj_destroy (P);
 
+
+    /* test proj_create_crs_to_crs() */
+    P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833");
+    if (P==0)
+        return 30;
+
+    a.coo.xy.x =  700000.0;
+    a.coo.xy.y = 6000000.0;
+    b.coo.xy.x =  307788.8761171057;
+    b.coo.xy.y = 5999669.3036037628;
+
+    a = proj_trans_obs(P, PJ_FWD, a);
+    if (dist > 1e-7)
+        return 31;
+    proj_destroy(P);
+
+    /* let's make sure that only entries in init-files results in a usable PJ */
+    P = proj_create_crs_to_crs(0, "proj=utm +zone=32 +datum=WGS84", "proj=utm +zone=33 +datum=WGS84");
+    if (P != 0) {
+        proj_destroy(P);
+        return 32;
+    }
+
     return 0;
 }
 #endif

@@ -314,6 +314,36 @@ PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
     return pj_init_ctx (ctx, argc, argv);
 }
 
+/*****************************************************************************/
+PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to) {
+/******************************************************************************
+    Create a transformation pipeline between two known coordinate reference
+    systems.
+
+    srid_from and srid_to should be the value part of a +init=... parameter
+    set, i.e. "epsg:25833" or "IGNF:AMST63". Any projection definition that is
+    can be found in a init-file in PROJ_LIB is a valid input to this function.
+
+    For now the function mimics the cs2cs app: An input and an output CRS is
+    given and coordinates are transformed via a hub datum (WGS84). This
+    transformation strategy is referred to as "early-binding" by the EPSG. The
+    function can be extended to support "late-binding" transformations in the
+    future without affecting users of the function.
+
+    Example call:
+
+        PJ *P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833");
+
+******************************************************************************/
+    PJ *P;
+    char buffer[256];
+
+    sprintf(buffer, "+proj=pipeline +step +init=%s +inv +step +init=%s", srid_from, srid_to);
+    P = proj_create(ctx, buffer);
+
+    return P;
+}
+
 PJ *proj_destroy (PJ *P) {
     pj_free (P);
     return 0;
@@ -447,4 +477,3 @@ double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians)
 int proj_transform_obs   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
 int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
 PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
-PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *def_from, const char *def_to);

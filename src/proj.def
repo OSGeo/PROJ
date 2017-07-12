@@ -92,42 +92,42 @@ EXPORTS
 
     proj_create                     @90
     proj_create_argv                @91
-    proj_destroy                    @92
+    proj_create_crs_to_crs          @92
+    proj_destroy                    @93
 
-    proj_trans_obs                  @93
-    proj_trans_coord                @94
-    proj_transform                  @95
-    proj_roundtrip                  @96
+    proj_trans_obs                  @94
+    proj_trans_coord                @95
+    proj_transform                  @96
+    proj_roundtrip                  @97
 
-    proj_coord                      @97
-    proj_coord_error                @98
-    proj_obs_error                  @99
+    proj_coord                      @98
+    proj_coord_error                @99
+    proj_obs_error                 @100
 
-    proj_errno                     @100
-    proj_errno_set                 @101
-    proj_errno_reset               @102
-    proj_errno_restore             @103
-    proj_context_errno_set         @104
+    proj_errno                     @101
+    proj_errno_set                 @102
+    proj_errno_reset               @103
+    proj_errno_restore             @104
+    proj_context_errno_set         @105
 
-    proj_context_create            @105
-    proj_context_set               @106
-    proj_context_inherit           @107
-    proj_context_destroy           @108
+    proj_context_create            @106
+    proj_context_set               @107
+    proj_context_inherit           @108
+    proj_context_destroy           @109
 
-    proj_lp_dist                   @109
-    proj_xy_dist                   @110
-    proj_xyz_dist                  @111
+    proj_lp_dist                   @110
+    proj_xy_dist                   @111
+    proj_xyz_dist                  @112
 
-    proj_log_level                 @112
-    proj_log_func                  @113
-    proj_log_error                 @114
-    proj_log_debug                 @115
-    proj_log_trace                 @116
+    proj_log_level                 @113
+    proj_log_func                  @114
+    proj_log_error                 @115
+    proj_log_debug                 @116
+    proj_log_trace                 @117
 
-    proj_definition_retrieve       @117
-    proj_release                   @118
-    proj_torad                     @119
-    proj_todeg                     @120
+    proj_definition_retrieve       @118
+    proj_release                   @119
+    proj_torad                     @120
+    proj_todeg                     @121
 
-
-    pj_find_file                   @121
+    pj_find_file                   @122
