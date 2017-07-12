@@ -311,6 +311,8 @@ size_t proj_transform (
     double *t, size_t st, size_t nt
 );
 
+int proj_transform_obs   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
+int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
 
 /* Initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);

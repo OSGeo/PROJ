@@ -216,7 +216,7 @@ size_t proj_transform (
     In most cases, the stride will be identical for x, y,z, and t, since they will
     typically be either individual arrays (stride = sizeof(double)), or strided
     views into an array of application specific data structures (stride = sizeof (...)).
-    
+
     But in order to support cases where x, y, z, and t come from heterogeneous
     sources, individual strides, sx, sy, sz, st, are used.
 
@@ -244,7 +244,7 @@ size_t proj_transform (
     if (0==ny) y = &null_broadcast;
     if (0==nz) z = &null_broadcast;
     if (0==nt) t = &null_broadcast;
-    
+
     /* nothing to do? */
     if (0==nx+ny+nz+nt)
         return 0;
@@ -315,8 +315,44 @@ size_t proj_transform (
         *z = coord.xyzt.z;
     if (nt==1)
         *t = coord.xyzt.t;
-    
+
     return i;
+}
+
+/*****************************************************************************/
+int proj_transform_obs (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs) {
+/******************************************************************************
+    Batch transform an array of PJ_OBS.
+
+    Returns 0 if all observations are transformed without error, otherwise
+    returns error number.
+******************************************************************************/
+    size_t i;
+    for (i=0; i<n; i++) {
+        obs[i] = proj_trans_obs(P, direction, obs[i]);
+        if (proj_errno(P))
+            return proj_errno(P);
+    }
+
+    return 0;
+}
+
+/*****************************************************************************/
+int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord) {
+/******************************************************************************
+    Batch transform an array of PJ_COORD.
+
+    Returns 0 if all coordinates are transformed without error, otherwise
+    returns error number.
+******************************************************************************/
+    size_t i;
+    for (i=0; i<n; i++) {
+        coord[i] = proj_trans_coord(P, direction, coord[i]);
+        if (proj_errno(P))
+            return proj_errno(P);
+    }
+
+    return 0;
 }
 
 
@@ -423,13 +459,13 @@ int proj_errno_reset (PJ *P) {
 /******************************************************************************
     Clears errno in the PJ, and bubbles it up to the context and
     pj_errno levels through the low level pj_ctx interface.
-    
+
     Returns the previous value of the errno, for convenient reset/restore
     operations:
 
     void foo (PJ *P) {
         int last_errno = proj_errno_reset (P);
-        
+
         do_something_with_P (P);
 
         (* failure - keep latest error status *)
@@ -489,9 +525,3 @@ void *proj_release (void *buffer) {
 
 double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
 double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
-
-
-/* The shape of jazz to come! */
-
-int proj_transform_obs   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
-int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
