@@ -337,6 +337,7 @@ void proj_errno_set (PJ *P, int err);
 int  proj_errno_reset (PJ *P);
 void proj_errno_restore (PJ *P, int err);
 
+
 /* Build a fully expanded proj_create() compatible representation of P */
 char *proj_definition_retrieve (PJ *P);
 /* ...and get rid of it safely */
@@ -348,6 +349,10 @@ void *proj_release (void *buffer);
 /* angular units expected by classical proj, and by Charles Karney's geodesics subsystem */
 double proj_torad (double angle_in_degrees);
 double proj_todeg (double angle_in_radians);
+
+/* Check if a projection has an inverse mapping */
+int proj_has_inverse(PJ *P);
+
 
 #ifdef __cplusplus
 }

@@ -132,5 +132,6 @@ EXPORTS
     proj_release                   @122
     proj_torad                     @123
     proj_todeg                     @124
+    proj_has_inverse               @125
 
-    pj_find_file                   @125
+    pj_find_file                   @126

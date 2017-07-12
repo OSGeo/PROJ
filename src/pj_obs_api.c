@@ -525,3 +525,7 @@ void *proj_release (void *buffer) {
 
 double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
 double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
+
+int proj_has_inverse(PJ *P) {
+    return (P->inv != 0 || P->inv3d != 0 || P->invobs != 0);
+}

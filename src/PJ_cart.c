@@ -473,6 +473,23 @@ int pj_cart_selftest (void) {
         proj_destroy(P);
         return 52;
     }
+    proj_destroy(P);
+
+    /* Test proj_has_inverse() */
+    P = proj_create(0, "+proj=august"); /* august has no inverse */
+    if (proj_has_inverse(P)) {
+        proj_destroy(P);
+        return 60;
+    }
+    proj_destroy(P);
+
+    P = proj_create(0, "+proj=merc"); /* merc has an inverse */
+    if (!proj_has_inverse(P)) {
+        proj_destroy(P);
+        return 61;
+    }
+    proj_destroy(P);
+
 
     return 0;
 }
