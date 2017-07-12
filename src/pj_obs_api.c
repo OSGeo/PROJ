@@ -42,6 +42,7 @@
 #include <errno.h>
 
 
+/* Initialize PJ_COORD struct */
 PJ_COORD proj_coord (double x, double y, double z, double t) {
     PJ_COORD res;
     res.v[0] = x;
@@ -50,6 +51,24 @@ PJ_COORD proj_coord (double x, double y, double z, double t) {
     res.v[3] = t;
     return res;
 }
+
+/* Initialize PJ_OBS struct */
+PJ_OBS proj_obs (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags) {
+    PJ_OBS res;
+    res.coo.v[0] = x;
+    res.coo.v[1] = y;
+    res.coo.v[2] = z;
+    res.coo.v[3] = t;
+    res.anc.v[0] = o;
+    res.anc.v[1] = p;
+    res.anc.v[2] = k;
+    res.id       = id;
+    res.flags    = flags;
+
+    return res;
+}
+
+
 
 /* Geodesic distance between two points with angular 2D coordinates */
 double proj_lp_dist (PJ *P, LP a, LP b) {
@@ -476,4 +495,3 @@ double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians)
 
 int proj_transform_obs   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
 int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
-PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);

@@ -312,9 +312,9 @@ size_t proj_transform (
 );
 
 
-/* not a constructor, but an initializer */
+/* Initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);
-
+PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
 
 /* Measure internal consistency - in forward or inverse direction */
 double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs);
