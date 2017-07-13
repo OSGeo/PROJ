@@ -77,7 +77,7 @@ static void special(LP lp, PJ *P, struct FACTORS *fac) {
     fac->code |= IS_ANAL_HK + IS_ANAL_CONV;
     fac->k = fac->h = P->k0 * Q->n * rho /
         pj_msfn(sin(lp.phi), cos(lp.phi), P->es);
-    fac->conv = - Q->n * lp.lam;
+    fac->conv = Q->n * lp.lam;
 }
 
 
