@@ -42,6 +42,7 @@
 #include <errno.h>
 
 
+/* Initialize PJ_COORD struct */
 PJ_COORD proj_coord (double x, double y, double z, double t) {
     PJ_COORD res;
     res.v[0] = x;
@@ -50,6 +51,24 @@ PJ_COORD proj_coord (double x, double y, double z, double t) {
     res.v[3] = t;
     return res;
 }
+
+/* Initialize PJ_OBS struct */
+PJ_OBS proj_obs (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags) {
+    PJ_OBS res;
+    res.coo.v[0] = x;
+    res.coo.v[1] = y;
+    res.coo.v[2] = z;
+    res.coo.v[3] = t;
+    res.anc.v[0] = o;
+    res.anc.v[1] = p;
+    res.anc.v[2] = k;
+    res.id       = id;
+    res.flags    = flags;
+
+    return res;
+}
+
+
 
 /* Geodesic distance between two points with angular 2D coordinates */
 double proj_lp_dist (PJ *P, LP a, LP b) {
@@ -197,7 +216,7 @@ size_t proj_transform (
     In most cases, the stride will be identical for x, y,z, and t, since they will
     typically be either individual arrays (stride = sizeof(double)), or strided
     views into an array of application specific data structures (stride = sizeof (...)).
-    
+
     But in order to support cases where x, y, z, and t come from heterogeneous
     sources, individual strides, sx, sy, sz, st, are used.
 
@@ -225,7 +244,7 @@ size_t proj_transform (
     if (0==ny) y = &null_broadcast;
     if (0==nz) z = &null_broadcast;
     if (0==nt) t = &null_broadcast;
-    
+
     /* nothing to do? */
     if (0==nx+ny+nz+nt)
         return 0;
@@ -296,8 +315,44 @@ size_t proj_transform (
         *z = coord.xyzt.z;
     if (nt==1)
         *t = coord.xyzt.t;
-    
+
     return i;
+}
+
+/*****************************************************************************/
+int proj_transform_obs (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs) {
+/******************************************************************************
+    Batch transform an array of PJ_OBS.
+
+    Returns 0 if all observations are transformed without error, otherwise
+    returns error number.
+******************************************************************************/
+    size_t i;
+    for (i=0; i<n; i++) {
+        obs[i] = proj_trans_obs(P, direction, obs[i]);
+        if (proj_errno(P))
+            return proj_errno(P);
+    }
+
+    return 0;
+}
+
+/*****************************************************************************/
+int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord) {
+/******************************************************************************
+    Batch transform an array of PJ_COORD.
+
+    Returns 0 if all coordinates are transformed without error, otherwise
+    returns error number.
+******************************************************************************/
+    size_t i;
+    for (i=0; i<n; i++) {
+        coord[i] = proj_trans_coord(P, direction, coord[i]);
+        if (proj_errno(P))
+            return proj_errno(P);
+    }
+
+    return 0;
 }
 
 
@@ -312,6 +367,36 @@ PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
     if (0==ctx)
         ctx = pj_get_default_ctx ();
     return pj_init_ctx (ctx, argc, argv);
+}
+
+/*****************************************************************************/
+PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to) {
+/******************************************************************************
+    Create a transformation pipeline between two known coordinate reference
+    systems.
+
+    srid_from and srid_to should be the value part of a +init=... parameter
+    set, i.e. "epsg:25833" or "IGNF:AMST63". Any projection definition that is
+    can be found in a init-file in PROJ_LIB is a valid input to this function.
+
+    For now the function mimics the cs2cs app: An input and an output CRS is
+    given and coordinates are transformed via a hub datum (WGS84). This
+    transformation strategy is referred to as "early-binding" by the EPSG. The
+    function can be extended to support "late-binding" transformations in the
+    future without affecting users of the function.
+
+    Example call:
+
+        PJ *P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833");
+
+******************************************************************************/
+    PJ *P;
+    char buffer[256];
+
+    sprintf(buffer, "+proj=pipeline +step +init=%s +inv +step +init=%s", srid_from, srid_to);
+    P = proj_create(ctx, buffer);
+
+    return P;
 }
 
 PJ *proj_destroy (PJ *P) {
@@ -374,13 +459,13 @@ int proj_errno_reset (PJ *P) {
 /******************************************************************************
     Clears errno in the PJ, and bubbles it up to the context and
     pj_errno levels through the low level pj_ctx interface.
-    
+
     Returns the previous value of the errno, for convenient reset/restore
     operations:
 
     void foo (PJ *P) {
         int last_errno = proj_errno_reset (P);
-        
+
         do_something_with_P (P);
 
         (* failure - keep latest error status *)
@@ -441,10 +526,14 @@ void *proj_release (void *buffer) {
 double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
 double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
 
+int proj_has_inverse(PJ *P) {
+    return (P->inv != 0 || P->inv3d != 0 || P->invobs != 0);
+}
 
-/* The shape of jazz to come! */
+double proj_dmstor(const char *is, char **rs) {
+    return dmstor(is, rs);
+}
 
-int proj_transform_obs   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
-int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
-PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
-PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *def_from, const char *def_to);
+char*  proj_rtodms(char *s, double r, int pos, int neg) {
+    return rtodms(s, r, pos, neg);
+}

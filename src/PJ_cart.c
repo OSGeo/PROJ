@@ -235,12 +235,14 @@ int pj_cart_selftest (void) {
     PJ_CONTEXT *ctx;
     PJ *P;
     PJ_OBS a, b, obs[2];
+    PJ_COORD coord[2];
     int err;
     size_t n, sz;
     double dist, h, t;
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
     char *arg = {" +proj=utm +zone=32 +ellps=GRS80"};
     char *arg_def;
+    char buf[40];
 
     /* An utm projection on the GRS80 ellipsoid */
     P = proj_create (0, arg);
@@ -419,8 +421,90 @@ int pj_cart_selftest (void) {
     if (50            != obs[1].coo.lpz.z)    return 27; /* NOTE: unchanged */
     if (50==h) return 28;
 
-    /* Clean up */
+    /* test proj_transform_obs() */
+
+    obs[0].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
+    obs[1].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
+
+    if (proj_transform_obs(P, PJ_FWD, 2, obs))
+        return 30;
+
+    if (a.coo.lpz.lam != obs[0].coo.lpz.lam)  return 31;
+    if (a.coo.lpz.phi != obs[0].coo.lpz.phi)  return 32;
+    if (a.coo.lpz.z   != obs[0].coo.lpz.z)    return 33;
+    if (b.coo.lpz.lam != obs[1].coo.lpz.lam)  return 34;
+    if (b.coo.lpz.phi != obs[1].coo.lpz.phi)  return 35;
+    if (b.coo.lpz.z   != obs[1].coo.lpz.z)    return 36;
+
+    /* test proj_transform_coord() */
+
+    coord[0] = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
+    coord[1] = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
+    if (proj_transform_coord(P, PJ_FWD, 2, coord))
+        return 40;
+
+    if (a.coo.lpz.lam != coord[0].lpz.lam)  return 41;
+    if (a.coo.lpz.phi != coord[0].lpz.phi)  return 42;
+    if (a.coo.lpz.z   != coord[0].lpz.z)    return 43;
+    if (b.coo.lpz.lam != coord[1].lpz.lam)  return 44;
+    if (b.coo.lpz.phi != coord[1].lpz.phi)  return 45;
+    if (b.coo.lpz.z   != coord[1].lpz.z)    return 46;
+
+    /* Clean up  after transform* tests */
     proj_destroy (P);
+
+    /* test proj_create_crs_to_crs() */
+    P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833");
+    if (P==0)
+        return 50;
+
+    a.coo.xy.x =  700000.0;
+    a.coo.xy.y = 6000000.0;
+    b.coo.xy.x =  307788.8761171057;
+    b.coo.xy.y = 5999669.3036037628;
+
+    a = proj_trans_obs(P, PJ_FWD, a);
+    if (dist > 1e-7)
+        return 51;
+    proj_destroy(P);
+
+    /* let's make sure that only entries in init-files results in a usable PJ */
+    P = proj_create_crs_to_crs(0, "proj=utm +zone=32 +datum=WGS84", "proj=utm +zone=33 +datum=WGS84");
+    if (P != 0) {
+        proj_destroy(P);
+        return 52;
+    }
+    proj_destroy(P);
+
+    /* Test proj_has_inverse() */
+    P = proj_create(0, "+proj=august"); /* august has no inverse */
+    if (proj_has_inverse(P)) {
+        proj_destroy(P);
+        return 60;
+    }
+    proj_destroy(P);
+
+    P = proj_create(0, "+proj=merc"); /* merc has an inverse */
+    if (!proj_has_inverse(P)) {
+        proj_destroy(P);
+        return 61;
+    }
+    proj_destroy(P);
+
+    /* test proj_rtodms() and proj_dmstor() */
+    if (strcmp("180dN", proj_rtodms(buf, M_PI, 'N', 'S')))
+        return 70;
+
+    if (proj_dmstor(&buf[0], NULL) != M_PI)
+        return 71;
+
+    if (strcmp("114d35'29.612\"S", proj_rtodms(buf, -2.0, 'N', 'S')))
+        return 72;
+
+    /* we can't expect perfect numerical accuracy so testing with a tolerance */
+    if (fabs(-2.0 - proj_dmstor(&buf[0], NULL)) > 1e-7)
+        return 73;
+
 
     return 0;
 }

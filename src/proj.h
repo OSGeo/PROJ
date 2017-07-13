@@ -286,6 +286,7 @@ void proj_context_destroy    (PJ_CONTEXT *ctx);
 /* Manage the transformation definition object PJ */
 PJ  *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
+PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to);
 PJ  *proj_destroy (PJ *P);
 
 
@@ -310,10 +311,12 @@ size_t proj_transform (
     double *t, size_t st, size_t nt
 );
 
+int proj_transform_obs   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
+int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
 
-/* not a constructor, but an initializer */
+/* Initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);
-
+PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
 
 /* Measure internal consistency - in forward or inverse direction */
 double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs);
@@ -334,6 +337,7 @@ void proj_errno_set (PJ *P, int err);
 int  proj_errno_reset (PJ *P);
 void proj_errno_restore (PJ *P, int err);
 
+
 /* Build a fully expanded proj_create() compatible representation of P */
 char *proj_definition_retrieve (PJ *P);
 /* ...and get rid of it safely */
@@ -345,6 +349,13 @@ void *proj_release (void *buffer);
 /* angular units expected by classical proj, and by Charles Karney's geodesics subsystem */
 double proj_torad (double angle_in_degrees);
 double proj_todeg (double angle_in_radians);
+
+/* Check if a projection has an inverse mapping */
+int proj_has_inverse(PJ *P);
+
+double proj_dmstor(const char *is, char **rs);
+char*  proj_rtodms(char *s, double r, int pos, int neg);
+
 
 #ifdef __cplusplus
 }
