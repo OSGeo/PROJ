@@ -529,3 +529,11 @@ double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians)
 int proj_has_inverse(PJ *P) {
     return (P->inv != 0 || P->inv3d != 0 || P->invobs != 0);
 }
+
+double proj_dmstor(const char *is, char **rs) {
+    return dmstor(is, rs);
+}
+
+char*  proj_rtodms(char *s, double r, int pos, int neg) {
+    return rtodms(s, r, pos, neg);
+}

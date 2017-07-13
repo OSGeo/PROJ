@@ -133,5 +133,7 @@ EXPORTS
     proj_torad                     @123
     proj_todeg                     @124
     proj_has_inverse               @125
+    proj_rtodms                    @126
+    proj_dmstor                    @127
 
-    pj_find_file                   @126
+    pj_find_file                   @128

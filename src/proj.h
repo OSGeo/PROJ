@@ -353,6 +353,9 @@ double proj_todeg (double angle_in_radians);
 /* Check if a projection has an inverse mapping */
 int proj_has_inverse(PJ *P);
 
+double proj_dmstor(const char *is, char **rs);
+char*  proj_rtodms(char *s, double r, int pos, int neg);
+
 
 #ifdef __cplusplus
 }

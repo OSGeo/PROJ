@@ -242,6 +242,7 @@ int pj_cart_selftest (void) {
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
     char *arg = {" +proj=utm +zone=32 +ellps=GRS80"};
     char *arg_def;
+    char buf[40];
 
     /* An utm projection on the GRS80 ellipsoid */
     P = proj_create (0, arg);
@@ -489,6 +490,20 @@ int pj_cart_selftest (void) {
         return 61;
     }
     proj_destroy(P);
+
+    /* test proj_rtodms() and proj_dmstor() */
+    if (strcmp("180dN", proj_rtodms(buf, M_PI, 'N', 'S')))
+        return 70;
+
+    if (proj_dmstor(&buf[0], NULL) != M_PI)
+        return 71;
+
+    if (strcmp("114d35'29.612\"S", proj_rtodms(buf, -2.0, 'N', 'S')))
+        return 72;
+
+    /* we can't expect perfect numerical accuracy so testing with a tolerance */
+    if (fabs(-2.0 - proj_dmstor(&buf[0], NULL)) > 1e-7)
+        return 73;
 
 
     return 0;
