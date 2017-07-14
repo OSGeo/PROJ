@@ -517,7 +517,66 @@ char *proj_definition_retrieve (PJ *P) {
     return pj_get_def(P, 0);
 }
 
-/* ...and get rid of it safely */
+
+/*****************************************************************************/
+PJ_DERIVS *proj_derivatives_retrieve(PJ *P, LP lp) {
+/******************************************************************************
+    Derivatives of coordinates.
+
+    Returns PJ_DERIVS pointer if succesfull, otherwise NULL.
+
+    The returned struct should be released with proj_release().
+
+******************************************************************************/
+    PJ_DERIVS *derivs = pj_calloc(1, sizeof(PJ_DERIVS));
+    if (derivs == 0) {
+
+        proj_errno_set(P, ENOMEM);
+        return NULL;
+    }
+
+    /* casting to struct DERIVS for compatibility reasons */
+    if (pj_deriv(lp, 0.0, P, (struct DERIVS *)derivs)) {
+        /* errno set in pj_derivs */
+        proj_release(derivs);
+        return NULL;
+    }
+
+    return derivs;
+}
+
+
+/*****************************************************************************/
+PJ_FACTORS *proj_factors_retrieve(PJ *P, LP lp) {
+/******************************************************************************
+    Cartographic characteristics at point lp.
+
+    Characteristics include meridian, parallel and areal scales, angular
+    distortion, meridian/parallel, meridian convergence and scale error.
+
+    returns PJ_FACTORS pointer if succesfull, otherwise NULL.
+
+    The returned struct should be released with proj_release().
+
+******************************************************************************/
+    PJ_FACTORS *factors = pj_calloc(1, sizeof(PJ_FACTORS));
+    if (factors == 0) {
+        proj_errno_set(P, ENOMEM);
+        return NULL;
+    }
+
+    /* casting to struct FACTORS for compatibility reasons */
+    if (pj_factors(lp, P, 0.0, (struct FACTORS *)factors)) {
+        /* errno set in pj_factors */
+        proj_release(factors);
+        return NULL;
+    }
+
+    return factors;
+}
+
+
+/* Release, or free, memory that was retrieved by the above functions */
 void *proj_release (void *buffer) {
     return pj_dealloc (buffer);
 }
@@ -537,3 +596,5 @@ double proj_dmstor(const char *is, char **rs) {
 char*  proj_rtodms(char *s, double r, int pos, int neg) {
     return rtodms(s, r, pos, neg);
 }
+
+

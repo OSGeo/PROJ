@@ -129,11 +129,15 @@ EXPORTS
     proj_log_trace                 @120
 
     proj_definition_retrieve       @121
-    proj_release                   @122
-    proj_torad                     @123
-    proj_todeg                     @124
-    proj_has_inverse               @125
-    proj_rtodms                    @126
-    proj_dmstor                    @127
+    proj_derivatives_retrieve      @122
+    proj_factors_retrieve          @123
+    proj_release                   @124
 
-    pj_find_file                   @128
+    proj_torad                     @125
+    proj_todeg                     @126
+    proj_has_inverse               @127
+    proj_rtodms                    @128
+    proj_dmstor                    @129
+
+
+    pj_find_file                   @130
