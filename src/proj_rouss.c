@@ -24,7 +24,8 @@
 ** SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 struct pj_opaque {
     double s0;
@@ -105,7 +106,7 @@ PJ *PROJECTION(rouss) {
     P->opaque = Q;
 
     if (!((Q->en = proj_mdist_ini(P->es))))
-        E_ERROR_0;
+        return freeup_new(P);
     es2 = sin(P->phi0);
     Q->s0 = proj_mdist(P->phi0, es2, cos(P->phi0), Q->en);
     t = 1. - (es2 = P->es * es2 * es2);

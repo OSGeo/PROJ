@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include    <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(tcc, "Transverse Central Cylindrical") "\n\tCyl, Sph, no inv.";
 
@@ -11,7 +12,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     double b, bt;
 
     b = cos (lp.phi) * sin (lp.lam);
-    if ((bt = 1. - b * b) < EPS10) F_ERROR;
+    if ((bt = 1. - b * b) < EPS10) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
     xy.x = b / sqrt(bt);
     xy.y = atan2 (tan (lp.phi) , cos (lp.lam));
     return xy;

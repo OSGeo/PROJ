@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(urm5, "Urmaev V") "\n\tPCyl., Sph., no inv.\n\tn= q= alpha=";
 
@@ -44,10 +45,14 @@ PJ *PROJECTION(urm5) {
     
     if (pj_param(P->ctx, P->params, "tn").i) {
         Q->n = pj_param(P->ctx, P->params, "dn").f;
-        if (Q->n <= 0. || Q->n > 1.)
-            E_ERROR(-40)
-    } else
-        E_ERROR(-40)
+        if (Q->n <= 0. || Q->n > 1.) {
+            proj_errno_set(P, PJD_ERR_N_OUT_OF_RANGE);
+            return freeup_new(0);
+        }
+    } else {
+            proj_errno_set(P, PJD_ERR_N_OUT_OF_RANGE);
+            return freeup_new(0);
+    }
     Q->q3 = pj_param(P->ctx, P->params, "dq").f / 3.;
     alpha = pj_param(P->ctx, P->params, "ralpha").f;
     t = Q->n * sin (alpha);

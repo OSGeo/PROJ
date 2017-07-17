@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(mbtfpq, "McBryde-Thomas Flat-Polar Quartic") "\n\tCyl., Sph.";
 
@@ -38,7 +39,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
     lp.phi = RYC * xy.y;
     if (fabs(lp.phi) > 1.) {
-        if (fabs(lp.phi) > ONETOL)  I_ERROR
+        if (fabs(lp.phi) > ONETOL) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        }
         else if (lp.phi < 0.) { t = -1.; lp.phi = -M_PI; }
         else { t = 1.; lp.phi = M_PI; }
     } else
@@ -46,7 +50,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     lp.lam = RXC * xy.x / (1. + 2. * cos(lp.phi)/cos(0.5 * lp.phi));
     lp.phi = RC * (t + sin(lp.phi));
     if (fabs(lp.phi) > 1.)
-        if (fabs(lp.phi) > ONETOL)  I_ERROR
+        if (fabs(lp.phi) > ONETOL) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        }
         else            lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
     else
         lp.phi = asin(lp.phi);

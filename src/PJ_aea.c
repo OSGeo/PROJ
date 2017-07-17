@@ -28,7 +28,8 @@
  *****************************************************************************/
 
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 # define EPS10  1.e-10
 # define TOL7   1.e-7
@@ -78,12 +79,33 @@ struct pj_opaque {
 };
 
 
+static void *freeup_new (PJ *P) {                        /* Destructor */
+    if (0==P)
+        return 0;
+
+    if (0==P->opaque)
+        return pj_dealloc (P);
+
+    pj_dealloc (P->opaque->en);
+    pj_dealloc (P->opaque);
+    return pj_dealloc(P);
+}
+
+
+static void freeup (PJ *P) {
+    freeup_new (P);
+    return;
+}
+
 
 static XY e_forward (LP lp, PJ *P) {   /* Ellipsoid/spheroid, forward */
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
-    if ((Q->rho = Q->c - (Q->ellips ? Q->n * pj_qsfn(sin(lp.phi),
-        P->e, P->one_es) : Q->n2 * sin(lp.phi))) < 0.) F_ERROR
+    Q->rho = Q->c - (Q->ellips ? Q->n * pj_qsfn(sin(lp.phi), P->e, P->one_es) : Q->n2 * sin(lp.phi));;
+    if (Q->rho < 0.) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
     Q->rho = Q->dd * sqrt(Q->rho);
     xy.x = Q->rho * sin( lp.lam *= Q->n );
     xy.y = Q->rho0 - Q->rho * cos(lp.lam);
@@ -104,8 +126,10 @@ static LP e_inverse (XY xy, PJ *P) {   /* Ellipsoid/spheroid, inverse */
         if (Q->ellips) {
             lp.phi = (Q->c - lp.phi * lp.phi) / Q->n;
             if (fabs(Q->ec - fabs(lp.phi)) > TOL7) {
-                if ((lp.phi = phi1_(lp.phi, P->e, P->one_es)) == HUGE_VAL)
-                    I_ERROR
+                if ((lp.phi = phi1_(lp.phi, P->e, P->one_es)) == HUGE_VAL) {
+                    proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                    return lp;
+                }
             } else
                 lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
         } else if (fabs(lp.phi = (Q->c - lp.phi * lp.phi) / Q->n2) <= 1.)
@@ -121,24 +145,6 @@ static LP e_inverse (XY xy, PJ *P) {   /* Ellipsoid/spheroid, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                        /* Destructor */
-    if (0==P)
-        return 0;
-
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque->en);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
 
 static PJ *setup(PJ *P) {
     double cosphi, sinphi;
@@ -148,14 +154,17 @@ static PJ *setup(PJ *P) {
     P->inv = e_inverse;
     P->fwd = e_forward;
 
-    if (fabs(Q->phi1 + Q->phi2) < EPS10) E_ERROR(-21);
+    if (fabs(Q->phi1 + Q->phi2) < EPS10) {
+        proj_errno_set(P, PJD_ERR_CONIC_LAT_EQUAL);
+        return freeup_new(P);
+    }
     Q->n = sinphi = sin(Q->phi1);
     cosphi = cos(Q->phi1);
     secant = fabs(Q->phi1 - Q->phi2) >= EPS10;
     if( (Q->ellips = (P->es > 0.))) {
         double ml1, m1;
 
-        if (!(Q->en = pj_enfn(P->es))) E_ERROR_0;
+        if (!(Q->en = pj_enfn(P->es))) return freeup_new(P);
         m1 = pj_msfn(sinphi, cosphi, P->es);
         ml1 = pj_qsfn(sinphi, P->e, P->one_es);
         if (secant) { /* secant cone */

@@ -523,15 +523,37 @@ struct FACTORS {
 #define PJD_WGS84     4   /* WGS84 (or anything considered equivalent) */
 
 /* library errors */
-#define PJD_ERR_NO_ARGS              -1
-#define PJD_ERR_INVALID_M_OR_N      -39
-#define PJD_ERR_GEOCENTRIC          -45
-#define PJD_ERR_AXIS                -47
-#define PJD_ERR_GRID_AREA           -48
-#define PJD_ERR_CATALOG             -49
-#define PJD_ERR_INVALID_SCALE       -52
-#define PJD_ERR_NON_CONVERGENT      -53
-#define PJD_ERR_MISSING_ARGS        -54
+#define PJD_ERR_NO_ARGS                  -1
+#define PJD_ERR_LAT_OR_LON_EXCEED_LIMIT -14
+#define PJD_ERR_TOLERANCE_CONDITION     -20
+#define PJD_ERR_CONIC_LAT_EQUAL         -21
+#define PJD_ERR_LAT_LARGER_THAN_90      -22
+#define PJD_ERR_LAT1_IS_ZERO            -23
+#define PJD_ERR_LAT_TS_LARGER_THAN_90   -24
+#define PJD_ERR_CONTROL_POINT_NO_DIST   -25
+#define PJD_ERR_NO_ROTATION_PROJ        -26
+#define PJD_ERR_W_OR_M_ZERO_OR_LESS     -27
+#define PJD_ERR_LSAT_NOT_IN_RANGE       -28
+#define PJD_ERR_PATH_NOT_IN_RANGE       -29
+#define PJD_ERR_H_LESS_THAN_ZERO        -30
+#define PJD_ERR_LAT_1_OR_2_ZERO_OR_90   -32
+#define PJD_ERR_LAT_0_OR_ALPHA_EQ_90    -33
+#define PJD_ERR_ELLIPSOID_USE_REQUIRED  -34
+#define PJD_ERR_INVALID_UTM_ZONE        -35
+#define PJD_ERR_FAILED_TO_FIND_PROJ     -37
+#define PJD_ERR_INVALID_M_OR_N          -39
+#define PJD_ERR_N_OUT_OF_RANGE          -40
+#define PJD_ERR_ABS_LAT1_EQ_ABS_LAT2    -42
+#define PJD_ERR_LAT_0_HALF_PI_FROM_MEAN -43
+#define PJD_ERR_GEOCENTRIC              -45
+#define PJD_ERR_UNKNOWN_PRIME_MERIDIAN  -46
+#define PJD_ERR_AXIS                    -47
+#define PJD_ERR_GRID_AREA               -48
+#define PJD_ERR_INVALID_SWEEP_AXIS      -49
+#define PJD_ERR_INVALID_SCALE           -52
+#define PJD_ERR_NON_CONVERGENT          -53
+#define PJD_ERR_MISSING_ARGS            -54
+#define PJD_ERR_LAT_0_IS_ZERO           -55
 
 struct projFileAPI_t;
 
@@ -582,12 +604,6 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #ifdef PJ_LIB__
 #define PROJ_HEAD(id, name) static const char des_##id [] = name
 
-#define E_ERROR(err) { pj_ctx_set_errno( P->ctx, err); freeup(P); return(0); }
-#define E_ERROR_0 { freeup(P); return(0); }
-#define F_ERROR { pj_ctx_set_errno( P->ctx, -20); return(xy); }
-#define F3_ERROR { pj_ctx_set_errno( P->ctx, -20); return(xyz); }
-#define I_ERROR { pj_ctx_set_errno( P->ctx, -20); return(lp); }
-#define I3_ERROR { pj_ctx_set_errno( P->ctx, -20); return(lpz); }
 
 #define PROJECTION(name)                                     \
 pj_projection_specific_setup_##name (PJ *P);                 \

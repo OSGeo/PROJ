@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(tmerc, "Transverse Mercator") "\n\tCyl, Sph&Ell";
 
@@ -83,16 +84,20 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 
     cosphi = cos(lp.phi);
     b = cosphi * sin (lp.lam);
-    if (fabs (fabs (b) - 1.) <= EPS10)
-        F_ERROR;
+    if (fabs (fabs (b) - 1.) <= EPS10) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
 
     xy.x = P->opaque->ml0 * log ((1. + b) / (1. - b));
     xy.y = cosphi * cos (lp.lam) / sqrt (1. - b * b);
 
     b = fabs ( xy.y );
     if (b >= 1.) {
-        if ((b - 1.) > EPS10)
-            F_ERROR
+        if ((b - 1.) > EPS10) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
         else xy.y = 0.;
     } else
         xy.y = acos (xy.y);
@@ -174,7 +179,7 @@ static PJ *setup(PJ *P) {                   /* general initialization */
     struct pj_opaque *Q = P->opaque;
     if (P->es != 0.0) {
         if (!(Q->en = pj_enfn(P->es)))
-            E_ERROR_0;
+            return freeup_new(P);
         Q->ml0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), Q->en);
         Q->esp = P->es / (1. - P->es);
         P->inv = e_inverse;

@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include   <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 struct pj_opaque {
     double qp;
@@ -44,7 +45,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         else
             lp.phi = asin(xy.y);
         lp.lam = xy.x / P->k0;
-    } else I_ERROR;
+    } else {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return lp;
+    }
     return (lp);
 }
 
@@ -76,14 +80,18 @@ PJ *PROJECTION(cea) {
     if (pj_param(P->ctx, P->params, "tlat_ts").i) {
         P->k0 = cos(t = pj_param(P->ctx, P->params, "rlat_ts").f);
         if (P->k0 < 0.) {
-            E_ERROR(-24);
+            proj_errno_set(P, PJD_ERR_LAT_TS_LARGER_THAN_90);
+            freeup_new(P);
+            return 0;
         }
     }
     if (P->es != 0.0) {
         t = sin(t);
         P->k0 /= sqrt(1. - P->es * t * t);
         P->e = sqrt(P->es);
-        if (!(Q->apa = pj_authset(P->es))) E_ERROR_0;
+        if (!(Q->apa = pj_authset(P->es))) {
+            return freeup_new(P);
+        }
         Q->qp = pj_qsfn(1., P->e, P->one_es);
         P->inv = e_inverse;
         P->fwd = e_forward;

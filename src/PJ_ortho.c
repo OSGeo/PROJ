@@ -1,48 +1,57 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(ortho, "Orthographic") "\n\tAzi, Sph.";
 
 struct pj_opaque {
-	double	sinph0;
-	double	cosph0;
-	int		mode;
+    double  sinph0;
+    double  cosph0;
+    int     mode;
 };
 
 #define EPS10 1.e-10
-#define N_POLE	0
+#define N_POLE  0
 #define S_POLE 1
-#define EQUIT	2
-#define OBLIQ	3
+#define EQUIT   2
+#define OBLIQ   3
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
-	double  coslam, cosphi, sinphi;
+    double  coslam, cosphi, sinphi;
 
-	cosphi = cos(lp.phi);
-	coslam = cos(lp.lam);
-	switch (Q->mode) {
-	case EQUIT:
-		if (cosphi * coslam < - EPS10) F_ERROR;
-		xy.y = sin(lp.phi);
-		break;
-	case OBLIQ:
-		if (Q->sinph0 * (sinphi = sin(lp.phi)) +
-		   Q->cosph0 * cosphi * coslam < - EPS10) F_ERROR;
-		xy.y = Q->cosph0 * sinphi - Q->sinph0 * cosphi * coslam;
-		break;
-	case N_POLE:
-		coslam = - coslam;
+    cosphi = cos(lp.phi);
+    coslam = cos(lp.lam);
+    switch (Q->mode) {
+    case EQUIT:
+        if (cosphi * coslam < - EPS10) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
+        xy.y = sin(lp.phi);
+        break;
+    case OBLIQ:
+        if (Q->sinph0 * (sinphi = sin(lp.phi)) + Q->cosph0 * cosphi * coslam < - EPS10) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
+        xy.y = Q->cosph0 * sinphi - Q->sinph0 * cosphi * coslam;
+        break;
+    case N_POLE:
+        coslam = - coslam;
                 /*-fallthrough*/
-	case S_POLE:
-		if (fabs(lp.phi - P->phi0) - EPS10 > M_HALFPI) F_ERROR;
-		xy.y = cosphi * coslam;
-		break;
-	}
-	xy.x = cosphi * sin(lp.lam);
-	return xy;
+    case S_POLE:
+        if (fabs(lp.phi - P->phi0) - EPS10 > M_HALFPI) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
+        xy.y = cosphi * coslam;
+        break;
+    }
+    xy.x = cosphi * sin(lp.lam);
+    return xy;
 }
 
 
@@ -52,7 +61,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     double  rh, cosc, sinc;
 
     if ((sinc = (rh = hypot(xy.x, xy.y))) > 1.) {
-        if ((sinc - 1.) > EPS10) I_ERROR;
+        if ((sinc - 1.) > EPS10) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        }
         sinc = 1.;
     }
     cosc = sqrt(1. - sinc * sinc); /* in this range OK */
@@ -114,17 +126,17 @@ PJ *PROJECTION(ortho) {
         return freeup_new (P);
     P->opaque = Q;
 
-	if (fabs(fabs(P->phi0) - M_HALFPI) <= EPS10)
-		Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
-	else if (fabs(P->phi0) > EPS10) {
-		Q->mode = OBLIQ;
-		Q->sinph0 = sin(P->phi0);
-		Q->cosph0 = cos(P->phi0);
-	} else
-		Q->mode = EQUIT;
-	P->inv = s_inverse;
-	P->fwd = s_forward;
-	P->es = 0.;
+    if (fabs(fabs(P->phi0) - M_HALFPI) <= EPS10)
+        Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
+    else if (fabs(P->phi0) > EPS10) {
+        Q->mode = OBLIQ;
+        Q->sinph0 = sin(P->phi0);
+        Q->cosph0 = cos(P->phi0);
+    } else
+        Q->mode = EQUIT;
+    P->inv = s_inverse;
+    P->fwd = s_forward;
+    P->es = 0.;
 
     return P;
 }

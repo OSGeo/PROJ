@@ -28,7 +28,8 @@
 */
 
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 struct pj_opaque {
     double h;
@@ -91,8 +92,10 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     Vz = r * sin (lp.phi);
 
     /* Check visibility. */
-    if (((Q->radius_g - Vx) * Vx - Vy * Vy - Vz * Vz * Q->radius_p_inv2) < 0.)
-        F_ERROR;
+    if (((Q->radius_g - Vx) * Vx - Vy * Vy - Vz * Vz * Q->radius_p_inv2) < 0.) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
 
     /* Calculation based on view angles from satellite. */
     tmp = Q->radius_g - Vx;
@@ -127,7 +130,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     /* Calculation of terms in cubic equation and determinant.*/
     a = Vy * Vy + Vz * Vz + Vx * Vx;
     b = 2 * Q->radius_g * Vx;
-    if ((det = (b * b) - 4 * a * Q->C) < 0.) I_ERROR;
+    if ((det = (b * b) - 4 * a * Q->C) < 0.) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return lp;
+    }
 
     /* Calculation of three components of vector from satellite to position.*/
     k  = (-b - sqrt(det)) / (2 * a);
@@ -163,7 +169,10 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     a = Vz / Q->radius_p;
     a   = Vy * Vy + a * a + Vx * Vx;
     b   = 2 * Q->radius_g * Vx;
-    if ((det = (b * b) - 4 * a * Q->C) < 0.) I_ERROR;
+    if ((det = (b * b) - 4 * a * Q->C) < 0.) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return lp;
+    }
 
     /* Calculation of three components of vector from satellite to position.*/
     k  = (-b - sqrt(det)) / (2. * a);
@@ -202,18 +211,24 @@ PJ *PROJECTION(geos) {
         return freeup_new (P);
     P->opaque = Q;
 
-    if ((Q->h = pj_param(P->ctx, P->params, "dh").f) <= 0.) E_ERROR(-30);
+    if ((Q->h = pj_param(P->ctx, P->params, "dh").f) <= 0.){
+        proj_errno_set(P, PJD_ERR_H_LESS_THAN_ZERO);
+        return freeup_new(P);
+    }
 
-    if (P->phi0 != 0.0) E_ERROR(-46);
+    if (P->phi0 != 0.0) {
+        proj_errno_set(P, PJD_ERR_UNKNOWN_PRIME_MERIDIAN);
+        return freeup_new(P);
+    }
 
     Q->sweep_axis = pj_param(P->ctx, P->params, "ssweep").s;
     if (Q->sweep_axis == NULL)
       Q->flip_axis = 0;
     else {
-        if (Q->sweep_axis[1] != '\0' ||
-            (Q->sweep_axis[0] != 'x' &&
-             Q->sweep_axis[0] != 'y'))
-          E_ERROR(-49);
+        if (Q->sweep_axis[1] != '\0' || (Q->sweep_axis[0] != 'x' && Q->sweep_axis[0] != 'y')) {
+            proj_errno_set(P, PJD_ERR_INVALID_SWEEP_AXIS);
+            return freeup_new(P);
+        }
         if (Q->sweep_axis[0] == 'x')
           Q->flip_axis = 1;
         else

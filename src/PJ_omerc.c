@@ -22,7 +22,8 @@
 ** SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(omerc, "Oblique Mercator")
     "\n\tCyl, Sph&Ell no_rot\n\t"
@@ -50,8 +51,10 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
         T = .5 * (W + temp);
         V = sin(Q->B * lp.lam);
         U = (S * Q->singam - V * Q->cosgam) / T;
-        if (fabs(fabs(U) - 1.0) < EPS)
-            F_ERROR;
+        if (fabs(fabs(U) - 1.0) < EPS) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
         v = 0.5 * Q->ArB * log((1. - U)/(1. + U));
         temp = cos(Q->B * lp.lam);
                 if(fabs(temp) < TOL) {
@@ -97,8 +100,10 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         lp.phi = Up < 0. ? -M_HALFPI : M_HALFPI;
     } else {
         lp.phi = Q->E / sqrt((1. + Up) / (1. - Up));
-        if ((lp.phi = pj_phi2(P->ctx, pow(lp.phi, 1. / Q->B), P->e)) == HUGE_VAL)
-            I_ERROR;
+        if ((lp.phi = pj_phi2(P->ctx, pow(lp.phi, 1. / Q->B), P->e)) == HUGE_VAL) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        }
         lp.lam = - Q->rB * atan2((Sp * Q->cosgam -
             Vp * Q->singam), cos(Q->BrA * u));
     }
@@ -159,7 +164,10 @@ PJ *PROJECTION(omerc) {
             (con = fabs(phi1)) <= TOL ||
             fabs(con - M_HALFPI) <= TOL ||
             fabs(fabs(P->phi0) - M_HALFPI) <= TOL ||
-            fabs(fabs(phi2) - M_HALFPI) <= TOL) E_ERROR(-33);
+            fabs(fabs(phi2) - M_HALFPI) <= TOL) {
+                proj_errno_set(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
+                return freeup_new(P);
+        }
     }
     com = sqrt(P->one_es);
     if (fabs(P->phi0) > EPS) {

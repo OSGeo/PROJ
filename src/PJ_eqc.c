@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 struct pj_opaque {
     double rc;
@@ -54,7 +55,10 @@ PJ *PROJECTION(eqc) {
         return freeup_new (P);
     P->opaque = Q;
 
-    if ((Q->rc = cos(pj_param(P->ctx, P->params, "rlat_ts").f)) <= 0.) E_ERROR(-24);
+    if ((Q->rc = cos(pj_param(P->ctx, P->params, "rlat_ts").f)) <= 0.) {
+        proj_errno_set(P, PJD_ERR_LAT_TS_LARGER_THAN_90);
+        return freeup_new(P);
+    }
     P->inv = s_inverse;
     P->fwd = s_forward;
     P->es = 0.;

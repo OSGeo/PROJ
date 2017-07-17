@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include    <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(somerc, "Swiss. Obl. Mercator") "\n\tCyl, Ell\n\tFor CH1903";
 
@@ -54,8 +55,10 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     if (i) {
         lp.phi = phip;
         lp.lam = lamp / Q->c;
-    } else
-        I_ERROR
+    } else {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return lp;
+    }
     return (lp);
 }
 

@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(lagrng, "Lagrange") "\n\tMisc Sph, no inv.\n\tW=";
 
@@ -23,8 +24,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     } else {
         lp.phi = sin(lp.phi);
         v = Q->a1 * pow((1. + lp.phi)/(1. - lp.phi), Q->hrw);
-        if ((c = 0.5 * (v + 1./v) + cos(lp.lam *= Q->rw)) < TOL)
-            F_ERROR;
+        if ((c = 0.5 * (v + 1./v) + cos(lp.lam *= Q->rw)) < TOL) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
         xy.x = 2. * sin(lp.lam) / c;
         xy.y = (v - 1./v) / c;
     }
@@ -56,12 +59,18 @@ PJ *PROJECTION(lagrng) {
     P->opaque = Q;
 
     Q->rw = pj_param(P->ctx, P->params, "dW").f;
-    if (Q->rw <= 0) E_ERROR(-27);
+    if (Q->rw <= 0) {
+        proj_errno_set(P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
+        return freeup_new(P);
+    }
 
     Q->rw = 1. / Q->rw;
     Q->hrw = 0.5 * Q->rw;
     phi1 = sin(pj_param(P->ctx, P->params, "rlat_1").f);
-    if (fabs(fabs(phi1) - 1.) < TOL) E_ERROR(-22);
+    if (fabs(fabs(phi1) - 1.) < TOL) {
+        proj_errno_set(P, PJD_ERR_LAT_LARGER_THAN_90);
+        return freeup_new(P);
+    }
 
     Q->a1 = pow((1. - phi1)/(1. + phi1), Q->hrw);
 
