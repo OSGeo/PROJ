@@ -14,7 +14,7 @@ Grid files are important for shifting and transforming between datums
 US, Canadian, French and New Zealand
 --------------------------------------------------------------------------------
 
-* http://download.osgeo.org/proj/proj-datumgrid-1.5.zip: US, Canadian, French
+* http://download.osgeo.org/proj/proj-datumgrid-1.6.zip: US, Canadian, French
   and New Zealand datum shift grids - unzip in the `nad` directory before
   configuring to add NAD27/NAD83 and NZGD49 datum conversion
 
