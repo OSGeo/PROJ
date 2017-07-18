@@ -16,6 +16,7 @@ Current Release
 --------------------------------------------------------------------------------
 
 * **2016-09-02** `proj-4.9.3.tar.gz`_ (`md5`_)
+* **2016-09-11** `proj-datumgrid-1.6.zip`_
 
 Past Releases
 --------------------------------------------------------------------------------
@@ -26,6 +27,7 @@ Past Releases
 .. _`proj-4.9.1.tar.gz`: http://download.osgeo.org/proj/proj-4.9.1.tar.gz
 .. _`proj-4.9.2.tar.gz`: http://download.osgeo.org/proj/proj-4.9.2.tar.gz
 .. _`proj-4.9.3.tar.gz`: http://download.osgeo.org/proj/proj-4.9.3.tar.gz
+.. _`proj-datumgrid-1.6.zip`: http://download.osgeo.org/proj/proj-datumgrid-1.6.zip
 .. _`md5`: http://download.osgeo.org/proj/proj-4.9.3.tar.gz.md5
 
 Binaries
@@ -43,7 +45,7 @@ Linux
 Docker
 ................................................................................
 
-A `Docker`_ image with just Proj.4 binaries and a full compliment of grid shift
+A `Docker`_ image with just PROJ.4 binaries and a full compliment of grid shift
 files is available on `DockerHub`:
 
 .. _`Docker`: https://docker.org
