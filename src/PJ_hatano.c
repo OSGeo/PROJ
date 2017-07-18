@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(hatano, "Hatano Asymmetrical Equal Area") "\n\tPCyl, Sph.";
 
@@ -43,7 +44,8 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     th = xy.y * ( xy.y < 0. ? RYCS : RYCN);
     if (fabs(th) > 1.) {
         if (fabs(th) > ONETOL) {
-            I_ERROR;
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
         } else {
             th = th > 0. ? M_HALFPI : - M_HALFPI;
         }
@@ -56,7 +58,8 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     lp.phi = (th + sin(th)) * (xy.y < 0. ? RCS : RCN);
     if (fabs(lp.phi) > 1.) {
         if (fabs(lp.phi) > ONETOL) {
-           I_ERROR;
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
         } else {
             lp.phi = lp.phi > 0. ? M_HALFPI : - M_HALFPI;
         }

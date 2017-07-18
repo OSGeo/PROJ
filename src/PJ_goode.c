@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(goode, "Goode Homolosine") "\n\tPCyl, Sph.";
 
@@ -71,12 +72,12 @@ PJ *PROJECTION(goode) {
 
     P->es = 0.;
     if (!(Q->sinu = pj_sinu(0)) || !(Q->moll = pj_moll(0)))
-        E_ERROR_0;
+        return freeup_new(P);
     Q->sinu->es = 0.;
         Q->sinu->ctx = P->ctx;
         Q->moll->ctx = P->ctx;
     if (!(Q->sinu = pj_sinu(Q->sinu)) || !(Q->moll = pj_moll(Q->moll)))
-        E_ERROR_0;
+        return freeup_new(P);
 
     P->fwd = s_forward;
     P->inv = s_inverse;

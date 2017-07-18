@@ -1,6 +1,7 @@
 /* based upon Snyder and Linck, USGS-NMD */
 #define PJ_LIB__
-#include    <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(lsat, "Space oblique for LANDSAT")
     "\n\tCyl, Sph&Ell\n\tlsat= path=";
@@ -172,9 +173,15 @@ PJ *PROJECTION(lsat) {
     P->opaque = Q;
 
     land = pj_param(P->ctx, P->params, "ilsat").i;
-    if (land <= 0 || land > 5) E_ERROR(-28);
+    if (land <= 0 || land > 5) {
+        proj_errno_set(P, PJD_ERR_LSAT_NOT_IN_RANGE);
+        return freeup_new(P);
+    }
     path = pj_param(P->ctx, P->params, "ipath").i;
-    if (path <= 0 || path > (land <= 3 ? 251 : 233)) E_ERROR(-29);
+    if (path <= 0 || path > (land <= 3 ? 251 : 233)) {
+        proj_errno_set(P, PJD_ERR_PATH_NOT_IN_RANGE);
+        return freeup_new(P);
+    }
     if (land <= 3) {
         P->lam0 = DEG_TO_RAD * 128.87 - M_TWOPI / 251. * path;
         Q->p22 = 103.2669323;

@@ -60,6 +60,7 @@ pj_err_list[] = {
     "invalid scale",                                                   /* -52 */
     "non-convergent computation",                                      /* -53 */
     "missing required arguments",                                      /* -54 */
+    "lat_0 = 0",                                                       /* -55 */
 };
 
 char *pj_strerrno(int err) {

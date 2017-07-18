@@ -1,7 +1,8 @@
 /* PROJ.4 Cartographic Projection System
 */
 #define PJ_LIB__
-#include    <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(lcca, "Lambert Conformal Conic Alternative")
     "\n\tConic, Sph&Ell\n\tlat_0=";
@@ -58,7 +59,10 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         S -= (dif = (fS(S, Q->C) - dr) / fSp(S, Q->C));
         if (fabs(dif) < DEL_TOL) break;
     }
-    if (!i) I_ERROR
+    if (!i) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return lp;
+    }
     lp.phi = pj_inv_mlfn(P->ctx, S + Q->M0, P->es, Q->en);
 
     return lp;
@@ -90,9 +94,13 @@ PJ *PROJECTION(lcca) {
     P->opaque = Q;
 
     (Q->en = pj_enfn(P->es));
-    if (!Q->en) E_ERROR_0;
-    if (!pj_param(P->ctx, P->params, "tlat_0").i) E_ERROR(50);
-    if (P->phi0 == 0.) E_ERROR(51);
+    if (!Q->en)
+        return freeup_new(P);
+
+    if (P->phi0 == 0.) {
+        proj_errno_set(P, PJD_ERR_LAT_0_IS_ZERO);
+        return freeup_new(P);
+    }
     Q->l = sin(P->phi0);
     Q->M0 = pj_mlfn(P->phi0, Q->l, cos(P->phi0), Q->en);
     s2p0 = Q->l * Q->l;

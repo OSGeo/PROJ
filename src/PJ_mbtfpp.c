@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include    <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(mbtfpp, "McBride-Thomas Flat-Polar Parabolic") "\n\tCyl., Sph.";
 
@@ -27,19 +28,23 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 
     lp.phi = xy.y / FYC;
     if (fabs(lp.phi) >= 1.) {
-        if (fabs(lp.phi) > ONEEPS)
-            I_ERROR
-        else
+        if (fabs(lp.phi) > ONEEPS) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        } else {
             lp.phi = (lp.phi < 0.) ? -M_HALFPI : M_HALFPI;
+        }
     } else
         lp.phi = asin(lp.phi);
 
     lp.lam = xy.x / ( FXC * (2. * cos(C23 * (lp.phi *= 3.)) - 1.) );
     if (fabs(lp.phi = sin(lp.phi) / CS) >= 1.) {
-        if (fabs(lp.phi) > ONEEPS)
-            I_ERROR
-        else
+        if (fabs(lp.phi) > ONEEPS) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        } else {
             lp.phi = (lp.phi < 0.) ? -M_HALFPI : M_HALFPI;
+        }
     } else
         lp.phi = asin(lp.phi);
 

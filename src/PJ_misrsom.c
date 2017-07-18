@@ -21,7 +21,8 @@
  *****************************************************************************/
 /* based upon Snyder and Linck, USGS-NMD */
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(misrsom, "Space oblique for MISR")
         "\n\tCyl, Sph&Ell\n\tpath=";
@@ -189,7 +190,10 @@ PJ *PROJECTION(misrsom) {
     P->opaque = Q;
 
     path = pj_param(P->ctx, P->params, "ipath").i;
-    if (path <= 0 || path > 233) E_ERROR(-29);
+    if (path <= 0 || path > 233) {
+        proj_errno_set(P, PJD_ERR_PATH_NOT_IN_RANGE);
+        return freeup_new(P);
+    }
     P->lam0 = DEG_TO_RAD * 129.3056 - M_TWOPI / 233. * path;
     alf = 98.30382 * DEG_TO_RAD;
     Q->p22 = 98.88 / 1440.0;

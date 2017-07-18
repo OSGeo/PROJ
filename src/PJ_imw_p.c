@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(imw_p, "International Map of the World Polyconic")
     "\n\tMod. Polyconic, Ell\n\tlat_1= and lat_2= [lon_1=]";
@@ -27,7 +28,7 @@ static int phi12(PJ *P, double *del, double *sig) {
         Q->phi_2 = pj_param(P->ctx, P->params, "rlat_2").f;
         *del = 0.5 * (Q->phi_2 - Q->phi_1);
         *sig = 0.5 * (Q->phi_2 + Q->phi_1);
-        err = (fabs(*del) < EPS || fabs(*sig) < EPS) ? -42 : 0;
+        err = (fabs(*del) < EPS || fabs(*sig) < EPS) ? PJD_ERR_ABS_LAT1_EQ_ABS_LAT2 : 0;
     }
     return err;
 }
@@ -155,9 +156,11 @@ PJ *PROJECTION(imw_p) {
         return freeup_new (P);
     P->opaque = Q;
 
-    if (!(Q->en = pj_enfn(P->es))) E_ERROR_0;
-    if( (i = phi12(P, &del, &sig)) != 0)
-        E_ERROR(i);
+    if (!(Q->en = pj_enfn(P->es))) return freeup_new(P);
+    if( (i = phi12(P, &del, &sig)) != 0) {
+        proj_errno_set(P, i);
+        return freeup_new(P);
+    }
     if (Q->phi_2 < Q->phi_1) { /* make sure P->phi_1 most southerly */
         del = Q->phi_1;
         Q->phi_1 = Q->phi_2;

@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 struct pj_opaque {
     double phi1;
@@ -96,9 +97,16 @@ PJ *PROJECTION(eqdc) {
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     Q->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
-    if (fabs(Q->phi1 + Q->phi2) < EPS10) E_ERROR(-21);
+
+    if (fabs(Q->phi1 + Q->phi2) < EPS10) {
+        proj_errno_set(P, PJD_ERR_CONIC_LAT_EQUAL);
+        freeup_new(P);
+        return 0;
+    }
+
     if (!(Q->en = pj_enfn(P->es)))
-        E_ERROR_0;
+        return freeup_new(P);
+
     Q->n = sinphi = sin(Q->phi1);
     cosphi = cos(Q->phi1);
     secant = fabs(Q->phi1 - Q->phi2) >= EPS10;
@@ -122,6 +130,7 @@ PJ *PROJECTION(eqdc) {
         Q->c = Q->phi1 + cos(Q->phi1) / Q->n;
         Q->rho0 = Q->c - P->phi0;
     }
+
     P->inv = e_inverse;
     P->fwd = e_forward;
     P->spc = special;

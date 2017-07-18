@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(hammer, "Hammer & Eckert-Greifendorff")
     "\n\tMisc Sph, \n\tW= M=";
@@ -33,7 +34,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     if (fabs(2.*z*z-1.) < EPS) {
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
-        pj_errno = -14;
+        proj_errno_set(P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
     } else {
         lp.lam = aatan2(Q->w * xy.x * z,2. * z * z - 1)/Q->w;
         lp.phi = aasin(P->ctx,z * xy.y);
@@ -65,11 +66,17 @@ PJ *PROJECTION(hammer) {
     P->opaque = Q;
 
     if (pj_param(P->ctx, P->params, "tW").i) {
-        if ((Q->w = fabs(pj_param(P->ctx, P->params, "dW").f)) <= 0.) E_ERROR(-27);
+        if ((Q->w = fabs(pj_param(P->ctx, P->params, "dW").f)) <= 0.) {
+            proj_errno_set(P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
+            return freeup_new(P);
+        }
     } else
         Q->w = .5;
     if (pj_param(P->ctx, P->params, "tM").i) {
-        if ((Q->m = fabs(pj_param(P->ctx, P->params, "dM").f)) <= 0.) E_ERROR(-27);
+        if ((Q->m = fabs(pj_param(P->ctx, P->params, "dM").f)) <= 0.) {
+            proj_errno_set(P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
+            return freeup_new(P);
+        }
     } else
         Q->m = 1.;
 

@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(laea, "Lambert Azimuthal Equal Area") "\n\tAzi, Sph&Ell";
 
@@ -55,7 +56,10 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
         q = Q->qp + q;
         break;
     }
-    if (fabs(b) < EPS10) F_ERROR;
+    if (fabs(b) < EPS10) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
 
     switch (Q->mode) {
     case OBLIQ:
@@ -98,7 +102,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     case OBLIQ:
         xy.y = 1. + Q->sinb1 * sinphi + Q->cosb1 * cosphi * coslam;
 oblcon:
-        if (xy.y <= EPS10) F_ERROR;
+        if (xy.y <= EPS10) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
         xy.y = sqrt(2. / xy.y);
         xy.x = xy.y * cosphi * sin(lp.lam);
         xy.y *= Q->mode == EQUIT ? sinphi :
@@ -108,7 +115,10 @@ oblcon:
         coslam = -coslam;
         /*-fallthrough*/
     case S_POLE:
-        if (fabs(lp.phi + P->phi0) < EPS10) F_ERROR;
+        if (fabs(lp.phi + P->phi0) < EPS10) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
         xy.y = M_FORTPI - lp.phi * .5;
         xy.y = 2. * (Q->mode == S_POLE ? cos(xy.y) : sin(xy.y));
         xy.x = xy.y * sin(lp.lam);
@@ -174,7 +184,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     double  cosz=0.0, rh, sinz=0.0;
 
     rh = hypot(xy.x, xy.y);
-    if ((lp.phi = rh * .5 ) > 1.) I_ERROR;
+    if ((lp.phi = rh * .5 ) > 1.) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return lp;
+    }
     lp.phi = 2. * asin(lp.phi);
     if (Q->mode == OBLIQ || Q->mode == EQUIT) {
         sinz = sin(lp.phi);

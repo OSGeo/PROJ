@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(calcofi,
     "Cal Coop Ocean Fish Invest Lines/Stations") "\n\tCyl, Sph&Ell";
@@ -46,7 +47,10 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     /* if the user has specified +lon_0 or +k0 for some reason,
     we're going to ignore it so that xy is consistent with point O */
     lp.lam = lp.lam + P->lam0;
-    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) F_ERROR;
+    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
     xy.x = lp.lam;
     xy.y = -log(pj_tsfn(lp.phi, sin(lp.phi), P->e)); /* Mercator transform xy*/
     oy = -log(pj_tsfn(PT_O_PHI, sin(PT_O_PHI), P->e));
@@ -74,7 +78,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     double l2;
     double ry;
     lp.lam = lp.lam + P->lam0;
-    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) F_ERROR;
+    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
     xy.x = lp.lam;
     xy.y = log(tan(M_FORTPI + .5 * lp.phi));
     oy = log(tan(M_FORTPI + .5 * PT_O_PHI));

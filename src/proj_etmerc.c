@@ -42,7 +42,8 @@
 #define PROJ_LIB__
 #define PJ_LIB__
 
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 
 struct pj_opaque {
@@ -57,7 +58,7 @@ struct pj_opaque {
 PROJ_HEAD(etmerc, "Extended Transverse Mercator")
     "\n\tCyl, Sph\n\tlat_ts=(0)\nlat_0=(0)";
 PROJ_HEAD(utm, "Universal Transverse Mercator (UTM)")
-	"\n\tCyl, Sph\n\tzone= south";
+    "\n\tCyl, Sph\n\tzone= south";
 
 #define PROJ_ETMERC_ORDER 6
 
@@ -250,8 +251,10 @@ static PJ *setup(PJ *P) { /* general initialization */
     double f, n, np, Z;
     struct pj_opaque *Q = P->opaque;
 
-    if (P->es <= 0)
-        E_ERROR(-34);
+    if (P->es <= 0) {
+        proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
+        return freeup_new(P);
+    }
 
     /* flattening */
     f = P->es / (1 + sqrt (1 -  P->es)); /* Replaces: f = 1 - sqrt(1-P->es); */
@@ -329,7 +332,7 @@ static PJ *setup(PJ *P) { /* general initialization */
     Q->Zb  = - Q->Qn*(Z + clens(Q->gtu, PROJ_ETMERC_ORDER, 2*Z));
     P->inv = e_inverse;
     P->fwd = e_forward;
-	return P;
+    return P;
 }
 
 
@@ -405,35 +408,39 @@ int pj_etmerc_selftest (void) {
 
 
 PJ *PROJECTION(utm) {
-	int zone;
+    int zone;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return freeup_new (P);
     P->opaque = Q;
 
-	if (P->es == 0.0)
-        E_ERROR(-34);
-	P->y0 = pj_param (P->ctx, P->params, "bsouth").i ? 10000000. : 0.;
-	P->x0 = 500000.;
-	if (pj_param (P->ctx, P->params, "tzone").i) /* zone input ? */
-	{
-		zone = pj_param(P->ctx, P->params, "izone").i;
-		if (zone > 0 && zone <= 60)
-			--zone;
-		else
-			E_ERROR(-35)
-	}
-	else /* nearest central meridian input */
-	{
-		zone = (int)(floor ((adjlon (P->lam0) + M_PI) * 30. / M_PI));
-		if (zone < 0)
-			zone = 0;
-		else if (zone >= 60)
-			zone = 59;
-	}
-	P->lam0 = (zone + .5) * M_PI / 30. - M_PI;
-	P->k0 = 0.9996;
-	P->phi0 = 0.;
+    if (P->es == 0.0) {
+        proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
+        return freeup_new(P);
+    }
+    P->y0 = pj_param (P->ctx, P->params, "bsouth").i ? 10000000. : 0.;
+    P->x0 = 500000.;
+    if (pj_param (P->ctx, P->params, "tzone").i) /* zone input ? */
+    {
+        zone = pj_param(P->ctx, P->params, "izone").i;
+        if (zone > 0 && zone <= 60)
+            --zone;
+        else {
+            proj_errno_set(P, PJD_ERR_INVALID_UTM_ZONE);
+            return freeup_new(P);
+        }
+    }
+    else /* nearest central meridian input */
+    {
+        zone = (int)(floor ((adjlon (P->lam0) + M_PI) * 30. / M_PI));
+        if (zone < 0)
+            zone = 0;
+        else if (zone >= 60)
+            zone = 59;
+    }
+    P->lam0 = (zone + .5) * M_PI / 30. - M_PI;
+    P->k0 = 0.9996;
+    P->phi0 = 0.;
 
     return setup (P);
 }

@@ -1034,7 +1034,8 @@ isea_forward(struct isea_dgg *g, struct isea_geo *in)
  */
 
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(isea, "Icosahedral Snyder Equal Area") "\n\tSph";
 
@@ -1099,7 +1100,8 @@ PJ *PROJECTION(isea) {
         } else if (!strcmp(opt, "pole")) {
             isea_orient_pole(&Q->dgg);
         } else {
-            E_ERROR(-34);
+            proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
+            return freeup_new(P);
         }
     }
 
@@ -1138,7 +1140,8 @@ PJ *PROJECTION(isea) {
         }
         else {
             /* TODO verify error code.  Possibly eliminate magic */
-            E_ERROR(-34);
+            proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
+            return freeup_new(P);
         }
     }
 

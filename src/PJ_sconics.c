@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include    <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 
 struct pj_opaque {
@@ -46,7 +47,7 @@ static int phi12(PJ *P, double *del) {
         p2 = pj_param(P->ctx, P->params, "rlat_2").f;
         *del = 0.5 * (p2 - p1);
         P->opaque->sig = 0.5 * (p2 + p1);
-        err = (fabs(*del) < EPS || fabs(P->opaque->sig) < EPS) ? -42 : 0;
+        err = (fabs(*del) < EPS || fabs(P->opaque->sig) < EPS) ? PJD_ERR_ABS_LAT1_EQ_ABS_LAT2 : 0;
         *del = *del;
     }
     return err;
@@ -129,8 +130,10 @@ static PJ *setup(PJ *P, int type) {
     Q->type = type;
 
     i = phi12 (P, &del);
-    if(i)
-        E_ERROR(i);
+    if(i) {
+        proj_errno_set(P, i);
+        return freeup_new(P);
+    }
     switch (Q->type) {
 
     case TISSOT:
@@ -169,8 +172,10 @@ static PJ *setup(PJ *P, int type) {
         Q->n = sin (Q->sig);
         Q->c2 = cos (del);
         Q->c1 = 1./tan (Q->sig);
-        if (fabs (del = P->phi0 - Q->sig) - EPS10 >= M_HALFPI)
-            E_ERROR(-43);
+        if (fabs (del = P->phi0 - Q->sig) - EPS10 >= M_HALFPI) {
+            proj_errno_set(P, PJD_ERR_LAT_0_HALF_PI_FROM_MEAN);
+            return freeup_new(P);
+        }
         Q->rho_0 = Q->c2 * (Q->c1 - tan (del));
         break;
 

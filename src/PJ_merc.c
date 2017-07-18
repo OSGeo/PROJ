@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 
@@ -7,8 +8,10 @@ PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
-    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10)
-        F_ERROR;
+    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
     xy.x = P->k0 * lp.lam;
     xy.y = - P->k0 * log(pj_tsfn(lp.phi, sin(lp.phi), P->e));
     return xy;
@@ -17,8 +20,10 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
-    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10)
-        F_ERROR;
+    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+}
     xy.x = P->k0 * lp.lam;
     xy.y = P->k0 * log(tan(M_FORTPI + .5 * lp.phi));
     return xy;
@@ -27,8 +32,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 
 static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     LP lp = {0.0,0.0};
-    if ((lp.phi = pj_phi2(P->ctx, exp(- xy.y / P->k0), P->e)) == HUGE_VAL)
-        I_ERROR;
+    if ((lp.phi = pj_phi2(P->ctx, exp(- xy.y / P->k0), P->e)) == HUGE_VAL) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return lp;
+}
     lp.lam = xy.x / P->k0;
     return lp;
 }
@@ -53,7 +60,11 @@ PJ *PROJECTION(merc) {
 
     if( (is_phits = pj_param(P->ctx, P->params, "tlat_ts").i) ) {
         phits = fabs(pj_param(P->ctx, P->params, "rlat_ts").f);
-        if (phits >= M_HALFPI) E_ERROR(-24);
+        if (phits >= M_HALFPI) {
+            proj_errno_set(P, PJD_ERR_LAT_TS_LARGER_THAN_90);
+            freeup(P);
+            return 0;
+        }
     }
 
     if (P->es != 0.0) { /* ellipsoid */

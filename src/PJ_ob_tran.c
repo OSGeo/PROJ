@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 #include <string.h>
 
 struct pj_opaque {
@@ -110,11 +111,20 @@ PJ *PROJECTION(ob_tran) {
     P->opaque = Q;
 
     /* get name of projection to be translated */
-    if (!(name = pj_param(P->ctx, P->params, "so_proj").s)) E_ERROR(-26);
+    if (!(name = pj_param(P->ctx, P->params, "so_proj").s)) {
+        proj_errno_set(P, PJD_ERR_NO_ROTATION_PROJ);
+        return freeup_new(P);
+    }
     /* avoid endless recursion */
-    if( strcmp(name, "ob_tran") == 0 ) E_ERROR(-37);
+    if( strcmp(name, "ob_tran") == 0 ) {
+        proj_errno_set(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+        return freeup_new(P);
+    }
     for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
-    if (!s || !(Q->link = (*pj_list[i].proj)(0))) E_ERROR(-37);
+    if (!s || !(Q->link = (*pj_list[i].proj)(0))) {
+        proj_errno_set(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+        return freeup_new(P);
+    }
     /* copy existing header into new */
     P->es = 0.; /* force to spherical */
     Q->link->params = P->params;
@@ -149,8 +159,10 @@ PJ *PROJECTION(ob_tran) {
             fabs(fabs(phic) - HALFPI) <= TOL ||
             fabs(fabs(alpha) - HALFPI) <= TOL)
 */
-        if (fabs(fabs(phic) - M_HALFPI) <= TOL)
-            E_ERROR(-32);
+        if (fabs(fabs(phic) - M_HALFPI) <= TOL) {
+            proj_errno_set(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
+            return freeup_new(P);
+        }
         Q->lamp = lamc + aatan2(-cos(alpha), -sin(alpha) * sin(phic));
         phip = aasin(P->ctx,cos(phic) * sin(alpha));
     } else if (pj_param(P->ctx, P->params, "to_lat_p").i) { /* specified new pole */
@@ -163,10 +175,11 @@ PJ *PROJECTION(ob_tran) {
         phi1 = pj_param(P->ctx, P->params, "ro_lat_1").f;
         lam2 = pj_param(P->ctx, P->params, "ro_lon_2").f;
         phi2 = pj_param(P->ctx, P->params, "ro_lat_2").f;
-        if (fabs(phi1 - phi2) <= TOL ||
-            (con = fabs(phi1)) <= TOL ||
-            fabs(con - M_HALFPI) <= TOL ||
-            fabs(fabs(phi2) - M_HALFPI) <= TOL) E_ERROR(-33);
+        if (fabs(phi1 - phi2) <= TOL || (con = fabs(phi1)) <= TOL ||
+            fabs(con - M_HALFPI) <= TOL || fabs(fabs(phi2) - M_HALFPI) <= TOL) {
+                proj_errno_set(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
+                return freeup_new(P);
+        }
         Q->lamp = atan2(cos(phi1) * sin(phi2) * cos(lam1) -
             sin(phi1) * cos(phi2) * cos(lam2),
             sin(phi1) * cos(phi2) * sin(lam2) -
