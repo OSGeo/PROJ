@@ -391,9 +391,13 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char 
 
 ******************************************************************************/
     PJ *P;
-    char buffer[256];
+    char buffer[512];
 
-    sprintf(buffer, "+proj=pipeline +step +init=%s +inv +step +init=%s", srid_from, srid_to);
+    strcpy(buffer, "+proj=pipeline +step +init=");
+    strncat(buffer, srid_from, 512-strlen(buffer));
+    strncat(buffer, " +inv +step +init=", 512-strlen(buffer));
+    strncat(buffer, srid_to, 512-strlen(buffer));
+
     P = proj_create(ctx, buffer);
 
     return P;
@@ -523,40 +527,55 @@ PJ_INFO proj_info(void) {
     const char **paths;
     char *tmpstr;
     int i, n;
+    size_t len = 0;
+
+    memset(&info, 0, sizeof(PJ_INFO));
 
     info.major = PROJ_VERSION_MAJOR;
     info.minor = PROJ_VERSION_MINOR;
     info.patch = PROJ_VERSION_PATCH;
-    sprintf(info.version, "%d.%d.%d", info.major, info.minor, info.patch);
-    strcpy(info.release, pj_get_release());
 
-    paths = proj_get_searchpath();
-    n = proj_get_path_count();
+    /* This is a controlled environment, so no risk of sprintf buffer
+       overflow. A normal version string is xx.yy.zz which is 8 characters
+       long and there is room for 64 bytes in the version string. */
+    sprintf(info.version, "%d.%d.%d", info.major, info.minor, info.patch);
+
+    pj_strlcpy(info.release, pj_get_release(), sizeof(info.release));
+
+
     /* build search path string */
     tmpstr = getenv("HOME");
     if (tmpstr != NULL) {
-        sprintf(info.searchpath, "%s", tmpstr);
+        pj_strlcpy(info.searchpath, tmpstr, sizeof(info.searchpath));
     }
 
     tmpstr = getenv("PROJ_LIB");
-    if (info.searchpath != NULL) {
-        /* $HOME already in path */
-        if (tmpstr != NULL)
-            sprintf(info.searchpath, "%s;%s", info.searchpath, tmpstr);
-    } else {
-        /* path is empty */
-        if (tmpstr != NULL)
-            sprintf(info.searchpath, "%s", getenv("HOME"));
+    if (tmpstr != NULL) {
+        if (strlen(info.searchpath) != 0) {
+            /* $HOME already in path */
+            strcat(info.searchpath, ";");
+            len = strlen(tmpstr);
+            strncat(info.searchpath, tmpstr, sizeof(info.searchpath)-len-1);
+        } else {
+            /* path is empty */
+            pj_strlcpy(info.searchpath, tmpstr, sizeof(info.searchpath));
+        }
     }
 
+    paths = proj_get_searchpath();
+    n = proj_get_path_count();
+
     for (i=0; i<n; i++) {
-        if (strlen(info.searchpath)+strlen(paths[i]) >= 512)
+        if (strlen(info.searchpath)+strlen(paths[i]) >= 511)
             continue;
 
-        if (info.searchpath != NULL)
-            sprintf(info.searchpath, "%s;%s", info.searchpath, paths[i]);
-        else
-            sprintf(info.searchpath, "%s", paths[i]);
+        if (strlen(info.searchpath) != 0) {
+            strcat(info.searchpath, ";");
+            len = strlen(paths[i]);
+            strncat(info.searchpath, paths[i], sizeof(info.searchpath)-len-1);
+        } else {
+            pj_strlcpy(info.searchpath, paths[i], sizeof(info.searchpath));
+        }
     }
 
     return info;
@@ -575,14 +594,14 @@ PJ_PROJ_INFO proj_pj_info(const PJ *P) {
 
     /* projection id */
     if (pj_param(P->ctx, P->params, "tproj").i)
-        strncpy(info.id, pj_param(P->ctx, P->params, "sproj").s, sizeof(info.id));
+        pj_strlcpy(info.id, pj_param(P->ctx, P->params, "sproj").s, sizeof(info.id));
 
     /* projection description */
-    strncpy(info.description, P->descr, sizeof(info.description));
+    pj_strlcpy(info.description, P->descr, sizeof(info.description));
 
     /* projection definition */
     def = pj_get_def((PJ *)P, 0); /* pj_get_def takes a non-const PJ pointer */
-    strncpy(info.definition, &def[1], sizeof(info.definition)); /* def includes a leading space */
+    pj_strlcpy(info.definition, &def[1], sizeof(info.definition)); /* def includes a leading space */
     pj_dealloc(def);
 
     /* this does not take into account that a pipeline potentially does not */
@@ -616,13 +635,13 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
     }
 
     /* name of grid */
-    strncpy(info.gridname, gridname, sizeof(info.gridname));
+    pj_strlcpy(info.gridname, gridname, sizeof(info.gridname));
 
     /* full path of grid */
     pj_find_file(ctx, gridname, info.filename, sizeof(info.filename));
 
     /* grid format */
-    strncpy(info.format, gridinfo->format, sizeof(info.format));
+    pj_strlcpy(info.format, gridinfo->format, sizeof(info.format));
 
     /* grid size */
     info.n_lon = gridinfo->ct->lim.lam;
@@ -647,6 +666,8 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 /******************************************************************************
     Information about a named init file.
 
+    Maximum length of initname is 64.
+
     Returns PJ_INIT_INFO struct.
 
     If the init file is not found all members of
@@ -655,7 +676,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 
 ******************************************************************************/
     int file_found, def_found=0;
-    char param[64], key[64];
+    char param[80], key[74];
     paralist *start, *next;
     PJ_INIT_INFO info;
     PJ_CONTEXT *ctx = pj_get_default_ctx();
@@ -663,31 +684,33 @@ PJ_INIT_INFO proj_init_info(const char *initname){
     memset(&info, 0, sizeof(PJ_INIT_INFO));
 
     file_found = pj_find_file(ctx, initname, info.filename, sizeof(info.filename));
-    if (!file_found) {
+    if (!file_found || strlen(initname) > 64) {
         return info;
     }
 
-    strncpy(info.name, initname, sizeof(info.name));
+    pj_strlcpy(info.name, initname, sizeof(info.name));
     strcpy(info.origin, "Unknown");
     strcpy(info.version, "Unknown");
     strcpy(info.lastupdate, "Unknown");
 
-    sprintf(key, "%s:metadata", initname);
-    sprintf(param, "+init=%s", key);
-    start = pj_mkparam(param);
+    pj_strlcpy(key, initname, 64); /* make room for ":metadata\0" at the end */
+    strncat(key, ":metadata", 9);
+    strcpy(param, "+init=");
+    strncat(param, key, 73);
 
+    start = pj_mkparam(param);
     next = pj_get_init(ctx, &start, start, key, &def_found);
 
     if (pj_param(ctx, start, "tversion").i) {
-        strncpy(info.version, pj_param(ctx, start, "sversion").s, sizeof(info.version));
+        pj_strlcpy(info.version, pj_param(ctx, start, "sversion").s, sizeof(info.version));
     }
 
     if (pj_param(ctx, start, "torigin").i) {
-        strncpy(info.origin, pj_param(ctx, start, "sorigin").s, sizeof(info.origin));
+        pj_strlcpy(info.origin, pj_param(ctx, start, "sorigin").s, sizeof(info.origin));
     }
 
     if (pj_param(ctx, start, "tlastupdate").i) {
-        strncpy(info.lastupdate, pj_param(ctx, start, "slastupdate").s, sizeof(info.lastupdate));
+        pj_strlcpy(info.lastupdate, pj_param(ctx, start, "slastupdate").s, sizeof(info.lastupdate));
     }
 
     for ( ; start; start = next) {

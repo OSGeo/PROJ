@@ -110,6 +110,8 @@ void proj_fileapi_set (PJ *P, void *fileapi);
 const char **proj_get_searchpath(void);
 int    proj_get_path_count(void);
 
+size_t pj_strlcpy(char *dst, const char *src, size_t siz);
+
 #ifdef __cplusplus
 }
 #endif

@@ -237,6 +237,9 @@ int pj_cart_selftest (void) {
     PJ_OBS a, b, obs[2];
     PJ_COORD coord[2];
     PJ_INFO info;
+    PJ_PROJ_INFO pj_info;
+    PJ_GRID_INFO grid_info;
+    PJ_INIT_INFO init_info;
     int err;
     size_t n, sz;
     double dist, h, t;
@@ -492,21 +495,26 @@ int pj_cart_selftest (void) {
     proj_destroy(P);
 
     P = proj_create(0, arg);
-    if ( !proj_pj_info(P).has_inverse )            {  proj_destroy(P); return 61; }
-    if ( strcmp(proj_pj_info(P).definition, arg) ) {  proj_destroy(P); return 62; }
-    if ( strcmp(proj_pj_info(P).id, "utm") )       {  proj_destroy(P); return 63; }
+    pj_info = proj_pj_info(P);
+    if ( !pj_info.has_inverse )            {  proj_destroy(P); return 61; }
+    if ( strcmp(pj_info.definition, arg) ) {  proj_destroy(P); return 62; }
+    if ( strcmp(pj_info.id, "utm") )       {  proj_destroy(P); return 63; }
     proj_destroy(P);
 
     /* proj_grid_info() */
-    if ( proj_grid_info("nonexistinggrid").filename[0] != '\0' )           return 64;
-    if ( proj_grid_info("egm96_15.gtx").filename[0] == '\0' )              return 65;
-    if ( strcmp(proj_grid_info("egm96_15.gtx").gridname, "egm96_15.gtx") ) return 66;
+    grid_info = proj_grid_info("egm96_15.gtx");
+    if ( strlen(grid_info.filename) == 0 )            return 64;
+    if ( strcmp(grid_info.gridname, "egm96_15.gtx") ) return 65;
+    grid_info = proj_grid_info("nonexistinggrid");
+    if ( strlen(grid_info.filename) > 0 )             return 66;
 
     /* proj_init_info() */
-    if ( strcmp(proj_init_info("epsg").origin, "EPSG") )  return 69;
-    if ( strcmp(proj_init_info("epsg").name, "epsg") )    return 68;
-    if ( proj_init_info("unknown").filename[0] != '\0' )  return 67;
+    init_info = proj_init_info("unknowninit");
+    if ( strlen(init_info.filename) != 0 )  return 67;
 
+    init_info = proj_init_info("epsg");
+    if ( strcmp(init_info.origin, "EPSG") )    return 69;
+    if ( strcmp(init_info.name, "epsg") )      return 68;
 
 
 
