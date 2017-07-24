@@ -90,50 +90,53 @@ EXPORTS
     geod_polygon_clear              @88
     pj_run_selftests                @89
 
-    proj_create                     @90
-    proj_create_argv                @91
-    proj_create_crs_to_crs          @92
-    proj_destroy                    @93
+    pj_find_file                    @90
 
-    proj_trans_obs                  @94
-    proj_trans_coord                @95
-    proj_transform                  @96
-    proj_transform_obs              @97
-    proj_transform_coord            @98
-    proj_roundtrip                  @99
+    proj_create                     @91
+    proj_create_argv                @92
+    proj_create_crs_to_crs          @93
+    proj_destroy                    @94
 
-    proj_coord                     @100
-    proj_obs                       @101
-    proj_coord_error               @102
-    proj_obs_error                 @103
+    proj_trans_obs                  @95
+    proj_trans_coord                @96
+    proj_transform                  @97
+    proj_transform_obs              @98
+    proj_transform_coord            @99
+    proj_roundtrip                 @100
 
-    proj_errno                     @104
-    proj_errno_set                 @105
-    proj_errno_reset               @106
-    proj_errno_restore             @107
-    proj_context_errno_set         @108
+    proj_coord                     @101
+    proj_obs                       @102
+    proj_coord_error               @103
+    proj_obs_error                 @104
 
-    proj_context_create            @109
-    proj_context_set               @110
-    proj_context_inherit           @111
-    proj_context_destroy           @112
+    proj_errno                     @105
+    proj_errno_set                 @106
+    proj_errno_reset               @107
+    proj_errno_restore             @108
+    proj_context_errno_set         @109
 
-    proj_lp_dist                   @113
-    proj_xy_dist                   @114
-    proj_xyz_dist                  @115
+    proj_context_create            @110
+    proj_context_set               @111
+    proj_context_inherit           @112
+    proj_context_destroy           @113
 
-    proj_log_level                 @116
-    proj_log_func                  @117
-    proj_log_error                 @118
-    proj_log_debug                 @119
-    proj_log_trace                 @120
+    proj_lp_dist                   @114
+    proj_xy_dist                   @115
+    proj_xyz_dist                  @116
 
-    proj_definition_retrieve       @121
-    proj_release                   @122
-    proj_torad                     @123
-    proj_todeg                     @124
-    proj_has_inverse               @125
-    proj_rtodms                    @126
-    proj_dmstor                    @127
+    proj_log_level                 @117
+    proj_log_func                  @118
+    proj_log_error                 @119
+    proj_log_debug                 @120
+    proj_log_trace                 @121
 
-    pj_find_file                   @128
+    proj_info                      @122
+    proj_pj_info                   @123
+    proj_grid_info                 @124
+    proj_init_info                 @125
+
+    proj_torad                     @126
+    proj_todeg                     @127
+    proj_rtodms                    @128
+    proj_dmstor                    @129
+

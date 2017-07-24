@@ -1,3 +1,4 @@
+<metadata> +origin=Esri +lastupdate=2017-02-26
 # Anguilla 1957 / British West Indies Grid
 <2000> +proj=tmerc +lat_0=0 +lon_0=-62 +k=0.999500 +x_0=400000 +y_0=0 +ellps=clrk80 +units=m +no_defs <>
 # Antigua 1943 / British West Indies Grid

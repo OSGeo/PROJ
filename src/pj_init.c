@@ -243,8 +243,9 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
         else
         {
             /* skip past word */
-            while( *next_char && !isspace(*next_char) )
+            while( *next_char && !isspace(*next_char) ) {
                 next_char++;
+            }
 
         }
     }
@@ -253,7 +254,6 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
         errno = 0;
 
     free(state);
-
     return next;
 }
 
@@ -280,8 +280,7 @@ get_defaults(projCtx ctx, paralist **start, paralist *next, char *name) {
 /************************************************************************/
 /*                              get_init()                              */
 /************************************************************************/
-static paralist *
-get_init(projCtx ctx, paralist **start, paralist *next, char *name, int *found_def) {
+static paralist *get_init(projCtx ctx, paralist **start, paralist *next, char *name, int *found_def) {
     char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *opt;
     PAFile fid;
     paralist *init_items = NULL;
@@ -328,6 +327,10 @@ get_init(projCtx ctx, paralist **start, paralist *next, char *name, int *found_d
         pj_insert_initcache( name, orig_next->next );
 
     return next;
+}
+
+paralist * pj_get_init(projCtx ctx, paralist **start, paralist *next, char *name, int *found_def) {
+    return get_init(ctx, start, next, name, found_def);
 }
 
 /************************************************************************/
@@ -466,7 +469,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         }
     }
 
-    /* in cae the parameter list only consist of a +init parameter
+    /* in case the parameter list only consist of a +init parameter
        it is expanded here (will not be handled in the above loop). */
     if (pj_param(ctx, start, "tinit").i && argc == 1) {
         found_def = 0;

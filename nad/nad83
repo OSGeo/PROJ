@@ -4,6 +4,7 @@
 #     State Plane Coordinate Systems,
 #     North American Datum 1983
 
+<metadata> +lastupdate=1992-12-20
 # 101: alabama east: nad83
 <101> proj=tmerc  datum=NAD83
 lon_0=-85d50 lat_0=30d30 k=.99996
