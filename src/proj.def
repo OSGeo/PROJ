@@ -129,8 +129,8 @@ EXPORTS
     proj_log_trace                 @120
 
     proj_definition_retrieve       @121
-    proj_derivatives_retrieve      @122
-    proj_factors_retrieve          @123
+    proj_derivatives               @122
+    proj_factors                   @123
     proj_release                   @124
 
     proj_torad                     @125

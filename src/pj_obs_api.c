@@ -37,7 +37,6 @@
 #include "proj_internal.h"
 #include "projects.h"
 #include <geodesic.h>
-
 #include <stddef.h>
 #include <errno.h>
 
@@ -519,27 +518,20 @@ char *proj_definition_retrieve (PJ *P) {
 
 
 /*****************************************************************************/
-PJ_DERIVS *proj_derivatives_retrieve(PJ *P, LP lp) {
+PJ_DERIVS proj_derivatives(const PJ *P, const LP lp) {
 /******************************************************************************
     Derivatives of coordinates.
 
-    Returns PJ_DERIVS pointer if succesfull, otherwise NULL.
-
-    The returned struct should be released with proj_release().
+    returns PJ_DERIVS. If unsuccessfull error number is set and the returned
+    struct contains NULL data.
 
 ******************************************************************************/
-    PJ_DERIVS *derivs = pj_calloc(1, sizeof(PJ_DERIVS));
-    if (derivs == 0) {
-
-        proj_errno_set(P, ENOMEM);
-        return NULL;
-    }
+    PJ_DERIVS derivs;
 
     /* casting to struct DERIVS for compatibility reasons */
-    if (pj_deriv(lp, 0.0, P, (struct DERIVS *)derivs)) {
+    if (pj_deriv(lp, 1e-5, (PJ *)P, (struct DERIVS *)&derivs)) {
         /* errno set in pj_derivs */
-        proj_release(derivs);
-        return NULL;
+        memset(&derivs, 0, sizeof(PJ_DERIVS));
     }
 
     return derivs;
@@ -547,29 +539,26 @@ PJ_DERIVS *proj_derivatives_retrieve(PJ *P, LP lp) {
 
 
 /*****************************************************************************/
-PJ_FACTORS *proj_factors_retrieve(PJ *P, LP lp) {
+PJ_FACTORS proj_factors(const PJ *P, const LP lp) {
 /******************************************************************************
     Cartographic characteristics at point lp.
 
     Characteristics include meridian, parallel and areal scales, angular
     distortion, meridian/parallel, meridian convergence and scale error.
 
-    returns PJ_FACTORS pointer if succesfull, otherwise NULL.
-
-    The returned struct should be released with proj_release().
+    returns PJ_FACTORS. If unsuccessfull error number is set and the returned
+    struct contains NULL data.
 
 ******************************************************************************/
-    PJ_FACTORS *factors = pj_calloc(1, sizeof(PJ_FACTORS));
-    if (factors == 0) {
-        proj_errno_set(P, ENOMEM);
-        return NULL;
-    }
+    PJ_FACTORS factors;
+
+    /* pj_factors rely code being zero */
+    factors.code = 0;
 
     /* casting to struct FACTORS for compatibility reasons */
-    if (pj_factors(lp, P, 0.0, (struct FACTORS *)factors)) {
+    if (pj_factors(lp, (PJ *)P, 0.0, (struct FACTORS *)&factors)) {
         /* errno set in pj_factors */
-        proj_release(factors);
-        return NULL;
+        memset(&factors, 0, sizeof(PJ_FACTORS));
     }
 
     return factors;

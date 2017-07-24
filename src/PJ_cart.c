@@ -236,8 +236,8 @@ int pj_cart_selftest (void) {
     PJ *P;
     PJ_OBS a, b, obs[2];
     PJ_COORD coord[2];
-    PJ_DERIVS *derivs;
-    PJ_FACTORS *factors;
+    PJ_DERIVS derivs;
+    PJ_FACTORS factors;
     int err;
     size_t n, sz;
     double dist, h, t;
@@ -510,25 +510,29 @@ int pj_cart_selftest (void) {
 
     /* test proj_derivatives_retrieve() and proj_factors_retrieve() */
     P = proj_create(0, "+proj=merc");
-    a = proj_obs_null();
+    a = proj_obs_null;
     a.coo.lp.lam = PJ_TORAD(12);
     a.coo.lp.phi = PJ_TORAD(55);
 
-    derivs = proj_derivatives_retrieve(P, a.coo.lp);
-    if (!derivs)
+    derivs = proj_derivatives(P, a.coo.lp);
+    if (proj_errno(P))
         return 80; /* derivs not created correctly */
-    proj_release(derivs);
 
-    factors = proj_factors_retrieve(P, a.coo.lp);
-    if (!derivs)
-        return 81; /* factors not created correctly */
+    if ( fabs(derivs.x_l - 1.0)     > 1e-5 )   return 81;
+    if ( fabs(derivs.x_p - 0.0)     > 1e-5 )   return 82;
+    if ( fabs(derivs.y_l - 0.0)     > 1e-5 )   return 83;
+    if ( fabs(derivs.y_p - 1.73959) > 1e-5 )   return 84;
+
+
+    factors = proj_factors(P, a.coo.lp);
+    if (proj_errno(P))
+        return 85; /* factors not created correctly */
 
     /* check a few key characteristics of the Mercator projection */
-    if (factors->omega != 0.0)       return 82; /* angular distortion should be 0 */
-    if (factors->thetap != M_PI_2)   return 83; /* Meridian/parallel angle should be 90 deg */
-    if (factors->conv != 0.0)        return 84; /* meridian convergence should be 0 */
+    if (factors.omega != 0.0)       return 86; /* angular distortion should be 0 */
+    if (factors.thetap != M_PI_2)   return 87; /* Meridian/parallel angle should be 90 deg */
+    if (factors.conv != 0.0)        return 88; /* meridian convergence should be 0 */
 
-    proj_release(factors);
 
     proj_destroy(P);
 

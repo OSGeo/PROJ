@@ -376,8 +376,8 @@ int proj_has_inverse(PJ *P);
 double proj_dmstor(const char *is, char **rs);
 char*  proj_rtodms(char *s, double r, int pos, int neg);
 
-PJ_DERIVS  *proj_derivatives_retrieve (PJ *P, LP lp);
-PJ_FACTORS *proj_factors_retrieve (PJ *P, LP lp);
+PJ_DERIVS  proj_derivatives(const PJ *P, const LP lp);
+PJ_FACTORS proj_factors(const PJ *P, const LP lp);
 
 #ifdef __cplusplus
 }
