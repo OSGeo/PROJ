@@ -182,6 +182,12 @@ typedef union PJ_TRIPLET PJ_TRIPLET;
 union PJ_COORD;
 typedef union PJ_COORD PJ_COORD;
 
+struct PJ_DERIVS;
+typedef struct PJ_DERIVS PJ_DERIVS;
+
+struct PJ_FACTORS;
+typedef struct PJ_FACTORS PJ_FACTORS;
+
 /* Data type for projection/transformation information */
 struct PJconsts;
 typedef struct PJconsts PJ;         /* the PJ object herself */
@@ -269,11 +275,25 @@ struct PJ_OBS {
     unsigned int flags;  /* additional data, intended for flags */
 };
 
+struct PJ_DERIVS {
+    double x_l, x_p;       /* derivatives of x for lambda-phi */
+    double y_l, y_p;       /* derivatives of y for lambda-phi */
+};
+
+struct PJ_FACTORS {
+    struct PJ_DERIVS der;
+    double h, k;           /* meridional, parallel scales */
+    double omega, thetap;  /* angular distortion, theta prime */
+    double conv;           /* convergence */
+    double s;              /* areal scale factor */
+    double a, b;           /* max-min scale error */
+    int code;              /* info as to analytics, see following */
+};
+
+
 /* The context type - properly namespaced synonym for projCtx */
 struct projCtx_t;
 typedef struct projCtx_t PJ_CONTEXT;
-
-
 
 /* A P I */
 
@@ -356,6 +376,8 @@ int proj_has_inverse(PJ *P);
 double proj_dmstor(const char *is, char **rs);
 char*  proj_rtodms(char *s, double r, int pos, int neg);
 
+PJ_DERIVS  proj_derivatives(const PJ *P, const LP lp);
+PJ_FACTORS proj_factors(const PJ *P, const LP lp);
 
 #ifdef __cplusplus
 }
