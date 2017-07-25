@@ -592,6 +592,12 @@ PJ_PROJ_INFO proj_pj_info(const PJ *P) {
     PJ_PROJ_INFO info;
     char *def;
 
+    memset(&info, 0, sizeof(PJ_PROJ_INFO));
+
+    if (!P) {
+        return info;
+    }
+
     /* projection id */
     if (pj_param(P->ctx, P->params, "tproj").i)
         pj_strlcpy(info.id, pj_param(P->ctx, P->params, "sproj").s, sizeof(info.id));
