@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(gn_sinu, "General Sinusoidal Series") "\n\tPCyl, Sph.\n\tm= n=";
 PROJ_HEAD(sinu, "Sinusoidal (Sanson-Flamsteed)") "\n\tPCyl, Sph&Ell";
@@ -36,7 +37,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     } else if ((s - EPS10) < M_HALFPI) {
         lp.lam = 0.;
     } else {
-        I_ERROR;
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
     }
 
     return lp;
@@ -60,8 +61,11 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
             if (fabs(V) < LOOP_TOL)
                 break;
         }
-        if (!i)
-            F_ERROR
+        if (!i) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
+
     }
     xy.x = Q->C_x * lp.lam * (Q->m + cos(lp.phi));
     xy.y = Q->C_y * lp.phi;

@@ -33,7 +33,8 @@
  ****************************************************************************/
 
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 #include "geocent.h"
 
 struct pj_opaque {
@@ -61,9 +62,10 @@ static LPZ inverse3d(XYZ xyz, PJ *P) {
     pxyz[1] = xyz.x * P->a / Q->rcurv;
     pxyz[2] = xyz.z;
 
-    if( pj_Convert_Geodetic_To_Geocentric( &(Q->sph), pxyz[0], pxyz[1], pxyz[2],
-                temp, temp+1, temp+2) != 0)
-            I3_ERROR;
+    if( pj_Convert_Geodetic_To_Geocentric( &(Q->sph), pxyz[0], pxyz[1], pxyz[2], temp, temp+1, temp+2) != 0) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lpz;
+    }
 
     /* Apply rotation */
     pxyz[0] = Q->transMat[0] * temp[0] + Q->transMat[1] * temp[1] + Q->transMat[2] * temp[2];
@@ -100,9 +102,10 @@ static XYZ forward3d(LPZ lpz, PJ *P) {
 
 
     /* Convert lat lon to geocentric coordinates */
-    if( pj_Convert_Geodetic_To_Geocentric( &(Q->elp_0), lpz.phi, lpz.lam, lpz.z,
-                temp, temp+1, temp+2 ) != 0 )
-        F3_ERROR;
+    if( pj_Convert_Geodetic_To_Geocentric( &(Q->elp_0), lpz.phi, lpz.lam, lpz.z, temp, temp+1, temp+2 ) != 0 ) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xyz;
+    }
 
 
     /* Adjust for offset */
@@ -162,8 +165,10 @@ static PJ *setup(PJ *P) { /* general initialization */
     temp = P->a * sqrt(1.0 - P->es);
 
     /* Setup original geocentric system */
-    if ( pj_Set_Geocentric_Parameters(&(Q->elp_0), P->a, temp) != 0)
-            E_ERROR(-37);
+    if ( pj_Set_Geocentric_Parameters(&(Q->elp_0), P->a, temp) != 0) {
+            proj_errno_set(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+            return freeup_new(P);
+    }
 
     clt = cos(Q->plat);
     slt = sin(Q->plat);
@@ -187,9 +192,10 @@ static PJ *setup(PJ *P) { /* general initialization */
 #endif
 
     /* Set up local sphere at the given peg point */
-    if ( pj_Set_Geocentric_Parameters(&(Q->sph), Q->rcurv, Q->rcurv) != 0)
-        E_ERROR(-37);
-
+    if ( pj_Set_Geocentric_Parameters(&(Q->sph), Q->rcurv, Q->rcurv) != 0) {
+            proj_errno_set(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+            return freeup_new(P);
+    }
     /* Set up the transformation matrices */
     Q->transMat[0] = clt * clo;
     Q->transMat[1] = -shdg*slo - slt*clo * chdg;
@@ -205,7 +211,8 @@ static PJ *setup(PJ *P) { /* general initialization */
     if( pj_Convert_Geodetic_To_Geocentric( &(Q->elp_0), Q->plat, Q->plon, Q->h0,
                                            pxyz, pxyz+1, pxyz+2 ) != 0 )
     {
-        E_ERROR(-14)
+        proj_errno_set(P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
+        return freeup_new(P);
     }
 
 
@@ -234,20 +241,26 @@ PJ *PROJECTION(sch) {
     /* Check if peg latitude was defined */
     if (pj_param(P->ctx, P->params, "tplat_0").i)
         Q->plat = pj_param(P->ctx, P->params, "rplat_0").f;
-    else
-        E_ERROR(-37);
+    else {
+        proj_errno_set(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+        return freeup_new(P);
+    }
 
     /* Check if peg longitude was defined */
     if (pj_param(P->ctx, P->params, "tplon_0").i)
         Q->plon = pj_param(P->ctx, P->params, "rplon_0").f;
-    else
-        E_ERROR(-37);
+    else {
+        proj_errno_set(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+        return freeup_new(P);
+    }
 
     /* Check if peg latitude is defined */
     if (pj_param(P->ctx, P->params, "tphdg_0").i)
         Q->phdg = pj_param(P->ctx, P->params, "rphdg_0").f;
-    else
-        E_ERROR(-37);
+    else {
+        proj_errno_set(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+        return freeup_new(P);
+    }
 
 
     /* Check if average height was defined - If so read it in */

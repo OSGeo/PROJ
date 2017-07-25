@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include    <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 typedef struct { double r, Az; } VECT;
 struct pj_opaque {
@@ -130,7 +131,10 @@ PJ *PROJECTION(chamb) {
         j = i == 2 ? 0 : i + 1;
         Q->c[i].v = vect(P->ctx,Q->c[j].phi - Q->c[i].phi, Q->c[i].cosphi, Q->c[i].sinphi,
             Q->c[j].cosphi, Q->c[j].sinphi, Q->c[j].lam - Q->c[i].lam);
-        if (Q->c[i].v.r == 0.0) E_ERROR(-25);
+        if (Q->c[i].v.r == 0.0) {
+            proj_errno_set(P, PJD_ERR_CONTROL_POINT_NO_DIST);
+            return freeup_new(P);
+        }
         /* co-linearity problem ignored for now */
     }
     Q->beta_0 = lc(P->ctx,Q->c[0].v.r, Q->c[2].v.r, Q->c[1].v.r);

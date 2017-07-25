@@ -27,7 +27,8 @@
 
 #define PJ_LIB__
 #include "geodesic.h"
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 struct pj_opaque {
     double  sinph0;
@@ -52,6 +53,24 @@ PROJ_HEAD(aeqd, "Azimuthal Equidistant") "\n\tAzi, Sph&Ell\n\tlat_0 guam";
 #define EQUIT   2
 #define OBLIQ   3
 
+
+static void *freeup_new (PJ *P) {                       /* Destructor */
+    if (0==P)
+        return 0;
+    if (0==P->opaque)
+        return pj_dealloc (P);
+
+    if (P->opaque->en)
+        pj_dealloc(P->opaque->en);
+    pj_dealloc (P->opaque);
+    return pj_dealloc(P);
+}
+
+
+static void freeup (PJ *P) {
+    freeup_new (P);
+    return;
+}
 
 static XY e_guam_fwd(LP lp, PJ *P) {        /* Guam elliptical */
     XY xy = {0.0,0.0};
@@ -124,8 +143,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         xy.y = Q->sinph0 * sinphi + Q->cosph0 * cosphi * coslam;
 oblcon:
         if (fabs(fabs(xy.y) - 1.) < TOL)
-            if (xy.y < 0.)
-                F_ERROR
+            if (xy.y < 0.) {
+                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                return xy;
+            }
             else
                 xy.x = xy.y = 0.;
         else {
@@ -141,7 +162,10 @@ oblcon:
         coslam = -coslam;
         /*-fallthrough*/
     case S_POLE:
-        if (fabs(lp.phi - M_HALFPI) < EPS10) F_ERROR;
+        if (fabs(lp.phi - M_HALFPI) < EPS10) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
         xy.x = (xy.y = (M_HALFPI + lp.phi)) * sin(lp.lam);
         xy.y *= coslam;
         break;
@@ -206,7 +230,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     double cosc, c_rh, sinc;
 
     if ((c_rh = hypot(xy.x, xy.y)) > M_PI) {
-        if (c_rh - EPS10 > M_PI) I_ERROR;
+        if (c_rh - EPS10 > M_PI) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        }
         c_rh = M_PI;
     } else if (c_rh < EPS10) {
         lp.phi = P->phi0;
@@ -238,25 +265,6 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    if (P->opaque->en)
-        pj_dealloc(P->opaque->en);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(aeqd) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
@@ -282,7 +290,7 @@ PJ *PROJECTION(aeqd) {
         P->inv = s_inverse;
         P->fwd = s_forward;
     } else {
-        if (!(Q->en = pj_enfn(P->es))) E_ERROR_0;
+        if (!(Q->en = pj_enfn(P->es))) return freeup_new(P);
         if (pj_param(P->ctx, P->params, "bguam").i) {
             Q->M1 = pj_mlfn(P->phi0, Q->sinph0, Q->cosph0, Q->en);
             P->inv = e_guam_inv;

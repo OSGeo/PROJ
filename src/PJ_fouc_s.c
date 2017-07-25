@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(fouc_s, "Foucaut Sinusoidal") "\n\tPCyl., Sph.";
 
@@ -71,8 +72,10 @@ PJ *PROJECTION(fouc_s) {
     P->opaque = Q;
 
     Q->n = pj_param(P->ctx, P->params, "dn").f;
-    if (Q->n < 0. || Q->n > 1.)
-        E_ERROR(-99)
+    if (Q->n < 0. || Q->n > 1.) {
+        proj_errno_set(P, PJD_ERR_N_OUT_OF_RANGE);
+        return freeup_new(P);
+    }
     Q->n1 = 1. - Q->n;
     P->es = 0;
     P->inv = s_inverse;

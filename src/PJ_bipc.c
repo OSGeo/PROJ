@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(bipc, "Bipolar conic of western hemisphere") "\n\tConic Sph.";
 
@@ -51,7 +52,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         sdlam = sin(sdlam);
         z = S20 * sphi + C20 * cphi * cdlam;
         if (fabs(z) > 1.) {
-            if (fabs(z) > ONEEPS) F_ERROR
+            if (fabs(z) > ONEEPS) {
+                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                return xy;
+            }
             else z = z < 0. ? -1. : 1.;
         } else
             z = acos(z);
@@ -62,19 +66,31 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     } else {
         z = S45 * (sphi + cphi * cdlam);
         if (fabs(z) > 1.) {
-            if (fabs(z) > ONEEPS) F_ERROR
+            if (fabs(z) > ONEEPS) {
+                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                return xy;
+            }
             else z = z < 0. ? -1. : 1.;
         } else
             z = acos(z);
         Av = Azba;
         xy.y = -rhoc;
     }
-    if (z < 0.) F_ERROR;
+    if (z < 0.) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
     r = F * (t = pow(tan(.5 * z), n));
-    if ((al = .5 * (R104 - z)) < 0.) F_ERROR;
+    if ((al = .5 * (R104 - z)) < 0.) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
     al = (t + pow(al, n)) / T;
     if (fabs(al) > 1.) {
-        if (fabs(al) > ONEEPS) F_ERROR
+        if (fabs(al) > ONEEPS) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
         else al = al < 0. ? -1. : 1.;
     } else
         al = acos(al);
@@ -125,7 +141,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
             break;
         rl = r;
     }
-    if (! i) I_ERROR;
+    if (! i) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return lp;
+    }
     Az = Av - Az / n;
     lp.phi = asin(s * cos(z) + c * sin(z) * cos(Az));
     lp.lam = atan2(sin(Az), c / tan(z) - s * cos(Az));

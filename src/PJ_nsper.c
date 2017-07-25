@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 struct pj_opaque {
     double  height;
@@ -50,7 +51,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         xy.y = sinphi;
         break;
     }
-    if (xy.y < Q->rp) F_ERROR;
+    if (xy.y < Q->rp) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
     xy.y = Q->pn1 / (Q->p - xy.y);
     xy.x = xy.y * cosphi * sin(lp.lam);
     switch (Q->mode) {
@@ -95,7 +99,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         xy.y = bq * Q->cg - bm * Q->sg;
     }
     rh = hypot(xy.x, xy.y);
-    if ((sinz = 1. - rh * rh * Q->pfact) < 0.) I_ERROR;
+    if ((sinz = 1. - rh * rh * Q->pfact) < 0.) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return lp;
+    }
     sinz = (Q->p - sqrt(sinz)) / (Q->pn1 / rh + rh / Q->pn1);
     cosz = sqrt(1. - sinz * sinz);
     if (fabs(rh) <= EPS10) {
@@ -146,7 +153,10 @@ static void freeup (PJ *P) {
 static PJ *setup(PJ *P) {
     struct pj_opaque *Q = P->opaque;
 
-    if ((Q->height = pj_param(P->ctx, P->params, "dh").f) <= 0.) E_ERROR(-30);
+    if ((Q->height = pj_param(P->ctx, P->params, "dh").f) <= 0.) {
+        proj_errno_set(P, PJD_ERR_H_LESS_THAN_ZERO);
+        return freeup_new(P);
+    }
     if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
     else if (fabs(P->phi0) < EPS10)

@@ -140,3 +140,6 @@ EXPORTS
     proj_rtodms                    @128
     proj_dmstor                    @129
 
+    proj_derivatives               @130
+    proj_factors                   @131
+

@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(vandg, "van der Grinten (I)") "\n\tMisc Sph";
 
@@ -18,7 +19,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     double  al, al2, g, g2, p2;
 
     p2 = fabs(lp.phi / M_HALFPI);
-    if ((p2 - TOL) > 1.) F_ERROR;
+    if ((p2 - TOL) > 1.) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
     if (p2 > 1.)
         p2 = 1.;
     if (fabs(lp.phi) <= TOL) {
@@ -41,7 +45,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         if (lp.lam < 0.) xy.x = -xy.x;
         xy.y = fabs(xy.x / M_PI);
         xy.y = 1. - xy.y * (xy.y + 2. * al);
-        if (xy.y < -TOL) F_ERROR;
+        if (xy.y < -TOL) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
         if (xy.y < 0.)
             xy.y = 0.;
         else
@@ -81,8 +88,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         t = r2 + TPISQ * (x2 - y2 + HPISQ);
         lp.lam = fabs(xy.x) <= TOL ? 0. :
            .5 * (r - PISQ + (t <= 0. ? 0. : sqrt(t))) / xy.x;
-    } else
-        I_ERROR;
+    } else {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return lp;
+    }
 
     return lp;
 }

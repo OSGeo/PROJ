@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(lcc, "Lambert Conformal Conic")
     "\n\tConic, Sph&Ell\n\tlat_1= and lat_2= or lat_0";
@@ -22,7 +23,10 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double rho;
 
     if (fabs(fabs(lp.phi) - M_HALFPI) < EPS10) {
-        if ((lp.phi * Q->n) <= 0.) F_ERROR;
+        if ((lp.phi * Q->n) <= 0.) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
         rho = 0.;
     } else {
         rho = Q->c * (Q->ellips ? pow(pj_tsfn(lp.phi, sin(lp.phi),
@@ -53,8 +57,11 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         }
         if (Q->ellips) {
             lp.phi = pj_phi2(P->ctx, pow(rho / Q->c, 1./Q->n), P->e);
-            if (lp.phi == HUGE_VAL)
-                I_ERROR;
+            if (lp.phi == HUGE_VAL) {
+                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                return lp;
+            }
+
         } else
             lp.phi = 2. * atan(pow(Q->c / rho, 1./Q->n)) - M_HALFPI;
         lp.lam = atan2(xy.x, xy.y) / Q->n;
@@ -115,7 +122,10 @@ PJ *PROJECTION(lcc) {
         if (!pj_param(P->ctx, P->params, "tlat_0").i)
             P->phi0 = Q->phi1;
     }
-    if (fabs(Q->phi1 + Q->phi2) < EPS10) E_ERROR(-21);
+    if (fabs(Q->phi1 + Q->phi2) < EPS10) {
+        proj_errno_set(P, PJD_ERR_CONIC_LAT_EQUAL);
+        return freeup_new(P);
+    }
     Q->n = sinphi = sin(Q->phi1);
     cosphi = cos(Q->phi1);
     secant = fabs(Q->phi1 - Q->phi2) >= EPS10;

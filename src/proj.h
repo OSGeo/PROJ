@@ -182,6 +182,12 @@ typedef union PJ_TRIPLET PJ_TRIPLET;
 union PJ_COORD;
 typedef union PJ_COORD PJ_COORD;
 
+struct PJ_DERIVS;
+typedef struct PJ_DERIVS PJ_DERIVS;
+
+struct PJ_FACTORS;
+typedef struct PJ_FACTORS PJ_FACTORS;
+
 /* Data type for projection/transformation information */
 struct PJconsts;
 typedef struct PJconsts PJ;         /* the PJ object herself */
@@ -282,6 +288,23 @@ struct PJ_OBS {
     unsigned int flags;  /* additional data, intended for flags */
 };
 
+
+struct PJ_DERIVS {
+    double x_l, x_p;       /* derivatives of x for lambda-phi */
+    double y_l, y_p;       /* derivatives of y for lambda-phi */
+};
+
+struct PJ_FACTORS {
+    struct PJ_DERIVS der;
+    double h, k;           /* meridional, parallel scales */
+    double omega, thetap;  /* angular distortion, theta prime */
+    double conv;           /* convergence */
+    double s;              /* areal scale factor */
+    double a, b;           /* max-min scale error */
+    int code;              /* info as to analytics, see following */
+};
+
+
 struct PJ_INFO {
     char        release[64];        /* Release info. Version + date         */
     char        version[64];        /* Full version number                  */
@@ -318,11 +341,11 @@ struct PJ_INIT_INFO {
     char        lastupdate[16];     /* Date of last update in YYYY-MM-DD format */
 };
 
+
+
 /* The context type - properly namespaced synonym for projCtx */
 struct projCtx_t;
 typedef struct projCtx_t PJ_CONTEXT;
-
-
 
 /* A P I */
 
@@ -386,6 +409,10 @@ void proj_errno_set (PJ *P, int err);
 int  proj_errno_reset (PJ *P);
 void proj_errno_restore (PJ *P, int err);
 
+
+PJ_DERIVS  proj_derivatives(const PJ *P, const LP lp);
+PJ_FACTORS proj_factors(const PJ *P, const LP lp);  
+  
 /* Info functions - get information about various PROJ.4 entities */
 PJ_INFO      proj_info(void);
 PJ_PROJ_INFO proj_pj_info(const PJ *P);
@@ -401,7 +428,6 @@ double proj_todeg (double angle_in_radians);
 
 double proj_dmstor(const char *is, char **rs);
 char*  proj_rtodms(char *s, double r, int pos, int neg);
-
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(gnom, "Gnomonic") "\n\tAzi, Sph.";
 
@@ -40,7 +41,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
             break;
     }
 
-    if (xy.y <= EPS10) F_ERROR;
+    if (xy.y <= EPS10) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
 
     xy.x = (xy.y = 1. / xy.y) * cosphi * sin(lp.lam);
     switch (Q->mode) {

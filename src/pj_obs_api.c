@@ -37,7 +37,6 @@
 #include "proj_internal.h"
 #include "projects.h"
 #include <geodesic.h>
-
 #include <stddef.h>
 #include <errno.h>
 
@@ -581,6 +580,7 @@ PJ_INFO proj_info(void) {
     return info;
 }
 
+
 /*****************************************************************************/
 PJ_PROJ_INFO proj_pj_info(const PJ *P) {
 /******************************************************************************
@@ -728,6 +728,54 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 }
 
 
+/*****************************************************************************/
+PJ_DERIVS proj_derivatives(const PJ *P, const LP lp) {
+/******************************************************************************
+    Derivatives of coordinates.
+
+    returns PJ_DERIVS. If unsuccessfull error number is set and the returned
+    struct contains NULL data.
+
+******************************************************************************/
+    PJ_DERIVS derivs;
+
+    /* casting to struct DERIVS for compatibility reasons */
+    if (pj_deriv(lp, 1e-5, (PJ *)P, (struct DERIVS *)&derivs)) {
+        /* errno set in pj_derivs */
+        memset(&derivs, 0, sizeof(PJ_DERIVS));
+    }
+
+    return derivs;
+}
+
+
+/*****************************************************************************/
+PJ_FACTORS proj_factors(const PJ *P, const LP lp) {
+/******************************************************************************
+    Cartographic characteristics at point lp.
+
+    Characteristics include meridian, parallel and areal scales, angular
+    distortion, meridian/parallel, meridian convergence and scale error.
+
+    returns PJ_FACTORS. If unsuccessfull error number is set and the returned
+    struct contains NULL data.
+
+******************************************************************************/
+    PJ_FACTORS factors;
+
+    /* pj_factors rely code being zero */
+    factors.code = 0;
+
+    /* casting to struct FACTORS for compatibility reasons */
+    if (pj_factors(lp, (PJ *)P, 0.0, (struct FACTORS *)&factors)) {
+        /* errno set in pj_factors */
+        memset(&factors, 0, sizeof(PJ_FACTORS));
+    }
+
+    return factors;
+}
+
+
 double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
 double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
 
@@ -739,3 +787,5 @@ double proj_dmstor(const char *is, char **rs) {
 char*  proj_rtodms(char *s, double r, int pos, int neg) {
     return rtodms(s, r, pos, neg);
 }
+
+

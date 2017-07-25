@@ -1,5 +1,6 @@
 #define PJ_LIB__
-# include   <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(eck2, "Eckert II") "\n\tPCyl. Sph.";
 
@@ -28,9 +29,12 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     lp.lam = xy.x / (FXC * ( lp.phi = 2. - fabs(xy.y) / FYC) );
     lp.phi = (4. - lp.phi * lp.phi) * C13;
     if (fabs(lp.phi) >= 1.) {
-        if (fabs(lp.phi) > ONEEPS)  I_ERROR
-        else
+        if (fabs(lp.phi) > ONEEPS) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        } else {
             lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
+        }
     } else
         lp.phi = asin(lp.phi);
     if (xy.y < 0)

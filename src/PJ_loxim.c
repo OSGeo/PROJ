@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(loxim, "Loximuthal") "\n\tPCyl Sph";
 
@@ -72,8 +73,10 @@ PJ *PROJECTION(loxim) {
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     Q->cosphi1 = cos(Q->phi1);
-    if (Q->cosphi1 < EPS)
-        E_ERROR(-22);
+    if (Q->cosphi1 < EPS) {
+        proj_errno_set(P, PJD_ERR_LAT_LARGER_THAN_90);
+        return freeup_new(P);
+    }
 
     Q->tanphi1 = tan(M_FORTPI + 0.5 * Q->phi1);
 

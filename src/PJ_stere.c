@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include    <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(stere, "Stereographic") "\n\tAzi, Sph&Ell\n\tlat_ts=";
 PROJ_HEAD(ups, "Universal Polar Stereographic") "\n\tAzi, Sph&Ell\n\tsouth";
@@ -96,7 +97,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     case OBLIQ:
         xy.y = 1. + sinph0 * sinphi + cosph0 * cosphi * coslam;
 oblcon:
-        if (xy.y <= EPS10) F_ERROR;
+        if (xy.y <= EPS10) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
         xy.x = (xy.y = Q->akm1 / xy.y) * cosphi * sinlam;
         xy.y *= (Q->mode == EQUIT) ? sinphi :
            cosph0 * sinphi - sinph0 * cosphi * coslam;
@@ -106,7 +110,10 @@ oblcon:
         lp.phi = - lp.phi;
         /*-fallthrough*/
     case S_POLE:
-        if (fabs (lp.phi - M_HALFPI) < TOL) F_ERROR;
+        if (fabs (lp.phi - M_HALFPI) < TOL) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return xy;
+        }
         xy.x = sinlam * ( xy.y = Q->akm1 * tan (M_FORTPI + .5 * lp.phi) );
         xy.y *= coslam;
         break;
@@ -159,7 +166,9 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
             return lp;
         }
     }
-    I_ERROR;
+
+    proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+    return lp;
 }
 
 
@@ -298,14 +307,17 @@ PJ *PROJECTION(ups) {
         return freeup_new (P);
     P->opaque = Q;
 
-	/* International Ellipsoid */
-	P->phi0 = pj_param(P->ctx, P->params, "bsouth").i ? - M_HALFPI: M_HALFPI;
-	if (P->es == 0.0) E_ERROR(-34);
-	P->k0 = .994;
-	P->x0 = 2000000.;
-	P->y0 = 2000000.;
-	Q->phits = M_HALFPI;
-	P->lam0 = 0.;
+    /* International Ellipsoid */
+    P->phi0 = pj_param(P->ctx, P->params, "bsouth").i ? - M_HALFPI: M_HALFPI;
+    if (P->es == 0.0) {
+        proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
+        return freeup_new(P);
+    }
+    P->k0 = .994;
+    P->x0 = 2000000.;
+    P->y0 = 2000000.;
+    Q->phits = M_HALFPI;
+    P->lam0 = 0.;
 
     return setup(P);
 }

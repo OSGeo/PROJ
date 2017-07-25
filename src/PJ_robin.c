@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(robin, "Robinson") "\n\tPCyl., Sph.";
 
@@ -80,8 +81,10 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     (void) P;
 
     i = (int)floor((dphi = fabs(lp.phi)) * C1);
-    if( i < 0 )
-        F_ERROR;
+    if( i < 0 ){
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return xy;
+    }
     if (i >= NODES) i = NODES - 1;
     dphi = RAD_TO_DEG * (dphi - RC1 * i);
     xy.x = V(X[i], dphi) * FXC * lp.lam;
@@ -102,7 +105,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     lp.lam = xy.x / FXC;
     lp.phi = fabs(xy.y / FYC);
     if (lp.phi >= 1.) { /* simple pathologic cases */
-        if (lp.phi > ONEEPS) I_ERROR
+        if (lp.phi > ONEEPS) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        }
         else {
             lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
             lp.lam /= X[NODES].c0;
@@ -110,8 +116,10 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     } else { /* general problem */
         /* in Y space, reduce to table interval */
         i = (int)floor(lp.phi * NODES);
-        if( i < 0 || i >= NODES )
-            I_ERROR;
+        if( i < 0 || i >= NODES ) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        }
         for (;;) {
             if (Y[i].c0 > lp.phi) --i;
             else if (Y[i+1].c0 <= lp.phi) ++i;

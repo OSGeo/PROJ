@@ -29,7 +29,8 @@
  * SOFTWARE.
  *****************************************************************************/
 # define PJ_LIB__
-# include <projects.h>
+# include <proj.h>
+# include "projects.h"
 
 PROJ_HEAD(healpix, "HEALPix") "\n\tSph., Ellps.";
 PROJ_HEAD(rhealpix, "rHEALPix") "\n\tSph., Ellps.\n\tnorth_square= south_square=";
@@ -649,10 +650,12 @@ PJ *PROJECTION(rhealpix) {
 
     /* Check for valid north_square and south_square inputs. */
     if (Q->north_square < 0 || Q->north_square > 3) {
-        E_ERROR(-47);
+        proj_errno_set(P, PJD_ERR_AXIS);
+        return freeup_new(P);
     }
     if (Q->south_square < 0 || Q->south_square > 3) {
-        E_ERROR(-47);
+        proj_errno_set(P, PJD_ERR_AXIS);
+        return freeup_new(P);
     }
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es); /* For auth_lat(). */

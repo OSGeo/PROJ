@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(igh, "Interrupted Goode Homolosine") "\n\tPCyl, Sph.";
 
@@ -175,8 +175,8 @@ static void freeup (PJ *P) {
 */
 
 #define SETUP(n, proj, x_0, y_0, lon_0) \
-    if (!(Q->pj[n-1] = pj_##proj(0))) E_ERROR_0; \
-    if (!(Q->pj[n-1] = pj_##proj(Q->pj[n-1]))) E_ERROR_0; \
+    if (!(Q->pj[n-1] = pj_##proj(0))) return freeup_new(P); \
+    if (!(Q->pj[n-1] = pj_##proj(Q->pj[n-1]))) return freeup_new(P); \
     Q->pj[n-1]->ctx = P->ctx; \
     Q->pj[n-1]->x0 = x_0; \
     Q->pj[n-1]->y0 = y_0; \

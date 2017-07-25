@@ -29,12 +29,13 @@
  *****************************************************************************/
 
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 
 struct pj_opaque {
-	double	cosphi1;
-	int		mode;
+    double  cosphi1;
+    int     mode;
 };
 
 
@@ -51,18 +52,18 @@ FORWARD(s_forward); /* spheroid */
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
-	double c, d;
+    double c, d;
 
-	if((d = acos(cos(lp.phi) * cos(c = 0.5 * lp.lam))) != 0.0) {/* basic Aitoff */
-		xy.x = 2. * d * cos(lp.phi) * sin(c) * (xy.y = 1. / sin(d));
-		xy.y *= d * sin(lp.phi);
-	} else
-		xy.x = xy.y = 0.;
-	if (Q->mode) { /* Winkel Tripel */
-		xy.x = (xy.x + lp.lam * Q->cosphi1) * 0.5;
-		xy.y = (xy.y + lp.phi) * 0.5;
-	}
-	return (xy);
+    if((d = acos(cos(lp.phi) * cos(c = 0.5 * lp.lam))) != 0.0) {/* basic Aitoff */
+        xy.x = 2. * d * cos(lp.phi) * sin(c) * (xy.y = 1. / sin(d));
+        xy.y *= d * sin(lp.phi);
+    } else
+        xy.x = xy.y = 0.;
+    if (Q->mode) { /* Winkel Tripel */
+        xy.x = (xy.x + lp.lam * Q->cosphi1) * 0.5;
+        xy.y = (xy.y + lp.phi) * 0.5;
+    }
+    return (xy);
 }
 
 /***********************************************************************************
@@ -90,64 +91,64 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
     int iter, MAXITER = 10, round = 0, MAXROUND = 20;
-	double EPSILON = 1e-12, D, C, f1, f2, f1p, f1l, f2p, f2l, dp, dl, sl, sp, cp, cl, x, y;
+    double EPSILON = 1e-12, D, C, f1, f2, f1p, f1l, f2p, f2l, dp, dl, sl, sp, cp, cl, x, y;
 
-	if ((fabs(xy.x) < EPSILON) && (fabs(xy.y) < EPSILON )) { lp.phi = 0.; lp.lam = 0.; return lp; }
+    if ((fabs(xy.x) < EPSILON) && (fabs(xy.y) < EPSILON )) { lp.phi = 0.; lp.lam = 0.; return lp; }
 
-	/* initial values for Newton-Raphson method */
-	lp.phi = xy.y; lp.lam = xy.x;
-	do {
-		iter = 0;
-		do {
-			sl = sin(lp.lam * 0.5); cl = cos(lp.lam * 0.5);
-			sp = sin(lp.phi); cp = cos(lp.phi);
-			D = cp * cl;
- 		      	C = 1. - D * D;
-			D = acos(D) / pow(C, 1.5);
-	       		f1 = 2. * D * C * cp * sl;
-		       	f2 = D * C * sp;
-		       	f1p = 2.* (sl * cl * sp * cp / C - D * sp * sl);
-		       	f1l = cp * cp * sl * sl / C + D * cp * cl * sp * sp;
-		    	f2p = sp * sp * cl / C + D * sl * sl * cp;
-		      	f2l = 0.5 * (sp * cp * sl / C - D * sp * cp * cp * sl * cl);
-		      	if (Q->mode) { /* Winkel Tripel */
-				f1 = 0.5 * (f1 + lp.lam * Q->cosphi1);
-				f2 = 0.5 * (f2 + lp.phi);
-				f1p *= 0.5;
-				f1l = 0.5 * (f1l + Q->cosphi1);
-				f2p = 0.5 * (f2p + 1.);
-				f2l *= 0.5;
-			}
-			f1 -= xy.x; f2 -= xy.y;
-			dl = (f2 * f1p - f1 * f2p) / (dp = f1p * f2l - f2p * f1l);
-			dp = (f1 * f2l - f2 * f1l) / dp;
-			dl = fmod(dl, M_PI); /* set to interval [-M_PI, M_PI] */
-			lp.phi -= dp;	lp.lam -= dl;
-		} while ((fabs(dp) > EPSILON || fabs(dl) > EPSILON) && (iter++ < MAXITER));
-		if (lp.phi > M_PI_2) lp.phi -= 2.*(lp.phi-M_PI_2); /* correct if symmetrical solution for Aitoff */
-		if (lp.phi < -M_PI_2) lp.phi -= 2.*(lp.phi+M_PI_2); /* correct if symmetrical solution for Aitoff */
-		if ((fabs(fabs(lp.phi) - M_PI_2) < EPSILON) && (!Q->mode)) lp.lam = 0.; /* if pole in Aitoff, return longitude of 0 */
+    /* initial values for Newton-Raphson method */
+    lp.phi = xy.y; lp.lam = xy.x;
+    do {
+        iter = 0;
+        do {
+            sl = sin(lp.lam * 0.5); cl = cos(lp.lam * 0.5);
+            sp = sin(lp.phi); cp = cos(lp.phi);
+            D = cp * cl;
+                C = 1. - D * D;
+            D = acos(D) / pow(C, 1.5);
+                f1 = 2. * D * C * cp * sl;
+                f2 = D * C * sp;
+                f1p = 2.* (sl * cl * sp * cp / C - D * sp * sl);
+                f1l = cp * cp * sl * sl / C + D * cp * cl * sp * sp;
+                f2p = sp * sp * cl / C + D * sl * sl * cp;
+                f2l = 0.5 * (sp * cp * sl / C - D * sp * cp * cp * sl * cl);
+                if (Q->mode) { /* Winkel Tripel */
+                f1 = 0.5 * (f1 + lp.lam * Q->cosphi1);
+                f2 = 0.5 * (f2 + lp.phi);
+                f1p *= 0.5;
+                f1l = 0.5 * (f1l + Q->cosphi1);
+                f2p = 0.5 * (f2p + 1.);
+                f2l *= 0.5;
+            }
+            f1 -= xy.x; f2 -= xy.y;
+            dl = (f2 * f1p - f1 * f2p) / (dp = f1p * f2l - f2p * f1l);
+            dp = (f1 * f2l - f2 * f1l) / dp;
+            dl = fmod(dl, M_PI); /* set to interval [-M_PI, M_PI] */
+            lp.phi -= dp;   lp.lam -= dl;
+        } while ((fabs(dp) > EPSILON || fabs(dl) > EPSILON) && (iter++ < MAXITER));
+        if (lp.phi > M_PI_2) lp.phi -= 2.*(lp.phi-M_PI_2); /* correct if symmetrical solution for Aitoff */
+        if (lp.phi < -M_PI_2) lp.phi -= 2.*(lp.phi+M_PI_2); /* correct if symmetrical solution for Aitoff */
+        if ((fabs(fabs(lp.phi) - M_PI_2) < EPSILON) && (!Q->mode)) lp.lam = 0.; /* if pole in Aitoff, return longitude of 0 */
 
-		/* calculate x,y coordinates with solution obtained */
-		if((D = acos(cos(lp.phi) * cos(C = 0.5 * lp.lam))) != 0.0) {/* Aitoff */
-			x = 2. * D * cos(lp.phi) * sin(C) * (y = 1. / sin(D));
-			y *= D * sin(lp.phi);
-		} else
-			x = y = 0.;
-		if (Q->mode) { /* Winkel Tripel */
-			x = (x + lp.lam * Q->cosphi1) * 0.5;
-			y = (y + lp.phi) * 0.5;
-		}
-	/* if too far from given values of x,y, repeat with better approximation of phi,lam */
-	} while (((fabs(xy.x-x) > EPSILON) || (fabs(xy.y-y) > EPSILON)) && (round++ < MAXROUND));
+        /* calculate x,y coordinates with solution obtained */
+        if((D = acos(cos(lp.phi) * cos(C = 0.5 * lp.lam))) != 0.0) {/* Aitoff */
+            x = 2. * D * cos(lp.phi) * sin(C) * (y = 1. / sin(D));
+            y *= D * sin(lp.phi);
+        } else
+            x = y = 0.;
+        if (Q->mode) { /* Winkel Tripel */
+            x = (x + lp.lam * Q->cosphi1) * 0.5;
+            y = (y + lp.phi) * 0.5;
+        }
+    /* if too far from given values of x,y, repeat with better approximation of phi,lam */
+    } while (((fabs(xy.x-x) > EPSILON) || (fabs(xy.y-y) > EPSILON)) && (round++ < MAXROUND));
 
-	if (iter == MAXITER && round == MAXROUND)
+    if (iter == MAXITER && round == MAXROUND)
         {
             pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
             /* fprintf(stderr, "Warning: Accuracy of 1e-12 not reached. Last increments: dlat=%e and dlon=%e\n", dp, dl); */
         }
 
-	return lp;
+    return lp;
 }
 
 
@@ -168,10 +169,10 @@ static void freeup (PJ *P) {
 }
 
 static PJ *setup(PJ *P) {
-	P->inv = s_inverse;
-	P->fwd = s_forward;
-	P->es = 0.;
-	return P;
+    P->inv = s_inverse;
+    P->fwd = s_forward;
+    P->es = 0.;
+    return P;
 }
 
 
@@ -181,7 +182,7 @@ PJ *PROJECTION(aitoff) {
         return freeup_new (P);
     P->opaque = Q;
 
-	Q->mode = 0;
+    Q->mode = 0;
     return setup(P);
 }
 
@@ -192,13 +193,15 @@ PJ *PROJECTION(wintri) {
         return freeup_new (P);
     P->opaque = Q;
 
-	Q->mode = 1;
-	if (pj_param(P->ctx, P->params, "tlat_1").i) {
-		if ((Q->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f)) == 0.)
-			E_ERROR(-22)
+    Q->mode = 1;
+    if (pj_param(P->ctx, P->params, "tlat_1").i) {
+        if ((Q->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f)) == 0.) {
+            proj_errno_set(P, PJD_ERR_LAT_LARGER_THAN_90);
+            return freeup_new(P);
+        }
     }
-	else /* 50d28' or acos(2/pi) */
-		Q->cosphi1 = 0.636619772367581343;
+    else /* 50d28' or acos(2/pi) */
+        Q->cosphi1 = 0.636619772367581343;
     return setup(P);
 }
 
