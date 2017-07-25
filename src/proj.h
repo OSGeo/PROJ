@@ -302,7 +302,7 @@ struct PJ_PROJ_INFO {
 
 struct PJ_GRID_INFO {
     char        gridname[32];       /* name of grid                         */
-    char        filename[128];      /* full path to grid                    */
+    char        filename[260];      /* full path to grid                    */
     char        format[8];          /* file format of grid                  */
     LP          lowerleft;          /* Coordinates of lower left corner     */
     LP          upperright;         /* Coordinates of upper right corner    */
@@ -312,7 +312,7 @@ struct PJ_GRID_INFO {
 
 struct PJ_INIT_INFO {
     char        name[32];           /* name of init file                        */
-    char        filename[128];      /* full path to the init file               */
+    char        filename[260];      /* full path to the init file.              */
     char        version[32];        /* version of the init file                 */
     char        origin[32];         /* origin of the file, e.g. EPSG            */
     char        lastupdate[16];     /* Date of last update in YYYY-MM-DD format */
