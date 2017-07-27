@@ -7,7 +7,7 @@
 OLD_GRIDS = conus MD TN WI WO alaska hawaii prvi stgeorge stlrnc stpaul null
 
 OTHER_FILES = FL GL27 nad.lst nad27 nad83 proj_def.dat world epsg esri \
-	esri.extra other.extra IGNF
+	esri.extra other.extra IGNF ITRF2000 ITRF2008 ITRF20014
 
 
 
