@@ -1,39 +1,132 @@
 '''
-Plot map data in different projections supported by proj.4
+Plot map data in different projections supported by PROJ.4
 
-Can be called either as
+Call with:
 
-> python plot.py definitions.txt [out]
-
-or
-
-> python plotproj.py "+proj=lcc +lat_1=20" [out]
+> python plot.py plotdefs outdir [plotname, [plotname, [plotname, ...]]]
 
 The output dir is optional. Uses current dir if not set.
 
-Change PROJ and COASTLINE_DATA to path on your local system
-before running the script.
+Inputs:
+------
+
+    plotdefs:       A JSON file with setup for each auto-generated plot.
+    outdir:         Directory to put the plots in.
+    plotname:       A list of plot names within the plotdefs file. More
+                    than one plotname can be given at once.
+
+Plot definitions:
+----------------
+
+Plots are defined by a JSON dict. A plot is defined by a name, filename,
+bounding box (lat/long space), a proj-string, plottype and resolution.
+An example of the setup for the plot for the Airy projection is shown below:
+
+    {
+        "filename": "airy.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 90,
+        "lonmin": -90,
+        "name": "airy",
+        "projstring": "+proj=airy",
+        "res": "low",
+        "type": "poly"
+    }
+
+"res" can be either "low" or "med" and "type" can be either "poly"(gon)
+or "line". The rest of the inputs are fairly free form.
+
+
+Change PROJ to path on your local system before running the script.
 '''
 
+from __future__ import print_function
+from __future__ import division
+
 import os
+import os.path
 import sys
 import json
 import subprocess
+import functools
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
+import fiona
+from shapely.geometry import Polygon
+from shapely.geometry import MultiPolygon
+from shapely.geometry import shape
+from shapely.ops import transform
+from descartes import PolygonPatch
 
-PROJ = 'proj'
+PROJ = '../../src/proj'
+#PROJ = 'proj'
 
-COASTLINE_DATA = 'data/coastline.geojson'
+LINE_LOW = 'data/coastline.geojson'
+LINE_MED = 'data/coastline50.geojson'
+POLY_LOW = 'data/land.geojson'
+POLY_MED = 'data/land50.geojson'
 
 GRATICULE_WIDTH = 15
-N_POINTS = 100
+N_POINTS = 1000
 
-LAT_MIN = -90
-LAT_MAX = 90
-LON_MIN = -180
-LON_MAX = 180
+# colors
+COLOR_LAND = '#000000'
+COLOR_COAST = '#000000'
+COLOR_GRAT = '#888888'
+
+def interp_coords(coords, tol):
+    '''
+    Interpolates extra coordinates when the euclidean distance between adjacent
+    points are larger than given tolerance.
+
+    The function tries to densify a list of coordinates based on a simple measure.
+    If two adjacent points in the input coordinate list are further away from each
+    other than the specified tolerance, the list will be densied between those two
+    points. Roughly speaking, a point will be inserted every `tol` between the
+    points.
+
+    Inputs:
+    -------
+    coords:         2xN numpy array with geodetic coordinates
+    tol:            Euclidean distance tolerance.
+
+    Returns:
+    --------
+    A densified numpy array of coordinates. If tol < 0 the input array is returned
+    unchanged.
+
+    '''
+    if tol < 0:
+        return coords
+
+    x, y = coords
+    x = np.array(x)
+    y = np.array(y)
+
+    l = len(x)
+    dsts = np.sqrt((x[0:-1]-x[1:l])**2 + (y[0:-1]-y[1:l])**2)
+    I = dsts > tol
+
+    offset = 0
+    xy = np.ndarray(shape=(2, 0))
+    for i, b in enumerate(I):
+        xy = np.append(xy, (x[i], y[i]))
+        if not b:
+            continue
+
+        n = round(dsts[i] / tol/2)
+        x1 = np.linspace(x[i], x[i+1], n+2)
+        y1 = np.linspace(y[i], y[i+1], n+2)
+        xy = np.append(xy, zip(x1[1:], y1[1:]))
+
+    # the last coordinate is not added in the loop above
+    #xy = np.append(xy, (x[i+1], y[i+1])).reshape((-1,2)).tolist()
+    xy = xy.reshape((-1, 2)).tolist()
+
+    return xy
 
 def project(coordinates, proj_string, in_radians=False):
     '''
@@ -63,7 +156,14 @@ def project(coordinates, proj_string, in_radians=False):
     stdout, _ = proc.communicate(coordinates.tobytes())
 
     out = np.frombuffer(stdout, dtype=np.double)
-    return np.reshape(out, coordinates.shape)
+    return np.reshape(out, (-1, 2))
+
+def project_xy(x, y, proj_string):
+    '''
+    Wrapper for project() that works with shapely.ops.transform().
+    '''
+    a = project(zip(x, y), proj_string)
+    return zip(*a)
 
 def meridian(lon, lat_min, lat_max):
     '''
@@ -83,55 +183,113 @@ def parallel(lat, lon_min, lon_max):
     coords[:, 1] = lat
     return coords
 
-def plotproj(proj_str, coastline, frame, graticule, outdir):
+def build_graticule(lonmin=-180, lonmax=180, latmin=-85, latmax=85):
+    '''
+    Build graticule
+    '''
+    # we might get unwanted floats
+    lonmin = int(lonmin)
+    lonmax = int(lonmax)
+    latmin = int(latmin)
+    latmax = int(latmax)
+    graticule = []
+
+    for lon in range(lonmin, lonmax+1, GRATICULE_WIDTH):
+        graticule.append(meridian(lon, latmin, latmax))
+
+    for lat in range(latmin, latmax+1, GRATICULE_WIDTH):
+        graticule.append(parallel(lat, lonmin, lonmax))
+
+    return graticule
+
+
+def resample_polygon(polygon):
+    '''
+    Use interp_coords() to resample (multi)polygons.
+    '''
+    xy = polygon.exterior.coords.xy
+    ext = interp_coords(xy, 2)
+    # interiors
+    rings = []
+    for int_ring in polygon.interiors:
+        rings.append(interp_coords(int_ring.coords.xy, 2))
+    return Polygon(ext, rings)
+
+def plotproj(plotdef, data, outdir):
     '''
     Plot map.
     '''
     fig = plt.figure()
     axes = fig.add_subplot(111)
 
+    bounds = (plotdef['lonmin'], plotdef['latmin'], plotdef['lonmax'], plotdef['latmax'])
+    for geom in data.filter(bbox=bounds):
+        temp_pol = shape(geom['geometry'])
+
+        box = Polygon([
+            (plotdef['lonmin'], plotdef['latmin']),
+            (plotdef['lonmin'], plotdef['latmax']),
+            (plotdef['lonmax'], plotdef['latmax']),
+            (plotdef['lonmax'], plotdef['latmin']),
+        ])
+        temp_pol = temp_pol.intersection(box)
+
+        if plotdef['type'] == 'poly':
+            if isinstance(temp_pol, MultiPolygon):
+                polys = []
+                for polygon in temp_pol:
+                    polys.append(resample_polygon(polygon))
+                pol = MultiPolygon(polys)
+            else:
+                pol = resample_polygon(temp_pol)
+        else:
+            pol = temp_pol
+
+        trans = functools.partial(project_xy, proj_string=plotdef['projstring'])
+        proj_geom = transform(trans, pol)
+
+        if plotdef['type'] == 'poly':
+            patch = PolygonPatch(proj_geom, fc=COLOR_LAND, zorder=0)
+            axes.add_patch(patch)
+        else:
+            x, y = proj_geom.xy
+            plt.plot(x, y, color=COLOR_COAST, linewidth=0.5)
+
     # Plot frame
+    frame = []
+    frame.append(parallel(plotdef['latmin'], plotdef['lonmin'], plotdef['lonmax']))
+    frame.append(parallel(plotdef['latmax'], plotdef['lonmin'], plotdef['lonmax']))
     for line in frame:
-        line = project(line, proj_str)
+        line = project(line, plotdef['projstring'])
         x, y = zip(*line)
         plt.plot(x, y, '-k')
 
-    # Plot coastline
-    for feature in coastline['features']:
-        C = np.array(feature['geometry']['coordinates'])
-
-        if np.any(C[:, 0] > 180.0):
-            C[C[:, 0] > 180.0, 0] = 180.0
-
-        if np.any(C[:, 0] < -180.0):
-            C[C[:, 0] < -180.0, 0] = -180.0
-
-        if np.any(C[:, 1] > 90.0):
-            C[C[:, 1] > 90.0, 1] = 90.0
-
-        if np.any(C[:, 1] < -90.0):
-            C[C[:, 1] < -90.0, 1] = -90.0
-
-        coords = project(C, proj_str)
-        x, y = zip(*coords)
-        plt.plot(x, y, '-k', linewidth=0.5)
+    graticule = build_graticule(
+        plotdef['lonmin'],
+        plotdef['lonmax'],
+        plotdef['latmin'],
+        plotdef['latmax'],
+    )
 
     # Plot graticule
-    graticule = project(graticule, proj_str)
     for feature in graticule:
+        feature = project(feature, plotdef['projstring'])
         x, y = zip(*feature)
-        plt.plot(x, y, '-k', linewidth=0.2)
+        plt.plot(x, y, color=COLOR_GRAT, linewidth=0.4)
 
     axes.axis('off')
-    font = {'family': 'serif',
-            'color': 'black',
-            'style': 'italic',
-            'size': 12}
-    plt.suptitle(proj_str, fontdict=font)
+    font = {
+        'family': 'serif',
+        'color': 'black',
+        'style': 'italic',
+        'size': 12
+    }
+    plt.suptitle(plotdef['projstring'], fontdict=font)
 
     plt.autoscale(tight=True)
-    name = proj_str.split()[0].split('=')[1]
-    plt.savefig(outdir + '/' + name + '.png', dpi=300)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    plt.savefig(outdir + '/' + plotdef['filename'], dpi=300)
 
     # Clean up
     fig = None
@@ -140,38 +298,50 @@ def plotproj(proj_str, coastline, frame, graticule, outdir):
     del axes
     plt.close()
 
-if __name__ == "__main__":
+
+def main():
     '''
+    Main function of plotting script.
+
+    Parses json-file with plot setups and runs the plotting
+    for each plot setup.
     '''
 
-    with open(COASTLINE_DATA) as data:
-        coastline = json.load(data)
+    data = {
+        ('line', 'low'): fiona.open(LINE_LOW),
+        ('line', 'med'): fiona.open(LINE_MED),
+        ('poly', 'low'): fiona.open(POLY_LOW),
+        ('poly', 'med'): fiona.open(POLY_MED),
+    }
 
     if os.path.exists(sys.argv[1]):
-        # it must be a file with proj-strings
-        with open(sys.argv[1]) as projs:
-            projs = projs.readlines()
+        # first argument is the JSON plot definition setup file
+        with open(sys.argv[1]) as plotsetup:
+            plotdefs = json.load(plotsetup)
     else:
-        #assumes it is a single roj string
-        projs = [sys.argv[1]]
+        raise ValueError('No plot definition file entered')
 
-    outdir = '.'
-    if len(sys.argv) > 2:
-        outdir = sys.argv[2]
+    plots = []
+    # second argument is the output dir
+    outdir = sys.argv[2]
 
-    frame = []
-    frame.append(parallel(LAT_MIN, LON_MIN, LON_MAX))
-    frame.append(parallel(LAT_MAX, LON_MIN, LON_MAX))
+    # subsecond arguments are (optional) names of plot in plotdef.json
+    if len(sys.argv) > 3:
+        plots = sys.argv[3:len(sys.argv)]
 
-    # build graticule
-    graticule = []
-    for lon in range(LON_MIN, LON_MAX+1, GRATICULE_WIDTH):
-        graticule.append(meridian(lon, LAT_MIN, LAT_MAX))
+    for i, plotdef in enumerate(plotdefs):
+        if plots != [] and plotdef['name'] not in plots:
+            continue
 
-    for lat in range(LAT_MIN, LAT_MAX+1, GRATICULE_WIDTH):
-        graticule.append(parallel(lat, LON_MIN, LON_MAX))
+        print(i, plotdef['projstring'])
+        if 'skip' in plotdef.keys():
+            print('skipping')
+            continue
 
-    for i, proj in enumerate(projs):
-        proj_str = proj.strip()
-        print(i, proj_str)
-        plotproj(proj_str, coastline, frame, graticule, outdir)
+        plotproj(plotdef, data[(plotdef['type'], plotdef['res'])], outdir)
+
+    for key in data:
+        data[key].close()
+
+if __name__ == "__main__":
+    sys.exit(main())
