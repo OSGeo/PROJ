@@ -1,2 +1,2 @@
 
-python3 plot.py definitinos.txt images/
+python3 plot.py plotdefs.json images/
