@@ -68,7 +68,7 @@ endif()
 include (CheckCSourceCompiles)
 if (MSVC)
   set (CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} /WX")
-else
+else ()
   set (CMAKE_REQUIRED_LIBRARIES m)
   set (CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} -Werror")
 endif ()
