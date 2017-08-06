@@ -29,6 +29,20 @@ CFLAGS="$save_CFLAGS"
 dnl We check for headers
 AC_HEADER_STDC
 
+dnl Check for C99 math functions
+save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Wall -Werror"
+AC_MSG_CHECKING([for C99 math functions])
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+        [#include <math.h>],
+        [int q;
+         return (int)(hypot(3.0, 4.0) + atanh(0.8) + cbrt(8.0) +
+                      remquo(100.0, 90.0, &q) +
+                      remainder(100.0, 90.0) + copysign(1.0, -0.0));])],
+        [AC_MSG_RESULT([yes]);C99_MATH="-DHAVE_C99_MATH=1"],
+        [AC_MSG_RESULT([no]);C99_MATH="-DHAVE_C99_MATH=0"])
+CFLAGS="$save_CFLAGS $C99_MATH"
+
 AC_CHECK_FUNC(localeconv, [AC_DEFINE(HAVE_LOCALECONV,1,[Define to 1 if you have localeconv])])
 
 dnl ---------------------------------------------------------------------------
