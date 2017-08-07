@@ -1,0 +1,24 @@
+# ITRF2008 params are in mm/year, PJ_helmert uses m/year
+<metadata> +version=1.0.0 +origin=http://itrf.ign.fr/doc_ITRF/Transfo-ITRF2008_ITRFs.txt +lastupdate=2017-07-26
+
+<ITRF2005> +proj=helmert +x=-0.002 +y=-0.0009 +z=-0.0047 +s=0.00094 +dx=0.0003 +epoch=2000.0 +transpose
+
+<ITRF2000> +proj=helmert +x=-0.0019 +y=-0.0017 +z=-0.0105 +s=0.00134  +dx=0.0001 +dy=0.0001 +dz=-0.0018 +ds=0.00008  +epoch=2000.0 +transpose
+
+<ITRF97> +proj=helmert +x=0.0048 +y=0.0026 +z=-0.0332 +s=0.00292 +rz=0.00006 +dx=0.0001 +dy=-0.0005 +dz=-0.0032 +ds=0.00009 +drz=0.00002 +epoch=2000.0 +transpose
+
+<ITRF96> +proj=helmert +x=0.0048 +y=0.0026 +z=-0.0332 +s=0.00292 +rz=0.00006 +dx=0.0001 +dy=-0.0005 +dz=-0.0032 +ds=0.00009 +drz=0.00002 +epoch=2000.0 +transpose
+
+<ITRF94> +proj=helmert +x=0.0048 +y=0.0026 +z=-0.0332 +s=0.00292 +rz=0.00006 +dx=0.0001 +dy=-0.0005 +dz=-0.0032 +ds=0.00009 +drz=0.00002 +epoch=2000.0 +transpose
+
+<ITRF93> +proj=helmert +x=-0.024 +y=0.0024 +z=-0.00386 +s=0.00341 +rx=-0.00171 +ry=-0.00148 +rz=-0.0003 +dx=-0.0028 +dy=-0.0001 +dz=-0.0024 +ds=0.00009 +drx=-0.00011 +dry=-0.00019 +drz=0.00007 +epoch=2000.0 +transpose
+
+<ITRF92> +proj=helmert +x=0.0128 +y=0.0046 +z=-0.0412 +s=0.00221 +rz=0.00006 +dx=0.0001 +dy=-0.0005 +dz=-0.0032 +ds=0.00009 +drz=0.00002 +epoch=2000.0 +transpose
+
+<ITRF91> +proj=helmert +x=0.0248 +y=0.0186 +z=-0.0472 +s=0.00361 +rz=0.00006 +dx=0.0001 +dy=-0.0005 +dz=-0.0032 +ds=0.00009 +drz=0.00002 +epoch=2000.0 +transpose
+
+<ITRF90> +proj=helmert +x=0.0228 +y=0.0146 +z=-0.0632 +s=0.00391 +rz=0.00006 +dx=0.0001 +dy=-0.0005 +dz=-0.0032 +ds=0.00009 +drz=0.00002 +epoch=2000.0 +transpose
+
+<ITRF89> +proj=helmert +x=0.0278 +y=0.0386 +z=-0.1012 +s=0.00731 +rz=0.00006 +dx=0.0001 +dy=-0.0005 +dz=-0.0032 +ds=0.00009 +drz=0.00002 +epoch=2000.0 +transpose
+
+<ITRF88> +proj=helmert +x=0.0228 +y=0.0026 +z=-0.1252 +s=0.01041 +rz=0.00006 +dx=0.0001 +dy=-0.0005 +dz=-0.0032 +ds=0.00009 +drz=0.00002 +epoch=2000.0 +transpose

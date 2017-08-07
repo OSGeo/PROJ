@@ -13,7 +13,10 @@ set(PROJ_DICTIONARY  epsg
                      nad83
                      nad.lst
                      proj_def.dat
-                     CH )
+                     CH
+                     ITRF2000
+                     ITRF2008
+                     ITRF2014 )
 
 #
 # gridshift file
