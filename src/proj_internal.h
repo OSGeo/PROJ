@@ -107,6 +107,10 @@ void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log);
 /* Lowest level: Minimum support for fileapi */
 void proj_fileapi_set (PJ *P, void *fileapi);
 
+const char **proj_get_searchpath(void);
+int    proj_get_path_count(void);
+
+size_t pj_strlcpy(char *dst, const char *src, size_t siz);
 
 #ifdef __cplusplus
 }

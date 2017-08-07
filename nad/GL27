@@ -1,5 +1,6 @@
 # SCCSID @(#)GL27	1.1 93/08/25 GIE REL
 # Great Lakes Grids
+<metadata> +lastupdate=1993-08-25
 <erie-etal> # Lake Erie, Ontario and St. Lawrence River.
 	proj=omerc ellps=clrk66 k_0=0.9999
 	lonc=78d00'W lat_0=44d00'N alpha=55d40'

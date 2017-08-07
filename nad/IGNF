@@ -1,3 +1,4 @@
+<metadata> +version=1.0.0 +origin=IGNF +lastupdate=2011-11-27
 # W [AMANU49]
 # W [AMANU63]
 <AMST63> +title=Ile d'Amsterdam 1963 +proj=geocent +towgs84=109.7530,-528.1330,-362.2440 +a=6378388.0000 +rf=297.0000000000000 +units=m +no_defs <>

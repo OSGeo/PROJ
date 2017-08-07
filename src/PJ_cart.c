@@ -236,14 +236,20 @@ int pj_cart_selftest (void) {
     PJ *P;
     PJ_OBS a, b, obs[2];
     PJ_COORD coord[2];
+
+    PJ_INFO info;
+    PJ_PROJ_INFO pj_info;
+    PJ_GRID_INFO grid_info;
+    PJ_INIT_INFO init_info;
+
     PJ_DERIVS derivs;
     PJ_FACTORS factors;
+
     int err;
     size_t n, sz;
     double dist, h, t;
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
-    char *arg = {" +proj=utm +zone=32 +ellps=GRS80"};
-    char *arg_def;
+    char *arg = {"+proj=utm +zone=32 +ellps=GRS80"};
     char buf[40];
 
     /* An utm projection on the GRS80 ellipsoid */
@@ -251,11 +257,6 @@ int pj_cart_selftest (void) {
     if (0==P)
         return 1;
 
-    /* note arg is handcrafted to go undisturbed through get def reconstruction */
-    arg_def = proj_definition_retrieve (P);
-    if (0!=strcmp(arg, arg_def))
-        return 44;
-    proj_release (arg_def);
 
     /* Clean up */
     proj_destroy (P);
@@ -478,20 +479,49 @@ int pj_cart_selftest (void) {
     }
     proj_destroy(P);
 
-    /* Test proj_has_inverse() */
-    P = proj_create(0, "+proj=august"); /* august has no inverse */
-    if (proj_has_inverse(P)) {
-        proj_destroy(P);
-        return 60;
+    /* ********************************************************************** */
+    /*                          Test info functions                           */
+    /* ********************************************************************** */
+
+    /* proj_info()                                                            */
+    /* this one is difficult to test, since the output changes with the setup */
+    info = proj_info();
+    if (info.version) {
+        char tmpstr[64];
+        sprintf(tmpstr, "%d.%d.%d", info.major, info.minor, info.patch);
+        if (strcmp(info.version, tmpstr)) return 55;
     }
+    if (!info.release)    return 56;
+    if (!info.searchpath) return 57;
+
+    /* proj_pj_info() */
+    P = proj_create(0, "+proj=august"); /* august has no inverse */
+    if (proj_pj_info(P).has_inverse) { proj_destroy(P); return 60; }
     proj_destroy(P);
 
-    P = proj_create(0, "+proj=merc"); /* merc has an inverse */
-    if (!proj_has_inverse(P)) {
-        proj_destroy(P);
-        return 61;
-    }
+    P = proj_create(0, arg);
+    pj_info = proj_pj_info(P);
+    if ( !pj_info.has_inverse )            {  proj_destroy(P); return 61; }
+    if ( strcmp(pj_info.definition, arg) ) {  proj_destroy(P); return 62; }
+    if ( strcmp(pj_info.id, "utm") )       {  proj_destroy(P); return 63; }
     proj_destroy(P);
+
+    /* proj_grid_info() */
+    grid_info = proj_grid_info("egm96_15.gtx");
+    if ( strlen(grid_info.filename) == 0 )            return 64;
+    if ( strcmp(grid_info.gridname, "egm96_15.gtx") ) return 65;
+    grid_info = proj_grid_info("nonexistinggrid");
+    if ( strlen(grid_info.filename) > 0 )             return 66;
+
+    /* proj_init_info() */
+    init_info = proj_init_info("unknowninit");
+    if ( strlen(init_info.filename) != 0 )  return 67;
+
+    init_info = proj_init_info("epsg");
+    if ( strcmp(init_info.origin, "EPSG") )    return 69;
+    if ( strcmp(init_info.name, "epsg") )      return 68;
+
+
 
     /* test proj_rtodms() and proj_dmstor() */
     if (strcmp("180dN", proj_rtodms(buf, M_PI, 'N', 'S')))
@@ -535,6 +565,7 @@ int pj_cart_selftest (void) {
 
 
     proj_destroy(P);
+
 
     return 0;
 }

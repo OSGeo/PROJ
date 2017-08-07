@@ -390,9 +390,13 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char 
 
 ******************************************************************************/
     PJ *P;
-    char buffer[256];
+    char buffer[512];
 
-    sprintf(buffer, "+proj=pipeline +step +init=%s +inv +step +init=%s", srid_from, srid_to);
+    strcpy(buffer, "+proj=pipeline +step +init=");
+    strncat(buffer, srid_from, 512-strlen(buffer));
+    strncat(buffer, " +inv +step +init=", 512-strlen(buffer));
+    strncat(buffer, srid_to, 512-strlen(buffer));
+
     P = proj_create(ctx, buffer);
 
     return P;
@@ -509,11 +513,218 @@ void proj_context_destroy (PJ_CONTEXT *ctx) {
 }
 
 
-/* Build a fully expanded proj_create() compatible representation of P */
-char *proj_definition_retrieve (PJ *P) {
-    if (0==P)
-        return 0;
-    return pj_get_def(P, 0);
+/*****************************************************************************/
+PJ_INFO proj_info(void) {
+/******************************************************************************
+    Basic info about the current instance of the PROJ.4 library.
+
+    Returns PJ_INFO struct. Searchpath member of the struct is truncated to 512
+    characters.
+
+******************************************************************************/
+    PJ_INFO info;
+    const char **paths;
+    char *tmpstr;
+    int i, n;
+    size_t len = 0;
+
+    memset(&info, 0, sizeof(PJ_INFO));
+
+    info.major = PROJ_VERSION_MAJOR;
+    info.minor = PROJ_VERSION_MINOR;
+    info.patch = PROJ_VERSION_PATCH;
+
+    /* This is a controlled environment, so no risk of sprintf buffer
+       overflow. A normal version string is xx.yy.zz which is 8 characters
+       long and there is room for 64 bytes in the version string. */
+    sprintf(info.version, "%d.%d.%d", info.major, info.minor, info.patch);
+
+    pj_strlcpy(info.release, pj_get_release(), sizeof(info.release));
+
+
+    /* build search path string */
+    tmpstr = getenv("HOME");
+    if (tmpstr != NULL) {
+        pj_strlcpy(info.searchpath, tmpstr, sizeof(info.searchpath));
+    }
+
+    tmpstr = getenv("PROJ_LIB");
+    if (tmpstr != NULL) {
+        if (strlen(info.searchpath) != 0) {
+            /* $HOME already in path */
+            strcat(info.searchpath, ";");
+            len = strlen(tmpstr);
+            strncat(info.searchpath, tmpstr, sizeof(info.searchpath)-len-1);
+        } else {
+            /* path is empty */
+            pj_strlcpy(info.searchpath, tmpstr, sizeof(info.searchpath));
+        }
+    }
+
+    paths = proj_get_searchpath();
+    n = proj_get_path_count();
+
+    for (i=0; i<n; i++) {
+        if (strlen(info.searchpath)+strlen(paths[i]) >= 511)
+            continue;
+
+        if (strlen(info.searchpath) != 0) {
+            strcat(info.searchpath, ";");
+            len = strlen(paths[i]);
+            strncat(info.searchpath, paths[i], sizeof(info.searchpath)-len-1);
+        } else {
+            pj_strlcpy(info.searchpath, paths[i], sizeof(info.searchpath));
+        }
+    }
+
+    return info;
+}
+
+
+/*****************************************************************************/
+PJ_PROJ_INFO proj_pj_info(const PJ *P) {
+/******************************************************************************
+    Basic info about a particular instance of a projection object.
+
+    Returns PJ_PROJ_INFO struct.
+
+******************************************************************************/
+    PJ_PROJ_INFO info;
+    char *def;
+
+    memset(&info, 0, sizeof(PJ_PROJ_INFO));
+
+    if (!P) {
+        return info;
+    }
+
+    /* projection id */
+    if (pj_param(P->ctx, P->params, "tproj").i)
+        pj_strlcpy(info.id, pj_param(P->ctx, P->params, "sproj").s, sizeof(info.id));
+
+    /* projection description */
+    pj_strlcpy(info.description, P->descr, sizeof(info.description));
+
+    /* projection definition */
+    def = pj_get_def((PJ *)P, 0); /* pj_get_def takes a non-const PJ pointer */
+    pj_strlcpy(info.definition, &def[1], sizeof(info.definition)); /* def includes a leading space */
+    pj_dealloc(def);
+
+    /* this does not take into account that a pipeline potentially does not */
+    /* have an inverse.                                                     */
+    info.has_inverse = (P->inv != 0 || P->inv3d != 0 || P->invobs != 0);
+
+    return info;
+}
+
+
+/*****************************************************************************/
+PJ_GRID_INFO proj_grid_info(const char *gridname) {
+/******************************************************************************
+    Information about a named datum grid.
+
+    Returns PJ_GRID_INFO struct.
+
+******************************************************************************/
+    PJ_GRID_INFO info;
+
+    /*PJ_CONTEXT *ctx = proj_context_create(); */
+    PJ_CONTEXT *ctx = pj_get_default_ctx();
+    PJ_GRIDINFO *gridinfo = pj_gridinfo_init(ctx, gridname);
+    memset(&info, 0, sizeof(PJ_GRID_INFO));
+
+    /* in case the grid wasn't found */
+    if (gridinfo->filename == NULL) {
+        pj_gridinfo_free(ctx, gridinfo);
+        strcpy(info.format, "missing");
+        return info;
+    }
+
+    /* name of grid */
+    pj_strlcpy(info.gridname, gridname, sizeof(info.gridname));
+
+    /* full path of grid */
+    pj_find_file(ctx, gridname, info.filename, sizeof(info.filename));
+
+    /* grid format */
+    pj_strlcpy(info.format, gridinfo->format, sizeof(info.format));
+
+    /* grid size */
+    info.n_lon = gridinfo->ct->lim.lam;
+    info.n_lat = gridinfo->ct->lim.phi;
+
+    /* cell size */
+    info.cs_lon = gridinfo->ct->del.lam;
+    info.cs_lat = gridinfo->ct->del.phi;
+
+    /* bounds of grid */
+    info.lowerleft  = gridinfo->ct->ll;
+    info.upperright.lam = info.lowerleft.lam + info.n_lon*info.cs_lon;
+    info.upperright.phi = info.lowerleft.phi + info.n_lat*info.cs_lat;
+
+    pj_gridinfo_free(ctx, gridinfo);
+
+    return info;
+}
+
+/*****************************************************************************/
+PJ_INIT_INFO proj_init_info(const char *initname){
+/******************************************************************************
+    Information about a named init file.
+
+    Maximum length of initname is 64.
+
+    Returns PJ_INIT_INFO struct.
+
+    If the init file is not found all members of
+    the return struct are set to 0. If the init file is found, but it the
+    metadata is missing, the value is set to "Unknown".
+
+******************************************************************************/
+    int file_found, def_found=0;
+    char param[80], key[74];
+    paralist *start, *next;
+    PJ_INIT_INFO info;
+    PJ_CONTEXT *ctx = pj_get_default_ctx();
+
+    memset(&info, 0, sizeof(PJ_INIT_INFO));
+
+    file_found = pj_find_file(ctx, initname, info.filename, sizeof(info.filename));
+    if (!file_found || strlen(initname) > 64) {
+        return info;
+    }
+
+    pj_strlcpy(info.name, initname, sizeof(info.name));
+    strcpy(info.origin, "Unknown");
+    strcpy(info.version, "Unknown");
+    strcpy(info.lastupdate, "Unknown");
+
+    pj_strlcpy(key, initname, 64); /* make room for ":metadata\0" at the end */
+    strncat(key, ":metadata", 9);
+    strcpy(param, "+init=");
+    strncat(param, key, 73);
+
+    start = pj_mkparam(param);
+    next = pj_get_init(ctx, &start, start, key, &def_found);
+
+    if (pj_param(ctx, start, "tversion").i) {
+        pj_strlcpy(info.version, pj_param(ctx, start, "sversion").s, sizeof(info.version));
+    }
+
+    if (pj_param(ctx, start, "torigin").i) {
+        pj_strlcpy(info.origin, pj_param(ctx, start, "sorigin").s, sizeof(info.origin));
+    }
+
+    if (pj_param(ctx, start, "tlastupdate").i) {
+        pj_strlcpy(info.lastupdate, pj_param(ctx, start, "slastupdate").s, sizeof(info.lastupdate));
+    }
+
+    for ( ; start; start = next) {
+        next = start->next;
+        pj_dalloc(start);
+    }
+
+   return info;
 }
 
 
@@ -565,18 +776,9 @@ PJ_FACTORS proj_factors(const PJ *P, const LP lp) {
 }
 
 
-/* Release, or free, memory that was retrieved by the above functions */
-void *proj_release (void *buffer) {
-    return pj_dealloc (buffer);
-}
-
-
 double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
 double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
 
-int proj_has_inverse(PJ *P) {
-    return (P->inv != 0 || P->inv3d != 0 || P->invobs != 0);
-}
 
 double proj_dmstor(const char *is, char **rs) {
     return dmstor(is, rs);

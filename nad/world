@@ -1,6 +1,8 @@
 # SCCSID @(#)world	1.2 95/08/05 GIE REL
 # proj +init files for various non-U.S. coordinate systems.
 #
+<metadata> +lastupdate=2016-12-12
+
 <CH1903> # Swiss Coordinate System
 	+proj=somerc +lat_0=46d57'8.660"N +lon_0=7d26'22.500"E
 	+ellps=bessel +x_0=600000 +y_0=200000

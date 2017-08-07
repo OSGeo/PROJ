@@ -156,7 +156,7 @@ extern "C" {
 ************************************************************************/
 #define PROJ_VERSION_MAJOR 10
 #define PROJ_VERSION_MINOR 0
-#define PROJ_VERSION_MICRO 0
+#define PROJ_VERSION_PATCH 0
 
 #ifndef PJ_VERSION
 #define PJ_VERSION 10##000##00
@@ -191,6 +191,19 @@ typedef struct PJ_FACTORS PJ_FACTORS;
 /* Data type for projection/transformation information */
 struct PJconsts;
 typedef struct PJconsts PJ;         /* the PJ object herself */
+
+/* Data type for library level information */
+struct PJ_INFO;
+typedef struct PJ_INFO PJ_INFO;
+
+struct PJ_PROJ_INFO;
+typedef struct PJ_PROJ_INFO PJ_PROJ_INFO;
+
+struct PJ_GRID_INFO;
+typedef struct PJ_GRID_INFO PJ_GRID_INFO;
+
+struct PJ_INIT_INFO;
+typedef struct PJ_INIT_INFO PJ_INIT_INFO;
 
 /* Omega, Phi, Kappa: Rotations */
 typedef struct {double o, p, k;}  PJ_OPK;
@@ -275,6 +288,7 @@ struct PJ_OBS {
     unsigned int flags;  /* additional data, intended for flags */
 };
 
+
 struct PJ_DERIVS {
     double x_l, x_p;       /* derivatives of x for lambda-phi */
     double y_l, y_p;       /* derivatives of y for lambda-phi */
@@ -289,6 +303,44 @@ struct PJ_FACTORS {
     double a, b;           /* max-min scale error */
     int code;              /* info as to analytics, see following */
 };
+
+
+struct PJ_INFO {
+    char        release[64];        /* Release info. Version + date         */
+    char        version[64];        /* Full version number                  */
+    int         major;              /* Major release number                 */
+    int         minor;              /* Minor release number                 */
+    int         patch;              /* Patch level                          */
+    char        searchpath[512];    /* Paths where init and grid files are  */
+                                    /* looked for. Paths are separated by   */
+                                    /* semi-colons.                         */
+};
+
+struct PJ_PROJ_INFO {
+    char        id[16];             /* Name of the projection in question           */
+    char        description[128];   /* Description of the projection                */
+    char        definition[512];    /* Projection definition                        */
+    int         has_inverse;        /* 1 if an inverse mapping exists, 0 otherwise  */
+};
+
+struct PJ_GRID_INFO {
+    char        gridname[32];       /* name of grid                         */
+    char        filename[260];      /* full path to grid                    */
+    char        format[8];          /* file format of grid                  */
+    LP          lowerleft;          /* Coordinates of lower left corner     */
+    LP          upperright;         /* Coordinates of upper right corner    */
+    int         n_lon, n_lat;       /* Grid size                            */
+    double      cs_lon, cs_lat;     /* Cell size of grid                    */
+};
+
+struct PJ_INIT_INFO {
+    char        name[32];           /* name of init file                        */
+    char        filename[260];      /* full path to the init file.              */
+    char        version[32];        /* version of the init file                 */
+    char        origin[32];         /* origin of the file, e.g. EPSG            */
+    char        lastupdate[16];     /* Date of last update in YYYY-MM-DD format */
+};
+
 
 
 /* The context type - properly namespaced synonym for projCtx */
@@ -358,10 +410,14 @@ int  proj_errno_reset (PJ *P);
 void proj_errno_restore (PJ *P, int err);
 
 
-/* Build a fully expanded proj_create() compatible representation of P */
-char *proj_definition_retrieve (PJ *P);
-/* ...and get rid of it safely */
-void *proj_release (void *buffer);
+PJ_DERIVS  proj_derivatives(const PJ *P, const LP lp);
+PJ_FACTORS proj_factors(const PJ *P, const LP lp);  
+  
+/* Info functions - get information about various PROJ.4 entities */
+PJ_INFO      proj_info(void);
+PJ_PROJ_INFO proj_pj_info(const PJ *P);
+PJ_GRID_INFO proj_grid_info(const char *gridname);
+PJ_INIT_INFO proj_init_info(const char *initname);
 
 
 /* These are trivial, and while occasionaly useful in real code, primarily here to       */
@@ -370,14 +426,8 @@ void *proj_release (void *buffer);
 double proj_torad (double angle_in_degrees);
 double proj_todeg (double angle_in_radians);
 
-/* Check if a projection has an inverse mapping */
-int proj_has_inverse(PJ *P);
-
 double proj_dmstor(const char *is, char **rs);
 char*  proj_rtodms(char *s, double r, int pos, int neg);
-
-PJ_DERIVS  proj_derivatives(const PJ *P, const LP lp);
-PJ_FACTORS proj_factors(const PJ *P, const LP lp);
 
 #ifdef __cplusplus
 }

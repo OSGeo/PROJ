@@ -29,6 +29,7 @@
  *****************************************************************************/
 
 #define PJ_LIB__
+#include "proj_internal.h"
 #include <projects.h>
 #include <stdio.h>
 #include <string.h>
@@ -86,10 +87,19 @@ void pj_set_searchpath ( int count, const char **path )
             strcpy(search_path[i], path[i]);
         }
     }
-        
+
     path_count = count;
 }
 
+/* just a couple of helper functions that lets other functions
+   access the otherwise private search path */
+const char **proj_get_searchpath(void) {
+    return (const char **)search_path;
+}
+
+int proj_get_path_count(void) {
+    return path_count;
+}
 /************************************************************************/
 /*                          pj_open_lib_ex()                            */
 /************************************************************************/
