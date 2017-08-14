@@ -66,16 +66,18 @@ the earth. This from Mikael Rittri on the Proj mailing list:
 
     For the fixed Earth radius, I would choose the average of the:
 
-        c   = radius of curvature at the poles,
-        b^2^ / a = radius of curvature in a meridian plane at the equator,
+        :math:`c`   = radius of curvature at the poles,
+
+        :math:`\frac{b^2}{a}` = radius of curvature in a meridian plane at the equator,
 
     since these are the extreme values for the local radius of curvature of the
     earth ellipsoid.
 
     If your coordinates are given in WGS84, then
 
-        c   = 6 399 593.626 m,
-        b^2^ / a = 6 335 439.327 m,
+        :math:`c`   = 6 399 593.626 m,
+
+        :math:`\frac{b^2}{a}` = 6 335 439.327 m,
 
     (see http://home.online.no/~sigurdhu/WGS84_Eng.html) so their average is 6,367,516.477 m.
     The maximal error for distance calculation should then be less than 0.51 percent.
