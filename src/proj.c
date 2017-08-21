@@ -7,7 +7,6 @@
 #include <math.h>
 #include "emess.h"
 
-/* TK 1999-02-13 */
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__WIN32__)
 #  include <fcntl.h>
 #  include <io.h>
@@ -15,7 +14,6 @@
 #else
 #  define SET_BINARY_MODE(file)
 #endif
-/* ! TK 1999-02-13 */
 
 #define MAX_LINE 1000
 #define MAX_PARGS 100
