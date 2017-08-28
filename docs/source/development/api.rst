@@ -143,7 +143,7 @@ definition into a projPJ object suitable for use with other API
 functions. On failure the function will return NULL and set pj_errno.
 The definition should be of the general form
 ``+proj=tmerc +lon_0 +datum=WGS84``. Refer to PROJ.4 documentation and
-the :ref:`parameters` notes for additional detail.
+the :ref:`transformation` notes for additional detail.
 
 Coordinate system objects allocated with ``pj_init_plus()`` should be
 deallocated with ``pj_free()``.

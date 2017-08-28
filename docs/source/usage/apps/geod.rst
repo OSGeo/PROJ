@@ -4,9 +4,6 @@
 geod
 ================================================================================
 
-
-.. Index:: geod
-
 ``geod``  (direct)  and  ``invgeod`` (inverse) perform geodesic ("Great
 Circle") computations for determining latitude,  longitude  and
 back  azimuth  of  a terminus point given a initial point latitude,
@@ -157,7 +154,7 @@ which gives:
      45d31'0.003"N 123d40'59.985"W 75d39'13.094"
 
 .. note::
-    lack  of precision in the distance value compromises the
+    Lack  of precision in the distance value compromises the
     precision of the Portland location.
 
 Further reading
