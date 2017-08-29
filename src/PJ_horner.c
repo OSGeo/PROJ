@@ -128,6 +128,8 @@ static void horner_free (HORNER *h) {
     horner_dealloc (h->fwd_u);
     horner_dealloc (h->fwd_c);
     horner_dealloc (h->inv_c);
+    horner_dealloc (h->fwd_origin);
+    horner_dealloc (h->inv_origin);
     horner_dealloc (h);
 }
 
@@ -406,8 +408,10 @@ static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
     }
 
     sprintf (buf, "t%s", param);
-    if (0==pj_param (P->ctx, P->params, buf).i)
+    if (0==pj_param (P->ctx, P->params, buf).i) {
+        pj_dealloc (buf);
         return 0;
+    }
     sprintf (buf, "s%s", param);
     init = pj_param(P->ctx, P->params, buf).s;
     pj_dealloc (buf);
