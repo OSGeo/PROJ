@@ -26,6 +26,10 @@
 #include "geodesic.h"
 #include <math.h>
 
+#if !defined(HAVE_C99_MATH)
+#define HAVE_C99_MATH 0
+#endif
+
 #define GEOGRAPHICLIB_GEODESIC_ORDER 6
 #define nA1   GEOGRAPHICLIB_GEODESIC_ORDER
 #define nC1   GEOGRAPHICLIB_GEODESIC_ORDER
@@ -105,6 +109,12 @@ enum captype {
 };
 
 static real sq(real x) { return x * x; }
+#if HAVE_C99_MATH
+#define atanhx atanh
+#define copysignx copysign
+#define hypotx hypot
+#define cbrtx cbrt
+#else
 static real log1px(real x) {
   volatile real
     y = 1 + x,
@@ -133,6 +143,7 @@ static real cbrtx(real x) {
   real y = pow(fabs(x), 1/(real)(3)); /* Return the real cube root */
   return x < 0 ? -y : y;
 }
+#endif
 
 static real sumx(real u, real v, real* t) {
   volatile real s = u + v;
@@ -170,8 +181,13 @@ static void norm2(real* sinx, real* cosx) {
 }
 
 static real AngNormalize(real x) {
+#if HAVE_C99_MATH
+  x = remainder(x, (real)(360));
+  return x != -180 ? x : 180;
+#else
   x = fmod(x, (real)(360));
   return x <= -180 ? x + 360 : (x <= 180 ? x : x - 360);
+#endif
 }
 
 static real LatFix(real x)
@@ -202,9 +218,15 @@ static void sincosdx(real x, real* sinx, real* cosx) {
   /* In order to minimize round-off errors, this function exactly reduces
    * the argument to the range [-45, 45] before converting it to radians. */
   real r, s, c; int q;
+#if HAVE_C99_MATH && !defined(__GNUC__)
+  /* Disable for gcc because of bug in glibc version < 2.22, see
+   * https://sourceware.org/bugzilla/show_bug.cgi?id=17569 */
+  r = remquo(x, (real)(90), &q);
+#else
   r = fmod(x, (real)(360));
   q = (int)(floor(r / 90 + (real)(0.5)));
   r -= 90 * q;
+#endif
   /* now abs(r) <= 45 */
   r *= degree;
   /* Possibly could call the gnu extension sincos */
@@ -538,7 +560,9 @@ real geod_genposition(const struct geod_geodesicline* l,
   salp2 = l->salp0; calp2 = l->calp0 * csig2; /* No need to normalize */
 
   if (outmask & GEOD_DISTANCE)
-    s12 = flags & GEOD_ARCMODE ? l->b * ((1 + l->A1m1) * sig12 + AB1) : s12_a12;
+    s12 = flags & GEOD_ARCMODE ?
+      l->b * ((1 + l->A1m1) * sig12 + AB1) :
+      s12_a12;
 
   if (outmask & GEOD_LONGITUDE) {
     real E = copysignx(1, l->salp0); /* east or west going? */
@@ -576,7 +600,8 @@ real geod_genposition(const struct geod_geodesicline* l,
       m12 = l->b * ((dn2 * (l->csig1 * ssig2) - l->dn1 * (l->ssig1 * csig2))
                     - l->csig1 * csig2 * J12);
     if (outmask & GEOD_GEODESICSCALE) {
-      real t = l->k2 * (ssig2 - l->ssig1) * (ssig2 + l->ssig1) / (l->dn1 + dn2);
+      real t = l->k2 * (ssig2 - l->ssig1) * (ssig2 + l->ssig1) /
+        (l->dn1 + dn2);
       M12 = csig12 + (t *  ssig2 -  csig2 * J12) * l->ssig1 / l->dn1;
       M21 = csig12 - (t * l->ssig1 - l->csig1 * J12) *  ssig2 /  dn2;
     }
@@ -639,7 +664,9 @@ static void geod_setarc(struct geod_geodesicline* l, real a13) {
 
 void geod_gensetdistance(struct geod_geodesicline* l,
  unsigned flags, real s13_a13) {
-  flags & GEOD_ARCMODE ? geod_setarc(l, s13_a13) : geod_setdistance(l, s13_a13);
+  flags & GEOD_ARCMODE ?
+    geod_setarc(l, s13_a13) :
+    geod_setdistance(l, s13_a13);
 }
 
 void geod_position(const struct geod_geodesicline* l, real s12,
@@ -1758,10 +1785,17 @@ int transit(real lon1, real lon2) {
 }
 
 int transitdirect(real lon1, real lon2) {
+#if HAVE_C99_MATH
+  lon1 = remainder(lon1, (real)(720));
+  lon2 = remainder(lon2, (real)(720));
+  return ( (lon2 >= 0 && lon2 < 360 ? 0 : 1) -
+           (lon1 >= 0 && lon1 < 360 ? 0 : 1) );
+#else
   lon1 = fmod(lon1, (real)(720));
   lon2 = fmod(lon2, (real)(720));
   return ( ((lon2 >= 0 && lon2 < 360) || lon2 < -360 ? 0 : 1) -
            ((lon1 >= 0 && lon1 < 360) || lon1 < -360 ? 0 : 1) );
+#endif
 }
 
 void accini(real s[]) {

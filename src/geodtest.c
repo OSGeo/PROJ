@@ -16,7 +16,7 @@
 #include <math.h>
 
 #if defined(_MSC_VER)
-// Squelch warnings about assignment within conditional expression
+/* Squelch warnings about assignment within conditional expression */
 #  pragma warning (disable: 4706)
 #endif
 
@@ -618,8 +618,9 @@ static int GeodSolve73() {
   return result;
 }
 
-static void planimeter(const struct geod_geodesic* g, double points[][2], int N,
-                double* perimeter, double* area) {
+static void planimeter(const struct geod_geodesic* g,
+                       double points[][2], int N,
+                       double* perimeter, double* area) {
   struct geod_polygon p;
   int i;
   geod_polygon_init(&p, 0);
@@ -628,8 +629,9 @@ static void planimeter(const struct geod_geodesic* g, double points[][2], int N,
   geod_polygon_compute(g, &p, 0, 1, area, perimeter);
 }
 
-static void polylength(const struct geod_geodesic* g, double points[][2], int N,
-                double* perimeter) {
+static void polylength(const struct geod_geodesic* g,
+                       double points[][2], int N,
+                       double* perimeter) {
   struct geod_polygon p;
   int i;
   geod_polygon_init(&p, 1);
@@ -655,6 +657,34 @@ static int GeodSolve74() {
   result += assertEquals(M12,   0.999999995, 5e-9);
   result += assertEquals(M21,   0.999999995, 5e-9);
   result += assertEquals(S12, 286698586.30197, 5e-4);
+  return result;
+}
+
+static int GeodSolve76() {
+  /* The distance from Wellington and Salamanca (a classic failure of
+     Vincenty) */
+  double azi1, azi2, s12;
+  struct geod_geodesic g;
+  int result = 0;
+  geod_init(&g, wgs84_a, wgs84_f);
+  geod_inverse(&g, -(41+19/60.0), 174+49/60.0, 40+58/60.0, -(5+30/60.0),
+               &s12, &azi1, &azi2);
+  result += assertEquals(azi1, 160.39137649664, 0.5e-11);
+  result += assertEquals(azi2,  19.50042925176, 0.5e-11);
+  result += assertEquals(s12,  19960543.857179, 0.5e-6);
+  return result;
+}
+
+static int GeodSolve78() {
+  /* An example where the NGS calculator fails to converge */
+  double azi1, azi2, s12;
+  struct geod_geodesic g;
+  int result = 0;
+  geod_init(&g, wgs84_a, wgs84_f);
+  geod_inverse(&g, 27.2, 0.0, -27.1, 179.5, &s12, &azi1, &azi2);
+  result += assertEquals(azi1,  45.82468716758, 0.5e-11);
+  result += assertEquals(azi2, 134.22776532670, 0.5e-11);
+  result += assertEquals(s12,  19974354.765767, 0.5e-6);
   return result;
 }
 
@@ -786,6 +816,8 @@ int main() {
   if ((i = GeodSolve71())) {++n; printf("GeodSolve71 fail: %d\n", i);}
   if ((i = GeodSolve73())) {++n; printf("GeodSolve73 fail: %d\n", i);}
   if ((i = GeodSolve74())) {++n; printf("GeodSolve74 fail: %d\n", i);}
+  if ((i = GeodSolve76())) {++n; printf("GeodSolve76 fail: %d\n", i);}
+  if ((i = GeodSolve78())) {++n; printf("GeodSolve78 fail: %d\n", i);}
   if ((i = Planimeter0())) {++n; printf("Planimeter0 fail: %d\n", i);}
   if ((i = Planimeter5())) {++n; printf("Planimeter5 fail: %d\n", i);}
   if ((i = Planimeter6())) {++n; printf("Planimeter6 fail: %d\n", i);}

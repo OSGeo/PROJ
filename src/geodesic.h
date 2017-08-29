@@ -112,7 +112,7 @@
  * https://geographiclib.sourceforge.io/
  *
  * This library was distributed with
- * <a href="../index.html">GeographicLib</a> 1.48.
+ * <a href="../index.html">GeographicLib</a> 1.49.
  **********************************************************************/
 
 #if !defined(GEODESIC_H)
@@ -127,12 +127,12 @@
  * The minor version of the geodesic library.  (This tracks the version of
  * GeographicLib.)
  **********************************************************************/
-#define GEODESIC_VERSION_MINOR 48
+#define GEODESIC_VERSION_MINOR 49
 /**
  * The patch level of the geodesic library.  (This tracks the version of
  * GeographicLib.)
  **********************************************************************/
-#define GEODESIC_VERSION_PATCH 1
+#define GEODESIC_VERSION_PATCH 0
 
 /**
  * Pack the version components into a single integer.  Users should not rely on
@@ -881,16 +881,16 @@ extern "C" {
    * mask values for the \e caps argument to geod_lineinit().
    **********************************************************************/
   enum geod_mask {
-    GEOD_NONE         = 0U,                     /**< Calculate nothing */
-    GEOD_LATITUDE     = 1U<<7  | 0U,            /**< Calculate latitude */
-    GEOD_LONGITUDE    = 1U<<8  | 1U<<3,         /**< Calculate longitude */
-    GEOD_AZIMUTH      = 1U<<9  | 0U,            /**< Calculate azimuth */
-    GEOD_DISTANCE     = 1U<<10 | 1U<<0,         /**< Calculate distance */
-    GEOD_DISTANCE_IN  = 1U<<11 | 1U<<0 | 1U<<1, /**< Allow distance as input  */
-    GEOD_REDUCEDLENGTH= 1U<<12 | 1U<<0 | 1U<<2, /**< Calculate reduced length */
-    GEOD_GEODESICSCALE= 1U<<13 | 1U<<0 | 1U<<2, /**< Calculate geodesic scale */
-    GEOD_AREA         = 1U<<14 | 1U<<4,         /**< Calculate reduced length */
-    GEOD_ALL          = 0x7F80U| 0x1FU          /**< Calculate everything */
+    GEOD_NONE         = 0U,                    /**< Calculate nothing */
+    GEOD_LATITUDE     = 1U<<7  | 0U,           /**< Calculate latitude */
+    GEOD_LONGITUDE    = 1U<<8  | 1U<<3,        /**< Calculate longitude */
+    GEOD_AZIMUTH      = 1U<<9  | 0U,           /**< Calculate azimuth */
+    GEOD_DISTANCE     = 1U<<10 | 1U<<0,        /**< Calculate distance */
+    GEOD_DISTANCE_IN  = 1U<<11 | 1U<<0 | 1U<<1,/**< Allow distance as input  */
+    GEOD_REDUCEDLENGTH= 1U<<12 | 1U<<0 | 1U<<2,/**< Calculate reduced length */
+    GEOD_GEODESICSCALE= 1U<<13 | 1U<<0 | 1U<<2,/**< Calculate geodesic scale */
+    GEOD_AREA         = 1U<<14 | 1U<<4,        /**< Calculate reduced length */
+    GEOD_ALL          = 0x7F80U| 0x1FU         /**< Calculate everything */
   };
 
   /**
