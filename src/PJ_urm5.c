@@ -47,11 +47,11 @@ PJ *PROJECTION(urm5) {
         Q->n = pj_param(P->ctx, P->params, "dn").f;
         if (Q->n <= 0. || Q->n > 1.) {
             proj_errno_set(P, PJD_ERR_N_OUT_OF_RANGE);
-            return freeup_new(0);
+            return freeup_new(P);
         }
     } else {
             proj_errno_set(P, PJD_ERR_N_OUT_OF_RANGE);
-            return freeup_new(0);
+            return freeup_new(P);
     }
     Q->q3 = pj_param(P->ctx, P->params, "dq").f / 3.;
     alpha = pj_param(P->ctx, P->params, "ralpha").f;
