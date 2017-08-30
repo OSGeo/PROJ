@@ -3,6 +3,9 @@ AM_CFLAGS = @C_WFLAGS@
 bin_PROGRAMS =	proj nad2bin geod cs2cs
 EXTRA_PROGRAMS = multistresstest test228
 
+TESTS = geodtest
+check_PROGRAMS = geodtest
+
 AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
@@ -19,6 +22,7 @@ nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h
 multistresstest_SOURCES = multistresstest.c
 test228_SOURCES = test228.c
+geodtest_SOURCES = geodtest.c
 
 proj_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
@@ -26,6 +30,7 @@ nad2bin_LDADD = libproj.la
 geod_LDADD = libproj.la
 multistresstest_LDADD = libproj.la @THREAD_LIB@
 test228_LDADD = libproj.la @THREAD_LIB@
+geodtest_LDADD = libproj.la
 
 lib_LTLIBRARIES = libproj.la
 
