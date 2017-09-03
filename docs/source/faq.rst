@@ -212,7 +212,7 @@ Similar issues apply with many other datasets distributed with projections
 based on a spherical earth model - such as many NASA datasets.  This coordinate
 system is now known by the EPSG code 3857 and has in the past been known as
 EPSG:3785 and EPSG:900913.  When using this coordinate system with GDAL/OGR it
-is helpful to include the +wktext so the exact proj.4 string will be preserved
+is helpful to include the +wktext so the exact PROJ.4 string will be preserved
 in the WKT representation (otherwise key parameters like `+nadgrids=@null` will
 be dropped):
 
@@ -302,7 +302,7 @@ Output of above command:
 
     0 0.7853981633974483 0.00 41.94
 
-What options does proj.4 allow for the shape of the Earth (geodesy)?
+What options does PROJ.4 allow for the shape of the Earth (geodesy)?
 --------------------------------------------------------------------------------
 
 See https://github.com/OSGeo/proj.4/blob/master/src/pj_ellps.c
@@ -315,7 +315,7 @@ What if I want a spherical Earth?
 Use ``+ellps=sphere``.  See https://github.com/OSGeo/proj.4/blob/master/src/pj_ellps.c
 for the radius used in this case.
 
-How do I change the radius of the Earth?  How do I use proj.4 for work on Mars?
+How do I change the radius of the Earth?  How do I use PROJ.4 for work on Mars?
 --------------------------------------------------------------------------------
 
 You can supply explicit values for the semi minor and semi major axes instead

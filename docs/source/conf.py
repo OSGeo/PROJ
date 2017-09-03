@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# proj.4 documentation build configuration file, created by
+# PROJ.4 documentation build configuration file, created by
 # sphinx-quickstart on Wed Feb 24 10:47:15 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -47,7 +47,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'proj.4'
+project = u'PROJ.4'
 copyright = u'1986?-2016'
 author = u'Gerald Evenden, Frank Warmerdam, and others'
 
@@ -230,7 +230,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'proj4.tex', u'proj.4 Documentation',
+    (master_doc, 'proj4.tex', u'PROJ.4 Documentation',
      u'Gerald Evenden', 'manual'),
 ]
 
@@ -260,7 +260,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'proj4', u'proj.4 Documentation',
+    (master_doc, 'proj4', u'PROJ.4 Documentation',
      [author], 1)
 ]
 
@@ -274,7 +274,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'proj4', u'proj.4 Documentation',
+    (master_doc, 'proj4', u'PROJ.4 Documentation',
      author, 'proj4', 'One line description of project.',
      'Miscellaneous'),
 ]
