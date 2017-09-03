@@ -41,6 +41,7 @@ Documentation
    htpd
    development/index
    faq
+   contributing
    download
    glossary
    license
