@@ -81,6 +81,8 @@ PJ *PROJECTION(hgridshift) {
     /* Was gridlist compiled properly? */
     if ( pj_ctx_get_errno(P->ctx) ) {
         proj_log_error(P, "hgridshift: could not find required grid(s).");
+        pj_dalloc(P->gridlist);
+        P->gridlist = NULL;
         return freeup_msg(P, -38);
     }
 
