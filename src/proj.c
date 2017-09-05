@@ -143,10 +143,17 @@ static void process(FILE *fid) {
                 putchar('\t');
                 (void)fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
             }
-        } else {    /* x-y or decimal degree ascii output */
+        } else {    /* x-y or decimal degree ascii output, scale if warranted by output units */
             if (inverse) {
-                data.v *= RAD_TO_DEG;
-                data.u *= RAD_TO_DEG;
+                if (Proj->left == PJ_IO_UNITS_RADIANS || Proj->left == PJ_IO_UNITS_CLASSIC) {
+                    data.v *= RAD_TO_DEG;
+                    data.u *= RAD_TO_DEG;
+                }
+            } else {
+                if (Proj->right == PJ_IO_UNITS_RADIANS) {
+                    data.v *= RAD_TO_DEG;
+                    data.u *= RAD_TO_DEG;
+                }
             }
 
             if (reverseout) {
@@ -176,6 +183,7 @@ static void vprocess(FILE *fid) {
     char line[MAX_LINE+3], *s, pline[40];
     projUV dat_ll, dat_xy, temp;
     int linvers;
+
 
     if (!oform)
         oform = "%.3f";
@@ -245,6 +253,12 @@ static void vprocess(FILE *fid) {
             }
             dat_xy = pj_fwd(dat_ll, Proj);
             if (postscale) { dat_xy.u *= fscale; dat_xy.v *= fscale; }
+        }
+
+        /* apply rad->deg scaling in case the output from a pipeline has degrees as units */
+        if (!inverse && Proj->right == PJ_IO_UNITS_RADIANS) {
+            dat_xy.u *= RAD_TO_DEG;
+            dat_xy.v *= RAD_TO_DEG;
         }
 
         /* For some reason pj_errno does not work as expected in some   */
