@@ -50,7 +50,7 @@ Documentation
 Mailing List
 ================================================================================
 
-The Proj.4 mailing list can be found at http://lists.maptools.org/mailman/listinfo/proj
+The PROJ.4 mailing list can be found at http://lists.maptools.org/mailman/listinfo/proj
 
 Indices and tables
 ==================
