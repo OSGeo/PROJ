@@ -200,6 +200,8 @@ static void *freeup_msg (PJ *P, int errlev) {
     if (0!=P->ctx)
         pj_ctx_set_errno (P->ctx, errlev);
 
+    pj_dealloc (P->opaque);
+
     return pj_dealloc(P);
 }
 
