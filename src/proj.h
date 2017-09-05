@@ -182,6 +182,9 @@ typedef union PJ_TRIPLET PJ_TRIPLET;
 union PJ_COORD;
 typedef union PJ_COORD PJ_COORD;
 
+struct PJ_BBOX;
+typedef struct PJ_BBOX PJ_BBOX;
+
 struct PJ_DERIVS;
 typedef struct PJ_DERIVS PJ_DERIVS;
 
@@ -281,6 +284,7 @@ union PJ_PAIR {
     double v[2]; /* Yes - It's really just a vector! */
 };
 
+
 struct PJ_OBS {
     PJ_COORD coo;        /* coordinate data */
     PJ_TRIPLET anc;      /* ancillary data */
@@ -288,6 +292,10 @@ struct PJ_OBS {
     unsigned int flags;  /* additional data, intended for flags */
 };
 
+struct PJ_BBOX {
+    LP  ll;             /* lower left  */
+    LP  ur;             /* upper right */
+};
 
 struct PJ_DERIVS {
     double x_l, x_p;       /* derivatives of x for lambda-phi */
@@ -358,7 +366,7 @@ void proj_context_destroy    (PJ_CONTEXT *ctx);
 /* Manage the transformation definition object PJ */
 PJ  *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
-PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to);
+PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, const PJ_BBOX *area);
 PJ  *proj_destroy (PJ *P);
 
 
