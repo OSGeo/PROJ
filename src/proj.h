@@ -304,6 +304,10 @@ struct PJ_FACTORS {
     int code;              /* info as to analytics, see following */
 };
 
+#define PJ_IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
+#define PJ_IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
+#define PJ_IS_ANAL_HK    04    /* h and k analytic */
+#define PJ_IS_ANAL_CONV 010    /* convergence analytic */
 
 struct PJ_INFO {
     char        release[64];        /* Release info. Version + date         */
