@@ -87,7 +87,14 @@ static void *freeup_new (PJ *P) {                       /* Destructor */
         return pj_dealloc (P);
 
     if (P->opaque->link)
-        P->opaque->link->pfree(P->opaque->link);
+    {
+        /* This is a bit tricky: the linked PJ* shares the same params as */
+        /* the current one, so unset it to avoid double free */
+        /* We used to call P->opaque->link->pfree(P->opaque->link); only */
+        /* but this leaked grids */
+        P->opaque->link->params = NULL;
+        pj_free(P->opaque->link);
+    }
 
     pj_dealloc (P->opaque);
     return pj_dealloc(P);
