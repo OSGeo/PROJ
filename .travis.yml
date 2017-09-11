@@ -39,6 +39,9 @@ matrix:
         - BUILD_NAME=mingw32
         - DETAILS="mingw32"
 
+python:
+    - 3.6
+
 #  allow_failures:
 #    - os: osx
 

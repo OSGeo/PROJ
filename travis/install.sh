@@ -84,7 +84,6 @@ PROJ_LIB=$GRIDDIR ./src/proj -VC
   
 # install & run the working GIGS test
   # create locations that pyproj understands
-pyenv global system 3.4
 python3 --version
 ln -s src include
 ln -s src/.libs lib
