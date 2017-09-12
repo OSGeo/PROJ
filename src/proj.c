@@ -31,6 +31,7 @@ reversein = 0,	/* != 0 reverse input arguments */
 reverseout = 0,	/* != 0 reverse output arguments */
 bin_in = 0,	/* != 0 then binary input */
 bin_out = 0,	/* != 0 then binary output */
+unbuf_out = 0,	/* != 0 then unbuffered output */
 echoin = 0,	/* echo input data to output line */
 tag = '#',	/* beginning of line tag character */
 inverse = 0,	/* != 0 then inverse projection */
@@ -44,7 +45,7 @@ postscale = 0;
 *oform = (char *)0,	/* output format for x-y or decimal degrees */
 *oterr = "*\t*",	/* output line for unprojectable input */
 *usage =
-"%s\nusage: %s [ -bCeEfiIlormsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
+"%s\nusage: %s [ -bCeEfiIlormsStTuvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
 	static struct FACTORS
 facs;
 	static double
@@ -295,6 +296,9 @@ int main(int argc, char **argv) {
               case 'o': /* output binary */
                 bin_out = 1;
                 continue;
+              case 'u': /* output unbuffered */
+                unbuf_out = 1;
+                continue;
               case 'I': /* alt. method to spec inverse */
                 inverse = 1;
                 continue;
@@ -488,6 +492,10 @@ int main(int argc, char **argv) {
     if (bin_out)
     {
         SET_BINARY_MODE(stdout);
+    }
+
+    if (unbuf_out) {
+        setbuf(stdout, NULL);
     }
 
     /* process input file list */
