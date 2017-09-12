@@ -17,7 +17,6 @@ matrix:
       env:
         - BUILD_NAME=linux_gcc
         - DETAILS="linux, gcc"
-        - PY_VERSION=3.4
     - os: linux
       compiler: clang
       language: c
@@ -27,13 +26,11 @@ matrix:
       env:
         - BUILD_NAME=linux_clang
         - DETAILS="linux, clang"
-        - PY_VERSION=3.4
     - os: osx
       language: c
       env:
         - BUILD_NAME=osx
         - DETAILS="osx"
-        - PY_VERSION=3.4
     - os: linux
       compiler: gcc
       language: c
@@ -41,7 +38,6 @@ matrix:
       env:
         - BUILD_NAME=mingw32
         - DETAILS="mingw32"
-        - PY_VERSION=3.4
 
 #  allow_failures:
 #    - os: osx

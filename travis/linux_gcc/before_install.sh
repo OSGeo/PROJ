@@ -1,5 +1,7 @@
 #!/bin/bash
 
+./travis/before_install.sh
+
 sudo apt-get install -y cppcheck
 
 cppcheck --inline-suppr --template='{file}:{line},{severity},{id},{message}' --enable=all --inconclusive --std=posix -DPJ_SELFTEST=1 src/*.c 2>/tmp/cppcheck.txt
@@ -12,4 +14,6 @@ fi
 
 set -e
 
-./travis/before_install.sh
+pip install --user cpp-coveralls
+./travis/docker.sh
+
