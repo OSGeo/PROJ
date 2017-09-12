@@ -311,9 +311,9 @@ static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
     /* delegate unit conversion of physical dimensions to the 3D function */
     out.coo.lpz = reverse_3d(obs.coo.xyz, P);
 
-    if (Q->t_in_id >= 0)
-        out.coo.xyzt.t = time_units[Q->t_out_id].t_in( obs.coo.xyzt.t );
     if (Q->t_out_id >= 0)
+        out.coo.xyzt.t = time_units[Q->t_out_id].t_in( obs.coo.xyzt.t );
+    if (Q->t_in_id >= 0)
         out.coo.xyzt.t = time_units[Q->t_in_id].t_out( out.coo.xyzt.t );
 
     return out;
