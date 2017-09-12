@@ -486,13 +486,13 @@ int pj_cart_selftest (void) {
     /* proj_info()                                                            */
     /* this one is difficult to test, since the output changes with the setup */
     info = proj_info();
-    if (info.version) {
+    if (info.version[0] != '\0' ) {
         char tmpstr[64];
         sprintf(tmpstr, "%d.%d.%d", info.major, info.minor, info.patch);
         if (strcmp(info.version, tmpstr)) return 55;
     }
-    if (!info.release)    return 56;
-    if (!info.searchpath) return 57;
+    if (info.release[0] == '\0')    return 56;
+    if (info.searchpath[0] == '\0') return 57;
 
     /* proj_pj_info() */
     P = proj_create(0, "+proj=august"); /* august has no inverse */
