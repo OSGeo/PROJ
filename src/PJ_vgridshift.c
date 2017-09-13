@@ -112,18 +112,18 @@ int pj_vgridshift_selftest (void) {
     PJ_OBS expect, a, b;
     double dist;
 
-    /* fail on purpose: +grids parameter it mandatory*/
-    P = proj_create(0, "+proj=vgridshift");
+    /* fail on purpose: +grids parameter is mandatory*/
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=vgridshift");
     if (0!=P)
         return 99;
 
     /* fail on purpose: open non-existing grid */
-    P = proj_create(0, "+proj=vgridshift +grids=nonexistinggrid.gtx");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=vgridshift +grids=nonexistinggrid.gtx");
     if (0!=P)
         return 999;
 
     /* Failure most likely means the grid is missing */
-    P = proj_create (0, "+proj=vgridshift +grids=egm96_15.gtx +ellps=GRS80");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=vgridshift +grids=egm96_15.gtx +ellps=GRS80");
     if (0==P)
         return 10;
 

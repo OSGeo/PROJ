@@ -529,7 +529,7 @@ int pj_horner_selftest (void) {
     double dist;
 
     /* Real polynonia relating the technical coordinate system TC32 to "System 45 Bornholm" */
-    P = proj_create (0, tc32_utm32);
+    P = proj_create (PJ_DEFAULT_CTX, tc32_utm32);
     if (0==P)
         return 10;
 
@@ -543,7 +543,7 @@ int pj_horner_selftest (void) {
         return 1;
 
     /* The complex polynomial transformation between the "System Storebaelt" and utm32/ed50 */
-    P = proj_create (0, sb_utm32);
+    P = proj_create (PJ_DEFAULT_CTX, sb_utm32);
     if (0==P)
         return 11;
 

@@ -338,7 +338,7 @@ int pj_molodensky_selftest (void) {
     PJ *P;
 
     /* Test the abridged Molodensky first. Example from appendix 3 of Deakin (2004). */
-    P = proj_create(0,
+    P = proj_create(PJ_DEFAULT_CTX,
         "+proj=molodensky +a=6378160 +rf=298.25 "
         "+da=-23 +df=-8.120449e-8 +dx=-134 +dy=-48 +dz=149 "
         "+abridged "
@@ -376,7 +376,7 @@ int pj_molodensky_selftest (void) {
 
     /* Test the abridged Molodensky first. Example from appendix 3 of Deaking (2004). */
 
-    P = proj_create(0,
+    P = proj_create(PJ_DEFAULT_CTX,
         "+proj=molodensky +a=6378160 +rf=298.25 "
         "+da=-23 +df=-8.120449e-8 +dx=-134 +dy=-48 +dz=149 "
     );

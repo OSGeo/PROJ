@@ -110,18 +110,18 @@ int pj_hgridshift_selftest (void) {
     double dist;
 
     /* fail on purpose: +grids parameter is mandatory*/
-    P = proj_create(0, "+proj=hgridshift");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=hgridshift");
     if (0!=P)
         return 99;
 
     /* fail on purpose: open non-existing grid */
-    P = proj_create(0, "+proj=hgridshift +grids=nonexistinggrid.gsb");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=hgridshift +grids=nonexistinggrid.gsb");
     if (0!=P)
         return 999;
 
 
     /* Failure most likely means the grid is missing */
-    P = proj_create (0, "+proj=hgridshift +grids=nzgd2kgrid0005.gsb +ellps=GRS80");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=hgridshift +grids=nzgd2kgrid0005.gsb +ellps=GRS80");
     if (0==P)
         return 10;
 
