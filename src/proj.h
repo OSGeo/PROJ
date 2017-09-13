@@ -367,35 +367,35 @@ PJ  *proj_destroy (PJ *P);
 
 
 /* Apply transformation to observation - in forward or inverse direction */
-enum proj_direction {
+enum PJ_DIRECTION {
     PJ_FWD   =  1,   /* Forward    */
     PJ_IDENT =  0,   /* Do nothing */
     PJ_INV   = -1    /* Inverse    */
 };
+typedef enum PJ_DIRECTION PJ_DIRECTION;
 
-
-PJ_OBS   proj_trans_obs   (PJ *P, enum proj_direction direction, PJ_OBS obs);
-PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coord);
+PJ_OBS   proj_trans_obs   (PJ *P, PJ_DIRECTION direction, PJ_OBS obs);
+PJ_COORD proj_trans_coord (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
 
 
 size_t proj_transform (
     PJ *P,
-    enum proj_direction direction,
+    PJ_DIRECTION direction,
     double *x, size_t sx, size_t nx,
     double *y, size_t sy, size_t ny,
     double *z, size_t sz, size_t nz,
     double *t, size_t st, size_t nt
 );
 
-int proj_transform_obs   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
-int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
+int proj_transform_obs   (PJ *P, PJ_DIRECTION direction, size_t n, PJ_OBS *obs);
+int proj_transform_coord (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
 
 /* Initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);
 PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
 
 /* Measure internal consistency - in forward or inverse direction */
-double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs);
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_OBS obs);
 
 /* Geodesic distance between two points with angular 2D coordinates */
 double proj_lp_dist (PJ *P, LP a, LP b);

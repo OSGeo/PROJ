@@ -94,7 +94,7 @@ PROJ_HEAD(horner,    "Horner polynomial evaluation");
 
 struct horner;
 typedef struct horner HORNER;
-static UV      horner (const HORNER *transformation, enum proj_direction, UV position);
+static UV      horner (const HORNER *transformation, PJ_DIRECTION direction, UV position);
 static HORNER *horner_alloc (size_t order, int complex_polynomia);
 static void    horner_free (HORNER *h);
 
@@ -178,7 +178,7 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
 
 
 /**********************************************************************/
-static UV horner (const HORNER *transformation, enum proj_direction direction, UV position) {
+static UV horner (const HORNER *transformation, PJ_DIRECTION direction, UV position) {
 /***********************************************************************
 
 A reimplementation of the classic Engsager/Poder 2D Horner polynomial
@@ -303,7 +303,7 @@ static PJ_OBS horner_reverse_obs (PJ_OBS point, PJ *P) {
 
 
 /**********************************************************************/
-static UV complex_horner (const HORNER *transformation, enum proj_direction direction, UV position) {
+static UV complex_horner (const HORNER *transformation, PJ_DIRECTION direction, UV position) {
 /***********************************************************************
 
 A reimplementation of a classic Engsager/Poder Horner complex

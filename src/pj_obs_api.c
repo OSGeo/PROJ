@@ -90,7 +90,7 @@ double proj_xyz_dist (XYZ a, XYZ b) {
 
 
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
-double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs) {
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_OBS obs) {
     int i;
     PJ_OBS o, u;
 
@@ -125,7 +125,7 @@ double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs) 
 
 
 /* Apply the transformation P to the coordinate coo */
-PJ_OBS proj_trans_obs (PJ *P, enum proj_direction direction, PJ_OBS obs) {
+PJ_OBS proj_trans_obs (PJ *P, PJ_DIRECTION direction, PJ_OBS obs) {
     if (0==P)
         return obs;
 
@@ -147,7 +147,7 @@ PJ_OBS proj_trans_obs (PJ *P, enum proj_direction direction, PJ_OBS obs) {
 
 
 /* Apply the transformation P to the coordinate coo */
-PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coo) {
+PJ_COORD proj_trans_coord (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
     if (0==P)
         return coo;
 
@@ -171,7 +171,7 @@ PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coo) {
 /*************************************************************************************/
 size_t proj_transform (
     PJ *P,
-    enum proj_direction direction,
+    PJ_DIRECTION direction,
     double *x, size_t sx, size_t nx,
     double *y, size_t sy, size_t ny,
     double *z, size_t sz, size_t nz,
@@ -319,7 +319,7 @@ size_t proj_transform (
 }
 
 /*****************************************************************************/
-int proj_transform_obs (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs) {
+int proj_transform_obs (PJ *P, PJ_DIRECTION direction, size_t n, PJ_OBS *obs) {
 /******************************************************************************
     Batch transform an array of PJ_OBS.
 
@@ -337,7 +337,7 @@ int proj_transform_obs (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *
 }
 
 /*****************************************************************************/
-int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord) {
+int proj_transform_coord (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord) {
 /******************************************************************************
     Batch transform an array of PJ_COORD.
 
