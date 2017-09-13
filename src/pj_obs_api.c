@@ -501,15 +501,16 @@ PJ_CONTEXT *proj_context_create (void) {
 }
 
 
-void proj_context_destroy (PJ_CONTEXT *ctx) {
+PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx) {
     if (0==ctx)
-        return;
+        return 0;
 
     /* Trying to free the default context is a no-op (since it is statically allocated) */
     if (pj_get_default_ctx ()==ctx)
-        return;
+        return 0;
 
     pj_ctx_free (ctx);
+    return 0;
 }
 
 

@@ -357,7 +357,7 @@ typedef struct projCtx_t PJ_CONTEXT;
 /* Functionality for handling thread contexts */
 #define PJ_DEFAULT_CTX 0
 PJ_CONTEXT *proj_context_create (void);
-void proj_context_destroy    (PJ_CONTEXT *ctx);
+PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx);
 
 
 
