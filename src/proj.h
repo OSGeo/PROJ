@@ -398,7 +398,7 @@ PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p,
 double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_OBS obs);
 
 /* Geodesic distance between two points with angular 2D coordinates */
-double proj_lp_dist (PJ *P, LP a, LP b);
+double proj_lp_dist (const PJ *P, LP a, LP b);
 
 /* Euclidean distance between two points with linear 2D coordinates */
 double proj_xy_dist (XY a, XY b);
@@ -415,8 +415,8 @@ void proj_errno_restore (PJ *P, int err);
 
 
 PJ_DERIVS  proj_derivatives(const PJ *P, const LP lp);
-PJ_FACTORS proj_factors(const PJ *P, const LP lp);  
-  
+PJ_FACTORS proj_factors(const PJ *P, const LP lp);
+
 /* Info functions - get information about various PROJ.4 entities */
 PJ_INFO      proj_info(void);
 PJ_PROJ_INFO proj_pj_info(const PJ *P);

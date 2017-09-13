@@ -70,7 +70,7 @@ PJ_OBS proj_obs (double x, double y, double z, double t, double o, double p, dou
 
 
 /* Geodesic distance between two points with angular 2D coordinates */
-double proj_lp_dist (PJ *P, LP a, LP b) {
+double proj_lp_dist (const PJ *P, LP a, LP b) {
     double s12, azi1, azi2;
     /* Note: the geodesic code takes arguments in degrees */
     geod_inverse (P->geod, PJ_TODEG(a.phi), PJ_TODEG(a.lam), PJ_TODEG(b.phi), PJ_TODEG(b.lam), &s12, &azi1, &azi2);
