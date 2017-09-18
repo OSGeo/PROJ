@@ -35,7 +35,6 @@ Documentation
    :maxdepth: 1
 
    usage/index
-   projections/index
    geodesic
    grids
    htpd

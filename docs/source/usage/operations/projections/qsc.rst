@@ -23,7 +23,7 @@ Quadrilateralized Spherical Cube
 The purpose of the Quadrilateralized Spherical Cube (QSC) projection is to project
 a sphere surface onto the six sides of a cube:
 
-.. image:: ../../images/qsc_concept.jpg
+.. image:: ../../../../images/qsc_concept.jpg
    :scale: 50%
    :align: center
    :alt:   Quadrilateralized Spherical Cube
@@ -112,32 +112,32 @@ Explanation:
 The resulting images can be laid out in a grid like below.
 
 
-.. |topside| image:: ../../images/qsc_topside.jpg
+.. |topside| image:: ../../../../images/qsc_topside.jpg
    :scale: 50%
    :align: middle
    :alt:   Top side
 
-.. |leftside| image:: ../../images/qsc_leftside.jpg
+.. |leftside| image:: ../../../../images/qsc_leftside.jpg
    :scale: 50%
    :align: middle
    :alt:   Left side
 
-.. |frontside| image:: ../../images/qsc_frontside.jpg
+.. |frontside| image:: ../../../../images/qsc_frontside.jpg
    :scale: 50%
    :align: middle
    :alt:   Front side
 
-.. |rightside| image:: ../../images/qsc_rightside.jpg
+.. |rightside| image:: ../../../../images/qsc_rightside.jpg
    :scale: 50%
    :align: middle
    :alt:   Right side
 
-.. |backside| image:: ../../images/qsc_backside.jpg
+.. |backside| image:: ../../../../images/qsc_backside.jpg
    :scale: 50%
    :align: middle
    :alt:   Back side
 
-.. |bottomside| image:: ../../images/qsc_bottomside.jpg
+.. |bottomside| image:: ../../../../images/qsc_bottomside.jpg
    :scale: 50%
    :align: middle
    :alt:   Bottom side
