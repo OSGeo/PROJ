@@ -8,3 +8,13 @@
 # a version that works for the complete build processs.
 pyenv global system 3.5
 pyenv versions # a bit of debug info
+
+which python
+python --version
+which python3
+python3 --version
+
+which pip
+pip --version
+which pip3
+pip3 --version
