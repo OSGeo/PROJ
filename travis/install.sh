@@ -84,7 +84,7 @@ PROJ_LIB=$GRIDDIR ./src/proj -VC
   
 # install & run the working GIGS test
   # create locations that pyproj understands
-python3 --version
+python35 --version
 ln -s src include
 ln -s src/.libs lib
 mkdir share
@@ -96,7 +96,7 @@ PROJ_DIR=`pwd` pip3 install -v --user pyproj
 
 cd test/gigs
   # run test_json.py
-PROJ_LIB=../../nad python3 test_json.py --test conversion 5101.1-jhs.json 5101.4-jhs-etmerc.json 5105.2.json 5106.json 5108.json 5110.json 5111.1.json
+PROJ_LIB=../../nad python35 test_json.py --test conversion 5101.1-jhs.json 5101.4-jhs-etmerc.json 5105.2.json 5106.json 5108.json 5110.json 5111.1.json
 PROJ_LIB=../../nad python3 test_json.py 5101.2-jhs.json 5101.3-jhs.json 5102.1.json 5103.1.json 5103.2.json 5103.3.json 5107.json 5109.json 5112.json 5113.json 5201.json 5208.json
 cd ../..
 

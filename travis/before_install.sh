@@ -13,6 +13,8 @@ which python
 python --version
 which python3
 python3 --version
+which python35
+python35 --version
 
 which pip
 pip --version
