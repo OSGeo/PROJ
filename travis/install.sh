@@ -92,7 +92,7 @@ ln -s nad share/proj
 pwd
   # install pyproj
 export CFLAGS=
-PROJ_DIR=`pwd` pip install -v --user pyproj
+PROJ_DIR=`pwd` pip3 install -v --user pyproj
 
 cd test/gigs
   # run test_json.py
