@@ -20,5 +20,5 @@ python3 --version
 
 which pip
 pip --version
-which pip3
-pip3 --version
+#which pip3
+#pip3 --version
