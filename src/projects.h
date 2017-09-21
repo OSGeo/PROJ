@@ -201,6 +201,12 @@ struct PJ_REGION_S {
     double ur_lat;
 };
 
+struct PJ_AREA {
+    int     id;         /* Area ID in the EPSG database */
+    LP      ll;         /* Lower left corner of bounding box */
+    LP      ur;         /* Upper right corner of bounding box */
+    char    descr[64];  /* text representation of area */
+};
 
 struct projCtx_t;
 typedef struct projCtx_t projCtx_t;

@@ -292,10 +292,8 @@ struct PJ_OBS {
     unsigned int flags;  /* additional data, intended for flags */
 };
 
-struct PJ_BBOX {
-    LP  ll;             /* lower left  */
-    LP  ur;             /* upper right */
-};
+struct PJ_AREA;
+typedef struct PJ_AREA PJ_AREA;
 
 struct PJ_DERIVS {
     double x_l, x_p;       /* derivatives of x for lambda-phi */
@@ -366,8 +364,12 @@ void proj_context_destroy    (PJ_CONTEXT *ctx);
 /* Manage the transformation definition object PJ */
 PJ  *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
-PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, const PJ_BBOX *area);
+PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area);
 PJ  *proj_destroy (PJ *P);
+
+/* setter-functions for the opaque PJ_AREA struct */
+void proj_area_bbox(PJ_AREA *area, LP ll, LP ur);
+void proj_area_description(PJ_AREA *area, const char *descr);
 
 
 /* Apply transformation to observation - in forward or inverse direction */
