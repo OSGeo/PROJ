@@ -400,12 +400,12 @@ int  proj_errno_reset (PJ *P);
 void proj_errno_restore (PJ *P, int err);
 
 
-PJ_DERIVS  proj_derivatives(const PJ *P, const LP lp);
-PJ_FACTORS proj_factors(const PJ *P, const LP lp);
+PJ_DERIVS  proj_derivatives(PJ *P, const LP lp);
+PJ_FACTORS proj_factors(PJ *P, const LP lp);
 
 /* Info functions - get information about various PROJ.4 entities */
 PJ_INFO      proj_info(void);
-PJ_PROJ_INFO proj_pj_info(const PJ *P);
+PJ_PROJ_INFO proj_pj_info(PJ *P);
 PJ_GRID_INFO proj_grid_info(const char *gridname);
 PJ_INIT_INFO proj_init_info(const char *initname);
 

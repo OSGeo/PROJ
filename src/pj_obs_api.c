@@ -583,7 +583,7 @@ PJ_INFO proj_info(void) {
 
 
 /*****************************************************************************/
-PJ_PROJ_INFO proj_pj_info(const PJ *P) {
+PJ_PROJ_INFO proj_pj_info(PJ *P) {
 /******************************************************************************
     Basic info about a particular instance of a projection object.
 
@@ -607,7 +607,7 @@ PJ_PROJ_INFO proj_pj_info(const PJ *P) {
     pj_strlcpy(info.description, P->descr, sizeof(info.description));
 
     /* projection definition */
-    def = pj_get_def((PJ *)P, 0); /* pj_get_def takes a non-const PJ pointer */
+    def = pj_get_def(P, 0); /* pj_get_def takes a non-const PJ pointer */
     pj_strlcpy(info.definition, &def[1], sizeof(info.definition)); /* def includes a leading space */
     pj_dealloc(def);
 
@@ -730,7 +730,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 
 
 /*****************************************************************************/
-PJ_DERIVS proj_derivatives(const PJ *P, const LP lp) {
+PJ_DERIVS proj_derivatives(PJ *P, const LP lp) {
 /******************************************************************************
     Derivatives of coordinates.
 
@@ -740,7 +740,7 @@ PJ_DERIVS proj_derivatives(const PJ *P, const LP lp) {
 ******************************************************************************/
     PJ_DERIVS derivs;
 
-    if (pj_deriv(lp, 1e-5, (PJ *)P, &derivs)) {
+    if (pj_deriv(lp, 1e-5, P, &derivs)) {
         /* errno set in pj_derivs */
         memset(&derivs, 0, sizeof(PJ_DERIVS));
     }
@@ -750,7 +750,7 @@ PJ_DERIVS proj_derivatives(const PJ *P, const LP lp) {
 
 
 /*****************************************************************************/
-PJ_FACTORS proj_factors(const PJ *P, const LP lp) {
+PJ_FACTORS proj_factors(PJ *P, const LP lp) {
 /******************************************************************************
     Cartographic characteristics at point lp.
 
@@ -766,7 +766,7 @@ PJ_FACTORS proj_factors(const PJ *P, const LP lp) {
     /* pj_factors rely code being zero */
     factors.code = 0;
 
-    if (pj_factors(lp, (PJ *)P, 0.0, &factors)) {
+    if (pj_factors(lp, P, 0.0, &factors)) {
         /* errno set in pj_factors */
         memset(&factors, 0, sizeof(PJ_FACTORS));
     }
