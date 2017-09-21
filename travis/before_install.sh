@@ -14,7 +14,9 @@ python --version
 which python3
 python3 --version
 which python35
-python35 --version
+python3.5 --version
+
+ls /opt/pyenv/shims
 
 which pip
 pip --version
