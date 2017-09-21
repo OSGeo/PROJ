@@ -740,8 +740,7 @@ PJ_DERIVS proj_derivatives(const PJ *P, const LP lp) {
 ******************************************************************************/
     PJ_DERIVS derivs;
 
-    /* casting to struct DERIVS for compatibility reasons */
-    if (pj_deriv(lp, 1e-5, (PJ *)P, (struct DERIVS *)&derivs)) {
+    if (pj_deriv(lp, 1e-5, (PJ *)P, &derivs)) {
         /* errno set in pj_derivs */
         memset(&derivs, 0, sizeof(PJ_DERIVS));
     }
@@ -767,8 +766,7 @@ PJ_FACTORS proj_factors(const PJ *P, const LP lp) {
     /* pj_factors rely code being zero */
     factors.code = 0;
 
-    /* casting to struct FACTORS for compatibility reasons */
-    if (pj_factors(lp, (PJ *)P, 0.0, (struct FACTORS *)&factors)) {
+    if (pj_factors(lp, (PJ *)P, 0.0, &factors)) {
         /* errno set in pj_factors */
         memset(&factors, 0, sizeof(PJ_FACTORS));
     }
