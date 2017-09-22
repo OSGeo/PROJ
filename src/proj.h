@@ -305,10 +305,11 @@ struct PJ_INFO {
 };
 
 struct PJ_PROJ_INFO {
-    char        id[16];             /* Name of the projection in question           */
-    char        description[128];   /* Description of the projection                */
-    char        definition[512];    /* Projection definition                        */
-    int         has_inverse;        /* 1 if an inverse mapping exists, 0 otherwise  */
+    char        id[16];             /* Name of the projection in question                       */
+    char        description[128];   /* Description of the projection                            */
+    char        definition[512];    /* Projection definition                                    */
+    int         has_inverse;        /* 1 if an inverse mapping exists, 0 otherwise              */
+    double      accuracy;           /* Expected accuracy of the transformation. -1 if unknown.  */
 };
 
 struct PJ_GRID_INFO {

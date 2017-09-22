@@ -595,6 +595,11 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
 
     memset(&info, 0, sizeof(PJ_PROJ_INFO));
 
+    /* Expected accuracy of the transformation. Hardcoded for now, will be improved */
+    /* later. Most likely to be used when a transformation is set up with           */
+    /* proj_create_crs_to_crs in a future version that leverages the EPSG database. */
+    info.accuracy = -1.0;
+
     if (!P) {
         return info;
     }
