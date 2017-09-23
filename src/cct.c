@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
 
     if (opt_given (o, "h")) {
         printf (usage, o->progname);
-        exit (0);
+        return 0;
     }
 
 
@@ -196,6 +196,8 @@ int main(int argc, char **argv) {
         if (ncols != nfields) {
             fprintf (stderr, "%s: Too few input columns given: '%s'\n", o->progname, opt_arg (o, "c"));
             free (o);
+            if (stdout != fout)
+                fclose (fout);
             return 1;
         }
     }
@@ -205,6 +207,8 @@ int main(int argc, char **argv) {
     if ((0==P) || (0==o->pargc)) {
         fprintf (stderr, "%s: Bad transformation arguments. '%s -h' for help\n", o->progname, o->progname);
         free (o);
+        if (stdout != fout)
+            fclose (fout);
         return 1;
     }
 
@@ -226,6 +230,8 @@ int main(int argc, char **argv) {
         fprintf (stderr, "%s: Out of memory\n", o->progname);
         pj_free (P);
         free (o);
+        if (stdout != fout)
+            fclose (fout);
         return 1;
     }
 
@@ -256,7 +262,9 @@ int main(int argc, char **argv) {
                 fprintf (stderr, "%s: Could not parse file '%s' line %d\n", o->progname, opt_filename (o), opt_record (o));
         }
     }
-
+    if (stdout != fout)
+        fclose (fout);
+    free (o);
     return 0;
 }
 
