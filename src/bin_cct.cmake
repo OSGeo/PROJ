@@ -1,5 +1,5 @@
-set(CCT_SRC cct.c 
-              proj_strtod.c) 
+set(CCT_SRC cct.c proj_strtod.c) 
+set(CCT_INCLUDE optargpm.h)
 
 source_group("Source Files\\Bin" FILES ${CCT_SRC})
 

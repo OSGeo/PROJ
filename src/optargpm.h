@@ -384,7 +384,7 @@ int opt_given (OPTARGS *opt, char *option) {
         return 0;
     /* For flags we return the number of times the flag was specified (mostly for repeated -v(erbose) flags) */
     if (opt_is_flag (opt, ordinal))
-        return opt->optarg[ordinal] - opt->flaglevel;
+        return (int) (opt->optarg[ordinal] - opt->flaglevel);
     return opt->argv[0] != opt->optarg[ordinal];
 }
 
@@ -488,7 +488,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
 
     /* Process all '-' and '--'-style options */
     for (i = 1;  i < argc;  i++) {
-        int arg_group_size = strlen (argv[i]);
+        int arg_group_size = (int) strlen (argv[i]);
 
         if ('-' != argv[i][0])
             break;

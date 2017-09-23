@@ -15,7 +15,7 @@ EXTRA_DIST = makefile.vc proj.def bin_cct.cmake bin_cs2cs.cmake \
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
-cct_SOURCES = cct.c proj_strtod.c
+cct_SOURCES = cct.c proj_strtod.c optargpm.h
 nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h
 multistresstest_SOURCES = multistresstest.c
