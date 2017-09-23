@@ -85,7 +85,7 @@ CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" \
 
 default:	all
 
-all: proj.lib $(PROJ_EXE) $(CS2CS_EXE) $(GEOD_EXE) $(NAD2BIN_EXE)
+all: proj.lib $(PROJ_EXE) $(CS2CS_EXE) $(GEOD_EXE) $(CCT_EXE) $(NAD2BIN_EXE)
 
 proj.lib:	$(LIBOBJ)
 	if exist proj.lib del proj.lib
