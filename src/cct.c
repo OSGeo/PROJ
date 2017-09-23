@@ -84,61 +84,14 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-09-19
 double proj_strtod(const char *str, char **endptr);
 double proj_atof(const char *str);
 
+char *column (char *buf, int n);
+PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time);
+int print_output_line (FILE *fout, char *buf, PJ_COORD point);
+int main(int argc, char **argv);
+    
 
 
-/* return a pointer to the n'th column of buf */
-char *column (char *buf, int n) {
-    int i;
-    if (n <= 0)
-        return buf;
-    for (i = 0;  i < n;  i++) {
-        while (isspace(*buf))
-            buf++;
-        if (i == n - 1)
-            break;
-        while ((0 != *buf) && !isspace(*buf))
-            buf++;
-    }
-    return buf;
-}
-
-
-PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time) {
-    PJ_COORD err = proj_coord (HUGE_VAL, HUGE_VAL, HUGE_VAL, HUGE_VAL);
-    PJ_COORD result = err;
-    int prev_errno = errno;
-    char *endptr = 0;
-    errno = 0;
-
-    result.xyzt.z = fixed_height;
-    result.xyzt.t = fixed_time;
-    result.xyzt.x = proj_strtod (column (buf, columns[0]), &endptr);
-    result.xyzt.y = proj_strtod (column (buf, columns[1]), &endptr);
-    if (result.xyzt.z==HUGE_VAL)
-        result.xyzt.z = proj_strtod (column (buf, columns[2]), &endptr);
-    if (result.xyzt.t==HUGE_VAL)
-        result.xyzt.t = proj_strtod (column (buf, columns[3]), &endptr);
-
-    if (0!=errno)
-        return err;
-
-    errno = prev_errno;
-    return result;
-}
-
-
-int print_output_line (FILE *fout, char *buf, PJ_COORD point) {
-    char *c;
-    if (HUGE_VAL!=point.xyzt.x)
-        return fprintf (fout, "%20.15f  %20.15f  %20.15f  %20.15f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
-    c = column (buf, 1);
-    /* reflect comments and blanks */
-    if (c && ((*c=='\0') || (*c=='#')))
-        return fprintf (fout, "%s\n", buf);
-    return 0;
-}
-
-const char usage[] = {
+static const char usage[] = {
     "--------------------------------------------------------------------------------\n"
     "Usage: %s [-options]... [+operator_specs]... infile...\n"
     "--------------------------------------------------------------------------------\n"
@@ -178,6 +131,17 @@ const char usage[] = {
     "\n"
     "        echo 12 55 | proj +proj=utm +zone=32 +ellps=GRS80\n"
     "--------------------------------------------------------------------------------\n"
+    "Examples:\n"
+    "--------------------------------------------------------------------------------\n"
+    "1. convert geographical input to UTM zone 32 on the GRS80 ellipsoid:\n"
+    "    cct +ellps=GRS80 +zone=32 +proj=utm\n"
+    "2. roundtrip accuract check for the case above:\n"
+    "    cct +proj=pipeline +proj=utm +ellps=GRS80 +zone=32 +step +step +inv\n"
+    "3. as (1) but specify input columns for longitude, latitude, height and time:\n"
+    "    cct -c 5,2,1,4  +proj=utm +ellps=GRS80 +zone=32\n"
+    "4. as (1) but specify fixed height and time, hence needing only 2 cols in input:\n"
+    "    cct -t 0 -z 0  +proj=utm  +ellps=GRS80  +zone=32\n"
+    "--------------------------------------------------------------------------------\n"    
 };
 
 int main(int argc, char **argv) {
@@ -293,5 +257,61 @@ int main(int argc, char **argv) {
         }
     }
 
+    return 0;
+}
+
+
+
+
+
+/* return a pointer to the n'th column of buf */
+char *column (char *buf, int n) {
+    int i;
+    if (n <= 0)
+        return buf;
+    for (i = 0;  i < n;  i++) {
+        while (isspace(*buf))
+            buf++;
+        if (i == n - 1)
+            break;
+        while ((0 != *buf) && !isspace(*buf))
+            buf++;
+    }
+    return buf;
+}
+
+
+PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time) {
+    PJ_COORD err = proj_coord (HUGE_VAL, HUGE_VAL, HUGE_VAL, HUGE_VAL);
+    PJ_COORD result = err;
+    int prev_errno = errno;
+    char *endptr = 0;
+    errno = 0;
+
+    result.xyzt.z = fixed_height;
+    result.xyzt.t = fixed_time;
+    result.xyzt.x = proj_strtod (column (buf, columns[0]), &endptr);
+    result.xyzt.y = proj_strtod (column (buf, columns[1]), &endptr);
+    if (result.xyzt.z==HUGE_VAL)
+        result.xyzt.z = proj_strtod (column (buf, columns[2]), &endptr);
+    if (result.xyzt.t==HUGE_VAL)
+        result.xyzt.t = proj_strtod (column (buf, columns[3]), &endptr);
+
+    if (0!=errno)
+        return err;
+
+    errno = prev_errno;
+    return result;
+}
+
+
+int print_output_line (FILE *fout, char *buf, PJ_COORD point) {
+    char *c;
+    if (HUGE_VAL!=point.xyzt.x)
+        return fprintf (fout, "%20.15f  %20.15f  %20.15f  %20.15f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
+    c = column (buf, 1);
+    /* reflect comments and blanks */
+    if (c && ((*c=='\0') || (*c=='#')))
+        return fprintf (fout, "%s\n", buf);
     return 0;
 }

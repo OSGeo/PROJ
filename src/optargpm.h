@@ -191,9 +191,28 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-09-10
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
+#include <errno.h>
 
+/**************************************************************************************************/
+struct OPTARGS;
+typedef struct OPTARGS OPTARGS;
+enum OPTARGS_FILE_FORMAT {optargs_file_format_text = 0, optargs_file_format_binary = 1};
 
-typedef struct {
+char *opt_filename (OPTARGS *opt);
+static int opt_eof (OPTARGS *opt);
+int opt_record (OPTARGS *opt);
+int opt_input_loop (OPTARGS *opt, int binary);
+static int opt_is_flag (OPTARGS *opt, int ordinal);
+static int opt_raise_flag (OPTARGS *opt, int ordinal);
+static int opt_ordinal (OPTARGS *opt, char *option);
+int opt_given (OPTARGS *opt, char *option);
+char *opt_arg (OPTARGS *opt, char *option);
+OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, const char **longflags, const char **longkeys);
+
+#define opt_eof_handler(opt) if (opt_eof (opt)) {continue;} else {;}
+/**************************************************************************************************/
+
+struct OPTARGS {
     int    argc,   margc,   pargc,   fargc;
     char **argv, **margv, **pargv, **fargv;
     FILE *input;
@@ -207,14 +226,7 @@ typedef struct {
     const char **longflags;  /* long flags, {"help", "verbose"}, or {"h=help", "v=verbose"}, to indicate homologous short options */ 
     const char **longkeys;   /* e.g. {"output"} or {o=output"} to support --output=/path/to/output-file. In the latter case, */
                              /* all operations on "--output" gets redirected to "-o", so user code need handle arguments to "-o" only */
-} OPTARGS;
-
-enum OPTARGS_FILE_FORMAT {optargs_file_format_text = 0, optargs_file_format_binary = 1};
-
-
-#define opt_eof_handler(opt) if (opt_eof (opt)) {continue;} else {;}
-
-
+};
 
 
 /* name of file currently read from */
@@ -390,7 +402,7 @@ char *opt_arg (OPTARGS *opt, char *option) {
 OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, const char **longflags, const char **longkeys) {
     int i, j;
     OPTARGS *o;
-    char *c;
+    char *last_path_delim;
     
     o = (OPTARGS *) calloc (1, sizeof(OPTARGS));
     if (0==o)
@@ -399,12 +411,12 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
     o->argc = argc;
     o->argv = argv;
     o->progname = argv[0];
-    c = strrchr (argv[0], '\\');
-    if (c > o->progname)
-        o->progname = c;
-    c = strrchr (argv[0], '/');
-    if (c > o->progname)
-        o->progname = c;
+    last_path_delim = strrchr (argv[0], '\\');
+    if (last_path_delim > o->progname)
+        o->progname = last_path_delim;
+    last_path_delim = strrchr (argv[0], '/');
+    if (last_path_delim > o->progname)
+        o->progname = last_path_delim;
         
 
     /* Reset all flags */
