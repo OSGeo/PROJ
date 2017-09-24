@@ -205,6 +205,23 @@ typedef struct PJ_GRID_INFO PJ_GRID_INFO;
 struct PJ_INIT_INFO;
 typedef struct PJ_INIT_INFO PJ_INIT_INFO;
 
+/* Data types for list of operations, ellipsoids, datums and units used in PROJ.4 */
+struct PJ_LIST;
+typedef struct PJ_LIST PJ_OPERATIONS;
+
+struct PJ_ELLPS;
+typedef struct PJ_ELLPS PJ_ELLPS;
+
+struct PJ_DATUMS;
+typedef struct PJ_DATUMS PJ_DATUMS;
+
+struct PJ_UNITS;
+typedef struct PJ_UNITS PJ_UNITS;
+
+struct PJ_PRIME_MERIDIANS;
+typedef struct PJ_PRIME_MERIDIANS PJ_PRIME_MERIDIANS;
+
+
 /* Omega, Phi, Kappa: Rotations */
 typedef struct {double o, p, k;}  PJ_OPK;
 
@@ -415,14 +432,21 @@ void proj_errno_restore (PJ *P, int err);
 
 
 PJ_DERIVS  proj_derivatives(const PJ *P, const LP lp);
-PJ_FACTORS proj_factors(const PJ *P, const LP lp);  
-  
+PJ_FACTORS proj_factors(const PJ *P, const LP lp);
+
 /* Info functions - get information about various PROJ.4 entities */
 PJ_INFO      proj_info(void);
 PJ_PROJ_INFO proj_pj_info(const PJ *P);
 PJ_GRID_INFO proj_grid_info(const char *gridname);
 PJ_INIT_INFO proj_init_info(const char *initname);
 
+/* List functions: */
+/* Get lists of operations, ellipsoids, datums, units and prime meridians. */
+PJ_OPERATIONS       *proj_list_operations(void);
+PJ_ELLPS            *proj_list_ellps(void);
+PJ_DATUMS           *proj_list_datums(void);
+PJ_UNITS            *proj_list_units(void);
+PJ_PRIME_MERIDIANS  *proj_list_prime_meridians(void);
 
 /* These are trivial, and while occasionaly useful in real code, primarily here to       */
 /* simplify demo code, and in acknowledgement of the proj-internal discrepancy between   */

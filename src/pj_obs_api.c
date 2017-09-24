@@ -776,6 +776,26 @@ PJ_FACTORS proj_factors(const PJ *P, const LP lp) {
 }
 
 
+PJ_ELLPS *proj_list_ellps(void) {
+    return pj_get_ellps_ref();
+}
+
+PJ_DATUMS *proj_list_datums(void) {
+    return pj_get_datums_ref();
+}
+
+PJ_UNITS *proj_list_units(void) {
+    return pj_get_units_ref();
+}
+
+PJ_OPERATIONS *proj_list_operations(void) {
+    return pj_get_list_ref();
+}
+
+PJ_PRIME_MERIDIANS *proj_list_prime_meridians(void) {
+    return pj_get_prime_meridians_ref();
+}
+
 double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
 double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
 

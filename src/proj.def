@@ -143,3 +143,8 @@ EXPORTS
     proj_derivatives               @130
     proj_factors                   @131
 
+    proj_list_operations           @132
+    proj_list_ellps                @133
+    proj_list_datums               @134
+    proj_list_units                @135
+    proj_list_prime_meridians      @136
