@@ -4,8 +4,7 @@
 
 ************************************************************************
 
-cct is a first attempt at a 4D equivalent to the "proj" projection
-program.
+cct is a 4D equivalent to the "proj" projection program.
 
 cct is an acromyn meaning "Coordinate Conversion and Transformation".
 

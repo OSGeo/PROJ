@@ -16,7 +16,6 @@ translation.
 The geod program provides the ability to compute
 geodesic (Great Circle) computations.
 
-The cct program does general 4D transformations.
 
 
 
@@ -26,5 +25,4 @@ The cct program does general 4D transformations.
    proj
    cs2cs
    geod
-   cct
 
