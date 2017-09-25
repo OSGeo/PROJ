@@ -412,7 +412,7 @@ int pj_unitconvert_selftest (void) {return 0;}
 
 static int test_time(char* args, double tol, double t_in, double t_exp) {
     PJ_OBS in, out;
-    PJ *P = proj_create(0, args);
+    PJ *P = proj_create(PJ_DEFAULT_CTX, args);
     int ret = 0;
 
     if (P == 0)
@@ -438,7 +438,7 @@ static int test_time(char* args, double tol, double t_in, double t_exp) {
 
 static int test_xyz(char* args, double tol, PJ_TRIPLET in, PJ_TRIPLET exp) {
     PJ_OBS out, obs_in;
-    PJ *P = proj_create(0, args);
+    PJ *P = proj_create(PJ_DEFAULT_CTX, args);
     int ret = 0;
 
     if (P == 0)

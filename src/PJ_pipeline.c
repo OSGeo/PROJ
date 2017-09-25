@@ -526,7 +526,7 @@ int pj_pipeline_selftest (void) {
     double dist;
 
     /* forward-reverse geo->utm->geo */
-    P = proj_create (0, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +step +proj=utm +ellps=GRS80 +inv");
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +step +proj=utm +ellps=GRS80 +inv");
     if (0==P)
         return 1000;
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 0) */
@@ -548,7 +548,7 @@ int pj_pipeline_selftest (void) {
     proj_destroy (P);
 
     /* And now the back-to-back situation utm->geo->utm */
-    P = proj_create (0, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +inv +step +proj=utm +ellps=GRS80");
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +inv +step +proj=utm +ellps=GRS80");
     if (0==P)
         return 2000;
 
@@ -572,7 +572,7 @@ int pj_pipeline_selftest (void) {
 
 
     /* Finally testing a corner case: A rather pointless one-step pipeline geo->utm */
-    P = proj_create (0, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 ");
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 ");
     if (0==P)
         return 3000;
 

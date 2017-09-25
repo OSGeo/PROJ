@@ -70,7 +70,7 @@ PJ_OBS proj_obs (double x, double y, double z, double t, double o, double p, dou
 
 
 /* Geodesic distance between two points with angular 2D coordinates */
-double proj_lp_dist (PJ *P, LP a, LP b) {
+double proj_lp_dist (const PJ *P, LP a, LP b) {
     double s12, azi1, azi2;
     /* Note: the geodesic code takes arguments in degrees */
     geod_inverse (P->geod, PJ_TODEG(a.phi), PJ_TODEG(a.lam), PJ_TODEG(b.phi), PJ_TODEG(b.lam), &s12, &azi1, &azi2);
@@ -90,7 +90,7 @@ double proj_xyz_dist (XYZ a, XYZ b) {
 
 
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
-double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs) {
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_OBS obs) {
     int i;
     PJ_OBS o, u;
 
@@ -125,7 +125,7 @@ double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs) 
 
 
 /* Apply the transformation P to the coordinate coo */
-PJ_OBS proj_trans_obs (PJ *P, enum proj_direction direction, PJ_OBS obs) {
+PJ_OBS proj_trans_obs (PJ *P, PJ_DIRECTION direction, PJ_OBS obs) {
     if (0==P)
         return obs;
 
@@ -147,7 +147,7 @@ PJ_OBS proj_trans_obs (PJ *P, enum proj_direction direction, PJ_OBS obs) {
 
 
 /* Apply the transformation P to the coordinate coo */
-PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coo) {
+PJ_COORD proj_trans_coord (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
     if (0==P)
         return coo;
 
@@ -171,7 +171,7 @@ PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coo) {
 /*************************************************************************************/
 size_t proj_transform (
     PJ *P,
-    enum proj_direction direction,
+    PJ_DIRECTION direction,
     double *x, size_t sx, size_t nx,
     double *y, size_t sy, size_t ny,
     double *z, size_t sz, size_t nz,
@@ -319,7 +319,7 @@ size_t proj_transform (
 }
 
 /*****************************************************************************/
-int proj_transform_obs (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs) {
+int proj_transform_obs (PJ *P, PJ_DIRECTION direction, size_t n, PJ_OBS *obs) {
 /******************************************************************************
     Batch transform an array of PJ_OBS.
 
@@ -337,7 +337,7 @@ int proj_transform_obs (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *
 }
 
 /*****************************************************************************/
-int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord) {
+int proj_transform_coord (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord) {
 /******************************************************************************
     Batch transform an array of PJ_COORD.
 
@@ -501,15 +501,16 @@ PJ_CONTEXT *proj_context_create (void) {
 }
 
 
-void proj_context_destroy (PJ_CONTEXT *ctx) {
+PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx) {
     if (0==ctx)
-        return;
+        return 0;
 
     /* Trying to free the default context is a no-op (since it is statically allocated) */
     if (pj_get_default_ctx ()==ctx)
-        return;
+        return 0;
 
     pj_ctx_free (ctx);
+    return 0;
 }
 
 
@@ -582,7 +583,7 @@ PJ_INFO proj_info(void) {
 
 
 /*****************************************************************************/
-PJ_PROJ_INFO proj_pj_info(const PJ *P) {
+PJ_PROJ_INFO proj_pj_info(PJ *P) {
 /******************************************************************************
     Basic info about a particular instance of a projection object.
 
@@ -593,6 +594,11 @@ PJ_PROJ_INFO proj_pj_info(const PJ *P) {
     char *def;
 
     memset(&info, 0, sizeof(PJ_PROJ_INFO));
+
+    /* Expected accuracy of the transformation. Hardcoded for now, will be improved */
+    /* later. Most likely to be used when a transformation is set up with           */
+    /* proj_create_crs_to_crs in a future version that leverages the EPSG database. */
+    info.accuracy = -1.0;
 
     if (!P) {
         return info;
@@ -606,7 +612,7 @@ PJ_PROJ_INFO proj_pj_info(const PJ *P) {
     pj_strlcpy(info.description, P->descr, sizeof(info.description));
 
     /* projection definition */
-    def = pj_get_def((PJ *)P, 0); /* pj_get_def takes a non-const PJ pointer */
+    def = pj_get_def(P, 0); /* pj_get_def takes a non-const PJ pointer */
     pj_strlcpy(info.definition, &def[1], sizeof(info.definition)); /* def includes a leading space */
     pj_dealloc(def);
 
@@ -729,7 +735,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 
 
 /*****************************************************************************/
-PJ_DERIVS proj_derivatives(const PJ *P, const LP lp) {
+PJ_DERIVS proj_derivatives(PJ *P, const LP lp) {
 /******************************************************************************
     Derivatives of coordinates.
 
@@ -739,8 +745,7 @@ PJ_DERIVS proj_derivatives(const PJ *P, const LP lp) {
 ******************************************************************************/
     PJ_DERIVS derivs;
 
-    /* casting to struct DERIVS for compatibility reasons */
-    if (pj_deriv(lp, 1e-5, (PJ *)P, (struct DERIVS *)&derivs)) {
+    if (pj_deriv(lp, 1e-5, P, &derivs)) {
         /* errno set in pj_derivs */
         memset(&derivs, 0, sizeof(PJ_DERIVS));
     }
@@ -750,7 +755,7 @@ PJ_DERIVS proj_derivatives(const PJ *P, const LP lp) {
 
 
 /*****************************************************************************/
-PJ_FACTORS proj_factors(const PJ *P, const LP lp) {
+PJ_FACTORS proj_factors(PJ *P, const LP lp) {
 /******************************************************************************
     Cartographic characteristics at point lp.
 
@@ -766,8 +771,7 @@ PJ_FACTORS proj_factors(const PJ *P, const LP lp) {
     /* pj_factors rely code being zero */
     factors.code = 0;
 
-    /* casting to struct FACTORS for compatibility reasons */
-    if (pj_factors(lp, (PJ *)P, 0.0, (struct FACTORS *)&factors)) {
+    if (pj_factors(lp, P, 0.0, &factors)) {
         /* errno set in pj_factors */
         memset(&factors, 0, sizeof(PJ_FACTORS));
     }
