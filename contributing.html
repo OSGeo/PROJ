@@ -1,0 +1,483 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Contributing &mdash; PROJ.4 4.9.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="PROJ.4 4.9.3 documentation" href="index.html"/>
+        <link rel="next" title="Download" href="download.html"/>
+        <link rel="prev" title="FAQ" href="faq.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.9.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage/index.html">Using PROJ.4</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic Calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="htpd.html">HTPD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#help-a-fellow-proj-4-user">Help a fellow PROJ.4 user</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-bug-reports">Adding bug reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-requests">Feature requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#write-documentation">Write documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-contributions">Code contributions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#making-changes">Making Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#submitting-changes">Submitting Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coding-conventions">Coding conventions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#programming-language">Programming language</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#coding-style">Coding style</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#whitespace">Whitespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-names">File names</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#legalese">Legalese</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#additional-resources">Additional Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Contributing</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="contributing">
+<span id="id1"></span><h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
+<p>PROJ.4 has a wide and varied user base. Some are highly skilled
+geodesists with a deep knowledge of map projections and reference
+systems, some are GIS software developers and others are GIS users. All
+users, regardless of the profession or skill level, has the ability to
+contribute to PROJ.4. Here&#8217;s a few suggestion on how:</p>
+<ul class="simple">
+<li>Help PROJ.4-users that is less experienced than yourself.</li>
+<li>Write a bug report</li>
+<li>Request a new feature</li>
+<li>Write documentation for your favorite map projection</li>
+<li>Fix a bug</li>
+<li>Implement a new feature</li>
+</ul>
+<p>In the following sections you can find some guidelines on how to
+contribute. As PROJ.4 is managed on GitHub most contributions require
+that you have a GitHub account. Familiarity with
+<a class="reference external" href="https://guides.github.com/features/issues/">issues</a> and the <a class="reference external" href="https://guides.github.com/introduction/flow/">GitHub
+Flow</a> is an advantage.</p>
+<div class="section" id="help-a-fellow-proj-4-user">
+<h2>Help a fellow PROJ.4 user<a class="headerlink" href="#help-a-fellow-proj-4-user" title="Permalink to this headline">¶</a></h2>
+<p>The main forum for support for PROJ.4 is the mailing list. You can
+subscribe to the mailing list
+<a class="reference external" href="http://lists.maptools.org/mailman/listinfo/proj">here</a> and read the
+archive <a class="reference external" href="http://lists.maptools.org/pipermail/proj/">here</a>.</p>
+<p>If you have questions about the usage of PROJ.4 the mailing list is also
+the place to go. Please <em>do not</em> use the GitHub issue tracker as a
+support forum. Your question is much more likely to be answered on the
+mailing list, as many more people follow that than the issue tracker.</p>
+</div>
+<div class="section" id="adding-bug-reports">
+<h2>Adding bug reports<a class="headerlink" href="#adding-bug-reports" title="Permalink to this headline">¶</a></h2>
+<p>Bug reports are handled in the <a class="reference external" href="https://github.com/OSGeo/proj.4/issues">issue
+tracker</a> on PROJ.4&#8217;s home on
+GitHub. Writing a good bug report is not easy. But fixing a poorly
+documented bug is not easy either, so please put in the effort it takes
+to create a thorough bug report.</p>
+<p>A good bug report includes at least:</p>
+<ul class="simple">
+<li>A title that quickly explains the problem</li>
+<li>A description of the problem and how it can be reproduced</li>
+<li>Version of PROJ.4 being used</li>
+<li>Version numbers of any other relevant software being used, e.g.
+operating system</li>
+<li>A description of what already has been done to solve the problem</li>
+</ul>
+<p>The more information that is given up front, the more likely it is that
+a developer will find interest in solving the problem. You will probably
+get follow-up questions after submitting a bug report. Please answer
+them in a timely manner if you have an interest in getting the issue
+solved.</p>
+<p>Finally, please only submit bug reports that are actually related to
+PROJ.4. If the issue materializes in software that uses PROJ.4 it is
+likely a problem with that particular software. Make sure that it
+actually is a PROJ.4 problem before you submit an issue. If you can
+reproduce the problem only by using tools from PROJ.4 it is definitely a
+problem with PROJ.4.</p>
+</div>
+<div class="section" id="feature-requests">
+<h2>Feature requests<a class="headerlink" href="#feature-requests" title="Permalink to this headline">¶</a></h2>
+<p>Got an idea for a new feature in PROJ.4? Submit a thorough description
+of the new feature in the <a class="reference external" href="https://github.com/OSGeo/proj.4/issues">issue
+tracker</a>. Please include any
+technical documents that can help the developer make the new feature a
+reality. An example of this could be a publicly available academic paper
+that describes a new projection. Also, including a numerical test case
+will make it much easier to verify that an implementation of your
+requested feature actually works as you expect.</p>
+<p>Note that not all feature requests are accepted.</p>
+</div>
+<div class="section" id="write-documentation">
+<h2>Write documentation<a class="headerlink" href="#write-documentation" title="Permalink to this headline">¶</a></h2>
+<p>PROJ.4 is in dire need of better documentation. Any contributiions of
+documentation are greatly appreaciated. The PROJ.4 documentation is
+available on <a class="reference external" href="ttp://proj4.org">proj4.org</a>. The website is generated
+with <a class="reference external" href="http://www.sphinx-doc.org/en/stable/">Sphinx</a>. Contributions to
+the documentation should be made as <a class="reference external" href="https://github.com/OSGeo/proj.4/pulls">Pull
+Requests</a> on GitHub.</p>
+<p>If you intend to document one of PROJ.4&#8217;s supported projections please
+use the <a class="reference external" href="http://proj4.org/projections/merc.html">Mercator projection</a>
+as a template.</p>
+</div>
+<div class="section" id="code-contributions">
+<h2>Code contributions<a class="headerlink" href="#code-contributions" title="Permalink to this headline">¶</a></h2>
+<p>Code contributions can be either bug fixes or new features. The process
+is the same for both, so they will be discussed together in this
+section.</p>
+<div class="section" id="making-changes">
+<h3>Making Changes<a class="headerlink" href="#making-changes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Create a topic branch from where you want to base your work.</li>
+<li>You usually should base your topic branch off of the master branch.</li>
+<li>To quickly create a topic branch: <code class="docutils literal"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">-b</span> <span class="pre">my-topic-branch</span></code></li>
+<li>Make commits of logical units.</li>
+<li>Check for unnecessary whitespace with <code class="docutils literal"><span class="pre">git</span> <span class="pre">diff</span> <span class="pre">--check</span></code> before
+committing.</li>
+<li>Make sure your commit messages are in the <a class="reference external" href="http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html">proper
+format</a>.</li>
+<li>Make sure you have added the necessary tests for your changes.</li>
+<li>Make sure that all tests pass</li>
+</ul>
+</div>
+<div class="section" id="submitting-changes">
+<h3>Submitting Changes<a class="headerlink" href="#submitting-changes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Push your changes to a topic branch in your fork of the repository.</li>
+<li>Submit a pull request to the PROJ.4 repository in the OSGeo
+organization.</li>
+<li>If your pull request fixes/references an issue, include that issue
+number in the pull request. For example:</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Wiz</span> <span class="n">the</span> <span class="n">bang</span>
+
+<span class="n">Fixes</span> <span class="c1">#123.</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>PROJ.4 developers will look at your patch and take an appropriate
+action.</li>
+</ul>
+</div>
+<div class="section" id="coding-conventions">
+<h3>Coding conventions<a class="headerlink" href="#coding-conventions" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="programming-language">
+<h4>Programming language<a class="headerlink" href="#programming-language" title="Permalink to this headline">¶</a></h4>
+<p>PROJ.4 is developed strictly in ANSI C 89.</p>
+</div>
+<div class="section" id="coding-style">
+<h4>Coding style<a class="headerlink" href="#coding-style" title="Permalink to this headline">¶</a></h4>
+<p>We don&#8217;t enforce any particular coding style, but please try to keep it
+as simple as possible. If improving existing code, please try to conform
+with the style of the locally surrounding code.</p>
+</div>
+<div class="section" id="whitespace">
+<h4>Whitespace<a class="headerlink" href="#whitespace" title="Permalink to this headline">¶</a></h4>
+<p>Throughout the PROJ.4 code base you will see differing whitespace use.
+The general rule is to keep whitespace in whatever form it is in the
+file you are currently editing. If the file has a mix of tabs and space
+please convert the tabs to space in a separate commit before making any
+other changes. This makes it a lot easier to see the changes in diffs
+when evaulating the changed code. New files should use spaces as
+whitespace.</p>
+</div>
+<div class="section" id="file-names">
+<h4>File names<a class="headerlink" href="#file-names" title="Permalink to this headline">¶</a></h4>
+<p>Files in which projections are implemented are prefixed with an
+upper-case <code class="docutils literal"><span class="pre">PJ_</span></code> and most other files are prefixed with lower-case
+<code class="docutils literal"><span class="pre">pj_</span></code>. Some file deviate from this pattern, most of them dates back to
+the very early releases of PROJ.4. New contributions should follow the
+pj-prefix pattern. Unless there are obvious reasons not to.</p>
+</div>
+</div>
+<div class="section" id="legalese">
+<h3>Legalese<a class="headerlink" href="#legalese" title="Permalink to this headline">¶</a></h3>
+<p>Commiters are the front line gatekeepers to keep the code base clear of
+improperly contributed code. It is important to the PROJ.4 users,
+developers and the OSGeo foundation to avoid contributing any code to
+the project without it being clearly licensed under the project license.</p>
+<p>Generally speaking the key issues are that those providing code to be
+included in the repository understand that the code will be released
+under the MIT/X license, and that the person providing the code has the
+right to contribute the code. For the commiter themselves understanding
+about the license is hopefully clear. For other contributors, the
+commiter should verify the understanding unless the commiter is very
+comfortable that the contributor understands the license (for instance
+frequent contributors).</p>
+<p>If the contribution was developed on behalf of an employer (on work
+time, as part of a work project, etc) then it is important that an
+appropriate representative of the employer understand that the code will
+be contributed under the MIT/X license. The arrangement should be
+cleared with an authorized supervisor/manager, etc.</p>
+<p>The code should be developed by the contributor, or the code should be
+from a source which can be rightfully contributed such as from the
+public domain, or from an open source project under a compatible
+license.</p>
+<p>All unusual situations need to be discussed and/or documented.</p>
+<p>Commiters should adhere to the following guidelines, and may be
+personally legally liable for improperly contributing code to the source
+repository:</p>
+<ul class="simple">
+<li>Make sure the contributor (and possibly employer) is aware of the
+contribution terms.</li>
+<li>Code coming from a source other than the contributor (such as adapted
+from another project) should be clearly marked as to the original
+source, copyright holders, license terms and so forth. This
+information can be in the file headers, but should also be added to
+the project licensing file if not exactly matching normal project
+licensing (COPYING).</li>
+<li>Existing copyright headers and license text should never be stripped
+from a file. If a copyright holder wishes to give up copyright they
+must do so in writing to the foundation before copyright messages are
+removed. If license terms are changed it has to be by agreement
+(written in email is ok) of the copyright holders.</li>
+<li>Code with licenses requiring credit, or disclosure to users should be
+added to COPYING.</li>
+<li>When substantial contributions are added to a file (such as
+substantial patches) the author/contributor should be added to the
+list of copyright holders for the file.</li>
+<li>If there is uncertainty about whether a change is proper to
+contribute to the code base, please seek more information from the
+project steering committee, or the foundation legal counsel.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="additional-resources">
+<h2>Additional Resources<a class="headerlink" href="#additional-resources" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://help.github.com/">General GitHub documentation</a></li>
+<li><a class="reference external" href="https://help.github.com/articles/about-pull-requests/">GitHub pull request
+documentation</a></li>
+</ul>
+</div>
+<div class="section" id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<p>The <em>code contribution</em> section of this CONTRIBUTING file is inspired by
+<a class="reference external" href="https://github.com/PDAL/PDAL/blob/master/CONTRIBUTING.md">PDAL&#8217;s</a>
+and the <em>legalese</em> section is modified from <a class="reference external" href="https://trac.osgeo.org/gdal/wiki/rfc3_commiters">GDAL contributer
+guidelines</a></p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="download.html" class="btn btn-neutral float-right" title="Download" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="faq.html" class="btn btn-neutral" title="FAQ" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1986?-2016.
+      Last updated on 25 Sep 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'4.9.3',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

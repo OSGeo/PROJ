@@ -1,0 +1,386 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Quick start &mdash; PROJ.4 4.9.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PROJ.4 4.9.3 documentation" href="../index.html"/>
+        <link rel="up" title="Development" href="index.html"/>
+        <link rel="next" title="Transformations" href="transformations.html"/>
+        <link rel="prev" title="Development" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.9.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ.4</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic Calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grids.html">Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../htpd.html">HTPD</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformations.html">Transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="errorhandling.html">Error handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="threads.html">Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/index.html">Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bindings.html">Language bindings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Development</a> &raquo;</li>
+        
+      <li>Quick start</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="quick-start">
+<span id="dev-quickstart"></span><h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<p>This is a short introduction to the PROJ.4 API. In the following section we
+create a simple program that transforms a geodetic coordinate to UTM and back
+again. The program is explained a few lines at a time. The complete program can
+be seen at the end of the section.</p>
+<p>See the following sections for more in-depth descriptions of different parts of
+the PROJ.4 API or consult the <a class="reference internal" href="reference/index.html"><span class="doc">API reference</span></a> for specifics.</p>
+<p>Before the PROJ.4 API can be used it is necessary to include the <code class="docutils literal"><span class="pre">proj.h</span></code> header
+file. Here <code class="docutils literal"><span class="pre">stdio.h</span></code> is also included so we can print some text to the screen:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;proj.h&gt;</span><span class="cp"></span>
+</pre></div>
+</div>
+<p>Let&#8217;s declare a few variables that&#8217;ll be used later in the program. Each variable
+will be discussed below.
+See the <a class="reference internal" href="reference/datatypes.html"><span class="doc">reference for more info on data types</span></a>.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">PJ_CONTEXT</span> <span class="o">*</span><span class="n">C</span><span class="p">;</span>
+<span class="n">PJ</span> <span class="o">*</span><span class="n">P</span><span class="p">;</span>
+<span class="n">PJ_COORD</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>For use in multi-threaded programs the <code class="docutils literal"><span class="pre">PJ_CONTEXT</span></code> threading-context is used.
+In this particular example it is not needed, but for the sake of completeness
+it created here. The section on <a class="reference internal" href="threads.html"><span class="doc">threads</span></a> discusses
+this in detail.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">C</span> <span class="o">=</span> <span class="n">proj_context_create</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Next we create the <code class="docutils literal"><span class="pre">PJ</span></code> transformation object <code class="docutils literal"><span class="pre">P</span></code> with the function
+<code class="docutils literal"><span class="pre">proj_create</span></code>. <code class="docutils literal"><span class="pre">proj_create</span></code> takes the threading context <code class="docutils literal"><span class="pre">C</span></code> created above,
+and a proj-string that defines the desired transformation. Here we transform
+from geodetic coordinate to UTM zone 32N.
+It is recommended to create one threading-context per thread used by the program.
+This ensures that all <code class="docutils literal"><span class="pre">PJ</span></code> objects created in the same context will be sharing
+resources such as error-numbers and loaded grids.
+In case the creation of the <code class="docutils literal"><span class="pre">PJ</span></code> object fails an error message is displayed and
+the program returns. See <a class="reference internal" href="errorhandling.html"><span class="doc">Error handling</span></a> for further
+details.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">P</span> <span class="o">=</span> <span class="n">proj_create</span> <span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="s">&quot;+proj=utm +zone=32 +ellps=GRS80&quot;</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="mi">0</span><span class="o">==</span><span class="n">P</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">puts</span> <span class="p">(</span><span class="s">&quot;Oops&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>PROJ.4 uses it&#8217;s own data structures for handling coordinates. Here we use a
+<code class="docutils literal"><span class="pre">PJ_COORD</span></code> which is easily assigned with the function <code class="docutils literal"><span class="pre">proj_coord</span></code>. Note
+that the input values are converted to radians with <code class="docutils literal"><span class="pre">proj_torad</span></code>. This is
+necessary since PROJ.4 is using radians internally. See <a class="reference internal" href="transformations.html"><span class="doc">Transformations</span></a>
+for further details.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">proj_coord</span> <span class="p">(</span><span class="n">proj_torad</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span> <span class="n">proj_torad</span><span class="p">(</span><span class="mi">55</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The coordinate defined above is transformed with <code class="docutils literal"><span class="pre">proj_trans_coord</span></code>. For this
+a <code class="docutils literal"><span class="pre">PJ</span></code> object, a transformation direction (either forward or inverse) and the
+coordinate is needed. The transformed coordinate is returned in <code class="docutils literal"><span class="pre">b</span></code>.
+Here the forward (<code class="docutils literal"><span class="pre">PJ_FWD</span></code>) transformation from geodetic to UTM is made.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">b</span> <span class="o">=</span> <span class="n">proj_trans_coord</span> <span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">PJ_FWD</span><span class="p">,</span> <span class="n">a</span><span class="p">);</span>
+<span class="n">printf</span> <span class="p">(</span><span class="s">&quot;easting: %g, northing: %g</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">b</span><span class="p">.</span><span class="n">en</span><span class="p">.</span><span class="n">e</span><span class="p">,</span> <span class="n">b</span><span class="p">.</span><span class="n">en</span><span class="p">.</span><span class="n">n</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The inverse transformation (UTM to geodetic) is done similar to above,
+this time using <code class="docutils literal"><span class="pre">PJ_INV</span></code> as the direction.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">b</span> <span class="o">=</span> <span class="n">proj_trans_coord</span> <span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">PJ_INV</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
+<span class="n">printf</span> <span class="p">(</span><span class="s">&quot;longitude: %g, latitude: %g</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">b</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">b</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">phi</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Before ending the program the allocated memory needs to be released again:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">proj_destroy</span> <span class="p">(</span><span class="n">P</span><span class="p">);</span>
+<span class="n">proj_context_destroy</span> <span class="p">(</span><span class="n">C</span><span class="p">);</span> <span class="cm">/* may be omitted in the single threaded case */</span>
+</pre></div>
+</div>
+<p>A complete compilable version of the above can be seen here:</p>
+<div class="highlight-c"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;proj.h&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PJ_CONTEXT</span> <span class="o">*</span><span class="n">C</span><span class="p">;</span>
+    <span class="n">PJ</span> <span class="o">*</span><span class="n">P</span><span class="p">;</span>
+    <span class="n">PJ_COORD</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">;</span>
+    
+    <span class="cm">/* or you may set C=0 if you are sure you will use PJ objects from only one thread */</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">proj_context_create</span><span class="p">();</span>
+
+    <span class="n">P</span> <span class="o">=</span> <span class="n">proj_create</span> <span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="s">&quot;+proj=utm +zone=32 +ellps=GRS80&quot;</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="mi">0</span><span class="o">==</span><span class="n">P</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">puts</span> <span class="p">(</span><span class="s">&quot;Oops&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="cm">/* a coordinate union representing Copenhagen: 55d N, 12d E    */</span>
+    <span class="cm">/* note: PROJ.4 works in radians, hence the proj_torad() calls */</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">proj_coord</span> <span class="p">(</span><span class="n">proj_torad</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span> <span class="n">proj_torad</span><span class="p">(</span><span class="mi">55</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+    <span class="cm">/* transform to UTM zone 32, then back to geographical */</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">proj_trans_coord</span> <span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">PJ_FWD</span><span class="p">,</span> <span class="n">a</span><span class="p">);</span>
+    <span class="n">printf</span> <span class="p">(</span><span class="s">&quot;easting: %g, northing: %g</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">b</span><span class="p">.</span><span class="n">en</span><span class="p">.</span><span class="n">e</span><span class="p">,</span> <span class="n">b</span><span class="p">.</span><span class="n">en</span><span class="p">.</span><span class="n">n</span><span class="p">);</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">proj_trans_coord</span> <span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">PJ_INV</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
+    <span class="n">printf</span> <span class="p">(</span><span class="s">&quot;longitude: %g, latitude: %g</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">b</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">b</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">phi</span><span class="p">);</span>
+
+    <span class="cm">/* Clean up */</span>
+    <span class="n">proj_destroy</span> <span class="p">(</span><span class="n">P</span><span class="p">);</span>
+    <span class="n">proj_context_destroy</span> <span class="p">(</span><span class="n">C</span><span class="p">);</span> <span class="cm">/* may be omitted in the single threaded case */</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="transformations.html" class="btn btn-neutral float-right" title="Transformations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Development" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1986?-2016.
+      Last updated on 25 Sep 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'4.9.3',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,407 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>geod &mdash; PROJ.4 4.9.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PROJ.4 4.9.3 documentation" href="../../index.html"/>
+        <link rel="up" title="Applications" href="index.html"/>
+        <link rel="next" title="Cartographic projection" href="../projections.html"/>
+        <link rel="prev" title="cs2cs" href="cs2cs.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.9.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Using PROJ.4</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html">Quick start</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Applications</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="proj.html">proj</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cs2cs.html">cs2cs</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">geod</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#synopsis">Synopsis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#further-reading">Further reading</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../projections.html">Cartographic projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transformation.html">Geodetic transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../geodesic.html">Geodesic Calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grids.html">Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../htpd.html">HTPD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Using PROJ.4</a> &raquo;</li>
+        
+          <li><a href="index.html">Applications</a> &raquo;</li>
+        
+      <li>geod</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="geod">
+<span id="id1"></span><h1>geod<a class="headerlink" href="#geod" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal"><span class="pre">geod</span></code>  (direct)  and  <code class="docutils literal"><span class="pre">invgeod</span></code> (inverse) perform geodesic (&#8220;Great
+Circle&#8221;) computations for determining latitude,  longitude  and
+back  azimuth  of  a terminus point given a initial point latitude,
+longitude, azimuth and distance (direct) or  the  forward
+and  back azimuths and distance between an initial and terminus
+point latitudes and  longitudes  (inverse).   The  results  are
+accurate  to  round  off for <span class="math">\(|f| &lt; 1/50\)</span>, where f is flattening.</p>
+<p><code class="docutils literal"><span class="pre">invgeod</span></code> may not be available on all  platforms;  in  this  case
+call geod with the -I option.</p>
+<div class="section" id="synopsis">
+<h2>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">geod</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=&lt;</span><span class="n">ellipse</span><span class="o">&gt;</span> <span class="p">[</span> <span class="o">-</span><span class="n">afFIlptwW</span> <span class="p">[</span> <span class="n">args</span> <span class="p">]</span> <span class="p">]</span> <span class="p">[</span> <span class="o">+</span><span class="n">args</span> <span class="p">]</span> <span class="n">file</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+
+<span class="n">invgeod</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=&lt;</span><span class="n">ellipse</span><span class="o">&gt;</span> <span class="p">[</span> <span class="o">-</span><span class="n">afFIlptwW</span> <span class="p">[</span> <span class="n">args</span>  <span class="p">]</span>  <span class="p">]</span>  <span class="p">[</span>  <span class="o">+</span><span class="n">args</span>  <span class="p">]</span> <span class="n">file</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>The following command-line options can appear in any order:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">I</span>     <span class="n">Specifies</span> <span class="n">that</span> <span class="n">the</span> <span class="n">inverse</span> <span class="n">geodesic</span> <span class="n">computation</span> <span class="ow">is</span> <span class="n">to</span> <span class="n">be</span>
+       <span class="n">performed</span><span class="o">.</span> <span class="n">May</span> <span class="n">be</span> <span class="n">used</span> <span class="k">with</span> <span class="n">execution</span> <span class="n">of</span> <span class="n">geod</span> <span class="k">as</span> <span class="n">an</span>
+       <span class="n">alternative</span> <span class="n">to</span> <span class="n">invgeod</span> <span class="n">execution</span><span class="o">.</span>
+
+<span class="o">-</span><span class="n">a</span>     <span class="n">Latitude</span> <span class="ow">and</span> <span class="n">longitudes</span> <span class="n">of</span> <span class="n">the</span> <span class="n">initial</span> <span class="ow">and</span> <span class="n">terminal</span>
+       <span class="n">points</span><span class="p">,</span> <span class="n">forward</span> <span class="ow">and</span> <span class="n">back</span> <span class="n">azimuths</span> <span class="ow">and</span> <span class="n">distance</span> <span class="n">are</span>  <span class="n">output</span><span class="o">.</span>
+
+<span class="o">-</span><span class="n">ta</span>    <span class="n">A</span> <span class="n">specifies</span> <span class="n">a</span> <span class="n">character</span> <span class="n">employed</span> <span class="k">as</span> <span class="n">the</span> <span class="n">first</span> <span class="n">character</span>
+       <span class="n">to</span> <span class="n">denote</span> <span class="n">a</span> <span class="n">control</span> <span class="n">line</span> <span class="n">to</span> <span class="n">be</span> <span class="n">passed</span> <span class="n">through</span> <span class="n">without</span>
+       <span class="n">processing</span><span class="o">.</span>
+
+<span class="o">-</span><span class="n">le</span>    <span class="n">Gives</span> <span class="n">a</span> <span class="n">listing</span> <span class="n">of</span> <span class="nb">all</span> <span class="n">the</span> <span class="n">ellipsoids</span> <span class="n">that</span> <span class="n">may</span> <span class="n">be</span>
+       <span class="n">selected</span> <span class="k">with</span> <span class="n">the</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span> <span class="n">option</span><span class="o">.</span>
+
+<span class="o">-</span><span class="n">lu</span>    <span class="n">Gives</span> <span class="n">a</span> <span class="n">listing</span> <span class="n">of</span> <span class="nb">all</span> <span class="n">the</span> <span class="n">units</span> <span class="n">that</span>  <span class="n">may</span>  <span class="n">be</span>  <span class="n">selected</span>
+       <span class="k">with</span> <span class="n">the</span> <span class="o">+</span><span class="n">units</span><span class="o">=</span> <span class="n">option</span><span class="o">.</span>
+
+<span class="o">-</span><span class="p">[</span><span class="n">f</span><span class="o">|</span><span class="n">F</span><span class="p">]</span> <span class="nb">format</span>
+       <span class="n">Format</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">printf</span> <span class="nb">format</span> <span class="n">string</span> <span class="n">to</span> <span class="n">control</span> <span class="n">the</span> <span class="n">output</span>
+       <span class="n">form</span> <span class="n">of</span> <span class="n">the</span> <span class="n">geographic</span> <span class="n">coordinate</span> <span class="n">values</span> <span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="ow">or</span> <span class="n">distance</span>
+       <span class="n">value</span> <span class="p">(</span><span class="n">F</span><span class="p">)</span><span class="o">.</span> <span class="n">The</span> <span class="n">default</span> <span class="n">mode</span> <span class="ow">is</span> <span class="n">DMS</span> <span class="k">for</span> <span class="n">geographic</span>
+       <span class="n">coordinates</span> <span class="ow">and</span> <span class="s2">&quot;</span><span class="si">%.3f</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">distance</span><span class="o">.</span>
+
+<span class="o">-</span><span class="p">[</span><span class="n">w</span><span class="o">|</span><span class="n">W</span><span class="p">]</span><span class="n">n</span>
+       <span class="n">N</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">number</span> <span class="n">of</span> <span class="n">significant</span> <span class="n">fractional</span> <span class="n">digits</span> <span class="n">to</span>
+       <span class="n">employ</span> <span class="k">for</span> <span class="n">seconds</span> <span class="n">output</span> <span class="p">(</span><span class="n">when</span> <span class="n">the</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span>
+       <span class="n">specified</span><span class="p">,</span> <span class="o">-</span><span class="n">w3</span> <span class="ow">is</span> <span class="n">assumed</span><span class="p">)</span><span class="o">.</span> <span class="n">When</span> <span class="o">-</span><span class="n">W</span> <span class="ow">is</span> <span class="n">employed</span> <span class="n">the</span> <span class="n">fields</span>
+       <span class="n">will</span> <span class="n">be</span> <span class="n">constant</span> <span class="n">width</span> <span class="k">with</span> <span class="n">leading</span> <span class="n">zeroes</span><span class="o">.</span>
+
+<span class="o">-</span><span class="n">p</span>     <span class="n">This</span> <span class="n">option</span> <span class="n">causes</span> <span class="n">the</span> <span class="n">azimuthal</span> <span class="n">values</span> <span class="n">to</span> <span class="n">be</span> <span class="n">output</span> <span class="k">as</span>
+       <span class="n">unsigned</span> <span class="n">DMS</span> <span class="n">numbers</span> <span class="n">between</span> <span class="mi">0</span> <span class="ow">and</span> <span class="mi">360</span> <span class="n">degrees</span><span class="o">.</span> <span class="n">Also</span>
+       <span class="n">note</span> <span class="o">-</span><span class="n">f</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>The  <code class="docutils literal"><span class="pre">+args</span></code>  command-line  options  are associated with geodetic
+parameters for specifying the ellipsoidal  or  sphere  to  use.
+See  <code class="docutils literal"><span class="pre">proj</span></code>  <a class="reference external" href="proj.html">documentation</a> for full list of these parameters and
+controls.  The options are processed in  left  to  right  order
+from  the  command  line.  Reentry of an option is ignored with
+the first occurrence assumed to be the desired value.</p>
+<p>One or more files (processed in left to  right  order)  specify
+the  source  of  data  to be transformed.  A - will specify the
+location of processing standard input.  If no files are  specified,
+the input is assumed to be from stdin.</p>
+<p>For  direct determinations input data must be in latitude, longitude,
+azimuth and distance order and output will be latitude,
+longitude  and  back  azimuth of the terminus point.  Latitude,
+longitude of the initial and terminus point are input  for  the
+inverse  mode  and respective forward and back azimuth from the
+initial and terminus points are output along with the  distance
+between the points.</p>
+<p>Input  geographic  coordinates  (latitude  and  longitude)  and
+azimuthal data must be in decimal degrees  or  DMS  format  and
+input distance data must be in units consistent with the ellipsoid
+major axis or sphere radius units.  The latitude must  lie
+in the range [-90d,90d].  Output geographic coordinates will be
+in DMS (if the -f switch is not employed) to 0.001&#8221; with trailing,
+zero-valued minute-second fields deleted.  Output distance
+data will be in the same  units  as  the  ellipsoid  or  sphere
+radius.</p>
+<p>The Earth&#8217;s ellipsoidal figure may be selected in the same manner
+as program <code class="docutils literal"><span class="pre">proj</span></code> by using <code class="docutils literal"><span class="pre">+ellps=</span></code>, <code class="docutils literal"><span class="pre">+a=</span></code>, <code class="docutils literal"><span class="pre">+es=</span></code>, etc.</p>
+<p>Geod may also be used to determine  intermediate  points  along
+either  a  geodesic  line between two points or along an arc of
+specified distance from a geographic point.  In both  cases  an
+initial  point must be specified with <code class="docutils literal"><span class="pre">+lat_1=lat</span></code> and <code class="docutils literal"><span class="pre">+lon_1=lon</span></code>
+parameters  and  either  a  terminus   point   <code class="docutils literal"><span class="pre">+lat_2=lat</span></code>   and
+<code class="docutils literal"><span class="pre">+lon_2=lon</span></code>  or  a  distance  and azimuth from the initial point
+with <code class="docutils literal"><span class="pre">+S=distance</span></code> and <code class="docutils literal"><span class="pre">+A=azimuth</span></code> must be specified.</p>
+<p>If points along a geodesic are to  be  determined  then  either
+<code class="docutils literal"><span class="pre">+n_S=integer</span></code>  specifying  the  number  of  intermediate  points
+and/or  <code class="docutils literal"><span class="pre">+del_S=distance</span></code>  specifying  the  incremental  distance
+between points must be specified.</p>
+<p>To  determine  points along an arc equidistant from the initial
+point both <code class="docutils literal"><span class="pre">+del_A=angle</span></code>  and  <code class="docutils literal"><span class="pre">+n_A=integer</span></code>  must  be  specified
+which determine the respective angular increments and number of
+points to be determined.</p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>The following script determines the geodesic azimuths and  distance in U.S.
+statute miles from Boston, MA, to Portland, OR:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">geod</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">-</span><span class="n">I</span> <span class="o">+</span><span class="n">units</span><span class="o">=</span><span class="n">us</span><span class="o">-</span><span class="n">mi</span>
+<span class="mi">42</span><span class="n">d15</span><span class="s1">&#39;N 71d07&#39;</span><span class="n">W</span> <span class="mi">45</span><span class="n">d31</span><span class="s1">&#39;N 123d41&#39;</span><span class="n">W</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+<p>which gives the results:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span><span class="mi">66</span><span class="n">d31</span><span class="s1">&#39;50.141&quot; 75d39&#39;</span><span class="mf">13.083</span><span class="s2">&quot; 2587.504</span>
+</pre></div>
+</div>
+<p>where the first two values are the azimuth from Boston to Portland,
+the back azimuth from Portland to Boston followed by the distance.</p>
+<p>An  example  of forward geodesic use is to use the Boston loca-
+tion and determine Portland&#8217;s location by azimuth and distance:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">geod</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">+</span><span class="n">units</span><span class="o">=</span><span class="n">us</span><span class="o">-</span><span class="n">mi</span>
+<span class="mi">42</span><span class="n">d15</span><span class="s1">&#39;N 71d07&#39;</span><span class="n">W</span> <span class="o">-</span><span class="mi">66</span><span class="n">d31</span><span class="s1">&#39;50.141&quot; 2587.504</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+<p>which gives:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">45</span><span class="n">d31</span><span class="s1">&#39;0.003&quot;N 123d40&#39;</span><span class="mf">59.985</span><span class="s2">&quot;W 75d39&#39;13.094&quot;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Lack  of precision in the distance value compromises the
+precision of the Portland location.</p>
+</div>
+</div>
+<div class="section" id="further-reading">
+<h2>Further reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://geographiclib.sf.net">GeographicLib</a></li>
+<li><a class="reference external" href="http://dx.doi.org/10.1007/s00190-012-0578-z">C. F. F. Karney, Algorithms for Geodesics, J. Geodesy 87, 43-55 (2013)</a>.
+<a class="reference external" href="http://geographiclib.sf.net/geod-addenda.html">Addendum</a></li>
+<li><a class="reference external" href="http://geographiclib.sf.net/geodesic-papers/biblio.html">The online geodesic bibliography</a></li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../projections.html" class="btn btn-neutral float-right" title="Cartographic projection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cs2cs.html" class="btn btn-neutral" title="cs2cs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1986?-2016.
+      Last updated on 25 Sep 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.9.3',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
