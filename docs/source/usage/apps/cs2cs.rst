@@ -5,8 +5,6 @@ cs2cs
 ================================================================================
 
 
-.. Index:: cs2cs
-
 ``cs2cs`` performs transformation between the source and destination cartographic  coordinate  system
 on a set of input points.  The coordinate system transformation can include  translation  between
 projected  and geographic coordinates as well as the application of datum shifts.
