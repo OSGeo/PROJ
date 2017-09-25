@@ -18,7 +18,6 @@ geodesic (Great Circle) computations.
 
 
 
-
 .. toctree::
    :maxdepth: 1
 
