@@ -15,19 +15,29 @@ endif(UNIX)
 
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-	SET(CMAKE_INSTALL_PREFIX ${DEFAULT_PROJ_ROOT_DIR} CACHE PATH "Foo install
+	SET(CMAKE_INSTALL_PREFIX ${DEFAULT_PROJ_ROOT_DIR} CACHE PATH "Proj.4 install
 		 prefix" FORCE)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 #TODO 
 # for data install testing the PROJ_LIB envVar
 
+string(TOLOWER "${PROJECT_NAME}" PROJECT_NAME_LOWER)
 if(WIN32)
   set(DEFAULT_BIN_SUBDIR bin)
   set(DEFAULT_LIB_SUBDIR local/lib)
   set(DEFAULT_DATA_SUBDIR share)
   set(DEFAULT_INCLUDE_SUBDIR local/include)
   set(DEFAULT_DOC_SUBDIR share/doc/proj)
+  set(DEFAULT_CMAKE_SUBDIR local/lib/cmake/${PROJECT_NAME_LOWER})
+elseif(UNIX)
+  include(GNUInstallDirs)
+  set(DEFAULT_BIN_SUBDIR ${CMAKE_INSTALL_BINDIR})
+  set(DEFAULT_LIB_SUBDIR ${CMAKE_INSTALL_LIBDIR})
+  set(DEFAULT_DATA_SUBDIR ${CMAKE_INSTALL_DATADIR})
+  set(DEFAULT_INCLUDE_SUBDIR ${CMAKE_INSTALL_INCLUDEDIR})
+  set(DEFAULT_DOC_SUBDIR ${CMAKE_INSTALL_DOCDIR})
+  set(DEFAULT_CMAKE_SUBDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME_LOWER})
 else()
   # Common locatoins for Unix and Mac OS X
   set(DEFAULT_BIN_SUBDIR bin)
@@ -35,9 +45,11 @@ else()
   set(DEFAULT_DATA_SUBDIR share/proj)
   set(DEFAULT_DOC_SUBDIR doc/proj)
   set(DEFAULT_INCLUDE_SUBDIR include)
+  set(DEFAULT_DOC_SUBDIR share/doc/proj)
+  set(DEFAULT_CMAKE_SUBDIR lib/cmake/${PROJECT_NAME_LOWER})
 endif()
 
-# Locations are changeable by user to customize layout of PDAL installation
+# Locations are changeable by user to customize layout of Proj.4 installation
 # (default values are platform-specific)
 set(PROJ_BIN_SUBDIR ${DEFAULT_BIN_SUBDIR} CACHE STRING
   "Subdirectory where executables will be installed")
@@ -48,7 +60,9 @@ set(PROJ_INCLUDE_SUBDIR ${DEFAULT_INCLUDE_SUBDIR} CACHE STRING
 set(PROJ_DATA_SUBDIR ${DEFAULT_DATA_SUBDIR} CACHE STRING
   "Subdirectory where data will be installed")
 set(PROJ_DOC_SUBDIR ${DEFAULT_DOC_SUBDIR} CACHE STRING
-  "Subdirectory where data will be installed")
+  "Subdirectory where doc will be installed")
+set(PROJ_CMAKE_SUBDIR ${DEFAULT_CMAKE_SUBDIR} CACHE STRING
+  "Subdirectory where cmake proj4-config file will be installed")
 
 # Mark *DIR variables as advanced and dedicated to use by power-users only.
 mark_as_advanced(PROJ_ROOT_DIR
@@ -56,12 +70,14 @@ mark_as_advanced(PROJ_ROOT_DIR
                  PROJ_LIB_SUBDIR 
                  PROJ_INCLUDE_SUBDIR 
                  PROJ_DATA_SUBDIR
-                 PROJ_DOC_SUBDIR )
+                 PROJ_DOC_SUBDIR
+                 PROJ_CMAKE_SUBDIR )
 
 set(DEFAULT_BINDIR "${PROJ_BIN_SUBDIR}")
 set(DEFAULT_LIBDIR "${PROJ_LIB_SUBDIR}")
 set(DEFAULT_DATADIR "${PROJ_DATA_SUBDIR}")
 set(DEFAULT_DOCDIR "${PROJ_DOC_SUBDIR}")
 set(DEFAULT_INCLUDEDIR "${PROJ_INCLUDE_SUBDIR}")
+set(DEFAULT_CMAKEDIR "${PROJ_CMAKE_SUBDIR}")
 
 

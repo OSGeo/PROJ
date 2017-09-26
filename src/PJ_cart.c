@@ -259,7 +259,7 @@ int pj_cart_selftest (void) {
     char buf[40];
 
     /* An utm projection on the GRS80 ellipsoid */
-    P = proj_create (0, arg);
+    P = proj_create (PJ_DEFAULT_CTX, arg);
     if (0==P)
         return 1;
 
@@ -268,7 +268,7 @@ int pj_cart_selftest (void) {
     proj_destroy (P);
 
     /* Same projection, now using argc/argv style initialization */
-    P = proj_create_argv (0, 3, args);
+    P = proj_create_argv (PJ_DEFAULT_CTX, 3, args);
     if (0==P)
         return 2;
 
@@ -312,7 +312,7 @@ int pj_cart_selftest (void) {
     proj_destroy (P);
 
     /* Now do some 3D transformations */
-    P = proj_create (0, "+proj=cart +ellps=GRS80");
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=cart +ellps=GRS80");
     if (0==P)
         return 6;
 
@@ -380,7 +380,7 @@ int pj_cart_selftest (void) {
     /* Testing the proj_transform nightmare */
 
     /* An utm projection on the GRS80 ellipsoid */
-    P = proj_create (0, "+proj=utm +zone=32 +ellps=GRS80");
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=utm +zone=32 +ellps=GRS80");
     if (0==P)
         return 13;
 
@@ -463,7 +463,7 @@ int pj_cart_selftest (void) {
     proj_destroy (P);
 
     /* test proj_create_crs_to_crs() */
-    P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833");
+    P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "epsg:25832", "epsg:25833");
     if (P==0)
         return 50;
 
@@ -478,7 +478,7 @@ int pj_cart_selftest (void) {
     proj_destroy(P);
 
     /* let's make sure that only entries in init-files results in a usable PJ */
-    P = proj_create_crs_to_crs(0, "proj=utm +zone=32 +datum=WGS84", "proj=utm +zone=33 +datum=WGS84");
+    P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "proj=utm +zone=32 +datum=WGS84", "proj=utm +zone=33 +datum=WGS84");
     if (P != 0) {
         proj_destroy(P);
         return 52;
@@ -501,11 +501,11 @@ int pj_cart_selftest (void) {
     if (info.searchpath[0] == '\0') return 57;
 
     /* proj_pj_info() */
-    P = proj_create(0, "+proj=august"); /* august has no inverse */
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=august"); /* august has no inverse */
     if (proj_pj_info(P).has_inverse) { proj_destroy(P); return 60; }
     proj_destroy(P);
 
-    P = proj_create(0, arg);
+    P = proj_create(PJ_DEFAULT_CTX, arg);
     pj_info = proj_pj_info(P);
     if ( !pj_info.has_inverse )            {  proj_destroy(P); return 61; }
     if ( strcmp(pj_info.definition, arg) ) {  proj_destroy(P); return 62; }
@@ -545,7 +545,7 @@ int pj_cart_selftest (void) {
 
 
     /* test proj_derivatives_retrieve() and proj_factors_retrieve() */
-    P = proj_create(0, "+proj=merc");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=merc");
     a = proj_obs_null;
     a.coo.lp.lam = PJ_TORAD(12);
     a.coo.lp.phi = PJ_TORAD(55);
