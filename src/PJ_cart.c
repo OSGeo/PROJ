@@ -575,7 +575,7 @@ int pj_cart_selftest (void) {
     /* Check that proj_list_* functions work by looping through them */
     n = 0;
     for (oper_list = proj_list_operations(); oper_list->id; ++oper_list) n++;
-    if (oper_list[n-1].id == 0) return 90;
+    if (n == 0) return 90;
 
     n = 0;
     for (ellps_list = proj_list_ellps(); ellps_list->id; ++ellps_list) n++;
