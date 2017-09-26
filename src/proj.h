@@ -429,11 +429,11 @@ PJ_INIT_INFO proj_init_info(const char *initname);
 
 /* List functions: */
 /* Get lists of operations, ellipsoids, datums, units and prime meridians. */
-PJ_OPERATIONS       *proj_list_operations(void);
-PJ_ELLPS            *proj_list_ellps(void);
-PJ_DATUMS           *proj_list_datums(void);
-PJ_UNITS            *proj_list_units(void);
-PJ_PRIME_MERIDIANS  *proj_list_prime_meridians(void);
+const PJ_OPERATIONS       *proj_list_operations(void);
+const PJ_ELLPS            *proj_list_ellps(void);
+const PJ_DATUMS           *proj_list_datums(void);
+const PJ_UNITS            *proj_list_units(void);
+const PJ_PRIME_MERIDIANS  *proj_list_prime_meridians(void);
 
 /* These are trivial, and while occasionaly useful in real code, primarily here to       */
 /* simplify demo code, and in acknowledgement of the proj-internal discrepancy between   */

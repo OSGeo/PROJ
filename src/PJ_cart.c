@@ -245,11 +245,11 @@ int pj_cart_selftest (void) {
     PJ_DERIVS derivs;
     PJ_FACTORS factors;
 
-    PJ_OPERATIONS *oper_list;
-    PJ_ELLPS *ellps_list;
-    PJ_DATUMS *datum_list;
-    PJ_UNITS *unit_list;
-    PJ_PRIME_MERIDIANS *pm_list;
+    const PJ_OPERATIONS *oper_list;
+    const PJ_ELLPS *ellps_list;
+    const PJ_DATUMS *datum_list;
+    const PJ_UNITS *unit_list;
+    const PJ_PRIME_MERIDIANS *pm_list;
 
     int err;
     size_t n, sz;

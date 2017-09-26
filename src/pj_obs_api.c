@@ -780,23 +780,23 @@ PJ_FACTORS proj_factors(PJ *P, const LP lp) {
 }
 
 
-PJ_ELLPS *proj_list_ellps(void) {
+const PJ_ELLPS *proj_list_ellps(void) {
     return pj_get_ellps_ref();
 }
 
-PJ_DATUMS *proj_list_datums(void) {
+const PJ_DATUMS *proj_list_datums(void) {
     return pj_get_datums_ref();
 }
 
-PJ_UNITS *proj_list_units(void) {
+const PJ_UNITS *proj_list_units(void) {
     return pj_get_units_ref();
 }
 
-PJ_OPERATIONS *proj_list_operations(void) {
+const PJ_OPERATIONS *proj_list_operations(void) {
     return pj_get_list_ref();
 }
 
-PJ_PRIME_MERIDIANS *proj_list_prime_meridians(void) {
+const PJ_PRIME_MERIDIANS *proj_list_prime_meridians(void) {
     return pj_get_prime_meridians_ref();
 }
 
