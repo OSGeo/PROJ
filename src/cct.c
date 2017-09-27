@@ -6,7 +6,7 @@
 
 cct is a 4D equivalent to the "proj" projection program.
 
-cct is an acromyn meaning "Coordinate Conversion and Transformation".
+cct is an acronym meaning "Coordinate Conversion and Transformation".
 
 The acronym refers to definitions given in the OGC 08-015r2/ISO-19111
 standard "Geographical Information -- Spatial Referencing by Coordinates",
