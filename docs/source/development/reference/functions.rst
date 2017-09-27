@@ -297,6 +297,69 @@ Initializers
     :type `flags`: unsigned int
     :returns: :c:type:`PJ_OBS`
 
+Error reporting
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. c:function:: int proj_errno(PJ *P)
+
+    Get a reading of the current error-state of :c:data:`P`. An non-zero error
+    codes indicates an error either with the transformation setup or during a
+    transformation.
+
+    :param: PJ* P: Transformation object.
+
+    :returns: :c:type:`int`
+
+.. c:function:: void proj_errno_set(PJ *P, int err)
+
+Change the error-state of :c:data:`P` to `err`.
+
+    :param PJ* P: Transformation object.
+    :param int err: Error number.
+
+.. c:function:: int proj_errno_reset(PJ *P)
+
+    Clears the error number in :c:data:`P`, and bubbles it up to the context.
+
+    Example:
+
+    .. code-block:: C
+
+        void foo (PJ *P) {
+            int last_errno = proj_errno_reset (P);
+
+            do_something_with_P (P);
+
+            /* failure - keep latest error status */
+            if (proj_errno(P))
+                return;
+            /* success - restore previous error status */
+            proj_errno_restore (P, last_errno);
+            return;
+        }
+
+    :param: PJ* P: Transformation object.
+
+    :returns: :c:type:`int` Returns the previous value of the errno, for convenient reset/restore operations.
+
+.. c:function:: void proj_errno_restore(PJ *P, int err)
+
+    Reduce some mental impedance in the canonical reset/restore use case:
+    Basically, :c:func:`proj_errno_restore()` is a synonym for
+    :c:func:`proj_errno_set()`, but the use cases are very different:
+    *set* indicate an error to higher level user code, *restore* passes previously
+    set error indicators in case of no errors at this level.
+
+    Hence, although the inner working is identical, we provide both options,
+    to avoid some rather confusing real world code.
+
+    See usage example under :c:func:`proj_errno_reset`
+
+    :param PJ* P: Transformation object.
+    :param int err: Error code.
+
+
+
 Info functions
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
