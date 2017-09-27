@@ -102,11 +102,11 @@ static int pj_gridlist_merge_gridfile( projCtx ctx,
                 PJ_GRIDINFO **new_list;
                 int new_max = *p_gridmax + 20;
 
-                new_list = (PJ_GRIDINFO **) pj_malloc(sizeof(void*) * new_max);
+                new_list = (PJ_GRIDINFO **) pj_calloc(new_max, sizeof(void *));
                 if( *p_gridlist != NULL )
                 {
                     memcpy( new_list, *p_gridlist,
-                            sizeof(void*) * (*p_gridmax) );
+                            sizeof(void *) * (*p_gridmax) );
                     pj_dalloc( *p_gridlist );
                 }
 
@@ -194,7 +194,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
         if( end_char >= sizeof(name) )
         {
             pj_dalloc( gridlist );
-            pj_ctx_set_errno( ctx, -38 );
+            pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             pj_release_lock();
             return NULL;
         }
@@ -211,7 +211,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx ctx, const char *nadgrids,
             && required )
         {
             pj_dalloc( gridlist );
-            pj_ctx_set_errno( ctx, -38 );
+            pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             pj_release_lock();
             return NULL;
         }

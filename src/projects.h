@@ -332,7 +332,7 @@ struct PJconsts {
     **************************************************************************************/
 
     double  lam0, phi0;                /* central longitude, latitude */
-    double  x0, y0;                    /* false easting and northing */
+    double  x0, y0, z0, t0;            /* false easting and northing (and height and time) */
 
 
     /*************************************************************************************
@@ -524,6 +524,7 @@ struct FACTORS {
 #define PJD_ERR_NON_CONVERGENT          -53
 #define PJD_ERR_MISSING_ARGS            -54
 #define PJD_ERR_LAT_0_IS_ZERO           -55
+#define PJD_ERR_ELLIPSOIDAL_UNSUPPORTED -56
 
 struct projFileAPI_t;
 
@@ -681,6 +682,8 @@ paralist *pj_clone_paralist( const paralist* );
 paralist *pj_search_initcache( const char *filekey );
 void      pj_insert_initcache( const char *filekey, const paralist *list);
 paralist *pj_get_init(projCtx ctx, paralist **start, paralist *next, char *name, int *found_def);
+void     *pj_dealloc_params (projCtx ctx, paralist *start, int errlev);
+
 
 double *pj_enfn(double);
 double  pj_mlfn(double, double, double, double *);

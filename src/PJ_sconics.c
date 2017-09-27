@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -105,35 +106,19 @@ static LP s_inverse (XY xy, PJ *P) {  /* Spheroidal, (and ellipsoidal?) inverse 
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 static PJ *setup(PJ *P, int type) {
     double del, cs;
-    int i;
+    int err;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
     Q->type = type;
 
-    i = phi12 (P, &del);
-    if(i) {
-        proj_errno_set(P, i);
-        return freeup_new(P);
-    }
+    err = phi12 (P, &del);
+    if(err)
+        return pj_default_destructor (P, err);
+
     switch (Q->type) {
 
     case TISSOT:
@@ -172,10 +157,9 @@ static PJ *setup(PJ *P, int type) {
         Q->n = sin (Q->sig);
         Q->c2 = cos (del);
         Q->c1 = 1./tan (Q->sig);
-        if (fabs (del = P->phi0 - Q->sig) - EPS10 >= M_HALFPI) {
-            proj_errno_set(P, PJD_ERR_LAT_0_HALF_PI_FROM_MEAN);
-            return freeup_new(P);
-        }
+        if (fabs (del = P->phi0 - Q->sig) - EPS10 >= M_HALFPI)
+            return pj_default_destructor(P, PJD_ERR_LAT_0_HALF_PI_FROM_MEAN);
+
         Q->rho_0 = Q->c2 * (Q->c1 - tan (del));
         break;
 

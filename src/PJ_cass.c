@@ -1,5 +1,6 @@
 #define PJ_LIB__
-# include   <projects.h>
+# include   <errno.h>
+# include   "projects.h"
 PROJ_HEAD(cass, "Cassini") "\n\tCyl, Sph&Ell";
 
 
@@ -77,22 +78,18 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     return lp;
 }
 
-
-static void *freeup_new(PJ *P) {                        /* Destructor */
+static void *destructor (PJ *P, int errlev) {                        /* Destructor */
     if (0==P)
         return 0;
+
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
-    pj_dealloc(P->opaque->en);
-    pj_dealloc(P->opaque);
-    return pj_dealloc(P);
+    pj_dealloc (P->opaque->en);
+    return pj_default_destructor (P, errlev);
 }
 
-static void freeup(PJ *P) {                             /* Destructor */
-    freeup_new (P);
-    return;
-}
+
 
 PJ *PROJECTION(cass) {
 
@@ -106,11 +103,12 @@ PJ *PROJECTION(cass) {
     /* otherwise it's ellipsoidal */
     P->opaque = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==P->opaque)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
+    P->destructor = destructor;
 
     P->opaque->en = pj_enfn (P->es);
     if (0==P->opaque->en)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
 
     P->opaque->m0 = pj_mlfn (P->phi0,  sin (P->phi0),  cos (P->phi0),  P->opaque->en);
     P->inv = e_inverse;

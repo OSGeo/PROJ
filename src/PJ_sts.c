@@ -1,5 +1,6 @@
 #define PJ_LIB__
-# include	<projects.h>
+#include <errno.h>
+#include "projects.h"
 
 PROJ_HEAD(kav5,    "Kavraisky V")         "\n\tPCyl., Sph.";
 PROJ_HEAD(qua_aut, "Quartic Authalic")    "\n\tPCyl., Sph.";
@@ -8,7 +9,7 @@ PROJ_HEAD(mbt_s,   "McBryde-Thomas Flat-Polar Sine (No. 1)") "\n\tPCyl., Sph.";
 
 
 struct pj_opaque {
-	double C_x, C_y, C_p; \
+	double C_x, C_y, C_p;
 	int tan_mode;
 };
 
@@ -50,19 +51,6 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 static PJ *setup(PJ *P, double p, double q, int mode) {
 	P->es  = 0.;
 	P->inv = s_inverse;
@@ -81,7 +69,7 @@ static PJ *setup(PJ *P, double p, double q, int mode) {
 PJ *PROJECTION(fouc) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
     return setup(P, 2., 2., 1);
 }
@@ -151,7 +139,7 @@ int pj_fouc_selftest (void) {
 PJ *PROJECTION(kav5) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
     return setup(P, 1.50488, 1.35439, 0);
@@ -221,7 +209,7 @@ int pj_kav5_selftest (void) {
 PJ *PROJECTION(qua_aut) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
     return setup(P, 2., 2., 0);
 }
@@ -289,7 +277,7 @@ int pj_qua_aut_selftest (void) {
 PJ *PROJECTION(mbt_s) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
     return setup(P, 1.48875, 1.36509, 0);
 }

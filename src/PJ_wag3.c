@@ -1,6 +1,9 @@
 #define PJ_LIB__
-# include	<projects.h>
+#include	<projects.h>
+#include <errno.h>
+
 PROJ_HEAD(wag3, "Wagner III") "\n\tPCyl., Sph.\n\tlat_ts=";
+
 #define TWOTHIRD 0.6666666666666666666667
 
 struct pj_opaque {
@@ -16,11 +19,6 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-#if 0
-INVERSE(s_inverse); /* spheroid */
-#endif
-
-
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
 	lp.phi = xy.y;
@@ -28,20 +26,13 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 	return lp;
 }
 
-static void freeup (PJ *P) {
-    pj_freeup_plain (P);
-    return;
-}
-
 
 PJ *PROJECTION(wag3) {
 	double ts;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-    {
-        freeup(P);
-        return 0;
-    }
+        return pj_default_destructor(P, ENOMEM);
+
     P->opaque = Q;
 
 	ts = pj_param (P->ctx, P->params, "rlat_ts").f;

@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -8,7 +9,7 @@ PROJ_HEAD(hammer, "Hammer & Eckert-Greifendorff")
 #define EPS 1.0e-10
 
 struct pj_opaque {
-    double w; \
+    double w;
     double m, rm;
 };
 
@@ -43,40 +44,20 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {              /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(hammer) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     if (pj_param(P->ctx, P->params, "tW").i) {
-        if ((Q->w = fabs(pj_param(P->ctx, P->params, "dW").f)) <= 0.) {
-            proj_errno_set(P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
-            return freeup_new(P);
-        }
+        if ((Q->w = fabs(pj_param(P->ctx, P->params, "dW").f)) <= 0.)
+            return pj_default_destructor (P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
     } else
         Q->w = .5;
     if (pj_param(P->ctx, P->params, "tM").i) {
-        if ((Q->m = fabs(pj_param(P->ctx, P->params, "dM").f)) <= 0.) {
-            proj_errno_set(P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
-            return freeup_new(P);
-        }
+        if ((Q->m = fabs(pj_param(P->ctx, P->params, "dM").f)) <= 0.)
+            return pj_default_destructor (P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
     } else
         Q->m = 1.;
 

@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -93,28 +94,13 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
 
 PJ *PROJECTION(chamb) {
     int i, j;
     char line[10];
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
 
@@ -131,10 +117,8 @@ PJ *PROJECTION(chamb) {
         j = i == 2 ? 0 : i + 1;
         Q->c[i].v = vect(P->ctx,Q->c[j].phi - Q->c[i].phi, Q->c[i].cosphi, Q->c[i].sinphi,
             Q->c[j].cosphi, Q->c[j].sinphi, Q->c[j].lam - Q->c[i].lam);
-        if (Q->c[i].v.r == 0.0) {
-            proj_errno_set(P, PJD_ERR_CONTROL_POINT_NO_DIST);
-            return freeup_new(P);
-        }
+        if (Q->c[i].v.r == 0.0)
+            return pj_default_destructor (P, PJD_ERR_CONTROL_POINT_NO_DIST);
         /* co-linearity problem ignored for now */
     }
     Q->beta_0 = lc(P->ctx,Q->c[0].v.r, Q->c[2].v.r, Q->c[1].v.r);

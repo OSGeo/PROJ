@@ -63,27 +63,6 @@ struct pj_opaque_molodensky {
 };
 
 
-static void *freeup_msg(PJ *P, int errlev) {
-    if (0==P)
-        return 0;
-
-    if (0!=P->ctx)
-        pj_ctx_set_errno (P->ctx, errlev);
-
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-
-    return pj_dealloc(P);
-}
-
-static void freeup(PJ *P) {
-    freeup_msg (P, 0);
-    return;
-}
-
-
 static double RN (double a, double es, double phi) {
 /**********************************************************
     N(phi) - prime vertical radius of curvature
@@ -287,7 +266,7 @@ static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
 PJ *PROJECTION(molodensky) {
     struct pj_opaque_molodensky *Q = pj_calloc(1, sizeof(struct pj_opaque_molodensky));
     if (0==Q)
-        return freeup_msg(P, ENOMEM);
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = (void *) Q;
 
     P->fwdobs = forward_obs;
@@ -320,10 +299,10 @@ PJ *PROJECTION(molodensky) {
 
     /* We want all parameters (except +abridged) to be set */
     if ((Q->dx == 0) && (Q->dy == 0) && (Q->dz == 0) && (Q->da == 0) && (Q->df == 0))
-        return freeup_msg(P, PJD_ERR_NO_ARGS);
+        return pj_default_destructor(P, PJD_ERR_NO_ARGS);
 
     if ((Q->dx == 0) || (Q->dy == 0) || (Q->dz == 0) || (Q->da == 0) || (Q->df == 0))
-        return freeup_msg(P, PJD_ERR_MISSING_ARGS);
+        return pj_default_destructor(P, PJD_ERR_MISSING_ARGS);
 
     return P;
 }

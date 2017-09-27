@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -213,19 +214,6 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 static PJ *setup(PJ *P) {                   /* general initialization */
     double t;
     struct pj_opaque *Q = P->opaque;
@@ -291,7 +279,7 @@ static PJ *setup(PJ *P) {                   /* general initialization */
 PJ *PROJECTION(stere) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     Q->phits = pj_param (P->ctx, P->params, "tlat_ts").i ?
@@ -304,14 +292,14 @@ PJ *PROJECTION(stere) {
 PJ *PROJECTION(ups) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     /* International Ellipsoid */
     P->phi0 = pj_param(P->ctx, P->params, "bsouth").i ? - M_HALFPI: M_HALFPI;
     if (P->es == 0.0) {
         proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
-        return freeup_new(P);
+        return pj_default_destructor (P, ENOMEM);
     }
     P->k0 = .994;
     P->x0 = 2000000.;

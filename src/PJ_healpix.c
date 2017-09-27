@@ -29,6 +29,7 @@
  * SOFTWARE.
  *****************************************************************************/
 # define PJ_LIB__
+# include <errno.h>
 # include <proj.h>
 # include "projects.h"
 
@@ -598,30 +599,24 @@ static LP e_rhealpix_inverse(XY xy, PJ *P) { /* ellipsoid */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
+static void *destructor (PJ *P, int errlev) {                        /* Destructor */
     if (0==P)
         return 0;
+
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
-    if (P->opaque->apa)
-        pj_dealloc(P->opaque->apa);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
+    pj_dealloc (P->opaque->apa);
+    return pj_default_destructor (P, errlev);
 }
 
 
 PJ *PROJECTION(healpix) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es);             /* For auth_lat(). */
@@ -642,21 +637,18 @@ PJ *PROJECTION(healpix) {
 PJ *PROJECTION(rhealpix) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     Q->north_square = pj_param(P->ctx, P->params,"inorth_square").i;
     Q->south_square = pj_param(P->ctx, P->params,"isouth_square").i;
 
     /* Check for valid north_square and south_square inputs. */
-    if (Q->north_square < 0 || Q->north_square > 3) {
-        proj_errno_set(P, PJD_ERR_AXIS);
-        return freeup_new(P);
-    }
-    if (Q->south_square < 0 || Q->south_square > 3) {
-        proj_errno_set(P, PJD_ERR_AXIS);
-        return freeup_new(P);
-    }
+    if (Q->north_square < 0 || Q->north_square > 3)
+        return destructor (P, PJD_ERR_AXIS);
+    if (Q->south_square < 0 || Q->south_square > 3)
+        return destructor (P, PJD_ERR_AXIS);
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es); /* For auth_lat(). */
         Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */

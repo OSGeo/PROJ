@@ -65,9 +65,9 @@ Last update: 2017-05-16
 
 #define PJ_LIB__
 #include <time.h>
-#include "proj_internal.h"
-#include <projects.h>
 #include <errno.h>
+#include "proj_internal.h"
+#include "projects.h"
 
 PROJ_HEAD(unitconvert, "Unit conversion");
 
@@ -192,28 +192,6 @@ struct pj_opaque_unitconvert {
 
 
 /***********************************************************************/
-static void *freeup_msg (PJ *P, int errlev) {
-/***********************************************************************/
-    if (0==P)
-        return 0;
-
-    if (0!=P->ctx)
-        pj_ctx_set_errno (P->ctx, errlev);
-
-    pj_dealloc (P->opaque);
-
-    return pj_dealloc(P);
-}
-
-
-/***********************************************************************/
-static void freeup (PJ *P) {
-/***********************************************************************/
-    freeup_msg (P, 0);
-    return;
-}
-
-/***********************************************************************/
 static XY forward_2d(LP lp, PJ *P) {
 /************************************************************************
     Forward unit conversions in the plane
@@ -328,7 +306,7 @@ PJ *PROJECTION(unitconvert) {
     int i;
 
     if (0==Q)
-        return freeup_msg (P, ENOMEM);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
     P->fwdobs = forward_obs;
@@ -348,7 +326,7 @@ PJ *PROJECTION(unitconvert) {
     if ((name = pj_param (P->ctx, P->params, "sxy_in").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
 
         Q->xy_in_id = i;
         proj_log_debug(P, "xy_in unit: %s", pj_units[i].name);
@@ -357,7 +335,7 @@ PJ *PROJECTION(unitconvert) {
     if ((name = pj_param (P->ctx, P->params, "sxy_out").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
 
         Q->xy_out_id = i;
         proj_log_debug(P, "xy_out unit: %s", pj_units[i].name);
@@ -366,7 +344,7 @@ PJ *PROJECTION(unitconvert) {
     if ((name = pj_param (P->ctx, P->params, "sz_in").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
 
         Q->z_in_id = i;
         proj_log_debug(P, "z_in unit: %s", pj_units[i].name);
@@ -375,7 +353,7 @@ PJ *PROJECTION(unitconvert) {
     if ((name = pj_param (P->ctx, P->params, "sz_out").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
 
         Q->z_out_id = i;
         proj_log_debug(P, "z_out unit: %s", pj_units[i].name);
@@ -385,7 +363,7 @@ PJ *PROJECTION(unitconvert) {
     if ((name = pj_param (P->ctx, P->params, "st_in").s) != NULL) {
         for (i = 0; (s = time_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
 
         Q->t_in_id = i;
         proj_log_debug(P, "t_in unit: %s", time_units[i].name);
@@ -394,9 +372,9 @@ PJ *PROJECTION(unitconvert) {
     s = 0;
     if ((name = pj_param (P->ctx, P->params, "st_out").s) != NULL) {
         for (i = 0; (s = time_units[i].id) && strcmp(name, s) ; ++i);
-        if (!s) {
-            return freeup_msg(P, -8); /* unknown unit conversion id */
-        }
+
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
+
         Q->t_out_id = i;
         proj_log_debug(P, "t_out unit: %s", time_units[i].name);
     }

@@ -49,7 +49,7 @@ libproj_la_SOURCES = \
 	PJ_tcc.c PJ_tcea.c PJ_times.c PJ_tmerc.c \
 	PJ_airy.c PJ_aitoff.c PJ_august.c PJ_bacon.c \
 	PJ_chamb.c PJ_hammer.c PJ_lagrng.c PJ_larr.c \
-	PJ_lask.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c \
+	PJ_lask.c PJ_latlong.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c \
 	PJ_tpeqd.c PJ_vandg.c PJ_vandg2.c PJ_vandg4.c \
 	PJ_wag7.c PJ_lcca.c PJ_geos.c proj_etmerc.c \
 	PJ_boggs.c PJ_collg.c PJ_comill.c PJ_crast.c PJ_denoy.c \
@@ -60,7 +60,7 @@ libproj_la_SOURCES = \
 	PJ_nell.c PJ_nell_h.c PJ_patterson.c PJ_putp2.c PJ_putp3.c \
 	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_qsc.c PJ_robin.c \
 	PJ_sch.c PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c \
-	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_latlong.c pj_geocent.c \
+	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_geocent.c \
 	aasincos.c adjlon.c bch2bps.c bchgen.c \
 	biveval.c dmstor.c mk_cheby.c pj_auth.c \
 	pj_deriv.c pj_ell_set.c pj_ellps.c pj_errno.c \

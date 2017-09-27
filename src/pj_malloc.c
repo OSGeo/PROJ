@@ -40,7 +40,7 @@
 ** projection system memory allocation/deallocation call with custom
 ** application procedures.  */
 
-#include <projects.h>
+#include "projects.h"
 #include <errno.h>
 
 /**********************************************************************/
@@ -52,30 +52,43 @@ https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=86420.
 It seems, that pj_init and similar functions incorrectly
 (under debian/glibs-2.3.2) assume that pj_malloc resets
 errno after success. pj_malloc tries to mimic this.
-***********************************************************************/
-        int old_errno = errno;
-        void *res = malloc(size);
-        if ( res && !old_errno )
-                errno = 0;
-        return res;
-}
 
-/**********************************************************************/
-void pj_dalloc(void *ptr) {
-/**********************************************************************/
-	free(ptr);
+NOTE (2017-09-29): The problem described at the bugzilla page
+referred to above, is most likely a case of someone not
+understanding the proper usage of errno. We should review
+whether "the problem is actually a problem" in PROJ.4 code.
+
+Library specific allocators can be useful, and improve
+interoperability, if properly used. That is, by making them
+run/initialization time switchable, somewhat like the file i/o
+interface.
+
+But as things stand, we are more likely to get benefit
+from reviewing the code for proper errno usage, which is hard,
+due to the presence of context local and global pj_errnos.
+
+Probably, these were introduced in order to support incomplete
+implementations of thread local errnos at an early phase of the
+implementation of multithreading support in PROJ.4).
+
+It is likely too late to get rid of contexts, but we can still
+benefit from a better usage of errno.
+***********************************************************************/
+    int old_errno = errno;
+    void *res = malloc(size);
+    if ( res && !old_errno )
+            errno = 0;
+    return res;
 }
 
 
 /**********************************************************************/
 void *pj_calloc (size_t n, size_t size) {
 /***********************************************************************
-
 pj_calloc is the pj-equivalent of calloc().
 
 It allocates space for an array of <n> elements of size <size>.
 The array is initialized to zeros.
-
 ***********************************************************************/
     void *res = pj_malloc (n*size);
     if (0==res)
@@ -86,9 +99,15 @@ The array is initialized to zeros.
 
 
 /**********************************************************************/
+void pj_dalloc(void *ptr) {
+/**********************************************************************/
+    free(ptr);
+}
+    
+
+/**********************************************************************/
 void *pj_dealloc (void *ptr) {
 /***********************************************************************
-
 pj_dealloc supports the common use case of "clean up and return a null
 pointer" to signal an error in a multi level allocation:
 
@@ -113,23 +132,55 @@ pointer" to signal an error in a multi level allocation:
 
 
 
+/*****************************************************************************/
+void *pj_dealloc_params (projCtx ctx, paralist *start, int errlev) {
+/*****************************************************************************
+    Companion to pj_default_destructor (below). Deallocates a linked list
+    of "+proj=xxx" initialization parameters.
+
+    Also called from pj_init_ctx when encountering errors before the PJ
+    proper is allocated.
+******************************************************************************/    
+    paralist *t, *n;
+    for (t = start; t; t = n) {
+        n = t->next;
+        pj_dealloc(t);
+    }
+    pj_ctx_set_errno (ctx, errlev);
+    return (void *) 0;
+}
+
 
 /*****************************************************************************/
 void *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
 /*****************************************************************************
     Does memory deallocation for "plain" PJ objects, i.e. that vast majority
     of PJs where the opaque object does not contain any additionally
-    allocated memory.
+    allocated memory below the P->opaque level.
 ******************************************************************************/
     if (0==P)
         return 0;
     
-    if (0!=errlev)
-        pj_ctx_set_errno (P->ctx, errlev);
+
+    /* free grid lists */
+    pj_dealloc( P->gridlist );
+    pj_dealloc( P->vgridlist_geoid );
+    pj_dealloc( P->catalog_name );
     
-    if (0==P->opaque)
-        return pj_dealloc (P);
+    /* We used to call pj_dalloc( P->catalog ), but this will leak */
+    /* memory. The safe way to clear catalog and grid is to call */
+    /* pj_gc_unloadall(pj_get_default_ctx()); and pj_deallocate_grids(); */
+    /* TODO: we should probably have a public pj_cleanup() method to do all */
+    /* that */
+
+    /* free the interface to Charles Karney's geodesic library */
+    pj_dealloc( P->geod );
+    
+    /* free parameter list elements */
+    pj_dealloc_params (pj_get_ctx(P), P->params, errlev);
 
     pj_dealloc (P->opaque);
+    if (0!=errlev)
+        pj_ctx_set_errno (pj_get_ctx(P), errlev);
     return pj_dealloc(P);
 }

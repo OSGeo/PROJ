@@ -53,19 +53,6 @@ static LP inverse(XY xy, PJ *P) {
 }
 
 
-static void *freeup_new (PJ *P) {
-    if (0==P)
-        return 0;
-
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(latlong) {
     P->is_latlong = 1;
     P->x0 = 0.0;

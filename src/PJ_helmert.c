@@ -43,39 +43,17 @@ Last update: 2017-05-15
 ***********************************************************************/
 
 #define PJ_LIB__
-#include "proj_internal.h"
-#include <projects.h>
-#include <geocent.h>
 #include <assert.h>
 #include <stddef.h>
 #include <errno.h>
+#include "proj_internal.h"
+#include "projects.h"
+#include "geocent.h"
 PROJ_HEAD(helmert, "3(6)-, 4(8)- and 7(14)-parameter Helmert shift");
 
 static XYZ helmert_forward_3d (LPZ lpz, PJ *P);
 static LPZ helmert_reverse_3d (XYZ xyz, PJ *P);
 
-
-
-static void *freeup_msg (PJ *P, int errlev) {         /* Destructor */
-    if (0==P)
-        return 0;
-
-    if (0!=P->ctx)
-        pj_ctx_set_errno (P->ctx, errlev);
-
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-
-/* Adapts pipeline_freeup to the format defined for the PJ object */
-static void freeup (PJ *P) {
-    freeup_msg (P, 0);
-    return;
-}
 
 
 /***********************************************************************/
@@ -484,7 +462,7 @@ PJ *PROJECTION(helmert) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = pj_calloc (1, sizeof (struct pj_opaque_helmert));
     if (0==Q)
-        return freeup_msg (P, ENOMEM);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
     P->fwdobs = helmert_forward_obs;
@@ -527,7 +505,7 @@ PJ *PROJECTION(helmert) {
     if (pj_param (P->ctx, P->params, "ts").i) {
         Q->scale_0 = pj_param (P->ctx, P->params, "ds").f;
         if (pj_param (P->ctx, P->params, "ttheta").i && Q->scale_0 == 0.0)
-            return freeup_msg(P, -PJD_ERR_INVALID_SCALE);
+            return pj_default_destructor (P, PJD_ERR_INVALID_SCALE);
     }
 
     /* Translation rates */

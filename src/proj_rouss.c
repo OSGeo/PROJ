@@ -24,6 +24,7 @@
 ** SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -79,21 +80,17 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
+static void *destructor (PJ *P, int errlev) {
     if (0==P)
         return 0;
+
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
     if (P->opaque->en)
         pj_dealloc (P->opaque->en);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
 
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
+    return pj_default_destructor (P, ENOMEM);
 }
 
 
@@ -102,11 +99,12 @@ PJ *PROJECTION(rouss) {
 
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
     if (!((Q->en = proj_mdist_ini(P->es))))
-        return freeup_new(P);
+        return pj_default_destructor (P, ENOMEM);
+
     es2 = sin(P->phi0);
     Q->s0 = proj_mdist(P->phi0, es2, cos(P->phi0), Q->en);
     t = 1. - (es2 = P->es * es2 * es2);
@@ -149,6 +147,7 @@ PJ *PROJECTION(rouss) {
 
     P->fwd = e_forward;
     P->inv = e_inverse;
+    P->destructor = destructor;
 
     return P;
 }

@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -7,7 +8,7 @@ PROJ_HEAD(tpeqd, "Two Point Equidistant")
     "\n\tMisc Sph\n\tlat_1= lon_1= lat_2= lon_2=";
 
 struct pj_opaque {
-    double cp1, sp1, cp2, sp2, ccs, cs, sc, r2z0, z02, dlam2; \
+    double cp1, sp1, cp2, sp2, ccs, cs, sc, r2z0, z02, dlam2;
     double hz0, thz0, rhshz0, ca, sa, lp, lamc;
 };
 
@@ -55,26 +56,11 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(tpeqd) {
     double lam_1, lam_2, phi_1, phi_2, A12, pp;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
 
@@ -84,10 +70,9 @@ PJ *PROJECTION(tpeqd) {
     phi_2 = pj_param(P->ctx, P->params, "rlat_2").f;
     lam_2 = pj_param(P->ctx, P->params, "rlon_2").f;
 
-    if (phi_1 == phi_2 && lam_1 == lam_2) {
-        proj_errno_set(P, PJD_ERR_CONTROL_POINT_NO_DIST);
-        return freeup_new(P);
-    }
+    if (phi_1 == phi_2 && lam_1 == lam_2)
+        return pj_default_destructor(P, PJD_ERR_CONTROL_POINT_NO_DIST);
+
     P->lam0  = adjlon (0.5 * (lam_1 + lam_2));
     Q->dlam2 = adjlon (lam_2 - lam_1);
 

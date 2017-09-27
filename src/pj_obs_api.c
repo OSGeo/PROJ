@@ -69,7 +69,7 @@ PJ_OBS proj_obs (double x, double y, double z, double t, double o, double p, dou
 
 
 
-/* Geodesic distance between two points with angular 2D coordinates */
+/* Geodesic distance (in meter) between two points with angular 2D coordinates */
 double proj_lp_dist (const PJ *P, LP a, LP b) {
     double s12, azi1, azi2;
     /* Note: the geodesic code takes arguments in degrees */
@@ -772,5 +772,3 @@ double proj_dmstor(const char *is, char **rs) {
 char*  proj_rtodms(char *s, double r, int pos, int neg) {
     return rtodms(s, r, pos, neg);
 }
-
-
