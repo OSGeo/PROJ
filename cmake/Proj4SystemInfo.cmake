@@ -50,6 +50,12 @@ if(WIN32)
     if(MSVC_VERSION EQUAL 1800)
       set(PROJ_COMPILER_NAME "msvc-12.0") #Visual Studio 2013
     endif()
+    if(MSVC_VERSION EQUAL 1900) # CMake 3.1+
+      set(PROJ_COMPILER_NAME "msvc-14.0") #Visual Studio 2015
+    endif()
+    if(MSVC_VERSION GREATER 1900 AND MSVC_VERSION LESS 1920) # CMake 3.8+
+      set(PROJ_COMPILER_NAME "msvc-14.1") #Visual Studio 2017
+    endif()
   endif(MSVC)
   
   if(MINGW)
