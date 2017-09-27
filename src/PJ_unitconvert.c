@@ -112,9 +112,16 @@ static double decimalyear_to_mjd(double decimalyear) {
 /***********************************************************************
     Epoch of modified julian date is 1858-11-16 00:00
 ************************************************************************/
-    int year = (int)floor(decimalyear);
-    double fractional_year = decimalyear - year;
-    double mjd = (year - 1859)*365 + 14 + 31;
+    int year;
+    double fractional_year;
+    double mjd;
+
+    if( decimalyear < -10000 || decimalyear > 10000 )
+        return 0;
+
+    year = (int)floor(decimalyear);
+    fractional_year = decimalyear - year;
+    mjd = (year - 1859)*365 + 14 + 31;
     mjd += fractional_year*days_in_year(year);
 
     /* take care of leap days */
