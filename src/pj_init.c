@@ -769,8 +769,8 @@ bum_call: /* cleanup error return */
 /*      This is the application callable entry point for destroying     */
 /*      a projection definition.  It does work generic to all           */
 /*      projection types, and then calls the projection specific        */
-/*      free function (P->pfree()) to do local work.  This maps to      */
-/*      the FREEUP code in the individual projection source files.      */
+/*      free function (P->pfree()) to do local work.  In most cases     */
+/*      P->pfree()==pj_default_destructor.                              */
 /************************************************************************/
 
 void
@@ -784,15 +784,10 @@ pj_free(PJ *P) {
             pj_dalloc(t);
         }
 
-        /* free array of grid pointers if we have one */
-        if( P->gridlist != NULL )
-            pj_dalloc( P->gridlist );
-
-        if( P->vgridlist_geoid != NULL )
-            pj_dalloc( P->vgridlist_geoid );
-
-        if( P->catalog_name != NULL )
-            pj_dalloc( P->catalog_name );
+        /* free grid lists */
+        pj_dealloc( P->gridlist );
+        pj_dealloc( P->vgridlist_geoid );
+        pj_dealloc( P->catalog_name );
 
         /* We used to call pj_dalloc( P->catalog ), but this will leak */
         /* memory. The safe way to clear catalog and grid is to call */
@@ -800,34 +795,10 @@ pj_free(PJ *P) {
         /* TODO: we should probably have a public pj_cleanup() method to do all */
         /* that */
 
-        if( P->geod != NULL )
-            pj_dalloc( P->geod );
+        /* free the interface to Charles Karney's geodesic library */
+        pj_dealloc( P->geod );
 
         /* free projection parameters */
-        P->pfree(P);
+        P->destructor (P, 0);
     }
-}
-
-
-
-
-
-
-
-
-/************************************************************************/
-/*                              pj_prepare()                            */
-/*                                                                      */
-/*      Helper function for the PJ_xxxx functions providing the         */
-/*      projection specific setup for each projection type.             */
-/*                                                                      */
-/*      Currently not used, but placed here as part of the  material    */
-/*      Demonstrating the idea for a future PJ_xxx architecture         */
-/*      (cf. pj_minimal.c)                                              */
-/*                                                                      */
-/************************************************************************/
-void pj_prepare (PJ *P, const char *description, void (*freeup)(struct PJconsts *), size_t sizeof_struct_opaque) {
-    P->descr = description;
-    P->pfree = freeup;
-    P->opaque  = pj_calloc (1, sizeof_struct_opaque);
 }

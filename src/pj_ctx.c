@@ -38,6 +38,8 @@ static volatile int       default_context_initialized = 0;
 projCtx pj_get_ctx( projPJ pj )
 
 {
+    if (0==pj)
+        return pj_get_default_ctx ();
     return pj->ctx;
 }
 

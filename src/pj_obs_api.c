@@ -12,7 +12,7 @@
  * Author:   Thomas Knudsen,  thokn@sdfe.dk,  2016-06-09/2016-11-06
  *
  ******************************************************************************
- * Copyright (c) 2016, Thomas Knudsen/SDFE
+ * Copyright (c) 2016, 2017 Thomas Knudsen/SDFE 
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -36,7 +36,7 @@
 #include <proj.h>
 #include "proj_internal.h"
 #include "projects.h"
-#include <geodesic.h>
+#include "geodesic.h"
 #include <stddef.h>
 #include <errno.h>
 
@@ -407,34 +407,20 @@ PJ *proj_destroy (PJ *P) {
     return 0;
 }
 
-/* For now, if PJ itself is clean, we return the thread local error level. */
-/* This may change as OBS_API error reporting matures */
 int proj_errno (PJ *P) {
-    if (0==P)
-        return pj_ctx_get_errno (pj_get_default_ctx ());
-    if (0 != P->last_errno)
-        return P->last_errno;
     return pj_ctx_get_errno (pj_get_ctx (P));
 }
 
 /*****************************************************************************/
 void proj_errno_set (PJ *P, int err) {
 /******************************************************************************
-    Sets errno in the PJ, and bubbles it up to the context and pj_errno levels
-    through the low level pj_ctx interface.
+    Sets errno at the context and bubble it up to the thread local errno
 ******************************************************************************/
-    if (0==P) {
-        errno = EINVAL;
-        return;
-    }
-
     /* Use proj_errno_reset to explicitly clear the error status */
     if (0==err)
         return;
 
-    /* set local error level */
-    P->last_errno = err;
-    /* and let it bubble up */
+    /* For P==0 err goes to the default context */
     proj_context_errno_set (pj_get_ctx (P), err);
     errno = err;
     return;
@@ -454,14 +440,16 @@ void proj_errno_restore (PJ *P, int err) {
 
     See usage example under proj_errno_reset ()
 ******************************************************************************/
+    if (0==err)
+        return;
     proj_errno_set (P, err);
 }
 
 /*****************************************************************************/
 int proj_errno_reset (PJ *P) {
 /******************************************************************************
-    Clears errno in the PJ, and bubbles it up to the context and
-    pj_errno levels through the low level pj_ctx interface.
+    Clears errno in the context and thread local levels
+    through the low level pj_ctx interface.
 
     Returns the previous value of the errno, for convenient reset/restore
     operations:
@@ -471,24 +459,17 @@ int proj_errno_reset (PJ *P) {
 
         do_something_with_P (P);
 
-        (* failure - keep latest error status *)
+        // failure - keep latest error status
         if (proj_errno(P))
             return;
-        (* success - restore previous error status *)
+        // success - restore previous error status
         proj_errno_restore (P, last_errno);
         return;
     }
 ******************************************************************************/
     int last_errno;
-    if (0==P) {
-        errno = EINVAL;
-        return EINVAL;
-    }
     last_errno = proj_errno (P);
 
-    /* set local error level */
-    P->last_errno = 0;
-    /* and let it bubble up */
     pj_ctx_set_errno (pj_get_ctx (P), 0);
     errno = 0;
     return last_errno;

@@ -115,7 +115,7 @@ pointer" to signal an error in a multi level allocation:
 
 
 /*****************************************************************************/
-static void *pj_freeup_msg_plain (PJ *P, int errlev) {         /* Destructor */
+void *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
 /*****************************************************************************
     Does memory deallocation for "plain" PJ objects, i.e. that vast majority
     of PJs where the opaque object does not contain any additionally
@@ -123,54 +123,13 @@ static void *pj_freeup_msg_plain (PJ *P, int errlev) {         /* Destructor */
 ******************************************************************************/
     if (0==P)
         return 0;
-
+    
     if (0!=errlev)
         pj_ctx_set_errno (P->ctx, errlev);
-
+    
     if (0==P->opaque)
         return pj_dealloc (P);
 
     pj_dealloc (P->opaque);
     return pj_dealloc(P);
 }
-
-
-/*****************************************************************************/
-void pj_freeup_plain (PJ *P) {
-/*****************************************************************************
-    Adapts pj_freeup_msg_plain to the format defined for the callback in
-    the PJ object.
-
-    i.e. reduces most instances of projection deallocation code to:
-
-	static void freeup (PJ *P) {
- 	    pj_freeup_plain (P);
- 	    return;
- 	}
-
-	rather than:
-
- 	static void *freeup_msg_add (PJ *P, int errlev) {
- 	    if (0==P)
- 	        return 0;
- 	    pj_ctx_set_errno (P->ctx, errlev);
-
- 	    if (0==P->opaque)
- 	        return pj_dealloc (P);
-
- 	    (* projection specific deallocation goes here *)
-
- 	    pj_dealloc (P->opaque);
- 	    return pj_dealloc(P);
- 	}
-
- 	(* Adapts pipeline_freeup to the format defined for the PJ object *)
- 	static void freeup_msg_add (PJ *P) {
- 	    freeup_new_add (P, 0);
- 	    return;
- 	}
-
- ******************************************************************************/
-    pj_freeup_msg_plain (P, 0);
-    return;
- }
