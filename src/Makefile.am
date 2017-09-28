@@ -1,6 +1,6 @@
 AM_CFLAGS = @C_WFLAGS@
 
-bin_PROGRAMS =	proj nad2bin geod cs2cs
+bin_PROGRAMS =	proj nad2bin geod cs2cs cct
 EXTRA_PROGRAMS = multistresstest test228
 
 TESTS = geodtest
@@ -12,12 +12,13 @@ AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 include_HEADERS = proj.h proj_api.h projects.h geodesic.h \
 	org_proj4_Projections.h org_proj4_PJ.h
 
-EXTRA_DIST = makefile.vc proj.def bin_cs2cs.cmake \
+EXTRA_DIST = makefile.vc proj.def bin_cct.cmake bin_cs2cs.cmake \
 			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake \
 			 lib_proj.cmake CMakeLists.txt bin_geodtest.cmake geodtest.c
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
+cct_SOURCES = cct.c proj_strtod.c optargpm.h
 nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h
 multistresstest_SOURCES = multistresstest.c
@@ -26,6 +27,7 @@ geodtest_SOURCES = geodtest.c
 
 proj_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
+cct_LDADD = libproj.la
 nad2bin_LDADD = libproj.la
 geod_LDADD = libproj.la
 multistresstest_LDADD = libproj.la @THREAD_LIB@

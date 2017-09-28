@@ -70,11 +70,13 @@ LIBOBJ	=	$(support) $(pseudo) $(azimuthal) $(conic) $(cylinder) $(misc) \
 PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
 CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
 GEODEXE_OBJ	= geod.obj geod_set.obj geod_interface.obj emess.obj
+CCTEXE_OBJ = cct.obj proj_strtod.obj
 MULTISTRESSTEST_OBJ = multistresstest.obj
 PROJ_DLL 	= proj$(VERSION).dll
 PROJ_EXE    = proj.exe
 CS2CS_EXE   = cs2cs.exe
 GEOD_EXE    = geod.exe
+CCT_EXE     = cct.exe
 NAD2BIN_EXE = nad2bin.exe
 MULTISTRESSTEST_EXE = multistresstest.exe
 
@@ -83,7 +85,7 @@ CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" \
 
 default:	all
 
-all: proj.lib $(PROJ_EXE) $(CS2CS_EXE) $(GEOD_EXE) $(NAD2BIN_EXE)
+all: proj.lib $(PROJ_EXE) $(CS2CS_EXE) $(GEOD_EXE) $(CCT_EXE) $(NAD2BIN_EXE)
 
 proj.lib:	$(LIBOBJ)
 	if exist proj.lib del proj.lib
@@ -107,6 +109,10 @@ $(CS2CS_EXE):	$(CS2CSEXE_OBJ) $(EXE_PROJ)
 $(GEOD_EXE):	$(GEODEXE_OBJ) $(EXE_PROJ)
 	cl $(GEODEXE_OBJ) $(EXE_PROJ)
 	if exist $(GEOD_EXE).manifest mt -manifest $(GEOD_EXE).manifest -outputresource:$(GEOD_EXE);1
+
+$(CCT_EXE):	$(CCTEXE_OBJ) $(EXE_PROJ)
+	cl $(CCTEXE_OBJ) $(EXE_PROJ)
+	if exist $(CCT_EXE).manifest mt -manifest $(CCT_EXE).manifest -outputresource:$(CCT_EXE);1
 
 $(NAD2BIN_EXE):	nad2bin.obj emess.obj $(EXE_PROJ)
 	cl nad2bin.obj emess.obj $(EXE_PROJ)
