@@ -54,6 +54,8 @@ static void* thread_main(void* unused)
         assert(fabs(y - 49.999396034285531698) < 1e-15);
     }
 
+    pj_free (p_OSGB36_proj);
+    pj_free (p_WGS84_proj);
     return NULL;
 }
 

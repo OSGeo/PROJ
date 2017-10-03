@@ -161,7 +161,6 @@ void *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
     if (0==P)
         return 0;
     
-
     /* free grid lists */
     pj_dealloc( P->gridlist );
     pj_dealloc( P->vgridlist_geoid );

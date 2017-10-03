@@ -84,13 +84,12 @@ static LP t_inverse(XY xy, PJ *P) {             /* spheroid */
 static void *destructor(PJ *P, int errlev) {
     if (0==P)
         return 0;
-
     if (0==P->opaque)
         return pj_default_destructor (P, errlev);
-
+        
     if (P->opaque->link)
         P->opaque->link->destructor (P->opaque->link, errlev);
-
+        
     return pj_default_destructor(P, errlev);
 }
 
@@ -166,12 +165,14 @@ PJ *PROJECTION(ob_tran) {
 
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return pj_default_destructor(P, ENOMEM);
-    P->opaque = Q;
+        return destructor(P, ENOMEM);
 
-    if (0 != P->es)
-        return pj_default_destructor(P, PJD_ERR_ELLIPSOIDAL_UNSUPPORTED);
+    P->opaque = Q;
+    P->destructor = destructor;
     
+    if (0 != P->es)
+        return destructor(P, PJD_ERR_ELLIPSOIDAL_UNSUPPORTED);
+
     /* get name of projection to be translated */
     if (!(name = pj_param(P->ctx, P->params, "so_proj").s))
         return destructor(P, PJD_ERR_NO_ROTATION_PROJ);
