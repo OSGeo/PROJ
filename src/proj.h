@@ -382,8 +382,8 @@ PJ_COORD proj_coord (double x, double y, double z, double t);
 PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
 
 /* Measure internal consistency - in forward or inverse direction */
-double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_OBS obs);
-
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo);
+    
 /* Geodesic distance between two points with angular 2D coordinates */
 double proj_lp_dist (const PJ *P, LP a, LP b);
 

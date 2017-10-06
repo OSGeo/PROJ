@@ -136,7 +136,7 @@ int pj_hgridshift_selftest (void) {
     a.coo.lpz.lam = PJ_TORAD(173);
     a.coo.lpz.phi = PJ_TORAD(-45);
     
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
     if (dist > 0.00000001)
         return 1;
 

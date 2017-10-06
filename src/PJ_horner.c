@@ -533,7 +533,7 @@ int pj_horner_selftest (void) {
     a.coo.uv.u =  878354.8539;
 
     /* Check roundtrip precision for 1 iteration each way, starting in forward direction */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
     if (dist > 0.01)
         return 1;
 
@@ -562,7 +562,7 @@ int pj_horner_selftest (void) {
         return 3;
 
     /* Check roundtrip precision for 1 iteration each way */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
     if (dist > 0.01)
         return 4;
 
