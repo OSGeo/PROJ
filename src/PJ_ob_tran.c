@@ -169,9 +169,11 @@ PJ *PROJECTION(ob_tran) {
 
     P->opaque = Q;
     P->destructor = destructor;
-    
+
+#if 0
     if (0 != P->es)
         return destructor(P, PJD_ERR_ELLIPSOIDAL_UNSUPPORTED);
+#endif
 
     /* get name of projection to be translated */
     if (!(name = pj_param(P->ctx, P->params, "so_proj").s))
@@ -181,7 +183,7 @@ PJ *PROJECTION(ob_tran) {
     if( strcmp(name, "ob_tran") == 0 )
         return destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
 
-    /* Create the projection object to rotate */
+    /* Create the target projection object to rotate */
     args = ob_tran_target_params (P->params);
     R = pj_init_ctx (pj_get_ctx(P), args.argc, args.argv);
     pj_dealloc (args.argv);
@@ -278,7 +280,7 @@ int pj_ob_tran_selftest (void) {
     };
 
     /* -- Tests from nad/testvarious -------------------------------------------- */
-    P = proj_create (0, "+proj=ob_tran  +o_proj=moll  +a=6378137.0  +es=0  +o_lon_p=0  +o_lat_p=0  +lon_0=180");
+    P = proj_create (0, "+proj=ob_tran  +o_proj=moll  +R=6378137.0  +o_lon_p=0  +o_lat_p=0  +lon_0=180");
     if (0==P)
         return 1;
 

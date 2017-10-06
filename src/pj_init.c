@@ -496,7 +496,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         return pj_dealloc_params (ctx, start, PJD_ERR_UNKNOWN_PROJECTION_ID);
         
     /* set defaults, unless inhibited */
-    if (!(pj_param(ctx, start, "bno_defs").i || (0==strcmp(pj_param(ctx, start, "sproj").s, "ob_tran"))))
+    if (!(pj_param(ctx, start, "bno_defs").i))
         curr = get_defaults(ctx,&start, curr, name);
     proj = (PJ *(*)(PJ *)) pj_list[i].proj;
 
