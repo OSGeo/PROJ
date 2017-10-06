@@ -173,7 +173,7 @@ PJ *PROJECTION(gn_sinu) {
     if (pj_param(P->ctx, P->params, "tn").i && pj_param(P->ctx, P->params, "tm").i) {
         Q->n = pj_param(P->ctx, P->params, "dn").f;
         Q->m = pj_param(P->ctx, P->params, "dm").f;
-        if (Q->n < 0 || Q->m < 0)
+        if (Q->n <= 0 || Q->m < 0)
             return destructor (P, PJD_ERR_INVALID_M_OR_N);
     } else
         return destructor (P, PJD_ERR_INVALID_M_OR_N);
