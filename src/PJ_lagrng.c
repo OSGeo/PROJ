@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -35,42 +36,22 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(lagrng) {
     double phi1;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     Q->rw = pj_param(P->ctx, P->params, "dW").f;
-    if (Q->rw <= 0) {
-        proj_errno_set(P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
-        return freeup_new(P);
-    }
+    if (Q->rw <= 0)
+        return pj_default_destructor(P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
 
     Q->rw = 1. / Q->rw;
     Q->hrw = 0.5 * Q->rw;
     phi1 = sin(pj_param(P->ctx, P->params, "rlat_1").f);
-    if (fabs(fabs(phi1) - 1.) < TOL) {
-        proj_errno_set(P, PJD_ERR_LAT_LARGER_THAN_90);
-        return freeup_new(P);
-    }
+    if (fabs(fabs(phi1) - 1.) < TOL)
+        return pj_default_destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
 
     Q->a1 = pow((1. - phi1)/(1. + phi1), Q->hrw);
 

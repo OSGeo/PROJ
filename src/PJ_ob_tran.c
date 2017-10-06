@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 #include <string.h>
@@ -80,96 +81,127 @@ static LP t_inverse(XY xy, PJ *P) {             /* spheroid */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
+static void *destructor(PJ *P, int errlev) {
     if (0==P)
         return 0;
     if (0==P->opaque)
-        return pj_dealloc (P);
-
+        return pj_default_destructor (P, errlev);
+        
     if (P->opaque->link)
-    {
-        /* This is a bit tricky: the linked PJ* shares the same params as */
-        /* the current one, so unset it to avoid double free */
-        /* We used to call P->opaque->link->pfree(P->opaque->link); only */
-        /* but this leaked grids */
-        P->opaque->link->params = NULL;
-        pj_free(P->opaque->link);
+        P->opaque->link->destructor (P->opaque->link, errlev);
+        
+    return pj_default_destructor(P, errlev);
+}
+
+
+
+
+/***********************************************************************
+
+These functions are modified versions of the functions "argc_params"
+and "argv_params" from PJ_pipeline.c
+
+Basically, they do the somewhat backwards stunt of turning the paralist
+representation of the +args back into the original +argv, +argc
+representation accepted by pj_init_ctx().
+
+This, however, also begs the question of whether we really need the
+paralist linked list representation, or if we could do with a simpler
+null-terminated argv style array? This would simplfy some code, and
+keep memory allocations more localized.
+
+***********************************************************************/
+
+typedef struct {int argc; char **argv;} ARGS;
+
+/* count the number of args in the linked list <params> */
+static size_t paralist_params_argc (paralist *params) {
+    size_t argc = 0;
+    for (; params != 0; params = params->next)
+        argc++;
+    return argc;
+}
+
+
+/* turn paralist into argc/argv style argument list */
+static ARGS ob_tran_target_params (paralist *params) {
+    int i = 0;
+    ARGS args = {0, 0};
+    size_t argc = paralist_params_argc (params);
+    if (argc < 2)
+        return args;
+
+    /* all args except the proj_ob_tran */
+    args.argv = pj_calloc (argc - 1, sizeof (char *));
+    if (0==args.argv)
+        return args;
+    
+    /* Copy all args *except* the proj=ob_tran arg to the argv array */
+    for (i = 0;  params != 0;  params = params->next) {
+        if (0==strcmp (params->param, "proj=ob_tran"))
+            continue;
+        args.argv[i++] = params->param;
+    }
+    args.argc = i;
+
+    /* Then convert the o_proj=xxx element to proj=xxx */
+    for (i = 0;   i < args.argc;   i++) {
+        if (0!=strncmp (args.argv[i], "o_proj=", 7))
+            continue;
+        args.argv[i] += 2;
+        break;
     }
 
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
+    return args;
 }
 
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
 
 
 PJ *PROJECTION(ob_tran) {
-    int i;
     double phip;
-    char *name, *s;
+    char *name;
+    ARGS args;
+    PJ *R; /* projection to rotate */
 
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return destructor(P, ENOMEM);
+
     P->opaque = Q;
+    P->destructor = destructor;
+
+#if 0
+    if (0 != P->es)
+        return destructor(P, PJD_ERR_ELLIPSOIDAL_UNSUPPORTED);
+#endif
 
     /* get name of projection to be translated */
-    if (!(name = pj_param(P->ctx, P->params, "so_proj").s)) {
-        proj_errno_set(P, PJD_ERR_NO_ROTATION_PROJ);
-        return freeup_new(P);
-    }
+    if (!(name = pj_param(P->ctx, P->params, "so_proj").s))
+        return destructor(P, PJD_ERR_NO_ROTATION_PROJ);
+
     /* avoid endless recursion */
-    if( strcmp(name, "ob_tran") == 0 ) {
-        proj_errno_set(P, PJD_ERR_FAILED_TO_FIND_PROJ);
-        return freeup_new(P);
-    }
-    for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
-    if (!s || !(Q->link = (*pj_list[i].proj)(0))) {
-        proj_errno_set(P, PJD_ERR_FAILED_TO_FIND_PROJ);
-        return freeup_new(P);
-    }
-    /* copy existing header into new */
-    P->es = 0.; /* force to spherical */
-    Q->link->params = P->params;
-    Q->link->ctx = P->ctx;
-    Q->link->over = P->over;
-    Q->link->geoc = P->geoc;
-    Q->link->a = P->a;
-    Q->link->es = P->es;
-    Q->link->ra = P->ra;
-    Q->link->lam0 = P->lam0;
-    Q->link->phi0 = P->phi0;
-    Q->link->x0 = P->x0;
-    Q->link->y0 = P->y0;
-    Q->link->k0 = P->k0;
-    /* force spherical earth */
-    Q->link->one_es = Q->link->rone_es = 1.;
-    Q->link->es = Q->link->e = 0.;
-    if (!(Q->link = pj_list[i].proj(Q->link))) {
-        return freeup_new(P);
-    }
-    if( Q->link->fwd == 0 ) {
-        return freeup_new(P);
-    }
+    if( strcmp(name, "ob_tran") == 0 )
+        return destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+
+    /* Create the target projection object to rotate */
+    args = ob_tran_target_params (P->params);
+    R = pj_init_ctx (pj_get_ctx(P), args.argc, args.argv);
+    pj_dealloc (args.argv);
+
+    if (0==R)
+        return destructor (P, PJD_ERR_UNKNOWN_PROJECTION_ID);
+    Q->link = R;
+
     if (pj_param(P->ctx, P->params, "to_alpha").i) {
         double lamc, phic, alpha;
 
         lamc    = pj_param(P->ctx, P->params, "ro_lon_c").f;
         phic    = pj_param(P->ctx, P->params, "ro_lat_c").f;
         alpha   = pj_param(P->ctx, P->params, "ro_alpha").f;
-/*
-        if (fabs(phic) <= TOL ||
-            fabs(fabs(phic) - HALFPI) <= TOL ||
-            fabs(fabs(alpha) - HALFPI) <= TOL)
-*/
-        if (fabs(fabs(phic) - M_HALFPI) <= TOL) {
-            proj_errno_set(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
-            return freeup_new(P);
-        }
+
+        if (fabs(fabs(phic) - M_HALFPI) <= TOL)
+            return destructor(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
+
         Q->lamp = lamc + aatan2(-cos(alpha), -sin(alpha) * sin(phic));
         phip = aasin(P->ctx,cos(phic) * sin(alpha));
     } else if (pj_param(P->ctx, P->params, "to_lat_p").i) { /* specified new pole */
@@ -183,16 +215,16 @@ PJ *PROJECTION(ob_tran) {
         lam2 = pj_param(P->ctx, P->params, "ro_lon_2").f;
         phi2 = pj_param(P->ctx, P->params, "ro_lat_2").f;
         if (fabs(phi1 - phi2) <= TOL || (con = fabs(phi1)) <= TOL ||
-            fabs(con - M_HALFPI) <= TOL || fabs(fabs(phi2) - M_HALFPI) <= TOL) {
-                proj_errno_set(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
-                return freeup_new(P);
-        }
+            fabs(con - M_HALFPI) <= TOL || fabs(fabs(phi2) - M_HALFPI) <= TOL)
+                return destructor(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
+
         Q->lamp = atan2(cos(phi1) * sin(phi2) * cos(lam1) -
             sin(phi1) * cos(phi2) * cos(lam2),
             sin(phi1) * cos(phi2) * sin(lam2) -
             cos(phi1) * sin(phi2) * sin(lam1));
         phip = atan(-cos(Q->lamp - lam1) / tan(phi1));
     }
+
     if (fabs(phip) > TOL) { /* oblique */
         Q->cphip = cos(phip);
         Q->sphip = sin(phip);
@@ -213,8 +245,11 @@ int pj_ob_tran_selftest (void) {return 0;}
 int pj_ob_tran_selftest (void) {
     double tolerance_lp = 1e-10;
     double tolerance_xy = 1e-7;
+    double d;
+    PJ *P;
+    PJ_COORD a, b;
 
-    char s_args[] = {"+proj=ob_tran +a=6400000 +o_proj=latlon +o_lon_p=20 +o_lat_p=20 +lon_0=180"};
+    char s_args[] = {"+proj=ob_tran +R=6400000 +o_proj=latlon +o_lon_p=20 +o_lat_p=20 +lon_0=180"};
 
     LP fwd_in[] = {
         { 2, 1},
@@ -243,6 +278,30 @@ int pj_ob_tran_selftest (void) {
         {-141.10073322351622,  26.091712304855108},
         {-65.862385598848391,  51.830295078417215},
     };
+
+    /* -- Tests from nad/testvarious -------------------------------------------- */
+    P = proj_create (0, "+proj=ob_tran  +o_proj=moll  +R=6378137.0  +o_lon_p=0  +o_lat_p=0  +lon_0=180");
+    if (0==P)
+        return 1;
+
+    a = proj_coord (300000, 400000, 0, 0);
+    b.lpz.lam = -proj_torad (42 + (45 + 22.377/60)/60);
+    b.lpz.phi =  proj_torad (85 + (35 + 28.083/60)/60);
+    a = proj_trans_coord (P, -1, a);
+    d = proj_lp_dist (P, a.lp, b.lp);
+    if (d > 1e-3)
+        return 2;
+
+    a = proj_coord (proj_torad(10), proj_torad(20), 0, 0);
+    b = proj_coord (-1384841.18787, 7581707.88240, 0, 0);
+    a = proj_trans_coord (P, 1, a);
+    d = proj_xy_dist (a.xy, b.xy);
+    if (d > 1e-3)
+        return 3;
+
+    proj_destroy (P);
+    /* -------------------------------------------------------------------------- */
+
 
     return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
 }

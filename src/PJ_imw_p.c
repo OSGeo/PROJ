@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -130,36 +131,31 @@ static void xy(PJ *P, double phi, double *x, double *y, double *sp, double *R) {
 }
 
 
-static void *freeup_new (PJ *P) {              /* Destructor */
+static void *destructor (PJ *P, int errlev) {
     if (0==P)
         return 0;
+
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
     if( P->opaque->en )
         pj_dealloc (P->opaque->en);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
 
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
+    return pj_default_destructor(P, errlev);
 }
 
 
 PJ *PROJECTION(imw_p) {
     double del, sig, s, t, x1, x2, T2, y1, m1, m2, y2;
-    int i;
+    int err;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
-    if (!(Q->en = pj_enfn(P->es))) return freeup_new(P);
-    if( (i = phi12(P, &del, &sig)) != 0) {
-        proj_errno_set(P, i);
-        return freeup_new(P);
+    if (!(Q->en = pj_enfn(P->es))) return pj_default_destructor (P, ENOMEM);
+    if( (err = phi12(P, &del, &sig)) != 0) {
+        return destructor(P, err);
     }
     if (Q->phi_2 < Q->phi_1) { /* make sure P->phi_1 most southerly */
         del = Q->phi_1;
@@ -204,6 +200,7 @@ PJ *PROJECTION(imw_p) {
 
     P->fwd = e_forward;
     P->inv = e_inverse;
+    P->destructor = destructor;
 
     return P;
 }

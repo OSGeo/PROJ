@@ -49,22 +49,14 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void freeup(PJ *P) {                             /* Destructor */
-    pj_dealloc(P);
-}
-
-
 PJ *PROJECTION(merc) {
     double phits=0.0;
     int is_phits;
 
     if( (is_phits = pj_param(P->ctx, P->params, "tlat_ts").i) ) {
         phits = fabs(pj_param(P->ctx, P->params, "rlat_ts").f);
-        if (phits >= M_HALFPI) {
-            proj_errno_set(P, PJD_ERR_LAT_TS_LARGER_THAN_90);
-            freeup(P);
-            return 0;
-        }
+        if (phits >= M_HALFPI)
+            return pj_default_destructor(P, PJD_ERR_LAT_TS_LARGER_THAN_90);
     }
 
     if (P->es != 0.0) { /* ellipsoid */

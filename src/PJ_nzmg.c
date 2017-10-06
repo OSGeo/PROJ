@@ -26,7 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 #define PJ_LIB__
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(nzmg, "New Zealand Map Grid") "\n\tfixed Earth";
 
@@ -100,19 +100,6 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         lp.lam = lp.phi = HUGE_VAL;
 
     return lp;
-}
-
-
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
 }
 
 

@@ -6,7 +6,7 @@ and Atmospheric Sciences, Oregon State University.
 Port to PROJ.4 by Bojan Savric, 4 April 2016
 */
 #define PJ_LIB__
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(natearth2, "Natural Earth 2") "\n\tPCyl., Sph.";
 
@@ -82,20 +82,6 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     lp.lam = xy.x / (A0 + A1 * y2 + y6 * y6 * (A2 + A3 * y2 + A4 * y4 + A5 * y6));
 
     return lp;
-}
-
-
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
 }
 
 

@@ -1,6 +1,7 @@
 /* PROJ.4 Cartographic Projection System
 */
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -69,20 +70,15 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
+static void *destructor (PJ *P, int errlev) {
     if (0==P)
         return 0;
+
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
     pj_dealloc (P->opaque->en);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
+    return pj_default_destructor (P, errlev);
 }
 
 
@@ -90,16 +86,15 @@ PJ *PROJECTION(lcca) {
     double s2p0, N0, R0, tan0;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     (Q->en = pj_enfn(P->es));
     if (!Q->en)
-        return freeup_new(P);
+        return pj_default_destructor (P, ENOMEM);
 
     if (P->phi0 == 0.) {
-        proj_errno_set(P, PJD_ERR_LAT_0_IS_ZERO);
-        return freeup_new(P);
+        return destructor(P, PJD_ERR_LAT_0_IS_ZERO);
     }
     Q->l = sin(P->phi0);
     Q->M0 = pj_mlfn(P->phi0, Q->l, cos(P->phi0), Q->en);
@@ -113,6 +108,7 @@ PJ *PROJECTION(lcca) {
 
     P->inv = e_inverse;
     P->fwd = e_forward;
+    P->destructor = destructor;
 
     return P;
 }

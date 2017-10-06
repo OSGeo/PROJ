@@ -108,11 +108,6 @@ PROJ_HEAD(cart,    "Geodetic/cartesian conversions");
 **************************************************************/
 
 
-static void freeup (PJ *P) {
-    pj_freeup_plain (P);
-    return;
-}
-
 /*********************************************************************/
 static double normal_radius_of_curvature (double a, double es, double phi) {
 /*********************************************************************/
@@ -518,7 +513,8 @@ int pj_cart_selftest (void) {
     if ( strlen(init_info.filename) != 0 )  return 67;
 
     init_info = proj_init_info("epsg");
-    if ( strcmp(init_info.origin, "EPSG") )    return 69;
+    /* Need to allow for "Unknown" until all commonly distributed EPSG-files comes with a metadata section */
+    if ( strcmp(init_info.origin, "EPSG") && strcmp(init_info.origin, "Unknown") )    return 69;
     if ( strcmp(init_info.name, "epsg") )      return 68;
 
 

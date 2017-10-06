@@ -29,6 +29,7 @@
 
 #define PJ_LIB__
 #include <proj.h>
+#include <errno.h>
 #include "projects.h"
 
 # define EPS10  1.e-10
@@ -79,23 +80,19 @@ struct pj_opaque {
 };
 
 
-static void *freeup_new (PJ *P) {                        /* Destructor */
+static void *destructor (PJ *P, int errlev) {                        /* Destructor */
     if (0==P)
         return 0;
 
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
     pj_dealloc (P->opaque->en);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
+    return pj_default_destructor (P, errlev);
 }
 
 
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
+
 
 
 static XY e_forward (LP lp, PJ *P) {   /* Ellipsoid/spheroid, forward */
@@ -154,17 +151,16 @@ static PJ *setup(PJ *P) {
     P->inv = e_inverse;
     P->fwd = e_forward;
 
-    if (fabs(Q->phi1 + Q->phi2) < EPS10) {
-        proj_errno_set(P, PJD_ERR_CONIC_LAT_EQUAL);
-        return freeup_new(P);
-    }
+    if (fabs(Q->phi1 + Q->phi2) < EPS10)
+        return destructor(P, PJD_ERR_CONIC_LAT_EQUAL);
     Q->n = sinphi = sin(Q->phi1);
     cosphi = cos(Q->phi1);
     secant = fabs(Q->phi1 - Q->phi2) >= EPS10;
     if( (Q->ellips = (P->es > 0.))) {
         double ml1, m1;
 
-        if (!(Q->en = pj_enfn(P->es))) return freeup_new(P);
+        if (!(Q->en = pj_enfn(P->es)))
+            return destructor(P, 0);
         m1 = pj_msfn(sinphi, cosphi, P->es);
         ml1 = pj_qsfn(sinphi, P->e, P->one_es);
         if (secant) { /* secant cone */
@@ -175,9 +171,8 @@ static PJ *setup(PJ *P) {
             m2 = pj_msfn(sinphi, cosphi, P->es);
             ml2 = pj_qsfn(sinphi, P->e, P->one_es);
             if (ml2 == ml1)
-            {
-                return freeup_new(P);
-            }
+                return destructor(P, 0);
+
             Q->n = (m1 * m1 - m2 * m2) / (ml2 - ml1);
         }
         Q->ec = 1. - .5 * P->one_es * log((1. - P->e) /
@@ -201,8 +196,9 @@ static PJ *setup(PJ *P) {
 PJ *PROJECTION(aea) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     Q->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
@@ -213,7 +209,7 @@ PJ *PROJECTION(aea) {
 PJ *PROJECTION(leac) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     Q->phi2 = pj_param(P->ctx, P->params, "rlat_1").f;

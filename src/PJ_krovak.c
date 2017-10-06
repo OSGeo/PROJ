@@ -77,7 +77,8 @@
 
 
 #define PJ_LIB__
-#include <projects.h>
+#include <errno.h>
+#include "projects.h"
 
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
 
@@ -173,27 +174,11 @@ static LP e_inverse (XY xy, PJ *P) {                /* Ellipsoidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                   /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc(P);
-
-    pj_dealloc(P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(krovak) {
     double u0, n0, g;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     /* we want Bessel as fixed ellipsoid */

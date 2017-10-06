@@ -1,6 +1,6 @@
 #define PJ_LIB__
 #include "proj_internal.h"
-#include <projects.h>
+#include "projects.h"
 #include <assert.h>
 #include <stddef.h>
 #include <math.h>
@@ -382,18 +382,14 @@ static PJ_OBS complex_horner_reverse_obs (PJ_OBS point, PJ *P) {
 }
 
 
-static void *horner_freeup (PJ *P) {                        /* Destructor */
+static void *horner_freeup (PJ *P, int errlev) {                        /* Destructor */
     if (0==P)
         return 0;
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
     horner_free ((HORNER *) P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    horner_freeup (P);
-    return;
+    P->opaque = 0;
+    return pj_default_destructor (P, errlev);
 }
 
 
@@ -442,13 +438,14 @@ PJ *PROJECTION(horner) {
     P->fwd     =  0;
     P->inv     =  0;
     P->left    =  P->right  =  PJ_IO_UNITS_METERS;
+    P->destructor = horner_freeup;
 
     /* Polynomial degree specified? */
     if (pj_param (P->ctx, P->params, "tdeg").i) /* degree specified? */
 		degree = pj_param(P->ctx, P->params, "ideg").i;
     else {
         proj_log_debug (P, "Horner: Must specify polynomial degree, (+deg=n)");
-        return horner_freeup (P);
+        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
     }
 
     if (pj_param (P->ctx, P->params, "tfwd_c").i || pj_param (P->ctx, P->params, "tinv_c").i) /* complex polynomium? */
@@ -456,17 +453,15 @@ PJ *PROJECTION(horner) {
 
     Q = horner_alloc (degree, complex_horner);
     if (Q == 0)
-    {
-        return horner_freeup (P);
-    }
+        return horner_freeup (P, ENOMEM);
     P->opaque = (void *) Q;
 
     if (complex_horner) {
         n = 2*degree + 2;
         if (0==parse_coefs (P, Q->fwd_c, "fwd_c", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         if (0==parse_coefs (P, Q->inv_c, "inv_c", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         P->fwdobs  =  complex_horner_forward_obs;
         P->invobs  =  complex_horner_reverse_obs;
 
@@ -474,19 +469,19 @@ PJ *PROJECTION(horner) {
     else {
         n = horner_number_of_coefficients (degree);
         if (0==parse_coefs (P, Q->fwd_u, "fwd_u", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         if (0==parse_coefs (P, Q->fwd_v, "fwd_v", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         if (0==parse_coefs (P, Q->inv_u, "inv_u", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         if (0==parse_coefs (P, Q->inv_v, "inv_v", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
     }
 
     if (0==parse_coefs (P, (double *)(Q->fwd_origin), "fwd_origin", 2))
-        return horner_freeup (P);
+        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
     if (0==parse_coefs (P, (double *)(Q->inv_origin), "inv_origin", 2))
-        return horner_freeup (P);
+        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
     if (0==parse_coefs (P, &Q->range, "range", 1))
         Q->range = 500000;
 

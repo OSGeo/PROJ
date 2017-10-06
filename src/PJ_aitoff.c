@@ -30,6 +30,7 @@
 
 #define PJ_LIB__
 #include <proj.h>
+#include <errno.h>
 #include "projects.h"
 
 
@@ -152,22 +153,6 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-
-static void *freeup_new (PJ *P) {                        /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
 static PJ *setup(PJ *P) {
     P->inv = s_inverse;
     P->fwd = s_forward;
@@ -179,7 +164,7 @@ static PJ *setup(PJ *P) {
 PJ *PROJECTION(aitoff) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
     Q->mode = 0;
@@ -190,15 +175,13 @@ PJ *PROJECTION(aitoff) {
 PJ *PROJECTION(wintri) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
     Q->mode = 1;
     if (pj_param(P->ctx, P->params, "tlat_1").i) {
-        if ((Q->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f)) == 0.) {
-            proj_errno_set(P, PJD_ERR_LAT_LARGER_THAN_90);
-            return freeup_new(P);
-        }
+        if ((Q->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f)) == 0.)
+            return pj_default_destructor (P, PJD_ERR_LAT_LARGER_THAN_90);
     }
     else /* 50d28' or acos(2/pi) */
         Q->cosphi1 = 0.636619772367581343;

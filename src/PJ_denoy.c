@@ -22,16 +22,6 @@ static XY s_forward (LP lp, PJ *P) {            /* Spheroidal, forward */
 }
 
 
-static void *freeup_new (PJ *P) {               /* Destructor */
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(denoy) {
     P->es = 0.0;
     P->fwd = s_forward;

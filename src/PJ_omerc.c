@@ -22,6 +22,7 @@
 ** SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -111,22 +112,6 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(omerc) {
     double con, com, cosph0, D, F, H, L, sinph0, p, J, gamma=0,
         gamma0, lamc=0, lam1=0, lam2=0, phi1=0, phi2=0, alpha_c=0;
@@ -134,7 +119,7 @@ PJ *PROJECTION(omerc) {
 
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     Q->no_rot = pj_param(P->ctx, P->params, "tno_rot").i;
@@ -164,10 +149,8 @@ PJ *PROJECTION(omerc) {
             (con = fabs(phi1)) <= TOL ||
             fabs(con - M_HALFPI) <= TOL ||
             fabs(fabs(P->phi0) - M_HALFPI) <= TOL ||
-            fabs(fabs(phi2) - M_HALFPI) <= TOL) {
-                proj_errno_set(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
-                return freeup_new(P);
-        }
+            fabs(fabs(phi2) - M_HALFPI) <= TOL)
+                return pj_default_destructor(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
     }
     com = sqrt(P->one_es);
     if (fabs(P->phi0) > EPS) {

@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -66,23 +67,15 @@ static void special(LP lp, PJ *P, struct FACTORS *fac) {
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
+static void *destructor (PJ *P, int errlev) {                        /* Destructor */
     if (0==P)
         return 0;
+
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
-    if (P->opaque->en)
-        pj_dealloc (P->opaque->en);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
+    pj_dealloc (P->opaque->en);
+    return pj_default_destructor (P, errlev);
 }
 
 
@@ -92,20 +85,18 @@ PJ *PROJECTION(eqdc) {
 
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     Q->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
 
-    if (fabs(Q->phi1 + Q->phi2) < EPS10) {
-        proj_errno_set(P, PJD_ERR_CONIC_LAT_EQUAL);
-        freeup_new(P);
-        return 0;
-    }
+    if (fabs(Q->phi1 + Q->phi2) < EPS10)
+        pj_default_destructor (P, PJD_ERR_CONIC_LAT_EQUAL);
 
     if (!(Q->en = pj_enfn(P->es)))
-        return freeup_new(P);
+        return pj_default_destructor(P, ENOMEM);
 
     Q->n = sinphi = sin(Q->phi1);
     cosphi = cos(Q->phi1);

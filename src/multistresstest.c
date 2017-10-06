@@ -363,6 +363,7 @@ static int do_main(void)
         {
             printf( "Unable to translate:\n%s\n", test->src_def );
             test->skip = 1;
+            pj_free (dst_pj);
             continue;
         }
 
@@ -370,6 +371,7 @@ static int do_main(void)
         {
             printf( "Unable to translate:\n%s\n", test->dst_def );
             test->skip = 1;
+            pj_free (src_pj);
             continue;
         }
         

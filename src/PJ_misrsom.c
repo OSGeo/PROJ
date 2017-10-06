@@ -21,6 +21,7 @@
  *****************************************************************************/
 /* based upon Snyder and Linck, USGS-NMD */
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -164,36 +165,19 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(misrsom) {
     int path;
     double lam, alf, esc, ess;
 
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     path = pj_param(P->ctx, P->params, "ipath").i;
-    if (path <= 0 || path > 233) {
-        proj_errno_set(P, PJD_ERR_PATH_NOT_IN_RANGE);
-        return freeup_new(P);
-    }
+    if (path <= 0 || path > 233)
+        return pj_default_destructor(P, PJD_ERR_PATH_NOT_IN_RANGE);
+
     P->lam0 = DEG_TO_RAD * 129.3056 - M_TWOPI / 233. * path;
     alf = 98.30382 * DEG_TO_RAD;
     Q->p22 = 98.88 / 1440.0;

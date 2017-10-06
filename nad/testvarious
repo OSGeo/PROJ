@@ -642,14 +642,14 @@ EOF
 echo "##############################################################" >> ${OUT}
 echo "Check inverse error handling with ob_tran (#225)" >> ${OUT}
 $EXE +proj=ob_tran \
-    +o_proj=moll +o_lon_p=LON_POLE +o_lat_p=LAT_POLE +lon_0=180 +ellps=WGS84 \
+    +o_proj=moll +a=6378137 +es=0 +o_lon_p=LON_POLE +o_lat_p=LAT_POLE +lon_0=180 \
  -E >>${OUT} <<EOF
 300000 400000
 20000000 30000000
 EOF
 echo "Test inverse handling" >> ${OUT}
 $EXE -I +proj=ob_tran \
-    +o_proj=moll +o_lon_p=LON_POLE +o_lat_p=LAT_POLE +lon_0=180 +ellps=WGS84 \
+    +o_proj=moll +a=6378137 +es=0 +o_lon_p=LON_POLE +o_lat_p=LAT_POLE +lon_0=180 \
  -E >>${OUT} <<EOF
 10 20
 EOF
@@ -894,6 +894,11 @@ if [ $? -ne 0 ] ; then
 	echo "PROBLEMS HAVE OCCURRED"
 	echo "test file ${OUT} saved"
     echo
+    echo "----------------------------------------------------------"
+	echo "${OUT}"
+    echo "----------------------------------------------------------"
+    cat ${OUT}
+    echo "----------------------------------------------------------"
 	exit 100
 else
 	echo "TEST OK"

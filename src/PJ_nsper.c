@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -134,29 +135,12 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 static PJ *setup(PJ *P) {
     struct pj_opaque *Q = P->opaque;
 
-    if ((Q->height = pj_param(P->ctx, P->params, "dh").f) <= 0.) {
-        proj_errno_set(P, PJD_ERR_H_LESS_THAN_ZERO);
-        return freeup_new(P);
-    }
+    if ((Q->height = pj_param(P->ctx, P->params, "dh").f) <= 0.)
+        return pj_default_destructor(P, PJD_ERR_H_LESS_THAN_ZERO);
+
     if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
     else if (fabs(P->phi0) < EPS10)
@@ -174,6 +158,7 @@ static PJ *setup(PJ *P) {
     P->inv = s_inverse;
     P->fwd = s_forward;
     P->es = 0.;
+
     return P;
 }
 
@@ -181,7 +166,7 @@ static PJ *setup(PJ *P) {
 PJ *PROJECTION(nsper) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     Q->tilt = 0;
@@ -195,7 +180,7 @@ PJ *PROJECTION(tpers) {
 
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     omega = pj_param(P->ctx, P->params, "dtilt").f * DEG_TO_RAD;

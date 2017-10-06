@@ -42,6 +42,7 @@
 #define PROJ_LIB__
 #define PJ_LIB__
 
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -232,28 +233,12 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
 static PJ *setup(PJ *P) { /* general initialization */
     double f, n, np, Z;
     struct pj_opaque *Q = P->opaque;
 
     if (P->es <= 0) {
-        proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
-        return freeup_new(P);
+        return pj_default_destructor(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
     }
 
     /* flattening */
@@ -340,7 +325,7 @@ static PJ *setup(PJ *P) { /* general initialization */
 PJ *PROJECTION(etmerc) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
    return setup (P);
 }
@@ -411,12 +396,12 @@ PJ *PROJECTION(utm) {
     int zone;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     if (P->es == 0.0) {
         proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
-        return freeup_new(P);
+        return pj_default_destructor(P, ENOMEM);
     }
     P->y0 = pj_param (P->ctx, P->params, "bsouth").i ? 10000000. : 0.;
     P->x0 = 500000.;
@@ -426,8 +411,7 @@ PJ *PROJECTION(utm) {
         if (zone > 0 && zone <= 60)
             --zone;
         else {
-            proj_errno_set(P, PJD_ERR_INVALID_UTM_ZONE);
-            return freeup_new(P);
+            return pj_default_destructor(P, PJD_ERR_INVALID_UTM_ZONE);
         }
     }
     else /* nearest central meridian input */

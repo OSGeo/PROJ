@@ -1,5 +1,6 @@
 #define PJ_LIB__
-#include <projects.h>
+#include <errno.h>
+#include "projects.h"
 
 PROJ_HEAD(eck3, "Eckert III") "\n\tPCyl, Sph.";
 PROJ_HEAD(putp1, "Putnins P1") "\n\tPCyl, Sph.";
@@ -36,22 +37,6 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {               /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 static PJ *setup(PJ *P) {
     P->es = 0.;
     P->inv = s_inverse;
@@ -63,7 +48,7 @@ static PJ *setup(PJ *P) {
 PJ *PROJECTION(eck3) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     Q->C_x = 0.42223820031577120149;
@@ -78,7 +63,7 @@ PJ *PROJECTION(eck3) {
 PJ *PROJECTION(kav7) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     /* Defined twice in original code - Using 0.866...,
@@ -96,7 +81,7 @@ PJ *PROJECTION(kav7) {
 PJ *PROJECTION(wag6) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     Q->C_x = Q->C_y = 0.94745;
@@ -110,7 +95,7 @@ PJ *PROJECTION(wag6) {
 PJ *PROJECTION(putp1) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     Q->C_x = 1.89490;

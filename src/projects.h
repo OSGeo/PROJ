@@ -253,62 +253,8 @@ struct PJconsts {
 
     void (*spc)(LP, PJ *, struct FACTORS *);
 
-    void (*pfree)(PJ *);
-
-    /*************************************************************************************
-
-                              E R R O R   R E P O R T I N G
-
-    **************************************************************************************
-
-        Currently, we're doing error reporting through the context->last_errno indicator.
-
-        It is, however, not entirely sure this will be the right way to do it in all
-        cases: During allocation/initialization, it is certainly nice to have a higher
-        level error indicator, since we primarily signal "something went wrong", by
-        returning 0 from the pj_init family of functions - and with a null return we
-        cannot pass messages through internal state in the PJ object.
-
-        Historically, the errno variable has been used for that kind of messages, but
-        apparently, thread safety was added to PROJ.4 at a time where it was not clear
-        that errno is actually thread local.
-
-        Additionally, errno semantics has historically been misinterpreted in parts of
-        pj_init.c, a misinterpretation, that was mitigated by a hack in pj_malloc.c
-        some 15 years ago.
-
-        This PJ-local errno is a first step towards a more structured approach to
-        error reporting, being implemented in the OBS_API (cf. pj_obs_api.[ch]), and
-        related plumbing efforts.
-        
-        In due course this will let us get rid of the pj_malloc.c hack, and allow us
-        to introduce a more layered error reporting structure, where errors are
-        reported where they occur, and bubble up to the higher levels (context->errno,
-        then thread local errno), so the highest level indicate "something went wrong
-        somewhere", then the more localized ones can be used for pinpointing: 
-        
-        errno:               "something went wrong somewhere on this thread",
-        context->last_errno: "something went wrong in some PROJ.4 related code",
-        PJ->last_errno:      "It was in THIS PJ something went wrong",
-        pj_strerrno:         "This was what went wrong".
-
-        Which will be quite helpful, once fully implemented, especially for 
-        debugging complex transformation pipelines, while still maintaining backward
-        compatibility in the messaging system.
-
-        Note that there is even a global pj_errno, which is here and there accessed
-        without acquiring lock. This, and the practise of resetting the thread local
-        errno, should be given some consideration during the cleanup of the error
-        reporting system.
-
-        The name "last_errno", rather than "errno" is used partially for alignment
-        with the context->last_errno, partially because in a multithreaded environment,
-        errno is a macro, and spurious spaces turning "errno" into a separate token
-        will expose it to macro expansion, to the tune of much confusion and agony.
-
-    **************************************************************************************/
-    int last_errno;
-
+    void *(*destructor)(PJ *, int);
+    
 
     /*************************************************************************************
 
@@ -386,7 +332,7 @@ struct PJconsts {
     **************************************************************************************/
 
     double  lam0, phi0;                /* central longitude, latitude */
-    double  x0, y0;                    /* false easting and northing */
+    double  x0, y0, z0, t0;            /* false easting and northing (and height and time) */
 
 
     /*************************************************************************************
@@ -524,7 +470,24 @@ struct FACTORS {
 
 /* library errors */
 #define PJD_ERR_NO_ARGS                  -1
+#define PJD_ERR_NO_OPTION_IN_INIT_FILE   -2
+#define PJD_ERR_NO_COLOR_IN_INIT_STRING  -3
+#define PJD_ERR_PROJ_NOT_NAMED           -4
+#define PJD_ERR_UNKNOWN_PROJECTION_ID    -5
+#define PJD_ERR_ECCENTRICITY_IS_ONE      -6
+#define PJD_ERR_UNKNOW_UNIT_ID           -7
+#define PJD_ERR_INVALID_BOOLEAN_PARAM    -8
+#define PJD_ERR_UNKNOWN_ELLP_PARAM       -9
+#define PJD_ERR_REC_FLATTENING_IS_ZERO  -10
+#define PJD_ERR_REF_RAD_LARGER_THAN_90  -11
+#define PJD_ERR_ES_LESS_THAN_ZERO       -12
+#define PJD_ERR_MAJOR_AXIS_NOT_GIVEN    -13
 #define PJD_ERR_LAT_OR_LON_EXCEED_LIMIT -14
+#define PJD_ERR_INVALID_X_OR_Y          -15
+#define PJD_ERR_WRONG_FORMAT_DMS_VALUE  -16
+#define PJD_ERR_NON_CONV_INV_MERI_DIST  -17
+#define PJD_ERR_NON_CON_INV_PHI2        -18
+#define PJD_ERR_ACOS_ASIN_ARG_TOO_LARGE -19
 #define PJD_ERR_TOLERANCE_CONDITION     -20
 #define PJD_ERR_CONIC_LAT_EQUAL         -21
 #define PJD_ERR_LAT_LARGER_THAN_90      -22
@@ -536,24 +499,32 @@ struct FACTORS {
 #define PJD_ERR_LSAT_NOT_IN_RANGE       -28
 #define PJD_ERR_PATH_NOT_IN_RANGE       -29
 #define PJD_ERR_H_LESS_THAN_ZERO        -30
+#define PJD_ERR_K_LESS_THAN_ZERO        -31
 #define PJD_ERR_LAT_1_OR_2_ZERO_OR_90   -32
 #define PJD_ERR_LAT_0_OR_ALPHA_EQ_90    -33
 #define PJD_ERR_ELLIPSOID_USE_REQUIRED  -34
 #define PJD_ERR_INVALID_UTM_ZONE        -35
+#define PJD_ERR_TCHEBY_VAL_OUT_OF_RANGE -36
 #define PJD_ERR_FAILED_TO_FIND_PROJ     -37
+#define PJD_ERR_FAILED_TO_LOAD_GRID     -38
 #define PJD_ERR_INVALID_M_OR_N          -39
 #define PJD_ERR_N_OUT_OF_RANGE          -40
+#define PJD_ERR_LAT_1_2_UNSPECIFIED     -41
 #define PJD_ERR_ABS_LAT1_EQ_ABS_LAT2    -42
 #define PJD_ERR_LAT_0_HALF_PI_FROM_MEAN -43
+#define PJD_ERR_UNPARSEABLE_CS_DEF      -44
 #define PJD_ERR_GEOCENTRIC              -45
 #define PJD_ERR_UNKNOWN_PRIME_MERIDIAN  -46
 #define PJD_ERR_AXIS                    -47
 #define PJD_ERR_GRID_AREA               -48
 #define PJD_ERR_INVALID_SWEEP_AXIS      -49
+#define PJD_ERR_MALFORMED_PIPELINE      -50
+#define PJD_ERR_UNIT_FACTOR_LESS_THAN_0 -51
 #define PJD_ERR_INVALID_SCALE           -52
 #define PJD_ERR_NON_CONVERGENT          -53
 #define PJD_ERR_MISSING_ARGS            -54
 #define PJD_ERR_LAT_0_IS_ZERO           -55
+#define PJD_ERR_ELLIPSOIDAL_UNSUPPORTED -56
 
 struct projFileAPI_t;
 
@@ -616,7 +587,7 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     P = (PJ*) pj_calloc (1, sizeof(PJ));                     \
     if (0==P)                                                \
         return 0;                                            \
-    P->pfree = freeup;                                       \
+    P->destructor = pj_default_destructor;                   \
     P->descr = des_##name;                                   \
     return P;                                                \
 }                                                            \
@@ -707,12 +678,12 @@ int pj_datum_set(projCtx,paralist *, PJ *);
 int pj_prime_meridian_set(paralist *, PJ *);
 int pj_angular_units_set(paralist *, PJ *);
 
-void pj_prepare (PJ *P, const char *description, void (*freeup)(struct PJconsts *), size_t sizeof_struct_opaque);
-
 paralist *pj_clone_paralist( const paralist* );
 paralist *pj_search_initcache( const char *filekey );
 void      pj_insert_initcache( const char *filekey, const paralist *list);
 paralist *pj_get_init(projCtx ctx, paralist **start, paralist *next, char *name, int *found_def);
+void     *pj_dealloc_params (projCtx ctx, paralist *start, int errlev);
+
 
 double *pj_enfn(double);
 double  pj_mlfn(double, double, double, double *);
@@ -821,6 +792,8 @@ struct PJ_UNITS            *pj_get_units_ref( void );
 struct PJ_LIST             *pj_get_list_ref( void );
 struct PJ_SELFTEST_LIST    *pj_get_selftest_list_ref ( void );
 struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
+
+void *pj_default_destructor (PJ *P, int errlev);
 
 double pj_atof( const char* nptr );
 double pj_strtod( const char *nptr, char **endptr );

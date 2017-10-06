@@ -27,6 +27,7 @@
 
 #include <projects.h>
 #include <string.h>
+#include <errno.h>
 
 static projCtx_t default_context;
 static volatile int       default_context_initialized = 0;
@@ -38,6 +39,10 @@ static volatile int       default_context_initialized = 0;
 projCtx pj_get_ctx( projPJ pj )
 
 {
+    if (0==pj)
+        return pj_get_default_ctx ();
+    if (0==pj->ctx)
+        return pj_get_default_ctx ();
     return pj->ctx;
 }
 
@@ -128,14 +133,20 @@ int pj_ctx_get_errno( projCtx ctx )
 /*                          pj_ctx_set_errno()                          */
 /*                                                                      */
 /*      Also sets the global errno.                                     */
+/*      Since pj_errno makes sense in single threaded cases only,       */
+/*      we set it only when called on the default context.              */
 /************************************************************************/
 
 void pj_ctx_set_errno( projCtx ctx, int new_errno )
 
 {
     ctx->last_errno = new_errno;
-    if( new_errno != 0 )
-        pj_errno = new_errno;
+    if (ctx!=pj_get_default_ctx())
+        return;
+    if( new_errno == 0 )
+        return;
+    pj_errno = new_errno;
+    errno = new_errno;
 }
 
 /************************************************************************/
