@@ -90,9 +90,10 @@ double proj_xyz_dist (XYZ a, XYZ b) {
 
 
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
-double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_OBS obs) {
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
     int i;
-    PJ_OBS o, u;
+    PJ_COORD o, u;
+    enum pj_io_units unit;
 
     if (0==P)
         return HUGE_VAL;
@@ -102,26 +103,44 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_OBS obs) {
         return HUGE_VAL;
     }
 
-    o.coo = obs.coo;
+    o = coo;
 
-    for (i = 0;  i < n;  i++) {
-        switch (direction) {
-            case PJ_FWD:
-                u  =  pj_fwdobs (o, P);
-                o  =  pj_invobs (u, P);
-                break;
-            case PJ_INV:
-                u  =  pj_invobs (o, P);
-                o  =  pj_fwdobs (u, P);
-                break;
-            default:
-                proj_errno_set (P, EINVAL);
-                return HUGE_VAL;
-        }
+    switch (direction) {
+        case PJ_FWD:
+            for (i = 0;  i < n;  i++) {
+                u  =  pj_fwdcoord (o, P);
+                o  =  pj_invcoord (u, P);
+            }
+            break;
+        case PJ_INV:
+            for (i = 0;  i < n;  i++) {
+                u  =  pj_invcoord (o, P);
+                o  =  pj_fwdcoord (u, P);
+            }
+            break;
+        default:
+            proj_errno_set (P, EINVAL);
+            return HUGE_VAL;
     }
 
-    return proj_xyz_dist (o.coo.xyz, obs.coo.xyz);
+    /* left when forward, because we do a roundtrip, and end where we begin */
+    unit = direction==PJ_FWD?  P->left:  P->right;
+    if (unit==PJ_IO_UNITS_RADIANS)
+        return hypot (proj_lp_dist (P, coo.lp, o.lp), coo.lpz.z - o.lpz.z);
+    
+    return proj_xyz_dist (coo.xyz, coo.xyz);
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* Apply the transformation P to the coordinate coo */

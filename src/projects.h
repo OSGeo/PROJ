@@ -589,6 +589,8 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
         return 0;                                            \
     P->destructor = pj_default_destructor;                   \
     P->descr = des_##name;                                   \
+    P->left  = PJ_IO_UNITS_RADIANS;                          \
+    P->right = PJ_IO_UNITS_CLASSIC;                          \
     return P;                                                \
 }                                                            \
 PJ *pj_projection_specific_setup_##name (PJ *P)

@@ -341,7 +341,7 @@ int pj_molodensky_selftest (void) {
     }
 
     /* let's try a roundtrip */
-    if (proj_roundtrip(P, PJ_FWD, 100, in) > 1) {
+    if (proj_roundtrip(P, PJ_FWD, 100, in.coo) > 1) {
         proj_destroy(P);
         return 12;
     }
@@ -370,7 +370,7 @@ int pj_molodensky_selftest (void) {
     }
 
     /* let's try a roundtrip */
-    if (proj_roundtrip(P, PJ_FWD, 100, in) > 1) {
+    if (proj_roundtrip(P, PJ_FWD, 100, in.coo) > 1) {
         proj_destroy(P);
         return 22;
     }

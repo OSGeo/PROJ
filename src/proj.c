@@ -145,7 +145,7 @@ static void process(FILE *fid) {
             }
         } else {    /* x-y or decimal degree ascii output, scale if warranted by output units */
             if (inverse) {
-                if (Proj->left == PJ_IO_UNITS_RADIANS || Proj->left == PJ_IO_UNITS_CLASSIC) {
+                if (Proj->left == PJ_IO_UNITS_RADIANS) {
                     data.v *= RAD_TO_DEG;
                     data.u *= RAD_TO_DEG;
                 }
