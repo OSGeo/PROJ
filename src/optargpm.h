@@ -372,7 +372,8 @@ static int opt_ordinal (OPTARGS *opt, char *option) {
         }
 
     }
-
+    /* kill some potential compiler warnings about unused functions */
+    (void) opt_eof (0);
     return 0;
 }
 
@@ -397,12 +398,23 @@ char *opt_arg (OPTARGS *opt, char *option) {
     return opt->optarg[ordinal];
 }
 
+char *opt_strip_path (char *full_name) {
+    char *last_path_delim, *stripped_name = full_name;
+
+    last_path_delim = strrchr (stripped_name, '\\');
+    if (last_path_delim > stripped_name)
+        stripped_name = last_path_delim + 1;
+
+    last_path_delim = strrchr (stripped_name, '/');
+    if (last_path_delim > stripped_name)
+        stripped_name = last_path_delim + 1;
+    return stripped_name;
+}
 
 /* split command line options into options/flags ("-" style), projdefs ("+" style) and input file args */
 OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, const char **longflags, const char **longkeys) {
     int i, j;
     OPTARGS *o;
-    char *last_path_delim;
     
     o = (OPTARGS *) calloc (1, sizeof(OPTARGS));
     if (0==o)
@@ -410,14 +422,15 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
 
     o->argc = argc;
     o->argv = argv;
-    o->progname = argv[0];
+    o->progname = opt_strip_path (argv[0]);
+/*    o->progname = argv[0];
     last_path_delim = strrchr (argv[0], '\\');
     if (last_path_delim > o->progname)
         o->progname = last_path_delim;
     last_path_delim = strrchr (argv[0], '/');
     if (last_path_delim > o->progname)
         o->progname = last_path_delim;
-        
+*/        
 
     /* Reset all flags */
     for (i = 0;  i < (int) strlen (flags);  i++)
