@@ -55,6 +55,8 @@ projCtx pj_get_ctx( projPJ pj )
 void pj_set_ctx( projPJ pj, projCtx ctx )
 
 {
+    if (pj==0)
+        return;
     pj->ctx = ctx;
 }
 
@@ -103,6 +105,8 @@ projCtx pj_ctx_alloc()
 
 {
     projCtx ctx = (projCtx_t *) malloc(sizeof(projCtx_t));
+    if (0==ctx)
+        return 0;
     memcpy( ctx, pj_get_default_ctx(), sizeof(projCtx_t) );
     ctx->last_errno = 0;
 
@@ -116,7 +120,7 @@ projCtx pj_ctx_alloc()
 void pj_ctx_free( projCtx ctx )
 
 {
-    free( ctx );
+    pj_dealloc( ctx );
 }
 
 /************************************************************************/
@@ -126,27 +130,25 @@ void pj_ctx_free( projCtx ctx )
 int pj_ctx_get_errno( projCtx ctx )
 
 {
+    if (0==ctx)
+        return pj_get_default_ctx ()->last_errno;
     return ctx->last_errno;
 }
 
 /************************************************************************/
 /*                          pj_ctx_set_errno()                          */
 /*                                                                      */
-/*      Also sets the global errno.                                     */
-/*      Since pj_errno makes sense in single threaded cases only,       */
-/*      we set it only when called on the default context.              */
+/*                      Also sets the global errno                      */
 /************************************************************************/
 
 void pj_ctx_set_errno( projCtx ctx, int new_errno )
 
 {
     ctx->last_errno = new_errno;
-    if (ctx!=pj_get_default_ctx())
-        return;
     if( new_errno == 0 )
         return;
-    pj_errno = new_errno;
     errno = new_errno;
+    pj_errno = new_errno;
 }
 
 /************************************************************************/
@@ -156,6 +158,8 @@ void pj_ctx_set_errno( projCtx ctx, int new_errno )
 void pj_ctx_set_debug( projCtx ctx, int new_debug )
 
 {
+    if (0==ctx)
+        pj_get_default_ctx ()->debug_level = new_debug;
     ctx->debug_level = new_debug;
 }
 
@@ -166,6 +170,8 @@ void pj_ctx_set_debug( projCtx ctx, int new_debug )
 void pj_ctx_set_logger( projCtx ctx, void (*new_logger)(void*,int,const char*) )
 
 {
+    if (0==ctx)
+        return;
     ctx->logger = new_logger;
 }
 
@@ -176,6 +182,8 @@ void pj_ctx_set_logger( projCtx ctx, void (*new_logger)(void*,int,const char*) )
 void pj_ctx_set_app_data( projCtx ctx, void *new_app_data )
 
 {
+    if (0==ctx)
+        return;
     ctx->app_data = new_app_data;
 }
 
@@ -186,6 +194,8 @@ void pj_ctx_set_app_data( projCtx ctx, void *new_app_data )
 void *pj_ctx_get_app_data( projCtx ctx )
 
 {
+    if (0==ctx)
+        return 0;
     return ctx->app_data;
 }
 
@@ -196,6 +206,8 @@ void *pj_ctx_get_app_data( projCtx ctx )
 void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
 
 {
+    if (0==ctx)
+        return;
     ctx->fileapi = fileapi;
 }
 
@@ -206,5 +218,7 @@ void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
 projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
 
 {
+    if (0==ctx)
+        return 0;
     return ctx->fileapi;
 }

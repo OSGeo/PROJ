@@ -40,7 +40,6 @@ struct pj_opaque {
     double radius_g;
     double radius_g_1;
     double C;
-    char *sweep_axis;
     int flip_axis;
 };
 
@@ -191,25 +190,26 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 
 
 PJ *PROJECTION(geos) {
+    char *sweep_axis;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     if ((Q->h = pj_param(P->ctx, P->params, "dh").f) <= 0.)
-        pj_default_destructor (P, PJD_ERR_H_LESS_THAN_ZERO);
+        return pj_default_destructor (P, PJD_ERR_H_LESS_THAN_ZERO);
 
     if (P->phi0 != 0.0)
-        pj_default_destructor (P, PJD_ERR_UNKNOWN_PRIME_MERIDIAN);
+        return pj_default_destructor (P, PJD_ERR_UNKNOWN_PRIME_MERIDIAN);
 
-    Q->sweep_axis = pj_param(P->ctx, P->params, "ssweep").s;
-    if (Q->sweep_axis == NULL)
+    sweep_axis = pj_param(P->ctx, P->params, "ssweep").s;
+    if (sweep_axis == NULL)
       Q->flip_axis = 0;
     else {
-        if (Q->sweep_axis[1] != '\0' || (Q->sweep_axis[0] != 'x' && Q->sweep_axis[0] != 'y'))
-            pj_default_destructor (P, PJD_ERR_INVALID_SWEEP_AXIS);
+        if (sweep_axis[1] != '\0' || (sweep_axis[0] != 'x' && sweep_axis[0] != 'y'))
+            return pj_default_destructor (P, PJD_ERR_INVALID_SWEEP_AXIS);
 
-        if (Q->sweep_axis[0] == 'x')
+        if (sweep_axis[0] == 'x')
           Q->flip_axis = 1;
         else
           Q->flip_axis = 0;
