@@ -219,6 +219,6 @@ projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
 
 {
     if (0==ctx)
-        return;
+        return 0;
     return ctx->fileapi;
 }
