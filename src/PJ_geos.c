@@ -47,6 +47,15 @@ struct pj_opaque {
 PROJ_HEAD(geos, "Geostationary Satellite View") "\n\tAzi, Sph&Ell\n\th=";
 
 
+static void *destructor (PJ *P, int errlev) {
+    if (0==P || 0==P->opaque)
+        return pj_default_destructor (P, errlev);
+
+    pj_dealloc (P->opaque->sweep_axis);
+    return pj_default_destructor(P, errlev);
+}
+
+
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
@@ -193,21 +202,22 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 PJ *PROJECTION(geos) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     if ((Q->h = pj_param(P->ctx, P->params, "dh").f) <= 0.)
-        pj_default_destructor (P, PJD_ERR_H_LESS_THAN_ZERO);
+        destructor (P, PJD_ERR_H_LESS_THAN_ZERO);
 
     if (P->phi0 != 0.0)
-        pj_default_destructor (P, PJD_ERR_UNKNOWN_PRIME_MERIDIAN);
+        destructor (P, PJD_ERR_UNKNOWN_PRIME_MERIDIAN);
 
     Q->sweep_axis = pj_param(P->ctx, P->params, "ssweep").s;
     if (Q->sweep_axis == NULL)
       Q->flip_axis = 0;
     else {
         if (Q->sweep_axis[1] != '\0' || (Q->sweep_axis[0] != 'x' && Q->sweep_axis[0] != 'y'))
-            pj_default_destructor (P, PJD_ERR_INVALID_SWEEP_AXIS);
+            destructor (P, PJD_ERR_INVALID_SWEEP_AXIS);
 
         if (Q->sweep_axis[0] == 'x')
           Q->flip_axis = 1;

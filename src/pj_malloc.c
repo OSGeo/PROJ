@@ -158,6 +158,13 @@ void *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
     of PJs where the opaque object does not contain any additionally
     allocated memory below the P->opaque level.
 ******************************************************************************/
+
+    /* Even if P==0, we set the errlev on pj_error and the default context   */
+    /* Note that both, in the multithreaded case, may then contain undefined */
+    /* values. This is expected behaviour. For MT have one ctx per thread    */
+    if (0!=errlev)
+        pj_ctx_set_errno (pj_get_ctx(P), errlev);
+
     if (0==P)
         return 0;
     
@@ -179,7 +186,5 @@ void *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
     pj_dealloc_params (pj_get_ctx(P), P->params, errlev);
 
     pj_dealloc (P->opaque);
-    if (0!=errlev)
-        pj_ctx_set_errno (pj_get_ctx(P), errlev);
     return pj_dealloc(P);
 }
