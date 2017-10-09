@@ -89,6 +89,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_lagrng.c
         PJ_larr.c
         PJ_lask.c
+        PJ_latlong.c
         PJ_lcca.c
         PJ_lcc.c
         PJ_loxim.c
@@ -193,7 +194,6 @@ SET(SRC_LIBPROJ_CORE
         pj_initcache.c
         pj_inv.c
         pj_inv3d.c
-        pj_latlong.c
         pj_list.c
         pj_list.h
         pj_log.c

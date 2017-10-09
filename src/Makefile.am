@@ -1,6 +1,6 @@
 AM_CFLAGS = @C_WFLAGS@
 
-bin_PROGRAMS =	proj nad2bin geod cs2cs
+bin_PROGRAMS =	proj nad2bin geod cs2cs cct
 EXTRA_PROGRAMS = multistresstest test228
 
 TESTS = geodtest
@@ -12,12 +12,13 @@ AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 include_HEADERS = proj.h proj_api.h projects.h geodesic.h \
 	org_proj4_Projections.h org_proj4_PJ.h
 
-EXTRA_DIST = makefile.vc proj.def bin_cs2cs.cmake \
+EXTRA_DIST = makefile.vc proj.def bin_cct.cmake bin_cs2cs.cmake \
 			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake \
 			 lib_proj.cmake CMakeLists.txt bin_geodtest.cmake geodtest.c
 
 proj_SOURCES = proj.c gen_cheb.c p_series.c
 cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
+cct_SOURCES = cct.c proj_strtod.c optargpm.h
 nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h
 multistresstest_SOURCES = multistresstest.c
@@ -26,6 +27,7 @@ geodtest_SOURCES = geodtest.c
 
 proj_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
+cct_LDADD = libproj.la
 nad2bin_LDADD = libproj.la
 geod_LDADD = libproj.la
 multistresstest_LDADD = libproj.la @THREAD_LIB@
@@ -49,7 +51,7 @@ libproj_la_SOURCES = \
 	PJ_tcc.c PJ_tcea.c PJ_times.c PJ_tmerc.c \
 	PJ_airy.c PJ_aitoff.c PJ_august.c PJ_bacon.c \
 	PJ_chamb.c PJ_hammer.c PJ_lagrng.c PJ_larr.c \
-	PJ_lask.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c \
+	PJ_lask.c PJ_latlong.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c \
 	PJ_tpeqd.c PJ_vandg.c PJ_vandg2.c PJ_vandg4.c \
 	PJ_wag7.c PJ_lcca.c PJ_geos.c proj_etmerc.c \
 	PJ_boggs.c PJ_collg.c PJ_comill.c PJ_crast.c PJ_denoy.c \
@@ -60,7 +62,7 @@ libproj_la_SOURCES = \
 	PJ_nell.c PJ_nell_h.c PJ_patterson.c PJ_putp2.c PJ_putp3.c \
 	PJ_putp4p.c PJ_putp5.c PJ_putp6.c PJ_qsc.c PJ_robin.c \
 	PJ_sch.c PJ_sts.c PJ_urm5.c PJ_urmfps.c PJ_wag2.c \
-	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_latlong.c pj_geocent.c \
+	PJ_wag3.c PJ_wink1.c PJ_wink2.c pj_geocent.c \
 	aasincos.c adjlon.c bch2bps.c bchgen.c \
 	biveval.c dmstor.c mk_cheby.c pj_auth.c \
 	pj_deriv.c pj_ell_set.c pj_ellps.c pj_errno.c \

@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -86,39 +87,17 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_msg (PJ *P, int errlev) {         /* Destructor */
+static void *destructor (PJ *P, int errlev) {                        /* Destructor */
     if (0==P)
         return 0;
 
-    if (0!=P->ctx)
-        pj_ctx_set_errno (P->ctx, errlev);
-
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
+    pj_dealloc (P->opaque->en);
+    return pj_default_destructor (P, errlev);
 }
 
-
-static void *freeup_new (PJ *P) {              /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    if (P->opaque->en)
-        pj_dalloc(P->opaque->en);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
 
 
 /* for spheres, only */
@@ -135,12 +114,13 @@ static void setup(PJ *P) {
 PJ *PROJECTION(sinu) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     if (!(Q->en = pj_enfn(P->es)))
-        return freeup_new(P);
-
+        return pj_default_destructor (P, ENOMEM);
+    
     if (P->es != 0.0) {
         P->inv = e_inverse;
         P->fwd = e_forward;
@@ -156,8 +136,9 @@ PJ *PROJECTION(sinu) {
 PJ *PROJECTION(eck6) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     Q->m = 1.;
     Q->n = 2.570796326794896619231321691;
@@ -170,8 +151,9 @@ PJ *PROJECTION(eck6) {
 PJ *PROJECTION(mbtfps) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     Q->m = 0.5;
     Q->n = 1.785398163397448309615660845;
@@ -184,16 +166,17 @@ PJ *PROJECTION(mbtfps) {
 PJ *PROJECTION(gn_sinu) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     if (pj_param(P->ctx, P->params, "tn").i && pj_param(P->ctx, P->params, "tm").i) {
         Q->n = pj_param(P->ctx, P->params, "dn").f;
         Q->m = pj_param(P->ctx, P->params, "dm").f;
-        if (Q->n < 0 || Q->m < 0)
-            return freeup_msg(P, PJD_ERR_INVALID_M_OR_N);
+        if (Q->n <= 0 || Q->m < 0)
+            return destructor (P, PJD_ERR_INVALID_M_OR_N);
     } else
-        return freeup_msg(P, PJD_ERR_INVALID_M_OR_N);
+        return destructor (P, PJD_ERR_INVALID_M_OR_N);
 
     setup(P);
 

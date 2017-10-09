@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(nicol, "Nicolosi Globular") "\n\tMisc Sph, no inv.";
 
@@ -40,20 +40,6 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         xy.y = M_HALFPI * ( n + (lp.phi < 0. ? xy.y : -xy.y ));
     }
     return (xy);
-}
-
-
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
 }
 
 

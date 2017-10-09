@@ -61,30 +61,36 @@ pj_err_list[] = {
     "non-convergent computation",                                      /* -53 */
     "missing required arguments",                                      /* -54 */
     "lat_0 = 0",                                                       /* -55 */
+    "ellipsoidal usage unsupported",                                   /* -56 */
+    
+    /* When adding error messages, remember to update ID defines in
+       projects.h, and transient_error array in pj_transform                  */
 };
 
 char *pj_strerrno(int err) {
     static char note[50];
+    size_t adjusted_err;
 
     if (0==err)
         return 0;
 
+    /* System error codes are positive */
     if (err > 0) {
 #ifdef HAVE_STRERROR
         return strerror(err);
 #else
-        sprintf(note,"no system list, errno: %d\n", err);
+        /* Defend string boundary against exorbitantly large err values */
+        /* which may occur on platforms with 64-bit ints */
+        sprintf(note,"no system list, errno: %d\n", (err < 9999)? err: 9999);
         return note;
 #endif
     }
 
-    else /*if (err < 0)*/ {
-        size_t adjusted_err = - err - 1;
-        if (adjusted_err < (sizeof(pj_err_list) / sizeof(char *)))
-            return(pj_err_list[adjusted_err]);
-        else {
-            sprintf( note, "invalid projection system error (%d)", err );
-            return note;
-        }
-    }
+    /* PROJ.4 error codes are negative */
+    adjusted_err = - err - 1;
+    if (adjusted_err < (sizeof(pj_err_list) / sizeof(char *)))
+        return(pj_err_list[adjusted_err]);
+    
+    sprintf( note, "invalid projection system error (%d)", (err > -9999)? err: -9999);
+    return note;
 }

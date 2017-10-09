@@ -3,6 +3,7 @@
 include(lib_proj.cmake)
 
 # configure executable build
+option(BUILD_CCT   "Build cct (coordinate conversion and transformation tool)" ON)
 option(BUILD_CS2CS "Build cs2cs (coordinate systems to coordinate systems translation tool)" ON)
 option(BUILD_PROJ "Build proj (cartographic projection tool : latlong <-> projected coordinates" ON)
 option(BUILD_GEOD "Build geod (computation of geodesic lines)" ON)
@@ -21,6 +22,11 @@ if(NOT MSVC)
     # "@loader_path/../${LIBDIR}"
   endif ()
 endif ()
+
+if(BUILD_CCT)
+ include(bin_cct.cmake)
+ set(BIN_TARGETS ${BIN_TARGETS} cct)
+endif(BUILD_CCT)
 
 if(BUILD_CS2CS)
  include(bin_cs2cs.cmake)

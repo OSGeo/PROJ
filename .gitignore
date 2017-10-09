@@ -1,4 +1,6 @@
 *~
+build.local.bat
+build.local.sh
 Makefile
 Makefile.in
 CMakeFiles
@@ -8,8 +10,10 @@ cmake_install.cmake
 install_manifest.txt
 cmake/project-config*.cmake
 
+/.vs*
 /*.manifest
 /*.swp
+/*build*
 /aclocal.m4
 /autom4te.cache
 /config.cache

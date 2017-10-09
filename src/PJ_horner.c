@@ -1,6 +1,6 @@
 #define PJ_LIB__
 #include "proj_internal.h"
-#include <projects.h>
+#include "projects.h"
 #include <assert.h>
 #include <stddef.h>
 #include <math.h>
@@ -94,7 +94,7 @@ PROJ_HEAD(horner,    "Horner polynomial evaluation");
 
 struct horner;
 typedef struct horner HORNER;
-static UV      horner (const HORNER *transformation, enum proj_direction, UV position);
+static UV      horner (const HORNER *transformation, PJ_DIRECTION direction, UV position);
 static HORNER *horner_alloc (size_t order, int complex_polynomia);
 static void    horner_free (HORNER *h);
 
@@ -178,7 +178,7 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
 
 
 /**********************************************************************/
-static UV horner (const HORNER *transformation, enum proj_direction direction, UV position) {
+static UV horner (const HORNER *transformation, PJ_DIRECTION direction, UV position) {
 /***********************************************************************
 
 A reimplementation of the classic Engsager/Poder 2D Horner polynomial
@@ -303,7 +303,7 @@ static PJ_OBS horner_reverse_obs (PJ_OBS point, PJ *P) {
 
 
 /**********************************************************************/
-static UV complex_horner (const HORNER *transformation, enum proj_direction direction, UV position) {
+static UV complex_horner (const HORNER *transformation, PJ_DIRECTION direction, UV position) {
 /***********************************************************************
 
 A reimplementation of a classic Engsager/Poder Horner complex
@@ -382,18 +382,14 @@ static PJ_OBS complex_horner_reverse_obs (PJ_OBS point, PJ *P) {
 }
 
 
-static void *horner_freeup (PJ *P) {                        /* Destructor */
+static void *horner_freeup (PJ *P, int errlev) {                        /* Destructor */
     if (0==P)
         return 0;
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
     horner_free ((HORNER *) P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    horner_freeup (P);
-    return;
+    P->opaque = 0;
+    return pj_default_destructor (P, errlev);
 }
 
 
@@ -442,13 +438,14 @@ PJ *PROJECTION(horner) {
     P->fwd     =  0;
     P->inv     =  0;
     P->left    =  P->right  =  PJ_IO_UNITS_METERS;
+    P->destructor = horner_freeup;
 
     /* Polynomial degree specified? */
     if (pj_param (P->ctx, P->params, "tdeg").i) /* degree specified? */
 		degree = pj_param(P->ctx, P->params, "ideg").i;
     else {
         proj_log_debug (P, "Horner: Must specify polynomial degree, (+deg=n)");
-        return horner_freeup (P);
+        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
     }
 
     if (pj_param (P->ctx, P->params, "tfwd_c").i || pj_param (P->ctx, P->params, "tinv_c").i) /* complex polynomium? */
@@ -456,17 +453,15 @@ PJ *PROJECTION(horner) {
 
     Q = horner_alloc (degree, complex_horner);
     if (Q == 0)
-    {
-        return horner_freeup (P);
-    }
+        return horner_freeup (P, ENOMEM);
     P->opaque = (void *) Q;
 
     if (complex_horner) {
         n = 2*degree + 2;
         if (0==parse_coefs (P, Q->fwd_c, "fwd_c", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         if (0==parse_coefs (P, Q->inv_c, "inv_c", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         P->fwdobs  =  complex_horner_forward_obs;
         P->invobs  =  complex_horner_reverse_obs;
 
@@ -474,19 +469,19 @@ PJ *PROJECTION(horner) {
     else {
         n = horner_number_of_coefficients (degree);
         if (0==parse_coefs (P, Q->fwd_u, "fwd_u", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         if (0==parse_coefs (P, Q->fwd_v, "fwd_v", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         if (0==parse_coefs (P, Q->inv_u, "inv_u", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         if (0==parse_coefs (P, Q->inv_v, "inv_v", n))
-            return horner_freeup (P);
+            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
     }
 
     if (0==parse_coefs (P, (double *)(Q->fwd_origin), "fwd_origin", 2))
-        return horner_freeup (P);
+        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
     if (0==parse_coefs (P, (double *)(Q->inv_origin), "inv_origin", 2))
-        return horner_freeup (P);
+        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
     if (0==parse_coefs (P, &Q->range, "range", 1))
         Q->range = 500000;
 
@@ -529,7 +524,7 @@ int pj_horner_selftest (void) {
     double dist;
 
     /* Real polynonia relating the technical coordinate system TC32 to "System 45 Bornholm" */
-    P = proj_create (0, tc32_utm32);
+    P = proj_create (PJ_DEFAULT_CTX, tc32_utm32);
     if (0==P)
         return 10;
 
@@ -538,12 +533,12 @@ int pj_horner_selftest (void) {
     a.coo.uv.u =  878354.8539;
 
     /* Check roundtrip precision for 1 iteration each way, starting in forward direction */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
     if (dist > 0.01)
         return 1;
 
     /* The complex polynomial transformation between the "System Storebaelt" and utm32/ed50 */
-    P = proj_create (0, sb_utm32);
+    P = proj_create (PJ_DEFAULT_CTX, sb_utm32);
     if (0==P)
         return 11;
 
@@ -567,7 +562,7 @@ int pj_horner_selftest (void) {
         return 3;
 
     /* Check roundtrip precision for 1 iteration each way */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
     if (dist > 0.01)
         return 4;
 

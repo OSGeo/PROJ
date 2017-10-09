@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -43,42 +44,34 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {              /* Destructor */
+static void *destructor (PJ *P, int errlev) {              /* Destructor */
     if (0==P)
         return 0;
     if (0==P->opaque)
-        return pj_dealloc(P);
-    if (P->opaque->sinu)
-        pj_free(P->opaque->sinu);
-    if (P->opaque->moll)
-        pj_free(P->opaque->moll);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-
+        return pj_default_destructor (P, errlev);
+    pj_free (P->opaque->sinu);
+    pj_free (P->opaque->moll);
+    return pj_default_destructor (P, errlev);
 }
 
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
 
 
 PJ *PROJECTION(goode) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     P->es = 0.;
     if (!(Q->sinu = pj_sinu(0)) || !(Q->moll = pj_moll(0)))
-        return freeup_new(P);
+        return destructor (P, ENOMEM);
     Q->sinu->es = 0.;
-        Q->sinu->ctx = P->ctx;
-        Q->moll->ctx = P->ctx;
+    Q->sinu->ctx = P->ctx;
+    Q->moll->ctx = P->ctx;
     if (!(Q->sinu = pj_sinu(Q->sinu)) || !(Q->moll = pj_moll(Q->moll)))
-        return freeup_new(P);
-
+        return destructor (P, ENOMEM);
+    
     P->fwd = s_forward;
     P->inv = s_inverse;
 

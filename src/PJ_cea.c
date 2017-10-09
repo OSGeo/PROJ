@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -52,46 +53,39 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     return (lp);
 }
 
-
-static void *freeup_new (PJ *P) {                       /* Destructor */
+static void *destructor (PJ *P, int errlev) {                        /* Destructor */
     if (0==P)
         return 0;
+
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
     pj_dealloc (P->opaque->apa);
-    pj_dealloc (P->opaque);
-    return pj_dealloc (P);
+    return pj_default_destructor (P, errlev);
 }
 
-static void freeup (PJ *P) {
-   freeup_new (P);
-    return;
-}
 
 PJ *PROJECTION(cea) {
     double t = 0.0;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
 
     if (pj_param(P->ctx, P->params, "tlat_ts").i) {
         P->k0 = cos(t = pj_param(P->ctx, P->params, "rlat_ts").f);
-        if (P->k0 < 0.) {
-            proj_errno_set(P, PJD_ERR_LAT_TS_LARGER_THAN_90);
-            freeup_new(P);
-            return 0;
-        }
+        if (P->k0 < 0.)
+            return pj_default_destructor (P, PJD_ERR_LAT_TS_LARGER_THAN_90);
     }
     if (P->es != 0.0) {
         t = sin(t);
         P->k0 /= sqrt(1. - P->es * t * t);
         P->e = sqrt(P->es);
-        if (!(Q->apa = pj_authset(P->es))) {
-            return freeup_new(P);
-        }
+        if (!(Q->apa = pj_authset(P->es)))
+            return pj_default_destructor(P, ENOMEM);
+
         Q->qp = pj_qsfn(1., P->e, P->one_es);
         P->inv = e_inverse;
         P->fwd = e_forward;

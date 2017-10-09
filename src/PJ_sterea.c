@@ -24,7 +24,8 @@
 ** SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #define PJ_LIB__
-#include    <projects.h>
+#include <errno.h>
+#include <projects.h>
 
 
 struct pj_opaque {
@@ -78,21 +79,15 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
+static void *destructor (PJ *P, int errlev) {
     if (0==P)
         return 0;
+
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
     pj_dealloc (P->opaque->en);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
+    return pj_default_destructor (P, errlev);
 }
 
 
@@ -101,12 +96,12 @@ PJ *PROJECTION(sterea) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
 
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     Q->en = pj_gauss_ini(P->e, P->phi0, &(Q->phic0), &R);
     if (0==Q->en)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
 
     Q->sinc0 = sin (Q->phic0);
     Q->cosc0 = cos (Q->phic0);
@@ -114,6 +109,8 @@ PJ *PROJECTION(sterea) {
 
     P->inv = e_inverse;
     P->fwd = e_forward;
+    P->destructor = destructor;
+
     return P;
 }
 

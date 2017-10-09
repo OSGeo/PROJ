@@ -28,6 +28,7 @@
 #define PJ_LIB__
 #include "geodesic.h"
 #include <proj.h>
+#include <errno.h>
 #include "projects.h"
 
 struct pj_opaque {
@@ -54,23 +55,18 @@ PROJ_HEAD(aeqd, "Azimuthal Equidistant") "\n\tAzi, Sph&Ell\n\tlat_0 guam";
 #define OBLIQ   3
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
+static void *destructor (PJ *P, int errlev) {                        /* Destructor */
     if (0==P)
         return 0;
+
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
-    if (P->opaque->en)
-        pj_dealloc(P->opaque->en);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
+    pj_dealloc (P->opaque->en);
+    return pj_default_destructor (P, errlev);
 }
 
 
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
 
 static XY e_guam_fwd(LP lp, PJ *P) {        /* Guam elliptical */
     XY xy = {0.0,0.0};
@@ -268,8 +264,9 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 PJ *PROJECTION(aeqd) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     geod_init(&Q->g, P->a, P->es / (1 + sqrt(P->one_es)));
     P->phi0 = pj_param(P->ctx, P->params, "rlat_0").f;
@@ -290,7 +287,8 @@ PJ *PROJECTION(aeqd) {
         P->inv = s_inverse;
         P->fwd = s_forward;
     } else {
-        if (!(Q->en = pj_enfn(P->es))) return freeup_new(P);
+        if (!(Q->en = pj_enfn(P->es)))
+            return pj_default_destructor (P, 0);
         if (pj_param(P->ctx, P->params, "bguam").i) {
             Q->M1 = pj_mlfn(P->phi0, Q->sinph0, Q->cosph0, Q->en);
             P->inv = e_guam_inv;

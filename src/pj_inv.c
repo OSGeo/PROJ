@@ -42,7 +42,7 @@ LP pj_inv(XY xy, PJ *P) {
     if (P->ctx->last_errno)
         return err;
 
-    if ((P->left==PJ_IO_UNITS_CLASSIC)||(P->left==PJ_IO_UNITS_RADIANS)) {
+    if (P->left==PJ_IO_UNITS_RADIANS) {
         /* reduce from del lp.lam */
         lp.lam += P->lam0;
 

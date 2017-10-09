@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include "projects.h"
 
 PROJ_HEAD(igh, "Interrupted Goode Homolosine") "\n\tPCyl, Sph.";
@@ -130,26 +131,20 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
+static void *destructor (PJ *P, int errlev) {
     int i;
     if (0==P)
         return 0;
+
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
     for (i = 0; i < 12; ++i) {
         if (P->opaque->pj[i])
-            P->opaque->pj[i]->pfree(P->opaque->pj[i]);
+            P->opaque->pj[i]->destructor(P->opaque->pj[i], errlev);
     }
 
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
+    return pj_default_destructor(P, errlev);
 }
 
 
@@ -175,8 +170,8 @@ static void freeup (PJ *P) {
 */
 
 #define SETUP(n, proj, x_0, y_0, lon_0) \
-    if (!(Q->pj[n-1] = pj_##proj(0))) return freeup_new(P); \
-    if (!(Q->pj[n-1] = pj_##proj(Q->pj[n-1]))) return freeup_new(P); \
+    if (!(Q->pj[n-1] = pj_##proj(0))) return destructor(P, ENOMEM); \
+    if (!(Q->pj[n-1] = pj_##proj(Q->pj[n-1]))) return destructor(P, ENOMEM); \
     Q->pj[n-1]->ctx = P->ctx; \
     Q->pj[n-1]->x0 = x_0; \
     Q->pj[n-1]->y0 = y_0; \
@@ -188,7 +183,7 @@ PJ *PROJECTION(igh) {
     LP lp = { 0, d4044118 };
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
 
@@ -220,6 +215,7 @@ PJ *PROJECTION(igh) {
 
     P->inv = s_inverse;
     P->fwd = s_forward;
+    P->destructor = destructor;
     P->es = 0.;
 
     return P;

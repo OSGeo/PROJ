@@ -128,6 +128,7 @@ set(LIBDIR "${DEFAULT_LIBDIR}" CACHE PATH "The directory to install libraries in
 set(DATADIR "${DEFAULT_DATADIR}" CACHE PATH "The directory to install data files into.")
 set(DOCDIR "${DEFAULT_DOCDIR}" CACHE PATH "The directory to install doc files into.")
 set(INCLUDEDIR "${DEFAULT_INCLUDEDIR}" CACHE PATH "The directory to install includes into.")
+set(CMAKECONFIGDIR "${DEFAULT_CMAKEDIR}" CACHE PATH "The directory to install cmake config files into.")
 
 #################################################################################
 # Build configured components

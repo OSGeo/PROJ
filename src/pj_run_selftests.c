@@ -40,7 +40,8 @@ int pj_run_selftests (int verbosity) {
 
 
 static void run_one_test (const char *mnemonic, int (testfunc)(void), int verbosity, int *n_ok, int *n_ko, int *n_stubs) {
-    int ret = testfunc ();
+    int ret;
+    ret = testfunc ();
     switch (ret) {
         case 0:      (*n_ok)++;     break;
         case 10000:  (*n_stubs)++;  break;

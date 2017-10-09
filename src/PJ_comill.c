@@ -70,15 +70,6 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     return lp;
 }
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
 
 PJ *PROJECTION(comill) {
     P->es = 0;

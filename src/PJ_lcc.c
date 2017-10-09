@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -88,29 +89,13 @@ static void special(LP lp, PJ *P, struct FACTORS *fac) {
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(lcc) {
     double cosphi, sinphi;
     int secant;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
 
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
 
@@ -122,10 +107,9 @@ PJ *PROJECTION(lcc) {
         if (!pj_param(P->ctx, P->params, "tlat_0").i)
             P->phi0 = Q->phi1;
     }
-    if (fabs(Q->phi1 + Q->phi2) < EPS10) {
-        proj_errno_set(P, PJD_ERR_CONIC_LAT_EQUAL);
-        return freeup_new(P);
-    }
+    if (fabs(Q->phi1 + Q->phi2) < EPS10)
+        return pj_default_destructor(P, PJD_ERR_CONIC_LAT_EQUAL);
+
     Q->n = sinphi = sin(Q->phi1);
     cosphi = cos(Q->phi1);
     secant = fabs(Q->phi1 - Q->phi2) >= EPS10;

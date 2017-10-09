@@ -260,29 +260,17 @@ static LP pipeline_reverse (XY xy, PJ *P) {
     return point.coo.lp;
 }
 
-static void freeup(PJ *P) {                                    /* Destructor */
-    if (P==0)
-        return;
-    /* Projection specific deallocation goes here */
-    pj_dealloc (P->opaque);
-    pj_dealloc (P);
-    return;
-}
 
-
-static void *pipeline_freeup (PJ *P, int errlev) {         /* Destructor */
+static void *destructor (PJ *P, int errlev) {
     int i;
     if (0==P)
         return 0;
 
-    if (errlev)
-        proj_errno_set (P, errlev);
-
     if (0==P->opaque)
-        return pj_dealloc (P);
+        return pj_default_destructor (P, errlev);
 
     for (i = 0;  i < P->opaque->steps; i++)
-        pj_free (P->opaque->pipeline[i+1]);
+        pj_default_destructor (P->opaque->pipeline[i+1], errlev);
 
     pj_dealloc (P->opaque->reverse_step);
     pj_dealloc (P->opaque->omit_forward);
@@ -291,15 +279,7 @@ static void *pipeline_freeup (PJ *P, int errlev) {         /* Destructor */
     pj_dealloc (P->opaque->current_argv);
     pj_dealloc (P->opaque->pipeline);
 
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-
-/* Adapts pipeline_freeup to the format defined for the PJ object */
-static void pipeline_freeup_wrapper (PJ *P) {
-    pipeline_freeup (P, 0);
-    return;
+    return pj_default_destructor(P, errlev);
 }
 
 
@@ -364,27 +344,27 @@ PJ *PROJECTION(pipeline) {
     P->inv3d  =  pipeline_reverse_3d;
     P->fwd    =  pipeline_forward;
     P->inv    =  pipeline_reverse;
-    P->pfree  =  pipeline_freeup_wrapper;
+    P->destructor  =  destructor;
 
     P->opaque = pj_calloc (1, sizeof(struct pj_opaque));
     if (0==P->opaque)
-        return 0;
+        return pj_default_destructor(P, ENOMEM);
 
     argc = (int)argc_params (P->params);
     P->opaque->argv = argv = argv_params (P->params, argc);
     if (0==argv)
-        return pipeline_freeup (P, ENOMEM);
+        return destructor (P, ENOMEM);
 
     P->opaque->current_argv = current_argv = pj_calloc (argc, sizeof (char *));
     if (0==current_argv)
-        return pipeline_freeup (P, ENOMEM);
+        return destructor (P, ENOMEM);
 
     /* Do some syntactical sanity checking */
     for (i = 0;  i < argc;  i++) {
         if (0==strcmp ("step", argv[i])) {
             if (-1==i_pipeline) {
                 proj_log_error (P, "Pipeline: +step before +proj=pipeline");
-                return pipeline_freeup (P, -50);
+                return destructor (P, PJD_ERR_MALFORMED_PIPELINE);
             }
             if (0==nsteps)
                 i_first_step = i;
@@ -395,7 +375,7 @@ PJ *PROJECTION(pipeline) {
         if (0==strcmp ("proj=pipeline", argv[i])) {
             if (-1 != i_pipeline) {
                 proj_log_error (P, "Pipeline: Nesting invalid");
-                return pipeline_freeup (P, -50); /* ERROR: nested pipelines */
+                return destructor (P, PJD_ERR_MALFORMED_PIPELINE); /* ERROR: nested pipelines */
             }
             i_pipeline = i;
         }
@@ -404,14 +384,14 @@ PJ *PROJECTION(pipeline) {
     P->opaque->steps = nsteps;
 
     if (-1==i_pipeline)
-        return pipeline_freeup (P, -50); /* ERROR: no pipeline def */
+        return destructor (P, PJD_ERR_MALFORMED_PIPELINE); /* ERROR: no pipeline def */
 
     if (0==nsteps)
-        return pipeline_freeup (P, -50); /* ERROR: no pipeline def */
+        return destructor (P, PJD_ERR_MALFORMED_PIPELINE); /* ERROR: no pipeline def */
 
     /* Make room for the pipeline and execution indicators */
     if (0==pj_create_pipeline (P, nsteps))
-        return pipeline_freeup (P, ENOMEM);
+        return destructor (P, ENOMEM);
 
     /* Now loop over all steps, building a new set of arguments for each init */
     for (i_current_step = i_first_step, i = 0;  i < nsteps;  i++) {
@@ -454,7 +434,7 @@ PJ *PROJECTION(pipeline) {
         proj_log_trace (P, "Pipeline: Step %d at %p", i, next_step);
         if (0==next_step) {
             proj_log_error (P, "Pipeline: Bad step definition: %s", current_argv[0]);
-            return pipeline_freeup (P, -50); /* ERROR: bad pipeline def */
+            return destructor (P, PJD_ERR_MALFORMED_PIPELINE); /* ERROR: bad pipeline def */
         }
         P->opaque->pipeline[i+1] = next_step;
         proj_log_trace (P, "Pipeline:    step done");
@@ -470,7 +450,7 @@ PJ *PROJECTION(pipeline) {
             break;
     if (i==nsteps) {
         proj_log_error (P, "Pipeline: No forward steps");
-        return pipeline_freeup (P, -50);
+        return destructor (P, PJD_ERR_MALFORMED_PIPELINE);
     }
 
     if (P->opaque->reverse_step[i + 1])
@@ -493,7 +473,7 @@ PJ *PROJECTION(pipeline) {
             break;
     if (i==-1) {
         proj_log_error (P, "Pipeline: No reverse steps");
-        return pipeline_freeup (P, -50);
+        return destructor (P, PJD_ERR_MALFORMED_PIPELINE);
     }
 
     if (P->opaque->reverse_step[i + 1])
@@ -526,7 +506,7 @@ int pj_pipeline_selftest (void) {
     double dist;
 
     /* forward-reverse geo->utm->geo */
-    P = proj_create (0, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +step +proj=utm +ellps=GRS80 +inv");
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +step +proj=utm +ellps=GRS80 +inv");
     if (0==P)
         return 1000;
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 0) */
@@ -548,7 +528,7 @@ int pj_pipeline_selftest (void) {
     proj_destroy (P);
 
     /* And now the back-to-back situation utm->geo->utm */
-    P = proj_create (0, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +inv +step +proj=utm +ellps=GRS80");
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +inv +step +proj=utm +ellps=GRS80");
     if (0==P)
         return 2000;
 
@@ -572,7 +552,7 @@ int pj_pipeline_selftest (void) {
 
 
     /* Finally testing a corner case: A rather pointless one-step pipeline geo->utm */
-    P = proj_create (0, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 ");
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 ");
     if (0==P)
         return 3000;
 

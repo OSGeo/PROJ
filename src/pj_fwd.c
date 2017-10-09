@@ -17,8 +17,8 @@ pj_fwd(LP lp, PJ *P) {
         return err;
     last_errno = proj_errno_reset (P);
 
-    /* Check input coordinates if angular */
-    if ((P->left==PJ_IO_UNITS_CLASSIC)||(P->left==PJ_IO_UNITS_RADIANS)) {
+    /* Check validity of angular input coordinates */
+    if (P->left==PJ_IO_UNITS_RADIANS) {
 
         /* check for forward and latitude or longitude overange */
         t = fabs(lp.phi)-M_HALFPI;
