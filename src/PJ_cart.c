@@ -240,6 +240,11 @@ int pj_cart_selftest (void) {
     PJ_DERIVS derivs;
     PJ_FACTORS factors;
 
+    const PJ_OPERATIONS *oper_list;
+    const PJ_ELLPS *ellps_list;
+    const PJ_UNITS *unit_list;
+    const PJ_PRIME_MERIDIANS *pm_list;
+
     int err;
     size_t n, sz;
     double dist, h, t;
@@ -562,6 +567,22 @@ int pj_cart_selftest (void) {
 
     proj_destroy(P);
 
+    /* Check that proj_list_* functions work by looping through them */
+    n = 0;
+    for (oper_list = proj_list_operations(); oper_list->id; ++oper_list) n++;
+    if (n == 0) return 90;
+
+    n = 0;
+    for (ellps_list = proj_list_ellps(); ellps_list->id; ++ellps_list) n++;
+    if (n == 0) return 91;
+
+    n = 0;
+    for (unit_list = proj_list_units(); unit_list->id; ++unit_list) n++;
+    if (n == 0) return 92;
+
+    n = 0;
+    for (pm_list = proj_list_prime_meridians(); pm_list->id; ++pm_list) n++;
+    if (n == 0) return 93;
 
     return 0;
 }
