@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -22,36 +23,19 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (P->opaque)
-        pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(urm5) {
     double alpha, t;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
     
     if (pj_param(P->ctx, P->params, "tn").i) {
         Q->n = pj_param(P->ctx, P->params, "dn").f;
-        if (Q->n <= 0. || Q->n > 1.) {
-            proj_errno_set(P, PJD_ERR_N_OUT_OF_RANGE);
-            return freeup_new(0);
-        }
+        if (Q->n <= 0. || Q->n > 1.)
+            return pj_default_destructor(P, PJD_ERR_N_OUT_OF_RANGE);
     } else {
-            proj_errno_set(P, PJD_ERR_N_OUT_OF_RANGE);
-            return freeup_new(0);
+            return pj_default_destructor(P, PJD_ERR_N_OUT_OF_RANGE);
     }
     Q->q3 = pj_param(P->ctx, P->params, "dq").f / 3.;
     alpha = pj_param(P->ctx, P->params, "ralpha").f;

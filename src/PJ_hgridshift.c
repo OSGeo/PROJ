@@ -1,24 +1,8 @@
 #define PJ_LIB__
 #include "proj_internal.h"
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(hgridshift, "Horizontal grid shift");
-
-static void *freeup_msg (PJ *P, int errlev) {
-    if (0==P)
-        return 0;
-
-    if (0!=P->ctx)
-        pj_ctx_set_errno (P->ctx, errlev);
-
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_msg (P, 0);
-    return;
-}
 
 
 static XYZ forward_3d(LPZ lpz, PJ *P) {
@@ -67,23 +51,30 @@ static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
 }
 
 
+
+#if 0
+static XY forward_xy(LP lp, PJ *P) {
+    PJ_TRIPLET point;
+    point.lp = lp;
+    point.lpz.z = 0;
+    point.xyz = forward_3d (point.lpz, P);
+    return point.xy;
+}
+
+
+static LP reverse_lp(XY xy, PJ *P) {
+    PJ_TRIPLET point;
+    point.xy = xy;
+    point.xyz.z = 0;
+    point.lpz = reverse_3d (point.xyz, P);
+    return point.lp;
+}
+#endif
+
+
+
 PJ *PROJECTION(hgridshift) {
-
-    if (!pj_param(P->ctx, P->params, "tgrids").i) {
-        proj_log_error(P, "hgridshift: +grids parameter missing.");
-        return freeup_msg(P, -1);
-    }
-
-    /* Build gridlist. P->gridlist can be empty if +grids only ask for optional grids. */
-    P->gridlist = pj_gridlist_from_nadgrids( P->ctx, pj_param(P->ctx, P->params, "sgrids").s,
-                                             &(P->gridlist_count) );
-
-    /* Was gridlist compiled properly? */
-    if ( pj_ctx_get_errno(P->ctx) ) {
-        proj_log_error(P, "hgridshift: could not find required grid(s).");
-        return freeup_msg(P, -38);
-    }
-
+    
     P->fwdobs = forward_obs;
     P->invobs = reverse_obs;
     P->fwd3d  = forward_3d;
@@ -93,6 +84,21 @@ PJ *PROJECTION(hgridshift) {
 
     P->left  = PJ_IO_UNITS_RADIANS;
     P->right = PJ_IO_UNITS_RADIANS;
+
+    if (0==pj_param(P->ctx, P->params, "tgrids").i) {
+        proj_log_error(P, "hgridshift: +grids parameter missing.");
+        return pj_default_destructor (P, PJD_ERR_NO_ARGS);
+    }
+
+    /* Build gridlist. P->gridlist can be empty if +grids only ask for optional grids. */
+    P->gridlist = pj_gridlist_from_nadgrids( P->ctx, pj_param(P->ctx, P->params, "sgrids").s,
+                                             &(P->gridlist_count) );
+
+    /* Was gridlist compiled properly? */
+    if ( pj_ctx_get_errno(pj_get_ctx(P)) ) {
+        proj_log_error(P, "hgridshift: could not find required grid(s).");
+        return pj_default_destructor (P, PJD_ERR_FAILED_TO_LOAD_GRID);
+    }
 
     return P;
 }
@@ -108,26 +114,29 @@ int pj_hgridshift_selftest (void) {
     double dist;
 
     /* fail on purpose: +grids parameter is mandatory*/
-    P = proj_create(0, "+proj=hgridshift");
-    if (0!=P)
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=hgridshift");
+    if (0!=P) {
+        proj_destroy (P);
         return 99;
-
+    }
+    
     /* fail on purpose: open non-existing grid */
-    P = proj_create(0, "+proj=hgridshift +grids=nonexistinggrid.gsb");
-    if (0!=P)
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=hgridshift +grids=@nonexistinggrid.gsb,anothernonexistinggrid.gsb");
+    if (0!=P) {
+        proj_destroy (P);
         return 999;
-
-
+    }
+        
     /* Failure most likely means the grid is missing */
-    P = proj_create (0, "+proj=hgridshift +grids=nzgd2kgrid0005.gsb +ellps=GRS80");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=hgridshift +grids=nzgd2kgrid0005.gsb +ellps=GRS80");
     if (0==P)
         return 10;
-
+        
     a = proj_obs_null;
     a.coo.lpz.lam = PJ_TORAD(173);
     a.coo.lpz.phi = PJ_TORAD(-45);
-
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    
+    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
     if (dist > 0.00000001)
         return 1;
 

@@ -108,11 +108,6 @@ PROJ_HEAD(cart,    "Geodetic/cartesian conversions");
 **************************************************************/
 
 
-static void freeup (PJ *P) {
-    pj_freeup_plain (P);
-    return;
-}
-
 /*********************************************************************/
 static double normal_radius_of_curvature (double a, double es, double phi) {
 /*********************************************************************/
@@ -245,6 +240,11 @@ int pj_cart_selftest (void) {
     PJ_DERIVS derivs;
     PJ_FACTORS factors;
 
+    const PJ_OPERATIONS *oper_list;
+    const PJ_ELLPS *ellps_list;
+    const PJ_UNITS *unit_list;
+    const PJ_PRIME_MERIDIANS *pm_list;
+
     int err;
     size_t n, sz;
     double dist, h, t;
@@ -253,7 +253,7 @@ int pj_cart_selftest (void) {
     char buf[40];
 
     /* An utm projection on the GRS80 ellipsoid */
-    P = proj_create (0, arg);
+    P = proj_create (PJ_DEFAULT_CTX, arg);
     if (0==P)
         return 1;
 
@@ -262,7 +262,7 @@ int pj_cart_selftest (void) {
     proj_destroy (P);
 
     /* Same projection, now using argc/argv style initialization */
-    P = proj_create_argv (0, 3, args);
+    P = proj_create_argv (PJ_DEFAULT_CTX, 3, args);
     if (0==P)
         return 2;
 
@@ -306,7 +306,7 @@ int pj_cart_selftest (void) {
     proj_destroy (P);
 
     /* Now do some 3D transformations */
-    P = proj_create (0, "+proj=cart +ellps=GRS80");
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=cart +ellps=GRS80");
     if (0==P)
         return 6;
 
@@ -320,8 +320,8 @@ int pj_cart_selftest (void) {
     b = proj_trans_obs (P, PJ_FWD, a);
 
     /* Check roundtrip precision for 10000 iterations each way */
-    dist = proj_roundtrip (P, PJ_FWD, 10000, a);
-    dist = proj_roundtrip (P, PJ_INV, 10000, b);
+    dist = proj_roundtrip (P, PJ_FWD, 10000, a.coo);
+    dist = proj_roundtrip (P, PJ_INV, 10000, b.coo);
     if (dist > 2e-9)
         return 7;
 
@@ -333,7 +333,7 @@ int pj_cart_selftest (void) {
     a.coo.lpz.z   = 100;
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
     if (dist > 1e-12)
         return 8;
 
@@ -344,7 +344,7 @@ int pj_cart_selftest (void) {
     a.coo.lpz.z   = 100;
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
     if (dist > 1e-12)
         return 9;
 
@@ -374,7 +374,7 @@ int pj_cart_selftest (void) {
     /* Testing the proj_transform nightmare */
 
     /* An utm projection on the GRS80 ellipsoid */
-    P = proj_create (0, "+proj=utm +zone=32 +ellps=GRS80");
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=utm +zone=32 +ellps=GRS80");
     if (0==P)
         return 13;
 
@@ -457,7 +457,7 @@ int pj_cart_selftest (void) {
     proj_destroy (P);
 
     /* test proj_create_crs_to_crs() */
-    P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833");
+    P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "epsg:25832", "epsg:25833");
     if (P==0)
         return 50;
 
@@ -472,7 +472,7 @@ int pj_cart_selftest (void) {
     proj_destroy(P);
 
     /* let's make sure that only entries in init-files results in a usable PJ */
-    P = proj_create_crs_to_crs(0, "proj=utm +zone=32 +datum=WGS84", "proj=utm +zone=33 +datum=WGS84");
+    P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "proj=utm +zone=32 +datum=WGS84", "proj=utm +zone=33 +datum=WGS84");
     if (P != 0) {
         proj_destroy(P);
         return 52;
@@ -486,20 +486,20 @@ int pj_cart_selftest (void) {
     /* proj_info()                                                            */
     /* this one is difficult to test, since the output changes with the setup */
     info = proj_info();
-    if (info.version) {
+    if (info.version[0] != '\0' ) {
         char tmpstr[64];
         sprintf(tmpstr, "%d.%d.%d", info.major, info.minor, info.patch);
         if (strcmp(info.version, tmpstr)) return 55;
     }
-    if (!info.release)    return 56;
-    if (!info.searchpath) return 57;
+    if (info.release[0] == '\0')    return 56;
+    if (info.searchpath[0] == '\0') return 57;
 
     /* proj_pj_info() */
-    P = proj_create(0, "+proj=august"); /* august has no inverse */
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=august"); /* august has no inverse */
     if (proj_pj_info(P).has_inverse) { proj_destroy(P); return 60; }
     proj_destroy(P);
 
-    P = proj_create(0, arg);
+    P = proj_create(PJ_DEFAULT_CTX, arg);
     pj_info = proj_pj_info(P);
     if ( !pj_info.has_inverse )            {  proj_destroy(P); return 61; }
     if ( strcmp(pj_info.definition, arg) ) {  proj_destroy(P); return 62; }
@@ -518,7 +518,8 @@ int pj_cart_selftest (void) {
     if ( strlen(init_info.filename) != 0 )  return 67;
 
     init_info = proj_init_info("epsg");
-    if ( strcmp(init_info.origin, "EPSG") )    return 69;
+    /* Need to allow for "Unknown" until all commonly distributed EPSG-files comes with a metadata section */
+    if ( strcmp(init_info.origin, "EPSG") && strcmp(init_info.origin, "Unknown") )    return 69;
     if ( strcmp(init_info.name, "epsg") )      return 68;
 
 
@@ -539,7 +540,7 @@ int pj_cart_selftest (void) {
 
 
     /* test proj_derivatives_retrieve() and proj_factors_retrieve() */
-    P = proj_create(0, "+proj=merc");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=merc");
     a = proj_obs_null;
     a.coo.lp.lam = PJ_TORAD(12);
     a.coo.lp.phi = PJ_TORAD(55);
@@ -566,6 +567,22 @@ int pj_cart_selftest (void) {
 
     proj_destroy(P);
 
+    /* Check that proj_list_* functions work by looping through them */
+    n = 0;
+    for (oper_list = proj_list_operations(); oper_list->id; ++oper_list) n++;
+    if (n == 0) return 90;
+
+    n = 0;
+    for (ellps_list = proj_list_ellps(); ellps_list->id; ++ellps_list) n++;
+    if (n == 0) return 91;
+
+    n = 0;
+    for (unit_list = proj_list_units(); unit_list->id; ++unit_list) n++;
+    if (n == 0) return 92;
+
+    n = 0;
+    for (pm_list = proj_list_prime_meridians(); pm_list->id; ++pm_list) n++;
+    if (n == 0) return 93;
 
     return 0;
 }

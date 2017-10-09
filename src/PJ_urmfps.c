@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -31,20 +32,6 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
 static PJ *setup(PJ *P) {
     P->opaque->C_y = Cy / P->opaque->n;
     P->es = 0.;
@@ -57,18 +44,16 @@ static PJ *setup(PJ *P) {
 PJ *PROJECTION(urmfps) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor(P, ENOMEM);
+
     P->opaque = Q;
 
     if (pj_param(P->ctx, P->params, "tn").i) {
         P->opaque->n = pj_param(P->ctx, P->params, "dn").f;
-        if (P->opaque->n <= 0. || P->opaque->n > 1.) {
-            proj_errno_set(P, PJD_ERR_N_OUT_OF_RANGE);
-            return freeup_new(P);
-        }
+        if (P->opaque->n <= 0. || P->opaque->n > 1.)
+            return pj_default_destructor(P, PJD_ERR_N_OUT_OF_RANGE);
     } else {
-        proj_errno_set(P, PJD_ERR_N_OUT_OF_RANGE);
-        return freeup_new(P);
+        return pj_default_destructor(P, PJD_ERR_N_OUT_OF_RANGE);
     }
 
     return setup(P);
@@ -78,7 +63,7 @@ PJ *PROJECTION(urmfps) {
 PJ *PROJECTION(wag1) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
     P->opaque->n = 0.8660254037844386467637231707;

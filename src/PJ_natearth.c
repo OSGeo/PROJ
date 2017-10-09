@@ -13,7 +13,7 @@ and designed in collaboration with Tom Patterson.
 Port to PROJ.4 by Bernhard Jenny, 6 June 2011
 */
 #define PJ_LIB__
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(natearth, "Natural Earth") "\n\tPCyl., Sph.";
 
@@ -85,20 +85,6 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     lp.lam = xy.x / (A0 + y2 * (A1 + y2 * (A2 + y2 * y2 * y2 * (A3 + y2 * A4))));
 
     return lp;
-}
-
-
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
 }
 
 

@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(nell, "Nell") "\n\tPCyl., Sph.";
 
@@ -35,20 +35,6 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     lp.phi = aasin(P->ctx,0.5 * (xy.y + sin(xy.y)));
 
     return lp;
-}
-
-
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
 }
 
 

@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(eck5, "Eckert V") "\n\tPCyl, Sph.";
 
@@ -25,18 +25,6 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     lp.lam = RXF * xy.x / (1. + cos( lp.phi = RYF * xy.y));
 
     return lp;
-}
-
-
-static void *freeup_new (PJ *P) {              /* Destructor */
-    if (0==P)
-        return 0;
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
 }
 
 

@@ -65,9 +65,9 @@ Last update: 2017-05-16
 
 #define PJ_LIB__
 #include <time.h>
-#include "proj_internal.h"
-#include <projects.h>
 #include <errno.h>
+#include "proj_internal.h"
+#include "projects.h"
 
 PROJ_HEAD(unitconvert, "Unit conversion");
 
@@ -112,9 +112,16 @@ static double decimalyear_to_mjd(double decimalyear) {
 /***********************************************************************
     Epoch of modified julian date is 1858-11-16 00:00
 ************************************************************************/
-    int year = (int)floor(decimalyear);
-    double fractional_year = decimalyear - year;
-    double mjd = (year - 1859)*365 + 14 + 31;
+    int year;
+    double fractional_year;
+    double mjd;
+
+    if( decimalyear < -10000 || decimalyear > 10000 )
+        return 0;
+
+    year = (int)floor(decimalyear);
+    fractional_year = decimalyear - year;
+    mjd = (year - 1859)*365 + 14 + 31;
     mjd += fractional_year*days_in_year(year);
 
     /* take care of leap days */
@@ -190,26 +197,6 @@ struct pj_opaque_unitconvert {
     int     z_out_id;   /* unit id for the vertical output unit   */
 };
 
-
-/***********************************************************************/
-static void *freeup_msg (PJ *P, int errlev) {
-/***********************************************************************/
-    if (0==P)
-        return 0;
-
-    if (0!=P->ctx)
-        pj_ctx_set_errno (P->ctx, errlev);
-
-    return pj_dealloc(P);
-}
-
-
-/***********************************************************************/
-static void freeup (PJ *P) {
-/***********************************************************************/
-    freeup_msg (P, 0);
-    return;
-}
 
 /***********************************************************************/
 static XY forward_2d(LP lp, PJ *P) {
@@ -309,9 +296,9 @@ static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
     /* delegate unit conversion of physical dimensions to the 3D function */
     out.coo.lpz = reverse_3d(obs.coo.xyz, P);
 
-    if (Q->t_in_id >= 0)
-        out.coo.xyzt.t = time_units[Q->t_out_id].t_in( obs.coo.xyzt.t );
     if (Q->t_out_id >= 0)
+        out.coo.xyzt.t = time_units[Q->t_out_id].t_in( obs.coo.xyzt.t );
+    if (Q->t_in_id >= 0)
         out.coo.xyzt.t = time_units[Q->t_in_id].t_out( out.coo.xyzt.t );
 
     return out;
@@ -326,7 +313,7 @@ PJ *PROJECTION(unitconvert) {
     int i;
 
     if (0==Q)
-        return freeup_msg (P, ENOMEM);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
     P->fwdobs = forward_obs;
@@ -346,7 +333,7 @@ PJ *PROJECTION(unitconvert) {
     if ((name = pj_param (P->ctx, P->params, "sxy_in").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
 
         Q->xy_in_id = i;
         proj_log_debug(P, "xy_in unit: %s", pj_units[i].name);
@@ -355,7 +342,7 @@ PJ *PROJECTION(unitconvert) {
     if ((name = pj_param (P->ctx, P->params, "sxy_out").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
 
         Q->xy_out_id = i;
         proj_log_debug(P, "xy_out unit: %s", pj_units[i].name);
@@ -364,7 +351,7 @@ PJ *PROJECTION(unitconvert) {
     if ((name = pj_param (P->ctx, P->params, "sz_in").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
 
         Q->z_in_id = i;
         proj_log_debug(P, "z_in unit: %s", pj_units[i].name);
@@ -373,7 +360,7 @@ PJ *PROJECTION(unitconvert) {
     if ((name = pj_param (P->ctx, P->params, "sz_out").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
 
         Q->z_out_id = i;
         proj_log_debug(P, "z_out unit: %s", pj_units[i].name);
@@ -383,7 +370,7 @@ PJ *PROJECTION(unitconvert) {
     if ((name = pj_param (P->ctx, P->params, "st_in").s) != NULL) {
         for (i = 0; (s = time_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return freeup_msg(P, -8); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
 
         Q->t_in_id = i;
         proj_log_debug(P, "t_in unit: %s", time_units[i].name);
@@ -392,9 +379,9 @@ PJ *PROJECTION(unitconvert) {
     s = 0;
     if ((name = pj_param (P->ctx, P->params, "st_out").s) != NULL) {
         for (i = 0; (s = time_units[i].id) && strcmp(name, s) ; ++i);
-        if (!s) {
-            return freeup_msg(P, -8); /* unknown unit conversion id */
-        }
+
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
+
         Q->t_out_id = i;
         proj_log_debug(P, "t_out unit: %s", time_units[i].name);
     }
@@ -410,7 +397,7 @@ int pj_unitconvert_selftest (void) {return 0;}
 
 static int test_time(char* args, double tol, double t_in, double t_exp) {
     PJ_OBS in, out;
-    PJ *P = proj_create(0, args);
+    PJ *P = proj_create(PJ_DEFAULT_CTX, args);
     int ret = 0;
 
     if (P == 0)
@@ -436,7 +423,7 @@ static int test_time(char* args, double tol, double t_in, double t_exp) {
 
 static int test_xyz(char* args, double tol, PJ_TRIPLET in, PJ_TRIPLET exp) {
     PJ_OBS out, obs_in;
-    PJ *P = proj_create(0, args);
+    PJ *P = proj_create(PJ_DEFAULT_CTX, args);
     int ret = 0;
 
     if (P == 0)

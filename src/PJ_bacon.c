@@ -1,6 +1,7 @@
 # define HLFPI2	2.46740110027233965467      /* (pi/2)^2 */
 # define EPS	1e-10
 #define PJ_LIB__
+#include	<errno.h>
 #include	<projects.h>
 
 
@@ -34,26 +35,11 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
 
 PJ *PROJECTION(bacon) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
 	Q->bacn = 1;
@@ -67,7 +53,7 @@ PJ *PROJECTION(bacon) {
 PJ *PROJECTION(apian) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
 	Q->bacn = Q->ortl = 0;
@@ -80,7 +66,7 @@ PJ *PROJECTION(apian) {
 PJ *PROJECTION(ortel) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
 	Q->bacn = 0;

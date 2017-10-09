@@ -182,11 +182,11 @@ typedef union PJ_TRIPLET PJ_TRIPLET;
 union PJ_COORD;
 typedef union PJ_COORD PJ_COORD;
 
-struct PJ_DERIVS;
-typedef struct PJ_DERIVS PJ_DERIVS;
+struct DERIVS;
+typedef struct DERIVS PJ_DERIVS;
 
-struct PJ_FACTORS;
-typedef struct PJ_FACTORS PJ_FACTORS;
+struct FACTORS;
+typedef struct FACTORS PJ_FACTORS;
 
 /* Data type for projection/transformation information */
 struct PJconsts;
@@ -204,6 +204,23 @@ typedef struct PJ_GRID_INFO PJ_GRID_INFO;
 
 struct PJ_INIT_INFO;
 typedef struct PJ_INIT_INFO PJ_INIT_INFO;
+
+/* Data types for list of operations, ellipsoids, datums and units used in PROJ.4 */
+struct PJ_LIST;
+typedef struct PJ_LIST PJ_OPERATIONS;
+
+struct PJ_ELLPS;
+typedef struct PJ_ELLPS PJ_ELLPS;
+
+struct PJ_DATUMS;
+typedef struct PJ_DATUMS PJ_DATUMS;
+
+struct PJ_UNITS;
+typedef struct PJ_UNITS PJ_UNITS;
+
+struct PJ_PRIME_MERIDIANS;
+typedef struct PJ_PRIME_MERIDIANS PJ_PRIME_MERIDIANS;
+
 
 /* Omega, Phi, Kappa: Rotations */
 typedef struct {double o, p, k;}  PJ_OPK;
@@ -288,22 +305,10 @@ struct PJ_OBS {
     unsigned int flags;  /* additional data, intended for flags */
 };
 
-
-struct PJ_DERIVS {
-    double x_l, x_p;       /* derivatives of x for lambda-phi */
-    double y_l, y_p;       /* derivatives of y for lambda-phi */
-};
-
-struct PJ_FACTORS {
-    struct PJ_DERIVS der;
-    double h, k;           /* meridional, parallel scales */
-    double omega, thetap;  /* angular distortion, theta prime */
-    double conv;           /* convergence */
-    double s;              /* areal scale factor */
-    double a, b;           /* max-min scale error */
-    int code;              /* info as to analytics, see following */
-};
-
+#define PJ_IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
+#define PJ_IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
+#define PJ_IS_ANAL_HK    04    /* h and k analytic */
+#define PJ_IS_ANAL_CONV 010    /* convergence analytic */
 
 struct PJ_INFO {
     char        release[64];        /* Release info. Version + date         */
@@ -317,10 +322,11 @@ struct PJ_INFO {
 };
 
 struct PJ_PROJ_INFO {
-    char        id[16];             /* Name of the projection in question           */
-    char        description[128];   /* Description of the projection                */
-    char        definition[512];    /* Projection definition                        */
-    int         has_inverse;        /* 1 if an inverse mapping exists, 0 otherwise  */
+    char        id[16];             /* Name of the projection in question                       */
+    char        description[128];   /* Description of the projection                            */
+    char        definition[512];    /* Projection definition                                    */
+    int         has_inverse;        /* 1 if an inverse mapping exists, 0 otherwise              */
+    double      accuracy;           /* Expected accuracy of the transformation. -1 if unknown.  */
 };
 
 struct PJ_GRID_INFO {
@@ -351,8 +357,10 @@ typedef struct projCtx_t PJ_CONTEXT;
 
 
 /* Functionality for handling thread contexts */
+#define PJ_DEFAULT_CTX 0
 PJ_CONTEXT *proj_context_create (void);
-void proj_context_destroy    (PJ_CONTEXT *ctx);
+PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx);
+
 
 
 /* Manage the transformation definition object PJ */
@@ -363,38 +371,38 @@ PJ  *proj_destroy (PJ *P);
 
 
 /* Apply transformation to observation - in forward or inverse direction */
-enum proj_direction {
+enum PJ_DIRECTION {
     PJ_FWD   =  1,   /* Forward    */
     PJ_IDENT =  0,   /* Do nothing */
     PJ_INV   = -1    /* Inverse    */
 };
+typedef enum PJ_DIRECTION PJ_DIRECTION;
 
-
-PJ_OBS   proj_trans_obs   (PJ *P, enum proj_direction direction, PJ_OBS obs);
-PJ_COORD proj_trans_coord (PJ *P, enum proj_direction direction, PJ_COORD coord);
+PJ_OBS   proj_trans_obs   (PJ *P, PJ_DIRECTION direction, PJ_OBS obs);
+PJ_COORD proj_trans_coord (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
 
 
 size_t proj_transform (
     PJ *P,
-    enum proj_direction direction,
+    PJ_DIRECTION direction,
     double *x, size_t sx, size_t nx,
     double *y, size_t sy, size_t ny,
     double *z, size_t sz, size_t nz,
     double *t, size_t st, size_t nt
 );
 
-int proj_transform_obs   (PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs);
-int proj_transform_coord (PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord);
+int proj_transform_obs   (PJ *P, PJ_DIRECTION direction, size_t n, PJ_OBS *obs);
+int proj_transform_coord (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
 
 /* Initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);
 PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
 
 /* Measure internal consistency - in forward or inverse direction */
-double proj_roundtrip (PJ *P, enum proj_direction direction, int n, PJ_OBS obs);
-
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo);
+    
 /* Geodesic distance between two points with angular 2D coordinates */
-double proj_lp_dist (PJ *P, LP a, LP b);
+double proj_lp_dist (const PJ *P, LP a, LP b);
 
 /* Euclidean distance between two points with linear 2D coordinates */
 double proj_xy_dist (XY a, XY b);
@@ -410,15 +418,21 @@ int  proj_errno_reset (PJ *P);
 void proj_errno_restore (PJ *P, int err);
 
 
-PJ_DERIVS  proj_derivatives(const PJ *P, const LP lp);
-PJ_FACTORS proj_factors(const PJ *P, const LP lp);  
-  
+PJ_DERIVS  proj_derivatives(PJ *P, const LP lp);
+PJ_FACTORS proj_factors(PJ *P, const LP lp);
+
 /* Info functions - get information about various PROJ.4 entities */
 PJ_INFO      proj_info(void);
-PJ_PROJ_INFO proj_pj_info(const PJ *P);
+PJ_PROJ_INFO proj_pj_info(PJ *P);
 PJ_GRID_INFO proj_grid_info(const char *gridname);
 PJ_INIT_INFO proj_init_info(const char *initname);
 
+/* List functions: */
+/* Get lists of operations, ellipsoids, units and prime meridians. */
+const PJ_OPERATIONS       *proj_list_operations(void);
+const PJ_ELLPS            *proj_list_ellps(void);
+const PJ_UNITS            *proj_list_units(void);
+const PJ_PRIME_MERIDIANS  *proj_list_prime_meridians(void);
 
 /* These are trivial, and while occasionaly useful in real code, primarily here to       */
 /* simplify demo code, and in acknowledgement of the proj-internal discrepancy between   */

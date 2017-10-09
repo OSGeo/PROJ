@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include <errno.h>
 #include <proj.h>
 #include "projects.h"
 
@@ -48,34 +49,16 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static void *freeup_new (PJ *P) {                       /* Destructor */
-    if (0==P)
-        return 0;
-    if (0==P->opaque)
-        return pj_dealloc (P);
-
-    pj_dealloc (P->opaque);
-    return pj_dealloc(P);
-}
-
-
-static void freeup (PJ *P) {
-    freeup_new (P);
-    return;
-}
-
-
 PJ *PROJECTION(fouc_s) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return freeup_new (P);
+        return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
     Q->n = pj_param(P->ctx, P->params, "dn").f;
-    if (Q->n < 0. || Q->n > 1.) {
-        proj_errno_set(P, PJD_ERR_N_OUT_OF_RANGE);
-        return freeup_new(P);
-    }
+    if (Q->n < 0. || Q->n > 1.)
+        return pj_default_destructor (P, PJD_ERR_N_OUT_OF_RANGE);
+
     Q->n1 = 1. - Q->n;
     P->es = 0;
     P->inv = s_inverse;

@@ -414,6 +414,8 @@ bum_call:
     return result;
 }
 
+
+
 /************************************************************************/
 /*                              pj_init()                               */
 /*                                                                      */
@@ -438,15 +440,18 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     int found_def = 0;
     PJ *PIN = 0;
 
+    if (0==ctx)
+        ctx = pj_get_default_ctx ();
+
     ctx->last_errno = 0;
     start = NULL;
 
-    /* put arguments into internal linked list */
     if (argc <= 0) {
-        pj_ctx_set_errno( ctx, -1 );
-        goto bum_call;
+        pj_ctx_set_errno (ctx, PJD_ERR_NO_ARGS);
+        return 0;
     }
-
+    
+    /* put arguments into internal linked list */
     start = curr = pj_mkparam(argv[0]);
 
     /* build parameter list and expand +init's. Does not take care of a single +init. */
@@ -458,12 +463,11 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             found_def = 0;
             curr = get_init(ctx, &curr, curr->next, pj_param(ctx, curr, "sinit").s, &found_def);
             if (!curr)
-                goto bum_call;
+                return pj_dealloc_params (ctx, start, PJD_ERR_NO_ARGS);
 
-            if (!found_def) {
-                pj_ctx_set_errno( ctx, -2);
-                goto bum_call;
-            }
+            if (!found_def)
+                return pj_dealloc_params (ctx, start, PJD_ERR_NO_OPTION_IN_INIT_FILE);
+                
         } else {
             curr = curr->next;
         }
@@ -475,31 +479,32 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         found_def = 0;
         curr = get_init(ctx, &start, curr, pj_param(ctx, start, "sinit").s, &found_def);
         if (!curr)
-            goto bum_call;
-        if (!found_def) {
-            pj_ctx_set_errno( ctx, -2);
-            goto bum_call;
-        }
+            return pj_dealloc_params (ctx, start, PJD_ERR_NO_ARGS);
+        if (!found_def)
+            return pj_dealloc_params (ctx, start, PJD_ERR_NO_OPTION_IN_INIT_FILE);
     }
-
-    if (ctx->last_errno) goto bum_call;
-
+    
+    if (ctx->last_errno)
+        return pj_dealloc_params (ctx, start, ctx->last_errno);
+        
     /* find projection selection */
-    if (!(name = pj_param(ctx, start, "sproj").s)) {
-        pj_ctx_set_errno( ctx, -4 );
-        goto bum_call;
-    }
+    if (!(name = pj_param(ctx, start, "sproj").s))
+        return pj_default_destructor (PIN, PJD_ERR_PROJ_NOT_NAMED);
     for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
 
-    if (!s) { pj_ctx_set_errno( ctx, -5 ); goto bum_call; }
-
+    if (!s)
+        return pj_dealloc_params (ctx, start, PJD_ERR_UNKNOWN_PROJECTION_ID);
+        
     /* set defaults, unless inhibited */
-    if (!pj_param(ctx, start, "bno_defs").i)
+    if (!(pj_param(ctx, start, "bno_defs").i))
         curr = get_defaults(ctx,&start, curr, name);
     proj = (PJ *(*)(PJ *)) pj_list[i].proj;
 
     /* allocate projection structure */
-    if (!(PIN = (*proj)(0))) goto bum_call;
+    PIN = proj(0);
+    if (0==PIN)
+        return pj_dealloc_params (ctx, start, ENOMEM);
+
     PIN->ctx = ctx;
     PIN->params = start;
     PIN->is_latlong = 0;
@@ -515,19 +520,19 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PIN->vgridlist_geoid_count = 0;
 
     /* set datum parameters */
-    if (pj_datum_set(ctx, start, PIN)) goto bum_call;
+    if (pj_datum_set(ctx, start, PIN)) 
+        return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
 
     /* set ellipsoid/sphere parameters */
     if (pj_ell_set(ctx, start, &PIN->a, &PIN->es)) {
         pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
-        goto bum_call;
+        return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
     }
 
     PIN->a_orig = PIN->a;
     PIN->es_orig = PIN->es;
 
     /* Compute some ancillary ellipsoidal parameters */
-
     PIN->e = sqrt(PIN->es);      /* eccentricity */
     PIN->alpha = asin (PIN->e);  /* angular eccentricity */
 
@@ -536,7 +541,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PIN->e2s = PIN->e2 * PIN->e2;
 
     /* third eccentricity */
-    PIN->e3    = sin (PIN->alpha) / sqrt(2 - sin (PIN->alpha)*sin (PIN->alpha));
+    PIN->e3    = (0!=PIN->alpha)? sin (PIN->alpha) / sqrt(2 - sin (PIN->alpha)*sin (PIN->alpha)): 0;
     PIN->e3s = PIN->e3 * PIN->e3;
 
     /* flattening */
@@ -544,7 +549,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PIN->rf = PIN->f != 0.0 ? 1.0/PIN->f: HUGE_VAL;
 
     /* second flattening */
-    PIN->f2  = 1/cos (PIN->alpha) - 1;
+    PIN->f2  = (cos(PIN->alpha)!=0)? 1/cos (PIN->alpha) - 1: 0;
     PIN->rf2 = PIN->f2 != 0.0 ? 1/PIN->f2: HUGE_VAL;
 
     /* third flattening */
@@ -557,7 +562,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PIN->ra = 1. / PIN->a;
 
     PIN->one_es = 1. - PIN->es;
-    if (PIN->one_es == 0.) { pj_ctx_set_errno( ctx, -6 ); goto bum_call; }
+    if (PIN->one_es == 0.)
+        return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE);
     PIN->rone_es = 1./PIN->one_es;
 
 
@@ -586,38 +592,28 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* longitude center for wrapping */
     PIN->is_long_wrap_set = pj_param(ctx, start, "tlon_wrap").i;
-    if (PIN->is_long_wrap_set)
-    {
+    if (PIN->is_long_wrap_set) {
         PIN->long_wrap_center = pj_param(ctx, start, "rlon_wrap").f;
         /* Don't accept excessive values otherwise we might perform badly */
         /* when correcting longitudes around it */
         /* The test is written this way to error on long_wrap_center "=" NaN */
         if( !(fabs(PIN->long_wrap_center) < 10 * M_TWOPI) )
-        {
-            pj_ctx_set_errno( ctx, -14 );
-            goto bum_call;
-        }
+            return pj_default_destructor (PIN, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
     }
-
+    
     /* axis orientation */
     if( (pj_param(ctx, start,"saxis").s) != NULL )
     {
         static const char *axis_legal = "ewnsud";
         const char *axis_arg = pj_param(ctx, start,"saxis").s;
         if( strlen(axis_arg) != 3 )
-        {
-            pj_ctx_set_errno( ctx, PJD_ERR_AXIS );
-            goto bum_call;
-        }
+            return pj_default_destructor (PIN, PJD_ERR_AXIS);
 
         if( strchr( axis_legal, axis_arg[0] ) == NULL
             || strchr( axis_legal, axis_arg[1] ) == NULL
             || strchr( axis_legal, axis_arg[2] ) == NULL)
-        {
-            pj_ctx_set_errno( ctx, PJD_ERR_AXIS );
-            goto bum_call;
-        }
-
+            return pj_default_destructor (PIN, PJD_ERR_AXIS);
+            
         /* it would be nice to validate we don't have on axis repeated */
         strcpy( PIN->axis, axis_arg );
     }
@@ -631,6 +627,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     /* false easting and northing */
     PIN->x0 = pj_param(ctx, start, "dx_0").f;
     PIN->y0 = pj_param(ctx, start, "dy_0").f;
+    PIN->z0 = pj_param(ctx, start, "dz_0").f;
+    PIN->t0 = pj_param(ctx, start, "dt_0").f;
 
     /* general scaling factor */
     if (pj_param(ctx, start, "tk_0").i)
@@ -639,26 +637,23 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         PIN->k0 = pj_param(ctx, start, "dk").f;
     else
         PIN->k0 = 1.;
-    if (PIN->k0 <= 0.) {
-        pj_ctx_set_errno( ctx, -31 );
-        goto bum_call;
-    }
+    if (PIN->k0 <= 0.) 
+        return pj_default_destructor (PIN, PJD_ERR_K_LESS_THAN_ZERO);
 
     /* set units */
     s = 0;
     if ((name = pj_param(ctx, start, "sunits").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
-        if (!s) { pj_ctx_set_errno( ctx, -7 ); goto bum_call; }
+        if (!s)
+            return pj_default_destructor (PIN, PJD_ERR_UNKNOW_UNIT_ID);
         s = pj_units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "sto_meter").s)) {
         PIN->to_meter = pj_strtod(s, &s);
         if (*s == '/') /* ratio number */
             PIN->to_meter /= pj_strtod(++s, 0);
-        if (PIN->to_meter <= 0.0) {
-            pj_ctx_set_errno( ctx, -51);
-            goto bum_call;
-        }
+        if (PIN->to_meter <= 0.0)
+            return pj_default_destructor (PIN, PJD_ERR_UNIT_FACTOR_LESS_THAN_0);
         PIN->fr_meter = 1. / PIN->to_meter;
     } else
         PIN->to_meter = PIN->fr_meter = 1.;
@@ -667,17 +662,16 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     s = 0;
     if ((name = pj_param(ctx, start, "svunits").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
-        if (!s) { pj_ctx_set_errno( ctx, -7 ); goto bum_call; }
+        if (!s)
+            return pj_default_destructor (PIN, PJD_ERR_UNKNOW_UNIT_ID);
         s = pj_units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "svto_meter").s)) {
         PIN->vto_meter = pj_strtod(s, &s);
         if (*s == '/') /* ratio number */
             PIN->vto_meter /= pj_strtod(++s, 0);
-        if (PIN->vto_meter <= 0.0) {
-            pj_ctx_set_errno( ctx, -51);
-            goto bum_call;
-        }
+        if (PIN->vto_meter <= 0.0)
+            return pj_default_destructor (PIN, PJD_ERR_UNIT_FACTOR_LESS_THAN_0);
         PIN->vfr_meter = 1. / PIN->vto_meter;
     } else {
         PIN->vto_meter = PIN->to_meter;
@@ -704,7 +698,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             && *next_str == '\0' )
             value = name;
 
-        if (!value) { pj_ctx_set_errno( ctx, -46 ); goto bum_call; }
+        if (!value) 
+            return pj_default_destructor (PIN, PJD_ERR_UNKNOWN_PRIME_MERIDIAN);
         PIN->from_greenwich = dmstor_ctx(ctx,value,NULL);
     }
     else
@@ -712,55 +707,15 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* Private object for the geodesic functions */
     PIN->geod = pj_calloc (1, sizeof (struct geod_geodesic));
-    if (0!=PIN->geod)
-        geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
+    if (0==PIN->geod)
+        return pj_default_destructor (PIN, ENOMEM);
+    geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
 
     /* projection specific initialization */
-    {
-        /* Backup those variables so that we can clean them in case
-         * (*proj)(PIN) fails */
-        void* gridlist = PIN->gridlist;
-        void* vgridlist_geoid = PIN->vgridlist_geoid;
-        void* catalog_name = PIN->catalog_name;
-        void* geod = PIN->geod;
-        if (!(PIN = (*proj)(PIN)) || ctx->last_errno) {
-            if (PIN)
-                pj_free(PIN);
-            else {
-                for ( ; start; start = curr) {
-                    curr = start->next;
-                    pj_dalloc(start);
-                }
-                if( gridlist )
-                    pj_dalloc( gridlist );
-                if( vgridlist_geoid )
-                    pj_dalloc( vgridlist_geoid );
-                if( catalog_name )
-                    pj_dalloc( catalog_name );
-                if( geod )
-                    pj_dalloc( geod );
-            }
-            PIN = 0;
-        }
-    }
-
-    return PIN;
-
-bum_call: /* cleanup error return */
-    {
-        if (PIN)
-        {
-            pj_free(PIN);
-        }
-        else {
-            for ( ; start; start = curr) {
-                curr = start->next;
-                pj_dalloc(start);
-            }
-        }
+    PIN = proj(PIN);
+    if ((0==PIN) || ctx->last_errno)
         return 0;
-    }
-
+    return PIN;
 }
 
 /************************************************************************/
@@ -769,65 +724,17 @@ bum_call: /* cleanup error return */
 /*      This is the application callable entry point for destroying     */
 /*      a projection definition.  It does work generic to all           */
 /*      projection types, and then calls the projection specific        */
-/*      free function (P->pfree()) to do local work.  This maps to      */
-/*      the FREEUP code in the individual projection source files.      */
+/*      free function (P->pfree()) to do local work.  In most cases     */
+/*      P->pfree()==pj_default_destructor.                              */
 /************************************************************************/
 
-void
-pj_free(PJ *P) {
-    if (P) {
-        paralist *t, *n;
-
-        /* free parameter list elements */
-        for (t = P->params; t; t = n) {
-            n = t->next;
-            pj_dalloc(t);
-        }
-
-        /* free array of grid pointers if we have one */
-        if( P->gridlist != NULL )
-            pj_dalloc( P->gridlist );
-
-        if( P->vgridlist_geoid != NULL )
-            pj_dalloc( P->vgridlist_geoid );
-
-        if( P->catalog_name != NULL )
-            pj_dalloc( P->catalog_name );
-
-        /* We used to call pj_dalloc( P->catalog ), but this will leak */
-        /* memory. The safe way to clear catalog and grid is to call */
-        /* pj_gc_unloadall(pj_get_default_ctx()); and pj_deallocate_grids(); */
-        /* TODO: we should probably have a public pj_cleanup() method to do all */
-        /* that */
-
-        if( P->geod != NULL )
-            pj_dalloc( P->geod );
-
-        /* free projection parameters */
-        P->pfree(P);
-    }
-}
-
-
-
-
-
-
-
-
-/************************************************************************/
-/*                              pj_prepare()                            */
-/*                                                                      */
-/*      Helper function for the PJ_xxxx functions providing the         */
-/*      projection specific setup for each projection type.             */
-/*                                                                      */
-/*      Currently not used, but placed here as part of the  material    */
-/*      Demonstrating the idea for a future PJ_xxx architecture         */
-/*      (cf. pj_minimal.c)                                              */
-/*                                                                      */
-/************************************************************************/
-void pj_prepare (PJ *P, const char *description, void (*freeup)(struct PJconsts *), size_t sizeof_struct_opaque) {
-    P->descr = description;
-    P->pfree = freeup;
-    P->opaque  = pj_calloc (1, sizeof_struct_opaque);
+void pj_free(PJ *P) {
+    if (0==P)
+        return;
+    /* free projection parameters - all the hard work is done by */
+    /* pj_default_destructor (in pj_malloc.c), which is supposed */
+    /* to be called as the last step of the local destructor     */
+    /* pointed to by P->destructor. In most cases,               */
+    /* pj_default_destructor actually *is* what is pointed to    */
+    P->destructor (P, 0);
 }

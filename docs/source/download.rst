@@ -46,7 +46,7 @@ Docker
 ................................................................................
 
 A `Docker`_ image with just PROJ.4 binaries and a full compliment of grid shift
-files is available on `DockerHub`:
+files is available on `DockerHub`_:
 
 .. _`Docker`: https://docker.org
 .. _`DockerHub`: https://hub.docker.com/r/osgeo/proj.4/

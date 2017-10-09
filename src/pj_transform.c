@@ -54,22 +54,32 @@ static int pj_adjust_axis( projCtx ctx, const char *axis, int denormalize_flag,
 
 /*
 ** This table is intended to indicate for any given error code in
-** the range 0 to -44, whether that error will occur for all locations (ie.
+** the range 0 to -56, whether that error will occur for all locations (ie.
 ** it is a problem with the coordinate system as a whole) in which case the
 ** value would be 0, or if the problem is with the point being transformed
 ** in which case the value is 1.
 **
 ** At some point we might want to move this array in with the error message
 ** list or something, but while experimenting with it this should be fine.
+**
+**
+** NOTE (2017-10-01): Non-transient errors really should have resulted in a
+** PJ==0 during initialization, and hence should be handled at the level
+** before calling pj_transform. The only obvious example of the contrary
+** appears to be the PJD_ERR_GRID_AREA case, which may also be taken to
+** mean "no grids available"
+**
+**
 */
 
-static const int transient_error[50] = {
+static const int transient_error[60] = {
     /*             0  1  2  3  4  5  6  7  8  9   */
     /* 0 to 9 */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* 10 to 19 */ 0, 0, 0, 0, 1, 1, 0, 1, 1, 1,
     /* 20 to 29 */ 1, 0, 0, 0, 0, 0, 0, 1, 0, 0,
     /* 30 to 39 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    /* 40 to 49 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 };
+    /* 40 to 49 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    /* 50 to 59 */ 1, 0, 1, 0, 1, 1, 1, 0, 0, 0 };
 
 /************************************************************************/
 /*                            pj_transform()                            */
