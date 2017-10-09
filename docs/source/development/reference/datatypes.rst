@@ -21,6 +21,34 @@ Transformation objects
     are created with :c:func:`proj_create` and destroyed with
     :c:func:`proj_destroy`.
 
+.. c:type:: PJ_DIRECTION
+
+    Enumeration that is used to convey in which direction a given transformation
+    should be performed. Used in transformation function call as described in
+    the section on :ref:`transformation functions <coord_trans_functions>`.
+
+    Forward transformations are defined with the :c:
+
+    .. code-block:: C
+
+        typedef enum proj_direction {
+            PJ_FWD   =  1,   /* Forward    */
+            PJ_IDENT =  0,   /* Do nothing */
+            PJ_INV   = -1    /* Inverse    */
+        } PJ_DIRECTION;
+
+    .. c:member:: PJ_FWD
+
+        Perform transformation in the forward direction.
+
+    .. c:member:: PJ_IDENT
+
+        Identity. Do nothing.
+
+    .. c:member:: PJ_INV
+
+        Perform transformation in the inverse direction.
+
 .. c:type:: PJ_CONTEXT
 
     Context objects enables safe multi-threaded usage of PROJ.4. Each :c:type:`PJ`
@@ -28,6 +56,7 @@ Transformation objects
     used). All operations within a context should be performed in the same thread.
     :c:type:`PJ_CONTEXT` objects are created with :c:func:`proj_context_create`
     and destroyed with :c:func:`proj_context_destroy`.
+
 
 2 dimensional coordinates
 --------------------------------------------------------------------------------

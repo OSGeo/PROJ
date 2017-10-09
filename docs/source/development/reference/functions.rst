@@ -95,33 +95,36 @@ Transformation setup
     :param PJ* P:
     :returns: :c:type:`PJ*`
 
+.. _coord_trans_functions:
+
 Coordinate transformation
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-.. c:function:: PJ_COORD proj_trans_coord(PJ *P, enum proj_direction direction, PJ_COORD coord)
+
+.. c:function:: PJ_COORD proj_trans_coord(PJ *P, PJ_DIRECTION direction, PJ_COORD coord)
 
     Transform a single :c:type:`PJ_COORD` coordinate.
 
     :param PJ* P:
     :param `direction`: Transformation direction.
-    :type `direction`: enum proj_direction
+    :type `direction`: PJ_DIRECTION
     :param PJ_COORD coord: Coordinate that will be transformed.
     :returns: :c:type:`PJ_COORD`
 
 
-.. c:function:: PJ_OBS proj_trans_obs(PJ *P, enum proj_direction direction, PJ_OBS obs)
+.. c:function:: PJ_OBS proj_trans_obs(PJ *P, PJ_DIRECTION direction, PJ_OBS obs)
 
     Transform a single :c:type:`PJ_OBS` observation.
 
     :param PJ* P:
     :param `direction`: Transformation direction.
-    :type `direction`: enum proj_direction
+    :type `direction`: PJ_DIRECTION
     :param PJ_OBS obs: Observation data to transform.
     :returns: :c:type:`PJ_OBS`
 
 
 
-.. c:function:: size_t proj_transform(PJ *P, enum proj_direction direction, \
+.. c:function:: size_t proj_transform(PJ *P, PJ_DIRECTION direction, \
                                       double *x, size_t sx, size_t nx, double *y, \
                                       size_t sy, size_t ny, double *z, size_t sz, size_t nz, \
                                       double *t, size_t st, size_t nt)
@@ -182,7 +185,7 @@ Coordinate transformation
 
     :param PJ* P: Transformation object
     :param `direction`: Transformation direction
-    :type `enum proj_direction`:
+    :type `PJ_DIRECTION`:
     :param double* x: Array of x-coordinates
     :param double* y: Array of y-coordinates
     :param double* z: Array of z-coordinates
@@ -199,23 +202,23 @@ Coordinate transformation
 
 
 
-.. c:function:: size_t proj_transform_coord(PJ *P, enum proj_direction direction, size_t n, PJ_COORD *coord)
+.. c:function:: size_t proj_transform_coord(PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord)
 
     Batch transform an array of :c:type:`PJ_COORD`.
 
     :param PJ* P:
     :param `direction`: Transformation direction
-    :type `direction`: enum proj_direction
+    :type `direction`: PJ_DIRECTION
     :param size_t n: Number of cordinates in :c:data:`coord`
     :returns: :c:type:`size_t` 0 if all observations are transformed without error, otherwise returns error number
 
-.. c:function:: size_t proj_transform_obs(PJ *P, enum proj_direction direction, size_t n, PJ_OBS *obs)
+.. c:function:: size_t proj_transform_obs(PJ *P, PJ_DIRECTION direction, size_t n, PJ_OBS *obs)
 
     Batch transform an array of :c:type:`PJ_OBS`.
 
     :param PJ* P:
     :param `direction`: Transformation direction
-    :type `direction`: enum proj_direction
+    :type `direction`: PJ_DIRECTION
     :param size_t n: Number of observations in :c:data:`obs`
     :returns: :c:type:`size_t` 0 if all observations are transformed without error, otherwise returns error number
 
@@ -426,7 +429,7 @@ Distances
 Various
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-.. c:function:: double proj_roundtrip(PJ *P, enum proj_direction direction, int n, PJ_OBS obs)
+.. c:function:: double proj_roundtrip(PJ *P, PJ_DIRECTION direction, int n, PJ_OBS obs)
 
     Measure internal consistency of a given transformation. The function
     performs :c:data:`n` round trip transformations starting in either
@@ -436,7 +439,7 @@ Various
 
     :param PJ* P:
     :param `direction`: Starting direction of transformation
-    :type `direction`: enum proj_direction
+    :type `direction`: PJ_DIRECTION
     :param int n: Number of roundtrip transformations
     :param PJ_OBS obs: Input coordinate
     :returns: :c:type:`double` Distance between original coordinate and the \
