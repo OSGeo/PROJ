@@ -780,10 +780,6 @@ PJ_ELLPS *proj_list_ellps(void) {
     return pj_get_ellps_ref();
 }
 
-PJ_DATUMS *proj_list_datums(void) {
-    return pj_get_datums_ref();
-}
-
 PJ_UNITS *proj_list_units(void) {
     return pj_get_units_ref();
 }

@@ -441,10 +441,9 @@ PJ_GRID_INFO proj_grid_info(const char *gridname);
 PJ_INIT_INFO proj_init_info(const char *initname);
 
 /* List functions: */
-/* Get lists of operations, ellipsoids, datums, units and prime meridians. */
+/* Get lists of operations, ellipsoids, units and prime meridians. */
 PJ_OPERATIONS       *proj_list_operations(void);
 PJ_ELLPS            *proj_list_ellps(void);
-PJ_DATUMS           *proj_list_datums(void);
 PJ_UNITS            *proj_list_units(void);
 PJ_PRIME_MERIDIANS  *proj_list_prime_meridians(void);
 

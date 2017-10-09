@@ -145,6 +145,5 @@ EXPORTS
 
     proj_list_operations           @132
     proj_list_ellps                @133
-    proj_list_datums               @134
-    proj_list_units                @135
-    proj_list_prime_meridians      @136
+    proj_list_units                @134
+    proj_list_prime_meridians      @135

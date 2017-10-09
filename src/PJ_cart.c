@@ -247,7 +247,6 @@ int pj_cart_selftest (void) {
 
     PJ_OPERATIONS *oper_list;
     PJ_ELLPS *ellps_list;
-    PJ_DATUMS *datum_list;
     PJ_UNITS *unit_list;
     PJ_PRIME_MERIDIANS *pm_list;
 
@@ -582,16 +581,12 @@ int pj_cart_selftest (void) {
     if (n == 0) return 91;
 
     n = 0;
-    for (datum_list = proj_list_datums(); datum_list->id; ++datum_list) n++;
+    for (unit_list = proj_list_units(); unit_list->id; ++unit_list) n++;
     if (n == 0) return 92;
 
     n = 0;
-    for (unit_list = proj_list_units(); unit_list->id; ++unit_list) n++;
-    if (n == 0) return 93;
-
-    n = 0;
     for (pm_list = proj_list_prime_meridians(); pm_list->id; ++pm_list) n++;
-    if (n == 0) return 94;
+    if (n == 0) return 93;
 
     return 0;
 }
