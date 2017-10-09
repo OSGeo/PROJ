@@ -212,9 +212,6 @@ typedef struct PJ_LIST PJ_OPERATIONS;
 struct PJ_ELLPS;
 typedef struct PJ_ELLPS PJ_ELLPS;
 
-struct PJ_DATUMS;
-typedef struct PJ_DATUMS PJ_DATUMS;
-
 struct PJ_UNITS;
 typedef struct PJ_UNITS PJ_UNITS;
 
