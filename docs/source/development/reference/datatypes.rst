@@ -749,6 +749,110 @@ Projection derivatives
 
             Meridian convergence calculated analytically.
 
+List structures
+-------------------------------------------------------------------------------
+
+.. c:type:: PJ_OPERATIONS
+
+    Description a PROJ.4 operation
+
+    .. code-block:: C
+
+        struct PJ_OPERATIONS {
+            char    *id;                 /* operation keyword */
+            PJ *(*proj)(PJ *);           /* operation  entry point */
+            char    * const *descr;      /* description text */
+        };
+
+    .. c:member:: char *id
+
+        Operation keyword.
+
+    .. c:member:: PJ *(*op)(PJ *)
+
+        Operation entry point.
+
+    .. c:member:: char * const *
+
+        Description of operation.
+
+
+.. c:type:: PJ_ELLPS
+
+    Description of ellipsoids defined in PROJ.4
+
+    .. code-block:: C
+
+        struct PJ_ELLPS {
+            char    *id;
+            char    *major;
+            char    *ell;
+            char    *name;
+        };
+
+    .. c:member:: char *id
+
+        Keyword name of the ellipsoid.
+
+    .. c:member:: char *major
+
+        Semi-major axis of the ellipsoid, or radius in case of a sphere.
+
+    .. c:member:: char *ell
+
+        Elliptical parameter, e.g. `rf=298.257` or `b=6356772.2`.
+
+    .. c:member:: char *name
+
+        Name of the ellipsoid
+
+.. c:type:: PJ_UNITS
+
+    Distance units defined in PROJ.4.
+
+    .. code-block:: C
+
+        struct PJ_UNITS {
+            char    *id;           /* units keyword */
+            char    *to_meter;     /* multiply by value to get meters */
+            char    *name;         /* comments */
+            double   factor;       /* to_meter factor in actual numbers */
+        };
+
+    .. c:member:: char *id
+
+        Keyword for the unit.
+
+    .. c:member:: char *to_meter
+
+        Text representation of the factor that converts a given unit to meters
+
+    .. c:member:: char *name
+
+        Name of the unit.
+
+    .. c:member:: double factor
+
+        Conversion factor that converts the unit to meters.
+
+.. c:type:: PJ_PRIME_MERIDIANS
+
+    Prime meridians defined in PROJ.4.
+
+    .. code-block:: C
+
+        struct PJ_PRIME_MERIDIANS {
+            char    *id;
+            char    *defn;
+        };
+
+    .. c:member:: char *id
+
+        Keyword for the prime meridian
+
+    .. c:member:: char *def
+
+        Offset from Greenwich in DMS format.
 
 Info structures
 -------------------------------------------------------------------------------

@@ -396,6 +396,49 @@ Info functions
     :type `initname`: const char*
     :returns: :c:type:`PJ_INIT_INFO`
 
+Lists
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. c:function::  const PJ_OPERATIONS* proj_list_operations(void)
+
+    Get a pointer to an array of all operations in PROJ.4. The last entry
+    of the returned array is a NULL-entry. The array is statically allocated
+    and does not need to be freed after use.
+
+    Print a list of all operations in PROJ.4:
+
+    .. code-block:: C
+
+        PJ_OPERATIONS *ops;
+        for (ops = proj_list_operations(); ops->id; ++ops)
+            printf("%s\n", ops->id);
+
+
+    :returns: :c:type:`PJ_OPERATIONS*`
+
+.. c:function:: const PJ_ELLPS* proj_list_ellps(void)
+
+    Get a pointer to an array of ellipsoids defined in PROJ.4. The last entry
+    of the returned array is a NULL-entry. The array is statically allocated
+    and does not need to be freed after use.
+
+    :returns: :c:type:`PJ_ELLPS*`
+
+.. c:function:: const PJ_UNITS* proj_list_units(void)
+
+    Get a pointer to an array of distance units defined in PROJ.4. The last
+    entry of the returned array is a NULL-entry. The array is statically
+    allocated and does not need to be freed after use.
+
+    :returns: :c:type:`PJ_UNITS*`
+
+.. c:function:: const PJ_PRIME_MERIDIANS* proj_list_prime_meridians(void)
+
+    Get a pointer to an array of prime meridians defined in PROJ.4. The last
+    entry of the returned array is a NULL-entry. The array is statically
+    allocated and does not need to be freed after use.
+
+    :returns: :c:type:`PJ_PRIME_MERIDIANS*`
 
 Distances
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
