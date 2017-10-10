@@ -430,7 +430,7 @@ void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
     while (SDPHI*SDPHI > genau2 && iter < maxiter);
 
 /*	ellipsoidal (geodetic) latitude */
-    *Latitude=atan(SPHI/fabs(CPHI));
+    *Latitude=atan2(SPHI, fabs(CPHI));
 
     return;
 #endif /* defined(USE_ITERATIVE_METHOD) */
