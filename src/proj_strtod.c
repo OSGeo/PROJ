@@ -94,7 +94,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-01-17/2017-09-18
 
 double proj_strtod(const char *str, char **endptr);
 double proj_atof(const char *str);
-    
+
 
 double proj_strtod(const char *str, char **endptr) {
     double number = 0, integral_part = 0;
@@ -106,7 +106,7 @@ double proj_strtod(const char *str, char **endptr) {
     int num_digits_total        = 0;
     int num_digits_after_comma  = 0;
     int num_prefixed_zeros      = 0;
-    
+
     if (0==str) {
         errno = EFAULT;
         if (endptr)
@@ -140,11 +140,11 @@ double proj_strtod(const char *str, char **endptr) {
             errno = EINVAL;
             return HUGE_VAL;
     }
-    
+
     /* skip prefixed zeros */
     while ('0'==*p || '_'==*p)
         p++;
-    
+
     /* Now expect a (potentially zero-length) string of digits */
     while (isdigit(*p) || ('_'==*p)) {
         if ('_'==*p) {
@@ -156,11 +156,11 @@ double proj_strtod(const char *str, char **endptr) {
         num_digits_total++;
     }
     integral_part = number;
-    
+
     /* Do we have a fractional part? */
     if ('.'==*p) {
         p++;
-        
+
         /* keep on skipping prefixed zeros (i.e. allow writing 1e-20 */
         /* as 0.00000000000000000001 without losing precision) */
         if (0==integral_part)
@@ -173,7 +173,7 @@ double proj_strtod(const char *str, char **endptr) {
         /* if the next character is nonnumeric, we have reached the end */
         if (0==strchr ("0123456789eE+-", *p))
             return integral_part;
-    
+
         while (isdigit(*p) || '_'==*p) {
             /* Don't let pathologically long fractions destroy precision */
             if ('_'==*p || num_digits_total > 17) {

@@ -124,15 +124,14 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 double proj_strtod(const char *str, char **endptr);
 double proj_atof(const char *str);
 
-static char *column (char *buf, int n);
 int   main(int argc, char **argv);
 
-static int   process_file (char *fname);    
+static int   process_file (char *fname);
 static int   errmsg (int errlev, char *msg, ...);
 static int   get_inp (FILE *f, char *inp, int size);
 static int   get_cmnd (char *inp, char *cmnd, int len);
 static char *get_args (char *inp);
-static int   dispatch (char *cmnd, char *args); 
+static int   dispatch (char *cmnd, char *args);
 
 
 
@@ -198,14 +197,14 @@ static const char usage[] = {
     "       gie -vvvv corner-cases.gie\n"
     "2. Run all tests in files \"foo\" and \"bar\", providing info on failures only\n"
     "       gie foo bar\n"
-    "--------------------------------------------------------------------------------\n"    
+    "--------------------------------------------------------------------------------\n"
 };
 
 int main (int argc, char **argv) {
     int  i;
     const char *longflags[]  = {"v=verbose", "q=quiet", "h=help", 0};
     const char *longkeys[]   = {"o=output", 0};
-    
+
     o = opt_parse (argc, argv, "hvq", "o", longflags, longkeys);
     if (0==o)
         return 0;
@@ -215,7 +214,7 @@ int main (int argc, char **argv) {
         return 0;
     }
 
-    
+
 
     T.verbosity = opt_given (o, "q");
     if (T.verbosity)
@@ -245,7 +244,7 @@ int main (int argc, char **argv) {
     if (T.verbosity > 0) {
         if (o->fargc > 1)
         fprintf (T.fout, "%sGrand total: %d. Success: %d, Failure: %d\n", delim, T.grand_ok+T.grand_ko, T.grand_ok, T.grand_ko);
-        printf (delim);
+        fprintf (T.fout, "%s", delim);
     }
     else
         if (T.grand_ko)
@@ -261,7 +260,7 @@ int main (int argc, char **argv) {
 
 
 
-    
+
 static int process_file (char *fname) {
     FILE *f;
     char inp[CMDLEN];
@@ -294,7 +293,7 @@ static int process_file (char *fname) {
             proj_destroy (T.P);
             T.P = 0;
             return 0;
-            
+
         }
         args = get_args (inp);
         if (SKIP==dispatch (cmnd, args))
@@ -306,7 +305,7 @@ static int process_file (char *fname) {
     T.grand_ko += T.total_ko;
     if (T.verbosity > 0)
     fprintf (T.fout, "%stotal: %2d tests succeeded,  %2d tests %s\n", delim, T.total_ok, T.total_ko, T.total_ko? "FAILED!": "failed.");
-    
+
     if (level==0)
         return errmsg (-3, "File '%s':Missing 'BEGIN' cmnd - bye!\n", fname);
     if (level && level%2)
@@ -315,25 +314,6 @@ static int process_file (char *fname) {
 }
 
 
-
-
-
-
-/* return a pointer to the n'th column of buf or a pointer to the terminating 0 if less than n */
-static char *column (char *buf, int n) {
-    int i;
-    if (n <= 0)
-        return buf;
-    for (i = 0;  i < n;  i++) {
-        while (isspace(*buf))
-            buf++;
-        if (i == n - 1)
-            break;
-        while ((0 != *buf) && !isspace(*buf))
-            buf++;
-    }
-    return buf;
-}
 
 
 
@@ -399,7 +379,7 @@ static int direction (char *args) {
             T.dir = PJ_INV;
             break;
         default:
-            return 1;                
+            return 1;
     }
     return 0;
 }
@@ -407,9 +387,10 @@ static int direction (char *args) {
 
 
 
-static void finish_previous_operation () {
+static void finish_previous_operation (char *args) {
     if (T.verbosity > 1 && T.op_id > 1 && T.op_ok+T.op_ko)
         fprintf (T.fout, "%s     %d tests succeeded,  %d tests %s\n", delim, T.op_ok, T.op_ko, T.op_ko? "FAILED!": "failed.");
+    (void) args;
 }
 
 static int operation (char *args) {
@@ -423,10 +404,10 @@ static int operation (char *args) {
         printf ("%d\n", (int) tol_lineno); */
     T.op_ok = 0;
     T.op_ko = 0;
-    
+
     direction ("forward");
     tolerance ("0.5");
-    
+
     if (T.P)
         proj_destroy (T.P);
     T.P = proj_create (0, args);
@@ -443,11 +424,11 @@ static PJ_COORD torad_if_needed (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
         u = P->right;
     if (u==PJ_IO_UNITS_CLASSIC || u==PJ_IO_UNITS_METERS)
         return a;
-    
-    if (u==PJ_IO_UNITS_RADIANS) {
-        c.lpz.lam = proj_torad (T.a.lpz.lam);
-        c.lpz.phi = proj_torad (T.a.lpz.phi);
-    }
+
+    c.lpz.lam = proj_torad (T.a.lpz.lam);
+    c.lpz.phi = proj_torad (T.a.lpz.phi);
+    c.v[2] = T.a.v[2];
+    c.v[3] = T.a.v[3];
 
     return c;
 }
@@ -478,15 +459,15 @@ static int roundtrip (char *args) {
     double d, r, ans;
     char *endp;
     ans = proj_strtod (args, &endp);
-    ntrips = ans==HUGE_VAL? 100: fabs(ans);
+    ntrips = (int) (ans==HUGE_VAL? 100: fabs(ans));
     d = proj_strtod (endp, &endp);
     d = d==HUGE_VAL?  T.tolerance:  d / 1000;
     r = proj_roundtrip (T.P, PJ_FWD, ntrips, T.a);
     if (r > d) {
         if (T.verbosity > -1) {
             if (0==T.op_ko && T.verbosity < 2)
-                banner (T.operation);            
-            fprintf (T.fout, T.op_ko? "     -----\n": delim);
+                banner (T.operation);
+            fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
             fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
             fprintf (T.fout, "     roundtrip deivation: %.3f mm, expected: %.3f mm\n", 1000*r, 1000*d);
         }
@@ -513,17 +494,17 @@ static int expect (char *args) {
         }
     }
     T.e = torad_if_needed (T.P, T.dir==PJ_FWD? PJ_INV:PJ_FWD, T.e);
-    
+
     T.b = proj_trans_coord (T.P, T.dir, T.a);
     T.b = torad_if_needed (T.P, T.dir==PJ_FWD? PJ_INV:PJ_FWD, T.b);
-    
+
     if (T.nargs < 2) {
         T.op_ko++;
         T.total_ko++;
         if (T.verbosity > -1) {
             if (0==T.op_ko && T.verbosity < 2)
-                banner (T.operation);            
-            fprintf (T.fout, T.op_ko? "     -----\n": delim);
+                banner (T.operation);
+            fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
             fprintf (T.fout, "     FAILURE in %s(%d):\n     Too few args: %s\n", opt_strip_path (T.curr_file), (int) lineno, args);
         }
      return 1;
@@ -544,8 +525,8 @@ static int expect (char *args) {
         if (T.verbosity > -1) {
             if (0==T.op_ko && T.verbosity < 2)
                 banner (T.operation);
-            fprintf (T.fout, T.op_ko? "     -----\n": delim);
-                
+            fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
+
             fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
             fprintf (T.fout, "     expected: %s\n", args);
             fprintf (T.fout, "     got:      %.9f   %.9f", T.b.xy.x,  T.b.xy.y);
@@ -572,7 +553,7 @@ static int expect (char *args) {
 
 
 static int verbose (char *args) {
-    int i = proj_atof (args);
+    int i = (int) proj_atof (args);
 
     /* if -q/--quiet flag has been given, we do nothing */
     if (T.verbosity < 0)
@@ -604,17 +585,26 @@ static int dispatch (char *cmnd, char *args) {
            level++;
         return 0;
     }
-    if  (0==stricmp (cmnd, "OPERATION")) return  operation (args);
-    if  (0==stricmp (cmnd, "ACCEPT"))    return  accept    (args);
-    if  (0==stricmp (cmnd, "EXPECT"))    return  expect    (args);
-    if  (0==stricmp (cmnd, "ROUNDTRIP")) return  roundtrip (args);
-    if  (0==stricmp (cmnd, "BANNER"))    return  banner    (args);
-    if  (0==stricmp (cmnd, "VERBOSE"))   return  verbose   (args);
-    if  (0==stricmp (cmnd, "DIRECTION")) return  direction (args);
-    if  (0==stricmp (cmnd, "TOLERANCE")) return  tolerance (args);
-    if  (0==stricmp (cmnd, "ECHO"))      return  echo      (args);
-    if  (0==strcmp  (cmnd, "END"))       return          finish_previous_operation (args), level++, 0;
-    if  ('#'==cmnd[0])                   return  comment   (args);
+    if  (0==strcmp (cmnd, "OPERATION")) return  operation (args);
+    if  (0==strcmp (cmnd, "operation")) return  operation (args);
+    if  (0==strcmp (cmnd, "ACCEPT"))    return  accept    (args);
+    if  (0==strcmp (cmnd, "accept"))    return  accept    (args);
+    if  (0==strcmp (cmnd, "EXPECT"))    return  expect    (args);
+    if  (0==strcmp (cmnd, "expect"))    return  expect    (args);
+    if  (0==strcmp (cmnd, "ROUNDTRIP")) return  roundtrip (args);
+    if  (0==strcmp (cmnd, "roundtrip")) return  roundtrip (args);
+    if  (0==strcmp (cmnd, "BANNER"))    return  banner    (args);
+    if  (0==strcmp (cmnd, "banner"))    return  banner    (args);
+    if  (0==strcmp (cmnd, "VERBOSE"))   return  verbose   (args);
+    if  (0==strcmp (cmnd, "verbose"))   return  verbose   (args);
+    if  (0==strcmp (cmnd, "DIRECTION")) return  direction (args);
+    if  (0==strcmp (cmnd, "direction")) return  direction (args);
+    if  (0==strcmp (cmnd, "TOLERANCE")) return  tolerance (args);
+    if  (0==strcmp (cmnd, "tolerance")) return  tolerance (args);
+    if  (0==strcmp (cmnd, "ECHO"))      return  echo      (args);
+    if  (0==strcmp (cmnd, "echo"))      return  echo      (args);
+    if  (0==strcmp  (cmnd, "END"))      return          finish_previous_operation (args), level++, 0;
+    if  ('#'==cmnd[0])                  return  comment   (args);
     return 0;
 }
 
@@ -661,10 +651,10 @@ static int errmsg (int errlev, char *msg, ...) {
         next--;                                   \
         while (isspace (c=fgetc(f)) && !feof(f)); \
     }
-                
+
 static int get_inp (FILE *f, char *inp, int size) {
     char *next;
-    int c, esc;
+    int c = 0, esc;
     char *endp = inp + size - 2;
 
     skipspace (f, c);
@@ -686,15 +676,15 @@ static int get_inp (FILE *f, char *inp, int size) {
             lineno++;
             break;
         }
-            
-        *next++ = c;
+
+        *next++ = (char) c;
         if ('\\'==c)
             esc = 1;
         if (feof(f) || (next==endp))
             break;
     }
     *(next) = 0;
-    return strlen(inp);
+    return (int) strlen(inp);
 }
 
 static int get_cmnd (char *inp, char *cmnd, int len) {
