@@ -270,7 +270,7 @@ static void *destructor (PJ *P, int errlev) {
         return pj_default_destructor (P, errlev);
 
     for (i = 0;  i < P->opaque->steps; i++)
-        pj_default_destructor (P->opaque->pipeline[i+1], errlev);
+        P->opaque->pipeline[i+1]->destructor (P->opaque->pipeline[i+1], errlev);
 
     pj_dealloc (P->opaque->reverse_step);
     pj_dealloc (P->opaque->omit_forward);
