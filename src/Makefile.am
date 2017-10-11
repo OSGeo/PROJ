@@ -1,6 +1,6 @@
 AM_CFLAGS = @C_WFLAGS@
 
-bin_PROGRAMS =	proj nad2bin geod cs2cs cct
+bin_PROGRAMS =	proj nad2bin geod cs2cs gie cct
 EXTRA_PROGRAMS = multistresstest test228
 
 TESTS = geodtest

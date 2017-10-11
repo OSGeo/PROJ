@@ -57,6 +57,7 @@ test_script:
   - echo "Contents of current directory:"
   - dir
   - proj.exe -VC
+  - gie.exe ..\test\gie\builtins.gie
 
 deploy: off
 
