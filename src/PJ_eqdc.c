@@ -93,7 +93,7 @@ PJ *PROJECTION(eqdc) {
     Q->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
 
     if (fabs(Q->phi1 + Q->phi2) < EPS10)
-        pj_default_destructor (P, PJD_ERR_CONIC_LAT_EQUAL);
+        return pj_default_destructor (P, PJD_ERR_CONIC_LAT_EQUAL);
 
     if (!(Q->en = pj_enfn(P->es)))
         return pj_default_destructor(P, ENOMEM);
