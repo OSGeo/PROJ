@@ -269,15 +269,18 @@ static void *destructor (PJ *P, int errlev) {
     if (0==P->opaque)
         return pj_default_destructor (P, errlev);
 
-    for (i = 0;  i < P->opaque->steps; i++)
-        P->opaque->pipeline[i+1]->destructor (P->opaque->pipeline[i+1], errlev);
+    /* Deallocate each pipeine step, then pipeline array */
+    if (0!=P->opaque->pipeline)
+        for (i = 0;  i < P->opaque->steps; i++)
+            if (0!=P->opaque->pipeline[i+1])
+                P->opaque->pipeline[i+1]->destructor (P->opaque->pipeline[i+1], errlev);
+    pj_dealloc (P->opaque->pipeline);
 
     pj_dealloc (P->opaque->reverse_step);
     pj_dealloc (P->opaque->omit_forward);
     pj_dealloc (P->opaque->omit_inverse);
     pj_dealloc (P->opaque->argv);
     pj_dealloc (P->opaque->current_argv);
-    pj_dealloc (P->opaque->pipeline);
 
     return pj_default_destructor(P, errlev);
 }
