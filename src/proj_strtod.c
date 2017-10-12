@@ -86,6 +86,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-01-17/2017-09-18
 ***********************************************************************/
 
 
+#include <string.h> /* for strchr */
 #include <errno.h>
 #include <ctype.h>
 #include <float.h>  /* for HUGE_VAL */
@@ -93,16 +94,18 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-01-17/2017-09-18
 
 double proj_strtod(const char *str, char **endptr);
 double proj_atof(const char *str);
-    
+
 
 double proj_strtod(const char *str, char **endptr) {
-    double number = 0;
+    double number = 0, integral_part = 0;
     int exponent = 0;
+    int fraction_is_nonzero = 0;
     int sign = 0;
     char *p = (char *) str;
     int n = 0;
-    int num_digits_total = 0;
-    int num_digits_after_comma = 0;
+    int num_digits_total        = 0;
+    int num_digits_after_comma  = 0;
+    int num_prefixed_zeros      = 0;
 
     if (0==str) {
         errno = EFAULT;
@@ -123,10 +126,10 @@ double proj_strtod(const char *str, char **endptr) {
         return HUGE_VAL;
     }
 
-    /* Then handle optional prefixed sign */
+    /* Then handle optional prefixed sign and skip prefix zeros */
     switch (*p) {
         case '-':
-            sign = -1,  p++;  break;
+            sign = -1,  p++;   break;
         case '+':
             sign =  1,  p++;  break;
         default:
@@ -138,6 +141,10 @@ double proj_strtod(const char *str, char **endptr) {
             return HUGE_VAL;
     }
 
+    /* skip prefixed zeros */
+    while ('0'==*p || '_'==*p)
+        p++;
+
     /* Now expect a (potentially zero-length) string of digits */
     while (isdigit(*p) || ('_'==*p)) {
         if ('_'==*p) {
@@ -148,23 +155,45 @@ double proj_strtod(const char *str, char **endptr) {
         p++;
         num_digits_total++;
     }
-        
+    integral_part = number;
+
     /* Do we have a fractional part? */
     if ('.'==*p) {
         p++;
 
+        /* keep on skipping prefixed zeros (i.e. allow writing 1e-20 */
+        /* as 0.00000000000000000001 without losing precision) */
+        if (0==integral_part)
+            while ('0'==*p || '_'==*p) {
+                if ('0'==*p)
+                    num_prefixed_zeros++;
+                p++;
+            }
+
+        /* if the next character is nonnumeric, we have reached the end */
+        if (0==strchr ("0123456789eE+-", *p))
+            return integral_part;
+
         while (isdigit(*p) || '_'==*p) {
-            if ('_'==*p) {
+            /* Don't let pathologically long fractions destroy precision */
+            if ('_'==*p || num_digits_total > 17) {
                 p++;
                 continue;
             }
+
             number = number * 10. + (*p - '0');
+            if (*p!='0')
+                fraction_is_nonzero = 1;
             p++;
             num_digits_total++;
             num_digits_after_comma++;
         }
 
-        exponent = -num_digits_after_comma;
+        /* Avoid having long zero-tails (4321.000...000) destroy precision */
+        if (fraction_is_nonzero)
+            exponent = -(num_digits_after_comma + num_prefixed_zeros);
+        else
+            number = integral_part;
     }
 
     /* non-digit */
@@ -221,8 +250,11 @@ double proj_strtod(const char *str, char **endptr) {
       return HUGE_VAL;
     }
 
-    number *= pow (10, exponent);
+    /* on some platforms pow() is very slow - so don't call it if exponent==0 */
+    if (exponent)
+        number *= pow (10, exponent);
 
+    /* Did we run into an infinity? */
     if (fabs(number) > DBL_MAX)
         errno = ERANGE;
 

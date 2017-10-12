@@ -1,6 +1,6 @@
 /***********************************************************************
 
-          OPTARGPM - a header-only library for decoding 
+          OPTARGPM - a header-only library for decoding
                 PROJ.4 style command line options
 
                    Thomas Knudsen, 2017-09-10
@@ -18,7 +18,7 @@ this is an attempt to catch up and chop the ketchup.
 
 Since optargpm (for "optarg plus minus") does not belong, in any
 obvious way, in any systems development library, it is provided as
-a "header only" library. 
+a "header only" library.
 
 While this is conventional in C++, it is frowned at in plain C.
 But frown away - "header only" has its places, and this is one of
@@ -56,7 +56,7 @@ Supporting a wide range of option syntax, the getoptpm API is somewhat
 quirky, but also compact, consisting of one data type, 3(+2) functions,
 and one enumeration:
 
-OPTARGS 
+OPTARGS
         Housekeeping data type. An instance of OPTARGS is conventionally
         called o or opt
 opt_parse (opt, argc, argv ...):
@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
     FILE *out = stdout;
     char *longflags[]  = {"v=verbose", "h=help", 0};
     char *longkeys[]   = {"o=output", "hello", 0};
-    
+
     o = opt_parse (argc, argv, "hv", "o", longflags, longkeys);
     if (0==o)
         return 0;
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
         exit (0);
     }
 
-    if (opt_given (o, "v")) 
+    if (opt_given (o, "v"))
         puts ("Feeling chatty today?");
 
     if (opt_given (o, "hello")) {
@@ -126,8 +126,8 @@ int main(int argc, char **argv) {
 
     if (opt_given (o, "o"))
         out = fopen (opt_arg (o, "output"), "rt"); // Note: "output" translates to "o" internally
-    
-    // Setup transformation 
+
+    // Setup transformation
     P = proj_create_argv (0, o->pargc, o->pargv);
 
     // Loop over all lines of all input files
@@ -207,6 +207,7 @@ static int opt_raise_flag (OPTARGS *opt, int ordinal);
 static int opt_ordinal (OPTARGS *opt, char *option);
 int opt_given (OPTARGS *opt, char *option);
 char *opt_arg (OPTARGS *opt, char *option);
+char *opt_strip_path (char *full_name);
 OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, const char **longflags, const char **longkeys);
 
 #define opt_eof_handler(opt) if (opt_eof (opt)) {continue;} else {;}
@@ -223,7 +224,7 @@ struct OPTARGS {
     char  *optarg[256];      /* optarg[(int) 'f'] holds a pointer to the argument of option "-f" */
     char  *flags;            /* a list of flag style options supported, e.g. "hv" (help and verbose) */
     char  *keys;             /* a list of key/value style options supported, e.g. "o" (output) */
-    const char **longflags;  /* long flags, {"help", "verbose"}, or {"h=help", "v=verbose"}, to indicate homologous short options */ 
+    const char **longflags;  /* long flags, {"help", "verbose"}, or {"h=help", "v=verbose"}, to indicate homologous short options */
     const char **longkeys;   /* e.g. {"output"} or {o=output"} to support --output=/path/to/output-file. In the latter case, */
                              /* all operations on "--output" gets redirected to "-o", so user code need handle arguments to "-o" only */
 };
@@ -264,7 +265,7 @@ int opt_input_loop (OPTARGS *opt, int binary) {
     }
 
     opt->record_index = 0;
-        
+
     /* no input files specified - read from stdin */
     if ((0==opt->fargc) && (0==opt->input)) {
         opt->input = stdin;
@@ -372,7 +373,8 @@ static int opt_ordinal (OPTARGS *opt, char *option) {
         }
 
     }
-
+    /* kill some potential compiler warnings about unused functions */
+    (void) opt_eof (0);
     return 0;
 }
 
@@ -397,27 +399,39 @@ char *opt_arg (OPTARGS *opt, char *option) {
     return opt->optarg[ordinal];
 }
 
+char *opt_strip_path (char *full_name) {
+    char *last_path_delim, *stripped_name = full_name;
+
+    last_path_delim = strrchr (stripped_name, '\\');
+    if (last_path_delim > stripped_name)
+        stripped_name = last_path_delim + 1;
+
+    last_path_delim = strrchr (stripped_name, '/');
+    if (last_path_delim > stripped_name)
+        stripped_name = last_path_delim + 1;
+    return stripped_name;
+}
 
 /* split command line options into options/flags ("-" style), projdefs ("+" style) and input file args */
 OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, const char **longflags, const char **longkeys) {
     int i, j;
     OPTARGS *o;
-    char *last_path_delim;
-    
+
     o = (OPTARGS *) calloc (1, sizeof(OPTARGS));
     if (0==o)
         return 0;
 
     o->argc = argc;
     o->argv = argv;
-    o->progname = argv[0];
+    o->progname = opt_strip_path (argv[0]);
+/*    o->progname = argv[0];
     last_path_delim = strrchr (argv[0], '\\');
     if (last_path_delim > o->progname)
         o->progname = last_path_delim;
     last_path_delim = strrchr (argv[0], '/');
     if (last_path_delim > o->progname)
         o->progname = last_path_delim;
-        
+*/
 
     /* Reset all flags */
     for (i = 0;  i < (int) strlen (flags);  i++)
@@ -426,7 +440,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
      /* Flag args for all argument taking options as "unset" */
     for (i = 0; i < (int) strlen (keys); i++)
         o->optarg[(int) keys[i]] = argv[0];
-    
+
     /* Hence, undefined/illegal options have an argument of 0 */
 
     /* long opts are handled similarly, but are mapped to the high bit character range (above 128) */
@@ -444,7 +458,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
         if (0==strchr (flags, longflags[i][0])) {
             fprintf (stderr, "%s: Invalid alias - '%s'. Valid short flags are '%s'\n", o->progname, longflags[i], flags);
             free (o);
-            return 0;            
+            return 0;
         }
     }
     for (i = 0;  longkeys && longkeys[i]; i++) {
@@ -456,7 +470,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
         if (0==strchr (keys, longkeys[i][0])) {
             fprintf (stderr, "%s: Invalid alias - '%s'. Valid short flags are '%s'\n", o->progname, longkeys[i], keys);
             free (o);
-            return 0;            
+            return 0;
         }
     }
 
@@ -501,7 +515,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
             char cstring[2], *crepr = cstring;
             cstring[0] = (char) c;
             cstring[1] = 0;
-            
+
 
             /* Long style flags and options (--long_opt_name, --long_opt_namr arg, --long_opt_name=arg) */
             if (c== (int)'-') {
@@ -524,7 +538,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                     o->optarg[c] = equals + 1;
                     break;
                 }
-                
+
                 /* "outline" --foo bar style arg */
                 if (!opt_is_flag (o, c)) {
                     if ((argc==i + 1) || ('+'==argv[i+1][0]) || ('-'==argv[i+1][0]))

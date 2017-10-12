@@ -81,7 +81,8 @@ if [ $TRAVIS_OS_NAME == "osx" ]; then
 make -j3
 make check
 PROJ_LIB=$GRIDDIR ./src/proj -VC
-  
+./src/gie ./test/gie/builtins.gie
+
 # install & run the working GIGS test
   # create locations that pyproj understands
 ln -s src include

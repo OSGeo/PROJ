@@ -3,11 +3,12 @@
 include(lib_proj.cmake)
 
 # configure executable build
-option(BUILD_CCT   "Build cct (coordinate conversion and transformation tool)" ON)
-option(BUILD_CS2CS "Build cs2cs (coordinate systems to coordinate systems translation tool)" ON)
-option(BUILD_PROJ "Build proj (cartographic projection tool : latlong <-> projected coordinates" ON)
-option(BUILD_GEOD "Build geod (computation of geodesic lines)" ON)
-option(BUILD_NAD2BIN "Build nad2bin (format conversion tool) " ON)
+option(BUILD_CCT     "Build cct (coordinate conversion and transformation tool)" ON)
+option(BUILD_CS2CS   "Build cs2cs (coordinate systems to coordinate systems translation tool)" ON)
+option(BUILD_GEOD    "Build geod (computation of geodesic lines)" ON)
+option(BUILD_GIE     "Build gie (geospatial integrity investigation environment - a PROJ.4 test tool)" ON)
+option(BUILD_NAD2BIN "Build nad2bin (format conversion tool)" ON)
+option(BUILD_PROJ    "Build proj (cartographic projection tool : latlong <-> projected coordinates)" ON)
 
 if(NOT MSVC)
   if (NOT APPLE)
@@ -33,11 +34,6 @@ if(BUILD_CS2CS)
  set(BIN_TARGETS ${BIN_TARGETS} cs2cs)
 endif(BUILD_CS2CS)
 
-if(BUILD_PROJ)
-  include(bin_proj.cmake)
-  set(BIN_TARGETS ${BIN_TARGETS} binproj)
-endif(BUILD_PROJ)
-
 if(BUILD_GEOD)
   include(bin_geod.cmake)
   include(bin_geodtest.cmake)
@@ -48,6 +44,16 @@ if(BUILD_NAD2BIN)
   include(bin_nad2bin.cmake)
   set(BIN_TARGETS ${BIN_TARGETS} nad2bin)
 endif(BUILD_NAD2BIN)
+
+if(BUILD_PROJ)
+  include(bin_proj.cmake)
+  set(BIN_TARGETS ${BIN_TARGETS} binproj)
+endif(BUILD_PROJ)
+
+if(BUILD_GIE)
+ include(bin_gie.cmake)
+ set(BIN_TARGETS ${BIN_TARGETS} gie)
+endif(BUILD_GIE)
 
 if (MSVC OR CMAKE_CONFIGURATION_TYPES)
   if(BIN_TARGETS)
