@@ -359,6 +359,8 @@ pj_init_plus_ctx( projCtx ctx, const char *definition )
 
     /* make a copy that we can manipulate */
     defn_copy = (char *) pj_malloc( strlen(definition)+1 );
+    if (!defn_copy)
+        return NULL;
     strcpy( defn_copy, definition );
 
     /* split into arguments based on '+' and trim white space */
@@ -453,10 +455,14 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     
     /* put arguments into internal linked list */
     start = curr = pj_mkparam(argv[0]);
+    if (!curr)
+        return pj_dealloc_params (ctx, start, ENOMEM);
 
     /* build parameter list and expand +init's. Does not take care of a single +init. */
     for (i = 1; i < argc; ++i) {
         curr->next = pj_mkparam(argv[i]);
+        if (!curr->next)
+            return pj_dealloc_params (ctx, start, ENOMEM);
 
         /* check if +init present */
         if (pj_param(ctx, curr, "tinit").i) {

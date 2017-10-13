@@ -620,6 +620,8 @@ PJ *PROJECTION(healpix) {
 
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es);             /* For auth_lat(). */
+        if (!Q->apa)
+            return destructor(P, ENOMEM);
         Q->qp = pj_qsfn(1.0, P->e, P->one_es);  /* For auth_lat(). */
         P->a = P->a*sqrt(0.5*Q->qp);            /* Set P->a to authalic radius. */
         P->ra = 1.0/P->a;
@@ -651,6 +653,8 @@ PJ *PROJECTION(rhealpix) {
         return destructor (P, PJD_ERR_AXIS);
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es); /* For auth_lat(). */
+        if (!Q->apa)
+            return destructor(P, ENOMEM);
         Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
         P->a = P->a*sqrt(0.5*Q->qp); /* Set P->a to authalic radius. */
         P->ra = 1.0/P->a;

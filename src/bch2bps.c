@@ -30,12 +30,14 @@ dadd(projUV *a, projUV *b, double m, int n) {
 		a++->v -= m * b++->v;
 	}
 }
-	static void /* convert row to pover series */
+	static int /* convert row to power series */
 rows(projUV *c, projUV *d, int n) {
 	projUV sv, *dd;
 	int j, k;
 
 	dd = (projUV *)vector1(n-1, sizeof(projUV));
+	if (!dd)
+		return 0;
 	sv.u = sv.v = 0.;
 	for (j = 0; j < n; ++j) d[j] = dd[j] = sv;
 	d[0] = c[n-1];
@@ -58,14 +60,21 @@ rows(projUV *c, projUV *d, int n) {
 	d[0].u = -dd[0].u + .5 * c[0].u;
 	d[0].v = -dd[0].v + .5 * c[0].v;
 	pj_dalloc(dd);
+	return 1;
 }
-	static void /* convert columns to power series */
+	static int /* convert columns to power series */
 cols(projUV **c, projUV **d, int nu, int nv) {
 	projUV *sv, **dd;
 	int j, k;
 
 	dd = (projUV **)vector2(nu, nv, sizeof(projUV));
+	if (!dd)
+		return 0;
 	sv = (projUV *)vector1(nv, sizeof(projUV));
+	if (!sv) {
+		freev2((void **)dd, nu);
+		return 0;
+	}
 	bclear(d, nu, nv);
 	bclear(dd, nu, nv);
 	bmove(d[0], c[nu-1], nv);
@@ -84,6 +93,7 @@ cols(projUV **c, projUV **d, int nu, int nv) {
 	submop(d[0], .5, c[0], dd[0], nv);
 	freev2((void **) dd, nu);
 	pj_dalloc(sv);
+	return 1;
 }
 	static void /* row adjust for range -1 to 1 to a to b */
 rowshft(double a, double b, projUV *d, int n) {
@@ -129,11 +139,13 @@ bch2bps(projUV a, projUV b, projUV **c, int nu, int nv) {
 		return 0;
 	/* do rows to power series */
 	for (i = 0; i < nu; ++i) {
-		rows(c[i], d[i], nv);
+		if (!rows(c[i], d[i], nv))
+			return 0;
 		rowshft(a.v, b.v, d[i], nv);
 	}
 	/* do columns to power series */
-	cols(d, c, nu, nv);
+	if (!cols(d, c, nu, nv))
+		return 0;
 	colshft(a.u, b.u, c, nu, nv);
 	freev2((void **) d, nu);
 	return 1;

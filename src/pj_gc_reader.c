@@ -61,10 +61,19 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
     }
     
     catalog->catalog_name = strdup(catalog_name);
+    if (!catalog->catalog_name) {
+        free(catalog);
+        return NULL;
+    }
     
     entry_max = 10;
     catalog->entries = (PJ_GridCatalogEntry *) 
         malloc(entry_max * sizeof(PJ_GridCatalogEntry));
+    if (!catalog->entries) {
+        free(catalog->catalog_name);
+        free(catalog);
+        return NULL;
+    }
     
     while( pj_gc_readentry( ctx, fid, 
                             catalog->entries+catalog->entry_count) == 0)
@@ -124,6 +133,7 @@ static int pj_gc_read_csv_line( projCtx ctx, PAFile fid,
         while( token_count < max_tokens && *next != '\0' ) 
         {
             const char *start = next;
+            char* token;
             
             while( *next != '\0' && *next != ',' ) 
                 next++;
@@ -134,7 +144,10 @@ static int pj_gc_read_csv_line( projCtx ctx, PAFile fid,
                 next++;
             }
             
-            tokens[token_count++] = strdup(start);
+            token = strdup(start);
+            if (!token)
+                return token_count; /* TODO: report allocation error */
+            tokens[token_count++] = token;
         }
 
         return token_count;
@@ -199,7 +212,7 @@ static int pj_gc_readentry(projCtx ctx, PAFile fid, PJ_GridCatalogEntry *entry)
     }
     else
     {
-        entry->definition = strdup( tokens[0] );
+        entry->definition = tokens[0];  /* We take ownership of tokens[0] */
         entry->region.ll_long = dmstor_ctx( ctx, tokens[1], NULL );
         entry->region.ll_lat = dmstor_ctx( ctx, tokens[2], NULL );
         entry->region.ur_long = dmstor_ctx( ctx, tokens[3], NULL );
@@ -210,7 +223,7 @@ static int pj_gc_readentry(projCtx ctx, PAFile fid, PJ_GridCatalogEntry *entry)
             entry->date = pj_gc_parsedate( ctx, tokens[6] );
     }
 
-    for( i = 0; i < token_count; i++ )
+    for( i = (token_count < 5) ? 0 : 1; i < token_count; i++ )
         free( tokens[i] );
 
     return error;

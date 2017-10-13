@@ -111,6 +111,8 @@ PJ *PROJECTION(bonne) {
 
     if (P->es != 0.0) {
         Q->en = pj_enfn(P->es);
+        if (!Q->en)
+            return destructor(P, ENOMEM);
         Q->m1 = pj_mlfn(Q->phi1, Q->am1 = sin(Q->phi1),
             c = cos(Q->phi1), Q->en);
         Q->am1 = c / (sqrt(1. - P->es * Q->am1 * Q->am1) * Q->am1);
