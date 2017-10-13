@@ -163,7 +163,7 @@ PJ *PROJECTION(lsat) {
 
     path = pj_param(P->ctx, P->params, "ipath").i;
     if (path <= 0 || path > (land <= 3 ? 251 : 233))
-        pj_default_destructor(P, PJD_ERR_PATH_NOT_IN_RANGE);
+        return pj_default_destructor(P, PJD_ERR_PATH_NOT_IN_RANGE);
 
     if (land <= 3) {
         P->lam0 = DEG_TO_RAD * 128.87 - M_TWOPI / 251. * path;
