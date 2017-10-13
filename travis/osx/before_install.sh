@@ -6,4 +6,3 @@ set -e
 
 brew update
 brew install ccache
-brew install python3

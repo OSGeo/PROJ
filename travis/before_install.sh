@@ -14,7 +14,6 @@
 # What is the current python setup?
 which python
 python --version
-python3 --version
 
 which pip
 pip --version
