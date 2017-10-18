@@ -66,6 +66,7 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
     if (!catalog->catalog_name) {
         pj_ctx_set_errno(ctx, ENOMEM);
         free(catalog);
+        pj_ctx_fclose(ctx, fid);
         return NULL;
     }
     
@@ -76,6 +77,7 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
         pj_ctx_set_errno(ctx, ENOMEM);
         free(catalog->catalog_name);
         free(catalog);
+        pj_ctx_fclose(ctx, fid);
         return NULL;
     }
     
@@ -96,6 +98,7 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
                 int i;
                 for( i = 0; i < catalog->entry_count; i++ )
                     free( catalog->entries[i].definition );
+                free( catalog->entries );
                 free( catalog->catalog_name );
                 free( catalog );
                 pj_ctx_fclose(ctx, fid);
@@ -150,8 +153,10 @@ static int pj_gc_read_csv_line( projCtx ctx, PAFile fid,
             
             token = strdup(start);
             if (!token) {
+                while (token_count > 0)
+                    free(tokens[--token_count]);
                 pj_ctx_set_errno(ctx, ENOMEM);
-                return token_count;
+                return 0;
             }
             tokens[token_count++] = token;
         }
@@ -218,7 +223,8 @@ static int pj_gc_readentry(projCtx ctx, PAFile fid, PJ_GridCatalogEntry *entry)
     }
     else
     {
-        entry->definition = tokens[0];  /* We take ownership of tokens[0] */
+        entry->definition = tokens[0];
+        tokens[0] = NULL;   /* We take ownership of tokens[0] */
         entry->region.ll_long = dmstor_ctx( ctx, tokens[1], NULL );
         entry->region.ll_lat = dmstor_ctx( ctx, tokens[2], NULL );
         entry->region.ur_long = dmstor_ctx( ctx, tokens[3], NULL );
@@ -229,7 +235,7 @@ static int pj_gc_readentry(projCtx ctx, PAFile fid, PJ_GridCatalogEntry *entry)
             entry->date = pj_gc_parsedate( ctx, tokens[6] );
     }
 
-    for( i = (token_count < 5) ? 0 : 1; i < token_count; i++ )
+    for( i = 0; i < token_count; i++ )
         free( tokens[i] );
 
     return error;
