@@ -93,7 +93,6 @@ extern double hypot(double, double);
 #  include <wce_stdio.h>
 #  define rewind wceex_rewind
 #  define getenv wceex_getenv
-#  define strdup _strdup
 #  define hypot _hypot
 #endif
 

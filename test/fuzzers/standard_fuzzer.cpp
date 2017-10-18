@@ -47,7 +47,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len);
 int LLVMFuzzerInitialize(int* /*argc*/, char*** argv)
 {
     const char* argv0 = (*argv)[0];
-    char* path = strdup(argv0);
+    char* path = pj_strdup(argv0);
     char* lastslash = strrchr(path, '/');
     if( lastslash )
     {

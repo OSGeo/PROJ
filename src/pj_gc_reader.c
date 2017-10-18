@@ -62,7 +62,7 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
         return NULL;
     }
     
-    catalog->catalog_name = strdup(catalog_name);
+    catalog->catalog_name = pj_strdup(catalog_name);
     if (!catalog->catalog_name) {
         pj_ctx_set_errno(ctx, ENOMEM);
         free(catalog);
@@ -151,7 +151,7 @@ static int pj_gc_read_csv_line( projCtx ctx, PAFile fid,
                 next++;
             }
             
-            token = strdup(start);
+            token = pj_strdup(start);
             if (!token) {
                 while (token_count > 0)
                     free(tokens[--token_count]);

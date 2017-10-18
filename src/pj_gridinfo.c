@@ -570,8 +570,8 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
             gi = (PJ_GRIDINFO *) pj_malloc(sizeof(PJ_GRIDINFO));
             memset( gi, 0, sizeof(PJ_GRIDINFO) );
 
-            gi->gridname = strdup( gilist->gridname );
-            gi->filename = strdup( gilist->filename );
+            gi->gridname = pj_strdup( gilist->gridname );
+            gi->filename = pj_strdup( gilist->filename );
             gi->next = NULL;
         }
 
@@ -866,7 +866,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
     gilist = (PJ_GRIDINFO *) pj_malloc(sizeof(PJ_GRIDINFO));
     memset( gilist, 0, sizeof(PJ_GRIDINFO) );
 
-    gilist->gridname = strdup( gridname );
+    gilist->gridname = pj_strdup( gridname );
     gilist->filename = NULL;
     gilist->format = "missing";
     gilist->grid_offset = 0;
@@ -882,7 +882,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
         return gilist;
     }
 
-    gilist->filename = strdup(fname);
+    gilist->filename = pj_strdup(fname);
 
 /* -------------------------------------------------------------------- */
 /*      Load a header, to determine the file type.                      */
