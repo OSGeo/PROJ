@@ -26,6 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#include <errno.h>
 #include <projects.h>
 #include <string.h>
 
@@ -78,6 +79,7 @@ static PAFile pj_stdio_fopen(projCtx ctx, const char *filename,
     pafile = (stdio_pafile *) malloc(sizeof(stdio_pafile));
     if (!pafile)
     {
+        pj_ctx_set_errno(ctx, ENOMEM);
         fclose(fp);
         return NULL;
     }

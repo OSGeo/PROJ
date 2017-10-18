@@ -27,6 +27,7 @@
 
 #define PJ_LIB__
 
+#include <errno.h>
 #include <projects.h>
 #include <string.h>
 #include <ctype.h>
@@ -56,12 +57,14 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
     catalog = (PJ_GridCatalog *) calloc(1,sizeof(PJ_GridCatalog));
     if( !catalog )
     {
+        pj_ctx_set_errno(ctx, ENOMEM);
         pj_ctx_fclose(ctx, fid);
         return NULL;
     }
     
     catalog->catalog_name = strdup(catalog_name);
     if (!catalog->catalog_name) {
+        pj_ctx_set_errno(ctx, ENOMEM);
         free(catalog);
         return NULL;
     }
@@ -70,6 +73,7 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
     catalog->entries = (PJ_GridCatalogEntry *) 
         malloc(entry_max * sizeof(PJ_GridCatalogEntry));
     if (!catalog->entries) {
+        pj_ctx_set_errno(ctx, ENOMEM);
         free(catalog->catalog_name);
         free(catalog);
         return NULL;
@@ -145,8 +149,10 @@ static int pj_gc_read_csv_line( projCtx ctx, PAFile fid,
             }
             
             token = strdup(start);
-            if (!token)
-                return token_count; /* TODO: report allocation error */
+            if (!token) {
+                pj_ctx_set_errno(ctx, ENOMEM);
+                return token_count;
+            }
             tokens[token_count++] = token;
         }
 
