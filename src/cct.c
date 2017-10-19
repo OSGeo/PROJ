@@ -87,7 +87,7 @@ char *column (char *buf, int n);
 PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time);
 int print_output_line (FILE *fout, char *buf, PJ_COORD point);
 int main(int argc, char **argv);
-    
+
 
 
 static const char usage[] = {
@@ -101,6 +101,7 @@ static const char usage[] = {
     "                      Defaults to 1,2,3,4\n"
     "    -z value          Provide a fixed z value for all input data (e.g. -z 0)\n"
     "    -t value          Provide a fixed t value for all input data (e.g. -t 0)\n"
+    "    -I                Do the inverse transformation\n"
     "    -v                Verbose: Provide non-essential informational output.\n"
     "                      Repeat -v for more verbosity (e.g. -vv)\n"
     "--------------------------------------------------------------------------------\n"
@@ -111,6 +112,7 @@ static const char usage[] = {
     "    --height          Alias for -z\n"
     "    --time            Alias for -t\n"
     "    --verbose         Alias for -v\n"
+    "    --inverse         Alias for -I\n"
     "    --help            Alias for -h\n"
     "--------------------------------------------------------------------------------\n"
     "Operator Specs:\n"
@@ -140,7 +142,7 @@ static const char usage[] = {
     "    cct -c 5,2,1,4  +proj=utm +ellps=GRS80 +zone=32\n"
     "4. as (1) but specify fixed height and time, hence needing only 2 cols in input:\n"
     "    cct -t 0 -z 0  +proj=utm  +ellps=GRS80  +zone=32\n"
-    "--------------------------------------------------------------------------------\n"    
+    "--------------------------------------------------------------------------------\n"
 };
 
 int main(int argc, char **argv) {
@@ -152,10 +154,10 @@ int main(int argc, char **argv) {
     int input_unit, output_unit, nfields = 4, direction = 1, verbose;
     double fixed_z = HUGE_VAL, fixed_time = HUGE_VAL;
     int columns_xyzt[] = {1, 2, 3, 4};
-    const char *longflags[]  = {"v=verbose", "h=help", 0};
+    const char *longflags[]  = {"v=verbose", "h=help", "I=inverse", 0};
     const char *longkeys[]   = {"o=output",  "c=columns", "z=height", "t=time", 0};
-    
-    o = opt_parse (argc, argv, "hv", "cozt", longflags, longkeys);
+
+    o = opt_parse (argc, argv, "hvI", "cozt", longflags, longkeys);
     if (0==o)
         return 0;
 
@@ -177,14 +179,14 @@ int main(int argc, char **argv) {
     }
     if (verbose > 3)
         fprintf (fout, "%s: Running in very verbose mode\n", o->progname);
-    
-    
+
+
 
     if (opt_given (o, "z")) {
         fixed_z = proj_atof (opt_arg (o, "z"));
         nfields--;
     }
-    
+
     if (opt_given (o, "t")) {
         fixed_time = proj_atof (opt_arg (o, "t"));
         nfields--;
@@ -200,7 +202,7 @@ int main(int argc, char **argv) {
             return 1;
         }
     }
-    
+
     /* Setup transformation */
     P = proj_create_argv (0, o->pargc, o->pargv);
     if ((0==P) || (0==o->pargc)) {
