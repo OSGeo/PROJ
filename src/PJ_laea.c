@@ -255,6 +255,8 @@ PJ *PROJECTION(laea) {
         Q->qp = pj_qsfn(1., P->e, P->one_es);
         Q->mmf = .5 / (1. - P->es);
         Q->apa = pj_authset(P->es);
+        if (0==Q->apa)
+            return destructor(P, ENOMEM);
         switch (Q->mode) {
         case N_POLE:
         case S_POLE:
