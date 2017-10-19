@@ -42,4 +42,4 @@ PJ *PROJECTION(boggs) {
 }
 
 
-int pj_boggs_selftest (void) {return 0;}
+int pj_boggs_selftest (void) {return 10000;}

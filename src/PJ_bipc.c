@@ -171,4 +171,4 @@ PJ *PROJECTION(bipc) {
 }
 
 
-int pj_bipc_selftest (void) {return 0;}
+int pj_bipc_selftest (void) {return 10000;}
