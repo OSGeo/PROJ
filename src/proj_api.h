@@ -69,10 +69,10 @@ extern "C" {
 
 
 
-#ifndef PROJ_H
 extern char const pj_release[]; /* global release id string */
 extern int pj_errno;    /* global error return code */
 
+#ifndef PROJ_H
 /* In proj.h these macros are replaced by the enumeration pj_log_level */
 #define PJ_LOG_NONE        0
 #define PJ_LOG_ERROR       1

@@ -33,16 +33,6 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef _WIN32_WCE
-/* assert.h includes all Windows API headers and causes 'LP' name clash.
- * Here assert we disable assert() for Windows CE.
- * TODO - mloskot: re-implement porting friendly assert
- */
-# define assert(exp)	((void)0)
-#else
-# include <assert.h>
-#endif /* _WIN32_WCE */
-
 static PJ_GRIDINFO *grid_list = NULL;
 #define PJ_MAX_PATH_LENGTH 1024
 

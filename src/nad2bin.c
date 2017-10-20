@@ -1,10 +1,10 @@
 /* Convert bivariate ASCII NAD27 to NAD83 tables to NTv2 binary structure */
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #define PJ_LIB__
-#include <projects.h>
+#include "proj_internal.h"
+#include "projects.h"
 #define U_SEC_TO_RAD 4.848136811095359935899141023e-12
 
 /************************************************************************/
@@ -177,8 +177,8 @@ int main(int argc, char **argv) {
             exit(2);
 	}
 
-        assert( MAX_TAB_ID == 80 );
-        assert( sizeof(int) == 4 ); /* for ct.lim.lam/phi */
+        STATIC_ASSERT( MAX_TAB_ID == 80 );
+        STATIC_ASSERT( sizeof(pj_int32) == 4 ); /* for ct.lim.lam/phi */
 
         memset( header, 0, sizeof(header) );
 
@@ -267,13 +267,13 @@ int main(int argc, char **argv) {
         {
             unsigned char achHeader[11*16];
             double dfValue;
-            int nGSCount = ct.lim.lam * ct.lim.phi;
+            pj_int32 nGSCount = ct.lim.lam * ct.lim.phi;
             LP ur;
 
             ur.lam = ct.ll.lam + (ct.lim.lam-1) * ct.del.lam;
             ur.phi = ct.ll.phi + (ct.lim.phi-1) * ct.del.phi;
 
-            assert( sizeof(nGSCount) == 4 );
+            STATIC_ASSERT( sizeof(nGSCount) == 4 );
 
             memset( achHeader, 0, sizeof(achHeader) );
 
