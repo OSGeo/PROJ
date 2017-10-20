@@ -388,13 +388,13 @@ PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
 }
 
 /*****************************************************************************/
-PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to) {
+PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area) {
 /******************************************************************************
     Create a transformation pipeline between two known coordinate reference
     systems.
 
     srid_from and srid_to should be the value part of a +init=... parameter
-    set, i.e. "epsg:25833" or "IGNF:AMST63". Any projection definition that is
+    set, i.e. "epsg:25833" or "IGNF:AMST63". Any projection definition that
     can be found in a init-file in PROJ_LIB is a valid input to this function.
 
     For now the function mimics the cs2cs app: An input and an output CRS is
@@ -403,13 +403,22 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char 
     function can be extended to support "late-binding" transformations in the
     future without affecting users of the function.
 
+    An "area of use" can be specified in area. In the current version of this
+    function is has no function, but is added in anticipation of a
+    "late-binding" implementation in the future. The idea being, that if a user
+    supplies an area of use, the more accurate transformation between two given
+    systems can be chosen.
+
     Example call:
 
-        PJ *P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833");
+        PJ *P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833", NULL);
 
 ******************************************************************************/
     PJ *P;
     char buffer[512];
+
+    /* area not in use yet, suppressing warning */
+    (void)area;
 
     strcpy(buffer, "+proj=pipeline +step +init=");
     strncat(buffer, srid_from, 512-strlen(buffer));

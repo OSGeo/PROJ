@@ -182,6 +182,9 @@ typedef union PJ_TRIPLET PJ_TRIPLET;
 union PJ_COORD;
 typedef union PJ_COORD PJ_COORD;
 
+struct PJ_AREA;
+typedef struct PJ_AREA PJ_AREA;
+
 struct DERIVS;
 typedef struct DERIVS PJ_DERIVS;
 
@@ -295,12 +298,14 @@ union PJ_PAIR {
     double v[2]; /* Yes - It's really just a vector! */
 };
 
+
 struct PJ_OBS {
     PJ_COORD coo;        /* coordinate data */
     PJ_TRIPLET anc;      /* ancillary data */
     int id;              /* integer ancillary data - e.g. observation number, EPSG code... */
     unsigned int flags;  /* additional data, intended for flags */
 };
+
 
 #define PJ_IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
 #define PJ_IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
@@ -363,9 +368,14 @@ PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx);
 /* Manage the transformation definition object PJ */
 PJ  *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
-PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to);
+PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area);
 PJ  *proj_destroy (PJ *P);
 
+/* Setter-functions for the opaque PJ_AREA struct */
+/* Uncomment these when implementing support for area-based transformations.
+void proj_area_bbox(PJ_AREA *area, LP ll, LP ur);
+void proj_area_description(PJ_AREA *area, const char *descr);
+*/
 
 /* Apply transformation to observation - in forward or inverse direction */
 enum PJ_DIRECTION {

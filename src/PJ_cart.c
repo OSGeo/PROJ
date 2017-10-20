@@ -457,7 +457,7 @@ int pj_cart_selftest (void) {
     proj_destroy (P);
 
     /* test proj_create_crs_to_crs() */
-    P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "epsg:25832", "epsg:25833");
+    P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "epsg:25832", "epsg:25833", NULL);
     if (P==0)
         return 50;
 
@@ -472,7 +472,7 @@ int pj_cart_selftest (void) {
     proj_destroy(P);
 
     /* let's make sure that only entries in init-files results in a usable PJ */
-    P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "proj=utm +zone=32 +datum=WGS84", "proj=utm +zone=33 +datum=WGS84");
+    P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "proj=utm +zone=32 +datum=WGS84", "proj=utm +zone=33 +datum=WGS84", NULL);
     if (P != 0) {
         proj_destroy(P);
         return 52;
