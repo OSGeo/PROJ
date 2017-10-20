@@ -157,6 +157,15 @@ double proj_strtod(const char *str, char **endptr) {
     }
     integral_part = number;
 
+    /* Done? */
+    if (0==*p) {
+        if (endptr)
+            *endptr = p;
+        if (sign==-1)
+            return -number;
+        return number;
+    }
+
     /* Do we have a fractional part? */
     if ('.'==*p) {
         p++;
@@ -171,8 +180,13 @@ double proj_strtod(const char *str, char **endptr) {
             }
 
         /* if the next character is nonnumeric, we have reached the end */
-        if (0==strchr ("0123456789eE+-", *p))
-            return integral_part;
+        if (0==*p || 0==strchr ("_0123456789eE+-", *p)) {
+            if (endptr)
+                *endptr = p;
+            if (sign==-1)
+                return -number;
+            return number;
+        }
 
         while (isdigit(*p) || '_'==*p) {
             /* Don't let pathologically long fractions destroy precision */
@@ -194,7 +208,8 @@ double proj_strtod(const char *str, char **endptr) {
             exponent = -(num_digits_after_comma + num_prefixed_zeros);
         else
             number = integral_part;
-    }
+    }  /* end of fractional part */
+
 
     /* non-digit */
     if (0==num_digits_total) {
@@ -210,6 +225,8 @@ double proj_strtod(const char *str, char **endptr) {
     /* Do we have an exponent part? */
     if (*p == 'e' || *p == 'E') {
         p++;
+        while ('_'==*p)
+            p++;
         /* Does it have a sign? */
         sign = 0;
         if ('-'==*p)
@@ -243,23 +260,26 @@ double proj_strtod(const char *str, char **endptr) {
         exponent += n;
     }
 
+    if (endptr)
+        *endptr = p;
+
     if ((exponent < DBL_MIN_EXP) || (exponent > DBL_MAX_EXP)) {
       errno = ERANGE;
-      if (endptr)
-          *endptr = p;
       return HUGE_VAL;
     }
 
-    /* on some platforms pow() is very slow - so don't call it if exponent==0 */
-    if (exponent)
+    /* on some platforms pow() is very slow - so don't call it if exponent is close to 0 */
+    if (0==exponent)
+        return number;
+    if (abs (exponent) < 20) {
+        double ex = 1;
+        int absexp = exponent < 0? -exponent: exponent;
+        while (absexp--)
+            ex *= 10;
+        number = exponent < 0? number / ex: number * ex;
+    }
+    else
         number *= pow (10, exponent);
-
-    /* Did we run into an infinity? */
-    if (fabs(number) > DBL_MAX)
-        errno = ERANGE;
-
-    if (endptr)
-        *endptr = p;
 
     return number;
 }
@@ -269,11 +289,103 @@ double proj_atof(const char *str) {
 }
 
 #ifdef TEST
+
+/* compile/run: gcc -DTEST -o proj_strtod_test proj_strtod.c  &&  proj_strtod_test */
+
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+char *un_underscore (char *s) {
+    static char u[1024];
+    int i, m,  n;
+    for (i = m = 0, n = strlen (s);  i < n;  i++) {
+        if (s[i]=='_') {
+            m++;
+            continue;
+        }
+        u[i - m] = s[i];
+    }
+    u[n-m] = 0;
+    return u;
+}
+
+int thetest (char *s, int line) {
+    char *endp, *endq, *u;
+    double p, q;
+    int errnop, errnoq, prev_errno;
+
+    prev_errno = errno;
+
+    u = un_underscore (s);
+
+    errno = 0;
+    p = proj_strtod (s, &endp);
+    errnop = errno;
+    errno = 0;
+    q = strtod (u, &endq);
+    errnoq = errno;
+
+    errno = prev_errno;
+
+    if (q==p && 0==strcmp (endp, endq) && errnop==errnoq && 0)
+        return 0;
+
+    errno = line;
+    printf ("Line: %3.3d  -  [%s] [%s]\n", line, s, u);
+    printf ("proj_strtod: %2d %.17g  [%s]\n", errnop, p, endp);
+    printf ("libc_strtod: %2d %.17g  [%s]\n", errnoq, q, endq);
+    return 1;
+}
+
+#define test(s) thetest(s, __LINE__)
 
 int main (int argc, char **argv) {
     double res;
     char *endptr;
+
+    errno = 0;
+
+    test ("1");
+    test ("0");
+    test ("1.");
+    test ("0.");
+    test ("1.0");
+    test ("0.0");
+    test ("1.0");
+    test ("0.0");
+    test ("_1.0");
+    test ("_0.0");
+    test ("1_.0");
+    test ("0_.0");
+    test ("1__.0");
+    test ("0__.0");
+    test ("1.__0");
+    test ("0.__0");
+    test ("1.0___");
+    test ("0.0___");
+    test ("1e2");
+    test ("__123_456_789_._10_11_12");
+    test ("1______");
+    test ("1___e__2__");
+    test ("-1");
+    test ("-1.0");
+    test ("-0");
+    test ("-1e__-_2__rest");
+    test ("0.00002");
+    test ("0.00001");
+    test ("-0.00002");
+    test ("-0.00001");
+    test ("-0.00001e-2");
+    test ("-0.00001e2");
+    test ("1e9999");
+
+    /* We expect this one to differ */
+    test ("0.000000000000000000000000000000000000000000000000000000000000000000000000002");
+
+    if (errno)
+        printf ("First discrepancy in line %d\n", errno);
+
     if (argc < 2)
         return 0;
     res =  proj_strtod (argv[1], &endptr);
