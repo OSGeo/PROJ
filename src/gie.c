@@ -474,6 +474,11 @@ static int roundtrip (char *args) {
         T.op_ko++;
         T.total_ko++;
     }
+    else {
+        T.op_ok++;
+        T.total_ok++;
+    }
+
     return 0;
 }
 
