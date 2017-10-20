@@ -86,6 +86,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-01-17/2017-09-18
 ***********************************************************************/
 
 
+#include <stdio.h> /* for strchr */
 #include <string.h> /* for strchr */
 #include <errno.h>
 #include <ctype.h>
@@ -141,9 +142,13 @@ double proj_strtod(const char *str, char **endptr) {
             return HUGE_VAL;
     }
 
-    /* skip prefixed zeros */
+    /* skip prefixed zeros before '.' */
     while ('0'==*p || '_'==*p)
         p++;
+
+    /* zero? */
+    if (0==*p || 0==strchr ("0123456789eE.", *p))
+        return 0;
 
     /* Now expect a (potentially zero-length) string of digits */
     while (isdigit(*p) || ('_'==*p)) {
@@ -264,8 +269,8 @@ double proj_strtod(const char *str, char **endptr) {
         *endptr = p;
 
     if ((exponent < DBL_MIN_EXP) || (exponent > DBL_MAX_EXP)) {
-      errno = ERANGE;
-      return HUGE_VAL;
+        errno = ERANGE;
+        return HUGE_VAL;
     }
 
     /* on some platforms pow() is very slow - so don't call it if exponent is close to 0 */
@@ -285,7 +290,7 @@ double proj_strtod(const char *str, char **endptr) {
 }
 
 double proj_atof(const char *str) {
-  return proj_strtod(str, (void *) 0);
+    return proj_strtod(str, (void *) 0);
 }
 
 #ifdef TEST
