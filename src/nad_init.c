@@ -224,7 +224,7 @@ struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid )
     ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
     if( ct == NULL )
     {
-        pj_ctx_set_errno( ctx, -38 );
+        pj_ctx_set_errno( ctx, ENOMEM );
         return NULL;
     }
 
@@ -241,6 +241,7 @@ struct CTABLE *nad_ctable2_init( projCtx ctx, PAFile fid )
         || ct->lim.phi < 1 || ct->lim.phi > 100000 )
     {
         pj_ctx_set_errno( ctx, -38 );
+        pj_dalloc( ct );
         return NULL;
     }
     
