@@ -357,10 +357,11 @@ PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
 PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area);
 PJ  *proj_destroy (PJ *P);
 
-/* setter-functions for the opaque PJ_AREA struct */
+/* Setter-functions for the opaque PJ_AREA struct */
+/* Uncomment these when implementing support for area-based transformations.
 void proj_area_bbox(PJ_AREA *area, LP ll, LP ur);
 void proj_area_description(PJ_AREA *area, const char *descr);
-
+*/
 
 /* Apply transformation to observation - in forward or inverse direction */
 enum PJ_DIRECTION {

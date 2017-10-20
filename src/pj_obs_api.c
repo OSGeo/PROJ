@@ -394,7 +394,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char 
     systems.
 
     srid_from and srid_to should be the value part of a +init=... parameter
-    set, i.e. "epsg:25833" or "IGNF:AMST63". Any projection definition that is
+    set, i.e. "epsg:25833" or "IGNF:AMST63". Any projection definition that
     can be found in a init-file in PROJ_LIB is a valid input to this function.
 
     For now the function mimics the cs2cs app: An input and an output CRS is
@@ -406,7 +406,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char 
     An "area of use" can be specified in area. In the current version of this
     function is has no function, but is added in anticipation of a
     "late-binding" implementation in the future. The idea being, that if a user
-    supplies an area of use, the more accurate transformation between to given 
+    supplies an area of use, the more accurate transformation between two given
     systems can be chosen.
 
     Example call:
