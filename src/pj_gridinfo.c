@@ -578,14 +578,13 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
             gi = gilist;
         else
         {
-            gi = (PJ_GRIDINFO *) pj_malloc(sizeof(PJ_GRIDINFO));
+            gi = (PJ_GRIDINFO *) pj_calloc(1, sizeof(PJ_GRIDINFO));
             if (!gi) {
                 pj_dalloc(ct);
                 pj_gridinfo_free(ctx, gilist);
                 pj_ctx_set_errno(ctx, ENOMEM);
                 return 0;
             }
-            memset( gi, 0, sizeof(PJ_GRIDINFO) );
 
             gi->gridname = pj_strdup( gilist->gridname );
             gi->filename = pj_strdup( gilist->filename );
@@ -895,12 +894,11 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 /*      Initialize a GRIDINFO with stub info we would use if it         */
 /*      cannot be loaded.                                               */
 /* -------------------------------------------------------------------- */
-    gilist = (PJ_GRIDINFO *) pj_malloc(sizeof(PJ_GRIDINFO));
+    gilist = (PJ_GRIDINFO *) pj_calloc(1, sizeof(PJ_GRIDINFO));
     if (!gilist) {
         pj_ctx_set_errno(ctx, ENOMEM);
         return NULL;
     }
-    memset( gilist, 0, sizeof(PJ_GRIDINFO) );
 
     gilist->gridname = pj_strdup( gridname );
     if (!gilist->gridname) {
