@@ -29,31 +29,4 @@ PJ *PROJECTION(denoy) {
     return P;
 }
 
-#ifndef PJ_SELFTEST
-int pj_denoy_selftest (void) {return 0;}
-#else
-
-int pj_denoy_selftest (void) {
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=denoy   +a=6400000    +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        { 223377.422876954137,  111701.07212763709},
-        { 223377.422876954137, -111701.07212763709},
-        {-223377.422876954137,  111701.07212763709},
-        {-223377.422876954137, -111701.07212763709},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, 0, 4, 4, fwd_in, 0, s_fwd_expect, 0, 0, 0);
-}
-
-
-#endif
+int pj_denoy_selftest (void) {return 10000;}
