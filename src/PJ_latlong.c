@@ -59,6 +59,8 @@ PJ *PROJECTION(latlong) {
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
 
     return P;
 }
@@ -70,6 +72,8 @@ PJ *PROJECTION(longlat) {
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
 
     return P;
 }
@@ -81,6 +85,8 @@ PJ *PROJECTION(latlon) {
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
 
     return P;
 }
@@ -91,6 +97,8 @@ PJ *PROJECTION(lonlat) {
     P->x0 = 0.0;
     P->y0 = 0.0;
     P->inv = inverse; P->fwd = forward;
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
 
     return P;
 }
