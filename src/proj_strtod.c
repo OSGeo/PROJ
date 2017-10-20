@@ -333,7 +333,7 @@ int thetest (char *s, int line) {
 
     errno = prev_errno;
 
-    if (q==p && 0==strcmp (endp, endq) && errnop==errnoq && 0)
+    if (q==p && 0==strcmp (endp, endq) && errnop==errnoq)
         return 0;
 
     errno = line;
