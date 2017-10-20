@@ -2,4 +2,5 @@
 # SCCSID--- @(#)proj_def.dat	4.3	94/02/23	GIE	REL"
 # very preliminary version
 <general>
+ellps=GRS80
 <>
