@@ -29,7 +29,8 @@
 
 /* very loosely based upon DMA code by Bradford W. Drew */
 #define PJ_LIB__
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 PROJ_HEAD(lonlat, "Lat/long (Geodetic)")  "\n\t";
 PROJ_HEAD(latlon, "Lat/long (Geodetic alias)")  "\n\t";
@@ -52,6 +53,15 @@ static LP inverse(XY xy, PJ *P) {
     return lp;
 }
 
+static PJ_OBS forward_obs(PJ_OBS obs, PJ *P) {
+    (void) P;
+    return obs;
+}
+
+static PJ_OBS inverse_obs(PJ_OBS obs, PJ *P) {
+    (void) P;
+    return obs;
+}
 
 PJ *PROJECTION(latlong) {
     P->is_latlong = 1;
@@ -59,6 +69,10 @@ PJ *PROJECTION(latlong) {
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
+    P->invobs = inverse_obs;
+    P->fwdobs = forward_obs;
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
 
     return P;
 }
@@ -70,6 +84,10 @@ PJ *PROJECTION(longlat) {
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
+    P->invobs = inverse_obs;
+    P->fwdobs = forward_obs;
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
 
     return P;
 }
@@ -81,6 +99,10 @@ PJ *PROJECTION(latlon) {
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
+    P->invobs = inverse_obs;
+    P->fwdobs = forward_obs;
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
 
     return P;
 }
@@ -90,7 +112,12 @@ PJ *PROJECTION(lonlat) {
     P->is_latlong = 1;
     P->x0 = 0.0;
     P->y0 = 0.0;
-    P->inv = inverse; P->fwd = forward;
+    P->inv = inverse;
+    P->fwd = forward;
+    P->invobs = inverse_obs;
+    P->fwdobs = forward_obs;
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
 
     return P;
 }
