@@ -89,7 +89,12 @@ PJ_OBS pj_invobs (PJ_OBS obs, PJ *P);
 PJ_COORD pj_fwdcoord (PJ_COORD coo, PJ *P);
 PJ_COORD pj_invcoord (PJ_COORD coo, PJ *P);
 
-
+/* Grid functionality */
+int             proj_vgrid_init(PJ *P, const char *grids);
+int             proj_hgrid_init(PJ *P, const char *grids);
+double          proj_vgrid_value(PJ *P, LP lp);
+LP              proj_hgrid_value(PJ *P, LP lp);
+LP              proj_hgrid_apply(PJ *P, LP lp, PJ_DIRECTION direction);
 
 /* High level functionality for handling thread contexts */
 enum proj_log_level {
