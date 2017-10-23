@@ -117,6 +117,7 @@ void proj_log_trace (PJ *P, const char *fmt, ...);
 /*void proj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *));*/
 void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log);
 
+void pj_inherit_ellipsoid_defs(const PJ *src, PJ *dst);
 
 /* Lowest level: Minimum support for fileapi */
 void proj_fileapi_set (PJ *P, void *fileapi);

@@ -58,6 +58,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_collg.c
         PJ_comill.c
         PJ_crast.c
+        PJ_deformation.c
         PJ_denoy.c
         PJ_eck1.c
         PJ_eck2.c
