@@ -121,10 +121,16 @@ double proj_strtod(const char *str, char **endptr) {
 
     /* Empty string? */
     if (0==*p) {
-        errno = EINVAL;
         if (endptr)
-            *endptr = p;
-        return HUGE_VAL;
+            *endptr = (char *) str;
+        return 0;
+    }
+
+    /* non-numeric? */
+    if (0==strchr("0123456789+-._", *p)) {
+        if (endptr)
+            *endptr = (char *) str;
+        return 0;
     }
 
     /* Then handle optional prefixed sign and skip prefix zeros */
@@ -137,9 +143,15 @@ double proj_strtod(const char *str, char **endptr) {
             if (isdigit(*p) || '_'==*p || '.'==*p)
                 break;
             if (endptr)
-                *endptr = p;
-            errno = EINVAL;
-            return HUGE_VAL;
+                *endptr = (char *) str;
+            return 0;
+    }
+
+    /* stray sign, as in "+/-"? */
+    if (0!=sign && (0==strchr ("0123456789._", *p) || 0==*p)) {
+        if (endptr)
+            *endptr = (char *) str;
+        return 0;
     }
 
     /* skip prefixed zeros before '.' */
@@ -147,8 +159,11 @@ double proj_strtod(const char *str, char **endptr) {
         p++;
 
     /* zero? */
-    if (0==*p || 0==strchr ("0123456789eE.", *p))
-        return 0;
+    if ((0==*p) || 0==strchr ("0123456789eE.", *p) || isspace(*p)) {
+        if (endptr)
+            *endptr = p;
+        return sign==-1? -0: 0;
+    }
 
     /* Now expect a (potentially zero-length) string of digits */
     while (isdigit(*p) || ('_'==*p)) {
@@ -228,8 +243,15 @@ double proj_strtod(const char *str, char **endptr) {
         number = -number;
 
     /* Do we have an exponent part? */
-    if (*p == 'e' || *p == 'E') {
+    while (*p == 'e' || *p == 'E') {
         p++;
+
+        /* Just a stray "e", as in 100elephants? */
+        if (0==*p || 0==strchr ("0123456789+-_", *p)) {
+            p--;
+            break;
+        }
+
         while ('_'==*p)
             p++;
         /* Does it have a sign? */
@@ -263,6 +285,7 @@ double proj_strtod(const char *str, char **endptr) {
         if (-1==sign)
             n = -n;
         exponent += n;
+        break;
     }
 
     if (endptr)
@@ -351,14 +374,31 @@ int main (int argc, char **argv) {
 
     errno = 0;
 
-    test ("1");
-    test ("0");
+    test ("");
+    test ("     ");
+    test ("     abcde");
+    test ("     edcba");
+    test ("abcde");
+    test ("edcba");
+    test ("+");
+    test ("-");
+    test ("+ ");
+    test ("- ");
+    test (" + ");
+    test (" - ");
+    test ("e 1");
+    test ("e1");
+    test ("0 66");
     test ("1.");
     test ("0.");
     test ("1.0");
     test ("0.0");
-    test ("1.0");
-    test ("0.0");
+    test ("1 ");
+    test ("0 ");
+    test ("-0 ");
+    test ("0_ ");
+    test ("0_");
+    test ("1e");
     test ("_1.0");
     test ("_0.0");
     test ("1_.0");
