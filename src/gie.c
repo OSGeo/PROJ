@@ -457,11 +457,11 @@ static int accept (char *args) {
 static int roundtrip (char *args) {
     int ntrips;
     double d, r, ans;
-    char *endp;
+    char *endp, *endq;
     ans = proj_strtod (args, &endp);
     ntrips = (int) (ans==HUGE_VAL? 100: fabs(ans));
-    d = proj_strtod (endp, &endp);
-    d = d==HUGE_VAL?  T.tolerance:  d / 1000;
+    d = proj_strtod (endp, &endq);
+    d = (endp==endq)?  T.tolerance:  d / 1000;
     r = proj_roundtrip (T.P, PJ_FWD, ntrips, T.a);
     if (r > d) {
         if (T.verbosity > -1) {
