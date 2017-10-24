@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project:  PROJ.4
  * Purpose:  Implement a (currently minimalistic) proj API based primarily
- *           on the PJ_OBS generic geodetic data type.
+ *           on the PJ_COORD 4D geodetic spatiotemporal data type.
  *
  *           proj thread contexts have not seen widespread use, so one of the
  *           intentions with this new API is to make them less visible on the
@@ -12,7 +12,7 @@
  * Author:   Thomas Knudsen,  thokn@sdfe.dk,  2016-06-09/2016-11-06
  *
  ******************************************************************************
- * Copyright (c) 2016, 2017 Thomas Knudsen/SDFE 
+ * Copyright (c) 2016, 2017 Thomas Knudsen/SDFE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,6 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-#define PJ_OBS_API_C
 #include <proj.h>
 #include "proj_internal.h"
 #include "projects.h"
@@ -48,22 +47,6 @@ PJ_COORD proj_coord (double x, double y, double z, double t) {
     res.v[1] = y;
     res.v[2] = z;
     res.v[3] = t;
-    return res;
-}
-
-/* Initialize PJ_OBS struct */
-PJ_OBS proj_obs (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags) {
-    PJ_OBS res;
-    res.coo.v[0] = x;
-    res.coo.v[1] = y;
-    res.coo.v[2] = z;
-    res.coo.v[3] = t;
-    res.anc.v[0] = o;
-    res.anc.v[1] = p;
-    res.anc.v[2] = k;
-    res.id       = id;
-    res.flags    = flags;
-
     return res;
 }
 
@@ -127,40 +110,8 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
     unit = direction==PJ_FWD?  P->left:  P->right;
     if (unit==PJ_IO_UNITS_RADIANS)
         return hypot (proj_lp_dist (P, coo.lp, o.lp), coo.lpz.z - o.lpz.z);
-    
+
     return proj_xyz_dist (coo.xyz, coo.xyz);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Apply the transformation P to the coordinate coo */
-PJ_OBS proj_trans_obs (PJ *P, PJ_DIRECTION direction, PJ_OBS obs) {
-    if (0==P)
-        return obs;
-
-    switch (direction) {
-        case PJ_FWD:
-            return pj_fwdobs (obs, P);
-        case PJ_INV:
-            return  pj_invobs (obs, P);
-        case PJ_IDENT:
-            return obs;
-        default:
-            break;
-    }
-
-    proj_errno_set (P, EINVAL);
-    return proj_obs_error ();
 }
 
 
@@ -338,24 +289,6 @@ size_t proj_transform (
 }
 
 /*****************************************************************************/
-int proj_transform_obs (PJ *P, PJ_DIRECTION direction, size_t n, PJ_OBS *obs) {
-/******************************************************************************
-    Batch transform an array of PJ_OBS.
-
-    Returns 0 if all observations are transformed without error, otherwise
-    returns error number.
-******************************************************************************/
-    size_t i;
-    for (i=0; i<n; i++) {
-        obs[i] = proj_trans_obs(P, direction, obs[i]);
-        if (proj_errno(P))
-            return proj_errno(P);
-    }
-
-    return 0;
-}
-
-/*****************************************************************************/
 int proj_transform_coord (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord) {
 /******************************************************************************
     Batch transform an array of PJ_COORD.
@@ -386,6 +319,7 @@ PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
         ctx = pj_get_default_ctx ();
     return pj_init_ctx (ctx, argc, argv);
 }
+
 
 /*****************************************************************************/
 PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area) {

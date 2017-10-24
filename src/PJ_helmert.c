@@ -668,11 +668,11 @@ int pj_helmert_selftest (void) {
        matrix is updated when necessary. Test coordinates from GNSStrans. */
     XYZ expect4a = {3370658.18890, 711877.42370, 5349787.12430};
     XYZ expect4b = {3370658.18087, 711877.42750, 5349787.12648};
-    PJ_OBS in4 = {{{3370658.378, 711877.314, 5349787.086, 2017.0}}, {{ 0, 0, 0}}, 0, 0};
+    PJ_OBS in4 = {{{3370658.378, 711877.314, 5349787.086, 2017.0}}};
     PJ_OBS out;
 
     PJ *helmert = proj_create(
-        0, 
+        0,
         " +proj=helmert +ellps=GRS80"
         " +x=0.0127 +y=0.0065 +z=-0.0209 +s=0.00195"
         " +rx=-0.00039 +ry=0.00080 +rz=-0.00114"

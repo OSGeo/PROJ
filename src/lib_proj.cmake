@@ -201,7 +201,7 @@ SET(SRC_LIBPROJ_CORE
         pj_mlfn.c
         pj_msfn.c
         pj_mutex.c
-        pj_obs_api.c
+        proj_4D_api.c
         pj_internal.c
         proj_internal.h
         pj_open_lib.c
