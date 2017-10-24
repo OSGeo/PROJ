@@ -387,10 +387,10 @@ int pj_cart_selftest (void) {
     b = proj_trans_obs (P, PJ_FWD, obs[1]);
 
     n = proj_transform (
-        P, PJ_FWD, 
+        P, PJ_FWD,
         &(obs[0].coo.lpz.lam), sz, 2,
         &(obs[0].coo.lpz.phi), sz, 2,
-        &(obs[0].coo.lpz.z),   sz, 2, 
+        &(obs[0].coo.lpz.z),   sz, 2,
         0,                     sz, 0
     );
     if (2!=n)
@@ -408,10 +408,10 @@ int pj_cart_selftest (void) {
     h = 27;
     t = 33;
     n = proj_transform (
-        P, PJ_FWD, 
+        P, PJ_FWD,
         &(obs[0].coo.lpz.lam), sz, 2,
         &(obs[0].coo.lpz.phi), sz, 2,
-        &h,                     0, 1, 
+        &h,                     0, 1,
         &t,                     0, 1
     );
     if (2!=n)
@@ -540,7 +540,7 @@ int pj_cart_selftest (void) {
 
 
     /* test proj_derivatives_retrieve() and proj_factors_retrieve() */
-    P = proj_create(PJ_DEFAULT_CTX, "+proj=merc");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=merc +ellps=WGS84");
     a = proj_obs_null;
     a.coo.lp.lam = PJ_TORAD(12);
     a.coo.lp.phi = PJ_TORAD(55);
