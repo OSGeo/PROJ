@@ -69,47 +69,4 @@ PJ *PROJECTION(gstmerc) {
 }
 
 
-#ifndef PJ_SELFTEST
-int pj_gstmerc_selftest (void) {return 0;}
-#else
-
-int pj_gstmerc_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=gstmerc   +R=6400000    +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-
-    XY s_fwd_expect[] = {
-        { 223413.46640632182,  111769.14504058557},
-        { 223413.46640632182, -111769.14504058668},
-        {-223413.46640632302,  111769.14504058557},
-        {-223413.46640632302, -111769.14504058668},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP s_inv_expect[] = {
-        { 0.0017904931097109673,  0.0008952465544509083},
-        { 0.0017904931097109673, -0.0008952465544509083},
-        {-0.0017904931097109673,  0.0008952465544509083},
-        {-0.0017904931097109673, -0.0008952465544509083},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
-}
-
-
-#endif
+int pj_gstmerc_selftest (void) {return 10000;}
