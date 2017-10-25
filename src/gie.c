@@ -132,6 +132,7 @@ static int   get_inp (FILE *f, char *inp, int size);
 static int   get_cmnd (char *inp, char *cmnd, int len);
 static char *get_args (char *inp);
 static int   dispatch (char *cmnd, char *args);
+static char *column (char *buf, int n);
 
 
 
@@ -314,6 +315,52 @@ static int process_file (char *fname) {
 }
 
 
+/* return a pointer to the n'th column of buf */
+char *column (char *buf, int n) {
+    int i;
+    if (n <= 0)
+        return buf;
+    for (i = 0;  i < n;  i++) {
+        while (isspace(*buf))
+            buf++;
+        if (i == n - 1)
+            break;
+        while ((0 != *buf) && !isspace(*buf))
+            buf++;
+    }
+    return buf;
+}
+
+
+
+static double strtod_scaled (char *args, double default_scale) {
+    double s;
+    char *endp = args;
+    s = proj_strtod (args, &endp);
+    if (args==endp)
+        return HUGE_VAL;
+
+    endp = column (args, 2);
+
+    if (0==strcmp(endp, "km"))
+        s *= 1000;
+    else if (0==strcmp(endp, "m"))
+        s *= 1;
+    else if (0==strcmp(endp, "dm"))
+        s /= 10;
+    else if (0==strcmp(endp, "cm"))
+        s /= 100;
+    else if (0==strcmp(endp, "mm"))
+        s /= 1000;
+    else if (0==strcmp(endp, "um"))
+        s /= 1e6;
+    else if (0==strcmp(endp, "nm"))
+        s /= 1e9;
+    else
+        s *= default_scale;
+    return s;
+}
+
 
 
 
@@ -334,31 +381,11 @@ static int banner (char *args) {
 
 
 static int tolerance (char *args) {
-    char *endp = args;
-    T.tolerance = proj_strtod (endp, &endp);
+    T.tolerance = strtod_scaled (args, 1);
     if (HUGE_VAL==T.tolerance) {
         T.tolerance = 0.0005;
         return 1;
     }
-    while (isspace (*endp))
-        endp++;
-
-    if (0==strcmp(endp, "km"))
-        T.tolerance *= 1000;
-    else if (0==strcmp(endp, "m"))
-        T.tolerance *= 1;
-    else if (0==strcmp(endp, "dm"))
-        T.tolerance /= 10;
-    else if (0==strcmp(endp, "cm"))
-        T.tolerance /= 100;
-    else if (0==strcmp(endp, "mm"))
-        T.tolerance /= 1000;
-    else if (0==strcmp(endp, "um"))
-        T.tolerance /= 1e6;
-    else if (0==strcmp(endp, "nm"))
-        T.tolerance /= 1e9;
-    else
-        T.tolerance /= 1000;  /* If no unit, assume mm */
     return 0;
 }
 
@@ -436,15 +463,17 @@ static PJ_COORD torad_if_needed (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
 
 static int accept (char *args) {
     int n, i;
-    char *endp = args;
+    char *endp, *prev = args;
     T.a = proj_coord (0,0,0,0);
     n = 4;
     for (i = 0; i < 4; i++) {
-        T.a.v[i] = proj_strtod (endp, &endp);
-        if (HUGE_VAL==T.a.v[i]) {
+        T.a.v[i] = proj_strtod (prev, &endp);
+        if (prev==endp) {
             n--;
             T.a.v[i] = 0;
+            break;
         }
+        prev = endp;
     }
     T.a = torad_if_needed (T.P, T.dir, T.a);
     if (T.verbosity > 3)
@@ -457,11 +486,11 @@ static int accept (char *args) {
 static int roundtrip (char *args) {
     int ntrips;
     double d, r, ans;
-    char *endp, *endq;
+    char *endp;
     ans = proj_strtod (args, &endp);
-    ntrips = (int) (ans==HUGE_VAL? 100: fabs(ans));
-    d = proj_strtod (endp, &endq);
-    d = (endp==endq)?  T.tolerance:  d / 1000;
+    ntrips = (int) (endp==args? 100: fabs(ans));
+    d = strtod_scaled (endp, 1);
+    d = d==HUGE_VAL?  T.tolerance:  d;
     r = proj_roundtrip (T.P, PJ_FWD, ntrips, T.a);
     if (r > d) {
         if (T.verbosity > -1) {
@@ -469,7 +498,7 @@ static int roundtrip (char *args) {
                 banner (T.operation);
             fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
             fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
-            fprintf (T.fout, "     roundtrip deivation: %.3f mm, expected: %.3f mm\n", 1000*r, 1000*d);
+            fprintf (T.fout, "     roundtrip deviation: %.3f mm, expected: %.3f mm\n", 1000*r, 1000*d);
         }
         T.op_ko++;
         T.total_ko++;
@@ -485,18 +514,20 @@ static int roundtrip (char *args) {
 static int expect (char *args) {
     double d;
     enum pj_io_units unit;
-    char *endp = args;
+    char *endp, *prev = args;
     int i;
 
     T.e     =  proj_coord (0,0,0,0);
     T.b     =  proj_coord (0,0,0,0);
     T.nargs = 4;
     for (i = 0; i < 4; i++) {
-        T.e.v[i] = proj_strtod (endp, &endp);
-        if (HUGE_VAL==T.e.v[i]) {
+        T.e.v[i] = proj_strtod (prev, &endp);
+        if (prev==endp) {
             T.nargs--;
             T.e.v[i] = 0;
+            break;
         }
+        prev = endp;
     }
     T.e = torad_if_needed (T.P, T.dir==PJ_FWD? PJ_INV:PJ_FWD, T.e);
 
@@ -525,8 +556,8 @@ static int expect (char *args) {
         d = proj_xyz_dist (T.b.xyz, T.e.xyz);
 
     if (d > T.tolerance) {
-        if (d > 10)
-            d = 9.999999;
+        if (d > 1e6)
+            d = 999999.999999;
         if (T.verbosity > -1) {
             if (0==T.op_ko && T.verbosity < 2)
                 banner (T.operation);
