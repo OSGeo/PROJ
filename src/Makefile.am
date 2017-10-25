@@ -85,7 +85,7 @@ libproj_la_SOURCES = \
 	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c geodesic.c \
 	pj_strtod.c \
 	\
-	pj_obs_api.c PJ_cart.c PJ_pipeline.c PJ_horner.c PJ_helmert.c \
+	proj_4D_api.c PJ_cart.c PJ_pipeline.c PJ_horner.c PJ_helmert.c \
 	PJ_vgridshift.c PJ_hgridshift.c PJ_unitconvert.c PJ_molodensky.c \
 	pj_internal.c
 

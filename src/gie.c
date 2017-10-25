@@ -487,7 +487,7 @@ static int accept (char *args) {
 static int roundtrip (char *args) {
     int ntrips;
     double d, r, ans;
-    char *endp;
+    char *endp, *endq;
     ans = proj_strtod (args, &endp);
     ntrips = (int) (endp==args? 100: fabs(ans));
     d = strtod_scaled (endp, 1);

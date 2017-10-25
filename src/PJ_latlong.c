@@ -1,6 +1,6 @@
 /******************************************************************************
  * Project:  PROJ.4
- * Purpose:  Stub projection implementation for lat/long coordinates. We 
+ * Purpose:  Stub projection implementation for lat/long coordinates. We
  *           don't actually change the coordinates, but we want proj=latlong
  *           to act sort of like a projection.
  * Author:   Frank Warmerdam, warmerdam@pobox.com
@@ -29,6 +29,7 @@
 
 /* very loosely based upon DMA code by Bradford W. Drew */
 #define PJ_LIB__
+#include "proj_internal.h"
 #include <proj.h>
 #include "projects.h"
 

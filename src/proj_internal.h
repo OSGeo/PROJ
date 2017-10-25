@@ -50,6 +50,12 @@ extern "C" {
 
 
 
+struct PJ_OBS {
+    PJ_COORD coo;        /* coordinate data */
+};
+typedef struct PJ_OBS PJ_OBS;
+
+
 #ifndef PJ_TODEG
 #define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
 #endif
@@ -58,6 +64,9 @@ extern "C" {
 #endif
 
 
+
+PJ_OBS   proj_obs   (double x, double y, double z, double t);
+PJ_OBS   proj_trans_obs   (PJ *P, PJ_DIRECTION direction, PJ_OBS obs);
 
 PJ_COORD proj_coord_error (void);
 PJ_OBS   proj_obs_error (void);
