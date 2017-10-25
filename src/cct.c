@@ -289,22 +289,32 @@ char *column (char *buf, int n) {
     return buf;
 }
 
+/* column to double */
+static double cold (char *args, int col) {
+    char *endp;
+    char *target;
+    double d;
+    target = column (args, col);
+    d = proj_strtod (target, &endp);
+    if (endp==target)
+        return HUGE_VAL;
+    return d;
+}
 
 PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time) {
     PJ_COORD err = proj_coord (HUGE_VAL, HUGE_VAL, HUGE_VAL, HUGE_VAL);
     PJ_COORD result = err;
     int prev_errno = errno;
-    char *endptr = 0;
     errno = 0;
 
     result.xyzt.z = fixed_height;
     result.xyzt.t = fixed_time;
-    result.xyzt.x = proj_strtod (column (buf, columns[0]), &endptr);
-    result.xyzt.y = proj_strtod (column (buf, columns[1]), &endptr);
+    result.xyzt.x = cold (buf, columns[0]);
+    result.xyzt.y = cold (buf, columns[1]);
     if (result.xyzt.z==HUGE_VAL)
-        result.xyzt.z = proj_strtod (column (buf, columns[2]), &endptr);
+        result.xyzt.z = cold (buf, columns[2]);
     if (result.xyzt.t==HUGE_VAL)
-        result.xyzt.t = proj_strtod (column (buf, columns[3]), &endptr);
+        result.xyzt.t = cold (buf, columns[3]);
 
     if (0!=errno)
         return err;
