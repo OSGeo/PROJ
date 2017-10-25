@@ -90,7 +90,7 @@
  *           compatible call proj_context_create(0), which will not create
  *           a new context, but simply provide a pointer to the default one.
  *
- *           See pj_obs_api_test.c for an example of how to use the API.
+ *           See proj_4D_api_test.c for examples of how to use the API.
  *
  * Author:   Thomas Knudsen, <thokn@sdfe.dk>
  *           Benefitting from a large number of comments and suggestions
@@ -169,10 +169,6 @@ extern "C" {
 extern char const pj_release[]; /* global release id string */
 
 /* first forward declare everything needed */
-
-/* Data type for generic geodetic observations */
-struct PJ_OBS;
-typedef struct PJ_OBS PJ_OBS;
 
 /* Data type for generic geodetic 3D data */
 union PJ_TRIPLET;
@@ -299,14 +295,6 @@ union PJ_PAIR {
 };
 
 
-struct PJ_OBS {
-    PJ_COORD coo;        /* coordinate data */
-    PJ_TRIPLET anc;      /* ancillary data */
-    int id;              /* integer ancillary data - e.g. observation number, EPSG code... */
-    unsigned int flags;  /* additional data, intended for flags */
-};
-
-
 #define PJ_IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
 #define PJ_IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
 #define PJ_IS_ANAL_HK    04    /* h and k analytic */
@@ -385,7 +373,6 @@ enum PJ_DIRECTION {
 };
 typedef enum PJ_DIRECTION PJ_DIRECTION;
 
-PJ_OBS   proj_trans_obs   (PJ *P, PJ_DIRECTION direction, PJ_OBS obs);
 PJ_COORD proj_trans_coord (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
 
 
@@ -398,16 +385,14 @@ size_t proj_transform (
     double *t, size_t st, size_t nt
 );
 
-int proj_transform_obs   (PJ *P, PJ_DIRECTION direction, size_t n, PJ_OBS *obs);
 int proj_transform_coord (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
 
 /* Initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);
-PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
 
 /* Measure internal consistency - in forward or inverse direction */
 double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo);
-    
+
 /* Geodesic distance between two points with angular 2D coordinates */
 double proj_lp_dist (const PJ *P, LP a, LP b);
 

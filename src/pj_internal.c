@@ -1,8 +1,9 @@
 /******************************************************************************
  * Project:  PROJ.4
- * Purpose:  This is primarily material originating from pj_obs_api.c,
- *           that does not fit into the API category. Hence this pile of
- *           tubings and fittings for PROJ.4 internal plumbing.
+ * Purpose:  This is primarily material originating from pj_obs_api.c
+ *           (now proj_4D_api.c), that does not fit into the API
+ *           category. Hence this pile of tubings and fittings for
+ *           PROJ.4 internal plumbing.
  *
  * Author:   Thomas Knudsen,  thokn@sdfe.dk,  2017-07-05
  *
@@ -42,10 +43,50 @@
 /* Used for zero-initializing new objects */
 const PJ_COORD proj_coord_null = {{0, 0, 0, 0}};
 const PJ_OBS   proj_obs_null = {
-    {{0, 0, 0, 0}},
-    {{0, 0, 0}},
-    0, 0
+    {{0, 0, 0, 0}}
 };
+
+
+
+/* Initialize PJ_OBS struct */
+PJ_OBS proj_obs (double x, double y, double z, double t) {
+    PJ_OBS res;
+    res.coo = proj_coord (x, y, z, t);
+    return res;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Apply the transformation P to the coordinate coo */
+PJ_OBS proj_trans_obs (PJ *P, PJ_DIRECTION direction, PJ_OBS obs) {
+    if (0==P)
+        return obs;
+
+    switch (direction) {
+        case PJ_FWD:
+            return pj_fwdobs (obs, P);
+        case PJ_INV:
+            return  pj_invobs (obs, P);
+        case PJ_IDENT:
+            return obs;
+        default:
+            break;
+    }
+
+    proj_errno_set (P, EINVAL);
+    return proj_obs_error ();
+}
 
 
 /* Work around non-constness of MSVC HUGE_VAL by providing functions rather than constants */
@@ -58,8 +99,6 @@ PJ_COORD proj_coord_error (void) {
 PJ_OBS proj_obs_error (void) {
     PJ_OBS obs;
     obs.coo = proj_coord_error ();
-    obs.anc.v[0] = obs.anc.v[1] = obs.anc.v[2] = HUGE_VAL;
-    obs.id = obs.flags = 0;
     return obs;
 }
 
