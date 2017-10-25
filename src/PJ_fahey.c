@@ -37,46 +37,4 @@ PJ *PROJECTION(fahey) {
     return P;
 }
 
-#ifndef PJ_SELFTEST
-int pj_fahey_selftest (void) {return 0;}
-#else
-
-int pj_fahey_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=fahey   +a=6400000    +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        { 182993.34464912376,  101603.19356988439},
-        { 182993.34464912376, -101603.19356988439},
-        {-182993.34464912376,  101603.19356988439},
-        {-182993.34464912376, -101603.19356988439},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP s_inv_expect[] = {
-        {0.0021857886080359551,  0.00098424601668238403},
-        {0.0021857886080359551,  -0.00098424601668238403},
-        {-0.0021857886080359551,  0.00098424601668238403},
-        {-0.0021857886080359551,  -0.00098424601668238403},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
-}
-
-
-#endif
+int pj_fahey_selftest (void) {return 10000;}
