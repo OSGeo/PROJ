@@ -100,50 +100,49 @@ EXPORTS
     proj_trans_obs                  @95
     proj_trans_coord                @96
     proj_transform                  @97
-    proj_transform_obs              @98
-    proj_transform_coord            @99
-    proj_roundtrip                 @100
+    proj_transform_coord            @98
+    proj_roundtrip                  @99
 
-    proj_coord                     @101
-    proj_obs                       @102
-    proj_coord_error               @103
-    proj_obs_error                 @104
+    proj_coord                     @100
+    proj_obs                       @101
+    proj_coord_error               @102
+    proj_obs_error                 @103
 
-    proj_errno                     @105
-    proj_errno_set                 @106
-    proj_errno_reset               @107
-    proj_errno_restore             @108
-    proj_context_errno_set         @109
+    proj_errno                     @104
+    proj_errno_set                 @105
+    proj_errno_reset               @106
+    proj_errno_restore             @107
+    proj_context_errno_set         @108
 
-    proj_context_create            @110
-    proj_context_set               @111
-    proj_context_inherit           @112
-    proj_context_destroy           @113
+    proj_context_create            @109
+    proj_context_set               @110
+    proj_context_inherit           @111
+    proj_context_destroy           @112
 
-    proj_lp_dist                   @114
-    proj_xy_dist                   @115
-    proj_xyz_dist                  @116
+    proj_lp_dist                   @113
+    proj_xy_dist                   @114
+    proj_xyz_dist                  @115
 
-    proj_log_level                 @117
-    proj_log_func                  @118
-    proj_log_error                 @119
-    proj_log_debug                 @120
-    proj_log_trace                 @121
+    proj_log_level                 @116
+    proj_log_func                  @117
+    proj_log_error                 @118
+    proj_log_debug                 @119
+    proj_log_trace                 @120
 
-    proj_info                      @122
-    proj_pj_info                   @123
-    proj_grid_info                 @124
-    proj_init_info                 @125
+    proj_info                      @121
+    proj_pj_info                   @122
+    proj_grid_info                 @123
+    proj_init_info                 @124
 
-    proj_torad                     @126
-    proj_todeg                     @127
-    proj_rtodms                    @128
-    proj_dmstor                    @129
+    proj_torad                     @125
+    proj_todeg                     @126
+    proj_rtodms                    @127
+    proj_dmstor                    @128
 
-    proj_derivatives               @130
-    proj_factors                   @131
+    proj_derivatives               @129
+    proj_factors                   @130
 
-    proj_list_operations           @132
-    proj_list_ellps                @133
-    proj_list_units                @134
-    proj_list_prime_meridians      @135
+    proj_list_operations           @131
+    proj_list_ellps                @132
+    proj_list_units                @133
+    proj_list_prime_meridians      @134

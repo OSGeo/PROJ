@@ -387,10 +387,10 @@ int pj_cart_selftest (void) {
     b = proj_trans_obs (P, PJ_FWD, obs[1]);
 
     n = proj_transform (
-        P, PJ_FWD, 
+        P, PJ_FWD,
         &(obs[0].coo.lpz.lam), sz, 2,
         &(obs[0].coo.lpz.phi), sz, 2,
-        &(obs[0].coo.lpz.z),   sz, 2, 
+        &(obs[0].coo.lpz.z),   sz, 2,
         0,                     sz, 0
     );
     if (2!=n)
@@ -408,10 +408,10 @@ int pj_cart_selftest (void) {
     h = 27;
     t = 33;
     n = proj_transform (
-        P, PJ_FWD, 
+        P, PJ_FWD,
         &(obs[0].coo.lpz.lam), sz, 2,
         &(obs[0].coo.lpz.phi), sz, 2,
-        &h,                     0, 1, 
+        &h,                     0, 1,
         &t,                     0, 1
     );
     if (2!=n)
@@ -429,7 +429,7 @@ int pj_cart_selftest (void) {
     obs[0].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
     obs[1].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
 
-    if (proj_transform_obs(P, PJ_FWD, 2, obs))
+    if (proj_transform_coord(P, PJ_FWD, 2, (PJ_COORD *) obs))
         return 30;
 
     if (a.coo.lpz.lam != obs[0].coo.lpz.lam)  return 31;
