@@ -239,7 +239,6 @@ int main(int argc, char **argv) {
     /* Loop over all lines of all input files */
     while (opt_input_loop (o, optargs_file_format_text)) {
         void *ret = fgets (buf, 10000, o->input);
-        int res;
         opt_eof_handler (o);
         if (0==ret) {
             fprintf (stderr, "Read error in record %d\n", (int) o->record_index);
