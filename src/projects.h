@@ -532,6 +532,7 @@ struct FACTORS {
 #define PJD_ERR_MISSING_ARGS            -54
 #define PJD_ERR_LAT_0_IS_ZERO           -55
 #define PJD_ERR_ELLIPSOIDAL_UNSUPPORTED -56
+#define PJD_ERR_TOO_MANY_INITS          -57
 
 struct projFileAPI_t;
 

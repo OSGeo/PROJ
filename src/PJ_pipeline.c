@@ -377,12 +377,10 @@ PJ *PROJECTION(pipeline) {
 
         if (0==strcmp ("proj=pipeline", argv[i])) {
             if (-1 != i_pipeline) {
-                /* mark nested "proj=pipeline" and subsequent "step" for later processign */
-                argv[i] = "NESTEDPIPE";
-                if (i+1 < argc) argv[++i] = "NESTEDPIPE";
-            } else {
-                i_pipeline = i;
+                proj_log_error (P, "Pipeline: Nesting only allowed when child pipelines are wrapped in +init's");
+                return destructor (P, PJD_ERR_MALFORMED_PIPELINE); /* ERROR: nested pipelines */
             }
+            i_pipeline = i;
         }
     }
     nsteps--; /* Last instance of +step is just a sentinel */
@@ -408,10 +406,8 @@ PJ *PROJECTION(pipeline) {
         proj_log_trace (P, "Pipeline: Building arg list for step no. %d", i);
 
         /* First add the step specific args */
-        for (j = i_current_step + 1;  0 != strcmp ("step", argv[j]); j++) {
-            if (strcmp("NESTEDPIPE", argv[j]))
-                current_argv[current_argc++] = argv[j];
-        }
+        for (j = i_current_step + 1;  0 != strcmp ("step", argv[j]); j++)
+            current_argv[current_argc++] = argv[j];
 
         i_current_step = j;
 

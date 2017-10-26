@@ -441,6 +441,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     int i;
     int found_def = 0;
     PJ *PIN = 0;
+    int n_pipelines = 0;
+    int n_inits = 0;
 
     if (0==ctx)
         ctx = pj_get_default_ctx ();
@@ -452,36 +454,45 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         pj_ctx_set_errno (ctx, PJD_ERR_NO_ARGS);
         return 0;
     }
-    
+
+    /* count occurrences of pipelines and inits */
+    for (i = 0; i < argc; ++i) {
+        if (!strcmp (argv[i], "+proj=pipeline") || !strcmp(argv[i], "proj=pipeline") )
+                n_pipelines++;
+        if (!strncmp (argv[i], "+init=", 6) || !strncmp(argv[i], "init=", 5))
+            n_inits++;
+    }
+
+    /* can't have nested pipeline directly */
+    if (n_pipelines > 1) {
+        pj_ctx_set_errno (ctx, PJD_ERR_MALFORMED_PIPELINE);
+        return 0;
+    }
+
+    /* don't allow more than one +init in non-pipeline operations */
+    if (n_pipelines == 0 && n_inits > 1) {
+        pj_ctx_set_errno (ctx, PJD_ERR_TOO_MANY_INITS);
+        return 0;
+    }
+
     /* put arguments into internal linked list */
     start = curr = pj_mkparam(argv[0]);
     if (!curr)
         return pj_dealloc_params (ctx, start, ENOMEM);
 
-    /* build parameter list and expand +init's. Does not take care of a single +init. */
     for (i = 1; i < argc; ++i) {
         curr->next = pj_mkparam(argv[i]);
         if (!curr->next)
             return pj_dealloc_params (ctx, start, ENOMEM);
-
-        /* check if +init present */
-        if (pj_param(ctx, curr, "tinit").i) {
-            found_def = 0;
-            curr = get_init(ctx, &curr, curr->next, pj_param(ctx, curr, "sinit").s, &found_def);
-            if (!curr)
-                return pj_dealloc_params (ctx, start, PJD_ERR_NO_ARGS);
-
-            if (!found_def)
-                return pj_dealloc_params (ctx, start, PJD_ERR_NO_OPTION_IN_INIT_FILE);
-                
-        } else {
-            curr = curr->next;
-        }
+        curr = curr->next;
     }
 
-    /* in case the parameter list only consist of a +init parameter
-       it is expanded here (will not be handled in the above loop). */
-    if (pj_param(ctx, start, "tinit").i && argc == 1) {
+
+    /* Only expand +init's in non-pipeline operations. +init's in pipelines are  */
+    /* expanded in the individual pipeline steps during pipeline initialization. */
+    /* Potentially this leads to many nested pipelines, which shouldn't be a     */
+    /* problem when +inits are expanded as late as possible.                     */
+    if (pj_param(ctx, start, "tinit").i && n_pipelines == 0) {
         found_def = 0;
         curr = get_init(ctx, &start, curr, pj_param(ctx, start, "sinit").s, &found_def);
         if (!curr)
@@ -489,10 +500,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         if (!found_def)
             return pj_dealloc_params (ctx, start, PJD_ERR_NO_OPTION_IN_INIT_FILE);
     }
-    
+
     if (ctx->last_errno)
         return pj_dealloc_params (ctx, start, ctx->last_errno);
-        
+
     /* find projection selection */
     if (!(name = pj_param(ctx, start, "sproj").s))
         return pj_default_destructor (PIN, PJD_ERR_PROJ_NOT_NAMED);
@@ -500,16 +511,18 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     if (!s)
         return pj_dealloc_params (ctx, start, PJD_ERR_UNKNOWN_PROJECTION_ID);
-        
-    /* set defaults, unless inhibited */
-    if (!(pj_param(ctx, start, "bno_defs").i))
-        curr = get_defaults(ctx,&start, curr, name);
+
+    /* set defaults, unless inhibited or we are initializing a pipeline */
+    if (!(pj_param(ctx, start, "bno_defs").i) && n_pipelines == 0)
+            curr = get_defaults(ctx,&start, curr, name);
+
     proj = (PJ *(*)(PJ *)) pj_list[i].proj;
 
     /* allocate projection structure */
     PIN = proj(0);
     if (0==PIN)
         return pj_dealloc_params (ctx, start, ENOMEM);
+
 
     PIN->ctx = ctx;
     PIN->params = start;
@@ -526,13 +539,21 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PIN->vgridlist_geoid_count = 0;
 
     /* set datum parameters */
-    if (pj_datum_set(ctx, start, PIN)) 
+    if (pj_datum_set(ctx, start, PIN))
         return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
 
-    /* set ellipsoid/sphere parameters */
-    if (pj_ell_set(ctx, start, &PIN->a, &PIN->es)) {
-        pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
-        return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
+    /* set ellipsoid/sphere parameters. If we are initializing a pipeline we */
+    /* override ellipsoid-setter, since it also adds a "+ellps=WGS84" to the */
+    /* parameter list which creates problems when the pipeline driver passes */
+    /* the global parameters on the it's children.                           */
+    if (n_pipelines > 0) {
+        PIN->a = 6378137.0;
+        PIN->es = .00669438002290341575;
+    } else {
+        if (pj_ell_set(ctx, start, &PIN->a, &PIN->es)) {
+            pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
+            return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
+        }
     }
 
     PIN->a_orig = PIN->a;
@@ -606,7 +627,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         if( !(fabs(PIN->long_wrap_center) < 10 * M_TWOPI) )
             return pj_default_destructor (PIN, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
     }
-    
+
     /* axis orientation */
     if( (pj_param(ctx, start,"saxis").s) != NULL )
     {
@@ -619,7 +640,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             || strchr( axis_legal, axis_arg[1] ) == NULL
             || strchr( axis_legal, axis_arg[2] ) == NULL)
             return pj_default_destructor (PIN, PJD_ERR_AXIS);
-            
+
         /* it would be nice to validate we don't have on axis repeated */
         strcpy( PIN->axis, axis_arg );
     }
@@ -643,7 +664,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         PIN->k0 = pj_param(ctx, start, "dk").f;
     else
         PIN->k0 = 1.;
-    if (PIN->k0 <= 0.) 
+    if (PIN->k0 <= 0.)
         return pj_default_destructor (PIN, PJD_ERR_K_LESS_THAN_ZERO);
 
     /* set units */
@@ -704,7 +725,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             && *next_str == '\0' )
             value = name;
 
-        if (!value) 
+        if (!value)
             return pj_default_destructor (PIN, PJD_ERR_UNKNOWN_PRIME_MERIDIAN);
         PIN->from_greenwich = dmstor_ctx(ctx,value,NULL);
     }
