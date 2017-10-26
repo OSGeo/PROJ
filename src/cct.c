@@ -44,7 +44,7 @@ Hence, in honour of cct (the geodesist) this is cct (the program).
 
 ************************************************************************
 
-Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-09-19
+Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 
 ************************************************************************
 
@@ -85,7 +85,6 @@ double proj_atof(const char *str);
 
 char *column (char *buf, int n);
 PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time);
-int main(int argc, char **argv);
 
 
 
@@ -236,7 +235,7 @@ int main(int argc, char **argv) {
     }
 
 
-    /* Loop over all lines of all input files */
+    /* Loop over all records of all input files */
     while (opt_input_loop (o, optargs_file_format_text)) {
         void *ret = fgets (buf, 10000, o->input);
         opt_eof_handler (o);
@@ -339,16 +338,4 @@ PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double 
 
     errno = prev_errno;
     return result;
-}
-
-
-int print_output_line (FILE *fout, char *buf, PJ_COORD point) {
-    char *c;
-    if (HUGE_VAL!=point.xyzt.x)
-        return fprintf (fout, "%20.15f  %20.15f  %20.15f  %20.15f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
-    c = column (buf, 1);
-    /* reflect comments and blanks */
-    if (c && ((*c=='\0') || (*c=='#')))
-        return fprintf (fout, "%s\n", buf);
-    return 0;
 }
