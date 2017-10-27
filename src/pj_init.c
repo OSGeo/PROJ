@@ -381,8 +381,9 @@ pj_init_plus_ctx( projCtx ctx, const char *definition )
 
                 if( argc+1 == MAX_ARG )
                 {
-                    pj_ctx_set_errno( ctx, -44 );
-                    goto bum_call;
+                    pj_dalloc( defn_copy );
+                    pj_ctx_set_errno( ctx, PJD_ERR_UNPARSEABLE_CS_DEF );
+                    return 0;
                 }
 
                 argv[argc++] = defn_copy + i + 1;
@@ -410,9 +411,7 @@ pj_init_plus_ctx( projCtx ctx, const char *definition )
     /* perform actual initialization */
     result = pj_init_ctx( ctx, argc, argv );
 
-bum_call:
     pj_dalloc( defn_copy );
-
     return result;
 }
 
