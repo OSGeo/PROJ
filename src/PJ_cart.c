@@ -212,8 +212,8 @@ PJ *PROJECTION(cart) {
 /*********************************************************************/
     P->fwd3d  =  cartesian;
     P->inv3d  =  geodetic;
-    P->fwd    =  cart_forward, NULL;
-    P->inv    =  cart_reverse, NULL;
+    P->fwd    =  cart_forward;
+    P->inv    =  cart_reverse;
     P->left   =  PJ_IO_UNITS_RADIANS;
     P->right  =  PJ_IO_UNITS_METERS;
     return P;
