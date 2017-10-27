@@ -186,7 +186,7 @@ struct PJ_REGION_S;
 typedef struct PJ_REGION_S  PJ_Region;
 typedef struct ARG_list paralist;   /* parameter list */
 enum pj_io_units {
-    PJ_IO_UNITS_CLASSIC = 0,   /* LEFT: Radians     RIGHT: Scaled meters */
+    PJ_IO_UNITS_CLASSIC = 0,   /* Scaled meters (right) */
     PJ_IO_UNITS_METERS  = 1,   /* Meters  */
     PJ_IO_UNITS_RADIANS = 2    /* Radians */
 };

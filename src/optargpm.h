@@ -10,8 +10,8 @@
 For PROJ.4 command line programs, we have a somewhat complex option
 decoding situation, since we have to navigate in a cocktail of classic
 single letter style options, prefixed by "-", GNU style long options
-prefixwd by "--", transformation specification elements prefixed by "+",
-and input file names prefixed by "" nothing.
+prefixed by "--", transformation specification elements prefixed by "+",
+and input file names prefixed by "" (i.e. nothing).
 
 Hence, classic getopt.h style decoding does not cut the mustard, so
 this is an attempt to catch up and chop the ketchup.
@@ -48,8 +48,8 @@ Operator specs are      +proj=utm +zone=32 +ellps=GRS80
 Operands are             bar baz
 
 
-While claiming neither to save the world, nor to hint at the "shape of
-jazz to come",  at least optargpm has shown useful in constructing cs2cs
+While neither claiming to save the world, nor to hint at the "shape of
+jazz to come", at least optargpm has shown useful in constructing cs2cs
 style transformation filters.
 
 Supporting a wide range of option syntax, the getoptpm API is somewhat
@@ -424,14 +424,6 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
     o->argc = argc;
     o->argv = argv;
     o->progname = opt_strip_path (argv[0]);
-/*    o->progname = argv[0];
-    last_path_delim = strrchr (argv[0], '\\');
-    if (last_path_delim > o->progname)
-        o->progname = last_path_delim;
-    last_path_delim = strrchr (argv[0], '/');
-    if (last_path_delim > o->progname)
-        o->progname = last_path_delim;
-*/
 
     /* Reset all flags */
     for (i = 0;  i < (int) strlen (flags);  i++)

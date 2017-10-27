@@ -3,12 +3,6 @@
  * Purpose:  Implement a (currently minimalistic) proj API based primarily
  *           on the PJ_COORD 4D geodetic spatiotemporal data type.
  *
- *           proj thread contexts have not seen widespread use, so one of the
- *           intentions with this new API is to make them less visible on the
- *           API surface: Contexts do not have a life by themselves, they are
- *           visible only through their associated PJs, and the number of
- *           functions supporting them is limited.
- *
  * Author:   Thomas Knudsen,  thokn@sdfe.dk,  2016-06-09/2016-11-06
  *
  ******************************************************************************

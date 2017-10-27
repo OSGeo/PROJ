@@ -1,19 +1,3 @@
-#define PJ_LIB__
-#include "proj_internal.h"
-#include "projects.h"
-#include <assert.h>
-#include <stddef.h>
-#include <math.h>
-#include <errno.h>
-
-PROJ_HEAD(horner,    "Horner polynomial evaluation");
-
-/* make horner.h interface with proj's memory management */
-#define horner_dealloc(x) pj_dealloc(x)
-#define horner_calloc(n,x) pj_calloc(n,x)
-
-/* The next few hundred lines is mostly cut-and-paste from the horner.h header library */
-
 /***********************************************************************
 
     Interfacing to a classic piece of geodetic software
@@ -90,6 +74,20 @@ PROJ_HEAD(horner,    "Horner polynomial evaluation");
  * DEALINGS IN THE SOFTWARE.
  *
  *****************************************************************************/
+
+#define PJ_LIB__
+#include "proj_internal.h"
+#include "projects.h"
+#include <assert.h>
+#include <stddef.h>
+#include <math.h>
+#include <errno.h>
+
+PROJ_HEAD(horner,    "Horner polynomial evaluation");
+
+/* make horner.h interface with proj's memory management */
+#define horner_dealloc(x) pj_dealloc(x)
+#define horner_calloc(n,x) pj_calloc(n,x)
 
 
 struct horner;
@@ -399,7 +397,7 @@ static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
 
     buf = pj_calloc (strlen (param) + 2, sizeof(char));
     if (0==buf) {
-        proj_log_error (P, "Horner: Out of core");
+        proj_log_error (P, "Horner: No memory left");
         return 0;
     }
 

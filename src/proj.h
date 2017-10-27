@@ -53,26 +53,21 @@
  *           it remains as-is for now).
  *
  *           THIRD, I try to eliminate implicit type punning. Hence this API
- *           introduces the PJ_OBS ("observation") data type, for generic
- *           coordinate and handling of ancillary data.
+ *           introduces the PJ_COORD union data type, for generic 4D coordinate
+ *           handling.
  *
- *           It includes the PJ_COORD and PJ_TRIPLET unions making it possible
- *           to make explicit the previously used "implicit type punning", where
- *           a XY is turned into a LP by re#defining both as UV, behind the back
- *           of the user.
+ *           PJ_COORD makes it possible to make explicit the previously used
+ *           "implicit type punning", where a XY is turned into a LP by
+ *           re#defining both as UV, behind the back of the user.
  *
  *           The PJ_COORD union is used for storing 1D, 2D, 3D and 4D coordinates.
- *           The PJ_TRIPLET union is used for storing any set of up to 3 related
- *           observations. At the application code level, the names of these
- *           unions will usually not be used - they will only be accessed via
- *           their tag names in the PJ_OBS data type.
  *
  *           The bare essentials API presented here follows the PROJ.4
  *           convention of sailing the coordinate to be reprojected, up on
  *           the stack ("call by value"), and symmetrically returning the
- *           result on the stack. Although the PJ_OBS object is 4 times
- *           as large as the traditional XY and LP objects, timing results
- *           have shown the overhead to be very reasonable.
+ *           result on the stack. Although the PJ_COORD object is twice as large
+ *           as the traditional XY and LP objects, timing results have shown the
+ *           overhead to be very reasonable.
  *
  *           Contexts and thread safety
  *           --------------------------
@@ -82,8 +77,8 @@
  *           context subsystem is unavoidable in a multi-threaded world.
  *           Hence, instead of hiding it away, we move it into the limelight,
  *           highly recommending (but not formally requiring) the bracketing
- *           with calls to proj_context_create(...)/proj_context_destroy() of
- *           any code block calling PROJ.4 functions.
+ *           of any code block calling PROJ.4 functions with calls to
+ *           proj_context_create(...)/proj_context_destroy()
  *
  *           Legacy single threaded code need not do anything, but *may*
  *           implement a bit of future compatibility by using the backward
@@ -426,7 +421,7 @@ const PJ_ELLPS            *proj_list_ellps(void);
 const PJ_UNITS            *proj_list_units(void);
 const PJ_PRIME_MERIDIANS  *proj_list_prime_meridians(void);
 
-/* These are trivial, and while occasionaly useful in real code, primarily here to       */
+/* These are trivial, and while occasionally useful in real code, primarily here to      */
 /* simplify demo code, and in acknowledgement of the proj-internal discrepancy between   */
 /* angular units expected by classical proj, and by Charles Karney's geodesics subsystem */
 double proj_torad (double angle_in_degrees);
