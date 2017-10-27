@@ -52,11 +52,12 @@ but all of them *just special functions*, and not particularly more
 special than the sin(), cos(), tan(), and hypot() already available in
 the C standard library.
 
-And hence, *they should not be particularly much harder to use*, for a
-programmer, than the sin()s, tan()s and hypot()s so readily available.
+And hence, according to Gerald, *they should not be particularly much
+harder to use*, for a programmer, than the sin()s, tan()s and hypot()s
+so readily available.
 
 Gerald's ingenuity also showed in the implementation of the vision,
-where he devised a highly comprehensible, yet simple, system of key-value
+where he devised a comprehensive, yet simple, system of key-value
 pairs for parameterising a map projection, and the highly flexible
 PJ struct, storing run-time compiled versions of those key-value pairs,
 hence making a map projection function call, pj_fwd(PJ, point), as easy
@@ -332,7 +333,7 @@ char *column (char *buf, int n) {
 }
 
 
-
+/* interpret <args> as a numeric followed by a linear decadal prefix - return the properly scaled numeric */
 static double strtod_scaled (char *args, double default_scale) {
     double s;
     char *endp = args;

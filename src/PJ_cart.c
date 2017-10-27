@@ -120,8 +120,13 @@ static double normal_radius_of_curvature (double a, double es, double phi) {
 
 /*********************************************************************/
 static double geocentric_radius (double a, double b, double phi) {
-/*********************************************************************/
-    /* This is from WP2, but uses hypot() for potentially better numerical robustness */
+/*********************************************************************
+    Return the geocentric radius at latitude phi, of an ellipsoid
+    with semimajor axis a and semiminor axis b.
+
+    This is from WP2, but uses hypot() for potentially better
+    numerical robustness
+***********************************************************************/
     return hypot (a*a*cos (phi), b*b*sin(phi)) / hypot (a*cos(phi), b*sin(phi));
 }
 
@@ -129,18 +134,15 @@ static double geocentric_radius (double a, double b, double phi) {
 /*********************************************************************/
 static XYZ cartesian (LPZ geodetic,  PJ *P) {
 /*********************************************************************/
-    double N, h, lam, phi, cosphi = cos(geodetic.phi);
+    double N, cosphi = cos(geodetic.phi);
     XYZ xyz;
 
     N   =  normal_radius_of_curvature(P->a, P->es, geodetic.phi);
-    phi =  geodetic.phi;
-    lam =  geodetic.lam;
-    h   =  geodetic.z;
 
     /* HM formula 5-27 (z formula follows WP) */
-    xyz.x = (N + h) * cosphi * cos(lam);
-    xyz.y = (N + h) * cosphi * sin(lam);
-    xyz.z = (N * (1 - P->es) + h) * sin(phi);
+    xyz.x = (N + geodetic.z) * cosphi      * cos(geodetic.lam);
+    xyz.y = (N + geodetic.z) * cosphi      * sin(geodetic.lam);
+    xyz.z = (N * (1 - P->es) + geodetic.z) * sin(geodetic.phi);
 
     return xyz;
 }
@@ -149,23 +151,19 @@ static XYZ cartesian (LPZ geodetic,  PJ *P) {
 /*********************************************************************/
 static LPZ geodetic (XYZ cartesian,  PJ *P) {
 /*********************************************************************/
-    double N, b, p, theta, c, s, e2s;
+    double N, p, theta, c, s;
     LPZ lpz;
 
     /* Perpendicular distance from point to Z-axis (HM eq. 5-28) */
     p = hypot (cartesian.x, cartesian.y);
 
-    /* Ancillary ellipsoidal parameters */
-    b   =  P->b;
-    e2s =  P->e2s;
-
     /* HM eq. (5-37) */
-    theta  =  atan2 (cartesian.z * P->a,  p * b);
+    theta  =  atan2 (cartesian.z * P->a,  p * P->b);
 
     /* HM eq. (5-36) (from BB, 1976) */
     c  =  cos(theta);
     s  =  sin(theta);
-    lpz.phi  =  atan2 (cartesian.z + e2s*b*s*s*s,  p - P->es*P->a*c*c*c);
+    lpz.phi  =  atan2 (cartesian.z + P->e2s*P->b*s*s*s,  p - P->es*P->a*c*c*c);
     lpz.lam  =  atan2 (cartesian.y, cartesian.x);
     N        =  normal_radius_of_curvature (P->a, P->es, lpz.phi);
 
@@ -176,7 +174,7 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
         /* by computing the height as the cartesian z value      */
         /* minus the geocentric radius of the Earth at the given */
         /* latitude                                              */
-        double r = geocentric_radius (P->a, b, lpz.phi);
+        double r = geocentric_radius (P->a, P->b, lpz.phi);
         lpz.z = fabs (cartesian.z) - r;
     }
     else
@@ -214,8 +212,8 @@ PJ *PROJECTION(cart) {
 /*********************************************************************/
     P->fwd3d  =  cartesian;
     P->inv3d  =  geodetic;
-    P->fwd    =  cart_forward;
-    P->inv    =  cart_reverse;
+    P->fwd    =  cart_forward, NULL;
+    P->inv    =  cart_reverse, NULL;
     P->left   =  PJ_IO_UNITS_RADIANS;
     P->right  =  PJ_IO_UNITS_METERS;
     return P;
