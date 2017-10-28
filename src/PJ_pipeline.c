@@ -380,7 +380,7 @@ PJ *PROJECTION(pipeline) {
 
         if (0==strcmp ("proj=pipeline", argv[i])) {
             if (-1 != i_pipeline) {
-                proj_log_error (P, "Pipeline: Nesting invalid");
+                proj_log_error (P, "Pipeline: Nesting only allowed when child pipelines are wrapped in +init's");
                 return destructor (P, PJD_ERR_MALFORMED_PIPELINE); /* ERROR: nested pipelines */
             }
             i_pipeline = i;
