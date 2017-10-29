@@ -436,7 +436,7 @@ PJ *PROJECTION(pipeline) {
         for (j = 1;  j < current_argc; j++)
             proj_log_trace (P, "    %s", current_argv[j]);
 
-        next_step = pj_init (current_argc, current_argv);
+        next_step = pj_init_ctx (P->ctx, current_argc, current_argv);
         proj_log_trace (P, "Pipeline: Step %d at %p", i, next_step);
         if (0==next_step) {
             proj_log_error (P, "Pipeline: Bad step definition: %s", current_argv[0]);
