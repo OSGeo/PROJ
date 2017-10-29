@@ -1,6 +1,6 @@
 #define PJ_LIB__
 #include <projects.h>
-#define MAX_TRY 9
+#define MAX_TRY 10
 #define TOL 1e-12
 	LP
 nad_cvt(LP in, int inverse, struct CTABLE *ct) {
@@ -34,22 +34,24 @@ nad_cvt(LP in, int inverse, struct CTABLE *ct) {
                            no result.  NFW
                            To demonstrate use -112.5839956 49.4914451 against
                            the NTv2 grid shift file from Canada. */
-			if (del.lam == HUGE_VAL) 
+			if (del.lam == HUGE_VAL)
                         {
                             if( getenv( "PROJ_DEBUG" ) != NULL )
-                                fprintf( stderr, 
+                                fprintf( stderr,
                                          "Inverse grid shift iteration failed, presumably at grid edge.\n"
                                          "Using first approximation.\n" );
                             /* return del */;
                             break;
                         }
 
-			t.lam -= dif.lam = t.lam - del.lam - tb.lam;
-			t.phi -= dif.phi = t.phi + del.phi - tb.phi;
-		} while (i-- && fabs(dif.lam) > TOL && fabs(dif.phi) > TOL);
+	    	dif.lam = t.lam - del.lam - tb.lam;
+    		dif.phi = t.phi + del.phi - tb.phi;
+			t.lam -= dif.lam;
+			t.phi -= dif.phi;
+		} while (--i && hypot (dif.lam, dif.phi) > TOL);
 		if (i < 0) {
                     if( getenv( "PROJ_DEBUG" ) != NULL )
-                        fprintf( stderr, 
+                        fprintf( stderr,
                                  "Inverse grid shift iterator failed to converge.\n" );
                     t.lam = t.phi = HUGE_VAL;
                     return t;
