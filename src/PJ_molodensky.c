@@ -90,6 +90,13 @@ static double RM (double a, double es, double phi) {
 
         E.J Krakiwsky & D.B. Thomson, 1974,
         GEODETIC POSITION COMPUTATIONS,
+
+        Fredericton NB, Canada:
+        University of New Brunswick,
+        Department of Geodesy and Geomatics Engineering,
+        Lecture Notes No. 39,
+        99 pp.
+
         http://www2.unb.ca/gge/Pubs/LN39.pdf
 
 **********************************************************/

@@ -44,7 +44,7 @@ Hence, in honour of cct (the geodesist) this is cct (the program).
 
 ************************************************************************
 
-Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-09-19
+Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 
 ************************************************************************
 
@@ -73,7 +73,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-09-19
 
 #include "optargpm.h"
 #include <proj.h>
-#include <projects.h>
+#include "projects.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -85,8 +85,6 @@ double proj_atof(const char *str);
 
 char *column (char *buf, int n);
 PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time);
-int print_output_line (FILE *fout, char *buf, PJ_COORD point);
-int main(int argc, char **argv);
 
 
 
@@ -237,16 +235,31 @@ int main(int argc, char **argv) {
     }
 
 
-    /* Loop over all lines of all input files */
+    /* Loop over all records of all input files */
     while (opt_input_loop (o, optargs_file_format_text)) {
         void *ret = fgets (buf, 10000, o->input);
-        int res;
         opt_eof_handler (o);
         if (0==ret) {
             fprintf (stderr, "Read error in record %d\n", (int) o->record_index);
             continue;
         }
         point = parse_input_line (buf, columns_xyzt, fixed_z, fixed_time);
+        if (HUGE_VAL==point.xyzt.x) {
+            char *c = column (buf, 1);
+
+            /* if it's a comment or blank line, we reflect it */
+            if (c && ((*c=='\0') || (*c=='#'))) {
+                fprintf (fout, "%s\n", buf);
+                continue;
+            }
+
+            /* otherwise, it must be a syntax error */
+            fprintf (fout, "# Record %d UNREADABLE: %s", (int) o->record_index, buf);
+            if (verbose)
+                fprintf (stderr, "%s: Could not parse file '%s' line %d\n", o->progname, opt_filename (o), opt_record (o));
+            continue;
+        }
+
         if (PJ_IO_UNITS_RADIANS==input_unit) {
             point.lpzt.lam = proj_torad (point.lpzt.lam);
             point.lpzt.phi = proj_torad (point.lpzt.phi);
@@ -256,13 +269,17 @@ int main(int argc, char **argv) {
             point.lpzt.lam = proj_todeg (point.lpzt.lam);
             point.lpzt.phi = proj_todeg (point.lpzt.phi);
         }
-        res = print_output_line (fout, buf, point);
-        if (0==res) {
-            fprintf (fout, "# UNREADABLE: %s", buf);
-            if (verbose)
-                fprintf (stderr, "%s: Could not parse file '%s' line %d\n", o->progname, opt_filename (o), opt_record (o));
+
+        if (HUGE_VAL==point.xyzt.x) {
+            /* transformation error (TODO provide existing internal errmsg here) */
+            fprintf (fout, "# Record %d TRANSFORMATION ERROR: %s", (int) o->record_index, buf);
+            continue;
         }
+
+        /* Time to print the result */
+        fprintf (fout, "%20.15f  %20.15f  %20.15f  %20.15f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
     }
+
     if (stdout != fout)
         fclose (fout);
     free (o);
@@ -321,16 +338,4 @@ PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double 
 
     errno = prev_errno;
     return result;
-}
-
-
-int print_output_line (FILE *fout, char *buf, PJ_COORD point) {
-    char *c;
-    if (HUGE_VAL!=point.xyzt.x)
-        return fprintf (fout, "%20.15f  %20.15f  %20.15f  %20.15f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
-    c = column (buf, 1);
-    /* reflect comments and blanks */
-    if (c && ((*c=='\0') || (*c=='#')))
-        return fprintf (fout, "%s\n", buf);
-    return 0;
 }

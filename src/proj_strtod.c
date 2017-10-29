@@ -17,7 +17,7 @@ In the early versions of proj, iirc, a gnu version of strtod was used,
 mostly to work around cases where the same system library was used for
 C and Fortran linking, hence making strtod accept "D" and "d" as
 exponentiation indicators, following Fortran Double Precision constant
-syntax. This broke the proj angular syntax accepting a "d" to mean
+syntax. This broke the proj angular syntax, accepting a "d" to mean
 "degree": 12d34'56", meaning 12 degrees 34 minutes and 56 seconds.
 
 With an explicit MIT licence, PROJ.4 could not include GPL code any

@@ -45,9 +45,10 @@
 
     It is a very powerful concept, that increases the range of relevance of the
     proj.4 system substantially. It is, however, not a particularly intrusive
-    addition to the code base: The implementation is by and large completed by
-    adding an extra projection called "pipeline" (i.e. this file), which
-    handles all business.
+    addition to the PROJ.4 code base: The implementation is by and large completed
+    by adding an extra projection called "pipeline" (i.e. this file), which
+    handles all business, and a small amount of added functionality in the
+    pj_init code, implementing support for multilevel, embedded pipelines.
 
     Syntactically, the pipeline system introduces the "+step" keyword (which
     indicates the start of each transformation step), the "+omit_fwd" and
@@ -63,10 +64,11 @@
 
     Where <ARGS> indicate the Helmert arguments: 3 translations (+x=..., +y=...,
     +z=...), 3 rotations (+rx=..., +ry=..., +rz=...) and a scale factor (+s=...).
-    Following geodetic conventions, the rotations are given in Milliarcseconds,
+    Following geodetic conventions, the rotations are given in arcseconds,
     and the scale factor is given as parts-per-million.
 
-    [1] B. W. Kernighan & P. J. Plauger: Software tools. Addison-Wesley, 1976, 338 pp.
+    [1] B. W. Kernighan & P. J. Plauger: Software tools.
+        Reading, Massachusetts, Addison-Wesley, 1976, 338 pp.
 
 ********************************************************************************
 
@@ -156,10 +158,11 @@ static LP     pipeline_reverse (XY xyz, PJ *P);
 
     The P->left and P->right elements indicate isomorphism.
 
-    For classic proj style projections, they both have the
-    value PJ_IO_UNITS_CLASSIC (default initialization), indicating
-    that the forward driver expects angular input coordinates, and
-    provides linear output coordinates.
+    For classic proj style projections, P->left has the value
+    PJ_IO_UNITS_RADIANS, while P->right has the value
+    PJ_IO_UNITS_CLASSIC, indicating that the forward driver expects
+    angular input coordinates, and provides linear output coordinates,
+    scaled by the P->a semimajor axis length.
 
     Newer projections may set P->left and P->right to either
     PJ_IO_UNITS_METERS, PJ_IO_UNITS_RADIANS or PJ_IO_UNITS_ANY,
@@ -377,7 +380,7 @@ PJ *PROJECTION(pipeline) {
 
         if (0==strcmp ("proj=pipeline", argv[i])) {
             if (-1 != i_pipeline) {
-                proj_log_error (P, "Pipeline: Nesting invalid");
+                proj_log_error (P, "Pipeline: Nesting only allowed when child pipelines are wrapped in +init's");
                 return destructor (P, PJD_ERR_MALFORMED_PIPELINE); /* ERROR: nested pipelines */
             }
             i_pipeline = i;

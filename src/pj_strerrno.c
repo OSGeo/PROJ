@@ -62,7 +62,8 @@ pj_err_list[] = {
     "missing required arguments",                                      /* -54 */
     "lat_0 = 0",                                                       /* -55 */
     "ellipsoidal usage unsupported",                                   /* -56 */
-    
+    "only one +init allowed for non-pipeline operations",              /* -57 */
+
     /* When adding error messages, remember to update ID defines in
        projects.h, and transient_error array in pj_transform                  */
 };

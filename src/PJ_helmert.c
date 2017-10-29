@@ -92,8 +92,9 @@ struct pj_opaque_helmert {
 #define R21 (Q->R[2][1])
 #define R22 (Q->R[2][2])
 
+/**************************************************************************/
 static void update_parameters(PJ *P) {
-    /**************************************************************************
+/***************************************************************************
 
     Update transformation parameters.
     ---------------------------------
@@ -114,7 +115,8 @@ static void update_parameters(PJ *P) {
     of that parameter.
 
     [0] http://itrf.ign.fr/doc_ITRF/Transfo-ITRF2008_ITRFs.txt
-    **************************************************************************/
+
+*******************************************************************************/
 
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     double dt = Q->t_obs - Q->epoch;
@@ -146,8 +148,9 @@ static void update_parameters(PJ *P) {
     return;
 }
 
+/**************************************************************************/
 static void build_rot_matrix(PJ *P) {
-    /**************************************************************************
+/***************************************************************************
 
     Build rotation matrix.
     ----------------------
@@ -208,7 +211,7 @@ static void build_rot_matrix(PJ *P) {
     as published, the "transpose" option provides the ability to switch
     between the conventions.
 
-    ***************************************************************************/
+***************************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
 
     double  f,  t,  p;    /* phi/fi , theta, psi  */
