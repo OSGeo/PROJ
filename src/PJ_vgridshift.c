@@ -9,14 +9,10 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
     PJ_TRIPLET point;
     point.lpz = lpz;
 
-    if (P->gridlist != NULL) {
+    if (P->vgridlist_geoid != NULL) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        pj_apply_vgridshift( P, "sgrids",
-                             &(P->gridlist),
-                             &(P->gridlist_count),
-                             1, 1, 0,
-                             &point.xyz.x, &point.xyz.y, &point.xyz.z );
+        point.xyz.z -= proj_vgrid_value(P, point.lp);
     }
 
     return point.xyz;
@@ -27,14 +23,10 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
     PJ_TRIPLET point;
     point.xyz = xyz;
 
-    if (P->gridlist != NULL) {
+    if (P->vgridlist_geoid != NULL) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        pj_apply_vgridshift( P, "sgrids",
-                             &(P->gridlist),
-                             &(P->gridlist_count),
-                             0, 1, 0,
-                             &point.xyz.x, &point.xyz.y, &point.xyz.z );
+        point.xyz.z += proj_vgrid_value(P, point.lp);
     }
 
     return point.lpz;
@@ -61,14 +53,13 @@ PJ *PROJECTION(vgridshift) {
         return pj_default_destructor(P, PJD_ERR_NO_ARGS);
     }
 
-    /* Build gridlist. P->gridlist can be empty if +grids only ask for optional grids. */
-    P->gridlist = pj_gridlist_from_nadgrids( P->ctx, pj_param(P->ctx, P->params, "sgrids").s,
-                                             &(P->gridlist_count) );
+    /* Build gridlist. P->vgridlist_geoid can be empty if +grids only ask for optional grids. */
+    proj_vgrid_init(P, "grids");
 
     /* Was gridlist compiled properly? */
-    if ( pj_ctx_get_errno(P->ctx) ) {
+    if ( proj_errno(P) ) {
         proj_log_error(P, "vgridshift: could not find required grid(s).");
-        return pj_default_destructor(P, -38);
+        return pj_default_destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
     }
 
     P->fwdobs = forward_obs;
