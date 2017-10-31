@@ -107,20 +107,18 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 PROJ_HEAD(pipeline,         "Transformation pipeline manager");
 
 /* Projection specific elements for the PJ object */
-#define PIPELINE_STACK_SIZE 100
 struct pj_opaque {
     int reversible;
     int steps;
-    int depth;
     int verbose;
     int *reverse_step;
     int *omit_forward;
     int *omit_inverse;
     char **argv;
     char **current_argv;
-    PJ_OBS stack[PIPELINE_STACK_SIZE];
     PJ **pipeline;
 };
+
 
 
 static PJ_OBS pipeline_forward_obs (PJ_OBS, PJ *P);
@@ -186,23 +184,14 @@ static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
     last_step  = P->opaque->steps + 1;
 
     for (i = first_step;  i != last_step;  i++) {
-        proj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %20.20s",
-            i-first_step, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
-            P->opaque->pipeline[i]->descr
-        );
-
         if (P->opaque->omit_forward[i])
             continue;
         if (P->opaque->reverse_step[i])
             point = proj_trans_obs (P->opaque->pipeline[i], PJ_INV, point);
         else
             point = proj_trans_obs (P->opaque->pipeline[i], PJ_FWD, point);
-        if (P->opaque->depth < PIPELINE_STACK_SIZE)
-            P->opaque->stack[P->opaque->depth++] = point;
     }
-    proj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
 
-    P->opaque->depth = 0;    /* Clear the stack */
     return point;
 }
 
@@ -213,22 +202,14 @@ static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
     first_step = P->opaque->steps;
     last_step  =  0;
     for (i = first_step;  i != last_step;  i--) {
-        proj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %.4f %.4f",
-            i - 1, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
-            P->opaque->pipeline[i]->a, P->opaque->pipeline[i]->rf
-        );
         if (P->opaque->omit_inverse[i])
             continue;
         if (P->opaque->reverse_step[i])
             point = proj_trans_obs (P->opaque->pipeline[i], PJ_FWD, point);
         else
             point = proj_trans_obs (P->opaque->pipeline[i], PJ_INV, point);
-        if (P->opaque->depth < PIPELINE_STACK_SIZE)
-            P->opaque->stack[P->opaque->depth++] = point;
     }
-    proj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
 
-    P->opaque->depth = 0;    /* Clear the stack */
     return point;
 }
 
