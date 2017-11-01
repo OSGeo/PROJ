@@ -231,6 +231,7 @@ struct PJconsts {
     paralist *params;              /* Parameter list */
     struct geod_geodesic *geod;    /* For geodesic computations */
     struct pj_opaque *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
+    int inverted;                  /* Tell high level API functions to swap inv/fwd */
 
 
     /*************************************************************************************

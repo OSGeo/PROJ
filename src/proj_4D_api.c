@@ -45,7 +45,6 @@ PJ_COORD proj_coord (double x, double y, double z, double t) {
 }
 
 
-
 /* Geodesic distance (in meter) between two points with angular 2D coordinates */
 double proj_lp_dist (const PJ *P, LP a, LP b) {
     double s12, azi1, azi2;

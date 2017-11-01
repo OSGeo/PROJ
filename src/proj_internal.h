@@ -64,6 +64,8 @@ typedef struct PJ_OBS PJ_OBS;
 #endif
 
 
+enum pj_io_units pj_left (PJ *P);
+enum pj_io_units pj_right (PJ *P);
 
 PJ_OBS   proj_obs   (double x, double y, double z, double t);
 PJ_OBS   proj_trans_obs   (PJ *P, PJ_DIRECTION direction, PJ_OBS obs);

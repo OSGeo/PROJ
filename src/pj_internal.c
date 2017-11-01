@@ -66,12 +66,27 @@ PJ_OBS proj_obs (double x, double y, double z, double t) {
 
 
 
+enum pj_io_units pj_left (PJ *P) {
+    enum pj_io_units u = P->inverted? P->right: P->left;
+    if (u==PJ_IO_UNITS_RADIANS)
+        return PJ_IO_UNITS_RADIANS;
+    return PJ_IO_UNITS_METERS;
+}
 
+enum pj_io_units pj_right (PJ *P) {
+    enum pj_io_units u = P->inverted? P->left: P->right;
+    if (u==PJ_IO_UNITS_RADIANS)
+        return PJ_IO_UNITS_RADIANS;
+    return PJ_IO_UNITS_METERS;
+}
 
 /* Apply the transformation P to the coordinate coo */
 PJ_OBS proj_trans_obs (PJ *P, PJ_DIRECTION direction, PJ_OBS obs) {
     if (0==P)
         return obs;
+
+    if (P->inverted)
+        direction = -direction;
 
     switch (direction) {
         case PJ_FWD:
