@@ -92,33 +92,33 @@ static double pj_read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ
             return PJD_ERR_FAILED_TO_LOAD_GRID;
         }
 
+
+        /* Interpolation a location within the grid */
+        grid_x = (input.lam - ct->ll.lam) / ct->del.lam;
+        grid_y = (input.phi - ct->ll.phi) / ct->del.phi;
+        grid_ix = (int) floor(grid_x);
+        grid_iy = (int) floor(grid_y);
+        grid_x -= grid_ix;
+        grid_y -= grid_iy;
+
+        grid_ix2 = grid_ix + 1;
+        if( grid_ix2 >= ct->lim.lam )
+            grid_ix2 = ct->lim.lam - 1;
+        grid_iy2 = grid_iy + 1;
+        if( grid_iy2 >= ct->lim.phi )
+            grid_iy2 = ct->lim.phi - 1;
+
+        cvs = (float *) ct->cvs;
+        value = cvs[grid_ix + grid_iy * ct->lim.lam]
+            * (1.0-grid_x) * (1.0-grid_y)
+            + cvs[grid_ix2 + grid_iy * ct->lim.lam]
+            * (grid_x) * (1.0-grid_y)
+            + cvs[grid_ix + grid_iy2 * ct->lim.lam]
+            * (1.0-grid_x) * (grid_y)
+            + cvs[grid_ix2 + grid_iy2 * ct->lim.lam]
+            * (grid_x) * (grid_y);
+
     }
-
-    /* Interpolation a location within the grid */
-    grid_x = (input.lam - ct->ll.lam) / ct->del.lam;
-    grid_y = (input.phi - ct->ll.phi) / ct->del.phi;
-    grid_ix = (int) floor(grid_x);
-    grid_iy = (int) floor(grid_y);
-    grid_x -= grid_ix;
-    grid_y -= grid_iy;
-
-    grid_ix2 = grid_ix + 1;
-    if( grid_ix2 >= ct->lim.lam )
-        grid_ix2 = ct->lim.lam - 1;
-    grid_iy2 = grid_iy + 1;
-    if( grid_iy2 >= ct->lim.phi )
-        grid_iy2 = ct->lim.phi - 1;
-
-    cvs = (float *) ct->cvs;
-    value = cvs[grid_ix + grid_iy * ct->lim.lam]
-        * (1.0-grid_x) * (1.0-grid_y)
-        + cvs[grid_ix2 + grid_iy * ct->lim.lam]
-        * (grid_x) * (1.0-grid_y)
-        + cvs[grid_ix + grid_iy2 * ct->lim.lam]
-        * (1.0-grid_x) * (grid_y)
-        + cvs[grid_ix2 + grid_iy2 * ct->lim.lam]
-        * (grid_x) * (grid_y);
-
     /* nodata?  */
     /* GTX official nodata value if  -88.88880f, but some grids also */
     /* use other  big values for nodata (e.g naptrans2008.gtx has */
