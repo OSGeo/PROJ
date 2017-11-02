@@ -538,7 +538,7 @@ int pj_cart_selftest (void) {
 
 
     /* test proj_derivatives_retrieve() and proj_factors_retrieve() */
-    P = proj_create(PJ_DEFAULT_CTX, "+proj=merc");
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=merc +ellps=WGS84");
     a = proj_obs_null;
     a.coo.lp.lam = PJ_TORAD(12);
     a.coo.lp.phi = PJ_TORAD(55);
