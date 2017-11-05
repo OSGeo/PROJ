@@ -461,7 +461,7 @@ static PJ_OBS helmert_reverse_obs (PJ_OBS point, PJ *P) {
 #define ARCSEC_TO_RAD (DEG_TO_RAD / 3600.0)
 
 /***********************************************************************/
-PJ *OPERATION(helmert, PJ_IO_UNITS_METERS, PJ_IO_UNITS_METERS, 0) {
+PJ *TRANSFORMATION(helmert, PJ_IO_UNITS_METERS, PJ_IO_UNITS_METERS, 0) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = pj_calloc (1, sizeof (struct pj_opaque_helmert));
     if (0==Q)
