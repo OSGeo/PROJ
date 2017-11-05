@@ -146,6 +146,3 @@ EXPORTS
     proj_list_ellps                @132
     proj_list_units                @133
     proj_list_prime_meridians      @134
-
-    pj_left                        @135
-    pj_right                       @136
