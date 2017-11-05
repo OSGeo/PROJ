@@ -93,7 +93,6 @@ static void special(LP lp, PJ *P, struct FACTORS *fac) {
 PJ *PROJECTION(lcc) {
     double cosphi, sinphi;
     int secant;
-    int itol;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
 
     if (0==Q)

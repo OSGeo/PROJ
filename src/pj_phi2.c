@@ -20,7 +20,7 @@ double pj_phi2(PJ *P, double ts, double tolerance) {
         previous = phi;
 		phi = M_HALFPI - 2 * atan (ts * pow ( (1. - con) / (1. + con), ehalf) );
 
-        if ( fabs (phi - previous) < TOL)
+        if ( fabs (phi - previous) < tolerance)
             break;
 	}
 
