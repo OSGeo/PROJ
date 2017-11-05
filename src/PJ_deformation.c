@@ -274,8 +274,8 @@ PJ *PROJECTION(deformation) {
        return destructor(P, PJD_ERR_MISSING_ARGS);
     }
 
-    P->fwdobs = P->fwd4d = forward_4d;
-    P->invobs = P->fwd4d = reverse_4d;
+    P->fwd4d = forward_4d;
+    P->inv4d = reverse_4d;
     P->fwd3d  = forward_3d;
     P->inv3d  = reverse_3d;
     P->fwd    = 0;

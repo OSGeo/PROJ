@@ -213,12 +213,13 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    /* We have no API call for inverting an operation, so we brute force it. */
     if (direction==-1)
         P->inverted = !(P->inverted);
     direction = 1;
 
-    input_unit   =  pj_left (P);
-    output_unit  =  pj_right (P);
+    input_unit   =  proj_angular_left (P)?  PJ_IO_UNITS_RADIANS: PJ_IO_UNITS_METERS;
+    output_unit  =  proj_angular_right (P)? PJ_IO_UNITS_RADIANS: PJ_IO_UNITS_METERS;
 
     /* Allocate input buffer */
     buf = calloc (1, 10000);

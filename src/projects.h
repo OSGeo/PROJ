@@ -209,6 +209,7 @@ struct PJ_AREA {
 struct projCtx_t;
 typedef struct projCtx_t projCtx_t;
 
+
 /* base projection data structure */
 struct PJconsts {
 
@@ -254,8 +255,6 @@ struct PJconsts {
     PJ_COORD (*fwd4d)(PJ_COORD, PJ *);
     PJ_COORD (*inv4d)(PJ_COORD, PJ *);
 
-    PJ_COORD (*fwdobs)(PJ_COORD, PJ *);
-    PJ_COORD (*invobs)(PJ_COORD, PJ *);
 
     void (*spc)(LP, PJ *, struct FACTORS *);
 

@@ -468,8 +468,8 @@ PJ *TRANSFORMATION(helmert, 0) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
-    P->fwdobs = P->fwd4d = helmert_forward_4d;
-    P->invobs = P->inv4d = helmert_reverse_4d;
+    P->fwd4d  = helmert_forward_4d;
+    P->inv4d  = helmert_reverse_4d;
     P->fwd3d  = helmert_forward_3d;
     P->inv3d  = helmert_reverse_3d;
     P->fwd    = helmert_forward;

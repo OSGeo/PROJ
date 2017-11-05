@@ -44,6 +44,13 @@ PJ_COORD proj_coord (double x, double y, double z, double t) {
     return res;
 }
 
+/* We do not want to bubble enum pj_io_units up to the API level, so we provide these predicates instead */
+int proj_angular_left (PJ *P) {
+    return pj_left (P)==PJ_IO_UNITS_RADIANS;
+}
+int proj_angular_right (PJ *P) {
+    return pj_right (P)==PJ_IO_UNITS_RADIANS;
+}
 
 /* Geodesic distance (in meter) between two points with angular 2D coordinates */
 double proj_lp_dist (const PJ *P, LP a, LP b) {
@@ -108,8 +115,6 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
 }
 
 
-
-
 /* Apply the transformation P to the coordinate coo */
 PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
     if (0==P)
@@ -131,7 +136,6 @@ PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
     proj_errno_set (P, EINVAL);
     return proj_coord_error ();
 }
-
 
 
 
@@ -565,7 +569,7 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
 
     /* this does not take into account that a pipeline potentially does not */
     /* have an inverse.                                                     */
-    info.has_inverse = (P->inv != 0 || P->inv3d != 0 || P->invobs != 0);
+    info.has_inverse = (P->inv != 0 || P->inv3d != 0 || P->inv4d != 0);
 
     return info;
 }

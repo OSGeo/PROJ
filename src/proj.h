@@ -368,6 +368,12 @@ enum PJ_DIRECTION {
 };
 typedef enum PJ_DIRECTION PJ_DIRECTION;
 
+
+
+
+int proj_angular_left (PJ *P);
+int proj_angular_right (PJ *P);
+
 PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
 
 

@@ -429,13 +429,13 @@ PJ *PROJECTION(horner) {
 /*********************************************************************/
     int   degree = 0, n, complex_horner = 0;
     HORNER *Q;
-    P->fwdobs  =  P->fwd4d = horner_forward_4d;
-    P->invobs  =  P->inv4d = horner_reverse_4d;
-    P->fwd3d   =  0;
-    P->inv3d   =  0;
-    P->fwd     =  0;
-    P->inv     =  0;
-    P->left    =  P->right  =  PJ_IO_UNITS_METERS;
+    P->fwd4d  = horner_forward_4d;
+    P->inv4d  = horner_reverse_4d;
+    P->fwd3d  =  0;
+    P->inv3d  =  0;
+    P->fwd    =  0;
+    P->inv    =  0;
+    P->left   =  P->right  =  PJ_IO_UNITS_METERS;
     P->destructor = horner_freeup;
 
     /* Polynomial degree specified? */
@@ -460,8 +460,8 @@ PJ *PROJECTION(horner) {
             return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         if (0==parse_coefs (P, Q->inv_c, "inv_c", n))
             return horner_freeup (P, PJD_ERR_MISSING_ARGS);
-        P->fwdobs  =  P->fwd4d = complex_horner_forward_4d;
-        P->invobs  =  P->inv4d = complex_horner_reverse_4d;
+        P->fwd4d  =  P->fwd4d = complex_horner_forward_4d;
+        P->inv4d  =  P->inv4d = complex_horner_reverse_4d;
 
     }
     else {

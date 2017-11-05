@@ -298,8 +298,8 @@ PJ *PROJECTION(pipeline) {
     int i_pipeline = -1, i_first_step = -1, i_current_step;
     char **argv, **current_argv;
 
-    P->fwdobs =  P->fwd4d = pipeline_forward_4d;
-    P->invobs =  P->inv4d = pipeline_reverse_4d;
+    P->fwd4d  = pipeline_forward_4d;
+    P->inv4d  = pipeline_reverse_4d;
     P->fwd3d  =  pipeline_forward_3d;
     P->inv3d  =  pipeline_reverse_3d;
     P->fwd    =  pipeline_forward;

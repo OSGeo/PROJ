@@ -127,7 +127,7 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
 }
 
 
-static PJ_COORD forward_obs(PJ_COORD coo, PJ *P) {
+static PJ_COORD forward_4d(PJ_COORD coo, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD out;
@@ -141,7 +141,7 @@ static PJ_COORD forward_obs(PJ_COORD coo, PJ *P) {
 }
 
 
-static PJ_COORD reverse_obs(PJ_COORD coo, PJ *P) {
+static PJ_COORD reverse_4d(PJ_COORD coo, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
     PJ_COORD out;
@@ -207,8 +207,8 @@ PJ *PROJECTION(axisswap) {
 
     /* only map fwd/inv functions that are possible with the given axis setup */
     if (n == 4) {
-        P->fwdobs = P->fwd4d = forward_obs;
-        P->invobs = P->inv4d = reverse_obs;
+        P->fwd4d = forward_4d;
+        P->inv4d = reverse_4d;
     }
     if (n == 3 && Q->axis[0] < 3 && Q->axis[1] < 3 && Q->axis[2] < 3) {
         P->fwd3d  = forward_3d;
@@ -219,7 +219,7 @@ PJ *PROJECTION(axisswap) {
         P->inv    = reverse_2d;
     }
 
-    if (P->fwdobs == NULL && P->fwd3d == NULL && P->fwd == NULL) {
+    if (P->fwd4d == NULL && P->fwd3d == NULL && P->fwd == NULL) {
         proj_log_error(P, "swapaxis: bad axis order");
         return pj_default_destructor(P, PJD_ERR_AXIS);
     }

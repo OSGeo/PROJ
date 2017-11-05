@@ -274,8 +274,8 @@ PJ *PROJECTION(molodensky) {
         return pj_default_destructor(P, ENOMEM);
     P->opaque = (void *) Q;
 
-    P->fwdobs = P->fwd4d = forward_4d;
-    P->invobs = P->inv4d = reverse_4d;
+    P->fwd4d = forward_4d;
+    P->inv4d = reverse_4d;
     P->fwd3d  = forward_3d;
     P->inv3d  = reverse_3d;
     P->fwd    = forward_2d;

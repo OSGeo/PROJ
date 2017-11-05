@@ -62,8 +62,8 @@ PJ *PROJECTION(vgridshift) {
         return pj_default_destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
     }
 
-    P->fwdobs = P->fwd4d = forward_4d;
-    P->invobs = P->inv4d = reverse_4d;
+    P->fwd4d = forward_4d;
+    P->inv4d = reverse_4d;
     P->fwd3d  = forward_3d;
     P->inv3d  = reverse_3d;
     P->fwd    = 0;

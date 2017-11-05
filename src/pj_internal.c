@@ -53,7 +53,6 @@ enum pj_io_units pj_right (PJ *P) {
 }
 
 
-
 /* Work around non-constness of MSVC HUGE_VAL by providing functions rather than constants */
 PJ_COORD proj_coord_error (void) {
     PJ_COORD c;
@@ -65,8 +64,6 @@ PJ_COORD proj_coord_error (void) {
 PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
     if (0!=P->fwd4d)
         return P->fwd4d (coo, P);
-    if (0!=P->fwdobs)
-        return P->fwdobs (coo, P);
     if (0!=P->fwd3d) {
         coo.xyz  =  pj_fwd3d (coo.lpz, P);
         return coo;
@@ -83,8 +80,6 @@ PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
 PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
     if (0!=P->inv4d)
         return P->inv4d (coo, P);
-    if (0!=P->invobs)
-        return P->invobs (coo, P);
     if (0!=P->inv3d) {
         coo.lpz  =  pj_inv3d (coo.xyz, P);
         return coo;
