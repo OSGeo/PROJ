@@ -107,20 +107,15 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 PROJ_HEAD(pipeline,         "Transformation pipeline manager");
 
 /* Projection specific elements for the PJ object */
-#define PIPELINE_STACK_SIZE 100
 struct pj_opaque {
     int reversible;
     int steps;
-    int depth;
     int verbose;
-    int *reverse_step;
-    int *omit_forward;
-    int *omit_inverse;
     char **argv;
     char **current_argv;
-    PJ_OBS stack[PIPELINE_STACK_SIZE];
     PJ **pipeline;
 };
+
 
 
 static PJ_OBS pipeline_forward_obs (PJ_OBS, PJ *P);
@@ -185,26 +180,12 @@ static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
     first_step = 1;
     last_step  = P->opaque->steps + 1;
 
-    for (i = first_step;  i != last_step;  i++) {
-        proj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %20.20s",
-            i-first_step, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
-            P->opaque->pipeline[i]->descr
-        );
+    for (i = first_step;  i != last_step;  i++)
+        point = proj_trans_obs (P->opaque->pipeline[i], 1, point);
 
-        if (P->opaque->omit_forward[i])
-            continue;
-        if (P->opaque->reverse_step[i])
-            point = proj_trans_obs (P->opaque->pipeline[i], PJ_INV, point);
-        else
-            point = proj_trans_obs (P->opaque->pipeline[i], PJ_FWD, point);
-        if (P->opaque->depth < PIPELINE_STACK_SIZE)
-            P->opaque->stack[P->opaque->depth++] = point;
-    }
-    proj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
-
-    P->opaque->depth = 0;    /* Clear the stack */
     return point;
 }
+
 
 
 static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
@@ -212,23 +193,10 @@ static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
 
     first_step = P->opaque->steps;
     last_step  =  0;
-    for (i = first_step;  i != last_step;  i--) {
-        proj_log_trace (P, "In[%2.2d]: %20.15g %20.15g %20.15g - %.4f %.4f",
-            i - 1, point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z,
-            P->opaque->pipeline[i]->a, P->opaque->pipeline[i]->rf
-        );
-        if (P->opaque->omit_inverse[i])
-            continue;
-        if (P->opaque->reverse_step[i])
-            point = proj_trans_obs (P->opaque->pipeline[i], PJ_FWD, point);
-        else
-            point = proj_trans_obs (P->opaque->pipeline[i], PJ_INV, point);
-        if (P->opaque->depth < PIPELINE_STACK_SIZE)
-            P->opaque->stack[P->opaque->depth++] = point;
-    }
-    proj_log_trace (P, "Out[ ]: %20.15g %20.15g %20.15g", point.coo.xyz.x, point.coo.xyz.y, point.coo.xyz.z);
 
-    P->opaque->depth = 0;    /* Clear the stack */
+    for (i = first_step;  i != last_step;  i--)
+        point = proj_trans_obs (P->opaque->pipeline[i], -1, point);
+
     return point;
 }
 
@@ -279,9 +247,6 @@ static void *destructor (PJ *P, int errlev) {
                 P->opaque->pipeline[i+1]->destructor (P->opaque->pipeline[i+1], errlev);
     pj_dealloc (P->opaque->pipeline);
 
-    pj_dealloc (P->opaque->reverse_step);
-    pj_dealloc (P->opaque->omit_forward);
-    pj_dealloc (P->opaque->omit_inverse);
     pj_dealloc (P->opaque->argv);
     pj_dealloc (P->opaque->current_argv);
 
@@ -297,18 +262,6 @@ static PJ *pj_create_pipeline (PJ *P, size_t steps) {
         return 0;
 
     P->opaque->steps = (int)steps;
-
-    P->opaque->reverse_step =  pj_calloc (steps + 2, sizeof(int));
-    if (0==P->opaque->reverse_step)
-        return 0;
-
-    P->opaque->omit_forward =  pj_calloc (steps + 2, sizeof(int));
-    if (0==P->opaque->omit_forward)
-        return 0;
-
-    P->opaque->omit_inverse =  pj_calloc (steps + 2, sizeof(int));
-    if (0==P->opaque->omit_inverse)
-        return 0;
 
     return P;
 }
@@ -337,6 +290,7 @@ static char **argv_params (paralist *params, size_t argc) {
     argv[i++] = argv_sentinel;
     return argv;
 }
+
 
 
 PJ *PROJECTION(pipeline) {
@@ -418,84 +372,35 @@ PJ *PROJECTION(pipeline) {
         for (j = i_pipeline + 1;  0 != strcmp ("step", argv[j]); j++)
             current_argv[current_argc++] = argv[j];
 
-        /* Finally handle non-symmetric steps and inverted steps */
-        for (j = 0;  j < current_argc; j++) {
-            if (0==strcmp("omit_inv", current_argv[j])) {
-                P->opaque->omit_inverse[i+1] = 1;
-                P->opaque->omit_forward[i+1] = 0;
-            }
-            if (0==strcmp("omit_fwd", current_argv[j])) {
-                P->opaque->omit_inverse[i+1] = 0;
-                P->opaque->omit_forward[i+1] = 1;
-            }
-            if (0==strcmp("inv", current_argv[j]))
-                P->opaque->reverse_step[i+1] = 1;
-        }
-
         proj_log_trace (P, "Pipeline: init - %s, %d", current_argv[0], current_argc);
         for (j = 1;  j < current_argc; j++)
             proj_log_trace (P, "    %s", current_argv[j]);
 
         next_step = pj_init_ctx (P->ctx, current_argc, current_argv);
+
         proj_log_trace (P, "Pipeline: Step %d at %p", i, next_step);
         if (0==next_step) {
             proj_log_error (P, "Pipeline: Bad step definition: %s", current_argv[0]);
             return destructor (P, PJD_ERR_MALFORMED_PIPELINE); /* ERROR: bad pipeline def */
         }
+
+        /* Is this step inverted? */
+        for (j = 0;  j < current_argc; j++)
+            if (0==strcmp("inv", current_argv[j]))
+                next_step->inverted = 1;
+
         P->opaque->pipeline[i+1] = next_step;
+
         proj_log_trace (P, "Pipeline:    step done");
     }
 
     proj_log_trace (P, "Pipeline: %d steps built. Determining i/o characteristics", nsteps);
 
     /* Determine forward input (= reverse output) data type */
-
-    /* First locate the first forward-active pipeline step */
-    for (i = 0;  i < nsteps;  i++)
-        if (0==P->opaque->omit_forward[i+1])
-            break;
-    if (i==nsteps) {
-        proj_log_error (P, "Pipeline: No forward steps");
-        return destructor (P, PJD_ERR_MALFORMED_PIPELINE);
-    }
-
-    if (P->opaque->reverse_step[i + 1])
-        P->left = P->opaque->pipeline[i + 1]->right;
-    else
-        P->left = P->opaque->pipeline[i + 1]->left;
-
-    if (P->left==PJ_IO_UNITS_CLASSIC) {
-        if (P->opaque->reverse_step[i + 1])
-            P->left = PJ_IO_UNITS_METERS;
-        else
-            P->left = PJ_IO_UNITS_RADIANS;
-    }
+    P->left = pj_left (P->opaque->pipeline[1]);
 
     /* Now, correspondingly determine forward output (= reverse input) data type */
-
-    /* First locate the last reverse-active pipeline step */
-    for (i = nsteps - 1;  i >= 0;  i--)
-        if (0==P->opaque->omit_inverse[i+1])
-            break;
-    if (i==-1) {
-        proj_log_error (P, "Pipeline: No reverse steps");
-        return destructor (P, PJD_ERR_MALFORMED_PIPELINE);
-    }
-
-    if (P->opaque->reverse_step[i + 1])
-        P->right = P->opaque->pipeline[i + 1]->left;
-    else
-        P->right = P->opaque->pipeline[i + 1]->right;
-
-    if (P->right==PJ_IO_UNITS_CLASSIC) {
-        if (P->opaque->reverse_step[i + 1])
-            P->right = PJ_IO_UNITS_RADIANS;
-        else
-            P->right = PJ_IO_UNITS_METERS;
-    }
-    proj_log_trace (P, "Pipeline: Units - left: [%s], right: [%s]\n",
-        P->left ==PJ_IO_UNITS_RADIANS? "angular": "linear",
-        P->right==PJ_IO_UNITS_RADIANS? "angular": "linear");
+    P->right = pj_right (P->opaque->pipeline[nsteps]);
 
     return P;
 }
@@ -512,14 +417,14 @@ int pj_pipeline_selftest (void) {
     double dist;
 
     /* forward-reverse geo->utm->geo */
-    P = proj_create (PJ_DEFAULT_CTX, "+proj=pipeline +zone=32 +step +proj=utm +ellps=GRS80 +step +proj=utm +ellps=GRS80 +inv");
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=pipeline +zone=32 +step +proj=utm   +ellps=GRS80 +step +proj=utm   +ellps=GRS80 +inv");
     if (0==P)
         return 1000;
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 0) */
     a = b = proj_obs_null;
     a.coo.lpz.lam = PJ_TORAD(12);
     a.coo.lpz.phi = PJ_TORAD(55);
-    a.coo.lpz.z   = 0;
+    a.coo.lpz.z   = 10;
 
     /* Forward projection */
     b = proj_trans_obs (P, PJ_FWD, a);
