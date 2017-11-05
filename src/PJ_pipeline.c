@@ -98,8 +98,9 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 ********************************************************************************/
 
 #define PJ_LIB__
+#include <geodesic.h>
 #include "proj_internal.h"
-#include <projects.h>
+#include "projects.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -291,9 +292,45 @@ static char **argv_params (paralist *params, size_t argc) {
     return argv;
 }
 
+/* Being the special operator that the pipeline is, we have to handle the    */
+/* ellipsoid differently than usual. In general, the pipeline operation does */
+/* not need an ellipsoid, but in some cases it is beneficial nonetheless.    */
+/* Unfortunately we can't use the normal ellipsoid setter in pj_init, since  */
+/* it adds a +ellps parameter to the global args if nothing else is specified*/
+/* This is problematic since that ellipsoid spec is then passed on to the    */
+/* pipeline children. This is rarely what we want, so here we implement our  */
+/* own logic instead. If an ellipsoid is set in the global args, it is used  */
+/* as the pipeline ellipsoid. Otherwise we use WGS84 parameters as default.  */
+/* At last we calculate the rest of the ellipsoid parameters and             */
+/* re-initialize P->geod.                                                    */
+static void set_ellipsoid(PJ *P) {
+    paralist *cur, *attachment;
+
+    /* Break the linked list after the global args */
+    attachment = 0;
+    for (cur = P->params; cur != 0; cur = cur->next)
+        if (strcmp("step", cur->next->param) == 0) {
+            attachment = cur->next;
+            cur->next = 0;
+            break;
+        }
+
+    /* Check if there's any ellipsoid specification in the global params. */
+    /* If not, use WGS84 as default                                       */
+    if (pj_ell_set(P->ctx, P->params, &P->a, &P->es)) {
+        P->a  = 6378137.0;
+        P->es = .00669438002290341575;
+    }
+
+    pj_calc_ellps_params(P, P->a, P->es);
+    geod_init(P->geod, P->a,  (1 - sqrt (1 - P->es)));
+
+    /* Re-attach the dangling list */
+    cur->next = attachment;
+}
 
 
-PJ *PROJECTION(pipeline) {
+PJ *OPERATION(pipeline,0) {
     int i, nsteps = 0, argc;
     int i_pipeline = -1, i_first_step = -1, i_current_step;
     char **argv, **current_argv;
@@ -352,6 +389,8 @@ PJ *PROJECTION(pipeline) {
     /* Make room for the pipeline and execution indicators */
     if (0==pj_create_pipeline (P, nsteps))
         return destructor (P, ENOMEM);
+
+    set_ellipsoid(P);
 
     /* Now loop over all steps, building a new set of arguments for each init */
     for (i_current_step = i_first_step, i = 0;  i < nsteps;  i++) {

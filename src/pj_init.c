@@ -28,12 +28,13 @@
  *****************************************************************************/
 
 #define PJ_LIB__
-#include <projects.h>
 #include <geodesic.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
+#include "proj_internal.h"
+#include "projects.h"
 
 /* Maximum size of files using the "escape carriage return" feature */
 #define MAX_CR_ESCAPE 65537
@@ -129,7 +130,6 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
         int *found_def) {
     pj_read_state *state = (pj_read_state*) calloc(1,sizeof(pj_read_state));
     char sword[MAX_CR_ESCAPE];
-    char *pipeline;
     int len;
     int in_target = 0;
     const char *next_char = NULL;
@@ -220,10 +220,7 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
             sword[word_len+1] = '\0';
 
             /* do not override existing parameter value of same name - unless in pipeline definition */
-            pipeline = pj_param(ctx, *start, "sproj").s;
-            if (pipeline && strcmp (pipeline, "pipeline"))
-                pipeline = 0;
-            if (pipeline || !pj_param(ctx, *start, sword).i) {
+            if (!pj_param(ctx, *start, sword).i) {
                 /* don't default ellipse if datum, ellps or any earth model
                    information is set. */
                 if( strncmp(sword+1,"ellps=",6) != 0
@@ -260,8 +257,7 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
 /************************************************************************/
 /*                            get_defaults()                            */
 /************************************************************************/
-static paralist *
-get_defaults(projCtx ctx, paralist **start, paralist *next, char *name) {
+static paralist *get_defaults(projCtx ctx, paralist **start, paralist *next, char *name) {
     PAFile fid;
 
     if ( (fid = pj_open_lib(ctx,"proj_def.dat", "rt")) != NULL) {
@@ -486,7 +482,6 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         curr = curr->next;
     }
 
-
     /* Only expand +init's in non-pipeline operations. +init's in pipelines are  */
     /* expanded in the individual pipeline steps during pipeline initialization. */
     /* Potentially this leads to many nested pipelines, which shouldn't be a     */
@@ -522,7 +517,6 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if (0==PIN)
         return pj_dealloc_params (ctx, start, ENOMEM);
 
-
     PIN->ctx = ctx;
     PIN->params = start;
     PIN->is_latlong = 0;
@@ -541,58 +535,17 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if (pj_datum_set(ctx, start, PIN))
         return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
 
-    /* set ellipsoid/sphere parameters. If we are initializing a pipeline we */
-    /* override ellipsoid-setter, since it also adds a "+ellps=WGS84" to the */
-    /* parameter list which creates problems when the pipeline driver passes */
-    /* the global parameters on the it's children.                           */
-    if (n_pipelines > 0) {
-        PIN->a = 6378137.0;
-        PIN->es = .00669438002290341575;
-    } else {
+    if (PIN->need_ellps) {
         if (pj_ell_set(ctx, start, &PIN->a, &PIN->es)) {
             pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
             return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
         }
+
+        PIN->a_orig = PIN->a;
+        PIN->es_orig = PIN->es;
+        if (pj_calc_ellps_params(PIN, PIN->a, PIN->es))
+            return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE);
     }
-
-    PIN->a_orig = PIN->a;
-    PIN->es_orig = PIN->es;
-
-    /* Compute some ancillary ellipsoidal parameters */
-    PIN->e = sqrt(PIN->es);      /* eccentricity */
-    PIN->alpha = asin (PIN->e);  /* angular eccentricity */
-
-    /* second eccentricity */
-    PIN->e2  = tan (PIN->alpha);
-    PIN->e2s = PIN->e2 * PIN->e2;
-
-    /* third eccentricity */
-    PIN->e3    = (0!=PIN->alpha)? sin (PIN->alpha) / sqrt(2 - sin (PIN->alpha)*sin (PIN->alpha)): 0;
-    PIN->e3s = PIN->e3 * PIN->e3;
-
-    /* flattening */
-    PIN->f  = 1 - cos (PIN->alpha);   /* = 1 - sqrt (1 - PIN->es); */
-    PIN->rf = PIN->f != 0.0 ? 1.0/PIN->f: HUGE_VAL;
-
-    /* second flattening */
-    PIN->f2  = (cos(PIN->alpha)!=0)? 1/cos (PIN->alpha) - 1: 0;
-    PIN->rf2 = PIN->f2 != 0.0 ? 1/PIN->f2: HUGE_VAL;
-
-    /* third flattening */
-    PIN->n  = pow (tan (PIN->alpha/2), 2);
-    PIN->rn = PIN->n != 0.0 ? 1/PIN->n: HUGE_VAL;
-
-    /* ...and a few more */
-    PIN->b  = (1 - PIN->f)*PIN->a;
-    PIN->rb = 1. / PIN->b;
-    PIN->ra = 1. / PIN->a;
-
-    PIN->one_es = 1. - PIN->es;
-    if (PIN->one_es == 0.)
-        return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE);
-    PIN->rone_es = 1./PIN->one_es;
-
-
 
     /* Now that we have ellipse information check for WGS84 datum */
     if( PIN->datum_type == PJD_3PARAM
