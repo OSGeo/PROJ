@@ -99,7 +99,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 
 #define PJ_LIB__
 #include "proj_internal.h"
-#include <projects.h>
+#include "projects.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -118,8 +118,8 @@ struct pj_opaque {
 
 
 
-static PJ_OBS pipeline_forward_obs (PJ_OBS, PJ *P);
-static PJ_OBS pipeline_reverse_obs (PJ_OBS, PJ *P);
+static PJ_COORD pipeline_forward_4d (PJ_COORD, PJ *P);
+static PJ_COORD pipeline_reverse_4d (PJ_COORD, PJ *P);
 static XYZ    pipeline_forward_3d (LPZ lpz, PJ *P);
 static LPZ    pipeline_reverse_3d (XYZ xyz, PJ *P);
 static XY     pipeline_forward (LP lpz, PJ *P);
@@ -174,61 +174,61 @@ static LP     pipeline_reverse (XY xyz, PJ *P);
 
 
 
-static PJ_OBS pipeline_forward_obs (PJ_OBS point, PJ *P) {
+static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P) {
     int i, first_step, last_step;
 
     first_step = 1;
     last_step  = P->opaque->steps + 1;
 
     for (i = first_step;  i != last_step;  i++)
-        point = proj_trans_obs (P->opaque->pipeline[i], 1, point);
+        point = proj_trans (P->opaque->pipeline[i], 1, point);
 
     return point;
 }
 
 
 
-static PJ_OBS pipeline_reverse_obs (PJ_OBS point, PJ *P) {
+static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P) {
     int i, first_step, last_step;
 
     first_step = P->opaque->steps;
     last_step  =  0;
 
     for (i = first_step;  i != last_step;  i--)
-        point = proj_trans_obs (P->opaque->pipeline[i], -1, point);
+        point = proj_trans (P->opaque->pipeline[i], -1, point);
 
     return point;
 }
 
 
-/* Delegate the work to pipeline_forward_obs() */
+/* Delegate the work to pipeline_forward_4d() */
 static XYZ pipeline_forward_3d (LPZ lpz, PJ *P) {
-    PJ_OBS point = proj_obs_null;
-    point.coo.lpz = lpz;
-    point = pipeline_forward_obs (point, P);
-    return point.coo.xyz;
+    PJ_COORD point = {{0,0,0,0}};
+    point.lpz = lpz;
+    point = pipeline_forward_4d (point, P);
+    return point.xyz;
 }
 
-/* Delegate the work to pipeline_reverse_obs() */
+/* Delegate the work to pipeline_reverse_4d() */
 static LPZ pipeline_reverse_3d (XYZ xyz, PJ *P) {
-    PJ_OBS point = proj_obs_null;
-    point.coo.xyz = xyz;
-    point = pipeline_reverse_obs (point, P);
-    return point.coo.lpz;
+    PJ_COORD point = {{0,0,0,0}};
+    point.xyz = xyz;
+    point = pipeline_reverse_4d (point, P);
+    return point.lpz;
 }
 
 static XY pipeline_forward (LP lp, PJ *P) {
-    PJ_OBS point = proj_obs_null;
-    point.coo.lp = lp;
-    point = pipeline_forward_obs (point, P);
-    return point.coo.xy;
+    PJ_COORD point = {{0,0,0,0}};
+    point.lp = lp;
+    point = pipeline_forward_4d (point, P);
+    return point.xy;
 }
 
 static LP pipeline_reverse (XY xy, PJ *P) {
-    PJ_OBS point = proj_obs_null;
-    point.coo.xy = xy;
-    point = pipeline_reverse_obs (point, P);
-    return point.coo.lp;
+    PJ_COORD point = {{0,0,0,0}};
+    point.xy = xy;
+    point = pipeline_reverse_4d (point, P);
+    return point.lp;
 }
 
 
@@ -298,8 +298,8 @@ PJ *PROJECTION(pipeline) {
     int i_pipeline = -1, i_first_step = -1, i_current_step;
     char **argv, **current_argv;
 
-    P->fwdobs =  pipeline_forward_obs;
-    P->invobs =  pipeline_reverse_obs;
+    P->fwdobs =  P->fwd4d = pipeline_forward_4d;
+    P->invobs =  P->inv4d = pipeline_reverse_4d;
     P->fwd3d  =  pipeline_forward_3d;
     P->inv3d  =  pipeline_reverse_3d;
     P->fwd    =  pipeline_forward;
@@ -412,7 +412,7 @@ int pj_pipeline_selftest (void) {return 0;}
 
 int pj_pipeline_selftest (void) {
     PJ *P;
-    PJ_OBS a, b;
+    PJ_COORD a, b;
     XY cph_utm32 = {691875.63214,  6098907.82501};
     double dist;
 
@@ -421,19 +421,19 @@ int pj_pipeline_selftest (void) {
     if (0==P)
         return 1000;
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 0) */
-    a = b = proj_obs_null;
-    a.coo.lpz.lam = PJ_TORAD(12);
-    a.coo.lpz.phi = PJ_TORAD(55);
-    a.coo.lpz.z   = 10;
+    a = b = proj_coord (0,0,0,0);
+    a.lpz.lam = PJ_TORAD(12);
+    a.lpz.phi = PJ_TORAD(55);
+    a.lpz.z   = 10;
 
     /* Forward projection */
-    b = proj_trans_obs (P, PJ_FWD, a);
-    if (proj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
+    b = proj_trans (P, PJ_FWD, a);
+    if (proj_lp_dist (P, a.lp, b.lp) > 1e-4)
         return 1001;
 
     /* Inverse projection (still same result: pipeline is symmetrical) */
-    a = proj_trans_obs (P, PJ_INV, b);
-    if (proj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
+    a = proj_trans (P, PJ_INV, b);
+    if (proj_lp_dist (P, a.lp, b.lp) > 1e-4)
         return 1002;
 
     proj_destroy (P);
@@ -444,19 +444,19 @@ int pj_pipeline_selftest (void) {
         return 2000;
 
     /* zero initialize everything, then set (easting, northing) to utm(12, 55) */
-    a = b = proj_obs_null;
-    a.coo.xy = cph_utm32;
+    a = b = proj_coord (0,0,0,0);
+    a.xy = cph_utm32;
 
     /* Forward projection */
-    b = proj_trans_obs (P, PJ_FWD, a);
-    if (proj_xy_dist (a.coo.xy, b.coo.xy) > 1e-4)
+    b = proj_trans (P, PJ_FWD, a);
+    if (proj_xy_dist (a.xy, b.xy) > 1e-4)
         return 2001;
 
     /* Inverse projection */
-    a = proj_trans_obs (P, PJ_INV, b);
-    if (proj_xy_dist (a.coo.xy, b.coo.xy) > 1e-4)
+    a = proj_trans (P, PJ_INV, b);
+    if (proj_xy_dist (a.xy, b.xy) > 1e-4)
         return 2001;
-    if (proj_xyz_dist (a.coo.xyz, b.coo.xyz) > 1e-4)
+    if (proj_xyz_dist (a.xyz, b.xyz) > 1e-4)
         return 2002;
 
     proj_destroy (P);
@@ -468,37 +468,37 @@ int pj_pipeline_selftest (void) {
         return 3000;
 
 
-    a = b = proj_obs_null;
-    a.coo.lpz.lam = PJ_TORAD(12);
-    a.coo.lpz.phi = PJ_TORAD(55);
+    a = b = proj_coord (0,0,0,0);
+    a.lpz.lam = PJ_TORAD(12);
+    a.lpz.phi = PJ_TORAD(55);
 
     /* Forward projection */
-    b = proj_trans_obs (P, PJ_FWD, a);
-    if (proj_xy_dist (cph_utm32, b.coo.xy) > 1e-4)
+    b = proj_trans (P, PJ_FWD, a);
+    if (proj_xy_dist (cph_utm32, b.xy) > 1e-4)
         return 3001;
 
     /* Inverse projection */
-    b = proj_trans_obs (P, PJ_INV, b);
-    if (proj_lp_dist (P, a.coo.lp, b.coo.lp) > 1e-4)
+    b = proj_trans (P, PJ_INV, b);
+    if (proj_lp_dist (P, a.lp, b.lp) > 1e-4)
         return 3002;
 
 
     /* Since we use pj_lp_dist to determine success above, we should also test that it works */
 
     /* Geodesic distance between two points with angular 2D coordinates */
-    a.coo.lp.lam = PJ_TORAD(12);
-    a.coo.lp.phi = PJ_TORAD(60);
-    b.coo.lp.lam = PJ_TORAD(12);
-    b.coo.lp.phi = PJ_TORAD(61);
-    dist = proj_lp_dist (P, a.coo.lp, b.coo.lp);
+    a.lp.lam = PJ_TORAD(12);
+    a.lp.phi = PJ_TORAD(60);
+    b.lp.lam = PJ_TORAD(12);
+    b.lp.phi = PJ_TORAD(61);
+    dist = proj_lp_dist (P, a.lp, b.lp);
     if (fabs (111420.727870234 - dist) > 1e-4)
         return 4001;
 
-    a.coo.lp.lam = PJ_TORAD(12);
-    a.coo.lp.phi = PJ_TORAD(0.);
-    b.coo.lp.lam = PJ_TORAD(12);
-    b.coo.lp.phi = PJ_TORAD(1.);
-    dist = proj_lp_dist (P, a.coo.lp, b.coo.lp);
+    a.lp.lam = PJ_TORAD(12);
+    a.lp.phi = PJ_TORAD(0.);
+    b.lp.lam = PJ_TORAD(12);
+    b.lp.phi = PJ_TORAD(1.);
+    dist = proj_lp_dist (P, a.lp, b.lp);
     if (fabs (110574.388554153 - dist) > 1e-4)
         return 4002;
 
@@ -516,11 +516,11 @@ int pj_pipeline_selftest (void) {
     if (0==P)
         return 5000;
 
-    a.coo.xy.x =  700000.0;
-    a.coo.xy.y = 6000000.0;
+    a.xy.x =  700000.0;
+    a.xy.y = 6000000.0;
 
-    b = proj_trans_obs(P, PJ_FWD, a);
-    dist = proj_xy_dist(a.coo.xy, b.coo.xy);
+    b = proj_trans(P, PJ_FWD, a);
+    dist = proj_xy_dist(a.xy, b.xy);
     if (dist > 1e-7)
         return 5001;
 

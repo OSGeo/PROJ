@@ -532,7 +532,7 @@ static int expect (char *args) {
     }
     T.e = torad_if_needed (T.P, T.dir==PJ_FWD? PJ_INV:PJ_FWD, T.e);
 
-    T.b = proj_trans_coord (T.P, T.dir, T.a);
+    T.b = proj_trans (T.P, T.dir, T.a);
     T.b = torad_if_needed (T.P, T.dir==PJ_FWD? PJ_INV:PJ_FWD, T.b);
 
     if (T.nargs < 2) {

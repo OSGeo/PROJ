@@ -32,25 +32,23 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
 }
 
 
-static PJ_OBS forward_obs(PJ_OBS obs, PJ *P) {
-    PJ_OBS point;
-    point.coo.xyz = forward_3d (obs.coo.lpz, P);
-    return point;
+static PJ_COORD forward_4d (PJ_COORD obs, PJ *P) {
+    obs.xyz = forward_3d (obs.lpz, P);
+    return obs;
 }
 
 
-static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
-    PJ_OBS point;
-    point.coo.lpz = reverse_3d (obs.coo.xyz, P);
-    return point;
+static PJ_COORD reverse_4d (PJ_COORD obs, PJ *P) {
+    obs.lpz = reverse_3d (obs.xyz, P);
+    return obs;
 }
 
 
 
 PJ *PROJECTION(hgridshift) {
 
-    P->fwdobs = forward_obs;
-    P->invobs = reverse_obs;
+    P->fwdobs = P->fwd4d = forward_4d;
+    P->invobs = P->inv4d = reverse_4d;
     P->fwd3d  = forward_3d;
     P->inv3d  = reverse_3d;
     P->fwd    = 0;
@@ -82,7 +80,7 @@ int pj_hgridshift_selftest (void) {return 0;}
 #else
 int pj_hgridshift_selftest (void) {
     PJ *P;
-    PJ_OBS expect, a, b;
+    PJ_COORD expect, a, b;
     double dist;
 
     /* fail on purpose: +grids parameter is mandatory*/
@@ -104,20 +102,20 @@ int pj_hgridshift_selftest (void) {
     if (0==P)
         return 10;
 
-    a = proj_obs_null;
-    a.coo.lpz.lam = PJ_TORAD(173);
-    a.coo.lpz.phi = PJ_TORAD(-45);
+    a = proj_coord (0,0,0,0);
+    a.lpz.lam = PJ_TORAD(173);
+    a.lpz.phi = PJ_TORAD(-45);
 
-    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 0.00000001) {
         printf("dist: %f\n",dist);
         return 1;
     }
 
-    expect.coo.lpz.lam = PJ_TORAD(172.999892181021551);
-    expect.coo.lpz.phi = PJ_TORAD(-45.001620431954613);
-    b = proj_trans_obs(P, PJ_FWD, a);
-    if (proj_xy_dist(expect.coo.xy, b.coo.xy) > 1e-4)
+    expect.lpz.lam = PJ_TORAD(172.999892181021551);
+    expect.lpz.phi = PJ_TORAD(-45.001620431954613);
+    b = proj_trans(P, PJ_FWD, a);
+    if (proj_xy_dist(expect.xy, b.xy) > 1e-4)
         return 2;
 
     proj_destroy(P);

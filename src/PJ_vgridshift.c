@@ -33,15 +33,15 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
 }
 
 
-static PJ_OBS forward_obs(PJ_OBS obs, PJ *P) {
-    PJ_OBS point;
-    point.coo.xyz = forward_3d (obs.coo.lpz, P);
+static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
+    PJ_COORD point;
+    point.xyz = forward_3d (obs.lpz, P);
     return point;
 }
 
-static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
-    PJ_OBS point;
-    point.coo.lpz = reverse_3d (obs.coo.xyz, P);
+static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
+    PJ_COORD point;
+    point.lpz = reverse_3d (obs.xyz, P);
     return point;
 }
 
@@ -62,8 +62,8 @@ PJ *PROJECTION(vgridshift) {
         return pj_default_destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
     }
 
-    P->fwdobs = forward_obs;
-    P->invobs = reverse_obs;
+    P->fwdobs = P->fwd4d = forward_4d;
+    P->invobs = P->inv4d = reverse_4d;
     P->fwd3d  = forward_3d;
     P->inv3d  = reverse_3d;
     P->fwd    = 0;
@@ -82,7 +82,7 @@ int pj_vgridshift_selftest (void) {return 0;}
 #else
 int pj_vgridshift_selftest (void) {
     PJ *P;
-    PJ_OBS expect, a, b;
+    PJ_COORD expect, a, b;
     double dist;
     int failures = 0;
 
@@ -105,29 +105,29 @@ int pj_vgridshift_selftest (void) {
     if (0==P)
         return 10;
 
-    a = proj_obs_null;
-    a.coo.lpz.lam = PJ_TORAD(12.5);
-    a.coo.lpz.phi = PJ_TORAD(55.5);
+    a = proj_coord(0,0,0,0);
+    a.lpz.lam = PJ_TORAD(12.5);
+    a.lpz.phi = PJ_TORAD(55.5);
 
-    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 0.00000001)
         return 1;
 
     expect = a;
     /* Appears there is a difference between the egm96_15.gtx distributed by OSGeo4W,  */
     /* and the one from http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx    */
-    /* Was: expect.coo.lpz.z   = -36.021305084228515625;  (download.osgeo.org)         */
-    /* Was: expect.coo.lpz.z   = -35.880001068115234000;  (OSGeo4W)                    */
+    /* Was: expect.lpz.z   = -36.021305084228515625;  (download.osgeo.org)         */
+    /* Was: expect.lpz.z   = -35.880001068115234000;  (OSGeo4W)                    */
     /* This is annoying, but must be handled elsewhere. So for now, we check for both. */
-    expect.coo.lpz.z   = -36.021305084228516;
+    expect.lpz.z   = -36.021305084228516;
     failures = 0;
-    b = proj_trans_obs(P, PJ_FWD, a);
-    if (proj_xyz_dist(expect.coo.xyz, b.coo.xyz) > 1e-4)  failures++;
-    expect.coo.lpz.z   = -35.880001068115234000;
-    if (proj_xyz_dist(expect.coo.xyz, b.coo.xyz) > 1e-4)  failures++;
+    b = proj_trans(P, PJ_FWD, a);
+    if (proj_xyz_dist(expect.xyz, b.xyz) > 1e-4)  failures++;
+    expect.lpz.z   = -35.880001068115234000;
+    if (proj_xyz_dist(expect.xyz, b.xyz) > 1e-4)  failures++;
     if (failures > 1)
         return 2;
-    
+
     proj_destroy (P);
 
     return 0;

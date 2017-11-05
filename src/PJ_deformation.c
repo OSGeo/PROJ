@@ -139,26 +139,26 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
 }
 
 
-static PJ_OBS forward_obs(PJ_OBS in, PJ *P) {
+static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     double dt;
     XYZ shift;
-    PJ_OBS out = in;
+    PJ_COORD out = in;
 
     if (Q->t_obs != HUGE_VAL) {
             dt = Q->t_obs - Q->t_epoch;
         } else {
-            dt = in.coo.xyzt.t - Q->t_epoch;
+            dt = in.xyzt.t - Q->t_epoch;
     }
 
     if (Q->has_xy_grids) {
-        shift = get_xygrid_shift(P, in.coo.xyz);
-        out.coo.xyz.x += dt * shift.x;
-        out.coo.xyz.y += dt * shift.y;
+        shift = get_xygrid_shift(P, in.xyz);
+        out.xyz.x += dt * shift.x;
+        out.xyz.y += dt * shift.y;
     }
 
     if (Q->has_z_grids)
-        out.coo.xyz.z += dt * get_zgrid_shift(P, in.coo.xyz);
+        out.xyz.z += dt * get_zgrid_shift(P, in.xyz);
 
     return out;
 }
@@ -188,22 +188,22 @@ static LPZ reverse_3d(XYZ in, PJ *P) {
     return out.lpz;
 }
 
-static PJ_OBS reverse_obs(PJ_OBS in, PJ *P) {
+static PJ_COORD reverse_4d(PJ_COORD in, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
-    PJ_OBS out = in;
+    PJ_COORD out = in;
     double dt;
 
     if (Q->t_obs != HUGE_VAL) {
             dt = Q->t_epoch - Q->t_obs;
         } else {
-            dt = Q->t_epoch - in.coo.xyzt.t;
+            dt = Q->t_epoch - in.xyzt.t;
     }
 
     if (Q->has_xy_grids)
-        out.coo.xyz = reverse_hshift(P, in.coo.xyz, dt);
+        out.xyz = reverse_hshift(P, in.xyz, dt);
 
     if (Q->has_z_grids)
-        out.coo.xyz.z = in.coo.xyz.z + dt * get_zgrid_shift(P, in.coo.xyz);
+        out.xyz.z = in.xyz.z + dt * get_zgrid_shift(P, in.xyz);
 
     return out;
 }
@@ -274,8 +274,8 @@ PJ *PROJECTION(deformation) {
        return destructor(P, PJD_ERR_MISSING_ARGS);
     }
 
-    P->fwdobs = forward_obs;
-    P->invobs = reverse_obs;
+    P->fwdobs = P->fwd4d = forward_4d;
+    P->invobs = P->fwd4d = reverse_4d;
     P->fwd3d  = forward_3d;
     P->inv3d  = reverse_3d;
     P->fwd    = 0;

@@ -227,7 +227,7 @@ int pj_cart_selftest (void) {return 0;}
 int pj_cart_selftest (void) {
     PJ_CONTEXT *ctx;
     PJ *P;
-    PJ_OBS a, b, obs[2];
+    PJ_COORD a, b, obs[2];
     PJ_COORD coord[2];
 
     PJ_INFO info;
@@ -265,24 +265,24 @@ int pj_cart_selftest (void) {
         return 2;
 
     /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
-    a = proj_obs_null;
-    /* a.coo.lp: The coordinate part of a, interpreted as a classic LP pair */
-    a.coo.lp.lam = PJ_TORAD(12);
-    a.coo.lp.phi = PJ_TORAD(55);
+    a = proj_coord (0,0,0,0);
+    /* a.lp: The coordinate part of a, interpreted as a classic LP pair */
+    a.lp.lam = PJ_TORAD(12);
+    a.lp.phi = PJ_TORAD(55);
 
     /* Forward projection */
-    b = proj_trans_obs (P, PJ_FWD, a);
+    b = proj_trans (P, PJ_FWD, a);
 
     /* Inverse projection */
-    a = proj_trans_obs (P, PJ_INV, b);
+    a = proj_trans (P, PJ_INV, b);
 
     /* Null projection */
-    a = proj_trans_obs (P, PJ_IDENT, a);
+    a = proj_trans (P, PJ_IDENT, a);
 
     /* Forward again, to get two linear items for comparison */
-    a = proj_trans_obs (P, PJ_FWD, a);
+    a = proj_trans (P, PJ_FWD, a);
 
-    dist = proj_xy_dist (a.coo.xy, b.coo.xy);
+    dist = proj_xy_dist (a.xy, b.xy);
     if (dist > 2e-9)
         return 3;
 
@@ -290,8 +290,8 @@ int pj_cart_selftest (void) {
     proj_errno_set (P, 0);
 
     /* Invalid projection */
-    a = proj_trans_obs (P, 42, a);
-    if (a.coo.lpz.lam!=HUGE_VAL)
+    a = proj_trans (P, 42, a);
+    if (a.lpz.lam!=HUGE_VAL)
         return 4;
     err = proj_errno (P);
     if (0==err)
@@ -309,45 +309,45 @@ int pj_cart_selftest (void) {
         return 6;
 
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
-    a = b = proj_obs_null;
-    a.coo.lpz.lam = PJ_TORAD(12);
-    a.coo.lpz.phi = PJ_TORAD(55);
-    a.coo.lpz.z   = 100;
+    a = b = proj_coord (0,0,0,0);
+    a.lpz.lam = PJ_TORAD(12);
+    a.lpz.phi = PJ_TORAD(55);
+    a.lpz.z   = 100;
 
     /* Forward projection: 3D-Cartesian-to-Ellipsoidal */
-    b = proj_trans_obs (P, PJ_FWD, a);
+    b = proj_trans (P, PJ_FWD, a);
 
     /* Check roundtrip precision for 10000 iterations each way */
-    dist = proj_roundtrip (P, PJ_FWD, 10000, a.coo);
-    dist = proj_roundtrip (P, PJ_INV, 10000, b.coo);
+    dist = proj_roundtrip (P, PJ_FWD, 10000, a);
+    dist = proj_roundtrip (P, PJ_INV, 10000, b);
     if (dist > 2e-9)
         return 7;
 
 
     /* Test at the North Pole */
-    a = b = proj_obs_null;
-    a.coo.lpz.lam = PJ_TORAD(0);
-    a.coo.lpz.phi = PJ_TORAD(90);
-    a.coo.lpz.z   = 100;
+    a = b = proj_coord (0,0,0,0);
+    a.lpz.lam = PJ_TORAD(0);
+    a.lpz.phi = PJ_TORAD(90);
+    a.lpz.z   = 100;
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 1e-12)
         return 8;
 
     /* Test at the South Pole */
-    a = b = proj_obs_null;
-    a.coo.lpz.lam = PJ_TORAD(0);
-    a.coo.lpz.phi = PJ_TORAD(-90);
-    a.coo.lpz.z   = 100;
+    a = b = proj_coord (0,0,0,0);
+    a.lpz.lam = PJ_TORAD(0);
+    a.lpz.phi = PJ_TORAD(-90);
+    a.lpz.z   = 100;
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 1e-12)
         return 9;
 
     /* Inverse projection: 3D-Cartesian-to-Ellipsoidal */
-    b = proj_trans_obs (P, PJ_INV, b);
+    b = proj_trans (P, PJ_INV, b);
 
     /* Move p to another context */
     ctx = proj_context_create ();
@@ -356,7 +356,7 @@ int pj_cart_selftest (void) {
     proj_context_set (P, ctx);
     if (ctx != P->ctx)
         return 11;
-    b = proj_trans_obs (P, PJ_FWD, b);
+    b = proj_trans (P, PJ_FWD, b);
 
     /* Move it back to the default context */
     proj_context_set (P, 0);
@@ -365,93 +365,78 @@ int pj_cart_selftest (void) {
     proj_context_destroy (ctx);
 
     /* We go on with the work - now back on the default context */
-    b = proj_trans_obs (P, PJ_INV, b);
+    b = proj_trans (P, PJ_INV, b);
     proj_destroy (P);
 
 
-    /* Testing the proj_transform nightmare */
+    /* Testing proj_trans_generic () */
 
     /* An utm projection on the GRS80 ellipsoid */
     P = proj_create (PJ_DEFAULT_CTX, "+proj=utm +zone=32 +ellps=GRS80");
     if (0==P)
         return 13;
 
-    obs[0].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
-    obs[1].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
-    sz = sizeof (PJ_OBS);
+    obs[0] = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
+    obs[1] = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
+    sz = sizeof (PJ_COORD);
 
     /* Forward projection */
-    a = proj_trans_obs (P, PJ_FWD, obs[0]);
-    b = proj_trans_obs (P, PJ_FWD, obs[1]);
+    a = proj_trans (P, PJ_FWD, obs[0]);
+    b = proj_trans (P, PJ_FWD, obs[1]);
 
-    n = proj_transform (
+    n = proj_trans_generic (
         P, PJ_FWD,
-        &(obs[0].coo.lpz.lam), sz, 2,
-        &(obs[0].coo.lpz.phi), sz, 2,
-        &(obs[0].coo.lpz.z),   sz, 2,
+        &(obs[0].lpz.lam), sz, 2,
+        &(obs[0].lpz.phi), sz, 2,
+        &(obs[0].lpz.z),   sz, 2,
         0,                     sz, 0
     );
     if (2!=n)
         return 14;
-    if (a.coo.lpz.lam != obs[0].coo.lpz.lam)  return 15;
-    if (a.coo.lpz.phi != obs[0].coo.lpz.phi)  return 16;
-    if (a.coo.lpz.z   != obs[0].coo.lpz.z)    return 17;
-    if (b.coo.lpz.lam != obs[1].coo.lpz.lam)  return 18;
-    if (b.coo.lpz.phi != obs[1].coo.lpz.phi)  return 19;
-    if (b.coo.lpz.z   != obs[1].coo.lpz.z)    return 20;
+    if (a.lpz.lam != obs[0].lpz.lam)  return 15;
+    if (a.lpz.phi != obs[0].lpz.phi)  return 16;
+    if (a.lpz.z   != obs[0].lpz.z)    return 17;
+    if (b.lpz.lam != obs[1].lpz.lam)  return 18;
+    if (b.lpz.phi != obs[1].lpz.phi)  return 19;
+    if (b.lpz.z   != obs[1].lpz.z)    return 20;
 
     /* now test the case of constant z */
-    obs[0].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
-    obs[1].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
+    obs[0] = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
+    obs[1] = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
     h = 27;
     t = 33;
-    n = proj_transform (
+    n = proj_trans_generic (
         P, PJ_FWD,
-        &(obs[0].coo.lpz.lam), sz, 2,
-        &(obs[0].coo.lpz.phi), sz, 2,
+        &(obs[0].lpz.lam), sz, 2,
+        &(obs[0].lpz.phi), sz, 2,
         &h,                     0, 1,
         &t,                     0, 1
     );
     if (2!=n)
         return 21;
-    if (a.coo.lpz.lam != obs[0].coo.lpz.lam)  return 22;
-    if (a.coo.lpz.phi != obs[0].coo.lpz.phi)  return 23;
-    if (45            != obs[0].coo.lpz.z)    return 24;
-    if (b.coo.lpz.lam != obs[1].coo.lpz.lam)  return 25;
-    if (b.coo.lpz.phi != obs[1].coo.lpz.phi)  return 26;
-    if (50            != obs[1].coo.lpz.z)    return 27; /* NOTE: unchanged */
+    if (a.lpz.lam != obs[0].lpz.lam)  return 22;
+    if (a.lpz.phi != obs[0].lpz.phi)  return 23;
+    if (45            != obs[0].lpz.z)    return 24;
+    if (b.lpz.lam != obs[1].lpz.lam)  return 25;
+    if (b.lpz.phi != obs[1].lpz.phi)  return 26;
+    if (50            != obs[1].lpz.z)    return 27; /* NOTE: unchanged */
     if (50==h) return 28;
 
-    /* test proj_transform_obs() */
-
-    obs[0].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
-    obs[1].coo = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
-
-    if (proj_transform_coord(P, PJ_FWD, 2, (PJ_COORD *) obs))
-        return 30;
-
-    if (a.coo.lpz.lam != obs[0].coo.lpz.lam)  return 31;
-    if (a.coo.lpz.phi != obs[0].coo.lpz.phi)  return 32;
-    if (a.coo.lpz.z   != obs[0].coo.lpz.z)    return 33;
-    if (b.coo.lpz.lam != obs[1].coo.lpz.lam)  return 34;
-    if (b.coo.lpz.phi != obs[1].coo.lpz.phi)  return 35;
-    if (b.coo.lpz.z   != obs[1].coo.lpz.z)    return 36;
-
-    /* test proj_transform_coord() */
+    /* test proj_trans_array () */
 
     coord[0] = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
     coord[1] = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
-    if (proj_transform_coord(P, PJ_FWD, 2, coord))
+    if (proj_trans_array (P, PJ_FWD, 2, coord))
         return 40;
 
-    if (a.coo.lpz.lam != coord[0].lpz.lam)  return 41;
-    if (a.coo.lpz.phi != coord[0].lpz.phi)  return 42;
-    if (a.coo.lpz.z   != coord[0].lpz.z)    return 43;
-    if (b.coo.lpz.lam != coord[1].lpz.lam)  return 44;
-    if (b.coo.lpz.phi != coord[1].lpz.phi)  return 45;
-    if (b.coo.lpz.z   != coord[1].lpz.z)    return 46;
+    if (a.lpz.lam != coord[0].lpz.lam)  return 41;
+    if (a.lpz.phi != coord[0].lpz.phi)  return 42;
+    if (a.lpz.z   != coord[0].lpz.z)    return 43;
+    if (b.lpz.lam != coord[1].lpz.lam)  return 44;
+    if (b.lpz.phi != coord[1].lpz.phi)  return 45;
+    if (b.lpz.z   != coord[1].lpz.z)    return 46;
 
-    /* Clean up  after transform* tests */
+    /* Clean up  after proj_trans_* tests */
     proj_destroy (P);
 
     /* test proj_create_crs_to_crs() */
@@ -459,12 +444,12 @@ int pj_cart_selftest (void) {
     if (P==0)
         return 50;
 
-    a.coo.xy.x =  700000.0;
-    a.coo.xy.y = 6000000.0;
-    b.coo.xy.x =  307788.8761171057;
-    b.coo.xy.y = 5999669.3036037628;
+    a.xy.x =  700000.0;
+    a.xy.y = 6000000.0;
+    b.xy.x =  307788.8761171057;
+    b.xy.y = 5999669.3036037628;
 
-    a = proj_trans_obs(P, PJ_FWD, a);
+    a = proj_trans(P, PJ_FWD, a);
     if (dist > 1e-7)
         return 51;
     proj_destroy(P);
@@ -539,11 +524,11 @@ int pj_cart_selftest (void) {
 
     /* test proj_derivatives_retrieve() and proj_factors_retrieve() */
     P = proj_create(PJ_DEFAULT_CTX, "+proj=merc");
-    a = proj_obs_null;
-    a.coo.lp.lam = PJ_TORAD(12);
-    a.coo.lp.phi = PJ_TORAD(55);
+    a = proj_coord (0,0,0,0);
+    a.lp.lam = PJ_TORAD(12);
+    a.lp.phi = PJ_TORAD(55);
 
-    derivs = proj_derivatives(P, a.coo.lp);
+    derivs = proj_derivatives(P, a.lp);
     if (proj_errno(P))
         return 80; /* derivs not created correctly */
 
@@ -553,7 +538,7 @@ int pj_cart_selftest (void) {
     if ( fabs(derivs.y_p - 1.73959) > 1e-5 )   return 84;
 
 
-    factors = proj_factors(P, a.coo.lp);
+    factors = proj_factors(P, a.lp);
     if (proj_errno(P))
         return 85; /* factors not created correctly */
 

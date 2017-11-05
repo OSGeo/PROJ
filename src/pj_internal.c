@@ -30,40 +30,12 @@
  *****************************************************************************/
 #define PJ_INTERNAL_C
 #include "proj_internal.h"
-#include <projects.h>
+#include "projects.h"
 #include <geodesic.h>
 
 #include <stddef.h>
 #include <stdarg.h>
 #include <errno.h>
-
-
-
-
-/* Used for zero-initializing new objects */
-const PJ_COORD proj_coord_null = {{0, 0, 0, 0}};
-const PJ_OBS   proj_obs_null = {
-    {{0, 0, 0, 0}}
-};
-
-
-
-/* Initialize PJ_OBS struct */
-PJ_OBS proj_obs (double x, double y, double z, double t) {
-    PJ_OBS res;
-    res.coo = proj_coord (x, y, z, t);
-    return res;
-}
-
-
-
-
-
-
-
-
-
-
 
 
 enum pj_io_units pj_left (PJ *P) {
@@ -80,28 +52,6 @@ enum pj_io_units pj_right (PJ *P) {
     return PJ_IO_UNITS_METERS;
 }
 
-/* Apply the transformation P to the coordinate coo */
-PJ_OBS proj_trans_obs (PJ *P, PJ_DIRECTION direction, PJ_OBS obs) {
-    if (0==P)
-        return obs;
-
-    if (P->inverted)
-        direction = -direction;
-
-    switch (direction) {
-        case PJ_FWD:
-            return pj_fwdobs (obs, P);
-        case PJ_INV:
-            return  pj_invobs (obs, P);
-        case PJ_IDENT:
-            return obs;
-        default:
-            break;
-    }
-
-    proj_errno_set (P, EINVAL);
-    return proj_obs_error ();
-}
 
 
 /* Work around non-constness of MSVC HUGE_VAL by providing functions rather than constants */
@@ -111,60 +61,12 @@ PJ_COORD proj_coord_error (void) {
     return c;
 }
 
-PJ_OBS proj_obs_error (void) {
-    PJ_OBS obs;
-    obs.coo = proj_coord_error ();
-    return obs;
-}
 
-
-
-PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P) {
-    if (0!=P->fwdobs) {
-        obs  =  P->fwdobs (obs, P);
-        return obs;
-    }
-    if (0!=P->fwd3d) {
-        obs.coo.xyz  =  pj_fwd3d (obs.coo.lpz, P);
-        return obs;
-    }
-    if (0!=P->fwd) {
-        obs.coo.xy  =  pj_fwd (obs.coo.lp, P);
-        return obs;
-    }
-    proj_errno_set (P, EINVAL);
-    return proj_obs_error ();
-}
-
-
-PJ_OBS pj_invobs (PJ_OBS obs, PJ *P) {
-    if (0!=P->invobs) {
-        obs  =  P->invobs (obs, P);
-        return obs;
-    }
-    if (0!=P->inv3d) {
-        obs.coo.lpz  =  pj_inv3d (obs.coo.xyz, P);
-        return obs;
-    }
-    if (0!=P->inv) {
-        obs.coo.lp  =  pj_inv (obs.coo.xy, P);
-        return obs;
-    }
-    proj_errno_set (P, EINVAL);
-    return proj_obs_error ();
-}
-
-
-
-PJ_COORD pj_fwdcoord (PJ_COORD coo, PJ *P) {
-    if (0!=P->fwdcoord)
-        return P->fwdcoord (coo, P);
-    if (0!=P->fwdobs) {
-        PJ_OBS obs = proj_obs_null;
-        obs.coo = coo;
-        obs  =  P->fwdobs (obs, P);
-        return obs.coo;
-    }
+PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
+    if (0!=P->fwd4d)
+        return P->fwd4d (coo, P);
+    if (0!=P->fwdobs)
+        return P->fwdobs (coo, P);
     if (0!=P->fwd3d) {
         coo.xyz  =  pj_fwd3d (coo.lpz, P);
         return coo;
@@ -178,15 +80,11 @@ PJ_COORD pj_fwdcoord (PJ_COORD coo, PJ *P) {
 }
 
 
-PJ_COORD pj_invcoord (PJ_COORD coo, PJ *P) {
-    if (0!=P->invcoord)
-        return P->invcoord (coo, P);
-    if (0!=P->invobs) {
-        PJ_OBS obs = proj_obs_null;
-        obs.coo = coo;
-        obs  =  P->invobs (obs, P);
-        return obs.coo;
-    }
+PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
+    if (0!=P->inv4d)
+        return P->inv4d (coo, P);
+    if (0!=P->invobs)
+        return P->invobs (coo, P);
     if (0!=P->inv3d) {
         coo.lpz  =  pj_inv3d (coo.xyz, P);
         return coo;

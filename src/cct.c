@@ -72,6 +72,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 ***********************************************************************/
 
 #include "optargpm.h"
+#include "proj_internal.h"
 #include <proj.h>
 #include "projects.h"
 #include <stdio.h>
@@ -79,6 +80,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
+
 
 double proj_strtod(const char *str, char **endptr);
 double proj_atof(const char *str);
@@ -211,17 +213,12 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    input_unit   =  P->left;
-    output_unit  =  P->right;
-    if (PJ_IO_UNITS_CLASSIC==P->left)
-        input_unit = PJ_IO_UNITS_RADIANS;
-    if (PJ_IO_UNITS_CLASSIC==P->right)
-        output_unit = PJ_IO_UNITS_METERS;
-    if (direction==-1) {
-        enum pj_io_units swap = input_unit;
-        input_unit = output_unit;
-        output_unit = swap;
-    }
+    if (direction==-1)
+        P->inverted = !(P->inverted);
+    direction = 1;
+
+    input_unit   =  pj_left (P);
+    output_unit  =  pj_right (P);
 
     /* Allocate input buffer */
     buf = calloc (1, 10000);
@@ -264,7 +261,7 @@ int main(int argc, char **argv) {
             point.lpzt.lam = proj_torad (point.lpzt.lam);
             point.lpzt.phi = proj_torad (point.lpzt.phi);
         }
-        point = proj_trans_coord (P, direction, point);
+        point = proj_trans (P, direction, point);
         if (PJ_IO_UNITS_RADIANS==output_unit) {
             point.lpzt.lam = proj_todeg (point.lpzt.lam);
             point.lpzt.phi = proj_todeg (point.lpzt.phi);

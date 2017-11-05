@@ -287,13 +287,13 @@ summing the tiny high order elements first.
 
 
 
-static PJ_OBS horner_forward_obs (PJ_OBS point, PJ *P) {
-    point.coo.uv = horner ((HORNER *) P->opaque, 1, point.coo.uv);
+static PJ_COORD horner_forward_4d (PJ_COORD point, PJ *P) {
+    point.uv = horner ((HORNER *) P->opaque, 1, point.uv);
     return point;
 }
 
-static PJ_OBS horner_reverse_obs (PJ_OBS point, PJ *P) {
-    point.coo.uv = horner ((HORNER *) P->opaque, -1, point.coo.uv);
+static PJ_COORD horner_reverse_4d (PJ_COORD point, PJ *P) {
+    point.uv = horner ((HORNER *) P->opaque, -1, point.uv);
     return point;
 }
 
@@ -369,13 +369,13 @@ polynomial evaluation engine.
 
 
 
-static PJ_OBS complex_horner_forward_obs (PJ_OBS point, PJ *P) {
-    point.coo.uv = complex_horner ((HORNER *) P->opaque, PJ_FWD, point.coo.uv);
+static PJ_COORD complex_horner_forward_4d (PJ_COORD point, PJ *P) {
+    point.uv = complex_horner ((HORNER *) P->opaque, PJ_FWD, point.uv);
     return point;
 }
 
-static PJ_OBS complex_horner_reverse_obs (PJ_OBS point, PJ *P) {
-    point.coo.uv = complex_horner ((HORNER *) P->opaque, PJ_INV, point.coo.uv);
+static PJ_COORD complex_horner_reverse_4d (PJ_COORD point, PJ *P) {
+    point.uv = complex_horner ((HORNER *) P->opaque, PJ_INV, point.uv);
     return point;
 }
 
@@ -429,8 +429,8 @@ PJ *PROJECTION(horner) {
 /*********************************************************************/
     int   degree = 0, n, complex_horner = 0;
     HORNER *Q;
-    P->fwdobs  =  horner_forward_obs;
-    P->invobs  =  horner_reverse_obs;
+    P->fwdobs  =  P->fwd4d = horner_forward_4d;
+    P->invobs  =  P->inv4d = horner_reverse_4d;
     P->fwd3d   =  0;
     P->inv3d   =  0;
     P->fwd     =  0;
@@ -460,8 +460,8 @@ PJ *PROJECTION(horner) {
             return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         if (0==parse_coefs (P, Q->inv_c, "inv_c", n))
             return horner_freeup (P, PJD_ERR_MISSING_ARGS);
-        P->fwdobs  =  complex_horner_forward_obs;
-        P->invobs  =  complex_horner_reverse_obs;
+        P->fwdobs  =  P->fwd4d = complex_horner_forward_4d;
+        P->invobs  =  P->inv4d = complex_horner_reverse_4d;
 
     }
     else {
@@ -518,7 +518,7 @@ char sb_utm32[] = {
 
 int pj_horner_selftest (void) {
     PJ *P;
-    PJ_OBS a, b, c;
+    PJ_COORD a, b, c;
     double dist;
 
     /* Real polynonia relating the technical coordinate system TC32 to "System 45 Bornholm" */
@@ -526,12 +526,12 @@ int pj_horner_selftest (void) {
     if (0==P)
         return 10;
 
-    a = b = proj_obs_null;
-    a.coo.uv.v = 6125305.4245;
-    a.coo.uv.u =  878354.8539;
+    a = b = proj_coord (0,0,0,0);
+    a.uv.v = 6125305.4245;
+    a.uv.u =  878354.8539;
 
     /* Check roundtrip precision for 1 iteration each way, starting in forward direction */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 0.01)
         return 1;
 
@@ -541,26 +541,26 @@ int pj_horner_selftest (void) {
         return 11;
 
     /* Test value: utm32_ed50(620000, 6130000) = sb_ed50(495136.8544, 6130821.2945) */
-    a = b = c = proj_obs_null;
-    a.coo.uv.v = 6130821.2945;
-    a.coo.uv.u =  495136.8544;
-    c.coo.uv.v = 6130000.0000;
-    c.coo.uv.u =  620000.0000;
+    a = b = c = proj_coord (0,0,0,0);
+    a.uv.v = 6130821.2945;
+    a.uv.u =  495136.8544;
+    c.uv.v = 6130000.0000;
+    c.uv.u =  620000.0000;
 
     /* Forward projection */
-    b = proj_trans_obs (P, PJ_FWD, a);
-    dist = proj_xy_dist (b.coo.xy, c.coo.xy);
+    b = proj_trans (P, PJ_FWD, a);
+    dist = proj_xy_dist (b.xy, c.xy);
     if (dist > 0.001)
         return 2;
 
     /* Inverse projection */
-    b = proj_trans_obs (P, PJ_INV, c);
-    dist = proj_xy_dist (b.coo.xy, a.coo.xy);
+    b = proj_trans (P, PJ_INV, c);
+    dist = proj_xy_dist (b.xy, a.xy);
     if (dist > 0.001)
         return 3;
 
     /* Check roundtrip precision for 1 iteration each way */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
+    dist = proj_roundtrip (P, PJ_FWD, 1, a);
     if (dist > 0.01)
         return 4;
 

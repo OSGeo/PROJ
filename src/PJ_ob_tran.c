@@ -86,10 +86,10 @@ static void *destructor(PJ *P, int errlev) {
         return 0;
     if (0==P->opaque)
         return pj_default_destructor (P, errlev);
-        
+
     if (P->opaque->link)
         P->opaque->link->destructor (P->opaque->link, errlev);
-        
+
     return pj_default_destructor(P, errlev);
 }
 
@@ -135,7 +135,7 @@ static ARGS ob_tran_target_params (paralist *params) {
     args.argv = pj_calloc (argc - 1, sizeof (char *));
     if (0==args.argv)
         return args;
-    
+
     /* Copy all args *except* the proj=ob_tran arg to the argv array */
     for (i = 0;  params != 0;  params = params->next) {
         if (0==strcmp (params->param, "proj=ob_tran"))
@@ -287,14 +287,14 @@ int pj_ob_tran_selftest (void) {
     a = proj_coord (300000, 400000, 0, 0);
     b.lpz.lam = -proj_torad (42 + (45 + 22.377/60)/60);
     b.lpz.phi =  proj_torad (85 + (35 + 28.083/60)/60);
-    a = proj_trans_coord (P, -1, a);
+    a = proj_trans (P, -1, a);
     d = proj_lp_dist (P, a.lp, b.lp);
     if (d > 1e-3)
         return 2;
 
     a = proj_coord (proj_torad(10), proj_torad(20), 0, 0);
     b = proj_coord (-1384841.18787, 7581707.88240, 0, 0);
-    a = proj_trans_coord (P, 1, a);
+    a = proj_trans (P, 1, a);
     d = proj_xy_dist (a.xy, b.xy);
     if (d > 1e-3)
         return 3;

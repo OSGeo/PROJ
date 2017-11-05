@@ -127,36 +127,31 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
 }
 
 
-static PJ_OBS forward_obs(PJ_OBS obs, PJ *P) {
+static PJ_COORD forward_obs(PJ_COORD coo, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
-    PJ_COORD in, out;
+    PJ_COORD out;
 
     out = proj_coord_error();
-    in = obs.coo;
 
     for (i=0; i<4; i++)
-        out.v[i] = in.v[Q->axis[i]] * Q->sign[i];
+        out.v[i] = coo.v[Q->axis[i]] * Q->sign[i];
 
-    obs.coo = out;
-    return obs;
+    return out;
 }
 
 
-static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
+static PJ_COORD reverse_obs(PJ_COORD coo, PJ *P) {
     struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
     unsigned int i;
-    PJ_COORD in, out;
+    PJ_COORD out;
 
     out = proj_coord_error();
-    in = obs.coo;
 
-    for (i=0; i<4; i++) {
-        out.v[Q->axis[i]] = in.v[i] * Q->sign[i];
-    }
+    for (i=0; i<4; i++)
+        out.v[Q->axis[i]] = coo.v[i] * Q->sign[i];
 
-    obs.coo = out;
-    return obs;
+    return out;
 }
 
 
@@ -182,7 +177,7 @@ PJ *PROJECTION(axisswap) {
     for (i=0; i<4; i++)
         Q->axis[i] = i+4;
 
-    /* check that all characteds are valid */
+    /* check that all characters are valid */
     for (i=0; i<strlen(order); i++)
         if (strchr("1234-,", order[i]) == 0) {
             proj_log_error(P, "axisswap: unknown axis '%c'", order[i]);
@@ -190,12 +185,12 @@ PJ *PROJECTION(axisswap) {
         }
 
     /* read axes numbers and signs */
-    for( s = order, n = 0; *s != '\0' && n < 4; ) {
+    for ( s = order, n = 0; *s != '\0' && n < 4; ) {
         Q->axis[n] = abs(atoi(s))-1;
         Q->sign[n++] = sign(atoi(s));
-        while( *s != '\0' && *s != ',' )
+        while ( *s != '\0' && *s != ',' )
             s++;
-        if( *s == ',' )
+        if ( *s == ',' )
             s++;
     }
 
@@ -212,8 +207,8 @@ PJ *PROJECTION(axisswap) {
 
     /* only map fwd/inv functions that are possible with the given axis setup */
     if (n == 4) {
-        P->fwdobs = forward_obs;
-        P->invobs = reverse_obs;
+        P->fwdobs = P->fwd4d = forward_obs;
+        P->invobs = P->inv4d = reverse_obs;
     }
     if (n == 3 && Q->axis[0] < 3 && Q->axis[1] < 3 && Q->axis[2] < 3) {
         P->fwd3d  = forward_3d;
