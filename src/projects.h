@@ -584,7 +584,7 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #ifdef PJ_LIB__
 #define PROJ_HEAD(id, name) static const char des_##id [] = name
 
-#define OPERATION(name, LEFT, RIGHT, NEED_ELLPS)             \
+#define OPERATION(name, NEED_ELLPS)                          \
                                                              \
 pj_projection_specific_setup_##name (PJ *P);                 \
 C_NAMESPACE PJ *pj_##name (PJ *P);                           \
@@ -601,19 +601,19 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     P->destructor = pj_default_destructor;                   \
     P->descr = des_##name;                                   \
     P->need_ellps = NEED_ELLPS;                              \
-    P->left  = LEFT;                                         \
-    P->right = RIGHT;                                        \
+    P->left  = PJ_IO_UNITS_RADIANS;                          \
+    P->right = PJ_IO_UNITS_CLASSIC;                          \
     return P;                                                \
 }                                                            \
                                                              \
 PJ *pj_projection_specific_setup_##name (PJ *P)
 
 /* In ISO19000 lingo, an operation is either a conversion or a transformation */
-#define CONVERSION(name, left, right, need_ellps)      OPERATION (name, left, right, need_ellps)
-#define TRANSFORMATION(name, left, right, need_ellps)  OPERATION (name, left, right, need_ellps)
+#define CONVERSION(name, need_ellps)      OPERATION (name, need_ellps)
+#define TRANSFORMATION(name, need_ellps)  OPERATION (name, need_ellps)
 
 /* In PROJ.4 a projection is a conversion taking angular input and giving scaled linear output */
-#define PROJECTION(name) CONVERSION (name, PJ_IO_UNITS_RADIANS, PJ_IO_UNITS_CLASSIC, 1)
+#define PROJECTION(name) CONVERSION (name, 1)
 
 #endif /* def PJ_LIB__ */
 
