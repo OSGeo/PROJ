@@ -28,11 +28,12 @@
 
 PROJ_HEAD(omerc, "Oblique Mercator")
     "\n\tCyl, Sph&Ell no_rot\n\t"
-    "alpha= [gamma=] [no_off] lonc= or\n\t lon_1= lat_1= lon_2= lat_2=";
+    "tol=\n\talpha= [gamma=] [no_off] lonc= or\n\t lon_1= lat_1= lon_2= lat_2=";
 
 struct pj_opaque {
     double  A, B, E, AB, ArB, BrA, rB, singam, cosgam, sinrot, cosrot;
     double  v_pole_n, v_pole_s, u_0;
+    double tol;
     int no_rot;
 };
 
@@ -101,7 +102,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         lp.phi = Up < 0. ? -M_HALFPI : M_HALFPI;
     } else {
         lp.phi = Q->E / sqrt((1. + Up) / (1. - Up));
-        if ((lp.phi = pj_phi2(P->ctx, pow(lp.phi, 1. / Q->B), P->e)) == HUGE_VAL) {
+        if ((lp.phi = pj_phi2(P, pow(lp.phi, 1. / Q->B), Q->tol)) == HUGE_VAL) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return lp;
         }
@@ -121,6 +122,12 @@ PJ *PROJECTION(omerc) {
     if (0==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+
+    /* convergence tolerance for pj_phi2, used in inverse case */
+    if (!pj_param(P->ctx, P->params, "ttol").i)
+        Q->tol = 1e-10;
+    else
+        Q->tol = pj_param(P->ctx, P->params, "ttol").f;
 
     Q->no_rot = pj_param(P->ctx, P->params, "tno_rot").i;
         if ((alp = pj_param(P->ctx, P->params, "talpha").i) != 0)

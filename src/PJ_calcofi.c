@@ -57,7 +57,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     l1 = (xy.y - oy) * tan(ROTATION_ANGLE);
     l2 = -xy.x - l1 + PT_O_LAMBDA;
     ry = l2 * cos(ROTATION_ANGLE) * sin(ROTATION_ANGLE) + xy.y;
-    ry = pj_phi2(P->ctx, exp(-ry), P->e); /*inverse Mercator*/
+    ry = pj_phi2(P, exp(-ry), 1e-10); /* inverse Mercator */
     xy.x = PT_O_LINE - RAD_TO_DEG *
         (ry - PT_O_PHI) * DEG_TO_LINE / cos(ROTATION_ANGLE);
     xy.y = PT_O_STATION + RAD_TO_DEG *

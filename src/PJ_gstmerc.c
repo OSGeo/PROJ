@@ -3,7 +3,7 @@
 #include "projects.h"
 
 PROJ_HEAD(gstmerc, "Gauss-Schreiber Transverse Mercator (aka Gauss-Laborde Reunion)")
-    "\n\tCyl, Sph&Ell\n\tlat_0= lon_0= k_0=";
+    "\n\tCyl, Sph&Ell\n\tlat_0= lon_0= k_0=, tol=";
 
 struct pj_opaque {
     double lamc;
@@ -13,6 +13,7 @@ struct pj_opaque {
     double n2;
     double XS;
     double YS;
+    double tol;
 };
 
 
@@ -41,7 +42,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     sinC = sin((xy.y * P->a - Q->YS) / Q->n2) / cosh((xy.x * P->a - Q->XS) / Q->n2);
     LC = log(pj_tsfn(-1.0 * asin(sinC), 0.0, 0.0));
     lp.lam = L / Q->n1;
-    lp.phi = -1.0 * pj_phi2(P->ctx, exp((LC - Q->c) / Q->n1), P->e);
+    lp.phi = -1.0 * pj_phi2(P, exp((LC - Q->c) / Q->n1), Q->tol);
 
     return lp;
 }
@@ -52,6 +53,12 @@ PJ *PROJECTION(gstmerc) {
     if (0==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+
+    /* convergence tolerance for pj_phi2, used in inverse case */
+    if (!pj_param(P->ctx, P->params, "ttol").i)
+        Q->tol = 1e-10;
+    else
+        Q->tol = pj_param(P->ctx, P->params, "ttol").f;
 
     Q->lamc = P->lam0;
     Q->n1 = sqrt(1.0 + P->es * pow(cos(P->phi0), 4.0) / (1.0 - P->es));
