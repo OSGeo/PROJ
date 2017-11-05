@@ -1,28 +1,30 @@
 /* determine latitude angle phi-2 */
-#include <projects.h>
+#include <proj.h>
+#include "projects.h"
 
 #define TOL 1.0e-10
 #define N_ITER 15
 
-	double
-pj_phi2(projCtx ctx, double ts, double e) {
-	double eccnth, Phi, con;
+
+double pj_phi2(PJ *P, double ts, double tolerance) {
+	double ehalf, phi;
 	int i;
 
-	eccnth = .5 * e;
-	Phi = M_HALFPI - 2. * atan (ts);
-	i = N_ITER;
-	for(;;) {
-		double dphi;
-		con = e * sin (Phi);
-		dphi = M_HALFPI - 2. * atan (ts * pow((1. - con) /
-		   (1. + con), eccnth)) - Phi;
-		Phi += dphi;
-		if( fabs(dphi) > TOL && --i )
-			continue;
-                break;
+    ehalf = P->e/2;
+    phi = M_HALFPI - 2 * atan (ts);
+
+    for (i = 0;  i < N_ITER;  i++) {
+		double previous, con;
+
+        con = P->e * sin (phi);
+        previous = phi;
+		phi = M_HALFPI - 2 * atan (ts * pow ( (1. - con) / (1. + con), ehalf) );
+
+        if ( fabs (phi - previous) < tolerance)
+            break;
 	}
-	if (i <= 0)
-		pj_ctx_set_errno( ctx, -18 );
-	return Phi;
+
+    if (i==N_ITER)
+		proj_errno_set (P, PJD_ERR_NON_CON_INV_PHI2);
+	return phi;
 }

@@ -2,9 +2,16 @@
 #include <proj.h>
 #include "projects.h"
 
-PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
+#include <errno.h>
+
+PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=, tol=";
 
 #define EPS10 1.e-10
+
+struct pj_opaque {
+    double tol;
+};
+
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
@@ -32,7 +39,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 
 static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     LP lp = {0.0,0.0};
-    if ((lp.phi = pj_phi2(P->ctx, exp(- xy.y / P->k0), P->e)) == HUGE_VAL) {
+    if ((lp.phi = pj_phi2 (P, exp (- xy.y / P->k0), P->opaque->tol)) == HUGE_VAL) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return lp;
 }
@@ -52,6 +59,17 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
 PJ *PROJECTION(merc) {
     double phits=0.0;
     int is_phits;
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+
+    if (0==Q)
+        return pj_default_destructor (P, ENOMEM);
+    P->opaque = Q;
+
+    /* convergence tolerance for pj_phi2, used in inverse case */
+    if (!pj_param(P->ctx, P->params, "ttol").i)
+        Q->tol = 1e-10;
+    else
+        Q->tol = pj_param(P->ctx, P->params, "ttol").f;
 
     if( (is_phits = pj_param(P->ctx, P->params, "tlat_ts").i) ) {
         phits = fabs(pj_param(P->ctx, P->params, "rlat_ts").f);

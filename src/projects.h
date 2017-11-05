@@ -718,8 +718,7 @@ double  pj_inv_mlfn(projCtx, double, double, double *);
 double  pj_qsfn(double, double, double);
 double  pj_tsfn(double, double, double);
 double  pj_msfn(double, double, double);
-double  pj_phi2(projCtx, double, double);
-double  pj_qsfn_(double, PJ *);
+double  pj_phi2(PJ *, double, double);
 double *pj_authset(double);
 double  pj_authlat(double, double *);
 

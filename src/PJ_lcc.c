@@ -4,7 +4,7 @@
 #include "projects.h"
 
 PROJ_HEAD(lcc, "Lambert Conformal Conic")
-    "\n\tConic, Sph&Ell\n\tlat_1= and lat_2= or lat_0";
+    "\n\tConic, Sph&Ell\n\tlat_1= and lat_2= or lat_0=. tol=";
 
 # define EPS10  1.e-10
 
@@ -14,6 +14,7 @@ struct pj_opaque {
     double n;
     double rho0;
     double c;
+    double tol;
     int    ellips;
 };
 
@@ -57,7 +58,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
             xy.y = -xy.y;
         }
         if (Q->ellips) {
-            lp.phi = pj_phi2(P->ctx, pow(rho / Q->c, 1./Q->n), P->e);
+            lp.phi = pj_phi2(P, pow(rho / Q->c, 1./Q->n), Q->tol);
             if (lp.phi == HUGE_VAL) {
                 proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
                 return lp;
@@ -98,6 +99,11 @@ PJ *PROJECTION(lcc) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
+    /* convergence tolerance for pj_phi2, used in inverse case */
+    if (!pj_param(P->ctx, P->params, "ttol").i)
+        Q->tol = 1e-10;
+    else
+        Q->tol = pj_param(P->ctx, P->params, "ttol").f;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     if (pj_param(P->ctx, P->params, "tlat_2").i)
