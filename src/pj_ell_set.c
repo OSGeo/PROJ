@@ -44,6 +44,51 @@ void pj_inherit_ellipsoid_defs(const PJ *src, PJ *dst) {
     dst->a_orig  = src->a_orig;
 }
 
+int pj_calc_ellps_params(PJ *P, double a, double es) {
+
+    P->a = a;
+    P->es = es;
+
+    /* Compute some ancillary ellipsoidal parameters */
+    P->e = sqrt(P->es);      /* eccentricity */
+    P->alpha = asin (P->e);  /* angular eccentricity */
+
+    /* second eccentricity */
+    P->e2  = tan (P->alpha);
+    P->e2s = P->e2 * P->e2;
+
+    /* third eccentricity */
+    P->e3    = (0!=P->alpha)? sin (P->alpha) / sqrt(2 - sin (P->alpha)*sin (P->alpha)): 0;
+    P->e3s = P->e3 * P->e3;
+
+    /* flattening */
+    P->f  = 1 - cos (P->alpha);   /* = 1 - sqrt (1 - PIN->es); */
+    P->rf = P->f != 0.0 ? 1.0/P->f: HUGE_VAL;
+
+    /* second flattening */
+    P->f2  = (cos(P->alpha)!=0)? 1/cos (P->alpha) - 1: 0;
+    P->rf2 = P->f2 != 0.0 ? 1/P->f2: HUGE_VAL;
+
+    /* third flattening */
+    P->n  = pow (tan (P->alpha/2), 2);
+    P->rn = P->n != 0.0 ? 1/P->n: HUGE_VAL;
+
+    /* ...and a few more */
+    P->b  = (1 - P->f)*P->a;
+    P->rb = 1. / P->b;
+    P->ra = 1. / P->a;
+
+    P->one_es = 1. - P->es;
+    if (P->one_es == 0.) {
+        pj_ctx_set_errno( P->ctx, PJD_ERR_ECCENTRICITY_IS_ONE);
+        return PJD_ERR_ECCENTRICITY_IS_ONE;
+    }
+
+    P->rone_es = 1./P->one_es;
+
+    return 0;
+}
+
 /* initialize geographic shape parameters */
 int pj_ell_set(projCtx ctx, paralist *pl, double *a, double *es) {
     int i;
