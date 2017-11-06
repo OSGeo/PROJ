@@ -48,14 +48,6 @@
 extern "C" {
 #endif
 
-
-
-struct PJ_OBS {
-    PJ_COORD coo;        /* coordinate data */
-};
-typedef struct PJ_OBS PJ_OBS;
-
-
 #ifndef PJ_TODEG
 #define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
 #endif
@@ -67,29 +59,16 @@ typedef struct PJ_OBS PJ_OBS;
 enum pj_io_units pj_left (PJ *P);
 enum pj_io_units pj_right (PJ *P);
 
-PJ_OBS   proj_obs   (double x, double y, double z, double t);
-PJ_OBS   proj_trans_obs   (PJ *P, PJ_DIRECTION direction, PJ_OBS obs);
+PJ_COORD   proj_trans   (PJ *P, PJ_DIRECTION direction, PJ_COORD obs);
 
 PJ_COORD proj_coord_error (void);
-PJ_OBS   proj_obs_error (void);
-#ifndef PJ_INTERNAL_C
-extern const PJ_COORD proj_coord_null;
-extern const PJ_OBS   proj_obs_null;
-#endif
-/* Part of MSVC workaround: Make proj_*_null look function-like for symmetry with proj_*_error */
-#define proj_coord_null(x) proj_coord_null
-#define proj_obs_null(x) proj_obs_null
-
 
 void proj_context_errno_set (PJ_CONTEXT *ctx, int err);
 void proj_context_set (PJ *P, PJ_CONTEXT *ctx);
 void proj_context_inherit (PJ *parent, PJ *child);
 
-
-PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P);
-PJ_OBS pj_invobs (PJ_OBS obs, PJ *P);
-PJ_COORD pj_fwdcoord (PJ_COORD coo, PJ *P);
-PJ_COORD pj_invcoord (PJ_COORD coo, PJ *P);
+PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P);
+PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
 
 /* Grid functionality */
 int             proj_vgrid_init(PJ *P, const char *grids);

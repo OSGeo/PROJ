@@ -423,35 +423,35 @@ static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
 }
 
 
-static PJ_OBS helmert_forward_obs (PJ_OBS point, PJ *P) {
+static PJ_COORD helmert_forward_4d (PJ_COORD point, PJ *P) {
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
 
     /* We only need to rebuild the rotation matrix if the
      * observation time is different from the last call */
-    if (point.coo.xyzt.t != Q->t_obs) {
-        Q->t_obs = point.coo.xyzt.t;
+    if (point.xyzt.t != Q->t_obs) {
+        Q->t_obs = point.xyzt.t;
         update_parameters(P);
         build_rot_matrix(P);
     }
 
-    point.coo.xyz = helmert_forward_3d (point.coo.lpz, P);
+    point.xyz = helmert_forward_3d (point.lpz, P);
 
     return point;
 }
 
 
-static PJ_OBS helmert_reverse_obs (PJ_OBS point, PJ *P) {
+static PJ_COORD helmert_reverse_4d (PJ_COORD point, PJ *P) {
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
 
     /* We only need to rebuild the rotation matrix if the
      * observation time is different from the last call */
-    if (point.coo.xyzt.t != Q->t_obs) {
-        Q->t_obs = point.coo.xyzt.t;
+    if (point.xyzt.t != Q->t_obs) {
+        Q->t_obs = point.xyzt.t;
         update_parameters(P);
         build_rot_matrix(P);
     }
 
-    point.coo.lpz = helmert_reverse_3d (point.coo.xyz, P);
+    point.lpz = helmert_reverse_3d (point.xyz, P);
 
     return point;
 }
@@ -468,8 +468,8 @@ PJ *TRANSFORMATION(helmert, 0) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
-    P->fwdobs = helmert_forward_obs;
-    P->invobs = helmert_reverse_obs;
+    P->fwd4d  = helmert_forward_4d;
+    P->inv4d  = helmert_reverse_4d;
     P->fwd3d  = helmert_forward_3d;
     P->inv3d  = helmert_reverse_3d;
     P->fwd    = helmert_forward;
@@ -671,8 +671,8 @@ int pj_helmert_selftest (void) {
        matrix is updated when necessary. Test coordinates from GNSStrans. */
     XYZ expect4a = {3370658.18890, 711877.42370, 5349787.12430};
     XYZ expect4b = {3370658.18087, 711877.42750, 5349787.12648};
-    PJ_OBS in4 = {{{3370658.378, 711877.314, 5349787.086, 2017.0}}};
-    PJ_OBS out;
+    PJ_COORD in4 = {{3370658.378, 711877.314, 5349787.086, 2017.0}};
+    PJ_COORD out;
 
     PJ *helmert = proj_create(
         0,
@@ -703,20 +703,20 @@ int pj_helmert_selftest (void) {
     ret = test (args5, in5, expect5, 0.001);  if (ret) return ret + 40;
 
     /* Run test 4 */
-    out = proj_trans_obs (helmert, PJ_FWD, in4);
-    if (proj_xyz_dist (out.coo.xyz, expect4a) > 1e-4) {
+    out = proj_trans (helmert, PJ_FWD, in4);
+    if (proj_xyz_dist (out.xyz, expect4a) > 1e-4) {
         proj_log_error(helmert, "Tolerance of test 4a not met!");
-        proj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.coo.xyz.x, in4.coo.xyz.y, in4.coo.xyz.z);
-        proj_log_error(helmert, "  Out: %10.10f, %10.10f, %10.10f", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
+        proj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.xyz.x, in4.xyz.y, in4.xyz.z);
+        proj_log_error(helmert, "  Out: %10.10f, %10.10f, %10.10f", out.xyz.x, out.xyz.y, out.xyz.z);
         return 31;
     }
 
-    in4.coo.xyzt.t = 2018.0;
-    out = proj_trans_obs (helmert, PJ_FWD, in4);
-    if (proj_xyz_dist (out.coo.xyz, expect4b) > 1e-4) {
+    in4.xyzt.t = 2018.0;
+    out = proj_trans (helmert, PJ_FWD, in4);
+    if (proj_xyz_dist (out.xyz, expect4b) > 1e-4) {
         proj_log_error(helmert, "Tolerance of test 4b not met!");
-        proj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.coo.xyz.x, in4.coo.xyz.y, in4.coo.xyz.z);
-        proj_log_error(helmert, "  Out: %10.10f, %10.10f, %10.10f", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
+        proj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.xyz.x, in4.xyz.y, in4.xyz.z);
+        proj_log_error(helmert, "  Out: %10.10f, %10.10f, %10.10f", out.xyz.x, out.xyz.y, out.xyz.z);
         return 32;
     }
 

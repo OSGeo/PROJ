@@ -368,10 +368,16 @@ enum PJ_DIRECTION {
 };
 typedef enum PJ_DIRECTION PJ_DIRECTION;
 
-PJ_COORD proj_trans_coord (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
 
 
-size_t proj_transform (
+
+int proj_angular_left (PJ *P);
+int proj_angular_right (PJ *P);
+
+PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
+
+
+size_t proj_trans_generic (
     PJ *P,
     PJ_DIRECTION direction,
     double *x, size_t sx, size_t nx,
@@ -380,7 +386,7 @@ size_t proj_transform (
     double *t, size_t st, size_t nt
 );
 
-int proj_transform_coord (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
+int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
 
 /* Initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);
