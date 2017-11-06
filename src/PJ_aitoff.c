@@ -34,9 +34,14 @@
 #include "projects.h"
 
 
+enum Mode {
+    AITOFF = 0,
+    WINKEL_TRIPEL = 1
+};
+
 struct pj_opaque {
     double  cosphi1;
-    int     mode;
+    enum Mode mode;
 };
 
 
@@ -60,7 +65,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         xy.y *= d * sin(lp.phi);
     } else
         xy.x = xy.y = 0.;
-    if (Q->mode) { /* Winkel Tripel */
+    if (Q->mode == WINKEL_TRIPEL) {
         xy.x = (xy.x + lp.lam * Q->cosphi1) * 0.5;
         xy.y = (xy.y + lp.phi) * 0.5;
     }
@@ -112,7 +117,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
                 f1l = cp * cp * sl * sl / C + D * cp * cl * sp * sp;
                 f2p = sp * sp * cl / C + D * sl * sl * cp;
                 f2l = 0.5 * (sp * cp * sl / C - D * sp * cp * cp * sl * cl);
-                if (Q->mode) { /* Winkel Tripel */
+                if (Q->mode == WINKEL_TRIPEL) {
                 f1 = 0.5 * (f1 + lp.lam * Q->cosphi1);
                 f2 = 0.5 * (f2 + lp.phi);
                 f1p *= 0.5;
@@ -128,7 +133,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         } while ((fabs(dp) > EPSILON || fabs(dl) > EPSILON) && (iter++ < MAXITER));
         if (lp.phi > M_PI_2) lp.phi -= 2.*(lp.phi-M_PI_2); /* correct if symmetrical solution for Aitoff */
         if (lp.phi < -M_PI_2) lp.phi -= 2.*(lp.phi+M_PI_2); /* correct if symmetrical solution for Aitoff */
-        if ((fabs(fabs(lp.phi) - M_PI_2) < EPSILON) && (!Q->mode)) lp.lam = 0.; /* if pole in Aitoff, return longitude of 0 */
+        if ((fabs(fabs(lp.phi) - M_PI_2) < EPSILON) && (Q->mode == AITOFF)) lp.lam = 0.; /* if pole in Aitoff, return longitude of 0 */
 
         /* calculate x,y coordinates with solution obtained */
         if((D = acos(cos(lp.phi) * cos(C = 0.5 * lp.lam))) != 0.0) {/* Aitoff */
@@ -167,7 +172,7 @@ PJ *PROJECTION(aitoff) {
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
-    Q->mode = 0;
+    Q->mode = AITOFF;
     return setup(P);
 }
 
@@ -178,7 +183,7 @@ PJ *PROJECTION(wintri) {
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
-    Q->mode = 1;
+    Q->mode = WINKEL_TRIPEL;
     if (pj_param(P->ctx, P->params, "tlat_1").i) {
         if ((Q->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f)) == 0.)
             return pj_default_destructor (P, PJD_ERR_LAT_LARGER_THAN_90);

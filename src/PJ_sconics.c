@@ -4,23 +4,26 @@
 #include "projects.h"
 
 
+enum Type {
+    EULER  = 0,
+    MURD1  = 1,
+    MURD2  = 2,
+    MURD3  = 3,
+    PCONIC = 4,
+    TISSOT = 5,
+    VITK1  = 6
+};
+
 struct pj_opaque {
     double  n;
     double  rho_c;
     double  rho_0;
     double  sig;
     double  c1, c2;
-    int     type;
+    enum Type type;
 };
 
 
-#define EULER 0
-#define MURD1 1
-#define MURD2 2
-#define MURD3 3
-#define PCONIC 4
-#define TISSOT 5
-#define VITK1 6
 #define EPS10   1.e-10
 #define EPS 1e-10
 #define LINE2 "\n\tConic, Sph\n\tlat_1= and lat_2="
@@ -106,7 +109,7 @@ static LP s_inverse (XY xy, PJ *P) {  /* Spheroidal, (and ellipsoidal?) inverse 
 }
 
 
-static PJ *setup(PJ *P, int type) {
+static PJ *setup(PJ *P, enum Type type) {
     double del, cs;
     int err;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));

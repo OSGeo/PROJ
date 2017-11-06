@@ -5,6 +5,13 @@
 
 PROJ_HEAD(laea, "Lambert Azimuthal Equal Area") "\n\tAzi, Sph&Ell";
 
+enum Mode {
+    N_POLE = 0,
+    S_POLE = 1,
+    EQUIT  = 2,
+    OBLIQ  = 3
+};
+
 struct pj_opaque {
     double sinb1;
     double cosb1;
@@ -15,16 +22,12 @@ struct pj_opaque {
     double dd;
     double rq;
     double *apa;
-    int mode;
+    enum Mode mode;
 };
 
 #define EPS10   1.e-10
 #define NITER   20
 #define CONV    1.e-10
-#define N_POLE  0
-#define S_POLE  1
-#define EQUIT   2
-#define OBLIQ   3
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
