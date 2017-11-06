@@ -19,7 +19,7 @@ date. A time unit conversion is performed like
 distance units are converted in the same manner, with meter being the
 central unit.
 
-The modified Julian date is chosen as the pivout unit since it has a
+The modified Julian date is chosen as the pivot unit since it has a
 fairly high precision, goes sufficiently long backwards in time, has no
 danger of hitting the upper limit in the near future and it is a fairly
 common time unit in astronomy and geodesy. Note that we are using the
@@ -266,40 +266,40 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
 
 
 /***********************************************************************/
-static PJ_OBS forward_obs(PJ_OBS obs, PJ *P) {
+static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
 /************************************************************************
     Forward conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_OBS out;
+    PJ_COORD out;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
-    out.coo.xyz = forward_3d(obs.coo.lpz, P);
+    out.xyz = forward_3d(obs.lpz, P);
 
     if (Q->t_in_id >= 0)
-        out.coo.xyzt.t = time_units[Q->t_in_id].t_in( obs.coo.xyzt.t );
+        out.xyzt.t = time_units[Q->t_in_id].t_in( obs.xyzt.t );
     if (Q->t_out_id >= 0)
-        out.coo.xyzt.t = time_units[Q->t_out_id].t_out( out.coo.xyzt.t );
+        out.xyzt.t = time_units[Q->t_out_id].t_out( out.xyzt.t );
 
     return out;
 }
 
 
 /***********************************************************************/
-static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
+static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
 /************************************************************************
     Reverse conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_OBS out;
+    PJ_COORD out;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
-    out.coo.lpz = reverse_3d(obs.coo.xyz, P);
+    out.lpz = reverse_3d(obs.xyz, P);
 
     if (Q->t_out_id >= 0)
-        out.coo.xyzt.t = time_units[Q->t_out_id].t_in( obs.coo.xyzt.t );
+        out.xyzt.t = time_units[Q->t_out_id].t_in( obs.xyzt.t );
     if (Q->t_in_id >= 0)
-        out.coo.xyzt.t = time_units[Q->t_in_id].t_out( out.coo.xyzt.t );
+        out.xyzt.t = time_units[Q->t_in_id].t_out( out.xyzt.t );
 
     return out;
 }
@@ -316,8 +316,8 @@ PJ *PROJECTION(unitconvert) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
-    P->fwdobs = forward_obs;
-    P->invobs = reverse_obs;
+    P->fwd4d  = forward_4d;
+    P->inv4d  = reverse_4d;
     P->fwd3d  = forward_3d;
     P->inv3d  = reverse_3d;
     P->fwd    = forward_2d;
@@ -396,23 +396,23 @@ int pj_unitconvert_selftest (void) {return 0;}
 #else
 
 static int test_time(char* args, double tol, double t_in, double t_exp) {
-    PJ_OBS in, out;
+    PJ_COORD in, out;
     PJ *P = proj_create(PJ_DEFAULT_CTX, args);
     int ret = 0;
 
     if (P == 0)
         return 5;
 
-    in.coo.xyzt.t = t_in;
+    in.xyzt.t = t_in;
 
-    out = proj_trans_obs(P, PJ_FWD, in);
-    if (fabs(out.coo.xyzt.t - t_exp) > tol) {
-        proj_log_error(P, "out: %10.10g, expect: %10.10g", out.coo.xyzt.t, t_exp);
+    out = proj_trans(P, PJ_FWD, in);
+    if (fabs(out.xyzt.t - t_exp) > tol) {
+        proj_log_error(P, "out: %10.10g, expect: %10.10g", out.xyzt.t, t_exp);
         ret = 1;
     }
-    out = proj_trans_obs(P, PJ_INV, out);
-    if (fabs(out.coo.xyzt.t - t_in) > tol) {
-        proj_log_error(P, "out: %10.10g, expect: %10.10g", out.coo.xyzt.t, t_in);
+    out = proj_trans(P, PJ_INV, out);
+    if (fabs(out.xyzt.t - t_in) > tol) {
+        proj_log_error(P, "out: %10.10g, expect: %10.10g", out.xyzt.t, t_in);
         ret = 2;
     }
     pj_free(P);
@@ -422,25 +422,25 @@ static int test_time(char* args, double tol, double t_in, double t_exp) {
 }
 
 static int test_xyz(char* args, double tol, PJ_TRIPLET in, PJ_TRIPLET exp) {
-    PJ_OBS out, obs_in;
+    PJ_COORD out, obs_in;
     PJ *P = proj_create(PJ_DEFAULT_CTX, args);
     int ret = 0;
 
     if (P == 0)
         return 5;
 
-    obs_in.coo.xyz = in.xyz;
-    out = proj_trans_obs(P, PJ_FWD, obs_in);
-    if (proj_xyz_dist(out.coo.xyz, exp.xyz) > tol) {
+    obs_in.xyz = in.xyz;
+    out = proj_trans(P, PJ_FWD, obs_in);
+    if (proj_xyz_dist(out.xyz, exp.xyz) > tol) {
         printf("exp: %10.10g, %10.10g, %10.10g\n", exp.xyz.x, exp.xyz.y, exp.xyz.z);
-        printf("out: %10.10g, %10.10g, %10.10g\n", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
+        printf("out: %10.10g, %10.10g, %10.10g\n", out.xyz.x, out.xyz.y, out.xyz.z);
         ret = 1;
     }
 
-    out = proj_trans_obs(P, PJ_INV, out);
-    if (proj_xyz_dist(out.coo.xyz, in.xyz) > tol) {
+    out = proj_trans(P, PJ_INV, out);
+    if (proj_xyz_dist(out.xyz, in.xyz) > tol) {
         printf("exp: %g, %g, %g\n", in.xyz.x, in.xyz.y, in.xyz.z);
-        printf("out: %g, %g, %g\n", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
+        printf("out: %g, %g, %g\n", out.xyz.x, out.xyz.y, out.xyz.z);
         ret += 2;
     }
     proj_destroy(P);

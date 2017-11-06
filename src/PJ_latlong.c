@@ -54,12 +54,12 @@ static LP inverse(XY xy, PJ *P) {
     return lp;
 }
 
-static PJ_OBS forward_obs(PJ_OBS obs, PJ *P) {
+static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
     (void) P;
     return obs;
 }
 
-static PJ_OBS inverse_obs(PJ_OBS obs, PJ *P) {
+static PJ_COORD inverse_4d(PJ_COORD obs, PJ *P) {
     (void) P;
     return obs;
 }
@@ -70,8 +70,8 @@ PJ *PROJECTION(latlong) {
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
-    P->invobs = inverse_obs;
-    P->fwdobs = forward_obs;
+    P->inv4d = inverse_4d;
+    P->fwd4d = forward_4d;
     P->left = PJ_IO_UNITS_RADIANS;
     P->right = PJ_IO_UNITS_RADIANS;
 
@@ -85,8 +85,8 @@ PJ *PROJECTION(longlat) {
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
-    P->invobs = inverse_obs;
-    P->fwdobs = forward_obs;
+    P->inv4d = inverse_4d;
+    P->fwd4d = forward_4d;
     P->left = PJ_IO_UNITS_RADIANS;
     P->right = PJ_IO_UNITS_RADIANS;
 
@@ -100,8 +100,8 @@ PJ *PROJECTION(latlon) {
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
-    P->invobs = inverse_obs;
-    P->fwdobs = forward_obs;
+    P->inv4d = inverse_4d;
+    P->fwd4d = forward_4d;
     P->left = PJ_IO_UNITS_RADIANS;
     P->right = PJ_IO_UNITS_RADIANS;
 
@@ -115,8 +115,8 @@ PJ *PROJECTION(lonlat) {
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
-    P->invobs = inverse_obs;
-    P->fwdobs = forward_obs;
+    P->inv4d = inverse_4d;
+    P->fwd4d = forward_4d;
     P->left = PJ_IO_UNITS_RADIANS;
     P->right = PJ_IO_UNITS_RADIANS;
 

@@ -173,10 +173,7 @@ typedef struct { double u, v, w; }     UVW;
 
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
 struct PJconsts;
-struct PJ_OBS;
-#ifndef PROJ_INTERNAL_H
-typedef struct PJ_OBS PJ_OBS;
-#endif
+
 union  PJ_COORD;
 struct geod_geodesic;
 struct pj_opaque;
@@ -211,6 +208,7 @@ struct PJ_AREA {
 
 struct projCtx_t;
 typedef struct projCtx_t projCtx_t;
+
 
 /* base projection data structure */
 struct PJconsts {
@@ -254,10 +252,9 @@ struct PJconsts {
     LP  (*inv)(XY,    PJ *);
     XYZ (*fwd3d)(LPZ, PJ *);
     LPZ (*inv3d)(XYZ, PJ *);
-    PJ_OBS (*fwdobs)(PJ_OBS, PJ *);
-    PJ_OBS (*invobs)(PJ_OBS, PJ *);
-    PJ_COORD (*fwdcoord)(PJ_COORD, PJ *);
-    PJ_COORD (*invcoord)(PJ_COORD, PJ *);
+    PJ_COORD (*fwd4d)(PJ_COORD, PJ *);
+    PJ_COORD (*inv4d)(PJ_COORD, PJ *);
+
 
     void (*spc)(LP, PJ *, struct FACTORS *);
 

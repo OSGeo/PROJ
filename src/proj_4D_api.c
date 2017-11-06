@@ -44,6 +44,13 @@ PJ_COORD proj_coord (double x, double y, double z, double t) {
     return res;
 }
 
+/* We do not want to bubble enum pj_io_units up to the API level, so we provide these predicates instead */
+int proj_angular_left (PJ *P) {
+    return pj_left (P)==PJ_IO_UNITS_RADIANS;
+}
+int proj_angular_right (PJ *P) {
+    return pj_right (P)==PJ_IO_UNITS_RADIANS;
+}
 
 /* Geodesic distance (in meter) between two points with angular 2D coordinates */
 double proj_lp_dist (const PJ *P, LP a, LP b) {
@@ -84,14 +91,14 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
     switch (direction) {
         case PJ_FWD:
             for (i = 0;  i < n;  i++) {
-                u  =  pj_fwdcoord (o, P);
-                o  =  pj_invcoord (u, P);
+                u  =  pj_fwd4d (o, P);
+                o  =  pj_inv4d (u, P);
             }
             break;
         case PJ_INV:
             for (i = 0;  i < n;  i++) {
-                u  =  pj_invcoord (o, P);
-                o  =  pj_fwdcoord (u, P);
+                u  =  pj_inv4d (o, P);
+                o  =  pj_fwd4d (u, P);
             }
             break;
         default:
@@ -108,17 +115,18 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
 }
 
 
-
 /* Apply the transformation P to the coordinate coo */
-PJ_COORD proj_trans_coord (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
     if (0==P)
         return coo;
+    if (P->inverted)
+        direction = -direction;
 
     switch (direction) {
         case PJ_FWD:
-            return pj_fwdcoord (coo, P);
+            return pj_fwd4d (coo, P);
         case PJ_INV:
-            return  pj_invcoord (coo, P);
+            return  pj_inv4d (coo, P);
         case PJ_IDENT:
             return coo;
         default:
@@ -131,8 +139,29 @@ PJ_COORD proj_trans_coord (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
 
 
 
+/*****************************************************************************/
+int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord) {
+/******************************************************************************
+    Batch transform an array of PJ_COORD.
+
+    Returns 0 if all coordinates are transformed without error, otherwise
+    returns error number.
+******************************************************************************/
+    size_t i;
+
+    for (i = 0;  i < n;  i++) {
+        coord[i] = proj_trans (P, direction, coord[i]);
+        if (proj_errno(P))
+            return proj_errno (P);
+    }
+
+   return 0;
+}
+
+
+
 /*************************************************************************************/
-size_t proj_transform (
+size_t proj_trans_generic (
     PJ *P,
     PJ_DIRECTION direction,
     double *x, size_t sx, size_t nx,
@@ -189,11 +218,15 @@ size_t proj_transform (
     Return value: Number of transformations completed.
 
 **************************************************************************************/
-    PJ_COORD coord = proj_coord_null;
+    PJ_COORD coord = {{0,0,0,0}};
     size_t i, nmin;
     double null_broadcast = 0;
+
     if (0==P)
         return 0;
+
+    if (P->inverted)
+        direction = -direction;
 
     /* ignore lengths of null arrays */
     if (0==x) nx = 0;
@@ -244,9 +277,9 @@ size_t proj_transform (
         coord.xyzt.t = *t;
 
         if (PJ_FWD==direction)
-            coord = pj_fwdcoord (coord, P);
+            coord = pj_fwd4d (coord, P);
         else
-            coord = pj_invcoord (coord, P);
+            coord = pj_inv4d (coord, P);
 
         /* in all full length cases, we overwrite the input with the output */
         if (nx > 1)  {
@@ -279,24 +312,6 @@ size_t proj_transform (
         *t = coord.xyzt.t;
 
     return i;
-}
-
-/*****************************************************************************/
-int proj_transform_coord (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord) {
-/******************************************************************************
-    Batch transform an array of PJ_COORD.
-
-    Returns 0 if all coordinates are transformed without error, otherwise
-    returns error number.
-******************************************************************************/
-    size_t i;
-    for (i=0; i<n; i++) {
-        coord[i] = proj_trans_coord(P, direction, coord[i]);
-        if (proj_errno(P))
-            return proj_errno(P);
-    }
-
-    return 0;
 }
 
 
@@ -554,7 +569,7 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
 
     /* this does not take into account that a pipeline potentially does not */
     /* have an inverse.                                                     */
-    info.has_inverse = (P->inv != 0 || P->inv3d != 0 || P->invobs != 0);
+    info.has_inverse = (P->inv != 0 || P->inv3d != 0 || P->inv4d != 0);
 
     return info;
 }
