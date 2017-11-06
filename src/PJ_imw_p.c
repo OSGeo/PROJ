@@ -9,11 +9,17 @@ PROJ_HEAD(imw_p, "International Map of the World Polyconic")
 #define TOL 1e-10
 #define EPS 1e-10
 
+enum Mode {
+    NONE_IS_ZERO  =  0, /* phi_1 and phi_2 != 0 */
+    PHI_1_IS_ZERO =  1, /* phi_1 = 0 */
+    PHI_2_IS_ZERO = -1  /* phi_2 = 0 */
+};
+
 struct pj_opaque {
-    double  P, Pp, Q, Qp, R_1, R_2, sphi_1, sphi_2, C2; \
-    double  phi_1, phi_2, lam_1; \
-    double  *en; \
-    int mode; /* = 0, phi_1 and phi_2 != 0, = 1, phi_1 = 0, = -1 phi_2 = 0 */
+    double  P, Pp, Q, Qp, R_1, R_2, sphi_1, sphi_2, C2;
+    double  phi_1, phi_2, lam_1;
+    double  *en;
+    enum Mode mode;
 };
 
 
@@ -53,7 +59,7 @@ static XY loc_for(LP lp, PJ *P, double *yc) {
         C = sqrt(R * R - xa * xa);
         if (lp.phi < 0.) C = - C;
         C += ya - R;
-        if (Q->mode < 0) {
+        if (Q->mode == PHI_2_IS_ZERO) {
             xb = lp.lam;
             yb = Q->C2;
         } else {
@@ -61,7 +67,7 @@ static XY loc_for(LP lp, PJ *P, double *yc) {
             xb = Q->R_2 * sin(t);
             yb = Q->C2 + Q->R_2 * (1. - cos(t));
         }
-        if (Q->mode > 0) {
+        if (Q->mode == PHI_1_IS_ZERO) {
             xc = lp.lam;
             *yc = 0.;
         } else {
@@ -171,18 +177,18 @@ PJ *PROJECTION(imw_p) {
         else                sig = 8.;
         Q->lam_1 = sig * DEG_TO_RAD;
     }
-    Q->mode = 0;
+    Q->mode = NONE_IS_ZERO;
     if (Q->phi_1 != 0.0)
         xy(P, Q->phi_1, &x1, &y1, &Q->sphi_1, &Q->R_1);
     else {
-        Q->mode = 1;
+        Q->mode = PHI_1_IS_ZERO;
         y1 = 0.;
         x1 = Q->lam_1;
     }
     if (Q->phi_2 != 0.0)
         xy(P, Q->phi_2, &x2, &T2, &Q->sphi_2, &Q->R_2);
     else {
-        Q->mode = -1;
+        Q->mode = PHI_2_IS_ZERO;
         T2 = 0.;
         x2 = Q->lam_1;
     }

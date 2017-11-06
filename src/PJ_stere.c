@@ -7,12 +7,19 @@ PROJ_HEAD(stere, "Stereographic") "\n\tAzi, Sph&Ell\n\tlat_ts=";
 PROJ_HEAD(ups, "Universal Polar Stereographic") "\n\tAzi, Sph&Ell\n\tsouth";
 
 
+enum Mode {
+    S_POLE = 0,
+    N_POLE = 1,
+    OBLIQ  = 2,
+    EQUIT  = 3
+};
+
 struct pj_opaque {
     double phits;
     double sinX1;
     double cosX1;
     double akm1;
-    int mode;
+    enum Mode mode;
 };
 
 #define sinph0  P->opaque->sinX1
@@ -21,10 +28,6 @@ struct pj_opaque {
 #define TOL 1.e-8
 #define NITER   8
 #define CONV    1.e-10
-#define S_POLE  0
-#define N_POLE  1
-#define OBLIQ   2
-#define EQUIT   3
 
 static double ssfn_ (double phit, double sinphi, double eccen) {
     sinphi *= eccen;

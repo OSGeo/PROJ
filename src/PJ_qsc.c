@@ -42,8 +42,18 @@
 #include <errno.h>
 #include "projects.h"
 
+/* The six cube faces. */
+enum Face {
+    FACE_FRONT  = 0,
+    FACE_RIGHT  = 1,
+    FACE_BACK   = 2,
+    FACE_LEFT   = 3,
+    FACE_TOP    = 4,
+    FACE_BOTTOM = 5
+};
+
 struct pj_opaque {
-        int face;
+        enum Face face;
         double a_squared;
         double b;
         double one_minus_f;
@@ -53,24 +63,18 @@ PROJ_HEAD(qsc, "Quadrilateralized Spherical Cube") "\n\tAzi, Sph.";
 
 #define EPS10 1.e-10
 
-/* The six cube faces. */
-#define FACE_FRONT  0
-#define FACE_RIGHT  1
-#define FACE_BACK   2
-#define FACE_LEFT   3
-#define FACE_TOP    4
-#define FACE_BOTTOM 5
-
 /* The four areas on a cube face. AREA_0 is the area of definition,
  * the other three areas are counted counterclockwise. */
-#define AREA_0 0
-#define AREA_1 1
-#define AREA_2 2
-#define AREA_3 3
+enum Area {
+    AREA_0 = 0,
+    AREA_1 = 1,
+    AREA_2 = 2,
+    AREA_3 = 3
+};
 
 /* Helper function for forward projection: compute the theta angle
  * and determine the area number. */
-static double qsc_fwd_equat_face_theta(double phi, double y, double x, int *area) {
+static double qsc_fwd_equat_face_theta(double phi, double y, double x, enum Area *area) {
     double theta;
     if (phi < EPS10) {
         *area = AREA_0;
@@ -111,7 +115,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double lat, lon;
     double theta, phi;
     double t, mu; /* nu; */
-    int area;
+    enum Area area;
 
     /* Convert the geodetic latitude to a geocentric latitude.
      * This corresponds to the shift from the ellipsoid to the sphere

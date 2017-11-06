@@ -31,6 +31,13 @@
 #include <errno.h>
 #include "projects.h"
 
+enum Mode {
+    N_POLE = 0,
+    S_POLE = 1,
+    EQUIT  = 2,
+    OBLIQ  = 3,
+};
+
 struct pj_opaque {
     double  sinph0;
     double  cosph0;
@@ -40,7 +47,7 @@ struct pj_opaque {
     double  Mp;
     double  He;
     double  G;
-    int     mode;
+    enum Mode mode;
     struct geod_geodesic g;
 };
 
@@ -48,11 +55,6 @@ PROJ_HEAD(aeqd, "Azimuthal Equidistant") "\n\tAzi, Sph&Ell\n\tlat_0 guam";
 
 #define EPS10 1.e-10
 #define TOL 1.e-14
-
-#define N_POLE  0
-#define S_POLE  1
-#define EQUIT   2
-#define OBLIQ   3
 
 
 static void *destructor (PJ *P, int errlev) {                        /* Destructor */

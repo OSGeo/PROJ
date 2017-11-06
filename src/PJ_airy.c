@@ -34,22 +34,24 @@
 PROJ_HEAD(airy, "Airy") "\n\tMisc Sph, no inv.\n\tno_cut lat_b=";
 
 
+enum Mode {
+    N_POLE = 0,
+    S_POLE = 1,
+    EQUIT  = 2,
+    OBLIQ  = 3,
+};
+
 struct pj_opaque {
     double  p_halfpi;
     double  sinph0;
     double  cosph0;
     double  Cb;
-    int     mode;
+    enum Mode mode;
     int     no_cut; /* do not cut at hemisphere limit */
 };
 
 
 # define EPS 1.e-10
-# define N_POLE 0
-# define S_POLE 1
-# define EQUIT  2
-# define OBLIQ  3
-
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */

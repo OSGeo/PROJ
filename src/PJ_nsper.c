@@ -3,6 +3,13 @@
 #include <proj.h>
 #include "projects.h"
 
+enum Mode {
+    N_POLE = 0,
+    S_POLE = 1,
+    EQUIT  = 2,
+    OBLIQ  = 3
+};
+
 struct pj_opaque {
     double  height;
     double  sinph0;
@@ -16,7 +23,7 @@ struct pj_opaque {
     double  sg;
     double  sw;
     double  cw;
-    int     mode;
+    enum Mode mode;
     int     tilt;
 };
 
@@ -24,10 +31,6 @@ PROJ_HEAD(nsper, "Near-sided perspective") "\n\tAzi, Sph\n\th=";
 PROJ_HEAD(tpers, "Tilted perspective") "\n\tAzi, Sph\n\ttilt= azi= h=";
 
 # define EPS10 1.e-10
-# define N_POLE 0
-# define S_POLE 1
-# define EQUIT  2
-# define OBLIQ  3
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
