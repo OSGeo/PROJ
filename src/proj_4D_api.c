@@ -71,33 +71,38 @@ double proj_xyz_dist (XYZ a, XYZ b) {
 }
 
 
-
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
-double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
-    int i;
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
+    int i, angular;
     PJ_COORD o, u;
-    enum pj_io_units unit;
 
     if (0==P)
         return HUGE_VAL;
+
+    if (P->inverted)
+        direction = -direction;
 
     if (n < 1) {
         proj_errno_set (P, EINVAL);
         return HUGE_VAL;
     }
 
-    o = coo;
+    o = *coo;
 
     switch (direction) {
         case PJ_FWD:
             for (i = 0;  i < n;  i++) {
                 u  =  pj_fwd4d (o, P);
+                if (i==0)
+                    *coo = u;
                 o  =  pj_inv4d (u, P);
             }
             break;
         case PJ_INV:
             for (i = 0;  i < n;  i++) {
                 u  =  pj_inv4d (o, P);
+                if (i==0)
+                    *coo = u;
                 o  =  pj_fwd4d (u, P);
             }
             break;
@@ -107,11 +112,15 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
     }
 
     /* left when forward, because we do a roundtrip, and end where we begin */
-    unit = direction==PJ_FWD?  P->left:  P->right;
-    if (unit==PJ_IO_UNITS_RADIANS)
-        return hypot (proj_lp_dist (P, coo.lp, o.lp), coo.lpz.z - o.lpz.z);
+    if (direction==PJ_FWD)
+        angular = proj_angular_left(P);
+    else
+        angular = proj_angular_right(P);
 
-    return proj_xyz_dist (coo.xyz, coo.xyz);
+    if (angular)
+        return hypot (proj_lp_dist (P, coo->lp, o.lp), coo->lpz.z - o.lpz.z);
+
+    return proj_xyz_dist (coo->xyz, coo->xyz);
 }
 
 

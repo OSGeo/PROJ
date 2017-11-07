@@ -488,11 +488,13 @@ static int roundtrip (char *args) {
     int ntrips;
     double d, r, ans;
     char *endp;
+    PJ_COORD c;
     ans = proj_strtod (args, &endp);
     ntrips = (int) (endp==args? 100: fabs(ans));
     d = strtod_scaled (endp, 1);
     d = d==HUGE_VAL?  T.tolerance:  d;
-    r = proj_roundtrip (T.P, PJ_FWD, ntrips, T.a);
+    c = T.a;
+    r = proj_roundtrip (T.P, PJ_FWD, ntrips, &c);
     if (r > d) {
         if (T.verbosity > -1) {
             if (0==T.op_ko && T.verbosity < 2)
