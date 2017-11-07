@@ -318,7 +318,7 @@ int pj_molodensky_selftest (void) {return 0;}
 #else
 int pj_molodensky_selftest (void) {
 
-    PJ_COORD in, res, exp;
+    PJ_COORD in, c, res, xp;
     PJ *P;
 
     /* Test the abridged Molodensky first. Example from appendix 3 of Deakin (2004). */
@@ -334,24 +334,25 @@ int pj_molodensky_selftest (void) {
     in.lpz.phi = PJ_TORAD(-37.8);
     in.lpz.z   = 50.0;
 
-    exp.lpz.lam = PJ_TORAD(144.968);
-    exp.lpz.phi = PJ_TORAD(-37.79848);
-    exp.lpz.z   = 46.378;
+    xp.lpz.lam = PJ_TORAD(144.968);
+    xp.lpz.phi = PJ_TORAD(-37.79848);
+    xp.lpz.z   = 46.378;
 
     res = proj_trans(P, PJ_FWD, in);
 
-    if (proj_lp_dist(P, res.lp, exp.lp) > 2 ) { /* we don't expect much accurecy here... */
+    if (proj_lp_dist(P, res.lp, xp.lp) > 2 ) { /* we don't expect much accuracy here... */
         proj_destroy(P);
         return 11;
     }
 
     /* let's try a roundtrip */
-    if (proj_roundtrip(P, PJ_FWD, 100, in) > 1) {
+    c = in;
+    if (proj_roundtrip(P, PJ_FWD, 100, &c) > 1) {
         proj_destroy(P);
         return 12;
     }
 
-    if (res.lpz.z - exp.lpz.z > 1e-3) {
+    if (res.lpz.z - xp.lpz.z > 1e-3) {
         proj_destroy(P);
         return 13;
     }
@@ -369,18 +370,19 @@ int pj_molodensky_selftest (void) {
 
     res = proj_trans(P, PJ_FWD, in);
 
-    if (proj_lp_dist(P, res.lp, exp.lp) > 2 ) { /* we don't expect much accurecy here... */
+    if (proj_lp_dist(P, res.lp, xp.lp) > 2 ) { /* we don't expect much accurecy here... */
         proj_destroy(P);
         return 21;
     }
 
     /* let's try a roundtrip */
-    if (proj_roundtrip(P, PJ_FWD, 100, in) > 1) {
+    c = in;
+    if (proj_roundtrip(P, PJ_FWD, 100, &c) > 1) {
         proj_destroy(P);
         return 22;
     }
 
-    if (res.lpz.z - exp.lpz.z > 1e-3) {
+    if (res.lpz.z - xp.lpz.z > 1e-3) {
         proj_destroy(P);
         return 23;
     }

@@ -109,7 +109,8 @@ int pj_vgridshift_selftest (void) {
     a.lpz.lam = PJ_TORAD(12.5);
     a.lpz.phi = PJ_TORAD(55.5);
 
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    expect = a;
+    dist = proj_roundtrip (P, PJ_FWD, 1, &expect);
     if (dist > 0.00000001)
         return 1;
 
