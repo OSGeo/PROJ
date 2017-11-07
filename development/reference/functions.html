@@ -108,7 +108,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#transformation-setup">Transformation setup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#coordinate-transformation">Coordinate transformation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#initializers">Initializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#error-reporting">Error reporting</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#info-functions">Info functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lists">Lists</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#distances">Distances</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#various">Various</a></li>
 </ul>
@@ -287,7 +289,7 @@ application each parameter in the defining proj-string is an entry in <code clas
 coordinate reference systems.</p>
 <p><code class="xref c c-data docutils literal"><span class="pre">srid_from</span></code> and <code class="xref c c-data docutils literal"><span class="pre">srid_to</span></code> should be the value part of a <code class="docutils literal"><span class="pre">+init=...</span></code> parameter
 set, i.e. &#8220;epsg:25833&#8221; or &#8220;IGNF:AMST63&#8221;. Any projection definition that
-can be found in a init-file in <span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal"><span class="pre">PROJ_LIB</span></code> is a valid input to this function.</p>
+can be found in a init-file in <span class="target" id="index-0"></span><a class="reference internal" href="../../usage/environmentvars.html#envvar-PROJ_LIB"><code class="xref std std-envvar docutils literal"><span class="pre">PROJ_LIB</span></code></a> is a valid input to this function.</p>
 <p>For now the function mimics the cs2cs app: An input and an output CRS is
 given and coordinates are transformed via a hub datum (WGS84). This
 transformation strategy is referred to as &#8220;early-binding&#8221; by the EPSG. The
@@ -338,10 +340,10 @@ future without affecting users of the function.</p>
 
 </div>
 <div class="section" id="coordinate-transformation">
-<h2>Coordinate transformation<a class="headerlink" href="#coordinate-transformation" title="Permalink to this headline">¶</a></h2>
+<span id="coord-trans-functions"></span><h2>Coordinate transformation<a class="headerlink" href="#coordinate-transformation" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="c.proj_trans_coord">
-<a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a> <code class="descname">proj_trans_coord</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, enum proj_direction<em>&nbsp;direction</em>, <a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a><em>&nbsp;coord</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_trans_coord" title="Permalink to this definition">¶</a></dt>
+<a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a> <code class="descname">proj_trans_coord</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, <a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION">PJ_DIRECTION</a><em>&nbsp;direction</em>, <a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a><em>&nbsp;coord</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_trans_coord" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform a single <a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD"><code class="xref c c-type docutils literal"><span class="pre">PJ_COORD</span></code></a> coordinate.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -349,7 +351,7 @@ future without affecting users of the function.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>P</strong> (<a class="reference internal" href="datatypes.html#c.PJ" title="PJ"><em>PJ*</em></a>) &#8211; </li>
-<li><strong>direction</strong> (<em>enum proj_direction</em>) &#8211; Transformation direction.</li>
+<li><strong>direction</strong> (<a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION"><em>PJ_DIRECTION</em></a>) &#8211; Transformation direction.</li>
 <li><strong>coord</strong> (<a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD"><em>PJ_COORD</em></a>) &#8211; Coordinate that will be transformed.</li>
 </ul>
 </td>
@@ -363,7 +365,7 @@ future without affecting users of the function.</p>
 
 <dl class="function">
 <dt id="c.proj_trans_obs">
-<a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS">PJ_OBS</a> <code class="descname">proj_trans_obs</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, enum proj_direction<em>&nbsp;direction</em>, <a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS">PJ_OBS</a><em>&nbsp;obs</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_trans_obs" title="Permalink to this definition">¶</a></dt>
+<a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS">PJ_OBS</a> <code class="descname">proj_trans_obs</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, <a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION">PJ_DIRECTION</a><em>&nbsp;direction</em>, <a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS">PJ_OBS</a><em>&nbsp;obs</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_trans_obs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform a single <a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS"><code class="xref c c-type docutils literal"><span class="pre">PJ_OBS</span></code></a> observation.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -371,7 +373,7 @@ future without affecting users of the function.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>P</strong> (<a class="reference internal" href="datatypes.html#c.PJ" title="PJ"><em>PJ*</em></a>) &#8211; </li>
-<li><strong>direction</strong> (<em>enum proj_direction</em>) &#8211; Transformation direction.</li>
+<li><strong>direction</strong> (<a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION"><em>PJ_DIRECTION</em></a>) &#8211; Transformation direction.</li>
 <li><strong>obs</strong> (<a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS"><em>PJ_OBS</em></a>) &#8211; Observation data to transform.</li>
 </ul>
 </td>
@@ -385,7 +387,7 @@ future without affecting users of the function.</p>
 
 <dl class="function">
 <dt id="c.proj_transform">
-size_t <code class="descname">proj_transform</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, enum proj_direction<em>&nbsp;direction</em>, double<em>&nbsp;*x</em>, size_t<em>&nbsp;sx</em>, size_t<em>&nbsp;nx</em>, double<em>&nbsp;*y</em>, size_t<em>&nbsp;sy</em>, size_t<em>&nbsp;ny</em>, double<em>&nbsp;*z</em>, size_t<em>&nbsp;sz</em>, size_t<em>&nbsp;nz</em>, double<em>&nbsp;*t</em>, size_t<em>&nbsp;st</em>, size_t<em>&nbsp;nt</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_transform" title="Permalink to this definition">¶</a></dt>
+size_t <code class="descname">proj_transform</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, <a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION">PJ_DIRECTION</a><em>&nbsp;direction</em>, double<em>&nbsp;*x</em>, size_t<em>&nbsp;sx</em>, size_t<em>&nbsp;nx</em>, double<em>&nbsp;*y</em>, size_t<em>&nbsp;sy</em>, size_t<em>&nbsp;ny</em>, double<em>&nbsp;*z</em>, size_t<em>&nbsp;sz</em>, size_t<em>&nbsp;nz</em>, double<em>&nbsp;*t</em>, size_t<em>&nbsp;st</em>, size_t<em>&nbsp;nt</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform a series of coordinates, where the individual coordinate dimension
 may be represented by an array that is either</p>
 <blockquote>
@@ -470,7 +472,7 @@ state. Hence, remember to reinitialize between repeated calls.</p>
 
 <dl class="function">
 <dt id="c.proj_transform_coord">
-size_t <code class="descname">proj_transform_coord</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, enum proj_direction<em>&nbsp;direction</em>, size_t<em>&nbsp;n</em>, <a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a><em>&nbsp;*coord</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_transform_coord" title="Permalink to this definition">¶</a></dt>
+size_t <code class="descname">proj_transform_coord</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, <a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION">PJ_DIRECTION</a><em>&nbsp;direction</em>, size_t<em>&nbsp;n</em>, <a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a><em>&nbsp;*coord</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_transform_coord" title="Permalink to this definition">¶</a></dt>
 <dd><p>Batch transform an array of <a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD"><code class="xref c c-type docutils literal"><span class="pre">PJ_COORD</span></code></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -478,7 +480,7 @@ size_t <code class="descname">proj_transform_coord</code><span class="sig-paren"
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>P</strong> (<a class="reference internal" href="datatypes.html#c.PJ" title="PJ"><em>PJ*</em></a>) &#8211; </li>
-<li><strong>direction</strong> (<em>enum proj_direction</em>) &#8211; Transformation direction</li>
+<li><strong>direction</strong> (<a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION"><em>PJ_DIRECTION</em></a>) &#8211; Transformation direction</li>
 <li><strong>n</strong> (<em>size_t</em>) &#8211; Number of cordinates in <code class="xref c c-data docutils literal"><span class="pre">coord</span></code></li>
 </ul>
 </td>
@@ -492,7 +494,7 @@ size_t <code class="descname">proj_transform_coord</code><span class="sig-paren"
 
 <dl class="function">
 <dt id="c.proj_transform_obs">
-size_t <code class="descname">proj_transform_obs</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, enum proj_direction<em>&nbsp;direction</em>, size_t<em>&nbsp;n</em>, <a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS">PJ_OBS</a><em>&nbsp;*obs</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_transform_obs" title="Permalink to this definition">¶</a></dt>
+size_t <code class="descname">proj_transform_obs</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, <a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION">PJ_DIRECTION</a><em>&nbsp;direction</em>, size_t<em>&nbsp;n</em>, <a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS">PJ_OBS</a><em>&nbsp;*obs</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_transform_obs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Batch transform an array of <a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS"><code class="xref c c-type docutils literal"><span class="pre">PJ_OBS</span></code></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -500,7 +502,7 @@ size_t <code class="descname">proj_transform_obs</code><span class="sig-paren">(
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>P</strong> (<a class="reference internal" href="datatypes.html#c.PJ" title="PJ"><em>PJ*</em></a>) &#8211; </li>
-<li><strong>direction</strong> (<em>enum proj_direction</em>) &#8211; Transformation direction</li>
+<li><strong>direction</strong> (<a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION"><em>PJ_DIRECTION</em></a>) &#8211; Transformation direction</li>
 <li><strong>n</strong> (<em>size_t</em>) &#8211; Number of observations in <code class="xref c c-data docutils literal"><span class="pre">obs</span></code></li>
 </ul>
 </td>
@@ -604,6 +606,101 @@ Equivalent to</p>
 </dd></dl>
 
 </div>
+<div class="section" id="error-reporting">
+<h2>Error reporting<a class="headerlink" href="#error-reporting" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.proj_errno">
+int <code class="descname">proj_errno</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_errno" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a reading of the current error-state of <code class="xref c c-data docutils literal"><span class="pre">P</span></code>. An non-zero error
+codes indicates an error either with the transformation setup or during a
+transformation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Param:</th><td class="field-body">PJ* P: Transformation object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><code class="xref c c-type docutils literal"><span class="pre">int</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.proj_errno_set">
+void <code class="descname">proj_errno_set</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, int<em>&nbsp;err</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_errno_set" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Change the error-state of <code class="xref c c-data docutils literal"><span class="pre">P</span></code> to <cite>err</cite>.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param PJ* P:</th><td class="field-body">Transformation object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param int err:</th><td class="field-body">Error number.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<dl class="function">
+<dt id="c.proj_errno_reset">
+int <code class="descname">proj_errno_reset</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_errno_reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the error number in <code class="xref c c-data docutils literal"><span class="pre">P</span></code>, and bubbles it up to the context.</p>
+<p>Example:</p>
+<div class="highlight-C"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">foo</span> <span class="p">(</span><span class="n">PJ</span> <span class="o">*</span><span class="n">P</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">last_errno</span> <span class="o">=</span> <span class="n">proj_errno_reset</span> <span class="p">(</span><span class="n">P</span><span class="p">);</span>
+
+    <span class="n">do_something_with_P</span> <span class="p">(</span><span class="n">P</span><span class="p">);</span>
+
+    <span class="cm">/* failure - keep latest error status */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">proj_errno</span><span class="p">(</span><span class="n">P</span><span class="p">))</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="cm">/* success - restore previous error status */</span>
+    <span class="n">proj_errno_restore</span> <span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">last_errno</span><span class="p">);</span>
+    <span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Param:</th><td class="field-body">PJ* P: Transformation object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><code class="xref c c-type docutils literal"><span class="pre">int</span></code> Returns the previous value of the errno, for convenient reset/restore operations.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.proj_errno_restore">
+void <code class="descname">proj_errno_restore</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, int<em>&nbsp;err</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_errno_restore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduce some mental impedance in the canonical reset/restore use case:
+Basically, <a class="reference internal" href="#c.proj_errno_restore" title="proj_errno_restore"><code class="xref c c-func docutils literal"><span class="pre">proj_errno_restore()</span></code></a> is a synonym for
+<a class="reference internal" href="#c.proj_errno_set" title="proj_errno_set"><code class="xref c c-func docutils literal"><span class="pre">proj_errno_set()</span></code></a>, but the use cases are very different:
+<em>set</em> indicate an error to higher level user code, <em>restore</em> passes previously
+set error indicators in case of no errors at this level.</p>
+<p>Hence, although the inner working is identical, we provide both options,
+to avoid some rather confusing real world code.</p>
+<p>See usage example under <a class="reference internal" href="#c.proj_errno_reset" title="proj_errno_reset"><code class="xref c c-func docutils literal"><span class="pre">proj_errno_reset()</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>P</strong> (<a class="reference internal" href="datatypes.html#c.PJ" title="PJ"><em>PJ*</em></a>) &#8211; Transformation object.</li>
+<li><strong>err</strong> (<em>int</em>) &#8211; Error code.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 <div class="section" id="info-functions">
 <h2>Info functions<a class="headerlink" href="#info-functions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -681,6 +778,79 @@ Equivalent to</p>
 </dd></dl>
 
 </div>
+<div class="section" id="lists">
+<h2>Lists<a class="headerlink" href="#lists" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.proj_list_operations">
+const <a class="reference internal" href="datatypes.html#c.PJ_OPERATIONS" title="PJ_OPERATIONS">PJ_OPERATIONS</a>* <code class="descname">proj_list_operations</code><span class="sig-paren">(</span>void<span class="sig-paren">)</span><a class="headerlink" href="#c.proj_list_operations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a pointer to an array of all operations in PROJ.4. The last entry
+of the returned array is a NULL-entry. The array is statically allocated
+and does not need to be freed after use.</p>
+<p>Print a list of all operations in PROJ.4:</p>
+<div class="highlight-C"><div class="highlight"><pre><span></span><span class="n">PJ_OPERATIONS</span> <span class="o">*</span><span class="n">ops</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">ops</span> <span class="o">=</span> <span class="n">proj_list_operations</span><span class="p">();</span> <span class="n">ops</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">;</span> <span class="o">++</span><span class="n">ops</span><span class="p">)</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">ops</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">);</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="datatypes.html#c.PJ_OPERATIONS" title="PJ_OPERATIONS"><code class="xref c c-type docutils literal"><span class="pre">PJ_OPERATIONS*</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.proj_list_ellps">
+const <a class="reference internal" href="datatypes.html#c.PJ_ELLPS" title="PJ_ELLPS">PJ_ELLPS</a>* <code class="descname">proj_list_ellps</code><span class="sig-paren">(</span>void<span class="sig-paren">)</span><a class="headerlink" href="#c.proj_list_ellps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a pointer to an array of ellipsoids defined in PROJ.4. The last entry
+of the returned array is a NULL-entry. The array is statically allocated
+and does not need to be freed after use.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="datatypes.html#c.PJ_ELLPS" title="PJ_ELLPS"><code class="xref c c-type docutils literal"><span class="pre">PJ_ELLPS*</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.proj_list_units">
+const <a class="reference internal" href="datatypes.html#c.PJ_UNITS" title="PJ_UNITS">PJ_UNITS</a>* <code class="descname">proj_list_units</code><span class="sig-paren">(</span>void<span class="sig-paren">)</span><a class="headerlink" href="#c.proj_list_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a pointer to an array of distance units defined in PROJ.4. The last
+entry of the returned array is a NULL-entry. The array is statically
+allocated and does not need to be freed after use.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="datatypes.html#c.PJ_UNITS" title="PJ_UNITS"><code class="xref c c-type docutils literal"><span class="pre">PJ_UNITS*</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.proj_list_prime_meridians">
+const <a class="reference internal" href="datatypes.html#c.PJ_PRIME_MERIDIANS" title="PJ_PRIME_MERIDIANS">PJ_PRIME_MERIDIANS</a>* <code class="descname">proj_list_prime_meridians</code><span class="sig-paren">(</span>void<span class="sig-paren">)</span><a class="headerlink" href="#c.proj_list_prime_meridians" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a pointer to an array of prime meridians defined in PROJ.4. The last
+entry of the returned array is a NULL-entry. The array is statically
+allocated and does not need to be freed after use.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="datatypes.html#c.PJ_PRIME_MERIDIANS" title="PJ_PRIME_MERIDIANS"><code class="xref c c-type docutils literal"><span class="pre">PJ_PRIME_MERIDIANS*</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 <div class="section" id="distances">
 <h2>Distances<a class="headerlink" href="#distances" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -752,7 +922,7 @@ double <code class="descname">proj_xyz_dist</code><span class="sig-paren">(</spa
 <h2>Various<a class="headerlink" href="#various" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="c.proj_roundtrip">
-double <code class="descname">proj_roundtrip</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, enum proj_direction<em>&nbsp;direction</em>, int<em>&nbsp;n</em>, <a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS">PJ_OBS</a><em>&nbsp;obs</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_roundtrip" title="Permalink to this definition">¶</a></dt>
+double <code class="descname">proj_roundtrip</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, <a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION">PJ_DIRECTION</a><em>&nbsp;direction</em>, int<em>&nbsp;n</em>, <a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS">PJ_OBS</a><em>&nbsp;obs</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_roundtrip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Measure internal consistency of a given transformation. The function
 performs <code class="xref c c-data docutils literal"><span class="pre">n</span></code> round trip transformations starting in either
 the forward or reverse <code class="xref c c-data docutils literal"><span class="pre">direction</span></code>. Returns the euclidean
@@ -764,7 +934,7 @@ coordinate after <code class="xref c c-data docutils literal"><span class="pre">
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>P</strong> (<a class="reference internal" href="datatypes.html#c.PJ" title="PJ"><em>PJ*</em></a>) &#8211; </li>
-<li><strong>direction</strong> (<em>enum proj_direction</em>) &#8211; Starting direction of transformation</li>
+<li><strong>direction</strong> (<a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION"><em>PJ_DIRECTION</em></a>) &#8211; Starting direction of transformation</li>
 <li><strong>n</strong> (<em>int</em>) &#8211; Number of roundtrip transformations</li>
 <li><strong>obs</strong> (<a class="reference internal" href="datatypes.html#c.PJ_OBS" title="PJ_OBS"><em>PJ_OBS</em></a>) &#8211; Input coordinate</li>
 </ul>
@@ -931,7 +1101,7 @@ char *<code class="descname">proj_rtodms</code><span class="sig-paren">(</span>c
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 25 Sep 2017.
+      Last updated on 07 Nov 2017.
 
     </p>
   </div>

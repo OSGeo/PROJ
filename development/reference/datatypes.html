@@ -110,6 +110,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#ancillary-types-for-geodetic-computations">Ancillary types for geodetic computations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#complex-coordinate-types">Complex coordinate types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#projection-derivatives">Projection derivatives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#list-structures">List structures</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#info-structures">Info structures</a></li>
 </ul>
 </li>
@@ -208,6 +209,40 @@ As a user of the PROJ.4 library your are only exposed to pointers to this
 object and the contents are hidden in the public API. <a class="reference internal" href="#c.PJ" title="PJ"><code class="xref c c-type docutils literal"><span class="pre">PJ</span></code></a> objects
 are created with <a class="reference internal" href="functions.html#c.proj_create" title="proj_create"><code class="xref c c-func docutils literal"><span class="pre">proj_create()</span></code></a> and destroyed with
 <a class="reference internal" href="functions.html#c.proj_destroy" title="proj_destroy"><code class="xref c c-func docutils literal"><span class="pre">proj_destroy()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="c.PJ_DIRECTION">
+<code class="descname">PJ_DIRECTION</code><a class="headerlink" href="#c.PJ_DIRECTION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enumeration that is used to convey in which direction a given transformation
+should be performed. Used in transformation function call as described in
+the section on <a class="reference internal" href="functions.html#coord-trans-functions"><span class="std std-ref">transformation functions</span></a>.</p>
+<p>Forward transformations are defined with the :c:</p>
+<div class="highlight-C"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">enum</span> <span class="n">proj_direction</span> <span class="p">{</span>
+    <span class="n">PJ_FWD</span>   <span class="o">=</span>  <span class="mi">1</span><span class="p">,</span>   <span class="cm">/* Forward    */</span>
+    <span class="n">PJ_IDENT</span> <span class="o">=</span>  <span class="mi">0</span><span class="p">,</span>   <span class="cm">/* Do nothing */</span>
+    <span class="n">PJ_INV</span>   <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>    <span class="cm">/* Inverse    */</span>
+<span class="p">}</span> <span class="n">PJ_DIRECTION</span><span class="p">;</span>
+</pre></div>
+</div>
+<dl class="member">
+<dt id="c.PJ_DIRECTION.PJ_FWD">
+<code class="descname">PJ_FWD</code><a class="headerlink" href="#c.PJ_DIRECTION.PJ_FWD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform transformation in the forward direction.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_DIRECTION.PJ_IDENT">
+<code class="descname">PJ_IDENT</code><a class="headerlink" href="#c.PJ_DIRECTION.PJ_IDENT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identity. Do nothing.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_DIRECTION.PJ_INV">
+<code class="descname">PJ_INV</code><a class="headerlink" href="#c.PJ_DIRECTION.PJ_INV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform transformation in the inverse direction.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="type">
@@ -1111,6 +1146,140 @@ The following bit flags exists:</p>
 </dd></dl>
 
 </div>
+<div class="section" id="list-structures">
+<h2>List structures<a class="headerlink" href="#list-structures" title="Permalink to this headline">¶</a></h2>
+<dl class="type">
+<dt id="c.PJ_OPERATIONS">
+<code class="descname">PJ_OPERATIONS</code><a class="headerlink" href="#c.PJ_OPERATIONS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description a PROJ.4 operation</p>
+<div class="highlight-C"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">PJ_OPERATIONS</span> <span class="p">{</span>
+    <span class="kt">char</span>    <span class="o">*</span><span class="n">id</span><span class="p">;</span>                 <span class="cm">/* operation keyword */</span>
+    <span class="n">PJ</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">proj</span><span class="p">)(</span><span class="n">PJ</span> <span class="o">*</span><span class="p">);</span>           <span class="cm">/* operation  entry point */</span>
+    <span class="kt">char</span>    <span class="o">*</span> <span class="k">const</span> <span class="o">*</span><span class="n">descr</span><span class="p">;</span>      <span class="cm">/* description text */</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<dl class="member">
+<dt id="c.PJ_OPERATIONS.id">
+char *<code class="descname">id</code><a class="headerlink" href="#c.PJ_OPERATIONS.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Operation keyword.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_OPERATIONS.op">
+<a class="reference internal" href="#c.PJ" title="PJ">PJ</a> *<code class="descname">(*op)</code><span class="sig-paren">(</span><a class="reference internal" href="#c.PJ" title="PJ">PJ</a><em>&nbsp;*</em><span class="sig-paren">)</span><a class="headerlink" href="#c.PJ_OPERATIONS.op" title="Permalink to this definition">¶</a></dt>
+<dd><p>Operation entry point.</p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<code class="descname">char * const *</code></dt>
+<dd><p>Description of operation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="type">
+<dt id="c.PJ_ELLPS">
+<code class="descname">PJ_ELLPS</code><a class="headerlink" href="#c.PJ_ELLPS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description of ellipsoids defined in PROJ.4</p>
+<div class="highlight-C"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">PJ_ELLPS</span> <span class="p">{</span>
+    <span class="kt">char</span>    <span class="o">*</span><span class="n">id</span><span class="p">;</span>
+    <span class="kt">char</span>    <span class="o">*</span><span class="n">major</span><span class="p">;</span>
+    <span class="kt">char</span>    <span class="o">*</span><span class="n">ell</span><span class="p">;</span>
+    <span class="kt">char</span>    <span class="o">*</span><span class="n">name</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<dl class="member">
+<dt id="c.PJ_ELLPS.id">
+char *<code class="descname">id</code><a class="headerlink" href="#c.PJ_ELLPS.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keyword name of the ellipsoid.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_ELLPS.major">
+char *<code class="descname">major</code><a class="headerlink" href="#c.PJ_ELLPS.major" title="Permalink to this definition">¶</a></dt>
+<dd><p>Semi-major axis of the ellipsoid, or radius in case of a sphere.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_ELLPS.ell">
+char *<code class="descname">ell</code><a class="headerlink" href="#c.PJ_ELLPS.ell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Elliptical parameter, e.g. <cite>rf=298.257</cite> or <cite>b=6356772.2</cite>.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_ELLPS.name">
+char *<code class="descname">name</code><a class="headerlink" href="#c.PJ_ELLPS.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the ellipsoid</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="type">
+<dt id="c.PJ_UNITS">
+<code class="descname">PJ_UNITS</code><a class="headerlink" href="#c.PJ_UNITS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Distance units defined in PROJ.4.</p>
+<div class="highlight-C"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">PJ_UNITS</span> <span class="p">{</span>
+    <span class="kt">char</span>    <span class="o">*</span><span class="n">id</span><span class="p">;</span>           <span class="cm">/* units keyword */</span>
+    <span class="kt">char</span>    <span class="o">*</span><span class="n">to_meter</span><span class="p">;</span>     <span class="cm">/* multiply by value to get meters */</span>
+    <span class="kt">char</span>    <span class="o">*</span><span class="n">name</span><span class="p">;</span>         <span class="cm">/* comments */</span>
+    <span class="kt">double</span>   <span class="n">factor</span><span class="p">;</span>       <span class="cm">/* to_meter factor in actual numbers */</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<dl class="member">
+<dt id="c.PJ_UNITS.id">
+char *<code class="descname">id</code><a class="headerlink" href="#c.PJ_UNITS.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keyword for the unit.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_UNITS.to_meter">
+char *<code class="descname">to_meter</code><a class="headerlink" href="#c.PJ_UNITS.to_meter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Text representation of the factor that converts a given unit to meters</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_UNITS.name">
+char *<code class="descname">name</code><a class="headerlink" href="#c.PJ_UNITS.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the unit.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_UNITS.factor">
+double <code class="descname">factor</code><a class="headerlink" href="#c.PJ_UNITS.factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conversion factor that converts the unit to meters.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="type">
+<dt id="c.PJ_PRIME_MERIDIANS">
+<code class="descname">PJ_PRIME_MERIDIANS</code><a class="headerlink" href="#c.PJ_PRIME_MERIDIANS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prime meridians defined in PROJ.4.</p>
+<div class="highlight-C"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">PJ_PRIME_MERIDIANS</span> <span class="p">{</span>
+    <span class="kt">char</span>    <span class="o">*</span><span class="n">id</span><span class="p">;</span>
+    <span class="kt">char</span>    <span class="o">*</span><span class="n">defn</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<dl class="member">
+<dt id="c.PJ_PRIME_MERIDIANS.id">
+char *<code class="descname">id</code><a class="headerlink" href="#c.PJ_PRIME_MERIDIANS.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keyword for the prime meridian</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_PRIME_MERIDIANS.def">
+char *<code class="descname">def</code><a class="headerlink" href="#c.PJ_PRIME_MERIDIANS.def" title="Permalink to this definition">¶</a></dt>
+<dd><p>Offset from Greenwich in DMS format.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="info-structures">
 <h2>Info structures<a class="headerlink" href="#info-structures" title="Permalink to this headline">¶</a></h2>
 <dl class="type">
@@ -1356,7 +1525,7 @@ char <code class="descname">PJ_INIT_INFO.lastupdate</code><a class="headerlink" 
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 25 Sep 2017.
+      Last updated on 07 Nov 2017.
 
     </p>
   </div>

@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../projections.html">Cartographic projection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../transformation.html">Geodetic transformation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../resource_files.html">Resource files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../environmentvars.html">Environment variables</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Coordinate operations</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../projections/index.html">Projections</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Transformations</a><ul class="current">
@@ -193,6 +194,154 @@
   <div class="section" id="unit-conversion">
 <span id="unitconvert"></span><h1>Unit conversion<a class="headerlink" href="#unit-conversion" title="Permalink to this headline">¶</a></h1>
 <p>Convert between various distance and time units.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
+</tr>
+<tr class="row-even"><td><cite>+xy_in</cite></td>
+<td>Input unit of the horizontal components.</td>
+</tr>
+<tr class="row-odd"><td><cite>+xy_out</cite></td>
+<td>Output unit of the horizontal components.</td>
+</tr>
+<tr class="row-even"><td><cite>+z_in</cite></td>
+<td>Input unit of the vertical component.</td>
+</tr>
+<tr class="row-odd"><td><cite>+z_out</cite></td>
+<td>Output unit of the vertical component.</td>
+</tr>
+<tr class="row-even"><td><cite>+t_in</cite></td>
+<td>Input unit of the time component.</td>
+</tr>
+<tr class="row-odd"><td><cite>+t_out</cite></td>
+<td>Output unit of the time component.</td>
+</tr>
+</tbody>
+</table>
+<p>There are many examples of coordinate reference systems that are expressed in
+other units than the meter. There are also many cases where temporal data
+has to be translated to different units. The <cite>unitconvert</cite> operation takes care
+of that.</p>
+<p>Many North American systems are defined with coordinates in feet. For example
+in Vermont:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">tmerc</span> <span class="o">+</span><span class="n">lat_0</span><span class="o">=</span><span class="mf">42.5</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=-</span><span class="mf">72.5</span> <span class="o">+</span><span class="n">k</span><span class="o">=</span><span class="mf">0.999964286</span> <span class="o">+</span><span class="n">x_0</span><span class="o">=</span><span class="mf">500000.00001016</span> <span class="o">+</span><span class="n">y_0</span><span class="o">=</span><span class="mi">0</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">unitconvert</span> <span class="o">+</span><span class="n">xy_in</span><span class="o">=</span><span class="n">m</span> <span class="o">+</span><span class="n">xy_out</span><span class="o">=</span><span class="n">us</span><span class="o">-</span><span class="n">ft</span>
+</pre></div>
+</div>
+<p>Often when working with GNNS data the timestamps are presented in GPS-weeks,
+but when the data transformed with the <cite>helmert</cite> operation timestamps are
+expected to be in units of decimalyears. This can be fixed with <cite>unitconvert</cite>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">unitconvert</span> <span class="o">+</span><span class="n">t_in</span><span class="o">=</span><span class="n">gpsweek</span> <span class="o">+</span><span class="n">t_out</span><span class="o">=</span><span class="n">decimalyear</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="o">+</span><span class="n">epoch</span><span class="o">=</span><span class="mf">2000.0</span> <span class="o">+</span><span class="n">t_obs</span><span class="o">=</span><span class="mf">2017.5</span> <span class="o">...</span>
+</pre></div>
+</div>
+<div class="section" id="distance-units">
+<h2>Distance units<a class="headerlink" href="#distance-units" title="Permalink to this headline">¶</a></h2>
+<p>In the table below all distance units supported by PROJ.4 is listed.
+The same list can also be produced on the command line with <cite>proj</cite> or <cite>cs2cs</cite>,
+by adding the <cite>-lu</cite> flag when calling the utility.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Label</td>
+<td>Name</td>
+</tr>
+<tr class="row-even"><td>km</td>
+<td>Kilometer</td>
+</tr>
+<tr class="row-odd"><td>m</td>
+<td>Meter</td>
+</tr>
+<tr class="row-even"><td>dm</td>
+<td>Decimeter</td>
+</tr>
+<tr class="row-odd"><td>cm</td>
+<td>Centimeter</td>
+</tr>
+<tr class="row-even"><td>mm</td>
+<td>Millimeter</td>
+</tr>
+<tr class="row-odd"><td>kmi</td>
+<td>International Nautical Mile</td>
+</tr>
+<tr class="row-even"><td>in</td>
+<td>International Inch</td>
+</tr>
+<tr class="row-odd"><td>ft</td>
+<td>International Foot</td>
+</tr>
+<tr class="row-even"><td>yd</td>
+<td>International Yard</td>
+</tr>
+<tr class="row-odd"><td>mi</td>
+<td>International Statute Mile</td>
+</tr>
+<tr class="row-even"><td>fath</td>
+<td>International Fathom</td>
+</tr>
+<tr class="row-odd"><td>ch</td>
+<td>International Chain</td>
+</tr>
+<tr class="row-even"><td>link</td>
+<td>International Link</td>
+</tr>
+<tr class="row-odd"><td>us-in</td>
+<td>U.S. Surveyor&#8217;s Inch</td>
+</tr>
+<tr class="row-even"><td>us-ft</td>
+<td>U.S. Surveyor&#8217;s Foot</td>
+</tr>
+<tr class="row-odd"><td>us-yd</td>
+<td>U.S. Surveyor&#8217;s Yard</td>
+</tr>
+<tr class="row-even"><td>us-ch</td>
+<td>U.S. Surveyor&#8217;s Chain</td>
+</tr>
+<tr class="row-odd"><td>us-mi</td>
+<td>U.S. Surveyor&#8217;s Statute Mile</td>
+</tr>
+<tr class="row-even"><td>ind-yd</td>
+<td>Indian Yard</td>
+</tr>
+<tr class="row-odd"><td>ind-ft</td>
+<td>Indian Foot</td>
+</tr>
+<tr class="row-even"><td>ind-ch</td>
+<td>Indian Chain</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="time-units">
+<h2>Time units<a class="headerlink" href="#time-units" title="Permalink to this headline">¶</a></h2>
+<p>In the table below all time units supported by PROJ.4 is listed.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="67%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>mjd</td>
+<td>Modfied Julian date</td>
+</tr>
+<tr class="row-even"><td>decimalyear</td>
+<td>Decimal year</td>
+</tr>
+<tr class="row-odd"><td>gps_week</td>
+<td>GPS Week</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 
 
@@ -218,7 +367,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 25 Sep 2017.
+      Last updated on 07 Nov 2017.
 
     </p>
   </div>
