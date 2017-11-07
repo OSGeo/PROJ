@@ -222,7 +222,7 @@ static void *destructor(PJ *P, int errlev) {
 }
 
 
-PJ *PROJECTION(deformation) {
+PJ *TRANSFORMATION(deformation,1) {
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return pj_default_destructor(P, ENOMEM);

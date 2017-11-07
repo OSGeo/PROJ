@@ -46,7 +46,7 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
 }
 
 
-PJ *PROJECTION(vgridshift) {
+PJ *TRANSFORMATION(vgridshift,0) {
 
    if (!pj_param(P->ctx, P->params, "tgrids").i) {
         proj_log_error(P, "vgridshift: +grids parameter missing.");
