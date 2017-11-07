@@ -84,7 +84,7 @@ extern "C" {
 #endif
 
 /* prototype hypot for systems where absent */
-#if !defined(_WIN32) || !defined(__ANSI__)
+#if !(defined(HAVE_C99_MATH) && HAVE_C99_MATH)
 extern double hypot(double, double);
 #endif
 
