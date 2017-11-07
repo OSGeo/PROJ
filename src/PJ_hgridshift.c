@@ -45,7 +45,7 @@ static PJ_COORD reverse_4d (PJ_COORD obs, PJ *P) {
 
 
 
-PJ *PROJECTION(hgridshift) {
+PJ *TRANSFORMATION(hgridshift,0) {
 
     P->fwd4d  = forward_4d;
     P->inv4d  = reverse_4d;

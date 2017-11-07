@@ -156,7 +156,7 @@ static PJ_COORD reverse_4d(PJ_COORD coo, PJ *P) {
 
 
 /***********************************************************************/
-PJ *PROJECTION(axisswap) {
+PJ *CONVERSION(axisswap,0) {
 /***********************************************************************/
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     char *order, *s;

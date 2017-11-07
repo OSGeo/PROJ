@@ -42,7 +42,7 @@
 
 #define PJ_LIB__
 #include "proj_internal.h"
-#include <projects.h>
+#include "projects.h"
 #include <assert.h>
 #include <stddef.h>
 #include <math.h>
@@ -208,7 +208,7 @@ static LP cart_reverse (XY xy, PJ *P) {
 
 
 /*********************************************************************/
-PJ *PROJECTION(cart) {
+PJ *CONVERSION(cart,1) {
 /*********************************************************************/
     P->fwd3d  =  cartesian;
     P->inv3d  =  geodetic;

@@ -306,7 +306,7 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
 
 
 /***********************************************************************/
-PJ *PROJECTION(unitconvert) {
+PJ *CONVERSION(unitconvert,0) {
 /***********************************************************************/
     struct pj_opaque_unitconvert *Q = pj_calloc (1, sizeof (struct pj_opaque_unitconvert));
     char *s, *name;

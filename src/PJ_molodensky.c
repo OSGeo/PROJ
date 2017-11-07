@@ -268,7 +268,7 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
 }
 
 
-PJ *PROJECTION(molodensky) {
+PJ *TRANSFORMATION(molodensky,1) {
     struct pj_opaque_molodensky *Q = pj_calloc(1, sizeof(struct pj_opaque_molodensky));
     if (0==Q)
         return pj_default_destructor(P, ENOMEM);
