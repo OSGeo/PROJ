@@ -372,7 +372,7 @@ static int banner (char *args) {
         printf ("\n\n");
     if (strlen(args) > 70)
         thedots = dots;
-        fprintf (T.fout, "%s%-70.70s%s\n", delim, args, thedots);
+    fprintf (T.fout, "%s%-70.70s%s\n", delim, args, thedots);
     return 0;
 }
 
