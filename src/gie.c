@@ -459,23 +459,6 @@ static PJ_COORD todeg_coord (PJ_COORD a) {
     return c;
 }
 
-
-static PJ_COORD torad_if_needed (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
-    enum pj_io_units u = P->left;
-    PJ_COORD c;
-    if (dir==PJ_INV)
-        u = P->right;
-    if (u==PJ_IO_UNITS_CLASSIC || u==PJ_IO_UNITS_METERS)
-        return a;
-
-    c.lpz.lam = proj_torad (T.a.lpz.lam);
-    c.lpz.phi = proj_torad (T.a.lpz.phi);
-    c.v[2] = T.a.v[2];
-    c.v[3] = T.a.v[3];
-
-    return c;
-}
-
 /* try to parse args as a PJ_COORD */
 static PJ_COORD parse_coord (char *args) {
     int i;
@@ -532,7 +515,7 @@ static int roundtrip (char *args) {
     return 0;
 }
 
-int expect_message (double d, char *args) {
+static int expect_message (double d, char *args) {
     T.op_ko++;
     T.total_ko++;
 
@@ -556,7 +539,7 @@ int expect_message (double d, char *args) {
     return 1;
 }
 
-int expect_message_cannot_parse (char *args) {
+static int expect_message_cannot_parse (char *args) {
     T.op_ko++;
     T.total_ko++;
     if (T.verbosity > -1) {
