@@ -294,27 +294,29 @@ size_t proj_trans_generic (
         else
             coord = pj_inv4d (coord, P);
 
-        /* in all full length cases, we overwrite the input with the output */
+        /* in all full length cases, we overwrite the input with the output,  */
+        /* and step on to the next element.                                   */
+        /* The casts are somewhat funky, but they compile down to no-ops and  */
+        /* they tell compilers and static analyzers that we know what we do   */
         if (nx > 1)  {
-            *x = coord.xyzt.x;
-            x =  (double *) ( ((char *) x) + sx);
+           *x = coord.xyzt.x;
+            x = (double *) ((void *) ( ((char *) x) + sx));
         }
         if (ny > 1)  {
-            *y = coord.xyzt.y;
-            y =  (double *) ( ((char *) y) + sy);
+           *y = coord.xyzt.y;
+            y = (double *) ((void *) ( ((char *) y) + sy));
         }
         if (nz > 1)  {
-            *z = coord.xyzt.z;
-            z =  (double *) ( ((char *) z) + sz);
+           *z = coord.xyzt.z;
+            z = (double *) ((void *) ( ((char *) z) + sz));
         }
         if (nt > 1)  {
-            *t = coord.xyzt.t;
-            t =  (double *) ( ((char *) t) + st);
+           *t = coord.xyzt.t;
+            t = (double *) ((void *) ( ((char *) t) + st));
         }
     }
+
     /* Last time around, we update the length 1 cases with their transformed alter egos */
-    /* ... or would we rather not? Then what about the nmin==1 case?                    */
-    /* perhaps signalling the non-array case by setting all strides to 0?               */
     if (nx==1)
         *x = coord.xyzt.x;
     if (ny==1)
