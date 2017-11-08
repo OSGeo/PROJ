@@ -421,7 +421,13 @@ static void finish_previous_operation (char *args) {
     (void) args;
 }
 
+/*****************************************************************************/
 static int operation (char *args) {
+/*****************************************************************************
+    Define the operation to apply to the input data (in ISO 19100 lingo,
+    an operation is the general term describing something that can be
+    either a conversion or a transformation)
+******************************************************************************/
     T.op_id++;
     strcpy (&(T.operation[0]), args);
     if (T.verbosity > 1) {
@@ -477,8 +483,11 @@ static PJ_COORD parse_coord (char *args) {
 }
 
 
-
+/*****************************************************************************/
 static int accept (char *args) {
+/*****************************************************************************
+    Read ("ACCEPT") a 2, 3, or 4 dimensional input coordinate.
+******************************************************************************/
     T.a = parse_coord (args);
     if (T.verbosity > 3)
         printf ("#  %s", args);
@@ -487,7 +496,12 @@ static int accept (char *args) {
 
 
 
+/*****************************************************************************/
 static int roundtrip (char *args) {
+/*****************************************************************************
+    Check how far we go from the ACCEPTed point when doing successive
+    back/forward transformation pairs.
+******************************************************************************/
     int ntrips;
     double d, r, ans;
     char *endp;
@@ -552,7 +566,11 @@ static int expect_message_cannot_parse (char *args) {
 }
 
 
+/*****************************************************************************/
 static int expect (char *args) {
+/*****************************************************************************
+    Tell GIE what to expect, when transforming the ACCEPTed input
+******************************************************************************/
     PJ_COORD ci, co, ce;
     double d;
 
@@ -599,7 +617,11 @@ static int expect (char *args) {
 
 
 
+/*****************************************************************************/
 static int verbose (char *args) {
+/*****************************************************************************
+    Tell the system how noisy it should be
+******************************************************************************/
     int i = (int) proj_atof (args);
 
     /* if -q/--quiet flag has been given, we do nothing */
@@ -613,14 +635,22 @@ static int verbose (char *args) {
     return 0;
 }
 
+/*****************************************************************************/
 static int comment (char *args) {
+/*****************************************************************************
+    in line comment. Equivalent to #
+******************************************************************************/
     (void) args;
     return 0;
 }
 
 
+/*****************************************************************************/
 static int echo (char *args) {
-    fprintf (T.fout, "%s\n", args);
+/*****************************************************************************
+    Add user defined noise to the output stream
+******************************************************************************/
+fprintf (T.fout, "%s\n", args);
     return 0;
 }
 
