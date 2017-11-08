@@ -15,6 +15,16 @@ cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 project(PROJ4 C)
 set(PROJECT_INTERN_NAME PROJ)
 
+# Set warnings
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+  set(CMAKE_C_FLAGS "/WX ${CMAKE_C_FLAGS}")
+elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+  set(CMAKE_C_FLAGS "-std=c89 -Wall -Wextra -Wswitch -Werror ${CMAKE_C_FLAGS}")
+elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
+  set(CMAKE_C_FLAGS "-std=c89 -Wall -Wextra -Wswitch -Werror \
+    -Wc99-extensions -Wc11-extensions ${CMAKE_C_FLAGS}")
+endif()
+
 #################################################################################
 # PROJ4 CMake modules
 #################################################################################

@@ -35,7 +35,7 @@ enum Mode {
     N_POLE = 0,
     S_POLE = 1,
     EQUIT  = 2,
-    OBLIQ  = 3,
+    OBLIQ  = 3
 };
 
 struct pj_opaque {
