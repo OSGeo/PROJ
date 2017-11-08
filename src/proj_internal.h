@@ -55,7 +55,13 @@ extern "C" {
 #define PJ_TORAD(deg)  ((deg)*M_PI/180.0)
 #endif
 
-
+/* This enum is also conditionally defined in projects.h - but we need it here */
+/* for the pj_left/right prototypes, and enums cannot be forward declared      */
+enum pj_io_units {
+    PJ_IO_UNITS_CLASSIC = 0,   /* Scaled meters (right) */
+    PJ_IO_UNITS_METERS  = 1,   /* Meters  */
+    PJ_IO_UNITS_RADIANS = 2    /* Radians */
+};
 enum pj_io_units pj_left (PJ *P);
 enum pj_io_units pj_right (PJ *P);
 

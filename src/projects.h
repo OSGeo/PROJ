@@ -182,11 +182,13 @@ struct FACTORS;
 struct PJ_REGION_S;
 typedef struct PJ_REGION_S  PJ_Region;
 typedef struct ARG_list paralist;   /* parameter list */
+#ifndef PROJ_INTERNAL_H
 enum pj_io_units {
     PJ_IO_UNITS_CLASSIC = 0,   /* Scaled meters (right) */
     PJ_IO_UNITS_METERS  = 1,   /* Meters  */
     PJ_IO_UNITS_RADIANS = 2    /* Radians */
 };
+#endif
 #ifndef PROJ_H
 typedef struct PJconsts PJ;         /* the PJ object herself */
 typedef union  PJ_COORD PJ_COORD;
