@@ -445,6 +445,21 @@ static int operation (char *args) {
 }
 
 
+static PJ_COORD torad_coord (PJ_COORD a) {
+    PJ_COORD c = a;
+    c.lpz.lam = proj_torad (a.lpz.lam);
+    c.lpz.phi = proj_torad (a.lpz.phi);
+    return c;
+}
+
+static PJ_COORD todeg_coord (PJ_COORD a) {
+    PJ_COORD c = a;
+    c.lpz.lam = proj_todeg (a.lpz.lam);
+    c.lpz.phi = proj_todeg (a.lpz.phi);
+    return c;
+}
+
+
 static PJ_COORD torad_if_needed (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
     enum pj_io_units u = P->left;
     PJ_COORD c;
@@ -461,22 +476,27 @@ static PJ_COORD torad_if_needed (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
     return c;
 }
 
-
-static int accept (char *args) {
-    int n, i;
+/* try to parse args as a PJ_COORD */
+static PJ_COORD parse_coord (char *args) {
+    int i;
     char *endp, *prev = args;
-    T.a = proj_coord (0,0,0,0);
-    n = 4;
+    PJ_COORD a = proj_coord (0,0,0,0);
+
     for (i = 0; i < 4; i++) {
-        T.a.v[i] = proj_strtod (prev, &endp);
-        if (prev==endp) {
-            n--;
-            T.a.v[i] = 0;
-            break;
-        }
+        double d = proj_strtod (prev, &endp);
+        if (prev==endp)
+            return i > 1? a: proj_coord_error ();
+        a.v[i] = d;
         prev = endp;
     }
-    T.a = torad_if_needed (T.P, T.dir, T.a);
+
+    return a;
+}
+
+
+
+static int accept (char *args) {
+    T.a = parse_coord (args);
     if (T.verbosity > 3)
         printf ("#  %s", args);
     return 0;
@@ -512,80 +532,87 @@ static int roundtrip (char *args) {
     return 0;
 }
 
-static int expect (char *args) {
-    double d;
-    enum pj_io_units unit;
-    char *endp, *prev = args;
-    int i;
+int expect_message (double d, char *args) {
+    T.op_ko++;
+    T.total_ko++;
 
-    T.e     =  proj_coord (0,0,0,0);
-    T.b     =  proj_coord (0,0,0,0);
-    T.nargs = 4;
-    for (i = 0; i < 4; i++) {
-        T.e.v[i] = proj_strtod (prev, &endp);
-        if (prev==endp) {
-            T.nargs--;
-            T.e.v[i] = 0;
-            break;
-        }
-        prev = endp;
+    if (T.verbosity < 0)
+        return 1;
+    if (d > 1e6)
+        d = 999999.999999;
+    if (0==T.op_ko && T.verbosity < 2)
+        banner (T.operation);
+    fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
+
+    fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
+    fprintf (T.fout, "     expected: %s\n", args);
+    fprintf (T.fout, "     got:      %.9f   %.9f", T.b.xy.x,  T.b.xy.y);
+    if (T.b.xyzt.t!=0 || T.b.xyzt.z!=0)
+        fprintf (T.fout, "   %.9f", T.b.xyz.z);
+    if (T.b.xyzt.t!=0)
+        fprintf (T.fout, "   %.9f", T.b.xyzt.t);
+    fprintf (T.fout, "\n");
+    fprintf (T.fout, "     deviation:  %.3f mm,  expected:  %.3f mm\n", 1000*d, 1000*T.tolerance);
+    return 1;
+}
+
+int expect_message_cannot_parse (char *args) {
+    T.op_ko++;
+    T.total_ko++;
+    if (T.verbosity > -1) {
+        if (0==T.op_ko && T.verbosity < 2)
+            banner (T.operation);
+        fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
+        fprintf (T.fout, "     FAILURE in %s(%d):\n     Too few args: %s\n", opt_strip_path (T.curr_file), (int) lineno, args);
     }
-    T.e = torad_if_needed (T.P, T.dir==PJ_FWD? PJ_INV:PJ_FWD, T.e);
-
-    T.b = proj_trans (T.P, T.dir, T.a);
-    T.b = torad_if_needed (T.P, T.dir==PJ_FWD? PJ_INV:PJ_FWD, T.b);
-
-    if (T.nargs < 2) {
-        T.op_ko++;
-        T.total_ko++;
-        if (T.verbosity > -1) {
-            if (0==T.op_ko && T.verbosity < 2)
-                banner (T.operation);
-            fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
-            fprintf (T.fout, "     FAILURE in %s(%d):\n     Too few args: %s\n", opt_strip_path (T.curr_file), (int) lineno, args);
-        }
-     return 1;
-    }
-
-    unit = T.dir==PJ_FWD? T.P->right: T.P->left;
-    if (PJ_IO_UNITS_CLASSIC==unit)
-        unit = PJ_IO_UNITS_METERS;
-
-    if (unit==PJ_IO_UNITS_RADIANS)
-        d = proj_lp_dist (T.P, T.b.lp, T.e.lp);
-    else
-        d = proj_xyz_dist (T.b.xyz, T.e.xyz);
-
-    if (d > T.tolerance) {
-        if (d > 1e6)
-            d = 999999.999999;
-        if (T.verbosity > -1) {
-            if (0==T.op_ko && T.verbosity < 2)
-                banner (T.operation);
-            fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
-
-            fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
-            fprintf (T.fout, "     expected: %s\n", args);
-            fprintf (T.fout, "     got:      %.9f   %.9f", T.b.xy.x,  T.b.xy.y);
-            if (T.nargs > 2)
-                fprintf (T.fout, "   %.9f", T.b.xyz.z);
-            if (T.nargs > 3)
-                fprintf (T.fout, "   %.9f", T.b.xyzt.t);
-            fprintf (T.fout, "\n");
-            fprintf (T.fout, "     deviation:  %.3f mm,  expected:  %.3f mm\n", 1000*d, 1000*T.tolerance);
-        }
-        T.op_ko++;
-        T.total_ko++;
-    }
-    else {
-        T.op_ok++;
-        T.total_ok++;
-    }
-    return 0;
+    return 1;
 }
 
 
+static int expect (char *args) {
+    PJ_COORD ci, co, ce;
+    double d;
 
+    T.e  =  parse_coord (args);
+    if (HUGE_VAL==T.e.v[0])
+        return expect_message_cannot_parse (args);
+
+    /* expected angular values probably in degrees */
+    ce = proj_angular_output (T.P, T.dir)? torad_coord (T.e): T.e;
+
+    /* input ("accepted") values also probably in degrees */
+    ci = proj_angular_input  (T.P, T.dir)? torad_coord (T.a): T.a;
+
+    /* angular output from proj_trans comes in radians */
+    co = proj_trans (T.P, T.dir, ci);
+    T.b = proj_angular_output (T.P, T.dir)? todeg_coord (co): co;
+
+    /* but there are a few more possible input conventions... */
+    if (proj_angular_output (T.P, T.dir)) {
+        double e = HUGE_VAL;
+        d = hypot (proj_lp_dist (T.P, ce.lp, co.lp), ce.lpz.z - co.lpz.z);
+        /* check whether input was already in radians */
+        if (d > T.tolerance)
+            e = hypot (proj_lp_dist (T.P, T.e.lp, co.lp), T.e.lpz.z - co.lpz.z);
+        if (e < d)
+            d = e;
+        /* or the tolerance may be based on euclidean distance */
+        if (d > T.tolerance)
+            e = proj_xyz_dist (T.b.xyz, T.e.xyz);
+        if (e < d)
+            d = e;
+    }
+    else
+        d = proj_xyz_dist (T.b.xyz, T.e.xyz);
+
+    if (d > T.tolerance)
+        return expect_message (d, args);
+
+    T.op_ok++;
+    T.total_ok++;
+
+    return 0;
+}
 
 
 

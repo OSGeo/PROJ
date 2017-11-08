@@ -144,5 +144,5 @@ EXPORTS
     proj_list_units                @130
     proj_list_prime_meridians      @131
 
-    proj_angular_left              @132
-    proj_angular_right             @133
+    proj_angular_input             @132
+    proj_angular_output            @133

@@ -567,6 +567,63 @@ int pj_cart_selftest (void) {
     for (pm_list = proj_list_prime_meridians(); pm_list->id; ++pm_list) n++;
     if (n == 0) return 93;
 
+
+    /* check io-predicates */
+
+    /* angular in on fwd, linear out */
+    P = proj_create (PJ_DEFAULT_CTX, "+proj=cart +ellps=GRS80");
+    if (0==P) return 0;
+    if (!proj_angular_input (P, PJ_FWD))  return 100;
+    if ( proj_angular_input (P, PJ_INV))  return 101;
+    if ( proj_angular_output (P, PJ_FWD)) return 102;
+    if (!proj_angular_output (P, PJ_INV)) return 103;
+    P->inverted = 1;
+    if ( proj_angular_input (P, PJ_FWD))  return 104;
+    if (!proj_angular_input (P, PJ_INV))  return 105;
+    if (!proj_angular_output (P, PJ_FWD)) return 106;
+    if ( proj_angular_output (P, PJ_INV)) return 107;
+    proj_destroy(P);
+
+    /* angular in and out */
+    P = proj_create(PJ_DEFAULT_CTX,
+        "+proj=molodensky +a=6378160 +rf=298.25 "
+        "+da=-23 +df=-8.120449e-8 +dx=-134 +dy=-48 +dz=149 "
+        "+abridged "
+    );
+    if (0==P) return 0;
+    if (!proj_angular_input (P, PJ_FWD))  return 108;
+    if (!proj_angular_input (P, PJ_INV))  return 109;
+    if (!proj_angular_output (P, PJ_FWD)) return 110;
+    if (!proj_angular_output (P, PJ_INV)) return 111;
+    P->inverted = 1;
+    if (!proj_angular_input (P, PJ_FWD))  return 112;
+    if (!proj_angular_input (P, PJ_INV))  return 113;
+    if (!proj_angular_output (P, PJ_FWD)) return 114;
+    if (!proj_angular_output (P, PJ_INV)) return 115;
+    proj_destroy(P);
+
+    /* linear in and out */
+    P = proj_create(PJ_DEFAULT_CTX,
+        " +proj=helmert +ellps=GRS80"
+        " +x=0.0127 +y=0.0065 +z=-0.0209 +s=0.00195"
+        " +rx=-0.00039 +ry=0.00080 +rz=-0.00114"
+        " +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +ds=0.00001"
+        " +drx=-0.00011 +dry=-0.00019 +drz=0.00007"
+        " +epoch=1988.0 +transpose"
+    );
+    if (0==P) return 0;
+    if (proj_angular_input (P, PJ_FWD))  return 116;
+    if (proj_angular_input (P, PJ_INV))  return 117;
+    if (proj_angular_output (P, PJ_FWD)) return 118;
+    if (proj_angular_output (P, PJ_INV)) return 119;
+    P->inverted = 1;
+    if (proj_angular_input (P, PJ_FWD))  return 120;
+    if (proj_angular_input (P, PJ_INV))  return 121;
+    if (proj_angular_output (P, PJ_FWD)) return 122;
+    if (proj_angular_output (P, PJ_INV)) return 123;
+    proj_destroy(P);
+
+
     return 0;
 }
 
