@@ -91,7 +91,6 @@ double proj_xyz_dist (XYZ a, XYZ b) {
 double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
     int i;
     PJ_COORD o, u;
-    enum pj_io_units unit;
 
     if (0==P)
         return HUGE_VAL;
