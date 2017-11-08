@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
     OPTARGS *o;
     FILE *fout = stdout;
     char *buf;
-    int input_unit, output_unit, nfields = 4, direction = 1, verbose;
+    int nfields = 4, direction = 1, verbose;
     double fixed_z = HUGE_VAL, fixed_time = HUGE_VAL;
     int columns_xyzt[] = {1, 2, 3, 4};
     const char *longflags[]  = {"v=verbose", "h=help", "I=inverse", 0};
@@ -218,9 +218,6 @@ int main(int argc, char **argv) {
         P->inverted = !(P->inverted);
     direction = 1;
 
-    input_unit   =  proj_angular_left (P)?  PJ_IO_UNITS_RADIANS: PJ_IO_UNITS_METERS;
-    output_unit  =  proj_angular_right (P)? PJ_IO_UNITS_RADIANS: PJ_IO_UNITS_METERS;
-
     /* Allocate input buffer */
     buf = calloc (1, 10000);
     if (0==buf) {
@@ -258,12 +255,12 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        if (PJ_IO_UNITS_RADIANS==input_unit) {
+        if (proj_angular_input (P, direction)) {
             point.lpzt.lam = proj_torad (point.lpzt.lam);
             point.lpzt.phi = proj_torad (point.lpzt.phi);
         }
         point = proj_trans (P, direction, point);
-        if (PJ_IO_UNITS_RADIANS==output_unit) {
+        if (proj_angular_output (P, direction)) {
             point.lpzt.lam = proj_todeg (point.lpzt.lam);
             point.lpzt.phi = proj_todeg (point.lpzt.phi);
         }

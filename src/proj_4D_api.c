@@ -44,13 +44,28 @@ PJ_COORD proj_coord (double x, double y, double z, double t) {
     return res;
 }
 
-/* We do not want to bubble enum pj_io_units up to the API level, so we provide these predicates instead */
-int proj_angular_left (PJ *P) {
-    return pj_left (P)==PJ_IO_UNITS_RADIANS;
-}
-int proj_angular_right (PJ *P) {
+/*****************************************************************************/
+int proj_angular_input (PJ *P, enum PJ_DIRECTION dir) {
+/******************************************************************************
+    Returns 1 if the operator P expects angular input coordinates when
+    operating in direction dir, 0 otherwise.
+    dir: {PJ_FWD, PJ_INV}
+******************************************************************************/
+    if (PJ_FWD==dir)
+        return pj_left (P)==PJ_IO_UNITS_RADIANS;
     return pj_right (P)==PJ_IO_UNITS_RADIANS;
 }
+
+/*****************************************************************************/
+int proj_angular_output (PJ *P, enum PJ_DIRECTION dir) {
+/******************************************************************************
+    Returns 1 if the operator P provides angular output coordinates when
+    operating in direction dir, 0 otherwise.
+    dir: {PJ_FWD, PJ_INV}
+******************************************************************************/
+    return proj_angular_input (P, -dir);
+}
+
 
 /* Geodesic distance (in meter) between two points with angular 2D coordinates */
 double proj_lp_dist (const PJ *P, LP a, LP b) {
@@ -76,7 +91,6 @@ double proj_xyz_dist (XYZ a, XYZ b) {
 double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
     int i;
     PJ_COORD o, u;
-    enum pj_io_units unit;
 
     if (0==P)
         return HUGE_VAL;
@@ -106,9 +120,8 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
             return HUGE_VAL;
     }
 
-    /* left when forward, because we do a roundtrip, and end where we begin */
-    unit = direction==PJ_FWD?  P->left:  P->right;
-    if (unit==PJ_IO_UNITS_RADIANS)
+    /* checking for angular input since we do a roundtrip, and end where we begin */
+    if (proj_angular_input (P, direction))
         return hypot (proj_lp_dist (P, coo.lp, o.lp), coo.lpz.z - o.lpz.z);
 
     return proj_xyz_dist (coo.xyz, coo.xyz);

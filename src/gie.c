@@ -421,7 +421,13 @@ static void finish_previous_operation (char *args) {
     (void) args;
 }
 
+/*****************************************************************************/
 static int operation (char *args) {
+/*****************************************************************************
+    Define the operation to apply to the input data (in ISO 19100 lingo,
+    an operation is the general term describing something that can be
+    either a conversion or a transformation)
+******************************************************************************/
     T.op_id++;
     strcpy (&(T.operation[0]), args);
     if (T.verbosity > 1) {
@@ -445,38 +451,44 @@ static int operation (char *args) {
 }
 
 
-static PJ_COORD torad_if_needed (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
-    enum pj_io_units u = P->left;
-    PJ_COORD c;
-    if (dir==PJ_INV)
-        u = P->right;
-    if (u==PJ_IO_UNITS_CLASSIC || u==PJ_IO_UNITS_METERS)
-        return a;
-
-    c.lpz.lam = proj_torad (T.a.lpz.lam);
-    c.lpz.phi = proj_torad (T.a.lpz.phi);
-    c.v[2] = T.a.v[2];
-    c.v[3] = T.a.v[3];
-
+static PJ_COORD torad_coord (PJ_COORD a) {
+    PJ_COORD c = a;
+    c.lpz.lam = proj_torad (a.lpz.lam);
+    c.lpz.phi = proj_torad (a.lpz.phi);
     return c;
 }
 
+static PJ_COORD todeg_coord (PJ_COORD a) {
+    PJ_COORD c = a;
+    c.lpz.lam = proj_todeg (a.lpz.lam);
+    c.lpz.phi = proj_todeg (a.lpz.phi);
+    return c;
+}
 
-static int accept (char *args) {
-    int n, i;
+/* try to parse args as a PJ_COORD */
+static PJ_COORD parse_coord (char *args) {
+    int i;
     char *endp, *prev = args;
-    T.a = proj_coord (0,0,0,0);
-    n = 4;
+    PJ_COORD a = proj_coord (0,0,0,0);
+
     for (i = 0; i < 4; i++) {
-        T.a.v[i] = proj_strtod (prev, &endp);
-        if (prev==endp) {
-            n--;
-            T.a.v[i] = 0;
-            break;
-        }
+        double d = proj_strtod (prev, &endp);
+        if (prev==endp)
+            return i > 1? a: proj_coord_error ();
+        a.v[i] = d;
         prev = endp;
     }
-    T.a = torad_if_needed (T.P, T.dir, T.a);
+
+    return a;
+}
+
+
+/*****************************************************************************/
+static int accept (char *args) {
+/*****************************************************************************
+    Read ("ACCEPT") a 2, 3, or 4 dimensional input coordinate.
+******************************************************************************/
+    T.a = parse_coord (args);
     if (T.verbosity > 3)
         printf ("#  %s", args);
     return 0;
@@ -484,7 +496,12 @@ static int accept (char *args) {
 
 
 
+/*****************************************************************************/
 static int roundtrip (char *args) {
+/*****************************************************************************
+    Check how far we go from the ACCEPTed point when doing successive
+    back/forward transformation pairs.
+******************************************************************************/
     int ntrips;
     double d, r, ans;
     char *endp;
@@ -512,84 +529,99 @@ static int roundtrip (char *args) {
     return 0;
 }
 
+static int expect_message (double d, char *args) {
+    T.op_ko++;
+    T.total_ko++;
+
+    if (T.verbosity < 0)
+        return 1;
+    if (d > 1e6)
+        d = 999999.999999;
+    if (0==T.op_ko && T.verbosity < 2)
+        banner (T.operation);
+    fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
+
+    fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
+    fprintf (T.fout, "     expected: %s\n", args);
+    fprintf (T.fout, "     got:      %.9f   %.9f", T.b.xy.x,  T.b.xy.y);
+    if (T.b.xyzt.t!=0 || T.b.xyzt.z!=0)
+        fprintf (T.fout, "   %.9f", T.b.xyz.z);
+    if (T.b.xyzt.t!=0)
+        fprintf (T.fout, "   %.9f", T.b.xyzt.t);
+    fprintf (T.fout, "\n");
+    fprintf (T.fout, "     deviation:  %.3f mm,  expected:  %.3f mm\n", 1000*d, 1000*T.tolerance);
+    return 1;
+}
+
+static int expect_message_cannot_parse (char *args) {
+    T.op_ko++;
+    T.total_ko++;
+    if (T.verbosity > -1) {
+        if (0==T.op_ko && T.verbosity < 2)
+            banner (T.operation);
+        fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
+        fprintf (T.fout, "     FAILURE in %s(%d):\n     Too few args: %s\n", opt_strip_path (T.curr_file), (int) lineno, args);
+    }
+    return 1;
+}
+
+
+/*****************************************************************************/
 static int expect (char *args) {
+/*****************************************************************************
+    Tell GIE what to expect, when transforming the ACCEPTed input
+******************************************************************************/
+    PJ_COORD ci, co, ce;
     double d;
-    enum pj_io_units unit;
-    char *endp, *prev = args;
-    int i;
 
-    T.e     =  proj_coord (0,0,0,0);
-    T.b     =  proj_coord (0,0,0,0);
-    T.nargs = 4;
-    for (i = 0; i < 4; i++) {
-        T.e.v[i] = proj_strtod (prev, &endp);
-        if (prev==endp) {
-            T.nargs--;
-            T.e.v[i] = 0;
-            break;
-        }
-        prev = endp;
+    T.e  =  parse_coord (args);
+    if (HUGE_VAL==T.e.v[0])
+        return expect_message_cannot_parse (args);
+
+    /* expected angular values probably in degrees */
+    ce = proj_angular_output (T.P, T.dir)? torad_coord (T.e): T.e;
+
+    /* input ("accepted") values also probably in degrees */
+    ci = proj_angular_input  (T.P, T.dir)? torad_coord (T.a): T.a;
+
+    /* angular output from proj_trans comes in radians */
+    co = proj_trans (T.P, T.dir, ci);
+    T.b = proj_angular_output (T.P, T.dir)? todeg_coord (co): co;
+
+    /* but there are a few more possible input conventions... */
+    if (proj_angular_output (T.P, T.dir)) {
+        double e = HUGE_VAL;
+        d = hypot (proj_lp_dist (T.P, ce.lp, co.lp), ce.lpz.z - co.lpz.z);
+        /* check whether input was already in radians */
+        if (d > T.tolerance)
+            e = hypot (proj_lp_dist (T.P, T.e.lp, co.lp), T.e.lpz.z - co.lpz.z);
+        if (e < d)
+            d = e;
+        /* or the tolerance may be based on euclidean distance */
+        if (d > T.tolerance)
+            e = proj_xyz_dist (T.b.xyz, T.e.xyz);
+        if (e < d)
+            d = e;
     }
-    T.e = torad_if_needed (T.P, T.dir==PJ_FWD? PJ_INV:PJ_FWD, T.e);
-
-    T.b = proj_trans (T.P, T.dir, T.a);
-    T.b = torad_if_needed (T.P, T.dir==PJ_FWD? PJ_INV:PJ_FWD, T.b);
-
-    if (T.nargs < 2) {
-        T.op_ko++;
-        T.total_ko++;
-        if (T.verbosity > -1) {
-            if (0==T.op_ko && T.verbosity < 2)
-                banner (T.operation);
-            fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
-            fprintf (T.fout, "     FAILURE in %s(%d):\n     Too few args: %s\n", opt_strip_path (T.curr_file), (int) lineno, args);
-        }
-     return 1;
-    }
-
-    unit = T.dir==PJ_FWD? T.P->right: T.P->left;
-    if (PJ_IO_UNITS_CLASSIC==unit)
-        unit = PJ_IO_UNITS_METERS;
-
-    if (unit==PJ_IO_UNITS_RADIANS)
-        d = proj_lp_dist (T.P, T.b.lp, T.e.lp);
     else
         d = proj_xyz_dist (T.b.xyz, T.e.xyz);
 
-    if (d > T.tolerance) {
-        if (d > 1e6)
-            d = 999999.999999;
-        if (T.verbosity > -1) {
-            if (0==T.op_ko && T.verbosity < 2)
-                banner (T.operation);
-            fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
+    if (d > T.tolerance)
+        return expect_message (d, args);
 
-            fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
-            fprintf (T.fout, "     expected: %s\n", args);
-            fprintf (T.fout, "     got:      %.9f   %.9f", T.b.xy.x,  T.b.xy.y);
-            if (T.nargs > 2)
-                fprintf (T.fout, "   %.9f", T.b.xyz.z);
-            if (T.nargs > 3)
-                fprintf (T.fout, "   %.9f", T.b.xyzt.t);
-            fprintf (T.fout, "\n");
-            fprintf (T.fout, "     deviation:  %.3f mm,  expected:  %.3f mm\n", 1000*d, 1000*T.tolerance);
-        }
-        T.op_ko++;
-        T.total_ko++;
-    }
-    else {
-        T.op_ok++;
-        T.total_ok++;
-    }
+    T.op_ok++;
+    T.total_ok++;
+
     return 0;
 }
 
 
 
-
-
-
+/*****************************************************************************/
 static int verbose (char *args) {
+/*****************************************************************************
+    Tell the system how noisy it should be
+******************************************************************************/
     int i = (int) proj_atof (args);
 
     /* if -q/--quiet flag has been given, we do nothing */
@@ -603,14 +635,22 @@ static int verbose (char *args) {
     return 0;
 }
 
+/*****************************************************************************/
 static int comment (char *args) {
+/*****************************************************************************
+    in line comment. Equivalent to #
+******************************************************************************/
     (void) args;
     return 0;
 }
 
 
+/*****************************************************************************/
 static int echo (char *args) {
-    fprintf (T.fout, "%s\n", args);
+/*****************************************************************************
+    Add user defined noise to the output stream
+******************************************************************************/
+fprintf (T.fout, "%s\n", args);
     return 0;
 }
 
