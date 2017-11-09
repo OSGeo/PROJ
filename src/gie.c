@@ -514,9 +514,9 @@ static int roundtrip (char *args) {
     coo = T.a;
 
     /* input ("accepted") values - probably in degrees */
-    coo = proj_angular_input  (T.P, T.dir)? puts("ost"), torad_coord (T.a): T.a;
+    coo = proj_angular_input  (T.P, T.dir)? torad_coord (T.a):  T.a;
 
-    r = proj_roundtrip (T.P, PJ_FWD, ntrips, &coo);
+    r = proj_roundtrip (T.P, T.dir, ntrips, &coo);
     if (r > d) {
         if (T.verbosity > -1) {
             if (0==T.op_ko && T.verbosity < 2)
@@ -589,7 +589,7 @@ static int expect (char *args) {
     ce = proj_angular_output (T.P, T.dir)? torad_coord (T.e): T.e;
 
     /* input ("accepted") values also probably in degrees */
-    ci = proj_angular_input  (T.P, T.dir)? torad_coord (T.a): T.a;
+    ci = proj_angular_input (T.P, T.dir)? torad_coord (T.a): T.a;
 
     /* angular output from proj_trans comes in radians */
     co = proj_trans (T.P, T.dir, ci);
@@ -598,10 +598,10 @@ static int expect (char *args) {
     /* but there are a few more possible input conventions... */
     if (proj_angular_output (T.P, T.dir)) {
         double e = HUGE_VAL;
-        d = hypot (proj_lp_dist (T.P, ce.lp, co.lp), ce.lpz.z - co.lpz.z);
+        d = proj_lpz_dist (T.P, ce.lpz, co.lpz);
         /* check whether input was already in radians */
         if (d > T.tolerance)
-            e = hypot (proj_lp_dist (T.P, T.e.lp, co.lp), T.e.lpz.z - co.lpz.z);
+            e = proj_lpz_dist (T.P, T.e.lpz, co.lpz);
         if (e < d)
             d = e;
         /* or the tolerance may be based on euclidean distance */
@@ -664,11 +664,14 @@ fprintf (T.fout, "%s\n", args);
 
 
 static int dispatch (char *cmnd, char *args) {
+    int last_errno = proj_errno_reset (T.P);
+
     if  (0==level%2) {
         if (0==strcmp (cmnd, "BEGIN"))
            level++;
         return 0;
     }
+
     if  (0==strcmp (cmnd, "OPERATION")) return  operation (args);
     if  (0==strcmp (cmnd, "operation")) return  operation (args);
     if  (0==strcmp (cmnd, "ACCEPT"))    return  accept    (args);
@@ -689,6 +692,10 @@ static int dispatch (char *cmnd, char *args) {
     if  (0==strcmp (cmnd, "echo"))      return  echo      (args);
     if  (0==strcmp  (cmnd, "END"))      return          finish_previous_operation (args), level++, 0;
     if  ('#'==cmnd[0])                  return  comment   (args);
+
+    if (proj_errno(T.P))
+        printf ("#####***** ERRNO=%d\n", proj_errno(T.P));
+    proj_errno_restore (T.P, last_errno);
     return 0;
 }
 
