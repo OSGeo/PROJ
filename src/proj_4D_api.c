@@ -26,12 +26,13 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
+#include <stddef.h>
+#include <errno.h>
+#include <ctype.h>
 #include <proj.h>
 #include "proj_internal.h"
 #include "projects.h"
 #include "geodesic.h"
-#include <stddef.h>
-#include <errno.h>
 
 
 /* Initialize PJ_COORD struct */
@@ -330,11 +331,63 @@ size_t proj_trans_generic (
 }
 
 
-
 PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
+    PJ   *P;
+    char *args, **argv;
+    int	  argc, i, j, n;
+
     if (0==ctx)
         ctx = pj_get_default_ctx ();
-    return pj_init_plus_ctx (ctx, definition);
+
+    /* make a copy that we can manipulate */
+    n = strlen (definition);
+    args = (char *) malloc (n + 1);
+    if (0==args)
+        return 0;
+    strcpy (args, definition);
+
+    /* count the number of arguments, eliminate superfluous whitespace, 0-terminate substrings */
+    for (i = j = argc = 0;  i < n;  ) {
+        /* skip prefix whitespace */
+        while (isspace (args[i]))
+            i++;
+        /* skip at most one prefix '+' */
+        if ('+'==args[i])
+            i++;
+        /* whitespace after a '+' is a syntax error - but by Postel's prescription, we ignore and go on */
+        if (isspace (args[i]))
+            continue;
+        /* move a whitespace delimited test string to the left, skipping over superfluous whitespace */
+        while ((0!=args[i]) && (!isspace (args[i])))
+            args[j++] = args[i++];
+        /* terminate string - if that makes j pass i, let i catch up */
+        args[j++] = 0;
+        if (i < j)
+            i = j;
+        /* we finished another argument */
+        argc++;
+        /* skip postfix whitespace */
+        while (isspace (args[i]))
+            i++;
+    }
+
+    /* turn the massaged input into an array of strings */
+    argv = (char **) calloc (argc + 1, sizeof (char *));
+    if (0==argv)
+        return pj_dealloc (args);
+
+    argv[0] = args;
+    for (i = 0, j = 1;  i < n;  i++) {
+        if (0==args[i])
+            argv[j++] = args + (i + 1);
+        if (j==argc)
+            break;
+    }
+
+    P = pj_init_ctx (ctx, argc, argv);
+    pj_dealloc (argv);
+    pj_dealloc (args);
+    return P;
 }
 
 PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
