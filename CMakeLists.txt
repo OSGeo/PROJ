@@ -19,10 +19,14 @@ set(PROJECT_INTERN_NAME PROJ)
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   set(CMAKE_C_FLAGS "/WX ${CMAKE_C_FLAGS}")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_C_FLAGS "-std=c89 -Wall -Wextra -Wswitch -Werror ${CMAKE_C_FLAGS}")
+  set(CMAKE_C_FLAGS "-std=c89 -Wall -Wextra -Wswitch -Werror \
+    -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat \
+    -Werror=format-security -Wshadow ${CMAKE_C_FLAGS}")
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   set(CMAKE_C_FLAGS "-std=c89 -Wall -Wextra -Wswitch -Werror \
-    -Wc99-extensions -Wc11-extensions ${CMAKE_C_FLAGS}")
+    -Wc99-extensions -Wc11-extensions -Wunused-parameter -Wmissing-prototypes \
+    -Wmissing-declarations -Wformat -Werror=format-security -Wshadow \
+    -Wfloat-conversion ${CMAKE_C_FLAGS}")
 endif()
 
 #################################################################################
