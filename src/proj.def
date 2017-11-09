@@ -117,32 +117,33 @@ EXPORTS
     proj_context_destroy           @109
 
     proj_lp_dist                   @110
-    proj_xy_dist                   @111
-    proj_xyz_dist                  @112
+    proj_lpz_dist                  @111
+    proj_xy_dist                   @112
+    proj_xyz_dist                  @113
 
-    proj_log_level                 @113
-    proj_log_func                  @114
-    proj_log_error                 @115
-    proj_log_debug                 @116
-    proj_log_trace                 @117
+    proj_log_level                 @114
+    proj_log_func                  @115
+    proj_log_error                 @116
+    proj_log_debug                 @117
+    proj_log_trace                 @118
 
-    proj_info                      @118
-    proj_pj_info                   @119
-    proj_grid_info                 @120
-    proj_init_info                 @121
+    proj_info                      @119
+    proj_pj_info                   @120
+    proj_grid_info                 @121
+    proj_init_info                 @122
 
-    proj_torad                     @122
-    proj_todeg                     @123
-    proj_rtodms                    @124
-    proj_dmstor                    @125
+    proj_torad                     @123
+    proj_todeg                     @124
+    proj_rtodms                    @125
+    proj_dmstor                    @126
 
-    proj_derivatives               @126
-    proj_factors                   @127
+    proj_derivatives               @127
+    proj_factors                   @128
 
-    proj_list_operations           @128
-    proj_list_ellps                @129
-    proj_list_units                @130
-    proj_list_prime_meridians      @131
+    proj_list_operations           @129
+    proj_list_ellps                @130
+    proj_list_units                @131
+    proj_list_prime_meridians      @132
 
-    proj_angular_input             @132
-    proj_angular_output            @133
+    proj_angular_input             @133
+    proj_angular_output            @134
