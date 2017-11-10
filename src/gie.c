@@ -259,8 +259,17 @@ int main (int argc, char **argv) {
     return T.grand_ko;
 }
 
+static int another_failure (void) {
+    T.op_ko++;
+    T.total_ko++;
+    return 0;
+}
 
-
+static int another_success (void) {
+    T.op_ok++;
+    T.total_ok++;
+    return 0;
+}
 
 
 static int process_file (char *fname) {
@@ -434,19 +443,18 @@ static int operation (char *args) {
         finish_previous_operation (args);
         banner (args);
     }
-    /* if (0==T.op_ko)
-        printf ("%d\n", (int) tol_lineno); */
+
     T.op_ok = 0;
     T.op_ko = 0;
 
     direction ("forward");
-    tolerance ("0.5");
+    tolerance ("0.5 mm");
 
     if (T.P)
         proj_destroy (T.P);
     T.P = proj_create (0, args);
     if (0==T.P)
-        return errmsg(3, "Invalid operation definition!\n");
+        errmsg(3, "Invalid operation definition!\n    %s\n", args);
     return 0;
 }
 
@@ -505,6 +513,8 @@ static int roundtrip (char *args) {
     int ntrips;
     double d, r, ans;
     char *endp;
+    if (0==T.P)
+        return another_failure ();
     ans = proj_strtod (args, &endp);
     ntrips = (int) (endp==args? 100: fabs(ans));
     d = strtod_scaled (endp, 1);
@@ -518,20 +528,16 @@ static int roundtrip (char *args) {
             fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
             fprintf (T.fout, "     roundtrip deviation: %.3f mm, expected: %.3f mm\n", 1000*r, 1000*d);
         }
-        T.op_ko++;
-        T.total_ko++;
+        another_failure ();
     }
-    else {
-        T.op_ok++;
-        T.total_ok++;
-    }
+    else
+        another_success ();
 
     return 0;
 }
 
 static int expect_message (double d, char *args) {
-    T.op_ko++;
-    T.total_ko++;
+    another_failure ();
 
     if (T.verbosity < 0)
         return 1;
@@ -554,8 +560,7 @@ static int expect_message (double d, char *args) {
 }
 
 static int expect_message_cannot_parse (char *args) {
-    T.op_ko++;
-    T.total_ko++;
+    another_failure ();
     if (T.verbosity > -1) {
         if (0==T.op_ko && T.verbosity < 2)
             banner (T.operation);
@@ -573,6 +578,8 @@ static int expect (char *args) {
 ******************************************************************************/
     PJ_COORD ci, co, ce;
     double d;
+    if (0==T.P)
+        return another_failure ();
 
     T.e  =  parse_coord (args);
     if (HUGE_VAL==T.e.v[0])
@@ -609,8 +616,7 @@ static int expect (char *args) {
     if (d > T.tolerance)
         return expect_message (d, args);
 
-    T.op_ok++;
-    T.total_ok++;
+    another_success ();
 
     return 0;
 }

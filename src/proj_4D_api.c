@@ -331,7 +331,14 @@ size_t proj_trans_generic (
 }
 
 
+/*************************************************************************************/
 PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
+/**************************************************************************************
+    Create a new PJ object in the context ctx, using the given definition. If ctx==0,
+    the default context is used, if definition==0, or invalid, a null-pointer is
+    returned. The definition may use '+' as argument start indicator, as in
+    "+proj=utm +zone=32", or leave it out, as in "proj=utm zone=32"
+**************************************************************************************/
     PJ   *P;
     char *args, **argv;
     int	  argc, i, j, n;
@@ -340,39 +347,45 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
         ctx = pj_get_default_ctx ();
 
     /* make a copy that we can manipulate */
-    n = strlen (definition);
+    n = (int) strlen (definition);
     args = (char *) malloc (n + 1);
     if (0==args)
         return 0;
     strcpy (args, definition);
 
-    /* count the number of arguments, eliminate superfluous whitespace, 0-terminate substrings */
+    /* all-in-one: count args, eliminate superfluous whitespace, 0-terminate substrings */
     for (i = j = argc = 0;  i < n;  ) {
         /* skip prefix whitespace */
         while (isspace (args[i]))
             i++;
+
         /* skip at most one prefix '+' */
         if ('+'==args[i])
             i++;
+
         /* whitespace after a '+' is a syntax error - but by Postel's prescription, we ignore and go on */
         if (isspace (args[i]))
             continue;
-        /* move a whitespace delimited test string to the left, skipping over superfluous whitespace */
+
+        /* move a whitespace delimited text string to the left, skipping over superfluous whitespace */
         while ((0!=args[i]) && (!isspace (args[i])))
             args[j++] = args[i++];
-        /* terminate string - if that makes j pass i, let i catch up */
+
+        /* terminate string - if that makes j pass i (often the case for first arg), let i catch up */
         args[j++] = 0;
         if (i < j)
             i = j;
-        /* we finished another argument */
+
+        /* we finished another arg */
         argc++;
+
         /* skip postfix whitespace */
         while (isspace (args[i]))
             i++;
     }
 
     /* turn the massaged input into an array of strings */
-    argv = (char **) calloc (argc + 1, sizeof (char *));
+    argv = (char **) calloc (argc, sizeof (char *));
     if (0==argv)
         return pj_dealloc (args);
 
@@ -384,17 +397,31 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
             break;
     }
 
+    /* ...and let pj_init_ctx do the hard work */
     P = pj_init_ctx (ctx, argc, argv);
     pj_dealloc (argv);
     pj_dealloc (args);
     return P;
 }
 
+
+
+/*************************************************************************************/
 PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
+/**************************************************************************************
+Create a new PJ object in the context ctx, using the given definition argument
+array argv. If ctx==0, the default context is used, if definition==0, or invalid,
+a null-pointer is returned. The definition arguments may use '+' as argument start
+indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
+"zone=32"}.
+**************************************************************************************/
+    if (0==argv)
+        return 0;
     if (0==ctx)
         ctx = pj_get_default_ctx ();
     return pj_init_ctx (ctx, argc, argv);
 }
+
 
 
 /*****************************************************************************/
@@ -514,7 +541,7 @@ int proj_errno_reset (PJ *P) {
 }
 
 
-/* Create a new context - or provide a pointer to the default context */
+/* Create a new context */
 PJ_CONTEXT *proj_context_create (void) {
     return pj_ctx_alloc ();
 }
