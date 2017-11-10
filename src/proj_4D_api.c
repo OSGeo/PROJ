@@ -121,7 +121,7 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
     /* finally, we take the last half-step */
     u = proj_trans (P, -direction, o);
 
-    /* checking for angular input since we do a roundtrip, and end where we begin */
+    /* checking for angular *input* since we do a roundtrip, and end where we begin */
     if (proj_angular_input (P, direction))
         return proj_lpz_dist (P, org.lpz, u.lpz);
 
