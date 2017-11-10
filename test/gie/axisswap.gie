@@ -53,8 +53,7 @@ EXPECT      3 -2 1 4
 ROUNDTRIP   100
 
 
-
-OPERATION   +proj=pipeline +step +proj=latlong +step +proj=axisswap +order=1,2,3,4 +angularunits
+OPERATION   proj=pipeline step proj=latlong step proj=axisswap order=1,2,3,4 angularunits
 TOLERANCE   0.00001 m
 ACCEPT      12 55 0 0
 EXPECT      12 55 0 0
