@@ -64,7 +64,7 @@ ROUNDTRIP   1000
 -------------------------------------------------------------------------------
 Test using both horizontal and vertical grids
 -------------------------------------------------------------------------------
-OPERATION   +proj=deformation +xy_grids=alaska +z_grids=egm96_15.gtx +t_epoch=2016.0
+OPERATION   proj=deformation xy_grids=alaska z_grids=egm96_15.gtx t_epoch=2016.0
 -------------------------------------------------------------------------------
 TOLERANCE   0.000001 m
 ACCEPT      -3004295.5882503074 -1093474.1690603832 5500477.1338251457 2000.0
