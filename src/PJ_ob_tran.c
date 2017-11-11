@@ -228,10 +228,10 @@ PJ *PROJECTION(ob_tran) {
     if (fabs(phip) > TOL) { /* oblique */
         Q->cphip = cos(phip);
         Q->sphip = sin(phip);
-        P->fwd = o_forward;
+        P->fwd = Q->link->fwd ? o_forward : 0;
         P->inv = Q->link->inv ? o_inverse : 0;
     } else { /* transverse */
-        P->fwd = t_forward;
+        P->fwd = Q->link->fwd ? t_forward : 0;
         P->inv = Q->link->inv ? t_inverse : 0;
     }
 
