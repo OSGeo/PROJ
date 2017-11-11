@@ -524,8 +524,6 @@ static int roundtrip (char *args) {
 
     /* input ("accepted") values - probably in degrees */
     coo = proj_angular_input  (T.P, T.dir)? torad_coord (T.a):  T.a;
-    if (T.P->inverted)
-        puts ("inverted");
 
     r = proj_roundtrip (T.P, T.dir, ntrips, &coo);
     if (r <= d)
