@@ -211,6 +211,7 @@ PJ *PROJECTION(leac) {
     if (0==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     Q->phi2 = pj_param(P->ctx, P->params, "rlat_1").f;
     Q->phi1 = pj_param(P->ctx, P->params, "bsouth").i ? - M_HALFPI: M_HALFPI;

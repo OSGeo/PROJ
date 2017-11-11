@@ -500,7 +500,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* find projection selection */
     if (!(name = pj_param(ctx, start, "sproj").s))
-        return pj_default_destructor (PIN, PJD_ERR_PROJ_NOT_NAMED);
+        return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);
     for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
 
     if (!s)
@@ -693,7 +693,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     /* projection specific initialization */
     PIN = proj(PIN);
     if ((0==PIN) || ctx->last_errno)
+    {
+        pj_free(PIN);
         return 0;
+    }
     return PIN;
 }
 
