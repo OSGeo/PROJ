@@ -437,6 +437,9 @@ double proj_todeg (double angle_in_radians);
 double proj_dmstor(const char *is, char **rs);
 char*  proj_rtodms(char *s, double r, int pos, int neg);
 
+int proj_find_file(PJ_CONTEXT* ctx, const char *short_filename,
+                   char* out_full_filename, size_t out_full_filename_size);
+
 #ifdef __cplusplus
 }
 #endif
