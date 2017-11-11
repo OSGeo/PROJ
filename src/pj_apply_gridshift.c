@@ -112,16 +112,14 @@ int pj_apply_gridshift_2( PJ *defn, int inverse,
 
 static struct CTABLE* find_ctable(projCtx ctx, LP input, int grid_count, PJ_GRIDINFO **tables) {
     int itable;
-    double epsilon;
-    struct CTABLE *ct = NULL;
 
     /* keep trying till we find a table that works */
     for( itable = 0; itable < grid_count; itable++ )
     {
 
         PJ_GRIDINFO *gi = tables[itable];
-        ct = gi->ct;
-        epsilon = (fabs(ct->del.phi)+fabs(ct->del.lam))/10000.0;
+        struct CTABLE *ct = gi->ct;
+        double epsilon = (fabs(ct->del.phi)+fabs(ct->del.lam))/10000.0;
         /* skip tables that don't match our point at all.  */
         if ( ct->ll.phi - epsilon > input.phi
                 || ct->ll.lam - epsilon > input.lam
@@ -164,9 +162,10 @@ static struct CTABLE* find_ctable(projCtx ctx, LP input, int grid_count, PJ_GRID
             }
         }
         /* if we get this far we have found a suitable grid */
-        break;
+        return ct;
     }
-    return ct;
+
+    return NULL;
 }
 
 /************************************************************************/
@@ -204,7 +203,10 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **tables, int grid_count,
         output.lam = HUGE_VAL;
 
         ct = find_ctable(ctx, input, grid_count, tables);
-        output = nad_cvt( input, inverse, ct );
+        if( ct != NULL )
+        {
+            output = nad_cvt( input, inverse, ct );
+        }
 
         if ( output.lam != HUGE_VAL && debug_count++ < 20 )
             pj_log( ctx, PJ_LOG_DEBUG_MINOR, "pj_apply_gridshift(): used %s", ct->id );
