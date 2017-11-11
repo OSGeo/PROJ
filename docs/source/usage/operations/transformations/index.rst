@@ -7,6 +7,7 @@ Transformations
 .. toctree::
    :maxdepth: 1
 
+   axisswap
    cart
    helmert
    molodensky
