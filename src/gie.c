@@ -377,8 +377,6 @@ static double strtod_scaled (char *args, double default_scale) {
 
 static int banner (char *args) {
     char dots[] = {"..."}, nodots[] = {""}, *thedots = nodots;
-    if (T.total_ko > 0 && T.op_ko==0)
-        printf ("\n\n");
     if (strlen(args) > 70)
         thedots = dots;
     fprintf (T.fout, "%s%-70.70s%s\n", delim, args, thedots);
@@ -517,7 +515,7 @@ static int roundtrip (char *args) {
 
     if (0==T.P)
         return another_failure ();
-  
+
     ans = proj_strtod (args, &endp);
     ntrips = (int) (endp==args? 100: fabs(ans));
     d = strtod_scaled (endp, 1);
@@ -526,23 +524,24 @@ static int roundtrip (char *args) {
 
     /* input ("accepted") values - probably in degrees */
     coo = proj_angular_input  (T.P, T.dir)? torad_coord (T.a):  T.a;
+    if (T.P->inverted)
+        puts ("inverted");
 
     r = proj_roundtrip (T.P, T.dir, ntrips, &coo);
-    if (r > d) {
-        if (T.verbosity > -1) {
-            if (0==T.op_ko && T.verbosity < 2)
-                banner (T.operation);
-            fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
-            fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
-            fprintf (T.fout, "     roundtrip deviation: %.3f mm, expected: %.3f mm\n", 1000*r, 1000*d);
-        }
-        another_failure ();
-    }
-    else
-        another_success ();
+    if (r <= d)
+        return another_success ();
 
-    return 0;
+    if (T.verbosity > -1) {
+        if (0==T.op_ko && T.verbosity < 2)
+            banner (T.operation);
+        fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
+        fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
+        fprintf (T.fout, "     roundtrip deviation: %.3f mm, expected: %.3f mm\n", 1000*r, 1000*d);
+    }
+    return another_failure ();
 }
+
+
 
 static int expect_message (double d, char *args) {
     another_failure ();
@@ -612,15 +611,16 @@ static int expect (char *args) {
             e = proj_lpz_dist (T.P, T.e.lpz, co.lpz);
         if (e < d)
             d = e;
+
         /* or the tolerance may be based on euclidean distance */
         if (d > T.tolerance)
             e = proj_xyz_dist (T.b.xyz, T.e.xyz);
         if (e < d)
             d = e;
+
     }
     else
         d = proj_xyz_dist (T.b.xyz, T.e.xyz);
-
     if (d > T.tolerance)
         return expect_message (d, args);
 
