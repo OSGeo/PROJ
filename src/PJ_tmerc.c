@@ -204,5 +204,3 @@ PJ *PROJECTION(tmerc) {
     return setup(P);
 }
 
-
-int pj_tmerc_selftest (void) {return 10000;}

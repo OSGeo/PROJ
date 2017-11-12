@@ -77,6 +77,3 @@ PJ *PROJECTION(ortel) {
 }
 
 
-int pj_bacon_selftest (void) {return 10000;}
-int pj_apian_selftest (void) {return 10000;}
-int pj_ortel_selftest (void) {return 10000;}

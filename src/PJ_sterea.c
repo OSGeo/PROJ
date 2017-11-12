@@ -114,5 +114,3 @@ PJ *PROJECTION(sterea) {
     return P;
 }
 
-
-int pj_sterea_selftest (void) {return 10000;}

@@ -103,9 +103,3 @@ PJ *PROJECTION(mbt_s) {
     return setup(P, 1.48875, 1.36509, 0);
 }
 
-
-
-int pj_fouc_selftest (void)    {return 10000;}
-int pj_kav5_selftest (void)    {return 10000;}
-int pj_qua_aut_selftest (void) {return 10000;}
-int pj_mbt_s_selftest (void)   {return 10000;}

@@ -130,4 +130,3 @@ PJ *PROJECTION(bonne) {
 }
 
 
-int pj_bonne_selftest (void) {return 10000;}

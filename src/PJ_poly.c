@@ -164,5 +164,3 @@ PJ *PROJECTION(poly) {
     return P;
 }
 
-
-int pj_poly_selftest (void) {return 10000;}

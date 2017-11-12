@@ -1147,5 +1147,3 @@ PJ *PROJECTION(isea) {
     return P;
 }
 
-
-int pj_isea_selftest (void) {return 10000;}

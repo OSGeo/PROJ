@@ -106,8 +106,3 @@ PJ *PROJECTION(putp1) {
     return setup(P);
 }
 
-
-int pj_eck3_selftest  (void) {return 10000;}
-int pj_kav7_selftest  (void) {return 10000;}
-int pj_wag6_selftest  (void) {return 10000;}
-int pj_putp1_selftest (void) {return 10000;}

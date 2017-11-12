@@ -29,4 +29,3 @@ PJ *PROJECTION(denoy) {
     return P;
 }
 
-int pj_denoy_selftest (void) {return 10000;}

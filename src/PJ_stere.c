@@ -313,6 +313,3 @@ PJ *PROJECTION(ups) {
     return setup(P);
 }
 
-
-int pj_stere_selftest (void) {return 10000;}
-int pj_ups_selftest (void)   {return 10000;}

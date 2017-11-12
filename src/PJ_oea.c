@@ -82,5 +82,3 @@ PJ *PROJECTION(oea) {
     return P;
 }
 
-
-int pj_oea_selftest (void) {return 10000;}

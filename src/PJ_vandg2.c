@@ -70,6 +70,3 @@ PJ *PROJECTION(vandg3) {
     return P;
 }
 
-
-int pj_vandg2_selftest (void) {return 10000;}
-int pj_vandg3_selftest (void) {return 10000;}

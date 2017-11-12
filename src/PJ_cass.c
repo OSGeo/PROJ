@@ -118,4 +118,3 @@ PJ *PROJECTION(cass) {
 }
 
 
-int pj_cass_selftest (void) {return 10000;}

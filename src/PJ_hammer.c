@@ -71,5 +71,3 @@ PJ *PROJECTION(hammer) {
     return P;
 }
 
-
-int pj_hammer_selftest (void) {return 10000;}

@@ -48,5 +48,3 @@ PJ *PROJECTION(wink2) {
     return P;
 }
 
-
-int pj_wink2_selftest (void) {return 10000;}

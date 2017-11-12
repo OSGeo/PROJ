@@ -57,4 +57,3 @@ PJ *PROJECTION(putp2) {
     return P;
 }
 
-int pj_putp2_selftest (void) {return 10000;}

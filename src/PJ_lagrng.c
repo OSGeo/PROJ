@@ -61,5 +61,3 @@ PJ *PROJECTION(lagrng) {
     return P;
 }
 
-
-int pj_lagrng_selftest (void) {return 10000;}

@@ -79,4 +79,3 @@ PJ *PROJECTION(hatano) {
     return P;
 }
 
-int pj_hatano_selftest (void) {return 10000;}

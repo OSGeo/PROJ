@@ -218,6 +218,3 @@ PJ *PROJECTION(leac) {
     return setup(P);
 }
 
-
-int pj_aea_selftest  (void) {return 10000;}
-int pj_leac_selftest (void) {return 10000;}

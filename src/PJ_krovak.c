@@ -219,5 +219,3 @@ PJ *PROJECTION(krovak) {
     return P;
 }
 
-
-int pj_krovak_selftest (void) {return 10000;}

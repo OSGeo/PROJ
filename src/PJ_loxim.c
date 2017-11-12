@@ -71,5 +71,3 @@ PJ *PROJECTION(loxim) {
    return P;
 }
 
-
-int pj_loxim_selftest (void) {return 10000;}

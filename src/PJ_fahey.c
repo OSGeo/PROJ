@@ -37,4 +37,3 @@ PJ *PROJECTION(fahey) {
     return P;
 }
 
-int pj_fahey_selftest (void) {return 10000;}

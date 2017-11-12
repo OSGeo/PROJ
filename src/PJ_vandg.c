@@ -105,5 +105,3 @@ PJ *PROJECTION(vandg) {
     return P;
 }
 
-
-int pj_vandg_selftest (void) {return 10000;}

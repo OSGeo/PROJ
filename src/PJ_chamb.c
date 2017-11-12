@@ -136,4 +136,3 @@ PJ *PROJECTION(chamb) {
 }
 
 
-int pj_chamb_selftest (void) {return 10000;}

@@ -106,6 +106,3 @@ PJ *PROJECTION(wag5) {
     return P;
 }
 
-int pj_moll_selftest (void) {return 10000;}
-int pj_wag4_selftest (void) {return 10000;}
-int pj_wag5_selftest (void) {return 10000;}

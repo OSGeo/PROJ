@@ -183,8 +183,3 @@ PJ *PROJECTION(gn_sinu) {
     return P;
 }
 
-
-int pj_sinu_selftest (void) {return 10000;}
-int pj_eck6_selftest (void) {return 10000;}
-int pj_mbtfps_selftest (void) {return 10000;}
-int pj_gn_sinu_selftest (void) {return 10000;}

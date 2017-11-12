@@ -130,5 +130,3 @@ PJ *PROJECTION(ortho) {
     return P;
 }
 
-
-int pj_ortho_selftest (void) {return 10000;}

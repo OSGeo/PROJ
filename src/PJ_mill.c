@@ -33,5 +33,3 @@ PJ *PROJECTION(mill) {
     return P;
 }
 
-
-int pj_mill_selftest (void) {return 10000;}

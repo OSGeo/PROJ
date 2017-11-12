@@ -53,4 +53,3 @@ PJ *PROJECTION(eck2) {
 }
 
 
-int pj_eck2_selftest (void) {return 10000;}

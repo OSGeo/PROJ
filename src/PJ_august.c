@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include	<projects.h>
+#include	"projects.h"
 
 
 PROJ_HEAD(august, "August Epicycloidal") "\n\tMisc Sph, no inv.";
@@ -31,4 +31,3 @@ PJ *PROJECTION(august) {
     return P;
 }
 
-int pj_august_selftest (void) {return 0;}

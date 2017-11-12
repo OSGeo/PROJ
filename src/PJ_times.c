@@ -75,5 +75,3 @@ PJ *PROJECTION(times) {
     return P;
 }
 
-
-int pj_times_selftest (void) {return 10000;}

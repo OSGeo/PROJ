@@ -214,11 +214,3 @@ PJ *PROJECTION(vitk1) {
     return setup(P, VITK1);
 }
 
-
-int pj_euler_selftest (void)  {return 10000;}
-int pj_murd1_selftest (void)  {return 10000;}
-int pj_murd2_selftest (void)  {return 10000;}
-int pj_murd3_selftest (void)  {return 10000;}
-int pj_pconic_selftest (void) {return 10000;}
-int pj_tissot_selftest (void) {return 10000;}
-int pj_vitk1_selftest (void)  {return 10000;}

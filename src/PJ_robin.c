@@ -154,4 +154,3 @@ PJ *PROJECTION(robin) {
 }
 
 
-int pj_robin_selftest (void) {return 10000;}

@@ -24,5 +24,3 @@ PJ *PROJECTION(larr) {
     return P;
 }
 
-
-int pj_larr_selftest (void) {return 10000;}

@@ -211,5 +211,3 @@ PJ *PROJECTION(imw_p) {
     return P;
 }
 
-
-int pj_imw_p_selftest (void) {return 10000;}

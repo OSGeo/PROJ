@@ -144,5 +144,3 @@ PJ *PROJECTION(lcc) {
     return P;
 }
 
-
-int pj_lcc_selftest (void) {return 10000;}

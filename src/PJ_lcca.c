@@ -158,6 +158,3 @@ PJ *PROJECTION(lcca) {
     return P;
 }
 
-
-
-int pj_lcca_selftest (void) {return 10000;}

@@ -88,5 +88,3 @@ PJ *PROJECTION(somerc) {
     return P;
 }
 
-
-int pj_somerc_selftest (void) {return 10000;}

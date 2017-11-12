@@ -79,4 +79,3 @@ PJ *PROJECTION(goode) {
 }
 
 
-int pj_goode_selftest (void) {return 10000;}

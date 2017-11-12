@@ -50,5 +50,3 @@ PJ *PROJECTION(urm5) {
     return P;
 }
 
-
-int pj_urm5_selftest (void) {return 10000;}

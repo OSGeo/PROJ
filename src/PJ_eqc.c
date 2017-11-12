@@ -49,4 +49,3 @@ PJ *PROJECTION(eqc) {
 }
 
 
-int pj_eqc_selftest (void) {return 10000;}

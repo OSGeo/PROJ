@@ -37,4 +37,3 @@ PJ *PROJECTION(lask) {
     return P;
 }
 
-int pj_lask_selftest (void) {return 10000;}

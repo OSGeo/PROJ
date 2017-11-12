@@ -42,7 +42,7 @@ static char
     *cheby_str,         /* string controlling Chebychev evaluation */
     *oform = (char *)0, /* output format for x-y or decimal degrees */
     *oterr = "*\t*",    /* output line for unprojectable input */
-    *usage = "%s\nusage: %s [ -bCeEfiIlormsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
+    *usage = "%s\nusage: %s [ -beEfiIlormsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
 
 static struct FACTORS facs;
 
@@ -328,9 +328,6 @@ int main(int argc, char **argv) {
                 break;
               case 'b': /* binary I/O */
                 bin_in = bin_out = 1;
-                continue;
-              case 'C': /* Check - run internal regression tests */
-                return pj_run_selftests (very_verby);
                 continue;
               case 'v': /* monitor dump of initialization */
                 mon = 1;

@@ -37,4 +37,3 @@ PJ *PROJECTION(crast) {
     return P;
 }
 
-int pj_crast_selftest (void) {return 10000;}

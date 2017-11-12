@@ -52,5 +52,3 @@ PJ *PROJECTION(rpoly) {
     return P;
 }
 
-
-int pj_rpoly_selftest (void) {return 10000;}

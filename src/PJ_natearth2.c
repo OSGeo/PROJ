@@ -93,4 +93,3 @@ PJ *PROJECTION(natearth2) {
     return P;
 }
 
-int pj_natearth2_selftest (void) {return 10000;}

@@ -70,6 +70,3 @@ PJ *PROJECTION(weren) {
     return P;
 }
 
-
-int pj_putp4p_selftest (void) {return 10000;}
-int pj_weren_selftest (void)  {return 10000;}
