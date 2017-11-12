@@ -31,29 +31,4 @@ PJ *PROJECTION(tcc) {
 }
 
 
-#ifndef PJ_SELFTEST
-int pj_tcc_selftest (void) {return 0;}
-#else
-int pj_tcc_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=tcc   +a=6400000    +lat_1=0.5 +lat_2=2 +n=0.5"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        {223458.84419245756,  111769.14504058579},
-        {223458.84419245756,  -111769.14504058579},
-        {-223458.84419245756,  111769.14504058579},
-        {-223458.84419245756,  -111769.14504058579},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, 0, 0, 0);
-}
-#endif
+int pj_tcc_selftest (void) {return 10000;}

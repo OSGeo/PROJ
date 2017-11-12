@@ -76,46 +76,4 @@ PJ *PROJECTION(times) {
 }
 
 
-#ifndef PJ_SELFTEST
-int pj_times_selftest (void) {return 0;}
-#else
-
-int pj_times_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-    int result;
-    int n = 5;
-
-    char s_args[] = {"+proj=times +ellps=sphere"};
-
-    XY *inv_in = malloc(n*sizeof(XY));
-    LP *s_inv_expect = malloc(n*sizeof(LP));
-
-    LP fwd_in[] = {
-        {  0,   0},
-        { 80,  70},
-        { 25, -10},
-        {-35,  20},
-        {-45, -30}
-    };
-
-    XY s_fwd_expect[] = {
-        { 0.0,  0.0},
-        { 5785183.5760670956,  7615452.0661204215},
-        { 2065971.5301078814, -951526.0648494592},
-        {-2873054.0454850947,  1917730.9530005211},
-        {-3651383.2035214868, -2914213.4578159209},
-    };
-
-    memcpy(inv_in, &s_fwd_expect, n*sizeof(XY));
-    memcpy(s_inv_expect, &fwd_in, n*sizeof(LP));
-
-    result = pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, n, n, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
-    free(inv_in);
-    free(s_inv_expect);
-
-    return result;
-}
-
-
-#endif
+int pj_times_selftest (void) {return 10000;}
