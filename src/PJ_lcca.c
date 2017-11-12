@@ -160,46 +160,4 @@ PJ *PROJECTION(lcca) {
 
 
 
-#ifndef PJ_SELFTEST
-int pj_lcca_selftest (void) {return 0;}
-#else
-
-int pj_lcca_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char e_args[] = {"+proj=lcca   +ellps=GRS80  +lat_0=1 +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY e_fwd_expect[] = {
-        { 222605.285770237417,  67.8060072715846616},
-        { 222740.037637936533, -221125.539829601563},
-        {-222605.285770237417,  67.8060072715846616},
-        {-222740.037637936533, -221125.539829601563},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP e_inv_expect[] = {
-        { 0.00179690290525662526, 1.00090436621350798},
-        { 0.00179690192174008037, 0.999095632791497268},
-        {-0.00179690290525662526, 1.00090436621350798},
-        {-0.00179690192174008037, 0.999095632791497268},
-    };
-
-    return pj_generic_selftest (e_args, 0, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, 0, inv_in, e_inv_expect, 0);
-}
-
-
-#endif
+int pj_lcca_selftest (void) {return 10000;}

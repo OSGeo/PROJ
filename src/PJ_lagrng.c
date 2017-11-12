@@ -62,32 +62,4 @@ PJ *PROJECTION(lagrng) {
 }
 
 
-#ifndef PJ_SELFTEST
-int pj_lagrng_selftest (void) {return 0;}
-#else
-
-int pj_lagrng_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=lagrng   +a=6400000 +W=2   +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        { 111703.37591722561,   27929.8319080333386},
-        { 111699.122088816002, -83784.1780133577704},
-        {-111703.37591722561,   27929.8319080333386},
-        {-111699.122088816002, -83784.1780133577704},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, 0, 0, 0);
-}
-
-
-#endif
+int pj_lagrng_selftest (void) {return 10000;}

@@ -70,46 +70,4 @@ PJ *PROJECTION(mbtfpq) {
     return P;
 }
 
-#ifndef PJ_SELFTEST
-int pj_mbtfpq_selftest (void) {return 0;}
-#else
-
-int pj_mbtfpq_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=mbtfpq   +a=6400000    +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        { 209391.854738393013,  119161.040199054827},
-        { 209391.854738393013, -119161.040199054827},
-        {-209391.854738393013,  119161.040199054827},
-        {-209391.854738393013, -119161.040199054827},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP s_inv_expect[] = {
-        { 0.00191010555824111571,  0.000839185447792341723},
-        { 0.00191010555824111571, -0.000839185447792341723},
-        {-0.00191010555824111571,  0.000839185447792341723},
-        {-0.00191010555824111571, -0.000839185447792341723},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
-}
-
-
-#endif
+int pj_mbtfpq_selftest (void) {return 10000;}
