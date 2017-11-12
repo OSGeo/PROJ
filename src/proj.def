@@ -146,3 +146,5 @@ EXPORTS
 
     proj_angular_input             @132
     proj_angular_output            @133
+
+    proj_find_file                 @134

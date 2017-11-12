@@ -246,3 +246,25 @@ int pj_find_file(projCtx ctx, const char *short_filename,
     }
     return 0;
 }
+
+/************************************************************************/
+/*                          proj_find_file()                            */
+/************************************************************************/
+
+/** Returns the full filename corresponding to a proj resource file specified
+ *  as a short filename.
+ * 
+ * @param ctx context.
+ * @param short_filename short filename (e.g. egm96_15.gtx)
+ * @param out_full_filename output buffer, of size out_full_filename_size, that
+ *                          will receive the full filename on success.
+ *                          Will be zero-terminated.
+ * @param out_full_filename_size size of out_full_filename.
+ * @return 1 if th file was found, 0 otherwise.
+ */
+int proj_find_file(PJ_CONTEXT *ctx, const char *short_filename,
+                 char* out_full_filename, size_t out_full_filename_size)
+{
+    return pj_find_file(ctx, short_filename, out_full_filename,
+                        out_full_filename_size);
+}

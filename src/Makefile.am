@@ -3,8 +3,8 @@ AM_CFLAGS = @C_WFLAGS@
 bin_PROGRAMS =	proj nad2bin geod cs2cs gie cct
 EXTRA_PROGRAMS = multistresstest test228
 
-TESTS = geodtest
-check_PROGRAMS = geodtest
+TESTS = geodtest proj_test
+check_PROGRAMS = geodtest proj_test
 
 AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
@@ -26,6 +26,7 @@ gie_SOURCES = gie.c proj_strtod.c optargpm.h
 multistresstest_SOURCES = multistresstest.c
 test228_SOURCES = test228.c
 geodtest_SOURCES = geodtest.c
+proj_test_SOURCES = proj_test.c
 
 cct_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
@@ -37,6 +38,7 @@ gie_LDADD = libproj.la
 multistresstest_LDADD = libproj.la @THREAD_LIB@
 test228_LDADD = libproj.la @THREAD_LIB@
 geodtest_LDADD = libproj.la
+proj_test_LDADD = libproj.la
 
 lib_LTLIBRARIES = libproj.la
 
