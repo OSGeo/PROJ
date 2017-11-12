@@ -243,41 +243,9 @@ int pj_ob_tran_selftest (void) {return 0;}
 #else
 
 int pj_ob_tran_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
     double d;
     PJ *P;
     PJ_COORD a, b;
-
-    char s_args[] = {"+proj=ob_tran +R=6400000 +o_proj=latlon +o_lon_p=20 +o_lat_p=20 +lon_0=180"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        {-2.6856872138416592, 1.2374302350496296},
-        {-2.6954069748943286, 1.2026833954513816},
-        {-2.8993663925401947, 1.2374302350496296},
-        {-2.8896466314875244, 1.2026833954513816},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP s_inv_expect[] = {
-        { 121.5518748407577,  -2.5361001573966084},
-        { 63.261184340201858,  17.585319578673531},
-        {-141.10073322351622,  26.091712304855108},
-        {-65.862385598848391,  51.830295078417215},
-    };
 
     /* -- Tests from nad/testvarious -------------------------------------------- */
     P = proj_create (0, "+proj=ob_tran  +o_proj=moll  +R=6378137.0  +o_lon_p=0  +o_lat_p=0  +lon_0=180");
@@ -303,7 +271,7 @@ int pj_ob_tran_selftest (void) {
     /* -------------------------------------------------------------------------- */
 
 
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
+    return 0;
 }
 
 #endif
