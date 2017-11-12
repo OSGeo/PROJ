@@ -332,63 +332,6 @@ PJ *PROJECTION(etmerc) {
 
 
 
-
-
-
-
-#ifndef PJ_SELFTEST
-int pj_etmerc_selftest (void) {return 0;}
-#else
-
-int pj_etmerc_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char e_args[] = {"+proj=etmerc   +ellps=GRS80  +lat_1=0.5 +lat_2=2 +n=0.5 +zone=30"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY e_fwd_expect[] = {
-        {222650.79679758562,  110642.22941193319},
-        {222650.79679758562,  -110642.22941193319},
-        {-222650.79679758562,  110642.22941193319},
-        {-222650.79679758562,  -110642.22941193319},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP e_inv_expect[] = {
-        {0.0017966305681649398,  0.00090436947663183873},
-        {0.0017966305681649398,  -0.00090436947663183873},
-        {-0.0017966305681649398,  0.00090436947663183873},
-        {-0.0017966305681649398,  -0.00090436947663183873},
-    };
-
-    return pj_generic_selftest (e_args, 0, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, 0, inv_in, e_inv_expect, 0);
-}
-#endif
-
-
-
-
-
-
-
-
-
-
-
-
 /* utm uses etmerc for the underlying projection */
 
 
@@ -428,49 +371,4 @@ PJ *PROJECTION(utm) {
 
     return setup (P);
 }
-
-
-#ifndef PJ_SELFTEST
-int pj_utm_selftest (void) {return 0;}
-#else
-
-int pj_utm_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char e_args[] = {"+proj=utm   +ellps=GRS80  +lat_1=0.5 +lat_2=2 +n=0.5 +zone=30"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY e_fwd_expect[] = {
-        {1057002.4054912981,  110955.14117594929},
-        {1057002.4054912981,  -110955.14117594929},
-        {611263.81227890507,  110547.10569680421},
-        {611263.81227890507,  -110547.10569680421},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP e_inv_expect[] = {
-        {-7.4869520833902357,  0.00090193980983462605},
-        {-7.4869520833902357,  -0.00090193980983462605},
-        {-7.4905356820622613,  0.00090193535121489081},
-        {-7.4905356820622613,  -0.00090193535121489081},
-    };
-
-    return pj_generic_selftest (e_args, 0, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, 0, inv_in, e_inv_expect, 0);
-}
-#endif
-
-
 

@@ -47,4 +47,3 @@ PJ *PROJECTION(nell) {
     return P;
 }
 
-int pj_nell_selftest (void) {return 10000;}

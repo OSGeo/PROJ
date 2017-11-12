@@ -70,4 +70,3 @@ PJ *PROJECTION(mbtfpq) {
     return P;
 }
 
-int pj_mbtfpq_selftest (void) {return 10000;}

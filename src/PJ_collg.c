@@ -49,4 +49,3 @@ PJ *PROJECTION(collg) {
     return P;
 }
 
-int pj_collg_selftest (void) {return 10000;}

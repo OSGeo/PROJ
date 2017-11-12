@@ -113,5 +113,3 @@ PJ *PROJECTION(patterson) {
     return P;
 }
 
-
-int pj_patterson_selftest (void) {return 10000;}

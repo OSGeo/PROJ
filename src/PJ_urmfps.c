@@ -70,6 +70,3 @@ PJ *PROJECTION(wag1) {
     return setup(P);
 }
 
-
-int pj_urmfps_selftest (void) {return 10000;}
-int pj_wag1_selftest (void)   {return 10000;}

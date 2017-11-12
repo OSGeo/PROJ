@@ -288,4 +288,3 @@ PJ *TRANSFORMATION(deformation,1) {
     return P;
 }
 
-int pj_deformation_selftest (void) {return 10000;}

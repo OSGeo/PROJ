@@ -194,5 +194,3 @@ PJ *PROJECTION(wintri) {
 }
 
 
-int pj_aitoff_selftest (void) {return 10000;}
-int pj_wintri_selftest (void) {return 10000;}

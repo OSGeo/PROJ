@@ -235,4 +235,3 @@ PJ *CONVERSION(axisswap,0) {
     return P;
 }
 
-int pj_axisswap_selftest (void) {return 10000;}

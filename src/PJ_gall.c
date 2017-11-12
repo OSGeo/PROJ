@@ -41,4 +41,3 @@ PJ *PROJECTION(gall) {
 }
 
 
-int pj_gall_selftest (void) {return 10000;}

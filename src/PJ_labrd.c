@@ -128,5 +128,3 @@ PJ *PROJECTION(labrd) {
     return P;
 }
 
-
-int pj_labrd_selftest (void) {return 10000;}

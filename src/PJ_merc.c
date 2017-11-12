@@ -76,5 +76,3 @@ PJ *PROJECTION(merc) {
     return P;
 }
 
-
-int pj_merc_selftest (void) {return 10000;}

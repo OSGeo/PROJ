@@ -118,5 +118,3 @@ PJ *PROJECTION(nzmg) {
     return P;
 }
 
-
-int pj_nzmg_selftest (void) {return 10000;}

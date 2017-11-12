@@ -32,5 +32,3 @@ PJ *PROJECTION(tcea) {
     return P;
 }
 
-
-int pj_tcea_selftest (void) {return 10000;}

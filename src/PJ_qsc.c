@@ -398,5 +398,3 @@ PJ *PROJECTION(qsc) {
     return P;
 }
 
-
-int pj_qsc_selftest (void) {return 10000;}

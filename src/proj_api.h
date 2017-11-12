@@ -175,8 +175,6 @@ void pj_acquire_lock(void);
 void pj_release_lock(void);
 void pj_cleanup_lock(void);
 
-int pj_run_selftests (int verbosity);
-
 void pj_set_ctx( projPJ, projCtx );
 projCtx pj_ctx_alloc(void);
 void    pj_ctx_free( projCtx );

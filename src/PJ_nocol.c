@@ -50,4 +50,3 @@ PJ *PROJECTION(nicol) {
     return P;
 }
 
-int pj_nicol_selftest (void) {return 10000;}

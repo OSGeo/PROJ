@@ -53,4 +53,3 @@ PJ *PROJECTION(mbt_fps) {
     return P;
 }
 
-int pj_mbt_fps_selftest (void) {return 10000;}

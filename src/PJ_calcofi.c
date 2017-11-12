@@ -163,4 +163,3 @@ PJ *PROJECTION(calcofi) {
 }
 
 
-int pj_calcofi_selftest (void) {return 10000;}

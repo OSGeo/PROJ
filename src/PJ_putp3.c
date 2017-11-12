@@ -63,5 +63,3 @@ PJ *PROJECTION(putp3p) {
     return P;
 }
 
-int pj_putp3_selftest (void)  {return 10000;}
-int pj_putp3p_selftest (void) {return 10000;}

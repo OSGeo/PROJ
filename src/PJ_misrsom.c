@@ -215,5 +215,3 @@ PJ *PROJECTION(misrsom) {
    return P;
 }
 
-
-int pj_misrsom_selftest (void) {return 10000;}

@@ -223,5 +223,3 @@ PJ *PROJECTION(omerc) {
     return P;
 }
 
-
-int pj_omerc_selftest (void) {return 10000;}

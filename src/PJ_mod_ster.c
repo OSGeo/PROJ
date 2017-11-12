@@ -277,9 +277,3 @@ PJ *PROJECTION(gs50) {
     return setup(P);
 }
 
-
-int pj_mil_os_selftest (void) {return 10000;}
-int pj_lee_os_selftest (void) {return 10000;}
-int pj_gs48_selftest (void)   {return 10000;}
-int pj_alsk_selftest (void)   {return 10000;}
-int pj_gs50_selftest (void)   {return 10000;}

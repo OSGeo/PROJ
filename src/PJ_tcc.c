@@ -30,5 +30,3 @@ PJ *PROJECTION(tcc) {
     return P;
 }
 
-
-int pj_tcc_selftest (void) {return 10000;}

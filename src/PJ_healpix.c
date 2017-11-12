@@ -668,6 +668,3 @@ PJ *PROJECTION(rhealpix) {
     return P;
 }
 
-
-int pj_healpix_selftest (void)  {return 10000;}
-int pj_rhealpix_selftest (void) {return 10000;}

@@ -222,4 +222,3 @@ PJ *PROJECTION(igh) {
 }
 
 
-int pj_igh_selftest (void) {return 10000;}

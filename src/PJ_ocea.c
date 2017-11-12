@@ -96,5 +96,3 @@ PJ *PROJECTION(ocea) {
     return P;
 }
 
-
-int pj_ocea_selftest (void) {return 10000;}

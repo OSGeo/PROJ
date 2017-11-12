@@ -295,5 +295,3 @@ PJ *PROJECTION(laea) {
     return P;
 }
 
-
-int pj_laea_selftest (void) {return 10000;}

@@ -32,5 +32,3 @@ PJ *PROJECTION(wag2) {
     return P;
 }
 
-
-int pj_wag2_selftest (void) {return 10000;}

@@ -104,5 +104,3 @@ PJ *PROJECTION(tpeqd) {
     return P;
 }
 
-
-int pj_tpeqd_selftest (void) {return 0;}

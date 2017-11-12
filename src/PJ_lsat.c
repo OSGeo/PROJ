@@ -208,5 +208,3 @@ PJ *PROJECTION(lsat) {
     return P;
 }
 
-
-int pj_lsat_selftest (void) {return 10000;}
