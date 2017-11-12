@@ -393,10 +393,13 @@ int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
 PJ_COORD proj_coord (double x, double y, double z, double t);
 
 /* Measure internal consistency - in forward or inverse direction */
-double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo);
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo);
 
 /* Geodesic distance between two points with angular 2D coordinates */
 double proj_lp_dist (const PJ *P, LP a, LP b);
+
+/* The geodesic distance AND the vertical offset */
+double proj_lpz_dist (const PJ *P, LPZ a, LPZ b);
 
 /* Euclidean distance between two points with linear 2D coordinates */
 double proj_xy_dist (XY a, XY b);

@@ -318,7 +318,7 @@ int pj_molodensky_selftest (void) {return 0;}
 #else
 int pj_molodensky_selftest (void) {
 
-    PJ_COORD in, res, exp;
+    PJ_COORD in, ni, res, exp;
     PJ *P;
 
     /* Test the abridged Molodensky first. Example from appendix 3 of Deakin (2004). */
@@ -346,7 +346,8 @@ int pj_molodensky_selftest (void) {
     }
 
     /* let's try a roundtrip */
-    if (proj_roundtrip(P, PJ_FWD, 100, in) > 1) {
+    ni = in;
+    if (proj_roundtrip(P, PJ_FWD, 100, &ni) > 1) {
         proj_destroy(P);
         return 12;
     }
@@ -375,7 +376,8 @@ int pj_molodensky_selftest (void) {
     }
 
     /* let's try a roundtrip */
-    if (proj_roundtrip(P, PJ_FWD, 100, in) > 1) {
+    ni = in;
+    if (proj_roundtrip(P, PJ_FWD, 100, &ni) > 1) {
         proj_destroy(P);
         return 22;
     }

@@ -377,8 +377,6 @@ static double strtod_scaled (char *args, double default_scale) {
 
 static int banner (char *args) {
     char dots[] = {"..."}, nodots[] = {""}, *thedots = nodots;
-    if (T.total_ko > 0 && T.op_ko==0)
-        printf ("\n\n");
     if (strlen(args) > 70)
         thedots = dots;
     fprintf (T.fout, "%s%-70.70s%s\n", delim, args, thedots);
@@ -513,28 +511,35 @@ static int roundtrip (char *args) {
     int ntrips;
     double d, r, ans;
     char *endp;
+    PJ_COORD coo;
+
     if (0==T.P)
         return another_failure ();
+
     ans = proj_strtod (args, &endp);
     ntrips = (int) (endp==args? 100: fabs(ans));
     d = strtod_scaled (endp, 1);
     d = d==HUGE_VAL?  T.tolerance:  d;
-    r = proj_roundtrip (T.P, PJ_FWD, ntrips, T.a);
-    if (r > d) {
-        if (T.verbosity > -1) {
-            if (0==T.op_ko && T.verbosity < 2)
-                banner (T.operation);
-            fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
-            fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
-            fprintf (T.fout, "     roundtrip deviation: %.3f mm, expected: %.3f mm\n", 1000*r, 1000*d);
-        }
-        another_failure ();
-    }
-    else
-        another_success ();
+    coo = T.a;
 
-    return 0;
+    /* input ("accepted") values - probably in degrees */
+    coo = proj_angular_input  (T.P, T.dir)? torad_coord (T.a):  T.a;
+
+    r = proj_roundtrip (T.P, T.dir, ntrips, &coo);
+    if (r <= d)
+        return another_success ();
+
+    if (T.verbosity > -1) {
+        if (0==T.op_ko && T.verbosity < 2)
+            banner (T.operation);
+        fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
+        fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
+        fprintf (T.fout, "     roundtrip deviation: %.3f mm, expected: %.3f mm\n", 1000*r, 1000*d);
+    }
+    return another_failure ();
 }
+
+
 
 static int expect_message (double d, char *args) {
     another_failure ();
@@ -589,7 +594,7 @@ static int expect (char *args) {
     ce = proj_angular_output (T.P, T.dir)? torad_coord (T.e): T.e;
 
     /* input ("accepted") values also probably in degrees */
-    ci = proj_angular_input  (T.P, T.dir)? torad_coord (T.a): T.a;
+    ci = proj_angular_input (T.P, T.dir)? torad_coord (T.a): T.a;
 
     /* angular output from proj_trans comes in radians */
     co = proj_trans (T.P, T.dir, ci);
@@ -598,21 +603,22 @@ static int expect (char *args) {
     /* but there are a few more possible input conventions... */
     if (proj_angular_output (T.P, T.dir)) {
         double e = HUGE_VAL;
-        d = hypot (proj_lp_dist (T.P, ce.lp, co.lp), ce.lpz.z - co.lpz.z);
+        d = proj_lpz_dist (T.P, ce.lpz, co.lpz);
         /* check whether input was already in radians */
         if (d > T.tolerance)
-            e = hypot (proj_lp_dist (T.P, T.e.lp, co.lp), T.e.lpz.z - co.lpz.z);
+            e = proj_lpz_dist (T.P, T.e.lpz, co.lpz);
         if (e < d)
             d = e;
+
         /* or the tolerance may be based on euclidean distance */
         if (d > T.tolerance)
             e = proj_xyz_dist (T.b.xyz, T.e.xyz);
         if (e < d)
             d = e;
+
     }
     else
         d = proj_xyz_dist (T.b.xyz, T.e.xyz);
-
     if (d > T.tolerance)
         return expect_message (d, args);
 
@@ -663,11 +669,14 @@ fprintf (T.fout, "%s\n", args);
 
 
 static int dispatch (char *cmnd, char *args) {
+    int last_errno = proj_errno_reset (T.P);
+
     if  (0==level%2) {
         if (0==strcmp (cmnd, "BEGIN"))
            level++;
         return 0;
     }
+
     if  (0==strcmp (cmnd, "OPERATION")) return  operation (args);
     if  (0==strcmp (cmnd, "operation")) return  operation (args);
     if  (0==strcmp (cmnd, "ACCEPT"))    return  accept    (args);
@@ -688,6 +697,10 @@ static int dispatch (char *cmnd, char *args) {
     if  (0==strcmp (cmnd, "echo"))      return  echo      (args);
     if  (0==strcmp  (cmnd, "END"))      return          finish_previous_operation (args), level++, 0;
     if  ('#'==cmnd[0])                  return  comment   (args);
+
+    if (proj_errno(T.P))
+        printf ("#####***** ERRNO=%d\n", proj_errno(T.P));
+    proj_errno_restore (T.P, last_errno);
     return 0;
 }
 

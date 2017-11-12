@@ -318,8 +318,8 @@ int pj_cart_selftest (void) {
     b = proj_trans (P, PJ_FWD, a);
 
     /* Check roundtrip precision for 10000 iterations each way */
-    dist = proj_roundtrip (P, PJ_FWD, 10000, a);
-    dist = proj_roundtrip (P, PJ_INV, 10000, b);
+    dist = proj_roundtrip (P, PJ_FWD, 10000, &a);
+    dist = proj_roundtrip (P, PJ_INV, 10000, &b);
     if (dist > 2e-9)
         return 7;
 
@@ -331,7 +331,7 @@ int pj_cart_selftest (void) {
     a.lpz.z   = 100;
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, &a);
     if (dist > 1e-12)
         return 8;
 
@@ -340,11 +340,13 @@ int pj_cart_selftest (void) {
     a.lpz.lam = PJ_TORAD(0);
     a.lpz.phi = PJ_TORAD(-90);
     a.lpz.z   = 100;
+    b = a;
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, &a);
     if (dist > 1e-12)
         return 9;
+
 
     /* Inverse projection: 3D-Cartesian-to-Ellipsoidal */
     b = proj_trans (P, PJ_INV, b);

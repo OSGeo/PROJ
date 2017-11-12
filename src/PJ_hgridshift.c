@@ -105,8 +105,9 @@ int pj_hgridshift_selftest (void) {
     a = proj_coord (0,0,0,0);
     a.lpz.lam = PJ_TORAD(173);
     a.lpz.phi = PJ_TORAD(-45);
+    b = a;
 
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    dist = proj_roundtrip (P, PJ_FWD, 1, &b);
     if (dist > 0.00000001) {
         printf("dist: %f\n",dist);
         return 1;

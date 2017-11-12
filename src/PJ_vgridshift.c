@@ -108,8 +108,8 @@ int pj_vgridshift_selftest (void) {
     a = proj_coord(0,0,0,0);
     a.lpz.lam = PJ_TORAD(12.5);
     a.lpz.phi = PJ_TORAD(55.5);
-
-    dist = proj_roundtrip (P, PJ_FWD, 1, a);
+    b = a;
+    dist = proj_roundtrip (P, PJ_FWD, 1, &b);
     if (dist > 0.00000001)
         return 1;
 
@@ -125,6 +125,9 @@ int pj_vgridshift_selftest (void) {
     if (proj_xyz_dist(expect.xyz, b.xyz) > 1e-4)  failures++;
     expect.lpz.z   = -35.880001068115234000;
     if (proj_xyz_dist(expect.xyz, b.xyz) > 1e-4)  failures++;
+    /* manual roundtrip a->b, b<-b, b==a */
+    b = proj_trans(P, PJ_INV, b);
+    if (proj_xyz_dist(a.xyz, b.xyz) > 1e-9)  failures++;
     if (failures > 1)
         return 2;
 
