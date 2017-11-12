@@ -131,7 +131,7 @@ PJ *PROJECTION(lonlat) {
  *
  * The code should be covered by the tests in nad/.
  * */
-int pj_latlong_selftest (void) {return 0;}
-int pj_longlat_selftest (void) {return 0;}
-int pj_latlon_selftest (void) {return 0;}
-int pj_lonlat_selftest (void) {return 0;}
+int pj_latlong_selftest (void) {return 10000;}
+int pj_longlat_selftest (void) {return 10000;}
+int pj_latlon_selftest (void) {return 10000;}
+int pj_lonlat_selftest (void) {return 10000;}
