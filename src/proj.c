@@ -287,21 +287,15 @@ static void vprocess(FILE *fid) {
         (void)printf(oform, dat_xy.u); putchar('\n');
         (void)fputs("Northing (y):  ", stdout);
         (void)printf(oform, dat_xy.v); putchar('\n');
-        (void)printf("Meridian scale (h)%c: %.8f  ( %.4g %% error )\n",
-            facs.code & IS_ANAL_HK ? '*' : ' ', facs.h, (facs.h-1.)*100.);
-        (void)printf("Parallel scale (k)%c: %.8f  ( %.4g %% error )\n",
-            facs.code & IS_ANAL_HK ? '*' : ' ', facs.k, (facs.k-1.)*100.);
-        (void)printf("Areal scale (s):     %.8f  ( %.4g %% error )\n",
-            facs.s, (facs.s-1.)*100.);
-        (void)printf("Angular distortion (w): %.3f\n", facs.omega *
-            RAD_TO_DEG);
-        (void)printf("Meridian/Parallel angle: %.5f\n",
-            facs.thetap * RAD_TO_DEG);
-        (void)printf("Convergence%c: ",facs.code & IS_ANAL_CONV ? '*' : ' ');
+        (void)printf("Meridian scale (h) : %.8f  ( %.4g %% error )\n", facs.h, (facs.h-1.)*100.);
+        (void)printf("Parallel scale (k) : %.8f  ( %.4g %% error )\n", facs.k, (facs.k-1.)*100.);
+        (void)printf("Areal scale (s):     %.8f  ( %.4g %% error )\n", facs.s, (facs.s-1.)*100.);
+        (void)printf("Angular distortion (w): %.3f\n", facs.omega * RAD_TO_DEG);
+        (void)printf("Meridian/Parallel angle: %.5f\n", facs.thetap * RAD_TO_DEG);
+        (void)printf("Convergence : ");
         (void)fputs(rtodms(pline, facs.conv, 0, 0), stdout);
         (void)printf(" [ %.8f ]\n", facs.conv * RAD_TO_DEG);
-        (void)printf("Max-min (Tissot axis a-b) scale error: %.5f %.5f\n\n",
-            facs.a, facs.b);
+        (void)printf("Max-min (Tissot axis a-b) scale error: %.5f %.5f\n\n", facs.a, facs.b);
     }
 }
 
