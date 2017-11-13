@@ -38,7 +38,7 @@
 #include "proj_api.h"
 
 /* Standalone build:
-g++ -g -std=c++11 standard_fuzzer.cpp -o standard_fuzzer -DSTANDALONE ../../src/.libs/libproj.a -lpthread 
+g++ -g -std=c++11 standard_fuzzer.cpp -o standard_fuzzer -DSTANDALONE ../../src/.libs/libproj.a -lpthread -I../../src
 */
 
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv);

@@ -234,4 +234,3 @@ PJ *PROJECTION(geos) {
 }
 
 
-int pj_geos_selftest (void) {return 10000;}

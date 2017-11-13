@@ -56,8 +56,7 @@ support = \
 	pj_utils.obj pj_gridlist.obj pj_gridinfo.obj \
 	proj_mdist.obj pj_mutex.obj pj_initcache.obj \
 	pj_ctx.obj pj_fileapi.obj pj_log.obj pj_apply_vgridshift.obj \
-	pj_strtod.obj pj_run_selftests.obj pj_generic_selftest.obj \
-	pj_internal.obj
+	pj_strtod.obj pj_internal.obj
 
 pipeline = \
 	proj_4D_api.obj PJ_cart.obj PJ_pipeline.obj PJ_horner.obj PJ_helmert.obj \

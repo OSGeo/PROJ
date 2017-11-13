@@ -123,15 +123,3 @@ PJ *PROJECTION(lonlat) {
     return P;
 }
 
-
-/* Bogus self-test functions. Self-tests can't be implemented the usual way for
- * these "projections" since they can't be used directly from proj.
- * We still need them though, as all projections are automatically added to
- * the list of self-test functions.
- *
- * The code should be covered by the tests in nad/.
- * */
-int pj_latlong_selftest (void) {return 0;}
-int pj_longlat_selftest (void) {return 0;}
-int pj_latlon_selftest (void) {return 0;}
-int pj_lonlat_selftest (void) {return 0;}

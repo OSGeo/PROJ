@@ -67,4 +67,3 @@ PJ *PROJECTION(fouc_s) {
 }
 
 
-int pj_fouc_s_selftest (void) {return 10000;}

@@ -31,4 +31,3 @@ PJ *PROJECTION(gins8) {
 }
 
 
-int pj_gins8_selftest (void) {return 10000;}

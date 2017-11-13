@@ -84,7 +84,7 @@ extern "C" {
 #endif
 
 /* prototype hypot for systems where absent */
-#if !defined(_WIN32) || !defined(__ANSI__)
+#if !(defined(HAVE_C99_MATH) && HAVE_C99_MATH)
 extern double hypot(double, double);
 #endif
 
@@ -561,7 +561,6 @@ struct PJ_LIST {
 
 #ifndef USE_PJ_LIST_H
 extern struct PJ_LIST pj_list[];
-extern struct PJ_SELFTEST_LIST pj_selftest_list[];
 #endif
 
 #ifndef PJ_ELLPS__
@@ -588,7 +587,6 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
                                                              \
 pj_projection_specific_setup_##name (PJ *P);                 \
 C_NAMESPACE PJ *pj_##name (PJ *P);                           \
-int pj_ ## name ## _selftest (void);                         \
                                                              \
 C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
                                                              \
@@ -616,27 +614,6 @@ PJ *pj_projection_specific_setup_##name (PJ *P)
 #define PROJECTION(name) CONVERSION (name, 1)
 
 #endif /* def PJ_LIB__ */
-
-
-
-
-
-int pj_generic_selftest (
-    char *e_args,
-    char *s_args,
-    double tolerance_xy,
-    double tolerance_lp,
-    int n_fwd,
-    int n_inv,
-    LP *fwd_in,
-    XY *e_fwd_expect,
-    XY *s_fwd_expect,
-    XY *inv_in,
-    LP *e_inv_expect,
-    LP *s_inv_expect
-);
-
-
 
 
 #define MAX_TAB_ID 80
@@ -816,7 +793,6 @@ struct PJ_ELLPS            *pj_get_ellps_ref( void );
 struct PJ_DATUMS           *pj_get_datums_ref( void );
 struct PJ_UNITS            *pj_get_units_ref( void );
 struct PJ_LIST             *pj_get_list_ref( void );
-struct PJ_SELFTEST_LIST    *pj_get_selftest_list_ref ( void );
 struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
 
 void *pj_default_destructor (PJ *P, int errlev);

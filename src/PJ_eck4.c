@@ -59,5 +59,3 @@ PJ *PROJECTION(eck4) {
     return P;
 }
 
-
-int pj_eck4_selftest (void) {return 10000;}

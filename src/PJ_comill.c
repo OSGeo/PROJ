@@ -81,4 +81,3 @@ PJ *PROJECTION(comill) {
 }
 
 
-int pj_comill_selftest (void) {return 10000;}

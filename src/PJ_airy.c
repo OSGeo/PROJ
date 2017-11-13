@@ -149,4 +149,3 @@ PJ *PROJECTION(airy) {
 }
 
 
-int pj_airy_selftest (void) {return 10000;}

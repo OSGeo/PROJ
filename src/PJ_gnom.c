@@ -138,5 +138,3 @@ PJ *PROJECTION(gnom) {
     return P;
 }
 
-
-int pj_gnom_selftest (void) {return 10000;}

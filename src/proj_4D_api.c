@@ -76,6 +76,14 @@ double proj_lp_dist (const PJ *P, LP a, LP b) {
     return s12;
 }
 
+/* The geodesic distance AND the vertical offset */
+double proj_lpz_dist (const PJ *P, LPZ a, LPZ b) {
+    PJ_COORD aa, bb;
+    aa.lpz = a;
+    bb.lpz = b;
+    return hypot (proj_lp_dist (P, aa.lp, bb.lp), a.z - b.z);
+}
+
 /* Euclidean distance between two points with linear 2D coordinates */
 double proj_xy_dist (XY a, XY b) {
     return hypot (a.x - b.x, a.y - b.y);
@@ -89,9 +97,9 @@ double proj_xyz_dist (XYZ a, XYZ b) {
 
 
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
-double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
     int i;
-    PJ_COORD o, u;
+    PJ_COORD o, u, org;
 
     if (0==P)
         return HUGE_VAL;
@@ -101,32 +109,26 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
         return HUGE_VAL;
     }
 
-    o = coo;
+    /* in the first half-step, we generate the output value */
+    u = org = *coo;
+    o = *coo = proj_trans (P, direction, u);
 
-    switch (direction) {
-        case PJ_FWD:
-            for (i = 0;  i < n;  i++) {
-                u  =  pj_fwd4d (o, P);
-                o  =  pj_inv4d (u, P);
-            }
-            break;
-        case PJ_INV:
-            for (i = 0;  i < n;  i++) {
-                u  =  pj_inv4d (o, P);
-                o  =  pj_fwd4d (u, P);
-            }
-            break;
-        default:
-            proj_errno_set (P, EINVAL);
-            return HUGE_VAL;
+    /* now we take n-1 full steps */
+    for (i = 0;  i < n - 1;  i++) {
+        u = proj_trans (P, -direction, o);
+        o = proj_trans (P,  direction, u);
     }
 
-    /* checking for angular input since we do a roundtrip, and end where we begin */
-    if (proj_angular_input (P, direction))
-        return hypot (proj_lp_dist (P, coo.lp, o.lp), coo.lpz.z - o.lpz.z);
+    /* finally, we take the last half-step */
+    u = proj_trans (P, -direction, o);
 
-    return proj_xyz_dist (coo.xyz, coo.xyz);
+    /* checking for angular *input* since we do a roundtrip, and end where we begin */
+    if (proj_angular_input (P, direction))
+        return proj_lpz_dist (P, org.lpz, u.lpz);
+
+    return proj_xyz_dist (org.xyz, u.xyz);
 }
+
 
 
 /* Apply the transformation P to the coordinate coo */

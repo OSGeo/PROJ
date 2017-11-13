@@ -226,7 +226,3 @@ PJ *PROJECTION(sch) {
     return setup(P);
 }
 
-/* Skipping sef-test since the test system is not capable of handling
- * 3D coordinate systems for the time being. Relying on tests in ../nad/
- */
-int pj_sch_selftest (void) {return 0;}

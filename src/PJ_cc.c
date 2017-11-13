@@ -38,4 +38,3 @@ PJ *PROJECTION(cc) {
 }
 
 
-int pj_cc_selftest (void) {return 10000;}

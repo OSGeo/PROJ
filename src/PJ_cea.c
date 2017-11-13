@@ -98,4 +98,3 @@ PJ *PROJECTION(cea) {
 }
 
 
-int pj_cea_selftest (void) {return 10000;}

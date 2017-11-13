@@ -320,4 +320,3 @@ PJ *PROJECTION(aeqd) {
 }
 
 
-int pj_aeqd_selftest (void) {return 10000;}

@@ -88,35 +88,35 @@ EXPORTS
     geod_polygon_testedge           @86
     geod_polygon_testpoint          @87
     geod_polygon_clear              @88
-    pj_run_selftests                @89
 
-    pj_find_file                    @90
+    pj_find_file                    @89
 
-    proj_create                     @91
-    proj_create_argv                @92
-    proj_create_crs_to_crs          @93
-    proj_destroy                    @94
+    proj_create                     @90
+    proj_create_argv                @91
+    proj_create_crs_to_crs          @92
+    proj_destroy                    @93
 
-    proj_trans                      @95
-    proj_trans_array                @96
-    proj_trans_generic              @97
-    proj_roundtrip                  @98
+    proj_trans                      @94
+    proj_trans_array                @95
+    proj_trans_generic              @96
+    proj_roundtrip                  @97
 
-    proj_coord                      @99
-    proj_coord_error               @100
+    proj_coord                      @98
+    proj_coord_error                @99
 
-    proj_errno                     @101
-    proj_errno_set                 @102
-    proj_errno_reset               @103
-    proj_errno_restore             @104
-    proj_context_errno_set         @105
+    proj_errno                     @100
+    proj_errno_set                 @101
+    proj_errno_reset               @102
+    proj_errno_restore             @103
+    proj_context_errno_set         @104
 
-    proj_context_create            @106
-    proj_context_set               @107
-    proj_context_inherit           @108
-    proj_context_destroy           @109
+    proj_context_create            @105
+    proj_context_set               @106
+    proj_context_inherit           @107
+    proj_context_destroy           @108
 
-    proj_lp_dist                   @110
+    proj_lp_dist                   @109
+    proj_lpz_dist                  @110
     proj_xy_dist                   @111
     proj_xyz_dist                  @112
 

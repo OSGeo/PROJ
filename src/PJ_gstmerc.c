@@ -68,5 +68,3 @@ PJ *PROJECTION(gstmerc) {
     return P;
 }
 
-
-int pj_gstmerc_selftest (void) {return 10000;}

@@ -130,4 +130,3 @@ PJ *PROJECTION(eqdc) {
 }
 
 
-int pj_eqdc_selftest (void) {return 10000;}
