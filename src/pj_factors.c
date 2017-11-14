@@ -65,13 +65,13 @@ int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
     /* areal scale factor */
     fac->s = (fac->der.y_p * fac->der.x_l - fac->der.x_p * fac->der.y_l) * r / cosphi;
 
-    /* meridian-parallel angle theta prime */
+    /* meridian-parallel angle, theta prime */
     fac->thetap = aasin(P->ctx,fac->s / (fac->h * fac->k));
 
     /* Tissot ellipse axis */
     t = fac->k * fac->k + fac->h * fac->h;
     fac->a = sqrt(t + 2. * fac->s);
-    t = t - 2. * fac->s);
+    t = t - 2. * fac->s;
     t = t > 0? sqrt(t): 0;
     fac->b = 0.5 * (fac->a - t);
     fac->a = 0.5 * (fac->a + t);
