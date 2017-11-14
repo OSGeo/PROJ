@@ -2,6 +2,7 @@
 #define PJ_LIB__
 #include <proj.h>
 #include "projects.h"
+
 #include <errno.h>
 
 #ifndef DEFAULT_H
@@ -16,22 +17,26 @@ int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 
     err = proj_errno_reset (P);
 
-    /* check for forward and latitude or longitude overange */
+    /* check for latitude or longitude overange */
     if ((fabs (lp.phi)-M_HALFPI) > EPS || fabs (lp.lam) > 10.) {
         proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
         return 1;
     }
 
+    /* set a reasonable step size for the numerical derivatives */
     if (h < EPS)
         h = DEFAULT_H;
+
+    /* If latitude overshoots the pole, move it slightly inside */
     if (fabs (lp.phi) > (M_HALFPI - h))
-        /* adjust to value around pi/2 where derived still exists*/
         lp.phi = lp.phi < 0. ? (-M_HALFPI+h) : (M_HALFPI-h);
     else if (P->geoc)
         lp.phi = atan(P->rone_es * tan(lp.phi));
-    lp.lam -= P->lam0;  /* compute del lp.lam */
+
+    /* Longitudinal distance from central meridian */
+    lp.lam -= P->lam0;
     if (!P->over)
-        lp.lam = adjlon(lp.lam); /* adjust del longitude */
+        lp.lam = adjlon(lp.lam);
 
     /* derivatives */
     if (pj_deriv (lp, h, P, &(fac->der))) {
@@ -63,10 +68,11 @@ int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
     /* meridian-parallel angle theta prime */
     fac->thetap = aasin(P->ctx,fac->s / (fac->h * fac->k));
 
-    /* Tissot ellips axis */
+    /* Tissot ellipse axis */
     t = fac->k * fac->k + fac->h * fac->h;
     fac->a = sqrt(t + 2. * fac->s);
-    t = (t = t - 2. * fac->s) <= 0. ? 0. : sqrt(t);
+    t = t - 2. * fac->s);
+    t = t > 0? sqrt(t): 0;
     fac->b = 0.5 * (fac->a - t);
     fac->a = 0.5 * (fac->a + t);
 
