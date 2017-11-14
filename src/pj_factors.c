@@ -28,12 +28,14 @@ int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
     if (h < EPS)
         h = DEFAULT_H;
 
+    /* If input latitudes are geocentric, convert to geographic */
+    if (P->geoc)
+        lp.phi = atan(P->rone_es * tan(lp.phi));
+
     /* If latitude + one step overshoots the pole, move it slightly inside, */
     /* so the numerical derivative still exists */
     if (fabs (lp.phi) > (M_HALFPI - h))
-        lp.phi = lp.phi < 0. ? (-M_HALFPI+h) : (M_HALFPI-h);
-    else if (P->geoc)
-        lp.phi = atan(P->rone_es * tan(lp.phi));
+        lp.phi = lp.phi < 0. ? -(M_HALFPI-h) : (M_HALFPI-h);
 
     /* Longitudinal distance from central meridian */
     lp.lam -= P->lam0;
