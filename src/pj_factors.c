@@ -17,17 +17,19 @@ int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 
     err = proj_errno_reset (P);
 
-    /* check for latitude or longitude overange */
+    /* Check for latitude or longitude overange */
     if ((fabs (lp.phi)-M_HALFPI) > EPS || fabs (lp.lam) > 10.) {
         proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
         return 1;
     }
 
-    /* set a reasonable step size for the numerical derivatives */
+    /* Set a reasonable step size for the numerical derivatives */
+    h = fabs (h);
     if (h < EPS)
         h = DEFAULT_H;
 
-    /* If latitude overshoots the pole, move it slightly inside */
+    /* If latitude + one step overshoots the pole, move it slightly inside, */
+    /* so the numerical derivative still exists */
     if (fabs (lp.phi) > (M_HALFPI - h))
         lp.phi = lp.phi < 0. ? (-M_HALFPI+h) : (M_HALFPI-h);
     else if (P->geoc)
@@ -38,13 +40,13 @@ int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
     if (!P->over)
         lp.lam = adjlon(lp.lam);
 
-    /* derivatives */
+    /* Derivatives */
     if (pj_deriv (lp, h, P, &(fac->der))) {
         proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
         return 1;
     }
 
-    /* scale factors */
+    /* Scale factors */
     cosphi = cos (lp.phi);
     fac->h = hypot (fac->der.x_p, fac->der.y_p);
     fac->k = hypot (fac->der.x_l, fac->der.y_l) / cosphi;
@@ -59,13 +61,13 @@ int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
     } else
         r = 1.;
 
-    /* convergence */
-    fac->conv = - atan2 (fac->der.x_p, fac->der.y_p);
+    /* Convergence */
+    fac->conv = -atan2 (fac->der.x_p, fac->der.y_p);
 
-    /* areal scale factor */
+    /* Areal scale factor */
     fac->s = (fac->der.y_p * fac->der.x_l - fac->der.x_p * fac->der.y_l) * r / cosphi;
 
-    /* meridian-parallel angle, theta prime */
+    /* Meridian-parallel angle (theta prime) */
     fac->thetap = aasin(P->ctx,fac->s / (fac->h * fac->k));
 
     /* Tissot ellipse axis */
@@ -76,7 +78,7 @@ int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
     fac->b = 0.5 * (fac->a - t);
     fac->a = 0.5 * (fac->a + t);
 
-    /* omega */
+    /* Angular distortion */
     fac->omega = 2. * aasin(P->ctx, (fac->a - fac->b) / (fac->a + fac->b) );
 
     proj_errno_restore (P, err);
