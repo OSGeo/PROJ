@@ -289,12 +289,6 @@ union PJ_PAIR {
     double v[2]; /* Yes - It's really just a vector! */
 };
 
-
-#define PJ_IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
-#define PJ_IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
-#define PJ_IS_ANAL_HK    04    /* h and k analytic */
-#define PJ_IS_ANAL_CONV 010    /* convergence analytic */
-
 struct PJ_INFO {
     char        release[64];        /* Release info. Version + date         */
     char        version[64];        /* Full version number                  */

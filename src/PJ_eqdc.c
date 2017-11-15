@@ -54,19 +54,6 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static void special(LP lp, PJ *P, struct FACTORS *fac) {
-    struct pj_opaque *Q = P->opaque;
-    double sinphi, cosphi;
-
-    sinphi = sin(lp.phi);
-    cosphi = cos(lp.phi);
-    fac->code |= IS_ANAL_HK;
-    fac->h = 1.;
-    fac->k = Q->n * (Q->c - (Q->ellips ? pj_mlfn(lp.phi, sinphi,
-        cosphi, Q->en) : lp.phi)) / pj_msfn(sinphi, cosphi, P->es);
-}
-
-
 static void *destructor (PJ *P, int errlev) {                        /* Destructor */
     if (0==P)
         return 0;
@@ -124,7 +111,6 @@ PJ *PROJECTION(eqdc) {
 
     P->inv = e_inverse;
     P->fwd = e_forward;
-    P->spc = special;
 
     return P;
 }

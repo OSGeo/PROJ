@@ -816,9 +816,6 @@ PJ_FACTORS proj_factors(PJ *P, const LP lp) {
 ******************************************************************************/
     PJ_FACTORS factors;
 
-    /* pj_factors rely code being zero */
-    factors.code = 0;
-
     if (pj_factors(lp, P, 0.0, &factors)) {
         /* errno set in pj_factors */
         memset(&factors, 0, sizeof(PJ_FACTORS));

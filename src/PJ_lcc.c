@@ -73,21 +73,6 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     return lp;
 }
 
-static void special(LP lp, PJ *P, struct FACTORS *fac) {
-    struct pj_opaque *Q = P->opaque;
-    double rho;
-    if (fabs(fabs(lp.phi) - M_HALFPI) < EPS10) {
-        if ((lp.phi * Q->n) <= 0.) return;
-        rho = 0.;
-    } else
-        rho = Q->c * (Q->ellips ? pow(pj_tsfn(lp.phi, sin(lp.phi),
-            P->e), Q->n) : pow(tan(M_FORTPI + .5 * lp.phi), -Q->n));
-    fac->code |= IS_ANAL_HK + IS_ANAL_CONV;
-    fac->k = fac->h = P->k0 * Q->n * rho /
-        pj_msfn(sin(lp.phi), cos(lp.phi), P->es);
-    fac->conv = Q->n * lp.lam;
-}
-
 
 PJ *PROJECTION(lcc) {
     double cosphi, sinphi;
@@ -139,7 +124,6 @@ PJ *PROJECTION(lcc) {
 
     P->inv = e_inverse;
     P->fwd = e_forward;
-    P->spc = special;
 
     return P;
 }
