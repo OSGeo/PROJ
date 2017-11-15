@@ -17,4 +17,5 @@ PROJ.4 project or using the library in their own software.
    threads
    reference/index
    bindings
+   migration
 
