@@ -5,14 +5,14 @@ Cartographic projection
 ================================================================================
 
 The foundation of PROJ.4 is the large number of
-:doc:`projections<../projections/index>` available in the library. This section
+:doc:`projections<operations/projections/index>` available in the library. This section
 is devoted to the generic parameters that can be used on any projection in the
 PROJ.4 library.
 
 Below is a list of PROJ.4 parameters which can be applied to most coordinate
 system definitions. This table does not attempt to describe the parameters
 particular to particular projection types. These can be found on the pages
-documenting the individual :doc:`projections<../projections/index>`.
+documenting the individual :doc:`projections<operations/projections/index>`.
 
     ==========   ================================================================
     Parameter    Description
@@ -79,8 +79,9 @@ Longitude Wrapping
 By default PROJ.4 wraps output longitudes in the range -180 to 180.  The ``+over``
 switch can be used to disable the default wrapping which is done at a low level
 in ``pj_inv()``.  This is particularly useful with projections like the
-:doc:`equidistant cylindrical<../projections/eqc>` where it would be desirable for
-X values past -20000000 (roughly) to continue past -180 instead of wrapping to +180.
+:doc:`equidistant cylindrical<operations/projections/eqc>`
+where it would be desirable for X values past -20000000 (roughly) to continue
+past -180 instead of wrapping to +180.
 
 The ``+lon_wrap`` option can be used to provide an alternative means of doing
 longitude wrapping within ``pj_transform()``.  The argument to this option is a

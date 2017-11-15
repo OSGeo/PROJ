@@ -115,7 +115,7 @@ used, then all parameters in that section applies for all proj-strings. Otherwis
 the identifier is connected to a specific projection. With the defaults file
 supplied with PROJ.4 the default ellipsoid is set to WGS84 (for all proj-strings).
 Apart from that only the Albers Equal Area,
-:doc:`Lambert Conic Conformal<../projections/lcc>` and the
-:doc:`Lagrange<../projections/lagrng>` projections have default parameters.
+:doc:`Lambert Conic Conformal<operations/projections/lcc>` and the
+:doc:`Lagrange<operations/projections/lagrng>` projections have default parameters.
 Defaults can be ignored by adding the ``+no_def`` parameter to a proj-string.
 

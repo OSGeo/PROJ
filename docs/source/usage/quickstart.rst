@@ -20,7 +20,7 @@ A proj-strings holds the parameters of a given coordinate transformation, e.g.
 I.e. a proj-string consists of a projection specifier, ``+proj``, a number of
 parameters that applies to the projection and, if needed, a description of a
 datum shift. In the example above geodetic coordinates are transformed to
-projected space with the :doc:`Mercator projection<../projections/merc>` with
+projected space with the :doc:`Mercator projection<operations/projections/merc>` with
 the latitude of true scale at 56.5 degrees north on the GRS80 ellipsoid. Every
 projection in PROJ.4 is identified by a shorthand such as ``merc`` in the above
 example.
