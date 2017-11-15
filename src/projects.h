@@ -457,7 +457,17 @@ struct FACTORS {
     double conv;           /* convergence */
     double s;              /* areal scale factor */
     double a, b;           /* max-min scale error */
+    int    code;           /* always 0 */
 };
+
+enum deprecated_constants_for_now_dropped_analytical_factors {
+    IS_ANAL_XL_YL =  01,   /* derivatives of lon analytic */
+    IS_ANAL_XP_YP =  02,   /* derivatives of lat analytic */
+    IS_ANAL_HK    =  04,   /* h and k analytic */
+    IS_ANAL_CONV  = 010    /* convergence analytic */
+};
+
+
 
 /* datum_type values */
 #define PJD_UNKNOWN   0

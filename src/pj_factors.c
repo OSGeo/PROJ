@@ -17,6 +17,14 @@ int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 
     err = proj_errno_reset (P);
 
+    if (0==fac) {
+        proj_errno_set (P, ENOMEM);
+        return 1;
+    }
+
+    /* Indicate that all factors are numerical approximations */
+    fac->code = 0;
+
     /* Check for latitude or longitude overange */
     if ((fabs (lp.phi)-M_HALFPI) > EPS || fabs (lp.lam) > 10.) {
         proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
