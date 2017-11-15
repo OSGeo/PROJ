@@ -150,12 +150,13 @@ typedef struct {
     int op_ok,    op_ko;
     int total_ok, total_ko;
     int grand_ok, grand_ko;
+    size_t operation_lineno;
     double tolerance;
     char *curr_file;
     FILE *fout;
 } gie_ctx;
 
-gie_ctx T = {{""}, 0, {{0,0,0,0}}, {{0,0,0,0}}, {{0,0,0,0}}, {{0,0,0,0}}, PJ_FWD, 1,   0,   0,0,0,0,0,0,0,  0.0005, 0, 0};
+gie_ctx T = {{""}, 0, {{0,0,0,0}}, {{0,0,0,0}}, {{0,0,0,0}}, {{0,0,0,0}}, PJ_FWD, 1,   0,   0,0,0,0,0,0,0,0,  0.0005, 0, 0};
 
 OPTARGS *o;
 
@@ -438,6 +439,8 @@ static int operation (char *args) {
     int i, j, n;
     T.op_id++;
 
+    T.operation_lineno = lineno;
+
     /* compactify the args, so we can fit more info on a line in verbose mode */
     n = (int) strlen (args);
     for (i = j = 0;  i < n;  ) {
@@ -658,7 +661,8 @@ static int expect (char *args) {
         expect_failure = 1;
 
     if (0==T.P && !expect_failure) {
-        errmsg(3, "Invalid operation definition!\n    %s\n", args);
+        banner (T.operation);
+        errmsg(3, "%sInvalid operation definition in line no. %d\n", delim, (int) T.operation_lineno);
         return another_failure ();
     }
 
