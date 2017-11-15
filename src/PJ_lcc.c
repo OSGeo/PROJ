@@ -73,21 +73,6 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     return lp;
 }
 
-static void special(LP lp, PJ *P, struct FACTORS *fac) {
-    struct pj_opaque *Q = P->opaque;
-    double rho;
-    if (fabs(fabs(lp.phi) - M_HALFPI) < EPS10) {
-        if ((lp.phi * Q->n) <= 0.) return;
-        rho = 0.;
-    } else
-        rho = Q->c * (Q->ellips ? pow(pj_tsfn(lp.phi, sin(lp.phi),
-            P->e), Q->n) : pow(tan(M_FORTPI + .5 * lp.phi), -Q->n));
-    fac->code |= IS_ANAL_HK + IS_ANAL_CONV;
-    fac->k = fac->h = P->k0 * Q->n * rho /
-        pj_msfn(sin(lp.phi), cos(lp.phi), P->es);
-    fac->conv = Q->n * lp.lam;
-}
-
 
 PJ *PROJECTION(lcc) {
     double cosphi, sinphi;
@@ -139,52 +124,7 @@ PJ *PROJECTION(lcc) {
 
     P->inv = e_inverse;
     P->fwd = e_forward;
-    P->spc = special;
 
     return P;
 }
 
-
-#ifndef PJ_SELFTEST
-int pj_lcc_selftest (void) {return 0;}
-#else
-
-int pj_lcc_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char e_args[] = {"+proj=lcc   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY e_fwd_expect[] = {
-        { 222588.439735968423,  110660.533870799671},
-        { 222756.879700278747, -110532.797660827026},
-        {-222588.439735968423,  110660.533870799671},
-        {-222756.879700278747, -110532.797660827026},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP e_inv_expect[] = {
-        { 0.00179635940600536667,  0.000904232207322381741},
-        { 0.00179635817735249777, -0.000904233135128348995},
-        {-0.00179635940600536667,  0.000904232207322381741},
-        {-0.00179635817735249777, -0.000904233135128348995},
-    };
-
-    return pj_generic_selftest (e_args, 0, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, 0, inv_in, e_inv_expect, 0);
-}
-
-
-#endif

@@ -130,6 +130,16 @@ pointer" to signal an error in a multi level allocation:
     return 0;
 }
 
+/**********************************************************************/
+char *pj_strdup(const char *str)
+/**********************************************************************/
+{
+    size_t len = strlen(str) + 1;
+    char *dup = pj_malloc(len);
+    if (dup)
+        memcpy(dup, str, len);
+    return dup;
+}
 
 
 /*****************************************************************************/

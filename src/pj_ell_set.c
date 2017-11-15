@@ -1,11 +1,93 @@
 /* set ellipsoid parameters a and es */
-#include <projects.h>
 #include <string.h>
+#include "proj_internal.h"
+#include "projects.h"
 #define SIXTH .1666666666666666667  /* 1/6 */
 #define RA4   .04722222222222222222 /* 17/360 */
 #define RA6   .02215608465608465608 /* 67/3024 */
 #define RV4   .06944444444444444444 /* 5/72 */
 #define RV6   .04243827160493827160 /* 55/1296 */
+
+/* copy ellipsoidal parameters from src to dst */
+void pj_inherit_ellipsoid_defs(const PJ *src, PJ *dst) {
+
+    /* The linear parameters */
+    dst->a  = src->a;
+    dst->b  = src->b;
+    dst->ra = src->ra;
+    dst->rb = src->rb;
+
+    /* The eccentricities */
+    dst->alpha   = src->alpha;
+    dst->e       = src->e;
+    dst->es      = src->es;
+    dst->e2      = src->e2;
+    dst->e2s     = src->e2s;
+    dst->e3      = src->e3;
+    dst->e3s     = src->e3s;
+    dst->one_es  = src->one_es;
+    dst->rone_es = src->rone_es;
+
+    /* The flattenings */
+    dst->f   = src->f;
+    dst->f2  = src->f2;
+    dst->n   = src->n;
+    dst->rf  = src->rf;
+    dst->rf2 = src->rf2;
+    dst->rn  = src->rn;
+
+    /* This one's for GRS80 */
+    dst->J = src->J;
+
+    /* es and a before any +proj related adjustment */
+    dst->es_orig = src->es_orig;
+    dst->a_orig  = src->a_orig;
+}
+
+int pj_calc_ellps_params(PJ *P, double a, double es) {
+
+    P->a = a;
+    P->es = es;
+
+    /* Compute some ancillary ellipsoidal parameters */
+    P->e = sqrt(P->es);      /* eccentricity */
+    P->alpha = asin (P->e);  /* angular eccentricity */
+
+    /* second eccentricity */
+    P->e2  = tan (P->alpha);
+    P->e2s = P->e2 * P->e2;
+
+    /* third eccentricity */
+    P->e3    = (0!=P->alpha)? sin (P->alpha) / sqrt(2 - sin (P->alpha)*sin (P->alpha)): 0;
+    P->e3s = P->e3 * P->e3;
+
+    /* flattening */
+    P->f  = 1 - cos (P->alpha);   /* = 1 - sqrt (1 - PIN->es); */
+    P->rf = P->f != 0.0 ? 1.0/P->f: HUGE_VAL;
+
+    /* second flattening */
+    P->f2  = (cos(P->alpha)!=0)? 1/cos (P->alpha) - 1: 0;
+    P->rf2 = P->f2 != 0.0 ? 1/P->f2: HUGE_VAL;
+
+    /* third flattening */
+    P->n  = pow (tan (P->alpha/2), 2);
+    P->rn = P->n != 0.0 ? 1/P->n: HUGE_VAL;
+
+    /* ...and a few more */
+    P->b  = (1 - P->f)*P->a;
+    P->rb = 1. / P->b;
+    P->ra = 1. / P->a;
+
+    P->one_es = 1. - P->es;
+    if (P->one_es == 0.) {
+        pj_ctx_set_errno( P->ctx, PJD_ERR_ECCENTRICITY_IS_ONE);
+        return PJD_ERR_ECCENTRICITY_IS_ONE;
+    }
+
+    P->rone_es = 1./P->one_es;
+
+    return 0;
+}
 
 /* initialize geographic shape parameters */
 int pj_ell_set(projCtx ctx, paralist *pl, double *a, double *es) {

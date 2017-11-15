@@ -3,6 +3,13 @@
 #include <proj.h>
 #include "projects.h"
 
+enum Mode {
+    N_POLE = 0,
+    S_POLE = 1,
+    EQUIT  = 2,
+    OBLIQ  = 3
+};
+
 struct pj_opaque {
     double  height;
     double  sinph0;
@@ -16,7 +23,7 @@ struct pj_opaque {
     double  sg;
     double  sw;
     double  cw;
-    int     mode;
+    enum Mode mode;
     int     tilt;
 };
 
@@ -24,10 +31,6 @@ PROJ_HEAD(nsper, "Near-sided perspective") "\n\tAzi, Sph\n\th=";
 PROJ_HEAD(tpers, "Tilted perspective") "\n\tAzi, Sph\n\ttilt= azi= h=";
 
 # define EPS10 1.e-10
-# define N_POLE 0
-# define S_POLE 1
-# define EQUIT  2
-# define OBLIQ  3
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
@@ -192,92 +195,3 @@ PJ *PROJECTION(tpers) {
     return setup(P);
 }
 
-
-#ifndef PJ_SELFTEST
-int pj_nsper_selftest (void) {return 0;}
-#else
-
-int pj_nsper_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=nsper   +a=6400000  +h=1000000"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        { 222239.816114099842,  111153.763991924759},
-        { 222239.816114099842, -111153.763991924759},
-        {-222239.816114099842,  111153.763991924759},
-        {-222239.816114099842, -111153.763991924759},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP s_inv_expect[] = {
-        { 0.00179049311728792437,  0.000895246558425396135},
-        { 0.00179049311728792437, -0.000895246558425396135},
-        {-0.00179049311728792437,  0.000895246558425396135},
-        {-0.00179049311728792437, -0.000895246558425396135},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
-}
-
-
-#endif
-
-
-#ifndef PJ_SELFTEST
-int pj_tpers_selftest (void) {return 0;}
-#else
-
-int pj_tpers_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=tpers   +a=6400000  +h=1000000 +azi=20"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        { 170820.288955531199,  180460.865555804776},
-        { 246853.941538942483, -28439.8780357754222},
-        {-246853.941538942483,  28439.8780357754222},
-        {-170820.288955531199, -180460.865555804776}
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP s_inv_expect[] = {
-        { 0.00198870552603137678,  0.000228871872278689991},
-        { 0.00137632081376749859, -0.00145364129728205432},
-        {-0.00137632081376749859,  0.00145364129728205432},
-        {-0.00198870552603137678, -0.000228871872278689991},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
-}
-
-
-#endif

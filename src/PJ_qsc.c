@@ -42,8 +42,18 @@
 #include <errno.h>
 #include "projects.h"
 
+/* The six cube faces. */
+enum Face {
+    FACE_FRONT  = 0,
+    FACE_RIGHT  = 1,
+    FACE_BACK   = 2,
+    FACE_LEFT   = 3,
+    FACE_TOP    = 4,
+    FACE_BOTTOM = 5
+};
+
 struct pj_opaque {
-        int face;
+        enum Face face;
         double a_squared;
         double b;
         double one_minus_f;
@@ -53,24 +63,18 @@ PROJ_HEAD(qsc, "Quadrilateralized Spherical Cube") "\n\tAzi, Sph.";
 
 #define EPS10 1.e-10
 
-/* The six cube faces. */
-#define FACE_FRONT  0
-#define FACE_RIGHT  1
-#define FACE_BACK   2
-#define FACE_LEFT   3
-#define FACE_TOP    4
-#define FACE_BOTTOM 5
-
 /* The four areas on a cube face. AREA_0 is the area of definition,
  * the other three areas are counted counterclockwise. */
-#define AREA_0 0
-#define AREA_1 1
-#define AREA_2 2
-#define AREA_3 3
+enum Area {
+    AREA_0 = 0,
+    AREA_1 = 1,
+    AREA_2 = 2,
+    AREA_3 = 3
+};
 
 /* Helper function for forward projection: compute the theta angle
  * and determine the area number. */
-static double qsc_fwd_equat_face_theta(double phi, double y, double x, int *area) {
+static double qsc_fwd_equat_face_theta(double phi, double y, double x, enum Area *area) {
     double theta;
     if (phi < EPS10) {
         *area = AREA_0;
@@ -111,7 +115,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double lat, lon;
     double theta, phi;
     double t, mu; /* nu; */
-    int area;
+    enum Area area;
 
     /* Convert the geodetic latitude to a geocentric latitude.
      * This corresponds to the shift from the ellipsoid to the sphere
@@ -394,62 +398,3 @@ PJ *PROJECTION(qsc) {
     return P;
 }
 
-
-#ifndef PJ_SELFTEST
-int pj_qsc_selftest (void) {return 0;}
-#else
-
-int pj_qsc_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char e_args[] = {"+proj=qsc   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
-    char s_args[] = {"+proj=qsc   +R=6400000    +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY e_fwd_expect[] = {
-        { 304638.450843852363,  164123.870923793991},
-        { 304638.450843852363, -164123.870923793991},
-        {-304638.450843852363,  164123.870923793962},
-        {-304638.450843852421, -164123.870923793904},
-    };
-
-    XY s_fwd_expect[] = {
-        { 305863.792402890511,  165827.722754715243},
-        { 305863.792402890511, -165827.722754715243},
-        {-305863.792402890511,  165827.722754715243},
-        {-305863.792402890569, -165827.722754715156},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP e_inv_expect[] = {
-        { 0.00132134098471627126,  0.000610652900922527926},
-        { 0.00132134098471627126, -0.000610652900922527926},
-        {-0.00132134098471627126,  0.000610652900922527926},
-        {-0.00132134098471627126, -0.000610652900922527926},
-    };
-
-    LP s_inv_expect[] = {
-        { 0.00131682718763827234,  0.000604493198178676161},
-        { 0.00131682718763827234, -0.000604493198178676161},
-        {-0.00131682718763827234,  0.000604493198178676161},
-        {-0.00131682718763827234, -0.000604493198178676161},
-    };
-
-    return pj_generic_selftest (e_args, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, s_fwd_expect, inv_in, e_inv_expect, s_inv_expect);
-}
-
-
-#endif

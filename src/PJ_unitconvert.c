@@ -19,7 +19,7 @@ date. A time unit conversion is performed like
 distance units are converted in the same manner, with meter being the
 central unit.
 
-The modified Julian date is chosen as the pivout unit since it has a
+The modified Julian date is chosen as the pivot unit since it has a
 fairly high precision, goes sufficiently long backwards in time, has no
 danger of hitting the upper limit in the near future and it is a fairly
 common time unit in astronomy and geodesy. Note that we are using the
@@ -266,47 +266,47 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
 
 
 /***********************************************************************/
-static PJ_OBS forward_obs(PJ_OBS obs, PJ *P) {
+static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
 /************************************************************************
     Forward conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_OBS out;
+    PJ_COORD out;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
-    out.coo.xyz = forward_3d(obs.coo.lpz, P);
+    out.xyz = forward_3d(obs.lpz, P);
 
     if (Q->t_in_id >= 0)
-        out.coo.xyzt.t = time_units[Q->t_in_id].t_in( obs.coo.xyzt.t );
+        out.xyzt.t = time_units[Q->t_in_id].t_in( obs.xyzt.t );
     if (Q->t_out_id >= 0)
-        out.coo.xyzt.t = time_units[Q->t_out_id].t_out( out.coo.xyzt.t );
+        out.xyzt.t = time_units[Q->t_out_id].t_out( out.xyzt.t );
 
     return out;
 }
 
 
 /***********************************************************************/
-static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
+static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
 /************************************************************************
     Reverse conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_OBS out;
+    PJ_COORD out;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
-    out.coo.lpz = reverse_3d(obs.coo.xyz, P);
+    out.lpz = reverse_3d(obs.xyz, P);
 
     if (Q->t_out_id >= 0)
-        out.coo.xyzt.t = time_units[Q->t_out_id].t_in( obs.coo.xyzt.t );
+        out.xyzt.t = time_units[Q->t_out_id].t_in( obs.xyzt.t );
     if (Q->t_in_id >= 0)
-        out.coo.xyzt.t = time_units[Q->t_in_id].t_out( out.coo.xyzt.t );
+        out.xyzt.t = time_units[Q->t_in_id].t_out( out.xyzt.t );
 
     return out;
 }
 
 
 /***********************************************************************/
-PJ *PROJECTION(unitconvert) {
+PJ *CONVERSION(unitconvert,0) {
 /***********************************************************************/
     struct pj_opaque_unitconvert *Q = pj_calloc (1, sizeof (struct pj_opaque_unitconvert));
     char *s, *name;
@@ -316,8 +316,8 @@ PJ *PROJECTION(unitconvert) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
-    P->fwdobs = forward_obs;
-    P->invobs = reverse_obs;
+    P->fwd4d  = forward_4d;
+    P->inv4d  = reverse_4d;
     P->fwd3d  = forward_3d;
     P->inv3d  = reverse_3d;
     P->fwd    = forward_2d;
@@ -389,95 +389,3 @@ PJ *PROJECTION(unitconvert) {
     return P;
 }
 
-#ifndef PJ_SELFTEST
-
-int pj_unitconvert_selftest (void) {return 0;}
-
-#else
-
-static int test_time(char* args, double tol, double t_in, double t_exp) {
-    PJ_OBS in, out;
-    PJ *P = proj_create(PJ_DEFAULT_CTX, args);
-    int ret = 0;
-
-    if (P == 0)
-        return 5;
-
-    in.coo.xyzt.t = t_in;
-
-    out = proj_trans_obs(P, PJ_FWD, in);
-    if (fabs(out.coo.xyzt.t - t_exp) > tol) {
-        proj_log_error(P, "out: %10.10g, expect: %10.10g", out.coo.xyzt.t, t_exp);
-        ret = 1;
-    }
-    out = proj_trans_obs(P, PJ_INV, out);
-    if (fabs(out.coo.xyzt.t - t_in) > tol) {
-        proj_log_error(P, "out: %10.10g, expect: %10.10g", out.coo.xyzt.t, t_in);
-        ret = 2;
-    }
-    pj_free(P);
-
-    proj_log_level(NULL, 0);
-    return ret;
-}
-
-static int test_xyz(char* args, double tol, PJ_TRIPLET in, PJ_TRIPLET exp) {
-    PJ_OBS out, obs_in;
-    PJ *P = proj_create(PJ_DEFAULT_CTX, args);
-    int ret = 0;
-
-    if (P == 0)
-        return 5;
-
-    obs_in.coo.xyz = in.xyz;
-    out = proj_trans_obs(P, PJ_FWD, obs_in);
-    if (proj_xyz_dist(out.coo.xyz, exp.xyz) > tol) {
-        printf("exp: %10.10g, %10.10g, %10.10g\n", exp.xyz.x, exp.xyz.y, exp.xyz.z);
-        printf("out: %10.10g, %10.10g, %10.10g\n", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
-        ret = 1;
-    }
-
-    out = proj_trans_obs(P, PJ_INV, out);
-    if (proj_xyz_dist(out.coo.xyz, in.xyz) > tol) {
-        printf("exp: %g, %g, %g\n", in.xyz.x, in.xyz.y, in.xyz.z);
-        printf("out: %g, %g, %g\n", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
-        ret += 2;
-    }
-    proj_destroy(P);
-    proj_log_level(NULL, 0);
-    return ret;
-}
-
-
-int pj_unitconvert_selftest (void) {
-    int ret = 0;
-    char args1[] = "+proj=unitconvert +t_in=decimalyear +t_out=decimalyear";
-    double in1 = 2004.25;
-
-    char args2[] = "+proj=unitconvert +t_in=gps_week +t_out=gps_week";
-    double in2 = 1782.0;
-
-    char args3[] = "+proj=unitconvert +t_in=mjd +t_out=mjd";
-    double in3 = 57390.0;
-
-    char args4[] = "+proj=unitconvert +t_in=gps_week +t_out=decimalyear";
-    double in4 = 1877.71428, exp4 = 2016.0;
-
-    char args5[] = "+proj=unitconvert +xy_in=m +xy_out=dm +z_in=cm +z_out=mm";
-    PJ_TRIPLET in5 = {{55.25, 23.23, 45.5}}, exp5 = {{552.5, 232.3, 455.0}};
-
-    char args6[] = "+proj=unitconvert +xy_in=m +xy_out=m +z_in=m +z_out=m";
-    PJ_TRIPLET in6 = {{12.3, 45.6, 7.89}};
-
-    ret = test_time(args1, 1e-6, in1, in1);   if (ret) return ret + 10;
-    ret = test_time(args2, 1e-6, in2, in2);   if (ret) return ret + 20;
-    ret = test_time(args3, 1e-6, in3, in3);   if (ret) return ret + 30;
-    ret = test_time(args4, 1e-6, in4, exp4);  if (ret) return ret + 40;
-    ret = test_xyz (args5, 1e-10, in5, exp5); if (ret) return ret + 50;
-    ret = test_xyz (args6, 1e-10, in6, in6);  if (ret) return ret + 50;
-
-    return 0;
-
-}
-
-#endif

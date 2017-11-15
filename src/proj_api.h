@@ -167,14 +167,13 @@ void *pj_malloc(size_t);
 void pj_dalloc(void *);
 void *pj_calloc (size_t n, size_t size);
 void *pj_dealloc (void *ptr);
+char *pj_strdup(const char *str);
 char *pj_strerrno(int);
 int *pj_get_errno_ref(void);
 const char *pj_get_release(void);
 void pj_acquire_lock(void);
 void pj_release_lock(void);
 void pj_cleanup_lock(void);
-
-int pj_run_selftests (int verbosity);
 
 void pj_set_ctx( projPJ, projCtx );
 projCtx pj_ctx_alloc(void);

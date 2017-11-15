@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include	<projects.h>
+#include "projects.h"
 #include <errno.h>
 
 PROJ_HEAD(wag3, "Wagner III") "\n\tPCyl., Sph.\n\tlat_ts=";
@@ -44,47 +44,3 @@ PJ *PROJECTION(wag3) {
     return P;
 }
 
-
-#ifndef PJ_SELFTEST
-int pj_wag3_selftest (void) {return 0;}
-#else
-
-int pj_wag3_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=wag3   +a=6400000    +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        {223387.02171816575,  111701.07212763709},
-        {223387.02171816575,  -111701.07212763709},
-        {-223387.02171816575,  111701.07212763709},
-        {-223387.02171816575,  -111701.07212763709},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP s_inv_expect[] = {
-        {0.001790493109880963,  0.00089524655489191132},
-        {0.001790493109880963,  -0.00089524655489191132},
-        {-0.001790493109880963,  0.00089524655489191132},
-        {-0.001790493109880963,  -0.00089524655489191132},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
-}
-
-
-#endif

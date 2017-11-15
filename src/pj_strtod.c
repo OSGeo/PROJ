@@ -101,8 +101,11 @@ static char* pj_replace_point_by_locale_point(const char* pszNumber, char point,
                 strcpy(pszWorkBuffer, pszNumber);
                 pszNew = pszWorkBuffer;
             }
-            else
-                pszNew = strdup(pszNumber);
+            else {
+                pszNew = pj_strdup(pszNumber);
+                if (!pszNew)
+                    return NULL;
+            }
             pszNew[pszPoint - pszNumber] = byPoint;
             return pszNew;
         }
@@ -127,8 +130,11 @@ static char* pj_replace_point_by_locale_point(const char* pszNumber, char point,
                     strcpy(pszWorkBuffer, pszNumber);
                     pszNew = pszWorkBuffer;
                 }
-                else
-                    pszNew = strdup(pszNumber);
+                else {
+                    pszNew = pj_strdup(pszNumber);
+                    if (!pszNew)
+                        return NULL;
+                }
                 if( pszLocalePoint )
                     pszNew[pszLocalePoint - pszNumber] = ' ';
                 if( pszPoint )

@@ -48,8 +48,6 @@
 extern "C" {
 #endif
 
-
-
 #ifndef PJ_TODEG
 #define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
 #endif
@@ -57,30 +55,33 @@ extern "C" {
 #define PJ_TORAD(deg)  ((deg)*M_PI/180.0)
 #endif
 
+/* This enum is also conditionally defined in projects.h - but we need it here */
+/* for the pj_left/right prototypes, and enums cannot be forward declared      */
+enum pj_io_units {
+    PJ_IO_UNITS_CLASSIC = 0,   /* Scaled meters (right) */
+    PJ_IO_UNITS_METERS  = 1,   /* Meters  */
+    PJ_IO_UNITS_RADIANS = 2    /* Radians */
+};
+enum pj_io_units pj_left (PJ *P);
+enum pj_io_units pj_right (PJ *P);
 
+PJ_COORD   proj_trans   (PJ *P, PJ_DIRECTION direction, PJ_COORD obs);
 
 PJ_COORD proj_coord_error (void);
-PJ_OBS   proj_obs_error (void);
-#ifndef PJ_INTERNAL_C
-extern const PJ_COORD proj_coord_null;
-extern const PJ_OBS   proj_obs_null;
-#endif
-/* Part of MSVC workaround: Make proj_*_null look function-like for symmetry with proj_*_error */
-#define proj_coord_null(x) proj_coord_null
-#define proj_obs_null(x) proj_obs_null
-
 
 void proj_context_errno_set (PJ_CONTEXT *ctx, int err);
 void proj_context_set (PJ *P, PJ_CONTEXT *ctx);
 void proj_context_inherit (PJ *parent, PJ *child);
 
+PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P);
+PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
 
-PJ_OBS pj_fwdobs (PJ_OBS obs, PJ *P);
-PJ_OBS pj_invobs (PJ_OBS obs, PJ *P);
-PJ_COORD pj_fwdcoord (PJ_COORD coo, PJ *P);
-PJ_COORD pj_invcoord (PJ_COORD coo, PJ *P);
-
-
+/* Grid functionality */
+int             proj_vgrid_init(PJ *P, const char *grids);
+int             proj_hgrid_init(PJ *P, const char *grids);
+double          proj_vgrid_value(PJ *P, LP lp);
+LP              proj_hgrid_value(PJ *P, LP lp);
+LP              proj_hgrid_apply(PJ *P, LP lp, PJ_DIRECTION direction);
 
 /* High level functionality for handling thread contexts */
 enum proj_log_level {
@@ -103,6 +104,8 @@ void proj_log_trace (PJ *P, const char *fmt, ...);
 /*void proj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *));*/
 void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log);
 
+void pj_inherit_ellipsoid_defs(const PJ *src, PJ *dst);
+int pj_calc_ellps_params(PJ *P, double a, double es);
 
 /* Lowest level: Minimum support for fileapi */
 void proj_fileapi_set (PJ *P, void *fileapi);

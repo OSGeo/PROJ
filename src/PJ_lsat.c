@@ -163,7 +163,7 @@ PJ *PROJECTION(lsat) {
 
     path = pj_param(P->ctx, P->params, "ipath").i;
     if (path <= 0 || path > (land <= 3 ? 251 : 233))
-        pj_default_destructor(P, PJD_ERR_PATH_NOT_IN_RANGE);
+        return pj_default_destructor(P, PJD_ERR_PATH_NOT_IN_RANGE);
 
     if (land <= 3) {
         P->lam0 = DEG_TO_RAD * 128.87 - M_TWOPI / 251. * path;
@@ -208,47 +208,3 @@ PJ *PROJECTION(lsat) {
     return P;
 }
 
-
-#ifndef PJ_SELFTEST
-int pj_lsat_selftest (void) {return 0;}
-#else
-
-int pj_lsat_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char e_args[] = {"+proj=lsat +ellps=GRS80 +lat_1=0.5 +lat_2=2 +lsat=1 +path=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY e_fwd_expect[] = {
-        {18241950.01455855,    9998256.83982293494},
-        {18746856.2533194572, 10215761.669925211},
-        {18565503.6836331636,  9085039.14672705345},
-        {19019696.9020289108,  9247763.0394328218},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP e_inv_expect[] = {
-        {126.000423834530011,  0.00172378224025701425},
-        {126.002213738256714,  0.00188015467480917966},
-        {126.000734468914601, -0.00188015467480917966},
-        {126.002524372641304, -0.00172378224025701425},
-    };
-
-    return pj_generic_selftest (e_args, 0, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, 0, inv_in, e_inv_expect, 0);
-}
-
-
-#endif

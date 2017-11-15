@@ -88,62 +88,61 @@ EXPORTS
     geod_polygon_testedge           @86
     geod_polygon_testpoint          @87
     geod_polygon_clear              @88
-    pj_run_selftests                @89
 
-    pj_find_file                    @90
+    pj_find_file                    @89
 
-    proj_create                     @91
-    proj_create_argv                @92
-    proj_create_crs_to_crs          @93
-    proj_destroy                    @94
+    proj_create                     @90
+    proj_create_argv                @91
+    proj_create_crs_to_crs          @92
+    proj_destroy                    @93
 
-    proj_trans_obs                  @95
-    proj_trans_coord                @96
-    proj_transform                  @97
-    proj_transform_obs              @98
-    proj_transform_coord            @99
-    proj_roundtrip                 @100
+    proj_trans                      @94
+    proj_trans_array                @95
+    proj_trans_generic              @96
+    proj_roundtrip                  @97
 
-    proj_coord                     @101
-    proj_obs                       @102
-    proj_coord_error               @103
-    proj_obs_error                 @104
+    proj_coord                      @98
+    proj_coord_error                @99
 
-    proj_errno                     @105
-    proj_errno_set                 @106
-    proj_errno_reset               @107
-    proj_errno_restore             @108
-    proj_context_errno_set         @109
+    proj_errno                     @100
+    proj_errno_set                 @101
+    proj_errno_reset               @102
+    proj_errno_restore             @103
+    proj_context_errno_set         @104
 
-    proj_context_create            @110
-    proj_context_set               @111
-    proj_context_inherit           @112
-    proj_context_destroy           @113
+    proj_context_create            @105
+    proj_context_set               @106
+    proj_context_inherit           @107
+    proj_context_destroy           @108
 
-    proj_lp_dist                   @114
-    proj_xy_dist                   @115
-    proj_xyz_dist                  @116
+    proj_lp_dist                   @109
+    proj_lpz_dist                  @110
+    proj_xy_dist                   @111
+    proj_xyz_dist                  @112
 
-    proj_log_level                 @117
-    proj_log_func                  @118
-    proj_log_error                 @119
-    proj_log_debug                 @120
-    proj_log_trace                 @121
+    proj_log_level                 @113
+    proj_log_func                  @114
+    proj_log_error                 @115
+    proj_log_debug                 @116
+    proj_log_trace                 @117
 
-    proj_info                      @122
-    proj_pj_info                   @123
-    proj_grid_info                 @124
-    proj_init_info                 @125
+    proj_info                      @118
+    proj_pj_info                   @119
+    proj_grid_info                 @120
+    proj_init_info                 @121
 
-    proj_torad                     @126
-    proj_todeg                     @127
-    proj_rtodms                    @128
-    proj_dmstor                    @129
+    proj_torad                     @122
+    proj_todeg                     @123
+    proj_rtodms                    @124
+    proj_dmstor                    @125
 
-    proj_derivatives               @130
-    proj_factors                   @131
+    proj_derivatives               @126
+    proj_factors                   @127
 
-    proj_list_operations           @132
-    proj_list_ellps                @133
-    proj_list_units                @134
-    proj_list_prime_meridians      @135
+    proj_list_operations           @128
+    proj_list_ellps                @129
+    proj_list_units                @130
+    proj_list_prime_meridians      @131
+
+    proj_angular_input             @132
+    proj_angular_output            @133

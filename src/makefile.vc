@@ -56,12 +56,12 @@ support = \
 	pj_utils.obj pj_gridlist.obj pj_gridinfo.obj \
 	proj_mdist.obj pj_mutex.obj pj_initcache.obj \
 	pj_ctx.obj pj_fileapi.obj pj_log.obj pj_apply_vgridshift.obj \
-	pj_strtod.obj pj_run_selftests.obj pj_generic_selftest.obj \
-	pj_internal.obj
+	pj_strtod.obj pj_internal.obj
 
 pipeline = \
-	pj_obs_api.obj PJ_cart.obj PJ_pipeline.obj PJ_horner.obj PJ_helmert.obj \
-	PJ_vgridshift.obj PJ_hgridshift.obj PJ_unitconvert.obj PJ_molodensky.obj
+	proj_4D_api.obj PJ_cart.obj PJ_pipeline.obj PJ_horner.obj PJ_helmert.obj \
+	PJ_vgridshift.obj PJ_hgridshift.obj PJ_unitconvert.obj PJ_molodensky.obj \
+	PJ_deformation.obj PJ_axisswap.obj
 
 geodesic = geodesic.obj
 
@@ -71,12 +71,15 @@ PROJEXE_OBJ	= proj.obj gen_cheb.obj p_series.obj emess.obj
 CS2CSEXE_OBJ	= cs2cs.obj gen_cheb.obj p_series.obj emess.obj
 GEODEXE_OBJ	= geod.obj geod_set.obj geod_interface.obj emess.obj
 CCTEXE_OBJ = cct.obj proj_strtod.obj
+GIEEXE_OBJ = gie.obj proj_strtod.obj
+
 MULTISTRESSTEST_OBJ = multistresstest.obj
 PROJ_DLL 	= proj$(VERSION).dll
 PROJ_EXE    = proj.exe
 CS2CS_EXE   = cs2cs.exe
 GEOD_EXE    = geod.exe
 CCT_EXE     = cct.exe
+GIE_EXE     = gie.exe
 NAD2BIN_EXE = nad2bin.exe
 MULTISTRESSTEST_EXE = multistresstest.exe
 
@@ -85,7 +88,7 @@ CFLAGS	=	/nologo -I. -DPROJ_LIB=\"$(PROJ_LIB_DIR)\" \
 
 default:	all
 
-all: proj.lib $(PROJ_EXE) $(CS2CS_EXE) $(GEOD_EXE) $(CCT_EXE) $(NAD2BIN_EXE)
+all: proj.lib $(PROJ_EXE) $(CS2CS_EXE) $(GEOD_EXE) $(CCT_EXE) $(GIE_EXE) $(NAD2BIN_EXE)
 
 proj.lib:	$(LIBOBJ)
 	if exist proj.lib del proj.lib
@@ -113,6 +116,10 @@ $(GEOD_EXE):	$(GEODEXE_OBJ) $(EXE_PROJ)
 $(CCT_EXE):	$(CCTEXE_OBJ) $(EXE_PROJ)
 	cl $(CCTEXE_OBJ) $(EXE_PROJ)
 	if exist $(CCT_EXE).manifest mt -manifest $(CCT_EXE).manifest -outputresource:$(CCT_EXE);1
+
+$(GIE_EXE):	$(GIEEXE_OBJ) $(EXE_PROJ)
+	cl $(GIEEXE_OBJ) $(EXE_PROJ)
+	if exist $(GIE_EXE).manifest mt -manifest $(GIE_EXE).manifest -outputresource:$(GIE_EXE);1
 
 $(NAD2BIN_EXE):	nad2bin.obj emess.obj $(EXE_PROJ)
 	cl nad2bin.obj emess.obj $(EXE_PROJ)

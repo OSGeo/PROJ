@@ -136,32 +136,3 @@ PJ *PROJECTION(chamb) {
 }
 
 
-#ifndef PJ_SELFTEST
-int pj_chamb_selftest (void) {return 0;}
-#else
-
-int pj_chamb_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=chamb   +R=6400000    +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        {-27864.7795868005815,  -223364.324593274243},
-        {-251312.283053493476,  -223402.145526208304},
-        {-27864.7856491046077,  223364.327328827145},
-        {-251312.289116443484,  223402.142197287147},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, 0, 0, 0);
-}
-
-
-#endif

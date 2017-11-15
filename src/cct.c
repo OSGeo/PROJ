@@ -44,7 +44,7 @@ Hence, in honour of cct (the geodesist) this is cct (the program).
 
 ************************************************************************
 
-Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-09-19
+Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 
 ************************************************************************
 
@@ -72,22 +72,22 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-09-19
 ***********************************************************************/
 
 #include "optargpm.h"
+#include "proj_internal.h"
 #include <proj.h>
-#include <projects.h>
+#include "projects.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
 
+
 double proj_strtod(const char *str, char **endptr);
 double proj_atof(const char *str);
 
 char *column (char *buf, int n);
 PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time);
-int print_output_line (FILE *fout, char *buf, PJ_COORD point);
-int main(int argc, char **argv);
-    
+
 
 
 static const char usage[] = {
@@ -101,6 +101,7 @@ static const char usage[] = {
     "                      Defaults to 1,2,3,4\n"
     "    -z value          Provide a fixed z value for all input data (e.g. -z 0)\n"
     "    -t value          Provide a fixed t value for all input data (e.g. -t 0)\n"
+    "    -I                Do the inverse transformation\n"
     "    -v                Verbose: Provide non-essential informational output.\n"
     "                      Repeat -v for more verbosity (e.g. -vv)\n"
     "--------------------------------------------------------------------------------\n"
@@ -111,6 +112,7 @@ static const char usage[] = {
     "    --height          Alias for -z\n"
     "    --time            Alias for -t\n"
     "    --verbose         Alias for -v\n"
+    "    --inverse         Alias for -I\n"
     "    --help            Alias for -h\n"
     "--------------------------------------------------------------------------------\n"
     "Operator Specs:\n"
@@ -140,7 +142,7 @@ static const char usage[] = {
     "    cct -c 5,2,1,4  +proj=utm +ellps=GRS80 +zone=32\n"
     "4. as (1) but specify fixed height and time, hence needing only 2 cols in input:\n"
     "    cct -t 0 -z 0  +proj=utm  +ellps=GRS80  +zone=32\n"
-    "--------------------------------------------------------------------------------\n"    
+    "--------------------------------------------------------------------------------\n"
 };
 
 int main(int argc, char **argv) {
@@ -149,13 +151,13 @@ int main(int argc, char **argv) {
     OPTARGS *o;
     FILE *fout = stdout;
     char *buf;
-    int input_unit, output_unit, nfields = 4, direction = 1, verbose;
+    int nfields = 4, direction = 1, verbose;
     double fixed_z = HUGE_VAL, fixed_time = HUGE_VAL;
     int columns_xyzt[] = {1, 2, 3, 4};
-    const char *longflags[]  = {"v=verbose", "h=help", 0};
+    const char *longflags[]  = {"v=verbose", "h=help", "I=inverse", 0};
     const char *longkeys[]   = {"o=output",  "c=columns", "z=height", "t=time", 0};
-    
-    o = opt_parse (argc, argv, "hv", "cozt", longflags, longkeys);
+
+    o = opt_parse (argc, argv, "hvI", "cozt", longflags, longkeys);
     if (0==o)
         return 0;
 
@@ -177,14 +179,14 @@ int main(int argc, char **argv) {
     }
     if (verbose > 3)
         fprintf (fout, "%s: Running in very verbose mode\n", o->progname);
-    
-    
+
+
 
     if (opt_given (o, "z")) {
         fixed_z = proj_atof (opt_arg (o, "z"));
         nfields--;
     }
-    
+
     if (opt_given (o, "t")) {
         fixed_time = proj_atof (opt_arg (o, "t"));
         nfields--;
@@ -200,7 +202,7 @@ int main(int argc, char **argv) {
             return 1;
         }
     }
-    
+
     /* Setup transformation */
     P = proj_create_argv (0, o->pargc, o->pargv);
     if ((0==P) || (0==o->pargc)) {
@@ -211,17 +213,10 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    input_unit   =  P->left;
-    output_unit  =  P->right;
-    if (PJ_IO_UNITS_CLASSIC==P->left)
-        input_unit = PJ_IO_UNITS_RADIANS;
-    if (PJ_IO_UNITS_CLASSIC==P->right)
-        output_unit = PJ_IO_UNITS_METERS;
-    if (direction==-1) {
-        enum pj_io_units swap = input_unit;
-        input_unit = output_unit;
-        output_unit = swap;
-    }
+    /* We have no API call for inverting an operation, so we brute force it. */
+    if (direction==-1)
+        P->inverted = !(P->inverted);
+    direction = 1;
 
     /* Allocate input buffer */
     buf = calloc (1, 10000);
@@ -235,32 +230,51 @@ int main(int argc, char **argv) {
     }
 
 
-    /* Loop over all lines of all input files */
+    /* Loop over all records of all input files */
     while (opt_input_loop (o, optargs_file_format_text)) {
         void *ret = fgets (buf, 10000, o->input);
-        int res;
         opt_eof_handler (o);
         if (0==ret) {
             fprintf (stderr, "Read error in record %d\n", (int) o->record_index);
             continue;
         }
         point = parse_input_line (buf, columns_xyzt, fixed_z, fixed_time);
-        if (PJ_IO_UNITS_RADIANS==input_unit) {
+        if (HUGE_VAL==point.xyzt.x) {
+            char *c = column (buf, 1);
+
+            /* if it's a comment or blank line, we reflect it */
+            if (c && ((*c=='\0') || (*c=='#'))) {
+                fprintf (fout, "%s\n", buf);
+                continue;
+            }
+
+            /* otherwise, it must be a syntax error */
+            fprintf (fout, "# Record %d UNREADABLE: %s", (int) o->record_index, buf);
+            if (verbose)
+                fprintf (stderr, "%s: Could not parse file '%s' line %d\n", o->progname, opt_filename (o), opt_record (o));
+            continue;
+        }
+
+        if (proj_angular_input (P, direction)) {
             point.lpzt.lam = proj_torad (point.lpzt.lam);
             point.lpzt.phi = proj_torad (point.lpzt.phi);
         }
-        point = proj_trans_coord (P, direction, point);
-        if (PJ_IO_UNITS_RADIANS==output_unit) {
+        point = proj_trans (P, direction, point);
+        if (proj_angular_output (P, direction)) {
             point.lpzt.lam = proj_todeg (point.lpzt.lam);
             point.lpzt.phi = proj_todeg (point.lpzt.phi);
         }
-        res = print_output_line (fout, buf, point);
-        if (0==res) {
-            fprintf (fout, "# UNREADABLE: %s", buf);
-            if (verbose)
-                fprintf (stderr, "%s: Could not parse file '%s' line %d\n", o->progname, opt_filename (o), opt_record (o));
+
+        if (HUGE_VAL==point.xyzt.x) {
+            /* transformation error (TODO provide existing internal errmsg here) */
+            fprintf (fout, "# Record %d TRANSFORMATION ERROR: %s", (int) o->record_index, buf);
+            continue;
         }
+
+        /* Time to print the result */
+        fprintf (fout, "%20.15f  %20.15f  %20.15f  %20.15f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
     }
+
     if (stdout != fout)
         fclose (fout);
     free (o);
@@ -287,38 +301,36 @@ char *column (char *buf, int n) {
     return buf;
 }
 
+/* column to double */
+static double cold (char *args, int col) {
+    char *endp;
+    char *target;
+    double d;
+    target = column (args, col);
+    d = proj_strtod (target, &endp);
+    if (endp==target)
+        return HUGE_VAL;
+    return d;
+}
 
 PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time) {
     PJ_COORD err = proj_coord (HUGE_VAL, HUGE_VAL, HUGE_VAL, HUGE_VAL);
     PJ_COORD result = err;
     int prev_errno = errno;
-    char *endptr = 0;
     errno = 0;
 
     result.xyzt.z = fixed_height;
     result.xyzt.t = fixed_time;
-    result.xyzt.x = proj_strtod (column (buf, columns[0]), &endptr);
-    result.xyzt.y = proj_strtod (column (buf, columns[1]), &endptr);
+    result.xyzt.x = cold (buf, columns[0]);
+    result.xyzt.y = cold (buf, columns[1]);
     if (result.xyzt.z==HUGE_VAL)
-        result.xyzt.z = proj_strtod (column (buf, columns[2]), &endptr);
+        result.xyzt.z = cold (buf, columns[2]);
     if (result.xyzt.t==HUGE_VAL)
-        result.xyzt.t = proj_strtod (column (buf, columns[3]), &endptr);
+        result.xyzt.t = cold (buf, columns[3]);
 
     if (0!=errno)
         return err;
 
     errno = prev_errno;
     return result;
-}
-
-
-int print_output_line (FILE *fout, char *buf, PJ_COORD point) {
-    char *c;
-    if (HUGE_VAL!=point.xyzt.x)
-        return fprintf (fout, "%20.15f  %20.15f  %20.15f  %20.15f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
-    c = column (buf, 1);
-    /* reflect comments and blanks */
-    if (c && ((*c=='\0') || (*c=='#')))
-        return fprintf (fout, "%s\n", buf);
-    return 0;
 }

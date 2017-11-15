@@ -16,8 +16,12 @@ geod_set(int argc, char **argv) {
 	if (argc <= 0)
 		emess(1, "no arguments in initialization list");
 	start = curr = pj_mkparam(argv[0]);
+	if (!curr)
+		emess(1, "memory allocation failed");
 	for (i = 1; i < argc; ++i) {
 		curr->next = pj_mkparam(argv[i]);
+		if (!curr->next)
+			emess(1, "memory allocation failed");
 		curr = curr->next;
 	}
 	/* set elliptical parameters */

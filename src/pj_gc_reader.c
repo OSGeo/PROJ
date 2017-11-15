@@ -27,6 +27,7 @@
 
 #define PJ_LIB__
 
+#include <errno.h>
 #include <projects.h>
 #include <string.h>
 #include <ctype.h>
@@ -56,15 +57,29 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
     catalog = (PJ_GridCatalog *) calloc(1,sizeof(PJ_GridCatalog));
     if( !catalog )
     {
+        pj_ctx_set_errno(ctx, ENOMEM);
         pj_ctx_fclose(ctx, fid);
         return NULL;
     }
     
-    catalog->catalog_name = strdup(catalog_name);
+    catalog->catalog_name = pj_strdup(catalog_name);
+    if (!catalog->catalog_name) {
+        pj_ctx_set_errno(ctx, ENOMEM);
+        free(catalog);
+        pj_ctx_fclose(ctx, fid);
+        return NULL;
+    }
     
     entry_max = 10;
     catalog->entries = (PJ_GridCatalogEntry *) 
         malloc(entry_max * sizeof(PJ_GridCatalogEntry));
+    if (!catalog->entries) {
+        pj_ctx_set_errno(ctx, ENOMEM);
+        free(catalog->catalog_name);
+        free(catalog);
+        pj_ctx_fclose(ctx, fid);
+        return NULL;
+    }
     
     while( pj_gc_readentry( ctx, fid, 
                             catalog->entries+catalog->entry_count) == 0)
@@ -83,6 +98,7 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
                 int i;
                 for( i = 0; i < catalog->entry_count; i++ )
                     free( catalog->entries[i].definition );
+                free( catalog->entries );
                 free( catalog->catalog_name );
                 free( catalog );
                 pj_ctx_fclose(ctx, fid);
@@ -124,6 +140,7 @@ static int pj_gc_read_csv_line( projCtx ctx, PAFile fid,
         while( token_count < max_tokens && *next != '\0' ) 
         {
             const char *start = next;
+            char* token;
             
             while( *next != '\0' && *next != ',' ) 
                 next++;
@@ -134,7 +151,14 @@ static int pj_gc_read_csv_line( projCtx ctx, PAFile fid,
                 next++;
             }
             
-            tokens[token_count++] = strdup(start);
+            token = pj_strdup(start);
+            if (!token) {
+                while (token_count > 0)
+                    free(tokens[--token_count]);
+                pj_ctx_set_errno(ctx, ENOMEM);
+                return 0;
+            }
+            tokens[token_count++] = token;
         }
 
         return token_count;
@@ -199,7 +223,8 @@ static int pj_gc_readentry(projCtx ctx, PAFile fid, PJ_GridCatalogEntry *entry)
     }
     else
     {
-        entry->definition = strdup( tokens[0] );
+        entry->definition = tokens[0];
+        tokens[0] = NULL;   /* We take ownership of tokens[0] */
         entry->region.ll_long = dmstor_ctx( ctx, tokens[1], NULL );
         entry->region.ll_lat = dmstor_ctx( ctx, tokens[2], NULL );
         entry->region.ur_long = dmstor_ctx( ctx, tokens[3], NULL );

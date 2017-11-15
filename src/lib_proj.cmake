@@ -45,6 +45,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_airy.c
         PJ_aitoff.c
         PJ_august.c
+        PJ_axisswap.c
         PJ_bacon.c
         PJ_bipc.c
         PJ_boggs.c
@@ -58,6 +59,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_collg.c
         PJ_comill.c
         PJ_crast.c
+        PJ_deformation.c
         PJ_denoy.c
         PJ_eck1.c
         PJ_eck2.c
@@ -184,7 +186,6 @@ SET(SRC_LIBPROJ_CORE
         pj_fwd3d.c
         pj_gauss.c
         pj_gc_reader.c
-        pj_generic_selftest.c
         pj_geocent.c
         pj_gridcatalog.c
         pj_gridinfo.c
@@ -201,7 +202,7 @@ SET(SRC_LIBPROJ_CORE
         pj_mlfn.c
         pj_msfn.c
         pj_mutex.c
-        pj_obs_api.c
+        proj_4D_api.c
         pj_internal.c
         proj_internal.h
         pj_open_lib.c
@@ -210,7 +211,6 @@ SET(SRC_LIBPROJ_CORE
         pj_pr_list.c
         pj_qsfn.c
         pj_release.c
-        pj_run_selftests.c
         pj_strerrno.c
         pj_transform.c
         pj_tsfn.c

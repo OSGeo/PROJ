@@ -92,8 +92,9 @@ struct pj_opaque_helmert {
 #define R21 (Q->R[2][1])
 #define R22 (Q->R[2][2])
 
+/**************************************************************************/
 static void update_parameters(PJ *P) {
-    /**************************************************************************
+/***************************************************************************
 
     Update transformation parameters.
     ---------------------------------
@@ -114,7 +115,8 @@ static void update_parameters(PJ *P) {
     of that parameter.
 
     [0] http://itrf.ign.fr/doc_ITRF/Transfo-ITRF2008_ITRFs.txt
-    **************************************************************************/
+
+*******************************************************************************/
 
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
     double dt = Q->t_obs - Q->epoch;
@@ -146,8 +148,9 @@ static void update_parameters(PJ *P) {
     return;
 }
 
+/**************************************************************************/
 static void build_rot_matrix(PJ *P) {
-    /**************************************************************************
+/***************************************************************************
 
     Build rotation matrix.
     ----------------------
@@ -208,7 +211,7 @@ static void build_rot_matrix(PJ *P) {
     as published, the "transpose" option provides the ability to switch
     between the conventions.
 
-    ***************************************************************************/
+***************************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
 
     double  f,  t,  p;    /* phi/fi , theta, psi  */
@@ -420,35 +423,35 @@ static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
 }
 
 
-static PJ_OBS helmert_forward_obs (PJ_OBS point, PJ *P) {
+static PJ_COORD helmert_forward_4d (PJ_COORD point, PJ *P) {
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
 
     /* We only need to rebuild the rotation matrix if the
      * observation time is different from the last call */
-    if (point.coo.xyzt.t != Q->t_obs) {
-        Q->t_obs = point.coo.xyzt.t;
+    if (point.xyzt.t != Q->t_obs) {
+        Q->t_obs = point.xyzt.t;
         update_parameters(P);
         build_rot_matrix(P);
     }
 
-    point.coo.xyz = helmert_forward_3d (point.coo.lpz, P);
+    point.xyz = helmert_forward_3d (point.lpz, P);
 
     return point;
 }
 
 
-static PJ_OBS helmert_reverse_obs (PJ_OBS point, PJ *P) {
+static PJ_COORD helmert_reverse_4d (PJ_COORD point, PJ *P) {
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
 
     /* We only need to rebuild the rotation matrix if the
      * observation time is different from the last call */
-    if (point.coo.xyzt.t != Q->t_obs) {
-        Q->t_obs = point.coo.xyzt.t;
+    if (point.xyzt.t != Q->t_obs) {
+        Q->t_obs = point.xyzt.t;
         update_parameters(P);
         build_rot_matrix(P);
     }
 
-    point.coo.lpz = helmert_reverse_3d (point.coo.xyz, P);
+    point.lpz = helmert_reverse_3d (point.xyz, P);
 
     return point;
 }
@@ -458,15 +461,15 @@ static PJ_OBS helmert_reverse_obs (PJ_OBS point, PJ *P) {
 #define ARCSEC_TO_RAD (DEG_TO_RAD / 3600.0)
 
 /***********************************************************************/
-PJ *PROJECTION(helmert) {
+PJ *TRANSFORMATION(helmert, 0) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = pj_calloc (1, sizeof (struct pj_opaque_helmert));
     if (0==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
-    P->fwdobs = helmert_forward_obs;
-    P->invobs = helmert_reverse_obs;
+    P->fwd4d  = helmert_forward_4d;
+    P->inv4d  = helmert_reverse_4d;
     P->fwd3d  = helmert_forward_3d;
     P->inv3d  = helmert_reverse_3d;
     P->fwd    = helmert_forward;
@@ -580,145 +583,3 @@ PJ *PROJECTION(helmert) {
     return P;
 }
 
-
-
-#ifndef PJ_SELFTEST
-
-int pj_helmert_selftest (void) {return 0;}
-
-#else
-
-
-static int test (char *args, PJ_TRIPLET in, PJ_TRIPLET expect, double tol) {
-    PJ_TRIPLET out;
-    PJ *P = pj_init_plus (args);
-
-    if (0==P)
-        return 5;
-
-    out.xyz = pj_fwd3d (in.lpz, P);
-    if (proj_xyz_dist (out.xyz, expect.xyz) > tol) {
-        proj_log_error(P, "Tolerance of forward calculation not met");
-        proj_log_error(P, "  Expect: %10.10f, %10.10f, %10.10f", expect.xyz.x, expect.xyz.y, expect.xyz.z);
-        proj_log_error(P, "  Out:    %10.10f, %10.10f, %10.10f", out.xyz.x, out.xyz.y, out.xyz.z);
-        proj_log_level(NULL, 0);
-        proj_destroy (P);
-        return 1;
-    }
-
-    out.lpz = pj_inv3d (out.xyz, P);
-    if (proj_xyz_dist (out.xyz, in.xyz) > tol) {
-        proj_log_error(P, "Tolerance of inverse calculation not met");
-        proj_log_error(P, "  In:  %10.10f, %10.10f, %10.10f", in.xyz.x, in.xyz.y, in.xyz.z);
-        proj_log_error(P, "  Out: %10.10f, %10.10f, %10.10f", out.xyz.x, out.xyz.y, out.xyz.z);
-        proj_log_level(NULL, 0);
-        proj_destroy (P);
-        return 2;
-    }
-
-    proj_destroy (P);
-    return 0;
-}
-
-
-
-int pj_helmert_selftest (void) {
-    int ret;
-
-    /* This example is from
-       Lotti Jivall:
-           Simplified transformations from ITRF2008/IGS08 to ETRS89 for maritime applications */
-    PJ_TRIPLET in1     = {{3565285.0000,     855949.0000,     5201383.0000}};
-    PJ_TRIPLET expect1 = {{3565285.41342351, 855948.67986759, 5201382.72939791}};
-    char args1[] = {
-        " +proj=helmert +ellps=GRS80"
-        "     +x=0.67678  +y=0.65495 +z=-0.52827"
-        "    +rx=-0.022742 +ry=0.012667 +rz=0.022704   +s=-0.01070"
-        /*"    +rx=-22.742 +ry=12.667 +rz=22.704   +s=-0.01070" */
-    };
-
-
-    /* This example is a random point, transformed from ED50 to ETRS89 using KMStrans2 */
-    PJ_TRIPLET in2 =     {{3494994.3012, 1056601.9725, 5212382.1666}};
-    PJ_TRIPLET expect2 = {{3494909.84026368, 1056506.78938633, 5212265.66699761}};
-    char args2[] = {
-        " +proj=helmert +ellps=GRS80"
-        "  +x=-81.0703 +y=-89.3603 +z=-115.7526"
-        " +rx=-0.48488 +ry=-0.02436  +rz=-0.41321   +s=-0.540645"
-    };
-
-
-    /* This example is a coordinate from the geodetic observatory in Onsala,
-       Sweden transformed from ITRF2000 @ 2017.0 to ITRF93 @ 2017.0.
-       The test coordinate was transformed using GNSStrans.
-       Transformation parameters published by ITRF:
-            ftp://itrf.ensg.ign.fr/pub/itrf/ITRF.TP  */
-    PJ_TRIPLET in3 = {{3370658.378, 711877.314, 5349787.086}}; /* ITRF2000@2017.0 */
-    PJ_TRIPLET expect3 = {{3370658.18890, 711877.42370, 5349787.12430}}; /* ITRF93@2017.0 */
-    char args3[] = {
-        " +proj=helmert +ellps=GRS80"
-        " +x=0.0127 +y=0.0065 +z=-0.0209 +s=0.00195"
-        " +rx=-0.00039 +ry=0.00080 +rz=-0.00114"
-        " +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +ds=0.00001"
-        " +drx=-0.00011 +dry=-0.00019 +drz=0.00007"
-        " +epoch=1988.0 +tobs=2017.0 +transpose"
-    };
-
-    /* Test the 4D-capabilities of the proj.h API, especially that the rotation
-       matrix is updated when necessary. Test coordinates from GNSStrans. */
-    XYZ expect4a = {3370658.18890, 711877.42370, 5349787.12430};
-    XYZ expect4b = {3370658.18087, 711877.42750, 5349787.12648};
-    PJ_OBS in4 = {{{3370658.378, 711877.314, 5349787.086, 2017.0}}, {{ 0, 0, 0}}, 0, 0};
-    PJ_OBS out;
-
-    PJ *helmert = proj_create(
-        0, 
-        " +proj=helmert +ellps=GRS80"
-        " +x=0.0127 +y=0.0065 +z=-0.0209 +s=0.00195"
-        " +rx=-0.00039 +ry=0.00080 +rz=-0.00114"
-        " +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +ds=0.00001"
-        " +drx=-0.00011 +dry=-0.00019 +drz=0.00007"
-        " +epoch=1988.0 +transpose"
-    );
-
-    /* This example is from "A mathematical relationship between NAD27 and NAD83 (91)
-       State Plane coordinates in Southeastern Wisconsin":
-
-            http://www.sewrpc.org/SEWRPCFiles/Publications/TechRep/tr-034-Mathematical-Relationship-Between-NAD27-and-NAD83-91-State-Plane-Coordinates-Southeastern-Wisconsin.pdf
-
-       The test data is taken from p. 29. Here we are using point 203 and converting it
-       from NAD27 (ft) -> NAD83 (m). The paper reports a difference of 0.0014 m from measured
-       to computed coordinates, hence the test tolerance is set accordingly. */
-    PJ_TRIPLET in5 = {{2546506.957, 542256.609, 0}};
-    PJ_TRIPLET expect5 = {{766563.675, 165282.277, 0}};
-    char args5[] = " +proj=helmert +ellps=GRS80 +x=-9597.3572 +y=.6112 +s=0.304794780637 +theta=-1.244048";
-
-    /* Run tests 1-3 & 5 */
-    ret = test (args1, in1, expect1, 1e-4);   if (ret)  return ret;
-    ret = test (args2, in2, expect2, 1e-4);   if (ret)  return ret + 10;
-    ret = test (args3, in3, expect3, 1e-4);   if (ret)  return ret + 20;
-    ret = test (args5, in5, expect5, 0.001);  if (ret) return ret + 40;
-
-    /* Run test 4 */
-    out = proj_trans_obs (helmert, PJ_FWD, in4);
-    if (proj_xyz_dist (out.coo.xyz, expect4a) > 1e-4) {
-        proj_log_error(helmert, "Tolerance of test 4a not met!");
-        proj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.coo.xyz.x, in4.coo.xyz.y, in4.coo.xyz.z);
-        proj_log_error(helmert, "  Out: %10.10f, %10.10f, %10.10f", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
-        return 31;
-    }
-
-    in4.coo.xyzt.t = 2018.0;
-    out = proj_trans_obs (helmert, PJ_FWD, in4);
-    if (proj_xyz_dist (out.coo.xyz, expect4b) > 1e-4) {
-        proj_log_error(helmert, "Tolerance of test 4b not met!");
-        proj_log_error(helmert, "  In:  %10.10f, %10.10f, %10.10f", in4.coo.xyz.x, in4.coo.xyz.y, in4.coo.xyz.z);
-        proj_log_error(helmert, "  Out: %10.10f, %10.10f, %10.10f", out.coo.xyz.x, out.coo.xyz.y, out.coo.xyz.z);
-        return 32;
-    }
-
-    proj_destroy(helmert);
-    return 0;
-}
-
-#endif

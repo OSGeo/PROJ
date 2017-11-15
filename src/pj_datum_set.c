@@ -25,6 +25,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#include <errno.h>
 #include <projects.h>
 #include <string.h>
 
@@ -101,7 +102,11 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
         const char *date;
 
         projdef->datum_type = PJD_GRIDSHIFT;
-        projdef->catalog_name = strdup(catalog);
+        projdef->catalog_name = pj_strdup(catalog);
+        if (!projdef->catalog_name) {
+            pj_ctx_set_errno(ctx, ENOMEM);
+            return 1;
+        }
 
         date = pj_param(ctx, pl, "sdate").s;
         if( date != NULL) 

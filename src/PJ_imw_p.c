@@ -9,11 +9,17 @@ PROJ_HEAD(imw_p, "International Map of the World Polyconic")
 #define TOL 1e-10
 #define EPS 1e-10
 
+enum Mode {
+    NONE_IS_ZERO  =  0, /* phi_1 and phi_2 != 0 */
+    PHI_1_IS_ZERO =  1, /* phi_1 = 0 */
+    PHI_2_IS_ZERO = -1  /* phi_2 = 0 */
+};
+
 struct pj_opaque {
-    double  P, Pp, Q, Qp, R_1, R_2, sphi_1, sphi_2, C2; \
-    double  phi_1, phi_2, lam_1; \
-    double  *en; \
-    int mode; /* = 0, phi_1 and phi_2 != 0, = 1, phi_1 = 0, = -1 phi_2 = 0 */
+    double  P, Pp, Q, Qp, R_1, R_2, sphi_1, sphi_2, C2;
+    double  phi_1, phi_2, lam_1;
+    double  *en;
+    enum Mode mode;
 };
 
 
@@ -53,7 +59,7 @@ static XY loc_for(LP lp, PJ *P, double *yc) {
         C = sqrt(R * R - xa * xa);
         if (lp.phi < 0.) C = - C;
         C += ya - R;
-        if (Q->mode < 0) {
+        if (Q->mode == PHI_2_IS_ZERO) {
             xb = lp.lam;
             yb = Q->C2;
         } else {
@@ -61,7 +67,7 @@ static XY loc_for(LP lp, PJ *P, double *yc) {
             xb = Q->R_2 * sin(t);
             yb = Q->C2 + Q->R_2 * (1. - cos(t));
         }
-        if (Q->mode > 0) {
+        if (Q->mode == PHI_1_IS_ZERO) {
             xc = lp.lam;
             *yc = 0.;
         } else {
@@ -171,18 +177,18 @@ PJ *PROJECTION(imw_p) {
         else                sig = 8.;
         Q->lam_1 = sig * DEG_TO_RAD;
     }
-    Q->mode = 0;
+    Q->mode = NONE_IS_ZERO;
     if (Q->phi_1 != 0.0)
         xy(P, Q->phi_1, &x1, &y1, &Q->sphi_1, &Q->R_1);
     else {
-        Q->mode = 1;
+        Q->mode = PHI_1_IS_ZERO;
         y1 = 0.;
         x1 = Q->lam_1;
     }
     if (Q->phi_2 != 0.0)
         xy(P, Q->phi_2, &x2, &T2, &Q->sphi_2, &Q->R_2);
     else {
-        Q->mode = -1;
+        Q->mode = PHI_2_IS_ZERO;
         T2 = 0.;
         x2 = Q->lam_1;
     }
@@ -205,47 +211,3 @@ PJ *PROJECTION(imw_p) {
     return P;
 }
 
-
-#ifndef PJ_SELFTEST
-int pj_imw_p_selftest (void) {return 0;}
-#else
-
-int pj_imw_p_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char e_args[] = {"+proj=imw_p   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY e_fwd_expect[] = {
-        { 222588.4411393762,   55321.128653809537},
-        { 222756.90637768712, -165827.58428832365},
-        {-222588.4411393762,   55321.128653809537},
-        {-222756.90637768712, -165827.58428832365},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP e_inv_expect[] = {
-        { 0.0017966991379592214, 0.50090492361427374},
-        { 0.0017966979081574697, 0.49909507588689922},
-        {-0.0017966991379592214, 0.50090492361427374},
-        {-0.0017966979081574697, 0.49909507588689922},
-    };
-
-    return pj_generic_selftest (e_args, 0, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, 0, inv_in, e_inv_expect, 0);
-}
-
-
-#endif

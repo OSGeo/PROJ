@@ -1,18 +1,12 @@
 /******************************************************************************
  * Project:  PROJ.4
  * Purpose:  Implement a (currently minimalistic) proj API based primarily
- *           on the PJ_OBS generic geodetic data type.
- *
- *           proj thread contexts have not seen widespread use, so one of the
- *           intentions with this new API is to make them less visible on the
- *           API surface: Contexts do not have a life by themselves, they are
- *           visible only through their associated PJs, and the number of
- *           functions supporting them is limited.
+ *           on the PJ_COORD 4D geodetic spatiotemporal data type.
  *
  * Author:   Thomas Knudsen,  thokn@sdfe.dk,  2016-06-09/2016-11-06
  *
  ******************************************************************************
- * Copyright (c) 2016, 2017 Thomas Knudsen/SDFE 
+ * Copyright (c) 2016, 2017 Thomas Knudsen/SDFE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,13 +26,13 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-#define PJ_OBS_API_C
+#include <stddef.h>
+#include <errno.h>
+#include <ctype.h>
 #include <proj.h>
 #include "proj_internal.h"
 #include "projects.h"
 #include "geodesic.h"
-#include <stddef.h>
-#include <errno.h>
 
 
 /* Initialize PJ_COORD struct */
@@ -51,22 +45,27 @@ PJ_COORD proj_coord (double x, double y, double z, double t) {
     return res;
 }
 
-/* Initialize PJ_OBS struct */
-PJ_OBS proj_obs (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags) {
-    PJ_OBS res;
-    res.coo.v[0] = x;
-    res.coo.v[1] = y;
-    res.coo.v[2] = z;
-    res.coo.v[3] = t;
-    res.anc.v[0] = o;
-    res.anc.v[1] = p;
-    res.anc.v[2] = k;
-    res.id       = id;
-    res.flags    = flags;
-
-    return res;
+/*****************************************************************************/
+int proj_angular_input (PJ *P, enum PJ_DIRECTION dir) {
+/******************************************************************************
+    Returns 1 if the operator P expects angular input coordinates when
+    operating in direction dir, 0 otherwise.
+    dir: {PJ_FWD, PJ_INV}
+******************************************************************************/
+    if (PJ_FWD==dir)
+        return pj_left (P)==PJ_IO_UNITS_RADIANS;
+    return pj_right (P)==PJ_IO_UNITS_RADIANS;
 }
 
+/*****************************************************************************/
+int proj_angular_output (PJ *P, enum PJ_DIRECTION dir) {
+/******************************************************************************
+    Returns 1 if the operator P provides angular output coordinates when
+    operating in direction dir, 0 otherwise.
+    dir: {PJ_FWD, PJ_INV}
+******************************************************************************/
+    return proj_angular_input (P, -dir);
+}
 
 
 /* Geodesic distance (in meter) between two points with angular 2D coordinates */
@@ -75,6 +74,14 @@ double proj_lp_dist (const PJ *P, LP a, LP b) {
     /* Note: the geodesic code takes arguments in degrees */
     geod_inverse (P->geod, PJ_TODEG(a.phi), PJ_TODEG(a.lam), PJ_TODEG(b.phi), PJ_TODEG(b.lam), &s12, &azi1, &azi2);
     return s12;
+}
+
+/* The geodesic distance AND the vertical offset */
+double proj_lpz_dist (const PJ *P, LPZ a, LPZ b) {
+    PJ_COORD aa, bb;
+    aa.lpz = a;
+    bb.lpz = b;
+    return hypot (proj_lp_dist (P, aa.lp, bb.lp), a.z - b.z);
 }
 
 /* Euclidean distance between two points with linear 2D coordinates */
@@ -90,10 +97,9 @@ double proj_xyz_dist (XYZ a, XYZ b) {
 
 
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
-double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
     int i;
-    PJ_COORD o, u;
-    enum pj_io_units unit;
+    PJ_COORD o, u, org;
 
     if (0==P)
         return HUGE_VAL;
@@ -103,78 +109,40 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo) {
         return HUGE_VAL;
     }
 
-    o = coo;
+    /* in the first half-step, we generate the output value */
+    u = org = *coo;
+    o = *coo = proj_trans (P, direction, u);
 
-    switch (direction) {
-        case PJ_FWD:
-            for (i = 0;  i < n;  i++) {
-                u  =  pj_fwdcoord (o, P);
-                o  =  pj_invcoord (u, P);
-            }
-            break;
-        case PJ_INV:
-            for (i = 0;  i < n;  i++) {
-                u  =  pj_invcoord (o, P);
-                o  =  pj_fwdcoord (u, P);
-            }
-            break;
-        default:
-            proj_errno_set (P, EINVAL);
-            return HUGE_VAL;
+    /* now we take n-1 full steps */
+    for (i = 0;  i < n - 1;  i++) {
+        u = proj_trans (P, -direction, o);
+        o = proj_trans (P,  direction, u);
     }
 
-    /* left when forward, because we do a roundtrip, and end where we begin */
-    unit = direction==PJ_FWD?  P->left:  P->right;
-    if (unit==PJ_IO_UNITS_RADIANS)
-        return hypot (proj_lp_dist (P, coo.lp, o.lp), coo.lpz.z - o.lpz.z);
-    
-    return proj_xyz_dist (coo.xyz, coo.xyz);
-}
+    /* finally, we take the last half-step */
+    u = proj_trans (P, -direction, o);
 
+    /* checking for angular *input* since we do a roundtrip, and end where we begin */
+    if (proj_angular_input (P, direction))
+        return proj_lpz_dist (P, org.lpz, u.lpz);
 
-
-
-
-
-
-
-
-
-
-
-
-/* Apply the transformation P to the coordinate coo */
-PJ_OBS proj_trans_obs (PJ *P, PJ_DIRECTION direction, PJ_OBS obs) {
-    if (0==P)
-        return obs;
-
-    switch (direction) {
-        case PJ_FWD:
-            return pj_fwdobs (obs, P);
-        case PJ_INV:
-            return  pj_invobs (obs, P);
-        case PJ_IDENT:
-            return obs;
-        default:
-            break;
-    }
-
-    proj_errno_set (P, EINVAL);
-    return proj_obs_error ();
+    return proj_xyz_dist (org.xyz, u.xyz);
 }
 
 
 
 /* Apply the transformation P to the coordinate coo */
-PJ_COORD proj_trans_coord (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
     if (0==P)
         return coo;
+    if (P->inverted)
+        direction = -direction;
 
     switch (direction) {
         case PJ_FWD:
-            return pj_fwdcoord (coo, P);
+            return pj_fwd4d (coo, P);
         case PJ_INV:
-            return  pj_invcoord (coo, P);
+            return  pj_inv4d (coo, P);
         case PJ_IDENT:
             return coo;
         default:
@@ -187,8 +155,29 @@ PJ_COORD proj_trans_coord (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
 
 
 
+/*****************************************************************************/
+int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord) {
+/******************************************************************************
+    Batch transform an array of PJ_COORD.
+
+    Returns 0 if all coordinates are transformed without error, otherwise
+    returns error number.
+******************************************************************************/
+    size_t i;
+
+    for (i = 0;  i < n;  i++) {
+        coord[i] = proj_trans (P, direction, coord[i]);
+        if (proj_errno(P))
+            return proj_errno (P);
+    }
+
+   return 0;
+}
+
+
+
 /*************************************************************************************/
-size_t proj_transform (
+size_t proj_trans_generic (
     PJ *P,
     PJ_DIRECTION direction,
     double *x, size_t sx, size_t nx,
@@ -245,11 +234,15 @@ size_t proj_transform (
     Return value: Number of transformations completed.
 
 **************************************************************************************/
-    PJ_COORD coord = proj_coord_null;
+    PJ_COORD coord = {{0,0,0,0}};
     size_t i, nmin;
     double null_broadcast = 0;
+
     if (0==P)
         return 0;
+
+    if (P->inverted)
+        direction = -direction;
 
     /* ignore lengths of null arrays */
     if (0==x) nx = 0;
@@ -300,31 +293,33 @@ size_t proj_transform (
         coord.xyzt.t = *t;
 
         if (PJ_FWD==direction)
-            coord = pj_fwdcoord (coord, P);
+            coord = pj_fwd4d (coord, P);
         else
-            coord = pj_invcoord (coord, P);
+            coord = pj_inv4d (coord, P);
 
-        /* in all full length cases, we overwrite the input with the output */
+        /* in all full length cases, we overwrite the input with the output,  */
+        /* and step on to the next element.                                   */
+        /* The casts are somewhat funky, but they compile down to no-ops and  */
+        /* they tell compilers and static analyzers that we know what we do   */
         if (nx > 1)  {
-            *x = coord.xyzt.x;
-            x =  (double *) ( ((char *) x) + sx);
+           *x = coord.xyzt.x;
+            x = (double *) ((void *) ( ((char *) x) + sx));
         }
         if (ny > 1)  {
-            *y = coord.xyzt.y;
-            y =  (double *) ( ((char *) y) + sy);
+           *y = coord.xyzt.y;
+            y = (double *) ((void *) ( ((char *) y) + sy));
         }
         if (nz > 1)  {
-            *z = coord.xyzt.z;
-            z =  (double *) ( ((char *) z) + sz);
+           *z = coord.xyzt.z;
+            z = (double *) ((void *) ( ((char *) z) + sz));
         }
         if (nt > 1)  {
-            *t = coord.xyzt.t;
-            t =  (double *) ( ((char *) t) + st);
+           *t = coord.xyzt.t;
+            t = (double *) ((void *) ( ((char *) t) + st));
         }
     }
+
     /* Last time around, we update the length 1 cases with their transformed alter egos */
-    /* ... or would we rather not? Then what about the nmin==1 case?                    */
-    /* perhaps signalling the non-array case by setting all strides to 0?               */
     if (nx==1)
         *x = coord.xyzt.x;
     if (ny==1)
@@ -337,64 +332,108 @@ size_t proj_transform (
     return i;
 }
 
-/*****************************************************************************/
-int proj_transform_obs (PJ *P, PJ_DIRECTION direction, size_t n, PJ_OBS *obs) {
-/******************************************************************************
-    Batch transform an array of PJ_OBS.
 
-    Returns 0 if all observations are transformed without error, otherwise
-    returns error number.
-******************************************************************************/
-    size_t i;
-    for (i=0; i<n; i++) {
-        obs[i] = proj_trans_obs(P, direction, obs[i]);
-        if (proj_errno(P))
-            return proj_errno(P);
-    }
-
-    return 0;
-}
-
-/*****************************************************************************/
-int proj_transform_coord (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord) {
-/******************************************************************************
-    Batch transform an array of PJ_COORD.
-
-    Returns 0 if all coordinates are transformed without error, otherwise
-    returns error number.
-******************************************************************************/
-    size_t i;
-    for (i=0; i<n; i++) {
-        coord[i] = proj_trans_coord(P, direction, coord[i]);
-        if (proj_errno(P))
-            return proj_errno(P);
-    }
-
-    return 0;
-}
-
-
-
+/*************************************************************************************/
 PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
+/**************************************************************************************
+    Create a new PJ object in the context ctx, using the given definition. If ctx==0,
+    the default context is used, if definition==0, or invalid, a null-pointer is
+    returned. The definition may use '+' as argument start indicator, as in
+    "+proj=utm +zone=32", or leave it out, as in "proj=utm zone=32"
+**************************************************************************************/
+    PJ   *P;
+    char *args, **argv;
+    int	  argc, i, j, n;
+
     if (0==ctx)
         ctx = pj_get_default_ctx ();
-    return pj_init_plus_ctx (ctx, definition);
+
+    /* make a copy that we can manipulate */
+    n = (int) strlen (definition);
+    args = (char *) malloc (n + 1);
+    if (0==args)
+        return 0;
+    strcpy (args, definition);
+
+    /* all-in-one: count args, eliminate superfluous whitespace, 0-terminate substrings */
+    for (i = j = argc = 0;  i < n;  ) {
+        /* skip prefix whitespace */
+        while (isspace (args[i]))
+            i++;
+
+        /* skip at most one prefix '+' */
+        if ('+'==args[i])
+            i++;
+
+        /* whitespace after a '+' is a syntax error - but by Postel's prescription, we ignore and go on */
+        if (isspace (args[i]))
+            continue;
+
+        /* move a whitespace delimited text string to the left, skipping over superfluous whitespace */
+        while ((0!=args[i]) && (!isspace (args[i])))
+            args[j++] = args[i++];
+
+        /* terminate string - if that makes j pass i (often the case for first arg), let i catch up */
+        args[j++] = 0;
+        if (i < j)
+            i = j;
+
+        /* we finished another arg */
+        argc++;
+
+        /* skip postfix whitespace */
+        while (isspace (args[i]))
+            i++;
+    }
+
+    /* turn the massaged input into an array of strings */
+    argv = (char **) calloc (argc, sizeof (char *));
+    if (0==argv)
+        return pj_dealloc (args);
+
+    argv[0] = args;
+    for (i = 0, j = 1;  i < n;  i++) {
+        if (0==args[i])
+            argv[j++] = args + (i + 1);
+        if (j==argc)
+            break;
+    }
+
+    /* ...and let pj_init_ctx do the hard work */
+    P = pj_init_ctx (ctx, argc, argv);
+    pj_dealloc (argv);
+    pj_dealloc (args);
+    return P;
 }
 
+
+
+/*************************************************************************************/
 PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
+/**************************************************************************************
+Create a new PJ object in the context ctx, using the given definition argument
+array argv. If ctx==0, the default context is used, if definition==0, or invalid,
+a null-pointer is returned. The definition arguments may use '+' as argument start
+indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
+"zone=32"}.
+**************************************************************************************/
+    if (0==argv)
+        return 0;
     if (0==ctx)
         ctx = pj_get_default_ctx ();
     return pj_init_ctx (ctx, argc, argv);
 }
 
+
+
 /*****************************************************************************/
-PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to) {
+PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area) {
 /******************************************************************************
     Create a transformation pipeline between two known coordinate reference
     systems.
 
     srid_from and srid_to should be the value part of a +init=... parameter
-    set, i.e. "epsg:25833" or "IGNF:AMST63". Any projection definition that is
+    set, i.e. "epsg:25833" or "IGNF:AMST63". Any projection definition that
     can be found in a init-file in PROJ_LIB is a valid input to this function.
 
     For now the function mimics the cs2cs app: An input and an output CRS is
@@ -403,13 +442,22 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char 
     function can be extended to support "late-binding" transformations in the
     future without affecting users of the function.
 
+    An "area of use" can be specified in area. In the current version of this
+    function is has no function, but is added in anticipation of a
+    "late-binding" implementation in the future. The idea being, that if a user
+    supplies an area of use, the more accurate transformation between two given
+    systems can be chosen.
+
     Example call:
 
-        PJ *P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833");
+        PJ *P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833", NULL);
 
 ******************************************************************************/
     PJ *P;
     char buffer[512];
+
+    /* area not in use yet, suppressing warning */
+    (void)area;
 
     strcpy(buffer, "+proj=pipeline +step +init=");
     strncat(buffer, srid_from, 512-strlen(buffer));
@@ -495,7 +543,7 @@ int proj_errno_reset (PJ *P) {
 }
 
 
-/* Create a new context - or provide a pointer to the default context */
+/* Create a new context */
 PJ_CONTEXT *proj_context_create (void) {
     return pj_ctx_alloc ();
 }
@@ -618,7 +666,7 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
 
     /* this does not take into account that a pipeline potentially does not */
     /* have an inverse.                                                     */
-    info.has_inverse = (P->inv != 0 || P->inv3d != 0 || P->invobs != 0);
+    info.has_inverse = (P->inv != 0 || P->inv3d != 0 || P->inv4d != 0);
 
     return info;
 }
@@ -767,9 +815,6 @@ PJ_FACTORS proj_factors(PJ *P, const LP lp) {
 
 ******************************************************************************/
     PJ_FACTORS factors;
-
-    /* pj_factors rely code being zero */
-    factors.code = 0;
 
     if (pj_factors(lp, P, 0.0, &factors)) {
         /* errno set in pj_factors */

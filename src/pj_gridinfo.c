@@ -212,7 +212,9 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         ct_tmp.cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
         if( row_buf == NULL || ct_tmp.cvs == NULL )
         {
-            pj_ctx_set_errno( ctx, -38 );
+            pj_dalloc( row_buf );
+            pj_dalloc( ct_tmp.cvs );
+            pj_ctx_set_errno( ctx, ENOMEM );
             pj_release_lock();
             return 0;
         }
@@ -230,6 +232,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
                 pj_dalloc( row_buf );
                 pj_dalloc( ct_tmp.cvs );
                 pj_ctx_set_errno( ctx, -38 );
+                pj_release_lock();
                 return 0;
             }
 
@@ -290,7 +293,9 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         ct_tmp.cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
         if( row_buf == NULL || ct_tmp.cvs == NULL )
         {
-            pj_ctx_set_errno( ctx, -38 );
+            pj_dalloc( row_buf );
+            pj_dalloc( ct_tmp.cvs );
+            pj_ctx_set_errno( ctx, ENOMEM );
             pj_release_lock();
             return 0;
         }
@@ -362,7 +367,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
         ct_tmp.cvs = (FLP *) pj_malloc(words*sizeof(float));
         if( ct_tmp.cvs == NULL )
         {
-            pj_ctx_set_errno( ctx, -38 );
+            pj_ctx_set_errno( ctx, ENOMEM );
             pj_release_lock();
             return 0;
         }
@@ -371,6 +376,7 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
             != (size_t)words )
         {
             pj_dalloc( ct_tmp.cvs );
+            pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
             pj_release_lock();
             return 0;
         }
@@ -519,6 +525,10 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
 /*      Initialize a corresponding "ct" structure.                      */
 /* -------------------------------------------------------------------- */
         ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
+        if (!ct) {
+            pj_ctx_set_errno(ctx, ENOMEM);
+            return 0;
+        }
         strncpy( ct->id, (const char *) header + 8, 8 );
         ct->id[8] = '\0';
 
@@ -553,6 +563,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
                     "GS_COUNT(%d) does not match expected cells (%dx%d=%d)\n",
                     gs_count, ct->lim.lam, ct->lim.phi,
                     ct->lim.lam * ct->lim.phi );
+            pj_dalloc(ct);
             pj_ctx_set_errno( ctx, -38 );
             return 0;
         }
@@ -567,11 +578,23 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
             gi = gilist;
         else
         {
-            gi = (PJ_GRIDINFO *) pj_malloc(sizeof(PJ_GRIDINFO));
-            memset( gi, 0, sizeof(PJ_GRIDINFO) );
+            gi = (PJ_GRIDINFO *) pj_calloc(1, sizeof(PJ_GRIDINFO));
+            if (!gi) {
+                pj_dalloc(ct);
+                pj_gridinfo_free(ctx, gilist);
+                pj_ctx_set_errno(ctx, ENOMEM);
+                return 0;
+            }
 
-            gi->gridname = strdup( gilist->gridname );
-            gi->filename = strdup( gilist->filename );
+            gi->gridname = pj_strdup( gilist->gridname );
+            gi->filename = pj_strdup( gilist->filename );
+            if (!gi->gridname || gi->filename) {
+                pj_gridinfo_free(ctx, gi);
+                pj_dalloc(ct);
+                pj_gridinfo_free(ctx, gilist);
+                pj_ctx_set_errno(ctx, ENOMEM);
+                return 0;
+            }
             gi->next = NULL;
         }
 
@@ -699,6 +722,10 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
 /*      Fill in CTABLE structure.                                       */
 /* -------------------------------------------------------------------- */
     ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
+    if (!ct) {
+        pj_ctx_set_errno(ctx, ENOMEM);
+        return 0;
+    }
     strcpy( ct->id, "NTv1 Grid Shift File" );
 
     ct->ll.lam = - *((double *) (header+72));
@@ -799,6 +826,10 @@ static int pj_gridinfo_init_gtx( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
 /*      Fill in CTABLE structure.                                       */
 /* -------------------------------------------------------------------- */
     ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
+    if (!ct) {
+        pj_ctx_set_errno(ctx, ENOMEM);
+        return 0;
+    }
     strcpy( ct->id, "GTX Vertical Grid Shift File" );
 
     ct->ll.lam = xorigin;
@@ -863,10 +894,18 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 /*      Initialize a GRIDINFO with stub info we would use if it         */
 /*      cannot be loaded.                                               */
 /* -------------------------------------------------------------------- */
-    gilist = (PJ_GRIDINFO *) pj_malloc(sizeof(PJ_GRIDINFO));
-    memset( gilist, 0, sizeof(PJ_GRIDINFO) );
+    gilist = (PJ_GRIDINFO *) pj_calloc(1, sizeof(PJ_GRIDINFO));
+    if (!gilist) {
+        pj_ctx_set_errno(ctx, ENOMEM);
+        return NULL;
+    }
 
-    gilist->gridname = strdup( gridname );
+    gilist->gridname = pj_strdup( gridname );
+    if (!gilist->gridname) {
+        pj_dalloc(gilist);
+        pj_ctx_set_errno(ctx, ENOMEM);
+        return NULL;
+    }
     gilist->filename = NULL;
     gilist->format = "missing";
     gilist->grid_offset = 0;
@@ -882,7 +921,13 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
         return gilist;
     }
 
-    gilist->filename = strdup(fname);
+    gilist->filename = pj_strdup(fname);
+    if (!gilist->filename) {
+        pj_dalloc(gilist->gridname);
+        pj_dalloc(gilist);
+        pj_ctx_set_errno(ctx, ENOMEM);
+        return NULL;
+    }
 
 /* -------------------------------------------------------------------- */
 /*      Load a header, to determine the file type.                      */

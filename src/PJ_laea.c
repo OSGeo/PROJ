@@ -5,6 +5,13 @@
 
 PROJ_HEAD(laea, "Lambert Azimuthal Equal Area") "\n\tAzi, Sph&Ell";
 
+enum Mode {
+    N_POLE = 0,
+    S_POLE = 1,
+    EQUIT  = 2,
+    OBLIQ  = 3
+};
+
 struct pj_opaque {
     double sinb1;
     double cosb1;
@@ -15,16 +22,12 @@ struct pj_opaque {
     double dd;
     double rq;
     double *apa;
-    int mode;
+    enum Mode mode;
 };
 
 #define EPS10   1.e-10
 #define NITER   20
 #define CONV    1.e-10
-#define N_POLE  0
-#define S_POLE  1
-#define EQUIT   2
-#define OBLIQ   3
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
@@ -255,6 +258,8 @@ PJ *PROJECTION(laea) {
         Q->qp = pj_qsfn(1., P->e, P->one_es);
         Q->mmf = .5 / (1. - P->es);
         Q->apa = pj_authset(P->es);
+        if (0==Q->apa)
+            return destructor(P, ENOMEM);
         switch (Q->mode) {
         case N_POLE:
         case S_POLE:
@@ -290,62 +295,3 @@ PJ *PROJECTION(laea) {
     return P;
 }
 
-
-#ifndef PJ_SELFTEST
-int pj_laea_selftest (void) {return 0;}
-#else
-
-int pj_laea_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char e_args[] = {"+proj=laea   +ellps=GRS80  +lat_1=0.5 +lat_2=2"};
-    char s_args[] = {"+proj=laea   +R=6400000    +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY e_fwd_expect[] = {
-        { 222602.471450095181,  110589.82722441027},
-        { 222602.471450095181, -110589.827224408786},
-        {-222602.471450095181,  110589.82722441027},
-        {-222602.471450095181, -110589.827224408786},
-    };
-
-    XY s_fwd_expect[] = {
-        { 223365.281370124663,  111716.668072915665},
-        { 223365.281370124663, -111716.668072915665},
-        {-223365.281370124663,  111716.668072915665},
-        {-223365.281370124663, -111716.668072915665},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP e_inv_expect[] = {
-        { 0.00179663056847900867,  0.000904369475966495845},
-        { 0.00179663056847900867, -0.000904369475966495845},
-        {-0.00179663056847900867,  0.000904369475966495845},
-        {-0.00179663056847900867, -0.000904369475966495845},
-    };
-
-    LP s_inv_expect[] = {
-        { 0.00179049311002060264,  0.000895246554791735271},
-        { 0.00179049311002060264, -0.000895246554791735271},
-        {-0.00179049311002060264,  0.000895246554791735271},
-        {-0.00179049311002060264, -0.000895246554791735271},
-    };
-
-    return pj_generic_selftest (e_args, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, s_fwd_expect, inv_in, e_inv_expect, s_inv_expect);
-}
-
-
-#endif

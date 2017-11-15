@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(putp2, "Putnins P2") "\n\tPCyl., Sph.";
 
@@ -57,46 +57,3 @@ PJ *PROJECTION(putp2) {
     return P;
 }
 
-#ifndef PJ_SELFTEST
-int pj_putp2_selftest (void) {return 0;}
-#else
-
-int pj_putp2_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=putp2   +a=6400000    +lat_1=0.5 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        { 211638.039634339279,  117895.033043379764},
-        { 211638.039634339279, -117895.033043379764},
-        {-211638.039634339279,  117895.033043379764},
-        {-211638.039634339279, -117895.033043379764},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP s_inv_expect[] = {
-        { 0.00188980221640386672,  0.000848201580276863377},
-        { 0.00188980221640386672, -0.000848201580276863377},
-        {-0.00188980221640386672,  0.000848201580276863377},
-        {-0.00188980221640386672, -0.000848201580276863377},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
-}
-
-
-#endif

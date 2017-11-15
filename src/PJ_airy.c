@@ -34,22 +34,24 @@
 PROJ_HEAD(airy, "Airy") "\n\tMisc Sph, no inv.\n\tno_cut lat_b=";
 
 
+enum Mode {
+    N_POLE = 0,
+    S_POLE = 1,
+    EQUIT  = 2,
+    OBLIQ  = 3
+};
+
 struct pj_opaque {
     double  p_halfpi;
     double  sinph0;
     double  cosph0;
     double  Cb;
-    int     mode;
+    enum Mode mode;
     int     no_cut; /* do not cut at hemisphere limit */
 };
 
 
 # define EPS 1.e-10
-# define N_POLE 0
-# define S_POLE 1
-# define EQUIT  2
-# define OBLIQ  3
-
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
@@ -147,31 +149,3 @@ PJ *PROJECTION(airy) {
 }
 
 
-#ifndef PJ_SELFTEST
-int pj_airy_selftest (void) {return 0;}
-#else
-
-int pj_airy_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char s_args[] = {"+proj=airy   +a=6400000    +lat_1=0 +lat_2=2"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        { 189109.88690862127,   94583.752387504152},
-        { 189109.88690862127,  -94583.752387504152},
-        {-189109.88690862127,   94583.752387504152},
-        {-189109.88690862127,  -94583.752387504152},
-    };
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 0, fwd_in, 0, s_fwd_expect, 0, 0, 0);
-}
-
-#endif

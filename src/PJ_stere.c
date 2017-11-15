@@ -7,12 +7,19 @@ PROJ_HEAD(stere, "Stereographic") "\n\tAzi, Sph&Ell\n\tlat_ts=";
 PROJ_HEAD(ups, "Universal Polar Stereographic") "\n\tAzi, Sph&Ell\n\tsouth";
 
 
+enum Mode {
+    S_POLE = 0,
+    N_POLE = 1,
+    OBLIQ  = 2,
+    EQUIT  = 3
+};
+
 struct pj_opaque {
     double phits;
     double sinX1;
     double cosX1;
     double akm1;
-    int mode;
+    enum Mode mode;
 };
 
 #define sinph0  P->opaque->sinX1
@@ -21,10 +28,6 @@ struct pj_opaque {
 #define TOL 1.e-8
 #define NITER   8
 #define CONV    1.e-10
-#define S_POLE  0
-#define N_POLE  1
-#define OBLIQ   2
-#define EQUIT   3
 
 static double ssfn_ (double phit, double sinphi, double eccen) {
     sinphi *= eccen;
@@ -310,110 +313,3 @@ PJ *PROJECTION(ups) {
     return setup(P);
 }
 
-
-#ifndef PJ_SELFTEST
-int pj_stere_selftest (void) {return 0;}
-#else
-
-int pj_stere_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char e_args[] = {"+proj=stere   +ellps=GRS80  +lat_1=0.5 +lat_2=2 +n=0.5"};
-    char s_args[] = {"+proj=stere   +R=6400000    +lat_1=0.5 +lat_2=2 +n=0.5"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY e_fwd_expect[] = {
-        { 222644.8545501172,  110610.8834741739},
-        { 222644.8545501172, -110610.8834741739},
-        {-222644.8545501172,  110610.8834741739},
-        {-222644.8545501172, -110610.8834741739},
-    };
-
-    XY s_fwd_expect[] = {
-        { 223407.81025950745,  111737.938996443},
-        { 223407.81025950745, -111737.938996443},
-        {-223407.81025950745,  111737.938996443},
-        {-223407.81025950745, -111737.938996443},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP e_inv_expect[] = {
-        { 0.0017966305682022392,  0.00090436947502443507},
-        { 0.0017966305682022392, -0.00090436947502443507},
-        {-0.0017966305682022392,  0.00090436947502443507},
-        {-0.0017966305682022392, -0.00090436947502443507},
-    };
-
-    LP s_inv_expect[] = {
-        { 0.001790493109747395,  0.00089524655465513144},
-        { 0.001790493109747395, -0.00089524655465513144},
-        {-0.001790493109747395,  0.00089524655465513144},
-        {-0.001790493109747395, -0.00089524655465513144},
-    };
-
-    return pj_generic_selftest (e_args, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, s_fwd_expect, inv_in, e_inv_expect, s_inv_expect);
-}
-
-
-#endif
-
-
-
-
-
-#ifndef PJ_SELFTEST
-int pj_ups_selftest (void) {return 0;}
-#else
-
-int pj_ups_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-
-    char e_args[] = {"+proj=ups   +ellps=GRS80  +lat_1=0.5 +lat_2=2 +n=0.5"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY e_fwd_expect[] = {
-        {2433455.5634384668,  -10412543.301512826},
-        {2448749.1185681992,  -10850493.419804076},
-        {1566544.4365615332,  -10412543.301512826},
-        {1551250.8814318008,  -10850493.419804076},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP e_inv_expect[] = {
-        {-44.998567498074834,  64.9182362867341},
-        {-44.995702709112308,  64.917020250675748},
-        {-45.004297076028529,  64.915804280954518},
-        {-45.001432287066002,  64.914588377560719},
-    };
-
-    return pj_generic_selftest (e_args, 0, tolerance_xy, tolerance_lp, 4, 4, fwd_in, e_fwd_expect, 0, inv_in, e_inv_expect, 0);
-}
-
-
-#endif

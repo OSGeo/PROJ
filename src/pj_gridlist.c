@@ -28,6 +28,7 @@
 
 #define PJ_LIB__
 
+#include <errno.h>
 #include <projects.h>
 #include <string.h>
 #include <math.h>
@@ -103,6 +104,10 @@ static int pj_gridlist_merge_gridfile( projCtx ctx,
                 int new_max = *p_gridmax + 20;
 
                 new_list = (PJ_GRIDINFO **) pj_calloc(new_max, sizeof(void *));
+                if (!new_list) {
+                    pj_ctx_set_errno( ctx, ENOMEM );
+                    return 0;
+                }
                 if( *p_gridlist != NULL )
                 {
                     memcpy( new_list, *p_gridlist,
@@ -132,8 +137,6 @@ static int pj_gridlist_merge_gridfile( projCtx ctx,
 
     if( this_grid == NULL )
     {
-        /* we should get at least a stub grid with a missing "ct" member */
-        assert( FALSE );
         return 0;
     }
     

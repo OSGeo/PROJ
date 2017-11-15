@@ -90,6 +90,13 @@ static double RM (double a, double es, double phi) {
 
         E.J Krakiwsky & D.B. Thomson, 1974,
         GEODETIC POSITION COMPUTATIONS,
+
+        Fredericton NB, Canada:
+        University of New Brunswick,
+        Department of Geodesy and Geomatics Engineering,
+        Lecture Notes No. 39,
+        99 pp.
+
         http://www2.unb.ca/gge/Pubs/LN39.pdf
 
 **********************************************************/
@@ -228,10 +235,9 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
 }
 
 
-static PJ_OBS forward_obs(PJ_OBS obs, PJ *P) {
-    PJ_OBS point;
-    point.coo.xyz = forward_3d(obs.coo.lpz, P);
-    return point;
+static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
+    obs.xyz = forward_3d(obs.lpz, P);
+    return obs;
 }
 
 
@@ -256,21 +262,20 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
 }
 
 
-static PJ_OBS reverse_obs(PJ_OBS obs, PJ *P) {
-    PJ_OBS point;
-    point.coo.lpz = reverse_3d(obs.coo.xyz, P);
-    return point;
+static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
+    obs.lpz = reverse_3d(obs.xyz, P);
+    return obs;
 }
 
 
-PJ *PROJECTION(molodensky) {
+PJ *TRANSFORMATION(molodensky,1) {
     struct pj_opaque_molodensky *Q = pj_calloc(1, sizeof(struct pj_opaque_molodensky));
     if (0==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = (void *) Q;
 
-    P->fwdobs = forward_obs;
-    P->invobs = reverse_obs;
+    P->fwd4d = forward_4d;
+    P->inv4d = reverse_4d;
     P->fwd3d  = forward_3d;
     P->inv3d  = reverse_3d;
     P->fwd    = forward_2d;
@@ -307,81 +312,3 @@ PJ *PROJECTION(molodensky) {
     return P;
 }
 
-
-#ifndef PJ_SELFTEST
-int pj_molodensky_selftest (void) {return 0;}
-#else
-int pj_molodensky_selftest (void) {
-
-    PJ_OBS in, res, exp;
-    PJ *P;
-
-    /* Test the abridged Molodensky first. Example from appendix 3 of Deakin (2004). */
-    P = proj_create(PJ_DEFAULT_CTX,
-        "+proj=molodensky +a=6378160 +rf=298.25 "
-        "+da=-23 +df=-8.120449e-8 +dx=-134 +dy=-48 +dz=149 "
-        "+abridged "
-    );
-    if (0==P)
-        return 10;
-
-    in.coo.lpz.lam = PJ_TORAD(144.9667);
-    in.coo.lpz.phi = PJ_TORAD(-37.8);
-    in.coo.lpz.z   = 50.0;
-
-    exp.coo.lpz.lam = PJ_TORAD(144.968);
-    exp.coo.lpz.phi = PJ_TORAD(-37.79848);
-    exp.coo.lpz.z   = 46.378;
-
-    res = proj_trans_obs(P, PJ_FWD, in);
-
-    if (proj_lp_dist(P, res.coo.lp, exp.coo.lp) > 2 ) { /* we don't expect much accurecy here... */
-        proj_destroy(P);
-        return 11;
-    }
-
-    /* let's try a roundtrip */
-    if (proj_roundtrip(P, PJ_FWD, 100, in.coo) > 1) {
-        proj_destroy(P);
-        return 12;
-    }
-
-    if (res.coo.lpz.z - exp.coo.lpz.z > 1e-3) {
-        proj_destroy(P);
-        return 13;
-    }
-
-    proj_destroy(P);
-
-    /* Test the abridged Molodensky first. Example from appendix 3 of Deaking (2004). */
-
-    P = proj_create(PJ_DEFAULT_CTX,
-        "+proj=molodensky +a=6378160 +rf=298.25 "
-        "+da=-23 +df=-8.120449e-8 +dx=-134 +dy=-48 +dz=149 "
-    );
-    if (0==P)
-        return 20;
-
-    res = proj_trans_obs(P, PJ_FWD, in);
-
-    if (proj_lp_dist(P, res.coo.lp, exp.coo.lp) > 2 ) { /* we don't expect much accurecy here... */
-        proj_destroy(P);
-        return 21;
-    }
-
-    /* let's try a roundtrip */
-    if (proj_roundtrip(P, PJ_FWD, 100, in.coo) > 1) {
-        proj_destroy(P);
-        return 22;
-    }
-
-    if (res.coo.lpz.z - exp.coo.lpz.z > 1e-3) {
-        proj_destroy(P);
-        return 23;
-    }
-
-    proj_destroy(P);
-    return 0;
-}
-
-#endif

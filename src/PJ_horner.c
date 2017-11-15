@@ -1,19 +1,3 @@
-#define PJ_LIB__
-#include "proj_internal.h"
-#include "projects.h"
-#include <assert.h>
-#include <stddef.h>
-#include <math.h>
-#include <errno.h>
-
-PROJ_HEAD(horner,    "Horner polynomial evaluation");
-
-/* make horner.h interface with proj's memory management */
-#define horner_dealloc(x) pj_dealloc(x)
-#define horner_calloc(n,x) pj_calloc(n,x)
-
-/* The next few hundred lines is mostly cut-and-paste from the horner.h header library */
-
 /***********************************************************************
 
     Interfacing to a classic piece of geodetic software
@@ -90,6 +74,20 @@ PROJ_HEAD(horner,    "Horner polynomial evaluation");
  * DEALINGS IN THE SOFTWARE.
  *
  *****************************************************************************/
+
+#define PJ_LIB__
+#include "proj_internal.h"
+#include "projects.h"
+#include <assert.h>
+#include <stddef.h>
+#include <math.h>
+#include <errno.h>
+
+PROJ_HEAD(horner,    "Horner polynomial evaluation");
+
+/* make horner.h interface with proj's memory management */
+#define horner_dealloc(x) pj_dealloc(x)
+#define horner_calloc(n,x) pj_calloc(n,x)
 
 
 struct horner;
@@ -289,13 +287,13 @@ summing the tiny high order elements first.
 
 
 
-static PJ_OBS horner_forward_obs (PJ_OBS point, PJ *P) {
-    point.coo.uv = horner ((HORNER *) P->opaque, 1, point.coo.uv);
+static PJ_COORD horner_forward_4d (PJ_COORD point, PJ *P) {
+    point.uv = horner ((HORNER *) P->opaque, 1, point.uv);
     return point;
 }
 
-static PJ_OBS horner_reverse_obs (PJ_OBS point, PJ *P) {
-    point.coo.uv = horner ((HORNER *) P->opaque, -1, point.coo.uv);
+static PJ_COORD horner_reverse_4d (PJ_COORD point, PJ *P) {
+    point.uv = horner ((HORNER *) P->opaque, -1, point.uv);
     return point;
 }
 
@@ -371,13 +369,13 @@ polynomial evaluation engine.
 
 
 
-static PJ_OBS complex_horner_forward_obs (PJ_OBS point, PJ *P) {
-    point.coo.uv = complex_horner ((HORNER *) P->opaque, PJ_FWD, point.coo.uv);
+static PJ_COORD complex_horner_forward_4d (PJ_COORD point, PJ *P) {
+    point.uv = complex_horner ((HORNER *) P->opaque, PJ_FWD, point.uv);
     return point;
 }
 
-static PJ_OBS complex_horner_reverse_obs (PJ_OBS point, PJ *P) {
-    point.coo.uv = complex_horner ((HORNER *) P->opaque, PJ_INV, point.coo.uv);
+static PJ_COORD complex_horner_reverse_4d (PJ_COORD point, PJ *P) {
+    point.uv = complex_horner ((HORNER *) P->opaque, PJ_INV, point.uv);
     return point;
 }
 
@@ -399,7 +397,7 @@ static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
 
     buf = pj_calloc (strlen (param) + 2, sizeof(char));
     if (0==buf) {
-        proj_log_error (P, "Horner: Out of core");
+        proj_log_error (P, "Horner: No memory left");
         return 0;
     }
 
@@ -431,13 +429,13 @@ PJ *PROJECTION(horner) {
 /*********************************************************************/
     int   degree = 0, n, complex_horner = 0;
     HORNER *Q;
-    P->fwdobs  =  horner_forward_obs;
-    P->invobs  =  horner_reverse_obs;
-    P->fwd3d   =  0;
-    P->inv3d   =  0;
-    P->fwd     =  0;
-    P->inv     =  0;
-    P->left    =  P->right  =  PJ_IO_UNITS_METERS;
+    P->fwd4d  = horner_forward_4d;
+    P->inv4d  = horner_reverse_4d;
+    P->fwd3d  =  0;
+    P->inv3d  =  0;
+    P->fwd    =  0;
+    P->inv    =  0;
+    P->left   =  P->right  =  PJ_IO_UNITS_METERS;
     P->destructor = horner_freeup;
 
     /* Polynomial degree specified? */
@@ -462,8 +460,8 @@ PJ *PROJECTION(horner) {
             return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         if (0==parse_coefs (P, Q->inv_c, "inv_c", n))
             return horner_freeup (P, PJD_ERR_MISSING_ARGS);
-        P->fwdobs  =  complex_horner_forward_obs;
-        P->invobs  =  complex_horner_reverse_obs;
+        P->fwd4d = complex_horner_forward_4d;
+        P->inv4d = complex_horner_reverse_4d;
 
     }
     else {
@@ -488,85 +486,3 @@ PJ *PROJECTION(horner) {
     return P;
 }
 
-#ifndef PJ_SELFTEST
-/* selftest stub */
-int pj_horner_selftest (void) {return 0;}
-#else
-char tc32_utm32[] = {
-    " +proj=horner"
-    " +ellps=intl"
-    " +range=500000"
-    " +fwd_origin=877605.269066,6125810.306769"
-    " +inv_origin=877605.760036,6125811.281773"
-    " +deg=4"
-    " +fwd_v=6.1258112678e+06,9.9999971567e-01,1.5372750011e-10,5.9300860915e-15,2.2609497633e-19,4.3188227445e-05,2.8225130416e-10,7.8740007114e-16,-1.7453997279e-19,1.6877465415e-10,-1.1234649773e-14,-1.7042333358e-18,-7.9303467953e-15,-5.2906832535e-19,3.9984284847e-19"
-    " +fwd_u=8.7760574982e+05,9.9999752475e-01,2.8817299305e-10,5.5641310680e-15,-1.5544700949e-18,-4.1357045890e-05,4.2106213519e-11,2.8525551629e-14,-1.9107771273e-18,3.3615590093e-10,2.4380247154e-14,-2.0241230315e-18,1.2429019719e-15,5.3886155968e-19,-1.0167505000e-18"
-    " +inv_v=6.1258103208e+06,1.0000002826e+00,-1.5372762184e-10,-5.9304261011e-15,-2.2612705361e-19,-4.3188331419e-05,-2.8225549995e-10,-7.8529116371e-16,1.7476576773e-19,-1.6875687989e-10,1.1236475299e-14,1.7042518057e-18,7.9300735257e-15,5.2881862699e-19,-3.9990736798e-19"
-    " +inv_u=8.7760527928e+05,1.0000024735e+00,-2.8817540032e-10,-5.5627059451e-15,1.5543637570e-18,4.1357152105e-05,-4.2114813612e-11,-2.8523713454e-14,1.9109017837e-18,-3.3616407783e-10,-2.4382678126e-14,2.0245020199e-18,-1.2441377565e-15,-5.3885232238e-19,1.0167203661e-18"
-};
-
-
-char sb_utm32[] = {
-    " +proj=horner"
-    " +ellps=intl"
-    " +range=500000"
-    " +tolerance=0.0005"
-    " +fwd_origin=4.94690026817276e+05,6.13342113183056e+06"
-    " +inv_origin=6.19480258923588e+05,6.13258568148837e+06"
-    " +deg=3"
-    " +fwd_c=6.13258562111350e+06,6.19480105709997e+05,9.99378966275206e-01,-2.82153291753490e-02,-2.27089979140026e-10,-1.77019590701470e-09,1.08522286274070e-14,2.11430298751604e-15"
-    " +inv_c=6.13342118787027e+06,4.94690181709311e+05,9.99824464710368e-01,2.82279070814774e-02,7.66123542220864e-11,1.78425334628927e-09,-1.05584823306400e-14,-3.32554258683744e-15"
-};
-
-int pj_horner_selftest (void) {
-    PJ *P;
-    PJ_OBS a, b, c;
-    double dist;
-
-    /* Real polynonia relating the technical coordinate system TC32 to "System 45 Bornholm" */
-    P = proj_create (PJ_DEFAULT_CTX, tc32_utm32);
-    if (0==P)
-        return 10;
-
-    a = b = proj_obs_null;
-    a.coo.uv.v = 6125305.4245;
-    a.coo.uv.u =  878354.8539;
-
-    /* Check roundtrip precision for 1 iteration each way, starting in forward direction */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
-    if (dist > 0.01)
-        return 1;
-
-    /* The complex polynomial transformation between the "System Storebaelt" and utm32/ed50 */
-    P = proj_create (PJ_DEFAULT_CTX, sb_utm32);
-    if (0==P)
-        return 11;
-
-    /* Test value: utm32_ed50(620000, 6130000) = sb_ed50(495136.8544, 6130821.2945) */
-    a = b = c = proj_obs_null;
-    a.coo.uv.v = 6130821.2945;
-    a.coo.uv.u =  495136.8544;
-    c.coo.uv.v = 6130000.0000;
-    c.coo.uv.u =  620000.0000;
-
-    /* Forward projection */
-    b = proj_trans_obs (P, PJ_FWD, a);
-    dist = proj_xy_dist (b.coo.xy, c.coo.xy);
-    if (dist > 0.001)
-        return 2;
-
-    /* Inverse projection */
-    b = proj_trans_obs (P, PJ_INV, c);
-    dist = proj_xy_dist (b.coo.xy, a.coo.xy);
-    if (dist > 0.001)
-        return 3;
-
-    /* Check roundtrip precision for 1 iteration each way */
-    dist = proj_roundtrip (P, PJ_FWD, 1, a.coo);
-    if (dist > 0.01)
-        return 4;
-
-    proj_destroy(P);
-    return 0;
-}
-#endif

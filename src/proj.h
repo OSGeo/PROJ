@@ -53,26 +53,21 @@
  *           it remains as-is for now).
  *
  *           THIRD, I try to eliminate implicit type punning. Hence this API
- *           introduces the PJ_OBS ("observation") data type, for generic
- *           coordinate and handling of ancillary data.
+ *           introduces the PJ_COORD union data type, for generic 4D coordinate
+ *           handling.
  *
- *           It includes the PJ_COORD and PJ_TRIPLET unions making it possible
- *           to make explicit the previously used "implicit type punning", where
- *           a XY is turned into a LP by re#defining both as UV, behind the back
- *           of the user.
+ *           PJ_COORD makes it possible to make explicit the previously used
+ *           "implicit type punning", where a XY is turned into a LP by
+ *           re#defining both as UV, behind the back of the user.
  *
  *           The PJ_COORD union is used for storing 1D, 2D, 3D and 4D coordinates.
- *           The PJ_TRIPLET union is used for storing any set of up to 3 related
- *           observations. At the application code level, the names of these
- *           unions will usually not be used - they will only be accessed via
- *           their tag names in the PJ_OBS data type.
  *
  *           The bare essentials API presented here follows the PROJ.4
  *           convention of sailing the coordinate to be reprojected, up on
  *           the stack ("call by value"), and symmetrically returning the
- *           result on the stack. Although the PJ_OBS object is 4 times
- *           as large as the traditional XY and LP objects, timing results
- *           have shown the overhead to be very reasonable.
+ *           result on the stack. Although the PJ_COORD object is twice as large
+ *           as the traditional XY and LP objects, timing results have shown the
+ *           overhead to be very reasonable.
  *
  *           Contexts and thread safety
  *           --------------------------
@@ -82,15 +77,15 @@
  *           context subsystem is unavoidable in a multi-threaded world.
  *           Hence, instead of hiding it away, we move it into the limelight,
  *           highly recommending (but not formally requiring) the bracketing
- *           with calls to proj_context_create(...)/proj_context_destroy() of
- *           any code block calling PROJ.4 functions.
+ *           of any code block calling PROJ.4 functions with calls to
+ *           proj_context_create(...)/proj_context_destroy()
  *
  *           Legacy single threaded code need not do anything, but *may*
  *           implement a bit of future compatibility by using the backward
  *           compatible call proj_context_create(0), which will not create
  *           a new context, but simply provide a pointer to the default one.
  *
- *           See pj_obs_api_test.c for an example of how to use the API.
+ *           See proj_4D_api_test.c for examples of how to use the API.
  *
  * Author:   Thomas Knudsen, <thokn@sdfe.dk>
  *           Benefitting from a large number of comments and suggestions
@@ -170,10 +165,6 @@ extern char const pj_release[]; /* global release id string */
 
 /* first forward declare everything needed */
 
-/* Data type for generic geodetic observations */
-struct PJ_OBS;
-typedef struct PJ_OBS PJ_OBS;
-
 /* Data type for generic geodetic 3D data */
 union PJ_TRIPLET;
 typedef union PJ_TRIPLET PJ_TRIPLET;
@@ -181,6 +172,9 @@ typedef union PJ_TRIPLET PJ_TRIPLET;
 /* Data type for generic geodetic 3D data plus epoch information */
 union PJ_COORD;
 typedef union PJ_COORD PJ_COORD;
+
+struct PJ_AREA;
+typedef struct PJ_AREA PJ_AREA;
 
 struct DERIVS;
 typedef struct DERIVS PJ_DERIVS;
@@ -211,9 +205,6 @@ typedef struct PJ_LIST PJ_OPERATIONS;
 
 struct PJ_ELLPS;
 typedef struct PJ_ELLPS PJ_ELLPS;
-
-struct PJ_DATUMS;
-typedef struct PJ_DATUMS PJ_DATUMS;
 
 struct PJ_UNITS;
 typedef struct PJ_UNITS PJ_UNITS;
@@ -298,18 +289,6 @@ union PJ_PAIR {
     double v[2]; /* Yes - It's really just a vector! */
 };
 
-struct PJ_OBS {
-    PJ_COORD coo;        /* coordinate data */
-    PJ_TRIPLET anc;      /* ancillary data */
-    int id;              /* integer ancillary data - e.g. observation number, EPSG code... */
-    unsigned int flags;  /* additional data, intended for flags */
-};
-
-#define PJ_IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
-#define PJ_IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
-#define PJ_IS_ANAL_HK    04    /* h and k analytic */
-#define PJ_IS_ANAL_CONV 010    /* convergence analytic */
-
 struct PJ_INFO {
     char        release[64];        /* Release info. Version + date         */
     char        version[64];        /* Full version number                  */
@@ -366,9 +345,14 @@ PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx);
 /* Manage the transformation definition object PJ */
 PJ  *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
-PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to);
+PJ  *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area);
 PJ  *proj_destroy (PJ *P);
 
+/* Setter-functions for the opaque PJ_AREA struct */
+/* Uncomment these when implementing support for area-based transformations.
+void proj_area_bbox(PJ_AREA *area, LP ll, LP ur);
+void proj_area_description(PJ_AREA *area, const char *descr);
+*/
 
 /* Apply transformation to observation - in forward or inverse direction */
 enum PJ_DIRECTION {
@@ -378,11 +362,17 @@ enum PJ_DIRECTION {
 };
 typedef enum PJ_DIRECTION PJ_DIRECTION;
 
-PJ_OBS   proj_trans_obs   (PJ *P, PJ_DIRECTION direction, PJ_OBS obs);
-PJ_COORD proj_trans_coord (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
 
 
-size_t proj_transform (
+
+int proj_angular_input (PJ *P, enum PJ_DIRECTION dir);
+int proj_angular_output (PJ *P, enum PJ_DIRECTION dir);
+
+
+PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
+
+
+size_t proj_trans_generic (
     PJ *P,
     PJ_DIRECTION direction,
     double *x, size_t sx, size_t nx,
@@ -391,18 +381,19 @@ size_t proj_transform (
     double *t, size_t st, size_t nt
 );
 
-int proj_transform_obs   (PJ *P, PJ_DIRECTION direction, size_t n, PJ_OBS *obs);
-int proj_transform_coord (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
+int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
 
 /* Initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);
-PJ_OBS   proj_obs   (double x, double y, double z, double t, double o, double p, double k, int id, unsigned int flags);
 
 /* Measure internal consistency - in forward or inverse direction */
-double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD coo);
-    
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo);
+
 /* Geodesic distance between two points with angular 2D coordinates */
 double proj_lp_dist (const PJ *P, LP a, LP b);
+
+/* The geodesic distance AND the vertical offset */
+double proj_lpz_dist (const PJ *P, LPZ a, LPZ b);
 
 /* Euclidean distance between two points with linear 2D coordinates */
 double proj_xy_dist (XY a, XY b);
@@ -434,7 +425,7 @@ const PJ_ELLPS            *proj_list_ellps(void);
 const PJ_UNITS            *proj_list_units(void);
 const PJ_PRIME_MERIDIANS  *proj_list_prime_meridians(void);
 
-/* These are trivial, and while occasionaly useful in real code, primarily here to       */
+/* These are trivial, and while occasionally useful in real code, primarily here to      */
 /* simplify demo code, and in acknowledgement of the proj-internal discrepancy between   */
 /* angular units expected by classical proj, and by Charles Karney's geodesics subsystem */
 double proj_torad (double angle_in_degrees);

@@ -84,7 +84,7 @@ extern "C" {
 #endif
 
 /* prototype hypot for systems where absent */
-#if !defined(_WIN32) || !defined(__ANSI__)
+#if !(defined(HAVE_C99_MATH) && HAVE_C99_MATH)
 extern double hypot(double, double);
 #endif
 
@@ -93,7 +93,6 @@ extern double hypot(double, double);
 #  include <wce_stdio.h>
 #  define rewind wceex_rewind
 #  define getenv wceex_getenv
-#  define strdup _strdup
 #  define hypot _hypot
 #endif
 
@@ -174,7 +173,7 @@ typedef struct { double u, v, w; }     UVW;
 
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
 struct PJconsts;
-struct PJ_OBS;
+
 union  PJ_COORD;
 struct geod_geodesic;
 struct pj_opaque;
@@ -183,14 +182,15 @@ struct FACTORS;
 struct PJ_REGION_S;
 typedef struct PJ_REGION_S  PJ_Region;
 typedef struct ARG_list paralist;   /* parameter list */
+#ifndef PROJ_INTERNAL_H
 enum pj_io_units {
-    PJ_IO_UNITS_CLASSIC = 0,   /* LEFT: Radians     RIGHT: Scaled meters */
+    PJ_IO_UNITS_CLASSIC = 0,   /* Scaled meters (right) */
     PJ_IO_UNITS_METERS  = 1,   /* Meters  */
     PJ_IO_UNITS_RADIANS = 2    /* Radians */
 };
+#endif
 #ifndef PROJ_H
 typedef struct PJconsts PJ;         /* the PJ object herself */
-typedef struct PJ_OBS PJ_OBS;
 typedef union  PJ_COORD PJ_COORD;
 #endif
 
@@ -201,9 +201,16 @@ struct PJ_REGION_S {
     double ur_lat;
 };
 
+struct PJ_AREA {
+    int     id;         /* Area ID in the EPSG database */
+    LP      ll;         /* Lower left corner of bounding box */
+    LP      ur;         /* Upper right corner of bounding box */
+    char    descr[64];  /* text representation of area */
+};
 
 struct projCtx_t;
 typedef struct projCtx_t projCtx_t;
+
 
 /* base projection data structure */
 struct PJconsts {
@@ -224,6 +231,7 @@ struct PJconsts {
     paralist *params;              /* Parameter list */
     struct geod_geodesic *geod;    /* For geodesic computations */
     struct pj_opaque *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
+    int inverted;                  /* Tell high level API functions to swap inv/fwd */
 
 
     /*************************************************************************************
@@ -246,15 +254,11 @@ struct PJconsts {
     LP  (*inv)(XY,    PJ *);
     XYZ (*fwd3d)(LPZ, PJ *);
     LPZ (*inv3d)(XYZ, PJ *);
-    PJ_OBS (*fwdobs)(PJ_OBS, PJ *);
-    PJ_OBS (*invobs)(PJ_OBS, PJ *);
-    PJ_COORD (*fwdcoord)(PJ_COORD, PJ *);
-    PJ_COORD (*invcoord)(PJ_COORD, PJ *);
-
-    void (*spc)(LP, PJ *, struct FACTORS *);
+    PJ_COORD (*fwd4d)(PJ_COORD, PJ *);
+    PJ_COORD (*inv4d)(PJ_COORD, PJ *);
 
     void *(*destructor)(PJ *, int);
-    
+
 
     /*************************************************************************************
 
@@ -320,6 +324,7 @@ struct PJconsts {
     int  geoc;                      /* Geocentric latitude flag */
     int  is_latlong;                /* proj=latlong ... not really a projection at all */
     int  is_geocent;                /* proj=geocent ... not really a projection at all */
+    int  need_ellps;                /* 0 for operations that are purely cartesian */
 
     enum pj_io_units left;          /* Flags for input/output coordinate types */
     enum pj_io_units right;
@@ -452,14 +457,17 @@ struct FACTORS {
     double conv;           /* convergence */
     double s;              /* areal scale factor */
     double a, b;           /* max-min scale error */
-    int code;              /* info as to analytics, see following */
+    int    code;           /* always 0 */
+};
+
+enum deprecated_constants_for_now_dropped_analytical_factors {
+    IS_ANAL_XL_YL =  01,   /* derivatives of lon analytic */
+    IS_ANAL_XP_YP =  02,   /* derivatives of lat analytic */
+    IS_ANAL_HK    =  04,   /* h and k analytic */
+    IS_ANAL_CONV  = 010    /* convergence analytic */
 };
 
 
-#define IS_ANAL_XL_YL 01    /* derivatives of lon analytic */
-#define IS_ANAL_XP_YP 02    /* derivatives of lat analytic */
-#define IS_ANAL_HK    04    /* h and k analytic */
-#define IS_ANAL_CONV 010    /* convergence analytic */
 
 /* datum_type values */
 #define PJD_UNKNOWN   0
@@ -525,6 +533,7 @@ struct FACTORS {
 #define PJD_ERR_MISSING_ARGS            -54
 #define PJD_ERR_LAT_0_IS_ZERO           -55
 #define PJD_ERR_ELLIPSOIDAL_UNSUPPORTED -56
+#define PJD_ERR_TOO_MANY_INITS          -57
 
 struct projFileAPI_t;
 
@@ -552,7 +561,6 @@ struct PJ_LIST {
 
 #ifndef USE_PJ_LIST_H
 extern struct PJ_LIST pj_list[];
-extern struct PJ_SELFTEST_LIST pj_selftest_list[];
 #endif
 
 #ifndef PJ_ELLPS__
@@ -575,12 +583,13 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 #ifdef PJ_LIB__
 #define PROJ_HEAD(id, name) static const char des_##id [] = name
 
-
-#define PROJECTION(name)                                     \
+#define OPERATION(name, NEED_ELLPS)                          \
+                                                             \
 pj_projection_specific_setup_##name (PJ *P);                 \
-C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
 C_NAMESPACE PJ *pj_##name (PJ *P);                           \
-int pj_ ## name ## _selftest (void);                         \
+                                                             \
+C_NAMESPACE_VAR const char * const pj_s_##name = des_##name; \
+                                                             \
 C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     if (P)                                                   \
         return pj_projection_specific_setup_##name (P);      \
@@ -589,30 +598,22 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
         return 0;                                            \
     P->destructor = pj_default_destructor;                   \
     P->descr = des_##name;                                   \
+    P->need_ellps = NEED_ELLPS;                              \
     P->left  = PJ_IO_UNITS_RADIANS;                          \
     P->right = PJ_IO_UNITS_CLASSIC;                          \
     return P;                                                \
 }                                                            \
+                                                             \
 PJ *pj_projection_specific_setup_##name (PJ *P)
+
+/* In ISO19000 lingo, an operation is either a conversion or a transformation */
+#define CONVERSION(name, need_ellps)      OPERATION (name, need_ellps)
+#define TRANSFORMATION(name, need_ellps)  OPERATION (name, need_ellps)
+
+/* In PROJ.4 a projection is a conversion taking angular input and giving scaled linear output */
+#define PROJECTION(name) CONVERSION (name, 1)
+
 #endif /* def PJ_LIB__ */
-
-
-int pj_generic_selftest (
-    char *e_args,
-    char *s_args,
-    double tolerance_xy,
-    double tolerance_lp,
-    int n_fwd,
-    int n_inv,
-    LP *fwd_in,
-    XY *e_fwd_expect,
-    XY *s_fwd_expect,
-    XY *inv_in,
-    LP *e_inv_expect,
-    LP *s_inv_expect
-);
-
-
 
 
 #define MAX_TAB_ID 80
@@ -792,7 +793,6 @@ struct PJ_ELLPS            *pj_get_ellps_ref( void );
 struct PJ_DATUMS           *pj_get_datums_ref( void );
 struct PJ_UNITS            *pj_get_units_ref( void );
 struct PJ_LIST             *pj_get_list_ref( void );
-struct PJ_SELFTEST_LIST    *pj_get_selftest_list_ref ( void );
 struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
 
 void *pj_default_destructor (PJ *P, int errlev);

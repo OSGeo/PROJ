@@ -1,6 +1,6 @@
 AM_CFLAGS = @C_WFLAGS@
 
-bin_PROGRAMS =	proj nad2bin geod cs2cs cct
+bin_PROGRAMS =	proj nad2bin geod cs2cs gie cct
 EXTRA_PROGRAMS = multistresstest test228
 
 TESTS = geodtest
@@ -12,7 +12,7 @@ AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 include_HEADERS = proj.h proj_api.h projects.h geodesic.h \
 	org_proj4_Projections.h org_proj4_PJ.h
 
-EXTRA_DIST = makefile.vc proj.def bin_cct.cmake bin_cs2cs.cmake \
+EXTRA_DIST = makefile.vc proj.def bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake \
 			 lib_proj.cmake CMakeLists.txt bin_geodtest.cmake geodtest.c
 
@@ -21,15 +21,19 @@ cs2cs_SOURCES = cs2cs.c gen_cheb.c p_series.c
 cct_SOURCES = cct.c proj_strtod.c optargpm.h
 nad2bin_SOURCES = nad2bin.c
 geod_SOURCES = geod.c geod_set.c geod_interface.c geod_interface.h
+
+gie_SOURCES = gie.c proj_strtod.c optargpm.h
 multistresstest_SOURCES = multistresstest.c
 test228_SOURCES = test228.c
 geodtest_SOURCES = geodtest.c
 
-proj_LDADD = libproj.la
-cs2cs_LDADD = libproj.la
 cct_LDADD = libproj.la
-nad2bin_LDADD = libproj.la
+cs2cs_LDADD = libproj.la
 geod_LDADD = libproj.la
+proj_LDADD = libproj.la
+nad2bin_LDADD = libproj.la
+
+gie_LDADD = libproj.la
 multistresstest_LDADD = libproj.la @THREAD_LIB@
 test228_LDADD = libproj.la @THREAD_LIB@
 geodtest_LDADD = libproj.la
@@ -69,7 +73,7 @@ libproj_la_SOURCES = \
 	pj_factors.c pj_fwd.c pj_init.c pj_inv.c pj_fwd3d.c pj_inv3d.c\
 	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c proj_mdist.c \
 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c \
-	pj_qsfn.c pj_generic_selftest.c pj_run_selftests.c pj_strerrno.c \
+	pj_qsfn.c pj_strerrno.c \
 	pj_tsfn.c pj_units.c pj_ctx.c pj_log.c pj_zpoly1.c rtodms.c \
 	vector1.c pj_release.c pj_gauss.c \
 	PJ_healpix.c PJ_natearth.c PJ_natearth2.c PJ_calcofi.c pj_fileapi.c \
@@ -81,9 +85,9 @@ libproj_la_SOURCES = \
 	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c geodesic.c \
 	pj_strtod.c \
 	\
-	pj_obs_api.c PJ_cart.c PJ_pipeline.c PJ_horner.c PJ_helmert.c \
+	proj_4D_api.c PJ_cart.c PJ_pipeline.c PJ_horner.c PJ_helmert.c \
 	PJ_vgridshift.c PJ_hgridshift.c PJ_unitconvert.c PJ_molodensky.c \
-	pj_internal.c
+	PJ_deformation.c pj_internal.c PJ_axisswap.c
 
 install-exec-local:
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)

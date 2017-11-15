@@ -41,7 +41,7 @@ build_script:
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
   - if "%BUILD_TYPE%" == "cmake" echo "%VS_FULL%"
 # warning C4706: assignment within conditional expression
-  - if "%BUILD_TYPE%" == "cmake" cmake -G "%VS_FULL%" . -DSELFTEST=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=../bin -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/W4 /wd4706 /WX /D_CRT_SECURE_NO_WARNINGS"
+  - if "%BUILD_TYPE%" == "cmake" cmake -G "%VS_FULL%" . -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=../bin -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/W4 /wd4706 /WX /D_CRT_SECURE_NO_WARNINGS"
   - if "%BUILD_TYPE%" == "cmake" cmake --build . --config Release
 
 test_script:
@@ -53,10 +53,15 @@ test_script:
   - curl -O http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
   - 7z e -aoa -y proj-datumgrid-1.6.zip
   - dir
-  - cd ..\bin
+  - cd ..
+  - dir
+  - cd bin
   - echo "Contents of current directory:"
   - dir
-  - proj.exe -VC
+  - gie.exe ..\test\gie\builtins.gie
+  - gie.exe ..\test\gie\more_builtins.gie
+  - gie.exe ..\test\gie\deformation.gie
+  - gie.exe ..\test\gie\axisswap.gie
 
 deploy: off
 

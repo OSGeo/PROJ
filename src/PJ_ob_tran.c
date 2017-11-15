@@ -86,10 +86,10 @@ static void *destructor(PJ *P, int errlev) {
         return 0;
     if (0==P->opaque)
         return pj_default_destructor (P, errlev);
-        
+
     if (P->opaque->link)
         P->opaque->link->destructor (P->opaque->link, errlev);
-        
+
     return pj_default_destructor(P, errlev);
 }
 
@@ -135,7 +135,7 @@ static ARGS ob_tran_target_params (paralist *params) {
     args.argv = pj_calloc (argc - 1, sizeof (char *));
     if (0==args.argv)
         return args;
-    
+
     /* Copy all args *except* the proj=ob_tran arg to the argv array */
     for (i = 0;  params != 0;  params = params->next) {
         if (0==strcmp (params->param, "proj=ob_tran"))
@@ -228,82 +228,13 @@ PJ *PROJECTION(ob_tran) {
     if (fabs(phip) > TOL) { /* oblique */
         Q->cphip = cos(phip);
         Q->sphip = sin(phip);
-        P->fwd = o_forward;
+        P->fwd = Q->link->fwd ? o_forward : 0;
         P->inv = Q->link->inv ? o_inverse : 0;
     } else { /* transverse */
-        P->fwd = t_forward;
+        P->fwd = Q->link->fwd ? t_forward : 0;
         P->inv = Q->link->inv ? t_inverse : 0;
     }
 
     return P;
 }
 
-#ifndef PJ_SELFTEST
-int pj_ob_tran_selftest (void) {return 0;}
-#else
-
-int pj_ob_tran_selftest (void) {
-    double tolerance_lp = 1e-10;
-    double tolerance_xy = 1e-7;
-    double d;
-    PJ *P;
-    PJ_COORD a, b;
-
-    char s_args[] = {"+proj=ob_tran +R=6400000 +o_proj=latlon +o_lon_p=20 +o_lat_p=20 +lon_0=180"};
-
-    LP fwd_in[] = {
-        { 2, 1},
-        { 2,-1},
-        {-2, 1},
-        {-2,-1}
-    };
-
-    XY s_fwd_expect[] = {
-        {-2.6856872138416592, 1.2374302350496296},
-        {-2.6954069748943286, 1.2026833954513816},
-        {-2.8993663925401947, 1.2374302350496296},
-        {-2.8896466314875244, 1.2026833954513816},
-    };
-
-    XY inv_in[] = {
-        { 200, 100},
-        { 200,-100},
-        {-200, 100},
-        {-200,-100}
-    };
-
-    LP s_inv_expect[] = {
-        { 121.5518748407577,  -2.5361001573966084},
-        { 63.261184340201858,  17.585319578673531},
-        {-141.10073322351622,  26.091712304855108},
-        {-65.862385598848391,  51.830295078417215},
-    };
-
-    /* -- Tests from nad/testvarious -------------------------------------------- */
-    P = proj_create (0, "+proj=ob_tran  +o_proj=moll  +R=6378137.0  +o_lon_p=0  +o_lat_p=0  +lon_0=180");
-    if (0==P)
-        return 1;
-
-    a = proj_coord (300000, 400000, 0, 0);
-    b.lpz.lam = -proj_torad (42 + (45 + 22.377/60)/60);
-    b.lpz.phi =  proj_torad (85 + (35 + 28.083/60)/60);
-    a = proj_trans_coord (P, -1, a);
-    d = proj_lp_dist (P, a.lp, b.lp);
-    if (d > 1e-3)
-        return 2;
-
-    a = proj_coord (proj_torad(10), proj_torad(20), 0, 0);
-    b = proj_coord (-1384841.18787, 7581707.88240, 0, 0);
-    a = proj_trans_coord (P, 1, a);
-    d = proj_xy_dist (a.xy, b.xy);
-    if (d > 1e-3)
-        return 3;
-
-    proj_destroy (P);
-    /* -------------------------------------------------------------------------- */
-
-
-    return pj_generic_selftest (0, s_args, tolerance_xy, tolerance_lp, 4, 4, fwd_in, 0, s_fwd_expect, inv_in, 0, s_inv_expect);
-}
-
-#endif
