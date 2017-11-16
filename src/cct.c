@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
     verbose   = opt_given (o, "v");
 
     if (opt_given (o, "o"))
-        fout = fopen (opt_arg (o, "output"), "rt");
+        fout = fopen (opt_arg (o, "output"), "wt");
     if (0==fout) {
         fprintf (stderr, "%s: Cannot open '%s' for output\n", o->progname, opt_arg (o, "output"));
         free (o);
@@ -260,10 +260,6 @@ int main(int argc, char **argv) {
             point.lpzt.phi = proj_torad (point.lpzt.phi);
         }
         point = proj_trans (P, direction, point);
-        if (proj_angular_output (P, direction)) {
-            point.lpzt.lam = proj_todeg (point.lpzt.lam);
-            point.lpzt.phi = proj_todeg (point.lpzt.phi);
-        }
 
         if (HUGE_VAL==point.xyzt.x) {
             /* transformation error (TODO provide existing internal errmsg here) */
@@ -272,7 +268,13 @@ int main(int argc, char **argv) {
         }
 
         /* Time to print the result */
-        fprintf (fout, "%20.15f  %20.15f  %20.15f  %20.15f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
+        if (proj_angular_output (P, direction)) {
+            point.lpzt.lam = proj_todeg (point.lpzt.lam);
+            point.lpzt.phi = proj_todeg (point.lpzt.phi);
+            fprintf (fout, "%14.10f  %14.10f  %12.4f  %12.4f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
+        }
+        else
+            fprintf (fout, "%13.4f  %13.4f  %12.4f  %12.4f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
     }
 
     if (stdout != fout)

@@ -285,6 +285,8 @@ int opt_input_loop (OPTARGS *opt, int binary) {
 
     /* otherwise, open next input file */
     opt->input = fopen (opt->fargv[opt->input_index++], binary? "rb": "rt");
+    if (0 != opt->input)
+        return 1;
 
     /* ignore non-existing files - go on! */
     if (0==opt->input)
