@@ -1,15 +1,24 @@
-/*
-
-	Central Conic Projection (spherical only, tangent, gnomonic)
-	
-	Very rarely used, implemented for ATPOL Polish Geobotanical Grid
-
-	see http://atpol.sourceforge.io
-
-	Lukasz Komsta, 2017
-
-*/
-
+/******************************************************************************
+ * Copyright (c) 2017, Lukasz Komsta
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ *****************************************************************************/
 
 #define PJ_LIB__
 #include <errno.h>
@@ -29,7 +38,7 @@ PROJ_HEAD(ccon, "Central Conic")
 
 
 
-static XY e_forward (LP lp, PJ *P) {          
+static XY forward (LP lp, PJ *P) {          
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
     double r;
@@ -42,7 +51,7 @@ static XY e_forward (LP lp, PJ *P) {
 }
 
 
-static LP e_inverse (XY xy, PJ *P) {         
+static LP inverse (XY xy, PJ *P) {         
     LP lp = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
 
@@ -84,11 +93,10 @@ PJ *PROJECTION(ccon) {
     Q->ctgphi1 = Q->cosphi1/Q->sinphi1;
 
 
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = inverse;
+    P->fwd = forward;
     
     return P;
 }
 
 
-int pj_ccon_selftest (void) {return 10000;}
