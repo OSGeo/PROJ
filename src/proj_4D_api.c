@@ -334,7 +334,7 @@ size_t proj_trans_generic (
 
 
 /*************************************************************************************/
-PJ_COORD proj_geoc_lat (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+PJ_COORD proj_geoc_lat (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
 /**************************************************************************************
     Convert geographical latitude to geocentric (or the other way round if
     direction = PJ_INV)
@@ -359,6 +359,17 @@ PJ_COORD proj_geoc_lat (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
         res.lp.phi = atan (P->rone_es * tan (coo.lp.phi) );
 
     return res;
+}
+
+double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
+double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
+
+double proj_dmstor(const char *is, char **rs) {
+    return dmstor(is, rs);
+}
+
+char*  proj_rtodms(char *s, double r, int pos, int neg) {
+    return rtodms(s, r, pos, neg);
 }
 
 
@@ -871,14 +882,3 @@ const PJ_PRIME_MERIDIANS *proj_list_prime_meridians(void) {
     return pj_get_prime_meridians_ref();
 }
 
-double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
-double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
-
-
-double proj_dmstor(const char *is, char **rs) {
-    return dmstor(is, rs);
-}
-
-char*  proj_rtodms(char *s, double r, int pos, int neg) {
-    return rtodms(s, r, pos, neg);
-}

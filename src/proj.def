@@ -133,16 +133,17 @@ EXPORTS
 
     proj_torad                     @122
     proj_todeg                     @123
-    proj_rtodms                    @124
-    proj_dmstor                    @125
+    proj_geoc_lat                  @124
+    proj_rtodms                    @125
+    proj_dmstor                    @126
 
-    proj_derivatives               @126
-    proj_factors                   @127
+    proj_derivatives               @127
+    proj_factors                   @128
 
-    proj_list_operations           @128
-    proj_list_ellps                @129
-    proj_list_units                @130
-    proj_list_prime_meridians      @131
+    proj_list_operations           @129
+    proj_list_ellps                @130
+    proj_list_units                @131
+    proj_list_prime_meridians      @132
 
-    proj_angular_input             @132
-    proj_angular_output            @133
+    proj_angular_input             @133
+    proj_angular_output            @134

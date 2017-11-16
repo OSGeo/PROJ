@@ -1,6 +1,6 @@
 /******************************************************************************
  * Project:  PROJ.4
- * Purpose:  Transfornation from geographic to geocentric latitude and back.
+ * Purpose:  Conversion from geographic to geocentric latitude and back.
  * Author:   Thomas Knudsen (2017)
  *
  ******************************************************************************
