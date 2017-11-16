@@ -71,6 +71,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_fahey.c
         PJ_fouc_s.c
         PJ_gall.c
+        PJ_geoc.c
         PJ_geos.c
         PJ_gins8.c
         PJ_gnom.c

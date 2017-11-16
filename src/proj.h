@@ -370,8 +370,7 @@ int proj_angular_output (PJ *P, enum PJ_DIRECTION dir);
 
 
 PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
-
-
+int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
 size_t proj_trans_generic (
     PJ *P,
     PJ_DIRECTION direction,
@@ -381,7 +380,9 @@ size_t proj_trans_generic (
     double *t, size_t st, size_t nt
 );
 
-int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
+
+/* Geographical to geocentric latitude */
+PJ_COORD proj_geoc_lat (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 
 /* Initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);

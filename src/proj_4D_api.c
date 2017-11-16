@@ -334,6 +334,37 @@ size_t proj_trans_generic (
 
 
 /*************************************************************************************/
+PJ_COORD proj_geoc_lat (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+/**************************************************************************************
+    Convert geographical latitude to geocentric (or the other way round if
+    direction = PJ_INV)
+
+    The conversion involves a call to the tangent function, which goes through the
+    roof at the poles, so very close (the last few micrometers) to the poles no
+    conversion takes place and the input latitude is copied directly to the output.
+
+    Fortunately, the geocentric latitude converges to the geographical at the
+    poles, so the difference is negligible.
+
+    For the spherical case, the geographical latitude equals the geocentric, and
+    consequently, the input is copied directly to the output.
+**************************************************************************************/
+    const double limit = M_HALFPI - 1e-12;
+    PJ_COORD res = coo;
+    if ((coo.lp.phi > limit) || (coo.lp.phi < -limit) || (P->es==0))
+        return res;
+    if (direction==PJ_FWD)
+        res.lp.phi = atan (P->one_es * tan (coo.lp.phi) );
+    else
+        res.lp.phi = atan (P->rone_es * tan (coo.lp.phi) );
+
+    return res;
+}
+
+
+
+
+/*************************************************************************************/
 PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
 /**************************************************************************************
     Create a new PJ object in the context ctx, using the given definition. If ctx==0,
@@ -390,7 +421,6 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     argv = (char **) calloc (argc, sizeof (char *));
     if (0==argv)
         return pj_dealloc (args);
-
     argv[0] = args;
     for (i = 0, j = 1;  i < n;  i++) {
         if (0==args[i])
