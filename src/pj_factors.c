@@ -14,7 +14,8 @@
 int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
     double cosphi, t, n, r;
     int err;
-    PJ_COORD coo = {{lp.lam, lp.phi, 0, 0}};
+    PJ_COORD coo = {{0, 0, 0, 0}};
+    coo.lp = lp;
 
     err = proj_errno_reset (P);
 
