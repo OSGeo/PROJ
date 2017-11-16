@@ -540,7 +540,6 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
             return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
         }
-
         PIN->a_orig = PIN->a;
         PIN->es_orig = PIN->es;
         if (pj_calc_ellps_params(PIN, PIN->a, PIN->es))

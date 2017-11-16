@@ -370,8 +370,7 @@ int proj_angular_output (PJ *P, enum PJ_DIRECTION dir);
 
 
 PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
-
-
+int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
 size_t proj_trans_generic (
     PJ *P,
     PJ_DIRECTION direction,
@@ -381,7 +380,7 @@ size_t proj_trans_generic (
     double *t, size_t st, size_t nt
 );
 
-int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);
+
 
 /* Initializers */
 PJ_COORD proj_coord (double x, double y, double z, double t);
@@ -430,6 +429,9 @@ const PJ_PRIME_MERIDIANS  *proj_list_prime_meridians(void);
 /* angular units expected by classical proj, and by Charles Karney's geodesics subsystem */
 double proj_torad (double angle_in_degrees);
 double proj_todeg (double angle_in_radians);
+
+/* Geographical to geocentric latitude - another of the "simple, but useful" */
+PJ_COORD proj_geoc_lat (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 
 double proj_dmstor(const char *is, char **rs);
 char*  proj_rtodms(char *s, double r, int pos, int neg);
