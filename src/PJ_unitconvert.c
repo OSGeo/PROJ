@@ -256,7 +256,7 @@ static double mjd_to_yyyymmdd(double mjd) {
 }
 
 
-struct TIME_UNITS time_units[] = {
+static const struct TIME_UNITS time_units[] = {
     {"mjd",         mjd_to_mjd,         mjd_to_mjd,         "Modified julian date"},
     {"decimalyear", decimalyear_to_mjd, mjd_to_decimalyear, "Decimal year"},
     {"gps_week",    gps_week_to_mjd,    mjd_to_gps_week,    "GPS Week"},

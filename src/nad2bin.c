@@ -13,8 +13,8 @@
 /*      Convert the byte order of the given word(s) in place.           */
 /************************************************************************/
 
-static int  byte_order_test = 1;
-#define IS_LSB	(((unsigned char *) (&byte_order_test))[0] == 1)
+static const int  byte_order_test = 1;
+#define IS_LSB	(((const unsigned char *) (&byte_order_test))[0] == 1)
 
 static void swap_words( void *data_in, int word_size, int word_count )
 

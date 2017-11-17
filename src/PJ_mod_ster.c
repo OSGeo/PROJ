@@ -12,7 +12,7 @@ PROJ_HEAD(gs50, "Mod. Stereographic of 50 U.S.") "\n\tAzi(mod)";
 #define EPSLN 1e-12
 
 struct pj_opaque {
-    COMPLEX *zcoeff; \
+    const COMPLEX *zcoeff; \
     double  cchio, schio; \
     int     n;
 };
@@ -120,7 +120,7 @@ static PJ *setup(PJ *P) { /* general initialization */
 
 /* Miller Oblated Stereographic */
 PJ *PROJECTION(mil_os) {
-    static COMPLEX AB[] = {
+    static const COMPLEX AB[] = {
         {0.924500, 0.},
         {0.,       0.},
         {0.019430, 0.}
@@ -143,7 +143,7 @@ PJ *PROJECTION(mil_os) {
 
 /* Lee Oblated Stereographic */
 PJ *PROJECTION(lee_os) {
-    static COMPLEX AB[] = {
+    static const COMPLEX AB[] = {
         {0.721316,    0.},
         {0.,          0.},
         {-0.0088162, -0.00617325}
@@ -165,7 +165,7 @@ PJ *PROJECTION(lee_os) {
 
 
 PJ *PROJECTION(gs48) {
-    static COMPLEX /* 48 United States */
+    static const COMPLEX /* 48 United States */
     AB[] = {
         {0.98879,   0.},
         {0.,        0.},
@@ -191,7 +191,7 @@ PJ *PROJECTION(gs48) {
 
 
 PJ *PROJECTION(alsk) {
-    static COMPLEX  ABe[] = { /* Alaska ellipsoid */
+    static const COMPLEX  ABe[] = { /* Alaska ellipsoid */
         { .9945303, 0.},
         { .0052083, -.0027404},
         { .0072721,  .0048181},
@@ -200,7 +200,7 @@ PJ *PROJECTION(alsk) {
         { .3582802, -.2884586},
     };
 
-    static COMPLEX ABs[] = { /* Alaska sphere */
+    static const COMPLEX ABs[] = { /* Alaska sphere */
         { .9972523, 0.},
         { .0052513, -.0041175},
         { .0074606,  .0048125},
@@ -231,7 +231,7 @@ PJ *PROJECTION(alsk) {
 
 
 PJ *PROJECTION(gs50) {
-    static COMPLEX  ABe[] = { /* GS50 ellipsoid */
+    static const COMPLEX  ABe[] = { /* GS50 ellipsoid */
         { .9827497, 0.},
         { .0210669,  .0053804},
         {-.1031415, -.0571664},
@@ -244,7 +244,7 @@ PJ *PROJECTION(gs50) {
         {-.0210072,  .0834037}
     };
 
-    static COMPLEX ABs[] = { /* GS50 sphere */
+    static const COMPLEX ABs[] = { /* GS50 sphere */
         { .9842990, 0.},
         { .0211642,  .0037608},
         {-.1036018, -.0575102},

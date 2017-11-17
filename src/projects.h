@@ -713,8 +713,8 @@ double  pj_qsfn_(double, PJ *);
 double *pj_authset(double);
 double  pj_authlat(double, double *);
 
-COMPLEX pj_zpoly1(COMPLEX, COMPLEX *, int);
-COMPLEX pj_zpolyd1(COMPLEX, COMPLEX *, int, COMPLEX *);
+COMPLEX pj_zpoly1(COMPLEX, const COMPLEX *, int);
+COMPLEX pj_zpolyd1(COMPLEX, const COMPLEX *, int, COMPLEX *);
 
 int pj_deriv(LP, double, const PJ *, struct DERIVS *);
 int pj_factors(LP, const PJ *, double, struct FACTORS *);

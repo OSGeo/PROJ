@@ -639,7 +639,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     /* Axis orientation */
     if( (pj_param(ctx, start,"saxis").s) != NULL )
     {
-        static const char *axis_legal = "ewnsud";
+        const char *axis_legal = "ewnsud";
         const char *axis_arg = pj_param(ctx, start,"saxis").s;
         if( strlen(axis_arg) != 3 )
             return pj_default_destructor (PIN, PJD_ERR_AXIS);
