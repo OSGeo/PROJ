@@ -135,31 +135,10 @@
 extern "C" {
 #endif
 
-/************************************************************************
-    These version numbers should be updated with every release!
-    The format of PJ_VERSION is
-
-    * Before version 4.10.0: PJ_VERSION=MNP
-      where M, N, and P are the major, minor, and patch numbers;
-      e.g., PJ_VERSION=493 for version 4.9.3.
-
-    * Version 4.10.0 and later: PJ_VERSION=MMMNNNPP later
-      where MMM, NNN, PP are the major, minor, and patch numbers.
-      The minor and patch numbers are padded with leading zeros if
-      necessary);
-      e.g., PJ_VERSION=401000 for version 4.10.0.
-************************************************************************/
-#define PROJ_VERSION_MAJOR 10
+/* The version numbers should be updated with every release! **/
+#define PROJ_VERSION_MAJOR 5
 #define PROJ_VERSION_MINOR 0
 #define PROJ_VERSION_PATCH 0
-
-#ifndef PJ_VERSION
-#define PJ_VERSION 10##000##00
-#endif
-#ifndef PROJ_VERSION
-#define PROJ_VERSION PJ_VERSION
-#endif
-
 
 extern char const pj_release[]; /* global release id string */
 
