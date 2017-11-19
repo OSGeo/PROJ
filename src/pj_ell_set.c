@@ -147,13 +147,6 @@ int pj_ellipsoid (PJ *P) {
     pj_dealloc (B.params);
     if (proj_errno (P))
         return proj_errno (P);
-    return proj_errno_restore (P, last_errno);
-
-    /* some remaining checks */
-    if (P->es < 0)
-        return proj_errno_set (P, PJD_ERR_ES_LESS_THAN_ZERO);
-    if (P->a <= 0)
-        return proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
 
     /* success - restore previous error status */
     return proj_errno_restore (P, last_errno);
