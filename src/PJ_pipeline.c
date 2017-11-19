@@ -317,7 +317,7 @@ static void set_ellipsoid(PJ *P) {
 
     /* Check if there's any ellipsoid specification in the global params. */
     /* If not, use WGS84 as default                                       */
-    if (pj_ell_set(P->ctx, P->params, &P->a, &P->es)) {
+    if (0 != pj_ellipsoid (P)) {
         P->a  = 6378137.0;
         P->es = .00669438002290341575;
     }

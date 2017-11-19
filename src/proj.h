@@ -403,9 +403,9 @@ double proj_xyz_dist (XYZ a, XYZ b);
 
 /* Set or read error level */
 int  proj_errno (PJ *P);
-void proj_errno_set (PJ *P, int err);
+int  proj_errno_set (PJ *P, int err);
 int  proj_errno_reset (PJ *P);
-void proj_errno_restore (PJ *P, int err);
+int  proj_errno_restore (PJ *P, int err);
 
 
 PJ_DERIVS  proj_derivatives(PJ *P, const LP lp);
