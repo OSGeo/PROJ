@@ -12,13 +12,15 @@
 #define RV4   .06944444444444444444 /* 5/72 */
 #define RV6   .04243827160493827160 /* 55/1296 */
 
-/* Helper function prototypes for pj_ellipsoid */
-static paralist *pj_get_param (paralist *list, char *key);
-static PJ_ELLPS *pj_find_ellps (char *name);
-static int pj_spherification (PJ *P);
+/* Prototypes of the pj_ellipsoid helper functions */
+static int pj_ellps_handler (PJ *P);
 static int pj_size (PJ *P);
 static int pj_shape (PJ *P);
-static char *pj_param_value (paralist *list);
+static int pj_spherification (PJ *P);
+
+static paralist *pj_get_param (paralist *list, char *key);
+static char     *pj_param_value (paralist *list);
+static PJ_ELLPS *pj_find_ellps (char *name);
 
 
 /***************************************************************************************/
@@ -67,61 +69,74 @@ int pj_ellipsoid (PJ *P) {
     If R is given as size parameter, any shape and spherification parameters
     given are ignored.
 
+    If size and shape is given as ellps=xxx, later shape and size parameters
+    are are taken into account as modifiers for the built in ellipsoid definition.
+
+    While this may seem strange, it is in accordance with historical PROJ
+    behaviour. It can e.g. be used to define coordinates on the ellipsoid
+    scaled to unit semimajor axis by specifying "+ellps=xxx +a=1"
+
 ****************************************************************************************/
-    PJ B;
     int   last_errno;
-    char *name;
-    PJ_ELLPS *ellps;
 
     last_errno = proj_errno_reset (P);
 
-    P->def_size = P->def_shape = P->def_spherification = 0;
+    P->def_size = P->def_shape = P->def_spherification = P->def_ellps = 0;
 
-    /* This amounts to zeroing all ellipsoidal parameters */
-    memset (&B, 0, sizeof (B));
-    pj_inherit_ellipsoid_defs(&B, P);
+    /* If an ellps argument is specified, start by using that */
+    if (0 != pj_ellps_handler (P))
+        return proj_errno (P);
 
+    /* We may overwrite the size */
     if (0 != pj_size (P))
         return proj_errno (P);
 
-    /* Now, if *R* given ... */
-    if ('R'==P->def_size[0]) {
-        P->a = pj_atof (P->def_size+2);
-        if (HUGE_VAL==P->a)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (0>=P->a)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        P->b = P->a;
-        P->f = P->es = P->e = 0;
-        P->rf = HUGE_VAL;
-        pj_calc_ellps_params (P, P->a, 0);
-        if (proj_errno (P))
-            return proj_errno (P);
-        return proj_errno_restore (P, last_errno);
-    }
+    /* We may also overwrite the shape */
+    if (0 != pj_shape (P))
+        return proj_errno (P);
 
-    /* if *a* given ... */
-    if ('a'==P->def_size[0]) {
-        if (strlen (P->def_size) < 3)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        P->a = pj_atof (P->def_size+2);
-        if (HUGE_VAL==P->a)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (0==P->a)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        pj_shape (P);
-        pj_spherification (P);
-        if (proj_errno (P))
-            return proj_errno (P);
-        return proj_errno_restore (P, last_errno);
-    }
+    /* When we're done with it, we compute all related ellipsoid parameters */
+    pj_calc_ellps_params (P, P->a, P->es);
+
+    /* And finally, we may turn it into a sphere */
+    if (0 != pj_spherification (P))
+        return proj_errno (P);
+
+    if (proj_errno (P))
+        return proj_errno (P);
+
+    /* success - restore previous error status */
+    return proj_errno_restore (P, last_errno);
+}
 
 
-    /* If we got so far, it's because *ellps* was given. */
-    /* Now find the correct ellipsoid definition */
-    if (strlen (P->def_size) < 7)
+/***************************************************************************************/
+static int pj_ellps_handler (PJ *P) {
+/***************************************************************************************/
+    PJ B;
+    PJ_ELLPS *ellps;
+    paralist *par = 0;
+    char *def, *name;
+
+    /* ellps specified? */
+    par = pj_get_param (P->params, "ellps");
+    if (0==par)
+        return 0;
+
+    /* This amounts to zeroing all ellipsoidal parameters in P */
+    memset (&B, 0, sizeof (B));
+    pj_inherit_ellipsoid_defs(&B, P);
+
+    /* move B into P's context */
+    B.ctx = P->ctx;
+
+    /* Store definition */
+    P->def_ellps = def = par->param;
+    par->used = 1;
+
+    if (strlen (def) < 7)
         return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-    name = P->def_size+6;
+    name = def + 6;
     ellps = pj_find_ellps (name);
     if (0==ellps)
         return proj_errno_set (P, PJD_ERR_UNKNOWN_ELLP_PARAM);
@@ -131,26 +146,238 @@ int pj_ellipsoid (PJ *P) {
     B = *P;
     B.params = pj_mkparam (ellps->major);
     B.params->next = pj_mkparam (ellps->ell);
-    /* Add the original stuff from P (needed for spherification) */
-    B.params->next->next = P->params;
 
     pj_size (&B);
     pj_shape (&B);
-    pj_spherification (&B);
+
     P->a = B.a;
     P->b = B.b;
     P->f = B.f;
     P->e = B.e;
     P->es = B.es;
-    pj_calc_ellps_params (P, P->a, P->es);
+
     pj_dealloc (B.params->next);
     pj_dealloc (B.params);
-    if (proj_errno (P))
-        return proj_errno (P);
-
-    /* success - restore previous error status */
-    return proj_errno_restore (P, last_errno);
+    if (proj_errno (&B))
+        return proj_errno (&B);
+     return 0;
 }
+
+
+/***************************************************************************************/
+static int pj_size (PJ *P) {
+/***************************************************************************************/
+    char *keys[]  =  {"R", "a"};
+    paralist *par = 0;
+    size_t i, len;
+    len = sizeof (keys) / sizeof (char *);
+    /* Check which size key is specified */
+    for (i = 0;  i < len;  i++) {
+        par = pj_get_param (P->params, keys[i]);
+        if (par)
+            break;
+    }
+
+    /* A size parameter *must* be given, but may have been given as ellps prior */
+    if (0==par)
+        return 0!=P->a? 0: proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
+
+    P->def_size = par->param;
+    par->used = 1;
+    P->a = pj_atof (pj_param_value (par));
+    if (P->a <= 0)
+        return proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
+    if (HUGE_VAL==P->a)
+        return proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
+
+    if ('R'==par->param[0]) {
+        P->es = P->f = P->e = P->rf = 0;
+        P->b = P->a;
+    }
+    return 0;
+}
+
+
+/***************************************************************************************/
+static int pj_shape (PJ *P) {
+/***************************************************************************************/
+    char *keys[]  = {"rf", "f", "es", "e", "b"};
+    paralist *par = 0;
+    char *def = 0;
+    size_t i, len;
+
+    par = 0;
+    len = sizeof (keys) / sizeof (char *);
+
+    /* Check which shape key is specified */
+    for (i = 0;  i < len;  i++) {
+        par = pj_get_param (P->params, keys[i]);
+        if (par)
+            break;
+    }
+
+    /* Not giving a shape parameter means selecting a sphere, unless shape */
+    /* has been selected previously via ellps=xxx */
+    if (0==par && P->es != 0)
+        return 0;
+    if (0==par && P->es==0) {
+        P->es = P->f = 0;
+        P->b = P->a;
+        return 0;
+    }
+
+    P->def_shape = def = par->param;
+    par->used = 1;
+    P->es = P->f = P->b = P->e = P->rf = 0;
+
+    switch (i) {
+
+    /* reverse flattening, rf */
+    case 0:
+         P->rf = pj_atof (pj_param_value (par));
+         if (HUGE_VAL==P->rf)
+             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+         P->f = 1 / P->rf;
+         P->es = 2*P->f - P->f*P->f;
+         break;
+
+    /* flattening, f */
+    case 1:
+        P->f = pj_atof (pj_param_value (par));
+        if (HUGE_VAL==P->f)
+            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+        if (0==P->f)
+            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+        P->rf = 1 / P->f;
+        P->es = 2*P->f - P->f*P->f;
+        break;
+
+    /* eccentricity squared, es */
+    case 2:
+        P->es = pj_atof (pj_param_value (par));
+        if (HUGE_VAL==P->es)
+            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+        if (1==P->es)
+            return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE);
+        break;
+
+    /* eccentricity, e */
+    case 3:
+        P->e = pj_atof (pj_param_value (par));
+        if (HUGE_VAL==P->e)
+            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+        if (0==P->e)
+            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+        if (1==P->e)
+             return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE);
+        P->es = P->e * P->e;
+        break;
+
+    /* semiminor axis, b */
+    case 4:
+        P->b = pj_atof (pj_param_value (par));
+        if (HUGE_VAL==P->b)
+            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+        if (0==P->b)
+            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+        P->f = (P->a - P->b) / P->a;
+        P->es = 2*P->f - P->f*P->f;
+        break;
+    default:
+        return PJD_ERR_INVALID_ARG;
+
+    }
+    if (P->es < 0)
+        return proj_errno_set (P, PJD_ERR_ES_LESS_THAN_ZERO);
+    return 0;
+}
+
+
+/***************************************************************************************/
+static int pj_spherification (PJ *P) {
+/***************************************************************************************/
+    char *keys[] =  {"R_A", "R_V", "R_a", "R_g", "R_h", "R_lat_a", "R_lat_g"};
+    size_t len, i;
+    paralist *par = 0;
+    char *def = 0;
+
+    double t;
+    char *v, *endp;
+
+    len = sizeof (keys) /  sizeof (char *);
+    P->def_spherification = 0;
+
+    /* Check which spherification key is specified */
+    for (i = 0;  i < len;  i++) {
+        par = pj_get_param (P->params, keys[i]);
+        if (par)
+            break;
+    }
+
+    /* No spherification specified? Then we're done */
+    if (i==len)
+        return 0;
+
+    /* Store definition */
+    P->def_spherification = def = par->param;
+    par->used = 1;
+
+    switch (i) {
+
+    /* R_A - a sphere with same area as ellipsoid */
+    case 0:
+        P->a *= 1. - P->es * (SIXTH + P->es * (RA4 + P->es * RA6));
+        break;
+
+    /* R_V - a sphere with same volume as ellipsoid */
+    case 1:
+        P->a *= 1. - P->es * (SIXTH + P->es * (RV4 + P->es * RV6));
+        break;
+
+    /* R_a - a sphere with R = the arithmetic mean of the ellipsoid */
+    case 2:
+        P->a = (P->a + P->b) / 2;
+        break;
+
+    /* R_g - a sphere with R = the geometric mean of the ellipsoid */
+    case 3:
+        P->a = sqrt (P->a * P->b);
+        break;
+
+    /* R_h - a sphere with R = the harmonic mean of the ellipsoid */
+    case 4:
+        if (P->a + P->b == 0)
+            return proj_errno_set (P, PJD_ERR_TOLERANCE_CONDITION);
+        P->a = (2*P->a * P->b) / (P->a + P->b);
+        break;
+
+    /* R_lat_a - a sphere with R = the arithmetic mean of the ellipsoid at given latitude */
+    case 5:
+    /* R_lat_g - a sphere with R = the geometric  mean of the ellipsoid at given latitude */
+    case 6:
+        v = pj_param_value (par);
+        t = proj_dmstor (v, &endp);
+        if (fabs (t) > M_HALFPI)
+            return proj_errno_set (P, PJD_ERR_REF_RAD_LARGER_THAN_90);
+        t = sin (t);
+        t = 1 - P->es * t * t;
+        if (i==5)   /* arithmetic */
+            P->a *= (1. - P->es + t) / (2 * t * sqrt(t));
+        else        /* geometric */
+            P->a *= sqrt (1 - P->es) / t;
+        break;
+    }
+
+    /* Clean up the ellipsoidal parameters to reflect the sphere */
+    P->es = P->e = P->rf = P->f = 0;
+    P->b = P->a;
+    pj_calc_ellps_params (P, P->a, 0);
+
+    return 0;
+}
+
+
+
 
 
 /* locate parameter in list */
@@ -186,218 +413,6 @@ static PJ_ELLPS *pj_find_ellps (char *name) {
     if (0==s)
         return 0;
     return pj_ellps + i;
-}
-
-
-static int pj_spherification (PJ *P) {
-    char *keys[] =  {"R_A", "R_V", "R_a", "R_g", "R_h", "R_lat_a", "R_lat_g"};
-    size_t len, i;
-    paralist *par = 0;
-    char *def = 0;
-
-    double t;
-    char *v, *endp;
-
-    len = sizeof (keys) /  sizeof (char *);
-    P->def_spherification = 0;
-
-    /* Check which spherification key is specified */
-    for (i = 0;  i < len;  i++) {
-        par = pj_get_param (P->params, keys[i]);
-        if (par)
-            break;
-    }
-
-    /* No spherification specified? Then we're done */
-    if (i==len)
-        return 0;
-
-    /* Store definition */
-    P->def_spherification = def = par->param;
-    par->used = 1;
-
-    switch (i) {
-
-    /* R_A - a sphere with same area as ellipsoid */
-    case 0:
-        P->a *= 1. - P->es * (SIXTH + P->es * (RA4 + P->es * RA6));
-        P->es = P->e = P->rf = P->f = P->b = 0;
-        break;
-
-    /* R_V - a sphere with same volume as ellipsoid */
-    case 1:
-        P->a *= 1. - P->es * (SIXTH + P->es * (RV4 + P->es * RV6));
-        P->es = P->e = P->rf = P->f = P->b = 0;
-        break;
-
-    /* R_a - a sphere with R = the arithmetic mean of the ellipsoid */
-    case 2:
-        P->a = (P->a + P->b) / 2;
-        P->es = P->e = P->rf = P->f = P->b = 0;
-        break;
-
-    /* R_g - a sphere with R = the geometric mean of the ellipsoid */
-    case 3:
-        P->a = sqrt (P->a * P->b);
-        P->es = P->e = P->rf = P->f = P->b = 0;
-        break;
-
-    /* R_h - a sphere with R = the harmonic mean of the ellipsoid */
-    case 4:
-        if (P->a + P->b == 0)
-            return proj_errno_set (P, PJD_ERR_TOLERANCE_CONDITION);
-        P->a = (2*P->a * P->b) / (P->a + P->b);
-        P->es = P->e = P->rf = P->f = P->b = 0;
-        break;
-
-    /* R_lat_a - a sphere with R = the arithmetic mean of the ellipsoid at given latitude */
-    case 5:
-    /* R_lat_g - a sphere with R = the geometric  mean of the ellipsoid at given latitude */
-    case 6:
-        v = pj_param_value (par);
-        t = proj_dmstor (v, &endp);
-        if (fabs (t) > M_HALFPI)
-            return proj_errno_set (P, PJD_ERR_REF_RAD_LARGER_THAN_90);
-        t = sin (t);
-        t = 1 - P->es * t * t;
-        if (i==5)   /* arithmetic */
-            P->a *= (1. - P->es + t) / (2 * t * sqrt(t));
-        else        /* geometric */
-            P->a *= sqrt (1 - P->es) / t;
-        P->es = P->e = P->rf = P->f = P->b = 0;
-        break;
-    }
-
-    pj_calc_ellps_params (P, P->a, P->es);
-
-    return 0;
-}
-
-static int pj_size (PJ *P) {
-    char *keys[]  =  {"R", "a", "ellps"};
-    paralist *par = 0;
-    char *def = 0;
-    size_t i, idx, len;
-
-    len = sizeof (keys) / sizeof (char *);
-    /* Check which size key is specified */
-    for (i = 0;  i < len;  i++) {
-        par = pj_get_param (P->params, keys[i]);
-        if (par)
-            break;
-    }
-    idx = i;
-
-    /* A size parameter *must* be given */
-    if (0==par)
-        return proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
-
-    P->def_size = def = par->param;
-    par->used = 1;
-
-    /* in case of ellps, we need another roundtrip through the system */
-    /* to expand the ellipsoidal parameters from the built in list */
-    if (2==idx)
-        return 0;
-
-    P->a = pj_atof (pj_param_value (par));
-    if (P->a <= 0)
-        return proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
-    if (HUGE_VAL==P->a)
-        return proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
-    return 0;
-}
-
-static int pj_shape (PJ *P) {
-    char *keys[]  = {"rf", "f", "es", "e", "b"};
-    paralist *par = 0;
-    char *def = 0;
-    size_t i, len;
-
-    par = 0;
-    len = sizeof (keys) / sizeof (char *);
-
-    /* Check which shape key is specified */
-    for (i = 0;  i < len;  i++) {
-        par = pj_get_param (P->params, keys[i]);
-        if (par)
-            break;
-    }
-
-    /* Not giving a shape parameter means selecting a sphere */
-    if (0==par) {
-        P->es = P->f = 0;
-        P->b = P->a;
-        return 0;
-    }
-
-    P->def_shape = def = par->param;
-    par->used = 1;
-
-    switch (i) {
-
-    /* reverse flattening, rf */
-    case 0:
-         P->rf = pj_atof (pj_param_value (par));
-         if (HUGE_VAL==P->rf)
-             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-         P->f = 1 / P->rf;
-         P->es = 2*P->f - P->f*P->f;
-         break;
-
-    /* flattening, f */
-    case 1:
-        P->f = pj_atof (pj_param_value (par));
-        if (HUGE_VAL==P->f)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (0==P->f)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        P->rf = 1 / P->f;
-        P->es = 2*P->f - P->f*P->f;
-        break;
-
-    /* eccentricity squared, es */
-    case 2:
-        P->es = pj_atof (pj_param_value (par));
-        if (HUGE_VAL==P->es)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (0==P->es)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (1==P->es)
-            return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE);
-        break;
-
-    /* eccentricity, e */
-    case 3:
-        P->e = pj_atof (pj_param_value (par));
-        if (HUGE_VAL==P->e)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (0==P->e)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (1==P->e)
-             return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE);
-        P->es = P->e * P->e;
-        break;
-
-    /* semiminor axis, b */
-    case 4:
-        P->b = pj_atof (pj_param_value (par));
-        if (HUGE_VAL==P->b)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (0==P->b)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        P->f = (P->a - P->b) / P->a;
-        P->es = 2*P->f - P->f*P->f;
-        break;
-    default:
-        return PJD_ERR_INVALID_ARG;
-
-    }
-    if (P->es < 0)
-        return proj_errno_set (P, PJD_ERR_ES_LESS_THAN_ZERO);
-
-    pj_calc_ellps_params (P, P->a, P->es);
-    return 0;
 }
 
 

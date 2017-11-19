@@ -232,6 +232,7 @@ struct PJconsts {
     char *def_size;                /* Shape and size parameters extracted from params */
     char *def_shape;
     char *def_spherification;
+    char *def_ellps;
 
     struct geod_geodesic *geod;    /* For geodesic computations */
     struct pj_opaque *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
