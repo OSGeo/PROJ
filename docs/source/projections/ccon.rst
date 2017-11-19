@@ -14,16 +14,16 @@ identical with ``conic()`` projection from ``mapproj`` R package.
 Usage
 ########
 
-This simple projection is rarely used, as it is not equidistant, equal-area nor
+This simple projection is rarely used, as it is not equidistant, equal-area, nor
 conformal. 
 
 An example of usage (and the main reason to implement this projection in proj4)
 is the ATPOL geobotanical grid of Poland, developed in Institute of Botany, 
-Jagiellonian University, Krakow, Poland in 1970s. The grid was originally handwritten
-on paper maps and further copied by hand. This projection (together with strange
-Earth radius) was chosen by its creators as the compromise fit to existing maps 
-during first software development in DOS era. Many years later it is still de facto
-standard grid in Polish geobotanical research.
+Jagiellonian University, Krakow, Poland in 1970s [Zajac1978]_. The grid was 
+originally handwritten on paper maps and further copied by hand. The projection
+(together with strange Earth radius) was chosen by its creators as the compromise
+fit to existing maps during first software development in DOS era. Many years later
+it is still de facto standard grid in Polish geobotanical research.
 
 The ATPOL coordinates can be achieved with with the following parameters:
 
@@ -31,7 +31,7 @@ The ATPOL coordinates can be achieved with with the following parameters:
 
    +proj=ccon +lat_1=52 +lat_0=52 +lon_0=19 +axis=esu +a=6390000 +x_0=330000 +y_0=-350000
 
-For more information and references see `OpenATPOL project <https://atpol.sourceforge.io>`_.
+For more information see [Komsta2016]_ and [Verey2017]_.
 
 
 Forward projection
