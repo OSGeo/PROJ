@@ -781,7 +781,7 @@ static int dispatch (char *cmnd, char *args) {
     int last_errno = proj_errno_reset (T.P);
 
     if  (0==level%2) {
-        if (0==strcmp (cmnd, "BEGIN"))
+        if (0==strcmp (cmnd, "BEGIN") || 0==strcmp (cmnd, "<begin>"))
            level++;
         return 0;
     }
@@ -807,6 +807,7 @@ static int dispatch (char *cmnd, char *args) {
     if  (0==strcmp (cmnd, "ECHO"))      return  echo      (args);
     if  (0==strcmp (cmnd, "echo"))      return  echo      (args);
     if  (0==strcmp  (cmnd, "END"))      return          finish_previous_operation (args), level++, 0;
+    if  (0==strcmp  (cmnd, "<end>"))    return          finish_previous_operation (args), level++, 0;
     if  ('#'==cmnd[0])                  return  comment   (args);
 
     if (proj_errno(T.P))
