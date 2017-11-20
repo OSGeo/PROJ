@@ -62,6 +62,7 @@ test_script:
   - gie.exe ..\test\gie\more_builtins.gie
   - gie.exe ..\test\gie\deformation.gie
   - gie.exe ..\test\gie\axisswap.gie
+  - gie.exe ..\test\gie\ellipsoid.gie
 
 deploy: off
 

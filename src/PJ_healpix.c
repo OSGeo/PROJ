@@ -30,6 +30,7 @@
  *****************************************************************************/
 # define PJ_LIB__
 # include <errno.h>
+# include "proj_internal.h"
 # include <proj.h>
 # include "projects.h"
 
@@ -624,7 +625,7 @@ PJ *PROJECTION(healpix) {
             return destructor(P, ENOMEM);
         Q->qp = pj_qsfn(1.0, P->e, P->one_es);  /* For auth_lat(). */
         P->a = P->a*sqrt(0.5*Q->qp);            /* Set P->a to authalic radius. */
-        P->ra = 1.0/P->a;
+        pj_calc_ellps_params (P, P->a, P->es);  /* Ensure we have a consistent parameter set */
         P->fwd = e_healpix_forward;
         P->inv = e_healpix_inverse;
     } else {

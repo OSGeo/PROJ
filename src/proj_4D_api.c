@@ -520,37 +520,33 @@ int proj_errno (PJ *P) {
 }
 
 /*****************************************************************************/
-void proj_errno_set (PJ *P, int err) {
+int proj_errno_set (PJ *P, int err) {
 /******************************************************************************
-    Sets errno at the context and bubble it up to the thread local errno
+    Set context-errno, bubble it up to the thread local errno, return err
 ******************************************************************************/
     /* Use proj_errno_reset to explicitly clear the error status */
     if (0==err)
-        return;
+        return 0;
 
     /* For P==0 err goes to the default context */
     proj_context_errno_set (pj_get_ctx (P), err);
     errno = err;
-    return;
+    return err;
 }
 
 /*****************************************************************************/
-void proj_errno_restore (PJ *P, int err) {
+int proj_errno_restore (PJ *P, int err) {
 /******************************************************************************
-    Reduce some mental impedance in the canonical reset/restore use case:
-    Basically, proj_errno_restore() is a synonym for proj_errno_set(),
-    but the use cases are very different (_set: indicate an error to higher
-    level user code, _restore: pass previously set error indicators in case
-    of no errors at this level).
-
-    Hence, although the inner working is identical, we provide both options,
-    to avoid some rather confusing real world code.
+    Use proj_errno_restore when the current function succeeds, but the
+    error flag was set on entry, and stored/reset using proj_errno_reset
+    in order to monitor for new errors.
 
     See usage example under proj_errno_reset ()
 ******************************************************************************/
     if (0==err)
-        return;
+        return 0;
     proj_errno_set (P, err);
+    return 0;
 }
 
 /*****************************************************************************/
@@ -562,17 +558,24 @@ int proj_errno_reset (PJ *P) {
     Returns the previous value of the errno, for convenient reset/restore
     operations:
 
-    void foo (PJ *P) {
+    int foo (PJ *P) {
+        // errno may be set on entry, but we need to reset it to be able to
+        // check for errors from "do_something_with_P(P)"
         int last_errno = proj_errno_reset (P);
 
+        // local failure
+        if (0==P)
+            return proj_errno_set (P, 42);
+
+        // call to function that may fail
         do_something_with_P (P);
 
-        // failure - keep latest error status
+        // failure in do_something_with_P? - keep latest error status
         if (proj_errno(P))
-            return;
-        // success - restore previous error status
-        proj_errno_restore (P, last_errno);
-        return;
+            return proj_errno (P);
+
+        // success - restore previous error status, return 0
+        return proj_errno_restore (P, last_errno);
     }
 ******************************************************************************/
     int last_errno;

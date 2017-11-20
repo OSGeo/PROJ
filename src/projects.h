@@ -229,6 +229,11 @@ struct PJconsts {
     projCtx_t *ctx;
     const char *descr;             /* From pj_list.h or individual PJ_*.c file */
     paralist *params;              /* Parameter list */
+    char *def_size;                /* Shape and size parameters extracted from params */
+    char *def_shape;
+    char *def_spherification;
+    char *def_ellps;
+
     struct geod_geodesic *geod;    /* For geodesic computations */
     struct pj_opaque *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
     int inverted;                  /* Tell high level API functions to swap inv/fwd */
@@ -413,11 +418,6 @@ struct ARG_list {
 typedef union { double  f; int  i; char *s; } PROJVALUE;
 
 
-struct PJ_SELFTEST_LIST {
-    char    *id;                 /* projection keyword */
-    int     (* testfunc)(void);  /* projection entry point */
-};
-
 struct PJ_ELLPS {
     char    *id;           /* ellipse keyword name */
     char    *major;        /* a= value */
@@ -534,6 +534,7 @@ enum deprecated_constants_for_now_dropped_analytical_factors {
 #define PJD_ERR_LAT_0_IS_ZERO           -55
 #define PJD_ERR_ELLIPSOIDAL_UNSUPPORTED -56
 #define PJD_ERR_TOO_MANY_INITS          -57
+#define PJD_ERR_INVALID_ARG             -58
 
 struct projFileAPI_t;
 
@@ -676,6 +677,7 @@ double aacos(projCtx,double), aasin(projCtx,double), asqrt(double), aatan2(doubl
 PROJVALUE pj_param(projCtx ctx, paralist *, const char *);
 paralist *pj_mkparam(char *);
 
+int pj_ellipsoid (PJ *);
 int pj_ell_set(projCtx ctx, paralist *, double *, double *);
 int pj_datum_set(projCtx,paralist *, PJ *);
 int pj_prime_meridian_set(paralist *, PJ *);

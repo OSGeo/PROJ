@@ -2,8 +2,9 @@
 #include <projects.h>
 #include <stdio.h>
 #include <string.h>
-	paralist * /* create parameter list entry */
-pj_mkparam(char *str) {
+
+/* create parameter list entry */
+paralist *pj_mkparam(char *str) {
 	paralist *newitem;
 
 	if((newitem = (paralist *)pj_malloc(sizeof(paralist) + strlen(str))) != NULL) {
@@ -15,6 +16,7 @@ pj_mkparam(char *str) {
 	}
 	return newitem;
 }
+
 
 /************************************************************************/
 /*                              pj_param()                              */
