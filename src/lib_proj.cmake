@@ -54,6 +54,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_cart.c
         PJ_cass.c
         PJ_cc.c
+        PJ_ccon.c
         PJ_cea.c
         PJ_chamb.c
         PJ_collg.c
