@@ -627,12 +627,22 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         s = pj_units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "sto_meter").s)) {
-        PIN->to_meter = pj_strtod(s, &s);
-        if (*s == '/') /* ratio number */
-            PIN->to_meter /= pj_strtod(++s, 0);
-        if (PIN->to_meter <= 0.0)
+        double factor;
+        int ratio = 0;
+
+        /* ratio number? */
+        if (*s == '/') {
+            ratio = 1;
+            s++;
+        }
+
+        factor = pj_strtod(s, &s);
+        if ((factor <= 0.0) || (1/factor==0))
             return pj_default_destructor (PIN, PJD_ERR_UNIT_FACTOR_LESS_THAN_0);
-        PIN->fr_meter = 1. / PIN->to_meter;
+
+        PIN->to_meter = ratio?  1 / factor: factor;
+        PIN->fr_meter = 1 / PIN->to_meter;
+
     } else
         PIN->to_meter = PIN->fr_meter = 1.;
 
