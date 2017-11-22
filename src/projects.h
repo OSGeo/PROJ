@@ -479,14 +479,14 @@ enum deprecated_constants_for_now_dropped_analytical_factors {
 /* library errors */
 #define PJD_ERR_NO_ARGS                  -1
 #define PJD_ERR_NO_OPTION_IN_INIT_FILE   -2
-#define PJD_ERR_NO_COLOR_IN_INIT_STRING  -3
+#define PJD_ERR_NO_COLON_IN_INIT_STRING  -3
 #define PJD_ERR_PROJ_NOT_NAMED           -4
 #define PJD_ERR_UNKNOWN_PROJECTION_ID    -5
 #define PJD_ERR_ECCENTRICITY_IS_ONE      -6
 #define PJD_ERR_UNKNOW_UNIT_ID           -7
 #define PJD_ERR_INVALID_BOOLEAN_PARAM    -8
 #define PJD_ERR_UNKNOWN_ELLP_PARAM       -9
-#define PJD_ERR_REC_FLATTENING_IS_ZERO  -10
+#define PJD_ERR_REV_FLATTENING_IS_ZERO  -10
 #define PJD_ERR_REF_RAD_LARGER_THAN_90  -11
 #define PJD_ERR_ES_LESS_THAN_ZERO       -12
 #define PJD_ERR_MAJOR_AXIS_NOT_GIVEN    -13
