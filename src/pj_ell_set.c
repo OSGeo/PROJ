@@ -237,6 +237,8 @@ static int pj_shape (PJ *P) {
          P->rf = pj_atof (pj_param_value (par));
          if (HUGE_VAL==P->rf)
              return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+         if (0==P->rf)
+             return proj_errno_set (P, PJD_ERR_REV_FLATTENING_IS_ZERO);
          P->f = 1 / P->rf;
          P->es = 2*P->f - P->f*P->f;
          break;
@@ -279,7 +281,7 @@ static int pj_shape (PJ *P) {
         if (HUGE_VAL==P->b)
             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
         if (0==P->b)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+            return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE);
         P->f = (P->a - P->b) / P->a;
         P->es = 2*P->f - P->f*P->f;
         break;

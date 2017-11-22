@@ -118,4 +118,37 @@ accept    -90 0
 expect    -1.56904	0
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+Shape parameters
+-------------------------------------------------------------------------------
+operation  proj=utm zone=32   ellps=GRS80 rf=0
+expect     failure
+
+operation  proj=utm zone=32   ellps=GRS80 es=1
+expect     failure
+
+operation  proj=utm zone=32   ellps=GRS80 b=0
+expect     failure
+
+operation  proj=utm zone=32   ellps=GRS80 b=6000000
+accept     12 55
+expect     699293.0880   5674591.5295
+
+operation  proj=utm zone=32   ellps=GRS80 rf=300
+accept     12 55
+expect     691873.1212   6099054.9661
+
+operation  proj=utm zone=32   ellps=GRS80 f=0.00333333333333
+accept     12 55
+expect     691873.1212   6099054.9661
+
+operation  proj=utm zone=32   ellps=GRS80 b=6000000
+accept     12 55
+expect     699293.0880   5674591.5295
+
+operation  proj=utm zone=32   a=6400000 b=6000000
+accept     12 55
+expect     700416.5900   5669475.8884
+-------------------------------------------------------------------------------
+
 END
