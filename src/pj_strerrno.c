@@ -63,6 +63,7 @@ pj_err_list[] = {
     "lat_0 = 0",                                                       /* -55 */
     "ellipsoidal usage unsupported",                                   /* -56 */
     "only one +init allowed for non-pipeline operations",              /* -57 */
+    "argument not numerical or out of range",                          /* -58 */
 
     /* When adding error messages, remember to update ID defines in
        projects.h, and transient_error array in pj_transform                  */
@@ -91,7 +92,7 @@ char *pj_strerrno(int err) {
     adjusted_err = - err - 1;
     if (adjusted_err < (sizeof(pj_err_list) / sizeof(char *)))
         return(pj_err_list[adjusted_err]);
-    
+
     sprintf( note, "invalid projection system error (%d)", (err > -9999)? err: -9999);
     return note;
 }
