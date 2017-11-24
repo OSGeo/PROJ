@@ -149,4 +149,4 @@ EXPORTS
     proj_angular_output            @134
 
     pj_ellipsoid                   @135
-    pj_calc_ellps_params           @136
+    pj_calc_ellipsoid_params       @136

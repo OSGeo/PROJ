@@ -662,7 +662,8 @@ static int expect (char *args) {
 
     if (0==T.P && !expect_failure) {
         banner (T.operation);
-        errmsg(3, "%sInvalid operation definition in line no. %d\n", delim, (int) T.operation_lineno);
+        errmsg(3, "%sInvalid operation definition in line no. %d: %s\n",
+            delim, (int) T.operation_lineno, pj_strerrno(proj_errno(T.P)));
         return another_failure ();
     }
 

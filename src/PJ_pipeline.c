@@ -321,11 +321,15 @@ static void set_ellipsoid(PJ *P) {
     if (0 != pj_ellipsoid (P)) {
         P->a  = 6378137.0;
         P->es = .00669438002290341575;
-        /* (reset this "unerror" - here it is just a reply from pj_ellipsoid) */
+
+        /* reset an "unerror": In this special use case, the errno is    */
+        /* not an error signal, but just a reply from pj_ellipsoid,      */
+        /* telling us that "No - there was no ellipsoid definition in    */
+        /* the PJ you provided".                                         */
         proj_errno_reset (P);
     }
 
-    pj_calc_ellps_params(P, P->a, P->es);
+    pj_calc_ellipsoid_params (P, P->a, P->es);
 
     geod_init(P->geod, P->a,  (1 - sqrt (1 - P->es)));
 
