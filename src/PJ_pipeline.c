@@ -305,6 +305,7 @@ static char **argv_params (paralist *params, size_t argc) {
 /* re-initialize P->geod.                                                    */
 static void set_ellipsoid(PJ *P) {
     paralist *cur, *attachment;
+    int err = proj_errno_reset (P);
 
     /* Break the linked list after the global args */
     attachment = 0;
@@ -320,13 +321,17 @@ static void set_ellipsoid(PJ *P) {
     if (0 != pj_ellipsoid (P)) {
         P->a  = 6378137.0;
         P->es = .00669438002290341575;
+        /* (reset this "unerror" - here it is just a reply from pj_ellipsoid) */
+        proj_errno_reset (P);
     }
 
     pj_calc_ellps_params(P, P->a, P->es);
+
     geod_init(P->geod, P->a,  (1 - sqrt (1 - P->es)));
 
     /* Re-attach the dangling list */
     cur->next = attachment;
+    proj_errno_restore (P, err);
 }
 
 
@@ -345,7 +350,7 @@ PJ *OPERATION(pipeline,0) {
 
     P->opaque = pj_calloc (1, sizeof(struct pj_opaque));
     if (0==P->opaque)
-        return pj_default_destructor(P, ENOMEM);
+        return destructor(P, ENOMEM);
 
     argc = (int)argc_params (P->params);
     P->opaque->argv = argv = argv_params (P->params, argc);
@@ -396,6 +401,7 @@ PJ *OPERATION(pipeline,0) {
     for (i_current_step = i_first_step, i = 0;  i < nsteps;  i++) {
         int j;
         int  current_argc = 0;
+        int  err;
         PJ     *next_step = 0;
 
         /* Build a set of setup args for the current step */
@@ -415,13 +421,19 @@ PJ *OPERATION(pipeline,0) {
         for (j = 1;  j < current_argc; j++)
             proj_log_trace (P, "    %s", current_argv[j]);
 
-        next_step = pj_init_ctx (P->ctx, current_argc, current_argv);
+        err = proj_errno_reset (P);
 
+        next_step = proj_create_argv (P->ctx, current_argc, current_argv);
         proj_log_trace (P, "Pipeline: Step %d at %p", i, next_step);
+
         if (0==next_step) {
-            proj_log_error (P, "Pipeline: Bad step definition: %s", current_argv[0]);
-            return destructor (P, PJD_ERR_MALFORMED_PIPELINE); /* ERROR: bad pipeline def */
+            /* The step init failed, but possibly without setting errno. If so, we say "malformed" */
+            int err_to_report = proj_errno(P) || PJD_ERR_MALFORMED_PIPELINE;
+            proj_log_error (P, "Pipeline: Bad step definition: %s (%s)", current_argv[0], pj_strerrno (err_to_report));
+            return destructor (P, err_to_report); /* ERROR: bad pipeline def */
         }
+
+        proj_errno_restore (P, err);
 
         /* Is this step inverted? */
         for (j = 0;  j < current_argc; j++)
@@ -430,7 +442,7 @@ PJ *OPERATION(pipeline,0) {
 
         P->opaque->pipeline[i+1] = next_step;
 
-        proj_log_trace (P, "Pipeline:    step done");
+        proj_log_trace (P, "Pipeline at [%p]:    step at [%p] done", P, next_step);
     }
 
     proj_log_trace (P, "Pipeline: %d steps built. Determining i/o characteristics", nsteps);
@@ -440,7 +452,5 @@ PJ *OPERATION(pipeline,0) {
 
     /* Now, correspondingly determine forward output (= reverse input) data type */
     P->right = pj_right (P->opaque->pipeline[nsteps]);
-
     return P;
 }
-

@@ -206,7 +206,8 @@ int main(int argc, char **argv) {
     /* Setup transformation */
     P = proj_create_argv (0, o->pargc, o->pargv);
     if ((0==P) || (0==o->pargc)) {
-        fprintf (stderr, "%s: Bad transformation arguments. '%s -h' for help\n", o->progname, o->progname);
+        fprintf (stderr, "%s: Bad transformation arguments - (%s)\n    '%s -h' for help\n",
+                 o->progname, pj_strerrno (proj_errno(P)), o->progname);
         free (o);
         if (stdout != fout)
             fclose (fout);
@@ -232,6 +233,7 @@ int main(int argc, char **argv) {
 
     /* Loop over all records of all input files */
     while (opt_input_loop (o, optargs_file_format_text)) {
+        int err;
         void *ret = fgets (buf, 10000, o->input);
         opt_eof_handler (o);
         if (0==ret) {
@@ -259,13 +261,17 @@ int main(int argc, char **argv) {
             point.lpzt.lam = proj_torad (point.lpzt.lam);
             point.lpzt.phi = proj_torad (point.lpzt.phi);
         }
+        err = proj_errno_reset (P);
         point = proj_trans (P, direction, point);
 
         if (HUGE_VAL==point.xyzt.x) {
-            /* transformation error (TODO provide existing internal errmsg here) */
-            fprintf (fout, "# Record %d TRANSFORMATION ERROR: %s", (int) o->record_index, buf);
+            /* transformation error */
+            fprintf (fout, "# Record %d TRANSFORMATION ERROR: %s (%s)",
+                            (int) o->record_index, buf, pj_strerrno (proj_errno(P)));
+            proj_errno_restore (P, err);
             continue;
         }
+        proj_errno_restore (P, err);
 
         /* Time to print the result */
         if (proj_angular_output (P, direction)) {

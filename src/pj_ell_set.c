@@ -117,6 +117,8 @@ static int pj_ellps_handler (PJ *P) {
     PJ_ELLPS *ellps;
     paralist *par = 0;
     char *def, *name;
+    int err;
+
 
     /* ellps specified? */
     par = pj_get_param (P->params, "ellps");
@@ -143,13 +145,14 @@ static int pj_ellps_handler (PJ *P) {
 
     /* Now, we have the right size and shape parameters and can produce */
     /* a fake PJ to make pj_shape do the hard work for us */
+
+    err = proj_errno_reset (P);
     B = *P;
     B.params = pj_mkparam (ellps->major);
     B.params->next = pj_mkparam (ellps->ell);
 
     pj_size (&B);
     pj_shape (&B);
-
     P->a = B.a;
     P->b = B.b;
     P->f = B.f;
@@ -160,27 +163,26 @@ static int pj_ellps_handler (PJ *P) {
     pj_dealloc (B.params);
     if (proj_errno (&B))
         return proj_errno (&B);
-     return 0;
+
+    return proj_errno_restore (P, err);
 }
 
 
 /***************************************************************************************/
 static int pj_size (PJ *P) {
 /***************************************************************************************/
-    char *keys[]  =  {"R", "a"};
     paralist *par = 0;
-    size_t i, len;
-    len = sizeof (keys) / sizeof (char *);
-    /* Check which size key is specified */
-    for (i = 0;  i < len;  i++) {
-        par = pj_get_param (P->params, keys[i]);
-        if (par)
-            break;
-    }
 
     /* A size parameter *must* be given, but may have been given as ellps prior */
+    if (P->a != 0)
+        return 0;
+
+    /* Check which size key is specified */
+    par = pj_get_param (P->params, "R");
     if (0==par)
-        return 0!=P->a? 0: proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
+        par = pj_get_param (P->params, "a");
+    if (0==par)
+        return proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
 
     P->def_size = par->param;
     par->used = 1;

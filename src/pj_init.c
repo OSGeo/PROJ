@@ -434,6 +434,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PJ *(*proj)(PJ *);
     paralist *curr;
     int i;
+    int err;
     int found_def = 0;
     PJ *PIN = 0;
     int n_pipelines = 0;
@@ -700,12 +701,13 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
 
     /* projection specific initialization */
+    err = proj_errno_reset (PIN);
     PIN = proj(PIN);
-    if ((0==PIN) || ctx->last_errno)
-    {
+    if (proj_errno (PIN)) {
         pj_free(PIN);
         return 0;
     }
+    proj_errno_restore (PIN, err);
     return PIN;
 }
 
