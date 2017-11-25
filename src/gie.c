@@ -1040,7 +1040,6 @@ static int pj_cart_selftest (void) {
     PJ_GRID_INFO grid_info;
     PJ_INIT_INFO init_info;
 
-    PJ_DERIVS derivs;
     PJ_FACTORS factors;
 
     const PJ_OPERATIONS *oper_list;
@@ -1335,25 +1334,14 @@ static int pj_cart_selftest (void) {
     a.lp.lam = PJ_TORAD(12);
     a.lp.phi = PJ_TORAD(55);
 
-    derivs = proj_derivatives(P, a.lp);
-    if (proj_errno(P))
-        return 80; /* derivs not created correctly */
-
-    if ( fabs(derivs.x_l - 1.0)     > 1e-5 )   return 81;
-    if ( fabs(derivs.x_p - 0.0)     > 1e-5 )   return 82;
-    if ( fabs(derivs.y_l - 0.0)     > 1e-5 )   return 83;
-    if ( fabs(derivs.y_p - 1.73959) > 1e-5 )   return 84;
-
-
     factors = proj_factors(P, a.lp);
     if (proj_errno(P))
         return 85; /* factors not created correctly */
 
     /* check a few key characteristics of the Mercator projection */
-    if (factors.omega != 0.0)       return 86; /* angular distortion should be 0 */
-    if (factors.thetap != M_PI_2)   return 87; /* Meridian/parallel angle should be 90 deg */
-    if (factors.conv != 0.0)        return 88; /* meridian convergence should be 0 */
-
+    if (factors.angular_distortion != 0.0)  return 86; /* angular distortion should be 0 */
+    if (factors.meridian_parallel_angle != M_PI_2)  return 87; /* Meridian/parallel angle should be 90 deg */
+    if (factors.meridian_convergence != 0.0)  return 88; /* meridian convergence should be 0 */
 
     proj_destroy(P);
 
@@ -1474,8 +1462,8 @@ static int test_time(char* args, double tol, double t_in, double t_exp) {
     return ret;
 }
 
-static int test_xyz(char* args, double tol, PJ_TRIPLET in, PJ_TRIPLET exp) {
-    PJ_COORD out, obs_in;
+static int test_xyz(char* args, double tol, PJ_COORD in, PJ_COORD exp) {
+    PJ_COORD out = {{0,0,0,0}}, obs_in = {{0,0,0,0}};
     PJ *P = proj_create(PJ_DEFAULT_CTX, args);
     int ret = 0;
 
@@ -1517,10 +1505,10 @@ static int pj_unitconvert_selftest (void) {
     double in4 = 1877.71428, exp4 = 2016.0;
 
     char args5[] = "+proj=unitconvert +xy_in=m +xy_out=dm +z_in=cm +z_out=mm";
-    PJ_TRIPLET in5 = {{55.25, 23.23, 45.5}}, exp5 = {{552.5, 232.3, 455.0}};
+    PJ_COORD in5 = {{55.25, 23.23, 45.5, 0}}, exp5 = {{552.5, 232.3, 455.0, 0}};
 
     char args6[] = "+proj=unitconvert +xy_in=m +xy_out=m +z_in=m +z_out=m";
-    PJ_TRIPLET in6 = {{12.3, 45.6, 7.89}};
+    PJ_COORD in6 = {{12.3, 45.6, 7.89, 0}};
 
     ret = test_time(args1, 1e-6, in1, in1);   if (ret) return ret + 10;
     ret = test_time(args2, 1e-6, in2, in2);   if (ret) return ret + 20;

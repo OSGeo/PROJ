@@ -515,12 +515,12 @@ PJ *proj_destroy (PJ *P) {
     return 0;
 }
 
-int proj_errno (PJ *P) {
-    return pj_ctx_get_errno (pj_get_ctx (P));
+int proj_errno (const PJ *P) {
+    return pj_ctx_get_errno (pj_get_ctx ((PJ *) P));
 }
 
 /*****************************************************************************/
-int proj_errno_set (PJ *P, int err) {
+int proj_errno_set (const PJ *P, int err) {
 /******************************************************************************
     Set context-errno, bubble it up to the thread local errno, return err
 ******************************************************************************/
@@ -529,13 +529,13 @@ int proj_errno_set (PJ *P, int err) {
         return 0;
 
     /* For P==0 err goes to the default context */
-    proj_context_errno_set (pj_get_ctx (P), err);
+    proj_context_errno_set (pj_get_ctx ((PJ *) P), err);
     errno = err;
     return err;
 }
 
 /*****************************************************************************/
-int proj_errno_restore (PJ *P, int err) {
+int proj_errno_restore (const PJ *P, int err) {
 /******************************************************************************
     Use proj_errno_restore when the current function succeeds, but the
     error flag was set on entry, and stored/reset using proj_errno_reset
@@ -550,7 +550,7 @@ int proj_errno_restore (PJ *P, int err) {
 }
 
 /*****************************************************************************/
-int proj_errno_reset (PJ *P) {
+int proj_errno_reset (const PJ *P) {
 /******************************************************************************
     Clears errno in the context and thread local levels
     through the low level pj_ctx interface.
@@ -581,7 +581,7 @@ int proj_errno_reset (PJ *P) {
     int last_errno;
     last_errno = proj_errno (P);
 
-    pj_ctx_set_errno (pj_get_ctx (P), 0);
+    pj_ctx_set_errno (pj_get_ctx ((PJ *) P), 0);
     errno = 0;
     return last_errno;
 }
@@ -826,28 +826,9 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 }
 
 
-/*****************************************************************************/
-PJ_DERIVS proj_derivatives(PJ *P, const LP lp) {
-/******************************************************************************
-    Derivatives of coordinates.
-
-    returns PJ_DERIVS. If unsuccessfull error number is set and the returned
-    struct contains NULL data.
-
-******************************************************************************/
-    PJ_DERIVS derivs;
-
-    if (pj_deriv(lp, 1e-5, P, &derivs)) {
-        /* errno set in pj_derivs */
-        memset(&derivs, 0, sizeof(PJ_DERIVS));
-    }
-
-    return derivs;
-}
-
 
 /*****************************************************************************/
-PJ_FACTORS proj_factors(PJ *P, const LP lp) {
+PJ_FACTORS proj_factors(PJ *P, LP lp) {
 /******************************************************************************
     Cartographic characteristics at point lp.
 
@@ -858,12 +839,22 @@ PJ_FACTORS proj_factors(PJ *P, const LP lp) {
     struct contains NULL data.
 
 ******************************************************************************/
-    PJ_FACTORS factors;
+    PJ_FACTORS factors = {0,0,0, 0,0,0, 0,0};
+    struct FACTORS f;
 
-    if (pj_factors(lp, P, 0.0, &factors)) {
-        /* errno set in pj_factors */
-        memset(&factors, 0, sizeof(PJ_FACTORS));
-    }
+    if (pj_factors(lp, P, 0.0, &f))
+        return factors;
+
+    factors.meridional_scale  =  f.h;
+    factors.parallel_scale    =  f.k;
+    factors.areal_scale       =  f.s;
+
+    factors.angular_distortion        =  f.omega;
+    factors.meridian_parallel_angle   =  f.thetap;
+    factors.meridian_convergence      =  f.conv;
+
+    factors.tissot_semimajor  =  f.a;
+    factors.tissot_semiminor  =  f.b;
 
     return factors;
 }

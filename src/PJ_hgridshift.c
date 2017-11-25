@@ -5,7 +5,7 @@
 PROJ_HEAD(hgridshift, "Horizontal grid shift");
 
 static XYZ forward_3d(LPZ lpz, PJ *P) {
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
 
     if (P->gridlist != NULL) {
@@ -19,7 +19,7 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
 
 
 static LPZ reverse_3d(XYZ xyz, PJ *P) {
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
 
     if (P->gridlist != NULL) {

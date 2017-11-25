@@ -137,16 +137,15 @@ EXPORTS
     proj_rtodms                    @125
     proj_dmstor                    @126
 
-    proj_derivatives               @127
-    proj_factors                   @128
+    proj_factors                   @127
 
-    proj_list_operations           @129
-    proj_list_ellps                @130
-    proj_list_units                @131
-    proj_list_prime_meridians      @132
+    proj_list_operations           @128
+    proj_list_ellps                @129
+    proj_list_units                @130
+    proj_list_prime_meridians      @131
 
-    proj_angular_input             @133
-    proj_angular_output            @134
+    proj_angular_input             @132
+    proj_angular_output            @133
 
-    pj_ellipsoid                   @135
-    pj_calc_ellipsoid_params       @136
+    pj_ellipsoid                   @134
+    pj_calc_ellipsoid_params       @135

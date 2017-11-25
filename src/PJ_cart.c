@@ -187,7 +187,7 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
 
 /* In effect, 2 cartesian coordinates of a point on the ellipsoid. Rather pointless, but... */
 static XY cart_forward (LP lp, PJ *P) {
-    PJ_TRIPLET point;
+    PJ_COORD point;
     point.lp = lp;
     point.lpz.z = 0;
 
@@ -197,7 +197,7 @@ static XY cart_forward (LP lp, PJ *P) {
 
 /* And the other way round. Still rather pointless, but... */
 static LP cart_reverse (XY xy, PJ *P) {
-    PJ_TRIPLET point;
+    PJ_COORD point;
     point.xy = xy;
     point.xyz.z = 0;
 

@@ -178,7 +178,6 @@ union  PJ_COORD;
 struct geod_geodesic;
 struct pj_opaque;
 struct ARG_list;
-struct FACTORS;
 struct PJ_REGION_S;
 typedef struct PJ_REGION_S  PJ_Region;
 typedef struct ARG_list paralist;   /* parameter list */
@@ -704,8 +703,8 @@ double  pj_authlat(double, double *);
 COMPLEX pj_zpoly1(COMPLEX, COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, COMPLEX *, int, COMPLEX *);
 
-int pj_deriv(LP, double, PJ *, struct DERIVS *);
-int pj_factors(LP, PJ *, double, struct FACTORS *);
+int pj_deriv(LP, double, const PJ *, struct DERIVS *);
+int pj_factors(LP, const PJ *, double, struct FACTORS *);
 
 struct PW_COEF {    /* row coefficient structure */
     int m;          /* number of c coefficients (=0 for none) */
