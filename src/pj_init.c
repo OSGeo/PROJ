@@ -219,23 +219,30 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
             strncpy(sword+1, start_of_word, word_len);
             sword[word_len+1] = '\0';
 
-            /* do not override existing parameter value of same name - unless in pipeline definition */
+            /* do not override existing parameter value of same name */
             if (!pj_param(ctx, *start, sword).i) {
-                /* don't default ellipse if datum, ellps or any earth model
-                   information is set. */
-                if( strncmp(sword+1,"ellps=",6) != 0
-                    || (!pj_param(ctx, *start, "tdatum").i
-                        && !pj_param(ctx, *start, "tellps").i
-                        && !pj_param(ctx, *start, "ta").i
-                        && !pj_param(ctx, *start, "tb").i
-                        && !pj_param(ctx, *start, "trf").i
-                        && !pj_param(ctx, *start, "tf").i) )
-                {
-                    next = next->next = pj_mkparam(sword+1);
+
+                /* don't default ellipse if datum, ellps or any earth model information is set */
+                if (0==strncmp(sword,"tellps=", 7)) {
+                    int n = 0;
+
+                    n += pj_param(ctx, *start, "tdatum").i;
+                    n += pj_param(ctx, *start, "tellps").i;
+                    n += pj_param(ctx, *start, "ta").i;
+                    n += pj_param(ctx, *start, "tb").i;
+                    n += pj_param(ctx, *start, "trf").i;
+                    n += pj_param(ctx, *start, "tf").i;
+                    n += pj_param(ctx, *start, "te").i;
+                    n += pj_param(ctx, *start, "tes").i;
+
+                    if (0==n)
+                        next = next->next = pj_mkparam(sword+1);
                 }
                 else
                     next = next->next = pj_mkparam(sword+1);
             }
+
+
         }
         else
         {
@@ -434,6 +441,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PJ *(*proj)(PJ *);
     paralist *curr;
     int i;
+    int err;
     int found_def = 0;
     PJ *PIN = 0;
     int n_pipelines = 0;
@@ -536,13 +544,14 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
 
     if (PIN->need_ellps) {
-        if (0 != pj_ellipsoid (PIN)) {
+        int ret = pj_ellipsoid (PIN);
+        if (0 != ret) {
             pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
             return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
         }
         PIN->a_orig = PIN->a;
         PIN->es_orig = PIN->es;
-        if (pj_calc_ellps_params(PIN, PIN->a, PIN->es))
+        if (pj_calc_ellipsoid_params (PIN, PIN->a, PIN->es))
             return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE);
     }
 
@@ -700,12 +709,13 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
 
     /* projection specific initialization */
+    err = proj_errno_reset (PIN);
     PIN = proj(PIN);
-    if ((0==PIN) || ctx->last_errno)
-    {
+    if (proj_errno (PIN)) {
         pj_free(PIN);
         return 0;
     }
+    proj_errno_restore (PIN, err);
     return PIN;
 }
 

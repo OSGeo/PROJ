@@ -101,11 +101,11 @@ typedef void (*PJ_LOG_FUNCTION)(void *, int, const char *);
 void proj_log_error (PJ *P, const char *fmt, ...);
 void proj_log_debug (PJ *P, const char *fmt, ...);
 void proj_log_trace (PJ *P, const char *fmt, ...);
-/*void proj_log_func (PJ *P, void *app_data, void (*log)(void *, int, const char *));*/
 void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log);
 
-void pj_inherit_ellipsoid_defs(const PJ *src, PJ *dst);
-int pj_calc_ellps_params(PJ *P, double a, double es);
+void pj_inherit_ellipsoid_def (const PJ *src, PJ *dst);
+void pj_erase_ellipsoid_def (PJ *P);
+int pj_calc_ellipsoid_params (PJ *P, double a, double es);
 
 /* Lowest level: Minimum support for fileapi */
 void proj_fileapi_set (PJ *P, void *fileapi);

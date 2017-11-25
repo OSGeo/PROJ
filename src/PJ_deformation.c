@@ -232,9 +232,8 @@ PJ *TRANSFORMATION(deformation,1) {
     if (Q->cart == 0)
         return destructor(P, ENOMEM);
 
-    /* inherit ellipsoid definition from P to Q->cart (simpler than guessing */
-    /* how the ellipsoid was specified in original definition)               */
-    pj_inherit_ellipsoid_defs(P, Q->cart);
+    /* inherit ellipsoid definition from P to Q->cart */
+    pj_inherit_ellipsoid_def (P, Q->cart);
 
     Q->has_xy_grids = pj_param(P->ctx, P->params, "txy_grids").i;
     Q->has_z_grids  = pj_param(P->ctx, P->params, "tz_grids").i;
