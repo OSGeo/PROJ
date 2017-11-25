@@ -2,8 +2,10 @@
 #define PJ_LIB__
 #include "projects.h"
 
-int pj_deriv(LP lp, double h, PJ *P, struct DERIVS *der) {
+int pj_deriv(LP lp, double h, const PJ *P, struct DERIVS *der) {
     XY t;
+    /* get rid of constness until we can do it for real */
+    PJ *Q = (PJ *) P;
 
     lp.lam += h;
     lp.phi += h;
@@ -11,7 +13,7 @@ int pj_deriv(LP lp, double h, PJ *P, struct DERIVS *der) {
         return 1;
 
     h += h;
-    t = (*P->fwd)(lp, P);
+    t = (*Q->fwd)(lp, Q);
     if (t.x == HUGE_VAL)
         return 1;
 
@@ -23,7 +25,7 @@ int pj_deriv(LP lp, double h, PJ *P, struct DERIVS *der) {
     if (fabs(lp.phi) > M_HALFPI)
         return 1;
 
-    t = (*P->fwd)(lp, P);
+    t = (*Q->fwd)(lp, Q);
     if (t.x == HUGE_VAL)
         return 1;
 
@@ -32,7 +34,7 @@ int pj_deriv(LP lp, double h, PJ *P, struct DERIVS *der) {
     der->x_p -= t.x;
     der->y_l += t.y;
     lp.lam -= h;
-    t = (*P->fwd)(lp, P);
+    t = (*Q->fwd)(lp, Q);
     if (t.x == HUGE_VAL)
         return 1;
 
@@ -41,7 +43,7 @@ int pj_deriv(LP lp, double h, PJ *P, struct DERIVS *der) {
     der->x_p -= t.x;
     der->y_l -= t.y;
     lp.phi += h;
-    t = (*P->fwd)(lp, P);
+    t = (*Q->fwd)(lp, Q);
     if (t.x == HUGE_VAL)
         return 1;
 

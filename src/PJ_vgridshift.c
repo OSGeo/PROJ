@@ -6,7 +6,7 @@ PROJ_HEAD(vgridshift, "Vertical grid shift");
 
 
 static XYZ forward_3d(LPZ lpz, PJ *P) {
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
 
     if (P->vgridlist_geoid != NULL) {
@@ -20,7 +20,7 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
 
 
 static LPZ reverse_3d(XYZ xyz, PJ *P) {
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
 
     if (P->vgridlist_geoid != NULL) {
@@ -34,7 +34,7 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
 
 
 static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
-    PJ_COORD point;
+    PJ_COORD point = {{0,0,0,0}};
     point.xyz = forward_3d (obs.lpz, P);
     return point;
 }

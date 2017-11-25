@@ -144,10 +144,6 @@ extern char const pj_release[]; /* global release id string */
 
 /* first forward declare everything needed */
 
-/* Data type for generic geodetic 3D data */
-union PJ_TRIPLET;
-typedef union PJ_TRIPLET PJ_TRIPLET;
-
 /* Data type for generic geodetic 3D data plus epoch information */
 union PJ_COORD;
 typedef union PJ_COORD PJ_COORD;
@@ -155,11 +151,24 @@ typedef union PJ_COORD PJ_COORD;
 struct PJ_AREA;
 typedef struct PJ_AREA PJ_AREA;
 
-struct DERIVS;
-typedef struct DERIVS PJ_DERIVS;
+/* The slimmed down PROJ 5.0.0 version of struct FACTORS  */
+/* Will take over the world and the name when we can rid  */
+/* the library for deprecated stuff, but it's the typedef */
+/* which is userspace useful, so it does not do much of a */
+/* difference */
+struct P5_FACTORS {                  /* Common designation */
+    double meridional_scale;               /* h */
+    double parallel_scale;                 /* k */
+    double areal_scale;                    /* s */
 
-struct FACTORS;
-typedef struct FACTORS PJ_FACTORS;
+    double angular_distortion;             /* omega */
+    double meridian_parallel_angle;        /* theta-prime */
+    double meridian_convergence;           /* alpha */
+
+    double tissot_semimajor;               /* a */
+    double tissot_semiminor;               /* b */
+};
+typedef struct P5_FACTORS PJ_FACTORS;
 
 /* Data type for projection/transformation information */
 struct PJconsts;
@@ -192,17 +201,11 @@ struct PJ_PRIME_MERIDIANS;
 typedef struct PJ_PRIME_MERIDIANS PJ_PRIME_MERIDIANS;
 
 
-/* Omega, Phi, Kappa: Rotations */
-typedef struct {double o, p, k;}  PJ_OPK;
-
-/* Easting, Northing, and some kind of height (orthometric or ellipsoidal) */
-typedef struct {double e, n, h;}  PJ_ENH;
-
-/* Geodetic spatiotemporal coordinate types */
+/* Geodetic, mostly spatiotemporal coordinate types */
 typedef struct { double   x,   y,  z, t; }  PJ_XYZT;
-typedef struct { double   e,   n,  h, t; }  PJ_ENHT;
 typedef struct { double   u,   v,  w, t; }  PJ_UVWT;
 typedef struct { double lam, phi,  z, t; }  PJ_LPZT;
+typedef struct { double o, p, k; }          PJ_OPK;  /* Rotations: omega, phi, kappa */
 
 /* Classic proj.4 pair/triplet types */
 typedef struct { double   u,   v; }  UV;
@@ -213,60 +216,22 @@ typedef struct { double   x,   y,  z; }  XYZ;
 typedef struct { double   u,   v,  w; }  UVW;
 typedef struct { double lam, phi,  z; }  LPZ;
 
-/* Ancillary pairs and triplets for geodetic computations */
 
-/* easting and northing */
-typedef struct { double   e, n; }  PJ_EN;
-
-/* Degrees, minutes, and seconds */
-typedef struct { double d, m,  s; }  PJ_DMS;
-
-/* Geoid undulation (N) and deflections of the vertical (eta, zeta) */
-typedef struct { double   e,  z, N; }  PJ_EZN;
-
-/* Ellipsoidal parameters */
-typedef struct { double   a,   f; }  PJ_AF;
-
-/* Avoid preprocessor renaming and implicit type-punning: Use unions to make it explicit */
+/* Avoid preprocessor renaming and implicit type-punning: Use a union to make it explicit */
 union PJ_COORD {
+     double v[4];   /* First and foremost, it really is "just 4 numbers in a vector" */
     PJ_XYZT xyzt;
     PJ_UVWT uvwt;
-    PJ_ENHT enht;
     PJ_LPZT lpzt;
-    PJ_ENH  enh;
-    PJ_EN   en;
-    double v[4]; /* It's just a vector */
-    XYZ  xyz;
-    UVW  uvw;
-    LPZ  lpz;
-    XY   xy;
-    UV   uv;
-    LP   lp;
+     PJ_OPK opk;
+        XYZ xyz;
+        UVW uvw;
+        LPZ lpz;
+         XY xy;
+         UV uv;
+         LP lp;
 };
 
-union PJ_TRIPLET {
-    PJ_OPK  opk;
-    PJ_ENH  enh;
-    PJ_EZN  ezn;
-    PJ_DMS  dms;
-    double v[3]; /* It's just a vector */
-    XYZ    xyz;
-    LPZ    lpz;
-    UVW    uvw;
-    XY     xy;
-    LP     lp;
-    UV     uv;
-    PJ_AF  af;
-};
-
-union PJ_PAIR {
-    XY     xy;
-    LP     lp;
-    UV     uv;
-    PJ_AF  af;
-    PJ_EN  en;
-    double v[2]; /* Yes - It's really just a vector! */
-};
 
 struct PJ_INFO {
     char        release[64];        /* Release info. Version + date         */
@@ -320,7 +285,6 @@ PJ_CONTEXT *proj_context_create (void);
 PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx);
 
 
-
 /* Manage the transformation definition object PJ */
 PJ  *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ  *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
@@ -342,8 +306,6 @@ enum PJ_DIRECTION {
 typedef enum PJ_DIRECTION PJ_DIRECTION;
 
 
-
-
 int proj_angular_input (PJ *P, enum PJ_DIRECTION dir);
 int proj_angular_output (PJ *P, enum PJ_DIRECTION dir);
 
@@ -358,7 +320,6 @@ size_t proj_trans_generic (
     double *z, size_t sz, size_t nz,
     double *t, size_t st, size_t nt
 );
-
 
 
 /* Initializers */
@@ -381,14 +342,13 @@ double proj_xyz_dist (XYZ a, XYZ b);
 
 
 /* Set or read error level */
-int  proj_errno (PJ *P);
-int  proj_errno_set (PJ *P, int err);
-int  proj_errno_reset (PJ *P);
-int  proj_errno_restore (PJ *P, int err);
+int  proj_errno (const PJ *P);
+int  proj_errno_set (const PJ *P, int err);
+int  proj_errno_reset (const PJ *P);
+int  proj_errno_restore (const PJ *P, int err);
 
-
-PJ_DERIVS  proj_derivatives(PJ *P, const LP lp);
-PJ_FACTORS proj_factors(PJ *P, const LP lp);
+/* Scaling and angular distortion factors */
+PJ_FACTORS proj_factors(PJ *P, LP lp);
 
 /* Info functions - get information about various PROJ.4 entities */
 PJ_INFO      proj_info(void);

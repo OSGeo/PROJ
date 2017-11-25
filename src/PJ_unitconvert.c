@@ -204,7 +204,7 @@ static XY forward_2d(LP lp, PJ *P) {
     Forward unit conversions in the plane
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     point.lp = lp;
 
     point.xy.x *= pj_units[Q->xy_in_id].factor / pj_units[Q->xy_out_id].factor;
@@ -220,7 +220,7 @@ static LP reverse_2d(XY xy, PJ *P) {
     Reverse unit conversions in the plane
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     point.xy = xy;
 
     point.xy.x *= pj_units[Q->xy_out_id].factor / pj_units[Q->xy_in_id].factor;
@@ -236,7 +236,7 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
     Forward unit conversions the vertical component
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
 
     /* take care of the horizontal components in the 2D function */
@@ -253,7 +253,7 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
     Reverse unit conversions the vertical component
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
 
     /* take care of the horizontal components in the 2D function */
@@ -271,7 +271,7 @@ static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
     Forward conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_COORD out;
+    PJ_COORD out = {{0,0,0,0}};
 
     /* delegate unit conversion of physical dimensions to the 3D function */
     out.xyz = forward_3d(obs.lpz, P);
@@ -291,7 +291,7 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
     Reverse conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_COORD out;
+    PJ_COORD out = {{0,0,0,0}};
 
     /* delegate unit conversion of physical dimensions to the 3D function */
     out.lpz = reverse_3d(obs.xyz, P);

@@ -310,7 +310,7 @@ static void build_rot_matrix(PJ *P) {
 static XY helmert_forward (LP lp, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     double x, y, cr, sr;
     point.lp = lp;
 
@@ -330,7 +330,7 @@ static XY helmert_forward (LP lp, PJ *P) {
 static LP helmert_reverse (XY xy, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     double x, y, sr, cr;
     point.xy = xy;
 
@@ -350,7 +350,7 @@ static LP helmert_reverse (XY xy, PJ *P) {
 static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     double X, Y, Z, scale;
 
     point.lpz = lpz;
@@ -390,7 +390,7 @@ static XYZ helmert_forward_3d (LPZ lpz, PJ *P) {
 static LPZ helmert_reverse_3d (XYZ xyz, PJ *P) {
 /***********************************************************************/
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    PJ_TRIPLET point;
+    PJ_COORD point = {{0,0,0,0}};
     double X, Y, Z, scale;
 
     point.xyz = xyz;
