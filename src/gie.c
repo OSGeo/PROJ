@@ -876,66 +876,66 @@ static int dispatch (const char *cmnd, const char *args) {
 
 struct errno_vs_err_const {const char *the_err_const; int the_errno;};
 static const struct errno_vs_err_const lookup[] = {
-    {"PJD_ERR_NO_ARGS"                  ,  -1},
-    {"PJD_ERR_NO_OPTION_IN_INIT_FILE"   ,  -2},
-    {"PJD_ERR_NO_COLON_IN_INIT_STRING"  ,  -3},
-    {"PJD_ERR_PROJ_NOT_NAMED"           ,  -4},
-    {"PJD_ERR_UNKNOWN_PROJECTION_ID"    ,  -5},
-    {"PJD_ERR_ECCENTRICITY_IS_ONE"      ,  -6},
-    {"PJD_ERR_UNKNOW_UNIT_ID"           ,  -7},
-    {"PJD_ERR_INVALID_BOOLEAN_PARAM"    ,  -8},
-    {"PJD_ERR_UNKNOWN_ELLP_PARAM"       ,  -9},
-    {"PJD_ERR_REV_FLATTENING_IS_ZERO"   ,  -10},
-    {"PJD_ERR_REF_RAD_LARGER_THAN_90"   ,  -11},
-    {"PJD_ERR_ES_LESS_THAN_ZERO"        ,  -12},
-    {"PJD_ERR_MAJOR_AXIS_NOT_GIVEN"     ,  -13},
-    {"PJD_ERR_LAT_OR_LON_EXCEED_LIMIT"  ,  -14},
-    {"PJD_ERR_INVALID_X_OR_Y"           ,  -15},
-    {"PJD_ERR_WRONG_FORMAT_DMS_VALUE"   ,  -16},
-    {"PJD_ERR_NON_CONV_INV_MERI_DIST"   ,  -17},
-    {"PJD_ERR_NON_CON_INV_PHI2"         ,  -18},
-    {"PJD_ERR_ACOS_ASIN_ARG_TOO_LARGE"  ,  -19},
-    {"PJD_ERR_TOLERANCE_CONDITION"      ,  -20},
-    {"PJD_ERR_CONIC_LAT_EQUAL"          ,  -21},
-    {"PJD_ERR_LAT_LARGER_THAN_90"       ,  -22},
-    {"PJD_ERR_LAT1_IS_ZERO"             ,  -23},
-    {"PJD_ERR_LAT_TS_LARGER_THAN_90"    ,  -24},
-    {"PJD_ERR_CONTROL_POINT_NO_DIST"    ,  -25},
-    {"PJD_ERR_NO_ROTATION_PROJ"         ,  -26},
-    {"PJD_ERR_W_OR_M_ZERO_OR_LESS"      ,  -27},
-    {"PJD_ERR_LSAT_NOT_IN_RANGE"        ,  -28},
-    {"PJD_ERR_PATH_NOT_IN_RANGE"        ,  -29},
-    {"PJD_ERR_H_LESS_THAN_ZERO"         ,  -30},
-    {"PJD_ERR_K_LESS_THAN_ZERO"         ,  -31},
-    {"PJD_ERR_LAT_1_OR_2_ZERO_OR_90"    ,  -32},
-    {"PJD_ERR_LAT_0_OR_ALPHA_EQ_90"     ,  -33},
-    {"PJD_ERR_ELLIPSOID_USE_REQUIRED"   ,  -34},
-    {"PJD_ERR_INVALID_UTM_ZONE"         ,  -35},
-    {"PJD_ERR_TCHEBY_VAL_OUT_OF_RANGE"  ,  -36},
-    {"PJD_ERR_FAILED_TO_FIND_PROJ"      ,  -37},
-    {"PJD_ERR_FAILED_TO_LOAD_GRID"      ,  -38},
-    {"PJD_ERR_INVALID_M_OR_N"           ,  -39},
-    {"PJD_ERR_N_OUT_OF_RANGE"           ,  -40},
-    {"PJD_ERR_LAT_1_2_UNSPECIFIED"      ,  -41},
-    {"PJD_ERR_ABS_LAT1_EQ_ABS_LAT2"     ,  -42},
-    {"PJD_ERR_LAT_0_HALF_PI_FROM_MEAN"  ,  -43},
-    {"PJD_ERR_UNPARSEABLE_CS_DEF"       ,  -44},
-    {"PJD_ERR_GEOCENTRIC"               ,  -45},
-    {"PJD_ERR_UNKNOWN_PRIME_MERIDIAN"   ,  -46},
-    {"PJD_ERR_AXIS"                     ,  -47},
-    {"PJD_ERR_GRID_AREA"                ,  -48},
-    {"PJD_ERR_INVALID_SWEEP_AXIS"       ,  -49},
-    {"PJD_ERR_MALFORMED_PIPELINE"       ,  -50},
-    {"PJD_ERR_UNIT_FACTOR_LESS_THAN_0"  ,  -51},
-    {"PJD_ERR_INVALID_SCALE"            ,  -52},
-    {"PJD_ERR_NON_CONVERGENT"           ,  -53},
-    {"PJD_ERR_MISSING_ARGS"             ,  -54},
-    {"PJD_ERR_LAT_0_IS_ZERO"            ,  -55},
-    {"PJD_ERR_ELLIPSOIDAL_UNSUPPORTED"  ,  -56},
-    {"PJD_ERR_TOO_MANY_INITS"           ,  -57},
-    {"PJD_ERR_INVALID_ARG"              ,  -58},
-    {"PJD_ERR_UNKNOWN"                  ,  9999},
-    {"PJD_ERR_ENOMEM"                   ,  ENOMEM},
+    {"pjd_err_no_args"                  ,  -1},
+    {"pjd_err_no_option_in_init_file"   ,  -2},
+    {"pjd_err_no_colon_in_init_string"  ,  -3},
+    {"pjd_err_proj_not_named"           ,  -4},
+    {"pjd_err_unknown_projection_id"    ,  -5},
+    {"pjd_err_eccentricity_is_one"      ,  -6},
+    {"pjd_err_unknow_unit_id"           ,  -7},
+    {"pjd_err_invalid_boolean_param"    ,  -8},
+    {"pjd_err_unknown_ellp_param"       ,  -9},
+    {"pjd_err_rev_flattening_is_zero"   ,  -10},
+    {"pjd_err_ref_rad_larger_than_90"   ,  -11},
+    {"pjd_err_es_less_than_zero"        ,  -12},
+    {"pjd_err_major_axis_not_given"     ,  -13},
+    {"pjd_err_lat_or_lon_exceed_limit"  ,  -14},
+    {"pjd_err_invalid_x_or_y"           ,  -15},
+    {"pjd_err_wrong_format_dms_value"   ,  -16},
+    {"pjd_err_non_conv_inv_meri_dist"   ,  -17},
+    {"pjd_err_non_con_inv_phi2"         ,  -18},
+    {"pjd_err_acos_asin_arg_too_large"  ,  -19},
+    {"pjd_err_tolerance_condition"      ,  -20},
+    {"pjd_err_conic_lat_equal"          ,  -21},
+    {"pjd_err_lat_larger_than_90"       ,  -22},
+    {"pjd_err_lat1_is_zero"             ,  -23},
+    {"pjd_err_lat_ts_larger_than_90"    ,  -24},
+    {"pjd_err_control_point_no_dist"    ,  -25},
+    {"pjd_err_no_rotation_proj"         ,  -26},
+    {"pjd_err_w_or_m_zero_or_less"      ,  -27},
+    {"pjd_err_lsat_not_in_range"        ,  -28},
+    {"pjd_err_path_not_in_range"        ,  -29},
+    {"pjd_err_h_less_than_zero"         ,  -30},
+    {"pjd_err_k_less_than_zero"         ,  -31},
+    {"pjd_err_lat_1_or_2_zero_or_90"    ,  -32},
+    {"pjd_err_lat_0_or_alpha_eq_90"     ,  -33},
+    {"pjd_err_ellipsoid_use_required"   ,  -34},
+    {"pjd_err_invalid_utm_zone"         ,  -35},
+    {"pjd_err_tcheby_val_out_of_range"  ,  -36},
+    {"pjd_err_failed_to_find_proj"      ,  -37},
+    {"pjd_err_failed_to_load_grid"      ,  -38},
+    {"pjd_err_invalid_m_or_n"           ,  -39},
+    {"pjd_err_n_out_of_range"           ,  -40},
+    {"pjd_err_lat_1_2_unspecified"      ,  -41},
+    {"pjd_err_abs_lat1_eq_abs_lat2"     ,  -42},
+    {"pjd_err_lat_0_half_pi_from_mean"  ,  -43},
+    {"pjd_err_unparseable_cs_def"       ,  -44},
+    {"pjd_err_geocentric"               ,  -45},
+    {"pjd_err_unknown_prime_meridian"   ,  -46},
+    {"pjd_err_axis"                     ,  -47},
+    {"pjd_err_grid_area"                ,  -48},
+    {"pjd_err_invalid_sweep_axis"       ,  -49},
+    {"pjd_err_malformed_pipeline"       ,  -50},
+    {"pjd_err_unit_factor_less_than_0"  ,  -51},
+    {"pjd_err_invalid_scale"            ,  -52},
+    {"pjd_err_non_convergent"           ,  -53},
+    {"pjd_err_missing_args"             ,  -54},
+    {"pjd_err_lat_0_is_zero"            ,  -55},
+    {"pjd_err_ellipsoidal_unsupported"  ,  -56},
+    {"pjd_err_too_many_inits"           ,  -57},
+    {"pjd_err_invalid_arg"              ,  -58},
+    {"pjd_err_unknown"                  ,  9999},
+    {"pjd_err_enomem"                   ,  ENOMEM},
 };
 
 static const struct errno_vs_err_const unknown = {"PJD_ERR_UNKNOWN", 9999};
@@ -955,8 +955,8 @@ static void list_err_codes (void) {
 
 
 static const char *err_const_from_errno (int err) {
-    int i;
-    const int n = sizeof lookup / sizeof lookup[0];
+    size_t i;
+    const size_t n = sizeof lookup / sizeof lookup[0];
 
     for (i = 0;  i < n;  i++) {
         if (err==lookup[i].the_errno)
@@ -968,8 +968,18 @@ static const char *err_const_from_errno (int err) {
 
 
 static int errno_from_err_const (const char *err_const) {
-    size_t i, n, len;
+    const size_t n = sizeof lookup / sizeof lookup[0];
+    size_t i, len;
     int ret;
+    char tolower_err_const[100];
+
+    /* Make a lower case copy for matching */
+    for (i = 0;  i < 99; i++) {
+        if (0==err_const[i] || isspace (err_const[i]))
+             break;
+        tolower_err_const[i] = tolower (err_const[i]);
+    }
+    tolower_err_const[i] = 0;
 
     /* If it looks numeric, return that numeric */
     ret = (int) pj_atof (err_const);
@@ -977,8 +987,7 @@ static int errno_from_err_const (const char *err_const) {
         return ret;
 
     /* Else try to find a matching identifier */
-    len = strlen (err_const);
-    n = sizeof lookup / sizeof lookup[0];
+    len = strlen (tolower_err_const);
 
     /* First try to find a match excluding the PJD_ERR_ prefix */
     for (i = 0;  i < n;  i++) {
