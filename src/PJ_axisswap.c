@@ -187,6 +187,10 @@ PJ *CONVERSION(axisswap,0) {
     /* read axes numbers and signs */
     for ( s = order, n = 0; *s != '\0' && n < 4; ) {
         Q->axis[n] = abs(atoi(s))-1;
+        if (Q->axis[n] >= 4) {
+            proj_log_error(P, "swapaxis: invalid axis '%s'", s);
+            return pj_default_destructor(P, PJD_ERR_AXIS);
+        }
         Q->sign[n++] = sign(atoi(s));
         while ( *s != '\0' && *s != ',' )
             s++;
