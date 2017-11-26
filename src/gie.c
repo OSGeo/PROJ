@@ -977,7 +977,7 @@ static int errno_from_err_const (const char *err_const) {
     for (i = 0;  i < 99; i++) {
         if (0==err_const[i] || isspace (err_const[i]))
              break;
-        tolower_err_const[i] = tolower (err_const[i]);
+        tolower_err_const[i] = (char) tolower (err_const[i]);
     }
     tolower_err_const[i] = 0;
 
