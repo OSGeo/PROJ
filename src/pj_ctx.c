@@ -159,7 +159,7 @@ void pj_ctx_set_debug( projCtx ctx, int new_debug )
 
 {
     if (0==ctx)
-        pj_get_default_ctx ()->debug_level = new_debug;
+        return;
     ctx->debug_level = new_debug;
 }
 
