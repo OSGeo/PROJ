@@ -968,10 +968,11 @@ static const char *err_const_from_errno (int err) {
 
 
 static int errno_from_err_const (const char *err_const) {
-    int i, n, len, ret;
+    size_t i, n, len;
+    int ret;
 
     /* If it looks numeric, return that numeric */
-    ret = pj_atof (err_const);
+    ret = (int) pj_atof (err_const);
     if (0!=ret)
         return ret;
 
