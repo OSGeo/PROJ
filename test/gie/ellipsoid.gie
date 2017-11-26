@@ -133,8 +133,6 @@ expect     failure errno REV_FLATTENING_IS_ZERO
 
 operation  proj=utm zone=32   ellps=GRS80 es=1
 expect     failure errno ECCENTRICITY_IS_ONE
-expect     failure errno -314
-
 
 operation  proj=utm zone=32   ellps=GRS80 b=0
 expect     failure errno ECCENTRICITY_IS_ONE
