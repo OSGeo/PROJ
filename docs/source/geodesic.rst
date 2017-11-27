@@ -1,219 +1,217 @@
 .. _geodesic:
 
-================================================================================
-Geodesic Calculations
-================================================================================
+Geodesic calculations
+=====================
 
 .. contents:: Contents
-   :depth: 3
+   :depth: 2
    :backlinks: none
 
+Introduction
+------------
 
-Geodesic Calculations
---------------------------------------------------------------------------------
+Consider a ellipsoid of revolution with equatorial radius *a*, polar
+semi-axis *b*, and flattening *f* = (*a* − *b*)/*a* .  Points on
+the surface of the ellipsoid are characterized by their latitude φ
+and longitude λ.  (Note that latitude here means the
+*geographical latitude*, the angle between the normal to the ellipsoid
+and the equatorial plane).
 
-Geodesic calculations are calculations along lines (great circle) on the
-surface of the earth. They can answer questions like:
+The shortest path between two points on the ellipsoid at
+(φ\ :sub:`1`, λ\ :sub:`1`) and (φ\ :sub:`2`, λ\ :sub:`2`)
+is called the geodesic.  Its length is
+*s*\ :sub:`12` and the geodesic from point 1 to point 2 has forward
+azimuths α\ :sub:`1` and α\ :sub:`2` at the two end
+points.  In this figure, we have λ\ :sub:`12` =
+λ\ :sub:`2` − λ\ :sub:`1`.
 
- * What is the distance between these two points?
- * If I travel X meters from point A at bearing phi, where will I be.  They are
-   done in native lat-long coordinates, rather than in projected coordinates.
+    .. raw:: html
 
-Relevant mailing list threads
-................................................................................
+       <center>
+         <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Geodesic_problem_on_an_ellipsoid.svg"
+              alt="Figure from wikipedia"
+              width="250">
+       </center>
 
- * http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3361
- * http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3375
- * http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3435
- * http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3588
- * http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3925
- * http://thread.gmane.org/gmane.comp.gis.proj-4.devel/4047
- * http://thread.gmane.org/gmane.comp.gis.proj-4.devel/4083
+A geodesic can be extended indefinitely by requiring that any
+sufficiently small segment is a shortest path; geodesics are also the
+straightest curves on the surface.
 
-Terminology
---------------------------------------------------------------------------------
+Solution of geodesic programs
+-----------------------------
 
-The shortest distance on the surface of a solid is generally termed a geodesic,
-be it an ellipsoid of revolution, aposphere, etc.  On a sphere, the geodesic is
-termed a Great Circle.
+Traditionally two geodesic problems are considered:
 
-HOWEVER, when computing the distance between two points using a projected
-coordinate system, that is a conformal projection such as Transverse Mercator,
-Oblique Mercator, Normal Mercator, Stereographic, or Lambert Conformal Conic -
-that then is a GRID distance which can be converted to an equivalent GEODETIC
-distance using the function for "Scale Factor at a Point."  The conversion is
-then termed "Grid Distance to Geodetic Distance," even though it will not be as
-exactly correct as a true ellipsoidal geodesic.  Closer to the truth with a TM
-than with a Lambert or other conformal projection, but still not exactly "on."
+* the direct problem — given φ\ :sub:`1`,
+  λ\ :sub:`1`, α\ :sub:`1`, *s*\ :sub:`12`,
+  determine φ\ :sub:`2`, λ\ :sub:`2`, and
+  α\ :sub:`2`.
 
+* the inverse problem — given φ\ :sub:`1`,
+  λ\ :sub:`1`, φ\ :sub:`2`, λ\ :sub:`2`,
+  determine *s*\ :sub:`12`, α\ :sub:`1`, and
+  α\ :sub:`2`.
 
-So, it can be termed "geodetic distance" or a  "geodesic distance," depending
-on just how you got there ...
+PROJ incorporates `C library for Geodesics
+<https://geographiclib.sourceforge.io/1.49/C/>`_ from `GeographicLib
+<https://geographiclib.sourceforge.io>`_.  This library provides
+routines to solve the direct and inverse geodesic problems.  Full double
+precision accuracy is maintained provided that −0.02 < *f* < 0.02.  Refer
+to the
 
+    `application programming interface
+    <https://geographiclib.sourceforge.io/1.49/C/geodesic_8h.html>`_
 
-The Math
---------------------------------------------------------------------------------
+for full documentation.  A brief summary of the routines is given in
+geodesic(3).
 
-Spherical Approximation
-................................................................................
+The interface to the geodesic routines differ in two respects from the
+rest of PROJ:
 
-The simplest way to compute geodesics is using a sphere as an approximation for
-the earth. This from Mikael Rittri on the Proj mailing list:
+* angles (latitudes, longitudes, and azimuths) are in degrees (instead
+  of in radians);
+* the shape of ellipsoid is specified by the flattening *f*; this can
+  be negative to denote a prolate ellipsoid; setting *f* = 0 corresponds
+  to a sphere in which case the geodesic becomes a great circle.
 
-    If 1 percent accuracy is enough, I think you can use spherical formulas
-    with a fixed Earth radius.  You can find good formulas in the Aviation
-    Formulary of Ed Williams, http://williams.best.vwh.net/avform.htm.
+PROJ also includes a command line tool, :ref:`geod`\ (1), for performing
+simple geodesic calculations.
 
-    For the fixed Earth radius, I would choose the average of the:
+Additional properties
+---------------------
 
-        :math:`c`   = radius of curvature at the poles,
+The routines also calculate several other quantities of interest
 
-        :math:`\frac{b^2}{a}` = radius of curvature in a meridian plane at the equator,
+* *S*\ :sub:`12` is the area between the geodesic from point 1 to
+  point 2 and the equator; i.e., it is the area, measured
+  counter-clockwise, of the quadrilateral with corners
+  (φ\ :sub:`1`,λ\ :sub:`1`), (0,λ\ :sub:`1`),
+  (0,λ\ :sub:`2`), and
+  (φ\ :sub:`2`,λ\ :sub:`2`).  It is given in
+  meters\ :sup:`2`.
+* *m*\ :sub:`12`, the reduced length of the geodesic is defined such
+  that if the initial azimuth is perturbed by *d*\ α\ :sub:`1`
+  (radians) then the second point is displaced by *m*\ :sub:`12`
+  *d*\ α\ :sub:`1` in the direction perpendicular to the
+  geodesic.  *m*\ :sub:`12` is given in meters.  On a curved surface
+  the reduced length obeys a symmetry relation, *m*\ :sub:`12` +
+  *m*\ :sub:`21` = 0.  On a flat surface, we have *m*\ :sub:`12` =
+  *s*\ :sub:`12`.
+* *M*\ :sub:`12` and *M*\ :sub:`21` are geodesic scales.  If two
+  geodesics are parallel at point 1 and separated by a small distance
+  *dt*, then they are separated by a distance *M*\ :sub:`12` *dt* at
+  point 2.  *M*\ :sub:`21` is defined similarly (with the geodesics
+  being parallel to one another at point 2).  *M*\ :sub:`12` and
+  *M*\ :sub:`21` are dimensionless quantities.  On a flat surface,
+  we have *M*\ :sub:`12` = *M*\ :sub:`21` = 1.
+* σ\ :sub:`12` is the arc length on the auxiliary sphere.
+  This is a construct for converting the problem to one in spherical
+  trigonometry.  The spherical arc length from one equator crossing to
+  the next is always 180°.
 
-    since these are the extreme values for the local radius of curvature of the
-    earth ellipsoid.
+If points 1, 2, and 3 lie on a single geodesic, then the following
+addition rules hold:
 
-    If your coordinates are given in WGS84, then
+* *s*\ :sub:`13` = *s*\ :sub:`12` + *s*\ :sub:`23`
+* σ\ :sub:`13` = σ\ :sub:`12` + σ\ :sub:`23`
+* *S*\ :sub:`13` = *S*\ :sub:`12` + *S*\ :sub:`23`
+* *m*\ :sub:`13` = *m*\ :sub:`12`\ *M*\ :sub:`23` +
+  *m*\ :sub:`23`\ *M*\ :sub:`21`
+* *M*\ :sub:`13` = *M*\ :sub:`12`\ *M*\ :sub:`23` −
+  (1 − *M*\ :sub:`12`\ *M*\ :sub:`21`)
+  *m*\ :sub:`23`/*m*\ :sub:`12`
+* *M*\ :sub:`31` = *M*\ :sub:`32`\ *M*\ :sub:`21` −
+  (1 − *M*\ :sub:`23`\ *M*\ :sub:`32`)
+  *m*\ :sub:`12`/*m*\ :sub:`23`
 
-        :math:`c`   = 6 399 593.626 m,
+Multiple shortest geodesics
+---------------------------
 
-        :math:`\frac{b^2}{a}` = 6 335 439.327 m,
+The shortest distance found by solving the inverse problem is
+(obviously) uniquely defined.  However, in a few special cases there are
+multiple azimuths which yield the same shortest distance.  Here is a
+catalog of those cases:
 
-    (see http://home.online.no/~sigurdhu/WGS84_Eng.html) so their average is 6,367,516.477 m.
-    The maximal error for distance calculation should then be less than 0.51 percent.
+* φ\ :sub:`1` = −φ\ :sub:`2` (with neither point at
+  a pole).  If α\ :sub:`1` = α\ :sub:`2`, the geodesic
+  is unique.  Otherwise there are two geodesics and the second one is
+  obtained by setting
+  [α\ :sub:`1`,α\ :sub:`2`] ←  [α\ :sub:`2`,α\ :sub:`1`],
+  [*M*\ :sub:`12`,\ *M*\ :sub:`21`] ← [*M*\ :sub:`21`,\ *M*\ :sub:`12`],
+  *S*\ :sub:`12` ← −\ *S*\ :sub:`12`.
+  (This occurs when the longitude difference is near ±180° for oblate
+  ellipsoids.)
+* λ\ :sub:`2` = λ\ :sub:`1` ± 180° (with
+  neither point at a pole).  If α\ :sub:`1` = 0° or
+  ±180°, the geodesic is unique.  Otherwise there are two
+  geodesics and the second one is obtained by setting
+  [α\ :sub:`1`,α\ :sub:`2`] ← [−α\ :sub:`1`,−α\ :sub:`2`],
+  *S*\ :sub:`12` ← −\ *S*\ :sub:`12`.  (This occurs when
+  φ\ :sub:`2` is near −φ\ :sub:`1` for prolate
+  ellipsoids.)
+* Points 1 and 2 at opposite poles.  There are infinitely many
+  geodesics which can be generated by setting
+  [α\ :sub:`1`,α\ :sub:`2`] ←
+  [α\ :sub:`1`,α\ :sub:`2`] + [δ,−δ], for arbitrary δ.
+  (For spheres, this prescription applies when points 1 and 2 are
+  antipodal.)
+* *s*\ :sub:`12` = 0 (coincident points).  There are infinitely many
+  geodesics which can be generated by setting
+  [α\ :sub:`1`,α\ :sub:`2`]_←
+  [α\ :sub:`1`,α\ :sub:`2`]_+ [δ,δ], for
+  arbitrary δ.
 
-    When computing the azimuth between two points by the spherical formulas,  I
-    think the maximal error on WGS84 will be 0.2 degrees, at least if the
-    points are not too far away (less than 1000 km apart, say). The error
-    should be maximal near the equator, for azimuths near northeast etc.
+Background
+----------
 
-I am not sure about the spherical errors for the forward geodetic problem:
-point positioning given initial point, distance and azimuth.
+The algorithms implemented by this package are given in Karney (2013)
+and are based on Bessel (1825) and Helmert (1880); the algorithm for
+areas is based on Danielsen (1989).  These improve on the work of
+Vincenty (1975) in the following respects:
 
-Ellipsoidal Approximation
-................................................................................
+* The results are accurate to round-off for terrestrial ellipsoids (the
+  error in the distance is less then 15 nanometers, compared to 0.1 mm
+  for Vincenty).
+* The solution of the inverse problem is always found.  (Vincenty's
+  method fails to converge for nearly antipodal points.)
+* The routines calculate differential and integral properties of a
+  geodesic.  This allows, for example, the area of a geodesic polygon to
+  be computed.
 
-For more accuracy, the earth can be approximated with an ellipsoid,
-complicating the math somewhat.  See the wikipedia page, `Geodesics on an
-ellipsoid <https://en.wikipedia.org/wiki/Geodesics_on_an_ellipsoid>`__, for
-more information.
+References
+----------
 
-Thaddeus Vincenty's method, April 1975
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For a very good procedure to calculate inter point distances see:
-
-http://www.ngs.noaa.gov/PC_PROD/Inv_Fwd/ (Fortran code, DOS executables, and an online app)
-
-and algorithm details published in: `Vincenty, T. (1975) <http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf>`__
-
-Javascript code
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Chris Veness has coded Vincenty's formulas as !JavaScript.
-
-distance: http://www.movable-type.co.uk/scripts/latlong-vincenty.html
-
-direct:   http://www.movable-type.co.uk/scripts/latlong-vincenty-direct.html
-
-C code
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-From Gerald Evenden: a library of the converted NGS Vincenty geodesic procedure
-and an application program, 'geodesic'.  In the case of a spherical earth
-[Snyder1987]_'s preferred equations are used.
-
-* http://article.gmane.org/gmane.comp.gis.proj-4.devel/3588/
-
-The link in this message is broken.  The correct URL is
-http://home.comcast.net/~gevenden56/proj/
-
-Earlier Mr. Evenden had posted to the PROJ.4 mailing list this code for
-determination of true distance and respective forward and back azimuths between
-two points on the ellipsoid.  Good for any pair of points that are not
-antipodal.
-Later he posted that this was not in fact the translation of NGS FORTRAN code,
-but something else. But, for what it's worth, here is the posted code (source
-unknown):
-
-* http://article.gmane.org/gmane.comp.gis.proj-4.devel/3478
-
-
-PROJ.4 - geod program
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-The PROJ.4 [wiki:man_geod geod] program can be used for great circle distances
-on an ellipsoid.  As of proj version 4.9.0, this uses a translation of
-GeographicLib::Geodesic (see below) into C.  The underlying geodesic
-calculation API is exposed as part of the PROJ.4 library (via the geodesic.h
-header).  Prior to version 4.9.0, the algorithm documented here was used:
-`
-Paul D. Thomas, 1970
-Spheroidal Geodesics, Reference Systems, and Local Geometry"
-U.S. Naval Oceanographic Office, p. 162
-Engineering Library 526.3 T36s
-
-http://handle.dtic.mil/100.2/AD0703541
-
-GeographicLib::Geodesic
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Charles Karney has written a C++ class to do geodesic calculations and a
-utility GeodSolve to call it.  See
-
-* http://geographiclib.sourceforge.net/geod.html
-
-An online version of GeodSolve is available at
-
-* http://geographiclib.sourceforge.net/cgi-bin/GeodSolve
-
-This is an attempt to do geodesic calculations "right", i.e.,
-
-* accurate to round-off (i.e., about 15 nm);
-* inverse solution always succeeds (even for near anti-podal points);
-* reasonably fast (comparable in speed to Vincenty);
-* differential properties of geodesics are computed (these give the scales of
-  geodesic projections);
-* the area between a geodesic and the equator is computed (allowing the
-  area of geodesic polygons to be found);
-* included also is an implementation in terms of elliptic integrals which
-  can deal with ellipsoids with 0.01 < b/a < 100.
-
-A JavaScript implementation is included, see
-
-* `geo-calc <http://geographiclib.sourceforge.net/scripts/geod-calc.html>`__,
-   a text interface to geodesic calculations;
-* `geod-google <http://geographiclib.sourceforge.net/scripts/geod-google.html>`__,
-   a tool for drawing geodesics on Google Maps.
-
-Implementations in `Python <http://pypi.python.org/pypi/geographiclib>`__,
-`Matlab <http://www.mathworks.com/matlabcentral/fileexchange/39108>`__,
-`C <http://geographiclib.sourceforge.net/html/C/>`__,
-`Fortran <http://geographiclib.sourceforge.net/html/Fortran/>`__ , and
-`Java <http://geographiclib.sourceforge.net/html/java/>`__ are also available.
-
-The algorithms are described in
- * C. F. F. Karney, `Algorithms for gedesics <http://dx.doi.org/10.1007/s00190-012-0578-z>`__,
-   J. Geodesy '''87'''(1), 43-55 (2013),
-   DOI: `10.1007/s00190-012-0578-z <http://dx.doi.org/10.1007/s00190-012-0578-z>`__; `geo-addenda.html <http://geographiclib.sf.net/geod-addenda.html>`__.
-
-Triaxial Ellipsoid
-................................................................................
-
-A triaxial ellipsoid is a marginally better approximation to the shape of the earth
-than an ellipsoid of revolution.
-The problem of geodesics on a triaxial ellipsoid was solved by Jacobi in 1838.
-For a discussion of this problem see
-* http://geographiclib.sourceforge.net/html/triaxial.html
-* the wikipedia entry: `Geodesics on a triaxial ellipsoid <https://en.wikipedia.org/wiki/Geodesics_on_an_ellipsoid#Geodesics_on_a_triaxial_ellipsoid>`__
-
-The History
---------------------------------------------------------------------------------
-
-The bibliography of papers on the geodesic problem for an ellipsoid is
-available at
-
-* http://geographiclib.sourceforge.net/geodesic-papers/biblio.html
-
-this includes links to online copies of the papers.
+* F. W. Bessel,
+  `The calculation of longitude and latitude from geodesic measurements (1825)
+  <https://arxiv.org/abs/0908.1824>`_,
+  Astron. Nachr. **331**\ (8), 852–861 (2010),
+  translated by C. F. F. Karney and R. E. Deakin.
+* F. R. Helmert,
+  `Mathematical and Physical Theories of Higher Geodesy, Vol 1
+  <https://doi.org/10.5281/zenodo.32050>`_,
+  (Teubner, Leipzig, 1880), Chaps. 5–7.
+* T. Vincenty,
+  `Direct and inverse solutions of geodesics on the ellipsoid with
+  application of nested equations
+  <http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf>`_,
+  Survey Review **23**\ (176), 88–93 (1975).
+* J. Danielsen,
+  `The area under the geodesic
+  <https://doi.org/10.1179/003962689791474267>`_,
+  Survey Review **30**\ (232), 61–66 (1989).
+* C. F. F. Karney,
+  `Algorithms for geodesics
+  <https://doi.org/10.1007/s00190-012-0578-z>`_,
+  J. Geodesy **87**\ (1) 43–55 (2013);
+  `addenda <https://geographiclib.sourceforge.io/geod-addenda.html>`_.
+* C. F. F. Karney,
+  `Geodesics on an ellipsoid of revolution
+  <https://arxiv.org/abs/1102.1215v1>`_,
+  Feb. 2011;
+  `errata
+  <https://geographiclib.sourceforge.io/geod-addenda.html#geod-errata>`_.
+* `A geodesic bibliography
+  <https://geographiclib.sourceforge.io/geodesic-papers/biblio.html>`_.
+* The wikipedia page,
+  `Geodesics on an ellipsoid
+  <https://en.wikipedia.org/wiki/Geodesics_on_an_ellipsoid>`_.
