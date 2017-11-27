@@ -185,13 +185,13 @@
   <div class="section" id="cartographic-projection">
 <span id="projections-intro"></span><h1>Cartographic projection<a class="headerlink" href="#cartographic-projection" title="Permalink to this headline">¶</a></h1>
 <p>The foundation of PROJ.4 is the large number of
-<span class="xref doc">projections</span> available in the library. This section
+<a class="reference internal" href="operations/projections/index.html"><span class="doc">projections</span></a> available in the library. This section
 is devoted to the generic parameters that can be used on any projection in the
 PROJ.4 library.</p>
 <p>Below is a list of PROJ.4 parameters which can be applied to most coordinate
 system definitions. This table does not attempt to describe the parameters
 particular to particular projection types. These can be found on the pages
-documenting the individual <span class="xref doc">projections</span>.</p>
+documenting the individual <a class="reference internal" href="operations/projections/index.html"><span class="doc">projections</span></a>.</p>
 <blockquote>
 <div><table border="1" class="docutils">
 <colgroup>
@@ -296,8 +296,9 @@ systems (such as UTM) have implicit false easting and northing values.</p>
 <p>By default PROJ.4 wraps output longitudes in the range -180 to 180.  The <code class="docutils literal"><span class="pre">+over</span></code>
 switch can be used to disable the default wrapping which is done at a low level
 in <code class="docutils literal"><span class="pre">pj_inv()</span></code>.  This is particularly useful with projections like the
-<span class="xref doc">equidistant cylindrical</span> where it would be desirable for
-X values past -20000000 (roughly) to continue past -180 instead of wrapping to +180.</p>
+<a class="reference internal" href="operations/projections/eqc.html"><span class="doc">equidistant cylindrical</span></a>
+where it would be desirable for X values past -20000000 (roughly) to continue
+past -180 instead of wrapping to +180.</p>
 <p>The <code class="docutils literal"><span class="pre">+lon_wrap</span></code> option can be used to provide an alternative means of doing
 longitude wrapping within <code class="docutils literal"><span class="pre">pj_transform()</span></code>.  The argument to this option is a
 center longitude.  So <code class="docutils literal"><span class="pre">+lon_wrap=180</span></code> means wrap longitudes in the range 0 to
@@ -431,7 +432,7 @@ utility.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 15 Nov 2017.
+      Last updated on 27 Nov 2017.
 
     </p>
   </div>

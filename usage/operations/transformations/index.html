@@ -37,8 +37,8 @@
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="PROJ.4 4.9.3 documentation" href="../../../index.html"/>
         <link rel="up" title="Coordinate operations" href="../index.html"/>
-        <link rel="next" title="Axis swap" href="axisswap.html"/>
-        <link rel="prev" title="Winkel Tripel" href="../projections/wintri.html"/> 
+        <link rel="next" title="Helmert transform" href="helmert.html"/>
+        <link rel="prev" title="Unit conversion" href="../conversions/unitconvert.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -101,14 +101,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../../environmentvars.html">Environment variables</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Coordinate operations</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../projections/index.html">Projections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../conversions/index.html">Conversions</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Transformations</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="axisswap.html">Axis swap</a></li>
-<li class="toctree-l4"><a class="reference internal" href="cart.html">Cartesian to geodetic conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="helmert.html">Helmert transform</a></li>
 <li class="toctree-l4"><a class="reference internal" href="molodensky.html">Molodensky transform</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hgridshift.html">Horizontal grid shift</a></li>
 <li class="toctree-l4"><a class="reference internal" href="vgridshift.html">Vertical grid shift</a></li>
-<li class="toctree-l4"><a class="reference internal" href="unitconvert.html">Unit conversion</a></li>
 </ul>
 </li>
 </ul>
@@ -192,15 +190,14 @@
             
   <div class="section" id="transformations">
 <span id="transformation-list"></span><h1>Transformations<a class="headerlink" href="#transformations" title="Permalink to this headline">¶</a></h1>
+<p>Transformations coordinate operation in which the two coordinate reference
+systems are based on different datums.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="axisswap.html">Axis swap</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cart.html">Cartesian to geodetic conversion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="helmert.html">Helmert transform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="molodensky.html">Molodensky transform</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hgridshift.html">Horizontal grid shift</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vgridshift.html">Vertical grid shift</a></li>
-<li class="toctree-l1"><a class="reference internal" href="unitconvert.html">Unit conversion</a></li>
 </ul>
 </div>
 </div>
@@ -215,10 +212,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="axisswap.html" class="btn btn-neutral float-right" title="Axis swap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="helmert.html" class="btn btn-neutral float-right" title="Helmert transform" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../projections/wintri.html" class="btn btn-neutral" title="Winkel Tripel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../conversions/unitconvert.html" class="btn btn-neutral" title="Unit conversion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -228,7 +225,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 15 Nov 2017.
+      Last updated on 27 Nov 2017.
 
     </p>
   </div>

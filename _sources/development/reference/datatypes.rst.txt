@@ -58,6 +58,14 @@ Transformation objects
     and destroyed with :c:func:`proj_context_destroy`.
 
 
+.. c:type:: PJ_AREA
+
+    Opaque object describing an area in which a transformation is performed.
+
+    .. note:: This object is not fully implemented yet. It is used with
+              :c:func:`proj_create_crs_to_crs` to select the best transformation
+              between the two input coordinate reference systems.
+
 2 dimensional coordinates
 --------------------------------------------------------------------------------
 
@@ -116,22 +124,6 @@ Various 2-dimensional coordinate data types.
 
         Latitude or northing, depending on use.
 
-
-.. c:type:: PJ_EN
-
-    Generic easting/northing coordinate.
-
-    .. code-block:: C
-
-        typedef struct { double e, n; } PJ_EN;
-
-    .. c:member:: double PJ_EN.e
-
-        Easting
-
-    .. c:member:: double PJ_EN.n
-
-        Northing
 
 3 dimensional coordinates
 --------------------------------------------------------------------------------
@@ -201,27 +193,6 @@ types above.
     .. c:member:: double UVW.w
 
         Vertical component.
-
-
-.. c:type:: PJ_ENH
-
-    Easting, northing and height.
-
-    .. code-block:: C
-
-        typedef struct {double e, n, h; } PJ_ENH;
-
-    .. c:member:: double PJ_ENH.e
-
-        Easting
-
-    .. c:member:: double PJ_ENH.n
-
-        Northing
-
-    .. c:member:: double PJ_ENH.h
-
-        Height
 
 
 Spatiotemporal coordinate types
@@ -318,29 +289,6 @@ domain.
         Temporal component.
 
 
-
-.. c:type:: PJ_ENHT
-
-    Spatiotemporal version of :c:type:`PJ_ENH`.
-
-    .. code-block:: C
-
-        typedef struct {double e, n, h, t; } PJ_ENHT;
-
-    .. c:member:: double PJ_ENHT.e
-
-        Easting
-
-    .. c:member:: double PJ_ENHT.n
-
-        Northing
-
-    .. c:member:: double PJ_ENHT.h
-
-        Height
-
-    .. c:member:: double PJ_ENHT.t
-
 Ancillary types for geodetic computations
 --------------------------------------------------------------------------------
 
@@ -366,173 +314,9 @@ Ancillary types for geodetic computations
         Third rotation angle, kappa.
 
 
-.. c:type:: PJ_DMS
-
-    Describe a longitude or latitude by degrees, minutes and seconds.
-
-    .. code-block:: C
-
-        typedef struct { double d, m, s; } PJ_DMS;
-
-    .. c:member:: double PJ_DMS.d
-
-        Degrees.
-
-    .. c:member:: double PJ_DMS.m
-
-        Minutes
-
-    .. c:member:: double PJ_DMS.s
-
-        Seconds.
-
-
-.. c:type:: PJ_EZN
-
-    Geoid undulation and deflections of the vertical.
-
-    .. code-block:: C
-
-        typedef struct { double e, z, N; } PJ_EZN;
-
-    .. c:member:: double PJ_EZN.e
-
-        Deflection of the vertical, eta.
-
-    .. c:member:: double PJ_EZN.z
-
-        Deflection of the vertical, zeta
-
-    .. c:member:: double PJ_EZN.N
-
-        Geoid undulation.
-
-
-.. c:type:: PJ_AF
-
-    Ellipsoidal parameters.
-
-    .. code-block:: C
-
-        typedef struct {double a, f; } PJ_AF;
-
-    .. c:member:: double PJ_AF.a
-
-        Major axis of ellipsoid.
-
-    .. c:member:: double PJ_AF.f
-
-        Flattening of ellipsoid.
-
-
 Complex coordinate types
 --------------------------------------------------------------------------------
 
-.. c:type:: PJ_PAIR
-
-    .. code-block:: C
-
-        typedef union {
-            XY     xy;
-            LP     lp;
-            UV     uv;
-            PJ_AF  af;
-            PJ_EN  en;
-            double v[2];
-        } PJ_PAIR;
-
-    .. c:member:: XY PJ_PAIR.xy
-
-        Coordinate in projected space.
-
-    .. c:member:: LP PJ_PAIR.lp
-
-        Coordinate in lat/long space.
-
-    .. c:member:: UV PJ_PAIR.uv
-
-        Coordinate either in lat/lon or projected space.
-
-    .. c:member:: PJ_AF PJ_PAIR.af;
-
-        Ellipsoidal parameters.
-
-    .. c:member:: PJ_EN PJ_PAIR.en
-
-        Easting/Northing pair.
-
-    .. c:member:: double PJ_PAIR.v[2]
-
-        Generic 2D-vector.
-
-.. c:type:: PJ_TRIPLET
-
-    Union type that groups all coordinate data types of two and tree dimensions.
-
-    .. code-block:: C
-
-        typedef union {
-            PJ_OPK  opk;
-            PJ_ENH  enh;
-            PJ_EZN  ezn;
-            PJ_DMS  dms;
-            double v[3];
-            XYZ    xyz;
-            LPZ    lpz;
-            UVW    uvw;
-            XY     xy;
-            LP     lp;
-            UV     uv;
-            PJ_AF  af;
-        } PJ_TRIPLET;
-
-    .. c:member:: PJ_OPK PJ_TRIPLET.opk
-
-        Rotations.
-
-    .. c:member:: PJ_ENH PJ_TRIPLET.enh
-
-        Easting, northing and height.
-
-    .. c:member:: PJ_EZN PJ_TRIPLET.ezn
-
-        Geoid undulation and deflections of the vertical.
-
-    .. c:member:: PJ_DMS PJ_TRIPLET.dsm
-
-        Degrees, minutes and seconds.
-
-    .. c:member:: double PJ_TRIPLET.v[3]
-
-        Generic 3-dimensional vector.
-
-    .. c:member:: XYZ PJ_TRIPLET.xyz
-
-        Coordinates in projected space.
-
-    .. c:member:: LPZ PJ_TRIPLET.lpz
-
-        Geodetic coordinates, including height.
-
-    .. c:member:: UVW PJ_TRIPLET.uvw
-
-        Either geodetic or projected coordinates.
-
-    .. c:member:: XY PJ_TRIPLET.xy
-
-        Horizontal coordinates in projected space.
-
-    .. c:member:: LP PJ_TRIPLET.lp
-
-        Geodetic coordinates.
-
-    .. c:member:: UV PJ_TRIPLET.uv
-
-        Geodetic or projected coordinate.
-
-    .. c:member:: PJ_AF PJ_TRIPLET.af
-
-        Ellipsoidal paramaters.
 
 .. c:type:: PJ_COORD
 
@@ -541,13 +325,10 @@ Complex coordinate types
     .. code-block:: C
 
         typedef union {
+            double v[4];
             PJ_XYZT xyzt;
             PJ_UVWT uvwt;
-            PJ_ENHT enht;
             PJ_LPZT lpzt;
-            PJ_ENH  enh;
-            PJ_EN   en;
-            double v[4];
             XYZ  xyz;
             UVW  uvw;
             LPZ  lpz;
@@ -555,6 +336,10 @@ Complex coordinate types
             UV   uv;
             LP   lp;
         } PJ_COORD ;
+
+    .. c:member:: double v[4]
+
+        Generic four-dimensional vector.
 
     .. c:member:: PJ_XYZT PJ_COORD.xyzt
 
@@ -564,25 +349,9 @@ Complex coordinate types
 
         Spatiotemporal generic coordinate.
 
-    .. c:member:: PJ_ENHT PJ_COORD.enht
-
-        Easting, northing, height and time.
-
     .. c:member:: PJ_LPZT PJ_COORD.lpzt
 
         Longitude, latitude, vertical and time components.
-
-    .. c:member:: PJ_ENH PJ_COORD.enh
-
-        Easting, northing and height
-
-    .. c:member:: PJ_EN PJCOORD.en
-
-        Easting and  northing.
-
-    .. c:member:: double v[4]
-
-        Generic four-dimensional vector.
 
     .. c:member:: XYZ PJ_COORD.xyz
 
@@ -609,67 +378,8 @@ Complex coordinate types
         Longitude and latitude.
 
 
-.. c:type:: PJ_OBS
-
-    Geodetic observation data type.
-
-    .. code-block:: C
-
-        typedef struct {
-            PJ_COORD coo;
-            PJ_TRIPLET anc;
-            int id;
-            unsigned int flags;
-        } PJ_OBS;
-
-    .. c:member:: PJ_COORD PJ_OBS.coo
-
-        Coordinate data
-
-    .. c:member:: PJ_TRIPLET PJ_OBS.anc
-
-        Ancillary data
-
-    .. c:member:: int PJ_OBS.id
-
-        Integer ancillary data, e.g. observation number, EPSG code, etc.
-
-    .. c:member:: unsigned int PJ_OBS.flags
-
-        Additional data intended for flags.
-
-
 Projection derivatives
 -------------------------------------------------------------------------------
-
-.. c:type:: PJ_DERIVS
-
-    Partial derivatives of geodetic coordinate :math:`\left(\lambda,\phi\right)`.
-    Calculated with :c:func:`proj_derivatives`.
-
-    .. code-block:: C
-
-        typedef struct {
-            double x_l, x_p;
-            double y_l, y_p;
-        } PJ_DERIVS;
-
-    .. c:member:: double PJ_DERIVS.x_l
-
-        :math:`\frac{\partial x}{\partial \lambda}`
-
-    .. c:member:: double PJ_DERIVS.x_p
-
-        :math:`\frac{\partial x}{\partial \phi}`
-
-    .. c:member:: double PJ_DERIVS.y_l
-
-        :math:`\frac{\partial y}{\partial \lambda}`
-
-    .. c:member:: double PJ_DERIVS.y_p
-
-        :math:`\frac{\partial y}{\partial \phi}`
-
 
 .. c:type:: PJ_FACTORS
 
@@ -681,73 +391,51 @@ Projection derivatives
     .. code-block:: C
 
         typedef struct {
-            struct PJ_DERIVS der;
-            double h, k;
-            double omega, thetap;
-            double conv;
-            double s;
-            double a, b;
-            int code;
+            double meridional_scale;
+            double parallel_scale;
+            double areal_scale;
+
+            double angular_distortion;
+            double meridian_parallel_angle;
+            double meridian_convergence;
+
+            double tissot_semimajor;
+            double tissot_semiminor;
         } PJ_FACTORS;
 
-    .. c:member:: PJ_DERIVS PJ_FACTORS.der
+    .. c:member:: double PJ_FACTORS.meridional_scale
 
-        Partial derivatives of coordinate :math:`\left(\lambda,\phi\right)`.
+        Meridional scale at coordinate :math:`\left(\lambda,\phi\right)`.
 
-    .. c:member:: double PJ_FACTORS.h
-
-        Meridian scale at coordinate :math:`\left(\lambda,\phi\right)`.
-
-    .. c:member:: double PJ_FACTORS.k
+    .. c:member:: double PJ_FACTORS.parallel_scale
 
         Parallel scale at coordinate :math:`\left(\lambda,\phi\right)`.
 
-    .. c:member:: double PJ_FACTORS.omega
+    .. c:member:: double PJ_FACTORS.areal_scale
+
+        Areal scale factor at coordinate :math:`\left(\lambda,\phi\right)`.
+
+    .. c:member:: double PJ_FACTORS.angular_distortion
 
         Angular distortion at coordinate :math:`\left(\lambda,\phi\right)`.
 
-    .. c:member:: double PJ_FACTORS.thetap
+    .. c:member:: double PJ_FACTORS.meridian_parallel_angle
 
          Meridian/parallel angle, :math:`\theta^\prime`, at coordinate :math:`\left(\lambda,\phi\right)`.
 
-     .. c:member:: double PJ_FACTORS.conv
+     .. c:member:: double PJ_FACTORS.meridian_convergence
 
         Meridian convergence at coordinate :math:`\left(\lambda,\phi\right)`.
         Sometimes also described as *grid declination*.
 
-    .. c:member:: double PJ_FACTORS.s
-
-        Areal scale factor at coordinate :math:`\left(\lambda,\phi\right)`.
-
-    .. c:member:: double PJ_FACTORS.a
+    .. c:member:: double PJ_FACTORS.tissot_semimajor
 
         Maximum scale error.
 
-    .. c:member:: double PJ_FACTORS.b
+    .. c:member:: double PJ_FACTORS.tissot_semiminor
 
         Minimum scale error.
 
-    .. c:member:: int code
-
-        Bitmask determing if calculation of various factors was done numerically
-        or analytically. If a bit flags is set the calculation was done analytically.
-        The following bit flags exists:
-
-        .. c:macro:: PJ_IS_ANAL_XL_YL
-
-            Longitude derivatives are calculated analytically
-
-        .. c:macro:: PJ_IS_ANAL_XP_YP
-
-            Latitude derivatives are calculated analyticall.
-
-        .. c:macro:: PJ_IS_ANAL_HK
-
-            Meridinal and parallel scale factors are calculated analytically.
-
-        .. c:macro:: PJ_IS_ANAL_CONV
-
-            Meridian convergence calculated analytically.
 
 List structures
 -------------------------------------------------------------------------------
@@ -913,6 +601,7 @@ Info structures
             char        description[128];
             char        definition[512];
             int         has_inverse;
+            double      accuracy;
         } PJ_PROJ_INFO;
 
     .. c:member:: char PJ_PROJ_INFO.id[16]
@@ -933,6 +622,10 @@ Info structures
     .. c:member:: int PJ_PROJ_INFO.has_inverse
 
         1 if an inverse mapping of the defined operation exists, otherwise 0.
+
+    .. c:member:: double PJ_PROJ_INFO.accuracy
+
+        Expected accuracy of the transformation. -1 if unknown.
 
 .. c:type:: PJ_GRID_INFO
 
@@ -957,7 +650,7 @@ Info structures
 
     .. c:member:: char PJ_GRID_INFO
 
-        Full path of grid file, e.g. "*C:\OSGeo4W64\\share\proj\BETA2007.gsb*"
+        Full path of grid file, e.g. *"C:\\OSGeo4W64\\share\\proj\\BETA2007.gsb"*
 
     .. c:member:: char PJ_GRID_INFO.format[8]
 
@@ -1009,7 +702,7 @@ Info structures
 
     .. c:member:: char PJ_INIT_INFO.filename[260]
 
-        Full path of init file, e.g. "*C:\OSGeo4W64\share\proj\epsg*"
+        Full path of init file, e.g. "*C:\\OSGeo4W64\\share\\proj\\epsg*"
 
     .. c:member:: char PJ_INIT_INFO.version[32]
 
