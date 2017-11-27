@@ -4,6 +4,11 @@
 Projections
 ================================================================================
 
+Projections are coordinate operations that are technically conversions but since
+projections are so fundamental to PROJ.4 we differentiate them from conversions.
+
+Projections map the spherical 3D space to a flat 2D space.
+
 .. toctree::
    :maxdepth: 1
 
@@ -62,8 +67,6 @@ Projections
    lagrng
    larr
    lask
-   lonlat
-   latlon
    lcc
    lcca
    leac
