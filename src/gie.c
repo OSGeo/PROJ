@@ -127,13 +127,16 @@ double proj_atof(const char *str);
 
 int   main(int argc, char **argv);
 
-static int   process_file (char *fname);
-static int   errmsg (int errlev, char *msg, ...);
+static int   process_file (const char *fname);
+static int   errmsg (int errlev, const char *msg, ...);
 static int   get_inp (FILE *f, char *inp, int size);
-static int   get_cmnd (char *inp, char *cmnd, int len);
-static char *get_args (char *inp);
-static int   dispatch (char *cmnd, char *args);
-static char *column (char *buf, int n);
+static int   get_cmnd (const char *inp, char *cmnd, int len);
+static const char *get_args (const char *inp);
+static int   dispatch (const char *cmnd, const char *args);
+static const char *column (const char *buf, int n);
+static int errno_from_err_const (const char *err_const);
+static const char *err_const_from_errno (int err);
+static void list_err_codes (void);
 
 
 
@@ -152,7 +155,7 @@ typedef struct {
     int grand_ok, grand_ko;
     size_t operation_lineno;
     double tolerance;
-    char *curr_file;
+    const char *curr_file;
     FILE *fout;
 } gie_ctx;
 
@@ -187,12 +190,14 @@ static const char usage[] = {
     "    -q                Quiet: Opposite of verbose. In quiet mode not even errors\n"
     "                      are reported. Only interaction is through the return code\n"
     "                      (0 on success, non-zero indicates number of FAILED tests)\n"
+    "    -l                List the PROJ internal system error codes\n"
     "--------------------------------------------------------------------------------\n"
     "Long Options:\n"
     "--------------------------------------------------------------------------------\n"
     "    --output          Alias for -o\n"
     "    --verbose         Alias for -v\n"
     "    --help            Alias for -h\n"
+    "    --list            Alias for -l\n"
     "--------------------------------------------------------------------------------\n"
     "Examples:\n"
     "--------------------------------------------------------------------------------\n"
@@ -205,10 +210,10 @@ static const char usage[] = {
 
 int main (int argc, char **argv) {
     int  i;
-    const char *longflags[]  = {"v=verbose", "q=quiet", "h=help", 0};
+    const char *longflags[]  = {"v=verbose", "q=quiet", "h=help", "l=list", 0};
     const char *longkeys[]   = {"o=output", 0};
 
-    o = opt_parse (argc, argv, "hvq", "o", longflags, longkeys);
+    o = opt_parse (argc, argv, "hlvq", "o", longflags, longkeys);
     if (0==o)
         return 0;
 
@@ -217,6 +222,8 @@ int main (int argc, char **argv) {
         return 0;
     }
 
+    if (opt_given (o, "l"))
+        list_err_codes ();
 
 
     T.verbosity = opt_given (o, "q");
@@ -273,11 +280,11 @@ static int another_success (void) {
 }
 
 
-static int process_file (char *fname) {
+static int process_file (const char *fname) {
     FILE *f;
     char inp[CMDLEN];
     char cmnd[1000];
-    char *args;
+    const char *args;
 
     lineno = level = 0;
     T.op_ok = T.total_ok = 0;
@@ -326,8 +333,11 @@ static int process_file (char *fname) {
 }
 
 
-/* return a pointer to the n'th column of buf */
-char *column (char *buf, int n) {
+/*****************************************************************************/
+const char *column (const char *buf, int n) {
+/*****************************************************************************
+    Return a pointer to the n'th column of buf. Coulmn numbers start at 0.
+******************************************************************************/
     int i;
     if (n <= 0)
         return buf;
@@ -343,11 +353,15 @@ char *column (char *buf, int n) {
 }
 
 
-/* interpret <args> as a numeric followed by a linear decadal prefix - return the properly scaled numeric */
-static double strtod_scaled (char *args, double default_scale) {
+/*****************************************************************************/
+static double strtod_scaled (const char *args, double default_scale) {
+/*****************************************************************************
+    Interpret <args> as a numeric followed by a linear decadal prefix.
+    Return the properly scaled numeric
+******************************************************************************/
     double s;
-    char *endp = args;
-    s = proj_strtod (args, &endp);
+    const char *endp = args;
+    s = proj_strtod (args, (char **) &endp);
     if (args==endp)
         return HUGE_VAL;
 
@@ -373,10 +387,7 @@ static double strtod_scaled (char *args, double default_scale) {
 }
 
 
-
-
-
-static int banner (char *args) {
+static int banner (const char *args) {
     char dots[] = {"..."}, nodots[] = {""}, *thedots = nodots;
     if (strlen(args) > 70)
         thedots = dots;
@@ -385,11 +396,7 @@ static int banner (char *args) {
 }
 
 
-
-
-
-
-static int tolerance (char *args) {
+static int tolerance (const char *args) {
     T.tolerance = strtod_scaled (args, 1);
     if (HUGE_VAL==T.tolerance) {
         T.tolerance = 0.0005;
@@ -399,8 +406,8 @@ static int tolerance (char *args) {
 }
 
 
-static int direction (char *args) {
-    char *endp = args;
+static int direction (const char *args) {
+    const char *endp = args;
     while (isspace (*endp))
         endp++;
     switch (*endp) {
@@ -421,13 +428,13 @@ static int direction (char *args) {
 }
 
 
-
-
-static void finish_previous_operation (char *args) {
+static void finish_previous_operation (const char *args) {
     if (T.verbosity > 1 && T.op_id > 1 && T.op_ok+T.op_ko)
         fprintf (T.fout, "%s     %d tests succeeded,  %d tests %s\n", delim, T.op_ok, T.op_ko, T.op_ko? "FAILED!": "failed.");
     (void) args;
 }
+
+
 
 /*****************************************************************************/
 static int operation (char *args) {
@@ -482,8 +489,9 @@ static int operation (char *args) {
 static int pj_unitconvert_selftest (void);
 static int pj_cart_selftest (void);
 static int pj_horner_selftest (void);
+
 /*****************************************************************************/
-static int builtins (char *args) {
+static int builtins (const char *args) {
 /*****************************************************************************
     There are still a few tests that cannot be described using gie
     primitives. Instead, they are implemented as builtins, and invoked
@@ -526,15 +534,13 @@ static int builtins (char *args) {
 }
 
 
-
-
-
 static PJ_COORD torad_coord (PJ_COORD a) {
     PJ_COORD c = a;
     c.lpz.lam = proj_torad (a.lpz.lam);
     c.lpz.phi = proj_torad (a.lpz.phi);
     return c;
 }
+
 
 static PJ_COORD todeg_coord (PJ_COORD a) {
     PJ_COORD c = a;
@@ -543,14 +549,19 @@ static PJ_COORD todeg_coord (PJ_COORD a) {
     return c;
 }
 
-/* try to parse args as a PJ_COORD */
-static PJ_COORD parse_coord (char *args) {
+
+
+/*****************************************************************************/
+static PJ_COORD parse_coord (const char *args) {
+/*****************************************************************************
+    Attempt to interpret args as a PJ_COORD.
+******************************************************************************/
     int i;
-    char *endp, *prev = args;
+    const char *endp, *prev = args;
     PJ_COORD a = proj_coord (0,0,0,0);
 
     for (i = 0; i < 4; i++) {
-        double d = proj_strtod (prev, &endp);
+        double d = proj_strtod (prev,  (char **) &endp);
         if (prev==endp)
             return i > 1? a: proj_coord_error ();
         a.v[i] = d;
@@ -562,7 +573,7 @@ static PJ_COORD parse_coord (char *args) {
 
 
 /*****************************************************************************/
-static int accept (char *args) {
+static int accept (const char *args) {
 /*****************************************************************************
     Read ("ACCEPT") a 2, 3, or 4 dimensional input coordinate.
 ******************************************************************************/
@@ -573,9 +584,8 @@ static int accept (char *args) {
 }
 
 
-
 /*****************************************************************************/
-static int roundtrip (char *args) {
+static int roundtrip (const char *args) {
 /*****************************************************************************
     Check how far we go from the ACCEPTed point when doing successive
     back/forward transformation pairs.
@@ -612,8 +622,7 @@ static int roundtrip (char *args) {
 }
 
 
-
-static int expect_message (double d, char *args) {
+static int expect_message (double d, const char *args) {
     another_failure ();
 
     if (T.verbosity < 0)
@@ -636,7 +645,8 @@ static int expect_message (double d, char *args) {
     return 1;
 }
 
-static int expect_message_cannot_parse (char *args) {
+
+static int expect_message_cannot_parse (const char *args) {
     another_failure ();
     if (T.verbosity > -1) {
         if (0==T.op_ko && T.verbosity < 2)
@@ -647,37 +657,78 @@ static int expect_message_cannot_parse (char *args) {
     return 1;
 }
 
+static int expect_failure_with_errno_message (int expected, int got) {
+    another_failure ();
+
+    if (T.verbosity < 0)
+        return 1;
+    if (0==T.op_ko && T.verbosity < 2)
+        banner (T.operation);
+    fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
+    fprintf (T.fout, "     FAILURE in %s(%d):\n",    opt_strip_path (T.curr_file), (int) lineno);
+    fprintf (T.fout, "     got errno %s (%d): %s\n", err_const_from_errno(got), got,  pj_strerrno (got));
+    fprintf (T.fout, "     expected %s (%d):  %s",   err_const_from_errno(expected), expected, pj_strerrno (expected));
+    fprintf (T.fout, "\n");
+    return 1;
+}
+
 
 /*****************************************************************************/
-static int expect (char *args) {
+static int expect (const char *args) {
 /*****************************************************************************
     Tell GIE what to expect, when transforming the ACCEPTed input
 ******************************************************************************/
     PJ_COORD ci, co, ce;
     double d;
     int expect_failure = 0;
+    int expect_failure_with_errno = 0;
 
-    if (0==strcmp (args, "failure"))
+    if (0==strncmp (args, "failure", 7)) {
         expect_failure = 1;
 
-    if (0==T.P && !expect_failure) {
+        /* Option: Fail with an expected errno (syntax: expect failure errno -33) */
+        if (0==strncmp (column (args, 2), "errno", 5))
+            expect_failure_with_errno = errno_from_err_const (column (args, 3));
+    }
+
+    if (0==T.P) {
+        /* If we expect failure, and fail, then it's a success... */
+        if (expect_failure) {
+            /* Failed to fail correctly? */
+            if (expect_failure_with_errno && proj_errno (T.P)!=expect_failure_with_errno)
+                return expect_failure_with_errno_message (expect_failure_with_errno, proj_errno(T.P));
+            return another_success ();
+        }
+
+        /* Otherwise, it's a true failure */
         banner (T.operation);
-        errmsg(3, "%sInvalid operation definition in line no. %d\n", delim, (int) T.operation_lineno);
+        errmsg(3, "%sInvalid operation definition in line no. %d: %s\n",
+            delim, (int) T.operation_lineno, pj_strerrno(proj_errno(T.P)));
         return another_failure ();
     }
 
-
+    /* We may still successfully fail even if the proj_create succeeded */
     if (expect_failure) {
-        /* If we expect failure, and fail, then it's a success... */
-        if (0==T.P)
-            return another_success ();
-        /* We may still successfully fail even if the proj_create succeeded */
+        proj_errno_reset (T.P);
+
+        /* Try to carry out the operation - and expect failure */
         ci = proj_angular_input (T.P, T.dir)? torad_coord (T.a): T.a;
         co = proj_trans (T.P, T.dir, ci);
-        if (co.xyz.x==HUGE_VAL)
-            return another_success ();
-        /* no - we didn't manage to purportedly fail */
-        return another_failure ();
+
+        /* Failed to fail? - that's a failure */
+        if (co.xyz.x!=HUGE_VAL)
+            return another_failure ();
+
+        if (expect_failure_with_errno) {
+            printf ("errno=%d, expected=%d\n", proj_errno (T.P), expect_failure_with_errno);
+            if (proj_errno (T.P)==expect_failure_with_errno)
+                return another_success ();
+
+            return another_failure ();
+        }
+
+        /* Yes, we failed successfully */
+        return another_success ();
     }
 
 
@@ -724,7 +775,6 @@ static int expect (char *args) {
             e = proj_xyz_dist (T.b.xyz, T.e.xyz);
         if (e < d)
             d = e;
-
     }
     else
         d = proj_xyz_dist (T.b.xyz, T.e.xyz);
@@ -739,7 +789,7 @@ static int expect (char *args) {
 
 
 /*****************************************************************************/
-static int verbose (char *args) {
+static int verbose (const char *args) {
 /*****************************************************************************
     Tell the system how noisy it should be
 ******************************************************************************/
@@ -757,7 +807,7 @@ static int verbose (char *args) {
 }
 
 /*****************************************************************************/
-static int comment (char *args) {
+static int comment (const char *args) {
 /*****************************************************************************
     in line comment. Equivalent to #
 ******************************************************************************/
@@ -767,7 +817,7 @@ static int comment (char *args) {
 
 
 /*****************************************************************************/
-static int echo (char *args) {
+static int echo (const char *args) {
 /*****************************************************************************
     Add user defined noise to the output stream
 ******************************************************************************/
@@ -777,17 +827,19 @@ fprintf (T.fout, "%s\n", args);
 
 
 
-static int dispatch (char *cmnd, char *args) {
+static int dispatch (const char *cmnd, const char *args) {
+#if 0
     int last_errno = proj_errno_reset (T.P);
+#endif
 
     if  (0==level%2) {
-        if (0==strcmp (cmnd, "BEGIN"))
+        if (0==strcmp (cmnd, "BEGIN") || 0==strcmp (cmnd, "<begin>") || 0==strcmp (cmnd, "<gie>"))
            level++;
         return 0;
     }
 
-    if  (0==strcmp (cmnd, "OPERATION")) return  operation (args);
-    if  (0==strcmp (cmnd, "operation")) return  operation (args);
+    if  (0==strcmp (cmnd, "OPERATION")) return  operation ((char *) args);
+    if  (0==strcmp (cmnd, "operation")) return  operation ((char *) args);
     if  (0==strcmp (cmnd, "ACCEPT"))    return  accept    (args);
     if  (0==strcmp (cmnd, "accept"))    return  accept    (args);
     if  (0==strcmp (cmnd, "EXPECT"))    return  expect    (args);
@@ -807,12 +859,150 @@ static int dispatch (char *cmnd, char *args) {
     if  (0==strcmp (cmnd, "ECHO"))      return  echo      (args);
     if  (0==strcmp (cmnd, "echo"))      return  echo      (args);
     if  (0==strcmp  (cmnd, "END"))      return          finish_previous_operation (args), level++, 0;
+    if  (0==strcmp  (cmnd, "<end>"))    return          finish_previous_operation (args), level++, 0;
+    if  (0==strcmp  (cmnd, "</gie>"))   return          finish_previous_operation (args), level++, 0;
     if  ('#'==cmnd[0])                  return  comment   (args);
 
+#if 0
     if (proj_errno(T.P))
         printf ("#####***** ERRNO=%d\n", proj_errno(T.P));
     proj_errno_restore (T.P, last_errno);
+#endif
     return 0;
+}
+
+
+
+
+struct errno_vs_err_const {const char *the_err_const; int the_errno;};
+static const struct errno_vs_err_const lookup[] = {
+    {"pjd_err_no_args"                  ,  -1},
+    {"pjd_err_no_option_in_init_file"   ,  -2},
+    {"pjd_err_no_colon_in_init_string"  ,  -3},
+    {"pjd_err_proj_not_named"           ,  -4},
+    {"pjd_err_unknown_projection_id"    ,  -5},
+    {"pjd_err_eccentricity_is_one"      ,  -6},
+    {"pjd_err_unknow_unit_id"           ,  -7},
+    {"pjd_err_invalid_boolean_param"    ,  -8},
+    {"pjd_err_unknown_ellp_param"       ,  -9},
+    {"pjd_err_rev_flattening_is_zero"   ,  -10},
+    {"pjd_err_ref_rad_larger_than_90"   ,  -11},
+    {"pjd_err_es_less_than_zero"        ,  -12},
+    {"pjd_err_major_axis_not_given"     ,  -13},
+    {"pjd_err_lat_or_lon_exceed_limit"  ,  -14},
+    {"pjd_err_invalid_x_or_y"           ,  -15},
+    {"pjd_err_wrong_format_dms_value"   ,  -16},
+    {"pjd_err_non_conv_inv_meri_dist"   ,  -17},
+    {"pjd_err_non_con_inv_phi2"         ,  -18},
+    {"pjd_err_acos_asin_arg_too_large"  ,  -19},
+    {"pjd_err_tolerance_condition"      ,  -20},
+    {"pjd_err_conic_lat_equal"          ,  -21},
+    {"pjd_err_lat_larger_than_90"       ,  -22},
+    {"pjd_err_lat1_is_zero"             ,  -23},
+    {"pjd_err_lat_ts_larger_than_90"    ,  -24},
+    {"pjd_err_control_point_no_dist"    ,  -25},
+    {"pjd_err_no_rotation_proj"         ,  -26},
+    {"pjd_err_w_or_m_zero_or_less"      ,  -27},
+    {"pjd_err_lsat_not_in_range"        ,  -28},
+    {"pjd_err_path_not_in_range"        ,  -29},
+    {"pjd_err_h_less_than_zero"         ,  -30},
+    {"pjd_err_k_less_than_zero"         ,  -31},
+    {"pjd_err_lat_1_or_2_zero_or_90"    ,  -32},
+    {"pjd_err_lat_0_or_alpha_eq_90"     ,  -33},
+    {"pjd_err_ellipsoid_use_required"   ,  -34},
+    {"pjd_err_invalid_utm_zone"         ,  -35},
+    {"pjd_err_tcheby_val_out_of_range"  ,  -36},
+    {"pjd_err_failed_to_find_proj"      ,  -37},
+    {"pjd_err_failed_to_load_grid"      ,  -38},
+    {"pjd_err_invalid_m_or_n"           ,  -39},
+    {"pjd_err_n_out_of_range"           ,  -40},
+    {"pjd_err_lat_1_2_unspecified"      ,  -41},
+    {"pjd_err_abs_lat1_eq_abs_lat2"     ,  -42},
+    {"pjd_err_lat_0_half_pi_from_mean"  ,  -43},
+    {"pjd_err_unparseable_cs_def"       ,  -44},
+    {"pjd_err_geocentric"               ,  -45},
+    {"pjd_err_unknown_prime_meridian"   ,  -46},
+    {"pjd_err_axis"                     ,  -47},
+    {"pjd_err_grid_area"                ,  -48},
+    {"pjd_err_invalid_sweep_axis"       ,  -49},
+    {"pjd_err_malformed_pipeline"       ,  -50},
+    {"pjd_err_unit_factor_less_than_0"  ,  -51},
+    {"pjd_err_invalid_scale"            ,  -52},
+    {"pjd_err_non_convergent"           ,  -53},
+    {"pjd_err_missing_args"             ,  -54},
+    {"pjd_err_lat_0_is_zero"            ,  -55},
+    {"pjd_err_ellipsoidal_unsupported"  ,  -56},
+    {"pjd_err_too_many_inits"           ,  -57},
+    {"pjd_err_invalid_arg"              ,  -58},
+    {"pjd_err_unknown"                  ,  9999},
+    {"pjd_err_enomem"                   ,  ENOMEM},
+};
+
+static const struct errno_vs_err_const unknown = {"PJD_ERR_UNKNOWN", 9999};
+
+
+static void list_err_codes (void) {
+    int i;
+    const int n = sizeof lookup / sizeof lookup[0];
+
+    for (i = 0;  i < n;  i++) {
+        if (9999==lookup[i].the_errno)
+            break;
+        printf ("%25s  (%2.2d):  %s\n", lookup[i].the_err_const + 8, lookup[i].the_errno, pj_strerrno(lookup[i].the_errno));
+    }
+    exit (0);
+}
+
+
+static const char *err_const_from_errno (int err) {
+    size_t i;
+    const size_t n = sizeof lookup / sizeof lookup[0];
+
+    for (i = 0;  i < n;  i++) {
+        if (err==lookup[i].the_errno)
+            return lookup[i].the_err_const + 8;
+    }
+    return unknown.the_err_const;
+}
+
+
+
+static int errno_from_err_const (const char *err_const) {
+    const size_t n = sizeof lookup / sizeof lookup[0];
+    size_t i, len;
+    int ret;
+    char tolower_err_const[100];
+
+    /* Make a lower case copy for matching */
+    for (i = 0;  i < 99; i++) {
+        if (0==err_const[i] || isspace (err_const[i]))
+             break;
+        tolower_err_const[i] = (char) tolower (err_const[i]);
+    }
+    tolower_err_const[i] = 0;
+
+    /* If it looks numeric, return that numeric */
+    ret = (int) pj_atof (err_const);
+    if (0!=ret)
+        return ret;
+
+    /* Else try to find a matching identifier */
+    len = strlen (tolower_err_const);
+
+    /* First try to find a match excluding the PJD_ERR_ prefix */
+    for (i = 0;  i < n;  i++) {
+        if (0==strncmp (lookup[i].the_err_const + 8, err_const, len))
+            return lookup[i].the_errno;
+    }
+
+    /* If that did not work, try with the full name */
+    for (i = 0;  i < n;  i++) {
+        if (0==strncmp (lookup[i].the_err_const, err_const, len))
+            return lookup[i].the_errno;
+    }
+
+    /* On failure, return something unlikely */
+    return 9999;
 }
 
 
@@ -822,7 +1012,7 @@ static int dispatch (char *cmnd, char *args) {
 
 
 
-static int errmsg (int errlev, char *msg, ...) {
+static int errmsg (int errlev, const char *msg, ...) {
     va_list args;
     va_start(args, msg);
     vfprintf(stdout, msg, args);
@@ -894,7 +1084,7 @@ static int get_inp (FILE *f, char *inp, int size) {
     return (int) strlen(inp);
 }
 
-static int get_cmnd (char *inp, char *cmnd, int len) {
+static int get_cmnd (const char *inp, char *cmnd, int len) {
     cmnd[0] = 0;
     while (isspace(*inp++));
     inp--;
@@ -904,8 +1094,8 @@ static int get_cmnd (char *inp, char *cmnd, int len) {
     return len;
 }
 
-static char *get_args (char *inp) {
-    char *args = inp;
+static const char *get_args (const char *inp) {
+    const char *args = inp;
     while (isspace(*args++))
         if (0==*args)
             return args;
@@ -1038,7 +1228,6 @@ static int pj_cart_selftest (void) {
     PJ_GRID_INFO grid_info;
     PJ_INIT_INFO init_info;
 
-    PJ_DERIVS derivs;
     PJ_FACTORS factors;
 
     const PJ_OPERATIONS *oper_list;
@@ -1333,25 +1522,14 @@ static int pj_cart_selftest (void) {
     a.lp.lam = PJ_TORAD(12);
     a.lp.phi = PJ_TORAD(55);
 
-    derivs = proj_derivatives(P, a.lp);
-    if (proj_errno(P))
-        return 80; /* derivs not created correctly */
-
-    if ( fabs(derivs.x_l - 1.0)     > 1e-5 )   return 81;
-    if ( fabs(derivs.x_p - 0.0)     > 1e-5 )   return 82;
-    if ( fabs(derivs.y_l - 0.0)     > 1e-5 )   return 83;
-    if ( fabs(derivs.y_p - 1.73959) > 1e-5 )   return 84;
-
-
     factors = proj_factors(P, a.lp);
     if (proj_errno(P))
         return 85; /* factors not created correctly */
 
     /* check a few key characteristics of the Mercator projection */
-    if (factors.omega != 0.0)       return 86; /* angular distortion should be 0 */
-    if (factors.thetap != M_PI_2)   return 87; /* Meridian/parallel angle should be 90 deg */
-    if (factors.conv != 0.0)        return 88; /* meridian convergence should be 0 */
-
+    if (factors.angular_distortion != 0.0)  return 86; /* angular distortion should be 0 */
+    if (factors.meridian_parallel_angle != M_PI_2)  return 87; /* Meridian/parallel angle should be 90 deg */
+    if (factors.meridian_convergence != 0.0)  return 88; /* meridian convergence should be 0 */
 
     proj_destroy(P);
 
@@ -1446,7 +1624,7 @@ static int pj_cart_selftest (void) {
 
 
 
-static int test_time(char* args, double tol, double t_in, double t_exp) {
+static int test_time(const char* args, double tol, double t_in, double t_exp) {
     PJ_COORD in, out;
     PJ *P = proj_create(PJ_DEFAULT_CTX, args);
     int ret = 0;
@@ -1472,8 +1650,8 @@ static int test_time(char* args, double tol, double t_in, double t_exp) {
     return ret;
 }
 
-static int test_xyz(char* args, double tol, PJ_TRIPLET in, PJ_TRIPLET exp) {
-    PJ_COORD out, obs_in;
+static int test_xyz(const char* args, double tol, PJ_COORD in, PJ_COORD exp) {
+    PJ_COORD out = {{0,0,0,0}}, obs_in = {{0,0,0,0}};
     PJ *P = proj_create(PJ_DEFAULT_CTX, args);
     int ret = 0;
 
@@ -1515,10 +1693,10 @@ static int pj_unitconvert_selftest (void) {
     double in4 = 1877.71428, exp4 = 2016.0;
 
     char args5[] = "+proj=unitconvert +xy_in=m +xy_out=dm +z_in=cm +z_out=mm";
-    PJ_TRIPLET in5 = {{55.25, 23.23, 45.5}}, exp5 = {{552.5, 232.3, 455.0}};
+    PJ_COORD in5 = {{55.25, 23.23, 45.5, 0}}, exp5 = {{552.5, 232.3, 455.0, 0}};
 
     char args6[] = "+proj=unitconvert +xy_in=m +xy_out=m +z_in=m +z_out=m";
-    PJ_TRIPLET in6 = {{12.3, 45.6, 7.89}};
+    PJ_COORD in6 = {{12.3, 45.6, 7.89, 0}};
 
     ret = test_time(args1, 1e-6, in1, in1);   if (ret) return ret + 10;
     ret = test_time(args2, 1e-6, in2, in2);   if (ret) return ret + 20;
@@ -1530,6 +1708,4 @@ static int pj_unitconvert_selftest (void) {
     return 0;
 
 }
-
-
 

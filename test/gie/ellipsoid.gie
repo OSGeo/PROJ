@@ -1,0 +1,161 @@
+===============================================================================
+
+Test pj_ellipsoid, the reimplementation of pj_ell_set
+
+===============================================================================
+
+
+BEGIN
+
+-------------------------------------------------------------------------------
+First a spherical example
+-------------------------------------------------------------------------------
+operation proj=merc R=6400000
+-------------------------------------------------------------------------------
+tolerance 10 nm
+accept    1 2
+expect    111701.0721276371  223447.5262032605
+
+accept    12 55
+expect    1340412.8655316452  7387101.1430967357
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+Then an explicitly defined ellipsoidal example
+-------------------------------------------------------------------------------
+operation proj=merc a=6400000 rf=297
+-------------------------------------------------------------------------------
+tolerance 10 nm
+accept    1 2
+expect    111701.0721276371  221945.9681832088
+
+accept    12 55
+expect    1340412.8655316452  7351803.9151705895
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+Then try using a built in ellipsoid
+-------------------------------------------------------------------------------
+operation proj=merc ellps=GRS80
+-------------------------------------------------------------------------------
+tolerance 10 nm
+accept    1 2
+expect    111319.4907932736  221194.0771604237
+
+accept    12 55
+expect    1335833.8895192828  7326837.7148738774
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+Then try to fail deliberately
+-------------------------------------------------------------------------------
+operation proj=merc ellps=GRS80000000000
+expect    failure errno unknown_ellp_param
+operation proj=merc +a=-1
+expect    failure errno major_axis_not_given
+operation proj=merc +no_defs
+expect    failure errno major_axis_not_given
+
+# This one should succeed due to ellps=WGS84 in proj_def.dat
+operation proj=merc
+accept    0 0
+expect    0 0
+
+operation proj=merc +es=-1
+expect    failure errno major_axis_not_given
+
+operation
+expect    failure
+operation cobra
+expect    failure
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+Finally test the spherification functionality
+-------------------------------------------------------------------------------
+operation proj=merc ellps=GRS80 R_A
+tolerance 10 nm
+accept    12 55
+expect    1334340.6237297705  7353636.6296552019
+-------------------------------------------------------------------------------
+operation proj=merc ellps=GRS80 R_V
+tolerance 10 nm
+accept    12 55
+expect    1334339.2852675652  7353629.2533042720
+-------------------------------------------------------------------------------
+operation proj=merc ellps=GRS80 R_a
+tolerance 10 nm
+accept    12 55
+expect    1333594.4904527504  7349524.6413825499
+-------------------------------------------------------------------------------
+operation proj=merc ellps=GRS80 R_g
+tolerance 10 nm
+accept    12 55
+expect    1333592.6102291327  7349514.2793497816
+-------------------------------------------------------------------------------
+operation proj=merc ellps=GRS80 R_h
+tolerance 10 nm
+accept    12 55
+expect    1333590.7300081658  7349503.9173316229
+-------------------------------------------------------------------------------
+operation proj=merc ellps=GRS80 R_lat_a=60
+tolerance 10 nm
+accept    12 55
+expect    1338073.7436268919  7374210.0924803326
+-------------------------------------------------------------------------------
+operation proj=merc ellps=GRS80 R_lat_g=60
+tolerance 10 nm
+accept    12 55
+expect    1338073.2696101593  7374207.4801437631
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+This one from testvarious failed at first version of the pull request
+-------------------------------------------------------------------------------
+operation  proj=healpix a=1 lon_0=0 ellps=WGS84
+-------------------------------------------------------------------------------
+accept     0 41.937853904844985
+expect     0 0.78452
+accept    -90 0
+expect    -1.56904	0
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+Shape parameters
+-------------------------------------------------------------------------------
+operation  proj=utm zone=32   ellps=GRS80 rf=0
+expect     failure errno rev_flattening_is_zero
+
+operation  proj=utm zone=32   ellps=GRS80 es=1
+expect     failure errno eccentricity_is_one
+
+operation  proj=utm zone=32   ellps=GRS80 b=0
+expect     failure errno eccentricity_is_one
+
+operation  proj=utm zone=32   ellps=GRS80 b=6000000
+accept     12 55
+expect     699293.0880   5674591.5295
+
+operation  proj=utm zone=32   ellps=GRS80 rf=300
+accept     12 55
+expect     691873.1212   6099054.9661
+
+operation  proj=utm zone=32   ellps=GRS80 f=0.00333333333333
+accept     12 55
+expect     691873.1212   6099054.9661
+
+operation  proj=utm zone=32   ellps=GRS80 b=6000000
+accept     12 55
+expect     699293.0880   5674591.5295
+
+operation  proj=utm zone=32   a=6400000 b=6000000
+accept     12 55
+expect     700416.5900   5669475.8884
+-------------------------------------------------------------------------------
+
+END

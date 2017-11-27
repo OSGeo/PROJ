@@ -46,11 +46,11 @@ libproj_la_SOURCES = \
 	pj_list.h proj_internal.h\
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c PJ_sterea.c \
-	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c PJ_isea.c \
+	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c PJ_isea.c PJ_ccon.c\
 	PJ_imw_p.c PJ_krovak.c PJ_lcc.c PJ_poly.c \
 	PJ_rpoly.c PJ_sconics.c proj_rouss.c \
-	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c \
-	PJ_gall.c PJ_labrd.c PJ_lsat.c PJ_misrsom.c PJ_merc.c \
+	PJ_cass.c PJ_cc.c PJ_cea.c PJ_eqc.c PJ_gall.c PJ_geoc.c \
+	PJ_labrd.c PJ_lsat.c PJ_misrsom.c PJ_merc.c \
 	PJ_mill.c PJ_ocea.c PJ_omerc.c PJ_somerc.c \
 	PJ_tcc.c PJ_tcea.c PJ_times.c PJ_tmerc.c \
 	PJ_airy.c PJ_aitoff.c PJ_august.c PJ_bacon.c \

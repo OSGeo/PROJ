@@ -133,10 +133,10 @@ EXPORTS
 
     proj_torad                     @122
     proj_todeg                     @123
-    proj_rtodms                    @124
-    proj_dmstor                    @125
+    proj_geoc_lat                  @124
+    proj_rtodms                    @125
+    proj_dmstor                    @126
 
-    proj_derivatives               @126
     proj_factors                   @127
 
     proj_list_operations           @128
@@ -146,3 +146,6 @@ EXPORTS
 
     proj_angular_input             @132
     proj_angular_output            @133
+
+    pj_ellipsoid                   @134
+    pj_calc_ellipsoid_params       @135

@@ -29,3 +29,10 @@ References
 .. [Snyder1993] Snyder, 1993, Flattening the Earth, Chicago and London, The university of Chicago press
 
 .. [WeberMoore2013] Weber, E.D., and T.J. Moore. 2013. `Corrected Conversion Algorithms For The Calcofi Station Grid And Their Implementation In Several Computer Languages <http://calcofi.org/publications/calcofireports/v54/Vol_54_Weber.pdf>`__. California Cooperative Oceanic Fisheries Investigations Reports 54.
+
+
+.. [Zajac1978] A. Zajac, 1978, "Atlas of distribution of vascular plants in Poland (ATPOL)". Taxon 27(5/6), 481–484.
+
+.. [Komsta2016] L. Komsta, 2016, `ATPOL geobotanical grid revisited – a proposal of coordinate conversion algorithms <http://wydawnictwo.up.lublin.pl/annales/Agricultura/2016/1/03.pdf>`__. Annales UMCS Sectio E Agricultura 71(1), 31-37.
+
+.. [Verey2017] M. Verey, 2017, `Theoretical analysis and practical consequences of adopting an ATPOL grid model as a conical projection, defining the conversion of plane coordinates to the WGS - 84 ellipsoid <http://www.botany.pl/atpol/Siatka%20ATPOL%20w%20analitycznym%20ujeciu.pdf>`__. Fragmenta Floristica et Geobotanica Polonica (preprint submitted).

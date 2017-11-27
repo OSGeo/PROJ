@@ -54,6 +54,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_cart.c
         PJ_cass.c
         PJ_cc.c
+        PJ_ccon.c
         PJ_cea.c
         PJ_chamb.c
         PJ_collg.c
@@ -71,6 +72,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_fahey.c
         PJ_fouc_s.c
         PJ_gall.c
+        PJ_geoc.c
         PJ_geos.c
         PJ_gins8.c
         PJ_gnom.c

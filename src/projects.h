@@ -178,7 +178,6 @@ union  PJ_COORD;
 struct geod_geodesic;
 struct pj_opaque;
 struct ARG_list;
-struct FACTORS;
 struct PJ_REGION_S;
 typedef struct PJ_REGION_S  PJ_Region;
 typedef struct ARG_list paralist;   /* parameter list */
@@ -229,6 +228,11 @@ struct PJconsts {
     projCtx_t *ctx;
     const char *descr;             /* From pj_list.h or individual PJ_*.c file */
     paralist *params;              /* Parameter list */
+    char *def_size;                /* Shape and size parameters extracted from params */
+    char *def_shape;
+    char *def_spherification;
+    char *def_ellps;
+
     struct geod_geodesic *geod;    /* For geodesic computations */
     struct pj_opaque *opaque;      /* Projection specific parameters, Defined in PJ_*.c */
     int inverted;                  /* Tell high level API functions to swap inv/fwd */
@@ -413,11 +417,6 @@ struct ARG_list {
 typedef union { double  f; int  i; char *s; } PROJVALUE;
 
 
-struct PJ_SELFTEST_LIST {
-    char    *id;                 /* projection keyword */
-    int     (* testfunc)(void);  /* projection entry point */
-};
-
 struct PJ_ELLPS {
     char    *id;           /* ellipse keyword name */
     char    *major;        /* a= value */
@@ -479,14 +478,14 @@ enum deprecated_constants_for_now_dropped_analytical_factors {
 /* library errors */
 #define PJD_ERR_NO_ARGS                  -1
 #define PJD_ERR_NO_OPTION_IN_INIT_FILE   -2
-#define PJD_ERR_NO_COLOR_IN_INIT_STRING  -3
+#define PJD_ERR_NO_COLON_IN_INIT_STRING  -3
 #define PJD_ERR_PROJ_NOT_NAMED           -4
 #define PJD_ERR_UNKNOWN_PROJECTION_ID    -5
 #define PJD_ERR_ECCENTRICITY_IS_ONE      -6
 #define PJD_ERR_UNKNOW_UNIT_ID           -7
 #define PJD_ERR_INVALID_BOOLEAN_PARAM    -8
 #define PJD_ERR_UNKNOWN_ELLP_PARAM       -9
-#define PJD_ERR_REC_FLATTENING_IS_ZERO  -10
+#define PJD_ERR_REV_FLATTENING_IS_ZERO  -10
 #define PJD_ERR_REF_RAD_LARGER_THAN_90  -11
 #define PJD_ERR_ES_LESS_THAN_ZERO       -12
 #define PJD_ERR_MAJOR_AXIS_NOT_GIVEN    -13
@@ -534,6 +533,7 @@ enum deprecated_constants_for_now_dropped_analytical_factors {
 #define PJD_ERR_LAT_0_IS_ZERO           -55
 #define PJD_ERR_ELLIPSOIDAL_UNSUPPORTED -56
 #define PJD_ERR_TOO_MANY_INITS          -57
+#define PJD_ERR_INVALID_ARG             -58
 
 struct projFileAPI_t;
 
@@ -676,6 +676,7 @@ double aacos(projCtx,double), aasin(projCtx,double), asqrt(double), aatan2(doubl
 PROJVALUE pj_param(projCtx ctx, paralist *, const char *);
 paralist *pj_mkparam(char *);
 
+int pj_ellipsoid (PJ *);
 int pj_ell_set(projCtx ctx, paralist *, double *, double *);
 int pj_datum_set(projCtx,paralist *, PJ *);
 int pj_prime_meridian_set(paralist *, PJ *);
@@ -702,8 +703,8 @@ double  pj_authlat(double, double *);
 COMPLEX pj_zpoly1(COMPLEX, COMPLEX *, int);
 COMPLEX pj_zpolyd1(COMPLEX, COMPLEX *, int, COMPLEX *);
 
-int pj_deriv(LP, double, PJ *, struct DERIVS *);
-int pj_factors(LP, PJ *, double, struct FACTORS *);
+int pj_deriv(LP, double, const PJ *, struct DERIVS *);
+int pj_factors(LP, const PJ *, double, struct FACTORS *);
 
 struct PW_COEF {    /* row coefficient structure */
     int m;          /* number of c coefficients (=0 for none) */

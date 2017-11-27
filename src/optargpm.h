@@ -207,7 +207,7 @@ static int opt_raise_flag (OPTARGS *opt, int ordinal);
 static int opt_ordinal (OPTARGS *opt, char *option);
 int opt_given (OPTARGS *opt, char *option);
 char *opt_arg (OPTARGS *opt, char *option);
-char *opt_strip_path (char *full_name);
+const char *opt_strip_path (const char *full_name);
 OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, const char **longflags, const char **longkeys);
 
 #define opt_eof_handler(opt) if (opt_eof (opt)) {continue;} else {;}
@@ -219,7 +219,7 @@ struct OPTARGS {
     FILE *input;
     int   input_index;
     int   record_index;
-    char  *progname;         /* argv[0], stripped from /path/to, if present */
+    const char  *progname;   /* argv[0], stripped from /path/to, if present */
     char   flaglevel[21];    /* if flag -f is specified n times, its optarg pointer is set to flaglevel + n */
     char  *optarg[256];      /* optarg[(int) 'f'] holds a pointer to the argument of option "-f" */
     char  *flags;            /* a list of flag style options supported, e.g. "hv" (help and verbose) */
@@ -285,6 +285,8 @@ int opt_input_loop (OPTARGS *opt, int binary) {
 
     /* otherwise, open next input file */
     opt->input = fopen (opt->fargv[opt->input_index++], binary? "rb": "rt");
+    if (0 != opt->input)
+        return 1;
 
     /* ignore non-existing files - go on! */
     if (0==opt->input)
@@ -399,8 +401,8 @@ char *opt_arg (OPTARGS *opt, char *option) {
     return opt->optarg[ordinal];
 }
 
-char *opt_strip_path (char *full_name) {
-    char *last_path_delim, *stripped_name = full_name;
+const char *opt_strip_path (const char *full_name) {
+    const char *last_path_delim, *stripped_name = full_name;
 
     last_path_delim = strrchr (stripped_name, '\\');
     if (last_path_delim > stripped_name)

@@ -334,6 +334,48 @@ size_t proj_trans_generic (
 
 
 /*************************************************************************************/
+PJ_COORD proj_geoc_lat (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+/**************************************************************************************
+    Convert geographical latitude to geocentric (or the other way round if
+    direction = PJ_INV)
+
+    The conversion involves a call to the tangent function, which goes through the
+    roof at the poles, so very close (the last few micrometers) to the poles no
+    conversion takes place and the input latitude is copied directly to the output.
+
+    Fortunately, the geocentric latitude converges to the geographical at the
+    poles, so the difference is negligible.
+
+    For the spherical case, the geographical latitude equals the geocentric, and
+    consequently, the input is copied directly to the output.
+**************************************************************************************/
+    const double limit = M_HALFPI - 1e-12;
+    PJ_COORD res = coo;
+    if ((coo.lp.phi > limit) || (coo.lp.phi < -limit) || (P->es==0))
+        return res;
+    if (direction==PJ_FWD)
+        res.lp.phi = atan (P->one_es * tan (coo.lp.phi) );
+    else
+        res.lp.phi = atan (P->rone_es * tan (coo.lp.phi) );
+
+    return res;
+}
+
+double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
+double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
+
+double proj_dmstor(const char *is, char **rs) {
+    return dmstor(is, rs);
+}
+
+char*  proj_rtodms(char *s, double r, int pos, int neg) {
+    return rtodms(s, r, pos, neg);
+}
+
+
+
+
+/*************************************************************************************/
 PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
 /**************************************************************************************
     Create a new PJ object in the context ctx, using the given definition. If ctx==0,
@@ -390,7 +432,6 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     argv = (char **) calloc (argc, sizeof (char *));
     if (0==argv)
         return pj_dealloc (args);
-
     argv[0] = args;
     for (i = 0, j = 1;  i < n;  i++) {
         if (0==args[i])
@@ -474,46 +515,42 @@ PJ *proj_destroy (PJ *P) {
     return 0;
 }
 
-int proj_errno (PJ *P) {
-    return pj_ctx_get_errno (pj_get_ctx (P));
+int proj_errno (const PJ *P) {
+    return pj_ctx_get_errno (pj_get_ctx ((PJ *) P));
 }
 
 /*****************************************************************************/
-void proj_errno_set (PJ *P, int err) {
+int proj_errno_set (const PJ *P, int err) {
 /******************************************************************************
-    Sets errno at the context and bubble it up to the thread local errno
+    Set context-errno, bubble it up to the thread local errno, return err
 ******************************************************************************/
     /* Use proj_errno_reset to explicitly clear the error status */
     if (0==err)
-        return;
+        return 0;
 
     /* For P==0 err goes to the default context */
-    proj_context_errno_set (pj_get_ctx (P), err);
+    proj_context_errno_set (pj_get_ctx ((PJ *) P), err);
     errno = err;
-    return;
+    return err;
 }
 
 /*****************************************************************************/
-void proj_errno_restore (PJ *P, int err) {
+int proj_errno_restore (const PJ *P, int err) {
 /******************************************************************************
-    Reduce some mental impedance in the canonical reset/restore use case:
-    Basically, proj_errno_restore() is a synonym for proj_errno_set(),
-    but the use cases are very different (_set: indicate an error to higher
-    level user code, _restore: pass previously set error indicators in case
-    of no errors at this level).
-
-    Hence, although the inner working is identical, we provide both options,
-    to avoid some rather confusing real world code.
+    Use proj_errno_restore when the current function succeeds, but the
+    error flag was set on entry, and stored/reset using proj_errno_reset
+    in order to monitor for new errors.
 
     See usage example under proj_errno_reset ()
 ******************************************************************************/
     if (0==err)
-        return;
+        return 0;
     proj_errno_set (P, err);
+    return 0;
 }
 
 /*****************************************************************************/
-int proj_errno_reset (PJ *P) {
+int proj_errno_reset (const PJ *P) {
 /******************************************************************************
     Clears errno in the context and thread local levels
     through the low level pj_ctx interface.
@@ -521,23 +558,30 @@ int proj_errno_reset (PJ *P) {
     Returns the previous value of the errno, for convenient reset/restore
     operations:
 
-    void foo (PJ *P) {
+    int foo (PJ *P) {
+        // errno may be set on entry, but we need to reset it to be able to
+        // check for errors from "do_something_with_P(P)"
         int last_errno = proj_errno_reset (P);
 
+        // local failure
+        if (0==P)
+            return proj_errno_set (P, 42);
+
+        // call to function that may fail
         do_something_with_P (P);
 
-        // failure - keep latest error status
+        // failure in do_something_with_P? - keep latest error status
         if (proj_errno(P))
-            return;
-        // success - restore previous error status
-        proj_errno_restore (P, last_errno);
-        return;
+            return proj_errno (P);
+
+        // success - restore previous error status, return 0
+        return proj_errno_restore (P, last_errno);
     }
 ******************************************************************************/
     int last_errno;
     last_errno = proj_errno (P);
 
-    pj_ctx_set_errno (pj_get_ctx (P), 0);
+    pj_ctx_set_errno (pj_get_ctx ((PJ *) P), 0);
     errno = 0;
     return last_errno;
 }
@@ -782,28 +826,9 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 }
 
 
-/*****************************************************************************/
-PJ_DERIVS proj_derivatives(PJ *P, const LP lp) {
-/******************************************************************************
-    Derivatives of coordinates.
-
-    returns PJ_DERIVS. If unsuccessfull error number is set and the returned
-    struct contains NULL data.
-
-******************************************************************************/
-    PJ_DERIVS derivs;
-
-    if (pj_deriv(lp, 1e-5, P, &derivs)) {
-        /* errno set in pj_derivs */
-        memset(&derivs, 0, sizeof(PJ_DERIVS));
-    }
-
-    return derivs;
-}
-
 
 /*****************************************************************************/
-PJ_FACTORS proj_factors(PJ *P, const LP lp) {
+PJ_FACTORS proj_factors(PJ *P, LP lp) {
 /******************************************************************************
     Cartographic characteristics at point lp.
 
@@ -814,12 +839,22 @@ PJ_FACTORS proj_factors(PJ *P, const LP lp) {
     struct contains NULL data.
 
 ******************************************************************************/
-    PJ_FACTORS factors;
+    PJ_FACTORS factors = {0,0,0, 0,0,0, 0,0};
+    struct FACTORS f;
 
-    if (pj_factors(lp, P, 0.0, &factors)) {
-        /* errno set in pj_factors */
-        memset(&factors, 0, sizeof(PJ_FACTORS));
-    }
+    if (pj_factors(lp, P, 0.0, &f))
+        return factors;
+
+    factors.meridional_scale  =  f.h;
+    factors.parallel_scale    =  f.k;
+    factors.areal_scale       =  f.s;
+
+    factors.angular_distortion        =  f.omega;
+    factors.meridian_parallel_angle   =  f.thetap;
+    factors.meridian_convergence      =  f.conv;
+
+    factors.tissot_semimajor  =  f.a;
+    factors.tissot_semiminor  =  f.b;
 
     return factors;
 }
@@ -841,14 +876,3 @@ const PJ_PRIME_MERIDIANS *proj_list_prime_meridians(void) {
     return pj_get_prime_meridians_ref();
 }
 
-double proj_torad (double angle_in_degrees) { return PJ_TORAD (angle_in_degrees);}
-double proj_todeg (double angle_in_radians) { return PJ_TODEG (angle_in_radians);}
-
-
-double proj_dmstor(const char *is, char **rs) {
-    return dmstor(is, rs);
-}
-
-char*  proj_rtodms(char *s, double r, int pos, int neg) {
-    return rtodms(s, r, pos, neg);
-}

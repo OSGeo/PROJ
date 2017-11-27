@@ -11,9 +11,11 @@
 
 #define EPS 1.0e-12
 
-int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
+int pj_factors(LP lp, const PJ *P, double h, struct FACTORS *fac) {
     double cosphi, t, n, r;
     int err;
+    PJ_COORD coo = {{0, 0, 0, 0}};
+    coo.lp = lp;
 
     err = proj_errno_reset (P);
 
@@ -38,7 +40,7 @@ int pj_factors(LP lp, PJ *P, double h, struct FACTORS *fac) {
 
     /* If input latitudes are geocentric, convert to geographic */
     if (P->geoc)
-        lp.phi = atan(P->rone_es * tan(lp.phi));
+        lp = proj_geoc_lat (P, PJ_INV, coo).lp;
 
     /* If latitude + one step overshoots the pole, move it slightly inside, */
     /* so the numerical derivative still exists */

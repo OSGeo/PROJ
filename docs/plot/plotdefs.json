@@ -143,6 +143,17 @@
         "type": "poly"
     },
     {
+        "filename": "ccon.png",
+        "latmax": 70,
+        "latmin": 34,
+        "lonmax": -30,
+        "lonmin": 68,
+        "name": "ccon",
+        "projstring": "+proj=ccon +lat_1=52 +lon_0=19",
+        "res": "med",
+        "type": "poly"
+    },
+    {
         "filename": "cea.png",
         "latmax": 90,
         "latmin": -90,

@@ -219,23 +219,30 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
             strncpy(sword+1, start_of_word, word_len);
             sword[word_len+1] = '\0';
 
-            /* do not override existing parameter value of same name - unless in pipeline definition */
+            /* do not override existing parameter value of same name */
             if (!pj_param(ctx, *start, sword).i) {
-                /* don't default ellipse if datum, ellps or any earth model
-                   information is set. */
-                if( strncmp(sword+1,"ellps=",6) != 0
-                    || (!pj_param(ctx, *start, "tdatum").i
-                        && !pj_param(ctx, *start, "tellps").i
-                        && !pj_param(ctx, *start, "ta").i
-                        && !pj_param(ctx, *start, "tb").i
-                        && !pj_param(ctx, *start, "trf").i
-                        && !pj_param(ctx, *start, "tf").i) )
-                {
-                    next = next->next = pj_mkparam(sword+1);
+
+                /* don't default ellipse if datum, ellps or any earth model information is set */
+                if (0==strncmp(sword,"tellps=", 7)) {
+                    int n = 0;
+
+                    n += pj_param(ctx, *start, "tdatum").i;
+                    n += pj_param(ctx, *start, "tellps").i;
+                    n += pj_param(ctx, *start, "ta").i;
+                    n += pj_param(ctx, *start, "tb").i;
+                    n += pj_param(ctx, *start, "trf").i;
+                    n += pj_param(ctx, *start, "tf").i;
+                    n += pj_param(ctx, *start, "te").i;
+                    n += pj_param(ctx, *start, "tes").i;
+
+                    if (0==n)
+                        next = next->next = pj_mkparam(sword+1);
                 }
                 else
                     next = next->next = pj_mkparam(sword+1);
             }
+
+
         }
         else
         {
@@ -434,6 +441,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PJ *(*proj)(PJ *);
     paralist *curr;
     int i;
+    int err;
     int found_def = 0;
     PJ *PIN = 0;
     int n_pipelines = 0;
@@ -533,17 +541,17 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* set datum parameters */
     if (pj_datum_set(ctx, start, PIN))
-        return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
+        return pj_default_destructor (PIN, proj_errno(PIN));
 
     if (PIN->need_ellps) {
-        if (pj_ell_set(ctx, start, &PIN->a, &PIN->es)) {
+        int ret = pj_ellipsoid (PIN);
+        if (0 != ret) {
             pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
-            return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
+            return pj_default_destructor (PIN, proj_errno(PIN));
         }
-
         PIN->a_orig = PIN->a;
         PIN->es_orig = PIN->es;
-        if (pj_calc_ellps_params(PIN, PIN->a, PIN->es))
+        if (pj_calc_ellipsoid_params (PIN, PIN->a, PIN->es))
             return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE);
     }
 
@@ -628,12 +636,22 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         s = pj_units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "sto_meter").s)) {
-        PIN->to_meter = pj_strtod(s, &s);
-        if (*s == '/') /* ratio number */
-            PIN->to_meter /= pj_strtod(++s, 0);
-        if (PIN->to_meter <= 0.0)
+        double factor;
+        int ratio = 0;
+
+        /* ratio number? */
+        if (*s == '/') {
+            ratio = 1;
+            s++;
+        }
+
+        factor = pj_strtod(s, &s);
+        if ((factor <= 0.0) || (1/factor==0))
             return pj_default_destructor (PIN, PJD_ERR_UNIT_FACTOR_LESS_THAN_0);
-        PIN->fr_meter = 1. / PIN->to_meter;
+
+        PIN->to_meter = ratio?  1 / factor: factor;
+        PIN->fr_meter = 1 / PIN->to_meter;
+
     } else
         PIN->to_meter = PIN->fr_meter = 1.;
 
@@ -691,12 +709,13 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
 
     /* projection specific initialization */
+    err = proj_errno_reset (PIN);
     PIN = proj(PIN);
-    if ((0==PIN) || ctx->last_errno)
-    {
+    if (proj_errno (PIN)) {
         pj_free(PIN);
         return 0;
     }
+    proj_errno_restore (PIN, err);
     return PIN;
 }
 
@@ -706,8 +725,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 /*      This is the application callable entry point for destroying     */
 /*      a projection definition.  It does work generic to all           */
 /*      projection types, and then calls the projection specific        */
-/*      free function (P->pfree()) to do local work.  In most cases     */
-/*      P->pfree()==pj_default_destructor.                              */
+/*      free function, P->destructor(), to do local work.               */
+/*      In most cases P->destructor()==pj_default_destructor.           */
 /************************************************************************/
 
 void pj_free(PJ *P) {

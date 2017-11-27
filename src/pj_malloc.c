@@ -103,7 +103,7 @@ void pj_dalloc(void *ptr) {
 /**********************************************************************/
     free(ptr);
 }
-    
+
 
 /**********************************************************************/
 void *pj_dealloc (void *ptr) {
@@ -150,7 +150,7 @@ void *pj_dealloc_params (projCtx ctx, paralist *start, int errlev) {
 
     Also called from pj_init_ctx when encountering errors before the PJ
     proper is allocated.
-******************************************************************************/    
+******************************************************************************/
     paralist *t, *n;
     for (t = start; t; t = n) {
         n = t->next;
@@ -177,12 +177,12 @@ void *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
 
     if (0==P)
         return 0;
-    
+
     /* free grid lists */
     pj_dealloc( P->gridlist );
     pj_dealloc( P->vgridlist_geoid );
     pj_dealloc( P->catalog_name );
-    
+
     /* We used to call pj_dalloc( P->catalog ), but this will leak */
     /* memory. The safe way to clear catalog and grid is to call */
     /* pj_gc_unloadall(pj_get_default_ctx()); and pj_deallocate_grids(); */
@@ -191,7 +191,7 @@ void *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
 
     /* free the interface to Charles Karney's geodesic library */
     pj_dealloc( P->geod );
-    
+
     /* free parameter list elements */
     pj_dealloc_params (pj_get_ctx(P), P->params, errlev);
 
