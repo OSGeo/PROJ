@@ -58,7 +58,7 @@ Transformation setup
     :param char** argv: Vector of strings with proj-string parameters, e.g. ``+proj=merc``
     :returns: :c:type:`PJ*`
 
-.. c:function:: PJ* proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to)
+.. c:function:: PJ* proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *srid_from, const char *srid_to, PJ_AREA *area)
 
     Create a transformation object that is a pipeline between two known
     coordinate reference systems.
@@ -71,13 +71,15 @@ Transformation setup
     given and coordinates are transformed via a hub datum (WGS84). This
     transformation strategy is referred to as "early-binding" by the EPSG. The
     function can be extended to support "late-binding" transformations in the
-    future without affecting users of the function.
+    future without affecting users of the function. When the function is extended
+    to the late-binding approach the :c:data:`area` argument will be used. For
+    now it is just a place-holder for a future improved implementation.
 
     Example call:
 
     .. code-block:: C
 
-        PJ *P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833");
+        PJ *P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833", 0);
 
     The returned :c:type:`PJ`-pointer should be deallocated with :c:func:`proj_destroy`.
 
@@ -86,6 +88,8 @@ Transformation setup
     :type `srid_from`: const char*
     :param `srid_to`: Destination SRID.
     :type `srid_to`: const char*
+    :param `area`: Descriptor of the desired area for the transformation.
+    :type `area`: PJ_AREA
     :returns: :c:type:`PJ*`
 
 .. c:function:: PJ* proj_destroy(PJ *P)
@@ -101,7 +105,7 @@ Coordinate transformation
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-.. c:function:: PJ_COORD proj_trans_coord(PJ *P, PJ_DIRECTION direction, PJ_COORD coord)
+.. c:function:: PJ_COORD proj_trans(PJ *P, PJ_DIRECTION direction, PJ_COORD coord)
 
     Transform a single :c:type:`PJ_COORD` coordinate.
 
@@ -112,22 +116,10 @@ Coordinate transformation
     :returns: :c:type:`PJ_COORD`
 
 
-.. c:function:: PJ_OBS proj_trans_obs(PJ *P, PJ_DIRECTION direction, PJ_OBS obs)
-
-    Transform a single :c:type:`PJ_OBS` observation.
-
-    :param PJ* P:
-    :param `direction`: Transformation direction.
-    :type `direction`: PJ_DIRECTION
-    :param PJ_OBS obs: Observation data to transform.
-    :returns: :c:type:`PJ_OBS`
-
-
-
-.. c:function:: size_t proj_transform(PJ *P, PJ_DIRECTION direction, \
-                                      double *x, size_t sx, size_t nx, double *y, \
-                                      size_t sy, size_t ny, double *z, size_t sz, size_t nz, \
-                                      double *t, size_t st, size_t nt)
+.. c:function:: size_t proj_trans_generic(PJ *P, PJ_DIRECTION direction, \
+                                          double *x, size_t sx, size_t nx, double *y, \
+                                          size_t sy, size_t ny, double *z, size_t sz, size_t nz, \
+                                          double *t, size_t st, size_t nt)
 
     Transform a series of coordinates, where the individual coordinate dimension
     may be represented by an array that is either
@@ -159,7 +151,7 @@ Coordinate transformation
 
         ...
 
-        proj_transform (
+        proj_trans_generic (
             P, PJ_INV, sizeof(XYQS),
             &(survey[0].x), stride, 345,  /*  We have 345 eastings  */
             &(survey[0].y), stride, 345,  /*  ...and 345 northings. */
@@ -202,7 +194,7 @@ Coordinate transformation
 
 
 
-.. c:function:: size_t proj_transform_coord(PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord)
+.. c:function:: size_t proj_trans_array(PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord)
 
     Batch transform an array of :c:type:`PJ_COORD`.
 
@@ -210,16 +202,6 @@ Coordinate transformation
     :param `direction`: Transformation direction
     :type `direction`: PJ_DIRECTION
     :param size_t n: Number of cordinates in :c:data:`coord`
-    :returns: :c:type:`size_t` 0 if all observations are transformed without error, otherwise returns error number
-
-.. c:function:: size_t proj_transform_obs(PJ *P, PJ_DIRECTION direction, size_t n, PJ_OBS *obs)
-
-    Batch transform an array of :c:type:`PJ_OBS`.
-
-    :param PJ* P:
-    :param `direction`: Transformation direction
-    :type `direction`: PJ_DIRECTION
-    :param size_t n: Number of observations in :c:data:`obs`
     :returns: :c:type:`size_t` 0 if all observations are transformed without error, otherwise returns error number
 
 
@@ -443,13 +425,22 @@ Lists
 Distances
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-.. c:function:: double proj_lp_dist(PJ *P, LP a, LP b)
+.. c:function:: double proj_lp_dist(const PJ *P, LP a, LP b)
 
     Calculate geodesic distance between two points in geodetic coordinates.
 
     :param PJ* P: Transformation object
     :param LP a: Coordinate of first point
     :param LP b: Coordinate of second point
+    :returns: :c:type:`double` Distance between :c:data:`a` and :c:data:`b` in meters.
+
+.. c:function:: double proj_lp_dist(const PJ *P, LPZ a, LPZ b)
+
+    Calculate geodesic distance between two points in geodetic coordinates.
+
+    :param PJ* P: Transformation object
+    :param LPZ a: Coordinate of first point
+    :param LPZ b: Coordinate of second point
     :returns: :c:type:`double` Distance between :c:data:`a` and :c:data:`b` in meters.
 
 .. c:function:: double proj_xy_dist(XY a, XY, b)
@@ -472,15 +463,16 @@ Distances
 Various
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-.. c:function:: double proj_roundtrip(PJ *P, PJ_DIRECTION direction, int n, PJ_OBS obs)
+.. c:function:: double proj_roundtrip(PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo)
 
     Measure internal consistency of a given transformation. The function
     performs :c:data:`n` round trip transformations starting in either
     the forward or reverse :c:data:`direction`. Returns the euclidean
-    distance of the starting point :c:data:`obs` and the resulting
+    distance of the starting point :c:data:`coo` and the resulting
     coordinate after :c:data:`n` iterations back and forth.
 
     :param PJ* P:
+    :type `P`: const PJ*
     :param `direction`: Starting direction of transformation
     :type `direction`: PJ_DIRECTION
     :param int n: Number of roundtrip transformations
@@ -488,17 +480,7 @@ Various
     :returns: :c:type:`double` Distance between original coordinate and the \
               resulting coordinate after :c:data:`n` transformation iterations.
 
-.. c:function:: PJ_DERIVS proj_derivatives(const PJ *P, const LP lp)
-
-    Calculate partial derivatives of geodetic coordinates.
-
-    :param `P`: Transformation object
-    :type `P`: const PJ*
-    :param `lp`: Geodetic coordinate
-    :type `lp`: const LP
-    :returns: :c:type:`PJ_DERIVS`
-
-.. c:function:: PJ_FACTORS proj_factors(const PJ *P, const  LP lp)
+.. c:function:: PJ_FACTORS proj_factors(PJ *P, LP lp)
 
     Calculate various cartographic properties, such as scale factors, angular
     distortion and meridian convergence. Depending on the underlying projection
@@ -547,3 +529,38 @@ Various
     :param int pos: Character denoting positive direction, typically `'N'` or `'E'`.
     :param int neg: Character denoting negative direction, typically `'S'` or `'W'`.
     :returns: :c:type:`char*` Pointer to output buffer (same as :c:data:`s`)
+
+
+.. c:function:: PJ_COORD proj_geoc_lat(const PJ *P, PJ_DIRECTION direction, PJ_COORD coo)
+
+    Convert geographical to geocentric latitude.
+
+    :param `P`: Transformation object
+    :type `P`: const PJ*
+    :param `direction`: Starting direction of transformation
+    :type `direction`: PJ_DIRECTION
+    :param `coo`: Coordinate
+    :type `coo`: PJ_COORD
+    :returns: :c:type:`PJ_COORD` Converted coordinate
+
+
+.. c:function:: int proj_angular_input (PJ *P, enum PJ_DIRECTION dir)
+
+    Check if a operation expects angular input.
+
+    :param `P`: Transformation object
+    :type `P`: const PJ*
+    :param `direction`: Starting direction of transformation
+    :type `direction`: PJ_DIRECTION
+    :returns: :c:type:`int` 1 if angular input is expected, otherwise 0
+
+.. c:function:: int proj_angular_output (PJ *P, enum PJ_DIRECTION dir)
+
+   Check if an operation returns angular output.
+
+    :param `P`: Transformation object
+    :type `P`: const PJ*
+    :param `direction`: Starting direction of transformation
+    :type `direction`: PJ_DIRECTION
+    :returns: :c:type:`int` 1 if angular output is returned, otherwise 0
+
