@@ -541,13 +541,13 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     /* set datum parameters */
     if (pj_datum_set(ctx, start, PIN))
-        return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
+        return pj_default_destructor (PIN, proj_errno(PIN));
 
     if (PIN->need_ellps) {
         int ret = pj_ellipsoid (PIN);
         if (0 != ret) {
             pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
-            return pj_default_destructor (PIN, PJD_ERR_MISSING_ARGS);
+            return pj_default_destructor (PIN, proj_errno(PIN));
         }
         PIN->a_orig = PIN->a;
         PIN->es_orig = PIN->es;
@@ -725,8 +725,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 /*      This is the application callable entry point for destroying     */
 /*      a projection definition.  It does work generic to all           */
 /*      projection types, and then calls the projection specific        */
-/*      free function (P->pfree()) to do local work.  In most cases     */
-/*      P->pfree()==pj_default_destructor.                              */
+/*      free function, P->destructor(), to do local work.               */
+/*      In most cases P->destructor()==pj_default_destructor.           */
 /************************************************************************/
 
 void pj_free(PJ *P) {

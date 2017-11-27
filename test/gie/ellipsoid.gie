@@ -53,13 +53,20 @@ expect    1335833.8895192828  7326837.7148738774
 Then try to fail deliberately
 -------------------------------------------------------------------------------
 operation proj=merc ellps=GRS80000000000
-expect    failure
+expect    failure errno unknown_ellp_param
 operation proj=merc +a=-1
-expect    failure
+expect    failure errno major_axis_not_given
 operation proj=merc +no_defs
-expect    failure
-operation proj=merc +es=-1 +no_defs
-expect    failure
+expect    failure errno major_axis_not_given
+
+# This one should succeed due to ellps=WGS84 in proj_def.dat
+operation proj=merc
+accept    0 0
+expect    0 0
+
+operation proj=merc +es=-1
+expect    failure errno major_axis_not_given
+
 operation
 expect    failure
 operation cobra
@@ -122,13 +129,13 @@ expect    -1.56904	0
 Shape parameters
 -------------------------------------------------------------------------------
 operation  proj=utm zone=32   ellps=GRS80 rf=0
-expect     failure
+expect     failure errno rev_flattening_is_zero
 
 operation  proj=utm zone=32   ellps=GRS80 es=1
-expect     failure
+expect     failure errno eccentricity_is_one
 
 operation  proj=utm zone=32   ellps=GRS80 b=0
-expect     failure
+expect     failure errno eccentricity_is_one
 
 operation  proj=utm zone=32   ellps=GRS80 b=6000000
 accept     12 55
