@@ -85,6 +85,7 @@ PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/more_builtins.gie
 PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/deformation.gie
 PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/axisswap.gie
 PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/ellipsoid.gie
+PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/GDA.gie
 
 # install & run the working GIGS test
   # create locations that pyproj understands

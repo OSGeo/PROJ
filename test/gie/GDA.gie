@@ -11,14 +11,14 @@ Version 1.0, 25 July 2017
 
 Which is distributed under Creative Commons CC-BY 4.0
 
-This will probably be useful as a template for an AU setup file, defining
-transformations for Australian systems, but I'm reluctant to provide such
-a file directly - I believe it should come from official AU sources.
+These tests will probably be useful as a template for an AU setup file, defining
+transformations for Australian systems, but I'm reluctant to provide such a file
+directly - I believe it should come from official AU sources.
 
 Thomas Knudsen, thokn@sdfe.dk, 2017-11-27
 -----------------------------------------------------------------------------------
 
-<gie>
+BEGIN
 -----------------------------------------------------------------------------------
 GDA94 to GDA2020
 -----------------------------------------------------------------------------------
@@ -45,4 +45,25 @@ operation proj=pipeline   ellps=GRS80                                           
 -----------------------------------------------------------------------------------
 accept    133.88551329 -23.67012389  603.3466  0   # Alice Springs GDA94
 expect    133.8855216  -23.67011014  603.2489  0   # Alice Springs GDA2020
-</gie>
+
+
+-----------------------------------------------------------------------------------
+ITRF2014@2018 to GDA2020
+-----------------------------------------------------------------------------------
+Just the Helmert transformation, to verify that we are within 100 um
+-----------------------------------------------------------------------------------
+operation proj=helmert   x=0  y=0  z=0  s=0 rx=0 ry=0  rz=0           \
+                        dx=0 dy=0 dz=0                                \
+                       drx=0.00150379  dry=0.00118346 drz=0.00120716  \
+                       ds=0                                           \
+                       epoch=2020.0
+-----------------------------------------------------------------------------------
+tolerance  50 um
+
+ # Alice Springs ITRF2014@2018.0
+accept     -4052052.6588 4212835.9938 -2545104.6946 2018.0
+
+ # Alice Springs GDA2020
+expect     -4052052.7373 4212835.9835 -2545104.5867
+
+END
