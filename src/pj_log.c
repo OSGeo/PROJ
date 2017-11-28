@@ -51,8 +51,17 @@ void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args )
 
 {
     char *msg_buf;
+    int debug_level = ctx->debug_level;
+    int shutup_unless_errno_set = debug_level < 0;
 
-    if( level > ctx->debug_level )
+    /* For negative debug levels, we first start logging when errno is set */
+    if (ctx->last_errno==0 && shutup_unless_errno_set)
+        return;
+
+    if (debug_level < 0)
+        debug_level = -debug_level;
+
+    if( level > debug_level )
         return;
 
     msg_buf = (char *) malloc(100000);

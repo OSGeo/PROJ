@@ -84,7 +84,7 @@ projCtx pj_get_default_ctx()
 
         if( getenv("PROJ_DEBUG") != NULL )
         {
-            if( atoi(getenv("PROJ_DEBUG")) > 0 )
+            if( atoi(getenv("PROJ_DEBUG")) >= -PJ_LOG_DEBUG_MINOR )
                 default_context.debug_level = atoi(getenv("PROJ_DEBUG"));
             else
                 default_context.debug_level = PJ_LOG_DEBUG_MINOR;
