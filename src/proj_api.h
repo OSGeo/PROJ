@@ -69,10 +69,8 @@ extern "C" {
 
 
 
-#ifndef PROJ_H
 extern char const pj_release[]; /* global release id string */
 extern int pj_errno;    /* global error return code */
-#endif
 
 #ifndef PROJ_INTERNAL_H
 /* replaced by enum proj_log_level in proj_internal.h */

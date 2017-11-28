@@ -43,7 +43,6 @@ Last update: 2017-05-15
 ***********************************************************************/
 
 #define PJ_LIB__
-#include <assert.h>
 #include <stddef.h>
 #include <errno.h>
 #include "proj_internal.h"
