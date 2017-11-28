@@ -381,39 +381,59 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     Create a new PJ object in the context ctx, using the given definition. If ctx==0,
     the default context is used, if definition==0, or invalid, a null-pointer is
     returned. The definition may use '+' as argument start indicator, as in
-    "+proj=utm +zone=32", or leave it out, as in "proj=utm zone=32"
+    "+proj=utm +zone=32", or leave it out, as in "proj=utm zone=32".
+
+    It may even use free formatting "proj  =  utm;  zone  =32  ellps= GRS80".
+    Note that the semicolon separator is allowed, but not required.
 **************************************************************************************/
     PJ   *P;
     char *args, **argv;
-    int	  argc, i, j, n;
+    int	  argc, i, j, last, n;
 
     if (0==ctx)
         ctx = pj_get_default_ctx ();
 
-    /* make a copy that we can manipulate */
+    /* Make a copy that we can manipulate */
     n = (int) strlen (definition);
     args = (char *) malloc (n + 1);
     if (0==args)
         return 0;
     strcpy (args, definition);
 
-    /* all-in-one: count args, eliminate superfluous whitespace, 0-terminate substrings */
-    for (i = j = argc = 0;  i < n;  ) {
-        /* skip prefix whitespace */
+    /* All-in-one: count args, eliminate superfluous whitespace, 0-terminate substrings */
+    for (i = j = argc = last = 0;  i < n;  ) {
+
+        /* Skip prefix whitespace */
         while (isspace (args[i]))
             i++;
 
-        /* skip at most one prefix '+' */
+        /* Skip at most one prefix '+' */
         if ('+'==args[i])
             i++;
 
-        /* whitespace after a '+' is a syntax error - but by Postel's prescription, we ignore and go on */
+        /* Whitespace after a '+' is a syntax error - but by Postel's prescription, we ignore and go on */
         if (isspace (args[i]))
             continue;
 
-        /* move a whitespace delimited text string to the left, skipping over superfluous whitespace */
-        while ((0!=args[i]) && (!isspace (args[i])))
+        /* Move a whitespace delimited text string to the left, skipping over superfluous whitespace */
+        while ((0!=args[i]) && (!isspace (args[i])) && (';'!=args[i]))
             args[j++] = args[i++];
+
+        /* Skip postfix whitespace */
+        while (isspace (args[i]) || ';'==args[i])
+            i++;
+
+        /* Greedy assignment operator: turn "a = b" into "a=b" */
+        if ('='==args[i]) {
+            args[j++] = '=';
+            i++;
+            while (isspace (args[i]))
+                i++;
+            while ((0!=args[i]) && (!isspace (args[i])) && (';'!=args[i]))
+                args[j++] = args[i++];
+            while (isspace (args[i]) || ';'==args[i])
+                i++;
+        }
 
         /* terminate string - if that makes j pass i (often the case for first arg), let i catch up */
         args[j++] = 0;
@@ -422,10 +442,6 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
 
         /* we finished another arg */
         argc++;
-
-        /* skip postfix whitespace */
-        while (isspace (args[i]))
-            i++;
     }
 
     /* turn the massaged input into an array of strings */
