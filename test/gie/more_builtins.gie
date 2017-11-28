@@ -140,11 +140,11 @@ roundtrip 100 1 nm
 -------------------------------------------------------------------------------
 Fail on purpose: +grids parameter is mandatory
 operation proj=vgridshift
-expect    failure
+expect    failure errno no_args
 
 Fail on purpose: open non-existing grid
 operation proj=vgridshift grids=nonexistinggrid.gtx
-expect    failure
+expect    failure errno failed_to_load_grid
 
 
 
@@ -166,11 +166,11 @@ expect    173 -45 0 0
 -------------------------------------------------------------------------------
 Fail on purpose: +grids parameter is mandatory:
 operation proj=hgridshift
-expect    failure
+expect    failure errno no_args
 
 Fail on purpose: open non-existing grid:
 operation proj=hgridshift grids=@nonexistinggrid.gsb,anothernonexistinggrid.gsb
-expect    failure
+expect    failure errno failed_to_load_grid
 -------------------------------------------------------------------------------
 
 
@@ -277,7 +277,7 @@ expect     12   89.999999999989996  0 0
 some less used options
 -------------------------------------------------------------------------------
 operation  proj=utm  ellps=GRS80  zone=32  to_meter=0
-expect     failure
+expect     failure   errno unit_factor_less_than_0
 
 operation  proj=utm  ellps=GRS80  zone=32  to_meter=10
 accept     12   55
