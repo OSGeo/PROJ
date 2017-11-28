@@ -183,11 +183,11 @@ enum proj_log_level proj_log_level (PJ_CONTEXT *ctx, enum proj_log_level log_lev
         ctx = pj_get_default_ctx();
     if (0==ctx)
         return PJ_LOG_TELL;
-    previous = ctx->debug_level;
+    previous = abs (ctx->debug_level);
     if (PJ_LOG_TELL==log_level)
         return previous;
     ctx->debug_level = log_level;
-    return abs(previous);
+    return previous;
 }
 
 
