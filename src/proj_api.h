@@ -83,7 +83,7 @@ extern int pj_errno;    /* global error return code */
 #ifdef PROJ_API_H_NOT_INVOKED_AS_PRIMARY_API
     /* These make the function declarations below conform with classic proj */
     typedef PJ *projPJ;          /* projPJ is a pointer to PJ */
-    typedef projCtx_t *projCtx;  /* projCtx is a pointer to projCtx_t */
+    typedef struct projCtx_t *projCtx;  /* projCtx is a pointer to projCtx_t */
 #   define projXY        XY
 #   define projLP       LP
 #   define projXYZ      XYZ
