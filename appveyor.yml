@@ -31,10 +31,10 @@ build_script:
   - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x86" call "%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat"
   - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
   - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" call "%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" x86_amd64
-  - if "%BUILD_TYPE%" == "nmake" nmake /f makefile.vc SELFTEST=1
+  - if "%BUILD_TYPE%" == "nmake" nmake /f makefile.vc
   - if "%BUILD_TYPE%" == "nmake" nmake /f makefile.vc install-all
   - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" cd src
-  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" nmake /f makefile.vc SELFTEST=1 multistresstest.exe
+  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" nmake /f makefile.vc multistresstest.exe
 # Disabled for now as it scales badly
 #  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" multistresstest.exe
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
