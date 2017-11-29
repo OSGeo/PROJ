@@ -74,9 +74,9 @@ PROJ_LIB=../nad src/multistresstest
 cd ..
 # autoconf build with grids and coverage
 if [ $TRAVIS_OS_NAME == "osx" ]; then
-      CFLAGS="-DPJ_SELFTEST --coverage" ./configure;
+      CFLAGS="--coverage" ./configure;
     else
-      CFLAGS="-DPJ_SELFTEST --coverage" LDFLAGS="-lgcov" ./configure;
+      CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure;
     fi
 make -j3
 make check

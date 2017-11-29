@@ -58,15 +58,6 @@ include(Proj4Mac)
 include(policies)
 
 #################################################################################
-# Self-test build config
-#################################################################################
-
-option(SELFTEST "Include self-test in build" OFF)
-if(SELFTEST)
-    add_definitions(-DPJ_SELFTEST)
-endif(SELFTEST)
-
-#################################################################################
 # threading configuration
 #################################################################################
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
