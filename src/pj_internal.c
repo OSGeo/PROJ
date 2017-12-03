@@ -298,6 +298,37 @@ char **pj_trimmed_args_to_argv (int argc, char *args) {
 }
 
 
+
+
+
+/***************************************************************************************/
+char *pj_free_format_from_argc_argv (int argc, const char **argv) {
+/****************************************************************************************
+    Convert free format command line input to something proj_create can eat.
+****************************************************************************************/
+    int i, n;
+    char *p;
+
+    for (i = n = 0;  i < argc;  i++)
+        n += strlen (argv[i]);
+
+    p = pj_calloc (n + argc + 1, sizeof (char));
+    if (0==p)
+        return 0;
+    if (0==argc)
+        return p;
+
+    for (i = n = 0;  i < argc;  i++) {
+        strcat (p, argv[i]);
+        strcat (p, " ");
+    }
+    return shrink (p);
+}
+
+
+
+
+
 void proj_context_errno_set (PJ_CONTEXT *ctx, int err) {
     if (0==ctx)
         ctx = pj_get_default_ctx();

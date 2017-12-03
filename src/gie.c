@@ -1096,8 +1096,8 @@ static int pj_cart_selftest (void) {
     int err;
     size_t n, sz;
     double dist, h, t;
-    char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
-    char *arg = {"+proj=utm +zone=32 +ellps=GRS80"};
+    const char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
+    const char *arg = {"+proj=utm +zone=32 +ellps=GRS80"};
     char buf[40];
 
     /* An utm projection on the GRS80 ellipsoid */

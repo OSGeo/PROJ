@@ -427,7 +427,7 @@ PJ *OPERATION(pipeline,0) {
 
         err = proj_errno_reset (P);
 
-        next_step = proj_create_argv (P->ctx, current_argc, current_argv);
+        next_step = proj_create_argv (P->ctx, current_argc, (const char **) current_argv);
         proj_log_trace (P, "Pipeline: Step %d at %p", i, next_step);
 
         if (0==next_step) {

@@ -418,7 +418,7 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
 
 
 /*************************************************************************************/
-PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
+PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, const char **argv) {
 /**************************************************************************************
 Create a new PJ object in the context ctx, using the given definition argument
 array argv. If ctx==0, the default context is used, if definition==0, or invalid,
@@ -426,11 +426,22 @@ a null-pointer is returned. The definition arguments may use '+' as argument sta
 indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
 "zone=32"}.
 **************************************************************************************/
+    PJ *P;
+    const char *c;
+
     if (0==argv)
         return 0;
     if (0==ctx)
         ctx = pj_get_default_ctx ();
-    return pj_init_ctx (ctx, argc, argv);
+
+    /* We assume that free format is used, and build a full proj_create compatible string */
+    c = pj_free_format_from_argc_argv (argc, argv);
+    if (0==c)
+        return 0;
+
+    P = proj_create (ctx, c);
+    pj_dealloc ((char *) c);
+    return P;
 }
 
 
