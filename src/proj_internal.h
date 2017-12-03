@@ -107,6 +107,10 @@ void pj_inherit_ellipsoid_def (const PJ *src, PJ *dst);
 void pj_erase_ellipsoid_def (PJ *P);
 int pj_calc_ellipsoid_params (PJ *P, double a, double es);
 
+
+int pj_trim_args (char *args);
+char **pj_trimmed_args_to_argv (int argc, char *args);
+
 /* Lowest level: Minimum support for fileapi */
 void proj_fileapi_set (PJ *P, void *fileapi);
 

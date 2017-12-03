@@ -64,15 +64,16 @@ hence making a map projection function call, pj_fwd(PJ, point), as easy
 as a traditional function call like hypot(x,y).
 
 While today, we may have more formally well defined metadata systems
-(most prominent the OGC WKT representation), nothing comes close being
+(most prominent the OGC WKT2 representation), nothing comes close being
 as easily readable ("human compatible") as Gerald's key-value system.
 This system in particular, and the PROJ.4 system in general, was
 Gerald's great gift to anyone using and/or communicating about geodata.
 
-It is only reasonable to name a program keeping an eye on the integrity
-of the PROJ.4 system in honour of Gerald. So in honour, and hopefully
-also in the spirit, of Gerald Ian Evenden (1935--2016), this is the
-Geospatial Integrity Investigation Environment.
+It is only reasonable to name a program, keeping an eye on the integrity
+of the PROJ.4 system, in honour of Gerald.
+
+So in honour, and hopefully also in the spirit, of Gerald Ian Evenden
+(1935--2016), this is the Geospatial Integrity Investigation Environment.
 
 ************************************************************************
 
@@ -129,14 +130,14 @@ int   main(int argc, char **argv);
 
 static int   process_file (const char *fname);
 static int   errmsg (int errlev, const char *msg, ...);
-static int   get_inp (FILE *f, char *inp, int size);
-static int   get_cmnd (const char *inp, char *cmnd, int len);
-static const char *get_args (const char *inp);
 static int   dispatch (const char *cmnd, const char *args);
 static const char *column (const char *buf, int n);
 static int errno_from_err_const (const char *err_const);
 static const char *err_const_from_errno (int err);
 static void list_err_codes (void);
+
+
+#include "readblock.c"
 
 
 
@@ -159,20 +160,18 @@ typedef struct {
     FILE *fout;
 } gie_ctx;
 
+ffio *F = 0;
+
 gie_ctx T = {{""}, 0, {{0,0,0,0}}, {{0,0,0,0}}, {{0,0,0,0}}, {{0,0,0,0}}, PJ_FWD, 1,   0,   0,0,0,0,0,0,0,0,  0.0005, 0, 0};
 
 OPTARGS *o;
 
 
 
-size_t tol_lineno = 0;
-size_t lineno = 0;
-size_t level  = 0;
-char delim[] = {"-------------------------------------------------------------------------------\n"};
-char DELIM[] = {"===============================================================================\n"};
+static const char delim[] = {"-------------------------------------------------------------------------------\n"};
 
 
-#define CMDLEN 25000
+#define CMDLEN 250000
 
 int nfiles = 0;
 
@@ -248,6 +247,13 @@ int main (int argc, char **argv) {
         return 0;
     }
 
+    F = ffio_create (gie_tags, n_gie_tags, 1000);
+    if (0==F) {
+        fprintf (stderr, "%s: No memory\n", o->progname);
+        free (o);
+        return 1;
+    }
+
     for (i = 0;  i < o->fargc; i++)
         process_file (o->fargv[i]);
 
@@ -264,6 +270,7 @@ int main (int argc, char **argv) {
         fclose (T.fout);
 
     free (o);
+    ffio_destroy (F);
     return T.grand_ko;
 }
 
@@ -282,11 +289,8 @@ static int another_success (void) {
 
 static int process_file (const char *fname) {
     FILE *f;
-    char inp[CMDLEN];
-    char cmnd[1000];
-    const char *args;
 
-    lineno = level = 0;
+    F->lineno = F->next_lineno = F->level = 0;
     T.op_ok = T.total_ok = 0;
     T.op_ko = T.total_ko = 0;
 
@@ -298,37 +302,29 @@ static int process_file (const char *fname) {
         }
         errmsg (2, "Cannot open spec'd input file '%s' - bye!\n", fname);
     }
+    F->f = f;
+
     if (T.verbosity > 0)
         fprintf (T.fout, "%sReading file '%s'\n", delim, fname);
     T.curr_file = fname;
-    while (get_inp(f, inp, CMDLEN)) {
-        int len;
 
-        if (feof(f))
-            break;
-        len = get_cmnd (inp, cmnd, 1000);
-        if (len>=999) {
-            errmsg (2, "Command verb too long: '%s' - bye!\n", cmnd);
-            proj_destroy (T.P);
-            T.P = 0;
-            return 0;
-
-        }
-        args = get_args (inp);
-        if (SKIP==dispatch (cmnd, args))
+    while (get_inp(F)) {
+        if (SKIP==dispatch (F->tag, F->args))
             return proj_destroy (T.P), T.P = 0, 0;
     }
+
     fclose (f);
+    F->lineno = F->next_lineno = 0;
 
     T.grand_ok += T.total_ok;
     T.grand_ko += T.total_ko;
     if (T.verbosity > 0)
     fprintf (T.fout, "%stotal: %2d tests succeeded,  %2d tests %s\n", delim, T.total_ok, T.total_ko, T.total_ko? "FAILED!": "failed.");
 
-    if (level==0)
-        return errmsg (-3, "File '%s':Missing 'BEGIN' cmnd - bye!\n", fname);
-    if (level && level%2)
-        return errmsg (-4, "File '%s':Missing 'END' cmnd - bye!\n", fname);
+    if (F->level==0)
+        return errmsg (-3, "File '%s':Missing '<gie>' cmnd - bye!\n", fname);
+    if (F->level && F->level%2)
+        return errmsg (-4, "File '%s':Missing '</gie>' cmnd - bye!\n", fname);
     return 0;
 }
 
@@ -336,7 +332,7 @@ static int process_file (const char *fname) {
 /*****************************************************************************/
 const char *column (const char *buf, int n) {
 /*****************************************************************************
-    Return a pointer to the n'th column of buf. Coulmn numbers start at 0.
+    Return a pointer to the n'th column of buf. Column numbers start at 0.
 ******************************************************************************/
     int i;
     if (n <= 0)
@@ -443,31 +439,17 @@ static int operation (char *args) {
     an operation is the general term describing something that can be
     either a conversion or a transformation)
 ******************************************************************************/
-    int i, j, n;
     T.op_id++;
 
-    T.operation_lineno = lineno;
+    T.operation_lineno = F->lineno;
 
-    /* compactify the args, so we can fit more info on a line in verbose mode */
-    n = (int) strlen (args);
-    for (i = j = 0;  i < n;  ) {
-        /* skip prefix whitespace */
-        while (isspace (args[i]))
-            i++;
-        /* move a whitespace delimited text string to the left, skipping over superfluous whitespace */
-        while ((0!=args[i]) && (!isspace (args[i])))
-            args[j++] = args[i++];
-        if (args[j+1]!=0)
-            args[j++] = ' ';
-        i++;
-    }
-    args[j++] = 0;
-    strcpy (&(T.operation[0]), args);
+    strcpy (&(T.operation[0]), F->args);
 
     if (T.verbosity > 1) {
-        finish_previous_operation (args);
+        finish_previous_operation (F->args);
         banner (args);
     }
+
 
     T.op_ok = 0;
     T.op_ko = 0;
@@ -475,10 +457,15 @@ static int operation (char *args) {
     direction ("forward");
     tolerance ("0.5 mm");
 
+    proj_errno_reset (T.P);
 
     if (T.P)
         proj_destroy (T.P);
-    T.P = proj_create (0, args);
+    proj_errno_reset (0);
+    T.P = proj_create (0, F->args);
+
+    /* Checking thst proj_create succeeds is first done at "expect" time, */
+    /* we want to support "expect"ing specific error codes */
 
     return 0;
 }
@@ -615,7 +602,7 @@ static int roundtrip (const char *args) {
         if (0==T.op_ko && T.verbosity < 2)
             banner (T.operation);
         fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
-        fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
+        fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) F->lineno);
         fprintf (T.fout, "     roundtrip deviation: %.3f mm, expected: %.3f mm\n", 1000*r, 1000*d);
     }
     return another_failure ();
@@ -633,7 +620,7 @@ static int expect_message (double d, const char *args) {
         banner (T.operation);
     fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
 
-    fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) lineno);
+    fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) F->lineno);
     fprintf (T.fout, "     expected: %s\n", args);
     fprintf (T.fout, "     got:      %.9f   %.9f", T.b.xy.x,  T.b.xy.y);
     if (T.b.xyzt.t!=0 || T.b.xyzt.z!=0)
@@ -652,7 +639,7 @@ static int expect_message_cannot_parse (const char *args) {
         if (0==T.op_ko && T.verbosity < 2)
             banner (T.operation);
         fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
-        fprintf (T.fout, "     FAILURE in %s(%d):\n     Too few args: %s\n", opt_strip_path (T.curr_file), (int) lineno, args);
+        fprintf (T.fout, "     FAILURE in %s(%d):\n     Too few args: %s\n", opt_strip_path (T.curr_file), (int) F->lineno, args);
     }
     return 1;
 }
@@ -665,7 +652,7 @@ static int expect_failure_with_errno_message (int expected, int got) {
     if (0==T.op_ko && T.verbosity < 2)
         banner (T.operation);
     fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
-    fprintf (T.fout, "     FAILURE in %s(%d):\n",    opt_strip_path (T.curr_file), (int) lineno);
+    fprintf (T.fout, "     FAILURE in %s(%d):\n",    opt_strip_path (T.curr_file), (int) F->lineno);
     fprintf (T.fout, "     got errno %s (%d): %s\n", err_const_from_errno(got), got,  pj_strerrno (got));
     fprintf (T.fout, "     expected %s (%d):  %s",   err_const_from_errno(expected), expected, pj_strerrno (expected));
     fprintf (T.fout, "\n");
@@ -737,6 +724,7 @@ static int expect (const char *args) {
         puts (T.dir== 1? "forward": "reverse");
         puts (proj_angular_input (T.P, T.dir)?  "angular in":  "linear in");
         puts (proj_angular_output (T.P, T.dir)? "angular out": "linear out");
+        printf ("left: %d   right:  %d\n", T.P->left, T.P->right);
     }
 
     T.e  =  parse_coord (args);
@@ -806,15 +794,6 @@ static int verbose (const char *args) {
     return 0;
 }
 
-/*****************************************************************************/
-static int comment (const char *args) {
-/*****************************************************************************
-    in line comment. Equivalent to #
-******************************************************************************/
-    (void) args;
-    return 0;
-}
-
 
 /*****************************************************************************/
 static int echo (const char *args) {
@@ -828,16 +807,6 @@ fprintf (T.fout, "%s\n", args);
 
 
 static int dispatch (const char *cmnd, const char *args) {
-#if 0
-    int last_errno = proj_errno_reset (T.P);
-#endif
-
-    if  (0==level%2) {
-        if (0==strcmp (cmnd, "BEGIN") || 0==strcmp (cmnd, "<begin>") || 0==strcmp (cmnd, "<gie>"))
-           level++;
-        return 0;
-    }
-
     if  (0==strcmp (cmnd, "OPERATION")) return  operation ((char *) args);
     if  (0==strcmp (cmnd, "operation")) return  operation ((char *) args);
     if  (0==strcmp (cmnd, "ACCEPT"))    return  accept    (args);
@@ -858,10 +827,6 @@ static int dispatch (const char *cmnd, const char *args) {
     if  (0==strcmp (cmnd, "builtins"))  return  builtins  (args);
     if  (0==strcmp (cmnd, "ECHO"))      return  echo      (args);
     if  (0==strcmp (cmnd, "echo"))      return  echo      (args);
-    if  (0==strcmp  (cmnd, "END"))      return          finish_previous_operation (args), level++, 0;
-    if  (0==strcmp  (cmnd, "<end>"))    return          finish_previous_operation (args), level++, 0;
-    if  (0==strcmp  (cmnd, "</gie>"))   return          finish_previous_operation (args), level++, 0;
-    if  ('#'==cmnd[0])                  return  comment   (args);
 
 #if 0
     if (proj_errno(T.P))
@@ -966,7 +931,6 @@ static const char *err_const_from_errno (int err) {
 }
 
 
-
 static int errno_from_err_const (const char *err_const) {
     const size_t n = sizeof lookup / sizeof lookup[0];
     size_t i, len;
@@ -1006,12 +970,6 @@ static int errno_from_err_const (const char *err_const) {
 }
 
 
-
-
-
-
-
-
 static int errmsg (int errlev, const char *msg, ...) {
     va_list args;
     va_start(args, msg);
@@ -1021,106 +979,6 @@ static int errmsg (int errlev, const char *msg, ...) {
         errno = errlev;
     return errlev;
 }
-
-#define skipspace(f, c)                           \
-    do {                                          \
-        while (isspace (c=fgetc(f)) && !feof(f)){ \
-            if ('\n'==c) lineno++;                \
-        }                                         \
-        if (feof(f))                              \
-            break;                                \
-    } while (ungetc(c, f), 0)
-
-#define skipline(f, c)                            \
-    do {                                          \
-        while ((c=fgetc(f)) && !feof(f)) {        \
-            if ((c=='\r') || (c=='\n'))           \
-                break;                            \
-        }                                         \
-        skipspace (f, c);                         \
-    } while (0)
-
-
-/* skip whitespace at continuation line */
-#define continuation(f, buf, c)                   \
-    if ((c=='\r')||(c=='\n')) {                   \
-        if (c=='\n') lineno++;                    \
-        next--;                                   \
-        while (isspace (c=fgetc(f)) && !feof(f)); \
-    }
-
-static int get_inp (FILE *f, char *inp, int size) {
-    char *next;
-    int c = 0, esc;
-    char *endp = inp + size - 2;
-
-    skipspace (f, c);
-
-    for (c = esc = 0, next = inp; !feof(f); ) {
-        c = fgetc(f);
-        if (esc) {
-            continuation (f, next, c);
-            esc = 0;
-            /* handle escape sequences here */
-            switch (c) {
-                case '\\': c = '\\'; break;
-                default: (void) c;
-            }
-        }
-        if (c=='\r')
-            break;
-        if (c=='\n') {
-            lineno++;
-            break;
-        }
-
-        *next++ = (char) c;
-        if ('\\'==c)
-            esc = 1;
-        if (feof(f) || (next==endp))
-            break;
-    }
-    *(next) = 0;
-    return (int) strlen(inp);
-}
-
-static int get_cmnd (const char *inp, char *cmnd, int len) {
-    cmnd[0] = 0;
-    while (isspace(*inp++));
-    inp--;
-    while (len-- && !isspace(*inp) && *inp)
-        *cmnd++ = *inp++;
-    *cmnd = 0;
-    return len;
-}
-
-static const char *get_args (const char *inp) {
-    const char *args = inp;
-    while (isspace(*args++))
-        if (0==*args)
-            return args;
-    while (!isspace(*++args))
-        if (0==*args)
-            return args;
-    while (isspace(*args++))
-        if (0==*args)
-            return args;
-    return --args;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1279,7 +1137,7 @@ static int pj_cart_selftest (void) {
         return 3;
 
     /* Clear any previous error */
-    proj_errno_set (P, 0);
+    proj_errno_reset (P);
 
     /* Invalid projection */
     a = proj_trans (P, 42, a);
@@ -1290,7 +1148,7 @@ static int pj_cart_selftest (void) {
         return 5;
 
     /* Clear error again */
-    proj_errno_set (P, 0);
+    proj_errno_reset (P);
 
     /* Clean up */
     proj_destroy (P);

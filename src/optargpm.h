@@ -219,6 +219,7 @@ struct OPTARGS {
     FILE *input;
     int   input_index;
     int   record_index;
+    int   free_format;       /* plus-style specs replaced by free format */
     const char  *progname;   /* argv[0], stripped from /path/to, if present */
     char   flaglevel[21];    /* if flag -f is specified n times, its optarg pointer is set to flaglevel + n */
     char  *optarg[256];      /* optarg[(int) 'f'] holds a pointer to the argument of option "-f" */
@@ -426,6 +427,12 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
     o->argc = argc;
     o->argv = argv;
     o->progname = opt_strip_path (argv[0]);
+    o->free_format = 0;
+
+    /* Is free format in use, instead of plus-style? */
+    for (i = 1;  i < argc;  i++)
+        if (0==strcmp ("--", argv[i]))
+            o->free_format = i;
 
     /* Reset all flags */
     for (i = 0;  i < (int) strlen (flags);  i++)
@@ -442,7 +449,8 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
     o->longkeys   =  longkeys;
 
 
-    /* check aliases, An end user should never experience this, but the developer should make sure that aliases are valid */
+    /* check aliases, An end user should never experience this, but */
+    /* the developer should make sure that aliases are valid */
     for (i = 0;  longflags && longflags[i]; i++) {
         /* Go on if it does not look like an alias */
         if (strlen (longflags[i]) < 3)
@@ -500,6 +508,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
 
         if ('-' != argv[i][0])
             break;
+
         if (0==o->margv)
             o->margv = argv + i;
         o->margc++;
@@ -516,7 +525,10 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                 char *equals;
                 crepr = argv[i] + 2;
 
-                /* need to maniplulate a bit to support gnu style --pap=pop syntax */
+                /* We need to maniplulate a bit to support gnu style --foo=bar syntax.  */
+                /* NOTE: This will segfault for read-only (const char * style) storage, */
+                /* but since the canonical use case, int main (int argc, char **argv),  */
+                /* is non-const, we ignore this for now */
                 equals = strchr (crepr, '=');
                 if (equals)
                     *equals = 0;
@@ -579,6 +591,14 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
 
     /* Process all '+'-style options, starting from where '-'-style processing ended */
     o->pargv = argv + i;
+    if (o->free_format) {
+        o->pargc = o->free_format - (o->margc + 1);
+        o->fargc = argc - (o->free_format + 1);
+        if (0 != o->fargc)
+            o->fargv = argv + o->free_format + 1;
+        return o;
+    }
+
     for (/* empty */; i < argc; i++) {
         if ('-' == argv[i][0]) {
             free (o);

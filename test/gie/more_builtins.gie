@@ -8,7 +8,7 @@ intends to exercise corner cases.
 ===============================================================================
 
 
-BEGIN
+<gie>
 
 -------------------------------------------------------------------------------
 Two ob_tran tests from nad/testvarious
@@ -164,13 +164,14 @@ direction inverse
 accept    172.999892181021551 -45.001620431954613  0 0
 expect    173 -45 0 0
 -------------------------------------------------------------------------------
-Fail on purpose: +grids parameter is mandatory:
-operation proj=hgridshift
-expect    failure errno no_args
 
-Fail on purpose: open non-existing grid:
+# Fail on purpose: open non-existing grid:
 operation proj=hgridshift grids=@nonexistinggrid.gsb,anothernonexistinggrid.gsb
 expect    failure errno failed_to_load_grid
+
+# Fail on purpose: +grids parameter is mandatory:
+operation proj=hgridshift
+expect    failure errno no_args
 -------------------------------------------------------------------------------
 
 
@@ -193,8 +194,9 @@ expect     3565285.41342351  855948.67986759  5201382.72939791
 This example is a random point, transformed from ED50 to ETRS89 using KMStrans2
 -------------------------------------------------------------------------------
 operation  proj=helmert ellps=GRS80                           \
-            x=-81.0703  y=-89.3603  z=-115.7526               \
-           rx=-0.48488 ry=-0.02436 rz=-0.41321   s=-0.540645
+            x=-081.0703   rx=-0.48488
+            y=-089.3603   ry=-0.02436
+            z=-115.7526   rz=-0.41321   s=-0.540645
 -------------------------------------------------------------------------------
 tolerance  1 um
 accept     3494994.30120000 1056601.97250000 5212382.16660000
@@ -293,4 +295,4 @@ to express in the gie command set
 builtins
 -------------------------------------------------------------------------------
 
-END
+</gie>

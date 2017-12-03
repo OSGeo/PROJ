@@ -33,6 +33,7 @@
 #include "projects.h"
 #include <geodesic.h>
 
+#include <ctype.h>
 #include <stddef.h>
 #include <stdarg.h>
 #include <errno.h>
@@ -163,8 +164,138 @@ size_t pj_strlcpy(char *dst, const char *src, size_t siz) {
 
 
 
-/* stuff below is *not* considered API, and will be moved to an "internal plumbing toolset" */
 
+
+
+/***************************************************************************************/
+static char *chomp (char *c) {
+/****************************************************************************************
+    Strip pre- and postfix whitespace. Note: Inline comments (indicated by '#')
+    are considered whitespace.
+****************************************************************************************/
+    int i, n;
+    char *comment;
+    if (0==c)
+        return 0;
+    comment = strchr (c, '#');
+    if (comment)
+        *comment = 0;
+    n = strlen (c);
+    for (i = n - 1; isspace (c[i]) || ';'==c[i]; i--)
+        c[i] = 0;
+    for (n = 0; isspace (c[n]); n++);
+    for (i = 0;  0 != c[i + n];  i++)
+        c[i] = c[i + n];
+    c[i] = 0;
+    return c;
+}
+
+
+/***************************************************************************************/
+static char *shrink (char *c) {
+/****************************************************************************************
+    Clash repeated whitespace, remove '+' and ';', make ',' and '=' greedy, eating
+    their surrounding whitespace.
+****************************************************************************************/
+    int i, j, n, ws;
+
+    chomp (c);
+    n = strlen (c);
+
+    /* First clash repeated whitespace (including +/;) */
+    for (i = j = ws = 0; j < n; j++) {
+
+        /* Blank out prefix '+', only if preceeded by whitespace (i.e. keep it in 1.23e+08 */
+        if ((i > 0) && ('+'==c[j]) && isspace (c[i]))
+            c[j] = ' ';
+
+        if (isspace (c[j]) || ';'==c[j] || '\\'==c[j]) {
+            if (0==ws && (i > 0))
+                c[i++] = ' ';
+            ws = 1;
+            continue;
+        }
+        else
+            ws = 0;
+        c[i++] = c[j];
+    }
+    c[i] = 0;
+    n = strlen(c);
+
+    /* Then make ',' and '=' greedy */
+    for (i = j = 0; j < n; j++) {
+        if (i==0) {
+            c[i++] = c[j];
+            continue;
+        }
+
+        /* Skip space before '='/',' */
+        if ('='==c[j] || ','==c[j]) {
+            if (c[i - 1]==' ')
+               c[i - 1] = c[j];
+            else
+                c[i++] = c[j];
+            continue;
+        }
+
+        if (' '==c[j] && ('='==c[i - 1] || ','==c[i - 1]) )
+            continue;
+
+        c[i++] = c[j];
+    }
+    c[i] = 0;
+    return c;
+}
+
+
+
+
+
+
+/***************************************************************************************/
+int pj_trim_args (char *args) {
+/****************************************************************************************
+    Trim an argument string and count its number of elements.
+****************************************************************************************/
+    size_t i, m, n;
+    shrink (args);
+    n = strlen (args);
+    if (n==0)
+        return 0;
+    for (i = m = 0;  i < n;  i++) {
+        if (' '==args[i]) {
+            args[i] = 0;
+            m++;
+        }
+    }
+    return m + 1;
+}
+
+
+/***************************************************************************************/
+char **pj_trimmed_args_to_argv (int argc, char *args) {
+/****************************************************************************************
+    Create an argv-style array from elements placed in args.
+
+    args is a trimmed string as returned by pj_trim_args(), and argv is the number of
+    trimmed strings found (i.e. the return value of pj_trim_args()).
+****************************************************************************************/
+    int i, j;
+    char **argv;
+    /* turn the massaged input into an array of strings */
+    argv = (char **) calloc (argc, sizeof (char *));
+    if (0==argv)
+        return 0;
+    argv[0] = args;
+    for (i = 0, j = 1;  ;  i++) {
+        if (0==args[i]) {
+            argv[j++] = args + (i + 1);
+        }
+        if (j==argc)
+            break;
+    }
+    return argv;
+}
 
 
 void proj_context_errno_set (PJ_CONTEXT *ctx, int err) {
