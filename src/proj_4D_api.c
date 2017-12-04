@@ -758,7 +758,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
     metadata is missing, the value is set to "Unknown".
 
 ******************************************************************************/
-    int file_found, def_found=0;
+    int file_found;
     char param[80], key[74];
     paralist *start, *next;
     PJ_INIT_INFO info;
@@ -782,7 +782,9 @@ PJ_INIT_INFO proj_init_info(const char *initname){
     strncat(param, key, 73);
 
     start = pj_mkparam(param);
-    next = pj_get_init(ctx, &start, start, key, &def_found);
+    next = pj_get_init(ctx, start, key);
+    start->next = next;
+
 
     if (pj_param(ctx, start, "tversion").i) {
         pj_strlcpy(info.version, pj_param(ctx, start, "sversion").s, sizeof(info.version));

@@ -116,7 +116,7 @@ void proj_context_inherit (PJ *parent, PJ *child) {
 
 
 /**************************************************************************************/
-size_t pj_strlcpy(char *dst, const char *src, size_t siz) {
+size_t pj_strlcpy(char *dst, const char *src, size_t dsize) {
 /***************************************************************************************
    Copy src to string dst of size siz.  At most siz-1 characters
    will be copied.  Always NUL terminates (unless siz == 0).
@@ -257,7 +257,7 @@ int pj_trim_args (char *args) {
     Trim an argument string and count its number of elements.
 ****************************************************************************************/
     size_t i, m, n;
-    shrink (args);
+    pj_shrink (args);
     n = strlen (args);
     if (n==0)
         return 0;
@@ -319,7 +319,7 @@ char *pj_free_format_from_argc_argv (int argc, const char **argv) {
         strcat (p, argv[i]);
         strcat (p, " ");
     }
-    return shrink (p);
+    return pj_shrink (p);
 }
 
 

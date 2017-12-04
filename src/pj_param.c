@@ -1,5 +1,6 @@
 /* put parameters in linked list and retrieve */
 #include <stdio.h>
+#include <ctype.h>
 #include <string.h>
 #include "projects.h"
 
@@ -46,6 +47,32 @@ paralist *pj_mkparam_ws (char *str) {
     newitem->next = 0;
 
     return newitem;
+}
+
+/**************************************************************************************/
+paralist *pj_param_exists (paralist *list, const char *parameter) {
+/***************************************************************************************
+    Determine whether a given parameter exists in a paralist. If it does, return
+    a pointer to the corresponding list element - otherwise return 0.
+
+    This function is equivalent to the pj_param (...) call with the "opt" argument
+    set to the parameter name preceeeded by a 't'. But by using this one, one avoids
+    writing the code allocating memory for a new copy of parameter name, and prepending
+    the t (for compile time known names, this is obviously not an issue).
+***************************************************************************************/
+    paralist *next = list;
+    char *c = strchr (parameter, '=');
+    size_t len = strlen (parameter);
+    if (c)
+        len = c - parameter;
+    if (list==0)
+        return 0;
+
+    for (next = list; next; next = next->next)
+        if (0==strncmp (parameter, next->param, len) && (next->param[len]=='=' || next->param[len]==0))
+            return next;
+
+    return 0;
 }
 
 
