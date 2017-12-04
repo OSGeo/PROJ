@@ -115,14 +115,15 @@ void proj_context_inherit (PJ *parent, PJ *child) {
 
 
 
+/**************************************************************************************/
 size_t pj_strlcpy(char *dst, const char *src, size_t siz) {
-/*******************************************************************
+/***************************************************************************************
    Copy src to string dst of size siz.  At most siz-1 characters
    will be copied.  Always NUL terminates (unless siz == 0).
    Returns strlen(src); if retval >= siz, truncation occurred.
 
-
- * Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
+ *
+ * Copyright (c) 1998, 2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -135,40 +136,37 @@ size_t pj_strlcpy(char *dst, const char *src, size_t siz) {
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
 
-  Source: http://www.i-pi.com/Training/EthicalHacking/Solutions/strlcpy.c
+  Source: http://cvsweb.openbsd.org/cgi-bin/cvsweb/src/lib/libc/string/strlcpy.c
 
-********************************************************************/
-    register char *d = dst;
-    register const char *s = src;
-    register size_t n = siz;
+***************************************************************************************/
+    const char *osrc = src;
+    size_t nleft = dsize;
 
-    /* Copy as many bytes as will fit */
-    if (n != 0 && --n != 0) {
-        do {
-            if ((*d++ = *s++) == 0)
+    /* Copy as many bytes as will fit. */
+    if (nleft != 0) {
+        while (--nleft != 0) {
+            if ((*dst++ = *src++) == '\0')
                 break;
-        } while (--n != 0);
+        }
     }
 
-    /* Not enough room in dst, add NUL and traverse rest of src */
-    if (n == 0) {
-        if (siz != 0)
-            *d = '\0';      /* NUL-terminate dst */
-        while (*s++)
+    /* Not enough room in dst, add NUL and traverse rest of src. */
+    if (nleft == 0) {
+        if (dsize != 0)
+            *dst = '\0';		/* NUL-terminate dst */
+        while (*src++)
             ;
     }
 
-    return(s - src - 1);    /* count does not include NUL */
+    return(src - osrc - 1);	/* count does not include NUL */
 }
 
 
 
-
-
-
 /***************************************************************************************/
-static char *chomp (char *c) {
+char *pj_chomp (char *c) {
 /****************************************************************************************
     Strip pre- and postfix whitespace. Note: Inline comments (indicated by '#')
     are considered whitespace.
@@ -192,14 +190,17 @@ static char *chomp (char *c) {
 
 
 /***************************************************************************************/
-static char *shrink (char *c) {
+char *pj_shrink (char *c) {
 /****************************************************************************************
     Clash repeated whitespace, remove '+' and ';', make ',' and '=' greedy, eating
     their surrounding whitespace.
 ****************************************************************************************/
     int i, j, n, ws;
 
-    chomp (c);
+    if (0==c)
+       return 0;
+
+    pj_chomp (c);
     n = strlen (c);
 
     /* First clash repeated whitespace (including +/;) */
@@ -250,8 +251,6 @@ static char *shrink (char *c) {
 
 
 
-
-
 /***************************************************************************************/
 int pj_trim_args (char *args) {
 /****************************************************************************************
@@ -296,8 +295,6 @@ char **pj_trimmed_args_to_argv (int argc, char *args) {
     }
     return argv;
 }
-
-
 
 
 

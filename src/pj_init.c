@@ -33,109 +33,18 @@
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
+#include <proj.h>
 #include "proj_internal.h"
 #include "projects.h"
 
-/* Maximum size of files using the "escape carriage return" feature */
-#define MAX_CR_ESCAPE 65537
-typedef struct {
-    projCtx ctx;
-    PAFile fid;
-    char buffer[MAX_CR_ESCAPE];
-    int buffer_filled;
-    int at_eof;
-} pj_read_state;
-
-/************************************************************************/
-/*                            fill_buffer()                             */
-/************************************************************************/
-
-static const char *fill_buffer(pj_read_state *state, const char *last_char)
-{
-    size_t bytes_read;
-    size_t char_remaining, char_requested;
-    char   *r, *w;
-
-/* -------------------------------------------------------------------- */
-/*      Don't bother trying to read more if we are at eof, or if the    */
-/*      buffer is still over half full.                                 */
-/* -------------------------------------------------------------------- */
-    if (last_char == NULL)
-        last_char = state->buffer;
-
-    if (state->at_eof)
-        return last_char;
-
-    char_remaining = state->buffer_filled - (last_char - state->buffer);
-    if (char_remaining >= sizeof(state->buffer) / 2)
-        return last_char;
-
-/* -------------------------------------------------------------------- */
-/*      Move the existing data to the start of the buffer.              */
-/* -------------------------------------------------------------------- */
-    memmove(state->buffer, last_char, char_remaining);
-    state->buffer_filled = (int)char_remaining;
-    last_char = state->buffer;
-
-/* -------------------------------------------------------------------- */
-/*      Refill.                                                         */
-/* -------------------------------------------------------------------- */
-    char_requested = sizeof(state->buffer) - state->buffer_filled - 1;
-    bytes_read = pj_ctx_fread( state->ctx, state->buffer + state->buffer_filled,
-                               1, char_requested, state->fid );
-    if (bytes_read < char_requested)
-    {
-        state->at_eof = 1;
-        state->buffer[state->buffer_filled + bytes_read] = '\0';
-    }
-
-/* -------------------------------------------------------------------- */
-/*      Line continuations: skip whitespace after escaped newlines      */
-/* -------------------------------------------------------------------- */
-    r = state->buffer;
-    w = state->buffer;
-    while (*r) {
-        /* Escaped newline? */
-        while ((r[0]=='\\')  &&  ((r[1]=='\n') || (r[1]=='\r'))) {
-            r += 2;
-            while (isspace (*r))
-                r++;
-            /* we also skip comments immediately after an escaped newline */
-            while (*r=='#') {
-                while( *r && (*r != '\n') )
-                    r++;
-                while (isspace (*r))
-                    r++;
-                /* Reaching end of buffer while skipping continuation comment is currently an error */
-                if (0==*r) {
-                    pj_ctx_set_errno (state->ctx, -2);
-                    pj_log (state->ctx, PJ_LOG_ERROR, "init file too big");
-                    return 0;
-                }
-            }
-        }
-        *w++ = *r++;
-    }
-    *w = 0;
-    state->buffer_filled += (int)(bytes_read - (r-w));
-
-    return last_char;
-}
-
-/************************************************************************/
-/*                              get_opt()                               */
-/************************************************************************/
-static paralist *
-get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
-        int *found_def) {
-    pj_read_state *state = (pj_read_state*) calloc(1,sizeof(pj_read_state));
-    char sword[MAX_CR_ESCAPE];
+#if 0
+static paralist *string_to_list (PJ_CONTEXT ctx, paralist **start, char *definition) {
+    char sword[ID_TAG_MAX + 2];
     int len;
     int in_target = 0;
     const char *next_char = NULL;
-    state->fid = fid;
-    state->ctx = ctx;
-    next_char = fill_buffer(state, NULL);
+
+
     if(found_def)
         *found_def = 0;
 
@@ -145,69 +54,9 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
     if (0==next_char)
         return 0;
 
-    /* loop till we find our target keyword */
-    while (*next_char)
-    {
-        next_char = fill_buffer(state, next_char);
-
-        /* Skip white space. */
-        while( isspace(*next_char) )
-            next_char++;
-
-        next_char = fill_buffer(state, next_char);
-        if (0==next_char)
-            return 0;
-
-        /* for comments, skip past end of line. */
-        if( *next_char == '#' )
-        {
-            while( *next_char && *next_char != '\n' )
-                next_char++;
-
-            next_char = fill_buffer(state, next_char);
-            if (0==next_char)
-                return 0;
-            if (*next_char == '\n')
-                next_char++;
-            if (*next_char == '\r')
-                next_char++;
-
-        }
-
-        /* Is this our target? */
-        else if( *next_char == '<' )
-        {
-            /* terminate processing target on the next block definition */
-            if (in_target)
-                break;
-
-            next_char++;
-            if (strncmp(name, next_char, len) == 0
-                && next_char[len] == '>')
-            {
-                /* skip past target word */
-                next_char += len + 1;
-                in_target = 1;
-                if(found_def)
-                    *found_def = 1;
-            }
-            else
-            {
-                /* skip past end of line */
-                while( *next_char && *next_char != '\n' )
-                    next_char++;
-            }
-        }
-        else if (in_target)
-        {
+        /* Her kører vi med output fra shrink - alt ovenfor slettes */
             const char *start_of_word = next_char;
             int word_len = 0;
-
-            if (*start_of_word == '+')
-            {
-                start_of_word++;
-                next_char++;
-            }
 
             /* capture parameter */
             while ( *next_char && !isspace(*next_char) )
@@ -260,6 +109,8 @@ get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
     free(state);
     return next;
 }
+#endif
+
 
 /************************************************************************/
 /*                            get_defaults()                            */
@@ -279,6 +130,146 @@ static paralist *get_defaults(projCtx ctx, paralist **start, paralist *next, cha
 
     return next;
 }
+
+
+/**************************************************************************************/
+static paralist *string_to_list (PJ_CONTEXT ctx, paralist **start, char *definition) {
+/***************************************************************************************
+    Convert a string (presumably originating from get_init_string) to a paralist.
+***************************************************************************************/
+    char *c = definition;
+    paralist *first = 0, *next;
+
+    while (*c) {
+        /* Find start of next substring */
+        while (isspace (*c))
+            c++;
+
+        /* Keep a handle to the start of the list, so we have something to return */
+        if (0==first)
+            first = next = next->next = pj_mkparam_ws (c);
+        else
+            next = next->next = pj_mkparam_ws (c);
+
+        /* And skip to the end of the substring */
+        while ((!isspace(*c)) && 0!=*c)
+            c++;
+    }
+
+    /* Terminate list and return */
+    next->next = next;
+    return first;
+}
+
+
+/**************************************************************************************/
+static char *get_init_string (PJ_CONTEXT ctx, char *name) {
+/***************************************************************************************
+    Read a section of an init file. Return its contents as a plain character string.
+***************************************************************************************/
+    const size_t max_line_length = 1000;
+    size_t current_buffer_size = 5 * (max_line_length + 1);
+    char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *section, *file;
+    char *buffer;
+    char line[max_line_length + 1];
+    PAFile fid;
+
+    /* support "init=file:section", "+init=file:section", and "file:section" format */
+    file = strstr (name, "init=");
+    if (0==file)
+        file = name;
+    else
+        file += 5;
+    if (MAX_PATH_FILENAME + ID_TAG_MAX + 2 < strlen (file))
+        return 0;
+    strncpy(fname, file, sizeof(fname)-2);
+    fname[sizeof(fname)-2] = '\0';
+
+    /* Locate the name of the section we search for */
+    section = strrchr(fname, ':');
+    if (0==section) {
+        proj_errno (ctx, PJD_ERR_NO_COLON_IN_INIT_STRING);
+        return 0;
+    }
+
+    fid = pj_open_lib (ctx, fname, "rt");
+    if (0==fid) {
+        proj_errno (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
+        return 0;
+    }
+
+    /* search for section in init file */
+    for (;;) {
+
+        /* End of file? */
+        if (0==pj_ctx_fgets (ctx, line, max_line_length, fid)) {
+            pj_dealloc (buffer);
+            proj_errno (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
+            return 0;
+        }
+
+        /* At start of right section? */
+        pj_chomp (line);
+        if ('<'!=line[0])
+            continue;
+        if (0==strncmp (line + 1, section, strlen (section)))
+            break;
+    }
+
+    /* We're at the first line of the right section - copy line to buffer */
+    buffer = pj_calloc (current_buffer_size);
+    if (0==buffer) {
+        pj_ctx_fclose (fid);
+        return 0;
+    }
+
+    /* Skip the "<section>" indicator, and copy the rest of the line over */
+    strcpy (buffer, line + strlen (section) + 2);
+
+    /* Copy the remaining lines of the section to buffer */
+    for (;;) {
+        char *end_i_cator = 0;
+        size_t next_length, buffer_length;
+
+        /* Did the section end somewhere in the most recently read line? */
+        end_i_cator = strchr (buffer, '<');
+        if (end_i_cator) {
+            *end_i_cator = 0;
+            break;
+        }
+
+        /* End of file? - done! */
+        if (0==pj_ctx_fgets (ctx, line, max_line_length, fid))
+            break;
+
+        /* Otherwise, handle the line. It MAY be the start of the next section, */
+        /* but that will be handled at the start of next trip through the loop  */
+        buffer_length = strlen (buffer)
+        next_length = strlen (line) + buffer_length + 1;
+        if (next_length > current_buffer_size) {
+            char *b = pj_malloc (2 * current_buffer_size);
+            if (0==b) {
+                pj_dealloc (buffer);
+                buffer = 0;
+                break;
+            }
+            strcpy (b, buffer);
+            current_buffer_size *= 2;
+            pj_dealloc (buffer);
+            buffer = b;
+        }
+        buffer[buffer_length] = ' ';
+        strcpy (buffer + buffer_length + 1, line);
+    }
+
+    pj_ctx_fclose (fid);
+    return pj_shrink (buffer);
+}
+
+
+
+
+
 
 /************************************************************************/
 /*                              get_init()                              */

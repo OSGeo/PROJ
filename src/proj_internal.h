@@ -108,6 +108,8 @@ void pj_erase_ellipsoid_def (PJ *P);
 int pj_calc_ellipsoid_params (PJ *P, double a, double es);
 
 
+char *pj_chomp (char *c);
+char *pj_shrink (char *c);
 int pj_trim_args (char *args);
 char **pj_trimmed_args_to_argv (int argc, char *args);
 char *pj_free_format_from_argc_argv (int argc, const char **argv);

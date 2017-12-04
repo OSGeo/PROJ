@@ -675,6 +675,8 @@ double aacos(projCtx,double), aasin(projCtx,double), asqrt(double), aatan2(doubl
 
 PROJVALUE pj_param(projCtx ctx, paralist *, const char *);
 paralist *pj_mkparam(char *);
+paralist *pj_mkparam_ws (char *str);
+
 
 int pj_ellipsoid (PJ *);
 int pj_ell_set(projCtx ctx, paralist *, double *, double *);

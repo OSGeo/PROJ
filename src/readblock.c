@@ -27,6 +27,8 @@
 #include <math.h>
 #include <errno.h>
 
+#include "proj_internal.h"
+#include "proj_api.h"
 
 
 static const char *gie_tags[] = {
@@ -96,7 +98,7 @@ static ffio *ffio_destroy (ffio *F) {
     return 0;
 }
 
-
+#if 0
 /***************************************************************************************/
 static char *chomp (char *c) {
 /****************************************************************************************
@@ -187,7 +189,7 @@ static char *shrink (char *c) {
     c[i] = 0;
     return c;
 }
-
+#endif
 
 
 
@@ -259,7 +261,7 @@ static int nextline (ffio *F) {
         return 0;
     if (feof (F->f))
         return 0;
-    chomp (F->next_args);
+    pj_chomp (F->next_args);
     F->next_lineno++;
     return 1;
 }
@@ -296,7 +298,7 @@ static int step_into_gie_block (ffio *F) {
             return 0;
         if (0==fgets (F->next_args, F->next_args_size - 1, F->f))
             return 0;
-        chomp (F->next_args);
+        pj_chomp (F->next_args);
         F->next_lineno++;
     }
     F->level++;
@@ -388,7 +390,58 @@ static int get_inp (ffio *F) {
             return 0;
     } while (!at_end_delimiter (F));
 
-    shrink (F->args);
+    pj_shrink (F->args);
+    return 1;
+}
+
+
+
+
+char *pj_expand_init_id (PJ_CONTEXT *ctx, const char *id) {
+    char *dup = pj_calloc (1, strlen (id) + 1), fname;
+    char *section;
+    const char *tags[2];
+    size_t n_tags = 2;
+    const char *endtag = {"<"};
+    char *starttag;
+
+    PAFile *fid;
+    char linebuf[1001];
+    char *buf;
+
+    if (0==dup)
+        return 0;
+    strcpy (dup, id);
+    fname = strstr (dup, "init=");
+    if (0==fname)
+        fname = dup;
+    else
+        fname += 5;
+
+    section = strrchr(fname, ':');
+    if (0==section) {
+        proj_errno (ctx, PJD_ERR_NO_COLON_IN_INIT_STRING);
+        return pj_dealloc (dup);
+    }
+
+    *section = '\0';
+    section++;
+
+    starttag = pj_calloc (1, strlen (section) + 3);
+    if (0==starttag)
+        return pj_dealloc (dup);
+    starttag[0] = '<';
+    strcpy (starttag + 1, section);
+    starttag[strlen(starttag)] = '>';
+
+    tags[0] = starttag;
+
+    fid = pj_open_lib(ctx, id, "rt");
+    if (0==fid)
+        return 0;
+
+    pj_ctx_fclose(ctx, fid);
+
     return 1;
 }
 
