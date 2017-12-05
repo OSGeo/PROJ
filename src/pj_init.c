@@ -82,7 +82,6 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     char *buffer = 0;
     char line[max_line_length + 1];
     PAFile fid;
-
     /* support "init=file:section", "+init=file:section", and "file:section" format */
     key = strstr (name, "init=");
     if (0==key)
@@ -100,8 +99,8 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
         proj_context_errno_set (ctx, PJD_ERR_NO_COLON_IN_INIT_STRING);
         return 0;
     }
+    *section = 0;
     section++;
-printf ("**** fname=%s, section=%s\n", fname, section);
     fid = pj_open_lib (ctx, fname, "rt");
     if (0==fid) {
         proj_context_errno_set (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
@@ -185,7 +184,6 @@ static paralist *get_init(PJ_CONTEXT *ctx, char *key) {
 *************************************************************************/
     char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *xkey, *section;
     paralist *init_items = 0;
-puts ("So er det get_init");
     /* support "init=file:section", "+init=file:section", and "file:section" format */
     xkey = strstr (key, "init=");
     if (0==xkey)
@@ -206,7 +204,6 @@ puts ("So er det get_init");
     section = get_init_string (ctx, xkey);
     if (0==section)
         return 0;
-printf ("keystring=%s, defaults=%s\n", key, section);
     init_items = string_to_list (ctx, section);
     pj_dealloc (section);
     if (0==init_items)
@@ -222,7 +219,6 @@ static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
     paralist *defaults, *last = 0;
     char keystring[ID_TAG_MAX + 20];
     paralist *next;
-puts ("So er det append_defaults");
     if (0==start)
         return 0;
 
@@ -277,7 +273,6 @@ paralist * pj_get_init(PJ_CONTEXT *ctx, paralist *start, char *key) {
 
     if (0==init)
         return 0;
-
     for (last = start;  last && last->next;  last = last->next);
     if (last)
         last->next = init;
@@ -468,7 +463,6 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     if (ctx->last_errno)
         return pj_dealloc_params (ctx, start, ctx->last_errno);
-puts ("XXXXX efter last->errno");
     /* find projection selection */
     if (!(name = pj_param(ctx, start, "sproj").s))
         return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);

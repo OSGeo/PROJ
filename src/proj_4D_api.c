@@ -823,6 +823,9 @@ PJ_FACTORS proj_factors(PJ *P, LP lp) {
     PJ_FACTORS factors = {0,0,0, 0,0,0, 0,0};
     struct FACTORS f;
 
+    if (0==P)
+        return factors;
+
     if (pj_factors(lp, P, 0.0, &f))
         return factors;
 
