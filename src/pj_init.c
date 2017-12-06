@@ -40,12 +40,12 @@
 
 
 /**************************************************************************************/
-static paralist *string_to_list (PJ_CONTEXT *ctx, char *definition) {
+static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
 /***************************************************************************************
     Convert a string (presumably originating from get_init_string) to a paralist.
 ***************************************************************************************/
     char *c = definition;
-    paralist *first = 0, *next;
+    paralist *first = 0, *next = 0;
 
     while (*c) {
         /* Find start of next substring */
@@ -76,11 +76,11 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
 /***************************************************************************************
     Read a section of an init file. Return its contents as a plain character string.
 ***************************************************************************************/
-    const size_t max_line_length = 1000;
-    size_t current_buffer_size = 5 * (max_line_length + 1);
+#define MAX_LINE_LENGTH 1000
+    size_t current_buffer_size = 5 * (MAX_LINE_LENGTH + 1);
     char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *section, *key;
     char *buffer = 0;
-    char line[max_line_length + 1];
+    char line[MAX_LINE_LENGTH + 1];
     PAFile fid;
 
     /* support "init=file:section", "+init=file:section", and "file:section" format */
@@ -114,7 +114,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     for (;;) {
 
         /* End of file? */
-        if (0==pj_ctx_fgets (ctx, line, max_line_length, fid)) {
+        if (0==pj_ctx_fgets (ctx, line, MAX_LINE_LENGTH, fid)) {
             pj_dealloc (buffer);
             proj_context_errno_set (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
             return 0;
@@ -140,7 +140,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
 
     /* Copy the remaining lines of the section to buffer */
     for (;;) {
-        char *end_i_cator = 0;
+        char *end_i_cator;
         size_t next_length, buffer_length;
 
         /* Did the section end somewhere in the most recently read line? */
@@ -151,7 +151,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
         }
 
         /* End of file? - done! */
-        if (0==pj_ctx_fgets (ctx, line, max_line_length, fid))
+        if (0==pj_ctx_fgets (ctx, line, MAX_LINE_LENGTH, fid))
             break;
 
         /* Otherwise, handle the line. It MAY be the start of the next section, */
@@ -208,7 +208,7 @@ static paralist *get_init(PJ_CONTEXT *ctx, char *key) {
     section = get_init_string (ctx, xkey);
     if (0==section)
         return 0;
-    init_items = string_to_list (ctx, section);
+    init_items = string_to_paralist (ctx, section);
     pj_dealloc (section);
     if (0==init_items)
         return 0;
@@ -224,9 +224,6 @@ static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
     char keystring[ID_TAG_MAX + 20];
     paralist *next, *proj;
     int err;
-
-    /* This PJ is used to wrap the PJ_CONTEXT ctx for the calls to proj_errno... */
-    PJ wrap_ctx;
 
     if (0==start)
         return 0;
@@ -244,8 +241,8 @@ static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
     if (0==strcmp ("pipeline", proj->param + 5))
         return start;
 
-    wrap_ctx.ctx = ctx;
-    err = proj_errno_reset (&wrap_ctx);
+    err = pj_ctx_get_errno (ctx);
+    pj_ctx_set_errno (ctx, 0);
 
     /* Locate end of start-list */
     for (last = start;  last->next;  last = last->next);
@@ -255,12 +252,8 @@ static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
     defaults = get_init (ctx, keystring);
 
     /* Defaults are optional - so we don't care if we cannot open the file */
-    if (proj_errno (&wrap_ctx)) {
-        if (err)
-            proj_errno_restore (&wrap_ctx, err);
-        else
-            proj_errno_reset (&wrap_ctx);
-    }
+    if (pj_ctx_get_errno (ctx))
+        pj_ctx_set_errno (ctx, err);
 
     if (!defaults)
         return last;

@@ -171,7 +171,7 @@ char *pj_chomp (char *c) {
     Strip pre- and postfix whitespace. Note: Inline comments (indicated by '#')
     are considered whitespace.
 ****************************************************************************************/
-    int i, n;
+    size_t i, n;
     char *comment;
     if (0==c)
         return 0;
@@ -195,7 +195,7 @@ char *pj_shrink (char *c) {
     Clash repeated whitespace, remove '+' and ';', make ',' and '=' greedy, eating
     their surrounding whitespace.
 ****************************************************************************************/
-    int i, j, n, ws;
+    size_t i, j, n, ws;
 
     if (0==c)
        return 0;
@@ -204,7 +204,7 @@ char *pj_shrink (char *c) {
     n = strlen (c);
 
     /* First clash repeated whitespace (including +/;) */
-    for (i = j = ws = 0; j < n; j++) {
+    for (i = j = ws = 0;  j < n;  j++) {
 
         /* Blank out prefix '+', only if preceeded by whitespace (i.e. keep it in 1.23e+08 */
         if ((i > 0) && ('+'==c[j]) && isspace (c[i]))
@@ -252,7 +252,7 @@ char *pj_shrink (char *c) {
 
 
 /***************************************************************************************/
-int pj_trim_args (char *args) {
+size_t pj_trim_args (char *args) {
 /****************************************************************************************
     Trim an argument string and count its number of elements.
 ****************************************************************************************/
@@ -272,14 +272,14 @@ int pj_trim_args (char *args) {
 
 
 /***************************************************************************************/
-char **pj_trimmed_args_to_argv (int argc, char *args) {
+char **pj_trimmed_args_to_argv (size_t argc, char *args) {
 /****************************************************************************************
     Create an argv-style array from elements placed in args.
 
     args is a trimmed string as returned by pj_trim_args(), and argv is the number of
     trimmed strings found (i.e. the return value of pj_trim_args()).
 ****************************************************************************************/
-    int i, j;
+    size_t i, j;
     char **argv;
     /* turn the massaged input into an array of strings */
     argv = (char **) calloc (argc, sizeof (char *));
@@ -299,11 +299,11 @@ char **pj_trimmed_args_to_argv (int argc, char *args) {
 
 
 /***************************************************************************************/
-char *pj_free_format_from_argc_argv (int argc, const char **argv) {
+char *pj_free_format_from_argc_argv (size_t argc, const char **argv) {
 /****************************************************************************************
     Convert free format command line input to something proj_create can eat.
 ****************************************************************************************/
-    int i, n;
+    size_t i, n;
     char *p;
 
     for (i = n = 0;  i < argc;  i++)
