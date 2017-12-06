@@ -51,7 +51,7 @@ paralist *pj_clone_paralist( const paralist *list)
       newitem->used = 0;
       newitem->next = 0;
       strcpy( newitem->param, list->param );
-
+      
       if( list_copy == NULL )
 	list_copy = newitem;
       else
@@ -62,8 +62,6 @@ paralist *pj_clone_paralist( const paralist *list)
 
   return list_copy;
 }
-
-
 
 /************************************************************************/
 /*                            pj_clear_initcache()                      */
@@ -82,7 +80,7 @@ void pj_clear_initcache()
         for( i = 0; i < cache_count; i++ )
         {
             paralist *n, *t = cache_paralist[i];
-
+		
             pj_dalloc( cache_key[i] );
 
             /* free parameter list elements */
@@ -118,8 +116,12 @@ paralist *pj_search_initcache( const char *filekey )
     pj_acquire_lock();
 
     for( i = 0; result == NULL && i < cache_count; i++)
+    {
         if( strcmp(filekey,cache_key[i]) == 0 )
+	{
             result = pj_clone_paralist( cache_paralist[i] );
+	}
+    }
 
     pj_release_lock();
 
@@ -137,7 +139,7 @@ void pj_insert_initcache( const char *filekey, const paralist *list )
 {
     pj_acquire_lock();
 
-    /*
+    /* 
     ** Grow list if required.
     */
     if( cache_count == cache_alloc )
@@ -155,7 +157,7 @@ void pj_insert_initcache( const char *filekey, const paralist *list )
         pj_dalloc( cache_key );
         cache_key = cache_key_new;
 
-        cache_paralist_new = (paralist **)
+        cache_paralist_new = (paralist **) 
             pj_malloc(sizeof(paralist*) * cache_alloc);
         if( cache_paralist && cache_count )
         {
