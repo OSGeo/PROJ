@@ -387,13 +387,13 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
 **************************************************************************************/
     PJ   *P;
     char *args, **argv;
-    int	  argc, n;
+    size_t argc, n;
 
     if (0==ctx)
         ctx = pj_get_default_ctx ();
 
     /* Make a copy that we can manipulate */
-    n = (int) strlen (definition);
+    n = strlen (definition);
     args = (char *) malloc (n + 1);
     if (0==args)
         return 0;
