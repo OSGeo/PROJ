@@ -163,11 +163,9 @@ which gives:
 Further reading
 ***************
 
-#. `GeographicLib <http://geographiclib.sf.net>`_
+#. `GeographicLib <https://geographiclib.sourceforge.io>`_.
 
-#. `C. F. F. Karney, Algorithms for Geodesics, J. Geodesy 87, 43-55 (2013) <http://dx.doi.org/10.1007/s00190-012-0578-z>`_.
-   `Addendum <http://geographiclib.sf.net/geod-addenda.html>`_
+#. C. F. F. Karney, `Algorithms for Geodesics <https://doi.org/10.1007/s00190-012-0578-z>`_, J. Geodesy **87**\ (1), 43–55 (2013);
+   `addenda <https://geographiclib.sourceforge.io/geod-addenda.html>`_.
 
-#. `The online geodesic bibliography <http://geographiclib.sf.net/geodesic-papers/biblio.html>`_
-
-
+#. `A geodesic bibliography <https://geographiclib.sourceforge.io/geodesic-papers/biblio.html>`_.
