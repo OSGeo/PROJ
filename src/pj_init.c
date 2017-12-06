@@ -82,6 +82,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     char *buffer = 0;
     char line[max_line_length + 1];
     PAFile fid;
+
     /* support "init=file:section", "+init=file:section", and "file:section" format */
     key = strstr (name, "init=");
     if (0==key)
@@ -93,6 +94,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     strncpy(fname, key, sizeof(fname)-2);
     fname[sizeof(fname)-2] = '\0';
 
+
     /* Locate the name of the section we search for */
     section = strrchr(fname, ':');
     if (0==section) {
@@ -101,6 +103,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     }
     *section = 0;
     section++;
+
     fid = pj_open_lib (ctx, fname, "rt");
     if (0==fid) {
         proj_context_errno_set (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
@@ -184,6 +187,7 @@ static paralist *get_init(PJ_CONTEXT *ctx, char *key) {
 *************************************************************************/
     char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *xkey, *section;
     paralist *init_items = 0;
+
     /* support "init=file:section", "+init=file:section", and "file:section" format */
     xkey = strstr (key, "init=");
     if (0==xkey)
@@ -218,12 +222,30 @@ static paralist *get_init(PJ_CONTEXT *ctx, char *key) {
 static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
     paralist *defaults, *last = 0;
     char keystring[ID_TAG_MAX + 20];
-    paralist *next;
+    paralist *next, *proj;
+    int err;
+
+    /* This PJ is used to wrap the PJ_CONTEXT ctx for the calls to proj_errno... */
+    PJ wrap_ctx;
+
     if (0==start)
         return 0;
 
     if (strlen(key) > ID_TAG_MAX)
         return 0;
+
+    /* Set defaults, unless inhibited (either explicitly through a "no_defs" token */
+    /* or implicitly, because we are initializing a pipeline) */
+    if (pj_param_exists (start, "no_defs"))
+        return start;
+    proj = pj_param_exists (start, "proj");
+    if (strlen (proj->param) < 6)
+        return start;
+    if (0==strcmp ("pipeline", proj->param + 5))
+        return start;
+
+    wrap_ctx.ctx = ctx;
+    err = proj_errno_reset (&wrap_ctx);
 
     /* Locate end of start-list */
     for (last = start;  last->next;  last = last->next);
@@ -231,8 +253,14 @@ static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
     strcpy (keystring, "proj_def.dat:");
     strcat (keystring, key);
     defaults = get_init (ctx, keystring);
+
     /* Defaults are optional - so we don't care if we cannot open the file */
-    errno = 0;
+    if (proj_errno (&wrap_ctx)) {
+        if (err)
+            proj_errno_restore (&wrap_ctx, err);
+        else
+            proj_errno_reset (&wrap_ctx);
+    }
 
     if (!defaults)
         return last;
@@ -266,7 +294,7 @@ static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
 }
 
 
-paralist * pj_get_init(PJ_CONTEXT *ctx, paralist *start, char *key) {
+paralist *pj_get_init(PJ_CONTEXT *ctx, paralist *start, char *key) {
     paralist *last;
     paralist *proj;
     paralist *init = get_init(ctx, key);
@@ -279,17 +307,11 @@ paralist * pj_get_init(PJ_CONTEXT *ctx, paralist *start, char *key) {
     else
         start = init;
 
-    /* Set defaults, unless inhibited (either explicitly through a "no_defs" token */
-    /* or implicitly, because we are initializing a pipeline) */
-    if (pj_param_exists (start, "no_defs"))
-        return start;
+    append_defaults (ctx, start, "general");
+
     proj = pj_param_exists (start, "proj");
     if (strlen (proj->param) < 6)
         return start;
-    if (0==strcmp ("pipeline", proj->param + 5))
-        return start;
-
-    append_defaults (ctx, start, "general");
     append_defaults (ctx, start, proj->param + 5);
     return start;
 }
@@ -460,12 +482,18 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         if (!curr)
             return pj_dealloc_params (ctx, start, PJD_ERR_NO_ARGS);
     }
-
     if (ctx->last_errno)
         return pj_dealloc_params (ctx, start, ctx->last_errno);
+
     /* find projection selection */
     if (!(name = pj_param(ctx, start, "sproj").s))
         return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);
+
+    /* Append general and projection specific defaults to the definition list */
+    append_defaults (ctx, start, "general");
+    append_defaults (ctx, start, name);
+
+
     for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
 
     if (!s)
@@ -477,6 +505,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PIN = proj(0);
     if (0==PIN)
         return pj_dealloc_params (ctx, start, ENOMEM);
+
 
     PIN->ctx = ctx;
     PIN->params = start;
