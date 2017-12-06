@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Geodesic Calculations &mdash; proj.4 4.9.3 documentation</title>
+  <title>Geodesic calculations &mdash; proj.4 4.9.3 documentation</title>
   
 
   
@@ -96,24 +96,12 @@
 <li class="toctree-l1"><a class="reference internal" href="apps/index.html">Applications</a></li>
 <li class="toctree-l1"><a class="reference internal" href="projections/index.html">Projections</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parameters.html">Parameters</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Geodesic Calculations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id1">Geodesic Calculations</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#relevant-mailing-list-threads">Relevant mailing list threads</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#terminology">Terminology</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#the-math">The Math</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#spherical-approximation">Spherical Approximation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ellipsoidal-approximation">Ellipsoidal Approximation</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#thaddeus-vincenty-s-method-april-1975">Thaddeus Vincenty&#8217;s method, April 1975</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#proj-4-geod-program">PROJ.4 - geod program</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geographiclib-geodesic">GeographicLib::Geodesic</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#triaxial-ellipsoid">Triaxial Ellipsoid</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#the-history">The History</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Geodesic calculations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solution-of-geodesic-problems">Solution of geodesic problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#additional-properties">Additional properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-shortest-geodesics">Multiple shortest geodesics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#background">Background</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="grids.html">Grids</a></li>
@@ -166,7 +154,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Geodesic Calculations</li>
+      <li>Geodesic calculations</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -184,224 +172,172 @@
            <div itemprop="articleBody">
             
   <div class="section" id="geodesic-calculations">
-<span id="geodesic"></span><h1>Geodesic Calculations<a class="headerlink" href="#geodesic-calculations" title="Permalink to this headline">¶</a></h1>
+<span id="geodesic"></span><h1>Geodesic calculations<a class="headerlink" href="#geodesic-calculations" title="Permalink to this headline">¶</a></h1>
 <div class="contents topic" id="contents">
 <p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#geodesic-calculations" id="id3">Geodesic Calculations</a><ul>
-<li><a class="reference internal" href="#id1" id="id4">Geodesic Calculations</a><ul>
-<li><a class="reference internal" href="#relevant-mailing-list-threads" id="id5">Relevant mailing list threads</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#terminology" id="id6">Terminology</a></li>
-<li><a class="reference internal" href="#the-math" id="id7">The Math</a><ul>
-<li><a class="reference internal" href="#spherical-approximation" id="id8">Spherical Approximation</a></li>
-<li><a class="reference internal" href="#ellipsoidal-approximation" id="id9">Ellipsoidal Approximation</a></li>
-<li><a class="reference internal" href="#triaxial-ellipsoid" id="id10">Triaxial Ellipsoid</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#the-history" id="id11">The History</a></li>
+<li><a class="reference internal" href="#geodesic-calculations" id="id9">Geodesic calculations</a><ul>
+<li><a class="reference internal" href="#introduction" id="id10">Introduction</a></li>
+<li><a class="reference internal" href="#solution-of-geodesic-problems" id="id11">Solution of geodesic problems</a></li>
+<li><a class="reference internal" href="#additional-properties" id="id12">Additional properties</a></li>
+<li><a class="reference internal" href="#multiple-shortest-geodesics" id="id13">Multiple shortest geodesics</a></li>
+<li><a class="reference internal" href="#background" id="id14">Background</a></li>
 </ul>
 </li>
 </ul>
 </div>
-<div class="section" id="id1">
-<h2>Geodesic Calculations<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>Geodesic calculations are calculations along lines (great circle) on the
-surface of the earth. They can answer questions like:</p>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Consider a ellipsoid of revolution with equatorial radius <span class="math">\(a\)</span>, polar
+semi-axis <span class="math">\(b\)</span>, and flattening <span class="math">\(f=(a−b)/a\)</span>.  Points on
+the surface of the ellipsoid are characterized by their latitude <span class="math">\(\phi\)</span>
+and longitude <span class="math">\(\lambda\)</span>.  (Note that latitude here means the
+<em>geographical latitude</em>, the angle between the normal to the ellipsoid
+and the equatorial plane).</p>
+<p>The shortest path between two points on the ellipsoid at
+<span class="math">\((\phi_1,\lambda_1)\)</span> and <span class="math">\((\phi_2,\lambda_2)\)</span>
+is called the geodesic.  Its length is
+<span class="math">\(s_{12}\)</span> and the geodesic from point 1 to point 2 has forward
+azimuths <span class="math">\(\alpha_1\)</span> and <span class="math">\(\alpha_2\)</span> at the two end
+points.  In this figure, we have <span class="math">\(\lambda_{12}=\lambda_2-\lambda_1\)</span>.</p>
 <blockquote>
-<div><ul class="simple">
-<li>What is the distance between these two points?</li>
-<li>If I travel X meters from point A at bearing phi, where will I be.  They are
-done in native lat-long coordinates, rather than in projected coordinates.</li>
+<div><center>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Geodesic_problem_on_an_ellipsoid.svg/320px-Geodesic_problem_on_an_ellipsoid.svg.png"
+       alt="Figure from wikipedia"
+       width="320">
+</center></div></blockquote>
+<p>A geodesic can be extended indefinitely by requiring that any
+sufficiently small segment is a shortest path; geodesics are also the
+straightest curves on the surface.</p>
+</div>
+<div class="section" id="solution-of-geodesic-problems">
+<h2>Solution of geodesic problems<a class="headerlink" href="#solution-of-geodesic-problems" title="Permalink to this headline">¶</a></h2>
+<p>Traditionally two geodesic problems are considered:</p>
+<ul class="simple">
+<li>the direct problem — given <span class="math">\(\phi_1\)</span>,
+<span class="math">\(\lambda_1\)</span>, <span class="math">\(\alpha_1\)</span>, <span class="math">\(s_{12}\)</span>,
+determine <span class="math">\(\phi_2\)</span>, <span class="math">\(\lambda_2\)</span>, <span class="math">\(\alpha_2\)</span>.</li>
+<li>the inverse problem — given  <span class="math">\(\phi_1\)</span>,
+<span class="math">\(\lambda_1\)</span>,  <span class="math">\(\phi_2\)</span>, <span class="math">\(\lambda_2\)</span>,
+determine <span class="math">\(s_{12}\)</span>, <span class="math">\(\alpha_1\)</span>,
+<span class="math">\(\alpha_2\)</span>.</li>
 </ul>
-</div></blockquote>
-<div class="section" id="relevant-mailing-list-threads">
-<h3>Relevant mailing list threads<a class="headerlink" href="#relevant-mailing-list-threads" title="Permalink to this headline">¶</a></h3>
+<p>PROJ incorporates <a class="reference external" href="https://geographiclib.sourceforge.io/1.49/C/">C library for Geodesics</a> from <a class="reference external" href="https://geographiclib.sourceforge.io">GeographicLib</a>.  This library provides
+routines to solve the direct and inverse geodesic problems.  Full double
+precision accuracy is maintained provided that
+<span class="math">\(\lvert f\rvert&lt;\frac1{50}\)</span>.  Refer
+to the</p>
 <blockquote>
-<div><ul class="simple">
-<li><a class="reference external" href="http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3361">http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3361</a></li>
-<li><a class="reference external" href="http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3375">http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3375</a></li>
-<li><a class="reference external" href="http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3435">http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3435</a></li>
-<li><a class="reference external" href="http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3588">http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3588</a></li>
-<li><a class="reference external" href="http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3925">http://thread.gmane.org/gmane.comp.gis.proj-4.devel/3925</a></li>
-<li><a class="reference external" href="http://thread.gmane.org/gmane.comp.gis.proj-4.devel/4047">http://thread.gmane.org/gmane.comp.gis.proj-4.devel/4047</a></li>
-<li><a class="reference external" href="http://thread.gmane.org/gmane.comp.gis.proj-4.devel/4083">http://thread.gmane.org/gmane.comp.gis.proj-4.devel/4083</a></li>
-</ul>
-</div></blockquote>
-</div>
-</div>
-<div class="section" id="terminology">
-<h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this headline">¶</a></h2>
-<p>The shortest distance on the surface of a solid is generally termed a geodesic,
-be it an ellipsoid of revolution, aposphere, etc.  On a sphere, the geodesic is
-termed a Great Circle.</p>
-<p>HOWEVER, when computing the distance between two points using a projected
-coordinate system, that is a conformal projection such as Transverse Mercator,
-Oblique Mercator, Normal Mercator, Stereographic, or Lambert Conformal Conic -
-that then is a GRID distance which can be converted to an equivalent GEODETIC
-distance using the function for &#8220;Scale Factor at a Point.&#8221;  The conversion is
-then termed &#8220;Grid Distance to Geodetic Distance,&#8221; even though it will not be as
-exactly correct as a true ellipsoidal geodesic.  Closer to the truth with a TM
-than with a Lambert or other conformal projection, but still not exactly &#8220;on.&#8221;</p>
-<p>So, it can be termed &#8220;geodetic distance&#8221; or a  &#8220;geodesic distance,&#8221; depending
-on just how you got there ...</p>
-</div>
-<div class="section" id="the-math">
-<h2>The Math<a class="headerlink" href="#the-math" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="spherical-approximation">
-<h3>Spherical Approximation<a class="headerlink" href="#spherical-approximation" title="Permalink to this headline">¶</a></h3>
-<p>The simplest way to compute geodesics is using a sphere as an approximation for
-the earth. This from Mikael Rittri on the Proj mailing list:</p>
-<blockquote>
-<div><p>If 1 percent accuracy is enough, I think you can use spherical formulas
-with a fixed Earth radius.  You can find good formulas in the Aviation
-Formulary of Ed Williams, <a class="reference external" href="http://williams.best.vwh.net/avform.htm">http://williams.best.vwh.net/avform.htm</a>.</p>
-<p>For the fixed Earth radius, I would choose the average of the:</p>
-<blockquote>
-<div><p><span class="math">\(c\)</span>   = radius of curvature at the poles,</p>
-<p><span class="math">\(\frac{b^2}{a}\)</span> = radius of curvature in a meridian plane at the equator,</p>
-</div></blockquote>
-<p>since these are the extreme values for the local radius of curvature of the
-earth ellipsoid.</p>
-<p>If your coordinates are given in WGS84, then</p>
-<blockquote>
-<div><p><span class="math">\(c\)</span>   = 6 399 593.626 m,</p>
-<p><span class="math">\(\frac{b^2}{a}\)</span> = 6 335 439.327 m,</p>
-</div></blockquote>
-<p>(see <a class="reference external" href="http://home.online.no/~sigurdhu/WGS84_Eng.html">http://home.online.no/~sigurdhu/WGS84_Eng.html</a>) so their average is 6,367,516.477 m.
-The maximal error for distance calculation should then be less than 0.51 percent.</p>
-<p>When computing the azimuth between two points by the spherical formulas,  I
-think the maximal error on WGS84 will be 0.2 degrees, at least if the
-points are not too far away (less than 1000 km apart, say). The error
-should be maximal near the equator, for azimuths near northeast etc.</p>
-</div></blockquote>
-<p>I am not sure about the spherical errors for the forward geodetic problem:
-point positioning given initial point, distance and azimuth.</p>
-</div>
-<div class="section" id="ellipsoidal-approximation">
-<h3>Ellipsoidal Approximation<a class="headerlink" href="#ellipsoidal-approximation" title="Permalink to this headline">¶</a></h3>
-<p>For more accuracy, the earth can be approximated with an ellipsoid,
-complicating the math somewhat.  See the wikipedia page, <a class="reference external" href="https://en.wikipedia.org/wiki/Geodesics_on_an_ellipsoid">Geodesics on an
-ellipsoid</a>, for
-more information.</p>
-<div class="section" id="thaddeus-vincenty-s-method-april-1975">
-<h4>Thaddeus Vincenty&#8217;s method, April 1975<a class="headerlink" href="#thaddeus-vincenty-s-method-april-1975" title="Permalink to this headline">¶</a></h4>
-<p>For a very good procedure to calculate inter point distances see:</p>
-<p><a class="reference external" href="http://www.ngs.noaa.gov/PC_PROD/Inv_Fwd/">http://www.ngs.noaa.gov/PC_PROD/Inv_Fwd/</a> (Fortran code, DOS executables, and an online app)</p>
-<p>and algorithm details published in: <a class="reference external" href="http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf">Vincenty, T. (1975)</a></p>
-<div class="section" id="javascript-code">
-<h5>Javascript code<a class="headerlink" href="#javascript-code" title="Permalink to this headline">¶</a></h5>
-<p>Chris Veness has coded Vincenty&#8217;s formulas as !JavaScript.</p>
-<p>distance: <a class="reference external" href="http://www.movable-type.co.uk/scripts/latlong-vincenty.html">http://www.movable-type.co.uk/scripts/latlong-vincenty.html</a></p>
-<p>direct:   <a class="reference external" href="http://www.movable-type.co.uk/scripts/latlong-vincenty-direct.html">http://www.movable-type.co.uk/scripts/latlong-vincenty-direct.html</a></p>
-</div>
-<div class="section" id="c-code">
-<h5>C code<a class="headerlink" href="#c-code" title="Permalink to this headline">¶</a></h5>
-<p>From Gerald Evenden: a library of the converted NGS Vincenty geodesic procedure
-and an application program, &#8216;geodesic&#8217;.  In the case of a spherical earth
-<a class="reference internal" href="references.html#snyder1987" id="id2">[Snyder1987]</a>&#8216;s preferred equations are used.</p>
+<div><a class="reference external" href="https://geographiclib.sourceforge.io/1.49/C/geodesic_8h.html">application programming interface</a></div></blockquote>
+<p>for full documentation.  A brief summary of the routines is given in
+geodesic(3).</p>
+<p>The interface to the geodesic routines differ in two respects from the
+rest of PROJ:</p>
 <ul class="simple">
-<li><a class="reference external" href="http://article.gmane.org/gmane.comp.gis.proj-4.devel/3588/">http://article.gmane.org/gmane.comp.gis.proj-4.devel/3588/</a></li>
+<li>angles (latitudes, longitudes, and azimuths) are in degrees (instead
+of in radians);</li>
+<li>the shape of ellipsoid is specified by the flattening <span class="math">\(f\)</span>; this can
+be negative to denote a prolate ellipsoid; setting <span class="math">\(f=0\)</span> corresponds
+to a sphere, in which case the geodesic becomes a great circle.</li>
 </ul>
-<p>The link in this message is broken.  The correct URL is
-<a class="reference external" href="http://home.comcast.net/~gevenden56/proj/">http://home.comcast.net/~gevenden56/proj/</a></p>
-<p>Earlier Mr. Evenden had posted to the PROJ.4 mailing list this code for
-determination of true distance and respective forward and back azimuths between
-two points on the ellipsoid.  Good for any pair of points that are not
-antipodal.
-Later he posted that this was not in fact the translation of NGS FORTRAN code,
-but something else. But, for what it&#8217;s worth, here is the posted code (source
-unknown):</p>
+<p>PROJ also includes a command line tool, <a class="reference internal" href="apps/geod.html#geod"><span class="std std-ref">geod</span></a>(1), for performing
+simple geodesic calculations.</p>
+</div>
+<div class="section" id="additional-properties">
+<h2>Additional properties<a class="headerlink" href="#additional-properties" title="Permalink to this headline">¶</a></h2>
+<p>The routines also calculate several other quantities of interest</p>
 <ul class="simple">
-<li><a class="reference external" href="http://article.gmane.org/gmane.comp.gis.proj-4.devel/3478">http://article.gmane.org/gmane.comp.gis.proj-4.devel/3478</a></li>
+<li><span class="math">\(S_{12}\)</span> is the area between the geodesic from point 1 to
+point 2 and the equator; i.e., it is the area, measured
+counter-clockwise, of the quadrilateral with corners
+<span class="math">\((\phi_1,\lambda_1)\)</span>, <span class="math">\((0,\lambda_1)\)</span>,
+<span class="math">\((0,\lambda_2)\)</span>, and
+<span class="math">\((\phi_2,\lambda_2)\)</span>.  It is given in
+meters<sup>2</sup>.</li>
+<li><span class="math">\(m_{12}\)</span>, the reduced length of the geodesic is defined such
+that if the initial azimuth is perturbed by <span class="math">\(d\alpha_1\)</span>
+(radians) then the second point is displaced by <span class="math">\(m_{12}\,d\alpha_1\)</span>
+in the direction perpendicular to the
+geodesic.  <span class="math">\(m_{12}\)</span> is given in meters.  On a curved surface
+the reduced length obeys a symmetry relation, <span class="math">\(m_{12}+m_{21}=0\)</span>.
+On a flat surface, we have <span class="math">\(m_{12}=s_{12}\)</span>.</li>
+<li><span class="math">\(M_{12}\)</span> and <span class="math">\(M_{21}\)</span> are geodesic scales.  If two
+geodesics are parallel at point 1 and separated by a small distance
+:math`dt`, then they are separated by a distance <span class="math">\(M_{12}\,dt\)</span> at
+point 2.  <span class="math">\(M_{21}\)</span> is defined similarly (with the geodesics
+being parallel to one another at point 2).  <span class="math">\(M_{12}\)</span> and
+<span class="math">\(M_{21}\)</span> are dimensionless quantities.  On a flat surface,
+we have <span class="math">\(M_{12}=M_{21}=1\)</span>.</li>
+<li><span class="math">\(\sigma_{12}\)</span> is the arc length on the auxiliary sphere.
+This is a construct for converting the problem to one in spherical
+trigonometry.  The spherical arc length from one equator crossing to
+the next is always <span class="math">\(180^\circ\)</span>.</li>
 </ul>
-</div>
-</div>
-<div class="section" id="proj-4-geod-program">
-<h4>PROJ.4 - geod program<a class="headerlink" href="#proj-4-geod-program" title="Permalink to this headline">¶</a></h4>
-<p>The PROJ.4 [wiki:man_geod geod] program can be used for great circle distances
-on an ellipsoid.  As of proj version 4.9.0, this uses a translation of
-GeographicLib::Geodesic (see below) into C.  The underlying geodesic
-calculation API is exposed as part of the PROJ.4 library (via the geodesic.h
-header).  Prior to version 4.9.0, the algorithm documented here was used:
-`
-Paul D. Thomas, 1970
-Spheroidal Geodesics, Reference Systems, and Local Geometry&#8221;
-U.S. Naval Oceanographic Office, p. 162
-Engineering Library 526.3 T36s</p>
-<p><a class="reference external" href="http://handle.dtic.mil/100.2/AD0703541">http://handle.dtic.mil/100.2/AD0703541</a></p>
-</div>
-<div class="section" id="geographiclib-geodesic">
-<h4>GeographicLib::Geodesic<a class="headerlink" href="#geographiclib-geodesic" title="Permalink to this headline">¶</a></h4>
-<p>Charles Karney has written a C++ class to do geodesic calculations and a
-utility GeodSolve to call it.  See</p>
+<p>If points 1, 2, and 3 lie on a single geodesic, then the following
+addition rules hold:</p>
 <ul class="simple">
-<li><a class="reference external" href="http://geographiclib.sourceforge.net/geod.html">http://geographiclib.sourceforge.net/geod.html</a></li>
+<li><span class="math">\(s_{13}=s_{12}+s_{23}\)</span>,</li>
+<li><span class="math">\(\sigma_{13}=\sigma_{12}+\sigma_{23}\)</span>,</li>
+<li><span class="math">\(S_{13}=S_{12}+S_{23}\)</span>,</li>
+<li><span class="math">\(m_{13}=m_{12}M_{23}+m_{23}M_{21}\)</span>,</li>
+<li><span class="math">\(M_{13}=M_{12}M_{23}-(1-M_{12}M_{21})m_{23}/m_{12}\)</span>,</li>
+<li><span class="math">\(M_{31}=M_{32}M_{21}-(1-M_{23}M_{32})m_{12}/m_{23}\)</span>.</li>
 </ul>
-<p>An online version of GeodSolve is available at</p>
-<ul class="simple">
-<li><a class="reference external" href="http://geographiclib.sourceforge.net/cgi-bin/GeodSolve">http://geographiclib.sourceforge.net/cgi-bin/GeodSolve</a></li>
-</ul>
-<p>This is an attempt to do geodesic calculations &#8220;right&#8221;, i.e.,</p>
-<ul class="simple">
-<li>accurate to round-off (i.e., about 15 nm);</li>
-<li>inverse solution always succeeds (even for near anti-podal points);</li>
-<li>reasonably fast (comparable in speed to Vincenty);</li>
-<li>differential properties of geodesics are computed (these give the scales of
-geodesic projections);</li>
-<li>the area between a geodesic and the equator is computed (allowing the
-area of geodesic polygons to be found);</li>
-<li>included also is an implementation in terms of elliptic integrals which
-can deal with ellipsoids with 0.01 &lt; b/a &lt; 100.</li>
-</ul>
-<p>A JavaScript implementation is included, see</p>
-<ul class="simple">
-<li><dl class="first docutils">
-<dt><a class="reference external" href="http://geographiclib.sourceforge.net/scripts/geod-calc.html">geo-calc</a>,</dt>
-<dd>a text interface to geodesic calculations;</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><a class="reference external" href="http://geographiclib.sourceforge.net/scripts/geod-google.html">geod-google</a>,</dt>
-<dd>a tool for drawing geodesics on Google Maps.</dd>
-</dl>
-</li>
-</ul>
-<p>Implementations in <a class="reference external" href="http://pypi.python.org/pypi/geographiclib">Python</a>,
-<a class="reference external" href="http://www.mathworks.com/matlabcentral/fileexchange/39108">Matlab</a>,
-<a class="reference external" href="http://geographiclib.sourceforge.net/html/C/">C</a>,
-<a class="reference external" href="http://geographiclib.sourceforge.net/html/Fortran/">Fortran</a> , and
-<a class="reference external" href="http://geographiclib.sourceforge.net/html/java/">Java</a> are also available.</p>
-<dl class="docutils">
-<dt>The algorithms are described in</dt>
-<dd><ul class="first last simple">
-<li>C. F. F. Karney, <a class="reference external" href="http://dx.doi.org/10.1007/s00190-012-0578-z">Algorithms for gedesics</a>,
-J. Geodesy &#8216;&#8217;&#8216;87&#8217;&#8216;&#8217;(1), 43-55 (2013),
-DOI: <a class="reference external" href="http://dx.doi.org/10.1007/s00190-012-0578-z">10.1007/s00190-012-0578-z</a>; <a class="reference external" href="http://geographiclib.sf.net/geod-addenda.html">geo-addenda.html</a>.</li>
-</ul>
-</dd>
-</dl>
 </div>
-</div>
-<div class="section" id="triaxial-ellipsoid">
-<h3>Triaxial Ellipsoid<a class="headerlink" href="#triaxial-ellipsoid" title="Permalink to this headline">¶</a></h3>
-<p>A triaxial ellipsoid is a marginally better approximation to the shape of the earth
-than an ellipsoid of revolution.
-The problem of geodesics on a triaxial ellipsoid was solved by Jacobi in 1838.
-For a discussion of this problem see
-* <a class="reference external" href="http://geographiclib.sourceforge.net/html/triaxial.html">http://geographiclib.sourceforge.net/html/triaxial.html</a>
-* the wikipedia entry: <a class="reference external" href="https://en.wikipedia.org/wiki/Geodesics_on_an_ellipsoid#Geodesics_on_a_triaxial_ellipsoid">Geodesics on a triaxial ellipsoid</a></p>
-</div>
-</div>
-<div class="section" id="the-history">
-<h2>The History<a class="headerlink" href="#the-history" title="Permalink to this headline">¶</a></h2>
-<p>The bibliography of papers on the geodesic problem for an ellipsoid is
-available at</p>
+<div class="section" id="multiple-shortest-geodesics">
+<h2>Multiple shortest geodesics<a class="headerlink" href="#multiple-shortest-geodesics" title="Permalink to this headline">¶</a></h2>
+<p>The shortest distance found by solving the inverse problem is
+(obviously) uniquely defined.  However, in a few special cases there are
+multiple azimuths which yield the same shortest distance.  Here is a
+catalog of those cases:</p>
 <ul class="simple">
-<li><a class="reference external" href="http://geographiclib.sourceforge.net/geodesic-papers/biblio.html">http://geographiclib.sourceforge.net/geodesic-papers/biblio.html</a></li>
+<li><span class="math">\(\phi_1=-\phi_2\)</span> (with neither point at
+a pole).  If <span class="math">\(\alpha_1=\alpha_2\)</span>, the geodesic
+is unique.  Otherwise there are two geodesics and the second one is
+obtained by setting
+<span class="math">\([\alpha_1,\alpha_2]\leftarrow[\alpha_2,\alpha_1]\)</span>,
+<span class="math">\([M_{12},M_{21}]\leftarrow[M_{21},M_{12}]\)</span>,
+<span class="math">\(S_{12}\leftarrow-S_{12}\)</span>.
+(This occurs when the longitude difference is near <span class="math">\(\pm180^\circ\)</span>
+for oblate ellipsoids.)</li>
+<li><span class="math">\(\lambda_2=\lambda_1\pm180^\circ\)</span> (with
+neither point at a pole).  If <span class="math">\(\alpha_1=0^\circ\)</span> or
+<span class="math">\(\pm180^\circ\)</span>, the geodesic is unique.  Otherwise there are two
+geodesics and the second one is obtained by setting
+<span class="math">\([\alpha_1,\alpha_2]\leftarrow[-\alpha_1,-\alpha_2]\)</span>,
+<span class="math">\(S_{12}\leftarrow-S_{12}\)</span>.  (This occurs when
+<span class="math">\(\phi_2\)</span> is near <span class="math">\(-\phi_1\)</span> for prolate
+ellipsoids.)</li>
+<li>Points 1 and 2 at opposite poles.  There are infinitely many
+geodesics which can be generated by setting
+<span class="math">\([\alpha_1,\alpha_2]\leftarrow[\alpha_1,\alpha_2]+[\delta,-\delta]\)</span>,
+for arbitrary <span class="math">\(\delta\)</span>.
+(For spheres, this prescription applies when points 1 and 2 are
+antipodal.)</li>
+<li><span class="math">\(s_{12}=0\)</span> (coincident points).  There are infinitely many
+geodesics which can be generated by setting
+<span class="math">\([\alpha_1,\alpha_2]\leftarrow[\alpha_1,\alpha_2]+[\delta,\delta]\)</span>,
+for arbitrary <span class="math">\(\delta\)</span>.</li>
 </ul>
-<p>this includes links to online copies of the papers.</p>
+</div>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<p>The algorithms implemented by this package are given in <a class="reference internal" href="references.html#karney2013" id="id1">[Karney2013]</a>
+and are based on <a class="reference internal" href="references.html#bessel1825" id="id2">[Bessel1825]</a> and <a class="reference internal" href="references.html#helmert1880" id="id3">[Helmert1880]</a>; the algorithm for
+areas is based on <a class="reference internal" href="references.html#danielsen1989" id="id4">[Danielsen1989]</a>.  These improve on the work of
+<a class="reference internal" href="references.html#vincenty1975" id="id5">[Vincenty1975]</a> in the following respects:</p>
+<ul class="simple">
+<li>The results are accurate to round-off for terrestrial ellipsoids (the
+error in the distance is less then 15 nanometers, compared to 0.1 mm
+for Vincenty).</li>
+<li>The solution of the inverse problem is always found.  (Vincenty&#8217;s
+method fails to converge for nearly antipodal points.)</li>
+<li>The routines calculate differential and integral properties of a
+geodesic.  This allows, for example, the area of a geodesic polygon to
+be computed.</li>
+</ul>
+<p>Additional background material is provided in <a class="reference internal" href="references.html#geodesicbib" id="id6">[GeodesicBib]</a>,
+<a class="reference internal" href="references.html#geodesicwiki" id="id7">[GeodesicWiki]</a>, and <a class="reference internal" href="references.html#karney2011" id="id8">[Karney2011]</a>.</p>
 </div>
 </div>
 
@@ -428,7 +364,7 @@ available at</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 29 Nov 2017.
+      Last updated on 06 Dec 2017.
 
     </p>
   </div>
