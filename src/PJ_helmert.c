@@ -73,7 +73,7 @@ struct pj_opaque_helmert {
     double theta_0;
     double dtheta;
     double R[3][3];
-    double epoch, t_obs;
+    double t_epoch, t_obs;
     int no_rotation, approximate, transpose, fourparam;
 };
 
@@ -118,7 +118,7 @@ static void update_parameters(PJ *P) {
 *******************************************************************************/
 
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    double dt = Q->t_obs - Q->epoch;
+    double dt = Q->t_obs - Q->t_epoch;
 
     Q->xyz.x = Q->xyz_0.x + Q->dxyz.x * dt;
     Q->xyz.y = Q->xyz_0.y + Q->dxyz.y * dt;
@@ -134,7 +134,7 @@ static void update_parameters(PJ *P) {
 
     /* debugging output */
     if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
-        proj_log_trace(P, "Transformation parameters for observation epoch %g:", Q->t_obs);
+        proj_log_trace(P, "Transformation parameters for observation t_epoch %g:", Q->t_obs);
         proj_log_trace(P, "x: %g", Q->xyz.x);
         proj_log_trace(P, "y: %g", Q->xyz.y);
         proj_log_trace(P, "z: %g", Q->xyz.z);
@@ -539,11 +539,11 @@ PJ *TRANSFORMATION(helmert, 0) {
 
 
     /* Epoch */
-    if (pj_param(P->ctx, P->params, "tepoch").i)
-        Q->epoch = pj_param (P->ctx, P->params, "depoch").f;
+    if (pj_param(P->ctx, P->params, "tt_epoch").i)
+        Q->t_epoch = pj_param (P->ctx, P->params, "dt_epoch").f;
 
-    if (pj_param(P->ctx, P->params, "ttobs").i)
-        Q->t_obs = pj_param (P->ctx, P->params, "dtobs").f;
+    if (pj_param(P->ctx, P->params, "tt_obs").i)
+        Q->t_obs = pj_param (P->ctx, P->params, "dt_obs").f;
 
     /* Use small angle approximations? */
     if (pj_param (P->ctx, P->params, "bapprox").i)
@@ -568,7 +568,7 @@ PJ *TRANSFORMATION(helmert, 0) {
                 Q->scale, Q->approximate, Q->transpose);
         proj_log_debug(P, "dx= % 3.5f  dy= % 3.5f  dz= % 3.5f", Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
         proj_log_debug(P, "drx=% 3.5f  dry=% 3.5f  drz=% 3.5f", Q->dopk.o, Q->dopk.p, Q->dopk.k);
-        proj_log_debug(P, "ds=% 3.5f  epoch=% 5.5f  tobs=% 5.5f", Q->dscale, Q->epoch, Q->t_obs);
+        proj_log_debug(P, "ds=% 3.5f  t_epoch=% 5.5f  t_obs=% 5.5f", Q->dscale, Q->t_epoch, Q->t_obs);
     }
 
     if ((Q->opk.o==0)  && (Q->opk.p==0)  && (Q->opk.k==0) && (Q->scale==0) &&
