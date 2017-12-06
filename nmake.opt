@@ -28,10 +28,6 @@ OPTFLAGS=	/Zi /MDd /Fdproj.pdb
 !ENDIF
 !ENDIF
 
-!IFDEF SELFTEST
-OPTFLAGS= $(OPTFLAGS) -DPJ_SELFTEST
-!ENDIF
-
 # Uncomment the first for linking exes against DLL or second for static
 EXE_PROJ =	proj_i.lib
 #EXE_PROJ =	proj.lib

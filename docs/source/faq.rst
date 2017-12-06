@@ -237,7 +237,7 @@ How do I calculate distances/directions on the surface of the earth?
 --------------------------------------------------------------------------------
 
 These are called geodesic calculations. There is a page about it here:
-[wiki:GeodesicCalculations]
+:ref:`geodesic`.
 
 What is the HEALPix projection and how can I use it?
 --------------------------------------------------------------------------------

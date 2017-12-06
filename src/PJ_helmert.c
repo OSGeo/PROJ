@@ -43,7 +43,6 @@ Last update: 2017-05-15
 ***********************************************************************/
 
 #define PJ_LIB__
-#include <assert.h>
 #include <stddef.h>
 #include <errno.h>
 #include "proj_internal.h"
@@ -572,7 +571,8 @@ PJ *TRANSFORMATION(helmert, 0) {
         proj_log_debug(P, "ds=% 3.5f  epoch=% 5.5f  tobs=% 5.5f", Q->dscale, Q->epoch, Q->t_obs);
     }
 
-    if ((Q->opk.o==0) && (Q->opk.p==0) && (Q->opk.k==0) && (Q->scale==0)) {
+    if ((Q->opk.o==0)  && (Q->opk.p==0)  && (Q->opk.k==0) && (Q->scale==0) &&
+        (Q->dopk.o==0) && (Q->dopk.p==0) && (Q->dopk.k==0)) {
         Q->no_rotation = 1;
         return P;
     }

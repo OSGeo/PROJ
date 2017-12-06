@@ -78,7 +78,6 @@
 #define PJ_LIB__
 #include "proj_internal.h"
 #include "projects.h"
-#include <assert.h>
 #include <stddef.h>
 #include <math.h>
 #include <errno.h>

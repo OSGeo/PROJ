@@ -74,9 +74,9 @@ PROJ_LIB=../nad src/multistresstest
 cd ..
 # autoconf build with grids and coverage
 if [ $TRAVIS_OS_NAME == "osx" ]; then
-      CFLAGS="-DPJ_SELFTEST --coverage" ./configure;
+      CFLAGS="--coverage" ./configure;
     else
-      CFLAGS="-DPJ_SELFTEST --coverage" LDFLAGS="-lgcov" ./configure;
+      CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure;
     fi
 make -j3
 make check
@@ -85,6 +85,7 @@ PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/more_builtins.gie
 PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/deformation.gie
 PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/axisswap.gie
 PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/ellipsoid.gie
+PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/GDA.gie
 
 # install & run the working GIGS test
   # create locations that pyproj understands
