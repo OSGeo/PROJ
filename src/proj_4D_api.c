@@ -408,7 +408,7 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     argv = pj_trimmed_args_to_argv (argc, args);
 
     /* ...and let pj_init_ctx do the hard work */
-    P = pj_init_ctx (ctx, argc, argv);
+    P = pj_init_ctx (ctx, (int) argc, argv);
 
     pj_dealloc (argv);
     pj_dealloc (args);

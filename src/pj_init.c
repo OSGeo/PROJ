@@ -27,6 +27,8 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+
+
 #define PJ_LIB__
 #include <geodesic.h>
 #include <stdio.h>
@@ -71,6 +73,7 @@ static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
 }
 
 
+
 /**************************************************************************************/
 static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
 /***************************************************************************************
@@ -83,7 +86,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     char line[MAX_LINE_LENGTH + 1];
     PAFile fid;
 
-    /* support "init=file:section", "+init=file:section", and "file:section" format */
+    /* Support "init=file:section", "+init=file:section", and "file:section" format */
     key = strstr (name, "init=");
     if (0==key)
         key = name;
@@ -110,7 +113,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
         return 0;
     }
 
-    /* search for section in init file */
+    /* Search for section in init file */
     for (;;) {
 
         /* End of file? */
@@ -219,6 +222,7 @@ static paralist *get_init(PJ_CONTEXT *ctx, char *key) {
 }
 
 
+
 static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
     paralist *defaults, *last = 0;
     char keystring[ID_TAG_MAX + 20];
@@ -252,8 +256,7 @@ static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
     defaults = get_init (ctx, keystring);
 
     /* Defaults are optional - so we don't care if we cannot open the file */
-    if (pj_ctx_get_errno (ctx))
-        pj_ctx_set_errno (ctx, err);
+    pj_ctx_set_errno (ctx, err);
 
     if (!defaults)
         return last;
@@ -287,6 +290,7 @@ static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
 }
 
 
+
 paralist *pj_get_init(PJ_CONTEXT *ctx, paralist *start, char *key) {
     paralist *last;
     paralist *proj;
@@ -308,6 +312,7 @@ paralist *pj_get_init(PJ_CONTEXT *ctx, paralist *start, char *key) {
     append_defaults (ctx, start, proj->param + 5);
     return start;
 }
+
 
 
 /************************************************************************/
@@ -465,10 +470,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     }
 
 
-    /* Only expand +init's in non-pipeline operations. +init's in pipelines are  */
-    /* expanded in the individual pipeline steps during pipeline initialization. */
-    /* Potentially this leads to many nested pipelines, which shouldn't be a     */
-    /* problem when +inits are expanded as late as possible.                     */
+    /* Only expand '+init's in non-pipeline operations. '+init's in pipelines are */
+    /* expanded in the individual pipeline steps during pipeline initialization.  */
+    /* Potentially this leads to many nested pipelines, which shouldn't be a      */
+    /* problem when '+init's are expanded as late as possible.                    */
     init = pj_param_exists (start, "init");
     if (init && n_pipelines == 0) {
         curr = pj_get_init(ctx, start, init->param);
@@ -478,7 +483,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if (ctx->last_errno)
         return pj_dealloc_params (ctx, start, ctx->last_errno);
 
-    /* find projection selection */
+    /* Find projection selection */
     if (!(name = pj_param(ctx, start, "sproj").s))
         return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);
 
@@ -494,7 +499,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
     proj = (PJ *(*)(PJ *)) pj_list[i].proj;
 
-    /* allocate projection structure */
+    /* Allocate projection structure */
     PIN = proj(0);
     if (0==PIN)
         return pj_dealloc_params (ctx, start, ENOMEM);
@@ -514,7 +519,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PIN->vgridlist_geoid = NULL;
     PIN->vgridlist_geoid_count = 0;
 
-    /* set datum parameters */
+    /* Set datum parameters */
     if (pj_datum_set(ctx, start, PIN))
         return pj_default_destructor (PIN, proj_errno(PIN));
 
@@ -541,18 +546,18 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         PIN->datum_type = PJD_WGS84;
     }
 
-    /* set PIN->geoc coordinate system */
+    /* Set PIN->geoc coordinate system */
     PIN->geoc = (PIN->es != 0.0 && pj_param(ctx, start, "bgeoc").i);
 
-    /* over-ranging flag */
+    /* Over-ranging flag */
     PIN->over = pj_param(ctx, start, "bover").i;
 
-    /* vertical datum geoid grids */
+    /* Vertical datum geoid grids */
     PIN->has_geoid_vgrids = pj_param(ctx, start, "tgeoidgrids").i;
     if( PIN->has_geoid_vgrids ) /* we need to mark it as used. */
         pj_param(ctx, start, "sgeoidgrids");
 
-    /* longitude center for wrapping */
+    /* Longitude center for wrapping */
     PIN->is_long_wrap_set = pj_param(ctx, start, "tlon_wrap").i;
     if (PIN->is_long_wrap_set) {
         PIN->long_wrap_center = pj_param(ctx, start, "rlon_wrap").f;
@@ -563,7 +568,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             return pj_default_destructor (PIN, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
     }
 
-    /* axis orientation */
+    /* Axis orientation */
     if( (pj_param(ctx, start,"saxis").s) != NULL )
     {
         static const char *axis_legal = "ewnsud";
@@ -576,23 +581,23 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             || strchr( axis_legal, axis_arg[2] ) == NULL)
             return pj_default_destructor (PIN, PJD_ERR_AXIS);
 
-        /* it would be nice to validate we don't have on axis repeated */
+        /* TODO: it would be nice to validate we don't have on axis repeated */
         strcpy( PIN->axis, axis_arg );
     }
 
-    /* central meridian */
+    /* Central meridian */
     PIN->lam0=pj_param(ctx, start, "rlon_0").f;
 
-    /* central latitude */
+    /* Central latitude */
     PIN->phi0 = pj_param(ctx, start, "rlat_0").f;
 
-    /* false easting and northing */
+    /* False easting and northing */
     PIN->x0 = pj_param(ctx, start, "dx_0").f;
     PIN->y0 = pj_param(ctx, start, "dy_0").f;
     PIN->z0 = pj_param(ctx, start, "dz_0").f;
     PIN->t0 = pj_param(ctx, start, "dt_0").f;
 
-    /* general scaling factor */
+    /* General scaling factor */
     if (pj_param(ctx, start, "tk_0").i)
         PIN->k0 = pj_param(ctx, start, "dk_0").f;
     else if (pj_param(ctx, start, "tk").i)
@@ -602,7 +607,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if (PIN->k0 <= 0.)
         return pj_default_destructor (PIN, PJD_ERR_K_LESS_THAN_ZERO);
 
-    /* set units */
+    /* Set units */
     s = 0;
     if ((name = pj_param(ctx, start, "sunits").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
@@ -630,7 +635,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     } else
         PIN->to_meter = PIN->fr_meter = 1.;
 
-    /* set vertical units */
+    /* Set vertical units */
     s = 0;
     if ((name = pj_param(ctx, start, "svunits").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
@@ -650,7 +655,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         PIN->vfr_meter = PIN->fr_meter;
     }
 
-    /* prime meridian */
+    /* Prime meridian */
     s = 0;
     if ((name = pj_param(ctx, start, "spm").s) != NULL) {
         const char *value = NULL;
@@ -683,7 +688,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         return pj_default_destructor (PIN, ENOMEM);
     geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
 
-    /* projection specific initialization */
+    /* Projection specific initialization */
     err = proj_errno_reset (PIN);
     PIN = proj(PIN);
     if (proj_errno (PIN)) {
@@ -693,6 +698,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     proj_errno_restore (PIN, err);
     return PIN;
 }
+
+
 
 /************************************************************************/
 /*                              pj_free()                               */
