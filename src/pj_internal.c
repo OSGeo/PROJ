@@ -179,7 +179,7 @@ char *pj_chomp (char *c) {
     if (comment)
         *comment = 0;
     n = strlen (c);
-    for (i = n - 1; isspace (c[i]) || ';'==c[i]; i--)
+    for (i = n - 1;  (i >= 1)  &&  (isspace (c[i]) || ';'==c[i]);  i--)
         c[i] = 0;
     for (n = 0; isspace (c[n]); n++);
     for (i = 0;  0 != c[i + n];  i++)
