@@ -4,11 +4,6 @@
 References
 ================================================================================
 
-.. [AltamimiEtAl2002] Altamimi, Z., P. Sillard, and C. Boucher (2002),
-    ITRF2000: A new release of the International Terrestrial Reference Frame for earth science applications,
-    J. Geophys. Res., 107(B10), 2214,
-    `doi:10.1029/2001JB000561 <http://www.agu.org/pubs/crossref/2002/2001JB000561.shtml>`__.
-
 
 .. [Bessel1825] F. W. Bessel, 1825,
    `The calculation of longitude and latitude from geodesic measurements
@@ -29,10 +24,6 @@ References
    <https://doi.org/10.1179/003962689791474267>`_,
    Survey Review **30**\ (232), 61–66.
 
-.. [Deakin2004] R.E. Deakin, 2004,
-    `The Standard and Abridged Molodensky Coordinate Transformation Formulae
-    <http://www.mygeodesy.id.au/documents/Molodensky%20V2.pdf>`__.
-
 .. [EberHewitt1979] L. E. Eber and R.P. Hewitt, 1979,
    `Conversion algorithms for the CALCOFI station grid
    <http://www.calcofi.org/publications/calcofireports/v20/Vol_20_Eber___Hewitt.pdf>`_,
@@ -47,11 +38,6 @@ References
    `libproj4: A Comprehensive Library of Cartographic Projection Functions
    (Preliminary Draft)
    <https://github.com/OSGeo/proj.4/blob/master/docs/old/libproj.pdf>`_.
-
-.. [EversKnudsen2017] K. Evers and T. Knudsen, 2017,
-    `Transformation pipelines for PROJ.4
-    <http://www.fig.net/resources/proceedings/fig_proceedings/fig2017/papers/iss6b/ISS6B_evers_knudsen_9156.pdf>`__,
-    FIG Working Week 2017 Proceedings.
 
 .. [GeodesicBib] `A geodesic bibliography
    <https://geographiclib.sourceforge.io/geodesic-papers/biblio.html>`_.
