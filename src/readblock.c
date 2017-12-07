@@ -161,7 +161,7 @@ static int nextline (ffio *F) {
     Read next line of input file
 ****************************************************************************************/
     F->next_args[0] = 0;
-    if (0==fgets (F->next_args, F->next_args_size - 1, F->f))
+    if (0==fgets (F->next_args, (int) F->next_args_size - 1, F->f))
         return 0;
     if (feof (F->f))
         return 0;
@@ -200,7 +200,7 @@ static int step_into_gie_block (ffio *F) {
         F->next_args[0] = 0;
         if (feof (F->f))
             return 0;
-        if (0==fgets (F->next_args, F->next_args_size - 1, F->f))
+        if (0==fgets (F->next_args, (int) F->next_args_size - 1, F->f))
             return 0;
         pj_chomp (F->next_args);
         F->next_lineno++;
