@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development &mdash; proj.4 4.9.3 documentation</title>
+  <title>Development &mdash; PROJ.4 5.0.0 documentation</title>
   
 
   
@@ -30,13 +30,15 @@
   
 
   
+    <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+  
 
   
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="proj.4 4.9.3 documentation" href="../index.html"/>
-        <link rel="next" title="API" href="api.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
+        <link rel="next" title="Quick start" href="quickstart.html"/>
         <link rel="prev" title="HTPD" href="../htpd.html"/> 
 
   
@@ -56,7 +58,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> proj.4
+            <a href="../index.html" class="icon icon-home"> PROJ.4
           
 
           
@@ -66,7 +68,7 @@
             
             
               <div class="version">
-                4.9.3
+                5.0.0
               </div>
             
           
@@ -91,20 +93,23 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../projections/index.html">Projections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../parameters.html">Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ.4</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../grids.html">Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../htpd.html">HTPD</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Development</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformations.html">Transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="errorhandling.html">Error handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="threads.html">Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/index.html">Reference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bindings.html">Language bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration.html">Version 4 to 5 API Migration</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
@@ -122,7 +127,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">proj.4</a>
+          <a href="../index.html">PROJ.4</a>
         
       </nav>
 
@@ -172,12 +177,16 @@
   <div class="section" id="development">
 <span id="id1"></span><h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
 <p>These pages are primarily focused towards developers either contributing to the
-proj.4 project or using the library in their own software.</p>
+PROJ.4 project or using the library in their own software.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transformations.html">Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="errorhandling.html">Error handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="threads.html">Threads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/index.html">Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bindings.html">Language bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Version 4 to 5 API Migration</a></li>
 </ul>
 </div>
 </div>
@@ -192,7 +201,7 @@ proj.4 project or using the library in their own software.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="api.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quick start" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../htpd.html" class="btn btn-neutral" title="HTPD" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -204,8 +213,8 @@ proj.4 project or using the library in their own software.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 1986?-2016.
-      Last updated on 06 Dec 2017.
+        &copy; Copyright 1983-2017.
+      Last updated on 07 Dec 2017.
 
     </p>
   </div>
@@ -227,7 +236,7 @@ proj.4 project or using the library in their own software.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'4.9.3',
+            VERSION:'5.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

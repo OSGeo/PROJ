@@ -6,11 +6,15 @@ Vertical grid shift
 
 Change Vertical datum change by grid shift
 
-+--------------+--------------------------------------------------------------------+
-| **Options**                                                                       |
-+--------------+--------------------------------------------------------------------+
-| `+grids`     | Comma-separated list of grids to load.                             |
-+--------------+--------------------------------------------------------------------+
++-----------------+--------------------------------------------------------------------+
+| **Input type**  | Geodetic coordinates (horizontal), meters (vertical).              |
++-----------------+--------------------------------------------------------------------+
+| **Output type** | Geodetic coordinates (horizontal), meters (vertical).              |
++-----------------+--------------------------------------------------------------------+
+| **Options**                                                                          |
++-----------------+--------------------------------------------------------------------+
+| `+grids`        | Comma-separated list of grids to load.                             |
++-----------------+--------------------------------------------------------------------+
 
 The vertical grid shift is done by offsetting the vertical input coordinates by
 a specific amount determined by the loaded grids. The simplest use case of the

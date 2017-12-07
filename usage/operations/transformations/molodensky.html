@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Molodensky transform &mdash; PROJ.4 4.9.3 documentation</title>
+  <title>Molodensky transform &mdash; PROJ.4 5.0.0 documentation</title>
   
 
   
@@ -30,12 +30,14 @@
   
 
   
+    <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+  
 
   
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="PROJ.4 4.9.3 documentation" href="../../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../../index.html"/>
         <link rel="up" title="Transformations" href="index.html"/>
         <link rel="next" title="Horizontal grid shift" href="hgridshift.html"/>
         <link rel="prev" title="Helmert transform" href="helmert.html"/> 
@@ -67,7 +69,7 @@
             
             
               <div class="version">
-                4.9.3
+                5.0.0
               </div>
             
           
@@ -113,7 +115,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../geodesic.html">Geodesic Calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geodesic.html">Geodesic calculations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../grids.html">Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../htpd.html">HTPD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../development/index.html">Development</a></li>
@@ -192,7 +194,87 @@
             
   <div class="section" id="molodensky-transform">
 <span id="molodensky"></span><h1>Molodensky transform<a class="headerlink" href="#molodensky-transform" title="Permalink to this headline">¶</a></h1>
-<p>Perform a datum shift in geodetic coordinate space.</p>
+<p>The Molodensky transformation resembles a <a class="reference internal" href="helmert.html#helmert"><span class="std std-ref">Helmert transform</span></a> with zero
+rotations and a scale of unity, but converts directly from geodetic coordinates to
+geodetic coordinates, without the intermediate shifts to and from cartesian
+geocentric coordinates, associated with the Helmert transformation.
+The Molodensky transformation is simple to implement and to parameterize, requiring
+only the 3 shifts between the input and output frame, and the corresponding
+differences between the semimajor axes and flattening parameters of the reference
+ellipsoids. Due to its algorithmic simplicity, it was popular prior to the
+ubiquity of digital computers. Today, it is mostly interesting for historical
+reasons, but nevertheless indispensable due to the large amount of data that has
+already been transformed that way <a class="reference internal" href="../../../references.html#eversknudsen2017" id="id1">[EversKnudsen2017]</a>.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Input type</strong></td>
+<td>Geodetic coordinates.</td>
+</tr>
+<tr class="row-even"><td><strong>Output type</strong></td>
+<td>Geodetic coordinates.</td>
+</tr>
+<tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
+</tr>
+<tr class="row-even"><td><cite>+da</cite></td>
+<td>Difference in semimajor axis of the defining ellipsoids.</td>
+</tr>
+<tr class="row-odd"><td><cite>+df</cite></td>
+<td>Difference in flattening of the defining ellipsoids.</td>
+</tr>
+<tr class="row-even"><td><cite>+dx</cite></td>
+<td>Offset of the X-axes of the defining ellipsoids.</td>
+</tr>
+<tr class="row-odd"><td><cite>+dy</cite></td>
+<td>Offset of the Y-axes of the defining ellipsoids.</td>
+</tr>
+<tr class="row-even"><td><cite>+dz</cite></td>
+<td>Offset of the Z-axes of the defining ellipsoids.</td>
+</tr>
+<tr class="row-odd"><td><cite>+ellps</cite></td>
+<td>Ellipsoid definition of source coordinates.
+Any specification can be used (e.g. <cite>+a</cite>, <cite>+rf</cite>, etc).
+If not specified, default ellipsoid is used.</td>
+</tr>
+<tr class="row-even"><td><cite>+abridged</cite></td>
+<td>Use the abridged version of the Molodensky transform.
+Optional.</td>
+</tr>
+</tbody>
+</table>
+<p>The Molodensky transform can be used to perform a datum shift from coordinate
+<span class="math">\((\phi_1, \lambda_1, h_1)\)</span> to <span class="math">\((\phi_2, \lambda_2, h_2)\)</span> where the two
+coordinates are referenced to different ellipsoids. This is based on three
+assumptions:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>The cartesian axes, <span class="math">\(X, Y, Z\)</span>,  of the two ellipsoids are parallel.</li>
+<li>The offset, <span class="math">\(\delta X, \delta Y, \delta Z\)</span>,  between the two ellipsoid
+are known.</li>
+<li>The characteristics of the two ellipsoids, expressed as the difference in
+semimajor axis (<span class="math">\(\delta a\)</span>) and flattening (<span class="math">\(\delta f\)</span>),  are known.</li>
+</ol>
+</div></blockquote>
+<p>The Molodensky transform is mostly used for transforming between old systems
+dating back to the time before computers. The advantage of the Molodensky transform
+is that it is fairly simple to compute by hand. The ease of computation come at the
+cost of limited accuracy.</p>
+<p>A derivation of the mathematical formulas for the Molodensky transform can be found
+in <a class="reference internal" href="../../../references.html#deakin2004" id="id2">[Deakin2004]</a>.</p>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>The abridged Molodensky:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span><span class="o">=</span><span class="n">molodensky</span> <span class="n">a</span><span class="o">=</span><span class="mi">6378160</span> <span class="n">rf</span><span class="o">=</span><span class="mf">298.25</span> <span class="n">da</span><span class="o">=-</span><span class="mi">23</span> <span class="n">df</span><span class="o">=-</span><span class="mf">8.120449e-8</span>  <span class="n">dx</span><span class="o">=-</span><span class="mi">134</span> <span class="n">dy</span><span class="o">=-</span><span class="mi">48</span> <span class="n">dz</span><span class="o">=</span><span class="mi">149</span> <span class="n">abridged</span>
+</pre></div>
+</div>
+<p>The same transformation using the standard Molodensky:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span><span class="o">=</span><span class="n">molodensky</span> <span class="n">a</span><span class="o">=</span><span class="mi">6378160</span> <span class="n">rf</span><span class="o">=</span><span class="mf">298.25</span> <span class="n">da</span><span class="o">=-</span><span class="mi">23</span> <span class="n">df</span><span class="o">=-</span><span class="mf">8.120449e-8</span>  <span class="n">dx</span><span class="o">=-</span><span class="mi">134</span> <span class="n">dy</span><span class="o">=-</span><span class="mi">48</span> <span class="n">dz</span><span class="o">=</span><span class="mi">149</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -217,8 +299,8 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 1986?-2016.
-      Last updated on 27 Nov 2017.
+        &copy; Copyright 1983-2017.
+      Last updated on 07 Dec 2017.
 
     </p>
   </div>
@@ -240,7 +322,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'4.9.3',
+            VERSION:'5.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
