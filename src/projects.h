@@ -43,6 +43,7 @@
 #endif
 
 /* standard inclusions */
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -76,6 +77,14 @@ extern "C" {
 
 #ifndef ABS
 #  define ABS(x)        ((x<0) ? (-1*(x)) : x)
+#endif
+
+#if INT_MAX == 2147483647
+typedef int pj_int32;
+#elif LONG_MAX == 2147483647
+typedef long pj_int32;
+#else
+#warning It seems no 32-bit integer type is available
 #endif
 
 /* maximum path/filename */
@@ -618,7 +627,7 @@ PJ *pj_projection_specific_setup_##name (PJ *P)
 
 #define MAX_TAB_ID 80
 typedef struct { float lam, phi; } FLP;
-typedef struct { int lam, phi; } ILP;
+typedef struct { pj_int32 lam, phi; } ILP;
 
 struct CTABLE {
     char id[MAX_TAB_ID];    /* ascii info */

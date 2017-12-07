@@ -4,7 +4,7 @@
 
 sudo apt-get install -y cppcheck
 
-cppcheck --inline-suppr --template='{file}:{line},{severity},{id},{message}' --enable=all --inconclusive --std=posix -DPJ_SELFTEST=1 src/*.c 2>/tmp/cppcheck.txt
+cppcheck --inline-suppr --template='{file}:{line},{severity},{id},{message}' --enable=all --inconclusive --std=posix src/*.c 2>/tmp/cppcheck.txt
 
 grep "error," /tmp/cppcheck.txt
 if [[ $? -eq 0 ]] ; then
