@@ -173,17 +173,26 @@ char *pj_chomp (char *c) {
 ****************************************************************************************/
     size_t i, n;
     char *comment;
+
     if (0==c)
         return 0;
+
     comment = strchr (c, '#');
     if (comment)
         *comment = 0;
+
     n = strlen (c);
-    for (i = n - 1;  (i >= 1)  &&  (isspace (c[i]) || ';'==c[i]);  i--)
+    if (0==n)
+        return c;
+
+    for (i = n - 1;  isspace (c[i]) || ';'==c[i];  i--)
         c[i] = 0;
+
     for (n = 0; isspace (c[n]); n++);
+
     for (i = 0;  0 != c[i + n];  i++)
         c[i] = c[i + n];
+
     c[i] = 0;
     return c;
 }

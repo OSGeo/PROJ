@@ -107,7 +107,6 @@ void pj_inherit_ellipsoid_def (const PJ *src, PJ *dst);
 void pj_erase_ellipsoid_def (PJ *P);
 int pj_calc_ellipsoid_params (PJ *P, double a, double es);
 
-
 char *pj_chomp (char *c);
 char *pj_shrink (char *c);
 size_t pj_trim_args (char *args);
