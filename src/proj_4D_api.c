@@ -34,6 +34,10 @@
 #include "projects.h"
 #include "geodesic.h"
 
+#if defined(_MSC_VER)
+// Squelch warnings about unsafe use of sprintf, etc
+#  pragma warning (disable: 4996)
+#endif
 
 /* Initialize PJ_COORD struct */
 PJ_COORD proj_coord (double x, double y, double z, double t) {

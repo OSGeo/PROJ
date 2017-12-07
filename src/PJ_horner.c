@@ -82,6 +82,11 @@
 #include <math.h>
 #include <errno.h>
 
+#if defined(_MSC_VER)
+// Squelch warnings about unsafe use of sprintf, etc
+#  pragma warning (disable: 4996)
+#endif
+
 PROJ_HEAD(horner,    "Horner polynomial evaluation");
 
 /* make horner.h interface with proj's memory management */

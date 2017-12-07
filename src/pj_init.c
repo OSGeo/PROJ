@@ -36,6 +36,11 @@
 #include "proj_internal.h"
 #include "projects.h"
 
+#if defined(_MSC_VER)
+// Squelch warnings about unsafe use of sprintf, etc
+#  pragma warning (disable: 4996)
+#endif
+
 /* Maximum size of files using the "escape carriage return" feature */
 #define MAX_CR_ESCAPE 65537
 typedef struct {

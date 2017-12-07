@@ -29,6 +29,11 @@
 #include <projects.h>
 #include <string.h>
 
+#if defined(_MSC_VER)
+// Squelch warnings about unsafe use of sprintf, etc
+#  pragma warning (disable: 4996)
+#endif
+
 /* SEC_TO_RAD = Pi/180/3600 */
 #define SEC_TO_RAD 4.84813681109535993589914102357e-6
 

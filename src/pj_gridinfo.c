@@ -34,6 +34,11 @@
 #include <math.h>
 #include <errno.h>
 
+#if defined(_MSC_VER)
+// Squelch warnings about unsafe use of sprintf, etc
+#  pragma warning (disable: 4996)
+#endif
+
 /************************************************************************/
 /*                             swap_words()                             */
 /*                                                                      */
