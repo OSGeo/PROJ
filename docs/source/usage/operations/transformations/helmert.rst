@@ -58,15 +58,24 @@ anoether by means of 3-, 4-and 7-parameter shifts, or one of their 6-, 8- and
 
 The Helmert transform, in all it's various incarnations, is used to perform reference
 frame shifts. The transformation operates in cartesian space. It can be used to transform
-planar coordinates from one datum to another (:ref:`2D Helmert`), transform 3D cartesian
+planar coordinates from one datum to another, transform 3D cartesian
 coordinates from one static reference frame to another or it can be used to do fully
-kinematic transformations from global reference frame to local static frames.
+kinematic transformations from global reference frames to local static frames.
 
 All of the parameters described in the table above are marked as optional. This is true
 as long as at least one parameter is defined in the setup of the transformation.
 The behaviour of the transformation depends on which parameters are used in the setup.
 For instance, if a rate of change paramater is specified a kinematic version of the
 transformation is used.
+
+The kinematic transformations require an observation time of the coordinate, as well
+as a central epoch for the transformation. The latter is usually documented
+alongside the rest of the transformation parameters for a given transformation.
+The central eopch is controlled with the parameter `t_epoch`. The observation
+time can either by stated as part of the coordinate when using PROJ's
+4D-functionality or it can be controlled in the transformation setup by the
+parameter `t_obs`. When `t_obs` is specified, all transformed coordinates are
+treated as if they have the same observation time.
 
 Examples
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -288,6 +297,12 @@ using the approximated rotation matrix:
             Z \\
         \end{bmatrix}^A
     \end{align}
+
+If the rotation matrix is transposed the transformation is effectively reversed.
+This is cause for some confusion since there is no correct way of defining the
+rotation matrix. Two conventions exists and they seem to be equally popular.
+In PROJ the rotation matrix can be transposed by adding the `transpose` flag in
+the transformation setup.
 
 Applying :eq:`propagation` we get the kinematic version of the approximated
 3D Helmert:
