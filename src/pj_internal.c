@@ -185,7 +185,7 @@ char *pj_chomp (char *c) {
     if (0==n)
         return c;
 
-    for (i = n - 1;  isspace (c[i]) || ';'==c[i];  i--)
+    for (i = n - 1; (i >= 1) && (isspace (c[i]) || ';'==c[i]);  i--)
         c[i] = 0;
 
     for (n = 0; isspace (c[n]); n++);
@@ -201,8 +201,8 @@ char *pj_chomp (char *c) {
 /***************************************************************************************/
 char *pj_shrink (char *c) {
 /****************************************************************************************
-    Clash repeated whitespace, remove '+' and ';', make ',' and '=' greedy, eating
-    their surrounding whitespace.
+    Collapse repeated whitespace, remove '+' and ';', make ',' and '=' greedy,
+    eating their surrounding whitespace.
 ****************************************************************************************/
     size_t i, j, n, ws;
 
@@ -212,7 +212,7 @@ char *pj_shrink (char *c) {
     pj_chomp (c);
     n = strlen (c);
 
-    /* First clash repeated whitespace (including +/;) */
+    /* First collapse repeated whitespace (including +/;) */
     for (i = j = ws = 0;  j < n;  j++) {
 
         /* Blank out prefix '+', only if preceeded by whitespace (i.e. keep it in 1.23e+08 */
