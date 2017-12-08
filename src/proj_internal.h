@@ -111,8 +111,8 @@ int pj_calc_ellipsoid_params (PJ *P, double a, double es);
 
 char *pj_chomp (char *c);
 char *pj_shrink (char *c);
-size_t pj_trim_args (char *args);
-char **pj_trimmed_args_to_argv (size_t argc, char *args);
+size_t pj_trim_argc (char *args);
+char **pj_trim_argv (size_t argc, char *args);
 char *pj_free_format_from_argc_argv (size_t argc, const char **argv);
 
 /* Lowest level: Minimum support for fileapi */

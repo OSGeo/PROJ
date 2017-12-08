@@ -399,13 +399,13 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
         return 0;
     strcpy (args, definition);
 
-    argc = pj_trim_args (args);
+    argc = pj_trim_argc (args);
     if (argc==0) {
         pj_dealloc (args);
         return 0;
     }
 
-    argv = pj_trimmed_args_to_argv (argc, args);
+    argv = pj_trim_argv (argc, args);
 
     /* ...and let pj_init_ctx do the hard work */
     P = pj_init_ctx (ctx, (int) argc, argv);
@@ -435,7 +435,7 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
         ctx = pj_get_default_ctx ();
 
     /* We assume that free format is used, and build a full proj_create compatible string */
-    c = pj_free_format_from_argc_argv (argc, argv);
+    c = pj_make_args (argc, argv);
     if (0==c)
         return 0;
 

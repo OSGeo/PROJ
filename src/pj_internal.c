@@ -165,12 +165,12 @@ size_t pj_strlcpy(char *dst, const char *src, size_t dsize) {
 
 
 
-/***************************************************************************************/
+/*****************************************************************************/
 char *pj_chomp (char *c) {
-/****************************************************************************************
-    Strip pre- and postfix whitespace. Note: Inline comments (indicated by '#')
-    are considered whitespace.
-****************************************************************************************/
+/******************************************************************************
+Strip pre- and postfix whitespace. Inline comments (indicated by '#') are
+considered whitespace.
+******************************************************************************/
     size_t i, n;
     char *comment;
 
@@ -198,12 +198,13 @@ char *pj_chomp (char *c) {
 }
 
 
-/***************************************************************************************/
+
+/*****************************************************************************/
 char *pj_shrink (char *c) {
-/****************************************************************************************
-    Collapse repeated whitespace, remove '+' and ';', make ',' and '=' greedy,
-    eating their surrounding whitespace.
-****************************************************************************************/
+/******************************************************************************
+Collapse repeated whitespace, remove '+' and ';', make ',' and '=' greedy,
+eating their surrounding whitespace.
+******************************************************************************/
     size_t i, j, n, ws;
 
     if (0==c)
@@ -215,7 +216,8 @@ char *pj_shrink (char *c) {
     /* First collapse repeated whitespace (including +/;) */
     for (i = j = ws = 0;  j < n;  j++) {
 
-        /* Blank out prefix '+', only if preceeded by whitespace (i.e. keep it in 1.23e+08 */
+        /* Blank out prefix '+', only if preceeded by whitespace */
+        /* (i.e. keep it in 1.23e+08) */
         if ((i > 0) && ('+'==c[j]) && isspace (c[i]))
             c[j] = ' ';
 
@@ -259,12 +261,12 @@ char *pj_shrink (char *c) {
 
 
 
-
-/***************************************************************************************/
-size_t pj_trim_args (char *args) {
-/****************************************************************************************
-    Trim an argument string and count its number of elements.
-****************************************************************************************/
+/*****************************************************************************/
+size_t pj_trim_argc (char *args) {
+/******************************************************************************
+Trim all unnecessary whitespace (and non-essential syntactic tokens) from the
+argument string, args, and count its number of elements.
+******************************************************************************/
     size_t i, m, n;
     pj_shrink (args);
     n = strlen (args);
@@ -280,14 +282,23 @@ size_t pj_trim_args (char *args) {
 }
 
 
-/***************************************************************************************/
-char **pj_trimmed_args_to_argv (size_t argc, char *args) {
-/****************************************************************************************
-    Create an argv-style array from elements placed in args.
 
-    args is a trimmed string as returned by pj_trim_args(), and argv is the number of
-    trimmed strings found (i.e. the return value of pj_trim_args()).
-****************************************************************************************/
+/*****************************************************************************/
+char **pj_trim_argv (size_t argc, char *args) {
+/******************************************************************************
+Create an argv-style array from elements placed in the argument string, args.
+
+args is a trimmed string as returned by pj_trim_argc(), and argc is the number
+of trimmed strings found (i.e. the return value of pj_trim_args()). Hence,
+    int argc    = pj_trim_argc (args);
+    char **argv = pj_trim_argv (argc, args);
+will produce a classic style (argc, argv) pair from a string of whitespace
+separated args. No new memory is allocated for storing the individual args
+(they stay in the args string), but for the pointers to the args a new array
+is allocated and returned.
+
+It is the duty of the caller to free this array.
+******************************************************************************/
     size_t i, j;
     char **argv;
     /* turn the massaged input into an array of strings */
@@ -307,11 +318,16 @@ char **pj_trimmed_args_to_argv (size_t argc, char *args) {
 
 
 
-/***************************************************************************************/
-char *pj_free_format_from_argc_argv (size_t argc, const char **argv) {
-/****************************************************************************************
-    Convert free format command line input to something proj_create can eat.
-****************************************************************************************/
+/*****************************************************************************/
+char *pj_make_args (size_t argc, const char **argv) {
+/******************************************************************************
+pj_make_args is the inverse of the pj_trim_argc/pj_trim_argv combo: It
+converts free format command line input to something proj_create can eat.
+
+Allocates, and returns, an array of char, large enough to hold a whitespace
+separated copy of the args in argv. It is the duty of the caller to free this
+array.
+******************************************************************************/
     size_t i, n;
     char *p;
 
@@ -334,8 +350,12 @@ char *pj_free_format_from_argc_argv (size_t argc, const char **argv) {
 
 
 
-
+/*****************************************************************************/
 void proj_context_errno_set (PJ_CONTEXT *ctx, int err) {
+/******************************************************************************
+Raise an error directly on a context, without going through a PJ belonging
+to that context.
+******************************************************************************/
     if (0==ctx)
         ctx = pj_get_default_ctx();
     pj_ctx_set_errno (ctx, err);
@@ -344,8 +364,20 @@ void proj_context_errno_set (PJ_CONTEXT *ctx, int err) {
 
 
 
-/* Set logging level 0-3. Higher number means more debug info. 0 turns it off */
+
+
+
+/*  logging  */
+
+/* pj_vlog resides in pj_log.c and relates to pj_log as vsprintf relates to sprintf */
+void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args );
+
+
+/***************************************************************************************/
 enum proj_log_level proj_log_level (PJ_CONTEXT *ctx, enum proj_log_level log_level) {
+/****************************************************************************************
+   Set logging level 0-3. Higher number means more debug info. 0 turns it off
+****************************************************************************************/
     enum proj_log_level previous;
     if (0==ctx)
         ctx = pj_get_default_ctx();
@@ -359,35 +391,48 @@ enum proj_log_level proj_log_level (PJ_CONTEXT *ctx, enum proj_log_level log_lev
 }
 
 
-
-/*  logging  */
-
-/* pj_vlog resides in pj_log.c and relates to pj_log as vsprintf relates to sprintf */
-void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args );
-
+/*****************************************************************************/
 void proj_log_error (PJ *P, const char *fmt, ...) {
+/******************************************************************************
+   For reporting the most severe events.
+******************************************************************************/
     va_list args;
     va_start( args, fmt );
     pj_vlog (pj_get_ctx (P), PJ_LOG_ERROR , fmt, args);
     va_end( args );
 }
 
+
+/*****************************************************************************/
 void proj_log_debug (PJ *P, const char *fmt, ...) {
+/******************************************************************************
+   For reporting debugging information.
+******************************************************************************/
     va_list args;
     va_start( args, fmt );
     pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MAJOR , fmt, args);
     va_end( args );
 }
 
+
+/*****************************************************************************/
 void proj_log_trace (PJ *P, const char *fmt, ...) {
+/******************************************************************************
+   For reporting embarrasingly detailed debugging information.
+******************************************************************************/
     va_list args;
     va_start( args, fmt );
     pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MINOR , fmt, args);
     va_end( args );
 }
 
-/* Put a new logging function into P's context. The opaque object app_data is passed as first arg at each call to the logger */
+
+/*****************************************************************************/
 void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log) {
+/******************************************************************************
+    Put a new logging function into P's context. The opaque object app_data is
+    passed as first arg at each call to the logger
+******************************************************************************/
     if (0==ctx)
         pj_get_default_ctx ();
     if (0==ctx)

@@ -1,7 +1,8 @@
 /* put parameters in linked list and retrieve */
-#include <stdio.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
+
 #include "projects.h"
 
 /* create parameter list entry */
