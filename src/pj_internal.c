@@ -188,7 +188,7 @@ considered whitespace.
     for (i = n - 1; (i >= 1) && (isspace (c[i]) || ';'==c[i]);  i--)
         c[i] = 0;
 
-    for (n = 0; isspace (c[n]); n++);
+    for (n = 0;  (0 != c[n]) && isspace (c[n]);  n++);
 
     for (i = 0;  0 != c[i + n];  i++)
         c[i] = c[i + n];

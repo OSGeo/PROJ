@@ -113,7 +113,7 @@ char *pj_chomp (char *c);
 char *pj_shrink (char *c);
 size_t pj_trim_argc (char *args);
 char **pj_trim_argv (size_t argc, char *args);
-char *pj_free_format_from_argc_argv (size_t argc, const char **argv);
+char *pj_make_args (size_t argc, const char **argv);
 
 /* Lowest level: Minimum support for fileapi */
 void proj_fileapi_set (PJ *P, void *fileapi);
