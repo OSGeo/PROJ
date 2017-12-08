@@ -275,14 +275,22 @@ transformations. [decimalyear]. <em>Optional</em>.</td>
 </table>
 <p>The Helmert transform, in all it&#8217;s various incarnations, is used to perform reference
 frame shifts. The transformation operates in cartesian space. It can be used to transform
-planar coordinates from one datum to another (<span class="xref std std-ref">2D Helmert</span>), transform 3D cartesian
+planar coordinates from one datum to another, transform 3D cartesian
 coordinates from one static reference frame to another or it can be used to do fully
-kinematic transformations from global reference frame to local static frames.</p>
+kinematic transformations from global reference frames to local static frames.</p>
 <p>All of the parameters described in the table above are marked as optional. This is true
 as long as at least one parameter is defined in the setup of the transformation.
 The behaviour of the transformation depends on which parameters are used in the setup.
 For instance, if a rate of change paramater is specified a kinematic version of the
 transformation is used.</p>
+<p>The kinematic transformations require an observation time of the coordinate, as well
+as a central epoch for the transformation. The latter is usually documented
+alongside the rest of the transformation parameters for a given transformation.
+The central eopch is controlled with the parameter <cite>t_epoch</cite>. The observation
+time can either by stated as part of the coordinate when using PROJ&#8217;s
+4D-functionality or it can be controlled in the transformation setup by the
+parameter <cite>t_obs</cite>. When <cite>t_obs</cite> is specified, all transformed coordinates are
+treated as if they have the same observation time.</p>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <p>Transforming coordinates from NAD72 to NAD83 using the 4 parameter 2D Helmert:</p>
@@ -447,6 +455,11 @@ using the approximated rotation matrix:</p>
         Z \\
     \end{bmatrix}^A
 \end{align}\end{split}\]</div>
+<p>If the rotation matrix is transposed the transformation is effectively reversed.
+This is cause for some confusion since there is no correct way of defining the
+rotation matrix. Two conventions exists and they seem to be equally popular.
+In PROJ the rotation matrix can be transposed by adding the <cite>transpose</cite> flag in
+the transformation setup.</p>
 <p>Applying <a class="reference internal" href="#equation-propagation">(1)</a> we get the kinematic version of the approximated
 3D Helmert:</p>
 <div class="math" id="equation-14param">
@@ -542,7 +555,7 @@ countpart:</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2017.
-      Last updated on 07 Dec 2017.
+      Last updated on 08 Dec 2017.
 
     </p>
   </div>
