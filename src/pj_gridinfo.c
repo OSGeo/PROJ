@@ -28,20 +28,11 @@
 
 #define PJ_LIB__
 
-#include <projects.h>
+#include "proj_internal.h"
+#include "projects.h"
 #include <string.h>
 #include <math.h>
 #include <errno.h>
-
-#ifdef _WIN32_WCE
-/* assert.h includes all Windows API headers and causes 'LP' name clash.
- * Here assert we disable assert() for Windows CE.
- * TODO - mloskot: re-implement porting friendly assert
- */
-# define assert(exp)	((void)0)
-#else
-# include <assert.h>
-#endif /* _WIN32_WCE */
 
 /************************************************************************/
 /*                             swap_words()                             */
@@ -431,23 +422,8 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
     int num_subfiles, subfile;
     int must_swap;
 
-    assert( sizeof(int) == 4 );
-    assert( sizeof(double) == 8 );
-#ifdef _MSC_VER
-#pragma warning( push )
-/* disable conditional expression is constant */
-#pragma warning( disable : 4127 )
-#endif
-    if( sizeof(int) != 4 || sizeof(double) != 8 )
-#ifdef _MSC_VER
-#pragma warning( pop )
-#endif
-    {
-        pj_log( ctx, PJ_LOG_ERROR,
-             "basic types of inappropraiate size in pj_gridinfo_init_ntv2()" );
-        pj_ctx_set_errno( ctx, -38 );
-        return 0;
-    }
+    STATIC_ASSERT( sizeof(pj_int32) == 4 );
+    STATIC_ASSERT( sizeof(double) == 8 );
 
 /* -------------------------------------------------------------------- */
 /*      Read the overview header.                                       */
@@ -541,8 +517,8 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
         ct->del.lam = *((double *) (header+9*16+8));
         ct->del.phi = *((double *) (header+8*16+8));
 
-        ct->lim.lam = (int) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
-        ct->lim.phi = (int) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
+        ct->lim.lam = (pj_int32) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
+        ct->lim.phi = (pj_int32) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
 
         pj_log( ctx, PJ_LOG_DEBUG_MINOR,
                 "NTv2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
@@ -669,23 +645,8 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
     struct CTABLE *ct;
     LP		ur;
 
-    assert( sizeof(int) == 4 );
-    assert( sizeof(double) == 8 );
-#ifdef _MSC_VER
-#pragma warning( push )
-/* disable conditional expression is constant */
-#pragma warning( disable : 4127 )
-#endif
-    if( sizeof(int) != 4 || sizeof(double) != 8 )
-#ifdef _MSC_VER
-#pragma warning( pop )
-#endif
-    {
-        pj_log( ctx, PJ_LOG_ERROR,
-                 "basic types of inappropraiate size in nad_load_ntv1()" );
-        pj_ctx_set_errno( ctx, -38 );
-        return 0;
-    }
+    STATIC_ASSERT( sizeof(pj_int32) == 4 );
+    STATIC_ASSERT( sizeof(double) == 8 );
 
 /* -------------------------------------------------------------------- */
 /*      Read the header.                                                */
@@ -734,8 +695,8 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
     ur.phi = *((double *) (header+40));
     ct->del.lam = *((double *) (header+104));
     ct->del.phi = *((double *) (header+88));
-    ct->lim.lam = (int) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
-    ct->lim.phi = (int) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
+    ct->lim.lam = (pj_int32) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
+    ct->lim.phi = (pj_int32) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
 
     pj_log( ctx, PJ_LOG_DEBUG_MINOR,
             "NTv1 %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)",
@@ -769,23 +730,8 @@ static int pj_gridinfo_init_gtx( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
     double      xorigin,yorigin,xstep,ystep;
     int         rows, columns;
 
-    assert( sizeof(int) == 4 );
-    assert( sizeof(double) == 8 );
-#ifdef _MSC_VER
-#pragma warning( push )
-/* disable conditional expression is constant */
-#pragma warning( disable : 4127 )
-#endif
-    if( sizeof(int) != 4 || sizeof(double) != 8 )
-#ifdef _MSC_VER
-#pragma warning( pop )
-#endif
-    {
-        pj_log( ctx, PJ_LOG_ERROR,
-                "basic types of inappropraiate size in nad_load_gtx()" );
-        pj_ctx_set_errno( ctx, -38 );
-        return 0;
-    }
+    STATIC_ASSERT( sizeof(pj_int32) == 4 );
+    STATIC_ASSERT( sizeof(double) == 8 );
 
 /* -------------------------------------------------------------------- */
 /*      Read the header.                                                */

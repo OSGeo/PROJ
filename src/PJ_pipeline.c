@@ -102,7 +102,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 #include "proj_internal.h"
 #include "projects.h"
 
-#include <assert.h>
 #include <stddef.h>
 #include <errno.h>
 PROJ_HEAD(pipeline,         "Transformation pipeline manager");

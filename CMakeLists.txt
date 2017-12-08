@@ -58,15 +58,6 @@ include(Proj4Mac)
 include(policies)
 
 #################################################################################
-# Self-test build config
-#################################################################################
-
-option(SELFTEST "Include self-test in build" OFF)
-if(SELFTEST)
-    add_definitions(-DPJ_SELFTEST)
-endif(SELFTEST)
-
-#################################################################################
 # threading configuration
 #################################################################################
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
@@ -93,7 +84,7 @@ int main() {
   int q;
   return (int)(hypot(3.0, 4.0) + atanh(0.8) + cbrt(8.0) +
                remquo(100.0, 90.0, &q) +
-               remainder(100.0, 90.0) + copysigna(1.0, -0.0));
+               remainder(100.0, 90.0) + copysign(1.0, -0.0));
 }\n" C99_MATH)
 if (C99_MATH)
   add_definitions (-DHAVE_C99_MATH=1)

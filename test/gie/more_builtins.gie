@@ -183,8 +183,8 @@ A number of tests from PJ_helmert.c
 This example is from Lotti Jivall: "Simplified transformations from
 ITRF2008/IGS08 to ETRS89 for maritime applications"
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80                          \
-            x=0.67678    y=0.65495   z=-0.52827              \
+operation  proj=helmert ellps=GRS80
+           x=0.67678    y=0.65495   z=-0.52827
            rx=-0.022742 ry=0.012667 rz=0.022704  s=-0.01070
 -------------------------------------------------------------------------------
 tolerance 1 um
@@ -193,7 +193,7 @@ expect     3565285.41342351  855948.67986759  5201382.72939791
 -------------------------------------------------------------------------------
 This example is a random point, transformed from ED50 to ETRS89 using KMStrans2
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80                           \
+operation  proj=helmert ellps=GRS80
             x=-081.0703   rx=-0.48488
             y=-089.3603   ry=-0.02436
             z=-115.7526   rz=-0.41321   s=-0.540645
@@ -213,7 +213,7 @@ operation  proj=helmert ellps=GRS80                        \
            dx=-0.0029   dy=-0.0002   dz=-0.0006 ds=0.00001 \
            rx=-0.00039  ry=0.00080   rz=-0.00114           \
            drx=-0.00011 dry=-0.00019 drz=0.00007           \
-           epoch=1988.0 tobs=2017.0    transpose
+           t_epoch=1988.0 t_obs=2017.0    transpose
 -------------------------------------------------------------------------------
 tolerance  0.03 mm
 accept     3370658.37800 711877.31400 5349787.08600  2017.0  # ITRF2000@2017.0
@@ -245,7 +245,7 @@ operation  proj=helmert ellps=GRS80                       \
         dx=-0.0029   dy=-0.0002   dz=-0.0006  ds=0.00001  \
         rx=-0.00039  ry=0.00080   rz=-0.00114             \
         drx=-0.00011 dry=-0.00019 drz=0.00007             \
-        epoch=1988.0 transpose
+        t_epoch=1988.0 transpose
 -------------------------------------------------------------------------------
 tolerance  0.1 mm
 accept     3370658.378    711877.314    5349787.086    2017.0

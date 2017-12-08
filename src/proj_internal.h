@@ -48,6 +48,8 @@
 extern "C" {
 #endif
 
+#define STATIC_ASSERT(COND) ((void)sizeof(char[(COND) ? 1 : -1]))
+
 #ifndef PJ_TODEG
 #define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
 #endif
