@@ -104,21 +104,22 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 
 ***********************************************************************/
 
-#include "optargpm.h"
+#include <ctype.h>
+#include <errno.h>
+#include <math.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <proj.h>
 #include "proj_internal.h"
 #include "projects.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
+#include "optargpm.h"
 
-#include <string.h>
-#include <ctype.h>
+#include "readblock.c"
 
-#include <math.h>
-#include <errno.h>
 
 
 
@@ -128,16 +129,14 @@ double proj_atof(const char *str);
 
 int   main(int argc, char **argv);
 
-static int   process_file (const char *fname);
-static int   errmsg (int errlev, const char *msg, ...);
 static int   dispatch (const char *cmnd, const char *args);
+static int   errmsg (int errlev, const char *msg, ...);
+static int   errno_from_err_const (const char *err_const);
+static int   list_err_codes (void);
+static int   process_file (const char *fname);
+
 static const char *column (const char *buf, int n);
-static int errno_from_err_const (const char *err_const);
 static const char *err_const_from_errno (int err);
-static void list_err_codes (void);
-
-
-#include "readblock.c"
 
 
 
@@ -162,10 +161,7 @@ typedef struct {
 
 ffio *F = 0;
 
-gie_ctx T = {{""}, 0, {{0,0,0,0}}, {{0,0,0,0}}, {{0,0,0,0}}, {{0,0,0,0}}, PJ_FWD, 1,   0,   0,0,0,0,0,0,0,0,  0.0005, 0, 0};
-
-OPTARGS *o;
-
+static gie_ctx T;
 
 
 static const char delim[] = {"-------------------------------------------------------------------------------\n"};
@@ -211,6 +207,13 @@ int main (int argc, char **argv) {
     int  i;
     const char *longflags[]  = {"v=verbose", "q=quiet", "h=help", "l=list", 0};
     const char *longkeys[]   = {"o=output", 0};
+    OPTARGS *o;
+
+    memset (&T, 0, sizeof (T));
+    T.dir = PJ_FWD;
+    T.verbosity = 1;
+    T.tolerance = 5e-4;
+
 
     o = opt_parse (argc, argv, "hlvq", "o", longflags, longkeys);
     if (0==o)
@@ -222,7 +225,7 @@ int main (int argc, char **argv) {
     }
 
     if (opt_given (o, "l"))
-        list_err_codes ();
+        return list_err_codes ();
 
 
     T.verbosity = opt_given (o, "q");
@@ -234,6 +237,7 @@ int main (int argc, char **argv) {
     T.fout = stdout;
     if (opt_given (o, "o"))
         T.fout = fopen (opt_arg (o, "output"), "rt");
+
     if (0==T.fout) {
         fprintf (stderr, "%s: Cannot open '%s' for output\n", o->progname, opt_arg (o, "output"));
         free (o);
@@ -247,15 +251,19 @@ int main (int argc, char **argv) {
         return 0;
     }
 
+puts ("before ffio_create");
     F = ffio_create (gie_tags, n_gie_tags, 1000);
+puts ("after ffio_create");
     if (0==F) {
         fprintf (stderr, "%s: No memory\n", o->progname);
         free (o);
         return 1;
     }
+puts ("after ffio_create handler");
 
-    for (i = 0;  i < o->fargc; i++)
+    for (i = 0;  i < o->fargc;  i++)
         process_file (o->fargv[i]);
+puts ("after file handler");
 
     if (T.verbosity > 0) {
         if (o->fargc > 1)
@@ -906,7 +914,7 @@ static const struct errno_vs_err_const lookup[] = {
 static const struct errno_vs_err_const unknown = {"PJD_ERR_UNKNOWN", 9999};
 
 
-static void list_err_codes (void) {
+static int list_err_codes (void) {
     int i;
     const int n = sizeof lookup / sizeof lookup[0];
 
@@ -915,7 +923,7 @@ static void list_err_codes (void) {
             break;
         printf ("%25s  (%2.2d):  %s\n", lookup[i].the_err_const + 8, lookup[i].the_errno, pj_strerrno(lookup[i].the_errno));
     }
-    exit (0);
+    return 0;
 }
 
 

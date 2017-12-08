@@ -183,15 +183,12 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-09-10
 * DEALINGS IN THE SOFTWARE.
 
 ***********************************************************************/
-
-#define PJ_LIB__
-#include <proj.h>
+#include <ctype.h>
+#include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
-#include <math.h>
-#include <errno.h>
 
 /**************************************************************************************************/
 struct OPTARGS;
@@ -525,7 +522,7 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                 char *equals;
                 crepr = argv[i] + 2;
 
-                /* We need to maniplulate a bit to support gnu style --foo=bar syntax.  */
+                /* We need to manipulate a bit to support gnu style --foo=bar syntax.   */
                 /* NOTE: This will segfault for read-only (const char * style) storage, */
                 /* but since the canonical use case, int main (int argc, char **argv),  */
                 /* is non-const, we ignore this for now */
