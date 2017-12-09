@@ -118,8 +118,39 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 
 #include "optargpm.h"
 
-#include "readblock.c"
 
+/* From readblock.c (now included here) */
+typedef struct ffio {
+    FILE *f;
+    const char **tags;
+    const char *tag;
+    char *args;
+    char *next_args;
+    size_t n_tags;
+    size_t args_size;
+    size_t next_args_size;
+    size_t argc;
+    size_t lineno, next_lineno;
+    size_t level;
+}  ffio;
+
+static int get_inp (ffio *F);
+static int skip_to_next_tag (ffio *F);
+static int step_into_gie_block (ffio *F);
+static int locate_tag (ffio *F, const char *tag);
+static int nextline (ffio *F);
+static int at_end_delimiter (ffio *F);
+static const char *at_tag (ffio *F);
+static int at_decorative_element (ffio *F);
+static ffio *ffio_destroy (ffio *F);
+static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size);
+
+static const char *gie_tags[] = {
+    "<gie>", "operation", "accept", "expect", "roundtrip", "banner", "verbose",
+    "direction", "tolerance", "builtins", "echo", "</gie>"
+};
+
+static const size_t n_gie_tags = sizeof gie_tags / sizeof gie_tags[0];
 
 
 
@@ -986,6 +1017,315 @@ static int errmsg (int errlev, const char *msg, ...) {
     if (errlev)
         errno = errlev;
     return errlev;
+}
+
+
+
+
+
+
+
+
+/****************************************************************************************
+
+    FFIO - Flexible format I/O
+
+    FFIO provides functionality for reading proj style instruction strings written
+    in a less strict format than usual:
+
+    *  Whitespace is generally allowed everywhere
+    *  Comments can be written inline, '#' style
+    *  ... or as free format blocks
+
+    The overall mission of FFIO is to facilitate communications of geodetic
+    parameters and test material in a format that is highly human readable,
+    and provides ample room for comment, documentation, and test material.
+
+    See the PROJ ".gie" test suites for examples of supported formatting.
+
+****************************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+#include <string.h>
+#include <ctype.h>
+
+#include <math.h>
+#include <errno.h>
+
+
+
+typedef struct ffio ffio;
+
+static int get_inp (ffio *F);
+static int skip_to_next_tag (ffio *F);
+static int step_into_gie_block (ffio *F);
+static int locate_tag (ffio *F, const char *tag);
+static int nextline (ffio *F);
+static int at_end_delimiter (ffio *F);
+static const char *at_tag (ffio *F);
+static int at_decorative_element (ffio *F);
+static ffio *ffio_destroy (ffio *F);
+static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size);
+
+
+
+/***************************************************************************************/
+static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size) {
+/****************************************************************************************
+
+****************************************************************************************/
+    ffio *G = calloc (1, sizeof (ffio));
+    if (0==G)
+        return 0;
+
+    if (0==max_record_size)
+        max_record_size = 1000;
+
+    G->args = calloc (1, 5*max_record_size);
+    if (0==G->args) {
+        free (G);
+        return 0;
+    }
+
+    G->next_args = calloc (1, max_record_size);
+    if (0==G->args) {
+        free (G->args);
+        free (G);
+        return 0;
+    }
+
+    G->args_size = 5*max_record_size;
+    G->next_args_size = max_record_size;
+
+    G->tags = tags;
+    G->n_tags = n_tags;
+    return G;
+}
+
+
+
+/***************************************************************************************/
+static ffio *ffio_destroy (ffio *G) {
+/****************************************************************************************
+
+****************************************************************************************/
+    free (G->args);
+    free (G->next_args);
+    free (G);
+    return 0;
+}
+
+
+
+/***************************************************************************************/
+static int at_decorative_element (ffio *G) {
+/****************************************************************************************
+    A decorative element consists of a line of at least 5 consecutive identical chars,
+    starting at buffer position 0:
+    "-----", "=====", "*****", etc.
+
+    A decorative element serves as a end delimiter for the current element, and
+    continues until a gie command verb is found at the start of a line
+****************************************************************************************/
+    int i;
+    char *c;
+    if (0==G)
+        return 0;
+    c = G->next_args;
+    if (0==c)
+        return 0;
+    if (0==c[0])
+        return 0;
+    for (i = 1; i < 5; i++)
+        if (c[i]!=c[0])
+            return 0;
+    return 1;
+}
+
+
+
+/***************************************************************************************/
+static const char *at_tag (ffio *G) {
+/****************************************************************************************
+    A start of a new command serves as an end delimiter for the current command
+****************************************************************************************/
+    size_t j;
+    for (j = 0;  j < G->n_tags;  j++)
+        if (strncmp (G->next_args, G->tags[j], strlen(G->tags[j]))==0)
+            return G->tags[j];
+    return 0;
+}
+
+
+
+/***************************************************************************************/
+static int at_end_delimiter (ffio *G) {
+/****************************************************************************************
+    An instruction consists of everything from its introductory tag to its end
+    delimiter.  An end delimiter can be either the introductory tag of the next
+    instruction, or a "decorative element", i.e. one of the "ascii art" style
+    block delimiters typically used to mark up block comments in a free format
+    file.
+****************************************************************************************/
+    if (G==0)
+        return 0;
+    if (at_decorative_element (G))
+        return 1;
+    if (at_tag (G))
+        return 1;
+    return 0;
+}
+
+
+
+/***************************************************************************************/
+static int nextline (ffio *G) {
+/****************************************************************************************
+    Read next line of input file
+****************************************************************************************/
+    G->next_args[0] = 0;
+    if (0==fgets (G->next_args, (int) G->next_args_size - 1, G->f))
+        return 0;
+    if (feof (G->f))
+        return 0;
+    pj_chomp (G->next_args);
+    G->next_lineno++;
+    return 1;
+}
+
+
+
+/***************************************************************************************/
+static int locate_tag (ffio *G, const char *tag) {
+/****************************************************************************************
+    find start-of-line tag
+****************************************************************************************/
+    size_t n = strlen (tag);
+    while (0!=strncmp (tag, G->next_args, n))
+        if (0==nextline (G))
+            return 0;
+    return 1;
+}
+
+
+
+/***************************************************************************************/
+static int step_into_gie_block (ffio *G) {
+/****************************************************************************************
+    Make sure we're inside a <gie>-block
+****************************************************************************************/
+    /* Already inside */
+    if (G->level % 2)
+        return 1;
+
+    if (0==locate_tag (G, "<gie>"))
+        return 0;
+
+    while (0!=strncmp ("<gie>", G->next_args, 5)) {
+        printf ("skipping [%s]\n", G->next_args);
+        G->next_args[0] = 0;
+        if (feof (G->f))
+            return 0;
+        if (0==fgets (G->next_args, (int) G->next_args_size - 1, G->f))
+            return 0;
+        pj_chomp (G->next_args);
+        G->next_lineno++;
+    }
+    G->level++;
+
+    /* We're ready at the start - now step into the block */
+    return nextline (G);
+}
+
+
+
+/***************************************************************************************/
+static int skip_to_next_tag (ffio *G) {
+/****************************************************************************************
+    Skip forward to the next command tag
+****************************************************************************************/
+    const char *c;
+    if (0==step_into_gie_block (G))
+        return 0;
+
+    c = at_tag (G);
+
+    /* If not already there - get there */
+    while (!c) {
+        if (0==nextline (G))
+            return 0;
+        c = at_tag (G);
+    }
+
+    /* If we reached the end of a <gie> block, locate the next and retry */
+    if (0==strcmp (c, "</gie>")) {
+        G->level++;
+        if (feof (G->f))
+            return 0;
+        if (0==step_into_gie_block (G))
+            return 0;
+        G->args[0] = 0;
+        return skip_to_next_tag (G);
+    }
+    G->lineno = G->next_lineno;
+
+    return 1;
+}
+
+
+static int append_args (ffio *G) {
+    size_t skip_chars = 0;
+    size_t next_len = strlen (G->next_args);
+    size_t args_len = strlen (G->args);
+    const char *tag = at_tag (G);
+
+    if (tag)
+        skip_chars = strlen (tag);
+
+    if (G->args_size < args_len + next_len - skip_chars + 1) {
+        void *p = realloc (G->args, 2 * G->args_size);
+        if (0==p)
+            return 0;
+        G->args = p;
+        G->args_size = 2 * G->args_size;
+    }
+
+    G->args[args_len] = ' ';
+    strcpy (G->args + args_len + 1,  G->next_args + skip_chars);
+
+    G->next_args[0] = 0;
+    return 1;
+}
+
+
+
+
+
+/***************************************************************************************/
+static int get_inp (ffio *G) {
+/****************************************************************************************
+    The primary command reader for gie. May be useful in the init-file reader as well.
+****************************************************************************************/
+    G->args[0] = 0;
+
+    if (0==skip_to_next_tag (G))
+        return 0;
+    G->tag = at_tag (G);
+
+    if (0==G->tag)
+        return 0;
+
+    do {
+        append_args (G);
+        if (0==nextline (G))
+            return 0;
+    } while (!at_end_delimiter (G));
+
+    pj_shrink (G->args);
+    return 1;
 }
 
 
