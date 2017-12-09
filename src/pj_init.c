@@ -85,6 +85,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     char *buffer = 0;
     char line[MAX_LINE_LENGTH + 1];
     PAFile fid;
+    size_t n;
 
     /* Support "init=file:section", "+init=file:section", and "file:section" format */
     key = strstr (name, "init=");
@@ -106,6 +107,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     }
     *section = 0;
     section++;
+    n = strlen (section);
 
     fid = pj_open_lib (ctx, fname, "rt");
     if (0==fid) {
@@ -127,7 +129,11 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
         pj_chomp (line);
         if ('<'!=line[0])
             continue;
-        if (0==strncmp (line + 1, section, strlen (section)))
+        if (strlen (line) < n + 2)
+            continue;
+        if (line[n + 1] != '>')
+            continue;
+        if (0==strncmp (line + 1, section, n))
             break;
     }
 
@@ -178,7 +184,9 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     }
 
     pj_ctx_fclose (ctx, fid);
-    return pj_shrink (buffer);
+    pj_shrink (buffer);
+    pj_log (ctx, 3, "key=%s, found: [%s]\n", key, buffer);
+    return buffer;
 }
 
 
