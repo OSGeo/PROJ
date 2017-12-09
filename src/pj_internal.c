@@ -173,6 +173,7 @@ considered whitespace.
 ******************************************************************************/
     size_t i, n;
     char *comment;
+    char *start = c;
 
     if (0==c)
         return 0;
@@ -185,15 +186,21 @@ considered whitespace.
     if (0==n)
         return c;
 
-    for (i = n - 1; (i >= 1) && (isspace (c[i]) || ';'==c[i]);  i--)
+    /* Eliminate postfix whitespace */
+    for (i = n - 1;  (i > 0) && (isspace (c[i]) || ';'==c[i]);  i--)
         c[i] = 0;
 
-    for (n = 0;  (0 != c[n]) && isspace (c[n]);  n++);
+    /* Find start of non-whitespace */
+    while (0 != *start  &&  (';'==*start  ||  isspace (*start)))
+        start++;
 
-    for (i = 0;  0 != c[i + n];  i++)
-        c[i] = c[i + n];
+    n = strlen (start);
+    if (0==n) {
+        c[0] = 0;
+        return c;
+    }
 
-    c[i] = 0;
+    memmove (c, start, n + 1);
     return c;
 }
 
@@ -205,7 +212,10 @@ char *pj_shrink (char *c) {
 Collapse repeated whitespace, remove '+' and ';', make ',' and '=' greedy,
 eating their surrounding whitespace.
 ******************************************************************************/
-    size_t i, j, n, ws;
+    size_t i, j, n;
+
+    /* Flag showing that a whitespace (ws) has been written after last non-ws */
+    size_t ws;
 
     if (0==c)
        return 0;
@@ -214,28 +224,29 @@ eating their surrounding whitespace.
     n = strlen (c);
 
     /* First collapse repeated whitespace (including +/;) */
-    for (i = j = ws = 0;  j < n;  j++) {
+    for (i = j = 0, ws = 0;  j < n;  j++) {
 
         /* Blank out prefix '+', only if preceeded by whitespace */
         /* (i.e. keep it in 1.23e+08) */
         if ((i > 0) && ('+'==c[j]) && isspace (c[i]))
             c[j] = ' ';
 
-        if (isspace (c[j]) || ';'==c[j] || '\\'==c[j]) {
+        if (isspace (c[j]) || ';'==c[j]) {
             if (0==ws && (i > 0))
                 c[i++] = ' ';
             ws = 1;
             continue;
         }
-        else
+        else {
             ws = 0;
-        c[i++] = c[j];
+            c[i++] = c[j];
+        }
     }
     c[i] = 0;
     n = strlen(c);
 
     /* Then make ',' and '=' greedy */
-    for (i = j = 0; j < n; j++) {
+    for (i = j = 0;  j < n;  j++) {
         if (i==0) {
             c[i++] = c[j];
             continue;
