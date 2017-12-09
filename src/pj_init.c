@@ -78,14 +78,27 @@ static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
 static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
 /***************************************************************************************
     Read a section of an init file. Return its contents as a plain character string.
+    It is the duty of the caller to free the memory allocated for the string.
 ***************************************************************************************/
 #define MAX_LINE_LENGTH 1000
     size_t current_buffer_size = 5 * (MAX_LINE_LENGTH + 1);
-    char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *section, *key;
+    char *fname, *section, *key;
     char *buffer = 0;
-    char line[MAX_LINE_LENGTH + 1];
+    char *line = 0;
     PAFile fid;
     size_t n;
+
+
+    line = pj_malloc (MAX_LINE_LENGTH + 1);
+    if (0==line)
+        return 0;
+
+    fname = pj_malloc (MAX_PATH_FILENAME+ID_TAG_MAX+3);
+    if (0==fname) {
+        pj_dealloc (line);
+        return 0;
+    }
+
 
     /* Support "init=file:section", "+init=file:section", and "file:section" format */
     key = strstr (name, "init=");
@@ -93,16 +106,19 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
         key = name;
     else
         key += 5;
-    if (MAX_PATH_FILENAME + ID_TAG_MAX + 2 < strlen (key))
+    if (MAX_PATH_FILENAME + ID_TAG_MAX + 2 < strlen (key)) {
+        pj_dealloc (fname);
+        pj_dealloc (line);
         return 0;
-    strncpy(fname, key, sizeof(fname)-2);
-    fname[sizeof(fname)-2] = '\0';
-
+    }
+    memmove (fname, key, strlen (key) + 1);
 
     /* Locate the name of the section we search for */
     section = strrchr(fname, ':');
     if (0==section) {
         proj_context_errno_set (ctx, PJD_ERR_NO_COLON_IN_INIT_STRING);
+        pj_dealloc (fname);
+        pj_dealloc (line);
         return 0;
     }
     *section = 0;
@@ -111,6 +127,8 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
 
     fid = pj_open_lib (ctx, fname, "rt");
     if (0==fid) {
+        pj_dealloc (fname);
+        pj_dealloc (line);
         proj_context_errno_set (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
         return 0;
     }
@@ -121,6 +139,8 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
         /* End of file? */
         if (0==pj_ctx_fgets (ctx, line, MAX_LINE_LENGTH, fid)) {
             pj_dealloc (buffer);
+            pj_dealloc (fname);
+            pj_dealloc (line);
             proj_context_errno_set (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
             return 0;
         }
@@ -140,6 +160,8 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     /* We're at the first line of the right section - copy line to buffer */
     buffer = pj_malloc (current_buffer_size);
     if (0==buffer) {
+        pj_dealloc (fname);
+        pj_dealloc (line);
         pj_ctx_fclose (ctx, fid);
         return 0;
     }
@@ -166,7 +188,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
         /* Otherwise, handle the line. It MAY be the start of the next section, */
         /* but that will be handled at the start of next trip through the loop  */
         buffer_length = strlen (buffer);
-        next_length = strlen (line) + buffer_length + 1;
+        next_length = strlen (line) + buffer_length + 2;
         if (next_length > current_buffer_size) {
             char *b = pj_malloc (2 * current_buffer_size);
             if (0==b) {
@@ -184,6 +206,8 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     }
 
     pj_ctx_fclose (ctx, fid);
+    pj_dealloc (fname);
+    pj_dealloc (line);
     pj_shrink (buffer);
     pj_log (ctx, 3, "key=%s, found: [%s]\n", key, buffer);
     return buffer;
@@ -207,7 +231,7 @@ static paralist *get_init(PJ_CONTEXT *ctx, char *key) {
         xkey += 5;
     if (MAX_PATH_FILENAME + ID_TAG_MAX + 2 < strlen (xkey))
         return 0;
-    (void) strncpy(fname, xkey, sizeof(fname)-2);
+    memmove (fname, xkey, sizeof(fname)-2);
     fname[sizeof(fname)-2] = '\0';
 
     /* Is file/key pair already in cache? */
