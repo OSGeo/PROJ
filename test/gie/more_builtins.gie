@@ -34,8 +34,8 @@ expect    -1384841.18787 7581707.88240 0 0
 -------------------------------------------------------------------------------
 Two tests from PJ_molodensky.c
 -------------------------------------------------------------------------------
-operation proj=molodensky a=6378160 rf=298.25                \
-          da=-23  df=-8.120449e-8  dx=-134  dy=-48  dz=149   \
+operation proj=molodensky a=6378160 rf=298.25
+          da=-23  df=-8.120449e-8  dx=-134  dy=-48  dz=149
           abridged
 -------------------------------------------------------------------------------
 tolerance 2 m
@@ -47,7 +47,7 @@ roundtrip 100    1 m
 -------------------------------------------------------------------------------
 Same thing once more, but this time unabridged
 -------------------------------------------------------------------------------
-operation proj=molodensky a=6378160 rf=298.25                \
+operation proj=molodensky a=6378160 rf=298.25
           da=-23  df=-8.120449e-8  dx=-134  dy=-48  dz=149
 -------------------------------------------------------------------------------
 tolerance 2 m
@@ -67,8 +67,8 @@ Some tests from PJ_pipeline.c
 -------------------------------------------------------------------------------
 Forward-reverse geo->utm->geo
 -------------------------------------------------------------------------------
-operation proj=pipeline zone=32 step  \
-          proj=utm  ellps=GRS80 step  \
+operation proj=pipeline zone=32 step
+          proj=utm  ellps=GRS80 step
           proj=utm  ellps=GRS80 inv
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
@@ -83,8 +83,8 @@ expect 12 55 0 0
 -------------------------------------------------------------------------------
 And now the back-to-back situation utm->geo->utm
 -------------------------------------------------------------------------------
-operation proj=pipeline zone=32 ellps=GRS80 step  \
-          proj=utm inv                      step  \
+operation proj=pipeline zone=32 ellps=GRS80 step
+          proj=utm inv                      step
           proj=utm
 -------------------------------------------------------------------------------
 accept 691875.63214  6098907.82501  0  0
@@ -104,10 +104,10 @@ expect    12 55 0 0
 -------------------------------------------------------------------------------
 Finally test a pipeline with more than one init step
 -------------------------------------------------------------------------------
-operation proj=pipeline        step  \
-          init=epsg:25832 inv  step  \
-          init=epsg:25833      step  \
-          init=epsg:25833 inv  step  \
+operation proj=pipeline        step
+          init=epsg:25832 inv  step
+          init=epsg:25833      step
+          init=epsg:25833 inv  step
           init=epsg:25832
 -------------------------------------------------------------------------------
 accept    691875.63214  6098907.82501  0  0
@@ -180,6 +180,9 @@ expect    failure errno no_args
 -------------------------------------------------------------------------------
 A number of tests from PJ_helmert.c
 -------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
 This example is from Lotti Jivall: "Simplified transformations from
 ITRF2008/IGS08 to ETRS89 for maritime applications"
 -------------------------------------------------------------------------------
@@ -190,6 +193,9 @@ operation  proj=helmert ellps=GRS80
 tolerance 1 um
 accept     3565285.00000000  855949.00000000  5201383.00000000
 expect     3565285.41342351  855948.67986759  5201382.72939791
+-------------------------------------------------------------------------------
+
+
 -------------------------------------------------------------------------------
 This example is a random point, transformed from ED50 to ETRS89 using KMStrans2
 -------------------------------------------------------------------------------
@@ -202,22 +208,28 @@ tolerance  1 um
 accept     3494994.30120000 1056601.97250000 5212382.16660000
 expect     3494909.84026368 1056506.78938633 5212265.66699761
 -------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
 This example is a coordinate from the geodetic observatory in Onsala,
 Sweden transformed from ITRF2000 @ 2017.0 to ITRF93 @ 2017.0.
 
 The test coordinate was transformed using GNSStrans, using transformation
 parameters published by ITRF: ftp://itrf.ensg.ign.fr/pub/itrf/ITRF.TP
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80                        \
-           x=0.0127     y=0.0065     z=-0.0209  s=0.00195  \
-           dx=-0.0029   dy=-0.0002   dz=-0.0006 ds=0.00001 \
-           rx=-0.00039  ry=0.00080   rz=-0.00114           \
-           drx=-0.00011 dry=-0.00019 drz=0.00007           \
+operation  proj=helmert ellps=GRS80
+           x=0.0127     y=0.0065     z=-0.0209  s=0.00195
+           dx=-0.0029   dy=-0.0002   dz=-0.0006 ds=0.00001
+           rx=-0.00039  ry=0.00080   rz=-0.00114
+           drx=-0.00011 dry=-0.00019 drz=0.00007
            t_epoch=1988.0 t_obs=2017.0    transpose
 -------------------------------------------------------------------------------
 tolerance  0.03 mm
 accept     3370658.37800 711877.31400 5349787.08600  2017.0  # ITRF2000@2017.0
 expect     3370658.18890 711877.42370 5349787.12430  2017.0  # ITRF93@2017.0
+-------------------------------------------------------------------------------
+
+
 -------------------------------------------------------------------------------
 This example is from "A mathematical relationship between NAD27 and NAD83 (91)
 State Plane coordinates in Southeastern Wisconsin":
@@ -227,24 +239,27 @@ The test data is taken from p. 29. Here we are using point 203 and converting it
 from NAD27 (ft) -> NAD83 (m). The paper reports a difference of 0.0014 m from
 measured to computed coordinates, hence the test tolerance is set accordingly.
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80     \
-           x=-9597.3572 y=.6112         \
+operation  proj=helmert ellps=GRS80
+           x=-9597.3572 y=.6112
            s=0.304794780637 theta=-1.244048
 -------------------------------------------------------------------------------
 tolerance  1 mm
 accept     2546506.957 542256.609  0
 expect     766563.675  165282.277  0
 -------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
 Finally test the 4D-capabilities of the proj.h API, especially that the
 rotation matrix is updated when necessary.
 
 Test coordinates from GNSStrans.
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80                       \
-        x=0.01270    y=0.00650    z=-0.0209   s=0.00195   \
-        dx=-0.0029   dy=-0.0002   dz=-0.0006  ds=0.00001  \
-        rx=-0.00039  ry=0.00080   rz=-0.00114             \
-        drx=-0.00011 dry=-0.00019 drz=0.00007             \
+operation  proj=helmert ellps=GRS80
+        x=0.01270    y=0.00650    z=-0.0209   s=0.00195
+        dx=-0.0029   dy=-0.0002   dz=-0.0006  ds=0.00001
+        rx=-0.00039  ry=0.00080   rz=-0.00114
+        drx=-0.00011 dry=-0.00019 drz=0.00007
         t_epoch=1988.0 transpose
 -------------------------------------------------------------------------------
 tolerance  0.1 mm
