@@ -423,6 +423,7 @@ static int banner (const char *args) {
     if (strlen(args) > 70)
         thedots = dots;
     fprintf (T.fout, "%s%-70.70s%s\n", delim, args, thedots);
+    puts ("banner completed!");
     return 0;
 }
 
@@ -483,6 +484,7 @@ static int operation (char *args) {
     if (T.verbosity > 1) {
         finish_previous_operation (F->args);
         banner (args);
+        banner ("Did banner finish?");
     }
 
 
@@ -498,7 +500,9 @@ static int operation (char *args) {
         proj_destroy (T.P);
     proj_errno_reset (0);
 
+    printf ("Creating [%s]\n", F->args);
     T.P = proj_create (0, F->args);
+    puts ("created");
 
     /* Checking that proj_create succeeds is first done at "expect" time, */
     /* we want to support "expect"ing specific error codes */
