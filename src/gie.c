@@ -531,7 +531,7 @@ static int builtins (const char *args) {
     }
     T.op_ok = 0;
     T.op_ko = 0;
-
+puts ("builtins - calling unitconvert");
     i = pj_unitconvert_selftest ();
     if (i!=0) {
         printf ("pj_unitconvert_selftest fails with %d\n", i);
@@ -541,6 +541,7 @@ static int builtins (const char *args) {
         another_success ();
 
 
+puts ("builtins - calling cart");
     i = pj_cart_selftest ();
     if (i!=0) {
         printf ("pj_cart_selftest fails with %d\n", i);
@@ -549,6 +550,7 @@ static int builtins (const char *args) {
     else
         another_success ();
 
+puts ("builtins - calling horner");
     i = pj_horner_selftest ();
     if (i!=0) {
         printf ("pj_horner_selftest fails with %d\n", i);
@@ -556,6 +558,7 @@ static int builtins (const char *args) {
     }
     else
         another_success ();
+puts ("builtins - completed");
 
     return 0;
 }
@@ -1362,10 +1365,12 @@ static int pj_horner_selftest (void) {
     PJ_COORD a, b, c;
     double dist;
 
+puts ("pj_horner_selftest");
     /* Real polynonia relating the technical coordinate system TC32 to "System 45 Bornholm" */
     P = proj_create (PJ_DEFAULT_CTX, tc32_utm32);
     if (0==P)
         return 10;
+puts ("pj_horner_selftest");
 
     a = b = proj_coord (0,0,0,0);
     a.uv.v = 6125305.4245;
@@ -1376,11 +1381,13 @@ static int pj_horner_selftest (void) {
     dist = proj_roundtrip (P, PJ_FWD, 1, &c);
     if (dist > 0.01)
         return 1;
+puts ("pj_horner_selftest");
 
     /* The complex polynomial transformation between the "System Storebaelt" and utm32/ed50 */
     P = proj_create (PJ_DEFAULT_CTX, sb_utm32);
     if (0==P)
         return 11;
+puts ("pj_horner_selftest");
 
     /* Test value: utm32_ed50(620000, 6130000) = sb_ed50(495136.8544, 6130821.2945) */
     a = b = c = proj_coord (0,0,0,0);
@@ -1394,12 +1401,14 @@ static int pj_horner_selftest (void) {
     dist = proj_xy_dist (b.xy, c.xy);
     if (dist > 0.001)
         return 2;
+puts ("pj_horner_selftest");
 
     /* Inverse projection */
     b = proj_trans (P, PJ_INV, c);
     dist = proj_xy_dist (b.xy, a.xy);
     if (dist > 0.001)
         return 3;
+puts ("pj_horner_selftest");
 
     /* Check roundtrip precision for 1 iteration each way */
     dist = proj_roundtrip (P, PJ_FWD, 1, &a);
@@ -1407,6 +1416,7 @@ static int pj_horner_selftest (void) {
         return 4;
 
     proj_destroy(P);
+puts ("pj_horner_selftest - done");
     return 0;
 }
 
@@ -1447,6 +1457,7 @@ static int pj_cart_selftest (void) {
     const char *arg = {"+proj=utm +zone=32 +ellps=GRS80"};
     char buf[40];
 
+puts ("pj_cart_selftest - start");
     /* An utm projection on the GRS80 ellipsoid */
     P = proj_create (PJ_DEFAULT_CTX, arg);
     if (0==P)
@@ -1455,11 +1466,13 @@ static int pj_cart_selftest (void) {
 
     /* Clean up */
     proj_destroy (P);
+puts ("pj_cart_selftest");
 
     /* Same projection, now using argc/argv style initialization */
     P = proj_create_argv (PJ_DEFAULT_CTX, 3, args);
     if (0==P)
         return 2;
+puts ("pj_cart_selftest");
 
     /* zero initialize everything, then set (longitude, latitude) to (12, 55) */
     a = proj_coord (0,0,0,0);
@@ -1482,6 +1495,7 @@ static int pj_cart_selftest (void) {
     dist = proj_xy_dist (a.xy, b.xy);
     if (dist > 2e-9)
         return 3;
+puts ("pj_cart_selftest");
 
     /* Clear any previous error */
     proj_errno_reset (P);
@@ -1902,13 +1916,19 @@ static int pj_unitconvert_selftest (void) {
 
     char args6[] = "+proj=unitconvert +xy_in=m +xy_out=m +z_in=m +z_out=m";
     PJ_COORD in6 = {{12.3, 45.6, 7.89, 0}};
-
+puts ("pj_unitconvert_selftest - start");
     ret = test_time(args1, 1e-6, in1, in1);   if (ret) return ret + 10;
+puts ("pj_unitconvert_selftest");
     ret = test_time(args2, 1e-6, in2, in2);   if (ret) return ret + 20;
+puts ("pj_unitconvert_selftest");
     ret = test_time(args3, 1e-6, in3, in3);   if (ret) return ret + 30;
+puts ("pj_unitconvert_selftest");
     ret = test_time(args4, 1e-6, in4, exp4);  if (ret) return ret + 40;
+puts ("pj_unitconvert_selftest");
     ret = test_xyz (args5, 1e-10, in5, exp5); if (ret) return ret + 50;
+puts ("pj_unitconvert_selftest");
     ret = test_xyz (args6, 1e-10, in6, in6);  if (ret) return ret + 50;
+puts ("pj_unitconvert_selftest - done");
 
     return 0;
 
