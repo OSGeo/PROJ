@@ -1688,7 +1688,9 @@ puts ("pj_cart_selftest");
         proj_destroy(P);
         return 52;
     }
+puts ("pj_cart_selftest - a");
     proj_destroy(P);
+puts ("pj_cart_selftest - b");
 
     /* ********************************************************************** */
     /*                          Test info functions                           */
@@ -1697,6 +1699,7 @@ puts ("pj_cart_selftest");
     /* proj_info()                                                            */
     /* this one is difficult to test, since the output changes with the setup */
     info = proj_info();
+puts ("pj_cart_selftest - c");
     if (info.version[0] != '\0' ) {
         char tmpstr[64];
         sprintf(tmpstr, "%d.%d.%d", info.major, info.minor, info.patch);
@@ -1709,12 +1712,15 @@ puts ("pj_cart_selftest");
     P = proj_create(PJ_DEFAULT_CTX, "+proj=august"); /* august has no inverse */
     if (proj_pj_info(P).has_inverse) { proj_destroy(P); return 60; }
     proj_destroy(P);
+puts ("pj_cart_selftest - d");
 
     P = proj_create(PJ_DEFAULT_CTX, arg);
     pj_info = proj_pj_info(P);
     if ( !pj_info.has_inverse )            {  proj_destroy(P); return 61; }
     if ( strcmp(pj_info.definition, arg) ) {  proj_destroy(P); return 62; }
     if ( strcmp(pj_info.id, "utm") )       {  proj_destroy(P); return 63; }
+puts ("pj_cart_selftest - e");
+
     proj_destroy(P);
 puts ("pj_cart_selftest");
 
