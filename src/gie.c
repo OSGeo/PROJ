@@ -1726,18 +1726,27 @@ puts ("pj_cart_selftest");
 
     /* proj_grid_info() */
     grid_info = proj_grid_info("egm96_15.gtx");
+puts ("pj_cart_selftest - 1");
     if ( strlen(grid_info.filename) == 0 )            return 64;
+puts ("pj_cart_selftest - 64");
     if ( strcmp(grid_info.gridname, "egm96_15.gtx") ) return 65;
+puts ("pj_cart_selftest - 65");
     grid_info = proj_grid_info("nonexistinggrid");
+puts ("pj_cart_selftest - 65a");
     if ( strlen(grid_info.filename) > 0 )             return 66;
+puts ("pj_cart_selftest - 66");
 
     /* proj_init_info() */
     init_info = proj_init_info("unknowninit");
+puts ("pj_cart_selftest - 66a");
     if ( strlen(init_info.filename) != 0 )  return 67;
+puts ("pj_cart_selftest - 67");
 
     init_info = proj_init_info("epsg");
+puts ("pj_cart_selftest - 67a");
     /* Need to allow for "Unknown" until all commonly distributed EPSG-files comes with a metadata section */
     if ( strcmp(init_info.origin, "EPSG") && strcmp(init_info.origin, "Unknown") )    return 69;
+puts ("pj_cart_selftest - 69");
     if ( strcmp(init_info.name, "epsg") )      return 68;
 puts ("pj_cart_selftest - 68");
 
