@@ -1653,6 +1653,7 @@ puts ("pj_cart_selftest - 28");
     coord[1] = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
     if (proj_trans_array (P, PJ_FWD, 2, coord))
         return 40;
+puts ("pj_cart_selftest");
 
     if (a.lpz.lam != coord[0].lpz.lam)  return 41;
     if (a.lpz.phi != coord[0].lpz.phi)  return 42;
@@ -1663,6 +1664,7 @@ puts ("pj_cart_selftest - 28");
 
     /* Clean up  after proj_trans_* tests */
     proj_destroy (P);
+puts ("pj_cart_selftest");
 
     /* test proj_create_crs_to_crs() */
     P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "epsg:25832", "epsg:25833", NULL);
@@ -1678,6 +1680,7 @@ puts ("pj_cart_selftest - 28");
     if (dist > 1e-7)
         return 51;
     proj_destroy(P);
+puts ("pj_cart_selftest");
 
     /* let's make sure that only entries in init-files results in a usable PJ */
     P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "proj=utm +zone=32 +datum=WGS84", "proj=utm +zone=33 +datum=WGS84", NULL);
@@ -1713,6 +1716,7 @@ puts ("pj_cart_selftest - 28");
     if ( strcmp(pj_info.definition, arg) ) {  proj_destroy(P); return 62; }
     if ( strcmp(pj_info.id, "utm") )       {  proj_destroy(P); return 63; }
     proj_destroy(P);
+puts ("pj_cart_selftest");
 
     /* proj_grid_info() */
     grid_info = proj_grid_info("egm96_15.gtx");
@@ -1729,6 +1733,7 @@ puts ("pj_cart_selftest - 28");
     /* Need to allow for "Unknown" until all commonly distributed EPSG-files comes with a metadata section */
     if ( strcmp(init_info.origin, "EPSG") && strcmp(init_info.origin, "Unknown") )    return 69;
     if ( strcmp(init_info.name, "epsg") )      return 68;
+puts ("pj_cart_selftest - 68");
 
 
 
@@ -1756,6 +1761,7 @@ puts ("pj_cart_selftest - 28");
     factors = proj_factors(P, a.lp);
     if (proj_errno(P))
         return 85; /* factors not created correctly */
+puts ("pj_cart_selftest");
 
     /* check a few key characteristics of the Mercator projection */
     if (factors.angular_distortion != 0.0)  return 86; /* angular distortion should be 0 */
@@ -1781,6 +1787,7 @@ puts ("pj_cart_selftest - 28");
     for (pm_list = proj_list_prime_meridians(); pm_list->id; ++pm_list) n++;
     if (n == 0) return 93;
 
+puts ("pj_cart_selftest");
 
     /* check io-predicates */
 
@@ -1797,6 +1804,7 @@ puts ("pj_cart_selftest - 28");
     if (!proj_angular_output (P, PJ_FWD)) return 106;
     if ( proj_angular_output (P, PJ_INV)) return 107;
     proj_destroy(P);
+puts ("pj_cart_selftest");
 
     /* angular in and out */
     P = proj_create(PJ_DEFAULT_CTX,
@@ -1815,6 +1823,7 @@ puts ("pj_cart_selftest - 28");
     if (!proj_angular_output (P, PJ_FWD)) return 114;
     if (!proj_angular_output (P, PJ_INV)) return 115;
     proj_destroy(P);
+puts ("pj_cart_selftest");
 
     /* linear in and out */
     P = proj_create(PJ_DEFAULT_CTX,
@@ -1836,6 +1845,7 @@ puts ("pj_cart_selftest - 28");
     if (proj_angular_output (P, PJ_FWD)) return 122;
     if (proj_angular_output (P, PJ_INV)) return 123;
     proj_destroy(P);
+puts ("pj_cart_selftest - done");
 
 
     return 0;
