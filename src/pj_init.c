@@ -140,6 +140,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
             pj_dealloc (buffer);
             pj_dealloc (fname);
             pj_dealloc (line);
+            pj_ctx_fclose (ctx, fid);
             proj_context_errno_set (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
             return 0;
         }
@@ -207,6 +208,8 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     pj_ctx_fclose (ctx, fid);
     pj_dealloc (fname);
     pj_dealloc (line);
+    if (0==buffer)
+        return 0;
     pj_shrink (buffer);
     pj_log (ctx, 3, "key=%s, found: [%s]\n", key, buffer);
     return buffer;
@@ -217,9 +220,9 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
 /************************************************************************/
 static paralist *get_init(PJ_CONTEXT *ctx, char *key) {
 /*************************************************************************
-    Expand key from buffer or (if not in buffer) from init file
+Expand key from buffer or (if not in buffer) from init file
 *************************************************************************/
-    char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *xkey, *section;
+    char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *xkey, *definition;
     paralist *init_items = 0;
 
     /* support "init=file:section", "+init=file:section", and "file:section" format */
@@ -239,11 +242,11 @@ static paralist *get_init(PJ_CONTEXT *ctx, char *key) {
         return init_items;
 
     /* If not, we must read it from file */
-    section = get_init_string (ctx, xkey);
-    if (0==section)
+    definition = get_init_string (ctx, xkey);
+    if (0==definition)
         return 0;
-    init_items = string_to_paralist (ctx, section);
-    pj_dealloc (section);
+    init_items = string_to_paralist (ctx, definition);
+    pj_dealloc (definition);
     if (0==init_items)
         return 0;
 
