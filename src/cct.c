@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
     }
 
     /* Setup transformation */
-    P = proj_create_argv (0, o->pargc, (const char **) o->pargv);
+    P = proj_create_argv (0, o->pargc, o->pargv);
     if ((0==P) || (0==o->pargc)) {
         fprintf (stderr, "%s: Bad transformation arguments - (%s)\n    '%s -h' for help\n",
                  o->progname, pj_strerrno (proj_errno(P)), o->progname);

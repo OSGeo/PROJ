@@ -1057,8 +1057,6 @@ static int errmsg (int errlev, const char *msg, ...) {
 
 
 
-typedef struct ffio ffio;
-
 static int get_inp (ffio *F);
 static int skip_to_next_tag (ffio *F);
 static int step_into_gie_block (ffio *F);
@@ -1444,7 +1442,7 @@ static int pj_cart_selftest (void) {
     int err;
     size_t n, sz;
     double dist, h, t;
-    const char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
+    char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
     const char *arg = {"+proj=utm +zone=32 +ellps=GRS80"};
     char buf[40];
 

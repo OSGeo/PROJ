@@ -209,7 +209,7 @@ considered whitespace.
 /*****************************************************************************/
 char *pj_shrink (char *c) {
 /******************************************************************************
-Collapse repeated whitespace, remove '+' and ';', make ',' and '=' greedy,
+Collapse repeated whitespace. Remove '+' and ';'. Make ',' and '=' greedy,
 eating their surrounding whitespace.
 ******************************************************************************/
     size_t i, j, n;
@@ -312,7 +312,8 @@ It is the duty of the caller to free this array.
 ******************************************************************************/
     size_t i, j;
     char **argv;
-    /* turn the massaged input into an array of strings */
+
+    /* turn the input string into an array of strings */
     argv = (char **) calloc (argc, sizeof (char *));
     if (0==argv)
         return 0;
@@ -330,7 +331,7 @@ It is the duty of the caller to free this array.
 
 
 /*****************************************************************************/
-char *pj_make_args (size_t argc, const char **argv) {
+char *pj_make_args (size_t argc, char **argv) {
 /******************************************************************************
 pj_make_args is the inverse of the pj_trim_argc/pj_trim_argv combo: It
 converts free format command line input to something proj_create can eat.
@@ -357,7 +358,6 @@ array.
     }
     return pj_shrink (p);
 }
-
 
 
 

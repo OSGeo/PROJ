@@ -418,7 +418,7 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
 
 
 /*************************************************************************************/
-PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, const char **argv) {
+PJ *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv) {
 /**************************************************************************************
 Create a new PJ object in the context ctx, using the given definition argument
 array argv. If ctx==0, the default context is used, if definition==0, or invalid,

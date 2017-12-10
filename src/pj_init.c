@@ -99,7 +99,6 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
         return 0;
     }
 
-
     /* Support "init=file:section", "+init=file:section", and "file:section" format */
     key = strstr (name, "init=");
     if (0==key)
