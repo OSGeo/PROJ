@@ -282,19 +282,15 @@ int main (int argc, char **argv) {
         return 0;
     }
 
-puts ("before ffio_create");
     F = ffio_create (gie_tags, n_gie_tags, 1000);
-puts ("after ffio_create");
     if (0==F) {
         fprintf (stderr, "%s: No memory\n", o->progname);
         free (o);
         return 1;
     }
-puts ("after ffio_create handler");
 
     for (i = 0;  i < o->fargc;  i++)
         process_file (o->fargv[i]);
-puts ("after file handler");
 
     if (T.verbosity > 0) {
         if (o->fargc > 1)
@@ -501,9 +497,10 @@ static int operation (char *args) {
     if (T.P)
         proj_destroy (T.P);
     proj_errno_reset (0);
+
     T.P = proj_create (0, F->args);
 
-    /* Checking thst proj_create succeeds is first done at "expect" time, */
+    /* Checking that proj_create succeeds is first done at "expect" time, */
     /* we want to support "expect"ing specific error codes */
 
     return 0;
