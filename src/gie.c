@@ -279,6 +279,7 @@ int main (int argc, char **argv) {
         if (T.verbosity==-1)
             return -1;
         fprintf (T.fout, "Nothing to do\n");
+        free (o);
         return 0;
     }
 
@@ -1507,6 +1508,7 @@ puts ("pj_cart_selftest");
     err = proj_errno (P);
     if (0==err)
         return 5;
+puts ("pj_cart_selftest");
 
     /* Clear error again */
     proj_errno_reset (P);
@@ -1518,6 +1520,7 @@ puts ("pj_cart_selftest");
     P = proj_create (PJ_DEFAULT_CTX, "+proj=cart +ellps=GRS80");
     if (0==P)
         return 6;
+puts ("pj_cart_selftest");
 
     /* zero initialize everything, then set (longitude, latitude, height) to (12, 55, 100) */
     a = b = proj_coord (0,0,0,0);
@@ -1533,6 +1536,7 @@ puts ("pj_cart_selftest");
     dist = proj_roundtrip (P, PJ_INV, 10000, &b);
     if (dist > 2e-9)
         return 7;
+puts ("pj_cart_selftest");
 
 
     /* Test at the North Pole */
@@ -1545,6 +1549,7 @@ puts ("pj_cart_selftest");
     dist = proj_roundtrip (P, PJ_FWD, 1, &a);
     if (dist > 1e-12)
         return 8;
+puts ("pj_cart_selftest");
 
     /* Test at the South Pole */
     a = b = proj_coord (0,0,0,0);
@@ -1557,6 +1562,7 @@ puts ("pj_cart_selftest");
     dist = proj_roundtrip (P, PJ_FWD, 1, &a);
     if (dist > 1e-12)
         return 9;
+puts ("pj_cart_selftest");
 
 
     /* Inverse projection: 3D-Cartesian-to-Ellipsoidal */
@@ -1566,15 +1572,18 @@ puts ("pj_cart_selftest");
     ctx = proj_context_create ();
     if (ctx==pj_get_default_ctx())
         return 10;
+puts ("pj_cart_selftest - 10");
     proj_context_set (P, ctx);
     if (ctx != P->ctx)
         return 11;
+puts ("pj_cart_selftest");
     b = proj_trans (P, PJ_FWD, b);
 
     /* Move it back to the default context */
     proj_context_set (P, 0);
     if (pj_get_default_ctx() != P->ctx)
         return 12;
+puts ("pj_cart_selftest");
     proj_context_destroy (ctx);
 
     /* We go on with the work - now back on the default context */
@@ -1588,6 +1597,7 @@ puts ("pj_cart_selftest");
     P = proj_create (PJ_DEFAULT_CTX, "+proj=utm +zone=32 +ellps=GRS80");
     if (0==P)
         return 13;
+puts ("pj_cart_selftest");
 
     obs[0] = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
     obs[1] = proj_coord (PJ_TORAD(12), PJ_TORAD(56), 50, 0);
@@ -1612,6 +1622,7 @@ puts ("pj_cart_selftest");
     if (b.lpz.lam != obs[1].lpz.lam)  return 18;
     if (b.lpz.phi != obs[1].lpz.phi)  return 19;
     if (b.lpz.z   != obs[1].lpz.z)    return 20;
+puts ("pj_cart_selftest");
 
     /* now test the case of constant z */
     obs[0] = proj_coord (PJ_TORAD(12), PJ_TORAD(55), 45, 0);
@@ -1634,6 +1645,7 @@ puts ("pj_cart_selftest");
     if (b.lpz.phi != obs[1].lpz.phi)  return 26;
     if (50            != obs[1].lpz.z)    return 27; /* NOTE: unchanged */
     if (50==h) return 28;
+puts ("pj_cart_selftest - 28");
 
     /* test proj_trans_array () */
 
