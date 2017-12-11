@@ -274,6 +274,8 @@ static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
     if (pj_param_exists (start, "no_defs"))
         return start;
     proj = pj_param_exists (start, "proj");
+    if (0==proj)
+        return start;
     if (strlen (proj->param) < 6)
         return start;
     if (0==strcmp ("pipeline", proj->param + 5))
