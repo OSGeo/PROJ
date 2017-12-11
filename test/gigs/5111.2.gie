@@ -1,0 +1,444 @@
+--------------------------------------------------------------------------------
+
+Test 5111 (part 2), Mercator (variant A), v2-0_2011-06-28.
+
+--------------------------------------------------------------------------------
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4813 +inv
+           +step +proj=merc +lon_0=110 +k=0.997 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m +no_defs
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    -6.7200711 77.6534822
+expect    2800000.0 15000000.0
+
+tolerance  0.05 m
+accept    -6.7200711 73.1442856
+expect    2800000.0 13000000.0
+
+tolerance  0.05 m
+accept    -6.7200711 67.0518325
+expect    2800000.0 11000000.0
+
+tolerance  0.05 m
+accept    -6.7200711 58.9140458
+expect    2800000.0 9000000.0
+
+tolerance  0.05 m
+accept    -6.7200711 48.2638981
+expect    2800000.0 7000000.0
+
+tolerance  0.05 m
+accept    -6.7200711 34.8029044
+expect    2800000.0 5000000.0
+
+tolerance  0.05 m
+accept    -6.7200711 18.7048581
+expect    2800000.0 3000000.0
+
+tolerance  0.05 m
+accept    -6.7200711 0.9071392
+expect    2800000.0 1000000.0
+
+tolerance  0.05 m
+accept    3.1922806 0.0
+expect    3900000.0 900000.0
+
+tolerance  0.05 m
+accept    -6.7200711 0.9071392
+expect    2800000.0 800000.0
+
+tolerance  0.05 m
+accept    -6.7200711 1.8140483
+expect    2800000.0 700000.0
+
+tolerance  0.05 m
+accept    -6.7200711 2.0
+expect    2800000.0 679490.65
+
+tolerance  0.05 m
+accept    -6.7200711 3.6262553
+expect    2800000.0 500000.0
+
+tolerance  0.05 m
+accept    -6.7200711 4.531095
+expect    2800000.0 400000.0
+
+tolerance  0.05 m
+accept    -6.7200711 5.4347892
+expect    2800000.0 300000.0
+
+tolerance  0.05 m
+accept    -6.7200711 6.3371111
+expect    2800000.0 200000.0
+
+tolerance  0.05 m
+accept    -6.7200711 7.2378372
+expect    2800000.0 100000.0
+
+tolerance  0.05 m
+accept    -31.9515111 8.136745
+expect    0.0 0.0
+
+tolerance  0.05 m
+accept    -177.8077194 2.0
+expect    23764105.84 679490.65
+
+tolerance  0.05 m
+accept    163.1922806 2.0
+expect    21655625.33 679490.65
+
+tolerance  0.05 m
+accept    133.1922806 2.0
+expect    18326445.58 679490.65
+
+tolerance  0.05 m
+accept    103.1922806 2.0
+expect    14997265.83 679490.65
+
+tolerance  0.05 m
+accept    73.1922806 2.0
+expect    11668086.08 679490.65
+
+tolerance  0.05 m
+accept    43.1922806 2.0
+expect    8338906.33 679490.65
+
+tolerance  0.05 m
+accept    13.1922806 2.0
+expect    5009726.58 679490.65
+
+tolerance  0.05 m
+accept    3.1922806 2.0
+expect    3900000.0 679490.65
+
+tolerance  0.05 m
+accept    0.0 2.0
+expect    3545744.14 679490.65
+
+tolerance  0.05 m
+accept    -6.7200711 2.0
+expect    2800000.0 679490.65
+
+tolerance  0.05 m
+accept    -16.8077194 2.0
+expect    1680546.83 679490.65
+
+tolerance  0.05 m
+accept    -46.8077194 2.0
+expect    -1648632.92 679490.65
+
+tolerance  0.05 m
+accept    -76.8077194 2.0
+expect    -4977812.67 679490.65
+
+tolerance  0.05 m
+accept    -106.8077194 2.0
+expect    -8306992.42 679490.65
+
+tolerance  0.05 m
+accept    -136.8077194 2.0
+expect    -11636172.17 679490.65
+
+tolerance  0.05 m
+accept    -166.8077194 2.0
+expect    -14965351.92 679490.65
+
+tolerance  0.05 m
+accept    -175.8077194 2.0
+expect    -15964105.84 679490.65
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +proj=merc +lon_0=110 +k=0.997 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m +no_defs +inv
+           +step +init=epsg:4813
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    2800000.0 15000000.0
+expect    -6.7200711 77.6534822
+
+tolerance  0.05 m
+accept    2800000.0 13000000.0
+expect    -6.7200711 73.1442856
+
+tolerance  0.05 m
+accept    2800000.0 11000000.0
+expect    -6.7200711 67.0518325
+
+tolerance  0.05 m
+accept    2800000.0 9000000.0
+expect    -6.7200711 58.9140458
+
+tolerance  0.05 m
+accept    2800000.0 7000000.0
+expect    -6.7200711 48.2638981
+
+tolerance  0.05 m
+accept    2800000.0 5000000.0
+expect    -6.7200711 34.8029044
+
+tolerance  0.05 m
+accept    2800000.0 3000000.0
+expect    -6.7200711 18.7048581
+
+tolerance  0.05 m
+accept    2800000.0 1000000.0
+expect    -6.7200711 0.9071392
+
+tolerance  0.05 m
+accept    3900000.0 900000.0
+expect    3.1922806 0.0
+
+tolerance  0.05 m
+accept    2800000.0 800000.0
+expect    -6.7200711 0.9071392
+
+tolerance  0.05 m
+accept    2800000.0 700000.0
+expect    -6.7200711 1.8140483
+
+tolerance  0.05 m
+accept    2800000.0 679490.65
+expect    -6.7200711 2.0
+
+tolerance  0.05 m
+accept    2800000.0 500000.0
+expect    -6.7200711 3.6262553
+
+tolerance  0.05 m
+accept    2800000.0 400000.0
+expect    -6.7200711 4.531095
+
+tolerance  0.05 m
+accept    2800000.0 300000.0
+expect    -6.7200711 5.4347892
+
+tolerance  0.05 m
+accept    2800000.0 200000.0
+expect    -6.7200711 6.3371111
+
+tolerance  0.05 m
+accept    2800000.0 100000.0
+expect    -6.7200711 7.2378372
+
+tolerance  0.05 m
+accept    0.0 0.0
+expect    -31.9515111 8.136745
+
+tolerance  0.05 m
+accept    23764105.84 679490.65
+expect    -177.8077194 2.0
+
+tolerance  0.05 m
+accept    21655625.33 679490.65
+expect    163.1922806 2.0
+
+tolerance  0.05 m
+accept    18326445.58 679490.65
+expect    133.1922806 2.0
+
+tolerance  0.05 m
+accept    14997265.83 679490.65
+expect    103.1922806 2.0
+
+tolerance  0.05 m
+accept    11668086.08 679490.65
+expect    73.1922806 2.0
+
+tolerance  0.05 m
+accept    8338906.33 679490.65
+expect    43.1922806 2.0
+
+tolerance  0.05 m
+accept    5009726.58 679490.65
+expect    13.1922806 2.0
+
+tolerance  0.05 m
+accept    3900000.0 679490.65
+expect    3.1922806 2.0
+
+tolerance  0.05 m
+accept    3545744.14 679490.65
+expect    0.0 2.0
+
+tolerance  0.05 m
+accept    2800000.0 679490.65
+expect    -6.7200711 2.0
+
+tolerance  0.05 m
+accept    1680546.83 679490.65
+expect    -16.8077194 2.0
+
+tolerance  0.05 m
+accept    -1648632.92 679490.65
+expect    -46.8077194 2.0
+
+tolerance  0.05 m
+accept    -4977812.67 679490.65
+expect    -76.8077194 2.0
+
+tolerance  0.05 m
+accept    -8306992.42 679490.65
+expect    -106.8077194 2.0
+
+tolerance  0.05 m
+accept    -11636172.17 679490.65
+expect    -136.8077194 2.0
+
+tolerance  0.05 m
+accept    -14965351.92 679490.65
+expect    -166.8077194 2.0
+
+tolerance  0.05 m
+accept    -15964105.84 679490.65
+expect    -175.8077194 2.0
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4813 +inv
+           +step +proj=merc +lon_0=110 +k=0.997 +x_0=3900000 +y_0=900000 +ellps=bessel +units=m +no_defs
+--------------------------------------------------------------------------------
+tolerance  0.006 m
+accept    -6.7200711 77.6534822
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 73.1442856
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 67.0518325
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 58.9140458
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 48.2638981
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 34.8029044
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 18.7048581
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 0.9071392
+roundtrip 1000
+
+tolerance  0.006 m
+accept    3.1922806 0.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 0.9071392
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 1.8140483
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 3.6262553
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 4.531095
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 5.4347892
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 6.3371111
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 7.2378372
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -31.9515111 8.136745
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -177.8077194 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    163.1922806 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    133.1922806 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    103.1922806 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    73.1922806 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    43.1922806 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    13.1922806 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    3.1922806 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    0.0 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -6.7200711 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -16.8077194 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -46.8077194 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -76.8077194 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -106.8077194 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -136.8077194 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -166.8077194 2.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -175.8077194 2.0
+roundtrip 1000
+
+</gie>
