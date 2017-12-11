@@ -1,0 +1,180 @@
+--------------------------------------------------------------------------------
+
+Test 5107, American Polyconic, v2-0_2011-06-28.
+
+--------------------------------------------------------------------------------
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4674 +inv
+           +step +proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    -54 0
+expect    5000000.0 10000000.0
+
+tolerance  0.05 m
+accept    -45 6
+expect    5996378.70982 10671650.0559
+
+tolerance  0.05 m
+accept    -45 0
+expect    6001875.41714 10000000.0
+
+tolerance  0.05 m
+accept    -45 -6
+expect    5996378.70982 9328349.94408
+
+tolerance  0.05 m
+accept    -41 -13
+expect    6409689.58688 8526306.26193
+
+tolerance  0.05 m
+accept    -38 -20
+expect    6671808.91963 7707735.72988
+
+tolerance  0.05 m
+accept    -37 -24
+expect    6725584.49173 7240461.99578
+
+tolerance  0.05 m
+accept    -36 -30
+expect    6729619.73995 6543762.57644
+
+tolerance  0.05 m
+accept    -57 -30
+expect    4710574.22344 6676097.81117
+
+tolerance  0.05 m
+accept    -54 -29.3674766667
+expect    5000000.0 6750000.0
+
+tolerance  0.05 m
+accept    -47 -27.5
+expect    5691318.14689 6937461.05067
+
+tolerance  0.05 m
+accept    -37 -24
+expect    6725584.49173 7240461.99578
+
+tolerance  0.05 m
+accept    -30 -22.5
+expect    7458947.70133 7313327.31691
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  +inv
+           +step +init=epsg:4674
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    5000000.0 10000000.0
+expect    -54 0
+
+tolerance  0.05 m
+accept    5996378.70982 10671650.0559
+expect    -45 6
+
+tolerance  0.05 m
+accept    6001875.41714 10000000.0
+expect    -45 0
+
+tolerance  0.05 m
+accept    5996378.70982 9328349.94408
+expect    -45 -6
+
+tolerance  0.05 m
+accept    6409689.58688 8526306.26193
+expect    -41 -13
+
+tolerance  0.05 m
+accept    6671808.91963 7707735.72988
+expect    -38 -20
+
+tolerance  0.05 m
+accept    6725584.49173 7240461.99578
+expect    -37 -24
+
+tolerance  0.05 m
+accept    6729619.73995 6543762.57644
+expect    -36 -30
+
+tolerance  0.05 m
+accept    4710574.22344 6676097.81117
+expect    -57 -30
+
+tolerance  0.05 m
+accept    5000000.0 6750000.0
+expect    -54 -29.3674766667
+
+tolerance  0.05 m
+accept    5691318.14689 6937461.05067
+expect    -47 -27.5
+
+tolerance  0.05 m
+accept    6725584.49173 7240461.99578
+expect    -37 -24
+
+tolerance  0.05 m
+accept    7458947.70133 7313327.31691
+expect    -30 -22.5
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4674 +inv
+           +step +proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 
+--------------------------------------------------------------------------------
+tolerance  0.006 m
+accept    -54 0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -45 6
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -45 0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -45 -6
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -41 -13
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -38 -20
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -37 -24
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -36 -30
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -57 -30
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -54 -29.3674766667
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -47 -27.5
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -37 -24
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -30 -22.5
+roundtrip 1000
+
+</gie>

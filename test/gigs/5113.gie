@@ -1,0 +1,84 @@
+--------------------------------------------------------------------------------
+
+Test 5113, Transverse Mercator (South Oriented), v2-0_2011-06-28.
+
+--------------------------------------------------------------------------------
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4148 +inv
+           +step +init=epsg:2049
+--------------------------------------------------------------------------------
+tolerance  0.03 m
+accept    22.5 0.0
+expect    -166998.44 0.0
+
+tolerance  0.03 m
+accept    21.5 -25.0
+expect    -50475.46 2766147.25
+
+tolerance  0.03 m
+accept    20.5 -30.0
+expect    48243.45 3320218.65
+
+tolerance  0.03 m
+accept    19.5 -35.0
+expect    136937.65 3875621.18
+
+tolerance  0.03 m
+accept    19.5 -35.0
+expect    136937.65 3875621.18
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:2049 +inv
+           +step +init=epsg:4148
+--------------------------------------------------------------------------------
+tolerance  0.03 m
+accept    -166998.44 0.0
+expect    22.5 0.0
+
+tolerance  0.03 m
+accept    -50475.46 2766147.25
+expect    21.5 -25.0
+
+tolerance  0.03 m
+accept    48243.45 3320218.65
+expect    20.5 -30.0
+
+tolerance  0.03 m
+accept    136937.65 3875621.18
+expect    19.5 -35.0
+
+tolerance  0.03 m
+accept    136937.65 3875621.18
+expect    19.5 -35.0
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4148 +inv
+           +step +init=epsg:2049
+--------------------------------------------------------------------------------
+tolerance  0.006 m
+accept    22.5 0.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    21.5 -25.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    20.5 -30.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    19.5 -35.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    19.5 -35.0
+roundtrip 1000
+
+</gie>

@@ -1,0 +1,300 @@
+--------------------------------------------------------------------------------
+
+Test 5105 (part 1), Oblique Mercator (variant B), v2-0_2011-06-28.
+
+--------------------------------------------------------------------------------
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4742 +inv
+           +step +proj=somerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +no_uoff +gamma=53.13010236111111 +ellps=GRS80 +units=m +no_defs
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    117 12
+expect    807919.14 1329535.33
+
+tolerance  0.05 m
+accept    117 10
+expect    808784.98 1107678.47
+
+tolerance  0.05 m
+accept    117 9
+expect    809334.18 996918.21
+
+tolerance  0.05 m
+accept    117 8
+expect    809939.3 886240.18
+
+tolerance  0.05 m
+accept    116.8465522 6.8784583
+expect    793704.63 762081.05
+
+tolerance  0.05 m
+accept    117 6
+expect    811253.3 665041.27
+
+tolerance  0.05 m
+accept    117 5
+expect    811930.35 554475.63
+
+tolerance  0.05 m
+accept    117 4
+expect    812599.58 443902.71
+
+tolerance  0.05 m
+accept    115 4
+expect    590521.15 442890.86
+
+tolerance  0.05 m
+accept    117 3
+expect    813245.13 333300.13
+
+tolerance  0.05 m
+accept    117 2
+expect    813851.07 222645.51
+
+tolerance  0.05 m
+accept    117.0 1.0
+expect    814401.38 111916.45
+
+tolerance  0.05 m
+accept    109.6858208 -0.0001733
+expect    0 0
+
+tolerance  0.05 m
+accept    123 6
+expect    1475669.28 673118.57
+
+tolerance  0.05 m
+accept    122 6
+expect    1364854.86 671146.25
+
+tolerance  0.05 m
+accept    121 6
+expect    1254086.17 669446.25
+
+tolerance  0.05 m
+accept    120.0 6.0
+expect    1143352.6 668002.07
+
+tolerance  0.05 m
+accept    119.0 6.0
+expect    1032643.31 666797.35
+
+tolerance  0.05 m
+accept    118.0 6.0
+expect    921947.29 665815.82
+
+tolerance  0.05 m
+accept    117.0 6.0
+expect    811253.3 665041.27
+
+tolerance  0.05 m
+accept    116.0 6.0
+expect    700549.97 664457.59
+
+tolerance  0.05 m
+accept    115.0 6.0
+expect    589825.71 664048.72
+
+tolerance  0.05 m
+accept    114 6
+expect    479068.802 663798.63
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +proj=somerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +no_uoff +gamma=53.13010236111111 +ellps=GRS80 +units=m +no_defs +inv
+           +step +init=epsg:4742
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    807919.14 1329535.33
+expect    117 12
+
+tolerance  0.05 m
+accept    808784.98 1107678.47
+expect    117 10
+
+tolerance  0.05 m
+accept    809334.18 996918.21
+expect    117 9
+
+tolerance  0.05 m
+accept    809939.3 886240.18
+expect    117 8
+
+tolerance  0.05 m
+accept    793704.63 762081.05
+expect    116.8465522 6.8784583
+
+tolerance  0.05 m
+accept    811253.3 665041.27
+expect    117 6
+
+tolerance  0.05 m
+accept    811930.35 554475.63
+expect    117 5
+
+tolerance  0.05 m
+accept    812599.58 443902.71
+expect    117 4
+
+tolerance  0.05 m
+accept    590521.15 442890.86
+expect    115 4
+
+tolerance  0.05 m
+accept    813245.13 333300.13
+expect    117 3
+
+tolerance  0.05 m
+accept    813851.07 222645.51
+expect    117 2
+
+tolerance  0.05 m
+accept    814401.38 111916.45
+expect    117.0 1.0
+
+tolerance  0.05 m
+accept    0 0
+expect    109.6858208 -0.0001733
+
+tolerance  0.05 m
+accept    1475669.28 673118.57
+expect    123 6
+
+tolerance  0.05 m
+accept    1364854.86 671146.25
+expect    122 6
+
+tolerance  0.05 m
+accept    1254086.17 669446.25
+expect    121 6
+
+tolerance  0.05 m
+accept    1143352.6 668002.07
+expect    120.0 6.0
+
+tolerance  0.05 m
+accept    1032643.31 666797.35
+expect    119.0 6.0
+
+tolerance  0.05 m
+accept    921947.29 665815.82
+expect    118.0 6.0
+
+tolerance  0.05 m
+accept    811253.3 665041.27
+expect    117.0 6.0
+
+tolerance  0.05 m
+accept    700549.97 664457.59
+expect    116.0 6.0
+
+tolerance  0.05 m
+accept    589825.71 664048.72
+expect    115.0 6.0
+
+tolerance  0.05 m
+accept    479068.802 663798.63
+expect    114 6
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4742 +inv
+           +step +proj=somerc +lat_0=4 +lonc=115 +alpha=53.31580995 +k=0.99984 +x_0=0 +y_0=0 +no_uoff +gamma=53.13010236111111 +ellps=GRS80 +units=m +no_defs
+--------------------------------------------------------------------------------
+tolerance  0.006 m
+accept    117 12
+roundtrip 1000
+
+tolerance  0.006 m
+accept    117 10
+roundtrip 1000
+
+tolerance  0.006 m
+accept    117 9
+roundtrip 1000
+
+tolerance  0.006 m
+accept    117 8
+roundtrip 1000
+
+tolerance  0.006 m
+accept    116.8465522 6.8784583
+roundtrip 1000
+
+tolerance  0.006 m
+accept    117 6
+roundtrip 1000
+
+tolerance  0.006 m
+accept    117 5
+roundtrip 1000
+
+tolerance  0.006 m
+accept    117 4
+roundtrip 1000
+
+tolerance  0.006 m
+accept    115 4
+roundtrip 1000
+
+tolerance  0.006 m
+accept    117 3
+roundtrip 1000
+
+tolerance  0.006 m
+accept    117 2
+roundtrip 1000
+
+tolerance  0.006 m
+accept    117.0 1.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    109.6858208 -0.0001733
+roundtrip 1000
+
+tolerance  0.006 m
+accept    123 6
+roundtrip 1000
+
+tolerance  0.006 m
+accept    122 6
+roundtrip 1000
+
+tolerance  0.006 m
+accept    121 6
+roundtrip 1000
+
+tolerance  0.006 m
+accept    120.0 6.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    119.0 6.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    118.0 6.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    117.0 6.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    116.0 6.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    115.0 6.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    114 6
+roundtrip 1000
+
+</gie>

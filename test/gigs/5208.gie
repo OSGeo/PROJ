@@ -1,0 +1,192 @@
+--------------------------------------------------------------------------------
+
+Test 5208, Longitude Rotation, v2.0_2011-06-28.
+
+--------------------------------------------------------------------------------
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4275 +inv
+           +step +init=epsg:4807
+--------------------------------------------------------------------------------
+tolerance  2.77777777778e-07 m
+accept    5 58
+expect    2.66277083 58
+
+tolerance  2.77777777778e-07 m
+accept    5 56
+expect    2.66277083 56
+
+tolerance  2.77777777778e-07 m
+accept    5 55
+expect    2.66277083 55
+
+tolerance  2.77777777778e-07 m
+accept    5 53
+expect    2.66277083 53
+
+tolerance  2.77777777778e-07 m
+accept    4 51
+expect    1.66277083 51
+
+tolerance  2.77777777778e-07 m
+accept    4 49
+expect    1.66277083 49
+
+tolerance  2.77777777778e-07 m
+accept    2.33722917 46.8
+expect    0 46.8
+
+tolerance  2.77777777778e-07 m
+accept    3 53
+expect    0.66277083 53
+
+tolerance  2.77777777778e-07 m
+accept    4 53
+expect    1.66277083 53
+
+tolerance  2.77777777778e-07 m
+accept    6 53
+expect    3.66277083 53
+
+tolerance  2.77777777778e-07 m
+accept    7 53
+expect    4.66277083 53
+
+tolerance  2.77777777778e-07 m
+accept    9 53
+expect    6.66277083 53
+
+tolerance  2.77777777778e-07 m
+accept    10 53
+expect    7.66277083 53
+
+tolerance  2.77777777778e-07 m
+accept    11 53
+expect    8.66277083 53
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4807 +inv
+           +step +init=epsg:4275
+--------------------------------------------------------------------------------
+tolerance  2.77777777778e-07 m
+accept    2.66277083 58
+expect    5 58
+
+tolerance  2.77777777778e-07 m
+accept    2.66277083 56
+expect    5 56
+
+tolerance  2.77777777778e-07 m
+accept    2.66277083 55
+expect    5 55
+
+tolerance  2.77777777778e-07 m
+accept    2.66277083 53
+expect    5 53
+
+tolerance  2.77777777778e-07 m
+accept    1.66277083 51
+expect    4 51
+
+tolerance  2.77777777778e-07 m
+accept    1.66277083 49
+expect    4 49
+
+tolerance  2.77777777778e-07 m
+accept    0 46.8
+expect    2.33722917 46.8
+
+tolerance  2.77777777778e-07 m
+accept    0.66277083 53
+expect    3 53
+
+tolerance  2.77777777778e-07 m
+accept    1.66277083 53
+expect    4 53
+
+tolerance  2.77777777778e-07 m
+accept    3.66277083 53
+expect    6 53
+
+tolerance  2.77777777778e-07 m
+accept    4.66277083 53
+expect    7 53
+
+tolerance  2.77777777778e-07 m
+accept    6.66277083 53
+expect    9 53
+
+tolerance  2.77777777778e-07 m
+accept    7.66277083 53
+expect    10 53
+
+tolerance  2.77777777778e-07 m
+accept    8.66277083 53
+expect    11 53
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4275 +inv
+           +step +init=epsg:4807
+--------------------------------------------------------------------------------
+tolerance  5.55555555556e-08 m
+accept    5 58
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    5 56
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    5 55
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    5 53
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    4 51
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    4 49
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    2.33722917 46.8
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    3 53
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    4 53
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    6 53
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    7 53
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    9 53
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    10 53
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    11 53
+roundtrip 1000
+
+</gie>

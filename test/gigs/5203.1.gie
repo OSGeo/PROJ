@@ -1,0 +1,192 @@
+--------------------------------------------------------------------------------
+
+GIGS Test 5203 (part 1), Position Vector 7-parameter transformation, v2.0_2011-06-28. Geographic 2D domain (EPSG method code 9606).
+
+--------------------------------------------------------------------------------
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4277 +inv
+           +step +init=epsg:4326
+--------------------------------------------------------------------------------
+tolerance  2.77777777778e-07 m
+accept    150.00567472 79.99487333
+expect    150.0 80.0
+
+tolerance  2.77777777778e-07 m
+accept    120.0 60.0
+expect    119.99435889 60.00569306
+
+tolerance  2.77777777778e-07 m
+accept    60.00446778 29.99566778
+expect    60.0 30.0
+
+tolerance  2.77777777778e-07 m
+accept    0.0 0.0
+expect    -0.00089056 0.00483333
+
+tolerance  2.77777777778e-07 m
+accept    -60.00357056 -30.00504639
+expect    -60.0 -30.0
+
+tolerance  2.77777777778e-07 m
+accept    -120.0 -60.0
+expect    -119.9918525 -59.99907361
+
+tolerance  2.77777777778e-07 m
+accept    -150.01693111 -79.99778139
+expect    -150.0 -80.0
+
+tolerance  2.77777777778e-07 m
+accept    -180.0 70.0
+expect    -179.99637361 70.005945
+
+tolerance  2.77777777778e-07 m
+accept    -135.00596333 49.99458694
+expect    -135.0 50.0
+
+tolerance  2.77777777778e-07 m
+accept    -90.0 25.0
+expect    -89.99531139 25.00445833
+
+tolerance  2.77777777778e-07 m
+accept    0.00089056 -0.00483333
+expect    0.0 0.0
+
+tolerance  2.77777777778e-07 m
+accept    143.9279419 -37.6532236
+expect    143.92634806 -37.65235306
+
+tolerance  2.77777777778e-07 m
+accept    135.00291194 -49.99973028
+expect    135.0 -50.0
+
+tolerance  2.77777777778e-07 m
+accept    180.0 -70.0
+expect    -179.99660139 -70.002485
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4326 +inv
+           +step +init=epsg:4277
+--------------------------------------------------------------------------------
+tolerance  2.77777777778e-07 m
+accept    150.0 80.0
+expect    150.00567472 79.99487333
+
+tolerance  2.77777777778e-07 m
+accept    119.99435889 60.00569306
+expect    120.0 60.0
+
+tolerance  2.77777777778e-07 m
+accept    60.0 30.0
+expect    60.00446778 29.99566778
+
+tolerance  2.77777777778e-07 m
+accept    -0.00089056 0.00483333
+expect    0.0 0.0
+
+tolerance  2.77777777778e-07 m
+accept    -60.0 -30.0
+expect    -60.00357056 -30.00504639
+
+tolerance  2.77777777778e-07 m
+accept    -119.9918525 -59.99907361
+expect    -120.0 -60.0
+
+tolerance  2.77777777778e-07 m
+accept    -150.0 -80.0
+expect    -150.01693111 -79.99778139
+
+tolerance  2.77777777778e-07 m
+accept    -179.99637361 70.005945
+expect    -180.0 70.0
+
+tolerance  2.77777777778e-07 m
+accept    -135.0 50.0
+expect    -135.00596333 49.99458694
+
+tolerance  2.77777777778e-07 m
+accept    -89.99531139 25.00445833
+expect    -90.0 25.0
+
+tolerance  2.77777777778e-07 m
+accept    0.0 0.0
+expect    0.00089056 -0.00483333
+
+tolerance  2.77777777778e-07 m
+accept    143.92634806 -37.65235306
+expect    143.9279419 -37.6532236
+
+tolerance  2.77777777778e-07 m
+accept    135.0 -50.0
+expect    135.00291194 -49.99973028
+
+tolerance  2.77777777778e-07 m
+accept    -179.99660139 -70.002485
+expect    180.0 -70.0
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4277 +inv
+           +step +init=epsg:4326
+--------------------------------------------------------------------------------
+tolerance  5.55555555556e-08 m
+accept    150.00567472 79.99487333
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    120.0 60.0
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    60.00446778 29.99566778
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    0.0 0.0
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    -60.00357056 -30.00504639
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    -120.0 -60.0
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    -150.01693111 -79.99778139
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    -180.0 70.0
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    -135.00596333 49.99458694
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    -90.0 25.0
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    0.00089056 -0.00483333
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    143.9279419 -37.6532236
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    135.00291194 -49.99973028
+roundtrip 1000
+
+tolerance  5.55555555556e-08 m
+accept    180.0 -70.0
+roundtrip 1000
+
+</gie>

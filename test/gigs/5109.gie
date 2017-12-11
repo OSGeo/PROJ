@@ -1,0 +1,180 @@
+--------------------------------------------------------------------------------
+
+Test 5109, Albers Equal Area, v2-0_2011-06-28.
+
+--------------------------------------------------------------------------------
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4283 +inv
+           +step +init=epsg:3577
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    132 0
+expect    0 0
+
+tolerance  0.05 m
+accept    132 -27
+expect    0 -2926820.89
+
+tolerance  0.05 m
+accept    140 0
+expect    966973.98 -30285.6
+
+tolerance  0.05 m
+accept    140 -20
+expect    832799.36 -2170181.93
+
+tolerance  0.05 m
+accept    140 -40
+expect    693250.21 -4395794.49
+
+tolerance  0.05 m
+accept    140 -60
+expect    567313.29 -6404311.16
+
+tolerance  0.05 m
+accept    140 -80
+expect    486878.674 -7687130.029
+
+tolerance  0.05 m
+accept    120 -60
+expect    -850274.75 -6426505.13
+
+tolerance  0.05 m
+accept    130 -60
+expect    -141915.26 -6387653.78
+
+tolerance  0.05 m
+accept    140 -60
+expect    567313.29 -6404311.16
+
+tolerance  0.05 m
+accept    150 -60
+expect    1273067.747 -6476375.276
+
+tolerance  0.05 m
+accept    160 -60
+expect    1971026.26 -6603404.82
+
+tolerance  0.05 m
+accept    170 -60
+expect    2656914.716 -6784621.89
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:3577 +inv
+           +step +init=epsg:4283
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    0 0
+expect    132 0
+
+tolerance  0.05 m
+accept    0 -2926820.89
+expect    132 -27
+
+tolerance  0.05 m
+accept    966973.98 -30285.6
+expect    140 0
+
+tolerance  0.05 m
+accept    832799.36 -2170181.93
+expect    140 -20
+
+tolerance  0.05 m
+accept    693250.21 -4395794.49
+expect    140 -40
+
+tolerance  0.05 m
+accept    567313.29 -6404311.16
+expect    140 -60
+
+tolerance  0.05 m
+accept    486878.674 -7687130.029
+expect    140 -80
+
+tolerance  0.05 m
+accept    -850274.75 -6426505.13
+expect    120 -60
+
+tolerance  0.05 m
+accept    -141915.26 -6387653.78
+expect    130 -60
+
+tolerance  0.05 m
+accept    567313.29 -6404311.16
+expect    140 -60
+
+tolerance  0.05 m
+accept    1273067.747 -6476375.276
+expect    150 -60
+
+tolerance  0.05 m
+accept    1971026.26 -6603404.82
+expect    160 -60
+
+tolerance  0.05 m
+accept    2656914.716 -6784621.89
+expect    170 -60
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4283 +inv
+           +step +init=epsg:3577
+--------------------------------------------------------------------------------
+tolerance  0.006 m
+accept    132 0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    132 -27
+roundtrip 1000
+
+tolerance  0.006 m
+accept    140 0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    140 -20
+roundtrip 1000
+
+tolerance  0.006 m
+accept    140 -40
+roundtrip 1000
+
+tolerance  0.006 m
+accept    140 -60
+roundtrip 1000
+
+tolerance  0.006 m
+accept    140 -80
+roundtrip 1000
+
+tolerance  0.006 m
+accept    120 -60
+roundtrip 1000
+
+tolerance  0.006 m
+accept    130 -60
+roundtrip 1000
+
+tolerance  0.006 m
+accept    140 -60
+roundtrip 1000
+
+tolerance  0.006 m
+accept    150 -60
+roundtrip 1000
+
+tolerance  0.006 m
+accept    160 -60
+roundtrip 1000
+
+tolerance  0.006 m
+accept    170 -60
+roundtrip 1000
+
+</gie>
