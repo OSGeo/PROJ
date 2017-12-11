@@ -233,7 +233,7 @@ Expand key from buffer or (if not in buffer) from init file
         xkey += 5;
     if (MAX_PATH_FILENAME + ID_TAG_MAX + 2 < strlen (xkey))
         return 0;
-    memmove (fname, xkey, sizeof(fname)-2);
+    memmove (fname, xkey, strlen (xkey) + 1);
     fname[sizeof(fname)-2] = '\0';
 
     /* Is file/key pair already in cache? */
