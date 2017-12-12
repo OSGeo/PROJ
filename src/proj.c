@@ -1,4 +1,5 @@
 /* <<<< Cartographic projection filter program >>>> */
+#include "proj.h"
 #include "projects.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +11,7 @@
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__WIN32__)
 #  include <fcntl.h>
 #  include <io.h>
-#  define SET_BINARY_MODE(file) setmode(fileno(file), O_BINARY)
+#  define SET_BINARY_MODE(file) _setmode(_fileno(file), O_BINARY)
 #else
 #  define SET_BINARY_MODE(file)
 #endif
@@ -22,7 +23,11 @@
 extern void gen_cheb(int, projUV(*)(projUV), char *, PJ *, int, char **);
 
 static PJ *Proj;
-static projUV (*proj)(projUV, PJ *);
+static union {
+    projUV (*generic)(projUV, PJ *);
+    projXY (*fwd)(projLP, PJ *);
+    projLP (*inv)(projXY, PJ *);
+} proj;
 
 static int
     reversein = 0,  /* != 0 reverse input arguments */
@@ -55,7 +60,7 @@ static projUV int_proj(projUV data) {
         data.v *= fscale;
     }
 
-    data = (*proj)(data, Proj);
+    data = (*proj.generic)(data, Proj);
 
     if (postscale && data.u != HUGE_VAL) {
         data.u *= fscale;
@@ -68,7 +73,7 @@ static projUV int_proj(projUV data) {
 /* file processing function */
 static void process(FILE *fid) {
     char line[MAX_LINE+3], *s = 0, pline[40];
-    projUV data;
+    PJ_COORD data;
 
     for (;;) {
         ++emess_dat.File_line;
@@ -94,15 +99,15 @@ static void process(FILE *fid) {
             }
 
             if (reversein) {
-                data.v = (*informat)(s, &s);
-                data.u = (*informat)(s, &s);
+                data.uv.v = (*informat)(s, &s);
+                data.uv.u = (*informat)(s, &s);
             } else {
-                data.u = (*informat)(s, &s);
-                data.v = (*informat)(s, &s);
+                data.uv.u = (*informat)(s, &s);
+                data.uv.v = (*informat)(s, &s);
             }
 
-            if (data.v == HUGE_VAL)
-                data.u = HUGE_VAL;
+            if (data.uv.v == HUGE_VAL)
+                data.uv.u = HUGE_VAL;
 
             if (!*s && (s > line)) --s; /* assumed we gobbled \n */
             if (!bin_out && echoin) {
@@ -115,53 +120,53 @@ static void process(FILE *fid) {
             }
         }
 
-        if (data.u != HUGE_VAL) {
-            if (prescale) { data.u *= fscale; data.v *= fscale; }
+        if (data.uv.u != HUGE_VAL) {
+            if (prescale) { data.uv.u *= fscale; data.uv.v *= fscale; }
             if (dofactors && !inverse)
-                facs_bad = pj_factors(data, Proj, 0., &facs);
-            data = (*proj)(data, Proj);
+                facs_bad = pj_factors(data.lp, Proj, 0., &facs);
+            data.xy = (*proj.fwd)(data.lp, Proj);
 
             if (dofactors && inverse)
-                facs_bad = pj_factors(data, Proj, 0., &facs);
+                facs_bad = pj_factors(data.lp, Proj, 0., &facs);
 
-            if (postscale && data.u != HUGE_VAL)
-                { data.u *= fscale; data.v *= fscale; }
+            if (postscale && data.uv.u != HUGE_VAL)
+                { data.uv.u *= fscale; data.uv.v *= fscale; }
         }
 
         if (bin_out) { /* binary output */
             (void)fwrite(&data, sizeof(projUV), 1, stdout);
             continue;
-        } else if (data.u == HUGE_VAL) /* error output */
+        } else if (data.uv.u == HUGE_VAL) /* error output */
             (void)fputs(oterr, stdout);
         else if (inverse && !oform) {   /*ascii DMS output */
             if (reverseout) {
-                (void)fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
+                (void)fputs(rtodms(pline, data.uv.v, 'N', 'S'), stdout);
                 putchar('\t');
-                (void)fputs(rtodms(pline, data.u, 'E', 'W'), stdout);
+                (void)fputs(rtodms(pline, data.uv.u, 'E', 'W'), stdout);
             } else {
-                (void)fputs(rtodms(pline, data.u, 'E', 'W'), stdout);
+                (void)fputs(rtodms(pline, data.uv.u, 'E', 'W'), stdout);
                 putchar('\t');
-                (void)fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
+                (void)fputs(rtodms(pline, data.uv.v, 'N', 'S'), stdout);
             }
         } else {    /* x-y or decimal degree ascii output, scale if warranted by output units */
             if (inverse) {
                 if (Proj->left == PJ_IO_UNITS_RADIANS) {
-                    data.v *= RAD_TO_DEG;
-                    data.u *= RAD_TO_DEG;
+                    data.uv.v *= RAD_TO_DEG;
+                    data.uv.u *= RAD_TO_DEG;
                 }
             } else {
                 if (Proj->right == PJ_IO_UNITS_RADIANS) {
-                    data.v *= RAD_TO_DEG;
-                    data.u *= RAD_TO_DEG;
+                    data.uv.v *= RAD_TO_DEG;
+                    data.uv.u *= RAD_TO_DEG;
                 }
             }
 
             if (reverseout) {
-                (void)printf(oform,data.v); putchar('\t');
-                (void)printf(oform,data.u);
+                (void)printf(oform, data.uv.v); putchar('\t');
+                (void)printf(oform, data.uv.u);
             } else {
-                (void)printf(oform,data.u); putchar('\t');
-                (void)printf(oform,data.v);
+                (void)printf(oform, data.uv.u); putchar('\t');
+                (void)printf(oform, data.uv.v);
             }
         }
 
@@ -181,7 +186,8 @@ static void process(FILE *fid) {
 /* file processing function --- verbosely */
 static void vprocess(FILE *fid) {
     char line[MAX_LINE+3], *s, pline[40];
-    projUV dat_ll, dat_xy, temp;
+    LP dat_ll;
+    projXY dat_xy;
     int linvers;
 
 
@@ -224,41 +230,39 @@ static void vprocess(FILE *fid) {
                 emess(-1,"inverse for this projection not avail.\n");
                 continue;
             }
-            dat_xy.u = strtod(s, &s);
-            dat_xy.v = strtod(s, &s);
-            if (dat_xy.u == HUGE_VAL || dat_xy.v == HUGE_VAL) {
+            dat_xy.x = strtod(s, &s);
+            dat_xy.y = strtod(s, &s);
+            if (dat_xy.x == HUGE_VAL || dat_xy.y == HUGE_VAL) {
                 emess(-1,"lon-lat input conversion failure\n");
                 continue;
             }
-            if (prescale) { dat_xy.u *= fscale; dat_xy.v *= fscale; }
+            if (prescale) { dat_xy.x *= fscale; dat_xy.y *= fscale; }
             if (reversein) {
-                temp.u = dat_xy.u;
-                temp.v = dat_xy.v;
-                dat_xy.u = temp.v;
-                dat_xy.v = temp.u;
+                projXY temp = dat_xy;
+                dat_xy.x = temp.y;
+                dat_xy.y = temp.x;
             }
             dat_ll = pj_inv(dat_xy, Proj);
         } else {
-            dat_ll.u = dmstor(s, &s);
-            dat_ll.v = dmstor(s, &s);
-            if (dat_ll.u == HUGE_VAL || dat_ll.v == HUGE_VAL) {
+            dat_ll.lam = dmstor(s, &s);
+            dat_ll.phi = dmstor(s, &s);
+            if (dat_ll.lam == HUGE_VAL || dat_ll.phi == HUGE_VAL) {
                 emess(-1,"lon-lat input conversion failure\n");
                 continue;
             }
             if (reversein) {
-                temp.u = dat_ll.u;
-                temp.v = dat_ll.v;
-                dat_ll.u = temp.v;
-                dat_ll.v = temp.u;
+                LP temp = dat_ll;
+                dat_ll.lam = temp.phi;
+                dat_ll.phi = temp.lam;
             }
             dat_xy = pj_fwd(dat_ll, Proj);
-            if (postscale) { dat_xy.u *= fscale; dat_xy.v *= fscale; }
+            if (postscale) { dat_xy.x *= fscale; dat_xy.y *= fscale; }
         }
 
         /* apply rad->deg scaling in case the output from a pipeline has degrees as units */
         if (!inverse && Proj->right == PJ_IO_UNITS_RADIANS) {
-            dat_xy.u *= RAD_TO_DEG;
-            dat_xy.v *= RAD_TO_DEG;
+            dat_xy.x *= RAD_TO_DEG;
+            dat_xy.y *= RAD_TO_DEG;
         }
 
         /* For some reason pj_errno does not work as expected in some   */
@@ -278,15 +282,15 @@ static void vprocess(FILE *fid) {
             (void)fputs(s, stdout);
 
         (void)fputs("Longitude: ", stdout);
-        (void)fputs(rtodms(pline, dat_ll.u, 'E', 'W'), stdout);
-        (void)printf(" [ %.11g ]\n", dat_ll.u * RAD_TO_DEG);
+        (void)fputs(rtodms(pline, dat_ll.lam, 'E', 'W'), stdout);
+        (void)printf(" [ %.11g ]\n", dat_ll.lam * RAD_TO_DEG);
         (void)fputs("Latitude:  ", stdout);
-        (void)fputs(rtodms(pline, dat_ll.v, 'N', 'S'), stdout);
-        (void)printf(" [ %.11g ]\n", dat_ll.v * RAD_TO_DEG);
+        (void)fputs(rtodms(pline, dat_ll.phi, 'N', 'S'), stdout);
+        (void)printf(" [ %.11g ]\n", dat_ll.phi * RAD_TO_DEG);
         (void)fputs("Easting (x):   ", stdout);
-        (void)printf(oform, dat_xy.u); putchar('\n');
+        (void)printf(oform, dat_xy.x); putchar('\n');
         (void)fputs("Northing (y):  ", stdout);
-        (void)printf(oform, dat_xy.v); putchar('\n');
+        (void)printf(oform, dat_xy.y); putchar('\n');
         (void)printf("Meridian scale (h) : %.8f  ( %.4g %% error )\n", facs.h, (facs.h-1.)*100.);
         (void)printf("Parallel scale (k) : %.8f  ( %.4g %% error )\n", facs.k, (facs.k-1.)*100.);
         (void)printf("Areal scale (s):     %.8f  ( %.4g %% error )\n", facs.s, (facs.s-1.)*100.);
@@ -489,9 +493,9 @@ int main(int argc, char **argv) {
     if (inverse) {
         if (!Proj->inv)
             emess(3,"inverse projection not available");
-        proj = pj_inv;
+        proj.inv = pj_inv;
     } else
-        proj = pj_fwd;
+        proj.fwd = pj_fwd;
     if (cheby_str) {
         gen_cheb(inverse, int_proj, cheby_str, Proj, iargc, iargv);
         exit(0);
