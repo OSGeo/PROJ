@@ -179,7 +179,6 @@ typedef struct {
     PJ_COORD a, b, c, e;
     PJ_DIRECTION dir;
     int verbosity;
-    int nargs;
     int op_id;
     int op_ok,    op_ko;
     int total_ok, total_ko;
@@ -633,7 +632,6 @@ static int roundtrip (const char *args) {
     ntrips = (int) (endp==args? 100: fabs(ans));
     d = strtod_scaled (endp, 1);
     d = d==HUGE_VAL?  T.tolerance:  d;
-    coo = T.a;
 
     /* input ("accepted") values - probably in degrees */
     coo = proj_angular_input  (T.P, T.dir)? torad_coord (T.a):  T.a;
@@ -1533,9 +1531,9 @@ puts ("pj_cart_selftest");
     b = proj_trans (P, PJ_FWD, a);
 
     /* Check roundtrip precision for 10000 iterations each way */
-    dist = proj_roundtrip (P, PJ_FWD, 10000, &a);
-    dist = proj_roundtrip (P, PJ_INV, 10000, &b);
-    if (dist > 2e-9)
+    dist  = proj_roundtrip (P, PJ_FWD, 10000, &a);
+    dist += proj_roundtrip (P, PJ_INV, 10000, &b);
+    if (dist > 4e-9)
         return 7;
 puts ("pj_cart_selftest");
 
