@@ -118,6 +118,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 
 #include "optargpm.h"
 
+#include "test.c"
 
 /* From readblock.c (now included here) */
 typedef struct ffio {
@@ -133,6 +134,8 @@ typedef struct ffio {
     size_t lineno, next_lineno;
     size_t level;
 }  ffio;
+
+FILE *test = 0;
 
 static int get_inp (ffio *F);
 static int skip_to_next_tag (ffio *F);
@@ -238,13 +241,13 @@ int main (int argc, char **argv) {
     const char *longflags[]  = {"v=verbose", "q=quiet", "h=help", "l=list", 0};
     const char *longkeys[]   = {"o=output", 0};
     OPTARGS *o;
-
+test_main ();
     memset (&T, 0, sizeof (T));
     T.dir = PJ_FWD;
     T.verbosity = 1;
     T.tolerance = 5e-4;
 
-
+    test = fopen ("test.c", "wt");
     o = opt_parse (argc, argv, "hlvq", "o", longflags, longkeys);
     if (0==o)
         return 0;
@@ -432,8 +435,10 @@ static int tolerance (const char *args) {
     T.tolerance = strtod_scaled (args, 1);
     if (HUGE_VAL==T.tolerance) {
         T.tolerance = 0.0005;
+fprintf (test, "    tolerance = %.12f;\n", T.tolerance);
         return 1;
     }
+fprintf (test, "    tolerance = %.12f;\n", T.tolerance);
     return 0;
 }
 
@@ -456,6 +461,8 @@ static int direction (const char *args) {
         default:
             return 1;
     }
+fprintf (test, "    direction = %d;\n", T.dir);
+
     return 0;
 }
 
@@ -503,7 +510,7 @@ static int operation (char *args) {
     printf ("Creating [%s]\n", F->args);
     T.P = proj_create (0, F->args);
     puts ("created");
-
+fprintf (test, "    (void) P;\n    pj_free (P);\n\n\n    P = proj_create(\"%s\");\n", F->args);
     /* Checking that proj_create succeeds is first done at "expect" time, */
     /* we want to support "expect"ing specific error codes */
 
@@ -782,7 +789,17 @@ static int expect (const char *args) {
     ci = proj_angular_input (T.P, T.dir)? torad_coord (T.a): T.a;
     if (T.verbosity > 3)
         printf ("ACCEPTS  %.4f  %.4f  %.4f  %.4f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
+fprintf (test, "    ci.xyzt.x = %.15f;\n", ci.xyzt.x);
+fprintf (test, "    ci.xyzt.y = %.15f;\n", ci.xyzt.y);
+fprintf (test, "    ci.xyzt.z = %.15f;\n", ci.xyzt.z);
+fprintf (test, "    ci.xyzt.t = %.15f;\n", ci.xyzt.t);
 
+fprintf (test, "    ce.xyzt.x = %.15f;\n", ce.xyzt.x);
+fprintf (test, "    ce.xyzt.y = %.15f;\n", ce.xyzt.y);
+fprintf (test, "    ce.xyzt.z = %.15f;\n", ce.xyzt.z);
+fprintf (test, "    ce.xyzt.t = %.15f;\n", ce.xyzt.t);
+
+fprintf (test, "    co = proj_trans (P, direction, ci);\n");
 
     /* angular output from proj_trans comes in radians */
     co = proj_trans (T.P, T.dir, ci);
@@ -794,6 +811,7 @@ static int expect (const char *args) {
     if (proj_angular_output (T.P, T.dir)) {
         double e = HUGE_VAL;
         d = proj_lpz_dist (T.P, ce.lpz, co.lpz);
+fprintf (test, "    d = proj_lpz_dist (co, ce);\n");
         /* check whether input was already in radians */
         if (d > T.tolerance)
             e = proj_lpz_dist (T.P, T.e.lpz, co.lpz);
@@ -806,8 +824,11 @@ static int expect (const char *args) {
         if (e < d)
             d = e;
     }
-    else
+    else {
         d = proj_xyz_dist (T.b.xyz, T.e.xyz);
+        fprintf (test, "    d = proj_xyz_dist (cb, ce);\n");
+    }
+fprintf (test, "    update (d, tolerance, \"%s\", ci, ce, cb);\n\n", T.operation);
     if (d > T.tolerance)
         return expect_message (d, args);
 

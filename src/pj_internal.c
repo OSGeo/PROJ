@@ -313,6 +313,12 @@ It is the duty of the caller to free this array.
     size_t i, j;
     char **argv;
 
+    if (0==args)
+        return 0;
+    if (0==argc)
+        return 0;
+
+
     /* turn the input string into an array of strings */
     argv = (char **) calloc (argc, sizeof (char *));
     if (0==argv)
