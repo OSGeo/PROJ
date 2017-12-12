@@ -86,8 +86,6 @@ Hungary
 `Hungarian grid <https://github.com/OSGeoLabBp/eov2etrs/>`__ ETRS89 - HD72/EOV (epsg:23700), both horizontal and elevation grids
 
 
-.. _nonfreegrids:
-
 Non-Free Grids
 --------------------------------------------------------------------------------
 
@@ -168,3 +166,6 @@ Netherlands
 ................................................................................
 
 `Dutch grid <https://www.kadaster.nl/web/Themas/Registraties/Rijksdriehoeksmeting/Transformatie-van-coordinaten.htm>`__ (Registration required before download)
+
+
+
