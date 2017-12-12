@@ -1383,6 +1383,7 @@ puts ("pj_horner_selftest");
     if (dist > 0.01)
         return 1;
 puts ("pj_horner_selftest");
+    proj_destroy(P);
 
     /* The complex polynomial transformation between the "System Storebaelt" and utm32/ed50 */
     P = proj_create (PJ_DEFAULT_CTX, sb_utm32);
