@@ -20603,6 +20603,7 @@ int test_main (void) {
     ce.xyzt.z = 0.000000000000000;
     ce.xyzt.t = 0.000000000000000;
     co = proj_trans (P, direction, ci);
+    printf ("geoc: %.12f\n", proj_todeg (co.lpzt.phi));
     d = proj_lpz_dist (P, co.lpz, ce.lpz);
     test_update (d, tolerance, "proj=geoc ellps=GRS80", ci, ce, co);
 
@@ -20615,6 +20616,7 @@ int test_main (void) {
     ce.xyzt.z = 0.000000000000000;
     ce.xyzt.t = 0.000000000000000;
     co = proj_trans (P, direction, ci);
+    printf ("geoc: %.12f\n", proj_todeg (co.lpzt.phi));
     d = proj_lpz_dist (P, co.lpz, ce.lpz);
     test_update (d, tolerance, "proj=geoc ellps=GRS80", ci, ce, co);
 
@@ -20627,6 +20629,7 @@ int test_main (void) {
     ce.xyzt.z = 0.000000000000000;
     ce.xyzt.t = 0.000000000000000;
     co = proj_trans (P, direction, ci);
+    printf ("geoc: %.12f\n", proj_todeg (co.lpzt.phi));
     d = proj_lpz_dist (P, co.lpz, ce.lpz);
     test_update (d, tolerance, "proj=geoc ellps=GRS80", ci, ce, co);
 
@@ -20639,6 +20642,7 @@ int test_main (void) {
     ce.xyzt.z = 0.000000000000000;
     ce.xyzt.t = 0.000000000000000;
     co = proj_trans (P, direction, ci);
+    printf ("geoc: %.12f\n", proj_todeg (co.lpzt.phi));
     d = proj_lpz_dist (P, co.lpz, ce.lpz);
     test_update (d, tolerance, "proj=geoc ellps=GRS80", ci, ce, co);
 

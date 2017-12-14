@@ -61,11 +61,13 @@ static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
             next = next->next = pj_mkparam_ws (c);
         if (0==next)
             return pj_dealloc_params (ctx, first, ENOMEM);
+printf ("string_to_paralist: [%s]\n", next->param);
 
         /* And skip to the end of the substring */
         while ((!isspace(*c)) && 0!=*c)
             c++;
     }
+printf ("string_to_paralist: last - [%s] first - [%s]\n", next->param, first->param);
 
     /* Terminate list and return */
     next->next = 0;
@@ -123,6 +125,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     *section = 0;
     section++;
     n = strlen (section);
+    pj_log (ctx, 3, "get_init_string: searching for section [%s] in init file [%s]\n", section, fname);
 
     fid = pj_open_lib (ctx, fname, "rt");
     if (0==fid) {
@@ -211,7 +214,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     if (0==buffer)
         return 0;
     pj_shrink (buffer);
-    pj_log (ctx, 3, "key=%s, found: [%s]\n", key, buffer);
+    pj_log (ctx, 3, "key=%s, value: [%s]\n", key, buffer);
     return buffer;
 }
 
@@ -222,7 +225,7 @@ static paralist *get_init(PJ_CONTEXT *ctx, char *key) {
 /*************************************************************************
 Expand key from buffer or (if not in buffer) from init file
 *************************************************************************/
-    char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *xkey, *definition;
+    char *xkey, *definition;
     paralist *init_items = 0;
 
     /* support "init=file:section", "+init=file:section", and "file:section" format */
@@ -231,10 +234,7 @@ Expand key from buffer or (if not in buffer) from init file
         xkey = key;
     else
         xkey += 5;
-    if (MAX_PATH_FILENAME + ID_TAG_MAX + 2 < strlen (xkey))
-        return 0;
-    memmove (fname, xkey, strlen (xkey) + 1);
-    fname[sizeof(fname)-2] = '\0';
+    pj_log (ctx, 3, "get_init: searching cache for key: [%s]\n", xkey);
 
     /* Is file/key pair already in cache? */
     init_items = pj_search_initcache (xkey);
@@ -242,13 +242,16 @@ Expand key from buffer or (if not in buffer) from init file
         return init_items;
 
     /* If not, we must read it from file */
+    pj_log (ctx, 3, "get_init: searching on in init files for [%s]\n", xkey);
     definition = get_init_string (ctx, xkey);
     if (0==definition)
         return 0;
     init_items = string_to_paralist (ctx, definition);
+    pj_log (ctx, 3, "get_init: got [%s], paralist[0,1]: [%s,%s]\n", definition, init_items->param, init_items->next? init_items->next->param: "(empty)");
     pj_dealloc (definition);
     if (0==init_items)
         return 0;
+
 
     /* We found it in file - now insert into the cache, before returning */
     pj_insert_initcache (xkey, init_items);

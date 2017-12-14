@@ -80,6 +80,8 @@ double proj_lpz_dist (const PJ *P, LPZ a, LPZ b) {
     PJ_COORD aa, bb;
     aa.lpz = a;
     bb.lpz = b;
+    if (HUGE_VAL==a.lam || HUGE_VAL==b.lam)
+        return HUGE_VAL;
     return hypot (proj_lp_dist (P, aa.lp, bb.lp), a.z - b.z);
 }
 
