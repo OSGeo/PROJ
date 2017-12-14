@@ -250,7 +250,7 @@ static double mjd_to_yyyymmdd(double mjd) {
     for (month=1; mjd_iter + days_in_month(year, month) <= mjd; month++)
         mjd_iter += days_in_month(year, month);
 
-    day = mjd - mjd_iter + 1;
+    day = (int)(mjd - mjd_iter + 1);
 
     return year*10000 + month*100 + day;
 }
