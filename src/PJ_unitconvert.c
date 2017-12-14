@@ -94,6 +94,39 @@ static int days_in_year(int year) {
     return is_leap_year(year) ? 366 : 365;
 }
 
+/***********************************************************************/
+static unsigned int days_in_month(unsigned int year, unsigned int month) {
+/***********************************************************************/
+    const unsigned int month_table[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    unsigned int days;
+
+    if (month > 12) month = 12;
+    if (month == 0) month = 1;
+
+    days = month_table[month-1];
+    if (is_leap_year(year) && month == 2) days++;
+
+    return days;
+}
+
+
+/***********************************************************************/
+static int daynumber_in_year(unsigned int year, unsigned int month, unsigned int day) {
+/***********************************************************************/
+    unsigned int daynumber=0, i;
+
+    if (month > 12) month = 12;
+    if (month == 0) month = 1;
+    if (day > days_in_month(year, month)) day = days_in_month(year, month);
+
+    for (i = 1; i < month; i++)
+        daynumber += days_in_month(year, i);
+
+    daynumber += day;
+
+    return daynumber;
+
+}
 
 /***********************************************************************/
 static double mjd_to_mjd(double mjd) {
@@ -181,10 +214,53 @@ static double mjd_to_gps_week(double mjd) {
     return (mjd - 44244.0) / 7.0;
 }
 
+
+/***********************************************************************/
+static double yyyymmdd_to_mjd(double yyyymmdd) {
+/************************************************************************
+    Date given in YYYY-MM-DD format.
+************************************************************************/
+
+    int year  = (int)floor( yyyymmdd / 10000 );
+    int month = (int)floor((yyyymmdd - year*10000) / 100);
+    int day   = (int)floor( yyyymmdd - year*10000 - month*100);
+    double mjd = daynumber_in_year(year, month, day);
+
+    for (year -= 1; year > 1858; year--)
+        mjd += days_in_year(year);
+
+    return mjd + 13 + 31;
+}
+
+
+/***********************************************************************/
+static double mjd_to_yyyymmdd(double mjd) {
+/************************************************************************
+    Date given in YYYY-MM-DD format.
+************************************************************************/
+    double mjd_iter = 14 + 31;
+    int year = 1859, month=0, day=0;
+
+    for (; mjd >= mjd_iter; year++) {
+        mjd_iter += days_in_year(year);
+    }
+    year--;
+    mjd_iter -= days_in_year(year);
+
+    for (month=1; mjd_iter + days_in_month(year, month) <= mjd; month++)
+        mjd_iter += days_in_month(year, month);
+
+    day = (int)(mjd - mjd_iter + 1);
+
+    return year*10000 + month*100 + day;
+}
+
+
 struct TIME_UNITS time_units[] = {
     {"mjd",         mjd_to_mjd,         mjd_to_mjd,         "Modified julian date"},
     {"decimalyear", decimalyear_to_mjd, mjd_to_decimalyear, "Decimal year"},
     {"gps_week",    gps_week_to_mjd,    mjd_to_gps_week,    "GPS Week"},
+    {"yyyymmdd",    yyyymmdd_to_mjd,    mjd_to_yyyymmdd,    "YYYYMMDD date"},
     {NULL,          NULL,               NULL,               NULL}
 };
 
@@ -323,8 +399,8 @@ PJ *CONVERSION(unitconvert,0) {
     P->fwd    = forward_2d;
     P->inv    = reverse_2d;
 
-    P->left  = PJ_IO_UNITS_RADIANS;
-    P->right = PJ_IO_UNITS_RADIANS;
+    P->left  = PJ_IO_UNITS_METERS;
+    P->right = PJ_IO_UNITS_METERS;
 
     /* if no time input/output unit is specified we can skip them */
     Q->t_in_id = -1;
