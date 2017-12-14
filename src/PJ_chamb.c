@@ -3,11 +3,6 @@
 #include <proj.h>
 #include "projects.h"
 
-#if defined(_MSC_VER)
-// Squelch warnings about unsafe use of sprintf, etc
-#  pragma warning (disable: 4996)
-#endif
-
 typedef struct { double r, Az; } VECT;
 struct pj_opaque {
     struct { /* control point data */

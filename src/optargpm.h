@@ -193,12 +193,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-09-10
 #include <math.h>
 #include <errno.h>
 
-#if defined(_MSC_VER)
-// Squelch warnings about unsafe use of sprintf, etc
-#  pragma warning (push)
-#  pragma warning (disable: 4996)
-#endif
-
 /**************************************************************************************************/
 struct OPTARGS;
 typedef struct OPTARGS OPTARGS;
@@ -605,7 +599,3 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
     return o;
 
 }
-
-#if defined(_MSC_VER)
-#  pragma warning (pop)
-#endif

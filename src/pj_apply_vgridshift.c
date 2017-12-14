@@ -33,11 +33,6 @@
 #include "proj_internal.h"
 #include "projects.h"
 
-#if defined(_MSC_VER)
-// Squelch warnings about unsafe use of sprintf, etc
-#  pragma warning (disable: 4996)
-#endif
-
 static double pj_read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GRIDINFO **tables, struct CTABLE *ct) {
     int  itable = 0;
     double value = HUGE_VAL;

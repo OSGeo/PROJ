@@ -119,10 +119,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 #include <math.h>
 #include <errno.h>
 
-#if defined(_MSC_VER)
-// Squelch warnings about unsafe use of sprintf, etc
-#  pragma warning (disable: 4996)
-#endif
+
 
 /* from proj_strtod.c */
 double proj_strtod(const char *str, char **endptr);

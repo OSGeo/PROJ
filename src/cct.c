@@ -81,10 +81,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 #include <string.h>
 #include <math.h>
 
-#if defined(_MSC_VER)
-// Squelch warnings about unsafe use of sprintf, etc
-#  pragma warning (disable: 4996)
-#endif
 
 double proj_strtod(const char *str, char **endptr);
 double proj_atof(const char *str);

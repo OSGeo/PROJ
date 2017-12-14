@@ -30,11 +30,6 @@
 #include <projects.h>
 #include <string.h>
 
-#if defined(_MSC_VER)
-// Squelch warnings about unsafe use of sprintf, etc
-#  pragma warning (disable: 4996)
-#endif
-
 static PAFile pj_stdio_fopen(projCtx ctx, const char *filename, 
                              const char *access);
 static size_t pj_stdio_fread(void *buffer, size_t size, size_t nmemb, 
