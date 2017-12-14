@@ -1698,12 +1698,16 @@ static int pj_unitconvert_selftest (void) {
     char args6[] = "+proj=unitconvert +xy_in=m +xy_out=m +z_in=m +z_out=m";
     PJ_COORD in6 = {{12.3, 45.6, 7.89, 0}};
 
+    char args7[] = "+proj=unitconvert +t_in=yyyymmdd +t_out=yyyymmdd";
+    double in7 = 20170131;
+
     ret = test_time(args1, 1e-6, in1, in1);   if (ret) return ret + 10;
     ret = test_time(args2, 1e-6, in2, in2);   if (ret) return ret + 20;
     ret = test_time(args3, 1e-6, in3, in3);   if (ret) return ret + 30;
     ret = test_time(args4, 1e-6, in4, exp4);  if (ret) return ret + 40;
     ret = test_xyz (args5, 1e-10, in5, exp5); if (ret) return ret + 50;
-    ret = test_xyz (args6, 1e-10, in6, in6);  if (ret) return ret + 50;
+    ret = test_xyz (args6, 1e-10, in6, in6);  if (ret) return ret + 60;
+    ret = test_time(args7, 1e-6, in7, in7);   if (ret) return ret + 70;
 
     return 0;
 
