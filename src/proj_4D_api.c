@@ -746,6 +746,8 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
     return info;
 }
 
+
+
 /*****************************************************************************/
 PJ_INIT_INFO proj_init_info(const char *initname){
 /******************************************************************************
@@ -795,8 +797,9 @@ puts (start->param);
 puts (param);
     next = pj_get_init(ctx, start, key);
 puts ("proj_init_info - 8");
-    start->next = next;
-
+/******** her *******
+start->next = (start==next)? 0: next;
+*/
 
     if (pj_param(ctx, start, "tversion").i) {
 puts ("proj_init_info - 9");
