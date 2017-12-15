@@ -252,7 +252,6 @@ Expand key from buffer or (if not in buffer) from init file
     if (0==init_items)
         return 0;
 
-
     /* We found it in file - now insert into the cache, before returning */
     pj_insert_initcache (xkey, init_items);
     return init_items;
@@ -346,7 +345,7 @@ paralist *pj_get_init(PJ_CONTEXT *ctx, paralist *start, char *key) {
     append_defaults (ctx, start, "general");
 
     proj = pj_param_exists (start, "proj");
-    if (strlen (proj->param) < 6)
+    if (0==proj || strlen (proj->param) < 6)
         return start;
     append_defaults (ctx, start, proj->param + 5);
     return start;

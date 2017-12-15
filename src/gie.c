@@ -240,7 +240,7 @@ int main (int argc, char **argv) {
     const char *longflags[]  = {"v=verbose", "q=quiet", "h=help", "l=list", 0};
     const char *longkeys[]   = {"o=output", 0};
     OPTARGS *o;
-test_main ();
+/* test_main ();*/
     memset (&T, 0, sizeof (T));
     T.dir = PJ_FWD;
     T.verbosity = 1;
@@ -1719,6 +1719,8 @@ puts ("pj_cart_selftest - b");
     /* this one is difficult to test, since the output changes with the setup */
     info = proj_info();
 puts ("pj_cart_selftest - c");
+printf("info.versionelts: %d.%d.%d\n", info.major, info.minor, info.patch);
+
     if (info.version[0] != '\0' ) {
         char tmpstr[64];
         sprintf(tmpstr, "%d.%d.%d", info.major, info.minor, info.patch);
@@ -2003,7 +2005,7 @@ puts ("pj_unitconvert_selftest - done");
 
 
 
-
+#if 0
 
 #include <stdio.h>
 /* #include <proj.h>*/
@@ -20727,3 +20729,4 @@ int test_main (void) {
     printf ("OK: %d,  KO: %d\nOL: %d\n", OK, KO, OK+KO);
     return 0;
 }
+#endif
