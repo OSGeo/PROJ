@@ -15,9 +15,13 @@ cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 project(PROJ4 C)
 set(PROJECT_INTERN_NAME PROJ)
 
+if (NOT CMAKE_VERSION VERSION_LESS 3.1)
+  cmake_policy(SET CMP0054 NEW)
+endif ()
 # Set warnings
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-  set(CMAKE_C_FLAGS "/WX ${CMAKE_C_FLAGS}")
+  # Suppress warning 4996 about sprintf, etc., being unsafe
+  set(CMAKE_C_FLAGS "/wd4996 /WX ${CMAKE_C_FLAGS}")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_C_FLAGS "-std=c89 -Wall -Wextra -Wswitch -Werror \
     -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat \

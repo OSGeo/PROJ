@@ -1975,6 +1975,10 @@ static int pj_unitconvert_selftest (void) {
     char args6[] = "+proj=unitconvert +xy_in=m +xy_out=m +z_in=m +z_out=m";
     PJ_COORD in6 = {{12.3, 45.6, 7.89, 0}};
 puts ("pj_unitconvert_selftest - start");
+
+    char args7[] = "+proj=unitconvert +t_in=yyyymmdd +t_out=yyyymmdd";
+    double in7 = 20170131;
+
     ret = test_time(args1, 1e-6, in1, in1);   if (ret) return ret + 10;
 puts ("pj_unitconvert_selftest");
     ret = test_time(args2, 1e-6, in2, in2);   if (ret) return ret + 20;
@@ -1987,6 +1991,8 @@ puts ("pj_unitconvert_selftest");
 puts ("pj_unitconvert_selftest");
     ret = test_xyz (args6, 1e-10, in6, in6);  if (ret) return ret + 50;
 puts ("pj_unitconvert_selftest - done");
+    ret = test_xyz (args6, 1e-10, in6, in6);  if (ret) return ret + 60;
+    ret = test_time(args7, 1e-6, in7, in7);   if (ret) return ret + 70;
 
     return 0;
 
