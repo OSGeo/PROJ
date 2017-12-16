@@ -206,6 +206,7 @@ typedef struct { double   x,   y,  z, t; }  PJ_XYZT;
 typedef struct { double   u,   v,  w, t; }  PJ_UVWT;
 typedef struct { double lam, phi,  z, t; }  PJ_LPZT;
 typedef struct { double o, p, k; }          PJ_OPK;  /* Rotations: omega, phi, kappa */
+typedef struct { double e, n, u; }          PJ_ENU;  /* East, North, Up */
 
 /* Classic proj.4 pair/triplet types */
 typedef struct { double   u,   v; }  UV;
@@ -224,6 +225,7 @@ union PJ_COORD {
     PJ_UVWT uvwt;
     PJ_LPZT lpzt;
      PJ_OPK opk;
+     PJ_ENU enu;
         XYZ xyz;
         UVW uvw;
         LPZ lpz;
