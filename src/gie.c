@@ -15,9 +15,9 @@ C compiler already employed for compiling the library.
 The basic functionality of the gie command language is implemented
 through just 3 command verbs:
 
-OPERATION,     which defines the PROJ.4 operation to test,
-ACCEPT,        which defines the input coordinate to read, and
-EXPECT,        which defines the result to expect.
+operation,     which defines the PROJ.4 operation to test,
+accept,        which defines the input coordinate to read, and
+expect,        which defines the result to expect.
 
 E.g:
 
@@ -32,7 +32,7 @@ long strings of numbers typically required in projected coordinates.
 
 By default, gie considers the EXPECTation met, if the result comes to
 within 0.5 mm of the expected. This default can be changed using the
-TOLERANCE command verb (and yes, I know, linguistically speaking, both
+'tolerance' command verb (and yes, I know, linguistically speaking, both
 "operation" and "tolerance" are nouns, not verbs). See the first
 few hundred lines of the "builtins.gie" test file for more details of
 the command verbs available (verbs of both the VERBal and NOUNistic
@@ -841,25 +841,15 @@ fprintf (T.fout, "%s\n", args);
 
 
 static int dispatch (const char *cmnd, const char *args) {
-    if  (0==strcmp (cmnd, "OPERATION")) return  operation ((char *) args);
     if  (0==strcmp (cmnd, "operation")) return  operation ((char *) args);
-    if  (0==strcmp (cmnd, "ACCEPT"))    return  accept    (args);
     if  (0==strcmp (cmnd, "accept"))    return  accept    (args);
-    if  (0==strcmp (cmnd, "EXPECT"))    return  expect    (args);
     if  (0==strcmp (cmnd, "expect"))    return  expect    (args);
-    if  (0==strcmp (cmnd, "ROUNDTRIP")) return  roundtrip (args);
     if  (0==strcmp (cmnd, "roundtrip")) return  roundtrip (args);
-    if  (0==strcmp (cmnd, "BANNER"))    return  banner    (args);
     if  (0==strcmp (cmnd, "banner"))    return  banner    (args);
-    if  (0==strcmp (cmnd, "VERBOSE"))   return  verbose   (args);
     if  (0==strcmp (cmnd, "verbose"))   return  verbose   (args);
-    if  (0==strcmp (cmnd, "DIRECTION")) return  direction (args);
     if  (0==strcmp (cmnd, "direction")) return  direction (args);
-    if  (0==strcmp (cmnd, "TOLERANCE")) return  tolerance (args);
     if  (0==strcmp (cmnd, "tolerance")) return  tolerance (args);
-    if  (0==strcmp (cmnd, "BUILTINS"))  return  builtins  (args);
     if  (0==strcmp (cmnd, "builtins"))  return  builtins  (args);
-    if  (0==strcmp (cmnd, "ECHO"))      return  echo      (args);
     if  (0==strcmp (cmnd, "echo"))      return  echo      (args);
 
     return 0;
