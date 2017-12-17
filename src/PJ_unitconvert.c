@@ -252,7 +252,7 @@ static double mjd_to_yyyymmdd(double mjd) {
 
     day = (int)(mjd - mjd_iter + 1);
 
-    return year*10000 + month*100 + day;
+    return year*10000.0 + month*100.0 + day;
 }
 
 
