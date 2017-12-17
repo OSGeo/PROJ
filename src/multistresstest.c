@@ -161,7 +161,7 @@ TestItem test_list[] = {
         0, 0
     },
     {
-        //Bad projection (invalid ellipsoid parameter +R_A=0)
+        /* Bad projection (invalid ellipsoid parameter +R_A=0) */
         "+proj=utm +zone=11 +datum=WGS84",
         "+proj=merc +datum=potsdam +R_A=0",
         150000.0, 3000000.0, 0.0,
@@ -201,7 +201,6 @@ static void TestThread()
 /* -------------------------------------------------------------------- */
     projPJ *src_pj_list, *dst_pj_list;
     projCtx ctx = pj_ctx_alloc();
-//    projCtx ctx = pj_get_default_ctx();
 
     src_pj_list = (projPJ *) calloc(test_count,sizeof(projPJ));
     dst_pj_list = (projPJ *) calloc(test_count,sizeof(projPJ));
