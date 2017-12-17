@@ -486,7 +486,6 @@ static int operation (char *args) {
     if (T.verbosity > 1) {
         finish_previous_operation (F->args);
         banner (args);
-        banner ("Did banner finish?");
     }
 
 
