@@ -326,37 +326,38 @@ static paralist *append_defaults_to_paralist (PJ_CONTEXT *ctx, paralist *start, 
 }
 
 /*****************************************************************************/
-paralist *pj_expand_init(PJ_CONTEXT *ctx, paralist *init, char *key) {
+paralist *pj_expand_init(PJ_CONTEXT *ctx, paralist *init) {
 /******************************************************************************
 Append expansion of <key> to the paralist <init>. The expansion is appended,
 rather than inserted at <init>'s place, since <init> may contain
 overrides to the expansion. These must take precedence, and hence come first
 in the expanded list.
 
-Consider e.g. the key 'bla:bla' which (hypothetically) expands to 'proj=utm
+Consider e.g. the key 'foo:bar' which (hypothetically) expands to 'proj=utm
 zone=32 ellps=GRS80', i.e. a UTM projection on the GRS80 ellipsoid.
 
-The expression 'init=bla.bla ellps=intl' will then expand to:
+The expression 'init=foo:bar ellps=intl' will then expand to:
 
-           'init=bla.bla ellps=intl proj=utm zone=32 ellps=GRS80',
+           'init=foo:bar ellps=intl proj=utm zone=32 ellps=GRS80',
 
 where 'ellps=intl' precedes 'ellps=GRS80', and hence takes precedence,
 turning the expansion into an UTM projection on the Hayford ellipsoid.
 
-Note that 'init=bla:bla' stays in the list. It is ignored after expansion.
+Note that 'init=foo:bar' stays in the list. It is ignored after expansion.
 ******************************************************************************/
     paralist *last;
     paralist *expn;
-
-    /* Nothing to expand? */
-    if (0==key)
-        return 0;
 
     /* Nowhere to start? */
     if (0==init)
         return 0;
 
-    expn = get_init(ctx, key);
+    /* Nothing to expand? */
+    if (0==init->param)
+        return 0;
+
+
+    expn = get_init(ctx, init->param);
 
     /* Nothing in expansion? */
     if (0==expn)
@@ -545,7 +546,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     /* problem when '+init's are expanded as late as possible.                    */
     init = pj_param_exists (start, "init");
     if (init && n_pipelines == 0) {
-        init = pj_expand_init (ctx, init, init->param);
+        init = pj_expand_init (ctx, init);
         if (!init)
             return pj_dealloc_params (ctx, start, PJD_ERR_NO_ARGS);
     }

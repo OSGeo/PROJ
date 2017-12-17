@@ -786,7 +786,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
     strncat(param, key, 73);
 
     start = pj_mkparam(param);
-    pj_expand_init(ctx, start, key);
+    pj_expand_init(ctx, start);
 
     if (pj_param(ctx, start, "tversion").i) {
         pj_strlcpy(info.version, pj_param(ctx, start, "sversion").s, sizeof(info.version));
