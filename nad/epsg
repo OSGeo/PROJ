@@ -1,4 +1,4 @@
-<metadata> +version=9.0.0 +origin=EPSG +lastupdate=2017-01-10
+<metadata> +version=9.2.0 +origin=EPSG +lastupdate=2017-12-17
 # HD1909
 <3819> +proj=longlat +ellps=bessel +towgs84=595.48,121.69,515.35,4.115,-2.9383,0.853,-3.408 +no_defs  <>
 # TWD67
@@ -588,7 +588,7 @@
 # Perroud 1950
 <4637> +proj=longlat +ellps=intl +towgs84=325,154,172,0,0,0,0 +no_defs  <>
 # Saint Pierre et Miquelon 1950
-<4638> +proj=longlat +ellps=clrk66 +towgs84=30,430,368,0,0,0,0 +no_defs  <>
+<4638> +proj=longlat +ellps=clrk66 +towgs84=11.363,424.148,373.13,0,0,0,0 +no_defs  <>
 # MOP78
 <4639> +proj=longlat +ellps=intl +towgs84=253,-132,-127,0,0,0,0 +no_defs  <>
 # RRAF 1991
@@ -1005,6 +1005,26 @@
 <7881> +proj=longlat +ellps=WGS84 +towgs84=-0.077,0.079,0.086,0,0,0,0 +no_defs  <>
 # SHGD2015
 <7886> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
+# Gusterberg (Ferro)
+<8042> +proj=longlat +a=6376045 +b=6355477.112903226 +pm=ferro +no_defs  <>
+# St. Stephen (Ferro)
+<8043> +proj=longlat +a=6376045 +b=6355477.112903226 +pm=ferro +no_defs  <>
+# ISN2016
+<8086> +proj=longlat +ellps=GRS80 +no_defs  <>
+# NAD83(CSRS96)
+<8232> +proj=longlat +ellps=GRS80 +no_defs  <>
+# NAD83(CSRS)v2
+<8237> +proj=longlat +ellps=GRS80 +no_defs  <>
+# NAD83(CSRS)v3
+<8240> +proj=longlat +ellps=GRS80 +no_defs  <>
+# NAD83(CSRS)v4
+<8246> +proj=longlat +ellps=GRS80 +no_defs  <>
+# NAD83(CSRS)v5
+<8249> +proj=longlat +ellps=GRS80 +no_defs  <>
+# NAD83(CSRS)v6
+<8252> +proj=longlat +ellps=GRS80 +no_defs  <>
+# NAD83(CSRS)v7
+<8255> +proj=longlat +ellps=GRS80 +no_defs  <>
 # Anguilla 1957 / British West Indies Grid
 <2000> +proj=tmerc +lat_0=0 +lon_0=-62 +k=0.9995000000000001 +x_0=400000 +y_0=0 +ellps=clrk80 +units=m +no_defs  <>
 # Antigua 1943 / British West Indies Grid
@@ -2979,7 +2999,7 @@
 # Unable to translate coordinate system EPSG:2986 into PROJ.4 format.
 #
 # Saint Pierre et Miquelon 1950 / UTM zone 21N
-<2987> +proj=utm +zone=21 +ellps=clrk66 +towgs84=30,430,368,0,0,0,0 +units=m +no_defs  <>
+<2987> +proj=utm +zone=21 +ellps=clrk66 +towgs84=11.363,424.148,373.13,0,0,0,0 +units=m +no_defs  <>
 # MOP78 / UTM zone 1S
 <2988> +proj=utm +zone=1 +south +ellps=intl +towgs84=253,-132,-127,0,0,0,0 +units=m +no_defs  <>
 # RRAF 1991 / UTM zone 20N (deprecated)
@@ -6931,7 +6951,7 @@
 <6861> +proj=tmerc +lat_0=44.08333333333334 +lon_0=-122.5 +k=1.000155 +x_0=0 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
 # NAD83(2011) / Oregon Santiam Pass zone (m)
 <6862> +proj=tmerc +lat_0=44.08333333333334 +lon_0=-122.5 +k=1.000155 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
-# NAD83(2011) / Oregon Santiam Pass (ft)
+# NAD83(2011) / Oregon Santiam Pass zone (ft)
 <6863> +proj=tmerc +lat_0=44.08333333333334 +lon_0=-122.5 +k=1.000155 +x_0=0 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
 # NAD83(CORS96) / Oregon LCC (m)
 <6867> +proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=400000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
@@ -7715,6 +7735,388 @@
 <7887> +proj=utm +zone=30 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
 # GDA2020 / Vicgrid
 <7899> +proj=lcc +lat_1=-36 +lat_2=-38 +lat_0=-37 +lon_0=145 +x_0=2500000 +y_0=2500000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD27 / MTM zone 10
+<7991> +proj=tmerc +lat_0=0 +lon_0=-79.5 +k=0.9999 +x_0=304800 +y_0=0 +datum=NAD27 +units=m +no_defs  <>
+# Malongo 1987 / UTM zone 33S
+<7992> +proj=utm +zone=33 +south +ellps=intl +towgs84=-254.1,-5.36,-100.29,0,0,0,0 +units=m +no_defs  <>
+# GDA2020 / ALB2020
+<8013> +proj=tmerc +lat_0=0 +lon_0=117.8833333333333 +k=1.0000044 +x_0=50000 +y_0=4100000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / BIO2020
+<8014> +proj=tmerc +lat_0=0 +lon_0=115.25 +k=1.0000022 +x_0=60000 +y_0=2700000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / BRO2020
+<8015> +proj=tmerc +lat_0=0 +lon_0=122.3333333333333 +k=1.00000298 +x_0=50000 +y_0=2300000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / BCG2020
+<8016> +proj=tmerc +lat_0=0 +lon_0=115.4333333333333 +k=0.99999592 +x_0=50000 +y_0=4000000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / CARN2020
+<8017> +proj=tmerc +lat_0=0 +lon_0=113.6666666666667 +k=0.99999796 +x_0=50000 +y_0=3050000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / CIG2020
+<8018> +proj=tmerc +lat_0=0 +lon_0=105.625 +k=1.00002514 +x_0=50000 +y_0=1400000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / CKIG2020
+<8019> +proj=tmerc +lat_0=0 +lon_0=96.875 +k=0.99999387 +x_0=50000 +y_0=1600000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / COL2020
+<8020> +proj=tmerc +lat_0=0 +lon_0=115.9333333333333 +k=1.000019 +x_0=40000 +y_0=4100000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / ESP2020
+<8021> +proj=tmerc +lat_0=0 +lon_0=121.8833333333333 +k=1.0000055 +x_0=50000 +y_0=4050000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / EXM2020
+<8022> +proj=tmerc +lat_0=0 +lon_0=114.0666666666667 +k=1.00000236 +x_0=50000 +y_0=2750000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / GCG2020
+<8023> +proj=tmerc +lat_0=0 +lon_0=114.5833333333333 +k=1.00000628 +x_0=50000 +y_0=3450000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / GOLD2020
+<8024> +proj=tmerc +lat_0=0 +lon_0=121.5 +k=1.00004949 +x_0=60000 +y_0=3800000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / JCG2020
+<8025> +proj=tmerc +lat_0=0 +lon_0=114.9833333333333 +k=1.00000314 +x_0=50000 +y_0=3650000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / KALB2020
+<8026> +proj=tmerc +lat_0=0 +lon_0=114.3152777777778 +k=1.000014 +x_0=55000 +y_0=3700000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / KAR2020
+<8027> +proj=tmerc +lat_0=0 +lon_0=116.9333333333333 +k=0.9999989 +x_0=50000 +y_0=2550000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / KUN2020
+<8028> +proj=tmerc +lat_0=0 +lon_0=128.75 +k=1.0000165 +x_0=50000 +y_0=2100000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / LCG2020
+<8029> +proj=tmerc +lat_0=0 +lon_0=115.3666666666667 +k=1.00000157 +x_0=50000 +y_0=3750000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / MRCG2020
+<8030> +proj=tmerc +lat_0=0 +lon_0=115.1666666666667 +k=1.0000055 +x_0=50000 +y_0=4050000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / PCG2020
+<8031> +proj=tmerc +lat_0=0 +lon_0=115.8166666666667 +k=0.9999990600000001 +x_0=50000 +y_0=3900000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / PHG2020
+<8032> +proj=tmerc +lat_0=0 +lon_0=118.6 +k=1.00000135 +x_0=50000 +y_0=2500000 +ellps=GRS80 +units=m +no_defs  <>
+# WGS 84 / TM Zone 20N (ftUS)
+<8035> +proj=utm +zone=20 +datum=WGS84 +units=us-ft +no_defs  <>
+# WGS 84 / TM Zone 21N (ftUS)
+<8036> +proj=utm +zone=21 +datum=WGS84 +units=us-ft +no_defs  <>
+# Gusterberg Grid (Ferro)
+<8044> +proj=cass +lat_0=48.03846388888888 +lon_0=31.80418055555556 +x_0=0 +y_0=0 +a=6376045 +b=6355477.112903226 +pm=ferro +units=m +no_defs  <>
+# St. Stephen Grid (Ferro)
+<8045> +proj=cass +lat_0=48.20876111111112 +lon_0=34.04092222222222 +x_0=0 +y_0=0 +a=6376045 +b=6355477.112903226 +pm=ferro +units=m +no_defs  <>
+# GDA2020 / NSW Lambert
+<8058> +proj=lcc +lat_1=-30.75 +lat_2=-35.75 +lat_0=-33.25 +lon_0=147 +x_0=9300000 +y_0=4500000 +ellps=GRS80 +units=m +no_defs  <>
+# GDA2020 / SA Lambert
+<8059> +proj=lcc +lat_1=-28 +lat_2=-36 +lat_0=-32 +lon_0=135 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / PCCS zone 1 (ft)
+<8065> +proj=omerc +lat_0=32.25 +lonc=-111.4 +alpha=45 +k=1.00011 +x_0=48768 +y_0=243840 +gamma=45 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / PCCS zone 2 (ft)
+<8066> +proj=tmerc +lat_0=31.25 +lon_0=-112.1666666666667 +k=1.00009 +x_0=548640 +y_0=304800 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / PCCS zone 3 (ft)
+<8067> +proj=tmerc +lat_0=31.5 +lon_0=-113.1666666666667 +k=1.000055 +x_0=182880 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / PCCS zone 4 (ft)
+<8068> +proj=lcc +lat_1=30.5 +lat_0=30.5 +lon_0=-110.75 +k_0=0.9998 +x_0=9144 +y_0=-188976 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(CSRS)v6 / MTM Nova Scotia zone 4
+<8082> +proj=tmerc +lat_0=0 +lon_0=-61.5 +k=0.9999 +x_0=24500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS)v6 / MTM Nova Scotia zone 5
+<8083> +proj=tmerc +lat_0=0 +lon_0=-64.5 +k=0.9999 +x_0=25500000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# ISN2016 / Lambert 2016
+<8088> +proj=lcc +lat_1=64.25 +lat_2=65.75 +lat_0=65 +lon_0=-19 +x_0=2700000 +y_0=300000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Florence (m)
+<8090> +proj=tmerc +lat_0=45.43888888888888 +lon_0=-88.14166666666668 +k=1.0000552095 +x_0=133502.6683 +y_0=0.0063 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Florence (ftUS)
+<8091> +proj=tmerc +lat_0=45.43888888888888 +lon_0=-88.14166666666668 +k=1.0000552095 +x_0=133502.6682245364 +y_0=0.006400812801625603 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Eau Claire (m)
+<8092> +proj=lcc +lat_1=44.87228112638889 +lat_0=44.87228112638889 +lon_0=-91.28888888888889 +k_0=1.000035079 +x_0=120091.4402 +y_0=91687.92389999999 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Eau Claire (ftUS)
+<8093> +proj=lcc +lat_1=44.87228112638889 +lat_0=44.87228112638889 +lon_0=-91.28888888888889 +k_0=1.000035079 +x_0=120091.4401828804 +y_0=91687.92390144781 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Wood (m)
+<8095> +proj=lcc +lat_1=44.36259546944444 +lat_0=44.36259546944444 +lon_0=-90 +k_0=1.0000421209 +x_0=208483.6173 +y_0=134589.754 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Wood (ftUS)
+<8096> +proj=lcc +lat_1=44.36259546944444 +lat_0=44.36259546944444 +lon_0=-90 +k_0=1.0000421209 +x_0=208483.6172720346 +y_0=134589.7539243078 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Waushara (m)
+<8097> +proj=lcc +lat_1=44.11394404583334 +lat_0=44.11394404583334 +lon_0=-89.24166666666667 +k_0=1.0000392096 +x_0=120091.4402 +y_0=45069.7587 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Waushara (ftUS)
+<8098> +proj=lcc +lat_1=44.11394404583334 +lat_0=44.11394404583334 +lon_0=-89.24166666666667 +k_0=1.0000392096 +x_0=120091.4401828804 +y_0=45069.7588011176 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Waupaca (m)
+<8099> +proj=tmerc +lat_0=43.42027777777778 +lon_0=-88.81666666666666 +k=1.0000333645 +x_0=185013.9709 +y_0=0.007 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Waupaca (ftUS)
+<8100> +proj=tmerc +lat_0=43.42027777777778 +lon_0=-88.81666666666666 +k=1.0000333645 +x_0=185013.9709423419 +y_0=0.007010414020828041 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Waukesha (m)
+<8101> +proj=tmerc +lat_0=42.56944444444445 +lon_0=-88.22499999999999 +k=1.0000346179 +x_0=208788.418 +y_0=0.0034 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Waukesha (ftUS)
+<8102> +proj=tmerc +lat_0=42.56944444444445 +lon_0=-88.22499999999999 +k=1.0000346179 +x_0=208788.4178816358 +y_0=0.003352806705613411 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Washington (m)
+<8103> +proj=tmerc +lat_0=42.91805555555555 +lon_0=-88.06388888888888 +k=1.00003738 +x_0=120091.4415 +y_0=0.003 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Washington (ftUS)
+<8104> +proj=tmerc +lat_0=42.91805555555555 +lon_0=-88.06388888888888 +k=1.00003738 +x_0=120091.4414020828 +y_0=0.003048006096012192 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Washburn (m)
+<8105> +proj=lcc +lat_1=45.96121983333334 +lat_0=45.96121983333334 +lon_0=-91.78333333333333 +k_0=1.0000475376 +x_0=234086.8682 +y_0=188358.6058 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Washburn (ftUS)
+<8106> +proj=lcc +lat_1=45.96121983333334 +lat_0=45.96121983333334 +lon_0=-91.78333333333333 +k_0=1.0000475376 +x_0=234086.8681737363 +y_0=188358.6059436119 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Walworth (m)
+<8107> +proj=lcc +lat_1=42.66946209694444 +lat_0=42.66946209694444 +lon_0=-88.54166666666667 +k_0=1.0000367192 +x_0=232562.8651 +y_0=111088.2224 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Walworth (ftUS)
+<8108> +proj=lcc +lat_1=42.66946209694444 +lat_0=42.66946209694444 +lon_0=-88.54166666666667 +k_0=1.0000367192 +x_0=232562.8651257302 +y_0=111088.2224028448 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Vilas (m)
+<8109> +proj=lcc +lat_1=46.07784409055556 +lat_0=46.07784409055556 +lon_0=-89.48888888888889 +k_0=1.0000730142 +x_0=134417.0689 +y_0=50337.1092 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Vilas (ftUS)
+<8110> +proj=lcc +lat_1=46.07784409055556 +lat_0=46.07784409055556 +lon_0=-89.48888888888889 +k_0=1.0000730142 +x_0=134417.0688341377 +y_0=50337.10927101854 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Vernon (m)
+<8111> +proj=lcc +lat_1=43.57503293972223 +lat_0=43.57503293972223 +lon_0=-90.78333333333333 +k_0=1.0000408158 +x_0=222504.4451 +y_0=47532.0602 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Vernon (ftUS)
+<8112> +proj=lcc +lat_1=43.57503293972223 +lat_0=43.57503293972223 +lon_0=-90.78333333333333 +k_0=1.0000408158 +x_0=222504.44500889 +y_0=47532.0603505207 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Trempealeau (m)
+<8113> +proj=tmerc +lat_0=43.16111111111111 +lon_0=-91.36666666666666 +k=1.0000361538 +x_0=256946.9138 +y_0=0.0041 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Trempealeau (ftUS)
+<8114> +proj=tmerc +lat_0=43.16111111111111 +lon_0=-91.36666666666666 +k=1.0000361538 +x_0=256946.9138938278 +y_0=0.003962407924815849 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Taylor (m)
+<8115> +proj=lcc +lat_1=45.17782208583333 +lat_0=45.17782208583333 +lon_0=-90.48333333333333 +k_0=1.0000597566 +x_0=187147.5744 +y_0=107746.7522 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Taylor (ftUS)
+<8116> +proj=lcc +lat_1=45.17782208583333 +lat_0=45.17782208583333 +lon_0=-90.48333333333333 +k_0=1.0000597566 +x_0=187147.5742951486 +y_0=107746.7521463043 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS St. Croix (m)
+<8117> +proj=tmerc +lat_0=44.03611111111111 +lon_0=-92.63333333333334 +k=1.0000381803 +x_0=165506.7302 +y_0=0.0103 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS St. Croix (ftUS)
+<8118> +proj=tmerc +lat_0=44.03611111111111 +lon_0=-92.63333333333334 +k=1.0000381803 +x_0=165506.7300990602 +y_0=0.01036322072644145 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Shawano (m)
+<8119> +proj=tmerc +lat_0=44.03611111111111 +lon_0=-88.60555555555555 +k=1.000032144 +x_0=262433.3253 +y_0=0.009599999999999999 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Shawano (ftUS)
+<8120> +proj=tmerc +lat_0=44.03611111111111 +lon_0=-88.60555555555555 +k=1.000032144 +x_0=262433.3251714504 +y_0=0.009448818897637795 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Sawyer (m)
+<8121> +proj=lcc +lat_1=45.90009913138888 +lat_0=45.90009913138888 +lon_0=-91.11666666666666 +k_0=1.0000573461 +x_0=216713.2336 +y_0=120734.1631 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Sawyer (ftUS)
+<8122> +proj=lcc +lat_1=45.90009913138888 +lat_0=45.90009913138888 +lon_0=-91.11666666666666 +k_0=1.0000573461 +x_0=216713.2337312675 +y_0=120734.1631699263 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Sauk (m)
+<8123> +proj=tmerc +lat_0=42.81944444444445 +lon_0=-89.90000000000001 +k=1.0000373868 +x_0=185623.5716 +y_0=0.0051 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Sauk (ftUS)
+<8124> +proj=tmerc +lat_0=42.81944444444445 +lon_0=-89.90000000000001 +k=1.0000373868 +x_0=185623.5715519431 +y_0=0.005181610363220727 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Rusk (m)
+<8125> +proj=tmerc +lat_0=43.91944444444444 +lon_0=-91.06666666666666 +k=1.0000495976 +x_0=250546.1013 +y_0=0.0234 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Rusk (ftUS)
+<8126> +proj=tmerc +lat_0=43.91944444444444 +lon_0=-91.06666666666666 +k=1.0000495976 +x_0=250546.1013970028 +y_0=0.02346964693929388 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Rock (m)
+<8127> +proj=tmerc +lat_0=41.94444444444444 +lon_0=-89.07222222222222 +k=1.0000337311 +x_0=146304.2926 +y_0=0.0068 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Rock (ftUS)
+<8128> +proj=tmerc +lat_0=41.94444444444444 +lon_0=-89.07222222222222 +k=1.0000337311 +x_0=146304.2926085852 +y_0=0.006705613411226822 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Richland (m)
+<8129> +proj=lcc +lat_1=43.3223129275 +lat_0=43.3223129275 +lon_0=-90.43055555555556 +k_0=1.0000375653 +x_0=202387.6048 +y_0=134255.4253 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Richland (ftUS)
+<8130> +proj=lcc +lat_1=43.3223129275 +lat_0=43.3223129275 +lon_0=-90.43055555555556 +k_0=1.0000375653 +x_0=202387.6047752095 +y_0=134255.4254508509 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Price (m)
+<8131> +proj=tmerc +lat_0=44.55555555555555 +lon_0=-90.48888888888889 +k=1.0000649554 +x_0=227990.8546 +y_0=0.0109 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Price (ftUS)
+<8132> +proj=tmerc +lat_0=44.55555555555555 +lon_0=-90.48888888888889 +k=1.0000649554 +x_0=227990.8544577089 +y_0=0.01097282194564389 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Portage (m)
+<8133> +proj=lcc +lat_1=44.41682397527777 +lat_0=44.41682397527777 +lon_0=-89.5 +k_0=1.000039936 +x_0=56388.1128 +y_0=50022.1874 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Portage (ftUS)
+<8134> +proj=lcc +lat_1=44.41682397527777 +lat_0=44.41682397527777 +lon_0=-89.5 +k_0=1.000039936 +x_0=56388.11277622555 +y_0=50022.1874523749 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Polk (m)
+<8135> +proj=tmerc +lat_0=44.66111111111111 +lon_0=-92.63333333333334 +k=1.0000433849 +x_0=141732.2823 +y_0=0.0059 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Polk (ftUS)
+<8136> +proj=tmerc +lat_0=44.66111111111111 +lon_0=-92.63333333333334 +k=1.0000433849 +x_0=141732.2822453645 +y_0=0.005791211582423164 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Pepin and Pierce (m)
+<8137> +proj=lcc +lat_1=44.63614887194444 +lat_0=44.63614887194444 +lon_0=-92.22777777777777 +k_0=1.0000362977 +x_0=167640.3354 +y_0=86033.0876 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Pepin and Pierce (ftUS)
+<8138> +proj=lcc +lat_1=44.63614887194444 +lat_0=44.63614887194444 +lon_0=-92.22777777777777 +k_0=1.0000362977 +x_0=167640.3352806706 +y_0=86033.08773177546 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Oneida (m)
+<8139> +proj=lcc +lat_1=45.70422377027778 +lat_0=45.70422377027778 +lon_0=-89.54444444444444 +k_0=1.0000686968 +x_0=70104.1401 +y_0=57588.0346 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Oneida (ftUS)
+<8140> +proj=lcc +lat_1=45.70422377027778 +lat_0=45.70422377027778 +lon_0=-89.54444444444444 +k_0=1.0000686968 +x_0=70104.14020828041 +y_0=57588.03474726949 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Oconto (m)
+<8141> +proj=tmerc +lat_0=44.39722222222222 +lon_0=-87.90833333333335 +k=1.0000236869 +x_0=182880.3676 +y_0=0.0033 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Oconto (ftUS)
+<8142> +proj=tmerc +lat_0=44.39722222222222 +lon_0=-87.90833333333335 +k=1.0000236869 +x_0=182880.3675895352 +y_0=0.003352806705613411 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Monroe (m)
+<8143> +proj=lcc +lat_1=44.00007392861111 +lat_0=44.00007392861111 +lon_0=-90.64166666666668 +k_0=1.0000434122 +x_0=204521.209 +y_0=121923.9861 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Monroe (ftUS)
+<8144> +proj=lcc +lat_1=44.00007392861111 +lat_0=44.00007392861111 +lon_0=-90.64166666666668 +k_0=1.0000434122 +x_0=204521.2090424181 +y_0=121923.9861823724 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Menominee (m)
+<8145> +proj=tmerc +lat_0=44.71666666666667 +lon_0=-88.41666666666667 +k=1.0000362499 +x_0=105461.0121 +y_0=0.0029 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Menominee (ftUS)
+<8146> +proj=tmerc +lat_0=44.71666666666667 +lon_0=-88.41666666666667 +k=1.0000362499 +x_0=105461.0121412243 +y_0=0.003048006096012192 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Marinette (m)
+<8147> +proj=tmerc +lat_0=44.69166666666666 +lon_0=-87.71111111111111 +k=1.0000234982 +x_0=238658.8794 +y_0=0.0032 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Marinette (ftUS)
+<8148> +proj=tmerc +lat_0=44.69166666666666 +lon_0=-87.71111111111111 +k=1.0000234982 +x_0=238658.8794513589 +y_0=0.003048006096012192 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Marathon (m)
+<8149> +proj=lcc +lat_1=44.90090442361111 +lat_0=44.90090442361111 +lon_0=-89.77 +k_0=1.000053289 +x_0=74676.1493 +y_0=55049.2669 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Marathon (ftUS)
+<8150> +proj=lcc +lat_1=44.90090442361111 +lat_0=44.90090442361111 +lon_0=-89.77 +k_0=1.000053289 +x_0=74676.1493522987 +y_0=55049.26695453391 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Lincoln (m)
+<8151> +proj=tmerc +lat_0=44.84444444444445 +lon_0=-89.73333333333333 +k=1.0000599003 +x_0=116129.0323 +y_0=0.0058 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Lincoln (ftUS)
+<8152> +proj=tmerc +lat_0=44.84444444444445 +lon_0=-89.73333333333333 +k=1.0000599003 +x_0=116129.0322580645 +y_0=0.005791211582423164 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Langlade (m)
+<8153> +proj=lcc +lat_1=45.15423710527778 +lat_0=45.15423710527778 +lon_0=-89.03333333333333 +k_0=1.0000627024 +x_0=198425.197 +y_0=105279.7829 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Langlade (ftUS)
+<8154> +proj=lcc +lat_1=45.15423710527778 +lat_0=45.15423710527778 +lon_0=-89.03333333333333 +k_0=1.0000627024 +x_0=198425.1968503937 +y_0=105279.7828803657 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS La Crosse (m)
+<8155> +proj=tmerc +lat_0=43.45111111111111 +lon_0=-91.31666666666666 +k=1.0000319985 +x_0=130454.6598 +y_0=0.0033 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS La Crosse (ftUS)
+<8156> +proj=tmerc +lat_0=43.45111111111111 +lon_0=-91.31666666666666 +k=1.0000319985 +x_0=130454.6596901194 +y_0=0.003352806705613411 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Kewaunee, Manitowoc and Sheboygan (m)
+<8157> +proj=tmerc +lat_0=43.26666666666667 +lon_0=-87.55 +k=1.0000233704 +x_0=79857.7614 +y_0=0.0012 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Kewaunee, Manitowoc and Sheboygan (ftUS)
+<8158> +proj=tmerc +lat_0=43.26666666666667 +lon_0=-87.55 +k=1.0000233704 +x_0=79857.76154432308 +y_0=0.001219202438404877 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Kenosha, Milwaukee, Ozaukee and Racine (m)
+<8159> +proj=tmerc +lat_0=42.21666666666667 +lon_0=-87.89444444444445 +k=1.0000260649 +x_0=185928.3728 +y_0=0.0009 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Kenosha, Milwaukee, Ozaukee and Racine (ftUS)
+<8160> +proj=tmerc +lat_0=42.21666666666667 +lon_0=-87.89444444444445 +k=1.0000260649 +x_0=185928.3727711455 +y_0=0.0009144018288036576 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Jackson (m)
+<8161> +proj=tmerc +lat_0=44.25333512777778 +lon_0=-90.84429651944444 +k=1.0000353 +x_0=27000 +y_0=25000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Jackson (ftUS)
+<8162> +proj=tmerc +lat_0=44.25333512777778 +lon_0=-90.84429651944444 +k=1.0000353 +x_0=27000 +y_0=24999.99989839979 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Iron (m)
+<8163> +proj=tmerc +lat_0=45.43333333333333 +lon_0=-90.25555555555556 +k=1.0000677153 +x_0=220980.4419 +y_0=0.008500000000000001 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Iron (ftUS)
+<8164> +proj=tmerc +lat_0=45.43333333333333 +lon_0=-90.25555555555556 +k=1.0000677153 +x_0=220980.4419608839 +y_0=0.008534417068834137 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Iowa (m)
+<8165> +proj=tmerc +lat_0=42.53888888888888 +lon_0=-90.16111111111111 +k=1.0000394961 +x_0=113081.0261 +y_0=0.0045 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Iowa (ftUS)
+<8166> +proj=tmerc +lat_0=42.53888888888888 +lon_0=-90.16111111111111 +k=1.0000394961 +x_0=113081.0261620523 +y_0=0.004572009144018288 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Green Lake and Marquette (m)
+<8167> +proj=lcc +lat_1=43.80700011777778 +lat_0=43.80700011777778 +lon_0=-89.24166666666667 +k_0=1.0000344057 +x_0=150876.3018 +y_0=79170.7795 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Green Lake and Marquette (ftUS)
+<8168> +proj=lcc +lat_1=43.80700011777778 +lat_0=43.80700011777778 +lon_0=-89.24166666666667 +k_0=1.0000344057 +x_0=150876.3017526035 +y_0=79170.77937515875 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Green and Lafayette (m)
+<8169> +proj=lcc +lat_1=42.63756227694444 +lat_0=42.63756227694444 +lon_0=-89.83888888888889 +k_0=1.0000390487 +x_0=170078.7403 +y_0=45830.2947 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Green and Lafayette (ftUS)
+<8170> +proj=lcc +lat_1=42.63756227694444 +lat_0=42.63756227694444 +lon_0=-89.83888888888889 +k_0=1.0000390487 +x_0=170078.7401574803 +y_0=45830.29484378968 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Grant (m)
+<8171> +proj=tmerc +lat_0=41.41111111111111 +lon_0=-90.8 +k=1.0000349452 +x_0=242316.4841 +y_0=0.01 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Grant (ftUS)
+<8172> +proj=tmerc +lat_0=41.41111111111111 +lon_0=-90.8 +k=1.0000349452 +x_0=242316.484023368 +y_0=0.01005842011684023 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Forest (m)
+<8173> +proj=tmerc +lat_0=44.00555555555555 +lon_0=-88.63333333333334 +k=1.0000673004 +x_0=275844.5533 +y_0=0.0157 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Forest (ftUS)
+<8177> +proj=tmerc +lat_0=44.00555555555555 +lon_0=-88.63333333333334 +k=1.0000673004 +x_0=275844.5532131065 +y_0=0.0158496316992634 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Dunn (m)
+<8179> +proj=tmerc +lat_0=44.40833333333333 +lon_0=-91.89444444444445 +k=1.0000410324 +x_0=51816.104 +y_0=0.003 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Dunn (ftUS)
+<8180> +proj=tmerc +lat_0=44.40833333333333 +lon_0=-91.89444444444445 +k=1.0000410324 +x_0=51816.10393700787 +y_0=0.003048006096012192 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Douglas (m)
+<8181> +proj=tmerc +lat_0=45.88333333333333 +lon_0=-91.91666666666667 +k=1.0000385418 +x_0=59131.3183 +y_0=0.0041 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Douglas (ftUS)
+<8182> +proj=tmerc +lat_0=45.88333333333333 +lon_0=-91.91666666666667 +k=1.0000385418 +x_0=59131.31826263652 +y_0=0.003962407924815849 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Door (m)
+<8184> +proj=tmerc +lat_0=44.4 +lon_0=-87.27222222222223 +k=1.0000187521 +x_0=158801.1176 +y_0=0.0023 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Door (ftUS)
+<8185> +proj=tmerc +lat_0=44.4 +lon_0=-87.27222222222223 +k=1.0000187521 +x_0=158801.1176022352 +y_0=0.002438404876809754 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Dodge and Jefferson (m)
+<8187> +proj=tmerc +lat_0=41.47222222222222 +lon_0=-88.77500000000001 +k=1.0000346418 +x_0=263347.7263 +y_0=0.0076 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Dodge and Jefferson (ftUS)
+<8189> +proj=tmerc +lat_0=41.47222222222222 +lon_0=-88.77500000000001 +k=1.0000346418 +x_0=263347.7263906528 +y_0=0.00762001524003048 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Dane (m)
+<8191> +proj=lcc +lat_1=43.0695160375 +lat_0=43.0695160375 +lon_0=-89.42222222222223 +k_0=1.0000384786 +x_0=247193.2944 +y_0=146591.9896 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Dane (ftUS)
+<8193> +proj=lcc +lat_1=43.0695160375 +lat_0=43.0695160375 +lon_0=-89.42222222222223 +k_0=1.0000384786 +x_0=247193.2943865888 +y_0=146591.9896367793 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Crawford (m)
+<8196> +proj=lcc +lat_1=43.200055605 +lat_0=43.200055605 +lon_0=-90.9388888888889 +k_0=1.0000349151 +x_0=113690.6274 +y_0=53703.1201 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Crawford (ftUS)
+<8197> +proj=lcc +lat_1=43.200055605 +lat_0=43.200055605 +lon_0=-90.9388888888889 +k_0=1.0000349151 +x_0=113690.6273812548 +y_0=53703.12024384048 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Columbia (m)
+<8198> +proj=lcc +lat_1=43.46254664583333 +lat_0=43.46254664583333 +lon_0=-89.39444444444445 +k_0=1.00003498 +x_0=169164.3381 +y_0=111569.6134 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Columbia (ftUS)
+<8200> +proj=lcc +lat_1=43.46254664583333 +lat_0=43.46254664583333 +lon_0=-89.39444444444445 +k_0=1.00003498 +x_0=169164.338023876 +y_0=111569.613512827 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Clark (m)
+<8201> +proj=tmerc +lat_0=43.6 +lon_0=-90.70833333333334 +k=1.0000463003 +x_0=199949.1989 +y_0=0.0086 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Clark (ftUS)
+<8202> +proj=tmerc +lat_0=43.6 +lon_0=-90.70833333333334 +k=1.0000463003 +x_0=199949.198983998 +y_0=0.008534417068834137 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Chippewa (m)
+<8203> +proj=lcc +lat_1=44.97785689861112 +lat_0=44.97785689861112 +lon_0=-91.29444444444444 +k_0=1.0000391127 +x_0=60045.72 +y_0=44091.4346 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Chippewa (ftUS)
+<8204> +proj=lcc +lat_1=44.97785689861112 +lat_0=44.97785689861112 +lon_0=-91.29444444444444 +k_0=1.0000391127 +x_0=60045.72009144018 +y_0=44091.43449326898 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Calumet, Fond du Lac, Outagamie and Winnebago (m)
+<8205> +proj=tmerc +lat_0=42.71944444444445 +lon_0=-88.5 +k=1.0000286569 +x_0=244754.8893 +y_0=0.0049 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Calumet, Fond du Lac, Outagamie and Winnebago (ftUS)
+<8206> +proj=tmerc +lat_0=42.71944444444445 +lon_0=-88.5 +k=1.0000286569 +x_0=244754.8892049784 +y_0=0.004876809753619507 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Burnett (m)
+<8207> +proj=lcc +lat_1=45.89871486583333 +lat_0=45.89871486583333 +lon_0=-92.45777777777778 +k_0=1.0000383841 +x_0=64008.1276 +y_0=59445.9043 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Burnett (ftUS)
+<8208> +proj=lcc +lat_1=45.89871486583333 +lat_0=45.89871486583333 +lon_0=-92.45777777777778 +k_0=1.0000383841 +x_0=64008.12771145543 +y_0=59445.90419100838 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Buffalo (m)
+<8209> +proj=tmerc +lat_0=43.48138888888889 +lon_0=-91.79722222222222 +k=1.0000382778 +x_0=175260.3502 +y_0=0.0048 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Buffalo (ftUS)
+<8210> +proj=tmerc +lat_0=43.48138888888889 +lon_0=-91.79722222222222 +k=1.0000382778 +x_0=175260.3502159004 +y_0=0.004876809753619507 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Brown (m)
+<8212> +proj=tmerc +lat_0=43 +lon_0=-88 +k=1.00002 +x_0=31600 +y_0=4600 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Brown (ftUS)
+<8213> +proj=tmerc +lat_0=43 +lon_0=-88 +k=1.00002 +x_0=31599.99989839979 +y_0=4599.999898399797 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Bayfield (m)
+<8214> +proj=lcc +lat_1=46.66964837722222 +lat_0=46.66964837722222 +lon_0=-91.15277777777779 +k_0=1.0000331195 +x_0=228600.4575 +y_0=148551.4837 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Bayfield (ftUS)
+<8216> +proj=lcc +lat_1=46.66964837722222 +lat_0=46.66964837722222 +lon_0=-91.15277777777779 +k_0=1.0000331195 +x_0=228600.4575057151 +y_0=148551.4835661671 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Barron (m)
+<8218> +proj=tmerc +lat_0=45.13333333333333 +lon_0=-91.84999999999999 +k=1.0000486665 +x_0=93150 +y_0=0.0029 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Barron (ftUS)
+<8220> +proj=tmerc +lat_0=45.13333333333333 +lon_0=-91.84999999999999 +k=1.0000486665 +x_0=93150 +y_0=0.003048006096012192 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Ashland (m)
+<8222> +proj=tmerc +lat_0=45.70611111111111 +lon_0=-90.62222222222222 +k=1.0000495683 +x_0=172821.9461 +y_0=0.0017 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Ashland (ftUS)
+<8224> +proj=tmerc +lat_0=45.70611111111111 +lon_0=-90.62222222222222 +k=1.0000495683 +x_0=172821.945948692 +y_0=0.001828803657607315 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(HARN) / WISCRS Adams and Juneau (m)
+<8225> +proj=tmerc +lat_0=43.36666666666667 +lon_0=-90 +k=1.0000365285 +x_0=147218.6942 +y_0=0.0037 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+# NAD83(HARN) / WISCRS Adams and Juneau (ftUS)
+<8226> +proj=tmerc +lat_0=43.36666666666667 +lon_0=-90 +k=1.0000365285 +x_0=147218.6941325883 +y_0=0.00365760731521463 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs  <>
+# NAD83(2011) / Oregon Burns-Harper zone (m)
+<8311> +proj=tmerc +lat_0=43.5 +lon_0=-117.6666666666667 +k=1.00014 +x_0=90000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Burns-Harper zone (ft)
+<8312> +proj=tmerc +lat_0=43.5 +lon_0=-117.6666666666667 +k=1.00014 +x_0=90000.00001488 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Canyon City-Burns zone (m)
+<8313> +proj=tmerc +lat_0=43.5 +lon_0=-119 +k=1.00022 +x_0=20000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Canyon City-Burns zone (ft)
+<8314> +proj=tmerc +lat_0=43.5 +lon_0=-119 +k=1.00022 +x_0=19999.99999992 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Coast Range North zone (m)
+<8315> +proj=lcc +lat_1=45.58333333333334 +lat_0=45.58333333333334 +lon_0=-123.4166666666667 +k_0=1.000045 +x_0=30000 +y_0=20000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Coast Range North zone (ft)
+<8316> +proj=lcc +lat_1=45.58333333333334 +lat_0=45.58333333333334 +lon_0=-123.4166666666667 +k_0=1.000045 +x_0=30000.00001512 +y_0=19999.99999992 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Dayville-Prairie City zone (m)
+<8317> +proj=tmerc +lat_0=44.25 +lon_0=-119.6333333333333 +k=1.00012 +x_0=20000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Dayville-Prairie City zone (ft)
+<8318> +proj=tmerc +lat_0=44.25 +lon_0=-119.6333333333333 +k=1.00012 +x_0=19999.99999992 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Denio-Burns zone (m)
+<8319> +proj=tmerc +lat_0=41.75 +lon_0=-118.4166666666667 +k=1.00019 +x_0=80000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Denio-Burns zone (ft)
+<8320> +proj=tmerc +lat_0=41.75 +lon_0=-118.4166666666667 +k=1.00019 +x_0=79999.99999968 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Halfway zone (m)
+<8321> +proj=lcc +lat_1=45.25 +lat_0=45.25 +lon_0=-117.25 +k_0=1.000085 +x_0=40000 +y_0=70000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Halfway zone (ft)
+<8322> +proj=lcc +lat_1=45.25 +lat_0=45.25 +lon_0=-117.25 +k_0=1.000085 +x_0=39999.99999984 +y_0=70000.00001495999 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Medford-Diamond Lake zone (m)
+<8323> +proj=lcc +lat_1=42 +lat_0=42 +lon_0=-122.25 +k_0=1.00004 +x_0=60000 +y_0=-60000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Medford-Diamond Lake zone (ft)
+<8324> +proj=lcc +lat_1=42 +lat_0=42 +lon_0=-122.25 +k_0=1.00004 +x_0=59999.99999976 +y_0=-59999.99999976 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Mitchell zone (m)
+<8325> +proj=lcc +lat_1=47 +lat_0=47 +lon_0=-120.25 +k_0=0.99927 +x_0=30000 +y_0=290000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Mitchell zone (ft)
+<8326> +proj=lcc +lat_1=47 +lat_0=47 +lon_0=-120.25 +k_0=0.99927 +x_0=30000.00001512 +y_0=290000.00001408 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon North Central zone (m)
+<8327> +proj=lcc +lat_1=46.16666666666666 +lat_0=46.16666666666666 +lon_0=-120.5 +k_0=1 +x_0=100000 +y_0=140000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon North Central zone (ft)
+<8328> +proj=lcc +lat_1=46.16666666666666 +lat_0=46.16666666666666 +lon_0=-120.5 +k_0=1 +x_0=99999.99999960001 +y_0=139999.99999944 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Ochoco Summit zone (m)
+<8329> +proj=lcc +lat_1=43.5 +lat_0=43.5 +lon_0=-120.5 +k_0=1.00006 +x_0=40000 +y_0=-80000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Ochoco Summit zone (ft)
+<8330> +proj=lcc +lat_1=43.5 +lat_0=43.5 +lon_0=-120.5 +k_0=1.00006 +x_0=39999.99999984 +y_0=-79999.99999968 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Owyhee zone (m)
+<8331> +proj=tmerc +lat_0=41.75 +lon_0=-117.5833333333333 +k=1.00018 +x_0=70000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Owyhee zone (ft)
+<8332> +proj=tmerc +lat_0=41.75 +lon_0=-117.5833333333333 +k=1.00018 +x_0=70000.00001495999 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Pilot Rock-Ukiah zone (m)
+<8333> +proj=lcc +lat_1=46.16666666666666 +lat_0=46.16666666666666 +lon_0=-119 +k_0=1.000025 +x_0=50000 +y_0=130000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Pilot Rock-Ukiah zone (ft)
+<8334> +proj=lcc +lat_1=46.16666666666666 +lat_0=46.16666666666666 +lon_0=-119 +k_0=1.000025 +x_0=50000.00001504 +y_0=130000.00001472 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Prairie City-Brogan zone (m)
+<8335> +proj=lcc +lat_1=44 +lat_0=44 +lon_0=-118 +k_0=1.00017 +x_0=60000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Prairie City-Brogan zone (ft)
+<8336> +proj=lcc +lat_1=44 +lat_0=44 +lon_0=-118 +k_0=1.00017 +x_0=59999.99999976 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Riley-Lakeview zone (m)
+<8337> +proj=tmerc +lat_0=41.75 +lon_0=-120.3333333333333 +k=1.000215 +x_0=70000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Riley-Lakeview zone (ft)
+<8338> +proj=tmerc +lat_0=41.75 +lon_0=-120.3333333333333 +k=1.000215 +x_0=70000.00001495999 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Siskiyou Pass zone (m)
+<8339> +proj=lcc +lat_1=42.5 +lat_0=42.5 +lon_0=-122.5833333333333 +k_0=1.00015 +x_0=10000 +y_0=60000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Siskiyou Pass zone (ft)
+<8340> +proj=lcc +lat_1=42.5 +lat_0=42.5 +lon_0=-122.5833333333333 +k_0=1.00015 +x_0=10000.0000152 +y_0=59999.99999976 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Ukiah-Fox zone (m)
+<8341> +proj=lcc +lat_1=45.25 +lat_0=45.25 +lon_0=-119 +k_0=1.00014 +x_0=30000 +y_0=90000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Ukiah-Fox zone (ft)
+<8342> +proj=lcc +lat_1=45.25 +lat_0=45.25 +lon_0=-119 +k_0=1.00014 +x_0=30000.00001512 +y_0=90000.00001488 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Wallowa zone (m)
+<8343> +proj=tmerc +lat_0=45.25 +lon_0=-117.5 +k=1.000195 +x_0=60000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Wallowa zone (ft)
+<8344> +proj=tmerc +lat_0=45.25 +lon_0=-117.5 +k=1.000195 +x_0=59999.99999976 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Warner Highway zone (m)
+<8345> +proj=lcc +lat_1=42.5 +lat_0=42.5 +lon_0=-120 +k_0=1.000245 +x_0=40000 +y_0=60000 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Warner Highway zone (ft)
+<8346> +proj=lcc +lat_1=42.5 +lat_0=42.5 +lon_0=-120 +k_0=1.000245 +x_0=39999.99999984 +y_0=59999.99999976 +ellps=GRS80 +units=ft +no_defs  <>
+# NAD83(2011) / Oregon Willamette Pass zone (m)
+<8347> +proj=tmerc +lat_0=43 +lon_0=-122 +k=1.000223 +x_0=20000 +y_0=0 +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(2011) / Oregon Willamette Pass zone (ft)
+<8348> +proj=tmerc +lat_0=43 +lon_0=-122 +k=1.000223 +x_0=19999.99999992 +y_0=0 +ellps=GRS80 +units=ft +no_defs  <>
 # Pulkovo 1995 / Gauss-Kruger zone 4
 <20004> +proj=tmerc +lat_0=0 +lon_0=21 +k=1 +x_0=4500000 +y_0=0 +ellps=krass +towgs84=24.47,-130.89,-81.56,0,0,0.13,-0.22 +units=m +no_defs  <>
 # Pulkovo 1995 / Gauss-Kruger zone 5
@@ -10975,6 +11377,42 @@
 <7879> +proj=geocent +ellps=WGS84 +units=m +no_defs  <>
 # SHGD2015
 <7884> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ETRF89
+<7914> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ETRF90
+<7916> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ETRF91
+<7918> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ETRF92
+<7920> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ETRF93
+<7922> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ETRF94
+<7924> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ETRF96
+<7926> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ETRF97
+<7928> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ETRF2000
+<7930> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# ISN2016
+<8084> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# IGS14
+<8227> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS96)
+<8230> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS)v2
+<8233> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS)v3
+<8238> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS)v4
+<8242> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS)v5
+<8247> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS)v6
+<8250> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
+# NAD83(CSRS)v7
+<8253> +proj=geocent +ellps=GRS80 +units=m +no_defs  <>
 # KKJ / Finland Uniform Coordinate System + N60 height
 <3901> +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=3500000 +y_0=0 +ellps=intl +towgs84=-96.062,-82.428,-121.753,4.801,0.345,-1.376,1.496 +units=m +vunits=m +no_defs  <>
 # ETRS89 / TM35FIN(N,E) + N60 height
@@ -11287,3 +11725,7 @@
 <7955> +proj=utm +zone=30 +south +ellps=WGS84 +towgs84=-0.077,0.079,0.086,0,0,0,0 +units=m +vunits=m +no_defs  <>
 # SHMG2015 +  SHVD2015 height
 <7956> +proj=utm +zone=30 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +vunits=m +no_defs  <>
+# GR96 + GVR2000 height
+<8349> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +vunits=m +no_defs  <>
+# GR96 + GVR2016 height
+<8350> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +vunits=m +no_defs  <>
