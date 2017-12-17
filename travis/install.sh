@@ -81,7 +81,7 @@ if [ $TRAVIS_OS_NAME == "osx" ]; then
 make -j3
 make check
 PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/builtins.gie
-PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/more_builtins.gie
+PROJ_LIB=$GRIDDIR ./src/gie -vvvvv ./test/gie/more_builtins.gie
 PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/deformation.gie
 PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/axisswap.gie
 PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/ellipsoid.gie

@@ -58,11 +58,13 @@ test_script:
   - cd bin
   - echo "Contents of current directory:"
   - dir
+  - echo "Contents of ..\test\gie:"
+  - dir ..\test\gie
   - gie.exe ..\test\gie\builtins.gie
-  - gie.exe ..\test\gie\more_builtins.gie
   - gie.exe ..\test\gie\deformation.gie
   - gie.exe ..\test\gie\axisswap.gie
   - gie.exe ..\test\gie\ellipsoid.gie
+  - gie.exe -vvvvv ..\test\gie\more_builtins.gie
   - gie.exe ..\test\gie\GDA.gie
 
 deploy: off

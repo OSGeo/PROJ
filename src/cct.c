@@ -71,20 +71,23 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 
 ***********************************************************************/
 
-#include "optargpm.h"
-#include "proj_internal.h"
-#include <proj.h>
-#include "projects.h"
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
-#include <math.h>
+
+#include <proj.h>
+#include "proj_internal.h"
+#include "projects.h"
+#include "optargpm.h"
 
 
+/* Prototypes for functions in proj_strtod.c */
 double proj_strtod(const char *str, char **endptr);
 double proj_atof(const char *str);
 
+/* Prototypes from functions in this file */
 char *column (char *buf, int n);
 PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time);
 

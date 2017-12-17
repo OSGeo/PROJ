@@ -159,6 +159,8 @@ install: all
 	-mkdir $(INSTDIR)\share
 	-mkdir $(INSTDIR)\lib
 	-mkdir $(INSTDIR)\include
+	-mkdir $(INSTDIR)\test
+	-mkdir $(INSTDIR)\test\gie
 	copy *.exe $(INSTDIR)\bin
 	copy *.dll $(INSTDIR)\bin
 	copy *.lib $(INSTDIR)\lib
@@ -166,3 +168,4 @@ install: all
 	copy proj_api.h $(INSTDIR)\include
 	copy projects.h $(INSTDIR)\include
 	copy geodesic.h $(INSTDIR)\include
+	copy ..\test\gie\*.gie $(INSTDIR)\test\gie

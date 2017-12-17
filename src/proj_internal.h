@@ -57,6 +57,7 @@ extern "C" {
 #define PJ_TORAD(deg)  ((deg)*M_PI/180.0)
 #endif
 
+
 /* This enum is also conditionally defined in projects.h - but we need it here */
 /* for the pj_left/right prototypes, and enums cannot be forward declared      */
 enum pj_io_units {
@@ -108,6 +109,12 @@ void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log);
 void pj_inherit_ellipsoid_def (const PJ *src, PJ *dst);
 void pj_erase_ellipsoid_def (PJ *P);
 int pj_calc_ellipsoid_params (PJ *P, double a, double es);
+
+char  *pj_chomp (char *c);
+char  *pj_shrink (char *c);
+size_t pj_trim_argc (char *args);
+char **pj_trim_argv (size_t argc, char *args);
+char  *pj_make_args (size_t argc, char **argv);
 
 /* Lowest level: Minimum support for fileapi */
 void proj_fileapi_set (PJ *P, void *fileapi);

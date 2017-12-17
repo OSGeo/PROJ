@@ -2,73 +2,75 @@
                         Tests for the axisswap operation
 -------------------------------------------------------------------------------
 
-BEGIN
+<gie>
 
-OPERATION   +proj=axisswap +order=1,2,3,4
-TOLERANCE   0.000001 m
-ACCEPT      1 2 3 4
-EXPECT      1 2 3 4
-ROUNDTRIP   100
+operation   proj=axisswap order=1,2,3,4
+tolerance   0.000001 m
+accept      1 2 3 4
+expect      1 2 3 4
+roundtrip   100
 
-OPERATION   +proj=axisswap +order=4,3,2,1
-TOLERANCE   0.000001 m
-ACCEPT      1 2 3 4
-EXPECT      4 3 2 1
-ROUNDTRIP   100
+operation   proj=axisswap order=4,3,2,1
+tolerance   0.000001 m
+accept      1 2 3 4
+expect      4 3 2 1
+roundtrip   100
 
-OPERATION   +proj=axisswap +order=-1,-2,-3,-4
-TOLERANCE   0.000001 m
-ACCEPT       1  2  3  4
-EXPECT      -1 -2 -3 -4
-ROUNDTRIP   100
+operation   proj=axisswap order=-1,-2,-3,-4
+tolerance   0.000001 m
+accept       1  2  3  4
+expect      -1 -2 -3 -4
+roundtrip   100
 
-OPERATION   +proj=axisswap +order=1,2,-3,4
-TOLERANCE   0.000001 m
-ACCEPT      1 2  3 4
-EXPECT      1 2 -3 4
-ROUNDTRIP   100
+operation   proj=axisswap order=1,2,-3,4
+tolerance   0.000001 m
+accept      1 2  3 4
+expect      1 2 -3 4
+roundtrip   100
 
-OPERATION   +proj=axisswap +order=-1,2,3,4
-TOLERANCE   0.000001 m
-ACCEPT       1 2 3 4
-EXPECT      -1 2 3 4
-ROUNDTRIP   100
+operation   proj=axisswap order=-1,2,3,4
+tolerance   0.000001 m
+accept       1 2 3 4
+expect      -1 2 3 4
+roundtrip   100
 
-OPERATION   +proj=axisswap +order=1,2,3,-4
-TOLERANCE   0.000001 m
-ACCEPT      1 2 3  4
-EXPECT      1 2 3 -4
-ROUNDTRIP   100
+operation   proj=axisswap order=1,2,3,-4
+tolerance   0.000001 m
+accept      1 2 3  4
+expect      1 2 3 -4
+roundtrip   100
 
-OPERATION   +proj=axisswap +order=-2,1
-TOLERANCE   0.000001 m
-ACCEPT       1 2 3 4
-EXPECT      -2 1 3 4
-ROUNDTRIP   100
-$
-OPERATION   +proj=axisswap +order=3,-2,1
-TOLERANCE   0.000001 m
-ACCEPT      1  2 3 4
-EXPECT      3 -2 1 4
-ROUNDTRIP   100
+operation   proj=axisswap order=-2,1
+tolerance   0.000001 m
+accept       1 2 3 4
+expect      -2 1 3 4
+roundtrip   100
+
+operation   proj=axisswap order=3,-2,1
+tolerance   0.000001 m
+accept      1  2 3 4
+expect      3 -2 1 4
+roundtrip   100
 
 
-OPERATION   proj=pipeline step proj=latlong step proj=axisswap order=1,2,3,4 angularunits
-TOLERANCE   0.00001 m
-ACCEPT      12 55 0 0
-EXPECT      12 55 0 0
+operation   proj=pipeline
+            step proj=latlong
+            step proj=axisswap
+            order=1,2,3,4
+            angularunits
 
-OPERATION   +proj=pipeline +step +proj=latlong +step +proj=axisswap +order=-2,-1,3,4 +angularunits
-TOLERANCE   0.00001 m
-ACCEPT        12 55 0 0
-EXPECT      -55 -12 0 0
+tolerance   0.00001 m
+accept      12 55 0 0
+expect      12 55 0 0
 
--------------------------------------------------------------------------------
-operation +proj=aea   +ellps=GRS80  +lat_1=0 +lat_2=2
--------------------------------------------------------------------------------
-tolerance 0.00010 mm
-accept  2 1
-expect  222571.608757106 110653.326743030
-ROUNDTRIP   100
+operation   proj=pipeline
+            step proj=latlong
+            step proj=axisswap
+            order=-2,-1,3,4
+            angularunits
 
-END
+tolerance   0.00001 m
+accept       12 55 0 0
+expect      -55 -12 0 0
+
+</gie>

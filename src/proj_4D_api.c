@@ -28,7 +28,6 @@
  *****************************************************************************/
 #include <stddef.h>
 #include <errno.h>
-#include <ctype.h>
 #include <proj.h>
 #include "proj_internal.h"
 #include "projects.h"
@@ -81,6 +80,8 @@ double proj_lpz_dist (const PJ *P, LPZ a, LPZ b) {
     PJ_COORD aa, bb;
     aa.lpz = a;
     bb.lpz = b;
+    if (HUGE_VAL==a.lam || HUGE_VAL==b.lam)
+        return HUGE_VAL;
     return hypot (proj_lp_dist (P, aa.lp, bb.lp), a.z - b.z);
 }
 
@@ -340,7 +341,7 @@ PJ_COORD proj_geoc_lat (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
     direction = PJ_INV)
 
     The conversion involves a call to the tangent function, which goes through the
-    roof at the poles, so very close (the last few micrometers) to the poles no
+    roof at the poles, so very close (the last centimeter) to the poles no
     conversion takes place and the input latitude is copied directly to the output.
 
     Fortunately, the geocentric latitude converges to the geographical at the
@@ -349,7 +350,7 @@ PJ_COORD proj_geoc_lat (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
     For the spherical case, the geographical latitude equals the geocentric, and
     consequently, the input is copied directly to the output.
 **************************************************************************************/
-    const double limit = M_HALFPI - 1e-12;
+    const double limit = M_HALFPI - 1e-9;
     PJ_COORD res = coo;
     if ((coo.lp.phi > limit) || (coo.lp.phi < -limit) || (P->es==0))
         return res;
@@ -388,76 +389,29 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
 **************************************************************************************/
     PJ   *P;
     char *args, **argv;
-    int	  argc, i, j, last, n;
+    size_t argc, n;
 
     if (0==ctx)
         ctx = pj_get_default_ctx ();
 
     /* Make a copy that we can manipulate */
-    n = (int) strlen (definition);
+    n = strlen (definition);
     args = (char *) malloc (n + 1);
     if (0==args)
         return 0;
     strcpy (args, definition);
 
-    /* All-in-one: count args, eliminate superfluous whitespace, 0-terminate substrings */
-    for (i = j = argc = last = 0;  i < n;  ) {
-
-        /* Skip prefix whitespace */
-        while (isspace (args[i]))
-            i++;
-
-        /* Skip at most one prefix '+' */
-        if ('+'==args[i])
-            i++;
-
-        /* Whitespace after a '+' is a syntax error - but by Postel's prescription, we ignore and go on */
-        if (isspace (args[i]))
-            continue;
-
-        /* Move a whitespace delimited text string to the left, skipping over superfluous whitespace */
-        while ((0!=args[i]) && (!isspace (args[i])) && (';'!=args[i]))
-            args[j++] = args[i++];
-
-        /* Skip postfix whitespace */
-        while (isspace (args[i]) || ';'==args[i])
-            i++;
-
-        /* Greedy assignment operator: turn "a = b" into "a=b" */
-        if ('='==args[i]) {
-            args[j++] = '=';
-            i++;
-            while (isspace (args[i]))
-                i++;
-            while ((0!=args[i]) && (!isspace (args[i])) && (';'!=args[i]))
-                args[j++] = args[i++];
-            while (isspace (args[i]) || ';'==args[i])
-                i++;
-        }
-
-        /* terminate string - if that makes j pass i (often the case for first arg), let i catch up */
-        args[j++] = 0;
-        if (i < j)
-            i = j;
-
-        /* we finished another arg */
-        argc++;
+    argc = pj_trim_argc (args);
+    if (argc==0) {
+        pj_dealloc (args);
+        return 0;
     }
 
-    /* turn the massaged input into an array of strings */
-    argv = (char **) calloc (argc, sizeof (char *));
-    if (0==argv)
-        return pj_dealloc (args);
-    argv[0] = args;
-    for (i = 0, j = 1;  i < n;  i++) {
-        if (0==args[i])
-            argv[j++] = args + (i + 1);
-        if (j==argc)
-            break;
-    }
+    argv = pj_trim_argv (argc, args);
 
     /* ...and let pj_init_ctx do the hard work */
-    P = pj_init_ctx (ctx, argc, argv);
+    P = pj_init_ctx (ctx, (int) argc, argv);
+
     pj_dealloc (argv);
     pj_dealloc (args);
     return P;
@@ -474,11 +428,22 @@ a null-pointer is returned. The definition arguments may use '+' as argument sta
 indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
 "zone=32"}.
 **************************************************************************************/
+    PJ *P;
+    const char *c;
+
     if (0==argv)
         return 0;
     if (0==ctx)
         ctx = pj_get_default_ctx ();
-    return pj_init_ctx (ctx, argc, argv);
+
+    /* We assume that free format is used, and build a full proj_create compatible string */
+    c = pj_make_args (argc, argv);
+    if (0==c)
+        return 0;
+
+    P = proj_create (ctx, c);
+    pj_dealloc ((char *) c);
+    return P;
 }
 
 
@@ -781,6 +746,8 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
     return info;
 }
 
+
+
 /*****************************************************************************/
 PJ_INIT_INFO proj_init_info(const char *initname){
 /******************************************************************************
@@ -790,12 +757,14 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 
     Returns PJ_INIT_INFO struct.
 
-    If the init file is not found all members of
-    the return struct are set to 0. If the init file is found, but it the
-    metadata is missing, the value is set to "Unknown".
+    If the init file is not found all members of the return struct are set
+    to the empty string.
+
+    If the init file is found, but the metadata is missing, the value is
+    set to "Unknown".
 
 ******************************************************************************/
-    int file_found, def_found=0;
+    int file_found;
     char param[80], key[74];
     paralist *start, *next;
     PJ_INIT_INFO info;
@@ -819,7 +788,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
     strncat(param, key, 73);
 
     start = pj_mkparam(param);
-    next = pj_get_init(ctx, &start, start, key, &def_found);
+    pj_expand_init(ctx, start);
 
     if (pj_param(ctx, start, "tversion").i) {
         pj_strlcpy(info.version, pj_param(ctx, start, "sversion").s, sizeof(info.version));
@@ -857,6 +826,9 @@ PJ_FACTORS proj_factors(PJ *P, LP lp) {
 ******************************************************************************/
     PJ_FACTORS factors = {0,0,0, 0,0,0, 0,0};
     struct FACTORS f;
+
+    if (0==P)
+        return factors;
 
     if (pj_factors(lp, P, 0.0, &f))
         return factors;

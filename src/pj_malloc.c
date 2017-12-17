@@ -40,6 +40,7 @@
 ** projection system memory allocation/deallocation call with custom
 ** application procedures.  */
 
+#include <proj.h>
 #include "projects.h"
 #include <errno.h>
 
@@ -143,7 +144,7 @@ char *pj_strdup(const char *str)
 
 
 /*****************************************************************************/
-void *pj_dealloc_params (projCtx ctx, paralist *start, int errlev) {
+void *pj_dealloc_params (PJ_CONTEXT *ctx, paralist *start, int errlev) {
 /*****************************************************************************
     Companion to pj_default_destructor (below). Deallocates a linked list
     of "+proj=xxx" initialization parameters.

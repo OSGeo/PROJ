@@ -51,12 +51,9 @@
     pj_init code, implementing support for multilevel, embedded pipelines.
 
     Syntactically, the pipeline system introduces the "+step" keyword (which
-    indicates the start of each transformation step), the "+omit_fwd" and
-    "+omit_inv" keywords (which indicate that a given transformation step
-    should be omitted when the pipeline is executed in forward, resp. inverse
-    direction), and reintroduces the +inv keyword (indicating that a given
-    transformation step should run in reverse, i.e. forward, when the pipeline
-    is executed in inverse direction, and vice versa).
+    indicates the start of each transformation step), and reintroduces the +inv
+    keyword (indicating that a given transformation step should run in reverse, i.e.
+    forward, when the pipeline is executed in inverse direction, and vice versa).
 
     Hence, the first transformation example above, can be implemented as:
 

@@ -149,3 +149,5 @@ EXPORTS
 
     pj_ellipsoid                   @134
     pj_calc_ellipsoid_params       @135
+    pj_chomp                       @136
+    pj_shrink                      @137

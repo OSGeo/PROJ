@@ -683,7 +683,10 @@ double adjlon(double);
 double aacos(projCtx,double), aasin(projCtx,double), asqrt(double), aatan2(double, double);
 
 PROJVALUE pj_param(projCtx ctx, paralist *, const char *);
+paralist *pj_param_exists (paralist *list, const char *parameter);
 paralist *pj_mkparam(char *);
+paralist *pj_mkparam_ws (char *str);
+
 
 int pj_ellipsoid (PJ *);
 int pj_ell_set(projCtx ctx, paralist *, double *, double *);
@@ -694,7 +697,8 @@ int pj_angular_units_set(paralist *, PJ *);
 paralist *pj_clone_paralist( const paralist* );
 paralist *pj_search_initcache( const char *filekey );
 void      pj_insert_initcache( const char *filekey, const paralist *list);
-paralist *pj_get_init(projCtx ctx, paralist **start, paralist *next, char *name, int *found_def);
+paralist *pj_expand_init(projCtx ctx, paralist *init);
+
 void     *pj_dealloc_params (projCtx ctx, paralist *start, int errlev);
 
 
