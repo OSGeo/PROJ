@@ -352,11 +352,6 @@ Note that 'init=foo:bar' stays in the list. It is ignored after expansion.
     if (0==init)
         return 0;
 
-    /* Nothing to expand? */
-    if (0==init->param)
-        return 0;
-
-
     expn = get_init(ctx, init->param);
 
     /* Nothing in expansion? */
