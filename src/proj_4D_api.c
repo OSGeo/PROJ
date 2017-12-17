@@ -757,9 +757,11 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 
     Returns PJ_INIT_INFO struct.
 
-    If the init file is not found all members of
-    the return struct are set to 0. If the init file is found, but it the
-    metadata is missing, the value is set to "Unknown".
+    If the init file is not found all members of the return struct are set
+    to the empty string.
+
+    If the init file is found, but the metadata is missing, the value is
+    set to "Unknown".
 
 ******************************************************************************/
     int file_found;
