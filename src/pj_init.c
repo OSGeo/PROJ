@@ -487,7 +487,6 @@ static constructor *pj_constructor (const char *name) {
 PJ *
 pj_init_ctx(projCtx ctx, int argc, char **argv) {
     char *s, *name;
-/*    PJ *(*proj)(PJ *)*/;
     constructor *proj;
     paralist *curr, *init, *start;
     int i;
