@@ -61,13 +61,11 @@ static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
             next = next->next = pj_mkparam_ws (c);
         if (0==next)
             return pj_dealloc_params (ctx, first, ENOMEM);
-printf ("string_to_paralist: [%s]\n", next->param);
 
         /* And skip to the end of the substring */
         while ((!isspace(*c)) && 0!=*c)
             c++;
     }
-printf ("string_to_paralist: last - [%s] first - [%s]\n", next->param, first->param);
 
     /* Terminate list and return */
     next->next = 0;
@@ -259,7 +257,7 @@ Expand key from buffer or (if not in buffer) from init file
 
 
 
-static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
+static paralist *append_defaults_to_paralist (PJ_CONTEXT *ctx, paralist *start, char *key) {
     paralist *defaults, *last = 0;
     char keystring[ID_TAG_MAX + 20];
     paralist *next, *proj;
@@ -327,28 +325,49 @@ static paralist *append_defaults (PJ_CONTEXT *ctx, paralist *start, char *key) {
     return last;
 }
 
+/*****************************************************************************/
+paralist *pj_expand_init(PJ_CONTEXT *ctx, paralist *init, char *key) {
+/******************************************************************************
+Append expansion of <key> to the paralist <init>. The expansion is appended,
+rather than inserted at <init>'s place, since <init> may contain
+overrides to the expansion. These must take precedence, and hence come first
+in the expanded list.
 
+Consider e.g. the key 'bla:bla' which (hypothetically) expands to 'proj=utm
+zone=32 ellps=GRS80', i.e. a UTM projection on the GRS80 ellipsoid.
 
-paralist *pj_get_init(PJ_CONTEXT *ctx, paralist *start, char *key) {
+The expression 'init=bla.bla ellps=intl' will then expand to:
+
+           'init=bla.bla ellps=intl proj=utm zone=32 ellps=GRS80',
+
+where 'ellps=intl' precedes 'ellps=GRS80', and hence takes precedence,
+turning the expansion into an UTM projection on the Hayford ellipsoid.
+
+Note that 'init=bla:bla' stays in the list. It is ignored after expansion.
+******************************************************************************/
     paralist *last;
-    paralist *proj;
-    paralist *init = get_init(ctx, key);
+    paralist *expn;
 
+    /* Nothing to expand? */
+    if (0==key)
+        return 0;
+
+    /* Nowhere to start? */
     if (0==init)
         return 0;
-    for (last = start;  last && last->next;  last = last->next);
-    if (last)
-        last->next = init;
-    else
-        start = init;
 
-    append_defaults (ctx, start, "general");
+    expn = get_init(ctx, key);
 
-    proj = pj_param_exists (start, "proj");
-    if (0==proj || strlen (proj->param) < 6)
-        return start;
-    append_defaults (ctx, start, proj->param + 5);
-    return start;
+    /* Nothing in expansion? */
+    if (0==expn)
+        return 0;
+
+    /* Locate  the end of the list */
+    for (last = init;  last && last->next;  last = last->next);
+
+    /* Then append and return */
+    last->next = expn;
+    return init;
 }
 
 
@@ -451,12 +470,26 @@ pj_init(int argc, char **argv) {
     return pj_init_ctx( pj_get_default_ctx(), argc, argv );
 }
 
+
+typedef    PJ *(constructor)(PJ *);
+typedef    constructor *(*function_returning_constructor)(const char *);
+
+static constructor *pj_constructor (const char *name) {
+    int i;
+    char *s;
+    for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
+    if (0==s)
+        return 0;
+    return (constructor *) pj_list[i].proj;
+}
+
+
 PJ *
 pj_init_ctx(projCtx ctx, int argc, char **argv) {
     char *s, *name;
-    paralist *start = NULL;
-    PJ *(*proj)(PJ *);
-    paralist *curr, *init;
+/*    PJ *(*proj)(PJ *)*/;
+    constructor *proj;
+    paralist *curr, *init, *start;
     int i;
     int err;
     PJ *PIN = 0;
@@ -467,7 +500,6 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         ctx = pj_get_default_ctx ();
 
     ctx->last_errno = 0;
-    start = NULL;
 
     if (argc <= 0) {
         pj_ctx_set_errno (ctx, PJD_ERR_NO_ARGS);
@@ -514,28 +546,31 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     /* problem when '+init's are expanded as late as possible.                    */
     init = pj_param_exists (start, "init");
     if (init && n_pipelines == 0) {
-        curr = pj_get_init(ctx, start, init->param);
-        if (!curr)
+        init = pj_expand_init (ctx, init, init->param);
+        if (!init)
             return pj_dealloc_params (ctx, start, PJD_ERR_NO_ARGS);
     }
     if (ctx->last_errno)
         return pj_dealloc_params (ctx, start, ctx->last_errno);
 
     /* Find projection selection */
-    if (!(name = pj_param(ctx, start, "sproj").s))
+    curr = pj_param_exists (start, "proj");
+    if (0==curr)
         return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);
+    name =  curr->param;
+    if (strlen (name) < 6)
+        return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);
+    name += 5;
 
-    /* Append general and projection specific defaults to the definition list */
-    append_defaults (ctx, start, "general");
-    append_defaults (ctx, start, name);
-
-
-    for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
-
-    if (!s)
+    proj = pj_constructor (name);
+    if (0==proj)
         return pj_dealloc_params (ctx, start, PJD_ERR_UNKNOWN_PROJECTION_ID);
 
-    proj = (PJ *(*)(PJ *)) pj_list[i].proj;
+
+    /* Append general and projection specific defaults to the definition list */
+    append_defaults_to_paralist (ctx, start, "general");
+    append_defaults_to_paralist (ctx, start, name);
+
 
     /* Allocate projection structure */
     PIN = proj(0);

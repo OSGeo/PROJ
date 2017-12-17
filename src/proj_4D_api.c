@@ -771,57 +771,39 @@ PJ_INIT_INFO proj_init_info(const char *initname){
     memset(&info, 0, sizeof(PJ_INIT_INFO));
 
     file_found = pj_find_file(ctx, initname, info.filename, sizeof(info.filename));
-puts ("proj_init_info - 1");
     if (!file_found || strlen(initname) > 64) {
         return info;
     }
-puts ("proj_init_info - 2");
 
     pj_strlcpy(info.name, initname, sizeof(info.name));
-puts ("proj_init_info - 3");
     strcpy(info.origin, "Unknown");
     strcpy(info.version, "Unknown");
     strcpy(info.lastupdate, "Unknown");
-puts ("proj_init_info - 4");
 
     pj_strlcpy(key, initname, 64); /* make room for ":metadata\0" at the end */
-puts ("proj_init_info - 5");
     strncat(key, ":metadata", 9);
     strcpy(param, "+init=");
     strncat(param, key, 73);
-puts ("proj_init_info - 6");
 
     start = pj_mkparam(param);
-puts ("proj_init_info - 7");
-puts (start->param);
-puts (param);
-    next = pj_get_init(ctx, start, key);
-puts ("proj_init_info - 8");
-/******** her *******
-start->next = (start==next)? 0: next;
-*/
+    pj_expand_init(ctx, start, key);
 
     if (pj_param(ctx, start, "tversion").i) {
-puts ("proj_init_info - 9");
         pj_strlcpy(info.version, pj_param(ctx, start, "sversion").s, sizeof(info.version));
     }
 
     if (pj_param(ctx, start, "torigin").i) {
-puts ("proj_init_info - 10");
         pj_strlcpy(info.origin, pj_param(ctx, start, "sorigin").s, sizeof(info.origin));
     }
 
     if (pj_param(ctx, start, "tlastupdate").i) {
-puts ("proj_init_info - 11");
         pj_strlcpy(info.lastupdate, pj_param(ctx, start, "slastupdate").s, sizeof(info.lastupdate));
     }
-puts ("proj_init_info - 12");
 
     for ( ; start; start = next) {
         next = start->next;
         pj_dalloc(start);
     }
-puts ("proj_init_info - 13");
 
    return info;
 }

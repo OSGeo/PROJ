@@ -697,7 +697,8 @@ int pj_angular_units_set(paralist *, PJ *);
 paralist *pj_clone_paralist( const paralist* );
 paralist *pj_search_initcache( const char *filekey );
 void      pj_insert_initcache( const char *filekey, const paralist *list);
-paralist *pj_get_init(projCtx ctx, paralist *start, char *key);
+paralist *pj_expand_init(projCtx ctx, paralist *init, char *key);
+
 void     *pj_dealloc_params (projCtx ctx, paralist *start, int errlev);
 
 

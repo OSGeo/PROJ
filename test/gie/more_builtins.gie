@@ -278,22 +278,16 @@ geocentric latitude
 operation  proj=geoc ellps=GRS80
 accept     12   55                  0 0
 expect     12   54.818973308324573  0 0
-echo       geoc -1
 roundtrip  1000
-echo       geoc 0
 
 accept     12   90                  0 0
-echo       geoc 1
 expect     12   90                  0 0
-echo       geoc 2
 
 accept     12  -90                  0 0
 expect     12  -90                  0 0
-echo       geoc 3
 
 accept     12   89.99999999999      0 0
 expect     12   89.999999999989996  0 0
-echo       geoc 4
 -------------------------------------------------------------------------------
 
 
