@@ -1175,7 +1175,7 @@ file.
 /***************************************************************************************/
 static int nextline (ffio *G) {
 /****************************************************************************************
-Read next line of input file. Returns 0 on failure, 1 on success.
+Read next line of input file. Returns 1 on success, 0 on failure.
 ****************************************************************************************/
     G->next_args[0] = 0;
     if (0==fgets (G->next_args, (int) G->next_args_size - 1, G->f))
