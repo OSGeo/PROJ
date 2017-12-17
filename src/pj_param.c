@@ -20,7 +20,7 @@ paralist *pj_mkparam(char *str) {
 }
 
 
-/* As pj_mkparam, but payload is terminated by whitespace, rather than 0 */
+/* As pj_mkparam, but payload ends at first whitespace, rather than at end of <str> */
 paralist *pj_mkparam_ws (char *str) {
     paralist *newitem;
     size_t len = 0;
@@ -38,7 +38,7 @@ paralist *pj_mkparam_ws (char *str) {
         len--;
     }
 
-    /* Use calloc to automagically 0-terminate the strncpy */
+    /* Use calloc to automagically 0-terminate the copy */
     newitem = (paralist *) pj_calloc (1, sizeof(paralist) + len);
     if (0==newitem)
         return 0;

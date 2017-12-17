@@ -210,7 +210,7 @@ considered whitespace.
 char *pj_shrink (char *c) {
 /******************************************************************************
 Collapse repeated whitespace. Remove '+' and ';'. Make ',' and '=' greedy,
-eating their surrounding whitespace.
+consuming their surrounding whitespace.
 ******************************************************************************/
     size_t i, j, n;
 
@@ -226,7 +226,7 @@ eating their surrounding whitespace.
     /* First collapse repeated whitespace (including +/;) */
     for (i = j = 0, ws = 0;  j < n;  j++) {
 
-        /* Blank out prefix '+', only if preceeded by whitespace */
+        /* Eliminate prefix '+', only if preceeded by whitespace */
         /* (i.e. keep it in 1.23e+08) */
         if ((i > 0) && ('+'==c[j]) && isspace (c[i]))
             c[j] = ' ';
@@ -340,7 +340,7 @@ It is the duty of the caller to free this array.
 char *pj_make_args (size_t argc, char **argv) {
 /******************************************************************************
 pj_make_args is the inverse of the pj_trim_argc/pj_trim_argv combo: It
-converts free format command line input to something proj_create can eat.
+converts free format command line input to something proj_create can consume.
 
 Allocates, and returns, an array of char, large enough to hold a whitespace
 separated copy of the args in argv. It is the duty of the caller to free this

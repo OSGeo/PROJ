@@ -118,7 +118,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 
 #include "optargpm.h"
 
-/* From readblock.c (now included here) */
+/* Package for flexible format I/O - ffio */
 typedef struct ffio {
     FILE *f;
     const char **tags;
@@ -152,8 +152,6 @@ static const char *gie_tags[] = {
 };
 
 static const size_t n_gie_tags = sizeof gie_tags / sizeof gie_tags[0];
-
-int test_main (void);
 
 
 /* from proj_strtod.c */
@@ -240,7 +238,7 @@ int main (int argc, char **argv) {
     const char *longflags[]  = {"v=verbose", "q=quiet", "h=help", "l=list", 0};
     const char *longkeys[]   = {"o=output", 0};
     OPTARGS *o;
-/* test_main ();*/
+
     memset (&T, 0, sizeof (T));
     T.dir = PJ_FWD;
     T.verbosity = 1;
@@ -369,7 +367,7 @@ static int process_file (const char *fname) {
 /*****************************************************************************/
 const char *column (const char *buf, int n) {
 /*****************************************************************************
-    Return a pointer to the n'th column of buf. Column numbers start at 0.
+Return a pointer to the n'th column of buf. Column numbers start at 0.
 ******************************************************************************/
     int i;
     if (n <= 0)
@@ -389,8 +387,8 @@ const char *column (const char *buf, int n) {
 /*****************************************************************************/
 static double strtod_scaled (const char *args, double default_scale) {
 /*****************************************************************************
-    Interpret <args> as a numeric followed by a linear decadal prefix.
-    Return the properly scaled numeric
+Interpret <args> as a numeric followed by a linear decadal prefix.
+Return the properly scaled numeric
 ******************************************************************************/
     double s;
     const char *endp = args;
@@ -473,9 +471,9 @@ static void finish_previous_operation (const char *args) {
 /*****************************************************************************/
 static int operation (char *args) {
 /*****************************************************************************
-    Define the operation to apply to the input data (in ISO 19100 lingo,
-    an operation is the general term describing something that can be
-    either a conversion or a transformation)
+Define the operation to apply to the input data (in ISO 19100 lingo,
+an operation is the general term describing something that can be
+either a conversion or a transformation)
 ******************************************************************************/
     T.op_id++;
 
@@ -519,9 +517,9 @@ static int pj_horner_selftest (void);
 /*****************************************************************************/
 static int builtins (const char *args) {
 /*****************************************************************************
-    There are still a few tests that cannot be described using gie
-    primitives. Instead, they are implemented as builtins, and invoked
-    using the "builtins" command verb.
+There are still a few tests that cannot be described using gie
+primitives. Instead, they are implemented as builtins, and invoked
+using the "builtins" command verb.
 ******************************************************************************/
     int i;
     if (T.verbosity > 1) {
@@ -579,7 +577,7 @@ static PJ_COORD todeg_coord (PJ_COORD a) {
 /*****************************************************************************/
 static PJ_COORD parse_coord (const char *args) {
 /*****************************************************************************
-    Attempt to interpret args as a PJ_COORD.
+Attempt to interpret args as a PJ_COORD.
 ******************************************************************************/
     int i;
     const char *endp, *prev = args;
@@ -600,7 +598,7 @@ static PJ_COORD parse_coord (const char *args) {
 /*****************************************************************************/
 static int accept (const char *args) {
 /*****************************************************************************
-    Read ("ACCEPT") a 2, 3, or 4 dimensional input coordinate.
+Read ("ACCEPT") a 2, 3, or 4 dimensional input coordinate.
 ******************************************************************************/
     T.a = parse_coord (args);
     if (T.verbosity > 3)
@@ -612,8 +610,8 @@ static int accept (const char *args) {
 /*****************************************************************************/
 static int roundtrip (const char *args) {
 /*****************************************************************************
-    Check how far we go from the ACCEPTed point when doing successive
-    back/forward transformation pairs.
+Check how far we go from the ACCEPTed point when doing successive
+back/forward transformation pairs.
 ******************************************************************************/
     int ntrips;
     double d, r, ans;
@@ -700,7 +698,7 @@ static int expect_failure_with_errno_message (int expected, int got) {
 /*****************************************************************************/
 static int expect (const char *args) {
 /*****************************************************************************
-    Tell GIE what to expect, when transforming the ACCEPTed input
+Tell GIE what to expect, when transforming the ACCEPTed input
 ******************************************************************************/
     PJ_COORD ci, co, ce;
     double d;
@@ -815,7 +813,7 @@ static int expect (const char *args) {
 /*****************************************************************************/
 static int verbose (const char *args) {
 /*****************************************************************************
-    Tell the system how noisy it should be
+Tell the system how noisy it should be
 ******************************************************************************/
     int i = (int) proj_atof (args);
 
@@ -834,7 +832,7 @@ static int verbose (const char *args) {
 /*****************************************************************************/
 static int echo (const char *args) {
 /*****************************************************************************
-    Add user defined noise to the output stream
+Add user defined noise to the output stream
 ******************************************************************************/
 fprintf (T.fout, "%s\n", args);
     return 0;
@@ -1020,20 +1018,20 @@ static int errmsg (int errlev, const char *msg, ...) {
 
 /****************************************************************************************
 
-    FFIO - Flexible format I/O
+FFIO - Flexible format I/O
 
-    FFIO provides functionality for reading proj style instruction strings written
-    in a less strict format than usual:
+FFIO provides functionality for reading proj style instruction strings written
+in a less strict format than usual:
 
-    *  Whitespace is generally allowed everywhere
-    *  Comments can be written inline, '#' style
-    *  ... or as free format blocks
+*  Whitespace is generally allowed everywhere
+*  Comments can be written inline, '#' style
+*  ... or as free format blocks
 
-    The overall mission of FFIO is to facilitate communications of geodetic
-    parameters and test material in a format that is highly human readable,
-    and provides ample room for comment, documentation, and test material.
+The overall mission of FFIO is to facilitate communications of geodetic
+parameters and test material in a format that is highly human readable,
+and provides ample room for comment, documentation, and test material.
 
-    See the PROJ ".gie" test suites for examples of supported formatting.
+See the PROJ ".gie" test suites for examples of supported formatting.
 
 ****************************************************************************************/
 
@@ -1065,7 +1063,7 @@ static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_si
 /***************************************************************************************/
 static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size) {
 /****************************************************************************************
-
+Constructor for the ffio object.
 ****************************************************************************************/
     ffio *G = calloc (1, sizeof (ffio));
     if (0==G)
@@ -1100,7 +1098,10 @@ static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_si
 /***************************************************************************************/
 static ffio *ffio_destroy (ffio *G) {
 /****************************************************************************************
-
+Free all allocated associated memory, then free G itself. For extra RAII compliancy,
+the file object should also be closed if still open, but this will require additional
+control logic, and ffio is a gie tool specific package, so we fall back to asserting that
+fclose has been called prior to ffio_destroy.
 ****************************************************************************************/
     free (G->args);
     free (G->next_args);
@@ -1113,12 +1114,12 @@ static ffio *ffio_destroy (ffio *G) {
 /***************************************************************************************/
 static int at_decorative_element (ffio *G) {
 /****************************************************************************************
-    A decorative element consists of a line of at least 5 consecutive identical chars,
-    starting at buffer position 0:
-    "-----", "=====", "*****", etc.
+A decorative element consists of a line of at least 5 consecutive identical chars,
+starting at buffer position 0:
+"-----", "=====", "*****", etc.
 
-    A decorative element serves as a end delimiter for the current element, and
-    continues until a gie command verb is found at the start of a line
+A decorative element serves as a end delimiter for the current element, and
+continues until a gie command verb is found at the start of a line
 ****************************************************************************************/
     int i;
     char *c;
@@ -1140,7 +1141,7 @@ static int at_decorative_element (ffio *G) {
 /***************************************************************************************/
 static const char *at_tag (ffio *G) {
 /****************************************************************************************
-    A start of a new command serves as an end delimiter for the current command
+A start of a new command serves as an end delimiter for the current command
 ****************************************************************************************/
     size_t j;
     for (j = 0;  j < G->n_tags;  j++)
@@ -1154,11 +1155,11 @@ static const char *at_tag (ffio *G) {
 /***************************************************************************************/
 static int at_end_delimiter (ffio *G) {
 /****************************************************************************************
-    An instruction consists of everything from its introductory tag to its end
-    delimiter.  An end delimiter can be either the introductory tag of the next
-    instruction, or a "decorative element", i.e. one of the "ascii art" style
-    block delimiters typically used to mark up block comments in a free format
-    file.
+An instruction consists of everything from its introductory tag to its end
+delimiter.  An end delimiter can be either the introductory tag of the next
+instruction, or a "decorative element", i.e. one of the "ascii art" style
+block delimiters typically used to mark up block comments in a free format
+file.
 ****************************************************************************************/
     if (G==0)
         return 0;
@@ -1174,7 +1175,7 @@ static int at_end_delimiter (ffio *G) {
 /***************************************************************************************/
 static int nextline (ffio *G) {
 /****************************************************************************************
-    Read next line of input file
+Read next line of input file. Returns 0 on failure, 1 on success.
 ****************************************************************************************/
     G->next_args[0] = 0;
     if (0==fgets (G->next_args, (int) G->next_args_size - 1, G->f))
@@ -1191,7 +1192,10 @@ static int nextline (ffio *G) {
 /***************************************************************************************/
 static int locate_tag (ffio *G, const char *tag) {
 /****************************************************************************************
-    find start-of-line tag
+Find start-of-line tag (currently only used to search for for <gie>, but any tag
+valid).
+
+Returns 1 on success, 0 on failure.
 ****************************************************************************************/
     size_t n = strlen (tag);
     while (0!=strncmp (tag, G->next_args, n))
@@ -1205,7 +1209,7 @@ static int locate_tag (ffio *G, const char *tag) {
 /***************************************************************************************/
 static int step_into_gie_block (ffio *G) {
 /****************************************************************************************
-    Make sure we're inside a <gie>-block
+Make sure we're inside a <gie>-block. Return 1 on success, 0 otherwise.
 ****************************************************************************************/
     /* Already inside */
     if (G->level % 2)
@@ -1234,7 +1238,7 @@ static int step_into_gie_block (ffio *G) {
 /***************************************************************************************/
 static int skip_to_next_tag (ffio *G) {
 /****************************************************************************************
-    Skip forward to the next command tag
+Skip forward to the next command tag. Return 1 on success, 0 otherwise.
 ****************************************************************************************/
     const char *c;
     if (0==step_into_gie_block (G))
@@ -1264,7 +1268,7 @@ static int skip_to_next_tag (ffio *G) {
     return 1;
 }
 
-
+/* Add the most recently read line of input to the block already stored. */
 static int append_args (ffio *G) {
     size_t skip_chars = 0;
     size_t next_len = strlen (G->next_args);
@@ -1296,7 +1300,8 @@ static int append_args (ffio *G) {
 /***************************************************************************************/
 static int get_inp (ffio *G) {
 /****************************************************************************************
-    The primary command reader for gie. May be useful in the init-file reader as well.
+The primary command reader for gie. Reads a block of gie input, cleans up repeated
+whitespace etc. The block is stored in G->args. Returns 1 on success, 0 otherwise.
 ****************************************************************************************/
     G->args[0] = 0;
 

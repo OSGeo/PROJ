@@ -17,7 +17,8 @@ int pj_factors(LP lp, const PJ *P, double h, struct FACTORS *fac) {
     PJ_COORD coo = {{0, 0, 0, 0}};
     coo.lp = lp;
 
-    /* These are probably due to earlier errors, so we leave errno alone */
+    /* Failing the 3 initial checks will most likely be due to */
+    /* earlier errors, so we leave errno alone */
     if (0==fac)
         return 1;
 
