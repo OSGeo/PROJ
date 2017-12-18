@@ -199,8 +199,6 @@ static const char delim[] = {"--------------------------------------------------
 
 #define CMDLEN 250000
 
-int nfiles = 0;
-
 
 static const char usage[] = {
     "--------------------------------------------------------------------------------\n"
@@ -1316,7 +1314,7 @@ whitespace etc. The block is stored in G->args. Returns 1 on success, 0 otherwis
 
 
 
-char tc32_utm32[] = {
+static const char tc32_utm32[] = {
     " +proj=horner"
     " +ellps=intl"
     " +range=500000"
@@ -1330,7 +1328,7 @@ char tc32_utm32[] = {
 };
 
 
-char sb_utm32[] = {
+static const char sb_utm32[] = {
     " +proj=horner"
     " +ellps=intl"
     " +range=500000"

@@ -1,8 +1,11 @@
 /* definition of standard geoids */
+
+#include "proj.h"
+
 #define PJ_ELLPS__
 #include "projects.h"
 
-C_NAMESPACE_VAR struct PJ_ELLPS
+C_NAMESPACE_VAR const struct PJ_ELLPS
 pj_ellps[] = {
 {"MERIT",	"a=6378137.0",		"rf=298.257",		"MERIT 1983"},
 {"SGS85",	"a=6378136.0",		"rf=298.257",		"Soviet Geodetic System 85"},
@@ -53,7 +56,11 @@ pj_ellps[] = {
 };
 
 struct PJ_ELLPS *pj_get_ellps_ref()
+{
+    return (struct PJ_ELLPS *)pj_ellps;
+}
 
+const PJ_ELLPS *proj_list_ellps(void)
 {
     return pj_ellps;
 }

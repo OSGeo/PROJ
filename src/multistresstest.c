@@ -54,7 +54,7 @@ typedef struct {
     int     skip;
 } TestItem;
 
-TestItem test_list[] = {
+static TestItem test_list[] = {
     {
         "+proj=utm +zone=11 +datum=WGS84",
         "+proj=latlong +datum=WGS84",

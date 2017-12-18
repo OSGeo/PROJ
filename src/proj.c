@@ -45,7 +45,9 @@ static int
 
 static char
     *cheby_str,         /* string controlling Chebychev evaluation */
-    *oform = (char *)0, /* output format for x-y or decimal degrees */
+    *oform = (char *)0; /* output format for x-y or decimal degrees */
+
+static const char
     *oterr = "*\t*",    /* output line for unprojectable input */
     *usage = "%s\nusage: %s [ -beEfiIlormsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
 
@@ -356,11 +358,11 @@ int main(int argc, char **argv) {
               case 'l': /* list projections, ellipses or units */
                 if (!arg[1] || arg[1] == 'p' || arg[1] == 'P') {
                     /* list projections */
-                    struct PJ_LIST *lp;
+                    const struct PJ_LIST *lp;
                     int do_long = arg[1] == 'P', c;
                     char *str;
 
-                    for (lp = pj_get_list_ref() ; lp->id ; ++lp) {
+                    for (lp = proj_list_operations() ; lp->id ; ++lp) {
                         if( strcmp(lp->id,"latlong") == 0
                             || strcmp(lp->id,"longlat") == 0
                             || strcmp(lp->id,"geocent") == 0 )
@@ -377,28 +379,28 @@ int main(int argc, char **argv) {
                         }
                     }
                 } else if (arg[1] == '=') { /* list projection 'descr' */
-                    struct PJ_LIST *lp;
+                    const struct PJ_LIST *lp;
 
                     arg += 2;
-                    for (lp = pj_get_list_ref(); lp->id ; ++lp)
+                    for (lp = proj_list_operations(); lp->id ; ++lp)
                         if (!strcmp(lp->id, arg)) {
                             (void)printf("%9s : %s\n", lp->id, *lp->descr);
                             break;
                         }
                 } else if (arg[1] == 'e') { /* list ellipses */
-                    struct PJ_ELLPS *le;
+                    const struct PJ_ELLPS *le;
 
-                    for (le = pj_get_ellps_ref(); le->id ; ++le)
+                    for (le = proj_list_ellps(); le->id ; ++le)
                         (void)printf("%9s %-16s %-16s %s\n",
                                      le->id, le->major, le->ell, le->name);
                 } else if (arg[1] == 'u') { /* list units */
-                    struct PJ_UNITS *lu;
+                    const struct PJ_UNITS *lu;
 
-                    for (lu = pj_get_units_ref(); lu->id ; ++lu)
+                    for (lu = proj_list_units(); lu->id ; ++lu)
                         (void)printf("%12s %-20s %s\n",
                                      lu->id, lu->to_meter, lu->name);
                 } else if (arg[1] == 'd') { /* list datums */
-                    struct PJ_DATUMS *ld;
+                    const struct PJ_DATUMS *ld;
 
                     printf("__datum_id__ __ellipse___ __definition/comments______________________________\n" );
                     for (ld = pj_get_datums_ref(); ld->id ; ++ld)

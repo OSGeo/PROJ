@@ -159,7 +159,7 @@ struct snyder_constants {
 };
 
 /* TODO put these in radians to avoid a later conversion */
-ISEA_STATIC
+ISEA_STATIC const
 struct snyder_constants constants[] = {
     {23.80018260, 62.15458023, 60.0, 3.75, 1.033, 0.968, 5.09, 1.195, 1.0},
     {20.07675127, 55.69063953, 54.0, 2.65, 1.030, 0.983, 3.59, 1.141, 1.027},
@@ -217,7 +217,7 @@ static int      tri_v1[] = {0, 0, 0, 0, 0, 0, 6, 7, 8, 9, 10, 2, 3, 4, 5, 1, 11,
 #define F_RAD 0.18871053072122403508
 
 /* triangle Centers */
-struct isea_geo icostriangles[] = {
+static const struct isea_geo icostriangles[] = {
     {0.0, 0.0},
     {-DEG144, E_RAD},
     {-DEG72, E_RAD},

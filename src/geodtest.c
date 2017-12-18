@@ -20,7 +20,7 @@
 #  pragma warning (disable: 4706)
 #endif
 
-double wgs84_a = 6378137, wgs84_f = 1/298.257223563; /* WGS84 */
+static const double wgs84_a = 6378137, wgs84_f = 1/298.257223563; /* WGS84 */
 
 static int assertEquals(double x, double y, double d) {
   if (fabs(x - y) <= d)
@@ -29,8 +29,8 @@ static int assertEquals(double x, double y, double d) {
   return 1;
 }
 
-const int ncases = 20;
-double testcases[20][12] = {
+static const int ncases = 20;
+static const double testcases[20][12] = {
   {35.60777, -139.44815, 111.098748429560326,
    -11.17491, -69.95921, 129.289270889708762,
    8935244.5604818305, 80.50729714281974, 6273170.2055303837,

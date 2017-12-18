@@ -119,7 +119,7 @@ char  *pj_make_args (size_t argc, char **argv);
 /* Lowest level: Minimum support for fileapi */
 void proj_fileapi_set (PJ *P, void *fileapi);
 
-const char **proj_get_searchpath(void);
+const char * const *proj_get_searchpath(void);
 int    proj_get_path_count(void);
 
 size_t pj_strlcpy(char *dst, const char *src, size_t siz);

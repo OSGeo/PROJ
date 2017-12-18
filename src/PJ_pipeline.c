@@ -273,7 +273,7 @@ static size_t argc_params (paralist *params) {
 }
 
 /* Sentinel for argument list */
-static char argv_sentinel[] = "step";
+static char *argv_sentinel = "step";
 
 /* turn paralist into argc/argv style argument list */
 static char **argv_params (paralist *params, size_t argc) {
@@ -363,7 +363,7 @@ PJ *OPERATION(pipeline,0) {
 
     /* Do some syntactical sanity checking */
     for (i = 0;  i < argc;  i++) {
-        if (0==strcmp ("step", argv[i])) {
+        if (0==strcmp (argv_sentinel, argv[i])) {
             if (-1==i_pipeline) {
                 proj_log_error (P, "Pipeline: +step before +proj=pipeline");
                 return destructor (P, PJD_ERR_MALFORMED_PIPELINE);

@@ -38,7 +38,7 @@
 static const char *(*pj_finder)(const char *) = NULL;
 static int path_count = 0;
 static char **search_path = NULL;
-static char * proj_lib_name =
+static const char * proj_lib_name =
 #ifdef PROJ_LIB
 PROJ_LIB;
 #else
@@ -93,8 +93,8 @@ void pj_set_searchpath ( int count, const char **path )
 
 /* just a couple of helper functions that lets other functions
    access the otherwise private search path */
-const char **proj_get_searchpath(void) {
-    return (const char **)search_path;
+const char * const *proj_get_searchpath(void) {
+    return (const char * const *)search_path;
 }
 
 int proj_get_path_count(void) {

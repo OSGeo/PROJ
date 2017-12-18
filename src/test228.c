@@ -17,8 +17,8 @@ int main(int argc, char* argv[])
 #include <assert.h>
 #include <unistd.h>
 
-volatile int run = 0;
-volatile int started = 0;
+static volatile int run = 0;
+static volatile int started = 0;
 
 static void* thread_main(void* unused)
 {
