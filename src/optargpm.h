@@ -216,7 +216,6 @@ struct OPTARGS {
     FILE *input;
     int   input_index;
     int   record_index;
-    int   free_format;       /* plus-style specs replaced by free format */
     const char  *progname;   /* argv[0], stripped from /path/to, if present */
     char   flaglevel[21];    /* if flag -f is specified n times, its optarg pointer is set to flaglevel + n */
     char  *optarg[256];      /* optarg[(int) 'f'] holds a pointer to the argument of option "-f" */
@@ -415,6 +414,7 @@ const char *opt_strip_path (const char *full_name) {
 /* split command line options into options/flags ("-" style), projdefs ("+" style) and input file args */
 OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, const char **longflags, const char **longkeys) {
     int i, j;
+    int free_format;
     OPTARGS *o;
 
     o = (OPTARGS *) calloc (1, sizeof(OPTARGS));
@@ -424,12 +424,6 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
     o->argc = argc;
     o->argv = argv;
     o->progname = opt_strip_path (argv[0]);
-    o->free_format = 0;
-
-    /* Is free format in use, instead of plus-style? */
-    for (i = 1;  i < argc;  i++)
-        if (0==strcmp ("--", argv[i]))
-            o->free_format = i;
 
     /* Reset all flags */
     for (i = 0;  i < (int) strlen (flags);  i++)
@@ -588,11 +582,20 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
 
     /* Process all '+'-style options, starting from where '-'-style processing ended */
     o->pargv = argv + i;
-    if (o->free_format) {
-        o->pargc = o->free_format - (o->margc + 1);
-        o->fargc = argc - (o->free_format + 1);
+
+    /* Is free format in use, instead of plus-style? */
+    for (free_format = 0, j = 1;  j < argc;  j++) {
+        if (0==strcmp ("--", argv[j])) {
+            free_format = j;
+            break;
+        }
+    }
+
+    if (free_format) {
+        o->pargc = free_format - (o->margc + 1);
+        o->fargc = argc - (free_format + 1);
         if (0 != o->fargc)
-            o->fargv = argv + o->free_format + 1;
+            o->fargv = argv + free_format + 1;
         return o;
     }
 
