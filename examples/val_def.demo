@@ -18,10 +18,12 @@ e.g. using the cct 4D transformation program:
 
 The system validation parts are used when validating the systems
 defined in the file. This is done using the gie test program:
+Place val_def.demo in your PROJ_LIB directory
+(or set PROJ_LIB=<directory where val_def.demo lives>) and say:
 
     gie val_def.demo
 
-Which will respond with a report detailing how many tests succeeded,
+This will result in a report detailing how many tests succeeded,
 resp. failed.
 
 The syntax of proj init files is orthogonal to the syntax of gie

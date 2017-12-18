@@ -343,7 +343,9 @@ The expression 'init=foo:bar ellps=intl' will then expand to:
 where 'ellps=intl' precedes 'ellps=GRS80', and hence takes precedence,
 turning the expansion into an UTM projection on the Hayford ellipsoid.
 
-Note that 'init=foo:bar' stays in the list. It is ignored after expansion.
+Note that 'init=foo:bar' stays in the list. It is ignored after expansion,
+and marked as expanded by changing 'init=foo.bar' to 'xnit=foo.bar'.
+
 ******************************************************************************/
     paralist *last;
     paralist *expn;
@@ -361,8 +363,9 @@ Note that 'init=foo:bar' stays in the list. It is ignored after expansion.
     /* Locate  the end of the list */
     for (last = init;  last && last->next;  last = last->next);
 
-    /* Then append and return */
+    /* Then append, mark the init=... as expanded, and return */
     last->next = expn;
+    init->param[0] = 'x';  /* Turns 'init=...' into 'xnit=...' */
     return init;
 }
 

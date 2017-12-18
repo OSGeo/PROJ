@@ -1888,7 +1888,6 @@ static int pj_unitconvert_selftest (void) {
     ret = test_time(args3, 1e-6, in3, in3);   if (ret) return ret + 30;
     ret = test_time(args4, 1e-6, in4, exp4);  if (ret) return ret + 40;
     ret = test_xyz (args5, 1e-10, in5, exp5); if (ret) return ret + 50;
-    ret = test_xyz (args6, 1e-10, in6, in6);  if (ret) return ret + 50;
     ret = test_xyz (args6, 1e-10, in6, in6);  if (ret) return ret + 60;
     ret = test_time(args7, 1e-6, in7, in7);   if (ret) return ret + 70;
 
