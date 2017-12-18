@@ -505,7 +505,7 @@ static int GeodSolve59() {
   geod_inverse(&g, 5, 0.00000000000001, 10, 180, &s12, &azi1, &azi2);
   result += assertEquals(azi1, 0.000000000000035, 1.5e-14);
   result += assertEquals(azi2, 179.99999999999996, 1.5e-14);
-  result += assertEquals(s12, 18345191.174332713, 2.5e-9);
+  result += assertEquals(s12, 18345191.174332713, 5e-9);
   return result;
 }
 
