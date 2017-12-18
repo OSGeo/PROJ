@@ -102,27 +102,27 @@ proj_i.lib:	$(LIBOBJ)
 	if exist $(PROJ_DLL).manifest mt -manifest $(PROJ_DLL).manifest -outputresource:$(PROJ_DLL);2
 
 $(PROJ_EXE):	$(PROJEXE_OBJ) $(EXE_PROJ)
-	cl $(PROJEXE_OBJ) $(EXE_PROJ)
+	cl $(PROJEXE_OBJ) $(EXE_PROJ) /link setargv.obj
 	if exist $(PROJ_EXE).manifest mt -manifest $(PROJ_EXE).manifest -outputresource:$(PROJ_EXE);1
 
 $(CS2CS_EXE):	$(CS2CSEXE_OBJ) $(EXE_PROJ)
-	cl $(CS2CSEXE_OBJ) $(EXE_PROJ)
+	cl $(CS2CSEXE_OBJ) $(EXE_PROJ) /link setargv.obj
 	if exist $(CS2CS_EXE).manifest mt -manifest $(CS2CS_EXE).manifest -outputresource:$(CS2CS_EXE);1
 
 $(GEOD_EXE):	$(GEODEXE_OBJ) $(EXE_PROJ)
-	cl $(GEODEXE_OBJ) $(EXE_PROJ)
+	cl $(GEODEXE_OBJ) $(EXE_PROJ) /link setargv.obj
 	if exist $(GEOD_EXE).manifest mt -manifest $(GEOD_EXE).manifest -outputresource:$(GEOD_EXE);1
 
 $(CCT_EXE):	$(CCTEXE_OBJ) $(EXE_PROJ)
-	cl $(CCTEXE_OBJ) $(EXE_PROJ)
+	cl $(CCTEXE_OBJ) $(EXE_PROJ) /link setargv.obj
 	if exist $(CCT_EXE).manifest mt -manifest $(CCT_EXE).manifest -outputresource:$(CCT_EXE);1
 
 $(GIE_EXE):	$(GIEEXE_OBJ) $(EXE_PROJ)
-	cl $(GIEEXE_OBJ) $(EXE_PROJ)
+	cl $(GIEEXE_OBJ) $(EXE_PROJ) /link setargv.obj
 	if exist $(GIE_EXE).manifest mt -manifest $(GIE_EXE).manifest -outputresource:$(GIE_EXE);1
 
 $(NAD2BIN_EXE):	nad2bin.obj emess.obj $(EXE_PROJ)
-	cl nad2bin.obj emess.obj $(EXE_PROJ)
+	cl nad2bin.obj emess.obj $(EXE_PROJ) /link setargv.obj
 
 $(MULTISTRESSTEST_EXE): $(MULTISTRESSTEST_OBJ)
 	cl $(MULTISTRESSTEST_OBJ) $(EXE_PROJ)

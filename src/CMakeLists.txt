@@ -11,6 +11,7 @@ option(BUILD_NAD2BIN "Build nad2bin (format conversion tool)" ON)
 option(BUILD_PROJ    "Build proj (cartographic projection tool : latlong <-> projected coordinates)" ON)
 
 if(NOT MSVC)
+
   if (NOT APPLE)
     # Use relative path so that package is relocatable
     set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${LIBDIR}")
@@ -22,6 +23,14 @@ if(NOT MSVC)
     # (2) setting the INSTALL_RPATH property on the executables to
     # "@loader_path/../${LIBDIR}"
   endif ()
+
+else ()
+
+    # Linking to setargv.obj enables wildcard globbing for the
+    # command line utilities, when compiling with MSVC
+    # https://docs.microsoft.com/da-dk/cpp/c-language/expanding-wildcard-arguments
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} setargv.obj")
+
 endif ()
 
 if(BUILD_CCT)
