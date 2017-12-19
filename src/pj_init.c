@@ -189,6 +189,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
         /* Otherwise, handle the line. It MAY be the start of the next section, */
         /* but that will be handled at the start of next trip through the loop  */
         buffer_length = strlen (buffer);
+        pj_chomp (line);   /* Remove '#' style comments */
         next_length = strlen (line) + buffer_length + 2;
         if (next_length > current_buffer_size) {
             char *b = pj_malloc (2 * current_buffer_size);
