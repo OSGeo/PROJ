@@ -30,10 +30,10 @@
 #define PJ_DATUMS__
 #include <projects.h>
 
-/* 
+/*
  * The ellipse code must match one from pj_ellps.c.  The datum id should
- * be kept to 12 characters or less if possible.  Use the official OGC 
- * datum name for the comments if available. 
+ * be kept to 12 characters or less if possible.  Use the official OGC
+ * datum name for the comments if available.
  */
 
 C_NAMESPACE_VAR const struct PJ_DATUMS pj_datums[] = {
@@ -86,6 +86,7 @@ C_NAMESPACE_VAR const struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
     {"stockholm", "18d3'29.8\"E"},
     {"athens",    "23d42'58.815\"E"},
     {"oslo",      "10d43'22.5\"E"},
+    {"copenhagen","12d34'40.35\"E"},
     {NULL,        NULL}
 };
 
