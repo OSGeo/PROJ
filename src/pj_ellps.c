@@ -16,6 +16,7 @@ pj_ellps[] = {
 {"NWL9D",	"a=6378145.0.",		"rf=298.25",		"Naval Weapons Lab., 1965"},
 {"mod_airy",	"a=6377340.189",	"b=6356034.446",	"Modified Airy"},
 {"andrae",	"a=6377104.43",		"rf=300.0",		"Andrae 1876 (Den., Iclnd.)"},
+{"danish",	"a=6377019.2563",	"rf=300.0",		"Andrae 1876 (Denmark, Iceland)"},
 {"aust_SA",	"a=6378160.0",		"rf=298.25",		"Australian Natl & S. Amer. 1969"},
 {"GRS67",	"a=6378160.0",		"rf=298.2471674270",	"GRS 67(IUGG 1967)"},
 {"GSK2011",	"a=6378136.5",		"rf=298.2564151",	"GSK-2011"},
