@@ -344,6 +344,7 @@ where 'ellps=intl' precedes 'ellps=GRS80', and hence takes precedence,
 turning the expansion into an UTM projection on the Hayford ellipsoid.
 
 Note that 'init=foo:bar' stays in the list. It is ignored after expansion.
+
 ******************************************************************************/
     paralist *last;
     paralist *expn;
