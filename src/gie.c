@@ -700,8 +700,8 @@ static int expect_failure_with_errno_message (int expected, int got) {
 
 /* For test purposes, we want to call a transformation of the same */
 /* dimensionality as the number of dimensions given in accept */
-PJ_COORD expect_trans_n_dim (PJ_COORD ci) {
-    PJ_COORD co = {0,0,0,0};
+static PJ_COORD expect_trans_n_dim (PJ_COORD ci) {
+    PJ_COORD co = {{0,0,0,0}};
 
     if (4==T.dimensions_given_at_last_accept)
         return proj_trans (T.P, T.dir, ci);
