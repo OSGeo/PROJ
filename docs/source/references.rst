@@ -60,6 +60,11 @@ References
    `Geodesics on an ellipsoid
    <https://en.wikipedia.org/wiki/Geodesics_on_an_ellipsoid>`_.
 
+.. [Häkli2016] P. Häkli, M. Lidberg, L. Jivall, et al, 2016,
+   `The NKG2008 GPS Campaign - final transformation results and a new common Nordic reference frame
+   <https://doi.org/10.1515/jogs-2016-0001>`_,
+   Journal of Geodetic Science, 6(1).
+
 .. [Helmert1880] F. R. Helmert, 1880,
    `Mathematical and Physical Theories of Higher Geodesy, Vol 1
    <https://doi.org/10.5281/zenodo.32050>`_,
