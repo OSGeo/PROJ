@@ -184,6 +184,7 @@ typedef struct {
     int total_ok, total_ko;
     int grand_ok, grand_ko;
     size_t operation_lineno;
+    size_t dimensions_given, dimensions_given_at_last_accept;
     double tolerance;
     const char *curr_file;
     FILE *fout;
@@ -581,10 +582,13 @@ Attempt to interpret args as a PJ_COORD.
     const char *endp, *prev = args;
     PJ_COORD a = proj_coord (0,0,0,0);
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0, T.dimensions_given = 0;   i < 4;   i++, T.dimensions_given++) {
         double d = proj_strtod (prev,  (char **) &endp);
+
+        /* Break out if there were no more numerals */
         if (prev==endp)
             return i > 1? a: proj_coord_error ();
+
         a.v[i] = d;
         prev = endp;
     }
@@ -601,6 +605,7 @@ Read ("ACCEPT") a 2, 3, or 4 dimensional input coordinate.
     T.a = parse_coord (args);
     if (T.verbosity > 3)
         printf ("#  %s\n", args);
+    T.dimensions_given_at_last_accept = T.dimensions_given;
     return 0;
 }
 
@@ -693,6 +698,41 @@ static int expect_failure_with_errno_message (int expected, int got) {
 }
 
 
+/* For test purposes, we want to call a transformation of the same */
+/* dimensionality as the number of dimensions given in accept */
+PJ_COORD expect_trans_n_dim (PJ_COORD ci) {
+    PJ_COORD co = {0,0,0,0};
+
+    if (4==T.dimensions_given_at_last_accept)
+        return proj_trans (T.P, T.dir, ci);
+
+    if (3==T.dimensions_given_at_last_accept) {
+        if (PJ_FWD==T.dir && 0!=T.P->fwd3d)
+                return co.xyz = pj_fwd3d (ci.lpz, T.P), co;
+        if (PJ_INV==T.dir && 0!=T.P->inv3d)
+                return co.lpz = pj_inv3d (ci.xyz, T.P), co;
+        return proj_trans (T.P, T.dir, ci);
+    }
+
+    /* If we're here, 2==T.dimensions_given_at_last_accept */
+    if (PJ_FWD==T.dir) {
+        if (0!=T.P->fwd)
+            return co.xy = pj_fwd (ci.lp, T.P), co;
+        if (0!=T.P->fwd3d)
+            return co.xyz = pj_fwd3d (ci.lpz, T.P), co;
+    }
+
+    if (PJ_INV==T.dir) {
+        if (0!=T.P->inv)
+            return co.lp = pj_inv (ci.xy, T.P), co;
+        if (0!=T.P->inv3d)
+            return co.lpz = pj_inv3d (ci.xyz, T.P), co;
+    }
+
+    return proj_trans (T.P, T.dir, ci);
+}
+
+
 /*****************************************************************************/
 static int expect (const char *args) {
 /*****************************************************************************
@@ -733,7 +773,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
 
         /* Try to carry out the operation - and expect failure */
         ci = proj_angular_input (T.P, T.dir)? torad_coord (T.a): T.a;
-        co = proj_trans (T.P, T.dir, ci);
+        co = expect_trans_n_dim (ci);
 
         /* Failed to fail? - that's a failure */
         if (co.xyz.x!=HUGE_VAL)
@@ -775,7 +815,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
         printf ("ACCEPTS  %.4f  %.4f  %.4f  %.4f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
 
     /* angular output from proj_trans comes in radians */
-    co = proj_trans (T.P, T.dir, ci);
+    co = expect_trans_n_dim (ci);
     T.b = proj_angular_output (T.P, T.dir)? todeg_coord (co): co;
     if (T.verbosity > 3)
         printf ("GOT      %.4f  %.4f  %.4f  %.4f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
