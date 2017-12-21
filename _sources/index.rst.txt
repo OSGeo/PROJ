@@ -1,13 +1,13 @@
 .. _home:
 
 ******************************************************************************
-proj.4
+PROJ.4
 ******************************************************************************
 
-proj.4 is a standard UNIX filter function which converts geographic longitude
+PROJ.4 is a standard UNIX filter function which converts geographic longitude
 and latitude coordinates into cartesian coordinates (and vice versa), and it is
 a C API for software developers to include coordinate transformation in their
-own software. proj.4 is maintained on `GitHub <http://github.com/OSGeo/proj.4/>`_.
+own software. PROJ.4 is maintained on `GitHub <http://github.com/OSGeo/proj.4/>`_.
 
 
 =============  ================================================================
@@ -34,15 +34,14 @@ Documentation
 .. toctree::
    :maxdepth: 1
 
-   download
-   faq
-   apps/index
-   projections/index
-   parameters
+   usage/index
    geodesic
    grids
    htpd
    development/index
+   faq
+   contributing
+   download
    glossary
    license
    references
@@ -50,7 +49,7 @@ Documentation
 Mailing List
 ================================================================================
 
-The Proj.4 mailing list can be found at http://lists.maptools.org/mailman/listinfo/proj
+The PROJ.4 mailing list can be found at http://lists.maptools.org/mailman/listinfo/proj
 
 Indices and tables
 ==================

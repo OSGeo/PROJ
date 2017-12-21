@@ -10,6 +10,7 @@ systems are based on different datums.
 .. toctree::
    :maxdepth: 1
 
+   deformation
    helmert
    molodensky
    hgridshift
