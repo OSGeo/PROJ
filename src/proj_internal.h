@@ -79,6 +79,14 @@ void proj_context_inherit (PJ *parent, PJ *child);
 PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P);
 PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
 
+PJ_COORD pj_fwd_prepare  (PJ *P, PJ_COORD coo);
+PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo);
+PJ_COORD pj_inv_prepare  (PJ *P, PJ_COORD coo);
+PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo);
+PJ_COORD pj_approx_2D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
+PJ_COORD pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
+
+
 /* Grid functionality */
 int             proj_vgrid_init(PJ *P, const char *grids);
 int             proj_hgrid_init(PJ *P, const char *grids);

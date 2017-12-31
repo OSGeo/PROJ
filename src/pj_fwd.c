@@ -1,58 +1,31 @@
-/* general forward projection */
 #define PJ_LIB__
 #include <proj.h>
-#include <projects.h>
-# define EPS 1.0e-12
-	XY /* forward projection entry */
-pj_fwd(LP lp, PJ *P) {
-	XY xy;
-    XY err;
-    double t;
-    int last_errno;
+#include "proj_internal.h"
+#include "projects.h"
 
-    /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
-    err.x = err.y = HUGE_VAL;
+/* Generic 2D forward operation */
 
-    if (0==P->fwd)
-        return err;
-    last_errno = proj_errno_reset (P);
+XY pj_fwd(LP lp, PJ *P) {
+    PJ_COORD coo = {{0,0,0,0}};
+    coo.lp = lp;
 
-    /* Check validity of angular input coordinates */
-    if (P->left==PJ_IO_UNITS_RADIANS) {
+    coo = pj_fwd_prepare (P, coo);
+    if (HUGE_VAL==coo.v[0])
+        return proj_coord_error ().xy;
 
-        /* check for forward and latitude or longitude overange */
-        t = fabs(lp.phi)-M_HALFPI;
-        if (t > EPS || fabs(lp.lam) > 10.) {
-            pj_ctx_set_errno( P->ctx, -14);
-            return err;
-        }
-
-        /* Clamp latitude to -90..90 degree range */
-        if (fabs(t) <= EPS)
-            lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
-        else if (P->geoc)   /* Maybe redundant and never used. */
-            lp.phi = atan(P->rone_es * tan(lp.phi));
-        lp.lam -= P->lam0;    /* compute del lp.lam */
-        if (!P->over)
-            lp.lam = adjlon(lp.lam); /* adjust del longitude */
+    /* Do the transformation, using the lowest dimensional transformer available */
+    if (P->fwd)
+        coo.xy = P->fwd(coo.lp, P);
+    else if (P->fwd3d)
+        coo.xyz = P->fwd3d (coo.lpz, P);
+    else if (P->fwd4d)
+        coo = P->fwd4d (coo, P);
+    else {
+        proj_errno_set (P, EINVAL);
+        return proj_coord_error ().xy;
     }
 
-    /* Do the transformation */
-    xy = (*P->fwd)(lp, P);
-    if ( proj_errno (P) )
-        return err;
-
-    /* Classic proj.4 functions return plane coordinates in units of the semimajor axis */
-    if (P->right==PJ_IO_UNITS_CLASSIC) {
-        xy.x *= P->a;
-        xy.y *= P->a;
-    }
-
-    /* Handle false eastings/northings and non-metric linear units */
-    xy.x = P->fr_meter * (xy.x + P->x0);
-    xy.y = P->fr_meter * (xy.y + P->y0);
-    /* z is not scaled since this is handled by vto_meter outside */
-
-    proj_errno_restore (P, last_errno);
-    return xy;
+    if (HUGE_VAL==coo.v[0])
+        return proj_coord_error ().xy;
+    return pj_fwd_finalize (P, coo).xy;
 }

@@ -337,6 +337,7 @@ struct PJconsts {
     int  geoc;                      /* Geocentric latitude flag */
     int  is_latlong;                /* proj=latlong ... not really a projection at all */
     int  is_geocent;                /* proj=geocent ... not really a projection at all */
+    int  is_pipeline;               /* 1 if PJ represents a pipeline */
     int  need_ellps;                /* 0 for operations that are purely cartesian */
 
     enum pj_io_units left;          /* Flags for input/output coordinate types */
@@ -349,7 +350,7 @@ struct PJconsts {
 
     **************************************************************************************/
 
-    double  lam0, phi0;                /* central longitude, latitude */
+    double  lam0, phi0;                /* central meridian, parallel */
     double  x0, y0, z0, t0;            /* false easting and northing (and height and time) */
 
 
@@ -590,7 +591,7 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 
 
 #ifdef PJ_LIB__
-#define PROJ_HEAD(id, name) static const char des_##id [] = name
+#define PROJ_HEAD(name, desc) static const char des_##name [] = desc
 
 #define OPERATION(name, NEED_ELLPS)                          \
                                                              \

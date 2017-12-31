@@ -1,60 +1,32 @@
-/* general inverse projection */
 #define PJ_LIB__
 #include <proj.h>
-#include <projects.h>
+#include "proj_internal.h"
+#include "projects.h"
 #include <errno.h>
-# define EPS 1.0e-12
 
-/* inverse projection entry */
+/* Generic 2D inverse operation */
+
 LP pj_inv(XY xy, PJ *P) {
-    LP lp;
-    LP err;
-    int last_errno;
+    PJ_COORD coo = {{0,0,0,0}};
+    coo.xy = xy;
 
-    /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
-    err.lam = err.phi = HUGE_VAL;
+    coo = pj_inv_prepare (P, coo);
+    if (HUGE_VAL==coo.v[0])
+        return proj_coord_error ().lp;
 
-    if (0==P->inv)
-        return err;
-
-    /* can't do as much preliminary checking as with forward */
-    if (xy.x == HUGE_VAL || xy.y == HUGE_VAL) {
-        pj_ctx_set_errno( P->ctx, -15);
-        return err;
+    /* Do the transformation, using the lowest dimensional transformer available */
+    if (P->inv)
+        coo.lp = P->inv(coo.xy, P);
+    else if (P->inv3d)
+        coo.lpz = P->inv3d (coo.xyz, P);
+    else if (P->inv4d)
+        coo = P->inv4d (coo, P);
+    else {
+        proj_errno_set (P, EINVAL);
+        return proj_coord_error ().lp;
     }
 
-    last_errno = proj_errno_reset (P);
-
-    /* de-scale and de-offset */
-    xy.x = (xy.x * P->to_meter - P->x0);
-    xy.y = (xy.y * P->to_meter - P->y0);
-
-    /* Classic proj.4 functions expect plane coordinates in units of the semimajor axis */
-    /* Multiplying by ra, rather than dividing by a because the CALCOFI projection      */
-    /* stomps on a and hence depends on this */
-    if (P->right==PJ_IO_UNITS_CLASSIC) {
-        xy.x *= P->ra;
-        xy.y *= P->ra;
-    }
-
-    /* Do inverse transformation */
-    lp = (*P->inv) (xy, P);
-    if (P->ctx->last_errno)
-        return err;
-
-    if (P->left==PJ_IO_UNITS_RADIANS) {
-        /* reduce from del lp.lam */
-        lp.lam += P->lam0;
-
-         /* adjust longitude to central meridian */
-        if (!P->over)
-            lp.lam = adjlon(lp.lam);
-
-        /* This may be redundant and never used */
-        if (P->geoc && fabs(fabs(lp.phi)-M_HALFPI) > EPS)
-            lp.phi = atan(P->one_es * tan(lp.phi));
-    }
-
-    proj_errno_restore (P, last_errno);
-    return lp;
+    if (HUGE_VAL==coo.v[0])
+        return proj_coord_error ().lp;
+    return pj_inv_finalize (P, coo).lp;
 }
