@@ -41,16 +41,18 @@ PROJ_HEAD(longlat, "Lat/long (Geodetic alias)")  "\n\t";
 
  static XY forward(LP lp, PJ *P) {
     XY xy = {0.0,0.0};
-    xy.x = lp.lam / P->a;
-    xy.y = lp.phi / P->a;
+    (void) P;
+    xy.x = lp.lam;
+    xy.y = lp.phi;
     return xy;
 }
 
 
 static LP inverse(XY xy, PJ *P) {
     LP lp = {0.0,0.0};
-    lp.phi = xy.y * P->a;
-    lp.lam = xy.x * P->a;
+    (void) P;
+    lp.phi = xy.y;
+    lp.lam = xy.x;
     return lp;
 }
 

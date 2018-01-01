@@ -96,7 +96,7 @@ PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
             coo = proj_geoc_lat (P, PJ_INV, coo);
 
         /* Distance from central meridian, taking system zero meridian into account */
-        lp.lam = lp.lam + P->from_greenwich - P->lam0;
+        lp.lam = (lp.lam - P->from_greenwich) - P->lam0;
 
         /* Ensure longitude is in the -pi:pi range */
         if (0==P->over)
@@ -160,7 +160,7 @@ PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo) {
 
     if (P->left==PJ_IO_UNITS_RADIANS) {
         /* Distance from central meridian, taking system zero meridian into account */
-        coo.lp.lam = coo.lp.lam - P->from_greenwich + P->lam0;
+        coo.lp.lam = coo.lp.lam + P->from_greenwich + P->lam0;
 
          /* adjust longitude to central meridian */
         if (0==P->over)

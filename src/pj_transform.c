@@ -255,6 +255,19 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     }
 
 /* -------------------------------------------------------------------- */
+/*      But if they are already lat long, adjust for the prime          */
+/*      meridian if there is one in effect.                             */
+/* -------------------------------------------------------------------- */
+    if ((srcdefn->is_geocent || srcdefn->is_latlong) && ( srcdefn->from_greenwich != 0.0 ))
+    {
+        for( i = 0; i < point_count; i++ )
+        {
+            if( x[point_offset*i] != HUGE_VAL )
+                x[point_offset*i] += srcdefn->from_greenwich;
+        }
+    }
+
+/* -------------------------------------------------------------------- */
 /*      Do we need to translate from geoid to ellipsoidal vertical      */
 /*      datum?                                                          */
 /* -------------------------------------------------------------------- */
@@ -292,7 +305,18 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             return dstdefn->ctx->last_errno;
     }
 
-
+/* -------------------------------------------------------------------- */
+/*      But if they are staying lat long, adjust for the prime          */
+/*      meridian if there is one in effect.                             */
+/* -------------------------------------------------------------------- */
+    if( dstdefn->from_greenwich != 0.0 )
+    {
+        for( i = 0; i < point_count; i++ )
+        {
+            if( x[point_offset*i] != HUGE_VAL )
+                x[point_offset*i] -= dstdefn->from_greenwich;
+        }
+}
 
 /* -------------------------------------------------------------------- */
 /*      Transform destination latlong to geocentric if required.        */
