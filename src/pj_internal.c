@@ -65,9 +65,6 @@ PJ_COORD proj_coord_error (void) {
 
 #define EPS 1e-12
 PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
-
-    if (0==P->fwd)
-        return proj_coord_error ();
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
     if (P->is_pipeline)
