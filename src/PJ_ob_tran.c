@@ -170,11 +170,6 @@ PJ *PROJECTION(ob_tran) {
     P->opaque = Q;
     P->destructor = destructor;
 
-#if 0
-    if (0 != P->es)
-        return destructor(P, PJD_ERR_ELLIPSOIDAL_UNSUPPORTED);
-#endif
-
     /* get name of projection to be translated */
     if (!(name = pj_param(P->ctx, P->params, "so_proj").s))
         return destructor(P, PJD_ERR_NO_ROTATION_PROJ);

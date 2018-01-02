@@ -115,16 +115,6 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
         if( err != 0 )
             return err;
     }
-#if 0
-/* -------------------------------------------------------------------- */
-/*      Transform Z to meters if it isn't already.                      */
-/* -------------------------------------------------------------------- */
-    if( srcdefn->vto_meter != 1.0 && z != NULL )
-    {
-        for( i = 0; i < point_count; i++ )
-            z[point_offset*i] *= srcdefn->vto_meter;
-    }
-#endif
 
 /* -------------------------------------------------------------------- */
 /*      Transform geocentric source coordinates to lat/long.            */
@@ -455,17 +445,6 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             x[point_offset*i] = val;
         }
     }
-
-/* -------------------------------------------------------------------- */
-/*      Transform Z from meters if needed.                              */
-/* -------------------------------------------------------------------- */
-#if 0
-    if( dstdefn->vto_meter != 1.0 && z != NULL )
-    {
-        for( i = 0; i < point_count; i++ )
-            z[point_offset*i] *= dstdefn->vfr_meter;
-    }
-#endif
 
 /* -------------------------------------------------------------------- */
 /*      Transform normalized axes into unusual output coordinate axis   */
