@@ -57,6 +57,9 @@ extern "C" {
 #define PJ_TORAD(deg)  ((deg)*M_PI/180.0)
 #endif
 
+/* Maximum latitudinal overshoot accepted */
+#define PJ_EPS_LAT 1e-12
+
 
 /* This enum is also conditionally defined in projects.h - but we need it here */
 /* for the pj_left/right prototypes, and enums cannot be forward declared      */

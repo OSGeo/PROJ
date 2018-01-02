@@ -45,7 +45,6 @@ support = \
 	biveval.obj dmstor.obj mk_cheby.obj pj_auth.obj \
 	pj_deriv.obj pj_ell_set.obj pj_ellps.obj pj_errno.obj \
 	pj_factors.obj pj_fwd.obj pj_init.obj pj_inv.obj \
-    pj_fwd3d.obj pj_inv3d.obj \
 	pj_list.obj pj_malloc.obj pj_mlfn.obj pj_msfn.obj \
 	pj_open_lib.obj pj_param.obj pj_phi2.obj pj_pr_list.obj \
 	pj_qsfn.obj pj_strerrno.obj pj_tsfn.obj pj_units.obj \

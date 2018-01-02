@@ -8,7 +8,7 @@
  * Author:   Thomas Knudsen,  thokn@sdfe.dk,  2017-07-05
  *
  ******************************************************************************
- * Copyright (c) 2016, 2017, Thomas Knudsen/SDFE
+ * Copyright (c) 2016, 2017, 2018, Thomas Knudsen/SDFE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -28,15 +28,14 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-#define PJ_INTERNAL_C
-#include "proj_internal.h"
-#include "projects.h"
-#include <geodesic.h>
-
 #include <ctype.h>
 #include <stddef.h>
 #include <stdarg.h>
 #include <errno.h>
+
+#include "proj_internal.h"
+#include "projects.h"
+#include <geodesic.h>
 
 
 enum pj_io_units pj_left (PJ *P) {
@@ -59,166 +58,6 @@ PJ_COORD proj_coord_error (void) {
     PJ_COORD c;
     c.v[0] = c.v[1] = c.v[2] = c.v[3] = HUGE_VAL;
     return c;
-}
-
-
-
-#define EPS 1e-12
-PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
-    if (HUGE_VAL==coo.v[0])
-        return proj_coord_error ();
-
-    /* Check validity of angular input coordinates */
-    if (P->left==PJ_IO_UNITS_RADIANS) {
-        double t;
-        LP lp = coo.lp;
-
-        /* check for latitude or longitude over-range */
-        t = (lp.phi < 0? -lp.phi: lp.phi) - M_HALFPI;
-        if (t > EPS  ||  lp.lam > 10  ||  lp.lam < -10) {
-            proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
-            return proj_coord_error ();
-        }
-
-        /* Clamp latitude to -90..90 degree range */
-        if (lp.phi > M_HALFPI)
-            lp.phi = M_HALFPI;
-        if (lp.phi < -M_HALFPI)
-            lp.phi = -M_HALFPI;
-
-        /* If input latitude is geocentrical, convert to geographical */
-        if (P->geoc)
-            coo = proj_geoc_lat (P, PJ_INV, coo);
-
-        /* Distance from central meridian, taking system zero meridian into account */
-        lp.lam = (lp.lam - P->from_greenwich) - P->lam0;
-
-        /* Ensure longitude is in the -pi:pi range */
-        if (0==P->over)
-            lp.lam = adjlon(lp.lam);
-
-        coo.lp = lp;
-    }
-
-    return coo;
-}
-
-
-PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
-    if (coo.xyz.x == HUGE_VAL) {
-        proj_errno_set (P, PJD_ERR_INVALID_X_OR_Y);
-        return proj_coord_error ();
-    }
-
-    /* de-scale and de-offset */
-    coo.xyz.x = (coo.xyz.x * P->to_meter  - P->x0);
-    coo.xyz.y = (coo.xyz.y * P->to_meter  - P->y0);
-    coo.xyz.z = (coo.xyz.z * P->vto_meter - P->z0);
-
-    /* Classic proj.4 functions expect plane coordinates in units of the semimajor axis  */
-    /* Multiplying by ra, rather than dividing by a because the CALCOFI projection       */
-    /* stomps on a and hence (apparently) depends on this to roundtrip correctly         */
-    /* (CALCOFI avoids further scaling by stomping - a better solution must be possible) */
-    if (P->right==PJ_IO_UNITS_CLASSIC) {
-        coo.xyz.x *= P->ra;
-        coo.xyz.y *= P->ra;
-    }
-
-    return coo;
-}
-
-
-PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo) {
-
-    /* Classic proj.4 functions return plane coordinates in units of the semimajor axis */
-    if (P->right==PJ_IO_UNITS_CLASSIC) {
-        coo.xy.x *= P->a;
-        coo.xy.y *= P->a;
-    }
-
-    /* Handle false eastings/northings and non-metric linear units */
-    coo.xyz.x = P->fr_meter  * (coo.xyz.x + P->x0);
-    coo.xyz.y = P->fr_meter  * (coo.xyz.y + P->y0);
-    coo.xyz.z = P->vfr_meter * (coo.xyz.z + P->z0);
-
-    return coo;
-}
-
-
-PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo) {
-    if (coo.xyz.x == HUGE_VAL) {
-        proj_errno_set (P, PJD_ERR_INVALID_X_OR_Y);
-        return proj_coord_error ();
-    }
-
-    if (P->left==PJ_IO_UNITS_RADIANS) {
-        /* Distance from central meridian, taking system zero meridian into account */
-        coo.lp.lam = coo.lp.lam + P->from_greenwich + P->lam0;
-
-         /* adjust longitude to central meridian */
-        if (0==P->over)
-            coo.lpz.lam = adjlon(coo.lpz.lam);
-
-        /* If input latitude was geocentrical, convert back to geocentrical */
-        if (P->geoc)
-            coo = proj_geoc_lat (P, PJ_FWD, coo);
-    }
-
-    return coo;
-}
-
-
-
-
-PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
-    if (!P->skip_fwd_prepare)
-        coo = pj_fwd_prepare (P, coo);
-    if (HUGE_VAL==coo.v[0])
-        return proj_coord_error ();
-
-    /* Call the highest dimensional converter available */
-    if (0!=P->fwd4d)
-        coo = P->fwd4d (coo, P);
-    else if (0!=P->fwd3d)
-        coo.xyz  =  P->fwd3d (coo.lpz, P);
-    else if (0!=P->fwd)
-        coo.xy  =  P->fwd (coo.lp, P);
-    else {
-        proj_errno_set (P, EINVAL);
-        return proj_coord_error ();
-    }
-    if (HUGE_VAL==coo.v[0])
-        return proj_coord_error ();
-
-    if (!P->skip_fwd_finalize)
-        coo = pj_fwd_finalize (P, coo);
-    return coo;
-}
-
-
-PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
-    if (!P->skip_inv_prepare)
-        coo = pj_inv_prepare (P, coo);
-    if (HUGE_VAL==coo.v[0])
-        return proj_coord_error ();
-
-    /* Call the highest dimensional converter available */
-    if (0!=P->inv4d)
-        coo = P->inv4d (coo, P);
-    else if (0!=P->inv3d)
-        coo.lpz  =  P->inv3d (coo.xyz, P);
-    else if (0!=P->inv)
-        coo.lp  =  P->inv (coo.xy, P);
-    else {
-        proj_errno_set (P, EINVAL);
-        return proj_coord_error ();
-    }
-    if (HUGE_VAL==coo.v[0])
-        return proj_coord_error ();
-
-    if (!P->skip_inv_finalize)
-        coo = pj_inv_finalize (P, coo);
-    return coo;
 }
 
 
