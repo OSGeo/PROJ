@@ -29,7 +29,6 @@
  *****************************************************************************/
 #include <errno.h>
 
-#include <proj.h>
 #include "proj_internal.h"
 #include "projects.h"
 
