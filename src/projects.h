@@ -339,6 +339,10 @@ struct PJconsts {
     int  is_geocent;                /* proj=geocent ... not really a projection at all */
     int  is_pipeline;               /* 1 if PJ represents a pipeline */
     int  need_ellps;                /* 0 for operations that are purely cartesian */
+    int  skip_fwd_prepare;
+    int  skip_fwd_finalize;
+    int  skip_inv_prepare;
+    int  skip_inv_finalize;
 
     enum pj_io_units left;          /* Flags for input/output coordinate types */
     enum pj_io_units right;

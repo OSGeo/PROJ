@@ -330,6 +330,12 @@ PJ *OPERATION(pipeline,0) {
     P->destructor  =  destructor;
     P->is_pipeline =  1;
 
+    P->skip_fwd_prepare  = 1;
+    P->skip_fwd_finalize = 1;
+    P->skip_inv_prepare  = 1;
+    P->skip_inv_finalize = 1;
+
+
     P->opaque = pj_calloc (1, sizeof(struct pj_opaque));
     if (0==P->opaque)
         return destructor(P, ENOMEM);

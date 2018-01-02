@@ -10,7 +10,8 @@ LP pj_inv(XY xy, PJ *P) {
     PJ_COORD coo = {{0,0,0,0}};
     coo.xy = xy;
 
-    coo = pj_inv_prepare (P, coo);
+    if (!P->skip_inv_prepare)
+        coo = pj_inv_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().lp;
 
@@ -25,8 +26,10 @@ LP pj_inv(XY xy, PJ *P) {
         proj_errno_set (P, EINVAL);
         return proj_coord_error ().lp;
     }
-
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().lp;
-    return pj_inv_finalize (P, coo).lp;
+
+    if (!P->skip_inv_finalize)
+        coo = pj_inv_finalize (P, coo);
+    return coo.lp;
 }

@@ -10,7 +10,8 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
     PJ_COORD coo = {{0,0,0,0}};
     coo.xyz = xyz;
 
-    coo = pj_inv_prepare (P, coo);
+    if (!P->skip_inv_prepare)
+        coo = pj_inv_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().lpz;
 
@@ -23,8 +24,10 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
         proj_errno_set (P, EINVAL);
         return proj_coord_error ().lpz;
     }
-
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().lpz;
-    return pj_inv_finalize (P, coo).lpz;
+
+    if (!P->skip_inv_finalize)
+        coo = pj_inv_finalize (P, coo);
+    return coo.lpz;
 }

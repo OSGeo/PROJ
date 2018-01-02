@@ -67,8 +67,6 @@ PJ_COORD proj_coord_error (void) {
 PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
-    if (P->is_pipeline)
-        return coo;
 
     /* Check validity of angular input coordinates */
     if (P->left==PJ_IO_UNITS_RADIANS) {
@@ -131,8 +129,6 @@ PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
 
 
 PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo) {
-    if (P->is_pipeline)
-        return coo;
 
     /* Classic proj.4 functions return plane coordinates in units of the semimajor axis */
     if (P->right==PJ_IO_UNITS_CLASSIC) {
@@ -175,7 +171,8 @@ PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo) {
 
 
 PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
-    coo = pj_fwd_prepare (P, coo);
+    if (!P->skip_fwd_prepare)
+        coo = pj_fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
 
@@ -190,15 +187,18 @@ PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
         proj_errno_set (P, EINVAL);
         return proj_coord_error ();
     }
-
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
-    return pj_fwd_finalize (P, coo);
+
+    if (!P->skip_fwd_finalize)
+        coo = pj_fwd_finalize (P, coo);
+    return coo;
 }
 
 
 PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
-    coo = pj_inv_prepare (P, coo);
+    if (!P->skip_inv_prepare)
+        coo = pj_inv_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
 
@@ -213,10 +213,12 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
         proj_errno_set (P, EINVAL);
         return proj_coord_error ();
     }
-
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
-    return pj_inv_finalize (P, coo);
+
+    if (!P->skip_inv_finalize)
+        coo = pj_inv_finalize (P, coo);
+    return coo;
 }
 
 

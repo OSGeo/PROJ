@@ -10,7 +10,8 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
     PJ_COORD coo = {{0,0,0,0}};
     coo.lpz = lpz;
 
-    coo = pj_fwd_prepare (P, coo);
+    if (!P->skip_fwd_prepare)
+        coo = pj_fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().xyz;
 
@@ -23,8 +24,10 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
         proj_errno_set (P, EINVAL);
         return proj_coord_error ().xyz;
     }
-
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().xyz;
-    return pj_fwd_finalize (P, coo).xyz;
+
+    if (!P->skip_fwd_finalize)
+        coo = pj_fwd_finalize (P, coo);
+    return coo.xyz;
 }

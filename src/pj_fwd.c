@@ -10,7 +10,8 @@ XY pj_fwd(LP lp, PJ *P) {
     PJ_COORD coo = {{0,0,0,0}};
     coo.lp = lp;
 
-    coo = pj_fwd_prepare (P, coo);
+    if (!P->skip_fwd_prepare)
+        coo = pj_fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().xy;
 
@@ -25,8 +26,10 @@ XY pj_fwd(LP lp, PJ *P) {
         proj_errno_set (P, EINVAL);
         return proj_coord_error ().xy;
     }
-
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().xy;
-    return pj_fwd_finalize (P, coo).xy;
+
+    if (!P->skip_fwd_finalize)
+        coo = pj_fwd_finalize (P, coo);
+    return coo.xy;
 }
