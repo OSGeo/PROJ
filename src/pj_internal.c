@@ -33,9 +33,9 @@
 #include <stdarg.h>
 #include <errno.h>
 
+#include <geodesic.h>
 #include "proj_internal.h"
 #include "projects.h"
-#include <geodesic.h>
 
 
 enum pj_io_units pj_left (PJ *P) {
