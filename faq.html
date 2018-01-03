@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>FAQ &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>FAQ &mdash; proj.4 4.9.3 documentation</title>
   
 
   
@@ -30,16 +30,14 @@
   
 
   
-    <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
-  
 
   
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Contributing" href="contributing.html"/>
-        <link rel="prev" title="Version 4 to 5 API Migration" href="development/migration.html"/> 
+    <link rel="top" title="proj.4 4.9.3 documentation" href="index.html"/>
+        <link rel="next" title="Applications" href="apps/index.html"/>
+        <link rel="prev" title="Download" href="download.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -58,7 +56,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> PROJ.4
+            <a href="index.html" class="icon icon-home"> proj.4
           
 
           
@@ -68,7 +66,7 @@
             
             
               <div class="version">
-                5.0.0
+                4.9.3
               </div>
             
           
@@ -93,11 +91,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="usage/index.html">Using PROJ.4</a></li>
-<li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grids.html">Grids</a></li>
-<li class="toctree-l1"><a class="reference internal" href="htpd.html">HTPD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">FAQ</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#where-can-i-find-the-list-of-projections-and-their-arguments">Where can I find the list of projections and their arguments?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-do-i-build-configure-proj-4-to-support-datum-shifting">How do I build/configure PROJ.4 to support datum shifting?</a></li>
@@ -110,14 +104,19 @@
 <li class="toctree-l2"><a class="reference internal" href="#how-do-i-calculate-distances-directions-on-the-surface-of-the-earth">How do I calculate distances/directions on the surface of the earth?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-is-the-healpix-projection-and-how-can-i-use-it">What is the HEALPix projection and how can I use it?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-is-the-rhealpix-projection-and-how-can-i-use-it">What is the rHEALPix projection and how can I use it?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#what-options-does-proj-4-allow-for-the-shape-of-the-earth-geodesy">What options does PROJ.4 allow for the shape of the Earth (geodesy)?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-options-does-proj-4-allow-for-the-shape-of-the-earth-geodesy">What options does proj.4 allow for the shape of the Earth (geodesy)?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-if-i-want-a-spherical-earth">What if I want a spherical Earth?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars">How do I change the radius of the Earth?  How do I use PROJ.4 for work on Mars?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars">How do I change the radius of the Earth?  How do I use proj.4 for work on Mars?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-do-i-do-false-eastings-and-false-northings">How do I do False Eastings and False Northings?</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projections/index.html">Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="htpd.html">HTPD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
@@ -135,7 +134,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">PROJ.4</a>
+          <a href="index.html">proj.4</a>
         
       </nav>
 
@@ -199,9 +198,9 @@
 <li><a class="reference internal" href="#how-do-i-calculate-distances-directions-on-the-surface-of-the-earth" id="id11">How do I calculate distances/directions on the surface of the earth?</a></li>
 <li><a class="reference internal" href="#what-is-the-healpix-projection-and-how-can-i-use-it" id="id12">What is the HEALPix projection and how can I use it?</a></li>
 <li><a class="reference internal" href="#what-is-the-rhealpix-projection-and-how-can-i-use-it" id="id13">What is the rHEALPix projection and how can I use it?</a></li>
-<li><a class="reference internal" href="#what-options-does-proj-4-allow-for-the-shape-of-the-earth-geodesy" id="id14">What options does PROJ.4 allow for the shape of the Earth (geodesy)?</a></li>
+<li><a class="reference internal" href="#what-options-does-proj-4-allow-for-the-shape-of-the-earth-geodesy" id="id14">What options does proj.4 allow for the shape of the Earth (geodesy)?</a></li>
 <li><a class="reference internal" href="#what-if-i-want-a-spherical-earth" id="id15">What if I want a spherical Earth?</a></li>
-<li><a class="reference internal" href="#how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars" id="id16">How do I change the radius of the Earth?  How do I use PROJ.4 for work on Mars?</a></li>
+<li><a class="reference internal" href="#how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars" id="id16">How do I change the radius of the Earth?  How do I use proj.4 for work on Mars?</a></li>
 <li><a class="reference internal" href="#how-do-i-do-false-eastings-and-false-northings" id="id17">How do I do False Eastings and False Northings?</a></li>
 </ul>
 </li>
@@ -384,7 +383,7 @@ definition.</p>
 based on a spherical earth model - such as many NASA datasets.  This coordinate
 system is now known by the EPSG code 3857 and has in the past been known as
 EPSG:3785 and EPSG:900913.  When using this coordinate system with GDAL/OGR it
-is helpful to include the +wktext so the exact PROJ.4 string will be preserved
+is helpful to include the +wktext so the exact proj.4 string will be preserved
 in the WKT representation (otherwise key parameters like <cite>+nadgrids=&#64;null</cite> will
 be dropped):</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">6378137</span> <span class="o">+</span><span class="n">b</span><span class="o">=</span><span class="mi">6378137</span> <span class="o">+</span><span class="n">lat_ts</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">x_0</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">+</span><span class="n">y_0</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">k</span><span class="o">=</span><span class="mf">1.0</span>
@@ -460,7 +459,7 @@ Collaboration Environment (SCENZGrid).</p>
 </div>
 </div>
 <div class="section" id="what-options-does-proj-4-allow-for-the-shape-of-the-earth-geodesy">
-<h2>What options does PROJ.4 allow for the shape of the Earth (geodesy)?<a class="headerlink" href="#what-options-does-proj-4-allow-for-the-shape-of-the-earth-geodesy" title="Permalink to this headline">¶</a></h2>
+<h2>What options does proj.4 allow for the shape of the Earth (geodesy)?<a class="headerlink" href="#what-options-does-proj-4-allow-for-the-shape-of-the-earth-geodesy" title="Permalink to this headline">¶</a></h2>
 <p>See <a class="reference external" href="https://github.com/OSGeo/proj.4/blob/master/src/pj_ellps.c">https://github.com/OSGeo/proj.4/blob/master/src/pj_ellps.c</a>
 for possible ellipse options. For example, putting <code class="docutils literal"><span class="pre">+ellps=WGS84</span></code> uses
 the <code class="docutils literal"><span class="pre">WGS84</span></code> Earth shape.</p>
@@ -471,7 +470,7 @@ the <code class="docutils literal"><span class="pre">WGS84</span></code> Earth s
 for the radius used in this case.</p>
 </div>
 <div class="section" id="how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars">
-<h2>How do I change the radius of the Earth?  How do I use PROJ.4 for work on Mars?<a class="headerlink" href="#how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars" title="Permalink to this headline">¶</a></h2>
+<h2>How do I change the radius of the Earth?  How do I use proj.4 for work on Mars?<a class="headerlink" href="#how-do-i-change-the-radius-of-the-earth-how-do-i-use-proj-4-for-work-on-mars" title="Permalink to this headline">¶</a></h2>
 <p>You can supply explicit values for the semi minor and semi major axes instead
 of using the symbolic &#8220;sphere&#8221; value.  Eg, if the radius were 2000000m:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">laea</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=-</span><span class="mf">40.000000</span> <span class="o">+</span><span class="n">lat_0</span><span class="o">=</span><span class="mf">74.000000</span> <span class="o">+</span><span class="n">x_0</span><span class="o">=</span><span class="mi">1000000</span> <span class="o">+</span><span class="n">y_0</span><span class="o">=</span><span class="mi">1700000</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">2000000</span> <span class="o">+</span><span class="n">b</span><span class="o">=</span><span class="mi">2000000</span><span class="s2">&quot;</span>
@@ -494,10 +493,10 @@ of using the symbolic &#8220;sphere&#8221; value.  Eg, if the radius were 200000
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="contributing.html" class="btn btn-neutral float-right" title="Contributing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="apps/index.html" class="btn btn-neutral float-right" title="Applications" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="development/migration.html" class="btn btn-neutral" title="Version 4 to 5 API Migration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="download.html" class="btn btn-neutral" title="Download" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -506,8 +505,8 @@ of using the symbolic &#8220;sphere&#8221; value.  Eg, if the radius were 200000
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 1983-2017.
-      Last updated on 21 Dec 2017.
+        &copy; Copyright 1986?-2016.
+      Last updated on 03 Jan 2018.
 
     </p>
   </div>
@@ -529,7 +528,7 @@ of using the symbolic &#8220;sphere&#8221; value.  Eg, if the radius were 200000
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'5.0.0',
+            VERSION:'4.9.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
