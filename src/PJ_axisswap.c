@@ -173,7 +173,10 @@ PJ *CONVERSION(axisswap,0) {
         return pj_default_destructor(P, PJD_ERR_MISSING_ARGS);
     }
 
-    /* This is a pass-through operation - handling of offsets etc. go elsewhere */
+    /* Preparation and finalization steps are skipped, since the raison   */
+    /* d'etre of axisswap is to bring input coordinates in line with the  */
+    /* the internally expected order (ENU), such that handling of offsets */
+    /* etc. can be done correctly in a later step of a pipeline */
     P->skip_fwd_prepare  = 1;
     P->skip_fwd_finalize = 1;
     P->skip_inv_prepare  = 1;

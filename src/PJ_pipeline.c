@@ -330,6 +330,8 @@ PJ *OPERATION(pipeline,0) {
     P->destructor  =  destructor;
     P->is_pipeline =  1;
 
+    /* Currently, the pipeline driver is a raw bit mover, enabling other operations */
+    /* to collaborate efficiently. All prep/fin stuff is done at the step levels. */
     P->skip_fwd_prepare  = 1;
     P->skip_fwd_finalize = 1;
     P->skip_inv_prepare  = 1;
