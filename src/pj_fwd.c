@@ -134,6 +134,8 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
         coo.xyz = P->fwd3d(coo.lpz, P);
     else if (P->fwd4d)
         coo = P->fwd4d (coo, P);
+    else if (P->fwd)
+        coo.xy = P->fwd (coo.lp, P);
     else {
         proj_errno_set (P, EINVAL);
         return proj_coord_error ().xyz;

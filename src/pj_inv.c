@@ -127,6 +127,8 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
         coo.lpz = P->inv3d (coo.xyz, P);
     else if (P->inv4d)
         coo = P->inv4d (coo, P);
+    else if (P->inv)
+        coo.lp = P->inv (coo.xy, P);
     else {
         proj_errno_set (P, EINVAL);
         return proj_coord_error ().lpz;
