@@ -30,7 +30,6 @@
 /* very loosely based upon DMA code by Bradford W. Drew */
 #define PJ_LIB__
 #include "proj_internal.h"
-#include <proj.h>
 #include "projects.h"
 
 PROJ_HEAD(lonlat, "Lat/long (Geodetic)")  "\n\t";
@@ -39,87 +38,87 @@ PROJ_HEAD(latlong, "Lat/long (Geodetic alias)")  "\n\t";
 PROJ_HEAD(longlat, "Lat/long (Geodetic alias)")  "\n\t";
 
 
- static XY forward(LP lp, PJ *P) {
+ static XY latlong_forward(LP lp, PJ *P) {
     XY xy = {0.0,0.0};
-    xy.x = lp.lam / P->a;
-    xy.y = lp.phi / P->a;
+    (void) P;
+    xy.x = lp.lam;
+    xy.y = lp.phi;
     return xy;
 }
 
 
-static LP inverse(XY xy, PJ *P) {
+static LP latlong_inverse(XY xy, PJ *P) {
     LP lp = {0.0,0.0};
-    lp.phi = xy.y * P->a;
-    lp.lam = xy.x * P->a;
+    (void) P;
+    lp.phi = xy.y;
+    lp.lam = xy.x;
     return lp;
 }
 
-static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
+
+ static XYZ latlong_forward_3d (LPZ lpz, PJ *P) {
+    XYZ xyz = {0,0,0};
+    (void) P;
+    xyz.x = lpz.lam;
+    xyz.y = lpz.phi;
+    xyz.z = lpz.z;
+    return xyz;
+}
+
+
+static LPZ latlong_inverse_3d (XYZ xyz, PJ *P) {
+    LPZ lpz = {0,0,0};
+    (void) P;
+    lpz.lam = xyz.x;
+    lpz.phi = xyz.y;
+    lpz.z   = xyz.z;
+    return lpz;
+}
+
+static PJ_COORD latlong_forward_4d (PJ_COORD obs, PJ *P) {
     (void) P;
     return obs;
 }
 
-static PJ_COORD inverse_4d(PJ_COORD obs, PJ *P) {
+
+static PJ_COORD latlong_inverse_4d (PJ_COORD obs, PJ *P) {
     (void) P;
     return obs;
+}
+
+
+
+static PJ *latlong_setup (PJ *P) {
+    P->is_latlong = 1;
+    P->x0 = 0;
+    P->y0 = 0;
+    P->inv = latlong_inverse;
+    P->fwd = latlong_forward;
+    P->inv3d = latlong_inverse_3d;
+    P->fwd3d = latlong_forward_3d;
+    P->inv4d = latlong_inverse_4d;
+    P->fwd4d = latlong_forward_4d;
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_RADIANS;
+    return P;
 }
 
 PJ *PROJECTION(latlong) {
-    P->is_latlong = 1;
-    P->x0 = 0.0;
-    P->y0 = 0.0;
-    P->inv = inverse;
-    P->fwd = forward;
-    P->inv4d = inverse_4d;
-    P->fwd4d = forward_4d;
-    P->left = PJ_IO_UNITS_RADIANS;
-    P->right = PJ_IO_UNITS_RADIANS;
-
-    return P;
+    return latlong_setup (P);
 }
 
 
 PJ *PROJECTION(longlat) {
-    P->is_latlong = 1;
-    P->x0 = 0.0;
-    P->y0 = 0.0;
-    P->inv = inverse;
-    P->fwd = forward;
-    P->inv4d = inverse_4d;
-    P->fwd4d = forward_4d;
-    P->left = PJ_IO_UNITS_RADIANS;
-    P->right = PJ_IO_UNITS_RADIANS;
-
-    return P;
+    return latlong_setup (P);
 }
 
 
 PJ *PROJECTION(latlon) {
-    P->is_latlong = 1;
-    P->x0 = 0.0;
-    P->y0 = 0.0;
-    P->inv = inverse;
-    P->fwd = forward;
-    P->inv4d = inverse_4d;
-    P->fwd4d = forward_4d;
-    P->left = PJ_IO_UNITS_RADIANS;
-    P->right = PJ_IO_UNITS_RADIANS;
-
-    return P;
+    return latlong_setup (P);
 }
 
 
 PJ *PROJECTION(lonlat) {
-    P->is_latlong = 1;
-    P->x0 = 0.0;
-    P->y0 = 0.0;
-    P->inv = inverse;
-    P->fwd = forward;
-    P->inv4d = inverse_4d;
-    P->fwd4d = forward_4d;
-    P->left = PJ_IO_UNITS_RADIANS;
-    P->right = PJ_IO_UNITS_RADIANS;
-
-    return P;
+    return latlong_setup (P);
 }
 

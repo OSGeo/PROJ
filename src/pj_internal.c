@@ -8,7 +8,7 @@
  * Author:   Thomas Knudsen,  thokn@sdfe.dk,  2017-07-05
  *
  ******************************************************************************
- * Copyright (c) 2016, 2017, Thomas Knudsen/SDFE
+ * Copyright (c) 2016, 2017, 2018, Thomas Knudsen/SDFE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -28,15 +28,14 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-#define PJ_INTERNAL_C
-#include "proj_internal.h"
-#include "projects.h"
-#include <geodesic.h>
-
 #include <ctype.h>
 #include <stddef.h>
 #include <stdarg.h>
 #include <errno.h>
+
+#include <geodesic.h>
+#include "proj_internal.h"
+#include "projects.h"
 
 
 enum pj_io_units pj_left (PJ *P) {
@@ -62,37 +61,63 @@ PJ_COORD proj_coord_error (void) {
 }
 
 
-PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
-    if (0!=P->fwd4d)
-        return P->fwd4d (coo, P);
-    if (0!=P->fwd3d) {
-        coo.xyz  =  pj_fwd3d (coo.lpz, P);
+
+/**************************************************************************************/
+PJ_COORD pj_approx_2D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+/***************************************************************************************
+Behave mostly as proj_trans, but attempt to use 2D interfaces only.
+Used in gie.c, to enforce testing 2D code, and by PJ_pipeline.c to implement
+chained calls starting out with a call to its 2D interface.
+***************************************************************************************/
+    if (0==P)
         return coo;
-    }
-    if (0!=P->fwd) {
-        coo.xy  =  pj_fwd (coo.lp, P);
-        return coo;
+    if (P->inverted)
+        direction = -direction;
+    switch (direction) {
+        case PJ_FWD:
+            coo.xy = pj_fwd (coo.lp, P);
+            return coo;
+        case PJ_INV:
+            coo.lp = pj_inv (coo.xy, P);
+            return coo;
+        case PJ_IDENT:
+            return coo;
+        default:
+            break;
     }
     proj_errno_set (P, EINVAL);
     return proj_coord_error ();
 }
 
 
-PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
-    if (0!=P->inv4d)
-        return P->inv4d (coo, P);
-    if (0!=P->inv3d) {
-        coo.lpz  =  pj_inv3d (coo.xyz, P);
+/**************************************************************************************/
+PJ_COORD pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+/***************************************************************************************
+Companion to pj_approx_2D_trans.
+
+Behave mostly as proj_trans, but attempt to use 3D interfaces only.
+Used in gie.c, to enforce testing 3D code, and by PJ_pipeline.c to implement
+chained calls starting out with a call to its 3D interface.
+***************************************************************************************/
+    if (0==P)
         return coo;
-    }
-    if (0!=P->inv) {
-        coo.lp  =  pj_inv (coo.xy, P);
-        return coo;
+    if (P->inverted)
+        direction = -direction;
+    switch (direction) {
+        case PJ_FWD:
+            coo.xyz = pj_fwd3d (coo.lpz, P);
+            return coo;
+        case PJ_INV:
+            coo.lpz = pj_inv3d (coo.xyz, P);
+            return coo;
+        case PJ_IDENT:
+            return coo;
+        default:
+            break;
     }
     proj_errno_set (P, EINVAL);
     return proj_coord_error ();
 }
-
 
 
 
@@ -104,6 +129,7 @@ void proj_context_set (PJ *P, PJ_CONTEXT *ctx) {
     pj_set_ctx (P, ctx);
     return;
 }
+
 
 void proj_context_inherit (PJ *parent, PJ *child) {
     if (0==parent)

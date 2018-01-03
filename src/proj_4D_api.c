@@ -132,8 +132,15 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
 
 
 
-/* Apply the transformation P to the coordinate coo */
+/**************************************************************************************/
 PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+/***************************************************************************************
+Apply the transformation P to the coordinate coo, preferring the 4D interfaces if
+available.
+
+See also pj_approx_2D_trans and pj_approx_3D_trans in pj_internal.c, which work
+similarly, but prefers the 2D resp. 3D interfaces if available.
+***************************************************************************************/
     if (0==P)
         return coo;
     if (P->inverted)

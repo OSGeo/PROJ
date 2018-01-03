@@ -173,6 +173,16 @@ PJ *CONVERSION(axisswap,0) {
         return pj_default_destructor(P, PJD_ERR_MISSING_ARGS);
     }
 
+    /* Preparation and finalization steps are skipped, since the raison   */
+    /* d'etre of axisswap is to bring input coordinates in line with the  */
+    /* the internally expected order (ENU), such that handling of offsets */
+    /* etc. can be done correctly in a later step of a pipeline */
+    P->skip_fwd_prepare  = 1;
+    P->skip_fwd_finalize = 1;
+    P->skip_inv_prepare  = 1;
+    P->skip_inv_finalize = 1;
+
+
     /* fill axis list with indices from 4-7 to simplify duplicate search further down */
     for (i=0; i<4; i++)
         Q->axis[i] = i+4;

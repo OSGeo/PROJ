@@ -18,13 +18,13 @@ operation +proj=ob_tran  +o_proj=moll  +R=6378137.0  +o_lon_p=0  +o_lat_p=0  +lo
 tolerance 1 mm
 direction inverse
 
-accept    300000 400000 0 0
-expect    -42.7562158333  85.5911341667  0  0
+accept    300000 400000
+expect    -42.7562158333  85.5911341667
 
 direction forward
 
-accept    10 20 0 0
-expect    -1384841.18787 7581707.88240 0 0
+accept    10 20
+expect    -1384841.18787 7581707.88240
 -------------------------------------------------------------------------------
 
 
