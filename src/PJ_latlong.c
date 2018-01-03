@@ -88,7 +88,7 @@ static PJ_COORD latlong_inverse_4d (PJ_COORD obs, PJ *P) {
 
 
 
-PJ *latlong_setup (PJ *P) {
+static PJ *latlong_setup (PJ *P) {
     P->is_latlong = 1;
     P->x0 = 0;
     P->y0 = 0;
