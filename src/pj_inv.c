@@ -150,12 +150,12 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
         return proj_coord_error ();
 
     /* Call the highest dimensional converter available */
-    if (0!=P->inv4d)
+    if (P->inv4d)
         coo = P->inv4d (coo, P);
-    else if (0!=P->inv3d)
-        coo.lpz  =  P->inv3d (coo.xyz, P);
-    else if (0!=P->inv)
-        coo.lp  =  P->inv (coo.xy, P);
+    else if (P->inv3d)
+        coo.lpz = P->inv3d (coo.xyz, P);
+    else if (P->inv)
+        coo.lp = P->inv (coo.xy, P);
     else {
         proj_errno_set (P, EINVAL);
         return proj_coord_error ();

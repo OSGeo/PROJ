@@ -42,7 +42,7 @@ PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
         LP lp = coo.lp;
 
         /* check for latitude or longitude over-range */
-        t = (lp.phi < 0? -lp.phi: lp.phi) - M_HALFPI;
+        t = (lp.phi < 0  ?  -lp.phi  :  lp.phi) - M_HALFPI;
         if (t > PJ_EPS_LAT  ||  lp.lam > 10  ||  lp.lam < -10) {
             proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
             return proj_coord_error ();
@@ -157,11 +157,11 @@ PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
         return proj_coord_error ();
 
     /* Call the highest dimensional converter available */
-    if (0!=P->fwd4d)
+    if (P->fwd4d)
         coo = P->fwd4d (coo, P);
-    else if (0!=P->fwd3d)
+    else if (P->fwd3d)
         coo.xyz  =  P->fwd3d (coo.lpz, P);
-    else if (0!=P->fwd)
+    else if (P->fwd)
         coo.xy  =  P->fwd (coo.lp, P);
     else {
         proj_errno_set (P, EINVAL);
