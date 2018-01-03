@@ -72,7 +72,7 @@
 Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 
 ********************************************************************************
-* Copyright (c) 2016, 2017 Thomas Knudsen / SDFE
+* Copyright (c) 2016, 2017, 2018 Thomas Knudsen / SDFE
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
 * copy of this software and associated documentation files (the "Software"),
@@ -96,7 +96,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 
 #define PJ_LIB__
 #include <geodesic.h>
-#include "proj.h"
+#include <proj.h>
 #include "proj_internal.h"
 #include "projects.h"
 
@@ -159,7 +159,7 @@ static XYZ pipeline_forward_3d (LPZ lpz, PJ *P) {
     point.lpz = lpz;
 
     for (i = 1;  i <= P->opaque->steps;  i++)
-        point = pj_approx_2D_trans (P->opaque->pipeline[i], 1, point);
+        point = pj_approx_3D_trans (P->opaque->pipeline[i], 1, point);
 
     return point.xyz;
 }
@@ -171,7 +171,7 @@ static LPZ pipeline_reverse_3d (XYZ xyz, PJ *P) {
     point.xyz = xyz;
 
     for (i = P->opaque->steps;  i > 0 ;  i--)
-        point = pj_approx_2D_trans (P->opaque->pipeline[i], -1, point);
+        point = pj_approx_3D_trans (P->opaque->pipeline[i], -1, point);
 
     return point.lpz;
 }
