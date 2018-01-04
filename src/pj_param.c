@@ -109,7 +109,7 @@ PROJVALUE pj_param (projCtx ctx, paralist *pl, const char *opt) {
 
     int type;
     unsigned l;
-    PROJVALUE value = {{0}};
+    PROJVALUE value = {0};
 
     if ( ctx == NULL )
         ctx = pj_get_default_ctx();
