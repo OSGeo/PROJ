@@ -1850,34 +1850,6 @@ static int test_time(const char* args, double tol, double t_in, double t_exp) {
     return ret;
 }
 
-static int test_xyz(const char* args, double tol, PJ_COORD in, PJ_COORD exp) {
-    PJ_COORD out = {{0,0,0,0}}, obs_in = {{0,0,0,0}};
-    PJ *P = proj_create(PJ_DEFAULT_CTX, args);
-    int ret = 0;
-
-    if (P == 0)
-        return 5;
-
-    obs_in.xyz = in.xyz;
-    out = proj_trans(P, PJ_FWD, obs_in);
-    if (proj_xyz_dist(out.xyz, exp.xyz) > tol) {
-        printf("exp: %10.10g, %10.10g, %10.10g\n", exp.xyz.x, exp.xyz.y, exp.xyz.z);
-        printf("out: %10.10g, %10.10g, %10.10g\n", out.xyz.x, out.xyz.y, out.xyz.z);
-        ret = 1;
-    }
-
-    out = proj_trans(P, PJ_INV, out);
-    if (proj_xyz_dist(out.xyz, in.xyz) > tol) {
-        printf("exp: %g, %g, %g\n", in.xyz.x, in.xyz.y, in.xyz.z);
-        printf("out: %g, %g, %g\n", out.xyz.x, out.xyz.y, out.xyz.z);
-        ret += 2;
-    }
-    proj_destroy(P);
-    proj_log_level(NULL, 0);
-    return ret;
-}
-
-
 static int pj_unitconvert_selftest (void) {
     int ret = 0;
     char args1[] = "+proj=unitconvert +t_in=decimalyear +t_out=decimalyear";
@@ -1892,22 +1864,14 @@ static int pj_unitconvert_selftest (void) {
     char args4[] = "+proj=unitconvert +t_in=gps_week +t_out=decimalyear";
     double in4 = 1877.71428, exp4 = 2016.0;
 
-    char args5[] = "+proj=unitconvert +xy_in=m +xy_out=dm +z_in=cm +z_out=mm";
-    PJ_COORD in5 = {{55.25, 23.23, 45.5, 0}}, exp5 = {{552.5, 232.3, 455.0, 0}};
-
-    char args6[] = "+proj=unitconvert +xy_in=m +xy_out=m +z_in=m +z_out=m";
-    PJ_COORD in6 = {{12.3, 45.6, 7.89, 0}};
-
-    char args7[] = "+proj=unitconvert +t_in=yyyymmdd +t_out=yyyymmdd";
-    double in7 = 20170131;
+    char args5[] = "+proj=unitconvert +t_in=yyyymmdd +t_out=yyyymmdd";
+    double in5 = 20170131;
 
     ret = test_time(args1, 1e-6, in1, in1);   if (ret) return ret + 10;
     ret = test_time(args2, 1e-6, in2, in2);   if (ret) return ret + 20;
     ret = test_time(args3, 1e-6, in3, in3);   if (ret) return ret + 30;
     ret = test_time(args4, 1e-6, in4, exp4);  if (ret) return ret + 40;
-    ret = test_xyz (args5, 1e-10, in5, exp5); if (ret) return ret + 50;
-    ret = test_xyz (args6, 1e-10, in6, in6);  if (ret) return ret + 60;
-    ret = test_time(args7, 1e-6, in7, in7);   if (ret) return ret + 70;
+    ret = test_time(args5, 1e-6, in5, in5);   if (ret) return ret + 50;
 
     return 0;
 
