@@ -347,7 +347,7 @@ static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
     Forward conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_COORD out = {{0,0,0,0}};
+    PJ_COORD out = obs;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
     out.xyz = forward_3d(obs.lpz, P);
@@ -367,7 +367,7 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
     Reverse conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_COORD out = {{0,0,0,0}};
+    PJ_COORD out = obs;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
     out.lpz = reverse_3d(obs.xyz, P);
