@@ -1,0 +1,28 @@
+-------------------------------------------------------------------------------
+                        Tests for the unitconvert operation
+-------------------------------------------------------------------------------
+
+<gie>
+
+operation   proj=unitconvert xy_in=m xy_out=dm z_in=cm z_out=mm
+tolerance   0.1
+accept       55.25   23.23   45.5
+expect      552.5   232.3   455.0
+
+operation   proj=unitconvert +xy_in=m +xy_out=m +z_in=m +z_out=m
+tolerance   0.1
+accept      12.3    45.6    7.89
+expect      12.3    45.6    7.89
+
+operation   proj=unitconvert xy_in=dm xy_out=dm
+tolerance   0.1
+accept      1 1 1 1
+expect      1 1 1 1
+
+
+operation   proj=unitconvert xy_in=2.0 xy_out=4.0
+tolerance   0.1
+accept      1       1       1   1
+expect      0.5     0.5     1   1
+
+</gie>
