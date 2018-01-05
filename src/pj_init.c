@@ -769,26 +769,3 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     proj_errno_restore (PIN, err);
     return PIN;
 }
-
-
-
-/************************************************************************/
-/*                              pj_free()                               */
-/*                                                                      */
-/*      This is the application callable entry point for destroying     */
-/*      a projection definition.  It does work generic to all           */
-/*      projection types, and then calls the projection specific        */
-/*      free function, P->destructor(), to do local work.               */
-/*      In most cases P->destructor()==pj_default_destructor.           */
-/************************************************************************/
-
-void pj_free(PJ *P) {
-    if (0==P)
-        return;
-    /* free projection parameters - all the hard work is done by */
-    /* pj_default_destructor (in pj_malloc.c), which is supposed */
-    /* to be called as the last step of the local destructor     */
-    /* pointed to by P->destructor. In most cases,               */
-    /* pj_default_destructor actually *is* what is pointed to    */
-    P->destructor (P, 0);
-}

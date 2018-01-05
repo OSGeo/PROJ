@@ -349,6 +349,14 @@ struct PJconsts {
     enum pj_io_units left;          /* Flags for input/output coordinate types */
     enum pj_io_units right;
 
+    /* These PJs are used for implementing cs2cs style coordinate handling in the 4D API */
+    PJ *axisswap;
+    PJ *cart;
+    PJ *cart_wgs84;
+    PJ *helmert;
+    PJ *hgridshift;
+    PJ *vgridshift;
+
 
     /*************************************************************************************
 
@@ -394,7 +402,7 @@ struct PJconsts {
     double  from_greenwich;            /* prime meridian offset (in radians) */
     double  long_wrap_center;          /* 0.0 for -180 to 180, actually in radians*/
     int     is_long_wrap_set;
-    char    axis[4];                   /* TODO: Description needed */
+    char    axis[4];                   /* Axis order, pj_transform/pj_adjust_axis */
 
     /* New Datum Shift Grid Catalogs */
     char   *catalog_name;

@@ -387,6 +387,7 @@ Interpret <args> as a numeric followed by a linear decadal prefix.
 Return the properly scaled numeric
 ******************************************************************************/
     double s;
+    const double GRS80_DEG = 111319.4908; /* deg-to-m at equator of GRS80 */
     const char *endp = args;
     s = proj_strtod (args, (char **) &endp);
     if (args==endp)
@@ -408,6 +409,10 @@ Return the properly scaled numeric
         s /= 1e6;
     else if (0==strcmp(endp, "nm"))
         s /= 1e9;
+    else if (0==strcmp(endp, "rad"))
+        s = GRS80_DEG * proj_todeg (s);
+    else if (0==strcmp(endp, "deg"))
+        s = GRS80_DEG * s;
     else
         s *= default_scale;
     return s;
@@ -553,19 +558,29 @@ using the "builtins" command verb.
 }
 
 
-static PJ_COORD torad_coord (PJ_COORD a) {
-    PJ_COORD c = a;
-    c.lpz.lam = proj_torad (a.lpz.lam);
-    c.lpz.phi = proj_torad (a.lpz.phi);
-    return c;
+static PJ_COORD torad_coord (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
+    size_t i, n;
+    char *axis = "enut";
+    paralist *l = pj_param_exists (P->params, "axis");
+    if (l && dir==PJ_INV)
+        axis = l->param + strlen ("axis=");
+    for (i = 0,  n = strlen (axis);  i < n;  i++)
+        if (strchr ("news", axis[i]))
+            a.v[i] = proj_torad (a.v[i]);
+    return a;
 }
 
 
-static PJ_COORD todeg_coord (PJ_COORD a) {
-    PJ_COORD c = a;
-    c.lpz.lam = proj_todeg (a.lpz.lam);
-    c.lpz.phi = proj_todeg (a.lpz.phi);
-    return c;
+static PJ_COORD todeg_coord (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
+    size_t i, n;
+    char *axis = "enut";
+    paralist *l = pj_param_exists (P->params, "axis");
+    if (l && dir==PJ_FWD)
+        axis = l->param + strlen ("axis=");
+    for (i = 0,  n = strlen (axis);  i < n;  i++)
+        if (strchr ("news", axis[i]))
+            a.v[i] = proj_todeg (a.v[i]);
+    return a;
 }
 
 
@@ -627,7 +642,7 @@ back/forward transformation pairs.
     d = d==HUGE_VAL?  T.tolerance:  d;
 
     /* input ("accepted") values - probably in degrees */
-    coo = proj_angular_input  (T.P, T.dir)? torad_coord (T.a):  T.a;
+    coo = proj_angular_input  (T.P, T.dir)? torad_coord (T.P, T.dir, T.a):  T.a;
 
     r = proj_roundtrip (T.P, T.dir, ntrips, &coo);
     if (r <= d)
@@ -747,7 +762,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
         proj_errno_reset (T.P);
 
         /* Try to carry out the operation - and expect failure */
-        ci = proj_angular_input (T.P, T.dir)? torad_coord (T.a): T.a;
+        ci = proj_angular_input (T.P, T.dir)? torad_coord (T.P, T.dir, T.a): T.a;
         co = expect_trans_n_dim (ci);
 
         /* Failed to fail? - that's a failure */
@@ -780,20 +795,20 @@ Tell GIE what to expect, when transforming the ACCEPTed input
         return expect_message_cannot_parse (args);
 
     /* expected angular values, probably in degrees */
-    ce = proj_angular_output (T.P, T.dir)? torad_coord (T.e): T.e;
+    ce = proj_angular_output (T.P, T.dir)? torad_coord (T.P, T.dir, T.e): T.e;
     if (T.verbosity > 3)
         printf ("EXPECTS  %.4f  %.4f  %.4f  %.4f\n", ce.v[0],ce.v[1],ce.v[2],ce.v[3]);
 
     /* input ("accepted") values, also probably in degrees */
-    ci = proj_angular_input (T.P, T.dir)? torad_coord (T.a): T.a;
+    ci = proj_angular_input (T.P, T.dir)? torad_coord (T.P, T.dir, T.a): T.a;
     if (T.verbosity > 3)
         printf ("ACCEPTS  %.4f  %.4f  %.4f  %.4f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
 
     /* angular output from proj_trans comes in radians */
     co = expect_trans_n_dim (ci);
-    T.b = proj_angular_output (T.P, T.dir)? todeg_coord (co): co;
+    T.b = proj_angular_output (T.P, T.dir)? todeg_coord (T.P, T.dir, co): co;
     if (T.verbosity > 3)
-        printf ("GOT      %.4f  %.4f  %.4f  %.4f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
+        printf ("GOT      %.4f  %.4f  %.4f  %.4f\n", co.v[0],co.v[1],co.v[2],co.v[3]);
 
     /* but there are a few more possible input conventions... */
     if (proj_angular_output (T.P, T.dir)) {

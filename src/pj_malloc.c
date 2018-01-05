@@ -162,6 +162,32 @@ void *pj_dealloc_params (PJ_CONTEXT *ctx, paralist *start, int errlev) {
 }
 
 
+
+
+/************************************************************************/
+/*                              pj_free()                               */
+/*                                                                      */
+/*      This is the application callable entry point for destroying     */
+/*      a projection definition.  It does work generic to all           */
+/*      projection types, and then calls the projection specific        */
+/*      free function, P->destructor(), to do local work.               */
+/*      In most cases P->destructor()==pj_default_destructor.           */
+/************************************************************************/
+
+void pj_free(PJ *P) {
+    if (0==P)
+        return;
+    /* free projection parameters - all the hard work is done by */
+    /* pj_default_destructor, which is supposed */
+    /* to be called as the last step of the local destructor     */
+    /* pointed to by P->destructor. In most cases,               */
+    /* pj_default_destructor actually *is* what is pointed to    */
+    P->destructor (P, 0);
+}
+
+
+
+
 /*****************************************************************************/
 void *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
 /*****************************************************************************
@@ -195,6 +221,14 @@ void *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
 
     /* free parameter list elements */
     pj_dealloc_params (pj_get_ctx(P), P->params, errlev);
+
+    /* free the cs2cs emulation elements */
+    pj_free (P->axisswap);
+    pj_free (P->helmert);
+    pj_free (P->cart);
+    pj_free (P->cart_wgs84);
+    pj_free (P->hgridshift);
+    pj_free (P->vgridshift);
 
     pj_dealloc (P->opaque);
     return pj_dealloc(P);

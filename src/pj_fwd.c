@@ -32,58 +32,137 @@
 #include "proj_internal.h"
 #include "projects.h"
 
-PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
+#define INPUT_UNITS  P->left
+#define OUTPUT_UNITS P->right
+
+
+static PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
 
+    /* The helmert datum shift will choke unless it gets a sensible 4D coordinate */
+    if (HUGE_VAL==coo.v[2] && P->helmert) coo.v[2] = 0.0;
+    if (HUGE_VAL==coo.v[3] && P->helmert) coo.v[3] = 0.0;
+
     /* Check validity of angular input coordinates */
-    if (P->left==PJ_IO_UNITS_RADIANS) {
+    if (INPUT_UNITS==PJ_IO_UNITS_RADIANS) {
         double t;
-        LP lp = coo.lp;
 
         /* check for latitude or longitude over-range */
-        t = (lp.phi < 0  ?  -lp.phi  :  lp.phi) - M_HALFPI;
-        if (t > PJ_EPS_LAT  ||  lp.lam > 10  ||  lp.lam < -10) {
+        t = (coo.lp.phi < 0  ?  -coo.lp.phi  :  coo.lp.phi) - M_HALFPI;
+        if (t > PJ_EPS_LAT  ||  coo.lp.lam > 10  ||  coo.lp.lam < -10) {
             proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
             return proj_coord_error ();
         }
 
         /* Clamp latitude to -90..90 degree range */
-        if (lp.phi > M_HALFPI)
-            lp.phi = M_HALFPI;
-        if (lp.phi < -M_HALFPI)
-            lp.phi = -M_HALFPI;
+        if (coo.lp.phi > M_HALFPI)
+            coo.lp.phi = M_HALFPI;
+        if (coo.lp.phi < -M_HALFPI)
+            coo.lp.phi = -M_HALFPI;
 
         /* If input latitude is geocentrical, convert to geographical */
         if (P->geoc)
             coo = proj_geoc_lat (P, PJ_INV, coo);
 
+        /* Ensure longitude is in the -pi:pi range */
+        if (0==P->over)
+            coo.lp.lam = adjlon(coo.lp.lam);
+
+        if (P->hgridshift)
+            coo = proj_trans (P->hgridshift, PJ_INV, coo);
+        else if (P->helmert) {
+            coo = proj_trans (P->cart_wgs84, PJ_FWD, coo); /* Go cartesian in WGS84 frame */
+            coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into local frame */
+            coo = proj_trans (P->cart,       PJ_INV, coo); /* Go back to angular using local ellps */
+        }
+        if (P->vgridshift)
+            coo = proj_trans (P->vgridshift, PJ_FWD, coo);
+
         /* Distance from central meridian, taking system zero meridian into account */
-        lp.lam = (lp.lam - P->from_greenwich) - P->lam0;
+        coo.lp.lam = (coo.lp.lam - P->from_greenwich) - P->lam0;
 
         /* Ensure longitude is in the -pi:pi range */
         if (0==P->over)
-            lp.lam = adjlon(lp.lam);
+            coo.lp.lam = adjlon(coo.lp.lam);
 
-        coo.lp = lp;
+        return coo;
     }
 
+
+    /* We do not support gridshifts on cartesian input */
+    if (INPUT_UNITS==PJ_IO_UNITS_CARTESIAN && P->helmert)
+            return proj_trans (P->helmert, PJ_FWD, coo);
     return coo;
 }
 
 
-PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo) {
 
-    /* Classic proj.4 functions return plane coordinates in units of the semimajor axis */
-    if (P->right==PJ_IO_UNITS_CLASSIC) {
-        coo.xy.x *= P->a;
-        coo.xy.y *= P->a;
-    }
+static PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo) {
+
+    switch (OUTPUT_UNITS) {
 
     /* Handle false eastings/northings and non-metric linear units */
-    coo.xyz.x = P->fr_meter  * (coo.xyz.x + P->x0);
-    coo.xyz.y = P->fr_meter  * (coo.xyz.y + P->y0);
-    coo.xyz.z = P->vfr_meter * (coo.xyz.z + P->z0);
+    case PJ_IO_UNITS_CARTESIAN:
+
+        if (P->is_geocent) {
+            coo = proj_trans (P->cart, PJ_FWD, coo);
+        }
+
+        coo.xyz.x = P->fr_meter * (coo.xyz.x + P->x0);
+        coo.xyz.y = P->fr_meter * (coo.xyz.y + P->y0);
+        coo.xyz.z = P->fr_meter * (coo.xyz.z + P->z0);
+        break;
+
+    /* Classic proj.4 functions return plane coordinates in units of the semimajor axis */
+    case PJ_IO_UNITS_CLASSIC:
+        coo.xy.x *= P->a;
+        coo.xy.y *= P->a;
+
+    /* Falls through */ /* (<-- GCC warning silencer) */
+    /* to continue processing in common with PJ_IO_UNITS_PROJECTED */
+    case PJ_IO_UNITS_PROJECTED:
+        coo.xyz.x = P->fr_meter  * (coo.xyz.x + P->x0);
+        coo.xyz.y = P->fr_meter  * (coo.xyz.y + P->y0);
+        coo.xyz.z = P->vfr_meter * (coo.xyz.z + P->z0);
+        break;
+
+    case PJ_IO_UNITS_WHATEVER:
+        break;
+
+    case PJ_IO_UNITS_RADIANS:
+        if (INPUT_UNITS==PJ_IO_UNITS_RADIANS)
+            break;
+
+        /* adjust longitude to central meridian */
+        if (0==P->over)
+            coo.lpz.lam = adjlon(coo.lpz.lam);
+
+        if (P->vgridshift)
+            coo = proj_trans (P->vgridshift, PJ_INV, coo);
+        if (P->hgridshift)
+            coo = proj_trans (P->hgridshift, PJ_FWD, coo);
+        else if (P->helmert) {
+            coo = proj_trans (P->cart_wgs84, PJ_FWD, coo); /* Go cartesian in WGS84 frame */
+            coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into local frame */
+            coo = proj_trans (P->cart,       PJ_INV, coo); /* Go back to angular using local ellps */
+        }
+
+        /* If input latitude was geocentrical, convert back to geocentrical */
+        if (P->geoc)
+            coo = proj_geoc_lat (P, PJ_FWD, coo);
+
+
+        /* Distance from central meridian, taking system zero meridian into account */
+        coo.lp.lam = coo.lp.lam + P->from_greenwich + P->lam0;
+
+        /* adjust longitude to central meridian */
+        if (0==P->over)
+            coo.lpz.lam = adjlon(coo.lpz.lam);
+    }
+
+    if (P->axisswap)
+        coo = proj_trans (P->axisswap, PJ_FWD, coo);
 
     return coo;
 }
