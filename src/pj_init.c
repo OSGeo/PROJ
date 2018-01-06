@@ -691,9 +691,9 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         int ratio = 0;
 
         /* ratio number? */
-        if (*s == '/') {
+        if (strlen (s) > 1 && s[0] == '1' && s[1]=='/') {
             ratio = 1;
-            s++;
+            s += 2;
         }
 
         factor = pj_strtod(s, &s);
