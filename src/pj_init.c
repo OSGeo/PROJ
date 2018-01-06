@@ -246,7 +246,8 @@ Expand key from buffer or (if not in buffer) from init file
     if (0==definition)
         return 0;
     init_items = string_to_paralist (ctx, definition);
-    pj_log (ctx, 3, "get_init: got [%s], paralist[0,1]: [%s,%s]\n", definition, init_items->param, init_items->next? init_items->next->param: "(empty)");
+    if (init_items)
+        pj_log (ctx, 3, "get_init: got [%s], paralist[0,1]: [%s,%s]\n", definition, init_items->param, init_items->next? init_items->next->param: "(empty)");
     pj_dealloc (definition);
     if (0==init_items)
         return 0;
