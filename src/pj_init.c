@@ -471,7 +471,6 @@ pj_init(int argc, char **argv) {
 
 
 typedef    PJ *(constructor)(PJ *);
-typedef    constructor *(*function_returning_constructor)(const char *);
 
 static constructor *pj_constructor (const char *name) {
     int i;
