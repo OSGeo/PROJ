@@ -192,9 +192,11 @@ typedef struct PJ_REGION_S  PJ_Region;
 typedef struct ARG_list paralist;   /* parameter list */
 #ifndef PROJ_INTERNAL_H
 enum pj_io_units {
-    PJ_IO_UNITS_CLASSIC = 0,   /* Scaled meters (right) */
-    PJ_IO_UNITS_METERS  = 1,   /* Meters  */
-    PJ_IO_UNITS_RADIANS = 2    /* Radians */
+    PJ_IO_UNITS_WHATEVER  = 0,  /* Doesn't matter (or depends on pipeline neighbours) */
+    PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
+    PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
+    PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
+    PJ_IO_UNITS_RADIANS   = 4   /* Radians */
 };
 #endif
 #ifndef PROJ_H

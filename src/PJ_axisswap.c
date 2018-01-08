@@ -242,10 +242,9 @@ PJ *CONVERSION(axisswap,0) {
         P->left  = PJ_IO_UNITS_RADIANS;
         P->right = PJ_IO_UNITS_RADIANS;
     } else {
-        P->left  = PJ_IO_UNITS_METERS;
-        P->right = PJ_IO_UNITS_METERS;
+        P->left  = PJ_IO_UNITS_PROJECTED;
+        P->right = PJ_IO_UNITS_PROJECTED;
     }
 
     return P;
 }
-

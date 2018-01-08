@@ -397,8 +397,8 @@ PJ *CONVERSION(unitconvert,0) {
     P->fwd    = forward_2d;
     P->inv    = reverse_2d;
 
-    P->left  = PJ_IO_UNITS_METERS;
-    P->right = PJ_IO_UNITS_METERS;
+    P->left  = PJ_IO_UNITS_WHATEVER;
+    P->right = PJ_IO_UNITS_WHATEVER;
 
     /* if no time input/output unit is specified we can skip them */
     Q->t_in_id = -1;
@@ -485,4 +485,3 @@ PJ *CONVERSION(unitconvert,0) {
 
     return P;
 }
-

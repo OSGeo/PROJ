@@ -233,7 +233,7 @@ PJ *PROJECTION(ob_tran) {
     /* Support some rather speculative test cases, where the rotated projection */
     /* is actually latlong. We do not want scaling in that case... */
     if (Q->link->right==PJ_IO_UNITS_RADIANS)
-        P->right = PJ_IO_UNITS_METERS;
+        P->right = PJ_IO_UNITS_PROJECTED;
 
 
     return P;

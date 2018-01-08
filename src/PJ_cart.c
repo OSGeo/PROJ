@@ -214,7 +214,6 @@ PJ *CONVERSION(cart,1) {
     P->fwd    =  cart_forward;
     P->inv    =  cart_reverse;
     P->left   =  PJ_IO_UNITS_RADIANS;
-    P->right  =  PJ_IO_UNITS_METERS;
+    P->right  =  PJ_IO_UNITS_CARTESIAN;
     return P;
 }
-

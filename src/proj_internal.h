@@ -61,12 +61,14 @@ extern "C" {
 #define PJ_EPS_LAT 1e-12
 
 
-/* This enum is also conditionally defined in projects.h - but we need it here */
-/* for the pj_left/right prototypes, and enums cannot be forward declared      */
+/* This enum is also conditionally defined in projects.h - but enums cannot */
+/* be forward declared and we need it here for the pj_left/right prototypes */
 enum pj_io_units {
-    PJ_IO_UNITS_CLASSIC = 0,   /* Scaled meters (right) */
-    PJ_IO_UNITS_METERS  = 1,   /* Meters  */
-    PJ_IO_UNITS_RADIANS = 2    /* Radians */
+    PJ_IO_UNITS_WHATEVER  = 0,  /* Doesn't matter (or depends on pipeline neighbours) */
+    PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
+    PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
+    PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
+    PJ_IO_UNITS_RADIANS   = 4   /* Radians */
 };
 enum pj_io_units pj_left (PJ *P);
 enum pj_io_units pj_right (PJ *P);

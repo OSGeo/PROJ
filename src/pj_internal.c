@@ -40,16 +40,16 @@
 
 enum pj_io_units pj_left (PJ *P) {
     enum pj_io_units u = P->inverted? P->right: P->left;
-    if (u==PJ_IO_UNITS_RADIANS)
-        return PJ_IO_UNITS_RADIANS;
-    return PJ_IO_UNITS_METERS;
+    if (u==PJ_IO_UNITS_CLASSIC)
+        return PJ_IO_UNITS_PROJECTED;
+    return u;
 }
 
 enum pj_io_units pj_right (PJ *P) {
     enum pj_io_units u = P->inverted? P->left: P->right;
-    if (u==PJ_IO_UNITS_RADIANS)
-        return PJ_IO_UNITS_RADIANS;
-    return PJ_IO_UNITS_METERS;
+    if (u==PJ_IO_UNITS_CLASSIC)
+        return PJ_IO_UNITS_PROJECTED;
+    return u;
 }
 
 
