@@ -39,7 +39,6 @@
 */
 
 
-#define PROJ_LIB__
 #define PJ_LIB__
 
 #include <errno.h>

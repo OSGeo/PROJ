@@ -170,10 +170,6 @@ struct snyder_constants constants[] = {
     {37.37736814, 36.0, 30.0, 17.27, 1.163, 0.860, 13.14, 1.584, 1.0},
 };
 
-#define E 52.62263186
-#define F 10.81231696
-
-#define DEG60 1.04719755119659774614
 #define DEG120 2.09439510239319549229
 #define DEG72 1.25663706143591729537
 #define DEG90 1.57079632679489661922
@@ -266,14 +262,12 @@ az_adjustment(int triangle)
 /* H = 0.25 R tan g = */
 #define TABLE_H 0.1909830056
 
-#define RPRIME 0.91038328153090290025
-
 ISEA_STATIC
 struct isea_pt
 isea_triangle_xy(int triangle)
 {
     struct isea_pt  c;
-    double Rprime = 0.91038328153090290025;
+    const double Rprime = 0.91038328153090290025;
 
     triangle = (triangle - 1) % 20;
 
@@ -508,8 +502,6 @@ isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
  * North Pole as the lon0 longitude in new coordinate system, given any point
  * in original coordinate system, this function return the new coordinates.
  */
-
-#define PRECISION 0.0000000000005
 
 /* formula from Snyder, Map Projections: A working manual, p31 */
 /*
