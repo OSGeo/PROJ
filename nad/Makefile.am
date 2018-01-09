@@ -1,8 +1,11 @@
 # Executables paths passed to test scripts
 NADPATH = $(top_srcdir)/nad
+GIETESTPATH = $(top_srcdir)/test/gie
+GIGSTESTPATH = $(top_srcdir)/test/gigs
 EXEPATH = ../src
 PROJEXE = $(EXEPATH)/proj
 CS2CSEXE = $(EXEPATH)/cs2cs
+GIEEXE = $(EXEPATH)/gie
 
 # PROJ.4 test scripts
 TEST27 = $(NADPATH)/test27
@@ -87,6 +90,8 @@ check-local: process-nad2bin
 	  export PROJ_LIB=. ; \
 	  $(TESTNTV2) $(CS2CSEXE) ; \
 	fi
+	$(GIEEXE) $(GIETESTPATH)/*.gie
+#$(GIEEXE) $(GIGSTESTPATH)/*.gie
 
 clean-local:
 	$(RM) $(TEST_DB)
