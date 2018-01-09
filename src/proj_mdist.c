@@ -27,7 +27,7 @@
 ** and inverse on unit ellipsoid.
 ** Precision commensurate with double precision.
 */
-#define PROJ_LIB__
+#define PJ_LIB__
 #include <projects.h>
 #define MAX_ITER 20
 #define TOL 1e-14

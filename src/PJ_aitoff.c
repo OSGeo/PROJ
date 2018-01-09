@@ -141,7 +141,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
             y *= D * sin(lp.phi);
         } else
             x = y = 0.;
-        if (Q->mode) { /* Winkel Tripel */
+        if (Q->mode == WINKEL_TRIPEL) {
             x = (x + lp.lam * Q->cosphi1) * 0.5;
             y = (y + lp.phi) * 0.5;
         }

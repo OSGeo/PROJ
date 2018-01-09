@@ -6,7 +6,7 @@
 #include <errno.h>
 #include "emess.h"
 #ifndef COEF_LINE_MAX
-#define COEF_LINE_MAX 60
+#define COEF_LINE_MAX 50
 #endif
 
 /* FIXME: put the declaration in a header. Also used in proj.c */
@@ -43,7 +43,7 @@ void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
 			if (*arg != '+') {
 				if (!n) { putchar('#'); ++n; }
 				(void)printf(" %s%n",arg, &L);
-				if ((n += L) > 50) { putchar('\n'); n = 0; }
+				if ((n += L) > COEF_LINE_MAX) { putchar('\n'); n = 0; }
 			}
 		}
 		if (n) putchar('\n');
