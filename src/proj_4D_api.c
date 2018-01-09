@@ -132,8 +132,15 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
 
 
 
-/* Apply the transformation P to the coordinate coo */
+/**************************************************************************************/
 PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+/***************************************************************************************
+Apply the transformation P to the coordinate coo, preferring the 4D interfaces if
+available.
+
+See also pj_approx_2D_trans and pj_approx_3D_trans in pj_internal.c, which work
+similarly, but prefers the 2D resp. 3D interfaces if available.
+***************************************************************************************/
     if (0==P)
         return coo;
     if (P->inverted)
@@ -597,7 +604,7 @@ PJ_INFO proj_info(void) {
 
 ******************************************************************************/
     PJ_INFO info;
-    const char **paths;
+    const char * const *paths;
     char *tmpstr;
     int i, n;
     size_t len = 0;
@@ -845,22 +852,5 @@ PJ_FACTORS proj_factors(PJ *P, LP lp) {
     factors.tissot_semiminor  =  f.b;
 
     return factors;
-}
-
-
-const PJ_ELLPS *proj_list_ellps(void) {
-    return pj_get_ellps_ref();
-}
-
-const PJ_UNITS *proj_list_units(void) {
-    return pj_get_units_ref();
-}
-
-const PJ_OPERATIONS *proj_list_operations(void) {
-    return pj_get_list_ref();
-}
-
-const PJ_PRIME_MERIDIANS *proj_list_prime_meridians(void) {
-    return pj_get_prime_meridians_ref();
 }
 

@@ -151,3 +151,6 @@ EXPORTS
     pj_calc_ellipsoid_params       @135
     pj_chomp                       @136
     pj_shrink                      @137
+
+    pj_approx_2D_trans             @138
+    pj_approx_3D_trans             @139

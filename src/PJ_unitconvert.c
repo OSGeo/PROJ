@@ -80,6 +80,13 @@ struct TIME_UNITS {
     char        *name;      /* comments */
 };
 
+struct pj_opaque_unitconvert {
+    int     t_in_id;        /* time unit id for the time input unit   */
+    int     t_out_id;       /* time unit id for the time output unit  */
+    double  xy_factor;      /* unit conversion factor for horizontal components */
+    double  z_factor;       /* unit conversion factor for vertical components */
+};
+
 
 /***********************************************************************/
 static int is_leap_year(int year) {
@@ -255,22 +262,12 @@ static double mjd_to_yyyymmdd(double mjd) {
     return year*10000.0 + month*100.0 + day;
 }
 
-
-struct TIME_UNITS time_units[] = {
+static const struct TIME_UNITS time_units[] = {
     {"mjd",         mjd_to_mjd,         mjd_to_mjd,         "Modified julian date"},
     {"decimalyear", decimalyear_to_mjd, mjd_to_decimalyear, "Decimal year"},
     {"gps_week",    gps_week_to_mjd,    mjd_to_gps_week,    "GPS Week"},
     {"yyyymmdd",    yyyymmdd_to_mjd,    mjd_to_yyyymmdd,    "YYYYMMDD date"},
     {NULL,          NULL,               NULL,               NULL}
-};
-
-struct pj_opaque_unitconvert {
-    int     t_in_id;    /* time unit id for the time input unit   */
-    int     t_out_id;   /* time unit id for the time output unit  */
-    int     xy_in_id;   /* unit id for the horizontal input unit  */
-    int     xy_out_id;  /* unit id for the horizontal output unit */
-    int     z_in_id;    /* unit id for the vertical input unit    */
-    int     z_out_id;   /* unit id for the vertical output unit   */
 };
 
 
@@ -283,8 +280,8 @@ static XY forward_2d(LP lp, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.lp = lp;
 
-    point.xy.x *= pj_units[Q->xy_in_id].factor / pj_units[Q->xy_out_id].factor;
-    point.xy.y *= pj_units[Q->xy_in_id].factor / pj_units[Q->xy_out_id].factor;
+    point.xy.x *= Q->xy_factor;
+    point.xy.y *= Q->xy_factor;
 
     return point.xy;
 }
@@ -299,8 +296,8 @@ static LP reverse_2d(XY xy, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.xy = xy;
 
-    point.xy.x *= pj_units[Q->xy_out_id].factor / pj_units[Q->xy_in_id].factor;
-    point.xy.y *= pj_units[Q->xy_out_id].factor / pj_units[Q->xy_in_id].factor;
+    point.xy.x /= Q->xy_factor;
+    point.xy.y /= Q->xy_factor;
 
     return point.lp;
 }
@@ -318,7 +315,7 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
     /* take care of the horizontal components in the 2D function */
     point.xy = forward_2d(point.lp, P);
 
-    point.xyz.z *= pj_units[Q->z_in_id].factor / pj_units[Q->z_out_id].factor;
+    point.xyz.z *= Q->z_factor;
 
     return point.xyz;
 }
@@ -335,7 +332,7 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
     /* take care of the horizontal components in the 2D function */
     point.lp = reverse_2d(point.xy, P);
 
-    point.xyz.z *= pj_units[Q->z_out_id].factor / pj_units[Q->z_in_id].factor;
+    point.xyz.z /= Q->z_factor;
 
     return point.lpz;
 }
@@ -347,7 +344,7 @@ static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
     Forward conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_COORD out = {{0,0,0,0}};
+    PJ_COORD out = obs;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
     out.xyz = forward_3d(obs.lpz, P);
@@ -367,7 +364,7 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
     Reverse conversion of time units
 ************************************************************************/
     struct pj_opaque_unitconvert *Q = (struct pj_opaque_unitconvert *) P->opaque;
-    PJ_COORD out = {{0,0,0,0}};
+    PJ_COORD out = obs;
 
     /* delegate unit conversion of physical dimensions to the 3D function */
     out.lpz = reverse_3d(obs.xyz, P);
@@ -387,6 +384,7 @@ PJ *CONVERSION(unitconvert,0) {
     struct pj_opaque_unitconvert *Q = pj_calloc (1, sizeof (struct pj_opaque_unitconvert));
     char *s, *name;
     int i;
+    double f;
 
     if (0==Q)
         return pj_default_destructor (P, ENOMEM);
@@ -399,47 +397,70 @@ PJ *CONVERSION(unitconvert,0) {
     P->fwd    = forward_2d;
     P->inv    = reverse_2d;
 
-    P->left  = PJ_IO_UNITS_METERS;
-    P->right = PJ_IO_UNITS_METERS;
+    P->left  = PJ_IO_UNITS_WHATEVER;
+    P->right = PJ_IO_UNITS_WHATEVER;
 
     /* if no time input/output unit is specified we can skip them */
     Q->t_in_id = -1;
     Q->t_out_id = -1;
 
+    Q->xy_factor = 1.0;
+    Q->z_factor  = 1.0;
+
     if ((name = pj_param (P->ctx, P->params, "sxy_in").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
-
-        Q->xy_in_id = i;
-        proj_log_debug(P, "xy_in unit: %s", pj_units[i].name);
+        if (s) {
+            f = pj_units[i].factor;
+            proj_log_debug(P, "xy_in unit: %s", pj_units[i].name);
+        } else {
+            if ( (f = pj_param (P->ctx, P->params, "dxy_in").f) == 0.0)
+                return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
+        }
+        if (f != 0.0)
+            Q->xy_factor *= f;
     }
 
     if ((name = pj_param (P->ctx, P->params, "sxy_out").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
-
-        Q->xy_out_id = i;
-        proj_log_debug(P, "xy_out unit: %s", pj_units[i].name);
+        if (s) {
+            f = pj_units[i].factor;
+            proj_log_debug(P, "xy_out unit: %s", pj_units[i].name);
+        } else {
+            if ( (f = pj_param (P->ctx, P->params, "dxy_out").f) == 0.0)
+                return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
+        }
+        if (f != 0.0)
+            Q->xy_factor /= f;
     }
 
     if ((name = pj_param (P->ctx, P->params, "sz_in").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
-
-        Q->z_in_id = i;
-        proj_log_debug(P, "z_in unit: %s", pj_units[i].name);
+        if (s) {
+            f = pj_units[i].factor;
+            proj_log_debug(P, "z_in unit: %s", pj_units[i].name);
+        } else {
+            if ( (f = pj_param (P->ctx, P->params, "dz_in").f) == 0.0)
+                return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
+        }
+        if (f != 0.0)
+            Q->z_factor *= f;
     }
 
     if ((name = pj_param (P->ctx, P->params, "sz_out").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
-
-        Q->z_out_id = i;
-        proj_log_debug(P, "z_out unit: %s", pj_units[i].name);
+        if (s) {
+            f = pj_units[i].factor;
+            proj_log_debug(P, "z_out unit: %s", pj_units[i].name);
+        } else {
+            if ( (f = pj_param (P->ctx, P->params, "dz_out").f) == 0.0)
+                return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
+        }
+        if (f != 0.0)
+            Q->z_factor /= f;
     }
 
 
@@ -464,4 +485,3 @@ PJ *CONVERSION(unitconvert,0) {
 
     return P;
 }
-

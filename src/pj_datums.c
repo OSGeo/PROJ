@@ -25,17 +25,18 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_DATUMS__
+#include "proj.h"
 
+#define PJ_DATUMS__
 #include <projects.h>
 
-/* 
+/*
  * The ellipse code must match one from pj_ellps.c.  The datum id should
- * be kept to 12 characters or less if possible.  Use the official OGC 
- * datum name for the comments if available. 
+ * be kept to 12 characters or less if possible.  Use the official OGC
+ * datum name for the comments if available.
  */
 
-C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[] = {
+C_NAMESPACE_VAR const struct PJ_DATUMS pj_datums[] = {
 /* id       definition                               ellipse  comments */
 /* --       ----------                               -------  -------- */
 {"WGS84",   "towgs84=0,0,0",                         "WGS84", ""},
@@ -65,12 +66,11 @@ C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[] = {
 };
 
 struct PJ_DATUMS *pj_get_datums_ref()
-
 {
-    return pj_datums;
+    return (struct PJ_DATUMS *)pj_datums;
 }
 
-C_NAMESPACE_VAR struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
+C_NAMESPACE_VAR const struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
     /* id        definition                         */
     /* --        ----------                         */
     {"greenwich", "0dE"},
@@ -86,12 +86,16 @@ C_NAMESPACE_VAR struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
     {"stockholm", "18d3'29.8\"E"},
     {"athens",    "23d42'58.815\"E"},
     {"oslo",      "10d43'22.5\"E"},
+    {"copenhagen","12d34'40.35\"E"},
     {NULL,        NULL}
 };
 
 struct PJ_PRIME_MERIDIANS *pj_get_prime_meridians_ref()
+{
+    return (struct PJ_PRIME_MERIDIANS *)pj_prime_meridians;
+}
 
+const PJ_PRIME_MERIDIANS *proj_list_prime_meridians(void)
 {
     return pj_prime_meridians;
 }
-

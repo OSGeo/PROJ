@@ -4,7 +4,7 @@
 #include <errno.h>
 #include <string.h>
 
-    static char *
+    static const char * const
 pj_err_list[] = {
     "no arguments in initialization list",                             /*  -1 */
     "no options found in 'init' file",                                 /*  -2 */
@@ -91,7 +91,7 @@ char *pj_strerrno(int err) {
     /* PROJ.4 error codes are negative */
     adjusted_err = - err - 1;
     if (adjusted_err < (sizeof(pj_err_list) / sizeof(char *)))
-        return(pj_err_list[adjusted_err]);
+        return (char *)pj_err_list[adjusted_err];
 
     sprintf( note, "invalid projection system error (%d)", (err > -9999)? err: -9999);
     return note;

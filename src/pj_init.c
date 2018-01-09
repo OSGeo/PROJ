@@ -189,6 +189,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
         /* Otherwise, handle the line. It MAY be the start of the next section, */
         /* but that will be handled at the start of next trip through the loop  */
         buffer_length = strlen (buffer);
+        pj_chomp (line);   /* Remove '#' style comments */
         next_length = strlen (line) + buffer_length + 2;
         if (next_length > current_buffer_size) {
             char *b = pj_malloc (2 * current_buffer_size);
@@ -245,7 +246,8 @@ Expand key from buffer or (if not in buffer) from init file
     if (0==definition)
         return 0;
     init_items = string_to_paralist (ctx, definition);
-    pj_log (ctx, 3, "get_init: got [%s], paralist[0,1]: [%s,%s]\n", definition, init_items->param, init_items->next? init_items->next->param: "(empty)");
+    if (init_items)
+        pj_log (ctx, 3, "get_init: got [%s], paralist[0,1]: [%s,%s]\n", definition, init_items->param, init_items->next? init_items->next->param: "(empty)");
     pj_dealloc (definition);
     if (0==init_items)
         return 0;
@@ -344,6 +346,7 @@ where 'ellps=intl' precedes 'ellps=GRS80', and hence takes precedence,
 turning the expansion into an UTM projection on the Hayford ellipsoid.
 
 Note that 'init=foo:bar' stays in the list. It is ignored after expansion.
+
 ******************************************************************************/
     paralist *last;
     paralist *expn;
@@ -468,7 +471,6 @@ pj_init(int argc, char **argv) {
 
 
 typedef    PJ *(constructor)(PJ *);
-typedef    constructor *(*function_returning_constructor)(const char *);
 
 static constructor *pj_constructor (const char *name) {
     int i;
@@ -639,7 +641,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     /* Axis orientation */
     if( (pj_param(ctx, start,"saxis").s) != NULL )
     {
-        static const char *axis_legal = "ewnsud";
+        const char *axis_legal = "ewnsud";
         const char *axis_arg = pj_param(ctx, start,"saxis").s;
         if( strlen(axis_arg) != 3 )
             return pj_default_destructor (PIN, PJD_ERR_AXIS);
@@ -688,9 +690,9 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         int ratio = 0;
 
         /* ratio number? */
-        if (*s == '/') {
+        if (strlen (s) > 1 && s[0] == '1' && s[1]=='/') {
             ratio = 1;
-            s++;
+            s += 2;
         }
 
         factor = pj_strtod(s, &s);

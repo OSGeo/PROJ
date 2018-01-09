@@ -306,8 +306,8 @@ PJ *TRANSFORMATION(deformation,1) {
     P->fwd    = 0;
     P->inv    = 0;
 
-    P->left  = PJ_IO_UNITS_METERS;
-    P->right = PJ_IO_UNITS_METERS;
+    P->left  = PJ_IO_UNITS_CARTESIAN;
+    P->right = PJ_IO_UNITS_CARTESIAN;
     P->destructor = destructor;
 
     return P;

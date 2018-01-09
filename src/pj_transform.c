@@ -117,15 +117,6 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     }
 
 /* -------------------------------------------------------------------- */
-/*      Transform Z to meters if it isn't already.                      */
-/* -------------------------------------------------------------------- */
-    if( srcdefn->vto_meter != 1.0 && z != NULL )
-    {
-        for( i = 0; i < point_count; i++ )
-            z[point_offset*i] *= srcdefn->vto_meter;
-    }
-
-/* -------------------------------------------------------------------- */
 /*      Transform geocentric source coordinates to lat/long.            */
 /* -------------------------------------------------------------------- */
     if( srcdefn->is_geocent )
@@ -145,6 +136,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
                 {
                     x[point_offset*i] *= srcdefn->to_meter;
                     y[point_offset*i] *= srcdefn->to_meter;
+                    z[point_offset*i] *= srcdefn->to_meter;
                 }
             }
         }
@@ -253,11 +245,12 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             }
         }
     }
+
 /* -------------------------------------------------------------------- */
 /*      But if they are already lat long, adjust for the prime          */
 /*      meridian if there is one in effect.                             */
 /* -------------------------------------------------------------------- */
-    if( srcdefn->from_greenwich != 0.0 )
+    if ((srcdefn->is_geocent || srcdefn->is_latlong) && ( srcdefn->from_greenwich != 0.0 ))
     {
         for( i = 0; i < point_count; i++ )
         {
@@ -308,15 +301,14 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 /*      But if they are staying lat long, adjust for the prime          */
 /*      meridian if there is one in effect.                             */
 /* -------------------------------------------------------------------- */
-    if( dstdefn->from_greenwich != 0.0 )
+    if ((dstdefn->is_geocent || dstdefn->is_latlong) && ( dstdefn->from_greenwich != 0.0 ))
     {
         for( i = 0; i < point_count; i++ )
         {
             if( x[point_offset*i] != HUGE_VAL )
                 x[point_offset*i] -= dstdefn->from_greenwich;
         }
-    }
-
+}
 
 /* -------------------------------------------------------------------- */
 /*      Transform destination latlong to geocentric if required.        */
@@ -340,6 +332,7 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
                 {
                     x[point_offset*i] *= dstdefn->fr_meter;
                     y[point_offset*i] *= dstdefn->fr_meter;
+                    z[point_offset*i] *= srcdefn->fr_meter;
                 }
             }
         }
@@ -451,15 +444,6 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
                 val -= M_TWOPI;
             x[point_offset*i] = val;
         }
-    }
-
-/* -------------------------------------------------------------------- */
-/*      Transform Z from meters if needed.                              */
-/* -------------------------------------------------------------------- */
-    if( dstdefn->vto_meter != 1.0 && z != NULL )
-    {
-        for( i = 0; i < point_count; i++ )
-            z[point_offset*i] *= dstdefn->vfr_meter;
     }
 
 /* -------------------------------------------------------------------- */

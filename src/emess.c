@@ -18,7 +18,7 @@
 #define EMESS_ROUTINE
 #include "emess.h"
 	void
-emess(int code, char *fmt, ...) {
+emess(int code, const char *fmt, ...) {
 	va_list args;
 
 	va_start(args, fmt);

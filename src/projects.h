@@ -192,9 +192,11 @@ typedef struct PJ_REGION_S  PJ_Region;
 typedef struct ARG_list paralist;   /* parameter list */
 #ifndef PROJ_INTERNAL_H
 enum pj_io_units {
-    PJ_IO_UNITS_CLASSIC = 0,   /* Scaled meters (right) */
-    PJ_IO_UNITS_METERS  = 1,   /* Meters  */
-    PJ_IO_UNITS_RADIANS = 2    /* Radians */
+    PJ_IO_UNITS_WHATEVER  = 0,  /* Doesn't matter (or depends on pipeline neighbours) */
+    PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
+    PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
+    PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
+    PJ_IO_UNITS_RADIANS   = 4   /* Radians */
 };
 #endif
 #ifndef PROJ_H
@@ -337,7 +339,12 @@ struct PJconsts {
     int  geoc;                      /* Geocentric latitude flag */
     int  is_latlong;                /* proj=latlong ... not really a projection at all */
     int  is_geocent;                /* proj=geocent ... not really a projection at all */
+    int  is_pipeline;               /* 1 if PJ represents a pipeline */
     int  need_ellps;                /* 0 for operations that are purely cartesian */
+    int  skip_fwd_prepare;
+    int  skip_fwd_finalize;
+    int  skip_inv_prepare;
+    int  skip_inv_finalize;
 
     enum pj_io_units left;          /* Flags for input/output coordinate types */
     enum pj_io_units right;
@@ -349,7 +356,7 @@ struct PJconsts {
 
     **************************************************************************************/
 
-    double  lam0, phi0;                /* central longitude, latitude */
+    double  lam0, phi0;                /* central meridian, parallel */
     double  x0, y0, z0, t0;            /* false easting and northing (and height and time) */
 
 
@@ -590,7 +597,7 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 
 
 #ifdef PJ_LIB__
-#define PROJ_HEAD(id, name) static const char des_##id [] = name
+#define PROJ_HEAD(name, desc) static const char des_##name [] = desc
 
 #define OPERATION(name, NEED_ELLPS)                          \
                                                              \
@@ -713,8 +720,8 @@ double  pj_qsfn_(double, PJ *);
 double *pj_authset(double);
 double  pj_authlat(double, double *);
 
-COMPLEX pj_zpoly1(COMPLEX, COMPLEX *, int);
-COMPLEX pj_zpolyd1(COMPLEX, COMPLEX *, int, COMPLEX *);
+COMPLEX pj_zpoly1(COMPLEX, const COMPLEX *, int);
+COMPLEX pj_zpolyd1(COMPLEX, const COMPLEX *, int, COMPLEX *);
 
 int pj_deriv(LP, double, const PJ *, struct DERIVS *);
 int pj_factors(LP, const PJ *, double, struct FACTORS *);

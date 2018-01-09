@@ -1,58 +1,176 @@
-/* general forward projection */
-#define PJ_LIB__
-#include <proj.h>
-#include <projects.h>
-# define EPS 1.0e-12
-	XY /* forward projection entry */
-pj_fwd(LP lp, PJ *P) {
-	XY xy;
-    XY err;
-    double t;
-    int last_errno;
+/******************************************************************************
+ * Project:  PROJ.4
+ * Purpose:  Forward operation invocation
+ * Author:   Thomas Knudsen,  thokn@sdfe.dk,  2018-01-02
+ *           Based on material from Gerald Evenden (original pj_fwd)
+ *           and Piyush Agram (original pj_fwd3d)
+ *
+ ******************************************************************************
+ * Copyright (c) 2000, Frank Warmerdam
+ * Copyright (c) 2018, Thomas Knudsen / SDFE
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ *****************************************************************************/
+#include <errno.h>
 
-    /* cannot const-initialize this due to MSVC's broken (non const) HUGE_VAL */
-    err.x = err.y = HUGE_VAL;
+#include "proj_internal.h"
+#include "projects.h"
 
-    if (0==P->fwd)
-        return err;
-    last_errno = proj_errno_reset (P);
+PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
+    if (HUGE_VAL==coo.v[0])
+        return proj_coord_error ();
 
     /* Check validity of angular input coordinates */
     if (P->left==PJ_IO_UNITS_RADIANS) {
+        double t;
+        LP lp = coo.lp;
 
-        /* check for forward and latitude or longitude overange */
-        t = fabs(lp.phi)-M_HALFPI;
-        if (t > EPS || fabs(lp.lam) > 10.) {
-            pj_ctx_set_errno( P->ctx, -14);
-            return err;
+        /* check for latitude or longitude over-range */
+        t = (lp.phi < 0  ?  -lp.phi  :  lp.phi) - M_HALFPI;
+        if (t > PJ_EPS_LAT  ||  lp.lam > 10  ||  lp.lam < -10) {
+            proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
+            return proj_coord_error ();
         }
 
         /* Clamp latitude to -90..90 degree range */
-        if (fabs(t) <= EPS)
-            lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
-        else if (P->geoc)   /* Maybe redundant and never used. */
-            lp.phi = atan(P->rone_es * tan(lp.phi));
-        lp.lam -= P->lam0;    /* compute del lp.lam */
-        if (!P->over)
-            lp.lam = adjlon(lp.lam); /* adjust del longitude */
+        if (lp.phi > M_HALFPI)
+            lp.phi = M_HALFPI;
+        if (lp.phi < -M_HALFPI)
+            lp.phi = -M_HALFPI;
+
+        /* If input latitude is geocentrical, convert to geographical */
+        if (P->geoc)
+            coo = proj_geoc_lat (P, PJ_INV, coo);
+
+        /* Distance from central meridian, taking system zero meridian into account */
+        lp.lam = (lp.lam - P->from_greenwich) - P->lam0;
+
+        /* Ensure longitude is in the -pi:pi range */
+        if (0==P->over)
+            lp.lam = adjlon(lp.lam);
+
+        coo.lp = lp;
     }
 
-    /* Do the transformation */
-    xy = (*P->fwd)(lp, P);
-    if ( proj_errno (P) )
-        return err;
+    return coo;
+}
+
+
+PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo) {
 
     /* Classic proj.4 functions return plane coordinates in units of the semimajor axis */
     if (P->right==PJ_IO_UNITS_CLASSIC) {
-        xy.x *= P->a;
-        xy.y *= P->a;
+        coo.xy.x *= P->a;
+        coo.xy.y *= P->a;
     }
 
     /* Handle false eastings/northings and non-metric linear units */
-    xy.x = P->fr_meter * (xy.x + P->x0);
-    xy.y = P->fr_meter * (xy.y + P->y0);
-    /* z is not scaled since this is handled by vto_meter outside */
+    coo.xyz.x = P->fr_meter  * (coo.xyz.x + P->x0);
+    coo.xyz.y = P->fr_meter  * (coo.xyz.y + P->y0);
+    coo.xyz.z = P->vfr_meter * (coo.xyz.z + P->z0);
 
-    proj_errno_restore (P, last_errno);
-    return xy;
+    return coo;
+}
+
+
+
+XY pj_fwd(LP lp, PJ *P) {
+    PJ_COORD coo = {{0,0,0,0}};
+    coo.lp = lp;
+
+    if (!P->skip_fwd_prepare)
+        coo = pj_fwd_prepare (P, coo);
+    if (HUGE_VAL==coo.v[0])
+        return proj_coord_error ().xy;
+
+    /* Do the transformation, using the lowest dimensional transformer available */
+    if (P->fwd)
+        coo.xy = P->fwd(coo.lp, P);
+    else if (P->fwd3d)
+        coo.xyz = P->fwd3d (coo.lpz, P);
+    else if (P->fwd4d)
+        coo = P->fwd4d (coo, P);
+    else {
+        proj_errno_set (P, EINVAL);
+        return proj_coord_error ().xy;
+    }
+    if (HUGE_VAL==coo.v[0])
+        return proj_coord_error ().xy;
+
+    if (!P->skip_fwd_finalize)
+        coo = pj_fwd_finalize (P, coo);
+    return coo.xy;
+}
+
+
+
+XYZ pj_fwd3d(LPZ lpz, PJ *P) {
+    PJ_COORD coo = {{0,0,0,0}};
+    coo.lpz = lpz;
+
+    if (!P->skip_fwd_prepare)
+        coo = pj_fwd_prepare (P, coo);
+    if (HUGE_VAL==coo.v[0])
+        return proj_coord_error ().xyz;
+
+    /* Do the transformation, using the lowest dimensional transformer feasible */
+    if (P->fwd3d)
+        coo.xyz = P->fwd3d(coo.lpz, P);
+    else if (P->fwd4d)
+        coo = P->fwd4d (coo, P);
+    else if (P->fwd)
+        coo.xy = P->fwd (coo.lp, P);
+    else {
+        proj_errno_set (P, EINVAL);
+        return proj_coord_error ().xyz;
+    }
+    if (HUGE_VAL==coo.v[0])
+        return proj_coord_error ().xyz;
+
+    if (!P->skip_fwd_finalize)
+        coo = pj_fwd_finalize (P, coo);
+    return coo.xyz;
+}
+
+
+
+PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
+    if (!P->skip_fwd_prepare)
+        coo = pj_fwd_prepare (P, coo);
+    if (HUGE_VAL==coo.v[0])
+        return proj_coord_error ();
+
+    /* Call the highest dimensional converter available */
+    if (P->fwd4d)
+        coo = P->fwd4d (coo, P);
+    else if (P->fwd3d)
+        coo.xyz  =  P->fwd3d (coo.lpz, P);
+    else if (P->fwd)
+        coo.xy  =  P->fwd (coo.lp, P);
+    else {
+        proj_errno_set (P, EINVAL);
+        return proj_coord_error ();
+    }
+    if (HUGE_VAL==coo.v[0])
+        return proj_coord_error ();
+
+    if (!P->skip_fwd_finalize)
+        coo = pj_fwd_finalize (P, coo);
+    return coo;
 }

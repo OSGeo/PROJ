@@ -20,7 +20,7 @@
 #  pragma warning (disable: 4706)
 #endif
 
-double wgs84_a = 6378137, wgs84_f = 1/298.257223563; /* WGS84 */
+static const double wgs84_a = 6378137, wgs84_f = 1/298.257223563; /* WGS84 */
 
 static int assertEquals(double x, double y, double d) {
   if (fabs(x - y) <= d)
@@ -29,8 +29,8 @@ static int assertEquals(double x, double y, double d) {
   return 1;
 }
 
-const int ncases = 20;
-double testcases[20][12] = {
+static const int ncases = 20;
+static const double testcases[20][12] = {
   {35.60777, -139.44815, 111.098748429560326,
    -11.17491, -69.95921, 129.289270889708762,
    8935244.5604818305, 80.50729714281974, 6273170.2055303837,
@@ -505,7 +505,7 @@ static int GeodSolve59() {
   geod_inverse(&g, 5, 0.00000000000001, 10, 180, &s12, &azi1, &azi2);
   result += assertEquals(azi1, 0.000000000000035, 1.5e-14);
   result += assertEquals(azi2, 179.99999999999996, 1.5e-14);
-  result += assertEquals(s12, 18345191.174332713, 2.5e-9);
+  result += assertEquals(s12, 18345191.174332713, 5e-9);
   return result;
 }
 

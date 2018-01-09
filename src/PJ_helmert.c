@@ -477,8 +477,14 @@ PJ *TRANSFORMATION(helmert, 0) {
     P->fwd    = helmert_forward;
     P->inv    = helmert_reverse;
 
-    P->left  = PJ_IO_UNITS_METERS;
-    P->right = PJ_IO_UNITS_METERS;
+    /* In most cases, we work on 3D cartesian coordinates */
+    P->left  = PJ_IO_UNITS_CARTESIAN;
+    P->right = PJ_IO_UNITS_CARTESIAN;
+    /* But in the 2D case, the coordinates are projected */
+    if (pj_param_exists (P->params, "theta")) {
+        P->left  = PJ_IO_UNITS_PROJECTED;
+        P->right = PJ_IO_UNITS_PROJECTED;
+    }
 
     /* Translations */
     if (pj_param (P->ctx, P->params, "tx").i)

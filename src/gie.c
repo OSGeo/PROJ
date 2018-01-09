@@ -184,6 +184,7 @@ typedef struct {
     int total_ok, total_ko;
     int grand_ok, grand_ko;
     size_t operation_lineno;
+    size_t dimensions_given, dimensions_given_at_last_accept;
     double tolerance;
     const char *curr_file;
     FILE *fout;
@@ -198,8 +199,6 @@ static const char delim[] = {"--------------------------------------------------
 
 
 #define CMDLEN 250000
-
-int nfiles = 0;
 
 
 static const char usage[] = {
@@ -583,10 +582,13 @@ Attempt to interpret args as a PJ_COORD.
     const char *endp, *prev = args;
     PJ_COORD a = proj_coord (0,0,0,0);
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0, T.dimensions_given = 0;   i < 4;   i++, T.dimensions_given++) {
         double d = proj_strtod (prev,  (char **) &endp);
+
+        /* Break out if there were no more numerals */
         if (prev==endp)
             return i > 1? a: proj_coord_error ();
+
         a.v[i] = d;
         prev = endp;
     }
@@ -603,6 +605,7 @@ Read ("ACCEPT") a 2, 3, or 4 dimensional input coordinate.
     T.a = parse_coord (args);
     if (T.verbosity > 3)
         printf ("#  %s\n", args);
+    T.dimensions_given_at_last_accept = T.dimensions_given;
     return 0;
 }
 
@@ -695,6 +698,19 @@ static int expect_failure_with_errno_message (int expected, int got) {
 }
 
 
+/* For test purposes, we want to call a transformation of the same */
+/* dimensionality as the number of dimensions given in accept */
+static PJ_COORD expect_trans_n_dim (PJ_COORD ci) {
+    if (4==T.dimensions_given_at_last_accept)
+        return proj_trans (T.P, T.dir, ci);
+
+    if (3==T.dimensions_given_at_last_accept)
+        return pj_approx_3D_trans (T.P, T.dir, ci);
+
+    return pj_approx_2D_trans (T.P, T.dir, ci);
+}
+
+
 /*****************************************************************************/
 static int expect (const char *args) {
 /*****************************************************************************
@@ -735,7 +751,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
 
         /* Try to carry out the operation - and expect failure */
         ci = proj_angular_input (T.P, T.dir)? torad_coord (T.a): T.a;
-        co = proj_trans (T.P, T.dir, ci);
+        co = expect_trans_n_dim (ci);
 
         /* Failed to fail? - that's a failure */
         if (co.xyz.x!=HUGE_VAL)
@@ -777,7 +793,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
         printf ("ACCEPTS  %.4f  %.4f  %.4f  %.4f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
 
     /* angular output from proj_trans comes in radians */
-    co = proj_trans (T.P, T.dir, ci);
+    co = expect_trans_n_dim (ci);
     T.b = proj_angular_output (T.P, T.dir)? todeg_coord (co): co;
     if (T.verbosity > 3)
         printf ("GOT      %.4f  %.4f  %.4f  %.4f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
@@ -1316,7 +1332,7 @@ whitespace etc. The block is stored in G->args. Returns 1 on success, 0 otherwis
 
 
 
-char tc32_utm32[] = {
+static const char tc32_utm32[] = {
     " +proj=horner"
     " +ellps=intl"
     " +range=500000"
@@ -1330,7 +1346,7 @@ char tc32_utm32[] = {
 };
 
 
-char sb_utm32[] = {
+static const char sb_utm32[] = {
     " +proj=horner"
     " +ellps=intl"
     " +range=500000"
@@ -1834,34 +1850,6 @@ static int test_time(const char* args, double tol, double t_in, double t_exp) {
     return ret;
 }
 
-static int test_xyz(const char* args, double tol, PJ_COORD in, PJ_COORD exp) {
-    PJ_COORD out = {{0,0,0,0}}, obs_in = {{0,0,0,0}};
-    PJ *P = proj_create(PJ_DEFAULT_CTX, args);
-    int ret = 0;
-
-    if (P == 0)
-        return 5;
-
-    obs_in.xyz = in.xyz;
-    out = proj_trans(P, PJ_FWD, obs_in);
-    if (proj_xyz_dist(out.xyz, exp.xyz) > tol) {
-        printf("exp: %10.10g, %10.10g, %10.10g\n", exp.xyz.x, exp.xyz.y, exp.xyz.z);
-        printf("out: %10.10g, %10.10g, %10.10g\n", out.xyz.x, out.xyz.y, out.xyz.z);
-        ret = 1;
-    }
-
-    out = proj_trans(P, PJ_INV, out);
-    if (proj_xyz_dist(out.xyz, in.xyz) > tol) {
-        printf("exp: %g, %g, %g\n", in.xyz.x, in.xyz.y, in.xyz.z);
-        printf("out: %g, %g, %g\n", out.xyz.x, out.xyz.y, out.xyz.z);
-        ret += 2;
-    }
-    proj_destroy(P);
-    proj_log_level(NULL, 0);
-    return ret;
-}
-
-
 static int pj_unitconvert_selftest (void) {
     int ret = 0;
     char args1[] = "+proj=unitconvert +t_in=decimalyear +t_out=decimalyear";
@@ -1876,23 +1864,14 @@ static int pj_unitconvert_selftest (void) {
     char args4[] = "+proj=unitconvert +t_in=gps_week +t_out=decimalyear";
     double in4 = 1877.71428, exp4 = 2016.0;
 
-    char args5[] = "+proj=unitconvert +xy_in=m +xy_out=dm +z_in=cm +z_out=mm";
-    PJ_COORD in5 = {{55.25, 23.23, 45.5, 0}}, exp5 = {{552.5, 232.3, 455.0, 0}};
-
-    char args6[] = "+proj=unitconvert +xy_in=m +xy_out=m +z_in=m +z_out=m";
-    PJ_COORD in6 = {{12.3, 45.6, 7.89, 0}};
-
-    char args7[] = "+proj=unitconvert +t_in=yyyymmdd +t_out=yyyymmdd";
-    double in7 = 20170131;
+    char args5[] = "+proj=unitconvert +t_in=yyyymmdd +t_out=yyyymmdd";
+    double in5 = 20170131;
 
     ret = test_time(args1, 1e-6, in1, in1);   if (ret) return ret + 10;
     ret = test_time(args2, 1e-6, in2, in2);   if (ret) return ret + 20;
     ret = test_time(args3, 1e-6, in3, in3);   if (ret) return ret + 30;
     ret = test_time(args4, 1e-6, in4, exp4);  if (ret) return ret + 40;
-    ret = test_xyz (args5, 1e-10, in5, exp5); if (ret) return ret + 50;
-    ret = test_xyz (args6, 1e-10, in6, in6);  if (ret) return ret + 50;
-    ret = test_xyz (args6, 1e-10, in6, in6);  if (ret) return ret + 60;
-    ret = test_time(args7, 1e-6, in7, in7);   if (ret) return ret + 70;
+    ret = test_time(args5, 1e-6, in5, in5);   if (ret) return ret + 50;
 
     return 0;
 

@@ -65,7 +65,7 @@ void *pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
 }
 
 LP pj_gauss(projCtx ctx, LP elp, const void *data) {
-    struct GAUSS *en = (struct GAUSS *)data;
+    const struct GAUSS *en = (const struct GAUSS *)data;
     LP slp;
     (void) ctx;
 
@@ -77,7 +77,7 @@ LP pj_gauss(projCtx ctx, LP elp, const void *data) {
 }
 
 LP pj_inv_gauss(projCtx ctx, LP slp, const void *data) {
-    struct GAUSS *en = (struct GAUSS *)data;
+    const struct GAUSS *en = (const struct GAUSS *)data;
     LP elp;
     double num;
     int i;

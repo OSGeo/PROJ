@@ -25,12 +25,14 @@
 #include <proj.h>
 #include "projects.h"
 
+#define EPS10   1e-10
+
 struct pj_opaque {
     double phi1;
     double ctgphi1;
     double sinphi1;
     double cosphi1;
-    double *en;	
+    double *en;
 };
 
 PROJ_HEAD(ccon, "Central Conic")
@@ -38,20 +40,20 @@ PROJ_HEAD(ccon, "Central Conic")
 
 
 
-static XY forward (LP lp, PJ *P) {          
+static XY forward (LP lp, PJ *P) {
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
     double r;
 
     r = Q->ctgphi1 - tan(lp.phi - Q->phi1);
     xy.x = r * sin(lp.lam * Q->sinphi1);
-    xy.y = Q->ctgphi1 - r * cos(lp.lam * Q->sinphi1);	
+    xy.y = Q->ctgphi1 - r * cos(lp.lam * Q->sinphi1);
 
     return xy;
 }
 
 
-static LP inverse (XY xy, PJ *P) {         
+static LP inverse (XY xy, PJ *P) {
     LP lp = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
 
@@ -63,7 +65,7 @@ static LP inverse (XY xy, PJ *P) {
 }
 
 
-static void *destructor (PJ *P, int errlev) {                       
+static void *destructor (PJ *P, int errlev) {
     if (0==P)
         return 0;
 
@@ -84,9 +86,11 @@ PJ *PROJECTION(ccon) {
     P->destructor = destructor;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
+    if (fabs(Q->phi1) < EPS10)
+        return destructor (P, PJD_ERR_LAT1_IS_ZERO);
 
     if (!(Q->en = pj_enfn(P->es)))
-        return pj_default_destructor(P, ENOMEM);
+        return destructor(P, ENOMEM);
 
     Q->sinphi1 = sin(Q->phi1);
     Q->cosphi1 = cos(Q->phi1);
@@ -95,7 +99,7 @@ PJ *PROJECTION(ccon) {
 
     P->inv = inverse;
     P->fwd = forward;
-    
+
     return P;
 }
 

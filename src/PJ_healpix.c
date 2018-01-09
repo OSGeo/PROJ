@@ -64,7 +64,7 @@ typedef struct {
     enum Region {north, south, equatorial} region;
 } CapMap;
 
-double rot[7][2][2] = ROT;
+static const double rot[7][2][2] = ROT;
 
 /**
  * Returns the sign of the double.
@@ -310,7 +310,7 @@ static LP healpix_sphere_inverse(XY xy) {
  * Return the vector sum a + b, where a and b are 2-dimensional vectors.
  * @param ret holds a + b.
  **/
-static void vector_add(double a[2], double b[2], double *ret) {
+static void vector_add(const double a[2], const double b[2], double *ret) {
     int i;
     for(i = 0; i < 2; i++) {
         ret[i] = a[i] + b[i];
@@ -322,7 +322,7 @@ static void vector_add(double a[2], double b[2], double *ret) {
  * Return the vector difference a - b, where a and b are 2-dimensional vectors.
  * @param ret holds a - b.
  **/
-static void vector_sub(double a[2], double b[2], double*ret) {
+static void vector_sub(const double a[2], const double b[2], double*ret) {
     int i;
     for(i = 0; i < 2; i++) {
         ret[i] = a[i] - b[i];
@@ -335,7 +335,7 @@ static void vector_sub(double a[2], double b[2], double*ret) {
  * b is a 2 x 1 matrix.
  * @param ret holds a*b.
  **/
-static void dot_product(double a[2][2], double b[2], double *ret) {
+static void dot_product(const double a[2][2], const double b[2], double *ret) {
     int i, j;
     int length = 2;
     for(i = 0; i < length; i++) {
@@ -453,7 +453,7 @@ static XY combine_caps(double x, double y, int north_square, int south_square,
     double vector[2];
     double v_min_c[2];
     double ret_dot[2];
-    double (*tmpRot)[2];
+    const double (*tmpRot)[2];
     int pole = 0;
 
     CapMap capmap = get_cap(x, y, north_square, south_square, inverse);

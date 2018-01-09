@@ -34,7 +34,7 @@ PROJ_HEAD(nzmg, "New Zealand Map Grid") "\n\tfixed Earth";
 #define SEC5_TO_RAD 0.4848136811095359935899141023
 #define RAD_TO_SEC5 2.062648062470963551564733573
 
-static COMPLEX bf[] = {
+static const COMPLEX bf[] = {
     { .7557853228, 0.0},
     { .249204646,  0.003371507},
     {-.001541739,  0.041058560},
@@ -42,12 +42,12 @@ static COMPLEX bf[] = {
     {-.26623489,  -0.36249218},
     {-.6870983,   -1.1651967} };
 
-static double tphi[] = { 1.5627014243, .5185406398, -.03333098,
-                         -.1052906,   -.0368594,     .007317,
-                          .01220,      .00394,      -.0013 };
+static const double tphi[] = { 1.5627014243, .5185406398, -.03333098,
+                               -.1052906,   -.0368594,     .007317,
+                                .01220,      .00394,      -.0013 };
 
-static double tpsi[] = { .6399175073, -.1358797613, .063294409, -.02526853, .0117879,
-                        -.0055161,     .0026906,   -.001333,     .00067,   -.00034 };
+static const double tpsi[] = { .6399175073, -.1358797613, .063294409, -.02526853, .0117879,
+                              -.0055161,     .0026906,   -.001333,     .00067,   -.00034 };
 
 #define Nbf 5
 #define Ntpsi 9
@@ -57,7 +57,7 @@ static double tpsi[] = { .6399175073, -.1358797613, .063294409, -.02526853, .011
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
     COMPLEX p;
-    double *C;
+    const double *C;
     int i;
 
     lp.phi = (lp.phi - P->phi0) * RAD_TO_SEC5;
@@ -77,7 +77,8 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     LP lp = {0.0,0.0};
     int nn, i;
     COMPLEX p, f, fp, dp;
-    double den, *C;
+    double den;
+    const double *C;
 
     p.r = xy.y;
     p.i = xy.x;

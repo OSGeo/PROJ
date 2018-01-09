@@ -56,6 +56,11 @@ paralist *pj_param_exists (paralist *list, const char *parameter) {
     Determine whether a given parameter exists in a paralist. If it does, return
     a pointer to the corresponding list element - otherwise return 0.
 
+    In support of the pipeline syntax, the search is terminated once a "+step" list
+    element is reached, in which case a 0 is returned, unless the parameter
+    searched for is actually "step", in which case a pointer to the "step" list
+    element is returned.
+
     This function is equivalent to the pj_param (...) call with the "opt" argument
     set to the parameter name preceeeded by a 't'. But by using this one, one avoids
     writing the code allocating memory for a new copy of parameter name, and prepending
@@ -69,9 +74,12 @@ paralist *pj_param_exists (paralist *list, const char *parameter) {
     if (list==0)
         return 0;
 
-    for (next = list; next; next = next->next)
+    for (next = list; next; next = next->next) {
         if (0==strncmp (parameter, next->param, len) && (next->param[len]=='=' || next->param[len]==0))
             return next;
+        if (0==strcmp (parameter, "step"))
+            return 0;
+    }
 
     return 0;
 }
@@ -92,78 +100,82 @@ paralist *pj_param_exists (paralist *list, const char *parameter) {
 /*       `s' - string returned in PROJVALUE.s                           */
 /*       `b' - test for t/T/f/F, return in PROJVALUE.i                  */
 /*                                                                      */
+/*      Search is terminated when "step" is found, in which case        */
+/*      0 is returned, unless "step" was the target searched for.       */
+/*                                                                      */
 /************************************************************************/
 
-    PROJVALUE /* test for presence or get parameter value */
-pj_param(projCtx ctx, paralist *pl, const char *opt) {
+PROJVALUE pj_param (projCtx ctx, paralist *pl, const char *opt) {
 
     int type;
     unsigned l;
-    PROJVALUE value;
+    PROJVALUE value = {0};
 
-    if( ctx == NULL )
+    if ( ctx == NULL )
         ctx = pj_get_default_ctx();
 
     type = *opt++;
-    /* simple linear lookup */
-    l = (int)strlen(opt);
-    while (pl && !(!strncmp(pl->param, opt, l) &&
-      (!pl->param[l] || pl->param[l] == '=')))
-        pl = pl->next;
-    if (type == 't')
+
+    if (0==strchr ("tbirds", type)) {
+        fprintf(stderr, "invalid request to pj_param, fatal\n");
+        exit(1);
+    }
+
+    pl = pj_param_exists (pl, opt);
+    if (type == 't') {
         value.i = pl != 0;
-    else if (pl) {
-        pl->used |= 1;
-        opt = pl->param + l;
-        if (*opt == '=')
-            ++opt;
+        return value;
+    }
+
+    /* Not found */
+    if (0==pl) {
         switch (type) {
-        case 'i':	/* integer input */
-            value.i = atoi(opt);
-            break;
-        case 'd':	/* simple real input */
-            value.f = pj_atof(opt);
-            break;
-        case 'r':	/* degrees input */
-            value.f = dmstor_ctx(ctx, opt, 0);
-            break;
-        case 's':	/* char string */
-                        value.s = (char *) opt;
-            break;
-        case 'b':	/* boolean */
-            switch (*opt) {
-            case 'F': case 'f':
-                value.i = 0;
-                break;
-            case '\0': case 'T': case 't':
-                value.i = 1;
-                break;
-            default:
-                pj_ctx_set_errno(ctx, -8);
-                value.i = 0;
-                break;
-            }
-            break;
-        default:
-bum_type:	/* note: this is an error in parameter, not a user error */
-            fprintf(stderr, "invalid request to pj_param, fatal\n");
-            exit(1);
-        }
-    } else /* not given */
-        switch (type) {
-        case 'b':
-        case 'i':
+        case 'b': case 'i':
             value.i = 0;
-            break;
-        case 'd':
-        case 'r':
+            return value;
+        case 'd': case 'r':
             value.f = 0.;
-            break;
+            return value;
         case 's':
             value.s = 0;
+            return value;
+        }
+    }
+
+    /* Found parameter - now find its value */
+    pl->used |= 1;
+    l = (int) strlen(opt);
+    opt = pl->param + l;
+    if (*opt == '=')
+        ++opt;
+
+    switch (type) {
+    case 'i':    /* integer input */
+        value.i = atoi(opt);
+        break;
+    case 'd':    /* simple real input */
+        value.f = pj_atof(opt);
+        break;
+    case 'r':    /* degrees input */
+        value.f = dmstor_ctx(ctx, opt, 0);
+        break;
+    case 's':    /* char string */
+        value.s = (char *) opt;
+        break;
+    case 'b':    /* boolean */
+        switch (*opt) {
+        case 'F': case 'f':
+            value.i = 0;
+            break;
+        case '\0': case 'T': case 't':
+            value.i = 1;
             break;
         default:
-            goto bum_type;
+            pj_ctx_set_errno (ctx, PJD_ERR_INVALID_BOOLEAN_PARAM);
+            value.i = 0;
+            break;
         }
+        break;
+    }
     return value;
 }
