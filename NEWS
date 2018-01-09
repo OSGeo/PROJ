@@ -1,3 +1,298 @@
+5.0.0 Release Notes
+-------------------
+
+This version of PROJ introduces some significant extensions and
+improvements to (primarily) the geodetic functionality of the system.
+
+The main driver for introducing the new features is the emergence of
+dynamic reference frames, the increasing use of high accuracy GNNS,
+and the related growing demand for accurate coordinate
+transformations.  While older versions of PROJ included some geodetic
+functionality, the new framework lays the foundation for turning PROJ
+into a generic geospatial coordinate transformation engine.
+
+The core of the library is still the well established projection code.
+The new functionality is primarily exposed in a new programming
+interface and a new command line utility, "cct" (for "Coordinate
+Conversion and Transformation").  The old programming interface is
+still available and can - to some extent - use the new geodetic
+transformation features.
+
+The internal architecture has also seen many changes and much
+improvement.  So far, these improvements respect the existing
+programming interface. But the process has revealed a need to simplify
+and reduce the code base, in order to support sustained active
+development.
+
+!!!
+!!! Therefore we have scheduled regular releases over the coming years
+!!! which will gradually remove the old programming interface.
+!!!
+!!! This will cause breaking changes with the next two major version
+!!! releases, which will affect all projects that depend on PROJ
+!!! (cf. section "deprecations" below).
+!!!
+
+The decision to break the existing API has not been easy, but has
+ultimately been deemed necessary to ensure the long term survival of
+the project. Not only by improving the maintainability immensely, but
+also by extending the potential user (and hence developer) community.
+
+The end goal is to deliver a generic coordinate transformation
+software package with a clean and concise code base appealing to
+both users and developers.
+
+
+VERSIONING AND NAMING
+---------------------
+
+For the first time in more than 25 years the major version number of
+the software is changed. The decision to do this is based on the many
+new features and new API. While backwards compatibility remains -
+except in a few rare corner cases - the addition of a new and improved
+programming interface warrants a new major release.
+
+The new major version number unfortunately leaves the project in a bit
+of a conundrum regarding the name. For the majority of the life-time
+of the product it has been known as PROJ.4, but since we have now
+reached version 5 the name is no longer aligned with the version
+number.
+
+Hence we have decided to decouple the name from the version number and
+from this version and onwards the product will simply be called PROJ.
+
+In recognition of the history of the software we are keeping PROJ.4 as
+the *name of the organizing project*. The same project team also
+produces the datum-grid package.
+
+In summary:
+
+o The PROJ.4 project provides the product PROJ, which is now at
+  version 5.0.0.
+
+o The foundational component of PROJ is the library libproj.
+
+o Other PROJ components include the application proj, which provides
+  a command line interface to libproj.
+
+o The PROJ.4 project also distributes the datum-grid package,
+  which at the time of writing is at version 1.6.0.
+
+
+ UPDATES
+ -------
+
+ o Introduced new API in proj.h.
+   - The new API is orthogonal to the existing proj_api.h API and the
+     internally used projects.h API.
+   - The new API adds the ability to transform spatiotemporal (4D)
+     coordinates.
+   - Functions in the new API use the "proj_" namespace.
+   - Data types in the new API use the "PJ_" namespace, with a few
+     historic exceptions such as XY, XYZ, LP and LPZ.
+
+ o Introduced the concept of "transformation pipelines" that makes it
+   possible to do complex geodetic transformations of spatiotemporal
+   coordinates by daisy chaining simple coordinate operations.
+
+ o Introduced cct, the Coordinate Conversion and Transformation
+   application.
+
+ o Introduced gie, the Geospatial Integrity Investigation Environment.
+   - Selftest invoked by -C flag in proj has been removed
+   - Ported approx. 1300 built-in selftests to gie format
+   - Ported approx. 1000 tests from the gigs test framework
+   - Added approx. 200 new tests
+
+ o Adopted terminology from the OGC/ISO-19100 geospatial standards
+   series. Key definitions are:
+   - At the most generic level, a *coordinate operation* is a change
+     of coordinates, based on a one-to-one relationship, from one
+     coordinate reference system to another.
+   - A *transformation* is a coordinate operation in which the two
+     coordinate reference systems are based on different datums, e.g.
+     a change from a global reference frame to a regional frame.
+   - A *conversion* is a coordinate operation in which both
+     coordinate reference systems are based on the same datum,
+     e.g. change of units of coordinates.
+   - A *projection* is a coordinate conversion from an ellipsoidal
+     coordinate system to a plane. Although projections are simply
+     conversions according to the standard, they are treated as
+     separate entities in PROJ as they make up the vast majority
+     of operations in the library.
+
+ o New operations:
+   - The pipeline operator (pipeline)
+   - Transformations:
+     + Helmert transform (helmert)
+     + Horner real and complex polynomial evaluation (horner)
+     + Horizontal gridshift (hgridshift)
+     + Vertical gridshift (vgridshift)
+     + Molodensky transform (molodensky)
+     + Kinematic gridshift with deformation model (deformation)
+   - Conversions:
+     + Unit conversion (unitconvert)
+     + Axis swap (axisswap)
+   - Projections:
+     + Central Conic projection (ccon)
+
+ o Significant documentation updates, including
+   - Overhaul of the structure of the documentation
+   - A better introduction to the use of PROJ
+   - A complete reference to the new proj.h API
+   - a complete rewrite of the section on geodesic calculations
+   - Figures for all projections
+
+ o New "free format" option for operation definitions, which
+   permits separating tokens by whitespace when specifying key/value-
+   pairs, e.g. "proj = merc lat_0 = 45".
+
+ o Added metadata to init-files that can be read with the
+   proj_init_info() function in the new proj.h API.
+
+ o Added ITRF2000, ITRF2008 and ITRF2014 init-files with ITRF
+   transformation parameters, including plate motion model
+   parameters.
+
+ o Added ellipsoid parameters for GSK2011, PZ90 and "danish". The
+   latter is similar to the already supported andrae ellipsoid,
+   but has a slightly different semimajor axis.
+
+ o Added Copenhagen prime meridian.
+
+ o Updated EPSG database to version 9.2.0.
+
+ o Geodesic library updated to version 1.49.1-c.
+
+ o Support for analytical partial derivatives has been removed.
+
+ o Improved performance in Winkel Tripel and Aitoff.
+
+ o Introduced pj_has_inverse() function to proj_api.h. Checks if an
+   operation has an inverse. Use this instead of checking whether
+   P->inv exists, since that can no longer be relied on.
+
+ o Removed support for Windows CE.
+
+ o Removed the VB6 COM interface.
+
+ BUG FIXES
+ ------------
+
+ All bug fix numbers refer to issues indexed at
+ https://github.com/OSGeo/proj.4/issues/
+
+ o Fixed incorrect convergence calculation in Lambert Conformal
+   Conic. #16.
+
+ o Handle ellipsoid parameters correctly when using +nadgrids=@null.
+   #22.
+
+ o Return correct latitude when using negative northings in
+   Transverse Mercator (tmerc). #138.
+
+ o Return correct result at origin in inverse Mod. Stererographic
+   of Alaska. #161.
+
+ o Return correct result at origin in inverse Mod. Stererographic
+   of 48 U.S. #162.
+
+ o Return correct result at origin in inverse Mod. Stererographic
+   of 50 U.S. #163.
+
+ o Return correct result at origin in inverse Lee Oblated
+   Stereographic. #164.
+
+ o Return correct result at origin in inverse Miller Oblated
+   Stereographic. #164.
+
+ o Fixed scaling and wrap-around issues in Oblique Cylindrical
+   Equal Area. #166.
+
+ o Corrected a coefficient error in inverse Transverse Mercator. #174.
+
+ o Respect -r flag when calling proj with -V. #184.
+
+ o Remove multiplication by 2 at the equator error in Stereographic
+   projection. #194.
+
+ o Allow +alpha=0 and +gamma=0 when using Oblique Mercator. #195.
+
+ o Return correct result of inverse Oblique Mercator when alpha is
+   between 90 and 270. #331.
+
+ o Avoid segmentation fault when accessing point outside grid. #369.
+
+ o Avoid segmentation fault on NaN input in Robin inverse. #463.
+
+ o Very verbose use of proj (-V) on Windows is fixed. #484.
+
+ o Fixed memory leak in General Oblique Transformation. #497.
+
+ o Equations for meridian convergence and partial derivatives have
+   been corrected for non-conformal projections. #526.
+
+ o Fixed scaling of cartesian coordiantes in pj_transform(). #726.
+
+ o Additional bug fixes courtesy of Googles OSS-Fuzz program:
+   https://bugs.chromium.org/p/oss-fuzz/issues/list?can=1&q=proj4
+
+
+ DEPRECATIONS
+ ------------
+
+ o The projects.h header and the functions related to it is
+   considered deprecated from version 5.0.0 and onwards.
+
+
+    !!!     PROJECTS.H WILL BE REMOVED FROM THE LIBRARY     !!!
+    !!!                 WITH VERSION 6.0.0                  !!!
+
+ o The nmake build system on Windows will not be supported from
+   version 6.0.0 on onwards. Use CMake instead.
+
+    !!! NMAKE BUILD SYSTEM WILL BE REMOVED FROM THE LIBRARY !!!
+    !!!                 WITH VERSION 6.0.0                  !!!
+
+ o The proj_api.h header and the functions related to it is
+   consided deprecated from version 5.0.0 and onwards.
+
+    !!!     PROJ_API.H WILL BE REMOVED FROM THE LIBRARY     !!!
+    !!!                 WITH VERSION 7.0.0                  !!!
+
+
+ THANKS TO
+ ------------
+
+ Version 5.0.0 is made possible by the following contributors:
+
+    Lukasz Komsta
+    Maxim Churilin
+    edechaux
+    dusanjovic
+    Zoltan Siki
+    Tom Fili
+    Nicolas David
+    Mike Toews
+    Micah Cochran
+    Luke Campbell
+    Ilya Oshchepkov
+    Adam Wulkiewicz
+    Jonas Tittmann
+    Mateusz Loskot
+    Etienne Jacques
+    Bas Couwenberg
+    Elliott Sales de Andrade
+    Charles Karney
+    Aaron Puchert
+    Julien Moquet
+    Charles Karney
+    Howard Butler
+    Even Rouault
+    Thomas Knudsen
+    Kristian Evers
+
+
 4.9.3 Release Notes
 -------------------
 
