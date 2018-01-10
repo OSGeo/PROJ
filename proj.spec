@@ -1,13 +1,13 @@
 %define PACKAGE_NAME proj
-%define PACKAGE_VERSION 4.9.3
-%define PACKAGE_URL http://trac.osgeo.org/proj
+%define PACKAGE_VERSION 5.0.0
+%define PACKAGE_URL http://proj4.org
 %define _prefix /usr
 
-Summary: Cartographic projection software
+Summary: Cartographic projection and geodetic transformation software
 Name: %PACKAGE_NAME
 Version: %PACKAGE_VERSION
 Release: 1
-Source0: proj-4.9.3.tar.gz
+Source0: proj-5.0.0.tar.gz
 License: MIT, Copyright (c) 2000, Frank Warmerdam
 Group: Applications/GIS
 Vendor: Intevation GmbH <http://intevation.net>
@@ -19,12 +19,12 @@ BuildRequires: libtool
 Conflicts: PROJ.4
 
 %description
-This package offers commandline tools and a library for performing respective
-forward and inverse transformation of cartographic data to or from cartesian
-data with a wide range of selectable projection functions.
+PROJ is a generic coordinate transformation software, that transforms
+coordinates from one coordinate reference system (CRS) to another. This
+includes cartographic projections as well as geodetic transformations.
 
 %prep
-%setup -D -n proj-4.9.3
+%setup -D -n proj-5.0.0
 %{_builddir}/%{name}-%{version}/autogen.sh
 %configure
 
@@ -36,7 +36,7 @@ rm -rf $RPM_BUILD_ROOT
 %makeinstall
 
 %clean
-rm -rf %{_builddir}/proj-4.9.3
+rm -rf %{_builddir}/proj-5.0.0
 rm -rf $RPM_BUILD_ROOT
 
 %files
