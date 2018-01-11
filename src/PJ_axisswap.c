@@ -211,19 +211,31 @@ PJ *CONVERSION(axisswap,0) {
             switch(P->axis[i]) {
                 case 'w':
                     Q->sign[i] = -1;
+                    Q->axis[i] = 0;
+                    break;
                 case 'e':
+                    Q->sign[i] = 1;
                     Q->axis[i] = 0;
                     break;
                 case 's':
                     Q->sign[i] = -1;
+                    Q->axis[i] = 1;
+                    break;
                 case 'n':
+                    Q->sign[i] = 1;
                     Q->axis[i] = 1;
                     break;
                 case 'd':
                     Q->sign[i] = -1;
-                case 'u':
                     Q->axis[i] = 2;
                     break;
+                case 'u':
+                    Q->sign[i] = 1;
+                    Q->axis[i] = 2;
+                    break;
+                default:
+                    proj_log_error(P, "axisswap: unknown axis '%c'", P->axis[i]);
+                    return pj_default_destructor(P, PJD_ERR_AXIS);
             }
         }
         n = 3;
