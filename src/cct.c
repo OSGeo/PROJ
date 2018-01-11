@@ -217,9 +217,15 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    /* We have no API call for inverting an operation, so we brute force it. */
-    if (direction==-1)
+    if (direction==-1) {
+        /* fail if an inverse operation is not available */
+        if (!proj_pj_info(P).has_inverse) {
+            fprintf (stderr, "Inverse operation not available\n");
+            return 1;
+        }
+        /* We have no API call for inverting an operation, so we brute force it. */
         P->inverted = !(P->inverted);
+    }
     direction = 1;
 
     /* Allocate input buffer */
