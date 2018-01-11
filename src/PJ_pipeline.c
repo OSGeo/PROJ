@@ -320,6 +320,7 @@ PJ *OPERATION(pipeline,0) {
     int i, nsteps = 0, argc;
     int i_pipeline = -1, i_first_step = -1, i_current_step;
     char **argv, **current_argv;
+    PJ *Q;
 
     P->fwd4d  =  pipeline_forward_4d;
     P->inv4d  =  pipeline_reverse_4d;
@@ -429,12 +430,27 @@ PJ *OPERATION(pipeline,0) {
 
         /* Is this step inverted? */
         for (j = 0;  j < current_argc; j++)
-            if (0==strcmp("inv", current_argv[j]))
+            if (0==strcmp("inv", current_argv[j])) {
                 next_step->inverted = 1;
+            }
 
         P->opaque->pipeline[i+1] = next_step;
 
         proj_log_trace (P, "Pipeline at [%p]:    step at [%p] done", P, next_step);
+    }
+
+    /* determine if an inverse operation is possible */
+    for (i = 1; i <= nsteps; i++) {
+        Q = P->opaque->pipeline[i];
+        if ( ( Q->inverted && (Q->fwd || Q->fwd3d || Q->fwd4d) ) ||
+             ( Q->inv || Q->inv3d || Q->inv4d) ) {
+            continue;
+        } else {
+            P->inv   = 0;
+            P->inv3d = 0;
+            P->inv4d = 0;
+            break;
+        }
     }
 
     proj_log_trace (P, "Pipeline: %d steps built. Determining i/o characteristics", nsteps);
