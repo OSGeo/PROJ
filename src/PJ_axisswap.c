@@ -192,7 +192,7 @@ PJ *CONVERSION(axisswap,0) {
         /* read axes numbers and signs */
         for ( s = order, n = 0; *s != '\0' && n < 4; ) {
             Q->axis[n] = abs(atoi(s))-1;
-            if (Q->axis[n] <= 0 || Q->axis[n] > 3) {
+            if (Q->axis[n] < 0 || Q->axis[n] > 3) {
                 proj_log_error(P, "axisswap: invalid axis '%d'", Q->axis[n]);
                 return pj_default_destructor(P, PJD_ERR_AXIS);
             }
