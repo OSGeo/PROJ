@@ -11,6 +11,11 @@ Grids
 
 Grid files are important for shifting and transforming between datums
 
+PROJ supports CTable2, NTv1 and NTv2 files for horizontal grid corrections and
+the GTX file format for vertical corrections. Details about the formats can be
+found in the GDAL documentation. GDAL reads and writes all formats. Using GDAL
+for construction of new grids is recommended.
+
 US, Canadian, French and New Zealand
 --------------------------------------------------------------------------------
 
