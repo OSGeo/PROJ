@@ -756,7 +756,8 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
         /* If the gridlist has either "@null" or "null" as its only    */
         /* grid we don't change the ellipsoid parameters, since the    */
         /* datum shift to WGS84 was not performed in practice.         */
-        if ( strcmp("@null", srcnadgrids) && strcmp("null", srcnadgrids) ) {
+        if ( srcnadgrids != NULL &&
+             strcmp("@null", srcnadgrids) && strcmp("null", srcnadgrids) ) {
             src_a = SRS_WGS84_SEMIMAJOR;
             src_es = SRS_WGS84_ESQUARED;
         }
@@ -768,7 +769,8 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
         /* If the gridlist has either "@null" or "null" as its only    */
         /* grid we don't change the ellipsoid parameters, since the    */
         /* datum shift to WGS84 will not be performed.                 */
-        if ( strcmp("@null", dstnadgrids) && strcmp("null", dstnadgrids) ) {
+        if ( dstnadgrids != NULL &&
+             strcmp("@null", dstnadgrids) && strcmp("null", dstnadgrids) ) {
             dst_a = SRS_WGS84_SEMIMAJOR;
             dst_es = SRS_WGS84_ESQUARED;
           }
