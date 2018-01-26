@@ -554,6 +554,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     curr = pj_param_exists (start, "proj");
     if (0==curr)
         return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);
+    curr->used = 1;
     name =  curr->param;
     if (strlen (name) < 6)
         return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);
