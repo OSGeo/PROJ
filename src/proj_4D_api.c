@@ -100,7 +100,7 @@ double proj_xyz_dist (XYZ a, XYZ b) {
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
 double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
     int i;
-    PJ_COORD o, u, org;
+    PJ_COORD t, org;
 
     if (0==P)
         return HUGE_VAL;
@@ -111,23 +111,23 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
     }
 
     /* in the first half-step, we generate the output value */
-    u = org = *coo;
-    o = *coo = proj_trans (P, direction, u);
+    org  = *coo;
+    *coo = proj_trans (P, direction, org);
+    t = *coo;
 
-    /* now we take n-1 full steps */
-    for (i = 0;  i < n - 1;  i++) {
-        u = proj_trans (P, -direction, o);
-        o = proj_trans (P,  direction, u);
-    }
+    /* now we take n-1 full steps in inverse direction: We are */
+    /* out of phase due to the half step already taken */
+    for (i = 0;  i < n - 1;  i++)
+        t = proj_trans (P,  direction,  proj_trans (P, -direction, t) );
 
     /* finally, we take the last half-step */
-    u = proj_trans (P, -direction, o);
+    t = proj_trans (P, -direction, t);
 
     /* checking for angular *input* since we do a roundtrip, and end where we begin */
     if (proj_angular_input (P, direction))
-        return proj_lpz_dist (P, org.lpz, u.lpz);
+        return proj_lpz_dist (P, org.lpz, t.lpz);
 
-    return proj_xyz_dist (org.xyz, u.xyz);
+    return proj_xyz_dist (org.xyz, t.xyz);
 }
 
 
