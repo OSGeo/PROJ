@@ -68,7 +68,7 @@ enum pj_io_units {
     PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
     PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
     PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
-    PJ_IO_UNITS_RADIANS   = 4   /* Radians */
+    PJ_IO_UNITS_ANGULAR   = 4   /* Radians */
 };
 enum pj_io_units pj_left (PJ *P);
 enum pj_io_units pj_right (PJ *P);

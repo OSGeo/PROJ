@@ -52,8 +52,8 @@ int proj_angular_input (PJ *P, enum PJ_DIRECTION dir) {
     dir: {PJ_FWD, PJ_INV}
 ******************************************************************************/
     if (PJ_FWD==dir)
-        return pj_left (P)==PJ_IO_UNITS_RADIANS;
-    return pj_right (P)==PJ_IO_UNITS_RADIANS;
+        return pj_left (P)==PJ_IO_UNITS_ANGULAR;
+    return pj_right (P)==PJ_IO_UNITS_ANGULAR;
 }
 
 /*****************************************************************************/

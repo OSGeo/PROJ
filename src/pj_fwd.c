@@ -45,7 +45,7 @@ static PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
     if (HUGE_VAL==coo.v[3] && P->helmert) coo.v[3] = 0.0;
 
     /* Check validity of angular input coordinates */
-    if (INPUT_UNITS==PJ_IO_UNITS_RADIANS) {
+    if (INPUT_UNITS==PJ_IO_UNITS_ANGULAR) {
         double t;
 
         /* check for latitude or longitude over-range */
@@ -130,8 +130,8 @@ static PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo) {
     case PJ_IO_UNITS_WHATEVER:
         break;
 
-    case PJ_IO_UNITS_RADIANS:
-        if (INPUT_UNITS==PJ_IO_UNITS_RADIANS)
+    case PJ_IO_UNITS_ANGULAR:
+        if (INPUT_UNITS==PJ_IO_UNITS_ANGULAR)
             break;
 
         /* adjust longitude to central meridian */

@@ -196,7 +196,7 @@ enum pj_io_units {
     PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
     PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
     PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
-    PJ_IO_UNITS_RADIANS   = 4   /* Radians */
+    PJ_IO_UNITS_ANGULAR   = 4   /* Radians */
 };
 #endif
 #ifndef PROJ_H
@@ -623,7 +623,7 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     P->destructor = pj_default_destructor;                   \
     P->descr = des_##name;                                   \
     P->need_ellps = NEED_ELLPS;                              \
-    P->left  = PJ_IO_UNITS_RADIANS;                          \
+    P->left  = PJ_IO_UNITS_ANGULAR;                          \
     P->right = PJ_IO_UNITS_CLASSIC;                          \
     return P;                                                \
 }                                                            \

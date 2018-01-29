@@ -48,8 +48,8 @@ static PJ *CONVERSION(geoc, 1) {
     P->inv4d = inverse;
     P->fwd4d = forward;
 
-    P->left   =  PJ_IO_UNITS_RADIANS;
-    P->right  =  PJ_IO_UNITS_RADIANS;
+    P->left   =  PJ_IO_UNITS_ANGULAR;
+    P->right  =  PJ_IO_UNITS_ANGULAR;
 
     P->is_latlong = 1;
     return P;

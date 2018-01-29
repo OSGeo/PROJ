@@ -152,12 +152,12 @@ static void process(FILE *fid) {
             }
         } else {    /* x-y or decimal degree ascii output, scale if warranted by output units */
             if (inverse) {
-                if (Proj->left == PJ_IO_UNITS_RADIANS) {
+                if (Proj->left == PJ_IO_UNITS_ANGULAR) {
                     data.uv.v *= RAD_TO_DEG;
                     data.uv.u *= RAD_TO_DEG;
                 }
             } else {
-                if (Proj->right == PJ_IO_UNITS_RADIANS) {
+                if (Proj->right == PJ_IO_UNITS_ANGULAR) {
                     data.uv.v *= RAD_TO_DEG;
                     data.uv.u *= RAD_TO_DEG;
                 }
@@ -262,7 +262,7 @@ static void vprocess(FILE *fid) {
         }
 
         /* apply rad->deg scaling in case the output from a pipeline has degrees as units */
-        if (!inverse && Proj->right == PJ_IO_UNITS_RADIANS) {
+        if (!inverse && Proj->right == PJ_IO_UNITS_ANGULAR) {
             dat_xy.x *= RAD_TO_DEG;
             dat_xy.y *= RAD_TO_DEG;
         }

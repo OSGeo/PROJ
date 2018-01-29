@@ -98,8 +98,8 @@ static PJ *latlong_setup (PJ *P) {
     P->fwd3d = latlong_forward_3d;
     P->inv4d = latlong_inverse_4d;
     P->fwd4d = latlong_forward_4d;
-    P->left = PJ_IO_UNITS_RADIANS;
-    P->right = PJ_IO_UNITS_RADIANS;
+    P->left = PJ_IO_UNITS_ANGULAR;
+    P->right = PJ_IO_UNITS_ANGULAR;
     return P;
 }
 

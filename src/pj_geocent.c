@@ -54,7 +54,7 @@ PJ *PROJECTION(geocent) {
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
-    P->left = PJ_IO_UNITS_RADIANS;
+    P->left = PJ_IO_UNITS_ANGULAR;
     P->right = PJ_IO_UNITS_CARTESIAN;
 
     return P;

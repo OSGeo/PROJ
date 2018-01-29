@@ -49,7 +49,7 @@ static PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
         coo = proj_trans (P->axisswap, PJ_INV, coo);
 
     /* Check validity of angular input coordinates */
-    if (INPUT_UNITS==PJ_IO_UNITS_RADIANS) {
+    if (INPUT_UNITS==PJ_IO_UNITS_ANGULAR) {
         double t;
 
         /* check for latitude or longitude over-range */
@@ -120,7 +120,7 @@ static PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
         coo.xyz.x *= P->ra;
         coo.xyz.y *= P->ra;
         return coo;
-    /* Silence some compiler warnings about PJ_IO_UNITS_RADIANS not handled */
+    /* Silence some compiler warnings about PJ_IO_UNITS_ANGULAR not handled */
     default:
         break;
     }
@@ -137,9 +137,9 @@ static PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo) {
         return proj_coord_error ();
     }
 
-    if (OUTPUT_UNITS==PJ_IO_UNITS_RADIANS) {
+    if (OUTPUT_UNITS==PJ_IO_UNITS_ANGULAR) {
 
-        if (INPUT_UNITS!=PJ_IO_UNITS_RADIANS) {
+        if (INPUT_UNITS!=PJ_IO_UNITS_ANGULAR) {
             /* Distance from central meridian, taking system zero meridian into account */
             coo.lp.lam = coo.lp.lam + P->from_greenwich + P->lam0;
 

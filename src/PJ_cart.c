@@ -213,7 +213,7 @@ PJ *CONVERSION(cart,1) {
     P->inv3d  =  geodetic;
     P->fwd    =  cart_forward;
     P->inv    =  cart_reverse;
-    P->left   =  PJ_IO_UNITS_RADIANS;
+    P->left   =  PJ_IO_UNITS_ANGULAR;
     P->right  =  PJ_IO_UNITS_CARTESIAN;
     return P;
 }

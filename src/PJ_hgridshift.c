@@ -54,8 +54,8 @@ PJ *TRANSFORMATION(hgridshift,0) {
     P->fwd    = 0;
     P->inv    = 0;
 
-    P->left  = PJ_IO_UNITS_RADIANS;
-    P->right = PJ_IO_UNITS_RADIANS;
+    P->left  = PJ_IO_UNITS_ANGULAR;
+    P->right = PJ_IO_UNITS_ANGULAR;
 
     if (0==pj_param(P->ctx, P->params, "tgrids").i) {
         proj_log_error(P, "hgridshift: +grids parameter missing.");
