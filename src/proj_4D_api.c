@@ -696,9 +696,7 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
     pj_strlcpy(info.definition, &def[1], sizeof(info.definition)); /* def includes a leading space */
     pj_dealloc(def);
 
-    /* this does not take into account that a pipeline potentially does not */
-    /* have an inverse.                                                     */
-    info.has_inverse = (P->inv != 0 || P->inv3d != 0 || P->inv4d != 0);
+    info.has_inverse = pj_has_inverse(P);
 
     return info;
 }

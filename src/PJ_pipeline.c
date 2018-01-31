@@ -454,8 +454,7 @@ PJ *OPERATION(pipeline,0) {
     /* determine if an inverse operation is possible */
     for (i = 1; i <= nsteps; i++) {
         PJ *Q = P->opaque->pipeline[i];
-        if ( ( Q->inverted && (Q->fwd || Q->fwd3d || Q->fwd4d) ) ||
-             ( Q->inv || Q->inv3d || Q->inv4d) ) {
+        if ( pj_has_inverse(Q) ) {
             continue;
         } else {
             P->inv   = 0;
