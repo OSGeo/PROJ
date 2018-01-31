@@ -119,7 +119,14 @@ chained calls starting out with a call to its 3D interface.
     return proj_coord_error ();
 }
 
-
+/**************************************************************************************/
+int pj_has_inverse(PJ *P) {
+/***************************************************************************************
+Check if a a PJ has an inverse.
+***************************************************************************************/
+    return ( (P->inverted && (P->fwd || P->fwd3d || P->fwd4d) ) ||
+             ( P->inv || P->inv3d || P->inv4d) );
+}
 
 
 /* Move P to a new context - or to the default context if 0 is specified */

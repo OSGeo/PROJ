@@ -155,6 +155,7 @@ projPJ pj_init_ctx( projCtx, int, char ** );
 projPJ pj_init_plus_ctx( projCtx, const char * );
 char *pj_get_def(projPJ, int);
 projPJ pj_latlong_from_proj( projPJ );
+int pj_has_inverse(projPJ);
 
 
 void *pj_malloc(size_t);

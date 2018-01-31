@@ -154,3 +154,4 @@ EXPORTS
 
     pj_approx_2D_trans             @138
     pj_approx_3D_trans             @139
+    pj_has_inverse                 @140
