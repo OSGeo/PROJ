@@ -97,14 +97,6 @@ typedef long pj_int32;
 extern double hypot(double, double);
 #endif
 
-#ifdef _WIN32_WCE
-#  include <wce_stdlib.h>
-#  include <wce_stdio.h>
-#  define rewind wceex_rewind
-#  define getenv wceex_getenv
-#  define hypot _hypot
-#endif
-
 /* If we still haven't got M_PI*, we rely on our own defines.
  * For example, this is necessary when compiling with gcc and
  * the -ansi flag.
@@ -136,11 +128,11 @@ extern double hypot(double, double);
 #endif
 
 /* Use WIN32 as a standard windows 32 bit declaration */
-#if defined(_WIN32) && !defined(WIN32) && !defined(_WIN32_WCE)
+#if defined(_WIN32) && !defined(WIN32)
 #  define WIN32
 #endif
 
-#if defined(_WINDOWS) && !defined(WIN32) && !defined(_WIN32_WCE)
+#if defined(_WINDOWS) && !defined(WIN32)
 #  define WIN32
 #endif
 
