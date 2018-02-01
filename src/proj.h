@@ -375,7 +375,7 @@ double proj_torad (double angle_in_degrees);
 double proj_todeg (double angle_in_radians);
 
 /* Geographical to geocentric latitude - another of the "simple, but useful" */
-PJ_COORD proj_geoc_lat (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
+PJ_COORD proj_geocentric_latitude (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 
 double proj_dmstor(const char *is, char **rs);
 char*  proj_rtodms(char *s, double r, int pos, int neg);

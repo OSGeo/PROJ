@@ -47,7 +47,7 @@ int pj_factors(LP lp, const PJ *P, double h, struct FACTORS *fac) {
 
     /* If input latitudes are geocentric, convert to geographic */
     if (P->geoc)
-        lp = proj_geoc_lat (P, PJ_INV, coo).lp;
+        lp = proj_geocentric_latitude (P, PJ_INV, coo).lp;
 
     /* If latitude + one step overshoots the pole, move it slightly inside, */
     /* so the numerical derivative still exists */
