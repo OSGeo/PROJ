@@ -703,7 +703,6 @@ paralist *pj_mkparam(char *);
 paralist *pj_mkparam_ws (char *str);
 
 
-int pj_ellipsoid (PJ *);
 int pj_ell_set(projCtx ctx, paralist *, double *, double *);
 int pj_datum_set(projCtx,paralist *, PJ *);
 int pj_prime_meridian_set(paralist *, PJ *);
