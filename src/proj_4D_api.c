@@ -940,11 +940,11 @@ PJ_FACTORS proj_factors(PJ *P, LP lp) {
     Characteristics include meridian, parallel and areal scales, angular
     distortion, meridian/parallel, meridian convergence and scale error.
 
-    returns PJ_FACTORS. If unsuccessfull error number is set and the returned
-    struct contains NULL data.
+    returns PJ_FACTORS. If unsuccessfull, error number is set and the
+    struct returned contains NULL data.
 
 ******************************************************************************/
-    PJ_FACTORS factors = {0,0,0, 0,0,0, 0,0};
+    PJ_FACTORS factors = {0,0,0,  0,0,0,  0,0,  0,0,0,0};
     struct FACTORS f;
 
     if (0==P)
@@ -963,6 +963,12 @@ PJ_FACTORS proj_factors(PJ *P, LP lp) {
 
     factors.tissot_semimajor  =  f.a;
     factors.tissot_semiminor  =  f.b;
+
+    /* Raw derivatives, for completeness's sake */
+    factors.dx_dlam = f.der.x_l;
+    factors.dx_dphi = f.der.x_p;
+    factors.dy_dlam = f.der.y_l;
+    factors.dy_dphi = f.der.y_p;
 
     return factors;
 }
