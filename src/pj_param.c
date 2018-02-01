@@ -75,8 +75,10 @@ paralist *pj_param_exists (paralist *list, const char *parameter) {
         return 0;
 
     for (next = list; next; next = next->next) {
-        if (0==strncmp (parameter, next->param, len) && (next->param[len]=='=' || next->param[len]==0))
+        if (0==strncmp (parameter, next->param, len) && (next->param[len]=='=' || next->param[len]==0)) {
+            next->used = 1;
             return next;
+        }
         if (0==strcmp (parameter, "step"))
             return 0;
     }
