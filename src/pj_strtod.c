@@ -75,7 +75,7 @@ double pj_atof( const char* nptr )
 static char* pj_replace_point_by_locale_point(const char* pszNumber, char point,
                                               char* pszWorkBuffer)
 {
-#if !defined(HAVE_LOCALECONV) || defined(_WIN32_WCE)
+#if !defined(HAVE_LOCALECONV)
 
 #if defined(_MSC_VER)  /* Visual C++ */
 #pragma message("localeconv not available")

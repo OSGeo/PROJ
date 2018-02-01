@@ -118,8 +118,6 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
     static const char dir_chars[] = "/";
 #endif
 
-#ifndef _WIN32_WCE
-
     if( out_full_filename != NULL && out_full_filename_size > 0 )
         out_full_filename[0] = '\0';
 
@@ -205,9 +203,6 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
             fid == NULL ? "failed" : "succeeded" );
 
     return(fid);
-#else
-    return NULL;
-#endif /* _WIN32_WCE */
 }
 
 /************************************************************************/
