@@ -531,9 +531,9 @@ Various
     :returns: :c:type:`char*` Pointer to output buffer (same as :c:data:`s`)
 
 
-.. c:function:: PJ_COORD proj_geoc_lat(const PJ *P, PJ_DIRECTION direction, PJ_COORD coo)
+.. c:function:: PJ_COORD proj_geocentric_latitude(const PJ *P, PJ_DIRECTION direction, PJ_COORD coo)
 
-    Convert geographical to geocentric latitude.
+    Convert from geographical latitude to geocentric latitude.
 
     :param `P`: Transformation object
     :type `P`: const PJ*
