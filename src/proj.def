@@ -90,70 +90,65 @@ EXPORTS
     geod_polygon_clear              @88
 
     pj_find_file                    @89
+    pj_chomp                        @90
+    pj_shrink                       @91
+    pj_approx_2D_trans              @92
+    pj_approx_3D_trans              @93
+    pj_has_inverse                  @94
+    pj_param_exists                 @95
 
-    proj_create                     @90
-    proj_create_argv                @91
-    proj_create_crs_to_crs          @92
-    proj_destroy                    @93
+    proj_create                     @96
+    proj_create_argv                @97
+    proj_create_crs_to_crs          @98
+    proj_destroy                    @99
 
-    proj_trans                      @94
-    proj_trans_array                @95
-    proj_trans_generic              @96
-    proj_roundtrip                  @97
+    proj_trans                     @100
+    proj_trans_array               @101
+    proj_trans_generic             @102
+    proj_roundtrip                 @103
 
-    proj_coord                      @98
-    proj_coord_error                @99
+    proj_coord                     @104
+    proj_coord_error               @105
 
-    proj_errno                     @100
-    proj_errno_set                 @101
-    proj_errno_reset               @102
-    proj_errno_restore             @103
-    proj_context_errno_set         @104
+    proj_errno                     @106
+    proj_errno_set                 @107
+    proj_errno_reset               @108
+    proj_errno_restore             @109
+    proj_context_errno_set         @110
 
-    proj_context_create            @105
-    proj_context_set               @106
-    proj_context_inherit           @107
-    proj_context_destroy           @108
+    proj_context_create            @111
+    proj_context_set               @112
+    proj_context_inherit           @113
+    proj_context_destroy           @114
 
-    proj_lp_dist                   @109
-    proj_lpz_dist                  @110
-    proj_xy_dist                   @111
-    proj_xyz_dist                  @112
+    proj_lp_dist                   @115
+    proj_lpz_dist                  @116
+    proj_xy_dist                   @117
+    proj_xyz_dist                  @118
 
-    proj_log_level                 @113
-    proj_log_func                  @114
-    proj_log_error                 @115
-    proj_log_debug                 @116
-    proj_log_trace                 @117
+    proj_log_level                 @119
+    proj_log_func                  @120
+    proj_log_error                 @121
+    proj_log_debug                 @122
+    proj_log_trace                 @123
 
-    proj_info                      @118
-    proj_pj_info                   @119
-    proj_grid_info                 @120
-    proj_init_info                 @121
+    proj_info                      @124
+    proj_pj_info                   @125
+    proj_grid_info                 @126
+    proj_init_info                 @127
 
-    proj_torad                     @122
-    proj_todeg                     @123
-    proj_geoc_lat                  @124
-    proj_rtodms                    @125
-    proj_dmstor                    @126
+    proj_torad                     @128
+    proj_todeg                     @129
+    proj_geoc_lat                  @130
+    proj_rtodms                    @131
+    proj_dmstor                    @132
 
-    proj_factors                   @127
+    proj_factors                   @133
 
-    proj_list_operations           @128
-    proj_list_ellps                @129
-    proj_list_units                @130
-    proj_list_prime_meridians      @131
+    proj_list_operations           @134
+    proj_list_ellps                @135
+    proj_list_units                @136
+    proj_list_prime_meridians      @137
 
-    proj_angular_input             @132
-    proj_angular_output            @133
-
-    pj_ellipsoid                   @134
-    pj_calc_ellipsoid_params       @135
-    pj_chomp                       @136
-    pj_shrink                      @137
-
-    pj_approx_2D_trans             @138
-    pj_approx_3D_trans             @139
-    pj_has_inverse                 @140
-    pj_param_exists                @141
-
+    proj_angular_input             @138
+    proj_angular_output            @139

@@ -115,6 +115,7 @@ void proj_log_debug (PJ *P, const char *fmt, ...);
 void proj_log_trace (PJ *P, const char *fmt, ...);
 void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log);
 
+int pj_ellipsoid (PJ *);
 void pj_inherit_ellipsoid_def (const PJ *src, PJ *dst);
 void pj_erase_ellipsoid_def (PJ *P);
 int pj_calc_ellipsoid_params (PJ *P, double a, double es);
