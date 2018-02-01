@@ -63,7 +63,7 @@ static PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
 
         /* If input latitude is geocentrical, convert to geographical */
         if (P->geoc)
-            coo = proj_geoc_lat (P, PJ_INV, coo);
+            coo = proj_geocentric_latitude (P, PJ_INV, coo);
 
         /* Ensure longitude is in the -pi:pi range */
         if (0==P->over)
@@ -150,7 +150,7 @@ static PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo) {
 
         /* If input latitude was geocentrical, convert back to geocentrical */
         if (P->geoc)
-            coo = proj_geoc_lat (P, PJ_FWD, coo);
+            coo = proj_geocentric_latitude (P, PJ_FWD, coo);
 
 
         /* Distance from central meridian, taking system zero meridian into account */

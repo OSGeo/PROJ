@@ -342,7 +342,7 @@ size_t proj_trans_generic (
 
 
 /*************************************************************************************/
-PJ_COORD proj_geoc_lat (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+PJ_COORD proj_geocentric_latitude (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
 /**************************************************************************************
     Convert geographical latitude to geocentric (or the other way round if
     direction = PJ_INV)

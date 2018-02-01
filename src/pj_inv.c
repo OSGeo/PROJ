@@ -67,7 +67,7 @@ static PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
 
         /* If input latitude is geocentrical, convert to geographical */
         if (P->geoc)
-            coo = proj_geoc_lat (P, PJ_INV, coo);
+            coo = proj_geocentric_latitude (P, PJ_INV, coo);
 
         /* Distance from central meridian, taking system zero meridian into account */
         coo.lp.lam = (coo.lp.lam + P->from_greenwich) - P->lam0;
@@ -160,7 +160,7 @@ static PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo) {
 
         /* If input latitude was geocentrical, convert back to geocentrical */
         if (P->geoc)
-            coo = proj_geoc_lat (P, PJ_FWD, coo);
+            coo = proj_geocentric_latitude (P, PJ_FWD, coo);
     }
 
     return coo;
