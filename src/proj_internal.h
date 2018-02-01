@@ -68,7 +68,7 @@ enum pj_io_units {
     PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
     PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
     PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
-    PJ_IO_UNITS_RADIANS   = 4   /* Radians */
+    PJ_IO_UNITS_ANGULAR   = 4   /* Radians */
 };
 enum pj_io_units pj_left (PJ *P);
 enum pj_io_units pj_right (PJ *P);
@@ -84,10 +84,6 @@ void proj_context_inherit (PJ *parent, PJ *child);
 PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P);
 PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
 
-PJ_COORD pj_fwd_prepare  (PJ *P, PJ_COORD coo);
-PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo);
-PJ_COORD pj_inv_prepare  (PJ *P, PJ_COORD coo);
-PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo);
 PJ_COORD pj_approx_2D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 PJ_COORD pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 

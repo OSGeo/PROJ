@@ -52,8 +52,8 @@ int proj_angular_input (PJ *P, enum PJ_DIRECTION dir) {
     dir: {PJ_FWD, PJ_INV}
 ******************************************************************************/
     if (PJ_FWD==dir)
-        return pj_left (P)==PJ_IO_UNITS_RADIANS;
-    return pj_right (P)==PJ_IO_UNITS_RADIANS;
+        return pj_left (P)==PJ_IO_UNITS_ANGULAR;
+    return pj_right (P)==PJ_IO_UNITS_ANGULAR;
 }
 
 /*****************************************************************************/
@@ -100,7 +100,7 @@ double proj_xyz_dist (XYZ a, XYZ b) {
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
 double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
     int i;
-    PJ_COORD o, u, org;
+    PJ_COORD t, org;
 
     if (0==P)
         return HUGE_VAL;
@@ -111,23 +111,23 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
     }
 
     /* in the first half-step, we generate the output value */
-    u = org = *coo;
-    o = *coo = proj_trans (P, direction, u);
+    org  = *coo;
+    *coo = proj_trans (P, direction, org);
+    t = *coo;
 
-    /* now we take n-1 full steps */
-    for (i = 0;  i < n - 1;  i++) {
-        u = proj_trans (P, -direction, o);
-        o = proj_trans (P,  direction, u);
-    }
+    /* now we take n-1 full steps in inverse direction: We are */
+    /* out of phase due to the half step already taken */
+    for (i = 0;  i < n - 1;  i++)
+        t = proj_trans (P,  direction,  proj_trans (P, -direction, t) );
 
     /* finally, we take the last half-step */
-    u = proj_trans (P, -direction, o);
+    t = proj_trans (P, -direction, t);
 
     /* checking for angular *input* since we do a roundtrip, and end where we begin */
     if (proj_angular_input (P, direction))
-        return proj_lpz_dist (P, org.lpz, u.lpz);
+        return proj_lpz_dist (P, org.lpz, t.lpz);
 
-    return proj_xyz_dist (org.xyz, u.xyz);
+    return proj_xyz_dist (org.xyz, t.xyz);
 }
 
 
@@ -380,7 +380,114 @@ char*  proj_rtodms(char *s, double r, int pos, int neg) {
     return rtodms(s, r, pos, neg);
 }
 
+/*************************************************************************************/
+static PJ* skip_prep_fin(PJ *P) {
+/**************************************************************************************
+Skip prepare and finalize function for the various "helper operations" added to P when
+in cs2cs compatibility mode.
+**************************************************************************************/
+    P->skip_fwd_prepare  = 1;
+    P->skip_fwd_finalize = 1;
+    P->skip_inv_prepare  = 1;
+    P->skip_inv_finalize = 1;
+    return P;
+}
 
+/*************************************************************************************/
+static int pj_cs2cs_emulation_setup (PJ *P) {
+/**************************************************************************************
+If any cs2cs style modifiers are given (axis=..., towgs84=..., ) create the 4D API
+equivalent operations, so the preparation and finalization steps in the pj_inv/pj_fwd
+invocators can emulate the behaviour of pj_transform and the cs2cs app.
+**************************************************************************************/
+    PJ *Q;
+    paralist *p;
+    char def[1000];
+    if (0==P)
+        return 0;
+
+    /* Don't recurse when calling proj_create (which calls us back) */
+    if (pj_param_exists (P->params, "break_cs2cs_recursion"))
+        return 1;
+
+    /* Swap axes? */
+    p = pj_param_exists (P->params, "axis");
+
+    /* Don't axisswap if data are already in "enu" order */
+    if (p && (0!=strcmp ("enu", p->param))) {
+        sprintf (def, "break_cs2cs_recursion     proj=axisswap  axis=%s", P->axis);
+        Q = proj_create (P->ctx, def);
+        if (0==Q)
+            return 0;
+        P->axisswap = skip_prep_fin(Q);
+    }
+
+    /* Geoid grid(s) given? */
+    p = pj_param_exists (P->params, "geoidgrids");
+    if (p  &&  strlen (p->param) > strlen ("geoidgrids=")) {
+        char *gridnames = p->param + strlen ("geoidgrids=");
+        sprintf (def, "break_cs2cs_recursion     proj=vgridshift  grids=%s", gridnames);
+        Q = proj_create (P->ctx, def);
+        if (0==Q)
+            return 0;
+        P->vgridshift = skip_prep_fin(Q);
+    }
+
+    /* Datum shift grid(s) given? */
+    p = pj_param_exists (P->params, "nadgrids");
+    if (p  &&  strlen (p->param) > strlen ("nadgrids=")) {
+        char *gridnames = p->param + strlen ("nadgrids=");
+        sprintf (def, "break_cs2cs_recursion     proj=hgridshift  grids=%s", gridnames);
+        Q = proj_create (P->ctx, def);
+        if (0==Q)
+            return 0;
+        P->hgridshift = skip_prep_fin(Q);
+    }
+
+    /* We ignore helmert if we have grid shift */
+    p = P->hgridshift ? 0 : pj_param_exists (P->params, "towgs84");
+    while (p) {
+        char *s = p->param;
+        double *d = P->datum_params;
+        size_t n = strlen (s);
+
+        /* We ignore null helmert shifts (common in auto-translated resource files, e.g. epsg) */
+        if (0==d[0] && 0==d[1] && 0==d[2] && 0==d[3] && 0==d[4] && 0==d[5] && 0==d[6])
+            break;
+
+        if (n > 900)
+            return 0;
+        if (n <= 8) /* 8==strlen ("towgs84=") */
+            return 0;
+        sprintf (def, "break_cs2cs_recursion     proj=helmert %s", s);
+        Q = proj_create (P->ctx, def);
+        if (0==Q)
+            return 0;
+        P->helmert = skip_prep_fin(Q);
+
+        break;
+    }
+
+    /* We also need cartesian/geographical transformations if we are working in */
+    /* geocentric/cartesian space or we need to do a Helmert transform.         */
+    if (P->is_geocent || P->helmert) {
+        char *wgs84 = "ellps=WGS84";
+        sprintf (def, "break_cs2cs_recursion     proj=cart");
+        Q = proj_create (P->ctx, def);
+        if (0==Q)
+            return 0;
+        pj_inherit_ellipsoid_def(P, Q);
+        P->cart = skip_prep_fin(Q);
+
+        sprintf (def, "break_cs2cs_recursion     proj=cart  %s", wgs84);
+        Q = proj_create (P->ctx, def);
+        if (0==Q)
+            return 0;
+        P->cart_wgs84 = skip_prep_fin(Q);
+    }
+
+    return 1;
+}
 
 
 /*************************************************************************************/
@@ -394,9 +501,10 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     It may even use free formatting "proj  =  utm;  zone  =32  ellps= GRS80".
     Note that the semicolon separator is allowed, but not required.
 **************************************************************************************/
-    PJ   *P;
-    char *args, **argv;
+    PJ    *P;
+    char  *args, **argv;
     size_t argc, n;
+    int    ret;
 
     if (0==ctx)
         ctx = pj_get_default_ctx ();
@@ -421,6 +529,12 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
 
     pj_dealloc (argv);
     pj_dealloc (args);
+
+    /* Support cs2cs-style modifiers */
+    ret = pj_cs2cs_emulation_setup  (P);
+    if (0==ret)
+        return proj_destroy (P);
+
     return P;
 }
 
@@ -449,6 +563,7 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
         return 0;
 
     P = proj_create (ctx, c);
+
     pj_dealloc ((char *) c);
     return P;
 }

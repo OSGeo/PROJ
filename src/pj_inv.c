@@ -32,46 +32,131 @@
 #include "proj_internal.h"
 #include "projects.h"
 
+#define INPUT_UNITS  P->right
+#define OUTPUT_UNITS P->left
 
-
-PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
+static PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
     if (coo.xyz.x == HUGE_VAL) {
         proj_errno_set (P, PJD_ERR_INVALID_X_OR_Y);
         return proj_coord_error ();
     }
 
-    /* de-scale and de-offset */
-    coo.xyz.x = (coo.xyz.x * P->to_meter  - P->x0);
-    coo.xyz.y = (coo.xyz.y * P->to_meter  - P->y0);
-    coo.xyz.z = (coo.xyz.z * P->vto_meter - P->z0);
+    /* The helmert datum shift will choke unless it gets a sensible 4D coordinate */
+    if (HUGE_VAL==coo.v[2] && P->helmert) coo.v[2] = 0.0;
+    if (HUGE_VAL==coo.v[3] && P->helmert) coo.v[3] = 0.0;
 
-    /* Classic proj.4 functions expect plane coordinates in units of the semimajor axis  */
-    /* Multiplying by ra, rather than dividing by a because the CALCOFI projection       */
-    /* stomps on a and hence (apparently) depends on this to roundtrip correctly         */
-    /* (CALCOFI avoids further scaling by stomping - a better solution must be possible) */
-    if (P->right==PJ_IO_UNITS_CLASSIC) {
-        coo.xyz.x *= P->ra;
-        coo.xyz.y *= P->ra;
+    if (P->axisswap)
+        coo = proj_trans (P->axisswap, PJ_INV, coo);
+
+    /* Check validity of angular input coordinates */
+    if (INPUT_UNITS==PJ_IO_UNITS_ANGULAR) {
+        double t;
+
+        /* check for latitude or longitude over-range */
+        t = (coo.lp.phi < 0  ?  -coo.lp.phi  :  coo.lp.phi) - M_HALFPI;
+        if (t > PJ_EPS_LAT  ||  coo.lp.lam > 10  ||  coo.lp.lam < -10) {
+            proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
+            return proj_coord_error ();
+        }
+
+        /* Clamp latitude to -90..90 degree range */
+        if (coo.lp.phi > M_HALFPI)
+            coo.lp.phi = M_HALFPI;
+        if (coo.lp.phi < -M_HALFPI)
+            coo.lp.phi = -M_HALFPI;
+
+        /* If input latitude is geocentrical, convert to geographical */
+        if (P->geoc)
+            coo = proj_geoc_lat (P, PJ_INV, coo);
+
+        /* Distance from central meridian, taking system zero meridian into account */
+        coo.lp.lam = (coo.lp.lam + P->from_greenwich) - P->lam0;
+
+        /* Ensure longitude is in the -pi:pi range */
+        if (0==P->over)
+            coo.lp.lam = adjlon(coo.lp.lam);
+
+        if (P->hgridshift)
+            coo = proj_trans (P->hgridshift, PJ_FWD, coo);
+        else if (P->helmert) {
+            coo = proj_trans (P->cart,       PJ_FWD, coo); /* Go cartesian in local frame */
+            coo = proj_trans (P->helmert,    PJ_INV, coo); /* Step into WGS84 */
+            coo = proj_trans (P->cart_wgs84, PJ_INV, coo); /* Go back to angular using WGS84 ellps */
+        }
+        if (P->vgridshift)
+            coo = proj_trans (P->vgridshift, PJ_INV, coo);
+        return coo;
     }
 
+    /* Handle remaining possible input types */
+    switch (INPUT_UNITS) {
+    case PJ_IO_UNITS_WHATEVER:
+        return coo;
+
+    /* de-scale and de-offset */
+    case PJ_IO_UNITS_CARTESIAN:
+        coo.xyz.x = P->to_meter * coo.xyz.x - P->x0;
+        coo.xyz.y = P->to_meter * coo.xyz.y - P->y0;
+        coo.xyz.z = P->to_meter * coo.xyz.z - P->z0;
+
+        if (P->is_geocent) {
+            coo = proj_trans (P->cart, PJ_INV, coo);
+        }
+
+        return coo;
+
+    case PJ_IO_UNITS_PROJECTED:
+    case PJ_IO_UNITS_CLASSIC:
+        coo.xyz.x = P->to_meter  * coo.xyz.x - P->x0;
+        coo.xyz.y = P->to_meter  * coo.xyz.y - P->y0;
+        coo.xyz.z = P->vto_meter * coo.xyz.z - P->z0;
+        if (INPUT_UNITS==PJ_IO_UNITS_PROJECTED)
+            return coo;
+
+        /* Classic proj.4 functions expect plane coordinates in units of the semimajor axis  */
+        /* Multiplying by ra, rather than dividing by a because the CALCOFI projection       */
+        /* stomps on a and hence (apparently) depends on this to roundtrip correctly         */
+        /* (CALCOFI avoids further scaling by stomping - but a better solution is possible)  */
+        coo.xyz.x *= P->ra;
+        coo.xyz.y *= P->ra;
+        return coo;
+    /* Silence some compiler warnings about PJ_IO_UNITS_ANGULAR not handled */
+    default:
+        break;
+    }
+
+    /* Should not happen, so we could return pj_coord_err here */
     return coo;
 }
 
 
 
-PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo) {
+static PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo) {
     if (coo.xyz.x == HUGE_VAL) {
         proj_errno_set (P, PJD_ERR_INVALID_X_OR_Y);
         return proj_coord_error ();
     }
 
-    if (P->left==PJ_IO_UNITS_RADIANS) {
-        /* Distance from central meridian, taking system zero meridian into account */
-        coo.lp.lam = coo.lp.lam + P->from_greenwich + P->lam0;
+    if (OUTPUT_UNITS==PJ_IO_UNITS_ANGULAR) {
 
-         /* adjust longitude to central meridian */
-        if (0==P->over)
-            coo.lpz.lam = adjlon(coo.lpz.lam);
+        if (INPUT_UNITS!=PJ_IO_UNITS_ANGULAR) {
+            /* Distance from central meridian, taking system zero meridian into account */
+            coo.lp.lam = coo.lp.lam + P->from_greenwich + P->lam0;
+
+            /* adjust longitude to central meridian */
+            if (0==P->over)
+                coo.lpz.lam = adjlon(coo.lpz.lam);
+
+            if (P->vgridshift)
+                coo = proj_trans (P->vgridshift, PJ_INV, coo);
+            if (P->hgridshift)
+                coo = proj_trans (P->hgridshift, PJ_FWD, coo);
+            else if (P->helmert) {
+                coo = proj_trans (P->cart,       PJ_FWD, coo); /* Go cartesian in local frame */
+                coo = proj_trans (P->helmert,    PJ_INV, coo); /* Step into WGS84 */
+                coo = proj_trans (P->cart_wgs84, PJ_INV, coo); /* Go back to angular using WGS84 ellps */
+            }
+        }
 
         /* If input latitude was geocentrical, convert back to geocentrical */
         if (P->geoc)

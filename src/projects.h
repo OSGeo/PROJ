@@ -196,7 +196,7 @@ enum pj_io_units {
     PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
     PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
     PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
-    PJ_IO_UNITS_RADIANS   = 4   /* Radians */
+    PJ_IO_UNITS_ANGULAR   = 4   /* Radians */
 };
 #endif
 #ifndef PROJ_H
@@ -349,6 +349,14 @@ struct PJconsts {
     enum pj_io_units left;          /* Flags for input/output coordinate types */
     enum pj_io_units right;
 
+    /* These PJs are used for implementing cs2cs style coordinate handling in the 4D API */
+    PJ *axisswap;
+    PJ *cart;
+    PJ *cart_wgs84;
+    PJ *helmert;
+    PJ *hgridshift;
+    PJ *vgridshift;
+
 
     /*************************************************************************************
 
@@ -394,7 +402,7 @@ struct PJconsts {
     double  from_greenwich;            /* prime meridian offset (in radians) */
     double  long_wrap_center;          /* 0.0 for -180 to 180, actually in radians*/
     int     is_long_wrap_set;
-    char    axis[4];                   /* TODO: Description needed */
+    char    axis[4];                   /* Axis order, pj_transform/pj_adjust_axis */
 
     /* New Datum Shift Grid Catalogs */
     char   *catalog_name;
@@ -615,7 +623,7 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     P->destructor = pj_default_destructor;                   \
     P->descr = des_##name;                                   \
     P->need_ellps = NEED_ELLPS;                              \
-    P->left  = PJ_IO_UNITS_RADIANS;                          \
+    P->left  = PJ_IO_UNITS_ANGULAR;                          \
     P->right = PJ_IO_UNITS_CLASSIC;                          \
     return P;                                                \
 }                                                            \

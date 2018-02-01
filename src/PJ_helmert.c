@@ -486,6 +486,25 @@ PJ *TRANSFORMATION(helmert, 0) {
         P->right = PJ_IO_UNITS_PROJECTED;
     }
 
+    /* Support the classic PROJ towgs84 parameter, but allow later overrides.*/
+    /* Note that if towgs84 is specified, the datum_params array is set up   */
+    /* for us automagically by the pj_datum_set call in pj_init_ctx */
+    if (pj_param_exists (P->params, "towgs84")) {
+        Q->xyz_0.x = P->datum_params[0];
+        Q->xyz_0.y = P->datum_params[1];
+        Q->xyz_0.z = P->datum_params[2];
+
+        Q->opk_0.o = P->datum_params[3];
+        Q->opk_0.p = P->datum_params[4];
+        Q->opk_0.k = P->datum_params[5];
+
+        /* We must undo conversion to absolute scale from pj_datum_set */
+        if (0==P->datum_params[6])
+            Q->scale_0 = 0;
+        else
+            Q->scale_0 = (P->datum_params[6] - 1) * 1e6;
+    }
+
     /* Translations */
     if (pj_param (P->ctx, P->params, "tx").i)
         Q->xyz_0.x = pj_param (P->ctx, P->params, "dx").f;
@@ -570,14 +589,13 @@ PJ *TRANSFORMATION(helmert, 0) {
     /* Let's help with debugging */
     if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
         proj_log_debug(P, "Helmert parameters:");
-        proj_log_debug(P, "x=  % 3.5f  y=  % 3.5f  z=  % 3.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
-        proj_log_debug(P, "rx= % 3.5f  ry= % 3.5f  rz= % 3.5f",
+        proj_log_debug(P, "x=  %8.5f  y=  %8.5f  z=  %8.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
+        proj_log_debug(P, "rx= %8.5f  ry= %8.5f  rz= %8.5f",
                 Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD, Q->opk.k / ARCSEC_TO_RAD);
-        proj_log_debug(P, "s=% 3.5f  exact=% d  transpose=% d",
-                Q->scale, Q->exact, Q->transpose);
-        proj_log_debug(P, "dx= % 3.5f  dy= % 3.5f  dz= % 3.5f", Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
-        proj_log_debug(P, "drx=% 3.5f  dry=% 3.5f  drz=% 3.5f", Q->dopk.o, Q->dopk.p, Q->dopk.k);
-        proj_log_debug(P, "ds=% 3.5f  t_epoch=% 5.5f  t_obs=% 5.5f", Q->dscale, Q->t_epoch, Q->t_obs);
+        proj_log_debug(P, "s=  %8.5f  exact=%d  transpose=%d", Q->scale, Q->exact, Q->transpose);
+        proj_log_debug(P, "dx= %8.5f  dy= %8.5f  dz= %8.5f",   Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
+        proj_log_debug(P, "drx=%8.5f  dry=%8.5f  drz=%8.5f",   Q->dopk.o, Q->dopk.p, Q->dopk.k);
+        proj_log_debug(P, "ds= %8.5f  t_epoch=%8.5f  t_obs=%8.5f", Q->dscale, Q->t_epoch, Q->t_obs);
     }
 
     if ((Q->opk.o==0)  && (Q->opk.p==0)  && (Q->opk.k==0) && (Q->scale==0) &&

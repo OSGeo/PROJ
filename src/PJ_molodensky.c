@@ -281,8 +281,8 @@ PJ *TRANSFORMATION(molodensky,1) {
     P->fwd    = forward_2d;
     P->inv    = reverse_2d;
 
-    P->left   = PJ_IO_UNITS_RADIANS;
-    P->right  = PJ_IO_UNITS_RADIANS;
+    P->left   = PJ_IO_UNITS_ANGULAR;
+    P->right  = PJ_IO_UNITS_ANGULAR;
 
     /* read args */
     if (pj_param(P->ctx, P->params, "tdx").i)

@@ -131,11 +131,11 @@ expect    12 55 0 0
 -------------------------------------------------------------------------------
 Finally test a pipeline with more than one init step
 -------------------------------------------------------------------------------
-operation proj=pipeline        step
-          init=epsg:25832 inv  step
-          init=epsg:25833      step
-          init=epsg:25833 inv  step
-          init=epsg:25832
+operation proj=pipeline
+          step init=epsg:25832 inv
+          step init=epsg:25833
+          step init=epsg:25833 inv
+          step init=epsg:25832
 -------------------------------------------------------------------------------
 accept    691875.63214  6098907.82501  0  0
 expect    691875.63214  6098907.82501  0  0

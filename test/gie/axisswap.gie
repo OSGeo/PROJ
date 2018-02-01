@@ -53,9 +53,17 @@ expect      3 -2 1 4
 roundtrip   100
 
 operation   proj=axisswap axis=neu
-tolerance   0.000001 m
-accept      1 2 3 4
-expect      2 1 3 4
+tolerance   0 m
+accept      1 2 3
+expect      2 1 3
+
+# when using the +axis parameter we specify the order of the INPUT coordinate,
+# as opposed to +order which relates to the OUTPUT coordinate. Here we test
+# that n(1), u(2) and e(3) are swapped correctly to enu ordering.
+operation   proj=axisswap axis=nue
+tolerance   0 m
+accept      1 2 3
+expect      2 3 1
 
 operation   proj=axisswap axis=swd
 tolerance   0.000001 m
