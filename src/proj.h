@@ -167,6 +167,9 @@ struct P5_FACTORS {                  /* Common designation */
 
     double tissot_semimajor;               /* a */
     double tissot_semiminor;               /* b */
+
+    double dx_dlam, dx_dphi;
+    double dy_dlam, dy_dphi;
 };
 typedef struct P5_FACTORS PJ_FACTORS;
 
