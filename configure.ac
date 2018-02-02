@@ -43,6 +43,8 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM(
         [AC_MSG_RESULT([no]);C99_MATH="-DHAVE_C99_MATH=0"])
 CFLAGS="$save_CFLAGS $C99_MATH"
 
+AC_SEARCH_LIBS([sqrt], [m])
+
 AC_CHECK_FUNC(localeconv, [AC_DEFINE(HAVE_LOCALECONV,1,[Define to 1 if you have localeconv])])
 
 dnl ---------------------------------------------------------------------------
