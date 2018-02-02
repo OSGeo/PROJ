@@ -1,11 +1,8 @@
 # Executables paths passed to test scripts
 NADPATH = $(top_srcdir)/nad
-GIETESTPATH = $(top_srcdir)/test/gie
-GIGSTESTPATH = $(top_srcdir)/test/gigs
 EXEPATH = ../src
 PROJEXE = $(EXEPATH)/proj
 CS2CSEXE = $(EXEPATH)/cs2cs
-GIEEXE = $(EXEPATH)/gie
 
 # PROJ.4 test scripts
 TEST27 = $(NADPATH)/test27
@@ -26,7 +23,7 @@ EXTRA_DIST = GL27 nad.lst proj_def.dat nad27 nad83 pj_out27.dist pj_out83.dist t
 		testflaky testvarious testdatumfile testntv2 ntv2_out.dist \
 		esri.extra other.extra \
 		CH IGNF testIGNF proj_outIGNF.dist \
-		ITRF2000 ITRF2008 ITRF2014
+		ITRF2000 ITRF2008 ITRF2014 \
 		makefile.vc CMakeLists.txt
 
 process-nad2bin:
@@ -90,8 +87,6 @@ check-local: process-nad2bin
 	  export PROJ_LIB=. ; \
 	  $(TESTNTV2) $(CS2CSEXE) ; \
 	fi
-	$(GIEEXE) $(GIETESTPATH)/*.gie
-#$(GIEEXE) $(GIGSTESTPATH)/*.gie
 
 clean-local:
 	$(RM) $(TEST_DB)
