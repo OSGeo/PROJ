@@ -1,0 +1,112 @@
+.\" release 5
+.\"
+.ad b
+.hy 1
+.TH CCT 1 "2018/02/25 Rel. 5.0.0"
+.SH NAME
+cct \- 4D equivalent to the "proj" projection program
+.SH SYNOPSIS
+.B cct
+[\-options]... [+operator_specs]... infile...
+.SH DESCRIPTION
+.I cct
+is a 4D equivalent to the proj(1) projection program.
+.PP
+cct is an acronym meaning "Coordinate Conversion and Transformation".
+.PP
+The acronym refers to definitions given in the OGC 08-015r2/ISO-19111
+standard "Geographical Information -- Spatial Referencing by Coordinates",
+which defines two different classes of coordinate operations:
+.PP
+*Coordinate Conversions*, which are coordinate operations where input
+and output datum are identical (e.g. conversion from geographical to
+cartesian coordinates) and
+.PP
+*Coordinate Transformations*, which are coordinate operations where
+input and output datums differ (e.g. change of reference frame).
+.PP
+\fBcct\fR, however, also refers to Carl Christian Tscherning (1942--2014),
+professor of Geodesy at the University of Copenhagen, mentor and advisor
+for a generation of Danish geodesists, colleague and collaborator for
+two generations of global geodesists, Secretary General for the
+International Association of Geodesy, IAG (1995--2007), fellow of the
+Amercan Geophysical Union (1991), recipient of the IAG Levallois Medal
+(2007), the European Geosciences Union Vening Meinesz Medal (2008), and
+of numerous other honours.
+.PP
+cct, or Christian, as he was known to most of us, was recognized for his
+good mood, his sharp wit, his tireless work, and his great commitment to
+the development of geodesy - both through his scientific contributions,
+comprising more than 250 publications, and by his mentoring and teaching
+of the next generations of geodesists.
+.PP
+As Christian was an avid Fortran programmer, and a keen Unix connoiseur,
+he would have enjoyed to know that his initials would be used to name a
+modest Unix style transformation filter, hinting at the tireless aspect
+of his personality, which was certainly one of the reasons he accomplished
+so much, and meant so much to so many people.
+.PP
+Hence, in honour of cct (the geodesist) this is cct (the program).
+.SH OPTIONS
+.IP "\fB\fB\-o /path/to/file\fR\fR" 1c
+Specify output file name\&
+.IP "\fB\fB\-c x,y,z,t\fR\fR" 1c
+Specify input columns for (up to) 4 input parameters.
+Defaults to 1,2,3,4\&
+.IP "\fB\fB\-z value\fR\fR" 1c
+Provide a fixed z value for all input data (e.g. \-z 0)\&
+.IP "\fB\fB\-t value\fR\fR" 1c
+Provide a fixed t value for all input data (e.g. \-t 0)\&
+.IP "\fB\fB\-I\fR\fR" 1c
+Do the inverse transformation\&
+.IP "\fB\fB\-v\fR\fR" 1c
+Verbose: Provide non-essential informational output.
+Repeat \-v for more verbosity (e.g. \-vv)\&
+.SH LONG OPTIONS
+.IP "\fB\fB\-\-output\fR\fR" 1c
+Alias for \-o\&
+.IP "\fB\fB\-\-columns\fR\fR" 1c
+Alias for \-c\&
+.IP "\fB\fB\-\-height\fR\fR" 1c
+Alias for \-z\&
+.IP "\fB\fB\-\-time\fR\fR" 1c
+Alias for \-t\&
+.IP "\fB\fB\-\-verbose\fR\fR" 1c
+Alias for \-v\&
+.IP "\fB\fB\-\-inverse\fR\fR" 1c
+Alias for \-I\&
+.IP "\fB\fB\-\-help\fR\fR" 1c
+Alias for -h\&
+.SH OPERATOR SPECS
+The operator specs describe the action to be performed by cct, e.g:
+.IP
++proj=utm  +ellps=GRS80  +zone=32
+.PP
+instructs cct to convert input data to Universal Transverse Mercator, zone 32
+coordinates, based on the GRS80 ellipsoid.
+.PP
+Hence, the command
+.IP
+echo 12 55 | cct -z0 -t0 +proj=utm +zone=32 +ellps=GRS80
+.PP
+Should give results comparable to the classic proj command
+.IP
+echo 12 55 | proj +proj=utm +zone=32 +ellps=GRS80
+.SH EXAMPLES
+1. convert geographical input to UTM zone 32 on the GRS80 ellipsoid:
+.IP
+cct +proj=utm +ellps=GRS80 +zone=32
+.PP
+2. roundtrip accuracy check for the case above:
+.IP
+cct +proj=pipeline +proj=utm +ellps=GRS80 +zone=32 +step +step +inv
+.PP
+3. as (1) but specify input columns for longitude, latitude, height and time:
+.IP
+cct -c 5,2,1,4  +proj=utm +ellps=GRS80 +zone=32
+.PP
+4. as (1) but specify fixed height and time, hence needing only 2 cols in input:
+.IP
+cct -t 0 -z 0  +proj=utm  +ellps=GRS80  +zone=32
+.SH HOME PAGE
+http://proj4.org/
