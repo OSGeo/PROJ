@@ -402,7 +402,6 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
 **************************************************************************************/
     PJ *Q;
     paralist *p;
-    char def[1000];
     if (0==P)
         return 0;
 
@@ -415,8 +414,12 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
 
     /* Don't axisswap if data are already in "enu" order */
     if (p && (0!=strcmp ("enu", p->param))) {
+        char *def = malloc (100+strlen(P->axis));
+        if (0==def)
+            return 0;
         sprintf (def, "break_cs2cs_recursion     proj=axisswap  axis=%s", P->axis);
         Q = proj_create (P->ctx, def);
+        free (def);
         if (0==Q)
             return 0;
         P->axisswap = skip_prep_fin(Q);
@@ -426,8 +429,12 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
     p = pj_param_exists (P->params, "geoidgrids");
     if (p  &&  strlen (p->param) > strlen ("geoidgrids=")) {
         char *gridnames = p->param + strlen ("geoidgrids=");
+        char *def = malloc (100+strlen(gridnames));
+        if (0==def)
+            return 0;
         sprintf (def, "break_cs2cs_recursion     proj=vgridshift  grids=%s", gridnames);
         Q = proj_create (P->ctx, def);
+        free (def);
         if (0==Q)
             return 0;
         P->vgridshift = skip_prep_fin(Q);
@@ -437,8 +444,12 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
     p = pj_param_exists (P->params, "nadgrids");
     if (p  &&  strlen (p->param) > strlen ("nadgrids=")) {
         char *gridnames = p->param + strlen ("nadgrids=");
+        char *def = malloc (100+strlen(gridnames));
+        if (0==def)
+            return 0;
         sprintf (def, "break_cs2cs_recursion     proj=hgridshift  grids=%s", gridnames);
         Q = proj_create (P->ctx, def);
+        free (def);
         if (0==Q)
             return 0;
         P->hgridshift = skip_prep_fin(Q);
@@ -447,6 +458,7 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
     /* We ignore helmert if we have grid shift */
     p = P->hgridshift ? 0 : pj_param_exists (P->params, "towgs84");
     while (p) {
+        char *def;
         char *s = p->param;
         double *d = P->datum_params;
         size_t n = strlen (s);
@@ -455,12 +467,15 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
         if (0==d[0] && 0==d[1] && 0==d[2] && 0==d[3] && 0==d[4] && 0==d[5] && 0==d[6])
             break;
 
-        if (n > 900)
-            return 0;
         if (n <= 8) /* 8==strlen ("towgs84=") */
+            return 0;
+
+        def = malloc (100+n);
+        if (0==def)
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=helmert %s", s);
         Q = proj_create (P->ctx, def);
+        free (def);
         if (0==Q)
             return 0;
         P->helmert = skip_prep_fin(Q);
@@ -471,7 +486,7 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
     /* We also need cartesian/geographical transformations if we are working in */
     /* geocentric/cartesian space or we need to do a Helmert transform.         */
     if (P->is_geocent || P->helmert) {
-        char *wgs84 = "ellps=WGS84";
+        char def[100];
         sprintf (def, "break_cs2cs_recursion     proj=cart");
         Q = proj_create (P->ctx, def);
         if (0==Q)
@@ -479,7 +494,7 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
         pj_inherit_ellipsoid_def(P, Q);
         P->cart = skip_prep_fin(Q);
 
-        sprintf (def, "break_cs2cs_recursion     proj=cart  %s", wgs84);
+        sprintf (def, "break_cs2cs_recursion     proj=cart  ellps=WGS84");
         Q = proj_create (P->ctx, def);
         if (0==Q)
             return 0;
