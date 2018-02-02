@@ -177,12 +177,12 @@ PJ *PROJECTION(omerc) {
     }
     if (alp || gam) {
         if (alp) {
-            gamma0 = asin(sin(alpha_c) / D);
+            gamma0 = aasin(P->ctx, sin(alpha_c) / D);
             if (!gam)
                 gamma = alpha_c;
         } else
-            alpha_c = asin(D*sin(gamma0 = gamma));
-        P->lam0 = lamc - asin(.5 * (F - 1. / F) *
+            alpha_c = aasin(P->ctx, D*sin(gamma0 = gamma));
+        P->lam0 = lamc - aasin(P->ctx, .5 * (F - 1. / F) *
            tan(gamma0)) / Q->B;
     } else {
         H = pow(pj_tsfn(phi1, sin(phi1), P->e), Q->B);
@@ -199,7 +199,7 @@ PJ *PROJECTION(omerc) {
            J * tan(.5 * Q->B * (lam1 - lam2)) / p) / Q->B);
         gamma0 = atan(2. * sin(Q->B * adjlon(lam1 - P->lam0)) /
            (F - 1. / F));
-        gamma = alpha_c = asin(D * sin(gamma0));
+        gamma = alpha_c = aasin(P->ctx, D * sin(gamma0));
     }
     Q->singam = sin(gamma0);
     Q->cosgam = cos(gamma0);
