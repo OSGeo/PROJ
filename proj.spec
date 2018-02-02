@@ -48,4 +48,4 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/*
 %{_mandir}/man3/*
 
-%doc AUTHORS COPYING ChangeLog NEWS README
+%doc AUTHORS COPYING ChangeLog NEWS README.md
