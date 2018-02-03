@@ -10,17 +10,17 @@ gie \- The Geospatial Integrity Investigation Environment
 [\-options]... infile...
 .SH DESCRIPTION
 \fBgie\fR, the Geospatial Integrity Investigation Environment, is a modest
-regression testing environment for the PROJ.4 transformation library.
+regression testing environment for the PROJ transformation library.
 .PP
 Its primary design goal was to be able to replace those thousands of
 lines of regression testing code that are (at time of writing) part
-of PROJ.4, while not requiring any other kind of tooling than the same
+of PROJ, while not requiring any other kind of tooling than the same
 C compiler already employed for compiling the library.
 .PP
 The basic functionality of the gie command language is implemented
 through just 3 command verbs:
 .PP
-operation,     which defines the PROJ.4 operation to test,
+operation,     which defines the PROJ operation to test,
 .br
 accept,        which defines the input coordinate to read, and
 .br
@@ -51,7 +51,7 @@ But more importantly than being an acronym for "Geospatial Integrity
 Investigation Environment", gie were also the initials, user id, and
 USGS email address of Gerald Ian Evenden (1935--2016), the geospatial
 visionary, who, already in the 1980s, started what was to become the
-PROJ.4 of today.
+PROJ of today.
 .PP
 Gerald's clear vision was that map projections are *just special
 functions*. Some of them rather complex, most of them of two variables,
@@ -73,11 +73,11 @@ as a traditional function call like hypot(x,y).
 While today, we may have more formally well defined metadata systems
 (most prominent the OGC WKT2 representation), nothing comes close being
 as easily readable ("human compatible") as Gerald's key-value system.
-This system in particular, and the PROJ.4 system in general, was
+This system in particular, and the PROJ system in general, was
 Gerald's great gift to anyone using and/or communicating about geodata.
 .PP
 It is only reasonable to name a program, keeping an eye on the integrity
-of the PROJ.4 system, in honour of Gerald.
+of the PROJ system, in honour of Gerald.
 .PP
 So in honour, and hopefully also in the spirit, of Gerald Ian Evenden
 (1935--2016), this is the Geospatial Integrity Investigation Environment.
