@@ -9,3 +9,7 @@ AUTOMAKE_OPTIONS =	dist-zip
 ACLOCAL_AMFLAGS =	-I m4
 
 README: README.md
+	cp $< $@
+
+clean-local:
+	$(RM) README
