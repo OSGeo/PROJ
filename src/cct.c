@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
     int nfields = 4, direction = 1, verbose;
     double fixed_z = HUGE_VAL, fixed_time = HUGE_VAL;
     int columns_xyzt[] = {1, 2, 3, 4};
-    const char *longflags[]  = {"v=verbose", "h=help", "I=inverse", 0};
+    const char *longflags[]  = {"v=verbose", "h=help", "I=inverse", "version", 0};
     const char *longkeys[]   = {"o=output",  "c=columns", "z=height", "t=time", 0};
 
     o = opt_parse (argc, argv, "hvI", "cozt", longflags, longkeys);
@@ -172,6 +172,11 @@ int main(int argc, char **argv) {
 
     direction = opt_given (o, "I")? -1: 1;
     verbose   = opt_given (o, "v");
+
+    if (opt_given (o, "version")) {
+        fprintf (stdout, "%s: %s\n", o->progname, pj_get_release ());
+        return 0;
+    }
 
     if (opt_given (o, "o"))
         fout = fopen (opt_arg (o, "output"), "wt");

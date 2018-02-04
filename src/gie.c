@@ -133,8 +133,6 @@ typedef struct ffio {
     size_t level;
 }  ffio;
 
-FILE *test = 0;
-
 static int get_inp (ffio *F);
 static int skip_to_next_tag (ffio *F);
 static int step_into_gie_block (ffio *F);
@@ -231,7 +229,7 @@ static const char usage[] = {
 
 int main (int argc, char **argv) {
     int  i;
-    const char *longflags[]  = {"v=verbose", "q=quiet", "h=help", "l=list", 0};
+    const char *longflags[]  = {"v=verbose", "q=quiet", "h=help", "l=list", "version", 0};
     const char *longkeys[]   = {"o=output", 0};
     OPTARGS *o;
 
@@ -240,7 +238,6 @@ int main (int argc, char **argv) {
     T.verbosity = 1;
     T.tolerance = 5e-4;
 
-    test = fopen ("test.c", "wt");
     o = opt_parse (argc, argv, "hlvq", "o", longflags, longkeys);
     if (0==o)
         return 0;
@@ -249,6 +246,13 @@ int main (int argc, char **argv) {
         printf (usage, o->progname);
         return 0;
     }
+
+
+    if (opt_given (o, "version")) {
+        fprintf (stdout, "%s: %s\n", o->progname, pj_get_release ());
+        return 0;
+    }
+
 
     if (opt_given (o, "l"))
         return list_err_codes ();
