@@ -10,7 +10,7 @@ ACLOCAL_AMFLAGS =	-I m4
 
 
 README: README.md
-	cp $< $@
+	fgrep -v "[![" $< > $@
 
 clean-local:
 	$(RM) README
