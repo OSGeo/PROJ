@@ -9,8 +9,8 @@ AUTOMAKE_OPTIONS =	dist-zip
 ACLOCAL_AMFLAGS =	-I m4
 
 
-README: README.md
-	cp $(builddir)/$< $(builddir)/$@
+README: $(srcdir)/README.md
+	cp $< $(builddir)/$@
 
 clean-local:
 	$(RM) $(builddir)/README
