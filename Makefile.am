@@ -10,7 +10,7 @@ ACLOCAL_AMFLAGS =	-I m4
 
 
 README: README.md
-	cp $< $(builddir)/$@
+	cp $< $@
 
 clean-local:
-	$(RM) $(builddir)/README
+	$(RM) README
