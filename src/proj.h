@@ -239,20 +239,20 @@ union PJ_COORD {
 
 
 struct PJ_INFO {
-    char        release[64];        /* Release info. Version + date         */
-    char        version[64];        /* Full version number                  */
     int         major;              /* Major release number                 */
     int         minor;              /* Minor release number                 */
     int         patch;              /* Patch level                          */
-    char        searchpath[512];    /* Paths where init and grid files are  */
+    const char  *release;           /* Release info. Version + date         */
+    const char  *version;           /* Full version number                  */
+    const char  *searchpath;        /* Paths where init and grid files are  */
                                     /* looked for. Paths are separated by   */
                                     /* semi-colons.                         */
 };
 
 struct PJ_PROJ_INFO {
-    char        id[16];             /* Name of the projection in question                       */
-    char        description[128];   /* Description of the projection                            */
-    char        definition[512];    /* Projection definition                                    */
+    const char  *id;                /* Name of the projection in question                       */
+    const char  *description;       /* Description of the projection                            */
+    const char  *definition;        /* Projection definition                                    */
     int         has_inverse;        /* 1 if an inverse mapping exists, 0 otherwise              */
     double      accuracy;           /* Expected accuracy of the transformation. -1 if unknown.  */
 };
@@ -356,7 +356,7 @@ int  proj_errno_restore (const PJ *P, int err);
 PJ_FACTORS proj_factors(PJ *P, LP lp);
 
 /* Info functions - get information about various PROJ.4 entities */
-PJ_INFO      proj_info(void);
+PJ_INFO proj_info(void);
 PJ_PROJ_INFO proj_pj_info(PJ *P);
 PJ_GRID_INFO proj_grid_info(const char *gridname);
 PJ_INIT_INFO proj_init_info(const char *initname);

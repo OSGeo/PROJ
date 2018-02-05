@@ -231,6 +231,7 @@ struct PJconsts {
     projCtx_t *ctx;
     const char *descr;             /* From pj_list.h or individual PJ_*.c file */
     paralist *params;              /* Parameter list */
+    char *def_full;                /* Full textual definition (usually 0 - set by proj_pj_info) */
     char *def_size;                /* Shape and size parameters extracted from params */
     char *def_shape;
     char *def_spherification;

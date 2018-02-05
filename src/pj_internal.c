@@ -261,7 +261,9 @@ consuming their surrounding whitespace.
 
         /* Eliminate prefix '+', only if preceeded by whitespace */
         /* (i.e. keep it in 1.23e+08) */
-        if ((i > 0) && ('+'==c[j]) && isspace (c[i]))
+        if ((i > 0) && ('+'==c[j]) && ws)
+            c[j] = ' ';
+        if ((i==0) && ('+'==c[j]))
             c[j] = ' ';
 
         if (isspace (c[j]) || ';'==c[j]) {

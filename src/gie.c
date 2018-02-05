@@ -1458,7 +1458,7 @@ static int pj_cart_selftest (void) {
     size_t n, sz;
     double dist, h, t;
     char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
-    const char *arg = {"+proj=utm +zone=32 +ellps=GRS80"};
+    char arg[50] = {"+proj=utm; +zone=32; +ellps=GRS80"};
     char buf[40];
 
     /* An utm projection on the GRS80 ellipsoid */
@@ -1699,6 +1699,7 @@ static int pj_cart_selftest (void) {
     P = proj_create(PJ_DEFAULT_CTX, arg);
     pj_info = proj_pj_info(P);
     if ( !pj_info.has_inverse )            {  proj_destroy(P); return 61; }
+    pj_shrink (arg);
     if ( strcmp(pj_info.definition, arg) ) {  proj_destroy(P); return 62; }
     if ( strcmp(pj_info.id, "utm") )       {  proj_destroy(P); return 63; }
 
