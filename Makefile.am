@@ -8,6 +8,8 @@ pkgconfig_DATA = proj.pc
 AUTOMAKE_OPTIONS =	dist-zip
 ACLOCAL_AMFLAGS =	-I m4
 
+README.md:
+
 README: README.md
 	cp $< $@
 
