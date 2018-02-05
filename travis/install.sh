@@ -38,7 +38,6 @@ cd $TAR_DIRECTORY
 ./configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 make -j3
 make install
-make dist-all
 PROJ_LIB=$GRIDDIR make check
 CURRENT_PWD=`pwd`
 cd /tmp/proj_autoconf_install
