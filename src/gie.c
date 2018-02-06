@@ -1739,9 +1739,9 @@ static int pj_cart_selftest (void) {
     proj_destroy(P);
 
     /* proj_grid_info() */
-    grid_info = proj_grid_info("egm96_15.gtx");
+    grid_info = proj_grid_info("null");
     if ( strlen(grid_info.filename) == 0 )            return 64;
-    if ( strcmp(grid_info.gridname, "egm96_15.gtx") ) return 65;
+    if ( strcmp(grid_info.gridname, "null") ) return 65;
     grid_info = proj_grid_info("nonexistinggrid");
     if ( strlen(grid_info.filename) > 0 )             return 66;
 
