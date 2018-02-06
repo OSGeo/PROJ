@@ -774,8 +774,8 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
 
 static const char *empty = {""};
 static char version[64]  = {""};
-static PJ_INFO info = {0, 0, 0, 0, 0, 0};
-
+static PJ_INFO info = {0, 0, 0, 0, 0, 0, 0, 0};
+static volatile int info_initialized = 0;
 
 /*****************************************************************************/
 PJ_INFO proj_info (void) {
@@ -785,49 +785,51 @@ PJ_INFO proj_info (void) {
     Returns PJ_INFO struct.
 ******************************************************************************/
     const char * const *paths;
-    int i, n;
+    size_t i, n;
 
     size_t  buf_size = 0;
     char   *buf = 0;
 
-    if (0 != info.version)
-        return info;
+    pj_acquire_lock ();
+    while (0==info_initialized) {
+        info.major = PROJ_VERSION_MAJOR;
+        info.minor = PROJ_VERSION_MINOR;
+        info.patch = PROJ_VERSION_PATCH;
 
-    pj_acquire_lock();
+        /* This is a controlled environment, so no risk of sprintf buffer
+        overflow. A normal version string is xx.yy.zz which is 8 characters
+        long and there is room for 64 bytes in the version string. */
+        sprintf (version, "%d.%d.%d", info.major, info.minor, info.patch);
 
-    info.major = PROJ_VERSION_MAJOR;
-    info.minor = PROJ_VERSION_MINOR;
-    info.patch = PROJ_VERSION_PATCH;
+        info.searchpath = empty;
+        info.version    = version;
+        info.release    = pj_get_release ();
 
-    /* This is a controlled environment, so no risk of sprintf buffer
-       overflow. A normal version string is xx.yy.zz which is 8 characters
-       long and there is room for 64 bytes in the version string. */
-    sprintf(version, "%d.%d.%d", info.major, info.minor, info.patch);
-
-    info.searchpath = empty;
-    info.version    = version;
-    info.release    = pj_get_release();
-
-    /* build search path string */
-    buf = path_append (buf, getenv("HOME"), &buf_size);
-    if (0==buf)
-        return info;
-
-    buf = path_append (buf, getenv("PROJ_LIB"), &buf_size);
-    if (0==buf)
-        return info;
-
-    paths = proj_get_searchpath();
-    n = proj_get_path_count();
-
-    for (i = 0;  i < n;  i++) {
-        buf = path_append (buf, paths[i], &buf_size);
+        /* build search path string */
+        buf = path_append (buf, getenv ("HOME"), &buf_size);
         if (0==buf)
-            return info;
-    }
-    info.searchpath = buf;
+            break;
 
-    pj_release_lock();
+        buf = path_append (buf, getenv ("PROJ_LIB"), &buf_size);
+        if (0==buf)
+            break;
+
+        paths = proj_get_searchpath ();
+        n = (size_t) proj_get_path_count ();
+
+        for (i = 0;  i < n;  i++) {
+            buf = path_append (buf, paths[i], &buf_size);
+            if (0==buf)
+                break;
+        }
+        info.searchpath = buf;
+
+        info.paths = paths;
+        info.path_count = n;
+
+        info_initialized = 1;
+    }
+    pj_release_lock ();
     return info;
 }
 

@@ -247,6 +247,8 @@ struct PJ_INFO {
     const char  *searchpath;        /* Paths where init and grid files are  */
                                     /* looked for. Paths are separated by   */
                                     /* semi-colons.                         */
+    const char * const *paths;
+    size_t path_count;
 };
 
 struct PJ_PROJ_INFO {
