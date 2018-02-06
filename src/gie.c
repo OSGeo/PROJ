@@ -1682,6 +1682,7 @@ static int pj_cart_selftest (void) {
     /* proj_info()                                                            */
     /* this one is difficult to test, since the output changes with the setup */
     info = proj_info();
+printf ("gie - info.searchpath=[%s]\n", info.searchpath);
 
     if (info.version[0] != '\0' ) {
         char tmpstr[64];
@@ -1689,6 +1690,7 @@ static int pj_cart_selftest (void) {
         if (strcmp(info.version, tmpstr)) return 55;
     }
     if (info.release[0] == '\0')    return 56;
+printf ("gie - info.searchpath=[%s]\n", info.searchpath);
     if (getenv ("HOME") || getenv ("PROJ_LIB"))
         if (info.searchpath[0] == '\0') return 57;
 
