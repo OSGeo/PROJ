@@ -761,6 +761,7 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
         *buf_size = 2 * len;
         if (buf != 0)
             strcpy (p, buf);
+        pj_dealloc (buf);
         buf = p;
     }
 
