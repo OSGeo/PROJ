@@ -18,6 +18,7 @@ operation   +proj=deformation +xy_grids=alaska +z_grids=egm96_15.gtx
             +t_epoch=2016.0 +t_obs=2000.0 +ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
+ignore      pjd_err_failed_to_load_grid
 accept      -3004295.5882503074 -1093474.1690603832 5500477.1338251457
 expect      -3004295.7025       -1093474.2106       5500477.3444
 roundtrip   5
@@ -29,6 +30,7 @@ operation   +proj=deformation
             +xy_grids=alaska +z_grids=egm96_15.gtx +t_epoch=2016.0 +ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
+ignore      pjd_err_failed_to_load_grid
 accept      -3004295.5882503074 -1093474.1690603832 5500477.1338251457 2000.0
 expect      -3004295.7025       -1093474.2106       5500477.3444       2000.0
 roundtrip   5
