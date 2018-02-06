@@ -781,8 +781,7 @@ PJ_INFO proj_info (void) {
 /******************************************************************************
     Basic info about the current instance of the PROJ.4 library.
 
-    Returns PJ_INFO struct. Searchpath member of the struct is truncated to 512
-    characters.
+    Returns PJ_INFO struct.
 ******************************************************************************/
     const char * const *paths;
     int i, n;
@@ -894,14 +893,17 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
         return grinfo;
     }
 
+    /* The string copies below are automatically null-terminated due to */
+    /* the memset above, so strncpy is safe */
+
     /* name of grid */
-    pj_strlcpy(grinfo.gridname, gridname, sizeof(grinfo.gridname));
+    strncpy (grinfo.gridname, gridname, sizeof(grinfo.gridname) - 1);
 
     /* full path of grid */
-    pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename));
+    pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1);
 
     /* grid format */
-    pj_strlcpy(grinfo.format, gridinfo->format, sizeof(grinfo.format));
+    strncpy (grinfo.format, gridinfo->format, sizeof(grinfo.format) - 1);
 
     /* grid size */
     grinfo.n_lon = gridinfo->ct->lim.lam;
@@ -951,12 +953,14 @@ PJ_INIT_INFO proj_init_info(const char *initname){
         return ininfo;
     }
 
-    pj_strlcpy(ininfo.name, initname, sizeof(ininfo.name));
+    /* The initial memset (0) makes strncpy safe here */
+    strncpy (ininfo.name, initname, sizeof(ininfo.name) - 1);
     strcpy(ininfo.origin, "Unknown");
     strcpy(ininfo.version, "Unknown");
     strcpy(ininfo.lastupdate, "Unknown");
 
-    pj_strlcpy(key, initname, 64); /* make room for ":metadata\0" at the end */
+    strncpy (key, initname, 64); /* make room for ":metadata\0" at the end */
+    key[64] = 0;
     strncat(key, ":metadata", 9);
     strcpy(param, "+init=");
     strncat(param, key, 73);
@@ -964,17 +968,14 @@ PJ_INIT_INFO proj_init_info(const char *initname){
     start = pj_mkparam(param);
     pj_expand_init(ctx, start);
 
-    if (pj_param(ctx, start, "tversion").i) {
-        pj_strlcpy(ininfo.version, pj_param(ctx, start, "sversion").s, sizeof(ininfo.version));
-    }
+    if (pj_param(ctx, start, "tversion").i)
+        strncpy(ininfo.version, pj_param(ctx, start, "sversion").s, sizeof(ininfo.version) - 1);
 
-    if (pj_param(ctx, start, "torigin").i) {
-        pj_strlcpy(ininfo.origin, pj_param(ctx, start, "sorigin").s, sizeof(ininfo.origin));
-    }
+    if (pj_param(ctx, start, "torigin").i)
+        strncpy(ininfo.origin, pj_param(ctx, start, "sorigin").s, sizeof(ininfo.origin) - 1);
 
-    if (pj_param(ctx, start, "tlastupdate").i) {
-        pj_strlcpy(ininfo.lastupdate, pj_param(ctx, start, "slastupdate").s, sizeof(ininfo.lastupdate));
-    }
+    if (pj_param(ctx, start, "tlastupdate").i)
+        strncpy(ininfo.lastupdate, pj_param(ctx, start, "slastupdate").s, sizeof(ininfo.lastupdate) - 1);
 
     for ( ; start; start = next) {
         next = start->next;
