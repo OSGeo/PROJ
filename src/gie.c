@@ -146,7 +146,7 @@ static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_si
 
 static const char *gie_tags[] = {
     "<gie>", "operation", "accept", "expect", "roundtrip", "banner", "verbose",
-    "direction", "tolerance", "builtins", "echo", "</gie>"
+    "direction", "tolerance", "ignore", "builtins", "echo", "</gie>"
 };
 
 static const size_t n_gie_tags = sizeof gie_tags / sizeof gie_tags[0];
@@ -178,12 +178,13 @@ typedef struct {
     PJ_DIRECTION dir;
     int verbosity;
     int op_id;
-    int op_ok,    op_ko;
-    int total_ok, total_ko;
-    int grand_ok, grand_ko;
+    int op_ok,    op_ko,    op_skip;
+    int total_ok, total_ko, total_skip;
+    int grand_ok, grand_ko, grand_skip;
     size_t operation_lineno;
     size_t dimensions_given, dimensions_given_at_last_accept;
     double tolerance;
+    int ignore;
     const char *curr_file;
     FILE *fout;
 } gie_ctx;
@@ -237,6 +238,7 @@ int main (int argc, char **argv) {
     T.dir = PJ_FWD;
     T.verbosity = 1;
     T.tolerance = 5e-4;
+    T.ignore = 5555; /* Error code that will not be issued by proj_create() */
 
     o = opt_parse (argc, argv, "hlvq", "o", longflags, longkeys);
     if (0==o)
@@ -294,7 +296,8 @@ int main (int argc, char **argv) {
 
     if (T.verbosity > 0) {
         if (o->fargc > 1)
-        fprintf (T.fout, "%sGrand total: %d. Success: %d, Failure: %d\n", delim, T.grand_ok+T.grand_ko, T.grand_ok, T.grand_ko);
+        fprintf (T.fout, "%sGrand total: %d. Success: %d, Skipped: %d, Failure: %d\n",
+                 delim, T.grand_ok+T.grand_ko+T.grand_skip, T.grand_ok, T.grand_skip, T.grand_ko);
         fprintf (T.fout, "%s", delim);
     }
     else
@@ -315,6 +318,12 @@ static int another_failure (void) {
     return 0;
 }
 
+static int another_skip (void) {
+    T.op_skip++;
+    T.total_skip++;
+    return 0;
+}
+
 static int another_success (void) {
     T.op_ok++;
     T.total_ok++;
@@ -328,6 +337,7 @@ static int process_file (const char *fname) {
     F->lineno = F->next_lineno = F->level = 0;
     T.op_ok = T.total_ok = 0;
     T.op_ko = T.total_ko = 0;
+    T.op_skip = T.total_skip = 0;
 
     f = fopen (fname, "rt");
     if (0==f) {
@@ -351,10 +361,12 @@ static int process_file (const char *fname) {
     fclose (f);
     F->lineno = F->next_lineno = 0;
 
-    T.grand_ok += T.total_ok;
-    T.grand_ko += T.total_ko;
+    T.grand_ok   += T.total_ok;
+    T.grand_ko   += T.total_ko;
+    T.grand_skip += T.grand_skip;
     if (T.verbosity > 0)
-    fprintf (T.fout, "%stotal: %2d tests succeeded,  %2d tests %s\n", delim, T.total_ok, T.total_ko, T.total_ko? "FAILED!": "failed.");
+    fprintf (T.fout, "%stotal: %2d tests succeeded, %2d tests skipped, %2d tests %s\n",
+             delim, T.total_ok, T.total_skip, T.total_ko, T.total_ko? "FAILED!": "failed.");
 
     if (F->level==0)
         return errmsg (-3, "File '%s':Missing '<gie>' cmnd - bye!\n", fname);
@@ -441,6 +453,10 @@ static int tolerance (const char *args) {
     return 0;
 }
 
+static int ignore (const char *args) {
+    T.ignore = errno_from_err_const (column (args, 1));
+    return 0;
+}
 
 static int direction (const char *args) {
     const char *endp = args;
@@ -467,7 +483,8 @@ static int direction (const char *args) {
 
 static void finish_previous_operation (const char *args) {
     if (T.verbosity > 1 && T.op_id > 1 && T.op_ok+T.op_ko)
-        fprintf (T.fout, "%s     %d tests succeeded,  %d tests %s\n", delim, T.op_ok, T.op_ko, T.op_ko? "FAILED!": "failed.");
+        fprintf (T.fout, "%s     %d tests succeeded,  %d tests skipped, %d tests %s\n",
+                 delim, T.op_ok, T.op_skip, T.op_ko, T.op_ko? "FAILED!": "failed.");
     (void) args;
 }
 
@@ -494,9 +511,11 @@ either a conversion or a transformation)
 
     T.op_ok = 0;
     T.op_ko = 0;
+    T.op_skip = 0;
 
     direction ("forward");
     tolerance ("0.5 mm");
+    ignore ("pjd_err_dont_skip");
 
     proj_errno_reset (T.P);
 
@@ -533,6 +552,7 @@ using the "builtins" command verb.
     }
     T.op_ok = 0;
     T.op_ko = 0;
+    T.op_skip = 0;
     i = pj_unitconvert_selftest ();
     if (i!=0) {
         fprintf (T.fout, "pj_unitconvert_selftest fails with %d\n", i);
@@ -637,8 +657,12 @@ back/forward transformation pairs.
     char *endp;
     PJ_COORD coo;
 
-    if (0==T.P)
+    if (0==T.P) {
+        if (T.ignore == proj_errno(T.P))
+            return another_skip();
+
         return another_failure ();
+    }
 
     ans = proj_strtod (args, &endp);
     ntrips = (int) (endp==args? 100: fabs(ans));
@@ -745,12 +769,16 @@ Tell GIE what to expect, when transforming the ACCEPTed input
             expect_failure_with_errno = errno_from_err_const (column (args, 3));
     }
 
+    if (T.ignore==proj_errno(T.P))
+        return another_skip ();
+
     if (0==T.P) {
         /* If we expect failure, and fail, then it's a success... */
         if (expect_failure) {
             /* Failed to fail correctly? */
             if (expect_failure_with_errno && proj_errno (T.P)!=expect_failure_with_errno)
                 return expect_failure_with_errno_message (expect_failure_with_errno, proj_errno(T.P));
+
             return another_success ();
         }
 
@@ -881,6 +909,7 @@ static int dispatch (const char *cmnd, const char *args) {
     if  (0==strcmp (cmnd, "verbose"))   return  verbose   (args);
     if  (0==strcmp (cmnd, "direction")) return  direction (args);
     if  (0==strcmp (cmnd, "tolerance")) return  tolerance (args);
+    if  (0==strcmp (cmnd, "ignore"))    return  ignore (args);
     if  (0==strcmp (cmnd, "builtins"))  return  builtins  (args);
     if  (0==strcmp (cmnd, "echo"))      return  echo      (args);
 
@@ -950,6 +979,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_ellipsoidal_unsupported"  ,  -56},
     {"pjd_err_too_many_inits"           ,  -57},
     {"pjd_err_invalid_arg"              ,  -58},
+    {"pjd_err_dont_skip"                ,  5555},
     {"pjd_err_unknown"                  ,  9999},
     {"pjd_err_enomem"                   ,  ENOMEM},
 };
