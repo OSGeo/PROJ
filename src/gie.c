@@ -1689,7 +1689,8 @@ static int pj_cart_selftest (void) {
         if (strcmp(info.version, tmpstr)) return 55;
     }
     if (info.release[0] == '\0')    return 56;
-    if (info.searchpath[0] == '\0') return 57;
+    if (getenv ("HOME") || getenv ("PROJ_LIB"))
+        if (info.searchpath[0] == '\0') return 57;
 
     /* proj_pj_info() */
     P = proj_create(PJ_DEFAULT_CTX, "+proj=august"); /* august has no inverse */
