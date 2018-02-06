@@ -10,28 +10,30 @@ EXTRA_DIST = 4D-API_cs2cs-style.gie \
 	more_builtins.gie \
 	unitconvert.gie
 
+PROJ_LIB ?= $(top_srcdir)/nad
+
 4D-API-cs2cs-style: 4D-API_cs2cs-style.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 GDA: GDA.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 axisswap: axisswap.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 builtins: builtins.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 deformation: deformation.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 ellipsoid: ellipsoid.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 more_builtins: more_builtins.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 unitconvert: unitconvert.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 check-local: 4D-API-cs2cs-style GDA axisswap builtins deformation ellipsoid more_builtins unitconvert
