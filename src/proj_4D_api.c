@@ -793,6 +793,8 @@ PJ_INFO proj_info (void) {
     if (0 != info.version)
         return info;
 
+    pj_acquire_lock();
+
     info.major = PROJ_VERSION_MAJOR;
     info.minor = PROJ_VERSION_MINOR;
     info.patch = PROJ_VERSION_PATCH;
@@ -823,8 +825,9 @@ PJ_INFO proj_info (void) {
         if (0==buf)
             return info;
     }
-
     info.searchpath = buf;
+
+    pj_release_lock();
     return info;
 }
 
