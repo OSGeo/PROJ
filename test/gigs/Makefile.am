@@ -20,57 +20,57 @@ EXTRA_DIST = \
 	5201.gie \
 	5208.gie
 
+PROJ_LIB ?= $(top_srcdir)/nad
 
 5101.1: 5101.1-jhs.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5101.2: 5101.2-jhs.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5101.3: 5101.3-jhs.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5101.4: 5101.4-jhs-etmerc.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5102.1: 5102.1.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5103.1: 5103.1.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5103.2: 5103.2.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5103.3: 5103.3.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5105.2: 5105.2.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5106: 5106.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5107: 5107.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5109: 5109.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5111.1: 5111.1.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5112: 5112.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5113: 5113.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5201: 5201.gie
-	$(GIEEXE) $<
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 5208: 5208.gie
-	$(GIEEXE) $<
-
+	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 check-local: 5101.1 5101.2 5101.3 5101.4 5102.1 5103.1 5103.2 5103.3 5105.2 5106 5107 5109 5111.1 5112 5113 5201 5208

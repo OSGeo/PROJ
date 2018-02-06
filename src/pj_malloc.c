@@ -182,7 +182,7 @@ void pj_free(PJ *P) {
     /* to be called as the last step of the local destructor     */
     /* pointed to by P->destructor. In most cases,               */
     /* pj_default_destructor actually *is* what is pointed to    */
-    P->destructor (P, 0);
+    P->destructor (P, proj_errno(P));
 }
 
 

@@ -190,6 +190,7 @@ This is annoying, but must be handled elsewhere. We jump through the hoop by
 setting a very lax tolerance.
 -------------------------------------------------------------------------------
 tolerance 15 cm
+ignore    pjd_err_failed_to_load_grid
 accept    12.5 55.5   0                  0
 expect    12.5 55.5 -36.021305084228516  0
 
@@ -214,6 +215,7 @@ Some tests from PJ_hgridshift.c
 operation  proj=hgridshift +grids=nzgd2kgrid0005.gsb  ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance 1 nm
+ignore    pjd_err_failed_to_load_grid
 accept    173 -45 0 0
 roundtrip 100
 -------------------------------------------------------------------------------
