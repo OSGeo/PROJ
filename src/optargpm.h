@@ -84,7 +84,7 @@ opt_eof_handler (o):
 
 Usage is probably easiest understood by a brief textbook style example:
 
-Consider a simple program taking the conventinal "-v, -h, -o" options
+Consider a simple program taking the conventional "-v, -h, -o" options
 indicating "verbose output", "help please", and "output file specification",
 respectively.
 
