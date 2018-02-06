@@ -792,6 +792,7 @@ PJ_INFO proj_info (void) {
 
     pj_acquire_lock ();
     while (0==info_initialized) {
+        info_initialized = 1;
         info.major = PROJ_VERSION_MAJOR;
         info.minor = PROJ_VERSION_MINOR;
         info.patch = PROJ_VERSION_PATCH;
@@ -827,7 +828,6 @@ PJ_INFO proj_info (void) {
         info.paths = paths;
         info.path_count = n;
 
-        info_initialized = 1;
     }
     pj_release_lock ();
     return info;
