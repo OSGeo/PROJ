@@ -810,22 +810,13 @@ printf ("HOME=[%s],  PROJ_LIB=[%s]\n", getenv("HOME"), getenv("PROJ_LIB"));
 
         /* build search path string */
         buf = path_append (buf, getenv ("HOME"), &buf_size);
-        if (0==buf)
-            break;
-
         buf = path_append (buf, getenv ("PROJ_LIB"), &buf_size);
-        if (0==buf)
-            break;
 
         paths = proj_get_searchpath ();
         n = (size_t) proj_get_path_count ();
 
-        for (i = 0;  i < n;  i++) {
+        for (i = 0;  i < n;  i++)
             buf = path_append (buf, paths[i], &buf_size);
-printf ("loop: buf_size=%3.3d,  info.searchpath=[%s]\n", (int) buf_size, info.searchpath);
-            if (0==buf)
-                break;
-        }
         if (0==buf)
             break;
         info.searchpath = buf;
