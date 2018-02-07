@@ -738,6 +738,11 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
 ******************************************************************************/
     char *p;
     size_t len, applen = 0, buflen = 0;
+#ifdef _WIN32
+    char *delim = ";";
+#else
+    char *delim = ":";
+#endif
 
     /* Nothing to do? */
     if (0 == app)
@@ -749,16 +754,16 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
     /* Start checking whether buf is long enough */
     if (0 != buf)
         buflen = strlen (buf);
-    len = buflen+applen+2;
+    len = buflen+applen+strlen (delim) + 1;
 
     /* "pj_realloc", so to speak */
     if (*buf_size < len) {
-        p = pj_calloc (2 * len + 2, sizeof (char));
+        p = pj_calloc (2 * len, sizeof (char));
         if (0==p) {
             pj_dealloc (buf);
             return 0;
         }
-        *buf_size = 2 * len + 2;
+        *buf_size = 2 * len;
         if (buf != 0)
             strcpy (p, buf);
         pj_dealloc (buf);
@@ -769,7 +774,6 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
     if (0 != buflen)
         strcat (buf, ";");
     strcat (buf, app);
-printf ("buf_size=%3.3d,  buf=[%s]\n", (int) *buf_size, buf);
     return buf;
 }
 
@@ -798,7 +802,6 @@ PJ_INFO proj_info (void) {
         return info;
     }
 
-    info_initialized = 1;
     info.major = PROJ_VERSION_MAJOR;
     info.minor = PROJ_VERSION_MINOR;
     info.patch = PROJ_VERSION_PATCH;
@@ -812,8 +815,6 @@ PJ_INFO proj_info (void) {
     info.version    = version;
     info.release    = pj_get_release ();
 
-printf ("HOME=[%s],  PROJ_LIB=[%s]\n", getenv("HOME"), getenv("PROJ_LIB"));
-
     /* build search path string */
     buf = path_append (buf, getenv ("HOME"), &buf_size);
     buf = path_append (buf, getenv ("PROJ_LIB"), &buf_size);
@@ -824,8 +825,6 @@ printf ("HOME=[%s],  PROJ_LIB=[%s]\n", getenv("HOME"), getenv("PROJ_LIB"));
     for (i = 0;  i < n;  i++)
         buf = path_append (buf, paths[i], &buf_size);
     info.searchpath = buf ? buf : empty;
-
-printf ("buf_size=%3.3d,  info.searchpath=[%s]\n", (int) buf_size, info.searchpath);
 
     info.paths = paths;
     info.path_count = n;
