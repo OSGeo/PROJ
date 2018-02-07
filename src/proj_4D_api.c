@@ -753,7 +753,7 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
 
     /* "pj_realloc", so to speak */
     if (*buf_size < len) {
-        p = pj_calloc (2 * len, sizeof (char));
+        p = pj_calloc (2 * len + 2, sizeof (char));
         if (0==p) {
             pj_dealloc (buf);
             return 0;
@@ -806,6 +806,7 @@ PJ_INFO proj_info (void) {
         info.searchpath = empty;
         info.version    = version;
         info.release    = pj_get_release ();
+printf ("HOME=[%s],  PROJ_LIB=[%s]\n", getenv("HOME"), getenv("PROJ_LIB"));
 
         /* build search path string */
         buf = path_append (buf, getenv ("HOME"), &buf_size);
@@ -821,11 +822,13 @@ PJ_INFO proj_info (void) {
 
         for (i = 0;  i < n;  i++) {
             buf = path_append (buf, paths[i], &buf_size);
+printf ("loop: buf_size=%3.3d,  info.searchpath=[%s]\n", (int) buf_size, info.searchpath);
             if (0==buf)
                 break;
         }
+        if (0==buf)
+            break;
         info.searchpath = buf;
-printf ("HOME=[%s],  PROJ_LIB=[%s]\n", getenv("HOME"), getenv("PROJ_LIB"));
 printf ("buf_size=%3.3d,  info.searchpath=[%s]\n", (int) buf_size, info.searchpath);
 
         info.paths = paths;
