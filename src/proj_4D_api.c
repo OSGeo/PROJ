@@ -792,40 +792,45 @@ PJ_INFO proj_info (void) {
     char   *buf = 0;
 
     pj_acquire_lock ();
-    while (0==info_initialized) {
-        info_initialized = 1;
-        info.major = PROJ_VERSION_MAJOR;
-        info.minor = PROJ_VERSION_MINOR;
-        info.patch = PROJ_VERSION_PATCH;
 
-        /* This is a controlled environment, so no risk of sprintf buffer
-        overflow. A normal version string is xx.yy.zz which is 8 characters
-        long and there is room for 64 bytes in the version string. */
-        sprintf (version, "%d.%d.%d", info.major, info.minor, info.patch);
+    if (0!=info_initialized) {
+        pj_release_lock ();
+        return info;
+    }
 
-        info.searchpath = empty;
-        info.version    = version;
-        info.release    = pj_get_release ();
+    info_initialized = 1;
+    info.major = PROJ_VERSION_MAJOR;
+    info.minor = PROJ_VERSION_MINOR;
+    info.patch = PROJ_VERSION_PATCH;
+
+    /* This is a controlled environment, so no risk of sprintf buffer
+    overflow. A normal version string is xx.yy.zz which is 8 characters
+    long and there is room for 64 bytes in the version string. */
+    sprintf (version, "%d.%d.%d", info.major, info.minor, info.patch);
+
+    info.searchpath = empty;
+    info.version    = version;
+    info.release    = pj_get_release ();
+
 printf ("HOME=[%s],  PROJ_LIB=[%s]\n", getenv("HOME"), getenv("PROJ_LIB"));
 
-        /* build search path string */
-        buf = path_append (buf, getenv ("HOME"), &buf_size);
-        buf = path_append (buf, getenv ("PROJ_LIB"), &buf_size);
+    /* build search path string */
+    buf = path_append (buf, getenv ("HOME"), &buf_size);
+    buf = path_append (buf, getenv ("PROJ_LIB"), &buf_size);
 
-        paths = proj_get_searchpath ();
-        n = (size_t) proj_get_path_count ();
+    paths = proj_get_searchpath ();
+    n = (size_t) proj_get_path_count ();
 
-        for (i = 0;  i < n;  i++)
-            buf = path_append (buf, paths[i], &buf_size);
-        if (0==buf)
-            break;
-        info.searchpath = buf;
+    for (i = 0;  i < n;  i++)
+        buf = path_append (buf, paths[i], &buf_size);
+    info.searchpath = buf ? buf : empty;
+
 printf ("buf_size=%3.3d,  info.searchpath=[%s]\n", (int) buf_size, info.searchpath);
 
-        info.paths = paths;
-        info.path_count = n;
+    info.paths = paths;
+    info.path_count = n;
 
-    }
+    info_initialized = 1;
     pj_release_lock ();
     return info;
 }
