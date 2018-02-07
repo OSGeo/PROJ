@@ -68,5 +68,33 @@ WI.lla.Z    --- Wisconsin
 WO.lla.Z    --- Washington, Oregon, N. California
 
 	Other grid shift files
+
+Australia	(sourced from https://github.com/icsm-au/transformation_grids)
+
+A66_National_13_09_01.gsb	--- EPSG:1803 [AGD66 to GDA94]
+Full national coverage two-way transformation file – see Appendix B
+in the GDA2020 Technical Manual available at
+http://www.icsm.gov.au/gda/tech.html for details.
+
+GDA94_GDA2020_conformal.gsb			--- [GDA94 to GDA2020]
+GDA94_GDA2020_conformal_and_distortion.gsb	--- [GDA94 to GDA2020]
+
+Full national coverage two-way transformation files – See Sections 3.2
+and 3.7 in the GDA2020 Technical Manual available at
+http://www.icsm.gov.au/gda/tech.html for details.
+Table 3.4 details which grid to use.
+
+National_84_02_07_01.gsb	--- EPSG:1804 [AGD66 to GDA94]
+Full coverage two-way transformation file in those states that
+originally adopted AGD84 - West Australia, South Australia, Queensland
+- see Appendix B in the GDA2020 Technical Manual available at
+http://www.icsm.gov.au/gda/tech.html for details.
+
+
+Canada
 ntv1_can.dat	--- Canadian NTv1 grid shift file (NAD27-->NAD83)
+
+France
 ntf_r93.gsb	--- French NTv2 grid shift file (NTF-->RGF93)
+
+
