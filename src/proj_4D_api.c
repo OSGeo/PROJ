@@ -825,6 +825,7 @@ PJ_INFO proj_info (void) {
                 break;
         }
         info.searchpath = buf;
+printf ("HOME=[%s],  PROJ_LIB=[%s]\n", getenv("HOME"), getenv("PROJ_LIB"));
 printf ("buf_size=%3.3d,  info.searchpath=[%s]\n", (int) buf_size, info.searchpath);
 
         info.paths = paths;
