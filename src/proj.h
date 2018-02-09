@@ -212,13 +212,13 @@ typedef struct { double o, p, k; }          PJ_OPK;  /* Rotations: omega, phi, k
 typedef struct { double e, n, u; }          PJ_ENU;  /* East, North, Up */
 
 /* Classic proj.4 pair/triplet types */
-typedef struct { double   u,   v; }  UV;
-typedef struct { double   x,   y; }  XY;
-typedef struct { double lam, phi; }  LP;
+typedef struct { double   u,   v; }  PJ_UV;
+typedef struct { double   x,   y; }  PJ_XY;
+typedef struct { double lam, phi; }  PJ_LP;
 
-typedef struct { double   x,   y,  z; }  XYZ;
-typedef struct { double   u,   v,  w; }  UVW;
-typedef struct { double lam, phi,  z; }  LPZ;
+typedef struct { double   x,   y,  z; }  PJ_XYZ;
+typedef struct { double   u,   v,  w; }  PJ_UVW;
+typedef struct { double lam, phi,  z; }  PJ_LPZ;
 
 
 /* Avoid preprocessor renaming and implicit type-punning: Use a union to make it explicit */
@@ -229,12 +229,12 @@ union PJ_COORD {
     PJ_LPZT lpzt;
      PJ_OPK opk;
      PJ_ENU enu;
-        XYZ xyz;
-        UVW uvw;
-        LPZ lpz;
-         XY xy;
-         UV uv;
-         LP lp;
+     PJ_XYZ xyz;
+     PJ_UVW uvw;
+     PJ_LPZ lpz;
+      PJ_XY xy;
+      PJ_UV uv;
+      PJ_LP lp;
 };
 
 
@@ -263,8 +263,8 @@ struct PJ_GRID_INFO {
     char        gridname[32];       /* name of grid                         */
     char        filename[260];      /* full path to grid                    */
     char        format[8];          /* file format of grid                  */
-    LP          lowerleft;          /* Coordinates of lower left corner     */
-    LP          upperright;         /* Coordinates of upper right corner    */
+    PJ_LP       lowerleft;          /* Coordinates of lower left corner     */
+    PJ_LP       upperright;         /* Coordinates of upper right corner    */
     int         n_lon, n_lat;       /* Grid size                            */
     double      cs_lon, cs_lat;     /* Cell size of grid                    */
 };
@@ -336,16 +336,16 @@ PJ_COORD proj_coord (double x, double y, double z, double t);
 double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo);
 
 /* Geodesic distance between two points with angular 2D coordinates */
-double proj_lp_dist (const PJ *P, LP a, LP b);
+double proj_lp_dist (const PJ *P, PJ_LP a, PJ_LP b);
 
 /* The geodesic distance AND the vertical offset */
-double proj_lpz_dist (const PJ *P, LPZ a, LPZ b);
+double proj_lpz_dist (const PJ *P, PJ_LPZ a, PJ_LPZ b);
 
 /* Euclidean distance between two points with linear 2D coordinates */
-double proj_xy_dist (XY a, XY b);
+double proj_xy_dist (PJ_XY a, PJ_XY b);
 
 /* Euclidean distance between two points with linear 3D coordinates */
-double proj_xyz_dist (XYZ a, XYZ b);
+double proj_xyz_dist (PJ_XYZ a, PJ_XYZ b);
 
 
 /* Set or read error level */
@@ -355,7 +355,7 @@ int  proj_errno_reset (const PJ *P);
 int  proj_errno_restore (const PJ *P, int err);
 
 /* Scaling and angular distortion factors */
-PJ_FACTORS proj_factors(PJ *P, LP lp);
+PJ_FACTORS proj_factors(PJ *P, PJ_LP lp);
 
 /* Info functions - get information about various PROJ.4 entities */
 PJ_INFO proj_info(void);
