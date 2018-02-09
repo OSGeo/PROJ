@@ -157,10 +157,6 @@ typedef struct { double u, v, w; } projUVW;
 #define XYZ projUVW
 #define LPZ projUVW
 
-/* Yes, this is ridiculous, but a consequence of an old and bad decision about implicit type-punning through preprocessor abuse */
-typedef struct { double u, v; }        UV;
-typedef struct { double u, v, w; }     UVW;
-
 #else
 typedef struct { double x, y; }        XY;
 typedef struct { double x, y, z; }     XYZ;
@@ -169,6 +165,15 @@ typedef struct { double lam, phi, z; } LPZ;
 typedef struct { double u, v; }        UV;
 typedef struct { double u, v, w; }     UVW;
 #endif  /* ndef PJ_LIB__ */
+
+#else
+typedef PJ_XY XY;
+typedef PJ_LP LP;
+typedef PJ_UV UV;
+typedef PJ_XYZ XYZ;
+typedef PJ_LPZ LPZ;
+typedef PJ_UVW UVW;
+
 #endif  /* ndef PROJ_H   */
 
 

@@ -91,9 +91,9 @@ PJ_COORD pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 /* Grid functionality */
 int             proj_vgrid_init(PJ *P, const char *grids);
 int             proj_hgrid_init(PJ *P, const char *grids);
-double          proj_vgrid_value(PJ *P, LP lp);
-LP              proj_hgrid_value(PJ *P, LP lp);
-LP              proj_hgrid_apply(PJ *P, LP lp, PJ_DIRECTION direction);
+double          proj_vgrid_value(PJ *P, PJ_LP lp);
+PJ_LP           proj_hgrid_value(PJ *P, PJ_LP lp);
+PJ_LP           proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction);
 
 /* High level functionality for handling thread contexts */
 enum proj_log_level {
