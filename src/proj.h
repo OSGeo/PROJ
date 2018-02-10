@@ -344,6 +344,7 @@ PJ_COORD proj_geod (const PJ *P, PJ_COORD a, PJ_COORD b);
 
 
 /* Set or read error level */
+int  proj_context_errno (PJ_CONTEXT *ctx);
 int  proj_errno (const PJ *P);
 int  proj_errno_set (const PJ *P, int err);
 int  proj_errno_reset (const PJ *P);

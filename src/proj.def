@@ -152,3 +152,6 @@ EXPORTS
 
     proj_angular_input             @138
     proj_angular_output            @139
+
+    proj_geod                      @140
+    proj_context_errno             @141
