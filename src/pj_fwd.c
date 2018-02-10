@@ -73,11 +73,13 @@ static PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
             coo = proj_trans (P->hgridshift, PJ_INV, coo);
         else if (P->helmert) {
             coo = proj_trans (P->cart_wgs84, PJ_FWD, coo); /* Go cartesian in WGS84 frame */
-            coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into local frame */
+            coo = proj_trans (P->helmert,    PJ_INV, coo); /* Step into local frame */
             coo = proj_trans (P->cart,       PJ_INV, coo); /* Go back to angular using local ellps */
         }
+        if (coo.lp.lam==HUGE_VAL)
+            return coo;
         if (P->vgridshift)
-            coo = proj_trans (P->vgridshift, PJ_FWD, coo);
+            coo = proj_trans (P->vgridshift, PJ_FWD, coo); /* Go orthometric from geometric */
 
         /* Distance from central meridian, taking system zero meridian into account */
         coo.lp.lam = (coo.lp.lam - P->from_greenwich) - P->lam0;
@@ -92,7 +94,7 @@ static PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
 
     /* We do not support gridshifts on cartesian input */
     if (INPUT_UNITS==PJ_IO_UNITS_CARTESIAN && P->helmert)
-            return proj_trans (P->helmert, PJ_FWD, coo);
+            return proj_trans (P->helmert, PJ_INV, coo);
     return coo;
 }
 
@@ -139,14 +141,18 @@ static PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo) {
             coo.lpz.lam = adjlon(coo.lpz.lam);
 
         if (P->vgridshift)
-            coo = proj_trans (P->vgridshift, PJ_INV, coo);
+            coo = proj_trans (P->vgridshift, PJ_FWD, coo); /* Go orthometric from geometric */
+        if (coo.lp.lam==HUGE_VAL)
+            return coo;
         if (P->hgridshift)
-            coo = proj_trans (P->hgridshift, PJ_FWD, coo);
+            coo = proj_trans (P->hgridshift, PJ_INV, coo);
         else if (P->helmert) {
             coo = proj_trans (P->cart_wgs84, PJ_FWD, coo); /* Go cartesian in WGS84 frame */
-            coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into local frame */
+            coo = proj_trans (P->helmert,    PJ_INV, coo); /* Step into local frame */
             coo = proj_trans (P->cart,       PJ_INV, coo); /* Go back to angular using local ellps */
         }
+        if (coo.lp.lam==HUGE_VAL)
+            return coo;
 
         /* If input latitude was geocentrical, convert back to geocentrical */
         if (P->geoc)

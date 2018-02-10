@@ -80,11 +80,13 @@ static PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
             coo = proj_trans (P->hgridshift, PJ_FWD, coo);
         else if (P->helmert) {
             coo = proj_trans (P->cart,       PJ_FWD, coo); /* Go cartesian in local frame */
-            coo = proj_trans (P->helmert,    PJ_INV, coo); /* Step into WGS84 */
+            coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into WGS84 */
             coo = proj_trans (P->cart_wgs84, PJ_INV, coo); /* Go back to angular using WGS84 ellps */
         }
+        if (coo.lp.lam==HUGE_VAL)
+            return coo;
         if (P->vgridshift)
-            coo = proj_trans (P->vgridshift, PJ_INV, coo);
+            coo = proj_trans (P->vgridshift, PJ_INV, coo); /* Go geometric from orthometric */
         return coo;
     }
 
@@ -99,9 +101,8 @@ static PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
         coo.xyz.y = P->to_meter * coo.xyz.y - P->y0;
         coo.xyz.z = P->to_meter * coo.xyz.z - P->z0;
 
-        if (P->is_geocent) {
+        if (P->is_geocent)
             coo = proj_trans (P->cart, PJ_INV, coo);
-        }
 
         return coo;
 
@@ -148,14 +149,18 @@ static PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo) {
                 coo.lpz.lam = adjlon(coo.lpz.lam);
 
             if (P->vgridshift)
-                coo = proj_trans (P->vgridshift, PJ_INV, coo);
+                coo = proj_trans (P->vgridshift, PJ_INV, coo); /* Go geometric from orthometric */
+            if (coo.lp.lam==HUGE_VAL)
+                return coo;
             if (P->hgridshift)
                 coo = proj_trans (P->hgridshift, PJ_FWD, coo);
             else if (P->helmert) {
                 coo = proj_trans (P->cart,       PJ_FWD, coo); /* Go cartesian in local frame */
-                coo = proj_trans (P->helmert,    PJ_INV, coo); /* Step into WGS84 */
+                coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into WGS84 */
                 coo = proj_trans (P->cart_wgs84, PJ_INV, coo); /* Go back to angular using WGS84 ellps */
             }
+            if (coo.lp.lam==HUGE_VAL)
+                return coo;
         }
 
         /* If input latitude was geocentrical, convert back to geocentrical */
