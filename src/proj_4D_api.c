@@ -473,12 +473,13 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
         def = malloc (100+n);
         if (0==def)
             return 0;
-        sprintf (def, "break_cs2cs_recursion     proj=helmert %s", s);
+        sprintf (def, "break_cs2cs_recursion     proj=helmert %s transpose", s);
         Q = proj_create (P->ctx, def);
+        pj_inherit_ellipsoid_def (P, Q);
         free (def);
         if (0==Q)
             return 0;
-        P->helmert = skip_prep_fin(Q);
+        P->helmert = skip_prep_fin (Q);
 
         break;
     }
@@ -491,14 +492,14 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
         Q = proj_create (P->ctx, def);
         if (0==Q)
             return 0;
-        pj_inherit_ellipsoid_def(P, Q);
-        P->cart = skip_prep_fin(Q);
+        pj_inherit_ellipsoid_def (P, Q);
+        P->cart = skip_prep_fin (Q);
 
         sprintf (def, "break_cs2cs_recursion     proj=cart  ellps=WGS84");
         Q = proj_create (P->ctx, def);
         if (0==Q)
             return 0;
-        P->cart_wgs84 = skip_prep_fin(Q);
+        P->cart_wgs84 = skip_prep_fin (Q);
     }
 
     return 1;
