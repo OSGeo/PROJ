@@ -228,17 +228,7 @@ We need a set of authoritative test cases to test the nzgd2000 grid.
 
 
 
-tolerance 1 nm
-ignore    pjd_err_failed_to_load_grid
-accept    173 -45 0 0
-roundtrip 100
 -------------------------------------------------------------------------------
-expect    172.999892181021551 -45.001620431954613  0 0
-direction inverse
-accept    172.999892181021551 -45.001620431954613  0 0
-expect    173 -45 0 0
--------------------------------------------------------------------------------
-
 # Fail on purpose: open non-existing grid:
 operation proj=hgridshift grids=@nonexistinggrid.gsb,anothernonexistinggrid.gsb
 expect    failure errno failed_to_load_grid

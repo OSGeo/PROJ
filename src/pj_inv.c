@@ -86,7 +86,7 @@ static PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
         if (coo.lp.lam==HUGE_VAL)
             return coo;
         if (P->vgridshift)
-            coo = proj_trans (P->vgridshift, PJ_FWD, coo);
+            coo = proj_trans (P->vgridshift, PJ_INV, coo); /* Go geometric from orthometric */
         return coo;
     }
 
@@ -149,7 +149,7 @@ static PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo) {
                 coo.lpz.lam = adjlon(coo.lpz.lam);
 
             if (P->vgridshift)
-                coo = proj_trans (P->vgridshift, PJ_FWD, coo);
+                coo = proj_trans (P->vgridshift, PJ_INV, coo); /* Go geometric from orthometric */
             if (coo.lp.lam==HUGE_VAL)
                 return coo;
             if (P->hgridshift)

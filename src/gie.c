@@ -842,10 +842,17 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     if (T.verbosity > 3)
         printf ("GOT      %.12f  %.12f  %.12f  %.12f\n", co.v[0],co.v[1],co.v[2],co.v[3]);
 
+#if 0
+    /* We need to handle unusual axis orders - that'll be an item for version 5.1 */
+    if (T.P->axisswap) {
+        ce = proj_trans (T.P->axisswap, T.dir, ce);
+        co = proj_trans (T.P->axisswap, T.dir, co);
+    }
+#endif
     if (proj_angular_output (T.P, T.dir))
         d = proj_lpz_dist (T.P, ce.lpz, co.lpz);
     else
-        d = proj_xyz_dist (T.b.xyz, T.e.xyz);
+        d = proj_xyz_dist (co.xyz, ce.xyz);
 
     if (d > T.tolerance)
         return expect_message (d, args);

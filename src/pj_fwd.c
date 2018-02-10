@@ -79,7 +79,7 @@ static PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
         if (coo.lp.lam==HUGE_VAL)
             return coo;
         if (P->vgridshift)
-            coo = proj_trans (P->vgridshift, PJ_FWD, coo);
+            coo = proj_trans (P->vgridshift, PJ_FWD, coo); /* Go orthometric from geometric */
 
         /* Distance from central meridian, taking system zero meridian into account */
         coo.lp.lam = (coo.lp.lam - P->from_greenwich) - P->lam0;
@@ -141,7 +141,7 @@ static PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo) {
             coo.lpz.lam = adjlon(coo.lpz.lam);
 
         if (P->vgridshift)
-            coo = proj_trans (P->vgridshift, PJ_INV, coo);
+            coo = proj_trans (P->vgridshift, PJ_FWD, coo); /* Go orthometric from geometric */
         if (coo.lp.lam==HUGE_VAL)
             return coo;
         if (P->hgridshift)
