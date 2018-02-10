@@ -12,74 +12,62 @@ but provided through a different interface.
 <gie>
 
 -------------------------------------------------------------------------------
-Test the handling of the +towgs84 parameter
+Test the handling of the +towgs84 parameter.
+-------------------------------------------------------------------------------
+(additional tests of the towgs84 handling can be found in DHDN_ETRS89.gie)
+-------------------------------------------------------------------------------
+
+
 -------------------------------------------------------------------------------
 This example is from Lotti Jivall: "Simplified transformations from
-ITRF2008/IGS08 to ETRS89 for maritime applications". The original
-XYZ data (cf. more_builtins.gie) have been transformed to LPZ using
-this command: echo x_val y_val z_val | cct -It0 proj=cart ellps=GRS80 --
-
-NOTE: Here, the ellipsoid has been swapped to WGS84, to align with
-      the WGS84 ellipsoid used in the cs2cs emulation introduced by
-      pj_cs2cs_emulation_setup()
+ITRF2008/IGS08 to ETRS89 for maritime applications" (see also more_builtins.gie)
 -------------------------------------------------------------------------------
-operation proj=latlong ellps=WGS84
-          towgs84 =  0.676780,  0.654950, -0.528270,
-                    -0.022742,  0.012667,  0.022704, -0.010700
+operation  proj=geocent ellps=WGS84
+           towgs84 = 0.676780, 0.654950, -0.528270,
+                    -0.022742, 0.012667,  0.022704,
+                    -0.01070
 -------------------------------------------------------------------------------
-tolerance 0.05 mm
-direction forward
-
-accept    13.4999969828397   54.9999995493206   -0.6034
-expect    13.4999906103972   54.9999957469562   -0.6374
+tolerance 1 um
 
 direction inverse
 
-accept    13.4999906103972   54.9999957469562   -0.6374
-expect    13.4999969828397   54.9999995493206   -0.6034
+accept     3565285.00000000  855949.00000000  5201383.00000000
+expect     3565285.41342351  855948.67986759  5201382.72939791
 -------------------------------------------------------------------------------
 
 
 
 -------------------------------------------------------------------------------
 This example is a random point, transformed from ED50 to ETRS89 using KMStrans2.
-
-NOTE: Signs swapped wrt. KMStrans2, which apparently uses frame rotation.
--------------------------------------------------------------------------------
-operation proj=latlong ellps=intl
-          towgs84 =  081.07030, 089.36030, 115.75260,
-                     000.48488, 000.02436, 000.41321, 0.540645
--------------------------------------------------------------------------------
-tolerance  0.1 mm
-# echo SWAPPED and trimmed - expect succcess
-# accept     16.819999997    55.170000002        61.0
-accept     16.82    55.17        61.0
-expect     16.8210462130   55.1705688946       29.0317
--------------------------------------------------------------------------------
-This commented-out version of the example above was used to detect the sign
-discrepancy between KMSTrans2 and PROJ.
 -------------------------------------------------------------------------------
 operation proj=latlong ellps=intl
           towgs84 =  -081.07030, -089.36030, -115.75260,
-                     -000.48488, -000.02436, -000.41321, -0.540645
+                      000.48488, 000.02436, 000.41321, -0.540645
 -------------------------------------------------------------------------------
-# echo NOT SWAPPED - Expect failure
-# accept     16.8210462130   55.1705688946       29.0317
-# expect     16.819999997    55.170000002        61.0
+tolerance  25 mm
+
+accept     16.82    55.17        61.0
+expect     16.8210462130   55.1705688946       29.0317
 -------------------------------------------------------------------------------
 
 
 
+
 -------------------------------------------------------------------------------
-operation  proj=latlong nadgrids=nzgd2kgrid0005.gsb  ellps=GRS80
+# operation  proj=latlong nadgrids=nzgd2kgrid0005.gsb  ellps=GRS80
 -------------------------------------------------------------------------------
-tolerance 1 nm
-ignore    pjd_err_failed_to_load_grid
-accept    173                 -45                  0 0
-expect    172.999892181021551 -45.001620431954613  0 0
-direction inverse
-accept    172.999892181021551 -45.001620431954613  0 0
-expect    173                 -45                  0 0
+Note: This test appears to use wrong coordinate data, and is commented out.
+We need a set of authoritative test cases to test the nzgd2000 grid.
+
+This functionality is sufficiently tested in DHDN_ETRS89.gie
+-------------------------------------------------------------------------------
+# tolerance 1 um
+# ignore    pjd_err_failed_to_load_grid
+# accept    173                 -45                  0 0
+# expect    172.999892181021551 -45.001620431954613  0 0
+# direction inverse
+# accept    172.999892181021551 -45.001620431954613  0 0
+# expect    173                 -45                  0 0
 -------------------------------------------------------------------------------
 
 
