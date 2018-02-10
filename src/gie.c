@@ -681,7 +681,7 @@ back/forward transformation pairs.
             banner (T.operation);
         fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
         fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) F->lineno);
-        fprintf (T.fout, "     roundtrip deviation: %.3f mm, expected: %.3f mm\n", 1000*r, 1000*d);
+        fprintf (T.fout, "     roundtrip deviation: %.6f mm, expected: %.6f mm\n", 1000*r, 1000*d);
     }
     return another_failure ();
 }
@@ -700,13 +700,13 @@ static int expect_message (double d, const char *args) {
 
     fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) F->lineno);
     fprintf (T.fout, "     expected: %s\n", args);
-    fprintf (T.fout, "     got:      %.9f   %.9f", T.b.xy.x,  T.b.xy.y);
+    fprintf (T.fout, "     got:      %.12f   %.12f", T.b.xy.x,  T.b.xy.y);
     if (T.b.xyzt.t!=0 || T.b.xyzt.z!=0)
         fprintf (T.fout, "   %.9f", T.b.xyz.z);
     if (T.b.xyzt.t!=0)
         fprintf (T.fout, "   %.9f", T.b.xyzt.t);
     fprintf (T.fout, "\n");
-    fprintf (T.fout, "     deviation:  %.3f mm,  expected:  %.3f mm\n", 1000*d, 1000*T.tolerance);
+    fprintf (T.fout, "     deviation:  %.6f mm,  expected:  %.6f mm\n", 1000*d, 1000*T.tolerance);
     return 1;
 }
 
@@ -829,42 +829,28 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     /* expected angular values, probably in degrees */
     ce = proj_angular_output (T.P, T.dir)? torad_coord (T.P, T.dir, T.e): T.e;
     if (T.verbosity > 3)
-        printf ("EXPECTS  %.4f  %.4f  %.4f  %.4f\n", ce.v[0],ce.v[1],ce.v[2],ce.v[3]);
+        printf ("EXPECTS  %.12f  %.12f  %.12f  %.12f\n", ce.v[0],ce.v[1],ce.v[2],ce.v[3]);
 
     /* input ("accepted") values, also probably in degrees */
     ci = proj_angular_input (T.P, T.dir)? torad_coord (T.P, T.dir, T.a): T.a;
     if (T.verbosity > 3)
-        printf ("ACCEPTS  %.4f  %.4f  %.4f  %.4f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
+        printf ("ACCEPTS  %.12f  %.12f  %.12f  %.12f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
 
     /* angular output from proj_trans comes in radians */
     co = expect_trans_n_dim (ci);
     T.b = proj_angular_output (T.P, T.dir)? todeg_coord (T.P, T.dir, co): co;
     if (T.verbosity > 3)
-        printf ("GOT      %.4f  %.4f  %.4f  %.4f\n", co.v[0],co.v[1],co.v[2],co.v[3]);
+        printf ("GOT      %.12f  %.12f  %.12f  %.12f\n", co.v[0],co.v[1],co.v[2],co.v[3]);
 
-    /* but there are a few more possible input conventions... */
-    if (proj_angular_output (T.P, T.dir)) {
-        double e = HUGE_VAL;
+    if (proj_angular_output (T.P, T.dir))
         d = proj_lpz_dist (T.P, ce.lpz, co.lpz);
-        /* check whether input was already in radians */
-        if (d > T.tolerance)
-            e = proj_lpz_dist (T.P, T.e.lpz, co.lpz);
-        if (e < d)
-            d = e;
-
-        /* or the tolerance may be based on euclidean distance */
-        if (d > T.tolerance)
-            e = proj_xyz_dist (T.b.xyz, T.e.xyz);
-        if (e < d)
-            d = e;
-    }
     else
         d = proj_xyz_dist (T.b.xyz, T.e.xyz);
+
     if (d > T.tolerance)
         return expect_message (d, args);
 
     another_success ();
-
     return 0;
 }
 
