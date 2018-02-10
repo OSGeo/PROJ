@@ -217,6 +217,7 @@ union PJ_COORD {
     PJ_XYZT xyzt;
     PJ_UVWT uvwt;
     PJ_LPZT lpzt;
+    PJ_GEOD geod;
      PJ_OPK opk;
      PJ_ENU enu;
      PJ_XYZ xyz;
