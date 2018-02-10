@@ -850,9 +850,9 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     }
 #endif
     if (proj_angular_output (T.P, T.dir))
-        d = proj_lpz_dist (T.P, ce.lpz, co.lpz);
+        d = proj_lpz_dist (T.P, ce, co);
     else
-        d = proj_xyz_dist (co.xyz, ce.xyz);
+        d = proj_xyz_dist (co, ce);
 
     if (d > T.tolerance)
         return expect_message (d, args);
@@ -1432,13 +1432,13 @@ static int pj_horner_selftest (void) {
 
     /* Forward projection */
     b = proj_trans (P, PJ_FWD, a);
-    dist = proj_xy_dist (b.xy, c.xy);
+    dist = proj_xy_dist (b, c);
     if (dist > 0.001)
         return 2;
 
     /* Inverse projection */
     b = proj_trans (P, PJ_INV, c);
-    dist = proj_xy_dist (b.xy, a.xy);
+    dist = proj_xy_dist (b, a);
     if (dist > 0.001)
         return 3;
 
@@ -1520,7 +1520,7 @@ static int pj_cart_selftest (void) {
     /* Forward again, to get two linear items for comparison */
     a = proj_trans (P, PJ_FWD, a);
 
-    dist = proj_xy_dist (a.xy, b.xy);
+    dist = proj_xy_dist (a, b);
     if (dist > 2e-9)
         return 3;
 
@@ -1771,7 +1771,7 @@ static int pj_cart_selftest (void) {
     a.lp.lam = PJ_TORAD(12);
     a.lp.phi = PJ_TORAD(55);
 
-    factors = proj_factors(P, a.lp);
+    factors = proj_factors(P, a);
     if (proj_errno(P))
         return 85; /* factors not created correctly */
 

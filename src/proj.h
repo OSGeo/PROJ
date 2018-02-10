@@ -112,13 +112,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-/*
-#ifdef _MSC_VER
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
-#endif
-#include <math.h>    For M_PI */
+
 #include <stddef.h>  /* For size_t */
 
 
@@ -151,11 +145,6 @@ typedef union PJ_COORD PJ_COORD;
 struct PJ_AREA;
 typedef struct PJ_AREA PJ_AREA;
 
-/* The slimmed down PROJ 5.0.0 version of struct FACTORS  */
-/* Will take over the world and the name when we can rid  */
-/* the library for deprecated stuff, but it's the typedef */
-/* which is userspace useful, so it does not do much of a */
-/* difference */
 struct P5_FACTORS {                  /* Common designation */
     double meridional_scale;               /* h */
     double parallel_scale;                 /* k */
@@ -210,8 +199,9 @@ typedef struct { double   u,   v,  w, t; }  PJ_UVWT;
 typedef struct { double lam, phi,  z, t; }  PJ_LPZT;
 typedef struct { double o, p, k; }          PJ_OPK;  /* Rotations: omega, phi, kappa */
 typedef struct { double e, n, u; }          PJ_ENU;  /* East, North, Up */
+typedef struct { double s, a1, a2; }        PJ_GEOD; /* Geodesic length, fwd azi, rev azi */
 
-/* Classic proj.4 pair/triplet types */
+/* Classic proj.4 pair/triplet types - moved into the PJ_ name space */
 typedef struct { double   u,   v; }  PJ_UV;
 typedef struct { double   x,   y; }  PJ_XY;
 typedef struct { double lam, phi; }  PJ_LP;
@@ -336,16 +326,20 @@ PJ_COORD proj_coord (double x, double y, double z, double t);
 double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo);
 
 /* Geodesic distance between two points with angular 2D coordinates */
-double proj_lp_dist (const PJ *P, PJ_LP a, PJ_LP b);
+double proj_lp_dist (const PJ *P, PJ_COORD a, PJ_COORD b);
 
 /* The geodesic distance AND the vertical offset */
-double proj_lpz_dist (const PJ *P, PJ_LPZ a, PJ_LPZ b);
+double proj_lpz_dist (const PJ *P, PJ_COORD a, PJ_COORD b);
 
 /* Euclidean distance between two points with linear 2D coordinates */
-double proj_xy_dist (PJ_XY a, PJ_XY b);
+double proj_xy_dist (PJ_COORD a, PJ_COORD b);
 
 /* Euclidean distance between two points with linear 3D coordinates */
-double proj_xyz_dist (PJ_XYZ a, PJ_XYZ b);
+double proj_xyz_dist (PJ_COORD a, PJ_COORD b);
+
+/* Geodesic distance (in meter) + fwd and rev azimuth between two points on the ellipsoid */
+PJ_COORD proj_geod (const PJ *P, PJ_COORD a, PJ_COORD b);
+
 
 
 /* Set or read error level */
@@ -355,7 +349,7 @@ int  proj_errno_reset (const PJ *P);
 int  proj_errno_restore (const PJ *P, int err);
 
 /* Scaling and angular distortion factors */
-PJ_FACTORS proj_factors(PJ *P, PJ_LP lp);
+PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp);
 
 /* Info functions - get information about various PROJ.4 entities */
 PJ_INFO proj_info(void);
