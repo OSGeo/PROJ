@@ -47,7 +47,8 @@ C_NAMESPACE_VAR const struct PJ_DATUMS pj_datums[] = {
 {"NAD27",   "nadgrids=@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat",
                                                      "clrk66",
                                                               "North_American_Datum_1927"},
-{"potsdam", "towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7",
+{"potsdam", /*"towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7",*/
+            "nadgrids=@BETA2007.gsb",
                                                      "bessel",
                                                               "Potsdam Rauenberg 1950 DHDN"},
 {"carthage","towgs84=-263.0,6.0,431.0",              "clrk80ign",
