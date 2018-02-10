@@ -284,6 +284,10 @@ add_library( ${PROJ_CORE_TARGET}
                     ${ALL_LIBPROJ_HEADERS}
                     ${PROJ_RESOURCES}  )
 
+if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
+  target_include_directories (${PROJ_CORE_TARGET} INTERFACE
+    $<INSTALL_INTERFACE:${INCLUDEDIR}>)
+endif ()
 
 if(WIN32)
   set_target_properties(${PROJ_CORE_TARGET}
