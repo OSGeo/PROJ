@@ -52,22 +52,18 @@ expect     16.8210462130   55.1705688946       29.0317
 
 
 
-
 -------------------------------------------------------------------------------
-# operation  proj=latlong nadgrids=nzgd2kgrid0005.gsb  ellps=GRS80
+operation  proj=latlong nadgrids=nzgd2kgrid0005.gsb  ellps=GRS80
 -------------------------------------------------------------------------------
-Note: This test appears to use wrong coordinate data, and is commented out.
-We need a set of authoritative test cases to test the nzgd2000 grid.
-
-This functionality is sufficiently tested in DHDN_ETRS89.gie
+This functionality is also tested in DHDN_ETRS89.gie
 -------------------------------------------------------------------------------
-# tolerance 1 um
-# ignore    pjd_err_failed_to_load_grid
-# accept    173                 -45                  0 0
-# expect    172.999892181021551 -45.001620431954613  0 0
-# direction inverse
-# accept    172.999892181021551 -45.001620431954613  0 0
-# expect    173                 -45                  0 0
+tolerance 1 mm
+ignore    pjd_err_failed_to_load_grid
+accept    173                 -45
+expect    172.999892181021551 -45.001620431954613
+direction inverse
+accept    172.999892181021551 -45.001620431954613
+expect    173                 -45
 -------------------------------------------------------------------------------
 
 
@@ -160,5 +156,20 @@ expect    -7424275.1946 -36.0213  1391493.6349 0.0000
 # direction inverse
 # accept    -7424275.1946 -36.0213  1391493.6349 0.0000
 # expect    12.5 55.5 0
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+A test point from a comment by Github user c0nk
+-------------------------------------------------------------------------------
+operation  proj=somerc
+           lat_0=46.95240555555556 lon_0=7.439583333333333 k_0=1
+           x_0=2600000 y_0=1200000 ellps=bessel
+           towgs84=674.374,15.056,405.346
+-------------------------------------------------------------------------------
+tolerance 20 cm      # lax tolerance due to widely distributed, bad egm96 file
+accept    7.438632495 46.951082877
+expect    2600000.0  1200000.0
 -------------------------------------------------------------------------------
 </gie>

@@ -211,20 +211,19 @@ expect    failure errno failed_to_load_grid
 -------------------------------------------------------------------------------
 Some tests from PJ_hgridshift.c
 -------------------------------------------------------------------------------
-# operation  proj=hgridshift +grids=nzgd2kgrid0005.gsb  ellps=GRS80
+operation  proj=hgridshift +grids=nzgd2kgrid0005.gsb  ellps=GRS80
 -------------------------------------------------------------------------------
-Note: This test appears to use wrong coordinate data, and is commented out.
+Note: These data are home grown and suitable for regression testing only
 We need a set of authoritative test cases to test the nzgd2000 grid.
 -------------------------------------------------------------------------------
-# tolerance 1 um
-# ignore    pjd_err_failed_to_load_grid
-# accept    173                 -45                  0 0
-# expect    172.999892181021551 -45.001620431954613  0 0
-# direction inverse
-# accept    172.999892181021551 -45.001620431954613  0 0
-# expect    173                 -45                  0 0
+tolerance 1 mm
+ignore    pjd_err_failed_to_load_grid
+accept    172.999892181021551 -45.001620431954613
+expect    173                 -45
+direction inverse
+accept    173                 -45
+expect    172.999892181021551 -45.001620431954613
 -------------------------------------------------------------------------------
-
 
 
 
