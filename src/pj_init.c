@@ -470,22 +470,20 @@ pj_init(int argc, char **argv) {
 }
 
 
-typedef    PJ *(constructor)(PJ *);
-
-static constructor *pj_constructor (const char *name) {
+static PJ_CONSTRUCTOR pj_locate_constructor (const char *name) {
     int i;
     char *s;
     for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
     if (0==s)
         return 0;
-    return (constructor *) pj_list[i].proj;
+    return (PJ_CONSTRUCTOR) pj_list[i].proj;
 }
 
 
 PJ *
 pj_init_ctx(projCtx ctx, int argc, char **argv) {
     char *s, *name;
-    constructor *proj;
+    PJ_CONSTRUCTOR proj;
     paralist *curr, *init, *start;
     int i;
     int err;
@@ -559,7 +557,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);
     name += 5;
 
-    proj = pj_constructor (name);
+    proj = pj_locate_constructor (name);
     if (0==proj)
         return pj_dealloc_params (ctx, start, PJD_ERR_UNKNOWN_PROJECTION_ID);
 
