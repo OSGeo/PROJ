@@ -25,8 +25,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-
-
  /*
   * This version number should be updated with every release!
   *
@@ -84,10 +82,18 @@ extern int pj_errno;    /* global error return code */
     /* These make the function declarations below conform with classic proj */
     typedef PJ *projPJ;          /* projPJ is a pointer to PJ */
     typedef struct projCtx_t *projCtx;  /* projCtx is a pointer to projCtx_t */
-#   define projXY        XY
+#ifdef PROJ_H
+#   define projXY       PJ_XY
+#   define projLP       PJ_LP
+#   define projXYZ      PJ_XYZ
+#   define projLPZ      PJ_LPZ
+#else
+#   define projXY       XY
 #   define projLP       LP
 #   define projXYZ      XYZ
 #   define projLPZ      LPZ
+#endif
+
 #else
     /* i.e. proj_api invoked as primary API */
     typedef struct { double u, v; } projUV;
