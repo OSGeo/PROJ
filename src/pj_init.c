@@ -509,7 +509,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             n_inits++;
     }
 
-    /* can't have nested pipeline directly */
+    /* can't have nested pipelines directly */
     if (n_pipelines > 1) {
         pj_ctx_set_errno (ctx, PJD_ERR_MALFORMED_PIPELINE);
         return 0;
