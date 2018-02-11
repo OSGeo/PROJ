@@ -592,16 +592,23 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         return pj_default_destructor (PIN, proj_errno(PIN));
 
     err = pj_ellipsoid (PIN);
-    if (PIN->need_ellps && 0 != err) {
-        pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
-        return pj_default_destructor (PIN, proj_errno(PIN));
+
+    if (err) {
+        /* Didn't get an ellps, but doesn't need one: Get a free WGS84 */
+        if (PIN->need_ellps) {
+            pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
+            return pj_default_destructor (PIN, proj_errno(PIN));
+        }
+        else {
+            PIN->f = 1.0/298.257223563;
+            PIN->a_orig  = PIN->a  = 6378137.0;
+            PIN->es_orig = PIN->es = PIN->f*(2-PIN->f);
+        }
     }
-    if (0==err) {
-        PIN->a_orig = PIN->a;
-        PIN->es_orig = PIN->es;
-        if (pj_calc_ellipsoid_params (PIN, PIN->a, PIN->es))
-            return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE);
-    }
+    PIN->a_orig = PIN->a;
+    PIN->es_orig = PIN->es;
+    if (pj_calc_ellipsoid_params (PIN, PIN->a, PIN->es))
+        return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE);
 
     /* Now that we have ellipse information check for WGS84 datum */
     if( PIN->datum_type == PJD_3PARAM

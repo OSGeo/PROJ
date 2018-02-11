@@ -1836,12 +1836,12 @@ static int pj_cart_selftest (void) {
 
     /* linear in and out */
     P = proj_create(PJ_DEFAULT_CTX,
-        " +proj=helmert +ellps=GRS80"
+        " +proj=helmert"
         " +x=0.0127 +y=0.0065 +z=-0.0209 +s=0.00195"
         " +rx=-0.00039 +ry=0.00080 +rz=-0.00114"
         " +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +ds=0.00001"
         " +drx=-0.00011 +dry=-0.00019 +drz=0.00007"
-        " +t_epoch=1988.0 +transpose"
+        " +t_epoch=1988.0 +transpose +no_defs"
     );
     if (0==P) return 0;
     if (proj_angular_input (P, PJ_FWD))  return 116;
@@ -1853,14 +1853,15 @@ static int pj_cart_selftest (void) {
     if (proj_angular_input (P, PJ_INV))  return 121;
     if (proj_angular_output (P, PJ_FWD)) return 122;
     if (proj_angular_output (P, PJ_INV)) return 123;
-    proj_destroy(P);
 
+    /* We specified "no_defs" but didn't give any ellipsoid info */
+    /* pj_init_ctx should defualt to WGS84 */
+    if (P->a != 6378137.0) return 124;
+    if (P->f != 1.0/298.257223563) return 125;
+    proj_destroy(P);
 
     return 0;
 }
-
-
-
 
 
 
