@@ -564,7 +564,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
 
             gi->gridname = pj_strdup( gilist->gridname );
             gi->filename = pj_strdup( gilist->filename );
-            if (!gi->gridname || gi->filename) {
+            if (!gi->gridname || !gi->filename) {
                 pj_gridinfo_free(ctx, gi);
                 pj_dalloc(ct);
                 pj_gridinfo_free(ctx, gilist);
