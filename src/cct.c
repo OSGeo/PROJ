@@ -151,6 +151,7 @@ static const char usage[] = {
 int main(int argc, char **argv) {
     PJ *P;
     PJ_COORD point;
+    PJ_PROJ_INFO info;
     OPTARGS *o;
     FILE *fout = stdout;
     char *buf;
@@ -220,6 +221,11 @@ int main(int argc, char **argv) {
         if (stdout != fout)
             fclose (fout);
         return 1;
+    }
+
+    if (verbose > 4) {
+        info = proj_pj_info (P);
+        fprintf (stdout, "Final: %s argc=%d pargc=%d\n", info.definition, argc, o->pargc);
     }
 
     if (direction==-1) {

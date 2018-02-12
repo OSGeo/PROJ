@@ -240,11 +240,13 @@ static PJ *pj_create_pipeline (PJ *P, size_t steps) {
 
 
 
-/* count the number of args in pipeline definition */
+/* count the number of args in pipeline definition, and mark all args as used */
 static size_t argc_params (paralist *params) {
     size_t argc = 0;
-    for (; params != 0; params = params->next)
+    for (; params != 0; params = params->next) {
         argc++;
+        params->used = 1;
+    }
     return ++argc;  /* one extra for the sentinel */
 }
 
@@ -414,7 +416,7 @@ PJ *OPERATION(pipeline,0) {
         err = proj_errno_reset (P);
 
         next_step = proj_create_argv (P->ctx, current_argc, current_argv);
-        proj_log_trace (P, "Pipeline: Step %d at %p", i, next_step);
+        proj_log_trace (P, "Pipeline: Step %d (%s) at %p", i, current_argv[0], next_step);
 
         if (0==next_step) {
             /* The step init failed, but possibly without setting errno. If so, we say "malformed" */
@@ -436,7 +438,7 @@ PJ *OPERATION(pipeline,0) {
 
         P->opaque->pipeline[i+1] = next_step;
 
-        proj_log_trace (P, "Pipeline at [%p]:    step at [%p] done", P, next_step);
+        proj_log_trace (P, "Pipeline at [%p]:    step at [%p] (%s) done", P, next_step, current_argv[0]);
     }
 
     /* Require a forward path through the pipeline */
