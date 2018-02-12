@@ -218,6 +218,37 @@ struct PJ_AREA {
 struct projCtx_t;
 typedef struct projCtx_t projCtx_t;
 
+/*****************************************************************************
+
+    Some function types that are especially useful when working with PJs
+
+******************************************************************************
+
+PJ_CONSTRUCTOR:
+
+    A function taking a pointer-to-PJ as arg, and returning a pointer-to-PJ.
+    Historically called twice: First with a 0 argument, to allocate memory,
+    second with the first return value as argument, for actual setup.
+
+PJ_DESTRUCTOR:
+
+    A function taking a pointer-to-PJ and an integer as args, then first
+    handling the deallocation of the PJ, afterwards handing the integer over
+    to the error reporting subsystem, and finally returning a null pointer in
+    support of the "return free (P)" (aka "get the hell out of here") idiom.
+
+PJ_OPERATOR:
+
+    A function taking a PJ_COORD and a pointer-to-PJ as args, applying the
+    PJ to the PJ_COORD, and returning the resulting PJ_COORD.
+
+*****************************************************************************/
+typedef    PJ       *(* PJ_CONSTRUCTOR) (PJ *);
+typedef    void     *(* PJ_DESTRUCTOR)  (PJ *, int);
+typedef    PJ_COORD  (* PJ_OPERATOR)    (PJ_COORD, PJ *);
+/****************************************************************************/
+
+
 
 /* base projection data structure */
 struct PJconsts {
@@ -267,10 +298,10 @@ struct PJconsts {
     LP  (*inv)(XY,    PJ *);
     XYZ (*fwd3d)(LPZ, PJ *);
     LPZ (*inv3d)(XYZ, PJ *);
-    PJ_COORD (*fwd4d)(PJ_COORD, PJ *);
-    PJ_COORD (*inv4d)(PJ_COORD, PJ *);
+    PJ_OPERATOR fwd4d;
+    PJ_OPERATOR inv4d;
 
-    void *(*destructor)(PJ *, int);
+    PJ_DESTRUCTOR destructor;
 
 
     /*************************************************************************************
