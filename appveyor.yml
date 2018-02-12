@@ -62,7 +62,7 @@ test_script:
   - dir ..\test\gie
   - echo "Contents of PROJ_LIB " %PROJ_LIB%
   - dir %PROJ_LIB%
-  - gie.exe ..\test\gie\*.gie
+  - gie.exe ..\test\gie\*.gie ..\test\gigs\*.gie
 
 deploy: off
 
