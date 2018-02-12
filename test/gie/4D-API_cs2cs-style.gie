@@ -161,14 +161,29 @@ expect    -7424275.1946 -36.0213  1391493.6349 0.0000
 
 
 -------------------------------------------------------------------------------
-A test point from a comment by Github user c0nk
+A test case from a comment by Github user c0nk
 -------------------------------------------------------------------------------
 operation  proj=somerc
            lat_0=46.95240555555556 lon_0=7.439583333333333 k_0=1
            x_0=2600000 y_0=1200000 ellps=bessel
-           towgs84=674.374,15.056,405.346
+           towgs84=674.374,15.056,405.346 no_defs
 -------------------------------------------------------------------------------
-tolerance 20 cm      # lax tolerance due to widely distributed, bad egm96 file
+tolerance 20 cm
+accept    7.438632495 46.951082877
+expect    2600000.0  1200000.0
+-------------------------------------------------------------------------------
+Same test, but now implemented as a pipeline. This is for testing a nasty bug,
+where, at the end of pipeline creation, a false warning about missing ellps was
+left behind from the creation of the Helmert step  (now repaired in pj_init).
+-------------------------------------------------------------------------------
+operation proj=pipeline
+     step proj=cart ellps=WGS84 no_defs
+     step proj=helmert x=674.37400 y=15.05600 z=405.34600 inv no_defs
+     step proj=cart ellps=bessel no_defs inv
+     step proj=somerc lat_0=46.95240555555556 lon_0=7.439583333333333
+                      k_0=1 x_0=2600000 y_0=1200000 ellps=bessel units=m no_defs
+-------------------------------------------------------------------------------
+tolerance 20 cm
 accept    7.438632495 46.951082877
 expect    2600000.0  1200000.0
 -------------------------------------------------------------------------------

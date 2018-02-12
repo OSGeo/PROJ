@@ -600,6 +600,8 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             return pj_default_destructor (PIN, proj_errno(PIN));
         }
         else {
+            if (PJD_ERR_MAJOR_AXIS_NOT_GIVEN==proj_errno (PIN))
+                proj_errno_reset (PIN);
             PIN->f = 1.0/298.257223563;
             PIN->a_orig  = PIN->a  = 6378137.0;
             PIN->es_orig = PIN->es = PIN->f*(2-PIN->f);
