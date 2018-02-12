@@ -22,7 +22,7 @@ Test the handling of the +towgs84 parameter.
 This example is from Lotti Jivall: "Simplified transformations from
 ITRF2008/IGS08 to ETRS89 for maritime applications" (see also more_builtins.gie)
 -------------------------------------------------------------------------------
-operation  proj=geocent ellps=WGS84
+operation  proj=geocent
            towgs84 = 0.676780, 0.654950, -0.528270,
                     -0.022742, 0.012667,  0.022704,
                     -0.01070
@@ -34,7 +34,6 @@ direction inverse
 accept     3565285.00000000  855949.00000000  5201383.00000000
 expect     3565285.41342351  855948.67986759  5201382.72939791
 -------------------------------------------------------------------------------
-
 
 
 -------------------------------------------------------------------------------

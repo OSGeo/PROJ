@@ -414,6 +414,8 @@ static int pj_cs2cs_emulation_setup (PJ *P) {
 If any cs2cs style modifiers are given (axis=..., towgs84=..., ) create the 4D API
 equivalent operations, so the preparation and finalization steps in the pj_inv/pj_fwd
 invocators can emulate the behaviour of pj_transform and the cs2cs app.
+
+Returns 1 on success, 0 on failure
 **************************************************************************************/
     PJ *Q;
     paralist *p;
@@ -502,12 +504,11 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
     /* We also need cartesian/geographical transformations if we are working in */
     /* geocentric/cartesian space or we need to do a Helmert transform.         */
     if (P->is_geocent || P->helmert) {
-        char def[100];
-        sprintf (def, "break_cs2cs_recursion     proj=cart");
+        char def[150];
+        sprintf (def, "break_cs2cs_recursion     proj=cart   a=%40.20g  f=%40.20g", P->a, P->f);
         Q = proj_create (P->ctx, def);
         if (0==Q)
             return 0;
-        pj_inherit_ellipsoid_def (P, Q);
         P->cart = skip_prep_fin (Q);
 
         sprintf (def, "break_cs2cs_recursion     proj=cart  ellps=WGS84");
@@ -519,6 +520,7 @@ invocators can emulate the behaviour of pj_transform and the cs2cs app.
 
     return 1;
 }
+
 
 
 /*************************************************************************************/
