@@ -197,10 +197,12 @@ expect    12.5 55.5 -36.021305084228516  0
 roundtrip 100 1 nm
 -------------------------------------------------------------------------------
 Fail on purpose: +grids parameter is mandatory
+-------------------------------------------------------------------------------
 operation proj=vgridshift
 expect    failure errno no_args
-
+-------------------------------------------------------------------------------
 Fail on purpose: open non-existing grid
+-------------------------------------------------------------------------------
 operation proj=vgridshift grids=nonexistinggrid.gtx
 expect    failure errno failed_to_load_grid
 -------------------------------------------------------------------------------
@@ -364,6 +366,29 @@ accept     12   55
 expect        69187.5632    609890.7825
 -------------------------------------------------------------------------------
 
+
+-------------------------------------------------------------------------------
+Coordinate values out of range (and other stuff caught in pj_fwd)
+-------------------------------------------------------------------------------
+operation  proj=latlong ellps=GRS80
+-------------------------------------------------------------------------------
+accept     -3600 0
+expect     failure   errno pjd_err_lat_or_lon_exceed_limit
+accept     3600 0
+expect     failure   errno pjd_err_lat_or_lon_exceed_limit
+accept     0 -91
+expect     failure   errno pjd_err_lat_or_lon_exceed_limit
+accept     0 91
+expect     failure   errno pjd_err_lat_or_lon_exceed_limit
+
+# Check PJ_EPS_LAT (1e-12 rad)
+accept     0  90.00000000001
+expect     0  90
+accept     0 -90.00000000001
+expect     0 -90
+accept     0  90.0000000001
+expect failure
+-------------------------------------------------------------------------------
 
 
 -------------------------------------------------------------------------------
