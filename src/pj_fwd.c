@@ -40,10 +40,6 @@ static PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
 
-    /* The helmert datum shift will choke unless it gets a sensible 4D coordinate */
-    if (HUGE_VAL==coo.v[2] && P->helmert) coo.v[2] = 0.0;
-    if (HUGE_VAL==coo.v[3] && P->helmert) coo.v[3] = 0.0;
-
     /* Check validity of angular input coordinates */
     if (INPUT_UNITS==PJ_IO_UNITS_ANGULAR) {
         double t;
@@ -72,6 +68,11 @@ static PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
         if (P->hgridshift)
             coo = proj_trans (P->hgridshift, PJ_INV, coo);
         else if (P->helmert) {
+            /* The helmert datum shift will choke unless it gets a sensible 4D coordinate */
+            if (HUGE_VAL==coo.v[2])
+                coo.v[2] = 0.0;
+            if (HUGE_VAL==coo.v[3])
+                coo.v[3] = 0.0;
             coo = proj_trans (P->cart_wgs84, PJ_FWD, coo); /* Go cartesian in WGS84 frame */
             coo = proj_trans (P->helmert,    PJ_INV, coo); /* Step into local frame */
             coo = proj_trans (P->cart,       PJ_INV, coo); /* Go back to angular using local ellps */
