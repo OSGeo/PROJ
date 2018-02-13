@@ -14,4 +14,4 @@ proj.4 project or using the library in their own software.
    api
    threads
    bindings
-
+   cmake
