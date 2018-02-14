@@ -95,6 +95,6 @@ number and "z" indicates the patch number of the release.
 
 In addition to the PROJ software package, a distribution of datum
 conversion grid files is also available. The grid package is
-distributed under the name `PROJ-datumgrid-x.y.zip`, where "x" is the
+distributed under the name `proj-datumgrid-x.y.zip`, where "x" is the
 major release version and "y" the minor release version numbers.
 The grid package can be downloaded from the PROJ.4 website.
