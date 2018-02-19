@@ -62,7 +62,7 @@ Transformation objects
 
     Opaque object describing an area in which a transformation is performed.
 
-    .. note:: This object is not fully implemented yet. It is used with
+    .. note:: This object is not fully implemented yet. It is to be used with
               :c:func:`proj_create_crs_to_crs` to select the best transformation
               between the two input coordinate reference systems.
 
@@ -71,56 +71,56 @@ Transformation objects
 
 Various 2-dimensional coordinate data types.
 
-.. c:type:: LP
+.. c:type:: PJ_LP
 
     Geodetic coordinate, latitude and longitude. Usually in radians.
 
     .. code-block:: C
 
-        typedef struct { double lam, phi; } LP;
+        typedef struct { double lam, phi; } PJ_LP;
 
-    .. c:member:: double LP.lam
+    .. c:member:: double PJ_LP.lam
 
         Longitude. Lambda.
 
-    .. c:member:: double LP.phi
+    .. c:member:: double PJ_LP.phi
 
         Latitude. Phi.
 
 
-.. c:type:: XY
+.. c:type:: PJ_XY
 
     2-dimensional cartesian coordinate.
 
     .. code-block:: C
 
-        typedef struct { double x, y; } XY;
+        typedef struct { double x, y; } PJ_XY;
 
 
-    .. c:member:: double XY.lam
+    .. c:member:: double PJ_XY.lam
 
         Easting.
 
-    .. c:member:: double XY.phi
+    .. c:member:: double PJ_XY.phi
 
         Northing.
 
 
-.. c:type:: UV
+.. c:type:: PJ_UV
 
     2-dimensional generic coordinate. Usually used when contents can be either
-    a :c:type:`XY` or :c:type:`UV`.
+    a :c:type:`PJ_XY` or :c:type:`PJ_LP`.
 
     .. code-block:: C
 
-        typedef struct {double u, v; } UV;
+        typedef struct {double u, v; } PJ_UV;
 
 
-    .. c:member:: double UV.u
+    .. c:member:: double PJ_UV.u
 
         Longitude or easting, depending on use.
 
-    .. c:member:: double UV.v
+    .. c:member:: double PJ_UV.v
 
         Latitude or northing, depending on use.
 
@@ -131,66 +131,66 @@ Various 2-dimensional coordinate data types.
 The following data types are the 3-dimensional equivalents to the data
 types above.
 
-.. c:type:: LPZ
+.. c:type:: PJ_LPZ
 
-    3-dimensional version of :c:type:`LP`. Holds longitude, latitude and
+    3-dimensional version of :c:type:`PJ_LP`. Holds longitude, latitude and
     vertical component.
 
     .. code-block:: C
 
-        typedef struct { double lam, phi, z; } LPZ;
+        typedef struct { double lam, phi, z; } PJ_LPZ;
 
-    .. c:member:: double LPZ.lam
+    .. c:member:: double PJ_LPZ.lam
 
         Longitude. Lambda.
 
-    .. c:member:: double LPZ.phi
+    .. c:member:: double PJ_LPZ.phi
 
         Latitude. Phi.
 
-    .. c:member:: double LPZ.z
+    .. c:member:: double PJ_LPZ.z
 
         Vertical component.
 
 
-.. c:type:: XYZ
+.. c:type:: PJ_XYZ
 
-    Cartesian coordinate in 3 dimensions. Extension  of :c:type:`XY`.
+    Cartesian coordinate in 3 dimensions. Extension  of :c:type:`PJ_XY`.
 
     .. code-block:: C
 
-        typedef struct { double x, y, z; } XYZ;
+        typedef struct { double x, y, z; } PJ_XYZ;
 
-    .. c:member:: double XYZ.x
+    .. c:member:: double PJ_XYZ.x
 
         Easting.
 
-    .. c:member:: double XYZ.y
+    .. c:member:: double PJ_XYZ.y
 
         Northing.
 
-    .. c:member:: double XYZ.z
+    .. c:member:: double PJ_XYZ.z
 
         Vertical component.
 
 
-.. c:type:: UVW
+.. c:type:: PJ_UVW
 
-    3-dimensional extension of :c:type:`UV`.
+    3-dimensional extension of :c:type:`PJ_UV`.
 
     .. code-block:: C
 
-        typedef struct {double u, v, w; } UVW;
+        typedef struct {double u, v, w; } PJ_UVW;
 
-    .. c:member:: double UVW.u
+    .. c:member:: double PJ_UVW.u
 
         Longitude or easting, depending on use.
 
-    .. c:member:: double UVW.v
+    .. c:member:: double PJ_UVW.v
 
         Latitude or northing, depending on use.
 
-    .. c:member:: double UVW.w
+    .. c:member:: double PJ_UVW.w
 
         Vertical component.
 
@@ -204,7 +204,7 @@ domain.
 
 .. c:type:: PJ_LPZT
 
-    Spatiotemporal version of :c:type:`LPZ`.
+    Spatiotemporal version of :c:type:`PJ_LPZ`.
 
     .. code-block:: C
 
@@ -321,6 +321,7 @@ Complex coordinate types
 .. c:type:: PJ_COORD
 
     General purpose coordinate union type usefull in two, three and four dimensions.
+    This is the default coordinate datatype used in PROJ.
 
     .. code-block:: C
 
@@ -329,12 +330,12 @@ Complex coordinate types
             PJ_XYZT xyzt;
             PJ_UVWT uvwt;
             PJ_LPZT lpzt;
-            XYZ  xyz;
-            UVW  uvw;
-            LPZ  lpz;
-            XY   xy;
-            UV   uv;
-            LP   lp;
+            PJ_XYZ  xyz;
+            PJ_UVW  uvw;
+            PJ_LPZ  lpz;
+            PJ_XY   xy;
+            PJ_UV   uv;
+            PJ_LP   lp;
         } PJ_COORD ;
 
     .. c:member:: double v[4]
@@ -353,27 +354,27 @@ Complex coordinate types
 
         Longitude, latitude, vertical and time components.
 
-    .. c:member:: XYZ PJ_COORD.xyz
+    .. c:member:: PJ_XYZ PJ_COORD.xyz
 
         3-dimensional cartesian coordinate.
 
-    .. c:member:: UVW PJ_COORD.uvw
+    .. c:member:: PJ_UVW PJ_COORD.uvw
 
         3-dimensional generic coordinate.
 
-    .. c:member:: LPZ PJ_COORD.lpz
+    .. c:member:: PJ_LPZ PJ_COORD.lpz
 
         Longitude, latitude and vertical component.
 
-    .. c:member:: XY PJ_COORD.xy
+    .. c:member:: PJ_XY PJ_COORD.xy
 
         2-dimensional cartesian coordinate.
 
-    .. c:member:: UV PJ_COORD.uv
+    .. c:member:: PJ_UV PJ_COORD.uv
 
         2-dimensional generic coordinate.
 
-    .. c:member:: LP PJ_COORD.lp
+    .. c:member:: PJ_LP PJ_COORD.lp
 
         Longitude and latitude.
 
@@ -496,7 +497,7 @@ List structures
 
 .. c:type:: PJ_UNITS
 
-    Distance units defined in PROJ.4.
+    Distance units defined in PROJ.
 
     .. code-block:: C
 
@@ -525,7 +526,7 @@ List structures
 
 .. c:type:: PJ_PRIME_MERIDIANS
 
-    Prime meridians defined in PROJ.4.
+    Prime meridians defined in PROJ.
 
     .. code-block:: C
 
@@ -547,7 +548,7 @@ Info structures
 
 .. c:type:: PJ_INFO
 
-    Struct holding information about the current instance of PROJ.4. Struct is
+    Struct holding information about the current instance of PROJ. Struct is
     populated by :c:func:`proj_info`.
 
     .. code-block:: C
@@ -585,8 +586,9 @@ Info structures
 
     .. c:member:: char PJ_INFO.searchpath[512]
 
-        Search path for PROJ.4. List of directories separated by
-        semicolons,  e.g. "C:\Users\doctorwho;C:\OSGeo4W64\\share\proj".
+        Search path for PROJ. List of directories separated by
+        semicolons (Windows) or colons (non-Windows), e.g.
+        "C:\\Users\\doctorwho;C:\\OSGeo4W64\\share\\proj".
         Grids and init files are looked for in directories in the search path.
 
 .. c:type:: PJ_PROJ_INFO
@@ -630,7 +632,7 @@ Info structures
 .. c:type:: PJ_GRID_INFO
 
     Struct holding information about a specific grid in the search path of
-    PROJ.4. Populated with the function :c:func:`proj_grid_info`.
+    PROJ. Populated with the function :c:func:`proj_grid_info`.
 
     .. code-block:: C
 
@@ -684,7 +686,7 @@ Info structures
 .. c:type:: PJ_INIT_INFO
 
     Struct holding information about a specific init file in the search path of
-    PROJ.4. Populated with the function :c:func:`proj_init_info`.
+    PROJ. Populated with the function :c:func:`proj_init_info`.
 
     .. code-block:: C
 
