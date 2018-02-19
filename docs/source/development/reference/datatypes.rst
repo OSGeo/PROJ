@@ -402,6 +402,11 @@ Projection derivatives
 
             double tissot_semimajor;
             double tissot_semiminor;
+
+            double dx_dlam;
+            double dx_dphi;
+            double dy_dlam;
+            double dy_dphi;
         } PJ_FACTORS;
 
     .. c:member:: double PJ_FACTORS.meridional_scale
@@ -437,6 +442,27 @@ Projection derivatives
 
         Minimum scale error.
 
+    .. c:member:: double PJ_FACTORS.dx_dlam
+
+        Partial derivative :math:`\frac{\partial x}{\partial \lambda}` of coordinate
+        :math:`\left(\lambda,\phi\right)`.
+
+    .. c:member:: double PJ_FACTORS.dy_dlam
+
+
+        Partial derivative :math:`\frac{\partial y}{\partial \lambda}` of coordinate
+        :math:`\left(\lambda,\phi\right)`.
+
+    .. c:member:: double PJ_FACTORS.dx_dphi
+
+        Partial derivative :math:`\frac{\partial x}{\partial \phi}` of coordinate
+        :math:`\left(\lambda,\phi\right)`.
+
+    .. c:member:: double PJ_FACTORS.dy_dphi
+
+
+        Partial derivative :math:`\frac{\partial y}{\partial \phi}` of coordinate
+        :math:`\left(\lambda,\phi\right)`.
 
 List structures
 -------------------------------------------------------------------------------
