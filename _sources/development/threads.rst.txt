@@ -4,11 +4,6 @@
 Threads
 ================================================================================
 
-.. contents:: Contents
-   :depth: 3
-   :backlinks: none
-
-
 This page is about efforts to make PROJ.4 thread safe.
 
 Key Thread Safety Issues

@@ -18,4 +18,5 @@ exert a change in reference frame are called transformations.
    projections/index
    conversions/index
    transformations/index
+   pipeline
 

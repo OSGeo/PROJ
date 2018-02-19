@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Threads &mdash; proj.4 4.9.3 documentation</title>
+  <title>Threads &mdash; PROJ.4 5.0.0 documentation</title>
   
 
   
@@ -30,15 +30,17 @@
   
 
   
+    <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+  
 
   
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="proj.4 4.9.3 documentation" href="../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
-        <link rel="next" title="Language bindings" href="bindings.html"/>
-        <link rel="prev" title="API" href="api.html"/> 
+        <link rel="next" title="Reference" href="reference/index.html"/>
+        <link rel="prev" title="Error handling" href="errorhandling.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -57,7 +59,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> proj.4
+            <a href="../index.html" class="icon icon-home"> PROJ.4
           
 
           
@@ -67,7 +69,7 @@
             
             
               <div class="version">
-                4.9.3
+                5.0.0
               </div>
             
           
@@ -92,26 +94,29 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../projections/index.html">Projections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../parameters.html">Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ.4</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../grids.html">Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../htpd.html">HTPD</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformations.html">Transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="errorhandling.html">Error handling</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Threads</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#key-thread-safety-issues">Key Thread Safety Issues</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#projctx">projCtx</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#src-multistresstest-c">src/multistresstest.c</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="bindings.html">Language bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/index.html">Reference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cmake.html">Using Proj.4 in CMake projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bindings.html">Language bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration.html">Version 4 to 5 API Migration</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
@@ -129,7 +134,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">proj.4</a>
+          <a href="../index.html">PROJ.4</a>
         
       </nav>
 
@@ -180,17 +185,6 @@
             
   <div class="section" id="threads">
 <span id="id1"></span><h1>Threads<a class="headerlink" href="#threads" title="Permalink to this headline">¶</a></h1>
-<div class="contents topic" id="contents">
-<p class="topic-title first">Contents</p>
-<ul class="simple">
-<li><a class="reference internal" href="#threads" id="id2">Threads</a><ul>
-<li><a class="reference internal" href="#key-thread-safety-issues" id="id3">Key Thread Safety Issues</a></li>
-<li><a class="reference internal" href="#projctx" id="id4">projCtx</a></li>
-<li><a class="reference internal" href="#src-multistresstest-c" id="id5">src/multistresstest.c</a></li>
-</ul>
-</li>
-</ul>
-</div>
 <p>This page is about efforts to make PROJ.4 thread safe.</p>
 <div class="section" id="key-thread-safety-issues">
 <h2>Key Thread Safety Issues<a class="headerlink" href="#key-thread-safety-issues" title="Permalink to this headline">¶</a></h2>
@@ -269,10 +263,10 @@ is not part of the builds but it can be built on linux like:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bindings.html" class="btn btn-neutral float-right" title="Language bindings" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="reference/index.html" class="btn btn-neutral float-right" title="Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="api.html" class="btn btn-neutral" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="errorhandling.html" class="btn btn-neutral" title="Error handling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -281,7 +275,7 @@ is not part of the builds but it can be built on linux like:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 1986?-2016.
+        &copy; Copyright 1983-2018.
       Last updated on 19 Feb 2018.
 
     </p>
@@ -304,7 +298,7 @@ is not part of the builds but it can be built on linux like:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'4.9.3',
+            VERSION:'5.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

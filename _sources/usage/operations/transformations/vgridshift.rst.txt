@@ -36,3 +36,6 @@ is not found in the PROJ.4 search path. The list of grids is prioritized so that
 grids in the start of the list takes presedence over the grids in the back of the
 list.
 
+PROJ supports the GTX file format for vertical grid corrections. Details
+about all the format can be found in the GDAL documentation. GDAL both reads and
+writes the format. Using GDAL for construction of new grids is recommended.

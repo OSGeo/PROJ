@@ -39,7 +39,7 @@
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../../index.html"/>
         <link rel="up" title="Transformations" href="index.html"/>
-        <link rel="next" title="Geodesic calculations" href="../../../geodesic.html"/>
+        <link rel="next" title="The pipeline operator" href="../pipeline.html"/>
         <link rel="prev" title="Horizontal grid shift" href="hgridshift.html"/> 
 
   
@@ -105,12 +105,14 @@
 <li class="toctree-l3"><a class="reference internal" href="../projections/index.html">Projections</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../conversions/index.html">Conversions</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html">Transformations</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="deformation.html">Kinematic datum shifting utilizing a deformation model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="helmert.html">Helmert transform</a></li>
 <li class="toctree-l4"><a class="reference internal" href="molodensky.html">Molodensky transform</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hgridshift.html">Horizontal grid shift</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Vertical grid shift</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../pipeline.html">The pipeline operator</a></li>
 </ul>
 </li>
 </ul>
@@ -232,6 +234,9 @@ the global model:</p>
 is not found in the PROJ.4 search path. The list of grids is prioritized so that
 grids in the start of the list takes presedence over the grids in the back of the
 list.</p>
+<p>PROJ supports the GTX file format for vertical grid corrections. Details
+about all the format can be found in the GDAL documentation. GDAL both reads and
+writes the format. Using GDAL for construction of new grids is recommended.</p>
 </div>
 
 
@@ -244,7 +249,7 @@ list.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../../../geodesic.html" class="btn btn-neutral float-right" title="Geodesic calculations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../pipeline.html" class="btn btn-neutral float-right" title="The pipeline operator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="hgridshift.html" class="btn btn-neutral" title="Horizontal grid shift" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -256,8 +261,8 @@ list.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 1983-2017.
-      Last updated on 21 Dec 2017.
+        &copy; Copyright 1983-2018.
+      Last updated on 19 Feb 2018.
 
     </p>
   </div>

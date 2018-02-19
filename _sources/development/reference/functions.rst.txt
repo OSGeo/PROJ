@@ -205,83 +205,6 @@ Coordinate transformation
     :returns: :c:type:`size_t` 0 if all observations are transformed without error, otherwise returns error number
 
 
-Initializers
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-.. c:function:: PJ_COORD proj_coord(double x, double y, double z, double t)
-
-    Initializer for the :c:type:`PJ_COORD` union. The function is
-    shorthand for the otherwise convoluted assignment.
-    Equivalent to
-
-    .. code-block:: C
-
-        PJ_COORD c = {{10.0, 20.0, 30.0, 40.0}};
-
-    or
-
-    .. code-block:: C
-
-        PJ_COORD c;
-        // Assign using the PJ_XYZT struct in the union
-        c.xyzt.x = 10.0;
-        c.xyzt.y = 20.0;
-        c.xyzt.z = 30.0;
-        c.xyzt.t = 40.0;
-
-    Since :c:type:`PJ_COORD` is a union of structs, the above assignment can
-    also be expressed in terms of the other types in the union, e.g.
-    :c:type:`PJ_UVWT` or :c:type:`PJ_LPZT`.
-
-
-    :param double x: 1st component in a :c:type:`PJ_COORD`
-    :param double y: 2nd component in a :c:type:`PJ_COORD`
-    :param double z: 3rd component in a :c:type:`PJ_COORD`
-    :param double t: 4th component in a :c:type:`PJ_COORD`
-    :returns: :c:type:`PJ_COORD`
-
-.. c:function:: PJ_OBS proj_obs(double x, double y, double z, double t,\
-                                double o, double p, double k,\
-                                int id, unsigned int flags)
-
-    Initializer for the :c:type:`PJ_OBS` union. The function is
-    shorthand for the otherwise convoluted assignment.
-    Equivalent to
-
-    .. code-block:: C
-
-        PJ_OBS c = {{{1.0, 2.0, 3.0, 4.0}}, {{5.0, 6.0, 7.0}}, 8, 9};
-
-    or
-
-    .. code-block:: C
-
-        PJ_OBS c;
-        // Assign using the PJ_COORD part of the struct in the union
-        o.coo.v[0] = 1.0;
-        o.coo.v[1] = 2.0;
-        o.coo.v[2] = 3.0;
-        o.coo.v[3] = 4.0;
-        o.anc.v[0] = 5.0;
-        o.anc.v[1] = 6.0;
-        o.anc.v[2] = 7.0;
-        o.id       = 8;
-        o.flags    = 9;
-
-    which is a bit too verbose in most practical applications.
-
-    :param double x: 1st component in a :c:type:`PJ_COORD`
-    :param double y: 2nd component in a :c:type:`PJ_COORD`
-    :param double z: 3rd component in a :c:type:`PJ_COORD`
-    :param double t: 4th component in a :c:type:`PJ_COORD`
-    :param double o: 1st component in a :c:type:`PJ_TRIPLET`
-    :param double p: 2nd component in a :c:type:`PJ_TRIPLET`
-    :param double k: 3rd component in a :c:type:`PJ_TRIPLET`
-    :param int id: Ancillary data, e.g. an ID
-    :param `flags`: Flags
-    :type `flags`: unsigned int
-    :returns: :c:type:`PJ_OBS`
-
 Error reporting
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -350,7 +273,7 @@ Info functions
 
 .. c:function:: PJ_INFO proj_info(void)
 
-    Get information about the current instance of the PROJ.4 library.
+    Get information about the current instance of the PROJ library.
 
     :returns: :c:type:`PJ_INFO`
 
@@ -366,7 +289,7 @@ Info functions
 
     Get information about a specific grid.
 
-    :param `gridname`: Gridname in the PROJ.4 searchpath
+    :param `gridname`: Gridname in the PROJ searchpath
     :type `gridname`: const char*
     :returns: :c:type:`PJ_GRID_INFO`
 
@@ -374,7 +297,7 @@ Info functions
 
     Get information about a specific init file.
 
-    :param `initname`: Init file in the PROJ.4 searchpath
+    :param `initname`: Init file in the PROJ searchpath
     :type `initname`: const char*
     :returns: :c:type:`PJ_INIT_INFO`
 
@@ -383,11 +306,11 @@ Lists
 
 .. c:function::  const PJ_OPERATIONS* proj_list_operations(void)
 
-    Get a pointer to an array of all operations in PROJ.4. The last entry
+    Get a pointer to an array of all operations in PROJ. The last entry
     of the returned array is a NULL-entry. The array is statically allocated
     and does not need to be freed after use.
 
-    Print a list of all operations in PROJ.4:
+    Print a list of all operations in PROJ:
 
     .. code-block:: C
 
@@ -400,7 +323,7 @@ Lists
 
 .. c:function:: const PJ_ELLPS* proj_list_ellps(void)
 
-    Get a pointer to an array of ellipsoids defined in PROJ.4. The last entry
+    Get a pointer to an array of ellipsoids defined in PROJ. The last entry
     of the returned array is a NULL-entry. The array is statically allocated
     and does not need to be freed after use.
 
@@ -408,7 +331,7 @@ Lists
 
 .. c:function:: const PJ_UNITS* proj_list_units(void)
 
-    Get a pointer to an array of distance units defined in PROJ.4. The last
+    Get a pointer to an array of distance units defined in PROJ. The last
     entry of the returned array is a NULL-entry. The array is statically
     allocated and does not need to be freed after use.
 
@@ -416,7 +339,7 @@ Lists
 
 .. c:function:: const PJ_PRIME_MERIDIANS* proj_list_prime_meridians(void)
 
-    Get a pointer to an array of prime meridians defined in PROJ.4. The last
+    Get a pointer to an array of prime meridians defined in PROJ. The last
     entry of the returned array is a NULL-entry. The array is statically
     allocated and does not need to be freed after use.
 
@@ -425,43 +348,76 @@ Lists
 Distances
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-.. c:function:: double proj_lp_dist(const PJ *P, LP a, LP b)
+.. c:function:: double proj_lp_dist(const PJ *P, PJ_COORD a, PJ_COORD b)
 
     Calculate geodesic distance between two points in geodetic coordinates.
 
     :param PJ* P: Transformation object
-    :param LP a: Coordinate of first point
-    :param LP b: Coordinate of second point
+    :param PJ_COORD a: Coordinate of first point
+    :param PJ_COORD b: Coordinate of second point
     :returns: :c:type:`double` Distance between :c:data:`a` and :c:data:`b` in meters.
 
-.. c:function:: double proj_lp_dist(const PJ *P, LPZ a, LPZ b)
+.. c:function:: double proj_lp_dist(const PJ *P, PJ_COORD a, PJ_COORD b)
 
     Calculate geodesic distance between two points in geodetic coordinates.
 
     :param PJ* P: Transformation object
-    :param LPZ a: Coordinate of first point
-    :param LPZ b: Coordinate of second point
+    :param PJ_COORD a: Coordinate of first point
+    :param PJ_COORD b: Coordinate of second point
     :returns: :c:type:`double` Distance between :c:data:`a` and :c:data:`b` in meters.
 
-.. c:function:: double proj_xy_dist(XY a, XY, b)
+.. c:function:: double proj_xy_dist(PJ_COORD a, PJ_COORD b)
 
     Calculate 2-dimensional euclidean between two projected coordinates.
 
-    :param XY a: First coordinate
-    :param XY b: Second coordinate
+    :param PJ_COORD a: First coordinate
+    :param PJ_COORD b: Second coordinate
     :returns: :c:type:`double` Distance between :c:data:`a` and :c:data:`b` in meters.
 
-.. c:function:: double proj_xyz_dist(XYZ a, XYZ b)
+.. c:function:: double proj_xyz_dist(PJ_COORD a, PJ_COORD b)
 
     Calculate 3-dimensional euclidean between two projected coordinates.
 
-    :param XYZ a: First coordinate
-    :param XYZ b: Second coordinate
+    :param PJ_COORD a: First coordinate
+    :param PJ_COORD b: Second coordinate
     :returns: :c:type:`double` Distance between :c:data:`a` and :c:data:`b` in meters.
 
 
 Various
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. c:function:: PJ_COORD proj_coord(double x, double y, double z, double t)
+
+    Initializer for the :c:type:`PJ_COORD` union. The function is
+    shorthand for the otherwise convoluted assignment.
+    Equivalent to
+
+    .. code-block:: C
+
+        PJ_COORD c = {{10.0, 20.0, 30.0, 40.0}};
+
+    or
+
+    .. code-block:: C
+
+        PJ_COORD c;
+        // Assign using the PJ_XYZT struct in the union
+        c.xyzt.x = 10.0;
+        c.xyzt.y = 20.0;
+        c.xyzt.z = 30.0;
+        c.xyzt.t = 40.0;
+
+    Since :c:type:`PJ_COORD` is a union of structs, the above assignment can
+    also be expressed in terms of the other types in the union, e.g.
+    :c:type:`PJ_UVWT` or :c:type:`PJ_LPZT`.
+
+
+    :param double x: 1st component in a :c:type:`PJ_COORD`
+    :param double y: 2nd component in a :c:type:`PJ_COORD`
+    :param double z: 3rd component in a :c:type:`PJ_COORD`
+    :param double t: 4th component in a :c:type:`PJ_COORD`
+    :returns: :c:type:`PJ_COORD`
+
 
 .. c:function:: double proj_roundtrip(PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo)
 
@@ -480,7 +436,7 @@ Various
     :returns: :c:type:`double` Distance between original coordinate and the \
               resulting coordinate after :c:data:`n` transformation iterations.
 
-.. c:function:: PJ_FACTORS proj_factors(PJ *P, LP lp)
+.. c:function:: PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp)
 
     Calculate various cartographic properties, such as scale factors, angular
     distortion and meridian convergence. Depending on the underlying projection
@@ -492,7 +448,7 @@ Various
     :param `P`: Transformation object
     :type `P`: const PJ*
     :param `lp`: Geodetic coordinate
-    :type `lp`: const LP
+    :type `lp`: const PJ_COORD
     :returns: :c:type:`PJ_FACTORS`
 
 .. c:function:: double proj_torad(double angle_in_degrees)
@@ -531,9 +487,9 @@ Various
     :returns: :c:type:`char*` Pointer to output buffer (same as :c:data:`s`)
 
 
-.. c:function:: PJ_COORD proj_geoc_lat(const PJ *P, PJ_DIRECTION direction, PJ_COORD coo)
+.. c:function:: PJ_COORD proj_geocentric_latitude(const PJ *P, PJ_DIRECTION direction, PJ_COORD coo)
 
-    Convert geographical to geocentric latitude.
+    Convert from geographical latitude to geocentric latitude.
 
     :param `P`: Transformation object
     :type `P`: const PJ*

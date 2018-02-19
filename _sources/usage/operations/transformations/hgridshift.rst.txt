@@ -34,3 +34,6 @@ is not found in the PROJ.4 search path. The list of grids is prioritized so that
 grids in the start of the list takes presedence over the grids in the back of the
 list.
 
+PROJ supports CTable2, NTv1 and NTv2 files for horizontal grid corrections. Details
+about all three formats can be found in the GDAL documentation. GDAL reads and
+writes all three formats. Using GDAL for construction of new grids is recommended.
