@@ -5,7 +5,7 @@ This version of PROJ introduces some significant extensions and
 improvements to (primarily) the geodetic functionality of the system.
 
 The main driver for introducing the new features is the emergence of
-dynamic reference frames, the increasing use of high accuracy GNNS,
+dynamic reference frames, the increasing use of high accuracy GNSS,
 and the related growing demand for accurate coordinate
 transformations.  While older versions of PROJ included some geodetic
 functionality, the new framework lays the foundation for turning PROJ
