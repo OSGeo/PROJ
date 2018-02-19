@@ -734,6 +734,7 @@ int proj_errno_reset (const PJ *P) {
 
     pj_ctx_set_errno (pj_get_ctx ((PJ *) P), 0);
     errno = 0;
+    pj_errno = 0;
     return last_errno;
 }
 
