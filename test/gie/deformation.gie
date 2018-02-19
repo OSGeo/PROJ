@@ -9,67 +9,49 @@ The input coordinate is located at lon=60, lam=-160 - somewhere in Alaska.
 
 ===============================================================================
 
-BEGIN
-
--------------------------------------------------------------------------------
-Test using only horizontal grid and +tobs parameter
--------------------------------------------------------------------------------
-OPERATION   +proj=deformation +xy_grids=alaska +t_epoch=2016.0 +t_obs=2000.0
--------------------------------------------------------------------------------
-TOLERANCE   1 um
-ACCEPT      -3004295.5882503074 -1093474.1690603832 5500477.1338251457
-EXPECT    -3004295.5888766116 -1093474.1688513425 5500477.1338251457
-# ROUNDTRIP   1000
-
--------------------------------------------------------------------------------
-Test using only vertical grid and +tobs parameter
--------------------------------------------------------------------------------
-OPERATION   +proj=deformation +z_grids=egm96_15.gtx +t_epoch=2016.0 +t_obs=2000.0
--------------------------------------------------------------------------------
-TOLERANCE   1 um
-ACCEPT      -3004295.5882503074 -1093474.1690603832 5500477.1338251457
-EXPECT      -3004295.5882503074 -1093474.1690603832 5500234.008855661
-# ROUNDTRIP   1000
+<gie>
 
 -------------------------------------------------------------------------------
 Test using both horizontal and vertical grids as well as the +tobs parameter
 -------------------------------------------------------------------------------
-OPERATION   +proj=deformation +xy_grids=alaska +z_grids=egm96_15.gtx +t_epoch=2016.0 +t_obs=2000.0
+operation   +proj=deformation +xy_grids=alaska +z_grids=egm96_15.gtx
+            +t_epoch=2016.0 +t_obs=2000.0 +ellps=GRS80
 -------------------------------------------------------------------------------
-TOLERANCE   0.000001 m
-ACCEPT      -3004295.5882503074 -1093474.1690603832 5500477.1338251457
-EXPECT      -3004295.5888766116 -1093474.1688513425 5500234.008855661
-# ROUNDTRIP   1000
-
--------------------------------------------------------------------------------
-Test using only horizontal grid
--------------------------------------------------------------------------------
-OPERATION   +proj=deformation +xy_grids=alaska +t_epoch=2016.0
--------------------------------------------------------------------------------
-TOLERANCE   1 um
-ACCEPT      -3004295.5882503074 -1093474.1690603832 5500477.1338251457 2000.0
-EXPECT      -3004295.5888766116 -1093474.1688513425 5500477.1338251457 2000.0
-# ROUNDTRIP   1000
-
--------------------------------------------------------------------------------
-Test using only vertical grid
--------------------------------------------------------------------------------
-OPERATION   +proj=deformation +z_grids=egm96_15.gtx +t_epoch=2016.0
--------------------------------------------------------------------------------
-TOLERANCE   1 um
-ACCEPT      -3004295.5882503074 -1093474.1690603832 5500477.1338251457 2000.0
-EXPECT      -3004295.5882503074 -1093474.1690603832 5500234.008855661  2000.0
-# ROUNDTRIP   1000
+tolerance   0.1 mm
+ignore      pjd_err_failed_to_load_grid
+accept      -3004295.5882503074 -1093474.1690603832 5500477.1338251457
+expect      -3004295.7025       -1093474.2106       5500477.3444
+roundtrip   5
 
 -------------------------------------------------------------------------------
 Test using both horizontal and vertical grids
 -------------------------------------------------------------------------------
-OPERATION   +proj=deformation +xy_grids=alaska +z_grids=egm96_15.gtx +t_epoch=2016.0 +ellps=GRS80
+operation   +proj=deformation
+            +xy_grids=alaska +z_grids=egm96_15.gtx +t_epoch=2016.0 +ellps=GRS80
 -------------------------------------------------------------------------------
-TOLERANCE   1 um
-ACCEPT      -3004295.5882503074 -1093474.1690603832 5500477.1338251457 2000.0
-EXPECT      -3004295.5888766116 -1093474.1688513425 5500234.008855661  2000.0
-# ROUNDTRIP   1000
+tolerance   0.1 mm
+ignore      pjd_err_failed_to_load_grid
+accept      -3004295.5882503074 -1093474.1690603832 5500477.1338251457 2000.0
+expect      -3004295.7025       -1093474.2106       5500477.3444       2000.0
+roundtrip   5
 
+-------------------------------------------------------------------------------
+operation   proj=deformation xy_grids=alaska t_epoch=2016.0 t_obs=2017.0
+            ellps=GRS80
+expect      failure pjd_err_no_args
 
-END
+operation   proj=deformation z_grids=egm96_15.gtx t_epoch=2016.0 t_obs=2017.0
+            ellps=GRS80
+expect      failure pjd_err_no_args
+
+operation   proj=deformation xy_grids=nonexisting z_grids=egm96_15.gtx
+            t_epoch=2016.0 t_obs=2017.0 ellps=GRS80
+expect      failure pjd_err_failed_to_load_grid
+
+operation   proj=deformation xy_grids=alaska z_grids=nonexisting
+            t_epoch=2016.0 t_obs=2017.0 ellps=GRS80
+expect      failure pjd_err_failed_to_load_grid
+
+operation   proj=deformation xy_grids=alaska z_grids=nonexisting ellps=GRS80
+expect      failure pjd_err_missing_args
+</gie>

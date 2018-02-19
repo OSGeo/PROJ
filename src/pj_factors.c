@@ -17,12 +17,19 @@ int pj_factors(LP lp, const PJ *P, double h, struct FACTORS *fac) {
     PJ_COORD coo = {{0, 0, 0, 0}};
     coo.lp = lp;
 
-    err = proj_errno_reset (P);
-
-    if (0==fac) {
-        proj_errno_set (P, ENOMEM);
+    /* Failing the 3 initial checks will most likely be due to */
+    /* earlier errors, so we leave errno alone */
+    if (0==fac)
         return 1;
-    }
+
+    if (0==P)
+        return 1;
+
+    if (HUGE_VAL==lp.lam)
+        return 1;
+
+    /* But from here, we're ready to make our own mistakes */
+    err = proj_errno_reset (P);
 
     /* Indicate that all factors are numerical approximations */
     fac->code = 0;
@@ -40,7 +47,7 @@ int pj_factors(LP lp, const PJ *P, double h, struct FACTORS *fac) {
 
     /* If input latitudes are geocentric, convert to geographic */
     if (P->geoc)
-        lp = proj_geoc_lat (P, PJ_INV, coo).lp;
+        lp = proj_geocentric_latitude (P, PJ_INV, coo).lp;
 
     /* If latitude + one step overshoots the pole, move it slightly inside, */
     /* so the numerical derivative still exists */

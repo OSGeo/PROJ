@@ -47,7 +47,7 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
     int entry_max;
     char line[302];
     
-    fid = pj_open_lib( ctx, (char *) catalog_name, "r" );
+    fid = pj_open_lib( ctx, catalog_name, "r" );
     if (fid == NULL) 
         return NULL;
 

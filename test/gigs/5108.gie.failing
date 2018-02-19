@@ -1,0 +1,235 @@
+--------------------------------------------------------------------------------
+
+Test 5108, Cassini-Soldner, v2-0_2011-06-28.
+
+--------------------------------------------------------------------------------
+
+# GDM2000
+<4742> +proj=longlat +ellps=GRS80 +no_defs  <>
+
+# GDM2000 / Johor Grid
+<3377> +proj=cass +lat_0=2.121679744444445 +lon_0=103.4279362361111 +x_0=-14810.562 +y_0=8758.32 +ellps=GRS80 +units=m +no_defs  <>
+
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4742 +inv
+           +step +init=epsg:3377
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    106 10
+expect    267186.017 881108.902
+
+tolerance  0.05 m
+accept    106 9
+expect    268006.024 770398.186
+
+tolerance  0.05 m
+accept    106 8
+expect    268740.351 659692.254
+
+tolerance  0.05 m
+accept    106 7
+expect    269388.786 548990.588
+
+tolerance  0.05 m
+accept    106 6
+expect    269951.141 438292.666
+
+tolerance  0.05 m
+accept    106 5
+expect    270427.255 327597.962
+
+tolerance  0.05 m
+accept    106 4
+expect    270816.99 216905.945
+
+tolerance  0.05 m
+accept    106 3
+expect    271120.234 106216.081
+
+tolerance  0.05 m
+accept    103.561065778 2.0424676812
+expect    0 0
+
+tolerance  0.05 m
+accept    103.64025984 1.82776484381
+expect    8813.252 -23740.095
+
+tolerance  0.05 m
+accept    106 1
+expect    271466.923 -115159.332
+
+tolerance  0.05 m
+accept    109 5
+expect    603116.703 329668.599
+
+tolerance  0.05 m
+accept    108 5
+expect    492221.308 328807.336
+
+tolerance  0.05 m
+accept    107 5
+expect    381324.74 328117.472
+
+tolerance  0.05 m
+accept    106 5
+expect    270427.255 327597.962
+
+tolerance  0.05 m
+accept    105 5
+expect    159529.111 327248.012
+
+tolerance  0.05 m
+accept    104 5
+expect    48630.563 327067.097
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:3377 +inv
+           +step +init=epsg:4742
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    267186.017 881108.902
+expect    106 10
+
+tolerance  0.05 m
+accept    268006.024 770398.186
+expect    106 9
+
+tolerance  0.05 m
+accept    268740.351 659692.254
+expect    106 8
+
+tolerance  0.05 m
+accept    269388.786 548990.588
+expect    106 7
+
+tolerance  0.05 m
+accept    269951.141 438292.666
+expect    106 6
+
+tolerance  0.05 m
+accept    270427.255 327597.962
+expect    106 5
+
+tolerance  0.05 m
+accept    270816.99 216905.945
+expect    106 4
+
+tolerance  0.05 m
+accept    271120.234 106216.081
+expect    106 3
+
+tolerance  0.05 m
+accept    0 0
+expect    103.561065778 2.0424676812
+
+tolerance  0.05 m
+accept    8813.252 -23740.095
+expect    103.64025984 1.82776484381
+
+tolerance  0.05 m
+accept    271466.923 -115159.332
+expect    106 1
+
+tolerance  0.05 m
+accept    603116.703 329668.599
+expect    109 5
+
+tolerance  0.05 m
+accept    492221.308 328807.336
+expect    108 5
+
+tolerance  0.05 m
+accept    381324.74 328117.472
+expect    107 5
+
+tolerance  0.05 m
+accept    270427.255 327597.962
+expect    106 5
+
+tolerance  0.05 m
+accept    159529.111 327248.012
+expect    105 5
+
+tolerance  0.05 m
+accept    48630.563 327067.097
+expect    104 5
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4742 +inv
+           +step +init=epsg:3377
+--------------------------------------------------------------------------------
+tolerance  0.006 m
+accept    106 10
+roundtrip 1000
+
+tolerance  0.006 m
+accept    106 9
+roundtrip 1000
+
+tolerance  0.006 m
+accept    106 8
+roundtrip 1000
+
+tolerance  0.006 m
+accept    106 7
+roundtrip 1000
+
+tolerance  0.006 m
+accept    106 6
+roundtrip 1000
+
+tolerance  0.006 m
+accept    106 5
+roundtrip 1000
+
+tolerance  0.006 m
+accept    106 4
+roundtrip 1000
+
+tolerance  0.006 m
+accept    106 3
+roundtrip 1000
+
+tolerance  0.006 m
+accept    103.561065778 2.0424676812
+roundtrip 1000
+
+tolerance  0.006 m
+accept    103.64025984 1.82776484381
+roundtrip 1000
+
+tolerance  0.006 m
+accept    106 1
+roundtrip 1000
+
+tolerance  0.006 m
+accept    109 5
+roundtrip 1000
+
+tolerance  0.006 m
+accept    108 5
+roundtrip 1000
+
+tolerance  0.006 m
+accept    107 5
+roundtrip 1000
+
+tolerance  0.006 m
+accept    106 5
+roundtrip 1000
+
+tolerance  0.006 m
+accept    105 5
+roundtrip 1000
+
+tolerance  0.006 m
+accept    104 5
+roundtrip 1000
+
+</gie>

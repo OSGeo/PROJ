@@ -38,7 +38,7 @@
 static const char *(*pj_finder)(const char *) = NULL;
 static int path_count = 0;
 static char **search_path = NULL;
-static char * proj_lib_name =
+static const char * proj_lib_name =
 #ifdef PROJ_LIB
 PROJ_LIB;
 #else
@@ -93,8 +93,8 @@ void pj_set_searchpath ( int count, const char **path )
 
 /* just a couple of helper functions that lets other functions
    access the otherwise private search path */
-const char **proj_get_searchpath(void) {
-    return (const char **)search_path;
+const char * const *proj_get_searchpath(void) {
+    return (const char * const *)search_path;
 }
 
 int proj_get_path_count(void) {
@@ -117,8 +117,6 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
 #else
     static const char dir_chars[] = "/";
 #endif
-
-#ifndef _WIN32_WCE
 
     if( out_full_filename != NULL && out_full_filename_size > 0 )
         out_full_filename[0] = '\0';
@@ -205,9 +203,6 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
             fid == NULL ? "failed" : "succeeded" );
 
     return(fid);
-#else
-    return NULL;
-#endif /* _WIN32_WCE */
 }
 
 /************************************************************************/

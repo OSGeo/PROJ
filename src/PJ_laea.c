@@ -26,8 +26,6 @@ struct pj_opaque {
 };
 
 #define EPS10   1.e-10
-#define NITER   20
-#define CONV    1.e-10
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};

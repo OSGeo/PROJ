@@ -37,8 +37,6 @@ struct pj_opaque {
 
 
 PROJ_HEAD(sterea, "Oblique Stereographic Alternative") "\n\tAzimuthal, Sph&Ell";
-# define DEL_TOL    1.e-14
-# define MAX_ITER   10
 
 
 

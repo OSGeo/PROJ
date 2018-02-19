@@ -73,8 +73,8 @@ struct pj_opaque_helmert {
     double theta_0;
     double dtheta;
     double R[3][3];
-    double epoch, t_obs;
-    int no_rotation, approximate, transpose, fourparam;
+    double t_epoch, t_obs;
+    int no_rotation, exact, transpose, fourparam;
 };
 
 
@@ -118,7 +118,7 @@ static void update_parameters(PJ *P) {
 *******************************************************************************/
 
     struct pj_opaque_helmert *Q = (struct pj_opaque_helmert *) P->opaque;
-    double dt = Q->t_obs - Q->epoch;
+    double dt = Q->t_obs - Q->t_epoch;
 
     Q->xyz.x = Q->xyz_0.x + Q->dxyz.x * dt;
     Q->xyz.y = Q->xyz_0.y + Q->dxyz.y * dt;
@@ -134,7 +134,7 @@ static void update_parameters(PJ *P) {
 
     /* debugging output */
     if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
-        proj_log_trace(P, "Transformation parameters for observation epoch %g:", Q->t_obs);
+        proj_log_trace(P, "Transformation parameters for observation t_epoch %g:", Q->t_obs);
         proj_log_trace(P, "x: %g", Q->xyz.x);
         proj_log_trace(P, "y: %g", Q->xyz.y);
         proj_log_trace(P, "z: %g", Q->xyz.z);
@@ -160,7 +160,7 @@ static void build_rot_matrix(PJ *P) {
     at https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions
     The relevant section is Euler angles ( z-’-x" intrinsic) -> Rotation matrix
 
-    If the option "approximate" is set, small angle approximations are used:
+    By default small angle approximations are used:
     The matrix elements are approximated by expanding the trigonometric
     functions to linear order (i.e. cos(x) = 1, sin(x) = x), and discarding
     products of second order.
@@ -179,8 +179,11 @@ static void build_rot_matrix(PJ *P) {
     However, in many cases the approximation is necessary, since it has
     been used historically: Rotation angles from older published datum
     shifts may actually be a least squares fit to the linearized rotation
-    approximation, hence not being strictly valid for deriving the full
-    rotation matrix.
+    approximation, hence not being strictly valid for deriving the exact
+    rotation matrix. In fact, most publicly available transformation
+    parameters are based on the approximate Helmert transform, which is why
+    we use that as the default setting, even though it is more correct to
+    use the exact form of the equations.
 
     So in order to fit historically derived coordinates, the access to
     the approximate rotation matrix is necessary - at least in principle.
@@ -222,20 +225,7 @@ static void build_rot_matrix(PJ *P) {
     t = Q->opk.p;
     p = Q->opk.k;
 
-    if (Q->approximate) {
-        R00 =  1;
-        R01 =  p;
-        R02 = -t;
-
-        R10 = -p;
-        R11 =  1;
-        R12 =  f;
-
-        R20 =  t;
-        R21 = -f;
-        R22 =  1;
-    }
-    else {
+    if (Q->exact) {
         cf = cos(f);
         sf = sin(f);
         ct = cos(t);
@@ -255,7 +245,20 @@ static void build_rot_matrix(PJ *P) {
         R20 =  st;
         R21 = -sf*ct;
         R22 =  cf*ct;
+    } else{
+        R00 =  1;
+        R01 =  p;
+        R02 = -t;
+
+        R10 = -p;
+        R11 =  1;
+        R12 =  f;
+
+        R20 =  t;
+        R21 = -f;
+        R22 =  1;
     }
+
 
     /*
         For comparison: Description from Engsager/Poder implementation
@@ -474,8 +477,33 @@ PJ *TRANSFORMATION(helmert, 0) {
     P->fwd    = helmert_forward;
     P->inv    = helmert_reverse;
 
-    P->left  = PJ_IO_UNITS_METERS;
-    P->right = PJ_IO_UNITS_METERS;
+    /* In most cases, we work on 3D cartesian coordinates */
+    P->left  = PJ_IO_UNITS_CARTESIAN;
+    P->right = PJ_IO_UNITS_CARTESIAN;
+    /* But in the 2D case, the coordinates are projected */
+    if (pj_param_exists (P->params, "theta")) {
+        P->left  = PJ_IO_UNITS_PROJECTED;
+        P->right = PJ_IO_UNITS_PROJECTED;
+    }
+
+    /* Support the classic PROJ towgs84 parameter, but allow later overrides.*/
+    /* Note that if towgs84 is specified, the datum_params array is set up   */
+    /* for us automagically by the pj_datum_set call in pj_init_ctx */
+    if (pj_param_exists (P->params, "towgs84")) {
+        Q->xyz_0.x = P->datum_params[0];
+        Q->xyz_0.y = P->datum_params[1];
+        Q->xyz_0.z = P->datum_params[2];
+
+        Q->opk_0.o = P->datum_params[3];
+        Q->opk_0.p = P->datum_params[4];
+        Q->opk_0.k = P->datum_params[5];
+
+        /* We must undo conversion to absolute scale from pj_datum_set */
+        if (0==P->datum_params[6])
+            Q->scale_0 = 0;
+        else
+            Q->scale_0 = (P->datum_params[6] - 1) * 1e6;
+    }
 
     /* Translations */
     if (pj_param (P->ctx, P->params, "tx").i)
@@ -539,15 +567,15 @@ PJ *TRANSFORMATION(helmert, 0) {
 
 
     /* Epoch */
-    if (pj_param(P->ctx, P->params, "tepoch").i)
-        Q->epoch = pj_param (P->ctx, P->params, "depoch").f;
+    if (pj_param(P->ctx, P->params, "tt_epoch").i)
+        Q->t_epoch = pj_param (P->ctx, P->params, "dt_epoch").f;
 
-    if (pj_param(P->ctx, P->params, "ttobs").i)
-        Q->t_obs = pj_param (P->ctx, P->params, "dtobs").f;
+    if (pj_param(P->ctx, P->params, "tt_obs").i)
+        Q->t_obs = pj_param (P->ctx, P->params, "dt_obs").f;
 
     /* Use small angle approximations? */
-    if (pj_param (P->ctx, P->params, "bapprox").i)
-        Q->approximate = 1;
+    if (pj_param (P->ctx, P->params, "bexact").i)
+        Q->exact = 1;
 
     /* Use "other" rotation sign convention? */
     if (pj_param (P->ctx, P->params, "ttranspose").i)
@@ -561,14 +589,13 @@ PJ *TRANSFORMATION(helmert, 0) {
     /* Let's help with debugging */
     if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
         proj_log_debug(P, "Helmert parameters:");
-        proj_log_debug(P, "x=  % 3.5f  y=  % 3.5f  z=  % 3.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
-        proj_log_debug(P, "rx= % 3.5f  ry= % 3.5f  rz= % 3.5f",
+        proj_log_debug(P, "x=  %8.5f  y=  %8.5f  z=  %8.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
+        proj_log_debug(P, "rx= %8.5f  ry= %8.5f  rz= %8.5f",
                 Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD, Q->opk.k / ARCSEC_TO_RAD);
-        proj_log_debug(P, "s=% 3.5f  approximate=% d  transpose=% d",
-                Q->scale, Q->approximate, Q->transpose);
-        proj_log_debug(P, "dx= % 3.5f  dy= % 3.5f  dz= % 3.5f", Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
-        proj_log_debug(P, "drx=% 3.5f  dry=% 3.5f  drz=% 3.5f", Q->dopk.o, Q->dopk.p, Q->dopk.k);
-        proj_log_debug(P, "ds=% 3.5f  epoch=% 5.5f  tobs=% 5.5f", Q->dscale, Q->epoch, Q->t_obs);
+        proj_log_debug(P, "s=  %8.5f  exact=%d  transpose=%d", Q->scale, Q->exact, Q->transpose);
+        proj_log_debug(P, "dx= %8.5f  dy= %8.5f  dz= %8.5f",   Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
+        proj_log_debug(P, "drx=%8.5f  dry=%8.5f  drz=%8.5f",   Q->dopk.o, Q->dopk.p, Q->dopk.k);
+        proj_log_debug(P, "ds= %8.5f  t_epoch=%8.5f  t_obs=%8.5f", Q->dscale, Q->t_epoch, Q->t_obs);
     }
 
     if ((Q->opk.o==0)  && (Q->opk.p==0)  && (Q->opk.k==0) && (Q->scale==0) &&

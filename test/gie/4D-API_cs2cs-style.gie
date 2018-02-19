@@ -1,0 +1,189 @@
+===============================================================================
+
+Test the 4D API handling of cs2cs style transformation options.
+
+These tests are mostly based on the same material as those in
+more_builtins.gie, since we are testing the same kinds of things,
+but provided through a different interface.
+
+===============================================================================
+
+
+<gie>
+
+-------------------------------------------------------------------------------
+Test the handling of the +towgs84 parameter.
+-------------------------------------------------------------------------------
+(additional tests of the towgs84 handling can be found in DHDN_ETRS89.gie)
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+This example is from Lotti Jivall: "Simplified transformations from
+ITRF2008/IGS08 to ETRS89 for maritime applications" (see also more_builtins.gie)
+-------------------------------------------------------------------------------
+operation  proj=geocent
+           towgs84 = 0.676780, 0.654950, -0.528270,
+                    -0.022742, 0.012667,  0.022704,
+                    -0.01070
+-------------------------------------------------------------------------------
+tolerance 1 um
+
+direction inverse
+
+accept     3565285.00000000  855949.00000000  5201383.00000000
+expect     3565285.41342351  855948.67986759  5201382.72939791
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+This example is a random point, transformed from ED50 to ETRS89 using KMStrans2.
+-------------------------------------------------------------------------------
+operation proj=latlong ellps=intl
+          towgs84 =  -081.07030, -089.36030, -115.75260,
+                      000.48488, 000.02436, 000.41321, -0.540645
+-------------------------------------------------------------------------------
+tolerance  25 mm
+
+accept     16.82    55.17        61.0
+expect     16.8210462130   55.1705688946       29.0317
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+operation  proj=latlong nadgrids=nzgd2kgrid0005.gsb  ellps=GRS80
+-------------------------------------------------------------------------------
+This functionality is also tested in DHDN_ETRS89.gie
+-------------------------------------------------------------------------------
+tolerance 1 mm
+ignore    pjd_err_failed_to_load_grid
+accept    173                 -45
+expect    172.999892181021551 -45.001620431954613
+direction inverse
+accept    172.999892181021551 -45.001620431954613
+expect    173                 -45
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+operation  proj=latlong geoidgrids=egm96_15.gtx  ellps=GRS80
+-------------------------------------------------------------------------------
+tolerance 15 cm      # lax tolerance due to widespread bad egm96 file
+ignore    pjd_err_failed_to_load_grid
+
+accept    12.5 55.5   0
+expect    12.5 55.5 -36.0213
+
+direction inverse
+
+accept    12.5 55.5 -36.0213
+expect    12.5 55.5  0
+-------------------------------------------------------------------------------
+operation  proj=merc geoidgrids=egm96_15.gtx  ellps=GRS80
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+ignore    pjd_err_failed_to_load_grid
+accept    12.5 55.5 0
+expect    1391493.63492   7424275.19462  -36.0213
+direction inverse
+accept    1391493.63492   7424275.19462  -36.0213
+expect    12.5 55.5 0
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+Same as the two above, but also do axis swapping.
+-------------------------------------------------------------------------------
+NOTE: A number of the tests below are commented out. The actually do the
+right thing, but the gie distance computation is not yet able to cope
+with "unusual" axis orders
+-------------------------------------------------------------------------------
+operation  proj=latlong geoidgrids=egm96_15.gtx  axis=neu ellps=GRS80
+-------------------------------------------------------------------------------
+tolerance 15 cm      # lax tolerance due to widely distributed, bad egm96 file
+ignore    pjd_err_failed_to_load_grid
+accept    12.5 55.5  0
+expect    55.5 12.5 -36.0213
+direction inverse
+accept    55.5 12.5 -36.0213
+expect    12.5 55.5  0
+-------------------------------------------------------------------------------
+operation  proj=latlong geoidgrids=egm96_15.gtx  axis=dne ellps=GRS80
+-------------------------------------------------------------------------------
+tolerance 15 cm      # lax tolerance due to widely distributed, bad egm96 file
+ignore    pjd_err_failed_to_load_grid
+# accept    12.5 55.5  0
+# expect    36.0213 55.5 12.5
+# direction inverse
+# accept    36.0213 55.5 12.5
+# expect    12.5 55.5  0
+-------------------------------------------------------------------------------
+operation  proj=merc geoidgrids=egm96_15.gtx  ellps=GRS80
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+ignore    pjd_err_failed_to_load_grid
+accept    12.5 55.5 0
+expect    1391493.63492   7424275.19462  -36.0213
+direction inverse
+accept    1391493.63492   7424275.19462  -36.0213
+expect    12.5 55.5 0
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+Some more complex axis swapping.
+-------------------------------------------------------------------------------
+operation  proj=latlong geoidgrids=egm96_15.gtx  axis=nue ellps=GRS80
+-------------------------------------------------------------------------------
+tolerance 15 cm      # lax tolerance due to widely distributed, bad egm96 file
+ignore    pjd_err_failed_to_load_grid
+accept    12.5 55.5 0
+expect    55.5 -36.0213 12.5
+# direction inverse
+# accept    55.5 -36.0213 12.5
+# expect    12.5 55.5 0
+-------------------------------------------------------------------------------
+operation  proj=merc geoidgrids=egm96_15.gtx axis=sue ellps=GRS80
+-------------------------------------------------------------------------------
+tolerance 15 cm
+ignore    pjd_err_failed_to_load_grid
+accept    12.5 55.5 0
+expect    -7424275.1946 -36.0213  1391493.6349 0.0000
+# direction inverse
+# accept    -7424275.1946 -36.0213  1391493.6349 0.0000
+# expect    12.5 55.5 0
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+A test case from a comment by Github user c0nk
+-------------------------------------------------------------------------------
+operation  proj=somerc
+           lat_0=46.95240555555556 lon_0=7.439583333333333 k_0=1
+           x_0=2600000 y_0=1200000 ellps=bessel
+           towgs84=674.374,15.056,405.346 no_defs
+-------------------------------------------------------------------------------
+tolerance 20 cm
+accept    7.438632495 46.951082877
+expect    2600000.0  1200000.0
+-------------------------------------------------------------------------------
+Same test, but now implemented as a pipeline. This is for testing a nasty bug,
+where, at the end of pipeline creation, a false warning about missing ellps was
+left behind from the creation of the Helmert step  (now repaired in pj_init).
+-------------------------------------------------------------------------------
+operation proj=pipeline
+     step proj=cart ellps=WGS84 no_defs
+     step proj=helmert x=674.37400 y=15.05600 z=405.34600 inv no_defs
+     step proj=cart ellps=bessel no_defs inv
+     step proj=somerc lat_0=46.95240555555556 lon_0=7.439583333333333
+                      k_0=1 x_0=2600000 y_0=1200000 ellps=bessel units=m no_defs
+-------------------------------------------------------------------------------
+tolerance 20 cm
+accept    7.438632495 46.951082877
+expect    2600000.0  1200000.0
+-------------------------------------------------------------------------------
+</gie>

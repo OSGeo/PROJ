@@ -1,7 +1,6 @@
 /* arc sin, cosine, tan2 and sqrt that will NOT fail */
 #include <projects.h>
 #define ONE_TOL	 1.00000000000001
-#define TOL	0.000000001
 #define ATOL 1e-50
 
 	double

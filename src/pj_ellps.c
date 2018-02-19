@@ -1,8 +1,11 @@
 /* definition of standard geoids */
+
+#include "proj.h"
+
 #define PJ_ELLPS__
 #include "projects.h"
 
-C_NAMESPACE_VAR struct PJ_ELLPS
+C_NAMESPACE_VAR const struct PJ_ELLPS
 pj_ellps[] = {
 {"MERIT",	"a=6378137.0",		"rf=298.257",		"MERIT 1983"},
 {"SGS85",	"a=6378136.0",		"rf=298.257",		"Soviet Geodetic System 85"},
@@ -13,6 +16,7 @@ pj_ellps[] = {
 {"NWL9D",	"a=6378145.0.",		"rf=298.25",		"Naval Weapons Lab., 1965"},
 {"mod_airy",	"a=6377340.189",	"b=6356034.446",	"Modified Airy"},
 {"andrae",	"a=6377104.43",		"rf=300.0",		"Andrae 1876 (Den., Iclnd.)"},
+{"danish",	"a=6377019.2563",	"rf=300.0",		"Andrae 1876 (Denmark, Iceland)"},
 {"aust_SA",	"a=6378160.0",		"rf=298.25",		"Australian Natl & S. Amer. 1969"},
 {"GRS67",	"a=6378160.0",		"rf=298.2471674270",	"GRS 67(IUGG 1967)"},
 {"GSK2011",	"a=6378136.5",		"rf=298.2564151",	"GSK-2011"},
@@ -53,7 +57,11 @@ pj_ellps[] = {
 };
 
 struct PJ_ELLPS *pj_get_ellps_ref()
+{
+    return (struct PJ_ELLPS *)pj_ellps;
+}
 
+const PJ_ELLPS *proj_list_ellps(void)
 {
     return pj_ellps;
 }

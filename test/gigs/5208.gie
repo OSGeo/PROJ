@@ -1,0 +1,208 @@
+--------------------------------------------------------------------------------
+
+Test 5208, Longitude Rotation, v2.0_2011-06-28.
+
+The test tolerance is 0.01". Since gie can only use linear tolerances we
+convert that to an approximate liniar distance instead, by multiplying with
+111km:
+
+    0.01" * 111 km = 2.777777778-7 * 111000 m = 0.03 m
+
+To be on the safe side we, use 0.01 m as the tolerance.
+
+--------------------------------------------------------------------------------
+
+# NTF
+<4275> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +no_defs  <>
+
+# NTF (Paris)
+<4807> +proj=longlat +a=6378249.2 +b=6356515 +towgs84=-168,-60,320,0,0,0,0 +pm=paris +no_defs  <>
+
+
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4275 +inv
+           +step +init=epsg:4807
+--------------------------------------------------------------------------------
+tolerance 0.01 m
+accept    5 58
+expect    2.66277083 58
+
+tolerance 0.01 m
+accept    5 56
+expect    2.66277083 56
+
+tolerance 0.01 m
+accept    5 55
+expect    2.66277083 55
+
+tolerance 0.01 m
+accept    5 53
+expect    2.66277083 53
+
+tolerance 0.01 m
+accept    4 51
+expect    1.66277083 51
+
+tolerance 0.01 m
+accept    4 49
+expect    1.66277083 49
+
+tolerance 0.01 m
+accept    2.33722917 46.8
+expect    0 46.8
+
+tolerance 0.01 m
+accept    3 53
+expect    0.66277083 53
+
+tolerance 0.01 m
+accept    4 53
+expect    1.66277083 53
+
+tolerance 0.01 m
+accept    6 53
+expect    3.66277083 53
+
+tolerance 0.01 m
+accept    7 53
+expect    4.66277083 53
+
+tolerance 0.01 m
+accept    9 53
+expect    6.66277083 53
+
+tolerance 0.01 m
+accept    10 53
+expect    7.66277083 53
+
+tolerance 0.01 m
+accept    11 53
+expect    8.66277083 53
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4807 +inv
+           +step +init=epsg:4275
+--------------------------------------------------------------------------------
+tolerance 0.01 m
+accept    2.66277083 58
+expect    5 58
+
+tolerance 0.01 m
+accept    2.66277083 56
+expect    5 56
+
+tolerance 0.01 m
+accept    2.66277083 55
+expect    5 55
+
+tolerance 0.01 m
+accept    2.66277083 53
+expect    5 53
+
+tolerance 0.01 m
+accept    1.66277083 51
+expect    4 51
+
+tolerance 0.01 m
+accept    1.66277083 49
+expect    4 49
+
+tolerance 0.01 m
+accept    0 46.8
+expect    2.33722917 46.8
+
+tolerance 0.01 m
+accept    0.66277083 53
+expect    3 53
+
+tolerance 0.01 m
+accept    1.66277083 53
+expect    4 53
+
+tolerance 0.01 m
+accept    3.66277083 53
+expect    6 53
+
+tolerance 0.01 m
+accept    4.66277083 53
+expect    7 53
+
+tolerance 0.01 m
+accept    6.66277083 53
+expect    9 53
+
+tolerance 0.01 m
+accept    7.66277083 53
+expect    10 53
+
+tolerance 0.01 m
+accept    8.66277083 53
+expect    11 53
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4275 +inv
+           +step +init=epsg:4807
+--------------------------------------------------------------------------------
+tolerance 0.01 m
+accept    5 58
+roundtrip 1000
+
+tolerance 0.01 m
+accept    5 56
+roundtrip 1000
+
+tolerance 0.01 m
+accept    5 55
+roundtrip 1000
+
+tolerance 0.01 m
+accept    5 53
+roundtrip 1000
+
+tolerance 0.01 m
+accept    4 51
+roundtrip 1000
+
+tolerance 0.01 m
+accept    4 49
+roundtrip 1000
+
+tolerance 0.01 m
+accept    2.33722917 46.8
+roundtrip 1000
+
+tolerance 0.01 m
+accept    3 53
+roundtrip 1000
+
+tolerance 0.01 m
+accept    4 53
+roundtrip 1000
+
+tolerance 0.01 m
+accept    6 53
+roundtrip 1000
+
+tolerance 0.01 m
+accept    7 53
+roundtrip 1000
+
+tolerance 0.01 m
+accept    9 53
+roundtrip 1000
+
+tolerance 0.01 m
+accept    10 53
+roundtrip 1000
+
+tolerance 0.01 m
+accept    11 53
+roundtrip 1000
+
+</gie>

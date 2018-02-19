@@ -2,6 +2,15 @@
 
 set -e
 
+# Download grid files to nad/
+wget http://download.osgeo.org/proj/proj-datumgrid-1.6.zip
+cd nad
+unzip -o ../proj-datumgrid-1.6.zip
+wget http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
+GRIDDIR=`pwd`
+echo $GRIDDIR
+cd ..
+
 # prepare build files
 ./autogen.sh
 # cmake build
@@ -20,7 +29,7 @@ make -j3
 make install
 make dist-all
 find /tmp/proj_autoconf_install
-make check
+PROJ_LIB=$GRIDDIR make check
 # Check consistency of generated tarball
 TAR_FILENAME=`ls *.tar.gz`
 TAR_DIRECTORY=`basename $TAR_FILENAME .tar.gz`
@@ -29,8 +38,7 @@ cd $TAR_DIRECTORY
 ./configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 make -j3
 make install
-make dist-all
-make check
+PROJ_LIB=$GRIDDIR make check
 CURRENT_PWD=`pwd`
 cd /tmp/proj_autoconf_install
 find | sort > /tmp/list_proj_autoconf_install.txt
@@ -41,14 +49,6 @@ cd $CURRENT_PWD
 #diff -u /tmp/list_proj_autoconf_install.txt /tmp/list_proj_autoconf_install_from_dist_all.txt
 cd ..
 #
-cd ..
-# Now with grids
-wget http://download.osgeo.org/proj/proj-datumgrid-1.6.zip
-cd nad
-unzip -o ../proj-datumgrid-1.6.zip
-wget http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
-GRIDDIR=`pwd`
-echo $GRIDDIR
 cd ..
 # cmake build with grids
 mkdir build_cmake_nad
@@ -65,7 +65,7 @@ cd build_autoconf_nad
 make -j3
 make install
 find /tmp/proj_autoconf_install_nad
-make check
+PROJ_LIB=$GRIDDIR make check
 cd src
 make multistresstest
 make test228
@@ -79,29 +79,6 @@ if [ $TRAVIS_OS_NAME == "osx" ]; then
       CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure;
     fi
 make -j3
-make check
-PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/builtins.gie
-PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/more_builtins.gie
-PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/deformation.gie
-PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/axisswap.gie
-PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/ellipsoid.gie
-PROJ_LIB=$GRIDDIR ./src/gie ./test/gie/GDA.gie
-
-# install & run the working GIGS test
-  # create locations that pyproj understands
-ln -s src include
-ln -s src/.libs lib
-mkdir share
-ln -s nad share/proj
-pwd
-  # install pyproj
-export CFLAGS=
-PROJ_DIR=`pwd` pip install -v --user pyproj
-
-cd test/gigs
-  # run test_json.py
-PROJ_LIB=../../nad python test_json.py --test conversion 5101.1-jhs.json 5101.4-jhs-etmerc.json 5105.2.json 5106.json 5108.json 5110.json 5111.1.json
-PROJ_LIB=../../nad python test_json.py 5101.2-jhs.json 5101.3-jhs.json 5102.1.json 5103.1.json 5103.2.json 5103.3.json 5107.json 5109.json 5112.json 5113.json 5201.json 5208.json
-cd ../..
+PROJ_LIB=$GRIDDIR make check
 
 mv src/.libs/*.gc* src

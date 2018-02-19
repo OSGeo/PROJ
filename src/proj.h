@@ -112,13 +112,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-/*
-#ifdef _MSC_VER
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
-#endif
-#include <math.h>    For M_PI */
+
 #include <stddef.h>  /* For size_t */
 
 
@@ -151,11 +145,6 @@ typedef union PJ_COORD PJ_COORD;
 struct PJ_AREA;
 typedef struct PJ_AREA PJ_AREA;
 
-/* The slimmed down PROJ 5.0.0 version of struct FACTORS  */
-/* Will take over the world and the name when we can rid  */
-/* the library for deprecated stuff, but it's the typedef */
-/* which is userspace useful, so it does not do much of a */
-/* difference */
 struct P5_FACTORS {                  /* Common designation */
     double meridional_scale;               /* h */
     double parallel_scale;                 /* k */
@@ -167,6 +156,9 @@ struct P5_FACTORS {                  /* Common designation */
 
     double tissot_semimajor;               /* a */
     double tissot_semiminor;               /* b */
+
+    double dx_dlam, dx_dphi;
+    double dy_dlam, dy_dphi;
 };
 typedef struct P5_FACTORS PJ_FACTORS;
 
@@ -206,15 +198,17 @@ typedef struct { double   x,   y,  z, t; }  PJ_XYZT;
 typedef struct { double   u,   v,  w, t; }  PJ_UVWT;
 typedef struct { double lam, phi,  z, t; }  PJ_LPZT;
 typedef struct { double o, p, k; }          PJ_OPK;  /* Rotations: omega, phi, kappa */
+typedef struct { double e, n, u; }          PJ_ENU;  /* East, North, Up */
+typedef struct { double s, a1, a2; }        PJ_GEOD; /* Geodesic length, fwd azi, rev azi */
 
-/* Classic proj.4 pair/triplet types */
-typedef struct { double   u,   v; }  UV;
-typedef struct { double   x,   y; }  XY;
-typedef struct { double lam, phi; }  LP;
+/* Classic proj.4 pair/triplet types - moved into the PJ_ name space */
+typedef struct { double   u,   v; }  PJ_UV;
+typedef struct { double   x,   y; }  PJ_XY;
+typedef struct { double lam, phi; }  PJ_LP;
 
-typedef struct { double   x,   y,  z; }  XYZ;
-typedef struct { double   u,   v,  w; }  UVW;
-typedef struct { double lam, phi,  z; }  LPZ;
+typedef struct { double   x,   y,  z; }  PJ_XYZ;
+typedef struct { double   u,   v,  w; }  PJ_UVW;
+typedef struct { double lam, phi,  z; }  PJ_LPZ;
 
 
 /* Avoid preprocessor renaming and implicit type-punning: Use a union to make it explicit */
@@ -223,31 +217,35 @@ union PJ_COORD {
     PJ_XYZT xyzt;
     PJ_UVWT uvwt;
     PJ_LPZT lpzt;
+    PJ_GEOD geod;
      PJ_OPK opk;
-        XYZ xyz;
-        UVW uvw;
-        LPZ lpz;
-         XY xy;
-         UV uv;
-         LP lp;
+     PJ_ENU enu;
+     PJ_XYZ xyz;
+     PJ_UVW uvw;
+     PJ_LPZ lpz;
+      PJ_XY xy;
+      PJ_UV uv;
+      PJ_LP lp;
 };
 
 
 struct PJ_INFO {
-    char        release[64];        /* Release info. Version + date         */
-    char        version[64];        /* Full version number                  */
     int         major;              /* Major release number                 */
     int         minor;              /* Minor release number                 */
     int         patch;              /* Patch level                          */
-    char        searchpath[512];    /* Paths where init and grid files are  */
+    const char  *release;           /* Release info. Version + date         */
+    const char  *version;           /* Full version number                  */
+    const char  *searchpath;        /* Paths where init and grid files are  */
                                     /* looked for. Paths are separated by   */
                                     /* semi-colons.                         */
+    const char * const *paths;
+    size_t path_count;
 };
 
 struct PJ_PROJ_INFO {
-    char        id[16];             /* Name of the projection in question                       */
-    char        description[128];   /* Description of the projection                            */
-    char        definition[512];    /* Projection definition                                    */
+    const char  *id;                /* Name of the projection in question                       */
+    const char  *description;       /* Description of the projection                            */
+    const char  *definition;        /* Projection definition                                    */
     int         has_inverse;        /* 1 if an inverse mapping exists, 0 otherwise              */
     double      accuracy;           /* Expected accuracy of the transformation. -1 if unknown.  */
 };
@@ -256,8 +254,8 @@ struct PJ_GRID_INFO {
     char        gridname[32];       /* name of grid                         */
     char        filename[260];      /* full path to grid                    */
     char        format[8];          /* file format of grid                  */
-    LP          lowerleft;          /* Coordinates of lower left corner     */
-    LP          upperright;         /* Coordinates of upper right corner    */
+    PJ_LP       lowerleft;          /* Coordinates of lower left corner     */
+    PJ_LP       upperright;         /* Coordinates of upper right corner    */
     int         n_lon, n_lat;       /* Grid size                            */
     double      cs_lon, cs_lat;     /* Cell size of grid                    */
 };
@@ -329,29 +327,34 @@ PJ_COORD proj_coord (double x, double y, double z, double t);
 double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo);
 
 /* Geodesic distance between two points with angular 2D coordinates */
-double proj_lp_dist (const PJ *P, LP a, LP b);
+double proj_lp_dist (const PJ *P, PJ_COORD a, PJ_COORD b);
 
 /* The geodesic distance AND the vertical offset */
-double proj_lpz_dist (const PJ *P, LPZ a, LPZ b);
+double proj_lpz_dist (const PJ *P, PJ_COORD a, PJ_COORD b);
 
 /* Euclidean distance between two points with linear 2D coordinates */
-double proj_xy_dist (XY a, XY b);
+double proj_xy_dist (PJ_COORD a, PJ_COORD b);
 
 /* Euclidean distance between two points with linear 3D coordinates */
-double proj_xyz_dist (XYZ a, XYZ b);
+double proj_xyz_dist (PJ_COORD a, PJ_COORD b);
+
+/* Geodesic distance (in meter) + fwd and rev azimuth between two points on the ellipsoid */
+PJ_COORD proj_geod (const PJ *P, PJ_COORD a, PJ_COORD b);
+
 
 
 /* Set or read error level */
+int  proj_context_errno (PJ_CONTEXT *ctx);
 int  proj_errno (const PJ *P);
 int  proj_errno_set (const PJ *P, int err);
 int  proj_errno_reset (const PJ *P);
 int  proj_errno_restore (const PJ *P, int err);
 
 /* Scaling and angular distortion factors */
-PJ_FACTORS proj_factors(PJ *P, LP lp);
+PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp);
 
 /* Info functions - get information about various PROJ.4 entities */
-PJ_INFO      proj_info(void);
+PJ_INFO proj_info(void);
 PJ_PROJ_INFO proj_pj_info(PJ *P);
 PJ_GRID_INFO proj_grid_info(const char *gridname);
 PJ_INIT_INFO proj_init_info(const char *initname);
@@ -370,7 +373,7 @@ double proj_torad (double angle_in_degrees);
 double proj_todeg (double angle_in_radians);
 
 /* Geographical to geocentric latitude - another of the "simple, but useful" */
-PJ_COORD proj_geoc_lat (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
+PJ_COORD proj_geocentric_latitude (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 
 double proj_dmstor(const char *is, char **rs);
 char*  proj_rtodms(char *s, double r, int pos, int neg);

@@ -48,12 +48,14 @@ static LP inverse(XY xy, PJ *P) {
     return lp;
 }
 
-PJ *PROJECTION(geocent) {
+PJ *CONVERSION (geocent, 0) {
     P->is_geocent = 1;
     P->x0 = 0.0;
     P->y0 = 0.0;
     P->inv = inverse;
     P->fwd = forward;
+    P->left = PJ_IO_UNITS_ANGULAR;
+    P->right = PJ_IO_UNITS_CARTESIAN;
 
     return P;
 }

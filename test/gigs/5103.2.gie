@@ -1,0 +1,144 @@
+--------------------------------------------------------------------------------
+
+Test 5103 (part 2), Lambert Conic Conformal (2SP), v2-0_2011-06-28.
+
+--------------------------------------------------------------------------------
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4152 +inv
+           +step +init=epsg:2921
+--------------------------------------------------------------------------------
+tolerance  0.03 m
+accept    -110 49
+expect    2003937.27 6452491.7
+
+tolerance  0.03 m
+accept    -110 47
+expect    2016621.93 5717728.61
+
+tolerance  0.03 m
+accept    -110 45
+expect    2029255.57 4985920.56
+
+tolerance  0.03 m
+accept    -110 43
+expect    2041855.08 4256089.74
+
+tolerance  0.03 m
+accept    -110 41
+expect    2054436.57 3527302.73
+
+tolerance  0.03 m
+accept    -110 41
+expect    2054436.57 3527302.73
+
+tolerance  0.03 m
+accept    -108 41
+expect    2606245.52 3543182.55
+
+tolerance  0.03 m
+accept    -106 41
+expect    3157542.86 3571757.39
+
+tolerance  0.03 m
+accept    -104 41
+expect    3708036.57 3613012.12
+
+tolerance  0.03 m
+accept    -102 41
+expect    4257435.06 3666924.89
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:2921 +inv
+           +step +init=epsg:4152
+--------------------------------------------------------------------------------
+tolerance  0.03 m
+accept    2003937.27 6452491.7
+expect    -110 49
+
+tolerance  0.03 m
+accept    2016621.93 5717728.61
+expect    -110 47
+
+tolerance  0.03 m
+accept    2029255.57 4985920.56
+expect    -110 45
+
+tolerance  0.03 m
+accept    2041855.08 4256089.74
+expect    -110 43
+
+tolerance  0.03 m
+accept    2054436.57 3527302.73
+expect    -110 41
+
+tolerance  0.03 m
+accept    2054436.57 3527302.73
+expect    -110 41
+
+tolerance  0.03 m
+accept    2606245.52 3543182.55
+expect    -108 41
+
+tolerance  0.03 m
+accept    3157542.86 3571757.39
+expect    -106 41
+
+tolerance  0.03 m
+accept    3708036.57 3613012.12
+expect    -104 41
+
+tolerance  0.03 m
+accept    4257435.06 3666924.89
+expect    -102 41
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4152 +inv
+           +step +init=epsg:2921
+--------------------------------------------------------------------------------
+tolerance  0.006 m
+accept    -110 49
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -110 47
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -110 45
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -110 43
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -110 41
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -110 41
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -108 41
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -106 41
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -104 41
+roundtrip 1000
+
+tolerance  0.006 m
+accept    -102 41
+roundtrip 1000
+
+</gie>

@@ -8,7 +8,7 @@ intends to exercise corner cases.
 ===============================================================================
 
 
-BEGIN
+<gie>
 
 -------------------------------------------------------------------------------
 Two ob_tran tests from nad/testvarious
@@ -18,13 +18,13 @@ operation +proj=ob_tran  +o_proj=moll  +R=6378137.0  +o_lon_p=0  +o_lat_p=0  +lo
 tolerance 1 mm
 direction inverse
 
-accept    300000 400000 0 0
-expect    -42.7562158333  85.5911341667  0  0
+accept    300000 400000
+expect    -42.7562158333  85.5911341667
 
 direction forward
 
-accept    10 20 0 0
-expect    -1384841.18787 7581707.88240 0 0
+accept    10 20
+expect    -1384841.18787 7581707.88240
 -------------------------------------------------------------------------------
 
 
@@ -34,8 +34,8 @@ expect    -1384841.18787 7581707.88240 0 0
 -------------------------------------------------------------------------------
 Two tests from PJ_molodensky.c
 -------------------------------------------------------------------------------
-operation proj=molodensky a=6378160 rf=298.25                \
-          da=-23  df=-8.120449e-8  dx=-134  dy=-48  dz=149   \
+operation proj=molodensky a=6378160 rf=298.25
+          da=-23  df=-8.120449e-8  dx=-134  dy=-48  dz=149
           abridged
 -------------------------------------------------------------------------------
 tolerance 2 m
@@ -47,7 +47,7 @@ roundtrip 100    1 m
 -------------------------------------------------------------------------------
 Same thing once more, but this time unabridged
 -------------------------------------------------------------------------------
-operation proj=molodensky a=6378160 rf=298.25                \
+operation proj=molodensky a=6378160 rf=298.25
           da=-23  df=-8.120449e-8  dx=-134  dy=-48  dz=149
 -------------------------------------------------------------------------------
 tolerance 2 m
@@ -65,10 +65,10 @@ roundtrip 100    1 m
 -------------------------------------------------------------------------------
 Some tests from PJ_pipeline.c
 -------------------------------------------------------------------------------
-Forward-reverse geo->utm->geo
+Forward-reverse geo->utm->geo (4D functions)
 -------------------------------------------------------------------------------
-operation proj=pipeline zone=32 step  \
-          proj=utm  ellps=GRS80 step  \
+operation proj=pipeline zone=32 step
+          proj=utm  ellps=GRS80 step
           proj=utm  ellps=GRS80 inv
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
@@ -81,16 +81,43 @@ Now the inverse direction (still same result: the pipeline is symmetrical)
 direction inverse
 expect 12 55 0 0
 -------------------------------------------------------------------------------
-And now the back-to-back situation utm->geo->utm
+And now the back-to-back situation utm->geo->utm (4D functions)
 -------------------------------------------------------------------------------
-operation proj=pipeline zone=32 ellps=GRS80 step  \
-          proj=utm inv                      step  \
+operation proj=pipeline zone=32 ellps=GRS80 step
+          proj=utm inv                      step
           proj=utm
 -------------------------------------------------------------------------------
 accept 691875.63214  6098907.82501  0  0
 expect 691875.63214  6098907.82501  0  0
 direction inverse
 expect 691875.63214  6098907.82501  0  0
+-------------------------------------------------------------------------------
+Forward-reverse geo->utm->geo (3D functions)
+-------------------------------------------------------------------------------
+operation proj=pipeline zone=32 step
+          proj=utm  ellps=GRS80 step
+          proj=utm  ellps=GRS80 inv
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept 12 55 0
+expect 12 55 0
+
+Now the inverse direction (still same result: the pipeline is symmetrical)
+
+direction inverse
+expect 12 55 0
+-------------------------------------------------------------------------------
+And now the back-to-back situation utm->geo->utm (3D functions)
+-------------------------------------------------------------------------------
+operation proj=pipeline zone=32 ellps=GRS80 step
+          proj=utm inv                      step
+          proj=utm
+-------------------------------------------------------------------------------
+accept 691875.63214  6098907.82501  0
+expect 691875.63214  6098907.82501  0
+direction inverse
+expect 691875.63214  6098907.82501  0
 -------------------------------------------------------------------------------
 Test a corner case: A rather pointless one-step pipeline geo->utm
 -------------------------------------------------------------------------------
@@ -104,20 +131,50 @@ expect    12 55 0 0
 -------------------------------------------------------------------------------
 Finally test a pipeline with more than one init step
 -------------------------------------------------------------------------------
-operation proj=pipeline        step  \
-          init=epsg:25832 inv  step  \
-          init=epsg:25833      step  \
-          init=epsg:25833 inv  step  \
-          init=epsg:25832
+operation proj=pipeline
+          step init=epsg:25832 inv
+          step init=epsg:25833
+          step init=epsg:25833 inv
+          step init=epsg:25832
 -------------------------------------------------------------------------------
 accept    691875.63214  6098907.82501  0  0
 expect    691875.63214  6098907.82501  0  0
 direction inverse
 accept    12 55 0 0
 expect    12 55 0 0
+-------------------------------------------------------------------------------
+Test a few inversion scenarios (urm5 has no inverse operation)
+-------------------------------------------------------------------------------
+operation   proj=pipeline       step
+            proj=urm5 n=0.5 inv
+expect      failure pjd_err_malformed_pipeline
 
+operation   proj=pipeline   inv step
+            proj=urm5 n=0.5
+expect      failure pjd_err_malformed_pipeline
 
+operation   proj=pipeline   inv step
+            proj=urm5 n=0.5 inv
+accept      12 56
+expect      1215663.2814182492      5452209.5424045017
 
+operation   proj=pipeline step
+            proj=urm5 n=0.5
+accept      12 56
+expect      1215663.2814182492      5452209.5424045017
+-------------------------------------------------------------------------------
+Test various failing scenarios.
+-------------------------------------------------------------------------------
+operation   proj=pipeline   step
+            proj=pipeline   step
+            proj=merc
+expect      failure pjd_err_malformed_pipeline
+
+operation   step proj=pipeline step proj=merc
+expect      failure pjd_err_malformed_pipeline
+
+operation   proj=pipeline
+expect      failure pjd_err_malformed_pipeline
 
 
 -------------------------------------------------------------------------------
@@ -131,8 +188,9 @@ N(12.5, 55.5) = -36.021305084228515625  (download.osgeo.org)
 N(12.5, 55.5) = -35.880001068115234000  (OSGeo4W)
 This is annoying, but must be handled elsewhere. We jump through the hoop by
 setting a very lax tolerance.
-
+-------------------------------------------------------------------------------
 tolerance 15 cm
+ignore    pjd_err_failed_to_load_grid
 accept    12.5 55.5   0                  0
 expect    12.5 55.5 -36.021305084228516  0
 
@@ -145,7 +203,7 @@ expect    failure errno no_args
 Fail on purpose: open non-existing grid
 operation proj=vgridshift grids=nonexistinggrid.gtx
 expect    failure errno failed_to_load_grid
-
+-------------------------------------------------------------------------------
 
 
 
@@ -155,22 +213,28 @@ Some tests from PJ_hgridshift.c
 -------------------------------------------------------------------------------
 operation  proj=hgridshift +grids=nzgd2kgrid0005.gsb  ellps=GRS80
 -------------------------------------------------------------------------------
-tolerance 1 nm
-accept    173 -45 0 0
-roundtrip 100
+Note: These data are home grown and suitable for regression testing only
+We need a set of authoritative test cases to test the nzgd2000 grid.
 -------------------------------------------------------------------------------
-expect    172.999892181021551 -45.001620431954613  0 0
+tolerance 1 mm
+ignore    pjd_err_failed_to_load_grid
+accept    172.999892181021551 -45.001620431954613
+expect    173                 -45
 direction inverse
-accept    172.999892181021551 -45.001620431954613  0 0
-expect    173 -45 0 0
+accept    173                 -45
+expect    172.999892181021551 -45.001620431954613
 -------------------------------------------------------------------------------
-Fail on purpose: +grids parameter is mandatory:
-operation proj=hgridshift
-expect    failure errno no_args
 
-Fail on purpose: open non-existing grid:
+
+
+-------------------------------------------------------------------------------
+# Fail on purpose: open non-existing grid:
 operation proj=hgridshift grids=@nonexistinggrid.gsb,anothernonexistinggrid.gsb
 expect    failure errno failed_to_load_grid
+
+# Fail on purpose: +grids parameter is mandatory:
+operation proj=hgridshift
+expect    failure errno no_args
 -------------------------------------------------------------------------------
 
 
@@ -179,26 +243,36 @@ expect    failure errno failed_to_load_grid
 -------------------------------------------------------------------------------
 A number of tests from PJ_helmert.c
 -------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
 This example is from Lotti Jivall: "Simplified transformations from
 ITRF2008/IGS08 to ETRS89 for maritime applications"
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80                          \
-            x=0.67678    y=0.65495   z=-0.52827              \
+operation  proj=helmert ellps=GRS80
+           x=0.67678    y=0.65495   z=-0.52827
            rx=-0.022742 ry=0.012667 rz=0.022704  s=-0.01070
 -------------------------------------------------------------------------------
 tolerance 1 um
 accept     3565285.00000000  855949.00000000  5201383.00000000
 expect     3565285.41342351  855948.67986759  5201382.72939791
 -------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
 This example is a random point, transformed from ED50 to ETRS89 using KMStrans2
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80                           \
-            x=-81.0703  y=-89.3603  z=-115.7526               \
-           rx=-0.48488 ry=-0.02436 rz=-0.41321   s=-0.540645
+operation   proj=helmert   ellps=GRS80   exact
+            x=-081.0703    rx=-0.48488
+            y=-089.3603    ry=-0.02436
+            z=-115.7526    rz=-0.41321   s=-0.540645
 -------------------------------------------------------------------------------
 tolerance  1 um
 accept     3494994.30120000 1056601.97250000 5212382.16660000
 expect     3494909.84026368 1056506.78938633 5212265.66699761
+-------------------------------------------------------------------------------
+
+
 -------------------------------------------------------------------------------
 This example is a coordinate from the geodetic observatory in Onsala,
 Sweden transformed from ITRF2000 @ 2017.0 to ITRF93 @ 2017.0.
@@ -206,16 +280,19 @@ Sweden transformed from ITRF2000 @ 2017.0 to ITRF93 @ 2017.0.
 The test coordinate was transformed using GNSStrans, using transformation
 parameters published by ITRF: ftp://itrf.ensg.ign.fr/pub/itrf/ITRF.TP
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80                        \
-           x=0.0127     y=0.0065     z=-0.0209  s=0.00195  \
-           dx=-0.0029   dy=-0.0002   dz=-0.0006 ds=0.00001 \
-           rx=-0.00039  ry=0.00080   rz=-0.00114           \
-           drx=-0.00011 dry=-0.00019 drz=0.00007           \
-           epoch=1988.0 tobs=2017.0    transpose
+operation  proj=helmert ellps=GRS80  transpose
+           x =  0.0127   dx = -0.0029   rx = -0.00039  drx = -0.00011
+           y =  0.0065   dy = -0.0002   ry =  0.00080  dry = -0.00019
+           z = -0.0209   dz = -0.0006   rz = -0.00114  drz =  0.00007
+
+           s =  0.00195  ds =  0.00001  t_epoch = 1988.0
 -------------------------------------------------------------------------------
 tolerance  0.03 mm
 accept     3370658.37800 711877.31400 5349787.08600  2017.0  # ITRF2000@2017.0
 expect     3370658.18890 711877.42370 5349787.12430  2017.0  # ITRF93@2017.0
+-------------------------------------------------------------------------------
+
+
 -------------------------------------------------------------------------------
 This example is from "A mathematical relationship between NAD27 and NAD83 (91)
 State Plane coordinates in Southeastern Wisconsin":
@@ -225,25 +302,28 @@ The test data is taken from p. 29. Here we are using point 203 and converting it
 from NAD27 (ft) -> NAD83 (m). The paper reports a difference of 0.0014 m from
 measured to computed coordinates, hence the test tolerance is set accordingly.
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80     \
-           x=-9597.3572 y=.6112         \
+operation  proj=helmert ellps=GRS80
+           x=-9597.3572 y=.6112
            s=0.304794780637 theta=-1.244048
 -------------------------------------------------------------------------------
 tolerance  1 mm
 accept     2546506.957 542256.609  0
 expect     766563.675  165282.277  0
 -------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
 Finally test the 4D-capabilities of the proj.h API, especially that the
 rotation matrix is updated when necessary.
 
 Test coordinates from GNSStrans.
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80                       \
-        x=0.01270    y=0.00650    z=-0.0209   s=0.00195   \
-        dx=-0.0029   dy=-0.0002   dz=-0.0006  ds=0.00001  \
-        rx=-0.00039  ry=0.00080   rz=-0.00114             \
-        drx=-0.00011 dry=-0.00019 drz=0.00007             \
-        epoch=1988.0 transpose
+operation  proj=helmert ellps=GRS80 transpose
+           x = 0.01270  dx =-0.0029  rx =-0.00039  drx =-0.00011
+           y = 0.00650  dy =-0.0002  ry = 0.00080  dry =-0.00019
+           z =-0.0209   dz =-0.0006  rz =-0.00114  drz = 0.00007
+           s = 0.00195  ds = 0.00001
+           t_epoch=1988.0
 -------------------------------------------------------------------------------
 tolerance  0.1 mm
 accept     3370658.378    711877.314    5349787.086    2017.0
@@ -293,4 +373,4 @@ to express in the gie command set
 builtins
 -------------------------------------------------------------------------------
 
-END
+</gie>

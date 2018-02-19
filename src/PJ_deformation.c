@@ -13,18 +13,21 @@ Perform datum shifts by means of a deformation/velocity model.
     Z_out = Z_in + (T_ct - T_obs)*DZ
 
 
-Corrections are done in cartesian space. Coordinates of the
-gridded model are in lat/long space and the corrections in the model are
-in cartesian space. Hence the input coordinates needs to be converted
-to lat/long space when searching for corrections in the grid. The
-corrections are then applied to the input coordinates in cartesian
-space.
+The deformation operation takes cartesian coordinates as input and
+returns cartesian coordinates as well.
+
+Corrections in the gridded model are in east, north, up (ENU) space.
+Hence the input coordinates needs to be converted to ENU-space when
+searching for corrections in the grid. The corrections are then converted
+to cartesian XYZ-space and applied to the input coordinates (also in
+cartesian space).
 
 A full deformation model is described by two grids, one for the horizontal
 components and one for the vertical component. The horizontal grid is
 stored in CTable/CTable2 and the vertical grid is stored in the GTX
-format. Both grids are expected to contain grid-values in units of
-m/year.
+format. The NTv2 format should not be used for this purpose since grid-
+values are scaled upon reading. Both grids are expected to contain
+grid-values in units of mm/year in ENU-space.
 
 ************************************************************************
 * Copyright (c) 2017, Kristian Evers
@@ -62,49 +65,90 @@ PROJ_HEAD(deformation, "Kinematic grid shift");
 struct pj_opaque {
     double t_obs;
     double t_epoch;
-    int has_xy_grids, has_z_grids;
     PJ *cart;
 };
 
-static XYZ get_xygrid_shift(PJ* P, XYZ cartesian) {
-    PJ_COORD geodetic, shift;
+/********************************************************************************/
+static XYZ get_grid_shift(PJ* P, XYZ cartesian) {
+/********************************************************************************
+    Read correction values from grid. The cartesian input coordinates are
+    converted to geodetic coordinates in order look up the correction values
+    in the grid. Once the grid corrections are read we need to convert them
+    from ENU-space to cartesian XYZ-space. ENU -> XYZ formula described in:
 
+    Nørbech, T., et al, 2003(?), "Transformation from a Common Nordic Reference
+    Frame to ETRS89 in Denmark, Finland, Norway, and Sweden – status report"
+
+********************************************************************************/
+    PJ_COORD geodetic, shift, temp;
+    double sp, cp, sl, cl;
+
+    /* cartesian to geodetic */
     geodetic.lpz = pj_inv3d(cartesian, P->opaque->cart);
-    shift.lp = proj_hgrid_value(P, geodetic.lp);
+
+    /* look up correction values in grids */
+    shift.lp    = proj_hgrid_value(P, geodetic.lp);
+    shift.enu.u = proj_vgrid_value(P, geodetic.lp);
+
+    /* grid values are stored as mm/yr, we need m/yr */
+    shift.xyz.x /= 1000;
+    shift.xyz.y /= 1000;
+    shift.xyz.z /= 1000;
+
+    /* pre-calc cosines and sines */
+    sp = sin(geodetic.lp.phi);
+    cp = cos(geodetic.lp.phi);
+    sl = sin(geodetic.lp.lam);
+    cl = cos(geodetic.lp.lam);
+
+    /* ENU -> XYZ */
+    temp.xyz.x = -sp*cl*shift.enu.n - sl*shift.enu.e + cp*cl*shift.enu.u;
+    temp.xyz.y = -sp*sl*shift.enu.n + cl*shift.enu.e + cp*sl*shift.enu.u;
+    temp.xyz.z =     cp*shift.enu.n +                     sp*shift.enu.u;
+
+    shift.xyz = temp.xyz;
 
     return shift.xyz;
 }
 
-static double get_zgrid_shift(PJ* P, XYZ cartesian) {
-    PJ_COORD geodetic;
-
-    geodetic.lpz = pj_inv3d(cartesian, P->opaque->cart);
-
-    return proj_vgrid_value(P, geodetic.lp);
-}
-
-static XYZ reverse_hshift(PJ *P, XYZ input, double dt) {
+/********************************************************************************/
+static XYZ reverse_shift(PJ *P, XYZ input, double dt) {
+/********************************************************************************
+    Iteratively determine the reverse grid shift correction values.
+*********************************************************************************/
     XYZ out, delta, dif;
+    double z0;
     int i = MAX_ITERATIONS;
 
-    delta = get_xygrid_shift(P, input);
+    delta = get_grid_shift(P, input);
 
-    out.x = input.x + dt*delta.x;
+    /* Store the origial z shift for later application */
+    z0 = delta.z;
+
+    /* When iterating to find the best horizontal coordinate we also carry   */
+    /* along the z-component, since we need it for the cartesian -> geodetic */
+    /* conversion. The z-component adjustment is overwritten with z0 after   */
+    /* the loop has finished.                                                */
+    out.x = input.x - dt*delta.x;
     out.y = input.y - dt*delta.y;
-    out.z = input.z;
+    out.z = input.z + dt*delta.z;
 
     do {
-        delta = get_xygrid_shift(P, out);
+        delta = get_grid_shift(P, out);
 
         if (delta.x == HUGE_VAL)
             break;
 
-        dif.x  = out.x - dt*delta.x - input.x;
+        dif.x  = out.x + dt*delta.x - input.x;
         dif.y  = out.y + dt*delta.y - input.y;
+        dif.z  = out.z - dt*delta.z - input.z;
         out.x += dif.x;
         out.y += dif.y;
+        out.z += dif.z;
 
     } while ( --i && hypot(dif.x, dif.y) > TOL );
+
+    out.z = input.z - dt*z0;
 
     return out;
 }
@@ -118,22 +162,18 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
     out = in;
 
     if (Q->t_obs != HUGE_VAL) {
-        dt = Q->t_obs - Q->t_epoch;
+        dt = Q->t_epoch - Q->t_obs;
     } else {
         out = proj_coord_error(); /* in the 3D case +t_obs must be specified */
         proj_log_debug(P, "deformation: +t_obs must be specified");
         return out.xyz;
     }
 
-    if (Q->has_xy_grids) {
-        shift = get_xygrid_shift(P, in.xyz);
+    shift = get_grid_shift(P, in.xyz);
 
-        out.xyz.x += dt * shift.x;
-        out.xyz.y += dt * shift.y;
-    }
-
-    if (Q->has_z_grids)
-        out.xyz.z += dt * get_zgrid_shift(P, in.xyz);
+    out.xyz.x += dt * shift.x;
+    out.xyz.y += dt * shift.y;
+    out.xyz.z += dt * shift.z;
 
     return out.xyz;
 }
@@ -146,19 +186,17 @@ static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
     PJ_COORD out = in;
 
     if (Q->t_obs != HUGE_VAL) {
-            dt = Q->t_obs - Q->t_epoch;
+            dt = Q->t_epoch - Q->t_obs;
         } else {
-            dt = in.xyzt.t - Q->t_epoch;
+            dt = Q->t_epoch - in.xyzt.t;
     }
 
-    if (Q->has_xy_grids) {
-        shift = get_xygrid_shift(P, in.xyz);
-        out.xyz.x += dt * shift.x;
-        out.xyz.y += dt * shift.y;
-    }
+    shift = get_grid_shift(P, in.xyz);
 
-    if (Q->has_z_grids)
-        out.xyz.z += dt * get_zgrid_shift(P, in.xyz);
+    out.xyzt.x += dt*shift.x;
+    out.xyzt.y += dt*shift.y;
+    out.xyzt.z += dt*shift.z;
+
 
     return out;
 }
@@ -178,12 +216,7 @@ static LPZ reverse_3d(XYZ in, PJ *P) {
         return out.lpz;
     }
 
-    if (Q->has_xy_grids) {
-        out.xyz = reverse_hshift(P, in, dt);
-    }
-
-    if (Q->has_z_grids)
-        out.xyz.z = in.z + dt * get_zgrid_shift(P, in);
+    out.xyz = reverse_shift(P, in, dt);
 
     return out.lpz;
 }
@@ -193,18 +226,14 @@ static PJ_COORD reverse_4d(PJ_COORD in, PJ *P) {
     PJ_COORD out = in;
     double dt;
 
+
     if (Q->t_obs != HUGE_VAL) {
             dt = Q->t_epoch - Q->t_obs;
         } else {
             dt = Q->t_epoch - in.xyzt.t;
     }
 
-    if (Q->has_xy_grids)
-        out.xyz = reverse_hshift(P, in.xyz, dt);
-
-    if (Q->has_z_grids)
-        out.xyz.z = in.xyz.z + dt * get_zgrid_shift(P, in.xyz);
-
+    out.xyz = reverse_shift(P, in.xyz, dt);
     return out;
 }
 
@@ -223,9 +252,11 @@ static void *destructor(PJ *P, int errlev) {
 
 
 PJ *TRANSFORMATION(deformation,1) {
+    int has_xy_grids = 0;
+    int has_z_grids  = 0;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return destructor(P, ENOMEM);
     P->opaque = (void *) Q;
 
     Q->cart = proj_create(P->ctx, "+proj=cart");
@@ -235,30 +266,25 @@ PJ *TRANSFORMATION(deformation,1) {
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def (P, Q->cart);
 
-    Q->has_xy_grids = pj_param(P->ctx, P->params, "txy_grids").i;
-    Q->has_z_grids  = pj_param(P->ctx, P->params, "tz_grids").i;
+    has_xy_grids = pj_param(P->ctx, P->params, "txy_grids").i;
+    has_z_grids  = pj_param(P->ctx, P->params, "tz_grids").i;
 
-    /* Build gridlists. P->gridlist and P->vgridlist_geoid can be empty if */
-    /* +xy_grids or +z_grids only ask for optional grids                   */
-    if (!Q->has_xy_grids && !Q->has_z_grids) {
-        proj_log_error(P, "deformation: At least one of either +xy_grids or +z_grids should be specified.");
+    /* Build gridlists. Both horizontal and vertical grids are mandatory. */
+    if (!has_xy_grids || !has_z_grids) {
+        proj_log_error(P, "deformation: Both +xy_grids and +z_grids should be specified.");
         return destructor(P, PJD_ERR_NO_ARGS );
     }
 
-    if (Q->has_xy_grids) {
-        Q->has_xy_grids = proj_hgrid_init(P, "xy_grids");
-        if (proj_errno(P)) {
-            proj_log_error(P, "deformation: could not find requested grid(s).");
-            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
-        }
+    proj_hgrid_init(P, "xy_grids");
+    if (proj_errno(P)) {
+        proj_log_error(P, "deformation: could not find requested xy_grid(s).");
+        return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
     }
 
-    if (Q->has_z_grids) {
-        Q->has_z_grids = proj_vgrid_init(P, "z_grids");
-        if (proj_errno(P)) {
-            proj_log_error(P, "deformation: could not find requested grid(s).");
-            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
-        }
+    proj_vgrid_init(P, "z_grids");
+    if (proj_errno(P)) {
+        proj_log_error(P, "deformation: could not find requested z_grid(s).");
+        return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
     }
 
     Q->t_obs = HUGE_VAL;
@@ -280,8 +306,8 @@ PJ *TRANSFORMATION(deformation,1) {
     P->fwd    = 0;
     P->inv    = 0;
 
-    P->left  = PJ_IO_UNITS_METERS;
-    P->right = PJ_IO_UNITS_METERS;
+    P->left  = PJ_IO_UNITS_CARTESIAN;
+    P->right = PJ_IO_UNITS_CARTESIAN;
     P->destructor = destructor;
 
     return P;

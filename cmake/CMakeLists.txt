@@ -21,3 +21,7 @@ install (FILES
 install (EXPORT targets
   FILE ${PROJECT_NAME_LOWER}-targets.cmake
   DESTINATION "${CMAKECONFIGDIR}")
+install (EXPORT targets
+  NAMESPACE ${PROJECT_NAME}::
+  FILE ${PROJECT_NAME_LOWER}-namespace-targets.cmake
+  DESTINATION "${CMAKECONFIGDIR}")

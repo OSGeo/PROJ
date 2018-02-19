@@ -14,7 +14,7 @@ static int ellps_spherification (PJ *P);
 
 static paralist *pj_get_param (paralist *list, char *key);
 static char     *pj_param_value (paralist *list);
-static PJ_ELLPS *pj_find_ellps (char *name);
+static const PJ_ELLPS *pj_find_ellps (char *name);
 
 
 /***************************************************************************************/
@@ -125,7 +125,7 @@ int pj_ellipsoid (PJ *P) {
 static int ellps_ellps (PJ *P) {
 /***************************************************************************************/
     PJ B;
-    PJ_ELLPS *ellps;
+    const PJ_ELLPS *ellps;
     paralist *par = 0;
     char *name;
     int err;
@@ -419,7 +419,7 @@ static char *pj_param_value (paralist *list) {
 }
 
 
-static PJ_ELLPS *pj_find_ellps (char *name) {
+static const PJ_ELLPS *pj_find_ellps (char *name) {
     int i;
     char *s;
     if (0==name)

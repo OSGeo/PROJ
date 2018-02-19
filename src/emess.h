@@ -24,6 +24,6 @@ extern struct EMESS emess_dat;
 
 #endif /* use type */
 
-void emess(int, char *, ...);
+void emess(int, const char *, ...);
 
 #endif /* end EMESS_H */

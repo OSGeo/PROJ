@@ -1,0 +1,85 @@
+
+-----------------------------------------------------------------------
+
+      INTEGRATING DEFINITION AND VALIDATION OF GEODETIC SYSTEMS
+
+-----------------------------------------------------------------------
+             Thomas Knudsen, thokn@sdfe.dk, 2017-12-06
+-----------------------------------------------------------------------
+
+This demo shows how to use the free format definition strings,
+introduced in PROJ version 5.0.0, to integrate system definition
+information with system validation data.
+
+The system definition parts are used when doing actual transformations,
+e.g. using the cct 4D transformation program:
+
+    echo 9 55 0 0 | cct +init=val_def.demo:DKTM1
+
+The system validation parts are used when validating the systems
+defined in the file. This is done using the gie test program:
+Place val_def.demo in your PROJ_LIB directory
+(or set PROJ_LIB=<directory where val_def.demo lives>) and say:
+
+    gie val_def.demo
+
+This will result in a report detailing how many tests succeeded,
+resp. failed.
+
+The syntax of proj init files is orthogonal to the syntax of gie
+integrity evaluation files. This makes it possible to interleave
+init and gie blocks in the same file.
+
+#-----------------------------------------------------------------------
+
+
+
+#-----------------------------------------------------------------------
+# Danish Transverse Mercator, zone 1
+#-----------------------------------------------------------------------
+<DKTM1> proj = etmerc
+        lat_0 = 0     lon_0 = 9
+        x_0 = 200000  y_0 = -5000000
+
+        k = 0.99998
+
+        ellps = GRS80
+        units = m
+
+        no_defs
+#-----------------------------------------------------------------------
+<gie>
+operation init = val_def.demo:DKTM1
+tolerance 100 um
+accept    9 55
+expect    200000.0000   1097108.3684
+roundtrip 1000 1 nm
+</gie>
+#-----------------------------------------------------------------------
+
+
+
+#-----------------------------------------------------------------------
+# Danish Transverse Mercator, zone 2
+#-----------------------------------------------------------------------
+<DKTM2> proj = etmerc
+        lat_0 = 0     lon_0 = 10
+        x_0 = 400000  y_0 = -5000000
+
+        k = 0.99998
+
+        ellps = GRS80
+        units = m
+
+        no_defs
+#-----------------------------------------------------------------------
+<gie>
+operation init = val_def.demo:DKTM2
+tolerance 100 um
+accept    10 55
+expect    400000.0000   1097108.3684
+accept    10.5 55.5
+expect    431597.1668   1152884.9398
+roundtrip 1000 100 um
+</gie>
+#-----------------------------------------------------------------------

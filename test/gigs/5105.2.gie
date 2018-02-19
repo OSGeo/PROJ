@@ -1,0 +1,168 @@
+--------------------------------------------------------------------------------
+
+Test 5105 (part 2), Oblique Mercator (variant B), v2-0_2011-06-28.
+
+--------------------------------------------------------------------------------
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4237 +inv
+           +step +init=epsg:23700
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    16 48.5
+expect    424714.235 355124.6
+
+tolerance  0.05 m
+accept    17.2 48.0
+expect    512056.188 296756.716
+
+tolerance  0.05 m
+accept    17.5826505556 47.6361347222
+expect    539847.765 255701.086
+
+tolerance  0.05 m
+accept    19.0485716667 47.1443936111
+expect    650000 200000
+
+tolerance  0.05 m
+accept    19.2234294444 46.8756683333
+expect    663329.053 170142.318
+
+tolerance  0.05 m
+accept    20.1357405556 46.3703011111
+expect    733651.455 114532.099
+
+tolerance  0.05 m
+accept    21.4 45.7
+expect    833148.855 42191.482
+
+tolerance  0.05 m
+accept    22.3 49.3
+expect    886565.935 444656.613
+
+tolerance  0.05 m
+accept    21.2941986111 48.4899747222
+expect    815999.993 351999.998
+
+tolerance  0.05 m
+accept    19.2234294444 46.8756683333
+expect    663329.053 170142.318
+
+tolerance  0.05 m
+accept    17.6191536111 46.0687463889
+expect    539403.958 81440.103
+
+tolerance  0.05 m
+accept    16.36 45.5
+expect    439836.709 20816.456
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:23700 +inv
+           +step +init=epsg:4237
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    424714.235 355124.6
+expect    16 48.5
+
+tolerance  0.05 m
+accept    512056.188 296756.716
+expect    17.2 48.0
+
+tolerance  0.05 m
+accept    539847.765 255701.086
+expect    17.5826505556 47.6361347222
+
+tolerance  0.05 m
+accept    650000 200000
+expect    19.0485716667 47.1443936111
+
+tolerance  0.05 m
+accept    663329.053 170142.318
+expect    19.2234294444 46.8756683333
+
+tolerance  0.05 m
+accept    733651.455 114532.099
+expect    20.1357405556 46.3703011111
+
+tolerance  0.05 m
+accept    833148.855 42191.482
+expect    21.4 45.7
+
+tolerance  0.05 m
+accept    886565.935 444656.613
+expect    22.3 49.3
+
+tolerance  0.05 m
+accept    815999.993 351999.998
+expect    21.2941986111 48.4899747222
+
+tolerance  0.05 m
+accept    663329.053 170142.318
+expect    19.2234294444 46.8756683333
+
+tolerance  0.05 m
+accept    539403.958 81440.103
+expect    17.6191536111 46.0687463889
+
+tolerance  0.05 m
+accept    439836.709 20816.456
+expect    16.36 45.5
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4237 +inv
+           +step +init=epsg:23700
+--------------------------------------------------------------------------------
+tolerance  0.006 m
+accept    16 48.5
+roundtrip 1000
+
+tolerance  0.006 m
+accept    17.2 48.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    17.5826505556 47.6361347222
+roundtrip 1000
+
+tolerance  0.006 m
+accept    19.0485716667 47.1443936111
+roundtrip 1000
+
+tolerance  0.006 m
+accept    19.2234294444 46.8756683333
+roundtrip 1000
+
+tolerance  0.006 m
+accept    20.1357405556 46.3703011111
+roundtrip 1000
+
+tolerance  0.006 m
+accept    21.4 45.7
+roundtrip 1000
+
+tolerance  0.006 m
+accept    22.3 49.3
+roundtrip 1000
+
+tolerance  0.006 m
+accept    21.2941986111 48.4899747222
+roundtrip 1000
+
+tolerance  0.006 m
+accept    19.2234294444 46.8756683333
+roundtrip 1000
+
+tolerance  0.006 m
+accept    17.6191536111 46.0687463889
+roundtrip 1000
+
+tolerance  0.006 m
+accept    16.36 45.5
+roundtrip 1000
+
+</gie>

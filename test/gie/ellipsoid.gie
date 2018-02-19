@@ -5,7 +5,7 @@ Test pj_ellipsoid, the reimplementation of pj_ell_set
 ===============================================================================
 
 
-BEGIN
+<gie>
 
 -------------------------------------------------------------------------------
 First a spherical example
@@ -56,7 +56,8 @@ operation proj=merc ellps=GRS80000000000
 expect    failure errno unknown_ellp_param
 operation proj=merc +a=-1
 expect    failure errno major_axis_not_given
-operation proj=merc +no_defs
+
+operation proj=merc no_defs
 expect    failure errno major_axis_not_given
 
 # This one should succeed due to ellps=WGS84 in proj_def.dat
@@ -158,4 +159,4 @@ accept     12 55
 expect     700416.5900   5669475.8884
 -------------------------------------------------------------------------------
 
-END
+</gie>

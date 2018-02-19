@@ -40,7 +40,7 @@ geodtest_LDADD = libproj.la
 
 lib_LTLIBRARIES = libproj.la
 
-libproj_la_LDFLAGS = -no-undefined -version-info 12:0:0
+libproj_la_LDFLAGS = -no-undefined -version-info 13:0:0
 
 libproj_la_SOURCES = \
 	pj_list.h proj_internal.h\
@@ -70,7 +70,7 @@ libproj_la_SOURCES = \
 	aasincos.c adjlon.c bch2bps.c bchgen.c \
 	biveval.c dmstor.c mk_cheby.c pj_auth.c \
 	pj_deriv.c pj_ell_set.c pj_ellps.c pj_errno.c \
-	pj_factors.c pj_fwd.c pj_init.c pj_inv.c pj_fwd3d.c pj_inv3d.c\
+	pj_factors.c pj_fwd.c pj_init.c pj_inv.c \
 	pj_list.c pj_malloc.c pj_mlfn.c pj_msfn.c proj_mdist.c \
 	pj_open_lib.c pj_param.c pj_phi2.c pj_pr_list.c \
 	pj_qsfn.c pj_strerrno.c \

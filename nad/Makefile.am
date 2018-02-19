@@ -23,7 +23,7 @@ EXTRA_DIST = GL27 nad.lst proj_def.dat nad27 nad83 pj_out27.dist pj_out83.dist t
 		testflaky testvarious testdatumfile testntv2 ntv2_out.dist \
 		esri.extra other.extra \
 		CH IGNF testIGNF proj_outIGNF.dist \
-		ITRF2000 ITRF2008 ITRF2014
+		ITRF2000 ITRF2008 ITRF2014 \
 		makefile.vc CMakeLists.txt
 
 process-nad2bin:

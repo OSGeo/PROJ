@@ -15,9 +15,13 @@ cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 project(PROJ4 C)
 set(PROJECT_INTERN_NAME PROJ)
 
+if (NOT CMAKE_VERSION VERSION_LESS 3.1)
+  cmake_policy(SET CMP0054 NEW)
+endif ()
 # Set warnings
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-  set(CMAKE_C_FLAGS "/WX ${CMAKE_C_FLAGS}")
+  # Suppress warning 4996 about sprintf, etc., being unsafe
+  set(CMAKE_C_FLAGS "/wd4996 /WX ${CMAKE_C_FLAGS}")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_C_FLAGS "-std=c89 -Wall -Wextra -Wswitch -Werror \
     -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat \
@@ -45,9 +49,9 @@ colormsg(_HIBLUE_ "Configuring PROJ:")
 #PROJ version information
 #################################################################################
 include(Proj4Version)
-proj_version(MAJOR 4 MINOR 9 PATCH 3)
-set(PROJ_API_VERSION "12")
-set(PROJ_BUILD_VERSION "12.0.0")
+proj_version(MAJOR 5 MINOR 0 PATCH 0)
+set(PROJ_API_VERSION "13")
+set(PROJ_BUILD_VERSION "13.0.1")
 
 #################################################################################
 # Build features and variants
@@ -84,7 +88,7 @@ int main() {
   int q;
   return (int)(hypot(3.0, 4.0) + atanh(0.8) + cbrt(8.0) +
                remquo(100.0, 90.0, &q) +
-               remainder(100.0, 90.0) + copysigna(1.0, -0.0));
+               remainder(100.0, 90.0) + copysign(1.0, -0.0));
 }\n" C99_MATH)
 if (C99_MATH)
   add_definitions (-DHAVE_C99_MATH=1)
@@ -145,4 +149,5 @@ add_subdirectory(nad)
 add_subdirectory(src)
 add_subdirectory(man)
 add_subdirectory(cmake)
+add_subdirectory(test)
 

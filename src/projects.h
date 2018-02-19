@@ -97,14 +97,6 @@ typedef long pj_int32;
 extern double hypot(double, double);
 #endif
 
-#ifdef _WIN32_WCE
-#  include <wce_stdlib.h>
-#  include <wce_stdio.h>
-#  define rewind wceex_rewind
-#  define getenv wceex_getenv
-#  define hypot _hypot
-#endif
-
 /* If we still haven't got M_PI*, we rely on our own defines.
  * For example, this is necessary when compiling with gcc and
  * the -ansi flag.
@@ -136,11 +128,11 @@ extern double hypot(double, double);
 #endif
 
 /* Use WIN32 as a standard windows 32 bit declaration */
-#if defined(_WIN32) && !defined(WIN32) && !defined(_WIN32_WCE)
+#if defined(_WIN32) && !defined(WIN32)
 #  define WIN32
 #endif
 
-#if defined(_WINDOWS) && !defined(WIN32) && !defined(_WIN32_WCE)
+#if defined(_WINDOWS) && !defined(WIN32)
 #  define WIN32
 #endif
 
@@ -165,10 +157,6 @@ typedef struct { double u, v, w; } projUVW;
 #define XYZ projUVW
 #define LPZ projUVW
 
-/* Yes, this is ridiculous, but a consequence of an old and bad decision about implicit type-punning through preprocessor abuse */
-typedef struct { double u, v; }        UV;
-typedef struct { double u, v, w; }     UVW;
-
 #else
 typedef struct { double x, y; }        XY;
 typedef struct { double x, y, z; }     XYZ;
@@ -177,6 +165,15 @@ typedef struct { double lam, phi, z; } LPZ;
 typedef struct { double u, v; }        UV;
 typedef struct { double u, v, w; }     UVW;
 #endif  /* ndef PJ_LIB__ */
+
+#else
+typedef PJ_XY XY;
+typedef PJ_LP LP;
+typedef PJ_UV UV;
+typedef PJ_XYZ XYZ;
+typedef PJ_LPZ LPZ;
+typedef PJ_UVW UVW;
+
 #endif  /* ndef PROJ_H   */
 
 
@@ -192,9 +189,11 @@ typedef struct PJ_REGION_S  PJ_Region;
 typedef struct ARG_list paralist;   /* parameter list */
 #ifndef PROJ_INTERNAL_H
 enum pj_io_units {
-    PJ_IO_UNITS_CLASSIC = 0,   /* Scaled meters (right) */
-    PJ_IO_UNITS_METERS  = 1,   /* Meters  */
-    PJ_IO_UNITS_RADIANS = 2    /* Radians */
+    PJ_IO_UNITS_WHATEVER  = 0,  /* Doesn't matter (or depends on pipeline neighbours) */
+    PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
+    PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
+    PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
+    PJ_IO_UNITS_ANGULAR   = 4   /* Radians */
 };
 #endif
 #ifndef PROJ_H
@@ -219,6 +218,37 @@ struct PJ_AREA {
 struct projCtx_t;
 typedef struct projCtx_t projCtx_t;
 
+/*****************************************************************************
+
+    Some function types that are especially useful when working with PJs
+
+******************************************************************************
+
+PJ_CONSTRUCTOR:
+
+    A function taking a pointer-to-PJ as arg, and returning a pointer-to-PJ.
+    Historically called twice: First with a 0 argument, to allocate memory,
+    second with the first return value as argument, for actual setup.
+
+PJ_DESTRUCTOR:
+
+    A function taking a pointer-to-PJ and an integer as args, then first
+    handling the deallocation of the PJ, afterwards handing the integer over
+    to the error reporting subsystem, and finally returning a null pointer in
+    support of the "return free (P)" (aka "get the hell out of here") idiom.
+
+PJ_OPERATOR:
+
+    A function taking a PJ_COORD and a pointer-to-PJ as args, applying the
+    PJ to the PJ_COORD, and returning the resulting PJ_COORD.
+
+*****************************************************************************/
+typedef    PJ       *(* PJ_CONSTRUCTOR) (PJ *);
+typedef    void     *(* PJ_DESTRUCTOR)  (PJ *, int);
+typedef    PJ_COORD  (* PJ_OPERATOR)    (PJ_COORD, PJ *);
+/****************************************************************************/
+
+
 
 /* base projection data structure */
 struct PJconsts {
@@ -237,6 +267,7 @@ struct PJconsts {
     projCtx_t *ctx;
     const char *descr;             /* From pj_list.h or individual PJ_*.c file */
     paralist *params;              /* Parameter list */
+    char *def_full;                /* Full textual definition (usually 0 - set by proj_pj_info) */
     char *def_size;                /* Shape and size parameters extracted from params */
     char *def_shape;
     char *def_spherification;
@@ -267,10 +298,10 @@ struct PJconsts {
     LP  (*inv)(XY,    PJ *);
     XYZ (*fwd3d)(LPZ, PJ *);
     LPZ (*inv3d)(XYZ, PJ *);
-    PJ_COORD (*fwd4d)(PJ_COORD, PJ *);
-    PJ_COORD (*inv4d)(PJ_COORD, PJ *);
+    PJ_OPERATOR fwd4d;
+    PJ_OPERATOR inv4d;
 
-    void *(*destructor)(PJ *, int);
+    PJ_DESTRUCTOR destructor;
 
 
     /*************************************************************************************
@@ -337,10 +368,23 @@ struct PJconsts {
     int  geoc;                      /* Geocentric latitude flag */
     int  is_latlong;                /* proj=latlong ... not really a projection at all */
     int  is_geocent;                /* proj=geocent ... not really a projection at all */
+    int  is_pipeline;               /* 1 if PJ represents a pipeline */
     int  need_ellps;                /* 0 for operations that are purely cartesian */
+    int  skip_fwd_prepare;
+    int  skip_fwd_finalize;
+    int  skip_inv_prepare;
+    int  skip_inv_finalize;
 
     enum pj_io_units left;          /* Flags for input/output coordinate types */
     enum pj_io_units right;
+
+    /* These PJs are used for implementing cs2cs style coordinate handling in the 4D API */
+    PJ *axisswap;
+    PJ *cart;
+    PJ *cart_wgs84;
+    PJ *helmert;
+    PJ *hgridshift;
+    PJ *vgridshift;
 
 
     /*************************************************************************************
@@ -349,7 +393,7 @@ struct PJconsts {
 
     **************************************************************************************/
 
-    double  lam0, phi0;                /* central longitude, latitude */
+    double  lam0, phi0;                /* central meridian, parallel */
     double  x0, y0, z0, t0;            /* false easting and northing (and height and time) */
 
 
@@ -387,7 +431,7 @@ struct PJconsts {
     double  from_greenwich;            /* prime meridian offset (in radians) */
     double  long_wrap_center;          /* 0.0 for -180 to 180, actually in radians*/
     int     is_long_wrap_set;
-    char    axis[4];                   /* TODO: Description needed */
+    char    axis[4];                   /* Axis order, pj_transform/pj_adjust_axis */
 
     /* New Datum Shift Grid Catalogs */
     char   *catalog_name;
@@ -590,7 +634,7 @@ extern struct PJ_PRIME_MERIDIANS pj_prime_meridians[];
 
 
 #ifdef PJ_LIB__
-#define PROJ_HEAD(id, name) static const char des_##id [] = name
+#define PROJ_HEAD(name, desc) static const char des_##name [] = desc
 
 #define OPERATION(name, NEED_ELLPS)                          \
                                                              \
@@ -608,7 +652,7 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     P->destructor = pj_default_destructor;                   \
     P->descr = des_##name;                                   \
     P->need_ellps = NEED_ELLPS;                              \
-    P->left  = PJ_IO_UNITS_RADIANS;                          \
+    P->left  = PJ_IO_UNITS_ANGULAR;                          \
     P->right = PJ_IO_UNITS_CLASSIC;                          \
     return P;                                                \
 }                                                            \
@@ -683,9 +727,11 @@ double adjlon(double);
 double aacos(projCtx,double), aasin(projCtx,double), asqrt(double), aatan2(double, double);
 
 PROJVALUE pj_param(projCtx ctx, paralist *, const char *);
+paralist *pj_param_exists (paralist *list, const char *parameter);
 paralist *pj_mkparam(char *);
+paralist *pj_mkparam_ws (char *str);
 
-int pj_ellipsoid (PJ *);
+
 int pj_ell_set(projCtx ctx, paralist *, double *, double *);
 int pj_datum_set(projCtx,paralist *, PJ *);
 int pj_prime_meridian_set(paralist *, PJ *);
@@ -694,7 +740,8 @@ int pj_angular_units_set(paralist *, PJ *);
 paralist *pj_clone_paralist( const paralist* );
 paralist *pj_search_initcache( const char *filekey );
 void      pj_insert_initcache( const char *filekey, const paralist *list);
-paralist *pj_get_init(projCtx ctx, paralist **start, paralist *next, char *name, int *found_def);
+paralist *pj_expand_init(projCtx ctx, paralist *init);
+
 void     *pj_dealloc_params (projCtx ctx, paralist *start, int errlev);
 
 
@@ -709,8 +756,8 @@ double  pj_qsfn_(double, PJ *);
 double *pj_authset(double);
 double  pj_authlat(double, double *);
 
-COMPLEX pj_zpoly1(COMPLEX, COMPLEX *, int);
-COMPLEX pj_zpolyd1(COMPLEX, COMPLEX *, int, COMPLEX *);
+COMPLEX pj_zpoly1(COMPLEX, const COMPLEX *, int);
+COMPLEX pj_zpolyd1(COMPLEX, const COMPLEX *, int, COMPLEX *);
 
 int pj_deriv(LP, double, const PJ *, struct DERIVS *);
 int pj_factors(LP, const PJ *, double, struct FACTORS *);

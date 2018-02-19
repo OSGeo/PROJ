@@ -1,0 +1,211 @@
+--------------------------------------------------------------------------------
+
+Test 5103 (part 1), Lambert Conic Conformal (2SP), v2-0_2011-06-28.
+
+--------------------------------------------------------------------------------
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4313 +inv
+           +step +init=epsg:31370
+
+tolerance  30 mm
+--------------------------------------------------------------------------------
+accept    5 58
+expect    187742.7 969521.653
+
+accept    5 57
+expect    188698.877 857277.135
+
+accept    5 56
+expect    189652.853 745291.184
+
+accept    5 55
+expect    190604.967 633523.672
+
+accept    5 54
+expect    191555.55 521935.9
+
+accept    5 53
+expect    192504.921 410490.433
+
+accept    5.3876389 52.1561606
+expect    219843.841 316827.604
+
+accept    4 51
+expect    124202.936 187756.876
+
+accept    4 50
+expect    123652.406 76521.628
+
+accept    4 49
+expect    123101.889 -34711.068
+
+accept    3.3137281 47.9752611
+expect    71254.553 -148236.592
+
+accept    3 53
+expect    58108.966 411155.591
+
+accept    4 53
+expect    125304.704 410370.504
+
+accept    5 53
+expect    192504.921 410490.433
+
+accept    6 53
+expect    259697.429 411515.356
+
+accept    7 53
+expect    326870.04 413445.087
+
+accept    8 53
+expect    394010.571 416279.276
+
+accept    9 53
+expect    461106.844 420017.408
+
+accept    10 53
+expect    528146.69 424658.807
+
+accept    11 53
+expect    595117.95 430202.63
+
+
+--------------------------------------------------------------------------------
+operation  proj=pipeline
+           step init=epsg:31370 inv
+           step init=epsg:4313
+
+tolerance  30 mm
+--------------------------------------------------------------------------------
+accept    187742.7 969521.653
+expect    5 58
+
+accept    188698.877 857277.135
+expect    5 57
+
+accept    189652.853 745291.184
+expect    5 56
+
+accept    190604.967 633523.672
+expect    5 55
+
+accept    191555.55 521935.9
+expect    5 54
+
+accept    192504.921 410490.433
+expect    5 53
+
+accept    219843.841 316827.604
+expect    5.3876389 52.1561606
+
+accept    124202.936 187756.876
+expect    4 51
+
+accept    123652.406 76521.628
+expect    4 50
+
+accept    123101.889 -34711.068
+expect    4 49
+
+accept    71254.553 -148236.592
+expect    3.3137281 47.9752611
+
+accept    58108.966 411155.591
+expect    3 53
+
+accept    125304.704 410370.504
+expect    4 53
+
+accept    192504.921 410490.433
+expect    5 53
+
+accept    259697.429 411515.356
+expect    6 53
+
+accept    326870.04 413445.087
+expect    7 53
+
+accept    394010.571 416279.276
+expect    8 53
+
+accept    461106.844 420017.408
+expect    9 53
+
+accept    528146.69 424658.807
+expect    10 53
+
+accept    595117.95 430202.63
+expect    11 53
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline   towgs84=0,0,0   # turn off dual datum shift
+           +step +init=epsg:4313 +inv
+           +step +init=epsg:31370
+
+tolerance  6 mm
+--------------------------------------------------------------------------------
+accept    5 58
+roundtrip 1000
+
+accept    5 57
+roundtrip 1000
+
+accept    5 56
+roundtrip 1000
+
+accept    5 55
+roundtrip 1000
+
+accept    5 54
+roundtrip 1000
+
+accept    5 53
+roundtrip 1000
+
+accept    5.3876389 52.1561606
+roundtrip 1000
+
+accept    4 51
+roundtrip 1000
+
+accept    4 50
+roundtrip 1000
+
+accept    4 49
+roundtrip 1000
+
+accept    3.3137281 47.9752611
+roundtrip 1000
+
+accept    3 53
+roundtrip 1000
+
+accept    4 53
+roundtrip 1000
+
+accept    5 53
+roundtrip 1000
+
+accept    6 53
+roundtrip 1000
+
+accept    7 53
+roundtrip 1000
+
+accept    8 53
+roundtrip 1000
+
+accept    9 53
+roundtrip 1000
+
+accept    10 53
+roundtrip 1000
+
+accept    11 53
+roundtrip 1000
+
+</gie>

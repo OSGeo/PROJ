@@ -2,6 +2,7 @@
 #define _IN_GEOD_SET
 
 #include <string.h>
+#include "proj.h"
 #include "projects.h"
 #include "geod_interface.h"
 #include "emess.h"
@@ -29,7 +30,7 @@ geod_set(int argc, char **argv) {
 	/* set units */
 	if ((name = pj_param(NULL,start, "sunits").s) != NULL) {
 		char *s;
-                struct PJ_UNITS *unit_list = pj_get_units_ref();
+                const struct PJ_UNITS *unit_list = proj_list_units();
 		for (i = 0; (s = unit_list[i].id) && strcmp(name, s) ; ++i) ;
 		if (!s)
 			emess(1,"%s unknown unit conversion id", name);

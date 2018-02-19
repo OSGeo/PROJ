@@ -16,6 +16,6 @@ PROJ.4 project or using the library in their own software.
    errorhandling
    threads
    reference/index
+   cmake
    bindings
    migration
-

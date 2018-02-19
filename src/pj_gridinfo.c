@@ -40,8 +40,8 @@
 /*      Convert the byte order of the given word(s) in place.           */
 /************************************************************************/
 
-static int  byte_order_test = 1;
-#define IS_LSB	(1 == ((unsigned char *) (&byte_order_test))[0])
+static const int  byte_order_test = 1;
+#define IS_LSB	(1 == ((const unsigned char *) (&byte_order_test))[0])
 
 static void swap_words( unsigned char *data, int word_size, int word_count )
 
@@ -564,7 +564,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
 
             gi->gridname = pj_strdup( gilist->gridname );
             gi->filename = pj_strdup( gilist->filename );
-            if (!gi->gridname || gi->filename) {
+            if (!gi->gridname || !gi->filename) {
                 pj_gridinfo_free(ctx, gi);
                 pj_dalloc(ct);
                 pj_gridinfo_free(ctx, gilist);

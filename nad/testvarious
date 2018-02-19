@@ -782,11 +782,11 @@ EOF
 echo  "##############################################################" >> ${OUT}
 echo  "Test SCH inverse projection" >> ${OUT}
 #
-$EXE -f '%.7f' \
+$EXE -f '%.6f' \
     +proj=sch +datum=WGS84 +plat_0=30.0 +plon_0=45.0 +phdg_0=-12.0 +nodefs +to \
     +proj=latlong +datum=WGS84 \
  -E >> ${OUT} <<EOF
-0. 0.
+0. 0. 2.
 0. 1000.
 1000. 0.
 1000. 1000.

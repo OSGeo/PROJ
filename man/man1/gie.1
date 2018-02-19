@@ -1,0 +1,116 @@
+.\" release 5
+.\"
+.ad b
+.hy 1
+.TH GIE 1 "2018/02/25 Rel. 5.0.0"
+.SH NAME
+gie \- The Geospatial Integrity Investigation Environment
+.SH SYNOPSIS
+.B gie
+[\-options]... infile...
+.SH DESCRIPTION
+\fBgie\fR, the Geospatial Integrity Investigation Environment, is a modest
+regression testing environment for the PROJ transformation library.
+.PP
+Its primary design goal was to be able to replace those thousands of
+lines of regression testing code that are (at time of writing) part
+of PROJ, while not requiring any other kind of tooling than the same
+C compiler already employed for compiling the library.
+.PP
+The basic functionality of the gie command language is implemented
+through just 3 command verbs:
+.PP
+operation,     which defines the PROJ operation to test,
+.br
+accept,        which defines the input coordinate to read, and
+.br
+expect,        which defines the result to expect.
+.PP
+E.g:
+.PP
+operation  +proj=utm  +zone=32  +ellps=GRS80
+.br
+accept     12  55
+.br
+expect     691_875.632_14   6_098_907.825_05
+.PP
+Note that gie accepts the underscore ("_") as a thousands separator.
+It is not required (in fact, it is entirely ignored by the input
+routine), but it significantly improves the readability of the very
+long strings of numbers typically required in projected coordinates.
+.PP
+By default, gie considers the EXPECTation met, if the result comes to
+within 0.5 mm of the expected. This default can be changed using the
+"tolerance" command verb (and yes, I know, linguistically speaking, both
+"operation" and "tolerance" are nouns, not verbs). See the first
+few hundred lines of the "builtins.gie" test file for more details of
+the command verbs available (verbs of both the VERBal and NOUNistic
+persuation).
+.PP
+But more importantly than being an acronym for "Geospatial Integrity
+Investigation Environment", gie were also the initials, user id, and
+USGS email address of Gerald Ian Evenden (1935--2016), the geospatial
+visionary, who, already in the 1980s, started what was to become the
+PROJ of today.
+.PP
+Gerald's clear vision was that map projections are *just special
+functions*. Some of them rather complex, most of them of two variables,
+but all of them *just special functions*, and not particularly more
+special than the sin(), cos(), tan(), and hypot() already available in
+the C standard library.
+.PP
+And hence, according to Gerald, *they should not be particularly much
+harder to use*, for a programmer, than the sin()s, tan()s and hypot()s
+so readily available.
+.PP
+Gerald's ingenuity also showed in the implementation of the vision,
+where he devised a comprehensive, yet simple, system of key-value
+pairs for parameterising a map projection, and the highly flexible
+PJ struct, storing run-time compiled versions of those key-value pairs,
+hence making a map projection function call, pj_fwd(PJ, point), as easy
+as a traditional function call like hypot(x,y).
+.PP
+While today, we may have more formally well defined metadata systems
+(most prominent the OGC WKT2 representation), nothing comes close being
+as easily readable ("human compatible") as Gerald's key-value system.
+This system in particular, and the PROJ system in general, was
+Gerald's great gift to anyone using and/or communicating about geodata.
+.PP
+It is only reasonable to name a program, keeping an eye on the integrity
+of the PROJ system, in honour of Gerald.
+.PP
+So in honour, and hopefully also in the spirit, of Gerald Ian Evenden
+(1935--2016), this is the Geospatial Integrity Investigation Environment.
+.SH OPTIONS
+.IP "\fB\fB\-h\fR\fR" 1c
+Help: print usage information\&
+.IP "\fB\fB\-o /path/to/file\fR\fR" 1c
+Specify output file name\&
+.IP "\fB\fB\-v\fR\fR" 1c
+Verbose: Provide non-essential informational output.
+Repeat \-v for more verbosity (e.g. \-vv)\&
+.IP "\fB\fB\-q\fR\fR" 1c
+Quiet: Opposite of verbose. In quiet mode not even errors
+are reported. Only interaction is through the return code
+(0 on success, non-zero indicates number of FAILED tests)\&
+.IP "\fB\fB\-l\fR\fR" 1c
+List the PROJ internal system error codes\&
+.SH LONG OPTIONS
+.IP "\fB\fB\-\-output\fR\fR" 1c
+Alias for \-o\&
+.IP "\fB\fB\-\-verbose\fR\fR" 1c
+Alias for \-v\&
+.IP "\fB\fB\-\-help\fR\fR" 1c
+Alias for -h\&
+.IP "\fB\fB\-\-list\fR\fR" 1c
+Alias for \-l\&
+.SH EXAMPLES
+1. Run all tests in file \"corner-cases.gie\", providing much extra information
+.IP
+gie \-vvvv corner-cases.gie
+.PP
+2. Run all tests in files \"foo\" and \"bar\", providing info on failures only
+.IP
+gie foo bar
+.SH HOME PAGE
+http://proj4.org/

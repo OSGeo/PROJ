@@ -159,43 +159,86 @@ static PJ_COORD reverse_4d(PJ_COORD coo, PJ *P) {
 PJ *CONVERSION(axisswap,0) {
 /***********************************************************************/
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
-    char *order, *s;
-    unsigned int i, j, n;
+    char *s;
+    unsigned int i, j, n = 0;
 
     if (0==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = (void *) Q;
 
-    /* read axis order */
-    if (pj_param (P->ctx, P->params, "torder").i) {
-        order = pj_param(P->ctx, P->params, "sorder").s;
-    } else {
-        return pj_default_destructor(P, PJD_ERR_MISSING_ARGS);
-    }
+
+    /* +order and +axis are mutually exclusive */
+    if ( !pj_param_exists(P->params, "order") == !pj_param_exists(P->params, "axis") )
+        return pj_default_destructor(P, PJD_ERR_AXIS);
 
     /* fill axis list with indices from 4-7 to simplify duplicate search further down */
-    for (i=0; i<4; i++)
+    for (i=0; i<4; i++) {
         Q->axis[i] = i+4;
+        Q->sign[i] = 1;
+    }
 
-    /* check that all characters are valid */
-    for (i=0; i<strlen(order); i++)
-        if (strchr("1234-,", order[i]) == 0) {
-            proj_log_error(P, "axisswap: unknown axis '%c'", order[i]);
-            return pj_default_destructor(P, PJD_ERR_AXIS);
-        }
+    /* if the "order" parameter is used */
+    if ( pj_param_exists(P->params, "order") ) {
+        /* read axis order */
+        char *order = pj_param(P->ctx, P->params, "sorder").s;
 
-    /* read axes numbers and signs */
-    for ( s = order, n = 0; *s != '\0' && n < 4; ) {
-        Q->axis[n] = abs(atoi(s))-1;
-        if (Q->axis[n] >= 4) {
-            proj_log_error(P, "swapaxis: invalid axis '%s'", s);
-            return pj_default_destructor(P, PJD_ERR_AXIS);
+        /* check that all characters are valid */
+        for (i=0; i<strlen(order); i++)
+            if (strchr("1234-,", order[i]) == 0) {
+                proj_log_error(P, "axisswap: unknown axis '%c'", order[i]);
+                return pj_default_destructor(P, PJD_ERR_AXIS);
+            }
+
+        /* read axes numbers and signs */
+        for ( s = order, n = 0; *s != '\0' && n < 4; ) {
+            Q->axis[n] = abs(atoi(s))-1;
+            if (Q->axis[n] > 3) {
+                proj_log_error(P, "axisswap: invalid axis '%d'", Q->axis[n]);
+                return pj_default_destructor(P, PJD_ERR_AXIS);
+            }
+            Q->sign[n++] = sign(atoi(s));
+            while ( *s != '\0' && *s != ',' )
+                s++;
+            if ( *s == ',' )
+                s++;
         }
-        Q->sign[n++] = sign(atoi(s));
-        while ( *s != '\0' && *s != ',' )
-            s++;
-        if ( *s == ',' )
-            s++;
+    }
+
+    /* if the "axis" parameter is used */
+    if ( pj_param_exists(P->params, "axis") ) {
+        /* parse the classic PROJ.4 enu axis specification */
+        for (i=0; i < 3; i++) {
+            switch(P->axis[i]) {
+                case 'w':
+                    Q->sign[i] = -1;
+                    Q->axis[i] = 0;
+                    break;
+                case 'e':
+                    Q->sign[i] = 1;
+                    Q->axis[i] = 0;
+                    break;
+                case 's':
+                    Q->sign[i] = -1;
+                    Q->axis[i] = 1;
+                    break;
+                case 'n':
+                    Q->sign[i] = 1;
+                    Q->axis[i] = 1;
+                    break;
+                case 'd':
+                    Q->sign[i] = -1;
+                    Q->axis[i] = 2;
+                    break;
+                case 'u':
+                    Q->sign[i] = 1;
+                    Q->axis[i] = 2;
+                    break;
+                default:
+                    proj_log_error(P, "axisswap: unknown axis '%c'", P->axis[i]);
+                    return pj_default_destructor(P, PJD_ERR_AXIS);
+            }
+        }
+        n = 3;
     }
 
     /* check for duplicate axes */
@@ -208,6 +251,7 @@ PJ *CONVERSION(axisswap,0) {
                 return pj_default_destructor(P, PJD_ERR_AXIS);
             }
         }
+
 
     /* only map fwd/inv functions that are possible with the given axis setup */
     if (n == 4) {
@@ -223,19 +267,29 @@ PJ *CONVERSION(axisswap,0) {
         P->inv    = reverse_2d;
     }
 
+
     if (P->fwd4d == NULL && P->fwd3d == NULL && P->fwd == NULL) {
         proj_log_error(P, "swapaxis: bad axis order");
         return pj_default_destructor(P, PJD_ERR_AXIS);
     }
 
     if (pj_param(P->ctx, P->params, "tangularunits").i) {
-        P->left  = PJ_IO_UNITS_RADIANS;
-        P->right = PJ_IO_UNITS_RADIANS;
+        P->left  = PJ_IO_UNITS_ANGULAR;
+        P->right = PJ_IO_UNITS_ANGULAR;
     } else {
-        P->left  = PJ_IO_UNITS_METERS;
-        P->right = PJ_IO_UNITS_METERS;
+        P->left  = PJ_IO_UNITS_PROJECTED;
+        P->right = PJ_IO_UNITS_PROJECTED;
     }
+
+
+    /* Preparation and finalization steps are skipped, since the raison   */
+    /* d'etre of axisswap is to bring input coordinates in line with the  */
+    /* the internally expected order (ENU), such that handling of offsets */
+    /* etc. can be done correctly in a later step of a pipeline */
+    P->skip_fwd_prepare  = 1;
+    P->skip_fwd_finalize = 1;
+    P->skip_inv_prepare  = 1;
+    P->skip_inv_finalize = 1;
 
     return P;
 }
-

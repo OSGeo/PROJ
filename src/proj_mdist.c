@@ -27,7 +27,7 @@
 ** and inverse on unit ellipsoid.
 ** Precision commensurate with double precision.
 */
-#define PROJ_LIB__
+#define PJ_LIB__
 #include <projects.h>
 #define MAX_ITER 20
 #define TOL 1e-14
@@ -88,7 +88,7 @@ proj_mdist_ini(double es) {
 }
 	double
 proj_mdist(double phi, double sphi, double cphi, const void *data) {
-	struct MDIST *b = (struct MDIST *)data;
+	const struct MDIST *b = (const struct MDIST *)data;
 	double sc, sum, sphi2, D;
 	int i;
 
@@ -101,7 +101,7 @@ proj_mdist(double phi, double sphi, double cphi, const void *data) {
 }
 	double
 proj_inv_mdist(projCtx ctx, double dist, const void *data) {
-	struct MDIST *b = (struct MDIST *)data;
+	const struct MDIST *b = (const struct MDIST *)data;
 	double s, t, phi, k;
 	int i;
 

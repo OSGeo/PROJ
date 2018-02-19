@@ -27,320 +27,355 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+
+
 #define PJ_LIB__
 #include <geodesic.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
+#include <proj.h>
 #include "proj_internal.h"
 #include "projects.h"
 
-/* Maximum size of files using the "escape carriage return" feature */
-#define MAX_CR_ESCAPE 65537
-typedef struct {
-    projCtx ctx;
-    PAFile fid;
-    char buffer[MAX_CR_ESCAPE];
-    int buffer_filled;
-    int at_eof;
-} pj_read_state;
 
-/************************************************************************/
-/*                            fill_buffer()                             */
-/************************************************************************/
 
-static const char *fill_buffer(pj_read_state *state, const char *last_char)
-{
-    size_t bytes_read;
-    size_t char_remaining, char_requested;
-    char   *r, *w;
+/**************************************************************************************/
+static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
+/***************************************************************************************
+    Convert a string (presumably originating from get_init_string) to a paralist.
+***************************************************************************************/
+    char *c = definition;
+    paralist *first = 0, *next = 0;
 
-/* -------------------------------------------------------------------- */
-/*      Don't bother trying to read more if we are at eof, or if the    */
-/*      buffer is still over half full.                                 */
-/* -------------------------------------------------------------------- */
-    if (last_char == NULL)
-        last_char = state->buffer;
+    while (*c) {
+        /* Find start of next substring */
+        while (isspace (*c))
+            c++;
 
-    if (state->at_eof)
-        return last_char;
+        /* Keep a handle to the start of the list, so we have something to return */
+        if (0==first)
+            first = next = pj_mkparam_ws (c);
+        else
+            next = next->next = pj_mkparam_ws (c);
+        if (0==next)
+            return pj_dealloc_params (ctx, first, ENOMEM);
 
-    char_remaining = state->buffer_filled - (last_char - state->buffer);
-    if (char_remaining >= sizeof(state->buffer) / 2)
-        return last_char;
-
-/* -------------------------------------------------------------------- */
-/*      Move the existing data to the start of the buffer.              */
-/* -------------------------------------------------------------------- */
-    memmove(state->buffer, last_char, char_remaining);
-    state->buffer_filled = (int)char_remaining;
-    last_char = state->buffer;
-
-/* -------------------------------------------------------------------- */
-/*      Refill.                                                         */
-/* -------------------------------------------------------------------- */
-    char_requested = sizeof(state->buffer) - state->buffer_filled - 1;
-    bytes_read = pj_ctx_fread( state->ctx, state->buffer + state->buffer_filled,
-                               1, char_requested, state->fid );
-    if (bytes_read < char_requested)
-    {
-        state->at_eof = 1;
-        state->buffer[state->buffer_filled + bytes_read] = '\0';
+        /* And skip to the end of the substring */
+        while ((!isspace(*c)) && 0!=*c)
+            c++;
     }
 
-/* -------------------------------------------------------------------- */
-/*      Line continuations: skip whitespace after escaped newlines      */
-/* -------------------------------------------------------------------- */
-    r = state->buffer;
-    w = state->buffer;
-    while (*r) {
-        /* Escaped newline? */
-        while ((r[0]=='\\')  &&  ((r[1]=='\n') || (r[1]=='\r'))) {
-            r += 2;
-            while (isspace (*r))
-                r++;
-            /* we also skip comments immediately after an escaped newline */
-            while (*r=='#') {
-                while( *r && (*r != '\n') )
-                    r++;
-                while (isspace (*r))
-                    r++;
-                /* Reaching end of buffer while skipping continuation comment is currently an error */
-                if (0==*r) {
-                    pj_ctx_set_errno (state->ctx, -2);
-                    pj_log (state->ctx, PJ_LOG_ERROR, "init file too big");
-                    return 0;
-                }
-            }
-        }
-        *w++ = *r++;
-    }
-    *w = 0;
-    state->buffer_filled += (int)(bytes_read - (r-w));
-
-    return last_char;
+    /* Terminate list and return */
+    next->next = 0;
+    return first;
 }
 
-/************************************************************************/
-/*                              get_opt()                               */
-/************************************************************************/
-static paralist *
-get_opt(projCtx ctx, paralist **start, PAFile fid, char *name, paralist *next,
-        int *found_def) {
-    pj_read_state *state = (pj_read_state*) calloc(1,sizeof(pj_read_state));
-    char sword[MAX_CR_ESCAPE];
-    int len;
-    int in_target = 0;
-    const char *next_char = NULL;
-    state->fid = fid;
-    state->ctx = ctx;
-    next_char = fill_buffer(state, NULL);
-    if(found_def)
-        *found_def = 0;
 
-    len = (int)strlen(name);
-    *sword = 't';
 
-    if (0==next_char)
+/**************************************************************************************/
+static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
+/***************************************************************************************
+    Read a section of an init file. Return its contents as a plain character string.
+    It is the duty of the caller to free the memory allocated for the string.
+***************************************************************************************/
+#define MAX_LINE_LENGTH 1000
+    size_t current_buffer_size = 5 * (MAX_LINE_LENGTH + 1);
+    char *fname, *section, *key;
+    char *buffer = 0;
+    char *line = 0;
+    PAFile fid;
+    size_t n;
+
+
+    line = pj_malloc (MAX_LINE_LENGTH + 1);
+    if (0==line)
         return 0;
 
-    /* loop till we find our target keyword */
-    while (*next_char)
-    {
-        next_char = fill_buffer(state, next_char);
-
-        /* Skip white space. */
-        while( isspace(*next_char) )
-            next_char++;
-
-        next_char = fill_buffer(state, next_char);
-        if (0==next_char)
-            return 0;
-
-        /* for comments, skip past end of line. */
-        if( *next_char == '#' )
-        {
-            while( *next_char && *next_char != '\n' )
-                next_char++;
-
-            next_char = fill_buffer(state, next_char);
-            if (0==next_char)
-                return 0;
-            if (*next_char == '\n')
-                next_char++;
-            if (*next_char == '\r')
-                next_char++;
-
-        }
-
-        /* Is this our target? */
-        else if( *next_char == '<' )
-        {
-            /* terminate processing target on the next block definition */
-            if (in_target)
-                break;
-
-            next_char++;
-            if (strncmp(name, next_char, len) == 0
-                && next_char[len] == '>')
-            {
-                /* skip past target word */
-                next_char += len + 1;
-                in_target = 1;
-                if(found_def)
-                    *found_def = 1;
-            }
-            else
-            {
-                /* skip past end of line */
-                while( *next_char && *next_char != '\n' )
-                    next_char++;
-            }
-        }
-        else if (in_target)
-        {
-            const char *start_of_word = next_char;
-            int word_len = 0;
-
-            if (*start_of_word == '+')
-            {
-                start_of_word++;
-                next_char++;
-            }
-
-            /* capture parameter */
-            while ( *next_char && !isspace(*next_char) )
-            {
-                next_char++;
-                word_len++;
-            }
-
-            strncpy(sword+1, start_of_word, word_len);
-            sword[word_len+1] = '\0';
-
-            /* do not override existing parameter value of same name */
-            if (!pj_param(ctx, *start, sword).i) {
-
-                /* don't default ellipse if datum, ellps or any earth model information is set */
-                if (0==strncmp(sword,"tellps=", 7)) {
-                    int n = 0;
-
-                    n += pj_param(ctx, *start, "tdatum").i;
-                    n += pj_param(ctx, *start, "tellps").i;
-                    n += pj_param(ctx, *start, "ta").i;
-                    n += pj_param(ctx, *start, "tb").i;
-                    n += pj_param(ctx, *start, "trf").i;
-                    n += pj_param(ctx, *start, "tf").i;
-                    n += pj_param(ctx, *start, "te").i;
-                    n += pj_param(ctx, *start, "tes").i;
-
-                    if (0==n)
-                        next = next->next = pj_mkparam(sword+1);
-                }
-                else
-                    next = next->next = pj_mkparam(sword+1);
-            }
-
-
-        }
-        else
-        {
-            /* skip past word */
-            while( *next_char && !isspace(*next_char) ) {
-                next_char++;
-            }
-
-        }
+    fname = pj_malloc (MAX_PATH_FILENAME+ID_TAG_MAX+3);
+    if (0==fname) {
+        pj_dealloc (line);
+        return 0;
     }
 
-    if (errno == 25)
-        errno = 0;
-
-    free(state);
-    return next;
-}
-
-/************************************************************************/
-/*                            get_defaults()                            */
-/************************************************************************/
-static paralist *get_defaults(projCtx ctx, paralist **start, paralist *next, char *name) {
-    PAFile fid;
-
-    if ( (fid = pj_open_lib(ctx,"proj_def.dat", "rt")) != NULL) {
-        next = get_opt(ctx, start, fid, "general", next, NULL);
-        pj_ctx_fseek(ctx, fid, 0, SEEK_SET);
-        next = get_opt(ctx, start, fid, name, next, NULL);
-        pj_ctx_fclose(ctx, fid);
-    }
-    if (errno)
-        errno = 0; /* don't care if can't open file */
-    ctx->last_errno = 0;
-
-    return next;
-}
-
-/************************************************************************/
-/*                              get_init()                              */
-/************************************************************************/
-static paralist *get_init(projCtx ctx, paralist **start, paralist *next, char *name, int *found_def) {
-    char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *opt;
-    PAFile fid;
-    paralist *init_items = NULL;
-    const paralist *orig_next = next;
-
-    (void)strncpy(fname, name, sizeof(fname)-2);
-    fname[sizeof(fname)-2] = '\0';
-
-    /*
-    ** Search for file/key pair in cache
-    */
-
-    init_items = pj_search_initcache( name );
-    if( init_items != NULL )
-    {
-        next->next = init_items;
-        while( next->next != NULL )
-            next = next->next;
-        *found_def = 1;
-        return next;
-    }
-
-    /*
-    ** Otherwise we try to open the file and search for it.
-    */
-    if ((opt = strrchr(fname, ':')) != NULL)
-        *opt++ = '\0';
-    else { pj_ctx_set_errno(ctx,-3); return NULL; }
-
-    if ( (fid = pj_open_lib(ctx,fname, "rt")) != NULL)
-        next = get_opt(ctx, start, fid, opt, next, found_def);
+    /* Support "init=file:section", "+init=file:section", and "file:section" format */
+    key = strstr (name, "init=");
+    if (0==key)
+        key = name;
     else
-        return NULL;
+        key += 5;
+    if (MAX_PATH_FILENAME + ID_TAG_MAX + 2 < strlen (key)) {
+        pj_dealloc (fname);
+        pj_dealloc (line);
+        return 0;
+    }
+    memmove (fname, key, strlen (key) + 1);
 
-    pj_ctx_fclose(ctx, fid);
-    if (errno == 25)
-        errno = 0; /* unknown problem with some sys errno<-25 */
+    /* Locate the name of the section we search for */
+    section = strrchr(fname, ':');
+    if (0==section) {
+        proj_context_errno_set (ctx, PJD_ERR_NO_COLON_IN_INIT_STRING);
+        pj_dealloc (fname);
+        pj_dealloc (line);
+        return 0;
+    }
+    *section = 0;
+    section++;
+    n = strlen (section);
+    pj_log (ctx, 3, "get_init_string: searching for section [%s] in init file [%s]\n", section, fname);
 
-    /*
-    ** If we seem to have gotten a result, insert it into the
-    ** init file cache.
-    */
-    if( next != NULL && next != orig_next )
-        pj_insert_initcache( name, orig_next->next );
+    fid = pj_open_lib (ctx, fname, "rt");
+    if (0==fid) {
+        pj_dealloc (fname);
+        pj_dealloc (line);
+        proj_context_errno_set (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
+        return 0;
+    }
 
-    return next;
+    /* Search for section in init file */
+    for (;;) {
+
+        /* End of file? */
+        if (0==pj_ctx_fgets (ctx, line, MAX_LINE_LENGTH, fid)) {
+            pj_dealloc (buffer);
+            pj_dealloc (fname);
+            pj_dealloc (line);
+            pj_ctx_fclose (ctx, fid);
+            proj_context_errno_set (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
+            return 0;
+        }
+
+        /* At start of right section? */
+        pj_chomp (line);
+        if ('<'!=line[0])
+            continue;
+        if (strlen (line) < n + 2)
+            continue;
+        if (line[n + 1] != '>')
+            continue;
+        if (0==strncmp (line + 1, section, n))
+            break;
+    }
+
+    /* We're at the first line of the right section - copy line to buffer */
+    buffer = pj_malloc (current_buffer_size);
+    if (0==buffer) {
+        pj_dealloc (fname);
+        pj_dealloc (line);
+        pj_ctx_fclose (ctx, fid);
+        return 0;
+    }
+
+    /* Skip the "<section>" indicator, and copy the rest of the line over */
+    strcpy (buffer, line + strlen (section) + 2);
+
+    /* Copy the remaining lines of the section to buffer */
+    for (;;) {
+        char *end_i_cator;
+        size_t next_length, buffer_length;
+
+        /* Did the section end somewhere in the most recently read line? */
+        end_i_cator = strchr (buffer, '<');
+        if (end_i_cator) {
+            *end_i_cator = 0;
+            break;
+        }
+
+        /* End of file? - done! */
+        if (0==pj_ctx_fgets (ctx, line, MAX_LINE_LENGTH, fid))
+            break;
+
+        /* Otherwise, handle the line. It MAY be the start of the next section, */
+        /* but that will be handled at the start of next trip through the loop  */
+        buffer_length = strlen (buffer);
+        pj_chomp (line);   /* Remove '#' style comments */
+        next_length = strlen (line) + buffer_length + 2;
+        if (next_length > current_buffer_size) {
+            char *b = pj_malloc (2 * current_buffer_size);
+            if (0==b) {
+                pj_dealloc (buffer);
+                buffer = 0;
+                break;
+            }
+            strcpy (b, buffer);
+            current_buffer_size *= 2;
+            pj_dealloc (buffer);
+            buffer = b;
+        }
+        buffer[buffer_length] = ' ';
+        strcpy (buffer + buffer_length + 1, line);
+    }
+
+    pj_ctx_fclose (ctx, fid);
+    pj_dealloc (fname);
+    pj_dealloc (line);
+    if (0==buffer)
+        return 0;
+    pj_shrink (buffer);
+    pj_log (ctx, 3, "key=%s, value: [%s]\n", key, buffer);
+    return buffer;
 }
 
-paralist * pj_get_init(projCtx ctx, paralist **start, paralist *next, char *name, int *found_def) {
-    return get_init(ctx, start, next, name, found_def);
+
+
+/************************************************************************/
+static paralist *get_init(PJ_CONTEXT *ctx, char *key) {
+/*************************************************************************
+Expand key from buffer or (if not in buffer) from init file
+*************************************************************************/
+    char *xkey, *definition;
+    paralist *init_items = 0;
+
+    /* support "init=file:section", "+init=file:section", and "file:section" format */
+    xkey = strstr (key, "init=");
+    if (0==xkey)
+        xkey = key;
+    else
+        xkey += 5;
+    pj_log (ctx, 3, "get_init: searching cache for key: [%s]\n", xkey);
+
+    /* Is file/key pair already in cache? */
+    init_items = pj_search_initcache (xkey);
+    if (init_items)
+        return init_items;
+
+    /* If not, we must read it from file */
+    pj_log (ctx, 3, "get_init: searching on in init files for [%s]\n", xkey);
+    definition = get_init_string (ctx, xkey);
+    if (0==definition)
+        return 0;
+    init_items = string_to_paralist (ctx, definition);
+    if (init_items)
+        pj_log (ctx, 3, "get_init: got [%s], paralist[0,1]: [%s,%s]\n", definition, init_items->param, init_items->next? init_items->next->param: "(empty)");
+    pj_dealloc (definition);
+    if (0==init_items)
+        return 0;
+
+    /* We found it in file - now insert into the cache, before returning */
+    pj_insert_initcache (xkey, init_items);
+    return init_items;
 }
+
+
+
+static paralist *append_defaults_to_paralist (PJ_CONTEXT *ctx, paralist *start, char *key) {
+    paralist *defaults, *last = 0;
+    char keystring[ID_TAG_MAX + 20];
+    paralist *next, *proj;
+    int err;
+
+    if (0==start)
+        return 0;
+
+    if (strlen(key) > ID_TAG_MAX)
+        return 0;
+
+    /* Set defaults, unless inhibited (either explicitly through a "no_defs" token */
+    /* or implicitly, because we are initializing a pipeline) */
+    if (pj_param_exists (start, "no_defs"))
+        return start;
+    proj = pj_param_exists (start, "proj");
+    if (0==proj)
+        return start;
+    if (strlen (proj->param) < 6)
+        return start;
+    if (0==strcmp ("pipeline", proj->param + 5))
+        return start;
+
+    err = pj_ctx_get_errno (ctx);
+    pj_ctx_set_errno (ctx, 0);
+
+    /* Locate end of start-list */
+    for (last = start;  last->next;  last = last->next);
+
+    strcpy (keystring, "proj_def.dat:");
+    strcat (keystring, key);
+    defaults = get_init (ctx, keystring);
+
+    /* Defaults are optional - so we don't care if we cannot open the file */
+    pj_ctx_set_errno (ctx, err);
+
+    if (!defaults)
+        return last;
+
+    /* Loop over all default items */
+    for (next = defaults;  next;  next = next->next) {
+
+        /* Don't override existing parameter value of same name */
+        if (pj_param_exists (start, next->param))
+            continue;
+
+        /* Don't default ellipse if datum, ellps or any ellipsoid information is set */
+        if (0==strncmp(next->param,"ellps=", 6)) {
+            if  (pj_param_exists (start, "datum"))  continue;
+            if  (pj_param_exists (start, "ellps"))  continue;
+            if  (pj_param_exists (start, "a"))      continue;
+            if  (pj_param_exists (start, "b"))      continue;
+            if  (pj_param_exists (start, "rf"))     continue;
+            if  (pj_param_exists (start, "f"))      continue;
+            if  (pj_param_exists (start, "e"))      continue;
+            if  (pj_param_exists (start, "es"))     continue;
+        }
+
+        /* If we're here, it's OK to append the current default item */
+        last = last->next = pj_mkparam(next->param);
+    }
+    last->next = 0;
+
+    pj_dealloc_params (ctx, defaults, 0);
+    return last;
+}
+
+/*****************************************************************************/
+paralist *pj_expand_init(PJ_CONTEXT *ctx, paralist *init) {
+/******************************************************************************
+Append expansion of <key> to the paralist <init>. The expansion is appended,
+rather than inserted at <init>'s place, since <init> may contain
+overrides to the expansion. These must take precedence, and hence come first
+in the expanded list.
+
+Consider e.g. the key 'foo:bar' which (hypothetically) expands to 'proj=utm
+zone=32 ellps=GRS80', i.e. a UTM projection on the GRS80 ellipsoid.
+
+The expression 'init=foo:bar ellps=intl' will then expand to:
+
+           'init=foo:bar ellps=intl proj=utm zone=32 ellps=GRS80',
+
+where 'ellps=intl' precedes 'ellps=GRS80', and hence takes precedence,
+turning the expansion into an UTM projection on the Hayford ellipsoid.
+
+Note that 'init=foo:bar' stays in the list. It is ignored after expansion.
+
+******************************************************************************/
+    paralist *last;
+    paralist *expn;
+
+    /* Nowhere to start? */
+    if (0==init)
+        return 0;
+
+    expn = get_init(ctx, init->param);
+
+    /* Nothing in expansion? */
+    if (0==expn)
+        return 0;
+
+    /* Locate  the end of the list */
+    for (last = init;  last && last->next;  last = last->next);
+
+    /* Then append and return */
+    last->next = expn;
+    return init;
+}
+
+
 
 /************************************************************************/
 /*                            pj_init_plus()                            */
 /*                                                                      */
 /*      Same as pj_init() except it takes one argument string with      */
-/*      individual arguments preceded by '+', such as "+proj=utm       */
+/*      individual arguments preceded by '+', such as "+proj=utm        */
 /*      +zone=11 +ellps=WGS84".                                         */
 /************************************************************************/
 
@@ -434,15 +469,24 @@ pj_init(int argc, char **argv) {
     return pj_init_ctx( pj_get_default_ctx(), argc, argv );
 }
 
+
+static PJ_CONSTRUCTOR pj_locate_constructor (const char *name) {
+    int i;
+    char *s;
+    for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
+    if (0==s)
+        return 0;
+    return (PJ_CONSTRUCTOR) pj_list[i].proj;
+}
+
+
 PJ *
 pj_init_ctx(projCtx ctx, int argc, char **argv) {
     char *s, *name;
-    paralist *start = NULL;
-    PJ *(*proj)(PJ *);
-    paralist *curr;
+    PJ_CONSTRUCTOR proj;
+    paralist *curr, *init, *start;
     int i;
     int err;
-    int found_def = 0;
     PJ *PIN = 0;
     int n_pipelines = 0;
     int n_inits = 0;
@@ -451,7 +495,6 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         ctx = pj_get_default_ctx ();
 
     ctx->last_errno = 0;
-    start = NULL;
 
     if (argc <= 0) {
         pj_ctx_set_errno (ctx, PJD_ERR_NO_ARGS);
@@ -466,7 +509,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             n_inits++;
     }
 
-    /* can't have nested pipeline directly */
+    /* can't have nested pipelines directly */
     if (n_pipelines > 1) {
         pj_ctx_set_errno (ctx, PJD_ERR_MALFORMED_PIPELINE);
         return 0;
@@ -477,6 +520,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         pj_ctx_set_errno (ctx, PJD_ERR_TOO_MANY_INITS);
         return 0;
     }
+
 
     /* put arguments into internal linked list */
     start = curr = pj_mkparam(argv[0]);
@@ -490,40 +534,44 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         curr = curr->next;
     }
 
-    /* Only expand +init's in non-pipeline operations. +init's in pipelines are  */
-    /* expanded in the individual pipeline steps during pipeline initialization. */
-    /* Potentially this leads to many nested pipelines, which shouldn't be a     */
-    /* problem when +inits are expanded as late as possible.                     */
-    if (pj_param(ctx, start, "tinit").i && n_pipelines == 0) {
-        found_def = 0;
-        curr = get_init(ctx, &start, curr, pj_param(ctx, start, "sinit").s, &found_def);
-        if (!curr)
-            return pj_dealloc_params (ctx, start, PJD_ERR_NO_ARGS);
-        if (!found_def)
-            return pj_dealloc_params (ctx, start, PJD_ERR_NO_OPTION_IN_INIT_FILE);
-    }
 
+    /* Only expand '+init's in non-pipeline operations. '+init's in pipelines are */
+    /* expanded in the individual pipeline steps during pipeline initialization.  */
+    /* Potentially this leads to many nested pipelines, which shouldn't be a      */
+    /* problem when '+init's are expanded as late as possible.                    */
+    init = pj_param_exists (start, "init");
+    if (init && n_pipelines == 0) {
+        init = pj_expand_init (ctx, init);
+        if (!init)
+            return pj_dealloc_params (ctx, start, PJD_ERR_NO_ARGS);
+    }
     if (ctx->last_errno)
         return pj_dealloc_params (ctx, start, ctx->last_errno);
 
-    /* find projection selection */
-    if (!(name = pj_param(ctx, start, "sproj").s))
+    /* Find projection selection */
+    curr = pj_param_exists (start, "proj");
+    if (0==curr)
         return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);
-    for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
+    name =  curr->param;
+    if (strlen (name) < 6)
+        return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);
+    name += 5;
 
-    if (!s)
+    proj = pj_locate_constructor (name);
+    if (0==proj)
         return pj_dealloc_params (ctx, start, PJD_ERR_UNKNOWN_PROJECTION_ID);
 
-    /* set defaults, unless inhibited or we are initializing a pipeline */
-    if (!(pj_param(ctx, start, "bno_defs").i) && n_pipelines == 0)
-            curr = get_defaults(ctx,&start, curr, name);
 
-    proj = (PJ *(*)(PJ *)) pj_list[i].proj;
+    /* Append general and projection specific defaults to the definition list */
+    append_defaults_to_paralist (ctx, start, "general");
+    append_defaults_to_paralist (ctx, start, name);
 
-    /* allocate projection structure */
+
+    /* Allocate projection structure */
     PIN = proj(0);
     if (0==PIN)
         return pj_dealloc_params (ctx, start, ENOMEM);
+
 
     PIN->ctx = ctx;
     PIN->params = start;
@@ -539,21 +587,30 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PIN->vgridlist_geoid = NULL;
     PIN->vgridlist_geoid_count = 0;
 
-    /* set datum parameters */
+    /* Set datum parameters */
     if (pj_datum_set(ctx, start, PIN))
         return pj_default_destructor (PIN, proj_errno(PIN));
 
-    if (PIN->need_ellps) {
-        int ret = pj_ellipsoid (PIN);
-        if (0 != ret) {
+    err = pj_ellipsoid (PIN);
+
+    if (err) {
+        /* Didn't get an ellps, but doesn't need one: Get a free WGS84 */
+        if (PIN->need_ellps) {
             pj_log (ctx, PJ_LOG_DEBUG_MINOR, "pj_init_ctx: Must specify ellipsoid or sphere");
             return pj_default_destructor (PIN, proj_errno(PIN));
         }
-        PIN->a_orig = PIN->a;
-        PIN->es_orig = PIN->es;
-        if (pj_calc_ellipsoid_params (PIN, PIN->a, PIN->es))
-            return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE);
+        else {
+            if (PJD_ERR_MAJOR_AXIS_NOT_GIVEN==proj_errno (PIN))
+                proj_errno_reset (PIN);
+            PIN->f = 1.0/298.257223563;
+            PIN->a_orig  = PIN->a  = 6378137.0;
+            PIN->es_orig = PIN->es = PIN->f*(2-PIN->f);
+        }
     }
+    PIN->a_orig = PIN->a;
+    PIN->es_orig = PIN->es;
+    if (pj_calc_ellipsoid_params (PIN, PIN->a, PIN->es))
+        return pj_default_destructor (PIN, PJD_ERR_ECCENTRICITY_IS_ONE);
 
     /* Now that we have ellipse information check for WGS84 datum */
     if( PIN->datum_type == PJD_3PARAM
@@ -566,18 +623,18 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         PIN->datum_type = PJD_WGS84;
     }
 
-    /* set PIN->geoc coordinate system */
+    /* Set PIN->geoc coordinate system */
     PIN->geoc = (PIN->es != 0.0 && pj_param(ctx, start, "bgeoc").i);
 
-    /* over-ranging flag */
+    /* Over-ranging flag */
     PIN->over = pj_param(ctx, start, "bover").i;
 
-    /* vertical datum geoid grids */
+    /* Vertical datum geoid grids */
     PIN->has_geoid_vgrids = pj_param(ctx, start, "tgeoidgrids").i;
     if( PIN->has_geoid_vgrids ) /* we need to mark it as used. */
         pj_param(ctx, start, "sgeoidgrids");
 
-    /* longitude center for wrapping */
+    /* Longitude center for wrapping */
     PIN->is_long_wrap_set = pj_param(ctx, start, "tlon_wrap").i;
     if (PIN->is_long_wrap_set) {
         PIN->long_wrap_center = pj_param(ctx, start, "rlon_wrap").f;
@@ -588,10 +645,10 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             return pj_default_destructor (PIN, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
     }
 
-    /* axis orientation */
+    /* Axis orientation */
     if( (pj_param(ctx, start,"saxis").s) != NULL )
     {
-        static const char *axis_legal = "ewnsud";
+        const char *axis_legal = "ewnsud";
         const char *axis_arg = pj_param(ctx, start,"saxis").s;
         if( strlen(axis_arg) != 3 )
             return pj_default_destructor (PIN, PJD_ERR_AXIS);
@@ -601,23 +658,23 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
             || strchr( axis_legal, axis_arg[2] ) == NULL)
             return pj_default_destructor (PIN, PJD_ERR_AXIS);
 
-        /* it would be nice to validate we don't have on axis repeated */
+        /* TODO: it would be nice to validate we don't have on axis repeated */
         strcpy( PIN->axis, axis_arg );
     }
 
-    /* central meridian */
+    /* Central meridian */
     PIN->lam0=pj_param(ctx, start, "rlon_0").f;
 
-    /* central latitude */
+    /* Central latitude */
     PIN->phi0 = pj_param(ctx, start, "rlat_0").f;
 
-    /* false easting and northing */
+    /* False easting and northing */
     PIN->x0 = pj_param(ctx, start, "dx_0").f;
     PIN->y0 = pj_param(ctx, start, "dy_0").f;
     PIN->z0 = pj_param(ctx, start, "dz_0").f;
     PIN->t0 = pj_param(ctx, start, "dt_0").f;
 
-    /* general scaling factor */
+    /* General scaling factor */
     if (pj_param(ctx, start, "tk_0").i)
         PIN->k0 = pj_param(ctx, start, "dk_0").f;
     else if (pj_param(ctx, start, "tk").i)
@@ -627,7 +684,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if (PIN->k0 <= 0.)
         return pj_default_destructor (PIN, PJD_ERR_K_LESS_THAN_ZERO);
 
-    /* set units */
+    /* Set units */
     s = 0;
     if ((name = pj_param(ctx, start, "sunits").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
@@ -640,9 +697,9 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         int ratio = 0;
 
         /* ratio number? */
-        if (*s == '/') {
+        if (strlen (s) > 1 && s[0] == '1' && s[1]=='/') {
             ratio = 1;
-            s++;
+            s += 2;
         }
 
         factor = pj_strtod(s, &s);
@@ -655,7 +712,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     } else
         PIN->to_meter = PIN->fr_meter = 1.;
 
-    /* set vertical units */
+    /* Set vertical units */
     s = 0;
     if ((name = pj_param(ctx, start, "svunits").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
@@ -675,7 +732,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         PIN->vfr_meter = PIN->fr_meter;
     }
 
-    /* prime meridian */
+    /* Prime meridian */
     s = 0;
     if ((name = pj_param(ctx, start, "spm").s) != NULL) {
         const char *value = NULL;
@@ -708,7 +765,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         return pj_default_destructor (PIN, ENOMEM);
     geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
 
-    /* projection specific initialization */
+    /* Projection specific initialization */
     err = proj_errno_reset (PIN);
     PIN = proj(PIN);
     if (proj_errno (PIN)) {
@@ -717,25 +774,4 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     }
     proj_errno_restore (PIN, err);
     return PIN;
-}
-
-/************************************************************************/
-/*                              pj_free()                               */
-/*                                                                      */
-/*      This is the application callable entry point for destroying     */
-/*      a projection definition.  It does work generic to all           */
-/*      projection types, and then calls the projection specific        */
-/*      free function, P->destructor(), to do local work.               */
-/*      In most cases P->destructor()==pj_default_destructor.           */
-/************************************************************************/
-
-void pj_free(PJ *P) {
-    if (0==P)
-        return;
-    /* free projection parameters - all the hard work is done by */
-    /* pj_default_destructor (in pj_malloc.c), which is supposed */
-    /* to be called as the last step of the local destructor     */
-    /* pointed to by P->destructor. In most cases,               */
-    /* pj_default_destructor actually *is* what is pointed to    */
-    P->destructor (P, 0);
 }

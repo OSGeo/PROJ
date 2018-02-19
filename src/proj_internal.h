@@ -57,12 +57,18 @@ extern "C" {
 #define PJ_TORAD(deg)  ((deg)*M_PI/180.0)
 #endif
 
-/* This enum is also conditionally defined in projects.h - but we need it here */
-/* for the pj_left/right prototypes, and enums cannot be forward declared      */
+/* Maximum latitudinal overshoot accepted */
+#define PJ_EPS_LAT 1e-12
+
+
+/* This enum is also conditionally defined in projects.h - but enums cannot */
+/* be forward declared and we need it here for the pj_left/right prototypes */
 enum pj_io_units {
-    PJ_IO_UNITS_CLASSIC = 0,   /* Scaled meters (right) */
-    PJ_IO_UNITS_METERS  = 1,   /* Meters  */
-    PJ_IO_UNITS_RADIANS = 2    /* Radians */
+    PJ_IO_UNITS_WHATEVER  = 0,  /* Doesn't matter (or depends on pipeline neighbours) */
+    PJ_IO_UNITS_CLASSIC   = 1,  /* Scaled meters (right), projected system */
+    PJ_IO_UNITS_PROJECTED = 2,  /* Meters, projected system */
+    PJ_IO_UNITS_CARTESIAN = 3,  /* Meters, 3D cartesian system */
+    PJ_IO_UNITS_ANGULAR   = 4   /* Radians */
 };
 enum pj_io_units pj_left (PJ *P);
 enum pj_io_units pj_right (PJ *P);
@@ -78,12 +84,16 @@ void proj_context_inherit (PJ *parent, PJ *child);
 PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P);
 PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
 
+PJ_COORD pj_approx_2D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
+PJ_COORD pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
+
+
 /* Grid functionality */
 int             proj_vgrid_init(PJ *P, const char *grids);
 int             proj_hgrid_init(PJ *P, const char *grids);
-double          proj_vgrid_value(PJ *P, LP lp);
-LP              proj_hgrid_value(PJ *P, LP lp);
-LP              proj_hgrid_apply(PJ *P, LP lp, PJ_DIRECTION direction);
+double          proj_vgrid_value(PJ *P, PJ_LP lp);
+PJ_LP           proj_hgrid_value(PJ *P, PJ_LP lp);
+PJ_LP           proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction);
 
 /* High level functionality for handling thread contexts */
 enum proj_log_level {
@@ -105,17 +115,22 @@ void proj_log_debug (PJ *P, const char *fmt, ...);
 void proj_log_trace (PJ *P, const char *fmt, ...);
 void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log);
 
+int pj_ellipsoid (PJ *);
 void pj_inherit_ellipsoid_def (const PJ *src, PJ *dst);
 void pj_erase_ellipsoid_def (PJ *P);
 int pj_calc_ellipsoid_params (PJ *P, double a, double es);
 
+char  *pj_chomp (char *c);
+char  *pj_shrink (char *c);
+size_t pj_trim_argc (char *args);
+char **pj_trim_argv (size_t argc, char *args);
+char  *pj_make_args (size_t argc, char **argv);
+
 /* Lowest level: Minimum support for fileapi */
 void proj_fileapi_set (PJ *P, void *fileapi);
 
-const char **proj_get_searchpath(void);
+const char * const *proj_get_searchpath(void);
 int    proj_get_path_count(void);
-
-size_t pj_strlcpy(char *dst, const char *src, size_t siz);
 
 #ifdef __cplusplus
 }

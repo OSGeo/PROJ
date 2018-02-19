@@ -1,0 +1,164 @@
+--------------------------------------------------------------------------------
+
+Test 5110, Lambert Azimuthal Equal Area, v2-0_2011-06-28.
+
+--------------------------------------------------------------------------------
+
+# ETRS89
+<4258> +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs  <>
+
+# ETRS89 / LAEA Europe
+<3035> +proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000
+       +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs  <>
+
+
+<gie>
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4258 +inv
+           +step +init=epsg:3035
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    5 70
+expect    4127824.65822 5214090.649
+
+tolerance  0.05 m
+accept    5 60
+expect    4041548.13 4109791.66
+
+tolerance  0.05 m
+accept    5 50
+expect    3962799.45 2999718.853
+
+tolerance  0.05 m
+accept    5 40
+expect    3892127.02 1892578.962
+
+tolerance  0.05 m
+accept    5 30
+expect    3830117.9 796781.677
+
+tolerance  0.05 m
+accept    10 52
+expect    4321000.0 3210000.0
+
+tolerance  0.05 m
+accept    0.0 50.0
+expect    3606514.43 3036305.967
+
+tolerance  0.05 m
+accept    3.0 50.0
+expect    3819948.288 3011432.894
+
+tolerance  0.05 m
+accept    5.0 50.0
+expect    3962799.451 2999718.853
+
+tolerance  0.05 m
+accept    8.0 50.0
+expect    4177612.521 2989464.315
+
+tolerance  0.05 m
+accept    10.0 50.0
+expect    4321000.0 2987510.567
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:3035 +inv
+           +step +init=epsg:4258
+--------------------------------------------------------------------------------
+tolerance  0.05 m
+accept    4127824.65822 5214090.649
+expect    5 70
+
+tolerance  0.05 m
+accept    4041548.13 4109791.66
+expect    5 60
+
+tolerance  0.05 m
+accept    3962799.45 2999718.853
+expect    5 50
+
+tolerance  0.05 m
+accept    3892127.02 1892578.962
+expect    5 40
+
+tolerance  0.05 m
+accept    3830117.9 796781.677
+expect    5 30
+
+tolerance  0.05 m
+accept    4321000.0 3210000.0
+expect    10 52
+
+tolerance  0.05 m
+accept    3606514.43 3036305.967
+expect    0.0 50.0
+
+tolerance  0.05 m
+accept    3819948.288 3011432.894
+expect    3.0 50.0
+
+tolerance  0.05 m
+accept    3962799.451 2999718.853
+expect    5.0 50.0
+
+tolerance  0.05 m
+accept    4177612.521 2989464.315
+expect    8.0 50.0
+
+tolerance  0.05 m
+accept    4321000.0 2987510.567
+expect    10.0 50.0
+
+--------------------------------------------------------------------------------
+operation  +proj=pipeline
+           +step +init=epsg:4258 +inv
+           +step +init=epsg:3035
+--------------------------------------------------------------------------------
+tolerance  0.006 m
+accept    5 70
+roundtrip 1000
+
+tolerance  0.006 m
+accept    5 60
+roundtrip 1000
+
+tolerance  0.006 m
+accept    5 50
+roundtrip 1000
+
+tolerance  0.006 m
+accept    5 40
+roundtrip 1000
+
+tolerance  0.006 m
+accept    5 30
+roundtrip 1000
+
+tolerance  0.006 m
+accept    10 52
+roundtrip 1000
+
+tolerance  0.006 m
+accept    0.0 50.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    3.0 50.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    5.0 50.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    8.0 50.0
+roundtrip 1000
+
+tolerance  0.006 m
+accept    10.0 50.0
+roundtrip 1000
+
+</gie>
