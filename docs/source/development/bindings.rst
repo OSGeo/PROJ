@@ -4,40 +4,40 @@
 Language bindings
 ********************************************************************************
 
-PROJ.4 bindings are available for a number of different development platforms.
+PROJ bindings are available for a number of different development platforms.
 
 Python
 ======
 `pyproj <http://pypi.python.org/pypi/pyproj>`_:
-Python interface (wrapper for PROJ.4)
+Python interface (wrapper for PROJ)
 
 
 Ruby
 =======
 
 `proj4rb <http://proj4rb.rubyforge.org>`_:
-Bindings for PROJ.4 in ruby
+Bindings for PROJ in ruby
 
 TCL
 ========
 `proj4tcl <http://wiki.tcl.tk/41270>`_:
-Bindings for PROJ.4 in tcl (critcl source)
+Bindings for PROJ in tcl (critcl source)
 
 MySQL
 =====
 
 `fProj4 <http://sourceforge.net/projects/mysqlscientific/files/fPROJ4/>`_:
-Bindings for PROJ.4 in MySQL
+Bindings for PROJ in MySQL
 
 
 Excel
 ========
 
 `proj.xll <https://github.com/jbuonagurio/proj.xll>`_:
-Excel add-in for PROJ.4 map projections
+Excel add-in for PROJ map projections
 
 Visual Basic
 ==================
 
-`PROJ.4 VB Wrappers <http://ftp.dfg.ca.gov/Public/BDB/Tools/proj4/proj_api.zip>`_:
+`PROJ VB Wrappers <http://ftp.dfg.ca.gov/Public/BDB/Tools/proj4/proj_api.zip>`_:
 By Eric G. Miller.

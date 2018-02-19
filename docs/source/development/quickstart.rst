@@ -4,15 +4,15 @@
 Quick start
 ================================================================================
 
-This is a short introduction to the PROJ.4 API. In the following section we
+This is a short introduction to the PROJ API. In the following section we
 create a simple program that transforms a geodetic coordinate to UTM and back
 again. The program is explained a few lines at a time. The complete program can
 be seen at the end of the section.
 
 See the following sections for more in-depth descriptions of different parts of
-the PROJ.4 API or consult the :doc:`API reference <reference/index>` for specifics.
+the PROJ API or consult the :doc:`API reference <reference/index>` for specifics.
 
-Before the PROJ.4 API can be used it is necessary to include the ``proj.h`` header
+Before the PROJ API can be used it is necessary to include the ``proj.h`` header
 file. Here ``stdio.h`` is also included so we can print some text to the screen:
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
@@ -54,10 +54,10 @@ details.
   :lines: 50-52
   :dedent: 4
 
-PROJ.4 uses it's own data structures for handling coordinates. Here we use a
+PROJ uses it's own data structures for handling coordinates. Here we use a
 ``PJ_COORD`` which is easily assigned with the function ``proj_coord``. Note
 that the input values are converted to radians with ``proj_torad``. This is
-necessary since PROJ.4 is using radians internally. See :doc:`transformations`
+necessary since PROJ is using radians internally. See :doc:`transformations`
 for further details.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c

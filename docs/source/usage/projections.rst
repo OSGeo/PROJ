@@ -4,12 +4,12 @@
 Cartographic projection
 ================================================================================
 
-The foundation of PROJ.4 is the large number of
+The foundation of PROJ is the large number of
 :doc:`projections<operations/projections/index>` available in the library. This section
 is devoted to the generic parameters that can be used on any projection in the
-PROJ.4 library.
+PROJ library.
 
-Below is a list of PROJ.4 parameters which can be applied to most coordinate
+Below is a list of PROJ parameters which can be applied to most coordinate
 system definitions. This table does not attempt to describe the parameters
 particular to particular projection types. These can be found on the pages
 documenting the individual :doc:`projections<operations/projections/index>`.
@@ -76,7 +76,7 @@ systems (such as UTM) have implicit false easting and northing values.
 Longitude Wrapping
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-By default PROJ.4 wraps output longitudes in the range -180 to 180.  The ``+over``
+By default PROJ wraps output longitudes in the range -180 to 180.  The ``+over``
 switch can be used to disable the default wrapping which is done at a low level
 in ``pj_inv()``.  This is particularly useful with projections like the
 :doc:`equidistant cylindrical<operations/projections/eqc>`

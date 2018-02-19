@@ -4,17 +4,17 @@
 Geodetic transformation
 ================================================================================
 
-PROJ.4 can do everything from the most simple projection to very complex
+PROJ can do everything from the most simple projection to very complex
 transformations across many reference frames. While originally developed as a
-tool for cartographic projections, PROJ.4 has over time evolved into a powerfull
+tool for cartographic projections, PROJ has over time evolved into a powerfull
 generic coordinate transformation engine that makes it possible to do both
 large scale cartographic projections as well as coordinate transformation at a
 geodetic high precision level. This chapter delves into the details of how
 geodetec transformations of varying complexity can be performed.
 
-In PROJ.4, two frameworks for geodetic transformations exists, the *cs2cs*
+In PROJ, two frameworks for geodetic transformations exists, the *cs2cs*
 framework and the *transformation pipelines* framework. The first is the original,
-and limited, framework for doing geodetic transforms in PROJ.4 The latter is a
+and limited, framework for doing geodetic transforms in PROJ The latter is a
 newer addition that aims to be a more complete transformation framework. Both are
 described in the sections below. Large portions of the text are based on
 [EversKnudsen2017]_.
@@ -60,7 +60,7 @@ of 3 steps (geodetic-to-cartesian → Helmert → cartesian-to-geodetic), pipeli
 The pipeline driver, makes this kind of chained transformations possible.
 The implementation is compact, consisting of just one pseudo-projection, called
 ``pipeline``, which takes as its arguments strings of elementary projections
-(note: "projection" is the, slightly misleading, PROJ.4 term used for any kind of
+(note: "projection" is the, slightly misleading, PROJ term used for any kind of
 transformation).
 The pipeline pseudo projection is supplemented by a number of elementary
 transformations, all in all providing a framework for building high accuracy
@@ -69,7 +69,7 @@ solutions for a wide spectrum of geodetic tasks.
 
 As a first example, let us take a look at the iconic
 *geodetic → Cartesian → Helmert → geodetic* case (steps 2 to 4 in the example in
-the itroduction). In PROJ.4 it can be implemented as
+the itroduction). In PROJ it can be implemented as
 
 ::
 
@@ -108,7 +108,7 @@ deprecated system with decimeter level tensions.
     step proj=utm ellps=GRS80 zone=33
 
 With the pipeline framework spatiotemporal transformation is possible. This is
-possible by leveraging the time dimension in PROJ.4 that enables 4D coordinates
+possible by leveraging the time dimension in PROJ that enables 4D coordinates
 (three spatial components and one temporal component) to be passed through a
 transformation pipeline. In the example below a transformation from ITRF93 to
 ITRF2000 is defined. The temporal component is given as GPS weeks in the input
@@ -209,8 +209,8 @@ such as NAD27 to NAD83.  These grid shift files include a shift to be applied
 at each grid location. Actually grid shifts are normally computed based on an
 interpolation between the containing four grid points.
 
-PROJ.4 supports use of grid files for shifting between various reference frames.
-The grid shift table formats are ctable (the binary format produced by the PROJ.4
+PROJ supports use of grid files for shifting between various reference frames.
+The grid shift table formats are ctable (the binary format produced by the PROJ
 ``nad2bin`` program), NTv1 (the old Canadian format), and NTv2 (``.gsb`` - the new
 Canadian and Australian format).
 

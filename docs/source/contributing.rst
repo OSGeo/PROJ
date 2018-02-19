@@ -4,13 +4,13 @@
 Contributing
 ===========================
 
-PROJ.4 has a wide and varied user base. Some are highly skilled
+PROJ has a wide and varied user base. Some are highly skilled
 geodesists with a deep knowledge of map projections and reference
 systems, some are GIS software developers and others are GIS users. All
 users, regardless of the profession or skill level, has the ability to
-contribute to PROJ.4. Here's a few suggestion on how:
+contribute to PROJ. Here's a few suggestion on how:
 
--  Help PROJ.4-users that is less experienced than yourself.
+-  Help PROJ-users that is less experienced than yourself.
 -  Write a bug report
 -  Request a new feature
 -  Write documentation for your favorite map projection
@@ -18,20 +18,20 @@ contribute to PROJ.4. Here's a few suggestion on how:
 -  Implement a new feature
 
 In the following sections you can find some guidelines on how to
-contribute. As PROJ.4 is managed on GitHub most contributions require
+contribute. As PROJ is managed on GitHub most contributions require
 that you have a GitHub account. Familiarity with
 `issues <https://guides.github.com/features/issues/>`__ and the `GitHub
 Flow <https://guides.github.com/introduction/flow/>`__ is an advantage.
 
-Help a fellow PROJ.4 user
+Help a fellow PROJ user
 -------------------------
 
-The main forum for support for PROJ.4 is the mailing list. You can
+The main forum for support for PROJ is the mailing list. You can
 subscribe to the mailing list
 `here <http://lists.maptools.org/mailman/listinfo/proj>`__ and read the
 archive `here <http://lists.maptools.org/pipermail/proj/>`__.
 
-If you have questions about the usage of PROJ.4 the mailing list is also
+If you have questions about the usage of PROJ the mailing list is also
 the place to go. Please *do not* use the GitHub issue tracker as a
 support forum. Your question is much more likely to be answered on the
 mailing list, as many more people follow that than the issue tracker.
@@ -40,7 +40,7 @@ Adding bug reports
 ------------------
 
 Bug reports are handled in the `issue
-tracker <https://github.com/OSGeo/proj.4/issues>`__ on PROJ.4's home on
+tracker <https://github.com/OSGeo/proj.4/issues>`__ on PROJ's home on
 GitHub. Writing a good bug report is not easy. But fixing a poorly
 documented bug is not easy either, so please put in the effort it takes
 to create a thorough bug report.
@@ -49,7 +49,7 @@ A good bug report includes at least:
 
 -  A title that quickly explains the problem
 -  A description of the problem and how it can be reproduced
--  Version of PROJ.4 being used
+-  Version of PROJ being used
 -  Version numbers of any other relevant software being used, e.g.
    operating system
 -  A description of what already has been done to solve the problem
@@ -61,16 +61,16 @@ them in a timely manner if you have an interest in getting the issue
 solved.
 
 Finally, please only submit bug reports that are actually related to
-PROJ.4. If the issue materializes in software that uses PROJ.4 it is
+PROJ. If the issue materializes in software that uses PROJ it is
 likely a problem with that particular software. Make sure that it
-actually is a PROJ.4 problem before you submit an issue. If you can
-reproduce the problem only by using tools from PROJ.4 it is definitely a
-problem with PROJ.4.
+actually is a PROJ problem before you submit an issue. If you can
+reproduce the problem only by using tools from PROJ it is definitely a
+problem with PROJ.
 
 Feature requests
 ----------------
 
-Got an idea for a new feature in PROJ.4? Submit a thorough description
+Got an idea for a new feature in PROJ? Submit a thorough description
 of the new feature in the `issue
 tracker <https://github.com/OSGeo/proj.4/issues>`__. Please include any
 technical documents that can help the developer make the new feature a
@@ -84,14 +84,14 @@ Note that not all feature requests are accepted.
 Write documentation
 -------------------
 
-PROJ.4 is in dire need of better documentation. Any contributiions of
-documentation are greatly appreaciated. The PROJ.4 documentation is
+PROJ is in dire need of better documentation. Any contributiions of
+documentation are greatly appreaciated. The PROJ documentation is
 available on `proj4.org <ttp://proj4.org>`__. The website is generated
 with `Sphinx <http://www.sphinx-doc.org/en/stable/>`__. Contributions to
 the documentation should be made as `Pull
 Requests <https://github.com/OSGeo/proj.4/pulls>`__ on GitHub.
 
-If you intend to document one of PROJ.4's supported projections please
+If you intend to document one of PROJ's supported projections please
 use the `Mercator projection <http://proj4.org/projections/merc.html>`__
 as a template.
 
@@ -120,7 +120,7 @@ Submitting Changes
 ~~~~~~~~~~~~~~~~~~
 
 -  Push your changes to a topic branch in your fork of the repository.
--  Submit a pull request to the PROJ.4 repository in the OSGeo
+-  Submit a pull request to the PROJ repository in the OSGeo
    organization.
 -  If your pull request fixes/references an issue, include that issue
    number in the pull request. For example:
@@ -131,7 +131,7 @@ Submitting Changes
 
     Fixes #123.
 
--  PROJ.4 developers will look at your patch and take an appropriate
+-  PROJ developers will look at your patch and take an appropriate
    action.
 
 Coding conventions
@@ -140,7 +140,7 @@ Coding conventions
 Programming language
 ^^^^^^^^^^^^^^^^^^^^
 
-PROJ.4 is developed strictly in ANSI C 89.
+PROJ is developed strictly in ANSI C 89.
 
 Coding style
 ^^^^^^^^^^^^
@@ -152,7 +152,7 @@ with the style of the locally surrounding code.
 Whitespace
 ^^^^^^^^^^
 
-Throughout the PROJ.4 code base you will see differing whitespace use.
+Throughout the PROJ code base you will see differing whitespace use.
 The general rule is to keep whitespace in whatever form it is in the
 file you are currently editing. If the file has a mix of tabs and space
 please convert the tabs to space in a separate commit before making any
@@ -166,14 +166,14 @@ File names
 Files in which projections are implemented are prefixed with an
 upper-case ``PJ_`` and most other files are prefixed with lower-case
 ``pj_``. Some file deviate from this pattern, most of them dates back to
-the very early releases of PROJ.4. New contributions should follow the
+the very early releases of PROJ. New contributions should follow the
 pj-prefix pattern. Unless there are obvious reasons not to.
 
 Legalese
 ~~~~~~~~
 
 Commiters are the front line gatekeepers to keep the code base clear of
-improperly contributed code. It is important to the PROJ.4 users,
+improperly contributed code. It is important to the PROJ users,
 developers and the OSGeo foundation to avoid contributing any code to
 the project without it being clearly licensed under the project license.
 

@@ -45,7 +45,7 @@ Linux
 Docker
 ................................................................................
 
-A `Docker`_ image with just PROJ.4 binaries and a full compliment of grid shift
+A `Docker`_ image with just PROJ binaries and a full compliment of grid shift
 files is available on `DockerHub`_:
 
 .. _`Docker`: https://docker.org

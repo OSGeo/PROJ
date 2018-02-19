@@ -46,7 +46,7 @@ expected to be in units of decimalyears. This can be fixed with `unitconvert`::
 Distance units
 ###############################################################################
 
-In the table below all distance units supported by PROJ.4 is listed.
+In the table below all distance units supported by PROJ is listed.
 The same list can also be produced on the command line with `proj` or `cs2cs`,
 by adding the `-lu` flag when calling the utility.
 
@@ -100,7 +100,7 @@ by adding the `-lu` flag when calling the utility.
 Time units
 ###############################################################################
 
-In the table below all time units supported by PROJ.4 is listed.
+In the table below all time units supported by PROJ is listed.
 
 +--------------+-----------------------------+
 | mjd          | Modfied Julian date         |
