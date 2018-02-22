@@ -96,6 +96,8 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia);
 static void    horner_free (HORNER *h);
 
 struct horner {
+    int    uneg;     /* u axis negated? */
+    int    vneg;     /* v axis negated? */
     int    order;    /* maximum degree of polynomium */
     int    coefs;    /* number of coefficients for each polynomium  */
     double range;    /* radius of the region of validity */
@@ -340,11 +342,19 @@ polynomial evaluation engine.
         c  =  cb + sz;
         e  =  position.u - transformation->fwd_origin->u;
         n  =  position.v - transformation->fwd_origin->v;
+        if (transformation->uneg)
+            e  =  -e;
+        if (transformation->vneg)
+            n  =  -n;
     } else {                                              /* inverse */
         cb =  transformation->inv_c;
         c  =  cb + sz;
         e  =  position.u - transformation->inv_origin->u;
         n  =  position.v - transformation->inv_origin->v;
+        if (transformation->uneg)
+            e  =  -e;
+        if (transformation->vneg)
+            n  =  -n;
     }
 
     if ((fabs(n) > range) || (fabs(e) > range)) {
@@ -454,6 +464,10 @@ PJ *PROJECTION(horner) {
     P->opaque = (void *) Q;
 
     if (complex_horner) {
+        /* Westings and/or southings? */
+        Q->uneg = pj_param_exists (P->params, "uneg") ? 1 : 0;
+        Q->vneg = pj_param_exists (P->params, "vneg") ? 1 : 0;
+
         n = 2*degree + 2;
         if (0==parse_coefs (P, Q->fwd_c, "fwd_c", n))
             return horner_freeup (P, PJD_ERR_MISSING_ARGS);
@@ -461,8 +475,8 @@ PJ *PROJECTION(horner) {
             return horner_freeup (P, PJD_ERR_MISSING_ARGS);
         P->fwd4d = complex_horner_forward_4d;
         P->inv4d = complex_horner_reverse_4d;
-
     }
+
     else {
         n = horner_number_of_coefficients (degree);
         if (0==parse_coefs (P, Q->fwd_u, "fwd_u", n))
