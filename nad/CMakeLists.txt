@@ -23,7 +23,8 @@ set(PROJ_DICTIONARY  epsg
 #
 
 file(GLOB GSB_FILES  *.gsb)
-set(GRIDSHIFT_FILES ${GSB_FILES})
+file(GLOB GTX_FILES  *.gtx)
+set(GRIDSHIFT_FILES ${GSB_FILES} ${GTX_FILES})
 set(GRIDSHIFT_FILES ${GRIDSHIFT_FILES}
                      )
 option(CONVERT_DATA "convert some ascii file to binary file for use in proj4" OFF)
