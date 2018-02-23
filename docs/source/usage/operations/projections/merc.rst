@@ -53,7 +53,7 @@ Example using scaling factor::
     12545706.61     2746073.80
 
 
-Note that ``+lat_ts`` and ``+k_0`` are mutually excusive.
+Note that ``+lat_ts`` and ``+k_0`` are mutually exclusive.
 If used together, ``+lat_ts`` takes precedence over ``+k_0``.
 
 Mathematical definition

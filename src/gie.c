@@ -146,7 +146,7 @@ static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_si
 
 static const char *gie_tags[] = {
     "<gie>", "operation", "accept", "expect", "roundtrip", "banner", "verbose",
-    "direction", "tolerance", "ignore", "builtins", "echo", "</gie>"
+    "direction", "tolerance", "ignore", "builtins", "echo", "skip", "</gie>"
 };
 
 static const size_t n_gie_tags = sizeof gie_tags / sizeof gie_tags[0];
@@ -177,6 +177,7 @@ typedef struct {
     PJ_COORD a, b, c, e;
     PJ_DIRECTION dir;
     int verbosity;
+    int skip;
     int op_id;
     int op_ok,    op_ko,    op_skip;
     int total_ok, total_ko, total_skip;
@@ -192,6 +193,8 @@ typedef struct {
 ffio *F = 0;
 
 static gie_ctx T;
+int tests=0, succs=0, succ_fails=0, fail_fails=0, succ_rtps=0, fail_rtps=0;
+int succ_builtins=0, fail_builtins=0;
 
 
 static const char delim[] = {"-------------------------------------------------------------------------------\n"};
@@ -299,6 +302,13 @@ int main (int argc, char **argv) {
         fprintf (T.fout, "%sGrand total: %d. Success: %d, Skipped: %d, Failure: %d\n",
                  delim, T.grand_ok+T.grand_ko+T.grand_skip, T.grand_ok, T.grand_skip, T.grand_ko);
         fprintf (T.fout, "%s", delim);
+        if (T.verbosity > 1) {
+            fprintf (T.fout, "Failing roundtrips: %4d,    Succeeding roundtrips: %4d\n", fail_rtps, succ_rtps);
+            fprintf (T.fout, "Failing failures:   %4d,    Succeeding failures:   %4d\n", fail_fails, succ_fails);
+            fprintf (T.fout, "Failing builtins:   %4d,    Succeeding builtins:   %4d\n", fail_builtins, succ_builtins);
+            fprintf (T.fout, "Internal counters:                            %4.4d(%4.4d)\n", tests, succs);
+            fprintf (T.fout, "%s", delim);
+        }
     }
     else
         if (T.grand_ko)
@@ -315,19 +325,52 @@ int main (int argc, char **argv) {
 static int another_failure (void) {
     T.op_ko++;
     T.total_ko++;
+    proj_errno_reset (T.P);
     return 0;
 }
 
 static int another_skip (void) {
     T.op_skip++;
     T.total_skip++;
+    proj_errno_reset (T.P);
     return 0;
 }
 
 static int another_success (void) {
     T.op_ok++;
     T.total_ok++;
+    proj_errno_reset (T.P);
     return 0;
+}
+
+static int another_succeeding_failure (void) {
+    succ_fails++;
+    return another_success ();
+}
+
+static int another_failing_failure (void) {
+    fail_fails++;
+    return another_failure ();
+}
+
+static int another_succeeding_roundtrip (void) {
+    succ_rtps++;
+    return another_success ();
+}
+
+static int another_failing_roundtrip (void) {
+    fail_rtps++;
+    return another_failure ();
+}
+
+static int another_succeeding_builtin (void) {
+    succ_builtins++;
+    return another_success ();
+}
+
+static int another_failing_builtin (void) {
+    fail_builtins++;
+    return another_failure ();
 }
 
 
@@ -338,6 +381,9 @@ static int process_file (const char *fname) {
     T.op_ok = T.total_ok = 0;
     T.op_ko = T.total_ko = 0;
     T.op_skip = T.total_skip = 0;
+
+    if (T.skip)
+        return proj_destroy (T.P), T.P = 0, 0;
 
     f = fopen (fname, "rt");
     if (0==f) {
@@ -556,27 +602,27 @@ using the "builtins" command verb.
     i = pj_unitconvert_selftest ();
     if (i!=0) {
         fprintf (T.fout, "pj_unitconvert_selftest fails with %d\n", i);
-        another_failure();
+        another_failing_builtin();
     }
     else
-        another_success ();
+        another_succeeding_builtin ();
 
 
     i = pj_cart_selftest ();
     if (i!=0) {
         fprintf (T.fout, "pj_cart_selftest fails with %d\n", i);
-        another_failure();
+        another_failing_builtin();
     }
     else
-        another_success ();
+        another_succeeding_builtin ();
 
     i = pj_horner_selftest ();
     if (i!=0) {
         fprintf (T.fout, "pj_horner_selftest fails with %d\n", i);
-        another_failure();
+        another_failing_builtin();
     }
     else
-        another_success ();
+        another_succeeding_builtin ();
 
     return 0;
 }
@@ -674,7 +720,7 @@ back/forward transformation pairs.
 
     r = proj_roundtrip (T.P, T.dir, ntrips, &coo);
     if (r <= d)
-        return another_success ();
+        return another_succeeding_roundtrip ();
 
     if (T.verbosity > -1) {
         if (0==T.op_ko && T.verbosity < 2)
@@ -683,7 +729,7 @@ back/forward transformation pairs.
         fprintf (T.fout, "     FAILURE in %s(%d):\n", opt_strip_path (T.curr_file), (int) F->lineno);
         fprintf (T.fout, "     roundtrip deviation: %.6f mm, expected: %.6f mm\n", 1000*r, 1000*d);
     }
-    return another_failure ();
+    return another_failing_roundtrip ();
 }
 
 
@@ -723,7 +769,7 @@ static int expect_message_cannot_parse (const char *args) {
 }
 
 static int expect_failure_with_errno_message (int expected, int got) {
-    another_failure ();
+    another_failing_failure ();
 
     if (T.verbosity < 0)
         return 1;
@@ -779,14 +825,16 @@ Tell GIE what to expect, when transforming the ACCEPTed input
             if (expect_failure_with_errno && proj_errno (T.P)!=expect_failure_with_errno)
                 return expect_failure_with_errno_message (expect_failure_with_errno, proj_errno(T.P));
 
-            return another_success ();
+            return another_succeeding_failure ();
         }
 
         /* Otherwise, it's a true failure */
         banner (T.operation);
-        errmsg(3, "%sInvalid operation definition in line no. %d: %s\n",
-            delim, (int) T.operation_lineno, pj_strerrno(proj_errno(T.P)));
-        return another_failure ();
+        errmsg (3, "%sInvalid operation definition in line no. %d:\n       %s (errno=%s/%d)\n",
+            delim, (int) T.operation_lineno, pj_strerrno(proj_errno(T.P)),
+            err_const_from_errno (proj_errno(T.P)), proj_errno(T.P)
+        );
+        return another_failing_failure ();
     }
 
     /* We may still successfully fail even if the proj_create succeeded */
@@ -797,20 +845,24 @@ Tell GIE what to expect, when transforming the ACCEPTed input
         ci = proj_angular_input (T.P, T.dir)? torad_coord (T.P, T.dir, T.a): T.a;
         co = expect_trans_n_dim (ci);
 
-        /* Failed to fail? - that's a failure */
-        if (co.xyz.x!=HUGE_VAL)
-            return another_failure ();
-
         if (expect_failure_with_errno) {
-            printf ("errno=%d, expected=%d\n", proj_errno (T.P), expect_failure_with_errno);
             if (proj_errno (T.P)==expect_failure_with_errno)
-                return another_success ();
-
-            return another_failure ();
+                return another_succeeding_failure ();
+            printf ("errno=%d, expected=%d\n", proj_errno (T.P), expect_failure_with_errno);
+            return another_failing_failure ();
         }
 
-        /* Yes, we failed successfully */
-        return another_success ();
+
+        /* Succeeded in failing? - that's a success */
+        if (co.xyz.x==HUGE_VAL)
+            return another_succeeding_failure ();
+
+        /* Failed to fail? - that's a failure */
+        banner (T.operation);
+        errmsg (3, "%sFailed to fail. Operation definition in line no. %d\n",
+            delim, (int) T.operation_lineno
+        );
+        return another_failing_failure ();
     }
 
 
@@ -822,9 +874,11 @@ Tell GIE what to expect, when transforming the ACCEPTed input
         printf ("left: %d   right:  %d\n", T.P->left, T.P->right);
     }
 
+    tests++;
     T.e  =  parse_coord (args);
     if (HUGE_VAL==T.e.v[0])
         return expect_message_cannot_parse (args);
+
 
     /* expected angular values, probably in degrees */
     ce = proj_angular_output (T.P, T.dir)? torad_coord (T.P, T.dir, T.e): T.e;
@@ -836,8 +890,14 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     if (T.verbosity > 3)
         printf ("ACCEPTS  %.12f  %.12f  %.12f  %.12f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
 
-    /* angular output from proj_trans comes in radians */
+    /* do the transformation, but mask off dimensions not given in expect-ation */
     co = expect_trans_n_dim (ci);
+    if (T.dimensions_given < 4)
+        co.v[3] = 0;
+    if (T.dimensions_given < 3)
+        co.v[2] = 0;
+
+    /* angular output from proj_trans comes in radians */
     T.b = proj_angular_output (T.P, T.dir)? todeg_coord (T.P, T.dir, co): co;
     if (T.verbosity > 3)
         printf ("GOT      %.12f  %.12f  %.12f  %.12f\n", co.v[0],co.v[1],co.v[2],co.v[3]);
@@ -856,6 +916,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
 
     if (d > T.tolerance)
         return expect_message (d, args);
+    succs++;
 
     another_success ();
     return 0;
@@ -893,7 +954,20 @@ fprintf (T.fout, "%s\n", args);
 
 
 
+/*****************************************************************************/
+static int skip (const char *args) {
+/*****************************************************************************
+Indicate that the remaining material should be skipped. Mostly for debugging.
+******************************************************************************/
+    T.skip = 1;
+    (void) args;
+    return 0;
+}
+
+
 static int dispatch (const char *cmnd, const char *args) {
+    if (T.skip)
+        return SKIP;
     if  (0==strcmp (cmnd, "operation")) return  operation ((char *) args);
     if  (0==strcmp (cmnd, "accept"))    return  accept    (args);
     if  (0==strcmp (cmnd, "expect"))    return  expect    (args);
@@ -902,9 +976,10 @@ static int dispatch (const char *cmnd, const char *args) {
     if  (0==strcmp (cmnd, "verbose"))   return  verbose   (args);
     if  (0==strcmp (cmnd, "direction")) return  direction (args);
     if  (0==strcmp (cmnd, "tolerance")) return  tolerance (args);
-    if  (0==strcmp (cmnd, "ignore"))    return  ignore (args);
+    if  (0==strcmp (cmnd, "ignore"))    return  ignore    (args);
     if  (0==strcmp (cmnd, "builtins"))  return  builtins  (args);
     if  (0==strcmp (cmnd, "echo"))      return  echo      (args);
+    if  (0==strcmp (cmnd, "skip"))      return  skip      (args);
 
     return 0;
 }
@@ -1223,6 +1298,8 @@ static int nextline (ffio *G) {
 Read next line of input file. Returns 1 on success, 0 on failure.
 ****************************************************************************************/
     G->next_args[0] = 0;
+    if (T.skip)
+        return 0;
     if (0==fgets (G->next_args, (int) G->next_args_size - 1, G->f))
         return 0;
     if (feof (G->f))
@@ -1570,7 +1647,7 @@ static int pj_cart_selftest (void) {
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
     dist = proj_roundtrip (P, PJ_FWD, 1, &a);
-    if (dist > 1e-12)
+    if (dist > 1e-9)
         return 8;
 
     /* Test at the South Pole */
@@ -1582,7 +1659,7 @@ static int pj_cart_selftest (void) {
 
     /* Forward projection: Ellipsoidal-to-3D-Cartesian */
     dist = proj_roundtrip (P, PJ_FWD, 1, &a);
-    if (dist > 1e-12)
+    if (dist > 1e-9)
         return 9;
 
 

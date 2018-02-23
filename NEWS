@@ -5,7 +5,7 @@ This version of PROJ introduces some significant extensions and
 improvements to (primarily) the geodetic functionality of the system.
 
 The main driver for introducing the new features is the emergence of
-dynamic reference frames, the increasing use of high accuracy GNNS,
+dynamic reference frames, the increasing use of high accuracy GNSS,
 and the related growing demand for accurate coordinate
 transformations.  While older versions of PROJ included some geodetic
 functionality, the new framework lays the foundation for turning PROJ
@@ -232,9 +232,9 @@ o The PROJ.4 project also distributes the datum-grid package,
  o Equations for meridian convergence and partial derivatives have
    been corrected for non-conformal projections. #526.
 
- o Fixed scaling of cartesian coordiantes in pj_transform(). #726.
+ o Fixed scaling of cartesian coordinates in pj_transform(). #726.
 
- o Additional bug fixes courtesy of Googles OSS-Fuzz program:
+ o Additional bug fixes courtesy of Google's OSS-Fuzz program:
    https://bugs.chromium.org/p/oss-fuzz/issues/list?can=1&q=proj4
 
 

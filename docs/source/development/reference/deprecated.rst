@@ -53,7 +53,7 @@ Example
 -------
 
 The following program reads latitude and longitude values in decimal
-degress, performs Mercator projection with a Clarke 1866 ellipsoid and a
+degrees, performs Mercator projection with a Clarke 1866 ellipsoid and a
 33° latitude of true scale and prints the projected cartesian values in
 meters:
 

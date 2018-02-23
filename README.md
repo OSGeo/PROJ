@@ -85,6 +85,12 @@ script out of the Visual C++ tree.
 
 The `makefile.vc` builds `proj.exe`, `proj.dll` and `proj.lib`.
 
+On Windows you have to set the PROJ_LIB environment variable to make
+sure that PROJ can find the resource files that it needs. For the
+default install directory you can set PROJ_LIB with:
+
+    C:\> set PROJ_LIB C:\PROJ\share
+
 
 ### Distribution files and format
 

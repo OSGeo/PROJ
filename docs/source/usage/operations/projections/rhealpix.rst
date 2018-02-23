@@ -28,7 +28,7 @@ rHEALPix
 rHEALPix is a projection based on the HEALPix projection. The implementation of
 rHEALPix uses the HEALPix projection. The rHEALPix combines the peaks of the
 HEALPix into a square. The square's position can be translated and rotated across
-the x-axis which is a noval approach for the rHEALPix projection. The initial
+the x-axis which is a novel approach for the rHEALPix projection. The initial
 intention of using rHEALPix in the Spatial Computation Engine Science Collaboration
 Environment (SCENZGrid).
 

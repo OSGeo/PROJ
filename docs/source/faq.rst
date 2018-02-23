@@ -134,7 +134,7 @@ to use EPSG numbers like this:
 The proj/nad/epsg file can be browsed and searched in a text editor for
 coordinate systems.  There are known to be problems with some coordinate
 systems, and any coordinate systems with odd axes, a non-greenwich prime
-meridian or other quirkyness are unlikely to work properly.  Caveat Emptor!
+meridian or other quirkiness are unlikely to work properly.  Caveat Emptor!
 
 How do I use 3 parameter and 7 parameter datum shifting
 --------------------------------------------------------------------------------
@@ -282,7 +282,7 @@ What is the rHEALPix projection and how can I use it?
 rHEALPix is a projection based on the HEALPix projection.  The implementation
 of rHEALPix uses the HEALPix projection.  The rHEALPix combines the peaks of
 the HEALPix into a square.  The square's position can be translated and rotated
-across the x-axis which is a noval approach for the rHEALPix projection.  The
+across the x-axis which is a novel approach for the rHEALPix projection.  The
 initial intention of using rHEALPix in the Spatial Computation Engine Science
 Collaboration Environment (SCENZGrid).
 

@@ -50,7 +50,7 @@ install-data-local: process-nad2bin
 	else \
 	  echo "nad2nad NADCON source files not present"; \
 	fi
-	@for gridfile in $(NADPATH)/*.gsb $(NADPATH)/ntv1_can.dat dummy \
+	@for gridfile in $(NADPATH)/*.gsb $(NADPATH)/*.gtx $(NADPATH)/ntv1_can.dat dummy \
 	                 $(NADPATH)/alaska $(NADPATH)/conus $(NADPATH)/hawaii $(NADPATH)/null \
 	                 $(NADPATH)/prvi $(NADPATH)/stgeorge $(NADPATH)/stlrnc $(NADPATH)/stpaul \
 	                 $(NADPATH)/FL $(NADPATH)/MD $(NADPATH)/TN $(NADPATH)/WI $(NADPATH)/WO; do \
@@ -63,7 +63,7 @@ install-data-local: process-nad2bin
 check-local: process-nad2bin
 # Check if we are doing an out-of-tree build
 	@if test ! -f epsg; then \
-	  for gridfile in $(NADPATH)/*.gsb $(NADPATH)/ntv1_can.dat dummy ; do \
+	  for gridfile in $(NADPATH)/*.gsb $(NADPATH)/*.gtx $(NADPATH)/ntv1_can.dat dummy ; do \
 	    if test "$$gridfile" != "dummy" -a -f "$$gridfile" ; then \
 	      cp $$gridfile .; \
 	    fi; \

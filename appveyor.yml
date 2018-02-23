@@ -22,6 +22,16 @@ environment:
   - BUILD_TYPE: cmake
     VS_VERSION: Visual Studio 12
 
+# VS 2015
+  - BUILD_TYPE: cmake
+    VS_VERSION: Visual Studio 14
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+
+# VS 2017
+  - BUILD_TYPE: cmake
+    VS_VERSION: Visual Studio 15
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
   - BUILD_TYPE: nmake
 
 shallow_clone: true
