@@ -61,6 +61,7 @@ test_script:
   - cd %PROJ_LIB%
   - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.6.zip
   - curl -O http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
+  - curl -O -k https://raw.githubusercontent.com/OSGeo/proj-datumgrid/master/BETA2007.gsb
   - 7z e -aoa -y proj-datumgrid-1.6.zip
   - dir
   - cd ..
@@ -75,4 +76,3 @@ test_script:
   - gie.exe ..\test\gie\*.gie ..\test\gigs\*.gie
 
 deploy: off
-

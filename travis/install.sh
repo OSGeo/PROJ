@@ -7,6 +7,7 @@ wget http://download.osgeo.org/proj/proj-datumgrid-1.6.zip
 cd nad
 unzip -o ../proj-datumgrid-1.6.zip
 wget http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
+wget https://raw.githubusercontent.com/OSGeo/proj-datumgrid/master/BETA2007.gsb
 GRIDDIR=`pwd`
 echo $GRIDDIR
 cd ..
