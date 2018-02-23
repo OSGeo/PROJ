@@ -310,7 +310,7 @@ same.
 nadgrids - Grid Based Datum Adjustments
 --------------------------------------------------------------------------------
 
-In many places (notably North America and Austrialia) national geodetic
+In many places (notably North America and Australia) national geodetic
 organizations provide grid shift files for converting between different datums,
 such as NAD27 to NAD83.  These grid shift files include a shift to be applied
 at each grid location. Actually grid shifts are normally computed based on an
