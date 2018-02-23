@@ -4,7 +4,7 @@
 Data types
 ================================================================================
 
-This section describe the multiplude of data types in use in PROJ.4. As a rule
+This section describes the numerous data types in use in PROJ.4. As a rule
 of thumb PROJ.4 data types are prefixed with ``PJ_``, or in one particular case,
 is simply called :c:type:`PJ`. A few notable exceptions can be traced
 back to the very early days of PROJ.4 when the ``PJ_`` prefix was not
@@ -16,8 +16,8 @@ Transformation objects
 .. c:type:: PJ
 
     Object containing everything related to a given projection or transformation.
-    As a user of the PROJ.4 library your are only exposed to pointers to this
-    object and the contents are hidden in the public API. :c:type:`PJ` objects
+    As a user of the PROJ.4 library you are only exposed to pointers to this
+    object and the contents is hidden behind the public API. :c:type:`PJ` objects
     are created with :c:func:`proj_create` and destroyed with
     :c:func:`proj_destroy`.
 
@@ -51,7 +51,7 @@ Transformation objects
 
 .. c:type:: PJ_CONTEXT
 
-    Context objects enables safe multi-threaded usage of PROJ.4. Each :c:type:`PJ`
+    Context objects enable safe multi-threaded usage of PROJ.4. Each :c:type:`PJ`
     object is connected to a context (if not specified, the default context is
     used). All operations within a context should be performed in the same thread.
     :c:type:`PJ_CONTEXT` objects are created with :c:func:`proj_context_create`
@@ -97,11 +97,11 @@ Various 2-dimensional coordinate data types.
         typedef struct { double x, y; } PJ_XY;
 
 
-    .. c:member:: double PJ_XY.lam
+    .. c:member:: double PJ_XY.x
 
         Easting.
 
-    .. c:member:: double PJ_XY.phi
+    .. c:member:: double PJ_XY.y
 
         Northing.
 
@@ -134,7 +134,7 @@ types above.
 .. c:type:: PJ_LPZ
 
     3-dimensional version of :c:type:`PJ_LP`. Holds longitude, latitude and
-    vertical component.
+    a vertical component.
 
     .. code-block:: C
 
@@ -163,15 +163,15 @@ types above.
 
     .. c:member:: double PJ_XYZ.x
 
-        Easting.
+        Easting or the X component of a 3D cartesian system.
 
     .. c:member:: double PJ_XYZ.y
 
-        Northing.
+        Northing or the Y component of a 3D cartesian system.
 
     .. c:member:: double PJ_XYZ.z
 
-        Vertical component.
+        Vertical component or the Z component of a 3D cartesian system.
 
 
 .. c:type:: PJ_UVW
@@ -249,15 +249,15 @@ domain.
 
     .. c:member:: double PJ_XYZT.x
 
-        Easting.
+        Easting or the X component of a 3D cartesian system.
 
     .. c:member:: double PJ_XYZT.y
 
-        Northing.
+        Northing or the Y component of a 3D cartesian system.
 
     .. c:member:: double PJ_XYZT.z
 
-        Vertical component.
+        Vertical or the Z component of a 3D cartesian system.
 
     .. c:member:: double PJ_XYZT.t
 
@@ -320,7 +320,7 @@ Complex coordinate types
 
 .. c:type:: PJ_COORD
 
-    General purpose coordinate union type usefull in two, three and four dimensions.
+    General purpose coordinate union type, applicable in two, three and four dimensions.
     This is the default coordinate datatype used in PROJ.
 
     .. code-block:: C
@@ -385,9 +385,7 @@ Projection derivatives
 .. c:type:: PJ_FACTORS
 
     Various cartographic properties, such as scale factors, angular distortion
-    and meridian convergence. Calculated with :c:func:`proj_factors`. Depending
-    on the underlying projection, values can be calculated either numerically
-    or analytically.
+    and meridian convergence. Calculated with :c:func:`proj_factors`.
 
     .. code-block:: C
 
@@ -434,13 +432,15 @@ Projection derivatives
         Meridian convergence at coordinate :math:`\left(\lambda,\phi\right)`.
         Sometimes also described as *grid declination*.
 
+
     .. c:member:: double PJ_FACTORS.tissot_semimajor
 
-        Maximum scale error.
+        Maximum scale factor.
 
     .. c:member:: double PJ_FACTORS.tissot_semiminor
 
-        Minimum scale error.
+        Minimum scale factor.
+
 
     .. c:member:: double PJ_FACTORS.dx_dlam
 
@@ -448,7 +448,6 @@ Projection derivatives
         :math:`\left(\lambda,\phi\right)`.
 
     .. c:member:: double PJ_FACTORS.dy_dlam
-
 
         Partial derivative :math:`\frac{\partial y}{\partial \lambda}` of coordinate
         :math:`\left(\lambda,\phi\right)`.
@@ -459,7 +458,6 @@ Projection derivatives
         :math:`\left(\lambda,\phi\right)`.
 
     .. c:member:: double PJ_FACTORS.dy_dphi
-
 
         Partial derivative :math:`\frac{\partial y}{\partial \phi}` of coordinate
         :math:`\left(\lambda,\phi\right)`.
@@ -580,20 +578,20 @@ Info structures
     .. code-block:: C
 
         typedef struct {
-            char        release[64];
-            char        version[64];
-            int         major;
-            int         minor;
-            int         patch;
-            char        searchpath[512];
+            int           major;
+            int           minor;
+            int           patch;
+            const char   *release;
+            const char   *version;
+            const char   *searchpath;
         } PJ_INFO;
 
-    .. c:member:: char PJ_INFO.release[64]
+    .. c:member:: const char *PJ_INFO.release
 
         Release info. Version number and release date,
         e.g. "Rel. 4.9.3, 15 August 2016".
 
-    .. c:member:: char PJ_INFO.version[64]
+    .. c:member:: const char *PJ_INFO.version
 
         Text representation of the full version number,
         e.g. "4.9.3".
@@ -610,7 +608,7 @@ Info structures
 
         Patch level of release.
 
-    .. c:member:: char PJ_INFO.searchpath[512]
+    .. c:member:: const char PJ_INFO.searchpath
 
         Search path for PROJ. List of directories separated by
         semicolons (Windows) or colons (non-Windows), e.g.
@@ -620,29 +618,32 @@ Info structures
 .. c:type:: PJ_PROJ_INFO
 
     Struct holding information about a :c:type:`PJ` object. Populated by
-    :c:func:`proj_pj_info`.
+    :c:func:`proj_pj_info`. The :c:type:`PJ_PROJ_INFO` object provides a
+    view into the internals of a :c:type:`PJ`, so once the :c:type:`PJ`
+    is destroyed or otherwise becomes invalid, so does the
+    :c:type:`PJ_PROJ_INFO`
 
     .. code-block:: C
 
         typedef struct {
-            char        id[16];
-            char        description[128];
-            char        definition[512];
-            int         has_inverse;
-            double      accuracy;
+            const char  *id;
+            const char  *description;
+            const char  *definition;
+            int          has_inverse;
+            double       accuracy;
         } PJ_PROJ_INFO;
 
-    .. c:member:: char PJ_PROJ_INFO.id[16]
+    .. c:member:: const char *PJ_PROJ_INFO.id
 
         Short ID of the operation the :c:type:`PJ` object is based on, that is,
         what comes afther the ``+proj=`` in a proj-string, e.g. "*merc*".
 
-    .. c:member:: char PJ_PROJ_INFO.description[128]
+    .. c:member:: const char *PJ_PROJ_INFO.description
 
         Long describes of the operation the :c:type:`PJ` object is based on,
         e.g. "*Mercator    Cyl, Sph&Ell   lat_ts=*".
 
-    .. c:member:: char PJ_PROJ_INFO.definition[512]
+    .. c:member:: const char *PJ_PROJ_INFO.definition
 
         The proj-string that was used to create the :c:type:`PJ` object with,
         e.g. "*+proj=merc +lat_0=24 +lon_0=53 +ellps=WGS84*".
