@@ -5,7 +5,7 @@ Projections
 ================================================================================
 
 Projections are coordinate operations that are technically conversions but since
-projections are so fundamental to PROJ.4 we differentiate them from conversions.
+projections are so fundamental to PROJ we differentiate them from conversions.
 
 Projections map the spherical 3D space to a flat 2D space.
 

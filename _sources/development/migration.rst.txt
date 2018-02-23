@@ -7,12 +7,69 @@ Version 4 to 5 API Migration
 This is a transition guide for developers wanting to migrate their code to use
 PROJ version 5.
 
-The difference between the old and new API is best shown with examples. Below
+
+Background
+###############################################################################
+
+Before we go on, a bit of background is needed. The new API takes a different
+view of the world than the old because it is needed in order to obtain high
+accuracy transformations. The old API is constructed in such a way that any transformation
+between two coordinate reference systems *must* pass through the ill-defined
+WGS84 reference frame, using it as a hub. The new API does away with this limitation to
+transformations in PROJ. It is still possible to do that type of transformations
+but in many cases there will be a better alternative.
+
+The world view represented by the old API is always sufficient if all you care about is
+meter level accuracy - and in many cases it will provide much higher accuracy
+than that. But the view that “WGS84 is the *true* foundation of the world, and
+everything else can be transformed natively to and from WGS84” is inherently flawed.
+
+First and foremost because any time WGS84 is mentioned, you should ask yourself
+“Which of the six WGS84 realizations are we talking about here?”.
+
+Second, because for many (especially legacy) systems, it may not be straightforward
+to transform to WGS84 (or actually ITRF-something, ETRS-something or NAD-something
+which appear to be the practical meaning of the term WGS84 in everyday PROJ related
+work), while centimeter-level accurate transformations may exist between pairs of
+older systems.
+
+The concept of a hub reference frame (“datum”) is not inherently bad, but in many
+cases you need to handle and select that datum with more care than the old API allows.
+The primary aim of the new API is to allow just that. And to do that, you must realize
+that the world is inherently 4 dimensional. You may in many cases assume one or more of
+the coordinates to be constant, but basically, to obtain geodetic accuracy transformations,
+you need to work in 4 dimensions.
+
+Now, having described the background for introducing the new API, let's try to show
+how to use it. First note that in order to go from system A to system B, the old API
+starts by doing an **inverse** transformation from system A to WGS84, then does a
+**forward** transformation from WGS84 to system B.
+
+With ``cs2cs`` being the command line interface to the old API, and ``cct`` being the same
+for the new, this example of doing the same thing in both world views will should give
+an idea of the differences:
+
+::
+
+    $ echo 300000 6100000 | cs2cs +proj=utm +zone=33 +ellps=GRS80 +to +proj=utm +zone=32 +ellps=GRS80
+    683687.87       6099299.66 0.00
+
+
+    $ echo 300000 6100000 0 0 | cct +proj=pipeline +step +inv +proj=utm +zone=33 +ellps=GRS80 +step +proj=utm +zone=32 +ellps=GRS80
+    683687.8667   6099299.6624    0.0000    0.0000
+
+Lookout for the ``+inv`` in the first ``+step``, indicating an inverse transform.
+
+
+Code example
+###############################################################################
+
+The difference between the old and new API is shown here with a few examples. Below
 we implement the same program with the two different API's. The program reads
 input latitude and longitude from the command line and convert them to
 projected coordinates with the Mercator projection.
 
-We start by writing the progran for PROJ v. 4:
+We start by writing the program for PROJ v. 4:
 
 .. code-block:: C
 
@@ -91,7 +148,6 @@ is superflous. We use that to our advantage in the new API and simply state
 the destination. This is simple at a glance, but is actually a big conceptual
 change. We are now focused on the path between two systems instead of what the
 source and destination systems are.
-
 
 Function mapping from old to new API
 ###############################################################################

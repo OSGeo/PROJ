@@ -65,9 +65,9 @@ The  following  control parameters can appear in any order
        -s     This options reverses the order of the output from x-y or longitude-latitude to
               y-x or latitude-longitude.
 
-       -S     Causes estimation of meridinal and parallel scale factors, area scale factor and
+       -S     Causes estimation of meridional and parallel scale factors, area scale factor and
               angular distortion, and maximum and minimum scale factors to be listed between <>
-              for each input point. For conformal projections meridinal and parallel scales
+              for each input point. For conformal projections meridional and parallel scales
               factors will be equal and angular distortion zero. Equal area projections will
               have an area factor of 1.
 
@@ -122,10 +122,10 @@ is  also  used  for  supporting files like datum
 shift files.
 
 One or more files (processed in  left  to  right
-order)  specify  the source of data to be trans-
-formed.  A - will specify the location  of  pro-
-cessing  standard input.  If no files are speci-
-fied, the input is assumed  to  be  from  stdin.
+order)  specify  the source of data to be transformed.
+A - will specify the location  of  processing
+standard input.  If no files are specified,
+the input is assumed  to  be  from  stdin.
 For ASCII input data the two data values must be
 in the first two white  space  separated  fields
 and  when  both  input  and output are ASCII all
@@ -135,8 +135,8 @@ to the output line.
 Input  geographic  data (longitude and latitude)
 must be in DMS format and input  cartesian  data
 must  be  in units consistent with the ellipsoid
-major axis or sphere radius units.  Output  geo-
-graphic  coordinates  will  be in DMS (if the -w
+major axis or sphere radius units.  Output
+geographic  coordinates  will  be in DMS (if the -w
 switch is not employed) and  precise  to  0.001"
 with  trailing, zero-valued minute-second fields
 deleted.
@@ -154,8 +154,8 @@ The following script
      +45.25919444444    111d30'000w
      EOF
 
-will perform UTM forward projection with a stan-
-dard  UTM  central  meridian  nearest  longitude
+will perform UTM forward projection with a standard
+UTM  central  meridian  nearest  longitude
 112W.  The geographic values of this example are
 equivalent and  meant  as  examples  of  various
 forms  of  DMS  input.  The x-y output data will

@@ -106,7 +106,7 @@ Forward projection
 
   y = M(\phi) - M(\phi_0) + N \tan(\phi)(\frac{A^2}{2} + (5-T+6C)\frac{A^4}{24})
 
-and M() is the meridionial distance function.
+and M() is the meridional distance function.
 
 Inverse projection
 ------------------

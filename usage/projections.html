@@ -38,7 +38,7 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Using PROJ.4" href="index.html"/>
+        <link rel="up" title="Using PROJ" href="index.html"/>
         <link rel="next" title="Geodetic transformation" href="transformation.html"/>
         <link rel="prev" title="geod" href="apps/geod.html"/> 
 
@@ -94,7 +94,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Using PROJ.4</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Using PROJ</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quick start</a></li>
 <li class="toctree-l2"><a class="reference internal" href="apps/index.html">Applications</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Cartographic projection</a><ul>
@@ -165,7 +165,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="index.html">Using PROJ.4</a> &raquo;</li>
+          <li><a href="index.html">Using PROJ</a> &raquo;</li>
         
       <li>Cartographic projection</li>
     
@@ -186,11 +186,11 @@
             
   <div class="section" id="cartographic-projection">
 <span id="projections-intro"></span><h1>Cartographic projection<a class="headerlink" href="#cartographic-projection" title="Permalink to this headline">¶</a></h1>
-<p>The foundation of PROJ.4 is the large number of
+<p>The foundation of PROJ is the large number of
 <a class="reference internal" href="operations/projections/index.html"><span class="doc">projections</span></a> available in the library. This section
 is devoted to the generic parameters that can be used on any projection in the
-PROJ.4 library.</p>
-<p>Below is a list of PROJ.4 parameters which can be applied to most coordinate
+PROJ library.</p>
+<p>Below is a list of PROJ parameters which can be applied to most coordinate
 system definitions. This table does not attempt to describe the parameters
 particular to particular projection types. These can be found on the pages
 documenting the individual <a class="reference internal" href="operations/projections/index.html"><span class="doc">projections</span></a>.</p>
@@ -295,7 +295,7 @@ systems (such as UTM) have implicit false easting and northing values.</p>
 </div>
 <div class="section" id="longitude-wrapping">
 <h2>Longitude Wrapping<a class="headerlink" href="#longitude-wrapping" title="Permalink to this headline">¶</a></h2>
-<p>By default PROJ.4 wraps output longitudes in the range -180 to 180.  The <code class="docutils literal"><span class="pre">+over</span></code>
+<p>By default PROJ wraps output longitudes in the range -180 to 180.  The <code class="docutils literal"><span class="pre">+over</span></code>
 switch can be used to disable the default wrapping which is done at a low level
 in <code class="docutils literal"><span class="pre">pj_inv()</span></code>.  This is particularly useful with projections like the
 <a class="reference internal" href="operations/projections/eqc.html"><span class="doc">equidistant cylindrical</span></a>
@@ -434,7 +434,7 @@ utility.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 19 Feb 2018.
+      Last updated on 23 Feb 2018.
 
     </p>
   </div>

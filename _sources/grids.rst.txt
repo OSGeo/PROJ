@@ -11,6 +11,11 @@ Grids
 
 Grid files are important for shifting and transforming between datums
 
+PROJ supports CTable2, NTv1 and NTv2 files for horizontal grid corrections and
+the GTX file format for vertical corrections. Details about the formats can be
+found in the GDAL documentation. GDAL reads and writes all formats. Using GDAL
+for construction of new grids is recommended.
+
 US, Canadian, French and New Zealand
 --------------------------------------------------------------------------------
 
@@ -39,7 +44,7 @@ HARN
 
 With the support of `i-cubed <http://www.i-cubed.com>`__, Frank Warmerdam has
 written tools to translate the HPGN grids from NOAA/NGS from ``.los/.las`` format
-into NTv2 format for convenient use with PROJ.4.  This project included
+into NTv2 format for convenient use with PROJ.  This project included
 implementing a `.los/.las reader <https://github.com/OSGeo/gdal/tree/trunk/gdal/frmts/raw/loslasdataset.cpp>`__
 for GDAL, and an `NTv2 reader/writer <https://github.com/OSGeo/gdal/tree/trunk/gdal/frmts/raw/ntv2dataset.cpp>`__.
 Also, a script to do the bulk translation was implemented in
@@ -50,7 +55,7 @@ The command to do the translation was:
 
     loslas2ntv2.py -auto *hpgn.los
 
-As GDAL uses NAD83/WGS84 as a pivot datum, the sense of the HPGN datum shift offsets were negated to map from HPGN to NAD83 instead of the other way.  The files can be used with PROJ.4 like this:
+As GDAL uses NAD83/WGS84 as a pivot datum, the sense of the HPGN datum shift offsets were negated to map from HPGN to NAD83 instead of the other way.  The files can be used with PROJ like this:
 
 ::
 
@@ -86,6 +91,8 @@ Hungary
 `Hungarian grid <https://github.com/OSGeoLabBp/eov2etrs/>`__ ETRS89 - HD72/EOV (epsg:23700), both horizontal and elevation grids
 
 
+.. _nonfreegrids:
+
 Non-Free Grids
 --------------------------------------------------------------------------------
 
@@ -94,7 +101,7 @@ distributed, but can be obtained by users through free and legal methods.
 
 Canada NTv2.0
 ................................................................................
-Although NTv1 grid shifts are provided freely with PROJ.4, the higher-quality
+Although NTv1 grid shifts are provided freely with PROJ, the higher-quality
 NTv2.0 file needs to be downloaded from Natural Resources Canada. More info:
 http://www.geod.nrcan.gc.ca/tools-outils/ntv2_e.php.
 
@@ -166,6 +173,3 @@ Netherlands
 ................................................................................
 
 `Dutch grid <https://www.kadaster.nl/web/Themas/Registraties/Rijksdriehoeksmeting/Transformatie-van-coordinaten.htm>`__ (Registration required before download)
-
-
-

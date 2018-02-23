@@ -94,7 +94,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ.4</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../grids.html">Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../htpd.html">HTPD</a></li>
@@ -104,7 +104,7 @@
 <li class="toctree-l2"><a class="reference internal" href="errorhandling.html">Error handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="threads.html">Threads</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/index.html">Reference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cmake.html">Using Proj.4 in CMake projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cmake.html">Using PROJ in CMake projects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bindings.html">Language bindings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="migration.html">Version 4 to 5 API Migration</a></li>
 </ul>
@@ -180,13 +180,13 @@
             
   <div class="section" id="quick-start">
 <span id="dev-quickstart"></span><h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
-<p>This is a short introduction to the PROJ.4 API. In the following section we
+<p>This is a short introduction to the PROJ API. In the following section we
 create a simple program that transforms a geodetic coordinate to UTM and back
 again. The program is explained a few lines at a time. The complete program can
 be seen at the end of the section.</p>
 <p>See the following sections for more in-depth descriptions of different parts of
-the PROJ.4 API or consult the <a class="reference internal" href="reference/index.html"><span class="doc">API reference</span></a> for specifics.</p>
-<p>Before the PROJ.4 API can be used it is necessary to include the <code class="docutils literal"><span class="pre">proj.h</span></code> header
+the PROJ API or consult the <a class="reference internal" href="reference/index.html"><span class="doc">API reference</span></a> for specifics.</p>
+<p>Before the PROJ API can be used it is necessary to include the <code class="docutils literal"><span class="pre">proj.h</span></code> header
 file. Here <code class="docutils literal"><span class="pre">stdio.h</span></code> is also included so we can print some text to the screen:</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;proj.h&gt;</span><span class="cp"></span>
@@ -222,10 +222,10 @@ details.</p>
     <span class="k">return</span> <span class="n">puts</span> <span class="p">(</span><span class="s">&quot;Oops&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>PROJ.4 uses it&#8217;s own data structures for handling coordinates. Here we use a
+<p>PROJ uses it&#8217;s own data structures for handling coordinates. Here we use a
 <code class="docutils literal"><span class="pre">PJ_COORD</span></code> which is easily assigned with the function <code class="docutils literal"><span class="pre">proj_coord</span></code>. Note
 that the input values are converted to radians with <code class="docutils literal"><span class="pre">proj_torad</span></code>. This is
-necessary since PROJ.4 is using radians internally. See <a class="reference internal" href="transformations.html"><span class="doc">Transformations</span></a>
+necessary since PROJ is using radians internally. See <a class="reference internal" href="transformations.html"><span class="doc">Transformations</span></a>
 for further details.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">proj_coord</span> <span class="p">(</span><span class="n">proj_torad</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span> <span class="n">proj_torad</span><span class="p">(</span><span class="mi">55</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 </pre></div>
@@ -336,7 +336,7 @@ this time using <code class="docutils literal"><span class="pre">PJ_INV</span></
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 19 Feb 2018.
+      Last updated on 23 Feb 2018.
 
     </p>
   </div>

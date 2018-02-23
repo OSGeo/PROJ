@@ -4,11 +4,11 @@
 Coordinate operations
 ================================================================================
 
-Coordinate operations in PROJ.4 are divided into three groups:
+Coordinate operations in PROJ are divided into three groups:
 Projections, conversions  and transformations.
 Projections are purely cartographic mappings of the sphere onto the plane.
 Technically projections are conversions (according to ISO standards), though in
-PROJ.4 projections are distinguished from conversions. Conversions are coordinate
+PROJ projections are distinguished from conversions. Conversions are coordinate
 operations that do not exert a change in reference frame. Operations that do
 exert a change in reference frame are called transformations.
 

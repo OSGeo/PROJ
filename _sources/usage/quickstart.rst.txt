@@ -4,7 +4,7 @@
 Quick start
 ================================================================================
 
-Coordinate transformations are defined by, what in PROJ.4 terminology is
+Coordinate transformations are defined by, what in PROJ terminology is
 known as, "proj-strings". A proj-string describes any transformation regardless of
 how simple or complicated it might be. The simplest case is projection of geodetic
 coordinates. This section focuses on the simpler cases and introduces the basic
@@ -22,7 +22,7 @@ parameters that applies to the projection and, if needed, a description of a
 datum shift. In the example above geodetic coordinates are transformed to
 projected space with the :doc:`Mercator projection<operations/projections/merc>` with
 the latitude of true scale at 56.5 degrees north on the GRS80 ellipsoid. Every
-projection in PROJ.4 is identified by a shorthand such as ``merc`` in the above
+projection in PROJ is identified by a shorthand such as ``merc`` in the above
 example.
 
 By using the  above projection definition as parameters for the command line
@@ -43,7 +43,7 @@ the utility, for instance by using the ``echo`` command:
     3399483.80      752085.60
 
 
-PROJ.4 also comes bundled with the ``cs2cs`` utility which is used to transform
+PROJ also comes bundled with the ``cs2cs`` utility which is used to transform
 from onecoordinate reference system to another. Say we want to convert
 the above Mercator coordinates to UTM, we can do that with ``cs2cs``:
 

@@ -5,7 +5,7 @@ Conversions
 ================================================================================
 
 Conversions are coordinate operations in which both coordinate reference systems
-are based on the same datum. In PROJ.4 projections are differentiated from
+are based on the same datum. In PROJ projections are differentiated from
 conversions.
 
 .. toctree::

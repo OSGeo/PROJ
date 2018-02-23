@@ -38,9 +38,9 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Using PROJ.4" href="index.html"/>
+        <link rel="up" title="Using PROJ" href="index.html"/>
         <link rel="next" title="Applications" href="apps/index.html"/>
-        <link rel="prev" title="Using PROJ.4" href="index.html"/> 
+        <link rel="prev" title="Using PROJ" href="index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -94,7 +94,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Using PROJ.4</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Using PROJ</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Quick start</a></li>
 <li class="toctree-l2"><a class="reference internal" href="apps/index.html">Applications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="projections.html">Cartographic projection</a></li>
@@ -158,7 +158,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="index.html">Using PROJ.4</a> &raquo;</li>
+          <li><a href="index.html">Using PROJ</a> &raquo;</li>
         
       <li>Quick start</li>
     
@@ -179,7 +179,7 @@
             
   <div class="section" id="quick-start">
 <span id="quickstart"></span><h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
-<p>Coordinate transformations are defined by, what in PROJ.4 terminology is
+<p>Coordinate transformations are defined by, what in PROJ terminology is
 known as, &#8220;proj-strings&#8221;. A proj-string describes any transformation regardless of
 how simple or complicated it might be. The simplest case is projection of geodetic
 coordinates. This section focuses on the simpler cases and introduces the basic
@@ -194,7 +194,7 @@ parameters that applies to the projection and, if needed, a description of a
 datum shift. In the example above geodetic coordinates are transformed to
 projected space with the <a class="reference internal" href="operations/projections/merc.html"><span class="doc">Mercator projection</span></a> with
 the latitude of true scale at 56.5 degrees north on the GRS80 ellipsoid. Every
-projection in PROJ.4 is identified by a shorthand such as <code class="docutils literal"><span class="pre">merc</span></code> in the above
+projection in PROJ is identified by a shorthand such as <code class="docutils literal"><span class="pre">merc</span></code> in the above
 example.</p>
 <p>By using the  above projection definition as parameters for the command line
 utility <code class="docutils literal"><span class="pre">proj</span></code> we can convert the geodetic coordinates to projected space:</p>
@@ -209,7 +209,7 @@ the utility, for instance by using the <code class="docutils literal"><span clas
 3399483.80      752085.60
 </pre></div>
 </div>
-<p>PROJ.4 also comes bundled with the <code class="docutils literal"><span class="pre">cs2cs</span></code> utility which is used to transform
+<p>PROJ also comes bundled with the <code class="docutils literal"><span class="pre">cs2cs</span></code> utility which is used to transform
 from onecoordinate reference system to another. Say we want to convert
 the above Mercator coordinates to UTM, we can do that with <code class="docutils literal"><span class="pre">cs2cs</span></code>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 3399483.80 752085.60 | cs2cs +proj=merc +lat_ts=56.5 +ellps=GRS80 +to +proj=utm +zone=32
@@ -242,7 +242,7 @@ UTM coordinates</p>
         <a href="apps/index.html" class="btn btn-neutral float-right" title="Applications" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Using PROJ.4" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="Using PROJ" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -252,7 +252,7 @@ UTM coordinates</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 19 Feb 2018.
+      Last updated on 23 Feb 2018.
 
     </p>
   </div>

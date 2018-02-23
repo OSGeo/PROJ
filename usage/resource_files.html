@@ -38,7 +38,7 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Using PROJ.4" href="index.html"/>
+        <link rel="up" title="Using PROJ" href="index.html"/>
         <link rel="next" title="Environment variables" href="environmentvars.html"/>
         <link rel="prev" title="Geodetic transformation" href="transformation.html"/> 
 
@@ -94,7 +94,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Using PROJ.4</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Using PROJ</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quick start</a></li>
 <li class="toctree-l2"><a class="reference internal" href="apps/index.html">Applications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="projections.html">Cartographic projection</a></li>
@@ -162,7 +162,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="index.html">Using PROJ.4</a> &raquo;</li>
+          <li><a href="index.html">Using PROJ</a> &raquo;</li>
         
       <li>Resource files</li>
     
@@ -184,7 +184,7 @@
   <div class="section" id="resource-files">
 <span id="id1"></span><h1>Resource files<a class="headerlink" href="#resource-files" title="Permalink to this headline">¶</a></h1>
 <p>A number of files containing preconfigured transformations and default parameters
-for certain projections are bundled with the PROJ.4 distribution. Init files
+for certain projections are bundled with the PROJ distribution. Init files
 contains preconfigured proj-strings for various coordinate reference systems
 and the defaults file contains default values for parameters of select
 projections.</p>
@@ -197,8 +197,8 @@ it easy to transformations between any two coordinate reference systems with
 <code class="docutils literal"><span class="pre">cs2cs</span></code>. Init files can however contain any proj-string and don&#8217;t necesarily
 have to follow the <em>cs2cs</em> paradigm where WGS84 is used as a pivot datum. The
 ITRF init file is a good example of that.</p>
-<p>A number of init files come pre-bundled with PROJ.4 but it is also possible to
-add your own custom init files. PROJ.4 looks for the init files in the directoty
+<p>A number of init files come pre-bundled with PROJ but it is also possible to
+add your own custom init files. PROJ looks for the init files in the directoty
 listed in the <code class="docutils literal"><span class="pre">PROJ_LIB</span></code> environment variable.</p>
 <p>The format of init files made up of a identifier in angled brackets and a
 proj-string:</p>
@@ -247,7 +247,7 @@ ITRF2005:</p>
 <span class="o">+</span><span class="n">tobs</span><span class="o">=</span><span class="mf">2010.5</span>
 </pre></div>
 </div>
-<p>Below is a list of the init files that are packaged with PROJ.4.</p>
+<p>Below is a list of the init files that are packaged with PROJ.</p>
 <blockquote>
 <div><table border="1" class="docutils">
 <colgroup>
@@ -297,12 +297,12 @@ ITRF&#8217;s</td>
 </div>
 <div class="section" id="defaults-file">
 <h2>Defaults file<a class="headerlink" href="#defaults-file" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal"><span class="pre">proj_def.dat</span></code> file supplies default parameters for PROJ.4. It uses the same
+<p>The <code class="docutils literal"><span class="pre">proj_def.dat</span></code> file supplies default parameters for PROJ. It uses the same
 syntax as the init files described above. The identifiers in the defaults file
 describe to what the parameters should apply. If the <code class="docutils literal"><span class="pre">&lt;general&gt;</span></code> identifier is
 used, then all parameters in that section applies for all proj-strings. Otherwise
 the identifier is connected to a specific projection. With the defaults file
-supplied with PROJ.4 the default ellipsoid is set to WGS84 (for all proj-strings).
+supplied with PROJ the default ellipsoid is set to WGS84 (for all proj-strings).
 Apart from that only the Albers Equal Area,
 <a class="reference internal" href="operations/projections/lcc.html"><span class="doc">Lambert Conic Conformal</span></a> and the
 <a class="reference internal" href="operations/projections/lagrng.html"><span class="doc">Lagrange</span></a> projections have default parameters.
@@ -333,7 +333,7 @@ Defaults can be ignored by adding the <code class="docutils literal"><span class
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 19 Feb 2018.
+      Last updated on 23 Feb 2018.
 
     </p>
   </div>

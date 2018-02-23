@@ -32,7 +32,7 @@ the global model::
     +vgridshift +grids=@dvr90.gtx,egm96_16.gtx
 
 The ``@`` in the above example states that the grid is optional, in case the grid
-is not found in the PROJ.4 search path. The list of grids is prioritized so that
+is not found in the PROJ search path. The list of grids is prioritized so that
 grids in the start of the list takes presedence over the grids in the back of the
 list.
 

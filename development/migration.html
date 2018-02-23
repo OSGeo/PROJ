@@ -94,7 +94,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ.4</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../grids.html">Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../htpd.html">HTPD</a></li>
@@ -104,9 +104,11 @@
 <li class="toctree-l2"><a class="reference internal" href="errorhandling.html">Error handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="threads.html">Threads</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/index.html">Reference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cmake.html">Using Proj.4 in CMake projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cmake.html">Using PROJ in CMake projects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bindings.html">Language bindings</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Version 4 to 5 API Migration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#background">Background</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-example">Code example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#function-mapping-from-old-to-new-api">Function mapping from old to new API</a></li>
 </ul>
 </li>
@@ -185,11 +187,56 @@
 <span id="api-migration"></span><h1>Version 4 to 5 API Migration<a class="headerlink" href="#version-4-to-5-api-migration" title="Permalink to this headline">¶</a></h1>
 <p>This is a transition guide for developers wanting to migrate their code to use
 PROJ version 5.</p>
-<p>The difference between the old and new API is best shown with examples. Below
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<p>Before we go on, a bit of background is needed. The new API takes a different
+view of the world than the old because it is needed in order to obtain high
+accuracy transformations. The old API is constructed in such a way that any transformation
+between two coordinate reference systems <em>must</em> pass through the ill-defined
+WGS84 reference frame, using it as a hub. The new API does away with this limitation to
+transformations in PROJ. It is still possible to do that type of transformations
+but in many cases there will be a better alternative.</p>
+<p>The world view represented by the old API is always sufficient if all you care about is
+meter level accuracy - and in many cases it will provide much higher accuracy
+than that. But the view that “WGS84 is the <em>true</em> foundation of the world, and
+everything else can be transformed natively to and from WGS84” is inherently flawed.</p>
+<p>First and foremost because any time WGS84 is mentioned, you should ask yourself
+“Which of the six WGS84 realizations are we talking about here?”.</p>
+<p>Second, because for many (especially legacy) systems, it may not be straightforward
+to transform to WGS84 (or actually ITRF-something, ETRS-something or NAD-something
+which appear to be the practical meaning of the term WGS84 in everyday PROJ related
+work), while centimeter-level accurate transformations may exist between pairs of
+older systems.</p>
+<p>The concept of a hub reference frame (“datum”) is not inherently bad, but in many
+cases you need to handle and select that datum with more care than the old API allows.
+The primary aim of the new API is to allow just that. And to do that, you must realize
+that the world is inherently 4 dimensional. You may in many cases assume one or more of
+the coordinates to be constant, but basically, to obtain geodetic accuracy transformations,
+you need to work in 4 dimensions.</p>
+<p>Now, having described the background for introducing the new API, let&#8217;s try to show
+how to use it. First note that in order to go from system A to system B, the old API
+starts by doing an <strong>inverse</strong> transformation from system A to WGS84, then does a
+<strong>forward</strong> transformation from WGS84 to system B.</p>
+<p>With <code class="docutils literal"><span class="pre">cs2cs</span></code> being the command line interface to the old API, and <code class="docutils literal"><span class="pre">cct</span></code> being the same
+for the new, this example of doing the same thing in both world views will should give
+an idea of the differences:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 300000 6100000 | cs2cs +proj=utm +zone=33 +ellps=GRS80 +to +proj=utm +zone=32 +ellps=GRS80
+683687.87       6099299.66 0.00
+
+
+$ echo 300000 6100000 0 0 | cct +proj=pipeline +step +inv +proj=utm +zone=33 +ellps=GRS80 +step +proj=utm +zone=32 +ellps=GRS80
+683687.8667   6099299.6624    0.0000    0.0000
+</pre></div>
+</div>
+<p>Lookout for the <code class="docutils literal"><span class="pre">+inv</span></code> in the first <code class="docutils literal"><span class="pre">+step</span></code>, indicating an inverse transform.</p>
+</div>
+<div class="section" id="code-example">
+<h2>Code example<a class="headerlink" href="#code-example" title="Permalink to this headline">¶</a></h2>
+<p>The difference between the old and new API is shown here with a few examples. Below
 we implement the same program with the two different API&#8217;s. The program reads
 input latitude and longitude from the command line and convert them to
 projected coordinates with the Mercator projection.</p>
-<p>We start by writing the progran for PROJ v. 4:</p>
+<p>We start by writing the program for PROJ v. 4:</p>
 <div class="highlight-C"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;proj_api.h&gt;</span><span class="cp"></span>
 
 <span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
@@ -262,6 +309,7 @@ is superflous. We use that to our advantage in the new API and simply state
 the destination. This is simple at a glance, but is actually a big conceptual
 change. We are now focused on the path between two systems instead of what the
 source and destination systems are.</p>
+</div>
 <div class="section" id="function-mapping-from-old-to-new-api">
 <h2>Function mapping from old to new API<a class="headerlink" href="#function-mapping-from-old-to-new-api" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
@@ -355,7 +403,7 @@ source and destination systems are.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 19 Feb 2018.
+      Last updated on 23 Feb 2018.
 
     </p>
   </div>

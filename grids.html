@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Grids &mdash; proj.4 4.9.3 documentation</title>
+  <title>Grids &mdash; PROJ.4 5.0.0 documentation</title>
   
 
   
@@ -30,12 +30,14 @@
   
 
   
+    <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+  
 
   
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="proj.4 4.9.3 documentation" href="index.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="index.html"/>
         <link rel="next" title="HTPD" href="htpd.html"/>
         <link rel="prev" title="Geodesic calculations" href="geodesic.html"/> 
 
@@ -56,7 +58,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> proj.4
+            <a href="index.html" class="icon icon-home"> PROJ.4
           
 
           
@@ -66,7 +68,7 @@
             
             
               <div class="version">
-                4.9.3
+                5.0.0
               </div>
             
           
@@ -91,11 +93,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="apps/index.html">Applications</a></li>
-<li class="toctree-l1"><a class="reference internal" href="projections/index.html">Projections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="parameters.html">Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/index.html">Using PROJ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic calculations</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Grids</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#us-canadian-french-and-new-zealand">US, Canadian, French and New Zealand</a></li>
@@ -121,6 +119,9 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="htpd.html">HTPD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
@@ -138,7 +139,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">proj.4</a>
+          <a href="index.html">PROJ.4</a>
         
       </nav>
 
@@ -215,6 +216,10 @@
 </ul>
 </div>
 <p>Grid files are important for shifting and transforming between datums</p>
+<p>PROJ supports CTable2, NTv1 and NTv2 files for horizontal grid corrections and
+the GTX file format for vertical corrections. Details about the formats can be
+found in the GDAL documentation. GDAL reads and writes all formats. Using GDAL
+for construction of new grids is recommended.</p>
 <div class="section" id="us-canadian-french-and-new-zealand">
 <h2>US, Canadian, French and New Zealand<a class="headerlink" href="#us-canadian-french-and-new-zealand" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -238,7 +243,7 @@ that.</p>
 <h2>HARN<a class="headerlink" href="#harn" title="Permalink to this headline">¶</a></h2>
 <p>With the support of <a class="reference external" href="http://www.i-cubed.com">i-cubed</a>, Frank Warmerdam has
 written tools to translate the HPGN grids from NOAA/NGS from <code class="docutils literal"><span class="pre">.los/.las</span></code> format
-into NTv2 format for convenient use with PROJ.4.  This project included
+into NTv2 format for convenient use with PROJ.  This project included
 implementing a <a class="reference external" href="https://github.com/OSGeo/gdal/tree/trunk/gdal/frmts/raw/loslasdataset.cpp">.los/.las reader</a>
 for GDAL, and an <a class="reference external" href="https://github.com/OSGeo/gdal/tree/trunk/gdal/frmts/raw/ntv2dataset.cpp">NTv2 reader/writer</a>.
 Also, a script to do the bulk translation was implemented in
@@ -247,7 +252,7 @@ The command to do the translation was:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">loslas2ntv2</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">auto</span> <span class="o">*</span><span class="n">hpgn</span><span class="o">.</span><span class="n">los</span>
 </pre></div>
 </div>
-<p>As GDAL uses NAD83/WGS84 as a pivot datum, the sense of the HPGN datum shift offsets were negated to map from HPGN to NAD83 instead of the other way.  The files can be used with PROJ.4 like this:</p>
+<p>As GDAL uses NAD83/WGS84 as a pivot datum, the sense of the HPGN datum shift offsets were negated to map from HPGN to NAD83 instead of the other way.  The files can be used with PROJ like this:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span>
       <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=./</span><span class="n">azhpgn</span><span class="o">.</span><span class="n">gsb</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span>
 </pre></div>
@@ -276,12 +281,12 @@ The command to do the translation was:</p>
 <p><a class="reference external" href="https://github.com/OSGeoLabBp/eov2etrs/">Hungarian grid</a> ETRS89 - HD72/EOV (epsg:23700), both horizontal and elevation grids</p>
 </div>
 <div class="section" id="non-free-grids">
-<h2>Non-Free Grids<a class="headerlink" href="#non-free-grids" title="Permalink to this headline">¶</a></h2>
+<span id="nonfreegrids"></span><h2>Non-Free Grids<a class="headerlink" href="#non-free-grids" title="Permalink to this headline">¶</a></h2>
 <p>Not all grid shift files have licensing that allows them to be freely
 distributed, but can be obtained by users through free and legal methods.</p>
 <div class="section" id="canada-ntv2-0">
 <h3>Canada NTv2.0<a class="headerlink" href="#canada-ntv2-0" title="Permalink to this headline">¶</a></h3>
-<p>Although NTv1 grid shifts are provided freely with PROJ.4, the higher-quality
+<p>Although NTv1 grid shifts are provided freely with PROJ, the higher-quality
 NTv2.0 file needs to be downloaded from Natural Resources Canada. More info:
 <a class="reference external" href="http://www.geod.nrcan.gc.ca/tools-outils/ntv2_e.php">http://www.geod.nrcan.gc.ca/tools-outils/ntv2_e.php</a>.</p>
 <p>Procedure:</p>
@@ -373,7 +378,7 @@ NTv2.0 file needs to be downloaded from Natural Resources Canada. More info:
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 1986?-2016.
+        &copy; Copyright 1983-2018.
       Last updated on 23 Feb 2018.
 
     </p>
@@ -396,7 +401,7 @@ NTv2.0 file needs to be downloaded from Natural Resources Canada. More info:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'4.9.3',
+            VERSION:'5.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

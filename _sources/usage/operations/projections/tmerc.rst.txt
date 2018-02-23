@@ -74,7 +74,7 @@ The formulas describing the Transverse Mercator are all taken from Evenden's [Ev
 
 :math:`k_0` is the scale factor at the natural origin (on the central meridian). It can be set with ``+k_0``.
 
-:math:`M(\phi)` is the meridianal distance.
+:math:`M(\phi)` is the meridional distance.
 
 Spherical form
 **************

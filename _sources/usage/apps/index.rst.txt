@@ -4,7 +4,7 @@
 Applications
 ================================================================================
 
-Bundled with PROJ.4 comes a set of small command line utilities. The
+Bundled with PROJ comes a set of small command line utilities. The
 ``proj`` program is limited to converting between geographic and projection
 coordinates within one datum. The ``cs2cs`` program operates similarly, but
 allows translation between any pair of definable coordinate systems, including

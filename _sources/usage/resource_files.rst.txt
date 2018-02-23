@@ -5,7 +5,7 @@ Resource files
 ================================================================================
 
 A number of files containing preconfigured transformations and default parameters
-for certain projections are bundled with the PROJ.4 distribution. Init files
+for certain projections are bundled with the PROJ distribution. Init files
 contains preconfigured proj-strings for various coordinate reference systems
 and the defaults file contains default values for parameters of select
 projections.
@@ -21,8 +21,8 @@ it easy to transformations between any two coordinate reference systems with
 have to follow the *cs2cs* paradigm where WGS84 is used as a pivot datum. The
 ITRF init file is a good example of that.
 
-A number of init files come pre-bundled with PROJ.4 but it is also possible to
-add your own custom init files. PROJ.4 looks for the init files in the directoty
+A number of init files come pre-bundled with PROJ but it is also possible to
+add your own custom init files. PROJ looks for the init files in the directoty
 listed in the ``PROJ_LIB`` environment variable.
 
 The format of init files made up of a identifier in angled brackets and a
@@ -84,7 +84,7 @@ which then expands to
     +epoch=2000.0 +transpose
     +tobs=2010.5
 
-Below is a list of the init files that are packaged with PROJ.4.
+Below is a list of the init files that are packaged with PROJ.
 
     ========    ================================================================
     Name        Description
@@ -108,12 +108,12 @@ Below is a list of the init files that are packaged with PROJ.4.
 Defaults file
 -------------------------------------------------------------------------------
 
-The ``proj_def.dat`` file supplies default parameters for PROJ.4. It uses the same
+The ``proj_def.dat`` file supplies default parameters for PROJ. It uses the same
 syntax as the init files described above. The identifiers in the defaults file
 describe to what the parameters should apply. If the ``<general>`` identifier is
 used, then all parameters in that section applies for all proj-strings. Otherwise
 the identifier is connected to a specific projection. With the defaults file
-supplied with PROJ.4 the default ellipsoid is set to WGS84 (for all proj-strings).
+supplied with PROJ the default ellipsoid is set to WGS84 (for all proj-strings).
 Apart from that only the Albers Equal Area,
 :doc:`Lambert Conic Conformal<operations/projections/lcc>` and the
 :doc:`Lagrange<operations/projections/lagrng>` projections have default parameters.
