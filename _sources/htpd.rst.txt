@@ -10,8 +10,8 @@ HTPD
 
 This page documents use of the `crs2crs2grid.py` script and the HTDP
 (Horizontal Time Dependent Positioning) grid shift modelling program from
-NGS/NOAA to produce PROJ compatible grid shift files for fine grade
-conversions between various NAD83 epochs and WGS84.  Traditionally PROJ has
+NGS/NOAA to produce PROJ.4 compatible grid shift files for fine grade
+conversions between various NAD83 epochs and WGS84.  Traditionally PROJ.4 has
 treated NAD83 and WGS84 as equivalent and failed to distinguish between
 different epochs or realizations of those datums.  At the scales of much
 mapping this is adequate but as interest grows in high resolution imagery and
@@ -121,7 +121,7 @@ source and destination date (epoch).  For example:
 
     crs2crs2grid.py 29 2002.0 8 2002.0 -o nad83_2002.ct2
 
-The output is a CTable2 format grid shift file suitable for use with PROJ
+The output is a CTable2 format grid shift file suitable for use with PROJ.4
 (4.8.0 or newer).  It might be utilized something like:
 
 
