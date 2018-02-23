@@ -787,6 +787,23 @@ static int Planimeter13() {
   return result;
 }
 
+static int AddEdge1() {
+  /* Check fix to transitdirect vs transit zero handling inconsistency */
+  struct geod_geodesic g;
+  struct geod_polygon p;
+  double area;
+  int result = 0;
+  geod_init(&g, wgs84_a, wgs84_f);
+  geod_polygon_init(&p, 0);
+  geod_polygon_addpoint(&g, &p, 0, 0);
+  geod_polygon_addedge(&g, &p,  90, 1000);
+  geod_polygon_addedge(&g, &p,   0, 1000);
+  geod_polygon_addedge(&g, &p, -90, 1000);
+  geod_polygon_compute(&g, &p, 0, 1, &area, 0);
+  result += assertEquals(area, 1000000.0, 0.01);
+  return result;
+}
+
 int main() {
   int n = 0, i;
   if ((i = testinverse())) {++n; printf("testinverse fail: %d\n", i);}
@@ -823,6 +840,7 @@ int main() {
   if ((i = Planimeter6())) {++n; printf("Planimeter6 fail: %d\n", i);}
   if ((i = Planimeter12())) {++n; printf("Planimeter12 fail: %d\n", i);}
   if ((i = Planimeter13())) {++n; printf("Planimeter13 fail: %d\n", i);}
+  if ((i = AddEdge1())) {++n; printf("AddEdge1 fail: %d\n", i);}
   return n;
 }
 
