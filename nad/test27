@@ -4,7 +4,7 @@
 #   the second pair of numbers are respective easting and northing output.
 #
 # Proj will vary in the .001ft range with projections using Transverse
-#   Mercator due to greater precision of meridinal distance function.
+#   Mercator due to greater precision of meridional distance function.
 #
 NAD_DIR=`dirname $0`
 EXE=$1

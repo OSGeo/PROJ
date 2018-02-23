@@ -13,7 +13,7 @@ PROJ_HEAD(calcofi,
 
 /* Conversions for the California Cooperative Oceanic Fisheries Investigations
 Line/Station coordinate system following the algorithm of:
-Eber, L.E., and  R.P. Hewitt. 1979. Conversion algorithms for the CALCOFI
+Eber, L.E., and  R.P. Hewitt. 1979. Conversion algorithms for the CalCOFI
 station grid. California Cooperative Oceanic Fisheries Investigations Reports
 20:135-137. (corrected for typographical errors).
 http://www.calcofi.org/publications/calcofireports/v20/Vol_20_Eber___Hewitt.pdf
