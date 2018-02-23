@@ -25,7 +25,7 @@ References
    Survey Review **30**\ (232), 61–66.
 
 .. [EberHewitt1979] L. E. Eber and R.P. Hewitt, 1979,
-   `Conversion algorithms for the CALCOFI station grid
+   `Conversion algorithms for the CalCOFI station grid
    <http://www.calcofi.org/publications/calcofireports/v20/Vol_20_Eber___Hewitt.pdf>`_,
    California Cooperative Oceanic Fisheries Investigations Reports 20:135-137.
 
@@ -71,7 +71,7 @@ References
 
 .. [LambersKolb2012] M. Lambers and A. Kolb, 2012,
    "Ellipsoidal Cube Maps for Accurate Rendering of Planetary-Scale
-   Terrain Data", Proc. Pacfic Graphics (Short Papers).
+   Terrain Data", Proc. Pacific Graphics (Short Papers).
 
 .. [ONeilLaubscher1976] E. M. O'Neill and R. E. Laubscher, 1976,
    "Extended Studies of a Quadrilateralized Spherical Cube Earth Data Base",
@@ -104,7 +104,7 @@ References
    Survey Review **23**\ (176), 88–93.
 
 .. [WeberMoore2013] E. D. Weber and T.J. Moore, 2013,
-   `Corrected Conversion Algorithms For The Calcofi Station Grid And Their
+   `Corrected Conversion Algorithms For The CalCOFI Station Grid And Their
    Implementation In Several Computer Languages
    <http://calcofi.org/publications/calcofireports/v54/Vol_54_Weber.pdf>`_,
    California Cooperative Oceanic Fisheries Investigations Reports 54.

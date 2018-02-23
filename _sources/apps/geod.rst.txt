@@ -141,8 +141,8 @@ which gives the results:
 where the first two values are the azimuth from Boston to Portland,
 the back azimuth from Portland to Boston followed by the distance.
 
-An  example  of forward geodesic use is to use the Boston loca-
-tion and determine Portland's location by azimuth and distance:
+An  example  of forward geodesic use is to use the Boston location
+and determine Portland's location by azimuth and distance:
 
 ::
 

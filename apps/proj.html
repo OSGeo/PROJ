@@ -231,9 +231,9 @@ or from cartesian data  with  a  wide  range  of selectable projection functions
 <span class="o">-</span><span class="n">s</span>     <span class="n">This</span> <span class="n">options</span> <span class="n">reverses</span> <span class="n">the</span> <span class="n">order</span> <span class="n">of</span> <span class="n">the</span> <span class="n">output</span> <span class="kn">from</span> <span class="nn">x</span><span class="o">-</span><span class="n">y</span> <span class="ow">or</span> <span class="n">longitude</span><span class="o">-</span><span class="n">latitude</span> <span class="n">to</span>
        <span class="n">y</span><span class="o">-</span><span class="n">x</span> <span class="ow">or</span> <span class="n">latitude</span><span class="o">-</span><span class="n">longitude</span><span class="o">.</span>
 
-<span class="o">-</span><span class="n">S</span>     <span class="n">Causes</span> <span class="n">estimation</span> <span class="n">of</span> <span class="n">meridinal</span> <span class="ow">and</span> <span class="n">parallel</span> <span class="n">scale</span> <span class="n">factors</span><span class="p">,</span> <span class="n">area</span> <span class="n">scale</span> <span class="n">factor</span> <span class="ow">and</span>
+<span class="o">-</span><span class="n">S</span>     <span class="n">Causes</span> <span class="n">estimation</span> <span class="n">of</span> <span class="n">meridional</span> <span class="ow">and</span> <span class="n">parallel</span> <span class="n">scale</span> <span class="n">factors</span><span class="p">,</span> <span class="n">area</span> <span class="n">scale</span> <span class="n">factor</span> <span class="ow">and</span>
        <span class="n">angular</span> <span class="n">distortion</span><span class="p">,</span> <span class="ow">and</span> <span class="n">maximum</span> <span class="ow">and</span> <span class="n">minimum</span> <span class="n">scale</span> <span class="n">factors</span> <span class="n">to</span> <span class="n">be</span> <span class="n">listed</span> <span class="n">between</span> <span class="o">&lt;&gt;</span>
-       <span class="k">for</span> <span class="n">each</span> <span class="nb">input</span> <span class="n">point</span><span class="o">.</span> <span class="n">For</span> <span class="n">conformal</span> <span class="n">projections</span> <span class="n">meridinal</span> <span class="ow">and</span> <span class="n">parallel</span> <span class="n">scales</span>
+       <span class="k">for</span> <span class="n">each</span> <span class="nb">input</span> <span class="n">point</span><span class="o">.</span> <span class="n">For</span> <span class="n">conformal</span> <span class="n">projections</span> <span class="n">meridional</span> <span class="ow">and</span> <span class="n">parallel</span> <span class="n">scales</span>
        <span class="n">factors</span> <span class="n">will</span> <span class="n">be</span> <span class="n">equal</span> <span class="ow">and</span> <span class="n">angular</span> <span class="n">distortion</span> <span class="n">zero</span><span class="o">.</span> <span class="n">Equal</span> <span class="n">area</span> <span class="n">projections</span> <span class="n">will</span>
        <span class="n">have</span> <span class="n">an</span> <span class="n">area</span> <span class="n">factor</span> <span class="n">of</span> <span class="mf">1.</span>
 
@@ -286,10 +286,10 @@ file reference without an absolute  path.   This
 is  also  used  for  supporting files like datum
 shift files.</p>
 <p>One or more files (processed in  left  to  right
-order)  specify  the source of data to be trans-
-formed.  A - will specify the location  of  pro-
-cessing  standard input.  If no files are speci-
-fied, the input is assumed  to  be  from  stdin.
+order)  specify  the source of data to be transformed.
+A - will specify the location  of  processing
+standard input.  If no files are specified,
+the input is assumed  to  be  from  stdin.
 For ASCII input data the two data values must be
 in the first two white  space  separated  fields
 and  when  both  input  and output are ASCII all
@@ -298,8 +298,8 @@ to the output line.</p>
 <p>Input  geographic  data (longitude and latitude)
 must be in DMS format and input  cartesian  data
 must  be  in units consistent with the ellipsoid
-major axis or sphere radius units.  Output  geo-
-graphic  coordinates  will  be in DMS (if the -w
+major axis or sphere radius units.  Output
+geographic  coordinates  will  be in DMS (if the -w
 switch is not employed) and  precise  to  0.001&#8221;
 with  trailing, zero-valued minute-second fields
 deleted.</p>
@@ -315,8 +315,8 @@ deleted.</p>
 <span class="n">EOF</span>
 </pre></div>
 </div>
-<p>will perform UTM forward projection with a stan-
-dard  UTM  central  meridian  nearest  longitude
+<p>will perform UTM forward projection with a standard
+UTM  central  meridian  nearest  longitude
 112W.  The geographic values of this example are
 equivalent and  meant  as  examples  of  various
 forms  of  DMS  input.  The x-y output data will
@@ -350,7 +350,7 @@ appear as three lines of:</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1986?-2016.
-      Last updated on 22 Feb 2018.
+      Last updated on 23 Feb 2018.
 
     </p>
   </div>
