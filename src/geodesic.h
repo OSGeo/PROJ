@@ -107,7 +107,7 @@
  * twice about restructuring the internals of the C code since this may make
  * porting fixes from the C++ code more difficult.
  *
- * Copyright (c) Charles Karney (2012-2017) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2012-2018) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * https://geographiclib.sourceforge.io/
  *
@@ -132,7 +132,7 @@
  * The patch level of the geodesic library.  (This tracks the version of
  * GeographicLib.)
  **********************************************************************/
-#define GEODESIC_VERSION_PATCH 1
+#define GEODESIC_VERSION_PATCH 2
 
 /**
  * Pack the version components into a single integer.  Users should not rely on

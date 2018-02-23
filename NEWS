@@ -162,7 +162,7 @@ o The PROJ.4 project also distributes the datum-grid package,
 
  o Updated EPSG database to version 9.2.0.
 
- o Geodesic library updated to version 1.49.1-c.
+ o Geodesic library updated to version 1.49.2-c.
 
  o Support for analytical partial derivatives has been removed.
 

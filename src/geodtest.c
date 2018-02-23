@@ -4,7 +4,7 @@
  *
  * Run these tests by configuring with cmake and running "make test".
  *
- * Copyright (c) Charles Karney (2015-2017) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2015-2018) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * https://geographiclib.sourceforge.io/
  **********************************************************************/
@@ -688,6 +688,48 @@ static int GeodSolve78() {
   return result;
 }
 
+static int GeodSolve80() {
+  /* Some tests to add code coverage: computing scale in special cases + zero
+     length geodesic (includes GeodSolve80 - GeodSolve83) + using an incapable
+     line. */
+  double a12, s12, azi1, azi2, m12, M12, M21, S12;
+  struct geod_geodesic g;
+  struct geod_geodesicline l;
+  int result = 0;
+  geod_init(&g, wgs84_a, wgs84_f);
+  geod_geninverse(&g, 0, 0, 0, 90, 0, 0, 0, 0, &M12, &M21, 0);
+  result += assertEquals(M12, -0.0052842753, 0.5e-10);
+  result += assertEquals(M21, -0.0052842753, 0.5e-10);
+  geod_geninverse(&g, 0, 0, 1e-6, 1e-6, 0, 0, 0, 0, &M12, &M21, 0);
+  result += assertEquals(M12, 1, 0.5e-10);
+  result += assertEquals(M21, 1, 0.5e-10);
+  a12 = geod_geninverse(&g, 20.001, 0, 20.001, 0,
+                        &s12, &azi1, &azi2, &m12, &M12, &M21, &S12);
+  result += a12 == 0 ? 0 : 1;
+  result += s12 == 0 ? 0 : 1;
+  result += azi1 == 180 ? 0 : 1;
+  result += azi2 == 180 ? 0 : 1;
+  result += m12 == 0 ? 0 : 1;
+  result += assertEquals(M12, 1, 1e-15);
+  result += assertEquals(M21, 1, 1e-15);
+  result += S12 == 0 ? 0 : 1;
+  a12 = geod_geninverse(&g, 90, 0, 90, 180,
+                        &s12, &azi1, &azi2, &m12, &M12, &M21, &S12);
+  result += a12 == 0 ? 0 : 1;
+  result += s12 == 0 ? 0 : 1;
+  result += azi1 == 0 ? 0 : 1;
+  result += azi2 == 180 ? 0 : 1;
+  result += m12 == 0 ? 0 : 1;
+  result += assertEquals(M12, 1, 1e-15);
+  result += assertEquals(M21, 1, 1e-15);
+  result += assertEquals(S12, 127516405431022, 0.5);
+  /* An incapable line which can't take distance as input */
+  geod_lineinit(&l, &g, 1, 2, 90, GEOD_LATITUDE);
+  a12 = geod_genposition(&l, 0, 1000, 0, 0, 0, 0, 0, 0, 0, 0);
+  result += a12 != a12 ? 0 : 1;
+  return result;
+}
+
 static int Planimeter0() {
   /* Check fix for pole-encircling bug found 2011-03-16 */
   double pa[4][2] = {{89, 0}, {89, 90}, {89, 180}, {89, 270}};
@@ -787,6 +829,188 @@ static int Planimeter13() {
   return result;
 }
 
+static int Planimeter15() {
+  /* Coverage tests, includes Planimeter15 - Planimeter18 (combinations of
+     reverse and sign) + calls to testpoint, testedge, geod_polygonarea. */
+  struct geod_geodesic g;
+  struct geod_polygon p;
+  double lat[] = {2, 1, 3}, lon[] = {1, 2, 3};
+  double area, s12, azi1;
+  double r = 18454562325.45119,
+    a0 = 510065621724088.5093;  /* ellipsoid area */
+  int result = 0;
+  geod_init(&g, wgs84_a, wgs84_f);
+  geod_polygon_init(&p, 0);
+  geod_polygon_addpoint(&g, &p, lat[0], lon[0]);
+  geod_polygon_addpoint(&g, &p, lat[1], lon[1]);
+  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 0, 1, &area, 0);
+  result += assertEquals(area, r, 0.5);
+  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 0, 0, &area, 0);
+  result += assertEquals(area, r, 0.5);
+  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 1, 1, &area, 0);
+  result += assertEquals(area, -r, 0.5);
+  geod_polygon_testpoint(&g, &p, lat[2], lon[2], 1, 0, &area, 0);
+  result += assertEquals(area, a0-r, 0.5);
+  geod_inverse(&g, lat[1], lon[1], lat[2], lon[2], &s12, &azi1, 0);
+  geod_polygon_testedge(&g, &p, azi1, s12, 0, 1, &area, 0);
+  result += assertEquals(area, r, 0.5);
+  geod_polygon_testedge(&g, &p, azi1, s12, 0, 0, &area, 0);
+  result += assertEquals(area, r, 0.5);
+  geod_polygon_testedge(&g, &p, azi1, s12, 1, 1, &area, 0);
+  result += assertEquals(area, -r, 0.5);
+  geod_polygon_testedge(&g, &p, azi1, s12, 1, 0, &area, 0);
+  result += assertEquals(area, a0-r, 0.5);
+  geod_polygon_addpoint(&g, &p, lat[2], lon[2]);
+  geod_polygon_compute(&g, &p, 0, 1, &area, 0);
+  result += assertEquals(area, r, 0.5);
+  geod_polygon_compute(&g, &p, 0, 0, &area, 0);
+  result += assertEquals(area, r, 0.5);
+  geod_polygon_compute(&g, &p, 1, 1, &area, 0);
+  result += assertEquals(area, -r, 0.5);
+  geod_polygon_compute(&g, &p, 1, 0, &area, 0);
+  result += assertEquals(area, a0-r, 0.5);
+  geod_polygonarea(&g, lat, lon, 3, &area, 0);
+  result += assertEquals(area, r, 0.5);
+  return result;
+}
+
+static int Planimeter19() {
+  /* Coverage tests, includes Planimeter19 - Planimeter20 (degenerate
+     polygons) + extra cases.  */
+  struct geod_geodesic g;
+  struct geod_polygon p;
+  double area, perim;
+  int result = 0;
+  geod_init(&g, wgs84_a, wgs84_f);
+  geod_polygon_init(&p, 0);
+  geod_polygon_compute(&g, &p, 0, 1, &area, &perim);
+  result += area == 0 ? 0 : 1;
+  result += perim == 0 ? 0 : 1;
+  geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, &area, &perim);
+  result += area == 0 ? 0 : 1;
+  result += perim == 0 ? 0 : 1;
+  geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, &area, &perim);
+  result += area != area ? 0 : 1;
+  result += perim != perim ? 0 : 1;
+  geod_polygon_addpoint(&g, &p, 1, 1);
+  geod_polygon_compute(&g, &p, 0, 1, &area, &perim);
+  result += area == 0 ? 0 : 1;
+  result += perim == 0 ? 0 : 1;
+  geod_polygon_init(&p, 1);
+  geod_polygon_compute(&g, &p, 0, 1, 0, &perim);
+  result += perim == 0 ? 0 : 1;
+  geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, 0, &perim);
+  result += perim == 0 ? 0 : 1;
+  geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, 0, &perim);
+  result += perim != perim ? 0 : 1;
+  geod_polygon_addpoint(&g, &p, 1, 1);
+  geod_polygon_compute(&g, &p, 0, 1, 0, &perim);
+  result += perim == 0 ? 0 : 1;
+  return result;
+}
+
+static int Planimeter21() {
+  /* Some test to add code coverage: multiple circlings of pole (includes
+     Planimeter21 - Planimeter28) + invocations via testpoint and testedge.
+     Some of the results for i = 4 in the loop are wrong because we don't
+     reduce the area to the allowed range correctly.  However these cases are
+     not "simple" polygons, so we'll defer fixing the problem for now.
+   */
+  struct geod_geodesic g;
+  struct geod_polygon p;
+  double area, lat = 45,
+    a = 39.2144607176828184218, s = 8420705.40957178156285,
+    r = 39433884866571.4277,    /* Area for one circuit */
+    a0 = 510065621724088.5093;  /* Ellipsoid area */
+  int result = 0, i;
+  geod_init(&g, wgs84_a, wgs84_f);
+  geod_polygon_init(&p, 0);
+  geod_polygon_addpoint(&g, &p, lat,  60);
+  geod_polygon_addpoint(&g, &p, lat, 180);
+  geod_polygon_addpoint(&g, &p, lat, -60);
+  geod_polygon_addpoint(&g, &p, lat,  60);
+  geod_polygon_addpoint(&g, &p, lat, 180);
+  geod_polygon_addpoint(&g, &p, lat, -60);
+  for (i = 3; i <= 4; ++i) {
+    geod_polygon_addpoint(&g, &p, lat,  60);
+    geod_polygon_addpoint(&g, &p, lat, 180);
+    geod_polygon_testpoint(&g, &p, lat, -60, 0, 1, &area, 0);
+    if (i != 4) result += assertEquals(area,  i*r, 0.5);
+    geod_polygon_testpoint(&g, &p, lat, -60, 0, 0, &area, 0);
+    if (i != 4) result += assertEquals(area,  i*r, 0.5);
+    geod_polygon_testpoint(&g, &p, lat, -60, 1, 1, &area, 0);
+    if (i != 4) result += assertEquals(area, -i*r, 0.5);
+    geod_polygon_testpoint(&g, &p, lat, -60, 1, 0, &area, 0);
+    result += assertEquals(area, -i*r + a0, 0.5);
+    geod_polygon_testedge(&g, &p, a, s, 0, 1, &area, 0);
+    if (i != 4) result += assertEquals(area,  i*r, 0.5);
+    geod_polygon_testedge(&g, &p, a, s, 0, 0, &area, 0);
+    if (i != 4) result += assertEquals(area,  i*r, 0.5);
+    geod_polygon_testedge(&g, &p, a, s, 1, 1, &area, 0);
+    if (i != 4) result += assertEquals(area, -i*r, 0.5);
+    geod_polygon_testedge(&g, &p, a, s, 1, 0, &area, 0);
+    result += assertEquals(area, -i*r + a0, 0.5);
+    geod_polygon_addpoint(&g, &p, lat, -60);
+    geod_polygon_compute(&g, &p, 0, 1, &area, 0);
+    if (i != 4) result += assertEquals(area,  i*r, 0.5);
+    geod_polygon_compute(&g, &p, 0, 0, &area, 0);
+    if (i != 4) result += assertEquals(area,  i*r, 0.5);
+    geod_polygon_compute(&g, &p, 1, 1, &area, 0);
+    if (i != 4) result += assertEquals(area, -i*r, 0.5);
+    geod_polygon_compute(&g, &p, 1, 0, &area, 0);
+    result += assertEquals(area, -i*r + a0, 0.5);
+  }
+  return result;
+}
+
+static int AddEdge1() {
+  /* Check fix to transitdirect vs transit zero handling inconsistency */
+  struct geod_geodesic g;
+  struct geod_polygon p;
+  double area;
+  int result = 0;
+  geod_init(&g, wgs84_a, wgs84_f);
+  geod_polygon_init(&p, 0);
+  geod_polygon_addpoint(&g, &p, 0, 0);
+  geod_polygon_addedge(&g, &p,  90, 1000);
+  geod_polygon_addedge(&g, &p,   0, 1000);
+  geod_polygon_addedge(&g, &p, -90, 1000);
+  geod_polygon_compute(&g, &p, 0, 1, &area, 0);
+  result += assertEquals(area, 1000000.0, 0.01);
+  return result;
+}
+
+static int EmptyPoly() {
+  struct geod_geodesic g;
+  struct geod_polygon p;
+  double perim, area;
+  int result = 0;
+  geod_init(&g, wgs84_a, wgs84_f);
+  geod_polygon_init(&p, 0);
+  geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, &area, &perim);
+  result += area == 0 ? 0 : 1;
+  result += perim == 0 ? 0 : 1;
+  geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, &area, &perim);
+  result += area != area ? 0 : 1;
+  result += perim != perim ? 0 : 1;
+  geod_polygon_compute(&g, &p, 0, 1, &area, &perim);
+  result += area == 0 ? 0 : 1;
+  result += perim == 0 ? 0 : 1;
+  geod_polygon_init(&p, 1);
+  geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, 0, &perim);
+  result += perim == 0 ? 0 : 1;
+  geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, 0, &perim);
+  result += perim != perim ? 0 : 1;
+  geod_polygon_compute(&g, &p, 0, 1, 0, &perim);
+  result += perim == 0 ? 0 : 1;
+  geod_polygon_addpoint(&g, &p, 1, 1);
+  geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, 0, &perim);
+  result += assertEquals(perim, 1000, 1e-10);
+  geod_polygon_testpoint(&g, &p, 2, 2, 0, 1, 0, &perim);
+  result += assertEquals(perim, 156876.149, 0.5e-3);
+  return result;
+}
+
 int main() {
   int n = 0, i;
   if ((i = testinverse())) {++n; printf("testinverse fail: %d\n", i);}
@@ -818,11 +1042,17 @@ int main() {
   if ((i = GeodSolve74())) {++n; printf("GeodSolve74 fail: %d\n", i);}
   if ((i = GeodSolve76())) {++n; printf("GeodSolve76 fail: %d\n", i);}
   if ((i = GeodSolve78())) {++n; printf("GeodSolve78 fail: %d\n", i);}
+  if ((i = GeodSolve80())) {++n; printf("GeodSolve80 fail: %d\n", i);}
   if ((i = Planimeter0())) {++n; printf("Planimeter0 fail: %d\n", i);}
   if ((i = Planimeter5())) {++n; printf("Planimeter5 fail: %d\n", i);}
   if ((i = Planimeter6())) {++n; printf("Planimeter6 fail: %d\n", i);}
   if ((i = Planimeter12())) {++n; printf("Planimeter12 fail: %d\n", i);}
   if ((i = Planimeter13())) {++n; printf("Planimeter13 fail: %d\n", i);}
+  if ((i = Planimeter15())) {++n; printf("Planimeter15 fail: %d\n", i);}
+  if ((i = Planimeter19())) {++n; printf("Planimeter19 fail: %d\n", i);}
+  if ((i = Planimeter21())) {++n; printf("Planimeter21 fail: %d\n", i);}
+  if ((i = AddEdge1())) {++n; printf("AddEdge1 fail: %d\n", i);}
+  if ((i = EmptyPoly())) {++n; printf("EmptyPoly fail: %d\n", i);}
   return n;
 }
 

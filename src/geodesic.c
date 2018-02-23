@@ -18,7 +18,7 @@
  *
  * See the comments in geodesic.h for documentation.
  *
- * Copyright (c) Charles Karney (2012-2017) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2012-2018) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * https://geographiclib.sourceforge.io/
  */
@@ -89,10 +89,14 @@ static void Init() {
     tolb = tol0 * tol2;
     xthresh = 1000 * tol2;
     degree = pi/180;
+    #if defined(NAN)
+    NaN = NAN;
+    #else
     {
       real minus1 = -1;
       NaN = sqrt(minus1);
     }
+    #endif
     init = 1;
   }
 }
@@ -1809,13 +1813,13 @@ int transitdirect(real lon1, real lon2) {
 #if HAVE_C99_MATH
   lon1 = remainder(lon1, (real)(720));
   lon2 = remainder(lon2, (real)(720));
-  return ( (lon2 >= 0 && lon2 < 360 ? 0 : 1) -
-           (lon1 >= 0 && lon1 < 360 ? 0 : 1) );
+  return ( (lon2 <= 0 && lon2 > -360 ? 1 : 0) -
+           (lon1 <= 0 && lon1 > -360 ? 1 : 0) );
 #else
   lon1 = fmod(lon1, (real)(720));
   lon2 = fmod(lon2, (real)(720));
-  return ( ((lon2 >= 0 && lon2 < 360) || lon2 < -360 ? 0 : 1) -
-           ((lon1 >= 0 && lon1 < 360) || lon1 < -360 ? 0 : 1) );
+  return ( ((lon2 <= 0 && lon2 > -360) || lon2 > 360 ? 1 : 0) -
+           ((lon1 <= 0 && lon1 > -360) || lon1 > 360 ? 1 : 0) );
 #endif
 }
 
@@ -1888,7 +1892,7 @@ void geod_polygon_addpoint(const struct geod_geodesic* g,
 void geod_polygon_addedge(const struct geod_geodesic* g,
                           struct geod_polygon* p,
                           real azi, real s) {
-  if (p->num) {                 /* Do nothing is num is zero */
+  if (p->num) {              /* Do nothing is num is zero */
     real lat, lon, S12 = 0;  /* Initialize S12 to stop Visual Studio warning */
     geod_gendirect(g, p->lat, p->lon, azi, GEOD_LONG_UNROLL, s,
                    &lat, &lon, 0,
