@@ -332,7 +332,6 @@ static int another_failure (void) {
 static int another_skip (void) {
     T.op_skip++;
     T.total_skip++;
-    proj_errno_reset (T.P);
     return 0;
 }
 
