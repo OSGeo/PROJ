@@ -82,4 +82,8 @@ if [ $TRAVIS_OS_NAME == "osx" ]; then
 make -j3
 PROJ_LIB=$GRIDDIR make check
 
+# Rerun tests without grids not included in proj-datumgrid
+rm -v ${GRIDDIR}/egm96_15.gtx
+PROJ_LIB=$GRIDDIR make check
+
 mv src/.libs/*.gc* src
