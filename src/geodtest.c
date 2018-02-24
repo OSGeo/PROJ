@@ -698,35 +698,35 @@ static int GeodSolve80() {
   int result = 0;
   geod_init(&g, wgs84_a, wgs84_f);
   geod_geninverse(&g, 0, 0, 0, 90, 0, 0, 0, 0, &M12, &M21, 0);
-  result += assertEquals(M12, -0.0052842753, 0.5e-10);
-  result += assertEquals(M21, -0.0052842753, 0.5e-10);
+  result += assertEquals(M12, -0.00528427534, 0.5e-10);
+  result += assertEquals(M21, -0.00528427534, 0.5e-10);
   geod_geninverse(&g, 0, 0, 1e-6, 1e-6, 0, 0, 0, 0, &M12, &M21, 0);
   result += assertEquals(M12, 1, 0.5e-10);
   result += assertEquals(M21, 1, 0.5e-10);
   a12 = geod_geninverse(&g, 20.001, 0, 20.001, 0,
                         &s12, &azi1, &azi2, &m12, &M12, &M21, &S12);
-  result += a12 == 0 ? 0 : 1;
-  result += s12 == 0 ? 0 : 1;
-  result += azi1 == 180 ? 0 : 1;
-  result += azi2 == 180 ? 0 : 1;
-  result += m12 == 0 ? 0 : 1;
+  result += assertEquals(a12, 0, 1e-13);
+  result += assertEquals(s12, 0, 1e-8);
+  result += assertEquals(azi1, 180, 1e-13);
+  result += assertEquals(azi2, 180, 1e-13);
+  result += assertEquals(m12, 0,  1e-8);
   result += assertEquals(M12, 1, 1e-15);
   result += assertEquals(M21, 1, 1e-15);
-  result += S12 == 0 ? 0 : 1;
+  result += assertEquals(S12, 0, 1e-10);
   a12 = geod_geninverse(&g, 90, 0, 90, 180,
                         &s12, &azi1, &azi2, &m12, &M12, &M21, &S12);
-  result += a12 == 0 ? 0 : 1;
-  result += s12 == 0 ? 0 : 1;
-  result += azi1 == 0 ? 0 : 1;
-  result += azi2 == 180 ? 0 : 1;
-  result += m12 == 0 ? 0 : 1;
+  result += assertEquals(a12, 0, 1e-13);
+  result += assertEquals(s12, 0, 1e-8);
+  result += assertEquals(azi1, 0, 1e-13);
+  result += assertEquals(azi2, 180, 1e-13);
+  result += assertEquals(m12, 0, 1e-8);
   result += assertEquals(M12, 1, 1e-15);
   result += assertEquals(M21, 1, 1e-15);
   result += assertEquals(S12, 127516405431022, 0.5);
   /* An incapable line which can't take distance as input */
   geod_lineinit(&l, &g, 1, 2, 90, GEOD_LATITUDE);
   a12 = geod_genposition(&l, 0, 1000, 0, 0, 0, 0, 0, 0, 0, 0);
-  result += a12 != a12 ? 0 : 1;
+  result += a12 == a12 ? 1 : 0;
   return result;
 }
 
@@ -890,8 +890,8 @@ static int Planimeter19() {
   result += area == 0 ? 0 : 1;
   result += perim == 0 ? 0 : 1;
   geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, &area, &perim);
-  result += area != area ? 0 : 1;
-  result += perim != perim ? 0 : 1;
+  result += area == area ? 1 : 0;
+  result += perim == perim ? 1 : 0;
   geod_polygon_addpoint(&g, &p, 1, 1);
   geod_polygon_compute(&g, &p, 0, 1, &area, &perim);
   result += area == 0 ? 0 : 1;
@@ -902,7 +902,7 @@ static int Planimeter19() {
   geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, 0, &perim);
   result += perim == 0 ? 0 : 1;
   geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, 0, &perim);
-  result += perim != perim ? 0 : 1;
+  result += perim == perim ? 1 : 0;
   geod_polygon_addpoint(&g, &p, 1, 1);
   geod_polygon_compute(&g, &p, 0, 1, 0, &perim);
   result += perim == 0 ? 0 : 1;
@@ -991,8 +991,8 @@ static int EmptyPoly() {
   result += area == 0 ? 0 : 1;
   result += perim == 0 ? 0 : 1;
   geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, &area, &perim);
-  result += area != area ? 0 : 1;
-  result += perim != perim ? 0 : 1;
+  result += area == area ? 1 : 0;
+  result += perim == perim ? 1 : 0;
   geod_polygon_compute(&g, &p, 0, 1, &area, &perim);
   result += area == 0 ? 0 : 1;
   result += perim == 0 ? 0 : 1;
@@ -1000,7 +1000,7 @@ static int EmptyPoly() {
   geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, 0, &perim);
   result += perim == 0 ? 0 : 1;
   geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, 0, &perim);
-  result += perim != perim ? 0 : 1;
+  result += perim == perim ? 1 : 0;
   geod_polygon_compute(&g, &p, 0, 1, 0, &perim);
   result += perim == 0 ? 0 : 1;
   geod_polygon_addpoint(&g, &p, 1, 1);
