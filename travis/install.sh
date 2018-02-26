@@ -3,10 +3,9 @@
 set -e
 
 # Download grid files to nad/
-wget http://download.osgeo.org/proj/proj-datumgrid-1.7RC1.zip
+wget http://download.osgeo.org/proj/proj-datumgrid-1.7RC2.zip
 cd nad
-unzip -o ../proj-datumgrid-1.7RC1.zip
-wget http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
+unzip -o ../proj-datumgrid-1.7RC2.zip
 GRIDDIR=`pwd`
 echo $GRIDDIR
 cd ..
