@@ -59,10 +59,8 @@ test_script:
   - if "%BUILD_TYPE%" == "cmake" set PROJ_LIB=C:\projects\proj-4\nad
   - if "%BUILD_TYPE%" == "nmake" set PROJ_LIB=C:\PROJ\SHARE
   - cd %PROJ_LIB%
-  - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.6.zip
-  - curl -O http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
-  - curl -O -k https://raw.githubusercontent.com/OSGeo/proj-datumgrid/master/BETA2007.gsb
-  - 7z e -aoa -y proj-datumgrid-1.6.zip
+  - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.7RC2.zip
+  - 7z e -aoa -y proj-datumgrid-1.7RC2.zip
   - dir
   - cd ..
   - dir
