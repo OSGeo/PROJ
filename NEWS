@@ -172,6 +172,8 @@ o The PROJ.4 project also distributes the datum-grid package,
    operation has an inverse. Use this instead of checking whether
    P->inv exists, since that can no longer be relied on.
 
+ o ABI version number updated to 13:0:0.
+
  o Removed support for Windows CE.
 
  o Removed the VB6 COM interface.
