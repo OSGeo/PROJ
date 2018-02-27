@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Language bindings &mdash; proj.4 4.9.3 documentation</title>
+  <title>Language bindings &mdash; PROJ.4 5.0.0 documentation</title>
   
 
   
@@ -30,15 +30,17 @@
   
 
   
+    <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+  
 
   
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="proj.4 4.9.3 documentation" href="../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
-        <link rel="next" title="Using Proj.4 in CMake projects" href="cmake.html"/>
-        <link rel="prev" title="Threads" href="threads.html"/> 
+        <link rel="next" title="Version 4 to 5 API Migration" href="migration.html"/>
+        <link rel="prev" title="Using PROJ in CMake projects" href="cmake.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -57,7 +59,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> proj.4
+            <a href="../index.html" class="icon icon-home"> PROJ.4
           
 
           
@@ -67,7 +69,7 @@
             
             
               <div class="version">
-                4.9.3
+                5.0.0
               </div>
             
           
@@ -92,17 +94,17 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../projections/index.html">Projections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../parameters.html">Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../grids.html">Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../htpd.html">HTPD</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformations.html">Transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="errorhandling.html">Error handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="threads.html">Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/index.html">Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cmake.html">Using PROJ in CMake projects</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Language bindings</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#python">Python</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ruby">Ruby</a></li>
@@ -112,9 +114,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#visual-basic">Visual Basic</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="cmake.html">Using Proj.4 in CMake projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration.html">Version 4 to 5 API Migration</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
@@ -132,7 +137,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">proj.4</a>
+          <a href="../index.html">PROJ.4</a>
         
       </nav>
 
@@ -183,35 +188,35 @@
             
   <div class="section" id="language-bindings">
 <span id="bindings"></span><h1>Language bindings<a class="headerlink" href="#language-bindings" title="Permalink to this headline">¶</a></h1>
-<p>Proj.4 bindings are available for a number of different development platforms.</p>
+<p>PROJ bindings are available for a number of different development platforms.</p>
 <div class="section" id="python">
 <h2>Python<a class="headerlink" href="#python" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://pypi.python.org/pypi/pyproj">pyproj</a>:
-Python interface (wrapper for proj.4)</p>
+Python interface (wrapper for PROJ)</p>
 </div>
 <div class="section" id="ruby">
 <h2>Ruby<a class="headerlink" href="#ruby" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://proj4rb.rubyforge.org">proj4rb</a>:
-Bindings for proj.4 in ruby</p>
+Bindings for PROJ in ruby</p>
 </div>
 <div class="section" id="tcl">
 <h2>TCL<a class="headerlink" href="#tcl" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://wiki.tcl.tk/41270">proj4tcl</a>:
-Bindings for proj.4 in tcl (critcl source)</p>
+Bindings for PROJ in tcl (critcl source)</p>
 </div>
 <div class="section" id="mysql">
 <h2>MySQL<a class="headerlink" href="#mysql" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://sourceforge.net/projects/mysqlscientific/files/fPROJ4/">fProj4</a>:
-Bindings for proj.4 in MySQL</p>
+Bindings for PROJ in MySQL</p>
 </div>
 <div class="section" id="excel">
 <h2>Excel<a class="headerlink" href="#excel" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://github.com/jbuonagurio/proj.xll">proj.xll</a>:
-Excel add-in for proj.4 map projections</p>
+Excel add-in for PROJ map projections</p>
 </div>
 <div class="section" id="visual-basic">
 <h2>Visual Basic<a class="headerlink" href="#visual-basic" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://ftp.dfg.ca.gov/Public/BDB/Tools/proj4/proj_api.zip">PROJ.4 VB Wrappers</a>:
+<p><a class="reference external" href="http://ftp.dfg.ca.gov/Public/BDB/Tools/proj4/proj_api.zip">PROJ VB Wrappers</a>:
 By Eric G. Miller.</p>
 </div>
 </div>
@@ -226,10 +231,10 @@ By Eric G. Miller.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="cmake.html" class="btn btn-neutral float-right" title="Using Proj.4 in CMake projects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="migration.html" class="btn btn-neutral float-right" title="Version 4 to 5 API Migration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="threads.html" class="btn btn-neutral" title="Threads" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="cmake.html" class="btn btn-neutral" title="Using PROJ in CMake projects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -238,7 +243,7 @@ By Eric G. Miller.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 1986?-2016.
+        &copy; Copyright 1983-2018.
       Last updated on 27 Feb 2018.
 
     </p>
@@ -261,7 +266,7 @@ By Eric G. Miller.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'4.9.3',
+            VERSION:'5.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
