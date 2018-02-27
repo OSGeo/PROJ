@@ -42,7 +42,7 @@ that.
 HARN
 --------------------------------------------------------------------------------
 
-With the support of `i-cubed <http://www.i-cubed.com>`__, Frank Warmerdam has
+With the support of `i-cubed <http://www.i3.com>`__, Frank Warmerdam has
 written tools to translate the HPGN grids from NOAA/NGS from ``.los/.las`` format
 into NTv2 format for convenient use with PROJ.  This project included
 implementing a `.los/.las reader <https://github.com/OSGeo/gdal/tree/trunk/gdal/frmts/raw/loslasdataset.cpp>`__
