@@ -30,7 +30,7 @@ CHECK_FUNCTION_EXISTS(localeconv HAVE_LOCALECONV)
 check_library_exists(m ceil "" HAVE_LIBM) 
 
 set(PACKAGE "proj")
-set(PACKAGE_BUGREPORT "warmerdam@pobox.com")
+set(PACKAGE_BUGREPORT "https://github.com/OSGeo/proj.4/issues")
 set(PACKAGE_NAME "PROJ.4 Projections")
 set(PACKAGE_STRING "PROJ.4 Projections ${${PROJECT_INTERN_NAME}_VERSION}")
 set(PACKAGE_TARNAME "proj")
