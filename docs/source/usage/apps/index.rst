@@ -15,6 +15,7 @@ to do geodesic (great circle) computations.
    :maxdepth: 1
 
    proj
+   cct
    cs2cs
    geod
 
