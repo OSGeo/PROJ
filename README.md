@@ -40,6 +40,13 @@ On Windows, one may need to specify generator:
 
     cmake -G "Visual Studio 15 2017" ..
 
+Tests are run with
+
+    ctest
+
+The test suite requires that the proj-datumgrid package is installed
+in `PROJ_LIB`.
+
 ### Building on Unix/Linux
 
 FSF's configuration procedure is used to ease installation of the
@@ -66,6 +73,13 @@ After executing configure, execute:
 
 The install target will create, if necessary, all required sub-directories.
 
+Tests are run with
+
+    make check
+
+The test suite requires that the proj-datumgrid package is installed
+in `PROJ_LIB`.
+
 ### Building on Windows with NMAKE
 
 PROJ can be built with Microsoft Visual C/C++ using the `makefile.vc`
@@ -85,11 +99,11 @@ script out of the Visual C++ tree.
 
 The `makefile.vc` builds `proj.exe`, `proj.dll` and `proj.lib`.
 
-On Windows you have to set the PROJ_LIB environment variable to make
+On Windows you have to set the `PROJ_LIB` environment variable to make
 sure that PROJ can find the resource files that it needs. For the
-default install directory you can set PROJ_LIB with:
+default install directory you can set `PROJ_LIB` with:
 
-    C:\> set PROJ_LIB C:\PROJ\share
+    C:\> set PROJ_LIB=C:\PROJ\share
 
 
 ### Distribution files and format
@@ -99,8 +113,25 @@ of the system are in a compress tar file named `proj-x.y.z.tar.gz` where
 "x" will indicate major release number, "y" indicates minor release
 number and "z" indicates the patch number of the release.
 
-In addition to the PROJ software package, a distribution of datum
-conversion grid files is also available. The grid package is
-distributed under the name `proj-datumgrid-x.y.zip`, where "x" is the
-major release version and "y" the minor release version numbers.
-The grid package can be downloaded from the PROJ.4 website.
+In addition to the PROJ software package, distributions of datum
+conversion grid files and PROJ parameter files are also available.
+The grid package is distributed under the name `proj-datumgrid-x.y.zip`,
+where "x" is the major release version and "y" the minor release
+version numbers. Similarly regional packages are distributed. The
+regional packages contain resources that are not essential to the
+functionality of PROJ but still of value to users in the region
+specific to the package. All grids that were in proj-datumgrids-1.6
+remain in proj-datumgrids-1.7; the regional datumgrid files contain
+grids for datums not previously supported (prior to PROJ 5.0.0).
+
+The resource packages can be downloaded from the PROJ.4 website.
+
+More info on the contents of the various resource packages can be
+found at the
+[proj-datumgrid GitHub repository](https://github.com/OSGeo/proj-datumgrid).
+
+The resource file packages should be extracted to `PROJ_LIB`
+where PROJ will find them after installation. The default location of
+`PROJ_LIB` on UNIX-based systems is `/usr/local/share/proj` but it may
+be changed to a different directory. On Windows you have to define
+`PROJ_LIB` yourself.
