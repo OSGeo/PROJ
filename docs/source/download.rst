@@ -54,6 +54,6 @@ files is available on `DockerHub`_:
 Windows
 ................................................................................
 
-* `OSGeo4W`_ contains 32-bit and 64-bit Windows binaries, including support for many :ref:`grids <grids>`.
+* `OSGeo4W`_ contains 32-bit and 64-bit Windows binaries, including support for many :ref:`grids <resource_files>`.
 
 .. _`OSGeo4W`: https://trac.osgeo.org/osgeo4w/

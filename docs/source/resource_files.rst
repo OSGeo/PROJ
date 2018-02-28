@@ -45,7 +45,7 @@ At the moment three regional resource file packages are distributed:
 Click the links to jump to the relevant README files for each package. Details
 on the content of the packages maintained there.
 
-Links to the resource packages can be found in the `download`_ section.
+Links to the resource packages can be found in the :ref:`download section <download>`.
 
 Transformation grids
 -------------------------------------------------------------------------------
@@ -170,12 +170,10 @@ Netherlands
 
 `Dutch grid <https://www.kadaster.nl/web/Themas/Registraties/Rijksdriehoeksmeting/Transformatie-van-coordinaten.htm>`__ (Registration required before download)
 
-Other grid resources
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 HARN
-................................................................................
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 With the support of `i-cubed <http://www.i3.com>`__, Frank Warmerdam has
 written tools to translate the HPGN grids from NOAA/NGS from ``.los/.las`` format
@@ -211,9 +209,6 @@ This was confirmed against the `NGS HPGN calculator
 <http://www.ngs.noaa.gov/cgi-bin/nadcon2.prl>`__.
 
 The grids are available at http://download.osgeo.org/proj/hpgn_ntv2.zip
-
-.. seealso::
-    :ref:`htpd` describes similar grid shifting
 
 HTDP
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
