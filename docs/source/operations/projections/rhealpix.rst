@@ -1,7 +1,7 @@
-.. _healpix:
+.. _rhealpix:
 
 ********************************************************************************
-HEALPix
+rHEALPix
 ********************************************************************************
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Mixed                                                    |
@@ -14,42 +14,38 @@ HEALPix
 +---------------------+----------------------------------------------------------+
 | **Options**                                                                    |
 +---------------------+----------------------------------------------------------+
-| `No special options for this projection`                                       |
+| `+north_square`     | Position of the north polar square.                      |
+|                     | Valid inputs are 0--3. Defaults to 0.                    |
++---------------------+----------------------------------------------------------+
+| `+south_square`     | Position of the south polar square.                      |
+|                     | Valid inputs are 0--3. Defaults to 0.                    |
 +---------------------+----------------------------------------------------------+
 
-.. image:: ../../../../images/healpix.png
+.. image:: ../../../images/rhealpix.png
    :scale: 75%
-   :alt:   HEALPix
+   :alt:   rHEALPix
 
-The HEALPix projection is area preserving and can be used with a spherical and
-ellipsoidal model. It was initially developed for mapping cosmic background
-microwave radiation. The image below is the graphical representation of the
-mapping and consists of eight isomorphic triangular interrupted map graticules.
-The north and south contains four in which straight meridians converge polewards
-to a point and unequally spaced horizontal parallels. HEALPix provides a mapping
-in which points of equal latitude and equally spaced longitude are mapped to points
-of equal latitude and equally spaced longitude with the module of the polar
-interruptions.
-
+rHEALPix is a projection based on the HEALPix projection. The implementation of
+rHEALPix uses the HEALPix projection. The rHEALPix combines the peaks of the
+HEALPix into a square. The square's position can be translated and rotated across
+the x-axis which is a novel approach for the rHEALPix projection. The initial
+intention of using rHEALPix in the Spatial Computation Engine Science Collaboration
+Environment (SCENZGrid).
 
 Usage
 ###############################################################################
 
-To run a forward HEALPix projection on a unit sphere model, use the following command::
+To run a rHEALPix projection on a WGS84 ellipsoidal model, use the following
+command::
 
-    proj +proj=healpix +lon_0=0 +a=1 -E <<EOF
-    0 0
-    EOF
-    # output
-    0 0 0.00 0.00
+    proj +proj=rhealpix -f '%.2f' +ellps=WGS84 +south_square=0 +north_square=2  -E << EOF
+    > 55 12
+    > EOF
+    55 12   6115727.86  1553840.13
+
 
 Further reading
 ################################################################################
 
 #. `NASA <http://healpix.jpl.nasa.gov/>`_
 #. `Wikipedia <https://en.wikipedia.org/wiki/HEALPix>`_
-
-
-
-
-

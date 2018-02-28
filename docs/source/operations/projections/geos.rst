@@ -55,7 +55,7 @@ projection have a two-axis gimbal viewing geometry. This means that the differen
 scanning positions are obtained by rotating the gimbal along a N/S axis (or ``y``)
 and a E/W axis (or ``x``).
 
-.. image:: ../../../../images/geos_sweep.png
+.. image:: ../../..//images/geos_sweep.png
    :scale: 50%
    :alt:   Gimbal geometry
 

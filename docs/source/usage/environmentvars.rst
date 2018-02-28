@@ -30,7 +30,7 @@ done by setting the variable with no content::
 
 .. envvar:: PROJ_LIB
 
-    The location of PROJ :doc:`resource files<resource_files>`.
+    The location of PROJ :doc:`resource files<../resource_files>`.
     It is only possible to specify a single library in :envvar:`PROJ_LIB`; e.g. it
     does not behave like PATH. PROJ is hardcoded to look for resource files
     in other locations as well, amongst those are the users home directory,

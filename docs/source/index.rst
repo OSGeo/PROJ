@@ -35,6 +35,7 @@ Documentation
    :maxdepth: 1
 
    usage/index
+   operations/index
    resource_files
    geodesic
    development/index
