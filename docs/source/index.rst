@@ -35,9 +35,8 @@ Documentation
    :maxdepth: 1
 
    usage/index
+   resource_files
    geodesic
-   grids
-   htpd
    development/index
    faq
    contributing

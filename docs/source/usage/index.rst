@@ -16,7 +16,6 @@ command line applications or the C API that is a part of the software package.
    apps/index
    projections
    transformation
-   resource_files
    environmentvars
    operations/index
 
