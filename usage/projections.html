@@ -106,14 +106,12 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="transformation.html">Geodetic transformation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="resource_files.html">Resource files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="environmentvars.html">Environment variables</a></li>
-<li class="toctree-l2"><a class="reference internal" href="operations/index.html">Coordinate operations</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../grids.html">Grids</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../htpd.html">HTPD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
@@ -187,13 +185,13 @@
   <div class="section" id="cartographic-projection">
 <span id="projections-intro"></span><h1>Cartographic projection<a class="headerlink" href="#cartographic-projection" title="Permalink to this headline">¶</a></h1>
 <p>The foundation of PROJ is the large number of
-<a class="reference internal" href="operations/projections/index.html"><span class="doc">projections</span></a> available in the library. This section
+<a class="reference internal" href="../operations/projections/index.html"><span class="doc">projections</span></a> available in the library. This section
 is devoted to the generic parameters that can be used on any projection in the
 PROJ library.</p>
 <p>Below is a list of PROJ parameters which can be applied to most coordinate
 system definitions. This table does not attempt to describe the parameters
 particular to particular projection types. These can be found on the pages
-documenting the individual <a class="reference internal" href="operations/projections/index.html"><span class="doc">projections</span></a>.</p>
+documenting the individual <a class="reference internal" href="../operations/projections/index.html"><span class="doc">projections</span></a>.</p>
 <blockquote>
 <div><table border="1" class="docutils">
 <colgroup>
@@ -298,7 +296,7 @@ systems (such as UTM) have implicit false easting and northing values.</p>
 <p>By default PROJ wraps output longitudes in the range -180 to 180.  The <code class="docutils literal"><span class="pre">+over</span></code>
 switch can be used to disable the default wrapping which is done at a low level
 in <code class="docutils literal"><span class="pre">pj_inv()</span></code>.  This is particularly useful with projections like the
-<a class="reference internal" href="operations/projections/eqc.html"><span class="doc">equidistant cylindrical</span></a>
+<a class="reference internal" href="../operations/projections/eqc.html"><span class="doc">equidistant cylindrical</span></a>
 where it would be desirable for X values past -20000000 (roughly) to continue
 past -180 instead of wrapping to +180.</p>
 <p>The <code class="docutils literal"><span class="pre">+lon_wrap</span></code> option can be used to provide an alternative means of doing
@@ -434,7 +432,7 @@ utility.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 27 Feb 2018.
+      Last updated on 01 Mar 2018.
 
     </p>
   </div>

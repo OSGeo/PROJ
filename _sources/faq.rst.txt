@@ -15,7 +15,7 @@ Where can I find the list of projections and their arguments?
 
 There is no simple single location to find all the required information. The
 !PostScript/PDF documents listed on the [http://trac.osgeo.org/proj/wiki main]
-PROJ.4 page under documentation are the authoritative source but projections
+PROJ page under documentation are the authoritative source but projections
 and options are spread over several documents in a form more related to their
 order of implementation than anything else.
 
@@ -25,7 +25,7 @@ units with the '''-lu''' option, and the list of built-in datums with the
 '''-ld''' option.
 
 The [http://www.remotesensing.org/geotiff/proj_list/ GeoTIFF Projections Pages]
-include most of the common PROJ.4 projections, and a definition of the
+include most of the common PROJ projections, and a definition of the
 projection specific options for each.
 
 * How do I do datum shifts between NAD27 and NAD83?
@@ -50,10 +50,10 @@ In order for datum shifting to work properly the various grid shift files must
 be available.  See below.  More details are available in the
 [wiki:GenParms#nadgrids-GridBasedDatumAdjustments General Parameters] document.
 
-How do I build/configure PROJ.4 to support datum shifting?
+How do I build/configure PROJ to support datum shifting?
 --------------------------------------------------------------------------------
 
-After downloading and unpacking the PROJ.4 source, also download and unpack the
+After downloading and unpacking the PROJ source, also download and unpack the
 set of datum shift files.  See :ref:`download` for instructions how to fetch
 and install these files
 
@@ -61,10 +61,10 @@ On Windows the extra nadshift target must be used.  For instance
 ``nmake /f makefile.vc nadshift`` in the ``proj/src`` directory.
 
 A default build and install on Unix will normally build knowledge of the
-directory where the grid shift files are installed into the PROJ.4 library
+directory where the grid shift files are installed into the PROJ library
 (usually /usr/local/share/proj).  On Windows the library is normally built
 thinking that C:\PROJ\NAD is the installed directory for the grid shift files.
-If the built in concept of the PROJ.4 data directory is incorrect, the ``PROJ_LIB``
+If the built in concept of the PROJ data directory is incorrect, the ``PROJ_LIB``
 environment can be defined with the correct directory.
 
 How do I debug problems with NAD27/NAD83 datum shifting?
@@ -88,7 +88,7 @@ How do I debug problems with NAD27/NAD83 datum shifting?
    are not identified as having a datum, the datum shifting (and ellipsoid
    change) step is just quietly skipped!
 4. The ``PROJ_DEBUG`` environment can be defined (any value) to force extra output
-   from the PROJ.4 library to stderr (the text console normally) with
+   from the PROJ library to stderr (the text console normally) with
    information on what data files are being opened and in some cases why a
    transformation fails.
 
@@ -99,17 +99,17 @@ How do I debug problems with NAD27/NAD83 datum shifting?
 
 
    .. note::
-        ``PROJ_DEBUG`` support is not yet very mature in the PROJ.4 library.
+        ``PROJ_DEBUG`` support is not yet very mature in the PROJ library.
 
 5. The ``-v`` flag to cs2cs can be useful in establishing more detail on what
    parameters being used internally for a coordinate system.  This will include
    expanding the definition of +datum clause.
 
-How do I use EPSG coordinate system codes with PROJ.4?
+How do I use EPSG coordinate system codes with PROJ?
 --------------------------------------------------------------------------------
 
 There is somewhat imperfect translation between 2d geographic and projected
-coordinate system codes and PROJ.4 descriptions of the coordinate system
+coordinate system codes and PROJ descriptions of the coordinate system
 available in the epsg definition file that normally lives in the proj/nad
 directory.  If installed (it is installed by default on Unix), it is possible
 to use EPSG numbers like this:
@@ -144,12 +144,12 @@ use is more fully described in the
 [wiki:GenParms#towgs84-DatumtransformationtoWGS84 towgs84] parameter
 discussion.
 
-Does PROJ.4 work in different international numeric locales?
+Does PROJ work in different international numeric locales?
 --------------------------------------------------------------------------------
 
-No.  PROJ.4 makes extensive use of sprintf() and atof() internally to translate
+No.  PROJ makes extensive use of sprintf() and atof() internally to translate
 numeric values.  If a locale is in effect that modifies formatting of numbers,
-altering the role of commas and periods in numbers, then PROJ.4 will not work.
+altering the role of commas and periods in numbers, then PROJ will not work.
 This problem is common in some European locales.
 
 On unix-like platforms, this problem can be avoided by forcing the use of the
@@ -194,7 +194,7 @@ the WGS84 datum which has a quite differently shaped ellipsoid.
 In this case, and many other cases using spherical projections, the desired
 approach is to actually treat the lat/long locations on the sphere as if they
 were on WGS84 without any adjustments when using them for converting to other
-coordinate systems.  The solution is to "trick" PROJ.4 into applying no change
+coordinate systems.  The solution is to "trick" PROJ into applying no change
 to the lat/long values when going to (and through) WGS84.  This can be
 accomplished by asking PROJ to use a null grid shift file for switching from
 your spherical lat/long coordinates to WGS84.
@@ -212,7 +212,7 @@ Similar issues apply with many other datasets distributed with projections
 based on a spherical earth model - such as many NASA datasets.  This coordinate
 system is now known by the EPSG code 3857 and has in the past been known as
 EPSG:3785 and EPSG:900913.  When using this coordinate system with GDAL/OGR it
-is helpful to include the +wktext so the exact proj.4 string will be preserved
+is helpful to include the +wktext so the exact PROJ string will be preserved
 in the WKT representation (otherwise key parameters like `+nadgrids=@null` will
 be dropped):
 
@@ -224,11 +224,11 @@ be dropped):
 Why do I get different results with 4.5.0 and 4.6.0?
 --------------------------------------------------------------------------------
 
-The default datum application behavior changed with the 4.6.0 release.  PROJ.4
+The default datum application behavior changed with the 4.6.0 release.  PROJ
 will now only apply a datum shift if both the source and destination coordinate
 system have valid datum shift information.
 
-From the PROJ.4 4.6.0 Release Notes (in NEWS):
+From the PROJ 4.6.0 Release Notes (in NEWS):
  * MAJOR: Rework pj_transform() to avoid applying ellipsoid to ellipsoid
    transformations as a datum shift when no datum info is available.
 
@@ -302,7 +302,7 @@ Output of above command:
 
     0 0.7853981633974483 0.00 41.94
 
-What options does proj.4 allow for the shape of the Earth (geodesy)?
+What options does PROJ allow for the shape of the Earth (geodesy)?
 --------------------------------------------------------------------------------
 
 See https://github.com/OSGeo/proj.4/blob/master/src/pj_ellps.c
@@ -315,7 +315,7 @@ What if I want a spherical Earth?
 Use ``+ellps=sphere``.  See https://github.com/OSGeo/proj.4/blob/master/src/pj_ellps.c
 for the radius used in this case.
 
-How do I change the radius of the Earth?  How do I use proj.4 for work on Mars?
+How do I change the radius of the Earth?  How do I use PROJ for work on Mars?
 --------------------------------------------------------------------------------
 
 You can supply explicit values for the semi minor and semi major axes instead

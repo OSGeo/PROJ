@@ -1,0 +1,688 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Resource files &mdash; PROJ.4 5.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Geodesic calculations" href="geodesic.html"/>
+        <link rel="prev" title="The pipeline operator" href="operations/pipeline.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Resource files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#external-resources">External resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transformation-grids">Transformation grids</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#free-grids">Free grids</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#switzerland">Switzerland</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hungary">Hungary</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#non-free-grids">Non-Free Grids</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#canada-ntv2-0">Canada NTv2.0</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#australia">Australia</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#canada">Canada</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#germany">Germany</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#great-britain">Great Britain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#austria">Austria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spain">Spain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#portugal">Portugal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#brazil">Brazil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#south-africa">South Africa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#netherlands">Netherlands</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#harn">HARN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#htdp">HTDP</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#getting-and-building-htdp">Getting and building HTDP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#getting-crs2crs2grid-py">Getting crs2crs2grid.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#init-files">Init files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-defaults-file">The defaults file</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Resource files</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="resource-files">
+<span id="id1"></span><h1>Resource files<a class="headerlink" href="#resource-files" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#resource-files" id="id3">Resource files</a><ul>
+<li><a class="reference internal" href="#external-resources" id="id4">External resources</a></li>
+<li><a class="reference internal" href="#transformation-grids" id="id5">Transformation grids</a></li>
+<li><a class="reference internal" href="#init-files" id="id6">Init files</a></li>
+<li><a class="reference internal" href="#the-defaults-file" id="id7">The defaults file</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>A number of files containing preconfigured transformations and default parameters
+for certain projections are bundled with the PROJ distribution. Init files
+contains preconfigured proj-strings for various coordinate reference systems
+and the defaults file contains default values for parameters of select
+projections.</p>
+<p>In addition to the bundled init-files the PROJ.4 project also distribute a number
+of packages containing transformation grids and additional init-files not included
+in the main PROJ package.</p>
+<div class="section" id="external-resources">
+<h2>External resources<a class="headerlink" href="#external-resources" title="Permalink to this headline">¶</a></h2>
+<p>For a functioning PROJ installation of the
+<a class="reference external" href="https://github.com/OSGeo/proj-datumgrid">proj-datumgrid</a> is needed. If you
+have installed PROJ from a package system chances are that this will already be
+done for you. The <em>proj-datumgrid</em> package provides transformation grids that
+are essential for many of the predefined transformations in PROJ. Which grids
+are included in the package can be seen on the
+<a class="reference external" href="https://github.com/OSGeo/proj-datumgrid">proj-datumgrid repository</a> as well
+as descriptions of those grids.</p>
+<p>In addition to the default <em>proj-datumgrid</em> package regional packages are also
+distributed. These include grids and init-files that are valid within the given
+region. The packages are divided into geographical regions in order to keep the
+needed disk space by PROJ at a minimum. Some users may have a use for resource
+files covering several regions in which case they can download more than one.</p>
+<p>At the moment three regional resource file packages are distributed:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/OSGeo/proj-datumgrid/tree/master/europe#proj-datumgrid-europe">Europe</a></li>
+<li><a class="reference external" href="https://github.com/OSGeo/proj-datumgrid/tree/master/oceania#proj-datumgrid-oceania">Oceania</a></li>
+<li><a class="reference external" href="https://github.com/OSGeo/proj-datumgrid/tree/master/north-america#proj-datumgrid-north-america">North America</a></li>
+</ul>
+<p>Click the links to jump to the relevant README files for each package. Details
+on the content of the packages maintained there.</p>
+<p>Links to the resource packages can be found in the <a class="reference internal" href="download.html#download"><span class="std std-ref">download section</span></a>.</p>
+</div>
+<div class="section" id="transformation-grids">
+<span id="id2"></span><h2>Transformation grids<a class="headerlink" href="#transformation-grids" title="Permalink to this headline">¶</a></h2>
+<p>Grid files are important for shifting and transforming between datums.</p>
+<p>PROJ supports CTable2, NTv1 and NTv2 files for horizontal grid corrections and
+the GTX file format for vertical corrections. Details about the formats can be
+found in the <a class="reference external" href="http://gdal.org/">GDAL documentation</a>. GDAL reads and writes
+all formats. Using GDAL for construction of new grids is recommended.</p>
+<p>Below is a given a list of grid resources for various countries which are not
+included in the grid distributions mentioned above.</p>
+<div class="section" id="free-grids">
+<h3>Free grids<a class="headerlink" href="#free-grids" title="Permalink to this headline">¶</a></h3>
+<p>Below is a list of grids distributed under a free and open license.</p>
+<div class="section" id="switzerland">
+<h4>Switzerland<a class="headerlink" href="#switzerland" title="Permalink to this headline">¶</a></h4>
+<p>Background in ticket <a class="reference external" href="https://github.com/OSGeo/proj.4/issues/145">#145</a></p>
+<p>We basically have two shift grids available. An official here:</p>
+<p><a class="reference external" href="https://shop.swisstopo.admin.ch/en/products/geo_software/GIS_info">Swiss CHENyx06 dataset in NTv2 format</a></p>
+<p>And a derived in a temporary location which is probably going to disappear soon.</p>
+<p>Main problem seems to be there&#8217;s no mention of distributivity of the grid from
+the official website.  It just tells: &#8220;you can use freely&#8221;.  The &#8220;contact&#8221; link
+is also broken, but maybe someone could make a phone call to ask for rephrasing
+that.</p>
+</div>
+<div class="section" id="hungary">
+<h4>Hungary<a class="headerlink" href="#hungary" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="https://github.com/OSGeoLabBp/eov2etrs/">Hungarian grid</a> ETRS89 - HD72/EOV (epsg:23700), both horizontal and elevation grids</p>
+</div>
+</div>
+<div class="section" id="non-free-grids">
+<span id="nonfreegrids"></span><h3>Non-Free Grids<a class="headerlink" href="#non-free-grids" title="Permalink to this headline">¶</a></h3>
+<p>Not all grid shift files have licensing that allows them to be freely
+distributed, but can be obtained by users through free and legal methods.</p>
+<div class="section" id="canada-ntv2-0">
+<h4>Canada NTv2.0<a class="headerlink" href="#canada-ntv2-0" title="Permalink to this headline">¶</a></h4>
+<p>Although NTv1 grid shifts are provided freely with PROJ, the higher-quality
+NTv2.0 file needs to be downloaded from Natural Resources Canada. More info:
+<a class="reference external" href="http://www.geod.nrcan.gc.ca/tools-outils/ntv2_e.php">http://www.geod.nrcan.gc.ca/tools-outils/ntv2_e.php</a>.</p>
+<p>Procedure:</p>
+<ol class="arabic">
+<li><p class="first">Visit the <a class="reference external" href="http://webapp.geod.nrcan.gc.ca/geod/tools-outils/applications.php?locale=en#ntv2">NTv2</a>, and register/login</p>
+</li>
+<li><p class="first">Follow the Download NTv2 link near the bottom of the page.</p>
+</li>
+<li><p class="first">Unzip <cite>ntv2_100325.zip</cite> (or similar), and move the grid shift file <cite>NTV2_0.GSB</cite> to the proj directory (be sure to change the name to lowercase for consistency)
+* e.g.: <cite>mv NTV2_0.GSB /usr/local/share/proj/ntv2_0.gsb</cite></p>
+</li>
+<li><dl class="first docutils">
+<dt>Test it using:</dt>
+<dd><div class="first highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=</span><span class="nd">@ntv2_0</span><span class="o">.</span><span class="n">gsb</span> <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span>
+<span class="o">-</span><span class="mi">111</span> <span class="mi">50</span>
+</pre></div>
+</div>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="mi">111</span><span class="n">d0</span><span class="s1">&#39;3.006&quot;W   50d0&#39;</span><span class="mf">0.103</span><span class="s2">&quot;N 0.000  # correct answer</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ol>
+</div>
+<div class="section" id="australia">
+<h4>Australia<a class="headerlink" href="#australia" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="http://www.icsm.gov.au/gda/tech.html">Geocentric Datum of Australia AGD66/AGD84</a></p>
+</div>
+<div class="section" id="canada">
+<h4>Canada<a class="headerlink" href="#canada" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="http://open.canada.ca/data/en/dataset/b3534942-31ea-59cf-bcc3-f8dc4875081a">Canadian NTv2 grid shift binary</a> for NAD27 &lt;=&gt; NAD83.</p>
+</div>
+<div class="section" id="germany">
+<h4>Germany<a class="headerlink" href="#germany" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="http://crs.bkg.bund.de/crseu/crs/descrtrans/BeTA/de_dhdn2etrs_beta.php">German BeTA2007 DHDN GK3 =&gt; ETRS89/UTM</a></p>
+</div>
+<div class="section" id="great-britain">
+<h4>Great Britain<a class="headerlink" href="#great-britain" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="https://www.ordnancesurvey.co.uk/docs/gps/OSTN15_NTv2.zip">Great Britain&#8217;s OSTN15_NTv2: OSGB 1936 =&gt; ETRS89</a></p>
+<p><a class="reference external" href="http://www.ordnancesurvey.co.uk/business-and-government/help-and-support/navigation-technology/os-net/ostn02-ntv2-format.html">Great Britain&#8217;s OSTN02_NTv2: OSGB 1936 =&gt; ETRS89</a></p>
+</div>
+<div class="section" id="austria">
+<h4>Austria<a class="headerlink" href="#austria" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="http://www.bev.gv.at/portal/page?_pageid=713,2204753&amp;_dad=portal&amp;_schema=PORTAL">Austrian Grid</a> for MGI</p>
+</div>
+<div class="section" id="spain">
+<h4>Spain<a class="headerlink" href="#spain" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="http://www.ign.es/ign/layoutIn/herramientas.do#DATUM">Spanish grids</a> for ED50.</p>
+</div>
+<div class="section" id="portugal">
+<h4>Portugal<a class="headerlink" href="#portugal" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="http://www.fc.up.pt/pessoas/jagoncal/coordenadas/index.htm">Portuguese grids</a> for ED50, Lisbon 1890, Lisbon 1937 and Datum 73</p>
+</div>
+<div class="section" id="brazil">
+<h4>Brazil<a class="headerlink" href="#brazil" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="http://www.ibge.gov.br/home/geociencias/geodesia/param_transf/default_param_transf.shtm">Brazilian grids</a> for datums Corrego Alegre 1961, Corrego Alegre 1970-72, SAD69 and SAD69(96)</p>
+</div>
+<div class="section" id="south-africa">
+<h4>South Africa<a class="headerlink" href="#south-africa" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="http://eepublishers.co.za/article/datum-transformations-using-the-ntv2-grid.html">South African grid</a> (Cape to Hartebeesthoek94 or WGS84)</p>
+</div>
+<div class="section" id="netherlands">
+<h4>Netherlands<a class="headerlink" href="#netherlands" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="https://www.kadaster.nl/web/Themas/Registraties/Rijksdriehoeksmeting/Transformatie-van-coordinaten.htm">Dutch grid</a> (Registration required before download)</p>
+</div>
+</div>
+<div class="section" id="harn">
+<h3>HARN<a class="headerlink" href="#harn" title="Permalink to this headline">¶</a></h3>
+<p>With the support of <a class="reference external" href="http://www.i3.com">i-cubed</a>, Frank Warmerdam has
+written tools to translate the HPGN grids from NOAA/NGS from <code class="docutils literal"><span class="pre">.los/.las</span></code> format
+into NTv2 format for convenient use with PROJ.  This project included
+implementing a <a class="reference external" href="https://github.com/OSGeo/gdal/tree/trunk/gdal/frmts/raw/loslasdataset.cpp">.los/.las reader</a>
+for GDAL, and an <a class="reference external" href="https://github.com/OSGeo/gdal/tree/trunk/gdal/frmts/raw/ntv2dataset.cpp">NTv2 reader/writer</a>.
+Also, a script to do the bulk translation was implemented in
+<a class="reference external" href="https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/loslas2ntv2.py">https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/loslas2ntv2.py</a>.
+The command to do the translation was:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">loslas2ntv2</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">auto</span> <span class="o">*</span><span class="n">hpgn</span><span class="o">.</span><span class="n">los</span>
+</pre></div>
+</div>
+<p>As GDAL uses NAD83/WGS84 as a pivot datum, the sense of the HPGN datum shift offsets were negated to map from HPGN to NAD83 instead of the other way.  The files can be used with PROJ like this:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span>
+      <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=./</span><span class="n">azhpgn</span><span class="o">.</span><span class="n">gsb</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># input:</span>
+<span class="o">-</span><span class="mi">112</span> <span class="mi">34</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># output:</span>
+<span class="mi">111</span><span class="n">d59</span><span class="s1">&#39;59.996&quot;W 34d0&#39;</span><span class="mf">0.006</span><span class="s2">&quot;N -0.000</span>
+</pre></div>
+</div>
+<p>This was confirmed against the <a class="reference external" href="http://www.ngs.noaa.gov/cgi-bin/nadcon2.prl">NGS HPGN calculator</a>.</p>
+<p>The grids are available at <a class="reference external" href="http://download.osgeo.org/proj/hpgn_ntv2.zip">http://download.osgeo.org/proj/hpgn_ntv2.zip</a></p>
+</div>
+<div class="section" id="htdp">
+<h3>HTDP<a class="headerlink" href="#htdp" title="Permalink to this headline">¶</a></h3>
+<p>This page documents use of the <cite>crs2crs2grid.py</cite> script and the HTDP
+(Horizontal Time Dependent Positioning) grid shift modelling program from
+NGS/NOAA to produce PROJ compatible grid shift files for fine grade
+conversions between various NAD83 epochs and WGS84.  Traditionally PROJ has
+treated NAD83 and WGS84 as equivalent and failed to distinguish between
+different epochs or realizations of those datums.  At the scales of much
+mapping this is adequate but as interest grows in high resolution imagery and
+other high resolution mapping this is inadequate.  Also, as the North American
+crust drifts over time the displacement between NAD83 and WGS84 grows (more
+than one foot over the last two decades).</p>
+<div class="section" id="getting-and-building-htdp">
+<h4>Getting and building HTDP<a class="headerlink" href="#getting-and-building-htdp" title="Permalink to this headline">¶</a></h4>
+<p>The HTDP modelling program is in written FORTRAN.  The source and documentation
+can be found on the HTDP page at <a class="reference external" href="http://www.ngs.noaa.gov/TOOLS/Htdp/Htdp.shtml">http://www.ngs.noaa.gov/TOOLS/Htdp/Htdp.shtml</a></p>
+<p>On linux systems it will be necessary to install <cite>gfortran</cite> or some FORTRAN
+compiler.  For ubuntu something like the following should work.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">gfortran</span>
+</pre></div>
+</div>
+<p>To compile the program do something like the following to produce the binary &#8220;htdp&#8221; from the source code.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gfortran</span> <span class="n">htdp</span><span class="o">.</span><span class="k">for</span> <span class="o">-</span><span class="n">o</span> <span class="n">htdp</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-crs2crs2grid-py">
+<h4>Getting crs2crs2grid.py<a class="headerlink" href="#getting-crs2crs2grid-py" title="Permalink to this headline">¶</a></h4>
+<p>The <cite>crs2crs2grid.py</cite> script can be found at
+<a class="reference external" href="https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/crs2crs2grid.py">https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/crs2crs2grid.py</a></p>
+<p>It depends on having the GDAL Python bindings operational.  If they are not</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;./crs2crs2grid.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">37</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+    <span class="kn">from</span> <span class="nn">osgeo</span> <span class="k">import</span> <span class="n">gdal</span><span class="p">,</span> <span class="n">gdal_array</span><span class="p">,</span> <span class="n">osr</span>
+<span class="ne">ImportError</span><span class="p">:</span> <span class="n">No</span> <span class="n">module</span> <span class="n">named</span> <span class="n">osgeo</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="usage">
+<h4>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-default"><div class="highlight"><pre><span></span>   <span class="n">crs2crs2grid</span><span class="o">.</span><span class="n">py</span>
+           <span class="o">&lt;</span><span class="n">src_crs_id</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">src_crs_date</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">dst_crs_id</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">dst_crs_year</span><span class="o">&gt;</span>
+           <span class="p">[</span><span class="o">-</span><span class="n">griddef</span> <span class="o">&lt;</span><span class="n">ul_lon</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">ul_lat</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">ll_lon</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">ll_lat</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">lon_count</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">lat_count</span><span class="o">&gt;</span><span class="p">]</span>
+           <span class="p">[</span><span class="o">-</span><span class="n">htdp</span> <span class="o">&lt;</span><span class="n">path_to_exe</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">wrkdir</span> <span class="o">&lt;</span><span class="n">dirpath</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">kwf</span><span class="p">]</span>
+           <span class="o">-</span><span class="n">o</span> <span class="o">&lt;</span><span class="n">output_grid_name</span><span class="o">&gt;</span>
+
+<span class="o">-</span><span class="n">griddef</span><span class="p">:</span> <span class="n">by</span> <span class="n">default</span> <span class="n">the</span> <span class="n">following</span> <span class="n">values</span> <span class="k">for</span> <span class="n">roughly</span> <span class="n">the</span> <span class="n">continental</span> <span class="n">USA</span>
+          <span class="n">at</span> <span class="n">a</span> <span class="n">six</span> <span class="n">minute</span> <span class="n">step</span> <span class="n">size</span> <span class="n">are</span> <span class="n">used</span><span class="p">:</span>
+          <span class="o">-</span><span class="mi">127</span> <span class="mi">50</span> <span class="o">-</span><span class="mi">66</span> <span class="mi">25</span> <span class="mi">251</span> <span class="mi">611</span>
+<span class="o">-</span><span class="n">kwf</span><span class="p">:</span> <span class="n">keep</span> <span class="n">working</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">working</span> <span class="n">directory</span> <span class="k">for</span> <span class="n">review</span><span class="o">.</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">crs2crs2grid</span><span class="o">.</span><span class="n">py</span> <span class="mi">29</span> <span class="mf">2002.0</span> <span class="mi">8</span> <span class="mf">2002.0</span> <span class="o">-</span><span class="n">o</span> <span class="n">nad83_2002</span><span class="o">.</span><span class="n">ct2</span>
+</pre></div>
+</div>
+<p>The goal of <cite>crs2crs2grid.py</cite> is to produce a grid shift file for a designated
+region.  The region is defined using the <cite>-griddef</cite> switch.  When missing a
+continental US region is used.  The script creates a set of sample points for
+the grid definition, runs the &#8220;htdp&#8221; program against it and then parses the
+resulting points and computes a point by point shift to encode into the final
+grid shift file.  By default it is assumed the <cite>htdp</cite> program will be in the
+executable path.  If not, please provide the path to the executable using the
+<cite>-htdp</cite> switch.</p>
+<p>The <cite>htdp</cite> program supports transformations between many CRSes and for each (or
+most?) of them you need to provide a date at which the CRS is fixed.  The full
+set of CRS Ids available in the HTDP program are:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span> <span class="mf">1.</span><span class="o">..</span><span class="n">NAD_83</span><span class="p">(</span><span class="mi">2011</span><span class="p">)</span> <span class="p">(</span><span class="n">North</span> <span class="n">America</span> <span class="n">tectonic</span> <span class="n">plate</span> <span class="n">fixed</span><span class="p">)</span>
+ <span class="mf">29.</span><span class="o">..</span><span class="n">NAD_83</span><span class="p">(</span><span class="n">CORS96</span><span class="p">)</span>  <span class="p">(</span><span class="n">NAD_83</span><span class="p">(</span><span class="mi">2011</span><span class="p">)</span> <span class="n">will</span> <span class="n">be</span> <span class="n">used</span><span class="p">)</span>
+ <span class="mf">30.</span><span class="o">..</span><span class="n">NAD_83</span><span class="p">(</span><span class="mi">2007</span><span class="p">)</span>    <span class="p">(</span><span class="n">NAD_83</span><span class="p">(</span><span class="mi">2011</span><span class="p">)</span> <span class="n">will</span> <span class="n">be</span> <span class="n">used</span><span class="p">)</span>
+ <span class="mf">2.</span><span class="o">..</span><span class="n">NAD_83</span><span class="p">(</span><span class="n">PA11</span><span class="p">)</span> <span class="p">(</span><span class="n">Pacific</span> <span class="n">tectonic</span> <span class="n">plate</span> <span class="n">fixed</span><span class="p">)</span>
+ <span class="mf">31.</span><span class="o">..</span><span class="n">NAD_83</span><span class="p">(</span><span class="n">PACP00</span><span class="p">)</span>  <span class="p">(</span><span class="n">NAD</span> <span class="mi">83</span><span class="p">(</span><span class="n">PA11</span><span class="p">)</span> <span class="n">will</span> <span class="n">be</span> <span class="n">used</span><span class="p">)</span>
+ <span class="mf">3.</span><span class="o">..</span><span class="n">NAD_83</span><span class="p">(</span><span class="n">MA11</span><span class="p">)</span> <span class="p">(</span><span class="n">Mariana</span> <span class="n">tectonic</span> <span class="n">plate</span> <span class="n">fixed</span><span class="p">)</span>
+ <span class="mf">32.</span><span class="o">..</span><span class="n">NAD_83</span><span class="p">(</span><span class="n">MARP00</span><span class="p">)</span>  <span class="p">(</span><span class="n">NAD_83</span><span class="p">(</span><span class="n">MA11</span><span class="p">)</span> <span class="n">will</span> <span class="n">be</span> <span class="n">used</span><span class="p">)</span>
+
+ <span class="mf">4.</span><span class="o">..</span><span class="n">WGS_72</span>                             <span class="mf">16.</span><span class="o">..</span><span class="n">ITRF92</span>
+ <span class="mf">5.</span><span class="o">..</span><span class="n">WGS_84</span><span class="p">(</span><span class="n">transit</span><span class="p">)</span> <span class="o">=</span> <span class="n">NAD_83</span><span class="p">(</span><span class="mi">2011</span><span class="p">)</span>     <span class="mf">17.</span><span class="o">..</span><span class="n">ITRF93</span>
+ <span class="mf">6.</span><span class="o">..</span><span class="n">WGS_84</span><span class="p">(</span><span class="n">G730</span><span class="p">)</span> <span class="o">=</span> <span class="n">ITRF92</span>              <span class="mf">18.</span><span class="o">..</span><span class="n">ITRF94</span> <span class="o">=</span> <span class="n">ITRF96</span>
+ <span class="mf">7.</span><span class="o">..</span><span class="n">WGS_84</span><span class="p">(</span><span class="n">G873</span><span class="p">)</span> <span class="o">=</span> <span class="n">ITRF96</span>              <span class="mf">19.</span><span class="o">..</span><span class="n">ITRF96</span>
+ <span class="mf">8.</span><span class="o">..</span><span class="n">WGS_84</span><span class="p">(</span><span class="n">G1150</span><span class="p">)</span> <span class="o">=</span> <span class="n">ITRF2000</span>           <span class="mf">20.</span><span class="o">..</span><span class="n">ITRF97</span>
+ <span class="mf">9.</span><span class="o">..</span><span class="n">PNEOS_90</span> <span class="o">=</span> <span class="n">ITRF90</span>                  <span class="mf">21.</span><span class="o">..</span><span class="n">IGS97</span> <span class="o">=</span> <span class="n">ITRF97</span>
+<span class="mf">10.</span><span class="o">..</span><span class="n">NEOS_90</span> <span class="o">=</span> <span class="n">ITRF90</span>                   <span class="mf">22.</span><span class="o">..</span><span class="n">ITRF2000</span>
+<span class="mf">11.</span><span class="o">..</span><span class="n">SIO</span><span class="o">/</span><span class="n">MIT_92</span> <span class="o">=</span> <span class="n">ITRF91</span>                <span class="mf">23.</span><span class="o">..</span><span class="n">IGS00</span> <span class="o">=</span> <span class="n">ITRF2000</span>
+<span class="mf">12.</span><span class="o">..</span><span class="n">ITRF88</span>                             <span class="mf">24.</span><span class="o">..</span><span class="n">IGb00</span> <span class="o">=</span> <span class="n">ITRF2000</span>
+<span class="mf">13.</span><span class="o">..</span><span class="n">ITRF89</span>                             <span class="mf">25.</span><span class="o">..</span><span class="n">ITRF2005</span>
+<span class="mf">14.</span><span class="o">..</span><span class="n">ITRF90</span>                             <span class="mf">26.</span><span class="o">..</span><span class="n">IGS05</span> <span class="o">=</span> <span class="n">ITRF2005</span>
+<span class="mf">15.</span><span class="o">..</span><span class="n">ITRF91</span>                             <span class="mf">27.</span><span class="o">..</span><span class="n">ITRF2008</span>
+                                        <span class="mf">28.</span><span class="o">..</span><span class="n">IGS08</span> <span class="o">=</span> <span class="n">ITRF2008</span>
+</pre></div>
+</div>
+<p>The typical use case is mapping from NAD83 on a particular date to WGS84 on
+some date.  In this case the source CRS Id &#8220;29&#8221; (NAD_83(CORS96)) and the
+destination CRS Id is &#8220;8 (WGS_84(G1150)).  It is also necessary to select the
+source and destination date (epoch).  For example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">crs2crs2grid</span><span class="o">.</span><span class="n">py</span> <span class="mi">29</span> <span class="mf">2002.0</span> <span class="mi">8</span> <span class="mf">2002.0</span> <span class="o">-</span><span class="n">o</span> <span class="n">nad83_2002</span><span class="o">.</span><span class="n">ct2</span>
+</pre></div>
+</div>
+<p>The output is a CTable2 format grid shift file suitable for use with PROJ
+(4.8.0 or newer).  It might be utilized something like:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=./</span><span class="n">nad83_2002</span><span class="o">.</span><span class="n">ct2</span> <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">WGS84</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="see-also">
+<h4>See Also<a class="headerlink" href="#see-also" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><a class="reference external" href="http://www.ngs.noaa.gov/TOOLS/Htdp/Htdp.shtml">http://www.ngs.noaa.gov/TOOLS/Htdp/Htdp.shtml</a> - NGS/NOAA page about the HTDP
+model and program.  Source for the HTDP program can be downloaded from here.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="init-files">
+<h2>Init files<a class="headerlink" href="#init-files" title="Permalink to this headline">¶</a></h2>
+<p>Init files are used for preconfiguring proj-strings for often used
+transformations, such as those found in the EPSG database. Most init files contain
+transformations from a given coordinate reference system to WGS84. This makes
+it easy to transformations between any two coordinate reference systems with
+<code class="docutils literal"><span class="pre">cs2cs</span></code>. Init files can however contain any proj-string and don&#8217;t necesarily
+have to follow the <em>cs2cs</em> paradigm where WGS84 is used as a pivot datum. The
+ITRF init file is a good example of that.</p>
+<p>A number of init files come pre-bundled with PROJ but it is also possible to
+add your own custom init files. PROJ looks for the init files in the directoty
+listed in the <code class="docutils literal"><span class="pre">PROJ_LIB</span></code> environment variable.</p>
+<p>The format of init files made up of a identifier in angled brackets and a
+proj-string:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="mi">3819</span><span class="o">&gt;</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">longlat</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">bessel</span>
+       <span class="o">+</span><span class="n">towgs84</span><span class="o">=</span><span class="mf">595.48</span><span class="p">,</span><span class="mf">121.69</span><span class="p">,</span><span class="mf">515.35</span><span class="p">,</span><span class="mf">4.115</span><span class="p">,</span><span class="o">-</span><span class="mf">2.9383</span><span class="p">,</span><span class="mf">0.853</span><span class="p">,</span><span class="o">-</span><span class="mf">3.408</span> <span class="o">+</span><span class="n">no_defs</span> <span class="o">&lt;&gt;</span>
+</pre></div>
+</div>
+<p>The above example is the first entry from the <code class="docutils literal"><span class="pre">epsg</span></code> init file. So, this is the
+coordinate reference system with ID 3819 in the EPSG database. Comments can be
+inserted by prefixing them with a &#8220;#&#8221;. With version 4.10.0 a new special metadata
+entry is now accepted in init files. It can be parsed with a function from the public
+API. The metadata entry in the epsg init file looks like this at the time of writing:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">metadata</span><span class="o">&gt;</span> <span class="o">+</span><span class="n">version</span><span class="o">=</span><span class="mf">9.0</span><span class="o">.</span><span class="mi">0</span> <span class="o">+</span><span class="n">origin</span><span class="o">=</span><span class="n">EPSG</span> <span class="o">+</span><span class="n">lastupdate</span><span class="o">=</span><span class="mi">2017</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">10</span>
+</pre></div>
+</div>
+<p>Pre-configured proj-strings from init files are used in the following way:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ cs2cs -v +proj=latlong +to +init=epsg:3819
+# ---- From Coordinate System ----
+#Lat/long (Geodetic alias)
+#
+# +proj=latlong +ellps=WGS84
+# ---- To Coordinate System ----
+#Lat/long (Geodetic alias)
+#
+# +init=epsg:3819 +proj=longlat +ellps=bessel
+# +towgs84=595.48,121.69,515.35,4.115,-2.9383,0.853,-3.408 +no_defs
+</pre></div>
+</div>
+<p>It is possible to override parameters when using <code class="docutils literal"><span class="pre">+init</span></code>. Just add the parameter
+to the proj-string alongside the <code class="docutils literal"><span class="pre">+init</span></code> parameter. For instance by overriding
+the ellipsoid as in the following example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">init</span><span class="o">=</span><span class="n">epsg</span><span class="p">:</span><span class="mi">25832</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">intl</span>
+</pre></div>
+</div>
+<p>where the Hayford ellipsoid is used instead of the predefined GRS80 ellipsoid.
+It is also possible to add additional parameters not specified in the init file,
+for instance by adding an obervation epoch when transforming from ITRF2000 to
+ITRF2005:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">init</span><span class="o">=</span><span class="n">ITRF2000</span><span class="p">:</span><span class="n">ITRF2005</span> <span class="o">+</span><span class="n">tobs</span><span class="o">=</span><span class="mf">2010.5</span>
+</pre></div>
+</div>
+<p>which then expands to</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="o">+</span><span class="n">x</span><span class="o">=-</span><span class="mf">0.0001</span> <span class="o">+</span><span class="n">y</span><span class="o">=</span><span class="mf">0.0008</span> <span class="o">+</span><span class="n">z</span><span class="o">=</span><span class="mf">0.0058</span> <span class="o">+</span><span class="n">s</span><span class="o">=-</span><span class="mf">0.0004</span>
+<span class="o">+</span><span class="n">dx</span><span class="o">=</span><span class="mf">0.0002</span> <span class="o">+</span><span class="n">dy</span><span class="o">=-</span><span class="mf">0.0001</span> <span class="o">+</span><span class="n">dz</span><span class="o">=</span><span class="mf">0.0018</span> <span class="o">+</span><span class="n">ds</span><span class="o">=-</span><span class="mf">0.000008</span>
+<span class="o">+</span><span class="n">epoch</span><span class="o">=</span><span class="mf">2000.0</span> <span class="o">+</span><span class="n">transpose</span>
+<span class="o">+</span><span class="n">tobs</span><span class="o">=</span><span class="mf">2010.5</span>
+</pre></div>
+</div>
+<p>Below is a list of the init files that are packaged with PROJ.</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="11%" />
+<col width="89%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>esri</td>
+<td>Auto-generated mapping from Esri projection index. Not
+maintained any more</td>
+</tr>
+<tr class="row-odd"><td>epsg</td>
+<td>EPSG database</td>
+</tr>
+<tr class="row-even"><td>GL27</td>
+<td>Great Lakes Grids</td>
+</tr>
+<tr class="row-odd"><td>IGNF</td>
+<td>French coordinate systems supplied by the IGNF</td>
+</tr>
+<tr class="row-even"><td>ITRF2000</td>
+<td>Full set of transformation parameters between ITRF2000 and other
+ITRF&#8217;s</td>
+</tr>
+<tr class="row-odd"><td>ITRF2008</td>
+<td>Full set of transformation parameters between ITRF2008 and other
+ITRF&#8217;s</td>
+</tr>
+<tr class="row-even"><td>ITRF2014</td>
+<td>Full set of transformation parameters between ITRF2014 and other
+ITRF&#8217;s</td>
+</tr>
+<tr class="row-odd"><td>nad27</td>
+<td>State plane coordinate systems, North American Datum 1927</td>
+</tr>
+<tr class="row-even"><td>nad83</td>
+<td>State plane coordinate systems, North American Datum 1983</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="section" id="the-defaults-file">
+<h2>The defaults file<a class="headerlink" href="#the-defaults-file" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">proj_def.dat</span></code> file supplies default parameters for PROJ. It uses the same
+syntax as the init files described above. The identifiers in the defaults file
+describe to what the parameters should apply. If the <code class="docutils literal"><span class="pre">&lt;general&gt;</span></code> identifier is
+used, then all parameters in that section applies for all proj-strings. Otherwise
+the identifier is connected to a specific projection. With the defaults file
+supplied with PROJ the default ellipsoid is set to WGS84 (for all proj-strings).
+Apart from that only the Albers Equal Area,
+<a class="reference internal" href="operations/projections/lcc.html"><span class="doc">Lambert Conic Conformal</span></a> and the
+<a class="reference internal" href="operations/projections/lagrng.html"><span class="doc">Lagrange</span></a> projections have default parameters.
+Defaults can be ignored by adding the <code class="docutils literal"><span class="pre">+no_def</span></code> parameter to a proj-string.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="geodesic.html" class="btn btn-neutral float-right" title="Geodesic calculations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="operations/pipeline.html" class="btn btn-neutral" title="The pipeline operator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1983-2018.
+      Last updated on 01 Mar 2018.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'5.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

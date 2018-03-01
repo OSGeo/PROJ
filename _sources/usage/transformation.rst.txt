@@ -289,7 +289,7 @@ no grid is found that contains the point to be transformed an error will occur.
     111d0'2.788"W   43d59'59.725"N 0.000
     111dW   55dN 0.000
 
-For more information see the chapter on :ref:`Grids`.
+For more information see the chapter on :ref:`transformation_grids`.
 
 Caveats
 ................................................................................

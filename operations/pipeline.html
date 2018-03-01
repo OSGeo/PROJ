@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The pipeline operator &mdash; PROJ.4 5.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="Coordinate operations" href="index.html"/>
+        <link rel="next" title="Resource files" href="../resource_files.html"/>
+        <link rel="prev" title="Vertical grid shift" href="transformations/vgridshift.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Coordinate operations</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="projections/index.html">Projections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conversions/index.html">Conversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformations/index.html">Transformations</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">The pipeline operator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rules-for-pipelines">Rules for pipelines</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Coordinate operations</a> &raquo;</li>
+        
+      <li>The pipeline operator</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="the-pipeline-operator">
+<span id="pipeline"></span><h1>The pipeline operator<a class="headerlink" href="#the-pipeline-operator" title="Permalink to this headline">¶</a></h1>
+<p>Construct complex operations by daisy-chaining operations in a sequential pipeline.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Input type</strong></td>
+<td>Any.</td>
+</tr>
+<tr class="row-even"><td><strong>Output type</strong></td>
+<td>Any.</td>
+</tr>
+<tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
+</tr>
+<tr class="row-even"><td><cite>step</cite></td>
+<td>Separate each step in a pipeline.</td>
+</tr>
+<tr class="row-odd"><td><cite>inv</cite></td>
+<td>Invert a step in a pipeline.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">See the section on <a class="reference internal" href="../usage/transformation.html#transformation"><span class="std std-ref">Geodetic transformation</span></a> for a more thorough introduction
+to the concept of transformation pipelines in PROJ.</p>
+</div>
+<p>With the pipeline operation it is possible to perform several operations after each
+other on the same input data. This feature makes it possible to create transformations
+that are made up of more than one operation, e.g. performing a datum shift and then
+applying a suitable map projection. Theoretically any transformation between two
+coordinate reference systems is possible to perform using the pipeline operation,
+provided that the necessary coordinate operations in each step is available in PROJ.</p>
+<p>A pipeline is made up of a number of steps, with each step being a coordinate operation
+in itself. By connecting these individual steps sequentially we end up with a concatenated
+coordinate operation. An example of this is a transformation from geodetic coordinates
+on the GRS80 ellipsoid to a projected system where the east-west and north-east axes has
+been swapped:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span> <span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">axisswap</span> <span class="o">+</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>Here the first step is applying the <a class="reference internal" href="projections/merc.html#merc"><span class="std std-ref">Mercator</span></a> projection and the second step is
+applying the <a class="reference internal" href="conversions/axisswap.html#axisswap"><span class="std std-ref">Axis swap</span></a> conversion. Note that the <cite>+ellps=GRS80</cite> is specified
+before the first occurence of <cite>+step</cite>. This means that the GRS80 ellipsoid is used
+in both steps, since any parameter stated before the first occurence of <cite>+step</cite> is
+treated as a global parameter and is transferred to each individual steps.</p>
+<div class="section" id="rules-for-pipelines">
+<h2>Rules for pipelines<a class="headerlink" href="#rules-for-pipelines" title="Permalink to this headline">¶</a></h2>
+<p><strong>1. Pipelines must consist of at least one step.</strong></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span>
+</pre></div>
+</div>
+<p>Will result in an error.</p>
+<p><strong>2. Pipelines can only be nested if the nested pipeline is defined in an init-file.</strong></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span> <span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span> <span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">axisswap</span> <span class="o">+</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">unitconvert</span> <span class="o">+</span><span class="n">xy_in</span><span class="o">=</span><span class="n">m</span> <span class="o">+</span><span class="n">xy_out</span><span class="o">=</span><span class="n">us</span><span class="o">-</span><span class="n">ft</span>
+</pre></div>
+</div>
+<p>Results in an error, while</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">init</span><span class="o">=</span><span class="n">predefined_pipelines</span><span class="p">:</span><span class="n">projectandswap</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">unitconvert</span> <span class="o">+</span><span class="n">xy_in</span><span class="o">=</span><span class="n">m</span> <span class="o">+</span><span class="n">xy_out</span><span class="o">=</span><span class="n">us</span><span class="o">-</span><span class="n">ft</span>
+</pre></div>
+</div>
+<p>does not.</p>
+<p><strong>3. Pipelines without a forward path can&#8217;t be constructed.</strong></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span> <span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">inv</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">urm5</span>
+</pre></div>
+</div>
+<p>Will result in an error since <a class="reference internal" href="projections/urm5.html#urm5"><span class="std std-ref">Urmaev V</span></a> does not have an inverse operation defined.</p>
+<p><strong>4. Parameters added before the first `+step` are global and will be applied to all steps.</strong></p>
+<p>In the following the GRS80 ellipsoid will be applied to all steps.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">cart</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="o">+</span><span class="n">x</span><span class="o">=</span><span class="mi">10</span> <span class="o">+</span><span class="n">y</span><span class="o">=</span><span class="mi">3</span> <span class="o">+</span><span class="n">z</span><span class="o">=</span><span class="mi">1</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">cart</span> <span class="o">+</span><span class="n">inv</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../resource_files.html" class="btn btn-neutral float-right" title="Resource files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="transformations/vgridshift.html" class="btn btn-neutral" title="Vertical grid shift" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1983-2018.
+      Last updated on 01 Mar 2018.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'5.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

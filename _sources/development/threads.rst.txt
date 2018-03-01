@@ -4,12 +4,7 @@
 Threads
 ================================================================================
 
-.. contents:: Contents
-   :depth: 3
-   :backlinks: none
-
-
-This page is about efforts to make PROJ.4 thread safe.
+This page is about efforts to make PROJ thread safe.
 
 Key Thread Safety Issues
 --------------------------------------------------------------------------------
@@ -19,14 +14,14 @@ Key Thread Safety Issues
   introduction of the projCtx execution context.
 * the datum shift using grid files uses globally shared lists of loaded grid
   information. Access to this has been made safe in 4.7.0 with the introduction
-  of a proj.4 mutex used to protect access to these memory structures (see
+  of a PROJ mutex used to protect access to these memory structures (see
   pj_mutex.c).
 
 projCtx
 --------------------------------------------------------------------------------
 
 Primarily in order to avoid having pj_errno as a global variable, a "thread
-context" structure has been introduced into a variation of the PROJ.4 API for
+context" structure has been introduced into a variation of the PROJ API for
 the 4.8.0 release.  The pj_init() and pj_init_plus() functions now have context
 variations called pj_init_ctx() and pj_init_plus_ctx() which take a projections
 context.
@@ -73,7 +68,7 @@ src/multistresstest.c
 --------------------------------------------------------------------------------
 
 A small multi-threaded test program has been written (src/multistresstest.c)
-for testing multithreaded use of PROJ.4.  It performs a series of reprojections
+for testing multithreaded use of PROJ.  It performs a series of reprojections
 to setup a table expected results, and then it does them many times in several
 threads to confirm that the results are consistent.  At this time this program
 is not part of the builds but it can be built on linux like:

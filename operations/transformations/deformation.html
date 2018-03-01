@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Kinematic datum shifting utilizing a deformation model &mdash; PROJ.4 5.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Transformations" href="index.html"/>
+        <link rel="next" title="Helmert transform" href="helmert.html"/>
+        <link rel="prev" title="Transformations" href="index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Coordinate operations</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../projections/index.html">Projections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../conversions/index.html">Conversions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Transformations</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Kinematic datum shifting utilizing a deformation model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mathematical-description">Mathematical description</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="helmert.html">Helmert transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="molodensky.html">Molodensky transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hgridshift.html">Horizontal grid shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vgridshift.html">Vertical grid shift</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline.html">The pipeline operator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Coordinate operations</a> &raquo;</li>
+        
+          <li><a href="index.html">Transformations</a> &raquo;</li>
+        
+      <li>Kinematic datum shifting utilizing a deformation model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="kinematic-datum-shifting-utilizing-a-deformation-model">
+<span id="deformation"></span><h1>Kinematic datum shifting utilizing a deformation model<a class="headerlink" href="#kinematic-datum-shifting-utilizing-a-deformation-model" title="Permalink to this headline">¶</a></h1>
+<p>Perform datum shifts means of a deformation/velocity model.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Input type</strong></td>
+<td>Cartesian coordinates.</td>
+</tr>
+<tr class="row-even"><td><strong>Output type</strong></td>
+<td>Cartesian coordinates.</td>
+</tr>
+<tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
+</tr>
+<tr class="row-even"><td><cite>xy_grids</cite></td>
+<td>Comma-separated list of grids to load.</td>
+</tr>
+<tr class="row-odd"><td><cite>z_grids</cite></td>
+<td>Comma-separated list of grids to load.</td>
+</tr>
+<tr class="row-even"><td><cite>t_epoch</cite></td>
+<td>Central epoch of transformation. [decimalyear]. Only used in
+spatiotemporal transformations.</td>
+</tr>
+<tr class="row-odd"><td><cite>t_obs</cite></td>
+<td>Observation time of coordinate(s). Mostly useful in 2D and 3D
+transformations. [decimalyear]. <em>Optional</em>.</td>
+</tr>
+</tbody>
+</table>
+<p>The deformation operation is used to adjust coordinates for intraplate deformations.
+Usually the transformation parameters for regional plate-fixed reference frames such as
+the ETRS89 does not take intraplate deformation into account. It is assumed that
+tectonic plate of the region is rigid. Often times this is true, but near the plate
+boundary and in areas with post-glacial uplift the assumption breaks. Tntraplate
+deformations can be modelled and then applied to the coordinates so that
+they represent the physical world better. In PROJ this is done with the deformation
+operation.</p>
+<p>The horizontal grid is stored in CTable2 format and the vertical grid is stored in the
+GTX format. Both grids are expected to contain grid-values in units of mm/year.
+Details about the formats can be found in the GDAL documentation. GDAL both reads and
+writes both file formats. Using GDAL for construction of new grids is recommended.</p>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>In <a class="reference internal" href="../../references.html#hakli2016" id="id1">[Häkli2016]</a> coordinate transformation including a deformation model is described.
+The paper describes how coordinates from the global ITRFxx frames are transformed to the
+local Nordic realisations of ERTS89. Scandinavia is an area with significant post-glacial
+rebound. The deformations from the post-glacial uplift is not accounted for in the
+offcial ETRS89 transformations so in order to get accurate transformations in the Nordic
+countries it is necesarry to apply the deformation model. The transformation from ITRF2008
+to the Danish realisation of ETRS89 is in PROJ described as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">=</span>  <span class="n">pipeline</span> <span class="n">ellps</span> <span class="o">=</span> <span class="n">GRS80</span>
+        <span class="c1"># ITRF2008@t_obs -&gt; ITRF2000@t_obs</span>
+<span class="n">step</span>    <span class="n">init</span> <span class="o">=</span> <span class="n">ITRF2008</span><span class="p">:</span><span class="n">ITRF2000</span>
+        <span class="c1"># ITRF2000@t_obs -&gt; ETRF2000@t_obs</span>
+<span class="n">step</span>    <span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="n">t_epoch</span> <span class="o">=</span> <span class="mf">2000.0</span> <span class="n">transpose</span>
+        <span class="n">x</span> <span class="o">=</span>  <span class="mf">0.054</span>  <span class="n">rx</span> <span class="o">=</span>  <span class="mf">0.000891</span> <span class="n">drx</span> <span class="o">=</span>  <span class="mf">8.1e-05</span>
+        <span class="n">y</span> <span class="o">=</span>  <span class="mf">0.051</span>  <span class="n">ry</span> <span class="o">=</span>  <span class="mf">0.00539</span>  <span class="n">dry</span> <span class="o">=</span>  <span class="mf">0.00049</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.048</span>  <span class="n">rz</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.008712</span> <span class="n">drz</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.000792</span>
+        <span class="c1"># ETRF2000@t_obs -&gt; NKG_ETRF00@2000.0</span>
+<span class="n">step</span>    <span class="n">proj</span> <span class="o">=</span> <span class="n">deformation</span> <span class="n">t_epoch</span> <span class="o">=</span> <span class="mf">2000.0</span>
+        <span class="n">xy_grids</span> <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_xy</span><span class="o">.</span><span class="n">ct2</span>
+        <span class="n">z_grids</span>  <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_z</span><span class="o">.</span><span class="n">gtx</span>
+        <span class="c1"># NKG_ETRF@2000.0 -&gt; ETRF92@2000.0</span>
+<span class="n">step</span>    <span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="n">transpose</span> <span class="n">s</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.009420</span><span class="n">e</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="mf">0.03863</span> <span class="n">rx</span> <span class="o">=</span> <span class="mf">0.00617753</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="mf">0.147</span>   <span class="n">ry</span> <span class="o">=</span> <span class="mf">5.064e-05</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="mf">0.02776</span> <span class="n">rz</span> <span class="o">=</span> <span class="mf">4.729e-05</span>
+        <span class="c1"># ETRF92@2000.0 -&gt; ETRF92@1994.704</span>
+<span class="n">step</span>    <span class="n">proj</span> <span class="o">=</span> <span class="n">deformation</span> <span class="n">t_epoch</span> <span class="o">=</span> <span class="mf">1994.704</span> <span class="n">t_obs</span> <span class="o">=</span> <span class="mf">2000.0</span>
+        <span class="n">xy_grids</span> <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_xy</span><span class="o">.</span><span class="n">ct2</span>
+        <span class="n">z_grids</span>  <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_z</span><span class="o">.</span><span class="n">gtx</span>
+</pre></div>
+</div>
+<p>From this we can see that the transformation from ITRF2008 to the Danish realisation of
+ETRS89 is a combination of Helmert transformations and adjustments with a deformation
+model. The first use of the deformation operation is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">=</span> <span class="n">deformation</span> <span class="n">t_epoch</span> <span class="o">=</span> <span class="mf">2000.0</span>
+<span class="n">xy_grids</span> <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_xy</span><span class="o">.</span><span class="n">ct2</span>
+<span class="n">z_grids</span>  <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_z</span><span class="o">.</span><span class="n">gtx</span>
+</pre></div>
+</div>
+<p>Here we set the central epoch of the transformation, 2000.0. The observation epoch
+is expected as part of the input coordinate tuple. The deformation model is
+described by two grids, specified with <em>xy_grids</em> and <em>z_grids</em>. The first is
+the horizontal part of the model and the second is the vertical component.</p>
+</div>
+<div class="section" id="mathematical-description">
+<h2>Mathematical description<a class="headerlink" href="#mathematical-description" title="Permalink to this headline">¶</a></h2>
+<p>Mathematically speaking, application of a deformation model is simple. The deformation model is
+represented as a grid of velocities in three dimensions. Coordinate corrections are
+applied in cartesian space. For a given coordinate, <span class="math">\((X, Y, Z)\)</span>, velocities
+<span class="math">\((V_X, V_Y, V_Z)\)</span> can be interpolated from the gridded model. The time span
+between <span class="math">\(t_c\)</span> and <span class="math">\(t_{obs}\)</span> determine the magnitude of the coordinate
+correcton as seen in eq. <a class="reference internal" href="#equation-apply_velocity">(1)</a> below.</p>
+<div class="math" id="equation-apply_velocity">
+<span class="eqno">(1)<a class="headerlink" href="#equation-apply_velocity" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align}
+    \begin{pmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{pmatrix}_B =
+    \begin{pmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{pmatrix}_A +
+    (t_c - t_{obs})
+    \begin{pmatrix}
+        V_X \\
+        V_Y \\
+        V_Z \\
+    \end{pmatrix}
+\end{align}\end{split}\]</div>
+<p>Corrections are done in cartesian space.</p>
+<p>Coordinates of the gridded model are in ENU (east, north, up) space because it would
+otherwise require an enormous 3 dimensional grid to handle the corrections in cartesian
+space. Keeping the correction in lat/long space reduces the complexity of the grid
+significantly. Consequentyly though, the input coordinates needs to be converted to
+lat/long space when searching for corrections in the grid. This is done with <em>cart</em>
+operation. The converted grid corrections can then be applied to the input coordinates
+in cartesian space. The conversion from ENU space to cartesian space is done in the
+following way:</p>
+<div class="math" id="equation-enu2xyz">
+<span class="eqno">(2)<a class="headerlink" href="#equation-enu2xyz" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align}
+    \begin{pmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{pmatrix} =
+    \begin{pmatrix}
+        -\sin\phi \cos\lambda N - \sin\lambda E + \cos\phi \cos\lambda U \\
+        -\sin\phi \sin\lambda N + \sin\lambda E + \cos\phi \sin\lambda U \\
+                     \cos\phi N +                 \sin\phi U \\
+    \end{pmatrix}
+\end{align}\end{split}\]</div>
+<p>where <span class="math">\(\phi\)</span> and <span class="math">\(\lambda\)</span> are the latitude and longitude of the coordinate
+that is searched for in the grid. <span class="math">\((E, N, U)\)</span> are the grid values in ENU-space and
+<span class="math">\((X, Y, Z)\)</span> are the corrections converted to cartesian space.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="helmert.html" class="btn btn-neutral float-right" title="Helmert transform" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Transformations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1983-2018.
+      Last updated on 01 Mar 2018.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'5.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,604 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Helmert transform &mdash; PROJ.4 5.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Transformations" href="index.html"/>
+        <link rel="next" title="Molodensky transform" href="molodensky.html"/>
+        <link rel="prev" title="Kinematic datum shifting utilizing a deformation model" href="deformation.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Coordinate operations</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../projections/index.html">Projections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../conversions/index.html">Conversions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Transformations</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="deformation.html">Kinematic datum shifting utilizing a deformation model</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Helmert transform</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mathematical-description">Mathematical description</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="molodensky.html">Molodensky transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hgridshift.html">Horizontal grid shift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vgridshift.html">Vertical grid shift</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline.html">The pipeline operator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Coordinate operations</a> &raquo;</li>
+        
+          <li><a href="index.html">Transformations</a> &raquo;</li>
+        
+      <li>Helmert transform</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="helmert-transform">
+<span id="helmert"></span><h1>Helmert transform<a class="headerlink" href="#helmert-transform" title="Permalink to this headline">¶</a></h1>
+<p>The Helmert transformation changes coordinates from one reference frame to
+anoether by means of 3-, 4-and 7-parameter shifts, or one of their 6-, 8- and
+14-parameter kinematic counterparts.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="19%" />
+<col width="0%" />
+<col width="81%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="2"><strong>Input type</strong></td>
+<td>Cartesian coordinates (spatial), decimalyears (temporal).</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Output type</strong></td>
+<td>Cartesian coordinates (spatial), decimalyears (temporal).</td>
+</tr>
+<tr class="row-odd"><td colspan="3"><strong>Options</strong></td>
+</tr>
+<tr class="row-even"><td><cite>x</cite></td>
+<td colspan="2">Translation of the x-axis [m]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-odd"><td><cite>y</cite></td>
+<td colspan="2">Translation of the y-axis [m]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-even"><td><cite>z</cite></td>
+<td colspan="2">Translation of the z-axis. [m]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-odd"><td><cite>s</cite></td>
+<td colspan="2">Scale factor [ppm]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-even"><td><cite>rx</cite></td>
+<td colspan="2">X-axis rotation in the 3D Helmert [arc seconds]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-odd"><td><cite>ry</cite></td>
+<td colspan="2">Y-axis rotatoin in the 3D Helmert [arc seconds]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-even"><td><cite>rz</cite></td>
+<td colspan="2">Z-axis rotation in the 3D Helmert [arc seconds]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-odd"><td><cite>theta</cite></td>
+<td colspan="2">Rotation angle in the 2D Helmert. [arc seconds]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-even"><td><cite>dx</cite></td>
+<td colspan="2">Translation rate of the x-axis. [m/year]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-odd"><td><cite>dy</cite></td>
+<td colspan="2">Translation rate of the y-axis. [m/year]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-even"><td><cite>dz</cite></td>
+<td colspan="2">Translation rate of the z-axis. [m/year]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-odd"><td><cite>ds</cite></td>
+<td colspan="2">Scale rate factor [ppm/year]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-even"><td><cite>drx</cite></td>
+<td colspan="2">Rotation rate of the x-axis [arc seconds/year]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-odd"><td><cite>dry</cite></td>
+<td colspan="2">Rotation rate of the y-axis [arc seconds/year]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-even"><td><cite>drz</cite></td>
+<td colspan="2">Rotation rate of the y-axis [arc seconds/year]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-odd"><td><cite>t_epoch</cite></td>
+<td colspan="2">Central epoch of transformation. [decimalyear]. Only used in
+spatiotemporal transformations. <em>Optional</em>.</td>
+</tr>
+<tr class="row-even"><td><cite>t_obs</cite></td>
+<td colspan="2">Observation time of coordinate(s). Mostly useful in 2D and 3D
+transformations. [decimalyear]. <em>Optional</em>.</td>
+</tr>
+<tr class="row-odd"><td><cite>exact</cite></td>
+<td colspan="2">Use exact transformation equations. <em>Optional</em>.</td>
+</tr>
+<tr class="row-even"><td><cite>transpose</cite></td>
+<td colspan="2">Transpose rotation matrix. <em>Optional</em>.</td>
+</tr>
+</tbody>
+</table>
+<p>The Helmert transform, in all it&#8217;s various incarnations, is used to perform reference
+frame shifts. The transformation operates in cartesian space. It can be used to transform
+planar coordinates from one datum to another, transform 3D cartesian
+coordinates from one static reference frame to another or it can be used to do fully
+kinematic transformations from global reference frames to local static frames.</p>
+<p>All of the parameters described in the table above are marked as optional. This is true
+as long as at least one parameter is defined in the setup of the transformation.
+The behaviour of the transformation depends on which parameters are used in the setup.
+For instance, if a rate of change paramater is specified a kinematic version of the
+transformation is used.</p>
+<p>The kinematic transformations require an observation time of the coordinate, as well
+as a central epoch for the transformation. The latter is usually documented
+alongside the rest of the transformation parameters for a given transformation.
+The central eopch is controlled with the parameter <cite>t_epoch</cite>. The observation
+time can either by stated as part of the coordinate when using PROJ&#8217;s
+4D-functionality or it can be controlled in the transformation setup by the
+parameter <cite>t_obs</cite>. When <cite>t_obs</cite> is specified, all transformed coordinates are
+treated as if they have the same observation time.</p>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>Transforming coordinates from NAD72 to NAD83 using the 4 parameter 2D Helmert:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="n">x</span><span class="o">=-</span><span class="mf">9597.3572</span> <span class="n">y</span><span class="o">=.</span><span class="mi">6112</span>
+             <span class="n">s</span><span class="o">=</span><span class="mf">0.304794780637</span> <span class="n">theta</span><span class="o">=-</span><span class="mf">1.244048</span>
+</pre></div>
+</div>
+<p>Simplified transformations from ITRF2008/IGS08 to ETRS89 using 7 parameters:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.67678</span>    <span class="n">y</span><span class="o">=</span><span class="mf">0.65495</span>   <span class="n">z</span><span class="o">=-</span><span class="mf">0.52827</span>
+            <span class="n">rx</span><span class="o">=-</span><span class="mf">0.022742</span> <span class="n">ry</span><span class="o">=</span><span class="mf">0.012667</span> <span class="n">rz</span><span class="o">=</span><span class="mf">0.022704</span>  <span class="n">s</span><span class="o">=-</span><span class="mf">0.01070</span>
+</pre></div>
+</div>
+<p>Transformation from <cite>ITRF2000&#64;2017.0</cite>  to <cite>ITRF93&#64;2017.0</cite> using 15 parameters:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span>
+     <span class="n">x</span><span class="o">=</span><span class="mf">0.0127</span>     <span class="n">y</span><span class="o">=</span><span class="mf">0.0065</span>     <span class="n">z</span><span class="o">=-</span><span class="mf">0.0209</span>  <span class="n">s</span><span class="o">=</span><span class="mf">0.00195</span>
+     <span class="n">dx</span><span class="o">=-</span><span class="mf">0.0029</span>   <span class="n">dy</span><span class="o">=-</span><span class="mf">0.0002</span>   <span class="n">dz</span><span class="o">=-</span><span class="mf">0.0006</span> <span class="n">ds</span><span class="o">=</span><span class="mf">0.00001</span>
+     <span class="n">rx</span><span class="o">=-</span><span class="mf">0.00039</span>  <span class="n">ry</span><span class="o">=</span><span class="mf">0.00080</span>   <span class="n">rz</span><span class="o">=-</span><span class="mf">0.00114</span>
+     <span class="n">drx</span><span class="o">=-</span><span class="mf">0.00011</span> <span class="n">dry</span><span class="o">=-</span><span class="mf">0.00019</span> <span class="n">drz</span><span class="o">=</span><span class="mf">0.00007</span>
+     <span class="n">epoch</span><span class="o">=</span><span class="mf">1988.0</span> <span class="n">tobs</span><span class="o">=</span><span class="mf">2017.0</span>    <span class="n">transpose</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mathematical-description">
+<h2>Mathematical description<a class="headerlink" href="#mathematical-description" title="Permalink to this headline">¶</a></h2>
+<p>In the notation used below, <span class="math">\(\hat{P}\)</span> is the rate of change of a given transformation
+parameter <span class="math">\(P\)</span>. <span class="math">\(\dot{P}\)</span> is the kinematically adjusted version of <span class="math">\(P\)</span>,
+described by</p>
+<div class="math" id="equation-propagation">
+<span class="eqno">(1)<a class="headerlink" href="#equation-propagation" title="Permalink to this equation">¶</a></span>\[\dot{P}= P + \hat{P}\left(t - t_{central}\right)\]</div>
+<p>where <span class="math">\(t\)</span> is the observation time of the coordinate and <span class="math">\(t_{central}\)</span> is
+the central epoch of the transformation. Equation <a class="reference internal" href="#equation-propagation">(1)</a> can be used to
+propagate all transformation parameters in time.</p>
+<p>Superscripts of vectors denote the reference frame the coordinates in the vector belong to.</p>
+<div class="section" id="d-helmert">
+<h3>2D Helmert<a class="headerlink" href="#d-helmert" title="Permalink to this headline">¶</a></h3>
+<p>The simplest version of the Helmert transform is the 2D case. In the 2-dimensional
+case only the horizontal coordinates are changed. The coordinates can be
+translated, rotated and scale. Translation is controlled with the <cite>x</cite> and <cite>y</cite>
+parameters. The rotation is determined by <cite>theta</cite> and the scale is controlled with
+the <cite>s</cite> paramaters.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The scaling parameter <cite>s</cite> is unitless for the 2D Helmert, as opposed to the
+3D version where the scaling parameter is given in units of ppm.</p>
+</div>
+<p>Mathematically the 2D Helmert is described as:</p>
+<div class="math" id="equation-4param">
+<span class="eqno">(2)<a class="headerlink" href="#equation-4param" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align}
+    \begin{bmatrix}
+        X \\
+        Y \\
+    \end{bmatrix}^B =
+    \begin{bmatrix}
+        T_x \\
+        T_y \\
+    \end{bmatrix} +
+    s
+    \begin{bmatrix}
+        \hphantom{-}\cos \theta &amp; \sin \theta \\
+        -\sin \theta &amp; \cos \theta \\
+    \end{bmatrix}
+    \begin{bmatrix}
+        X \\
+        Y \\
+    \end{bmatrix}^A
+\end{align}\end{split}\]</div>
+<p><a class="reference internal" href="#equation-4param">(2)</a> can be extended to a time-varying kinematic version by
+adjusting the parameters with <a class="reference internal" href="#equation-propagation">(1)</a> to <a class="reference internal" href="#equation-4param">(2)</a>, which yields
+the kinematic 2D Helmert transform:</p>
+<div class="math" id="equation-8param">
+<span class="eqno">(3)<a class="headerlink" href="#equation-8param" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align}
+    \begin{bmatrix}
+        X \\
+        Y \\
+    \end{bmatrix}^B =
+    \begin{bmatrix}
+        \dot{T_x} \\
+        \dot{T_y} \\
+    \end{bmatrix} +
+    s(t)
+    \begin{bmatrix}
+         \hphantom{-}\cos \dot{\theta} &amp; \sin \dot{\theta}  \\
+                    -\sin\ \dot{\theta} &amp; \cos \dot{\theta} \\
+    \end{bmatrix}
+    \begin{bmatrix}
+        X \\
+        Y \\
+    \end{bmatrix}^A
+\end{align}\end{split}\]</div>
+<p>All parameters in <a class="reference internal" href="#equation-8param">(3)</a> are determined by the use of <a class="reference internal" href="#equation-propagation">(1)</a>,
+which applies the rate of change to each individual parameter for a given
+timespan between <span class="math">\(t\)</span> and <span class="math">\(t_{central}\)</span>.</p>
+</div>
+<div class="section" id="id1">
+<h3>3D Helmert<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>The general form of the 3D Helmert is</p>
+<div class="math" id="equation-general-helmert">
+<span class="eqno">(4)<a class="headerlink" href="#equation-general-helmert" title="Permalink to this equation">¶</a></span>\[\begin{align}
+    V^B = T + \left(1 + s \times 10^{-6}\right) \mathbf{R} V^A
+\end{align}\]</div>
+<p>Where <span class="math">\(T\)</span> is a vector consisting of the three translation parameters, <span class="math">\(s\)</span>
+is the scaling factor and <span class="math">\(\mathbf{R}\)</span> is a rotation matrix. <span class="math">\(V^A\)</span> and
+<span class="math">\(V^B\)</span> are coordinate vectors, with <span class="math">\(V^A\)</span> being the input coordinate and
+<span class="math">\(V^B\)</span> is the output coordinate.</p>
+<p>The rotation matrix is composed of three rotation matrices, one for each axis:</p>
+<div class="math">
+\[\begin{split}\begin{align}
+    \mathbf{R}_X &amp;= \begin{bmatrix} 1 &amp; 0 &amp; 0\\ 0 &amp; \cos\phi &amp; -\sin\phi\\ 0 &amp; \sin\phi &amp; \cos\phi \end{bmatrix}
+\end{align}\end{split}\]</div>
+<div class="math">
+\[\begin{split}\begin{align}
+    \mathbf{R}_Y &amp;= \begin{bmatrix} \cos\theta &amp; 0 &amp; \sin\theta\\ 0 &amp; 1 &amp; 0\\ -\sin\theta &amp; 0 &amp; \cos\theta \end{bmatrix}
+\end{align}\end{split}\]</div>
+<div class="math">
+\[\begin{split}\begin{align}
+    \mathbf{R}_Z &amp;= \begin{bmatrix} \cos\psi &amp; -\sin\psi &amp; 0\\ \sin\psi &amp; \cos\psi &amp; 0\\ 0 &amp; 0 &amp; 1 \end{bmatrix}
+\end{align}\end{split}\]</div>
+<p>The three rotation matrices can be combined in one:</p>
+<div class="math">
+\[\begin{align}
+    \mathbf{R} = \mathbf{R_X} \mathbf{R_Y} \mathbf{R_Y}
+\end{align}\]</div>
+<p>For <span class="math">\(\mathbf{R}\)</span>, this yields:</p>
+<div class="math" id="equation-rot_exact">
+<span class="eqno">(5)<a class="headerlink" href="#equation-rot_exact" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{bmatrix}
+  \cos\theta \cos\psi &amp;  -\cos\phi \sin\psi + \sin\phi \sin\theta \cos\psi &amp;   \sin\phi \sin\psi + \cos\phi \sin\theta \cos\psi \\
+  \cos\theta\sin\psi &amp;  \cos\phi \cos\psi + \sin\phi \sin\theta \sin\psi &amp;  - \sin\phi \cos\psi + \cos\phi \sin\theta \sin\psi \\
+  -\sin\theta             &amp;  \sin\phi \cos\theta                                          &amp;   \cos\phi \cos\theta \\
+ \end{bmatrix}\end{split}\]</div>
+<p>Using the small angle approxition the rotation matrix can be simplified to</p>
+<div class="math" id="equation-rot_approx">
+<span class="eqno">(6)<a class="headerlink" href="#equation-rot_approx" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align} \mathbf{R} =
+    \begin{bmatrix}
+         1  &amp; -R_z  &amp;  R_y \\
+         Rz &amp;  1    &amp; -R_x \\
+        -Ry &amp;  R_x  &amp;  1   \\
+    \end{bmatrix}
+\end{align}\end{split}\]</div>
+<p>Which allow us to express the most common version of the Helmert transform,
+using the approximated rotation matrix:</p>
+<div class="math" id="equation-7param">
+<span class="eqno">(7)<a class="headerlink" href="#equation-7param" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align}
+    \begin{bmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{bmatrix}^B =
+    \begin{bmatrix}
+        T_x \\
+        T_y \\
+        T_z \\
+    \end{bmatrix} +
+    \left(1 + s \times 10^{-6}\right)
+    \begin{bmatrix}
+         1  &amp; -R_z  &amp;  R_y \\
+         Rz &amp;  1    &amp; -R_x \\
+        -Ry &amp;  R_x  &amp;  1   \\
+    \end{bmatrix}
+    \begin{bmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{bmatrix}^A
+\end{align}\end{split}\]</div>
+<p>If the rotation matrix is transposed the transformation is effectively reversed.
+This is cause for some confusion since there is no correct way of defining the
+rotation matrix. Two conventions exists and they seem to be equally popular.
+In PROJ the rotation matrix can be transposed by adding the <cite>transpose</cite> flag in
+the transformation setup.</p>
+<p>Applying <a class="reference internal" href="#equation-propagation">(1)</a> we get the kinematic version of the approximated
+3D Helmert:</p>
+<div class="math" id="equation-14param">
+<span class="eqno">(8)<a class="headerlink" href="#equation-14param" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align}
+    \begin{bmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{bmatrix}^B =
+    \begin{bmatrix}
+        \dot{T_x} \\
+        \dot{T_y} \\
+        \dot{T_z} \\
+    \end{bmatrix} +
+    \left(1 + \dot{s} \times 10^{-6}\right)
+    \begin{bmatrix}
+         1         &amp; -\dot{R_z}  &amp;  \dot{R_y} \\
+         \dot{R_z} &amp;  1          &amp; -\dot{R_x} \\
+        -\dot{R_y} &amp;  \dot{R_x}  &amp;  1      \\
+    \end{bmatrix}
+    \begin{bmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{bmatrix}^A
+\end{align}\end{split}\]</div>
+<p>The Helmert transformation can be applied without using the rotation parameters,
+in which case it becomes a simlpe translation of the origin of the coordinate
+system. When using the Helmert in this version equation <a class="reference internal" href="#equation-general-helmert">(4)</a>
+simplies to:</p>
+<div class="math" id="equation-3param">
+<span class="eqno">(9)<a class="headerlink" href="#equation-3param" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align}
+    \begin{bmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{bmatrix}^B =
+    \begin{bmatrix}
+        T_x \\
+        T_y \\
+        T_z \\
+    \end{bmatrix} +
+    \begin{bmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{bmatrix}^A
+\end{align}\end{split}\]</div>
+<p>That after application of <a class="reference internal" href="#equation-propagation">(1)</a> has the following kinematic
+countpart:</p>
+<div class="math" id="equation-6param">
+<span class="eqno">(10)<a class="headerlink" href="#equation-6param" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align}
+    \begin{bmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{bmatrix}^B =
+    \begin{bmatrix}
+        \dot{T_x} \\
+        \dot{T_y} \\
+        \dot{T_z} \\
+    \end{bmatrix} +
+    \begin{bmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{bmatrix}^A
+\end{align}\end{split}\]</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="molodensky.html" class="btn btn-neutral float-right" title="Molodensky transform" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="deformation.html" class="btn btn-neutral" title="Kinematic datum shifting utilizing a deformation model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1983-2018.
+      Last updated on 01 Mar 2018.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'5.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

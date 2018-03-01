@@ -39,7 +39,7 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
         <link rel="up" title="Using PROJ" href="index.html"/>
-        <link rel="next" title="Resource files" href="resource_files.html"/>
+        <link rel="next" title="Environment variables" href="environmentvars.html"/>
         <link rel="prev" title="Cartographic projection" href="projections.html"/> 
 
   
@@ -109,14 +109,12 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="resource_files.html">Resource files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="environmentvars.html">Environment variables</a></li>
-<li class="toctree-l2"><a class="reference internal" href="operations/index.html">Coordinate operations</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../grids.html">Grids</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../htpd.html">HTPD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
@@ -429,7 +427,7 @@ tried in turn till one is found that contains the point being transformed.</p>
 <p>The special prefix <code class="docutils literal"><span class="pre">&#64;</span></code> may be prefixed to a grid to make it optional.  If it
 not found, the search will continue to the next grid.  Normally any grid not
 found will cause an error.  For instance, the following would use the
-<code class="docutils literal"><span class="pre">ntv2_0.gsb</span></code> file if available (see <a class="reference internal" href="../grids.html#nonfreegrids"><span class="std std-ref">Non-Free Grids</span></a>), otherwise it would
+<code class="docutils literal"><span class="pre">ntv2_0.gsb</span></code> file if available (see <a class="reference internal" href="../resource_files.html#nonfreegrids"><span class="std std-ref">Non-Free Grids</span></a>), otherwise it would
 fallback to using the <code class="docutils literal"><span class="pre">ntv1_can.dat</span></code> file.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=</span><span class="nd">@ntv2_0</span><span class="o">.</span><span class="n">gsb</span><span class="p">,</span><span class="n">ntv1_can</span><span class="o">.</span><span class="n">dat</span> \
     <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
@@ -461,7 +459,7 @@ no grid is found that contains the point to be transformed an error will occur.<
 <span class="mi">111</span><span class="n">dW</span>   <span class="mi">55</span><span class="n">dN</span> <span class="mf">0.000</span>
 </pre></div>
 </div>
-<p>For more information see the chapter on <a class="reference internal" href="../grids.html#grids"><span class="std std-ref">Grids</span></a>.</p>
+<p>For more information see the chapter on <a class="reference internal" href="../resource_files.html#transformation-grids"><span class="std std-ref">Transformation grids</span></a>.</p>
 </div>
 <div class="section" id="caveats">
 <h3>Caveats<a class="headerlink" href="#caveats" title="Permalink to this headline">¶</a></h3>
@@ -499,7 +497,7 @@ WGS84). Other types of grids can be used with the <em>pipeline</em> framework.</
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="resource_files.html" class="btn btn-neutral float-right" title="Resource files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="environmentvars.html" class="btn btn-neutral float-right" title="Environment variables" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="projections.html" class="btn btn-neutral" title="Cartographic projection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -512,7 +510,7 @@ WGS84). Other types of grids can be used with the <em>pipeline</em> framework.</
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 27 Feb 2018.
+      Last updated on 01 Mar 2018.
 
     </p>
   </div>
