@@ -17,7 +17,7 @@ HEALPix
 | `No special options for this projection`                                       |
 +---------------------+----------------------------------------------------------+
 
-.. image:: ../../images/healpix.png
+.. image:: ../../../images/healpix.png
    :scale: 75%
    :alt:   HEALPix
 

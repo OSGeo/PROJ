@@ -31,6 +31,9 @@
     and destructor may be left out, and the default context selected
     by passing a null-pointer to pj_create.
 
+    Note: This file is in-lined in the documentation. Any changes must be
+    reflected in docs/source/development/quickstart.rst 
+
     Thomas Knudsen, 2016-10-30/2017-07-06
 *******************************************************************************/
 #include <stdio.h>
@@ -53,7 +56,6 @@ int main (void) {
     a = proj_coord (proj_torad(12), proj_torad(55), 0, 0);
 
     /* transform to UTM zone 32, then back to geographical */
-    /* note the use of union selectors to indicate what kind of coordinates are expected */
     b = proj_trans_coord (P, PJ_FWD, a);
     printf ("easting: %g, northing: %g\n", b.en.e, b.en.n);
     b = proj_trans_coord (P, PJ_INV, b);

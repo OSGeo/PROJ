@@ -21,7 +21,7 @@ rHEALPix
 |                     | Valid inputs are 0--3. Defaults to 0.                    |
 +---------------------+----------------------------------------------------------+
 
-.. image:: ../../images/rhealpix.png
+.. image:: ../../../images/rhealpix.png
    :scale: 75%
    :alt:   rHEALPix
 

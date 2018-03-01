@@ -1,4 +1,4 @@
-:. _proj:
+.. _proj:
 
 ================================================================================
 proj
@@ -7,7 +7,7 @@ proj
 
 .. Index:: proj
 
-Proj and invproj perform respective forward  and inverse  transformation  of cartographic data to
+``proj`` and ``invproj`` perform respective forward  and inverse  transformation  of cartographic data to
 or from cartesian data  with  a  wide  range  of selectable projection functions.
 
 

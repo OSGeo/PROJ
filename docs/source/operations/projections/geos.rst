@@ -55,7 +55,7 @@ projection have a two-axis gimbal viewing geometry. This means that the differen
 scanning positions are obtained by rotating the gimbal along a N/S axis (or ``y``)
 and a E/W axis (or ``x``).
 
-.. image:: ../../images/geos_sweep.png
+.. image:: ../../..//images/geos_sweep.png
    :scale: 50%
    :alt:   Gimbal geometry
 
@@ -66,7 +66,7 @@ This example represents the scanning geometry of the Meteosat series satellite.
 However, the GOES satellite series use the opposite scanning geometry, with the
 E/W axis (``x``) as the sweep-angle axis, and the N/S (``y``) as the fixed-angle axis.
 
-The sweep argument is used to tell proj.4 which on which axis the outer-gimbal
+The sweep argument is used to tell PROJ which on which axis the outer-gimbal
 is rotating. The possible values are x or y, y being the default. Thus, the
 scanning geometry of the Meteosat series satellite should take sweep as x, and
 GOES should take sweep as y.

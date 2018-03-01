@@ -1,10 +1,10 @@
 .. _cmake:
 
 ********************************************************************************
-Using Proj.4 in CMake projects
+Using PROJ in CMake projects
 ********************************************************************************
 
-The recommended way to use the Proj.4 library in a CMake project is to
+The recommended way to use the PROJ library in a CMake project is to
 link to the imported library target ``${PROJ4_LIBRARIES}`` provided by
 the CMake configuration which comes with the library. Typical usage is:
 

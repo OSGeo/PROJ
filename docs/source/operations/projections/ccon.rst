@@ -4,22 +4,37 @@
 Central Conic
 ********************************************************************************
 
-.. image:: ./images/ccon.png
-   :scale: 50%
-   :alt:   Central Conic 
-
 This is central (centrographic) projection on cone tangent at ``lat_0`` latitude,
 identical with ``conic()`` projection from ``mapproj`` R package.
+
++---------------------+----------------------------------------------------------+
+| **Classification**  | Conic                                                    |
++---------------------+----------------------------------------------------------+
+| **Available forms** | Forward and inverse, spherical projection                |
++---------------------+----------------------------------------------------------+
+| **Defined area**    | Global, but best used near the standard parallel         |
++---------------------+----------------------------------------------------------+
+| **Implemented by**  | Lukasz Komsta                                            |
++---------------------+----------------------------------------------------------+
+| **Options**                                                                    |
++---------------------+----------------------------------------------------------+
+| `+lat_1`            | Latitude of standard parallel.                           |
++---------------------+----------------------------------------------------------+
+
+.. image:: ./images/ccon.png
+   :scale: 50%
+   :alt:   Central Conic
+
 
 Usage
 ########
 
 This simple projection is rarely used, as it is not equidistant, equal-area, nor
-conformal. 
+conformal.
 
 An example of usage (and the main reason to implement this projection in proj4)
-is the ATPOL geobotanical grid of Poland, developed in Institute of Botany, 
-Jagiellonian University, Krakow, Poland in 1970s [Zajac1978]_. The grid was 
+is the ATPOL geobotanical grid of Poland, developed in Institute of Botany,
+Jagiellonian University, Krakow, Poland in 1970s [Zajac1978]_. The grid was
 originally handwritten on paper maps and further copied by hand. The projection
 (together with strange Earth radius) was chosen by its creators as the compromise
 fit to existing maps during first software development in DOS era. Many years later
@@ -47,7 +62,7 @@ Forward projection
 
 .. math::
 
-   y = \cot \phi_0 - r \cos (\lambda\sin\phi_0) 
+   y = \cot \phi_0 - r \cos (\lambda\sin\phi_0)
 
 
 Inverse projection
@@ -110,9 +125,3 @@ and it should give the following results:
    3.707419E+04	6.768262E+05 0.000000E+00
    6.960534E+05	6.722946E+05 0.000000E+00
    3.300000E+05	3.500000E+05 0.000000E+00
-
-
-
-
-
-
