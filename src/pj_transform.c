@@ -748,32 +748,17 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /* -------------------------------------------------------------------- */
     if( srcdefn->datum_type == PJD_GRIDSHIFT )
     {
-        const char* srcnadgrids = pj_param(srcdefn->ctx, srcdefn->params,"snadgrids").s;
-
         pj_apply_gridshift_2( srcdefn, 0, point_count, point_offset, x, y, z );
         CHECK_RETURN(srcdefn);
 
-        /* If the gridlist has either "@null" or "null" as its only    */
-        /* grid we don't change the ellipsoid parameters, since the    */
-        /* datum shift to WGS84 was not performed in practice.         */
-        if ( srcnadgrids != NULL &&
-             strcmp("@null", srcnadgrids) && strcmp("null", srcnadgrids) ) {
-            src_a = SRS_WGS84_SEMIMAJOR;
-            src_es = SRS_WGS84_ESQUARED;
-        }
+        src_a = SRS_WGS84_SEMIMAJOR;
+        src_es = SRS_WGS84_ESQUARED;
     }
 
     if( dstdefn->datum_type == PJD_GRIDSHIFT )
     {
-        const char* dstnadgrids = pj_param(dstdefn->ctx, dstdefn->params,"snadgrids").s;
-        /* If the gridlist has either "@null" or "null" as its only    */
-        /* grid we don't change the ellipsoid parameters, since the    */
-        /* datum shift to WGS84 will not be performed.                 */
-        if ( dstnadgrids != NULL &&
-             strcmp("@null", dstnadgrids) && strcmp("null", dstnadgrids) ) {
-            dst_a = SRS_WGS84_SEMIMAJOR;
-            dst_es = SRS_WGS84_ESQUARED;
-          }
+        dst_a = SRS_WGS84_SEMIMAJOR;
+        dst_es = SRS_WGS84_ESQUARED;
     }
 
 /* ==================================================================== */
