@@ -186,8 +186,8 @@ PJ *PROJECTION(tpers) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
-    omega = pj_param(P->ctx, P->params, "dtilt").f * DEG_TO_RAD;
-    gamma = pj_param(P->ctx, P->params, "dazi").f * DEG_TO_RAD;
+    omega = pj_param(P->ctx, P->params, "rtilt").f;
+    gamma = pj_param(P->ctx, P->params, "razi").f;
     Q->tilt = 1;
     Q->cg = cos(gamma); Q->sg = sin(gamma);
     Q->cw = cos(omega); Q->sw = sin(omega);
