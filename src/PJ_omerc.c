@@ -122,7 +122,7 @@ PJ *PROJECTION(omerc) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
-    Q->no_rot = pj_param(P->ctx, P->params, "tno_rot").i;
+    Q->no_rot = pj_param(P->ctx, P->params, "bno_rot").i;
         if ((alp = pj_param(P->ctx, P->params, "talpha").i) != 0)
         alpha_c = pj_param(P->ctx, P->params, "ralpha").f;
         if ((gam = pj_param(P->ctx, P->params, "tgamma").i) != 0)
