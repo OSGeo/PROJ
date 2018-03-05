@@ -4,7 +4,7 @@
 Environment variables
 ================================================================================
 
-PROJ can be crontrolled by setting environment variables. Most users will
+PROJ can be controlled by setting environment variables. Most users will
 have a use for the :envvar:`PROJ_LIB`.
 
 On UNIX systems environment variables can be set for a shell-session with::

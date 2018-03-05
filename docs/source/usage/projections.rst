@@ -93,7 +93,7 @@ Prime Meridian
 
 A prime meridian may be declared indicating the offset between the prime
 meridian of the declared coordinate system and that of greenwich.  A prime
-meridian is clared using the "pm" parameter, and may be assigned a symbolic
+meridian is declared using the "pm" parameter, and may be assigned a symbolic
 name, or the longitude of the alternative prime meridian relative to greenwich.
 
 Currently prime meridian declarations are only utilized by the

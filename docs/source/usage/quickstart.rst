@@ -33,7 +33,7 @@ utility ``proj`` we can convert the geodetic coordinates to projected space:
     $ proj +proj=merc +lat_ts=56.5 +ellps=GRS80
 
 If called as above ``proj`` will be in interactive mode, letting you type the
-input data manually and getting a responce presented on screen. ``proj``
+input data manually and getting a response presented on screen. ``proj``
 works as any UNIX filter though, which means that you can also pipe data to
 the utility, for instance by using the ``echo`` command:
 
@@ -44,7 +44,7 @@ the utility, for instance by using the ``echo`` command:
 
 
 PROJ also comes bundled with the ``cs2cs`` utility which is used to transform
-from onecoordinate reference system to another. Say we want to convert
+from one coordinate reference system to another. Say we want to convert
 the above Mercator coordinates to UTM, we can do that with ``cs2cs``:
 
 ::
@@ -52,10 +52,10 @@ the above Mercator coordinates to UTM, we can do that with ``cs2cs``:
     $ echo 3399483.80 752085.60 | cs2cs +proj=merc +lat_ts=56.5 +ellps=GRS80 +to +proj=utm +zone=32
     6103992.36      1924052.47 0.00
 
-Notice the ``+to`` parameter that seperates the source and destination
+Notice the ``+to`` parameter that separates the source and destination
 projection definitions.
 
-If you happen to know the EPSG identifiers for the two cordinates reference
+If you happen to know the EPSG identifiers for the two coordinates reference
 systems you are transforming between you can use those with ``cs2cs``:
 
 ::

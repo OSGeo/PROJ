@@ -181,4 +181,4 @@ improperly contributing code to the source repository:
 
 The _code contribution_ section of this CONTRIBUTING file is inspired by
 [PDAL's](https://github.com/PDAL/PDAL/blob/master/CONTRIBUTING.md) and the _legalese_ section is
-modified from [GDAL contributer guidelines](https://trac.osgeo.org/gdal/wiki/rfc3_commiters)
+modified from [GDAL commiter guidelines](https://trac.osgeo.org/gdal/wiki/rfc3_commiters)

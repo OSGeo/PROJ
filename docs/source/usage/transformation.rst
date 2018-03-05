@@ -6,11 +6,11 @@ Geodetic transformation
 
 PROJ can do everything from the most simple projection to very complex
 transformations across many reference frames. While originally developed as a
-tool for cartographic projections, PROJ has over time evolved into a powerfull
+tool for cartographic projections, PROJ has over time evolved into a powerful
 generic coordinate transformation engine that makes it possible to do both
 large scale cartographic projections as well as coordinate transformation at a
 geodetic high precision level. This chapter delves into the details of how
-geodetec transformations of varying complexity can be performed.
+geodetic transformations of varying complexity can be performed.
 
 In PROJ, two frameworks for geodetic transformations exists, the *cs2cs*
 framework and the *transformation pipelines* framework. The first is the original,
@@ -69,7 +69,7 @@ solutions for a wide spectrum of geodetic tasks.
 
 As a first example, let us take a look at the iconic
 *geodetic → Cartesian → Helmert → geodetic* case (steps 2 to 4 in the example in
-the itroduction). In PROJ it can be implemented as
+the introduction). In PROJ it can be implemented as
 
 ::
 
@@ -161,11 +161,11 @@ specified in the input proj-string. The most common is ``+towgs84``, which is us
 define a 3- or 7-parameter Helmert shift from the input reference frame to WGS84.
 Exactly which realization of WGS84 is not specified, hence a fair amount of
 uncertainty is introduced in this step of the transformation. With the +nadgrids
-parameter a non-lineaer planar correction derived from interpolation in a
+parameter a non-linear planar correction derived from interpolation in a
 correction grid can be applied. Originally this was implemented as a means to
-transform coordinates between the american datums NAD27 and NAD83, but corrections
-can be applied for any datum for which a correction grid exists. The inverse
-transform for the horizontal grid shift is "dumb", in the sense that the
+transform coordinates between the North American datums NAD27 and NAD83, but
+corrections can be applied for any datum for which a correction grid exists. The
+inverse transform for the horizontal grid shift is "dumb", in the sense that the
 correction grid is applied verbatim without taking into account that the inverse
 operation is non-linear. Similar to the horizontal grid correction, ``+geoidgrids``
 can be used to perform grid corrections in the vertical component.
@@ -203,7 +203,7 @@ using an approximated 7 parameter transformation.
 Grid Based Datum Adjustments
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-In many places (notably North America and Austrialia) national geodetic
+In many places (notably North America and Australia) national geodetic
 organizations provide grid shift files for converting between different datums,
 such as NAD27 to NAD83.  These grid shift files include a shift to be applied
 at each grid location. Actually grid shifts are normally computed based on an

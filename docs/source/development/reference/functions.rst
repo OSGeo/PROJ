@@ -15,7 +15,7 @@ Threading contexts
 
 .. c:function:: void proj_context_destroy(PJ_CONTEXT *ctx)
 
-    Deallacote a threading-context.
+    Deallocate a threading-context.
 
     :param PJ_CONTEXT* ctx: Threading context.
 
@@ -182,15 +182,15 @@ Coordinate transformation
     :param double* y: Array of y-coordinates
     :param double* z: Array of z-coordinates
     :param double* t: Array of t-coordinates
-    :param size_t sx: Step lenght, in bytes, between consecutive elements of the corresponding array
+    :param size_t sx: Step length, in bytes, between consecutive elements of the corresponding array
     :param size_t nx: Number of elements in the corresponding array
-    :param size_t sy: Step lenght, in bytes, between consecutive elements of the corresponding array
+    :param size_t sy: Step length, in bytes, between consecutive elements of the corresponding array
     :param size_t nv: Number of elements in the corresponding array
-    :param size_t sz: Step lenght, in bytes, between consecutive elements of the corresponding array
+    :param size_t sz: Step length, in bytes, between consecutive elements of the corresponding array
     :param size_t nz: Number of elements in the corresponding array
-    :param size_t st: Step lenght, in bytes, between consecutive elements of the corresponding array
+    :param size_t st: Step length, in bytes, between consecutive elements of the corresponding array
     :param size_t nt: Number of elements in the corresponding array
-    :returns: Number of transformations succesfully completed
+    :returns: Number of transformations successfully completed
 
 
 
@@ -201,7 +201,7 @@ Coordinate transformation
     :param PJ* P:
     :param `direction`: Transformation direction
     :type `direction`: PJ_DIRECTION
-    :param size_t n: Number of cordinates in :c:data:`coord`
+    :param size_t n: Number of coordinates in :c:data:`coord`
     :returns: :c:type:`size_t` 0 if all observations are transformed without error, otherwise returns error number
 
 

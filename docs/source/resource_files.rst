@@ -350,12 +350,12 @@ Init files are used for preconfiguring proj-strings for often used
 transformations, such as those found in the EPSG database. Most init files contain
 transformations from a given coordinate reference system to WGS84. This makes
 it easy to transformations between any two coordinate reference systems with
-``cs2cs``. Init files can however contain any proj-string and don't necesarily
+``cs2cs``. Init files can however contain any proj-string and don't necessarily
 have to follow the *cs2cs* paradigm where WGS84 is used as a pivot datum. The
 ITRF init file is a good example of that.
 
 A number of init files come pre-bundled with PROJ but it is also possible to
-add your own custom init files. PROJ looks for the init files in the directoty
+add your own custom init files. PROJ looks for the init files in the directory
 listed in the ``PROJ_LIB`` environment variable.
 
 The format of init files made up of a identifier in angled brackets and a
@@ -401,7 +401,7 @@ the ellipsoid as in the following example
 
 where the Hayford ellipsoid is used instead of the predefined GRS80 ellipsoid.
 It is also possible to add additional parameters not specified in the init file,
-for instance by adding an obervation epoch when transforming from ITRF2000 to
+for instance by adding an observation epoch when transforming from ITRF2000 to
 ITRF2005:
 
 ::

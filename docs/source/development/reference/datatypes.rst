@@ -8,7 +8,7 @@ This section describes the numerous data types in use in PROJ.4. As a rule
 of thumb PROJ.4 data types are prefixed with ``PJ_``, or in one particular case,
 is simply called :c:type:`PJ`. A few notable exceptions can be traced
 back to the very early days of PROJ.4 when the ``PJ_`` prefix was not
-consistenly used.
+consistently used.
 
 Transformation objects
 --------------------------------------------------------------------------------
@@ -234,7 +234,7 @@ domain.
 
 .. c:type:: PJ_XYZT
 
-    Generic spatiotemporal coordinate. Usefull for e.g. cartesian coordinates with
+    Generic spatiotemporal coordinate. Useful for e.g. cartesian coordinates with
     an attached time-stamp.
 
     .. code-block:: C

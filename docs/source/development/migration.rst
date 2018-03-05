@@ -144,7 +144,7 @@ example with the old API the source system is described as
 ``+proj=latlon +ellps=clrk66`` and the destination system is described as
 ``+proj=merc +ellps=clrk66 +lat_ts=33``. Since the Mercator projection accepts
 geodetic coordinates as its input, the description of the source in this case
-is superflous. We use that to our advantage in the new API and simply state
+is superfluous. We use that to our advantage in the new API and simply state
 the destination. This is simple at a glance, but is actually a big conceptual
 change. We are now focused on the path between two systems instead of what the
 source and destination systems are.
