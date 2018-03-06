@@ -115,9 +115,9 @@ static PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
             return coo;
 
         /* Classic proj.4 functions expect plane coordinates in units of the semimajor axis  */
-        /* Multiplying by ra, rather than dividing by a because the CALCOFI projection       */
+        /* Multiplying by ra, rather than dividing by a because the CalCOFI projection       */
         /* stomps on a and hence (apparently) depends on this to roundtrip correctly         */
-        /* (CALCOFI avoids further scaling by stomping - but a better solution is possible)  */
+        /* (CalCOFI avoids further scaling by stomping - but a better solution is possible)  */
         coo.xyz.x *= P->ra;
         coo.xyz.y *= P->ra;
         return coo;

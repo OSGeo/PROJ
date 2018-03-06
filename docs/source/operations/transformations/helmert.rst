@@ -25,7 +25,7 @@ anoether by means of 3-, 4-and 7-parameter shifts, or one of their 6-, 8- and
 +----------------+--------------------------------------------------------------------+
 | `rx`           | X-axis rotation in the 3D Helmert [arc seconds]. *Optional*.       |
 +----------------+--------------------------------------------------------------------+
-| `ry`           | Y-axis rotatoin in the 3D Helmert [arc seconds]. *Optional*.       |
+| `ry`           | Y-axis rotation in the 3D Helmert [arc seconds]. *Optional*.       |
 +----------------+--------------------------------------------------------------------+
 | `rz`           | Z-axis rotation in the 3D Helmert [arc seconds]. *Optional*.       |
 +----------------+--------------------------------------------------------------------+
@@ -65,13 +65,13 @@ kinematic transformations from global reference frames to local static frames.
 All of the parameters described in the table above are marked as optional. This is true
 as long as at least one parameter is defined in the setup of the transformation.
 The behaviour of the transformation depends on which parameters are used in the setup.
-For instance, if a rate of change paramater is specified a kinematic version of the
+For instance, if a rate of change parameter is specified a kinematic version of the
 transformation is used.
 
 The kinematic transformations require an observation time of the coordinate, as well
 as a central epoch for the transformation. The latter is usually documented
 alongside the rest of the transformation parameters for a given transformation.
-The central eopch is controlled with the parameter `t_epoch`. The observation
+The central epoch is controlled with the parameter `t_epoch`. The observation
 time can either by stated as part of the coordinate when using PROJ's
 4D-functionality or it can be controlled in the transformation setup by the
 parameter `t_obs`. When `t_obs` is specified, all transformed coordinates are
@@ -131,7 +131,7 @@ The simplest version of the Helmert transform is the 2D case. In the 2-dimension
 case only the horizontal coordinates are changed. The coordinates can be
 translated, rotated and scale. Translation is controlled with the `x` and `y`
 parameters. The rotation is determined by `theta` and the scale is controlled with
-the `s` paramaters.
+the `s` parameters.
 
 .. note::
 
@@ -338,9 +338,9 @@ Applying :eq:`propagation` we get the kinematic version of the approximated
 
 
 The Helmert transformation can be applied without using the rotation parameters,
-in which case it becomes a simlpe translation of the origin of the coordinate
+in which case it becomes a simple translation of the origin of the coordinate
 system. When using the Helmert in this version equation :eq:`general-helmert`
-simplies to:
+simplifies to:
 
 .. math::
     :label: 3param
@@ -364,7 +364,7 @@ simplies to:
     \end{align}
 
 That after application of :eq:`propagation` has the following kinematic
-countpart:
+counterpart:
 
 .. math::
     :label: 6param

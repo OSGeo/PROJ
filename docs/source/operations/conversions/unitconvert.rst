@@ -34,7 +34,7 @@ in Vermont::
     +step +proj=tmerc +lat_0=42.5 +lon_0=-72.5 +k=0.999964286 +x_0=500000.00001016 +y_0=0
     +step +proj=unitconvert +xy_in=m +xy_out=us-ft
 
-Often when working with GNNS data the timestamps are presented in GPS-weeks,
+Often when working with GNSS data the timestamps are presented in GPS-weeks,
 but when the data transformed with the `helmert` operation timestamps are
 expected to be in units of decimalyears. This can be fixed with `unitconvert`::
 
@@ -103,7 +103,7 @@ Time units
 In the table below all time units supported by PROJ is listed.
 
 +--------------+-----------------------------+
-| mjd          | Modfied Julian date         |
+| mjd          | Modified Julian date        |
 +--------------+-----------------------------+
 | decimalyear  | Decimal year                |
 +--------------+-----------------------------+
