@@ -33,7 +33,7 @@
 #endif
 #include <math.h>   /* For M_PI */
 
-#include <proj.h>
+#include "proj.h"
 
 #ifdef PROJECTS_H
 #error proj_internal.h must be included before projects.h
