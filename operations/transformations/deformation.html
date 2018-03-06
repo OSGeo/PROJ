@@ -224,7 +224,7 @@ transformations. [decimalyear]. <em>Optional</em>.</td>
 Usually the transformation parameters for regional plate-fixed reference frames such as
 the ETRS89 does not take intraplate deformation into account. It is assumed that
 tectonic plate of the region is rigid. Often times this is true, but near the plate
-boundary and in areas with post-glacial uplift the assumption breaks. Tntraplate
+boundary and in areas with post-glacial uplift the assumption breaks. Intraplate
 deformations can be modelled and then applied to the coordinates so that
 they represent the physical world better. In PROJ this is done with the deformation
 operation.</p>
@@ -236,10 +236,10 @@ writes both file formats. Using GDAL for construction of new grids is recommende
 <h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
 <p>In <a class="reference internal" href="../../references.html#hakli2016" id="id1">[Häkli2016]</a> coordinate transformation including a deformation model is described.
 The paper describes how coordinates from the global ITRFxx frames are transformed to the
-local Nordic realisations of ERTS89. Scandinavia is an area with significant post-glacial
+local Nordic realisations of ETRS89. Scandinavia is an area with significant post-glacial
 rebound. The deformations from the post-glacial uplift is not accounted for in the
-offcial ETRS89 transformations so in order to get accurate transformations in the Nordic
-countries it is necesarry to apply the deformation model. The transformation from ITRF2008
+official ETRS89 transformations so in order to get accurate transformations in the Nordic
+countries it is necessary to apply the deformation model. The transformation from ITRF2008
 to the Danish realisation of ETRS89 is in PROJ described as:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">=</span>  <span class="n">pipeline</span> <span class="n">ellps</span> <span class="o">=</span> <span class="n">GRS80</span>
         <span class="c1"># ITRF2008@t_obs -&gt; ITRF2000@t_obs</span>
@@ -308,7 +308,7 @@ correcton as seen in eq. <a class="reference internal" href="#equation-apply_vel
 <p>Coordinates of the gridded model are in ENU (east, north, up) space because it would
 otherwise require an enormous 3 dimensional grid to handle the corrections in cartesian
 space. Keeping the correction in lat/long space reduces the complexity of the grid
-significantly. Consequentyly though, the input coordinates needs to be converted to
+significantly. Consequently though, the input coordinates needs to be converted to
 lat/long space when searching for corrections in the grid. This is done with <em>cart</em>
 operation. The converted grid corrections can then be applied to the input coordinates
 in cartesian space. The conversion from ENU space to cartesian space is done in the
@@ -355,7 +355,7 @@ that is searched for in the grid. <span class="math">\((E, N, U)\)</span> are th
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 05 Mar 2018.
+      Last updated on 06 Mar 2018.
 
     </p>
   </div>

@@ -15,7 +15,7 @@ program, performs transformation coordinate systems on a set of input points.
 The coordinate system transformation can include  translation  between
 projected  and geographic coordinates as well as the application of datum shifts.
 
-cct is an acromyn meaning *Coordinate Conversion and Transformation*.
+cct is an acronym meaning *Coordinate Conversion and Transformation*.
 
 The acronym refers to definitions given in the OGC 08-015r2/ISO-19111
 standard "Geographical Information -- Spatial Referencing by Coordinates",
@@ -33,7 +33,7 @@ professor of Geodesy at the University of Copenhagen, mentor and advisor
 for a generation of Danish geodesists, colleague and collaborator for
 two generations of global geodesists, Secretary General for the
 International Association of Geodesy, IAG (1995--2007), fellow of the
-Amercan Geophysical Union (1991), recipient of the IAG Levallois Medal
+American Geophysical Union (1991), recipient of the IAG Levallois Medal
 (2007), the European Geosciences Union Vening Meinesz Medal (2008), and
 of numerous other honours.
 
@@ -43,7 +43,7 @@ the development of geodesy -- both through his scientific contributions,
 comprising more than 250 publications, and by his mentoring and teaching
 of the next generations of geodesists.
 
-As Christian was an avid Fortran programmer, and a keen Unix connoiseur,
+As Christian was an avid Fortran programmer, and a keen Unix connoisseur,
 he would have enjoyed to know that his initials would be used to name a
 modest Unix style transformation filter, hinting at the tireless aspect
 of his personality, which was certainly one of the reasons he accomplished

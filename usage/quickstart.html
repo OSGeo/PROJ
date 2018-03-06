@@ -200,7 +200,7 @@ utility <code class="docutils literal"><span class="pre">proj</span></code> we c
 </pre></div>
 </div>
 <p>If called as above <code class="docutils literal"><span class="pre">proj</span></code> will be in interactive mode, letting you type the
-input data manually and getting a responce presented on screen. <code class="docutils literal"><span class="pre">proj</span></code>
+input data manually and getting a response presented on screen. <code class="docutils literal"><span class="pre">proj</span></code>
 works as any UNIX filter though, which means that you can also pipe data to
 the utility, for instance by using the <code class="docutils literal"><span class="pre">echo</span></code> command:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 55.2 12.2 | proj +proj=merc +lat_ts=56.5 +ellps=GRS80
@@ -208,15 +208,15 @@ the utility, for instance by using the <code class="docutils literal"><span clas
 </pre></div>
 </div>
 <p>PROJ also comes bundled with the <code class="docutils literal"><span class="pre">cs2cs</span></code> utility which is used to transform
-from onecoordinate reference system to another. Say we want to convert
+from one coordinate reference system to another. Say we want to convert
 the above Mercator coordinates to UTM, we can do that with <code class="docutils literal"><span class="pre">cs2cs</span></code>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 3399483.80 752085.60 | cs2cs +proj=merc +lat_ts=56.5 +ellps=GRS80 +to +proj=utm +zone=32
 6103992.36      1924052.47 0.00
 </pre></div>
 </div>
-<p>Notice the <code class="docutils literal"><span class="pre">+to</span></code> parameter that seperates the source and destination
+<p>Notice the <code class="docutils literal"><span class="pre">+to</span></code> parameter that separates the source and destination
 projection definitions.</p>
-<p>If you happen to know the EPSG identifiers for the two cordinates reference
+<p>If you happen to know the EPSG identifiers for the two coordinates reference
 systems you are transforming between you can use those with <code class="docutils literal"><span class="pre">cs2cs</span></code>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 56 12 | cs2cs +init=epsg:4326 +to +init=epsg:25832
 231950.54      1920310.71 0.00
@@ -250,7 +250,7 @@ UTM coordinates</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 05 Mar 2018.
+      Last updated on 06 Mar 2018.
 
     </p>
   </div>

@@ -41,8 +41,8 @@ been swapped:
 
 Here the first step is applying the :ref:`merc` projection and the second step is
 applying the :ref:`axisswap` conversion. Note that the `+ellps=GRS80` is specified
-before the first occurence of `+step`. This means that the GRS80 ellipsoid is used
-in both steps, since any parameter stated before the first occurence of `+step` is
+before the first occurrence of `+step`. This means that the GRS80 ellipsoid is used
+in both steps, since any parameter stated before the first occurrence of `+step` is
 treated as a global parameter and is transferred to each individual steps.
 
 

@@ -216,7 +216,7 @@
 <dl class="function">
 <dt id="c.proj_context_destroy">
 void <code class="descname">proj_context_destroy</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ_CONTEXT" title="PJ_CONTEXT">PJ_CONTEXT</a><em>&nbsp;*ctx</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_context_destroy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deallacote a threading-context.</p>
+<dd><p>Deallocate a threading-context.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -436,18 +436,18 @@ state. Hence, remember to reinitialize between repeated calls.</p>
 <li><strong>y</strong> (<em>double*</em>) &#8211; Array of y-coordinates</li>
 <li><strong>z</strong> (<em>double*</em>) &#8211; Array of z-coordinates</li>
 <li><strong>t</strong> (<em>double*</em>) &#8211; Array of t-coordinates</li>
-<li><strong>sx</strong> (<em>size_t</em>) &#8211; Step lenght, in bytes, between consecutive elements of the corresponding array</li>
+<li><strong>sx</strong> (<em>size_t</em>) &#8211; Step length, in bytes, between consecutive elements of the corresponding array</li>
 <li><strong>nx</strong> (<em>size_t</em>) &#8211; Number of elements in the corresponding array</li>
-<li><strong>sy</strong> (<em>size_t</em>) &#8211; Step lenght, in bytes, between consecutive elements of the corresponding array</li>
+<li><strong>sy</strong> (<em>size_t</em>) &#8211; Step length, in bytes, between consecutive elements of the corresponding array</li>
 <li><strong>nv</strong> (<em>size_t</em>) &#8211; Number of elements in the corresponding array</li>
-<li><strong>sz</strong> (<em>size_t</em>) &#8211; Step lenght, in bytes, between consecutive elements of the corresponding array</li>
+<li><strong>sz</strong> (<em>size_t</em>) &#8211; Step length, in bytes, between consecutive elements of the corresponding array</li>
 <li><strong>nz</strong> (<em>size_t</em>) &#8211; Number of elements in the corresponding array</li>
-<li><strong>st</strong> (<em>size_t</em>) &#8211; Step lenght, in bytes, between consecutive elements of the corresponding array</li>
+<li><strong>st</strong> (<em>size_t</em>) &#8211; Step length, in bytes, between consecutive elements of the corresponding array</li>
 <li><strong>nt</strong> (<em>size_t</em>) &#8211; Number of elements in the corresponding array</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Number of transformations succesfully completed</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Number of transformations successfully completed</p>
 </td>
 </tr>
 </tbody>
@@ -465,7 +465,7 @@ size_t <code class="descname">proj_trans_array</code><span class="sig-paren">(</
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>P</strong> (<a class="reference internal" href="datatypes.html#c.PJ" title="PJ"><em>PJ*</em></a>) &#8211; </li>
 <li><strong>direction</strong> (<a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION"><em>PJ_DIRECTION</em></a>) &#8211; Transformation direction</li>
-<li><strong>n</strong> (<em>size_t</em>) &#8211; Number of cordinates in <code class="xref c c-data docutils literal"><span class="pre">coord</span></code></li>
+<li><strong>n</strong> (<em>size_t</em>) &#8211; Number of coordinates in <code class="xref c c-data docutils literal"><span class="pre">coord</span></code></li>
 </ul>
 </td>
 </tr>
@@ -1081,7 +1081,7 @@ int <code class="descname">proj_angular_output</code><span class="sig-paren">(</
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 05 Mar 2018.
+      Last updated on 06 Mar 2018.
 
     </p>
   </div>

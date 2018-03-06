@@ -28,7 +28,7 @@ The deformation operation is used to adjust coordinates for intraplate deformati
 Usually the transformation parameters for regional plate-fixed reference frames such as
 the ETRS89 does not take intraplate deformation into account. It is assumed that
 tectonic plate of the region is rigid. Often times this is true, but near the plate
-boundary and in areas with post-glacial uplift the assumption breaks. Tntraplate
+boundary and in areas with post-glacial uplift the assumption breaks. Intraplate
 deformations can be modelled and then applied to the coordinates so that
 they represent the physical world better. In PROJ this is done with the deformation
 operation.
@@ -43,10 +43,10 @@ Example
 
 In [Häkli2016]_ coordinate transformation including a deformation model is described.
 The paper describes how coordinates from the global ITRFxx frames are transformed to the
-local Nordic realisations of ERTS89. Scandinavia is an area with significant post-glacial
+local Nordic realisations of ETRS89. Scandinavia is an area with significant post-glacial
 rebound. The deformations from the post-glacial uplift is not accounted for in the
-offcial ETRS89 transformations so in order to get accurate transformations in the Nordic
-countries it is necesarry to apply the deformation model. The transformation from ITRF2008
+official ETRS89 transformations so in order to get accurate transformations in the Nordic
+countries it is necessary to apply the deformation model. The transformation from ITRF2008
 to the Danish realisation of ETRS89 is in PROJ described as::
 
     proj =  pipeline ellps = GRS80
@@ -121,7 +121,7 @@ Corrections are done in cartesian space.
 Coordinates of the gridded model are in ENU (east, north, up) space because it would
 otherwise require an enormous 3 dimensional grid to handle the corrections in cartesian
 space. Keeping the correction in lat/long space reduces the complexity of the grid
-significantly. Consequentyly though, the input coordinates needs to be converted to
+significantly. Consequently though, the input coordinates needs to be converted to
 lat/long space when searching for corrections in the grid. This is done with *cart*
 operation. The converted grid corrections can then be applied to the input coordinates
 in cartesian space. The conversion from ENU space to cartesian space is done in the

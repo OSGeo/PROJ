@@ -495,11 +495,11 @@ model and program.  Source for the HTDP program can be downloaded from here.</li
 transformations, such as those found in the EPSG database. Most init files contain
 transformations from a given coordinate reference system to WGS84. This makes
 it easy to transformations between any two coordinate reference systems with
-<code class="docutils literal"><span class="pre">cs2cs</span></code>. Init files can however contain any proj-string and don&#8217;t necesarily
+<code class="docutils literal"><span class="pre">cs2cs</span></code>. Init files can however contain any proj-string and don&#8217;t necessarily
 have to follow the <em>cs2cs</em> paradigm where WGS84 is used as a pivot datum. The
 ITRF init file is a good example of that.</p>
 <p>A number of init files come pre-bundled with PROJ but it is also possible to
-add your own custom init files. PROJ looks for the init files in the directoty
+add your own custom init files. PROJ looks for the init files in the directory
 listed in the <code class="docutils literal"><span class="pre">PROJ_LIB</span></code> environment variable.</p>
 <p>The format of init files made up of a identifier in angled brackets and a
 proj-string:</p>
@@ -536,7 +536,7 @@ the ellipsoid as in the following example</p>
 </div>
 <p>where the Hayford ellipsoid is used instead of the predefined GRS80 ellipsoid.
 It is also possible to add additional parameters not specified in the init file,
-for instance by adding an obervation epoch when transforming from ITRF2000 to
+for instance by adding an observation epoch when transforming from ITRF2000 to
 ITRF2005:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">init</span><span class="o">=</span><span class="n">ITRF2000</span><span class="p">:</span><span class="n">ITRF2005</span> <span class="o">+</span><span class="n">tobs</span><span class="o">=</span><span class="mf">2010.5</span>
 </pre></div>
@@ -634,7 +634,7 @@ Defaults can be ignored by adding the <code class="docutils literal"><span class
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 05 Mar 2018.
+      Last updated on 06 Mar 2018.
 
     </p>
   </div>

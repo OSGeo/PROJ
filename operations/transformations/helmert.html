@@ -223,7 +223,7 @@ anoether by means of 3-, 4-and 7-parameter shifts, or one of their 6-, 8- and
 <td colspan="2">X-axis rotation in the 3D Helmert [arc seconds]. <em>Optional</em>.</td>
 </tr>
 <tr class="row-odd"><td><cite>ry</cite></td>
-<td colspan="2">Y-axis rotatoin in the 3D Helmert [arc seconds]. <em>Optional</em>.</td>
+<td colspan="2">Y-axis rotation in the 3D Helmert [arc seconds]. <em>Optional</em>.</td>
 </tr>
 <tr class="row-even"><td><cite>rz</cite></td>
 <td colspan="2">Z-axis rotation in the 3D Helmert [arc seconds]. <em>Optional</em>.</td>
@@ -276,12 +276,12 @@ kinematic transformations from global reference frames to local static frames.</
 <p>All of the parameters described in the table above are marked as optional. This is true
 as long as at least one parameter is defined in the setup of the transformation.
 The behaviour of the transformation depends on which parameters are used in the setup.
-For instance, if a rate of change paramater is specified a kinematic version of the
+For instance, if a rate of change parameter is specified a kinematic version of the
 transformation is used.</p>
 <p>The kinematic transformations require an observation time of the coordinate, as well
 as a central epoch for the transformation. The latter is usually documented
 alongside the rest of the transformation parameters for a given transformation.
-The central eopch is controlled with the parameter <cite>t_epoch</cite>. The observation
+The central epoch is controlled with the parameter <cite>t_epoch</cite>. The observation
 time can either by stated as part of the coordinate when using PROJ&#8217;s
 4D-functionality or it can be controlled in the transformation setup by the
 parameter <cite>t_obs</cite>. When <cite>t_obs</cite> is specified, all transformed coordinates are
@@ -325,7 +325,7 @@ propagate all transformation parameters in time.</p>
 case only the horizontal coordinates are changed. The coordinates can be
 translated, rotated and scale. Translation is controlled with the <cite>x</cite> and <cite>y</cite>
 parameters. The rotation is determined by <cite>theta</cite> and the scale is controlled with
-the <cite>s</cite> paramaters.</p>
+the <cite>s</cite> parameters.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">The scaling parameter <cite>s</cite> is unitless for the 2D Helmert, as opposed to the
@@ -482,9 +482,9 @@ the transformation setup.</p>
     \end{bmatrix}^A
 \end{align}\end{split}\]</div>
 <p>The Helmert transformation can be applied without using the rotation parameters,
-in which case it becomes a simlpe translation of the origin of the coordinate
+in which case it becomes a simple translation of the origin of the coordinate
 system. When using the Helmert in this version equation <a class="reference internal" href="#equation-general-helmert">(4)</a>
-simplies to:</p>
+simplifies to:</p>
 <div class="math" id="equation-3param">
 <span class="eqno">(9)<a class="headerlink" href="#equation-3param" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align}
     \begin{bmatrix}
@@ -504,7 +504,7 @@ simplies to:</p>
     \end{bmatrix}^A
 \end{align}\end{split}\]</div>
 <p>That after application of <a class="reference internal" href="#equation-propagation">(1)</a> has the following kinematic
-countpart:</p>
+counterpart:</p>
 <div class="math" id="equation-6param">
 <span class="eqno">(10)<a class="headerlink" href="#equation-6param" title="Permalink to this equation">¶</a></span>\[\begin{split}\begin{align}
     \begin{bmatrix}
@@ -550,7 +550,7 @@ countpart:</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 05 Mar 2018.
+      Last updated on 06 Mar 2018.
 
     </p>
   </div>

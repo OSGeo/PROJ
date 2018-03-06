@@ -32,7 +32,7 @@ Tilted perspective
 
 
 Tilted Perspective is similar to :ref:`nsper` (``nsper``) in that it simulates a
-perspective view from a hight. Where ``nsper`` projects onto a plane tangent to
+perspective view from a height. Where ``nsper`` projects onto a plane tangent to
 the surface, Tilted Perspective orients the plane towards the direction of the
 view. Thus, extra parameters azi and tilt are required beyond `nsper``'s ``h``.
 As with ``nsper``, ``lat_0`` & ``lon_0`` are also required

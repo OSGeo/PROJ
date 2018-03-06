@@ -214,14 +214,14 @@ reference from the ellipsoid to the global geoid model, EGM96:</p>
 </div>
 <p>More than one grid can be loaded at the same time, for instance in the case where
 a better geoid model than the global is available for a certain area. Here the
-gridshift is set up so that the local DVR90 geoid model takes presedence over
+gridshift is set up so that the local DVR90 geoid model takes precedence over
 the global model:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">vgridshift</span> <span class="o">+</span><span class="n">grids</span><span class="o">=</span><span class="nd">@dvr90</span><span class="o">.</span><span class="n">gtx</span><span class="p">,</span><span class="n">egm96_16</span><span class="o">.</span><span class="n">gtx</span>
 </pre></div>
 </div>
 <p>The <code class="docutils literal"><span class="pre">&#64;</span></code> in the above example states that the grid is optional, in case the grid
 is not found in the PROJ search path. The list of grids is prioritized so that
-grids in the start of the list takes presedence over the grids in the back of the
+grids in the start of the list takes precedence over the grids in the back of the
 list.</p>
 <p>PROJ supports the GTX file format for vertical grid corrections. Details
 about all the format can be found in the GDAL documentation. GDAL both reads and
@@ -251,7 +251,7 @@ writes the format. Using GDAL for construction of new grids is recommended.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 05 Mar 2018.
+      Last updated on 06 Mar 2018.
 
     </p>
   </div>

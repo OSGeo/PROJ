@@ -84,8 +84,8 @@ Note that not all feature requests are accepted.
 Write documentation
 -------------------
 
-PROJ is in dire need of better documentation. Any contributiions of
-documentation are greatly appreaciated. The PROJ documentation is
+PROJ is in dire need of better documentation. Any contributions of
+documentation are greatly appreciated. The PROJ documentation is
 available on `proj4.org <ttp://proj4.org>`__. The website is generated
 with `Sphinx <http://www.sphinx-doc.org/en/stable/>`__. Contributions to
 the documentation should be made as `Pull
@@ -157,7 +157,7 @@ The general rule is to keep whitespace in whatever form it is in the
 file you are currently editing. If the file has a mix of tabs and space
 please convert the tabs to space in a separate commit before making any
 other changes. This makes it a lot easier to see the changes in diffs
-when evaulating the changed code. New files should use spaces as
+when evaluating the changed code. New files should use spaces as
 whitespace.
 
 File names
@@ -237,6 +237,6 @@ Acknowledgements
 
 The *code contribution* section of this CONTRIBUTING file is inspired by
 `PDAL's <https://github.com/PDAL/PDAL/blob/master/CONTRIBUTING.md>`__
-and the *legalese* section is modified from `GDAL contributer
+and the *legalese* section is modified from `GDAL commiter
 guidelines <https://trac.osgeo.org/gdal/wiki/rfc3_commiters>`__
 
