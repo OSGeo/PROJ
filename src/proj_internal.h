@@ -73,8 +73,6 @@ enum pj_io_units {
 enum pj_io_units pj_left (PJ *P);
 enum pj_io_units pj_right (PJ *P);
 
-PJ_COORD   proj_trans   (PJ *P, PJ_DIRECTION direction, PJ_COORD obs);
-
 PJ_COORD proj_coord_error (void);
 
 void proj_context_errno_set (PJ_CONTEXT *ctx, int err);
