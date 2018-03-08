@@ -114,7 +114,7 @@ static int adjust_axes (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x, do
 /*    Transform cartesian ("geocentric") source coordinates to lat/long,   */
 /*    if needed                                                            */
 /* ----------------------------------------------------------------------- */
-static int cartesian_to_geographic (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x, double *y, double *z) {
+static int geographic_to_cartesian (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x, double *y, double *z) {
     int res;
     long i;
     double fac = P->to_meter;
@@ -364,7 +364,7 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
 /* -------------------------------------------------------------------- */
 /*            Adjust for the prime meridian if needed.                  */
 /* -------------------------------------------------------------------- */
-static int pm_to_greenwich (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x) {
+static int prime_meridian (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x) {
     int i;
     double pm = P->from_greenwich;
 
@@ -389,7 +389,7 @@ static int pm_to_greenwich (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x
 /* -------------------------------------------------------------------- */
 /*            Adjust for vertical scale factor if needed                */
 /* -------------------------------------------------------------------- */
-static int height_unit_to_meter (PJ *P, PJ_DIRECTION dir, long n, int dist, double *z) {
+static int height_unit (PJ *P, PJ_DIRECTION dir, long n, int dist, double *z) {
     int i;
     double fac = P->vto_meter;
 
@@ -412,7 +412,7 @@ static int height_unit_to_meter (PJ *P, PJ_DIRECTION dir, long n, int dist, doub
 /* -------------------------------------------------------------------- */
 /*           Transform to ellipsoidal heights if needed                 */
 /* -------------------------------------------------------------------- */
-static int orthometric_to_geometric (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x, double *y, double *z) {
+static int geometric_to_orthometric (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x, double *y, double *z) {
     int err;
     if (0==P->has_geoid_vgrids)
         return 0;
@@ -504,19 +504,19 @@ int pj_transform(
     err = adjust_axes (srcdefn, PJ_INV, point_count, point_offset, x, y, z);
     if (err)
         return err;
-    err = cartesian_to_geographic (srcdefn, PJ_INV, point_count, point_offset, x, y, z);
+    err = geographic_to_cartesian (srcdefn, PJ_INV, point_count, point_offset, x, y, z);
     if (err)
         return err;
     err = projected_to_geographic (srcdefn, point_count, point_offset, x, y, z);
     if (err)
         return err;
-    err = pm_to_greenwich (srcdefn, PJ_INV, point_count, point_offset, x);
+    err = prime_meridian (srcdefn, PJ_INV, point_count, point_offset, x);
     if (err)
         return err;
-    err = height_unit_to_meter (srcdefn, PJ_INV, point_count, point_offset, z);
+    err = height_unit (srcdefn, PJ_INV, point_count, point_offset, z);
     if (err)
         return err;
-    err = orthometric_to_geometric (srcdefn, PJ_INV, point_count, point_offset, x, y, z);
+    err = geometric_to_orthometric (srcdefn, PJ_INV, point_count, point_offset, x, y, z);
     if (err)
         return err;
 
@@ -528,16 +528,16 @@ int pj_transform(
 
     /* Now get out on the other side: Bring "normal form" to output form */
 
-    err = orthometric_to_geometric (dstdefn, PJ_FWD, point_count, point_offset, x, y, z);
+    err = geometric_to_orthometric (dstdefn, PJ_FWD, point_count, point_offset, x, y, z);
     if (err)
         return err;
-    err = height_unit_to_meter (dstdefn, PJ_FWD, point_count, point_offset, z);
+    err = height_unit (dstdefn, PJ_FWD, point_count, point_offset, z);
     if (err)
         return err;
-    err = pm_to_greenwich (dstdefn, PJ_FWD, point_count, point_offset, x);
+    err = prime_meridian (dstdefn, PJ_FWD, point_count, point_offset, x);
     if (err)
         return err;
-    err = cartesian_to_geographic (dstdefn, PJ_FWD, point_count, point_offset, x, y, z);
+    err = geographic_to_cartesian (dstdefn, PJ_FWD, point_count, point_offset, x, y, z);
     if (err)
         return err;
     err = geographic_to_projected (dstdefn, point_count, point_offset, x, y, z);
