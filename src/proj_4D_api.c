@@ -113,7 +113,7 @@ double proj_xyz_dist (PJ_COORD a, PJ_COORD b) {
 
 
 /* Measure numerical deviation after n roundtrips fwd-inv (or inv-fwd) */
-double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
+double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord) {
     int i;
     PJ_COORD t, org;
 
@@ -126,9 +126,9 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
     }
 
     /* in the first half-step, we generate the output value */
-    org  = *coo;
-    *coo = proj_trans (P, direction, org);
-    t = *coo;
+    org  = *coord;
+    *coord = proj_trans (P, direction, org);
+    t = *coord;
 
     /* now we take n-1 full steps in inverse direction: We are */
     /* out of phase due to the half step already taken */
@@ -148,26 +148,26 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo) {
 
 
 /**************************************************************************************/
-PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
 /***************************************************************************************
-Apply the transformation P to the coordinate coo, preferring the 4D interfaces if
+Apply the transformation P to the coordinate coord, preferring the 4D interfaces if
 available.
 
 See also pj_approx_2D_trans and pj_approx_3D_trans in pj_internal.c, which work
 similarly, but prefers the 2D resp. 3D interfaces if available.
 ***************************************************************************************/
     if (0==P)
-        return coo;
+        return coord;
     if (P->inverted)
         direction = -direction;
 
     switch (direction) {
         case PJ_FWD:
-            return pj_fwd4d (coo, P);
+            return pj_fwd4d (coord, P);
         case PJ_INV:
-            return  pj_inv4d (coo, P);
+            return  pj_inv4d (coord, P);
         case PJ_IDENT:
-            return coo;
+            return coord;
         default:
             break;
     }
@@ -357,7 +357,7 @@ size_t proj_trans_generic (
 
 
 /*************************************************************************************/
-PJ_COORD proj_geocentric_latitude (const PJ *P, PJ_DIRECTION direction, PJ_COORD coo) {
+PJ_COORD proj_geocentric_latitude (const PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
 /**************************************************************************************
     Convert geographical latitude to geocentric (or the other way round if
     direction = PJ_INV)
@@ -373,13 +373,13 @@ PJ_COORD proj_geocentric_latitude (const PJ *P, PJ_DIRECTION direction, PJ_COORD
     consequently, the input is copied directly to the output.
 **************************************************************************************/
     const double limit = M_HALFPI - 1e-9;
-    PJ_COORD res = coo;
-    if ((coo.lp.phi > limit) || (coo.lp.phi < -limit) || (P->es==0))
+    PJ_COORD res = coord;
+    if ((coord.lp.phi > limit) || (coord.lp.phi < -limit) || (P->es==0))
         return res;
     if (direction==PJ_FWD)
-        res.lp.phi = atan (P->one_es * tan (coo.lp.phi) );
+        res.lp.phi = atan (P->one_es * tan (coord.lp.phi) );
     else
-        res.lp.phi = atan (P->rone_es * tan (coo.lp.phi) );
+        res.lp.phi = atan (P->rone_es * tan (coord.lp.phi) );
 
     return res;
 }

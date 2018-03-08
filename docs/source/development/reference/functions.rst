@@ -419,7 +419,7 @@ Various
     :returns: :c:type:`PJ_COORD`
 
 
-.. c:function:: double proj_roundtrip(PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coo)
+.. c:function:: double proj_roundtrip(PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord)
 
     Measure internal consistency of a given transformation. The function
     performs :c:data:`n` round trip transformations starting in either
@@ -432,7 +432,7 @@ Various
     :param `direction`: Starting direction of transformation
     :type `direction`: PJ_DIRECTION
     :param int n: Number of roundtrip transformations
-    :param PJ_OBS obs: Input coordinate
+    :param PJ_COORD coord: Input coordinate
     :returns: :c:type:`double` Distance between original coordinate and the \
               resulting coordinate after :c:data:`n` transformation iterations.
 
@@ -487,7 +487,7 @@ Various
     :returns: :c:type:`char*` Pointer to output buffer (same as :c:data:`s`)
 
 
-.. c:function:: PJ_COORD proj_geocentric_latitude(const PJ *P, PJ_DIRECTION direction, PJ_COORD coo)
+.. c:function:: PJ_COORD proj_geocentric_latitude(const PJ *P, PJ_DIRECTION direction, PJ_COORD coord)
 
     Convert from geographical latitude to geocentric latitude.
 
@@ -495,8 +495,8 @@ Various
     :type `P`: const PJ*
     :param `direction`: Starting direction of transformation
     :type `direction`: PJ_DIRECTION
-    :param `coo`: Coordinate
-    :type `coo`: PJ_COORD
+    :param `coord`: Coordinate
+    :type `coord`: PJ_COORD
     :returns: :c:type:`PJ_COORD` Converted coordinate
 
 
