@@ -379,7 +379,7 @@ static int pm_to_greenwich (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x
 
     for (i = 0;  i < n;  i++)
         if (x[dist*i] != HUGE_VAL)
-            x[dist*i] += P->from_greenwich;
+            x[dist*i] += pm;
 
     return 0;
 }
