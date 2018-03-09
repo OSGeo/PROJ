@@ -27,10 +27,22 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#include <projects.h>
+#include "projects.h"
 #include <string.h>
 #include <math.h>
 #include "geocent.h"
+
+
+/* Apply transformation to observation - in forward or inverse direction */
+/* Copied from proj.h */
+enum PJ_DIRECTION {
+    PJ_FWD   =  1,   /* Forward    */
+    PJ_IDENT =  0,   /* Do nothing */
+    PJ_INV   = -1    /* Inverse    */
+};
+typedef enum PJ_DIRECTION PJ_DIRECTION;
+
+
 
 static int pj_adjust_axis( projCtx ctx, const char *axis, int denormalize_flag,
                            long point_count, int point_offset,
@@ -81,6 +93,390 @@ static const int transient_error[60] = {
     /* 40 to 49 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
     /* 50 to 59 */ 1, 0, 1, 0, 1, 1, 1, 1, 0, 0 };
 
+
+
+/* -------------------------------------------------------------------- */
+/*      Transform unusual input coordinate axis orientation to          */
+/*      standard form if needed.                                        */
+/* -------------------------------------------------------------------- */
+static int adjust_axes (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x, double *y, double *z) {
+    /* Nothing to do? */
+    if (0==strcmp(P->axis,"enu"))
+        return 0;
+
+    return pj_adjust_axis( P->ctx, P->axis,
+                dir==PJ_FWD ? 1: 0, n, dist, x, y, z );
+}
+
+
+
+/* ----------------------------------------------------------------------- */
+/*    Transform cartesian ("geocentric") source coordinates to lat/long,   */
+/*    if needed                                                            */
+/* ----------------------------------------------------------------------- */
+static int geographic_to_cartesian (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x, double *y, double *z) {
+    int res;
+    long i;
+    double fac = P->to_meter;
+
+    /* Nothing to do? */
+    if (!P->is_geocent)
+        return 0;
+
+    if ( z == NULL ) {
+        pj_ctx_set_errno( pj_get_ctx(P), PJD_ERR_GEOCENTRIC);
+        return PJD_ERR_GEOCENTRIC;
+    }
+
+    if (PJ_FWD==dir) {
+        fac = P->fr_meter;
+        res = pj_geodetic_to_geocentric( P->a_orig, P->es_orig, n, dist, x, y, z );
+        if (res)
+            return res;
+    }
+
+    if (fac != 1.0) {
+        for( i = 0; i < n; i++ ) {
+            if( x[dist*i] != HUGE_VAL ) {
+                x[dist*i] *= fac;
+                y[dist*i] *= fac;
+                z[dist*i] *= fac;
+            }
+        }
+    }
+
+    if (PJ_FWD==dir)
+        return 0;
+    return pj_geocentric_to_geodetic(
+        P->a_orig, P->es_orig,
+        n, dist,
+        x, y, z
+    );
+}
+
+
+
+
+
+
+
+
+
+
+/* -------------------------------------------------------------------- */
+/*      Transform destination points to projection coordinates, if      */
+/*      desired.                                                        */
+/*                                                                      */
+/*      Ought to fold this into projected_to_geographic                 */
+/* -------------------------------------------------------------------- */
+static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *y, double *z) {
+    long i;
+
+    /* Nothing to do? */
+    if (P->is_latlong)
+        return 0;
+    if (P->is_geocent)
+        return 0;
+
+    if(P->fwd3d != NULL)
+    {
+        /* Three dimensions must be defined */
+        if ( z == NULL)
+        {
+            pj_ctx_set_errno( pj_get_ctx(P), PJD_ERR_GEOCENTRIC);
+            return PJD_ERR_GEOCENTRIC;
+        }
+
+        for( i = 0; i < n; i++ )
+        {
+            XYZ projected_loc;
+            LPZ geodetic_loc;
+
+            geodetic_loc.u = x[dist*i];
+            geodetic_loc.v = y[dist*i];
+            geodetic_loc.w = z[dist*i];
+
+            if (geodetic_loc.u == HUGE_VAL)
+                continue;
+
+            projected_loc = pj_fwd3d( geodetic_loc, P);
+            if( P->ctx->last_errno != 0 )
+            {
+                if( (P->ctx->last_errno != 33 /*EDOM*/
+                        && P->ctx->last_errno != 34 /*ERANGE*/ )
+                    && (P->ctx->last_errno > 0
+                        || P->ctx->last_errno < -44 || n == 1
+                        || transient_error[-P->ctx->last_errno] == 0 ) )
+                    return P->ctx->last_errno;
+                else
+                {
+                    projected_loc.u = HUGE_VAL;
+                    projected_loc.v = HUGE_VAL;
+                    projected_loc.w = HUGE_VAL;
+                }
+            }
+
+            x[dist*i] = projected_loc.u;
+            y[dist*i] = projected_loc.v;
+            z[dist*i] = projected_loc.w;
+        }
+        return 0;
+    }
+
+    for( i = 0; i <n; i++ )
+    {
+        XY         projected_loc;
+        LP	       geodetic_loc;
+
+        geodetic_loc.u = x[dist*i];
+        geodetic_loc.v = y[dist*i];
+
+        if( geodetic_loc.u == HUGE_VAL )
+            continue;
+
+        projected_loc = pj_fwd( geodetic_loc, P );
+        if( P->ctx->last_errno != 0 )
+        {
+            if( (P->ctx->last_errno != 33 /*EDOM*/
+                    && P->ctx->last_errno != 34 /*ERANGE*/ )
+                && (P->ctx->last_errno > 0
+                    || P->ctx->last_errno < -44 || n == 1
+                    || transient_error[-P->ctx->last_errno] == 0 ) )
+                return P->ctx->last_errno;
+            else
+            {
+                projected_loc.u = HUGE_VAL;
+                projected_loc.v = HUGE_VAL;
+            }
+        }
+
+        x[dist*i] = projected_loc.u;
+        y[dist*i] = projected_loc.v;
+    }
+    return 0;
+}
+
+
+
+
+
+/* ----------------------------------------------------------------------- */
+/*    Transform projected source coordinates to lat/long, if needed        */
+/* ----------------------------------------------------------------------- */
+static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *y, double *z) {
+    long i;
+
+    /* Nothing to do? */
+    if (P->is_latlong)
+        return 0;
+
+    /* Check first if projection is invertible. */
+    if( (P->inv3d == NULL) && (P->inv == NULL))
+    {
+        pj_ctx_set_errno( pj_get_ctx(P), -17 );
+        pj_log( pj_get_ctx(P), PJ_LOG_ERROR,
+                "pj_transform(): source projection not invertable" );
+        return -17;
+    }
+
+    /* If invertible - First try inv3d if defined */
+    if (P->inv3d != NULL)
+    {
+        /* Three dimensions must be defined */
+        if ( z == NULL)
+        {
+            pj_ctx_set_errno( pj_get_ctx(P), PJD_ERR_GEOCENTRIC);
+            return PJD_ERR_GEOCENTRIC;
+        }
+
+        for (i=0; i < n; i++)
+        {
+            XYZ projected_loc;
+            XYZ geodetic_loc;
+
+            projected_loc.u = x[dist*i];
+            projected_loc.v = y[dist*i];
+            projected_loc.w = z[dist*i];
+
+            if (projected_loc.u == HUGE_VAL)
+                continue;
+
+            geodetic_loc = pj_inv3d(projected_loc, P);
+            if( P->ctx->last_errno != 0 )
+            {
+                if( (P->ctx->last_errno != 33 /*EDOM*/
+                        && P->ctx->last_errno != 34 /*ERANGE*/ )
+                    && (P->ctx->last_errno > 0
+                        || P->ctx->last_errno < -44 || n == 1
+                        || transient_error[-P->ctx->last_errno] == 0 ) )
+                    return P->ctx->last_errno;
+                else
+                {
+                    geodetic_loc.u = HUGE_VAL;
+                    geodetic_loc.v = HUGE_VAL;
+                    geodetic_loc.w = HUGE_VAL;
+                }
+            }
+
+            x[dist*i] = geodetic_loc.u;
+            y[dist*i] = geodetic_loc.v;
+            z[dist*i] = geodetic_loc.w;
+
+        }
+        return 0;
+    }
+
+    /* Fallback to the original PROJ.4 API 2d inversion - inv */
+    for( i = 0; i < n; i++ ) {
+        XY         projected_loc;
+        LP	       geodetic_loc;
+
+        projected_loc.u = x[dist*i];
+        projected_loc.v = y[dist*i];
+
+        if( projected_loc.u == HUGE_VAL )
+            continue;
+
+        geodetic_loc = pj_inv( projected_loc, P );
+        if( P->ctx->last_errno != 0 )
+        {
+            if( (P->ctx->last_errno != 33 /*EDOM*/
+                    && P->ctx->last_errno != 34 /*ERANGE*/ )
+                && (P->ctx->last_errno > 0
+                    || P->ctx->last_errno < -44 || n == 1
+                    || transient_error[-P->ctx->last_errno] == 0 ) )
+                return P->ctx->last_errno;
+            else
+            {
+                geodetic_loc.u = HUGE_VAL;
+                geodetic_loc.v = HUGE_VAL;
+            }
+        }
+
+        x[dist*i] = geodetic_loc.u;
+        y[dist*i] = geodetic_loc.v;
+    }
+    return 0;
+}
+
+
+
+/* -------------------------------------------------------------------- */
+/*            Adjust for the prime meridian if needed.                  */
+/* -------------------------------------------------------------------- */
+static int prime_meridian (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x) {
+    int i;
+    double pm = P->from_greenwich;
+
+    /* Nothing to do? */
+    if (pm==0.0)
+        return 0;
+    if (!(P->is_geocent || P->is_latlong))
+        return 0;
+
+    if (dir==PJ_FWD)
+        pm = -pm;
+
+    for (i = 0;  i < n;  i++)
+        if (x[dist*i] != HUGE_VAL)
+            x[dist*i] += pm;
+
+    return 0;
+}
+
+
+
+/* -------------------------------------------------------------------- */
+/*            Adjust for vertical scale factor if needed                */
+/* -------------------------------------------------------------------- */
+static int height_unit (PJ *P, PJ_DIRECTION dir, long n, int dist, double *z) {
+    int i;
+    double fac = P->vto_meter;
+
+    if (PJ_FWD==dir)
+        fac = P->vfr_meter;
+
+    /* Nothing to do? */
+    if (P->vto_meter==0.0)
+        return 0;
+
+    for (i = 0;  i < n;  i++)
+        if (z[dist*i] != HUGE_VAL )
+            z[dist*i] *= fac;
+
+    return 0;
+}
+
+
+
+/* -------------------------------------------------------------------- */
+/*           Transform to ellipsoidal heights if needed                 */
+/* -------------------------------------------------------------------- */
+static int geometric_to_orthometric (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x, double *y, double *z) {
+    int err;
+    if (0==P->has_geoid_vgrids)
+        return 0;
+    if (z==0)
+        return PJD_ERR_GEOCENTRIC;
+    err = pj_apply_vgridshift (P, "sgeoidgrids",
+              &(P->vgridlist_geoid),
+              &(P->vgridlist_geoid_count),
+              dir==PJ_FWD ? 1 : 0, n, dist, x, y, z );
+    if (err)
+        return pj_ctx_get_errno(P->ctx);
+    return 0;
+}
+
+
+
+/* -------------------------------------------------------------------- */
+/*      Convert datums if needed, and possible.                         */
+/* -------------------------------------------------------------------- */
+static int datum_transform (PJ *P, PJ *Q, long n, int dist, double *x, double *y, double *z) {
+    if (0==pj_datum_transform (P, Q, n, dist, x, y, z))
+        return 0;
+    if (P->ctx->last_errno)
+        return P->ctx->last_errno;
+    return Q->ctx->last_errno;
+}
+
+
+
+
+
+/* -------------------------------------------------------------------- */
+/*      If a wrapping center other than 0 is provided, rewrap around    */
+/*      the suggested center (for latlong coordinate systems only).     */
+/* -------------------------------------------------------------------- */
+static int long_wrap (PJ *P, long n, int dist, double *x) {
+    long i;
+
+    /* Nothing to do? */
+    if (P->is_geocent)
+        return 0;
+    if (!P->is_long_wrap_set)
+        return 0;
+    if (!P->is_latlong)
+        return 0;
+
+    for (i = 0;  i < n;  i++ ) {
+        double val = x[dist*i];
+        if (val == HUGE_VAL)
+            continue;
+
+        /* Get fast in ] -2 PI, 2 PI [ range */
+        val = fmod(val, M_TWOPI);
+        while( val < P->long_wrap_center - M_PI )
+            val += M_TWOPI;
+        while( val > P->long_wrap_center + M_PI )
+            val -= M_TWOPI;
+        x[dist*i] = val;
+    }
+    return 0;
+}
+
+
+
 /************************************************************************/
 /*                            pj_transform()                            */
 /*                                                                      */
@@ -90,11 +486,12 @@ static const int transient_error[60] = {
 /*      projection specific components).                                */
 /************************************************************************/
 
-int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
-                  double *x, double *y, double *z )
-
-{
-    long      i;
+int pj_transform(
+    PJ *srcdefn, PJ *dstdefn,
+    long point_count, int point_offset,
+    double *x, double *y, double *z
+){
+    int       err;
 
     srcdefn->ctx->last_errno = 0;
     dstdefn->ctx->last_errno = 0;
@@ -102,366 +499,61 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     if( point_offset == 0 )
         point_offset = 1;
 
-/* -------------------------------------------------------------------- */
-/*      Transform unusual input coordinate axis orientation to          */
-/*      standard form if needed.                                        */
-/* -------------------------------------------------------------------- */
-    if( strcmp(srcdefn->axis,"enu") != 0 )
-    {
-        int err;
+    /* Bring input to "normal form": longitude, latitude, ellipsoidal height */
 
-        err = pj_adjust_axis( srcdefn->ctx, srcdefn->axis,
-                              0, point_count, point_offset, x, y, z );
-        if( err != 0 )
-            return err;
-    }
+    err = adjust_axes (srcdefn, PJ_INV, point_count, point_offset, x, y, z);
+    if (err)
+        return err;
+    err = geographic_to_cartesian (srcdefn, PJ_INV, point_count, point_offset, x, y, z);
+    if (err)
+        return err;
+    err = projected_to_geographic (srcdefn, point_count, point_offset, x, y, z);
+    if (err)
+        return err;
+    err = prime_meridian (srcdefn, PJ_INV, point_count, point_offset, x);
+    if (err)
+        return err;
+    err = height_unit (srcdefn, PJ_INV, point_count, point_offset, z);
+    if (err)
+        return err;
+    err = geometric_to_orthometric (srcdefn, PJ_INV, point_count, point_offset, x, y, z);
+    if (err)
+        return err;
 
-/* -------------------------------------------------------------------- */
-/*      Transform geocentric source coordinates to lat/long.            */
-/* -------------------------------------------------------------------- */
-    if( srcdefn->is_geocent )
-    {
-        int err;
-        if( z == NULL )
-        {
-            pj_ctx_set_errno( pj_get_ctx(srcdefn), PJD_ERR_GEOCENTRIC);
-            return PJD_ERR_GEOCENTRIC;
-        }
+    /* At the center of the process we do the datum shift (if needed) */
 
-        if( srcdefn->to_meter != 1.0 )
-        {
-            for( i = 0; i < point_count; i++ )
-            {
-                if( x[point_offset*i] != HUGE_VAL )
-                {
-                    x[point_offset*i] *= srcdefn->to_meter;
-                    y[point_offset*i] *= srcdefn->to_meter;
-                    z[point_offset*i] *= srcdefn->to_meter;
-                }
-            }
-        }
+    err = datum_transform(srcdefn, dstdefn, point_count, point_offset, x, y, z );
+    if (err)
+        return err;
 
-        err = pj_geocentric_to_geodetic( srcdefn->a_orig, srcdefn->es_orig,
-                                         point_count, point_offset,
-                                         x, y, z );
-        if( err != 0 )
-            return err;
-    }
+    /* Now get out on the other side: Bring "normal form" to output form */
 
-/* -------------------------------------------------------------------- */
-/*      Transform source points to lat/long, if they aren't             */
-/*      already.                                                        */
-/* -------------------------------------------------------------------- */
-    else if( !srcdefn->is_latlong )
-    {
-
-        /* Check first if projection is invertible. */
-        if( (srcdefn->inv3d == NULL) && (srcdefn->inv == NULL))
-        {
-            pj_ctx_set_errno( pj_get_ctx(srcdefn), -17 );
-            pj_log( pj_get_ctx(srcdefn), PJ_LOG_ERROR,
-                    "pj_transform(): source projection not invertable" );
-            return -17;
-        }
-
-        /* If invertible - First try inv3d if defined */
-        if (srcdefn->inv3d != NULL)
-        {
-            /* Three dimensions must be defined */
-            if ( z == NULL)
-            {
-                pj_ctx_set_errno( pj_get_ctx(srcdefn), PJD_ERR_GEOCENTRIC);
-                return PJD_ERR_GEOCENTRIC;
-            }
-
-            for (i=0; i < point_count; i++)
-            {
-                XYZ projected_loc;
-                XYZ geodetic_loc;
-
-                projected_loc.u = x[point_offset*i];
-                projected_loc.v = y[point_offset*i];
-                projected_loc.w = z[point_offset*i];
-
-                if (projected_loc.u == HUGE_VAL)
-                    continue;
-
-                geodetic_loc = pj_inv3d(projected_loc, srcdefn);
-                if( srcdefn->ctx->last_errno != 0 )
-                {
-                    if( (srcdefn->ctx->last_errno != 33 /*EDOM*/
-                         && srcdefn->ctx->last_errno != 34 /*ERANGE*/ )
-                        && (srcdefn->ctx->last_errno > 0
-                            || srcdefn->ctx->last_errno < -44 || point_count == 1
-                            || transient_error[-srcdefn->ctx->last_errno] == 0 ) )
-                        return srcdefn->ctx->last_errno;
-                    else
-                    {
-                        geodetic_loc.u = HUGE_VAL;
-                        geodetic_loc.v = HUGE_VAL;
-                        geodetic_loc.w = HUGE_VAL;
-                    }
-                }
-
-                x[point_offset*i] = geodetic_loc.u;
-                y[point_offset*i] = geodetic_loc.v;
-                z[point_offset*i] = geodetic_loc.w;
-
-            }
-
-        }
-        else
-        {
-            /* Fallback to the original PROJ.4 API 2d inversion - inv */
-            for( i = 0; i < point_count; i++ )
-            {
-                XY         projected_loc;
-                LP	       geodetic_loc;
-
-                projected_loc.u = x[point_offset*i];
-                projected_loc.v = y[point_offset*i];
-
-                if( projected_loc.u == HUGE_VAL )
-                    continue;
-
-                geodetic_loc = pj_inv( projected_loc, srcdefn );
-                if( srcdefn->ctx->last_errno != 0 )
-                {
-                    if( (srcdefn->ctx->last_errno != 33 /*EDOM*/
-                         && srcdefn->ctx->last_errno != 34 /*ERANGE*/ )
-                        && (srcdefn->ctx->last_errno > 0
-                            || srcdefn->ctx->last_errno < -44 || point_count == 1
-                            || transient_error[-srcdefn->ctx->last_errno] == 0 ) )
-                        return srcdefn->ctx->last_errno;
-                    else
-                    {
-                        geodetic_loc.u = HUGE_VAL;
-                        geodetic_loc.v = HUGE_VAL;
-                    }
-                }
-
-                x[point_offset*i] = geodetic_loc.u;
-                y[point_offset*i] = geodetic_loc.v;
-            }
-        }
-    }
-
-/* -------------------------------------------------------------------- */
-/*      But if they are already lat long, adjust for the prime          */
-/*      meridian if there is one in effect.                             */
-/* -------------------------------------------------------------------- */
-    if ((srcdefn->is_geocent || srcdefn->is_latlong) && ( srcdefn->from_greenwich != 0.0 ))
-    {
-        for( i = 0; i < point_count; i++ )
-        {
-            if( x[point_offset*i] != HUGE_VAL )
-                x[point_offset*i] += srcdefn->from_greenwich;
-        }
-    }
-
-/* -------------------------------------------------------------------- */
-/*      Do we need to translate from geoid to ellipsoidal vertical      */
-/*      datum?                                                          */
-/* -------------------------------------------------------------------- */
-    if( srcdefn->has_geoid_vgrids && z != NULL )
-    {
-        if( pj_apply_vgridshift( srcdefn, "sgeoidgrids",
-                                 &(srcdefn->vgridlist_geoid),
-                                 &(srcdefn->vgridlist_geoid_count),
-                                 0, point_count, point_offset, x, y, z ) != 0 )
-            return pj_ctx_get_errno(srcdefn->ctx);
-    }
-
-/* -------------------------------------------------------------------- */
-/*      Convert datums if needed, and possible.                         */
-/* -------------------------------------------------------------------- */
-    if( pj_datum_transform( srcdefn, dstdefn, point_count, point_offset,
-                            x, y, z ) != 0 )
-    {
-        if( srcdefn->ctx->last_errno != 0 )
-            return srcdefn->ctx->last_errno;
-        else
-            return dstdefn->ctx->last_errno;
-    }
-
-/* -------------------------------------------------------------------- */
-/*      Do we need to translate from ellipsoidal to geoid vertical      */
-/*      datum?                                                          */
-/* -------------------------------------------------------------------- */
-    if( dstdefn->has_geoid_vgrids && z != NULL )
-    {
-        if( pj_apply_vgridshift( dstdefn, "sgeoidgrids",
-                                 &(dstdefn->vgridlist_geoid),
-                                 &(dstdefn->vgridlist_geoid_count),
-                                 1, point_count, point_offset, x, y, z ) != 0 )
-            return dstdefn->ctx->last_errno;
-    }
-
-/* -------------------------------------------------------------------- */
-/*      But if they are staying lat long, adjust for the prime          */
-/*      meridian if there is one in effect.                             */
-/* -------------------------------------------------------------------- */
-    if ((dstdefn->is_geocent || dstdefn->is_latlong) && ( dstdefn->from_greenwich != 0.0 ))
-    {
-        for( i = 0; i < point_count; i++ )
-        {
-            if( x[point_offset*i] != HUGE_VAL )
-                x[point_offset*i] -= dstdefn->from_greenwich;
-        }
-}
-
-/* -------------------------------------------------------------------- */
-/*      Transform destination latlong to geocentric if required.        */
-/* -------------------------------------------------------------------- */
-    if( dstdefn->is_geocent )
-    {
-        if( z == NULL )
-        {
-            pj_ctx_set_errno( dstdefn->ctx, PJD_ERR_GEOCENTRIC );
-            return PJD_ERR_GEOCENTRIC;
-        }
-
-        pj_geodetic_to_geocentric( dstdefn->a_orig, dstdefn->es_orig,
-                                   point_count, point_offset, x, y, z );
-
-        if( dstdefn->fr_meter != 1.0 )
-        {
-            for( i = 0; i < point_count; i++ )
-            {
-                if( x[point_offset*i] != HUGE_VAL )
-                {
-                    x[point_offset*i] *= dstdefn->fr_meter;
-                    y[point_offset*i] *= dstdefn->fr_meter;
-                    z[point_offset*i] *= srcdefn->fr_meter;
-                }
-            }
-        }
-    }
-
-/* -------------------------------------------------------------------- */
-/*      Transform destination points to projection coordinates, if      */
-/*      desired.                                                        */
-/* -------------------------------------------------------------------- */
-    else if( !dstdefn->is_latlong )
-    {
-
-        if( dstdefn->fwd3d != NULL)
-        {
-            /* Three dimensions must be defined */
-            if ( z == NULL)
-            {
-                pj_ctx_set_errno( pj_get_ctx(dstdefn), PJD_ERR_GEOCENTRIC);
-                return PJD_ERR_GEOCENTRIC;
-            }
-
-            for( i = 0; i < point_count; i++ )
-            {
-                XYZ projected_loc;
-                LPZ geodetic_loc;
-
-                geodetic_loc.u = x[point_offset*i];
-                geodetic_loc.v = y[point_offset*i];
-                geodetic_loc.w = z[point_offset*i];
-
-                if (geodetic_loc.u == HUGE_VAL)
-                    continue;
-
-                projected_loc = pj_fwd3d( geodetic_loc, dstdefn);
-                if( dstdefn->ctx->last_errno != 0 )
-                {
-                    if( (dstdefn->ctx->last_errno != 33 /*EDOM*/
-                         && dstdefn->ctx->last_errno != 34 /*ERANGE*/ )
-                        && (dstdefn->ctx->last_errno > 0
-                            || dstdefn->ctx->last_errno < -44 || point_count == 1
-                            || transient_error[-dstdefn->ctx->last_errno] == 0 ) )
-                        return dstdefn->ctx->last_errno;
-                    else
-                    {
-                        projected_loc.u = HUGE_VAL;
-                        projected_loc.v = HUGE_VAL;
-                        projected_loc.w = HUGE_VAL;
-                    }
-                }
-
-                x[point_offset*i] = projected_loc.u;
-                y[point_offset*i] = projected_loc.v;
-                z[point_offset*i] = projected_loc.w;
-            }
-
-        }
-        else
-        {
-            for( i = 0; i < point_count; i++ )
-            {
-                XY         projected_loc;
-                LP	       geodetic_loc;
-
-                geodetic_loc.u = x[point_offset*i];
-                geodetic_loc.v = y[point_offset*i];
-
-                if( geodetic_loc.u == HUGE_VAL )
-                    continue;
-
-                projected_loc = pj_fwd( geodetic_loc, dstdefn );
-                if( dstdefn->ctx->last_errno != 0 )
-                {
-                    if( (dstdefn->ctx->last_errno != 33 /*EDOM*/
-                         && dstdefn->ctx->last_errno != 34 /*ERANGE*/ )
-                        && (dstdefn->ctx->last_errno > 0
-                            || dstdefn->ctx->last_errno < -44 || point_count == 1
-                            || transient_error[-dstdefn->ctx->last_errno] == 0 ) )
-                        return dstdefn->ctx->last_errno;
-                    else
-                    {
-                        projected_loc.u = HUGE_VAL;
-                        projected_loc.v = HUGE_VAL;
-                    }
-                }
-
-                x[point_offset*i] = projected_loc.u;
-                y[point_offset*i] = projected_loc.v;
-            }
-        }
-    }
-
-/* -------------------------------------------------------------------- */
-/*      If a wrapping center other than 0 is provided, rewrap around    */
-/*      the suggested center (for latlong coordinate systems only).     */
-/* -------------------------------------------------------------------- */
-    else if( dstdefn->is_latlong && dstdefn->is_long_wrap_set )
-    {
-        for( i = 0; i < point_count; i++ )
-        {
-            double val = x[point_offset*i];
-            if( val == HUGE_VAL )
-                continue;
-
-            /* Get fast in ] -2 PI, 2 PI [ range */
-            val = fmod(val, M_TWOPI);
-            while( val < dstdefn->long_wrap_center - M_PI )
-                val += M_TWOPI;
-            while( val > dstdefn->long_wrap_center + M_PI )
-                val -= M_TWOPI;
-            x[point_offset*i] = val;
-        }
-    }
-
-/* -------------------------------------------------------------------- */
-/*      Transform normalized axes into unusual output coordinate axis   */
-/*      orientation if needed.                                          */
-/* -------------------------------------------------------------------- */
-    if( strcmp(dstdefn->axis,"enu") != 0 )
-    {
-        int err;
-
-        err = pj_adjust_axis( dstdefn->ctx, dstdefn->axis,
-                              1, point_count, point_offset, x, y, z );
-        if( err != 0 )
-            return err;
-    }
+    err = geometric_to_orthometric (dstdefn, PJ_FWD, point_count, point_offset, x, y, z);
+    if (err)
+        return err;
+    err = height_unit (dstdefn, PJ_FWD, point_count, point_offset, z);
+    if (err)
+        return err;
+    err = prime_meridian (dstdefn, PJ_FWD, point_count, point_offset, x);
+    if (err)
+        return err;
+    err = geographic_to_cartesian (dstdefn, PJ_FWD, point_count, point_offset, x, y, z);
+    if (err)
+        return err;
+    err = geographic_to_projected (dstdefn, point_count, point_offset, x, y, z);
+    if (err)
+        return err;
+    err = long_wrap (dstdefn, point_count, point_offset, x);
+    if (err)
+        return err;
+    err = adjust_axes (dstdefn, PJ_FWD, point_count, point_offset, x, y, z);
+    if (err)
+        return err;
 
     return 0;
 }
+
+
 
 /************************************************************************/
 /*                     pj_geodetic_to_geocentric()                      */
