@@ -855,7 +855,7 @@ also be expressed in terms of the other types in the union, e.g.
 
 <dl class="function">
 <dt id="c.proj_roundtrip">
-double <code class="descname">proj_roundtrip</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, <a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION">PJ_DIRECTION</a><em>&nbsp;direction</em>, int<em>&nbsp;n</em>, <a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a><em>&nbsp;*coo</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_roundtrip" title="Permalink to this definition">¶</a></dt>
+double <code class="descname">proj_roundtrip</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, <a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION">PJ_DIRECTION</a><em>&nbsp;direction</em>, int<em>&nbsp;n</em>, <a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a><em>&nbsp;*coord</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_roundtrip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Measure internal consistency of a given transformation. The function
 performs <code class="xref c c-data docutils literal"><span class="pre">n</span></code> round trip transformations starting in either
 the forward or reverse <code class="xref c c-data docutils literal"><span class="pre">direction</span></code>. Returns the euclidean
@@ -869,7 +869,7 @@ coordinate after <code class="xref c c-data docutils literal"><span class="pre">
 <li><strong>P</strong> (<em>const PJ*</em>) &#8211; </li>
 <li><strong>direction</strong> (<a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION"><em>PJ_DIRECTION</em></a>) &#8211; Starting direction of transformation</li>
 <li><strong>n</strong> (<em>int</em>) &#8211; Number of roundtrip transformations</li>
-<li><strong>obs</strong> (<em>PJ_OBS</em>) &#8211; Input coordinate</li>
+<li><strong>coord</strong> (<a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD"><em>PJ_COORD</em></a>) &#8211; Input coordinate</li>
 </ul>
 </td>
 </tr>
@@ -989,7 +989,7 @@ char *<code class="descname">proj_rtodms</code><span class="sig-paren">(</span>c
 
 <dl class="function">
 <dt id="c.proj_geocentric_latitude">
-<a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a> <code class="descname">proj_geocentric_latitude</code><span class="sig-paren">(</span>const <a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, <a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION">PJ_DIRECTION</a><em>&nbsp;direction</em>, <a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a><em>&nbsp;coo</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_geocentric_latitude" title="Permalink to this definition">¶</a></dt>
+<a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a> <code class="descname">proj_geocentric_latitude</code><span class="sig-paren">(</span>const <a class="reference internal" href="datatypes.html#c.PJ" title="PJ">PJ</a><em>&nbsp;*P</em>, <a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION">PJ_DIRECTION</a><em>&nbsp;direction</em>, <a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD">PJ_COORD</a><em>&nbsp;coord</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_geocentric_latitude" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert from geographical latitude to geocentric latitude.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -998,7 +998,7 @@ char *<code class="descname">proj_rtodms</code><span class="sig-paren">(</span>c
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>P</strong> (<em>const PJ*</em>) &#8211; Transformation object</li>
 <li><strong>direction</strong> (<a class="reference internal" href="datatypes.html#c.PJ_DIRECTION" title="PJ_DIRECTION"><em>PJ_DIRECTION</em></a>) &#8211; Starting direction of transformation</li>
-<li><strong>coo</strong> (<a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD"><em>PJ_COORD</em></a>) &#8211; Coordinate</li>
+<li><strong>coord</strong> (<a class="reference internal" href="datatypes.html#c.PJ_COORD" title="PJ_COORD"><em>PJ_COORD</em></a>) &#8211; Coordinate</li>
 </ul>
 </td>
 </tr>
