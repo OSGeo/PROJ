@@ -23,7 +23,7 @@
 */
 #define PJ_LIB__
 #include <errno.h>
-#include <proj.h>
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(omerc, "Oblique Mercator")

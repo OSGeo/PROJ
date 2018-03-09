@@ -1,6 +1,6 @@
 #define PJ_LIB__
 #include <errno.h>
-#include <projects.h>
+#include "projects.h"
 
 struct pj_opaque {
     double  A;

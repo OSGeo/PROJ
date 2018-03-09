@@ -1,6 +1,6 @@
 /* make storage for one and two dimensional matricies */
 #include <stdlib.h>
-#include <projects.h>
+#include "projects.h"
 	void * /* one dimension array */
 vector1(int nvals, int size) { return((void *)pj_malloc(size * nvals)); }
 	void /* free 2D array */

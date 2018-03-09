@@ -28,7 +28,7 @@
  *****************************************************************************/
 
 #define PJ_LIB__
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(geocent, "Geocentric")  "\n\t";
 

@@ -1,5 +1,5 @@
 /* print projection's list of parameters */
-#include <projects.h>
+#include "projects.h"
 #include <stdio.h>
 #include <string.h>
 #define LINE_LEN 72

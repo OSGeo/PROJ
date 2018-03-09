@@ -35,7 +35,7 @@
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
-#include <proj.h>
+#include "proj.h"
 #include "proj_internal.h"
 #include "projects.h"
 

@@ -22,7 +22,7 @@
 
 #define PJ_LIB__
 #include <errno.h>
-#include <proj.h>
+#include "proj.h"
 #include "projects.h"
 
 #define EPS10   1e-10

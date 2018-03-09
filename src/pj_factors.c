@@ -1,6 +1,6 @@
 /* projection scale factors */
 #define PJ_LIB__
-#include <proj.h>
+#include "proj.h"
 #include "projects.h"
 
 #include <errno.h>

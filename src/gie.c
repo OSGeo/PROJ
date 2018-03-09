@@ -112,7 +112,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 #include <stdlib.h>
 #include <string.h>
 
-#include <proj.h>
+#include "proj.h"
 #include "proj_internal.h"
 #include "projects.h"
 

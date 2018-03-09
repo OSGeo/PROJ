@@ -27,7 +27,7 @@
  *****************************************************************************/
 
 #include <errno.h>
-#include <projects.h>
+#include "projects.h"
 #include <string.h>
 
 static PAFile pj_stdio_fopen(projCtx ctx, const char *filename, 

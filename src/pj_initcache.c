@@ -25,7 +25,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#include <projects.h>
+#include "projects.h"
 #include <string.h>
 
 static int cache_count = 0;

@@ -1,7 +1,7 @@
 /* based upon Snyder and Linck, USGS-NMD */
 #define PJ_LIB__
 #include <errno.h>
-#include <proj.h>
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(lsat, "Space oblique for LANDSAT")

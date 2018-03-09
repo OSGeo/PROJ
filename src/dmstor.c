@@ -1,5 +1,5 @@
 /* Convert DMS string to radians */
-#include <projects.h>
+#include "projects.h"
 #include <string.h>
 #include <ctype.h>
 

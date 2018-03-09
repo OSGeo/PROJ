@@ -1,4 +1,4 @@
-#include <projects.h>
+#include "projects.h"
 static void /* sum coefficients less than res */
 eval(projUV **w, int nu, int nv, double res, projUV *resid) {
     int i, j;

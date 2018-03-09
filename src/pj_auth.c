@@ -1,5 +1,5 @@
 /* determine latitude from authalic latitude */
-#include <projects.h>
+#include "projects.h"
 # define P00 .33333333333333333333 /*   1 /     3 */
 # define P01 .17222222222222222222 /*  31 /   180 */
 # define P02 .10257936507936507937 /* 517 /  5040 */

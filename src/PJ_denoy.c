@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include    <projects.h>
+#include    "projects.h"
 
 PROJ_HEAD(denoy, "Denoyer Semi-Elliptical") "\n\tPCyl., no inv., Sph.";
 

@@ -96,7 +96,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 
 #define PJ_LIB__
 #include <geodesic.h>
-#include <proj.h>
+#include "proj.h"
 #include "proj_internal.h"
 #include "projects.h"
 
