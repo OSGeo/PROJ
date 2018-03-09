@@ -30,7 +30,7 @@
 
 
 #define PJ_LIB__
-#include <geodesic.h>
+#include "geodesic.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
