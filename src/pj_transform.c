@@ -397,7 +397,9 @@ static int height_unit (PJ *P, PJ_DIRECTION dir, long n, int dist, double *z) {
         fac = P->vfr_meter;
 
     /* Nothing to do? */
-    if (P->vto_meter==0.0)
+    if (fac==1.0)
+        return 0;
+    if (0==z)
         return 0;
 
     for (i = 0;  i < n;  i++)
