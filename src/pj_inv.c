@@ -198,6 +198,12 @@ LP pj_inv(XY xy, PJ *P) {
 
     if (!P->skip_inv_finalize)
         coo = inv_finalize (P, coo);
+
+    if (proj_errno(P)) {
+        proj_errno_reset(P);
+        return proj_coord_error().lp;
+    }
+
     return coo.lp;
 }
 
@@ -228,6 +234,12 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
 
     if (!P->skip_inv_finalize)
         coo = inv_finalize (P, coo);
+
+    if (proj_errno(P)) {
+        proj_errno_reset(P);
+        return proj_coord_error().lpz;
+    }
+
     return coo.lpz;
 }
 
@@ -255,5 +267,11 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
 
     if (!P->skip_inv_finalize)
         coo = inv_finalize (P, coo);
+
+    if (proj_errno(P)) {
+        proj_errno_reset(P);
+        return proj_coord_error();
+    }
+
     return coo;
 }
