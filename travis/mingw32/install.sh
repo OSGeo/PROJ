@@ -33,6 +33,6 @@ cd src
 make multistresstest.exe
 make test228.exe
 cd ..
-PROJ_LIB=../nad src/multistresstest.exe
+PROJ_LIB=../nad src/multistresstest.exe -num_iterations 100000
 cd ..
 
