@@ -59,13 +59,14 @@ If this default path prefix is proper, then execute:
 
     ./configure
 
+See the note below if you are building PROJ directly from the git repository.
+
 If another path prefix is required, then execute:
 
     ./configure --prefix=/my/path
 
 In either case, the directory of the prefix path must exist and be
 writable by the installer.
-
 After executing configure, execute:
 
     make
@@ -79,6 +80,14 @@ Tests are run with
 
 The test suite requires that the proj-datumgrid package is installed
 in `PROJ_LIB`.
+
+#### Building from the git repository
+
+If you are building from the git repository you have to first run
+
+    ./autogen.sh
+
+which will generate a configure script that can be used as described above.
 
 ### Building on Windows with NMAKE
 
