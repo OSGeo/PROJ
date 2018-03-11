@@ -12,6 +12,7 @@ Projections map the spherical 3D space to a flat 2D space.
 .. toctree::
    :maxdepth: 1
 
+   aea
    aeqd
    airy
    aitoff
