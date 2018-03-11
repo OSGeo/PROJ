@@ -75,7 +75,7 @@ typedef double (*tconvert)(double);
 
 struct TIME_UNITS {
     char        *id;        /* units keyword */
-    tconvert     t_in;      /* unit -> mod. julian date funtion pointer */
+    tconvert     t_in;      /* unit -> mod. julian date function pointer */
     tconvert     t_out;     /* mod. julian date > unit function pointer */
     char        *name;      /* comments */
 };

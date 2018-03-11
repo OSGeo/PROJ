@@ -209,7 +209,7 @@ consuming their surrounding whitespace.
     /* First collapse repeated whitespace (including +/;) */
     for (i = j = 0, ws = 0;  j < n;  j++) {
 
-        /* Eliminate prefix '+', only if preceeded by whitespace */
+        /* Eliminate prefix '+', only if preceded by whitespace */
         /* (i.e. keep it in 1.23e+08) */
         if ((i > 0) && ('+'==c[j]) && ws)
             c[j] = ' ';

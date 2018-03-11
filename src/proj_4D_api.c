@@ -1036,7 +1036,7 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
     Characteristics include meridian, parallel and areal scales, angular
     distortion, meridian/parallel, meridian convergence and scale error.
 
-    returns PJ_FACTORS. If unsuccessfull, error number is set and the
+    returns PJ_FACTORS. If unsuccessful, error number is set and the
     struct returned contains NULL data.
 ******************************************************************************/
     PJ_FACTORS factors = {0,0,0,  0,0,0,  0,0,  0,0,0,0};
