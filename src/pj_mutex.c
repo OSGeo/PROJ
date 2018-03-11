@@ -100,9 +100,9 @@ void pj_cleanup_lock()
 
 #include "pthread.h"
 
-static pthread_mutex_t pj_precreated_lock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t pj_core_lock;
-static int pj_core_lock_created = 0;
+static pthread_mutex_t precreated_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t core_lock;
+static int core_lock_created = 0;
 
 /************************************************************************/
 /*                          pj_acquire_lock()                           */
@@ -112,16 +112,16 @@ static int pj_core_lock_created = 0;
 
 void pj_acquire_lock()
 {
-    if (!pj_core_lock_created) {
+    if (!core_lock_created) {
         /*
         ** We need to ensure the core mutex is created in recursive mode
         ** and there is no portable way of doing that using automatic
-        ** initialization so we have pj_precreated_lock only for the purpose
+        ** initialization so we have precreated_lock only for the purpose
         ** of protecting the creation of the core lock.
         */
         pthread_mutexattr_t mutex_attr;
 
-        pthread_mutex_lock( &pj_precreated_lock);
+        pthread_mutex_lock( &precreated_lock);
 
         pthread_mutexattr_init(&mutex_attr);
 #ifdef HAVE_PTHREAD_MUTEX_RECURSIVE
@@ -129,13 +129,13 @@ void pj_acquire_lock()
 #else
         pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE_NP);
 #endif
-        pthread_mutex_init(&pj_core_lock, &mutex_attr);
-        pj_core_lock_created = 1;
+        pthread_mutex_init(&core_lock, &mutex_attr);
+        core_lock_created = 1;
 
-        pthread_mutex_unlock( &pj_precreated_lock );
+        pthread_mutex_unlock( &precreated_lock );
     }
 
-    pthread_mutex_lock( &pj_core_lock);
+    pthread_mutex_lock( &core_lock);
 }
 
 /************************************************************************/
@@ -146,7 +146,7 @@ void pj_acquire_lock()
 
 void pj_release_lock()
 {
-    pthread_mutex_unlock( &pj_core_lock );
+    pthread_mutex_unlock( &core_lock );
 }
 
 /************************************************************************/

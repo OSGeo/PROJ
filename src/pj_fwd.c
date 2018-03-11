@@ -36,7 +36,7 @@
 #define OUTPUT_UNITS P->right
 
 
-static PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
+static PJ_COORD fwd_prepare (PJ *P, PJ_COORD coo) {
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
 
@@ -100,7 +100,7 @@ static PJ_COORD pj_fwd_prepare (PJ *P, PJ_COORD coo) {
 
 
 
-static PJ_COORD pj_fwd_finalize (PJ *P, PJ_COORD coo) {
+static PJ_COORD fwd_finalize (PJ *P, PJ_COORD coo) {
 
     switch (OUTPUT_UNITS) {
 
@@ -180,7 +180,7 @@ XY pj_fwd(LP lp, PJ *P) {
     coo.lp = lp;
 
     if (!P->skip_fwd_prepare)
-        coo = pj_fwd_prepare (P, coo);
+        coo = fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().xy;
 
@@ -199,7 +199,7 @@ XY pj_fwd(LP lp, PJ *P) {
         return proj_coord_error ().xy;
 
     if (!P->skip_fwd_finalize)
-        coo = pj_fwd_finalize (P, coo);
+        coo = fwd_finalize (P, coo);
     return coo.xy;
 }
 
@@ -210,7 +210,7 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
     coo.lpz = lpz;
 
     if (!P->skip_fwd_prepare)
-        coo = pj_fwd_prepare (P, coo);
+        coo = fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().xyz;
 
@@ -229,7 +229,7 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
         return proj_coord_error ().xyz;
 
     if (!P->skip_fwd_finalize)
-        coo = pj_fwd_finalize (P, coo);
+        coo = fwd_finalize (P, coo);
     return coo.xyz;
 }
 
@@ -237,7 +237,7 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
 
 PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
     if (!P->skip_fwd_prepare)
-        coo = pj_fwd_prepare (P, coo);
+        coo = fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
 
@@ -256,6 +256,6 @@ PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
         return proj_coord_error ();
 
     if (!P->skip_fwd_finalize)
-        coo = pj_fwd_finalize (P, coo);
+        coo = fwd_finalize (P, coo);
     return coo;
 }

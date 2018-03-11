@@ -69,10 +69,10 @@ double pj_atof( const char* nptr )
 
 
 /************************************************************************/
-/*                     pj_replace_point_by_locale_point()               */
+/*                     replace_point_by_locale_point()               */
 /************************************************************************/
 
-static char* pj_replace_point_by_locale_point(const char* pszNumber, char point,
+static char* replace_point_by_locale_point(const char* pszNumber, char point,
                                               char* pszWorkBuffer)
 {
 #if !defined(HAVE_LOCALECONV)
@@ -179,7 +179,7 @@ double pj_strtod( const char *nptr, char **endptr )
     int         nError;
     char        szWorkBuffer[PJ_STRTOD_WORK_BUFFER_SIZE];
 
-    char*       pszNumber = pj_replace_point_by_locale_point(nptr, '.', szWorkBuffer);
+    char*       pszNumber = replace_point_by_locale_point(nptr, '.', szWorkBuffer);
 
     dfValue = strtod( pszNumber, endptr );
     nError = errno;

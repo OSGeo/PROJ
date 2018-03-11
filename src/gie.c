@@ -579,9 +579,9 @@ either a conversion or a transformation)
 
 
 
-static int pj_unitconvert_selftest (void);
-static int pj_cart_selftest (void);
-static int pj_horner_selftest (void);
+static int unitconvert_selftest (void);
+static int cart_selftest (void);
+static int horner_selftest (void);
 
 /*****************************************************************************/
 static int builtins (const char *args) {
@@ -598,26 +598,26 @@ using the "builtins" command verb.
     T.op_ok = 0;
     T.op_ko = 0;
     T.op_skip = 0;
-    i = pj_unitconvert_selftest ();
+    i = unitconvert_selftest ();
     if (i!=0) {
-        fprintf (T.fout, "pj_unitconvert_selftest fails with %d\n", i);
+        fprintf (T.fout, "unitconvert_selftest fails with %d\n", i);
         another_failing_builtin();
     }
     else
         another_succeeding_builtin ();
 
 
-    i = pj_cart_selftest ();
+    i = cart_selftest ();
     if (i!=0) {
-        fprintf (T.fout, "pj_cart_selftest fails with %d\n", i);
+        fprintf (T.fout, "cart_selftest fails with %d\n", i);
         another_failing_builtin();
     }
     else
         another_succeeding_builtin ();
 
-    i = pj_horner_selftest ();
+    i = horner_selftest ();
     if (i!=0) {
-        fprintf (T.fout, "pj_horner_selftest fails with %d\n", i);
+        fprintf (T.fout, "horner_selftest fails with %d\n", i);
         another_failing_builtin();
     }
     else
@@ -1473,7 +1473,7 @@ static const char sb_utm32[] = {
     " +inv_c=6.13342118787027e+06,4.94690181709311e+05,9.99824464710368e-01,2.82279070814774e-02,7.66123542220864e-11,1.78425334628927e-09,-1.05584823306400e-14,-3.32554258683744e-15"
 };
 
-static int pj_horner_selftest (void) {
+static int horner_selftest (void) {
     PJ *P;
     PJ_COORD a, b, c;
     double dist;
@@ -1539,7 +1539,7 @@ static int pj_horner_selftest (void) {
 
 
 /* Testing quite a bit of the pj_obs_api as a side effect (inspired by pj_obs_api_test.c) */
-static int pj_cart_selftest (void) {
+static int cart_selftest (void) {
     PJ_CONTEXT *ctx;
     PJ *P;
     PJ_COORD a, b, obs[2];
@@ -1968,7 +1968,7 @@ static int test_time(const char* args, double tol, double t_in, double t_exp) {
     return ret;
 }
 
-static int pj_unitconvert_selftest (void) {
+static int unitconvert_selftest (void) {
     int ret = 0;
     char args1[] = "+proj=unitconvert +t_in=decimalyear +t_out=decimalyear";
     double in1 = 2004.25;

@@ -35,7 +35,7 @@
 #define INPUT_UNITS  P->right
 #define OUTPUT_UNITS P->left
 
-static PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
+static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
     if (coo.xyz.x == HUGE_VAL) {
         proj_errno_set (P, PJD_ERR_INVALID_X_OR_Y);
         return proj_coord_error ();
@@ -132,7 +132,7 @@ static PJ_COORD pj_inv_prepare (PJ *P, PJ_COORD coo) {
 
 
 
-static PJ_COORD pj_inv_finalize (PJ *P, PJ_COORD coo) {
+static PJ_COORD inv_finalize (PJ *P, PJ_COORD coo) {
     if (coo.xyz.x == HUGE_VAL) {
         proj_errno_set (P, PJD_ERR_INVALID_X_OR_Y);
         return proj_coord_error ();
@@ -178,7 +178,7 @@ LP pj_inv(XY xy, PJ *P) {
     coo.xy = xy;
 
     if (!P->skip_inv_prepare)
-        coo = pj_inv_prepare (P, coo);
+        coo = inv_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().lp;
 
@@ -197,7 +197,7 @@ LP pj_inv(XY xy, PJ *P) {
         return proj_coord_error ().lp;
 
     if (!P->skip_inv_finalize)
-        coo = pj_inv_finalize (P, coo);
+        coo = inv_finalize (P, coo);
     return coo.lp;
 }
 
@@ -208,7 +208,7 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
     coo.xyz = xyz;
 
     if (!P->skip_inv_prepare)
-        coo = pj_inv_prepare (P, coo);
+        coo = inv_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().lpz;
 
@@ -227,7 +227,7 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
         return proj_coord_error ().lpz;
 
     if (!P->skip_inv_finalize)
-        coo = pj_inv_finalize (P, coo);
+        coo = inv_finalize (P, coo);
     return coo.lpz;
 }
 
@@ -235,7 +235,7 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
 
 PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
     if (!P->skip_inv_prepare)
-        coo = pj_inv_prepare (P, coo);
+        coo = inv_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
 
@@ -254,6 +254,6 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
         return proj_coord_error ();
 
     if (!P->skip_inv_finalize)
-        coo = pj_inv_finalize (P, coo);
+        coo = inv_finalize (P, coo);
     return coo;
 }
