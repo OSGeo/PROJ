@@ -1,6 +1,6 @@
 /* determine small t */
 #include <math.h>
-#include <projects.h>
+#include "projects.h"
 
 double pj_tsfn(double phi, double sinphi, double e) {
     double denominator;

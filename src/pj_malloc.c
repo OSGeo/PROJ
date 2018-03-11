@@ -40,7 +40,7 @@
 ** projection system memory allocation/deallocation call with custom
 ** application procedures.  */
 
-#include <proj.h>
+#include "proj.h"
 #include "projects.h"
 #include <errno.h>
 

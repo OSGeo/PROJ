@@ -1,6 +1,6 @@
 #define PJ_LIB__
 #include <errno.h>
-#include <proj.h>
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(imw_p, "International Map of the World Polyconic")

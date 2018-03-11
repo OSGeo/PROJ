@@ -77,7 +77,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 #include <stdlib.h>
 #include <string.h>
 
-#include <proj.h>
+#include "proj.h"
 #include "proj_internal.h"
 #include "projects.h"
 #include "optargpm.h"

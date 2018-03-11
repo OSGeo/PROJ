@@ -1,6 +1,6 @@
 #define PJ_LIB__
 #include <errno.h>
-#include <proj.h>
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(gn_sinu, "General Sinusoidal Series") "\n\tPCyl, Sph.\n\tm= n=";

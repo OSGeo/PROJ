@@ -1,5 +1,5 @@
 /* evaluate complex polynomial */
-#include <projects.h>
+#include "projects.h"
 /* note: coefficients are always from C_1 to C_n
 **	i.e. C_0 == (0., 0)
 **	n should always be >= 1 though no checks are made

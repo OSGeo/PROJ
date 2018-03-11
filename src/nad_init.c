@@ -27,7 +27,7 @@
 
 #define PJ_LIB__
 
-#include <projects.h>
+#include "projects.h"
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>

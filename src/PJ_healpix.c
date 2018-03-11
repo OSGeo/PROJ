@@ -31,7 +31,7 @@
 # define PJ_LIB__
 # include <errno.h>
 # include "proj_internal.h"
-# include <proj.h>
+# include "proj.h"
 # include "projects.h"
 
 PROJ_HEAD(healpix, "HEALPix") "\n\tSph., Ellps.";

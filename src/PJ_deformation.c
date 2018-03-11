@@ -53,7 +53,7 @@ grid-values in units of mm/year in ENU-space.
 ***********************************************************************/
 #define PJ_LIB__
 #include <errno.h>
-#include <proj.h>
+#include "proj.h"
 #include "proj_internal.h"
 #include "projects.h"
 

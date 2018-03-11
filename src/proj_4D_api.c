@@ -28,7 +28,7 @@
  *****************************************************************************/
 #include <stddef.h>
 #include <errno.h>
-#include <proj.h>
+#include "proj.h"
 #include "proj_internal.h"
 #include "projects.h"
 #include "geodesic.h"

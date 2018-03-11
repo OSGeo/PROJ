@@ -30,7 +30,7 @@
  *****************************************************************************/
 
 #define PJ_LIB__
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(times, "Times") "\n\tCyl, Sph";
 
