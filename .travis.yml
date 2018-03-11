@@ -39,8 +39,8 @@ matrix:
         - BUILD_NAME=mingw32
         - DETAILS="mingw32"
 
-#  allow_failures:
-#    - os: osx
+  allow_failures:
+      - env: BUILD_NAME=mingw32
 
 before_install: ./travis/${BUILD_NAME}/before_install.sh
 
