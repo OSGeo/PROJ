@@ -172,7 +172,7 @@ pj-prefix pattern. Unless there are obvious reasons not to.
 Legalese
 ~~~~~~~~
 
-Commiters are the front line gatekeepers to keep the code base clear of
+Committers are the front line gatekeepers to keep the code base clear of
 improperly contributed code. It is important to the PROJ users,
 developers and the OSGeo foundation to avoid contributing any code to
 the project without it being clearly licensed under the project license.
@@ -180,9 +180,9 @@ the project without it being clearly licensed under the project license.
 Generally speaking the key issues are that those providing code to be
 included in the repository understand that the code will be released
 under the MIT/X license, and that the person providing the code has the
-right to contribute the code. For the commiter themselves understanding
+right to contribute the code. For the committer themselves understanding
 about the license is hopefully clear. For other contributors, the
-commiter should verify the understanding unless the commiter is very
+committer should verify the understanding unless the committer is very
 comfortable that the contributor understands the license (for instance
 frequent contributors).
 
@@ -199,7 +199,7 @@ license.
 
 All unusual situations need to be discussed and/or documented.
 
-Commiters should adhere to the following guidelines, and may be
+Committers should adhere to the following guidelines, and may be
 personally legally liable for improperly contributing code to the source
 repository:
 
@@ -237,6 +237,6 @@ Acknowledgements
 
 The *code contribution* section of this CONTRIBUTING file is inspired by
 `PDAL's <https://github.com/PDAL/PDAL/blob/master/CONTRIBUTING.md>`__
-and the *legalese* section is modified from `GDAL commiter
+and the *legalese* section is modified from `GDAL committer
 guidelines <https://trac.osgeo.org/gdal/wiki/rfc3_commiters>`__
 

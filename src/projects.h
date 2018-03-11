@@ -535,7 +535,8 @@ enum deprecated_constants_for_now_dropped_analytical_factors {
 #define PJD_ERR_PROJ_NOT_NAMED           -4
 #define PJD_ERR_UNKNOWN_PROJECTION_ID    -5
 #define PJD_ERR_ECCENTRICITY_IS_ONE      -6
-#define PJD_ERR_UNKNOW_UNIT_ID           -7
+#define PJD_ERR_UNKNOW_UNIT_ID           -7  /* deprecated: typo */
+#define PJD_ERR_UNKNOWN_UNIT_ID          -7
 #define PJD_ERR_INVALID_BOOLEAN_PARAM    -8
 #define PJD_ERR_UNKNOWN_ELLP_PARAM       -9
 #define PJD_ERR_REV_FLATTENING_IS_ZERO  -10

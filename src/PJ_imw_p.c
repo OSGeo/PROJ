@@ -105,7 +105,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     XY t;
     double yc = 0.0;
     int i = 0;
-    const int N_MAX_ITER = 1000; /* Arbitrarily choosen number... */
+    const int N_MAX_ITER = 1000; /* Arbitrarily chosen number... */
 
     lp.phi = Q->phi_2;
     lp.lam = xy.x / cos(lp.phi);

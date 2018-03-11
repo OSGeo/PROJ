@@ -689,7 +689,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if ((name = pj_param(ctx, start, "sunits").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
         if (!s)
-            return pj_default_destructor (PIN, PJD_ERR_UNKNOW_UNIT_ID);
+            return pj_default_destructor (PIN, PJD_ERR_UNKNOWN_UNIT_ID);
         s = pj_units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "sto_meter").s)) {
@@ -717,7 +717,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     if ((name = pj_param(ctx, start, "svunits").s) != NULL) {
         for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i) ;
         if (!s)
-            return pj_default_destructor (PIN, PJD_ERR_UNKNOW_UNIT_ID);
+            return pj_default_destructor (PIN, PJD_ERR_UNKNOWN_UNIT_ID);
         s = pj_units[i].to_meter;
     }
     if (s || (s = pj_param(ctx, start, "svto_meter").s)) {

@@ -20,7 +20,7 @@ static const PJ_ELLPS *pj_find_ellps (char *name);
 /***************************************************************************************/
 int pj_ellipsoid (PJ *P) {
 /****************************************************************************************
-    This is a replacement for the clasic PROJ pj_ell_set function. The main difference
+    This is a replacement for the classic PROJ pj_ell_set function. The main difference
     is that pj_ellipsoid augments the PJ object with a copy of the exact tags used to
     define its related ellipsoid.
 

@@ -1931,7 +1931,7 @@ static int pj_cart_selftest (void) {
     if (proj_angular_output (P, PJ_INV)) return 123;
 
     /* We specified "no_defs" but didn't give any ellipsoid info */
-    /* pj_init_ctx should defualt to WGS84 */
+    /* pj_init_ctx should default to WGS84 */
     if (P->a != 6378137.0) return 124;
     if (P->f != 1.0/298.257223563) return 125;
     proj_destroy(P);
