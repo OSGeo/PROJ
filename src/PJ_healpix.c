@@ -71,7 +71,7 @@ static const double rot[7][2][2] = ROT;
  * @param v the parameter whose sign is returned.
  * @return 1 for positive number, -1 for negative, and 0 for zero.
  **/
-static double pj_sign (double v) {
+static double sign (double v) {
     return v > 0 ? 1 : (v < 0 ? -1 : 0);
 }
 
@@ -236,7 +236,7 @@ static double auth_lat(PJ *P, double alpha, int inverse) {
 
         if (fabs(ratio) > 1) {
             /* Rounding error. */
-            ratio = pj_sign(ratio);
+            ratio = sign(ratio);
         }
         return asin(ratio);
     } else {
@@ -269,7 +269,7 @@ static XY healpix_sphere(LP lp) {
         }
         lamc = -3*M_FORTPI + M_HALFPI*cn;
         xy.x = lamc + (lam - lamc)*sigma;
-        xy.y = pj_sign(phi)*M_FORTPI*(2 - sigma);
+        xy.y = sign(phi)*M_FORTPI*(2 - sigma);
     }
     return xy;
 }
@@ -297,10 +297,10 @@ static LP healpix_sphere_inverse(XY xy) {
         xc = -3*M_FORTPI + M_HALFPI*cn;
         tau = 2.0 - 4*fabs(y)/M_PI;
         lp.lam = xc + (x - xc)/tau;
-        lp.phi = pj_sign(y)*asin(1.0 - pow(tau, 2)/3.0);
+        lp.phi = sign(y)*asin(1.0 - pow(tau, 2)/3.0);
     } else {
         lp.lam = -M_PI;
-        lp.phi = pj_sign(y)*M_HALFPI;
+        lp.phi = sign(y)*M_HALFPI;
     }
     return (lp);
 }

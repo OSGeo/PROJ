@@ -44,7 +44,7 @@ typedef enum PJ_DIRECTION PJ_DIRECTION;
 
 
 
-static int pj_adjust_axis( projCtx ctx, const char *axis, int denormalize_flag,
+static int adjust_axis( projCtx ctx, const char *axis, int denormalize_flag,
                            long point_count, int point_offset,
                            double *x, double *y, double *z );
 
@@ -104,7 +104,7 @@ static int adjust_axes (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x, do
     if (0==strcmp(P->axis,"enu"))
         return 0;
 
-    return pj_adjust_axis( P->ctx, P->axis,
+    return adjust_axis( P->ctx, P->axis,
                 dir==PJ_FWD ? 1: 0, n, dist, x, y, z );
 }
 
@@ -914,12 +914,12 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 }
 
 /************************************************************************/
-/*                           pj_adjust_axis()                           */
+/*                           adjust_axis()                           */
 /*                                                                      */
 /*      Normalize or de-normalized the x/y/z axes.  The normal form     */
 /*      is "enu" (easting, northing, up).                               */
 /************************************************************************/
-static int pj_adjust_axis( projCtx ctx,
+static int adjust_axis( projCtx ctx,
                            const char *axis, int denormalize_flag,
                            long point_count, int point_offset,
                            double *x, double *y, double *z )
