@@ -415,7 +415,7 @@ PJ *CONVERSION(unitconvert,0) {
             proj_log_debug(P, "xy_in unit: %s", pj_units[i].name);
         } else {
             if ( (f = pj_param (P->ctx, P->params, "dxy_in").f) == 0.0)
-                return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
+                return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
         }
         if (f != 0.0)
             Q->xy_factor *= f;
@@ -429,7 +429,7 @@ PJ *CONVERSION(unitconvert,0) {
             proj_log_debug(P, "xy_out unit: %s", pj_units[i].name);
         } else {
             if ( (f = pj_param (P->ctx, P->params, "dxy_out").f) == 0.0)
-                return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
+                return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
         }
         if (f != 0.0)
             Q->xy_factor /= f;
@@ -443,7 +443,7 @@ PJ *CONVERSION(unitconvert,0) {
             proj_log_debug(P, "z_in unit: %s", pj_units[i].name);
         } else {
             if ( (f = pj_param (P->ctx, P->params, "dz_in").f) == 0.0)
-                return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
+                return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
         }
         if (f != 0.0)
             Q->z_factor *= f;
@@ -457,7 +457,7 @@ PJ *CONVERSION(unitconvert,0) {
             proj_log_debug(P, "z_out unit: %s", pj_units[i].name);
         } else {
             if ( (f = pj_param (P->ctx, P->params, "dz_out").f) == 0.0)
-                return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID);
+                return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
         }
         if (f != 0.0)
             Q->z_factor /= f;
@@ -467,7 +467,7 @@ PJ *CONVERSION(unitconvert,0) {
     if ((name = pj_param (P->ctx, P->params, "st_in").s) != NULL) {
         for (i = 0; (s = time_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID); /* unknown unit conversion id */
 
         Q->t_in_id = i;
         proj_log_debug(P, "t_in unit: %s", time_units[i].name);
@@ -477,7 +477,7 @@ PJ *CONVERSION(unitconvert,0) {
     if ((name = pj_param (P->ctx, P->params, "st_out").s) != NULL) {
         for (i = 0; (s = time_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOW_UNIT_ID); /* unknown unit conversion id */
+        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID); /* unknown unit conversion id */
 
         Q->t_out_id = i;
         proj_log_debug(P, "t_out unit: %s", time_units[i].name);
