@@ -266,7 +266,15 @@ Change the error-state of :c:data:`P` to `err`.
     :param PJ* P: Transformation object.
     :param int err: Error code.
 
+.. c:function:: const char* proj_errno_string(int err)
 
+    Get a text representation of an error number.
+
+    :param int err: Error number.
+
+    :returns: :c:type:`const char*` String with description of error.
+
+    .. note:: Available from version 5.1.0.
 
 Info functions
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -349,6 +349,7 @@ int  proj_errno (const PJ *P);
 int  proj_errno_set (const PJ *P, int err);
 int  proj_errno_reset (const PJ *P);
 int  proj_errno_restore (const PJ *P, int err);
+const char* proj_errno_string (int err);
 
 /* Scaling and angular distortion factors */
 PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp);

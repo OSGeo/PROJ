@@ -1,10 +1,11 @@
 /* list of projection system pj_errno values */
-#include "projects.h"
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include "proj.h"
+#include "projects.h"
 
-    static const char * const
+static const char * const
 pj_err_list[] = {
     "no arguments in initialization list",                             /*  -1 */
     "no options found in 'init' file",                                 /*  -2 */
@@ -95,4 +96,8 @@ char *pj_strerrno(int err) {
 
     sprintf( note, "invalid projection system error (%d)", (err > -9999)? err: -9999);
     return note;
+}
+
+const char* proj_errno_string(int err) {
+    return pj_strerrno(err);
 }
