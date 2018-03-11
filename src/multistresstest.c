@@ -39,7 +39,7 @@
 #endif
 
 #define num_threads    10
-#define num_iterations 1000000
+static int num_iterations = 1000000;
 static int reinit_every_iteration=0;
 static int add_no_defs = 0;
 
@@ -459,6 +459,11 @@ int main( int argc, char **argv )
             reinit_every_iteration = 1;
         else if( strcmp(argv[i], "-add_no_defs") == 0 )
             add_no_defs = 1;
+        else if( strcmp(argv[i], "-num_iterations") == 0 && i+1 < argc )
+        {
+            num_iterations = atoi(argv[i+1]);
+            i++;
+        }
     }
 
 #ifdef _WIN32
