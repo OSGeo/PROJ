@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include <projects.h>
+#include "projects.h"
 
 PROJ_HEAD(fahey, "Fahey") "\n\tPcyl, Sph.";
 

@@ -1,6 +1,6 @@
 /* For full ANSI compliance of global variable */
 
-#include <projects.h>
+#include "projects.h"
 
 C_NAMESPACE_VAR int pj_errno = 0;
 

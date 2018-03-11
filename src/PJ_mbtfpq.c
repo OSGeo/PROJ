@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include <proj.h>
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(mbtfpq, "McBryde-Thomas Flat-Polar Quartic") "\n\tCyl., Sph.";

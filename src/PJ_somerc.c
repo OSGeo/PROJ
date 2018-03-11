@@ -1,6 +1,6 @@
 #define PJ_LIB__
 #include <errno.h>
-#include <proj.h>
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(somerc, "Swiss. Obl. Mercator") "\n\tCyl, Ell\n\tFor CH1903";

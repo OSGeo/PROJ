@@ -29,7 +29,7 @@
 #define PJ_LIB__
 
 #include <errno.h>
-#include <projects.h>
+#include "projects.h"
 #include <string.h>
 #include <math.h>
 

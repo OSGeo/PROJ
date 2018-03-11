@@ -36,9 +36,9 @@
 
 #ifndef _WIN32
 #include "proj_config.h"
-#include <projects.h>
+#include "projects.h"
 #else
-#include <proj_api.h>
+#include "proj_api.h"
 #endif
 
 /* on win32 we always use win32 mutexes, even if pthreads are available */

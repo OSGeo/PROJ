@@ -1,5 +1,5 @@
 /* procedures for evaluating Tseries */
-# include <projects.h>
+# include "projects.h"
 # define NEAR_ONE	1.00001
 static double ceval(struct PW_COEF *C, int n, projUV w, projUV w2) {
     double d=0, dd=0, vd, vdd, tmp, *c;

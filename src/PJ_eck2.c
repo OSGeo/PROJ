@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include <proj.h>
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(eck2, "Eckert II") "\n\tPCyl. Sph.";

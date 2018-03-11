@@ -33,7 +33,7 @@
 #include <stdarg.h>
 #include <errno.h>
 
-#include <geodesic.h>
+#include "geodesic.h"
 #include "proj_internal.h"
 #include "projects.h"
 

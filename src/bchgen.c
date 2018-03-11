@@ -1,5 +1,5 @@
 /* generate double bivariate Chebychev polynomial */
-#include <projects.h>
+#include "projects.h"
 	int
 bchgen(projUV a, projUV b, int nu, int nv, projUV **f, projUV(*func)(projUV)) {
 	int i, j, k;

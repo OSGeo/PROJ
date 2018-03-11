@@ -14,7 +14,7 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
-#include <proj_api.h>
+#include "proj_api.h"
 #define EMESS_ROUTINE
 #include "emess.h"
 	void

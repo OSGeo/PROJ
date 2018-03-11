@@ -1,5 +1,5 @@
 #define PJ_LIB__
-#include <proj.h>
+#include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(calcofi,
@@ -8,7 +8,7 @@ PROJ_HEAD(calcofi,
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#include <proj_api.h>
+#include "proj_api.h"
 #include <errno.h>
 
 /* Conversions for the California Cooperative Oceanic Fisheries Investigations

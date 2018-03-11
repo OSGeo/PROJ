@@ -1,5 +1,5 @@
 /* convert bivariate w Chebyshev series to w Power series */
-#include <projects.h>
+#include "projects.h"
 /* basic support procedures */
 	static void /* clear vector to zero */
 clear(projUV *p, int n) { static const projUV c = {0., 0.}; while (n--) *p++ = c; }

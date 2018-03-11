@@ -27,7 +27,7 @@
 
 #define PJ_LIB__
 #include "geodesic.h"
-#include <proj.h>
+#include "proj.h"
 #include <errno.h>
 #include "projects.h"
 
