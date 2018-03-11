@@ -389,12 +389,12 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 }
 
 /************************************************************************/
-/*                        pj_gridinfo_parent()                          */
+/*                        gridinfo_parent()                          */
 /*                                                                      */
 /*      Seek a parent grid file by name from a grid list                */
 /************************************************************************/
 
-static PJ_GRIDINFO* pj_gridinfo_parent( PJ_GRIDINFO *gilist,
+static PJ_GRIDINFO* gridinfo_parent( PJ_GRIDINFO *gilist,
         const char *name, int length )
 {
     while( gilist )
@@ -402,7 +402,7 @@ static PJ_GRIDINFO* pj_gridinfo_parent( PJ_GRIDINFO *gilist,
         if( strncmp(gilist->ct->id,name,length) == 0 ) return gilist;
         if( gilist->child )
         {
-            PJ_GRIDINFO *parent=pj_gridinfo_parent( gilist->child, name, length );
+            PJ_GRIDINFO *parent=gridinfo_parent( gilist->child, name, length );
             if( parent ) return parent;
         }
         gilist=gilist->next;
@@ -596,7 +596,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
         else
         {
             PJ_GRIDINFO *lnk;
-            PJ_GRIDINFO *gp = pj_gridinfo_parent(gilist,
+            PJ_GRIDINFO *gp = gridinfo_parent(gilist,
                                                  (const char*)header+24,8);
 
             if( gp == NULL )

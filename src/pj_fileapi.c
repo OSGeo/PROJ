@@ -30,20 +30,20 @@
 #include "projects.h"
 #include <string.h>
 
-static PAFile pj_stdio_fopen(projCtx ctx, const char *filename, 
+static PAFile stdio_fopen(projCtx ctx, const char *filename, 
                              const char *access);
-static size_t pj_stdio_fread(void *buffer, size_t size, size_t nmemb, 
+static size_t stdio_fread(void *buffer, size_t size, size_t nmemb, 
                              PAFile file);
-static int pj_stdio_fseek(PAFile file, long offset, int whence);
-static long pj_stdio_ftell(PAFile file);
-static void pj_stdio_fclose(PAFile file);
+static int stdio_fseek(PAFile file, long offset, int whence);
+static long stdio_ftell(PAFile file);
+static void stdio_fclose(PAFile file);
 
 static projFileAPI default_fileapi = { 
-    pj_stdio_fopen, 
-    pj_stdio_fread,
-    pj_stdio_fseek,
-    pj_stdio_ftell,
-    pj_stdio_fclose
+    stdio_fopen, 
+    stdio_fread,
+    stdio_fseek,
+    stdio_ftell,
+    stdio_fclose
 };
 
 typedef struct {
@@ -61,10 +61,10 @@ projFileAPI *pj_get_default_fileapi(void)
 }
 
 /************************************************************************/
-/*                           pj_stdio_fopen()                           */
+/*                           stdio_fopen()                           */
 /************************************************************************/
 
-static PAFile pj_stdio_fopen(projCtx ctx, const char *filename, 
+static PAFile stdio_fopen(projCtx ctx, const char *filename, 
                              const char *access)
 {
     stdio_pafile *pafile;
@@ -90,10 +90,10 @@ static PAFile pj_stdio_fopen(projCtx ctx, const char *filename,
 }
 
 /************************************************************************/
-/*                           pj_stdio_fread()                           */
+/*                           stdio_fread()                           */
 /************************************************************************/
 
-static size_t pj_stdio_fread(void *buffer, size_t size, size_t nmemb, 
+static size_t stdio_fread(void *buffer, size_t size, size_t nmemb, 
                              PAFile file)
 {
     stdio_pafile *pafile = (stdio_pafile *) file;
@@ -101,27 +101,27 @@ static size_t pj_stdio_fread(void *buffer, size_t size, size_t nmemb,
 }
 
 /************************************************************************/
-/*                           pj_stdio_fseek()                           */
+/*                           stdio_fseek()                           */
 /************************************************************************/
-static int pj_stdio_fseek(PAFile file, long offset, int whence)
+static int stdio_fseek(PAFile file, long offset, int whence)
 {
     stdio_pafile *pafile = (stdio_pafile *) file;
     return fseek(pafile->fp, offset, whence);
 }
 
 /************************************************************************/
-/*                           pj_stdio_ftell()                           */
+/*                           stdio_ftell()                           */
 /************************************************************************/
-static long pj_stdio_ftell(PAFile file)
+static long stdio_ftell(PAFile file)
 {
     stdio_pafile *pafile = (stdio_pafile *) file;
     return ftell(pafile->fp);
 }
 
 /************************************************************************/
-/*                          pj_stdio_fclose()                           */
+/*                          stdio_fclose()                           */
 /************************************************************************/
-static void pj_stdio_fclose(PAFile file)
+static void stdio_fclose(PAFile file)
 {
     stdio_pafile *pafile = (stdio_pafile *) file;
     fclose(pafile->fp);

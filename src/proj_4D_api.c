@@ -409,7 +409,7 @@ in cs2cs compatibility mode.
 }
 
 /*************************************************************************************/
-static int pj_cs2cs_emulation_setup (PJ *P) {
+static int cs2cs_emulation_setup (PJ *P) {
 /**************************************************************************************
 If any cs2cs style modifiers are given (axis=..., towgs84=..., ) create the 4D API
 equivalent operations, so the preparation and finalization steps in the pj_inv/pj_fwd
@@ -564,7 +564,7 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     pj_dealloc (args);
 
     /* Support cs2cs-style modifiers */
-    ret = pj_cs2cs_emulation_setup  (P);
+    ret = cs2cs_emulation_setup  (P);
     if (0==ret)
         return proj_destroy (P);
 

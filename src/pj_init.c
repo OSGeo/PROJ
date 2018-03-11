@@ -470,7 +470,7 @@ pj_init(int argc, char **argv) {
 }
 
 
-static PJ_CONSTRUCTOR pj_locate_constructor (const char *name) {
+static PJ_CONSTRUCTOR locate_constructor (const char *name) {
     int i;
     char *s;
     for (i = 0; (s = pj_list[i].id) && strcmp(name, s) ; ++i) ;
@@ -557,7 +557,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
         return pj_dealloc_params (ctx, start, PJD_ERR_PROJ_NOT_NAMED);
     name += 5;
 
-    proj = pj_locate_constructor (name);
+    proj = locate_constructor (name);
     if (0==proj)
         return pj_dealloc_params (ctx, start, PJD_ERR_UNKNOWN_PROJECTION_ID);
 

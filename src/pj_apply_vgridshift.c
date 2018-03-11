@@ -33,7 +33,7 @@
 #include "proj_internal.h"
 #include "projects.h"
 
-static double pj_read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GRIDINFO **tables, struct CTABLE *ct) {
+static double read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GRIDINFO **tables, struct CTABLE *ct) {
     int  itable = 0;
     double value = HUGE_VAL;
     double grid_x, grid_y;
@@ -180,7 +180,7 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
         input.phi = y[io];
         input.lam = x[io];
 
-        value = pj_read_vgrid_value(defn, input, gridlist_count_p, tables, &ct);
+        value = read_vgrid_value(defn, input, gridlist_count_p, tables, &ct);
 
         if( inverse )
             z[io] -= value;
@@ -286,7 +286,7 @@ double proj_vgrid_value(PJ *P, LP lp){
     double value;
     memset(&used_grid, 0, sizeof(struct CTABLE));
 
-    value = pj_read_vgrid_value(P, lp, &(P->vgridlist_geoid_count), P->vgridlist_geoid, &used_grid);
+    value = read_vgrid_value(P, lp, &(P->vgridlist_geoid_count), P->vgridlist_geoid, &used_grid);
     proj_log_trace(P, "proj_vgrid_value: (%f, %f) = %f", lp.lam*RAD_TO_DEG, lp.phi*RAD_TO_DEG, value);
 
     return value;
