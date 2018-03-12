@@ -308,6 +308,7 @@ int main(int argc, char **argv) {
     if (stdout != fout)
         fclose (fout);
     free (o);
+    free (buf);
     return 0;
 }
 
