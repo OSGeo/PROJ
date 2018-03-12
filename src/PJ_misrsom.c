@@ -78,8 +78,6 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
             sav = lampp;
             lamtp = lp.lam + Q->p22 * lampp;
             cl = cos(lamtp);
-            if (fabs(cl) < TOL)
-                lamtp -= TOL;
             if( cl < 0 )
                 fac = lampp + sin(lampp) * M_HALFPI;
             else
