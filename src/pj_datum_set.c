@@ -81,6 +81,8 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
         
         if( pj_datums[i].defn && strlen(pj_datums[i].defn) > 0 )
             curr = curr->next = pj_mkparam(pj_datums[i].defn);
+
+        (void)curr; /* make clang static analyzer happy */
     }
 
 /* -------------------------------------------------------------------- */
