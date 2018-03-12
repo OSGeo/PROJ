@@ -48,11 +48,11 @@ static XY t_forward(LP lp, PJ *P) {             /* spheroid */
 
 
 static LP o_inverse(XY xy, PJ *P) {             /* spheroid */
-    LP lp = {0.0,0.0};
+
     struct pj_opaque *Q = P->opaque;
     double coslam, sinphi, cosphi;
 
-    lp = Q->link->inv(xy, Q->link);
+    LP lp = Q->link->inv(xy, Q->link);
     if (lp.lam != HUGE_VAL) {
         coslam = cos(lp.lam -= Q->lamp);
         sinphi = sin(lp.phi);
@@ -66,11 +66,11 @@ static LP o_inverse(XY xy, PJ *P) {             /* spheroid */
 
 
 static LP t_inverse(XY xy, PJ *P) {             /* spheroid */
-    LP lp = {0.0,0.0};
+
     struct pj_opaque *Q = P->opaque;
     double cosphi, t;
 
-    lp = Q->link->inv(xy, Q->link);
+    LP lp = Q->link->inv(xy, Q->link);
     if (lp.lam != HUGE_VAL) {
         cosphi = cos(lp.phi);
         t = lp.lam - Q->lamp;
