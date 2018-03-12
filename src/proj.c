@@ -221,9 +221,6 @@ static void vprocess(FILE *fid) {
         if (*s == 'I' || *s == 'i') {
             linvers = 1;
             ++s;
-        } else if (*s == 'I' || *s == 'i') {
-            linvers = 0;
-            ++s;
         } else
             linvers = inverse;
 
