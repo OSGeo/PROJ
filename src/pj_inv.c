@@ -172,10 +172,21 @@ static PJ_COORD inv_finalize (PJ *P, PJ_COORD coo) {
 }
 
 
+static PJ_COORD error_or_coord(PJ *P, PJ_COORD coord, int last_errno) {
+    if (proj_errno(P))
+        return proj_coord_error();
+
+    proj_errno_restore(P, last_errno);
+    return coord;
+}
+
 
 LP pj_inv(XY xy, PJ *P) {
+    int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.xy = xy;
+
+    last_errno = proj_errno_reset(P);
 
     if (!P->skip_inv_prepare)
         coo = inv_prepare (P, coo);
@@ -199,19 +210,17 @@ LP pj_inv(XY xy, PJ *P) {
     if (!P->skip_inv_finalize)
         coo = inv_finalize (P, coo);
 
-    if (proj_errno(P)) {
-        proj_errno_reset(P);
-        return proj_coord_error().lp;
-    }
-
-    return coo.lp;
+    return error_or_coord(P, coo, last_errno).lp;
 }
 
 
 
 LPZ pj_inv3d (XYZ xyz, PJ *P) {
+    int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.xyz = xyz;
+
+    last_errno = proj_errno_reset(P);
 
     if (!P->skip_inv_prepare)
         coo = inv_prepare (P, coo);
@@ -235,17 +244,14 @@ LPZ pj_inv3d (XYZ xyz, PJ *P) {
     if (!P->skip_inv_finalize)
         coo = inv_finalize (P, coo);
 
-    if (proj_errno(P)) {
-        proj_errno_reset(P);
-        return proj_coord_error().lpz;
-    }
-
-    return coo.lpz;
+    return error_or_coord(P, coo, last_errno).lpz;
 }
 
 
 
 PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
+    int last_errno = proj_errno_reset(P);
+
     if (!P->skip_inv_prepare)
         coo = inv_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
@@ -268,10 +274,5 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
     if (!P->skip_inv_finalize)
         coo = inv_finalize (P, coo);
 
-    if (proj_errno(P)) {
-        proj_errno_reset(P);
-        return proj_coord_error();
-    }
-
-    return coo;
+    return error_or_coord(P, coo, last_errno);
 }
