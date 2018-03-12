@@ -271,7 +271,7 @@ PJ *PROJECTION(aeqd) {
     P->destructor = destructor;
 
     geod_init(&Q->g, P->a, P->es / (1 + sqrt(P->one_es)));
-    P->phi0 = pj_param(P->ctx, P->params, "rlat_0").f;
+
     if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) {
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
         Q->sinph0 = P->phi0 < 0. ? -1. : 1.;
