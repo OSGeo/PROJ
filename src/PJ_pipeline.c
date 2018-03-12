@@ -106,7 +106,6 @@ PROJ_HEAD(pipeline,         "Transformation pipeline manager");
 
 /* Projection specific elements for the PJ object */
 struct pj_opaque {
-    int reversible;
     int steps;
     char **argv;
     char **current_argv;
