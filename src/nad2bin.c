@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 /* ==================================================================== */
     for( i = 1; i < argc; i++ )
     {
-        if( strcmp(argv[i],"-f") == 0 && i < argc-1 ) 
+        if( i < argc-1 && strcmp(argv[i],"-f") == 0 ) 
         {
             format = argv[++i];
         }
