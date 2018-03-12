@@ -446,10 +446,8 @@ int main(int argc, char **argv)
         emess_dat.File_name = 0;
     }
 
-    if( fromProj != NULL )
-        pj_free( fromProj );
-    if( toProj != NULL )
-        pj_free( toProj );
+    pj_free( fromProj );
+    pj_free( toProj );
 
     pj_deallocate_grids();
 
