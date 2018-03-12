@@ -86,7 +86,8 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
 /* -------------------------------------------------------------------- */
 /*      Check for nadgrids parameter.                                   */
 /* -------------------------------------------------------------------- */
-    if( (nadgrids = pj_param(ctx, pl,"snadgrids").s) != NULL )
+    nadgrids = pj_param(ctx, pl,"snadgrids").s;
+    if( nadgrids != NULL )
     {
         /* We don't actually save the value separately.  It will continue
            to exist int he param list for use in pj_apply_gridshift.c */
