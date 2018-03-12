@@ -585,7 +585,7 @@ real geod_genposition(const struct geod_geodesicline* l,
   salp2 = l->salp0; calp2 = l->calp0 * csig2; /* No need to normalize */
 
   if (outmask & GEOD_DISTANCE)
-    s12 = flags & GEOD_ARCMODE ?
+    s12 = (flags & GEOD_ARCMODE) ?
       l->b * ((1 + l->A1m1) * sig12 + AB1) :
       s12_a12;
 
@@ -594,7 +594,7 @@ real geod_genposition(const struct geod_geodesicline* l,
     /* tan(omg2) = sin(alp0) * tan(sig2) */
     somg2 = l->salp0 * ssig2; comg2 = csig2;  /* No need to normalize */
     /* omg12 = omg2 - omg1 */
-    omg12 = flags & GEOD_LONG_UNROLL
+    omg12 = (flags & GEOD_LONG_UNROLL)
       ? E * (sig12
              - (atan2(    ssig2, csig2) - atan2(    l->ssig1, l->csig1))
              + (atan2(E * somg2, comg2) - atan2(E * l->somg1, l->comg1)))
@@ -604,7 +604,7 @@ real geod_genposition(const struct geod_geodesicline* l,
       ( sig12 + (SinCosSeries(TRUE, ssig2, csig2, l->C3a, nC3-1)
                  - l->B31));
     lon12 = lam12 / degree;
-    lon2 = flags & GEOD_LONG_UNROLL ? l->lon1 + lon12 :
+    lon2 = (flags & GEOD_LONG_UNROLL) ? l->lon1 + lon12 :
       AngNormalize(AngNormalize(l->lon1) + AngNormalize(lon12));
   }
 
@@ -674,7 +674,7 @@ real geod_genposition(const struct geod_geodesicline* l,
   if (outmask & GEOD_AREA)
     *pS12 = S12;
 
-  return flags & GEOD_ARCMODE ? s12_a12 : sig12 / degree;
+  return (flags & GEOD_ARCMODE) ? s12_a12 : sig12 / degree;
 }
 
 void geod_setdistance(struct geod_geodesicline* l, real s13) {
@@ -689,7 +689,7 @@ static void geod_setarc(struct geod_geodesicline* l, real a13) {
 
 void geod_gensetdistance(struct geod_geodesicline* l,
  unsigned flags, real s13_a13) {
-  flags & GEOD_ARCMODE ?
+  (flags & GEOD_ARCMODE) ?
     geod_setarc(l, s13_a13) :
     geod_setdistance(l, s13_a13);
 }
@@ -718,7 +718,7 @@ real geod_gendirect(const struct geod_geodesic* g,
   geod_lineinit(&l, g, lat1, lon1, azi1,
                 /* Automatically supply GEOD_DISTANCE_IN if necessary */
                 outmask |
-                (flags & GEOD_ARCMODE ? GEOD_NONE : GEOD_DISTANCE_IN));
+                ((flags & GEOD_ARCMODE) ? GEOD_NONE : GEOD_DISTANCE_IN));
   return geod_genposition(&l, flags, s12_a12,
                           plat2, plon2, pazi2, ps12, pm12, pM12, pM21, pS12);
 }
@@ -845,8 +845,8 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
                                   csig1 * csig2 + ssig1 * ssig2);
     Lengths(g, g->n, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2,
             cbet1, cbet2, &s12x, &m12x, 0,
-            outmask & GEOD_GEODESICSCALE ? &M12 : 0,
-            outmask & GEOD_GEODESICSCALE ? &M21 : 0,
+            (outmask & GEOD_GEODESICSCALE) ? &M12 : 0,
+            (outmask & GEOD_GEODESICSCALE) ? &M21 : 0,
             Ca);
     /* Add the check for sig12 since zero length geodesics might yield m12 <
      * 0.  Test case was
@@ -969,8 +969,8 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
       }
       Lengths(g, eps, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2,
               cbet1, cbet2, &s12x, &m12x, 0,
-              outmask & GEOD_GEODESICSCALE ? &M12 : 0,
-              outmask & GEOD_GEODESICSCALE ? &M21 : 0, Ca);
+              (outmask & GEOD_GEODESICSCALE) ? &M12 : 0,
+              (outmask & GEOD_GEODESICSCALE) ? &M21 : 0, Ca);
       m12x *= g->b;
       s12x *= g->b;
       a12 = sig12 / degree;
@@ -1126,7 +1126,7 @@ real SinCosSeries(boolx sinp, real sinx, real cosx, const real c[], int n) {
   real ar, y0, y1;
   c += (n + sinp);              /* Point to one beyond last element */
   ar = 2 * (cosx - sinx) * (cosx + sinx); /* 2 * cos(2 * x) */
-  y0 = n & 1 ? *--c : 0; y1 = 0;          /* accumulators for sum */
+  y0 = (n & 1) ? *--c : 0; y1 = 0;          /* accumulators for sum */
   /* Now n is even */
   n /= 2;
   while (n--) {
