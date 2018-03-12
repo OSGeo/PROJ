@@ -41,6 +41,7 @@ static double read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GR
     int    grid_ix2, grid_iy2;
     float  *cvs;
     /* do not deal with NaN coordinates */
+    /* cppcheck-suppress duplicateExpression */
     if( input.phi != input.phi || input.lam != input.lam )
         itable = *gridlist_count_p;
 
