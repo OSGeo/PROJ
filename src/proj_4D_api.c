@@ -1008,6 +1008,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
     key[64] = 0;
     strncat(key, ":metadata", 9);
     strcpy(param, "+init=");
+    /* The +strlen(param) avoids a cppcheck false positive warning */
     strncat(param + strlen(param), key, sizeof(param)-1-strlen(param));
 
     start = pj_mkparam(param);
