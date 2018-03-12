@@ -103,6 +103,7 @@ int main(int argc, char **argv) {
         perror("fgets");
         exit(1);
     }
+    /* cppcheck-suppress invalidscanf */
     if ( EOF == scanf("%d %d %*d %lf %lf %lf %lf", &ct.lim.lam, &ct.lim.phi,
           &ct.ll.lam, &ct.del.lam, &ct.ll.phi, &ct.del.phi) ) {
         perror("scanf");
@@ -119,6 +120,7 @@ int main(int argc, char **argv) {
     ct.del.phi *= DEG_TO_RAD;
     /* load table */
     for (p = ct.cvs, i = 0; i < ct.lim.phi; ++i) {
+        /* cppcheck-suppress invalidscanf */
         if ( EOF == scanf("%d:%ld %ld", &ichk, &laml, &phil) ) {
             perror("scanf on row");
             exit(1);
@@ -131,6 +133,7 @@ int main(int argc, char **argv) {
         t.phi = (float) (phil * U_SEC_TO_RAD);
         *p++ = t;
         for (j = 1; j < ct.lim.lam; ++j) {
+            /* cppcheck-suppress invalidscanf */
             if ( EOF == scanf("%ld %ld", &lam, &phi) ) {
                 perror("scanf on column");
                 exit(1);

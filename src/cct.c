@@ -202,6 +202,7 @@ int main(int argc, char **argv) {
     }
 
     if (opt_given (o, "c")) {
+        /* cppcheck-suppress invalidscanf */
         int ncols = sscanf (opt_arg (o, "c"), "%d,%d,%d,%d", columns_xyzt, columns_xyzt+1, columns_xyzt+2, columns_xyzt+3);
         if (ncols != nfields) {
             fprintf (stderr, "%s: Too few input columns given: '%s'\n", o->progname, opt_arg (o, "c"));
