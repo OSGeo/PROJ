@@ -8,6 +8,7 @@ cache:
 matrix:
   fast_finish: true
   include:
+
     - os: linux
       compiler: gcc
       language: c
@@ -38,6 +39,14 @@ matrix:
       env:
         - BUILD_NAME=mingw32
         - DETAILS="mingw32"
+
+    - os: linux
+      compiler: gcc
+      language: c
+      dist: trusty
+      env:
+        - BUILD_NAME=csa
+        - DETAILS="CLang Static Analyzer"
 
   allow_failures:
       - env: BUILD_NAME=mingw32
