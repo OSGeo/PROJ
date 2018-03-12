@@ -131,17 +131,20 @@ PROJVALUE pj_param (projCtx ctx, paralist *pl, const char *opt) {
 
     /* Not found */
     if (0==pl) {
+        /* Return value after the switch, so that the return path is */
+        /* taken in all cases */
         switch (type) {
         case 'b': case 'i':
             value.i = 0;
-            return value;
+            break;
         case 'd': case 'r':
             value.f = 0.;
-            return value;
+            break;
         case 's':
             value.s = 0;
-            return value;
+            break;
         }
+        return value;
     }
 
     /* Found parameter - now find its value */

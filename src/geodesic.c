@@ -658,21 +658,21 @@ real geod_genposition(const struct geod_geodesicline* l,
     S12 = l->c2 * atan2(salp12, calp12) + l->A4 * (B42 - l->B41);
   }
 
-  if (outmask & GEOD_LATITUDE)
+  if ((outmask & GEOD_LATITUDE) && plat2)
     *plat2 = lat2;
-  if (outmask & GEOD_LONGITUDE)
+  if ((outmask & GEOD_LONGITUDE) && plon2)
     *plon2 = lon2;
-  if (outmask & GEOD_AZIMUTH)
+  if ((outmask & GEOD_AZIMUTH) && pazi2)
     *pazi2 = azi2;
-  if (outmask & GEOD_DISTANCE)
+  if ((outmask & GEOD_DISTANCE) && ps12)
     *ps12 = s12;
-  if (outmask & GEOD_REDUCEDLENGTH)
+  if ((outmask & GEOD_REDUCEDLENGTH) && pm12)
     *pm12 = m12;
   if (outmask & GEOD_GEODESICSCALE) {
     if (pM12) *pM12 = M12;
     if (pM21) *pM21 = M21;
   }
-  if (outmask & GEOD_AREA)
+  if ((outmask & GEOD_AREA) && pS12)
     *pS12 = S12;
 
   return (flags & GEOD_ARCMODE) ? s12_a12 : sig12 / degree;

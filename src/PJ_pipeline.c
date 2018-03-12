@@ -286,7 +286,9 @@ static void set_ellipsoid(PJ *P) {
     /* Break the linked list after the global args */
     attachment = 0;
     for (cur = P->params; cur != 0; cur = cur->next)
-        if (strcmp("step", cur->next->param) == 0) {
+        /* cur->next will always be non 0 given argv_sentinel presence, */
+        /* but this is far from being obvious for a static analyzer */
+        if (cur->next != 0 && strcmp(argv_sentinel, cur->next->param) == 0) {
             attachment = cur->next;
             cur->next = 0;
             break;
@@ -310,7 +312,10 @@ static void set_ellipsoid(PJ *P) {
     geod_init(P->geod, P->a,  (1 - sqrt (1 - P->es)));
 
     /* Re-attach the dangling list */
-    cur->next = attachment;
+    /* Note: cur will always be non 0 given argv_sentinel presence, */
+    /* but this is far from being obvious for a static analyzer */
+    if( cur != 0 )
+        cur->next = attachment;
     proj_errno_restore (P, err);
 }
 

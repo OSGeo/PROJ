@@ -260,7 +260,7 @@ PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx, PJ_GridCatalog *catalog, int after,
         break;
     }
 
-    if( iEntry == catalog->entry_count )
+    if( entry == NULL )
     {
         if( grid_date )
             *grid_date = 0.0;

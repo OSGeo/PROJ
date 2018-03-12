@@ -61,7 +61,10 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
 
         /* find the end of the list, so we can add to it */
         for (curr = pl; curr && curr->next ; curr = curr->next) {}
-        
+
+        /* cannot happen in practice, but makes static analyzers happy */
+        if( !curr ) return -1;
+
         /* find the datum definition */
         for (i = 0; (s = pj_datums[i].id) && strcmp(name, s) ; ++i) {}
 
