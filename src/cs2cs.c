@@ -263,6 +263,7 @@ int main(int argc, char **argv)
                 } else
                     emess(1,"invalid list option: l%c",arg[1]);
                 exit(0);
+                /* cppcheck-suppress duplicateBreak */
                 continue; /* artificial */
               case 'e': /* error line alternative */
                 if (--argc <= 0)
