@@ -232,6 +232,8 @@ int main(int argc, char **argv) {
         /* fail if an inverse operation is not available */
         if (!proj_pj_info(P).has_inverse) {
             fprintf (stderr, "Inverse operation not available\n");
+            if (stdout != fout)
+                fclose (fout);
             return 1;
         }
         /* We have no API call for inverting an operation, so we brute force it. */
