@@ -180,7 +180,9 @@ int main(int argc, char **argv) {
             exit(2);
 	}
 
+	/* cppcheck-suppress sizeofCalculation */
         STATIC_ASSERT( MAX_TAB_ID == 80 );
+        /* cppcheck-suppress sizeofCalculation */
         STATIC_ASSERT( sizeof(pj_int32) == 4 ); /* for ct.lim.lam/phi */
 
         memset( header, 0, sizeof(header) );
@@ -276,6 +278,7 @@ int main(int argc, char **argv) {
             ur.lam = ct.ll.lam + (ct.lim.lam-1) * ct.del.lam;
             ur.phi = ct.ll.phi + (ct.lim.phi-1) * ct.del.phi;
 
+            /* cppcheck-suppress sizeofCalculation */
             STATIC_ASSERT( sizeof(nGSCount) == 4 );
 
             memset( achHeader, 0, sizeof(achHeader) );

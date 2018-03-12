@@ -422,7 +422,9 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
     int num_subfiles, subfile;
     int must_swap;
 
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(pj_int32) == 4 );
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(double) == 8 );
 
 /* -------------------------------------------------------------------- */
@@ -645,7 +647,9 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
     struct CTABLE *ct;
     LP		ur;
 
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(pj_int32) == 4 );
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(double) == 8 );
 
 /* -------------------------------------------------------------------- */
@@ -730,7 +734,9 @@ static int pj_gridinfo_init_gtx( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
     double      xorigin,yorigin,xstep,ystep;
     int         rows, columns;
 
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(pj_int32) == 4 );
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(double) == 8 );
 
 /* -------------------------------------------------------------------- */
