@@ -149,7 +149,9 @@ enum snyder_polyhedron {
 };
 
 struct snyder_constants {
-    double          g, G, theta, ea_w, ea_a, ea_b, g_w, g_a, g_b;
+    double          g, G, theta;
+    /* cppcheck-suppress unusedStructMember */
+    double ea_w, ea_a, ea_b, g_w, g_a, g_b;
 };
 
 /* TODO put these in radians to avoid a later conversion */

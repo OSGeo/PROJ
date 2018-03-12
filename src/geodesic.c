@@ -94,6 +94,7 @@ static void Init() {
     #else
     {
       real minus1 = -1;
+      /* cppcheck-suppress wrongmathcall */
       NaN = sqrt(minus1);
     }
     #endif

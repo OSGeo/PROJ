@@ -341,6 +341,7 @@ static int GeodSolve14() {
   int result = 0;
   {
     double minus1 = -1;
+    /* cppcheck-suppress wrongmathcall */
     nan = sqrt(minus1);
   }
   geod_init(&g, wgs84_a, wgs84_f);
@@ -482,6 +483,7 @@ static int GeodSolve55() {
   int result = 0;
   {
     double minus1 = -1;
+    /* cppcheck-suppress wrongmathcall */
     nan = sqrt(minus1);
   }
   geod_init(&g, wgs84_a, wgs84_f);
