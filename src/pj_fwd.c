@@ -174,10 +174,21 @@ static PJ_COORD fwd_finalize (PJ *P, PJ_COORD coo) {
 }
 
 
+static PJ_COORD error_or_coord(PJ *P, PJ_COORD coord, int last_errno) {
+    if (proj_errno(P))
+        return proj_coord_error();
+
+    proj_errno_restore(P, last_errno);
+    return coord;
+}
+
 
 XY pj_fwd(LP lp, PJ *P) {
+    int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.lp = lp;
+
+    last_errno = proj_errno_reset(P);
 
     if (!P->skip_fwd_prepare)
         coo = fwd_prepare (P, coo);
@@ -200,14 +211,18 @@ XY pj_fwd(LP lp, PJ *P) {
 
     if (!P->skip_fwd_finalize)
         coo = fwd_finalize (P, coo);
-    return coo.xy;
+
+    return error_or_coord(P, coo, last_errno).xy;
 }
 
 
 
 XYZ pj_fwd3d(LPZ lpz, PJ *P) {
+    int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.lpz = lpz;
+
+    last_errno = proj_errno_reset(P);
 
     if (!P->skip_fwd_prepare)
         coo = fwd_prepare (P, coo);
@@ -230,12 +245,15 @@ XYZ pj_fwd3d(LPZ lpz, PJ *P) {
 
     if (!P->skip_fwd_finalize)
         coo = fwd_finalize (P, coo);
-    return coo.xyz;
+
+    return error_or_coord(P, coo, last_errno).xyz;
 }
 
 
 
 PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
+    int last_errno = proj_errno_reset(P);
+
     if (!P->skip_fwd_prepare)
         coo = fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
@@ -257,5 +275,6 @@ PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
 
     if (!P->skip_fwd_finalize)
         coo = fwd_finalize (P, coo);
-    return coo;
+
+    return error_or_coord(P, coo, last_errno);
 }
