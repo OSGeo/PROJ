@@ -34,6 +34,8 @@ Documentation
 .. toctree::
    :maxdepth: 1
 
+   download
+   install
    usage/index
    operations/index
    resource_files
@@ -41,7 +43,6 @@ Documentation
    development/index
    faq
    contributing
-   download
    glossary
    license
    references
