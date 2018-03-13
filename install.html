@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Installation &mdash; PROJ.4 5.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Using PROJ" href="usage/index.html"/>
+        <link rel="prev" title="Download" href="download.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#windows">Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linux">Linux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#debian">Debian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#red-hat">Red Hat</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#mac-os-x">Mac OS X</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Installation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installation">
+<span id="install"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>These pages describe how to install PROJ on your computer without compiling it
+yourself. Below are guides for installing on Windows, Linux and Mac OS X. This
+is a good place to get started if this is your first time using PROJ. More
+advanced users may want to compile the software themselves.</p>
+<div class="section" id="windows">
+<h2>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h2>
+<p>The simplest way to install PROJ on Windows is to use the <a class="reference external" href="https://trac.osgeo.org/osgeo4w/">OSGeo4W</a> software
+distribution. OSGeo4W provides easy access to many popular open source geospatial
+software packages. After installation you can use PROJ from the OSGeo4W shell.
+To install PROJ do the following:</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you have already installed software via OSGeo4W on your computer it is
+likely that PROJ is already installed.</p>
+</div>
+<ol class="arabic simple">
+<li>Download either the <a class="reference external" href="http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86.exe">32 bit</a> or <a class="reference external" href="http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe">64 bit</a> installer.</li>
+<li>Run the OSGeo4W setup program.</li>
+<li>Select &#8220;Advanced Install&#8221; and press Next.</li>
+<li>Select &#8220;Install from Internet&#8221; and press Next.</li>
+<li>Select a installation directory. The default suggestion is fine in most cases. Press Next.</li>
+<li>Select &#8220;Local packacke directory&#8221;. The suggestions is fine in most cases. Press Next.</li>
+<li>Select &#8220;Direct connection&#8221; and press Next.</li>
+<li>Choose the download.osgeo.org and press Next.</li>
+<li>Find &#8220;proj&#8221; under &#8220;Commandline_Utilities&#8221; and click the package in the &#8220;New&#8221; column until the version you want to install appears.</li>
+<li>Press next to install PROJ.</li>
+</ol>
+<p>You should now have a &#8220;OSGeo&#8221; menu in your start menu. Within that menu you can
+find the &#8220;OSGeo4W Shell&#8221; where you have access to all the OSGeo4W applications,
+including proj.</p>
+<p>For those who are more inclined to the command line, steps 2&#8211;10 above can be
+accomplished by executing the following command:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">:</span>\<span class="n">temp</span>\<span class="n">osgeo4w</span><span class="o">-</span><span class="n">setup</span><span class="o">-</span><span class="n">x86</span><span class="o">-</span><span class="mf">64.</span><span class="n">exe</span> <span class="o">-</span><span class="n">q</span> <span class="o">-</span><span class="n">k</span> <span class="o">-</span><span class="n">r</span> <span class="o">-</span><span class="n">A</span> <span class="o">-</span><span class="n">s</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">download</span><span class="o">.</span><span class="n">osgeo</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">osgeo4w</span><span class="o">/</span> <span class="o">-</span><span class="n">a</span> <span class="n">x86_64</span> <span class="o">-</span><span class="n">P</span> <span class="n">proj</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="linux">
+<h2>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h2>
+<p>How to install PROJ on Linux depends on which distribution you are using. Below
+is a few examples for some of the more common Linux distributions:</p>
+<div class="section" id="debian">
+<h3>Debian<a class="headerlink" href="#debian" title="Permalink to this headline">¶</a></h3>
+<p>On Debian and similar systems (e.g. Ubuntu) the APT package manager is used:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">proj</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="red-hat">
+<h3>Red Hat<a class="headerlink" href="#red-hat" title="Permalink to this headline">¶</a></h3>
+<p>On Red Hat based system packages are installed with yum:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">proj</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="mac-os-x">
+<h2>Mac OS X<a class="headerlink" href="#mac-os-x" title="Permalink to this headline">¶</a></h2>
+<p>On OS X PROJ can be installed via the Homebrew package manager:</p>
+<blockquote>
+<div>brew install proj</div></blockquote>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="usage/index.html" class="btn btn-neutral float-right" title="Using PROJ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="download.html" class="btn btn-neutral" title="Download" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1983-2018.
+      Last updated on 13 Mar 2018.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'5.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
