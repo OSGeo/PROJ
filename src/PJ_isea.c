@@ -139,14 +139,6 @@ struct isea_geo {
     double lon, lat;
 };
 
-#ifdef unused
-struct isea_address {
-    int type; /* enum isea_address_form */
-    int number;
-    double  x,y; /* or i,j or lon,lat depending on type */
-};
-#endif
-
 /* ENDINC */
 
 enum snyder_polyhedron {
