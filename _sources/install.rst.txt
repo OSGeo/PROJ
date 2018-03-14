@@ -56,7 +56,7 @@ Debian
 
 On Debian and similar systems (e.g. Ubuntu) the APT package manager is used::
 
-    sudo apt-get install proj
+    sudo apt-get install proj-bin
 
 Red Hat
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
