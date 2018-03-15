@@ -631,7 +631,7 @@ Info structures
             const char  *definition;
             int          has_inverse;
             double       accuracy;
-        } PJ_PROJ_INFO;
+        } PJ_PROJ_INFO;
 
     .. c:member:: const char *PJ_PROJ_INFO.id
 
