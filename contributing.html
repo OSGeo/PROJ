@@ -107,15 +107,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#feature-requests">Feature requests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#write-documentation">Write documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#code-contributions">Code contributions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#making-changes">Making Changes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#submitting-changes">Submitting Changes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#coding-conventions">Coding conventions</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#programming-language">Programming language</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#coding-style">Coding style</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#whitespace">Whitespace</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#file-names">File names</a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="#legalese">Legalese</a></li>
 </ul>
 </li>
@@ -272,74 +263,7 @@ as a template.</p>
 </div>
 <div class="section" id="code-contributions">
 <h2>Code contributions<a class="headerlink" href="#code-contributions" title="Permalink to this headline">¶</a></h2>
-<p>Code contributions can be either bug fixes or new features. The process
-is the same for both, so they will be discussed together in this
-section.</p>
-<div class="section" id="making-changes">
-<h3>Making Changes<a class="headerlink" href="#making-changes" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Create a topic branch from where you want to base your work.</li>
-<li>You usually should base your topic branch off of the master branch.</li>
-<li>To quickly create a topic branch: <code class="docutils literal"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">-b</span> <span class="pre">my-topic-branch</span></code></li>
-<li>Make commits of logical units.</li>
-<li>Check for unnecessary whitespace with <code class="docutils literal"><span class="pre">git</span> <span class="pre">diff</span> <span class="pre">--check</span></code> before
-committing.</li>
-<li>Make sure your commit messages are in the <a class="reference external" href="http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html">proper
-format</a>.</li>
-<li>Make sure you have added the necessary tests for your changes.</li>
-<li>Make sure that all tests pass</li>
-</ul>
-</div>
-<div class="section" id="submitting-changes">
-<h3>Submitting Changes<a class="headerlink" href="#submitting-changes" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Push your changes to a topic branch in your fork of the repository.</li>
-<li>Submit a pull request to the PROJ repository in the OSGeo
-organization.</li>
-<li>If your pull request fixes/references an issue, include that issue
-number in the pull request. For example:</li>
-</ul>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Wiz</span> <span class="n">the</span> <span class="n">bang</span>
-
-<span class="n">Fixes</span> <span class="c1">#123.</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li>PROJ developers will look at your patch and take an appropriate
-action.</li>
-</ul>
-</div>
-<div class="section" id="coding-conventions">
-<h3>Coding conventions<a class="headerlink" href="#coding-conventions" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="programming-language">
-<h4>Programming language<a class="headerlink" href="#programming-language" title="Permalink to this headline">¶</a></h4>
-<p>PROJ is developed strictly in ANSI C 89.</p>
-</div>
-<div class="section" id="coding-style">
-<h4>Coding style<a class="headerlink" href="#coding-style" title="Permalink to this headline">¶</a></h4>
-<p>We don&#8217;t enforce any particular coding style, but please try to keep it
-as simple as possible. If improving existing code, please try to conform
-with the style of the locally surrounding code.</p>
-</div>
-<div class="section" id="whitespace">
-<h4>Whitespace<a class="headerlink" href="#whitespace" title="Permalink to this headline">¶</a></h4>
-<p>Throughout the PROJ code base you will see differing whitespace use.
-The general rule is to keep whitespace in whatever form it is in the
-file you are currently editing. If the file has a mix of tabs and space
-please convert the tabs to space in a separate commit before making any
-other changes. This makes it a lot easier to see the changes in diffs
-when evaluating the changed code. New files should use spaces as
-whitespace.</p>
-</div>
-<div class="section" id="file-names">
-<h4>File names<a class="headerlink" href="#file-names" title="Permalink to this headline">¶</a></h4>
-<p>Files in which projections are implemented are prefixed with an
-upper-case <code class="docutils literal"><span class="pre">PJ_</span></code> and most other files are prefixed with lower-case
-<code class="docutils literal"><span class="pre">pj_</span></code>. Some file deviate from this pattern, most of them dates back to
-the very early releases of PROJ. New contributions should follow the
-pj-prefix pattern. Unless there are obvious reasons not to.</p>
-</div>
-</div>
+<p>See <a class="reference internal" href="development/for_proj_contributors.html"><span class="doc">Code contributions</span></a></p>
 <div class="section" id="legalese">
 <h3>Legalese<a class="headerlink" href="#legalese" title="Permalink to this headline">¶</a></h3>
 <p>Committers are the front line gatekeepers to keep the code base clear of
