@@ -139,12 +139,6 @@ struct isea_geo {
     double lon, lat;
 };
 
-struct isea_address {
-    int type; /* enum isea_address_form */
-    int number;
-    double  x,y; /* or i,j or lon,lat depending on type */
-};
-
 /* ENDINC */
 
 enum snyder_polyhedron {
@@ -155,7 +149,9 @@ enum snyder_polyhedron {
 };
 
 struct snyder_constants {
-    double          g, G, theta, ea_w, ea_a, ea_b, g_w, g_a, g_b;
+    double          g, G, theta;
+    /* cppcheck-suppress unusedStructMember */
+    double ea_w, ea_a, ea_b, g_w, g_a, g_b;
 };
 
 /* TODO put these in radians to avoid a later conversion */

@@ -67,6 +67,9 @@ static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
             c++;
     }
 
+    if( next == 0 )
+        return 0;
+
     /* Terminate list and return */
     next->next = 0;
     return first;

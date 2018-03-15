@@ -50,7 +50,7 @@ static double lc(projCtx ctx, double b,double c,double a) {
 
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+    XY xy;
     struct pj_opaque *Q = P->opaque;
     double sinphi, cosphi, a;
     VECT v[3];

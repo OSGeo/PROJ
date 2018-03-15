@@ -66,6 +66,19 @@ static void swap_words( unsigned char *data, int word_size, int word_count )
 }
 
 /************************************************************************/
+/*                             to_double()                              */
+/*                                                                      */
+/*      Returns a double from the pointed data.                         */
+/************************************************************************/
+
+static double to_double( unsigned char* data )
+{
+    double d;
+    memcpy(&d, data, sizeof(d));
+    return d;
+}
+
+/************************************************************************/
 /*                          pj_gridinfo_free()                          */
 /************************************************************************/
 
@@ -422,7 +435,9 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
     int num_subfiles, subfile;
     int must_swap;
 
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(pj_int32) == 4 );
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(double) == 8 );
 
 /* -------------------------------------------------------------------- */
@@ -508,14 +523,14 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
         strncpy( ct->id, (const char *) header + 8, 8 );
         ct->id[8] = '\0';
 
-        ct->ll.lam = - *((double *) (header+7*16+8)); /* W_LONG */
-        ct->ll.phi = *((double *) (header+4*16+8));   /* S_LAT */
+        ct->ll.lam = - to_double(header+7*16+8); /* W_LONG */
+        ct->ll.phi = to_double(header+4*16+8);   /* S_LAT */
 
-        ur.lam = - *((double *) (header+6*16+8));     /* E_LONG */
-        ur.phi = *((double *) (header+5*16+8));       /* N_LAT */
+        ur.lam = - to_double(header+6*16+8);     /* E_LONG */
+        ur.phi = to_double(header+5*16+8);       /* N_LAT */
 
-        ct->del.lam = *((double *) (header+9*16+8));
-        ct->del.phi = *((double *) (header+8*16+8));
+        ct->del.lam = to_double(header+9*16+8);
+        ct->del.phi = to_double(header+8*16+8);
 
         ct->lim.lam = (pj_int32) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
         ct->lim.phi = (pj_int32) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
@@ -645,7 +660,9 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
     struct CTABLE *ct;
     LP		ur;
 
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(pj_int32) == 4 );
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(double) == 8 );
 
 /* -------------------------------------------------------------------- */
@@ -689,12 +706,12 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
     }
     strcpy( ct->id, "NTv1 Grid Shift File" );
 
-    ct->ll.lam = - *((double *) (header+72));
-    ct->ll.phi = *((double *) (header+24));
-    ur.lam = - *((double *) (header+56));
-    ur.phi = *((double *) (header+40));
-    ct->del.lam = *((double *) (header+104));
-    ct->del.phi = *((double *) (header+88));
+    ct->ll.lam = - to_double(header+72);
+    ct->ll.phi = to_double(header+24);
+    ur.lam = - to_double(header+56);
+    ur.phi = to_double(header+40);
+    ct->del.lam = to_double(header+104);
+    ct->del.phi = to_double(header+88);
     ct->lim.lam = (pj_int32) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
     ct->lim.phi = (pj_int32) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
 
@@ -730,7 +747,9 @@ static int pj_gridinfo_init_gtx( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
     double      xorigin,yorigin,xstep,ystep;
     int         rows, columns;
 
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(pj_int32) == 4 );
+    /* cppcheck-suppress sizeofCalculation */
     STATIC_ASSERT( sizeof(double) == 8 );
 
 /* -------------------------------------------------------------------- */

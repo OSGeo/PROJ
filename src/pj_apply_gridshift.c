@@ -206,10 +206,10 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **tables, int grid_count,
         if( ct != NULL )
         {
             output = nad_cvt( input, inverse, ct );
-        }
 
-        if ( output.lam != HUGE_VAL && debug_count++ < 20 )
-            pj_log( ctx, PJ_LOG_DEBUG_MINOR, "pj_apply_gridshift(): used %s", ct->id );
+            if ( output.lam != HUGE_VAL && debug_count++ < 20 )
+                pj_log( ctx, PJ_LOG_DEBUG_MINOR, "pj_apply_gridshift(): used %s", ct->id );
+        }
 
         if ( output.lam == HUGE_VAL )
         {

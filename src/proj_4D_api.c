@@ -632,14 +632,18 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *srid_from, const char 
 ******************************************************************************/
     PJ *P;
     char buffer[512];
+    size_t len;
 
     /* area not in use yet, suppressing warning */
     (void)area;
 
     strcpy(buffer, "+proj=pipeline +step +init=");
-    strncat(buffer, srid_from, 512-strlen(buffer));
-    strncat(buffer, " +inv +step +init=", 512-strlen(buffer));
-    strncat(buffer, srid_to, 512-strlen(buffer));
+    len = strlen(buffer);
+    strncat(buffer + len, srid_from, sizeof(buffer)-1-len);
+    len += strlen(buffer + len);
+    strncat(buffer + len, " +inv +step +init=", sizeof(buffer)-1-len);
+    len += strlen(buffer + len);
+    strncat(buffer + len, srid_to, sizeof(buffer)-1-len);
 
     P = proj_create(ctx, buffer);
 
@@ -1004,7 +1008,8 @@ PJ_INIT_INFO proj_init_info(const char *initname){
     key[64] = 0;
     strncat(key, ":metadata", 9);
     strcpy(param, "+init=");
-    strncat(param, key, 73);
+    /* The +strlen(param) avoids a cppcheck false positive warning */
+    strncat(param + strlen(param), key, sizeof(param)-1-strlen(param));
 
     start = pj_mkparam(param);
     pj_expand_init(ctx, start);

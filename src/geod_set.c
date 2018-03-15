@@ -19,7 +19,7 @@ geod_set(int argc, char **argv) {
 	start = curr = pj_mkparam(argv[0]);
 	if (!curr)
 		emess(1, "memory allocation failed");
-	for (i = 1; i < argc; ++i) {
+	for (i = 1; curr != 0 && i < argc; ++i) {
 		curr->next = pj_mkparam(argv[i]);
 		if (!curr->next)
 			emess(1, "memory allocation failed");

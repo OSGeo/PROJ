@@ -91,10 +91,8 @@ static XY loc_for(LP lp, PJ *P, double *yc) {
 
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    XY xy = {0.0,0.0};
     double yc;
-
-    xy = loc_for(lp, P, &yc);
+    XY xy = loc_for(lp, P, &yc);
     return (xy);
 }
 

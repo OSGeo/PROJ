@@ -61,7 +61,10 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
 
         /* find the end of the list, so we can add to it */
         for (curr = pl; curr && curr->next ; curr = curr->next) {}
-        
+
+        /* cannot happen in practice, but makes static analyzers happy */
+        if( !curr ) return -1;
+
         /* find the datum definition */
         for (i = 0; (s = pj_datums[i].id) && strcmp(name, s) ; ++i) {}
 
@@ -81,12 +84,15 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
         
         if( pj_datums[i].defn && strlen(pj_datums[i].defn) > 0 )
             curr = curr->next = pj_mkparam(pj_datums[i].defn);
+
+        (void)curr; /* make clang static analyzer happy */
     }
 
 /* -------------------------------------------------------------------- */
 /*      Check for nadgrids parameter.                                   */
 /* -------------------------------------------------------------------- */
-    if( (nadgrids = pj_param(ctx, pl,"snadgrids").s) != NULL )
+    nadgrids = pj_param(ctx, pl,"snadgrids").s;
+    if( nadgrids != NULL )
     {
         /* We don't actually save the value separately.  It will continue
            to exist int he param list for use in pj_apply_gridshift.c */

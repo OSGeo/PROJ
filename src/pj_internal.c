@@ -343,7 +343,7 @@ array.
     if (0==argc)
         return p;
 
-    for (i = n = 0;  i < argc;  i++) {
+    for (i = 0;  i < argc;  i++) {
         strcat (p, argv[i]);
         strcat (p, " ");
     }
