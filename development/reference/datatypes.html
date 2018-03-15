@@ -966,13 +966,13 @@ Grids and init files are looked for in directories in the search path.</p>
 view into the internals of a <a class="reference internal" href="#c.PJ" title="PJ"><code class="xref c c-type docutils literal"><span class="pre">PJ</span></code></a>, so once the <a class="reference internal" href="#c.PJ" title="PJ"><code class="xref c c-type docutils literal"><span class="pre">PJ</span></code></a>
 is destroyed or otherwise becomes invalid, so does the
 <a class="reference internal" href="#c.PJ_PROJ_INFO" title="PJ_PROJ_INFO"><code class="xref c c-type docutils literal"><span class="pre">PJ_PROJ_INFO</span></code></a></p>
-<div class="highlight-C"><div class="highlight"><pre><span></span>typedef struct {
-    const char  *id;
-    const char  *description;
-    const char  *definition;
-    int          has_inverse;
-    double       accuracy;
-} PJ_PROJ_INFO;
+<div class="highlight-C"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="k">const</span> <span class="kt">char</span>  <span class="o">*</span><span class="n">id</span><span class="p">;</span>
+    <span class="k">const</span> <span class="kt">char</span>  <span class="o">*</span><span class="n">description</span><span class="p">;</span>
+    <span class="k">const</span> <span class="kt">char</span>  <span class="o">*</span><span class="n">definition</span><span class="p">;</span>
+    <span class="kt">int</span>          <span class="n">has_inverse</span><span class="p">;</span>
+    <span class="kt">double</span>       <span class="n">accuracy</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">PJ_PROJ_INFO</span><span class="p">;</span>
 </pre></div>
 </div>
 <dl class="member">
