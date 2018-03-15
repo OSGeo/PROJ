@@ -79,56 +79,7 @@ If you intend to document one of PROJ.4's supported projections please use the
 
 ## Code contributions
 
-Code contributions can be either bug fixes or new features. The process is the same
-for both, so they will be discussed together in this section.
-
-### Making Changes
-
-* Create a topic branch from where you want to base your work.
-  * You usually should base your topic branch off of the master branch.
-  * To quickly create a topic branch: `git checkout -b my-topic-branch`
-* Make commits of logical units.
-* Check for unnecessary whitespace with `git diff --check` before committing.
-* Make sure your commit messages are in the [proper format](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
-* Make sure you have added the necessary tests for your changes.
-* Make sure that all tests pass
-
-### Submitting Changes
-
-* Push your changes to a topic branch in your fork of the repository.
-* Submit a pull request to the PROJ.4 repository in the OSGeo organization.
-  * If your pull request fixes/references an issue, include that issue number in the pull request. For example:
-
-```
-Wiz the bang
-
-Fixes #123.
-```
-
-* PROJ.4 developers will look at your patch and take an appropriate action.
-
-### Coding conventions
-
-#### Programming language
-PROJ.4 is developed strictly in ANSI C 89.
-
-#### Coding style
-We don't enforce any particular coding style, but please try to keep it as simple as possible.
-If improving existing code, please try to conform with the style of the locally surrounding code.
-
-#### Whitespace
-Throughout the PROJ.4 code base you will see differing whitespace use.
-The general rule is to keep whitespace in whatever form it is
-in the file you are currently editing. If the file has a mix of tabs and space please
-convert the tabs to space in a separate commit before making any other changes. This
-makes it a lot easier to see the changes in diffs when evaluating the changed code. New
-files should use spaces as whitespace.
-
-#### File names
-Files in which projections are implemented are prefixed with an upper-case `PJ_` and most other
-files are prefixed with lower-case `pj_`. Some file deviate from this pattern, most of them dates
-back to the very early releases of PROJ.4. New contributions should follow the pj-prefix pattern.
-Unless there are obvious reasons not to.
+See [Code Contributions](http://proj4.org/development/for_proj_contributors.html)
 
 #### Legalese
 Commiters are the front line gatekeepers to keep the code base clear of improperly contributed code.
