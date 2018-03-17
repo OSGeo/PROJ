@@ -33,8 +33,8 @@ dnl Check flag for accurate arithmetic with Intel compiler.  This is
 dnl needed to stop the compiler from ignoring parentheses in expressions
 dnl like (a + b) + c and from simplifying 0.0 + x to x (which is wrong if
 dnl x = -0.0).
-AX_CHECK_COMPILE_FLAG([-Werror -fprotect-parens -fsigned-zeros],
-        [CFLAGS="$CFLAGS -fprotect-parens -fsigned-zeros"])
+AX_CHECK_COMPILE_FLAG([-fprotect-parens -fsigned-zeros],
+        [CFLAGS="$CFLAGS -fprotect-parens -fsigned-zeros"],,[-Werror])
 dnl Check for C99 math functions
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Wall -Werror"
