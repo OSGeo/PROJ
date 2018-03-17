@@ -342,6 +342,7 @@ See Also
   model and program.  Source for the HTDP program can be downloaded from here.
 
 
+.. _init_files:
 
 Init files
 -------------------------------------------------------------------------------
