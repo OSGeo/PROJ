@@ -239,7 +239,8 @@ static void sincosdx(real x, real* sinx, real* cosx) {
   r = remquo(x, (real)(90), &q);
 #else
   r = fmod(x, (real)(360));
-  q = (int)(floor(r / 90 + (real)(0.5)));
+  /* check for NaN */
+  q = r == r ? (int)(floor(r / 90 + (real)(0.5))) : 0;
   r -= 90 * q;
 #endif
   /* now abs(r) <= 45 */
@@ -658,21 +659,21 @@ real geod_genposition(const struct geod_geodesicline* l,
     S12 = l->c2 * atan2(salp12, calp12) + l->A4 * (B42 - l->B41);
   }
 
-  if ((outmask & GEOD_LATITUDE) && plat2)
+  if ((outmask & GEOD_LATITUDE) && plat2) /* plat2 check redundant */
     *plat2 = lat2;
-  if ((outmask & GEOD_LONGITUDE) && plon2)
+  if ((outmask & GEOD_LONGITUDE) && plon2) /* plon2 check redundant */
     *plon2 = lon2;
-  if ((outmask & GEOD_AZIMUTH) && pazi2)
+  if ((outmask & GEOD_AZIMUTH) && pazi2) /* pazi2 check redundant */
     *pazi2 = azi2;
-  if ((outmask & GEOD_DISTANCE) && ps12)
+  if ((outmask & GEOD_DISTANCE) && ps12) /* ps12 check redundant */
     *ps12 = s12;
-  if ((outmask & GEOD_REDUCEDLENGTH) && pm12)
+  if ((outmask & GEOD_REDUCEDLENGTH) && pm12) /* pm12 check redundant */
     *pm12 = m12;
   if (outmask & GEOD_GEODESICSCALE) {
     if (pM12) *pM12 = M12;
     if (pM21) *pM21 = M21;
   }
-  if ((outmask & GEOD_AREA) && pS12)
+  if ((outmask & GEOD_AREA) && pS12) /* pS12 check redundant */
     *pS12 = S12;
 
   return (flags & GEOD_ARCMODE) ? s12_a12 : sig12 / degree;
@@ -1127,7 +1128,7 @@ real SinCosSeries(boolx sinp, real sinx, real cosx, const real c[], int n) {
   real ar, y0, y1;
   c += (n + sinp);              /* Point to one beyond last element */
   ar = 2 * (cosx - sinx) * (cosx + sinx); /* 2 * cos(2 * x) */
-  y0 = (n & 1) ? *--c : 0; y1 = 0;          /* accumulators for sum */
+  y0 = (n & 1) ? *--c : 0; y1 = 0;        /* accumulators for sum */
   /* Now n is even */
   n /= 2;
   while (n--) {
@@ -1894,7 +1895,9 @@ void geod_polygon_addedge(const struct geod_geodesic* g,
                           struct geod_polygon* p,
                           real azi, real s) {
   if (p->num) {              /* Do nothing is num is zero */
-    real lat = 0, lon = 0, S12 = 0;  /* Initialize S12 to stop Visual Studio warning */
+    /* Initialize S12 to stop Visual Studio warning.  Initialization of lat and
+       lon is to make CLang static analyzer happy. */
+    real lat = 0, lon = 0, S12 = 0;
     geod_gendirect(g, p->lat, p->lon, azi, GEOD_LONG_UNROLL, s,
                    &lat, &lon, 0,
                    0, 0, 0, 0, p->polyline ? 0 : &S12);
@@ -2031,6 +2034,8 @@ unsigned geod_polygon_testedge(const struct geod_geodesic* g,
   tempsum = p->A[0];
   crossings = p->crossings;
   {
+    /* Initialization of lat, lon, and S12 is to make CLang static analyzer
+       happy. */
     real lat = 0, lon = 0, s12, S12 = 0;
     geod_gendirect(g, p->lat, p->lon, azi, GEOD_LONG_UNROLL, s,
                    &lat, &lon, 0,
