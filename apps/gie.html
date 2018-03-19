@@ -1,0 +1,534 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gie &mdash; PROJ.4 5.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="Applications" href="index.html"/>
+        <link rel="next" title="Coordinate operations" href="../operations/index.html"/>
+        <link rel="prev" title="geod" href="geod.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Applications</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="proj.html">proj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cct.html">cct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cs2cs.html">cs2cs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geod.html">geod</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">gie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#synopsis">Synopsis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gie-command-language">gie command language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#background">Background</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Applications</a> &raquo;</li>
+        
+      <li>gie</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="gie">
+<span id="id1"></span><h1>gie<a class="headerlink" href="#gie" title="Permalink to this headline">¶</a></h1>
+<p id="index-0">The Geospatial Integrity Investigation Environment</p>
+<div class="section" id="synopsis">
+<h2>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><strong>gie</strong> [ <strong>-hovql</strong> [ args ] ] file[s]</div></blockquote>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p><strong class="program">gie</strong>, the Geospatial Integrity Investigation Environment, is a
+regression testing environment for the PROJ transformation library. Its primary
+design goal is to be able to perform regression testing of code that are a part
+of PROJ, while not requiring any other kind of tooling than the same C compiler
+already employed for compiling the library.</p>
+<dl class="option">
+<dt id="cmdoption-h">
+<code class="descname">-h</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--help</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-h" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print usage information</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-o">
+<code class="descname">-o</code><code class="descclassname"> &lt;file&gt;</code><code class="descclassname">, </code><code class="descname">--output</code><code class="descclassname"> &lt;file&gt;</code><a class="headerlink" href="#cmdoption-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify output file name</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-v">
+<code class="descname">-v</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--verbose</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-v" title="Permalink to this definition">¶</a></dt>
+<dd><p>Verbose: Provide non-essential informational output.  Repeat <a class="reference internal" href="#cmdoption-v"><code class="xref std std-option docutils literal"><span class="pre">-v</span></code></a> for
+more verbosity (e.g. <code class="docutils literal"><span class="pre">-vv</span></code>)</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-q">
+<code class="descname">-q</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--quiet</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quiet: Opposite of verbose. In  quiet  mode  not  even  errors  are
+reported.  Only  interaction  is through the return code (0 on success,
+non-zero indicates number of FAILED tests)</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-l">
+<code class="descname">-l</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--list</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-l" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the PROJ internal system error codes</p>
+</dd></dl>
+
+<p>Tests for <strong class="program">gie</strong> are defined in simple text files. Usually having the
+extension <code class="docutils literal"><span class="pre">.gie</span></code>. Test for <strong class="program">gie</strong> are written in the purpose-build command language for gie.
+The basic functionality of the gie command language is implemented through just
+3 command verbs: <code class="docutils literal"><span class="pre">operation</span></code>, which defines the PROJ operation to test,
+<code class="docutils literal"><span class="pre">accept</span></code>, which defines the input coordinate to read, and <code class="docutils literal"><span class="pre">expect</span></code>, which
+defines the result to expect.</p>
+<p>A sample test file for <strong class="program">gie</strong> that uses the three above basic commands looks
+like:</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;gie&gt;</span>
+
+<span class="go">--------------------------------------------</span>
+<span class="go">Test output of the UTM projection</span>
+<span class="go">--------------------------------------------</span>
+<span class="go">operation  +proj=utm  +zone=32  +ellps=GRS80</span>
+<span class="go">--------------------------------------------</span>
+<span class="go">accept     12  55</span>
+<span class="go">expect     691_875.632_14   6_098_907.825_05</span>
+
+<span class="go">&lt;/gie&gt;</span>
+</pre></div>
+</div>
+<p>Parsing of a  <strong class="program">gie</strong> file starts at <code class="docutils literal"><span class="pre">&lt;gie&gt;</span></code> and ends when <code class="docutils literal"><span class="pre">&lt;/gie&gt;</span></code>
+is reached. Anything before <code class="docutils literal"><span class="pre">&lt;gie&gt;</span></code> and after <code class="docutils literal"><span class="pre">&lt;/gie&gt;</span></code> is not considered.
+Test cases are created by defining an <a class="reference internal" href="#cmdoption-arg-operation"><code class="xref std std-option docutils literal"><span class="pre">operation</span></code></a> which
+<a class="reference internal" href="#cmdoption-arg-accept"><code class="xref std std-option docutils literal"><span class="pre">accept</span></code></a> an input coordinate and <a class="reference internal" href="#cmdoption-arg-expect"><code class="xref std std-option docutils literal"><span class="pre">expect</span></code></a> an output
+coordinate.</p>
+<p>Because <strong class="program">gie</strong> tests are wrapped in the <code class="docutils literal"><span class="pre">&lt;gie&gt;</span></code>/<code class="docutils literal"><span class="pre">&lt;/gie&gt;</span></code> tags it is
+also possible to add test cases to custom made <a class="reference internal" href="../resource_files.html#init-files"><span class="std std-ref">init files</span></a>.
+The tests will be ignore by PROJ when reading the init file with <em>+init</em> and
+<strong class="program">gie</strong> ignores anything not wrapped in <code class="docutils literal"><span class="pre">&lt;gie&gt;</span></code>/<code class="docutils literal"><span class="pre">&lt;/gie&gt;</span></code>.</p>
+<p><strong class="program">gie</strong> tests are defined by a set of commands like <a class="reference internal" href="#cmdoption-arg-operation"><code class="xref std std-option docutils literal"><span class="pre">operation</span></code></a>,
+<a class="reference internal" href="#cmdoption-arg-accept"><code class="xref std std-option docutils literal"><span class="pre">accept</span></code></a> and <a class="reference internal" href="#cmdoption-arg-expect"><code class="xref std std-option docutils literal"><span class="pre">expect</span></code></a> in the example above. Together the
+commands make out the <strong class="program">gie</strong> command language. Any line in a
+<strong class="program">gie</strong> file that does not start with a command is ignored. In the
+example above it is seen how this can be used to add comments and styling to
+<strong class="program">gie</strong> test files in order to make them more readable as well as
+documenting what the purpose of the various tests are.</p>
+<p>Below the <a class="reference internal" href="#gie-commands"><span class="std std-ref">gie command language</span></a> is explained in details.</p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Run all tests in a file with all debug information turned on</li>
+</ol>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">gie -vvvv corner-cases.gie</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Run all tests in several files</li>
+</ol>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">gie foo bar</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="gie-command-language">
+<span id="gie-commands"></span><h2>gie command language<a class="headerlink" href="#gie-command-language" title="Permalink to this headline">¶</a></h2>
+<dl class="option">
+<dt id="cmdoption-arg-operation">
+<code class="descname">operation</code><code class="descclassname"> &lt;+args&gt;</code><a class="headerlink" href="#cmdoption-arg-operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define a PROJ operation to test. Example:</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">operation proj=utm zone=32 ellps=GRS80</span>
+<span class="gp">#</span> <span class="nb">test</span> 4D <span class="k">function</span>
+<span class="go">accept    12 55 0 0</span>
+<span class="go">expect    691875.63214  6098907.82501  0  0</span>
+
+<span class="gp">#</span> <span class="nb">test</span> 2D <span class="k">function</span>
+<span class="go">accept    12 56</span>
+<span class="go">expect    687071.4391   6210141.3267</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-accept">
+<code class="descname">accept</code><code class="descclassname"> &lt;x y [z [t]]&gt;</code><a class="headerlink" href="#cmdoption-arg-accept" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the input coordinate to read. Takes test coordinate. The coordinate
+can be defined by either 2, 3 or 4 values, where the first two values are
+the x- and y-components, the 3rd is the z-component and the 4th is the time
+component. The number of components in the coordinate determines which
+version of the operation is tested (2D, 3D or 4D). Many coordinates can be
+accepted for one <a class="reference internal" href="#cmdoption-arg-operation"><code class="xref std std-option docutils literal"><span class="pre">operation</span></code></a>. For each <a class="reference internal" href="#cmdoption-arg-accept"><code class="xref std std-option docutils literal"><span class="pre">accept</span></code></a> an
+accompanying <a class="reference internal" href="#cmdoption-arg-expect"><code class="xref std std-option docutils literal"><span class="pre">expect</span></code></a> is needed.</p>
+<p>Note that <strong class="program">gie</strong> accepts the underscore (&#8220;_&#8221;) as a thousands
+separator.  It is not required (in fact, it is entirely ignored by the
+input routine), but it significantly improves the readability of the very
+long strings of numbers typically required in projected coordinates.</p>
+<p>See <a class="reference internal" href="#cmdoption-arg-operation"><code class="xref std std-option docutils literal"><span class="pre">operation</span></code></a> for an example.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-expect">
+<code class="descname">expect</code><code class="descclassname"> &lt;x y [z [t]]&gt; | &lt;error code&gt;</code><a class="headerlink" href="#cmdoption-arg-expect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the expected coordinate that will be returned from accepted
+coordinate passed though an operation. The expected coordinate can be
+defined by either 2, 3 or 4 components, similarly to <a class="reference internal" href="#cmdoption-arg-accept"><code class="xref std std-option docutils literal"><span class="pre">accept</span></code></a>.
+Many coordinates can be expected for one <a class="reference internal" href="#cmdoption-arg-operation"><code class="xref std std-option docutils literal"><span class="pre">operation</span></code></a>. For each
+<a class="reference internal" href="#cmdoption-arg-expect"><code class="xref std std-option docutils literal"><span class="pre">expect</span></code></a> an accompanying <a class="reference internal" href="#cmdoption-arg-accept"><code class="xref std std-option docutils literal"><span class="pre">accept</span></code></a> is needed.</p>
+<p>See <a class="reference internal" href="#cmdoption-arg-operation"><code class="xref std std-option docutils literal"><span class="pre">operation</span></code></a> for an example.</p>
+<p>In addition to expecting a coordinate it is also possible to expect a
+PROJ error code in case an operation can&#8217;t be created. This is useful when
+testing that errors are caught and handled correctly. Below is an example of
+that tests that the pipeline operator fails correctly when a non-invertable
+pipeline is constructed.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">operation   proj=pipeline step</span>
+<span class="go">            proj=urm5 n=0.5 inv</span>
+<span class="go">expect      failure pjd_err_malformed_pipeline</span>
+</pre></div>
+</div>
+<p>See <code class="docutils literal"><span class="pre">gie</span> <span class="pre">-l</span></code> for a list of error codes that can be expected.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-tolerance">
+<code class="descname">tolerance</code><code class="descclassname"> &lt;tolerance&gt;</code><a class="headerlink" href="#cmdoption-arg-tolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#cmdoption-arg-tolerance"><code class="xref std std-option docutils literal"><span class="pre">tolerance</span></code></a> command controls how much accepted coordinates
+can deviate from the expected coordinate. This is handy to test that an
+operation meets a certain numerical tolerance threshold. Some operations
+are expexted to be accurate within milimeters  where others might only be
+accurate within a few meters. <a class="reference internal" href="#cmdoption-arg-tolerance"><code class="xref std std-option docutils literal"><span class="pre">tolerance</span></code></a> should</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">operation       proj=merc</span>
+<span class="gp">#</span> <span class="nb">test</span> coordinate as returned by <span class="sb">```</span><span class="nb">echo</span> <span class="m">12</span> <span class="m">55</span> <span class="p">|</span> proj +proj<span class="o">=</span>merc<span class="sb">``</span>
+<span class="go">tolerance       1 cm</span>
+<span class="go">accept          12 55</span>
+<span class="go">expect          1335833.89 7326837.72</span>
+
+<span class="gp">#</span> <span class="nb">test</span> that the same coordinate with a <span class="m">50</span> m <span class="nb">false</span> easting as determined
+<span class="gp">#</span> by <span class="sb">``</span><span class="nb">echo</span> <span class="m">12</span> <span class="m">55</span> <span class="p">|</span>proj +proj<span class="o">=</span>merc +x_0<span class="o">=</span><span class="m">50</span><span class="sb">``</span> is still within a <span class="m">100</span> m
+<span class="gp">#</span> tolerance of the unaltered coordinate from <span class="nv">proj</span><span class="o">=</span>merc
+<span class="go">tolerance       100 m</span>
+<span class="go">accept          12 55</span>
+<span class="go">expect          1335883.89  7326837.72</span>
+</pre></div>
+</div>
+<p>The default tolerance is 0.5 mm. See <a class="reference internal" href="proj.html#cmdoption-proj-lu"><code class="xref std std-option docutils literal"><span class="pre">proj</span> <span class="pre">-lu</span></code></a> for a list of possible
+units.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-roundtrip">
+<code class="descname">roundtrip</code><code class="descclassname"> &lt;n&gt; &lt;tolerance&gt;</code><a class="headerlink" href="#cmdoption-arg-roundtrip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do a roundtrip test of an operation. <a class="reference internal" href="#cmdoption-arg-roundtrip"><code class="xref std std-option docutils literal"><span class="pre">roundtrip</span></code></a> needs a
+<a class="reference internal" href="#cmdoption-arg-operation"><code class="xref std std-option docutils literal"><span class="pre">operation</span></code></a> and a <a class="reference internal" href="#cmdoption-arg-accept"><code class="xref std std-option docutils literal"><span class="pre">accept</span></code></a> command
+to function. The accepted coordinate is passed to the operation first in
+it&#8217;s forward mode, then the output from the forward operation is passed
+back to the inverse operation. This procedure is done <code class="docutils literal"><span class="pre">n</span></code> times. If the
+resulting coordinate is within the set tolerance of the initial coordinate
+the test is passed.</p>
+<p>Example:</p>
+<p>operation       proj=merc
+accept          12 55
+roundtrip       10000 5 mm</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-direction">
+<code class="descname">direction</code><code class="descclassname"> &lt;direction&gt;</code><a class="headerlink" href="#cmdoption-arg-direction" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#cmdoption-arg-direction"><code class="xref std std-option docutils literal"><span class="pre">direction</span></code></a> command specifies in which direction an operation
+is performed. This can either be <code class="docutils literal"><span class="pre">forward</span></code> or <code class="docutils literal"><span class="pre">inverse</span></code>. An example of
+this is seen below where it is tested that a symmetrical transformation
+pipeline returns the same results in both directions.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">operation proj=pipeline zone=32 step</span>
+<span class="go">          proj=utm  ellps=GRS80 step</span>
+<span class="go">          proj=utm  ellps=GRS80 inv</span>
+<span class="go">tolerance 0.1 mm</span>
+
+<span class="go">accept 12 55 0 0</span>
+<span class="go">expect 12 55 0 0</span>
+
+<span class="gp">#</span> Now the inverse direction <span class="o">(</span>still same result: the pipeline is symmetrical<span class="o">)</span>
+
+<span class="go">direction inverse</span>
+<span class="go">expect 12 55 0 0</span>
+</pre></div>
+</div>
+<p>The default direction is &#8220;forward&#8221;.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-ignore">
+<code class="descname">ignore</code><code class="descclassname"> &lt;error code&gt;</code><a class="headerlink" href="#cmdoption-arg-ignore" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is especially
+useful in test cases that rely on a grid that is not guaranteed to be
+available. Below is an example of that situation.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">operation  proj=hgridshift +grids=nzgd2kgrid0005.gsb  ellps=GRS80</span>
+<span class="go">tolerance 1 mm</span>
+<span class="go">ignore    pjd_err_failed_to_load_grid</span>
+<span class="go">accept    172.999892181021551 -45.001620431954613</span>
+<span class="go">expect    173                 -45</span>
+</pre></div>
+</div>
+<p>See <code class="docutils literal"><span class="pre">gie</span> <span class="pre">-l</span></code> for a list of error codes that can be ignored.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<p>More importantly than being an acronym for &#8220;Geospatial Integrity Investigation
+Environment&#8221;, gie were also the initials, user id, and USGS email address of
+Gerald Ian Evenden (1935&#8211;2016), the geospatial visionary, who, already in the
+1980s, started what was  to  become  the PROJ of today.</p>
+<p>Gerald&#8217;s clear vision was that map projections are <em>just special functions</em>.
+Some of them rather complex, most of them of two variables, but all of them
+<em>just special functions</em>, and not particularly more special than the <code class="xref c c-func docutils literal"><span class="pre">sin()</span></code>,
+<code class="xref c c-func docutils literal"><span class="pre">cos()</span></code>, <code class="xref c c-func docutils literal"><span class="pre">tan()</span></code>, and <code class="xref c c-func docutils literal"><span class="pre">hypot()</span></code> already available  in  the  C standard library.</p>
+<p>And hence, according to Gerald, <em>they should not be particularly much harder
+to use</em>, for a programmer, than the <code class="xref c c-func docutils literal"><span class="pre">sin()</span></code>&#8216;s, <code class="xref c c-func docutils literal"><span class="pre">tan()</span></code>&#8216;s and
+<code class="xref c c-func docutils literal"><span class="pre">hypot()</span></code>&#8216;s so readily available.</p>
+<p>Gerald&#8217;s ingenuity also showed in the implementation of the vision, where
+he devised a comprehensive, yet simple, system of key-value pairs for
+parameterising a map projection, and the highly flexible PJ struct, storing
+run-time compiled versions of those key-value pairs, hence mak- ing  a  map
+projection  function call, pj_fwd(PJ, point), as easy as a traditional function
+call like <code class="docutils literal"><span class="pre">hypot(x,y)</span></code>.</p>
+<p>While today, we may have more formally well defined metadata systems (most
+prominent the OGC WKT2 representation), nothing comes close being as easily
+readable (&#8220;human compatible&#8221;) as Gerald&#8217;s key-value system. This system in
+particular, and the PROJ system in general, was Gerald&#8217;s great gift to anyone
+using and/or communicating about geodata.</p>
+<p>It is only reasonable to name a program, keeping an eye on the
+integrity of the PROJ system, in honour of Gerald.</p>
+<p>So in honour, and hopefully also in the spirit, of Gerald Ian Evenden
+(1935&#8211;2016), this is the Geospatial Integrity Investigation Environment.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../operations/index.html" class="btn btn-neutral float-right" title="Coordinate operations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="geod.html" class="btn btn-neutral" title="geod" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1983-2018.
+      Last updated on 19 Mar 2018.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'5.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

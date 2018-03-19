@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>cs2cs &mdash; proj.4 4.9.3 documentation</title>
+  <title>cs2cs &mdash; PROJ.4 5.0.0 documentation</title>
   
 
   
@@ -30,15 +30,17 @@
   
 
   
+    <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+  
 
   
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="proj.4 4.9.3 documentation" href="../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
         <link rel="up" title="Applications" href="index.html"/>
         <link rel="next" title="geod" href="geod.html"/>
-        <link rel="prev" title="proj" href="proj.html"/> 
+        <link rel="prev" title="cct" href="cct.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -57,7 +59,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> proj.4
+            <a href="../index.html" class="icon icon-home"> PROJ.4
           
 
           
@@ -67,7 +69,7 @@
             
             
               <div class="version">
-                4.9.3
+                5.0.0
               </div>
             
           
@@ -93,9 +95,11 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Applications</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="proj.html">proj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cct.html">cct</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">cs2cs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#synopsis">Synopsis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#description">Description</a></li>
@@ -103,14 +107,15 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="geod.html">geod</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gie.html">gie</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../projections/index.html">Projections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../parameters.html">Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../grids.html">Grids</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../htpd.html">HTPD</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
@@ -128,7 +133,7 @@
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">proj.4</a>
+          <a href="../index.html">PROJ.4</a>
         
       </nav>
 
@@ -179,123 +184,170 @@
             
   <div class="section" id="cs2cs">
 <span id="id1"></span><h1>cs2cs<a class="headerlink" href="#cs2cs" title="Permalink to this headline">¶</a></h1>
-<p id="index-0"><code class="docutils literal"><span class="pre">cs2cs</span></code> performs transformation between the source and destination cartographic  coordinate  system
-on a set of input points.  The coordinate system transformation can include  translation  between
-projected  and geographic coordinates as well as the application of datum shifts.</p>
+<p>Cartographic coordinate system filter.</p>
 <div class="section" id="synopsis">
 <h2>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="p">[</span> <span class="o">-</span><span class="n">eEfIlrstvwW</span> <span class="p">[</span> <span class="n">args</span> <span class="p">]</span> <span class="p">]</span> <span class="p">[</span> <span class="o">+</span><span class="n">opts</span><span class="p">[</span><span class="o">=</span><span class="n">arg</span><span class="p">]</span> <span class="p">]</span> <span class="p">[</span> <span class="o">+</span><span class="n">to</span> <span class="p">[</span><span class="o">+</span><span class="n">opts</span><span class="p">[</span><span class="o">=</span><span class="n">arg</span><span class="p">]]</span> <span class="p">]</span> <span class="n">file</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
-</pre></div>
-</div>
+<blockquote>
+<div><strong>cs2cs</strong> [ <strong>-eEfIlrstvwW</strong> [ args ] ] [ <em>+opts[=arg]</em> ] [ +to [<em>+opts[=arg]</em>] ] file[s]</div></blockquote>
 </div>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p><strong class="program">cs2cs</strong> performs transformation between the source and destination
+cartographic  coordinate  system on a set of input points.  The coordinate
+system transformation can include  translation  between projected  and
+geographic coordinates as well as the application of datum shifts.</p>
 <p>The following control parameters can  appear  in any order:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">I</span>     <span class="n">method</span> <span class="n">to</span> <span class="n">specify</span> <span class="n">inverse</span> <span class="n">translation</span><span class="p">,</span> <span class="n">convert</span> <span class="kn">from</span> <span class="o">+</span><span class="n">to</span> <span class="n">coordinate</span> <span class="n">system</span> <span class="n">to</span> <span class="n">the</span>
-       <span class="n">primary</span> <span class="n">coordinate</span> <span class="n">system</span> <span class="n">defined</span><span class="o">.</span>
+<dl class="option">
+<dt id="cmdoption-cs2cs-i">
+<code class="descname">-I</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-i" title="Permalink to this definition">¶</a></dt>
+<dd><p>method to specify inverse translation, convert from <em>+to</em> coordinate system to
+the primary coordinate system defined.</p>
+</dd></dl>
 
-<span class="o">-</span><span class="n">ta</span>    <span class="n">A</span> <span class="n">specifies</span> <span class="n">a</span> <span class="n">character</span> <span class="n">employed</span> <span class="k">as</span> <span class="n">the</span> <span class="n">first</span> <span class="n">character</span> <span class="n">to</span> <span class="n">denote</span> <span class="n">a</span> <span class="n">control</span>  <span class="n">line</span>
-       <span class="n">to</span>  <span class="n">be</span> <span class="n">passed</span> <span class="n">through</span> <span class="n">without</span> <span class="n">processing</span><span class="o">.</span> <span class="n">This</span> <span class="n">option</span>  <span class="n">applicable</span>  <span class="n">to</span>  <span class="n">ascii</span>  <span class="nb">input</span>
-       <span class="n">only</span><span class="o">.</span> <span class="p">(</span><span class="c1"># is the default value).</span>
+<dl class="option">
+<dt id="cmdoption-cs2cs-t">
+<code class="descname">-t</code><code class="descclassname">&lt;a&gt;</code><a class="headerlink" href="#cmdoption-cs2cs-t" title="Permalink to this definition">¶</a></dt>
+<dd><p>A specifies a character employed as the first character to denote a control
+line to  be passed through without processing. This option  applicable  to
+ascii  input only. (# is the default value).</p>
+</dd></dl>
 
-<span class="o">-</span><span class="n">e</span> <span class="n">string</span>
-       <span class="n">String</span> <span class="ow">is</span> <span class="n">an</span> <span class="n">arbitrary</span> <span class="n">string</span> <span class="n">to</span> <span class="n">be</span> <span class="n">output</span> <span class="k">if</span> <span class="n">an</span> <span class="n">error</span> <span class="ow">is</span> <span class="n">detected</span>  <span class="n">during</span>  <span class="n">data</span>
-       <span class="n">transformations</span><span class="o">.</span> <span class="n">The</span>  <span class="n">default</span> <span class="n">value</span> <span class="ow">is</span><span class="p">:</span> <span class="o">*</span>\<span class="n">t</span><span class="o">*.</span> <span class="n">Note</span> <span class="n">that</span> <span class="k">if</span> <span class="n">the</span> <span class="o">-</span><span class="n">b</span><span class="p">,</span> <span class="o">-</span><span class="n">i</span> <span class="ow">or</span> <span class="o">-</span><span class="n">o</span>
-       <span class="n">options</span> <span class="n">are</span> <span class="n">employed</span><span class="p">,</span> <span class="n">an</span> <span class="n">error</span> <span class="ow">is</span> <span class="n">returned</span> <span class="k">as</span> <span class="n">HUGE_VAL</span> <span class="n">value</span> <span class="k">for</span> <span class="n">both</span>
-       <span class="k">return</span> <span class="n">values</span><span class="o">.</span>
+<dl class="option">
+<dt id="cmdoption-cs2cs-e">
+<code class="descname">-e</code><code class="descclassname"> &lt;string&gt;</code><a class="headerlink" href="#cmdoption-cs2cs-e" title="Permalink to this definition">¶</a></dt>
+<dd><p>String is an arbitrary string to be output if an error is detected  during
+data transformations. The  default value is: <em>t</em>. Note that if the -b, -i
+or -o options are employed, an error is returned as HUGE_VAL value for both
+return values.</p>
+</dd></dl>
 
-<span class="o">-</span><span class="n">E</span>     <span class="n">causes</span> <span class="n">the</span> <span class="nb">input</span> <span class="n">coordinates</span> <span class="n">to</span> <span class="n">be</span> <span class="n">copied</span> <span class="n">to</span> <span class="n">the</span> <span class="n">output</span> <span class="n">line</span> <span class="n">prior</span> <span class="n">to</span> <span class="n">printing</span>  <span class="n">the</span>
-       <span class="n">converted</span> <span class="n">values</span><span class="o">.</span>
+<dl class="option">
+<dt id="id2">
+<code class="descname">-E</code><code class="descclassname"></code><a class="headerlink" href="#id2" title="Permalink to this definition">¶</a></dt>
+<dd><p>causes the input coordinates to be copied to the output line prior to
+printing  the converted values.</p>
+</dd></dl>
 
-<span class="o">-</span><span class="n">l</span><span class="p">[</span><span class="n">p</span><span class="o">|</span><span class="n">P</span><span class="o">|=|</span><span class="n">e</span><span class="o">|</span><span class="n">u</span><span class="o">|</span><span class="n">d</span><span class="p">]</span><span class="nb">id</span>
-       <span class="n">List</span> <span class="n">projection</span> <span class="n">identifiers</span> <span class="k">with</span> <span class="o">-</span><span class="n">l</span><span class="p">,</span> <span class="o">-</span><span class="n">lp</span> <span class="ow">or</span> <span class="o">-</span><span class="n">lP</span> <span class="p">(</span><span class="n">expanded</span><span class="p">)</span> <span class="n">that</span> <span class="n">can</span> <span class="n">be</span> <span class="n">selected</span>
-       <span class="k">with</span> <span class="o">+</span><span class="n">proj</span><span class="o">.</span> <span class="o">-</span><span class="n">l</span><span class="o">=</span><span class="nb">id</span> <span class="n">gives</span> <span class="n">expanded</span> <span class="n">description</span> <span class="n">of</span> <span class="n">projection</span> <span class="nb">id</span><span class="o">.</span> <span class="n">List</span>
-       <span class="n">ellipsoid</span> <span class="n">identifiers</span> <span class="k">with</span> <span class="o">-</span><span class="n">le</span><span class="p">,</span> <span class="n">that</span> <span class="n">can</span> <span class="n">be</span> <span class="n">selected</span> <span class="k">with</span> <span class="o">+</span><span class="n">ellps</span><span class="p">,</span><span class="o">-</span><span class="n">lu</span> <span class="nb">list</span>  <span class="n">of</span>
-       <span class="n">cartesian</span> <span class="n">to</span> <span class="n">meter</span> <span class="n">conversion</span> <span class="n">factors</span> <span class="n">that</span> <span class="n">can</span> <span class="n">be</span> <span class="n">selected</span> <span class="k">with</span> <span class="o">+</span><span class="n">units</span> <span class="ow">or</span> <span class="o">-</span><span class="n">ld</span>
-       <span class="nb">list</span> <span class="n">of</span> <span class="n">datums</span> <span class="n">that</span> <span class="n">can</span> <span class="n">be</span> <span class="n">selected</span> <span class="k">with</span> <span class="o">+</span><span class="n">datum</span><span class="o">.</span>
+<dl class="option">
+<dt id="cmdoption-cs2cs-l">
+<code class="descname">-l</code><code class="descclassname">&lt;[=id]&gt;</code><a class="headerlink" href="#cmdoption-cs2cs-l" title="Permalink to this definition">¶</a></dt>
+<dd><p>List projection identifiers that can be selected with <em>+proj</em>. <code class="docutils literal"><span class="pre">cs2cs</span> <span class="pre">-l=id</span></code>
+gives expanded description of projection id, e.g. <code class="docutils literal"><span class="pre">cs2cs</span> <span class="pre">-l=merc</span></code>.</p>
+</dd></dl>
 
-<span class="o">-</span><span class="n">r</span>     <span class="n">This</span> <span class="n">options</span> <span class="n">reverses</span> <span class="n">the</span> <span class="n">order</span> <span class="n">of</span> <span class="n">the</span> <span class="n">expected</span> <span class="nb">input</span> <span class="kn">from</span> <span class="nn">longitude</span><span class="o">-</span><span class="n">latitude</span> <span class="ow">or</span>
-       <span class="n">x</span><span class="o">-</span><span class="n">y</span> <span class="n">to</span> <span class="n">latitude</span><span class="o">-</span><span class="n">longitude</span> <span class="ow">or</span> <span class="n">y</span><span class="o">-</span><span class="n">x</span><span class="o">.</span>
+<dl class="option">
+<dt id="cmdoption-cs2cs-lp">
+<code class="descname">-lp</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-lp" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all projection id that can be used with the <em>+proj</em> parameter.
+Equivalent to <code class="docutils literal"><span class="pre">cs2cs</span> <span class="pre">-l</span></code>.</p>
+</dd></dl>
 
-<span class="o">-</span><span class="n">s</span>     <span class="n">This</span> <span class="n">options</span> <span class="n">reverses</span> <span class="n">the</span> <span class="n">order</span> <span class="n">of</span> <span class="n">the</span> <span class="n">output</span> <span class="kn">from</span> <span class="nn">x</span><span class="o">-</span><span class="n">y</span> <span class="ow">or</span> <span class="n">longitude</span><span class="o">-</span><span class="n">latitude</span> <span class="n">to</span>
-       <span class="n">y</span><span class="o">-</span><span class="n">x</span> <span class="ow">or</span> <span class="n">latitude</span><span class="o">-</span><span class="n">longitude</span><span class="o">.</span>
+<dl class="option">
+<dt id="id3">
+<code class="descname">-lP</code><code class="descclassname"></code><a class="headerlink" href="#id3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expanded description of all projections that can be used with the <em>+proj</em>
+parameter.</p>
+</dd></dl>
 
-<span class="o">-</span><span class="n">f</span> <span class="nb">format</span>
-       <span class="n">Format</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">printf</span> <span class="nb">format</span> <span class="n">string</span> <span class="n">to</span> <span class="n">control</span> <span class="n">the</span> <span class="n">form</span> <span class="n">of</span> <span class="n">the</span> <span class="n">output</span> <span class="n">values</span><span class="o">.</span> <span class="n">For</span>
-       <span class="n">inverse</span> <span class="n">projections</span><span class="p">,</span> <span class="n">the</span> <span class="n">output</span> <span class="n">will</span> <span class="n">be</span> <span class="ow">in</span> <span class="n">degrees</span> <span class="n">when</span> <span class="n">this</span> <span class="n">option</span> <span class="ow">is</span> <span class="n">employed</span><span class="o">.</span>
-       <span class="n">If</span> <span class="n">a</span> <span class="nb">format</span> <span class="ow">is</span> <span class="n">specified</span> <span class="k">for</span> <span class="n">inverse</span> <span class="n">projection</span> <span class="n">the</span> <span class="n">output</span> <span class="n">data</span> <span class="n">will</span> <span class="n">be</span> <span class="ow">in</span> <span class="n">deci</span><span class="o">-</span>
-       <span class="n">mal</span>  <span class="n">degrees</span><span class="o">.</span> <span class="n">The</span> <span class="n">default</span> <span class="nb">format</span> <span class="ow">is</span> <span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">forward</span> <span class="n">projection</span> <span class="ow">and</span> <span class="n">DMS</span> <span class="k">for</span>
-       <span class="n">inverse</span><span class="o">.</span>
+<dl class="option">
+<dt id="cmdoption-cs2cs-le">
+<code class="descname">-le</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-le" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all ellipsoids that can be selected with the <em>+ellps</em> parameters.</p>
+</dd></dl>
 
-<span class="o">-</span><span class="p">[</span><span class="n">w</span><span class="o">|</span><span class="n">W</span><span class="p">]</span><span class="n">n</span>
-       <span class="n">N</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">number</span> <span class="n">of</span> <span class="n">significant</span> <span class="n">fractional</span> <span class="n">digits</span> <span class="n">to</span> <span class="n">employ</span> <span class="k">for</span> <span class="n">seconds</span> <span class="n">output</span> <span class="p">(</span><span class="n">when</span>
-       <span class="n">the</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">specified</span><span class="p">,</span> <span class="o">-</span><span class="n">w3</span> <span class="ow">is</span> <span class="n">assumed</span><span class="p">)</span><span class="o">.</span> <span class="n">When</span> <span class="o">-</span><span class="n">W</span> <span class="ow">is</span> <span class="n">employed</span> <span class="n">the</span> <span class="n">fields</span>
-       <span class="n">will</span> <span class="n">be</span> <span class="n">constant</span> <span class="n">width</span> <span class="ow">and</span> <span class="k">with</span> <span class="n">leading</span> <span class="n">zeroes</span><span class="o">.</span>
+<dl class="option">
+<dt id="cmdoption-cs2cs-lu">
+<code class="descname">-lu</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-lu" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all distance units that can be selected with the <em>+units</em> parameter.</p>
+</dd></dl>
 
-<span class="o">-</span><span class="n">v</span>     <span class="n">causes</span> <span class="n">a</span> <span class="n">listing</span> <span class="n">of</span> <span class="n">cartographic</span> <span class="n">control</span> <span class="n">parameters</span> <span class="n">tested</span> <span class="k">for</span> <span class="ow">and</span> <span class="n">used</span> <span class="n">by</span> <span class="n">the</span>
-       <span class="n">program</span> <span class="n">to</span> <span class="n">be</span> <span class="n">printed</span> <span class="n">prior</span> <span class="n">to</span> <span class="nb">input</span> <span class="n">data</span><span class="o">.</span>
-</pre></div>
-</div>
-<p>The <code class="docutils literal"><span class="pre">+args</span></code> run-line arguments are associated with cartographic parameters. Usage varies with
-projection and for a complete description consult the <a class="reference external" href="../projections/index.html">projection pages</a></p>
-<p>The cs2cs program requires two coordinate system
-definitions.  The first (or primary  is  defined
-based on all projection parameters not appearing
-after the +to argument.  All projection  parameters
-appearing  after the <code class="docutils literal"><span class="pre">+to</span></code> argument are considered
-the definition of the second  coordinate
-system.  If there is no second coordinate system
-defined, a geographic coordinate system based on
-the datum and ellipsoid of the source coordinate
-system is assumed.  Note  that  the  source  and
-destination  coordinate  system can both be projections,
-both be geographic, or one of each and
-may have the same or different datums.</p>
-<p>Additional  projection control parameters may be
-contained in two auxiliary  control  files:  the
-first   is   optionally   referenced   with  the
-<code class="docutils literal"><span class="pre">+init=file:id</span></code> and the second is always processed
-after the name of the projection has been established
-from either the run-line or the  contents
-of  <code class="docutils literal"><span class="pre">+init</span></code>   file.   The  environment  parameter
-PROJ_LIB establishes the default directory for a
-file  reference  without an absolute path.  This
-is also used for  supporting  files  like  datum
-shift files.</p>
-<p>One  or  more  files (processed in left to right
-order) specify the source of data to  be  transformed.
-A  - will specify the location of processing standard input.
-If no files are  specified,  the  input  is  assumed to be from stdin.
-For input data the two data values  must  be  in
-the  first  two white space separated fields and
-when both input and output are ASCII all  trailing
-portions  of the input line are appended to
-the output line.</p>
-<p>Input geographic data (longitude  and  latitude)
-must  be  in  DMS  or decimal degrees format and
-input cartesian data must be in units consistent
-with  the  ellipsoid major axis or sphere radius
-units.  Output geographic coordinates will  normally
-be in DMS format (use <code class="docutils literal"><span class="pre">-f</span> <span class="pre">%.12f</span></code> for decimal
-degrees with 12 decimal places), while projected
-(cartesian)   coordinates   will  be  in  linear
+<dl class="option">
+<dt id="cmdoption-cs2cs-ld">
+<code class="descname">-ld</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-ld" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of datums that can be selected with the <em>+datum</em> parameter.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-r">
+<code class="descname">-r</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-r" title="Permalink to this definition">¶</a></dt>
+<dd><p>This options reverses the order of the expected input from
+longitude-latitude or x-y to latitude-longitude or y-x.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-s">
+<code class="descname">-s</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-s" title="Permalink to this definition">¶</a></dt>
+<dd><p>This options reverses the order of the output from x-y or longitude-latitude
+to y-x or latitude-longitude.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-f">
+<code class="descname">-f</code><code class="descclassname"> &lt;format&gt;</code><a class="headerlink" href="#cmdoption-cs2cs-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format is a printf format string to control the form of the output values.
+For inverse projections, the output will be in degrees when this option is
+employed.  If a format is specified for inverse projection the output data
+will be in deci- mal  degrees. The default format is &#8220;%.2f&#8221; for forward
+projection and DMS for inverse.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs">
+<code class="descname">-</code><code class="descclassname">[w|W]&lt;n&gt;</code><a class="headerlink" href="#cmdoption-cs2cs" title="Permalink to this definition">¶</a></dt>
+<dd><p>N is the number of significant fractional digits to employ for seconds
+output (when the option is not specified, -w3 is assumed). When -W is
+employed the fields will be constant width and with leading zeroes.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-v">
+<code class="descname">-v</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-v" title="Permalink to this definition">¶</a></dt>
+<dd><p>causes a listing of cartographic control parameters tested for and used by
+the program to be printed prior to input data.</p>
+</dd></dl>
+
+<p>The <em>+args</em> run-line arguments are associated with cartographic
+parameters.  Usage varies with projection and for a complete description
+consult the <a class="reference internal" href="../operations/projections/index.html#projections"><span class="std std-ref">projection pages</span></a>.</p>
+<p>The <strong class="program">cs2cs</strong> program requires two coordinate system definitions.  The first (or
+primary  is  defined based on all projection parameters not appearing after the
+<em>+to</em> argument.  All projection  parameters appearing  after the <em>+to</em> argument
+are considered the definition of the second  coordinate system.  If there is no
+second coordinate system defined, a geographic coordinate system based on the
+datum and ellipsoid of the source coordinate system is assumed.  Note  that  the
+source  and destination  coordinate  system can both be projections, both be
+geographic, or one of each and may have the same or different datums.</p>
+<p>Additional  projection control parameters may be contained in two auxiliary
+control  files:  the first   is   optionally   referenced   with  the
+<em>+init=file:id</em> and the second is always processed after the name of the
+projection has been established from either the run-line or the  contents of
+<em>+init</em>   file.   The  environment  parameter PROJ_LIB establishes the default
+directory for a file  reference  without an absolute path.  This is also used
+for  supporting  files  like  datum shift files.</p>
+<p>One  or  more  files (processed in left to right order) specify the source of
+data to  be  transformed.  A <code class="docutils literal"><span class="pre">-</span></code> will specify the location of processing standard
+input.  If no files are  specified,  the  input  is  assumed to be from stdin.
+For input data the two data values  must  be  in the  first  two white space
+separated fields and when both input and output are ASCII all  trailing portions
+of the input line are appended to the output line.</p>
+<p>Input geographic data (longitude  and  latitude) must  be  in  DMS  or decimal
+degrees format and input cartesian data must be in units consistent with  the
+ellipsoid major axis or sphere radius units.  Output geographic coordinates will
+normally be in DMS format (use <code class="docutils literal"><span class="pre">-f</span> <span class="pre">%.12f</span></code> for decimal degrees with 12 decimal
+places), while projected (cartesian)   coordinates   will  be  in  linear
 (meter, feet) units.</p>
 </div>
 <div class="section" id="example">
 <h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
 <p>The following script</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span>
-      <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">utm</span> <span class="o">+</span><span class="n">zone</span><span class="o">=</span><span class="mi">10</span>  <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD27</span>
-<span class="o">-</span><span class="n">r</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
-<span class="mi">45</span><span class="n">d15</span><span class="s1">&#39;33.1&quot;   111.5W</span>
-<span class="mi">45</span><span class="n">d15</span><span class="o">.</span><span class="mi">551666667</span><span class="n">N</span>   <span class="o">-</span><span class="mi">111</span><span class="n">d30</span>
-<span class="o">+</span><span class="mf">45.25919444444</span>    <span class="mi">111</span><span class="n">d30</span><span class="s1">&#39;000w</span>
-<span class="n">EOF</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span> <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">utm</span> <span class="o">+</span><span class="n">zone</span><span class="o">=</span><span class="mi">10</span>  <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD27</span> <span class="o">-</span><span class="n">r</span>
+<span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="mi">45</span><span class="n">d15</span><span class="s1">&#39;33.1&quot;   111.5W 45d15.551666667N   -111d30 +45.25919444444</span>
+<span class="mi">111</span><span class="n">d30</span><span class="s1">&#39;000w EOF</span>
 </pre></div>
 </div>
-<p>will  transform the input NAD83 geographic coordinates into NAD27
-coordinates in the  UTM  projection  with  zone 10 selected.  The geographic
-values of this example are equivalent and  meant as  examples of various forms of DMS input.
+<p>will  transform the input NAD83 geographic coordinates into NAD27 coordinates in
+the  UTM  projection  with  zone 10 selected.  The geographic values of this
+example are equivalent and  meant as  examples of various forms of DMS input.
 The x-y output data will appear as three lines of:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">1402285.99</span>      <span class="mf">5076292.42</span> <span class="mf">0.000</span>
 </pre></div>
@@ -316,7 +368,7 @@ The x-y output data will appear as three lines of:</p>
         <a href="geod.html" class="btn btn-neutral float-right" title="geod" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="proj.html" class="btn btn-neutral" title="proj" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="cct.html" class="btn btn-neutral" title="cct" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -325,8 +377,8 @@ The x-y output data will appear as three lines of:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 1986?-2016.
-      Last updated on 01 Mar 2018.
+        &copy; Copyright 1983-2018.
+      Last updated on 19 Mar 2018.
 
     </p>
   </div>
@@ -348,7 +400,7 @@ The x-y output data will appear as three lines of:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'4.9.3',
+            VERSION:'5.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -13,7 +13,6 @@ command line applications or the C API that is a part of the software package.
    :maxdepth: 1
 
    quickstart
-   apps/index
    projections
    transformation
    environmentvars
