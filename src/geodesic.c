@@ -192,12 +192,12 @@ static real AngNormalize(real x) {
   real y = fmod(x, (real)(360));
 #if defined(_MSC_VER) && _MSC_VER < 1900
   /*
-    Before version 14 (2015), Visual Studio had problems dealing
-    with -0.0.  Specifically
-      VC 10,11,12 and 32-bit compile: fmod(-0.0, 360.0) -> +0.0
-    sincosdx has a similar fix.
-    python 2.7 on Windows 32-bit machines has the same problem.
-  */
+   * Before version 14 (2015), Visual Studio had problems dealing
+   * with -0.0.  Specifically
+   *   VC 10,11,12 and 32-bit compile: fmod(-0.0, 360.0) -> +0.0
+   * sincosdx has a similar fix.
+   * python 2.7 on Windows 32-bit machines has the same problem.
+   */
   if (x == 0) y = x;
 #endif
   return y <= -180 ? y + 360 : (y <= 180 ? y : y - 360);
@@ -238,7 +238,8 @@ static void sincosdx(real x, real* sinx, real* cosx) {
   r = remquo(x, (real)(90), &q);
 #else
   r = fmod(x, (real)(360));
-  q = (int)(floor(r / 90 + (real)(0.5)));
+  /* check for NaN */
+  q = r == r ? (int)(floor(r / 90 + (real)(0.5))) : 0;
   r -= 90 * q;
 #endif
   /* now abs(r) <= 45 */
@@ -247,13 +248,13 @@ static void sincosdx(real x, real* sinx, real* cosx) {
   s = sin(r); c = cos(r);
 #if defined(_MSC_VER) && _MSC_VER < 1900
   /*
-    Before version 14 (2015), Visual Studio had problems dealing
-    with -0.0.  Specifically
-      VC 10,11,12 and 32-bit compile: fmod(-0.0, 360.0) -> +0.0
-      VC 12       and 64-bit compile:  sin(-0.0)        -> +0.0
-    AngNormalize has a similar fix.
-    python 2.7 on Windows 32-bit machines has the same problem.
-  */
+   * Before version 14 (2015), Visual Studio had problems dealing
+   * with -0.0.  Specifically
+   *   VC 10,11,12 and 32-bit compile: fmod(-0.0, 360.0) -> +0.0
+   *   VC 12       and 64-bit compile:  sin(-0.0)        -> +0.0
+   * AngNormalize has a similar fix.
+   * python 2.7 on Windows 32-bit machines has the same problem.
+   */
   if (x == 0) s = x;
 #endif
   switch ((unsigned)q & 3U) {
@@ -657,7 +658,15 @@ real geod_genposition(const struct geod_geodesicline* l,
     S12 = l->c2 * atan2(salp12, calp12) + l->A4 * (B42 - l->B41);
   }
 
-  if (outmask & GEOD_LATITUDE)
+  /* In the pattern
+   *
+   *   if ((outmask & GEOD_XX) && pYY)
+   *     *pYY = YY;
+   *
+   * the second check "&& pYY" is redundant.  It's there to make the CLang
+   * static analyzer happy.
+   */
+  if ((outmask & GEOD_LATITUDE) && plat2)
     *plat2 = lat2;
   if (outmask & GEOD_LONGITUDE)
     *plon2 = lon2;
@@ -1126,7 +1135,7 @@ real SinCosSeries(boolx sinp, real sinx, real cosx, const real c[], int n) {
   real ar, y0, y1;
   c += (n + sinp);              /* Point to one beyond last element */
   ar = 2 * (cosx - sinx) * (cosx + sinx); /* 2 * cos(2 * x) */
-  y0 = n & 1 ? *--c : 0; y1 = 0;          /* accumulators for sum */
+  y0 = (n & 1) ? *--c : 0; y1 = 0;        /* accumulators for sum */
   /* Now n is even */
   n /= 2;
   while (n--) {
@@ -1893,7 +1902,9 @@ void geod_polygon_addedge(const struct geod_geodesic* g,
                           struct geod_polygon* p,
                           real azi, real s) {
   if (p->num) {              /* Do nothing is num is zero */
-    real lat, lon, S12 = 0;  /* Initialize S12 to stop Visual Studio warning */
+    /* Initialize S12 to stop Visual Studio warning.  Initialization of lat and
+     * lon is to make CLang static analyzer happy. */
+    real lat = 0, lon = 0, S12 = 0;
     geod_gendirect(g, p->lat, p->lon, azi, GEOD_LONG_UNROLL, s,
                    &lat, &lon, 0,
                    0, 0, 0, 0, p->polyline ? 0 : &S12);
@@ -2030,7 +2041,9 @@ unsigned geod_polygon_testedge(const struct geod_geodesic* g,
   tempsum = p->A[0];
   crossings = p->crossings;
   {
-    real lat, lon, s12, S12;
+    /* Initialization of lat, lon, and S12 is to make CLang static analyzer
+       happy. */
+    real lat = 0, lon = 0, s12, S12 = 0;
     geod_gendirect(g, p->lat, p->lon, azi, GEOD_LONG_UNROLL, s,
                    &lat, &lon, 0,
                    0, 0, 0, 0, &S12);

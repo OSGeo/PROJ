@@ -614,7 +614,8 @@ static int GeodSolve73() {
               &lat2, &lon2, &azi2);
   result += assertEquals(lat2, 81.04623, 0.5e-5);
   result += assertEquals(lon2, -170, 0.5e-5);
-  result += assertEquals(azi2, 0, 0.5e-5);
+  result += azi2 == 0 ? 0 : 1;
+  result += 1/azi2 > 0 ? 0 : 1; /* Check that azi2 = +0.0 not -0.0 */
   return result;
 }
 

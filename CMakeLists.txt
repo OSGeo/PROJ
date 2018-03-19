@@ -33,6 +33,18 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
     -Wfloat-conversion ${CMAKE_C_FLAGS}")
 endif()
 
+# Tell Intel compiler to do arithmetic accurately.  This is needed to
+# stop the compiler from ignoring parentheses in expressions like
+# (a + b) + c and from simplifying 0.0 + x to x (which is wrong if
+# x = -0.0).
+if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
+  if (MSVC)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:precise")
+  else ()
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprotect-parens -fsigned-zeros")
+  endif ()
+endif ()
+
 #################################################################################
 # PROJ4 CMake modules
 #################################################################################
