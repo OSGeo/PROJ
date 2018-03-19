@@ -268,8 +268,41 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'proj4', u'PROJ.4 Documentation',
-     [author], 1)
+    (
+        'apps/proj',
+        'proj',
+        u'Cartographic projection filter',
+        ['Gerald I. Evenden'],
+        1
+    ),
+    (
+        'apps/cs2cs',
+        'cs2cs',
+        u'Cartographic coordinate system filter',
+        ['Frank Warmerdam'],
+        1
+    ),
+    (
+        'apps/cct',
+        'cct',
+        u'Coordinate Conversion and Transformation',
+        ['Thomas Knudsen'],
+        1
+    ),
+    (
+        'apps/geod',
+        'geod',
+        u'Geodesic computations',
+        ['Charles Karney'],
+        1
+    ),
+    (
+        'apps/gie',
+        'gie',
+        u'The Geospatial Integrity Investigation Environment',
+        ['Thomas Knudsen'],
+        1
+    ),
 ]
 
 # If true, show URL addresses after external links.

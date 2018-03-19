@@ -37,6 +37,7 @@ Documentation
    download
    install
    usage/index
+   apps/index
    operations/index
    resource_files
    geodesic
