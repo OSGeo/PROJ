@@ -590,9 +590,12 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
     PIN->vgridlist_geoid = NULL;
     PIN->vgridlist_geoid_count = 0;
 
-    /* Set datum parameters */
-    if (pj_datum_set(ctx, start, PIN))
-        return pj_default_destructor (PIN, proj_errno(PIN));
+    /* Set datum parameters. Similarly to +init parameters we want to expand    */
+    /* +datum parameters as late as possible when dealing with pipelines.       */
+    /* otherwise only the first occurrence of +datum will be expanded and that */
+    if (n_pipelines == 0)
+        if (pj_datum_set(ctx, start, PIN))
+            return pj_default_destructor (PIN, proj_errno(PIN));
 
     err = pj_ellipsoid (PIN);
 
