@@ -198,7 +198,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         pj_ctx_set_errno( ctx, errno );
 
     pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
-            "pj_open_lib(%s): call fopen(%s) - %s\n",
+            "pj_open_lib(%s): call fopen(%s) - %s",
             name, sysname,
             fid == NULL ? "failed" : "succeeded" );
 

@@ -87,7 +87,7 @@ int nad_ctable_load( projCtx ctx, struct CTABLE *ct, PAFile fid )
         ct->cvs = NULL;
 
         pj_log( ctx, PJ_LOG_ERROR, 
-                "ctable loading failed on fread() - binary incompatible?\n" );
+                "ctable loading failed on fread() - binary incompatible?" );
         pj_ctx_set_errno( ctx, -38 );
         return 0;
     }
