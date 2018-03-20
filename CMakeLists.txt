@@ -41,7 +41,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
   if (MSVC)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:precise")
   else ()
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprotect-parens -fsigned-zeros")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fp-model precise")
   endif ()
 endif ()
 
