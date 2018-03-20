@@ -851,6 +851,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
     PJ_GRIDINFO *gilist;
     PAFile 	fp;
     char	header[160];
+    size_t      header_size = 0;
 
     errno = pj_errno = 0;
     ctx->last_errno = 0;
@@ -897,10 +898,14 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 /* -------------------------------------------------------------------- */
 /*      Load a header, to determine the file type.                      */
 /* -------------------------------------------------------------------- */
-    if( pj_ctx_fread( ctx, header, sizeof(header), 1, fp ) != 1 )
+    if( (header_size = pj_ctx_fread( ctx, header, 1,
+                                     sizeof(header), fp ) ) != sizeof(header) )
     {
         /* some files may be smaller that sizeof(header), eg 160, so */
         ctx->last_errno = 0; /* don't treat as a persistent error */
+        pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
+                "pj_gridinfo_init: short header read of %d bytes",
+                (int)header_size );
     }
 
     pj_ctx_fseek( ctx, fp, SEEK_SET, 0 );
@@ -908,14 +913,16 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
 /* -------------------------------------------------------------------- */
 /*      Determine file type.                                            */
 /* -------------------------------------------------------------------- */
-    if( strncmp(header + 0, "HEADER", 6) == 0
+    if( header_size >= 144 + 16
+        && strncmp(header + 0, "HEADER", 6) == 0
         && strncmp(header + 96, "W GRID", 6) == 0
         && strncmp(header + 144, "TO      NAD83   ", 16) == 0 )
     {
         pj_gridinfo_init_ntv1( ctx, fp, gilist );
     }
 
-    else if( strncmp(header + 0, "NUM_OREC", 8) == 0
+    else if( header_size >= 48 + 7
+             && strncmp(header + 0, "NUM_OREC", 8) == 0
              && strncmp(header + 48, "GS_TYPE", 7) == 0 )
     {
         pj_gridinfo_init_ntv2( ctx, fp, gilist );
@@ -928,7 +935,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
         pj_gridinfo_init_gtx( ctx, fp, gilist );
     }
 
-    else if( strncmp(header + 0,"CTABLE V2",9) == 0 )
+    else if( header_size >= 9 && strncmp(header + 0,"CTABLE V2",9) == 0 )
     {
         struct CTABLE *ct = nad_ctable2_init( ctx, fp );
 
