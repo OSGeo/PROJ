@@ -1,303 +1,277 @@
-.\" release 5
-.\"
-.ad b
-.hy 1
-.TH PROJ 1 "2018/02/25 Rel. 5.0.0"
+.\" Man page generated from reStructuredText.
+.
+.TH "PROJ" "1" "Apr 1, 2018" "5.0.1" "PROJ.4"
 .SH NAME
-proj \- forward cartographic projection filter
-.br
-invproj \- inverse cartographic projection filter
+proj \- Cartographic projection filter
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
 .SH SYNOPSIS
-.B proj
-[
-.B \-bcCeEfiIlmorsStTvVwW
-[
-.I args
-] ] [
-.B +args
-]
-file[s]
-.br
-.B invproj
-[
-.B \-bcCeEfiIlmorsStTwW
-[
-.I args
-] ] [
-.B +args
-]
-file[s]
+.INDENT 0.0
+.INDENT 3.5
+\fBproj\fP [ \fB\-bceEfiIlmorsStTvVwW\fP ] [ args ] ] [ \fI+args\fP ] file[s]
+.sp
+\fBinvproj\fP [ \fB\-bceEfiIlmorsStTwW\fP ] [ args ] ] [ \fI+args\fP ] file[s]
+.UNINDENT
+.UNINDENT
 .SH DESCRIPTION
-.I Proj
-and
-.I invproj
-perform respective forward and inverse transformation of cartographic data
-to or from cartesian data with a wide range of selectable projection functions.
-.PP
-The following control parameters can appear in any order:
+.sp
+\fBproj\fP and \fBinvproj\fP perform respective forward  and inverse
+transformation  of cartographic data to or from cartesian data  with  a  wide
+range  of selectable projection functions.
+.sp
+\fBinvproj\fP may not be available on all  platforms;  in  this  case
+use \fI\%proj \-I\fP instead.
+.sp
+The  following  control parameters can appear in any order
+.INDENT 0.0
 .TP
-.BI \-b
-Special option for binary coordinate data input and output
-through standard input and standard output.
-Data is assumed to be in system type
-.I double
-floating point words.
-This option is to be used when
-.B proj
-is a
-.I son
-process and allows bypassing formatting operations.
+.B \-b
+Special option for binary coordinate data input and output through standard
+input and standard output. Data is assumed to be in system type double
+floating point words. This option is to be used when proj is a son process
+and allows bypassing formatting operations.
+.UNINDENT
+.INDENT 0.0
 .TP
-.BI \-i
-Selects binary input only (see
-.B \-b option).
-.TP
-.BI \-I
-alternate method to specify inverse projection.
-Redundant when used with
-.B invproj.
-.TP
-.BI \-o
-Selects binary output only (see
-.B \-b option).
-.TP
-.BI \-t "a"
-.I A
-specifies a character employed as the first character to denote
-a control line to be passed through without processing.
-This option applicable to ascii input only.
-(# is the default value).
-.TP
-.BI \-e " string"
-.I String
-is an arbitrary string to be output if an error is detected during
-data transformations.
-The default value is: *\et*.
-Note that if the
-.B \-b,
 .B \-i
-or
+Selects binary input only (see \fI\%\-b\fP).
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-I
+alternate method to specify inverse projection. Redundant when used with
+invproj.
+.UNINDENT
+.INDENT 0.0
+.TP
 .B \-o
-options are employed, an error is returned as HUGE_VAL
-value for both return values.
+Selects binary output only (see \fI\%\-b\fP).
+.UNINDENT
+.INDENT 0.0
 .TP
-.BI \-E
-causes the input coordinates to be copied to the output line
-prior to printing the converted values.
+.B \-t<a>
+\fIa\fP specifies a character employed as the first character to denote a
+control line to be passed through without  processing. This  option
+applicable to ascii input only. (# is the default value).
+.UNINDENT
+.INDENT 0.0
 .TP
-.BI \-l "[p|P|=|e|u|d]" id
-List projection identifiers with
-.B \-l,
+.B \-e <string>
+String is an arbitrary string to be output if an error is detected during
+data transformations. The default value is: \fIt\fP\&. Note that if the
+\fI\%\-b\fP, \fI\%\-i\fP or \fI\%\-o\fP options are employed, an error
+is returned as HUGE_VAL value for both return values.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-E
+causes the input coordinates to be copied to the output line prior to
+printing the converted values.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-l<[=id]>
+List projection identifiers that can be selected with \fI+proj\fP\&. \fBproj \-l=id\fP
+gives expanded description of projection id, e.g. \fBproj \-l=merc\fP\&.
+.UNINDENT
+.INDENT 0.0
+.TP
 .B \-lp
-or
-.B \-lP (expanded)
-that can be selected with
-.B +proj.
-.BI \-l= id
-gives expanded description of projection
-.I id.
-List ellipsoid identifiers with
-.B \-le,
-that can be selected with
-.B +ellps,
-.B \-lu
-list of cartesian to meter conversion factors
-that can be selected with
-.B +units
-or
-.B \-ld
-list of datums that can be selected with
-.B +datum.
+List of all projection id that can be used with the \fI+proj\fP parameter.
+Equivalent to \fBproj \-l\fP\&.
+.UNINDENT
+.INDENT 0.0
 .TP
-.BI \-r
-This options reverses the order of the
-expected input from longitude-latitude or x-y to latitude-longitude or y-x.
-.TP
-.BI \-s
-This options reverses the order of the
-output from x-y or longitude-latitude to y-x or latitude-longitude.
-.TP
-.BI \-S
-Causes estimation of
-.I meridional
-and
-.I parallel
-scale factors,
-.I area
-scale factor and
-.I angular distortion,
-and
-.I maximum
-and
-.I minimum
-scale factors to be listed between <> for each input point.
-For conformal projections meridional and parallel scales factors
-will be equal and angular distortion zero.
-Equal area projections will have an area factor of 1.
-.TP
-.BI \-m " mult"
-The cartesian data may be scaled by the
-.I mult
+.B \-lP
+Expanded description of all projections that can be used with the \fI+proj\fP
 parameter.
-When processing data in a forward projection mode the
-cartesian output values are multiplied by
-.I mult
-otherwise the input cartesian values are divided by
-.I mult
-before inverse projection.
-If the first two characters of
-.I mult
-are 1/ or 1: then the reciprocal value of
-.I mult
-is employed.
+.UNINDENT
+.INDENT 0.0
 .TP
-.BI \-f " format"
-.I Format
-is a
-.I printf
-format string to control the form of the output values.
-For inverse projections, the output will be in degrees when this option
-is employed.
-The default format is "%.2f" for forward projection and DMS
-for inverse.
+.B \-le
+List of all ellipsoids that can be selected with the \fI+ellps\fP parameters.
+.UNINDENT
+.INDENT 0.0
 .TP
-.BI \-[w|W] n
-.I N
-is the number of significant fractional digits to employ for
-seconds output (when the option is not specified,
-.B \-w3
-is assumed).
-When
-.B \-W
-is employed the fields will be constant width and with leading zeroes.
+.B \-lu
+List of all distance units that can be selected with the \fI+units\fP parameter.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-ld
+List of datums that can be selected with the \fI+datum\fP parameter.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-r
+This options reverses the order of the expected input from
+longitude\-latitude or x\-y to latitude\-longitude or y\-x.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-s
+This options reverses the order of the output from x\-y or longitude\-latitude
+to y\-x or latitude\-longitude.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-S
+Causes estimation of meridional and parallel scale factors, area scale
+factor and angular distortion, and maximum and minimum scale factors to be
+listed between <> for each input point. For conformal projections meridional
+and parallel scales factors will be equal and angular distortion zero. Equal
+area projections will have an area factor of 1.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-m <mult>
+The cartesian data may be scaled by the mult parameter. When processing data
+in a forward projection mode the cartesian output values are multiplied by
+mult otherwise the input cartesian values are divided by mult before inverse
+projection.  If the first two characters of mult are 1/ or 1: then the
+reciprocal value of mult is employed.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-f <format>
+Format is a printf format string to control the form of the output values.
+For inverse projections, the output will be in degrees when this option is
+employed.  The  default format is “%.2f” for forward projection and DMS for
+inverse.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-[w|W]<n>
+N is the number of significant fractional digits to employ for seconds
+output (when the  option  is  not  specified, \fB\-w3\fP is assumed). When \fB\-W\fP
+is employed the fields will be constant width and  with  leading zeroes.
+.UNINDENT
+.INDENT 0.0
 .TP
 .B \-v
-causes a listing of cartographic control parameters tested for and
-used by the program to be printed prior to input data.
-Should not be used with the
-.B \-T
-option.
+causes a listing of cartographic control parameters tested for and used by
+the program to be printed prior to input data. Should not be used with the
+\fI\%\-T\fP option.
+.UNINDENT
+.INDENT 0.0
 .TP
 .B \-V
-This option causes an expanded annotated listing of the characteristics
-of the projected point.
-.B -v is implied with this option.
+This option causes an expanded annotated listing of the characteristics of
+the projected point. \fI\%\-v\fP is implied with this option.
+.UNINDENT
+.INDENT 0.0
 .TP
-.BI \-T " ulow,uhi,vlow,vhi,res[,umax,vmax]"
-This option creates a set of bivariate Chebyshev polynomial
-coefficients that approximate the selected cartographic projection on
-.I stdout.
-The values
-.I low
-and
-.I hi
-denote the range of the input where the
-.I u
-or
-.I v
-prefixes apply to respective longitude-x or latitude-y
-depending upon whether a forward or inverse projection is selected.
-.I Res
-is an integer number specifying the power of 10 precision of the
-approximation.
-For example, a
-.I res
-of \-3 specifies an approximation with an accuracy better than .001.
-.I Umax,
-and
-.I vmax
+.B \-T <ulow,uhi,vlow,vhi,res[,umax,vmax]>
+This option creates a set of bivariate Chebyshev polynomial coefficients
+that approximate the selected  cartographic projection on stdout. The values
+low and hi denote the range of the input where the u or v prefixes apply to
+respective longitude\-x or latitude\-y depending upon whether a forward or
+inverse projection is selected. Res is an integer number specifying the
+power of 10 precision of the approximation. For example, a res of \-3
+specifies an approximation with an accuracy better than .001. Umax, and vmax
 specify maximum degree of the polynomials (default: 15).
-See also:
-.B fproj(1).
-.PP
-The
-.B +args
-run-line arguments are associated with cartographic parameters
-and usage varies with projection and for a complete description see
-.I "Cartographic Projection Procedures for the UNIX Environment\(emA User's Manual"
-and supplementary documentation for Release 4.
-.PP
-Additional projection control parameters may be contained in two
-auxiliary control files:
-the first is optionally referenced with the
-.BI +init= file:id
-and the second is always processed after the name
-of the projection has been established from either the run-line
-or the contents of
-.B +init
-file.
-The environment parameter
-.B PROJ_LIB
-establishes the default directory for a file reference without
-an absolute path.  This is also used for supporting files like
-datum shift files.
-.PP
-One or more
-.I files
-(processed in left to right order)
-specify the source of data to be transformed.
-A \- will specify the location of processing standard input.
-If no files are specified, the input is assumed to be from
-.I stdin.
-For ASCII input data the two data values must be in the
-first two white space separated fields and
-when both input and output are ASCII all trailing portions
-of the input line are appended to the output line.
-.PP
-Input geographic data
-(longitude and latitude) must be in DMS format and input
-cartesian data must be in units consistent with the ellipsoid
-major axis or sphere radius units.
-Output geographic coordinates will be in DMS
-(if the
-.B \-w
-switch is not employed) and precise to 0.001"
-with trailing, zero-valued minute-second fields deleted.
+.UNINDENT
+.sp
+The \fI+args\fP run\-line arguments are associated with cartographic parameters.
+Additional projection control parameters may  be contained  in  two  auxiliary
+control files: the first  is   optionally   referenced   with   the
+\fI+init=file:id\fP and the second is always processed after the name of the
+projection has been established from either the run\-line or the contents of
++init  file.   The   environment   parameter \fBPROJ_LIB\fP establishes the
+default directory for a file reference without an absolute  path.   This is
+also  used  for  supporting files like datum shift files.
+.sp
+One or more files (processed in  left  to  right order)  specify  the source of
+data to be transformed.  A \fB\-\fP will specify the location  of  processing standard
+input.  If no files are specified, the input is assumed  to  be  from  stdin.
+For ASCII input data the two data values must be in the first two white  space
+separated  fields and  when  both  input  and output are ASCII all trailing
+portions of the input line are appended to the output line.
+.sp
+Input  geographic  data (longitude and latitude) must be in DMS format and input
+cartesian  data must  be  in units consistent with the ellipsoid major axis or
+sphere radius units.  Output geographic  coordinates  will  be in DMS (if the
+\fB\-w\fP switch is not employed) and  precise  to  0.001” with  trailing, zero\-valued
+minute\-second fields deleted.
 .SH EXAMPLE
+.sp
 The following script
-.RS 5
- \f(CWproj +proj=utm +lon_0=112w +ellps=clrk66 \-r <<EOF
- 45d15'33.1"	111.5W
- 45d15.551666667N	\-111d30
- +45.25919444444	111d30'000w
- EOF\fR
-.RE
-will perform UTM forward projection with a standard UTM
-central meridian nearest longitude 112\(deW.
-The geographic values of this example are equivalent and meant
-as examples of various forms of DMS input.
-The x\-y output data will appear as three lines of:
-.RS 5
- \f(CW460769.27	5011648.45
-.RE
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+proj +proj=utm  +lon_0=112w  +ellps=clrk66
+\-r <<EOF
+45d15\(aq33.1"   111.5W
+45d15.551666667N   \-111d30
++45.25919444444    111d30\(aq000w
+EOF
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+will perform UTM forward projection with a standard UTM  central  meridian
+nearest  longitude 112W.  The geographic values of this example are equivalent
+and  meant  as  examples  of  various forms  of  DMS  input.  The x\-y output
+data will appear as three lines of:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+460769.27     5011648.45
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
 .SH OTHER PROGRAMS
-.PP
-The \fIproj\fR program is limited to converting between geographic and
-projection coordinates within one datum.
-.PP
-The \fIcs2cs\fR program operates
-similarly, but allows translation between any pair of definable coordinate
-systems, including support for datum translation.
-.PP
-The \fIgeod\fR program provides the ability to compute geodesic (Great
-Circle) computations.
+.sp
+The \fBproj\fP program is limited to converting between geographic and
+projected coordinates within one datum.
+.sp
+The \fBcs2cs\fP program operates similarly, but allows translation
+between any paor of definable coordinate reference systems, including
+support for datum translation.
 .SH SEE ALSO
-.B cs2cs(1), geod(1), pj_init(3),
-.br
-.I "Cartographic Projection Procedures for the UNIX Environment\(emA User's Manual,"
-(Evenden, 1990, Open-file report 90\-284).
-.br
-.I "Map Projections Used by the U. S. Geological Survey"
-(Snyder, 1984,
-USGS Bulletin 1532).
-.br
-.I "Map Projections\(emA Working Manual"
-(Snyder, 1988, USGS Prof. Paper 1395).
-.br
-.I "An Album of Map Projections"
-(Snyder & Voxland, 1989, USGS Prof. Paper 1453).
+.sp
+\fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP
 .SH BUGS
-A list of known bugs can found at https://github.com/OSGeo/proj.4/issues
-where new bug reports can be submitted too.
+.sp
+A list of know bugs can be found at \fI\%http://github.com/OSGeo/proj.4/issues\fP
+where new bug reports can be submitted to.
 .SH HOME PAGE
-http://proj4.org/
+.sp
+\fI\%http://proj4.org/\fP
+.SH AUTHOR
+Gerald I. Evenden
+.SH COPYRIGHT
+1983-2018
+.\" Generated by docutils manpage writer.
+.
