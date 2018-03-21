@@ -111,7 +111,7 @@ typedef void (*PJ_LOG_FUNCTION)(void *, int, const char *);
 void proj_log_error (PJ *P, const char *fmt, ...);
 void proj_log_debug (PJ *P, const char *fmt, ...);
 void proj_log_trace (PJ *P, const char *fmt, ...);
-void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log);
+void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf);
 
 int pj_ellipsoid (PJ *);
 void pj_inherit_ellipsoid_def (const PJ *src, PJ *dst);

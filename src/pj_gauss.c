@@ -36,8 +36,8 @@ struct GAUSS {
 };
 #define DEL_TOL 1e-14
 
-static double srat(double esinp, double exp) {
-    return(pow((1.-esinp)/(1.+esinp), exp));
+static double srat(double esinp, double ratexp) {
+    return(pow((1.-esinp)/(1.+esinp), ratexp));
 }
 
 void *pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
