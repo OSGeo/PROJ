@@ -923,13 +923,21 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
         gilist->format = "ctable2";
         gilist->ct = ct;
 
-        pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
-                "Ctable2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
-                ct->id,
-                ct->lim.lam, ct->lim.phi,
-                ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
-                (ct->ll.lam + (ct->lim.lam-1)*ct->del.lam) * RAD_TO_DEG,
-                (ct->ll.phi + (ct->lim.phi-1)*ct->del.phi) * RAD_TO_DEG );
+        if (ct == NULL)
+        {
+            pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
+                    "CTABLE V2 ct is NULL.");
+        }
+        else
+        {
+            pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
+                    "Ctable2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)",
+                    ct->id,
+                    ct->lim.lam, ct->lim.phi,
+                    ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
+                    (ct->ll.lam + (ct->lim.lam-1)*ct->del.lam) * RAD_TO_DEG,
+                    (ct->ll.phi + (ct->lim.phi-1)*ct->del.phi) * RAD_TO_DEG );
+        }
     }
 
     else
