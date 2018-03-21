@@ -126,7 +126,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     *section = 0;
     section++;
     n = strlen (section);
-    pj_log (ctx, 3, "get_init_string: searching for section [%s] in init file [%s]\n", section, fname);
+    pj_log (ctx, 3, "get_init_string: searching for section [%s] in init file [%s]", section, fname);
 
     fid = pj_open_lib (ctx, fname, "rt");
     if (0==fid) {
@@ -216,7 +216,7 @@ static char *get_init_string (PJ_CONTEXT *ctx, char *name) {
     if (0==buffer)
         return 0;
     pj_shrink (buffer);
-    pj_log (ctx, 3, "key=%s, value: [%s]\n", key, buffer);
+    pj_log (ctx, 3, "key=%s, value: [%s]", key, buffer);
     return buffer;
 }
 
@@ -236,7 +236,7 @@ Expand key from buffer or (if not in buffer) from init file
         xkey = key;
     else
         xkey += 5;
-    pj_log (ctx, 3, "get_init: searching cache for key: [%s]\n", xkey);
+    pj_log (ctx, 3, "get_init: searching cache for key: [%s]", xkey);
 
     /* Is file/key pair already in cache? */
     init_items = pj_search_initcache (xkey);
@@ -244,13 +244,13 @@ Expand key from buffer or (if not in buffer) from init file
         return init_items;
 
     /* If not, we must read it from file */
-    pj_log (ctx, 3, "get_init: searching on in init files for [%s]\n", xkey);
+    pj_log (ctx, 3, "get_init: searching on in init files for [%s]", xkey);
     definition = get_init_string (ctx, xkey);
     if (0==definition)
         return 0;
     init_items = string_to_paralist (ctx, definition);
     if (init_items)
-        pj_log (ctx, 3, "get_init: got [%s], paralist[0,1]: [%s,%s]\n", definition, init_items->param, init_items->next? init_items->next->param: "(empty)");
+        pj_log (ctx, 3, "get_init: got [%s], paralist[0,1]: [%s,%s]", definition, init_items->param, init_items->next? init_items->next->param: "(empty)");
     pj_dealloc (definition);
     if (0==init_items)
         return 0;
