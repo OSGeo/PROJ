@@ -131,39 +131,39 @@ static double geocentric_radius (double a, double b, double phi) {
 
 
 /*********************************************************************/
-static XYZ cartesian (LPZ geodetic,  PJ *P) {
+static XYZ cartesian (LPZ geod,  PJ *P) {
 /*********************************************************************/
-    double N, cosphi = cos(geodetic.phi);
+    double N, cosphi = cos(geod.phi);
     XYZ xyz;
 
-    N   =  normal_radius_of_curvature(P->a, P->es, geodetic.phi);
+    N   =  normal_radius_of_curvature(P->a, P->es, geod.phi);
 
     /* HM formula 5-27 (z formula follows WP) */
-    xyz.x = (N + geodetic.z) * cosphi      * cos(geodetic.lam);
-    xyz.y = (N + geodetic.z) * cosphi      * sin(geodetic.lam);
-    xyz.z = (N * (1 - P->es) + geodetic.z) * sin(geodetic.phi);
+    xyz.x = (N + geod.z) * cosphi      * cos(geod.lam);
+    xyz.y = (N + geod.z) * cosphi      * sin(geod.lam);
+    xyz.z = (N * (1 - P->es) + geod.z) * sin(geod.phi);
 
     return xyz;
 }
 
 
 /*********************************************************************/
-static LPZ geodetic (XYZ cartesian,  PJ *P) {
+static LPZ geodetic (XYZ cart,  PJ *P) {
 /*********************************************************************/
     double N, p, theta, c, s;
     LPZ lpz;
 
     /* Perpendicular distance from point to Z-axis (HM eq. 5-28) */
-    p = hypot (cartesian.x, cartesian.y);
+    p = hypot (cart.x, cart.y);
 
     /* HM eq. (5-37) */
-    theta  =  atan2 (cartesian.z * P->a,  p * P->b);
+    theta  =  atan2 (cart.z * P->a,  p * P->b);
 
     /* HM eq. (5-36) (from BB, 1976) */
     c  =  cos(theta);
     s  =  sin(theta);
-    lpz.phi  =  atan2 (cartesian.z + P->e2s*P->b*s*s*s,  p - P->es*P->a*c*c*c);
-    lpz.lam  =  atan2 (cartesian.y, cartesian.x);
+    lpz.phi  =  atan2 (cart.z + P->e2s*P->b*s*s*s,  p - P->es*P->a*c*c*c);
+    lpz.lam  =  atan2 (cart.y, cart.x);
     N        =  normal_radius_of_curvature (P->a, P->es, lpz.phi);
 
 
@@ -174,7 +174,7 @@ static LPZ geodetic (XYZ cartesian,  PJ *P) {
         /* minus the geocentric radius of the Earth at the given */
         /* latitude                                              */
         double r = geocentric_radius (P->a, P->b, lpz.phi);
-        lpz.z = fabs (cartesian.z) - r;
+        lpz.z = fabs (cart.z) - r;
     }
     else
         lpz.z =  p / c  -  N;
