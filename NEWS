@@ -1,3 +1,54 @@
+5.0.1 Release Notes
+-------------------
+
+ BUG FIXES
+ ------------
+
+ All bug fix numbers refer to issues or pull requests indexed at
+ https://github.com/OSGeo/proj.4/
+
+ o Handle ellipsoid change correctly in pipelines when
+   +towgs84=0,0,0 is set #881
+
+ o Handle the case where nad_ctable2_init returns NULL #883
+
+ o Avoid shadowed declaration errors with old gcc #880
+
+ o Expand +datum properly +datum in pipelines #872
+
+ o Fail gracefully when incorrect headers are encountered in grid
+   files #875
+
+ o Improve roundtrip stability in pipelines using +towgs84 #871
+
+ o Fixed typo in gie error codes #861
+
+ o Numerical stability fixes to the geodesic package #826 #843
+
+ o Make sure that transient errors are returned correctly #857
+
+ o Make sure that locally installed header files are not used when
+   building PROJ #849
+
+ o Fix inconsistent parameter names in proj.h/proj_4D_api.c #842
+
+ o Make sure +vunits is applied #833
+
+ o Fix incorrect Web Mercator transformations #834
+
+ THANKS TO
+ ------------
+
+ Version 5.0.1 is made possible by the following contributors:
+
+   Mike Toews
+   Kurt Schwehr
+   Even Rouault
+   Charles Karney
+   Thomas Knudsen
+   Kristian Evers
+
+
 5.0.0 Release Notes
 -------------------
 
