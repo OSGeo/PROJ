@@ -436,7 +436,7 @@ static int parse_coefs (PJ *P, double *coefs, char *param, int ncoefs) {
 /*********************************************************************/
 PJ *PROJECTION(horner) {
 /*********************************************************************/
-    int   degree = 0, n, complex_horner = 0;
+    int   degree = 0, n, complex_polynomia = 0;
     HORNER *Q;
     P->fwd4d  = horner_forward_4d;
     P->inv4d  = horner_reverse_4d;
@@ -456,14 +456,14 @@ PJ *PROJECTION(horner) {
     }
 
     if (pj_param (P->ctx, P->params, "tfwd_c").i || pj_param (P->ctx, P->params, "tinv_c").i) /* complex polynomium? */
-		complex_horner = 1;
+		complex_polynomia = 1;
 
-    Q = horner_alloc (degree, complex_horner);
+    Q = horner_alloc (degree, complex_polynomia);
     if (Q == 0)
         return horner_freeup (P, ENOMEM);
     P->opaque = (void *) Q;
 
-    if (complex_horner) {
+    if (complex_polynomia) {
         /* Westings and/or southings? */
         Q->uneg = pj_param_exists (P->params, "uneg") ? 1 : 0;
         Q->vneg = pj_param_exists (P->params, "vneg") ? 1 : 0;

@@ -430,7 +430,7 @@ void proj_log_trace (PJ *P, const char *fmt, ...) {
 
 
 /*****************************************************************************/
-void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log) {
+void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf) {
 /******************************************************************************
     Put a new logging function into P's context. The opaque object app_data is
     passed as first arg at each call to the logger
@@ -440,6 +440,6 @@ void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION log) {
     if (0==ctx)
         return;
     ctx->app_data = app_data;
-    if (0!=log)
-        ctx->logger = log;
+    if (0!=logf)
+        ctx->logger = logf;
 }
