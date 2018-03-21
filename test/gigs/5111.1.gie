@@ -21,7 +21,7 @@ tolerance  0.05 m
 accept    100.0876483 77.6534822
 expect    2800000.0 15000000.0
 
-tolerance  0.05 m
+tolerance  0.055 m
 accept    100.0876483 73.1442856
 expect    2800000.0 13000000.0
 
