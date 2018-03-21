@@ -78,9 +78,10 @@ static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
 
         if (P->hgridshift)
             coo = proj_trans (P->hgridshift, PJ_FWD, coo);
-        else if (P->helmert) {
+        else if (P->helmert || (P->cart_wgs84 != 0 && P->cart != 0)) {
             coo = proj_trans (P->cart,       PJ_FWD, coo); /* Go cartesian in local frame */
-            coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into WGS84 */
+            if( P->helmert )
+                coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into WGS84 */
             coo = proj_trans (P->cart_wgs84, PJ_INV, coo); /* Go back to angular using WGS84 ellps */
         }
         if (coo.lp.lam==HUGE_VAL)
@@ -154,9 +155,10 @@ static PJ_COORD inv_finalize (PJ *P, PJ_COORD coo) {
                 return coo;
             if (P->hgridshift)
                 coo = proj_trans (P->hgridshift, PJ_FWD, coo);
-            else if (P->helmert) {
+            else if (P->helmert || (P->cart_wgs84 != 0 && P->cart != 0)) {
                 coo = proj_trans (P->cart,       PJ_FWD, coo); /* Go cartesian in local frame */
-                coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into WGS84 */
+                if( P->helmert )
+                    coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into WGS84 */
                 coo = proj_trans (P->cart_wgs84, PJ_INV, coo); /* Go back to angular using WGS84 ellps */
             }
             if (coo.lp.lam==HUGE_VAL)
