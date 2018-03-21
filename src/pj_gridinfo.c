@@ -536,7 +536,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
         ct->lim.phi = (pj_int32) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
 
         pj_log( ctx, PJ_LOG_DEBUG_MINOR,
-                "NTv2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
+                "NTv2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)",
                 ct->id,
                 ct->lim.lam, ct->lim.phi,
                 ct->ll.lam/3600.0, ct->ll.phi/3600.0,
@@ -551,7 +551,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
         if( gs_count != ct->lim.lam * ct->lim.phi )
         {
             pj_log( ctx, PJ_LOG_ERROR,
-                    "GS_COUNT(%d) does not match expected cells (%dx%d=%d)\n",
+                    "GS_COUNT(%d) does not match expected cells (%dx%d=%d)",
                     gs_count, ct->lim.lam, ct->lim.phi,
                     ct->lim.lam * ct->lim.phi );
             pj_dalloc(ct);
@@ -618,7 +618,7 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, PAFile fid, PJ_GRIDINFO *gilist )
             {
                 pj_log( ctx, PJ_LOG_ERROR,
                         "pj_gridinfo_init_ntv2(): "
-                        "failed to find parent %8.8s for %s.\n",
+                        "failed to find parent %8.8s for %s.",
                         (const char *) header+24, gi->ct->id );
 
                 for( lnk = gilist; lnk->next != NULL; lnk = lnk->next ) {}
@@ -950,7 +950,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
         else
         {
             pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
-                    "Ctable2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
+                    "Ctable2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)",
                     ct->id,
                     ct->lim.lam, ct->lim.phi,
                     ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
@@ -972,7 +972,7 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
             gilist->ct = ct;
 
             pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
-                    "Ctable %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
+                    "Ctable %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)",
                     ct->id,
                     ct->lim.lam, ct->lim.phi,
                     ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
