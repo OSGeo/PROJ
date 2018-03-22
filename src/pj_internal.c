@@ -443,3 +443,15 @@ void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf) {
     if (0!=logf)
         ctx->logger = logf;
 }
+
+
+/*****************************************************************************/
+int pj_is_nan (double val) {
+/******************************************************************************
+    Returns 0 if not a NaN and non-zero if val is a NaN.
+
+    Provides an equivalent to isnan().
+******************************************************************************/
+    /* cppcheck-suppress duplicateExpression */
+    return val != val;
+}
