@@ -82,15 +82,15 @@ If you intend to document one of PROJ.4's supported projections please use the
 See [Code Contributions](http://proj4.org/development/for_proj_contributors.html)
 
 #### Legalese
-Commiters are the front line gatekeepers to keep the code base clear of improperly contributed code.
+Committers are the front line gatekeepers to keep the code base clear of improperly contributed code.
 It is important to the PROJ.4 users, developers and the OSGeo foundation to avoid contributing any
 code to the project without it being clearly licensed under the project license.
 
 Generally speaking the key issues are that those providing code to be included in the repository
 understand that the code will be released under the MIT/X license, and that the person providing
-the code has the right to contribute the code. For the commiter themselves understanding about
-the license is hopefully clear. For other contributors, the commiter should verify the understanding
-unless the commiter is very comfortable that the contributor understands the license (for
+the code has the right to contribute the code. For the committer themselves understanding about
+the license is hopefully clear. For other contributors, the committer should verify the understanding
+unless the committer is very comfortable that the contributor understands the license (for
 instance frequent contributors).
 
 If the contribution was developed on behalf of an employer (on work time, as part of a work project,
@@ -104,7 +104,7 @@ compatible license.
 
 All unusual situations need to be discussed and/or documented.
 
-Commiters should adhere to the following guidelines, and may be personally legally liable for
+Committer should adhere to the following guidelines, and may be personally legally liable for
 improperly contributing code to the source repository:
 
 * Make sure the contributor (and possibly employer) is aware of the contribution terms.
@@ -132,4 +132,4 @@ improperly contributing code to the source repository:
 
 The _code contribution_ section of this CONTRIBUTING file is inspired by
 [PDAL's](https://github.com/PDAL/PDAL/blob/master/CONTRIBUTING.md) and the _legalese_ section is
-modified from [GDAL commiter guidelines](https://trac.osgeo.org/gdal/wiki/rfc3_commiters)
+modified from [GDAL committer guidelines](https://trac.osgeo.org/gdal/wiki/rfc3_commiters)
