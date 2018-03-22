@@ -130,6 +130,8 @@ void proj_fileapi_set (PJ *P, void *fileapi);
 const char * const *proj_get_searchpath(void);
 int    proj_get_path_count(void);
 
+int pj_is_nan (double val);
+
 #ifdef __cplusplus
 }
 #endif
