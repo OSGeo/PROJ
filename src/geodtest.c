@@ -29,6 +29,10 @@ static int assertEquals(double x, double y, double d) {
   return 1;
 }
 
+static int assertNaN(double x) {
+  return x == x ? 1 : 0;
+}
+
 static const int ncases = 20;
 static const double testcases[20][12] = {
   {35.60777, -139.44815, 111.098748429560326,
@@ -346,9 +350,9 @@ static int GeodSolve14() {
   }
   geod_init(&g, wgs84_a, wgs84_f);
   geod_inverse(&g, 0, 0, 1, nan, &s12, &azi1, &azi2);
-  result += azi1 == azi1 ? 1 : 0;
-  result += azi2 == azi2 ? 1 : 0;
-  result += s12 == s12 ? 1 : 0;
+  result += assertNaN(azi1);
+  result += assertNaN(azi2);
+  result += assertNaN(s12);
   return result;
 }
 
@@ -488,13 +492,13 @@ static int GeodSolve55() {
   }
   geod_init(&g, wgs84_a, wgs84_f);
   geod_inverse(&g, nan, 0, 0, 90, &s12, &azi1, &azi2);
-  result += azi1 == azi1 ? 1 : 0;
-  result += azi2 == azi2 ? 1 : 0;
-  result += s12 == s12 ? 1 : 0;
+  result += assertNaN(azi1);
+  result += assertNaN(azi2);
+  result += assertNaN(s12);
   geod_inverse(&g, nan, 0, 90, 9, &s12, &azi1, &azi2);
-  result += azi1 == azi1 ? 1 : 0;
-  result += azi2 == azi2 ? 1 : 0;
-  result += s12 == s12 ? 1 : 0;
+  result += assertNaN(azi1);
+  result += assertNaN(azi2);
+  result += assertNaN(s12);
   return result;
 }
 
@@ -729,7 +733,7 @@ static int GeodSolve80() {
   /* An incapable line which can't take distance as input */
   geod_lineinit(&l, &g, 1, 2, 90, GEOD_LATITUDE);
   a12 = geod_genposition(&l, 0, 1000, 0, 0, 0, 0, 0, 0, 0, 0);
-  result += a12 == a12 ? 1 : 0;
+  result += assertNaN(a12);
   return result;
 }
 
@@ -893,8 +897,8 @@ static int Planimeter19() {
   result += area == 0 ? 0 : 1;
   result += perim == 0 ? 0 : 1;
   geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, &area, &perim);
-  result += area == area ? 1 : 0;
-  result += perim == perim ? 1 : 0;
+  result += assertNaN(area);
+  result += assertNaN(perim);
   geod_polygon_addpoint(&g, &p, 1, 1);
   geod_polygon_compute(&g, &p, 0, 1, &area, &perim);
   result += area == 0 ? 0 : 1;
@@ -905,7 +909,7 @@ static int Planimeter19() {
   geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, 0, &perim);
   result += perim == 0 ? 0 : 1;
   geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, 0, &perim);
-  result += perim == perim ? 1 : 0;
+  result += assertNaN(perim);
   geod_polygon_addpoint(&g, &p, 1, 1);
   geod_polygon_compute(&g, &p, 0, 1, 0, &perim);
   result += perim == 0 ? 0 : 1;
@@ -994,8 +998,8 @@ static int EmptyPoly() {
   result += area == 0 ? 0 : 1;
   result += perim == 0 ? 0 : 1;
   geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, &area, &perim);
-  result += area == area ? 1 : 0;
-  result += perim == perim ? 1 : 0;
+  result += assertNaN(area);
+  result += assertNaN(perim);
   geod_polygon_compute(&g, &p, 0, 1, &area, &perim);
   result += area == 0 ? 0 : 1;
   result += perim == 0 ? 0 : 1;
@@ -1003,7 +1007,7 @@ static int EmptyPoly() {
   geod_polygon_testpoint(&g, &p, 1, 1, 0, 1, 0, &perim);
   result += perim == 0 ? 0 : 1;
   geod_polygon_testedge(&g, &p, 90, 1000, 0, 1, 0, &perim);
-  result += perim == perim ? 1 : 0;
+  result += assertNaN(perim);
   geod_polygon_compute(&g, &p, 0, 1, 0, &perim);
   result += perim == 0 ? 0 : 1;
   geod_polygon_addpoint(&g, &p, 1, 1);
