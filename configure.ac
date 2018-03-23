@@ -44,7 +44,8 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM(
         [int q;
          return (int)(hypot(3.0, 4.0) + atanh(0.8) + cbrt(8.0) +
                       remquo(100.0, 90.0, &q) +
-                      remainder(100.0, 90.0) + copysign(1.0, -0.0));])],
+                      remainder(100.0, 90.0) + copysign(1.0, -0.0)) +
+		      isnan(0.0);])],
         [AC_MSG_RESULT([yes]);C99_MATH="-DHAVE_C99_MATH=1"],
         [AC_MSG_RESULT([no]);C99_MATH="-DHAVE_C99_MATH=0"])
 CFLAGS="$save_CFLAGS $C99_MATH"
