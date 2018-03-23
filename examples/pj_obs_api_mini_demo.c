@@ -21,18 +21,18 @@
     The proj thread contexts have not seen widespread use, so one of the
     intentions with this new API is to make them less visible on the API
     surface.
-    
+
     A series of experiments have, however, shown that they, for (mostly)
     historical reasons, are very hard to eliminate totally. But we have
     reduced their API surface presence to a constructor and a destructor,
     plus an extra argument to the PJ constructor, pj_create().
-    
+
     For single threaded programs, the calls to the context constructor
     and destructor may be left out, and the default context selected
     by passing a null-pointer to pj_create.
 
     Note: This file is in-lined in the documentation. Any changes must be
-    reflected in docs/source/development/quickstart.rst 
+    reflected in docs/source/development/quickstart.rst
 
     Thomas Knudsen, 2016-10-30/2017-07-06
 *******************************************************************************/
@@ -43,8 +43,9 @@ int main (void) {
     PJ_CONTEXT *C;
     PJ *P;
     PJ_COORD a, b;
-    
-    /* or you may set C=0 if you are sure you will use PJ objects from only one thread */
+
+    /* or you may set C=PJ_DEFAULT_CTX if you are sure you will     */
+    /* use PJ objects from only one thread                          */
     C = proj_context_create();
 
     P = proj_create (C, "+proj=utm +zone=32 +ellps=GRS80");
@@ -56,9 +57,9 @@ int main (void) {
     a = proj_coord (proj_torad(12), proj_torad(55), 0, 0);
 
     /* transform to UTM zone 32, then back to geographical */
-    b = proj_trans_coord (P, PJ_FWD, a);
-    printf ("easting: %g, northing: %g\n", b.en.e, b.en.n);
-    b = proj_trans_coord (P, PJ_INV, b);
+    b = proj_trans (P, PJ_FWD, a);
+    printf ("easting: %g, northing: %g\n", b.enu.e, b.en.n);
+    b = proj_trans (P, PJ_INV, b);
     printf ("longitude: %g, latitude: %g\n", b.lp.lam, b.lp.phi);
 
     /* Clean up */
