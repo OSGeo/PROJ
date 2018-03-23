@@ -445,6 +445,9 @@ void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf) {
 }
 
 
+#if HAVE_C99_MATH
+/* proj_internal.h defines pj_is_nan as isnan */
+#else
 /*****************************************************************************/
 int pj_is_nan (double val) {
 /******************************************************************************
@@ -455,3 +458,4 @@ int pj_is_nan (double val) {
     /* cppcheck-suppress duplicateExpression */
     return val != val;
 }
+#endif
