@@ -32,7 +32,7 @@ static int checkEquals(double x, double y, double d) {
 static int checkNaN(double x) {
   if (x != x)
     return 0;
-  printf("checkNaN fails\n");
+  printf("checkNaN fails: %.7g\n", x);
   return 1;
 }
 
