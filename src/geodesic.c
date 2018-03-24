@@ -239,7 +239,8 @@ static void sincosdx(real x, real* sinx, real* cosx) {
   r = remquo(x, (real)(90), &q);
 #else
   r = fmod(x, (real)(360));
-  /* check for NaN */
+  /* check for NaN -- do not use pj_is_nan, since we want geodesic.c not to
+   * depend on the rest of proj.4 */
   q = r == r ? (int)(floor(r / 90 + (real)(0.5))) : 0;
   r -= 90 * q;
 #endif
