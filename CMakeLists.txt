@@ -18,19 +18,21 @@ set(PROJECT_INTERN_NAME PROJ)
 if (NOT CMAKE_VERSION VERSION_LESS 3.1)
   cmake_policy(SET CMP0054 NEW)
 endif ()
+
 # Set warnings
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+  # Suppress warning 4706 about assignment within conditional expression
   # Suppress warning 4996 about sprintf, etc., being unsafe
-  set(CMAKE_C_FLAGS "/wd4996 /WX ${CMAKE_C_FLAGS}")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4706 /wd4996 \
+    /D_CRT_SECURE_NO_WARNINGS")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_C_FLAGS "-std=c89 -Wall -Wextra -Wswitch -Werror \
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow \
     -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat \
-    -Werror=format-security -Wshadow ${CMAKE_C_FLAGS}")
+    -Wformat-security")
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
-  set(CMAKE_C_FLAGS "-std=c89 -Wall -Wextra -Wswitch -Werror \
-    -Wc99-extensions -Wc11-extensions -Wunused-parameter -Wmissing-prototypes \
-    -Wmissing-declarations -Wformat -Werror=format-security -Wshadow \
-    -Wfloat-conversion ${CMAKE_C_FLAGS}")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow \
+    -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat \
+    -Wformat-security -Wfloat-conversion -Wc99-extensions -Wc11-extensions")
 endif()
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to
