@@ -31,9 +31,10 @@ check_library_exists(m ceil "" HAVE_LIBM)
 
 set(PACKAGE "proj")
 set(PACKAGE_BUGREPORT "https://github.com/OSGeo/proj.4/issues")
-set(PACKAGE_NAME "PROJ.4 Projections")
-set(PACKAGE_STRING "PROJ.4 Projections ${${PROJECT_INTERN_NAME}_VERSION}")
+set(PACKAGE_NAME "PROJ")
+set(PACKAGE_STRING "PROJ ${${PROJECT_INTERN_NAME}_VERSION}")
 set(PACKAGE_TARNAME "proj")
+set(PACKAGE_URL "http://proj4.org")
 set(PACKAGE_VERSION "${${PROJECT_INTERN_NAME}_VERSION}")
 
 configure_file(cmake/proj_config.cmake.in src/proj_config.h)
