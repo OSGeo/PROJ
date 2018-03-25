@@ -1,5 +1,5 @@
 ################################################################################
-# Proj4Version.cmake - part of CMake configuration of Proj4 library
+# ProjVersion.cmake - part of CMake configuration of PROJ library
 ################################################################################
 # Copyright (C) 2010 Mateusz Loskot <mateusz@loskot.net>
 #
@@ -8,7 +8,6 @@
 # Macros in this module:
 #   
 #   proj_version - defines version information for PROJ library
-#   (best known as PROJ4 because MAJOR version is 4 since a very long time) 
 ################################################################################
 
 # Defines version information for PROJ library

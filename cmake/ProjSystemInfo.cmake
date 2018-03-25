@@ -1,5 +1,5 @@
 ################################################################################
-# SociSystemInfo.cmake - part of CMake configuration of Proj.4 library
+# ProjSystemInfo.cmake - part of CMake configuration of PROJ library
 #
 # Based on idea taken from http://code.google.com/p/softart/ project
 ################################################################################

@@ -1,5 +1,5 @@
 ################################################################################
-# SociConfig.cmake - CMake build configuration of SOCI library
+# ProjConfig.cmake - CMake build configuration of PROJ library
 ################################################################################
 # Copyright (C) 2010 Mateusz Loskot <mateusz@loskot.net>
 #

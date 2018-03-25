@@ -1,5 +1,5 @@
 ################################################################################
-# SociUtilities.cmake - part of CMake configuration of Proj4 library
+# ProjUtilities.cmake - part of CMake configuration of PROJ library
 #
 # Based on BoostUtilities.cmake from CMake configuration for Boost
 ################################################################################
