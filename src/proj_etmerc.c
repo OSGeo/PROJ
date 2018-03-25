@@ -345,6 +345,10 @@ PJ *PROJECTION(utm) {
         proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
         return pj_default_destructor(P, ENOMEM);
     }
+    if (P->lam0 < -1000.0 || P->lam0 > 1000.0) {
+        return pj_default_destructor(P, PJD_ERR_INVALID_UTM_ZONE);
+    }
+
     P->y0 = pj_param (P->ctx, P->params, "bsouth").i ? 10000000. : 0.;
     P->x0 = 500000.;
     if (pj_param (P->ctx, P->params, "tzone").i) /* zone input ? */
