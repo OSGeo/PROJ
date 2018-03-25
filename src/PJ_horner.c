@@ -448,9 +448,14 @@ PJ *PROJECTION(horner) {
     P->destructor = horner_freeup;
 
     /* Polynomial degree specified? */
-    if (pj_param (P->ctx, P->params, "tdeg").i) /* degree specified? */
-		degree = pj_param(P->ctx, P->params, "ideg").i;
-    else {
+    if (pj_param (P->ctx, P->params, "tdeg").i) { /* degree specified? */
+        degree = pj_param(P->ctx, P->params, "ideg").i;
+        if (degree > 10000) {
+            /* What is a reasonable maximum for the degree? */
+            proj_log_debug (P, "Horner: Degree too large: %d", degree);
+            return horner_freeup (P, PJD_ERR_INVALID_ARG);
+        }
+    } else {
         proj_log_debug (P, "Horner: Must specify polynomial degree, (+deg=n)");
         return horner_freeup (P, PJD_ERR_MISSING_ARGS);
     }
