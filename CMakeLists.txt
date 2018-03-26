@@ -11,8 +11,8 @@
 #################################################################################
 cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 
-# proj is an ANSI C project
-project(PROJ C)
+# For historic reasons, the CMake PROJECT-NAME is PROJ4
+project(PROJ4 C)
 set(PROJECT_INTERN_NAME PROJ)
 
 if (NOT CMAKE_VERSION VERSION_LESS 3.1)
@@ -51,8 +51,7 @@ endif ()
 # PROJ CMake modules
 #################################################################################
 # Path to additional CMake modules
-set(CMAKE_MODULE_PATH ${PROJ_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
-set(CMAKE_MODULE_PATH ${PROJ_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${PROJ4_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 include(ProjUtilities)
 
@@ -157,7 +156,7 @@ set(CMAKECONFIGDIR "${DEFAULT_CMAKEDIR}" CACHE PATH "The directory to install cm
 #################################################################################
 # Build configured components
 #################################################################################
-include_directories(${PROJ_SOURCE_DIR}/src)
+include_directories(${PROJ4_SOURCE_DIR}/src)
 
 message(STATUS "")
 add_subdirectory(nad)
