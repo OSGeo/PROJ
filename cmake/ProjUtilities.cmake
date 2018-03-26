@@ -378,7 +378,7 @@ endmacro()
 
 #
 # Generates output name for given target depending on platform and version.
-# For instance, on Windows, libraries get ABI version suffix soci_coreXY.{dll|lib}.
+# For instance, on Windows, libraries get ABI version suffix proj_X_Y.{dll|lib}.
 #
 
 function(proj_target_output_name TARGET_NAME OUTPUT_NAME)

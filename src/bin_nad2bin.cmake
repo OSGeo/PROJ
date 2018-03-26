@@ -1,5 +1,5 @@
 if(WIN32 AND BUILD_LIBPROJ_SHARED)
-    message(warning " nad2nad can't be build with a DLL proj4 library you need a static lib")
+    message(warning " nad2nad can't be build with a DLL proj library you need a static lib")
 endif(WIN32 AND BUILD_LIBPROJ_SHARED)
 
 
