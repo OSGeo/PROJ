@@ -95,4 +95,17 @@ In the following the GRS80 ellipsoid will be applied to all steps.
     +step +proj=cart +inv
     +step +proj=merc
 
+**5. Units of operations must match between steps.**
+
+.. versionadded:: 5.1.0
+
+The output units of step *n* must match the expected input unit of step *n+1*. E.g., you can't
+pass an operation that outputs projected coordinates to an operation that expects angular units
+(degrees). An example of such a unit mismatch is displayed below.
+
+::
+
+    +proj=pipeline
+    +step +proj=merc  # Mercator outputs projected coordinates
+    +step +proj=robin # The Robinson projection expects angular input
 
