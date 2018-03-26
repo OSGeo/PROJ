@@ -1950,7 +1950,7 @@ static int test_time(const char* args, double tol, double t_in, double t_exp) {
     if (P == 0)
         return 5;
 
-    in.xyzt.t = t_in;
+    in = proj_coord(0.0, 0.0, 0.0, t_in);
 
     out = proj_trans(P, PJ_FWD, in);
     if (fabs(out.xyzt.t - t_exp) > tol) {
