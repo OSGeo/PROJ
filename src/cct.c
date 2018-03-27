@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
     if (0==o)
         return 0;
 
-    if (opt_given (o, "h")) {
+    if (opt_given (o, "h") || argc==1) {
         printf (usage, o->progname);
         return 0;
     }
