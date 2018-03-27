@@ -221,6 +221,7 @@ static const char usage[] = {
     "    --verbose         Alias for -v\n"
     "    --help            Alias for -h\n"
     "    --list            Alias for -l\n"
+    "    --version         Print version number\n"
     "--------------------------------------------------------------------------------\n"
     "Examples:\n"
     "--------------------------------------------------------------------------------\n"
@@ -247,21 +248,24 @@ int main (int argc, char **argv) {
     if (0==o)
         return 0;
 
-    if (opt_given (o, "h")) {
+    if (opt_given (o, "h") || argc==1) {
         printf (usage, o->progname);
+        free (o);
         return 0;
     }
 
 
     if (opt_given (o, "version")) {
         fprintf (stdout, "%s: %s\n", o->progname, pj_get_release ());
+        free (o);
         return 0;
     }
 
 
-    if (opt_given (o, "l"))
+    if (opt_given (o, "l")) {
+        free (o);
         return list_err_codes ();
-
+    }
 
     T.verbosity = opt_given (o, "q");
     if (T.verbosity)

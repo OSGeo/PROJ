@@ -47,6 +47,10 @@ already employed for compiling the library.
 
     List the PROJ internal system error codes
 
+.. option:: --version
+
+    Print version number
+
 Tests for :program:`gie` are defined in simple text files. Usually having the
 extension ``.gie``. Test for :program:`gie` are written in the purpose-build command language for gie.
 The basic functionality of the gie command language is implemented through just
