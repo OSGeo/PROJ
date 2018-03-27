@@ -262,6 +262,18 @@ treated as a global parameter and is transferred to each individual steps.</p>
 <span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span>
 </pre></div>
 </div>
+<p><strong>5. Units of operations must match between steps.</strong></p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 5.1.0.</span></p>
+</div>
+<p>The output units of step <em>n</em> must match the expected input unit of step <em>n+1</em>. E.g., you can&#8217;t
+pass an operation that outputs projected coordinates to an operation that expects angular units
+(degrees). An example of such a unit mismatch is displayed below.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span>  <span class="c1"># Mercator outputs projected coordinates</span>
+<span class="o">+</span><span class="n">step</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">robin</span> <span class="c1"># The Robinson projection expects angular input</span>
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -288,7 +300,7 @@ treated as a global parameter and is transferred to each individual steps.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 26 Mar 2018.
+      Last updated on 27 Mar 2018.
 
     </p>
   </div>
