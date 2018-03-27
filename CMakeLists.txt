@@ -1,6 +1,6 @@
 #################################################################################
 #
-# This file is part of CMake configuration for PROJ4 library (inspired from SOCI
+# This file is part of CMake configuration for PROJ library (inspired from SOCI
 # CMake,  Copyright (C) 2009-2010 Mateusz Loskot <mateusz@loskot.net> )
 #
 # Copyright (C) 2011 Nicolas David <nicolas.david@ign.fr>
@@ -11,7 +11,7 @@
 #################################################################################
 cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 
-# proj4 is an ANSI C project
+# For historic reasons, the CMake PROJECT-NAME is PROJ4
 project(PROJ4 C)
 set(PROJECT_INTERN_NAME PROJ)
 
@@ -48,13 +48,12 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
 endif ()
 
 #################################################################################
-# PROJ4 CMake modules
+# PROJ CMake modules
 #################################################################################
 # Path to additional CMake modules
 set(CMAKE_MODULE_PATH ${PROJ4_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
-set(CMAKE_MODULE_PATH ${PROJ4_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
-include(Proj4Utilities)
+include(ProjUtilities)
 
 message(STATUS "")
 colormsg(_HIBLUE_ "Configuring PROJ:")
@@ -62,7 +61,7 @@ colormsg(_HIBLUE_ "Configuring PROJ:")
 #################################################################################
 #PROJ version information
 #################################################################################
-include(Proj4Version)
+include(ProjVersion)
 proj_version(MAJOR 5 MINOR 0 PATCH 0)
 set(PROJ_API_VERSION "13")
 set(PROJ_BUILD_VERSION "13.0.1")
@@ -70,9 +69,9 @@ set(PROJ_BUILD_VERSION "13.0.1")
 #################################################################################
 # Build features and variants
 #################################################################################
-include(Proj4SystemInfo)
-include(Proj4Config)
-include(Proj4Mac)
+include(ProjSystemInfo)
+include(ProjConfig)
+include(ProjMac)
 include(policies)
 
 #################################################################################
@@ -126,13 +125,13 @@ if (MSVC OR CMAKE_CONFIGURATION_TYPES)
   set (CMAKE_DEBUG_POSTFIX _d)
 endif ()
 
-option(PROJ4_TESTS "Enable build of collection of PROJ4 tests" ON)
-boost_report_value(PROJ4_TESTS)
-if(PROJ4_TESTS)
+option(PROJ_TESTS "Enable build of collection of PROJ tests" ON)
+boost_report_value(PROJ_TESTS)
+if(PROJ_TESTS)
     include(CTest)
     enable_testing()
-endif(PROJ4_TESTS)
-include(Proj4Test)
+endif(PROJ_TESTS)
+include(ProjTest)
 
 # Put the libraries and binaries that get built into directories at the
 # top of the build tree rather than in hard-to-find leaf
@@ -146,7 +145,7 @@ link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 #################################################################################
 # Installation
 #################################################################################
-include(Proj4InstallPath)
+include(ProjInstallPath)
 set(BINDIR "${DEFAULT_BINDIR}" CACHE PATH "The directory to install binaries into.")
 set(LIBDIR "${DEFAULT_LIBDIR}" CACHE PATH "The directory to install libraries into.")
 set(DATADIR "${DEFAULT_DATADIR}" CACHE PATH "The directory to install data files into.")

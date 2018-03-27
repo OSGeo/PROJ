@@ -15,8 +15,8 @@ endif(UNIX)
 
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-	SET(CMAKE_INSTALL_PREFIX ${DEFAULT_PROJ_ROOT_DIR} CACHE PATH "Proj.4 install
-		 prefix" FORCE)
+	SET(CMAKE_INSTALL_PREFIX ${DEFAULT_PROJ_ROOT_DIR} CACHE PATH
+		"Proj install prefix" FORCE)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 #TODO
@@ -49,7 +49,7 @@ else()
   set(DEFAULT_CMAKE_SUBDIR lib/cmake/${PROJECT_NAME_LOWER})
 endif()
 
-# Locations are changeable by user to customize layout of Proj.4 installation
+# Locations are changeable by user to customize layout of PROJ installation
 # (default values are platform-specific)
 set(PROJ_BIN_SUBDIR ${DEFAULT_BIN_SUBDIR} CACHE STRING
   "Subdirectory where executables will be installed")
@@ -62,7 +62,7 @@ set(PROJ_DATA_SUBDIR ${DEFAULT_DATA_SUBDIR} CACHE STRING
 set(PROJ_DOC_SUBDIR ${DEFAULT_DOC_SUBDIR} CACHE STRING
   "Subdirectory where doc will be installed")
 set(PROJ_CMAKE_SUBDIR ${DEFAULT_CMAKE_SUBDIR} CACHE STRING
-  "Subdirectory where cmake proj4-config file will be installed")
+  "Subdirectory where cmake proj-config file will be installed")
 
 # Mark *DIR variables as advanced and dedicated to use by power-users only.
 mark_as_advanced(PROJ_ROOT_DIR
