@@ -243,4 +243,26 @@ accept      440720 3751320 0
 expect      440719.958709357 3751294.2109841 -4.44340920541435
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+Test that pipelines with unit mismatch between steps can't be constructed.
+-------------------------------------------------------------------------------
+operation   +proj=pipeline
+            +step +proj=merc
+            +step +proj=merc
+expect      failure pjd_err_malformed_pipeline
+
+operation   +proj=pipeline
+            +step +proj=latlong
+            +step +proj=merc
+            +step +proj=helmert +x=200 +y=100
+expect      failure pjd_err_malformed_pipeline
+
+operation   +proj=pipeline
+            +step +proj=merc
+            +step +proj=unitconvert +xy_in=m +xy_out=km
+accept      12          56
+expect      1335.8339   7522.963
+-------------------------------------------------------------------------------
+
+
 </gie>

@@ -277,8 +277,8 @@ PJ *CONVERSION(axisswap,0) {
         P->left  = PJ_IO_UNITS_ANGULAR;
         P->right = PJ_IO_UNITS_ANGULAR;
     } else {
-        P->left  = PJ_IO_UNITS_PROJECTED;
-        P->right = PJ_IO_UNITS_PROJECTED;
+        P->left  = PJ_IO_UNITS_WHATEVER;
+        P->right = PJ_IO_UNITS_WHATEVER;
     }
 
 

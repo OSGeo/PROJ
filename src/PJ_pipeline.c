@@ -470,6 +470,19 @@ PJ *OPERATION(pipeline,0) {
         }
     }
 
+    /* Check that output units from step i are compatible with expected units in step i+1 */
+    for (i = 1; i < nsteps; i++) {
+        enum pj_io_units unit_returned = pj_right (P->opaque->pipeline[i]);
+        enum pj_io_units unit_expected = pj_left  (P->opaque->pipeline[i+1]);
+
+        if ( unit_returned == PJ_IO_UNITS_WHATEVER || unit_expected == PJ_IO_UNITS_WHATEVER )
+            continue;
+        if ( unit_returned != unit_expected ) {
+            proj_log_error (P, "Pipeline: Mismatched units between step %d and %d", i, i+1);
+            return destructor (P, PJD_ERR_MALFORMED_PIPELINE);
+        }
+    }
+
     proj_log_trace (P, "Pipeline: %d steps built. Determining i/o characteristics", nsteps);
 
     /* Determine forward input (= reverse output) data type */
