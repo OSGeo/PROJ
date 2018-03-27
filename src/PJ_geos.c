@@ -206,8 +206,8 @@ PJ *PROJECTION(geos) {
     if (sweep_axis == NULL)
       Q->flip_axis = 0;
     else {
-        if (sweep_axis[0] == '\0' || sweep_axis[1] != '\0' ||
-            (sweep_axis[0] != 'x' && sweep_axis[0] != 'y'))
+        if ((sweep_axis[0] != 'x' && sweep_axis[0] != 'y') ||
+            sweep_axis[1] != '\0')
             return pj_default_destructor (P, PJD_ERR_INVALID_SWEEP_AXIS);
 
         if (sweep_axis[0] == 'x')
