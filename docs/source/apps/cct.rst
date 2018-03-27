@@ -49,6 +49,10 @@ The following control parameters can  appear  in any order:
     Write non-essential, but potentially useful, information to stderr.
     Repeat for additional information (``-vv``, ``-vvv``, etc.)
 
+.. option:: --version
+
+    Print version number.
+
 The *+args* arguments are associated with coordinate operation parameters.
 Usage varies with operation.
 

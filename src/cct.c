@@ -117,6 +117,7 @@ static const char usage[] = {
     "    --verbose         Alias for -v\n"
     "    --inverse         Alias for -I\n"
     "    --help            Alias for -h\n"
+    "    --version         Print version number\n"
     "--------------------------------------------------------------------------------\n"
     "Operator Specs:\n"
     "--------------------------------------------------------------------------------\n"
