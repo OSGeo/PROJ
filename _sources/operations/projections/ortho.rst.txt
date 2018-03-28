@@ -17,9 +17,9 @@ around a given latitude and longitude.
 +---------------------+--------------------------------------------------------+
 | **Options**                                                                  |
 +---------------------+--------------------------------------------------------+
-| `+lon_0`            | Longitudinal projection center                         |
+| `+lon_0`            | Longitudinal projection center. Defaults to 0.0.       |
 +---------------------+--------------------------------------------------------+
-| `+lat_0`            | Latitudinal projection center                          |
+| `+lat_0`            | Latitudinal projection center. Defaults to 0.0.        |
 +---------------------+--------------------------------------------------------+
 
 .. image:: ./images/ortho.png
