@@ -386,9 +386,11 @@ back to the inverse operation. This procedure is done <code class="docutils lite
 resulting coordinate is within the set tolerance of the initial coordinate
 the test is passed.</p>
 <p>Example:</p>
-<p>operation       proj=merc
-accept          12 55
-roundtrip       10000 5 mm</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">operation       proj=merc</span>
+<span class="go">accept          12 55</span>
+<span class="go">roundtrip       10000 5 mm</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="option">
@@ -447,9 +449,9 @@ to use</em>, for a programmer, than the <code class="xref c c-func docutils lite
 <code class="xref c c-func docutils literal"><span class="pre">hypot()</span></code>&#8216;s so readily available.</p>
 <p>Gerald&#8217;s ingenuity also showed in the implementation of the vision, where
 he devised a comprehensive, yet simple, system of key-value pairs for
-parameterising a map projection, and the highly flexible PJ struct, storing
-run-time compiled versions of those key-value pairs, hence mak- ing  a  map
-projection  function call, pj_fwd(PJ, point), as easy as a traditional function
+parameterising a map projection, and the highly flexible <a class="reference internal" href="../development/reference/datatypes.html#c.PJ" title="PJ"><code class="xref c c-type docutils literal"><span class="pre">PJ</span></code></a> struct, storing
+run-time compiled versions of those key-value pairs, hence making a map
+projection  function call, <code class="docutils literal"><span class="pre">pj_fwd(PJ,</span> <span class="pre">point)</span></code>, as easy as a traditional function
 call like <code class="docutils literal"><span class="pre">hypot(x,y)</span></code>.</p>
 <p>While today, we may have more formally well defined metadata systems (most
 prominent the OGC WKT2 representation), nothing comes close being as easily
@@ -486,7 +488,7 @@ integrity of the PROJ system, in honour of Gerald.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 28 Mar 2018.
+      Last updated on 29 Mar 2018.
 
     </p>
   </div>

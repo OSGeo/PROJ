@@ -212,9 +212,11 @@ gie command language
 
     Example:
 
-    operation       proj=merc
-    accept          12 55
-    roundtrip       10000 5 mm
+    .. code-block:: console
+
+        operation       proj=merc
+        accept          12 55
+        roundtrip       10000 5 mm
 
 
 .. option:: direction <direction>
@@ -278,9 +280,9 @@ to use*, for a programmer, than the :c:func:`sin()`'s, :c:func:`tan()`'s and
 
 Gerald's ingenuity also showed in the implementation of the vision, where
 he devised a comprehensive, yet simple, system of key-value pairs for
-parameterising a map projection, and the highly flexible PJ struct, storing
-run-time compiled versions of those key-value pairs, hence mak- ing  a  map
-projection  function call, pj_fwd(PJ, point), as easy as a traditional function
+parameterising a map projection, and the highly flexible :c:type:`PJ` struct, storing
+run-time compiled versions of those key-value pairs, hence making a map
+projection  function call, ``pj_fwd(PJ, point)``, as easy as a traditional function
 call like ``hypot(x,y)``.
 
 While today, we may have more formally well defined metadata systems (most
