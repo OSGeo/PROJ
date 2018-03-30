@@ -16,16 +16,12 @@ The projection is conformal which makes it suitable for navigational purposes.
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global, but best used near the equator                   |
 +---------------------+----------------------------------------------------------+
-| **Implemented by**  | Gerald I. Evenden                                        |
++ **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Input type**      | Geodetic coordinates                                     |
 +---------------------+----------------------------------------------------------+
-| `+lat_ts`           | Latitude of true scale. Defaults to 0.0                  |
+| **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
-| `+k_0`              | Scaling factor. Defaults to 1.0                          |
-+---------------------+----------------------------------------------------------+
-
-
 
 .. image:: ./images/merc.png
    :scale: 50%
@@ -36,7 +32,7 @@ Usage
 ########
 
 Applications should be limited to equatorial regions, but is frequently
-used for navigational charts with latitude of true scale (``+lat_ts``) specified within
+used for navigational charts with latitude of true scale (:option:`+lat_ts`) specified within
 or near chart's boundaries.
 Often inappropriately used for world maps since the regions near the poles
 cannot be shown [Evenden1995]_.
@@ -53,8 +49,27 @@ Example using scaling factor::
     12545706.61     2746073.80
 
 
-Note that ``+lat_ts`` and ``+k_0`` are mutually exclusive.
-If used together, ``+lat_ts`` takes precedence over ``+k_0``.
+Note that :option:`+lat_ts` and :option:`+k_0` are mutually exclusive.
+If used together, :option:`+lat_ts` takes precedence over :option:`+k_0`.
+
+Options
+#########
+
+.. note:: All options are optional for the Mercator projection.
+
+.. include:: ../options/k_0.rst
+
+.. include:: ../options/lat_ts.rst
+
+.. include:: ../options/lat_0.rst
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
+
+.. include:: ../options/ellps.rst
 
 Mathematical definition
 #######################

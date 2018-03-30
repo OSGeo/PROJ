@@ -1,0 +1,5 @@
+.. option:: +k_0=<value>
+
+    Scale factor. Determines scale factor used in the projection.
+
+    *Defaults to 1.0.*
