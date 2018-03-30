@@ -7,21 +7,21 @@ Kinematic datum shifting utilizing a deformation model
 Perform datum shifts means of a deformation/velocity model.
 
 +-----------------+--------------------------------------------------------------------+
-| **Input type**  | Cartesian coordinates.                                             |
+| **Input type**  | Cartesian coordinates (spatial), decimalyears (temporal).          |
 +-----------------+--------------------------------------------------------------------+
-| **Output type** | Cartesian coordinates.                                             |
+| **Output type** | Cartesian coordinates (spatial), decimalyears (temporal).          |
 +-----------------+--------------------------------------------------------------------+
 | **Options**                                                                          |
 +-----------------+--------------------------------------------------------------------+
-| `xy_grids`      | Comma-separated list of grids to load.                             |
+| `xy_grids`      | Comma-separated list of grids to load. *Required*.                 |
 +-----------------+--------------------------------------------------------------------+
-| `z_grids`       | Comma-separated list of grids to load.                             |
+| `z_grids`       | Comma-separated list of grids to load. *Required*.                 |
 +-----------------+--------------------------------------------------------------------+
-| `t_epoch`       | Central epoch of transformation. [decimalyear]. Only used in       |
-|                 | spatiotemporal transformations.                                    |
+| `t_epoch`       | Central epoch of transformation. [decimalyear]. *Required*.        |
 +-----------------+--------------------------------------------------------------------+
-| `t_obs`         | Observation time of coordinate(s). Mostly useful in 2D and 3D      |
-|                 | transformations. [decimalyear]. *Optional*.                        |
+| `t_obs`         | Observation time of coordinate(s). [decimalyear]. *Optional*.      |
+|                 | If not specified, will be get from the t component of 4D input     |
+|                 | points.                                                            |
 +-----------------+--------------------------------------------------------------------+
 
 The deformation operation is used to adjust coordinates for intraplate deformations.
