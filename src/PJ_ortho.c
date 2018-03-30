@@ -1,6 +1,7 @@
 #define PJ_LIB__
 #include <errno.h>
 #include "proj.h"
+#include "proj_internal.h"
 #include "projects.h"
 
 PROJ_HEAD(ortho, "Orthographic") "\n\tAzi, Sph.";
@@ -20,37 +21,39 @@ struct pj_opaque {
 
 #define EPS10 1.e-10
 
+static XY forward_error(PJ *P, LP lp, XY xy) {
+    proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+    proj_log_trace(P, "Coordinate (%.3f, %.3f) is on the unprojected hemisphere",
+                   proj_todeg(lp.lam), proj_todeg(lp.phi));
+    return xy;
+}
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
+    XY xy;
     struct pj_opaque *Q = P->opaque;
     double  coslam, cosphi, sinphi;
+
+    xy.x = HUGE_VAL; xy.y = HUGE_VAL;
 
     cosphi = cos(lp.phi);
     coslam = cos(lp.lam);
     switch (Q->mode) {
     case EQUIT:
-        if (cosphi * coslam < - EPS10) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-            return xy;
-        }
+        if (cosphi * coslam < - EPS10)
+            return forward_error(P, lp, xy);
         xy.y = sin(lp.phi);
         break;
     case OBLIQ:
-        if (Q->sinph0 * (sinphi = sin(lp.phi)) + Q->cosph0 * cosphi * coslam < - EPS10) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-            return xy;
-        }
+        if (Q->sinph0 * (sinphi = sin(lp.phi)) + Q->cosph0 * cosphi * coslam < - EPS10)
+            return forward_error(P, lp, xy);
         xy.y = Q->cosph0 * sinphi - Q->sinph0 * cosphi * coslam;
         break;
     case N_POLE:
         coslam = - coslam;
                 /*-fallthrough*/
     case S_POLE:
-        if (fabs(lp.phi - P->phi0) - EPS10 > M_HALFPI) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-            return xy;
-        }
+        if (fabs(lp.phi - P->phi0) - EPS10 > M_HALFPI)
+            return forward_error(P, lp, xy);
         xy.y = cosphi * coslam;
         break;
     }
@@ -60,13 +63,16 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 
 
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
+    LP lp;
     struct pj_opaque *Q = P->opaque;
     double  rh, cosc, sinc;
+
+    lp.lam = HUGE_VAL; lp.phi = HUGE_VAL;
 
     if ((sinc = (rh = hypot(xy.x, xy.y))) > 1.) {
         if ((sinc - 1.) > EPS10) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_log_trace(P, "Point (%.3f, %.3f) is outside the projection boundary");
             return lp;
         }
         sinc = 1.;
