@@ -50,6 +50,8 @@ anoether by means of 3-, 4-and 7-parameter shifts, or one of their 6-, 8- and
 +----------------+--------------------------------------------------------------------+
 | `t_obs`        | Observation time of coordinate(s). Mostly useful in 2D and 3D      |
 |                | transformations. [decimalyear]. *Optional*.                        |
+|                | If not specified, will be get from the t component of 4D input     |
+|                | points.                                                            |
 +----------------+--------------------------------------------------------------------+
 | `exact`        | Use exact transformation equations. *Optional*.                    |
 +----------------+--------------------------------------------------------------------+
