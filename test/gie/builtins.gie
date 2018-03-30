@@ -3078,28 +3078,156 @@ Orthographic
 ===============================================================================
 
 -------------------------------------------------------------------------------
-operation +proj=ortho   +a=6400000    +lat_1=0.5 +lat_2=2
+Test the equatorial aspect of the Orthopgraphic projection.
+
+Test data from Snyder (1987), table 22, p. 151.
+-------------------------------------------------------------------------------
+operation   +proj=ortho +R=1 +lat_0=0 +lon_0=0
+-------------------------------------------------------------------------------
+tolerance   0.1 mm
+accept      0       0
+expect      0       0
+roundtrip   100
+accept      0       90
+expect      0       1
+roundtrip   100
+accept      0       30
+expect      0       0.5000
+roundtrip   100
+accept      10      50
+expect      0.1116  0.7660
+roundtrip   100
+accept      20      40
+expect      0.2620  0.6428
+roundtrip   100
+accept      30      80
+expect      0.0868  0.9848
+roundtrip   100
+accept      40      70
+expect      0.2198  0.9397
+roundtrip   100
+accept      50      60
+expext      0.3830  0.8660
+roundtrip   100
+accept      60      50
+expect      0.5567  0.7660
+roundtrip   100
+accept      70      20
+expect      0.8830  0.3420
+roundtrip   100
+accept      80      10
+expect      0.9698  0.1736
+roundtrip   100
+accept      90      90
+expect      0       1
+roundtrip   100
+accept      120     0
+expect      failure errno tolerance_condition
+
+direction   inverse
+accept      2   2
+expect      failure errno tolerance_condition
+
+
+-------------------------------------------------------------------------------
+Test the oblique aspect of the Orthopgraphic projection.
+
+Test data from Snyder (1987), table 23, pp. 152-153.
+-------------------------------------------------------------------------------
+operation   +proj=ortho +R=1 +lat_0=40 +lon_0=0
+-------------------------------------------------------------------------------
+tolerance   0.1 mm
+accept      0.0     90
+expect      0.0     0.7660
+roundtrip   100
+accept      20      60
+expect      0.1710  0.3614
+roundtrip   100
+accept      40     -30
+expect      0.5567  -0.8095
+roundtrip   100
+accept      100     70
+expect      0.3368  0.7580
+roundtrip   100
+accept      130     40
+expect      0.5868  0.8089
+roundtrip   100
+accept      170     60
+expect      0.0868  0.9799
+roundtrip   100
+accept      140     20
+expect      failure errno tolerance_condition
+
+direction   inverse
+accept      2   2
+expect      failure errno tolerance_condition
+
+
+-------------------------------------------------------------------------------
+Test the north polar aspect of the Orthopgraphic projection.
+-------------------------------------------------------------------------------
+operation   +proj=ortho +R=1 +lat_0=90 +lon_0=0
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
-accept  2 1
-expect  223322.760576727 111695.401198614
-accept  2 -1
-expect  223322.760576727 -111695.401198614
-accept  -2 1
-expect  -223322.760576727 111695.401198614
-accept  -2 -1
-expect  -223322.760576727 -111695.401198614
+accept      0   0
+expect      0   -1
+roundtrip   100
+accept      180 0
+expect      0   1
+roundtrip   100
+accept      90  90
+expect      0   0
+roundtrip   100
+accept      0   90
+expect      0   0
+roundtrip   100
+accept      90  0
+expect      1   0
+roundtrip   100
+accept      180 -90
+expect      failure errno tolerance_condition
+accept      0   -45
+expect      failure errno tolerance_condition
 
-direction inverse
-accept  200 100
-expect  0.001790493 0.000895247
-accept  200 -100
-expect  0.001790493 -0.000895247
-accept  -200 100
-expect  -0.001790493 0.000895247
-accept  -200 -100
-expect  -0.001790493 -0.000895247
+direction   inverse
+accept      2   2
+expect      failure errno tolerance_condition
 
+-------------------------------------------------------------------------------
+Test the south polar aspect of the Orthopgraphic projection.
+-------------------------------------------------------------------------------
+operation   +proj=ortho +R=1 +lat_0=-90 +lon_0=0
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept      0   0
+expect      0   1
+roundtrip   100
+accept      180 0
+expect      0   -1
+roundtrip   100
+accept      90  -90
+expect      0   0
+roundtrip   100
+accept      0   -90
+expect      0   0
+roundtrip   100
+accept      90  0
+expect      1   0
+roundtrip   100
+accept      180 90
+expect      failure errno tolerance_condition
+accept      0   45
+expect      failure errno tolerance_condition
+
+direction   inverse
+accept      2   2
+expect      failure errno tolerance_condition
+
+# Put a point a tiny tiny bit outside the radius of the sphere.
+# Since we are right at the numerical limit of floating point representation
+# it should still results in a correct coordinate.
+accept      0.70710678118 0.7071067812
+expect      45  0
 
 ===============================================================================
 Perspective Conic

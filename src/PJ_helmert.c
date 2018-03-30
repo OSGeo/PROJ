@@ -134,7 +134,8 @@ static void update_parameters(PJ *P) {
 
     /* debugging output */
     if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
-        proj_log_trace(P, "Transformation parameters for observation t_epoch %g:", Q->t_obs);
+        proj_log_trace(P, "Transformation parameters for observation "
+                       "t_obs=%g (t_epoch=%g):", Q->t_obs, Q->t_epoch);
         proj_log_trace(P, "x: %g", Q->xyz.x);
         proj_log_trace(P, "y: %g", Q->xyz.y);
         proj_log_trace(P, "z: %g", Q->xyz.z);
