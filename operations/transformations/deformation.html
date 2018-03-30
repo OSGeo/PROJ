@@ -199,26 +199,26 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><strong>Input type</strong></td>
-<td>Cartesian coordinates.</td>
+<td>Cartesian coordinates (spatial), decimalyears (temporal).</td>
 </tr>
 <tr class="row-even"><td><strong>Output type</strong></td>
-<td>Cartesian coordinates.</td>
+<td>Cartesian coordinates (spatial), decimalyears (temporal).</td>
 </tr>
 <tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
 </tr>
 <tr class="row-even"><td><cite>xy_grids</cite></td>
-<td>Comma-separated list of grids to load.</td>
+<td>Comma-separated list of grids to load. <em>Required</em>.</td>
 </tr>
 <tr class="row-odd"><td><cite>z_grids</cite></td>
-<td>Comma-separated list of grids to load.</td>
+<td>Comma-separated list of grids to load. <em>Required</em>.</td>
 </tr>
 <tr class="row-even"><td><cite>t_epoch</cite></td>
-<td>Central epoch of transformation. [decimalyear]. Only used in
-spatiotemporal transformations.</td>
+<td>Central epoch of transformation. [decimalyear]. <em>Required</em>.</td>
 </tr>
 <tr class="row-odd"><td><cite>t_obs</cite></td>
-<td>Observation time of coordinate(s). Mostly useful in 2D and 3D
-transformations. [decimalyear]. <em>Optional</em>.</td>
+<td>Observation time of coordinate(s). [decimalyear]. <em>Optional</em>.
+If not specified, will be get from the t component of 4D input
+points.</td>
 </tr>
 </tbody>
 </table>
