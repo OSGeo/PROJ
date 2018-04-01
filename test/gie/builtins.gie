@@ -1366,28 +1366,102 @@ Gnomonic
 ===============================================================================
 
 -------------------------------------------------------------------------------
-operation +proj=gnom   +a=6400000    +lat_1=0.5 +lat_2=2
+Test material from Snyder p. 168, table 26.
+Tests the equatorial aspect of the projection.
+-------------------------------------------------------------------------------
+operation +proj=gnom +R=1
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
-accept  2 1
-expect  223492.924747185 111780.509206593
-accept  2 -1
-expect  223492.924747185 -111780.509206593
-accept  -2 1
-expect  -223492.924747185 111780.509206593
-accept  -2 -1
-expect  -223492.924747185 -111780.509206593
+accept  0       0
+expect  0       0
+roundtrip   100
+accept  10      80
+expect  0.1763  5.7588
+roundtrip   100
+accept  20      70
+expect  0.3640  2.9238
+roundtrip   100
+accept  30      60
+expect  0.5774  2.0000
+roundtrip   100
+accept  40      50
+expect  0.8391  1.5557
+roundtrip   100
+accept  50      40
+expect  1.1918  1.3054
+roundtrip   100
+accept  60      30
+expect  1.7321  1.1547
+roundtrip   100
+accept  70      20
+expect  2.7475  1.0642
+roundtrip   100
+accept  80      10
+expect  5.6713  1.0154
+roundtrip   100
+accept  80      80
+expect  5.6713  32.6596
+roundtrip   100
+accept  0   90
+expect  failure errno tolerance_condition
 
-direction inverse
-accept  200 100
-expect  0.001790493 0.000895247
-accept  200 -100
-expect  0.001790493 -0.000895247
-accept  -200 100
-expect  -0.001790493 0.000895247
-accept  -200 -100
-expect  -0.001790493 -0.000895247
+# test that extreme northings are mapped to the sphere
+direction   inverse
+accept      0   1e8
+expect      0   90
 
+
+-------------------------------------------------------------------------------
+Test the northern polar aspect of the gnonomic projection
+-------------------------------------------------------------------------------
+operation +proj=gnom +R=1 +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       90
+expect  0       0
+roundtrip   100
+accept  45      45
+expect  0.7071  -0.7071
+roundtrip   100
+accept  0       0
+expect  failure errno tolerance_condition
+accept  90      0
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+Test the sourthern polar aspect of the gnonomic projection
+-------------------------------------------------------------------------------
+operation +proj=gnom +R=1 +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       -90
+expect  0       0
+roundtrip   100
+accept  45      -45
+expect  0.7071  0.7071
+roundtrip   100
+accept  0       0
+expect  failure errno tolerance_condition
+accept  90      0
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+Test the oblique aspect of the gnonomic projection
+-------------------------------------------------------------------------------
+operation +proj=gnom +R=1 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       45
+expect  0       0
+roundtrip   100
+accept  0       0
+expect  0       -1
+roundtrip   100
+accept  0       90
+expect  0       1
+roundtrip   100
+accept  0       -45
+expect  failure errno tolerance_condition
 
 ===============================================================================
 Goode Homolosine
