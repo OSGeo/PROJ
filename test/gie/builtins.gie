@@ -71,51 +71,233 @@ Azimuthal Equidistant
 ===============================================================================
 
 -------------------------------------------------------------------------------
-operation +proj=aeqd   +ellps=GRS80  +lat_1=0.5 +lat_2=2
+Test equatorial aspect of the spherical azimuthal equidistant. Test data from
+Snyder pp. 196-197, table 30.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +R=1 +lat_0=0
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
-accept  2 1
-expect  222616.522190052 110596.996549550
-accept  2 -1
-expect  222616.522190052 -110596.996549550
-accept  -2 1
-expect  -222616.522190052 110596.996549550
-accept  -2 -1
-expect  -222616.522190052 -110596.996549550
+accept  0       0
+expect  0       0
+roundtrip   100
+accept  0       90
+expect  0       1.57080
+roundtrip   100
+accept  10      80
+expect  0.04281 1.39829
+roundtrip   100
+accept  40      30
+expect  0.62896 0.56493
+roundtrip   100
+accept  90      0
+expect  1.57080 0
+roundtrip   100
+accept  90      90
+expect  0       1.57080
+roundtrip   100
 
-direction inverse
-accept  200 100
-expect  0.001796631 0.000904369
-accept  200 -100
-expect  0.001796631 -0.000904369
-accept  -200 100
-expect  -0.001796631 0.000904369
-accept  -200 -100
-expect  -0.001796631 -0.000904369
+# point opposite projection center is undefined
+accept  180     0
+expect  failure errno tolerance_condition
 
 -------------------------------------------------------------------------------
-operation +proj=aeqd   +R=6400000    +lat_1=0.5 +lat_2=2
+Test equatorial aspect of the ellipsoidal azimuthal equidistant. Test data from
+Snyder pp. 196-197, table 30.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +ellps=GRS80 +lat_0=0
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
-accept  2 1
-expect  223379.456047271 111723.757570854
-accept  2 -1
-expect  223379.456047271 -111723.757570854
-accept  -2 1
-expect  -223379.456047271 111723.757570854
-accept  -2 -1
-expect  -223379.456047271 -111723.757570854
+accept  0   90
+expect  0   10001965.7292
+roundtrip   100
+accept  0   0
+expect  0   0
+roundtrip   100
+accept  90  0
+expect  10_018_754.1714  0
+roundtrip   100
+accept  90  0
+expect  10_018_754.1714  0
+roundtrip   100
+accept  45  45
+expect  3_860_398.3783  5_430_089.0490
+roundtrip   100
+
+-------------------------------------------------------------------------------
+Test equatorial aspect of the ellipsoidal azimuthal equidistant. Test data from
+Snyder pp. 196-197, table 30.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +ellps=GRS80 +guam
+-------------------------------------------------------------------------------
+tolerance 1 m
+accept 0                0
+expect 0.0000           0.0000
+roundtrip   100
+accept 90               90
+except 0.0000           10_001_965.7292
+roundtrip   100
+accept 0                90
+expect 0.0000           10_001_965.7292
+roundtrip   100
+accept 90               90
+expect 0.0000           10_001_965.7292
+roundtrip   100
+accept 45               45
+expect 3548107.5793    5970183.542
+#roundtrip   100
+accept -45              -45
+expect -3548107.5793   -5970183.542
+#roundtrip   100
+
+-------------------------------------------------------------------------------
+Test northern polar aspect of the ellipsoidal azimuthal equidistant. Test data
+from Snyder p. 198, table 31.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +ellps=intl +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0   90
+expect  0   0
+roundtrip   100
+accept  0   85
+expect  0   -558_485.4
+roundtrip   100
+accept  0   80
+expect  0   -1_116_885.2
+roundtrip   100
+accept  0   70
+expect  0   -2_233_100.9
+roundtrip   100
+
+-------------------------------------------------------------------------------
+Test sourthern polar aspect of the ellipsoidal azimuthal equidistant. Test data
+from Snyder p. 198, table 31.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +ellps=intl +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0   -90
+expect  0   0
+roundtrip   100
+accept  0   -85
+expect  0   558_485.4
+roundtrip   100
+accept  0   -80
+expect  0   1_116_885.2
+roundtrip   100
+accept  0   -70
+expect  0   2_233_100.9
+roundtrip   100
+
+-------------------------------------------------------------------------------
+Test northern polar aspect of the spherical azimuthal equidistant.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +R=1 +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0       0
+expect  0       -1.5708
+roundtrip   100
+accept  0       90
+expect  0       0
+roundtrip   100
+accept  90      90
+expect  0       0
+roundtrip   100
+accept  90      0
+expect  1.5708  0
+roundtrip   100
+accept  45      45
+expext  0.5554  -0.5554
+roundtrip   100
+
+#point opposite of projection center is undefined
+accept  0   -90
+expect  failure errno tolerance_condition
 
 direction inverse
-accept  200 100
-expect  0.001790493 0.000895247
-accept  200 -100
-expect  0.001790493 -0.000895247
-accept  -200 100
-expect  -0.001790493 0.000895247
-accept  -200 -100
-expect  -0.001790493 -0.000895247
+accept  0   5
+expect  failure errno tolerance_condition
 
+accept  0   3.14159265359
+expect  180 -90
+
+-------------------------------------------------------------------------------
+Test sourthnern polar aspect of the spherical azimuthal equidistant.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +R=1 +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0       0
+expect  0       1.5708
+roundtrip   100
+accept  0       -90
+expect  0       0
+roundtrip   100
+accept  90      -90
+expect  0       0
+roundtrip   100
+accept  90      0
+expect  1.5708  0
+roundtrip   100
+accept  45      -45
+expext  0.5554  -0.5554
+roundtrip   100
+
+#point opposite of projection center is undefined
+accept  0   90
+expect  failure errno tolerance_condition
+
+
+-------------------------------------------------------------------------------
+Test oblique aspect of the spherical azimuthal equidistant.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +R=1 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0 0
+expect  0.0000  -0.7854
+roundtrip   100
+accept  0 45
+expect  0.0000  0.0000
+roundtrip   100
+accept  0 90
+expect  0.0000  0.7854
+roundtrip   100
+accept  90 0
+expect  1.5708  -0.0000
+roundtrip   100
+accept  90 45
+expect  0.8550  0.6046
+#roundtrip   100 # roundtrip performs badly for this test on some platforms
+accept  90 90
+expect  0.0000  0.7854
+roundtrip   100
+
+-------------------------------------------------------------------------------
+Test oblique aspect of the ellipsoidal azimuthal equidistant.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +ellps=GRS80 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0 0
+expect  0.0000  -4984944.3779
+roundtrip   100
+accept  0 45
+expect  0.0000  0.0000
+roundtrip   100
+accept  0 90
+expect  0.0000  5017021.3514
+roundtrip   100
+accept  90 0
+expect  10010351.5666   26393.3781
+roundtrip   100
+accept  90 45
+expect  5461910.9128    3863514.7047
+roundtrip   100
+accept  90 90
+expect  0.0000  5017021.3514
+roundtrip   100
 
 ===============================================================================
 Airy
