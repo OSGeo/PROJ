@@ -433,6 +433,47 @@ available. Below is an example of that situation.</p>
 <p>See <code class="docutils literal"><span class="pre">gie</span> <span class="pre">-l</span></code> for a list of error codes that can be ignored.</p>
 </dd></dl>
 
+<dl class="option">
+<dt id="cmdoption-arg-echo">
+<code class="descname">echo</code><code class="descclassname"> &lt;text&gt;</code><a class="headerlink" href="#cmdoption-arg-echo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add user defined text to the output stream. See the example below.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;gie&gt;</span>
+<span class="go">echo ** Mercator projection tests **</span>
+<span class="go">operation +proj=merc</span>
+<span class="go">accept  0   0</span>
+<span class="go">expect  0   0</span>
+<span class="go">&lt;/gie&gt;</span>
+</pre></div>
+</div>
+<p>which returns</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">-------------------------------------------------------------------------------</span>
+<span class="go">Reading file &#39;test.gie&#39;</span>
+<span class="go">** Mercator projection test **</span>
+<span class="go">-------------------------------------------------------------------------------</span>
+<span class="go">total:  1 tests succeeded,  0 tests skipped,  0 tests failed.</span>
+<span class="go">-------------------------------------------------------------------------------</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-skip">
+<code class="descname">skip</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-skip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skip any test after the first occurence of <a class="reference internal" href="#cmdoption-arg-skip"><code class="xref std std-option docutils literal"><span class="pre">skip</span></code></a>. In the example below only
+the first test will be performed. The second test is skipped. This feature is mostly
+relevant for debugging when writing new test cases.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">&lt;gie&gt;</span>
+<span class="go">operation proj=merc</span>
+<span class="go">accept  0   0</span>
+<span class="go">expect  0   0</span>
+<span class="go">skip</span>
+<span class="go">accept  0   1</span>
+<span class="go">expect  0   110579.9</span>
+<span class="go">&lt;/gie&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="background">
 <h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
