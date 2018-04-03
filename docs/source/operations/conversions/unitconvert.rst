@@ -109,4 +109,6 @@ In the table below all time units supported by PROJ is listed.
 +--------------+-----------------------------+
 | gps_week     | GPS Week                    |
 +--------------+-----------------------------+
+| yyyymmdd     | Date in yyyymmdd format     |
++--------------+-----------------------------+
 
