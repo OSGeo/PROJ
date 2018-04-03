@@ -105,6 +105,7 @@ static const char usage[] = {
     "    -z value          Provide a fixed z value for all input data (e.g. -z 0)\n"
     "    -t value          Provide a fixed t value for all input data (e.g. -t 0)\n"
     "    -I                Do the inverse transformation\n"
+    "    -s n              Skip n first lines of a infile\n"
     "    -v                Verbose: Provide non-essential informational output.\n"
     "                      Repeat -v for more verbosity (e.g. -vv)\n"
     "--------------------------------------------------------------------------------\n"
@@ -116,6 +117,7 @@ static const char usage[] = {
     "    --time            Alias for -t\n"
     "    --verbose         Alias for -v\n"
     "    --inverse         Alias for -I\n"
+    "    --skip-lines      Alias for -s\n"
     "    --help            Alias for -h\n"
     "    --version         Print version number\n"
     "--------------------------------------------------------------------------------\n"
@@ -156,13 +158,19 @@ int main(int argc, char **argv) {
     OPTARGS *o;
     FILE *fout = stdout;
     char *buf;
-    int nfields = 4, direction = 1, verbose;
+    int nfields = 4, direction = 1, skip_lines = 0, verbose;
     double fixed_z = HUGE_VAL, fixed_time = HUGE_VAL;
     int columns_xyzt[] = {1, 2, 3, 4};
     const char *longflags[]  = {"v=verbose", "h=help", "I=inverse", "version", 0};
-    const char *longkeys[]   = {"o=output",  "c=columns", "z=height", "t=time", 0};
+    const char *longkeys[]   = {
+        "o=output",
+        "c=columns",
+        "z=height",
+        "t=time",
+        "s=skip-lines",
+        0};
 
-    o = opt_parse (argc, argv, "hvI", "cozt", longflags, longkeys);
+    o = opt_parse (argc, argv, "hvI", "cozts", longflags, longkeys);
     if (0==o)
         return 0;
 
@@ -200,6 +208,10 @@ int main(int argc, char **argv) {
     if (opt_given (o, "t")) {
         fixed_time = proj_atof (opt_arg (o, "t"));
         nfields--;
+    }
+
+    if (opt_given (o, "s")) {
+        skip_lines = atoi (opt_arg(o, "s"));
     }
 
     if (opt_given (o, "c")) {
@@ -265,6 +277,10 @@ int main(int argc, char **argv) {
             continue;
         }
         point = parse_input_line (buf, columns_xyzt, fixed_z, fixed_time);
+        if (skip_lines > 0) {
+            skip_lines--;
+            continue;
+        }
         if (HUGE_VAL==point.xyzt.x) {
             char *c = column (buf, 1);
 
