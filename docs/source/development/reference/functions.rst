@@ -276,6 +276,34 @@ Change the error-state of :c:data:`P` to `err`.
 
     .. note:: Available from version 5.1.0.
 
+
+Logging
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. c:function::  PJ_LOG_LEVEL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL level)
+
+    Get and set logging level for a given context. Changes the log level to
+    :c:data:`level` and returns the previous logging level. If called with
+    :c:data:`level` set to :c:type:`PJ_LOG_TELL` the function returns the current
+    logging level without changing it.
+
+    :param PJ_CONTEXT* ctx: Threading context.
+    :param PJ_LOG_LEVEL level: New logging level.
+
+    :returns: :c:type:`PJ_LOG_LEVEL`
+
+    .. versionadded:: 5.1.0
+
+.. c:function::  void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf)
+
+    Override the internal log function of PROJ.
+
+    :param PJ_CONTEXT* ctx: Threading context.
+    :param void* app_data: Pointer to data structure used by the calling application.
+    :param PJ_LOG_FUNCTION logf: Log function that overrides the PROJ log function.
+
+    .. versionadded:: 5.1.0
+
 Info functions
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
