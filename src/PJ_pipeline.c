@@ -306,6 +306,8 @@ static void set_ellipsoid(PJ *P) {
         /* the PJ you provided".                                         */
         proj_errno_reset (P);
     }
+    P->a_orig = P->a;
+    P->es_orig = P->es;
 
     pj_calc_ellipsoid_params (P, P->a, P->es);
 

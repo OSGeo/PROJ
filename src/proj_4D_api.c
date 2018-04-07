@@ -485,7 +485,7 @@ Returns 1 on success, 0 on failure
         if (0==d[0] && 0==d[1] && 0==d[2] && 0==d[3] && 0==d[4] && 0==d[5] && 0==d[6]) {
             /* If the current ellipsoid is not WGS84, then make sure the */
             /* change in ellipsoid is still done. */
-            if (!(fabs(P->a - 6378137.0) < 1e-8 && fabs(P->f - 1./ 298.257223563) < 1e-15)) {
+            if (!(fabs(P->a_orig - 6378137.0) < 1e-8 && fabs(P->es_orig - 0.0066943799901413) < 1e-15)) {
                 do_cart = 1;
             }
             break;
@@ -512,7 +512,7 @@ Returns 1 on success, 0 on failure
     /* geocentric/cartesian space or we need to do a Helmert transform.         */
     if (P->is_geocent || P->helmert || do_cart) {
         char def[150];
-        sprintf (def, "break_cs2cs_recursion     proj=cart   a=%40.20g  f=%40.20g", P->a, P->f);
+        sprintf (def, "break_cs2cs_recursion     proj=cart   a=%40.20g  es=%40.20g", P->a_orig, P->es_orig);
         Q = proj_create (P->ctx, def);
         if (0==Q)
             return 0;
