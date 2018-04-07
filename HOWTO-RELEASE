@@ -46,27 +46,29 @@
 
 7) Update NEWS file with summary of release changes.
 
-8) If this is a major release, prepare a branch.
+8) Update the year in CITATION
+
+9) If this is a major release, prepare a branch.
 
    git checkout -b 5.0
 
-9) Tag the release
+10) Tag the release
 
    git tag 5.0.0
 
-10) Do a "make dist-all" in the proj root directory.  After some grinding
+11) Do a "make dist-all" in the proj root directory.  After some grinding
    this should result in files like proj-4.4.3.tar.gz and proj-4.4.3.zip
    being created.  These are full source distributions.
 
-11) Put these in the proj ftp area on /osgeo/download/proj on
+12) Put these in the proj ftp area on /osgeo/download/proj on
    download.osgeo.org.  This can be done via scp using a command like the
    following.
 
   scp proj-4.4.3.{tar.gz,zip} warmerdam@download.osgeo.org:/osgeo/download/proj
 
-12) Announce the new release on the PROJ.4 and MetaCRS mailing lists.
+13) Announce the new release on the PROJ.4 and MetaCRS mailing lists.
 
-13) Issue a new release report on GitHub:
+14) Issue a new release report on GitHub:
 
    https://github.com/OSGeo/proj.4/releases/new
 
