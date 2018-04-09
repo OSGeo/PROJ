@@ -1,8 +1,10 @@
 #define PJ_LIB__
+#include "proj_internal.h"
 #include "proj.h"
 #include "projects.h"
 
 PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
+PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Sph\n\t";
 
 #define EPS10 1.e-10
 
@@ -76,3 +78,18 @@ PJ *PROJECTION(merc) {
     return P;
 }
 
+PJ *PROJECTION(webmerc) {
+
+    /* Overriding k_0, lat_0 and lon_0 with fixed parameters */
+    P->k0 = 1.0;
+    P->phi0 = 0.0;
+    P->lam0 = 0.0;
+
+    P->b = P->a;
+    /* Clean up the ellipsoidal parameters to reflect the sphere */
+    P->es = P->e = P->f = 0;
+    pj_calc_ellipsoid_params (P, P->a, 0);
+    P->inv = s_inverse;
+    P->fwd = s_forward;
+    return P;
+}
