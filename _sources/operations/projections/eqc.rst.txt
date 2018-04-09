@@ -64,9 +64,8 @@ Example using EPSG 32662 (WGS84 Plate Carrée)::
 
 Example using Plate Carrée projection with true scale at latitude 30° and central meridian 90°W::
 
-    $ echo -88 30 | proj +proj=eqc +lat_ts=30 +lat_0=90w
-    -8483684.61     13358338.90
-
+    $ echo -88 30 | proj +proj=eqc +lat_ts=30 +lon_0=90w
+    192811.01       3339584.72
 
 Mathematical definition
 #######################
