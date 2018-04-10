@@ -316,6 +316,9 @@
             
   <div class="section" id="airy">
 <span id="id1"></span><h1>Airy<a class="headerlink" href="#airy" title="Permalink to this headline">¶</a></h1>
+<p>The Airy projection is an azimuthal minimum error projection for the region
+within the small or great circle defined by an angular distance,
+<span class="math">\(\phi_b\)</span>, from the tangency point of the plane <span class="math">\(( \lambda_0, \phi_0 )\)</span>.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="27%" />
@@ -337,7 +340,10 @@
 <tr class="row-odd"><td colspan="2"><strong>Options</strong></td>
 </tr>
 <tr class="row-even"><td><cite>+lat_b</cite></td>
-<td>&#160;</td>
+<td>Angular distance from tangency point of the plane
+<span class="math">\(( \lambda_0, \phi_0 )\)</span> where the error is kept at
+minimum. Defaults to <span class="math">\(90^{\circ}\)</span> which is
+suitable for hemispherical maps.</td>
 </tr>
 <tr class="row-odd"><td><cite>+no_cut</cite></td>
 <td>Do not cut at hemisphere limit</td>
@@ -370,7 +376,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 09 Apr 2018.
+      Last updated on 10 Apr 2018.
 
     </p>
   </div>
