@@ -2211,7 +2211,7 @@ Lambert Azimuthal Equal Area
 ===============================================================================
 
 -------------------------------------------------------------------------------
-operation +proj=laea   +ellps=GRS80  +lat_1=0.5 +lat_2=2
+operation +proj=laea +ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
 accept  2 1
@@ -2222,6 +2222,9 @@ accept  -2 1
 expect  -222602.471450095 110589.827224410
 accept  -2 -1
 expect  -222602.471450095 -110589.827224409
+
+accept  180 0
+expect  failure errno tolerance_condition
 
 direction inverse
 accept  200 100
@@ -2234,7 +2237,7 @@ accept  -200 -100
 expect  -0.001796631 -0.000904369
 
 -------------------------------------------------------------------------------
-operation +proj=laea   +R=6400000    +lat_1=0.5 +lat_2=2
+operation +proj=laea +R=6400000
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
 accept  2 1
@@ -2246,6 +2249,9 @@ expect  -223365.281370125 111716.668072916
 accept  -2 -1
 expect  -223365.281370125 -111716.668072916
 
+accept  180 0
+expect  failure errno tolerance_condition
+
 direction inverse
 accept  200 100
 expect  0.001790493 0.000895247
@@ -2255,6 +2261,147 @@ accept  -200 100
 expect  -0.001790493 0.000895247
 accept  -200 -100
 expect  -0.001790493 -0.000895247
+
+-------------------------------------------------------------------------------
+Test oblique aspect of the spherical form
+-------------------------------------------------------------------------------
+operation +proj=laea +R=1 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   45
+expect  0   0
+accept  0   0
+expect  0   -0.7654
+accept  0   90
+expect  0   0.7654
+accept  0   -45
+expect  0   -1.4142
+accept  45  45
+expect  0.5194  0.1521
+
+tolerance 0.1 mm
+accept  45  45
+roundtrip   100
+
+# error when waaay outside the sphere
+direction inverse
+accept  0   10
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+Test oblique aspect of the ellipsoidal form
+-------------------------------------------------------------------------------
+operation +proj=laea +ellps=GRS80 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   45
+expect  0   0
+accept  0   0
+expect  0   -4860248.8602
+accept  0   90
+expect  0   4886594.2207
+accept  0   -45
+expect  0   -8984728.0442
+accept  45  45
+expect  3318800.8682    968788.2336
+
+tolerance 10 cm
+accept  45 45
+roundtrip 100
+
+# test rho <EPS10
+direction inverse
+accept  0   0
+expect  0   45
+
+-------------------------------------------------------------------------------
+Test south polar aspect for the spherical form
+-------------------------------------------------------------------------------
+operation +proj=laea +R=1 +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   -90
+expect  0   0
+accept  0   0
+expect  0   1.4142
+accept  0   -45
+expect  0   0.7654
+accept  0   45
+expect  0   1.8478
+accept  0   90
+expect failure errno tolerance_condition
+
+tolerance 0.1 mm
+accept  45  45
+roundtrip   100
+
+-------------------------------------------------------------------------------
+Test south polar aspect for the ellipsoidal form
+-------------------------------------------------------------------------------
+operation +proj=laea +ellps=GRS80 +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   -90
+expect  0   0
+accept  0   0
+expect  0   9009964.7611
+accept  0   -45
+expect  0   4889334.8030
+accept  0   45
+expect  0   11766619.5307
+accept  0   90
+expect failure errno tolerance_condition
+
+tolerance 10 cm
+accept  45  45
+roundtrip   100
+
+# test q == 0.0 condition
+direction inverse
+accept  0   0
+expect  0   -90
+
+-------------------------------------------------------------------------------
+Test north polar aspect for the spherical form
+-------------------------------------------------------------------------------
+operation +proj=laea +R=1 +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   90
+expect  0   0
+accept  0   0
+expect  0   -1.4142
+accept  0   45
+expect  0   -0.7654
+accept  0   -45
+expect  0   -1.8478
+accept  0   -90
+expect failure errno tolerance_condition
+
+tolerance 0.1 mm
+accept  45  45
+roundtrip   100
+
+-------------------------------------------------------------------------------
+Test north polar aspect
+-------------------------------------------------------------------------------
+operation +proj=laea +ellps=GRS80 +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   90
+expect  0   0
+accept  0   0
+expect  0   -9009964.7611
+accept  0   45
+expect  0   -4889334.8030
+accept  0   -45
+expect  0   -11766619.5307
+accept  0   -90
+expect failure errno tolerance_condition
+
+tolerance 10 cm
+accept 45   45
+roundtrip   100
 
 
 ===============================================================================
