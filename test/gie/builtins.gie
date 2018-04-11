@@ -3347,6 +3347,60 @@ expect  -0.001790493 0.000895247
 accept  -200 -100
 expect  -0.001790493 -0.000895247
 
+-------------------------------------------------------------------------------
+Test north polar aspect
+-------------------------------------------------------------------------------
+operation +proj=nsper +R=1 +h=3 +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       90
+expect  0       0
+accept  45      45
+expect  0.4555 -0.4555
+roundtrip   100
+accept  0       0
+expect  failure errno tolerance_condition
+
+direction inverse
+accept  0       0
+expect  0       90
+accept  0       2   # projected coordinate is outside the sphere
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+Test south polar aspect
+-------------------------------------------------------------------------------
+operation +proj=nsper +R=1 +h=3 +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       -90
+expect  0       0
+accept  -45      -45
+expect  -0.4555 0.4555
+roundtrip   100
+accept  0       0
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+operation +proj=nsper +R=1 +h=3 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       45
+expect  0       0
+accept  0       90
+expect  0       0.6442
+accept  0       0
+expect  0       -0.6442
+accept  45      45
+expect  0.4767  0.1396
+roundtrip   100
+
+
+-------------------------------------------------------------------------------
+operation +proj=nsper +R=1 +h=0
+-------------------------------------------------------------------------------
+expect  failure errno h_less_than_zero
+
 
 ===============================================================================
 New Zealand Map Grid
