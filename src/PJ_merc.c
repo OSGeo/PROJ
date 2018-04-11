@@ -8,6 +8,13 @@ PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Sph\n\t";
 
 #define EPS10 1.e-10
 
+static double _tan_near_fort_pi(double x) {
+    if (fabs(x) <= __DBL_EPSILON__) {
+        return 2*x + 1.0;
+    }
+    return tan(M_FORTPI + x);
+}
+
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     XY xy = {0.0,0.0};
     if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
@@ -27,7 +34,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         return xy;
 }
     xy.x = P->k0 * lp.lam;
-    xy.y = P->k0 * log(tan(M_FORTPI + .5 * lp.phi));
+    xy.y = P->k0 * log(_tan_near_fort_pi(.5 * lp.phi));
     return xy;
 }
 
