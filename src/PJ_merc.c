@@ -2,6 +2,7 @@
 #include "proj_internal.h"
 #include "proj.h"
 #include "projects.h"
+#include <float.h>
 
 PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Sph\n\t";
@@ -9,7 +10,7 @@ PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Sph\n\t";
 #define EPS10 1.e-10
 
 static double _tan_near_fort_pi(double x) {
-    if (fabs(x) <= __DBL_EPSILON__) {
+    if (fabs(x) <= DBL_EPSILON) {
         return 2*x + 1.0;
     }
     return tan(M_FORTPI + x);
