@@ -9,11 +9,31 @@ PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Sph\n\t";
 
 #define EPS10 1.e-10
 
-static double _tan_near_fort_pi(double x) {
+#if !defined(HAVE_C99_MATH)
+#define HAVE_C99_MATH 0
+#endif
+
+#if HAVE_C99_MATH
+#define log1px log1p
+#else
+static double log1px(double x) {
+  volatile double
+    y = 1 + x,
+    z = y - 1;
+  /* Here's the explanation for this magic: y = 1 + z, exactly, and z
+   * approx x, thus log(y)/z (which is nearly constant near z = 0) returns
+   * a good approximation to the true log(1 + x)/x.  The multiplication x *
+   * (log(y)/z) introduces little additional error. */
+  return z == 0 ? x : x * log(y) / z;
+}
+#endif
+
+static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
     if (fabs(x) <= DBL_EPSILON) {
-        return 2*x + 1.0;
+        /* tan(M_FORTPI + .5 * x) can be approximated by  1.0 + x */
+        return log1px(x);
     }
-    return tan(M_FORTPI + x);
+    return log(tan(M_FORTPI + .5 * x));
 }
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
@@ -35,7 +55,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         return xy;
 }
     xy.x = P->k0 * lp.lam;
-    xy.y = P->k0 * log(_tan_near_fort_pi(.5 * lp.phi));
+    xy.y = P->k0 * logtanpfpim1(lp.phi);
     return xy;
 }
 
