@@ -217,6 +217,8 @@ int main(int argc, char **argv) {
         "s=skip-lines",
         0};
 
+    fout = stdout;
+
     o = opt_parse (argc, argv, "hvI", "cozts", longflags, longkeys);
     if (0==o)
         return 0;
@@ -316,6 +318,7 @@ int main(int argc, char **argv) {
     while (opt_input_loop (o, optargs_file_format_text)) {
         int err;
         void *ret = fgets (buf, 10000, o->input);
+        char *c = column (buf, 1);
         opt_eof_handler (o);
         if (0==ret) {
             print (PJ_LOG_ERROR, "Read error in record %d\n", (int) o->record_index);
@@ -326,15 +329,14 @@ int main(int argc, char **argv) {
             skip_lines--;
             continue;
         }
+
+        /* if it's a comment or blank line, we reflect it */
+        if (c && ((*c=='\0') || (*c=='#'))) {
+            fprintf (fout, "%s", buf);
+            continue;
+        }
+
         if (HUGE_VAL==point.xyzt.x) {
-            char *c = column (buf, 1);
-
-            /* if it's a comment or blank line, we reflect it */
-            if (c && ((*c=='\0') || (*c=='#'))) {
-                print (PJ_LOG_NONE, "%s\n", buf);
-                continue;
-            }
-
             /* otherwise, it must be a syntax error */
             print (PJ_LOG_NONE, "# Record %d UNREADABLE: %s", (int) o->record_index, buf);
             print (PJ_LOG_ERROR, "%s: Could not parse file '%s' line %d\n", o->progname, opt_filename (o), opt_record (o));
