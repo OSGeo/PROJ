@@ -271,6 +271,7 @@ int main(int argc, char **argv) {
     while (opt_input_loop (o, optargs_file_format_text)) {
         int err;
         void *ret = fgets (buf, 10000, o->input);
+        char *c = column (buf, 1);
         opt_eof_handler (o);
         if (0==ret) {
             fprintf (stderr, "Read error in record %d\n", (int) o->record_index);
@@ -281,15 +282,14 @@ int main(int argc, char **argv) {
             skip_lines--;
             continue;
         }
+
+        /* if it's a comment or blank line, we reflect it */
+        if (c && ((*c=='\0') || (*c=='#'))) {
+            fprintf (fout, "%s", buf);
+            continue;
+        }
+
         if (HUGE_VAL==point.xyzt.x) {
-            char *c = column (buf, 1);
-
-            /* if it's a comment or blank line, we reflect it */
-            if (c && ((*c=='\0') || (*c=='#'))) {
-                fprintf (fout, "%s\n", buf);
-                continue;
-            }
-
             /* otherwise, it must be a syntax error */
             fprintf (fout, "# Record %d UNREADABLE: %s", (int) o->record_index, buf);
             if (verbose)
