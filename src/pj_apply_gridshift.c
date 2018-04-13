@@ -306,13 +306,18 @@ int proj_hgrid_init(PJ* P, const char *grids) {
 /********************************************/
 LP proj_hgrid_value(PJ *P, LP lp) {
     struct CTABLE *ct;
-    LP out;
+    LP out = proj_coord_error().lp;
 
     ct = find_ctable(P->ctx, lp, P->gridlist_count, P->gridlist);
+    if (ct == 0) {
+        pj_ctx_set_errno( P->ctx, PJD_ERR_GRID_AREA);
+        return out;
+    }
 
     /* normalize input to ll origin */
     lp.lam -= ct->ll.lam;
     lp.phi -= ct->ll.phi;
+
     lp.lam = adjlon(lp.lam - M_PI) + M_PI;
 
     out = nad_intr(lp, ct);
