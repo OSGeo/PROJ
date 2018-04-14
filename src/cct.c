@@ -76,6 +76,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -86,11 +87,12 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 /* Prototypes for functions in proj_strtod.c */
 double proj_strtod(const char *str, char **endptr);
 double proj_atof(const char *str);
+static void logger(void *data, int level, const char *msg);
+static void print(PJ_LOG_LEVEL verbosity, const char *fmt, ...);
 
 /* Prototypes from functions in this file */
 char *column (char *buf, int n);
 PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time);
-
 
 
 static const char usage[] = {
@@ -151,12 +153,57 @@ static const char usage[] = {
     "--------------------------------------------------------------------------------\n"
 };
 
+
+static void logger(void *data, int level, const char *msg) {
+    FILE *stream;
+    int log_tell = proj_log_level(PJ_DEFAULT_CTX, PJ_LOG_TELL);
+
+    stream  = (FILE *) data;
+
+    /* if we use PJ_LOG_NONE we always want to print stuff to stream */
+    if (level == PJ_LOG_NONE) {
+        fprintf(stream, "%s", msg);
+        return;
+    }
+
+    /* should always print to stderr if level == PJ_LOG_ERROR */
+    if (level == PJ_LOG_ERROR) {
+        fprintf(stderr, "%s", msg);
+        return;
+    }
+
+    /* otherwise only print if log level set by user is high enough */
+    if (level <= log_tell)
+        fprintf(stream, "%s", msg);
+}
+
+FILE *fout;
+
+static void print(PJ_LOG_LEVEL log_level, const char *fmt, ...) {
+
+    va_list args;
+    char *msg_buf;
+
+    va_start( args, fmt );
+
+    msg_buf = (char *) malloc(100000);
+    if( msg_buf == NULL )
+        return;
+
+    vsprintf( msg_buf, fmt, args );
+
+    logger((void *) fout, log_level, msg_buf);
+
+    va_end( args );
+    free( msg_buf );
+}
+
+
 int main(int argc, char **argv) {
     PJ *P;
     PJ_COORD point;
     PJ_PROJ_INFO info;
     OPTARGS *o;
-    FILE *fout = stdout;
     char *buf;
     int nfields = 4, direction = 1, skip_lines = 0, verbose;
     double fixed_z = HUGE_VAL, fixed_time = HUGE_VAL;
@@ -170,6 +217,8 @@ int main(int argc, char **argv) {
         "s=skip-lines",
         0};
 
+    fout = stdout;
+
     o = opt_parse (argc, argv, "hvI", "cozts", longflags, longkeys);
     if (0==o)
         return 0;
@@ -179,26 +228,26 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-
     direction = opt_given (o, "I")? -1: 1;
-    verbose   = opt_given (o, "v");
+
+    verbose   = MIN(opt_given (o, "v"), 3); /* log level can't be larger than 3 */
+    proj_log_level (PJ_DEFAULT_CTX, verbose);
+    proj_log_func  (PJ_DEFAULT_CTX, (void *) fout, logger);
 
     if (opt_given (o, "version")) {
-        fprintf (stdout, "%s: %s\n", o->progname, pj_get_release ());
+        print (PJ_LOG_NONE, "%s: %s\n", o->progname, pj_get_release ());
         return 0;
     }
 
     if (opt_given (o, "o"))
         fout = fopen (opt_arg (o, "output"), "wt");
     if (0==fout) {
-        fprintf (stderr, "%s: Cannot open '%s' for output\n", o->progname, opt_arg (o, "output"));
+        print (PJ_LOG_ERROR, "%s: Cannot open '%s' for output\n", o->progname, opt_arg (o, "output"));
         free (o);
         return 1;
     }
-    if (verbose > 3)
-        fprintf (fout, "%s: Running in very verbose mode\n", o->progname);
 
-
+    print (PJ_LOG_TRACE, "%s: Running in very verbose mode\n", o->progname);
 
     if (opt_given (o, "z")) {
         fixed_z = proj_atof (opt_arg (o, "z"));
@@ -218,7 +267,7 @@ int main(int argc, char **argv) {
         /* cppcheck-suppress invalidscanf */
         int ncols = sscanf (opt_arg (o, "c"), "%d,%d,%d,%d", columns_xyzt, columns_xyzt+1, columns_xyzt+2, columns_xyzt+3);
         if (ncols != nfields) {
-            fprintf (stderr, "%s: Too few input columns given: '%s'\n", o->progname, opt_arg (o, "c"));
+            print (PJ_LOG_ERROR, "%s: Too few input columns given: '%s'\n", o->progname, opt_arg (o, "c"));
             free (o);
             if (stdout != fout)
                 fclose (fout);
@@ -229,7 +278,7 @@ int main(int argc, char **argv) {
     /* Setup transformation */
     P = proj_create_argv (0, o->pargc, o->pargv);
     if ((0==P) || (0==o->pargc)) {
-        fprintf (stderr, "%s: Bad transformation arguments - (%s)\n    '%s -h' for help\n",
+        print (PJ_LOG_ERROR, "%s: Bad transformation arguments - (%s)\n    '%s -h' for help\n",
                  o->progname, pj_strerrno (proj_errno(P)), o->progname);
         free (o);
         if (stdout != fout)
@@ -237,15 +286,13 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    if (verbose > 4) {
-        info = proj_pj_info (P);
-        fprintf (stdout, "Final: %s argc=%d pargc=%d\n", info.definition, argc, o->pargc);
-    }
+    info = proj_pj_info (P);
+    print (PJ_LOG_TRACE, "Final: %s argc=%d pargc=%d\n", info.definition, argc, o->pargc);
 
     if (direction==-1) {
         /* fail if an inverse operation is not available */
-        if (!proj_pj_info(P).has_inverse) {
-            fprintf (stderr, "Inverse operation not available\n");
+        if (!info.has_inverse) {
+            print (PJ_LOG_ERROR, "Inverse operation not available\n");
             if (stdout != fout)
                 fclose (fout);
             return 1;
@@ -258,7 +305,7 @@ int main(int argc, char **argv) {
     /* Allocate input buffer */
     buf = calloc (1, 10000);
     if (0==buf) {
-        fprintf (stderr, "%s: Out of memory\n", o->progname);
+        print (PJ_LOG_ERROR, "%s: Out of memory\n", o->progname);
         pj_free (P);
         free (o);
         if (stdout != fout)
@@ -274,7 +321,7 @@ int main(int argc, char **argv) {
         char *c = column (buf, 1);
         opt_eof_handler (o);
         if (0==ret) {
-            fprintf (stderr, "Read error in record %d\n", (int) o->record_index);
+            print (PJ_LOG_ERROR, "Read error in record %d\n", (int) o->record_index);
             continue;
         }
         point = parse_input_line (buf, columns_xyzt, fixed_z, fixed_time);
@@ -291,9 +338,8 @@ int main(int argc, char **argv) {
 
         if (HUGE_VAL==point.xyzt.x) {
             /* otherwise, it must be a syntax error */
-            fprintf (fout, "# Record %d UNREADABLE: %s", (int) o->record_index, buf);
-            if (verbose)
-                fprintf (stderr, "%s: Could not parse file '%s' line %d\n", o->progname, opt_filename (o), opt_record (o));
+            print (PJ_LOG_NONE, "# Record %d UNREADABLE: %s", (int) o->record_index, buf);
+            print (PJ_LOG_ERROR, "%s: Could not parse file '%s' line %d\n", o->progname, opt_filename (o), opt_record (o));
             continue;
         }
 
@@ -306,8 +352,8 @@ int main(int argc, char **argv) {
 
         if (HUGE_VAL==point.xyzt.x) {
             /* transformation error */
-            fprintf (fout, "# Record %d TRANSFORMATION ERROR: %s (%s)",
-                            (int) o->record_index, buf, pj_strerrno (proj_errno(P)));
+            print (PJ_LOG_NONE, "# Record %d TRANSFORMATION ERROR: %s (%s)",
+                   (int) o->record_index, buf, pj_strerrno (proj_errno(P)));
             proj_errno_restore (P, err);
             continue;
         }
@@ -317,10 +363,10 @@ int main(int argc, char **argv) {
         if (proj_angular_output (P, direction)) {
             point.lpzt.lam = proj_todeg (point.lpzt.lam);
             point.lpzt.phi = proj_todeg (point.lpzt.phi);
-            fprintf (fout, "%14.10f  %14.10f  %12.4f  %12.4f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
+            print (PJ_LOG_NONE, "%14.10f  %14.10f  %12.4f  %12.4f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
         }
         else
-            fprintf (fout, "%13.4f  %13.4f  %12.4f  %12.4f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
+            print (PJ_LOG_NONE, "%13.4f  %13.4f  %12.4f  %12.4f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
     }
 
     if (stdout != fout)
