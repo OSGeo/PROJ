@@ -43,8 +43,8 @@
 #define PJ_LIB__
 #include "proj_internal.h"
 #include "projects.h"
+#include "proj_math.h"
 #include <stddef.h>
-#include <math.h>
 #include <errno.h>
 PROJ_HEAD(cart,    "Geodetic/cartesian conversions");
 

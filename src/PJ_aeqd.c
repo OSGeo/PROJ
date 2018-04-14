@@ -30,6 +30,7 @@
 #include "proj.h"
 #include <errno.h>
 #include "projects.h"
+#include "proj_math.h"
 
 enum Mode {
     N_POLE = 0,

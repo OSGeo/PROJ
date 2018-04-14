@@ -31,6 +31,7 @@
 #include <errno.h>
 #include "proj.h"
 #include "projects.h"
+#include "proj_math.h"
 
 struct pj_opaque {
     double h;

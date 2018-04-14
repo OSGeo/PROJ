@@ -199,6 +199,7 @@ SET(SRC_LIBPROJ_CORE
         pj_list.h
         pj_log.c
         pj_malloc.c
+        pj_math.c
         pj_mlfn.c
         pj_msfn.c
         pj_mutex.c
@@ -218,6 +219,7 @@ SET(SRC_LIBPROJ_CORE
         pj_utils.c
         pj_zpoly1.c
         proj_mdist.c
+        proj_math.h
         proj_rouss.c
         rtodms.c
         vector1.c

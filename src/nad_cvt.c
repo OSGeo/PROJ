@@ -1,5 +1,6 @@
 #define PJ_LIB__
 #include "projects.h"
+#include "proj_math.h"
 #define MAX_ITERATIONS 10
 #define TOL 1e-12
 

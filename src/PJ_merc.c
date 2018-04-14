@@ -1,6 +1,7 @@
 #define PJ_LIB__
 #include "proj_internal.h"
 #include "proj.h"
+#include "proj_math.h"
 #include "projects.h"
 #include <float.h>
 
@@ -8,30 +9,10 @@ PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Sph\n\t";
 
 #define EPS10 1.e-10
-
-#if !defined(HAVE_C99_MATH)
-#define HAVE_C99_MATH 0
-#endif
-
-#if HAVE_C99_MATH
-#define log1px log1p
-#else
-static double log1px(double x) {
-  volatile double
-    y = 1 + x,
-    z = y - 1;
-  /* Here's the explanation for this magic: y = 1 + z, exactly, and z
-   * approx x, thus log(y)/z (which is nearly constant near z = 0) returns
-   * a good approximation to the true log(1 + x)/x.  The multiplication x *
-   * (log(y)/z) introduces little additional error. */
-  return z == 0 ? x : x * log(y) / z;
-}
-#endif
-
 static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
     if (fabs(x) <= DBL_EPSILON) {
         /* tan(M_FORTPI + .5 * x) can be approximated by  1.0 + x */
-        return log1px(x);
+        return log1p(x);
     }
     return log(tan(M_FORTPI + .5 * x));
 }
