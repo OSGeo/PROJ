@@ -82,6 +82,7 @@ static XYZ get_grid_shift(PJ* P, XYZ cartesian) {
 ********************************************************************************/
     PJ_COORD geodetic, shift, temp;
     double sp, cp, sl, cl;
+    int previous_errno = proj_errno_reset(P);
 
     /* cartesian to geodetic */
     geodetic.lpz = pj_inv3d(cartesian, P->opaque->cart);
@@ -89,6 +90,10 @@ static XYZ get_grid_shift(PJ* P, XYZ cartesian) {
     /* look up correction values in grids */
     shift.lp    = proj_hgrid_value(P, geodetic.lp);
     shift.enu.u = proj_vgrid_value(P, geodetic.lp);
+
+    if (proj_errno(P) == PJD_ERR_GRID_AREA)
+        proj_log_debug(P, "deformation: coordinate (%.3f, %.3f) outside deformation model",
+                       proj_todeg(geodetic.lp.lam), proj_todeg(geodetic.lp.phi));
 
     /* grid values are stored as mm/yr, we need m/yr */
     shift.xyz.x /= 1000;
@@ -107,6 +112,8 @@ static XYZ get_grid_shift(PJ* P, XYZ cartesian) {
     temp.xyz.z =     cp*shift.enu.n +                     sp*shift.enu.u;
 
     shift.xyz = temp.xyz;
+
+    proj_errno_restore(P, previous_errno);
 
     return shift.xyz;
 }
