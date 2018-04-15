@@ -12,7 +12,10 @@ Azimuthal Equidistant
 +---------------------+----------------------------------------------------------+
 | **Options**                                                                    |
 +---------------------+----------------------------------------------------------+
-| `+guam`             |  Use Guam elliptical formulas. Defaults to false.        |
+| `+guam`             | Use Guam elliptical formulas. Only accurate near the     |
+|                     | Island of Guam (:math:`\lambda\approx 144.5^{\circ}`,    |
+|                     | :math:`\phi\approx 13.5^{\circ}`)                        |
+|                     | Defaults to false.                                       |
 +---------------------+----------------------------------------------------------+
 
 
