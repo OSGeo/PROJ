@@ -964,6 +964,7 @@ Indicate that the remaining material should be skipped. Mostly for debugging.
 ******************************************************************************/
     T.skip = 1;
     (void) args;
+    F->level = 2; /* Silence complaints about missing </gie> element */
     return 0;
 }
 
