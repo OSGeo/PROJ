@@ -47,7 +47,7 @@ static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
 static double hpip2atanexp(double x) {       /* M_HALFPI - 2. * atan(exp(x)) */
     if (fabs(x) <= DBL_EPSILON) {
         /* atan(exp(x))  can be approximated by (exp(x)-1)/2 + pi/4 */
-        return -expm1x(x));
+        return -expm1x(x);
     }
     return M_HALFPI - 2. * atan(exp(x));
 }
