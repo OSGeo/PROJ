@@ -361,7 +361,7 @@ int  proj_errno_reset (const PJ *P);
 int  proj_errno_restore (const PJ *P, int err);
 const char* proj_errno_string (int err);
 
-PJ_LOG_LEVEL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL level);
+PJ_LOG_LEVEL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL log_level);
 void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf);
 
 /* Scaling and angular distortion factors */
