@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
+#include "proj_internal.h"
 
 #ifndef M_PI
 #  define M_PI 3.14159265358979323846
@@ -59,12 +60,18 @@ int hex_iso(struct hex *h) {
 }
 
 ISEA_STATIC
-int hexbin2(double width, double x, double y,
-                int *i, int *j) {
+void hexbin2(double width, double x, double y, int *i, int *j) {
     double z, rx, ry, rz;
     double abs_dx, abs_dy, abs_dz;
     int ix, iy, iz, s;
     struct hex h;
+
+    if (pj_is_nan(x) || pj_is_nan(y) || pj_is_nan(width)) {
+        fprintf(stderr, "hexbin2 cannot handle NaN inputs\n");
+        *i = 0;
+        *j = 0;
+        return;
+    }
 
     x = x / cos(30 * M_PI / 180.0); /* rotated X coord */
     y = y - x / 2.0; /* adjustment for rotated X */
@@ -105,7 +112,6 @@ int hexbin2(double width, double x, double y,
     hex_xy(&h);
     *i = h.x;
     *j = h.y;
-        return ix * 100 + iy;
 }
 #ifndef ISEA_STATIC
 #define ISEA_STATIC
@@ -1134,4 +1140,3 @@ PJ *PROJECTION(isea) {
 
     return P;
 }
-
