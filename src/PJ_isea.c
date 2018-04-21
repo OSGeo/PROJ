@@ -66,13 +66,6 @@ void hexbin2(double width, double x, double y, int *i, int *j) {
     int ix, iy, iz, s;
     struct hex h;
 
-    if (pj_is_nan(x) || pj_is_nan(y) || pj_is_nan(width)) {
-        fprintf(stderr, "hexbin2 cannot handle NaN inputs\n");
-        *i = 0;
-        *j = 0;
-        return;
-    }
-
     x = x / cos(30 * M_PI / 180.0); /* rotated X coord */
     y = y - x / 2.0; /* adjustment for rotated X */
 
@@ -1044,6 +1037,12 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     struct pj_opaque *Q = P->opaque;
     struct isea_pt out;
     struct isea_geo in;
+
+    if (pj_is_nan(lp.lam) || pj_is_nan(lp.phi)) {
+        proj_log_error(P, "isea lp input has a NaN: lam: %lf phi: %lf",
+                       lp.lam, lp.phi);
+        return xy;
+    }
 
     in.lon = lp.lam;
     in.lat = lp.phi;
