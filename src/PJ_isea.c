@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
-#include "proj_internal.h"
 
 #ifndef M_PI
 #  define M_PI 3.14159265358979323846
@@ -60,7 +59,8 @@ int hex_iso(struct hex *h) {
 }
 
 ISEA_STATIC
-void hexbin2(double width, double x, double y, int *i, int *j) {
+int hexbin2(double width, double x, double y,
+                int *i, int *j) {
     double z, rx, ry, rz;
     double abs_dx, abs_dy, abs_dz;
     int ix, iy, iz, s;
@@ -105,6 +105,7 @@ void hexbin2(double width, double x, double y, int *i, int *j) {
     hex_xy(&h);
     *i = h.x;
     *j = h.y;
+        return ix * 100 + iy;
 }
 #ifndef ISEA_STATIC
 #define ISEA_STATIC
@@ -1038,12 +1039,6 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     struct isea_pt out;
     struct isea_geo in;
 
-    if (pj_is_nan(lp.lam) || pj_is_nan(lp.phi)) {
-        proj_log_error(P, "isea lp input has a NaN: lam: %lf phi: %lf",
-                       lp.lam, lp.phi);
-        return xy;
-    }
-
     in.lon = lp.lam;
     in.lat = lp.phi;
 
@@ -1139,3 +1134,4 @@ PJ *PROJECTION(isea) {
 
     return P;
 }
+
