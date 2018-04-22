@@ -49,9 +49,10 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PROJ'
+title = 'PROJ coordinate transformation software library'
+author = 'PROJ contributors'
 now = datetime.datetime.now()
 copyright = u'1983-{0}'.format(now.year)
-author = u'Gerald Evenden, Frank Warmerdam, and others'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -241,8 +242,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'proj.tex', u'PROJ Documentation',
-     u'Gerald Evenden', 'manual'),
+    (master_doc, 'proj.tex', title, author, 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -318,8 +318,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'proj', u'PROJ Documentation',
-     author, 'proj', 'One line description of project.',
+    (master_doc, 'proj', title, author, 'proj',
+     'Cartographic projections software library.',
      'Miscellaneous'),
 ]
 
