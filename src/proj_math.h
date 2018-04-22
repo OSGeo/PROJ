@@ -39,10 +39,12 @@ extern "C" {
 double  pj_hypot(double x, double y);
 double  pj_log1p(double x);
 double  pj_asinh(double x);
+int     pj_isnan(double x);
 
 #define hypot   pj_hypot
 #define log1p   pj_log1p
 #define asinh   pj_asinh
+#define isnan   pj_isnan
 
 
 #endif /* !(defined(HAVE_C99_MATH) && HAVE_C99_MATH) */

@@ -29,7 +29,7 @@
 #define PJ_LIB__
 
 #include <string.h>
-#include <math.h>
+#include "proj_math.h"
 #include "proj_internal.h"
 #include "projects.h"
 
@@ -42,7 +42,7 @@ static double read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GR
     float  *cvs;
     /* do not deal with NaN coordinates */
     /* cppcheck-suppress duplicateExpression */
-    if( pj_is_nan(input.phi) || pj_is_nan(input.lam) )
+    if( isnan(input.phi) || isnan(input.lam) )
         itable = *gridlist_count_p;
 
     /* keep trying till we find a table that works */

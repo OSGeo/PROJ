@@ -61,6 +61,11 @@ double pj_asinh(double x) {
     return x > 0 ? y : (x < 0 ? -y : x);
 }
 
+/* Returns 0 if not a NaN and non-zero if val is a NaN */
+int pj_isnan (double x) {
+    /* cppcheck-suppress duplicateExpression */
+    return x != x;
+}
+
+
 #endif /* !(defined(HAVE_C99_MATH) && HAVE_C99_MATH) */
-
-
