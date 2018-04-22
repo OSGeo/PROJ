@@ -18,7 +18,7 @@ The near-sided perspective projection simulates a view from a height
 +---------------------+-------------------------------------------------------------+
 | `+h`                | Height of the view point above the Earth and must be in     |
 |                     | the same units as the radius of the sphere. Required.       |
-+---------------------+-------------------------------------------------------------|
++---------------------+-------------------------------------------------------------+
 | `+lat_0`            | Latitude (in degrees) of the view position. Defaults to 0.  |
 +---------------------+-------------------------------------------------------------+
 | `+lon_0`            | Longitude (in degrees) of the view position. Defaults to 0. |
