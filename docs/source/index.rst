@@ -26,7 +26,7 @@ Coverage       |coverals|
                     :target: https://coveralls.io/r/OSGeo/proj.4?branch=master
 
 Full documentation is available as a single PDF at
-https://raw.githubusercontent.com/OSGeo/proj.4/gh-pages/proj4.pdf
+https://raw.githubusercontent.com/OSGeo/proj.4/gh-pages/proj.pdf
 
 Documentation
 =================

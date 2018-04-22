@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# PROJ.4 documentation build configuration file, created by
+# PROJ documentation build configuration file, created by
 # sphinx-quickstart on Wed Feb 24 10:47:15 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -48,7 +48,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PROJ.4'
+project = u'PROJ'
 now = datetime.datetime.now()
 copyright = u'1983-{0}'.format(now.year)
 author = u'Gerald Evenden, Frank Warmerdam, and others'
@@ -211,7 +211,7 @@ html_show_sourcelink = False
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'proj4doc'
+htmlhelp_basename = 'projdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -238,7 +238,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'proj4.tex', u'PROJ.4 Documentation',
+    (master_doc, 'proj.tex', u'PROJ Documentation',
      u'Gerald Evenden', 'manual'),
 ]
 
@@ -315,8 +315,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'proj4', u'PROJ.4 Documentation',
-     author, 'proj4', 'One line description of project.',
+    (master_doc, 'proj', u'PROJ Documentation',
+     author, 'proj', 'One line description of project.',
      'Miscellaneous'),
 ]
 
