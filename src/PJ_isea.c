@@ -30,7 +30,7 @@ struct hex {
 /* y *must* be positive down as the xy /iso conversion assumes this */
 ISEA_STATIC
 void hex_xy(struct hex *h) {
-    if (!h->iso) return 1;
+    if (!h->iso) return;
     if (h->x >= 0) {
         h->y = -h->y - (h->x+1)/2;
     } else {
@@ -42,7 +42,7 @@ void hex_xy(struct hex *h) {
 
 ISEA_STATIC
 void hex_iso(struct hex *h) {
-    if (h->iso) return 1;
+    if (h->iso) return;
 
     if (h->x >= 0) {
         h->y = (-h->y - (h->x+1)/2);
@@ -600,27 +600,27 @@ isea_grid_init(struct isea_dgg * g)
 }
 
 ISEA_STATIC
-int
+void
 isea_orient_isea(struct isea_dgg * g)
 {
     if (!g)
-        return 0;
+        return;
     g->o_lat = ISEA_STD_LAT;
     g->o_lon = ISEA_STD_LON;
     g->o_az = 0.0;
-    return 1;
+    return;
 }
 
 ISEA_STATIC
-int
+void
 isea_orient_pole(struct isea_dgg * g)
 {
     if (!g)
-        return 0;
+        return;
     g->o_lat = M_PI / 2.0;
     g->o_lon = 0.0;
     g->o_az = 0;
-    return 1;
+    return;
 }
 
 ISEA_STATIC
