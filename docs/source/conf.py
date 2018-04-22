@@ -217,6 +217,9 @@ htmlhelp_basename = 'projdoc'
 
 
 preamble = r"""
+\ifdefined\DeclareUnicodeCharacter
+  \DeclareUnicodeCharacter{2032}{$'$}% prime
+\fi
 """
 
 latex_elements = {
@@ -228,7 +231,7 @@ latex_elements = {
 
 # Additional stuff for the LaTeX preamble.
 'preamble': preamble,
-'inputenc':'\usepackage[utf8x]{inputenc}'
+'inputenc':'\usepackage[utf8]{inputenc}'
 
 # Latex figure (float) alignment
 #'figure_align': 'htbp',
