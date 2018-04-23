@@ -15,6 +15,7 @@ PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Sph\n\t";
 
 #if HAVE_C99_MATH
 #define log1px log1p
+#define expm1x expm1
 #else
 static double log1px(double x) {
   volatile double
@@ -26,6 +27,13 @@ static double log1px(double x) {
    * (log(y)/z) introduces little additional error. */
   return z == 0 ? x : x * log(y) / z;
 }
+static double expm1x(double x) {
+    /* very simplistic exmp1 implementation */
+    if (fabs(x) <= DBL_EPSILON) {
+        return x;
+    }
+    return exp(x) - 1.0;
+}
 #endif
 
 static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
@@ -34,6 +42,14 @@ static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
         return log1px(x);
     }
     return log(tan(M_FORTPI + .5 * x));
+}
+
+static double hpip2atanexp(double x) {       /* M_HALFPI - 2. * atan(exp(x)) */
+    if (fabs(x) <= DBL_EPSILON) {
+        /* atan(exp(x))  can be approximated by (exp(x)-1)/2 + pi/4 */
+        return -expm1x(x);
+    }
+    return M_HALFPI - 2. * atan(exp(x));
 }
 
 static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
@@ -73,7 +89,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
-    lp.phi = M_HALFPI - 2. * atan(exp(-xy.y / P->k0));
+    lp.phi = hpip2atanexp(xy.y / P->k0);
     lp.lam = xy.x / P->k0;
     return lp;
 }
