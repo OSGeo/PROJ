@@ -2,6 +2,8 @@
 #include <errno.h>
 #include "proj.h"
 #include "projects.h"
+#include "proj_math.h"
+
 
 PROJ_HEAD(bonne, "Bonne (Werner lat_1=90)")
     "\n\tConic Sph&Ell\n\tlat_1=";

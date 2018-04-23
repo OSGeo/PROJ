@@ -26,6 +26,7 @@
 #define PJ_LIB__
 #include <errno.h>
 #include "projects.h"
+#include "proj_math.h"
 
 
 struct pj_opaque {

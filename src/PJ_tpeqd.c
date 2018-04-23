@@ -1,6 +1,7 @@
 #define PJ_LIB__
 #include <errno.h>
 #include "proj.h"
+#include "proj_math.h"
 #include "projects.h"
 
 
