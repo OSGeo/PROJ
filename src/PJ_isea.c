@@ -29,8 +29,8 @@ struct hex {
 
 /* y *must* be positive down as the xy /iso conversion assumes this */
 ISEA_STATIC
-int hex_xy(struct hex *h) {
-    if (!h->iso) return 1;
+void hex_xy(struct hex *h) {
+    if (!h->iso) return;
     if (h->x >= 0) {
         h->y = -h->y - (h->x+1)/2;
     } else {
@@ -38,13 +38,11 @@ int hex_xy(struct hex *h) {
         h->y = -h->y - h->x/2;
     }
     h->iso = 0;
-
-    return 1;
 }
 
 ISEA_STATIC
-int hex_iso(struct hex *h) {
-    if (h->iso) return 1;
+void hex_iso(struct hex *h) {
+    if (h->iso) return;
 
     if (h->x >= 0) {
         h->y = (-h->y - (h->x+1)/2);
@@ -55,12 +53,10 @@ int hex_iso(struct hex *h) {
 
     h->z = -h->x - h->y;
     h->iso = 1;
-    return 1;
 }
 
 ISEA_STATIC
-int hexbin2(double width, double x, double y,
-                int *i, int *j) {
+void hexbin2(double width, double x, double y, int *i, int *j) {
     double z, rx, ry, rz;
     double abs_dx, abs_dy, abs_dz;
     int ix, iy, iz, s;
@@ -105,7 +101,6 @@ int hexbin2(double width, double x, double y,
     hex_xy(&h);
     *i = h.x;
     *j = h.y;
-        return ix * 100 + iy;
 }
 #ifndef ISEA_STATIC
 #define ISEA_STATIC
@@ -605,27 +600,27 @@ isea_grid_init(struct isea_dgg * g)
 }
 
 ISEA_STATIC
-int
+void
 isea_orient_isea(struct isea_dgg * g)
 {
     if (!g)
-        return 0;
+        return;
     g->o_lat = ISEA_STD_LAT;
     g->o_lon = ISEA_STD_LON;
     g->o_az = 0.0;
-    return 1;
+    return;
 }
 
 ISEA_STATIC
-int
+void
 isea_orient_pole(struct isea_dgg * g)
 {
     if (!g)
-        return 0;
+        return;
     g->o_lat = M_PI / 2.0;
     g->o_lon = 0.0;
     g->o_az = 0;
-    return 1;
+    return;
 }
 
 ISEA_STATIC
@@ -1134,4 +1129,3 @@ PJ *PROJECTION(isea) {
 
     return P;
 }
-
