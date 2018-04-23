@@ -191,7 +191,7 @@ XY pj_fwd(LP lp, PJ *P) {
 
     if (!P->skip_fwd_prepare)
         coo = fwd_prepare (P, coo);
-    if (HUGE_VAL==coo.v[0])
+    if (HUGE_VAL==coo.v[0] || pj_is_nan(coo.v[0]))
         return proj_coord_error ().xy;
 
     /* Do the transformation, using the lowest dimensional transformer available */
