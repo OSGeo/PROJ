@@ -423,10 +423,7 @@ endfunction()
 # in place conversion of lla file to gsb 
 #
 
-function(proj_convert_grid_lla2gsb GRID_DIRECTORY) 
-    set(NAD2BIN_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    set(NAD2BIN_PATH ${NAD2BIN_DIR}/nad2bin${CMAKE_EXECUTABLE_SUFFIX})
-    file(TO_NATIVE_PATH ${NAD2BIN_PATH} NAD2BIN_EXE)
+function(proj_convert_grid_lla2gsb GRID_DIRECTORY)
     file(GLOB LLA_FILES  ${${GRID_DIRECTORY}}/*.lla)
     foreach(LLA ${LLA_FILES} )
         proj_lla_output_name(${LLA} DEST_FILE)
@@ -434,7 +431,7 @@ function(proj_convert_grid_lla2gsb GRID_DIRECTORY)
         proj_lla_target_name(${LLA} LLA_TARGET)
         if(NOT EXISTS ${DEST})
             add_custom_target( ${LLA_TARGET} ALL
-               COMMAND ${NAD2BIN_EXE} ${DEST} "<" ${LLA}
+               COMMAND nad2bin ${DEST} "<" ${LLA}
                DEPENDS nad2bin )
         endif(NOT EXISTS ${DEST})
     endforeach(LLA)
