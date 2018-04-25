@@ -10,8 +10,8 @@ Geodesic calculations
 Introduction
 ------------
 
-Consider a ellipsoid of revolution with equatorial radius :math:`a`, polar
-semi-axis :math:`b`, and flattening :math:`f=(a−b)/a`.  Points on
+Consider an ellipsoid of revolution with equatorial radius :math:`a`, polar
+semi-axis :math:`b`, and flattening :math:`f=(a-b)/a`.  Points on
 the surface of the ellipsoid are characterized by their latitude :math:`\phi`
 and longitude :math:`\lambda`.  (Note that latitude here means the
 *geographical latitude*, the angle between the normal to the ellipsoid
