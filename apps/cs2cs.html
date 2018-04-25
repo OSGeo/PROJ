@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>cs2cs &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>cs2cs &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../index.html"/>
         <link rel="up" title="Applications" href="index.html"/>
         <link rel="next" title="geod" href="geod.html"/>
         <link rel="prev" title="cct" href="cct.html"/> 
@@ -340,16 +340,16 @@ places), while projected (cartesian)   coordinates   will  be  in  linear
 <div class="section" id="example">
 <h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
 <p>The following script</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span> <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">utm</span> <span class="o">+</span><span class="n">zone</span><span class="o">=</span><span class="mi">10</span>  <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD27</span> <span class="o">-</span><span class="n">r</span>
-<span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="mi">45</span><span class="n">d15</span><span class="s1">&#39;33.1&quot;   111.5W 45d15.551666667N   -111d30 +45.25919444444</span>
-<span class="mi">111</span><span class="n">d30</span><span class="s1">&#39;000w EOF</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +datum=NAD83 +to +proj=utm +zone=10  +datum=NAD27 -r
+&lt;&lt;EOF 45d15&#39;33.1&quot;   111.5W 45d15.551666667N   -111d30 +45.25919444444
+111d30&#39;000w EOF
 </pre></div>
 </div>
 <p>will  transform the input NAD83 geographic coordinates into NAD27 coordinates in
 the  UTM  projection  with  zone 10 selected.  The geographic values of this
 example are equivalent and  meant as  examples of various forms of DMS input.
 The x-y output data will appear as three lines of:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">1402285.99</span>      <span class="mf">5076292.42</span> <span class="mf">0.000</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>1402285.99      5076292.42 0.000
 </pre></div>
 </div>
 </div>
@@ -378,7 +378,7 @@ The x-y output data will appear as three lines of:</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -400,7 +400,7 @@ The x-y output data will appear as three lines of:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

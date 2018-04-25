@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>rHEALPix &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>rHEALPix &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Projections" href="index.html"/>
         <link rel="next" title="Interrupted Goode Homolosine" href="igh.html"/>
         <link rel="prev" title="HEALPix" href="healpix.html"/> 
@@ -361,10 +361,10 @@ Environment (SCENZGrid).</p>
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <p>To run a rHEALPix projection on a WGS84 ellipsoidal model, use the following
 command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">rhealpix</span> <span class="o">-</span><span class="n">f</span> <span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">WGS84</span> <span class="o">+</span><span class="n">south_square</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">north_square</span><span class="o">=</span><span class="mi">2</span>  <span class="o">-</span><span class="n">E</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
-<span class="o">&gt;</span> <span class="mi">55</span> <span class="mi">12</span>
-<span class="o">&gt;</span> <span class="n">EOF</span>
-<span class="mi">55</span> <span class="mi">12</span>   <span class="mf">6115727.86</span>  <span class="mf">1553840.13</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj +proj=rhealpix -f &#39;%.2f&#39; +ellps=WGS84 +south_square=0 +north_square=2  -E &lt;&lt; EOF
+&gt; 55 12
+&gt; EOF
+55 12   6115727.86  1553840.13
 </pre></div>
 </div>
 </div>
@@ -400,7 +400,7 @@ command:</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -422,7 +422,7 @@ command:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

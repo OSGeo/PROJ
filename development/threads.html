@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Threads &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Threads &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
         <link rel="next" title="Reference" href="reference/index.html"/>
         <link rel="prev" title="Error handling" href="errorhandling.html"/> 
@@ -214,20 +214,20 @@ is a pj_ctx_ set of functions to create, manipulate, query, and destroy
 contexts.  The contexts are also used now to handle setting debugging mode, and
 to hold an error reporting function for textual error and debug messages.   The
 API looks like:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">projPJ</span> <span class="n">pj_init_ctx</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">char</span> <span class="o">**</span> <span class="p">);</span>
-<span class="n">projPJ</span> <span class="n">pj_init_plus_ctx</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span> <span class="p">);</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>projPJ pj_init_ctx( projCtx, int, char ** );
+projPJ pj_init_plus_ctx( projCtx, const char * );
 
-<span class="n">projCtx</span> <span class="n">pj_get_default_ctx</span><span class="p">(</span><span class="n">void</span><span class="p">);</span>
-<span class="n">projCtx</span> <span class="n">pj_get_ctx</span><span class="p">(</span> <span class="n">projPJ</span> <span class="p">);</span>
-<span class="n">void</span> <span class="n">pj_set_ctx</span><span class="p">(</span> <span class="n">projPJ</span><span class="p">,</span> <span class="n">projCtx</span> <span class="p">);</span>
-<span class="n">projCtx</span> <span class="n">pj_ctx_alloc</span><span class="p">(</span><span class="n">void</span><span class="p">);</span>
-<span class="n">void</span>    <span class="n">pj_ctx_free</span><span class="p">(</span> <span class="n">projCtx</span> <span class="p">);</span>
-<span class="nb">int</span> <span class="n">pj_ctx_get_errno</span><span class="p">(</span> <span class="n">projCtx</span> <span class="p">);</span>
-<span class="n">void</span> <span class="n">pj_ctx_set_errno</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="nb">int</span> <span class="p">);</span>
-<span class="n">void</span> <span class="n">pj_ctx_set_debug</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="nb">int</span> <span class="p">);</span>
-<span class="n">void</span> <span class="n">pj_ctx_set_logger</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="n">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="n">void</span> <span class="o">*</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="p">)</span> <span class="p">);</span>
-<span class="n">void</span> <span class="n">pj_ctx_set_app_data</span><span class="p">(</span> <span class="n">projCtx</span><span class="p">,</span> <span class="n">void</span> <span class="o">*</span> <span class="p">);</span>
-<span class="n">void</span> <span class="o">*</span><span class="n">pj_ctx_get_app_data</span><span class="p">(</span> <span class="n">projCtx</span> <span class="p">);</span>
+projCtx pj_get_default_ctx(void);
+projCtx pj_get_ctx( projPJ );
+void pj_set_ctx( projPJ, projCtx );
+projCtx pj_ctx_alloc(void);
+void    pj_ctx_free( projCtx );
+int pj_ctx_get_errno( projCtx );
+void pj_ctx_set_errno( projCtx, int );
+void pj_ctx_set_debug( projCtx, int );
+void pj_ctx_set_logger( projCtx, void (*)(void *, int, const char *) );
+void pj_ctx_set_app_data( projCtx, void * );
+void *pj_ctx_get_app_data( projCtx );
 </pre></div>
 </div>
 <p>Multithreaded applications are now expected to create a projCtx per thread
@@ -249,8 +249,8 @@ for testing multithreaded use of PROJ.  It performs a series of reprojections
 to setup a table expected results, and then it does them many times in several
 threads to confirm that the results are consistent.  At this time this program
 is not part of the builds but it can be built on linux like:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gcc</span> <span class="o">-</span><span class="n">g</span> <span class="n">multistresstest</span><span class="o">.</span><span class="n">c</span> <span class="o">.</span><span class="n">libs</span><span class="o">/</span><span class="n">libproj</span><span class="o">.</span><span class="n">so</span> <span class="o">-</span><span class="n">lpthread</span> <span class="o">-</span><span class="n">o</span> <span class="n">multistresstest</span>
-<span class="o">./</span><span class="n">multistresstest</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>gcc -g multistresstest.c .libs/libproj.so -lpthread -o multistresstest
+./multistresstest
 </pre></div>
 </div>
 </div>
@@ -279,7 +279,7 @@ is not part of the builds but it can be built on linux like:</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -301,7 +301,7 @@ is not part of the builds but it can be built on linux like:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

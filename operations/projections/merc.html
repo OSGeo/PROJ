@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Mercator &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Mercator &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Projections" href="index.html"/>
         <link rel="next" title="Miller Oblated Stereographic" href="mil_os.html"/>
         <link rel="prev" title="McBryde-Thomas Flat-Polar Sinusoidal" href="mbtfps.html"/> 
@@ -361,13 +361,13 @@ or near chart&#8217;s boundaries.
 Often inappropriately used for world maps since the regions near the poles
 cannot be shown <a class="reference internal" href="../../references.html#evenden1995" id="id1">[Evenden1995]</a>.</p>
 <p>Example using latitude of true scale:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 56.35 12.32 | proj +proj=merc +lat_ts=56.5
+<div class="highlight-none"><div class="highlight"><pre><span></span>$ echo 56.35 12.32 | proj +proj=merc +lat_ts=56.5
 3470306.37    759599.90
 </pre></div>
 </div>
 <p>Example using scaling factor:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="mf">56.35</span> <span class="mf">12.32</span> <span class="o">|</span> <span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">merc</span> <span class="o">+</span><span class="n">k_0</span><span class="o">=</span><span class="mi">2</span>
-<span class="mf">12545706.61</span>     <span class="mf">2746073.80</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>echo 56.35 12.32 | proj +proj=merc +k_0=2
+12545706.61     2746073.80
 </pre></div>
 </div>
 <p>Note that <code class="docutils literal"><span class="pre">+lat_ts</span></code> and <code class="docutils literal"><span class="pre">+k_0</span></code> are mutually exclusive.
@@ -455,7 +455,7 @@ If used together, <code class="docutils literal"><span class="pre">+lat_ts</span
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -477,7 +477,7 @@ If used together, <code class="docutils literal"><span class="pre">+lat_ts</span
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Axis swap &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Axis swap &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Conversions" href="index.html"/>
         <link rel="next" title="Cartesian to geodetic conversion" href="cart.html"/>
         <link rel="prev" title="Conversions" href="index.html"/> 
@@ -210,21 +210,21 @@ input axes re-ordered to the new mapping.</p>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <p>Reversing the order of the axes:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">axisswap</span> <span class="o">+</span><span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>+proj=axisswap +order=4,3,2,1
 </pre></div>
 </div>
 <p>Swapping the first two axes (x and y):</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">axisswap</span> <span class="o">+</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>+proj=axisswap +order=2,1,3,4
 </pre></div>
 </div>
 <p>The direction, or sign, of an axis can be changed by adding a minus in
 front of the axis-number:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">axisswap</span> <span class="o">+</span><span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>+proj=axisswap +order=1,-2,3,4
 </pre></div>
 </div>
 <p>It is only necessary to specify the axes that are affected by the swap
 operation:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">axisswap</span> <span class="o">+</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>+proj=axisswap +order=2,1
 </pre></div>
 </div>
 </div>
@@ -253,7 +253,7 @@ operation:</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -275,7 +275,7 @@ operation:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

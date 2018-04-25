@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Cal Coop Ocean Fish Invest Lines/Stations &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Cal Coop Ocean Fish Invest Lines/Stations &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Projections" href="index.html"/>
         <link rel="next" title="Cassini (Cassini-Soldner)" href="cass.html"/>
         <link rel="prev" title="Bonne (Werner lat_1=90)" href="bonne.html"/> 
@@ -365,24 +365,24 @@ The figure depicts some commonly sampled locations from line 40 to line 156.7 an
 <p>A typical forward CalCOFI projection would be from lon/lat coordinates on the
 Clark 1866 ellipsoid.
 For example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">calcofi</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> <span class="o">-</span><span class="n">E</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
-<span class="o">-</span><span class="mf">121.15</span> <span class="mf">34.15</span>
-<span class="n">EOF</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj +proj=calcofi +ellps=clrk66 -E &lt;&lt;EOF
+-121.15 34.15
+EOF
 </pre></div>
 </div>
 <p>Output of the above command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span><span class="mf">121.15</span> <span class="mf">34.15</span>   <span class="mf">80.00</span>   <span class="mf">60.00</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>-121.15 34.15   80.00   60.00
 </pre></div>
 </div>
 <p>The reverse projection from line/station coordinates to lon/lat would be entered
 as:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">calcofi</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> <span class="o">-</span><span class="n">I</span> <span class="o">-</span><span class="n">E</span> <span class="o">-</span><span class="n">f</span> <span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">&quot;</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
-<span class="mf">80.0</span> <span class="mf">60.0</span>
-<span class="n">EOF</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj +proj=calcofi +ellps=clrk66 -I -E -f &quot;%.2f&quot; &lt;&lt;EOF
+80.0 60.0
+EOF
 </pre></div>
 </div>
 <p>Output of the above command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">80.0</span> <span class="mf">60.0</span>   <span class="o">-</span><span class="mf">121.15</span> <span class="mf">34.15</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>80.0 60.0   -121.15 34.15
 </pre></div>
 </div>
 </div>
@@ -423,7 +423,7 @@ a few corrections reported in <a class="reference internal" href="../../referenc
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -445,7 +445,7 @@ a few corrections reported in <a class="reference internal" href="../../referenc
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Kinematic datum shifting utilizing a deformation model &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Kinematic datum shifting utilizing a deformation model &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Transformations" href="index.html"/>
         <link rel="next" title="Helmert transform" href="helmert.html"/>
         <link rel="prev" title="Transformations" href="index.html"/> 
@@ -243,35 +243,35 @@ rebound. The deformations from the post-glacial uplift is not accounted for in t
 official ETRS89 transformations so in order to get accurate transformations in the Nordic
 countries it is necessary to apply the deformation model. The transformation from ITRF2008
 to the Danish realisation of ETRS89 is in PROJ described as:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">=</span>  <span class="n">pipeline</span> <span class="n">ellps</span> <span class="o">=</span> <span class="n">GRS80</span>
-        <span class="c1"># ITRF2008@t_obs -&gt; ITRF2000@t_obs</span>
-<span class="n">step</span>    <span class="n">init</span> <span class="o">=</span> <span class="n">ITRF2008</span><span class="p">:</span><span class="n">ITRF2000</span>
-        <span class="c1"># ITRF2000@t_obs -&gt; ETRF2000@t_obs</span>
-<span class="n">step</span>    <span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="n">t_epoch</span> <span class="o">=</span> <span class="mf">2000.0</span> <span class="n">transpose</span>
-        <span class="n">x</span> <span class="o">=</span>  <span class="mf">0.054</span>  <span class="n">rx</span> <span class="o">=</span>  <span class="mf">0.000891</span> <span class="n">drx</span> <span class="o">=</span>  <span class="mf">8.1e-05</span>
-        <span class="n">y</span> <span class="o">=</span>  <span class="mf">0.051</span>  <span class="n">ry</span> <span class="o">=</span>  <span class="mf">0.00539</span>  <span class="n">dry</span> <span class="o">=</span>  <span class="mf">0.00049</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.048</span>  <span class="n">rz</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.008712</span> <span class="n">drz</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.000792</span>
-        <span class="c1"># ETRF2000@t_obs -&gt; NKG_ETRF00@2000.0</span>
-<span class="n">step</span>    <span class="n">proj</span> <span class="o">=</span> <span class="n">deformation</span> <span class="n">t_epoch</span> <span class="o">=</span> <span class="mf">2000.0</span>
-        <span class="n">xy_grids</span> <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_xy</span><span class="o">.</span><span class="n">ct2</span>
-        <span class="n">z_grids</span>  <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_z</span><span class="o">.</span><span class="n">gtx</span>
-        <span class="c1"># NKG_ETRF@2000.0 -&gt; ETRF92@2000.0</span>
-<span class="n">step</span>    <span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="n">transpose</span> <span class="n">s</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.009420</span><span class="n">e</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="mf">0.03863</span> <span class="n">rx</span> <span class="o">=</span> <span class="mf">0.00617753</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="mf">0.147</span>   <span class="n">ry</span> <span class="o">=</span> <span class="mf">5.064e-05</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="mf">0.02776</span> <span class="n">rz</span> <span class="o">=</span> <span class="mf">4.729e-05</span>
-        <span class="c1"># ETRF92@2000.0 -&gt; ETRF92@1994.704</span>
-<span class="n">step</span>    <span class="n">proj</span> <span class="o">=</span> <span class="n">deformation</span> <span class="n">t_epoch</span> <span class="o">=</span> <span class="mf">1994.704</span> <span class="n">t_obs</span> <span class="o">=</span> <span class="mf">2000.0</span>
-        <span class="n">xy_grids</span> <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_xy</span><span class="o">.</span><span class="n">ct2</span>
-        <span class="n">z_grids</span>  <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_z</span><span class="o">.</span><span class="n">gtx</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj =  pipeline ellps = GRS80
+        # ITRF2008@t_obs -&gt; ITRF2000@t_obs
+step    init = ITRF2008:ITRF2000
+        # ITRF2000@t_obs -&gt; ETRF2000@t_obs
+step    proj=helmert t_epoch = 2000.0 transpose
+        x =  0.054  rx =  0.000891 drx =  8.1e-05
+        y =  0.051  ry =  0.00539  dry =  0.00049
+        z = -0.048  rz = -0.008712 drz = -0.000792
+        # ETRF2000@t_obs -&gt; NKG_ETRF00@2000.0
+step    proj = deformation t_epoch = 2000.0
+        xy_grids = ./nkgrf03vel_realigned_xy.ct2
+        z_grids  = ./nkgrf03vel_realigned_z.gtx
+        # NKG_ETRF@2000.0 -&gt; ETRF92@2000.0
+step    proj=helmert transpose s = -0.009420e
+        x = 0.03863 rx = 0.00617753
+        y = 0.147   ry = 5.064e-05
+        z = 0.02776 rz = 4.729e-05
+        # ETRF92@2000.0 -&gt; ETRF92@1994.704
+step    proj = deformation t_epoch = 1994.704 t_obs = 2000.0
+        xy_grids = ./nkgrf03vel_realigned_xy.ct2
+        z_grids  = ./nkgrf03vel_realigned_z.gtx
 </pre></div>
 </div>
 <p>From this we can see that the transformation from ITRF2008 to the Danish realisation of
 ETRS89 is a combination of Helmert transformations and adjustments with a deformation
 model. The first use of the deformation operation is:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">=</span> <span class="n">deformation</span> <span class="n">t_epoch</span> <span class="o">=</span> <span class="mf">2000.0</span>
-<span class="n">xy_grids</span> <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_xy</span><span class="o">.</span><span class="n">ct2</span>
-<span class="n">z_grids</span>  <span class="o">=</span> <span class="o">./</span><span class="n">nkgrf03vel_realigned_z</span><span class="o">.</span><span class="n">gtx</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj = deformation t_epoch = 2000.0
+xy_grids = ./nkgrf03vel_realigned_xy.ct2
+z_grids  = ./nkgrf03vel_realigned_z.gtx
 </pre></div>
 </div>
 <p>Here we set the central epoch of the transformation, 2000.0. The observation epoch
@@ -357,7 +357,7 @@ that is searched for in the grid. <span class="math">\((E, N, U)\)</span> are th
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -379,7 +379,7 @@ that is searched for in the grid. <span class="math">\((E, N, U)\)</span> are th
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

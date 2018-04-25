@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>HEALPix &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>HEALPix &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Projections" href="index.html"/>
         <link rel="next" title="rHEALPix" href="rhealpix.html"/>
         <link rel="prev" title="Hatano Asymmetrical Equal Area" href="hatano.html"/> 
@@ -357,11 +357,11 @@ interruptions.</p>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <p>To run a forward HEALPix projection on a unit sphere model, use the following command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">healpix</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mi">0</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span><span class="n">E</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
-<span class="mi">0</span> <span class="mi">0</span>
-<span class="n">EOF</span>
-<span class="c1"># output</span>
-<span class="mi">0</span> <span class="mi">0</span> <span class="mf">0.00</span> <span class="mf">0.00</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj +proj=healpix +lon_0=0 +a=1 -E &lt;&lt;EOF
+0 0
+EOF
+# output
+0 0 0.00 0.00
 </pre></div>
 </div>
 </div>
@@ -397,7 +397,7 @@ interruptions.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -419,7 +419,7 @@ interruptions.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

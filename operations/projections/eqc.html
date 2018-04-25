@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Equidistant Cylindrical (Plate Carrée) &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Equidistant Cylindrical (Plate Carrée) &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Projections" href="index.html"/>
         <link rel="next" title="Equidistant Conic" href="eqdc.html"/>
         <link rel="prev" title="Eckert VI" href="eck6.html"/> 
@@ -395,12 +395,12 @@ In particular, the plate carrée has become a standard for global raster dataset
 </tbody>
 </table>
 <p>Example using EPSG 32662 (WGS84 Plate Carrée):</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 2 47 | proj +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
+<div class="highlight-none"><div class="highlight"><pre><span></span>$ echo 2 47 | proj +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
 222638.98       5232016.07
 </pre></div>
 </div>
 <p>Example using Plate Carrée projection with true scale at latitude 30° and central meridian 90°W:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ echo -88 30 | proj +proj=eqc +lat_ts=30 +lon_0=90w
+<div class="highlight-none"><div class="highlight"><pre><span></span>$ echo -88 30 | proj +proj=eqc +lat_ts=30 +lon_0=90w
 192811.01       3339584.72
 </pre></div>
 </div>
@@ -457,7 +457,7 @@ In particular, the plate carrée has become a standard for global raster dataset
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -479,7 +479,7 @@ In particular, the plate carrée has become a standard for global raster dataset
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

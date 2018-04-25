@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Vertical grid shift &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Vertical grid shift &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Transformations" href="index.html"/>
         <link rel="next" title="The pipeline operator" href="../pipeline.html"/>
         <link rel="prev" title="Horizontal grid shift" href="hgridshift.html"/> 
@@ -211,14 +211,14 @@
 a specific amount determined by the loaded grids. The simplest use case of the
 horizontal grid shift is applying a single grid. Here we change the vertical
 reference from the ellipsoid to the global geoid model, EGM96:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">vgridshift</span> <span class="o">+</span><span class="n">grids</span><span class="o">=</span><span class="n">egm96_16</span><span class="o">.</span><span class="n">gtx</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>+vgridshift +grids=egm96_16.gtx
 </pre></div>
 </div>
 <p>More than one grid can be loaded at the same time, for instance in the case where
 a better geoid model than the global is available for a certain area. Here the
 gridshift is set up so that the local DVR90 geoid model takes precedence over
 the global model:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">vgridshift</span> <span class="o">+</span><span class="n">grids</span><span class="o">=</span><span class="nd">@dvr90</span><span class="o">.</span><span class="n">gtx</span><span class="p">,</span><span class="n">egm96_16</span><span class="o">.</span><span class="n">gtx</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>+vgridshift +grids=@dvr90.gtx,egm96_16.gtx
 </pre></div>
 </div>
 <p>The <code class="docutils literal"><span class="pre">&#64;</span></code> in the above example states that the grid is optional, in case the grid
@@ -253,7 +253,7 @@ writes the format. Using GDAL for construction of new grids is recommended.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -275,7 +275,7 @@ writes the format. Using GDAL for construction of new grids is recommended.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

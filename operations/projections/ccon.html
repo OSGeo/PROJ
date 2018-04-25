@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Central Conic &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Central Conic &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Projections" href="index.html"/>
         <link rel="next" title="Equal Area Cylindrical" href="cea.html"/>
         <link rel="prev" title="Central Cylindrical" href="cc.html"/> 
@@ -359,7 +359,7 @@ originally handwritten on paper maps and further copied by hand. The projection
 fit to existing maps during first software development in DOS era. Many years later
 it is still de facto standard grid in Polish geobotanical research.</p>
 <p>The ATPOL coordinates can be achieved with with the following parameters:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">ccon</span> <span class="o">+</span><span class="n">lat_1</span><span class="o">=</span><span class="mi">52</span> <span class="o">+</span><span class="n">lat_0</span><span class="o">=</span><span class="mi">52</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mi">19</span> <span class="o">+</span><span class="n">axis</span><span class="o">=</span><span class="n">esu</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">6390000</span> <span class="o">+</span><span class="n">x_0</span><span class="o">=</span><span class="mi">330000</span> <span class="o">+</span><span class="n">y_0</span><span class="o">=-</span><span class="mi">350000</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>+proj=ccon +lat_1=52 +lat_0=52 +lon_0=19 +axis=esu +a=6390000 +x_0=330000 +y_0=-350000
 </pre></div>
 </div>
 <p>For more information see <a class="reference internal" href="../../references.html#komsta2016" id="id2">[Komsta2016]</a> and <a class="reference internal" href="../../references.html#verey2017" id="id3">[Verey2017]</a>.</p>
@@ -384,38 +384,38 @@ it is still de facto standard grid in Polish geobotanical research.</p>
 <div class="section" id="reference-values">
 <h3>Reference values<a class="headerlink" href="#reference-values" title="Permalink to this headline">¶</a></h3>
 <p>For ATPOL to WGS84 test, run the following script:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
-<span class="n">cat</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span> <span class="o">|</span> <span class="n">src</span><span class="o">/</span><span class="n">cs2cs</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">f</span> <span class="s2">&quot;</span><span class="si">%E</span><span class="s2">&quot;</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">ccon</span> <span class="o">+</span><span class="n">lat_1</span><span class="o">=</span><span class="mi">52</span> <span class="o">+</span><span class="n">lat_0</span><span class="o">=</span><span class="mi">52</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mi">19</span> <span class="o">+</span><span class="n">axis</span><span class="o">=</span><span class="n">esu</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">6390000</span> <span class="o">+</span><span class="n">x_0</span><span class="o">=</span><span class="mi">330000</span> <span class="o">+</span><span class="n">y_0</span><span class="o">=-</span><span class="mi">350000</span> <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">longlat</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">WGS84</span> <span class="o">+</span><span class="n">no_defs</span>
-<span class="mi">0</span> <span class="mi">0</span>
-<span class="mi">0</span> <span class="mi">700000</span>
-<span class="mi">700000</span> <span class="mi">0</span>
-<span class="mi">700000</span> <span class="mi">700000</span>
-<span class="mi">330000</span> <span class="mi">350000</span>
-<span class="n">EOF</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>#!/bin/bash
+cat &lt;&lt; EOF | src/cs2cs -v -f &quot;%E&quot; +proj=ccon +lat_1=52 +lat_0=52 +lon_0=19 +axis=esu +a=6390000 +x_0=330000 +y_0=-350000 +to +proj=longlat +datum=WGS84 +no_defs
+0 0
+0 700000
+700000 0
+700000 700000
+330000 350000
+EOF
 </pre></div>
 </div>
 <p>It should result with</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">1.384023E+01</span> <span class="mf">5.503040E+01</span> <span class="mf">0.000000E+00</span>
-<span class="mf">1.451445E+01</span> <span class="mf">4.877385E+01</span> <span class="mf">0.000000E+00</span>
-<span class="mf">2.478271E+01</span> <span class="mf">5.500352E+01</span> <span class="mf">0.000000E+00</span>
-<span class="mf">2.402761E+01</span> <span class="mf">4.875048E+01</span> <span class="mf">0.000000E+00</span>
-<span class="mf">1.900000E+01</span> <span class="mf">5.200000E+01</span> <span class="mf">0.000000E+00</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>1.384023E+01 5.503040E+01 0.000000E+00
+1.451445E+01 4.877385E+01 0.000000E+00
+2.478271E+01 5.500352E+01 0.000000E+00
+2.402761E+01 4.875048E+01 0.000000E+00
+1.900000E+01 5.200000E+01 0.000000E+00
 </pre></div>
 </div>
 <p>Analogous script can be run for reverse test:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>  <span class="o">|</span> <span class="n">src</span><span class="o">/</span><span class="n">cs2cs</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">f</span> <span class="s2">&quot;</span><span class="si">%E</span><span class="s2">&quot;</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">longlat</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">WGS84</span> <span class="o">+</span><span class="n">no_defs</span> <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">ccon</span> <span class="o">+</span><span class="n">lat_1</span><span class="o">=</span><span class="mi">52</span> <span class="o">+</span><span class="n">lat_0</span><span class="o">=</span><span class="mi">52</span> <span class="o">+</span><span class="n">lon_0</span><span class="o">=</span><span class="mi">19</span> <span class="o">+</span><span class="n">axis</span><span class="o">=</span><span class="n">esu</span> <span class="o">+</span><span class="n">a</span><span class="o">=</span><span class="mi">6390000</span> <span class="o">+</span><span class="n">x_0</span><span class="o">=</span><span class="mi">330000</span> <span class="o">+</span><span class="n">y_0</span><span class="o">=-</span><span class="mi">350000</span>
-<span class="mi">24</span> <span class="mi">55</span>
-<span class="mi">15</span> <span class="mi">49</span>
-<span class="mi">24</span> <span class="mi">49</span>
-<span class="mi">19</span> <span class="mi">52</span>
-<span class="n">EOF</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>cat &lt;&lt; EOF  | src/cs2cs -v -f &quot;%E&quot; +proj=longlat +datum=WGS84 +no_defs +to +proj=ccon +lat_1=52 +lat_0=52 +lon_0=19 +axis=esu +a=6390000 +x_0=330000 +y_0=-350000
+24 55
+15 49
+24 49
+19 52
+EOF
 </pre></div>
 </div>
 <p>and it should give the following results:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">6.500315E+05</span> <span class="mf">4.106162E+03</span> <span class="mf">0.000000E+00</span>
-<span class="mf">3.707419E+04</span> <span class="mf">6.768262E+05</span> <span class="mf">0.000000E+00</span>
-<span class="mf">6.960534E+05</span> <span class="mf">6.722946E+05</span> <span class="mf">0.000000E+00</span>
-<span class="mf">3.300000E+05</span> <span class="mf">3.500000E+05</span> <span class="mf">0.000000E+00</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>6.500315E+05 4.106162E+03 0.000000E+00
+3.707419E+04 6.768262E+05 0.000000E+00
+6.960534E+05 6.722946E+05 0.000000E+00
+3.300000E+05 3.500000E+05 0.000000E+00
 </pre></div>
 </div>
 </div>
@@ -445,7 +445,7 @@ it is still de facto standard grid in Polish geobotanical research.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -467,7 +467,7 @@ it is still de facto standard grid in Polish geobotanical research.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

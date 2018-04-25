@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Data types &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Data types &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Reference" href="index.html"/>
         <link rel="next" title="Functions" href="functions.html"/>
         <link rel="prev" title="Reference" href="index.html"/> 
@@ -117,6 +117,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#projection-derivatives">Projection derivatives</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#list-structures">List structures</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#info-structures">Info structures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#logging">Logging</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="functions.html">Functions</a></li>
@@ -1131,6 +1132,68 @@ char <code class="descname">PJ_INIT_INFO.lastupdate</code><a class="headerlink" 
 </dd></dl>
 
 </div>
+<div class="section" id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<dl class="type">
+<dt id="c.PJ_LOG_LEVEL">
+<code class="descname">PJ_LOG_LEVEL</code><a class="headerlink" href="#c.PJ_LOG_LEVEL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enum of logging levels in PROJ. Used to set the logging level in PROJ.
+Usually using <a class="reference internal" href="functions.html#c.proj_log_level" title="proj_log_level"><code class="xref c c-func docutils literal"><span class="pre">proj_log_level()</span></code></a>.</p>
+<dl class="member">
+<dt id="c.PJ_LOG_LEVEL.PJ_LOG_NONE">
+<code class="descname">PJ_LOG_NONE</code><a class="headerlink" href="#c.PJ_LOG_LEVEL.PJ_LOG_NONE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Don&#8217;t log anything.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_LOG_LEVEL.PJ_LOG_ERROR">
+<code class="descname">PJ_LOG_ERROR</code><a class="headerlink" href="#c.PJ_LOG_LEVEL.PJ_LOG_ERROR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log only errors.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_LOG_LEVEL.PJ_LOG_DEBUG">
+<code class="descname">PJ_LOG_DEBUG</code><a class="headerlink" href="#c.PJ_LOG_LEVEL.PJ_LOG_DEBUG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log errors and additional debug information.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_LOG_LEVEL.PJ_LOG_TRACE">
+<code class="descname">PJ_LOG_TRACE</code><a class="headerlink" href="#c.PJ_LOG_LEVEL.PJ_LOG_TRACE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Highest logging level. Log everything including very detailed debug
+information.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="c.PJ_LOG_LEVEL.PJ_LOG_TELL">
+<code class="descname">PJ_LOG_TELL</code><a class="headerlink" href="#c.PJ_LOG_LEVEL.PJ_LOG_TELL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Special logging level that when used in <a class="reference internal" href="functions.html#c.proj_log_level" title="proj_log_level"><code class="xref c c-func docutils literal"><span class="pre">proj_log_level()</span></code></a>
+will return the current logging level set in PROJ.</p>
+</dd></dl>
+
+<div class="versionadded">
+<p><span class="versionmodified">New in version 5.1.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="type">
+<dt id="c.PJ_LOG_FUNC">
+<code class="descname">PJ_LOG_FUNC</code><a class="headerlink" href="#c.PJ_LOG_FUNC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function prototype for the logging function used by PROJ.
+Defined as</p>
+<div class="highlight-C"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">PJ_LOG_FUNCTION</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>where the <code class="xref c c-type docutils literal"><span class="pre">void</span></code> pointer references a data structure used by the
+calling application, the <code class="xref c c-type docutils literal"><span class="pre">int</span></code> is used to set the logging level
+and the <code class="xref c c-type docutils literal"><span class="pre">const</span> <span class="pre">char</span></code> pointer is the string that will be logged
+by the function.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 5.1.0.</span></p>
+</div>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -1156,7 +1219,7 @@ char <code class="descname">PJ_INIT_INFO.lastupdate</code><a class="headerlink" 
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -1178,7 +1241,7 @@ char <code class="descname">PJ_INIT_INFO.lastupdate</code><a class="headerlink" 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Horizontal grid shift &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Horizontal grid shift &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Transformations" href="index.html"/>
         <link rel="next" title="Vertical grid shift" href="vgridshift.html"/>
         <link rel="prev" title="Molodensky transform" href="molodensky.html"/> 
@@ -210,13 +210,13 @@
 <p>The horizontal grid shift is done by offsetting the planar input coordinates by
 a specific amount determined by the loaded grids. The simplest use case of the
 horizontal grid shift is applying a single grid:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">hgridshift</span> <span class="o">+</span><span class="n">grids</span><span class="o">=</span><span class="n">nzgr2kgrid0005</span><span class="o">.</span><span class="n">gsb</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>+hgridshift +grids=nzgr2kgrid0005.gsb
 </pre></div>
 </div>
 <p>More than one grid can be loaded at the same time, for instance in case the
 dataset needs to be transformed spans several countries. In this example grids
 of the continental US, Alaska and Canada is loaded at the same time:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">hgridshift</span> <span class="o">+</span><span class="n">grids</span><span class="o">=</span><span class="nd">@conus</span><span class="p">,</span><span class="nd">@alaska</span><span class="p">,</span><span class="nd">@ntv2_0</span><span class="o">.</span><span class="n">gsb</span><span class="p">,</span><span class="nd">@ntv_can</span><span class="o">.</span><span class="n">dat</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>+hgridshift +grids=@conus,@alaska,@ntv2_0.gsb,@ntv_can.dat
 </pre></div>
 </div>
 <p>The <code class="docutils literal"><span class="pre">&#64;</span></code> in the above example states that the grid is optional, in case the grid
@@ -251,7 +251,7 @@ writes all three formats. Using GDAL for construction of new grids is recommende
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -273,7 +273,7 @@ writes all three formats. Using GDAL for construction of new grids is recommende
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Cartographic projection &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Cartographic projection &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../index.html"/>
         <link rel="up" title="Using PROJ" href="index.html"/>
         <link rel="next" title="Geodetic transformation" href="transformation.html"/>
         <link rel="prev" title="Quick start" href="quickstart.html"/> 
@@ -374,9 +374,9 @@ listed using with <code class="docutils literal"><span class="pre">cs2cs</span> 
 <p>Example of use.  The location <code class="docutils literal"><span class="pre">long=0</span></code>, <code class="docutils literal"><span class="pre">lat=0</span></code> in the greenwich based lat/long
 coordinates is translated to lat/long coordinates with Madrid as the prime
 meridian.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">WGS84</span> <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">WGS84</span> <span class="o">+</span><span class="n">pm</span><span class="o">=</span><span class="n">madrid</span>
-<span class="mi">0</span> <span class="mi">0</span>                           <span class="o">&lt;</span><span class="n">i</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span><span class="o">&lt;/</span><span class="n">i</span><span class="o">&gt;</span>
-<span class="mi">3</span><span class="n">d41</span><span class="s1">&#39;16.48&quot;E    0dN 0.000     &lt;i&gt;(output)&lt;/i&gt;</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +datum=WGS84 +to +proj=latlong +datum=WGS84 +pm=madrid
+0 0                           &lt;i&gt;(input)&lt;/i&gt;
+3d41&#39;16.48&quot;E    0dN 0.000     &lt;i&gt;(output)&lt;/i&gt;
 </pre></div>
 </div>
 </div>
@@ -433,7 +433,7 @@ utility.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -455,7 +455,7 @@ utility.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

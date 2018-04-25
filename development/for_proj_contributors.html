@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development rules and tools for PROJ code contributors &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Development rules and tools for PROJ code contributors &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
         <link rel="next" title="FAQ" href="../faq.html"/>
         <link rel="prev" title="Version 4 to 5 API Migration" href="migration.html"/> 
@@ -227,9 +227,9 @@ organization.</li>
 <li>If your pull request fixes/references an issue, include that issue
 number in the pull request. For example:</li>
 </ul>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Wiz</span> <span class="n">the</span> <span class="n">bang</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>Wiz the bang
 
-<span class="n">Fixes</span> <span class="c1">#123.</span>
+Fixes #123.
 </pre></div>
 </div>
 <ul class="simple">
@@ -283,7 +283,7 @@ master.</p>
 <p>cppcheck can have false positives. In general, it is preferable to rework the
 code a bit to make it more &#8216;obvious&#8217; and avoid those false positives. When not
 possible, you can add a comment in the code like</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">/*</span> <span class="n">cppcheck</span><span class="o">-</span><span class="n">suppress</span> <span class="n">duplicateBreak</span> <span class="o">*/</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>/* cppcheck-suppress duplicateBreak */
 </pre></div>
 </div>
 <p>in the preceding line. Replace
@@ -293,23 +293,23 @@ duplicateBreak with the actual name of the violated rule emitted by cppcheck.</p
 <h3>CLang Static Analyzer (CSA)<a class="headerlink" href="#clang-static-analyzer-csa" title="Permalink to this headline">¶</a></h3>
 <p>CSA is run by the <code class="docutils literal"><span class="pre">travis/csa</span></code> build configuration. You may also run it locally.</p>
 <p>Preliminary step: install clang. For example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">releases</span><span class="o">.</span><span class="n">llvm</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="mf">6.0</span><span class="o">.</span><span class="mi">0</span><span class="o">/</span><span class="n">clang</span><span class="o">+</span><span class="n">llvm</span><span class="o">-</span><span class="mf">6.0</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span><span class="o">-</span><span class="n">ubuntu</span><span class="o">-</span><span class="mf">14.04</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">xz</span>
-<span class="n">tar</span> <span class="n">xJf</span> <span class="n">clang</span><span class="o">+</span><span class="n">llvm</span><span class="o">-</span><span class="mf">6.0</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span><span class="o">-</span><span class="n">ubuntu</span><span class="o">-</span><span class="mf">14.04</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">xz</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>wget http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
+tar xJf clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
 </pre></div>
 </div>
 <p>Run configure under the scan-build utility of clang:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">clang</span><span class="o">+</span><span class="n">llvm</span><span class="o">-</span><span class="mf">6.0</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span><span class="o">-</span><span class="n">ubuntu</span><span class="o">-</span><span class="mf">14.04</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">scan</span><span class="o">-</span><span class="n">build</span> <span class="o">./</span><span class="n">configure</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>./clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04/bin/scan-build ./configure
 </pre></div>
 </div>
 <p>Build under scan-build:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">clang</span><span class="o">+</span><span class="n">llvm</span><span class="o">-</span><span class="mf">6.0</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span><span class="o">-</span><span class="n">ubuntu</span><span class="o">-</span><span class="mf">14.04</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">scan</span><span class="o">-</span><span class="n">build</span> <span class="n">make</span> <span class="p">[</span><span class="o">-</span><span class="n">j8</span><span class="p">]</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>./clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04/bin/scan-build make [-j8]
 </pre></div>
 </div>
 <p>If CSA finds errors, they will be emitted during the build. And in which case,
 at the end of the build process, scan-build will emit a warning message
 indicating errors have been found and how to display the error report. This
 is with someling like</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">clang</span><span class="o">+</span><span class="n">llvm</span><span class="o">-</span><span class="mf">6.0</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">gnu</span><span class="o">-</span><span class="n">ubuntu</span><span class="o">-</span><span class="mf">14.04</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">scan</span><span class="o">-</span><span class="n">view</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">scan</span><span class="o">-</span><span class="n">build</span><span class="o">-</span><span class="mi">2018</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">15</span><span class="o">-</span><span class="mi">121416</span><span class="o">-</span><span class="mi">17476</span><span class="o">-</span><span class="mi">1</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>./clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04/bin/scan-view /tmp/scan-build-2018-03-15-121416-17476-1
 </pre></div>
 </div>
 <p>This will open a web browser with the interactive report.</p>
@@ -348,7 +348,7 @@ This will also help humans reading your code !</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -370,7 +370,7 @@ This will also help humans reading your code !</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

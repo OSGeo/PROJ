@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Helmert transform &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Helmert transform &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Transformations" href="index.html"/>
         <link rel="next" title="Molodensky transform" href="molodensky.html"/>
         <link rel="prev" title="Kinematic datum shifting utilizing a deformation model" href="deformation.html"/> 
@@ -293,22 +293,22 @@ treated as if they have the same observation time.</p>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <p>Transforming coordinates from NAD72 to NAD83 using the 4 parameter 2D Helmert:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="n">x</span><span class="o">=-</span><span class="mf">9597.3572</span> <span class="n">y</span><span class="o">=.</span><span class="mi">6112</span>
-             <span class="n">s</span><span class="o">=</span><span class="mf">0.304794780637</span> <span class="n">theta</span><span class="o">=-</span><span class="mf">1.244048</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj=helmert ellps=GRS80 x=-9597.3572 y=.6112
+             s=0.304794780637 theta=-1.244048
 </pre></div>
 </div>
 <p>Simplified transformations from ITRF2008/IGS08 to ETRS89 using 7 parameters:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.67678</span>    <span class="n">y</span><span class="o">=</span><span class="mf">0.65495</span>   <span class="n">z</span><span class="o">=-</span><span class="mf">0.52827</span>
-            <span class="n">rx</span><span class="o">=-</span><span class="mf">0.022742</span> <span class="n">ry</span><span class="o">=</span><span class="mf">0.012667</span> <span class="n">rz</span><span class="o">=</span><span class="mf">0.022704</span>  <span class="n">s</span><span class="o">=-</span><span class="mf">0.01070</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj=helmert ellps=GRS80 x=0.67678    y=0.65495   z=-0.52827
+            rx=-0.022742 ry=0.012667 rz=0.022704  s=-0.01070
 </pre></div>
 </div>
 <p>Transformation from <cite>ITRF2000&#64;2017.0</cite>  to <cite>ITRF93&#64;2017.0</cite> using 15 parameters:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span><span class="o">=</span><span class="n">helmert</span> <span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span>
-     <span class="n">x</span><span class="o">=</span><span class="mf">0.0127</span>     <span class="n">y</span><span class="o">=</span><span class="mf">0.0065</span>     <span class="n">z</span><span class="o">=-</span><span class="mf">0.0209</span>  <span class="n">s</span><span class="o">=</span><span class="mf">0.00195</span>
-     <span class="n">dx</span><span class="o">=-</span><span class="mf">0.0029</span>   <span class="n">dy</span><span class="o">=-</span><span class="mf">0.0002</span>   <span class="n">dz</span><span class="o">=-</span><span class="mf">0.0006</span> <span class="n">ds</span><span class="o">=</span><span class="mf">0.00001</span>
-     <span class="n">rx</span><span class="o">=-</span><span class="mf">0.00039</span>  <span class="n">ry</span><span class="o">=</span><span class="mf">0.00080</span>   <span class="n">rz</span><span class="o">=-</span><span class="mf">0.00114</span>
-     <span class="n">drx</span><span class="o">=-</span><span class="mf">0.00011</span> <span class="n">dry</span><span class="o">=-</span><span class="mf">0.00019</span> <span class="n">drz</span><span class="o">=</span><span class="mf">0.00007</span>
-     <span class="n">epoch</span><span class="o">=</span><span class="mf">1988.0</span> <span class="n">tobs</span><span class="o">=</span><span class="mf">2017.0</span>    <span class="n">transpose</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj=helmert ellps=GRS80
+     x=0.0127     y=0.0065     z=-0.0209  s=0.00195
+     dx=-0.0029   dy=-0.0002   dz=-0.0006 ds=0.00001
+     rx=-0.00039  ry=0.00080   rz=-0.00114
+     drx=-0.00011 dry=-0.00019 drz=0.00007
+     epoch=1988.0 tobs=2017.0    transpose
 </pre></div>
 </div>
 </div>
@@ -554,7 +554,7 @@ counterpart:</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -576,7 +576,7 @@ counterpart:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

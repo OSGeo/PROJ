@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Using PROJ in CMake projects &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Using PROJ in CMake projects &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
         <link rel="next" title="Language bindings" href="bindings.html"/>
         <link rel="prev" title="Deprecated API" href="reference/deprecated.html"/> 
@@ -186,7 +186,7 @@
 <p>The recommended way to use the PROJ library in a CMake project is to
 link to the imported library target <code class="docutils literal"><span class="pre">${PROJ4_LIBRARIES}</span></code> provided by
 the CMake configuration which comes with the library. Typical usage is:</p>
-<div class="code highlight-default"><div class="highlight"><pre><span></span>find_package(PROJ4)
+<div class="code highlight-none"><div class="highlight"><pre><span></span>find_package(PROJ4)
 
 target_link_libraries(MyApp ${PROJ4_LIBRARIES})
 </pre></div>
@@ -195,7 +195,7 @@ target_link_libraries(MyApp ${PROJ4_LIBRARIES})
 target link libraries, CMake will also pass the include directories to
 the compiler.  This requires that you use CMake version 2.8.11 or later.
 If you are using an older version of CMake, then add</p>
-<div class="code highlight-default"><div class="highlight"><pre><span></span>include_directories(${PROJ4_INCLUDE_DIRS})
+<div class="code highlight-none"><div class="highlight"><pre><span></span>include_directories(${PROJ4_INCLUDE_DIRS})
 </pre></div>
 </div>
 <p>The CMake command <code class="docutils literal"><span class="pre">find_package</span></code> will look for the configuration in a
@@ -228,7 +228,7 @@ particular, CMake will consult (and set) the cache variable
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -250,7 +250,7 @@ particular, CMake will consult (and set) the cache variable
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

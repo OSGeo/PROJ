@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Transverse Mercator &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Transverse Mercator &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Projections" href="index.html"/>
         <link rel="next" title="Two Point Equidistant" href="tpeqd.html"/>
         <link rel="prev" title="Tissot" href="tissot.html"/> 
@@ -411,12 +411,12 @@ In the post-war years, these concepts were extended into the Universal Transvers
 </tbody>
 </table>
 <p>Example using Gauss-Kruger on Germany area (aka EPSG:31467)</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 9 51 | proj +proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +ellps=bessel +datum=potsdam +units=m +no_defs
+<div class="highlight-none"><div class="highlight"><pre><span></span>$ echo 9 51 | proj +proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +ellps=bessel +datum=potsdam +units=m +no_defs
 3500000.00  5651505.56
 </pre></div>
 </div>
 <p>Example using Gauss Boaga on Italy area (EPSG:3004)</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 15 42 | proj +proj=tmerc +lat_0=0 +lon_0=15 +k=0.9996 +x_0=2520000 +y_0=0 +ellps=intl +units=m +no_defs
+<div class="highlight-none"><div class="highlight"><pre><span></span>$ echo 15 42 | proj +proj=tmerc +lat_0=0 +lon_0=15 +k=0.9996 +x_0=2520000 +y_0=0 +ellps=intl +units=m +no_defs
 2520000.00  4649858.60
 </pre></div>
 </div>
@@ -532,7 +532,7 @@ In the post-war years, these concepts were extended into the Universal Transvers
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -554,7 +554,7 @@ In the post-war years, these concepts were extended into the Universal Transvers
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

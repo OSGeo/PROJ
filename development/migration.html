@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Version 4 to 5 API Migration &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Version 4 to 5 API Migration &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
         <link rel="next" title="Development rules and tools for PROJ code contributors" href="for_proj_contributors.html"/>
         <link rel="prev" title="Language bindings" href="bindings.html"/> 
@@ -223,7 +223,7 @@ starts by doing an <strong>inverse</strong> transformation from system A to WGS8
 <p>With <code class="docutils literal"><span class="pre">cs2cs</span></code> being the command line interface to the old API, and <code class="docutils literal"><span class="pre">cct</span></code> being the same
 for the new, this example of doing the same thing in both world views will should give
 an idea of the differences:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ echo 300000 6100000 | cs2cs +proj=utm +zone=33 +ellps=GRS80 +to +proj=utm +zone=32 +ellps=GRS80
+<div class="highlight-none"><div class="highlight"><pre><span></span>$ echo 300000 6100000 | cs2cs +proj=utm +zone=33 +ellps=GRS80 +to +proj=utm +zone=32 +ellps=GRS80
 683687.87       6099299.66 0.00
 
 
@@ -406,7 +406,7 @@ source and destination systems are.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -428,7 +428,7 @@ source and destination systems are.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

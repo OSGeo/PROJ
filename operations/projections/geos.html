@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Geostationary Satellite View &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Geostationary Satellite View &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Projections" href="index.html"/>
         <link rel="next" title="Ginsburg VIII (TsNIIGAiK)" href="gins8.html"/>
         <link rel="prev" title="Gall (Gall Stereographic)" href="gall.html"/> 
@@ -357,14 +357,14 @@ scanning angle intervals.</p>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <p>In order to project using the geos projection you can do the following:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">geos</span> <span class="o">+</span><span class="n">h</span><span class="o">=</span><span class="mf">35785831.0</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj +proj=geos +h=35785831.0
 </pre></div>
 </div>
 <p>The required argument <code class="docutils literal"><span class="pre">h</span></code> is the viewing point (satellite position) height above
 the earth.</p>
 <p>The projection coordinate relate to the scanning angle by the following simple
 relation:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">scanning_angle</span> <span class="p">(</span><span class="n">radians</span><span class="p">)</span> <span class="o">=</span> <span class="n">projection_coordinate</span> <span class="o">/</span> <span class="n">h</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>scanning_angle (radians) = projection_coordinate / h
 </pre></div>
 </div>
 <div class="section" id="note-on-sweep-angle">
@@ -410,7 +410,7 @@ GOES should take sweep as y.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -432,7 +432,7 @@ GOES should take sweep as y.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

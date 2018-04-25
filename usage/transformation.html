@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Geodetic transformation &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Geodetic transformation &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../index.html"/>
         <link rel="up" title="Using PROJ" href="index.html"/>
         <link rel="next" title="Environment variables" href="environmentvars.html"/>
         <link rel="prev" title="Cartographic projection" href="projections.html"/> 
@@ -247,12 +247,12 @@ solutions for a wide spectrum of geodetic tasks.</p>
 <p>As a first example, let us take a look at the iconic
 <em>geodetic → Cartesian → Helmert → geodetic</em> case (steps 2 to 4 in the example in
 the introduction). In PROJ it can be implemented as</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span>
-<span class="n">step</span> <span class="n">proj</span><span class="o">=</span><span class="n">cart</span> <span class="n">ellps</span><span class="o">=</span><span class="n">intl</span>
-<span class="n">step</span> <span class="n">proj</span><span class="o">=</span><span class="n">helmert</span>
-     <span class="n">x</span><span class="o">=-</span><span class="mf">81.0703</span>  <span class="n">y</span><span class="o">=-</span><span class="mf">89.3603</span>  <span class="n">z</span><span class="o">=-</span><span class="mf">115.7526</span>
-    <span class="n">rx</span><span class="o">=-</span><span class="mf">0.48488</span> <span class="n">ry</span><span class="o">=-</span><span class="mf">0.02436</span> <span class="n">rz</span><span class="o">=-</span><span class="mf">0.41321</span>  <span class="n">s</span><span class="o">=-</span><span class="mf">0.540645</span>
-<span class="n">step</span> <span class="n">proj</span><span class="o">=</span><span class="n">cart</span> <span class="n">inv</span> <span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj=pipeline
+step proj=cart ellps=intl
+step proj=helmert
+     x=-81.0703  y=-89.3603  z=-115.7526
+    rx=-0.48488 ry=-0.02436 rz=-0.41321  s=-0.540645
+step proj=cart inv ellps=GRS80
 </pre></div>
 </div>
 <p>The pipeline can be expanded at both ends to accommodate whatever coordinate type
@@ -269,15 +269,15 @@ using the relevant Helmert transformation, and back to geodetic(ETRS89), before
 finally being projected onto the UTM zone 33, ETRS89 system. All in all a 6 step
 pipeline, implementing a transformation with centimeter level accuracy from a
 deprecated system with decimeter level tensions.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span>
-<span class="n">step</span> <span class="n">init</span><span class="o">=./</span><span class="n">s45b</span><span class="o">.</span><span class="n">pol</span><span class="p">:</span><span class="n">s45b_tc32</span>
-<span class="n">step</span> <span class="n">proj</span><span class="o">=</span><span class="n">utm</span> <span class="n">inv</span> <span class="n">ellps</span><span class="o">=</span><span class="n">intl</span> <span class="n">zone</span><span class="o">=</span><span class="mi">32</span>
-<span class="n">step</span> <span class="n">proj</span><span class="o">=</span><span class="n">cart</span> <span class="n">ellps</span><span class="o">=</span><span class="n">intl</span>
-<span class="n">step</span> <span class="n">proj</span><span class="o">=</span><span class="n">helmert</span>
-      <span class="n">x</span><span class="o">=-</span><span class="mf">81.0703</span>  <span class="n">y</span><span class="o">=-</span><span class="mf">89.3603</span>  <span class="n">z</span><span class="o">=-</span><span class="mf">115.7526</span>
-     <span class="n">rx</span><span class="o">=-</span><span class="mf">0.48488</span> <span class="n">ry</span><span class="o">=-</span><span class="mf">0.02436</span> <span class="n">rz</span><span class="o">=-</span><span class="mf">0.41321</span> <span class="n">s</span><span class="o">=-</span><span class="mf">0.540645</span>
-<span class="n">step</span> <span class="n">proj</span><span class="o">=</span><span class="n">cart</span> <span class="n">inv</span> <span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span>
-<span class="n">step</span> <span class="n">proj</span><span class="o">=</span><span class="n">utm</span> <span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="n">zone</span><span class="o">=</span><span class="mi">33</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj=pipeline
+step init=./s45b.pol:s45b_tc32
+step proj=utm inv ellps=intl zone=32
+step proj=cart ellps=intl
+step proj=helmert
+      x=-81.0703  y=-89.3603  z=-115.7526
+     rx=-0.48488 ry=-0.02436 rz=-0.41321 s=-0.540645
+step proj=cart inv ellps=GRS80
+step proj=utm ellps=GRS80 zone=33
 </pre></div>
 </div>
 <p>With the pipeline framework spatiotemporal transformation is possible. This is
@@ -293,15 +293,15 @@ except the epoch which is the epoch of the transformation. The default setting i
 use “coordinate frame” convention of the Helmert transform, but “position vector”
 convention can also be used. The last step in the pipeline is converting the
 coordinate timestamps back to GPS weeks.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proj</span><span class="o">=</span><span class="n">pipeline</span>
-<span class="n">step</span> <span class="n">proj</span><span class="o">=</span><span class="n">unitconvert</span> <span class="n">t_in</span><span class="o">=</span><span class="n">gps_week</span> <span class="n">t_out</span><span class="o">=</span><span class="n">decimalyear</span>
-<span class="n">step</span> <span class="n">proj</span><span class="o">=</span><span class="n">helmert</span>
-     <span class="n">x</span><span class="o">=</span><span class="mf">0.0127</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0065</span> <span class="n">z</span><span class="o">=-</span><span class="mf">0.0209</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.00195</span>
-     <span class="n">rx</span><span class="o">=</span><span class="mf">0.00039</span> <span class="n">ry</span><span class="o">=-</span><span class="mf">0.00080</span> <span class="n">rz</span><span class="o">=</span><span class="mf">0.00114</span>
-     <span class="n">dx</span><span class="o">=-</span><span class="mf">0.0029</span> <span class="n">dy</span><span class="o">=-</span><span class="mf">0.0002</span> <span class="n">dz</span><span class="o">=-</span><span class="mf">0.0006</span> <span class="n">ds</span><span class="o">=</span><span class="mf">0.00001</span>
-     <span class="n">drx</span><span class="o">=</span><span class="mf">0.00011</span> <span class="n">dry</span><span class="o">=</span><span class="mf">0.00019</span> <span class="n">drz</span><span class="o">=-</span><span class="mf">0.00007</span>
-     <span class="n">epoch</span><span class="o">=</span><span class="mf">1988.0</span>
-<span class="n">step</span> <span class="n">proj</span><span class="o">=</span><span class="n">unitconvert</span> <span class="n">t_in</span><span class="o">=</span><span class="n">decimalyear</span> <span class="n">t_out</span><span class="o">=</span><span class="n">gps_week</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>proj=pipeline
+step proj=unitconvert t_in=gps_week t_out=decimalyear
+step proj=helmert
+     x=0.0127 y=0.0065 z=-0.0209 s=0.00195
+     rx=0.00039 ry=-0.00080 rz=0.00114
+     dx=-0.0029 dy=-0.0002 dz=-0.0006 ds=0.00001
+     drx=0.00011 dry=0.00019 drz=-0.00007
+     epoch=1988.0
+step proj=unitconvert t_in=decimalyear t_out=gps_week
 </pre></div>
 </div>
 </div>
@@ -371,18 +371,18 @@ When used with the <code class="docutils literal"><span class="pre">cs2cs</span>
 special <code class="docutils literal"><span class="pre">+to</span></code> parameter.</p>
 <p>The following example demonstrates converting from the Greek GGRS87 datum
 to WGS84 with the <code class="docutils literal"><span class="pre">+towgs84</span></code> parameter.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="o">+</span><span class="n">towgs84</span><span class="o">=-</span><span class="mf">199.87</span><span class="p">,</span><span class="mf">74.79</span><span class="p">,</span><span class="mf">246.62</span>
-    <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">WGS84</span>
-<span class="mi">20</span> <span class="mi">35</span>
-<span class="mi">20</span><span class="n">d0</span><span class="s1">&#39;5.467&quot;E    35d0&#39;</span><span class="mf">9.575</span><span class="s2">&quot;N 8.570</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=GRS80 +towgs84=-199.87,74.79,246.62
+    +to +proj=latlong +datum=WGS84
+20 35
+20d0&#39;5.467&quot;E    35d0&#39;9.575&quot;N 8.570
 </pre></div>
 </div>
 <p>The EPSG database provides this example for transforming from WGS72 to WGS84
 using an approximated 7 parameter transformation.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">WGS72</span> <span class="o">+</span><span class="n">towgs84</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">4.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.554</span><span class="p">,</span><span class="mf">0.219</span> \
-    <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">WGS84</span>
-<span class="mi">4</span> <span class="mi">55</span>
-<span class="mi">4</span><span class="n">d0</span><span class="s1">&#39;0.554&quot;E     55d0&#39;</span><span class="mf">0.09</span><span class="s2">&quot;N 3.223</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=WGS72 +towgs84=0,0,4.5,0,0,0.554,0.219 \
+    +to +proj=latlong +datum=WGS84
+4 55
+4d0&#39;0.554&quot;E     55d0&#39;0.09&quot;N 3.223
 </pre></div>
 </div>
 </div>
@@ -404,23 +404,23 @@ two is that the <em>cs2cs</em> framework is limited to grid mappings to WGS84, w
 reference frames, as long as a grid exists.</p>
 <p>Use of grid shifts with <code class="docutils literal"><span class="pre">cs2cs</span></code> is specified using the <code class="docutils literal"><span class="pre">+nadgrids</span></code>
 keyword in a coordinate system definition. For example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=</span><span class="n">ntv1_can</span><span class="o">.</span><span class="n">dat</span> \
-    <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
-<span class="o">-</span><span class="mi">111</span> <span class="mi">50</span>
-<span class="n">EOF</span>
-<span class="mi">111</span><span class="n">d0</span><span class="s1">&#39;2.952&quot;W   50d0&#39;</span><span class="mf">0.111</span><span class="s2">&quot;N 0.000</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>% cs2cs +proj=latlong +ellps=clrk66 +nadgrids=ntv1_can.dat \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 &lt;&lt; EOF
+-111 50
+EOF
+111d0&#39;2.952&quot;W   50d0&#39;0.111&quot;N 0.000
 </pre></div>
 </div>
 <p>In this case the <code class="docutils literal"><span class="pre">/usr/local/share/proj/ntv1_can.dat</span></code> grid shift file was
 loaded, and used to get a grid shift value for the selected point.</p>
 <p>It is possible to list multiple grid shift files, in which case each will be
 tried in turn till one is found that contains the point being transformed.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> \
-          <span class="o">+</span><span class="n">nadgrids</span><span class="o">=</span><span class="n">conus</span><span class="p">,</span><span class="n">alaska</span><span class="p">,</span><span class="n">hawaii</span><span class="p">,</span><span class="n">stgeorge</span><span class="p">,</span><span class="n">stlrnc</span><span class="p">,</span><span class="n">stpaul</span> \
-    <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
-<span class="o">-</span><span class="mi">111</span> <span class="mi">44</span>
-<span class="n">EOF</span>
-<span class="mi">111</span><span class="n">d0</span><span class="s1">&#39;2.788&quot;W   43d59&#39;</span><span class="mf">59.725</span><span class="s2">&quot;N 0.000</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=clrk66 \
+          +nadgrids=conus,alaska,hawaii,stgeorge,stlrnc,stpaul \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 &lt;&lt; EOF
+-111 44
+EOF
+111d0&#39;2.788&quot;W   43d59&#39;59.725&quot;N 0.000
 </pre></div>
 </div>
 <div class="section" id="skipping-missing-grids">
@@ -430,11 +430,11 @@ not found, the search will continue to the next grid.  Normally any grid not
 found will cause an error.  For instance, the following would use the
 <code class="docutils literal"><span class="pre">ntv2_0.gsb</span></code> file if available (see <a class="reference internal" href="../resource_files.html#nonfreegrids"><span class="std std-ref">Non-Free Grids</span></a>), otherwise it would
 fallback to using the <code class="docutils literal"><span class="pre">ntv1_can.dat</span></code> file.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=</span><span class="nd">@ntv2_0</span><span class="o">.</span><span class="n">gsb</span><span class="p">,</span><span class="n">ntv1_can</span><span class="o">.</span><span class="n">dat</span> \
-    <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
-<span class="o">-</span><span class="mi">111</span> <span class="mi">50</span>
-<span class="n">EOF</span>
-<span class="mi">111</span><span class="n">d0</span><span class="s1">&#39;3.006&quot;W   50d0&#39;</span><span class="mf">0.103</span><span class="s2">&quot;N 0.000</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=clrk66 +nadgrids=@ntv2_0.gsb,ntv1_can.dat \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 &lt;&lt; EOF
+-111 50
+EOF
+111d0&#39;3.006&quot;W   50d0&#39;0.103&quot;N 0.000
 </pre></div>
 </div>
 </div>
@@ -445,19 +445,19 @@ inclusive).  This file provides a zero shift for the whole world.  It may be
 listed at the end of a nadgrids file list if you want a zero shift to be
 applied to points outside the valid region of all the other grids.  Normally if
 no grid is found that contains the point to be transformed an error will occur.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=</span><span class="n">conus</span><span class="p">,</span><span class="n">null</span> \
-    <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
-<span class="o">-</span><span class="mi">111</span> <span class="mi">45</span>
-<span class="n">EOF</span>
-<span class="mi">111</span><span class="n">d0</span><span class="s1">&#39;3.006&quot;W   50d0&#39;</span><span class="mf">0.103</span><span class="s2">&quot;N 0.000</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +ellps=clrk66 +nadgrids=conus,null \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 &lt;&lt; EOF
+-111 45
+EOF
+111d0&#39;3.006&quot;W   50d0&#39;0.103&quot;N 0.000
 
-<span class="n">cs2cs</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">clrk66</span> <span class="o">+</span><span class="n">nadgrids</span><span class="o">=</span><span class="n">conus</span><span class="p">,</span><span class="n">null</span> \
-    <span class="o">+</span><span class="n">to</span> <span class="o">+</span><span class="n">proj</span><span class="o">=</span><span class="n">latlong</span> <span class="o">+</span><span class="n">ellps</span><span class="o">=</span><span class="n">GRS80</span> <span class="o">+</span><span class="n">datum</span><span class="o">=</span><span class="n">NAD83</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
-<span class="o">-</span><span class="mi">111</span> <span class="mi">44</span>
-<span class="o">-</span><span class="mi">111</span> <span class="mi">55</span>
-<span class="n">EOF</span>
-<span class="mi">111</span><span class="n">d0</span><span class="s1">&#39;2.788&quot;W   43d59&#39;</span><span class="mf">59.725</span><span class="s2">&quot;N 0.000</span>
-<span class="mi">111</span><span class="n">dW</span>   <span class="mi">55</span><span class="n">dN</span> <span class="mf">0.000</span>
+cs2cs +proj=latlong +ellps=clrk66 +nadgrids=conus,null \
+    +to +proj=latlong +ellps=GRS80 +datum=NAD83 &lt;&lt; EOF
+-111 44
+-111 55
+EOF
+111d0&#39;2.788&quot;W   43d59&#39;59.725&quot;N 0.000
+111dW   55dN 0.000
 </pre></div>
 </div>
 <p>For more information see the chapter on <a class="reference internal" href="../resource_files.html#transformation-grids"><span class="std std-ref">Transformation grids</span></a>.</p>
@@ -511,7 +511,7 @@ WGS84). Other types of grids can be used with the <em>pipeline</em> framework.</
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -533,7 +533,7 @@ WGS84). Other types of grids can be used with the <em>pipeline</em> framework.</
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Quadrilateralized Spherical Cube &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Quadrilateralized Spherical Cube &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Projections" href="index.html"/>
         <link rel="next" title="Robinson" href="robin.html"/>
         <link rel="prev" title="Quartic Authalic" href="qua_aut.html"/> 
@@ -399,29 +399,29 @@ A preceding shift to a sphere is performed automatically; see <a class="referenc
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <p>The following example uses QSC projection via GDAL to create the six cube side
 maps from a world map for the WGS84 ellipsoid:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84  +lat_0=0 +lon_0=0&quot;</span>        \
-    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
-    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">frontside</span><span class="o">.</span><span class="n">tiff</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>gdalwarp -t_srs &quot;+wktext +proj=qsc +units=m +ellps=WGS84  +lat_0=0 +lon_0=0&quot;        \
+    -wo SOURCE_EXTRA=100 -wo SAMPLE_GRID=YES -te -6378137 -6378137 6378137 6378137  \
+    worldmap.tiff frontside.tiff
 
-<span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=0 +lon_0=90&quot;</span>        \
-    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
-    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">rightside</span><span class="o">.</span><span class="n">tiff</span>
+gdalwarp -t_srs &quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=0 +lon_0=90&quot;        \
+    -wo SOURCE_EXTRA=100 -wo SAMPLE_GRID=YES -te -6378137 -6378137 6378137 6378137  \
+    worldmap.tiff rightside.tiff
 
-<span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=0 +lon_0=180&quot;</span>       \
-    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
-    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">backside</span><span class="o">.</span><span class="n">tiff</span>
+gdalwarp -t_srs &quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=0 +lon_0=180&quot;       \
+    -wo SOURCE_EXTRA=100 -wo SAMPLE_GRID=YES -te -6378137 -6378137 6378137 6378137  \
+    worldmap.tiff backside.tiff
 
-<span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=0 +lon_0=-90&quot;</span>       \
-    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
-    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">leftside</span><span class="o">.</span><span class="n">tiff</span>
+gdalwarp -t_srs &quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=0 +lon_0=-90&quot;       \
+    -wo SOURCE_EXTRA=100 -wo SAMPLE_GRID=YES -te -6378137 -6378137 6378137 6378137  \
+    worldmap.tiff leftside.tiff
 
-<span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=90 +lon_0=0&quot;</span>        \
-    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
-    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">topside</span><span class="o">.</span><span class="n">tiff</span>
+gdalwarp -t_srs &quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=90 +lon_0=0&quot;        \
+    -wo SOURCE_EXTRA=100 -wo SAMPLE_GRID=YES -te -6378137 -6378137 6378137 6378137  \
+    worldmap.tiff topside.tiff
 
-<span class="n">gdalwarp</span> <span class="o">-</span><span class="n">t_srs</span> <span class="s2">&quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=-90 +lon_0=0&quot;</span>       \
-    <span class="o">-</span><span class="n">wo</span> <span class="n">SOURCE_EXTRA</span><span class="o">=</span><span class="mi">100</span> <span class="o">-</span><span class="n">wo</span> <span class="n">SAMPLE_GRID</span><span class="o">=</span><span class="n">YES</span> <span class="o">-</span><span class="n">te</span> <span class="o">-</span><span class="mi">6378137</span> <span class="o">-</span><span class="mi">6378137</span> <span class="mi">6378137</span> <span class="mi">6378137</span>  \
-    <span class="n">worldmap</span><span class="o">.</span><span class="n">tiff</span> <span class="n">bottomside</span><span class="o">.</span><span class="n">tiff</span>
+gdalwarp -t_srs &quot;+wktext +proj=qsc +units=m +ellps=WGS84 +lat_0=-90 +lon_0=0&quot;       \
+    -wo SOURCE_EXTRA=100 -wo SAMPLE_GRID=YES -te -6378137 -6378137 6378137 6378137  \
+    worldmap.tiff bottomside.tiff
 </pre></div>
 </div>
 <p>Explanation:</p>
@@ -493,7 +493,7 @@ of the circumscribing cube.</li>
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -515,7 +515,7 @@ of the circumscribing cube.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

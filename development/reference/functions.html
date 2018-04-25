@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Functions &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Functions &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Reference" href="index.html"/>
         <link rel="next" title="Deprecated API" href="deprecated.html"/>
         <link rel="prev" title="Data types" href="datatypes.html"/> 
@@ -113,6 +113,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#transformation-setup">Transformation setup</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#coordinate-transformation">Coordinate transformation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#error-reporting">Error reporting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#logging">Logging</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#info-functions">Info functions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lists">Lists</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#distances">Distances</a></li>
@@ -595,6 +596,58 @@ const char* <code class="descname">proj_errno_string</code><span class="sig-pare
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Available from version 5.1.0.</p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="c.proj_log_level">
+<a class="reference internal" href="datatypes.html#c.PJ_LOG_LEVEL" title="PJ_LOG_LEVEL">PJ_LOG_LEVEL</a> <code class="descname">proj_log_level</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ_CONTEXT" title="PJ_CONTEXT">PJ_CONTEXT</a><em>&nbsp;*ctx</em>, <a class="reference internal" href="datatypes.html#c.PJ_LOG_LEVEL" title="PJ_LOG_LEVEL">PJ_LOG_LEVEL</a><em>&nbsp;level</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_log_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get and set logging level for a given context. Changes the log level to
+<code class="xref c c-data docutils literal"><span class="pre">level</span></code> and returns the previous logging level. If called with
+<code class="xref c c-data docutils literal"><span class="pre">level</span></code> set to <code class="xref c c-type docutils literal"><span class="pre">PJ_LOG_TELL</span></code> the function returns the current
+logging level without changing it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ctx</strong> (<a class="reference internal" href="datatypes.html#c.PJ_CONTEXT" title="PJ_CONTEXT"><em>PJ_CONTEXT*</em></a>) &#8211; Threading context.</li>
+<li><strong>level</strong> (<a class="reference internal" href="datatypes.html#c.PJ_LOG_LEVEL" title="PJ_LOG_LEVEL"><em>PJ_LOG_LEVEL</em></a>) &#8211; New logging level.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference internal" href="datatypes.html#c.PJ_LOG_LEVEL" title="PJ_LOG_LEVEL"><code class="xref c c-type docutils literal"><span class="pre">PJ_LOG_LEVEL</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 5.1.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.proj_log_func">
+void <code class="descname">proj_log_func</code><span class="sig-paren">(</span><a class="reference internal" href="datatypes.html#c.PJ_CONTEXT" title="PJ_CONTEXT">PJ_CONTEXT</a><em>&nbsp;*ctx</em>, void<em>&nbsp;*app_data</em>, PJ_LOG_FUNCTION<em>&nbsp;logf</em><span class="sig-paren">)</span><a class="headerlink" href="#c.proj_log_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override the internal log function of PROJ.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ctx</strong> (<a class="reference internal" href="datatypes.html#c.PJ_CONTEXT" title="PJ_CONTEXT"><em>PJ_CONTEXT*</em></a>) &#8211; Threading context.</li>
+<li><strong>app_data</strong> (<em>void*</em>) &#8211; Pointer to data structure used by the calling application.</li>
+<li><strong>logf</strong> (<em>PJ_LOG_FUNCTION</em>) &#8211; Log function that overrides the PROJ log function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 5.1.0.</span></p>
 </div>
 </dd></dl>
 
@@ -1108,7 +1161,7 @@ int <code class="descname">proj_angular_output</code><span class="sig-paren">(</
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -1130,7 +1183,7 @@ int <code class="descname">proj_angular_output</code><span class="sig-paren">(</
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

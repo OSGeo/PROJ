@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Deprecated API &mdash; PROJ.4 5.0.0 documentation</title>
+  <title>Deprecated API &mdash; PROJ.4 5.0.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="PROJ.4 5.0.0 documentation" href="../../index.html"/>
+    <link rel="top" title="PROJ.4 5.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Reference" href="index.html"/>
         <link rel="next" title="Using PROJ in CMake projects" href="../cmake.html"/>
         <link rel="prev" title="Functions" href="functions.html"/> 
@@ -262,7 +262,7 @@ on failure.</p>
 degrees, performs Mercator projection with a Clarke 1866 ellipsoid and a
 33° latitude of true scale and prints the projected cartesian values in
 meters:</p>
-<div class="code highlight-default"><div class="highlight"><pre><span></span>#include &lt;proj_api.h&gt;
+<div class="code highlight-none"><div class="highlight"><pre><span></span>#include &lt;proj_api.h&gt;
 
 main(int argc, char **argv) {
      projPJ pj_merc, pj_latlong;
@@ -289,13 +289,13 @@ main(int argc, char **argv) {
 <h2>API Functions<a class="headerlink" href="#api-functions" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="pj-transform">
 <h3>pj_transform<a class="headerlink" href="#pj-transform" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">int</span> <span class="n">pj_transform</span><span class="p">(</span> <span class="n">projPJ</span> <span class="n">srcdefn</span><span class="p">,</span>
-                  <span class="n">projPJ</span> <span class="n">dstdefn</span><span class="p">,</span>
-                  <span class="n">long</span> <span class="n">point_count</span><span class="p">,</span>
-                  <span class="nb">int</span> <span class="n">point_offset</span><span class="p">,</span>
-                  <span class="n">double</span> <span class="o">*</span><span class="n">x</span><span class="p">,</span>
-                  <span class="n">double</span> <span class="o">*</span><span class="n">y</span><span class="p">,</span>
-                  <span class="n">double</span> <span class="o">*</span><span class="n">z</span> <span class="p">);</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>int pj_transform( projPJ srcdefn,
+                  projPJ dstdefn,
+                  long point_count,
+                  int point_offset,
+                  double *x,
+                  double *y,
+                  double *z );
 </pre></div>
 </div>
 <p>Transform the x/y/z points from the source coordinate system to the
@@ -323,7 +323,7 @@ transformed.</p>
 </div>
 <div class="section" id="pj-init-plus">
 <h3>pj_init_plus<a class="headerlink" href="#pj-init-plus" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">projPJ</span> <span class="n">pj_init_plus</span><span class="p">(</span><span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">definition</span><span class="p">);</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>projPJ pj_init_plus(const char *definition);
 </pre></div>
 </div>
 <p>This function converts a string representation of a coordinate system
@@ -337,14 +337,14 @@ deallocated with <code class="docutils literal"><span class="pre">pj_free()</spa
 </div>
 <div class="section" id="pj-free">
 <h3>pj_free<a class="headerlink" href="#pj-free" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">void</span> <span class="n">pj_free</span><span class="p">(</span> <span class="n">projPJ</span> <span class="n">pj</span> <span class="p">);</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>void pj_free( projPJ pj );
 </pre></div>
 </div>
 <p>Frees all resources associated with pj.</p>
 </div>
 <div class="section" id="pj-is-latlong">
 <h3>pj_is_latlong<a class="headerlink" href="#pj-is-latlong" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">int</span> <span class="n">pj_is_latlong</span><span class="p">(</span> <span class="n">projPJ</span> <span class="n">pj</span> <span class="p">);</span>
+<div class="highlight-none"><div class="highlight"><pre><span></span>int pj_is_latlong( projPJ pj );
 </pre></div>
 </div>
 <p>Returns TRUE if the passed coordinate system is geographic
@@ -352,14 +352,14 @@ deallocated with <code class="docutils literal"><span class="pre">pj_free()</spa
 </div>
 <div class="section" id="pj-is-geocent">
 <h3>pj_is_geocent<a class="headerlink" href="#pj-is-geocent" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span>int pj_is_geocent( projPJ pj );``
+<div class="highlight-none"><div class="highlight"><pre><span></span>int pj_is_geocent( projPJ pj );``
 </pre></div>
 </div>
 <p>Returns TRUE if the coordinate system is geocentric (<code class="docutils literal"><span class="pre">proj=geocent</span></code>).</p>
 </div>
 <div class="section" id="pj-get-def">
 <h3>pj_get_def<a class="headerlink" href="#pj-get-def" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span>char *pj_get_def( projPJ pj, int options);``
+<div class="highlight-none"><div class="highlight"><pre><span></span>char *pj_get_def( projPJ pj, int options);``
 </pre></div>
 </div>
 <p>Returns the PROJ.4 initialization string suitable for use with
@@ -369,7 +369,7 @@ the definition expanded as much as possible (for instance <code class="docutils 
 </div>
 <div class="section" id="pj-latlong-from-proj">
 <h3>pj_latlong_from_proj<a class="headerlink" href="#pj-latlong-from-proj" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span>projPJ pj_latlong_from_proj( projPJ pj_in );``
+<div class="highlight-none"><div class="highlight"><pre><span></span>projPJ pj_latlong_from_proj( projPJ pj_in );``
 </pre></div>
 </div>
 <p>Returns a new coordinate system definition which is the geographic
@@ -377,42 +377,42 @@ coordinate (lat/long) system underlying <code class="docutils literal"><span cla
 </div>
 <div class="section" id="pj-set-finder">
 <h3>pj_set_finder<a class="headerlink" href="#pj-set-finder" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span>void pj_set_finder( const char *(*new_finder)(const char *) );``
+<div class="highlight-none"><div class="highlight"><pre><span></span>void pj_set_finder( const char *(*new_finder)(const char *) );``
 </pre></div>
 </div>
 <p>Install a custom function for finding init and grid shift files.</p>
 </div>
 <div class="section" id="pj-set-searchpath">
 <h3>pj_set_searchpath<a class="headerlink" href="#pj-set-searchpath" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span>void pj_set_searchpath ( int count, const char **path );``
+<div class="highlight-none"><div class="highlight"><pre><span></span>void pj_set_searchpath ( int count, const char **path );``
 </pre></div>
 </div>
 <p>Set a list of directories to search for init and grid shift files.</p>
 </div>
 <div class="section" id="pj-deallocate-grids">
 <h3>pj_deallocate_grids<a class="headerlink" href="#pj-deallocate-grids" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span>void pj_deallocate_grids( void );``
+<div class="highlight-none"><div class="highlight"><pre><span></span>void pj_deallocate_grids( void );``
 </pre></div>
 </div>
 <p>Frees all resources associated with loaded and cached datum shift grids.</p>
 </div>
 <div class="section" id="pj-strerrno">
 <h3>pj_strerrno<a class="headerlink" href="#pj-strerrno" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span>char *pj_strerrno( int );``
+<div class="highlight-none"><div class="highlight"><pre><span></span>char *pj_strerrno( int );``
 </pre></div>
 </div>
 <p>Returns the error text associated with the passed in error code.</p>
 </div>
 <div class="section" id="pj-get-errno-ref">
 <h3>pj_get_errno_ref<a class="headerlink" href="#pj-get-errno-ref" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span>int *pj_get_errno_ref( void );``
+<div class="highlight-none"><div class="highlight"><pre><span></span>int *pj_get_errno_ref( void );``
 </pre></div>
 </div>
 <p>Returns a pointer to the global pj_errno error variable.</p>
 </div>
 <div class="section" id="pj-get-release">
 <h3>pj_get_release<a class="headerlink" href="#pj-get-release" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-default"><div class="highlight"><pre><span></span>const char *pj_get_release( void );``
+<div class="highlight-none"><div class="highlight"><pre><span></span>const char *pj_get_release( void );``
 </pre></div>
 </div>
 <p>Returns an internal string describing the release version.</p>
@@ -449,7 +449,7 @@ coordinate (lat/long) system underlying <code class="docutils literal"><span cla
   <div role="contentinfo">
     <p>
         &copy; Copyright 1983-2018.
-      Last updated on 11 Apr 2018.
+      Last updated on 25 Apr 2018.
 
     </p>
   </div>
@@ -471,7 +471,7 @@ coordinate (lat/long) system underlying <code class="docutils literal"><span cla
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'5.0.0',
+            VERSION:'5.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
