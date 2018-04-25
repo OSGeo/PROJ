@@ -4,16 +4,16 @@ builddir=$1
 destdir=$2
 
 
-git clone git@github.com:OSGeo/proj.4.git $destdir/proj4docs
-cd $destdir/proj4docs
+git clone git@github.com:OSGeo/proj.4.git $destdir/projdocs
+cd $destdir/projdocs
 git checkout gh-pages
 
 
 cd $builddir/html
-cp -rf * $destdir/proj4docs
-cp $builddir/latex/proj4.pdf $destdir/proj4docs
+cp -rf * $destdir/projdocs
+cp $builddir/latex/proj.pdf $destdir/projdocs
 
-cd $destdir/proj4docs
+cd $destdir/projdocs
 git config user.email "proj4bot@proj4.bot"
 git config user.name "proj.4 deploybot"
 
