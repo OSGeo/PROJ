@@ -5,7 +5,9 @@
  *           Martin Desruisseaux
  *
  ******************************************************************************
- * Copyright (c) 2005, Antonello Andrea
+ * Copyright (c) 2005, Andrea Antonello
+ * Copyright (c) 2011, Martin Desruisseaux
+ * Copyright (c) 2018, Even Rouault
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -351,11 +353,8 @@ void convertAngularOrdinates(PJ *pj, double* data, jint numPts, int dimension, d
     if (pj_is_latlong(pj)) {
         /* Convert only the 2 first ordinates and skip all the other dimensions. */
         dimToSkip = dimension - 2;
-    } else if (pj_is_geocent(pj)) {
-        /* Convert only the 3 first ordinates and skip all the other dimensions. */
-        dimToSkip = dimension - 3;
     } else {
-        /* Not a geographic or geocentric CRS: nothing to convert. */
+        /* Not a geographic CRS: nothing to convert. */
         return;
     }
     double *stop = data + dimension*numPts;
