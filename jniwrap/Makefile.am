@@ -1,4 +1,4 @@
-EXTRA_DIST = build.xml doxygen.cfg README
+EXTRA_DIST = build.xml doxygen.cfg README.md
 
 SUBDIRS	=	org
 
