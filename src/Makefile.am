@@ -10,7 +10,7 @@ AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
 include_HEADERS = proj.h proj_api.h projects.h geodesic.h \
-	org_proj4_Projections.h org_proj4_PJ.h
+	org_proj4_PJ.h
 
 EXTRA_DIST = makefile.vc proj.def bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake \
