@@ -94,4 +94,7 @@ README
 /src/gie
 /src/geodtest
 
+# Java bridge
+jniwrap/out
+
 /docs/build
