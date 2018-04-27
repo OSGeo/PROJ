@@ -258,8 +258,7 @@ if(JNI_SUPPORT)
   set(SRC_LIBPROJ_CORE ${SRC_LIBPROJ_CORE}
                        jniproj.c )
   set(HEADERS_LIBPROJ ${HEADERS_LIBPROJ}
-                        org_proj4_PJ.h
-                        org_proj4_Projections.h)
+                        org_proj4_PJ.h)
   source_group("Source Files\\JNI" FILES ${SRC_LIBPROJ_JNI})
   add_definitions(-DJNI_ENABLED)
   include_directories( ${JNI_INCLUDE_DIRS})
