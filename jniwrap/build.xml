@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="Java bridge to Proj.4" default="compile" basedir=".">
+<project name="Proj bridge to Java" default="compile" basedir=".">
 
     <!-- *******************************************
              Set directory paths and versions.
@@ -8,6 +8,7 @@
     <property name="src-C"    value="../src"/>
     <property name="out"      value="out"/>
     <property name="classes"  value="${out}/classes"/>
+    <property name="javadoc"  value="${out}/apidocs"/>
     <property name="version"  value="5.1"/>
 
     <!-- *******************************************
@@ -33,23 +34,18 @@
     </target>
 
     <!-- **********************************************************
-             Execute doxygen help file and source file creation.
+             Build and create documentation.
          ********************************************************** -->
-    <target name="do_make_help">
-        <echo>Creating help files...</echo>
-        <exec dir="." executable="doxygen">
-            <arg line="doxygen.cfg"/>
-        </exec>
+    <target name="javadoc" depends="compile">
+        <javadoc sourcepath="${src-java}" classpath="${classes}" destdir="${javadoc}" encoding="UTF-8"
+                 noqualifier="all" windowtitle="Proj bridge to Java" author="false"/>
     </target>
 
     <!-- *******************************************
              Clean up everything.
          ******************************************* -->
     <target name="clean">
-        <echo>Cleaning up...</echo>
-        <delete dir="${classes}"/>
         <delete dir="${out}"/>
-        <delete dir="docs"/>
     </target>
 
 </project>

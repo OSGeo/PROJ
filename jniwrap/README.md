@@ -49,12 +49,8 @@ Beyond the ones already put by Proj, you need:
 ### Documentation
 
 The documentation is held inside the code and can be retrieved by running
-doxygen inside the folder jniwrap. This will create the HTML format
-documentation inside of jniwrap/docs
-
-The standard way to achieve this is to use an Ant target:
-
-    ant do_make_help
+`ant javadoc` inside the folder `jniwrap`. This will create the HTML format
+documentation inside of `jniwrap/out/apidocs`
 
 
 
