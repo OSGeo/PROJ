@@ -33,6 +33,8 @@
 #define _XOPEN_SOURCE 500
 #endif
 
+/* For PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP */
+#define _GNU_SOURCE
 
 #ifndef _WIN32
 #include "proj_config.h"
@@ -100,6 +102,9 @@ void pj_cleanup_lock()
 
 #include "pthread.h"
 
+#ifdef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+static pthread_mutex_t core_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+#else
 static pthread_mutex_t core_lock;
 
 /************************************************************************/
@@ -122,6 +127,8 @@ static void pj_create_lock()
     pthread_mutex_init(&core_lock, &mutex_attr);
 }
 
+#endif /* PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP */
+
 /************************************************************************/
 /*                          pj_acquire_lock()                           */
 /*                                                                      */
@@ -130,11 +137,14 @@ static void pj_create_lock()
 
 void pj_acquire_lock()
 {
+
+#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
     static pthread_once_t sOnceKey = PTHREAD_ONCE_INIT;
     if( pthread_once(&sOnceKey, pj_create_lock) != 0 )
     {
         fprintf(stderr, "pthread_once() failed in pj_acquire_lock().\n");
     }
+#endif
 
     pthread_mutex_lock( &core_lock);
 }
