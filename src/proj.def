@@ -155,3 +155,7 @@ EXPORTS
 
     proj_geod                      @140
     proj_context_errno             @141
+
+    pj_acquire_lock                @142
+    pj_release_lock                @143
+    pj_cleanup_lock                @144
