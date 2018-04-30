@@ -118,12 +118,6 @@ void proj_fileapi_set (PJ *P, void *fileapi);
 const char * const *proj_get_searchpath(void);
 int    proj_get_path_count(void);
 
-#if HAVE_C99_MATH
-#define pj_is_nan isnan
-#else
-int pj_is_nan (double val);
-#endif
-
 #ifdef __cplusplus
 }
 #endif
