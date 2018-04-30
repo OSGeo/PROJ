@@ -1,4 +1,4 @@
-.. option:: +lat_0
+.. option:: +lat_0=<value>
 
     Latitude of projection center.
 

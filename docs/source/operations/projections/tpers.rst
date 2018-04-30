@@ -10,20 +10,15 @@ Tilted perspective
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Implemented by**  | Gerald I. Evenden                                        |
+| **Alias**           | tpers                                                    |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
-| `+h`                | Height (in meters) above the surface. Required.          |
+| **Input type**      | Geodetic coordinates                                     |
 +---------------------+----------------------------------------------------------+
-| `+azi`              | Bearing (in degrees) from due north.                     |
+| **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
-| `+tilt`             | Angle (in degrees) away from nadir.                      |
-+---------------------+----------------------------------------------------------+
-| `+lat_0`            | Latitude (in degrees) of the view position.              |
-+---------------------+----------------------------------------------------------+
-| `+lon_0`            | Longitude (in degrees) of the view position.             |
-+---------------------+----------------------------------------------------------+
+
 
 
 .. image:: ./images/tpers.png
@@ -34,6 +29,40 @@ Tilted perspective
 Tilted Perspective is similar to :ref:`nsper` (``nsper``) in that it simulates a
 perspective view from a height. Where ``nsper`` projects onto a plane tangent to
 the surface, Tilted Perspective orients the plane towards the direction of the
-view. Thus, extra parameters azi and tilt are required beyond `nsper``'s ``h``.
-As with ``nsper``, ``lat_0`` & ``lon_0`` are also required
-for satellite position.
+view. Thus, extra parameters specifying azimuth and tilt are required beyond
+`nsper``'s ``h``. As with ``nsper``, ``lat_0`` & ``lon_0`` are
+also required for satellite position.
+
+Parameters
+################################################################################
+
+Required
+-------------------------------------------------------------------------------
+
+.. include:: ../options/h.rst
+
+Optional
+-------------------------------------------------------------------------------
+
+.. option:: +azi=<value>
+
+    Bearing in degrees away from north.
+
+    *Defaults to 0.0.*
+
+.. option:: +tilt=<value>
+
+    Angle in degrees away from nadir.
+
+    *Defaults to 0.0.*
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/lat_0.rst
+
+.. include:: ../options/R.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
+

@@ -4,23 +4,42 @@
 Albers Equal Area
 ********************************************************************************
 +---------------------+----------------------------------------------------------+
-| **Classification**  | Conic.                                                   |
+| **Classification**  | Conic                                                    |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical and elliptical projection.|
+| **Available forms** | Forward and inverse, spherical and elliptical projection |
 +---------------------+----------------------------------------------------------+
-| **Defined area**    | Global.                                                  |
+| **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
+| **Alias**           | aea                                                      |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
-| `+lat_1`            | First standard parallel. Defaults to 0.0.                |
+| **Input type**      | Geodetic coordinates                                     |
 +---------------------+----------------------------------------------------------+
-| `+lat_2`            | Second standard parallel. Can not be equal to `lat_1`.   |
-|                     | Defaults to 0.0.                                         |
+| **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
+
 
 .. image:: ./images/aea.png
    :scale: 50%
    :alt:   Albers Equal Area
 
+Options
+################################################################################
+
+.. note:: All options are optional for the Albers Equal Area projection.
+
+.. include:: ../options/lat_1.rst
+
+.. include:: ../options/lat_2.rst
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/R.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
 

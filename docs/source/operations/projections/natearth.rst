@@ -10,12 +10,16 @@ Natural Earth
 +---------------------+--------------------------------------------------------+
 | **Defined area**    | Global                                                 |
 +---------------------+--------------------------------------------------------+
-| **Implemented by**  | Bernhard Jenny                                         |
+| **Alias**           | natearth                                               |
 +---------------------+--------------------------------------------------------+
-| **Options**                                                                  |
+| **Domain**          | 2D                                                     |
 +---------------------+--------------------------------------------------------+
-| `No special options for this projection`                                     |
+| **Input type**      | Geodetic coordinates                                   |
 +---------------------+--------------------------------------------------------+
+| **Output type**     | Projected coordinates                                  |
++---------------------+--------------------------------------------------------+
+
+
 
 .. image:: ./images/natearth.png
    :scale: 50%
@@ -40,6 +44,18 @@ an example of an inverse projection on a sphere with a radius of 7500 m::
     $ echo 3500 -8000 | proj -I +proj=natearth +a=7500
     37d54'6.091"E  61d23'4.582"S
 
+Parameters
+################################################################################
+
+.. note:: All parameters for the projection are optional.
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/R.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
 
 Further reading
 ################################################################################

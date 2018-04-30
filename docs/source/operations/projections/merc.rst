@@ -16,6 +16,8 @@ The projection is conformal which makes it suitable for navigational purposes.
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global, but best used near the equator                   |
 +---------------------+----------------------------------------------------------+
+| **Alias**           | merc                                                     |
++---------------------+----------------------------------------------------------+
 + **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
 | **Input type**      | Geodetic coordinates                                     |
@@ -52,16 +54,14 @@ Example using scaling factor::
 Note that :option:`+lat_ts` and :option:`+k_0` are mutually exclusive.
 If used together, :option:`+lat_ts` takes precedence over :option:`+k_0`.
 
-Options
-#########
+Parameters
+################################################################################
 
-.. note:: All options are optional for the Mercator projection.
-
-.. include:: ../options/k_0.rst
+.. note:: All parameters for the projection are optional.
 
 .. include:: ../options/lat_ts.rst
 
-.. include:: ../options/lat_0.rst
+.. include:: ../options/k_0.rst
 
 .. include:: ../options/lon_0.rst
 
@@ -70,6 +70,8 @@ Options
 .. include:: ../options/y_0.rst
 
 .. include:: ../options/ellps.rst
+
+.. include:: ../options/R.rst
 
 Mathematical definition
 #######################

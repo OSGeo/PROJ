@@ -3,6 +3,10 @@
 ********************************************************************************
 Geostationary Satellite View
 ********************************************************************************
+
+The geos projection pictures how a geostationary satellite scans the earth at regular
+scanning angle intervals.
+
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Azimuthal                                                |
 +---------------------+----------------------------------------------------------+
@@ -10,25 +14,19 @@ Geostationary Satellite View
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Implemented by**  | Gerald I. Evenden and Martin Raspaud                     |
+| **Alias**           | geos                                                     |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
-| `+h`                | Satellite height above earth. Required.                  |
+| **Input type**      | Geodetic coordinates                                     |
 +---------------------+----------------------------------------------------------+
-| `+sweep`            | Sweep angle axis of the viewing instrument.              |
-|                     | Valid options are ``x`` and ``y``. Defaults to ``y``.    |
-+---------------------+----------------------------------------------------------+
-| `+lon_0`            | Subsatellite longitude point.                            |
+| **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
 
 
 .. image:: ./images/geos.png
    :scale: 50%
    :alt:   Geostationary Satellite View
-
-The geos projection pictures how a geostationary satellite scans the earth at regular
-scanning angle intervals.
 
 
 Usage
@@ -70,3 +68,33 @@ The sweep argument is used to tell PROJ which on which axis the outer-gimbal
 is rotating. The possible values are x or y, y being the default. Thus, the
 scanning geometry of the Meteosat series satellite should take sweep as x, and
 GOES should take sweep as y.
+
+Parameters
+################################################################################
+
+Required
+-------------------------------------------------------------------------------
+
+.. include:: ../options/h.rst
+
+
+Optional
+-------------------------------------------------------------------------------
+
+.. option:: +sweep=<axis>
+
+    Sweep angle axis of the viewing instrument. Valid options are *"x"* and *"y*".
+
+    *Defaults to "y".*
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/R.rst
+
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
+
+

@@ -13,12 +13,15 @@ Although the Cassini projection has been largely replaced by the Transverse Merc
 +---------------------+-------------------------------------------------------------------------+
 | **Defined area**    | Global, but best used near the central meridian with long, narrow areas |
 +---------------------+-------------------------------------------------------------------------+
-| **Implemented by**  | Gerald I. Evenden                                                       |
+| **Alias**           | cass                                                                    |
 +---------------------+-------------------------------------------------------------------------+
-| **Options**                                                                                   |
+| **Domain**          | 2D                                                                      |
 +---------------------+-------------------------------------------------------------------------+
-| `+lat_0`            | Latitude of origin (Default to 0)                                       |
+| **Input type**      | Geodetic coordinates                                                    |
 +---------------------+-------------------------------------------------------------------------+
+| **Output type**     | Projected coordinates                                                   |
++---------------------+-------------------------------------------------------------------------+
+
 
 .. image:: ./images/cass.png
    :scale: 50%
@@ -41,6 +44,24 @@ Example using EPSG 3068 (Soldner Berlin)::
 
     $ echo 13.5 52.4 | proj +proj=cass +lat_0=52.41864827777778 +lon_0=13.62720366666667 +x_0=40000 +y_0=10000 +ellps=bessel +datum=potsdam +units=m +no_defs
     31343.05	7932.76
+
+Options
+################################################################################
+
+.. note:: All options are optional for the Cassini projection.
+
+.. include:: ../options/lat_0.rst
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
+
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/R.rst
+
 
 
 Mathematical definition

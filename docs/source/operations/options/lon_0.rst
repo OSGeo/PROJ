@@ -1,4 +1,4 @@
-.. option:: +lon_0
+.. option:: +lon_0=<value>
 
     Longitude of projection center.
 

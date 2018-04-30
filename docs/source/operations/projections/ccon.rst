@@ -4,8 +4,10 @@
 Central Conic
 ********************************************************************************
 
-This is central (centrographic) projection on cone tangent at ``lat_0`` latitude,
-identical with ``conic()`` projection from ``mapproj`` R package.
+.. versionadded:: 5.0.0
+
+This is central (centrographic) projection on cone tangent at :option:``lat_1``
+latitude, identical with ``conic()`` projection from ``mapproj`` R package.
 
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Conic                                                    |
@@ -14,12 +16,15 @@ identical with ``conic()`` projection from ``mapproj`` R package.
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global, but best used near the standard parallel         |
 +---------------------+----------------------------------------------------------+
-| **Implemented by**  | Lukasz Komsta                                            |
+| **Alias**           | ccon                                                     |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
-| `+lat_1`            | Latitude of standard parallel.                           |
+| **Input type**      | Geodetic coordinates                                     |
 +---------------------+----------------------------------------------------------+
+| **Output type**     | Projected coordinates                                    |
++---------------------+----------------------------------------------------------+
+
 
 .. image:: ./images/ccon.png
    :scale: 50%
@@ -44,13 +49,38 @@ The ATPOL coordinates can be achieved with with the following parameters:
 
 ::
 
-   +proj=ccon +lat_1=52 +lat_0=52 +lon_0=19 +axis=esu +a=6390000 +x_0=330000 +y_0=-350000
+   +proj=ccon +lat_1=52 +lon_0=19 +axis=esu +a=6390000 +x_0=330000 +y_0=-350000
 
 For more information see [Komsta2016]_ and [Verey2017]_.
 
+Parameters
+################################################################################
+
+Required
+-------------------------------------------------------------------------------
+
+.. option:: +lat_1=<value>
+
+    Standard parallel of projection.
+
+Optional
+-------------------------------------------------------------------------------
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/R.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
+
+
+Mathematical definition
+################################################################################
+
 
 Forward projection
-==================
+-------------------------------------------------------------------------------
 
 .. math::
 
@@ -66,7 +96,7 @@ Forward projection
 
 
 Inverse projection
-==================
+-------------------------------------------------------------------------------
 
 .. math::
 
@@ -81,7 +111,7 @@ Inverse projection
    \lambda = \frac{\tan^{-1} \sqrt{x^2+y^2}}{\sin \phi_0}
 
 Reference values
-==================
+################################################################################
 
 For ATPOL to WGS84 test, run the following script:
 

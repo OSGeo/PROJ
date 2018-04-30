@@ -4,59 +4,26 @@
 Helmert transform
 ================================================================================
 
+.. versionadded:: 5.0.0
+
 The Helmert transformation changes coordinates from one reference frame to
 anoether by means of 3-, 4-and 7-parameter shifts, or one of their 6-, 8- and
 14-parameter kinematic counterparts.
 
+
++-----------------+-------------------------------------------------------------------+
+| **Alias**       | helmert                                                           |
++-----------------+-------------------------------------------------------------------+
++ **Domain**      | 2D, 3D and 4D                                                     |
 +-----------------+-------------------------------------------------------------------+
 | **Input type**  | Cartesian coordinates (spatial), decimalyears (temporal).         |
 +-----------------+-------------------------------------------------------------------+
 | **Output type** | Cartesian coordinates (spatial), decimalyears (temporal).         |
 +-----------------+-------------------------------------------------------------------+
-| **Options**                                                                         |
-+----------------+--------------------------------------------------------------------+
-| `x`            | Translation of the x-axis [m]. *Optional*.                         |
-+----------------+--------------------------------------------------------------------+
-| `y`            | Translation of the y-axis [m]. *Optional*.                         |
-+----------------+--------------------------------------------------------------------+
-| `z`            | Translation of the z-axis. [m]. *Optional*.                        |
-+----------------+--------------------------------------------------------------------+
-| `s`            | Scale factor [ppm]. *Optional*.                                    |
-+----------------+--------------------------------------------------------------------+
-| `rx`           | X-axis rotation in the 3D Helmert [arc seconds]. *Optional*.       |
-+----------------+--------------------------------------------------------------------+
-| `ry`           | Y-axis rotation in the 3D Helmert [arc seconds]. *Optional*.       |
-+----------------+--------------------------------------------------------------------+
-| `rz`           | Z-axis rotation in the 3D Helmert [arc seconds]. *Optional*.       |
-+----------------+--------------------------------------------------------------------+
-| `theta`        | Rotation angle in the 2D Helmert. [arc seconds]. *Optional*.       |
-+----------------+--------------------------------------------------------------------+
-| `dx`           | Translation rate of the x-axis. [m/year]. *Optional*.              |
-+----------------+--------------------------------------------------------------------+
-| `dy`           | Translation rate of the y-axis. [m/year]. *Optional*.              |
-+----------------+--------------------------------------------------------------------+
-| `dz`           | Translation rate of the z-axis. [m/year]. *Optional*.              |
-+----------------+--------------------------------------------------------------------+
-| `ds`           | Scale rate factor [ppm/year]. *Optional*.                          |
-+----------------+--------------------------------------------------------------------+
-| `drx`          | Rotation rate of the x-axis [arc seconds/year]. *Optional*.        |
-+----------------+--------------------------------------------------------------------+
-| `dry`          | Rotation rate of the y-axis [arc seconds/year]. *Optional*.        |
-+----------------+--------------------------------------------------------------------+
-| `drz`          | Rotation rate of the y-axis [arc seconds/year]. *Optional*.        |
-+----------------+--------------------------------------------------------------------+
-| `t_epoch`      | Central epoch of transformation. [decimalyear]. Only used in       |
-|                | spatiotemporal transformations. *Optional*.                        |
-+----------------+--------------------------------------------------------------------+
-| `t_obs`        | Observation time of coordinate(s). Mostly useful in 2D and 3D      |
-|                | transformations. [decimalyear]. *Optional*.                        |
-|                | If not specified, will be get from the t component of 4D input     |
-|                | points.                                                            |
-+----------------+--------------------------------------------------------------------+
-| `exact`        | Use exact transformation equations. *Optional*.                    |
-+----------------+--------------------------------------------------------------------+
-| `transpose`    | Transpose rotation matrix. *Optional*.                             |
-+----------------+--------------------------------------------------------------------+
+| **Input type**  | Cartesian coordinates                                             |
++-----------------+-------------------------------------------------------------------+
+| **Output type** | Cartesian coordinates                                             |
++-----------------+-------------------------------------------------------------------+
 
 The Helmert transform, in all it's various incarnations, is used to perform reference
 frame shifts. The transformation operates in cartesian space. It can be used to transform
@@ -106,6 +73,102 @@ Transformation from `ITRF2000@2017.0`  to `ITRF93@2017.0` using 15 parameters:
          rx=-0.00039  ry=0.00080   rz=-0.00114
          drx=-0.00011 dry=-0.00019 drz=0.00007
          epoch=1988.0 tobs=2017.0    transpose
+
+Parameters
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. note::
+
+    All parameters are optional but at least one should be used, otherwise the
+    operation will return the coordinates unchanged.
+
+.. option:: +x=<value>
+
+    Translation of the x-axis given in meters.
+
+.. option:: +y=<value>
+
+    Translation of the x-axis given in meters.
+
+.. option:: +z=<value>
+
+    Translation of the z-axis given in meters.
+
+.. option:: +s=<value>
+
+    Scale factor given in ppm.
+
+.. option:: +rx=<value>
+
+    X-axis rotation in the 3D Helmert given arc seconds.
+
+
+.. option:: +ry=<value>
+
+    Y-axis rotation in the 3D Helmert given in arc seconds.
+
+.. option:: +rz=<value>
+
+    Z-axis rotation in the 3D Helmert given in arc seconds.
+
+
+.. option:: +theta=<value>
+
+    Rotation angle in the 2D Helmert given in arc seconds.
+
+.. option:: +dx=<value>
+
+    Translation rate of the x-axis given in m/year.
+
+.. option:: +dy=<value>
+
+    Translation rate of the y-axis given in m/year.
+
+.. option:: +dz=<value>
+
+    Translation rate of the z-axis given in m/year.
+
+.. option:: +ds=<value>
+
+    Scale rate factor given in ppm/year.
+
+.. option:: +drx=<value>
+
+    Rotation rate of the x-axis given in arc seconds/year.
+
+.. option:: +dry=<value>
+
+    Rotation rate of the y-axis given in arc seconds/year.
+
+.. option:: +drz=<value>
+
+    Rotation rate of the y-axis given in arc seconds/year.
+
+.. option:: +t_epoch=<value>
+
+    Central epoch of transformation given in decimalyear. Only used
+    spatiotemporal transformations.
+
+.. option:: +t_obs=<value>
+
+    Observation time of coordinate(s) given in decicalyear. Mostly useful
+    in 2D and 3D transformations where the observation time is not passed
+    as part of the input coordinate. Can be used to override the observation
+    time from the input coordinate.
+
+.. option:: +exact
+
+    Use exact transformation equations.
+
+    See :eq:`rot_exact`
+
+.. option:: +transpose
+
+    Transpose rotation matrix and follow the **Cordinate Frame** rotation
+    convention. If :option:`+transpose` is not added the **Position Vector**
+    rotation convention is used.
+
+
 
 Mathematical description
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -244,6 +307,7 @@ The three rotation matrices can be combined in one:
         \mathbf{R} = \mathbf{R_X} \mathbf{R_Y} \mathbf{R_Y}
     \end{align}
 
+
 For :math:`\mathbf{R}`, this yields:
 
 .. math::
@@ -302,9 +366,10 @@ using the approximated rotation matrix:
 
 If the rotation matrix is transposed the transformation is effectively reversed.
 This is cause for some confusion since there is no correct way of defining the
-rotation matrix. Two conventions exists and they seem to be equally popular.
-In PROJ the rotation matrix can be transposed by adding the `transpose` flag in
-the transformation setup.
+rotation matrix. Two conventions exists and they seem to be equally popular. PROJ
+uses the **Position Vector** rotation convention. The rotation matrix can be transposed by
+adding the :option:`+transpose` flag in the transformation setup which makes PROJ
+follow the **Coordinate Frame** rotation convention.
 
 Applying :eq:`propagation` we get the kinematic version of the approximated
 3D Helmert:

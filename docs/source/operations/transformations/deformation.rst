@@ -4,6 +4,8 @@
 Kinematic datum shifting utilizing a deformation model
 ================================================================================
 
+.. versionadded:: 5.0.0
+
 Perform datum shifts means of a deformation/velocity model.
 
 +-----------------+--------------------------------------------------------------------+
@@ -11,18 +13,13 @@ Perform datum shifts means of a deformation/velocity model.
 +-----------------+--------------------------------------------------------------------+
 | **Output type** | Cartesian coordinates (spatial), decimalyears (temporal).          |
 +-----------------+--------------------------------------------------------------------+
-| **Options**                                                                          |
++ **Domain**      | 4D                                                                 |
 +-----------------+--------------------------------------------------------------------+
-| `xy_grids`      | Comma-separated list of grids to load. *Required*.                 |
+| **Input type**  | Geodetic coordinates                                               |
 +-----------------+--------------------------------------------------------------------+
-| `z_grids`       | Comma-separated list of grids to load. *Required*.                 |
+| **Output type** | Geodetic coordinates                                               |
 +-----------------+--------------------------------------------------------------------+
-| `t_epoch`       | Central epoch of transformation. [decimalyear]. *Required*.        |
-+-----------------+--------------------------------------------------------------------+
-| `t_obs`         | Observation time of coordinate(s). [decimalyear]. *Optional*.      |
-|                 | If not specified, will be get from the t component of 4D input     |
-|                 | points.                                                            |
-+-----------------+--------------------------------------------------------------------+
+
 
 The deformation operation is used to adjust coordinates for intraplate deformations.
 Usually the transformation parameters for regional plate-fixed reference frames such as
@@ -48,6 +45,7 @@ rebound. The deformations from the post-glacial uplift is not accounted for in t
 official ETRS89 transformations so in order to get accurate transformations in the Nordic
 countries it is necessary to apply the deformation model. The transformation from ITRF2008
 to the Danish realisation of ETRS89 is in PROJ described as::
+
 
     proj =  pipeline ellps = GRS80
             # ITRF2008@t_obs -> ITRF2000@t_obs
@@ -81,8 +79,46 @@ model. The first use of the deformation operation is::
 
 Here we set the central epoch of the transformation, 2000.0. The observation epoch
 is expected as part of the input coordinate tuple. The deformation model is
-described by two grids, specified with *xy_grids* and *z_grids*. The first is
-the horizontal part of the model and the second is the vertical component.
+described by two grids, specified with :option:`+xy_grids` and :option:`+z_grids`.
+The first is the horizontal part of the model and the second is the vertical
+component.
+
+Parameters
+-------------------------------------------------------------------------------
+
+Required
+################################################################################
+
+
+.. option:: +xy_grids=<list>
+
+    Comma-separated list of grids to load. If a grid is prefixed by an `@` the
+    grid is consideres optional and PROJ will the not complain if the grid is
+    not available.
+
+    Grids for the horizontla component of a deformation model is expected to be
+    in CTable2 format.
+
+.. option:: +z_grids=<list>
+
+    Comma-separated list of grids to load. If a grid is prefixed by an `@` the
+    grid is consideres optional and PROJ will the not complain if the grid is
+    not available.
+
+    Grids for the vertical component of a deformation model is expected to be
+    in either GTX format.
+
+.. option:: +t_epoch=<value>
+
+    Central epoch of transformation given in decimalyears.
+
+Optional
+################################################################################
+
+.. option:: +t_obs=<value>
+
+    Observation time of coordinate(s) given in decimalyears. If not specified,
+    the observation time from the temporal component of 4D input points is used.
 
 Mathematical description
 -------------------------------------------------------------------------------
@@ -122,7 +158,7 @@ Coordinates of the gridded model are in ENU (east, north, up) space because it w
 otherwise require an enormous 3 dimensional grid to handle the corrections in cartesian
 space. Keeping the correction in lat/long space reduces the complexity of the grid
 significantly. Consequently though, the input coordinates needs to be converted to
-lat/long space when searching for corrections in the grid. This is done with *cart*
+lat/long space when searching for corrections in the grid. This is done with the *cart*
 operation. The converted grid corrections can then be applied to the input coordinates
 in cartesian space. The conversion from ENU space to cartesian space is done in the
 following way:

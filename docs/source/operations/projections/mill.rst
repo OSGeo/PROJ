@@ -7,19 +7,22 @@ Miller Cylindrical
 The Miller cylindrical projection is a modified Mercator projection, proposed by Osborn Maitland Miller in 1942.
 The latitude is scaled by a factor of :math:`\frac{4}{5}`, projected according to Mercator, and then the result is multiplied by :math:`\frac{5}{4}` to retain scale along the equator.
 
-+---------------------+--------------------------------------------------------------------------------+
-| **Classification**  | Neither conformal nor equal area cylindrical                                   |
-+---------------------+--------------------------------------------------------------------------------+
-| **Available forms** | Forward and inverse spherical                                                  |
-+---------------------+--------------------------------------------------------------------------------+
-| **Defined area**    | Global, but best used near the equator                                         |
-+---------------------+--------------------------------------------------------------------------------+
-| **Implemented by**  | Gerald I. Evenden                                                              |
-+---------------------+--------------------------------------------------------------------------------+
-| **Options**                                                                                          |
-+---------------------+--------------------------------------------------------------------------------+
-| `+lat_0`            | Latitude of origin (Default to 0)                                              |
-+---------------------+--------------------------------------------------------------------------------+
++---------------------+----------------------------------------------------------+
+| **Classification**  | Neither conformal nor equal area cylindrical             |
++---------------------+----------------------------------------------------------+
+| **Available forms** | Forward and inverse spherical                            |
++---------------------+----------------------------------------------------------+
+| **Defined area**    | Global, but best used near the equator                   |
++---------------------+----------------------------------------------------------+
+| **Alias**           | mill                                                     |
++---------------------+----------------------------------------------------------+
+| **Domain**          | 2D                                                       |
++---------------------+----------------------------------------------------------+
+| **Input type**      | Geodetic coordinates                                     |
++---------------------+----------------------------------------------------------+
+| **Output type**     | Projected coordinates                                    |
++---------------------+----------------------------------------------------------+
+
 
 .. image:: ./images/mill.png
    :scale: 50%
@@ -35,6 +38,19 @@ Example using Central meridian 90°W::
 
     $ echo -100 35 | proj +proj=mill +lon_0=90w
     -1113194.91      4061217.24
+
+Parameters
+################################################################################
+
+.. note:: All parameters for the projection are optional.
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/R.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
 
 Mathematical definition
 #######################
