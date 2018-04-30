@@ -25,16 +25,16 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#include <math.h>
-
 #ifndef PROJ_MATH_H
 #define PROJ_MATH_H
+
+#include <math.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #if !(defined(HAVE_C99_MATH) && HAVE_C99_MATH)
-
 
 double  pj_hypot(double x, double y);
 double  pj_log1p(double x);
@@ -46,10 +46,10 @@ int     pj_isnan(double x);
 #define asinh   pj_asinh
 #define isnan   pj_isnan
 
-
 #endif /* !(defined(HAVE_C99_MATH) && HAVE_C99_MATH) */
 
 #ifdef __cplusplus
 }
 #endif
-#endif /*PROJ_MATH_H */
+
+#endif /* PROJ_MATH_H */
