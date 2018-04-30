@@ -13,6 +13,5 @@ conversions.
 
    axisswap
    cart
-   lonlat
    latlon
    unitconvert
