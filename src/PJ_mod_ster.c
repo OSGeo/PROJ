@@ -2,6 +2,7 @@
 #define PJ_LIB__
 #include <errno.h>
 #include "projects.h"
+#include "proj_math.h"
 
 PROJ_HEAD(mil_os, "Miller Oblated Stereographic") "\n\tAzi(mod)";
 PROJ_HEAD(lee_os, "Lee Oblated Stereographic") "\n\tAzi(mod)";

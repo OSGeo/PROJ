@@ -364,11 +364,6 @@ to that context.
     return;
 }
 
-
-
-
-
-
 /*  logging  */
 
 /* pj_vlog resides in pj_log.c and relates to pj_log as vsprintf relates to sprintf */
@@ -376,11 +371,11 @@ void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args );
 
 
 /***************************************************************************************/
-enum proj_log_level proj_log_level (PJ_CONTEXT *ctx, enum proj_log_level log_level) {
+PJ_LOG_LEVEL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL log_level) {
 /****************************************************************************************
    Set logging level 0-3. Higher number means more debug info. 0 turns it off
 ****************************************************************************************/
-    enum proj_log_level previous;
+    PJ_LOG_LEVEL previous;
     if (0==ctx)
         ctx = pj_get_default_ctx();
     if (0==ctx)
@@ -443,19 +438,3 @@ void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf) {
     if (0!=logf)
         ctx->logger = logf;
 }
-
-
-#if HAVE_C99_MATH
-/* proj_internal.h defines pj_is_nan as isnan */
-#else
-/*****************************************************************************/
-int pj_is_nan (double val) {
-/******************************************************************************
-    Returns 0 if not a NaN and non-zero if val is a NaN.
-
-    Provides an equivalent to isnan().
-******************************************************************************/
-    /* cppcheck-suppress duplicateExpression */
-    return val != val;
-}
-#endif

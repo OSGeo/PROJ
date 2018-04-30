@@ -44,6 +44,13 @@ The following control parameters can  appear  in any order:
 
     Specify a fixed observation height to be used for all input data.
 
+.. option:: s <n>, --skip-lines=<n>
+
+    .. versionadded:: 5.1.0
+
+    Skip the first *n* lines of input. This applies to any kind of input, wether
+    it comes from ``STDIN``, a file or interactive user input.
+
 .. option:: -v, --verbose
 
     Write non-essential, but potentially useful, information to stderr.

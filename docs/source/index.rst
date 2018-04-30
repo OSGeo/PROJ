@@ -27,8 +27,10 @@ own software. PROJ is maintained on `GitHub <http://github.com/OSGeo/proj.4/>`_.
     .. |coverals| image:: https://coveralls.io/repos/OSGeo/proj.4/badge.svg?branch=master
                         :target: https://coveralls.io/r/OSGeo/proj.4?branch=master
 
-Full documentation is available as a single PDF at
-https://raw.githubusercontent.com/OSGeo/proj.4/gh-pages/proj4.pdf
+.. only:: not latex
+
+   Full documentation is available as a single PDF at
+   https://raw.githubusercontent.com/OSGeo/proj.4/gh-pages/proj.pdf
 
 Documentation
 =================

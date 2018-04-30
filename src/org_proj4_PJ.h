@@ -44,7 +44,7 @@ JNIEXPORT jstring JNICALL Java_org_proj4_PJ_getDefinition
 /*
  * Class:     org_proj4_PJ
  * Method:    getType
- * Signature: ()Lorg/proj4/PJ$Type;
+ * Signature: ()Lorg/proj4/PJ/Type;
  */
 JNIEXPORT jobject JNICALL Java_org_proj4_PJ_getType
   (JNIEnv *, jobject);

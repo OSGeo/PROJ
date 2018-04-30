@@ -42,6 +42,8 @@ enum PJ_DIRECTION {
 };
 typedef enum PJ_DIRECTION PJ_DIRECTION;
 
+/* Copied from proj.h FIXME */
+int  proj_errno_reset (const PJ *P);
 
 
 static int adjust_axis( projCtx ctx, const char *axis, int denormalize_flag,
@@ -199,6 +201,7 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
             if (geodetic_loc.u == HUGE_VAL)
                 continue;
 
+            proj_errno_reset( P );
             projected_loc = pj_fwd3d( geodetic_loc, P);
             if( P->ctx->last_errno != 0 )
             {
@@ -234,6 +237,7 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
         if( geodetic_loc.u == HUGE_VAL )
             continue;
 
+        proj_errno_reset( P );
         projected_loc = pj_fwd( geodetic_loc, P );
         if( P->ctx->last_errno != 0 )
         {
@@ -301,6 +305,7 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
             if (projected_loc.u == HUGE_VAL)
                 continue;
 
+            proj_errno_reset( P );
             geodetic_loc = pj_inv3d(projected_loc, P);
             if( P->ctx->last_errno != 0 )
             {
@@ -337,6 +342,7 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
         if( projected_loc.u == HUGE_VAL )
             continue;
 
+        proj_errno_reset( P );
         geodetic_loc = pj_inv( projected_loc, P );
         if( P->ctx->last_errno != 0 )
         {

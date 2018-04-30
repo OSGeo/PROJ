@@ -199,6 +199,7 @@ SET(SRC_LIBPROJ_CORE
         pj_list.h
         pj_log.c
         pj_malloc.c
+        pj_math.c
         pj_mlfn.c
         pj_msfn.c
         pj_mutex.c
@@ -218,6 +219,7 @@ SET(SRC_LIBPROJ_CORE
         pj_utils.c
         pj_zpoly1.c
         proj_mdist.c
+        proj_math.h
         proj_rouss.c
         rtodms.c
         vector1.c
@@ -256,8 +258,7 @@ if(JNI_SUPPORT)
   set(SRC_LIBPROJ_CORE ${SRC_LIBPROJ_CORE}
                        jniproj.c )
   set(HEADERS_LIBPROJ ${HEADERS_LIBPROJ}
-                        org_proj4_PJ.h
-                        org_proj4_Projections.h)
+                        org_proj4_PJ.h)
   source_group("Source Files\\JNI" FILES ${SRC_LIBPROJ_JNI})
   add_definitions(-DJNI_ENABLED)
   include_directories( ${JNI_INCLUDE_DIRS})

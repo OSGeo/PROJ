@@ -46,11 +46,7 @@
 
 7) Update NEWS file with summary of release changes.
 
-8) Update the proj.spec file for the new version:
-    - PACKAGE_VERSION
-    - Source0
-    - %setup line
-    - rm -rf line
+8) Update the year in CITATION
 
 9) If this is a major release, prepare a branch.
 

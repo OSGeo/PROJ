@@ -71,51 +71,223 @@ Azimuthal Equidistant
 ===============================================================================
 
 -------------------------------------------------------------------------------
-operation +proj=aeqd   +ellps=GRS80  +lat_1=0.5 +lat_2=2
+Test equatorial aspect of the spherical azimuthal equidistant. Test data from
+Snyder pp. 196-197, table 30.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +R=1 +lat_0=0
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
-accept  2 1
-expect  222616.522190052 110596.996549550
-accept  2 -1
-expect  222616.522190052 -110596.996549550
-accept  -2 1
-expect  -222616.522190052 110596.996549550
-accept  -2 -1
-expect  -222616.522190052 -110596.996549550
+accept  0       0
+expect  0       0
+roundtrip   100
+accept  0       90
+expect  0       1.57080
+roundtrip   100
+accept  10      80
+expect  0.04281 1.39829
+roundtrip   100
+accept  40      30
+expect  0.62896 0.56493
+roundtrip   100
+accept  90      0
+expect  1.57080 0
+roundtrip   100
+accept  90      90
+expect  0       1.57080
+roundtrip   100
 
-direction inverse
-accept  200 100
-expect  0.001796631 0.000904369
-accept  200 -100
-expect  0.001796631 -0.000904369
-accept  -200 100
-expect  -0.001796631 0.000904369
-accept  -200 -100
-expect  -0.001796631 -0.000904369
+# point opposite projection center is undefined
+accept  180     0
+expect  failure errno tolerance_condition
 
 -------------------------------------------------------------------------------
-operation +proj=aeqd   +R=6400000    +lat_1=0.5 +lat_2=2
+Test equatorial aspect of the ellipsoidal azimuthal equidistant. Test data from
+Snyder pp. 196-197, table 30.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +ellps=GRS80 +lat_0=0
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
-accept  2 1
-expect  223379.456047271 111723.757570854
-accept  2 -1
-expect  223379.456047271 -111723.757570854
-accept  -2 1
-expect  -223379.456047271 111723.757570854
-accept  -2 -1
-expect  -223379.456047271 -111723.757570854
+accept  0   90
+expect  0   10001965.7292
+roundtrip   100
+accept  0   0
+expect  0   0
+roundtrip   100
+accept  90  0
+expect  10_018_754.1714  0
+roundtrip   100
+accept  90  0
+expect  10_018_754.1714  0
+roundtrip   100
+accept  45  45
+expect  3_860_398.3783  5_430_089.0490
+roundtrip   100
+
+-------------------------------------------------------------------------------
+# Test the azimuthal equidistant modified for Guam. Test data from the EPSG
+Guidance Note 7 part 2, September 2016,  p. 85
+-------------------------------------------------------------------------------
+operation +proj=aeqd +guam +ellps=clrk66 +x_0=50000.00 +y_0=50000.00
+          +lon_0=144.74875069444445 +lat_0=13.47246633333333
+-------------------------------------------------------------------------------
+tolerance 1 cm
+accept  144.635331291666660     13.33903846111111
+expect  37712.48    35242.00
+roundtrip 100
 
 direction inverse
-accept  200 100
-expect  0.001790493 0.000895247
-accept  200 -100
-expect  0.001790493 -0.000895247
-accept  -200 100
-expect  -0.001790493 0.000895247
-accept  -200 -100
-expect  -0.001790493 -0.000895247
+accept   37712.48   35242.00
+expect  144.635331291666660     13.33903846111111
 
+-------------------------------------------------------------------------------
+Test northern polar aspect of the ellipsoidal azimuthal equidistant. Test data
+from Snyder p. 198, table 31.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +ellps=intl +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0   90
+expect  0   0
+roundtrip   100
+accept  0   85
+expect  0   -558_485.4
+roundtrip   100
+accept  0   80
+expect  0   -1_116_885.2
+roundtrip   100
+accept  0   70
+expect  0   -2_233_100.9
+roundtrip   100
+
+-------------------------------------------------------------------------------
+Test sourthern polar aspect of the ellipsoidal azimuthal equidistant. Test data
+from Snyder p. 198, table 31.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +ellps=intl +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0   -90
+expect  0   0
+roundtrip   100
+accept  0   -85
+expect  0   558_485.4
+roundtrip   100
+accept  0   -80
+expect  0   1_116_885.2
+roundtrip   100
+accept  0   -70
+expect  0   2_233_100.9
+roundtrip   100
+
+-------------------------------------------------------------------------------
+Test northern polar aspect of the spherical azimuthal equidistant.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +R=1 +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0       0
+expect  0       -1.5708
+roundtrip   100
+accept  0       90
+expect  0       0
+roundtrip   100
+accept  90      90
+expect  0       0
+roundtrip   100
+accept  90      0
+expect  1.5708  0
+roundtrip   100
+accept  45      45
+expext  0.5554  -0.5554
+roundtrip   100
+
+#point opposite of projection center is undefined
+accept  0   -90
+expect  failure errno tolerance_condition
+
+direction inverse
+accept  0   5
+expect  failure errno tolerance_condition
+
+accept  0   3.14159265359
+expect  180 -90
+
+-------------------------------------------------------------------------------
+Test sourthnern polar aspect of the spherical azimuthal equidistant.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +R=1 +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0       0
+expect  0       1.5708
+roundtrip   100
+accept  0       -90
+expect  0       0
+roundtrip   100
+accept  90      -90
+expect  0       0
+roundtrip   100
+accept  90      0
+expect  1.5708  0
+roundtrip   100
+accept  45      -45
+expext  0.5554  -0.5554
+roundtrip   100
+
+#point opposite of projection center is undefined
+accept  0   90
+expect  failure errno tolerance_condition
+
+
+-------------------------------------------------------------------------------
+Test oblique aspect of the spherical azimuthal equidistant.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +R=1 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0 0
+expect  0.0000  -0.7854
+roundtrip   100
+accept  0 45
+expect  0.0000  0.0000
+roundtrip   100
+accept  0 90
+expect  0.0000  0.7854
+roundtrip   100
+accept  90 0
+expect  1.5708  -0.0000
+roundtrip   100
+accept  90 45
+expect  0.8550  0.6046
+#roundtrip   100 # roundtrip performs badly for this test on some platforms
+accept  90 90
+expect  0.0000  0.7854
+roundtrip   100
+
+-------------------------------------------------------------------------------
+Test oblique aspect of the ellipsoidal azimuthal equidistant.
+-------------------------------------------------------------------------------
+operation +proj=aeqd +ellps=GRS80 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 m
+accept  0 0
+expect  0.0000  -4984944.3779
+roundtrip   100
+accept  0 45
+expect  0.0000  0.0000
+roundtrip   100
+accept  0 90
+expect  0.0000  5017021.3514
+roundtrip   100
+accept  90 0
+expect  10010351.5666   26393.3781
+roundtrip   100
+accept  90 45
+expect  5461910.9128    3863514.7047
+roundtrip   100
+accept  90 90
+expect  0.0000  5017021.3514
+roundtrip   100
 
 ===============================================================================
 Airy
@@ -135,6 +307,74 @@ accept  -2 1
 expect  -189109.886908621 94583.752387504
 accept  -2 -1
 expect  -189109.886908621 -94583.752387504
+
+-------------------------------------------------------------------------------
+Test north polar aspect
+-------------------------------------------------------------------------------
+operation +proj=airy +R=1 +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   0
+expect  0   -1.3863
+accept  0   90
+expect  0   0
+accept  0   -90
+expect  failure errno tolerance_condition
+
+
+-------------------------------------------------------------------------------
+Test south polar aspect
+-------------------------------------------------------------------------------
+operation +proj=airy +R=1 +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   0
+expect  0   1.3863
+accept  0   -90
+expect  0   0
+accept  0   90
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+Test oblique aspect
+-------------------------------------------------------------------------------
+operation +proj=airy +R=1 +lon_0=45 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  45      45
+expect  0       0
+accept  0       0
+expext  -0.7336 -0.5187
+accept  -45     -45
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+Test that coordinates on the opposing hemisphere are projected when using
++no_cut.
+-------------------------------------------------------------------------------
+operation +proj=airy +R=1 +lat_0=-90 +no_cut
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   10
+expect  0   1.5677
+
+
+-------------------------------------------------------------------------------
+Test the +lat_b parameter
+-------------------------------------------------------------------------------
+operation +proj=airy +R=1 +lat_b=89.99999999 # check tolerance
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   0
+expect  0   0
+-------------------------------------------------------------------------------
+operation +proj=airy +R=1 +lat_b=30
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       0
+expect  0       0
+accept  25      25
+expect  0.3821  0.4216
 
 
 ===============================================================================
@@ -1366,28 +1606,102 @@ Gnomonic
 ===============================================================================
 
 -------------------------------------------------------------------------------
-operation +proj=gnom   +a=6400000    +lat_1=0.5 +lat_2=2
+Test material from Snyder p. 168, table 26.
+Tests the equatorial aspect of the projection.
+-------------------------------------------------------------------------------
+operation +proj=gnom +R=1
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
-accept  2 1
-expect  223492.924747185 111780.509206593
-accept  2 -1
-expect  223492.924747185 -111780.509206593
-accept  -2 1
-expect  -223492.924747185 111780.509206593
-accept  -2 -1
-expect  -223492.924747185 -111780.509206593
+accept  0       0
+expect  0       0
+roundtrip   100
+accept  10      80
+expect  0.1763  5.7588
+roundtrip   100
+accept  20      70
+expect  0.3640  2.9238
+roundtrip   100
+accept  30      60
+expect  0.5774  2.0000
+roundtrip   100
+accept  40      50
+expect  0.8391  1.5557
+roundtrip   100
+accept  50      40
+expect  1.1918  1.3054
+roundtrip   100
+accept  60      30
+expect  1.7321  1.1547
+roundtrip   100
+accept  70      20
+expect  2.7475  1.0642
+roundtrip   100
+accept  80      10
+expect  5.6713  1.0154
+roundtrip   100
+accept  80      80
+expect  5.6713  32.6596
+roundtrip   100
+accept  0   90
+expect  failure errno tolerance_condition
 
-direction inverse
-accept  200 100
-expect  0.001790493 0.000895247
-accept  200 -100
-expect  0.001790493 -0.000895247
-accept  -200 100
-expect  -0.001790493 0.000895247
-accept  -200 -100
-expect  -0.001790493 -0.000895247
+# test that extreme northings are mapped to the sphere
+direction   inverse
+accept      0   1e8
+expect      0   90
 
+
+-------------------------------------------------------------------------------
+Test the northern polar aspect of the gnonomic projection
+-------------------------------------------------------------------------------
+operation +proj=gnom +R=1 +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       90
+expect  0       0
+roundtrip   100
+accept  45      45
+expect  0.7071  -0.7071
+roundtrip   100
+accept  0       0
+expect  failure errno tolerance_condition
+accept  90      0
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+Test the sourthern polar aspect of the gnonomic projection
+-------------------------------------------------------------------------------
+operation +proj=gnom +R=1 +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       -90
+expect  0       0
+roundtrip   100
+accept  45      -45
+expect  0.7071  0.7071
+roundtrip   100
+accept  0       0
+expect  failure errno tolerance_condition
+accept  90      0
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+Test the oblique aspect of the gnonomic projection
+-------------------------------------------------------------------------------
+operation +proj=gnom +R=1 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       45
+expect  0       0
+roundtrip   100
+accept  0       0
+expect  0       -1
+roundtrip   100
+accept  0       90
+expect  0       1
+roundtrip   100
+accept  0       -45
+expect  failure errno tolerance_condition
 
 ===============================================================================
 Goode Homolosine
@@ -1887,7 +2201,7 @@ Lambert Azimuthal Equal Area
 ===============================================================================
 
 -------------------------------------------------------------------------------
-operation +proj=laea   +ellps=GRS80  +lat_1=0.5 +lat_2=2
+operation +proj=laea +ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
 accept  2 1
@@ -1898,6 +2212,9 @@ accept  -2 1
 expect  -222602.471450095 110589.827224410
 accept  -2 -1
 expect  -222602.471450095 -110589.827224409
+
+accept  180 0
+expect  failure errno tolerance_condition
 
 direction inverse
 accept  200 100
@@ -1910,7 +2227,7 @@ accept  -200 -100
 expect  -0.001796631 -0.000904369
 
 -------------------------------------------------------------------------------
-operation +proj=laea   +R=6400000    +lat_1=0.5 +lat_2=2
+operation +proj=laea +R=6400000
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
 accept  2 1
@@ -1922,6 +2239,9 @@ expect  -223365.281370125 111716.668072916
 accept  -2 -1
 expect  -223365.281370125 -111716.668072916
 
+accept  180 0
+expect  failure errno tolerance_condition
+
 direction inverse
 accept  200 100
 expect  0.001790493 0.000895247
@@ -1931,6 +2251,147 @@ accept  -200 100
 expect  -0.001790493 0.000895247
 accept  -200 -100
 expect  -0.001790493 -0.000895247
+
+-------------------------------------------------------------------------------
+Test oblique aspect of the spherical form
+-------------------------------------------------------------------------------
+operation +proj=laea +R=1 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   45
+expect  0   0
+accept  0   0
+expect  0   -0.7654
+accept  0   90
+expect  0   0.7654
+accept  0   -45
+expect  0   -1.4142
+accept  45  45
+expect  0.5194  0.1521
+
+tolerance 0.1 mm
+accept  45  45
+roundtrip   100
+
+# error when waaay outside the sphere
+direction inverse
+accept  0   10
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+Test oblique aspect of the ellipsoidal form
+-------------------------------------------------------------------------------
+operation +proj=laea +ellps=GRS80 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   45
+expect  0   0
+accept  0   0
+expect  0   -4860248.8602
+accept  0   90
+expect  0   4886594.2207
+accept  0   -45
+expect  0   -8984728.0442
+accept  45  45
+expect  3318800.8682    968788.2336
+
+tolerance 10 cm
+accept  45 45
+roundtrip 100
+
+# test rho <EPS10
+direction inverse
+accept  0   0
+expect  0   45
+
+-------------------------------------------------------------------------------
+Test south polar aspect for the spherical form
+-------------------------------------------------------------------------------
+operation +proj=laea +R=1 +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   -90
+expect  0   0
+accept  0   0
+expect  0   1.4142
+accept  0   -45
+expect  0   0.7654
+accept  0   45
+expect  0   1.8478
+accept  0   90
+expect failure errno tolerance_condition
+
+tolerance 0.1 mm
+accept  45  45
+roundtrip   100
+
+-------------------------------------------------------------------------------
+Test south polar aspect for the ellipsoidal form
+-------------------------------------------------------------------------------
+operation +proj=laea +ellps=GRS80 +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   -90
+expect  0   0
+accept  0   0
+expect  0   9009964.7611
+accept  0   -45
+expect  0   4889334.8030
+accept  0   45
+expect  0   11766619.5307
+accept  0   90
+expect failure errno tolerance_condition
+
+tolerance 10 cm
+accept  45  45
+roundtrip   100
+
+# test q == 0.0 condition
+direction inverse
+accept  0   0
+expect  0   -90
+
+-------------------------------------------------------------------------------
+Test north polar aspect for the spherical form
+-------------------------------------------------------------------------------
+operation +proj=laea +R=1 +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   90
+expect  0   0
+accept  0   0
+expect  0   -1.4142
+accept  0   45
+expect  0   -0.7654
+accept  0   -45
+expect  0   -1.8478
+accept  0   -90
+expect failure errno tolerance_condition
+
+tolerance 0.1 mm
+accept  45  45
+roundtrip   100
+
+-------------------------------------------------------------------------------
+Test north polar aspect
+-------------------------------------------------------------------------------
+operation +proj=laea +ellps=GRS80 +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0   90
+expect  0   0
+accept  0   0
+expect  0   -9009964.7611
+accept  0   45
+expect  0   -4889334.8030
+accept  0   -45
+expect  0   -11766619.5307
+accept  0   -90
+expect failure errno tolerance_condition
+
+tolerance 10 cm
+accept 45   45
+roundtrip   100
 
 
 ===============================================================================
@@ -2875,6 +3336,60 @@ accept  -200 100
 expect  -0.001790493 0.000895247
 accept  -200 -100
 expect  -0.001790493 -0.000895247
+
+-------------------------------------------------------------------------------
+Test north polar aspect
+-------------------------------------------------------------------------------
+operation +proj=nsper +R=1 +h=3 +lat_0=90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       90
+expect  0       0
+accept  45      45
+expect  0.4555 -0.4555
+roundtrip   100
+accept  0       0
+expect  failure errno tolerance_condition
+
+direction inverse
+accept  0       0
+expect  0       90
+accept  0       2   # projected coordinate is outside the sphere
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+Test south polar aspect
+-------------------------------------------------------------------------------
+operation +proj=nsper +R=1 +h=3 +lat_0=-90
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       -90
+expect  0       0
+accept  -45      -45
+expect  -0.4555 0.4555
+roundtrip   100
+accept  0       0
+expect  failure errno tolerance_condition
+
+-------------------------------------------------------------------------------
+operation +proj=nsper +R=1 +h=3 +lat_0=45
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  0       45
+expect  0       0
+accept  0       90
+expect  0       0.6442
+accept  0       0
+expect  0       -0.6442
+accept  45      45
+expect  0.4767  0.1396
+roundtrip   100
+
+
+-------------------------------------------------------------------------------
+operation +proj=nsper +R=1 +h=0
+-------------------------------------------------------------------------------
+expect  failure errno h_less_than_zero
 
 
 ===============================================================================

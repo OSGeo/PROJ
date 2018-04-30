@@ -23,16 +23,11 @@ endif ()
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   # Suppress warning 4706 about assignment within conditional expression
   # Suppress warning 4996 about sprintf, etc., being unsafe
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4706 /wd4996 \
-    /D_CRT_SECURE_NO_WARNINGS")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow \
-    -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat \
-    -Wformat-security")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security")
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow \
-    -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat \
-    -Wformat-security -Wfloat-conversion -Wc99-extensions -Wc11-extensions")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion -Wc99-extensions -Wc11-extensions")
 endif()
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to
@@ -101,7 +96,8 @@ int main() {
   int q;
   return (int)(hypot(3.0, 4.0) + atanh(0.8) + cbrt(8.0) +
                remquo(100.0, 90.0, &q) +
-               remainder(100.0, 90.0) + copysign(1.0, -0.0)) +
+               remainder(100.0, 90.0) + copysign(1.0, -0.0) +
+               log1p(0.1) + asinh(0.1)) +
                isnan(0.0);
 }\n" C99_MATH)
 if (C99_MATH)

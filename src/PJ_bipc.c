@@ -2,6 +2,7 @@
 #include "proj.h"
 #include <errno.h>
 #include "projects.h"
+#include "proj_math.h"
 
 PROJ_HEAD(bipc, "Bipolar conic of western hemisphere") "\n\tConic Sph.";
 

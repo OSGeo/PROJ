@@ -260,6 +260,46 @@ gie command language
 
     See ``gie -l`` for a list of error codes that can be ignored.
 
+.. option:: echo <text>
+
+    Add user defined text to the output stream. See the example below.
+
+    .. code-block:: console
+
+        <gie>
+        echo ** Mercator projection tests **
+        operation +proj=merc
+        accept  0   0
+        expect  0   0
+        </gie>
+
+    which returns
+
+    .. code-block:: console
+
+        -------------------------------------------------------------------------------
+        Reading file 'test.gie'
+        ** Mercator projection test **
+        -------------------------------------------------------------------------------
+        total:  1 tests succeeded,  0 tests skipped,  0 tests failed.
+        -------------------------------------------------------------------------------
+
+.. option:: skip
+
+    Skip any test after the first occurence of :option:`skip`. In the example below only
+    the first test will be performed. The second test is skipped. This feature is mostly
+    relevant for debugging when writing new test cases.
+
+    .. code-block:: console
+
+        <gie>
+        operation proj=merc
+        accept  0   0
+        expect  0   0
+        skip
+        accept  0   1
+        expect  0   110579.9
+        </gie>
 
 Background
 **********

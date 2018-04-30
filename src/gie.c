@@ -114,6 +114,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 
 #include "proj.h"
 #include "proj_internal.h"
+#include "proj_math.h"
 #include "projects.h"
 
 #include "optargpm.h"
@@ -964,6 +965,7 @@ Indicate that the remaining material should be skipped. Mostly for debugging.
 ******************************************************************************/
     T.skip = 1;
     (void) args;
+    F->level = 2; /* Silence complaints about missing </gie> element */
     return 0;
 }
 

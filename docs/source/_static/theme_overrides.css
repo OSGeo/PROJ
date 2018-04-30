@@ -55,3 +55,16 @@ div.math {
     overflow-x: auto;
     overflow-y: hidden;
 }
+
+/* Override style of versionmodified directives */
+.versionadded {
+    font-style: italic;
+}
+
+.versionchanged {
+    font-style: italic;
+}
+
+.deprecated {
+    font-style: italic;
+}

@@ -24,7 +24,11 @@
  */
 
 #include "geodesic.h"
+#ifdef PJ_LIB__
+#include "proj_math.h"
+#else
 #include <math.h>
+#endif
 
 #if !defined(HAVE_C99_MATH)
 #define HAVE_C99_MATH 0
@@ -239,8 +243,7 @@ static void sincosdx(real x, real* sinx, real* cosx) {
   r = remquo(x, (real)(90), &q);
 #else
   r = fmod(x, (real)(360));
-  /* check for NaN -- do not use pj_is_nan, since we want geodesic.c not to
-   * depend on the rest of proj.4 */
+  /* check for NaN */
   q = r == r ? (int)(floor(r / 90 + (real)(0.5))) : 0;
   r -= 90 * q;
 #endif

@@ -268,6 +268,17 @@ struct PJ_INIT_INFO {
     char        lastupdate[16];     /* Date of last update in YYYY-MM-DD format */
 };
 
+typedef enum PJ_LOG_LEVEL {
+    PJ_LOG_NONE  = 0,
+    PJ_LOG_ERROR = 1,
+    PJ_LOG_DEBUG = 2,
+    PJ_LOG_TRACE = 3,
+    PJ_LOG_TELL  = 4,
+    PJ_LOG_DEBUG_MAJOR = 2, /* for proj_api.h compatibility */
+    PJ_LOG_DEBUG_MINOR = 3  /* for proj_api.h compatibility */
+} PJ_LOG_LEVEL;
+
+typedef void (*PJ_LOG_FUNCTION)(void *, int, const char *);
 
 
 /* The context type - properly namespaced synonym for projCtx */
@@ -342,7 +353,6 @@ double proj_xyz_dist (PJ_COORD a, PJ_COORD b);
 PJ_COORD proj_geod (const PJ *P, PJ_COORD a, PJ_COORD b);
 
 
-
 /* Set or read error level */
 int  proj_context_errno (PJ_CONTEXT *ctx);
 int  proj_errno (const PJ *P);
@@ -350,6 +360,9 @@ int  proj_errno_set (const PJ *P, int err);
 int  proj_errno_reset (const PJ *P);
 int  proj_errno_restore (const PJ *P, int err);
 const char* proj_errno_string (int err);
+
+PJ_LOG_LEVEL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL log_level);
+void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf);
 
 /* Scaling and angular distortion factors */
 PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp);

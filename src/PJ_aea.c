@@ -31,6 +31,8 @@
 #include "proj.h"
 #include <errno.h>
 #include "projects.h"
+#include "proj_math.h"
+
 
 # define EPS10  1.e-10
 # define TOL7   1.e-7

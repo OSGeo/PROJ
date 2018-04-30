@@ -44,6 +44,7 @@
 #include <errno.h>
 #include "proj.h"
 #include "projects.h"
+#include "proj_math.h"
 
 
 struct pj_opaque {
@@ -61,32 +62,6 @@ PROJ_HEAD(utm, "Universal Transverse Mercator (UTM)")
     "\n\tCyl, Sph\n\tzone= south";
 
 #define PROJ_ETMERC_ORDER 6
-
-
-#ifdef _GNU_SOURCE
-    inline
-#endif
-static double log1py(double x) {              /* Compute log(1+x) accurately */
-    volatile double
-      y = 1 + x,
-      z = y - 1;
-    /* Here's the explanation for this magic: y = 1 + z, exactly, and z
-     * approx x, thus log(y)/z (which is nearly constant near z = 0) returns
-     * a good approximation to the true log(1 + x)/x.  The multiplication x *
-     * (log(y)/z) introduces little additional error. */
-    return z == 0 ? x : x * log(y) / z;
-}
-
-
-#ifdef _GNU_SOURCE
-    inline
-#endif
-static double asinhy(double x) {              /* Compute asinh(x) accurately */
-    double y = fabs(x);         /* Enforce odd parity */
-    y = log1py(y * (1 + y/(hypot(1.0, y) + 1)));
-    return x < 0 ? -y : y;
-}
-
 
 #ifdef _GNU_SOURCE
     inline
@@ -182,7 +157,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     Ce     = atan2 (sin_Ce*cos_Cn,  hypot (sin_Cn, cos_Cn*cos_Ce));
 
     /* compl. sph. N, E -> ell. norm. N, E */
-    Ce  = asinhy ( tan (Ce) );     /* Replaces: Ce  = log(tan(FORTPI + Ce*0.5)); */
+    Ce  = asinh ( tan (Ce) );     /* Replaces: Ce  = log(tan(FORTPI + Ce*0.5)); */
     Cn += clenS (Q->gtu, PROJ_ETMERC_ORDER, 2*Cn, 2*Ce, &dCn, &dCe);
     Ce += dCe;
     if (fabs (Ce) <= 2.623395162778) {

@@ -144,3 +144,7 @@ where PROJ will find them after installation. The default location of
 `PROJ_LIB` on UNIX-based systems is `/usr/local/share/proj` but it may
 be changed to a different directory. On Windows you have to define
 `PROJ_LIB` yourself.
+
+### Citing PROJ in publications
+
+See [CITATION](CITATION)

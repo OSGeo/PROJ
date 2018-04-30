@@ -1,4 +1,5 @@
 #define PJ_LIB__
+#include "proj_math.h"
 #include "proj_internal.h"
 #include "proj.h"
 #include "projects.h"
@@ -82,7 +83,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     (void) P;
 
     dphi = fabs(lp.phi);
-    i = pj_is_nan(lp.phi) ? -1 : (int)floor(dphi * C1);
+    i = isnan(lp.phi) ? -1 : (int)floor(dphi * C1);
     if( i < 0 ){
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return xy;
@@ -117,7 +118,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         }
     } else { /* general problem */
         /* in Y space, reduce to table interval */
-        i = pj_is_nan(lp.phi) ? -1 : (int)floor(lp.phi * NODES);
+        i = isnan(lp.phi) ? -1 : (int)floor(lp.phi * NODES);
         if( i < 0 || i >= NODES ) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return lp;

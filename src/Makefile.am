@@ -10,7 +10,7 @@ AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
 
 include_HEADERS = proj.h proj_api.h projects.h geodesic.h \
-	org_proj4_Projections.h org_proj4_PJ.h
+	org_proj4_PJ.h
 
 EXTRA_DIST = makefile.vc proj.def bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake \
@@ -43,7 +43,7 @@ lib_LTLIBRARIES = libproj.la
 libproj_la_LDFLAGS = -no-undefined -version-info 13:0:0
 
 libproj_la_SOURCES = \
-	pj_list.h proj_internal.h\
+	pj_list.h proj_internal.h proj_math.h\
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c PJ_sterea.c \
 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c PJ_isea.c PJ_ccon.c\
@@ -83,7 +83,7 @@ libproj_la_SOURCES = \
 	pj_apply_gridshift.c pj_datums.c pj_datum_set.c pj_transform.c \
 	geocent.c geocent.h pj_utils.c pj_gridinfo.c pj_gridlist.c \
 	jniproj.c pj_mutex.c pj_initcache.c pj_apply_vgridshift.c geodesic.c \
-	pj_strtod.c \
+	pj_strtod.c pj_math.c\
 	\
 	proj_4D_api.c PJ_cart.c PJ_pipeline.c PJ_horner.c PJ_helmert.c \
 	PJ_vgridshift.c PJ_hgridshift.c PJ_unitconvert.c PJ_molodensky.c \

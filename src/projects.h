@@ -92,11 +92,6 @@ typedef long pj_int32;
 #define MAX_PATH_FILENAME 1024
 #endif
 
-/* prototype hypot for systems where absent */
-#if !(defined(HAVE_C99_MATH) && HAVE_C99_MATH)
-extern double hypot(double, double);
-#endif
-
 /* If we still haven't got M_PI*, we rely on our own defines.
  * For example, this is necessary when compiling with gcc and
  * the -ansi flag.

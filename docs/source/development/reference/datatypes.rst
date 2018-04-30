@@ -744,3 +744,53 @@ Info structures
     .. c:member:: char PJ_INIT_INFO.lastupdate
 
         Date of last update of the init-file.
+
+
+Logging
+-------------------------------------------------------------------------------
+
+.. c:type:: PJ_LOG_LEVEL
+
+    Enum of logging levels in PROJ. Used to set the logging level in PROJ.
+    Usually using :c:func:`proj_log_level`.
+
+    .. c:member:: PJ_LOG_NONE
+
+        Don't log anything.
+
+    .. c:member:: PJ_LOG_ERROR
+
+        Log only errors.
+
+    .. c:member:: PJ_LOG_DEBUG
+
+        Log errors and additional debug information.
+
+    .. c:member:: PJ_LOG_TRACE
+
+        Highest logging level. Log everything including very detailed debug
+        information.
+
+    .. c:member:: PJ_LOG_TELL
+
+        Special logging level that when used in :c:func:`proj_log_level`
+        will return the current logging level set in PROJ.
+
+    .. versionadded:: 5.1.0
+
+.. c:type:: PJ_LOG_FUNC
+
+    Function prototype for the logging function used by PROJ.
+    Defined as
+
+    .. code-block:: C
+
+        typedef void (*PJ_LOG_FUNCTION)(void *, int, const char *);
+
+    where the :c:type:`void` pointer references a data structure used by the
+    calling application, the :c:type:`int` is used to set the logging level
+    and the :c:type:`const char` pointer is the string that will be logged
+    by the function.
+
+
+    .. versionadded:: 5.1.0
