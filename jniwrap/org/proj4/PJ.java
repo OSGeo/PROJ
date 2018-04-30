@@ -288,5 +288,6 @@ public class PJ {
      * <strong>NEVER INVOKE THIS METHOD EXPLICITLY, NEVER OVERRIDE</strong>.
      */
     @Override
+    @SuppressWarnings("deprecation")
     protected final native void finalize();
 }
