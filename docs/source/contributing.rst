@@ -86,7 +86,7 @@ Write documentation
 
 PROJ is in dire need of better documentation. Any contributions of
 documentation are greatly appreciated. The PROJ documentation is
-available on `proj4.org <ttp://proj4.org>`__. The website is generated
+available on `proj4.org <http://proj4.org>`__. The website is generated
 with `Sphinx <http://www.sphinx-doc.org/en/stable/>`__. Contributions to
 the documentation should be made as `Pull
 Requests <https://github.com/OSGeo/proj.4/pulls>`__ on GitHub.
