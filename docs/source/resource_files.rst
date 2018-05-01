@@ -107,9 +107,10 @@ Procedure:
 
 1. Visit the `NTv2 <http://webapp.geod.nrcan.gc.ca/geod/tools-outils/applications.php?locale=en#ntv2>`__, and register/login
 2. Follow the Download NTv2 link near the bottom of the page.
-3. Unzip `ntv2_100325.zip` (or similar), and move the grid shift file `NTV2_0.GSB` to the proj directory (be sure to change the name to lowercase for consistency)
-   * e.g.: `mv NTV2_0.GSB /usr/local/share/proj/ntv2_0.gsb`
+3. Unzip ``ntv2_100325.zip`` (or similar), and move the grid shift file ``NTV2_0.GSB`` to the proj directory (be sure to change the name to lowercase for consistency) 
+   e.g.: ``mv NTV2_0.GSB /usr/local/share/proj/ntv2_0.gsb``
 4. Test it using:
+
     ::
 
         cs2cs +proj=latlong +ellps=clrk66 +nadgrids=@ntv2_0.gsb +to +proj=latlong +ellps=GRS80 +datum=NAD83
