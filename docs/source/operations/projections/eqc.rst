@@ -13,14 +13,15 @@ The simplest of all projections. Standard parallels (0° when omitted) may be sp
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global, but best used near the equator                   |
 +---------------------+----------------------------------------------------------+
-| **Implemented by**  | Gerald I. Evenden                                        |
+| **Alias**           | eqc                                                      |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
-| `+lat_ts`           | Latitude of true scale. Defaults to 0.0                  |
+| **Input type**      | Geodetic coordinates                                     |
 +---------------------+----------------------------------------------------------+
-| `+lat_0`            | Center of the map : latitude of origin                   |
+| **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
+
 
 .. image:: ./images/eqc.png
    :scale: 50%
@@ -66,6 +67,24 @@ Example using Plate Carrée projection with true scale at latitude 30° and cent
 
     $ echo -88 30 | proj +proj=eqc +lat_ts=30 +lon_0=90w
     192811.01       3339584.72
+
+Parameters
+################################################################################
+
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/lat_0.rst
+
+.. include:: ../options/lat_ts.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
+
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/R.rst
 
 Mathematical definition
 #######################

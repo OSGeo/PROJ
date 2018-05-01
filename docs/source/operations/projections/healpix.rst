@@ -4,18 +4,21 @@
 HEALPix
 ********************************************************************************
 +---------------------+----------------------------------------------------------+
-| **Classification**  | Mixed                                                    |
+| **Classification**  | Miscellaneous                                            |
 +---------------------+----------------------------------------------------------+
 | **Available forms** | Forward and inverse, spherical and elliptical projection |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Implemented by**  | Alex Raichev and Michael Speth                           |
+| **Alias**           | healpix                                                  |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
-| `No special options for this projection`                                       |
+| **Input type**      | Geodetic coordinates                                     |
 +---------------------+----------------------------------------------------------+
+| **Output type**     | Projected coordinates                                    |
++---------------------+----------------------------------------------------------+
+
 
 .. image:: ../../../images/healpix.png
    :scale: 75%
@@ -43,13 +46,23 @@ To run a forward HEALPix projection on a unit sphere model, use the following co
     # output
     0 0 0.00 0.00
 
+Parameters
+################################################################################
+
+.. note:: All parameters for the projection are optional.
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
+
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/R.rst
+
 Further reading
 ################################################################################
 
 #. `NASA <http://healpix.jpl.nasa.gov/>`_
 #. `Wikipedia <https://en.wikipedia.org/wiki/HEALPix>`_
-
-
-
-
-

@@ -6,21 +6,23 @@ Transverse Mercator
 
 The transverse Mercator projection in its various forms is the most widely used projected coordinate system for world topographical and offshore mapping.
 
-+---------------------+--------------------------------------------------------------------------------+
-| **Classification**  | Transverse and oblique cylindrical                                             |
-+---------------------+--------------------------------------------------------------------------------+
-| **Available forms** | Forward and inverse, Spherical and Elliptical                                  |
-+---------------------+--------------------------------------------------------------------------------+
-| **Defined area**    | Global, but reasonably accurate only within 15 degrees of the central meridian |
-+---------------------+--------------------------------------------------------------------------------+
-| **Implemented by**  | Gerald I. Evenden                                                              |
-+---------------------+--------------------------------------------------------------------------------+
-| **Options**                                                                                          |
-+---------------------+--------------------------------------------------------------------------------+
-| `+lat_0`            | Latitude of origin (Default to 0)                                              |
-+---------------------+--------------------------------------------------------------------------------+
-| `+k0`               | Scale factor at natural origin (Default to 1)                                  |
-+---------------------+--------------------------------------------------------------------------------+
++---------------------+----------------------------------------------------------+
+| **Classification**  | Transverse and oblique cylindrical                       |
++---------------------+----------------------------------------------------------+
+| **Available forms** | Forward and inverse, Spherical and Elliptical            |
++---------------------+----------------------------------------------------------+
+| **Defined area**    | Global, but reasonably accurate only within 15 degrees   |
+|                     | of the central meridian                                  |
++---------------------+----------------------------------------------------------+
+| **Alias**           | tmerc                                                    |
++---------------------+----------------------------------------------------------+
+| **Domain**          | 2D                                                       |
++---------------------+----------------------------------------------------------+
+| **Input type**      | Geodetic coordinates                                     |
++---------------------+----------------------------------------------------------+
+| **Output type**     | Projected coordinates                                    |
++---------------------+----------------------------------------------------------+
+
 
 
 .. image:: ./images/tmerc.png
@@ -64,6 +66,25 @@ Example using Gauss Boaga on Italy area (EPSG:3004) ::
 
     $ echo 15 42 | proj +proj=tmerc +lat_0=0 +lon_0=15 +k=0.9996 +x_0=2520000 +y_0=0 +ellps=intl +units=m +no_defs
     2520000.00	4649858.60 
+
+Parameters
+################################################################################
+
+.. note:: All parameters for the projection are optional.
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/lat_0.rst
+
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/R.rst
+
+.. include:: ../options/k_0.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
 
 Mathematical definition
 #######################

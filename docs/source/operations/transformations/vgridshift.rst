@@ -4,16 +4,16 @@
 Vertical grid shift
 ================================================================================
 
+.. versionadded:: 5.0.0
+
 Change Vertical datum change by grid shift
 
++-----------------+--------------------------------------------------------------------+
+| **Domain**      | 3D                                                                 |
 +-----------------+--------------------------------------------------------------------+
 | **Input type**  | Geodetic coordinates (horizontal), meters (vertical).              |
 +-----------------+--------------------------------------------------------------------+
 | **Output type** | Geodetic coordinates (horizontal), meters (vertical).              |
-+-----------------+--------------------------------------------------------------------+
-| **Options**                                                                          |
-+-----------------+--------------------------------------------------------------------+
-| `+grids`        | Comma-separated list of grids to load.                             |
 +-----------------+--------------------------------------------------------------------+
 
 The vertical grid shift is done by offsetting the vertical input coordinates by
@@ -39,3 +39,14 @@ list.
 PROJ supports the GTX file format for vertical grid corrections. Details
 about all the format can be found in the GDAL documentation. GDAL both reads and
 writes the format. Using GDAL for construction of new grids is recommended.
+
+Parameters
+################################################################################
+
+.. option:: +grids=<list>
+
+    Comma-separated list of grids to load. If a grid is prefixed by an `@` the
+    grid is consideres optional and PROJ will the not complain if the grid is
+    not available.
+
+    Grids are expected to be in GTX format.

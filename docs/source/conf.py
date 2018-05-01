@@ -252,6 +252,8 @@ latex_documents = [
     (master_doc, 'proj.tex', title, author, 'manual'),
 ]
 
+latex_toplevel_sectioning = 'chapter'
+
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
 #latex_logo = None

@@ -11,14 +11,15 @@ Quadrilateralized Spherical Cube
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Implemented by**  | Martin Lambers                                           |
+| **Alias**           | qsc                                                      |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
-| `+lat_0`            | Latitude (in degrees) of the view position.              |
+| **Input type**      | Geodetic coordinates                                     |
 +---------------------+----------------------------------------------------------+
-| `+lon_0`            | Longitude (in degrees) of the view position.             |
+| **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
+
 
 The purpose of the Quadrilateralized Spherical Cube (QSC) projection is to project
 a sphere surface onto the six sides of a cube:
@@ -150,6 +151,21 @@ The resulting images can be laid out in a grid like below.
 +------------+--------------+-------------+------------+
 |            | |bottomside| |             |            |
 +------------+--------------+-------------+------------+
+
+Parameters
+################################################################################
+
+.. note:: All parameters for the projection are optional.
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/lat_0.rst
+
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
 
 Further reading
 ################################################################################

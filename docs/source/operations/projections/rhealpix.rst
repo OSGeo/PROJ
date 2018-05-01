@@ -4,22 +4,21 @@
 rHEALPix
 ********************************************************************************
 +---------------------+----------------------------------------------------------+
-| **Classification**  | Mixed                                                    |
+| **Classification**  | Miscellaneous                                            |
 +---------------------+----------------------------------------------------------+
 | **Available forms** | Forward and inverse, spherical and elliptical projection |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Implemented by**  | Alex Raichev and Michael Speth                           |
+| **Alias**           | rhealpix                                                 |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
-| `+north_square`     | Position of the north polar square.                      |
-|                     | Valid inputs are 0--3. Defaults to 0.                    |
+| **Input type**      | Geodetic coordinates                                     |
 +---------------------+----------------------------------------------------------+
-| `+south_square`     | Position of the south polar square.                      |
-|                     | Valid inputs are 0--3. Defaults to 0.                    |
+| **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
+
 
 .. image:: ../../../images/rhealpix.png
    :scale: 75%
@@ -43,6 +42,31 @@ command::
     > EOF
     55 12   6115727.86  1553840.13
 
+Parameters
+################################################################################
+
+.. note:: All parameters for the projection are optional.
+
+.. option:: +north_square
+
+    Position of the north polar square. Valid inputs are 0--3.
+
+    *Defaults to 0.0.*
+
+.. option:: +south_square
+
+    Position of the south polar square. Valid inputs are 0--3.
+
+    *Defaults to 0.0.*
+
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
 
 Further reading
 ################################################################################

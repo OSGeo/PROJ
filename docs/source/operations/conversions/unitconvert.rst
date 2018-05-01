@@ -4,23 +4,19 @@
 Unit conversion
 ================================================================================
 
+.. versionadded:: 5.0.0
+
 Convert between various distance and time units.
 
-+--------------+--------------------------------------------------------------------+
-| **Options**                                                                       |
-+--------------+--------------------------------------------------------------------+
-| `+xy_in`     | Input unit of the horizontal components.                           |
-+--------------+--------------------------------------------------------------------+
-| `+xy_out`    | Output unit of the horizontal components.                          |
-+--------------+--------------------------------------------------------------------+
-| `+z_in`      | Input unit of the vertical component.                              |
-+--------------+--------------------------------------------------------------------+
-| `+z_out`     | Output unit of the vertical component.                             |
-+--------------+--------------------------------------------------------------------+
-| `+t_in`      | Input unit of the time component.                                  |
-+--------------+--------------------------------------------------------------------+
-| `+t_out`     | Output unit of the time component.                                 |
-+--------------+--------------------------------------------------------------------+
++---------------------+--------------------------------------------------------+
+| **Alias**           | unitconvert                                            |
++---------------------+--------------------------------------------------------+
++ **Domain**          | 2D, 3D or 4D                                           |
++---------------------+--------------------------------------------------------+
+| **Input type**      | Any                                                    |
++---------------------+--------------------------------------------------------+
+| **Output type**     | Any                                                    |
++---------------------+--------------------------------------------------------+
 
 There are many examples of coordinate reference systems that are expressed in
 other units than the meter. There are also many cases where temporal data
@@ -42,16 +38,48 @@ expected to be in units of decimalyears. This can be fixed with `unitconvert`::
     +step +proj=unitconvert +t_in=gpsweek +t_out=decimalyear
     +step +proj=helmert +epoch=2000.0 +t_obs=2017.5 ...
 
+Parameters
+################################################################################
+
+.. option:: +xy_in=<unit>
+
+    Horizontal input units. See :ref:`distance_units` for a list of available
+    units.
+
+.. option:: +xy_out=<unit>
+
+    Horizontal output units. See :ref:`distance_units` for a list of available
+    units.
+
+.. option:: +z_in=<unit>
+
+    Vertical output units. See :ref:`distance_units` for a list of available
+    units.
+
+.. option:: +z_out=<unit>
+
+    Vertical output units. See :ref:`distance_units` for a list of available
+    units.
+
+.. option:: +t_in=<unit>
+
+    Temporal input units. See :ref:`time_units` for a list of available units.
+
+.. option:: +t_out=<unit>
+
+    Temporal output units. See :ref:`time_units` for a list of available units.
+
+.. _distance_units:
 
 Distance units
 ###############################################################################
 
 In the table below all distance units supported by PROJ is listed.
-The same list can also be produced on the command line with `proj` or `cs2cs`,
-by adding the `-lu` flag when calling the utility.
+The same list can also be produced on the command line with :program:`proj` or
+:program:`cs2cs`, by adding the `-lu` flag when calling the utility.
 
 +----------+---------------------------------+
-| Label    | Name                            |
+| **Label**| **Name**                        |
 +----------+---------------------------------+
 |     km   | Kilometer                       |
 +----------+---------------------------------+
@@ -96,12 +124,15 @@ by adding the `-lu` flag when calling the utility.
 | ind-ch   | Indian Chain                    |
 +----------+---------------------------------+
 
+.. _time_units:
 
 Time units
 ###############################################################################
 
 In the table below all time units supported by PROJ is listed.
 
++--------------+-----------------------------+
+| **label**    | **Name**                    |
 +--------------+-----------------------------+
 | mjd          | Modified Julian date        |
 +--------------+-----------------------------+

@@ -4,16 +4,17 @@
 Horizontal grid shift
 ================================================================================
 
+.. versionadded:: 5.0.0
+
 Change of horizontal datum by grid shift.
 
+
++-----------------+--------------------------------------------------------------------+
+| **Domain**      | 2D                                                                 |
 +-----------------+--------------------------------------------------------------------+
 | **Input type**  | Geodetic coordinates.                                              |
 +-----------------+--------------------------------------------------------------------+
 | **Output type** | Geodetic coordinates.                                              |
-+-----------------+--------------------------------------------------------------------+
-| **Options**                                                                          |
-+-----------------+--------------------------------------------------------------------+
-| `+grids`        | Comma-separated list of grids to load.                             |
 +-----------------+--------------------------------------------------------------------+
 
 The horizontal grid shift is done by offsetting the planar input coordinates by
@@ -37,3 +38,15 @@ list.
 PROJ supports CTable2, NTv1 and NTv2 files for horizontal grid corrections. Details
 about all three formats can be found in the GDAL documentation. GDAL reads and
 writes all three formats. Using GDAL for construction of new grids is recommended.
+
+
+Parameters
+################################################################################
+
+.. option:: +grids=<list>
+
+    Comma-separated list of grids to load. If a grid is prefixed by an `@` the
+    grid is consideres optional and PROJ will the not complain if the grid is
+    not available.
+
+    Grids are expected to be in CTable2, NTv1 or NTv2 format.

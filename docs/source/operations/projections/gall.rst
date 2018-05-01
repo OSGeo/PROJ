@@ -7,22 +7,26 @@ Gall (Gall Stereographic)
 The Gall stereographic projection, presented by James Gall in 1855, is a cylindrical projection.
 It is neither equal-area nor conformal but instead tries to balance the distortion inherent in any projection.
 
-+---------------------+--------------------------------------------------------------------------------+
-| **Classification**  | Transverse and oblique cylindrical                                             |
-+---------------------+--------------------------------------------------------------------------------+
-| **Available forms** | Forward and inverse, Spherical                                                 |
-+---------------------+--------------------------------------------------------------------------------+
-| **Defined area**    | Global                                                                         |
-+---------------------+--------------------------------------------------------------------------------+
-| **Implemented by**  | Gerald I. Evenden                                                              |
-+---------------------+--------------------------------------------------------------------------------+
-| **Options**         | No special options for this projection                                         |
-+---------------------+--------------------------------------------------------------------------------+
++---------------------+----------------------------------------------------------+
+| **Classification**  | Transverse and oblique cylindrical                       |
++---------------------+----------------------------------------------------------+
+| **Available forms** | Forward and inverse, Spherical                           |
++---------------------+----------------------------------------------------------+
+| **Defined area**    | Global                                                   |
++---------------------+----------------------------------------------------------+
+| **Alias**           | gall                                                     |
++---------------------+----------------------------------------------------------+
+| **Domain**          | 2D                                                       |
++---------------------+----------------------------------------------------------+
+| **Input type**      | Geodetic coordinates                                     |
++---------------------+----------------------------------------------------------+
+| **Output type**     | Projected coordinates                                    |
++---------------------+----------------------------------------------------------+
 
 
 .. image:: ./images/gall.png
    :scale: 50%
-   :alt:   Gall (Gall Stereographic)  
+   :alt:   Gall (Gall Stereographic)
 
 Usage
 #####
@@ -38,13 +42,29 @@ Unlike the Mercator, the Gall shows the poles as lines running across the top an
 
 Example using Gall Stereographical  ::
 
-    $ echo 9 51 | proj +proj=gall +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+    $ echo 9 51 | proj +proj=gall +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
     708432.90	5193386.36
 
 Example using Gall Stereographical (Central meridian 90°W) ::
 
     $ echo 9 51 | proj +proj=gall +lon_0=90w +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
     7792761.91	5193386.36
+
+Parameters
+################################################################################
+
+.. note:: All parameters for the projection are optional.
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/R.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
+
+.. include:: ../options/ellps.rst
+
 
 Mathematical definition
 #######################
@@ -70,7 +90,7 @@ Inverse projection
 
 .. math::
 
-  \phi = 2 \arctan( \frac{y}{1+\frac{\sqrt{2}}{2}} ) 
+  \phi = 2 \arctan( \frac{y}{1+\frac{\sqrt{2}}{2}} )
 
 .. math::
 

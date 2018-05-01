@@ -4,6 +4,8 @@
 Molodensky transform
 ================================================================================
 
+.. versionadded:: 5.0.0
+
 The Molodensky transformation resembles a :ref:`Helmert` with zero
 rotations and a scale of unity, but converts directly from geodetic coordinates to
 geodetic coordinates, without the intermediate shifts to and from cartesian
@@ -17,28 +19,13 @@ reasons, but nevertheless indispensable due to the large amount of data that has
 already been transformed that way [EversKnudsen2017]_.
 
 +---------------------+----------------------------------------------------------+
-| **Input type**      | Geodetic coordinates.                                    |
+| **Alias**           | molodensky                                               |
 +---------------------+----------------------------------------------------------+
-| **Output type**     | Geodetic coordinates.                                    |
+| **Domain**          | 3D                                                       |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Input type**      | Geodetic coordinates (horizontal), meters (vertical)     |
 +---------------------+----------------------------------------------------------+
-| `+da`               | Difference in semimajor axis of the defining ellipsoids. |
-+---------------------+----------------------------------------------------------+
-| `+df`               | Difference in flattening of the defining ellipsoids.     |
-+---------------------+----------------------------------------------------------+
-| `+dx`               | Offset of the X-axes of the defining ellipsoids.         |
-+---------------------+----------------------------------------------------------+
-| `+dy`               | Offset of the Y-axes of the defining ellipsoids.         |
-+---------------------+----------------------------------------------------------+
-| `+dz`               | Offset of the Z-axes of the defining ellipsoids.         |
-+---------------------+----------------------------------------------------------+
-| `+ellps`            | Ellipsoid definition of source coordinates.              |
-|                     | Any specification can be used (e.g. `+a`, `+rf`, etc).   |
-|                     | If not specified, default ellipsoid is used.             |
-+---------------------+----------------------------------------------------------+
-| `+abridged`         | Use the abridged version of the Molodensky transform.    |
-|                     | Optional.                                                |
+| **output type**     | Geodetic coordinates (horizontal), meters (vertical)     |
 +---------------------+----------------------------------------------------------+
 
 The Molodensky transform can be used to perform a datum shift from coordinate
@@ -72,3 +59,38 @@ The same transformation using the standard Molodensky::
 
     proj=molodensky a=6378160 rf=298.25 da=-23 df=-8.120449e-8  dx=-134 dy=-48 dz=149
 
+
+Parameters
+################################################################################
+
+Required
+-------------------------------------------------------------------------------
+
+.. option:: +da=<value>
+
+    Difference in semimajor axis of the defining ellipsoids.
+
+.. option:: +df=<value>
+
+    Difference in flattening of the defining ellipsoids.
+
+.. option:: +dx=<value>
+
+    Offset of the X-axes of the defining ellipsoids.
+
+.. option:: +dy=<value>
+
+    Offset of the Y-axes of the defining ellipsoids.
+
+.. option:: +dz=<value>
+
+    Offset of the Z-axes of the defining ellipsoids.
+
+.. include:: ../options/ellps.rst
+
+Optional
+-------------------------------------------------------------------------------
+
+.. option:: +abridged
+
+    Use the abridged version of the Molodensky transform.

@@ -12,24 +12,36 @@ Hatano Asymmetrical Equal Area
 +---------------------+----------------------------------------------------------+
 | **Available forms** | Forward and inverse, spherical projection                |
 +---------------------+----------------------------------------------------------+
-| **Defined area**    | Global, but best between standard parallels              |
+| **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Implemented by**  | Gerald I. Evenden                                        |
+| **Alias**           | hatano                                                   |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
-| `+lat_1`            | Standard Parallel 1                                      |
+| **Input type**      | Geodetic coordinates                                     |
 +---------------------+----------------------------------------------------------+
-| `+lat_2`            | Standard Parallel 2                                      |
+| **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
-| `+sym`              | Symmetric form used instead of asymmetric                |
-+---------------------+----------------------------------------------------------+
+
 
 
 .. image:: ./images/hatano.png
    :scale: 50%
    :alt:   Hatano Asymmetrical Equal Area
 
+
+Parameters
+################################################################################
+
+.. note:: All parameters for the projection are optional.
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/R.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
 
 
 Mathematical Definition
@@ -52,10 +64,10 @@ Forward
 
 
 ====================================  ==================  ===================
-Condition                                    :math:`C_p`          :math:`C_p`
+Condition                                    :math:`C_y`          :math:`C_p`
 ====================================  ==================  ===================
-if ``+sym`` or :math:`\phi > 0`                  1.75859              2.67595
-if not ``+sym`` and :math:`\phi < 0`             1.93052              2.43763
+For :math:`\phi > 0`                      1.75859              2.67595
+For :math:`\phi < 0`                      1.93052              2.43763
 ====================================  ==================  ===================
 
 For :math:`\phi = 0`, :math:`y \leftarrow 0`, and :math:`x \leftarrow 0.85\lambda`.

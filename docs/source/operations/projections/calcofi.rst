@@ -14,12 +14,15 @@ California Cooperative Oceanic Fisheries Investigations program, known as CalCOF
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Only valid for the west coast of USA and Mexico          |
 +---------------------+----------------------------------------------------------+
-| **Implemented by**  | Frank Warmerdam                                          |
+| **Alias**           | calcofi                                                  |
 +---------------------+----------------------------------------------------------+
-| **Options**                                                                    |
+| **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
-| `No special options for this projection`                                       |
+| **Input type**      | Geodetic coordinates                                     |
 +---------------------+----------------------------------------------------------+
+| **Output type**     | Projected coordinates                                    |
++---------------------+----------------------------------------------------------+
+
 
 
 .. image:: ../../../images/calcofi.png
@@ -66,6 +69,15 @@ as::
 Output of the above command::
 
     80.0 60.0   -121.15 34.15
+
+Options
+################################################################################
+
+.. note:: All options are optional for the CalCOFI projection.
+
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/R.rst
 
 Mathematical definition
 ################################################################################
