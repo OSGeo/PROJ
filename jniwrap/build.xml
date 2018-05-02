@@ -38,7 +38,8 @@
          ********************************************************** -->
     <target name="javadoc" depends="compile">
         <javadoc sourcepath="${src-java}" classpath="${classes}" destdir="${javadoc}" encoding="UTF-8"
-                 noqualifier="all" windowtitle="Proj bridge to Java" author="false"/>
+                 noqualifier="all" windowtitle="Proj bridge to Java" author="false" version="true"
+                 link="http://www.geoapi.org/3.0/javadoc/" additionalparam="-html5"/>
     </target>
 
     <!-- *******************************************
