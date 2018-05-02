@@ -4,11 +4,11 @@
     <!-- *******************************************
              Set directory paths and versions.
          ******************************************* -->
-    <property name="src-java" value="."/>
-    <property name="src-C"    value="../src"/>
+    <property name="src"      value="."/>
     <property name="out"      value="out"/>
     <property name="classes"  value="${out}/classes"/>
     <property name="javadoc"  value="${out}/apidocs"/>
+    <property name="module"   value="org.osgeo.proj"/>
     <property name="version"  value="5.1"/>
 
     <!-- *******************************************
@@ -18,12 +18,12 @@
     <target name="compile">
         <mkdir dir="${out}"/>
         <mkdir dir="${classes}"/>
-        <javac srcdir="${src-java}" destdir="${classes}" encoding="UTF-8" nativeheaderdir="${src-C}"
+        <javac modulesourcepath="${src}" destdir="${classes}" encoding="UTF-8" nativeheaderdir="${src}"
                createMissingPackageInfoClass = "false"
                includeAntRuntime = "false"
                includes = "org/**/*.java"/>
 
-        <jar destfile="${out}/proj.jar" basedir="${classes}" level="9" strict="fail">
+        <jar destfile="${out}/proj.jar" basedir="${classes}/${module}" level="9" strict="fail">
             <manifest>
                 <attribute name="Implementation-Title"   value="Proj bridge to Java"/>
                 <attribute name="Implementation-Version" value="${version}"/>
@@ -37,9 +37,16 @@
              Build and create documentation.
          ********************************************************** -->
     <target name="javadoc" depends="compile">
-        <javadoc sourcepath="${src-java}" classpath="${classes}" destdir="${javadoc}" encoding="UTF-8"
-                 noqualifier="all" windowtitle="Proj bridge to Java" author="false" version="true"
-                 link="http://www.geoapi.org/3.0/javadoc/" additionalparam="-html5"/>
+        <javadoc classpath="${classes}/${module}" destdir="${javadoc}"
+                 encoding="UTF-8" noqualifier="all" windowtitle="Proj bridge to Java" author="false" version="true"
+                 link="http://www.geoapi.org/3.0/javadoc/" additionalparam="-html5">
+          <sourcefiles>
+            <fileset dir="${src}/${module}">
+                <include name="org/**/*.java"/>
+                <exclude name="module-info.java"/>
+            </fileset>
+          </sourcefiles>
+        </javadoc>
     </target>
 
     <!-- *******************************************
