@@ -1,10 +1,10 @@
 /******************************************************************************
  * Project:  PROJ.4
- * Purpose:  Java/JNI wrappers for PROJ.4 API.
+ * Purpose:  Java/JNI wrappers for PROJ API.
  * Author:   Martin Desruisseaux
  *
  ******************************************************************************
- * Copyright (c) 2011, Open Geospatial Consortium, Inc.
+ * Copyright (c) 2011-2018, Open Geospatial Consortium, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -23,10 +23,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- *****************************************************************************
- * This file is a copy of a file developed in the GeoAPI "Proj.4 binding"
- * module (http://www.geoapi.org/geoapi-proj4/index.html). If this file is
- * modified, please consider synchronizing the changes with GeoAPI.
+ ******************************************************************************
  */
 package org.proj4;
 
@@ -35,6 +32,8 @@ package org.proj4;
  * Exception thrown when a call to {@link PJ#transform(PJ, int, double[], int, int)} failed.
  *
  * @author  Martin Desruisseaux (Geomatys)
+ * @version 5.1
+ * @since   4.8
  */
 public class PJException extends Exception {
     /**
@@ -52,7 +51,7 @@ public class PJException extends Exception {
     /**
      * Constructs a new exception with the given message.
      *
-     * @param message A message that describe the cause for the failure.
+     * @param message  a message that describe the cause for the failure.
      */
     public PJException(final String message) {
         super(message);
