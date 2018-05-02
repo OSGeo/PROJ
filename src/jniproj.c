@@ -54,9 +54,6 @@
 
 #define PJ_FIELD_NAME "ptr"
 #define PJ_FIELD_TYPE "J"
-#define PJ_MAX_DIMENSION 100
-/* The PJ_MAX_DIMENSION value appears also in quoted strings.
-   Please perform a search-and-replace if this value is changed. */
 
 /*!
  * \brief
@@ -391,9 +388,9 @@ JNIEXPORT void JNICALL Java_org_proj4_PJ_transform
         if (c) (*env)->ThrowNew(env, c, "The target CRS and the coordinates array can not be null.");
         return;
     }
-    if (dimension < 2 || dimension > PJ_MAX_DIMENSION) { /* Arbitrary upper value for catching potential misuse. */
+    if (dimension < 2 || dimension > org_proj4_PJ_DIMENSION_MAX) { /* Arbitrary upper value for catching potential misuse. */
         jclass c = (*env)->FindClass(env, "java/lang/IllegalArgumentException");
-        if (c) (*env)->ThrowNew(env, c, "Illegal dimension. Must be in the [2-100] range.");
+        if (c) (*env)->ThrowNew(env, c, "Illegal number of dimensions.");
         return;
     }
     if ((offset < 0) || (numPts < 0) || (offset + dimension*numPts) > (*env)->GetArrayLength(env, coordinates)) {
