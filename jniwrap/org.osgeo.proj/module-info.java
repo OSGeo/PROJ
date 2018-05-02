@@ -1,6 +1,6 @@
 /******************************************************************************
  * Project:  PROJ.4
- * Purpose:  Java/JNI wrappers for PROJ.4 API.
+ * Purpose:  Java/JNI wrappers for PROJ API.
  * Author:   Martin Desruisseaux
  *
  ******************************************************************************

@@ -1,6 +1,6 @@
 /******************************************************************************
  * Project:  PROJ.4
- * Purpose:  Java/JNI wrappers for PROJ.4 API.
+ * Purpose:  Java/JNI wrappers for PROJ API.
  * Author:   Antonello Andrea
  *           Martin Desruisseaux
  *
@@ -32,7 +32,7 @@
  * \file jniproj.c
  *
  * \brief
- * Functions used by the Java Native Interface (JNI) wrappers of Proj.4
+ * Functions used by the Java Native Interface (JNI) wrappers of PROJ.
  *
  *
  * \author Antonello Andrea
@@ -339,7 +339,7 @@ JNIEXPORT jdouble JNICALL Java_org_proj4_PJ_getLinearUnitToMetre
  * Converts input values from degrees to radians before coordinate operation, or the output
  * values from radians to degrees after the coordinate operation.
  *
- * \param pj        - The Proj.4 PJ structure.
+ * \param pj        - The PROJ.4 PJ structure.
  * \param data      - The coordinate array to transform.
  * \param numPts    - Number of points to transform.
  * \param dimension - Dimension of points in the coordinate array.

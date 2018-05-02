@@ -32,11 +32,11 @@ import java.lang.annotation.Native;
 
 
 /**
- * Wraps the <a href="http://proj4.org/">Proj</a> {@code PJ} native data structure.
- * Almost every methods defined in this class are native methods delegating the work to the Proj library.
+ * Wraps the <a href="http://proj4.org/">PROJ</a> {@code PJ} native data structure.
+ * Almost every methods defined in this class are native methods delegating the work to the PROJ library.
  * This class is the only place where such native methods are defined.
  *
- * <p>In the Proj library, the {@code PJ} structure aggregates in a single place information usually
+ * <p>In the PROJ library, the {@code PJ} structure aggregates in a single place information usually
  * splitted in many different ISO 19111 interfaces: {@link org.opengis.referencing.datum.Ellipsoid},
  * {@link org.opengis.referencing.datum.Datum}, {@link org.opengis.referencing.datum.PrimeMeridian},
  * {@link org.opengis.referencing.cs.CoordinateSystem}, {@link org.opengis.referencing.crs.CoordinateReferenceSystem}
@@ -56,7 +56,7 @@ public class PJ {
     public static final int DIMENSION_MAX = 100;
 
     /**
-     * Loads the Proj library.
+     * Loads the PROJ library.
      */
     static {
         System.loadLibrary("proj");
@@ -64,15 +64,15 @@ public class PJ {
 
     /**
      * The pointer to {@code PJ} structure allocated in the C/C++ heap. This value has no meaning in Java code.
-     * <strong>Do not modify</strong>, since this value is used by Proj. Do not rename neither, unless you update
+     * <strong>Do not modify</strong>, since this value is used by PROJ. Do not rename neither, unless you update
      * accordingly the C code in JNI wrappers.
      */
     private final long ptr;
 
     /**
-     * Creates a new {@code PJ} structure from the given Proj definition string.
+     * Creates a new {@code PJ} structure from the given PROJ definition string.
      *
-     * @param  definition  the Proj definition string.
+     * @param  definition  the PROJ definition string.
      * @throws IllegalArgumentException if the PJ structure can not be created from the given string.
      */
     public PJ(final String definition) throws IllegalArgumentException {
@@ -110,7 +110,7 @@ public class PJ {
      * to the {@link #ptr} field. The allocated structure is released by the {@link #finalize()}
      * method.
      *
-     * @param  definition  the Proj definition string.
+     * @param  definition  the PROJ definition string.
      * @return a pointer to the PJ native data structure, or 0 if the operation failed.
      */
     private static native long allocatePJ(String definition);
@@ -127,17 +127,17 @@ public class PJ {
     private static native long allocateGeoPJ(PJ projected);
 
     /**
-     * Returns the version number of the Proj library.
+     * Returns the version number of the PROJ library.
      *
-     * @return the Proj release string.
+     * @return the PROJ release string.
      */
     public static native String getVersion();
 
     /**
-     * Returns the Proj definition string. This is the string given to the constructor,
+     * Returns the PROJ definition string. This is the string given to the constructor,
      * expanded with as much information as possible.
      *
-     * @return the Proj definition string.
+     * @return the PROJ definition string.
      */
     public native String getDefinition();
 
@@ -150,7 +150,7 @@ public class PJ {
 
     /**
      * The coordinate reference system (CRS) type returned by {@link PJ#getType()}.
-     * In the Proj library, a CRS can only be geographic, geocentric or projected,
+     * In the PROJ library, a CRS can only be geographic, geocentric or projected,
      * without distinction between 2D and 3D CRS.
      *
      * @author  Martin Desruisseaux (Geomatys)
@@ -259,7 +259,7 @@ public class PJ {
      * @param  numPts       number of points to transform.
      * @throws NullPointerException if the {@code target} or {@code coordinates} argument is null.
      * @throws IndexOutOfBoundsException if the {@code offset} or {@code numPts} arguments are invalid.
-     * @throws PJException if the operation failed for another reason (provided by Proj).
+     * @throws PJException if the operation failed for another reason (provided by PROJ).
      *
      * @see org.opengis.referencing.operation.MathTransform#transform(double[], int, double[], int, int)
      */

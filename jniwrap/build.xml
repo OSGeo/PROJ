@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="Proj bridge to Java" default="compile" basedir=".">
+<project name="PROJ bridge to Java" default="compile" basedir=".">
 
     <!-- *******************************************
              Set directory paths and versions.
@@ -25,7 +25,7 @@
 
         <jar destfile="${out}/proj.jar" basedir="${classes}/${module}" level="9" strict="fail">
             <manifest>
-                <attribute name="Implementation-Title"   value="Proj bridge to Java"/>
+                <attribute name="Implementation-Title"   value="PROJ bridge to Java"/>
                 <attribute name="Implementation-Version" value="${version}"/>
                 <attribute name="Implementation-Vendor"  value="Proj.4 project"/>
                 <attribute name="Implementation-URL"     value="http://proj4.org/"/>
@@ -38,7 +38,7 @@
          ********************************************************** -->
     <target name="javadoc" depends="compile">
         <javadoc classpath="${classes}/${module}" destdir="${javadoc}"
-                 encoding="UTF-8" noqualifier="all" windowtitle="Proj bridge to Java" author="false" version="true"
+                 encoding="UTF-8" noqualifier="all" windowtitle="PROJ bridge to Java" author="false" version="true"
                  link="http://www.geoapi.org/3.0/javadoc/" additionalparam="-html5">
           <sourcefiles>
             <fileset dir="${src}/${module}">

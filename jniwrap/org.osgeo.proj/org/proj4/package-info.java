@@ -27,10 +27,10 @@
  */
 
 /**
- * Wrappers for the <a href="http://proj4.org/">Proj</a> library.
- * The {@link org.proj4.PJ} class contains only native methods delegating their work to the Proj library.
+ * Wrappers for the <a href="http://proj4.org/">PROJ</a> library.
+ * The {@link org.proj4.PJ} class contains only native methods delegating their work to the PROJ library.
  * For higher-level methods making use of those native methods, see for example the
- * <a href="http://www.geoapi.org/geoapi-proj4/index.html">GeoAPI bindings for Proj</a>.
+ * <a href="http://www.geoapi.org/geoapi-proj4/index.html">GeoAPI bindings for PROJ</a>.
  *
  * @author  Martin Desruisseaux (Geomatys)
  * @version 5.1
