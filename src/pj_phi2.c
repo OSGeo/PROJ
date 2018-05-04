@@ -14,8 +14,9 @@ double pj_phi2(projCtx ctx, double ts, double e) {
     int i = N_ITER;
 
     for(;;) {
+        double dphi;
         con = e * sin(Phi);
-        double dphi = M_HALFPI - 2. * atan(ts * pow((1. - con) /
+        dphi = M_HALFPI - 2. * atan(ts * pow((1. - con) /
            (1. + con), eccnth)) - Phi;
 
         Phi += dphi;

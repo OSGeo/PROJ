@@ -56,6 +56,6 @@ pj_inv_mlfn(projCtx ctx, double arg, double es, double *en) {
 		if (fabs(t) < EPS)
 			return phi;
 	}
-	pj_ctx_set_errno( ctx, -17 );
+	pj_ctx_set_errno( ctx, PJD_ERR_NON_CONV_INV_MERI_DIST );
 	return phi;
 }

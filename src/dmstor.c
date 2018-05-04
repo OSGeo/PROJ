@@ -51,7 +51,7 @@ dmstor_ctx(projCtx ctx, const char *is, char **rs) {
 			n = 2; break;
 		case 'r': case 'R':
 			if (nl) {
-				pj_ctx_set_errno( ctx, -16 );
+				pj_ctx_set_errno( ctx, PJD_ERR_WRONG_FORMAT_DMS_VALUE );
 				return HUGE_VAL;
 			}
 			++s;
@@ -63,7 +63,7 @@ dmstor_ctx(projCtx ctx, const char *is, char **rs) {
 			continue;
 		}
 		if (n < nl) {
-			pj_ctx_set_errno( ctx, -16 );
+			pj_ctx_set_errno( ctx, PJD_ERR_WRONG_FORMAT_DMS_VALUE );
 			return HUGE_VAL;
 		}
 		v += tv * vm[n];

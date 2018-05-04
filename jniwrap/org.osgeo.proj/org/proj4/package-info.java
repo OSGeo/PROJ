@@ -1,10 +1,10 @@
 /******************************************************************************
  * Project:  PROJ.4
- * Purpose:  Java/JNI wrappers for PROJ.4 API.
+ * Purpose:  Java/JNI wrappers for PROJ API.
  * Author:   Martin Desruisseaux
  *
  ******************************************************************************
- * Copyright (c) 2011, Open Geospatial Consortium, Inc.
+ * Copyright (c) 2011-2018, Open Geospatial Consortium, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -23,18 +23,17 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- *****************************************************************************
- * This file is a copy of a file developed in the GeoAPI "Proj.4 binding"
- * module (http://www.geoapi.org/geoapi-proj4/index.html). If this file is
- * modified, please consider synchronizing the changes with GeoAPI.
+ ******************************************************************************
  */
 
 /**
- * Wrappers for the <a href="http://proj.osgeo.org/">Proj4</a> library. The {@link org.proj4.PJ}
- * class contains only native methods delegating their work to the Proj.4 library.
+ * Wrappers for the <a href="http://proj4.org/">PROJ</a> library.
+ * The {@link org.proj4.PJ} class contains only native methods delegating their work to the PROJ library.
  * For higher-level methods making use of those native methods, see for example the
- * <a href="http://www.geoapi.org/geoapi-proj4/index.html">GeoAPI bindings for Proj.4</a>.
+ * <a href="http://www.geoapi.org/geoapi-proj4/index.html">GeoAPI bindings for PROJ</a>.
  *
  * @author  Martin Desruisseaux (Geomatys)
+ * @version 5.1
+ * @since   4.8
  */
 package org.proj4;

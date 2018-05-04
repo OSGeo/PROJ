@@ -68,7 +68,10 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
         /* find the datum definition */
         for (i = 0; (s = pj_datums[i].id) && strcmp(name, s) ; ++i) {}
 
-        if (!s) { pj_ctx_set_errno(ctx, -9); return 1; }
+        if (!s) {
+            pj_ctx_set_errno(ctx, PJD_ERR_UNKNOWN_ELLP_PARAM);
+            return 1;
+        }
 
         if( pj_datums[i].ellipse_id && strlen(pj_datums[i].ellipse_id) > 0 )
         {

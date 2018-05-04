@@ -37,7 +37,7 @@ bcheval(projUV in, Tseries *T) {
     w.v = ( in.v + in.v - T->a.v ) * T->b.v;
     if (fabs(w.u) > NEAR_ONE || fabs(w.v) > NEAR_ONE) {
         out.u = out.v = HUGE_VAL;
-        pj_errno = -36;
+        pj_errno = PJD_ERR_TCHEBY_VAL_OUT_OF_RANGE;
     } else { /* double evaluation */
         w2.u = w.u + w.u;
         w2.v = w.v + w.v;

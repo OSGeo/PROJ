@@ -597,7 +597,7 @@ int pj_geodetic_to_geocentric( double a, double es,
         if( pj_Convert_Geodetic_To_Geocentric( &gi, y[io], x[io], z[io],
                                                x+io, y+io, z+io ) != 0 )
         {
-            ret_errno = -14;
+            ret_errno = PJD_ERR_LAT_OR_LON_EXCEED_LIMIT;
             x[io] = y[io] = HUGE_VAL;
             /* but keep processing points! */
         }
