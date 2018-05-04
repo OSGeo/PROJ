@@ -139,8 +139,8 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
                                 &(defn->last_after_date));
             if( defn->last_after_grid == NULL )
             {
-                pj_ctx_set_errno( defn->ctx, -38 );
-                return -38;
+                pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+                return PJD_ERR_FAILED_TO_LOAD_GRID;
             }
         }
         gi = defn->last_after_grid;
@@ -149,8 +149,8 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
         /* load the grid shift info if we don't have it. */
         if( gi->ct->cvs == NULL && !pj_gridinfo_load( defn->ctx, gi ) )
         {
-            pj_ctx_set_errno( defn->ctx, -38 );
-            return -38;
+            pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+            return PJD_ERR_FAILED_TO_LOAD_GRID;
         }
             
         output_after = nad_cvt( input, inverse, gi->ct );
@@ -187,8 +187,8 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
                                 &(defn->last_before_date));
             if( defn->last_before_grid == NULL )
             {
-                pj_ctx_set_errno( defn->ctx, -38 );
-                return -38;
+                pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+                return PJD_ERR_FAILED_TO_LOAD_GRID;
             }
         }
 
@@ -198,8 +198,8 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
         /* load the grid shift info if we don't have it. */
         if( gi->ct->cvs == NULL && !pj_gridinfo_load( defn->ctx, gi ) )
         {
-            pj_ctx_set_errno( defn->ctx, -38 );
-            return -38;
+            pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+            return PJD_ERR_FAILED_TO_LOAD_GRID;
         }
             
         output_before = nad_cvt( input, inverse, gi->ct );

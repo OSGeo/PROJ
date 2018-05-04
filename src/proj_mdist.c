@@ -117,6 +117,6 @@ proj_inv_mdist(projCtx ctx, double dist, const void *data) {
 			return phi;
 	}
 		/* convergence failed */
-	pj_ctx_set_errno(ctx, -17);
+	pj_ctx_set_errno(ctx, PJD_ERR_NON_CONV_INV_MERI_DIST);
 	return phi;
 }
