@@ -1,21 +1,21 @@
-# Proj bridge to Java
+# PROJ bridge to Java
 
-This is the third release of JNI wrappers for the main Proj functions.
+This is the third release of JNI wrappers for the main PROJ functions.
 The first release of JNI wrappers were created by http://www.hydrologis.com.
 The second release of JNI wrappers were created by http://www.geoapi.org.
 
 
 
-## What is "Proj bridge to Java"
+## What is "PROJ bridge to Java"
 
-_Proj bridge to Java_ is a small library of Java classes that wrap a few Proj functions
+_Proj bridge to Java_ is a small library of Java classes that wrap a few PROJ functions
 by using the Java Native Interface (JNI). The main Java class is `org.proj4.PJ`.
 
 
 
 ### Compilation
 
-To compile the native part, `configure` has to be run in the Proj directory like this:
+To compile the native part, `configure` has to be run in the PROJ directory like this:
 
     CFLAGS=-Iinclude2 ./configure --with-jni=include1
 
@@ -35,7 +35,7 @@ It applies to Linux, MacOS and Windows (and virtually to every system supporting
 
 ### Requirements
 
-Beyond the ones already put by Proj, you need:
+Beyond the ones already put by PROJ, you need:
 
 * For compilation:
   * Java 9+, the Java standard development kit version 9 or above
@@ -70,8 +70,8 @@ Proj.4 license for the second release.
 
 ## Usage & a fast example:
 
-The `proj.jar` is all is needed to implement Proj support in java applications.
-The whole job is done by the Proj library, so there are just a couple of functions that be used.
+The `proj.jar` is all is needed to implement PROJ support in java applications.
+The whole job is done by the PROJ library, so there are just a couple of functions that be used.
 
 The best way is to see everything through an example.
 In the following example we create two Coordinate Reference System and transform 3 points.
@@ -103,7 +103,7 @@ Of course, real applications would read them from a file or other data source.
 
 ### compile the Main code
 
-we assume that Proj was compiled with the right flag to support the bridge to Java
+we assume that PROJ was compiled with the right flag to support the bridge to Java
 Therefore we have a library called `proj.jar`.
 Thus we compile the `Main.java` with the command:
 

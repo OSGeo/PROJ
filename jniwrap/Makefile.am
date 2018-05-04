@@ -1,6 +1,6 @@
 EXTRA_DIST = build.xml README.md
 
-SUBDIRS	=	org
+SUBDIRS	=	org.osgeo.proj
 
 install-data-local:
 	echo In jniwrap

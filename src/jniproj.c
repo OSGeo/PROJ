@@ -1,6 +1,6 @@
 /******************************************************************************
  * Project:  PROJ.4
- * Purpose:  Java/JNI wrappers for PROJ.4 API.
+ * Purpose:  Java/JNI wrappers for PROJ API.
  * Author:   Antonello Andrea
  *           Martin Desruisseaux
  *
@@ -32,7 +32,7 @@
  * \file jniproj.c
  *
  * \brief
- * Functions used by the Java Native Interface (JNI) wrappers of Proj.4
+ * Functions used by the Java Native Interface (JNI) wrappers of PROJ.
  *
  *
  * \author Antonello Andrea
@@ -54,9 +54,6 @@
 
 #define PJ_FIELD_NAME "ptr"
 #define PJ_FIELD_TYPE "J"
-#define PJ_MAX_DIMENSION 100
-/* The PJ_MAX_DIMENSION value appears also in quoted strings.
-   Please perform a search-and-replace if this value is changed. */
 
 /*!
  * \brief
@@ -342,7 +339,7 @@ JNIEXPORT jdouble JNICALL Java_org_proj4_PJ_getLinearUnitToMetre
  * Converts input values from degrees to radians before coordinate operation, or the output
  * values from radians to degrees after the coordinate operation.
  *
- * \param pj        - The Proj.4 PJ structure.
+ * \param pj        - The PROJ.4 PJ structure.
  * \param data      - The coordinate array to transform.
  * \param numPts    - Number of points to transform.
  * \param dimension - Dimension of points in the coordinate array.
@@ -391,9 +388,9 @@ JNIEXPORT void JNICALL Java_org_proj4_PJ_transform
         if (c) (*env)->ThrowNew(env, c, "The target CRS and the coordinates array can not be null.");
         return;
     }
-    if (dimension < 2 || dimension > PJ_MAX_DIMENSION) { /* Arbitrary upper value for catching potential misuse. */
+    if (dimension < 2 || dimension > org_proj4_PJ_DIMENSION_MAX) { /* Arbitrary upper value for catching potential misuse. */
         jclass c = (*env)->FindClass(env, "java/lang/IllegalArgumentException");
-        if (c) (*env)->ThrowNew(env, c, "Illegal dimension. Must be in the [2-100] range.");
+        if (c) (*env)->ThrowNew(env, c, "Illegal number of dimensions.");
         return;
     }
     if ((offset < 0) || (numPts < 0) || (offset + dimension*numPts) > (*env)->GetArrayLength(env, coordinates)) {
