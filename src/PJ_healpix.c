@@ -526,7 +526,7 @@ static LP s_healpix_inverse(XY xy, PJ *P) { /* sphere */
         LP lp;
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
-        pj_ctx_set_errno(P->ctx, -15);
+        pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
         return lp;
     }
     return healpix_sphere_inverse(xy);
@@ -540,7 +540,7 @@ static LP e_healpix_inverse(XY xy, PJ *P) { /* ellipsoid */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
-        pj_ctx_set_errno(P->ctx, -15);
+        pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
         return lp;
     }
     lp = healpix_sphere_inverse(xy);
@@ -574,7 +574,7 @@ static LP s_rhealpix_inverse(XY xy, PJ *P) { /* sphere */
         LP lp;
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
-        pj_ctx_set_errno(P->ctx, -15);
+        pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
         return lp;
     }
     xy = combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 1);
@@ -590,7 +590,7 @@ static LP e_rhealpix_inverse(XY xy, PJ *P) { /* ellipsoid */
     if (in_image(xy.x, xy.y, 1, Q->north_square, Q->south_square) == 0) {
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
-        pj_ctx_set_errno(P->ctx, -15);
+        pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
         return lp;
     }
     xy = combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 1);

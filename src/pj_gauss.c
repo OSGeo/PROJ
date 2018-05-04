@@ -92,6 +92,6 @@ LP pj_inv_gauss(projCtx ctx, LP slp, const void *data) {
     }
     /* convergence failed */
     if (!i)
-        pj_ctx_set_errno( ctx, -17 );
+        pj_ctx_set_errno(ctx, PJD_ERR_NON_CONV_INV_MERI_DIST);
     return (elp);
 }

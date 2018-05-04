@@ -23,6 +23,6 @@ pj_phi2(projCtx ctx, double ts, double e) {
                 break;
 	}
 	if (i <= 0)
-		pj_ctx_set_errno( ctx, -18 );
+		pj_ctx_set_errno( ctx, PJD_ERR_NON_CON_INV_PHI2 );
 	return Phi;
 }
