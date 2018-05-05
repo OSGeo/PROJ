@@ -13,7 +13,7 @@ cct
 Synopsis
 ********
 
-    **cct** [ **-cotvz** [ args ] ] *+opts[=arg]* file[s]
+    **cct** [ **-cIostvz** [ args ] ] *+opts[=arg]* file[s]
 
 Description
 ***********
@@ -31,6 +31,10 @@ The following control parameters can appear in any order:
 .. option:: -c <x,y,z,t>
 
     Specify input columns for (up to) 4 input parameters. Defaults to 1,2,3,4.
+
+.. option:: -I
+
+    Do the inverse transformation.
 
 .. option:: -o <output file name>, --output=<output file name>
 
