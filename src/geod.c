@@ -21,7 +21,7 @@ inverse = 0;	/* != 0 then inverse geodesic */
 *osform = "%.3f",	/* output format for S */
 pline[50],		/* work string */
 *usage =
-"%s\nusage: %s [ -afFIptTwW [args] ] [ +opts[=arg] ] [ files ]\n";
+"%s\nusage: %s [ -afFIlptwW [args] ] [ +opts[=arg] ] [ files ]\n";
 	static void
 printLL(double p, double l) {
 	if (oform) {
