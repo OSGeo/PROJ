@@ -163,7 +163,7 @@ gie command language
     In addition to expecting a coordinate it is also possible to expect a
     PROJ error code in case an operation can't be created. This is useful when
     testing that errors are caught and handled correctly. Below is an example of
-    that tests that the pipeline operator fails correctly when a non-invertable
+    that tests that the pipeline operator fails correctly when a non-invertible
     pipeline is constructed.
 
     .. code-block:: console
@@ -179,7 +179,7 @@ gie command language
     The :option:`tolerance` command controls how much accepted coordinates
     can deviate from the expected coordinate. This is handy to test that an
     operation meets a certain numerical tolerance threshold. Some operations
-    are expexted to be accurate within milimeters where others might only be
+    are expected to be accurate within millimeters where others might only be
     accurate within a few meters. :option:`tolerance` should
 
     .. code-block:: console
@@ -286,7 +286,7 @@ gie command language
 
 .. option:: skip
 
-    Skip any test after the first occurence of :option:`skip`. In the example below only
+    Skip any test after the first occurrence of :option:`skip`. In the example below only
     the first test will be performed. The second test is skipped. This feature is mostly
     relevant for debugging when writing new test cases.
 

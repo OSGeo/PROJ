@@ -219,7 +219,7 @@ data will appear as three lines of::
     projected coordinates within one datum.
 
     The :program:`cs2cs` program operates similarly, but allows translation
-    between any paor of definable coordinate reference systems, including
+    between any pair of definable coordinate reference systems, including
     support for datum translation.
 
     See also
