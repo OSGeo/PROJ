@@ -13,18 +13,18 @@ cct
 Synopsis
 ********
 
-       **cct** [ **-cotvz** [ args ] ] *+opts[=arg]*  file[s]
+    **cct** [ **-cotvz** [ args ] ] *+opts[=arg]* file[s]
 
 Description
 ***********
 
 :program:`cct` a 4D equivalent to the :program:`proj` projection program,
-performs transformation coordinate systems on a set of input points.  The
-coordinate system transformation can include  translation  between projected
+performs transformation coordinate systems on a set of input points. The
+coordinate system transformation can include translation between projected
 and geographic coordinates as well as the application of datum shifts.
 
 
-The following control parameters can  appear  in any order:
+The following control parameters can appear in any order:
 
 .. program:: cct
 
@@ -120,14 +120,14 @@ Should give results comparable to the classic proj command
 
 .. code-block:: console
 
-      cct -c 5,2,1,4  +proj=utm +ellps=GRS80 +zone=32
+      cct -c 5,2,1,4 +proj=utm +ellps=GRS80 +zone=32
 
 5. As (2) but specify fixed height and time, hence needing only 2 cols in
    input:
 
 .. code-block:: console
 
-      cct -t 0 -z 0  +proj=utm  +ellps=GRS80  +zone=32
+      cct -t 0 -z 0 +proj=utm +ellps=GRS80 +zone=32
 
 
 Background

@@ -19,14 +19,14 @@ Synopsis
 
 Description
 ***********
-:program:`proj` and :program:`invproj` perform respective forward  and inverse
-transformation  of cartographic data to or from cartesian data  with  a  wide
-range  of selectable projection functions.
+:program:`proj` and :program:`invproj` perform respective forward and inverse
+transformation of cartographic data to or from cartesian data with a wide
+range of selectable projection functions.
 
-:program:`invproj` may not be available on all  platforms;  in  this  case
+:program:`invproj` may not be available on all platforms; in this case
 use :option:`proj -I` instead.
 
-The  following  control parameters can appear in any order
+The following control parameters can appear in any order
 
 .. program:: proj
 
@@ -53,15 +53,15 @@ The  following  control parameters can appear in any order
 .. option:: -t<a>
 
     *a* specifies a character employed as the first character to denote a
-    control line to be passed through without  processing. This  option
+    control line to be passed through without processing. This option
     applicable to ascii input only. (# is the default value).
 
 .. option:: -e <string>
 
-      String is an arbitrary string to be output if an error is detected during
-      data transformations. The default value is: *\t*. Note that if the
-      :option:`-b`, :option:`-i` or :option:`-o` options are employed, an error
-      is returned as HUGE_VAL value for both return values.
+    String is an arbitrary string to be output if an error is detected during
+    data transformations. The default value is: *\t*. Note that if the
+    :option:`-b`, :option:`-i` or :option:`-o` options are employed, an error
+    is returned as HUGE_VAL value for both return values.
 
 .. option:: -E
 
@@ -119,21 +119,21 @@ The  following  control parameters can appear in any order
     The cartesian data may be scaled by the mult parameter. When processing data
     in a forward projection mode the cartesian output values are multiplied by
     mult otherwise the input cartesian values are divided by mult before inverse
-    projection.  If the first two characters of mult are 1/ or 1: then the
+    projection. If the first two characters of mult are 1/ or 1: then the
     reciprocal value of mult is employed.
 
 .. option:: -f <format>
 
     Format is a printf format string to control the form of the output values.
     For inverse projections, the output will be in degrees when this option is
-    employed.  The  default format is "%.2f" for forward projection and DMS for
+    employed. The default format is "%.2f" for forward projection and DMS for
     inverse.
 
 .. option:: -[w|W]<n>
 
     N is the number of significant fractional digits to employ for seconds
-    output (when the  option  is  not  specified, ``-w3`` is assumed). When ``-W``
-    is employed the fields will be constant width and  with  leading zeroes.
+    output (when the option is not specified, ``-w3`` is assumed). When ``-W``
+    is employed the fields will be constant width and with leading zeroes.
 
 .. option:: -v
 
@@ -149,7 +149,7 @@ The  following  control parameters can appear in any order
 .. option:: -T <ulow,uhi,vlow,vhi,res[,umax,vmax]>
 
     This option creates a set of bivariate Chebyshev polynomial coefficients
-    that approximate the selected  cartographic projection on stdout. The values
+    that approximate the selected cartographic projection on stdout. The values
     low and hi denote the range of the input where the u or v prefixes apply to
     respective longitude-x or latitude-y depending upon whether a forward or
     inverse projection is selected. Res is an integer number specifying the
@@ -160,13 +160,13 @@ The  following  control parameters can appear in any order
 
 
 The *+args* run-line arguments are associated with cartographic parameters.
-Additional projection control parameters may  be contained  in  two  auxiliary
-control files: the first  is   optionally   referenced   with   the
+Additional projection control parameters may be contained in two auxiliary
+control files: the first is optionally referenced with the
 *+init=file:id* and the second is always processed after the name of the
 projection has been established from either the run-line or the contents of
-+init  file.   The   environment   parameter :envvar:`PROJ_LIB` establishes the
-default directory for a file reference without an absolute  path.   This is
-also  used  for  supporting files like datum shift files.
++init file. The environment parameter :envvar:`PROJ_LIB` establishes the
+default directory for a file reference without an absolute path. This is
+also used for supporting files like datum shift files.
 
 .. only:: html
 
@@ -174,17 +174,17 @@ also  used  for  supporting files like datum shift files.
     consult the :ref:`projection pages <projections>`.
 
 
-One or more files (processed in  left  to  right order)  specify  the source of
-data to be transformed.  A ``-`` will specify the location  of  processing standard
-input.  If no files are specified, the input is assumed  to  be  from  stdin.
-For ASCII input data the two data values must be in the first two white  space
-separated  fields and  when  both  input  and output are ASCII all trailing
+One or more files (processed in left to right order) specify the source of
+data to be transformed. A ``-`` will specify the location of processing standard
+input. If no files are specified, the input is assumed to be from stdin.
+For ASCII input data the two data values must be in the first two white space
+separated fields and when both input and output are ASCII all trailing
 portions of the input line are appended to the output line.
 
-Input  geographic  data (longitude and latitude) must be in DMS format and input
-cartesian  data must  be  in units consistent with the ellipsoid major axis or
-sphere radius units.  Output geographic  coordinates  will  be in DMS (if the
-``-w`` switch is not employed) and  precise  to  0.001" with  trailing, zero-valued
+Input geographic data (longitude and latitude) must be in DMS format and input
+cartesian data must be in units consistent with the ellipsoid major axis or
+sphere radius units. Output geographic coordinates will be in DMS (if the
+``-w`` switch is not employed) and precise to 0.001" with trailing, zero-valued
 minute-second fields deleted.
 
 Example
@@ -193,16 +193,15 @@ The following script
 
 .. code-block:: console
 
-     proj +proj=utm  +lon_0=112w  +ellps=clrk66
-     -r <<EOF
-     45d15'33.1"   111.5W
-     45d15.551666667N   -111d30
-     +45.25919444444    111d30'000w
-     EOF
+    proj +proj=utm +lon_0=112w +ellps=clrk66 -r <<EOF
+    45d15'33.1" 111.5W
+    45d15.551666667N -111d30
+    +45.25919444444 111d30'000w
+    EOF
 
-will perform UTM forward projection with a standard UTM  central  meridian
-nearest  longitude 112W.  The geographic values of this example are equivalent
-and  meant  as  examples  of  various forms  of  DMS  input.  The x-y output
+will perform UTM forward projection with a standard UTM central meridian
+nearest longitude 112W. The geographic values of this example are equivalent
+and meant as examples of various forms of DMS input. The x-y output
 data will appear as three lines of::
 
     460769.27     5011648.45

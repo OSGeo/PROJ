@@ -8,7 +8,7 @@ gie
 
 .. only:: html
 
-       The Geospatial Integrity Investigation Environment
+    The Geospatial Integrity Investigation Environment
 
 Synopsis
 ********
@@ -34,13 +34,13 @@ already employed for compiling the library.
 
 .. option:: -v, --verbose
 
-    Verbose: Provide non-essential informational output.  Repeat :option:`-v` for
+    Verbose: Provide non-essential informational output. Repeat :option:`-v` for
     more verbosity (e.g. ``-vv``)
 
 .. option:: -q, --quiet
 
-    Quiet: Opposite of verbose. In  quiet  mode  not  even  errors  are
-    reported.  Only  interaction  is through the return code (0 on success,
+    Quiet: Opposite of verbose. In quiet mode not even errors are
+    reported. Only interaction is through the return code (0 on success,
     non-zero indicates number of FAILED tests)
 
 .. option:: -l, --list
@@ -75,7 +75,7 @@ like:
 
     </gie>
 
-Parsing of a  :program:`gie` file starts at ``<gie>`` and ends when ``</gie>``
+Parsing of a :program:`gie` file starts at ``<gie>`` and ends when ``</gie>``
 is reached. Anything before ``<gie>`` and after ``</gie>`` is not considered.
 Test cases are created by defining an :option:`operation` which
 :option:`accept` an input coordinate and :option:`expect` an output
@@ -143,7 +143,7 @@ gie command language
     accompanying :option:`expect` is needed.
 
     Note that :program:`gie` accepts the underscore ("_") as a thousands
-    separator.  It is not required (in fact, it is entirely ignored by the
+    separator. It is not required (in fact, it is entirely ignored by the
     input routine), but it significantly improves the readability of the very
     long strings of numbers typically required in projected coordinates.
 
@@ -179,7 +179,7 @@ gie command language
     The :option:`tolerance` command controls how much accepted coordinates
     can deviate from the expected coordinate. This is handy to test that an
     operation meets a certain numerical tolerance threshold. Some operations
-    are expexted to be accurate within milimeters  where others might only be
+    are expexted to be accurate within milimeters where others might only be
     accurate within a few meters. :option:`tolerance` should
 
     .. code-block:: console
@@ -251,7 +251,7 @@ gie command language
 
     .. code-block:: console
 
-        operation  proj=hgridshift +grids=nzgd2kgrid0005.gsb  ellps=GRS80
+        operation proj=hgridshift +grids=nzgd2kgrid0005.gsb ellps=GRS80
         tolerance 1 mm
         ignore    pjd_err_failed_to_load_grid
         accept    172.999892181021551 -45.001620431954613
@@ -307,12 +307,12 @@ Background
 More importantly than being an acronym for "Geospatial Integrity Investigation
 Environment", gie were also the initials, user id, and USGS email address of
 Gerald Ian Evenden (1935--2016), the geospatial visionary, who, already in the
-1980s, started what was  to  become  the PROJ of today.
+1980s, started what was to become the PROJ of today.
 
 Gerald's clear vision was that map projections are *just special functions*.
 Some of them rather complex, most of them of two variables, but all of them
 *just special functions*, and not particularly more special than the :c:func:`sin()`,
-:c:func:`cos()`, :c:func:`tan()`, and :c:func:`hypot()` already available  in  the  C standard library.
+:c:func:`cos()`, :c:func:`tan()`, and :c:func:`hypot()` already available in the C standard library.
 
 And hence, according to Gerald, *they should not be particularly much harder
 to use*, for a programmer, than the :c:func:`sin()`'s, :c:func:`tan()`'s and
@@ -322,7 +322,7 @@ Gerald's ingenuity also showed in the implementation of the vision, where
 he devised a comprehensive, yet simple, system of key-value pairs for
 parameterising a map projection, and the highly flexible :c:type:`PJ` struct, storing
 run-time compiled versions of those key-value pairs, hence making a map
-projection  function call, ``pj_fwd(PJ, point)``, as easy as a traditional function
+projection function call, ``pj_fwd(PJ, point)``, as easy as a traditional function
 call like ``hypot(x,y)``.
 
 While today, we may have more formally well defined metadata systems (most
