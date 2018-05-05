@@ -34,7 +34,7 @@ The following control parameters can appear in any order
 
     Special option for binary coordinate data input and output through standard
     input and standard output. Data is assumed to be in system type double
-    floating point words. This option is to be used when :program:`proj` is a son process
+    floating point words. This option is to be used when :program:`proj` is a child process
     and allows bypassing formatting operations.
 
 .. option:: -i
