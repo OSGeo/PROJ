@@ -12,9 +12,9 @@ proj
 
 Synopsis
 ********
-    **proj** [ **-bceEfiIlmorsStTvVwW** ] [ args ] ] [ *+args* ] file[s]
+    **proj** [ **-beEfiIlmorsStTvVwW** ] [ args ] ] [ *+args* ] file[s]
 
-    **invproj** [ **-bceEfiIlmorsStTwW** ] [ args ] ] [ *+args* ] file[s]
+    **invproj** [ **-beEfiIlmorsStTvVwW** ] [ args ] ] [ *+args* ] file[s]
 
 
 Description
