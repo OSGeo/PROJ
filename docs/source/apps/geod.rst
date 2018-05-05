@@ -35,16 +35,16 @@ The following command-line options can appear in any order:
 .. option:: -I
 
     Specifies that the inverse geodesic computation is to be performed. May be
-    used with execution of geod as an alternative to invgeod execution.
+    used with execution of :program:`geod` as an alternative to :program:`invgeod` execution.
 
 .. option:: -a
 
     Latitude and longitudes of the initial and terminal points, forward and
     back azimuths and distance are output.
 
-.. option:: -ta
+.. option:: -t<a>
 
-    A specifies a character employed as the first character to denote a control
+    Where *a* specifies a character employed as the first character to denote a control
     line to be passed through without processing.
 
 .. option:: -le
@@ -59,24 +59,24 @@ The following command-line options can appear in any order:
 
 .. option:: -f <format>
 
-    Format is a printf format string to control the output form of the
+    Where *format* is a printf format string to control the output form of the
     geographic coordinate values. The default mode is DMS for geographic
-    coordinates and "%.3f" for distance.
+    coordinates and ``"%.3f"`` for distance.
 
 .. option:: -F <format>
 
-    Format is a printf format string to control the output form of the distance
+    Where *format* is a printf format string to control the output form of the distance
     value (``-F``). The default mode is DMS for geographic coordinates and
-    "%.3f" for distance.
+    ``"%.3f"`` for distance.
 
 .. option:: -w<n>
 
-    N is the number of significant fractional digits to employ for seconds
+    Where *n* is the number of significant fractional digits to employ for seconds
     output (when the option is not specified, ``-w3`` is assumed).
 
 .. option:: -W<n>
 
-    N is the number of significant fractional digits to employ for seconds
+    Where *n* is the number of significant fractional digits to employ for seconds
     output. When ``-W`` is employed the fields will be constant width
     with leading zeroes.
 
@@ -127,7 +127,7 @@ radius.
 The Earth's ellipsoidal figure may be selected in the same manner
 as program :program:`proj` by using *+ellps=*, *+a=*, *+es=*, etc.
 
-Geod may also be used to determine intermediate points along
+:program:`geod` may also be used to determine intermediate points along
 either a geodesic line between two points or along an arc of
 specified distance from a geographic point. In both cases an
 initial point must be specified with *+lat_1=lat* and *+lon_1=lon*

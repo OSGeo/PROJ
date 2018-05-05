@@ -142,7 +142,7 @@ gie command language
     accepted for one :option:`operation`. For each :option:`accept` an
     accompanying :option:`expect` is needed.
 
-    Note that :program:`gie` accepts the underscore ("_") as a thousands
+    Note that :program:`gie` accepts the underscore (``_``) as a thousands
     separator. It is not required (in fact, it is entirely ignored by the
     input routine), but it significantly improves the readability of the very
     long strings of numbers typically required in projected coordinates.

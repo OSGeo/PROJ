@@ -38,13 +38,13 @@ The following control parameters can appear in any order:
 
 .. option:: -t <time>, --time=<time>
 
-    Specify a fixed observation time to be used for all input data.
+    Specify a fixed observation *time* to be used for all input data.
 
 .. option:: -z <height>, --height=<height>
 
-    Specify a fixed observation height to be used for all input data.
+    Specify a fixed observation *height* to be used for all input data.
 
-.. option:: s <n>, --skip-lines=<n>
+.. option:: -s <n>, --skip-lines=<n>
 
     .. versionadded:: 5.1.0
 
@@ -89,7 +89,7 @@ Examples
 
 .. code-block:: console
 
-     echo 12 55 0 0 | cct +proj=utm +zone=32 +ellps=GRS80
+      echo 12 55 0 0 | cct +proj=utm +zone=32 +ellps=GRS80
 
 will transform the input geographic coordinates into UTM zone 32 coordinates.
 Hence, the command
@@ -98,7 +98,7 @@ Hence, the command
 
       echo 12 55 | cct -z0 -t0 +proj=utm +zone=32 +ellps=GRS80
 
-Should give results comparable to the classic proj command
+Should give results comparable to the classic :program:`proj` command
 
 .. code-block:: console
 

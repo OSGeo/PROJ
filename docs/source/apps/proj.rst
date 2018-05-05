@@ -34,7 +34,7 @@ The following control parameters can appear in any order
 
     Special option for binary coordinate data input and output through standard
     input and standard output. Data is assumed to be in system type double
-    floating point words. This option is to be used when proj is a son process
+    floating point words. This option is to be used when :program:`proj` is a son process
     and allows bypassing formatting operations.
 
 .. option:: -i
@@ -43,8 +43,8 @@ The following control parameters can appear in any order
 
 .. option:: -I
 
-    alternate method to specify inverse projection. Redundant when used with
-    invproj.
+    Alternate method to specify inverse projection. Redundant when used with
+    :program:`invproj`.
 
 .. option:: -o
 
@@ -52,26 +52,26 @@ The following control parameters can appear in any order
 
 .. option:: -t<a>
 
-    *a* specifies a character employed as the first character to denote a
+    Where *a* specifies a character employed as the first character to denote a
     control line to be passed through without processing. This option
-    applicable to ascii input only. (# is the default value).
+    applicable to ASCII input only. (# is the default value).
 
 .. option:: -e <string>
 
-    String is an arbitrary string to be output if an error is detected during
-    data transformations. The default value is: *\t*. Note that if the
-    :option:`-b`, :option:`-i` or :option:`-o` options are employed, an error
+    Where *string* is an arbitrary string to be output if an error is detected during
+    data transformations. The default value is a three character string: ``*\t*``.
+    Note that if the :option:`-b`, :option:`-i` or :option:`-o` options are employed, an error
     is returned as HUGE_VAL value for both return values.
 
 .. option:: -E
 
-    causes the input coordinates to be copied to the output line prior to
+    Causes the input coordinates to be copied to the output line prior to
     printing the converted values.
 
 .. option:: -l<[=id]>
 
     List projection identifiers that can be selected with *+proj*. ``proj -l=id``
-    gives expanded description of projection id, e.g. ``proj -l=merc``.
+    gives expanded description of projection *id*, e.g. ``proj -l=merc``.
 
 .. option:: -lp
 
@@ -95,7 +95,6 @@ The following control parameters can appear in any order
 
     List of datums that can be selected with the *+datum* parameter.
 
-
 .. option:: -r
 
     This options reverses the order of the expected input from
@@ -116,28 +115,33 @@ The following control parameters can appear in any order
 
 .. option:: -m <mult>
 
-    The cartesian data may be scaled by the mult parameter. When processing data
+    The cartesian data may be scaled by the *mult* parameter. When processing data
     in a forward projection mode the cartesian output values are multiplied by
-    mult otherwise the input cartesian values are divided by mult before inverse
-    projection. If the first two characters of mult are 1/ or 1: then the
-    reciprocal value of mult is employed.
+    *mult* otherwise the input cartesian values are divided by *mult* before inverse
+    projection. If the first two characters of *mult* are 1/ or 1: then the
+    reciprocal value of *mult* is employed.
 
 .. option:: -f <format>
 
-    Format is a printf format string to control the form of the output values.
+    Where *format* is a printf format string to control the form of the output values.
     For inverse projections, the output will be in degrees when this option is
-    employed. The default format is "%.2f" for forward projection and DMS for
+    employed. The default format is ``"%.2f"`` for forward projection and DMS for
     inverse.
 
-.. option:: -[w|W]<n>
+.. option:: -w<n>
 
-    N is the number of significant fractional digits to employ for seconds
-    output (when the option is not specified, ``-w3`` is assumed). When ``-W``
-    is employed the fields will be constant width and with leading zeroes.
+    Where *n* is the number of significant fractional digits to employ for seconds
+    output (when the option is not specified, ``-w3`` is assumed).
+
+.. option:: -W<n>
+
+    Where *n* is the number of significant fractional digits to employ for seconds
+    output. When ``-W`` is employed the fields will be constant width
+    with leading zeroes.
 
 .. option:: -v
 
-    causes a listing of cartographic control parameters tested for and used by
+    Causes a listing of cartographic control parameters tested for and used by
     the program to be printed prior to input data. Should not be used with the
     :option:`-T` option.
 
@@ -150,11 +154,11 @@ The following control parameters can appear in any order
 
     This option creates a set of bivariate Chebyshev polynomial coefficients
     that approximate the selected cartographic projection on stdout. The values
-    low and hi denote the range of the input where the u or v prefixes apply to
+    *low* and *hi* denote the range of the input where the *u* or *v* prefixes apply to
     respective longitude-x or latitude-y depending upon whether a forward or
-    inverse projection is selected. Res is an integer number specifying the
-    power of 10 precision of the approximation. For example, a res of -3
-    specifies an approximation with an accuracy better than .001. Umax, and vmax
+    inverse projection is selected. The integer *res* is a number specifying the
+    power of 10 precision of the approximation. For example, a *res* of -3
+    specifies an approximation with an accuracy better than 0.001. Optional *umax*, and *vmax*
     specify maximum degree of the polynomials (default: 15).
 
 
