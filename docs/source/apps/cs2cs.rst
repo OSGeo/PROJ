@@ -40,8 +40,6 @@ The following control parameters can appear in any order:
 
     Where *string* is an arbitrary string to be output if an error is detected during
     data transformations. The default value is a three character string: ``*\t*``.
-    Note that if the -b, -i or -o options are employed, an error is returned as HUGE_VAL value for both
-    return values.
 
 .. option:: -E
 
