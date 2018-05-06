@@ -200,9 +200,6 @@ PJ *PROJECTION(geos) {
     if ((Q->h = pj_param(P->ctx, P->params, "dh").f) <= 0.)
         return pj_default_destructor (P, PJD_ERR_H_LESS_THAN_ZERO);
 
-    if (P->phi0 != 0.0)
-        return pj_default_destructor (P, PJD_ERR_UNKNOWN_PRIME_MERIDIAN);
-
     sweep_axis = pj_param(P->ctx, P->params, "ssweep").s;
     if (sweep_axis == NULL)
       Q->flip_axis = 0;
