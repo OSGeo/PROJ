@@ -30,6 +30,7 @@
 #include <errno.h>
 
 #include "proj_internal.h"
+#include "proj_math.h"
 #include "projects.h"
 
 #define INPUT_UNITS  P->left
@@ -37,7 +38,7 @@
 
 
 static PJ_COORD fwd_prepare (PJ *P, PJ_COORD coo) {
-    if (HUGE_VAL==coo.v[0])
+    if (HUGE_VAL==coo.v[0] || HUGE_VAL==coo.v[1] || HUGE_VAL==coo.v[2])
         return proj_coord_error ();
 
     /* The helmert datum shift will choke unless it gets a sensible 4D coordinate */
@@ -191,7 +192,7 @@ XY pj_fwd(LP lp, PJ *P) {
 
     if (!P->skip_fwd_prepare)
         coo = fwd_prepare (P, coo);
-    if (HUGE_VAL==coo.v[0])
+    if (HUGE_VAL==coo.v[0] || HUGE_VAL==coo.v[1])
         return proj_coord_error ().xy;
 
     /* Do the transformation, using the lowest dimensional transformer available */
