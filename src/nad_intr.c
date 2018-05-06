@@ -14,9 +14,9 @@ nad_intr(LP t, struct CTABLE *ct) {
 	int in;
 
 	t.lam /= ct->del.lam;
-	indx.lam = isnan(t.lam) ? 0 : (int)floor(t.lam);
+	indx.lam = isnan(t.lam) ? 0 : (pj_int32)lround(floor(t.lam));
 	t.phi /= ct->del.phi;
-	indx.phi = isnan(t.phi) ? 0 : (int)floor(t.phi);
+	indx.phi = isnan(t.phi) ? 0 : (pj_int32)lround(floor(t.phi));
 
 	frct.lam = t.lam - indx.lam;
 	frct.phi = t.phi - indx.phi;
