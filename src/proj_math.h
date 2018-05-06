@@ -29,6 +29,7 @@
 #define PROJ_MATH_H
 
 #include <math.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C" {
