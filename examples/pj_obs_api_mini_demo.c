@@ -58,7 +58,7 @@ int main (void) {
 
     /* transform to UTM zone 32, then back to geographical */
     b = proj_trans (P, PJ_FWD, a);
-    printf ("easting: %g, northing: %g\n", b.enu.e, b.en.n);
+    printf ("easting: %g, northing: %g\n", b.enu.e, b.enu.n);
     b = proj_trans (P, PJ_INV, b);
     printf ("longitude: %g, latitude: %g\n", b.lp.lam, b.lp.phi);
 
