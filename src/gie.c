@@ -1160,30 +1160,6 @@ See the PROJ ".gie" test suites for examples of supported formatting.
 
 ****************************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-#include <string.h>
-#include <ctype.h>
-
-#include <math.h>
-#include <errno.h>
-
-
-
-static int get_inp (ffio *G);
-static int skip_to_next_tag (ffio *G);
-static int step_into_gie_block (ffio *G);
-static int locate_tag (ffio *G, const char *tag);
-static int nextline (ffio *G);
-static int at_end_delimiter (ffio *G);
-static const char *at_tag (ffio *G);
-static int at_decorative_element (ffio *G);
-static ffio *ffio_destroy (ffio *G);
-static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size);
-
-
 
 /***************************************************************************************/
 static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size) {
