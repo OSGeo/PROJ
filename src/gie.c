@@ -134,15 +134,15 @@ typedef struct ffio {
     size_t level;
 }  ffio;
 
-static int get_inp (ffio *F);
-static int skip_to_next_tag (ffio *F);
-static int step_into_gie_block (ffio *F);
-static int locate_tag (ffio *F, const char *tag);
-static int nextline (ffio *F);
-static int at_end_delimiter (ffio *F);
-static const char *at_tag (ffio *F);
-static int at_decorative_element (ffio *F);
-static ffio *ffio_destroy (ffio *F);
+static int get_inp (ffio *G);
+static int skip_to_next_tag (ffio *G);
+static int step_into_gie_block (ffio *G);
+static int locate_tag (ffio *G, const char *tag);
+static int nextline (ffio *G);
+static int at_end_delimiter (ffio *G);
+static const char *at_tag (ffio *G);
+static int at_decorative_element (ffio *G);
+static ffio *ffio_destroy (ffio *G);
 static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size);
 
 static const char *gie_tags[] = {
@@ -1172,15 +1172,15 @@ See the PROJ ".gie" test suites for examples of supported formatting.
 
 
 
-static int get_inp (ffio *F);
-static int skip_to_next_tag (ffio *F);
-static int step_into_gie_block (ffio *F);
-static int locate_tag (ffio *F, const char *tag);
-static int nextline (ffio *F);
-static int at_end_delimiter (ffio *F);
-static const char *at_tag (ffio *F);
-static int at_decorative_element (ffio *F);
-static ffio *ffio_destroy (ffio *F);
+static int get_inp (ffio *G);
+static int skip_to_next_tag (ffio *G);
+static int step_into_gie_block (ffio *G);
+static int locate_tag (ffio *G, const char *tag);
+static int nextline (ffio *G);
+static int at_end_delimiter (ffio *G);
+static const char *at_tag (ffio *G);
+static int at_decorative_element (ffio *G);
+static ffio *ffio_destroy (ffio *G);
 static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size);
 
 

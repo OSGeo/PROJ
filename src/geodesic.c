@@ -331,7 +331,7 @@ static real Lambda12(const struct geod_geodesic* g,
                      real* pssig1, real* pcsig1,
                      real* pssig2, real* pcsig2,
                      real* peps,
-                     real* pgomg12,
+                     real* pdomg12,
                      boolx diffp, real* pdlam12,
                      /* Scratch area of the right size */
                      real Ca[]);
@@ -481,10 +481,10 @@ void geod_lineinit(struct geod_geodesicline* l,
 void geod_gendirectline(struct geod_geodesicline* l,
                         const struct geod_geodesic* g,
                         real lat1, real lon1, real azi1,
-                        unsigned flags, real a12_s12,
+                        unsigned flags, real s12_a12,
                         unsigned caps) {
   geod_lineinit(l, g, lat1, lon1, azi1, caps);
-  geod_gensetdistance(l, flags, a12_s12);
+  geod_gensetdistance(l, flags, s12_a12);
 }
 
 void geod_directline(struct geod_geodesicline* l,
