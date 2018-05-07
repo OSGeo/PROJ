@@ -690,6 +690,21 @@ expect  -207.544906814 81.314089279
 accept  -200 -100
 expect  -62.576950372 87.980755945
 
+operation +proj=calcofi +lon_0=50
+accept  10 50
+expect  303.525850      -1576.974388
+roundtrip 100
+
+operation +proj=calcofi +ellps=GRS80 +lon_0=50
+accept  10 50
+expect  303.525850      -1576.974388
+roundtrip 100
+
+operation +proj=calcofi +R=400 +lon_0=50 +x_0=10000 +y_0=500000
+accept  10 50
+expect  301.769827      -1567.849822
+roundtrip 100
+
 
 ===============================================================================
 Cassini
