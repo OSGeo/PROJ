@@ -303,9 +303,11 @@ int main (int argc, char **argv) {
         process_file (o->fargv[i]);
 
     if (T.verbosity > 0) {
-        if (o->fargc > 1)
-        fprintf (T.fout, "%sGrand total: %d. Success: %d, Skipped: %d, Failure: %d\n",
-                 delim, T.grand_ok+T.grand_ko+T.grand_skip, T.grand_ok, T.grand_skip, T.grand_ko);
+        if (o->fargc > 1) {
+            fprintf (T.fout, "%sGrand total: %d. Success: %d, Skipped: %d, Failure: %d\n",
+                     delim, T.grand_ok+T.grand_ko+T.grand_skip, T.grand_ok, T.grand_skip,
+                     T.grand_ko);
+        }
         fprintf (T.fout, "%s", delim);
         if (T.verbosity > 1) {
             fprintf (T.fout, "Failing roundtrips: %4d,    Succeeding roundtrips: %4d\n", fail_rtps, succ_rtps);
@@ -414,10 +416,11 @@ static int process_file (const char *fname) {
     T.grand_ok   += T.total_ok;
     T.grand_ko   += T.total_ko;
     T.grand_skip += T.grand_skip;
-    if (T.verbosity > 0)
-    fprintf (T.fout, "%stotal: %2d tests succeeded, %2d tests skipped, %2d tests %s\n",
-             delim, T.total_ok, T.total_skip, T.total_ko, T.total_ko? "FAILED!": "failed.");
-
+    if (T.verbosity > 0) {
+        fprintf (T.fout, "%stotal: %2d tests succeeded, %2d tests skipped, %2d tests %s\n",
+                 delim, T.total_ok, T.total_skip, T.total_ko,
+                 T.total_ko? "FAILED!": "failed.");
+    }
     if (F->level==0)
         return errmsg (-3, "File '%s':Missing '<gie>' cmnd - bye!\n", fname);
     if (F->level && F->level%2)
