@@ -1,8 +1,18 @@
 #define PJ_LIB__
+
+#include <string.h>
+#include <errno.h>
+#include <time.h>
+
 #include "proj_internal.h"
 #include "projects.h"
 
 PROJ_HEAD(hgridshift, "Horizontal grid shift");
+
+struct pj_opaque_hgridshift {
+    double t_final;
+    double t_epoch;
+};
 
 static XYZ forward_3d(LPZ lpz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
@@ -31,21 +41,36 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
     return point.lpz;
 }
 
-
-static PJ_COORD forward_4d (PJ_COORD obs, PJ *P) {
-    obs.xyz = forward_3d (obs.lpz, P);
-    return obs;
+static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
+    struct pj_opaque_hgridshift *Q = (struct pj_opaque_hgridshift *) P->opaque;
+    PJ_COORD point = obs;
+    if (Q->t_final != 0.0  && Q->t_epoch != 0.0) {
+        if (obs.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
+            point.xyz = forward_3d (obs.lpz, P);
+    } else {
+        point.xyz = forward_3d (obs.lpz, P);
+    }
+    return point;
 }
 
-
-static PJ_COORD reverse_4d (PJ_COORD obs, PJ *P) {
-    obs.lpz = reverse_3d (obs.xyz, P);
-    return obs;
+static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
+    struct pj_opaque_hgridshift *Q = (struct pj_opaque_hgridshift *) P->opaque;
+    PJ_COORD point = obs;
+    if (Q->t_final != 0.0  && Q->t_epoch != 0.0) {
+        if (obs.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
+            point.lpz = reverse_3d (obs.xyz, P);
+    } else {
+        point.lpz = reverse_3d (obs.xyz, P);
+    }
+    return point;
 }
-
 
 
 PJ *TRANSFORMATION(hgridshift,0) {
+    struct pj_opaque_hgridshift *Q = pj_calloc (1, sizeof (struct pj_opaque_hgridshift));
+    if (0==Q)
+        return pj_default_destructor (P, ENOMEM);
+    P->opaque = (void *) Q;
 
     P->fwd4d  = forward_4d;
     P->inv4d  = reverse_4d;
@@ -61,6 +86,24 @@ PJ *TRANSFORMATION(hgridshift,0) {
         proj_log_error(P, "hgridshift: +grids parameter missing.");
         return pj_default_destructor (P, PJD_ERR_NO_ARGS);
     }
+
+   if (pj_param(P->ctx, P->params, "tt_final").i) {
+        Q->t_final = pj_param (P->ctx, P->params, "dt_final").f;
+        if (Q->t_final == 0) {
+            /* a number wasn't passed to +t_final, let's see if it was "now" */
+            /* and set the time accordingly.                                 */
+            if (!strcmp("now", pj_param(P->ctx, P->params, "st_final").s)) {
+                    time_t now;
+                    struct tm *date;
+                    time(&now);
+                    date = localtime(&now);
+                    Q->t_final = 1900.0 + date->tm_year + date->tm_yday/365.0;
+            }
+        }
+    }
+
+   if (pj_param(P->ctx, P->params, "tt_epoch").i)
+        Q->t_epoch = pj_param (P->ctx, P->params, "dt_epoch").f;
 
 
     proj_hgrid_init(P, "grids");

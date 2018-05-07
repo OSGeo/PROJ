@@ -11,9 +11,11 @@ Change Vertical datum change by grid shift
 +-----------------+--------------------------------------------------------------------+
 | **Domain**      | 3D                                                                 |
 +-----------------+--------------------------------------------------------------------+
-| **Input type**  | Geodetic coordinates (horizontal), meters (vertical).              |
+| **Input type**  | Geodetic coordinates (horizontal), meters (vertical),              |
+|                 | decimalyear (temporal)                                             |
 +-----------------+--------------------------------------------------------------------+
-| **Output type** | Geodetic coordinates (horizontal), meters (vertical).              |
+| **Output type** | Geodetic coordinates (horizontal), meters (vertical),              |
+|                 | decimalyear (temporal)                                             |
 +-----------------+--------------------------------------------------------------------+
 
 The vertical grid shift is done by offsetting the vertical input coordinates by
@@ -50,3 +52,7 @@ Parameters
     not available.
 
     Grids are expected to be in GTX format.
+
+.. option:: +t_final=<time>
+
+.. option:: +t_epoch=<time>
