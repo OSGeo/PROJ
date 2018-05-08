@@ -124,9 +124,9 @@ PJ *PROJECTION(omerc) {
 
     Q->no_rot = pj_param(P->ctx, P->params, "bno_rot").i;
         if ((alp = pj_param(P->ctx, P->params, "talpha").i) != 0)
-        alpha_c = pj_param(P->ctx, P->params, "ralpha").f;
+            alpha_c = pj_param(P->ctx, P->params, "ralpha").f;
         if ((gam = pj_param(P->ctx, P->params, "tgamma").i) != 0)
-        gamma = pj_param(P->ctx, P->params, "rgamma").f;
+            gamma = pj_param(P->ctx, P->params, "rgamma").f;
     if (alp || gam) {
         lamc    = pj_param(P->ctx, P->params, "rlonc").f;
         no_off =

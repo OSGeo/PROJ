@@ -114,12 +114,12 @@ struct pj_opaque {
 
 
 
-static PJ_COORD pipeline_forward_4d (PJ_COORD, PJ *P);
-static PJ_COORD pipeline_reverse_4d (PJ_COORD, PJ *P);
+static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P);
+static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P);
 static XYZ    pipeline_forward_3d (LPZ lpz, PJ *P);
 static LPZ    pipeline_reverse_3d (XYZ xyz, PJ *P);
-static XY     pipeline_forward (LP lpz, PJ *P);
-static LP     pipeline_reverse (XY xyz, PJ *P);
+static XY     pipeline_forward (LP lp, PJ *P);
+static LP     pipeline_reverse (XY xy, PJ *P);
 
 
 

@@ -608,7 +608,6 @@ isea_orient_isea(struct isea_dgg * g)
     g->o_lat = ISEA_STD_LAT;
     g->o_lon = ISEA_STD_LON;
     g->o_az = 0.0;
-    return;
 }
 
 ISEA_STATIC
@@ -620,7 +619,6 @@ isea_orient_pole(struct isea_dgg * g)
     g->o_lat = M_PI / 2.0;
     g->o_lon = 0.0;
     g->o_az = 0;
-    return;
 }
 
 ISEA_STATIC

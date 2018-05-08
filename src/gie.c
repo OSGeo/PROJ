@@ -134,15 +134,15 @@ typedef struct ffio {
     size_t level;
 }  ffio;
 
-static int get_inp (ffio *F);
-static int skip_to_next_tag (ffio *F);
-static int step_into_gie_block (ffio *F);
-static int locate_tag (ffio *F, const char *tag);
-static int nextline (ffio *F);
-static int at_end_delimiter (ffio *F);
-static const char *at_tag (ffio *F);
-static int at_decorative_element (ffio *F);
-static ffio *ffio_destroy (ffio *F);
+static int get_inp (ffio *G);
+static int skip_to_next_tag (ffio *G);
+static int step_into_gie_block (ffio *G);
+static int locate_tag (ffio *G, const char *tag);
+static int nextline (ffio *G);
+static int at_end_delimiter (ffio *G);
+static const char *at_tag (ffio *G);
+static int at_decorative_element (ffio *G);
+static ffio *ffio_destroy (ffio *G);
 static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size);
 
 static const char *gie_tags[] = {
@@ -303,9 +303,11 @@ int main (int argc, char **argv) {
         process_file (o->fargv[i]);
 
     if (T.verbosity > 0) {
-        if (o->fargc > 1)
-        fprintf (T.fout, "%sGrand total: %d. Success: %d, Skipped: %d, Failure: %d\n",
-                 delim, T.grand_ok+T.grand_ko+T.grand_skip, T.grand_ok, T.grand_skip, T.grand_ko);
+        if (o->fargc > 1) {
+            fprintf (T.fout, "%sGrand total: %d. Success: %d, Skipped: %d, Failure: %d\n",
+                     delim, T.grand_ok+T.grand_ko+T.grand_skip, T.grand_ok, T.grand_skip,
+                     T.grand_ko);
+        }
         fprintf (T.fout, "%s", delim);
         if (T.verbosity > 1) {
             fprintf (T.fout, "Failing roundtrips: %4d,    Succeeding roundtrips: %4d\n", fail_rtps, succ_rtps);
@@ -414,10 +416,11 @@ static int process_file (const char *fname) {
     T.grand_ok   += T.total_ok;
     T.grand_ko   += T.total_ko;
     T.grand_skip += T.grand_skip;
-    if (T.verbosity > 0)
-    fprintf (T.fout, "%stotal: %2d tests succeeded, %2d tests skipped, %2d tests %s\n",
-             delim, T.total_ok, T.total_skip, T.total_ko, T.total_ko? "FAILED!": "failed.");
-
+    if (T.verbosity > 0) {
+        fprintf (T.fout, "%stotal: %2d tests succeeded, %2d tests skipped, %2d tests %s\n",
+                 delim, T.total_ok, T.total_skip, T.total_ko,
+                 T.total_ko? "FAILED!": "failed.");
+    }
     if (F->level==0)
         return errmsg (-3, "File '%s':Missing '<gie>' cmnd - bye!\n", fname);
     if (F->level && F->level%2)
@@ -1159,30 +1162,6 @@ and provides ample room for comment, documentation, and test material.
 See the PROJ ".gie" test suites for examples of supported formatting.
 
 ****************************************************************************************/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-#include <string.h>
-#include <ctype.h>
-
-#include <math.h>
-#include <errno.h>
-
-
-
-static int get_inp (ffio *F);
-static int skip_to_next_tag (ffio *F);
-static int step_into_gie_block (ffio *F);
-static int locate_tag (ffio *F, const char *tag);
-static int nextline (ffio *F);
-static int at_end_delimiter (ffio *F);
-static const char *at_tag (ffio *F);
-static int at_decorative_element (ffio *F);
-static ffio *ffio_destroy (ffio *F);
-static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size);
-
 
 
 /***************************************************************************************/

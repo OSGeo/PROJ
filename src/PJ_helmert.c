@@ -145,7 +145,6 @@ static void update_parameters(PJ *P) {
         proj_log_trace(P, "rz: %g", Q->opk.k);
         proj_log_trace(P, "theta: %g", Q->theta);
     }
-    return;
 }
 
 /**************************************************************************/
@@ -302,8 +301,6 @@ static void build_rot_matrix(PJ *P) {
         proj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R10, R11, R12);
         proj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R20, R21, R22);
     }
-
-    return;
 }
 
 

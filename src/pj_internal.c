@@ -134,7 +134,6 @@ void proj_context_set (PJ *P, PJ_CONTEXT *ctx) {
     if (0==ctx)
         ctx = pj_get_default_ctx ();
     pj_set_ctx (P, ctx);
-    return;
 }
 
 
@@ -143,7 +142,6 @@ void proj_context_inherit (PJ *parent, PJ *child) {
         pj_set_ctx (child, pj_get_default_ctx());
     else
         pj_set_ctx (child, pj_get_ctx(parent));
-    return;
 }
 
 
@@ -361,7 +359,6 @@ to that context.
     if (0==ctx)
         ctx = pj_get_default_ctx();
     pj_ctx_set_errno (ctx, err);
-    return;
 }
 
 /*  logging  */
