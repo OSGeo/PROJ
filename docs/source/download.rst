@@ -4,13 +4,7 @@
 Download
 ================================================================================
 
-.. contents:: Contents
-   :depth: 3
-   :backlinks: none
 
-Release Notes
---------------------------------------------------------------------------------
-* `NEWS <https://github.com/OSGeo/proj.4/blob/master/NEWS>`_ 
 
 Current Release
 --------------------------------------------------------------------------------
@@ -20,6 +14,7 @@ Current Release
 * **2018-03-01** `proj-datumgrid-europe-1.0.zip`_
 * **2018-03-01** `proj-datumgrid-north-america-1.0.zip`_
 * **2018-03-01** `proj-datumgrid-oceania-1.0.zip`_
+* **PDF Manual** `proj.pdf`_
 
 Past Releases
 --------------------------------------------------------------------------------
@@ -42,6 +37,8 @@ Past Releases
 .. _`proj-datumgrid-north-america-1.0.zip`: http://download.osgeo.org/proj/proj-datumgrid-north-america-1.0.zip
 .. _`proj-datumgrid-oceania-1.0.zip`: http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip
 .. _`md5`: http://download.osgeo.org/proj/proj-5.0.1.tar.gz.md5
+.. _`proj.pdf`: https://raw.githubusercontent.com/OSGeo/proj.4/gh-pages/proj.pdf
+
 
 Binaries
 --------------------------------------------------------------------------------
