@@ -41,16 +41,12 @@ Documentation
    resource_files
    geodesic
    development/index
+   community/index
    faq
-   contributing
    glossary
    license
    references
 
-Mailing List
-================================================================================
-
-The PROJ mailing list can be found at http://lists.maptools.org/mailman/listinfo/proj
 
 Indices and tables
 ==================
