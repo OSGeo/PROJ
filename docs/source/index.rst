@@ -4,7 +4,7 @@ PROJ
 ###############################################################################
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
    :hidden:
 
    about
@@ -21,12 +21,13 @@ PROJ
    glossary
    references
 
-PROJ is a standard UNIX filter function which converts geographic longitude
-and latitude coordinates into cartesian coordinates (and vice versa), and it is
-a C API for software developers to include coordinate transformation in their
-own software. PROJ is maintained on `GitHub <http://github.com/OSGeo/proj.4/>`_.
-
 .. only:: html
+
+    PROJ is a standard UNIX filter function which converts geographic longitude
+    and latitude coordinates into cartesian coordinates (and vice versa), and it is
+    a C API for software developers to include coordinate transformation in their
+    own software. PROJ is maintained on `GitHub <http://github.com/OSGeo/proj.4/>`_.
+
 
     NEWS
     ---------------------------------------------------------------------------

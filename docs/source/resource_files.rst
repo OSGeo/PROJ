@@ -4,10 +4,6 @@
 Resource files
 ================================================================================
 
-.. contents:: Contents
-   :depth: 2
-   :backlinks: none
-
 A number of files containing preconfigured transformations and default parameters
 for certain projections are bundled with the PROJ distribution. Init files
 contains preconfigured proj-strings for various coordinate reference systems
