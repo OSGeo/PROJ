@@ -4,7 +4,11 @@
 Download
 ================================================================================
 
+Here you can download current and previous releases of PROJ. We only supply a
+distribution of the source code and various resource files archives. See
+:ref:`install` for information on how to get pre-built packages of PROJ.
 
+.. _current_release:
 
 Current Release
 --------------------------------------------------------------------------------
@@ -38,32 +42,3 @@ Past Releases
 .. _`proj-datumgrid-oceania-1.0.zip`: http://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip
 .. _`md5`: http://download.osgeo.org/proj/proj-5.0.1.tar.gz.md5
 .. _`proj.pdf`: https://raw.githubusercontent.com/OSGeo/proj.4/gh-pages/proj.pdf
-
-
-Binaries
---------------------------------------------------------------------------------
-
-Linux
-................................................................................
-
-* `RedHat RPMs <http://yum.postgresql.org>`__
-* `SUSE <http://download.opensuse.org/repositories/Application:/Geo/ openSUSE Application:Geo Repository>`__
-* `Debian <http://packages.debian.org/proj>`__
-* `pkgsrc <http://pkgsrc.se/misc/proj pkgsrc package>`__
-* `Delphi <http://www.triplexware.huckfinn.de/geogfix.html#proj>`__
-
-Docker
-................................................................................
-
-A `Docker`_ image with just PROJ binaries and a full compliment of grid shift
-files is available on `DockerHub`_:
-
-.. _`Docker`: https://docker.org
-.. _`DockerHub`: https://hub.docker.com/r/osgeo/proj.4/
-
-Windows
-................................................................................
-
-* `OSGeo4W`_ contains 32-bit and 64-bit Windows binaries, including support for many :ref:`grids <resource_files>`.
-
-.. _`OSGeo4W`: https://trac.osgeo.org/osgeo4w/
