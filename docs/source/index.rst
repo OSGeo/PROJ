@@ -7,6 +7,7 @@ PROJ
    :maxdepth: 1
    :hidden:
 
+   about
    download
    install
    usage/index
@@ -18,7 +19,6 @@ PROJ
    community/index
    faq
    glossary
-   license
    references
 
 PROJ is a standard UNIX filter function which converts geographic longitude
