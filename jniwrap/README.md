@@ -3,7 +3,7 @@
 This is the third release of JNI wrappers for the main PROJ functions.
 The first release of JNI wrappers were created by http://www.hydrologis.com.
 The second release of JNI wrappers were created by http://www.geoapi.org.
-This release is compatible with any PROJ versions from 4.9 to 5
+This release is compatible with any PROJ versions from 4.8 to 5
 provided that PROJ has been compiled as described below.
 
 
@@ -25,8 +25,8 @@ Version compatibility is given below:
 
 Java bridge | Compatible with PROJ library
 ----------- | ----------------------------
-2.0 and 3.0 | 4.9 to 5+
-1.0         | 4.4.9 to 4.8
+2.0 and 3.0 | 4.8 to 5+
+1.0         | 4.4.9 to 4.8 inclusive
 
 
 
@@ -60,7 +60,7 @@ Beyond the ones already put by PROJ, you need:
 * For execution:
   * If a Java version less than the current version on the local machine is desired,
     add a `release` attribute in the `javac` task of `build.xml` before to compile.
-  * Proj version 4.9 or more recent compiled with the `--with-jni` option.
+  * Proj version 4.8 or more recent compiled with the `--with-jni` option.
 
 
 
