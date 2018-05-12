@@ -127,9 +127,9 @@ Thus we compile the `Main.java` with the command:
 
     javac --class-path <path to the jar library>/proj.jar Main.java
 
-and execute the created test case with:
+and execute the created test case with (replace `:` by `;` on the Windows platform):
 
-    java --class-path .:<path to the jar library>/proj.jar -Djava.library.path=<path to the libproj, if needed> Main
+    java --class-path <path to the jar library>/proj.jar:. Main
 
 
 
@@ -142,4 +142,5 @@ If an `java.lang.UnsatisfiedLinkError` is thrown at execution time, add the foll
 Then verify that the `libproj.so` (Linux), `libproj.dylib` (MacOS) or `libproj.dll` (Windows) file is located
 in one of the directories listed by above code. If this is not the case, then try configuring the
 `LD_LIBRARY_PATH` (Linux), `DYLD_LIBRARY_PATH` (MacOS) or `PATH` (Windows) environment variable.
+Alternatively, a `-Djava.library.path=<path to the libproj>` option can be added to above `java` command.
 If the problem persist, adding the `-verbose:jni` option to the `java` command may help more advanced diagnostics.
