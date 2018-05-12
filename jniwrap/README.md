@@ -42,7 +42,7 @@ Beyond the ones already put by PROJ, you need:
   * Ant 1.9.8+, to run the build.
 * For execution:
   * If a Java version less than the current version on the local machine is desired,
-    add an `release` attribute in the `javac` task of `build.xml`.
+    add a `release` attribute in the `javac` task of `build.xml` before to compile.
 
 
 
@@ -107,10 +107,10 @@ we assume that PROJ was compiled with the right flag to support the bridge to Ja
 Therefore we have a library called `proj.jar`.
 Thus we compile the `Main.java` with the command:
 
-    javac -classpath <path to the jar library>/proj.jar Main.java
+    javac --class-path <path to the jar library>/proj.jar Main.java
 
 and execute the created test case with:
 
-    java -cp .:<path to the jar library>/proj.jar -Djava.library.path=<path to the libproj, if needed> Main
+    java --class-path .:<path to the jar library>/proj.jar -Djava.library.path=<path to the libproj, if needed> Main
 
 That's it, enjoy!
