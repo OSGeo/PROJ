@@ -3,13 +3,30 @@
 This is the third release of JNI wrappers for the main PROJ functions.
 The first release of JNI wrappers were created by http://www.hydrologis.com.
 The second release of JNI wrappers were created by http://www.geoapi.org.
+This release is compatible with any PROJ versions from 4.9 to 5
+provided that PROJ has been compiled as described below.
 
 
 
 ## What is "PROJ bridge to Java"
 
-_Proj bridge to Java_ is a small library of Java classes that wrap a few PROJ functions
+_PROJ bridge to Java_ is a small library of Java classes that wrap a few PROJ functions
 by using the Java Native Interface (JNI). The main Java class is `org.proj4.PJ`.
+A Java code example is given in the _Usage & a fast example_ section below.
+
+
+
+### Versions
+
+The PROJ bridge to Java does not follow the same version numbers than the main PROJ library
+since the same JAR file can be compatible with a range of PROJ versions.
+Version compatibility is given below:
+
+
+Java bridge | Compatible with PROJ library
+----------- | ----------------------------
+2.0 and 3.0 | 4.9 to 5+
+1.0         | 4.4.9 to 4.8
 
 
 
@@ -43,6 +60,7 @@ Beyond the ones already put by PROJ, you need:
 * For execution:
   * If a Java version less than the current version on the local machine is desired,
     add a `release` attribute in the `javac` task of `build.xml` before to compile.
+  * Proj version 4.9 or more recent compiled with the `--with-jni` option.
 
 
 
