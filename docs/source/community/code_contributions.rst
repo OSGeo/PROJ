@@ -1,7 +1,7 @@
-.. _for_proj_contributors:
+.. _code_contributions:
 
 ================================================================================
-Development rules and tools for PROJ code contributors
+Guidelines for PROJ code contributors
 ================================================================================
 
 This is a guide for PROJ, casual or regular, code contributors.

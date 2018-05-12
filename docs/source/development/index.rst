@@ -19,4 +19,3 @@ PROJ project or using the library in their own software.
    cmake
    bindings
    migration
-   for_proj_contributors

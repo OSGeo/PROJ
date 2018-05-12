@@ -1,8 +1,10 @@
 .. _references:
 
-================================================================================
-References
-================================================================================
+.. only:: not latex
+
+    ================================================================================
+    References
+    ================================================================================
 
 .. [AltamimiEtAl2002] Altamimi, Z., P. Sillard, and C. Boucher (2002),
     ITRF2000: A new release of the International Terrestrial Reference Frame for earth science applications,
