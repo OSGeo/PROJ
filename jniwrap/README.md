@@ -56,7 +56,7 @@ Beyond the ones already put by PROJ, you need:
 
 * For compilation:
   * Java 9+, the Java standard development kit version 9 or above
-  * Ant 1.9.8+, to run the build.
+  * Ant 1.10+, to run the build.
 * For execution:
   * If a Java version less than the current version on the local machine is desired,
     add a `release` attribute in the `javac` task of `build.xml` before to compile.
