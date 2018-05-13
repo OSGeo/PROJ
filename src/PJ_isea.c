@@ -134,8 +134,7 @@ struct snyder_constants {
 };
 
 /* TODO put these in radians to avoid a later conversion */
-static const
-struct snyder_constants constants[] = {
+static const struct snyder_constants constants[] = {
     {23.80018260, 62.15458023, 60.0, 3.75, 1.033, 0.968, 5.09, 1.195, 1.0},
     {20.07675127, 55.69063953, 54.0, 2.65, 1.030, 0.983, 3.59, 1.141, 1.027},
     {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -178,7 +177,7 @@ static struct isea_geo vertex[] = {
 
 /* TODO make an isea_pt array of the vertices as well */
 
-static int      tri_v1[] = {0, 0, 0, 0, 0, 0, 6, 7, 8, 9, 10, 2, 3, 4, 5, 1, 11, 11, 11, 11, 11};
+static int tri_v1[] = {0, 0, 0, 0, 0, 0, 6, 7, 8, 9, 10, 2, 3, 4, 5, 1, 11, 11, 11, 11, 11};
 
 /* 52.62263186 */
 #define E_RAD 0.91843818702186776133
@@ -211,8 +210,7 @@ static const struct isea_geo icostriangles[] = {
     {DEG180, -E_RAD},
 };
 
-static double
-az_adjustment(int triangle)
+static double az_adjustment(int triangle)
 {
     double          adj;
 
@@ -236,8 +234,7 @@ az_adjustment(int triangle)
 /* H = 0.25 R tan g = */
 #define TABLE_H 0.1909830056
 
-static struct isea_pt
-isea_triangle_xy(int triangle)
+static struct isea_pt isea_triangle_xy(int triangle)
 {
     struct isea_pt  c;
     const double Rprime = 0.91038328153090290025;
@@ -272,8 +269,8 @@ isea_triangle_xy(int triangle)
 }
 
 /* snyder eq 14 */
-static double
-sph_azimuth(double f_lon, double f_lat, double t_lon, double t_lat)
+static double sph_azimuth(double f_lon, double f_lat,
+                          double t_lon, double t_lat)
 {
     double          az;
 
@@ -291,8 +288,7 @@ sph_azimuth(double f_lon, double f_lat, double t_lon, double t_lat)
 #endif
 
 /* coord needs to be in radians */
-static int
-isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
+static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
 {
     int             i;
 
@@ -482,8 +478,7 @@ isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
  *
  * TODO take a result pointer
  */
-static struct isea_geo
-snyder_ctran(struct isea_geo * np, struct isea_geo * pt)
+static struct isea_geo snyder_ctran(struct isea_geo * np, struct isea_geo * pt)
 {
     struct isea_geo npt;
     double          alpha, phi, lambda, lambda0, beta, lambdap, phip;
@@ -527,8 +522,8 @@ snyder_ctran(struct isea_geo * np, struct isea_geo * pt)
     return npt;
 }
 
-static struct isea_geo
-isea_ctran(struct isea_geo * np, struct isea_geo * pt, double lon0)
+static struct isea_geo isea_ctran(struct isea_geo * np, struct isea_geo * pt,
+                                  double lon0)
 {
     struct isea_geo npt;
 
@@ -559,8 +554,7 @@ isea_ctran(struct isea_geo * np, struct isea_geo * pt, double lon0)
 
 /* fuller's at 5.2454 west, 2.3009 N, adjacent at 7.46658 deg */
 
-static int
-isea_grid_init(struct isea_dgg * g)
+static int isea_grid_init(struct isea_dgg * g)
 {
     if (!g)
         return 0;
@@ -577,8 +571,7 @@ isea_grid_init(struct isea_dgg * g)
     return 1;
 }
 
-static void
-isea_orient_isea(struct isea_dgg * g)
+static void isea_orient_isea(struct isea_dgg * g)
 {
     if (!g)
         return;
@@ -587,8 +580,7 @@ isea_orient_isea(struct isea_dgg * g)
     g->o_az = 0.0;
 }
 
-static void
-isea_orient_pole(struct isea_dgg * g)
+static void isea_orient_pole(struct isea_dgg * g)
 {
     if (!g)
         return;
@@ -597,9 +589,8 @@ isea_orient_pole(struct isea_dgg * g)
     g->o_az = 0;
 }
 
-static int
-isea_transform(struct isea_dgg * g, struct isea_geo * in,
-           struct isea_pt * out)
+static int isea_transform(struct isea_dgg * g, struct isea_geo * in,
+                          struct isea_pt * out)
 {
     struct isea_geo i, pole;
     int             tri;
@@ -619,8 +610,7 @@ isea_transform(struct isea_dgg * g, struct isea_geo * in,
 
 #define DOWNTRI(tri) (((tri - 1) / 5) % 2 == 1)
 
-static void
-isea_rotate(struct isea_pt * pt, double degrees)
+static void isea_rotate(struct isea_pt * pt, double degrees)
 {
     double          rad;
 
@@ -653,8 +643,7 @@ static int isea_tri_plane(int tri, struct isea_pt *pt, double radius) {
 }
 
 /* convert projected triangle coords to quad xy coords, return quad number */
-static int
-isea_ptdd(int tri, struct isea_pt *pt) {
+static int isea_ptdd(int tri, struct isea_pt *pt) {
     int             downtri, quad;
 
     downtri = (((tri - 1) / 5) % 2 == 1);
@@ -669,8 +658,8 @@ isea_ptdd(int tri, struct isea_pt *pt) {
     return quad;
 }
 
-static int
-isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt, struct isea_pt *di)
+static int isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt,
+                            struct isea_pt *di)
 {
     struct isea_pt  v;
     double          hexwidth;
@@ -747,8 +736,8 @@ isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt, struct isea_p
     return quad;
 }
 
-static int
-isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt, struct isea_pt *di) {
+static int isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt,
+                     struct isea_pt *di) {
     struct isea_pt  v;
     double          hexwidth;
     int             sidelength; /* in hexes */
@@ -928,8 +917,7 @@ static int isea_hex(struct isea_dgg *g, int tri,
 #endif
 }
 
-static struct isea_pt
-isea_forward(struct isea_dgg *g, struct isea_geo *in)
+static struct isea_pt isea_forward(struct isea_dgg *g, struct isea_geo *in)
 {
     int             tri;
     struct isea_pt  out, coord;
