@@ -12,24 +12,13 @@
 #  define M_PI 3.14159265358979323846
 #endif
 
-/*
- * Proj 4 provides its own entry points into
- * the code, so none of the library functions
- * need to be global
- */
-#define ISEA_STATIC static
-#ifndef ISEA_STATIC
-#define ISEA_STATIC
-#endif
-
 struct hex {
         int iso;
         int x, y, z;
 };
 
 /* y *must* be positive down as the xy /iso conversion assumes this */
-ISEA_STATIC
-void hex_xy(struct hex *h) {
+static void hex_xy(struct hex *h) {
     if (!h->iso) return;
     if (h->x >= 0) {
         h->y = -h->y - (h->x+1)/2;
@@ -40,8 +29,7 @@ void hex_xy(struct hex *h) {
     h->iso = 0;
 }
 
-ISEA_STATIC
-void hex_iso(struct hex *h) {
+static void hex_iso(struct hex *h) {
     if (h->iso) return;
 
     if (h->x >= 0) {
@@ -55,8 +43,7 @@ void hex_iso(struct hex *h) {
     h->iso = 1;
 }
 
-ISEA_STATIC
-void hexbin2(double width, double x, double y, int *i, int *j) {
+static void hexbin2(double width, double x, double y, int *i, int *j) {
     double z, rx, ry, rz;
     double abs_dx, abs_dy, abs_dz;
     int ix, iy, iz, s;
@@ -102,9 +89,6 @@ void hexbin2(double width, double x, double y, int *i, int *j) {
     *i = h.x;
     *j = h.y;
 }
-#ifndef ISEA_STATIC
-#define ISEA_STATIC
-#endif
 
 enum isea_poly { ISEA_NONE, ISEA_ICOSAHEDRON = 20 };
 enum isea_topology { ISEA_HEXAGON=6, ISEA_TRIANGLE=3, ISEA_DIAMOND=4 };
@@ -150,8 +134,7 @@ struct snyder_constants {
 };
 
 /* TODO put these in radians to avoid a later conversion */
-ISEA_STATIC const
-struct snyder_constants constants[] = {
+static const struct snyder_constants constants[] = {
     {23.80018260, 62.15458023, 60.0, 3.75, 1.033, 0.968, 5.09, 1.195, 1.0},
     {20.07675127, 55.69063953, 54.0, 2.65, 1.030, 0.983, 3.59, 1.141, 1.027},
     {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -177,8 +160,7 @@ struct snyder_constants constants[] = {
 #define RAD2DEG (180.0/M_PI)
 #define DEG2RAD (M_PI/180.0)
 
-ISEA_STATIC
-struct isea_geo vertex[] = {
+static struct isea_geo vertex[] = {
     {0.0, DEG90},
     {DEG180, V_LAT},
     {-DEG108, V_LAT},
@@ -195,7 +177,7 @@ struct isea_geo vertex[] = {
 
 /* TODO make an isea_pt array of the vertices as well */
 
-static int      tri_v1[] = {0, 0, 0, 0, 0, 0, 6, 7, 8, 9, 10, 2, 3, 4, 5, 1, 11, 11, 11, 11, 11};
+static int tri_v1[] = {0, 0, 0, 0, 0, 0, 6, 7, 8, 9, 10, 2, 3, 4, 5, 1, 11, 11, 11, 11, 11};
 
 /* 52.62263186 */
 #define E_RAD 0.91843818702186776133
@@ -228,8 +210,7 @@ static const struct isea_geo icostriangles[] = {
     {DEG180, -E_RAD},
 };
 
-static double
-az_adjustment(int triangle)
+static double az_adjustment(int triangle)
 {
     double          adj;
 
@@ -253,9 +234,7 @@ az_adjustment(int triangle)
 /* H = 0.25 R tan g = */
 #define TABLE_H 0.1909830056
 
-ISEA_STATIC
-struct isea_pt
-isea_triangle_xy(int triangle)
+static struct isea_pt isea_triangle_xy(int triangle)
 {
     struct isea_pt  c;
     const double Rprime = 0.91038328153090290025;
@@ -290,8 +269,8 @@ isea_triangle_xy(int triangle)
 }
 
 /* snyder eq 14 */
-static double
-sph_azimuth(double f_lon, double f_lat, double t_lon, double t_lat)
+static double sph_azimuth(double f_lon, double f_lat,
+                          double t_lon, double t_lat)
 {
     double          az;
 
@@ -309,9 +288,7 @@ sph_azimuth(double f_lon, double f_lat, double t_lon, double t_lat)
 #endif
 
 /* coord needs to be in radians */
-ISEA_STATIC
-int
-isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
+static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
 {
     int             i;
 
@@ -501,9 +478,7 @@ isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
  *
  * TODO take a result pointer
  */
-ISEA_STATIC
-struct isea_geo
-snyder_ctran(struct isea_geo * np, struct isea_geo * pt)
+static struct isea_geo snyder_ctran(struct isea_geo * np, struct isea_geo * pt)
 {
     struct isea_geo npt;
     double          alpha, phi, lambda, lambda0, beta, lambdap, phip;
@@ -547,9 +522,8 @@ snyder_ctran(struct isea_geo * np, struct isea_geo * pt)
     return npt;
 }
 
-ISEA_STATIC
-struct isea_geo
-isea_ctran(struct isea_geo * np, struct isea_geo * pt, double lon0)
+static struct isea_geo isea_ctran(struct isea_geo * np, struct isea_geo * pt,
+                                  double lon0)
 {
     struct isea_geo npt;
 
@@ -580,9 +554,7 @@ isea_ctran(struct isea_geo * np, struct isea_geo * pt, double lon0)
 
 /* fuller's at 5.2454 west, 2.3009 N, adjacent at 7.46658 deg */
 
-ISEA_STATIC
-int
-isea_grid_init(struct isea_dgg * g)
+static int isea_grid_init(struct isea_dgg * g)
 {
     if (!g)
         return 0;
@@ -599,9 +571,7 @@ isea_grid_init(struct isea_dgg * g)
     return 1;
 }
 
-ISEA_STATIC
-void
-isea_orient_isea(struct isea_dgg * g)
+static void isea_orient_isea(struct isea_dgg * g)
 {
     if (!g)
         return;
@@ -610,9 +580,7 @@ isea_orient_isea(struct isea_dgg * g)
     g->o_az = 0.0;
 }
 
-ISEA_STATIC
-void
-isea_orient_pole(struct isea_dgg * g)
+static void isea_orient_pole(struct isea_dgg * g)
 {
     if (!g)
         return;
@@ -621,10 +589,8 @@ isea_orient_pole(struct isea_dgg * g)
     g->o_az = 0;
 }
 
-ISEA_STATIC
-int
-isea_transform(struct isea_dgg * g, struct isea_geo * in,
-           struct isea_pt * out)
+static int isea_transform(struct isea_dgg * g, struct isea_geo * in,
+                          struct isea_pt * out)
 {
     struct isea_geo i, pole;
     int             tri;
@@ -644,9 +610,7 @@ isea_transform(struct isea_dgg * g, struct isea_geo * in,
 
 #define DOWNTRI(tri) (((tri - 1) / 5) % 2 == 1)
 
-ISEA_STATIC
-void
-isea_rotate(struct isea_pt * pt, double degrees)
+static void isea_rotate(struct isea_pt * pt, double degrees)
 {
     double          rad;
 
@@ -663,8 +627,7 @@ isea_rotate(struct isea_pt * pt, double degrees)
     pt->y = y;
 }
 
-ISEA_STATIC
-int isea_tri_plane(int tri, struct isea_pt *pt, double radius) {
+static int isea_tri_plane(int tri, struct isea_pt *pt, double radius) {
     struct isea_pt tc; /* center of triangle */
 
     if (DOWNTRI(tri)) {
@@ -680,9 +643,7 @@ int isea_tri_plane(int tri, struct isea_pt *pt, double radius) {
 }
 
 /* convert projected triangle coords to quad xy coords, return quad number */
-ISEA_STATIC
-int
-isea_ptdd(int tri, struct isea_pt *pt) {
+static int isea_ptdd(int tri, struct isea_pt *pt) {
     int             downtri, quad;
 
     downtri = (((tri - 1) / 5) % 2 == 1);
@@ -697,9 +658,8 @@ isea_ptdd(int tri, struct isea_pt *pt) {
     return quad;
 }
 
-ISEA_STATIC
-int
-isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt, struct isea_pt *di)
+static int isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt,
+                            struct isea_pt *di)
 {
     struct isea_pt  v;
     double          hexwidth;
@@ -776,9 +736,8 @@ isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt, struct isea_p
     return quad;
 }
 
-ISEA_STATIC
-int
-isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt, struct isea_pt *di) {
+static int isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt,
+                     struct isea_pt *di) {
     struct isea_pt  v;
     double          hexwidth;
     int             sidelength; /* in hexes */
@@ -849,9 +808,8 @@ isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt, struct isea_pt *di) 
     return quad;
 }
 
-ISEA_STATIC
-int isea_ptdi(struct isea_dgg *g, int tri, struct isea_pt *pt,
-            struct isea_pt *di) {
+static int isea_ptdi(struct isea_dgg *g, int tri, struct isea_pt *pt,
+                     struct isea_pt *di) {
     struct isea_pt  v;
     int             quad;
 
@@ -862,8 +820,7 @@ int isea_ptdi(struct isea_dgg *g, int tri, struct isea_pt *pt,
 }
 
 /* q2di to seqnum */
-ISEA_STATIC
-int isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
+static int isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
     int             sidelength;
     int             sn, height;
     int             hexes;
@@ -898,9 +855,8 @@ int isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
  * d' = d << 4 + q, d = d' >> 4, q = d' & 0xf
  */
 /* convert a q2di to global hex coord */
-ISEA_STATIC
-int isea_hex(struct isea_dgg *g, int tri,
-        struct isea_pt *pt, struct isea_pt *hex) {
+static int isea_hex(struct isea_dgg *g, int tri,
+                    struct isea_pt *pt, struct isea_pt *hex) {
     struct isea_pt v;
 #ifdef FIXME
     int sidelength;
@@ -961,9 +917,7 @@ int isea_hex(struct isea_dgg *g, int tri,
 #endif
 }
 
-ISEA_STATIC
-struct isea_pt
-isea_forward(struct isea_dgg *g, struct isea_geo *in)
+static struct isea_pt isea_forward(struct isea_dgg *g, struct isea_geo *in)
 {
     int             tri;
     struct isea_pt  out, coord;
