@@ -7,7 +7,10 @@ Port to PROJ.4 by Bojan Savric, 4 April 2016
 */
 
 #define PJ_LIB__
-#include    "projects.h"
+
+#include <math.h>
+
+#include "projects.h"
 
 PROJ_HEAD(comill, "Compact Miller") "\n\tCyl., Sph.";
 
@@ -79,5 +82,3 @@ PJ *PROJECTION(comill) {
 
     return P;
 }
-
-

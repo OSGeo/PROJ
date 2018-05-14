@@ -1,15 +1,14 @@
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "proj.h"
 #include "projects.h"
+#include "proj_api.h"
 
 PROJ_HEAD(calcofi,
     "Cal Coop Ocean Fish Invest Lines/Stations") "\n\tCyl, Sph&Ell";
 
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
-#include "proj_api.h"
-#include <errno.h>
 
 /* Conversions for the California Cooperative Oceanic Fisheries Investigations
 Line/Station coordinate system following the algorithm of:
@@ -162,5 +161,3 @@ PJ *PROJECTION(calcofi) {
     }
     return P;
 }
-
-

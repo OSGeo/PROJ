@@ -1,8 +1,10 @@
 # define HLFPI2	2.46740110027233965467      /* (pi/2)^2 */
 # define EPS	1e-10
 #define PJ_LIB__
-#include	<errno.h>
-#include	"projects.h"
+#include <errno.h>
+#include <math.h>
+
+#include "projects.h"
 
 
 struct pj_opaque {
@@ -75,5 +77,3 @@ PJ *PROJECTION(ortel) {
     P->fwd = s_forward;
     return P;
 }
-
-
