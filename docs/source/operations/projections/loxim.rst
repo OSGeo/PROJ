@@ -5,6 +5,6 @@ Loximuthal
 ********************************************************************************
 
 .. image:: ./images/loxim.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Loximuthal  
 

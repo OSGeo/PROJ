@@ -22,7 +22,7 @@ Apian Globular I
 
 
 .. image:: ./images/apian.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Apian Globular I
 
 Options

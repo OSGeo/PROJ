@@ -25,7 +25,7 @@ around a given latitude and longitude.
 +---------------------+--------------------------------------------------------+
 
 .. image:: ./images/ortho.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Orthographic
 
 Parameters

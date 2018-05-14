@@ -5,6 +5,6 @@ Icosahedral Snyder Equal Area
 ********************************************************************************
 
 .. image:: ./images/isea.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Icosahedral Snyder Equal Area  
 

@@ -5,6 +5,6 @@ General Sinusoidal Series
 ********************************************************************************
 
 .. image:: ./images/gn_sinu.png
-   :scale: 50%
+   :scale: 100%
    :alt:   General Sinusoidal Series  
 

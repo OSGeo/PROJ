@@ -25,7 +25,7 @@ The near-sided perspective projection simulates a view from a height
 
 
 .. image:: ./images/nsper.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Near-sided perspective
 
 Parameters

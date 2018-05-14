@@ -5,6 +5,6 @@ Transverse Central Cylindrical
 ********************************************************************************
 
 .. image:: ./images/tcc.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Transverse Central Cylindrical  
 

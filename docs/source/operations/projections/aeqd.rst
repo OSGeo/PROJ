@@ -19,7 +19,7 @@ Azimuthal Equidistant
 
 
 .. image:: ./images/aeqd.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Azimuthal Equidistant
 
 

@@ -5,6 +5,6 @@ International Map of the World Polyconic
 ********************************************************************************
 
 .. image:: ./images/imw_p.png
-   :scale: 50%
+   :scale: 100%
    :alt:   International Map of the World Polyconic  
 

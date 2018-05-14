@@ -5,6 +5,6 @@ Quartic Authalic
 ********************************************************************************
 
 .. image:: ./images/qua_aut.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Quartic Authalic  
 

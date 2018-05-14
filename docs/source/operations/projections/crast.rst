@@ -5,6 +5,6 @@ Craster Parabolic (Putnins P4)
 ********************************************************************************
 
 .. image:: ./images/crast.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Craster Parabolic (Putnins P4)  
 

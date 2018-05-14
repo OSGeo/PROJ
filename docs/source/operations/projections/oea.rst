@@ -5,6 +5,6 @@ Oblated Equal Area
 ********************************************************************************
 
 .. image:: ./images/oea.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Oblated Equal Area  
 

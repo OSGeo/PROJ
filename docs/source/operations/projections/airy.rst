@@ -27,7 +27,7 @@ within the small or great circle defined by an angular distance,
 
 
 .. image:: ./images/airy.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Airy
 
 Options

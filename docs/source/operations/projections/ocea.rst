@@ -5,6 +5,6 @@ Oblique Cylindrical Equal Area
 ********************************************************************************
 
 .. image:: ./images/ocea.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Oblique Cylindrical Equal Area  
 

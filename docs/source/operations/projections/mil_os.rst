@@ -5,6 +5,6 @@ Miller Oblated Stereographic
 ********************************************************************************
 
 .. image:: ./images/mil_os.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Miller Oblated Stereographic  
 

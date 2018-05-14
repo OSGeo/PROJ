@@ -5,6 +5,6 @@ van der Grinten II
 ********************************************************************************
 
 .. image:: ./images/vandg2.png
-   :scale: 50%
+   :scale: 100%
    :alt:   van der Grinten II  
 

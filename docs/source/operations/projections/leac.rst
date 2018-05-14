@@ -5,6 +5,6 @@ Lambert Equal Area Conic
 ********************************************************************************
 
 .. image:: ./images/leac.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Lambert Equal Area Conic  
 

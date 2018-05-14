@@ -5,6 +5,6 @@ Kavraisky VII
 ********************************************************************************
 
 .. image:: ./images/kav7.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Kavraisky VII  
 

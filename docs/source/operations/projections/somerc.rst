@@ -5,6 +5,6 @@ Swiss. Obl. Mercator
 ********************************************************************************
 
 .. image:: ./images/somerc.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Swiss. Obl. Mercator  
 

@@ -25,7 +25,7 @@ It is neither equal-area nor conformal but instead tries to balance the distorti
 
 
 .. image:: ./images/gall.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Gall (Gall Stereographic)
 
 Usage

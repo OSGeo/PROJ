@@ -5,6 +5,6 @@ Lambert Azimuthal Equal Area
 ********************************************************************************
 
 .. image:: ./images/laea.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Lambert Azimuthal Equal Area  
 

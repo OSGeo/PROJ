@@ -27,7 +27,7 @@ latitude, identical with ``conic()`` projection from ``mapproj`` R package.
 
 
 .. image:: ./images/ccon.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Central Conic
 
 

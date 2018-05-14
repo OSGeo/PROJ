@@ -25,7 +25,7 @@ scanning angle intervals.
 
 
 .. image:: ./images/geos.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Geostationary Satellite View
 
 
@@ -55,6 +55,7 @@ and a E/W axis (or ``x``).
 
 .. image:: ../../..//images/geos_sweep.png
    :scale: 50%
+   :align: center
    :alt:   Gimbal geometry
 
 In the image above, the outer-gimbal axis, or sweep-angle axis, is the N/S axis (``y``)

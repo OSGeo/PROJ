@@ -5,6 +5,6 @@ New Zealand Map Grid
 ********************************************************************************
 
 .. image:: ./images/nzmg.png
-   :scale: 50%
+   :scale: 100%
    :alt:   New Zealand Map Grid  
 

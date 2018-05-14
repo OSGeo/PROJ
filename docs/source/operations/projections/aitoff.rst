@@ -20,7 +20,7 @@ Aitoff
 +---------------------+----------------------------------------------------------+
 
 .. image:: ./images/aitoff.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Aitoff
 
 Parameters

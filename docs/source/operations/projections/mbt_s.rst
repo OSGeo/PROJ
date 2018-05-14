@@ -5,6 +5,6 @@ McBryde-Thomas Flat-Polar Sine (No. 1)
 ********************************************************************************
 
 .. image:: ./images/mbt_s.png
-   :scale: 50%
+   :scale: 100%
    :alt:   McBryde-Thomas Flat-Polar Sine (No. 1)  
 

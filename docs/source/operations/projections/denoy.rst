@@ -5,6 +5,6 @@ Denoyer Semi-Elliptical
 ********************************************************************************
 
 .. image:: ./images/denoy.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Denoyer Semi-Elliptical  
 

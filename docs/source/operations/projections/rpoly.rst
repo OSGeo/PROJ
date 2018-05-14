@@ -5,6 +5,6 @@ Rectangular Polyconic
 ********************************************************************************
 
 .. image:: ./images/rpoly.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Rectangular Polyconic  
 

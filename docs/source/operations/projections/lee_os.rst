@@ -5,6 +5,6 @@ Lee Oblated Stereographic
 ********************************************************************************
 
 .. image:: ./images/lee_os.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Lee Oblated Stereographic  
 

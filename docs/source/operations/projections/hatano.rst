@@ -26,7 +26,7 @@ Hatano Asymmetrical Equal Area
 
 
 .. image:: ./images/hatano.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Hatano Asymmetrical Equal Area
 
 

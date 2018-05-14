@@ -5,6 +5,6 @@ Mod. Stererographics of 48 U.S.
 ********************************************************************************
 
 .. image:: ./images/gs48.png
-   :scale: 50%
+   :scale: 100%
    :alt:   Mod. Stererographics of 48 U.S.  
 

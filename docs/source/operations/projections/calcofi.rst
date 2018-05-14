@@ -26,7 +26,7 @@ California Cooperative Oceanic Fisheries Investigations program, known as CalCOF
 
 
 .. image:: ../../../images/calcofi.png
-   :scale: 50%
+   :scale: 100%
    :align: center
    :alt:   Cal Coop Ocean Fish Invest Lines/Stations
 
