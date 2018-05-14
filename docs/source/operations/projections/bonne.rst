@@ -5,6 +5,6 @@ Bonne (Werner lat_1=90)
 ********************************************************************************
 
 .. image:: ./images/bonne.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Bonne (Werner lat_1=90)  
 

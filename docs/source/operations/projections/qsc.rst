@@ -114,32 +114,32 @@ The resulting images can be laid out in a grid like below.
 
 
 .. |topside| image:: ../../../images/qsc_topside.jpg
-   :scale: 100%
+   :scale: 50%
    :align: middle
    :alt:   Top side
 
 .. |leftside| image:: ../../../images/qsc_leftside.jpg
-   :scale: 100%
+   :scale: 50%
    :align: middle
    :alt:   Left side
 
 .. |frontside| image:: ../../../images/qsc_frontside.jpg
-   :scale: 100%
+   :scale: 50%
    :align: middle
    :alt:   Front side
 
 .. |rightside| image:: ../../../images/qsc_rightside.jpg
-   :scale: 100%
+   :scale: 50%
    :align: middle
    :alt:   Right side
 
 .. |backside| image:: ../../../images/qsc_backside.jpg
-   :scale: 100%
+   :scale: 50%
    :align: middle
    :alt:   Back side
 
 .. |bottomside| image:: ../../../images/qsc_bottomside.jpg
-   :scale: 100%
+   :scale: 50%
    :align: middle
    :alt:   Bottom side
 

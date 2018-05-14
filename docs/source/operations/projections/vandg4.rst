@@ -5,6 +5,6 @@ van der Grinten IV
 ********************************************************************************
 
 .. image:: ./images/vandg4.png
-   :scale: 100%
+   :scale: 50%
    :alt:   van der Grinten IV  
 

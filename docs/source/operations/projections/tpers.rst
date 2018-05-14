@@ -22,7 +22,7 @@ Tilted perspective
 
 
 .. image:: ./images/tpers.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Tilted perspective
 
 

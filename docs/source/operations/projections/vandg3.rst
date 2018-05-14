@@ -5,6 +5,6 @@ van der Grinten III
 ********************************************************************************
 
 .. image:: ./images/vandg3.png
-   :scale: 100%
+   :scale: 50%
    :alt:   van der Grinten III  
 

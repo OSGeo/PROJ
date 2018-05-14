@@ -5,6 +5,6 @@ Nell-Hammer
 ********************************************************************************
 
 .. image:: ./images/nell_h.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Nell-Hammer  
 

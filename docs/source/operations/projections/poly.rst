@@ -5,6 +5,6 @@ Polyconic (American)
 ********************************************************************************
 
 .. image:: ./images/poly.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Polyconic (American)  
 

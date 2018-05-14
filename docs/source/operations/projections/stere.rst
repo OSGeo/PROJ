@@ -5,6 +5,6 @@ Stereographic
 ********************************************************************************
 
 .. image:: ./images/stere.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Stereographic  
 

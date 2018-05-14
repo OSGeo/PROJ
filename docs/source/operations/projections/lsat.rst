@@ -5,6 +5,6 @@ Space oblique for LANDSAT
 ********************************************************************************
 
 .. image:: ./images/lsat.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Space oblique for LANDSAT  
 

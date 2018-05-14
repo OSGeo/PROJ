@@ -21,7 +21,7 @@ Modified Stererographics of Alaska
 
 
 .. image:: ./images/alsk.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Mod. Stererographics of Alaska
 
 Options

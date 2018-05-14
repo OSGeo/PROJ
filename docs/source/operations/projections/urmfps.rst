@@ -5,6 +5,6 @@ Urmaev Flat-Polar Sinusoidal
 ********************************************************************************
 
 .. image:: ./images/urmfps.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Urmaev Flat-Polar Sinusoidal  
 

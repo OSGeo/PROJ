@@ -5,6 +5,6 @@ Collignon
 ********************************************************************************
 
 .. image:: ./images/collg.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Collignon  
 

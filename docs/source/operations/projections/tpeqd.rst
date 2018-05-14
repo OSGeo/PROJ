@@ -5,6 +5,6 @@ Two Point Equidistant
 ********************************************************************************
 
 .. image:: ./images/tpeqd.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Two Point Equidistant  
 

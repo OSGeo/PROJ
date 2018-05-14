@@ -22,7 +22,7 @@ Natural Earth
 
 
 .. image:: ./images/natearth.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Natural Earth
 
 

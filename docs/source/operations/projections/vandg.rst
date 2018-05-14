@@ -5,6 +5,6 @@ van der Grinten (I)
 ********************************************************************************
 
 .. image:: ./images/vandg.png
-   :scale: 100%
+   :scale: 50%
    :alt:   van der Grinten (I)  
 

@@ -5,6 +5,6 @@ August Epicycloidal
 ********************************************************************************
 
 .. image:: ./images/august.png
-   :scale: 100%
+   :scale: 50%
    :alt:   August Epicycloidal  
 

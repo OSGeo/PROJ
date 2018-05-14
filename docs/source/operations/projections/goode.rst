@@ -5,6 +5,6 @@ Goode Homolosine
 ********************************************************************************
 
 .. image:: ./images/goode.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Goode Homolosine  
 

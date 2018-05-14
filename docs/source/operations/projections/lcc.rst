@@ -5,6 +5,6 @@ Lambert Conformal Conic
 ********************************************************************************
 
 .. image:: ./images/lcc.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Lambert Conformal Conic  
 

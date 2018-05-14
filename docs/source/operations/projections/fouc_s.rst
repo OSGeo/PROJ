@@ -5,7 +5,7 @@ Foucaut Sinusoidal
 ********************************************************************************
 
 .. image:: ./images/fouc_s.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Foucaut Sinusoidal
 
 

@@ -5,6 +5,6 @@ Werenskiold I
 ********************************************************************************
 
 .. image:: ./images/weren.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Werenskiold I  
 

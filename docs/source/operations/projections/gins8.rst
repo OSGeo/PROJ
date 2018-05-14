@@ -5,6 +5,6 @@ Ginsburg VIII (TsNIIGAiK)
 ********************************************************************************
 
 .. image:: ./images/gins8.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Ginsburg VIII (TsNIIGAiK)  
 

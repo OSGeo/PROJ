@@ -5,6 +5,6 @@ Oblique Stereographic Alternative
 ********************************************************************************
 
 .. image:: ./images/sterea.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Oblique Stereographic Alternative  
 

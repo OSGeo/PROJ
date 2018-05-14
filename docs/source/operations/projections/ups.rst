@@ -5,6 +5,6 @@ Universal Polar Stereographic
 ********************************************************************************
 
 .. image:: ./images/ups.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Universal Polar Stereographic  
 

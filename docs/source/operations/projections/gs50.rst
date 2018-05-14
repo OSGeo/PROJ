@@ -5,6 +5,6 @@ Mod. Stererographics of 50 U.S.
 ********************************************************************************
 
 .. image:: ./images/gs50.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Mod. Stererographics of 50 U.S.  
 

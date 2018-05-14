@@ -5,6 +5,6 @@ McBryde-Thomas Flat-Polar Quartic
 ********************************************************************************
 
 .. image:: ./images/mbtfpq.png
-   :scale: 100%
+   :scale: 50%
    :alt:   McBryde-Thomas Flat-Polar Quartic  
 

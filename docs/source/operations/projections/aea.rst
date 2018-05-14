@@ -21,7 +21,7 @@ Albers Equal Area
 
 
 .. image:: ./images/aea.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Albers Equal Area
 
 Options

@@ -26,7 +26,7 @@ The transverse Mercator projection in its various forms is the most widely used 
 
 
 .. image:: ./images/tmerc.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Transverse Mercator  
 
 Usage

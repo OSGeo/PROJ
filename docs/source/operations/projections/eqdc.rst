@@ -5,6 +5,6 @@ Equidistant Conic
 ********************************************************************************
 
 .. image:: ./images/eqdc.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Equidistant Conic  
 

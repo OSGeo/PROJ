@@ -5,6 +5,6 @@ Chamberlin Trimetric
 ********************************************************************************
 
 .. image:: ./images/chamb.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Chamberlin Trimetric  
 

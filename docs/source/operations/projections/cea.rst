@@ -5,6 +5,6 @@ Equal Area Cylindrical
 ********************************************************************************
 
 .. image:: ./images/cea.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Equal Area Cylindrical  
 

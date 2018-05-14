@@ -5,6 +5,6 @@ Bipolar conic of western hemisphere
 ********************************************************************************
 
 .. image:: ./images/bipc.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Bipolar conic of western hemisphere  
 

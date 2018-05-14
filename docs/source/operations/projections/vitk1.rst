@@ -5,6 +5,6 @@ Vitkovsky I
 ********************************************************************************
 
 .. image:: ./images/vitk1.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Vitkovsky I  
 

@@ -25,7 +25,7 @@ The latitude is scaled by a factor of :math:`\frac{4}{5}`, projected according t
 
 
 .. image:: ./images/mill.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Miller Cylindrical  
 
 Usage

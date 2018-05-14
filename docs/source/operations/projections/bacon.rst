@@ -5,6 +5,6 @@ Bacon Globular
 ********************************************************************************
 
 .. image:: ./images/bacon.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Bacon Globular  
 

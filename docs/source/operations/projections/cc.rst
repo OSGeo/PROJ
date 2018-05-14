@@ -5,6 +5,6 @@ Central Cylindrical
 ********************************************************************************
 
 .. image:: ./images/cc.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Central Cylindrical  
 

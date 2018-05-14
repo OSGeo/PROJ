@@ -5,6 +5,6 @@ Nicolosi Globular
 ********************************************************************************
 
 .. image:: ./images/nicol.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Nicolosi Globular  
 

@@ -5,6 +5,6 @@ Wagner I (Kavraisky VI)
 ********************************************************************************
 
 .. image:: ./images/wag1.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Wagner I (Kavraisky VI)  
 

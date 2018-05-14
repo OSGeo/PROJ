@@ -5,6 +5,6 @@ Transverse Cylindrical Equal Area
 ********************************************************************************
 
 .. image:: ./images/tcea.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Transverse Cylindrical Equal Area  
 

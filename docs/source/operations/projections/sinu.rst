@@ -5,7 +5,7 @@ Sinusoidal (Sanson-Flamsteed)
 ********************************************************************************
 
 .. image:: ./images/sinu.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Sinusoidal (Sanson-Flamsteed)
 
 MacBryde and Thomas developed generalized formulas for sever of the

@@ -26,7 +26,7 @@ The projection is conformal which makes it suitable for navigational purposes.
 +---------------------+----------------------------------------------------------+
 
 .. image:: ./images/merc.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Mercator
 
 

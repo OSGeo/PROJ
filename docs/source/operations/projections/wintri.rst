@@ -5,6 +5,6 @@ Winkel Tripel
 ********************************************************************************
 
 .. image:: ./images/wintri.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Winkel Tripel  
 

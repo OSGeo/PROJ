@@ -5,6 +5,6 @@ Oblique Mercator
 ********************************************************************************
 
 .. image:: ./images/omerc.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Oblique Mercator  
 

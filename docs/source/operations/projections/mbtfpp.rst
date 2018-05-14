@@ -5,6 +5,6 @@ McBride-Thomas Flat-Polar Parabolic
 ********************************************************************************
 
 .. image:: ./images/mbtfpp.png
-   :scale: 100%
+   :scale: 50%
    :alt:   McBride-Thomas Flat-Polar Parabolic  
 

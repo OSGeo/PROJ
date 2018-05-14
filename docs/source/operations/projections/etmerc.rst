@@ -5,6 +5,6 @@ Extended Transverse Mercator
 ********************************************************************************
 
 .. image:: ./images/etmerc.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Extended Transverse Mercator  
 

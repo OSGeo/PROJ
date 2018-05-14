@@ -22,7 +22,6 @@ HEALPix
 
 .. image:: ../../../images/healpix.png
    :scale: 75%
-   :align: center
    :alt:   HEALPix
 
 The HEALPix projection is area preserving and can be used with a spherical and

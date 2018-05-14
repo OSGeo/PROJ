@@ -5,6 +5,6 @@ Boggs Eumorphic
 ********************************************************************************
 
 .. image:: ./images/boggs.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Boggs Eumorphic  
 

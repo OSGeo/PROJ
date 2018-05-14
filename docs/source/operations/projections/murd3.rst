@@ -5,6 +5,6 @@ Murdoch III
 ********************************************************************************
 
 .. image:: ./images/murd3.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Murdoch III  
 

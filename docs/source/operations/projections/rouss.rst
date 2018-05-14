@@ -5,6 +5,6 @@ Roussilhe Stereographic
 ********************************************************************************
 
 .. image:: ./images/rouss.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Roussilhe Stereographic  
 

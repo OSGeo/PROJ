@@ -5,6 +5,6 @@ General Oblique Transformation
 ********************************************************************************
 
 .. image:: ./images/ob_tran.png
-   :scale: 100%
+   :scale: 50%
    :alt:   General Oblique Transformation  
 

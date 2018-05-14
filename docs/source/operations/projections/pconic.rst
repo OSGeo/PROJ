@@ -5,6 +5,6 @@ Perspective Conic
 ********************************************************************************
 
 .. image:: ./images/pconic.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Perspective Conic  
 

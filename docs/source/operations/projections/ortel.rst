@@ -5,6 +5,6 @@ Ortelius Oval
 ********************************************************************************
 
 .. image:: ./images/ortel.png
-   :scale: 100%
+   :scale: 50%
    :alt:   Ortelius Oval  
 
