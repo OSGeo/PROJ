@@ -1,5 +1,8 @@
 #define PJ_LIB__
+
 #include <errno.h>
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(labrd, "Laborde") "\n\tCyl, Sph\n\tSpecial for Madagascar";
@@ -127,4 +130,3 @@ PJ *PROJECTION(labrd) {
 
     return P;
 }
-
