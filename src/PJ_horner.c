@@ -76,13 +76,17 @@
  *****************************************************************************/
 
 #define PJ_LIB__
+
+#include <errno.h>
+#include <math.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "proj_internal.h"
 #include "projects.h"
-#include <stddef.h>
-#include <math.h>
-#include <errno.h>
 
-PROJ_HEAD(horner,    "Horner polynomial evaluation");
+PROJ_HEAD(horner, "Horner polynomial evaluation");
 
 /* make horner.h interface with proj's memory management */
 #define horner_dealloc(x) pj_dealloc(x)
@@ -503,4 +507,3 @@ PJ *PROJECTION(horner) {
 
     return P;
 }
-

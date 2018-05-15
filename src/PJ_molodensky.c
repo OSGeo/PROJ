@@ -43,7 +43,10 @@
 *
 ***********************************************************************/
 #define PJ_LIB__
+
 #include <errno.h>
+#include <math.h>
+
 #include "proj.h"
 #include "proj_internal.h"
 #include "projects.h"
@@ -311,4 +314,3 @@ PJ *TRANSFORMATION(molodensky,1) {
 
     return P;
 }
-
