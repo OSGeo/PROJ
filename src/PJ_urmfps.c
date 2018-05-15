@@ -1,5 +1,8 @@
 #define PJ_LIB__
+
 #include <errno.h>
+#include <math.h>
+
 #include "proj.h"
 #include "projects.h"
 
@@ -69,4 +72,3 @@ PJ *PROJECTION(wag1) {
     P->opaque->n = 0.8660254037844386467637231707;
     return setup(P);
 }
-

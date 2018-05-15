@@ -27,14 +27,16 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-
-
 #define PJ_LIB__
-#include "geodesic.h"
+
+#include <ctype.h>
+#include <errno.h>
+#include <math.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
-#include <ctype.h>
+
+#include "geodesic.h"
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_math.h"

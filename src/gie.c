@@ -108,6 +108,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 #include <errno.h>
 #include <math.h>
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

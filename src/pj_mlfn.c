@@ -1,4 +1,7 @@
+#include <math.h>
+
 #include "projects.h"
+
 /* meridional distance for ellipsoid and inverse
 **	8th degree - accurate to < 1e-5 meters when used in conjunction
 **		with typical major axis values.

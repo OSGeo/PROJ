@@ -1,5 +1,8 @@
 /* dervative of (*P->fwd) projection */
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
 
 int pj_deriv(LP lp, double h, const PJ *P, struct DERIVS *der) {

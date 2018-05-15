@@ -25,6 +25,8 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#include <stddef.h>
+
 #include "proj.h"
 
 #define PJ_DATUMS__

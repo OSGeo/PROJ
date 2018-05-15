@@ -31,7 +31,9 @@
 #define _USE_MATH_DEFINES
 #endif
 #endif
+
 #include <math.h>   /* For M_PI */
+#include <stddef.h>
 
 #include "proj.h"
 

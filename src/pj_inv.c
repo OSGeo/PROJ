@@ -28,6 +28,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 #include <errno.h>
+#include <math.h>
 
 #include "proj_internal.h"
 #include "projects.h"

@@ -1,4 +1,7 @@
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(nicol, "Nicolosi Globular") "\n\tMisc Sph, no inv.";
@@ -49,4 +52,3 @@ PJ *PROJECTION(nicol) {
 
     return P;
 }
-

@@ -1,7 +1,11 @@
 /* Convert DMS string to radians */
-#include "projects.h"
-#include <string.h>
+
 #include <ctype.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "projects.h"
 
 static double proj_strtod(char *nptr, char **endptr);
 

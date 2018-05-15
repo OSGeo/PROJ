@@ -1,5 +1,8 @@
 #define PJ_LIB__
+
 #include <errno.h>
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(kav5,    "Kavraisky V")         "\n\tPCyl., Sph.";
@@ -102,4 +105,3 @@ PJ *PROJECTION(mbt_s) {
     P->opaque = Q;
     return setup(P, 1.48875, 1.36509, 0);
 }
-

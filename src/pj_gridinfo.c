@@ -28,11 +28,15 @@
 
 #define PJ_LIB__
 
+#include <errno.h>
+#include <math.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "proj_internal.h"
 #include "projects.h"
-#include <string.h>
-#include <math.h>
-#include <errno.h>
 
 /************************************************************************/
 /*                             swap_words()                             */
