@@ -1,5 +1,7 @@
 #define PJ_LIB__
-#include    "projects.h"
+#include <math.h>
+
+#include "projects.h"
 
 PROJ_HEAD(denoy, "Denoyer Semi-Elliptical") "\n\tPCyl., no inv., Sph.";
 
@@ -28,4 +30,3 @@ PJ *PROJECTION(denoy) {
 
     return P;
 }
-

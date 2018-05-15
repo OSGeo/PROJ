@@ -1,5 +1,8 @@
 #define PJ_LIB__
+
 #include <errno.h>
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(eck3, "Eckert III") "\n\tPCyl, Sph.";
@@ -105,4 +108,3 @@ PJ *PROJECTION(putp1) {
 
     return setup(P);
 }
-
