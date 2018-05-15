@@ -29,8 +29,11 @@
  *****************************************************************************/
 
 #define PJ_LIB__
-#include "proj.h"
+
 #include <errno.h>
+#include <math.h>
+
+#include "proj.h"
 #include "projects.h"
 
 
@@ -192,5 +195,3 @@ PJ *PROJECTION(wintri) {
         Q->cosphi1 = 0.636619772367581343;
     return setup(P);
 }
-
-

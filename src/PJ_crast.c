@@ -1,5 +1,7 @@
 #define PJ_LIB__
-# include   "projects.h"
+#include <math.h>
+
+#include "projects.h"
 
 PROJ_HEAD(crast, "Craster Parabolic (Putnins P4)") "\n\tPCyl., Sph.";
 
@@ -36,4 +38,3 @@ PJ *PROJECTION(crast) {
 
     return P;
 }
-

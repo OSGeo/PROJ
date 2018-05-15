@@ -29,6 +29,9 @@
 
 #define PJ_LIB__
 #include <errno.h>
+#include <math.h>
+#include <stddef.h>
+
 #include "proj.h"
 #include "projects.h"
 #include "proj_math.h"
@@ -231,5 +234,3 @@ PJ *PROJECTION(geos) {
 
     return P;
 }
-
-
