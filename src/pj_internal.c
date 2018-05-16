@@ -28,10 +28,14 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
+
 #include <ctype.h>
-#include <stddef.h>
-#include <stdarg.h>
 #include <errno.h>
+#include <math.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "geodesic.h"
 #include "proj_internal.h"

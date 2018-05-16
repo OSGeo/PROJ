@@ -28,7 +28,9 @@
 
 #define PJ_LIB__
 
+#include <stdio.h>
 #include <string.h>
+
 #include "proj_math.h"
 #include "proj_internal.h"
 #include "projects.h"
@@ -292,4 +294,3 @@ double proj_vgrid_value(PJ *P, LP lp){
 
     return value;
 }
-

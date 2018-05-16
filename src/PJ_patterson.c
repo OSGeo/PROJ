@@ -39,6 +39,9 @@
  */
 
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(patterson, "Patterson Cylindrical") "\n\tCyl.";
@@ -112,4 +115,3 @@ PJ *PROJECTION(patterson) {
 
     return P;
 }
-

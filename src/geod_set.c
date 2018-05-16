@@ -1,11 +1,14 @@
-
 #define _IN_GEOD_SET
 
+#include <math.h>
+#include <stdlib.h>
 #include <string.h>
+
 #include "proj.h"
 #include "projects.h"
 #include "geod_interface.h"
 #include "emess.h"
+
 	void
 geod_set(int argc, char **argv) {
 	paralist *start = 0, *curr;

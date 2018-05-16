@@ -1,6 +1,9 @@
 #define PJ_LIB__
-#include "projects.h"
+
 #include <errno.h>
+#include <math.h>
+
+#include "projects.h"
 
 PROJ_HEAD(wink1, "Winkel I") "\n\tPCyl., Sph.\n\tlat_ts=";
 
@@ -39,4 +42,3 @@ PJ *PROJECTION(wink1) {
 
     return P;
 }
-

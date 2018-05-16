@@ -27,9 +27,12 @@
 
 #define PJ_LIB__
 
-#include "projects.h"
-#include <string.h>
 #include <assert.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "projects.h"
 
 static PJ_GridCatalog *grid_catalog_list = NULL;
 

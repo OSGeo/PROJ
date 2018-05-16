@@ -29,11 +29,15 @@
  *****************************************************************************/
 
 #define PJ_LIB__
+
+#include <errno.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "proj_internal.h"
 #include "projects.h"
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
 
 static const char *(*pj_finder)(const char *) = NULL;
 static int path_count = 0;

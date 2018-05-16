@@ -30,8 +30,10 @@
 
 #define PJ_LIB__
 
-#include <string.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "proj_internal.h"
 #include "projects.h"
 

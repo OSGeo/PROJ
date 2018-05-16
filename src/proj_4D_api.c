@@ -26,8 +26,13 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-#include <stddef.h>
+
 #include <errno.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_math.h"
@@ -1080,4 +1085,3 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
 
     return factors;
 }
-

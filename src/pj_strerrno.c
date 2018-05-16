@@ -1,7 +1,9 @@
 /* list of projection system pj_errno values */
+
+#include <stddef.h>
 #include <stdio.h>
-#include <errno.h>
 #include <string.h>
+
 #include "proj.h"
 #include "projects.h"
 
