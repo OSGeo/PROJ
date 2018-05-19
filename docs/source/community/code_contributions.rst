@@ -151,3 +151,19 @@ Typo detection and fixes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Run ``scripts/fix_typos.sh``
+
+Include What You Use (IWYU)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Managing C includes is a pain.  IWYU makes updating headers a bit
+easier.  IWYU scans the code for functions that are called and makes
+sure that the headers for all those functions are present and in
+sorted order.  However, you cannot blindly apply IWYU to PROJ.  It
+does not understand ifdefs, other platforms, or the order requirements
+of PROJ internal headers.  So the way to use it is to run it on a copy
+of the source and merge in only the changes that make sense.
+Additions of standard headers should always be safe to merge.  The
+rest require careful evaluation.  See the IWYU documentation for
+motivation and details.
+
+`IWYU docs <https://github.com/include-what-you-use/include-what-you-use/tree/master/docs>`_
