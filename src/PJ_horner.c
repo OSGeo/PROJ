@@ -456,7 +456,7 @@ PJ *PROJECTION(horner) {
         degree = pj_param(P->ctx, P->params, "ideg").i;
         if (degree < 0 || degree > 10000) {
             /* What are reasonable minimum and maximums for degree? */
-            proj_log_debug (P, "Horner: Degree is unreasnable: %d", degree);
+            proj_log_debug (P, "Horner: Degree is unreasonable: %d", degree);
             return horner_freeup (P, PJD_ERR_INVALID_ARG);
         }
     } else {
