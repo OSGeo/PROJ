@@ -47,6 +47,7 @@ build_script:
   - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" nmake /f makefile.vc multistresstest.exe
 # Disabled for now as it scales badly
 #  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" multistresstest.exe
+  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" cd ..
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
   - if "%BUILD_TYPE%" == "cmake" echo "%VS_FULL%"
@@ -57,6 +58,8 @@ test_script:
   - echo test_script
   - if "%BUILD_TYPE%" == "cmake" set PROJ_LIB=C:\projects\proj-4\nad
   - if "%BUILD_TYPE%" == "nmake" set PROJ_LIB=C:\PROJ\SHARE
+  - if "%BUILD_TYPE%" == "nmake" mkdir %PROJ_LIB%\tests
+  - if "%BUILD_TYPE%" == "nmake" copy nad\tests\*.* %PROJ_LIB%\tests
   - cd %PROJ_LIB%
   - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.7.zip
   - 7z e -aoa -y proj-datumgrid-1.7.zip
