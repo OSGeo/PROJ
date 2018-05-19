@@ -1,4 +1,7 @@
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(mbt_fps, "McBryde-Thomas Flat-Pole Sine (No. 2)") "\n\tCyl., Sph.";
@@ -52,4 +55,3 @@ PJ *PROJECTION(mbt_fps) {
 
     return P;
 }
-

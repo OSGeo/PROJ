@@ -25,9 +25,11 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#include "projects.h"
-#include <string.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "projects.h"
 
 static projCtx_t default_context;
 static volatile int       default_context_initialized = 0;

@@ -1,4 +1,7 @@
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(putp2, "Putnins P2") "\n\tPCyl., Sph.";
@@ -56,4 +59,3 @@ PJ *PROJECTION(putp2) {
 
     return P;
 }
-

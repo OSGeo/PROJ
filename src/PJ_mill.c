@@ -1,4 +1,7 @@
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(mill, "Miller Cylindrical") "\n\tCyl, Sph";
@@ -32,4 +35,3 @@ PJ *PROJECTION(mill) {
 
     return P;
 }
-

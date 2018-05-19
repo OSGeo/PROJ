@@ -28,16 +28,18 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *****************************************************************************/
-# define PJ_LIB__
-# include <errno.h>
-# include "proj_internal.h"
-# include "proj.h"
-# include "projects.h"
+#define PJ_LIB__
+
+#include <errno.h>
+#include <math.h>
+
+#include "proj_internal.h"
+#include "proj.h"
+#include "projects.h"
 
 PROJ_HEAD(healpix, "HEALPix") "\n\tSph., Ellps.";
 PROJ_HEAD(rhealpix, "rHEALPix") "\n\tSph., Ellps.\n\tnorth_square= south_square=";
 
-# include <stdio.h>
 /* Matrix for counterclockwise rotation by pi/2: */
 # define R1 {{ 0,-1},{ 1, 0}}
 /* Matrix for counterclockwise rotation by pi: */
@@ -668,4 +670,3 @@ PJ *PROJECTION(rhealpix) {
 
     return P;
 }
-

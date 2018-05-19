@@ -24,6 +24,10 @@
 ** SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #define PJ_LIB__
+
+#include <math.h>
+#include <stdlib.h>
+
 #include "projects.h"
 
 #define MAX_ITER 20

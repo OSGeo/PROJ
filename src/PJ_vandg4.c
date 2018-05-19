@@ -1,4 +1,7 @@
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(vandg4, "van der Grinten IV") "\n\tMisc Sph, no inv.";
@@ -50,4 +53,3 @@ PJ *PROJECTION(vandg4) {
 
     return P;
 }
-

@@ -27,10 +27,12 @@
 
 #define PJ_LIB__
 
-#include <errno.h>
-#include "projects.h"
-#include <string.h>
 #include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "projects.h"
 
 static int gc_readentry(projCtx ctx, PAFile fid, PJ_GridCatalogEntry *entry);
 
@@ -46,7 +48,7 @@ PJ_GridCatalog *pj_gc_readcatalog( projCtx ctx, const char *catalog_name )
     PJ_GridCatalog *catalog;
     int entry_max;
     char line[302];
-    
+
     fid = pj_open_lib( ctx, catalog_name, "r" );
     if (fid == NULL) 
         return NULL;

@@ -29,9 +29,10 @@
 #define PJ_LIB__
 
 #include <errno.h>
-#include "projects.h"
+#include <stddef.h>
 #include <string.h>
-#include <math.h>
+
+#include "projects.h"
 
 static PJ_GRIDINFO *grid_list = NULL;
 #define PJ_MAX_PATH_LENGTH 1024

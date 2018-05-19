@@ -1,6 +1,9 @@
 #define PJ_LIB__
-#include "projects.h"
+
 #include <errno.h>
+#include <math.h>
+
+#include "projects.h"
 
 PROJ_HEAD(wag3, "Wagner III") "\n\tPCyl., Sph.\n\tlat_ts=";
 
@@ -43,4 +46,3 @@ PJ *PROJECTION(wag3) {
 
     return P;
 }
-

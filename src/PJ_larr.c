@@ -1,4 +1,7 @@
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(larr, "Larrivee") "\n\tMisc Sph, no inv.";
@@ -23,4 +26,3 @@ PJ *PROJECTION(larr) {
 
     return P;
 }
-

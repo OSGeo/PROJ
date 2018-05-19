@@ -1,4 +1,7 @@
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "proj.h"
 #include "projects.h"
 
@@ -29,4 +32,3 @@ PJ *PROJECTION(tcc) {
 
     return P;
 }
-

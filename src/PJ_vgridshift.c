@@ -1,4 +1,7 @@
 #define PJ_LIB__
+
+#include <stddef.h>
+
 #include "proj_internal.h"
 #include "projects.h"
 
@@ -74,4 +77,3 @@ PJ *TRANSFORMATION(vgridshift,0) {
 
     return P;
 }
-

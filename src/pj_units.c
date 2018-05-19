@@ -1,5 +1,7 @@
 /* definition of standard cartesian units */
 
+#include <stddef.h>
+
 #include "proj.h"
 
 #define PJ_UNITS__

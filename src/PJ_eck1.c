@@ -1,4 +1,6 @@
 #define PJ_LIB__
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(eck1, "Eckert I") "\n\tPCyl., Sph.";
@@ -37,5 +39,3 @@ PJ *PROJECTION(eck1) {
     return P
 ;
 }
-
-

@@ -25,8 +25,9 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#include "projects.h"
 #include <string.h>
+
+#include "projects.h"
 
 static int cache_count = 0;
 static int cache_alloc = 0;
@@ -51,7 +52,7 @@ paralist *pj_clone_paralist( const paralist *list)
       newitem->used = 0;
       newitem->next = 0;
       strcpy( newitem->param, list->param );
-      
+
       if( list_copy == NULL )
 	list_copy = newitem;
       else

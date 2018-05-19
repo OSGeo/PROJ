@@ -46,7 +46,10 @@
 *****************************************************************************/
 
 #define PJ_LIB__
+
 #include <errno.h>
+#include <math.h>
+
 #include "proj.h"
 #include "projects.h"
 
@@ -157,4 +160,3 @@ PJ *PROJECTION(lcca) {
 
     return P;
 }
-

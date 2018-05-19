@@ -1,7 +1,12 @@
 /* Convert radian argument to DMS ascii format */
-#include "projects.h"
+
+#include <math.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "projects.h"
+
 /*
 ** RES is fractional second figures
 ** RES60 = 60 * RES

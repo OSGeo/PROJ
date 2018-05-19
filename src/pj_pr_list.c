@@ -1,7 +1,11 @@
 /* print projection's list of parameters */
-#include "projects.h"
+
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "projects.h"
+
 #define LINE_LEN 72
 	static int
 pr_list(PJ *P, int not_used) {

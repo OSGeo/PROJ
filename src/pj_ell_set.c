@@ -1,6 +1,9 @@
 /* set ellipsoid parameters a and es */
+
+#include <math.h>
+#include <stddef.h>
 #include <string.h>
-#include <errno.h>
+
 #include "proj.h"
 #include "proj_internal.h"
 #include "projects.h"

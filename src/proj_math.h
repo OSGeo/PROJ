@@ -44,6 +44,9 @@ int     pj_isnan(double x);
 #define hypot   pj_hypot
 #define log1p   pj_log1p
 #define asinh   pj_asinh
+#ifdef isnan
+#undef isnan
+#endif
 #define isnan   pj_isnan
 
 #endif /* !(defined(HAVE_C99_MATH) && HAVE_C99_MATH) */
