@@ -11,6 +11,7 @@
 #include <string.h>
 
 #define PJ_LIB__
+#include "proj_internal.h"
 #include "proj.h"
 #include "projects.h"
 
@@ -43,9 +44,6 @@
 /* in radians */
 #define ISEA_STD_LAT 1.01722196792335072101
 #define ISEA_STD_LON .19634954084936207740
-
-#define RAD2DEG (180.0/M_PI)
-#define DEG2RAD (M_PI/180.0)
 
 struct hex {
         int iso;
@@ -336,9 +334,9 @@ static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
 
     /* TODO put these constants in as radians to begin with */
     c = constants[SNYDER_POLY_ICOSAHEDRON];
-    theta = c.theta * DEG2RAD;
-    g = c.g * DEG2RAD;
-    G = c.G * DEG2RAD;
+    theta = PJ_TORAD(c.theta);
+    g = PJ_TORAD(c.g);
+    G = PJ_TORAD(c.G);
 
     for (i = 1; i <= 20; i++) {
         double          z;
@@ -458,7 +456,7 @@ static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
      */
 
     fprintf(stderr, "impossible transform: %f %f is not on any triangle\n",
-        ll->lon * RAD2DEG, ll->lat * RAD2DEG);
+            PJ_TODEG(ll->lon), PJ_TODEG(ll->lat));
 
     exit(EXIT_FAILURE);
 
