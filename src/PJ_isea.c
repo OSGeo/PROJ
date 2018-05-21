@@ -3,15 +3,47 @@
  * and is in the public domain.
  */
 
+#include <errno.h>
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef M_PI
-#  define M_PI 3.14159265358979323846
-#endif
+#define PJ_LIB__
+#include "proj_internal.h"
+#include "proj.h"
+#include "projects.h"
+
+#define DEG36 0.62831853071795864768
+#define DEG72 1.25663706143591729537
+#define DEG90 M_PI_2
+#define DEG108 1.88495559215387594306
+#define DEG120 2.09439510239319549229
+#define DEG144 2.51327412287183459075
+#define DEG180 M_PI
+
+/* sqrt(5)/M_PI */
+#define ISEA_SCALE 0.8301572857837594396028083
+
+/* 26.565051177 degrees */
+#define V_LAT 0.46364760899944494524
+
+/* 52.62263186 */
+#define E_RAD 0.91843818702186776133
+
+/* 10.81231696 */
+#define F_RAD 0.18871053072122403508
+
+/* R tan(g) sin(60) */
+#define TABLE_G 0.6615845383
+
+/* H = 0.25 R tan g = */
+#define TABLE_H 0.1909830056
+
+/* in radians */
+#define ISEA_STD_LAT 1.01722196792335072101
+#define ISEA_STD_LON .19634954084936207740
 
 struct hex {
         int iso;
@@ -145,22 +177,6 @@ static const struct snyder_constants constants[] = {
     {37.37736814, 36.0, 30.0, 17.27, 1.163, 0.860, 13.14, 1.584, 1.0},
 };
 
-#define DEG120 2.09439510239319549229
-#define DEG72 1.25663706143591729537
-#define DEG90 1.57079632679489661922
-#define DEG144 2.51327412287183459075
-#define DEG36 0.62831853071795864768
-#define DEG108 1.88495559215387594306
-#define DEG180 M_PI
-/* sqrt(5)/M_PI */
-#define ISEA_SCALE 0.8301572857837594396028083
-
-/* 26.565051177 degrees */
-#define V_LAT 0.46364760899944494524
-
-#define RAD2DEG (180.0/M_PI)
-#define DEG2RAD (M_PI/180.0)
-
 static struct isea_geo vertex[] = {
     {0.0, DEG90},
     {DEG180, V_LAT},
@@ -179,12 +195,6 @@ static struct isea_geo vertex[] = {
 /* TODO make an isea_pt array of the vertices as well */
 
 static int tri_v1[] = {0, 0, 0, 0, 0, 0, 6, 7, 8, 9, 10, 2, 3, 4, 5, 1, 11, 11, 11, 11, 11};
-
-/* 52.62263186 */
-#define E_RAD 0.91843818702186776133
-
-/* 10.81231696 */
-#define F_RAD 0.18871053072122403508
 
 /* triangle Centers */
 static const struct isea_geo icostriangles[] = {
@@ -228,12 +238,6 @@ static double az_adjustment(int triangle)
             - sin(c.lat) * cos(v.lat) * cos(v.lon - c.lon));
     return adj;
 }
-
-/* R tan(g) sin(60) */
-#define TABLE_G 0.6615845383
-
-/* H = 0.25 R tan g = */
-#define TABLE_H 0.1909830056
 
 static struct isea_pt isea_triangle_xy(int triangle)
 {
@@ -330,9 +334,9 @@ static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
 
     /* TODO put these constants in as radians to begin with */
     c = constants[SNYDER_POLY_ICOSAHEDRON];
-    theta = c.theta * DEG2RAD;
-    g = c.g * DEG2RAD;
-    G = c.G * DEG2RAD;
+    theta = PJ_TORAD(c.theta);
+    g = PJ_TORAD(c.g);
+    G = PJ_TORAD(c.G);
 
     for (i = 1; i <= 20; i++) {
         double          z;
@@ -452,7 +456,7 @@ static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
      */
 
     fprintf(stderr, "impossible transform: %f %f is not on any triangle\n",
-        ll->lon * RAD2DEG, ll->lat * RAD2DEG);
+            PJ_TODEG(ll->lon), PJ_TODEG(ll->lat));
 
     exit(EXIT_FAILURE);
 
@@ -548,10 +552,6 @@ static struct isea_geo isea_ctran(struct isea_geo * np, struct isea_geo * pt,
 
     return npt;
 }
-
-/* in radians */
-#define ISEA_STD_LAT 1.01722196792335072101
-#define ISEA_STD_LON .19634954084936207740
 
 /* fuller's at 5.2454 west, 2.3009 N, adjacent at 7.46658 deg */
 
@@ -965,14 +965,10 @@ static struct isea_pt isea_forward(struct isea_dgg *g, struct isea_geo *in)
 
     return out;
 }
+
 /*
  * Proj 4 integration code follows
  */
-
-#define PJ_LIB__
-#include <errno.h>
-#include "proj.h"
-#include "projects.h"
 
 PROJ_HEAD(isea, "Icosahedral Snyder Equal Area") "\n\tSph";
 
