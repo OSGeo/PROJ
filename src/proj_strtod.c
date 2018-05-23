@@ -85,6 +85,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-01-17/2017-09-18
 
 ***********************************************************************/
 
+#include "proj_strtod.h"
 
 #include <stdlib.h> /* for abs */
 #include <string.h> /* for strchr */
@@ -92,9 +93,6 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-01-17/2017-09-18
 #include <ctype.h>
 #include <float.h>  /* for HUGE_VAL */
 #include <math.h>   /* for pow() */
-
-double proj_strtod(const char *str, char **endptr);
-double proj_atof(const char *str);
 
 
 double proj_strtod(const char *str, char **endptr) {
@@ -321,8 +319,6 @@ double proj_atof(const char *str) {
 /* compile/run: gcc -DTEST -o proj_strtod_test proj_strtod.c  &&  proj_strtod_test */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 char *un_underscore (char *s) {
     static char u[1024];
