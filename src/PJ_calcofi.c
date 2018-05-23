@@ -1,15 +1,14 @@
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "proj.h"
 #include "projects.h"
+#include "proj_api.h"
 
 PROJ_HEAD(calcofi,
     "Cal Coop Ocean Fish Invest Lines/Stations") "\n\tCyl, Sph&Ell";
 
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
-#include "proj_api.h"
-#include <errno.h>
 
 /* Conversions for the California Cooperative Oceanic Fisheries Investigations
 Line/Station coordinate system following the algorithm of:
@@ -44,13 +43,12 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double l2;
     double ry; /* r is the point on the same station as o (60) and the same
                line as xy xy, r, o form a right triangle */
-    /* if the user has specified +lon_0 or +k0 for some reason,
-    we're going to ignore it so that xy is consistent with point O */
-    lp.lam = lp.lam + P->lam0;
+
     if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return xy;
     }
+
     xy.x = lp.lam;
     xy.y = -log(pj_tsfn(lp.phi, sin(lp.phi), P->e)); /* Mercator transform xy*/
     oy = -log(pj_tsfn(PT_O_PHI, sin(PT_O_PHI), P->e));
@@ -64,9 +62,7 @@ static XY e_forward (LP lp, PJ *P) {          /* Ellipsoidal, forward */
         (ry - lp.phi) * DEG_TO_STATION / sin(ROTATION_ANGLE);
     /* set a = 1, x0 = 0, and y0 = 0 so that no further unit adjustments
     are done */
-    P->a = 1;
-    P->x0 = 0;
-    P->y0 = 0;
+
     return xy;
 }
 
@@ -77,7 +73,6 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     double l1;
     double l2;
     double ry;
-    lp.lam = lp.lam + P->lam0;
     if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return xy;
@@ -93,24 +88,20 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
         (ry - PT_O_PHI) * DEG_TO_LINE / cos(ROTATION_ANGLE);
     xy.y = PT_O_STATION + RAD_TO_DEG *
         (ry - lp.phi) * DEG_TO_STATION / sin(ROTATION_ANGLE);
-    P->a = 1;
-    P->x0 = 0;
-    P->y0 = 0;
+
     return xy;
 }
 
 
 static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     LP lp = {0.0,0.0};
-    double ry; /* y value of point r */
+    double ry;     /* y value of point r */
     double oymctr; /* Mercator-transformed y value of point O */
     double rymctr; /* Mercator-transformed ry */
     double xymctr; /* Mercator-transformed xy.y */
     double l1;
     double l2;
-    /* turn x and y back into Line/Station */
-    xy.x /= P->ra;
-    xy.y /= P->ra;
+
     ry = PT_O_PHI - LINE_TO_RAD * (xy.x - PT_O_LINE) *
         cos(ROTATION_ANGLE);
     lp.phi = ry - STATION_TO_RAD * (xy.y - PT_O_STATION) * sin(ROTATION_ANGLE);
@@ -120,7 +111,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     l1 = (xymctr - oymctr) * tan(ROTATION_ANGLE);
     l2 = (rymctr - xymctr) / (cos(ROTATION_ANGLE) * sin(ROTATION_ANGLE));
     lp.lam = PT_O_LAMBDA - (l1 + l2);
-    P->over = 1;
+
     return lp;
 }
 
@@ -133,8 +124,8 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     double xymctr;
     double l1;
     double l2;
-    xy.x /= P->ra;
-    xy.y /= P->ra;
+    (void) P;
+
     ry = PT_O_PHI - LINE_TO_RAD * (xy.x - PT_O_LINE) *
         cos(ROTATION_ANGLE);
     lp.phi = ry - STATION_TO_RAD * (xy.y - PT_O_STATION) * sin(ROTATION_ANGLE);
@@ -144,13 +135,22 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     l1 = (xymctr - oymctr) * tan(ROTATION_ANGLE);
     l2 = (rymctr - xymctr) / (cos(ROTATION_ANGLE) * sin(ROTATION_ANGLE));
     lp.lam = PT_O_LAMBDA - (l1 + l2);
-    P->over = 1;
+
     return lp;
 }
 
 
 PJ *PROJECTION(calcofi) {
     P->opaque = 0;
+
+    /* if the user has specified +lon_0 or +k0 for some reason,
+    we're going to ignore it so that xy is consistent with point O */
+    P->lam0 = 0;
+    P->ra = 1;
+    P->a = 1;
+    P->x0 = 0;
+    P->y0 = 0;
+    P->over = 1;
 
     if (P->es != 0.0) { /* ellipsoid */
         P->inv = e_inverse;
@@ -161,5 +161,3 @@ PJ *PROJECTION(calcofi) {
     }
     return P;
 }
-
-

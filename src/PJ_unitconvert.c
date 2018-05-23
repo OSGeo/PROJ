@@ -64,11 +64,14 @@ Last update: 2017-05-16
 ***********************************************************************/
 
 #define PJ_LIB__
-#include <time.h>
-#include <errno.h>
 
-#include "proj_math.h"
+#include <errno.h>
+#include <math.h>
+#include <string.h>
+#include <time.h>
+
 #include "proj_internal.h"
+#include "proj_math.h"
 #include "projects.h"
 
 PROJ_HEAD(unitconvert, "Unit conversion");

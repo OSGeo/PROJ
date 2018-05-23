@@ -129,8 +129,8 @@ meridian.
 ::
 
     cs2cs +proj=latlong +datum=WGS84 +to +proj=latlong +datum=WGS84 +pm=madrid
-    0 0                           <i>(input)</i>
-    3d41'16.48"E    0dN 0.000     <i>(output)</i>
+    0 0
+    3d41'16.48"E    0dN 0.000
 
 
 Axis orientation

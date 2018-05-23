@@ -27,6 +27,11 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#include <errno.h>
+#include <locale.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "projects.h"
 
 /* Windows nmake build doesn't have a proj_config.h, but HAVE_LOCALECONV */
@@ -34,10 +39,6 @@
 #ifndef HAVE_LOCALECONV
 #include "proj_config.h"
 #endif
-
-#include <stdlib.h>
-#include <locale.h>
-#include <errno.h>
 
 #define PJ_STRTOD_WORK_BUFFER_SIZE 64
 
@@ -193,4 +194,3 @@ double pj_strtod( const char *nptr, char **endptr )
     errno = nError;
     return dfValue;
 }
-

@@ -28,9 +28,10 @@
 
 #define PJ_LIB__
 
-#include "projects.h"
+#include <stdio.h>
 #include <string.h>
-#include <math.h>
+
+#include "projects.h"
 
 /************************************************************************/
 /*                           pj_is_latlong()                            */

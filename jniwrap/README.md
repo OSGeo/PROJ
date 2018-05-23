@@ -3,13 +3,30 @@
 This is the third release of JNI wrappers for the main PROJ functions.
 The first release of JNI wrappers were created by http://www.hydrologis.com.
 The second release of JNI wrappers were created by http://www.geoapi.org.
+This release is compatible with any PROJ versions from 4.8 to 5
+provided that PROJ has been compiled as described below.
 
 
 
 ## What is "PROJ bridge to Java"
 
-_Proj bridge to Java_ is a small library of Java classes that wrap a few PROJ functions
+_PROJ bridge to Java_ is a small library of Java classes that wrap a few PROJ functions
 by using the Java Native Interface (JNI). The main Java class is `org.proj4.PJ`.
+A Java code example is given in the _Usage & a fast example_ section below.
+
+
+
+### Versions
+
+The PROJ bridge to Java does not follow the same version numbers than the main PROJ library
+since the same JAR file can be compatible with a range of PROJ versions.
+Version compatibility is given below:
+
+
+Java bridge | Compatible with PROJ library
+----------- | ----------------------------
+2.0 and 3.0 | 4.8 to 5+
+1.0         | 4.4.9 to 4.8 inclusive
 
 
 
@@ -39,10 +56,11 @@ Beyond the ones already put by PROJ, you need:
 
 * For compilation:
   * Java 9+, the Java standard development kit version 9 or above
-  * Ant 1.9.8+, to run the build.
+  * Ant 1.10+, to run the build.
 * For execution:
   * If a Java version less than the current version on the local machine is desired,
-    add an `release` attribute in the `javac` task of `build.xml`.
+    add a `release` attribute in the `javac` task of `build.xml` before to compile.
+  * Proj version 4.8 or more recent compiled with the `--with-jni` option.
 
 
 
@@ -101,16 +119,28 @@ Of course, real applications would read them from a file or other data source.
 
 
 
-### compile the Main code
+### Compile the Main code
 
-we assume that PROJ was compiled with the right flag to support the bridge to Java
+We assume that PROJ was compiled with the right flag to support the bridge to Java.
 Therefore we have a library called `proj.jar`.
 Thus we compile the `Main.java` with the command:
 
-    javac -classpath <path to the jar library>/proj.jar Main.java
+    javac --class-path <path to the jar library>/proj.jar Main.java
 
-and execute the created test case with:
+and execute the created test case with (replace `:` by `;` on the Windows platform):
 
-    java -cp .:<path to the jar library>/proj.jar -Djava.library.path=<path to the libproj, if needed> Main
+    java --class-path <path to the jar library>/proj.jar:. Main
 
-That's it, enjoy!
+
+
+### Troubleshooting
+
+If an `java.lang.UnsatisfiedLinkError` is thrown at execution time, add the following line in the Java code:
+
+    System.out.println(System.getProperty("java.library.path"));
+
+Then verify that the `libproj.so` (Linux), `libproj.dylib` (MacOS) or `libproj.dll` (Windows) file is located
+in one of the directories listed by above code. If this is not the case, then try configuring the
+`LD_LIBRARY_PATH` (Linux), `DYLD_LIBRARY_PATH` (MacOS) or `PATH` (Windows) environment variable.
+Alternatively, a `-Djava.library.path=<path to the libproj>` option can be added to above `java` command.
+If the problem persist, adding the `-verbose:jni` option to the `java` command may help more advanced diagnostics.

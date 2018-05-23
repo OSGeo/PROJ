@@ -28,10 +28,21 @@
 
 #define PJ_LIB__
 
+#include <stdio.h>
 #include <string.h>
+
 #include "proj_math.h"
 #include "proj_internal.h"
 #include "projects.h"
+
+static int is_nodata(float value)
+{
+    /* nodata?  */
+    /* GTX official nodata value if  -88.88880f, but some grids also */
+    /* use other  big values for nodata (e.g naptrans2008.gtx has */
+    /* nodata values like -2147479936), so test them too */
+    return value > 1000 || value < -1000 || value == -88.88880f;
+}
 
 static double read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GRIDINFO **tables, struct CTABLE *ct) {
     int  itable = 0;
@@ -110,23 +121,49 @@ static double read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GR
             grid_iy2 = ct->lim.phi - 1;
 
         cvs = (float *) ct->cvs;
-        value = cvs[grid_ix + grid_iy * ct->lim.lam]
-            * (1.0-grid_x) * (1.0-grid_y)
-            + cvs[grid_ix2 + grid_iy * ct->lim.lam]
-            * (grid_x) * (1.0-grid_y)
-            + cvs[grid_ix + grid_iy2 * ct->lim.lam]
-            * (1.0-grid_x) * (grid_y)
-            + cvs[grid_ix2 + grid_iy2 * ct->lim.lam]
-            * (grid_x) * (grid_y);
+        {
+            float value_a = cvs[grid_ix + grid_iy * ct->lim.lam];
+            float value_b = cvs[grid_ix2 + grid_iy * ct->lim.lam];
+            float value_c = cvs[grid_ix + grid_iy2 * ct->lim.lam];
+            float value_d = cvs[grid_ix2 + grid_iy2 * ct->lim.lam];
+            double total_weight = 0.0;
+            int n_weights = 0;
+            value = 0.0f;
+            if( !is_nodata(value_a) )
+            {
+                double weight = (1.0-grid_x) * (1.0-grid_y);
+                value += value_a * weight;
+                total_weight += weight;
+                n_weights ++;
+            }
+            if( !is_nodata(value_b) )
+            {
+                double weight = (grid_x) * (1.0-grid_y);
+                value += value_b * weight;
+                total_weight += weight;
+                n_weights ++;
+            }
+            if( !is_nodata(value_c) )
+            {
+                double weight = (1.0-grid_x) * (grid_y);
+                value += value_c * weight;
+                total_weight += weight;
+                n_weights ++;
+            }
+            if( !is_nodata(value_d) )
+            {
+                double weight = (grid_x) * (grid_y);
+                value += value_d * weight;
+                total_weight += weight;
+                n_weights ++;
+            }
+            if( n_weights == 0 )
+                value = HUGE_VAL;
+            else if( n_weights != 4 )
+                value /= total_weight;
+        }
 
     }
-    /* nodata?  */
-    /* GTX official nodata value if  -88.88880f, but some grids also */
-    /* use other  big values for nodata (e.g naptrans2008.gtx has */
-    /* nodata values like -2147479936), so test them too */
-    if( value > 1000 || value < -1000 || value == -88.88880f )
-        value = HUGE_VAL;
-
 
     return value;
 }
@@ -292,4 +329,3 @@ double proj_vgrid_value(PJ *P, LP lp){
 
     return value;
 }
-

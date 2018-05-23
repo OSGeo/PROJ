@@ -9,14 +9,16 @@
 #  endif
 #endif
 
+#include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
-#include <errno.h>
 #include <string.h>
+
 #include "proj_api.h"
 #define EMESS_ROUTINE
 #include "emess.h"
+
 	void
 emess(int code, const char *fmt, ...) {
 	va_list args;

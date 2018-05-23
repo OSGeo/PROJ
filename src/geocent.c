@@ -432,6 +432,5 @@ void pj_Convert_Geocentric_To_Geodetic (GeocentricInfo *gi,
 /*	ellipsoidal (geodetic) latitude */
     *Latitude=atan2(SPHI, fabs(CPHI));
 
-    return;
 #endif /* defined(USE_ITERATIVE_METHOD) */
 } /* END OF Convert_Geocentric_To_Geodetic */

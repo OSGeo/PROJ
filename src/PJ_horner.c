@@ -76,13 +76,17 @@
  *****************************************************************************/
 
 #define PJ_LIB__
+
+#include <errno.h>
+#include <math.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "proj_internal.h"
 #include "projects.h"
-#include <stddef.h>
-#include <math.h>
-#include <errno.h>
 
-PROJ_HEAD(horner,    "Horner polynomial evaluation");
+PROJ_HEAD(horner, "Horner polynomial evaluation");
 
 /* make horner.h interface with proj's memory management */
 #define horner_dealloc(x) pj_dealloc(x)
@@ -450,9 +454,9 @@ PJ *PROJECTION(horner) {
     /* Polynomial degree specified? */
     if (pj_param (P->ctx, P->params, "tdeg").i) { /* degree specified? */
         degree = pj_param(P->ctx, P->params, "ideg").i;
-        if (degree > 10000) {
-            /* What is a reasonable maximum for the degree? */
-            proj_log_debug (P, "Horner: Degree too large: %d", degree);
+        if (degree < 0 || degree > 10000) {
+            /* What are reasonable minimum and maximums for degree? */
+            proj_log_debug (P, "Horner: Degree is unreasonable: %d", degree);
             return horner_freeup (P, PJD_ERR_INVALID_ARG);
         }
     } else {
@@ -503,4 +507,3 @@ PJ *PROJECTION(horner) {
 
     return P;
 }
-

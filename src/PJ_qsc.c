@@ -39,7 +39,10 @@
  */
 
 #define PJ_LIB__
+
 #include <errno.h>
+#include <math.h>
+
 #include "projects.h"
 
 /* The six cube faces. */
@@ -397,4 +400,3 @@ PJ *PROJECTION(qsc) {
 
     return P;
 }
-

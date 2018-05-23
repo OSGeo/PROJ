@@ -27,7 +27,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
+
 #include <errno.h>
+#include <math.h>
 
 #include "proj_internal.h"
 #include "proj_math.h"

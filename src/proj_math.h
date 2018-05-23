@@ -58,9 +58,12 @@ int     pj_isnan(double x);
 #define round   pj_round
 #define lround  pj_lround
 
-#ifndef isnan
-#define isnan   pj_isnan
+
+#ifdef isnan
+#undef isnan
 #endif
+
+#define isnan   pj_isnan
 
 #endif /* !(defined(HAVE_C99_MATH) && HAVE_C99_MATH) */
 

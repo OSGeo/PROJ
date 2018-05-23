@@ -1,8 +1,11 @@
 #define PJ_LIB__
 #include <errno.h>
+#include <math.h>
+#include <stddef.h>
+#include <string.h>
+
 #include "proj.h"
 #include "projects.h"
-#include <string.h>
 
 struct pj_opaque {
     struct PJconsts *link;
@@ -238,4 +241,3 @@ PJ *PROJECTION(ob_tran) {
 
     return P;
 }
-

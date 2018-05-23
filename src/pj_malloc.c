@@ -34,15 +34,18 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-
 /* allocate and deallocate memory */
 /* These routines are used so that applications can readily replace
 ** projection system memory allocation/deallocation call with custom
 ** application procedures.  */
 
+#include <errno.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "proj.h"
 #include "projects.h"
-#include <errno.h>
 
 /**********************************************************************/
 void *pj_malloc(size_t size) {

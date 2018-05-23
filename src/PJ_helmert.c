@@ -43,11 +43,14 @@ Last update: 2017-05-15
 ***********************************************************************/
 
 #define PJ_LIB__
-#include <stddef.h>
+
 #include <errno.h>
+#include <math.h>
+
 #include "proj_internal.h"
 #include "projects.h"
 #include "geocent.h"
+
 PROJ_HEAD(helmert, "3(6)-, 4(8)- and 7(14)-parameter Helmert shift");
 
 static XYZ helmert_forward_3d (LPZ lpz, PJ *P);
@@ -145,7 +148,6 @@ static void update_parameters(PJ *P) {
         proj_log_trace(P, "rz: %g", Q->opk.k);
         proj_log_trace(P, "theta: %g", Q->theta);
     }
-    return;
 }
 
 /**************************************************************************/
@@ -302,8 +304,6 @@ static void build_rot_matrix(PJ *P) {
         proj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R10, R11, R12);
         proj_log_trace(P, "  | % 6.6g  % 6.6g  % 6.6g |", R20, R21, R22);
     }
-
-    return;
 }
 
 
@@ -610,4 +610,3 @@ PJ *TRANSFORMATION(helmert, 0) {
 
     return P;
 }
-

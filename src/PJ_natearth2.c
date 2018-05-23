@@ -6,6 +6,9 @@ and Atmospheric Sciences, Oregon State University.
 Port to PROJ.4 by Bojan Savric, 4 April 2016
 */
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(natearth2, "Natural Earth 2") "\n\tPCyl., Sph.";
@@ -92,4 +95,3 @@ PJ *PROJECTION(natearth2) {
 
     return P;
 }
-

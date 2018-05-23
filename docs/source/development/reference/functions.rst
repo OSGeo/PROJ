@@ -386,16 +386,19 @@ Distances
 
 .. c:function:: double proj_lp_dist(const PJ *P, PJ_COORD a, PJ_COORD b)
 
-    Calculate geodesic distance between two points in geodetic coordinates.
+    Calculate geodesic distance between two points in geodetic coordinates. The
+    calculated distance is between the two points located on the ellipsoid.
 
     :param PJ* P: Transformation object
     :param PJ_COORD a: Coordinate of first point
     :param PJ_COORD b: Coordinate of second point
     :returns: :c:type:`double` Distance between :c:data:`a` and :c:data:`b` in meters.
 
-.. c:function:: double proj_lp_dist(const PJ *P, PJ_COORD a, PJ_COORD b)
+.. c:function:: double proj_lpz_dist(const PJ *P, PJ_COORD a, PJ_COORD b)
 
     Calculate geodesic distance between two points in geodetic coordinates.
+    Similar to :c:func:`proj_lp_dist` but also takes the height above the ellipsoid
+    into account.
 
     :param PJ* P: Transformation object
     :param PJ_COORD a: Coordinate of first point
