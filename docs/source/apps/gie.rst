@@ -207,10 +207,26 @@ gie command language
     to function. The accepted coordinate is passed to the operation first in
     it's forward mode, then the output from the forward operation is passed
     back to the inverse operation. This procedure is done ``n`` times. If the
-    resulting coordinate is within the set tolerance of the initial coordinate
+    resulting coordinate is within the set tolerance of the initial coordinate,
     the test is passed.
 
-    Example:
+    Example with the default 100 iterations and the default tolerance:
+
+    .. code-block:: console
+
+        operation       proj=merc
+        accept          12 55
+        roundtrip
+
+   Example with count and default tolerance:
+
+    .. code-block:: console
+
+        operation       proj=merc
+        accept          12 55
+        roundtrip       10000
+
+   Example with count and tolerance:
 
     .. code-block:: console
 
