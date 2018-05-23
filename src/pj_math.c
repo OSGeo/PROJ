@@ -27,6 +27,21 @@
 
 #include "proj_math.h"
 
+/* pj_isnan is used in gie.c which means that is has to */
+/* be exported in the Windows DLL and therefore needs   */
+/* to be declared even though we have isnan() on the    */
+/* system.                                              */
+
+#ifdef HAVE_C99_MATH
+int pj_isnan (double x);
+#endif
+
+/* Returns 0 if not a NaN and non-zero if val is a NaN */
+int pj_isnan (double x) {
+    /* cppcheck-suppress duplicateExpression */
+    return x != x;
+}
+
 #if !(defined(HAVE_C99_MATH) && HAVE_C99_MATH)
 
 /* Compute hypotenuse */
@@ -59,12 +74,6 @@ double pj_asinh(double x) {
     double y = fabs(x); /* Enforce odd parity */
     y = log1p(y * (1 + y/(hypot(1.0, y) + 1)));
     return x > 0 ? y : (x < 0 ? -y : x);
-}
-
-/* Returns 0 if not a NaN and non-zero if val is a NaN */
-int pj_isnan (double x) {
-    /* cppcheck-suppress duplicateExpression */
-    return x != x;
 }
 
 double pj_round(double x) {

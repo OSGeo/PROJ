@@ -155,3 +155,5 @@ EXPORTS
 
     proj_geod                      @140
     proj_context_errno             @141
+
+    pj_isnan                       @142
