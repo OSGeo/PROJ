@@ -218,7 +218,7 @@ gie command language
         accept          12 55
         roundtrip
 
-   Example with count and default tolerance:
+    Example with count and default tolerance:
 
     .. code-block:: console
 
@@ -226,14 +226,13 @@ gie command language
         accept          12 55
         roundtrip       10000
 
-   Example with count and tolerance:
+    Example with count and tolerance:
 
     .. code-block:: console
 
         operation       proj=merc
         accept          12 55
         roundtrip       10000 5 mm
-
 
 .. option:: direction <direction>
 
