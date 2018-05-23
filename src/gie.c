@@ -705,6 +705,20 @@ static int roundtrip (const char *args) {
 /*****************************************************************************
 Check how far we go from the ACCEPTed point when doing successive
 back/forward transformation pairs.
+
+Without args, roundtrip defaults to 100 iterations:
+
+  roundtrip
+
+With one arg, roundtrip will default to a tolerance of T.tolerance:
+
+  roundtrip ntrips
+
+With two args:
+
+  roundtrip ntrips tolerance
+
+Always returns 0.
 ******************************************************************************/
     int ntrips;
     double d, r, ans;
@@ -719,7 +733,17 @@ back/forward transformation pairs.
     }
 
     ans = proj_strtod (args, &endp);
-    ntrips = (int) (endp==args? 100: fabs(ans));
+    if (endp==args) {
+        /* Default to 100 iterations if not args. */
+        ntrips = 100;
+    } else {
+        if (ans < 1.0 || ans > 1000000.0) {
+            errmsg (2, "Invalid number of roundtrips: %lf\n", ans);
+            return another_failing_roundtrip ();
+        }
+        ntrips = (int)ans;
+    }
+
     d = strtod_scaled (endp, 1);
     d = d==HUGE_VAL?  T.tolerance:  d;
 
