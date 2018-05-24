@@ -22,6 +22,8 @@
 
  o Consistently return NaN values on NaN input (#949)
 
+ o Removed unused src/org_proj4_Projections.h file (#956)
+
  o Java Native Interface bindings updated (#957, #969)
 
  o Horizontal and vertical gridshift operations extended to
