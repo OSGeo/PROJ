@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "CCT" "1" "Mar 18, 2018" "5.0.0" "PROJ.4"
+.TH "CCT" "1" "May 24, 2018" "5.1.0" "PROJ.4"
 .SH NAME
 cct \- Coordinate Conversion and Transformation
 .
@@ -33,21 +33,26 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .SH SYNOPSIS
 .INDENT 0.0
 .INDENT 3.5
-\fBcct\fP [ \fB\-cotvz\fP [ args ] ] \fI+opts[=arg]\fP  file[s]
+\fBcct\fP [ \fB\-cIostvz\fP [ args ] ] \fI+opts[=arg]\fP file[s]
 .UNINDENT
 .UNINDENT
 .SH DESCRIPTION
 .sp
 \fBcct\fP a 4D equivalent to the \fBproj\fP projection program,
-performs transformation coordinate systems on a set of input points.  The
-coordinate system transformation can include  translation  between projected
+performs transformation coordinate systems on a set of input points. The
+coordinate system transformation can include translation between projected
 and geographic coordinates as well as the application of datum shifts.
 .sp
-The following control parameters can  appear  in any order:
+The following control parameters can appear in any order:
 .INDENT 0.0
 .TP
 .B \-c <x,y,z,t>
 Specify input columns for (up to) 4 input parameters. Defaults to 1,2,3,4.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-I
+Do the inverse transformation.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -57,18 +62,32 @@ Specify the name of the output file.
 .INDENT 0.0
 .TP
 .B \-t <time>, \-\-time=<time>
-Specify a fixed observation time to be used for all input data.
+Specify a fixed observation \fItime\fP to be used for all input data.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-z <height>, \-\-height=<height>
-Specify a fixed observation height to be used for all input data.
+Specify a fixed observation \fIheight\fP to be used for all input data.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-s <n>, \-\-skip\-lines=<n>
+New in version 5.1.0.
+
+.sp
+Skip the first \fIn\fP lines of input. This applies to any kind of input, whether
+it comes from \fBSTDIN\fP, a file or interactive user input.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-v, \-\-verbose
 Write non\-essential, but potentially useful, information to stderr.
 Repeat for additional information (\fB\-vv\fP, \fB\-vvv\fP, etc.)
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-version
+Print version number.
 .UNINDENT
 .sp
 The \fI+args\fP arguments are associated with coordinate operation parameters.
@@ -77,7 +96,7 @@ Usage varies with operation.
 \fBcct\fP is an acronym meaning \fICoordinate Conversion and Transformation\fP\&.
 .sp
 The acronym refers to definitions given in the OGC 08\-015r2/ISO\-19111
-standard “Geographical Information – Spatial Referencing by Coordinates”,
+standard "Geographical Information \-\- Spatial Referencing by Coordinates",
 which defines two different classes of \fIcoordinate operations\fP:
 .sp
 \fICoordinate Conversions\fP, which are coordinate operations where input
@@ -116,7 +135,7 @@ echo 12 55 | cct \-z0 \-t0 +proj=utm +zone=32 +ellps=GRS80
 .UNINDENT
 .UNINDENT
 .sp
-Should give results comparable to the classic proj command
+Should give results comparable to the classic \fBproj\fP command
 .INDENT 0.0
 .INDENT 3.5
 .sp
@@ -164,7 +183,7 @@ As (2) but specify input columns for longitude, latitude, height and time:
 .sp
 .nf
 .ft C
-cct \-c 5,2,1,4  +proj=utm +ellps=GRS80 +zone=32
+cct \-c 5,2,1,4 +proj=utm +ellps=GRS80 +zone=32
 .ft P
 .fi
 .UNINDENT
@@ -179,25 +198,25 @@ input:
 .sp
 .nf
 .ft C
-cct \-t 0 \-z 0  +proj=utm  +ellps=GRS80  +zone=32
+cct \-t 0 \-z 0 +proj=utm +ellps=GRS80 +zone=32
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .SH BACKGROUND
 .sp
-\fBcct\fP also refers to Carl Christian Tscherning (1942–2014),
+\fBcct\fP also refers to Carl Christian Tscherning (1942\-\-2014),
 professor of Geodesy at the University of Copenhagen, mentor and advisor
 for a generation of Danish geodesists, colleague and collaborator for
 two generations of global geodesists, Secretary General for the
-International Association of Geodesy, IAG (1995–2007), fellow of the
+International Association of Geodesy, IAG (1995\-\-2007), fellow of the
 American Geophysical Union (1991), recipient of the IAG Levallois Medal
 (2007), the European Geosciences Union Vening Meinesz Medal (2008), and
 of numerous other honours.
 .sp
 \fIcct\fP, or Christian, as he was known to most of us, was recognized for his
 good mood, his sharp wit, his tireless work, and his great commitment to
-the development of geodesy – both through his scientific contributions,
+the development of geodesy \-\- both through his scientific contributions,
 comprising more than 250 publications, and by his mentoring and teaching
 of the next generations of geodesists.
 .sp
