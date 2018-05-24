@@ -83,6 +83,8 @@ does not.
 
 Will result in an error since :ref:`urm5` does not have an inverse operation defined.
 
+.. _global-pipeline-parameter:
+
 **4. Parameters added before the first `+step` are global and will be applied to all steps.**
 
 In the following the GRS80 ellipsoid will be applied to all steps.
