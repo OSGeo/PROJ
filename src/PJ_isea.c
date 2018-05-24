@@ -679,7 +679,7 @@ static int isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt,
     /* TODO I think sidelength is always x.5, so
      * (int)sidelength * 2 + 1 might be just as good
      */
-    maxcoord = lround((sidelength * 2.0 + 0.5));
+    maxcoord = lround((sidelength * 2.0));
 
     v = *pt;
     hexbin2(hexwidth, v.x, v.y, &h.x, &h.y);
@@ -750,7 +750,7 @@ static int isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt,
     }
     /* todo might want to do this as an iterated loop */
     if (g->aperture >0) {
-        sidelength = lround((pow(g->aperture, g->resolution / 2.0) + 0.5));
+        sidelength = lround(pow(g->aperture, g->resolution / 2.0));
     } else {
         sidelength = g->resolution;
     }
@@ -833,20 +833,20 @@ static int isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
         return g->serial;
     }
     /* hexes in a quad */
-    hexes = lround((pow(g->aperture, g->resolution) + 0.5));
+    hexes = lround(pow(g->aperture, g->resolution));
     if (quad == 11) {
         g->serial = 1 + 10 * hexes + 1;
         return g->serial;
     }
     if (g->aperture == 3 && g->resolution % 2 == 1) {
-        height = lround((pow(g->aperture, (g->resolution - 1) / 2.0)));
+        height = lround(floor((pow(g->aperture, (g->resolution - 1) / 2.0))));
         sn = ((int) di->x) * height;
         sn += ((int) di->y) / height;
         sn += (quad - 1) * hexes;
         sn += 2;
     } else {
-        sidelength = lround((pow(g->aperture, g->resolution / 2.0) + 0.5));
-        sn = lround(((quad - 1) * hexes + sidelength * di->x + di->y + 2));
+        sidelength = lround((pow(g->aperture, g->resolution / 2.0)));
+        sn = lround(floor(((quad - 1) * hexes + sidelength * di->x + di->y + 2)));
     }
 
     g->serial = sn;
@@ -874,8 +874,8 @@ static int isea_hex(struct isea_dgg *g, int tri,
 
     return 1;
 #ifdef FIXME
-    d = lround(v.x);
-    i = lround(v.y);
+    d = lround(floor(v.x));
+    i = lround(floor(v.y));
 
     /* Aperture 3 odd resolutions */
     if (g->aperture == 3 && g->resolution % 2 != 0) {
@@ -903,7 +903,7 @@ static int isea_hex(struct isea_dgg *g, int tri,
     }
 
     /* aperture 3 even resolutions and aperture 4 */
-    sidelength = lround((pow(g->aperture, g->resolution / 2.0) + 0.5));
+    sidelength = lround((pow(g->aperture, g->resolution / 2.0)));
     if (g->quad == 0) {
         hex->x = 0;
         hex->y = sidelength;
