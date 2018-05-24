@@ -48,8 +48,8 @@ static double read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GR
     int  itable = 0;
     double value = HUGE_VAL;
     double grid_x, grid_y;
-    int    grid_ix, grid_iy;
-    int    grid_ix2, grid_iy2;
+    long   grid_ix, grid_iy;
+    long   grid_ix2, grid_iy2;
     float  *cvs;
     /* do not deal with NaN coordinates */
     /* cppcheck-suppress duplicateExpression */
@@ -108,8 +108,8 @@ static double read_vgrid_value( PJ *defn, LP input, int *gridlist_count_p, PJ_GR
         /* Interpolation a location within the grid */
         grid_x = (input.lam - ct->ll.lam) / ct->del.lam;
         grid_y = (input.phi - ct->ll.phi) / ct->del.phi;
-        grid_ix = (int) floor(grid_x);
-        grid_iy = (int) floor(grid_y);
+        grid_ix = lround(floor(grid_x));
+        grid_iy = lround(floor(grid_y));
         grid_x -= grid_ix;
         grid_y -= grid_iy;
 

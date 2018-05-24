@@ -1943,6 +1943,19 @@ static int cart_selftest (void) {
     if (P->f != 1.0/298.257223563) return 125;
     proj_destroy(P);
 
+    /* Test that pj_fwd* and pj_inv* returns NaNs when receiving NaN input */
+    P = proj_create(PJ_DEFAULT_CTX, "+proj=merc");
+    if (0==P) return 0;
+    a = proj_coord(NAN, NAN, NAN, NAN);
+    a = proj_trans(P, PJ_FWD, a);
+    if ( !( isnan(a.v[0]) && isnan(a.v[1]) && isnan(a.v[2]) && isnan(a.v[3]) ) )
+        return 126;
+    a = proj_coord(NAN, NAN, NAN, NAN);
+    a = proj_trans(P, PJ_INV, a);
+    if ( !( isnan(a.v[0]) && isnan(a.v[1]) && isnan(a.v[2]) && isnan(a.v[3]) ) )
+        return 127;
+    proj_destroy(P);
+
     return 0;
 }
 

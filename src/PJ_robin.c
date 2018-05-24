@@ -78,12 +78,12 @@ static const struct COEFS Y[] = {
 
 static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
     XY xy = {0.0,0.0};
-    int i;
+    long i;
     double dphi;
     (void) P;
 
     dphi = fabs(lp.phi);
-    i = isnan(lp.phi) ? -1 : (int)floor(dphi * C1);
+    i = isnan(lp.phi) ? -1 : lround(floor(dphi * C1));
     if( i < 0 ){
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return xy;
@@ -100,7 +100,7 @@ static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
 
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
-    int i;
+    long i;
     double t, t1;
     struct COEFS T;
     int iters;
@@ -118,7 +118,7 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         }
     } else { /* general problem */
         /* in Y space, reduce to table interval */
-        i = isnan(lp.phi) ? -1 : (int)floor(lp.phi * NODES);
+        i = isnan(lp.phi) ? -1 : lround(floor(lp.phi * NODES));
         if( i < 0 || i >= NODES ) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return lp;

@@ -310,7 +310,7 @@ PJ *PROJECTION(etmerc) {
 
 
 PJ *PROJECTION(utm) {
-    int zone;
+    long zone;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return pj_default_destructor (P, ENOMEM);
@@ -337,7 +337,7 @@ PJ *PROJECTION(utm) {
     }
     else /* nearest central meridian input */
     {
-        zone = (int)(floor ((adjlon (P->lam0) + M_PI) * 30. / M_PI));
+        zone = lround((floor ((adjlon (P->lam0) + M_PI) * 30. / M_PI)));
         if (zone < 0)
             zone = 0;
         else if (zone >= 60)

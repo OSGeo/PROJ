@@ -4,14 +4,15 @@
  */
 
 #include <errno.h>
-#include <float.h>
 #include <math.h>
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define PJ_LIB__
 #include "proj_internal.h"
+#include "proj_math.h"
 #include "proj.h"
 #include "projects.h"
 
@@ -79,7 +80,7 @@ static void hex_iso(struct hex *h) {
 static void hexbin2(double width, double x, double y, int *i, int *j) {
     double z, rx, ry, rz;
     double abs_dx, abs_dy, abs_dz;
-    int ix, iy, iz, s;
+    long ix, iy, iz, s;
     struct hex h;
 
     x = x / cos(30 * M_PI / 180.0); /* rotated X coord */
@@ -92,11 +93,11 @@ static void hexbin2(double width, double x, double y, int *i, int *j) {
     z = -x - y;
 
     rx = floor(x + 0.5);
-    ix = (int)rx;
+    ix = lround(rx);
     ry = floor(y + 0.5);
-    iy = (int)ry;
+    iy = lround(ry);
     rz = floor(z + 0.5);
-    iz = (int)rz;
+    iz = lround(rz);
 
     s = ix + iy + iz;
 
@@ -666,7 +667,7 @@ static int isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt,
     double          hexwidth;
     double          sidelength; /* in hexes */
     int             d, i;
-    int             maxcoord;
+    long            maxcoord;
     struct hex      h;
 
     /* This is the number of hexes from apex to base of a triangle */
@@ -678,7 +679,7 @@ static int isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt,
     /* TODO I think sidelength is always x.5, so
      * (int)sidelength * 2 + 1 might be just as good
      */
-    maxcoord = (int) (sidelength * 2.0 + 0.5);
+    maxcoord = lround((sidelength * 2.0));
 
     v = *pt;
     hexbin2(hexwidth, v.x, v.y, &h.x, &h.y);
@@ -741,7 +742,7 @@ static int isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt,
                      struct isea_pt *di) {
     struct isea_pt  v;
     double          hexwidth;
-    int             sidelength; /* in hexes */
+    long            sidelength; /* in hexes */
     struct hex      h;
 
     if (g->aperture == 3 && g->resolution % 2 != 0) {
@@ -749,7 +750,7 @@ static int isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt,
     }
     /* todo might want to do this as an iterated loop */
     if (g->aperture >0) {
-        sidelength = (int) (pow(g->aperture, g->resolution / 2.0) + 0.5);
+        sidelength = lround(pow(g->aperture, g->resolution / 2.0));
     } else {
         sidelength = g->resolution;
     }
@@ -821,6 +822,7 @@ static int isea_ptdi(struct isea_dgg *g, int tri, struct isea_pt *pt,
 }
 
 /* q2di to seqnum */
+
 static int isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
     int             sidelength;
     int             sn, height;
@@ -831,20 +833,20 @@ static int isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
         return g->serial;
     }
     /* hexes in a quad */
-    hexes = (int) (pow(g->aperture, g->resolution) + 0.5);
+    hexes = lround(pow(g->aperture, g->resolution));
     if (quad == 11) {
         g->serial = 1 + 10 * hexes + 1;
         return g->serial;
     }
     if (g->aperture == 3 && g->resolution % 2 == 1) {
-        height = (int) (pow(g->aperture, (g->resolution - 1) / 2.0));
+        height = lround(floor((pow(g->aperture, (g->resolution - 1) / 2.0))));
         sn = ((int) di->x) * height;
         sn += ((int) di->y) / height;
         sn += (quad - 1) * hexes;
         sn += 2;
     } else {
-        sidelength = (int) (pow(g->aperture, g->resolution / 2.0) + 0.5);
-        sn = (int) ((quad - 1) * hexes + sidelength * di->x + di->y + 2);
+        sidelength = lround((pow(g->aperture, g->resolution / 2.0)));
+        sn = lround(floor(((quad - 1) * hexes + sidelength * di->x + di->y + 2)));
     }
 
     g->serial = sn;
@@ -860,8 +862,8 @@ static int isea_hex(struct isea_dgg *g, int tri,
                     struct isea_pt *pt, struct isea_pt *hex) {
     struct isea_pt v;
 #ifdef FIXME
-    int sidelength;
-    int d, i, x, y;
+    long sidelength;
+    long d, i, x, y;
 #endif
     int quad;
 
@@ -872,12 +874,12 @@ static int isea_hex(struct isea_dgg *g, int tri,
 
     return 1;
 #ifdef FIXME
-    d = (int)v.x;
-    i = (int)v.y;
+    d = lround(floor(v.x));
+    i = lround(floor(v.y));
 
     /* Aperture 3 odd resolutions */
     if (g->aperture == 3 && g->resolution % 2 != 0) {
-        int offset = (int)(pow(3.0, g->resolution - 1) + 0.5);
+        long offset = lround((pow(3.0, g->resolution - 1) + 0.5));
 
         d += offset * ((g->quad-1) % 5);
         i += offset * ((g->quad-1) % 5);
@@ -901,7 +903,7 @@ static int isea_hex(struct isea_dgg *g, int tri,
     }
 
     /* aperture 3 even resolutions and aperture 4 */
-    sidelength = (int) (pow(g->aperture, g->resolution / 2.0) + 0.5);
+    sidelength = lround((pow(g->aperture, g->resolution / 2.0)));
     if (g->quad == 0) {
         hex->x = 0;
         hex->y = sidelength;

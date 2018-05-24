@@ -31,13 +31,14 @@
 #include <math.h>
 
 #include "proj_internal.h"
+#include "proj_math.h"
 #include "projects.h"
 
 #define INPUT_UNITS  P->right
 #define OUTPUT_UNITS P->left
 
 static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
-    if (coo.xyz.x == HUGE_VAL) {
+    if (coo.v[0] == HUGE_VAL || coo.v[1] == HUGE_VAL || coo.v[2] == HUGE_VAL) {
         proj_errno_set (P, PJD_ERR_INVALID_X_OR_Y);
         return proj_coord_error ();
     }

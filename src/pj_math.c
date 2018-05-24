@@ -27,6 +27,21 @@
 
 #include "proj_math.h"
 
+/* pj_isnan is used in gie.c which means that is has to */
+/* be exported in the Windows DLL and therefore needs   */
+/* to be declared even though we have isnan() on the    */
+/* system.                                              */
+
+#ifdef HAVE_C99_MATH
+int pj_isnan (double x);
+#endif
+
+/* Returns 0 if not a NaN and non-zero if val is a NaN */
+int pj_isnan (double x) {
+    /* cppcheck-suppress duplicateExpression */
+    return x != x;
+}
+
 #if !(defined(HAVE_C99_MATH) && HAVE_C99_MATH)
 
 /* Compute hypotenuse */
@@ -61,11 +76,33 @@ double pj_asinh(double x) {
     return x > 0 ? y : (x < 0 ? -y : x);
 }
 
-/* Returns 0 if not a NaN and non-zero if val is a NaN */
-int pj_isnan (double x) {
-    /* cppcheck-suppress duplicateExpression */
-    return x != x;
+double pj_round(double x) {
+  /* The handling of corner cases is copied from boost; see
+   *   https://github.com/boostorg/math/pull/8
+   * with improvements to return -0.0 when appropriate */
+  double t;
+  if (x == 0)
+    return x;               /* Retain sign of 0 */
+  else if (0 < x && x <  0.5)
+    return +0.0;
+  else if (0 > x && x > -0.5)
+    return -0.0;
+  else if (x > 0) {
+    t = ceil(x);
+    return 0.5 < t - x ? t - 1 : t;
+  } else {                  /* Includes NaN */
+    t = floor(x);
+    return 0.5 < x - t ? t + 1 : t;
+  }
 }
 
+long pj_lround(double x) {
+  /* Default value for overflow + NaN + (x == LONG_MIN) */
+  long r = LONG_MIN;
+  x = round(x);
+  if (fabs(x) < -(double)LONG_MIN) /* Assume (double)LONG_MIN is exact */
+    r = (int)x;
+  return r;
+}
 
 #endif /* !(defined(HAVE_C99_MATH) && HAVE_C99_MATH) */

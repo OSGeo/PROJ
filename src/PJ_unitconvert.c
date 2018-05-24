@@ -71,6 +71,7 @@ Last update: 2017-05-16
 #include <time.h>
 
 #include "proj_internal.h"
+#include "proj_math.h"
 #include "projects.h"
 
 PROJ_HEAD(unitconvert, "Unit conversion");
@@ -156,14 +157,14 @@ static double decimalyear_to_mjd(double decimalyear) {
 /***********************************************************************
     Epoch of modified julian date is 1858-11-16 00:00
 ************************************************************************/
-    int year;
+    long year;
     double fractional_year;
     double mjd;
 
     if( decimalyear < -10000 || decimalyear > 10000 )
         return 0;
 
-    year = (int)floor(decimalyear);
+    year = lround(floor(decimalyear));
     fractional_year = decimalyear - year;
     mjd = (year - 1859)*365 + 14 + 31;
     mjd += fractional_year*days_in_year(year);
@@ -232,9 +233,9 @@ static double yyyymmdd_to_mjd(double yyyymmdd) {
     Date given in YYYY-MM-DD format.
 ************************************************************************/
 
-    int year  = (int)floor( yyyymmdd / 10000 );
-    int month = (int)floor((yyyymmdd - year*10000) / 100);
-    int day   = (int)floor( yyyymmdd - year*10000 - month*100);
+    long year  = lround(floor( yyyymmdd / 10000 ));
+    long month = lround(floor((yyyymmdd - year*10000) / 100));
+    long day   = lround(floor( yyyymmdd - year*10000 - month*100));
     double mjd = daynumber_in_year(year, month, day);
 
     for (year -= 1; year > 1858; year--)
