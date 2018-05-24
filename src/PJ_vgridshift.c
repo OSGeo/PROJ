@@ -46,24 +46,35 @@ static LPZ reverse_3d(XYZ xyz, PJ *P) {
 static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
     struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
     PJ_COORD point = obs;
-    if (Q->t_final != 0.0  && Q->t_epoch != 0.0) {
-        if (obs.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
-            point.xyz = forward_3d (obs.lpz, P);
-    } else {
+
+    /* If transformation is not time restricted, we always call it */
+    if (Q->t_final==0 || Q->t_epoch==0) {
         point.xyz = forward_3d (obs.lpz, P);
+        return point;
     }
+
+    /* Time restricted - only apply transform if within time bracket */
+    if (obs.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
+        point.xyz = forward_3d (obs.lpz, P);
+
+
     return point;
 }
 
 static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
     struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
     PJ_COORD point = obs;
-    if (Q->t_final != 0.0  && Q->t_epoch != 0.0) {
-        if (obs.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
-            point.lpz = reverse_3d (obs.xyz, P);
-    } else {
+
+    /* If transformation is not time restricted, we always call it */
+    if (Q->t_final==0 || Q->t_epoch==0) {
         point.lpz = reverse_3d (obs.xyz, P);
+        return point;
     }
+
+    /* Time restricted - only apply transform if within time bracket */
+    if (obs.lpzt.t < Q->t_epoch && Q->t_final > Q->t_epoch)
+        point.lpz = reverse_3d (obs.xyz, P);
+
     return point;
 }
 
@@ -79,6 +90,8 @@ PJ *TRANSFORMATION(vgridshift,0) {
         return pj_default_destructor(P, PJD_ERR_NO_ARGS);
     }
 
+   /* TODO: Refactor into shared function that can be used  */
+   /* by both vgridshift and hgridshift                     */
    if (pj_param(P->ctx, P->params, "tt_final").i) {
         Q->t_final = pj_param (P->ctx, P->params, "dt_final").f;
         if (Q->t_final == 0) {
