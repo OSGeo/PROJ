@@ -33,7 +33,7 @@
   *
   */
 #ifndef PJ_VERSION
-#define PJ_VERSION 500
+#define PJ_VERSION 510
 #endif
 
 

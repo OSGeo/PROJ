@@ -1,3 +1,88 @@
+5.1.0 Release Notes
+-------------------
+
+ UPDATES
+ -------
+
+ o Function proj_errno_string() added to proj.h API (#847)
+
+ o Validate units between pipeline steps and ensure transformation
+   sanity (#906)
+
+ o Print help when calling cct and gie without arguments (#907)
+
+ o CITATION file added to source distribution (#914)
+
+ o Webmercator operation added (#925)
+
+ o Enhanced numerical precision of forward spherical Mercator near
+   the Equator (#928)
+
+ o Added --skip-lines option to cct (#923)
+
+ o Consistently return NaN values on NaN input (#949)
+
+ o Java Native Interface bindings updated (#957, #969)
+
+ o Horizontal and vertical gridshift operations extended to
+   the temporal domain (#1015)
+
+
+ BUG FIXES
+ ------------
+
+ o Handle nan float cast overflow in PJ_robin.c and nad_intr.c (#887)
+
+ o Avoid overflow when Horner order is unreasonably large (#893)
+
+ o Avoid unwanted NaN conversions in etmerc (#899)
+
+ o Avoid memory failure in gie when not specifying x,y,z in gie files (#902)
+
+ o Avoid memory failure when +sweep is initialized incorrectly in geos (#908)
+
+ o Return HUGE_VAL on erroneous input in ortho (#912)
+
+ o Handle commented lines correctly in cct (#933)
+
+ o Avoid segmentation fault when transformation coordinates outside grid
+   area in deformation (#934)
+
+ o Avoid doing false easting/northing adjustments on cartesian
+   coordinates (#936)
+
+ o Thread-safe creation of proj mutex (#954)
+
+ o Avoid errors when setting up geos with +lat_0!=0 (#986)
+
+ o Reset errno when running proj in verbose mode (#988)
+
+ o Do not interpolate node values at nodata value in vertical
+   grid shifts (#1004)
+
+ o Restrict Horner degrees to positive integer values to avoid
+   memory allocation issues (#1005)
+
+ All bug fix numbers refer to issues or pull requests indexed at
+ https://github.com/OSGeo/proj.4/
+
+ THANKS TO
+ ------------
+
+ Version 5.1.0 is made possible by the following contributors:
+
+   Kristian Evers
+   Even Rouault
+   Kurt Schwehr
+   Mike Toews
+   Martin Desruisseaux
+   Charles Karney
+   Thomas Knudsen
+   Javier Goizueta
+   Bas Couwenberg
+   Adam Wulkiewicz
+   Aaron Puchert
+
 5.0.1 Release Notes
 -------------------
 

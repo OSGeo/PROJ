@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "GEOD" "1" "Mar 18, 2018" "5.0.0" "PROJ.4"
+.TH "GEOD" "1" "May 24, 2018" "5.1.0" "PROJ.4"
 .SH NAME
 geod \- Geodesic computations
 .
@@ -35,20 +35,20 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .INDENT 3.5
 \fBgeod\fP \fI+ellps=<ellipse>\fP [ \fB\-afFIlptwW\fP [ args ] ] [ \fI+args\fP ] file[s]
 .sp
-\fBinvgeod\fP \fI+ellps=<ellipse>\fP [ \fB\-afFIlptwW\fP [ args  ]  ]  [ \fI+args\fP  ] file[s]
+\fBinvgeod\fP \fI+ellps=<ellipse>\fP [ \fB\-afFIlptwW\fP [ args ] ] [ \fI+args\fP ] file[s]
 .UNINDENT
 .UNINDENT
 .SH DESCRIPTION
 .sp
-\fBgeod\fP  (direct)  and  \fBinvgeod\fP (inverse) perform geodesic
-(Great Circle) computations for determining latitude,  longitude  and back
-azimuth  of  a terminus point given a initial point latitude, longitude,
-azimuth and distance (direct) or  the  forward and  back azimuths and distance
-between an initial and terminus point latitudes and  longitudes  (inverse).
-The  results  are accurate  to  round  off for |f| < 1/50, where
+\fBgeod\fP (direct) and \fBinvgeod\fP (inverse) perform geodesic
+(Great Circle) computations for determining latitude, longitude and back
+azimuth of a terminus point given a initial point latitude, longitude,
+azimuth and distance (direct) or the forward and back azimuths and distance
+between an initial and terminus point latitudes and longitudes (inverse).
+The results are accurate to round off for |f| < 1/50, where
 f is flattening.
 .sp
-\fBinvgeod\fP may not be available on all  platforms;  in  this  case
+\fBinvgeod\fP may not be available on all platforms; in this case
 use \fI\%geod \-I\fP instead.
 .sp
 The following command\-line options can appear in any order:
@@ -56,18 +56,18 @@ The following command\-line options can appear in any order:
 .TP
 .B \-I
 Specifies that the inverse geodesic computation is to be performed. May be
-used with execution of geod as an alternative to invgeod execution.
+used with execution of \fBgeod\fP as an alternative to \fBinvgeod\fP execution.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-a
 Latitude and longitudes of the initial and terminal points, forward and
-back azimuths and distance are  output.
+back azimuths and distance are output.
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-ta
-A specifies a character employed as the first character to denote a control
+.B \-t<a>
+Where \fIa\fP specifies a character employed as the first character to denote a control
 line to be passed through without processing.
 .UNINDENT
 .INDENT 0.0
@@ -79,33 +79,33 @@ Gives a listing of all the ellipsoids that may be selected with the
 .INDENT 0.0
 .TP
 .B \-lu
-Gives a listing of all the units that  may  be  selected with the \fI+units=\fP
+Gives a listing of all the units that may be selected with the \fI+units=\fP
 option.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-f <format>
-Format is a printf format string to control the output form of the
+Where \fIformat\fP is a printf format string to control the output form of the
 geographic coordinate values. The default mode is DMS for geographic
-coordinates and “%.3f” for distance.
+coordinates and \fB"%.3f"\fP for distance.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-F <format>
-Format is a printf format string to control the output form of the distance
+Where \fIformat\fP is a printf format string to control the output form of the distance
 value (\fB\-F\fP). The default mode is DMS for geographic coordinates and
-“%.3f” for distance.
+\fB"%.3f"\fP for distance.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-w<n>
-N is the number of significant fractional digits to employ for seconds
+Where \fIn\fP is the number of significant fractional digits to employ for seconds
 output (when the option is not specified, \fB\-w3\fP is assumed).
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-W<n>
-N is the number of significant fractional digits to employ for seconds
+Where \fIn\fP is the number of significant fractional digits to employ for seconds
 output. When \fB\-W\fP is employed the fields will be constant width
 with leading zeroes.
 .UNINDENT
@@ -116,61 +116,61 @@ This option causes the azimuthal values to be output as unsigned DMS
 numbers between 0 and 360 degrees. Also note \fI\%\-f\fP\&.
 .UNINDENT
 .sp
-The  \fI+args\fP  command\-line  options  are associated with geodetic
-parameters for specifying the ellipsoidal  or  sphere  to  use.
-controls.  The options are processed in  left  to  right  order
-from  the  command  line.  Reentry of an option is ignored with
+The \fI+args\fP command\-line options are associated with geodetic
+parameters for specifying the ellipsoidal or sphere to use.
+controls. The options are processed in left to right order
+from the command line. Reentry of an option is ignored with
 the first occurrence assumed to be the desired value.
 .sp
 See the PROJ documentation for a full list of these parameters and
 controls.
 .sp
-One or more files (processed in left to  right  order)  specify
-the  source  of  data  to be transformed.  A \fB\-\fP will specify the
-location of processing standard input.  If no files are  specified,
+One or more files (processed in left to right order) specify
+the source of data to be transformed. A \fB\-\fP will specify the
+location of processing standard input. If no files are specified,
 the input is assumed to be from stdin.
 .sp
-For  direct determinations input data must be in latitude, longitude,
+For direct determinations input data must be in latitude, longitude,
 azimuth and distance order and output will be latitude,
-longitude  and  back  azimuth of the terminus point.  Latitude,
-longitude of the initial and terminus point are input  for  the
-inverse  mode  and respective forward and back azimuth from the
-initial and terminus points are output along with the  distance
+longitude and back azimuth of the terminus point. Latitude,
+longitude of the initial and terminus point are input for the
+inverse mode and respective forward and back azimuth from the
+initial and terminus points are output along with the distance
 between the points.
 .sp
-Input  geographic  coordinates  (latitude  and  longitude)  and
-azimuthal data must be in decimal degrees  or  DMS  format  and
+Input geographic coordinates (latitude and longitude) and
+azimuthal data must be in decimal degrees or DMS format and
 input distance data must be in units consistent with the ellipsoid
-major axis or sphere radius units.  The latitude must  lie
-in the range [\-90d,90d].  Output geographic coordinates will be
-in DMS (if the \fI\%\-f\fP switch is not employed) to 0.001” with trailing,
-zero\-valued minute\-second fields deleted.  Output distance
-data will be in the same  units  as  the  ellipsoid  or  sphere
+major axis or sphere radius units. The latitude must lie
+in the range [\-90d,90d]. Output geographic coordinates will be
+in DMS (if the \fI\%\-f\fP switch is not employed) to 0.001" with trailing,
+zero\-valued minute\-second fields deleted. Output distance
+data will be in the same units as the ellipsoid or sphere
 radius.
 .sp
-The Earth’s ellipsoidal figure may be selected in the same manner
+The Earth\(aqs ellipsoidal figure may be selected in the same manner
 as program \fBproj\fP by using \fI+ellps=\fP, \fI+a=\fP, \fI+es=\fP, etc.
 .sp
-Geod may also be used to determine  intermediate  points  along
-either  a  geodesic  line between two points or along an arc of
-specified distance from a geographic point.  In both  cases  an
-initial  point must be specified with \fI+lat_1=lat\fP and \fI+lon_1=lon\fP
-parameters  and  either  a  terminus   point   \fI+lat_2=lat\fP   and
-\fI+lon_2=lon\fP  or  a  distance  and azimuth from the initial point
+\fBgeod\fP may also be used to determine intermediate points along
+either a geodesic line between two points or along an arc of
+specified distance from a geographic point. In both cases an
+initial point must be specified with \fI+lat_1=lat\fP and \fI+lon_1=lon\fP
+parameters and either a terminus point \fI+lat_2=lat\fP and
+\fI+lon_2=lon\fP or a distance and azimuth from the initial point
 with \fI+S=distance\fP and \fI+A=azimuth\fP must be specified.
 .sp
-If points along a geodesic are to  be  determined  then  either
-\fI+n_S=integer\fP  specifying  the  number  of  intermediate  points
-and/or  \fI+del_S=distance\fP  specifying  the  incremental  distance
+If points along a geodesic are to be determined then either
+\fI+n_S=integer\fP specifying the number of intermediate points
+and/or \fI+del_S=distance\fP specifying the incremental distance
 between points must be specified.
 .sp
-To  determine  points along an arc equidistant from the initial
-point both \fI+del_A=angle\fP  and  \fI+n_A=integer\fP  must  be  specified
+To determine points along an arc equidistant from the initial
+point both \fI+del_A=angle\fP and \fI+n_A=integer\fP must be specified
 which determine the respective angular increments and number of
 points to be determined.
 .SH EXAMPLES
 .sp
-The following script determines the geodesic azimuths and  distance in U.S.
+The following script determines the geodesic azimuths and distance in U.S.
 statute miles from Boston, MA, to Portland, OR:
 .INDENT 0.0
 .INDENT 3.5
@@ -200,8 +200,8 @@ which gives the results:
 where the first two values are the azimuth from Boston to Portland,
 the back azimuth from Portland to Boston followed by the distance.
 .sp
-An  example  of forward geodesic use is to use the Boston location
-and determine Portland’s location by azimuth and distance:
+An example of forward geodesic use is to use the Boston location
+and determine Portland\(aqs location by azimuth and distance:
 .INDENT 0.0
 .INDENT 3.5
 .sp
@@ -230,7 +230,7 @@ which gives:
 \fBNOTE:\fP
 .INDENT 0.0
 .INDENT 3.5
-Lack  of precision in the distance value compromises the
+Lack of precision in the distance value compromises the
 precision of the Portland location.
 .UNINDENT
 .UNINDENT

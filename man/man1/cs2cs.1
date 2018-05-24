@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "CS2CS" "1" "Mar 18, 2018" "5.0.0" "PROJ.4"
+.TH "CS2CS" "1" "May 24, 2018" "5.1.0" "PROJ.4"
 .SH NAME
 cs2cs \- Cartographic coordinate system filter
 .
@@ -39,43 +39,41 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .SH DESCRIPTION
 .sp
 \fBcs2cs\fP performs transformation between the source and destination
-cartographic  coordinate  system on a set of input points.  The coordinate
-system transformation can include  translation  between projected  and
+cartographic coordinate system on a set of input points. The coordinate
+system transformation can include translation between projected and
 geographic coordinates as well as the application of datum shifts.
 .sp
-The following control parameters can  appear  in any order:
+The following control parameters can appear in any order:
 .INDENT 0.0
 .TP
 .B \-I
-method to specify inverse translation, convert from \fI+to\fP coordinate system to
+Method to specify inverse translation, convert from \fI+to\fP coordinate system to
 the primary coordinate system defined.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-t<a>
-A specifies a character employed as the first character to denote a control
-line to  be passed through without processing. This option  applicable  to
-ascii  input only. (# is the default value).
+Where \fIa\fP specifies a character employed as the first character to denote a control
+line to be passed through without processing. This option applicable to
+ASCII input only. (# is the default value).
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-e <string>
-String is an arbitrary string to be output if an error is detected  during
-data transformations. The  default value is: \fIt\fP\&. Note that if the \-b, \-i
-or \-o options are employed, an error is returned as HUGE_VAL value for both
-return values.
+Where \fIstring\fP is an arbitrary string to be output if an error is detected during
+data transformations. The default value is a three character string: \fB*\et*\fP\&.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-E
-causes the input coordinates to be copied to the output line prior to
-printing  the converted values.
+Causes the input coordinates to be copied to the output line prior to
+printing the converted values.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-l<[=id]>
 List projection identifiers that can be selected with \fI+proj\fP\&. \fBcs2cs \-l=id\fP
-gives expanded description of projection id, e.g. \fBcs2cs \-l=merc\fP\&.
+gives expanded description of projection \fIid\fP, e.g. \fBcs2cs \-l=merc\fP\&.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -119,58 +117,64 @@ to y\-x or latitude\-longitude.
 .INDENT 0.0
 .TP
 .B \-f <format>
-Format is a printf format string to control the form of the output values.
+Where \fIformat\fP is a printf format string to control the form of the output values.
 For inverse projections, the output will be in degrees when this option is
-employed.  If a format is specified for inverse projection the output data
-will be in deci\- mal  degrees. The default format is “%.2f” for forward
+employed. If a format is specified for inverse projection the output data
+will be in decimal degrees. The default format is \fB"%.2f"\fP for forward
 projection and DMS for inverse.
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-[w|W]<n>
-N is the number of significant fractional digits to employ for seconds
-output (when the option is not specified, \-w3 is assumed). When \-W is
-employed the fields will be constant width and with leading zeroes.
+.B \-w<n>
+Where \fIn\fP is the number of significant fractional digits to employ for seconds
+output (when the option is not specified, \fB\-w3\fP is assumed).
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-W<n>
+Where \fIn\fP is the number of significant fractional digits to employ for seconds
+output. When \fB\-W\fP is employed the fields will be constant width
+with leading zeroes.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-v
-causes a listing of cartographic control parameters tested for and used by
+Causes a listing of cartographic control parameters tested for and used by
 the program to be printed prior to input data.
 .UNINDENT
 .sp
 The \fI+args\fP run\-line arguments are associated with cartographic
 parameters.
 .sp
-The \fBcs2cs\fP program requires two coordinate system definitions.  The first (or
-primary  is  defined based on all projection parameters not appearing after the
-\fI+to\fP argument.  All projection  parameters appearing  after the \fI+to\fP argument
-are considered the definition of the second  coordinate system.  If there is no
+The \fBcs2cs\fP program requires two coordinate system definitions. The first (or
+primary is defined based on all projection parameters not appearing after the
+\fI+to\fP argument. All projection parameters appearing after the \fI+to\fP argument
+are considered the definition of the second coordinate system. If there is no
 second coordinate system defined, a geographic coordinate system based on the
-datum and ellipsoid of the source coordinate system is assumed.  Note  that  the
-source  and destination  coordinate  system can both be projections, both be
+datum and ellipsoid of the source coordinate system is assumed. Note that the
+source and destination coordinate system can both be projections, both be
 geographic, or one of each and may have the same or different datums.
 .sp
-Additional  projection control parameters may be contained in two auxiliary
-control  files:  the first   is   optionally   referenced   with  the
+Additional projection control parameters may be contained in two auxiliary
+control files: the first is optionally referenced with the
 \fI+init=file:id\fP and the second is always processed after the name of the
-projection has been established from either the run\-line or the  contents of
-\fI+init\fP   file.   The  environment  parameter PROJ_LIB establishes the default
-directory for a file  reference  without an absolute path.  This is also used
-for  supporting  files  like  datum shift files.
+projection has been established from either the run\-line or the contents of
+\fI+init\fP file. The environment parameter \fBPROJ_LIB\fP establishes the default
+directory for a file reference without an absolute path. This is also used
+for supporting files like datum shift files.
 .sp
-One  or  more  files (processed in left to right order) specify the source of
-data to  be  transformed.  A \fB\-\fP will specify the location of processing standard
-input.  If no files are  specified,  the  input  is  assumed to be from stdin.
-For input data the two data values  must  be  in the  first  two white space
-separated fields and when both input and output are ASCII all  trailing portions
+One or more files (processed in left to right order) specify the source of
+data to be transformed. A \fB\-\fP will specify the location of processing standard
+input. If no files are specified, the input is assumed to be from stdin.
+For input data the two data values must be in the first two white space
+separated fields and when both input and output are ASCII all trailing portions
 of the input line are appended to the output line.
 .sp
-Input geographic data (longitude  and  latitude) must  be  in  DMS  or decimal
-degrees format and input cartesian data must be in units consistent with  the
-ellipsoid major axis or sphere radius units.  Output geographic coordinates will
+Input geographic data (longitude and latitude) must be in DMS or decimal
+degrees format and input cartesian data must be in units consistent with the
+ellipsoid major axis or sphere radius units. Output geographic coordinates will
 normally be in DMS format (use \fB\-f %.12f\fP for decimal degrees with 12 decimal
-places), while projected (cartesian)   coordinates   will  be  in  linear
+places), while projected (cartesian) coordinates will be in linear
 (meter, feet) units.
 .SH EXAMPLE
 .sp
@@ -180,17 +184,19 @@ The following script
 .sp
 .nf
 .ft C
-cs2cs +proj=latlong +datum=NAD83 +to +proj=utm +zone=10  +datum=NAD27 \-r
-<<EOF 45d15\(aq33.1"   111.5W 45d15.551666667N   \-111d30 +45.25919444444
-111d30\(aq000w EOF
+cs2cs +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27 \-r <<EOF
+45d15\(aq33.1" 111.5W
+45d15.551666667N \-111d30
++45.25919444444 111d30\(aq000w
+EOF
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .sp
-will  transform the input NAD83 geographic coordinates into NAD27 coordinates in
-the  UTM  projection  with  zone 10 selected.  The geographic values of this
-example are equivalent and  meant as  examples of various forms of DMS input.
+will transform the input NAD83 geographic coordinates into NAD27 coordinates in
+the UTM projection with zone 10 selected. The geographic values of this
+example are equivalent and meant as examples of various forms of DMS input.
 The x\-y output data will appear as three lines of:
 .INDENT 0.0
 .INDENT 3.5
