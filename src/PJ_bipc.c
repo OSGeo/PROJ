@@ -1,6 +1,8 @@
 #define PJ_LIB__
-#include "proj.h"
 #include <errno.h>
+#include <math.h>
+
+#include "proj.h"
 #include "projects.h"
 #include "proj_math.h"
 
@@ -170,5 +172,3 @@ PJ *PROJECTION(bipc) {
     P->es = 0.;
     return P;
 }
-
-

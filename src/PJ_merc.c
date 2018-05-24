@@ -1,9 +1,12 @@
 #define PJ_LIB__
+
+#include <float.h>
+#include <math.h>
+
 #include "proj_internal.h"
 #include "proj.h"
 #include "proj_math.h"
 #include "projects.h"
-#include <float.h>
 
 PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Sph\n\t";

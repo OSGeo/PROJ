@@ -26,6 +26,9 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(nzmg, "New Zealand Map Grid") "\n\tfixed Earth";
@@ -118,4 +121,3 @@ PJ *PROJECTION(nzmg) {
 
     return P;
 }
-

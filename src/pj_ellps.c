@@ -1,5 +1,7 @@
 /* definition of standard geoids */
 
+#include <stddef.h>
+
 #include "proj.h"
 
 #define PJ_ELLPS__

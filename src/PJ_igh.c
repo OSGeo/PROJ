@@ -1,5 +1,8 @@
 #define PJ_LIB__
+
 #include <errno.h>
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(igh, "Interrupted Goode Homolosine") "\n\tPCyl, Sph.";
@@ -220,5 +223,3 @@ PJ *PROJECTION(igh) {
 
     return P;
 }
-
-

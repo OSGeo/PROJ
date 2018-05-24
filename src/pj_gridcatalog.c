@@ -27,9 +27,12 @@
 
 #define PJ_LIB__
 
-#include "projects.h"
-#include <string.h>
 #include <assert.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "projects.h"
 
 static PJ_GridCatalog *grid_catalog_list = NULL;
 
@@ -234,7 +237,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
 
 PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx, PJ_GridCatalog *catalog, int after,
                              LP location, double date,
-                             PJ_Region *optimal_region,
+                             PJ_Region *optional_region,
                              double *grid_date ) 
 {
     int iEntry;
@@ -264,15 +267,15 @@ PJ_GRIDINFO *pj_gc_findgrid( projCtx ctx, PJ_GridCatalog *catalog, int after,
     {
         if( grid_date )
             *grid_date = 0.0;
-        if( optimal_region != NULL )
-            memset( optimal_region, 0, sizeof(PJ_Region));
+        if( optional_region != NULL )
+            memset( optional_region, 0, sizeof(PJ_Region));
         return NULL;
     }
 
     if( grid_date )
         *grid_date = entry->date;
 
-    if( optimal_region )
+    if( optional_region )
     {
         
     }

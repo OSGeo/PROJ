@@ -1,5 +1,8 @@
 #define PJ_LIB__
+
 #include <errno.h>
+#include <math.h>
+
 #include "proj.h"
 #include "projects.h"
 
@@ -65,5 +68,3 @@ PJ *PROJECTION(fouc_s) {
     P->fwd = s_forward;
     return P;
 }
-
-

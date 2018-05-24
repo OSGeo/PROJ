@@ -13,6 +13,9 @@ and designed in collaboration with Tom Patterson.
 Port to PROJ.4 by Bernhard Jenny, 6 June 2011
 */
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(natearth, "Natural Earth") "\n\tPCyl., Sph.";
@@ -95,4 +98,3 @@ PJ *PROJECTION(natearth) {
 
     return P;
 }
-

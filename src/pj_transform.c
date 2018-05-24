@@ -27,9 +27,10 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#include "projects.h"
-#include <string.h>
 #include <math.h>
+#include <string.h>
+
+#include "projects.h"
 #include "geocent.h"
 
 
@@ -495,66 +496,66 @@ static int long_wrap (PJ *P, long n, int dist, double *x) {
 /************************************************************************/
 
 int pj_transform(
-    PJ *srcdefn, PJ *dstdefn,
+    PJ *src, PJ *dst,
     long point_count, int point_offset,
     double *x, double *y, double *z
 ){
     int       err;
 
-    srcdefn->ctx->last_errno = 0;
-    dstdefn->ctx->last_errno = 0;
+    src->ctx->last_errno = 0;
+    dst->ctx->last_errno = 0;
 
     if( point_offset == 0 )
         point_offset = 1;
 
     /* Bring input to "normal form": longitude, latitude, ellipsoidal height */
 
-    err = adjust_axes (srcdefn, PJ_INV, point_count, point_offset, x, y, z);
+    err = adjust_axes (src, PJ_INV, point_count, point_offset, x, y, z);
     if (err)
         return err;
-    err = geographic_to_cartesian (srcdefn, PJ_INV, point_count, point_offset, x, y, z);
+    err = geographic_to_cartesian (src, PJ_INV, point_count, point_offset, x, y, z);
     if (err)
         return err;
-    err = projected_to_geographic (srcdefn, point_count, point_offset, x, y, z);
+    err = projected_to_geographic (src, point_count, point_offset, x, y, z);
     if (err)
         return err;
-    err = prime_meridian (srcdefn, PJ_INV, point_count, point_offset, x);
+    err = prime_meridian (src, PJ_INV, point_count, point_offset, x);
     if (err)
         return err;
-    err = height_unit (srcdefn, PJ_INV, point_count, point_offset, z);
+    err = height_unit (src, PJ_INV, point_count, point_offset, z);
     if (err)
         return err;
-    err = geometric_to_orthometric (srcdefn, PJ_INV, point_count, point_offset, x, y, z);
+    err = geometric_to_orthometric (src, PJ_INV, point_count, point_offset, x, y, z);
     if (err)
         return err;
 
     /* At the center of the process we do the datum shift (if needed) */
 
-    err = datum_transform(srcdefn, dstdefn, point_count, point_offset, x, y, z );
+    err = datum_transform(src, dst, point_count, point_offset, x, y, z );
     if (err)
         return err;
 
     /* Now get out on the other side: Bring "normal form" to output form */
 
-    err = geometric_to_orthometric (dstdefn, PJ_FWD, point_count, point_offset, x, y, z);
+    err = geometric_to_orthometric (dst, PJ_FWD, point_count, point_offset, x, y, z);
     if (err)
         return err;
-    err = height_unit (dstdefn, PJ_FWD, point_count, point_offset, z);
+    err = height_unit (dst, PJ_FWD, point_count, point_offset, z);
     if (err)
         return err;
-    err = prime_meridian (dstdefn, PJ_FWD, point_count, point_offset, x);
+    err = prime_meridian (dst, PJ_FWD, point_count, point_offset, x);
     if (err)
         return err;
-    err = geographic_to_cartesian (dstdefn, PJ_FWD, point_count, point_offset, x, y, z);
+    err = geographic_to_cartesian (dst, PJ_FWD, point_count, point_offset, x, y, z);
     if (err)
         return err;
-    err = geographic_to_projected (dstdefn, point_count, point_offset, x, y, z);
+    err = geographic_to_projected (dst, point_count, point_offset, x, y, z);
     if (err)
         return err;
-    err = long_wrap (dstdefn, point_count, point_offset, x);
+    err = long_wrap (dst, point_count, point_offset, x);
     if (err)
         return err;
-    err = adjust_axes (dstdefn, PJ_FWD, point_count, point_offset, x, y, z);
+    err = adjust_axes (dst, PJ_FWD, point_count, point_offset, x, y, z);
     if (err)
         return err;
 
@@ -799,7 +800,7 @@ int pj_geocentric_from_wgs84( PJ *defn,
 /*      coordinates in radians in the destination datum.                */
 /************************************************************************/
 
-int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
+int pj_datum_transform( PJ *src, PJ *dst,
                         long point_count, int point_offset,
                         double *x, double *y, double *z )
 
@@ -813,21 +814,21 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /*      (ie. only a +ellps declaration, no +datum).  This is new        */
 /*      behavior for PROJ 4.6.0.                                        */
 /* -------------------------------------------------------------------- */
-    if( srcdefn->datum_type == PJD_UNKNOWN
-        || dstdefn->datum_type == PJD_UNKNOWN )
+    if( src->datum_type == PJD_UNKNOWN
+        || dst->datum_type == PJD_UNKNOWN )
         return 0;
 
 /* -------------------------------------------------------------------- */
 /*      Short cut if the datums are identical.                          */
 /* -------------------------------------------------------------------- */
-    if( pj_compare_datums( srcdefn, dstdefn ) )
+    if( pj_compare_datums( src, dst ) )
         return 0;
 
-    src_a = srcdefn->a_orig;
-    src_es = srcdefn->es_orig;
+    src_a = src->a_orig;
+    src_es = src->es_orig;
 
-    dst_a = dstdefn->a_orig;
-    dst_es = dstdefn->es_orig;
+    dst_a = dst->a_orig;
+    dst_es = dst->es_orig;
 
 /* -------------------------------------------------------------------- */
 /*      Create a temporary Z array if one is not provided.              */
@@ -846,16 +847,16 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /*	If this datum requires grid shifts, then apply it to geodetic   */
 /*      coordinates.                                                    */
 /* -------------------------------------------------------------------- */
-    if( srcdefn->datum_type == PJD_GRIDSHIFT )
+    if( src->datum_type == PJD_GRIDSHIFT )
     {
-        pj_apply_gridshift_2( srcdefn, 0, point_count, point_offset, x, y, z );
-        CHECK_RETURN(srcdefn);
+        pj_apply_gridshift_2( src, 0, point_count, point_offset, x, y, z );
+        CHECK_RETURN(src);
 
         src_a = SRS_WGS84_SEMIMAJOR;
         src_es = SRS_WGS84_ESQUARED;
     }
 
-    if( dstdefn->datum_type == PJD_GRIDSHIFT )
+    if( dst->datum_type == PJD_GRIDSHIFT )
     {
         dst_a = SRS_WGS84_SEMIMAJOR;
         dst_es = SRS_WGS84_ESQUARED;
@@ -865,52 +866,52 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /*      Do we need to go through geocentric coordinates?                */
 /* ==================================================================== */
     if( src_es != dst_es || src_a != dst_a
-        || srcdefn->datum_type == PJD_3PARAM
-        || srcdefn->datum_type == PJD_7PARAM
-        || dstdefn->datum_type == PJD_3PARAM
-        || dstdefn->datum_type == PJD_7PARAM)
+        || src->datum_type == PJD_3PARAM
+        || src->datum_type == PJD_7PARAM
+        || dst->datum_type == PJD_3PARAM
+        || dst->datum_type == PJD_7PARAM)
     {
 /* -------------------------------------------------------------------- */
 /*      Convert to geocentric coordinates.                              */
 /* -------------------------------------------------------------------- */
-        srcdefn->ctx->last_errno =
+        src->ctx->last_errno =
             pj_geodetic_to_geocentric( src_a, src_es,
                                        point_count, point_offset, x, y, z );
-        CHECK_RETURN(srcdefn);
+        CHECK_RETURN(src);
 
 /* -------------------------------------------------------------------- */
 /*      Convert between datums.                                         */
 /* -------------------------------------------------------------------- */
-        if( srcdefn->datum_type == PJD_3PARAM
-            || srcdefn->datum_type == PJD_7PARAM )
+        if( src->datum_type == PJD_3PARAM
+            || src->datum_type == PJD_7PARAM )
         {
-            pj_geocentric_to_wgs84( srcdefn, point_count, point_offset,x,y,z);
-            CHECK_RETURN(srcdefn);
+            pj_geocentric_to_wgs84( src, point_count, point_offset,x,y,z);
+            CHECK_RETURN(src);
         }
 
-        if( dstdefn->datum_type == PJD_3PARAM
-            || dstdefn->datum_type == PJD_7PARAM )
+        if( dst->datum_type == PJD_3PARAM
+            || dst->datum_type == PJD_7PARAM )
         {
-            pj_geocentric_from_wgs84( dstdefn, point_count,point_offset,x,y,z);
-            CHECK_RETURN(dstdefn);
+            pj_geocentric_from_wgs84( dst, point_count,point_offset,x,y,z);
+            CHECK_RETURN(dst);
         }
 
 /* -------------------------------------------------------------------- */
 /*      Convert back to geodetic coordinates.                           */
 /* -------------------------------------------------------------------- */
-        dstdefn->ctx->last_errno =
+        dst->ctx->last_errno =
             pj_geocentric_to_geodetic( dst_a, dst_es,
                                        point_count, point_offset, x, y, z );
-        CHECK_RETURN(dstdefn);
+        CHECK_RETURN(dst);
     }
 
 /* -------------------------------------------------------------------- */
 /*      Apply grid shift to destination if required.                    */
 /* -------------------------------------------------------------------- */
-    if( dstdefn->datum_type == PJD_GRIDSHIFT )
+    if( dst->datum_type == PJD_GRIDSHIFT )
     {
-        pj_apply_gridshift_2( dstdefn, 1, point_count, point_offset, x, y, z );
-        CHECK_RETURN(dstdefn);
+        pj_apply_gridshift_2( dst, 1, point_count, point_offset, x, y, z );
+        CHECK_RETURN(dst);
     }
 
     if( z_is_temp )

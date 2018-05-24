@@ -27,8 +27,10 @@
  *****************************************************************************/
 
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "proj.h"
-#include <errno.h>
 #include "projects.h"
 
 PROJ_HEAD(geoc, "Geocentric Latitude");

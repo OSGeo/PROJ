@@ -54,6 +54,9 @@ operation:
 
 #define PJ_LIB__
 #include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "proj_internal.h"
 #include "projects.h"
 

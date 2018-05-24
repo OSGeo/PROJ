@@ -200,6 +200,7 @@ static void vprocess(FILE *fid) {
         emess(1,"binary I/O not available in -V option");
 
     for (;;) {
+        proj_errno_reset(Proj);
         ++emess_dat.File_line;
 
         if (!(s = fgets(line, MAX_LINE, fid)))

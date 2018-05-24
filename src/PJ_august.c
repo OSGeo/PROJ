@@ -1,6 +1,8 @@
 #define PJ_LIB__
-#include	"projects.h"
 
+#include <math.h>
+
+#include "projects.h"
 
 PROJ_HEAD(august, "August Epicycloidal") "\n\tMisc Sph, no inv.";
 #define M 1.333333333333333
@@ -30,4 +32,3 @@ PJ *PROJECTION(august) {
     P->es = 0.;
     return P;
 }
-

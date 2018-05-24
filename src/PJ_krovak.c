@@ -75,9 +75,11 @@
  *
  *****************************************************************************/
 
-
 #define PJ_LIB__
+
 #include <errno.h>
+#include <math.h>
+
 #include "projects.h"
 
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
@@ -218,4 +220,3 @@ PJ *PROJECTION(krovak) {
 
     return P;
 }
-

@@ -4,9 +4,11 @@
 FAQ
 ******************************************************************************
 
-.. contents:: Contents
-   :depth: 3
-   :backlinks: none
+.. only:: not latex
+
+    .. contents::
+       :depth: 3
+       :backlinks: none
 
 
 

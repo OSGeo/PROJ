@@ -38,10 +38,10 @@
  *
 */
 
-
 #define PJ_LIB__
 
 #include <errno.h>
+
 #include "proj.h"
 #include "projects.h"
 #include "proj_math.h"
@@ -349,4 +349,3 @@ PJ *PROJECTION(utm) {
 
     return setup (P);
 }
-

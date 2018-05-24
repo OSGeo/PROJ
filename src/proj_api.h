@@ -25,16 +25,16 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
- /*
+/*
   * This version number should be updated with every release!
   *
   * This file is expected to be removed from the PROJ distribution
   * when a few minor-version releases has been made.
   *
   */
- #ifndef PJ_VERSION
- #define PJ_VERSION 500
- #endif
+#ifndef PJ_VERSION
+#define PJ_VERSION 500
+#endif
 
 
 /* If we're not asked for PJ_VERSION only, give them everything */
@@ -43,14 +43,15 @@
 #ifndef PROJ_API_H
 #define PROJ_API_H
 
+/* standard inclusions */
+#include <math.h>
+#include <stddef.h>
+#include <stdlib.h>
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
-/* standard inclusions */
-#include <math.h>
-#include <stdlib.h>
 
 
 /* pj_init() and similar functions can be used with a non-C locale */

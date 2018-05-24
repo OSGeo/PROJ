@@ -26,15 +26,16 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#include "proj.h"
-#include "projects.h"
+#include <ctype.h>
+#include <locale.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
-#include <math.h>
+
+#include "proj.h"
+#include "projects.h"
 #include "emess.h"
-#include <locale.h>
 
 #define MAX_LINE 1000
 #define MAX_PARGS 100

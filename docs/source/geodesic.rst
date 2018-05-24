@@ -3,10 +3,6 @@
 Geodesic calculations
 =====================
 
-.. contents:: Contents
-   :depth: 2
-   :backlinks: none
-
 Introduction
 ------------
 

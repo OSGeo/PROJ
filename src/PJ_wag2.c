@@ -1,6 +1,11 @@
 #define PJ_LIB__
+
+#include <math.h>
+
 #include "projects.h"
+
 PROJ_HEAD(wag2, "Wagner II") "\n\tPCyl., Sph.";
+
 #define C_x 0.92483
 #define C_y 1.38725
 #define C_p1 0.88022
@@ -31,4 +36,3 @@ PJ *PROJECTION(wag2) {
     P->fwd = s_forward;
     return P;
 }
-

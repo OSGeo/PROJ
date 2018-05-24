@@ -88,7 +88,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 double proj_strtod(const char *str, char **endptr);
 double proj_atof(const char *str);
 static void logger(void *data, int level, const char *msg);
-static void print(PJ_LOG_LEVEL verbosity, const char *fmt, ...);
+static void print(PJ_LOG_LEVEL log_level, const char *fmt, ...);
 
 /* Prototypes from functions in this file */
 char *column (char *buf, int n);

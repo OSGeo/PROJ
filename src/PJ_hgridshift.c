@@ -1,7 +1,8 @@
 #define PJ_LIB__
 
-#include <string.h>
 #include <errno.h>
+#include <string.h>
+#include <stddef.h>
 #include <time.h>
 
 #include "proj_internal.h"
@@ -115,4 +116,3 @@ PJ *TRANSFORMATION(hgridshift,0) {
 
     return P;
 }
-

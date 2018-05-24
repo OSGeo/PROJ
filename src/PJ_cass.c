@@ -1,6 +1,10 @@
 #define PJ_LIB__
-# include   <errno.h>
-# include   "projects.h"
+
+#include <errno.h>
+#include <math.h>
+
+#include "projects.h"
+
 PROJ_HEAD(cass, "Cassini") "\n\tCyl, Sph&Ell";
 
 
@@ -115,5 +119,3 @@ PJ *PROJECTION(cass) {
 
     return P;
 }
-
-
