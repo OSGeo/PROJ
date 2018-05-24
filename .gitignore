@@ -10,6 +10,7 @@ cmake_install.cmake
 install_manifest.txt
 cmake/project-config*.cmake
 README
+test-driver
 
 /.vs*
 /*.manifest
