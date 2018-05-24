@@ -404,7 +404,7 @@ ITRF2005:
 
 ::
 
-    +init=ITRF2000:ITRF2005 +tobs=2010.5
+    +init=ITRF2000:ITRF2005 +t_obs=2010.5
 
 which then expands to
 
@@ -412,8 +412,8 @@ which then expands to
 
     +proj=helmert +x=-0.0001 +y=0.0008 +z=0.0058 +s=-0.0004
     +dx=0.0002 +dy=-0.0001 +dz=0.0018 +ds=-0.000008
-    +epoch=2000.0 +transpose
-    +tobs=2010.5
+    +t_epoch=2000.0 +transpose
+    +t_obs=2010.5
 
 Below is a list of the init files that are packaged with PROJ.
 

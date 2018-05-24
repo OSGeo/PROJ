@@ -130,7 +130,7 @@ coordinate timestamps back to GPS weeks.
          rx=0.00039 ry=-0.00080 rz=0.00114
          dx=-0.0029 dy=-0.0002 dz=-0.0006 ds=0.00001
          drx=0.00011 dry=0.00019 drz=-0.00007
-         epoch=1988.0
+         t_epoch=1988.0
     step proj=unitconvert t_in=decimalyear t_out=gps_week
 
 

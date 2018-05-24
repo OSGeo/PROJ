@@ -72,7 +72,7 @@ Transformation from `ITRF2000@2017.0`  to `ITRF93@2017.0` using 15 parameters:
          dx=-0.0029   dy=-0.0002   dz=-0.0006 ds=0.00001
          rx=-0.00039  ry=0.00080   rz=-0.00114
          drx=-0.00011 dry=-0.00019 drz=0.00007
-         epoch=1988.0 tobs=2017.0    transpose
+         t_epoch=1988.0 t_obs=2017.0    transpose
 
 Parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
