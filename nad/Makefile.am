@@ -24,7 +24,7 @@ EXTRA_DIST = GL27 nad.lst proj_def.dat nad27 nad83 pj_out27.dist pj_out83.dist t
 		esri.extra other.extra \
 		CH IGNF testIGNF proj_outIGNF.dist \
 		ITRF2000 ITRF2008 ITRF2014 \
-		makefile.vc CMakeLists.txt
+		makefile.vc CMakeLists.txt tests/test_nodata.gtx
 
 process-nad2bin:
 	@if [ -f $(NADPATH)/null.lla -a ! -f null ] || [ -f $(NADPATH)/conus.lla -a ! -f conus ] ; then \
