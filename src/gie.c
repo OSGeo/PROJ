@@ -260,12 +260,6 @@ int main (int argc, char **argv) {
         return 0;
     }
 
-
-    if (opt_given (o, "l")) {
-        free (o);
-        return list_err_codes ();
-    }
-
     T.verbosity = opt_given (o, "q");
     if (T.verbosity)
         T.verbosity = -1;
@@ -280,6 +274,11 @@ int main (int argc, char **argv) {
         fprintf (stderr, "%s: Cannot open '%s' for output\n", o->progname, opt_arg (o, "output"));
         free (o);
         return 1;
+    }
+
+    if (opt_given (o, "l")) {
+        free (o);
+        return list_err_codes ();
     }
 
     if (0==o->fargc) {
@@ -691,7 +690,7 @@ Read ("ACCEPT") a 2, 3, or 4 dimensional input coordinate.
 ******************************************************************************/
     T.a = parse_coord (args);
     if (T.verbosity > 3)
-        printf ("#  %s\n", args);
+        fprintf (T.fout, "#  %s\n", args);
     T.dimensions_given_at_last_accept = T.dimensions_given;
     return 0;
 }
@@ -877,7 +876,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
         if (expect_failure_with_errno) {
             if (proj_errno (T.P)==expect_failure_with_errno)
                 return another_succeeding_failure ();
-            printf ("errno=%d, expected=%d\n", proj_errno (T.P), expect_failure_with_errno);
+            fprintf (T.fout, "errno=%d, expected=%d\n", proj_errno (T.P), expect_failure_with_errno);
             return another_failing_failure ();
         }
 
@@ -896,11 +895,11 @@ Tell GIE what to expect, when transforming the ACCEPTed input
 
 
     if (T.verbosity > 3) {
-        puts (T.P->inverted? "INVERTED": "NOT INVERTED");
-        puts (T.dir== 1? "forward": "reverse");
-        puts (proj_angular_input (T.P, T.dir)?  "angular in":  "linear in");
-        puts (proj_angular_output (T.P, T.dir)? "angular out": "linear out");
-        printf ("left: %d   right:  %d\n", T.P->left, T.P->right);
+        fprintf (T.fout, "%s\n", T.P->inverted? "INVERTED": "NOT INVERTED");
+        fprintf (T.fout, "%s\n", T.dir== 1? "forward": "reverse");
+        fprintf (T.fout, "%s\n", proj_angular_input (T.P, T.dir)?  "angular in":  "linear in");
+        fprintf (T.fout, "%s\n", proj_angular_output (T.P, T.dir)? "angular out": "linear out");
+        fprintf (T.fout, "left: %d   right:  %d\n", T.P->left, T.P->right);
     }
 
     tests++;
@@ -912,12 +911,14 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     /* expected angular values, probably in degrees */
     ce = proj_angular_output (T.P, T.dir)? torad_coord (T.P, T.dir, T.e): T.e;
     if (T.verbosity > 3)
-        printf ("EXPECTS  %.12f  %.12f  %.12f  %.12f\n", ce.v[0],ce.v[1],ce.v[2],ce.v[3]);
+        fprintf (T.fout, "EXPECTS  %.12f  %.12f  %.12f  %.12f\n",
+                 ce.v[0],ce.v[1],ce.v[2],ce.v[3]);
 
     /* input ("accepted") values, also probably in degrees */
     ci = proj_angular_input (T.P, T.dir)? torad_coord (T.P, T.dir, T.a): T.a;
     if (T.verbosity > 3)
-        printf ("ACCEPTS  %.12f  %.12f  %.12f  %.12f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
+        fprintf (T.fout, "ACCEPTS  %.12f  %.12f  %.12f  %.12f\n",
+                 ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
 
     /* do the transformation, but mask off dimensions not given in expect-ation */
     co = expect_trans_n_dim (ci);
@@ -929,7 +930,8 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     /* angular output from proj_trans comes in radians */
     T.b = proj_angular_output (T.P, T.dir)? todeg_coord (T.P, T.dir, co): co;
     if (T.verbosity > 3)
-        printf ("GOT      %.12f  %.12f  %.12f  %.12f\n", co.v[0],co.v[1],co.v[2],co.v[3]);
+        fprintf (T.fout, "GOT      %.12f  %.12f  %.12f  %.12f\n",
+                 co.v[0],co.v[1],co.v[2],co.v[3]);
 
 #if 0
     /* We need to handle unusual axis orders - that'll be an item for version 5.1 */
@@ -1092,7 +1094,8 @@ static int list_err_codes (void) {
     for (i = 0;  i < n;  i++) {
         if (9999==lookup[i].the_errno)
             break;
-        printf ("%25s  (%2.2d):  %s\n", lookup[i].the_err_const + 8, lookup[i].the_errno, pj_strerrno(lookup[i].the_errno));
+        fprintf (T.fout, "%25s  (%2.2d):  %s\n", lookup[i].the_err_const + 8,
+                 lookup[i].the_errno, pj_strerrno(lookup[i].the_errno));
     }
     return 0;
 }
@@ -2012,5 +2015,4 @@ static int unitconvert_selftest (void) {
     ret = test_time(args5, 1e-6, in5, in5);   if (ret) return ret + 50;
 
     return 0;
-
 }
