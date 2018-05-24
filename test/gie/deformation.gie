@@ -67,6 +67,7 @@ expect      failure pjd_err_missing_args
 operation   +proj=vgridshift +grids=egm96_15.gtx +t_epoch=2010.0 +t_final=2018.0
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
+ignore      pjd_err_failed_to_load_grid
 
 accept      12 56  0.0        2000.0
 expect      12 56 -36.5966    2000.0
@@ -85,6 +86,7 @@ expect      12 56 -36.5966
 operation   +proj=vgridshift +grids=egm96_15.gtx +t_epoch=2010.0 +t_final=now
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
+ignore      pjd_err_failed_to_load_grid
 
 accept      12 56  0.0        2000.0
 expect      12 56 -36.5966    2000.0
@@ -100,6 +102,7 @@ expect      12 56  0.0        3011.0
 operation +proj=hgridshift +grids=alaska +t_epoch=2010.0 +t_final=2018.0
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
+ignore      pjd_err_failed_to_load_grid
 
 accept      -147.0              64.0                0.0     2000.0
 expect      -147.0023233121     63.9995792119       0.0     2000.0
@@ -117,6 +120,7 @@ roundtrip   100
 operation +proj=hgridshift +grids=alaska +t_epoch=2010.0 +t_final=now
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
+ignore      pjd_err_failed_to_load_grid
 
 accept      -147.0              64.0                0.0     2000.0
 expect      -147.0023233121     63.9995792119       0.0     2000.0
