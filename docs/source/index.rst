@@ -50,6 +50,10 @@ PROJ
         removed from PROJ in version 7.0.0 scheduled for release February 1st
         2020.
 
+    .. attention::
+
+        With the introduction of PROJ 5, behavioural changes has been made to
+        existing functionality. Consult :ref:`differences` for the details.
 
 
 
