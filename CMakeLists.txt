@@ -19,6 +19,8 @@ if (NOT CMAKE_VERSION VERSION_LESS 3.1)
   cmake_policy(SET CMP0054 NEW)
 endif ()
 
+add_definitions(-DPROJ_COMPILATION=1)
+
 # Set warnings
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   # Suppress warning 4706 about assignment within conditional expression
@@ -161,6 +163,7 @@ include_directories(${PROJ4_SOURCE_DIR}/src)
 
 message(STATUS "")
 add_subdirectory(data)
+add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(man)
 add_subdirectory(cmake)

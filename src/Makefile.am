@@ -1,5 +1,4 @@
 AM_CFLAGS = @C_WFLAGS@
-AM_CXXFLAGS = @CXX_WFLAGS@
 
 bin_PROGRAMS =	proj nad2bin geod cs2cs gie cct
 EXTRA_PROGRAMS = multistresstest test228
@@ -8,7 +7,8 @@ TESTS = geodtest
 check_PROGRAMS = geodtest
 
 AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
-		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@
+		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@ -I$(top_srcdir)/include
+AM_CXXFLAGS =    @CXX_WFLAGS@ -DPROJ_COMPILATION
 
 include_HEADERS = proj.h proj_api.h geodesic.h \
 	org_proj4_PJ.h
@@ -45,6 +45,8 @@ libproj_la_LDFLAGS = -no-undefined -version-info 14:1:1
 
 libproj_la_SOURCES = \
 	pj_list.h proj_internal.h proj_math.h projects.h\
+	static.cpp util.cpp metadata.cpp common.cpp crs.cpp datum.cpp coordinatesystem.cpp coordinateoperation.cpp io.cpp \
+	internal.cpp \
 	PJ_aeqd.c PJ_gnom.c PJ_laea.c PJ_mod_ster.c \
 	PJ_nsper.c PJ_nzmg.c PJ_ortho.c PJ_stere.c PJ_sterea.c \
 	PJ_aea.c PJ_bipc.c PJ_bonne.c PJ_eqdc.c PJ_isea.c PJ_ccon.c\

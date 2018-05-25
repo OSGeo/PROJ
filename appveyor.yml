@@ -23,13 +23,13 @@ build_script:
 #
   - if "%platform%" == "x64" mkdir build_dll
   - if "%platform%" == "x64" cd build_dll
-  - if "%platform%" == "x64" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/WX"
+  - if "%platform%" == "x64" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX"
   - if "%platform%" == "x64" cmake --build . --config Release
   - if "%platform%" == "x64" cd ..
 #
   - if "%platform%" == "x86" mkdir build_static
   - if "%platform%" == "x86" cd build_static
-  - if "%platform%" == "x86" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS="/WX"
+  - if "%platform%" == "x86" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX"
   - if "%platform%" == "x86" cmake --build . --config Release
   - if "%platform%" == "x86" cd ..
 

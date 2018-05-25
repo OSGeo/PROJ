@@ -59,11 +59,16 @@ make install
 find /tmp/proj_autoconf_install_grids
 cd ..
 
-# autoconf build with grids and coverage
-if [ $TRAVIS_OS_NAME == "osx" ]; then
-    CFLAGS="--coverage" ./configure;
+# There's an issue with the clang on Travis + coverage + cpp code
+if [ "$BUILD_NAME" != "linux_clang" ]; then
+    # autoconf build with grids and coverage
+    if [ $TRAVIS_OS_NAME == "osx" ]; then
+        CFLAGS="--coverage" CXXFLAGS="--coverage" ./configure;
+    else
+        CFLAGS="$CFLAGS --coverage" CXXFLAGS="$CXXCFLAGS --coverage" LDFLAGS="$LDFLAGS -lgcov" ./configure;
+    fi
 else
-    CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure;
+    ./configure
 fi
 make -j3
 make check
@@ -72,4 +77,6 @@ make check
 rm -v data/egm96_15.gtx
 make check
 
-mv src/.libs/*.gc* src
+if [ "$BUILD_NAME" != "linux_clang" ]; then
+    mv src/.libs/*.gc* src
+fi

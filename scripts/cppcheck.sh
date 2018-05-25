@@ -23,7 +23,7 @@ for dirname in ${TOPDIR}/src; do
     echo "Running cppcheck on $dirname... (can be long)"
     if ! cppcheck --inline-suppr --template='{file}:{line},{severity},{id},{message}' \
         --enable=all --inconclusive --std=posix \
-        -DCPPCHECK -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H\
+        -DCPPCHECK -D__cplusplus=201103L -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H \
         "$dirname" \
         -j 8 >>${LOG_FILE} 2>&1 ; then
         echo "cppcheck failed"
@@ -33,7 +33,7 @@ done
 
 ret_code=0
 
-grep -v "unmatchedSuppression" ${LOG_FILE} > ${LOG_FILE}.tmp
+grep -v "unmatchedSuppression" ${LOG_FILE} | grep -v "nn.hpp" > ${LOG_FILE}.tmp
 mv ${LOG_FILE}.tmp ${LOG_FILE}
 
 if grep "null pointer" ${LOG_FILE} ; then

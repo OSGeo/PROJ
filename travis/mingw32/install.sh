@@ -4,6 +4,12 @@ set -e
 
 export CCACHE_CPP2=yes
 
+# prepare wine environment
+wine64 cmd /c dir
+ln -s /usr/lib/gcc/x86_64-w64-mingw32/4.8/libstdc++-6.dll  $HOME/.wine/drive_c/windows
+ln -s /usr/lib/gcc/x86_64-w64-mingw32/4.8/libgcc_s_sjlj-1.dll  $HOME/.wine/drive_c/windows
+ln -s /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll  $HOME/.wine/drive_c/windows
+
 # prepare build files
 ./autogen.sh
 # autoconf build

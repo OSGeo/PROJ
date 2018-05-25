@@ -26,6 +26,8 @@ if(NOT MSVC)
 
 else ()
 
+    add_definitions(-DPROJ_MSVC_DLL_EXPORT=1)
+
     # Linking to setargv.obj enables wildcard globbing for the
     # command line utilities, when compiling with MSVC
     # https://docs.microsoft.com/da-dk/cpp/c-language/expanding-wildcard-arguments

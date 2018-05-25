@@ -263,7 +263,7 @@ fi
 AC_SUBST(MUTEX_SETTING,$MUTEX_SETTING)
 AC_SUBST(THREAD_LIB,$THREAD_LIB)
 
-AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile
+AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile include/Makefile include/proj/Makefile
                  test/Makefile test/old/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
                  test/googletest/Makefile test/googletest/include/Makefile
                  test/googletest/include/gtest/Makefile

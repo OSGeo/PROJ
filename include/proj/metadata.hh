@@ -1,0 +1,143 @@
+/******************************************************************************
+ *
+ * Project:  PROJ
+ * Purpose:  ISO19111:2018 implementation
+ * Author:   Even Rouault <even dot rouault at spatialys dot com>
+ *
+ ******************************************************************************
+ * Copyright (c) 2018, Even Rouault <even dot rouault at spatialys dot com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ ****************************************************************************/
+
+#ifndef METADATA_HH_INCLUDED
+#define METADATA_HH_INCLUDED
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "exception.hh"
+#include "util.hh"
+
+NS_PROJ_START
+
+namespace common {
+class IdentifiedObject;
+}
+
+/** osgeo.proj.metadata namespace
+ *
+ * \brief Common classes from metadata ISO standard
+ */
+namespace metadata {
+
+// ---------------------------------------------------------------------------
+
+class Citation : public util::BaseObject {
+  public:
+    PROJ_DLL Citation();
+    PROJ_DLL explicit Citation(const std::string &titleIn);
+    PROJ_DLL Citation(const Citation &other);
+    PROJ_DLL ~Citation();
+
+    PROJ_DLL const util::optional<std::string> &title() const;
+
+  protected:
+    friend class util::optional<Citation>;
+    Citation &operator=(const Citation &other);
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+class Extent {
+  public:
+    PROJ_DLL Extent();
+    PROJ_DLL Extent(const Extent &other);
+    PROJ_DLL Extent &operator=(const Extent &other) = delete;
+    PROJ_DLL ~Extent();
+
+    const util::optional<std::string> &description() const;
+    // TODO: geographic part !
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+class Identifier;
+using IdentifierPtr = std::shared_ptr<Identifier>;
+using IdentifierNNPtr = util::nn<IdentifierPtr>;
+
+class Identifier : public util::BaseObject {
+  public:
+    PROJ_DLL Identifier(const Identifier &other);
+    PROJ_DLL ~Identifier();
+
+    PROJ_DLL static IdentifierNNPtr
+    create(const std::string &codeIn = std::string(),
+           const util::PropertyMap &properties =
+               util::PropertyMap()); // throw(InvalidValueTypeException)
+
+    PROJ_DLL static const std::string AUTHORITY_KEY;
+    PROJ_DLL static const std::string CODE_KEY;
+    PROJ_DLL static const std::string CODESPACE_KEY;
+    PROJ_DLL static const std::string VERSION_KEY;
+    PROJ_DLL static const std::string DESCRIPTION_KEY;
+
+    PROJ_DLL const util::optional<Citation> &authority() const;
+    PROJ_DLL const std::string &code() const;
+    PROJ_DLL const util::optional<std::string> &codeSpace() const;
+    PROJ_DLL const util::optional<std::string> &version() const;
+    PROJ_DLL const util::optional<std::string> &description() const;
+
+  protected:
+    explicit Identifier(const std::string &codeIn = std::string());
+
+    friend class util::optional<Identifier>;
+    INLINED_MAKE_SHARED
+    Identifier &operator=(const Identifier &other);
+
+    friend class common::IdentifiedObject;
+
+    // Non-standard
+    void setProperties(const util::PropertyMap
+                           &properties); // throw(InvalidValueTypeException)
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+// Content does not match ISO_19115
+class PositionalAccuracy {
+  public:
+    std::string value{};
+};
+
+} // namespace metadata
+
+NS_PROJ_END
+
+#endif //  METADATA_HH_INCLUDED

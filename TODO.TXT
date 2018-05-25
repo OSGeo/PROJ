@@ -1,0 +1,18 @@
+- Functional:
+    - export as ESRI WKT 1 ?
+    - WKTv2 Bison based validator ?
+    - import from WKT
+    - import from Proj4
+    - exportToProj4()
+    - derived crs, vertical crs, compound crs
+    - TOWGS84 / boundcrs
+    - DATUMENSEMBLE, REMARK, URI, SCOPE, EXTENT
+    - dynamic CRS WKT
+    - test sphericalCS
+    - WKT2: Why PROJCRS.GEODCRS doesn't include a ID node ?
+
+- Fix Doxygen warnings
+- Integrate Doxygen doc in PROJ doc
+- More tests
+- Address TODO and FIXME
+
