@@ -12,7 +12,7 @@
 cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 
 # For historic reasons, the CMake PROJECT-NAME is PROJ4
-project(PROJ4 C)
+project(PROJ4 LANGUAGES C CXX)
 set(PROJECT_INTERN_NAME PROJ)
 
 if (NOT CMAKE_VERSION VERSION_LESS 3.1)
@@ -26,8 +26,10 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-declarations -Wformat -Wformat-security")
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion -Wc99-extensions -Wc11-extensions")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion")
 endif()
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to

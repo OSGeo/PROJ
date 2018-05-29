@@ -43,5 +43,4 @@ proj_add_gie_test("GIGS-5201" "gigs/5201.gie")
 #proj_add_gie_test("GIGS-5207.2" "gigs/5207.2.gie")
 proj_add_gie_test("GIGS-5208" "gigs/5208.gie")
 
-
-
+add_subdirectory(cpp)
