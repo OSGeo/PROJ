@@ -6,13 +6,16 @@ eval(projUV **w, int nu, int nv, double res, projUV *resid) {
     projUV *s;
 
     resid->u = resid->v = 0.;
-    for (i = 0; i < nu; ++i)
-        for (s = w[i], j = 0; j < nv; ++j, ++s) {
+    for (i = 0; i < nu; ++i) {
+        s = w[i];
+        for (j = 0; j < nv; ++j) {
             if ((ab = fabs(s->u)) < res)
                 resid->u += ab;
             if ((ab = fabs(s->v)) < res)
                 resid->v += ab;
+            ++s;
         }
+    }
 }
 static Tseries * /* create power series structure */
 makeT(int nru, int nrv) {
@@ -70,7 +73,8 @@ mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(projUV),
         nru = nrv = 0;
         for (j = 0; j < nu; ++j) {
             ncu[j] = ncv[j] = 0; /* clear column maxes */
-            for (s = w[j], i = 0; i < nv; ++i, ++s) {
+            s = w[j];
+            for (i = 0; i < nv; ++i) {
                 if ((ab = fabs(s->u)) < cutres) /* < resolution ? */
                     s->u = 0.;		/* clear coefficient */
                 else
@@ -79,6 +83,7 @@ mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(projUV),
                     s->v = 0.;
                 else
                     ncv[j] = i + 1;
+                ++s;
             }
             if (ncu[j]) nru = j + 1;	/* update row max */
             if (ncv[j]) nrv = j + 1;
@@ -90,11 +95,13 @@ mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(projUV),
             nru = nrv = 0;
             for (j = 0; j < nu; ++j) {
                 ncu[j] = ncv[j] = 0; /* clear column maxes */
-                for (s = w[j], i = 0; i < nv; ++i, ++s) {
+                s = w[j];
+                for (i = 0; i < nv; ++i) {
                     if (s->u != 0.0)
                         ncu[j] = i + 1;	/* update column max */
                     if (s->v != 0.0)
                         ncv[j] = i + 1;
+                    ++s;
                 }
                 if (ncu[j]) nru = j + 1;	/* update row max */
                 if (ncv[j]) nrv = j + 1;

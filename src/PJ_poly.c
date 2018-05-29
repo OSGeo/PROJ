@@ -71,7 +71,8 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         int i;
 
         r = xy.y * xy.y + xy.x * xy.x;
-        for (lp.phi = xy.y, i = I_ITER; i ; --i) {
+        lp.phi = xy.y;
+        for (i = I_ITER; i ; --i) {
             sp = sin(lp.phi);
             s2ph = sp * ( cp = cos(lp.phi));
             if (fabs(cp) < ITOL) {

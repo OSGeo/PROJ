@@ -932,8 +932,9 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
       unsigned numit = 0;
       /* Bracketing range */
       real salp1a = tiny, calp1a = 1, salp1b = tiny, calp1b = -1;
-      boolx tripn, tripb;
-      for (tripn = FALSE, tripb = FALSE; numit < maxit2; ++numit) {
+      boolx tripn = FALSE;
+      boolx tripb = FALSE;
+      for (; numit < maxit2; ++numit) {
         /* the WGS84 test set: mean = 1.47, sd = 1.25, max = 16
          * WGS84 and random input: mean = 2.85, sd = 0.60 */
         real dv = 0,

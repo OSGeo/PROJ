@@ -119,7 +119,8 @@ int main(int argc, char **argv) {
     ct.del.lam *= DEG_TO_RAD;
     ct.del.phi *= DEG_TO_RAD;
     /* load table */
-    for (p = ct.cvs, i = 0; i < ct.lim.phi; ++i) {
+    p = ct.cvs;
+    for (i = 0; i < ct.lim.phi; ++i) {
         /* cppcheck-suppress invalidscanf */
         if ( EOF == scanf("%d:%ld %ld", &ichk, &laml, &phil) ) {
             perror("scanf on row");

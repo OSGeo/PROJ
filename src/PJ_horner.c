@@ -270,8 +270,12 @@ summing the tiny high order elements first.
         double u, v, N, E;
 
         /* Double Horner's scheme: N = n*Cy*e -> yout, E = e*Cx*n -> xout */
-        for (N = *--tcy,  E = *--tcx;    r > 0;    r--) {
-            for (c = g,  u = *--tcy,  v = *--tcx;    c >= r;    c--) {
+        N = *--tcy;
+        E = *--tcx;
+        for (;    r > 0;    r--) {
+            u = *--tcy;
+            v = *--tcx;
+            for (c = g;    c >= r;    c--) {
                 u = n*u + *--tcy;
                 v = e*v + *--tcx;
             }

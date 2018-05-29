@@ -164,7 +164,6 @@ static char* replace_point_by_locale_point(const char* pszNumber, char point,
  * @param endptr If is not NULL, a pointer to the character after the last
  * character used in the conversion is stored in the location referenced
  * by endptr.
- * @param point Decimal delimiter.
  *
  * @return Converted value.
  */

@@ -94,20 +94,20 @@ struct pj_opaque_unitconvert {
 
 
 /***********************************************************************/
-static int is_leap_year(int year) {
+static int is_leap_year(long year) {
 /***********************************************************************/
     return ((year % 4 == 0 && year % 100 != 0) || year % 400 ==0);
 }
 
 
 /***********************************************************************/
-static int days_in_year(int year) {
+static int days_in_year(long year) {
 /***********************************************************************/
     return is_leap_year(year) ? 366 : 365;
 }
 
 /***********************************************************************/
-static unsigned int days_in_month(unsigned int year, unsigned int month) {
+static unsigned int days_in_month(unsigned long year, unsigned long month) {
 /***********************************************************************/
     const unsigned int month_table[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     unsigned int days;
@@ -123,7 +123,7 @@ static unsigned int days_in_month(unsigned int year, unsigned int month) {
 
 
 /***********************************************************************/
-static int daynumber_in_year(unsigned int year, unsigned int month, unsigned int day) {
+static int daynumber_in_year(unsigned long year, unsigned long month, unsigned long day) {
 /***********************************************************************/
     unsigned int daynumber=0, i;
 
@@ -167,7 +167,7 @@ static double decimalyear_to_mjd(double decimalyear) {
     year = lround(floor(decimalyear));
     fractional_year = decimalyear - year;
     mjd = (year - 1859)*365 + 14 + 31;
-    mjd += fractional_year*days_in_year(year);
+    mjd += (double)fractional_year*(double)days_in_year(year);
 
     /* take care of leap days */
     year--;

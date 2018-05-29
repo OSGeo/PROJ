@@ -134,9 +134,13 @@ double proj_strtod(const char *str, char **endptr) {
     /* Then handle optional prefixed sign and skip prefix zeros */
     switch (*p) {
         case '-':
-            sign = -1,  p++;   break;
+            sign = -1;
+            p++;
+            break;
         case '+':
-            sign =  1,  p++;  break;
+            sign =  1;
+            p++;
+            break;
         default:
             if (isdigit(*p) || '_'==*p || '.'==*p)
                 break;
