@@ -1019,7 +1019,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 
     strncpy (key, initname, 64); /* make room for ":metadata\0" at the end */
     key[64] = 0;
-    strncat(key, ":metadata", 9);
+    memcpy(key + strlen(key), ":metadata", 9 + 1);
     strcpy(param, "+init=");
     /* The +strlen(param) avoids a cppcheck false positive warning */
     strncat(param + strlen(param), key, sizeof(param)-1-strlen(param));
