@@ -1406,7 +1406,7 @@ static int append_args (ffio *G) {
     if (tag)
         skip_chars = strlen (tag);
 
-    if (G->args_size < args_len + next_len - skip_chars + 1) {
+    if (G->args_size < args_len + next_len - skip_chars + 2) {
         void *p = realloc (G->args, 2 * G->args_size);
         if (0==p)
             return 0;
