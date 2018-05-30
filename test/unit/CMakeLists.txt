@@ -1,11 +1,5 @@
-SET(CATCH2_INCLUDE catch.hpp)
-
-SET(TEST_MAIN_SRC test_main.cpp)
-set(TEST_MAIN_LIBRARIES test_main)
-add_library( ${TEST_MAIN_LIBRARIES}
-                    ${PROJ_LIBRARY_TYPE}
-                    ${TEST_MAIN_SRC}
-                    ${CATCH2_INCLUDE}  )
+SET(CATCH2_INCLUDE ../catch.hpp)
+include_directories(..)
 
 SET(BASIC_TEST_SRC basic_test.cpp)
 add_executable(basic_test ${BASIC_TEST_SRC} ${CATCH2_INCLUDE})

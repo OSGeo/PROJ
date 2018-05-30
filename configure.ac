@@ -263,7 +263,7 @@ AC_SUBST(MUTEX_SETTING,$MUTEX_SETTING)
 AC_SUBST(THREAD_LIB,$THREAD_LIB)
 
 AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile
-                 test/Makefile test/gie/Makefile test/gigs/Makefile test/cpp/Makefile
+                 test/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
                  man/Makefile man/man1/Makefile man/man3/Makefile nad/Makefile
                  jniwrap/Makefile jniwrap/org.osgeo.proj/Makefile jniwrap/org.osgeo.proj/org/Makefile jniwrap/org.osgeo.proj/org/proj4/Makefile])
 AC_CONFIG_FILES([nad/install], [chmod +x nad/install])
