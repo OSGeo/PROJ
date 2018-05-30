@@ -71,8 +71,13 @@ static double gatg(double *p1, int len_p1, double B) {
     double h = 0, h1, h2 = 0, cos_2B;
 
     cos_2B = 2*cos(2*B);
-    for (p = p1 + len_p1, h1 = *--p; p - p1; h2 = h1, h1 = h)
+    p = p1 + len_p1;
+    h1 = *--p;
+    while (p - p1) {
         h = -h2 + cos_2B*h1 + *--p;
+        h2 = h1;
+        h1 = h;
+    }
     return (B + h*sin(2*B));
 }
 
@@ -98,7 +103,9 @@ static double clenS(double *a, int size, double arg_r, double arg_i, double *R, 
     i          = -2*sin_arg_r*sinh_arg_i;
 
     /* summation loop */
-    for (hi1 = hr1 = hi = 0, hr = *--p; a - p;) {
+    hi1 = hr1 = hi = 0;
+    hr = *--p;
+    for (; a - p;) {
         hr2 = hr1;
         hi2 = hi1;
         hr1 = hr;
@@ -124,7 +131,9 @@ static double clens(double *a, int size, double arg_r) {
     r          =  2*cos_arg_r;
 
     /* summation loop */
-    for (hr1 = 0, hr = *--p; a - p;) {
+    hr1 = 0;
+    hr = *--p;
+    for (; a - p;) {
         hr2 = hr1;
         hr1 = hr;
         hr  = -hr2 + r*hr1 + *--p;

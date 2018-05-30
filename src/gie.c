@@ -385,8 +385,11 @@ static int process_file (const char *fname) {
     T.op_ko = T.total_ko = 0;
     T.op_skip = T.total_skip = 0;
 
-    if (T.skip)
-        return proj_destroy (T.P), T.P = 0, 0;
+    if (T.skip) {
+        proj_destroy (T.P);
+        T.P = 0;
+        return 0;
+    }
 
     f = fopen (fname, "rt");
     if (0==f) {
@@ -403,8 +406,11 @@ static int process_file (const char *fname) {
     T.curr_file = fname;
 
     while (get_inp(F)) {
-        if (SKIP==dispatch (F->tag, F->args))
-            return proj_destroy (T.P), T.P = 0, 0;
+        if (SKIP==dispatch (F->tag, F->args)) {
+            proj_destroy (T.P);
+            T.P = 0;
+            return 0;
+        }
     }
 
     fclose (f);
@@ -638,7 +644,8 @@ static PJ_COORD torad_coord (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
     paralist *l = pj_param_exists (P->params, "axis");
     if (l && dir==PJ_INV)
         axis = l->param + strlen ("axis=");
-    for (i = 0,  n = strlen (axis);  i < n;  i++)
+    n = strlen (axis);
+    for (i = 0;  i < n;  i++)
         if (strchr ("news", axis[i]))
             a.v[i] = proj_torad (a.v[i]);
     return a;
@@ -651,7 +658,8 @@ static PJ_COORD todeg_coord (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
     paralist *l = pj_param_exists (P->params, "axis");
     if (l && dir==PJ_FWD)
         axis = l->param + strlen ("axis=");
-    for (i = 0,  n = strlen (axis);  i < n;  i++)
+    n = strlen (axis);
+    for (i = 0;  i < n;  i++)
         if (strchr ("news", axis[i]))
             a.v[i] = proj_todeg (a.v[i]);
     return a;
@@ -668,7 +676,8 @@ Attempt to interpret args as a PJ_COORD.
     const char *endp, *prev = args;
     PJ_COORD a = proj_coord (0,0,0,0);
 
-    for (i = 0, T.dimensions_given = 0;   i < 4;   i++, T.dimensions_given++) {
+    T.dimensions_given = 0;
+    for (i = 0;   i < 4;   i++) {
         double d = proj_strtod (prev,  (char **) &endp);
 
         /* Break out if there were no more numerals */
@@ -677,6 +686,7 @@ Attempt to interpret args as a PJ_COORD.
 
         a.v[i] = d;
         prev = endp;
+        T.dimensions_given++;
     }
 
     return a;

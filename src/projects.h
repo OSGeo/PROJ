@@ -684,7 +684,7 @@ typedef struct _pj_gi {
     const char *format; /* format of this grid, ie "ctable", "ntv1",
                            "ntv2" or "missing". */
 
-    int   grid_offset;  /* offset in file, for delayed loading */
+    long   grid_offset;  /* offset in file, for delayed loading */
     int   must_swap;    /* only for NTv2 */
 
     struct CTABLE *ct;

@@ -34,7 +34,10 @@ dmstor_ctx(projCtx ctx, const char *is, char **rs) {
 		*rs = (char *)is;
 	/* copy sting into work space */
 	while (isspace(sign = *is)) ++is;
-	for (n = MAX_WORK, s = work, p = (char *)is; isgraph(*p) && --n ; )
+	n = MAX_WORK;
+	s = work;
+	p = (char *)is;
+	while (isgraph(*p) && --n)
 		*s++ = *p++;
 	*s = '\0';
 	/* it is possible that a really odd input (like lots of leading
@@ -42,7 +45,8 @@ dmstor_ctx(projCtx ctx, const char *is, char **rs) {
 	sign = *(s = work);
 	if (sign == '+' || sign == '-') s++;
 	else sign = '+';
-	for (v = 0., nl = 0 ; nl < 3 ; nl = n + 1 ) {
+	v = 0.;
+	for (nl = 0 ; nl < 3 ; nl = n + 1 ) {
 		if (!(isdigit(*s) || *s == '.')) break;
 		if ((tv = proj_strtod(s, &s)) == HUGE_VAL)
 			return tv;

@@ -400,7 +400,8 @@ PJ *OPERATION(pipeline,0) {
     set_ellipsoid(P);
 
     /* Now loop over all steps, building a new set of arguments for each init */
-    for (i_current_step = i_first_step, i = 0;  i < nsteps;  i++) {
+    i_current_step = i_first_step;
+    for (i = 0;  i < nsteps;  i++) {
         int j;
         int  current_argc = 0;
         int  err;

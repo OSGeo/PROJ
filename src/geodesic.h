@@ -633,7 +633,7 @@ extern "C" {
   /**
    * Specify position of point 3 in terms of distance.
    *
-   * @param[inout] l a pointer to the geod_geodesicline object.
+   * @param[in,out] l a pointer to the geod_geodesicline object.
    * @param[in] s13 the distance from point 1 to point 3 (meters); it
    *   can be negative.
    *
@@ -645,7 +645,7 @@ extern "C" {
   /**
    * Specify position of point 3 in terms of either distance or arc length.
    *
-   * @param[inout] l a pointer to the geod_geodesicline object.
+   * @param[in,out] l a pointer to the geod_geodesicline object.
    * @param[in] flags either GEOD_NOFLAGS or GEOD_ARCMODE to determining the
    *   meaning of the \e s13_a13.
    * @param[in] s13_a13 if \e flags = GEOD_NOFLAGS, this is the distance
