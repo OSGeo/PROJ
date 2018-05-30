@@ -170,8 +170,10 @@ static const char *err_const_from_errno (int err);
 
 #define SKIP -1
 
+#define MAX_OPERATION 10000
+
 typedef struct {
-    char operation[10000];
+    char operation[MAX_OPERATION+1];
     PJ *P;
     PJ_COORD a, b, c, e;
     PJ_DIRECTION dir;
@@ -552,7 +554,8 @@ either a conversion or a transformation)
 
     T.operation_lineno = F->lineno;
 
-    strcpy (&(T.operation[0]), F->args);
+    strncpy (&(T.operation[0]), F->args, MAX_OPERATION);
+    T.operation[MAX_OPERATION] = '\0';
 
     if (T.verbosity > 1) {
         finish_previous_operation (F->args);
