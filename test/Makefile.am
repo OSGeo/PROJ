@@ -1,10 +1,10 @@
 EXTRA_DIST = CMakeLists.txt
 
-include_HEADERS = catch.hpp
+# include_HEADERS = catch.hpp
 
-lib_LTLIBRARIES = libtestmain.la
+# lib_LTLIBRARIES = libtestmain.la
 
-libtestmain_la_LDFLAGS = -no-undefined
-libtestmain_la_SOURCES = test_main.cpp
+# libtestmain_la_LDFLAGS = -no-undefined
+# libtestmain_la_SOURCES = test_main.cpp
 
-SUBDIRS = . gie gigs unit
+SUBDIRS = googletest . gie gigs unit

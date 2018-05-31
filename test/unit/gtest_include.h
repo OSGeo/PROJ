@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Test
+ * Purpose:  Wrapper for gtest/gtest.h
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -26,14 +26,11 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#include "gtest_include.h"
+// Disable all warnings for gtest.h, so as to be able to still use them for
+// our own code.
 
-namespace {
+#if defined(__GNUC__)
+#pragma GCC system_header
+#endif
 
-// ---------------------------------------------------------------------------
-
-TEST( dumy, dummy ) {
-    ASSERT_EQ( 1 , 1 );
-}
-
-} // namespace
+#include "gtest/gtest.h"
