@@ -1422,7 +1422,8 @@ static int append_args (ffio *G) {
     if (tag)
         skip_chars = strlen (tag);
 
-    if (G->args_size < args_len + next_len - skip_chars + 1) {
+    /* +2: 1 for the space separator and 1 for the NUL termination. */
+    if (G->args_size < args_len + next_len - skip_chars + 2) {
         void *p = realloc (G->args, 2 * G->args_size);
         if (0==p)
             return 0;
