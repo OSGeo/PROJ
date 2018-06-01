@@ -55,6 +55,75 @@ PROJ
         With the introduction of PROJ 5, behavioural changes has been made to
         existing functionality. Consult :ref:`differences` for the details.
 
+    PROJ 5.1.0
+    ++++++++++++++++++++++++++++++++++++++++
+    *June 1st 2018*
+
+
+    UPDATES
+    -------
+
+    * Function :c:func:`proj_errno_string()` added to ``proj.h`` API (`#847 <https://github.com/OSGeo/proj.4/issues/847>`_)
+
+    * Validate units between pipeline steps and ensure transformation
+      sanity (`#906 <https://github.com/OSGeo/proj.4/issues/906>`_)
+
+    * Print help when calling :program:`cct` and :program:`gie` without arguments (`#907 <https://github.com/OSGeo/proj.4/issues/907>`_)
+
+    * `CITATION` file added to source distribution (`#914 <https://github.com/OSGeo/proj.4/issues/914>`_)
+
+    * Webmercator operation added (`#925 <https://github.com/OSGeo/proj.4/issues/925>`_)
+
+    * Enhanced numerical precision of forward spherical Mercator near
+      the Equator (`#928 <https://github.com/OSGeo/proj.4/issues/928>`_)
+
+    * Added :option:`--skip-lines` option to :program:`cct` (`#923 <https://github.com/OSGeo/proj.4/issues/923>`_)
+
+    * Consistently return ``NaN`` values on ``NaN`` input (`#949 <https://github.com/OSGeo/proj.4/issues/949>`_)
+
+    * Removed unused ``src/org_proj4_Projections.h`` file (`#956 <https://github.com/OSGeo/proj.4/issues/956>`_)
+
+    * Java Native Interface bindings updated (`#957 <https://github.com/OSGeo/proj.4/issues/957>`_, `#969 <https://github.com/OSGeo/proj.4/issues/969>`_)
+
+    * Horizontal and vertical gridshift operations extended to
+      the temporal domain (`#1015 <https://github.com/OSGeo/proj.4/issues/1015>`_)
+
+
+    BUG FIXES
+    ------------
+
+    * Handle ``NaN`` float cast overflow in ``PJ_robin.c`` and ``nad_intr.c`` (`#887 <https://github.com/OSGeo/proj.4/issues/887>`_)
+
+    * Avoid overflow when Horner order is unreasonably large (`#893 <https://github.com/OSGeo/proj.4/issues/893>`_)
+
+    * Avoid unwanted NaN conversions in etmerc (`#899 <https://github.com/OSGeo/proj.4/issues/899>`_)
+
+    * Avoid memory failure in :program:`gie` when not specifying x,y,z in gie files (`#902 <https://github.com/OSGeo/proj.4/issues/902>`_)
+
+    * Avoid memory failure when :option:`+sweep` is initialized incorrectly in geos (`#908 <https://github.com/OSGeo/proj.4/issues/908>`_)
+
+    * Return ``HUGE_VAL`` on erroneous input in ortho (`#912 <https://github.com/OSGeo/proj.4/issues/912>`_)
+
+    * Handle commented lines correctly in cct (`#933 <https://github.com/OSGeo/proj.4/issues/933>`_)
+
+    * Avoid segmentation fault when transformation coordinates outside grid
+      area in deformation (`#934 <https://github.com/OSGeo/proj.4/issues/934>`_)
+
+    * Avoid doing false easting/northing adjustments on cartesian
+      coordinates (`#936 <https://github.com/OSGeo/proj.4/issues/936>`_)
+
+    * Thread-safe creation of proj mutex (`#954 <https://github.com/OSGeo/proj.4/issues/954>`_)
+
+    * Avoid errors when setting up geos with +lat_0!=0 (`#986 <https://github.com/OSGeo/proj.4/issues/986>`_)
+
+    * Reset errno when running :program:`proj` in verbose mode (`#988 <https://github.com/OSGeo/proj.4/issues/988>`_)
+
+    * Do not interpolate node values at nodata value in vertical
+      grid shifts (`#1004 <https://github.com/OSGeo/proj.4/issues/1004>`_)
+
+    * Restrict Horner degrees to positive integer values to avoid
+      memory allocation issues (`#1005 <https://github.com/OSGeo/proj.4/issues/1005>`_)
+
 
 
     PROJ 5.0.1
