@@ -21,7 +21,7 @@ Longitude wrapping when using custom central meridian
 
 By default PROJ wraps output longitudes in the range -180 to 180. Previous to
 PROJ 5, this was handled incorrectly when a custom central meridian was set with
-:option:`+lon`. This caused a change in sign on the resulting easting as seen
+:option:`+lon_0`. This caused a change in sign on the resulting easting as seen
 below::
 
     $ proj +proj=merc +lon_0=110
@@ -43,5 +43,5 @@ The change is made on the basis that :math:`\lambda=290^{\circ}` is a full
 rotation of the circle larger than :math:`\lambda=-70^{\circ}` and hence
 should return the same output for both.
 
-Adding the :option:`+over` flag to the projection definition provides
+Adding the ``+over`` flag to the projection definition provides
 the old behaviour.

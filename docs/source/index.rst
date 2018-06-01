@@ -77,7 +77,7 @@ PROJ
     * Enhanced numerical precision of forward spherical Mercator near
       the Equator (`#928 <https://github.com/OSGeo/proj.4/issues/928>`_)
 
-    * Added :option:`--skip-lines` option to :program:`cct` (`#923 <https://github.com/OSGeo/proj.4/issues/923>`_)
+    * Added ``--skip-lines`` option to :program:`cct` (`#923 <https://github.com/OSGeo/proj.4/issues/923>`_)
 
     * Consistently return ``NaN`` values on ``NaN`` input (`#949 <https://github.com/OSGeo/proj.4/issues/949>`_)
 
