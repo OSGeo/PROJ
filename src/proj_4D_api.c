@@ -524,11 +524,13 @@ Returns 1 on success, 0 on failure
             return 0;
         P->cart = skip_prep_fin (Q);
 
-        sprintf (def, "break_cs2cs_recursion     proj=cart  ellps=WGS84");
-        Q = proj_create (P->ctx, def);
-        if (0==Q)
-            return 0;
-        P->cart_wgs84 = skip_prep_fin (Q);
+        if (!P->is_geocent) {
+            sprintf (def, "break_cs2cs_recursion     proj=cart  ellps=WGS84");
+            Q = proj_create (P->ctx, def);
+            if (0==Q)
+                return 0;
+            P->cart_wgs84 = skip_prep_fin (Q);
+        }
     }
 
     return 1;

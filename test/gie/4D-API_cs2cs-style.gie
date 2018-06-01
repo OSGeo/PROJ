@@ -291,4 +291,22 @@ accept      4.05        52.1        0
 expect      4.05        52.1        -10
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+Test bug fix of https://github.com/OSGeo/proj.4/issues/1025.
+Using geocent in the new API with a custom ellipsoid should return coordinates
+that correspond to that particular ellipsoid and not WGS84 as demonstrated in
+the bug report.
+-------------------------------------------------------------------------------
+operation   +proj=pipeline +step
+            +proj=longlat +a=3396190 +b=3376200 +inv +step
+            +proj=geocent +a=3396190 +b=3376200 +lon_0=0 +units=m
+accept      0.0         0.0     0.0
+expect      3396190.0   0.0     0.0
+roundtrip   1
+
+operation   +proj=geocent +a=3396190 +b=3376200 +lon_0=0 +units=m
+accept      0.0         0.0     0.00
+expect      3396190.0   0.0     0.0
+roundtrip   1
+
 </gie>
