@@ -7,7 +7,7 @@
 #
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
+# https://www.boost.org/LICENSE_1_0.txt)
 ################################################################################
 # The following variables are defined:
 #   PROJ_COMPILER_NAME - name of compiler toolset, follows Boost toolset naming.

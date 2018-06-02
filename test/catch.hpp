@@ -6,7 +6,7 @@
  *  Copyright (c) 2018 Two Blue Cubes Ltd. All rights reserved.
  *
  *  Distributed under the Boost Software License, Version 1.0. (See accompanying
- *  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ *  file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
  */
 #ifndef TWOBLUECUBES_SINGLE_INCLUDE_CATCH_HPP_INCLUDED
 #define TWOBLUECUBES_SINGLE_INCLUDE_CATCH_HPP_INCLUDED
@@ -5216,7 +5216,7 @@ namespace Catch {
 // Copyright 2017 Two Blue Cubes Ltd. All rights reserved.
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 //
 // See https://github.com/philsquared/Clara for more details
 
@@ -6893,7 +6893,7 @@ namespace {
 
     // use POSIX/ ANSI console terminal codes
     // Thanks to Adam Strzelecki for original contribution
-    // (http://github.com/nanoant)
+    // (https://github.com/nanoant)
     // https://github.com/philsquared/Catch/pull/131
     class PosixColourImpl : public IColourImpl {
     public:
@@ -11011,7 +11011,7 @@ namespace {
 
     void XmlEncode::encodeTo( std::ostream& os ) const {
         // Apostrophe escaping not necessary if we always use " to write attributes
-        // (see: http://www.w3.org/TR/xml/#syntax)
+        // (see: https://www.w3.org/TR/xml/#syntax)
 
         for( std::size_t idx = 0; idx < m_str.size(); ++ idx ) {
             uchar c = m_str[idx];
@@ -11020,7 +11020,7 @@ namespace {
             case '&':   os << "&amp;"; break;
 
             case '>':
-                // See: http://www.w3.org/TR/xml/#syntax
+                // See: https://www.w3.org/TR/xml/#syntax
                 if (idx > 2 && m_str[idx - 1] == ']' && m_str[idx - 2] == ']')
                     os << "&gt;";
                 else
