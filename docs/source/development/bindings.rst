@@ -15,7 +15,7 @@ Python interface (wrapper for PROJ)
 Ruby
 =======
 
-`proj4rb <http://proj4rb.rubyforge.org>`_:
+`proj4rb <https://github.com/cfis/proj4rb>`_:
 Bindings for PROJ in ruby
 
 TCL
