@@ -169,7 +169,7 @@ namespace Catch {
 #ifdef __CYGWIN__
 
 // Required for some versions of Cygwin to declare gettimeofday
-// see: http://stackoverflow.com/questions/36901803/gettimeofday-not-declared-in-this-scope-cygwin
+// see: https://stackoverflow.com/a/36902237
 #   define _BSD_SOURCE
 
 #endif // __CYGWIN__
@@ -11038,7 +11038,7 @@ namespace {
                 // Check for control characters and invalid utf-8
 
                 // Escape control characters in standard ascii
-                // see http://stackoverflow.com/questions/404107/why-are-control-characters-illegal-in-xml-1-0
+                // see https://stackoverflow.com/q/404107
                 if (c < 0x09 || (c > 0x0D && c < 0x20) || c == 0x7F) {
                     hexEscapeChar(os, c);
                     break;
