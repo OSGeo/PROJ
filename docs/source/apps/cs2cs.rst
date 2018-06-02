@@ -183,10 +183,10 @@ The x-y output data will appear as three lines of:
     Bugs
     ****
 
-    A list of know bugs can be found at http://github.com/OSGeo/proj.4/issues
+    A list of know bugs can be found at https://github.com/OSGeo/proj.4/issues
     where new bug reports can be submitted to.
 
     Home page
     *********
 
-    http://proj4.org/
+    https://proj4.org/

@@ -32,7 +32,7 @@ import java.lang.annotation.Native;
 
 
 /**
- * Wraps the <a href="http://proj4.org/">PROJ</a> {@code PJ} native data structure.
+ * Wraps the <a href="https://proj4.org/">PROJ</a> {@code PJ} native data structure.
  * Almost every methods defined in this class are native methods delegating the work to the PROJ library.
  * This class is the only place where such native methods are defined.
  *

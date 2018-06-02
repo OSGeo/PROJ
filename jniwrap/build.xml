@@ -36,7 +36,7 @@
                 <attribute name="Implementation-Title"   value="PROJ bridge to Java"/>
                 <attribute name="Implementation-Version" value="${version}"/>
                 <attribute name="Implementation-Vendor"  value="Proj.4 project"/>
-                <attribute name="Implementation-URL"     value="http://proj4.org/"/>
+                <attribute name="Implementation-URL"     value="https://proj4.org/"/>
             </manifest>
         </jar>
     </target>

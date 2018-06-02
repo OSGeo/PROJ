@@ -26,7 +26,7 @@ The '''proj''' command itself can report the list of projections using the
 units with the '''-lu''' option, and the list of built-in datums with the
 '''-ld''' option.
 
-The [http://www.remotesensing.org/geotiff/proj_list/ GeoTIFF Projections Pages]
+The [http://geotiff.maptools.org/proj_list/ GeoTIFF Projections Pages]
 include most of the common PROJ projections, and a definition of the
 projection specific options for each.
 

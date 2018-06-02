@@ -5,7 +5,7 @@
 #
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
+# https://www.boost.org/LICENSE_1_0.txt)
 ################################################################################
 include (CheckIncludeFiles)
 include (CheckLibraryExists) 
@@ -34,7 +34,7 @@ set(PACKAGE_BUGREPORT "https://github.com/OSGeo/proj.4/issues")
 set(PACKAGE_NAME "PROJ")
 set(PACKAGE_STRING "PROJ ${${PROJECT_INTERN_NAME}_VERSION}")
 set(PACKAGE_TARNAME "proj")
-set(PACKAGE_URL "http://proj4.org")
+set(PACKAGE_URL "https://proj4.org")
 set(PACKAGE_VERSION "${${PROJECT_INTERN_NAME}_VERSION}")
 
 configure_file(cmake/proj_config.cmake.in src/proj_config.h)

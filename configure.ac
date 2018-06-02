@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
 AC_INIT([PROJ], [5.1.0],
-        [https://github.com/OSGeo/proj.4/issues], proj, [http://proj4.org])
+        [https://github.com/OSGeo/proj.4/issues], proj, [https://proj4.org])
 AC_CONFIG_MACRO_DIR([m4])
 AC_LANG(C)
 

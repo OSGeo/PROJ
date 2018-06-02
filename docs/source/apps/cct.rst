@@ -171,10 +171,10 @@ Hence, in honour of *cct* (the geodesist) this is :program:`cct` (the program).
     Bugs
     ****
 
-    A list of know bugs can be found at http://github.com/OSGeo/proj.4/issues
+    A list of know bugs can be found at https://github.com/OSGeo/proj.4/issues
     where new bug reports can be submitted to.
 
     Home page
     *********
 
-    http://proj4.org/
+    https://proj4.org/

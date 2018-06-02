@@ -9,7 +9,7 @@
 #
 # Distributed under the Boost Software License, Version 1.0.
 # See accompanying file LICENSE_1_0.txt or copy at
-#   http://www.boost.org/LICENSE_1_0.txt
+#   https://www.boost.org/LICENSE_1_0.txt
 ################################################################################
 # Macros in this module:
 #
@@ -355,7 +355,7 @@ endmacro()
 #
 # Scans the current directory and returns a list of subdirectories.
 # Author: Robert Fleming
-# Source: http://www.cmake.org/pipermail/cmake/2008-February/020114.html
+# Source: https://www.cmake.org/pipermail/cmake/2008-February/020114.html
 #
 # Third parameter is 1 if you want relative paths returned.
 # Usage: list_subdirectories(the_list_is_returned_here /path/to/project TRUE)

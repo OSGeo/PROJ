@@ -68,18 +68,18 @@ Note that not all feature requests are accepted.
 ## Write documentation
 
 PROJ.4 is in dire need of better documentation. Any contributions of documentation
-are greatly appreciated. The PROJ.4 documentation is available on [proj4.org](ttp://proj4.org).
+are greatly appreciated. The PROJ.4 documentation is available on [proj4.org](https://proj4.org).
 The website is generated with [Sphinx](http://www.sphinx-doc.org/en/stable/). Contributions
 to the documentation should be made as [Pull Requests](https://github.com/OSGeo/proj.4/pulls)
 on GitHub.
 
 If you intend to document one of PROJ.4's supported projections please use the
-[Mercator projection](http://proj4.org/projections/merc.html) as a template.
+[Mercator projection](https://proj4.org/projections/merc.html) as a template.
 
 
 ## Code contributions
 
-See [Code Contributions](http://proj4.org/development/for_proj_contributors.html)
+See [Code Contributions](https://proj4.org/development/for_proj_contributors.html)
 
 #### Legalese
 Committers are the front line gatekeepers to keep the code base clear of improperly contributed code.
@@ -125,7 +125,7 @@ improperly contributing code to the source repository:
 
 ## Additional Resources
 
-* [General GitHub documentation](http://help.github.com/)
+* [General GitHub documentation](https://help.github.com/)
 * [GitHub pull request documentation](https://help.github.com/articles/about-pull-requests/)
 
 ## Acknowledgements
