@@ -102,7 +102,7 @@ When is Vote Required?
 * Issues of procedure.
 * When releases should take place.
 * Anything dealing with relationships with external entities such as OSGeo
-* Anything that might be controversial.</li>
+* Anything that might be controversial.
 
 Observations
 ----------------
@@ -122,7 +122,7 @@ Committee Membership
 The PSC is made up of individuals consisting of technical contributors
 (e.g. developers) and prominent members of the PROJ user community.
 There is no set number of members for the PSC although the initial desire
-is to set the membership at 9.
+is to set the membership at 6.
 
 Adding Members
 ..............
