@@ -10,4 +10,4 @@ set_target_properties(basic_test
 
 add_test( NAME basic_test
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test
-            COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/basic_test )
+            COMMAND basic_test )

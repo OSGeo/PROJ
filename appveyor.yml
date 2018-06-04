@@ -43,6 +43,7 @@ test_script:
   - if "%BUILD_TYPE%" == "nmake" set PROJ_LIB=C:\PROJ\SHARE
   - if "%BUILD_TYPE%" == "nmake" mkdir %PROJ_LIB%\tests
   - if "%BUILD_TYPE%" == "nmake" copy nad\tests\*.* %PROJ_LIB%\tests
+  - set CURDIR=%CD%
   - cd %PROJ_LIB%
   - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.7.zip
   - 7z e -aoa -y proj-datumgrid-1.7.zip
@@ -57,5 +58,7 @@ test_script:
   - echo "Contents of PROJ_LIB " %PROJ_LIB%
   - dir %PROJ_LIB%
   - gie.exe ..\test\gie\*.gie ..\test\gigs\*.gie
+  - cd %CURDIR%
+  - if "%BUILD_TYPE%" == "cmake" ctest -C Release
 
 deploy: off
