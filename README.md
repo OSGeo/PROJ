@@ -1,6 +1,6 @@
 # PROJ
 
-[![Travis Status](https://travis-ci.com/OSGeo/proj.4.svg?branch=master)](https://travis-ci.org/OSGeo/proj.4)
+[![Travis Status](https://travis-ci.com/OSGeo/proj.4.svg?branch=master)](https://travis-ci.com/OSGeo/proj.4)
 [![AppVeyor Status](https://ci.appveyor.com/api/projects/status/584j49uguwoo5evi?svg=true)](https://ci.appveyor.com/project/OSGeo/proj-4)
 [![Coveralls Status](https://coveralls.io/repos/github/OSGeo/proj.4/badge.svg?branch=master)](https://coveralls.io/github/OSGeo/proj.4?branch=master)
 
