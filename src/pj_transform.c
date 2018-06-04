@@ -27,6 +27,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#include <errno.h>
 #include <math.h>
 #include <string.h>
 
@@ -206,12 +207,14 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
             projected_loc = pj_fwd3d( geodetic_loc, P);
             if( P->ctx->last_errno != 0 )
             {
-                if( (P->ctx->last_errno != 33 /*EDOM*/
-                        && P->ctx->last_errno != 34 /*ERANGE*/ )
+                if( (P->ctx->last_errno != EDOM
+                        && P->ctx->last_errno != ERANGE)
                     && (P->ctx->last_errno > 0
                         || P->ctx->last_errno < -44 || n == 1
                         || transient_error[-P->ctx->last_errno] == 0 ) )
+                {
                     return P->ctx->last_errno;
+                }
                 else
                 {
                     projected_loc.u = HUGE_VAL;
@@ -242,12 +245,14 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
         projected_loc = pj_fwd( geodetic_loc, P );
         if( P->ctx->last_errno != 0 )
         {
-            if( (P->ctx->last_errno != 33 /*EDOM*/
-                    && P->ctx->last_errno != 34 /*ERANGE*/ )
+            if( (P->ctx->last_errno != EDOM
+                    && P->ctx->last_errno != ERANGE)
                 && (P->ctx->last_errno > 0
                     || P->ctx->last_errno < -44 || n == 1
                     || transient_error[-P->ctx->last_errno] == 0 ) )
+            {
                 return P->ctx->last_errno;
+            }
             else
             {
                 projected_loc.u = HUGE_VAL;
@@ -310,12 +315,14 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
             geodetic_loc = pj_inv3d(projected_loc, P);
             if( P->ctx->last_errno != 0 )
             {
-                if( (P->ctx->last_errno != 33 /*EDOM*/
-                        && P->ctx->last_errno != 34 /*ERANGE*/ )
+                if( (P->ctx->last_errno != EDOM
+                        && P->ctx->last_errno != ERANGE)
                     && (P->ctx->last_errno > 0
                         || P->ctx->last_errno < -44 || n == 1
                         || transient_error[-P->ctx->last_errno] == 0 ) )
+                {
                     return P->ctx->last_errno;
+                }
                 else
                 {
                     geodetic_loc.u = HUGE_VAL;
@@ -347,12 +354,14 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
         geodetic_loc = pj_inv( projected_loc, P );
         if( P->ctx->last_errno != 0 )
         {
-            if( (P->ctx->last_errno != 33 /*EDOM*/
-                    && P->ctx->last_errno != 34 /*ERANGE*/ )
+            if( (P->ctx->last_errno != EDOM
+                    && P->ctx->last_errno != ERANGE)
                 && (P->ctx->last_errno > 0
                     || P->ctx->last_errno < -44 || n == 1
                     || transient_error[-P->ctx->last_errno] == 0 ) )
+            {
                 return P->ctx->last_errno;
+            }
             else
             {
                 geodetic_loc.u = HUGE_VAL;
