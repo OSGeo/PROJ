@@ -693,7 +693,6 @@ Attempt to interpret args as a PJ_COORD.
         /* A subsequent call to proj_strtod restores order.                  */
         double dms = PJ_TODEG(proj_dmstor (prev, (char **) &endp));
         double d = proj_strtod (prev,  (char **) &endp);
-        printf("d: %.5f dms: %.5f\n", d, dms);
        /* TODO: When projects.h is removed, call proj_dmstor() in all cases */
         if (d < dms && dms < d + 1)
             d = dms;
