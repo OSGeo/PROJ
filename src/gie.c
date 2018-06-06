@@ -676,7 +676,9 @@ static PJ_COORD parse_coord (const char *args) {
 Attempt to interpret args as a PJ_COORD.
 ******************************************************************************/
     int i;
-    const char *endp, *prev = args;
+    const char *endp;
+    const char *dmsendp;
+    const char *prev = args;
     PJ_COORD a = proj_coord (0,0,0,0);
 
     T.dimensions_given = 0;
@@ -688,14 +690,18 @@ Attempt to interpret args as a PJ_COORD.
         /* This could be avoided if proj_dmstor used the same proj_strtod()  */
         /* as gie, but that is not the case (yet). When we remove projects.h */
         /* from the public API we can change that.                           */
-        /* Note that the call to proj_dmstor needs to come first, since it   */
-        /* returns the wrong endp when reading numbers with _ separators.    */
-        /* A subsequent call to proj_strtod restores order.                  */
-        double dms = PJ_TODEG(proj_dmstor (prev, (char **) &endp));
-        double d = proj_strtod (prev,  (char **) &endp);
+        double d = proj_strtod(prev,  (char **) &endp);
+        double dms = PJ_TODEG(proj_dmstor (prev, (char **) &dmsendp));
        /* TODO: When projects.h is removed, call proj_dmstor() in all cases */
-        if (d < dms && dms < d + 1)
+        if (d != dms && fabs(d) < fabs(dms) && fabs(dms) < fabs(d) + 1) {
             d = dms;
+            endp = dmsendp;
+        }
+        /* A number like -81d00'00.000 will be parsed correctly by both */
+        /* proj_strtod and proj_dmstor but only the latter will return  */
+        /* the correct end-pointer.                                     */
+        if (d == dms && endp != dmsendp)
+            endp = dmsendp;
 
         /* Break out if there were no more numerals */
         if (prev==endp)
