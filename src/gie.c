@@ -681,7 +681,22 @@ Attempt to interpret args as a PJ_COORD.
 
     T.dimensions_given = 0;
     for (i = 0;   i < 4;   i++) {
+        /* proj_strtod doesn't read values like 123d45'678W so we need a bit */
+        /* of help from proj_dmstor. proj_strtod effectively ignores what    */
+        /* comes after "d", so we use that fact that when dms is larger than */
+        /* d the value was stated in "dms" form.                             */
+        /* This could be avoided if proj_dmstor used the same proj_strtod()  */
+        /* as gie, but that is not the case (yet). When we remove projects.h */
+        /* from the public API we can change that.                           */
+        /* Note that the call to proj_dmstor needs to come first, since it   */
+        /* returns the wrong endp when reading numbers with _ separators.    */
+        /* A subsequent call to proj_strtod restores order.                  */
+        double dms = PJ_TODEG(proj_dmstor (prev, (char **) &endp));
         double d = proj_strtod (prev,  (char **) &endp);
+        printf("d: %.5f dms: %.5f\n", d, dms);
+       /* TODO: When projects.h is removed, call proj_dmstor() in all cases */
+        if (d < dms && dms < d + 1)
+            d = dms;
 
         /* Break out if there were no more numerals */
         if (prev==endp)
