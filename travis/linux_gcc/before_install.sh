@@ -1,11 +1,12 @@
 #!/bin/bash
 
+set -e
+
 ./travis/before_install.sh
 
 sudo apt-get update -qq
 sudo apt-get install -y cppcheck
-
-set -e
+sudo apt-get install -qq lcov
 
 scripts/cppcheck.sh
 
