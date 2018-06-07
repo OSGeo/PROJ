@@ -43,13 +43,13 @@ proj_add_gie_test("GIGS-5201" "gigs/5201.gie")
 #proj_add_gie_test("GIGS-5207.2" "gigs/5207.2.gie")
 proj_add_gie_test("GIGS-5208" "gigs/5208.gie")
 
-SET(CATCH2_INCLUDE catch.hpp)
+#SET(CATCH2_INCLUDE catch.hpp)
 
-SET(TEST_MAIN_SRC test_main.cpp)
-set(TEST_MAIN_LIBRARIES test_main)
-add_library( ${TEST_MAIN_LIBRARIES}
-                    ${PROJ_LIBRARY_TYPE}
-                    ${TEST_MAIN_SRC}
-                    ${CATCH2_INCLUDE}  )
+#SET(TEST_MAIN_SRC test_main.cpp)
+#set(TEST_MAIN_LIBRARIES test_main)
+#add_library( ${TEST_MAIN_LIBRARIES}
+#                    ${PROJ_LIBRARY_TYPE}
+#                    ${TEST_MAIN_SRC}
+#                    ${CATCH2_INCLUDE}  )
 
 add_subdirectory(unit)

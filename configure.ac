@@ -23,7 +23,6 @@ dnl Enable as much warnings as possible
 AX_CFLAGS_WARN_ALL(C_WFLAGS)
 AX_CXXFLAGS_WARN_ALL(CXX_WFLAGS)
 
-
 dnl For ICC: it needs -we10006 instead of -Werror to turn unknown options to errors
 dnl Some gcc/clang versions might succeed on this test, so also include -Werror in ERROR_ON_UNKNOWN_OPTIONS
 AX_CHECK_COMPILE_FLAG([-Werror -we10006],[ERROR_ON_UNKNOWN_OPTIONS="-Werror -we10006"],[ERROR_ON_UNKNOWN_OPTIONS="-Werror"])
@@ -120,7 +119,8 @@ if test "$WARN_EFFCPLUSPLUS" != ""; then
     [AC_MSG_RESULT([yes])],
     [WARN_EFFCPLUSPLUS=""]
     [AC_MSG_RESULT([no])])
-    CXXFLAGS="$SAVED_CXXFLAGS $WARN_EFFCPLUSPLUS"
+    CXXFLAGS="$SAVED_CXXFLAGS"
+    CXX_WFLAGS="$CXX_WFLAGS $WARN_EFFCPLUSPLUS"
 fi
 
 dnl Clang enables -Woverloaded-virtual if -Wall is defined, but not GCC
@@ -130,7 +130,7 @@ dnl Forbid use of 'or', 'and', ... alias operators
 AX_CHECK_COMPILE_FLAG([-fno-operator-names], [CXX_WFLAGS="$CXX_WFLAGS -fno-operator-names"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 
 HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT=no
-AX_CHECK_COMPILE_FLAG([-Wzero-as-null-pointer-constant], [CXX_WFLAGS="$CXX_WFLAGS -Wzero-as-null-pointer-constant" HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT=yes],,[$ERROR_ON_UNKNOWN_OPTIONS])
+AX_CHECK_COMPILE_FLAG([-Wzero-as-null-pointer-constant], [CXX_WFLAGS="$CXX_WFLAGS -Wzero-as-null-pointer-constant" HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT=yes NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG="-Wno-zero-as-null-pointer-constant"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 if test "$HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT" = "yes"; then
 AC_DEFINE_UNQUOTED(HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT, 1,
           [Define to 1 if the compiler supports -Wzero-as-null-pointer-constant])
@@ -140,6 +140,7 @@ AC_LANG_POP([C++])
 
 AC_SUBST(C_WFLAGS,$C_WFLAGS)
 AC_SUBST(CXX_WFLAGS,$CXX_WFLAGS)
+AC_SUBST(NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG,$NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
 
 
 dnl Checks for libraries.
@@ -264,6 +265,11 @@ AC_SUBST(THREAD_LIB,$THREAD_LIB)
 
 AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile
                  test/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
+                 test/googletest/Makefile test/googletest/include/Makefile
+                 test/googletest/include/gtest/Makefile
+                 test/googletest/include/gtest/internal/Makefile
+                 test/googletest/include/gtest/internal/custom/Makefile
+                 test/googletest/src/Makefile
                  man/Makefile man/man1/Makefile man/man3/Makefile nad/Makefile
                  jniwrap/Makefile jniwrap/org.osgeo.proj/Makefile jniwrap/org.osgeo.proj/org/Makefile jniwrap/org.osgeo.proj/org/proj4/Makefile])
 AC_CONFIG_FILES([nad/install], [chmod +x nad/install])
