@@ -27,13 +27,18 @@
  ****************************************************************************/
 
 #include "gtest_include.h"
+#include <proj.h>
+#include <memory>
 
 namespace {
 
 // ---------------------------------------------------------------------------
 
 TEST( dumy, dummy ) {
-    ASSERT_EQ( 1 , 1 );
+    std::unique_ptr<PJ, decltype(&::proj_destroy)> pj(
+        ::proj_create(PJ_DEFAULT_CTX, "+proj=merc +ellps=clrk66 +lat_ts=33"),
+        &::proj_destroy);
+    ASSERT_NE(pj, nullptr);
 }
 
 } // namespace
