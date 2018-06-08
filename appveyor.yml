@@ -59,6 +59,7 @@ test_script:
   - dir %PROJ_LIB%
   - gie.exe ..\test\gie\*.gie ..\test\gigs\*.gie
   - cd %CURDIR%
+  - if "%BUILD_TYPE%" == "cmake" set PATH=C:\projects\proj-4\bin;%PATH%
   - if "%BUILD_TYPE%" == "cmake" ctest -C Release
 
 deploy: off
