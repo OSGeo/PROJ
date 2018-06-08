@@ -34,8 +34,18 @@ build_script:
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
   - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
   - if "%BUILD_TYPE%" == "cmake" echo "%VS_FULL%"
-  - if "%BUILD_TYPE%" == "cmake" cmake -G "%VS_FULL%" . -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=../bin -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/WX"
-  - if "%BUILD_TYPE%" == "cmake" cmake --build . --config Release
+#
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" mkdir build_dll
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cd build_dll
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/WX"
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cmake --build . --config Release
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cd ..
+#
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" mkdir build_static
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cd build_static
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS="/WX"
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cmake --build . --config Release
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cd ..
 
 test_script:
   - echo test_script
@@ -49,17 +59,23 @@ test_script:
   - 7z e -aoa -y proj-datumgrid-1.7.zip
   - dir
   - cd ..
-  - dir
-  - cd bin
-  - echo "Contents of current directory:"
-  - dir
-  - echo "Contents of ..\test\gie:"
-  - dir ..\test\gie
-  - echo "Contents of PROJ_LIB " %PROJ_LIB%
-  - dir %PROJ_LIB%
-  - gie.exe ..\test\gie\*.gie ..\test\gigs\*.gie
+  - if "%BUILD_TYPE%" == "nmake" dir
+  - if "%BUILD_TYPE%" == "nmake" cd bin
+  - if "%BUILD_TYPE%" == "nmake" echo "Contents of current directory:"
+  - if "%BUILD_TYPE%" == "nmake" dir
+  - if "%BUILD_TYPE%" == "nmake" echo "Contents of ..\test\gie:"
+  - if "%BUILD_TYPE%" == "nmake" dir ..\test\gie
+  - if "%BUILD_TYPE%" == "nmake" echo "Contents of PROJ_LIB " %PROJ_LIB%
+  - if "%BUILD_TYPE%" == "nmake" dir %PROJ_LIB%
+  - if "%BUILD_TYPE%" == "nmake" gie.exe ..\test\gie\*.gie ..\test\gigs\*.gie
   - cd %CURDIR%
-  - if "%BUILD_TYPE%" == "cmake" set PATH=C:\projects\proj-4\bin;%PATH%
-  - if "%BUILD_TYPE%" == "cmake" ctest -C Release
+#
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cd build_dll
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" ctest -C Release
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cd ..
+#
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cd build_static
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" ctest -C Release
+  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cd ..
 
 deploy: off

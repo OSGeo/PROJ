@@ -58,6 +58,9 @@ target_link_libraries(proj_test_unit
   ${PROJ_LIBRARIES})
 add_test(NAME proj_test_unit COMMAND proj_test_unit)
 
+if (MSVC AND BUILD_LIBPROJ_SHARED)
+# ph_phi2_test not compatible of a .dll build
+else()
 add_executable(pj_phi2_test
         main.cpp
         pj_phi2_test.cpp)
@@ -65,3 +68,4 @@ target_link_libraries(pj_phi2_test
         gtest
         ${PROJ_LIBRARIES})
 add_test(NAME pj_phi2_test COMMAND pj_phi2_test)
+endif()
