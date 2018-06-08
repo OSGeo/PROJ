@@ -26,7 +26,6 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-
 /* FIXME: this is temporary manual testing for development purposes */
 /* ultimately must be removed */
 

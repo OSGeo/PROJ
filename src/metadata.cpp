@@ -190,9 +190,8 @@ void Identifier::setProperties(
     {
         auto oIter = properties.find(AUTHORITY_KEY);
         if (oIter != properties.end()) {
-            auto genVal =
-                util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second);
-            if (genVal) {
+            if (auto genVal =
+                    util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second)) {
                 if (genVal->type() == BoxedValue::Type::STRING) {
                     d->authority = Citation(genVal->stringValue());
                 } else {
@@ -200,9 +199,8 @@ void Identifier::setProperties(
                                                     AUTHORITY_KEY);
                 }
             } else {
-                auto citation =
-                    util::nn_dynamic_pointer_cast<Citation>(oIter->second);
-                if (citation) {
+                if (auto citation = util::nn_dynamic_pointer_cast<Citation>(
+                        oIter->second)) {
                     d->authority = Citation(*citation);
                 } else {
                     throw InvalidValueTypeException("Invalid value type for " +
@@ -215,9 +213,8 @@ void Identifier::setProperties(
     {
         auto oIter = properties.find(CODE_KEY);
         if (oIter != properties.end()) {
-            auto genVal =
-                util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second);
-            if (genVal) {
+            if (auto genVal =
+                    util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second)) {
                 if (genVal->type() == BoxedValue::Type::INTEGER) {
                     std::ostringstream buffer;
                     buffer << genVal->integerValue();

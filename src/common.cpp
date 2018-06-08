@@ -229,6 +229,10 @@ struct IdentifiedObject::Private {
     std::vector<GenericNameNNPtr> aliases{};
     std::string remarks{};
     bool isDeprecated{};
+
+    void setIdentifiers(const PropertyMap &properties);
+    void setName(const PropertyMap &properties);
+    void setAliases(const PropertyMap &properties);
 };
 //! @endcond
 
@@ -298,128 +302,133 @@ bool IdentifiedObject::isDeprecated() const { return d->isDeprecated; }
 
 // ---------------------------------------------------------------------------
 
-void IdentifiedObject::setProperties(
+void IdentifiedObject::Private::setName(
     const PropertyMap &properties) // throw(InvalidValueTypeException)
 {
-    d->name->setProperties(properties);
-
-    {
-        auto oIter = properties.find(NAME_KEY);
-        if (oIter != properties.end()) {
-            auto genVal =
-                util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second);
-            if (genVal) {
-                if (genVal->type() == BoxedValue::Type::STRING) {
-                    d->name = Identifier::create(genVal->stringValue());
-                } else {
-                    throw InvalidValueTypeException("Invalid value type for " +
-                                                    NAME_KEY);
-                }
-            } else {
-                auto identifier =
-                    util::nn_dynamic_pointer_cast<Identifier>(oIter->second);
-                if (identifier) {
-                    d->name = NN_CHECK_ASSERT(identifier);
-                } else {
-                    throw InvalidValueTypeException("Invalid value type for " +
-                                                    NAME_KEY);
-                }
-            }
+    auto oIter = properties.find(NAME_KEY);
+    if (oIter == properties.end()) {
+        return;
+    }
+    if (auto genVal =
+            util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second)) {
+        if (genVal->type() == BoxedValue::Type::STRING) {
+            name = Identifier::create(genVal->stringValue());
+        } else {
+            throw InvalidValueTypeException("Invalid value type for " +
+                                            NAME_KEY);
+        }
+    } else {
+        if (auto identifier =
+                util::nn_dynamic_pointer_cast<Identifier>(oIter->second)) {
+            name = NN_CHECK_ASSERT(identifier);
+        } else {
+            throw InvalidValueTypeException("Invalid value type for " +
+                                            NAME_KEY);
         }
     }
+}
 
-    {
-        auto oIter = properties.find(IDENTIFIER_KEY);
-        if (oIter != properties.end()) {
-            auto identifier =
-                util::nn_dynamic_pointer_cast<Identifier>(oIter->second);
-            if (identifier) {
-                d->identifiers.clear();
-                d->identifiers.push_back(NN_CHECK_ASSERT(identifier));
-            } else {
-                auto array = util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
-                    oIter->second);
-                if (array) {
-                    d->identifiers.clear();
-                    for (const auto &val : array->values) {
-                        identifier =
-                            util::nn_dynamic_pointer_cast<Identifier>(val);
-                        if (identifier) {
-                            d->identifiers.push_back(
-                                NN_CHECK_ASSERT(identifier));
-                        } else {
-                            throw InvalidValueTypeException(
-                                "Invalid value type for " + IDENTIFIER_KEY);
-                        }
-                    }
+// ---------------------------------------------------------------------------
+
+void IdentifiedObject::Private::setIdentifiers(
+    const PropertyMap &properties) // throw(InvalidValueTypeException)
+{
+    auto oIter = properties.find(IDENTIFIER_KEY);
+    if (oIter == properties.end()) {
+        return;
+    }
+    if (auto identifier =
+            util::nn_dynamic_pointer_cast<Identifier>(oIter->second)) {
+        identifiers.clear();
+        identifiers.push_back(NN_CHECK_ASSERT(identifier));
+    } else {
+        if (auto array = util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
+                oIter->second)) {
+            identifiers.clear();
+            for (const auto &val : array->values) {
+                identifier = util::nn_dynamic_pointer_cast<Identifier>(val);
+                if (identifier) {
+                    identifiers.push_back(NN_CHECK_ASSERT(identifier));
                 } else {
                     throw InvalidValueTypeException("Invalid value type for " +
                                                     IDENTIFIER_KEY);
                 }
             }
+        } else {
+            throw InvalidValueTypeException("Invalid value type for " +
+                                            IDENTIFIER_KEY);
         }
     }
+}
 
-    {
-        auto oIter = properties.find(ALIAS_KEY);
-        if (oIter != properties.end()) {
-            auto l_name =
-                util::nn_dynamic_pointer_cast<GenericName>(oIter->second);
-            if (l_name) {
-                d->aliases.clear();
-                d->aliases.push_back(NN_CHECK_ASSERT(l_name));
-            } else {
-                auto array = util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
-                    oIter->second);
-                if (array) {
-                    d->aliases.clear();
-                    for (const auto &val : array->values) {
-                        l_name =
-                            util::nn_dynamic_pointer_cast<GenericName>(val);
-                        if (l_name) {
-                            d->aliases.push_back(NN_CHECK_ASSERT(l_name));
-                        } else {
-                            auto genVal =
-                                util::nn_dynamic_pointer_cast<BoxedValue>(val);
-                            if (genVal) {
-                                if (genVal->type() ==
-                                    BoxedValue::Type::STRING) {
-                                    d->aliases.push_back(
-                                        NameFactory::createLocalName(
-                                            nullptr, genVal->stringValue()));
-                                } else {
-                                    throw InvalidValueTypeException(
-                                        "Invalid value type for " + ALIAS_KEY);
-                                }
-                            } else {
-                                throw InvalidValueTypeException(
-                                    "Invalid value type for " + ALIAS_KEY);
-                            }
-                        }
-                    }
+// ---------------------------------------------------------------------------
+
+void IdentifiedObject::Private::setAliases(
+    const PropertyMap &properties) // throw(InvalidValueTypeException)
+{
+    auto oIter = properties.find(ALIAS_KEY);
+    if (oIter == properties.end()) {
+        return;
+    }
+    if (auto l_name =
+            util::nn_dynamic_pointer_cast<GenericName>(oIter->second)) {
+        aliases.clear();
+        aliases.push_back(NN_CHECK_ASSERT(l_name));
+    } else {
+        if (auto array = util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
+                oIter->second)) {
+            aliases.clear();
+            for (const auto &val : array->values) {
+                l_name = util::nn_dynamic_pointer_cast<GenericName>(val);
+                if (l_name) {
+                    aliases.push_back(NN_CHECK_ASSERT(l_name));
                 } else {
-                    std::string temp;
-                    if (properties.getStringValue(ALIAS_KEY, temp)) {
-                        d->aliases.clear();
-                        d->aliases.push_back(
-                            NameFactory::createLocalName(nullptr, temp));
+                    if (auto genVal =
+                            util::nn_dynamic_pointer_cast<BoxedValue>(val)) {
+                        if (genVal->type() == BoxedValue::Type::STRING) {
+                            aliases.push_back(NameFactory::createLocalName(
+                                nullptr, genVal->stringValue()));
+                        } else {
+                            throw InvalidValueTypeException(
+                                "Invalid value type for " + ALIAS_KEY);
+                        }
                     } else {
                         throw InvalidValueTypeException(
                             "Invalid value type for " + ALIAS_KEY);
                     }
                 }
             }
+        } else {
+            std::string temp;
+            if (properties.getStringValue(ALIAS_KEY, temp)) {
+                aliases.clear();
+                aliases.push_back(NameFactory::createLocalName(nullptr, temp));
+            } else {
+                throw InvalidValueTypeException("Invalid value type for " +
+                                                ALIAS_KEY);
+            }
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+
+void IdentifiedObject::setProperties(
+    const PropertyMap &properties) // throw(InvalidValueTypeException)
+{
+    d->name->setProperties(properties);
+
+    d->setName(properties);
+    d->setIdentifiers(properties);
+    d->setAliases(properties);
 
     properties.getStringValue(REMARKS_KEY, d->remarks);
 
     {
         auto oIter = properties.find(DEPRECATED_KEY);
         if (oIter != properties.end()) {
-            auto genVal =
-                util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second);
-            if (genVal) {
+            if (auto genVal =
+                    util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second)) {
                 if (genVal->type() == BoxedValue::Type::BOOLEAN) {
                     d->isDeprecated = genVal->booleanValue();
                 } else {

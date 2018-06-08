@@ -50,8 +50,7 @@ std::string replaceAll(const std::string &str, const std::string &before,
     const size_t nAfterSize = after.size();
     if (nBeforeSize) {
         size_t nStartPos = 0;
-        while ((nStartPos = ret.find(before, nStartPos)) !=
-               std::string::npos) {
+        while ((nStartPos = ret.find(before, nStartPos)) != std::string::npos) {
             ret.replace(nStartPos, nBeforeSize, after);
             nStartPos += nAfterSize;
         }
