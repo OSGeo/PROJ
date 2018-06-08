@@ -41,18 +41,18 @@ namespace internal {
 // ---------------------------------------------------------------------------
 
 /**
- * Replace all occurrences of osBefore with osAfter.
+ * Replace all occurrences of before with after.
  */
-std::string replaceAll(const std::string &osStr, const std::string &osBefore,
-                       const std::string &osAfter) {
-    std::string ret(osStr);
-    const size_t nBeforeSize = osBefore.size();
-    const size_t nAfterSize = osAfter.size();
+std::string replaceAll(const std::string &str, const std::string &before,
+                       const std::string &after) {
+    std::string ret(str);
+    const size_t nBeforeSize = before.size();
+    const size_t nAfterSize = after.size();
     if (nBeforeSize) {
         size_t nStartPos = 0;
-        while ((nStartPos = ret.find(osBefore, nStartPos)) !=
+        while ((nStartPos = ret.find(before, nStartPos)) !=
                std::string::npos) {
-            ret.replace(nStartPos, nBeforeSize, osAfter);
+            ret.replace(nStartPos, nBeforeSize, after);
             nStartPos += nAfterSize;
         }
     }
@@ -65,10 +65,10 @@ std::string replaceAll(const std::string &osStr, const std::string &osBefore,
  * Convert to lower case.
  */
 
-std::string tolower(const std::string &osStr)
+std::string tolower(const std::string &str)
 
 {
-    std::string ret(osStr);
+    std::string ret(str);
     for (size_t i = 0; i < ret.size(); i++)
         ret[i] = static_cast<char>(::tolower(ret[i]));
     return ret;
@@ -80,10 +80,10 @@ std::string tolower(const std::string &osStr)
  * Convert to upper case.
  */
 
-std::string toupper(const std::string &osStr)
+std::string toupper(const std::string &str)
 
 {
-    std::string ret(osStr);
+    std::string ret(str);
     for (size_t i = 0; i < ret.size(); i++)
         ret[i] = static_cast<char>(::toupper(ret[i]));
     return ret;
@@ -92,27 +92,27 @@ std::string toupper(const std::string &osStr)
 // ---------------------------------------------------------------------------
 
 /** Strip leading and trailing double quote characters */
-std::string stripQuotes(const std::string &osStr) {
+std::string stripQuotes(const std::string &str) {
     // As used in examples of OGC 12-063r5
     static const std::string printedQuote("\xE2\x80\x9C");
 
-    if (osStr.size() >= 2 && osStr[0] == '"' && osStr.back() == '"') {
-        return osStr.substr(1, osStr.size() - 2);
-    } else if (osStr.size() >= 6 && osStr.substr(0, 3) == printedQuote &&
-               osStr.substr(osStr.size() - 3) == printedQuote) {
-        return osStr.substr(3, osStr.size() - 6);
+    if (str.size() >= 2 && str[0] == '"' && str.back() == '"') {
+        return str.substr(1, str.size() - 2);
+    } else if (str.size() >= 6 && str.substr(0, 3) == printedQuote &&
+               str.substr(str.size() - 3) == printedQuote) {
+        return str.substr(3, str.size() - 6);
     }
-    return osStr;
+    return str;
 }
 
 // ---------------------------------------------------------------------------
 
-size_t ci_find(const std::string &osStr, const std::string &osNeedle,
+size_t ci_find(const std::string &str, const std::string &osNeedle,
                size_t nStartPos) {
-    if (nStartPos >= osStr.size()) {
+    if (nStartPos >= str.size()) {
         return std::string::npos;
     }
-    auto lowerStr = tolower(osStr.substr(nStartPos));
+    auto lowerStr = tolower(str.substr(nStartPos));
     auto lowerNeedle = tolower(osNeedle);
     return lowerStr.find(lowerNeedle);
 }
