@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 EXTRA_DIST = CMakeLists.txt
 
-include_HEADERS = gtest_include.h
+noinst_HEADERS = gtest_include.h
 
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/test/googletest/include
 AM_CXXFLAGS = @CXX_WFLAGS@ @NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG@
