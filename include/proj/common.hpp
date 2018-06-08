@@ -33,10 +33,10 @@
 #include <string>
 #include <vector>
 
-#include "exception.hh"
-#include "io.hh"
-#include "metadata.hh"
-#include "util.hh"
+#include "exception.hpp"
+#include "io.hpp"
+#include "metadata.hpp"
+#include "util.hpp"
 
 NS_PROJ_START
 

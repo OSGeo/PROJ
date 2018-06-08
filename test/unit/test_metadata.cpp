@@ -28,8 +28,8 @@
 
 #include "gtest_include.h"
 
-#include "proj/metadata.hh"
-#include "proj/util.hh"
+#include "proj/metadata.hpp"
+#include "proj/util.hpp"
 
 using namespace osgeo::proj::metadata;
 using namespace osgeo::proj::util;

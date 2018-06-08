@@ -30,9 +30,9 @@
 #define FROM_PROJ_CPP
 #endif
 
-#include "proj/util.hh"
-#include "proj/internal.hh"
-#include "proj/io.hh"
+#include "proj/util.hpp"
+#include "proj/internal.hpp"
+#include "proj/io.hpp"
 
 #include <map>
 #include <memory>

@@ -2,7 +2,7 @@ EXTRA_DIST = CMakeLists.txt
 
 projdir = $(includedir)/proj
 
-noinst_HEADERS = internal.hh coordinateoperation_internal.hh io_internal.hh coordinatesystem_internal.hh
+noinst_HEADERS = internal.hpp coordinateoperation_internal.hpp io_internal.hpp coordinatesystem_internal.hpp
 
-proj_HEADERS = util.hh metadata.hh common.hh crs.hh datum.hh \
-	coordinatesystem.hh coordinateoperation.hh io.hh exception.hh nn.hpp
+proj_HEADERS = util.hpp metadata.hpp common.hpp crs.hpp datum.hpp \
+	coordinatesystem.hpp coordinateoperation.hpp io.hpp exception.hpp nn.hpp

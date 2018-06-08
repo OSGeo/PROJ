@@ -38,18 +38,18 @@
 #include <string>
 #include <vector>
 
-#include "proj/common.hh"
-#include "proj/coordinateoperation.hh"
-#include "proj/coordinateoperation_internal.hh"
-#include "proj/coordinatesystem.hh"
-#include "proj/coordinatesystem_internal.hh"
-#include "proj/crs.hh"
-#include "proj/datum.hh"
-#include "proj/internal.hh"
-#include "proj/io.hh"
-#include "proj/io_internal.hh"
-#include "proj/metadata.hh"
-#include "proj/util.hh"
+#include "proj/common.hpp"
+#include "proj/coordinateoperation.hpp"
+#include "proj/coordinateoperation_internal.hpp"
+#include "proj/coordinatesystem.hpp"
+#include "proj/coordinatesystem_internal.hpp"
+#include "proj/crs.hpp"
+#include "proj/datum.hpp"
+#include "proj/internal.hpp"
+#include "proj/io.hpp"
+#include "proj/io_internal.hpp"
+#include "proj/metadata.hpp"
+#include "proj/util.hpp"
 
 using namespace NS_PROJ::common;
 using namespace NS_PROJ::crs;

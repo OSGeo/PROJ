@@ -30,13 +30,13 @@
 #define FROM_PROJ_CPP
 #endif
 
-#include "proj/coordinatesystem.hh"
-#include "proj/common.hh"
-#include "proj/coordinatesystem_internal.hh"
-#include "proj/internal.hh"
-#include "proj/io.hh"
-#include "proj/io_internal.hh"
-#include "proj/util.hh"
+#include "proj/coordinatesystem.hpp"
+#include "proj/common.hpp"
+#include "proj/coordinatesystem_internal.hpp"
+#include "proj/internal.hpp"
+#include "proj/io.hpp"
+#include "proj/io_internal.hpp"
+#include "proj/util.hpp"
 
 #include <map>
 #include <memory>

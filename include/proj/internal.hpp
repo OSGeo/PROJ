@@ -45,7 +45,7 @@
 #endif
 #include <vector>
 
-#include "util.hh"
+#include "util.hpp"
 
 //! @cond Doxygen_Suppress
 

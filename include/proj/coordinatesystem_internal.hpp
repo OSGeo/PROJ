@@ -30,68 +30,48 @@
 #error This file should only be included from a PROJ cpp file
 #endif
 
-#ifndef IO_INTERNAL_HH_INCLUDED
-#define IO_INTERNAL_HH_INCLUDED
+#ifndef COORDINATESYSTEM_INTERNAL_HH_INCLUDED
+#define COORDINATESYSTEM_INTERNAL_HH_INCLUDED
 
+#include "util.hpp"
+
+#include <map>
+#include <set>
 #include <string>
-
-#include "util.hh"
 
 //! @cond Doxygen_Suppress
 
 NS_PROJ_START
 
-namespace io {
+namespace cs {
 
 // ---------------------------------------------------------------------------
 
-class WKTConstants {
+class AxisDirectionWKT1 : public util::CodeList {
   public:
-    // WKT1
-    static const std::string GEOCCS;
-    static const std::string GEOGCS;
-    static const std::string DATUM; // WKT2 preferred too
-    static const std::string UNIT;
-    static const std::string SPHEROID;
-    static const std::string AXIS;   // WKT2 too
-    static const std::string PRIMEM; // WKT2 too
-    static const std::string AUTHORITY;
-    static const std::string PROJCS;
-    static const std::string PROJECTION;
-    static const std::string PARAMETER; // WKT2 too
+    static const AxisDirectionWKT1 *valueOf(const std::string &nameIn);
+    static const std::set<std::string> &getKeys();
 
-    // WKT2 preferred
-    static const std::string GEODCRS;
-    static const std::string LENGTHUNIT;
-    static const std::string ANGLEUNIT;
-    static const std::string SCALEUNIT;
-    static const std::string ELLIPSOID;
-    static const std::string CS;
-    static const std::string ID;
-    static const std::string PROJCRS;
-    static const std::string BASEGEODCRS;
-    static const std::string MERIDIAN;
-    static const std::string ORDER;
-    static const std::string ANCHOR;
-    static const std::string CONVERSION;
-    static const std::string METHOD;
-    static const std::string REMARK;
-    static const std::string GEOGCRS;     // WKT2-2018
-    static const std::string BASEGEOGCRS; // WKT2-2018
+    static const AxisDirectionWKT1 NORTH;
+    static const AxisDirectionWKT1 SOUTH;
+    static const AxisDirectionWKT1 EAST;
+    static const AxisDirectionWKT1 WEST;
+    static const AxisDirectionWKT1 UP;
+    static const AxisDirectionWKT1 DOWN;
+    static const AxisDirectionWKT1 OTHER;
 
-    // WKT2 long
-    static const std::string GEODETICCRS;
-    static const std::string GEODETICDATUM;
-    static const std::string PROJECTEDCRS;
-    static const std::string PRIMEMERIDIAN;
-    static const std::string GEOGRAPHICCRS;          // WKT2-2018
-    static const std::string GEODETICREFERENCEFRAME; // WKT2-2018
+  private:
+    explicit AxisDirectionWKT1(const std::string &nameIn);
+
+    static std::map<std::string, const AxisDirectionWKT1 *>
+        axisDirectionWKT1Registry;
+    static std::set<std::string> axisDirectionWKT1Keys;
 };
 
-} // namespace io
+} // namespace cs
 
 NS_PROJ_END
 
 //! @endcond
 
-#endif // IO_INTERNAL_HH_INCLUDED
+#endif // COORDINATESYSTEM_INTERNAL_HH_INCLUDED

@@ -15,6 +15,6 @@ esac
 
 TOPDIR="$SCRIPT_DIR/.."
 
-for i in "$TOPDIR"/include/proj/*.hh "$TOPDIR"/src/*.cpp "$TOPDIR"/test/unit/test*.cpp; do
+for i in "$TOPDIR"/include/proj/*.hpp "$TOPDIR"/src/*.cpp "$TOPDIR"/test/unit/test*.cpp; do
     "$SCRIPT_DIR"/reformat.sh "$i";
 done

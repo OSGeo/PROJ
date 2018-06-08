@@ -30,11 +30,11 @@
 /* FIXME: this is temporary manual testing for development purposes */
 /* ultimately must be removed */
 
-#include "proj/coordinateoperation.hh"
-#include "proj/coordinatesystem.hh"
-#include "proj/crs.hh"
-#include "proj/datum.hh"
-#include "proj/metadata.hh"
+#include "proj/coordinateoperation.hpp"
+#include "proj/coordinatesystem.hpp"
+#include "proj/crs.hpp"
+#include "proj/datum.hpp"
+#include "proj/metadata.hpp"
 
 #include <iostream>
 

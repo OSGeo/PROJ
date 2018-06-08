@@ -30,7 +30,7 @@
 #define FROM_PROJ_CPP
 #endif
 
-#include "proj/internal.hh"
+#include "proj/internal.hpp"
 
 #include <string>
 

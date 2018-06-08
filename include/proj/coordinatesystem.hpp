@@ -34,9 +34,9 @@
 #include <string>
 #include <vector>
 
-#include "common.hh"
-#include "io.hh"
-#include "util.hh"
+#include "common.hpp"
+#include "io.hpp"
+#include "util.hpp"
 
 NS_PROJ_START
 

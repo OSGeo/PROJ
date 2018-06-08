@@ -33,8 +33,8 @@
 #include <string>
 #include <vector>
 
-#include "exception.hh"
-#include "util.hh"
+#include "exception.hpp"
+#include "util.hpp"
 
 NS_PROJ_START
 

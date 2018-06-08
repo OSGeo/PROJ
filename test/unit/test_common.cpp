@@ -28,9 +28,9 @@
 
 #include "gtest_include.h"
 
-#include "proj/common.hh"
-#include "proj/metadata.hh"
-#include "proj/util.hh"
+#include "proj/common.hpp"
+#include "proj/metadata.hpp"
+#include "proj/util.hpp"
 
 using namespace osgeo::proj::common;
 using namespace osgeo::proj::metadata;

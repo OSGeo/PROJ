@@ -28,13 +28,13 @@
 
 #include "gtest_include.h"
 
-#include "proj/common.hh"
-#include "proj/coordinateoperation.hh"
-#include "proj/coordinatesystem.hh"
-#include "proj/crs.hh"
-#include "proj/datum.hh"
-#include "proj/io.hh"
-#include "proj/util.hh"
+#include "proj/common.hpp"
+#include "proj/coordinateoperation.hpp"
+#include "proj/coordinatesystem.hpp"
+#include "proj/crs.hpp"
+#include "proj/datum.hpp"
+#include "proj/io.hpp"
+#include "proj/util.hpp"
 
 #include <string>
 

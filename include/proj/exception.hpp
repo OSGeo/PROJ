@@ -1,3 +1,4 @@
+
 /******************************************************************************
  *
  * Project:  PROJ
@@ -26,48 +27,41 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef FROM_PROJ_CPP
-#error This file should only be included from a PROJ cpp file
-#endif
+#ifndef EXCEPTION_HH_INCLUDED
+#define EXCEPTION_HH_INCLUDED
 
-#ifndef COORDINATEOPERATION_INTERNAL_HH_INCLUDED
-#define COORDINATEOPERATION_INTERNAL_HH_INCLUDED
+#include <exception>
+#include <string>
 
-#include "coordinateoperation.hh"
-
-#include <vector>
-
-//! @cond Doxygen_Suppress
+#include "util.hpp"
 
 NS_PROJ_START
 
-namespace operation {
+namespace util {
 
-struct MethodMapping {
-    typedef struct {
-        std::string wkt2_name;
-        int epsg_code;
-        std::string wkt1_name;
-    } ParamMapping;
+// ---------------------------------------------------------------------------
 
-    std::string wkt2_name;
-    int epsg_code;
-    std::string wkt1_name;
-    std::vector<ParamMapping> params;
+class Exception : public std::exception {
+    std::string msg_;
+
+  public:
+    explicit Exception(const char *message) : msg_(message) {}
+    explicit Exception(const std::string &message) : msg_(message) {}
+    PROJ_DLL virtual const char *what() const noexcept { return msg_.c_str(); }
 };
 
-const MethodMapping *getMapping(int epsg_code);
-const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name);
-const MethodMapping *getMapping(const OperationMethod *method);
-const MethodMapping::ParamMapping *
-getMapping(const MethodMapping *mapping, const OperationParameterValue *param);
-const MethodMapping::ParamMapping *
-getMappingFromWKT1(const MethodMapping *mapping, const std::string &wkt1_name);
+// ---------------------------------------------------------------------------
 
-} // namespace operation
+class InvalidValueTypeException : public Exception {
+  public:
+    explicit InvalidValueTypeException(const char *message)
+        : Exception(message) {}
+    explicit InvalidValueTypeException(const std::string &message)
+        : Exception(message) {}
+};
+
+} // namespace util
 
 NS_PROJ_END
 
-//! @endcond
-
-#endif // COORDINATEOPERATION_INTERNAL_HH_INCLUDED
+#endif //  EXCEPTION_HH_INCLUDED

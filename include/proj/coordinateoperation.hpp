@@ -33,9 +33,9 @@
 #include <string>
 #include <vector>
 
-#include "common.hh"
-#include "io.hh"
-#include "metadata.hh"
+#include "common.hpp"
+#include "io.hpp"
+#include "metadata.hpp"
 
 NS_PROJ_START
 

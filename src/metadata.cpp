@@ -30,9 +30,9 @@
 #define FROM_PROJ_CPP
 #endif
 
-#include "proj/metadata.hh"
-#include "proj/internal.hh"
-#include "proj/util.hh"
+#include "proj/metadata.hpp"
+#include "proj/internal.hpp"
+#include "proj/util.hpp"
 
 #include <memory>
 #include <sstream> // std::ostringstream

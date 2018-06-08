@@ -30,14 +30,14 @@
 #define FROM_PROJ_CPP
 #endif
 
-#include "proj/coordinateoperation.hh"
-#include "proj/common.hh"
-#include "proj/coordinateoperation_internal.hh"
-#include "proj/internal.hh"
-#include "proj/io.hh"
-#include "proj/io_internal.hh"
-#include "proj/metadata.hh"
-#include "proj/util.hh"
+#include "proj/coordinateoperation.hpp"
+#include "proj/common.hpp"
+#include "proj/coordinateoperation_internal.hpp"
+#include "proj/internal.hpp"
+#include "proj/io.hpp"
+#include "proj/io_internal.hpp"
+#include "proj/metadata.hpp"
+#include "proj/util.hpp"
 
 #include <cassert>
 #include <cmath>
