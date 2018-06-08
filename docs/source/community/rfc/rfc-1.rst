@@ -6,8 +6,8 @@ PROJ RFC 1: Project Committee Guidelines
 
 :Author: Frank Warmerdam, Howard Butler
 :Contact: howard@hobu.co
-:Status: Proposed
-:Last Updated: 2018-06-04
+:Status: Passed
+:Last Updated: 2018-06-08
 
 Summary
 -----------
@@ -111,10 +111,6 @@ Observations
 * The absolute majority rule can be used to override an obstructionist
   veto, but it is intended that in normal circumstances vetoers need to be
   convinced to withdraw their veto.  We are trying to reach consensus.
-* It is anticipated that separate "committees" will exist to manage
-  conferences, documentation and web sites.  That said, it is expected
-  that the PSC will be the entity largely responsible for creating any
-  such committees.
 
 Committee Membership
 ---------------------
