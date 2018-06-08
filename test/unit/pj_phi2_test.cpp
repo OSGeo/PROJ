@@ -1,11 +1,11 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Test pj_phi2.c
+ * Purpose:  Test pj_phi2 function.
  * Author:   Kurt Schwehr <schwehr@google.com>
  *
  ******************************************************************************
- * Copyright (c) 2018, Google Inc
+ * Copyright (c) 2018, Google Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
