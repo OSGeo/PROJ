@@ -23,3 +23,4 @@ pj_phi2_test-check: pj_phi2_test
 	./pj_phi2_test
 
 check-local: basic_test-check
+check-local: pj_phi2_test-check
