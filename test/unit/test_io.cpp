@@ -931,6 +931,29 @@ TEST(wkt_parse, invalid_CS_of_GEODCRS) {
             startWKT +
             ",CS[ellipsoidal,2],AXIS[\"latitude\",north],AXIS[\"longitude\"]]"),
         ParsingException);
+
+    // not enough children in ORDER
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     startWKT +
+                     ",CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[]],AXIS["
+                     "\"longitude\",east]]"),
+                 ParsingException);
+
+    // invalid value in ORDER
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            startWKT +
+            ",CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[\"x\"]],AXIS["
+            "\"longitude\",east]]"),
+        ParsingException);
+
+    // unexpected ORDER value
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            startWKT +
+            ",CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[2]],AXIS["
+            "\"longitude\",east]]"),
+        ParsingException);
 }
 
 // ---------------------------------------------------------------------------

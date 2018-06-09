@@ -657,7 +657,8 @@ struct WKTParser::Private {
                                 PrimeMeridianNNPtr primeMeridian);
     CoordinateSystemAxisNNPtr buildAxis(WKTNodeNNPtr node,
                                         const UnitOfMeasure &unitIn,
-                                        bool isGeocentric);
+                                        bool isGeocentric,
+                                        int expectedOrderNum);
     CoordinateSystemNNPtr buildCS(WKTNodePtr node, /* maybe null */
                                   WKTNodeNNPtr parentNode);
     GeodeticCRSNNPtr buildGeodeticCRS(WKTNodeNNPtr node);
@@ -902,12 +903,35 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
 
 CoordinateSystemAxisNNPtr
 WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
-                              bool isGeocentric) {
+                              bool isGeocentric, int expectedOrderNum) {
     const auto &children = node->children();
     if (children.size() < 2) {
         throw ParsingException("not enough children in " + node->value() +
                                " node");
     }
+
+    auto orderNode = node->lookForChild(WKTConstants::ORDER);
+    if (orderNode) {
+        const auto &orderNodeChildren = orderNode->children();
+        if (orderNodeChildren.size() != 1) {
+            throw ParsingException("not enough children in " +
+                                   orderNode->value() + " node");
+        }
+        int orderNum;
+        try {
+            orderNum = std::stoi(orderNodeChildren[0]->value());
+        } catch (const std::exception &) {
+            throw ParsingException(
+                std::string("buildAxis: invalid ORDER value: ") +
+                orderNodeChildren[0]->value());
+        }
+        if (orderNum != expectedOrderNum) {
+            throw ParsingException(
+                std::string("buildAxis: did not get expected ORDER value: ") +
+                orderNodeChildren[0]->value());
+        }
+    }
+
     // The axis designation in WK2 can be: "name", "(abbrev)" or "name (abbrev)"
     std::string axisDesignation(stripQuotes(children[0]->value()));
     size_t sepPos = axisDesignation.find(" (");
@@ -1073,10 +1097,10 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
 
     auto firstAxis = buildAxis(
         NN_CHECK_ASSERT(parentNode->lookForChild(WKTConstants::AXIS, 0)), unit,
-        isGeocentric);
+        isGeocentric, 1);
     auto secondAxis = buildAxis(
         NN_CHECK_ASSERT(parentNode->lookForChild(WKTConstants::AXIS, 1)), unit,
-        isGeocentric);
+        isGeocentric, 2);
 
     PropertyMap csMap =
         node ? buildProperties(NN_CHECK_ASSERT(node)) : PropertyMap();
@@ -1086,7 +1110,7 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
         } else {
             auto thirdAxis = buildAxis(NN_CHECK_ASSERT(parentNode->lookForChild(
                                            WKTConstants::AXIS, 2)),
-                                       unit, false);
+                                       unit, false, 3);
             return EllipsoidalCS::create(csMap, firstAxis, secondAxis,
                                          thirdAxis);
         }
@@ -1096,14 +1120,14 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
         } else {
             auto thirdAxis = buildAxis(NN_CHECK_ASSERT(parentNode->lookForChild(
                                            WKTConstants::AXIS, 2)),
-                                       unit, isGeocentric);
+                                       unit, isGeocentric, 3);
             return CartesianCS::create(csMap, firstAxis, secondAxis, thirdAxis);
         }
     } else if (ci_equal(csType, "spherical")) {
         if (axisCount == 3) {
             auto thirdAxis = buildAxis(NN_CHECK_ASSERT(parentNode->lookForChild(
                                            WKTConstants::AXIS, 2)),
-                                       unit, false);
+                                       unit, false, 3);
             return SphericalCS::create(csMap, firstAxis, secondAxis, thirdAxis);
         } else {
             throw ParsingException(
