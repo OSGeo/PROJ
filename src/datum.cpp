@@ -95,7 +95,7 @@ const optional<IdentifiedObject> &Datum::conventionalRS() const {
 struct PrimeMeridian::Private {
     Angle greenwichLongitude{};
 
-    Private(const Angle &longitude) : greenwichLongitude(longitude) {}
+    explicit Private(const Angle &longitude) : greenwichLongitude(longitude) {}
 };
 //! @endcond
 

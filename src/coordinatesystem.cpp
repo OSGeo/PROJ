@@ -56,7 +56,7 @@ using namespace NS_PROJ::util;
 struct Meridian::Private {
     Angle longitude_{};
 
-    Private(const Angle &longitude) : longitude_(longitude) {}
+    explicit Private(const Angle &longitude) : longitude_(longitude) {}
 };
 //! @endcond
 
