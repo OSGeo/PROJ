@@ -615,3 +615,36 @@ TEST(datum, datum_with_ANCHOR) {
 
     EXPECT_EQ(datum->exportToWKT(WKTFormatter::create()), expected);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, cs_with_MERIDIAN) {
+    std::vector<CoordinateSystemAxisPtr> axis{
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY, "Easting"), "X",
+            AxisDirection::SOUTH, UnitOfMeasure::METRE,
+            Meridian::create(Angle(90.0))),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY, "Northing"), "Y",
+            AxisDirection::SOUTH, UnitOfMeasure::METRE,
+            Meridian::create(Angle(180.0)))};
+    auto cs(CartesianCS::create(PropertyMap(), axis[0], axis[1]));
+
+    auto expected = "CS[Cartesian,2]\n"
+                    "    AXIS[\"easting (X)\",south,\n"
+                    "        MERIDIAN[90,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]],\n"
+                    "        ORDER[1],\n"
+                    "        LENGTHUNIT[\"metre\",1,\n"
+                    "            ID[\"EPSG\",9001]]],\n"
+                    "    AXIS[\"northing (Y)\",south,\n"
+                    "        MERIDIAN[180,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]],\n"
+                    "        ORDER[2],\n"
+                    "        LENGTHUNIT[\"metre\",1,\n"
+                    "            ID[\"EPSG\",9001]]]";
+
+    EXPECT_EQ(cs->exportToWKT(WKTFormatter::create()), expected);
+}

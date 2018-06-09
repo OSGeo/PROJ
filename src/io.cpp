@@ -655,6 +655,7 @@ struct WKTParser::Private {
     GeodeticReferenceFrameNNPtr
     buildGeodeticReferenceFrame(WKTNodeNNPtr node,
                                 PrimeMeridianNNPtr primeMeridian);
+    MeridianNNPtr buildMeridian(WKTNodeNNPtr node);
     CoordinateSystemAxisNNPtr buildAxis(WKTNodeNNPtr node,
                                         const UnitOfMeasure &unitIn,
                                         bool isGeocentric,
@@ -901,6 +902,32 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
 
 // ---------------------------------------------------------------------------
 
+MeridianNNPtr WKTParser::Private::buildMeridian(WKTNodeNNPtr node) {
+    const auto &children = node->children();
+    if (children.size() < 2) {
+        throw ParsingException("not enough children in " + node->value() +
+                               " node");
+    }
+    auto unitNode = node->lookForChild(WKTConstants::ANGLEUNIT);
+    if (!unitNode) {
+        unitNode = node->lookForChild(WKTConstants::UNIT);
+    }
+    UnitOfMeasure unit;
+    if (unitNode) {
+        unit =
+            buildUnit(NN_CHECK_ASSERT(unitNode), UnitOfMeasure::Type::ANGULAR);
+    }
+    try {
+        double angleValue = asDouble(children[0]->value());
+        Angle angle(angleValue, unit);
+        return Meridian::create(angle);
+    } catch (const std::exception &e) {
+        throw ParsingException(std::string("buildMeridian: ") + e.what());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateSystemAxisNNPtr
 WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
                               bool isGeocentric, int expectedOrderNum) {
@@ -1007,10 +1034,16 @@ WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
         // the CS.
         unit = unitIn;
     }
-    // TODO meridian node
+
+    MeridianPtr meridian;
+    auto meridianNode = node->lookForChild(WKTConstants::MERIDIAN);
+    if (meridianNode) {
+        meridian = buildMeridian(NN_CHECK_ASSERT(meridianNode)).as_nullable();
+    }
+
     return CoordinateSystemAxis::create(
         buildProperties(node).set(Identifier::DESCRIPTION_KEY, axisName),
-        axisAbbrev, *direction, unit);
+        axisAbbrev, *direction, unit, meridian);
 }
 
 // ---------------------------------------------------------------------------

@@ -82,11 +82,8 @@ const Angle &Meridian::longitude() const { return d->longitude_; }
 
 // ---------------------------------------------------------------------------
 
-MeridianPtr Meridian::create(const PropertyMap &properties,
-                             const Angle &longitudeIn) {
-    MeridianPtr pm(Meridian::make_shared<Meridian>(longitudeIn));
-    pm->setProperties(properties);
-    return pm;
+MeridianNNPtr Meridian::create(const Angle &longitudeIn) {
+    return Meridian::nn_make_shared<Meridian>(longitudeIn);
 }
 
 // ---------------------------------------------------------------------------
@@ -95,7 +92,6 @@ std::string Meridian::exportToWKT(
     WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
     formatter->startNode(WKTConstants::MERIDIAN);
-    formatter->addQuotedString(*(name()->description()));
     formatter->add(longitude().value());
     longitude().unit().exportToWKT(formatter, WKTConstants::ANGLEUNIT);
     if (formatter->outputId()) {

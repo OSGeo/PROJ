@@ -748,6 +748,35 @@ TEST(wkt_parse, wkt2_2018_simplified_projected) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, cs_with_MERIDIAN) {
+    auto wkt =
+        "PROJCRS[\"dummy\",\n"
+        "    BASEGEOGCRS[\"WGS 84\",\n"
+        "        DATUM[\"WGS_1984\",\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
+        "        UNIT[\"degree\",0.0174532925199433]],\n"
+        "    CONVERSION[\"dummy\",\n"
+        "        METHOD[\"dummy\"]]\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"easting "
+        "(X)\",south,MERIDIAN[90,ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        AXIS[\"northing (Y)\",north],\n"
+        "        UNIT[\"metre\",1],\n"
+        "    ID[\"EPSG\",32631]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 2);
+    auto axis = crs->coordinateSystem()->axisList()[0];
+    auto meridian = axis->meridian();
+    ASSERT_TRUE(meridian != nullptr);
+    EXPECT_EQ(meridian->longitude().value(), 90.0);
+    EXPECT_EQ(meridian->longitude().unit(), UnitOfMeasure::DEGREE);
+    ASSERT_TRUE(crs->coordinateSystem()->axisList()[1]->meridian() == nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);
@@ -1016,6 +1045,24 @@ TEST(wkt_parse, invalid_PROJCRS) {
                                 "ellipsoidal,2],AXIS[\"latitude\",north],AXIS["
                                 "\"longitude\",east]]"),
                  ParsingException);
+
+    // not enough children in MERIDIAN
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     startWKT + ",CONVERSION[\"x\",METHOD[\"y\"]],CS["
+                                "Cartesian,2],AXIS[\"easting (X)\",south,"
+                                "MERIDIAN[90]],AXIS["
+                                "\"northing (Y)\",south]]"),
+                 ParsingException);
+
+    // non numeric angle value for MERIDIAN
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            startWKT +
+            ",CONVERSION[\"x\",METHOD[\"y\"]],CS["
+            "Cartesian,2],AXIS[\"easting (X)\",south,"
+            "MERIDIAN[\"x\",UNIT[\"degree\",0.0174532925199433]]],AXIS["
+            "\"northing (Y)\",south]]"),
+        ParsingException);
 }
 
 // ---------------------------------------------------------------------------

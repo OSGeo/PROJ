@@ -106,6 +106,7 @@ class AxisDirection : public util::CodeList {
 
 class Meridian;
 using MeridianPtr = std::shared_ptr<Meridian>;
+using MeridianNNPtr = util::nn<MeridianPtr>;
 
 /** For WKT2. Used by CoordinateSystemAxis optionaly */
 class Meridian : public common::IdentifiedObject, public io::IWKTExportable {
@@ -117,8 +118,7 @@ class Meridian : public common::IdentifiedObject, public io::IWKTExportable {
     PROJ_DLL const common::Angle &longitude() const;
 
     // non-standard
-    PROJ_DLL static MeridianPtr create(const util::PropertyMap &properties,
-                                       const common::Angle &longitudeIn);
+    PROJ_DLL static MeridianNNPtr create(const common::Angle &longitudeIn);
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
