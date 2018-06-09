@@ -835,3 +835,24 @@ ConversionNNPtr Conversion::identify() const {
 
     return newConversion;
 }
+
+// ---------------------------------------------------------------------------
+
+InvalidOperation::InvalidOperation(const char *message) : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+InvalidOperation::InvalidOperation(const std::string &message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+InvalidOperation::~InvalidOperation() = default;
+
+// ---------------------------------------------------------------------------
+
+Transformation::~Transformation() = default;
+
+// ---------------------------------------------------------------------------
+
+PointMotionOperation::~PointMotionOperation() = default;

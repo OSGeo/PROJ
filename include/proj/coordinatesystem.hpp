@@ -211,6 +211,8 @@ using SphericalCSNNPtr = util::nn<SphericalCSPtr>;
 
 class SphericalCS : public CoordinateSystem {
   public:
+    PROJ_DLL ~SphericalCS() override;
+
     // non-standard
 
     PROJ_DLL static SphericalCSNNPtr
@@ -236,6 +238,8 @@ using EllipsoidalCSNNPtr = util::nn<EllipsoidalCSPtr>;
 
 class EllipsoidalCS : public CoordinateSystem {
   public:
+    PROJ_DLL ~EllipsoidalCS() override;
+
     // non-standard
     PROJ_DLL static EllipsoidalCSNNPtr
     create(const util::PropertyMap &properties,
@@ -274,6 +278,8 @@ using CartesianCSNNPtr = util::nn<CartesianCSPtr>;
 
 class CartesianCS : public CoordinateSystem {
   public:
+    PROJ_DLL ~CartesianCS() override;
+
     PROJ_DLL static CartesianCSNNPtr
     create(const util::PropertyMap &properties,
            const CoordinateSystemAxisPtr &axis0,

@@ -147,6 +147,10 @@ ArrayOfBaseObject::ArrayOfBaseObject(const ArrayOfBaseObject &other) {
 
 // ---------------------------------------------------------------------------
 
+ArrayOfBaseObject::~ArrayOfBaseObject() = default;
+
+// ---------------------------------------------------------------------------
+
 ArrayOfBaseObject &ArrayOfBaseObject::
 operator=(const ArrayOfBaseObject &other) {
     if (this != &other) {
@@ -462,3 +466,32 @@ bool CodeList::operator==(const CodeList &other) const {
 bool CodeList::operator!=(const CodeList &other) const {
     return toString() != other.toString();
 }
+// ---------------------------------------------------------------------------
+
+Exception::Exception(const char *message) : msg_(message) {}
+
+// ---------------------------------------------------------------------------
+
+Exception::Exception(const std::string &message) : msg_(message) {}
+
+// ---------------------------------------------------------------------------
+
+Exception::~Exception() = default;
+
+// ---------------------------------------------------------------------------
+
+const char *Exception::what() const noexcept { return msg_.c_str(); }
+
+// ---------------------------------------------------------------------------
+
+InvalidValueTypeException::InvalidValueTypeException(const char *message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+InvalidValueTypeException::InvalidValueTypeException(const std::string &message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+InvalidValueTypeException::~InvalidValueTypeException() = default;

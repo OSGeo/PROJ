@@ -32,7 +32,6 @@
 #include <memory>
 #include <string>
 
-#include "exception.hpp"
 #include "util.hpp"
 
 NS_PROJ_START
@@ -181,10 +180,10 @@ class WKTFormatter {
 class FormattingException : public util::Exception {
   public:
     /** Constructor. */
-    explicit FormattingException(const char *message) : Exception(message) {}
+    PROJ_DLL explicit FormattingException(const char *message);
     /** Constructor. */
-    explicit FormattingException(const std::string &message)
-        : Exception(message) {}
+    PROJ_DLL explicit FormattingException(const std::string &message);
+    PROJ_DLL virtual ~FormattingException() override;
 };
 
 // ---------------------------------------------------------------------------
@@ -193,10 +192,10 @@ class FormattingException : public util::Exception {
 class ParsingException : public util::Exception {
   public:
     /** Constructor. */
-    explicit ParsingException(const char *message) : Exception(message) {}
+    PROJ_DLL explicit ParsingException(const char *message);
     /** Constructor. */
-    explicit ParsingException(const std::string &message)
-        : Exception(message) {}
+    PROJ_DLL explicit ParsingException(const std::string &message);
+    PROJ_DLL virtual ~ParsingException() override;
 };
 
 // ---------------------------------------------------------------------------

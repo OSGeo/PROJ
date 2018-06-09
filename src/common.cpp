@@ -221,6 +221,44 @@ Measure Measure::convertToUnit(const UnitOfMeasure &otherUnit) const {
 
 // ---------------------------------------------------------------------------
 
+Scale::Scale(double valueIn) : Measure(valueIn, UnitOfMeasure::SCALE_UNITY) {}
+
+// ---------------------------------------------------------------------------
+
+Scale::~Scale() = default;
+
+// ---------------------------------------------------------------------------
+
+Angle::Angle(double valueIn, const UnitOfMeasure &unitIn)
+    : Measure(valueIn, unitIn) {}
+
+// ---------------------------------------------------------------------------
+
+Angle Angle::convertToUnit(const UnitOfMeasure &otherUnit) const {
+    return Angle(Measure::convertToUnit(otherUnit).value(), otherUnit);
+}
+
+// ---------------------------------------------------------------------------
+
+Angle::~Angle() = default;
+
+// ---------------------------------------------------------------------------
+
+Length::Length(double valueIn, const UnitOfMeasure &unitIn)
+    : Measure(valueIn, unitIn) {}
+
+// ---------------------------------------------------------------------------
+
+Length Length::convertToUnit(const UnitOfMeasure &otherUnit) const {
+    return Length(Measure::convertToUnit(otherUnit).value(), otherUnit);
+}
+
+// ---------------------------------------------------------------------------
+
+Length::~Length() = default;
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 // cppcheck-suppress copyCtorAndEqOperator
 struct IdentifiedObject::Private {

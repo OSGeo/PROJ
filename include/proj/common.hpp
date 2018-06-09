@@ -33,7 +33,6 @@
 #include <string>
 #include <vector>
 
-#include "exception.hpp"
 #include "io.hpp"
 #include "metadata.hpp"
 #include "util.hpp"
@@ -130,8 +129,8 @@ using MeasureNNPtr = util::nn<MeasurePtr>;
 
 class Scale : public Measure {
   public:
-    PROJ_DLL explicit Scale(double valueIn = 0.0)
-        : Measure(valueIn, UnitOfMeasure::SCALE_UNITY) {}
+    PROJ_DLL explicit Scale(double valueIn = 0.0);
+    PROJ_DLL ~Scale() override;
 };
 
 // ---------------------------------------------------------------------------
@@ -139,12 +138,10 @@ class Scale : public Measure {
 class Angle : public Measure {
   public:
     PROJ_DLL Angle(double valueIn = 0.0,
-                   const UnitOfMeasure &unitIn = UnitOfMeasure::DEGREE)
-        : Measure(valueIn, unitIn) {}
+                   const UnitOfMeasure &unitIn = UnitOfMeasure::DEGREE);
+    PROJ_DLL ~Angle() override;
 
-    PROJ_DLL Angle convertToUnit(const UnitOfMeasure &otherUnit) const {
-        return Angle(Measure::convertToUnit(otherUnit).value(), otherUnit);
-    }
+    PROJ_DLL Angle convertToUnit(const UnitOfMeasure &otherUnit) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -152,12 +149,10 @@ class Angle : public Measure {
 class Length : public Measure {
   public:
     PROJ_DLL Length(double valueIn = 0.0,
-                    const UnitOfMeasure &unitIn = UnitOfMeasure::METRE)
-        : Measure(valueIn, unitIn) {}
+                    const UnitOfMeasure &unitIn = UnitOfMeasure::METRE);
+    PROJ_DLL ~Length() override;
 
-    PROJ_DLL Length convertToUnit(const UnitOfMeasure &otherUnit) const {
-        return Length(Measure::convertToUnit(otherUnit).value(), otherUnit);
-    }
+    PROJ_DLL Length convertToUnit(const UnitOfMeasure &otherUnit) const;
 };
 
 // ---------------------------------------------------------------------------

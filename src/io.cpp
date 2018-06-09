@@ -1366,3 +1366,30 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
 }
 
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+FormattingException::FormattingException(const char *message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+FormattingException::FormattingException(const std::string &message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+FormattingException::~FormattingException() = default;
+
+// ---------------------------------------------------------------------------
+
+ParsingException::ParsingException(const char *message) : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+ParsingException::ParsingException(const std::string &message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+ParsingException::~ParsingException() = default;

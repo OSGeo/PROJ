@@ -33,6 +33,7 @@
 #error Must have C++11 or newer.
 #endif
 
+#include <exception>
 #include <map>
 #include <memory>
 #include <string>
@@ -238,6 +239,7 @@ class ArrayOfBaseObject : public BaseObject {
     PROJ_DLL ArrayOfBaseObject() = default;
     PROJ_DLL ArrayOfBaseObject(const ArrayOfBaseObject &other);
     PROJ_DLL ArrayOfBaseObject &operator=(const ArrayOfBaseObject &other);
+    PROJ_DLL ~ArrayOfBaseObject() override;
 
     PROJ_DLL static ArrayOfBaseObjectNNPtr create();
 };
@@ -387,6 +389,27 @@ class CodeList {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+class Exception : public std::exception {
+    std::string msg_;
+
+  public:
+    PROJ_DLL explicit Exception(const char *message);
+    PROJ_DLL explicit Exception(const std::string &message);
+    PROJ_DLL ~Exception() override;
+    PROJ_DLL virtual const char *what() const noexcept override;
+};
+
+// ---------------------------------------------------------------------------
+
+class InvalidValueTypeException : public Exception {
+  public:
+    PROJ_DLL explicit InvalidValueTypeException(const char *message);
+    PROJ_DLL explicit InvalidValueTypeException(const std::string &message);
+    PROJ_DLL ~InvalidValueTypeException() override;
 };
 
 } // namespace util

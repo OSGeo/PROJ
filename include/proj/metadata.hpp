@@ -33,7 +33,6 @@
 #include <string>
 #include <vector>
 
-#include "exception.hpp"
 #include "util.hpp"
 
 NS_PROJ_START

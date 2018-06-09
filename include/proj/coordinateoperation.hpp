@@ -208,7 +208,7 @@ class OperationParameterValue : public GeneralParameterValue {
     PROJ_DLL OperationParameterValue(const OperationParameterValue &other);
     PROJ_DLL OperationParameterValue &
     operator=(const OperationParameterValue &other) = delete;
-    PROJ_DLL virtual ~OperationParameterValue();
+    PROJ_DLL ~OperationParameterValue() override;
 
     PROJ_DLL const OperationParameterNNPtr &parameter() const;
     PROJ_DLL const ParameterValueNNPtr &parameterValue() const;
@@ -271,14 +271,11 @@ class OperationMethod : public common::IdentifiedObject,
 
 // ---------------------------------------------------------------------------
 
-class InvalidOperation : public std::exception {
-    std::string msg_;
-
+class InvalidOperation : public util::Exception {
   public:
-    PROJ_DLL explicit InvalidOperation(const char *message) : msg_(message) {}
-    PROJ_DLL explicit InvalidOperation(const std::string &message)
-        : msg_(message) {}
-    PROJ_DLL virtual const char *what() const noexcept { return msg_.c_str(); }
+    PROJ_DLL explicit InvalidOperation(const char *message);
+    PROJ_DLL explicit InvalidOperation(const std::string &message);
+    PROJ_DLL ~InvalidOperation() override;
 };
 
 // ---------------------------------------------------------------------------
@@ -348,6 +345,7 @@ class Conversion : public SingleOperation, public io::IWKTExportable {
 class Transformation : public SingleOperation {
   public:
     // TODO
+    PROJ_DLL ~Transformation() override;
 };
 
 // ---------------------------------------------------------------------------
@@ -355,6 +353,7 @@ class Transformation : public SingleOperation {
 class PointMotionOperation : public SingleOperation {
   public:
     // TODO
+    PROJ_DLL ~PointMotionOperation() override;
 
     // ---------------------------------------------------------------------------
 };

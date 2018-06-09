@@ -324,6 +324,10 @@ SphericalCS::SphericalCS() = default;
 
 // ---------------------------------------------------------------------------
 
+SphericalCS::~SphericalCS() = default;
+
+// ---------------------------------------------------------------------------
+
 SphericalCS::SphericalCS(const std::vector<CoordinateSystemAxisPtr> &axisIn)
     : CoordinateSystem(axisIn) {}
 
@@ -346,6 +350,10 @@ SphericalCSNNPtr SphericalCS::create(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 EllipsoidalCS::EllipsoidalCS() = default;
+
+// ---------------------------------------------------------------------------
+
+EllipsoidalCS::~EllipsoidalCS() = default;
 
 // ---------------------------------------------------------------------------
 
@@ -414,6 +422,10 @@ EllipsoidalCS::createLatitudeLongitudeDegreeEllipsoidalHeightMetre() {
 // ---------------------------------------------------------------------------
 
 CartesianCS::CartesianCS() = default;
+
+// ---------------------------------------------------------------------------
+
+CartesianCS::~CartesianCS() = default;
 
 // ---------------------------------------------------------------------------
 
