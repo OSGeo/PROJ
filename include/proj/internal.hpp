@@ -60,6 +60,10 @@
 #define PROJ_FALLTHROUGH
 #endif
 
+#if defined(__clang__) || defined(_MSC_VER)
+#define COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT
+#endif
+
 NS_PROJ_START
 
 namespace operation {

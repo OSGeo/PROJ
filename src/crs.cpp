@@ -415,17 +415,35 @@ struct DerivedCRS::Private {
 
 // ---------------------------------------------------------------------------
 
+// DerivedCRS is an abstract class, that virtually inherits from SingleCRS
+// Consequently the base constructor in SingleCRS will never be called by
+// that constructor. clang -Wabstract-vbase-init and VC++ underline this, but other
+// compilers will complain if we don't call the base constructor.
+
 DerivedCRS::DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
                        const ConversionNNPtr &derivingConversionIn,
-                       const CoordinateSystemNNPtr &cs)
-    : SingleCRS(baseCRSIn->datum(), cs),
+                       const CoordinateSystemNNPtr &
+#if !defined(COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT)
+                           cs
+#endif
+                       )
+    :
+#if !defined(COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT)
+      SingleCRS(baseCRSIn->datum(), cs),
+#endif
       d(internal::make_unique<Private>(
-          baseCRSIn, Conversion::create(derivingConversionIn))) {}
+          baseCRSIn, Conversion::create(derivingConversionIn))) {
+}
 
 // ---------------------------------------------------------------------------
 
 DerivedCRS::DerivedCRS(const DerivedCRS &other)
-    : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
+    :
+#if !defined(COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT)
+      SingleCRS(other),
+#endif
+      d(internal::make_unique<Private>(*other.d)) {
+}
 
 // ---------------------------------------------------------------------------
 
