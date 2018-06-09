@@ -225,7 +225,7 @@ Scale::Scale(double valueIn) : Measure(valueIn, UnitOfMeasure::SCALE_UNITY) {}
 
 // ---------------------------------------------------------------------------
 
-Scale::Scale(const Scale &other) : Measure(other) {}
+Scale::Scale(const Scale &) = default;
 
 // ---------------------------------------------------------------------------
 
@@ -233,12 +233,7 @@ Scale::~Scale() = default;
 
 // ---------------------------------------------------------------------------
 
-Scale &Scale::operator=(const Scale &other) {
-    if (this != &other) {
-        Measure::operator=(other);
-    }
-    return *this;
-}
+Scale &Scale::operator=(const Scale &) = default;
 
 // ---------------------------------------------------------------------------
 
@@ -247,7 +242,7 @@ Angle::Angle(double valueIn, const UnitOfMeasure &unitIn)
 
 // ---------------------------------------------------------------------------
 
-Angle::Angle(const Angle &other) : Measure(other) {}
+Angle::Angle(const Angle &) = default;
 
 // ---------------------------------------------------------------------------
 
@@ -261,12 +256,7 @@ Angle::~Angle() = default;
 
 // ---------------------------------------------------------------------------
 
-Angle &Angle::operator=(const Angle &other) {
-    if (this != &other) {
-        Measure::operator=(other);
-    }
-    return *this;
-}
+Angle &Angle::operator=(const Angle &) = default;
 
 // ---------------------------------------------------------------------------
 
@@ -275,7 +265,7 @@ Length::Length(double valueIn, const UnitOfMeasure &unitIn)
 
 // ---------------------------------------------------------------------------
 
-Length::Length(const Length &other) : Measure(other) {}
+Length::Length(const Length &) = default;
 
 // ---------------------------------------------------------------------------
 
@@ -289,12 +279,7 @@ Length::~Length() = default;
 
 // ---------------------------------------------------------------------------
 
-Length &Length::operator=(const Length &other) {
-    if (this != &other) {
-        Measure::operator=(other);
-    }
-    return *this;
-}
+Length &Length::operator=(const Length &) = default;
 
 // ---------------------------------------------------------------------------
 

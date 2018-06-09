@@ -417,7 +417,8 @@ struct DerivedCRS::Private {
 
 // DerivedCRS is an abstract class, that virtually inherits from SingleCRS
 // Consequently the base constructor in SingleCRS will never be called by
-// that constructor. clang -Wabstract-vbase-init and VC++ underline this, but other
+// that constructor. clang -Wabstract-vbase-init and VC++ underline this, but
+// other
 // compilers will complain if we don't call the base constructor.
 
 DerivedCRS::DerivedCRS(const SingleCRSNNPtr &baseCRSIn,

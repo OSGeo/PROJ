@@ -1379,8 +1379,7 @@ FormattingException::FormattingException(const std::string &message)
 
 // ---------------------------------------------------------------------------
 
-FormattingException::FormattingException(const FormattingException &other)
-    : Exception(other) {}
+FormattingException::FormattingException(const FormattingException &) = default;
 
 // ---------------------------------------------------------------------------
 
@@ -1397,8 +1396,7 @@ ParsingException::ParsingException(const std::string &message)
 
 // ---------------------------------------------------------------------------
 
-ParsingException::ParsingException(const ParsingException &other)
-    : Exception(other) {}
+ParsingException::ParsingException(const ParsingException &) = default;
 
 // ---------------------------------------------------------------------------
 

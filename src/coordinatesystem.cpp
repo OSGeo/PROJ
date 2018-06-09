@@ -335,7 +335,7 @@ SphericalCS::SphericalCS(const std::vector<CoordinateSystemAxisPtr> &axisIn)
 
 // ---------------------------------------------------------------------------
 
-SphericalCS::SphericalCS(const SphericalCS &other) : CoordinateSystem(other) {}
+SphericalCS::SphericalCS(const SphericalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
@@ -364,8 +364,7 @@ EllipsoidalCS::EllipsoidalCS(const std::vector<CoordinateSystemAxisPtr> &axisIn)
 
 // ---------------------------------------------------------------------------
 
-EllipsoidalCS::EllipsoidalCS(const EllipsoidalCS &other)
-    : CoordinateSystem(other) {}
+EllipsoidalCS::EllipsoidalCS(const EllipsoidalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
@@ -436,7 +435,7 @@ CartesianCS::CartesianCS(const std::vector<CoordinateSystemAxisPtr> &axisIn)
 
 // ---------------------------------------------------------------------------
 
-CartesianCS::CartesianCS(const CartesianCS &other) : CoordinateSystem(other) {}
+CartesianCS::CartesianCS(const CartesianCS &) = default;
 
 // ---------------------------------------------------------------------------
 
