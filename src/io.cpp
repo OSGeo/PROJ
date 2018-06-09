@@ -908,20 +908,64 @@ WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
         throw ParsingException("not enough children in " + node->value() +
                                " node");
     }
-    std::string abbreviation(stripQuotes(children[0]->value()));
+    // The axis designation in WK2 can be: "name", "(abbrev)" or "name (abbrev)"
+    std::string axisDesignation(stripQuotes(children[0]->value()));
+    size_t sepPos = axisDesignation.find(" (");
+    std::string axisName;
+    std::string axisAbbrev;
+    if (sepPos != std::string::npos && axisDesignation.back() == ')') {
+        axisName = CoordinateSystemAxis::normalizeAxisName(
+            axisDesignation.substr(0, sepPos));
+        axisAbbrev = axisDesignation.substr(sepPos + 2);
+        axisAbbrev.resize(axisAbbrev.size() - 1);
+    } else if (!axisDesignation.empty() && axisDesignation[0] == '(' &&
+               axisDesignation.back() == ')') {
+        axisAbbrev = axisDesignation.substr(1, axisDesignation.size() - 2);
+        if (axisAbbrev == AxisAbbreviation::E) {
+            axisName = AxisName::Easting;
+        } else if (axisAbbrev == AxisAbbreviation::N) {
+            axisName = AxisName::Northing;
+        } else if (axisAbbrev == AxisAbbreviation::lat) {
+            axisName = AxisName::Latitude;
+        } else if (axisAbbrev == AxisAbbreviation::lon) {
+            axisName = AxisName::Longitude;
+        }
+    } else {
+        axisName = CoordinateSystemAxis::normalizeAxisName(axisDesignation);
+        if (axisName == AxisName::Latitude) {
+            axisAbbrev = AxisAbbreviation::lat;
+        } else if (axisName == AxisName::Longitude) {
+            axisAbbrev = AxisAbbreviation::lon;
+        } else if (axisName == AxisName::Ellipsoidal_height) {
+            axisAbbrev = AxisAbbreviation::h;
+        }
+    }
     std::string dirString = children[1]->value();
     const AxisDirection *direction = AxisDirection::valueOf(dirString);
 
+    // WKT2, geocentric CS: axis names are omitted
+    if (direction == &AxisDirection::GEOCENTRIC_X &&
+        axisAbbrev == AxisAbbreviation::X && axisName.empty()) {
+        axisName = AxisName::Geocentric_X;
+    } else if (direction == &AxisDirection::GEOCENTRIC_Y &&
+               axisAbbrev == AxisAbbreviation::Y && axisName.empty()) {
+        axisName = AxisName::Geocentric_Y;
+    } else if (direction == &AxisDirection::GEOCENTRIC_Z &&
+               axisAbbrev == AxisAbbreviation::Z && axisName.empty()) {
+        axisName = AxisName::Geocentric_Z;
+    }
+
     // WKT1
-    if (!direction && isGeocentric && abbreviation == "Geocentric X") {
-        abbreviation = "(X)";
+    if (!direction && isGeocentric && axisName == AxisName::Geocentric_X) {
+        axisAbbrev = AxisAbbreviation::X;
         direction = &AxisDirection::GEOCENTRIC_X;
-    } else if (!direction && isGeocentric && abbreviation == "Geocentric Y") {
-        abbreviation = "(Y)";
+    } else if (!direction && isGeocentric &&
+               axisName == AxisName::Geocentric_Y) {
+        axisAbbrev = AxisAbbreviation::Y;
         direction = &AxisDirection::GEOCENTRIC_Y;
-    } else if (isGeocentric && abbreviation == "Geocentric Z" &&
+    } else if (isGeocentric && axisName == AxisName::Geocentric_Z &&
                dirString == AxisDirectionWKT1::NORTH.toString()) {
-        abbreviation = "(Z)";
+        axisAbbrev = AxisAbbreviation::Z;
         direction = &AxisDirection::GEOCENTRIC_Z;
     } else if (dirString == AxisDirectionWKT1::OTHER.toString()) {
         direction = &AxisDirection::UNSPECIFIED;
@@ -940,8 +984,9 @@ WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
         unit = unitIn;
     }
     // TODO meridian node
-    return CoordinateSystemAxis::create(buildProperties(node), abbreviation,
-                                        *direction, unit);
+    return CoordinateSystemAxis::create(
+        buildProperties(node).set(Identifier::DESCRIPTION_KEY, axisName),
+        axisAbbrev, *direction, unit);
 }
 
 // ---------------------------------------------------------------------------
@@ -981,12 +1026,16 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
                 // Missing axis with GEOGCS ? Presumably Long/Lat order implied
                 return EllipsoidalCS::create(
                     PropertyMap(),
-                    CoordinateSystemAxis::create(PropertyMap(), "longitude",
-                                                 AxisDirection::EAST,
-                                                 UnitOfMeasure::DEGREE),
-                    CoordinateSystemAxis::create(PropertyMap(), "latitude",
-                                                 AxisDirection::NORTH,
-                                                 UnitOfMeasure::DEGREE));
+                    CoordinateSystemAxis::create(
+                        PropertyMap().set(Identifier::DESCRIPTION_KEY,
+                                          AxisName::Longitude),
+                        AxisAbbreviation::lon, AxisDirection::EAST,
+                        UnitOfMeasure::DEGREE),
+                    CoordinateSystemAxis::create(
+                        PropertyMap().set(Identifier::DESCRIPTION_KEY,
+                                          AxisName::Latitude),
+                        AxisAbbreviation::lat, AxisDirection::NORTH,
+                        UnitOfMeasure::DEGREE));
             }
         } else if (ci_equal(parentNode->value(), WKTConstants::BASEGEODCRS) ||
                    ci_equal(parentNode->value(), WKTConstants::BASEGEOGCRS)) {

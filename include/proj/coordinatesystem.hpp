@@ -64,7 +64,8 @@ class AxisDirection : public util::CodeList {
     PROJ_DLL static const AxisDirection SOUTH;
     PROJ_DLL static const AxisDirection SOUTH_SOUTH_WEST;
     PROJ_DLL static const AxisDirection SOUTH_WEST;
-    PROJ_DLL static const AxisDirection WEST_SOUTH_WEST;
+    PROJ_DLL static const AxisDirection
+        WEST_SOUTH_WEST; // note: was forgotten in WKT2-2015
     PROJ_DLL static const AxisDirection WEST;
     PROJ_DLL static const AxisDirection WEST_NORTH_WEST;
     PROJ_DLL static const AxisDirection NORTH_WEST;
@@ -163,8 +164,10 @@ class CoordinateSystemAxis : public common::IdentifiedObject,
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter,
-                                     int order) const;
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter, int order,
+                                     bool disableAbbrev) const;
+
+    static std::string normalizeAxisName(const std::string &str);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

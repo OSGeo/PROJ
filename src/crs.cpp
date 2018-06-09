@@ -34,6 +34,7 @@
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
 #include "proj/coordinatesystem.hpp"
+#include "proj/coordinatesystem_internal.hpp"
 #include "proj/internal.hpp"
 #include "proj/io.hpp"
 #include "proj/io_internal.hpp"
@@ -325,10 +326,12 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
                               Angle(2.5969213, UnitOfMeasure::GRAD)));
 
     auto axisLat(CoordinateSystemAxis::create(
-        PropertyMap(), "latitude", AxisDirection::NORTH, UnitOfMeasure::GRAD));
+        PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Latitude),
+        AxisAbbreviation::lat, AxisDirection::NORTH, UnitOfMeasure::GRAD));
 
     auto axisLong(CoordinateSystemAxis::create(
-        PropertyMap(), "longitude", AxisDirection::EAST, UnitOfMeasure::GRAD));
+        PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Longitude),
+        AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::GRAD));
 
     auto cs(EllipsoidalCS::create(PropertyMap(), axisLat, axisLong));
 

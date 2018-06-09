@@ -203,15 +203,25 @@ std::map<std::string, BaseObjectNNPtr>::iterator PropertyMap::end() const {
 
 PropertyMap &PropertyMap::set(const std::string &key,
                               const BaseObjectNNPtr &val) {
-    d->map_.insert(std::pair<std::string, BaseObjectNNPtr>(key, val));
+    auto iter = d->map_.find(key);
+    if (iter != d->map_.end()) {
+        iter->second = val;
+    } else {
+        d->map_.insert(std::pair<std::string, BaseObjectNNPtr>(key, val));
+    }
     return *this;
 }
 
 // ---------------------------------------------------------------------------
 
 PropertyMap &PropertyMap::set(const std::string &key, const BoxedValue &val) {
-    d->map_.insert(std::pair<std::string, BaseObjectNNPtr>(
-        key, util::nn_make_shared<BoxedValue>(val)));
+    auto iter = d->map_.find(key);
+    if (iter != d->map_.end()) {
+        iter->second = util::nn_make_shared<BoxedValue>(val);
+    } else {
+        d->map_.insert(std::pair<std::string, BaseObjectNNPtr>(
+            key, util::nn_make_shared<BoxedValue>(val)));
+    }
     return *this;
 }
 
@@ -223,7 +233,12 @@ PropertyMap &PropertyMap::set(const std::string &key,
     for (const auto &str : arrayIn) {
         array->values.push_back(util::nn_make_shared<BoxedValue>(str));
     }
-    d->map_.insert(std::pair<std::string, BaseObjectNNPtr>(key, array));
+    auto iter = d->map_.find(key);
+    if (iter != d->map_.end()) {
+        iter->second = array;
+    } else {
+        d->map_.insert(std::pair<std::string, BaseObjectNNPtr>(key, array));
+    }
     return *this;
 }
 

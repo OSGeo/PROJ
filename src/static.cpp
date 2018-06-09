@@ -199,6 +199,28 @@ const AxisDirectionWKT1 AxisDirectionWKT1::OTHER("OTHER");
 
 // ---------------------------------------------------------------------------
 
+const std::string AxisName::Longitude("Longitude");
+const std::string AxisName::Latitude("Latitude");
+const std::string AxisName::Easting("Easting");
+const std::string AxisName::Northing("Northing");
+const std::string AxisName::Ellipsoidal_height("Ellipsoidal height");
+const std::string AxisName::Geocentric_X("Geocentric X");
+const std::string AxisName::Geocentric_Y("Geocentric Y");
+const std::string AxisName::Geocentric_Z("Geocentric Z");
+
+// ---------------------------------------------------------------------------
+
+const std::string AxisAbbreviation::lon("lon");
+const std::string AxisAbbreviation::lat("lat");
+const std::string AxisAbbreviation::E("E");
+const std::string AxisAbbreviation::N("N");
+const std::string AxisAbbreviation::h("h");
+const std::string AxisAbbreviation::X("X");
+const std::string AxisAbbreviation::Y("Y");
+const std::string AxisAbbreviation::Z("Z");
+
+// ---------------------------------------------------------------------------
+
 const PrimeMeridianNNPtr
     PrimeMeridian::GREENWICH(PrimeMeridian::createGREENWICH());
 

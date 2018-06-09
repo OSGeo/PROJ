@@ -68,6 +68,34 @@ class AxisDirectionWKT1 : public util::CodeList {
     static std::set<std::string> axisDirectionWKT1Keys;
 };
 
+// ---------------------------------------------------------------------------
+
+class AxisName {
+  public:
+    static const std::string Longitude;
+    static const std::string Latitude;
+    static const std::string Easting;
+    static const std::string Northing;
+    static const std::string Ellipsoidal_height;
+    static const std::string Geocentric_X;
+    static const std::string Geocentric_Y;
+    static const std::string Geocentric_Z;
+};
+
+// ---------------------------------------------------------------------------
+
+class AxisAbbreviation {
+  public:
+    static const std::string lon;
+    static const std::string lat;
+    static const std::string E;
+    static const std::string N;
+    static const std::string h;
+    static const std::string X;
+    static const std::string Y;
+    static const std::string Z;
+};
+
 } // namespace cs
 
 NS_PROJ_END

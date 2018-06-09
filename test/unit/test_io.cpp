@@ -143,14 +143,20 @@ static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
     auto cs = crs->coordinateSystem();
     ASSERT_EQ(cs->axisList().size(), 2);
     if (latLong) {
-        EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "latitude");
+        EXPECT_EQ(*(cs->axisList()[0]->name()->description()), "Latitude");
+        EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "lat");
         EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::NORTH);
-        EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "longitude");
+
+        EXPECT_EQ(*(cs->axisList()[1]->name()->description()), "Longitude");
+        EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "lon");
         EXPECT_EQ(cs->axisList()[1]->axisDirection(), AxisDirection::EAST);
     } else {
-        EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "longitude");
+        EXPECT_EQ(*(cs->axisList()[0]->name()->description()), "Longitude");
+        EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "lon");
         EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::EAST);
-        EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "latitude");
+
+        EXPECT_EQ(*(cs->axisList()[1]->name()->description()), "Latitude");
+        EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "lat");
         EXPECT_EQ(cs->axisList()[1]->axisDirection(), AxisDirection::NORTH);
     }
 
@@ -288,8 +294,9 @@ TEST(wkt_parse, wkt2_simplified_EPSG_4326) {
         "    DATUM[\"WGS_1984\",\n"
         "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
         "    CS[ellipsoidal,2],\n"
-        "        AXIS[\"latitude\",north],\n"
-        "        AXIS[\"longitude\",east],\n"
+        "        AXIS[\"latitude (lat)\",north],\n" // test "name
+                                                    // (abbreviation)"
+        "        AXIS[\"longitude (lon)\",east],\n"
         "        UNIT[\"degree\",0.0174532925199433],\n"
         "    ID[\"EPSG\",4326]]");
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
@@ -305,8 +312,8 @@ TEST(wkt_parse, wkt2_GEODETICDATUM) {
         "    GEODETICDATUM[\"WGS_1984\",\n"
         "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
         "    CS[ellipsoidal,2],\n"
-        "        AXIS[\"latitude\",north],\n"
-        "        AXIS[\"longitude\",east],\n"
+        "        AXIS[\"(lat)\",north],\n" // test "(abbreviation)"
+        "        AXIS[\"(lon)\",east],\n"
         "        UNIT[\"degree\",0.0174532925199433],\n"
         "    ID[\"EPSG\",4326]]");
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
@@ -340,11 +347,17 @@ static void checkEPSG_4979(GeographicCRSPtr crs) {
 
     auto cs = crs->coordinateSystem();
     ASSERT_EQ(cs->axisList().size(), 3);
-    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "latitude");
+    EXPECT_EQ(*(cs->axisList()[0]->name()->description()), "Latitude");
+    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "lat");
     EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::NORTH);
-    EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "longitude");
+
+    EXPECT_EQ(*(cs->axisList()[1]->name()->description()), "Longitude");
+    EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "lon");
     EXPECT_EQ(cs->axisList()[1]->axisDirection(), AxisDirection::EAST);
-    EXPECT_EQ(cs->axisList()[2]->axisAbbrev(), "ellipsoidal height");
+
+    EXPECT_EQ(*(cs->axisList()[2]->name()->description()),
+              "Ellipsoidal height");
+    EXPECT_EQ(cs->axisList()[2]->axisAbbrev(), "h");
     EXPECT_EQ(cs->axisList()[2]->axisDirection(), AxisDirection::UP);
 
     auto datum = crs->datum();
@@ -389,11 +402,16 @@ static void checkGeocentric(GeodeticCRSPtr crs) {
     auto cs = crs->coordinateSystem();
     ASSERT_EQ(cs->axisList().size(), 3);
 
-    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "(X)");
+    EXPECT_EQ(*(cs->axisList()[0]->name()->description()), "Geocentric X");
+    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "X");
     EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::GEOCENTRIC_X);
-    EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "(Y)");
+
+    EXPECT_EQ(*(cs->axisList()[1]->name()->description()), "Geocentric Y");
+    EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "Y");
     EXPECT_EQ(cs->axisList()[1]->axisDirection(), AxisDirection::GEOCENTRIC_Y);
-    EXPECT_EQ(cs->axisList()[2]->axisAbbrev(), "(Z)");
+
+    EXPECT_EQ(*(cs->axisList()[2]->name()->description()), "Geocentric Z");
+    EXPECT_EQ(cs->axisList()[2]->axisAbbrev(), "Z");
     EXPECT_EQ(cs->axisList()[2]->axisDirection(), AxisDirection::GEOCENTRIC_Z);
 
     auto datum = crs->datum();
@@ -576,9 +594,12 @@ static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
     auto cs = crs->coordinateSystem();
     ASSERT_EQ(cs->axisList().size(), 2);
 
-    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "easting (E)");
+    EXPECT_EQ(*(cs->axisList()[0]->name()->description()), "Easting");
+    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "E");
     EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::EAST);
-    EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "northing (N)");
+
+    EXPECT_EQ(*(cs->axisList()[1]->name()->description()), "Northing");
+    EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "N");
     EXPECT_EQ(cs->axisList()[1]->axisDirection(), AxisDirection::NORTH);
 }
 
@@ -606,8 +627,8 @@ TEST(wkt_parse, wkt1_projected) {
                "    PARAMETER[\"false_northing\",0],\n"
                "    UNIT[\"metre\",1,\n"
                "        AUTHORITY[\"EPSG\",9001]],\n"
-               "    AXIS[\"easting (E)\",EAST],\n"
-               "    AXIS[\"northing (N)\",NORTH],\n"
+               "    AXIS[\"(E)\",EAST],\n"
+               "    AXIS[\"(N)\",NORTH],\n"
                "    AUTHORITY[\"EPSG\",\"32631\"]]";
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
@@ -684,11 +705,11 @@ TEST(wkt_parse, wkt2_projected) {
                "            ID[\"EPSG\",8807]],\n"
                "        ID[\"EPSG\",16031]],\n"
                "    CS[Cartesian,2],\n"
-               "        AXIS[\"easting (E)\",east,\n"
+               "        AXIS[\"(E)\",east,\n"
                "            ORDER[1],\n"
                "            LENGTHUNIT[\"metre\",1,\n"
                "                ID[\"EPSG\",9001]]],\n"
-               "        AXIS[\"northing (N)\",north,\n"
+               "        AXIS[\"(N)\",north,\n"
                "            ORDER[2],\n"
                "            LENGTHUNIT[\"metre\",1,\n"
                "                ID[\"EPSG\",9001]]],\n"
@@ -715,8 +736,8 @@ TEST(wkt_parse, wkt2_2018_simplified_projected) {
                "        PARAMETER[\"False easting\",500000],\n"
                "        PARAMETER[\"False northing\",0]],\n"
                "    CS[Cartesian,2],\n"
-               "        AXIS[\"easting (E)\",east],\n"
-               "        AXIS[\"northing (N)\",north],\n"
+               "        AXIS[\"(E)\",east],\n"
+               "        AXIS[\"(N)\",north],\n"
                "        UNIT[\"metre\",1],\n"
                "    ID[\"EPSG\",32631]]";
     auto obj = WKTParser().createFromWKT(wkt);

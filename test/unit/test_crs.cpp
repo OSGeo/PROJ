@@ -198,8 +198,8 @@ TEST(crs, EPSG_4326_as_WKT1_GDAL) {
               "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
               "    UNIT[\"degree\",0.0174532925199433,\n"
               "        AUTHORITY[\"EPSG\",9122]],\n"
-              "    AXIS[\"latitude\",NORTH],\n"
-              "    AXIS[\"longitude\",EAST],\n"
+              "    AXIS[\"Latitude\",NORTH],\n"
+              "    AXIS[\"Longitude\",EAST],\n"
               "    AUTHORITY[\"EPSG\",\"4326\"]]");
 }
 
@@ -265,9 +265,9 @@ TEST(crs, EPSG_4979_as_WKT1_GDAL) {
               "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
               "    UNIT[\"degree\",0.0174532925199433,\n"
               "        AUTHORITY[\"EPSG\",9122]],\n"
-              "    AXIS[\"latitude\",NORTH],\n"
-              "    AXIS[\"longitude\",EAST],\n"
-              "    AXIS[\"ellipsoidal height\",UP],\n"
+              "    AXIS[\"Latitude\",NORTH],\n"
+              "    AXIS[\"Longitude\",EAST],\n"
+              "    AXIS[\"Ellipsoidal height\",UP],\n"
               "    AUTHORITY[\"EPSG\",\"4979\"]]");
 }
 
@@ -341,8 +341,8 @@ TEST(crs, EPSG_4807_as_WKT1_GDAL) {
         "        AUTHORITY[\"EPSG\",\"8903\"]],\n"
         "    UNIT[\"grad\",0.015707963267949,\n"
         "        AUTHORITY[\"EPSG\",9105]],\n"
-        "    AXIS[\"latitude\",NORTH],\n"
-        "    AXIS[\"longitude\",EAST],\n"
+        "    AXIS[\"Latitude\",NORTH],\n"
+        "    AXIS[\"Longitude\",EAST],\n"
         "    AUTHORITY[\"EPSG\",\"4807\"]]");
 }
 
@@ -492,11 +492,11 @@ TEST(crs, projectedCRS_as_WKT2) {
         "            ID[\"EPSG\",8807]],\n"
         "        ID[\"EPSG\",16031]],\n"
         "    CS[Cartesian,2],\n"
-        "        AXIS[\"easting (E)\",east,\n"
+        "        AXIS[\"(E)\",east,\n"
         "            ORDER[1],\n"
         "            LENGTHUNIT[\"metre\",1,\n"
         "                ID[\"EPSG\",9001]]],\n"
-        "        AXIS[\"northing (N)\",north,\n"
+        "        AXIS[\"(N)\",north,\n"
         "            ORDER[2],\n"
         "            LENGTHUNIT[\"metre\",1,\n"
         "                ID[\"EPSG\",9001]]],\n"
@@ -524,8 +524,8 @@ TEST(crs, projectedCRS_as_WKT2_simplified) {
         "        PARAMETER[\"False easting\",500000],\n"
         "        PARAMETER[\"False northing\",0]],\n"
         "    CS[Cartesian,2],\n"
-        "        AXIS[\"easting (E)\",east],\n"
-        "        AXIS[\"northing (N)\",north],\n"
+        "        AXIS[\"(E)\",east],\n"
+        "        AXIS[\"(N)\",north],\n"
         "        UNIT[\"metre\",1],\n"
         "    ID[\"EPSG\",32631]]";
 
@@ -553,8 +553,8 @@ TEST(crs, projectedCRS_as_WKT2_2018_simplified) {
         "        PARAMETER[\"False easting\",500000],\n"
         "        PARAMETER[\"False northing\",0]],\n"
         "    CS[Cartesian,2],\n"
-        "        AXIS[\"easting (E)\",east],\n"
-        "        AXIS[\"northing (N)\",north],\n"
+        "        AXIS[\"(E)\",east],\n"
+        "        AXIS[\"(N)\",north],\n"
         "        UNIT[\"metre\",1],\n"
         "    ID[\"EPSG\",32631]]";
 
@@ -578,8 +578,8 @@ TEST(crs, projectedCRS_as_WKT1_GDAL) {
                     "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
                     "        UNIT[\"degree\",0.0174532925199433,\n"
                     "            AUTHORITY[\"EPSG\",9122]],\n"
-                    "        AXIS[\"latitude\",NORTH],\n"
-                    "        AXIS[\"longitude\",EAST],\n"
+                    "        AXIS[\"Latitude\",NORTH],\n"
+                    "        AXIS[\"Longitude\",EAST],\n"
                     "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
                     "    PROJECTION[\"Transverse_Mercator\"],\n"
                     "    PARAMETER[\"latitude_of_origin\",0],\n"
@@ -589,8 +589,8 @@ TEST(crs, projectedCRS_as_WKT1_GDAL) {
                     "    PARAMETER[\"false_northing\",0],\n"
                     "    UNIT[\"metre\",1,\n"
                     "        AUTHORITY[\"EPSG\",9001]],\n"
-                    "    AXIS[\"easting (E)\",EAST],\n"
-                    "    AXIS[\"northing (N)\",NORTH],\n"
+                    "    AXIS[\"Easting\",EAST],\n"
+                    "    AXIS[\"Northing\",NORTH],\n"
                     "    AUTHORITY[\"EPSG\",\"32631\"]]";
 
     EXPECT_EQ(crs->exportToWKT(

@@ -36,6 +36,7 @@
 #include "proj/internal.hpp"
 #include "proj/io.hpp"
 #include "proj/io_internal.hpp"
+#include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
 #include <map>
@@ -48,6 +49,7 @@ using namespace NS_PROJ::common;
 using namespace NS_PROJ::cs;
 using namespace NS_PROJ::internal;
 using namespace NS_PROJ::io;
+using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::util;
 
 // ---------------------------------------------------------------------------
@@ -188,36 +190,79 @@ CoordinateSystemAxisNNPtr CoordinateSystemAxis::create(
 std::string CoordinateSystemAxis::exportToWKT(
     WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    return exportToWKT(formatter, 0);
+    return exportToWKT(formatter, 0, false);
+}
+
+// ---------------------------------------------------------------------------
+
+std::string CoordinateSystemAxis::normalizeAxisName(const std::string &str) {
+    if (str.empty()) {
+        return str;
+    }
+    // on import, transform from WKT2 "longitude" to "Longitude", as in the
+    // EPSG database.
+    return toupper(str.substr(0, 1)) + str.substr(1);
 }
 
 // ---------------------------------------------------------------------------
 
 std::string CoordinateSystemAxis::exportToWKT(WKTFormatterNNPtr formatter,
-                                              int order) const {
+                                              int order,
+                                              bool disableAbbrev) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     formatter->startNode(WKTConstants::AXIS);
-    std::string l_name = axisAbbrev();
+    std::string axisName = *(name()->description());
+    std::string abbrev = axisAbbrev();
+    std::string parenthesedAbbrev = "(" + abbrev + ")";
     std::string dir = axisDirection().toString();
+    std::string axisDesignation;
+
+    // It seems that the convention in WKT2 for axis name is first letter in
+    // lower case. Whereas in WKT1 GDAL, it is in upper case (as in the EPSG
+    // database)
+    if (!axisName.empty()) {
+        if (isWKT2) {
+            axisDesignation =
+                tolower(axisName.substr(0, 1)) + axisName.substr(1);
+        } else {
+            axisDesignation = axisName;
+        }
+    }
+
+    if (!disableAbbrev && isWKT2 &&
+        // For geodetic CS, export the axis name without abbreviation
+        !(axisName == AxisName::Latitude || axisName == AxisName::Longitude)) {
+        if (!axisDesignation.empty() && !abbrev.empty()) {
+            axisDesignation += " ";
+        }
+        if (!abbrev.empty()) {
+            axisDesignation += parenthesedAbbrev;
+        }
+    }
     if (!isWKT2) {
         dir = toupper(dir);
-        if (axisDirection() == AxisDirection::GEOCENTRIC_X && l_name == "(X)") {
-            l_name = "Geocentric X";
-        } else if (axisDirection() == AxisDirection::GEOCENTRIC_Y &&
-                   l_name == "(Y)") {
-            l_name = "Geocentric Y";
-        } else if (axisDirection() == AxisDirection::GEOCENTRIC_Z &&
-                   l_name == "(Z)") {
-            l_name = "Geocentric Z";
-        }
 
         if (axisDirection() == AxisDirection::GEOCENTRIC_Z) {
             dir = AxisDirectionWKT1::NORTH;
         } else if (AxisDirectionWKT1::valueOf(dir) == nullptr) {
             dir = AxisDirectionWKT1::OTHER;
         }
+    } else if (!abbrev.empty()) {
+        // For geocentric CS, just put the abbreviation
+        if (axisDirection() == AxisDirection::GEOCENTRIC_X ||
+            axisDirection() == AxisDirection::GEOCENTRIC_Y ||
+            axisDirection() == AxisDirection::GEOCENTRIC_Z) {
+            axisDesignation = parenthesedAbbrev;
+        }
+        // For cartesian CS with Easting/Northing, export only the abbreviation
+        else if ((order == 1 && axisName == AxisName::Easting &&
+                  abbrev == AxisAbbreviation::E) ||
+                 (order == 2 && axisName == AxisName::Northing &&
+                  abbrev == AxisAbbreviation::N)) {
+            axisDesignation = parenthesedAbbrev;
+        }
     }
-    formatter->addQuotedString(l_name);
+    formatter->addQuotedString(axisDesignation);
     formatter->add(dir);
     if (meridian()) {
         meridian()->exportToWKT(formatter);
@@ -303,8 +348,15 @@ std::string CoordinateSystem::exportToWKT(
         isWKT2 && (!bAllSameUnit || !formatter->outputCSUnitOnlyOnceIfSame()));
 
     int order = 1;
+    bool disableAbbrev =
+        (axisList().size() == 3 &&
+         *(axisList()[0]->name()->description()) == AxisName::Latitude &&
+         *(axisList()[1]->name()->description()) == AxisName::Longitude &&
+         *(axisList()[2]->name()->description()) ==
+             AxisName::Ellipsoidal_height);
+
     for (auto &axis : axisList()) {
-        axis->exportToWKT(formatter, isWKT2 ? order : 0);
+        axis->exportToWKT(formatter, isWKT2 ? order : 0, disableAbbrev);
         order++;
     }
     if (isWKT2 && !axisList().empty() && bAllSameUnit &&
@@ -393,12 +445,12 @@ EllipsoidalCSNNPtr EllipsoidalCS::create(const PropertyMap &properties,
 
 EllipsoidalCSNNPtr EllipsoidalCS::createLatitudeLongitudeDegree() {
     std::vector<CoordinateSystemAxisPtr> axis{
-        CoordinateSystemAxis::create(PropertyMap(), "latitude",
-                                     AxisDirection::NORTH,
-                                     UnitOfMeasure::DEGREE),
-        CoordinateSystemAxis::create(PropertyMap(), "longitude",
-                                     AxisDirection::EAST,
-                                     UnitOfMeasure::DEGREE)};
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Latitude),
+            AxisAbbreviation::lat, AxisDirection::NORTH, UnitOfMeasure::DEGREE),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Longitude),
+            AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::DEGREE)};
     auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
     return cs;
 }
@@ -408,14 +460,16 @@ EllipsoidalCSNNPtr EllipsoidalCS::createLatitudeLongitudeDegree() {
 EllipsoidalCSNNPtr
 EllipsoidalCS::createLatitudeLongitudeDegreeEllipsoidalHeightMetre() {
     std::vector<CoordinateSystemAxisPtr> axis{
-        CoordinateSystemAxis::create(PropertyMap(), "latitude",
-                                     AxisDirection::NORTH,
-                                     UnitOfMeasure::DEGREE),
-        CoordinateSystemAxis::create(PropertyMap(), "longitude",
-                                     AxisDirection::EAST,
-                                     UnitOfMeasure::DEGREE),
-        CoordinateSystemAxis::create(PropertyMap(), "ellipsoidal height",
-                                     AxisDirection::UP, UnitOfMeasure::METRE)};
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Latitude),
+            AxisAbbreviation::lat, AxisDirection::NORTH, UnitOfMeasure::DEGREE),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Longitude),
+            AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::DEGREE),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY,
+                              AxisName::Ellipsoidal_height),
+            AxisAbbreviation::h, AxisDirection::UP, UnitOfMeasure::METRE)};
     auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
     return cs;
 }
@@ -464,11 +518,12 @@ CartesianCSNNPtr CartesianCS::create(const PropertyMap &properties,
 
 CartesianCSNNPtr CartesianCS::createEastingNorthingMetre() {
     std::vector<CoordinateSystemAxisPtr> axis{
-        CoordinateSystemAxis::create(PropertyMap(), "easting (E)",
-                                     AxisDirection::EAST, UnitOfMeasure::METRE),
-        CoordinateSystemAxis::create(PropertyMap(), "northing (N)",
-                                     AxisDirection::NORTH,
-                                     UnitOfMeasure::METRE)};
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Easting),
+            AxisAbbreviation::E, AxisDirection::EAST, UnitOfMeasure::METRE),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Northing),
+            AxisAbbreviation::N, AxisDirection::NORTH, UnitOfMeasure::METRE)};
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     return cs;
 }
@@ -477,15 +532,21 @@ CartesianCSNNPtr CartesianCS::createEastingNorthingMetre() {
 
 CartesianCSNNPtr CartesianCS::createGeocentric() {
     std::vector<CoordinateSystemAxisPtr> axis{
-        CoordinateSystemAxis::create(PropertyMap(), "(X)",
-                                     AxisDirection::GEOCENTRIC_X,
-                                     UnitOfMeasure::METRE),
-        CoordinateSystemAxis::create(PropertyMap(), "(Y)",
-                                     AxisDirection::GEOCENTRIC_Y,
-                                     UnitOfMeasure::METRE),
-        CoordinateSystemAxis::create(PropertyMap(), "(Z)",
-                                     AxisDirection::GEOCENTRIC_Z,
-                                     UnitOfMeasure::METRE)};
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY,
+                              AxisName::Geocentric_X),
+            AxisAbbreviation::X, AxisDirection::GEOCENTRIC_X,
+            UnitOfMeasure::METRE),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY,
+                              AxisName::Geocentric_Y),
+            AxisAbbreviation::Y, AxisDirection::GEOCENTRIC_Y,
+            UnitOfMeasure::METRE),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(Identifier::DESCRIPTION_KEY,
+                              AxisName::Geocentric_Z),
+            AxisAbbreviation::Z, AxisDirection::GEOCENTRIC_Z,
+            UnitOfMeasure::METRE)};
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     return cs;
 }
