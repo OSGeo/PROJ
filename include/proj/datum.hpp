@@ -109,7 +109,7 @@ class PrimeMeridian : public common::IdentifiedObject,
   public:
     PROJ_DLL PrimeMeridian(const PrimeMeridian &other);
     PROJ_DLL PrimeMeridian &operator=(const PrimeMeridian &other) = delete;
-    PROJ_DLL ~PrimeMeridian();
+    PROJ_DLL ~PrimeMeridian() override;
 
     PROJ_DLL const common::Angle &greenwichLongitude() const;
 
@@ -146,7 +146,7 @@ class Ellipsoid : public common::IdentifiedObject, public io::IWKTExportable {
   public:
     PROJ_DLL Ellipsoid(const Ellipsoid &other);
     PROJ_DLL Ellipsoid &operator=(const Ellipsoid &other) = delete;
-    PROJ_DLL ~Ellipsoid();
+    PROJ_DLL ~Ellipsoid() override;
 
     PROJ_DLL const common::Length &semiMajorAxis() const;
 
@@ -198,7 +198,7 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
     PROJ_DLL GeodeticReferenceFrame(const GeodeticReferenceFrame &other);
     PROJ_DLL GeodeticReferenceFrame &
     operator=(const GeodeticReferenceFrame &other) = delete;
-    PROJ_DLL ~GeodeticReferenceFrame();
+    PROJ_DLL ~GeodeticReferenceFrame() override;
 
     PROJ_DLL const PrimeMeridianPtr &primeMeridian() const;
     PROJ_DLL const EllipsoidPtr &ellipsoid() const;

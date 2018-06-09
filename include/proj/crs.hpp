@@ -67,7 +67,7 @@ class SingleCRS : public CRS {
   public:
     PROJ_DLL SingleCRS &operator=(const SingleCRS &other) = delete;
 
-    PROJ_DLL ~SingleCRS();
+    PROJ_DLL ~SingleCRS() override;
 
     PROJ_DLL const datum::DatumPtr &datum() const;
     PROJ_DLL const datum::DatumEnsemblePtr &datumEnsemble() const;
@@ -97,7 +97,7 @@ class GeodeticCRS : virtual public SingleCRS {
   public:
     PROJ_DLL GeodeticCRS(const GeodeticCRS &other);
     PROJ_DLL GeodeticCRS &operator=(const GeodeticCRS &other) = delete;
-    PROJ_DLL ~GeodeticCRS();
+    PROJ_DLL ~GeodeticCRS() override;
 
     PROJ_DLL const datum::GeodeticReferenceFrameNNPtr datum() const;
 
@@ -182,7 +182,7 @@ class VerticalCRS : public SingleCRS {
   public:
     PROJ_DLL VerticalCRS(const VerticalCRS &other);
     PROJ_DLL VerticalCRS &operator=(const VerticalCRS &other) = delete;
-    PROJ_DLL ~VerticalCRS();
+    PROJ_DLL ~VerticalCRS() override;
 
     PROJ_DLL const datum::VerticalReferenceFramePtr datum() const;
     PROJ_DLL const cs::VerticalCSNNPtr coordinateSystem() const;
@@ -205,7 +205,7 @@ using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
 
 class DerivedCRS : virtual public SingleCRS {
   public:
-    PROJ_DLL ~DerivedCRS();
+    PROJ_DLL ~DerivedCRS() override;
 
     PROJ_DLL const SingleCRSNNPtr &baseCRS() const;
     PROJ_DLL const operation::ConversionNNPtr &derivingConversion() const;
@@ -233,7 +233,7 @@ using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
 class ProjectedCRS : public DerivedCRS {
   public:
     PROJ_DLL ProjectedCRS &operator=(const ProjectedCRS &other) = delete;
-    PROJ_DLL ~ProjectedCRS();
+    PROJ_DLL ~ProjectedCRS() override;
 
     PROJ_DLL const GeodeticCRSNNPtr baseCRS() const;
     PROJ_DLL const cs::CartesianCSNNPtr coordinateSystem() const;

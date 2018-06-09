@@ -206,7 +206,7 @@ class BoxedValue : public BaseObject {
 
     PROJ_DLL BoxedValue(const BoxedValue &other);
     PROJ_DLL BoxedValue &operator=(const BoxedValue &other);
-    PROJ_DLL ~BoxedValue();
+    PROJ_DLL ~BoxedValue() override;
 
     PROJ_DLL const Type &type() const;
     PROJ_DLL BaseObjectNNPtr object() const;
@@ -341,7 +341,7 @@ class LocalName : public GenericName {
   public:
     PROJ_DLL LocalName(const LocalName &other);
     PROJ_DLL LocalName &operator=(const LocalName &other) = delete;
-    ~LocalName();
+    ~LocalName() override;
 
     PROJ_DLL const NameSpacePtr scope() const override;
     PROJ_DLL std::string toString() const override;

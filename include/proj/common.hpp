@@ -187,7 +187,7 @@ using IdentifiedObjectNNPtr = util::nn<IdentifiedObjectPtr>;
 class IdentifiedObject : public util::BaseObject {
   public:
     PROJ_DLL IdentifiedObject(const IdentifiedObject &other);
-    PROJ_DLL virtual ~IdentifiedObject();
+    PROJ_DLL ~IdentifiedObject() override;
 
     PROJ_DLL static IdentifiedObjectNNPtr
     create(const util::PropertyMap

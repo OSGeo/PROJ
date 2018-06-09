@@ -111,7 +111,7 @@ class Meridian : public common::IdentifiedObject, public io::IWKTExportable {
   public:
     PROJ_DLL Meridian(const Meridian &other);
     PROJ_DLL Meridian &operator=(const Meridian &other) = delete;
-    PROJ_DLL ~Meridian();
+    PROJ_DLL ~Meridian() override;
 
     PROJ_DLL const common::Angle &longitude() const;
 
@@ -146,7 +146,7 @@ class CoordinateSystemAxis : public common::IdentifiedObject,
     PROJ_DLL CoordinateSystemAxis(const CoordinateSystemAxis &other);
     PROJ_DLL CoordinateSystemAxis &
     operator=(const CoordinateSystemAxis &other) = delete;
-    PROJ_DLL ~CoordinateSystemAxis();
+    PROJ_DLL ~CoordinateSystemAxis() override;
 
     PROJ_DLL const std::string &axisAbbrev() const;
     PROJ_DLL const AxisDirection &axisDirection() const;
@@ -178,7 +178,7 @@ class CoordinateSystemAxis : public common::IdentifiedObject,
 class CoordinateSystem : public common::IdentifiedObject,
                          public io::IWKTExportable {
   public:
-    PROJ_DLL virtual ~CoordinateSystem();
+    PROJ_DLL ~CoordinateSystem() override;
     PROJ_DLL CoordinateSystem &
     operator=(const CoordinateSystem &other) = delete;
 

@@ -143,7 +143,7 @@ class GeneralParameterValue : public io::IWKTExportable {
   public:
     PROJ_DLL GeneralParameterValue &
     operator=(const GeneralParameterValue &other) = delete;
-    PROJ_DLL virtual ~GeneralParameterValue();
+    PROJ_DLL ~GeneralParameterValue() override;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override = 0; // throw(io::FormattingException)
@@ -173,7 +173,7 @@ using ParameterValueNNPtr = util::nn<ParameterValuePtr>;
 class ParameterValue : public util::BoxedValue, public io::IWKTExportable {
   public:
     PROJ_DLL ParameterValue &operator=(const ParameterValue &other) = delete;
-    PROJ_DLL virtual ~ParameterValue();
+    PROJ_DLL ~ParameterValue() override;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
@@ -242,7 +242,7 @@ class OperationMethod : public common::IdentifiedObject,
                         public io::IWKTExportable {
   public:
     PROJ_DLL OperationMethod(const OperationMethod &other);
-    PROJ_DLL virtual ~OperationMethod();
+    PROJ_DLL ~OperationMethod() override;
     PROJ_DLL OperationMethod &operator=(const OperationMethod &other) = delete;
 
     PROJ_DLL const util::optional<std::string> &formula() const;
@@ -283,7 +283,7 @@ class InvalidOperation : public util::Exception {
 
 class SingleOperation : public CoordinateOperation {
   public:
-    PROJ_DLL virtual ~SingleOperation();
+    PROJ_DLL ~SingleOperation() override;
     PROJ_DLL SingleOperation &operator=(const SingleOperation &other) = delete;
 
     PROJ_DLL const std::vector<GeneralParameterValueNNPtr> &
@@ -309,7 +309,7 @@ using ConversionNNPtr = util::nn<ConversionPtr>;
 
 class Conversion : public SingleOperation, public io::IWKTExportable {
   public:
-    PROJ_DLL virtual ~Conversion();
+    PROJ_DLL ~Conversion() override;
     PROJ_DLL Conversion &operator=(const Conversion &other) = delete;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
