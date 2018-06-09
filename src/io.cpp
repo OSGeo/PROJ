@@ -818,14 +818,10 @@ EllipsoidNNPtr WKTParser::Private::buildEllipsoid(WKTNodeNNPtr node) {
                                " node");
     }
     try {
-        auto unitNode = node->lookForChild(WKTConstants::LENGTHUNIT);
-        if (!unitNode) {
-            unitNode = node->lookForChild(WKTConstants::UNIT);
-        }
-        UnitOfMeasure unit = UnitOfMeasure::METRE;
-        if (unitNode) {
-            unit = buildUnit(NN_CHECK_ASSERT(unitNode),
-                             UnitOfMeasure::Type::LINEAR);
+        UnitOfMeasure unit =
+            buildUnitInSubNode(node, UnitOfMeasure::Type::LINEAR);
+        if (unit == UnitOfMeasure()) {
+            unit = UnitOfMeasure::METRE;
         }
         Length semiMajorAxis(asDouble(children[1]->value()), unit);
         Scale invFlattening(asDouble(children[2]->value()));
@@ -846,20 +842,12 @@ PrimeMeridianNNPtr WKTParser::Private::buildPrimeMeridian(
                                " node");
     }
     auto name = stripQuotes(children[0]->value());
-    auto unitNode = node->lookForChild(WKTConstants::ANGLEUNIT);
-    if (!unitNode) {
-        unitNode = node->lookForChild(WKTConstants::UNIT);
-    }
-    UnitOfMeasure unit;
-    if (unitNode) {
-        unit =
-            buildUnit(NN_CHECK_ASSERT(unitNode), UnitOfMeasure::Type::ANGULAR);
-    }
+    UnitOfMeasure unit = buildUnitInSubNode(node, UnitOfMeasure::Type::ANGULAR);
     if (unit == UnitOfMeasure()) {
         unit = defaultAngularUnit;
-    }
-    if (unit == UnitOfMeasure()) {
-        unit = UnitOfMeasure::DEGREE;
+        if (unit == UnitOfMeasure()) {
+            unit = UnitOfMeasure::DEGREE;
+        }
     }
     try {
         double angleValue = asDouble(children[1]->value());
@@ -908,15 +896,7 @@ MeridianNNPtr WKTParser::Private::buildMeridian(WKTNodeNNPtr node) {
         throw ParsingException("not enough children in " + node->value() +
                                " node");
     }
-    auto unitNode = node->lookForChild(WKTConstants::ANGLEUNIT);
-    if (!unitNode) {
-        unitNode = node->lookForChild(WKTConstants::UNIT);
-    }
-    UnitOfMeasure unit;
-    if (unitNode) {
-        unit =
-            buildUnit(NN_CHECK_ASSERT(unitNode), UnitOfMeasure::Type::ANGULAR);
-    }
+    UnitOfMeasure unit = buildUnitInSubNode(node, UnitOfMeasure::Type::ANGULAR);
     try {
         double angleValue = asDouble(children[0]->value());
         Angle angle(angleValue, unit);
