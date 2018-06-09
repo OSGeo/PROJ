@@ -127,6 +127,7 @@ dnl Clang enables -Woverloaded-virtual if -Wall is defined, but not GCC
 AX_CHECK_COMPILE_FLAG([-Woverloaded-virtual], [CXX_WFLAGS="$CXX_WFLAGS -Woverloaded-virtual"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 
 AX_CHECK_COMPILE_FLAG([-Wweak-vtables], [CXX_WFLAGS="$CXX_WFLAGS -Wweak-vtables"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+AX_CHECK_COMPILE_FLAG([-Wdeprecated], [CXX_WFLAGS="$CXX_WFLAGS -Wdeprecated"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 
 dnl Forbid use of 'or', 'and', ... alias operators
 AX_CHECK_COMPILE_FLAG([-fno-operator-names], [CXX_WFLAGS="$CXX_WFLAGS -fno-operator-names"],,[$ERROR_ON_UNKNOWN_OPTIONS])

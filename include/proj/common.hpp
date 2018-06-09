@@ -130,7 +130,12 @@ using MeasureNNPtr = util::nn<MeasurePtr>;
 class Scale : public Measure {
   public:
     PROJ_DLL explicit Scale(double valueIn = 0.0);
+    PROJ_DLL Scale(const Scale &other);
     PROJ_DLL ~Scale() override;
+
+  protected:
+    friend class util::optional<Scale>;
+    Scale &operator=(const Scale &);
 };
 
 // ---------------------------------------------------------------------------
@@ -139,9 +144,14 @@ class Angle : public Measure {
   public:
     PROJ_DLL Angle(double valueIn = 0.0,
                    const UnitOfMeasure &unitIn = UnitOfMeasure::DEGREE);
+    PROJ_DLL Angle(const Angle &other);
     PROJ_DLL ~Angle() override;
 
     PROJ_DLL Angle convertToUnit(const UnitOfMeasure &otherUnit) const;
+
+  protected:
+    friend class util::optional<Angle>;
+    Angle &operator=(const Angle &);
 };
 
 // ---------------------------------------------------------------------------
@@ -150,9 +160,14 @@ class Length : public Measure {
   public:
     PROJ_DLL Length(double valueIn = 0.0,
                     const UnitOfMeasure &unitIn = UnitOfMeasure::METRE);
+    PROJ_DLL Length(const Length &other);
     PROJ_DLL ~Length() override;
 
     PROJ_DLL Length convertToUnit(const UnitOfMeasure &otherUnit) const;
+
+  protected:
+    friend class util::optional<Length>;
+    Length &operator=(const Length &);
 };
 
 // ---------------------------------------------------------------------------

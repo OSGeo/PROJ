@@ -399,6 +399,7 @@ class Exception : public std::exception {
   public:
     PROJ_DLL explicit Exception(const char *message);
     PROJ_DLL explicit Exception(const std::string &message);
+    PROJ_DLL explicit Exception(const Exception &other);
     PROJ_DLL ~Exception() override;
     PROJ_DLL virtual const char *what() const noexcept override;
 };
@@ -409,6 +410,7 @@ class InvalidValueTypeException : public Exception {
   public:
     PROJ_DLL explicit InvalidValueTypeException(const char *message);
     PROJ_DLL explicit InvalidValueTypeException(const std::string &message);
+    PROJ_DLL InvalidValueTypeException(const InvalidValueTypeException &other);
     PROJ_DLL ~InvalidValueTypeException() override;
 };
 

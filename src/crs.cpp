@@ -117,7 +117,7 @@ const CoordinateSystemNNPtr &SingleCRS::coordinateSystem() const {
 
 //! @cond Doxygen_Suppress
 struct GeodeticCRS::Private {
-    std::vector<PointMotionOperation> velocityModel{};
+    std::vector<PointMotionOperationNNPtr> velocityModel{};
 };
 //! @endcond
 
@@ -157,7 +157,8 @@ const GeodeticReferenceFrameNNPtr GeodeticCRS::datum() const {
 
 // ---------------------------------------------------------------------------
 
-const std::vector<PointMotionOperation> &GeodeticCRS::velocityModel() const {
+const std::vector<PointMotionOperationNNPtr> &
+GeodeticCRS::velocityModel() const {
     return d->velocityModel;
 }
 
@@ -351,8 +352,8 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
 
 //! @cond Doxygen_Suppress
 struct VerticalCRS::Private {
-    std::vector<Transformation> geoidModel{};
-    std::vector<PointMotionOperation> velocityModel{};
+    std::vector<TransformationNNPtr> geoidModel{};
+    std::vector<PointMotionOperationNNPtr> velocityModel{};
 };
 //! @endcond
 
@@ -374,13 +375,14 @@ const VerticalReferenceFramePtr VerticalCRS::datum() const {
 
 // ---------------------------------------------------------------------------
 
-const std::vector<Transformation> &VerticalCRS::geoidModel() const {
+const std::vector<TransformationNNPtr> &VerticalCRS::geoidModel() const {
     return d->geoidModel;
 }
 
 // ---------------------------------------------------------------------------
 
-const std::vector<PointMotionOperation> &VerticalCRS::velocityModel() const {
+const std::vector<PointMotionOperationNNPtr> &
+VerticalCRS::velocityModel() const {
     return d->velocityModel;
 }
 

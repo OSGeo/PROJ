@@ -225,12 +225,29 @@ Scale::Scale(double valueIn) : Measure(valueIn, UnitOfMeasure::SCALE_UNITY) {}
 
 // ---------------------------------------------------------------------------
 
+Scale::Scale(const Scale &other) : Measure(other) {}
+
+// ---------------------------------------------------------------------------
+
 Scale::~Scale() = default;
+
+// ---------------------------------------------------------------------------
+
+Scale &Scale::operator=(const Scale &other) {
+    if (this != &other) {
+        Measure::operator=(other);
+    }
+    return *this;
+}
 
 // ---------------------------------------------------------------------------
 
 Angle::Angle(double valueIn, const UnitOfMeasure &unitIn)
     : Measure(valueIn, unitIn) {}
+
+// ---------------------------------------------------------------------------
+
+Angle::Angle(const Angle &other) : Measure(other) {}
 
 // ---------------------------------------------------------------------------
 
@@ -244,8 +261,21 @@ Angle::~Angle() = default;
 
 // ---------------------------------------------------------------------------
 
+Angle &Angle::operator=(const Angle &other) {
+    if (this != &other) {
+        Measure::operator=(other);
+    }
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
 Length::Length(double valueIn, const UnitOfMeasure &unitIn)
     : Measure(valueIn, unitIn) {}
+
+// ---------------------------------------------------------------------------
+
+Length::Length(const Length &other) : Measure(other) {}
 
 // ---------------------------------------------------------------------------
 
@@ -256,6 +286,15 @@ Length Length::convertToUnit(const UnitOfMeasure &otherUnit) const {
 // ---------------------------------------------------------------------------
 
 Length::~Length() = default;
+
+// ---------------------------------------------------------------------------
+
+Length &Length::operator=(const Length &other) {
+    if (this != &other) {
+        Measure::operator=(other);
+    }
+    return *this;
+}
 
 // ---------------------------------------------------------------------------
 

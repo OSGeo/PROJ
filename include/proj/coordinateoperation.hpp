@@ -275,6 +275,7 @@ class InvalidOperation : public util::Exception {
   public:
     PROJ_DLL explicit InvalidOperation(const char *message);
     PROJ_DLL explicit InvalidOperation(const std::string &message);
+    PROJ_DLL InvalidOperation(const InvalidOperation &other);
     PROJ_DLL ~InvalidOperation() override;
 };
 
@@ -342,19 +343,32 @@ class Conversion : public SingleOperation, public io::IWKTExportable {
 
 // ---------------------------------------------------------------------------
 
+class Transformation;
+using TransformationPtr = std::shared_ptr<Transformation>;
+using TransformationNNPtr = util::nn<TransformationPtr>;
+
 class Transformation : public SingleOperation {
   public:
     // TODO
     PROJ_DLL ~Transformation() override;
+
+  private:
+    Transformation(const Transformation &) = delete;
 };
 
 // ---------------------------------------------------------------------------
+
+class PointMotionOperation;
+using PointMotionOperationPtr = std::shared_ptr<PointMotionOperation>;
+using PointMotionOperationNNPtr = util::nn<PointMotionOperationPtr>;
 
 class PointMotionOperation : public SingleOperation {
   public:
     // TODO
     PROJ_DLL ~PointMotionOperation() override;
 
+  private:
+    PointMotionOperation(const PointMotionOperation &) = delete;
     // ---------------------------------------------------------------------------
 };
 

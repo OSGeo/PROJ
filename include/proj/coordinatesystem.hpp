@@ -117,7 +117,7 @@ class Meridian : public common::IdentifiedObject, public io::IWKTExportable {
 
     // non-standard
     PROJ_DLL static MeridianPtr create(const util::PropertyMap &properties,
-                                       const common::Angle &longitude);
+                                       const common::Angle &longitudeIn);
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
@@ -127,7 +127,7 @@ class Meridian : public common::IdentifiedObject, public io::IWKTExportable {
     Angle angle_;
 #endif
 
-    Meridian();
+    explicit Meridian(const common::Angle &longitudeIn);
     INLINED_MAKE_SHARED
 
   private:

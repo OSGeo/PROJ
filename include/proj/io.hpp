@@ -183,6 +183,7 @@ class FormattingException : public util::Exception {
     PROJ_DLL explicit FormattingException(const char *message);
     /** Constructor. */
     PROJ_DLL explicit FormattingException(const std::string &message);
+    PROJ_DLL FormattingException(const FormattingException &other);
     PROJ_DLL virtual ~FormattingException() override;
 };
 
@@ -195,6 +196,7 @@ class ParsingException : public util::Exception {
     PROJ_DLL explicit ParsingException(const char *message);
     /** Constructor. */
     PROJ_DLL explicit ParsingException(const std::string &message);
+    PROJ_DLL ParsingException(const ParsingException &other);
     PROJ_DLL virtual ~ParsingException() override;
 };
 

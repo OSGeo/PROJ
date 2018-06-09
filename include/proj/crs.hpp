@@ -104,7 +104,7 @@ class GeodeticCRS : virtual public SingleCRS {
     // coordinateSystem() returns either a EllipsoidalCS, SphericalCS or
     // CartesianCS
 
-    PROJ_DLL const std::vector<operation::PointMotionOperation> &
+    PROJ_DLL const std::vector<operation::PointMotionOperationNNPtr> &
     velocityModel() const;
 
     // Non-standard
@@ -186,8 +186,9 @@ class VerticalCRS : public SingleCRS {
 
     PROJ_DLL const datum::VerticalReferenceFramePtr datum() const;
     PROJ_DLL const cs::VerticalCSNNPtr coordinateSystem() const;
-    PROJ_DLL const std::vector<operation::Transformation> &geoidModel() const;
-    PROJ_DLL const std::vector<operation::PointMotionOperation> &
+    PROJ_DLL const std::vector<operation::TransformationNNPtr> &
+    geoidModel() const;
+    PROJ_DLL const std::vector<operation::PointMotionOperationNNPtr> &
     velocityModel() const;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)

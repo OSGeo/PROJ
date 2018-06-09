@@ -54,13 +54,16 @@ using namespace NS_PROJ::util;
 
 //! @cond Doxygen_Suppress
 struct Meridian::Private {
-    Angle longitude{};
+    Angle longitude_{};
+
+    Private(const Angle &longitude) : longitude_(longitude) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-Meridian::Meridian() : d(internal::make_unique<Private>()) {}
+Meridian::Meridian(const Angle &longitudeIn)
+    : d(internal::make_unique<Private>(longitudeIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -73,15 +76,14 @@ Meridian::~Meridian() = default;
 
 // ---------------------------------------------------------------------------
 
-const Angle &Meridian::longitude() const { return d->longitude; }
+const Angle &Meridian::longitude() const { return d->longitude_; }
 
 // ---------------------------------------------------------------------------
 
 MeridianPtr Meridian::create(const PropertyMap &properties,
-                             const Angle &longitude) {
-    MeridianPtr pm(Meridian::make_shared<Meridian>());
+                             const Angle &longitudeIn) {
+    MeridianPtr pm(Meridian::make_shared<Meridian>(longitudeIn));
     pm->setProperties(properties);
-    pm->d->longitude = longitude;
     return pm;
 }
 

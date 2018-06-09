@@ -476,6 +476,10 @@ Exception::Exception(const std::string &message) : msg_(message) {}
 
 // ---------------------------------------------------------------------------
 
+Exception::Exception(const Exception &other) : msg_(other.msg_) {}
+
+// ---------------------------------------------------------------------------
+
 Exception::~Exception() = default;
 
 // ---------------------------------------------------------------------------
@@ -495,3 +499,9 @@ InvalidValueTypeException::InvalidValueTypeException(const std::string &message)
 // ---------------------------------------------------------------------------
 
 InvalidValueTypeException::~InvalidValueTypeException() = default;
+
+// ---------------------------------------------------------------------------
+
+InvalidValueTypeException::InvalidValueTypeException(
+    const InvalidValueTypeException &other)
+    : Exception(other) {}

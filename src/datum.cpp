@@ -94,12 +94,15 @@ const optional<IdentifiedObject> &Datum::conventionalRS() const {
 //! @cond Doxygen_Suppress
 struct PrimeMeridian::Private {
     Angle greenwichLongitude{};
+
+    Private(const Angle &longitude) : greenwichLongitude(longitude) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-PrimeMeridian::PrimeMeridian() : d(internal::make_unique<Private>()) {}
+PrimeMeridian::PrimeMeridian(const Angle &longitude)
+    : d(internal::make_unique<Private>(longitude)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -120,9 +123,8 @@ const Angle &PrimeMeridian::greenwichLongitude() const {
 
 PrimeMeridianNNPtr PrimeMeridian::create(const PropertyMap &properties,
                                          const Angle &longitude) {
-    auto pm(PrimeMeridian::nn_make_shared<PrimeMeridian>());
+    auto pm(PrimeMeridian::nn_make_shared<PrimeMeridian>(longitude));
     pm->setProperties(properties);
-    pm->d->greenwichLongitude = longitude;
     return pm;
 }
 
@@ -182,17 +184,21 @@ std::string PrimeMeridian::exportToWKT(
 
 //! @cond Doxygen_Suppress
 struct Ellipsoid::Private {
-    Length semiMajorAxis{};
-    optional<Scale> inverseFlattening{};
-    optional<Length> semiMinorAxis{};
-    bool isSphere{false};
-    optional<Length> semiMedianAxis{};
+    Length semiMajorAxis_{};
+    optional<Scale> inverseFlattening_{};
+    optional<Length> semiMinorAxis_{};
+    bool isSphere_{false};
+    optional<Length> semiMedianAxis_{};
+
+    Private(const Length &semiMajorAxisIn, const Scale &invFlattening)
+        : semiMajorAxis_(semiMajorAxisIn), inverseFlattening_(invFlattening) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-Ellipsoid::Ellipsoid() : d(internal::make_unique<Private>()) {}
+Ellipsoid::Ellipsoid(const Length &semiMajorAxisIn, const Scale &invFlattening)
+    : d(internal::make_unique<Private>(semiMajorAxisIn, invFlattening)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -205,40 +211,39 @@ Ellipsoid::~Ellipsoid() = default;
 
 // ---------------------------------------------------------------------------
 
-const Length &Ellipsoid::semiMajorAxis() const { return d->semiMajorAxis; }
+const Length &Ellipsoid::semiMajorAxis() const { return d->semiMajorAxis_; }
 
 // ---------------------------------------------------------------------------
 
 const optional<Scale> &Ellipsoid::inverseFlattening() const {
-    return d->inverseFlattening;
+    return d->inverseFlattening_;
 }
 
 // ---------------------------------------------------------------------------
 
 const optional<Length> &Ellipsoid::semiMinorAxis() const {
-    return d->semiMinorAxis;
+    return d->semiMinorAxis_;
 }
 
 // ---------------------------------------------------------------------------
 
-bool Ellipsoid::isSphere() const { return d->isSphere; }
+bool Ellipsoid::isSphere() const { return d->isSphere_; }
 
 // ---------------------------------------------------------------------------
 
 const optional<Length> &Ellipsoid::semiMedianAxis() const {
-    return d->semiMedianAxis;
+    return d->semiMedianAxis_;
 }
 
 // ---------------------------------------------------------------------------
 
 /* static */
 EllipsoidNNPtr Ellipsoid::createFlattenedSphere(const PropertyMap &properties,
-                                                const Length &semiMajorAxis,
+                                                const Length &semiMajorAxisIn,
                                                 const Scale &invFlattening) {
-    auto ellipsoid(Ellipsoid::nn_make_shared<Ellipsoid>());
+    auto ellipsoid(
+        Ellipsoid::nn_make_shared<Ellipsoid>(semiMajorAxisIn, invFlattening));
     ellipsoid->setProperties(properties);
-    ellipsoid->d->semiMajorAxis = semiMajorAxis;
-    ellipsoid->d->inverseFlattening = Scale(invFlattening);
     return ellipsoid;
 }
 

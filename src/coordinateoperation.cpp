@@ -847,6 +847,11 @@ InvalidOperation::InvalidOperation(const std::string &message)
 
 // ---------------------------------------------------------------------------
 
+InvalidOperation::InvalidOperation(const InvalidOperation &other)
+    : Exception(other) {}
+
+// ---------------------------------------------------------------------------
+
 InvalidOperation::~InvalidOperation() = default;
 
 // ---------------------------------------------------------------------------

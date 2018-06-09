@@ -127,7 +127,7 @@ class PrimeMeridian : public common::IdentifiedObject,
     Angle greenwichLongitude_;
 #endif
 
-    PrimeMeridian();
+    explicit PrimeMeridian(const common::Angle &angle = common::Angle());
     INLINED_MAKE_SHARED
 
   private:
@@ -160,7 +160,7 @@ class Ellipsoid : public common::IdentifiedObject, public io::IWKTExportable {
     // non-standard
     PROJ_DLL static EllipsoidNNPtr
     createFlattenedSphere(const util::PropertyMap &properties,
-                          const common::Length &semiMajorAxis,
+                          const common::Length &semiMajorAxisIn,
                           const common::Scale &invFlattening);
 
     PROJ_DLL static const EllipsoidNNPtr EPSG_7030; // WGS 84
@@ -177,7 +177,8 @@ class Ellipsoid : public common::IdentifiedObject, public io::IWKTExportable {
     common::Length *semiMedianAxis_;
 #endif
 
-    Ellipsoid();
+    Ellipsoid(const common::Length &semiMajorAxisIn,
+              const common::Scale &invFlattening);
     INLINED_MAKE_SHARED
 
   private:
