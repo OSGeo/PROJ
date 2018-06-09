@@ -179,7 +179,7 @@ struct CoordinateOperation::Private {
                                // ProjectedCRS.defininingCoversion
     CRSPtr targetCRSLocked_{}; // do not set this for a
                                // ProjectedCRS.defininingCoversion
-    CRSPtr interplationCRS_{};
+    CRSPtr interpolationCRS_{};
     optional<DataEpoch> sourceCoordinateEpoch_{};
     optional<DataEpoch> targetCoordinateEpoch_{};
 };
@@ -225,8 +225,8 @@ const CRSPtr CoordinateOperation::targetCRS() const {
 
 // ---------------------------------------------------------------------------
 
-const CRSPtr &CoordinateOperation::interplationCRS() const {
-    return d->interplationCRS_;
+const CRSPtr &CoordinateOperation::interpolationCRS() const {
+    return d->interpolationCRS_;
 }
 
 // ---------------------------------------------------------------------------

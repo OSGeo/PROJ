@@ -70,7 +70,7 @@ class CoordinateOperation : public common::ObjectUsage {
     // will return null pointers if the owning DerivedCRS has been destroyed.
     PROJ_DLL const crs::CRSPtr sourceCRS() const;
     PROJ_DLL const crs::CRSPtr targetCRS() const;
-    PROJ_DLL const crs::CRSPtr &interplationCRS() const;
+    PROJ_DLL const crs::CRSPtr &interpolationCRS() const;
     PROJ_DLL const util::optional<common::DataEpoch> &
     sourceCoordinateEpoch() const;
     PROJ_DLL const util::optional<common::DataEpoch> &
