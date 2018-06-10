@@ -32,6 +32,8 @@
 
 #include "proj/metadata.hpp"
 #include "proj/internal.hpp"
+#include "proj/io.hpp"
+#include "proj/io_internal.hpp"
 #include "proj/util.hpp"
 
 #include <memory>
@@ -41,6 +43,7 @@
 
 using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::internal;
+using namespace NS_PROJ::io;
 using namespace NS_PROJ::util;
 
 // ---------------------------------------------------------------------------
@@ -199,11 +202,12 @@ Extent::create(const optional<std::string> &descriptionIn,
 
 //! @cond Doxygen_Suppress
 struct Identifier::Private {
-    optional<Citation> authority{};
-    std::string code{};
-    optional<std::string> codeSpace{};
-    optional<std::string> version{};
-    optional<std::string> description{};
+    optional<Citation> authority_{};
+    std::string code_{};
+    optional<std::string> codeSpace_{};
+    optional<std::string> version_{};
+    optional<std::string> description_{};
+    optional<std::string> uri_{};
 };
 //! @endcond
 
@@ -211,7 +215,7 @@ struct Identifier::Private {
 
 Identifier::Identifier(const std::string &codeIn)
     : d(internal::make_unique<Private>()) {
-    d->code = codeIn;
+    d->code_ = codeIn;
 }
 
 // ---------------------------------------------------------------------------
@@ -243,27 +247,33 @@ Identifier &Identifier::operator=(const Identifier &other) {
 
 // ---------------------------------------------------------------------------
 
-const optional<Citation> &Identifier::authority() const { return d->authority; }
+const optional<Citation> &Identifier::authority() const {
+    return d->authority_;
+}
 
 // ---------------------------------------------------------------------------
 
-const std::string &Identifier::code() const { return d->code; }
+const std::string &Identifier::code() const { return d->code_; }
 
 // ---------------------------------------------------------------------------
 
 const optional<std::string> &Identifier::codeSpace() const {
-    return d->codeSpace;
+    return d->codeSpace_;
 }
 
 // ---------------------------------------------------------------------------
 
-const optional<std::string> &Identifier::version() const { return d->version; }
+const optional<std::string> &Identifier::version() const { return d->version_; }
 
 // ---------------------------------------------------------------------------
 
 const optional<std::string> &Identifier::description() const {
-    return d->description;
+    return d->description_;
 }
+
+// ---------------------------------------------------------------------------
+
+const optional<std::string> &Identifier::uri() const { return d->uri_; }
 
 // ---------------------------------------------------------------------------
 
@@ -276,7 +286,7 @@ void Identifier::setProperties(
             if (auto genVal =
                     util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second)) {
                 if (genVal->type() == BoxedValue::Type::STRING) {
-                    d->authority = Citation(genVal->stringValue());
+                    d->authority_ = Citation(genVal->stringValue());
                 } else {
                     throw InvalidValueTypeException("Invalid value type for " +
                                                     AUTHORITY_KEY);
@@ -284,7 +294,7 @@ void Identifier::setProperties(
             } else {
                 if (auto citation = util::nn_dynamic_pointer_cast<Citation>(
                         oIter->second)) {
-                    d->authority = Citation(*citation);
+                    d->authority_ = Citation(*citation);
                 } else {
                     throw InvalidValueTypeException("Invalid value type for " +
                                                     AUTHORITY_KEY);
@@ -301,9 +311,9 @@ void Identifier::setProperties(
                 if (genVal->type() == BoxedValue::Type::INTEGER) {
                     std::ostringstream buffer;
                     buffer << genVal->integerValue();
-                    d->code = buffer.str();
+                    d->code_ = buffer.str();
                 } else if (genVal->type() == BoxedValue::Type::STRING) {
-                    d->code = genVal->stringValue();
+                    d->code_ = genVal->stringValue();
                 } else {
                     throw InvalidValueTypeException("Invalid value type for " +
                                                     CODE_KEY);
@@ -318,23 +328,74 @@ void Identifier::setProperties(
     {
         std::string temp;
         if (properties.getStringValue(CODESPACE_KEY, temp)) {
-            d->codeSpace = temp;
+            d->codeSpace_ = temp;
         }
     }
 
     {
         std::string temp;
         if (properties.getStringValue(VERSION_KEY, temp)) {
-            d->version = temp;
+            d->version_ = temp;
         }
     }
 
     {
         std::string temp;
         if (properties.getStringValue(DESCRIPTION_KEY, temp)) {
-            d->description = temp;
+            d->description_ = temp;
+        }
+    }
+
+    {
+        std::string temp;
+        if (properties.getStringValue(URI_KEY, temp)) {
+            d->uri_ = temp;
         }
     }
 }
 
 // ---------------------------------------------------------------------------
+
+std::string Identifier::exportToWKT(WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    const std::string &l_code = code();
+    if (codeSpace() && !codeSpace()->empty() && !l_code.empty()) {
+        if (isWKT2) {
+            formatter->startNode(WKTConstants::ID);
+            formatter->addQuotedString(*(codeSpace()));
+            try {
+                std::stoi(l_code);
+                formatter->add(l_code);
+            } catch (const std::exception &) {
+                formatter->addQuotedString(l_code);
+            }
+            if (version().has_value()) {
+                auto l_version = *(version());
+                try {
+                    std::stod(l_version);
+                    formatter->add(l_version);
+                } catch (const std::exception &) {
+                    formatter->addQuotedString(l_version);
+                }
+            }
+            if (authority().has_value() && authority()->title().has_value() &&
+                *(authority()->title()) != *(codeSpace())) {
+                formatter->startNode(WKTConstants::CITATION);
+                formatter->addQuotedString(*(authority()->title()));
+                formatter->endNode();
+            }
+            if (uri().has_value()) {
+                formatter->startNode(WKTConstants::URI);
+                formatter->addQuotedString(*(uri()));
+                formatter->endNode();
+            }
+            formatter->endNode();
+        } else {
+            formatter->startNode(WKTConstants::AUTHORITY);
+            formatter->addQuotedString(*(codeSpace()));
+            formatter->addQuotedString(l_code);
+            formatter->endNode();
+        }
+    }
+    return formatter->toString();
+}

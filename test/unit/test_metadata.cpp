@@ -28,9 +28,11 @@
 
 #include "gtest_include.h"
 
+#include "proj/io.hpp"
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+using namespace osgeo::proj::io;
 using namespace osgeo::proj::metadata;
 using namespace osgeo::proj::util;
 
@@ -129,4 +131,27 @@ TEST(metadata, identifier_authority_invalid_type) {
     properties.set(Identifier::AUTHORITY_KEY, true);
     ASSERT_THROW(Identifier::create(std::string(), properties),
                  InvalidValueTypeException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(metadata, id) {
+    auto in_wkt = "ID[\"EPSG\",4946,1.5,\n"
+                  "    CITATION[\"my citation\"],\n"
+                  "    URI[\"urn:ogc:def:crs:EPSG::4946\"]]";
+    auto id =
+        nn_dynamic_pointer_cast<Identifier>(WKTParser().createFromWKT(in_wkt));
+    ASSERT_TRUE(id != nullptr);
+
+    EXPECT_TRUE(id->authority().has_value());
+    EXPECT_EQ(*(id->authority()->title()), "my citation");
+    EXPECT_EQ(*(id->codeSpace()), "EPSG");
+    EXPECT_EQ(id->code(), "4946");
+    EXPECT_TRUE(id->version().has_value());
+    EXPECT_EQ(*(id->version()), "1.5");
+    EXPECT_TRUE(id->uri().has_value());
+    EXPECT_EQ(*(id->uri()), "urn:ogc:def:crs:EPSG::4946");
+
+    auto got_wkt = id->exportToWKT(WKTFormatter::create());
+    EXPECT_EQ(got_wkt, in_wkt);
 }

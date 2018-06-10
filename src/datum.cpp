@@ -132,7 +132,7 @@ PrimeMeridianNNPtr PrimeMeridian::create(const PropertyMap &properties,
 
 const PrimeMeridianNNPtr PrimeMeridian::createGREENWICH() {
     return create(PropertyMap()
-                      .set(Identifier::AUTHORITY_KEY, "EPSG")
+                      .set(Identifier::CODESPACE_KEY, "EPSG")
                       .set(Identifier::CODE_KEY, 8901)
                       .set(IdentifiedObject::NAME_KEY, "Greenwich"),
                   Angle(0));
@@ -251,7 +251,7 @@ EllipsoidNNPtr Ellipsoid::createFlattenedSphere(const PropertyMap &properties,
 
 const EllipsoidNNPtr Ellipsoid::createEPSG_7030() {
     PropertyMap propertiesEllps;
-    propertiesEllps.set(Identifier::AUTHORITY_KEY, "EPSG")
+    propertiesEllps.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 7030)
         .set(IdentifiedObject::NAME_KEY, "WGS 84");
     return createFlattenedSphere(propertiesEllps, Length(6378137),
@@ -361,7 +361,7 @@ GeodeticReferenceFrame::create(const PropertyMap &properties,
 
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6326() {
     PropertyMap propertiesDatum;
-    propertiesDatum.set(Identifier::AUTHORITY_KEY, "EPSG")
+    propertiesDatum.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 6326)
         .set(IdentifiedObject::NAME_KEY, "WGS_1984");
 

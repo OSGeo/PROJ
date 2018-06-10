@@ -280,7 +280,7 @@ class ObjectUsage : public IdentifiedObject {
     void setProperties(const util::PropertyMap
                            &properties); // throw(InvalidValueTypeException)
 
-    std::string _exportToWKT(io::WKTFormatterNNPtr formatter)
+    void _exportToWKT(io::WKTFormatterNNPtr formatter)
         const; // throw(io::FormattingException)
 
   private:

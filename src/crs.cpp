@@ -284,7 +284,7 @@ GeographicCRS::create(const PropertyMap &properties,
 
 GeographicCRSNNPtr GeographicCRS::createEPSG_4326() {
     PropertyMap propertiesCRS;
-    propertiesCRS.set(Identifier::AUTHORITY_KEY, "EPSG")
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4326)
         .set(IdentifiedObject::NAME_KEY, "WGS 84");
     return create(propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
@@ -295,7 +295,7 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4326() {
 
 GeographicCRSNNPtr GeographicCRS::createEPSG_4979() {
     PropertyMap propertiesCRS;
-    propertiesCRS.set(Identifier::AUTHORITY_KEY, "EPSG")
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4979)
         .set(IdentifiedObject::NAME_KEY, "WGS 84");
     return create(
@@ -307,14 +307,14 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4979() {
 
 GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
     PropertyMap propertiesEllps;
-    propertiesEllps.set(Identifier::AUTHORITY_KEY, "EPSG")
+    propertiesEllps.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 6807)
         .set(IdentifiedObject::NAME_KEY, "Clarke 1880 (IGN)");
     auto ellps(Ellipsoid::createFlattenedSphere(
         propertiesEllps, Length(6378249.2), Scale(293.4660212936269)));
 
     auto pm(PrimeMeridian::create(PropertyMap()
-                                      .set(Identifier::AUTHORITY_KEY, "EPSG")
+                                      .set(Identifier::CODESPACE_KEY, "EPSG")
                                       .set(Identifier::CODE_KEY, 8903)
                                       .set(IdentifiedObject::NAME_KEY, "Paris"),
                                   Angle(2.5969213, UnitOfMeasure::GRAD)));
@@ -330,7 +330,7 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
     auto cs(EllipsoidalCS::create(PropertyMap(), axisLat, axisLong));
 
     PropertyMap propertiesDatum;
-    propertiesDatum.set(Identifier::AUTHORITY_KEY, "EPSG")
+    propertiesDatum.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 6807)
         .set(IdentifiedObject::NAME_KEY,
              "Nouvelle_Triangulation_Francaise_Paris");
@@ -338,7 +338,7 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
                                               optional<std::string>(), pm));
 
     PropertyMap propertiesCRS;
-    propertiesCRS.set(Identifier::AUTHORITY_KEY, "EPSG")
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4807)
         .set(IdentifiedObject::NAME_KEY, "NTF (Paris)");
     auto gcrs(create(propertiesCRS, datum, cs));

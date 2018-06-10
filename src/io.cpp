@@ -276,8 +276,23 @@ void WKTFormatter::startNode(const std::string &keyword) {
     d->indentLevel_++;
     d->stackHasChild_.push_back(false);
     d->stackEmptyKeyword_.push_back(keyword.empty());
-    if (d->indentLevel_ == 2 && d->params_.idOnTopLevelOnly_) {
+
+    // We should emit ID nodes for :
+    // -root element
+    // - and for METHOD&PARAMETER nodes in WKT2, unless idOnTopLevelOnly_ is
+    // set.
+    // For WKT2, all other intermediate nodes shouldn't have ID ("not
+    // recommended")
+    if (!d->params_.idOnTopLevelOnly_ && d->indentLevel_ >= 2 &&
+        d->params_.version_ == WKTFormatter::Version::WKT2 &&
+        (keyword == WKTConstants::METHOD ||
+         keyword == WKTConstants::PARAMETER)) {
+        pushOutputId(true);
+    } else if (d->indentLevel_ >= 2 &&
+               d->params_.version_ == WKTFormatter::Version::WKT2) {
         pushOutputId(false);
+    } else {
+        pushOutputId(outputId());
     }
 }
 
@@ -285,9 +300,7 @@ void WKTFormatter::startNode(const std::string &keyword) {
 
 void WKTFormatter::endNode() {
     assert(d->indentLevel_ > 0);
-    if (d->indentLevel_ == 2 && d->params_.idOnTopLevelOnly_) {
-        popOutputId();
-    }
+    popOutputId();
     d->indentLevel_--;
     bool emptyKeyword = d->stackEmptyKeyword_.back();
     d->stackEmptyKeyword_.pop_back();
@@ -647,6 +660,7 @@ struct WKTParser::Private {
     bool strict_ = true;
     std::vector<std::string> warningList_{};
 
+    IdentifierPtr buildId(WKTNodeNNPtr node, bool tolerant = true);
     PropertyMap buildProperties(WKTNodeNNPtr node);
     UnitOfMeasure
     buildUnit(WKTNodeNNPtr node,
@@ -710,6 +724,50 @@ static double asDouble(const std::string &val) { return std::stod(val); }
 
 // ---------------------------------------------------------------------------
 
+IdentifierPtr WKTParser::Private::buildId(WKTNodeNNPtr node, bool tolerant) {
+    if (node->children().size() >= 2) {
+        auto codeSpace = stripQuotes(node->children()[0]->value());
+        auto code = stripQuotes(node->children()[1]->value());
+        auto citationNode = node->lookForChild(WKTConstants::CITATION);
+        auto uriNode = node->lookForChild(WKTConstants::URI);
+        PropertyMap propertiesId;
+        propertiesId.set(Identifier::CODESPACE_KEY, codeSpace);
+        bool authoritySet = false;
+        if (citationNode) {
+            if (citationNode->children().size() == 1) {
+                authoritySet = true;
+                propertiesId.set(
+                    Identifier::AUTHORITY_KEY,
+                    stripQuotes(citationNode->children()[0]->value()));
+            }
+        }
+        if (!authoritySet) {
+            propertiesId.set(Identifier::AUTHORITY_KEY, codeSpace);
+        }
+        if (uriNode) {
+            if (uriNode->children().size() == 1) {
+                propertiesId.set(Identifier::URI_KEY,
+                                 stripQuotes(uriNode->children()[0]->value()));
+            }
+        }
+        if (node->children().size() >= 3 &&
+            node->children()[2]->children().size() == 0) {
+            auto version = stripQuotes(node->children()[2]->value());
+            propertiesId.set(Identifier::VERSION_KEY, version);
+        }
+        return Identifier::create(code, propertiesId);
+    } else if (strict_ || !tolerant) {
+        throw ParsingException("not enough children in " + node->value() +
+                               " node");
+    } else {
+        warningList_.push_back("not enough children in " + node->value() +
+                               " node");
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
     PropertyMap properties;
     if (!node->children().empty()) {
@@ -721,19 +779,9 @@ PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
     for (const auto &subNode : node->children()) {
         if (ci_equal(subNode->value(), WKTConstants::ID) ||
             ci_equal(subNode->value(), WKTConstants::AUTHORITY)) {
-            if (subNode->children().size() >= 2) {
-                // TODO citation + uri
-                auto authority = stripQuotes(subNode->children()[0]->value());
-                auto code = stripQuotes(subNode->children()[1]->value());
-                identifiers->values.push_back(Identifier::create(
-                    code,
-                    PropertyMap().set(Identifier::AUTHORITY_KEY, authority)));
-            } else if (strict_) {
-                throw ParsingException("not enough children in " +
-                                       subNode->value() + " node");
-            } else {
-                warningList_.push_back("not enough children in " +
-                                       subNode->value() + " node");
+            auto id = buildId(subNode);
+            if (id) {
+                identifiers->values.push_back(NN_CHECK_ASSERT(id));
             }
         }
     }
@@ -1385,7 +1433,7 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
     if (mapping) {
         projectionName = mapping->wkt2_name;
         propertiesMethod.set(Identifier::CODE_KEY, mapping->epsg_code);
-        propertiesMethod.set(Identifier::AUTHORITY_KEY, "EPSG");
+        propertiesMethod.set(Identifier::CODESPACE_KEY, "EPSG");
     }
     propertiesMethod.set(IdentifiedObject::NAME_KEY, projectionName);
 
@@ -1406,7 +1454,7 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                 parameterName = paramMapping->wkt2_name;
                 propertiesParameter.set(Identifier::CODE_KEY,
                                         paramMapping->epsg_code);
-                propertiesParameter.set(Identifier::AUTHORITY_KEY, "EPSG");
+                propertiesParameter.set(Identifier::CODESPACE_KEY, "EPSG");
             }
             propertiesParameter.set(IdentifiedObject::NAME_KEY, parameterName);
             parameters.push_back(
@@ -1518,6 +1566,12 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
         ci_equal(name, WKTConstants::PROJECTEDCRS)) {
         return util::nn_static_pointer_cast<BaseObject>(
             d->buildProjectedCRS(root));
+    }
+
+    if (ci_equal(name, WKTConstants::ID) ||
+        ci_equal(name, WKTConstants::AUTHORITY)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            NN_CHECK_ASSERT(d->buildId(root, false)));
     }
 
     throw ParsingException("unhandled keyword: " + name);

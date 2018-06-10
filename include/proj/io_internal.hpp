@@ -81,6 +81,8 @@ class WKTConstants {
     static const std::string SCOPE;
     static const std::string AREA;
     static const std::string BBOX;
+    static const std::string CITATION;
+    static const std::string URI;
 
     // WKT2 long
     static const std::string GEODETICCRS;

@@ -137,7 +137,7 @@ static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
     if (checkEPSGCodes) {
         ASSERT_EQ(crs->identifiers().size(), 1);
         EXPECT_EQ(crs->identifiers()[0]->code(), "4326");
-        EXPECT_EQ(*(crs->identifiers()[0]->authority()->title()), "EPSG");
+        EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     }
     EXPECT_EQ(*(crs->name()->description()), "WGS 84");
 
@@ -165,7 +165,7 @@ static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
     if (checkEPSGCodes) {
         ASSERT_EQ(datum->identifiers().size(), 1);
         EXPECT_EQ(datum->identifiers()[0]->code(), "6326");
-        EXPECT_EQ(*(datum->identifiers()[0]->authority()->title()), "EPSG");
+        EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
     }
     EXPECT_EQ(*(datum->name()->description()), "WGS_1984");
 
@@ -176,7 +176,7 @@ static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
     if (checkEPSGCodes) {
         ASSERT_EQ(ellipsoid->identifiers().size(), 1);
         EXPECT_EQ(ellipsoid->identifiers()[0]->code(), "7030");
-        EXPECT_EQ(*(ellipsoid->identifiers()[0]->authority()->title()), "EPSG");
+        EXPECT_EQ(*(ellipsoid->identifiers()[0]->codeSpace()), "EPSG");
     }
     EXPECT_EQ(*(ellipsoid->name()->description()), "WGS 84");
 }
@@ -346,7 +346,7 @@ TEST(wkt_parse, wkt2_GEODETICREFERENCEFRAME) {
 static void checkEPSG_4979(GeographicCRSPtr crs) {
     ASSERT_EQ(crs->identifiers().size(), 1);
     EXPECT_EQ(crs->identifiers()[0]->code(), "4979");
-    EXPECT_EQ(*(crs->identifiers()[0]->authority()->title()), "EPSG");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()), "WGS 84");
 
     auto cs = crs->coordinateSystem();
@@ -508,7 +508,7 @@ static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
     EXPECT_EQ(*(crs->name()->description()), "WGS 84 / UTM zone 31N");
     ASSERT_EQ(crs->identifiers().size(), 1);
     EXPECT_EQ(crs->identifiers()[0]->code(), "32631");
-    EXPECT_EQ(*(crs->identifiers()[0]->authority()->title()), "EPSG");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
 
     auto geogCRS = nn_dynamic_pointer_cast<GeographicCRS>(crs->baseCRS());
     ASSERT_TRUE(geogCRS != nullptr);
@@ -799,9 +799,9 @@ TEST(wkt_parse, cs_with_multiple_ID) {
     EXPECT_EQ(*(crs->name()->description()), "WGS 84");
     ASSERT_EQ(crs->identifiers().size(), 2);
     EXPECT_EQ(crs->identifiers()[0]->code(), "codeA");
-    EXPECT_EQ(*(crs->identifiers()[0]->authority()->title()), "authorityA");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "authorityA");
     EXPECT_EQ(crs->identifiers()[1]->code(), "codeB");
-    EXPECT_EQ(*(crs->identifiers()[1]->authority()->title()), "authorityB");
+    EXPECT_EQ(*(crs->identifiers()[1]->codeSpace()), "authorityB");
 }
 
 // ---------------------------------------------------------------------------

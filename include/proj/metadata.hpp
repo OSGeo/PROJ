@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 
+#include "io.hpp"
 #include "util.hpp"
 
 NS_PROJ_START
@@ -149,10 +150,10 @@ class Identifier;
 using IdentifierPtr = std::shared_ptr<Identifier>;
 using IdentifierNNPtr = util::nn<IdentifierPtr>;
 
-class Identifier : public util::BaseObject {
+class Identifier : public util::BaseObject, public io::IWKTExportable {
   public:
     PROJ_DLL Identifier(const Identifier &other);
-    PROJ_DLL ~Identifier();
+    PROJ_DLL ~Identifier() override;
 
     PROJ_DLL static IdentifierNNPtr
     create(const std::string &codeIn = std::string(),
@@ -164,12 +165,17 @@ class Identifier : public util::BaseObject {
     PROJ_DLL static const std::string CODESPACE_KEY;
     PROJ_DLL static const std::string VERSION_KEY;
     PROJ_DLL static const std::string DESCRIPTION_KEY;
+    PROJ_DLL static const std::string URI_KEY;
 
     PROJ_DLL const util::optional<Citation> &authority() const;
     PROJ_DLL const std::string &code() const;
     PROJ_DLL const util::optional<std::string> &codeSpace() const;
     PROJ_DLL const util::optional<std::string> &version() const;
     PROJ_DLL const util::optional<std::string> &description() const;
+    PROJ_DLL const util::optional<std::string> &uri() const;
+
+    std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
 
   protected:
     explicit Identifier(const std::string &codeIn = std::string());

@@ -75,6 +75,7 @@ const std::string Identifier::CODE_KEY("code");
 const std::string Identifier::CODESPACE_KEY("codespace");
 const std::string Identifier::VERSION_KEY("version");
 const std::string Identifier::DESCRIPTION_KEY("description");
+const std::string Identifier::URI_KEY("uri");
 
 // ---------------------------------------------------------------------------
 
@@ -118,6 +119,8 @@ DEFINE_WKT_CONSTANT(BASEGEOGCRS);
 DEFINE_WKT_CONSTANT(SCOPE);
 DEFINE_WKT_CONSTANT(AREA);
 DEFINE_WKT_CONSTANT(BBOX);
+DEFINE_WKT_CONSTANT(CITATION);
+DEFINE_WKT_CONSTANT(URI);
 
 DEFINE_WKT_CONSTANT(GEODETICCRS);
 DEFINE_WKT_CONSTANT(GEODETICDATUM);

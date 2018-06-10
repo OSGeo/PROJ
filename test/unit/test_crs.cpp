@@ -52,13 +52,13 @@ TEST(crs, EPSG_4326_get_components) {
     auto crs = GeographicCRS::EPSG_4326;
     ASSERT_EQ(crs->identifiers().size(), 1);
     EXPECT_EQ(crs->identifiers()[0]->code(), "4326");
-    EXPECT_EQ(*(crs->identifiers()[0]->authority()->title()), "EPSG");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()), "WGS 84");
 
     auto datum = crs->datum();
     ASSERT_EQ(datum->identifiers().size(), 1);
     EXPECT_EQ(datum->identifiers()[0]->code(), "6326");
-    EXPECT_EQ(*(datum->identifiers()[0]->authority()->title()), "EPSG");
+    EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(datum->name()->description()), "WGS_1984");
 
     auto ellipsoid = datum->ellipsoid();
@@ -67,7 +67,7 @@ TEST(crs, EPSG_4326_get_components) {
     EXPECT_EQ(ellipsoid->inverseFlattening()->value(), 298.257223563);
     ASSERT_EQ(ellipsoid->identifiers().size(), 1);
     EXPECT_EQ(ellipsoid->identifiers()[0]->code(), "7030");
-    EXPECT_EQ(*(ellipsoid->identifiers()[0]->authority()->title()), "EPSG");
+    EXPECT_EQ(*(ellipsoid->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(ellipsoid->name()->description()), "WGS 84");
 }
 
@@ -81,23 +81,16 @@ TEST(crs, EPSG_4326_as_WKT2) {
               "GEODCRS[\"WGS 84\",\n"
               "    DATUM[\"WGS_1984\",\n"
               "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
-              "            LENGTHUNIT[\"metre\",1,\n"
-              "                ID[\"EPSG\",9001]],\n"
-              "            ID[\"EPSG\",7030]],\n"
-              "        ID[\"EPSG\",6326]],\n"
+              "            LENGTHUNIT[\"metre\",1]]],\n"
               "    PRIMEM[\"Greenwich\",0,\n"
-              "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-              "            ID[\"EPSG\",9122]],\n"
-              "        ID[\"EPSG\",8901]],\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
               "    CS[ellipsoidal,2],\n"
               "        AXIS[\"latitude\",north,\n"
               "            ORDER[1],\n"
-              "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-              "                ID[\"EPSG\",9122]]],\n"
+              "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
               "        AXIS[\"longitude\",east,\n"
               "            ORDER[2],\n"
-              "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-              "                ID[\"EPSG\",9122]]],\n"
+              "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
               "    ID[\"EPSG\",4326]]");
 }
 
@@ -112,23 +105,16 @@ TEST(crs, EPSG_4326_as_WKT2_2018) {
               "GEOGCRS[\"WGS 84\",\n"
               "    DATUM[\"WGS_1984\",\n"
               "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
-              "            LENGTHUNIT[\"metre\",1,\n"
-              "                ID[\"EPSG\",9001]],\n"
-              "            ID[\"EPSG\",7030]],\n"
-              "        ID[\"EPSG\",6326]],\n"
+              "            LENGTHUNIT[\"metre\",1]]],\n"
               "    PRIMEM[\"Greenwich\",0,\n"
-              "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-              "            ID[\"EPSG\",9122]],\n"
-              "        ID[\"EPSG\",8901]],\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
               "    CS[ellipsoidal,2],\n"
               "        AXIS[\"latitude\",north,\n"
               "            ORDER[1],\n"
-              "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-              "                ID[\"EPSG\",9122]]],\n"
+              "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
               "        AXIS[\"longitude\",east,\n"
               "            ORDER[2],\n"
-              "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-              "                ID[\"EPSG\",9122]]],\n"
+              "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
               "    ID[\"EPSG\",4326]]");
 }
 
@@ -285,23 +271,16 @@ TEST(crs, EPSG_4807_as_WKT2) {
         "GEODCRS[\"NTF (Paris)\",\n"
         "    DATUM[\"Nouvelle_Triangulation_Francaise_Paris\",\n"
         "        ELLIPSOID[\"Clarke 1880 (IGN)\",6378249.2,293.466021293627,\n"
-        "            LENGTHUNIT[\"metre\",1,\n"
-        "                ID[\"EPSG\",9001]],\n"
-        "            ID[\"EPSG\",6807]],\n"
-        "        ID[\"EPSG\",6807]],\n"
+        "            LENGTHUNIT[\"metre\",1]]],\n"
         "    PRIMEM[\"Paris\",2.5969213,\n"
-        "        ANGLEUNIT[\"grad\",0.015707963267949,\n"
-        "            ID[\"EPSG\",9105]],\n"
-        "        ID[\"EPSG\",8903]],\n"
+        "        ANGLEUNIT[\"grad\",0.015707963267949]],\n"
         "    CS[ellipsoidal,2],\n"
         "        AXIS[\"latitude\",north,\n"
         "            ORDER[1],\n"
-        "            ANGLEUNIT[\"grad\",0.015707963267949,\n"
-        "                ID[\"EPSG\",9105]]],\n"
+        "            ANGLEUNIT[\"grad\",0.015707963267949]],\n"
         "        AXIS[\"longitude\",east,\n"
         "            ORDER[2],\n"
-        "            ANGLEUNIT[\"grad\",0.015707963267949,\n"
-        "                ID[\"EPSG\",9105]]],\n"
+        "            ANGLEUNIT[\"grad\",0.015707963267949]],\n"
         "    ID[\"EPSG\",4807]]");
 }
 
@@ -353,7 +332,7 @@ TEST(crs, EPSG_4807_as_WKT1_GDAL) {
 
 static GeodeticCRSNNPtr createGeocentric() {
     PropertyMap propertiesCRS;
-    propertiesCRS.set(Identifier::AUTHORITY_KEY, "EPSG")
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4328)
         .set(IdentifiedObject::NAME_KEY, "WGS 84");
     return GeodeticCRS::create(propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
@@ -368,27 +347,19 @@ TEST(crs, geocentricCRS_as_WKT2) {
     auto expected = "GEODCRS[\"WGS 84\",\n"
                     "    DATUM[\"WGS_1984\",\n"
                     "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
-                    "            LENGTHUNIT[\"metre\",1,\n"
-                    "                ID[\"EPSG\",9001]],\n"
-                    "            ID[\"EPSG\",7030]],\n"
-                    "        ID[\"EPSG\",6326]],\n"
+                    "            LENGTHUNIT[\"metre\",1]]],\n"
                     "    PRIMEM[\"Greenwich\",0,\n"
-                    "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-                    "            ID[\"EPSG\",9122]],\n"
-                    "        ID[\"EPSG\",8901]],\n"
+                    "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
                     "    CS[Cartesian,3],\n"
                     "        AXIS[\"(X)\",geocentricX,\n"
                     "            ORDER[1],\n"
-                    "            LENGTHUNIT[\"metre\",1,\n"
-                    "                ID[\"EPSG\",9001]]],\n"
+                    "            LENGTHUNIT[\"metre\",1]],\n"
                     "        AXIS[\"(Y)\",geocentricY,\n"
                     "            ORDER[2],\n"
-                    "            LENGTHUNIT[\"metre\",1,\n"
-                    "                ID[\"EPSG\",9001]]],\n"
+                    "            LENGTHUNIT[\"metre\",1]],\n"
                     "        AXIS[\"(Z)\",geocentricZ,\n"
                     "            ORDER[3],\n"
-                    "            LENGTHUNIT[\"metre\",1,\n"
-                    "                ID[\"EPSG\",9001]]],\n"
+                    "            LENGTHUNIT[\"metre\",1]],\n"
                     "    ID[\"EPSG\",4328]]";
 
     EXPECT_EQ(crs->exportToWKT(WKTFormatter::create()), expected);
@@ -444,7 +415,7 @@ TEST(crs, geocentricCRS_as_WKT1_GDAL) {
 
 static ProjectedCRSNNPtr createProjected() {
     PropertyMap propertiesCRS;
-    propertiesCRS.set(Identifier::AUTHORITY_KEY, "EPSG")
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 32631)
         .set(IdentifiedObject::NAME_KEY, "WGS 84 / UTM zone 31N");
     return ProjectedCRS::create(propertiesCRS, GeographicCRS::EPSG_4326,
@@ -462,47 +433,34 @@ TEST(crs, projectedCRS_as_WKT2) {
         "    BASEGEODCRS[\"WGS 84\",\n"
         "        DATUM[\"WGS_1984\",\n"
         "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
-        "                LENGTHUNIT[\"metre\",1,\n"
-        "                    ID[\"EPSG\",9001]],\n"
-        "                ID[\"EPSG\",7030]],\n"
-        "            ID[\"EPSG\",6326]],\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
         "        PRIMEM[\"Greenwich\",0,\n"
-        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-        "                ID[\"EPSG\",9122]],\n"
-        "            ID[\"EPSG\",8901]]],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
         "    CONVERSION[\"UTM zone 31N\",\n"
         "        METHOD[\"Transverse Mercator\",\n"
         "            ID[\"EPSG\",9807]],\n"
         "        PARAMETER[\"Latitude of natural origin\",0,\n"
-        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-        "                ID[\"EPSG\",9122]],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "            ID[\"EPSG\",8801]],\n"
         "        PARAMETER[\"Longitude of natural origin\",3,\n"
-        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-        "                ID[\"EPSG\",9122]],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "            ID[\"EPSG\",8802]],\n"
         "        PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
-        "            SCALEUNIT[\"unity\",1,\n"
-        "                ID[\"EPSG\",9201]],\n"
+        "            SCALEUNIT[\"unity\",1],\n"
         "            ID[\"EPSG\",8805]],\n"
         "        PARAMETER[\"False easting\",500000,\n"
-        "            LENGTHUNIT[\"metre\",1,\n"
-        "                ID[\"EPSG\",9001]],\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
         "            ID[\"EPSG\",8806]],\n"
         "        PARAMETER[\"False northing\",0,\n"
-        "            LENGTHUNIT[\"metre\",1,\n"
-        "                ID[\"EPSG\",9001]],\n"
-        "            ID[\"EPSG\",8807]],\n"
-        "        ID[\"EPSG\",16031]],\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
         "    CS[Cartesian,2],\n"
         "        AXIS[\"(E)\",east,\n"
         "            ORDER[1],\n"
-        "            LENGTHUNIT[\"metre\",1,\n"
-        "                ID[\"EPSG\",9001]]],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
         "        AXIS[\"(N)\",north,\n"
         "            ORDER[2],\n"
-        "            LENGTHUNIT[\"metre\",1,\n"
-        "                ID[\"EPSG\",9001]]],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
         "    ID[\"EPSG\",32631]]";
 
     EXPECT_EQ(crs->exportToWKT(WKTFormatter::create()), expected);
@@ -611,9 +569,7 @@ TEST(datum, datum_with_ANCHOR) {
 
     auto expected = "DATUM[\"WGS_1984 with anchor\",\n"
                     "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
-                    "        LENGTHUNIT[\"metre\",1,\n"
-                    "            ID[\"EPSG\",9001]],\n"
-                    "        ID[\"EPSG\",7030]],\n"
+                    "        LENGTHUNIT[\"metre\",1]],\n"
                     "    ANCHOR[\"My anchor\"]]";
 
     EXPECT_EQ(datum->exportToWKT(WKTFormatter::create()), expected);
@@ -636,25 +592,21 @@ TEST(datum, cs_with_MERIDIAN) {
     auto expected = "CS[Cartesian,2]\n"
                     "    AXIS[\"easting (X)\",south,\n"
                     "        MERIDIAN[90,\n"
-                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-                    "                ID[\"EPSG\",9122]]],\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
                     "        ORDER[1],\n"
-                    "        LENGTHUNIT[\"metre\",1,\n"
-                    "            ID[\"EPSG\",9001]]],\n"
+                    "        LENGTHUNIT[\"metre\",1]],\n"
                     "    AXIS[\"northing (Y)\",south,\n"
                     "        MERIDIAN[180,\n"
-                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-                    "                ID[\"EPSG\",9122]]],\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
                     "        ORDER[2],\n"
-                    "        LENGTHUNIT[\"metre\",1,\n"
-                    "            ID[\"EPSG\",9001]]]";
+                    "        LENGTHUNIT[\"metre\",1]]";
 
     EXPECT_EQ(cs->exportToWKT(WKTFormatter::create()), expected);
 }
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, scope_area_bbox_id_remark) {
+TEST(crs, scope_area_bbox_remark) {
     auto in_wkt = "GEODETICCRS[\"JGD2000\","
                   "DATUM[\"Japanese Geodetic Datum 2000\","
                   "  ELLIPSOID[\"GRS 1980\",6378137,298.257222101]],"
@@ -667,7 +619,6 @@ TEST(crs, scope_area_bbox_id_remark) {
                   "AREA[\"Japan\"],"
                   "BBOX[17.09,122.38,46.05,157.64],"
                   "TIMEEXTENT[2002-04-01,2011-10-21]," // TODO TIMEEXTENT
-                  "ID[\"EPSG\",4946,URI[\"urn:ogc:def:crs:EPSG::4946\"]],"
                   "REMARK[\"some_remark\"]]";
     auto crs =
         nn_dynamic_pointer_cast<GeodeticCRS>(WKTParser().createFromWKT(in_wkt));
@@ -694,12 +645,9 @@ TEST(crs, scope_area_bbox_id_remark) {
         "GEODCRS[\"JGD2000\",\n"
         "    DATUM[\"Japanese Geodetic Datum 2000\",\n"
         "        ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
-        "            LENGTHUNIT[\"metre\",1,\n"
-        "                ID[\"EPSG\",9001]]]],\n"
+        "            LENGTHUNIT[\"metre\",1]]],\n"
         "    PRIMEM[\"Greenwich\",0,\n"
-        "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-        "            ID[\"EPSG\",9122]],\n"
-        "        ID[\"EPSG\",8901]],\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
         "    CS[Cartesian,3],\n"
         "        AXIS[\"(X)\",geocentricX,\n"
         "            ORDER[1],\n"
@@ -713,7 +661,6 @@ TEST(crs, scope_area_bbox_id_remark) {
         "    SCOPE[\"Geodesy, topographic mapping and cadastre\"],\n"
         "    AREA[\"Japan\"],\n"
         "    BBOX[17.09,122.38,46.05,157.64],\n"
-        "    ID[\"EPSG\",4946],\n"
         "    REMARK[\"some_remark\"]]";
 
     EXPECT_EQ(got_wkt, expected);
@@ -727,9 +674,9 @@ TEST(crs, multiple_ID) {
     propertiesCRS.set(IdentifiedObject::NAME_KEY, "WGS 84");
     auto identifiers = ArrayOfBaseObject::create();
     identifiers->values.push_back(Identifier::create(
-        "codeA", PropertyMap().set(Identifier::AUTHORITY_KEY, "authorityA")));
+        "codeA", PropertyMap().set(Identifier::CODESPACE_KEY, "authorityA")));
     identifiers->values.push_back(Identifier::create(
-        "codeB", PropertyMap().set(Identifier::AUTHORITY_KEY, "authorityB")));
+        "codeB", PropertyMap().set(Identifier::CODESPACE_KEY, "authorityB")));
     propertiesCRS.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
     auto crs =
         GeodeticCRS::create(propertiesCRS, GeodeticReferenceFrame::EPSG_6326,

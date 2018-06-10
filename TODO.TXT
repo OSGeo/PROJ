@@ -6,7 +6,7 @@
     - exportToProj4()
     - derived crs, vertical crs, compound crs
     - TOWGS84 / boundcrs
-    - DATUMENSEMBLE, URI
+    - DATUMENSEMBLE
     - WKT2:2018 USAGE
     - dynamic CRS WKT
     - test sphericalCS

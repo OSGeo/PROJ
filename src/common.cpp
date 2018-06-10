@@ -517,29 +517,7 @@ void IdentifiedObject::setProperties(
 void IdentifiedObject::formatID(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     for (const auto &id : identifiers()) {
-        if (id->authority() && id->authority()->title() &&
-            !id->authority()->title()->empty() && !id->code().empty()) {
-            const std::string &code = id->code();
-            if (isWKT2) {
-                // TODO citation + uri
-                if (code[0] >= '0' && code[0] <= '9') {
-                    formatter->startNode(WKTConstants::ID);
-                    formatter->addQuotedString(*(id->authority()->title()));
-                    formatter->add(code);
-                    formatter->endNode();
-                } else {
-                    formatter->startNode(WKTConstants::ID);
-                    formatter->addQuotedString(*(id->authority()->title()));
-                    formatter->addQuotedString(code);
-                    formatter->endNode();
-                }
-            } else {
-                formatter->startNode(WKTConstants::AUTHORITY);
-                formatter->addQuotedString(*(id->authority()->title()));
-                formatter->addQuotedString(code);
-                formatter->endNode();
-            }
-        }
+        id->exportToWKT(formatter);
         if (!isWKT2) {
             break;
         }
@@ -716,13 +694,14 @@ void ObjectUsage::setProperties(
 
 // ---------------------------------------------------------------------------
 
-std::string ObjectUsage::_exportToWKT(WKTFormatterNNPtr formatter) const {
+void ObjectUsage::_exportToWKT(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     if (isWKT2) {
         auto l_domains = domains();
         if (l_domains.size() == 1) {
             l_domains[0]->exportToWKT(formatter);
         }
+        // TODO add support for multiple USAGE nodes in WKT2:2018
     }
     if (formatter->outputId()) {
         formatID(formatter);
@@ -730,5 +709,4 @@ std::string ObjectUsage::_exportToWKT(WKTFormatterNNPtr formatter) const {
     if (isWKT2) {
         formatRemarks(formatter);
     }
-    return formatter->toString();
 }
