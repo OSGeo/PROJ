@@ -46,7 +46,8 @@ TEST(metadata, citation) {
 // ---------------------------------------------------------------------------
 
 TEST(metadata, extent) {
-    Extent x;
+    auto extent = Extent::create(optional<std::string>(),
+                                 std::vector<GeographicExtentNNPtr>());
     // TODO
 }
 

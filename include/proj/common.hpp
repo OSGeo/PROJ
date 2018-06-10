@@ -228,21 +228,36 @@ class IdentifiedObject : public util::BaseObject {
 
 // ---------------------------------------------------------------------------
 
-class ObjectDomain {
+class ObjectDomain;
+using ObjectDomainPtr = std::shared_ptr<ObjectDomain>;
+using ObjectDomainNNPtr = util::nn<ObjectDomainPtr>;
+
+class ObjectDomain : public util::BaseObject {
   public:
-    PROJ_DLL ObjectDomain();
     PROJ_DLL ObjectDomain(const ObjectDomain &other);
     PROJ_DLL ObjectDomain &operator=(const ObjectDomain &other) = delete;
     PROJ_DLL ~ObjectDomain();
 
-    PROJ_DLL const std::string &scope() const;
-    PROJ_DLL const metadata::Extent &domainOfValidity() const;
+    // In ISO_19111:2018, scope and domain are compulsory, but in WKT2:2015,
+    // they
+    // are not necessarily both specified
+    PROJ_DLL const util::optional<std::string> &scope() const;
+    PROJ_DLL const metadata::ExtentPtr &domainOfValidity() const;
+
+    PROJ_DLL static ObjectDomainNNPtr
+    create(const util::optional<std::string> &scopeIn,
+           const metadata::ExtentPtr &extent);
+
+    std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const; // throw(io::FormattingException)
+
+  protected:
+    ObjectDomain();
+    INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
 };
-
-using ObjectDomainPtr = std::shared_ptr<ObjectDomain>;
 
 // ---------------------------------------------------------------------------
 
@@ -253,7 +268,19 @@ class ObjectUsage : public IdentifiedObject {
     PROJ_DLL ObjectUsage &operator=(const ObjectUsage &other) = delete;
     PROJ_DLL ~ObjectUsage();
 
-    PROJ_DLL const ObjectDomainPtr &domain() const;
+    PROJ_DLL const std::vector<ObjectDomainNNPtr> &domains() const;
+
+    PROJ_DLL static const std::string SCOPE_KEY;
+    PROJ_DLL static const std::string DOMAIN_OF_VALIDITY_KEY;
+
+    PROJ_DLL static const std::string OBJECT_DOMAIN_KEY;
+
+  protected:
+    void setProperties(const util::PropertyMap
+                           &properties); // throw(InvalidValueTypeException)
+
+    std::string _exportToWKT(io::WKTFormatterNNPtr formatter)
+        const; // throw(io::FormattingException)
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

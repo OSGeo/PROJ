@@ -93,12 +93,13 @@ std::string toupper(const std::string &str)
 /** Strip leading and trailing double quote characters */
 std::string stripQuotes(const std::string &str) {
     // As used in examples of OGC 12-063r5
-    static const std::string printedQuote("\xE2\x80\x9C");
+    static const std::string startPrintedQuote("\xE2\x80\x9C");
+    static const std::string endPrintedQuote("\xE2\x80\x9D");
 
     if (str.size() >= 2 && str[0] == '"' && str.back() == '"') {
         return str.substr(1, str.size() - 2);
-    } else if (str.size() >= 6 && str.substr(0, 3) == printedQuote &&
-               str.substr(str.size() - 3) == printedQuote) {
+    } else if (str.size() >= 6 && str.substr(0, 3) == startPrintedQuote &&
+               str.substr(str.size() - 3) == endPrintedQuote) {
         return str.substr(3, str.size() - 6);
     }
     return str;

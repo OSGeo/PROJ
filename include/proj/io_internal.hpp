@@ -78,6 +78,9 @@ class WKTConstants {
     static const std::string REMARK;
     static const std::string GEOGCRS;     // WKT2-2018
     static const std::string BASEGEOGCRS; // WKT2-2018
+    static const std::string SCOPE;
+    static const std::string AREA;
+    static const std::string BBOX;
 
     // WKT2 long
     static const std::string GEODETICCRS;

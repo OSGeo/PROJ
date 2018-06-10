@@ -548,8 +548,8 @@ void IdentifiedObject::formatRemarks(WKTFormatterNNPtr formatter) const {
 
 //! @cond Doxygen_Suppress"
 struct ObjectDomain::Private {
-    std::string scope{};
-    Extent domainOfValidity{};
+    optional<std::string> scope_{};
+    ExtentPtr domainOfValidity_{};
 };
 //! @endcond
 
@@ -568,19 +568,59 @@ ObjectDomain::~ObjectDomain() = default;
 
 // ---------------------------------------------------------------------------
 
-const std::string &ObjectDomain::scope() const { return d->scope; }
+const optional<std::string> &ObjectDomain::scope() const { return d->scope_; }
 
 // ---------------------------------------------------------------------------
 
-const Extent &ObjectDomain::domainOfValidity() const {
-    return d->domainOfValidity;
+const ExtentPtr &ObjectDomain::domainOfValidity() const {
+    return d->domainOfValidity_;
+}
+
+// ---------------------------------------------------------------------------
+
+ObjectDomainNNPtr ObjectDomain::create(const optional<std::string> &scopeIn,
+                                       const ExtentPtr &extent) {
+    auto objectDomain = ObjectDomain::nn_make_shared<ObjectDomain>();
+    objectDomain->d->scope_ = scopeIn;
+    objectDomain->d->domainOfValidity_ = extent;
+    return objectDomain;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string ObjectDomain::exportToWKT(WKTFormatterNNPtr formatter) const {
+    if (d->scope_.has_value()) {
+        formatter->startNode(WKTConstants::SCOPE);
+        formatter->addQuotedString(*(d->scope_));
+        formatter->endNode();
+    }
+    if (d->domainOfValidity_) {
+        if (d->domainOfValidity_->description().has_value()) {
+            formatter->startNode(WKTConstants::AREA);
+            formatter->addQuotedString(*(d->domainOfValidity_->description()));
+            formatter->endNode();
+        }
+        if (d->domainOfValidity_->geographicElements().size() == 1) {
+            auto bbox = util::nn_dynamic_pointer_cast<GeographicBoundingBox>(
+                d->domainOfValidity_->geographicElements()[0]);
+            if (bbox) {
+                formatter->startNode(WKTConstants::BBOX);
+                formatter->add(bbox->southBoundLongitude());
+                formatter->add(bbox->westBoundLongitude());
+                formatter->add(bbox->northBoundLongitude());
+                formatter->add(bbox->eastBoundLongitude());
+                formatter->endNode();
+            }
+        }
+    }
+    return formatter->toString();
 }
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 struct ObjectUsage::Private {
-    ObjectDomainPtr domain{};
+    std::vector<ObjectDomainNNPtr> domains_{};
 };
 //! @endcond
 
@@ -599,4 +639,84 @@ ObjectUsage::~ObjectUsage() = default;
 
 // ---------------------------------------------------------------------------
 
-const ObjectDomainPtr &ObjectUsage::domain() const { return d->domain; }
+const std::vector<ObjectDomainNNPtr> &ObjectUsage::domains() const {
+    return d->domains_;
+}
+
+// ---------------------------------------------------------------------------
+
+void ObjectUsage::setProperties(
+    const PropertyMap &properties) // throw(InvalidValueTypeException)
+{
+    IdentifiedObject::setProperties(properties);
+
+    optional<std::string> scope;
+    {
+        std::string temp;
+        if (properties.getStringValue(SCOPE_KEY, temp)) {
+            scope = temp;
+        }
+    }
+
+    ExtentPtr domainOfValidity;
+    {
+        auto oIter = properties.find(DOMAIN_OF_VALIDITY_KEY);
+        if (oIter != properties.end()) {
+            domainOfValidity =
+                util::nn_dynamic_pointer_cast<Extent>(oIter->second);
+            if (!domainOfValidity) {
+                throw InvalidValueTypeException("Invalid value type for " +
+                                                DOMAIN_OF_VALIDITY_KEY);
+            }
+        }
+    }
+
+    if (scope.has_value() || domainOfValidity) {
+        d->domains_.emplace_back(ObjectDomain::create(scope, domainOfValidity));
+    }
+
+    {
+        auto oIter = properties.find(OBJECT_DOMAIN_KEY);
+        if (oIter != properties.end()) {
+            if (auto objectDomain = util::nn_dynamic_pointer_cast<ObjectDomain>(
+                    oIter->second)) {
+                d->domains_.emplace_back(NN_CHECK_ASSERT(objectDomain));
+            } else if (auto array =
+                           util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
+                               oIter->second)) {
+                for (const auto &val : array->values) {
+                    objectDomain =
+                        util::nn_dynamic_pointer_cast<ObjectDomain>(val);
+                    if (objectDomain) {
+                        d->domains_.emplace_back(NN_CHECK_ASSERT(objectDomain));
+                    } else {
+                        throw InvalidValueTypeException(
+                            "Invalid value type for " + OBJECT_DOMAIN_KEY);
+                    }
+                }
+            } else {
+                throw InvalidValueTypeException("Invalid value type for " +
+                                                OBJECT_DOMAIN_KEY);
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+std::string ObjectUsage::_exportToWKT(WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    if (isWKT2) {
+        auto l_domains = domains();
+        if (l_domains.size() == 1) {
+            l_domains[0]->exportToWKT(formatter);
+        }
+    }
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+    if (isWKT2) {
+        formatRemarks(formatter);
+    }
+    return formatter->toString();
+}

@@ -561,11 +561,17 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
         throw ParsingException("whitespace only string");
     }
     bool inString = false;
+    static const std::string startPrintedQuote("\xE2\x80\x9C");
+    static const std::string endPrintedQuote("\xE2\x80\x9D");
     for (;
          i < wkt.size() && (inString || (wkt[i] != '[' && wkt[i] != ',' &&
                                          wkt[i] != ']' && !::isspace(wkt[i])));
          ++i) {
         if (wkt[i] == '"') {
+            inString = !inString;
+        } else if (i + 3 <= wkt.size() &&
+                   (wkt.substr(i, 3) == startPrintedQuote ||
+                    wkt.substr(i, 3) == endPrintedQuote)) {
             inString = !inString;
         }
         value += wkt[i];
@@ -700,6 +706,10 @@ std::vector<std::string> WKTParser::warningList() const {
 
 // ---------------------------------------------------------------------------
 
+static double asDouble(const std::string &val) { return std::stod(val); }
+
+// ---------------------------------------------------------------------------
+
 PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
     PropertyMap properties;
     if (!node->children().empty()) {
@@ -727,12 +737,70 @@ PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
         }
     }
 
+    auto remarkNode = node->lookForChild(WKTConstants::REMARK);
+    if (remarkNode) {
+        if (remarkNode->children().size() == 1) {
+            properties.set(IdentifiedObject::REMARKS_KEY,
+                           stripQuotes(remarkNode->children()[0]->value()));
+        } else {
+            throw ParsingException("not required number of children in " +
+                                   remarkNode->value() + " node");
+        }
+    }
+
+    auto scopeNode = node->lookForChild(WKTConstants::SCOPE);
+    auto areaNode = node->lookForChild(WKTConstants::AREA);
+    auto bboxNode = node->lookForChild(WKTConstants::BBOX);
+    if (scopeNode || areaNode || bboxNode) {
+        optional<std::string> scope;
+        if (scopeNode && scopeNode->children().size() == 1) {
+            scope = stripQuotes(scopeNode->children()[0]->value());
+        }
+        ExtentPtr extent;
+        if (areaNode || bboxNode) {
+            util::optional<std::string> description;
+            std::vector<GeographicExtentNNPtr> geogExtent;
+            if (areaNode) {
+                if (areaNode->children().size() == 1) {
+                    description = stripQuotes(areaNode->children()[0]->value());
+                } else {
+                    throw ParsingException(
+                        "not required number of children in " +
+                        areaNode->value() + " node");
+                }
+            }
+            if (bboxNode) {
+                if (bboxNode->children().size() == 4) {
+                    try {
+                        double south =
+                            asDouble(bboxNode->children()[0]->value());
+                        double west =
+                            asDouble(bboxNode->children()[1]->value());
+                        double north =
+                            asDouble(bboxNode->children()[2]->value());
+                        double east =
+                            asDouble(bboxNode->children()[3]->value());
+                        auto bbox = GeographicBoundingBox::create(west, south,
+                                                                  east, north);
+                        geogExtent.emplace_back(bbox);
+                    } catch (const std::exception &) {
+                        throw ParsingException("not 4 double valus in " +
+                                               bboxNode->value() + " node");
+                    }
+                } else {
+                    throw ParsingException(
+                        "not required number of children in " +
+                        bboxNode->value() + " node");
+                }
+            }
+            extent = Extent::create(description, geogExtent).as_nullable();
+        }
+        properties.set(ObjectUsage::OBJECT_DOMAIN_KEY,
+                       ObjectDomain::create(scope, extent));
+    }
+
     return properties;
 }
-
-// ---------------------------------------------------------------------------
-
-static double asDouble(const std::string &val) { return std::stod(val); }
 
 // ---------------------------------------------------------------------------
 

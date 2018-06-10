@@ -648,3 +648,70 @@ TEST(datum, cs_with_MERIDIAN) {
 
     EXPECT_EQ(cs->exportToWKT(WKTFormatter::create()), expected);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, scope_area_bbox_id_remark) {
+    auto in_wkt = "GEODETICCRS[\"JGD2000\","
+                  "DATUM[\"Japanese Geodetic Datum 2000\","
+                  "  ELLIPSOID[\"GRS 1980\",6378137,298.257222101]],"
+                  "CS[Cartesian,3],"
+                  "  AXIS[\"(X)\",geocentricX],"
+                  "  AXIS[\"(Y)\",geocentricY],"
+                  "  AXIS[\"(Z)\",geocentricZ],"
+                  "  LENGTHUNIT[\"metre\",1.0],"
+                  "SCOPE[\"Geodesy, topographic mapping and cadastre\"],"
+                  "AREA[\"Japan\"],"
+                  "BBOX[17.09,122.38,46.05,157.64],"
+                  "TIMEEXTENT[2002-04-01,2011-10-21]," // TODO TIMEEXTENT
+                  "ID[\"EPSG\",4946,URI[\"urn:ogc:def:crs:EPSG::4946\"]],"
+                  "REMARK[\"some_remark\"]]";
+    auto crs =
+        nn_dynamic_pointer_cast<GeodeticCRS>(WKTParser().createFromWKT(in_wkt));
+    ASSERT_TRUE(crs != nullptr);
+
+    ASSERT_EQ(crs->domains().size(), 1);
+    auto domain = crs->domains()[0];
+    EXPECT_TRUE(domain->scope().has_value());
+    EXPECT_EQ(*(domain->scope()), "Geodesy, topographic mapping and cadastre");
+    ASSERT_TRUE(domain->domainOfValidity() != nullptr);
+    EXPECT_TRUE(domain->domainOfValidity()->description().has_value());
+    EXPECT_EQ(*(domain->domainOfValidity()->description()), "Japan");
+    ASSERT_EQ(domain->domainOfValidity()->geographicElements().size(), 1);
+    auto geogElement = domain->domainOfValidity()->geographicElements()[0];
+    auto bbox = nn_dynamic_pointer_cast<GeographicBoundingBox>(geogElement);
+    ASSERT_TRUE(bbox != nullptr);
+    EXPECT_EQ(bbox->southBoundLongitude(), 17.09);
+    EXPECT_EQ(bbox->westBoundLongitude(), 122.38);
+    EXPECT_EQ(bbox->northBoundLongitude(), 46.05);
+    EXPECT_EQ(bbox->eastBoundLongitude(), 157.64);
+
+    auto got_wkt = crs->exportToWKT(WKTFormatter::create());
+    auto expected =
+        "GEODCRS[\"JGD2000\",\n"
+        "    DATUM[\"Japanese Geodetic Datum 2000\",\n"
+        "        ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]]],\n"
+        "    PRIMEM[\"Greenwich\",0,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "            ID[\"EPSG\",9122]],\n"
+        "        ID[\"EPSG\",8901]],\n"
+        "    CS[Cartesian,3],\n"
+        "        AXIS[\"(X)\",geocentricX,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"(Y)\",geocentricY,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"(Z)\",geocentricZ,\n"
+        "            ORDER[3],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    SCOPE[\"Geodesy, topographic mapping and cadastre\"],\n"
+        "    AREA[\"Japan\"],\n"
+        "    BBOX[17.09,122.38,46.05,157.64],\n"
+        "    ID[\"EPSG\",4946],\n"
+        "    REMARK[\"some_remark\"]]";
+
+    EXPECT_EQ(got_wkt, expected);
+}

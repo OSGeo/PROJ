@@ -68,15 +68,76 @@ class Citation : public util::BaseObject {
 
 // ---------------------------------------------------------------------------
 
-class Extent {
+class GeographicExtent;
+using GeographicExtentPtr = std::shared_ptr<GeographicExtent>;
+using GeographicExtentNNPtr = util::nn<GeographicExtentPtr>;
+
+// ISO_19115 EX_GeographicExtent */
+class GeographicExtent {
   public:
-    PROJ_DLL Extent();
+    PROJ_DLL virtual ~GeographicExtent();
+
+    // GeoAPI has a getInclusion() method. We assume that it is included for our
+    // use
+
+  protected:
+    GeographicExtent();
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+class GeographicBoundingBox;
+using GeographicBoundingBoxPtr = std::shared_ptr<GeographicBoundingBox>;
+using GeographicBoundingBoxNNPtr = util::nn<GeographicBoundingBoxPtr>;
+
+// ISO_19115 EX_GeographicBoundingBox */
+class GeographicBoundingBox : public GeographicExtent {
+  public:
+    PROJ_DLL ~GeographicBoundingBox() override;
+    PROJ_DLL double westBoundLongitude() const;
+    PROJ_DLL double southBoundLongitude() const;
+    PROJ_DLL double eastBoundLongitude() const;
+    PROJ_DLL double northBoundLongitude() const;
+
+    PROJ_DLL static GeographicBoundingBoxNNPtr
+    create(double west, double south, double east, double north);
+
+  protected:
+    GeographicBoundingBox(double west, double south, double east, double north);
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+class Extent;
+using ExtentPtr = std::shared_ptr<Extent>;
+using ExtentNNPtr = util::nn<ExtentPtr>;
+
+// ISO_19115 EX_Extent */
+class Extent : public util::BaseObject {
+  public:
     PROJ_DLL Extent(const Extent &other);
     PROJ_DLL Extent &operator=(const Extent &other) = delete;
     PROJ_DLL ~Extent();
 
-    const util::optional<std::string> &description() const;
-    // TODO: geographic part !
+    PROJ_DLL const util::optional<std::string> &description() const;
+    PROJ_DLL const std::vector<GeographicExtentNNPtr> &
+    geographicElements() const;
+    // TODO: temporal and vertical part !
+
+    PROJ_DLL static ExtentNNPtr
+    create(const util::optional<std::string> &descriptionIn,
+           const std::vector<GeographicExtentNNPtr> &geographicElementsIn);
+
+  protected:
+    Extent();
+    INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

@@ -87,8 +87,74 @@ const optional<std::string> &Citation::title() const { return d->title; }
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+struct GeographicExtent::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+GeographicExtent::GeographicExtent() : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+GeographicExtent::~GeographicExtent() = default;
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct GeographicBoundingBox::Private {
+    double west_{};
+    double south_{};
+    double east_{};
+    double north_{};
+
+    Private(double west, double south, double east, double north)
+        : west_(west), south_(south), east_(east), north_(north) {}
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+GeographicBoundingBox::GeographicBoundingBox(double west, double south,
+                                             double east, double north)
+    : GeographicExtent(),
+      d(internal::make_unique<Private>(west, south, east, north)) {}
+
+// ---------------------------------------------------------------------------
+
+GeographicBoundingBox::~GeographicBoundingBox() = default;
+
+// ---------------------------------------------------------------------------
+
+double GeographicBoundingBox::westBoundLongitude() const { return d->west_; }
+
+// ---------------------------------------------------------------------------
+
+double GeographicBoundingBox::southBoundLongitude() const { return d->south_; }
+
+// ---------------------------------------------------------------------------
+
+double GeographicBoundingBox::eastBoundLongitude() const { return d->east_; }
+
+// ---------------------------------------------------------------------------
+
+double GeographicBoundingBox::northBoundLongitude() const { return d->north_; }
+
+// ---------------------------------------------------------------------------
+
+GeographicBoundingBoxNNPtr GeographicBoundingBox::create(double west,
+                                                         double south,
+                                                         double east,
+                                                         double north) {
+    return GeographicBoundingBox::nn_make_shared<GeographicBoundingBox>(
+        west, south, east, north);
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 struct Extent::Private {
-    optional<std::string> description{};
+    optional<std::string> description_{};
+    std::vector<GeographicExtentNNPtr> geographicElements_{};
 };
 //! @endcond
 
@@ -109,7 +175,24 @@ Extent::~Extent() = default;
 // ---------------------------------------------------------------------------
 
 const optional<std::string> &Extent::description() const {
-    return d->description;
+    return d->description_;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::vector<GeographicExtentNNPtr> &Extent::geographicElements() const {
+    return d->geographicElements_;
+}
+
+// ---------------------------------------------------------------------------
+
+ExtentNNPtr
+Extent::create(const optional<std::string> &descriptionIn,
+               const std::vector<GeographicExtentNNPtr> &geographicElementsIn) {
+    auto extent = Extent::nn_make_shared<Extent>();
+    extent->d->description_ = descriptionIn;
+    extent->d->geographicElements_ = geographicElementsIn;
+    return extent;
 }
 
 // ---------------------------------------------------------------------------

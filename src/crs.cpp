@@ -233,12 +233,7 @@ std::string GeodeticCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
         }
     }
     coordinateSystem()->exportToWKT(formatter);
-    if (formatter->outputId()) {
-        formatID(formatter);
-    }
-    if (isWKT2) {
-        formatRemarks(formatter);
-    }
+    ObjectUsage::_exportToWKT(formatter);
     formatter->endNode();
     return formatter->toString();
 }
@@ -564,12 +559,7 @@ std::string ProjectedCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
     }
 
     coordinateSystem()->exportToWKT(formatter);
-    if (formatter->outputId()) {
-        formatID(formatter);
-    }
-    if (isWKT2) {
-        formatRemarks(formatter);
-    }
+    ObjectUsage::_exportToWKT(formatter);
     formatter->endNode();
     return formatter->toString();
 }

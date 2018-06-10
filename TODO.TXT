@@ -6,7 +6,8 @@
     - exportToProj4()
     - derived crs, vertical crs, compound crs
     - TOWGS84 / boundcrs
-    - DATUMENSEMBLE, REMARK, URI, SCOPE, EXTENT
+    - DATUMENSEMBLE, URI
+    - WKT2:2018 USAGE
     - dynamic CRS WKT
     - test sphericalCS
     - WKT2: Why PROJCRS.GEODCRS doesn't include a ID node ?

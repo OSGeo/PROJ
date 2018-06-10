@@ -78,6 +78,12 @@ const std::string Identifier::DESCRIPTION_KEY("description");
 
 // ---------------------------------------------------------------------------
 
+const std::string ObjectUsage::SCOPE_KEY("scope");
+const std::string ObjectUsage::DOMAIN_OF_VALIDITY_KEY("domainOfValidity");
+const std::string ObjectUsage::OBJECT_DOMAIN_KEY("objectUsage");
+
+// ---------------------------------------------------------------------------
+
 #define DEFINE_WKT_CONSTANT(x) const std::string WKTConstants::x(#x)
 
 DEFINE_WKT_CONSTANT(GEOCCS);
@@ -109,6 +115,9 @@ DEFINE_WKT_CONSTANT(METHOD);
 DEFINE_WKT_CONSTANT(REMARK);
 DEFINE_WKT_CONSTANT(GEOGCRS);
 DEFINE_WKT_CONSTANT(BASEGEOGCRS);
+DEFINE_WKT_CONSTANT(SCOPE);
+DEFINE_WKT_CONSTANT(AREA);
+DEFINE_WKT_CONSTANT(BBOX);
 
 DEFINE_WKT_CONSTANT(GEODETICCRS);
 DEFINE_WKT_CONSTANT(GEODETICDATUM);
