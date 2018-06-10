@@ -696,7 +696,7 @@ static PropertyMap getUTMConversionProperty(int zone, bool north) {
     conversionName << (north ? 'N' : 'S');
 
     return PropertyMap()
-        .set(Identifier::DESCRIPTION_KEY, conversionName.str())
+        .set(IdentifiedObject::NAME_KEY, conversionName.str())
         .set(Identifier::AUTHORITY_KEY, "EPSG")
         .set(Identifier::CODE_KEY, (north ? 16000 : 17000) + zone);
 }
@@ -711,7 +711,7 @@ ConversionNNPtr Conversion::createUTM(int zone, bool north) {
     for (const auto &param : mapping->params) {
         parameters.push_back(OperationParameter::create(
             PropertyMap()
-                .set(Identifier::DESCRIPTION_KEY, param.wkt2_name)
+                .set(IdentifiedObject::NAME_KEY, param.wkt2_name)
                 .set(Identifier::AUTHORITY_KEY, "EPSG")
                 .set(Identifier::CODE_KEY, param.epsg_code)));
     }
@@ -728,7 +728,7 @@ ConversionNNPtr Conversion::createUTM(int zone, bool north) {
     return create(
         getUTMConversionProperty(zone, north),
         PropertyMap()
-            .set(Identifier::DESCRIPTION_KEY, EPSG_METHOD_TRANSVERSE_MERCATOR)
+            .set(IdentifiedObject::NAME_KEY, EPSG_METHOD_TRANSVERSE_MERCATOR)
             .set(Identifier::AUTHORITY_KEY, "EPSG")
             .set(Identifier::CODE_KEY, EPSG_METHOD_TRANSVERSE_MERCATOR_CODE),
         parameters, values);

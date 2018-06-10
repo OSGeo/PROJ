@@ -63,7 +63,7 @@ using namespace NS_PROJ::util;
 // ---------------------------------------------------------------------------
 
 const std::string IdentifiedObject::NAME_KEY("name");
-const std::string IdentifiedObject::IDENTIFIER_KEY("identifier");
+const std::string IdentifiedObject::IDENTIFIERS_KEY("identifiers");
 const std::string IdentifiedObject::ALIAS_KEY("alias");
 const std::string IdentifiedObject::REMARKS_KEY("remarks");
 const std::string IdentifiedObject::DEPRECATED_KEY("deprecated");

@@ -135,8 +135,9 @@ TEST(wkt_parse, datum_with_ANCHOR) {
 static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
                            bool checkEPSGCodes = true) {
     if (checkEPSGCodes) {
-        EXPECT_EQ(crs->name()->code(), "4326");
-        EXPECT_EQ(*(crs->name()->authority()->title()), "EPSG");
+        ASSERT_EQ(crs->identifiers().size(), 1);
+        EXPECT_EQ(crs->identifiers()[0]->code(), "4326");
+        EXPECT_EQ(*(crs->identifiers()[0]->authority()->title()), "EPSG");
     }
     EXPECT_EQ(*(crs->name()->description()), "WGS 84");
 
@@ -162,8 +163,9 @@ static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
 
     auto datum = crs->datum();
     if (checkEPSGCodes) {
-        EXPECT_EQ(datum->name()->code(), "6326");
-        EXPECT_EQ(*(datum->name()->authority()->title()), "EPSG");
+        ASSERT_EQ(datum->identifiers().size(), 1);
+        EXPECT_EQ(datum->identifiers()[0]->code(), "6326");
+        EXPECT_EQ(*(datum->identifiers()[0]->authority()->title()), "EPSG");
     }
     EXPECT_EQ(*(datum->name()->description()), "WGS_1984");
 
@@ -172,8 +174,9 @@ static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
     EXPECT_EQ(ellipsoid->semiMajorAxis().unit(), UnitOfMeasure::METRE);
     EXPECT_EQ(ellipsoid->inverseFlattening()->value(), 298.257223563);
     if (checkEPSGCodes) {
-        EXPECT_EQ(ellipsoid->name()->code(), "7030");
-        EXPECT_EQ(*(ellipsoid->name()->authority()->title()), "EPSG");
+        ASSERT_EQ(ellipsoid->identifiers().size(), 1);
+        EXPECT_EQ(ellipsoid->identifiers()[0]->code(), "7030");
+        EXPECT_EQ(*(ellipsoid->identifiers()[0]->authority()->title()), "EPSG");
     }
     EXPECT_EQ(*(ellipsoid->name()->description()), "WGS 84");
 }
@@ -341,8 +344,9 @@ TEST(wkt_parse, wkt2_GEODETICREFERENCEFRAME) {
 // ---------------------------------------------------------------------------
 
 static void checkEPSG_4979(GeographicCRSPtr crs) {
-    EXPECT_EQ(crs->name()->code(), "4979");
-    EXPECT_EQ(*(crs->name()->authority()->title()), "EPSG");
+    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "4979");
+    EXPECT_EQ(*(crs->identifiers()[0]->authority()->title()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()), "WGS 84");
 
     auto cs = crs->coordinateSystem();
@@ -502,8 +506,9 @@ TEST(wkt_parse, wkt1_geocentric) {
 
 static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
     EXPECT_EQ(*(crs->name()->description()), "WGS 84 / UTM zone 31N");
-    EXPECT_EQ(crs->name()->code(), "32631");
-    EXPECT_EQ(*(crs->name()->authority()->title()), "EPSG");
+    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "32631");
+    EXPECT_EQ(*(crs->identifiers()[0]->authority()->title()), "EPSG");
 
     auto geogCRS = nn_dynamic_pointer_cast<GeographicCRS>(crs->baseCRS());
     ASSERT_TRUE(geogCRS != nullptr);
@@ -773,6 +778,30 @@ TEST(wkt_parse, cs_with_MERIDIAN) {
     EXPECT_EQ(meridian->longitude().value(), 90.0);
     EXPECT_EQ(meridian->longitude().unit(), UnitOfMeasure::DEGREE);
     ASSERT_TRUE(crs->coordinateSystem()->axisList()[1]->meridian() == nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, cs_with_multiple_ID) {
+    auto wkt = "GEODCRS[\"WGS 84\",\n"
+               "    DATUM[\"WGS_1984\",\n"
+               "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
+               "    CS[Cartesian,3],\n"
+               "        AXIS[\"(X)\",geocentricX],\n"
+               "        AXIS[\"(Y)\",geocentricY],\n"
+               "        AXIS[\"(Z)\",geocentricZ],\n"
+               "        UNIT[\"metre\",1],\n"
+               "    ID[\"authorityA\",\"codeA\"],\n"
+               "    ID[\"authorityB\",\"codeB\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    EXPECT_EQ(*(crs->name()->description()), "WGS 84");
+    ASSERT_EQ(crs->identifiers().size(), 2);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "codeA");
+    EXPECT_EQ(*(crs->identifiers()[0]->authority()->title()), "authorityA");
+    EXPECT_EQ(crs->identifiers()[1]->code(), "codeB");
+    EXPECT_EQ(*(crs->identifiers()[1]->authority()->title()), "authorityB");
 }
 
 // ---------------------------------------------------------------------------

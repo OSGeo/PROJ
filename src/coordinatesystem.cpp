@@ -442,10 +442,10 @@ EllipsoidalCSNNPtr EllipsoidalCS::create(const PropertyMap &properties,
 EllipsoidalCSNNPtr EllipsoidalCS::createLatitudeLongitudeDegree() {
     std::vector<CoordinateSystemAxisPtr> axis{
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Latitude),
+            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
             AxisAbbreviation::lat, AxisDirection::NORTH, UnitOfMeasure::DEGREE),
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Longitude),
+            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
             AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::DEGREE)};
     auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
     return cs;
@@ -457,13 +457,13 @@ EllipsoidalCSNNPtr
 EllipsoidalCS::createLatitudeLongitudeDegreeEllipsoidalHeightMetre() {
     std::vector<CoordinateSystemAxisPtr> axis{
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Latitude),
+            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
             AxisAbbreviation::lat, AxisDirection::NORTH, UnitOfMeasure::DEGREE),
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Longitude),
+            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
             AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::DEGREE),
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY,
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
                               AxisName::Ellipsoidal_height),
             AxisAbbreviation::h, AxisDirection::UP, UnitOfMeasure::METRE)};
     auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
@@ -515,10 +515,10 @@ CartesianCSNNPtr CartesianCS::create(const PropertyMap &properties,
 CartesianCSNNPtr CartesianCS::createEastingNorthingMetre() {
     std::vector<CoordinateSystemAxisPtr> axis{
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Easting),
+            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Easting),
             AxisAbbreviation::E, AxisDirection::EAST, UnitOfMeasure::METRE),
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Northing),
+            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Northing),
             AxisAbbreviation::N, AxisDirection::NORTH, UnitOfMeasure::METRE)};
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     return cs;
@@ -529,17 +529,17 @@ CartesianCSNNPtr CartesianCS::createEastingNorthingMetre() {
 CartesianCSNNPtr CartesianCS::createGeocentric() {
     std::vector<CoordinateSystemAxisPtr> axis{
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY,
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
                               AxisName::Geocentric_X),
             AxisAbbreviation::X, AxisDirection::GEOCENTRIC_X,
             UnitOfMeasure::METRE),
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY,
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
                               AxisName::Geocentric_Y),
             AxisAbbreviation::Y, AxisDirection::GEOCENTRIC_Y,
             UnitOfMeasure::METRE),
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY,
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
                               AxisName::Geocentric_Z),
             AxisAbbreviation::Z, AxisDirection::GEOCENTRIC_Z,
             UnitOfMeasure::METRE)};

@@ -286,7 +286,7 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4326() {
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::AUTHORITY_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4326)
-        .set(Identifier::DESCRIPTION_KEY, "WGS 84");
+        .set(IdentifiedObject::NAME_KEY, "WGS 84");
     return create(propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
                   EllipsoidalCS::createLatitudeLongitudeDegree());
 }
@@ -297,7 +297,7 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4979() {
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::AUTHORITY_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4979)
-        .set(Identifier::DESCRIPTION_KEY, "WGS 84");
+        .set(IdentifiedObject::NAME_KEY, "WGS 84");
     return create(
         propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
         EllipsoidalCS::createLatitudeLongitudeDegreeEllipsoidalHeightMetre());
@@ -309,23 +309,22 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
     PropertyMap propertiesEllps;
     propertiesEllps.set(Identifier::AUTHORITY_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 6807)
-        .set(Identifier::DESCRIPTION_KEY, "Clarke 1880 (IGN)");
+        .set(IdentifiedObject::NAME_KEY, "Clarke 1880 (IGN)");
     auto ellps(Ellipsoid::createFlattenedSphere(
         propertiesEllps, Length(6378249.2), Scale(293.4660212936269)));
 
-    auto pm(
-        PrimeMeridian::create(PropertyMap()
-                                  .set(Identifier::AUTHORITY_KEY, "EPSG")
-                                  .set(Identifier::CODE_KEY, 8903)
-                                  .set(Identifier::DESCRIPTION_KEY, "Paris"),
-                              Angle(2.5969213, UnitOfMeasure::GRAD)));
+    auto pm(PrimeMeridian::create(PropertyMap()
+                                      .set(Identifier::AUTHORITY_KEY, "EPSG")
+                                      .set(Identifier::CODE_KEY, 8903)
+                                      .set(IdentifiedObject::NAME_KEY, "Paris"),
+                                  Angle(2.5969213, UnitOfMeasure::GRAD)));
 
     auto axisLat(CoordinateSystemAxis::create(
-        PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Latitude),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
         AxisAbbreviation::lat, AxisDirection::NORTH, UnitOfMeasure::GRAD));
 
     auto axisLong(CoordinateSystemAxis::create(
-        PropertyMap().set(Identifier::DESCRIPTION_KEY, AxisName::Longitude),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
         AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::GRAD));
 
     auto cs(EllipsoidalCS::create(PropertyMap(), axisLat, axisLong));
@@ -333,7 +332,7 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
     PropertyMap propertiesDatum;
     propertiesDatum.set(Identifier::AUTHORITY_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 6807)
-        .set(Identifier::DESCRIPTION_KEY,
+        .set(IdentifiedObject::NAME_KEY,
              "Nouvelle_Triangulation_Francaise_Paris");
     auto datum(GeodeticReferenceFrame::create(propertiesDatum, ellps,
                                               optional<std::string>(), pm));
@@ -341,7 +340,7 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::AUTHORITY_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4807)
-        .set(Identifier::DESCRIPTION_KEY, "NTF (Paris)");
+        .set(IdentifiedObject::NAME_KEY, "NTF (Paris)");
     auto gcrs(create(propertiesCRS, datum, cs));
     return gcrs;
 }

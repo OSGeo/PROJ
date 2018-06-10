@@ -194,11 +194,12 @@ class IdentifiedObject : public util::BaseObject {
                &properties); // throw(InvalidValueTypeException)
 
     PROJ_DLL static const std::string NAME_KEY;
-    PROJ_DLL static const std::string IDENTIFIER_KEY;
+    PROJ_DLL static const std::string IDENTIFIERS_KEY;
     PROJ_DLL static const std::string ALIAS_KEY;
     PROJ_DLL static const std::string REMARKS_KEY;
     PROJ_DLL static const std::string DEPRECATED_KEY;
 
+    // in practice only name().description() is used
     PROJ_DLL const metadata::IdentifierNNPtr &name() const;
     PROJ_DLL const std::vector<metadata::IdentifierNNPtr> &identifiers() const;
     PROJ_DLL const std::vector<util::GenericNameNNPtr> &aliases() const;

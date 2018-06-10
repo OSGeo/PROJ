@@ -50,21 +50,24 @@ using namespace osgeo::proj::util;
 
 TEST(crs, EPSG_4326_get_components) {
     auto crs = GeographicCRS::EPSG_4326;
-    EXPECT_EQ(crs->name()->code(), "4326");
-    EXPECT_EQ(*(crs->name()->authority()->title()), "EPSG");
+    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "4326");
+    EXPECT_EQ(*(crs->identifiers()[0]->authority()->title()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()), "WGS 84");
 
     auto datum = crs->datum();
-    EXPECT_EQ(datum->name()->code(), "6326");
-    EXPECT_EQ(*(datum->name()->authority()->title()), "EPSG");
+    ASSERT_EQ(datum->identifiers().size(), 1);
+    EXPECT_EQ(datum->identifiers()[0]->code(), "6326");
+    EXPECT_EQ(*(datum->identifiers()[0]->authority()->title()), "EPSG");
     EXPECT_EQ(*(datum->name()->description()), "WGS_1984");
 
     auto ellipsoid = datum->ellipsoid();
     EXPECT_EQ(ellipsoid->semiMajorAxis().value(), 6378137.0);
     EXPECT_EQ(ellipsoid->semiMajorAxis().unit(), UnitOfMeasure::METRE);
     EXPECT_EQ(ellipsoid->inverseFlattening()->value(), 298.257223563);
-    EXPECT_EQ(ellipsoid->name()->code(), "7030");
-    EXPECT_EQ(*(ellipsoid->name()->authority()->title()), "EPSG");
+    ASSERT_EQ(ellipsoid->identifiers().size(), 1);
+    EXPECT_EQ(ellipsoid->identifiers()[0]->code(), "7030");
+    EXPECT_EQ(*(ellipsoid->identifiers()[0]->authority()->title()), "EPSG");
     EXPECT_EQ(*(ellipsoid->name()->description()), "WGS 84");
 }
 
@@ -352,7 +355,7 @@ static GeodeticCRSNNPtr createGeocentric() {
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::AUTHORITY_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4328)
-        .set(Identifier::DESCRIPTION_KEY, "WGS 84");
+        .set(IdentifiedObject::NAME_KEY, "WGS 84");
     return GeodeticCRS::create(propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
                                CartesianCS::createGeocentric());
 }
@@ -443,7 +446,7 @@ static ProjectedCRSNNPtr createProjected() {
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::AUTHORITY_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 32631)
-        .set(Identifier::DESCRIPTION_KEY, "WGS 84 / UTM zone 31N");
+        .set(IdentifiedObject::NAME_KEY, "WGS 84 / UTM zone 31N");
     return ProjectedCRS::create(propertiesCRS, GeographicCRS::EPSG_4326,
                                 Conversion::createUTM(31, true),
                                 CartesianCS::createEastingNorthingMetre());
@@ -602,7 +605,7 @@ TEST(crs, projectedCRS_as_WKT1_GDAL) {
 
 TEST(datum, datum_with_ANCHOR) {
     auto datum = GeodeticReferenceFrame::create(
-        PropertyMap().set(Identifier::DESCRIPTION_KEY, "WGS_1984 with anchor"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "WGS_1984 with anchor"),
         Ellipsoid::EPSG_7030, optional<std::string>("My anchor"),
         PrimeMeridian::GREENWICH);
 
@@ -621,11 +624,11 @@ TEST(datum, datum_with_ANCHOR) {
 TEST(datum, cs_with_MERIDIAN) {
     std::vector<CoordinateSystemAxisPtr> axis{
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY, "Easting"), "X",
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Easting"), "X",
             AxisDirection::SOUTH, UnitOfMeasure::METRE,
             Meridian::create(Angle(90.0))),
         CoordinateSystemAxis::create(
-            PropertyMap().set(Identifier::DESCRIPTION_KEY, "Northing"), "Y",
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Northing"), "Y",
             AxisDirection::SOUTH, UnitOfMeasure::METRE,
             Meridian::create(Angle(180.0)))};
     auto cs(CartesianCS::create(PropertyMap(), axis[0], axis[1]));
@@ -712,6 +715,38 @@ TEST(crs, scope_area_bbox_id_remark) {
         "    BBOX[17.09,122.38,46.05,157.64],\n"
         "    ID[\"EPSG\",4946],\n"
         "    REMARK[\"some_remark\"]]";
+
+    EXPECT_EQ(got_wkt, expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, multiple_ID) {
+
+    PropertyMap propertiesCRS;
+    propertiesCRS.set(IdentifiedObject::NAME_KEY, "WGS 84");
+    auto identifiers = ArrayOfBaseObject::create();
+    identifiers->values.push_back(Identifier::create(
+        "codeA", PropertyMap().set(Identifier::AUTHORITY_KEY, "authorityA")));
+    identifiers->values.push_back(Identifier::create(
+        "codeB", PropertyMap().set(Identifier::AUTHORITY_KEY, "authorityB")));
+    propertiesCRS.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
+    auto crs =
+        GeodeticCRS::create(propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
+                            CartesianCS::createGeocentric());
+
+    auto got_wkt = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_SIMPLIFIED));
+    auto expected = "GEODCRS[\"WGS 84\",\n"
+                    "    DATUM[\"WGS_1984\",\n"
+                    "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
+                    "    CS[Cartesian,3],\n"
+                    "        AXIS[\"(X)\",geocentricX],\n"
+                    "        AXIS[\"(Y)\",geocentricY],\n"
+                    "        AXIS[\"(Z)\",geocentricZ],\n"
+                    "        UNIT[\"metre\",1],\n"
+                    "    ID[\"authorityA\",\"codeA\"],\n"
+                    "    ID[\"authorityB\",\"codeB\"]]";
 
     EXPECT_EQ(got_wkt, expected);
 }

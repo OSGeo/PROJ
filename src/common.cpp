@@ -374,7 +374,9 @@ void IdentifiedObject::Private::setName(
     if (auto genVal =
             util::nn_dynamic_pointer_cast<BoxedValue>(oIter->second)) {
         if (genVal->type() == BoxedValue::Type::STRING) {
-            name = Identifier::create(genVal->stringValue());
+            name = Identifier::create();
+            name->setProperties(PropertyMap().set(Identifier::DESCRIPTION_KEY,
+                                                  genVal->stringValue()));
         } else {
             throw InvalidValueTypeException("Invalid value type for " +
                                             NAME_KEY);
@@ -395,8 +397,15 @@ void IdentifiedObject::Private::setName(
 void IdentifiedObject::Private::setIdentifiers(
     const PropertyMap &properties) // throw(InvalidValueTypeException)
 {
-    auto oIter = properties.find(IDENTIFIER_KEY);
+    auto oIter = properties.find(IDENTIFIERS_KEY);
     if (oIter == properties.end()) {
+
+        oIter = properties.find(Identifier::CODE_KEY);
+        if (oIter != properties.end()) {
+            auto identifier = Identifier::create();
+            identifier->setProperties(properties);
+            identifiers.push_back(identifier);
+        }
         return;
     }
     if (auto identifier =
@@ -413,12 +422,12 @@ void IdentifiedObject::Private::setIdentifiers(
                     identifiers.push_back(NN_CHECK_ASSERT(identifier));
                 } else {
                     throw InvalidValueTypeException("Invalid value type for " +
-                                                    IDENTIFIER_KEY);
+                                                    IDENTIFIERS_KEY);
                 }
             }
         } else {
             throw InvalidValueTypeException("Invalid value type for " +
-                                            IDENTIFIER_KEY);
+                                            IDENTIFIERS_KEY);
         }
     }
 }
@@ -478,8 +487,6 @@ void IdentifiedObject::Private::setAliases(
 void IdentifiedObject::setProperties(
     const PropertyMap &properties) // throw(InvalidValueTypeException)
 {
-    d->name->setProperties(properties);
-
     d->setName(properties);
     d->setIdentifiers(properties);
     d->setAliases(properties);
@@ -508,28 +515,33 @@ void IdentifiedObject::setProperties(
 // ---------------------------------------------------------------------------
 
 void IdentifiedObject::formatID(WKTFormatterNNPtr formatter) const {
-    if (name()->authority() && name()->authority()->title() &&
-        !name()->authority()->title()->empty() && !name()->code().empty()) {
-        const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-        const std::string &code = name()->code();
-        if (isWKT2) {
-            // TODO citation + uri
-            if (code[0] >= '0' && code[0] <= '9') {
-                formatter->startNode(WKTConstants::ID);
-                formatter->addQuotedString(*(name()->authority()->title()));
-                formatter->add(code);
-                formatter->endNode();
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    for (const auto &id : identifiers()) {
+        if (id->authority() && id->authority()->title() &&
+            !id->authority()->title()->empty() && !id->code().empty()) {
+            const std::string &code = id->code();
+            if (isWKT2) {
+                // TODO citation + uri
+                if (code[0] >= '0' && code[0] <= '9') {
+                    formatter->startNode(WKTConstants::ID);
+                    formatter->addQuotedString(*(id->authority()->title()));
+                    formatter->add(code);
+                    formatter->endNode();
+                } else {
+                    formatter->startNode(WKTConstants::ID);
+                    formatter->addQuotedString(*(id->authority()->title()));
+                    formatter->addQuotedString(code);
+                    formatter->endNode();
+                }
             } else {
-                formatter->startNode(WKTConstants::ID);
-                formatter->addQuotedString(*(name()->authority()->title()));
+                formatter->startNode(WKTConstants::AUTHORITY);
+                formatter->addQuotedString(*(id->authority()->title()));
                 formatter->addQuotedString(code);
                 formatter->endNode();
             }
-        } else {
-            formatter->startNode(WKTConstants::AUTHORITY);
-            formatter->addQuotedString(*(name()->authority()->title()));
-            formatter->addQuotedString(code);
-            formatter->endNode();
+        }
+        if (!isWKT2) {
+            break;
         }
     }
 }

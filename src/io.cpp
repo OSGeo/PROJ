@@ -713,28 +713,32 @@ static double asDouble(const std::string &val) { return std::stod(val); }
 PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
     PropertyMap properties;
     if (!node->children().empty()) {
-        properties.set(Identifier::DESCRIPTION_KEY,
+        properties.set(IdentifiedObject::NAME_KEY,
                        stripQuotes(node->children()[0]->value()));
     }
 
-    auto idNode = node->lookForChild(WKTConstants::ID);
-    if (!idNode) {
-        idNode = node->lookForChild(WKTConstants::AUTHORITY);
-    }
-    if (idNode) {
-        if (idNode->children().size() >= 2) {
-            // TODO citation + uri
-            properties.set(Identifier::AUTHORITY_KEY,
-                           stripQuotes(idNode->children()[0]->value()));
-            properties.set(Identifier::CODE_KEY,
-                           stripQuotes(idNode->children()[1]->value()));
-        } else if (strict_) {
-            throw ParsingException("not enough children in " + idNode->value() +
-                                   " node");
-        } else {
-            warningList_.push_back("not enough children in " + idNode->value() +
-                                   " node");
+    auto identifiers = ArrayOfBaseObject::create();
+    for (const auto &subNode : node->children()) {
+        if (ci_equal(subNode->value(), WKTConstants::ID) ||
+            ci_equal(subNode->value(), WKTConstants::AUTHORITY)) {
+            if (subNode->children().size() >= 2) {
+                // TODO citation + uri
+                auto authority = stripQuotes(subNode->children()[0]->value());
+                auto code = stripQuotes(subNode->children()[1]->value());
+                identifiers->values.push_back(Identifier::create(
+                    code,
+                    PropertyMap().set(Identifier::AUTHORITY_KEY, authority)));
+            } else if (strict_) {
+                throw ParsingException("not enough children in " +
+                                       subNode->value() + " node");
+            } else {
+                warningList_.push_back("not enough children in " +
+                                       subNode->value() + " node");
+            }
         }
+    }
+    if (!identifiers->values.empty()) {
+        properties.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
     }
 
     auto remarkNode = node->lookForChild(WKTConstants::REMARK);
@@ -1090,7 +1094,7 @@ WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
     }
 
     return CoordinateSystemAxis::create(
-        buildProperties(node).set(Identifier::DESCRIPTION_KEY, axisName),
+        buildProperties(node).set(IdentifiedObject::NAME_KEY, axisName),
         axisAbbrev, *direction, unit, meridian);
 }
 
@@ -1132,12 +1136,12 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
                 return EllipsoidalCS::create(
                     PropertyMap(),
                     CoordinateSystemAxis::create(
-                        PropertyMap().set(Identifier::DESCRIPTION_KEY,
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
                                           AxisName::Longitude),
                         AxisAbbreviation::lon, AxisDirection::EAST,
                         UnitOfMeasure::DEGREE),
                     CoordinateSystemAxis::create(
-                        PropertyMap().set(Identifier::DESCRIPTION_KEY,
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
                                           AxisName::Latitude),
                         AxisAbbreviation::lat, AxisDirection::NORTH,
                         UnitOfMeasure::DEGREE));
@@ -1383,7 +1387,7 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
         propertiesMethod.set(Identifier::CODE_KEY, mapping->epsg_code);
         propertiesMethod.set(Identifier::AUTHORITY_KEY, "EPSG");
     }
-    propertiesMethod.set(Identifier::DESCRIPTION_KEY, projectionName);
+    propertiesMethod.set(IdentifiedObject::NAME_KEY, projectionName);
 
     std::vector<OperationParameterNNPtr> parameters;
     std::vector<ParameterValueNNPtr> values;
@@ -1404,7 +1408,7 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                                         paramMapping->epsg_code);
                 propertiesParameter.set(Identifier::AUTHORITY_KEY, "EPSG");
             }
-            propertiesParameter.set(Identifier::DESCRIPTION_KEY, parameterName);
+            propertiesParameter.set(IdentifiedObject::NAME_KEY, parameterName);
             parameters.push_back(
                 OperationParameter::create(propertiesParameter));
             auto paramValue = childNode->children()[1]->value();
@@ -1425,7 +1429,7 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
     }
 
     return Conversion::create(
-               PropertyMap().set(Identifier::DESCRIPTION_KEY, "unnamed"),
+               PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
                propertiesMethod, parameters, values)
         ->identify();
 }

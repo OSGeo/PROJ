@@ -86,13 +86,13 @@ TEST(common, identifiedobject_empty) {
 TEST(common, identifiedobject) {
     PropertyMap properties;
     properties.set(IdentifiedObject::NAME_KEY, "name");
-    properties.set(IdentifiedObject::IDENTIFIER_KEY,
+    properties.set(IdentifiedObject::IDENTIFIERS_KEY,
                    Identifier::create("identifier_code"));
     properties.set(IdentifiedObject::ALIAS_KEY, "alias");
     properties.set(IdentifiedObject::REMARKS_KEY, "remarks");
     properties.set(IdentifiedObject::DEPRECATED_KEY, true);
     auto obj = IdentifiedObject::create(properties);
-    EXPECT_EQ(obj->name()->code(), "name");
+    EXPECT_EQ(*(obj->name()->description()), "name");
     ASSERT_EQ(obj->identifiers().size(), 1);
     EXPECT_EQ(obj->identifiers()[0]->code(), "identifier_code");
     ASSERT_EQ(obj->aliases().size(), 1);
@@ -124,7 +124,7 @@ TEST(common, identifiedobject_name_invalid_type_citation) {
 
 TEST(common, identifiedobject_identifier_invalid_type) {
     PropertyMap properties;
-    properties.set(IdentifiedObject::IDENTIFIER_KEY, "string not allowed");
+    properties.set(IdentifiedObject::IDENTIFIERS_KEY, "string not allowed");
     ASSERT_THROW(IdentifiedObject::create(properties),
                  InvalidValueTypeException);
 }
@@ -136,7 +136,7 @@ TEST(common, identifiedobject_identifier_array_of_identifier) {
     auto array = ArrayOfBaseObject::create();
     array->values.push_back(Identifier::create("identifier_code1"));
     array->values.push_back(Identifier::create("identifier_code2"));
-    properties.set(IdentifiedObject::IDENTIFIER_KEY, array);
+    properties.set(IdentifiedObject::IDENTIFIERS_KEY, array);
     auto obj = IdentifiedObject::create(properties);
     ASSERT_EQ(obj->identifiers().size(), 2);
     EXPECT_EQ(obj->identifiers()[0]->code(), "identifier_code1");
@@ -149,7 +149,7 @@ TEST(common, identifiedobject_identifier_array_of_invalid_type) {
     PropertyMap properties;
     auto array = ArrayOfBaseObject::create();
     array->values.push_back(nn_make_shared<Citation>("unexpected type"));
-    properties.set(IdentifiedObject::IDENTIFIER_KEY, array);
+    properties.set(IdentifiedObject::IDENTIFIERS_KEY, array);
     ASSERT_THROW(IdentifiedObject::create(properties),
                  InvalidValueTypeException);
 }
