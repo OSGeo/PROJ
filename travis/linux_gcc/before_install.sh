@@ -10,6 +10,7 @@ sudo apt-get install -qq lcov
 
 scripts/cppcheck.sh
 
+pip install --user sphinxcontrib-bibtex
 pip install --user cpp-coveralls
-./travis/docker.sh
 
+./travis/docker.sh

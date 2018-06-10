@@ -32,7 +32,7 @@ Usage
 ########
 
 The Miller Cylindrical projection is used for world maps and in several atlases,
-including the National Atlas of the United States (USGS, 1970, p. 330-331) [Snyder1987]_.
+including the National Atlas of the United States (USGS, 1970, p. 330-331) :cite:`Snyder1987`.
 
 Example using Central meridian 90°W::
 
@@ -55,7 +55,7 @@ Parameters
 Mathematical definition
 #######################
 
-The formulas describing the Miller projection are all taken from Snyder's manuals [Snyder1987]_.
+The formulas describing the Miller projection are all taken from :cite:`Snyder1987`.
 
 
 Forward projection

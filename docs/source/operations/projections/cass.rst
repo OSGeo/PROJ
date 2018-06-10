@@ -30,7 +30,7 @@ Although the Cassini projection has been largely replaced by the Transverse Merc
 Usage
 #####
 
-There has been little usage of the spherical version of the Cassini, but the ellipsoidal Cassini-Soldner version was adopted by the Ordnance Survey for the official survey of Great Britain during the second half of the 19th century [Steers1970]_.
+There has been little usage of the spherical version of the Cassini, but the ellipsoidal Cassini-Soldner version was adopted by the Ordnance Survey for the official survey of Great Britain during the second half of the 19th century :cite:`Steers1970`.
 Many of these maps were prepared at a scale of 1:2,500.
 The Cassini-Soldner was also used for the detailed mapping of many German states during the same period.
 
@@ -67,7 +67,7 @@ Options
 Mathematical definition
 #######################
 
-The formulas describing the Cassini projection are taken from Snyder's [Snyder1987]_.
+The formulas describing the Cassini projection are taken from :cite:`Snyder1987`.
 
 :math:`\phi_0` is the latitude of origin that match the center of the map (default to 0). It can be set with ``+lat_0``.
 
@@ -162,5 +162,4 @@ Further reading
 ###############
 
 #. `Wikipedia <https://en.wikipedia.org/wiki/Equirectangular_projection>`_
-#. [Snyder1987]_
 #. `EPSG, POSC literature pertaining to Coordinate Conversions and Transformations including Formulas  <http://www.ihsenergy.com/epsg/guid7.pdf>`_

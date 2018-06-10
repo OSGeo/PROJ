@@ -37,7 +37,7 @@ Applications should be limited to equatorial regions, but is frequently
 used for navigational charts with latitude of true scale (:option:`+lat_ts`) specified within
 or near chart's boundaries.
 Often inappropriately used for world maps since the regions near the poles
-cannot be shown [Evenden1995]_.
+cannot be shown :cite:`Evenden1995`.
 
 
 Example using latitude of true scale::
@@ -76,7 +76,7 @@ Parameters
 Mathematical definition
 #######################
 
-The formulas describing the Mercator projection are all taken from G. Evenden's libproj manuals [Evenden2005]_.
+The formulas describing the Mercator projection are all taken from G. Evenden's libproj manuals :cite:`Evenden2005`.
 
 Spherical form
 **************
