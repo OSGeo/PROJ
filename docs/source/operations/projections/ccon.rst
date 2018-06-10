@@ -39,7 +39,7 @@ conformal.
 
 An example of usage (and the main reason to implement this projection in proj4)
 is the ATPOL geobotanical grid of Poland, developed in Institute of Botany,
-Jagiellonian University, Krakow, Poland in 1970s [Zajac1978]_. The grid was
+Jagiellonian University, Krakow, Poland in 1970s :cite:`Zajac1978`. The grid was
 originally handwritten on paper maps and further copied by hand. The projection
 (together with strange Earth radius) was chosen by its creators as the compromise
 fit to existing maps during first software development in DOS era. Many years later
@@ -51,7 +51,7 @@ The ATPOL coordinates can be achieved with with the following parameters:
 
    +proj=ccon +lat_1=52 +lon_0=19 +axis=esu +a=6390000 +x_0=330000 +y_0=-350000
 
-For more information see [Komsta2016]_ and [Verey2017]_.
+For more information see :cite:`Komsta2016` and :cite:`Verey2017`.
 
 Parameters
 ################################################################################

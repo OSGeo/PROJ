@@ -152,10 +152,11 @@ catalog of those cases:
 Background
 ----------
 
-The algorithms implemented by this package are given in [Karney2013]_
-and are based on [Bessel1825]_ and [Helmert1880]_; the algorithm for
-areas is based on [Danielsen1989]_.  These improve on the work of
-[Vincenty1975]_ in the following respects:
+The algorithms implemented by this package are given in :cite:`Karney2013`
+(`addenda <https://geographiclib.sourceforge.io/geod-addenda.html>`_)
+and are based on :cite:`Bessel1825` and :cite:`Helmert1880`; the algorithm for
+areas is based on :cite:`Danielsen1989`.  These improve on the work of
+:cite:`Vincenty1975` in the following respects:
 
 * The results are accurate to round-off for terrestrial ellipsoids (the
   error in the distance is less then 15 nanometers, compared to 0.1 mm
@@ -166,5 +167,8 @@ areas is based on [Danielsen1989]_.  These improve on the work of
   geodesic.  This allows, for example, the area of a geodesic polygon to
   be computed.
 
-Additional background material is provided in [GeodesicBib]_,
-[GeodesicWiki]_, and [Karney2011]_.
+Additional background material is provided in GeographicLib's `geodesic
+bibliography <https://geographiclib.sourceforge.io/geodesic-papers/biblio.html>`_,
+Wikipedia's article "`Geodesics on an ellipsoid
+<https://en.wikipedia.org/wiki/Geodesics_on_an_ellipsoid>`_", and :cite:`Karney2011`
+(`errata <https://geographiclib.sourceforge.io/geod-addenda.html#geod-errata>`_).

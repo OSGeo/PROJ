@@ -16,7 +16,7 @@ differences between the semimajor axes and flattening parameters of the referenc
 ellipsoids. Due to its algorithmic simplicity, it was popular prior to the
 ubiquity of digital computers. Today, it is mostly interesting for historical
 reasons, but nevertheless indispensable due to the large amount of data that has
-already been transformed that way [EversKnudsen2017]_.
+already been transformed that way :cite:`EversKnudsen2017`.
 
 +---------------------+----------------------------------------------------------+
 | **Alias**           | molodensky                                               |
@@ -45,7 +45,7 @@ is that it is fairly simple to compute by hand. The ease of computation come at 
 cost of limited accuracy.
 
 A derivation of the mathematical formulas for the Molodensky transform can be found
-in [Deakin2004]_.
+in :cite:`Deakin2004`.
 
 
 Examples

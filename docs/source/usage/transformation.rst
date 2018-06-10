@@ -17,7 +17,7 @@ framework and the *transformation pipelines* framework. The first is the origina
 and limited, framework for doing geodetic transforms in PROJ The latter is a
 newer addition that aims to be a more complete transformation framework. Both are
 described in the sections below. Large portions of the text are based on
-[EversKnudsen2017]_.
+:cite:`EversKnudsen2017`.
 
 Before describing the details of the two frameworks, let us first remark that
 most cases of geodetic transformations can be expressed as a series of elementary
@@ -115,7 +115,7 @@ ITRF2000 is defined. The temporal component is given as GPS weeks in the input
 data, but the 14-parameter Helmert transform expects temporal units in decimalyears.
 Hence the first step in the pipeline is the unitconvert pseudo-projection that makes
 sure the correct units are passed along to the Helmert transform.
-Most parameters of the Helmert transform are taken from [AltamimiEtAl2002]_,
+Most parameters of the Helmert transform are taken from :cite:`Altamimi2002`,
 except the epoch which is the epoch of the transformation. The default setting is to
 use “coordinate frame” convention of the Helmert transform, but “position vector”
 convention can also be used. The last step in the pipeline is converting the

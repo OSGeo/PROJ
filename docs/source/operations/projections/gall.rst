@@ -69,7 +69,7 @@ Parameters
 Mathematical definition
 #######################
 
-The formulas describing the Gall Stereographical are all taken from Snyder's [Snyder1993]_.
+The formulas describing the Gall Stereographical are all taken from :cite:`Snyder1993`.
 
 Spherical form
 **************

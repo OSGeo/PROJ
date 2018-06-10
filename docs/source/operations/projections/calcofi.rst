@@ -82,8 +82,8 @@ Options
 Mathematical definition
 ################################################################################
 
-The algorithm used to make conversions is described in [EberHewitt1979]_ with
-a few corrections reported in [WeberMoore2013]_.
+The algorithm used to make conversions is described in :cite:`EberHewitt1979` with
+a few corrections reported in :cite:`WeberMoore2013`.
 
 
 Further reading
