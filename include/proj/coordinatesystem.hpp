@@ -185,7 +185,7 @@ class CoordinateSystem : public common::IdentifiedObject,
     PROJ_DLL CoordinateSystem &
     operator=(const CoordinateSystem &other) = delete;
 
-    PROJ_DLL virtual const std::vector<CoordinateSystemAxisPtr> &
+    PROJ_DLL virtual const std::vector<CoordinateSystemAxisNNPtr> &
     axisList() const;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
@@ -196,7 +196,7 @@ class CoordinateSystem : public common::IdentifiedObject,
   protected:
     CoordinateSystem();
     explicit CoordinateSystem(
-        const std::vector<CoordinateSystemAxisPtr> &axisIn);
+        const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     CoordinateSystem(const CoordinateSystem &other);
 
   private:
@@ -220,16 +220,16 @@ class SphericalCS : public CoordinateSystem {
 
     PROJ_DLL static SphericalCSNNPtr
     create(const util::PropertyMap &properties,
-           const CoordinateSystemAxisPtr &axis0,
-           const CoordinateSystemAxisPtr &axis1,
-           const CoordinateSystemAxisPtr &axis2);
+           const CoordinateSystemAxisNNPtr &axis0,
+           const CoordinateSystemAxisNNPtr &axis1,
+           const CoordinateSystemAxisNNPtr &axis2);
 
     PROJ_DLL std::string getWKT2Type() const override { return "spherical"; }
 
   protected:
     SphericalCS();
     SphericalCS(const SphericalCS &other);
-    explicit SphericalCS(const std::vector<CoordinateSystemAxisPtr> &axisIn);
+    explicit SphericalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 };
 
@@ -246,32 +246,54 @@ class EllipsoidalCS : public CoordinateSystem {
     // non-standard
     PROJ_DLL static EllipsoidalCSNNPtr
     create(const util::PropertyMap &properties,
-           const CoordinateSystemAxisPtr &axis0,
-           const CoordinateSystemAxisPtr &axis1);
+           const CoordinateSystemAxisNNPtr &axis0,
+           const CoordinateSystemAxisNNPtr &axis1);
     PROJ_DLL static EllipsoidalCSNNPtr
     create(const util::PropertyMap &properties,
-           const CoordinateSystemAxisPtr &axis0,
-           const CoordinateSystemAxisPtr &axis1,
-           const CoordinateSystemAxisPtr &axis2);
-    PROJ_DLL static EllipsoidalCSNNPtr createLatitudeLongitudeDegree();
+           const CoordinateSystemAxisNNPtr &axis0,
+           const CoordinateSystemAxisNNPtr &axis1,
+           const CoordinateSystemAxisNNPtr &axis2);
     PROJ_DLL static EllipsoidalCSNNPtr
-    createLatitudeLongitudeDegreeEllipsoidalHeightMetre();
+    createLatitudeLongitude(const common::UnitOfMeasure &unit);
+    PROJ_DLL static EllipsoidalCSNNPtr createLatitudeLongitudeEllipsoidalHeight(
+        const common::UnitOfMeasure &angularUnit,
+        const common::UnitOfMeasure &linearUnit);
 
     PROJ_DLL std::string getWKT2Type() const override { return "ellipsoidal"; }
 
   protected:
     EllipsoidalCS();
     EllipsoidalCS(const EllipsoidalCS &other);
-    explicit EllipsoidalCS(const std::vector<CoordinateSystemAxisPtr> &axisIn);
+    explicit EllipsoidalCS(
+        const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 };
 
 // ---------------------------------------------------------------------------
 
-class VerticalCS : public CoordinateSystem {};
-
+class VerticalCS;
 using VerticalCSPtr = std::shared_ptr<VerticalCS>;
 using VerticalCSNNPtr = util::nn<VerticalCSPtr>;
+
+class VerticalCS : public CoordinateSystem {
+  public:
+    PROJ_DLL ~VerticalCS() override;
+
+    PROJ_DLL static VerticalCSNNPtr
+    create(const util::PropertyMap &properties,
+           const CoordinateSystemAxisNNPtr &axis);
+
+    PROJ_DLL static VerticalCSNNPtr
+    createGravityRelatedHeight(const common::UnitOfMeasure &unit);
+
+    PROJ_DLL std::string getWKT2Type() const override { return "vertical"; }
+
+  protected:
+    VerticalCS();
+    VerticalCS(const VerticalCS &other);
+    explicit VerticalCS(const CoordinateSystemAxisNNPtr &axisIn);
+    INLINED_MAKE_SHARED
+};
 
 // ---------------------------------------------------------------------------
 
@@ -285,22 +307,24 @@ class CartesianCS : public CoordinateSystem {
 
     PROJ_DLL static CartesianCSNNPtr
     create(const util::PropertyMap &properties,
-           const CoordinateSystemAxisPtr &axis0,
-           const CoordinateSystemAxisPtr &axis1);
+           const CoordinateSystemAxisNNPtr &axis0,
+           const CoordinateSystemAxisNNPtr &axis1);
     PROJ_DLL static CartesianCSNNPtr
     create(const util::PropertyMap &properties,
-           const CoordinateSystemAxisPtr &axis0,
-           const CoordinateSystemAxisPtr &axis1,
-           const CoordinateSystemAxisPtr &axis2);
-    PROJ_DLL static CartesianCSNNPtr createEastingNorthingMetre();
-    PROJ_DLL static CartesianCSNNPtr createGeocentric();
+           const CoordinateSystemAxisNNPtr &axis0,
+           const CoordinateSystemAxisNNPtr &axis1,
+           const CoordinateSystemAxisNNPtr &axis2);
+    PROJ_DLL static CartesianCSNNPtr
+    createEastingNorthing(const common::UnitOfMeasure &unit);
+    PROJ_DLL static CartesianCSNNPtr
+    createGeocentric(const common::UnitOfMeasure &unit);
 
     PROJ_DLL std::string getWKT2Type() const override { return "Cartesian"; }
 
   protected:
     CartesianCS();
     CartesianCS(const CartesianCS &other);
-    explicit CartesianCS(const std::vector<CoordinateSystemAxisPtr> &axisIn);
+    explicit CartesianCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
 };
 

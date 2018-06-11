@@ -178,6 +178,10 @@ class GeographicCRS : public GeodeticCRS {
 
 // ---------------------------------------------------------------------------
 
+class VerticalCRS;
+using VerticalCRSPtr = std::shared_ptr<VerticalCRS>;
+using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
+
 class VerticalCRS : public SingleCRS {
   public:
     PROJ_DLL VerticalCRS(const VerticalCRS &other);
@@ -194,12 +198,19 @@ class VerticalCRS : public SingleCRS {
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_DLL static VerticalCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const datum::VerticalReferenceFrameNNPtr &datumIn,
+           const cs::VerticalCSNNPtr &csIn);
+
+  protected:
+    VerticalCRS(const datum::VerticalReferenceFrameNNPtr &datumIn,
+                const cs::VerticalCSNNPtr &csIn);
+    INLINED_MAKE_SHARED
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
 };
-
-using VerticalCRSPtr = std::shared_ptr<VerticalCRS>;
-using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
 
 // ---------------------------------------------------------------------------
 

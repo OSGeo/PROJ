@@ -335,8 +335,9 @@ static GeodeticCRSNNPtr createGeocentric() {
     propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4328)
         .set(IdentifiedObject::NAME_KEY, "WGS 84");
-    return GeodeticCRS::create(propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
-                               CartesianCS::createGeocentric());
+    return GeodeticCRS::create(
+        propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
+        CartesianCS::createGeocentric(UnitOfMeasure::METRE));
 }
 
 // ---------------------------------------------------------------------------
@@ -418,9 +419,10 @@ static ProjectedCRSNNPtr createProjected() {
     propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 32631)
         .set(IdentifiedObject::NAME_KEY, "WGS 84 / UTM zone 31N");
-    return ProjectedCRS::create(propertiesCRS, GeographicCRS::EPSG_4326,
-                                Conversion::createUTM(31, true),
-                                CartesianCS::createEastingNorthingMetre());
+    return ProjectedCRS::create(
+        propertiesCRS, GeographicCRS::EPSG_4326,
+        Conversion::createUTM(31, true),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 }
 
 // ---------------------------------------------------------------------------
@@ -578,7 +580,7 @@ TEST(datum, datum_with_ANCHOR) {
 // ---------------------------------------------------------------------------
 
 TEST(datum, cs_with_MERIDIAN) {
-    std::vector<CoordinateSystemAxisPtr> axis{
+    std::vector<CoordinateSystemAxisNNPtr> axis{
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "Easting"), "X",
             AxisDirection::SOUTH, UnitOfMeasure::METRE,
@@ -678,9 +680,9 @@ TEST(crs, multiple_ID) {
     identifiers->values.push_back(Identifier::create(
         "codeB", PropertyMap().set(Identifier::CODESPACE_KEY, "authorityB")));
     propertiesCRS.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
-    auto crs =
-        GeodeticCRS::create(propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
-                            CartesianCS::createGeocentric());
+    auto crs = GeodeticCRS::create(
+        propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
+        CartesianCS::createGeocentric(UnitOfMeasure::METRE));
 
     auto got_wkt = crs->exportToWKT(
         WKTFormatter::create(WKTFormatter::Convention::WKT2_SIMPLIFIED));
@@ -696,4 +698,52 @@ TEST(crs, multiple_ID) {
                     "    ID[\"authorityB\",\"codeB\"]]";
 
     EXPECT_EQ(got_wkt, expected);
+}
+
+// ---------------------------------------------------------------------------
+
+static VerticalCRSNNPtr createVerticalCRS() {
+    PropertyMap propertiesVDatum;
+    propertiesVDatum.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 5101)
+        .set(IdentifiedObject::NAME_KEY, "Ordnance Datum Newlyn");
+    auto vdatum = VerticalReferenceFrame::create(propertiesVDatum);
+    PropertyMap propertiesCRS;
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 5701)
+        .set(IdentifiedObject::NAME_KEY, "ODN height");
+    return VerticalCRS::create(
+        propertiesCRS, vdatum,
+        VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, verticalCRS_as_WKT2) {
+    auto crs = createVerticalCRS();
+    auto expected = "VERTCRS[\"ODN height\",\n"
+                    "    VDATUM[\"Ordnance Datum Newlyn\"],\n"
+                    "    CS[vertical,1],\n"
+                    "        AXIS[\"gravity-related height (H)\",up,\n"
+                    "            LENGTHUNIT[\"metre\",1]],\n"
+                    "    ID[\"EPSG\",5701]]";
+
+    EXPECT_EQ(crs->exportToWKT(WKTFormatter::create()), expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, verticalCRS_as_WKT1_GDAL) {
+    auto crs = createVerticalCRS();
+    auto expected = "VERT_CS[\"ODN height\",\n"
+                    "    VERT_DATUM[\"Ordnance Datum Newlyn\",2005,\n"
+                    "        AUTHORITY[\"EPSG\",\"5101\"]],\n"
+                    "    UNIT[\"metre\",1,\n"
+                    "        AUTHORITY[\"EPSG\",9001]],\n"
+                    "    AXIS[\"Gravity-related height\",UP],\n"
+                    "    AUTHORITY[\"EPSG\",\"5701\"]]";
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              expected);
 }

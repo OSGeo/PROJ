@@ -386,6 +386,7 @@ class CodeList {
 
   protected:
     explicit CodeList(const std::string &nameIn);
+    CodeList &operator=(const CodeList &other);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

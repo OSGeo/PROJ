@@ -457,3 +457,90 @@ const std::vector<DatumPtr> &DatumEnsemble::datums() const { return d->datums; }
 const PositionalAccuracy &DatumEnsemble::positionalAccuracy() const {
     return d->positionalAccuracy;
 }
+
+// ---------------------------------------------------------------------------
+
+RealizationMethod::RealizationMethod(const std::string &nameIn)
+    : CodeList(nameIn) {}
+
+// ---------------------------------------------------------------------------
+
+RealizationMethod &RealizationMethod::
+operator=(const RealizationMethod &other) {
+    CodeList::operator=(other);
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+// cppcheck-suppress copyCtorAndEqOperator
+struct VerticalReferenceFrame::Private {
+    optional<RealizationMethod> realizationMethod_{};
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+VerticalReferenceFrame::VerticalReferenceFrame()
+    : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+VerticalReferenceFrame::~VerticalReferenceFrame() = default;
+
+// ---------------------------------------------------------------------------
+
+const optional<RealizationMethod> &
+VerticalReferenceFrame::realizationMethod() const {
+    return d->realizationMethod_;
+}
+
+// ---------------------------------------------------------------------------
+
+VerticalReferenceFrameNNPtr VerticalReferenceFrame::create(
+    const PropertyMap &properties, const optional<std::string> &anchor,
+    const optional<RealizationMethod> &realizationMethodIn) {
+    auto rf(VerticalReferenceFrame::nn_make_shared<VerticalReferenceFrame>());
+    util::nn_static_pointer_cast<Datum>(rf)->d->anchorDefinition = anchor;
+    rf->setProperties(properties);
+    if (realizationMethodIn.has_value() &&
+        !realizationMethodIn->toString().empty()) {
+        rf->d->realizationMethod_ = *realizationMethodIn;
+    }
+    return rf;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string VerticalReferenceFrame::exportToWKT(
+    WKTFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    if (isWKT2) {
+        formatter->startNode(WKTConstants::VDATUM);
+        formatter->addQuotedString(name()->description().has_value()
+                                       ? *(name()->description())
+                                       : "unnamed");
+        if (anchorDefinition()) {
+            formatter->startNode(WKTConstants::ANCHOR);
+            formatter->addQuotedString(*anchorDefinition());
+            formatter->endNode();
+        }
+        if (formatter->outputId()) {
+            formatID(formatter);
+        }
+        formatter->endNode();
+    } else {
+        formatter->startNode(WKTConstants::VERT_DATUM);
+        formatter->addQuotedString(name()->description().has_value()
+                                       ? *(name()->description())
+                                       : "unnamed");
+        formatter->add(2005); // CS_VD_GeoidModelDerived from OGC 01-009
+        if (formatter->outputId()) {
+            formatID(formatter);
+        }
+        formatter->endNode();
+    }
+    return formatter->toString();
+}

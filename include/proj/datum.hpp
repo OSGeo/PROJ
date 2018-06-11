@@ -49,7 +49,7 @@ namespace datum {
 
 class Datum : public common::ObjectUsage {
   public:
-    PROJ_DLL Datum &operator=(const Datum &other) = delete;
+    Datum &operator=(const Datum &other) = delete;
     PROJ_DLL ~Datum();
 
     PROJ_DLL const util::optional<std::string> &anchorDefinition() const;
@@ -69,6 +69,7 @@ class Datum : public common::ObjectUsage {
 
   private:
     friend class GeodeticReferenceFrame;
+    friend class VerticalReferenceFrame;
     PROJ_OPAQUE_PRIVATE_DATA
 };
 
@@ -89,7 +90,7 @@ class DatumEnsemble : public common::IdentifiedObject {
         public : PROJ_DLL
                  DatumEnsemble();
     PROJ_DLL DatumEnsemble(const DatumEnsemble &other);
-    PROJ_DLL DatumEnsemble &operator=(const DatumEnsemble &other) = delete;
+    DatumEnsemble &operator=(const DatumEnsemble &other) = delete;
     PROJ_DLL ~DatumEnsemble();
 
     PROJ_DLL const std::vector<DatumPtr> &datums() const;
@@ -108,7 +109,7 @@ class PrimeMeridian : public common::IdentifiedObject,
                       public io::IWKTExportable {
   public:
     PROJ_DLL PrimeMeridian(const PrimeMeridian &other);
-    PROJ_DLL PrimeMeridian &operator=(const PrimeMeridian &other) = delete;
+    PrimeMeridian &operator=(const PrimeMeridian &other) = delete;
     PROJ_DLL ~PrimeMeridian() override;
 
     PROJ_DLL const common::Angle &greenwichLongitude() const;
@@ -145,7 +146,7 @@ using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
 class Ellipsoid : public common::IdentifiedObject, public io::IWKTExportable {
   public:
     PROJ_DLL Ellipsoid(const Ellipsoid &other);
-    PROJ_DLL Ellipsoid &operator=(const Ellipsoid &other) = delete;
+    Ellipsoid &operator=(const Ellipsoid &other) = delete;
     PROJ_DLL ~Ellipsoid() override;
 
     PROJ_DLL const common::Length &semiMajorAxis() const;
@@ -196,7 +197,7 @@ using GeodeticReferenceFrameNNPtr = util::nn<GeodeticReferenceFramePtr>;
 class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
   public:
     PROJ_DLL GeodeticReferenceFrame(const GeodeticReferenceFrame &other);
-    PROJ_DLL GeodeticReferenceFrame &
+    GeodeticReferenceFrame &
     operator=(const GeodeticReferenceFrame &other) = delete;
     PROJ_DLL ~GeodeticReferenceFrame() override;
 
@@ -232,19 +233,20 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
 
 class DynamicGeodeticReferenceFrame : public GeodeticReferenceFrame {
   public:
-    PROJ_DLL DynamicGeodeticReferenceFrame();
     PROJ_DLL
     DynamicGeodeticReferenceFrame(const DynamicGeodeticReferenceFrame &other);
-    PROJ_DLL DynamicGeodeticReferenceFrame &
+    DynamicGeodeticReferenceFrame &
     operator=(const DynamicGeodeticReferenceFrame &other) = delete;
-    PROJ_DLL ~DynamicGeodeticReferenceFrame();
+    PROJ_DLL ~DynamicGeodeticReferenceFrame() override;
 
     PROJ_DLL const common::Measure &frameReferenceEpoch() const;
 
-#ifdef DOXYGEN_ENABLED
   protected:
+#ifdef DOXYGEN_ENABLED
     Measure frameReferenceEpoch_;
 #endif
+
+    DynamicGeodeticReferenceFrame();
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -252,13 +254,57 @@ class DynamicGeodeticReferenceFrame : public GeodeticReferenceFrame {
 
 // ---------------------------------------------------------------------------
 
-class VerticalReferenceFrame : public Datum {
-    // TODO
+class RealizationMethod : public util::CodeList {
+  public:
+    PROJ_DLL static const RealizationMethod LEVELLING;
+    PROJ_DLL static const RealizationMethod GEOID;
+    PROJ_DLL static const RealizationMethod TIDAL;
+
+  private:
+    friend class util::optional<RealizationMethod>;
+    PROJ_DLL explicit RealizationMethod(
+        const std::string &nameIn = std::string());
+    PROJ_DLL RealizationMethod &operator=(const RealizationMethod &other);
 };
 
 // ---------------------------------------------------------------------------
 
+class VerticalReferenceFrame;
 using VerticalReferenceFramePtr = std::shared_ptr<VerticalReferenceFrame>;
+using VerticalReferenceFrameNNPtr = util::nn<VerticalReferenceFramePtr>;
+
+class VerticalReferenceFrame : public Datum, public io::IWKTExportable {
+  public:
+    PROJ_DLL ~VerticalReferenceFrame() override;
+
+    const util::optional<RealizationMethod> &realizationMethod() const;
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    // non-standard
+    PROJ_DLL static VerticalReferenceFrameNNPtr
+    create(const util::PropertyMap &properties,
+           const util::optional<std::string> &anchor =
+               util::optional<std::string>(),
+           const util::optional<RealizationMethod> &realizationMethodIn =
+               util::optional<RealizationMethod>());
+
+  protected:
+#ifdef DOXYGEN_ENABLED
+    RealizationMethod realizationMethod_;
+#endif
+
+    VerticalReferenceFrame();
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+// TODO DynamicVerticalReferenceFrame
 
 } // namespace datum
 

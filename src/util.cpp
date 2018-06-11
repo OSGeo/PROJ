@@ -468,6 +468,13 @@ CodeList::~CodeList() = default;
 
 // ---------------------------------------------------------------------------
 
+CodeList &CodeList::operator=(const CodeList &other) {
+    d->name = other.d->name;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
 const std::string &CodeList::toString() const { return d->name; }
 
 // ---------------------------------------------------------------------------

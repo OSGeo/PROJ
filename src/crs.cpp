@@ -287,8 +287,9 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4326() {
     propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4326)
         .set(IdentifiedObject::NAME_KEY, "WGS 84");
-    return create(propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
-                  EllipsoidalCS::createLatitudeLongitudeDegree());
+    return create(
+        propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
+        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
 }
 
 // ---------------------------------------------------------------------------
@@ -298,9 +299,9 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4979() {
     propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 4979)
         .set(IdentifiedObject::NAME_KEY, "WGS 84");
-    return create(
-        propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
-        EllipsoidalCS::createLatitudeLongitudeDegreeEllipsoidalHeightMetre());
+    return create(propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
+                  EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
+                      UnitOfMeasure::DEGREE, UnitOfMeasure::METRE));
 }
 
 // ---------------------------------------------------------------------------
@@ -356,6 +357,12 @@ struct VerticalCRS::Private {
 
 // ---------------------------------------------------------------------------
 
+VerticalCRS::VerticalCRS(const VerticalReferenceFrameNNPtr &datumIn,
+                         const VerticalCSNNPtr &csIn)
+    : SingleCRS(datumIn, csIn), d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
 VerticalCRS::VerticalCRS(const VerticalCRS &other)
     : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
 
@@ -392,8 +399,34 @@ const VerticalCSNNPtr VerticalCRS::coordinateSystem() const {
 
 // ---------------------------------------------------------------------------
 
-std::string VerticalCRS::exportToWKT(WKTFormatterNNPtr /*formatter*/) const {
-    throw FormattingException("Not implemented");
+std::string VerticalCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    formatter->startNode(isWKT2 ? WKTConstants::VERTCRS
+                                : WKTConstants::VERT_CS);
+    formatter->addQuotedString(*(name()->description()));
+    if (datum()) {
+        datum()->exportToWKT(formatter);
+    } else {
+        throw FormattingException("Missing VDATUM");
+    }
+    auto &axisList = coordinateSystem()->axisList();
+    if (!isWKT2 && !axisList.empty()) {
+        axisList[0]->axisUnitID().exportToWKT(formatter);
+    }
+    coordinateSystem()->exportToWKT(formatter);
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+VerticalCRSNNPtr VerticalCRS::create(const PropertyMap &properties,
+                                     const VerticalReferenceFrameNNPtr &datumIn,
+                                     const VerticalCSNNPtr &csIn) {
+    auto crs(VerticalCRS::nn_make_shared<VerticalCRS>(datumIn, csIn));
+    crs->setProperties(properties);
+    return crs;
 }
 
 // ---------------------------------------------------------------------------

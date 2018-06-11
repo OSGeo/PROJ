@@ -660,6 +660,8 @@ struct WKTParser::Private {
     bool strict_ = true;
     std::vector<std::string> warningList_{};
 
+    void emitRecoverableAssertion(const std::string &errorMsg);
+
     IdentifierPtr buildId(WKTNodeNNPtr node, bool tolerant = true);
     PropertyMap buildProperties(WKTNodeNNPtr node);
     UnitOfMeasure
@@ -695,6 +697,8 @@ struct WKTParser::Private {
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit);
     ProjectedCRSNNPtr buildProjectedCRS(WKTNodeNNPtr node);
+    VerticalReferenceFrameNNPtr buildVerticalReferenceFrame(WKTNodeNNPtr node);
+    VerticalCRSNNPtr buildVerticalCRS(WKTNodeNNPtr node);
 };
 
 // ---------------------------------------------------------------------------
@@ -716,6 +720,16 @@ WKTParser &WKTParser::setStrict(bool strict) {
 
 std::vector<std::string> WKTParser::warningList() const {
     return d->warningList_;
+}
+
+// ---------------------------------------------------------------------------
+
+void WKTParser::Private::emitRecoverableAssertion(const std::string &errorMsg) {
+    if (strict_) {
+        throw ParsingException(errorMsg);
+    } else {
+        warningList_.push_back(errorMsg);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -836,7 +850,7 @@ PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
                                                                   east, north);
                         geogExtent.emplace_back(bbox);
                     } catch (const std::exception &) {
-                        throw ParsingException("not 4 double valus in " +
+                        throw ParsingException("not 4 double values in " +
                                                bboxNode->value() + " node");
                     }
                 } else {
@@ -871,13 +885,8 @@ UnitOfMeasure WKTParser::Private::buildUnit(WKTNodeNNPtr node,
             idNode = node->lookForChild(WKTConstants::AUTHORITY);
         }
         if (idNode && idNode->children().size() < 2) {
-            if (strict_) {
-                throw ParsingException("not enough children in " +
-                                       idNode->value() + " node");
-            } else {
-                warningList_.push_back("not enough children in " +
-                                       idNode->value() + " node");
-            }
+            emitRecoverableAssertion("not enough children in " +
+                                     idNode->value() + " node");
         }
         const bool hasValidNode = idNode && idNode->children().size() >= 2;
         if (type == UnitOfMeasure::Type::UNKNOWN) {
@@ -1175,35 +1184,63 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
             csType = "Cartesian";
             isGeocentric = true;
             if (axisCount == 0) {
-                return CartesianCS::createGeocentric();
+                auto unit =
+                    buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
+                if (unit == UnitOfMeasure()) {
+                    throw ParsingException("buildCS: missing UNIT");
+                }
+                return CartesianCS::createGeocentric(unit);
             }
         } else if (ci_equal(parentNode->value(), WKTConstants::GEOGCS)) {
             csType = "Ellipsoidal";
             if (axisCount == 0) {
                 // Missing axis with GEOGCS ? Presumably Long/Lat order implied
+                auto unit = buildUnitInSubNode(parentNode,
+                                               UnitOfMeasure::Type::ANGULAR);
+                if (unit == UnitOfMeasure()) {
+                    throw ParsingException("buildCS: missing UNIT");
+                }
                 return EllipsoidalCS::create(
                     PropertyMap(),
                     CoordinateSystemAxis::create(
                         PropertyMap().set(IdentifiedObject::NAME_KEY,
                                           AxisName::Longitude),
-                        AxisAbbreviation::lon, AxisDirection::EAST,
-                        UnitOfMeasure::DEGREE),
+                        AxisAbbreviation::lon, AxisDirection::EAST, unit),
                     CoordinateSystemAxis::create(
                         PropertyMap().set(IdentifiedObject::NAME_KEY,
                                           AxisName::Latitude),
-                        AxisAbbreviation::lat, AxisDirection::NORTH,
-                        UnitOfMeasure::DEGREE));
+                        AxisAbbreviation::lat, AxisDirection::NORTH, unit));
             }
         } else if (ci_equal(parentNode->value(), WKTConstants::BASEGEODCRS) ||
                    ci_equal(parentNode->value(), WKTConstants::BASEGEOGCRS)) {
             csType = "Ellipsoidal";
             if (axisCount == 0) {
-                return EllipsoidalCS::createLatitudeLongitudeDegree();
+                auto unit = buildUnitInSubNode(parentNode,
+                                               UnitOfMeasure::Type::ANGULAR);
+                if (unit == UnitOfMeasure()) {
+                    unit = UnitOfMeasure::DEGREE;
+                }
+                return EllipsoidalCS::createLatitudeLongitude(unit);
             }
         } else if (ci_equal(parentNode->value(), WKTConstants::PROJCS)) {
             csType = "Cartesian";
             if (axisCount == 0) {
-                return CartesianCS::createEastingNorthingMetre();
+                auto unit =
+                    buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
+                if (unit == UnitOfMeasure()) {
+                    throw ParsingException("buildCS: missing UNIT");
+                }
+                return CartesianCS::createEastingNorthing(unit);
+            }
+        } else if (ci_equal(parentNode->value(), WKTConstants::VERT_CS)) {
+            csType = "vertical";
+            if (axisCount == 0) {
+                auto unit =
+                    buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
+                if (unit == UnitOfMeasure()) {
+                    throw ParsingException("buildCS: missing UNIT");
+                }
+                return VerticalCS::createGravityRelatedHeight(unit);
             }
         } else {
             // Shouldn't happen normally
@@ -1213,7 +1250,7 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
         }
     }
 
-    if (axisCount != 2 && axisCount != 3) {
+    if (axisCount != 1 && axisCount != 2 && axisCount != 3) {
         throw ParsingException(std::string("buildCS: invalid CS axis count"));
     }
     if (numberOfAxis != axisCount) {
@@ -1222,46 +1259,53 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
     }
 
     UnitOfMeasure unit = buildUnitInSubNode(
-        parentNode, ci_equal(csType, "ellipsoidal")
-                        ? UnitOfMeasure::Type::ANGULAR
-                        : ci_equal(csType, "Cartesian")
-                              ? UnitOfMeasure::Type::LINEAR
-                              : UnitOfMeasure::Type::UNKNOWN);
+        parentNode,
+        ci_equal(csType, "ellipsoidal")
+            ? UnitOfMeasure::Type::ANGULAR
+            : ci_equal(csType, "Cartesian") || ci_equal(csType, "vertical")
+                  ? UnitOfMeasure::Type::LINEAR
+                  : UnitOfMeasure::Type::UNKNOWN);
 
-    auto firstAxis = buildAxis(
-        NN_CHECK_ASSERT(parentNode->lookForChild(WKTConstants::AXIS, 0)), unit,
-        isGeocentric, 1);
-    auto secondAxis = buildAxis(
-        NN_CHECK_ASSERT(parentNode->lookForChild(WKTConstants::AXIS, 1)), unit,
-        isGeocentric, 2);
+    std::vector<CoordinateSystemAxisNNPtr> axisList;
+    for (int i = 0; i < axisCount; i++) {
+        axisList.emplace_back(buildAxis(
+            NN_CHECK_ASSERT(parentNode->lookForChild(WKTConstants::AXIS, i)),
+            unit, isGeocentric, i + 1));
+    };
 
     PropertyMap csMap =
         node ? buildProperties(NN_CHECK_ASSERT(node)) : PropertyMap();
     if (ci_equal(csType, "ellipsoidal")) {
         if (axisCount == 2) {
-            return EllipsoidalCS::create(csMap, firstAxis, secondAxis);
+            return EllipsoidalCS::create(csMap, axisList[0], axisList[1]);
+        } else if (axisCount == 3) {
+            return EllipsoidalCS::create(csMap, axisList[0], axisList[1],
+                                         axisList[2]);
         } else {
-            auto thirdAxis = buildAxis(NN_CHECK_ASSERT(parentNode->lookForChild(
-                                           WKTConstants::AXIS, 2)),
-                                       unit, false, 3);
-            return EllipsoidalCS::create(csMap, firstAxis, secondAxis,
-                                         thirdAxis);
+            throw ParsingException(
+                std::string("buildCS: invalid CS axis count for ellipsoidal"));
         }
     } else if (ci_equal(csType, "Cartesian")) {
         if (axisCount == 2) {
-            return CartesianCS::create(csMap, firstAxis, secondAxis);
+            return CartesianCS::create(csMap, axisList[0], axisList[1]);
+        } else if (axisCount == 3) {
+            return CartesianCS::create(csMap, axisList[0], axisList[1],
+                                       axisList[2]);
         } else {
-            auto thirdAxis = buildAxis(NN_CHECK_ASSERT(parentNode->lookForChild(
-                                           WKTConstants::AXIS, 2)),
-                                       unit, isGeocentric, 3);
-            return CartesianCS::create(csMap, firstAxis, secondAxis, thirdAxis);
+            throw ParsingException(
+                std::string("buildCS: invalid CS axis count for Cartesian"));
+        }
+    } else if (ci_equal(csType, "vertical")) {
+        if (axisCount == 1) {
+            return VerticalCS::create(csMap, axisList[0]);
+        } else {
+            throw ParsingException(
+                std::string("buildCS: invalid CS axis count for vertical"));
         }
     } else if (ci_equal(csType, "spherical")) {
         if (axisCount == 3) {
-            auto thirdAxis = buildAxis(NN_CHECK_ASSERT(parentNode->lookForChild(
-                                           WKTConstants::AXIS, 2)),
-                                       unit, false, 3);
-            return SphericalCS::create(csMap, firstAxis, secondAxis, thirdAxis);
+            return SphericalCS::create(csMap, axisList[0], axisList[1],
+                                       axisList[2]);
         } else {
             throw ParsingException(
                 std::string("buildCS: invalid CS axis count for spherical"));
@@ -1295,7 +1339,14 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
 
     auto primeMeridianNode = node->lookForChild(WKTConstants::PRIMEM);
     if (!primeMeridianNode) {
-        primeMeridianNode = node->lookForChild(WKTConstants::PRIMEMERIDIAN);
+        // PRIMEM is required in WKT1
+        if (ci_equal(node->value(), WKTConstants::GEOGCS) ||
+            ci_equal(node->value(), WKTConstants::GEOCCS)) {
+            emitRecoverableAssertion(node->value() +
+                                     " should have a PRIMEM node");
+        } else {
+            primeMeridianNode = node->lookForChild(WKTConstants::PRIMEMERIDIAN);
+        }
     }
 
     auto angularUnit =
@@ -1529,6 +1580,43 @@ ProjectedCRSNNPtr WKTParser::Private::buildProjectedCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
+VerticalReferenceFrameNNPtr
+WKTParser::Private::buildVerticalReferenceFrame(WKTNodeNNPtr node) {
+    // WKT1 VERT_DATUM has a datum type after the datum name that we ignore.
+    return VerticalReferenceFrame::create(buildProperties(node));
+}
+
+// ---------------------------------------------------------------------------
+
+VerticalCRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
+    auto datumNode = node->lookForChild(WKTConstants::VDATUM);
+    if (!datumNode) {
+        datumNode = node->lookForChild(WKTConstants::VERT_DATUM);
+        if (!datumNode) {
+            datumNode = node->lookForChild(WKTConstants::VERTICALDATUM);
+            if (!datumNode) {
+                throw ParsingException("Missing VDATUM node");
+            }
+        }
+    }
+    auto datum = buildVerticalReferenceFrame(NN_CHECK_ASSERT(datumNode));
+
+    auto csNode = node->lookForChild(WKTConstants::CS);
+    if (!csNode && !ci_equal(node->value(), WKTConstants::VERT_CS)) {
+        throw ParsingException("Missing CS node");
+    }
+    auto cs = buildCS(csNode, node);
+    auto verticalCS = nn_dynamic_pointer_cast<VerticalCS>(cs);
+    if (!verticalCS) {
+        throw ParsingException("CS node is not of type vertical");
+    }
+
+    return VerticalCRS::create(buildProperties(node), datum,
+                               NN_CHECK_ASSERT(verticalCS));
+}
+
+// ---------------------------------------------------------------------------
+
 static bool isGeodeticCRS(const std::string &name) {
     return ci_equal(name, WKTConstants::GEODCRS) ||       // WKT2
            ci_equal(name, WKTConstants::GEODETICCRS) ||   // WKT2
@@ -1555,6 +1643,13 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
             d->buildGeodeticReferenceFrame(root, PrimeMeridian::GREENWICH));
     }
 
+    if (ci_equal(name, WKTConstants::VDATUM) ||
+        ci_equal(name, WKTConstants::VERT_DATUM) ||
+        ci_equal(name, WKTConstants::VERTICALDATUM)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            d->buildVerticalReferenceFrame(root));
+    }
+
     if (ci_equal(name, WKTConstants::ELLIPSOID) ||
         ci_equal(name, WKTConstants::SPHEROID)) {
         return util::nn_static_pointer_cast<BaseObject>(
@@ -1566,6 +1661,13 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
         ci_equal(name, WKTConstants::PROJECTEDCRS)) {
         return util::nn_static_pointer_cast<BaseObject>(
             d->buildProjectedCRS(root));
+    }
+
+    if (ci_equal(name, WKTConstants::VERT_CS) ||
+        ci_equal(name, WKTConstants::VERTCRS) ||
+        ci_equal(name, WKTConstants::VERTICALCRS)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            d->buildVerticalCRS(root));
     }
 
     if (ci_equal(name, WKTConstants::ID) ||

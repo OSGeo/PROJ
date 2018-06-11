@@ -426,6 +426,9 @@ static void checkGeocentric(GeodeticCRSPtr crs) {
     EXPECT_EQ(ellipsoid->semiMajorAxis().unit(), UnitOfMeasure::METRE);
     EXPECT_EQ(ellipsoid->inverseFlattening()->value(), 298.257223563);
     EXPECT_EQ(*(ellipsoid->name()->description()), "WGS 84");
+
+    auto primem = datum->primeMeridian();
+    ASSERT_EQ(primem->greenwichLongitude().unit(), UnitOfMeasure::DEGREE);
 }
 
 // ---------------------------------------------------------------------------
@@ -650,6 +653,8 @@ TEST(wkt_parse, wkt1_projected_no_axis) {
                "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
                "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
                "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
                "        UNIT[\"degree\",0.0174532925199433,\n"
                "            AUTHORITY[\"EPSG\",9122]],\n"
                "        AXIS[\"latitude\",NORTH],\n"
@@ -806,6 +811,90 @@ TEST(wkt_parse, cs_with_multiple_ID) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, vertcrs_WKT2) {
+    auto wkt = "VERTCRS[\"ODN height\",\n"
+               "    VDATUM[\"Ordnance Datum Newlyn\"],\n"
+               "    CS[vertical,1],\n"
+               "        AXIS[\"gravity-related height (H)\",up,\n"
+               "            LENGTHUNIT[\"metre\",1]],\n"
+               "    ID[\"EPSG\",5701]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    EXPECT_EQ(*(crs->name()->description()), "ODN height");
+    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "5701");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
+
+    auto datum = crs->datum();
+    EXPECT_EQ(*(datum->name()->description()), "Ordnance Datum Newlyn");
+    // ASSERT_EQ(datum->identifiers().size(), 1);
+    // EXPECT_EQ(datum->identifiers()[0]->code(), "5101");
+    // EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
+
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 1);
+    EXPECT_EQ(*(cs->axisList()[0]->name()->description()),
+              "Gravity-related height");
+    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "H");
+    EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::UP);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, vertcrs_WKT1_GDAL) {
+    auto wkt = "VERT_CS[\"ODN height\",\n"
+               "    VERT_DATUM[\"Ordnance Datum Newlyn\",2005,\n"
+               "        AUTHORITY[\"EPSG\",\"5101\"]],\n"
+               "    UNIT[\"metre\",1,\n"
+               "        AUTHORITY[\"EPSG\",9001]],\n"
+               "    AXIS[\"gravity-related height\",UP],\n"
+               "    AUTHORITY[\"EPSG\",\"5701\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    EXPECT_EQ(*(crs->name()->description()), "ODN height");
+    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "5701");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
+
+    auto datum = crs->datum();
+    EXPECT_EQ(*(datum->name()->description()), "Ordnance Datum Newlyn");
+    ASSERT_EQ(datum->identifiers().size(), 1);
+    EXPECT_EQ(datum->identifiers()[0]->code(), "5101");
+    EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
+
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 1);
+    EXPECT_EQ(*(cs->axisList()[0]->name()->description()),
+              "Gravity-related height");
+    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), ""); // "H" in WKT2
+    EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::UP);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, vertcrs_WKT1_GDAL_minimum) {
+    auto wkt = "VERT_CS[\"ODN height\",\n"
+               "    VERT_DATUM[\"Ordnance Datum Newlyn\",2005],\n"
+               "    UNIT[\"metre\",1]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    EXPECT_EQ(*(crs->name()->description()), "ODN height");
+
+    auto datum = crs->datum();
+    EXPECT_EQ(*(datum->name()->description()), "Ordnance Datum Newlyn");
+
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 1);
+    EXPECT_EQ(*(cs->axisList()[0]->name()->description()),
+              "Gravity-related height");
+    EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::UP);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);
@@ -841,52 +930,77 @@ TEST(wkt_parse, invalid_DATUM) {
 
 TEST(wkt_parse, invalid_GEOGCS) {
     EXPECT_NO_THROW(WKTParser().createFromWKT(
-        "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]]]"));
+        "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM[\"x\",0],UNIT["
+        "\"degree\",0.0174532925199433]]"));
+
+    // missing PRIMEM
+    EXPECT_THROW(
+        WKTParser().createFromWKT("GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0."
+                                  "5]],UNIT[\"degree\",0.0174532925199433]]"),
+        ParsingException);
+
+    // missing UNIT
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM[\"x\",0]]"),
+        ParsingException);
+
     EXPECT_THROW(WKTParser().createFromWKT("GEOGCS[\"x\"]"), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("GEOGCS[\"x\",FOO[]]"),
                  ParsingException);
 
     // not enough children for DATUM
-    EXPECT_THROW(WKTParser().createFromWKT("GEOGCS[\"x\",DATUM[\"x\"]]"),
-                 ParsingException);
+    EXPECT_THROW(
+        WKTParser().createFromWKT("GEOGCS[\"x\",DATUM[\"x\"],PRIMEM[\"x\",0],"
+                                  "UNIT[\"degree\",0.0174532925199433]]"),
+        ParsingException);
 
     // not enough children for AUTHORITY
     EXPECT_THROW(WKTParser().createFromWKT("GEOGCS[\"x\",DATUM[\"x\",SPHEROID["
-                                           "\"x\",1,0.5]],AUTHORITY[\"x\"]]"),
+                                           "\"x\",1,0.5]],PRIMEM[\"x\",0],UNIT["
+                                           "\"degree\",0.0174532925199433],"
+                                           "AUTHORITY[\"x\"]]"),
                  ParsingException);
 
     // not enough children for AUTHORITY, but ignored
     EXPECT_NO_THROW(WKTParser().setStrict(false).createFromWKT(
-        "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],AUTHORITY[\"x\"]]"));
+        "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM[\"x\",0],UNIT["
+        "\"degree\",0.0174532925199433],AUTHORITY[\"x\"]]"));
 
     EXPECT_NO_THROW(WKTParser().createFromWKT(
-        "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM[\"x\",0]]"));
+        "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM[\"x\",0],UNIT["
+        "\"degree\",0.0174532925199433]]"));
 
     // PRIMEM not numeric
     EXPECT_THROW(
-        WKTParser().createFromWKT("GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0."
-                                  "5]],PRIMEM[\"x\",\"a\"]]"),
+        WKTParser().createFromWKT(
+            "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0."
+            "5]],PRIMEM[\"x\",\"a\"],UNIT[\"degree\",0.0174532925199433]]"),
         ParsingException);
 
     // not enough children for PRIMEM
-    EXPECT_THROW(
-        WKTParser().createFromWKT(
-            "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM[\"x\"]]"),
-        ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT("GEOGCS[\"x\",DATUM[\"x\",SPHEROID["
+                                           "\"x\",1,0.5]],PRIMEM[\"x\"],UNIT["
+                                           "\"degree\",0.0174532925199433]]"),
+                 ParsingException);
 
     EXPECT_NO_THROW(WKTParser().createFromWKT(
-        "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],AXIS[\"latitude\","
+        "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM[\"x\",0],UNIT["
+        "\"degree\",0.0174532925199433],AXIS[\"latitude\","
         "NORTH],AXIS[\"longitude\",EAST]]"));
 
     // one axis only
-    EXPECT_THROW(
-        WKTParser().createFromWKT("GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0."
-                                  "5]],AXIS[\"latitude\",NORTH]]"),
-        ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "GEOGCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0."
+                     "5]],PRIMEM[\"x\",0],UNIT[\"degree\",0.0174532925199433],"
+                     "AXIS[\"latitude\",NORTH]]"),
+                 ParsingException);
 
     // invalid axis
     EXPECT_THROW(WKTParser().createFromWKT("GEOGCS[\"x\",DATUM[\"x\",SPHEROID["
-                                           "\"x\",1,0.5]],AXIS[\"latitude\","
+                                           "\"x\",1,0.5]],PRIMEM[\"x\",0],UNIT["
+                                           "\"degree\",0.0174532925199433],"
+                                           "AXIS[\"latitude\","
                                            "NORTH],AXIS[\"longitude\"]]"),
                  ParsingException);
 }
@@ -919,18 +1033,33 @@ TEST(wkt_parse, invalid_UNIT) {
 // ---------------------------------------------------------------------------
 
 TEST(wkt_parse, invalid_GEOCCS) {
-    EXPECT_NO_THROW(WKTParser().createFromWKT(
-        "GEOCCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]]]"));
+    EXPECT_NO_THROW(
+        WKTParser().createFromWKT("GEOCCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0."
+                                  "5]],PRIMEM[\"x\",0],UNIT[\"metre\",1]]"));
+
+    // missing PRIMEM
+    EXPECT_THROW(WKTParser().createFromWKT("GEOCCS[\"x\",DATUM[\"x\",SPHEROID["
+                                           "\"x\",1,0.5]],UNIT[\"metre\",1]]"),
+                 ParsingException);
+
+    // missing UNIT
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "GEOCCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM[\"x\",0]]"),
+        ParsingException);
 
     // ellipsoidal CS is invalid in a GEOCCS
     EXPECT_THROW(WKTParser().createFromWKT("GEOCCS[\"x\",DATUM[\"x\",SPHEROID["
-                                           "\"x\",1,0.5]],AXIS[\"latitude\","
+                                           "\"x\",1,0.5]],PRIMEM[\"x\",0],UNIT["
+                                           "\"degree\",0.0174532925199433],"
+                                           "AXIS[\"latitude\","
                                            "NORTH],AXIS[\"longitude\",EAST]]"),
                  ParsingException);
 
     // 3 axis required
     EXPECT_THROW(WKTParser().createFromWKT(
-                     "GEOCCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],AXIS["
+                     "GEOCCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM["
+                     "\"x\",0],UNIT[\"metre\",1],AXIS["
                      "\"Geocentric X\",OTHER],AXIS[\"Geocentric Y\",OTHER]]"),
                  ParsingException);
 }
@@ -1105,6 +1234,7 @@ TEST(wkt_parse, invalid_PROJCS) {
         "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
         "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
         "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+        "        PRIMEM[\"x\",0],\n"
         "        UNIT[\"degree\",0.0174532925199433,\n"
         "            AUTHORITY[\"EPSG\",9122]],\n"
         "        AXIS[\"latitude\",NORTH],\n"
@@ -1115,16 +1245,72 @@ TEST(wkt_parse, invalid_PROJCS) {
     EXPECT_THROW(WKTParser().createFromWKT(startWKT + "]"), ParsingException);
 
     // not enough children in PROJECTION
-    EXPECT_THROW(WKTParser().createFromWKT(startWKT + ",PROJECTION[]]"),
+    EXPECT_THROW(WKTParser().createFromWKT(startWKT +
+                                           ",PROJECTION[],UNIT[\"metre\",1]]"),
                  ParsingException);
 
     // not enough children in PARAMETER
     EXPECT_THROW(WKTParser().createFromWKT(
-                     startWKT + ",PROJECTION[\"x\"],PARAMETER[\"z\"]]"),
+                     startWKT +
+                     ",PROJECTION[\"x\"],PARAMETER[\"z\"],UNIT[\"metre\",1]]"),
                  ParsingException);
 
     // not enough children in PARAMETER
-    EXPECT_THROW(WKTParser().createFromWKT(
-                     startWKT + ",PROJECTION[\"x\"],PARAMETER[\"z\",\"foo\"]]"),
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            startWKT +
+            ",PROJECTION[\"x\"],PARAMETER[\"z\",\"foo\"],UNIT[\"metre\",1]]"),
+        ParsingException);
+
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        startWKT + ",PROJECTION[\"x\"],UNIT[\"metre\",1]]"));
+
+    // missing UNIT
+    EXPECT_THROW(WKTParser().createFromWKT(startWKT + ",PROJECTION[\"x\"]]"),
                  ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_VERTCRS) {
+
+    // missing VDATUM
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "VERTCRS[\"foo\",CS[vertical,1],AXIS[\"x\",up]]"),
+                 ParsingException);
+
+    // missing CS
+    EXPECT_THROW(WKTParser().createFromWKT("VERTCRS[\"foo\",VDATUM[\"bar\"]]"),
+                 ParsingException);
+
+    // CS is not of type vertical
+    EXPECT_THROW(WKTParser().createFromWKT("VERTCRS[\"foo\",VDATUM[\"bar\"],CS["
+                                           "ellipsoidal,2],AXIS[\"latitude\","
+                                           "north],AXIS["
+                                           "\"longitude\",east]]"),
+                 ParsingException);
+
+    // verticalCS should have only 1 axis
+    EXPECT_THROW(
+        WKTParser().createFromWKT("VERTCRS[\"foo\",VDATUM[\"bar\"],CS[vertical,"
+                                  "2],AXIS[\"latitude\",north],AXIS["
+                                  "\"longitude\",east]]"),
+        ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_VERT_CS) {
+
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        "VERT_CS[\"x\",VERT_DATUM[\"y\",2005],UNIT[\"metre\",1]]"));
+
+    // Missing VERT_DATUM
+    EXPECT_THROW(WKTParser().createFromWKT("VERT_CS[\"x\",UNIT[\"metre\",1]]"),
+                 ParsingException);
+
+    // Missing UNIT
+    EXPECT_THROW(
+        WKTParser().createFromWKT("VERT_CS[\"x\",VERT_DATUM[\"y\",2005]]"),
+        ParsingException);
 }

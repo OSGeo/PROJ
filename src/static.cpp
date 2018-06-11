@@ -98,6 +98,8 @@ DEFINE_WKT_CONSTANT(AUTHORITY);
 DEFINE_WKT_CONSTANT(PROJCS);
 DEFINE_WKT_CONSTANT(PROJECTION);
 DEFINE_WKT_CONSTANT(PARAMETER);
+DEFINE_WKT_CONSTANT(VERT_CS);
+DEFINE_WKT_CONSTANT(VERT_DATUM);
 
 DEFINE_WKT_CONSTANT(GEODCRS);
 DEFINE_WKT_CONSTANT(LENGTHUNIT);
@@ -121,6 +123,8 @@ DEFINE_WKT_CONSTANT(AREA);
 DEFINE_WKT_CONSTANT(BBOX);
 DEFINE_WKT_CONSTANT(CITATION);
 DEFINE_WKT_CONSTANT(URI);
+DEFINE_WKT_CONSTANT(VERTCRS);
+DEFINE_WKT_CONSTANT(VDATUM);
 
 DEFINE_WKT_CONSTANT(GEODETICCRS);
 DEFINE_WKT_CONSTANT(GEODETICDATUM);
@@ -128,6 +132,8 @@ DEFINE_WKT_CONSTANT(PROJECTEDCRS);
 DEFINE_WKT_CONSTANT(PRIMEMERIDIAN);
 DEFINE_WKT_CONSTANT(GEOGRAPHICCRS);
 DEFINE_WKT_CONSTANT(GEODETICREFERENCEFRAME);
+DEFINE_WKT_CONSTANT(VERTICALCRS);
+DEFINE_WKT_CONSTANT(VERTICALDATUM);
 
 // ---------------------------------------------------------------------------
 
@@ -230,6 +236,12 @@ const std::string AxisAbbreviation::h("h");
 const std::string AxisAbbreviation::X("X");
 const std::string AxisAbbreviation::Y("Y");
 const std::string AxisAbbreviation::Z("Z");
+
+// ---------------------------------------------------------------------------
+
+const RealizationMethod RealizationMethod::LEVELLING("levelling");
+const RealizationMethod RealizationMethod::GEOID("geoid");
+const RealizationMethod RealizationMethod::TIDAL("tidal");
 
 // ---------------------------------------------------------------------------
 

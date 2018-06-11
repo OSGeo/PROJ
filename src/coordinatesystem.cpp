@@ -282,7 +282,7 @@ std::string CoordinateSystemAxis::exportToWKT(WKTFormatterNNPtr formatter,
 
 //! @cond Doxygen_Suppress
 struct CoordinateSystem::Private {
-    std::vector<CoordinateSystemAxisPtr> axis{};
+    std::vector<CoordinateSystemAxisNNPtr> axis{};
 };
 //! @endcond
 
@@ -293,7 +293,7 @@ CoordinateSystem::CoordinateSystem() : d(internal::make_unique<Private>()) {}
 // ---------------------------------------------------------------------------
 
 CoordinateSystem::CoordinateSystem(
-    const std::vector<CoordinateSystemAxisPtr> &axisIn)
+    const std::vector<CoordinateSystemAxisNNPtr> &axisIn)
     : CoordinateSystem() {
     d->axis = axisIn;
 }
@@ -309,7 +309,8 @@ CoordinateSystem::~CoordinateSystem() = default;
 
 // ---------------------------------------------------------------------------
 
-const std::vector<CoordinateSystemAxisPtr> &CoordinateSystem::axisList() const {
+const std::vector<CoordinateSystemAxisNNPtr> &
+CoordinateSystem::axisList() const {
     return d->axis;
 }
 
@@ -352,7 +353,8 @@ std::string CoordinateSystem::exportToWKT(
              AxisName::Ellipsoidal_height);
 
     for (auto &axis : axisList()) {
-        axis->exportToWKT(formatter, isWKT2 ? order : 0, disableAbbrev);
+        int axisOrder = (isWKT2 && axisList().size() > 1) ? order : 0;
+        axis->exportToWKT(formatter, axisOrder, disableAbbrev);
         order++;
     }
     if (isWKT2 && !axisList().empty() && bAllSameUnit &&
@@ -378,7 +380,7 @@ SphericalCS::~SphericalCS() = default;
 
 // ---------------------------------------------------------------------------
 
-SphericalCS::SphericalCS(const std::vector<CoordinateSystemAxisPtr> &axisIn)
+SphericalCS::SphericalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn)
     : CoordinateSystem(axisIn) {}
 
 // ---------------------------------------------------------------------------
@@ -388,10 +390,10 @@ SphericalCS::SphericalCS(const SphericalCS &) = default;
 // ---------------------------------------------------------------------------
 
 SphericalCSNNPtr SphericalCS::create(const PropertyMap &properties,
-                                     const CoordinateSystemAxisPtr &axis0,
-                                     const CoordinateSystemAxisPtr &axis1,
-                                     const CoordinateSystemAxisPtr &axis2) {
-    std::vector<CoordinateSystemAxisPtr> axis{axis0, axis1, axis2};
+                                     const CoordinateSystemAxisNNPtr &axis0,
+                                     const CoordinateSystemAxisNNPtr &axis1,
+                                     const CoordinateSystemAxisNNPtr &axis2) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1, axis2};
     auto cs(SphericalCS::nn_make_shared<SphericalCS>(axis));
     cs->setProperties(properties);
     return cs;
@@ -407,7 +409,8 @@ EllipsoidalCS::~EllipsoidalCS() = default;
 
 // ---------------------------------------------------------------------------
 
-EllipsoidalCS::EllipsoidalCS(const std::vector<CoordinateSystemAxisPtr> &axisIn)
+EllipsoidalCS::EllipsoidalCS(
+    const std::vector<CoordinateSystemAxisNNPtr> &axisIn)
     : CoordinateSystem(axisIn) {}
 
 // ---------------------------------------------------------------------------
@@ -416,57 +419,96 @@ EllipsoidalCS::EllipsoidalCS(const EllipsoidalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
-EllipsoidalCSNNPtr EllipsoidalCS::create(const PropertyMap &properties,
-                                         const CoordinateSystemAxisPtr &axis0,
-                                         const CoordinateSystemAxisPtr &axis1) {
-    std::vector<CoordinateSystemAxisPtr> axis{axis0, axis1};
+EllipsoidalCSNNPtr
+EllipsoidalCS::create(const PropertyMap &properties,
+                      const CoordinateSystemAxisNNPtr &axis0,
+                      const CoordinateSystemAxisNNPtr &axis1) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1};
     auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
     cs->setProperties(properties);
-    return cs;
-}
-
-// ---------------------------------------------------------------------------
-
-EllipsoidalCSNNPtr EllipsoidalCS::create(const PropertyMap &properties,
-                                         const CoordinateSystemAxisPtr &axis0,
-                                         const CoordinateSystemAxisPtr &axis1,
-                                         const CoordinateSystemAxisPtr &axis2) {
-    std::vector<CoordinateSystemAxisPtr> axis{axis0, axis1, axis2};
-    auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
-    cs->setProperties(properties);
-    return cs;
-}
-
-// ---------------------------------------------------------------------------
-
-EllipsoidalCSNNPtr EllipsoidalCS::createLatitudeLongitudeDegree() {
-    std::vector<CoordinateSystemAxisPtr> axis{
-        CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
-            AxisAbbreviation::lat, AxisDirection::NORTH, UnitOfMeasure::DEGREE),
-        CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
-            AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::DEGREE)};
-    auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
     return cs;
 }
 
 // ---------------------------------------------------------------------------
 
 EllipsoidalCSNNPtr
-EllipsoidalCS::createLatitudeLongitudeDegreeEllipsoidalHeightMetre() {
-    std::vector<CoordinateSystemAxisPtr> axis{
+EllipsoidalCS::create(const PropertyMap &properties,
+                      const CoordinateSystemAxisNNPtr &axis0,
+                      const CoordinateSystemAxisNNPtr &axis1,
+                      const CoordinateSystemAxisNNPtr &axis2) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1, axis2};
+    auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+EllipsoidalCSNNPtr
+EllipsoidalCS::createLatitudeLongitude(const UnitOfMeasure &unit) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
-            AxisAbbreviation::lat, AxisDirection::NORTH, UnitOfMeasure::DEGREE),
+            AxisAbbreviation::lat, AxisDirection::NORTH, unit),
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
-            AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::DEGREE),
+            AxisAbbreviation::lon, AxisDirection::EAST, unit)};
+    auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+EllipsoidalCSNNPtr EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
+    const UnitOfMeasure &angularUnit, const UnitOfMeasure &linearUnit) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{
+        CoordinateSystemAxis::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
+            AxisAbbreviation::lat, AxisDirection::NORTH, angularUnit),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
+            AxisAbbreviation::lon, AxisDirection::EAST, angularUnit),
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY,
                               AxisName::Ellipsoidal_height),
-            AxisAbbreviation::h, AxisDirection::UP, UnitOfMeasure::METRE)};
+            AxisAbbreviation::h, AxisDirection::UP, linearUnit)};
     auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+VerticalCS::VerticalCS() = default;
+
+// ---------------------------------------------------------------------------
+
+VerticalCS::~VerticalCS() = default;
+
+// ---------------------------------------------------------------------------
+
+VerticalCS::VerticalCS(const CoordinateSystemAxisNNPtr &axisIn)
+    : CoordinateSystem(std::vector<CoordinateSystemAxisNNPtr>{axisIn}) {}
+
+// ---------------------------------------------------------------------------
+
+VerticalCS::VerticalCS(const VerticalCS &) = default;
+
+// ---------------------------------------------------------------------------
+
+VerticalCSNNPtr VerticalCS::create(const PropertyMap &properties,
+                                   const CoordinateSystemAxisNNPtr &axis) {
+    auto cs(VerticalCS::nn_make_shared<VerticalCS>(axis));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+VerticalCSNNPtr
+VerticalCS::createGravityRelatedHeight(const UnitOfMeasure &unit) {
+    auto cs(VerticalCS::nn_make_shared<VerticalCS>(CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Gravity-related height"),
+        "H", AxisDirection::UP, unit)));
     return cs;
 }
 
@@ -480,7 +522,7 @@ CartesianCS::~CartesianCS() = default;
 
 // ---------------------------------------------------------------------------
 
-CartesianCS::CartesianCS(const std::vector<CoordinateSystemAxisPtr> &axisIn)
+CartesianCS::CartesianCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn)
     : CoordinateSystem(axisIn) {}
 
 // ---------------------------------------------------------------------------
@@ -490,9 +532,9 @@ CartesianCS::CartesianCS(const CartesianCS &) = default;
 // ---------------------------------------------------------------------------
 
 CartesianCSNNPtr CartesianCS::create(const PropertyMap &properties,
-                                     const CoordinateSystemAxisPtr &axis0,
-                                     const CoordinateSystemAxisPtr &axis1) {
-    std::vector<CoordinateSystemAxisPtr> axis{axis0, axis1};
+                                     const CoordinateSystemAxisNNPtr &axis0,
+                                     const CoordinateSystemAxisNNPtr &axis1) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1};
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     cs->setProperties(properties);
     return cs;
@@ -501,10 +543,10 @@ CartesianCSNNPtr CartesianCS::create(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 CartesianCSNNPtr CartesianCS::create(const PropertyMap &properties,
-                                     const CoordinateSystemAxisPtr &axis0,
-                                     const CoordinateSystemAxisPtr &axis1,
-                                     const CoordinateSystemAxisPtr &axis2) {
-    std::vector<CoordinateSystemAxisPtr> axis{axis0, axis1, axis2};
+                                     const CoordinateSystemAxisNNPtr &axis0,
+                                     const CoordinateSystemAxisNNPtr &axis1,
+                                     const CoordinateSystemAxisNNPtr &axis2) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1, axis2};
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     cs->setProperties(properties);
     return cs;
@@ -512,37 +554,34 @@ CartesianCSNNPtr CartesianCS::create(const PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-CartesianCSNNPtr CartesianCS::createEastingNorthingMetre() {
-    std::vector<CoordinateSystemAxisPtr> axis{
+CartesianCSNNPtr CartesianCS::createEastingNorthing(const UnitOfMeasure &unit) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Easting),
-            AxisAbbreviation::E, AxisDirection::EAST, UnitOfMeasure::METRE),
+            AxisAbbreviation::E, AxisDirection::EAST, unit),
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Northing),
-            AxisAbbreviation::N, AxisDirection::NORTH, UnitOfMeasure::METRE)};
+            AxisAbbreviation::N, AxisDirection::NORTH, unit)};
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     return cs;
 }
 
 // ---------------------------------------------------------------------------
 
-CartesianCSNNPtr CartesianCS::createGeocentric() {
-    std::vector<CoordinateSystemAxisPtr> axis{
+CartesianCSNNPtr CartesianCS::createGeocentric(const UnitOfMeasure &unit) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY,
                               AxisName::Geocentric_X),
-            AxisAbbreviation::X, AxisDirection::GEOCENTRIC_X,
-            UnitOfMeasure::METRE),
+            AxisAbbreviation::X, AxisDirection::GEOCENTRIC_X, unit),
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY,
                               AxisName::Geocentric_Y),
-            AxisAbbreviation::Y, AxisDirection::GEOCENTRIC_Y,
-            UnitOfMeasure::METRE),
+            AxisAbbreviation::Y, AxisDirection::GEOCENTRIC_Y, unit),
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY,
                               AxisName::Geocentric_Z),
-            AxisAbbreviation::Z, AxisDirection::GEOCENTRIC_Z,
-            UnitOfMeasure::METRE)};
+            AxisAbbreviation::Z, AxisDirection::GEOCENTRIC_Z, unit)};
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     return cs;
 }
