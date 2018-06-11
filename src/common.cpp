@@ -416,7 +416,7 @@ void IdentifiedObject::Private::setIdentifiers(
         if (auto array = util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
                 oIter->second)) {
             identifiers.clear();
-            for (const auto &val : array->values) {
+            for (const auto &val : *array) {
                 identifier = util::nn_dynamic_pointer_cast<Identifier>(val);
                 if (identifier) {
                     identifiers.push_back(NN_CHECK_ASSERT(identifier));
@@ -449,7 +449,7 @@ void IdentifiedObject::Private::setAliases(
         if (auto array = util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
                 oIter->second)) {
             aliases.clear();
-            for (const auto &val : array->values) {
+            for (const auto &val : *array) {
                 l_name = util::nn_dynamic_pointer_cast<GenericName>(val);
                 if (l_name) {
                     aliases.push_back(NN_CHECK_ASSERT(l_name));
@@ -674,7 +674,7 @@ void ObjectUsage::setProperties(
             } else if (auto array =
                            util::nn_dynamic_pointer_cast<ArrayOfBaseObject>(
                                oIter->second)) {
-                for (const auto &val : array->values) {
+                for (const auto &val : *array) {
                     objectDomain =
                         util::nn_dynamic_pointer_cast<ObjectDomain>(val);
                     if (objectDomain) {

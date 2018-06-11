@@ -134,8 +134,8 @@ TEST(common, identifiedobject_identifier_invalid_type) {
 TEST(common, identifiedobject_identifier_array_of_identifier) {
     PropertyMap properties;
     auto array = ArrayOfBaseObject::create();
-    array->values.push_back(Identifier::create("identifier_code1"));
-    array->values.push_back(Identifier::create("identifier_code2"));
+    array->add(Identifier::create("identifier_code1"));
+    array->add(Identifier::create("identifier_code2"));
     properties.set(IdentifiedObject::IDENTIFIERS_KEY, array);
     auto obj = IdentifiedObject::create(properties);
     ASSERT_EQ(obj->identifiers().size(), 2);
@@ -148,7 +148,7 @@ TEST(common, identifiedobject_identifier_array_of_identifier) {
 TEST(common, identifiedobject_identifier_array_of_invalid_type) {
     PropertyMap properties;
     auto array = ArrayOfBaseObject::create();
-    array->values.push_back(nn_make_shared<Citation>("unexpected type"));
+    array->add(nn_make_shared<Citation>("unexpected type"));
     properties.set(IdentifiedObject::IDENTIFIERS_KEY, array);
     ASSERT_THROW(IdentifiedObject::create(properties),
                  InvalidValueTypeException);
@@ -181,7 +181,7 @@ TEST(common, identifiedobject_alias_invalid_type) {
 TEST(common, identifiedobject_alias_array_of_invalid_type) {
     PropertyMap properties;
     auto array = ArrayOfBaseObject::create();
-    array->values.push_back(nn_make_shared<Citation>("unexpected type"));
+    array->add(nn_make_shared<Citation>("unexpected type"));
     properties.set(IdentifiedObject::ALIAS_KEY, array);
     ASSERT_THROW(IdentifiedObject::create(properties),
                  InvalidValueTypeException);

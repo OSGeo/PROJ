@@ -233,15 +233,21 @@ using ArrayOfBaseObjectNNPtr = util::nn<ArrayOfBaseObjectPtr>;
  */
 class ArrayOfBaseObject : public BaseObject {
   public:
-    // FIXME
-    std::vector<BaseObjectNNPtr> values{};
-
-    PROJ_DLL ArrayOfBaseObject() = default;
+    PROJ_DLL ArrayOfBaseObject();
     PROJ_DLL ArrayOfBaseObject(const ArrayOfBaseObject &other);
     PROJ_DLL ArrayOfBaseObject &operator=(const ArrayOfBaseObject &other);
     PROJ_DLL ~ArrayOfBaseObject() override;
 
+    PROJ_DLL void add(BaseObjectNNPtr obj);
+
+    std::vector<BaseObjectNNPtr>::const_iterator begin() const;
+    std::vector<BaseObjectNNPtr>::const_iterator end() const;
+    bool empty() const;
+
     PROJ_DLL static ArrayOfBaseObjectNNPtr create();
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
 };
 
 // ---------------------------------------------------------------------------
@@ -293,9 +299,8 @@ using GenericNameNNPtr = util::nn<GenericNamePtr>;
 
 class GenericName : public BaseObject {
   public:
-    PROJ_DLL GenericName(const GenericName &other);
-    PROJ_DLL GenericName &operator=(const GenericName &other) = delete;
-    PROJ_DLL virtual ~GenericName();
+    PROJ_DLL virtual ~GenericName() override;
+    GenericName(const GenericName &other);
 
     PROJ_DLL virtual const NameSpacePtr scope() const = 0;
     PROJ_DLL virtual std::string toString() const = 0;
@@ -306,15 +311,15 @@ class GenericName : public BaseObject {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    GenericName &operator=(const GenericName &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
 
 class NameSpace {
   public:
-    PROJ_DLL NameSpace(const NameSpace &other);
-    PROJ_DLL NameSpace &operator=(const NameSpace &other) = delete;
     PROJ_DLL ~NameSpace();
+    NameSpace(const NameSpace &other);
 
     PROJ_DLL bool isGlobal() const;
     PROJ_DLL const GenericNamePtr &name() const;
@@ -330,6 +335,7 @@ class NameSpace {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    NameSpace &operator=(const NameSpace &other) = delete;
 
     static NameSpaceNNPtr createGLOBAL();
 };
@@ -338,9 +344,8 @@ class NameSpace {
 
 class LocalName : public GenericName {
   public:
-    PROJ_DLL LocalName(const LocalName &other);
-    PROJ_DLL LocalName &operator=(const LocalName &other) = delete;
-    ~LocalName() override;
+    LocalName(const LocalName &other);
+    PROJ_DLL ~LocalName() override;
 
     PROJ_DLL const NameSpacePtr scope() const override;
     PROJ_DLL std::string toString() const override;
@@ -355,6 +360,7 @@ class LocalName : public GenericName {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    LocalName &operator=(const LocalName &other) = delete;
 };
 
 // ---------------------------------------------------------------------------

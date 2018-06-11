@@ -141,9 +141,19 @@ bool BoxedValue::booleanValue() const { return d->booleanValue_; }
 
 // ---------------------------------------------------------------------------
 
-ArrayOfBaseObject::ArrayOfBaseObject(const ArrayOfBaseObject &other) {
-    *this = other;
-}
+//! @cond Doxygen_Suppress
+struct ArrayOfBaseObject::Private {
+    std::vector<BaseObjectNNPtr> values_{};
+};
+//! @endcond
+// ---------------------------------------------------------------------------
+
+ArrayOfBaseObject::ArrayOfBaseObject() : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+ArrayOfBaseObject::ArrayOfBaseObject(const ArrayOfBaseObject &other)
+    : d(internal::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
@@ -154,10 +164,30 @@ ArrayOfBaseObject::~ArrayOfBaseObject() = default;
 ArrayOfBaseObject &ArrayOfBaseObject::
 operator=(const ArrayOfBaseObject &other) {
     if (this != &other) {
-        values = other.values;
+        *d = *(other.d);
     }
     return *this;
 }
+
+// ---------------------------------------------------------------------------
+
+void ArrayOfBaseObject::add(BaseObjectNNPtr obj) { d->values_.push_back(obj); }
+
+// ---------------------------------------------------------------------------
+
+std::vector<BaseObjectNNPtr>::const_iterator ArrayOfBaseObject::begin() const {
+    return d->values_.begin();
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<BaseObjectNNPtr>::const_iterator ArrayOfBaseObject::end() const {
+    return d->values_.end();
+}
+
+// ---------------------------------------------------------------------------
+
+bool ArrayOfBaseObject::empty() const { return d->values_.empty(); }
 
 // ---------------------------------------------------------------------------
 
@@ -231,7 +261,7 @@ PropertyMap &PropertyMap::set(const std::string &key,
                               const std::vector<std::string> &arrayIn) {
     ArrayOfBaseObjectNNPtr array = util::nn_make_shared<ArrayOfBaseObject>();
     for (const auto &str : arrayIn) {
-        array->values.push_back(util::nn_make_shared<BoxedValue>(str));
+        array->add(util::nn_make_shared<BoxedValue>(str));
     }
     auto iter = d->map_.find(key);
     if (iter != d->map_.end()) {

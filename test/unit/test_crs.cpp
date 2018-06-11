@@ -675,9 +675,9 @@ TEST(crs, multiple_ID) {
     PropertyMap propertiesCRS;
     propertiesCRS.set(IdentifiedObject::NAME_KEY, "WGS 84");
     auto identifiers = ArrayOfBaseObject::create();
-    identifiers->values.push_back(Identifier::create(
+    identifiers->add(Identifier::create(
         "codeA", PropertyMap().set(Identifier::CODESPACE_KEY, "authorityA")));
-    identifiers->values.push_back(Identifier::create(
+    identifiers->add(Identifier::create(
         "codeB", PropertyMap().set(Identifier::CODESPACE_KEY, "authorityB")));
     propertiesCRS.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
     auto crs = GeodeticCRS::create(

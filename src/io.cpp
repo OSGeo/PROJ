@@ -835,11 +835,11 @@ PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
             ci_equal(subNode->value(), WKTConstants::AUTHORITY)) {
             auto id = buildId(subNode);
             if (id) {
-                identifiers->values.push_back(NN_CHECK_ASSERT(id));
+                identifiers->add(NN_CHECK_ASSERT(id));
             }
         }
     }
-    if (!identifiers->values.empty()) {
+    if (!identifiers->empty()) {
         properties.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
     }
 
