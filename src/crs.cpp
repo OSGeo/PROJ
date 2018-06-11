@@ -90,9 +90,11 @@ SingleCRS::SingleCRS(const DatumPtr &datumIn, const CoordinateSystemNNPtr &csIn)
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 SingleCRS::SingleCRS(const SingleCRS &other)
     : // CRS(other),
       d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -142,8 +144,10 @@ GeodeticCRS::GeodeticCRS(const GeodeticReferenceFrameNNPtr &datumIn,
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 GeodeticCRS::GeodeticCRS(const GeodeticCRS &other)
     : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -253,9 +257,11 @@ GeographicCRS::GeographicCRS(const GeodeticReferenceFrameNNPtr &datumIn,
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 GeographicCRS::GeographicCRS(const GeographicCRS &other)
     : SingleCRS(other), GeodeticCRS(other),
       d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -363,8 +369,10 @@ VerticalCRS::VerticalCRS(const VerticalReferenceFrameNNPtr &datumIn,
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 VerticalCRS::VerticalCRS(const VerticalCRS &other)
     : SingleCRS(other), d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -468,6 +476,7 @@ DerivedCRS::DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 DerivedCRS::DerivedCRS(const DerivedCRS &other)
     :
 #if !defined(COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT)
@@ -475,6 +484,7 @@ DerivedCRS::DerivedCRS(const DerivedCRS &other)
 #endif
       d(internal::make_unique<Private>(*other.d)) {
 }
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -507,9 +517,11 @@ ProjectedCRS::ProjectedCRS(const GeodeticCRSNNPtr &baseCRSIn,
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 ProjectedCRS::ProjectedCRS(const ProjectedCRS &other)
     : SingleCRS(other), DerivedCRS(other),
       d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -608,4 +620,90 @@ ProjectedCRSNNPtr ProjectedCRS::create(
         static_cast<const GeodeticCRSPtr>(baseCRSIn),
         static_cast<const ProjectedCRSPtr>(crs));
     return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct CompoundCRS::Private {
+    std::vector<CRSNNPtr> components_{};
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+CompoundCRS::CompoundCRS(const std::vector<CRSNNPtr> &components)
+    : CRS(), d(internal::make_unique<Private>()) {
+    d->components_ = components;
+}
+
+// ---------------------------------------------------------------------------
+
+CompoundCRS::~CompoundCRS() = default;
+
+// ---------------------------------------------------------------------------
+
+std::vector<SingleCRSNNPtr> CompoundCRS::componentReferenceSystems() const {
+    // Flatten the potential hierarchy to return only SingleCRS
+    std::vector<SingleCRSNNPtr> res;
+    for (const auto &crs : d->components_) {
+        auto childCompound = util::nn_dynamic_pointer_cast<CompoundCRS>(crs);
+        if (childCompound) {
+            auto childFlattened = childCompound->componentReferenceSystems();
+            res.insert(res.end(), childFlattened.begin(), childFlattened.end());
+        } else {
+            auto singleCRS = util::nn_dynamic_pointer_cast<SingleCRS>(crs);
+            if (singleCRS) {
+                res.push_back(NN_CHECK_ASSERT(singleCRS));
+            }
+        }
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+CompoundCRSNNPtr CompoundCRS::create(const PropertyMap &properties,
+                                     const std::vector<CRSNNPtr> &components) {
+    auto compoundCRS(CompoundCRS::nn_make_shared<CompoundCRS>(components));
+    compoundCRS->setProperties(properties);
+    if (properties.find(IdentifiedObject::NAME_KEY) == properties.end()) {
+        std::string name;
+        for (const auto &crs : components) {
+            if (!name.empty()) {
+                name += " + ";
+            }
+            if (crs->name()->description()) {
+                name += *crs->name()->description();
+            } else {
+                name += "unnamed";
+            }
+        }
+        PropertyMap propertyName;
+        propertyName.set(IdentifiedObject::NAME_KEY, name);
+        compoundCRS->setProperties(propertyName);
+    }
+
+    return compoundCRS;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string CompoundCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    formatter->startNode(isWKT2 ? WKTConstants::COMPOUNDCRS
+                                : WKTConstants::COMPD_CS);
+    formatter->addQuotedString(*(name()->description()));
+    if (isWKT2) {
+        for (const auto &crs : componentReferenceSystems()) {
+            crs->exportToWKT(formatter);
+        }
+    } else {
+        for (const auto &crs : d->components_) {
+            crs->exportToWKT(formatter);
+        }
+    }
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+    return formatter->toString();
 }

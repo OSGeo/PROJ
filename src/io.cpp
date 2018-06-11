@@ -737,6 +737,8 @@ struct WKTParser::Private {
     ProjectedCRSNNPtr buildProjectedCRS(WKTNodeNNPtr node);
     VerticalReferenceFrameNNPtr buildVerticalReferenceFrame(WKTNodeNNPtr node);
     VerticalCRSNNPtr buildVerticalCRS(WKTNodeNNPtr node);
+    CompoundCRSNNPtr buildCompoundCRS(WKTNodeNNPtr node);
+    CRSPtr buildCRS(WKTNodeNNPtr node);
 };
 
 // ---------------------------------------------------------------------------
@@ -1662,6 +1664,19 @@ VerticalCRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
+CompoundCRSNNPtr WKTParser::Private::buildCompoundCRS(WKTNodeNNPtr node) {
+    std::vector<CRSNNPtr> components;
+    for (const auto &child : node->children()) {
+        auto crs = buildCRS(child);
+        if (crs) {
+            components.push_back(NN_CHECK_ASSERT(crs));
+        }
+    }
+    return CompoundCRS::create(buildProperties(node), components);
+}
+
+// ---------------------------------------------------------------------------
+
 static bool isGeodeticCRS(const std::string &name) {
     return ci_equal(name, WKTConstants::GEODCRS) ||       // WKT2
            ci_equal(name, WKTConstants::GEODETICCRS) ||   // WKT2
@@ -1673,12 +1688,42 @@ static bool isGeodeticCRS(const std::string &name) {
 
 // ---------------------------------------------------------------------------
 
+CRSPtr WKTParser::Private::buildCRS(WKTNodeNNPtr node) {
+    const std::string &name(node->value());
+
+    if (isGeodeticCRS(name)) {
+        return util::nn_static_pointer_cast<CRS>(buildGeodeticCRS(node));
+    }
+
+    if (ci_equal(name, WKTConstants::PROJCS) ||
+        ci_equal(name, WKTConstants::PROJCRS) ||
+        ci_equal(name, WKTConstants::PROJECTEDCRS)) {
+        return util::nn_static_pointer_cast<CRS>(buildProjectedCRS(node));
+    }
+
+    if (ci_equal(name, WKTConstants::VERT_CS) ||
+        ci_equal(name, WKTConstants::VERTCRS) ||
+        ci_equal(name, WKTConstants::VERTICALCRS)) {
+        return util::nn_static_pointer_cast<CRS>(buildVerticalCRS(node));
+    }
+
+    if (ci_equal(name, WKTConstants::COMPD_CS) ||
+        ci_equal(name, WKTConstants::COMPOUNDCRS)) {
+        return util::nn_static_pointer_cast<CRS>(buildCompoundCRS(node));
+    }
+
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
     WKTNodeNNPtr root = WKTNode::createFrom(wkt);
     const std::string &name(root->value());
-    if (isGeodeticCRS(name)) {
-        return util::nn_static_pointer_cast<BaseObject>(
-            d->buildGeodeticCRS(root));
+
+    auto crs = d->buildCRS(root);
+    if (crs) {
+        return util::nn_static_pointer_cast<BaseObject>(NN_CHECK_ASSERT(crs));
     }
 
     if (ci_equal(name, WKTConstants::DATUM) ||
@@ -1699,20 +1744,6 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
         ci_equal(name, WKTConstants::SPHEROID)) {
         return util::nn_static_pointer_cast<BaseObject>(
             d->buildEllipsoid(root));
-    }
-
-    if (ci_equal(name, WKTConstants::PROJCS) ||
-        ci_equal(name, WKTConstants::PROJCRS) ||
-        ci_equal(name, WKTConstants::PROJECTEDCRS)) {
-        return util::nn_static_pointer_cast<BaseObject>(
-            d->buildProjectedCRS(root));
-    }
-
-    if (ci_equal(name, WKTConstants::VERT_CS) ||
-        ci_equal(name, WKTConstants::VERTCRS) ||
-        ci_equal(name, WKTConstants::VERTICALCRS)) {
-        return util::nn_static_pointer_cast<BaseObject>(
-            d->buildVerticalCRS(root));
     }
 
     if (ci_equal(name, WKTConstants::ID) ||

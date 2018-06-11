@@ -931,6 +931,104 @@ TEST(wkt_parse, vdatum_with_ANCHOR) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, COMPOUNDCRS) {
+    auto obj = WKTParser().createFromWKT(
+        "COMPOUNDCRS[\"horizontal + vertical\",\n"
+        "    PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+        "        BASEGEODCRS[\"WGS 84\",\n"
+        "            DATUM[\"WGS_1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        CONVERSION[\"UTM zone 31N\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",3,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",500000,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8807]]],\n"
+        "        CS[Cartesian,2],\n"
+        "            AXIS[\"(E)\",east,\n"
+        "                ORDER[1],\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            AXIS[\"(N)\",north,\n"
+        "                ORDER[2],\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "    VERTCRS[\"ODN height\",\n"
+        "        VDATUM[\"Ordnance Datum Newlyn\"],\n"
+        "        CS[vertical,1],\n"
+        "            AXIS[\"gravity-related height (H)\",up,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "    ID[\"codespace\",\"code\"]]");
+    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(*(crs->name()->description()), "horizontal + vertical");
+    EXPECT_EQ(crs->componentReferenceSystems().size(), 2);
+    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "code");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "codespace");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, COMPD_CS) {
+    auto obj = WKTParser().createFromWKT(
+        "COMPD_CS[\"horizontal + vertical\",\n"
+        "    PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+        "        GEOGCS[\"WGS 84\",\n"
+        "            DATUM[\"WGS_1984\",\n"
+        "                SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    AUTHORITY[\"EPSG\",\"7030\"]],\n"
+        "                AUTHORITY[\"EPSG\",\"6326\"]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "            UNIT[\"degree\",0.0174532925199433,\n"
+        "                AUTHORITY[\"EPSG\",9122]],\n"
+        "            AXIS[\"Latitude\",NORTH],\n"
+        "            AXIS[\"Longitude\",EAST],\n"
+        "            AUTHORITY[\"EPSG\",\"4326\"]],\n"
+        "        PROJECTION[\"Transverse_Mercator\"],\n"
+        "        PARAMETER[\"latitude_of_origin\",0],\n"
+        "        PARAMETER[\"central_meridian\",3],\n"
+        "        PARAMETER[\"scale_factor\",0.9996],\n"
+        "        PARAMETER[\"false_easting\",500000],\n"
+        "        PARAMETER[\"false_northing\",0],\n"
+        "        UNIT[\"metre\",1,\n"
+        "            AUTHORITY[\"EPSG\",9001]],\n"
+        "        AXIS[\"Easting\",EAST],\n"
+        "        AXIS[\"Northing\",NORTH],\n"
+        "        AUTHORITY[\"EPSG\",\"32631\"]],\n"
+        "    VERT_CS[\"ODN height\",\n"
+        "        VERT_DATUM[\"Ordnance Datum Newlyn\",2005,\n"
+        "            AUTHORITY[\"EPSG\",\"5101\"]],\n"
+        "        UNIT[\"metre\",1,\n"
+        "            AUTHORITY[\"EPSG\",9001]],\n"
+        "        AXIS[\"Gravity-related height\",UP],\n"
+        "        AUTHORITY[\"EPSG\",\"5701\"]],\n"
+        "    AUTHORITY[\"codespace\",\"code\"]]");
+    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(*(crs->name()->description()), "horizontal + vertical");
+    EXPECT_EQ(crs->componentReferenceSystems().size(), 2);
+    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "code");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "codespace");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);

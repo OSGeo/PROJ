@@ -65,8 +65,6 @@ using CRSNNPtr = util::nn<CRSPtr>;
 
 class SingleCRS : public CRS {
   public:
-    PROJ_DLL SingleCRS &operator=(const SingleCRS &other) = delete;
-
     PROJ_DLL ~SingleCRS() override;
 
     PROJ_DLL const datum::DatumPtr &datum() const;
@@ -78,10 +76,11 @@ class SingleCRS : public CRS {
               const cs::CoordinateSystemNNPtr &csIn);
     SingleCRS(const datum::DatumPtr &datumIn,
               const cs::CoordinateSystemNNPtr &csIn);
-    SingleCRS(const SingleCRS &other);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    SingleCRS &operator=(const SingleCRS &other) = delete;
+    SingleCRS(const SingleCRS &other) = delete;
 };
 
 using SingleCRSPtr = std::shared_ptr<SingleCRS>;
@@ -95,8 +94,6 @@ using GeodeticCRSNNPtr = util::nn<GeodeticCRSPtr>;
 
 class GeodeticCRS : virtual public SingleCRS {
   public:
-    PROJ_DLL GeodeticCRS(const GeodeticCRS &other);
-    PROJ_DLL GeodeticCRS &operator=(const GeodeticCRS &other) = delete;
     PROJ_DLL ~GeodeticCRS() override;
 
     PROJ_DLL const datum::GeodeticReferenceFrameNNPtr datum() const;
@@ -138,6 +135,8 @@ class GeodeticCRS : virtual public SingleCRS {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    GeodeticCRS(const GeodeticCRS &other) = delete;
+    GeodeticCRS &operator=(const GeodeticCRS &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -148,8 +147,6 @@ using GeographicCRSNNPtr = util::nn<GeographicCRSPtr>;
 
 class GeographicCRS : public GeodeticCRS {
   public:
-    PROJ_DLL GeographicCRS(const GeographicCRS &other);
-    PROJ_DLL GeographicCRS &operator=(const GeographicCRS &other) = delete;
     PROJ_DLL ~GeographicCRS();
 
     PROJ_DLL const cs::EllipsoidalCSNNPtr coordinateSystem() const;
@@ -174,6 +171,8 @@ class GeographicCRS : public GeodeticCRS {
     static GeographicCRSNNPtr createEPSG_4326();
     static GeographicCRSNNPtr createEPSG_4807();
     static GeographicCRSNNPtr createEPSG_4979();
+    GeographicCRS(const GeographicCRS &other) = delete;
+    GeographicCRS &operator=(const GeographicCRS &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -184,8 +183,6 @@ using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
 
 class VerticalCRS : public SingleCRS {
   public:
-    PROJ_DLL VerticalCRS(const VerticalCRS &other);
-    PROJ_DLL VerticalCRS &operator=(const VerticalCRS &other) = delete;
     PROJ_DLL ~VerticalCRS() override;
 
     PROJ_DLL const datum::VerticalReferenceFramePtr datum() const;
@@ -210,6 +207,8 @@ class VerticalCRS : public SingleCRS {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    VerticalCRS(const VerticalCRS &other) = delete;
+    VerticalCRS &operator=(const VerticalCRS &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -225,11 +224,11 @@ class DerivedCRS : virtual public SingleCRS {
     DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
                const operation::ConversionNNPtr &derivingConversionIn,
                const cs::CoordinateSystemNNPtr &cs);
-    DerivedCRS(const DerivedCRS &other);
-    DerivedCRS &operator=(const DerivedCRS &other) = delete;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    DerivedCRS(const DerivedCRS &other) = delete;
+    DerivedCRS &operator=(const DerivedCRS &other) = delete;
 };
 
 using DerivedCRSPtr = std::shared_ptr<DerivedCRS>;
@@ -243,7 +242,6 @@ using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
 
 class ProjectedCRS : public DerivedCRS {
   public:
-    PROJ_DLL ProjectedCRS &operator=(const ProjectedCRS &other) = delete;
     PROJ_DLL ~ProjectedCRS() override;
 
     PROJ_DLL const GeodeticCRSNNPtr baseCRS() const;
@@ -262,11 +260,12 @@ class ProjectedCRS : public DerivedCRS {
     ProjectedCRS(const GeodeticCRSNNPtr &baseCRSIn,
                  const operation::ConversionNNPtr &derivingConversionIn,
                  const cs::CartesianCSNNPtr &csIn);
-    ProjectedCRS(const ProjectedCRS &other);
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    ProjectedCRS(const ProjectedCRS &other) = delete;
+    ProjectedCRS &operator=(const ProjectedCRS &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -280,11 +279,32 @@ class DerivedGeodeticCRS : public GeodeticCRS, public DerivedCRS {
 
 // ---------------------------------------------------------------------------
 
+class CompoundCRS;
+using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
+using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
+
 class CompoundCRS : public CRS {
-    // TODO
-    // const std::vector<std::unique_ptr<SingleCRS>>&
-    // componentReferenceSystems()
-    // const;
+  public:
+    CompoundCRS &operator=(const CompoundCRS &other) = delete;
+    PROJ_DLL ~CompoundCRS() override;
+
+    PROJ_DLL std::vector<SingleCRSNNPtr> componentReferenceSystems() const;
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL static CompoundCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const std::vector<CRSNNPtr> &components);
+
+  protected:
+    // relaxed: standard say SingleCRSNNPtr
+    CompoundCRS(const std::vector<CRSNNPtr> &components);
+    CompoundCRS(const CompoundCRS &other) = delete;
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
 };
 
 #ifdef notdef

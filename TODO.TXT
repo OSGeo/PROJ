@@ -4,7 +4,8 @@
     - import from WKT
     - import from Proj4
     - exportToProj4()
-    - derived crs, vertical crs, compound crs
+    - derived crs
+    - all GDAL projected methods
     - TOWGS84 / boundcrs
     - DATUMENSEMBLE
     - WKT2:2018 USAGE

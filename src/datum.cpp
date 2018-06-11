@@ -64,8 +64,10 @@ Datum::Datum() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 Datum::Datum(const Datum &other)
     : ObjectUsage(other), d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -106,8 +108,10 @@ PrimeMeridian::PrimeMeridian(const Angle &longitude)
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 PrimeMeridian::PrimeMeridian(const PrimeMeridian &other)
     : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -202,8 +206,10 @@ Ellipsoid::Ellipsoid(const Length &semiMajorAxisIn, const Scale &invFlattening)
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 Ellipsoid::Ellipsoid(const Ellipsoid &other)
     : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -322,9 +328,11 @@ GeodeticReferenceFrame::GeodeticReferenceFrame()
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 GeodeticReferenceFrame::GeodeticReferenceFrame(
     const GeodeticReferenceFrame &other)
     : Datum(other), d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -410,10 +418,12 @@ DynamicGeodeticReferenceFrame::DynamicGeodeticReferenceFrame()
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 DynamicGeodeticReferenceFrame::DynamicGeodeticReferenceFrame(
     const DynamicGeodeticReferenceFrame &other)
     : GeodeticReferenceFrame(other),
       d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -441,8 +451,10 @@ DatumEnsemble::DatumEnsemble() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 DatumEnsemble::DatumEnsemble(const DatumEnsemble &other)
     : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 

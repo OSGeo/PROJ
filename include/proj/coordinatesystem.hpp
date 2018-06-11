@@ -111,8 +111,6 @@ using MeridianNNPtr = util::nn<MeridianPtr>;
 /** For WKT2. Used by CoordinateSystemAxis optionaly */
 class Meridian : public common::IdentifiedObject, public io::IWKTExportable {
   public:
-    PROJ_DLL Meridian(const Meridian &other);
-    PROJ_DLL Meridian &operator=(const Meridian &other) = delete;
     PROJ_DLL ~Meridian() override;
 
     PROJ_DLL const common::Angle &longitude() const;
@@ -133,6 +131,8 @@ class Meridian : public common::IdentifiedObject, public io::IWKTExportable {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    Meridian(const Meridian &other) = delete;
+    Meridian &operator=(const Meridian &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -144,9 +144,6 @@ using CoordinateSystemAxisNNPtr = util::nn<CoordinateSystemAxisPtr>;
 class CoordinateSystemAxis : public common::IdentifiedObject,
                              public io::IWKTExportable {
   public:
-    PROJ_DLL CoordinateSystemAxis(const CoordinateSystemAxis &other);
-    PROJ_DLL CoordinateSystemAxis &
-    operator=(const CoordinateSystemAxis &other) = delete;
     PROJ_DLL ~CoordinateSystemAxis() override;
 
     PROJ_DLL const std::string &axisAbbrev() const;
@@ -171,6 +168,8 @@ class CoordinateSystemAxis : public common::IdentifiedObject,
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    CoordinateSystemAxis(const CoordinateSystemAxis &other) = delete;
+    CoordinateSystemAxis &operator=(const CoordinateSystemAxis &other) = delete;
 
     CoordinateSystemAxis();
     INLINED_MAKE_SHARED
@@ -197,10 +196,10 @@ class CoordinateSystem : public common::IdentifiedObject,
     CoordinateSystem();
     explicit CoordinateSystem(
         const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
-    CoordinateSystem(const CoordinateSystem &other);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    CoordinateSystem(const CoordinateSystem &other) = delete;
 };
 
 using CoordinateSystemPtr = std::shared_ptr<CoordinateSystem>;
@@ -228,9 +227,10 @@ class SphericalCS : public CoordinateSystem {
 
   protected:
     SphericalCS();
-    SphericalCS(const SphericalCS &other);
     explicit SphericalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
+  private:
+    SphericalCS(const SphericalCS &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -263,10 +263,11 @@ class EllipsoidalCS : public CoordinateSystem {
 
   protected:
     EllipsoidalCS();
-    EllipsoidalCS(const EllipsoidalCS &other);
     explicit EllipsoidalCS(
         const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
+  protected:
+    EllipsoidalCS(const EllipsoidalCS &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -290,9 +291,10 @@ class VerticalCS : public CoordinateSystem {
 
   protected:
     VerticalCS();
-    VerticalCS(const VerticalCS &other);
     explicit VerticalCS(const CoordinateSystemAxisNNPtr &axisIn);
     INLINED_MAKE_SHARED
+  private:
+    VerticalCS(const VerticalCS &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -323,9 +325,10 @@ class CartesianCS : public CoordinateSystem {
 
   protected:
     CartesianCS();
-    CartesianCS(const CartesianCS &other);
     explicit CartesianCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
     INLINED_MAKE_SHARED
+  private:
+    CartesianCS(const CartesianCS &other) = delete;
 };
 
 } // namespace cs

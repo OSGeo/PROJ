@@ -767,3 +767,132 @@ TEST(datum, vdatum_with_anchor) {
 
     EXPECT_EQ(vdatum->exportToWKT(WKTFormatter::create()), expected);
 }
+
+// ---------------------------------------------------------------------------
+
+static CompoundCRSNNPtr createCompoundCRS() {
+    PropertyMap properties;
+    properties.set(Identifier::CODESPACE_KEY, "codespace")
+        .set(Identifier::CODE_KEY, "code")
+        .set(IdentifiedObject::NAME_KEY, "horizontal + vertical");
+    return CompoundCRS::create(
+        properties,
+        std::vector<CRSNNPtr>{createProjected(), createVerticalCRS()});
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, compoundCRS_as_WKT2) {
+    auto crs = createCompoundCRS();
+    auto expected =
+        "COMPOUNDCRS[\"horizontal + vertical\",\n"
+        "    PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+        "        BASEGEODCRS[\"WGS 84\",\n"
+        "            DATUM[\"WGS_1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        CONVERSION[\"UTM zone 31N\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",3,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",500000,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8807]]],\n"
+        "        CS[Cartesian,2],\n"
+        "            AXIS[\"(E)\",east,\n"
+        "                ORDER[1],\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            AXIS[\"(N)\",north,\n"
+        "                ORDER[2],\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "    VERTCRS[\"ODN height\",\n"
+        "        VDATUM[\"Ordnance Datum Newlyn\"],\n"
+        "        CS[vertical,1],\n"
+        "            AXIS[\"gravity-related height (H)\",up,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "    ID[\"codespace\",\"code\"]]";
+
+    EXPECT_EQ(crs->exportToWKT(WKTFormatter::create()), expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, compoundCRS_as_WKT1_GDAL) {
+    auto crs = createCompoundCRS();
+    auto expected =
+        "COMPD_CS[\"horizontal + vertical\",\n"
+        "    PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+        "        GEOGCS[\"WGS 84\",\n"
+        "            DATUM[\"WGS_1984\",\n"
+        "                SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    AUTHORITY[\"EPSG\",\"7030\"]],\n"
+        "                AUTHORITY[\"EPSG\",\"6326\"]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "            UNIT[\"degree\",0.0174532925199433,\n"
+        "                AUTHORITY[\"EPSG\",9122]],\n"
+        "            AXIS[\"Latitude\",NORTH],\n"
+        "            AXIS[\"Longitude\",EAST],\n"
+        "            AUTHORITY[\"EPSG\",\"4326\"]],\n"
+        "        PROJECTION[\"Transverse_Mercator\"],\n"
+        "        PARAMETER[\"latitude_of_origin\",0],\n"
+        "        PARAMETER[\"central_meridian\",3],\n"
+        "        PARAMETER[\"scale_factor\",0.9996],\n"
+        "        PARAMETER[\"false_easting\",500000],\n"
+        "        PARAMETER[\"false_northing\",0],\n"
+        "        UNIT[\"metre\",1,\n"
+        "            AUTHORITY[\"EPSG\",9001]],\n"
+        "        AXIS[\"Easting\",EAST],\n"
+        "        AXIS[\"Northing\",NORTH],\n"
+        "        AUTHORITY[\"EPSG\",\"32631\"]],\n"
+        "    VERT_CS[\"ODN height\",\n"
+        "        VERT_DATUM[\"Ordnance Datum Newlyn\",2005,\n"
+        "            AUTHORITY[\"EPSG\",\"5101\"]],\n"
+        "        UNIT[\"metre\",1,\n"
+        "            AUTHORITY[\"EPSG\",9001]],\n"
+        "        AXIS[\"Gravity-related height\",UP],\n"
+        "        AUTHORITY[\"EPSG\",\"5701\"]],\n"
+        "    AUTHORITY[\"codespace\",\"code\"]]";
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, compoundCRS_of_compoundCRS) {
+    auto crs = CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{
+            createProjected(),
+            // we are cheating here with a compoundCRS made of only one CRS
+            CompoundCRS::create(PropertyMap(),
+                                std::vector<CRSNNPtr>{createVerticalCRS()})});
+    EXPECT_EQ(crs->componentReferenceSystems().size(), 2);
+    EXPECT_TRUE(nn_dynamic_pointer_cast<VerticalCRS>(
+                    crs->componentReferenceSystems()[1]) != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, compoundCRS_no_name_proided) {
+    auto crs = CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{createProjected(), createVerticalCRS()});
+    EXPECT_EQ(*(crs->name()->description()),
+              "WGS 84 / UTM zone 31N + ODN height");
+}

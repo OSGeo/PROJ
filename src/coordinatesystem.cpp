@@ -69,8 +69,10 @@ Meridian::Meridian(const Angle &longitudeIn)
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 Meridian::Meridian(const Meridian &other)
     : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -123,8 +125,10 @@ CoordinateSystemAxis::CoordinateSystemAxis()
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 CoordinateSystemAxis::CoordinateSystemAxis(const CoordinateSystemAxis &other)
     : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -300,8 +304,10 @@ CoordinateSystem::CoordinateSystem(
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 CoordinateSystem::CoordinateSystem(const CoordinateSystem &other)
     : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -385,7 +391,9 @@ SphericalCS::SphericalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn)
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 SphericalCS::SphericalCS(const SphericalCS &) = default;
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -415,7 +423,9 @@ EllipsoidalCS::EllipsoidalCS(
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 EllipsoidalCS::EllipsoidalCS(const EllipsoidalCS &) = default;
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -491,7 +501,9 @@ VerticalCS::VerticalCS(const CoordinateSystemAxisNNPtr &axisIn)
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 VerticalCS::VerticalCS(const VerticalCS &) = default;
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -527,7 +539,9 @@ CartesianCS::CartesianCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn)
 
 // ---------------------------------------------------------------------------
 
+#ifdef notdef
 CartesianCS::CartesianCS(const CartesianCS &) = default;
+#endif
 
 // ---------------------------------------------------------------------------
 

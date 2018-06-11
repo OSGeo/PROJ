@@ -58,8 +58,6 @@ namespace operation {
 class CoordinateOperation : public common::ObjectUsage {
   public:
     PROJ_DLL virtual ~CoordinateOperation();
-    PROJ_DLL CoordinateOperation &
-    operator=(const CoordinateOperation &other) = delete;
 
     PROJ_DLL const util::optional<std::string> &operationVersion() const;
     PROJ_DLL const std::vector<metadata::PositionalAccuracy> &
@@ -89,6 +87,7 @@ class CoordinateOperation : public common::ObjectUsage {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    CoordinateOperation &operator=(const CoordinateOperation &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -96,8 +95,6 @@ class CoordinateOperation : public common::ObjectUsage {
 class GeneralOperationParameter : public common::IdentifiedObject {
   public:
     PROJ_DLL virtual ~GeneralOperationParameter();
-    PROJ_DLL GeneralOperationParameter &
-    operator=(const GeneralOperationParameter &other) = delete;
 
   protected:
     GeneralOperationParameter();
@@ -105,6 +102,8 @@ class GeneralOperationParameter : public common::IdentifiedObject {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    GeneralOperationParameter &
+    operator=(const GeneralOperationParameter &other) = delete;
 };
 
 using GeneralOperationParameterPtr = std::shared_ptr<GeneralOperationParameter>;
@@ -118,9 +117,6 @@ using OperationParameterNNPtr = util::nn<OperationParameterPtr>;
 
 class OperationParameter : public GeneralOperationParameter {
   public:
-    PROJ_DLL OperationParameter(const OperationParameter &other);
-    PROJ_DLL OperationParameter &
-    operator=(const OperationParameter &other) = delete;
     PROJ_DLL virtual ~OperationParameter();
 
     // non-standard
@@ -129,10 +125,12 @@ class OperationParameter : public GeneralOperationParameter {
 
   protected:
     OperationParameter();
+    OperationParameter(const OperationParameter &other);
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    OperationParameter &operator=(const OperationParameter &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -141,8 +139,6 @@ struct MethodMapping;
 
 class GeneralParameterValue : public io::IWKTExportable {
   public:
-    PROJ_DLL GeneralParameterValue &
-    operator=(const GeneralParameterValue &other) = delete;
     PROJ_DLL ~GeneralParameterValue() override;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
@@ -159,6 +155,8 @@ class GeneralParameterValue : public io::IWKTExportable {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    GeneralParameterValue &
+    operator=(const GeneralParameterValue &other) = delete;
 };
 
 using GeneralParameterValuePtr = std::shared_ptr<GeneralParameterValue>;
@@ -172,7 +170,6 @@ using ParameterValueNNPtr = util::nn<ParameterValuePtr>;
 
 class ParameterValue : public util::BoxedValue, public io::IWKTExportable {
   public:
-    PROJ_DLL ParameterValue &operator=(const ParameterValue &other) = delete;
     PROJ_DLL ~ParameterValue() override;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
@@ -195,6 +192,8 @@ class ParameterValue : public util::BoxedValue, public io::IWKTExportable {
     explicit ParameterValue(int integerValueIn);
     explicit ParameterValue(bool booleanValueIn);
     INLINED_MAKE_SHARED
+  private:
+    ParameterValue &operator=(const ParameterValue &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -205,9 +204,6 @@ using OperationParameterValueNNPtr = util::nn<OperationParameterValuePtr>;
 
 class OperationParameterValue : public GeneralParameterValue {
   public:
-    PROJ_DLL OperationParameterValue(const OperationParameterValue &other);
-    PROJ_DLL OperationParameterValue &
-    operator=(const OperationParameterValue &other) = delete;
     PROJ_DLL ~OperationParameterValue() override;
 
     PROJ_DLL const OperationParameterNNPtr &parameter() const;
@@ -222,6 +218,7 @@ class OperationParameterValue : public GeneralParameterValue {
   protected:
     OperationParameterValue(OperationParameterNNPtr parameterIn,
                             ParameterValueNNPtr valueIn);
+    OperationParameterValue(const OperationParameterValue &other);
     INLINED_MAKE_SHARED
 
     std::string _exportToWKT(io::WKTFormatterNNPtr formatter,
@@ -230,6 +227,8 @@ class OperationParameterValue : public GeneralParameterValue {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    OperationParameterValue &
+    operator=(const OperationParameterValue &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -241,9 +240,7 @@ using OperationMethodNNPtr = util::nn<OperationMethodPtr>;
 class OperationMethod : public common::IdentifiedObject,
                         public io::IWKTExportable {
   public:
-    PROJ_DLL OperationMethod(const OperationMethod &other);
     PROJ_DLL ~OperationMethod() override;
-    PROJ_DLL OperationMethod &operator=(const OperationMethod &other) = delete;
 
     PROJ_DLL const util::optional<std::string> &formula() const;
     PROJ_DLL const util::optional<metadata::Citation> &formulaCitation() const;
@@ -263,10 +260,12 @@ class OperationMethod : public common::IdentifiedObject,
 
   protected:
     OperationMethod();
+    OperationMethod(const OperationMethod &other);
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    OperationMethod &operator=(const OperationMethod &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -284,7 +283,6 @@ class InvalidOperation : public util::Exception {
 class SingleOperation : public CoordinateOperation {
   public:
     PROJ_DLL ~SingleOperation() override;
-    PROJ_DLL SingleOperation &operator=(const SingleOperation &other) = delete;
 
     PROJ_DLL const std::vector<GeneralParameterValueNNPtr> &
     parameterValues() const;
@@ -299,6 +297,7 @@ class SingleOperation : public CoordinateOperation {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    SingleOperation &operator=(const SingleOperation &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
@@ -310,7 +309,6 @@ using ConversionNNPtr = util::nn<ConversionPtr>;
 class Conversion : public SingleOperation, public io::IWKTExportable {
   public:
     PROJ_DLL ~Conversion() override;
-    PROJ_DLL Conversion &operator=(const Conversion &other) = delete;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
@@ -339,6 +337,7 @@ class Conversion : public SingleOperation, public io::IWKTExportable {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    Conversion &operator=(const Conversion &other) = delete;
 };
 
 // ---------------------------------------------------------------------------

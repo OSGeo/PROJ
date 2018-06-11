@@ -49,7 +49,6 @@ namespace datum {
 
 class Datum : public common::ObjectUsage {
   public:
-    Datum &operator=(const Datum &other) = delete;
     PROJ_DLL ~Datum();
 
     PROJ_DLL const util::optional<std::string> &anchorDefinition() const;
@@ -59,7 +58,6 @@ class Datum : public common::ObjectUsage {
 
   protected:
     Datum();
-    Datum(const Datum &other);
 
 #ifdef DOXYGEN_ENABLED
     std::string *anchorDefinition_;
@@ -71,6 +69,8 @@ class Datum : public common::ObjectUsage {
     friend class GeodeticReferenceFrame;
     friend class VerticalReferenceFrame;
     PROJ_OPAQUE_PRIVATE_DATA
+    Datum &operator=(const Datum &other) = delete;
+    Datum(const Datum &other) = delete;
 };
 
 using DatumPtr = std::shared_ptr<Datum>;
@@ -79,22 +79,23 @@ using DatumNNPtr = util::nn<DatumPtr>;
 // ---------------------------------------------------------------------------
 
 class DatumEnsemble : public common::IdentifiedObject {
-    PROJ_OPAQUE_PRIVATE_DATA
-
-#ifdef DOXYGEN_ENABLED
-  protected:
-    Datum datums_[];
-    PositionalAccuracy positionalAccuracy_
-#endif
-
-        public : PROJ_DLL
-                 DatumEnsemble();
-    PROJ_DLL DatumEnsemble(const DatumEnsemble &other);
-    DatumEnsemble &operator=(const DatumEnsemble &other) = delete;
-    PROJ_DLL ~DatumEnsemble();
+  public:
+    PROJ_DLL ~DatumEnsemble() override;
 
     PROJ_DLL const std::vector<DatumPtr> &datums() const;
     PROJ_DLL const metadata::PositionalAccuracy &positionalAccuracy() const;
+
+  protected:
+#ifdef DOXYGEN_ENABLED
+    Datum datums_[];
+    PositionalAccuracy positionalAccuracy_
+#endif
+    DatumEnsemble();
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    DatumEnsemble(const DatumEnsemble &other) = delete;
+    DatumEnsemble &operator=(const DatumEnsemble &other) = delete;
 };
 
 using DatumEnsemblePtr = std::shared_ptr<DatumEnsemble>;
@@ -108,8 +109,6 @@ using PrimeMeridianNNPtr = util::nn<PrimeMeridianPtr>;
 class PrimeMeridian : public common::IdentifiedObject,
                       public io::IWKTExportable {
   public:
-    PROJ_DLL PrimeMeridian(const PrimeMeridian &other);
-    PrimeMeridian &operator=(const PrimeMeridian &other) = delete;
     PROJ_DLL ~PrimeMeridian() override;
 
     PROJ_DLL const common::Angle &greenwichLongitude() const;
@@ -133,6 +132,8 @@ class PrimeMeridian : public common::IdentifiedObject,
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    PrimeMeridian(const PrimeMeridian &other) = delete;
+    PrimeMeridian &operator=(const PrimeMeridian &other) = delete;
 
     static const PrimeMeridianNNPtr createGREENWICH();
 };
@@ -145,8 +146,6 @@ using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
 
 class Ellipsoid : public common::IdentifiedObject, public io::IWKTExportable {
   public:
-    PROJ_DLL Ellipsoid(const Ellipsoid &other);
-    Ellipsoid &operator=(const Ellipsoid &other) = delete;
     PROJ_DLL ~Ellipsoid() override;
 
     PROJ_DLL const common::Length &semiMajorAxis() const;
@@ -184,6 +183,8 @@ class Ellipsoid : public common::IdentifiedObject, public io::IWKTExportable {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    Ellipsoid(const Ellipsoid &other) = delete;
+    Ellipsoid &operator=(const Ellipsoid &other) = delete;
 
     static const EllipsoidNNPtr createEPSG_7030(); // WGS 84
 };
@@ -196,9 +197,6 @@ using GeodeticReferenceFrameNNPtr = util::nn<GeodeticReferenceFramePtr>;
 
 class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
   public:
-    PROJ_DLL GeodeticReferenceFrame(const GeodeticReferenceFrame &other);
-    GeodeticReferenceFrame &
-    operator=(const GeodeticReferenceFrame &other) = delete;
     PROJ_DLL ~GeodeticReferenceFrame() override;
 
     PROJ_DLL const PrimeMeridianPtr &primeMeridian() const;
@@ -227,16 +225,15 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     static const GeodeticReferenceFrameNNPtr createEPSG_6326();
+    GeodeticReferenceFrame(const GeodeticReferenceFrame &other) = delete;
+    GeodeticReferenceFrame &
+    operator=(const GeodeticReferenceFrame &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
 
 class DynamicGeodeticReferenceFrame : public GeodeticReferenceFrame {
   public:
-    PROJ_DLL
-    DynamicGeodeticReferenceFrame(const DynamicGeodeticReferenceFrame &other);
-    DynamicGeodeticReferenceFrame &
-    operator=(const DynamicGeodeticReferenceFrame &other) = delete;
     PROJ_DLL ~DynamicGeodeticReferenceFrame() override;
 
     PROJ_DLL const common::Measure &frameReferenceEpoch() const;
@@ -250,6 +247,10 @@ class DynamicGeodeticReferenceFrame : public GeodeticReferenceFrame {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    DynamicGeodeticReferenceFrame(const DynamicGeodeticReferenceFrame &other) =
+        delete;
+    DynamicGeodeticReferenceFrame &
+    operator=(const DynamicGeodeticReferenceFrame &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
