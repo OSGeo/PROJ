@@ -747,3 +747,23 @@ TEST(crs, verticalCRS_as_WKT1_GDAL) {
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
               expected);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, vdatum_with_anchor) {
+    PropertyMap propertiesVDatum;
+    propertiesVDatum.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 5101)
+        .set(IdentifiedObject::NAME_KEY, "Ordnance Datum Newlyn");
+    auto vdatum = VerticalReferenceFrame::create(
+        propertiesVDatum, optional<std::string>("my anchor"),
+        optional<RealizationMethod>(RealizationMethod::LEVELLING));
+    EXPECT_TRUE(vdatum->realizationMethod().has_value());
+    EXPECT_EQ(*(vdatum->realizationMethod()), RealizationMethod::LEVELLING);
+
+    auto expected = "VDATUM[\"Ordnance Datum Newlyn\",\n"
+                    "    ANCHOR[\"my anchor\"],\n"
+                    "    ID[\"EPSG\",5101]]";
+
+    EXPECT_EQ(vdatum->exportToWKT(WKTFormatter::create()), expected);
+}

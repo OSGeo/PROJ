@@ -918,6 +918,19 @@ TEST(wkt_parse, vertcrs_WKT1_GDAL_minimum) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, vdatum_with_ANCHOR) {
+    auto obj = WKTParser().createFromWKT("VDATUM[\"Ordnance Datum Newlyn\",\n"
+                                         "    ANCHOR[\"my anchor\"],\n"
+                                         "    ID[\"EPSG\",5101]]");
+    auto datum = nn_dynamic_pointer_cast<VerticalReferenceFrame>(obj);
+    ASSERT_TRUE(datum != nullptr);
+    auto anchor = datum->anchorDefinition();
+    EXPECT_TRUE(anchor.has_value());
+    EXPECT_EQ(*anchor, "my anchor");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);

@@ -386,6 +386,7 @@ class CodeList {
 
   protected:
     explicit CodeList(const std::string &nameIn);
+    CodeList(const CodeList &other);
     CodeList &operator=(const CodeList &other);
 
   private:

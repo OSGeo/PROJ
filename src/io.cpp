@@ -711,6 +711,7 @@ struct WKTParser::Private {
     PrimeMeridianNNPtr
     buildPrimeMeridian(WKTNodeNNPtr node,
                        const UnitOfMeasure &defaultAngularUnit);
+    optional<std::string> getAnchor(WKTNodeNNPtr node);
     GeodeticReferenceFrameNNPtr
     buildGeodeticReferenceFrame(WKTNodeNNPtr node,
                                 PrimeMeridianNNPtr primeMeridian);
@@ -1033,6 +1034,18 @@ PrimeMeridianNNPtr WKTParser::Private::buildPrimeMeridian(
 
 // ---------------------------------------------------------------------------
 
+optional<std::string> WKTParser::Private::getAnchor(WKTNodeNNPtr node) {
+
+    auto anchorNode = node->lookForChild(WKTConstants::ANCHOR);
+    optional<std::string> anchor;
+    if (anchorNode && anchorNode->children().size() == 1) {
+        anchor = stripQuotes(anchorNode->children()[0]->value());
+    }
+    return anchor;
+}
+
+// ---------------------------------------------------------------------------
+
 GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
     WKTNodeNNPtr node, PrimeMeridianNNPtr primeMeridian) {
     auto ellipsoidNode = node->lookForChild(WKTConstants::ELLIPSOID);
@@ -1044,14 +1057,8 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
     }
     auto ellipsoid = buildEllipsoid(NN_CHECK_ASSERT(ellipsoidNode));
 
-    auto anchorNode = node->lookForChild(WKTConstants::ANCHOR);
-    optional<std::string> anchor;
-    if (anchorNode && anchorNode->children().size() == 1) {
-        anchor = stripQuotes(anchorNode->children()[0]->value());
-    }
-
     return GeodeticReferenceFrame::create(buildProperties(node), ellipsoid,
-                                          anchor, primeMeridian);
+                                          getAnchor(node), primeMeridian);
 }
 
 // ---------------------------------------------------------------------------
@@ -1620,7 +1627,8 @@ ProjectedCRSNNPtr WKTParser::Private::buildProjectedCRS(WKTNodeNNPtr node) {
 VerticalReferenceFrameNNPtr
 WKTParser::Private::buildVerticalReferenceFrame(WKTNodeNNPtr node) {
     // WKT1 VERT_DATUM has a datum type after the datum name that we ignore.
-    return VerticalReferenceFrame::create(buildProperties(node));
+    return VerticalReferenceFrame::create(buildProperties(node),
+                                          getAnchor(node));
 }
 
 // ---------------------------------------------------------------------------

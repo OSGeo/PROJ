@@ -464,6 +464,11 @@ CodeList::CodeList(const std::string &nameIn)
 
 // ---------------------------------------------------------------------------
 
+CodeList::CodeList(const CodeList &other)
+    : d(internal::make_unique<Private>(*(other.d))) {}
+
+// ---------------------------------------------------------------------------
+
 CodeList::~CodeList() = default;
 
 // ---------------------------------------------------------------------------

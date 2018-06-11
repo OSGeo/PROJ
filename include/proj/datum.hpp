@@ -264,6 +264,7 @@ class RealizationMethod : public util::CodeList {
     friend class util::optional<RealizationMethod>;
     PROJ_DLL explicit RealizationMethod(
         const std::string &nameIn = std::string());
+    PROJ_DLL RealizationMethod(const RealizationMethod &other);
     PROJ_DLL RealizationMethod &operator=(const RealizationMethod &other);
 };
 
@@ -277,7 +278,7 @@ class VerticalReferenceFrame : public Datum, public io::IWKTExportable {
   public:
     PROJ_DLL ~VerticalReferenceFrame() override;
 
-    const util::optional<RealizationMethod> &realizationMethod() const;
+    PROJ_DLL const util::optional<RealizationMethod> &realizationMethod() const;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
