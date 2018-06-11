@@ -265,10 +265,9 @@ class PropertyMap {
     PROJ_DLL std::map<std::string, BaseObjectNNPtr>::iterator end() const;
 
     //! @cond Doxygen_Suppress
-    bool getStringValue(
-        const std::string &key,
-        std::string &outVal) const; // throw(InvalidValueTypeException)
-                                    //! @endcond
+    // throw(InvalidValueTypeException)
+    bool getStringValue(const std::string &key, std::string &outVal) const;
+    //! @endcond
 
   private:
     PropertyMap &operator=(const PropertyMap &) = delete;
