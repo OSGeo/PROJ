@@ -322,7 +322,7 @@ void WKTFormatter::Private::startNewChild() {
 
 void WKTFormatter::addQuotedString(const std::string &str) {
     d->startNewChild();
-    d->result_ += "\"" + str + "\"";
+    d->result_ += "\"" + replaceAll(str, "\"", "\"\"") + "\"";
 }
 
 // ---------------------------------------------------------------------------
@@ -573,7 +573,10 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
     if (i == wkt.size()) {
         throw ParsingException("whitespace only string");
     }
+    std::string closingStringMarker;
     bool inString = false;
+
+    // As used in examples of OGC 12-063r5
     static const std::string startPrintedQuote("\xE2\x80\x9C");
     static const std::string endPrintedQuote("\xE2\x80\x9D");
     for (;
@@ -581,11 +584,34 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
                                          wkt[i] != ']' && !::isspace(wkt[i])));
          ++i) {
         if (wkt[i] == '"') {
-            inString = !inString;
+            if (!inString) {
+                inString = true;
+                closingStringMarker = "\"";
+            } else if (closingStringMarker == "\"") {
+                if (i + 1 < wkt.size() && wkt[i + 1] == '"') {
+                    i++;
+                } else {
+                    inString = false;
+                    closingStringMarker.clear();
+                }
+            }
         } else if (i + 3 <= wkt.size() &&
-                   (wkt.substr(i, 3) == startPrintedQuote ||
-                    wkt.substr(i, 3) == endPrintedQuote)) {
-            inString = !inString;
+                   wkt.substr(i, 3) == startPrintedQuote) {
+            if (!inString) {
+                inString = true;
+                closingStringMarker = endPrintedQuote;
+                value += "\"";
+                i += 2;
+                continue;
+            }
+        } else if (i + 3 <= wkt.size() &&
+                   closingStringMarker == endPrintedQuote &&
+                   wkt.substr(i, 3) == endPrintedQuote) {
+            inString = false;
+            closingStringMarker.clear();
+            value += "\"";
+            i += 2;
+            continue;
         }
         value += wkt[i];
     }
@@ -636,8 +662,19 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart) {
 
 // ---------------------------------------------------------------------------
 
+static std::string escapeIfQuotedString(const std::string &str) {
+    if (str.size() > 2 && str[0] == '"' && str.back() == '"') {
+        return "\"" + replaceAll(str.substr(1, str.size() - 2), "\"", "\"\"") +
+               "\"";
+    } else {
+        return str;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 std::string WKTNode::toString() const {
-    std::string str(d->value_);
+    std::string str(escapeIfQuotedString(d->value_));
     if (!d->children_.empty()) {
         str += "[";
         bool first = true;

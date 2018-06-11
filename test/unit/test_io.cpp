@@ -115,6 +115,29 @@ TEST(io, wkt_parsing) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, wkt_parsing_with_double_quotes_inside) {
+
+    auto n = WKTNode::createFrom("A[\"xy\"\"z\"]");
+    EXPECT_EQ(n->children()[0]->value(), "\"xy\"z\"");
+    EXPECT_EQ(n->toString(), "A[\"xy\"\"z\"]");
+
+    EXPECT_THROW(WKTNode::createFrom("A[\"x\""), ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, wkt_parsing_with_printed_quotes) {
+    static const std::string startPrintedQuote("\xE2\x80\x9C");
+    static const std::string endPrintedQuote("\xE2\x80\x9D");
+
+    auto n = WKTNode::createFrom("A[" + startPrintedQuote + "x" +
+                                 endPrintedQuote + "]");
+    EXPECT_EQ(n->children()[0]->value(), "\"x\"");
+    EXPECT_EQ(n->toString(), "A[\"x\"]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, datum_with_ANCHOR) {
     auto obj = WKTParser().createFromWKT(
         "DATUM[\"WGS_1984 with anchor\",\n"
