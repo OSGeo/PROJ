@@ -219,7 +219,8 @@ std::string GeodeticCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
                                        ? WKTConstants::GEOGCRS
                                        : WKTConstants::GEODCRS)
                                 : isGeocentric() ? WKTConstants::GEOCCS
-                                                 : WKTConstants::GEOGCS);
+                                                 : WKTConstants::GEOGCS,
+                         !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
     auto &axisList = coordinateSystem()->axisList();
     if (!axisList.empty()) {
@@ -409,8 +410,8 @@ const VerticalCSNNPtr VerticalCRS::coordinateSystem() const {
 
 std::string VerticalCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    formatter->startNode(isWKT2 ? WKTConstants::VERTCRS
-                                : WKTConstants::VERT_CS);
+    formatter->startNode(isWKT2 ? WKTConstants::VERTCRS : WKTConstants::VERT_CS,
+                         !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
     if (datum()) {
         datum()->exportToWKT(formatter);
@@ -545,7 +546,8 @@ const CartesianCSNNPtr ProjectedCRS::coordinateSystem() const {
 
 std::string ProjectedCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    formatter->startNode(isWKT2 ? WKTConstants::PROJCRS : WKTConstants::PROJCS);
+    formatter->startNode(isWKT2 ? WKTConstants::PROJCRS : WKTConstants::PROJCS,
+                         !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
 
     auto &geodeticCRSAxisList = baseCRS()->coordinateSystem()->axisList();
@@ -555,7 +557,8 @@ std::string ProjectedCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
             (formatter->use2018Keywords() &&
              dynamic_cast<const GeographicCRS *>(baseCRS().get()))
                 ? WKTConstants::BASEGEOGCRS
-                : WKTConstants::BASEGEODCRS);
+                : WKTConstants::BASEGEODCRS,
+            !baseCRS()->identifiers().empty());
         formatter->addQuotedString(*(baseCRS()->name()->description()));
         baseCRS()->datum()->exportToWKT(formatter);
         // insert ellipsoidal cs unit when the units of the map
@@ -692,7 +695,8 @@ CompoundCRSNNPtr CompoundCRS::create(const PropertyMap &properties,
 std::string CompoundCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     formatter->startNode(isWKT2 ? WKTConstants::COMPOUNDCRS
-                                : WKTConstants::COMPD_CS);
+                                : WKTConstants::COMPD_CS,
+                         !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
     if (isWKT2) {
         for (const auto &crs : componentReferenceSystems()) {

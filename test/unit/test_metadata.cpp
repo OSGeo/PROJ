@@ -155,3 +155,10 @@ TEST(metadata, id) {
     auto got_wkt = id->exportToWKT(WKTFormatter::create());
     EXPECT_EQ(got_wkt, in_wkt);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(metadata, Identifier_isEquivalentName) {
+    EXPECT_TRUE(Identifier::isEquivalentName("Central_Meridian",
+                                             "Central_- ()/Meridian"));
+}

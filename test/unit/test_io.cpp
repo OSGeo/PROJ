@@ -554,12 +554,10 @@ static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
             *(opParamvalue->parameter()->name()->description());
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_EQ(paramName, "Latitude of natural origin");
-        EXPECT_EQ(parameterValue->type(), BoxedValue::Type::OTHER_OBJECT);
-        auto measure =
-            nn_dynamic_pointer_cast<Measure>(parameterValue->object());
-        ASSERT_TRUE(measure);
-        EXPECT_EQ(measure->unit(), UnitOfMeasure::DEGREE);
-        EXPECT_EQ(measure->value(), 0);
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::DEGREE);
+        EXPECT_EQ(measure.value(), 0);
     }
     {
         const auto &opParamvalue =
@@ -569,12 +567,10 @@ static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
             *(opParamvalue->parameter()->name()->description());
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_EQ(paramName, "Longitude of natural origin");
-        EXPECT_EQ(parameterValue->type(), BoxedValue::Type::OTHER_OBJECT);
-        auto measure =
-            nn_dynamic_pointer_cast<Measure>(parameterValue->object());
-        ASSERT_TRUE(measure);
-        EXPECT_EQ(measure->unit(), UnitOfMeasure::DEGREE);
-        EXPECT_EQ(measure->value(), 3);
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::DEGREE);
+        EXPECT_EQ(measure.value(), 3);
     }
     {
         const auto &opParamvalue =
@@ -584,12 +580,10 @@ static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
             *(opParamvalue->parameter()->name()->description());
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_EQ(paramName, "Scale factor at natural origin");
-        EXPECT_EQ(parameterValue->type(), BoxedValue::Type::OTHER_OBJECT);
-        auto measure =
-            nn_dynamic_pointer_cast<Measure>(parameterValue->object());
-        ASSERT_TRUE(measure);
-        EXPECT_EQ(measure->unit(), UnitOfMeasure::SCALE_UNITY);
-        EXPECT_EQ(measure->value(), 0.9996);
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::SCALE_UNITY);
+        EXPECT_EQ(measure.value(), 0.9996);
     }
     {
         const auto &opParamvalue =
@@ -599,12 +593,10 @@ static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
             *(opParamvalue->parameter()->name()->description());
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_EQ(paramName, "False easting");
-        EXPECT_EQ(parameterValue->type(), BoxedValue::Type::OTHER_OBJECT);
-        auto measure =
-            nn_dynamic_pointer_cast<Measure>(parameterValue->object());
-        ASSERT_TRUE(measure);
-        EXPECT_EQ(measure->unit(), UnitOfMeasure::METRE);
-        EXPECT_EQ(measure->value(), 500000);
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::METRE);
+        EXPECT_EQ(measure.value(), 500000);
     }
     {
         const auto &opParamvalue =
@@ -614,12 +606,10 @@ static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
             *(opParamvalue->parameter()->name()->description());
         const auto &parameterValue = opParamvalue->parameterValue();
         EXPECT_EQ(paramName, "False northing");
-        EXPECT_EQ(parameterValue->type(), BoxedValue::Type::OTHER_OBJECT);
-        auto measure =
-            nn_dynamic_pointer_cast<Measure>(parameterValue->object());
-        ASSERT_TRUE(measure);
-        EXPECT_EQ(measure->unit(), UnitOfMeasure::METRE);
-        EXPECT_EQ(measure->value(), 0);
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::METRE);
+        EXPECT_EQ(measure.value(), 0);
     }
 
     auto cs = crs->coordinateSystem();
@@ -1025,6 +1015,69 @@ TEST(wkt_parse, COMPD_CS) {
     ASSERT_EQ(crs->identifiers().size(), 1);
     EXPECT_EQ(crs->identifiers()[0]->code(), "code");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "codespace");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, COORDINATEOPERATION) {
+
+    std::string src_wkt;
+    {
+        auto formatter = WKTFormatter::create();
+        formatter->setOutputId(false);
+        src_wkt = GeographicCRS::EPSG_4326->exportToWKT(formatter);
+    }
+
+    std::string dst_wkt;
+    {
+        auto formatter = WKTFormatter::create();
+        formatter->setOutputId(false);
+        dst_wkt = GeographicCRS::EPSG_4807->exportToWKT(formatter);
+    }
+
+    std::string interpolation_wkt;
+    {
+        auto formatter = WKTFormatter::create();
+        formatter->setOutputId(false);
+        interpolation_wkt = GeographicCRS::EPSG_4979->exportToWKT(formatter);
+    }
+
+    auto wkt =
+        "COORDINATEOPERATION[\"transformationName\",\n"
+        "    SOURCECRS[" +
+        src_wkt + "],\n"
+                  "    TARGETCRS[" +
+        dst_wkt +
+        "],\n"
+        "    METHOD[\"operationMethodName\",\n"
+        "        ID[\"codeSpaceOperationMethod\",\"codeOperationMethod\"]],\n"
+        "    PARAMETERFILE[\"paramName\",\"foo.bin\"],\n"
+        "    INTERPOLATIONCRS[" +
+        interpolation_wkt +
+        "],\n"
+        "    OPERATIONACCURACY[0.1],\n"
+        "    ID[\"codeSpaceTransformation\",\"codeTransformation\"],\n"
+        "    REMARK[\"my remarks\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(*(transf->name()->description()), "transformationName");
+    ASSERT_EQ(transf->identifiers().size(), 1);
+    EXPECT_EQ(transf->identifiers()[0]->code(), "codeTransformation");
+    EXPECT_EQ(*(transf->identifiers()[0]->codeSpace()),
+              "codeSpaceTransformation");
+    ASSERT_EQ(transf->coordinateOperationAccuracies().size(), 1);
+    EXPECT_EQ(transf->coordinateOperationAccuracies()[0]->value(), "0.1");
+    EXPECT_EQ(*transf->sourceCRS()->name()->description(),
+              *(GeographicCRS::EPSG_4326->name()->description()));
+    EXPECT_EQ(*transf->targetCRS()->name()->description(),
+              *(GeographicCRS::EPSG_4807->name()->description()));
+    ASSERT_TRUE(transf->interpolationCRS() != nullptr);
+    EXPECT_EQ(*transf->interpolationCRS()->name()->description(),
+              *(GeographicCRS::EPSG_4979->name()->description()));
+    EXPECT_EQ(*transf->method()->name()->description(), "operationMethodName");
+    EXPECT_EQ(transf->parameterValues().size(), 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -1447,4 +1500,113 @@ TEST(wkt_parse, invalid_VERT_CS) {
     EXPECT_THROW(
         WKTParser().createFromWKT("VERT_CS[\"x\",VERT_DATUM[\"y\",2005]]"),
         ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_COORDINATEOPERATION) {
+
+    std::string src_wkt;
+    {
+        auto formatter = WKTFormatter::create();
+        formatter->setOutputId(false);
+        src_wkt = GeographicCRS::EPSG_4326->exportToWKT(formatter);
+    }
+
+    std::string dst_wkt;
+    {
+        auto formatter = WKTFormatter::create();
+        formatter->setOutputId(false);
+        dst_wkt = GeographicCRS::EPSG_4807->exportToWKT(formatter);
+    }
+
+    std::string interpolation_wkt;
+    {
+        auto formatter = WKTFormatter::create();
+        formatter->setOutputId(false);
+        interpolation_wkt = GeographicCRS::EPSG_4979->exportToWKT(formatter);
+    }
+
+    // Valid
+    {
+        auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
+                   "    SOURCECRS[" +
+                   src_wkt + "],\n"
+                             "    TARGETCRS[" +
+                   dst_wkt + "],\n"
+                             "    METHOD[\"operationMethodName\"],\n"
+                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+
+        EXPECT_NO_THROW(WKTParser().createFromWKT(wkt));
+    }
+
+    // Missing SOURCECRS
+    {
+        auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
+                   "    TARGETCRS[" +
+                   dst_wkt + "],\n"
+                             "    METHOD[\"operationMethodName\"],\n"
+                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+
+        EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+    }
+
+    // Invalid content in SOURCECRS
+    {
+        auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
+                   "    SOURCECRS[FOO],\n"
+                   "    TARGETCRS[" +
+                   dst_wkt + "],\n"
+                             "    METHOD[\"operationMethodName\"],\n"
+                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+
+        EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+    }
+
+    // Missing TARGETCRS
+    {
+        auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
+                   "    SOURCECRS[" +
+                   src_wkt + "],\n"
+                             "    METHOD[\"operationMethodName\"],\n"
+                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+
+        EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+    }
+
+    // Invalid content in TARGETCRS
+    {
+        auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
+                   "    SOURCECRS[" +
+                   src_wkt + "],\n"
+                             "    TARGETCRS[FOO],\n"
+                             "    METHOD[\"operationMethodName\"],\n"
+                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+
+        EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+    }
+
+    // Missing METHOD
+    {
+        auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
+                   "    SOURCECRS[" +
+                   src_wkt + "],\n"
+                             "    TARGETCRS[" +
+                   dst_wkt + "]]";
+
+        EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+    }
+
+    // Invalid METHOD
+    {
+        auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
+                   "    SOURCECRS[" +
+                   src_wkt + "],\n"
+                             "    TARGETCRS[" +
+                   dst_wkt + "],\n"
+                             "    METHOD[],\n"
+                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+
+        EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+    }
 }

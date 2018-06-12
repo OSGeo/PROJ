@@ -42,6 +42,8 @@ NS_PROJ_START
 namespace crs {
 class CRS;
 using CRSPtr = std::shared_ptr<CRS>;
+using CRSNNPtr = util::nn<CRSPtr>;
+
 class DerivedCRS;
 class ProjectedCRS;
 }
@@ -55,12 +57,16 @@ namespace operation {
 
 // ---------------------------------------------------------------------------
 
+class CoordinateOperation;
+using CoordinateOperationPtr = std::shared_ptr<CoordinateOperation>;
+using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
+
 class CoordinateOperation : public common::ObjectUsage {
   public:
     PROJ_DLL virtual ~CoordinateOperation();
 
     PROJ_DLL const util::optional<std::string> &operationVersion() const;
-    PROJ_DLL const std::vector<metadata::PositionalAccuracy> &
+    PROJ_DLL const std::vector<metadata::PositionalAccuracyNNPtr> &
     coordinateOperationAccuracies() const;
 
     // In the case of a derivingConversion of a DerivedCRS, sourceCRS() and
@@ -84,6 +90,11 @@ class CoordinateOperation : public common::ObjectUsage {
     friend class crs::ProjectedCRS;
     void setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
                                 std::weak_ptr<crs::CRS> targetCRSIn);
+    void setCRSs(const crs::CRSNNPtr &sourceCRSIn,
+                 const crs::CRSNNPtr &targetCRSIn,
+                 const crs::CRSPtr &interpolationCRSIn);
+    void setAccuracies(
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -149,6 +160,7 @@ class GeneralParameterValue : public io::IWKTExportable {
     GeneralParameterValue(const GeneralParameterValue &other);
 
     friend class Conversion;
+    friend class Transformation;
     virtual std::string _exportToWKT(io::WKTFormatterNNPtr formatter,
                                      const MethodMapping *mapping)
         const = 0; // throw(io::FormattingException)
@@ -168,8 +180,10 @@ class ParameterValue;
 using ParameterValuePtr = std::shared_ptr<ParameterValue>;
 using ParameterValueNNPtr = util::nn<ParameterValuePtr>;
 
-class ParameterValue : public util::BoxedValue, public io::IWKTExportable {
+class ParameterValue : public io::IWKTExportable {
   public:
+    enum class Type { MEASURE, STRING, INTEGER, BOOLEAN, FILENAME };
+
     PROJ_DLL ~ParameterValue() override;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
@@ -182,17 +196,24 @@ class ParameterValue : public util::BoxedValue, public io::IWKTExportable {
     create(const std::string &stringValueIn);
     PROJ_DLL static ParameterValueNNPtr create(int integerValueIn);
     PROJ_DLL static ParameterValueNNPtr create(bool booleanValueIn);
+    PROJ_DLL static ParameterValueNNPtr
+    createFilename(const std::string &stringValueIn);
+
+    PROJ_DLL const Type &type() const;
+    PROJ_DLL const common::Measure &value() const;
+    PROJ_DLL const std::string &stringValue() const;
+    PROJ_DLL const std::string &valueFile() const;
+    PROJ_DLL int integerValue() const;
+    PROJ_DLL bool booleanValue() const;
 
   protected:
-    explicit ParameterValue(const common::MeasureNNPtr &measureIn);
-    explicit ParameterValue(
-        const char *stringValueIn); // needed to avoid the bool constructor
-                                    // to be taken !
-    explicit ParameterValue(const std::string &stringValueIn);
+    explicit ParameterValue(const common::Measure &measureIn);
+    explicit ParameterValue(const std::string &stringValueIn, Type typeIn);
     explicit ParameterValue(int integerValueIn);
     explicit ParameterValue(bool booleanValueIn);
     INLINED_MAKE_SHARED
   private:
+    PROJ_OPAQUE_PRIVATE_DATA
     ParameterValue &operator=(const ParameterValue &other) = delete;
 };
 
@@ -346,12 +367,45 @@ class Transformation;
 using TransformationPtr = std::shared_ptr<Transformation>;
 using TransformationNNPtr = util::nn<TransformationPtr>;
 
-class Transformation : public SingleOperation {
+class Transformation : public SingleOperation, public io::IWKTExportable {
   public:
-    // TODO
     PROJ_DLL ~Transformation() override;
 
+    PROJ_DLL const crs::CRSNNPtr sourceCRS() const;
+    PROJ_DLL const crs::CRSNNPtr targetCRS() const;
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL static TransformationNNPtr
+    create(const util::PropertyMap &properties,
+           const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
+           const crs::CRSPtr &interpolationCRSIn,
+           const OperationMethodNNPtr &methodIn,
+           const std::vector<GeneralParameterValueNNPtr> &values,
+           const std::vector<metadata::PositionalAccuracyNNPtr>
+               &accuracies); // throw InvalidOperation
+    PROJ_DLL static TransformationNNPtr
+    create(const util::PropertyMap &propertiesTransformation,
+           const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
+           const crs::CRSPtr &interpolationCRSIn,
+           const util::PropertyMap &propertiesOperationMethod,
+           const std::vector<OperationParameterNNPtr> &parameters,
+           const std::vector<ParameterValueNNPtr> &values,
+           const std::vector<metadata::PositionalAccuracyNNPtr>
+               &accuracies); // throw InvalidOperation
+
+  protected:
+    Transformation(
+        const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
+        const crs::CRSPtr &interpolationCRSIn,
+        const OperationMethodNNPtr &methodIn,
+        const std::vector<GeneralParameterValueNNPtr> &values,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+    INLINED_MAKE_SHARED
+
   private:
+    PROJ_OPAQUE_PRIVATE_DATA
     Transformation(const Transformation &) = delete;
 };
 

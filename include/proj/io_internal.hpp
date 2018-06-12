@@ -89,6 +89,12 @@ class WKTConstants {
     static const std::string VERTCRS;
     static const std::string VDATUM;
     static const std::string COMPOUNDCRS;
+    static const std::string PARAMETERFILE;
+    static const std::string COORDINATEOPERATION;
+    static const std::string SOURCECRS;
+    static const std::string TARGETCRS;
+    static const std::string INTERPOLATIONCRS;
+    static const std::string OPERATIONACCURACY;
 
     // WKT2 long
     static const std::string GEODETICCRS;

@@ -122,18 +122,19 @@ std::string UnitOfMeasure::exportToWKT(
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
 
     if (formatter->forceUNITKeyword()) {
-        formatter->startNode(WKTConstants::UNIT);
+        formatter->startNode(WKTConstants::UNIT, !authority().empty());
     } else if (!unitType.empty()) {
-        formatter->startNode(unitType);
+        formatter->startNode(unitType, !authority().empty());
     } else {
         if (isWKT2 && type() == Type::LINEAR) {
-            formatter->startNode(WKTConstants::LENGTHUNIT);
+            formatter->startNode(WKTConstants::LENGTHUNIT,
+                                 !authority().empty());
         } else if (isWKT2 && type() == Type::ANGULAR) {
-            formatter->startNode(WKTConstants::ANGLEUNIT);
+            formatter->startNode(WKTConstants::ANGLEUNIT, !authority().empty());
         } else if (isWKT2 && type() == Type::SCALE) {
-            formatter->startNode(WKTConstants::SCALEUNIT);
+            formatter->startNode(WKTConstants::SCALEUNIT, !authority().empty());
         } else {
-            formatter->startNode(WKTConstants::UNIT);
+            formatter->startNode(WKTConstants::UNIT, !authority().empty());
         }
     }
 
@@ -141,8 +142,8 @@ std::string UnitOfMeasure::exportToWKT(
         formatter->addQuotedString(name());
         formatter->add(conversionToSI());
         if (!authority().empty() && formatter->outputId()) {
-            formatter->startNode(isWKT2 ? WKTConstants::ID
-                                        : WKTConstants::AUTHORITY);
+            formatter->startNode(
+                isWKT2 ? WKTConstants::ID : WKTConstants::AUTHORITY, false);
             formatter->addQuotedString(authority());
             formatter->add(code());
             formatter->endNode();
@@ -528,7 +529,7 @@ void IdentifiedObject::formatID(WKTFormatterNNPtr formatter) const {
 
 void IdentifiedObject::formatRemarks(WKTFormatterNNPtr formatter) const {
     if (!remarks().empty()) {
-        formatter->startNode(WKTConstants::REMARK);
+        formatter->startNode(WKTConstants::REMARK, false);
         formatter->addQuotedString(remarks());
         formatter->endNode();
     }
@@ -580,13 +581,13 @@ ObjectDomainNNPtr ObjectDomain::create(const optional<std::string> &scopeIn,
 
 std::string ObjectDomain::exportToWKT(WKTFormatterNNPtr formatter) const {
     if (d->scope_.has_value()) {
-        formatter->startNode(WKTConstants::SCOPE);
+        formatter->startNode(WKTConstants::SCOPE, false);
         formatter->addQuotedString(*(d->scope_));
         formatter->endNode();
     }
     if (d->domainOfValidity_) {
         if (d->domainOfValidity_->description().has_value()) {
-            formatter->startNode(WKTConstants::AREA);
+            formatter->startNode(WKTConstants::AREA, false);
             formatter->addQuotedString(*(d->domainOfValidity_->description()));
             formatter->endNode();
         }
@@ -594,7 +595,7 @@ std::string ObjectDomain::exportToWKT(WKTFormatterNNPtr formatter) const {
             auto bbox = util::nn_dynamic_pointer_cast<GeographicBoundingBox>(
                 d->domainOfValidity_->geographicElements()[0]);
             if (bbox) {
-                formatter->startNode(WKTConstants::BBOX);
+                formatter->startNode(WKTConstants::BBOX, false);
                 formatter->add(bbox->southBoundLongitude());
                 formatter->add(bbox->westBoundLongitude());
                 formatter->add(bbox->northBoundLongitude());

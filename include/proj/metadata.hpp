@@ -174,6 +174,9 @@ class Identifier : public util::BaseObject, public io::IWKTExportable {
     PROJ_DLL const util::optional<std::string> &description() const;
     PROJ_DLL const util::optional<std::string> &uri() const;
 
+    PROJ_DLL static bool isEquivalentName(const std::string &a,
+                                          const std::string &b);
+
     std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 
@@ -196,10 +199,27 @@ class Identifier : public util::BaseObject, public io::IWKTExportable {
 
 // ---------------------------------------------------------------------------
 
+class PositionalAccuracy;
+using PositionalAccuracyPtr = std::shared_ptr<PositionalAccuracy>;
+using PositionalAccuracyNNPtr = util::nn<PositionalAccuracyPtr>;
+
 // Content does not match ISO_19115
-class PositionalAccuracy {
+class PositionalAccuracy : public util::BaseObject {
   public:
-    std::string value{};
+    PROJ_DLL ~PositionalAccuracy() override;
+
+    PROJ_DLL const std::string &value() const;
+
+    PROJ_DLL static PositionalAccuracyNNPtr create(const std::string &valueIn);
+
+  protected:
+    explicit PositionalAccuracy(const std::string &valueIn);
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    PositionalAccuracy(const PositionalAccuracy &other) = delete;
+    PositionalAccuracy &operator=(const PositionalAccuracy &other) = delete;
 };
 
 } // namespace metadata

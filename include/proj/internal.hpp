@@ -95,8 +95,9 @@ std::unique_ptr<T> make_unique(Args &&... args) {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
-std::string replaceAll(const std::string &osStr, const std::string &osBefore,
-                       const std::string &osAfter);
+PROJ_DLL std::string replaceAll(const std::string &osStr,
+                                const std::string &osBefore,
+                                const std::string &osAfter);
 
 size_t ci_find(const std::string &osStr, const std::string &osNeedle,
                size_t nStartPos = 0);

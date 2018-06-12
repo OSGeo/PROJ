@@ -571,7 +571,8 @@ TEST(datum, datum_with_ANCHOR) {
 
     auto expected = "DATUM[\"WGS_1984 with anchor\",\n"
                     "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
-                    "        LENGTHUNIT[\"metre\",1]],\n"
+                    "        LENGTHUNIT[\"metre\",1],\n"
+                    "        ID[\"EPSG\",7030]],\n"
                     "    ANCHOR[\"My anchor\"]]";
 
     EXPECT_EQ(datum->exportToWKT(WKTFormatter::create()), expected);
@@ -603,7 +604,9 @@ TEST(datum, cs_with_MERIDIAN) {
                     "        ORDER[2],\n"
                     "        LENGTHUNIT[\"metre\",1]]";
 
-    EXPECT_EQ(cs->exportToWKT(WKTFormatter::create()), expected);
+    auto formatter = WKTFormatter::create();
+    formatter->setOutputId(false);
+    EXPECT_EQ(cs->exportToWKT(formatter), expected);
 }
 
 // ---------------------------------------------------------------------------
@@ -621,6 +624,7 @@ TEST(crs, scope_area_bbox_remark) {
                   "AREA[\"Japan\"],"
                   "BBOX[17.09,122.38,46.05,157.64],"
                   "TIMEEXTENT[2002-04-01,2011-10-21]," // TODO TIMEEXTENT
+                  "ID[\"EPSG\",4946],\n"
                   "REMARK[\"some_remark\"]]";
     auto crs =
         nn_dynamic_pointer_cast<GeodeticCRS>(WKTParser().createFromWKT(in_wkt));
@@ -663,6 +667,7 @@ TEST(crs, scope_area_bbox_remark) {
         "    SCOPE[\"Geodesy, topographic mapping and cadastre\"],\n"
         "    AREA[\"Japan\"],\n"
         "    BBOX[17.09,122.38,46.05,157.64],\n"
+        "    ID[\"EPSG\",4946],\n"
         "    REMARK[\"some_remark\"]]";
 
     EXPECT_EQ(got_wkt, expected);

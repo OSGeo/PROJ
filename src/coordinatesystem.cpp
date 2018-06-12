@@ -93,7 +93,7 @@ MeridianNNPtr Meridian::create(const Angle &longitudeIn) {
 std::string Meridian::exportToWKT(
     WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    formatter->startNode(WKTConstants::MERIDIAN);
+    formatter->startNode(WKTConstants::MERIDIAN, !identifiers().empty());
     formatter->add(longitude().value());
     longitude().unit().exportToWKT(formatter, WKTConstants::ANGLEUNIT);
     if (formatter->outputId()) {
@@ -210,7 +210,7 @@ std::string CoordinateSystemAxis::exportToWKT(WKTFormatterNNPtr formatter,
                                               int order,
                                               bool disableAbbrev) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    formatter->startNode(WKTConstants::AXIS);
+    formatter->startNode(WKTConstants::AXIS, !identifiers().empty());
     std::string axisName = *(name()->description());
     std::string abbrev = axisAbbrev();
     std::string parenthesedAbbrev = "(" + abbrev + ")";
@@ -268,7 +268,7 @@ std::string CoordinateSystemAxis::exportToWKT(WKTFormatterNNPtr formatter,
         meridian()->exportToWKT(formatter);
     }
     if (formatter->outputAxisOrder() && order > 0) {
-        formatter->startNode(WKTConstants::ORDER);
+        formatter->startNode(WKTConstants::ORDER, false);
         formatter->add(order);
         formatter->endNode();
     }
@@ -328,11 +328,12 @@ std::string CoordinateSystem::exportToWKT(
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
 
     if (isWKT2) {
-        formatter->startNode(WKTConstants::CS);
+        formatter->startNode(WKTConstants::CS, !identifiers().empty());
         formatter->add(getWKT2Type());
         formatter->add(axisList().size());
         formatter->endNode();
-        formatter->startNode(std::string()); // anonymous indentation level
+        formatter->startNode(std::string(),
+                             false); // anonymous indentation level
     }
 
     UnitOfMeasure unit = UnitOfMeasure::NONE;

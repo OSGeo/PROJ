@@ -15,7 +15,7 @@ noinst_PROGRAMS += test_cpp_api test_cpp
 basic_test_SOURCES = basic_test.cpp main.cpp
 basic_test_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la
 
-test_cpp_api_SOURCES = test_common.cpp test_crs.cpp test_metadata.cpp test_io.cpp main.cpp
+test_cpp_api_SOURCES = test_common.cpp test_crs.cpp test_metadata.cpp test_io.cpp test_operation.cpp main.cpp
 test_cpp_api_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la
 
 test_cpp_SOURCES = test_cpp.cpp

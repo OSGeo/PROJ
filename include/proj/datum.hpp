@@ -83,18 +83,17 @@ class DatumEnsemble : public common::IdentifiedObject {
     PROJ_DLL ~DatumEnsemble() override;
 
     PROJ_DLL const std::vector<DatumPtr> &datums() const;
-    PROJ_DLL const metadata::PositionalAccuracy &positionalAccuracy() const;
+    PROJ_DLL const metadata::PositionalAccuracyNNPtr &
+    positionalAccuracy() const;
 
   protected:
 #ifdef DOXYGEN_ENABLED
     Datum datums_[];
     PositionalAccuracy positionalAccuracy_
 #endif
-    DatumEnsemble();
 
-  private:
-    PROJ_OPAQUE_PRIVATE_DATA
-    DatumEnsemble(const DatumEnsemble &other) = delete;
+        private : PROJ_OPAQUE_PRIVATE_DATA
+                  DatumEnsemble(const DatumEnsemble &other) = delete;
     DatumEnsemble &operator=(const DatumEnsemble &other) = delete;
 };
 

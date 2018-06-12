@@ -123,7 +123,9 @@ class WKTFormatter {
     PROJ_DLL const std::string &toString() const;
 
     //! @cond Doxygen_Suppress
-    void startNode(const std::string &keyword);
+    PROJ_DLL WKTFormatter &setOutputId(bool outputIdIn);
+
+    void startNode(const std::string &keyword, bool hasId);
     void endNode();
     void addQuotedString(const std::string &str);
     void add(const std::string &str);

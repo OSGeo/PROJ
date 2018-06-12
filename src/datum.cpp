@@ -153,7 +153,7 @@ std::string PrimeMeridian::exportToWKT(
                              : "Greenwich";
     if (!(isWKT2 && formatter->primeMeridianOmittedIfGreenwich() &&
           l_name == "Greenwich")) {
-        formatter->startNode("PRIMEM");
+        formatter->startNode(WKTConstants::PRIMEM, !identifiers().empty());
         formatter->addQuotedString(l_name);
         if (formatter->primeMeridianInDegree()) {
             formatter->add(greenwichLongitude()
@@ -271,7 +271,8 @@ std::string Ellipsoid::exportToWKT(
 {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     formatter->startNode(isWKT2 ? WKTConstants::ELLIPSOID
-                                : WKTConstants::SPHEROID);
+                                : WKTConstants::SPHEROID,
+                         !identifiers().empty());
     {
         formatter->addQuotedString(name()->description().has_value()
                                        ? *(name()->description())
@@ -383,14 +384,14 @@ std::string GeodeticReferenceFrame::exportToWKT(
     WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    formatter->startNode(WKTConstants::DATUM);
+    formatter->startNode(WKTConstants::DATUM, !identifiers().empty());
     formatter->addQuotedString(name()->description().has_value()
                                    ? *(name()->description())
                                    : "unnamed");
     ellipsoid()->exportToWKT(formatter);
     if (isWKT2) {
         if (anchorDefinition()) {
-            formatter->startNode(WKTConstants::ANCHOR);
+            formatter->startNode(WKTConstants::ANCHOR, false);
             formatter->addQuotedString(*anchorDefinition());
             formatter->endNode();
         }
@@ -441,13 +442,9 @@ const Measure &DynamicGeodeticReferenceFrame::frameReferenceEpoch() const {
 // cppcheck-suppress copyCtorAndEqOperator
 struct DatumEnsemble::Private {
     std::vector<DatumPtr> datums{};
-    PositionalAccuracy positionalAccuracy{};
+    PositionalAccuracyNNPtr positionalAccuracy;
 };
 //! @endcond
-
-// ---------------------------------------------------------------------------
-
-DatumEnsemble::DatumEnsemble() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
@@ -466,7 +463,7 @@ const std::vector<DatumPtr> &DatumEnsemble::datums() const { return d->datums; }
 
 // ---------------------------------------------------------------------------
 
-const PositionalAccuracy &DatumEnsemble::positionalAccuracy() const {
+const PositionalAccuracyNNPtr &DatumEnsemble::positionalAccuracy() const {
     return d->positionalAccuracy;
 }
 
@@ -534,12 +531,12 @@ std::string VerticalReferenceFrame::exportToWKT(
 {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     if (isWKT2) {
-        formatter->startNode(WKTConstants::VDATUM);
+        formatter->startNode(WKTConstants::VDATUM, !identifiers().empty());
         formatter->addQuotedString(name()->description().has_value()
                                        ? *(name()->description())
                                        : "unnamed");
         if (anchorDefinition()) {
-            formatter->startNode(WKTConstants::ANCHOR);
+            formatter->startNode(WKTConstants::ANCHOR, false);
             formatter->addQuotedString(*anchorDefinition());
             formatter->endNode();
         }
@@ -548,7 +545,7 @@ std::string VerticalReferenceFrame::exportToWKT(
         }
         formatter->endNode();
     } else {
-        formatter->startNode(WKTConstants::VERT_DATUM);
+        formatter->startNode(WKTConstants::VERT_DATUM, !identifiers().empty());
         formatter->addQuotedString(name()->description().has_value()
                                        ? *(name()->description())
                                        : "unnamed");

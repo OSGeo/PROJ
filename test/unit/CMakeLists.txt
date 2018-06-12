@@ -91,7 +91,8 @@ add_executable(proj_test_cpp_api
   test_common.cpp
   test_crs.cpp
   test_metadata.cpp
-  test_io.cpp)
+  test_io.cpp
+  test_operation.cpp)
 target_link_libraries(proj_test_cpp_api
   gtest
   ${PROJ_LIBRARIES})

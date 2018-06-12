@@ -33,6 +33,7 @@
 #include "proj/coordinateoperation.hpp"
 #include "proj/common.hpp"
 #include "proj/coordinateoperation_internal.hpp"
+#include "proj/crs.hpp"
 #include "proj/internal.hpp"
 #include "proj/io.hpp"
 #include "proj/io_internal.hpp"
@@ -84,6 +85,8 @@ constexpr double UTM_FALSE_EASTING = 500000.0;
 constexpr double UTM_NORTH_FALSE_NORTHING = 0.0;
 constexpr double UTM_SOUTH_FALSE_NORTHING = 10000000.0;
 
+// ---------------------------------------------------------------------------
+
 static const MethodMapping methodMappings[] = {
     {EPSG_METHOD_TRANSVERSE_MERCATOR,
      EPSG_METHOD_TRANSVERSE_MERCATOR_CODE,
@@ -98,6 +101,8 @@ static const MethodMapping methodMappings[] = {
     // TODO: add at least all GDAL supported methods !!!
 };
 
+// ---------------------------------------------------------------------------
+
 const MethodMapping *getMapping(int epsg_code) {
     for (const auto &mapping : methodMappings) {
         if (mapping.epsg_code == epsg_code) {
@@ -106,6 +111,8 @@ const MethodMapping *getMapping(int epsg_code) {
     }
     return nullptr;
 }
+
+// ---------------------------------------------------------------------------
 
 const MethodMapping *getMapping(const OperationMethod *method) {
     const std::string name(*(method->name()->description()));
@@ -119,10 +126,7 @@ const MethodMapping *getMapping(const OperationMethod *method) {
     return nullptr;
 }
 
-static bool isSameWKT1ProjectionMethod(const std::string &a,
-                                       const std::string &b) {
-    return tolower(replaceAll(a, " ", "_")) == tolower(replaceAll(b, " ", "_"));
-}
+// ---------------------------------------------------------------------------
 
 const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) {
     // Unusual for a WKT1 projection name, but mentionned in OGC 12-063r5 C.4.2
@@ -131,12 +135,14 @@ const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) {
     }
 
     for (const auto &mapping : methodMappings) {
-        if (isSameWKT1ProjectionMethod(mapping.wkt1_name, wkt1_name)) {
+        if (Identifier::isEquivalentName(mapping.wkt1_name, wkt1_name)) {
             return &mapping;
         }
     }
     return nullptr;
 }
+
+// ---------------------------------------------------------------------------
 
 const MethodMapping::ParamMapping *
 getMapping(const MethodMapping *mapping, const OperationParameterValue *param) {
@@ -152,6 +158,8 @@ getMapping(const MethodMapping *mapping, const OperationParameterValue *param) {
     }
     return nullptr;
 }
+
+// ---------------------------------------------------------------------------
 
 const MethodMapping::ParamMapping *
 getMappingFromWKT1(const MethodMapping *mapping, const std::string &wkt1_name) {
@@ -172,7 +180,7 @@ NS_PROJ_END
 //! @cond Doxygen_Suppress
 struct CoordinateOperation::Private {
     optional<std::string> operationVersion_{};
-    std::vector<PositionalAccuracy> coordinateOperationAccuracies_{};
+    std::vector<PositionalAccuracyNNPtr> coordinateOperationAccuracies_{};
     std::weak_ptr<CRS> sourceCRSWeak_{};
     std::weak_ptr<CRS> targetCRSWeak_{};
     CRSPtr sourceCRSLocked_{}; // do not set this for a
@@ -206,7 +214,7 @@ const optional<std::string> &CoordinateOperation::operationVersion() const {
 
 // ---------------------------------------------------------------------------
 
-const std::vector<PositionalAccuracy> &
+const std::vector<PositionalAccuracyNNPtr> &
 CoordinateOperation::coordinateOperationAccuracies() const {
     return d->coordinateOperationAccuracies_;
 }
@@ -247,6 +255,25 @@ void CoordinateOperation::setWeakSourceTargetCRS(
     std::weak_ptr<CRS> sourceCRSIn, std::weak_ptr<CRS> targetCRSIn) {
     d->sourceCRSWeak_ = sourceCRSIn;
     d->targetCRSWeak_ = targetCRSIn;
+}
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperation::setCRSs(const CRSNNPtr &sourceCRSIn,
+                                  const CRSNNPtr &targetCRSIn,
+                                  const CRSPtr &interpolationCRSIn) {
+    d->sourceCRSLocked_ = sourceCRSIn;
+    d->sourceCRSWeak_ = sourceCRSIn.as_nullable();
+    d->targetCRSLocked_ = targetCRSIn;
+    d->targetCRSWeak_ = targetCRSIn.as_nullable();
+    d->interpolationCRS_ = interpolationCRSIn;
+}
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperation::setAccuracies(
+    const std::vector<PositionalAccuracyNNPtr> &accuracies) {
+    d->coordinateOperationAccuracies_ = accuracies;
 }
 
 // ---------------------------------------------------------------------------
@@ -321,7 +348,8 @@ OperationMethodNNPtr OperationMethod::create(
 std::string OperationMethod::exportToWKT(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     formatter->startNode(isWKT2 ? WKTConstants::METHOD
-                                : WKTConstants::PROJECTION);
+                                : WKTConstants::PROJECTION,
+                         !identifiers().empty());
     std::string l_name(*(name()->description()));
     if (!isWKT2) {
         const MethodMapping *mapping = getMapping(this);
@@ -424,7 +452,14 @@ OperationParameterValue::_exportToWKT(WKTFormatterNNPtr formatter,
                                       const MethodMapping *mapping) const {
     const MethodMapping::ParamMapping *paramMapping =
         mapping ? getMapping(mapping, this) : nullptr;
-    formatter->startNode(WKTConstants::PARAMETER);
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    if (isWKT2 && parameterValue()->type() == ParameterValue::Type::FILENAME) {
+        formatter->startNode(WKTConstants::PARAMETERFILE,
+                             !parameter()->identifiers().empty());
+    } else {
+        formatter->startNode(WKTConstants::PARAMETER,
+                             !parameter()->identifiers().empty());
+    }
     if (paramMapping) {
         formatter->addQuotedString(paramMapping->wkt1_name);
     } else {
@@ -538,50 +573,79 @@ void SingleOperation::setParameterValues(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+struct ParameterValue::Private {
+    ParameterValue::Type type_{ParameterValue::Type::STRING};
+    Measure measure_{};
+    std::string stringValue_{};
+    int integerValue_{};
+    bool booleanValue_{};
+
+    explicit Private(const Measure &valueIn)
+        : type_(ParameterValue::Type::MEASURE), measure_(valueIn) {}
+
+    Private(const std::string &stringValueIn, ParameterValue::Type typeIn)
+        : type_(typeIn), stringValue_(stringValueIn) {}
+
+    explicit Private(int integerValueIn)
+        : type_(ParameterValue::Type::INTEGER), integerValue_(integerValueIn) {}
+
+    explicit Private(bool booleanValueIn)
+        : type_(ParameterValue::Type::BOOLEAN), booleanValue_(booleanValueIn) {}
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 ParameterValue::~ParameterValue() = default;
 
 // ---------------------------------------------------------------------------
 
-ParameterValue::ParameterValue(const MeasureNNPtr &measureIn)
-    : BoxedValue(static_cast<const BaseObjectNNPtr>(measureIn)) {}
+ParameterValue::ParameterValue(const Measure &measureIn)
+    : d(internal::make_unique<Private>(measureIn)) {}
 
 // ---------------------------------------------------------------------------
 
-ParameterValue::ParameterValue(const char *stringValueIn)
-    : BoxedValue(stringValueIn) {}
-
-// ---------------------------------------------------------------------------
-
-ParameterValue::ParameterValue(const std::string &stringValueIn)
-    : BoxedValue(stringValueIn) {}
+ParameterValue::ParameterValue(const std::string &stringValueIn,
+                               ParameterValue::Type typeIn)
+    : d(internal::make_unique<Private>(stringValueIn, typeIn)) {}
 
 // ---------------------------------------------------------------------------
 
 ParameterValue::ParameterValue(int integerValueIn)
-    : BoxedValue(integerValueIn) {}
+    : d(internal::make_unique<Private>(integerValueIn)) {}
 
 // ---------------------------------------------------------------------------
 
 ParameterValue::ParameterValue(bool booleanValueIn)
-    : BoxedValue(booleanValueIn) {}
+    : d(internal::make_unique<Private>(booleanValueIn)) {}
 
 // ---------------------------------------------------------------------------
 
 ParameterValueNNPtr ParameterValue::create(const Measure &measureIn) {
-    return ParameterValue::nn_make_shared<ParameterValue>(
-        util::nn_make_shared<Measure>(measureIn));
+    return ParameterValue::nn_make_shared<ParameterValue>(measureIn);
 }
 
 // ---------------------------------------------------------------------------
 
 ParameterValueNNPtr ParameterValue::create(const char *stringValueIn) {
-    return ParameterValue::nn_make_shared<ParameterValue>(stringValueIn);
+    return ParameterValue::nn_make_shared<ParameterValue>(
+        std::string(stringValueIn), ParameterValue::Type::STRING);
 }
 
 // ---------------------------------------------------------------------------
 
 ParameterValueNNPtr ParameterValue::create(const std::string &stringValueIn) {
-    return ParameterValue::nn_make_shared<ParameterValue>(stringValueIn);
+    return ParameterValue::nn_make_shared<ParameterValue>(
+        stringValueIn, ParameterValue::Type::STRING);
+}
+
+// ---------------------------------------------------------------------------
+
+ParameterValueNNPtr
+ParameterValue::createFilename(const std::string &stringValueIn) {
+    return ParameterValue::nn_make_shared<ParameterValue>(
+        stringValueIn, ParameterValue::Type::FILENAME);
 }
 
 // ---------------------------------------------------------------------------
@@ -598,23 +662,51 @@ ParameterValueNNPtr ParameterValue::create(bool booleanValueIn) {
 
 // ---------------------------------------------------------------------------
 
+const ParameterValue::Type &ParameterValue::type() const { return d->type_; }
+
+// ---------------------------------------------------------------------------
+
+const Measure &ParameterValue::value() const { return d->measure_; }
+
+// ---------------------------------------------------------------------------
+
+const std::string &ParameterValue::stringValue() const {
+    return d->stringValue_;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::string &ParameterValue::valueFile() const { return d->stringValue_; }
+
+// ---------------------------------------------------------------------------
+
+int ParameterValue::integerValue() const { return d->integerValue_; }
+
+// ---------------------------------------------------------------------------
+
+bool ParameterValue::booleanValue() const { return d->booleanValue_; }
+
+// ---------------------------------------------------------------------------
+
 std::string ParameterValue::exportToWKT(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    if (type() == Type::OTHER_OBJECT) {
-        auto measure = util::nn_dynamic_pointer_cast<Measure>(object());
-        if (measure) {
-            formatter->add(measure->value());
-
-            if (isWKT2 && measure->unit() != UnitOfMeasure::NONE) {
-                if (!formatter
-                         ->primeMeridianOrParameterUnitOmittedIfSameAsAxis() ||
-                    (measure->unit() != UnitOfMeasure::SCALE_UNITY &&
-                     measure->unit() != *(formatter->axisLinearUnit()) &&
-                     measure->unit() != *(formatter->axisAngularUnit()))) {
-                    measure->unit().exportToWKT(formatter);
-                }
+    if (type() == Type::MEASURE) {
+        formatter->add(value().value());
+        const auto &unit = value().unit();
+        if (isWKT2 && unit != UnitOfMeasure::NONE) {
+            if (!formatter->primeMeridianOrParameterUnitOmittedIfSameAsAxis() ||
+                (unit != UnitOfMeasure::SCALE_UNITY &&
+                 unit != *(formatter->axisLinearUnit()) &&
+                 unit != *(formatter->axisAngularUnit()))) {
+                unit.exportToWKT(formatter);
             }
         }
+    } else if (type() == Type::STRING || type() == Type::FILENAME) {
+        formatter->addQuotedString(stringValue());
+    } else if (type() == Type::INTEGER) {
+        formatter->add(integerValue());
+    } else {
+        throw FormattingException("boolean parameter value not handled");
     }
     return formatter->toString();
 }
@@ -681,6 +773,7 @@ ConversionNNPtr Conversion::create(
     }
     return create(propertiesConversion, op, generalParameterValues);
 }
+
 // ---------------------------------------------------------------------------
 
 ConversionNNPtr Conversion::create(const ConversionNNPtr &other) {
@@ -738,7 +831,7 @@ ConversionNNPtr Conversion::createUTM(int zone, bool north) {
 
 std::string Conversion::exportToWKT(WKTFormatterNNPtr formatter) const {
     if (formatter->outputConversionNode()) {
-        formatter->startNode(WKTConstants::CONVERSION);
+        formatter->startNode(WKTConstants::CONVERSION, !identifiers().empty());
         formatter->addQuotedString(*(name()->description()));
     }
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
@@ -790,38 +883,36 @@ ConversionNNPtr Conversion::identify() const {
                 const auto &paramName =
                     *(opParamvalue->parameter()->name()->description());
                 const auto &parameterValue = opParamvalue->parameterValue();
-                MeasurePtr measure;
-                if (parameterValue->type() == BoxedValue::Type::OTHER_OBJECT) {
-                    BaseObjectNNPtr obj = parameterValue->object();
-                    measure = util::nn_dynamic_pointer_cast<Measure>(obj);
-                }
-
-                if (paramName == EPSG_LATITUDE_OF_NATURAL_ORIGIN && measure &&
-                    measure->value() == UTM_LATITUDE_OF_NATURAL_ORIGIN) {
-                    bLatitudeNatOriginUTM = true;
-                } else if (paramName == EPSG_LONGITUDE_OF_NATURAL_ORIGIN &&
-                           measure &&
-                           measure->unit() == UnitOfMeasure::DEGREE) {
-                    double dfZone = (measure->value() + 183.0) / 6.0;
-                    if (dfZone > 0.9 && dfZone < 60.1 &&
-                        std::abs(dfZone - std::round(dfZone)) < 1e-10) {
-                        nUTMZone = static_cast<int>(std::lround(dfZone));
-                    }
-                } else if (paramName == EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN &&
-                           measure && measure->value() == UTM_SCALE_FACTOR) {
-                    bScaleFactorUTM = true;
-                } else if (paramName == EPSG_FALSE_EASTING && measure &&
-                           measure->value() == UTM_FALSE_EASTING &&
-                           measure->unit() == UnitOfMeasure::METRE) {
-                    bFalseEastingUTM = true;
-                } else if (paramName == EPSG_FALSE_NORTHING && measure &&
-                           measure->unit() == UnitOfMeasure::METRE) {
-                    if (measure->value() == UTM_NORTH_FALSE_NORTHING) {
-                        bFalseNorthingUTM = true;
-                        bNorthUTM = true;
-                    } else if (measure->value() == UTM_SOUTH_FALSE_NORTHING) {
-                        bFalseNorthingUTM = true;
-                        bNorthUTM = false;
+                if (parameterValue->type() == ParameterValue::Type::MEASURE) {
+                    auto measure = parameterValue->value();
+                    if (paramName == EPSG_LATITUDE_OF_NATURAL_ORIGIN &&
+                        measure.value() == UTM_LATITUDE_OF_NATURAL_ORIGIN) {
+                        bLatitudeNatOriginUTM = true;
+                    } else if (paramName == EPSG_LONGITUDE_OF_NATURAL_ORIGIN &&
+                               measure.unit() == UnitOfMeasure::DEGREE) {
+                        double dfZone = (measure.value() + 183.0) / 6.0;
+                        if (dfZone > 0.9 && dfZone < 60.1 &&
+                            std::abs(dfZone - std::round(dfZone)) < 1e-10) {
+                            nUTMZone = static_cast<int>(std::lround(dfZone));
+                        }
+                    } else if (paramName ==
+                                   EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN &&
+                               measure.value() == UTM_SCALE_FACTOR) {
+                        bScaleFactorUTM = true;
+                    } else if (paramName == EPSG_FALSE_EASTING &&
+                               measure.value() == UTM_FALSE_EASTING &&
+                               measure.unit() == UnitOfMeasure::METRE) {
+                        bFalseEastingUTM = true;
+                    } else if (paramName == EPSG_FALSE_NORTHING &&
+                               measure.unit() == UnitOfMeasure::METRE) {
+                        if (measure.value() == UTM_NORTH_FALSE_NORTHING) {
+                            bFalseNorthingUTM = true;
+                            bNorthUTM = true;
+                        } else if (measure.value() ==
+                                   UTM_SOUTH_FALSE_NORTHING) {
+                            bFalseNorthingUTM = true;
+                            bNorthUTM = false;
+                        }
                     }
                 }
             }
@@ -855,7 +946,136 @@ InvalidOperation::~InvalidOperation() = default;
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+struct Transformation::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+Transformation::Transformation(
+    const CRSNNPtr &sourceCRSIn, const CRSNNPtr &targetCRSIn,
+    const CRSPtr &interpolationCRSIn, const OperationMethodNNPtr &methodIn,
+    const std::vector<GeneralParameterValueNNPtr> &values,
+    const std::vector<PositionalAccuracyNNPtr> &accuracies)
+    : SingleOperation(methodIn), d(internal::make_unique<Private>()) {
+    setParameterValues(values);
+    setCRSs(sourceCRSIn, targetCRSIn, interpolationCRSIn);
+    setAccuracies(accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
 Transformation::~Transformation() = default;
+
+// ---------------------------------------------------------------------------
+
+const CRSNNPtr Transformation::sourceCRS() const {
+    return NN_CHECK_ASSERT(CoordinateOperation::sourceCRS());
+}
+
+// ---------------------------------------------------------------------------
+
+const CRSNNPtr Transformation::targetCRS() const {
+    return NN_CHECK_ASSERT(CoordinateOperation::targetCRS());
+}
+
+// ---------------------------------------------------------------------------
+
+TransformationNNPtr
+Transformation::create(const PropertyMap &properties,
+                       const CRSNNPtr &sourceCRSIn, const CRSNNPtr &targetCRSIn,
+                       const CRSPtr &interpolationCRSIn,
+                       const OperationMethodNNPtr &methodIn,
+                       const std::vector<GeneralParameterValueNNPtr> &values,
+                       const std::vector<PositionalAccuracyNNPtr>
+                           &accuracies) // throw InvalidOperation
+{
+    if (methodIn->parameters().size() != values.size()) {
+        throw InvalidOperation(
+            "Inconsistent number of parameters and parameter values");
+    }
+    auto conv = Transformation::nn_make_shared<Transformation>(
+        sourceCRSIn, targetCRSIn, interpolationCRSIn, methodIn, values,
+        accuracies);
+    conv->setProperties(properties);
+    return conv;
+}
+
+// ---------------------------------------------------------------------------
+
+TransformationNNPtr
+Transformation::create(const PropertyMap &propertiesTransformation,
+                       const CRSNNPtr &sourceCRSIn, const CRSNNPtr &targetCRSIn,
+                       const CRSPtr &interpolationCRSIn,
+                       const PropertyMap &propertiesOperationMethod,
+                       const std::vector<OperationParameterNNPtr> &parameters,
+                       const std::vector<ParameterValueNNPtr> &values,
+                       const std::vector<PositionalAccuracyNNPtr>
+                           &accuracies) // throw InvalidOperation
+{
+    OperationMethodNNPtr op(
+        OperationMethod::create(propertiesOperationMethod, parameters));
+
+    if (parameters.size() != values.size()) {
+        throw InvalidOperation(
+            "Inconsistent number of parameters and parameter values");
+    }
+    std::vector<GeneralParameterValueNNPtr> generalParameterValues;
+    generalParameterValues.reserve(values.size());
+    for (size_t i = 0; i < values.size(); i++) {
+        generalParameterValues.push_back(
+            OperationParameterValue::create(parameters[i], values[i]));
+    }
+    return create(propertiesTransformation, sourceCRSIn, targetCRSIn,
+                  interpolationCRSIn, op, generalParameterValues, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+std::string Transformation::exportToWKT(WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        throw FormattingException(
+            "Transformation can only be exported to WKT2");
+    }
+
+    formatter->startNode(WKTConstants::COORDINATEOPERATION,
+                         !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+
+    formatter->startNode(WKTConstants::SOURCECRS, false);
+    sourceCRS()->exportToWKT(formatter);
+    formatter->endNode();
+
+    formatter->startNode(WKTConstants::TARGETCRS, false);
+    targetCRS()->exportToWKT(formatter);
+    formatter->endNode();
+
+    method()->exportToWKT(formatter);
+
+    const MethodMapping *mapping =
+        !isWKT2 ? getMapping(method().get()) : nullptr;
+    for (const auto &paramValue : parameterValues()) {
+        paramValue->_exportToWKT(formatter, mapping);
+    }
+
+    if (interpolationCRS()) {
+        formatter->startNode(WKTConstants::INTERPOLATIONCRS, false);
+        interpolationCRS()->exportToWKT(formatter);
+        formatter->endNode();
+    }
+
+    if (!coordinateOperationAccuracies().empty()) {
+        formatter->startNode(WKTConstants::OPERATIONACCURACY, false);
+        formatter->add(coordinateOperationAccuracies()[0]->value());
+        formatter->endNode();
+    }
+
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+
+    return formatter->toString();
+}
 
 // ---------------------------------------------------------------------------
 

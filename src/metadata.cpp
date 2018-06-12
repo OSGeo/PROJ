@@ -361,7 +361,7 @@ std::string Identifier::exportToWKT(WKTFormatterNNPtr formatter) const {
     const std::string &l_code = code();
     if (codeSpace() && !codeSpace()->empty() && !l_code.empty()) {
         if (isWKT2) {
-            formatter->startNode(WKTConstants::ID);
+            formatter->startNode(WKTConstants::ID, false);
             formatter->addQuotedString(*(codeSpace()));
             try {
                 std::stoi(l_code);
@@ -380,22 +380,67 @@ std::string Identifier::exportToWKT(WKTFormatterNNPtr formatter) const {
             }
             if (authority().has_value() && authority()->title().has_value() &&
                 *(authority()->title()) != *(codeSpace())) {
-                formatter->startNode(WKTConstants::CITATION);
+                formatter->startNode(WKTConstants::CITATION, false);
                 formatter->addQuotedString(*(authority()->title()));
                 formatter->endNode();
             }
             if (uri().has_value()) {
-                formatter->startNode(WKTConstants::URI);
+                formatter->startNode(WKTConstants::URI, false);
                 formatter->addQuotedString(*(uri()));
                 formatter->endNode();
             }
             formatter->endNode();
         } else {
-            formatter->startNode(WKTConstants::AUTHORITY);
+            formatter->startNode(WKTConstants::AUTHORITY, false);
             formatter->addQuotedString(*(codeSpace()));
             formatter->addQuotedString(l_code);
             formatter->endNode();
         }
     }
     return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+static std::string canonicalizeName(const std::string &str) {
+    std::string res(tolower(str));
+    for (auto c : std::vector<std::string>{" ", "_", "-", "/", "(", ")"}) {
+        res = replaceAll(res, c, "");
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+bool Identifier::isEquivalentName(const std::string &a, const std::string &b) {
+    return canonicalizeName(a) == canonicalizeName(b);
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct PositionalAccuracy::Private {
+    std::string value_{};
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+PositionalAccuracy::PositionalAccuracy(const std::string &valueIn)
+    : d(internal::make_unique<Private>()) {
+    d->value_ = valueIn;
+}
+
+// ---------------------------------------------------------------------------
+
+PositionalAccuracy::~PositionalAccuracy() = default;
+
+// ---------------------------------------------------------------------------
+
+const std::string &PositionalAccuracy::value() const { return d->value_; }
+
+// ---------------------------------------------------------------------------
+
+PositionalAccuracyNNPtr PositionalAccuracy::create(const std::string &valueIn) {
+    return PositionalAccuracy::nn_make_shared<PositionalAccuracy>(valueIn);
 }

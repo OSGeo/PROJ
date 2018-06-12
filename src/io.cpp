@@ -90,6 +90,7 @@ struct WKTFormatter::Private {
 
     int indentLevel_ = 0;
     std::vector<bool> stackHasChild_{};
+    std::vector<bool> stackHasId_{false};
     std::vector<bool> stackEmptyKeyword_{};
     std::vector<bool> outputUnitStack_{true};
     std::vector<bool> outputIdStack_{true};
@@ -247,6 +248,17 @@ WKTFormatter::WKTFormatter(Convention convention)
 
 // ---------------------------------------------------------------------------
 
+WKTFormatter &WKTFormatter::setOutputId(bool outputIdIn) {
+    if (d->indentLevel_ != 0) {
+        throw Exception(
+            "setOutputId() shall only be called when the stack state is empty");
+    }
+    d->outputIdStack_[0] = outputIdIn;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
 void WKTFormatter::Private::addNewLine() { result_ += '\n'; }
 
 // ---------------------------------------------------------------------------
@@ -257,7 +269,7 @@ void WKTFormatter::Private::addIndentation() {
 
 // ---------------------------------------------------------------------------
 
-void WKTFormatter::startNode(const std::string &keyword) {
+void WKTFormatter::startNode(const std::string &keyword, bool hasId) {
     if (!d->stackHasChild_.empty()) {
         d->startNewChild();
     }
@@ -277,8 +289,8 @@ void WKTFormatter::startNode(const std::string &keyword) {
     d->stackHasChild_.push_back(false);
     d->stackEmptyKeyword_.push_back(keyword.empty());
 
-    // We should emit ID nodes for :
-    // -root element
+    // Starting from a node that has a ID, we should emit ID nodes for :
+    // - this node
     // - and for METHOD&PARAMETER nodes in WKT2, unless idOnTopLevelOnly_ is
     // set.
     // For WKT2, all other intermediate nodes shouldn't have ID ("not
@@ -287,19 +299,22 @@ void WKTFormatter::startNode(const std::string &keyword) {
         d->params_.version_ == WKTFormatter::Version::WKT2 &&
         (keyword == WKTConstants::METHOD ||
          keyword == WKTConstants::PARAMETER)) {
-        pushOutputId(true);
+        pushOutputId(d->outputIdStack_[0]);
     } else if (d->indentLevel_ >= 2 &&
                d->params_.version_ == WKTFormatter::Version::WKT2) {
-        pushOutputId(false);
+        pushOutputId(d->outputIdStack_[0] && !d->stackHasId_.back());
     } else {
         pushOutputId(outputId());
     }
+
+    d->stackHasId_.push_back(hasId || d->stackHasId_.back());
 }
 
 // ---------------------------------------------------------------------------
 
 void WKTFormatter::endNode() {
     assert(d->indentLevel_ > 0);
+    d->stackHasId_.pop_back();
     popOutputId();
     d->indentLevel_--;
     bool emptyKeyword = d->stackEmptyKeyword_.back();
@@ -727,6 +742,11 @@ struct WKTParser::Private {
     guessUnitForParameter(const std::string &paramName,
                           const UnitOfMeasure &defaultLinearUnit,
                           const UnitOfMeasure &defaultAngularUnit);
+    void consumeParameters(WKTNodeNNPtr node,
+                           std::vector<OperationParameterNNPtr> &parameters,
+                           std::vector<ParameterValueNNPtr> &values,
+                           const UnitOfMeasure &defaultLinearUnit,
+                           const UnitOfMeasure &defaultAngularUnit);
     ConversionNNPtr buildConversion(WKTNodeNNPtr node,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit);
@@ -739,6 +759,7 @@ struct WKTParser::Private {
     VerticalCRSNNPtr buildVerticalCRS(WKTNodeNNPtr node);
     CompoundCRSNNPtr buildCompoundCRS(WKTNodeNNPtr node);
     CRSPtr buildCRS(WKTNodeNNPtr node);
+    CoordinateOperationNNPtr buildCoordinateOperation(WKTNodeNNPtr node);
 };
 
 // ---------------------------------------------------------------------------
@@ -1465,6 +1486,55 @@ UnitOfMeasure WKTParser::Private::guessUnitForParameter(
 
 // ---------------------------------------------------------------------------
 
+void WKTParser::Private::consumeParameters(
+    WKTNodeNNPtr node, std::vector<OperationParameterNNPtr> &parameters,
+    std::vector<ParameterValueNNPtr> &values,
+    const UnitOfMeasure &defaultLinearUnit,
+    const UnitOfMeasure &defaultAngularUnit) {
+    for (const auto &childNode : node->children()) {
+        if (ci_equal(childNode->value(), WKTConstants::PARAMETER)) {
+            if (childNode->children().size() < 2) {
+                throw ParsingException("not enough children in " +
+                                       childNode->value() + " node");
+            }
+            parameters.push_back(
+                OperationParameter::create(buildProperties(childNode)));
+            auto paramValue = childNode->children()[1]->value();
+            if (!paramValue.empty() && paramValue[0] == '"') {
+                values.push_back(
+                    ParameterValue::create(stripQuotes(paramValue)));
+            } else {
+                try {
+                    double val = std::stod(paramValue);
+                    auto unit = buildUnitInSubNode(childNode);
+                    if (unit == UnitOfMeasure()) {
+                        auto paramName = childNode->children()[0]->value();
+                        unit = guessUnitForParameter(
+                            paramName, defaultLinearUnit, defaultAngularUnit);
+                    }
+                    values.push_back(
+                        ParameterValue::create(Measure(val, unit)));
+                } catch (const std::exception &) {
+                    throw ParsingException("unhandled parameter value type : " +
+                                           paramValue);
+                }
+            }
+        } else if (ci_equal(childNode->value(), WKTConstants::PARAMETERFILE)) {
+            if (childNode->children().size() < 2) {
+                throw ParsingException("not enough children in " +
+                                       childNode->value() + " node");
+            }
+            parameters.push_back(
+                OperationParameter::create(buildProperties(childNode)));
+            auto paramValue = childNode->children()[1]->value();
+            values.push_back(
+                ParameterValue::createFilename(stripQuotes(paramValue)));
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 ConversionNNPtr
 WKTParser::Private::buildConversion(WKTNodeNNPtr node,
                                     const UnitOfMeasure &defaultLinearUnit,
@@ -1483,33 +1553,72 @@ WKTParser::Private::buildConversion(WKTNodeNNPtr node,
 
     std::vector<OperationParameterNNPtr> parameters;
     std::vector<ParameterValueNNPtr> values;
-    for (const auto &childNode : node->children()) {
-        if (ci_equal(childNode->value(), WKTConstants::PARAMETER)) {
-            if (childNode->children().size() < 2) {
-                throw ParsingException("not enough children in " +
-                                       WKTConstants::PARAMETER + " node");
-            }
-            parameters.push_back(
-                OperationParameter::create(buildProperties(childNode)));
-            auto paramValue = childNode->children()[1]->value();
-            try {
-                double val = std::stod(paramValue);
-                auto unit = buildUnitInSubNode(childNode);
-                if (unit == UnitOfMeasure()) {
-                    auto paramName = childNode->children()[0]->value();
-                    unit = guessUnitForParameter(paramName, defaultLinearUnit,
-                                                 defaultAngularUnit);
-                }
-                values.push_back(ParameterValue::create(Measure(val, unit)));
-            } catch (const std::exception &) {
-                throw ParsingException("unhandled parameter value type : " +
-                                       paramValue);
-            }
-        }
-    }
+    consumeParameters(node, parameters, values, defaultLinearUnit,
+                      defaultAngularUnit);
+
     return Conversion::create(buildProperties(node),
                               buildProperties(NN_CHECK_ASSERT(methodNode)),
                               parameters, values);
+}
+
+// ---------------------------------------------------------------------------
+
+CoordinateOperationNNPtr
+WKTParser::Private::buildCoordinateOperation(WKTNodeNNPtr node) {
+    auto methodNode = node->lookForChild(WKTConstants::METHOD);
+    if (!methodNode) {
+        throw ParsingException("Missing METHOD node");
+    }
+    if (methodNode->children().size() < 1) {
+        throw ParsingException("not enough children in " +
+                               WKTConstants::METHOD + " node");
+    }
+
+    auto sourceCRSNode = node->lookForChild(WKTConstants::SOURCECRS);
+    if (!sourceCRSNode || sourceCRSNode->children().size() != 1) {
+        throw ParsingException("Missing SOURCECRS node");
+    }
+    auto sourceCRS = buildCRS(sourceCRSNode->children()[0]);
+    if (!sourceCRS) {
+        throw ParsingException("Invalid content in SOURCECRS node");
+    }
+
+    auto targetCRSNode = node->lookForChild(WKTConstants::TARGETCRS);
+    if (!targetCRSNode || targetCRSNode->children().size() != 1) {
+        throw ParsingException("Missing TARGETCRS node");
+    }
+    auto targetCRS = buildCRS(targetCRSNode->children()[0]);
+    if (!targetCRS) {
+        throw ParsingException("Invalid content in TARGETCRS node");
+    }
+
+    auto interpolationCRSNode =
+        node->lookForChild(WKTConstants::INTERPOLATIONCRS);
+    CRSPtr interpolationCRS;
+    if (interpolationCRSNode && interpolationCRSNode->children().size() == 1) {
+        interpolationCRS = buildCRS(interpolationCRSNode->children()[0]);
+    }
+
+    std::vector<OperationParameterNNPtr> parameters;
+    std::vector<ParameterValueNNPtr> values;
+    auto defaultLinearUnit = UnitOfMeasure();
+    auto defaultAngularUnit = UnitOfMeasure();
+    consumeParameters(node, parameters, values, defaultLinearUnit,
+                      defaultAngularUnit);
+
+    std::vector<PositionalAccuracyNNPtr> accuracies;
+    auto accuracyNode = node->lookForChild(WKTConstants::OPERATIONACCURACY);
+    if (accuracyNode && accuracyNode->children().size() == 1) {
+        accuracies.push_back(PositionalAccuracy::create(
+            stripQuotes(accuracyNode->children()[0]->value())));
+    }
+
+    return util::nn_static_pointer_cast<CoordinateOperation>(
+        Transformation::create(buildProperties(node),
+                               NN_CHECK_ASSERT(sourceCRS),
+                               NN_CHECK_ASSERT(targetCRS), interpolationCRS,
+                               buildProperties(NN_CHECK_ASSERT(methodNode)),
+                               parameters, values, accuracies));
 }
 
 // ---------------------------------------------------------------------------
@@ -1744,6 +1853,11 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
         ci_equal(name, WKTConstants::SPHEROID)) {
         return util::nn_static_pointer_cast<BaseObject>(
             d->buildEllipsoid(root));
+    }
+
+    if (ci_equal(name, WKTConstants::COORDINATEOPERATION)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            d->buildCoordinateOperation(root));
     }
 
     if (ci_equal(name, WKTConstants::ID) ||
