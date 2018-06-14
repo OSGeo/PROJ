@@ -8,3 +8,4 @@
 
 .. bibliography:: references.bib
    :cited:
+   :style: customstyle

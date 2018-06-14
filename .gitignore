@@ -1,4 +1,6 @@
 *~
+*.bak
+*.pyc
 build.local.bat
 build.local.sh
 Makefile
