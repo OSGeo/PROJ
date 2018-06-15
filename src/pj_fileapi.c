@@ -188,6 +188,7 @@ char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file)
     long start = pj_ctx_ftell(ctx, file);
     size_t bytes_read;
     int i;
+    int max_size;
 
     line[size-1] = '\0';
     bytes_read = pj_ctx_fread(ctx, line, 1, size-1, file);
@@ -198,7 +199,8 @@ char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file)
         line[bytes_read] = '\0';
     }
 
-    for( i = 0; i < size-2; i++)
+    max_size = (int)MIN(bytes_read, (size_t)(size > 2 ? size - 2 : 0));
+    for( i = 0; i < max_size; i++)
     {
         if (line[i] == '\n')
         {
