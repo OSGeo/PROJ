@@ -34,16 +34,16 @@
 
 #include "projects.h"
 
-static PAFile stdio_fopen(projCtx ctx, const char *filename, 
+static PAFile stdio_fopen(projCtx ctx, const char *filename,
                              const char *access);
-static size_t stdio_fread(void *buffer, size_t size, size_t nmemb, 
+static size_t stdio_fread(void *buffer, size_t size, size_t nmemb,
                              PAFile file);
 static int stdio_fseek(PAFile file, long offset, int whence);
 static long stdio_ftell(PAFile file);
 static void stdio_fclose(PAFile file);
 
-static projFileAPI default_fileapi = { 
-    stdio_fopen, 
+static projFileAPI default_fileapi = {
+    stdio_fopen,
     stdio_fread,
     stdio_fseek,
     stdio_ftell,
@@ -59,7 +59,7 @@ typedef struct {
 /*                       pj_get_default_fileapi()                       */
 /************************************************************************/
 
-projFileAPI *pj_get_default_fileapi(void) 
+projFileAPI *pj_get_default_fileapi(void)
 {
     return &default_fileapi;
 }
@@ -68,14 +68,14 @@ projFileAPI *pj_get_default_fileapi(void)
 /*                           stdio_fopen()                           */
 /************************************************************************/
 
-static PAFile stdio_fopen(projCtx ctx, const char *filename, 
+static PAFile stdio_fopen(projCtx ctx, const char *filename,
                              const char *access)
 {
     stdio_pafile *pafile;
     FILE *fp;
 
     fp = fopen(filename, access);
-    if (fp == NULL) 
+    if (fp == NULL)
     {
         return NULL;
     }
@@ -97,7 +97,7 @@ static PAFile stdio_fopen(projCtx ctx, const char *filename,
 /*                           stdio_fread()                           */
 /************************************************************************/
 
-static size_t stdio_fread(void *buffer, size_t size, size_t nmemb, 
+static size_t stdio_fread(void *buffer, size_t size, size_t nmemb,
                              PAFile file)
 {
     stdio_pafile *pafile = (stdio_pafile *) file;
@@ -183,11 +183,12 @@ void   pj_ctx_fclose(projCtx ctx, PAFile file)
 /*      taken.                                                          */
 /************************************************************************/
 
-char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file) 
+char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file)
 {
     long start = pj_ctx_ftell(ctx, file);
     size_t bytes_read;
     int i;
+    int max_size;
 
     line[size-1] = '\0';
     bytes_read = pj_ctx_fread(ctx, line, 1, size-1, file);
@@ -197,10 +198,11 @@ char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file)
     {
         line[bytes_read] = '\0';
     }
-    
-    for( i = 0; i < size-2; i++) 
+
+    max_size = (int)MIN(bytes_read, (size_t)(size > 2 ? size - 2 : 0));
+    for( i = 0; i < max_size; i++)
     {
-        if (line[i] == '\n') 
+        if (line[i] == '\n')
         {
             line[i+1] = '\0';
             pj_ctx_fseek(ctx, file, start + i + 1, SEEK_SET);
