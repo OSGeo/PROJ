@@ -95,6 +95,8 @@ class WKTConstants {
     static const std::string TARGETCRS;
     static const std::string INTERPOLATIONCRS;
     static const std::string OPERATIONACCURACY;
+    static const std::string CONCATENATEDOPERATION; // WKT2-2018
+    static const std::string STEP;                  // WKT2-2018
 
     // WKT2 long
     static const std::string GEODETICCRS;

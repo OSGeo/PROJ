@@ -1080,3 +1080,99 @@ std::string Transformation::exportToWKT(WKTFormatterNNPtr formatter) const {
 // ---------------------------------------------------------------------------
 
 PointMotionOperation::~PointMotionOperation() = default;
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct ConcatenatedOperation::Private {
+    std::vector<CoordinateOperationNNPtr> operations_{};
+
+    Private(const std::vector<CoordinateOperationNNPtr> &operationsIn)
+        : operations_(operationsIn) {}
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+ConcatenatedOperation::~ConcatenatedOperation() = default;
+
+// ---------------------------------------------------------------------------
+
+ConcatenatedOperation::ConcatenatedOperation(
+    const std::vector<CoordinateOperationNNPtr> &operationsIn)
+    : CoordinateOperation(), d(internal::make_unique<Private>(operationsIn)) {}
+
+// ---------------------------------------------------------------------------
+
+const std::vector<CoordinateOperationNNPtr> &
+ConcatenatedOperation::operations() const {
+    return d->operations_;
+}
+
+// ---------------------------------------------------------------------------
+
+ConcatenatedOperationNNPtr ConcatenatedOperation::create(
+    const PropertyMap &properties,
+    const std::vector<CoordinateOperationNNPtr> &operationsIn,
+    const std::vector<PositionalAccuracyNNPtr>
+        &accuracies) // throw InvalidOperation
+{
+    if (operationsIn.size() < 2) {
+        throw InvalidOperation(
+            "ConcatenatedOperation must have at least 2 operations");
+    }
+    for (size_t i = 0; i < operationsIn.size(); i++) {
+        if (operationsIn[i]->sourceCRS() == nullptr ||
+            operationsIn[i]->targetCRS() == nullptr) {
+            throw InvalidOperation("At least one of the operation lacks a "
+                                   "source and/or target CRS");
+        }
+        if (i >= 1 &&
+            *(operationsIn[i]->sourceCRS()->name()->description()) !=
+                *(operationsIn[i - 1]->targetCRS()->name()->description())) {
+            throw InvalidOperation(
+                "Inconsistent chaining of CRS in operations");
+        }
+    }
+    auto op = ConcatenatedOperation::nn_make_shared<ConcatenatedOperation>(
+        operationsIn);
+    op->setProperties(properties);
+    op->setCRSs(NN_CHECK_ASSERT(operationsIn[0]->sourceCRS()),
+                NN_CHECK_ASSERT(operationsIn.back()->targetCRS()), nullptr);
+    op->setAccuracies(accuracies);
+    return op;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string
+ConcatenatedOperation::exportToWKT(WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    if (!isWKT2 || !formatter->use2018Keywords()) {
+        throw FormattingException(
+            "Transformation can only be exported to WKT2:2018");
+    }
+
+    formatter->startNode(WKTConstants::CONCATENATEDOPERATION,
+                         !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+
+    formatter->startNode(WKTConstants::SOURCECRS, false);
+    sourceCRS()->exportToWKT(formatter);
+    formatter->endNode();
+
+    formatter->startNode(WKTConstants::TARGETCRS, false);
+    targetCRS()->exportToWKT(formatter);
+    formatter->endNode();
+
+    for (const auto &operation : operations()) {
+        formatter->startNode(WKTConstants::STEP, false);
+        operation->exportToWKT(formatter);
+        formatter->endNode();
+    }
+
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+
+    return formatter->toString();
+}

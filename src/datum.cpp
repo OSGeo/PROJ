@@ -176,9 +176,6 @@ std::string PrimeMeridian::exportToWKT(
         if (formatter->outputId()) {
             formatID(formatter);
         }
-        if (isWKT2) {
-            formatRemarks(formatter);
-        }
         formatter->endNode();
     }
     return formatter->toString();
@@ -304,9 +301,6 @@ std::string Ellipsoid::exportToWKT(
         }
         if (formatter->outputId()) {
             formatID(formatter);
-        }
-        if (isWKT2) {
-            formatRemarks(formatter);
         }
     }
     formatter->endNode();

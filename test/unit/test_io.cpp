@@ -34,6 +34,7 @@
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
 #include "proj/io.hpp"
+#include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
 #include <string>
@@ -43,6 +44,7 @@ using namespace osgeo::proj::crs;
 using namespace osgeo::proj::cs;
 using namespace osgeo::proj::datum;
 using namespace osgeo::proj::io;
+using namespace osgeo::proj::metadata;
 using namespace osgeo::proj::operation;
 using namespace osgeo::proj::util;
 
@@ -1082,6 +1084,65 @@ TEST(wkt_parse, COORDINATEOPERATION) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, CONCATENATEDOPERATION) {
+
+    auto transf_1 = Transformation::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "transf_1"),
+        nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326),
+        nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4807), nullptr,
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "operationMethodName"),
+        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName"))},
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::createFilename("foo.bin")},
+        std::vector<PositionalAccuracyNNPtr>());
+
+    auto transf_2 = Transformation::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "transf_2"),
+        nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4807),
+        nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4979), nullptr,
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "operationMethodName"),
+        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName"))},
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::createFilename("foo.bin")},
+        std::vector<PositionalAccuracyNNPtr>());
+
+    auto concat_in = ConcatenatedOperation::create(
+        PropertyMap()
+            .set(Identifier::CODESPACE_KEY, "codeSpace")
+            .set(Identifier::CODE_KEY, "code")
+            .set(IdentifiedObject::NAME_KEY, "name")
+            .set(IdentifiedObject::REMARKS_KEY, "my remarks"),
+        std::vector<CoordinateOperationNNPtr>{transf_1, transf_2},
+        std::vector<PositionalAccuracyNNPtr>{
+            PositionalAccuracy::create("0.1")});
+
+    auto wkt = concat_in->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto concat = nn_dynamic_pointer_cast<ConcatenatedOperation>(obj);
+    ASSERT_TRUE(concat != nullptr);
+    EXPECT_EQ(*(concat->name()->description()), "name");
+    ASSERT_EQ(concat->identifiers().size(), 1);
+    EXPECT_EQ(concat->identifiers()[0]->code(), "code");
+    EXPECT_EQ(*(concat->identifiers()[0]->codeSpace()), "codeSpace");
+    ASSERT_EQ(concat->operations().size(), 2);
+    ASSERT_EQ(*(concat->operations()[0]->name()->description()),
+              *(transf_1->name()->description()));
+    ASSERT_EQ(*(concat->operations()[1]->name()->description()),
+              *(transf_2->name()->description()));
+    ASSERT_TRUE(concat->sourceCRS() != nullptr);
+    ASSERT_TRUE(concat->targetCRS() != nullptr);
+    ASSERT_EQ(*(concat->sourceCRS()->name()->description()),
+              *(transf_1->sourceCRS()->name()->description()));
+    ASSERT_EQ(*(concat->targetCRS()->name()->description()),
+              *(transf_2->targetCRS()->name()->description()));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);
@@ -1606,6 +1667,81 @@ TEST(wkt_parse, invalid_COORDINATEOPERATION) {
                    dst_wkt + "],\n"
                              "    METHOD[],\n"
                              "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+
+        EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_CONCATENATEDOPERATION) {
+
+    // No STEP
+    EXPECT_THROW(WKTParser().createFromWKT("CONCATENATEDOPERATION[\"name\"]"),
+                 ParsingException);
+
+    auto transf_1 = Transformation::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "transf_1"),
+        nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326),
+        nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4807), nullptr,
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "operationMethodName"),
+        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName"))},
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::createFilename("foo.bin")},
+        std::vector<PositionalAccuracyNNPtr>());
+
+    // One single STEP
+    {
+        auto wkt = "CONCATENATEDOPERATION[\"name\",\n"
+                   "    SOURCECRS[" +
+                   transf_1->sourceCRS()->exportToWKT(WKTFormatter::create()) +
+                   "],\n"
+                   "    TARGETCRS[" +
+                   transf_1->targetCRS()->exportToWKT(WKTFormatter::create()) +
+                   "],\n"
+                   "    STEP[" +
+                   transf_1->exportToWKT(WKTFormatter::create()) +
+                   "],\n"
+                   "    ID[\"codeSpace\",\"code\"],\n"
+                   "    REMARK[\"my remarks\"]]";
+
+        EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+    }
+
+    // empty STEP
+    {
+        auto wkt = "CONCATENATEDOPERATION[\"name\",\n"
+                   "    SOURCECRS[" +
+                   transf_1->sourceCRS()->exportToWKT(WKTFormatter::create()) +
+                   "],\n"
+                   "    TARGETCRS[" +
+                   transf_1->targetCRS()->exportToWKT(WKTFormatter::create()) +
+                   "],\n"
+                   "    STEP[],\n"
+                   "    STEP[],\n"
+                   "    ID[\"codeSpace\",\"code\"],\n"
+                   "    REMARK[\"my remarks\"]]";
+        EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
+    }
+
+    // Invalid content in STEP
+    {
+        auto wkt = "CONCATENATEDOPERATION[\"name\",\n"
+                   "    SOURCECRS[" +
+                   transf_1->sourceCRS()->exportToWKT(WKTFormatter::create()) +
+                   "],\n"
+                   "    TARGETCRS[" +
+                   transf_1->targetCRS()->exportToWKT(WKTFormatter::create()) +
+                   "],\n"
+                   "    STEP[" +
+                   transf_1->sourceCRS()->exportToWKT(WKTFormatter::create()) +
+                   "],\n"
+                   "    STEP[" +
+                   transf_1->sourceCRS()->exportToWKT(WKTFormatter::create()) +
+                   "],\n"
+                   "    ID[\"codeSpace\",\"code\"],\n"
+                   "    REMARK[\"my remarks\"]]";
 
         EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
     }

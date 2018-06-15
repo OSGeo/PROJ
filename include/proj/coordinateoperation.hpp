@@ -61,9 +61,10 @@ class CoordinateOperation;
 using CoordinateOperationPtr = std::shared_ptr<CoordinateOperation>;
 using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
 
-class CoordinateOperation : public common::ObjectUsage {
+class CoordinateOperation : public common::ObjectUsage,
+                            public io::IWKTExportable {
   public:
-    PROJ_DLL virtual ~CoordinateOperation();
+    PROJ_DLL ~CoordinateOperation() override;
 
     PROJ_DLL const util::optional<std::string> &operationVersion() const;
     PROJ_DLL const std::vector<metadata::PositionalAccuracyNNPtr> &
@@ -81,6 +82,7 @@ class CoordinateOperation : public common::ObjectUsage {
     targetCoordinateEpoch() const;
 
     // virtual void transform(...) = 0;  TODO
+    std::string exportToWKT(io::WKTFormatterNNPtr formatter) const override = 0;
 
   protected:
     CoordinateOperation();
@@ -327,7 +329,7 @@ class Conversion;
 using ConversionPtr = std::shared_ptr<Conversion>;
 using ConversionNNPtr = util::nn<ConversionPtr>;
 
-class Conversion : public SingleOperation, public io::IWKTExportable {
+class Conversion : public SingleOperation {
   public:
     PROJ_DLL ~Conversion() override;
 
@@ -367,7 +369,7 @@ class Transformation;
 using TransformationPtr = std::shared_ptr<Transformation>;
 using TransformationNNPtr = util::nn<TransformationPtr>;
 
-class Transformation : public SingleOperation, public io::IWKTExportable {
+class Transformation : public SingleOperation {
   public:
     PROJ_DLL ~Transformation() override;
 
@@ -422,7 +424,38 @@ class PointMotionOperation : public SingleOperation {
 
   private:
     PointMotionOperation(const PointMotionOperation &) = delete;
-    // ---------------------------------------------------------------------------
+};
+
+// ---------------------------------------------------------------------------
+
+class ConcatenatedOperation;
+using ConcatenatedOperationPtr = std::shared_ptr<ConcatenatedOperation>;
+using ConcatenatedOperationNNPtr = util::nn<ConcatenatedOperationPtr>;
+
+class ConcatenatedOperation : public CoordinateOperation {
+  public:
+    PROJ_DLL ~ConcatenatedOperation() override;
+
+    PROJ_DLL const std::vector<CoordinateOperationNNPtr> &operations() const;
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL static ConcatenatedOperationNNPtr
+    create(const util::PropertyMap &properties,
+           const std::vector<CoordinateOperationNNPtr> &operationsIn,
+           const std::vector<metadata::PositionalAccuracyNNPtr>
+               &accuracies); // throw InvalidOperation
+
+  protected:
+    explicit ConcatenatedOperation(
+        const std::vector<CoordinateOperationNNPtr> &operationsIn);
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    ConcatenatedOperation &
+    operator=(const ConcatenatedOperation &other) = delete;
 };
 
 } // namespace operation

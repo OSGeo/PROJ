@@ -714,6 +714,8 @@ struct WKTParser::Private {
 
     void emitRecoverableAssertion(const std::string &errorMsg);
 
+    BaseObjectNNPtr build(WKTNodeNNPtr node);
+
     IdentifierPtr buildId(WKTNodeNNPtr node, bool tolerant = true);
     PropertyMap buildProperties(WKTNodeNNPtr node);
     UnitOfMeasure
@@ -760,6 +762,7 @@ struct WKTParser::Private {
     CompoundCRSNNPtr buildCompoundCRS(WKTNodeNNPtr node);
     CRSPtr buildCRS(WKTNodeNNPtr node);
     CoordinateOperationNNPtr buildCoordinateOperation(WKTNodeNNPtr node);
+    ConcatenatedOperationNNPtr buildConcatenatedOperation(WKTNodeNNPtr node);
 };
 
 // ---------------------------------------------------------------------------
@@ -1623,6 +1626,34 @@ WKTParser::Private::buildCoordinateOperation(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
+ConcatenatedOperationNNPtr
+WKTParser::Private::buildConcatenatedOperation(WKTNodeNNPtr node) {
+    std::vector<CoordinateOperationNNPtr> operations;
+    for (const auto &childNode : node->children()) {
+        if (ci_equal(childNode->value(), WKTConstants::STEP)) {
+            if (childNode->children().size() != 1) {
+                throw ParsingException("Invalid content in STEP node");
+            }
+            auto op = nn_dynamic_pointer_cast<CoordinateOperation>(
+                build(childNode->children()[0]));
+            if (!op) {
+                throw ParsingException("Invalid content in STEP node");
+            }
+            operations.emplace_back(NN_CHECK_ASSERT(op));
+        }
+    }
+    try {
+        return ConcatenatedOperation::create(
+            buildProperties(node), operations,
+            std::vector<PositionalAccuracyNNPtr>());
+    } catch (const InvalidOperation &e) {
+        throw ParsingException(
+            std::string("Cannot build concatenated operation: ") + e.what());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 ConversionNNPtr
 WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                                     WKTNodeNNPtr projectionNode,
@@ -1826,11 +1857,10 @@ CRSPtr WKTParser::Private::buildCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
-    WKTNodeNNPtr root = WKTNode::createFrom(wkt);
-    const std::string &name(root->value());
+BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
+    const std::string &name(node->value());
 
-    auto crs = d->buildCRS(root);
+    auto crs = buildCRS(node);
     if (crs) {
         return util::nn_static_pointer_cast<BaseObject>(NN_CHECK_ASSERT(crs));
     }
@@ -1839,34 +1869,45 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
         ci_equal(name, WKTConstants::GEODETICDATUM) ||
         ci_equal(name, WKTConstants::GEODETICREFERENCEFRAME)) {
         return util::nn_static_pointer_cast<BaseObject>(
-            d->buildGeodeticReferenceFrame(root, PrimeMeridian::GREENWICH));
+            buildGeodeticReferenceFrame(node, PrimeMeridian::GREENWICH));
     }
 
     if (ci_equal(name, WKTConstants::VDATUM) ||
         ci_equal(name, WKTConstants::VERT_DATUM) ||
         ci_equal(name, WKTConstants::VERTICALDATUM)) {
         return util::nn_static_pointer_cast<BaseObject>(
-            d->buildVerticalReferenceFrame(root));
+            buildVerticalReferenceFrame(node));
     }
 
     if (ci_equal(name, WKTConstants::ELLIPSOID) ||
         ci_equal(name, WKTConstants::SPHEROID)) {
-        return util::nn_static_pointer_cast<BaseObject>(
-            d->buildEllipsoid(root));
+        return util::nn_static_pointer_cast<BaseObject>(buildEllipsoid(node));
     }
 
     if (ci_equal(name, WKTConstants::COORDINATEOPERATION)) {
         return util::nn_static_pointer_cast<BaseObject>(
-            d->buildCoordinateOperation(root));
+            buildCoordinateOperation(node));
+    }
+
+    if (ci_equal(name, WKTConstants::CONCATENATEDOPERATION)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            buildConcatenatedOperation(node));
     }
 
     if (ci_equal(name, WKTConstants::ID) ||
         ci_equal(name, WKTConstants::AUTHORITY)) {
         return util::nn_static_pointer_cast<BaseObject>(
-            NN_CHECK_ASSERT(d->buildId(root, false)));
+            NN_CHECK_ASSERT(buildId(node, false)));
     }
 
     throw ParsingException("unhandled keyword: " + name);
+}
+
+// ---------------------------------------------------------------------------
+
+BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
+    WKTNodeNNPtr root = WKTNode::createFrom(wkt);
+    return d->build(root);
 }
 
 //! @endcond

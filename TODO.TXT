@@ -1,7 +1,6 @@
 - Functional:
     - export as ESRI WKT 1 ?
     - WKTv2 Bison based validator ?
-    - import from WKT
     - import from Proj4
     - exportToProj4()
     - derived crs
@@ -11,7 +10,6 @@
     - WKT2:2018 USAGE
     - dynamic CRS WKT
     - test sphericalCS
-    - WKT2: Why PROJCRS.GEODCRS doesn't include a ID node ?
 
 - Fix Doxygen warnings
 - Integrate Doxygen doc in PROJ doc

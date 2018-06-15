@@ -118,4 +118,111 @@ TEST(operation, transformation_to_wkt) {
                                     " ", ""),
                          "\n", ""),
               replaceAll(replaceAll(expected, " ", ""), "\n", ""));
+
+    EXPECT_THROW(transf->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, concatenated_operation) {
+
+    PropertyMap propertiesTransformation;
+    propertiesTransformation
+        .set(Identifier::CODESPACE_KEY, "codeSpaceTransformation")
+        .set(Identifier::CODE_KEY, "codeTransformation")
+        .set(IdentifiedObject::NAME_KEY, "transformationName")
+        .set(IdentifiedObject::REMARKS_KEY, "my remarks");
+
+    auto transf_1 = Transformation::create(
+        propertiesTransformation,
+        nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326),
+        nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4807), nullptr,
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "operationMethodName"),
+        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName"))},
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::createFilename("foo.bin")},
+        std::vector<PositionalAccuracyNNPtr>());
+
+    auto transf_2 = Transformation::create(
+        propertiesTransformation,
+        nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4807),
+        nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4979), nullptr,
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "operationMethodName"),
+        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "paramName"))},
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::createFilename("foo.bin")},
+        std::vector<PositionalAccuracyNNPtr>());
+
+    auto concat = ConcatenatedOperation::create(
+        PropertyMap()
+            .set(Identifier::CODESPACE_KEY, "codeSpace")
+            .set(Identifier::CODE_KEY, "code")
+            .set(IdentifiedObject::NAME_KEY, "name")
+            .set(IdentifiedObject::REMARKS_KEY, "my remarks"),
+        std::vector<CoordinateOperationNNPtr>{transf_1, transf_2},
+        std::vector<PositionalAccuracyNNPtr>{
+            PositionalAccuracy::create("0.1")});
+
+    std::string src_wkt;
+    {
+        auto formatter =
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+        formatter->setOutputId(false);
+        src_wkt = GeographicCRS::EPSG_4326->exportToWKT(formatter);
+    }
+
+    std::string dst_wkt;
+    {
+        auto formatter =
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+        formatter->setOutputId(false);
+        dst_wkt = GeographicCRS::EPSG_4979->exportToWKT(formatter);
+    }
+
+    std::string step1_wkt;
+    {
+        auto formatter =
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+        formatter->setOutputId(false);
+        step1_wkt = transf_1->exportToWKT(formatter);
+    }
+
+    std::string step2_wkt;
+    {
+        auto formatter =
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+        formatter->setOutputId(false);
+        step2_wkt = transf_2->exportToWKT(formatter);
+    }
+
+    auto expected = "CONCATENATEDOPERATION[\"name\",\n"
+                    "    SOURCECRS[" +
+                    src_wkt + "],\n"
+                              "    TARGETCRS[" +
+                    dst_wkt + "],\n"
+                              "    STEP[" +
+                    step1_wkt + "],\n"
+                                "    STEP[" +
+                    step2_wkt + "],\n"
+                                "    ID[\"codeSpace\",\"code\"],\n"
+                                "    REMARK[\"my remarks\"]]";
+
+    EXPECT_EQ(replaceAll(replaceAll(concat->exportToWKT(WKTFormatter::create(
+                                        WKTFormatter::Convention::WKT2_2018)),
+                                    " ", ""),
+                         "\n", ""),
+              replaceAll(replaceAll(expected, " ", ""), "\n", ""));
+
+    EXPECT_THROW(concat->exportToWKT(WKTFormatter::create()),
+                 FormattingException);
+
+    EXPECT_THROW(ConcatenatedOperation::create(
+                     PropertyMap().set(IdentifiedObject::NAME_KEY, "name"),
+                     std::vector<CoordinateOperationNNPtr>{transf_1, transf_1},
+                     std::vector<PositionalAccuracyNNPtr>()),
+                 InvalidOperation);
 }

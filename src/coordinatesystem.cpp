@@ -99,7 +99,6 @@ std::string Meridian::exportToWKT(
     if (formatter->outputId()) {
         formatID(formatter);
     }
-    formatRemarks(formatter);
     formatter->endNode();
     return formatter->toString();
 }
