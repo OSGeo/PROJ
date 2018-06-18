@@ -560,13 +560,16 @@ PJ *proj_create (PJ_CONTEXT *ctx, const char *definition) {
     /* Make a copy that we can manipulate */
     n = strlen (definition);
     args = (char *) malloc (n + 1);
-    if (0==args)
+    if (0==args) {
+        proj_context_errno_set(ctx, ENOMEM);
         return 0;
+    }
     strcpy (args, definition);
 
     argc = pj_trim_argc (args);
     if (argc==0) {
         pj_dealloc (args);
+        proj_context_errno_set(ctx, PJD_ERR_NO_ARGS);
         return 0;
     }
 
@@ -600,15 +603,19 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
     PJ *P;
     const char *c;
 
-    if (0==argv)
-        return 0;
     if (0==ctx)
         ctx = pj_get_default_ctx ();
+    if (0==argv) {
+        proj_context_errno_set(ctx, PJD_ERR_NO_ARGS);
+        return 0;
+    }
 
     /* We assume that free format is used, and build a full proj_create compatible string */
     c = pj_make_args (argc, argv);
-    if (0==c)
+    if (0==c) {
+        proj_context_errno_set(ctx, ENOMEM);
         return 0;
+    }
 
     P = proj_create (ctx, c);
 
