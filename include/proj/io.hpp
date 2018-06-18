@@ -152,6 +152,12 @@ class WKTFormatter {
     void setOutputConversionNode(bool outputIn);
     bool outputConversionNode() const;
 
+    void setAbridgedTransformation(bool abriged);
+    bool abridgedTransformation() const;
+
+    void setTOWGS84Parameters(const std::vector<double> &params);
+    const std::vector<double> &getTOWGS84Parameters() const;
+
     bool outputAxisOrder() const;
     bool primeMeridianOmittedIfGreenwich() const;
     bool ellipsoidUnitOmittedIfMetre() const;

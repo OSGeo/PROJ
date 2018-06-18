@@ -28,11 +28,15 @@
 
 #include "gtest_include.h"
 
+// to be able to use internal::replaceAll
+#define FROM_PROJ_CPP
+
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
+#include "proj/internal.hpp"
 #include "proj/io.hpp"
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
@@ -42,6 +46,7 @@ using namespace osgeo::proj::crs;
 using namespace osgeo::proj::cs;
 using namespace osgeo::proj::datum;
 using namespace osgeo::proj::io;
+using namespace osgeo::proj::internal;
 using namespace osgeo::proj::metadata;
 using namespace osgeo::proj::operation;
 using namespace osgeo::proj::util;
@@ -900,4 +905,254 @@ TEST(crs, compoundCRS_no_name_proided) {
         std::vector<CRSNNPtr>{createProjected(), createVerticalCRS()});
     EXPECT_EQ(*(crs->name()->description()),
               "WGS 84 / UTM zone 31N + ODN height");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, boundCRS_to_WKT2) {
+
+    auto projcrs = ProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "my PROJCRS"),
+        GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
+            GeodeticReferenceFrame::EPSG_6326,
+            EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE)),
+        Conversion::createUTM(31, true),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto crs = BoundCRS::createFromTOWGS84(
+        projcrs, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+
+    EXPECT_EQ(*(crs->baseCRS()->name()->description()),
+              *(projcrs->name()->description()));
+
+    EXPECT_EQ(*(crs->hubCRS()->name()->description()),
+              *(GeographicCRS::EPSG_4326->name()->description()));
+
+    ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
+    EXPECT_EQ(*(crs->transformation()->sourceCRS()->name()->description()),
+              *(projcrs->baseCRS()->name()->description()));
+
+    ASSERT_TRUE(crs->transformation()->targetCRS() != nullptr);
+    EXPECT_EQ(*(crs->transformation()->targetCRS()->name()->description()),
+              *(GeographicCRS::EPSG_4326->name()->description()));
+
+    auto values = crs->transformation()->parameterValues();
+    ASSERT_EQ(values.size(), 7);
+    {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(values[0]);
+        ASSERT_TRUE(opParamvalue);
+        const auto &paramName =
+            *(opParamvalue->parameter()->name()->description());
+        const auto &parameterValue = opParamvalue->parameterValue();
+        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8605));
+        EXPECT_EQ(paramName, "X-axis translation");
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::METRE);
+        EXPECT_EQ(measure.value(), 1.0);
+    }
+    {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(values[1]);
+        ASSERT_TRUE(opParamvalue);
+        const auto &paramName =
+            *(opParamvalue->parameter()->name()->description());
+        const auto &parameterValue = opParamvalue->parameterValue();
+        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8606));
+        EXPECT_EQ(paramName, "Y-axis translation");
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::METRE);
+        EXPECT_EQ(measure.value(), 2.0);
+    }
+    {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(values[2]);
+        ASSERT_TRUE(opParamvalue);
+        const auto &paramName =
+            *(opParamvalue->parameter()->name()->description());
+        const auto &parameterValue = opParamvalue->parameterValue();
+        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8607));
+        EXPECT_EQ(paramName, "Z-axis translation");
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::METRE);
+        EXPECT_EQ(measure.value(), 3.0);
+    }
+    {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(values[3]);
+        ASSERT_TRUE(opParamvalue);
+        const auto &paramName =
+            *(opParamvalue->parameter()->name()->description());
+        const auto &parameterValue = opParamvalue->parameterValue();
+        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8608));
+        EXPECT_EQ(paramName, "X-axis rotation");
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::MICRORADIAN);
+        EXPECT_EQ(measure.value(), 4.0);
+    }
+    {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(values[4]);
+        ASSERT_TRUE(opParamvalue);
+        const auto &paramName =
+            *(opParamvalue->parameter()->name()->description());
+        const auto &parameterValue = opParamvalue->parameterValue();
+        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8609));
+        EXPECT_EQ(paramName, "Y-axis rotation");
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::MICRORADIAN);
+        EXPECT_EQ(measure.value(), 5.0);
+    }
+    {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(values[5]);
+        ASSERT_TRUE(opParamvalue);
+        const auto &paramName =
+            *(opParamvalue->parameter()->name()->description());
+        const auto &parameterValue = opParamvalue->parameterValue();
+        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8610));
+        EXPECT_EQ(paramName, "Z-axis rotation");
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::MICRORADIAN);
+        EXPECT_EQ(measure.value(), 6.0);
+    }
+    {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(values[6]);
+        ASSERT_TRUE(opParamvalue);
+        const auto &paramName =
+            *(opParamvalue->parameter()->name()->description());
+        const auto &parameterValue = opParamvalue->parameterValue();
+        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8611));
+        EXPECT_EQ(paramName, "Scale difference");
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::PARTS_PER_MILLION);
+        EXPECT_EQ(measure.value(), 7.0);
+    }
+
+    auto expected =
+        "BOUNDCRS[SOURCECRS[" + projcrs->exportToWKT(WKTFormatter::create()) +
+        "],\n" + "TARGETCRS[" +
+        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
+        "],\n"
+        "    ABRIDGEDTRANSFORMATION[\"Transformation to WGS84\",\n"
+        "        METHOD[\"Position Vector transformation (geocentric "
+        "domain)\",\n"
+        "            ID[\"EPSG\",1033]],\n"
+        "        PARAMETER[\"X-axis translation\",1,\n"
+        "            ID[\"EPSG\",8605]],\n"
+        "        PARAMETER[\"Y-axis translation\",2,\n"
+        "            ID[\"EPSG\",8606]],\n"
+        "        PARAMETER[\"Z-axis translation\",3,\n"
+        "            ID[\"EPSG\",8607]],\n"
+        "        PARAMETER[\"X-axis rotation\",0.825059224988385,\n"
+        "            ID[\"EPSG\",8608]],\n"
+        "        PARAMETER[\"Y-axis rotation\",1.03132403123548,\n"
+        "            ID[\"EPSG\",8609]],\n"
+        "        PARAMETER[\"Z-axis rotation\",1.23758883748258,\n"
+        "            ID[\"EPSG\",8610]],\n"
+        "        PARAMETER[\"Scale difference\",1.000007,\n"
+        "            ID[\"EPSG\",8611]]]]";
+
+    EXPECT_EQ(replaceAll(
+                  replaceAll(crs->exportToWKT(WKTFormatter::create()), " ", ""),
+                  "\n", ""),
+              replaceAll(replaceAll(expected, " ", ""), "\n", ""));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, boundCRS_to_WKT1) {
+
+    auto projcrs = ProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "my PROJCRS"),
+        GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
+            GeodeticReferenceFrame::EPSG_6326,
+            EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE)),
+        Conversion::createUTM(31, true),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto crs = BoundCRS::createFromTOWGS84(
+        projcrs, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+    auto expected = "PROJCS[\"my PROJCRS\",\n"
+                    "    GEOGCS[\"my GEOGCRS\",\n"
+                    "        DATUM[\"WGS_1984\",\n"
+                    "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+                    "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+                    "            TOWGS84[1,2,3,4,5,6,7],\n"
+                    "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+                    "        PRIMEM[\"Greenwich\",0,\n"
+                    "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+                    "        UNIT[\"degree\",0.0174532925199433,\n"
+                    "            AUTHORITY[\"EPSG\",9122]],\n"
+                    "        AXIS[\"Latitude\",NORTH],\n"
+                    "        AXIS[\"Longitude\",EAST]],\n"
+                    "    PROJECTION[\"Transverse_Mercator\"],\n"
+                    "    PARAMETER[\"latitude_of_origin\",0],\n"
+                    "    PARAMETER[\"central_meridian\",3],\n"
+                    "    PARAMETER[\"scale_factor\",0.9996],\n"
+                    "    PARAMETER[\"false_easting\",500000],\n"
+                    "    PARAMETER[\"false_northing\",0],\n"
+                    "    UNIT[\"metre\",1,\n"
+                    "        AUTHORITY[\"EPSG\",9001]],\n"
+                    "    AXIS[\"Easting\",EAST],\n"
+                    "    AXIS[\"Northing\",NORTH]]";
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, incompatible_boundCRS_hubCRS_to_WKT1) {
+
+    auto crs = BoundCRS::create(
+        GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4807,
+        Transformation::createGeocentricTranslations(
+            PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4807,
+            1.0, 2.0, 3.0, std::vector<PositionalAccuracyNNPtr>()));
+
+    EXPECT_THROW(crs->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, incompatible_boundCRS_transformation_to_WKT1) {
+
+    auto crs = BoundCRS::create(
+        GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326,
+        Transformation::create(PropertyMap(), GeographicCRS::EPSG_4807,
+                               GeographicCRS::EPSG_4326, nullptr, PropertyMap(),
+                               std::vector<OperationParameterNNPtr>(),
+                               std::vector<ParameterValueNNPtr>(),
+                               std::vector<PositionalAccuracyNNPtr>()));
+
+    EXPECT_THROW(crs->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, extractGeographicCRS) {
+    EXPECT_EQ(CRS::extractGeographicCRS(GeographicCRS::EPSG_4326),
+              GeographicCRS::EPSG_4326);
+    EXPECT_EQ(CRS::extractGeographicCRS(createProjected()),
+              GeographicCRS::EPSG_4326);
+    EXPECT_EQ(
+        CRS::extractGeographicCRS(CompoundCRS::create(
+            PropertyMap(), std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326})),
+        GeographicCRS::EPSG_4326);
 }

@@ -83,7 +83,6 @@ struct WKTFormatter::Private {
         bool forceUNITKeyword_ = false;
         bool outputCSUnitOnlyOnceIfSame_ = false;
         bool primeMeridianInDegree_ = false;
-        bool outputConversionNode_ = true;
         bool use2018Keywords_ = false;
     };
     Params params_{};
@@ -98,6 +97,9 @@ struct WKTFormatter::Private {
         util::nn_make_shared<UnitOfMeasure>(UnitOfMeasure::NONE)};
     std::vector<UnitOfMeasureNNPtr> axisAngularUnitStack_{
         util::nn_make_shared<UnitOfMeasure>(UnitOfMeasure::NONE)};
+    bool outputConversionNode_ = true;
+    bool abridgedTransformation_ = false;
+    std::vector<double> toWGS84Parameters_{};
     std::string result_{};
 
     void addNewLine();
@@ -494,13 +496,37 @@ bool WKTFormatter::use2018Keywords() const {
 // ---------------------------------------------------------------------------
 
 void WKTFormatter::setOutputConversionNode(bool outputIn) {
-    d->params_.outputConversionNode_ = outputIn;
+    d->outputConversionNode_ = outputIn;
 }
 
 // ---------------------------------------------------------------------------
 
 bool WKTFormatter::outputConversionNode() const {
-    return d->params_.outputConversionNode_;
+    return d->outputConversionNode_;
+}
+
+// ---------------------------------------------------------------------------
+
+void WKTFormatter::setAbridgedTransformation(bool outputIn) {
+    d->abridgedTransformation_ = outputIn;
+}
+
+// ---------------------------------------------------------------------------
+
+bool WKTFormatter::abridgedTransformation() const {
+    return d->abridgedTransformation_;
+}
+
+// ---------------------------------------------------------------------------
+
+void WKTFormatter::setTOWGS84Parameters(const std::vector<double> &params) {
+    d->toWGS84Parameters_ = params;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::vector<double> &WKTFormatter::getTOWGS84Parameters() const {
+    return d->toWGS84Parameters_;
 }
 
 // ---------------------------------------------------------------------------
@@ -711,6 +737,7 @@ std::string WKTNode::toString() const {
 struct WKTParser::Private {
     bool strict_ = true;
     std::vector<std::string> warningList_{};
+    std::vector<double> toWGS84Parameters_{};
 
     void emitRecoverableAssertion(const std::string &errorMsg);
 
@@ -744,7 +771,7 @@ struct WKTParser::Private {
     guessUnitForParameter(const std::string &paramName,
                           const UnitOfMeasure &defaultLinearUnit,
                           const UnitOfMeasure &defaultAngularUnit);
-    void consumeParameters(WKTNodeNNPtr node,
+    void consumeParameters(WKTNodeNNPtr node, bool isAbridged,
                            std::vector<OperationParameterNNPtr> &parameters,
                            std::vector<ParameterValueNNPtr> &values,
                            const UnitOfMeasure &defaultLinearUnit,
@@ -760,6 +787,7 @@ struct WKTParser::Private {
     VerticalReferenceFrameNNPtr buildVerticalReferenceFrame(WKTNodeNNPtr node);
     VerticalCRSNNPtr buildVerticalCRS(WKTNodeNNPtr node);
     CompoundCRSNNPtr buildCompoundCRS(WKTNodeNNPtr node);
+    BoundCRSNNPtr buildBoundCRS(WKTNodeNNPtr node);
     CRSPtr buildCRS(WKTNodeNNPtr node);
     CoordinateOperationNNPtr buildCoordinateOperation(WKTNodeNNPtr node);
     ConcatenatedOperationNNPtr buildConcatenatedOperation(WKTNodeNNPtr node);
@@ -1082,6 +1110,21 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
         throw ParsingException("Missing ELLIPSOID node");
     }
     auto ellipsoid = buildEllipsoid(NN_CHECK_ASSERT(ellipsoidNode));
+
+    auto TOWGS84Node = node->lookForChild(WKTConstants::TOWGS84);
+    if (TOWGS84Node) {
+        if (TOWGS84Node->children().size() == 7) {
+            try {
+                for (const auto &child : TOWGS84Node->children()) {
+                    toWGS84Parameters_.push_back(std::stod(child->value()));
+                }
+            } catch (const std::exception &) {
+                throw ParsingException("Invalid TOWGS84 node");
+            }
+        } else {
+            throw ParsingException("Invalid TOWGS84 node");
+        }
+    }
 
     return GeodeticReferenceFrame::create(buildProperties(node), ellipsoid,
                                           getAnchor(node), primeMeridian);
@@ -1490,7 +1533,8 @@ UnitOfMeasure WKTParser::Private::guessUnitForParameter(
 // ---------------------------------------------------------------------------
 
 void WKTParser::Private::consumeParameters(
-    WKTNodeNNPtr node, std::vector<OperationParameterNNPtr> &parameters,
+    WKTNodeNNPtr node, bool isAbridged,
+    std::vector<OperationParameterNNPtr> &parameters,
     std::vector<ParameterValueNNPtr> &values,
     const UnitOfMeasure &defaultLinearUnit,
     const UnitOfMeasure &defaultAngularUnit) {
@@ -1515,6 +1559,30 @@ void WKTParser::Private::consumeParameters(
                         unit = guessUnitForParameter(
                             paramName, defaultLinearUnit, defaultAngularUnit);
                     }
+
+                    if (isAbridged) {
+                        auto paramName =
+                            *(parameters.back()->name()->description());
+                        int paramEPSGCode = 0;
+                        if (parameters.back()->identifiers().size() == 1 &&
+                            ci_equal(*(parameters.back()
+                                           ->identifiers()[0]
+                                           ->codeSpace()),
+                                     "EPSG")) {
+                            paramEPSGCode = ::atoi(parameters.back()
+                                                       ->identifiers()[0]
+                                                       ->code()
+                                                       .c_str());
+                        }
+                        if (OperationParameterValue::convertFromAbridged(
+                                paramName, val, unit, paramEPSGCode)) {
+                            parameters.back() = OperationParameter::create(
+                                buildProperties(childNode)
+                                    .set(Identifier::CODESPACE_KEY, "EPSG")
+                                    .set(Identifier::CODE_KEY, paramEPSGCode));
+                        }
+                    }
+
                     values.push_back(
                         ParameterValue::create(Measure(val, unit)));
                 } catch (const std::exception &) {
@@ -1549,14 +1617,14 @@ WKTParser::Private::buildConversion(WKTNodeNNPtr node,
             throw ParsingException("Missing METHOD node");
         }
     }
-    if (methodNode->children().size() < 1) {
+    if (methodNode->children().empty()) {
         throw ParsingException("not enough children in " +
                                WKTConstants::METHOD + " node");
     }
 
     std::vector<OperationParameterNNPtr> parameters;
     std::vector<ParameterValueNNPtr> values;
-    consumeParameters(node, parameters, values, defaultLinearUnit,
+    consumeParameters(node, false, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
 
     return Conversion::create(buildProperties(node),
@@ -1572,7 +1640,7 @@ WKTParser::Private::buildCoordinateOperation(WKTNodeNNPtr node) {
     if (!methodNode) {
         throw ParsingException("Missing METHOD node");
     }
-    if (methodNode->children().size() < 1) {
+    if (methodNode->children().empty()) {
         throw ParsingException("not enough children in " +
                                WKTConstants::METHOD + " node");
     }
@@ -1606,7 +1674,7 @@ WKTParser::Private::buildCoordinateOperation(WKTNodeNNPtr node) {
     std::vector<ParameterValueNNPtr> values;
     auto defaultLinearUnit = UnitOfMeasure();
     auto defaultAngularUnit = UnitOfMeasure();
-    consumeParameters(node, parameters, values, defaultLinearUnit,
+    consumeParameters(node, false, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
 
     std::vector<PositionalAccuracyNNPtr> accuracies;
@@ -1659,7 +1727,7 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                                     WKTNodeNNPtr projectionNode,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit) {
-    if (projectionNode->children().size() < 1) {
+    if (projectionNode->children().empty()) {
         throw ParsingException("not enough children in " +
                                WKTConstants::PROJECTION + " node");
     }
@@ -1817,6 +1885,70 @@ CompoundCRSNNPtr WKTParser::Private::buildCompoundCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
+BoundCRSNNPtr WKTParser::Private::buildBoundCRS(WKTNodeNNPtr node) {
+    auto abridgedNode =
+        node->lookForChild(WKTConstants::ABRIDGEDTRANSFORMATION);
+    if (!abridgedNode) {
+        throw ParsingException("Missing ABRIDGEDTRANSFORMATION node");
+    }
+
+    auto methodNode = abridgedNode->lookForChild(WKTConstants::METHOD);
+    if (!methodNode) {
+        throw ParsingException("Missing METHOD node");
+    }
+    if (methodNode->children().empty()) {
+        throw ParsingException("not enough children in " +
+                               WKTConstants::METHOD + " node");
+    }
+
+    auto sourceCRSNode = node->lookForChild(WKTConstants::SOURCECRS);
+    if (!sourceCRSNode || sourceCRSNode->children().size() != 1) {
+        throw ParsingException("Missing SOURCECRS node");
+    }
+    auto sourceCRS = buildCRS(sourceCRSNode->children()[0]);
+    if (!sourceCRS) {
+        throw ParsingException("Invalid content in SOURCECRS node");
+    }
+
+    auto targetCRSNode = node->lookForChild(WKTConstants::TARGETCRS);
+    if (!targetCRSNode || targetCRSNode->children().size() != 1) {
+        throw ParsingException("Missing TARGETCRS node");
+    }
+    auto targetCRS = buildCRS(targetCRSNode->children()[0]);
+    if (!targetCRS) {
+        throw ParsingException("Invalid content in TARGETCRS node");
+    }
+
+    std::vector<OperationParameterNNPtr> parameters;
+    std::vector<ParameterValueNNPtr> values;
+    auto defaultLinearUnit = UnitOfMeasure();
+    auto defaultAngularUnit = UnitOfMeasure();
+    consumeParameters(NN_CHECK_ASSERT(abridgedNode), true, parameters, values,
+                      defaultLinearUnit, defaultAngularUnit);
+
+    CRSPtr sourceTransformationCRS;
+    if (std::dynamic_pointer_cast<GeographicCRS>(targetCRS)) {
+        sourceTransformationCRS =
+            CRS::extractGeographicCRS(NN_CHECK_ASSERT(sourceCRS));
+        if (!sourceTransformationCRS) {
+            throw ParsingException("Cannot find GeographicCRS in sourceCRS");
+        }
+    } else {
+        sourceTransformationCRS = sourceCRS;
+    }
+
+    auto transformation = Transformation::create(
+        buildProperties(NN_CHECK_ASSERT(abridgedNode)),
+        NN_CHECK_ASSERT(sourceTransformationCRS), NN_CHECK_ASSERT(targetCRS),
+        nullptr, buildProperties(NN_CHECK_ASSERT(methodNode)), parameters,
+        values, std::vector<PositionalAccuracyNNPtr>());
+
+    return BoundCRS::create(NN_CHECK_ASSERT(sourceCRS),
+                            NN_CHECK_ASSERT(targetCRS), transformation);
+}
+
+// ---------------------------------------------------------------------------
+
 static bool isGeodeticCRS(const std::string &name) {
     return ci_equal(name, WKTConstants::GEODCRS) ||       // WKT2
            ci_equal(name, WKTConstants::GEODETICCRS) ||   // WKT2
@@ -1852,6 +1984,10 @@ CRSPtr WKTParser::Private::buildCRS(WKTNodeNNPtr node) {
         return util::nn_static_pointer_cast<CRS>(buildCompoundCRS(node));
     }
 
+    if (ci_equal(name, WKTConstants::BOUNDCRS)) {
+        return util::nn_static_pointer_cast<CRS>(buildBoundCRS(node));
+    }
+
     return nullptr;
 }
 
@@ -1862,6 +1998,11 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
 
     auto crs = buildCRS(node);
     if (crs) {
+        if (!toWGS84Parameters_.empty()) {
+            return util::nn_static_pointer_cast<BaseObject>(
+                BoundCRS::createFromTOWGS84(NN_CHECK_ASSERT(crs),
+                                            toWGS84Parameters_));
+        }
         return util::nn_static_pointer_cast<BaseObject>(NN_CHECK_ASSERT(crs));
     }
 

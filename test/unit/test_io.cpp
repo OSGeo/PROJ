@@ -1143,6 +1143,154 @@ TEST(wkt_parse, CONCATENATEDOPERATION) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, BOUNDCRS_transformation_from_names) {
+
+    auto projcrs = ProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "my PROJCRS"),
+        GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
+            GeodeticReferenceFrame::EPSG_6326,
+            EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE)),
+        Conversion::createUTM(31, true),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto wkt = "BOUNDCRS[SOURCECRS[" +
+               projcrs->exportToWKT(WKTFormatter::create()) + "],\n" +
+               "TARGETCRS[" +
+               GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
+               "],\n"
+               "    ABRIDGEDTRANSFORMATION[\"Transformation to WGS84\",\n"
+               "        METHOD[\"Coordinate Frame\"],\n"
+               "        PARAMETER[\"X-axis translation\",1],\n"
+               "        PARAMETER[\"Y-axis translation\",2],\n"
+               "        PARAMETER[\"Z-axis translation\",3],\n"
+               "        PARAMETER[\"X-axis rotation\",-0.825059224988385],\n"
+               "        PARAMETER[\"Y-axis rotation\",-1.03132403123548],\n"
+               "        PARAMETER[\"Z-axis rotation\",-1.23758883748258],\n"
+               "        PARAMETER[\"Scale difference\",1.000007]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->baseCRS()->name()->description()),
+              *(projcrs->name()->description()));
+
+    EXPECT_EQ(*(crs->hubCRS()->name()->description()),
+              *(GeographicCRS::EPSG_4326->name()->description()));
+
+    ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
+    EXPECT_EQ(*(crs->transformation()->sourceCRS()->name()->description()),
+              *(projcrs->baseCRS()->name()->description()));
+
+    auto params = crs->transformation()->getTOWGS84Parameters();
+    auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
+    ASSERT_EQ(params.size(), expected.size());
+    for (int i = 0; i < 7; i++) {
+        EXPECT_NEAR(params[i], expected[i], 1e-10);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, BOUNDCRS_transformation_from_codes) {
+
+    auto projcrs = ProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "my PROJCRS"),
+        GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
+            GeodeticReferenceFrame::EPSG_6326,
+            EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE)),
+        Conversion::createUTM(31, true),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto wkt =
+        "BOUNDCRS[SOURCECRS[" + projcrs->exportToWKT(WKTFormatter::create()) +
+        "],\n" + "TARGETCRS[" +
+        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
+        "],\n"
+        "    ABRIDGEDTRANSFORMATION[\"Transformation to WGS84\",\n"
+        "        METHOD[\"bla\",ID[\"EPSG\",1032]],\n"
+        "        PARAMETER[\"tx\",1,ID[\"EPSG\",8605]],\n"
+        "        PARAMETER[\"ty\",2,ID[\"EPSG\",8606]],\n"
+        "        PARAMETER[\"tz\",3,ID[\"EPSG\",8607]],\n"
+        "        PARAMETER[\"rotx\",-0.825059224988385,ID[\"EPSG\",8608]],\n"
+        "        PARAMETER[\"roty\",-1.03132403123548,ID[\"EPSG\",8609]],\n"
+        "        PARAMETER[\"rotz\",-1.23758883748258,ID[\"EPSG\",8610]],\n"
+        "        PARAMETER[\"scale\",1.000007,ID[\"EPSG\",8611]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->baseCRS()->name()->description()),
+              *(projcrs->name()->description()));
+
+    EXPECT_EQ(*(crs->hubCRS()->name()->description()),
+              *(GeographicCRS::EPSG_4326->name()->description()));
+
+    ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
+    EXPECT_EQ(*(crs->transformation()->sourceCRS()->name()->description()),
+              *(projcrs->baseCRS()->name()->description()));
+
+    auto params = crs->transformation()->getTOWGS84Parameters();
+    auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
+    ASSERT_EQ(params.size(), expected.size());
+    for (int i = 0; i < 7; i++) {
+        EXPECT_NEAR(params[i], expected[i], 1e-10);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, TOWGS84) {
+    auto wkt = "PROJCS[\"my PROJCRS\",\n"
+               "    GEOGCS[\"my GEOGCRS\",\n"
+               "        DATUM[\"WGS_1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+               "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+               "            TOWGS84[1,2,3,4,5,6,7],\n"
+               "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+               "        UNIT[\"degree\",0.0174532925199433,\n"
+               "            AUTHORITY[\"EPSG\",9122]],\n"
+               "        AXIS[\"Latitude\",NORTH],\n"
+               "        AXIS[\"Longitude\",EAST]],\n"
+               "    PROJECTION[\"Transverse_Mercator\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",0],\n"
+               "    PARAMETER[\"central_meridian\",3],\n"
+               "    PARAMETER[\"scale_factor\",0.9996],\n"
+               "    PARAMETER[\"false_easting\",500000],\n"
+               "    PARAMETER[\"false_northing\",0],\n"
+               "    UNIT[\"metre\",1,\n"
+               "        AUTHORITY[\"EPSG\",9001]],\n"
+               "    AXIS[\"Easting\",EAST],\n"
+               "    AXIS[\"Northing\",NORTH]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->baseCRS()->name()->description()), "my PROJCRS");
+
+    EXPECT_EQ(*(crs->hubCRS()->name()->description()),
+              *(GeographicCRS::EPSG_4326->name()->description()));
+
+    ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
+    EXPECT_EQ(*(crs->transformation()->sourceCRS()->name()->description()),
+              "my GEOGCRS");
+
+    auto params = crs->transformation()->getTOWGS84Parameters();
+    auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
+    ASSERT_EQ(params.size(), expected.size());
+    for (int i = 0; i < 7; i++) {
+        EXPECT_NEAR(params[i], expected[i], 1e-10);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);
@@ -1745,4 +1893,117 @@ TEST(wkt_parse, invalid_CONCATENATEDOPERATION) {
 
         EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
     }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_BOUNDCRS) {
+
+    auto projcrs = ProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "my PROJCRS"),
+        GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
+            GeodeticReferenceFrame::EPSG_6326,
+            EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE)),
+        Conversion::createUTM(31, true),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        "BOUNDCRS[SOURCECRS[" + projcrs->exportToWKT(WKTFormatter::create()) +
+        "],\n" + "TARGETCRS[" +
+        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
+        "],\n"
+        "    ABRIDGEDTRANSFORMATION[\"foo\",\n"
+        "        METHOD[\"bar\"]]]"));
+
+    // Missing SOURCECRS
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "BOUNDCRS[TARGETCRS[" +
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
+            "],\n"
+            "    ABRIDGEDTRANSFORMATION[\"foo\",\n"
+            "        METHOD[\"bar\"]]]"),
+        ParsingException);
+
+    // Invalid SOURCECRS
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "BOUNDCRS[SOURCECRS[foo], TARGETCRS[" +
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
+            "],\n"
+            "    ABRIDGEDTRANSFORMATION[\"foo\",\n"
+            "        METHOD[\"bar\"]]]"),
+        ParsingException);
+
+    // Missing TARGETCRS
+    EXPECT_THROW(
+        WKTParser().createFromWKT("BOUNDCRS[SOURCECRS[" +
+                                  projcrs->exportToWKT(WKTFormatter::create()) +
+                                  "],\n"
+                                  "    ABRIDGEDTRANSFORMATION[\"foo\",\n"
+                                  "        METHOD[\"bar\"]]]"),
+        ParsingException);
+
+    // Invalid TARGETCRS
+    EXPECT_THROW(
+        WKTParser().createFromWKT("BOUNDCRS[SOURCECRS[" +
+                                  projcrs->exportToWKT(WKTFormatter::create()) +
+                                  "],TARGETCRS[\"foo\"],\n"
+                                  "    ABRIDGEDTRANSFORMATION[\"foo\",\n"
+                                  "        METHOD[\"bar\"]]]"),
+        ParsingException);
+
+    // Missing ABRIDGEDTRANSFORMATION
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "BOUNDCRS[SOURCECRS[" +
+            projcrs->exportToWKT(WKTFormatter::create()) + "],\n" +
+            "TARGETCRS[" +
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
+            "]]"),
+        ParsingException);
+
+    // Missing METHOD
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "BOUNDCRS[SOURCECRS[" +
+            projcrs->exportToWKT(WKTFormatter::create()) + "],\n" +
+            "TARGETCRS[" +
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
+            "],"
+            "ABRIDGEDTRANSFORMATION[\"foo\"]]"),
+        ParsingException);
+
+    // Invalid METHOD
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "BOUNDCRS[SOURCECRS[" +
+            projcrs->exportToWKT(WKTFormatter::create()) + "],\n" +
+            "TARGETCRS[" +
+            GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
+            "],"
+            "ABRIDGEDTRANSFORMATION[\"foo\",METHOD[]]]"),
+        ParsingException);
+}
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_TOWGS84) {
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "GEOGCS[\"WGS 84\","
+                     "    DATUM[\"WGS_1984\","
+                     "        SPHEROID[\"WGS 84\",6378137,298.257223563],"
+                     "        TOWGS84[0]],"
+                     "    PRIMEM[\"Greenwich\",0],"
+                     "    UNIT[\"degree\",0.0174532925199433]]"),
+                 ParsingException);
+
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "GEOGCS[\"WGS 84\","
+                     "    DATUM[\"WGS_1984\","
+                     "        SPHEROID[\"WGS 84\",6378137,298.257223563],"
+                     "        TOWGS84[0,0,0,0,0,0,\"foo\"]],"
+                     "    PRIMEM[\"Greenwich\",0],"
+                     "    UNIT[\"degree\",0.0174532925199433]]"),
+                 ParsingException);
 }

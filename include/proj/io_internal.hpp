@@ -62,6 +62,7 @@ class WKTConstants {
     static const std::string VERT_CS;
     static const std::string VERT_DATUM;
     static const std::string COMPD_CS;
+    static const std::string TOWGS84; // WKT1 only
 
     // WKT2 preferred
     static const std::string GEODCRS;
@@ -97,6 +98,8 @@ class WKTConstants {
     static const std::string OPERATIONACCURACY;
     static const std::string CONCATENATEDOPERATION; // WKT2-2018
     static const std::string STEP;                  // WKT2-2018
+    static const std::string BOUNDCRS;
+    static const std::string ABRIDGEDTRANSFORMATION;
 
     // WKT2 long
     static const std::string GEODETICCRS;

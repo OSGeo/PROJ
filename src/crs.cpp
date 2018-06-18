@@ -64,6 +64,30 @@ CRS::~CRS() = default;
 
 // ---------------------------------------------------------------------------
 
+GeographicCRSPtr CRS::extractGeographicCRS(CRSNNPtr crs) {
+    CRSPtr transformSourceCRS;
+    auto geogCRS = util::nn_dynamic_pointer_cast<GeographicCRS>(crs);
+    if (geogCRS) {
+        return geogCRS;
+    }
+    auto projCRS = util::nn_dynamic_pointer_cast<ProjectedCRS>(crs);
+    if (projCRS) {
+        return util::nn_dynamic_pointer_cast<GeographicCRS>(projCRS->baseCRS());
+    }
+    auto compoundCRS = util::nn_dynamic_pointer_cast<CompoundCRS>(crs);
+    if (compoundCRS) {
+        for (const auto &subCrs : compoundCRS->componentReferenceSystems()) {
+            geogCRS = util::nn_dynamic_pointer_cast<GeographicCRS>(subCrs);
+            if (geogCRS) {
+                return geogCRS;
+            }
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct SingleCRS::Private {
     DatumPtr datum{};
@@ -711,3 +735,94 @@ std::string CompoundCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
     formatter->endNode();
     return formatter->toString();
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct BoundCRS::Private {
+    CRSNNPtr baseCRS_;
+    CRSNNPtr hubCRS_;
+    TransformationNNPtr transformation_;
+
+    Private(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
+            const TransformationNNPtr &transformationIn)
+        : baseCRS_(baseCRSIn), hubCRS_(hubCRSIn),
+          transformation_(transformationIn) {}
+};
+
+// ---------------------------------------------------------------------------
+
+BoundCRS::BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
+                   const TransformationNNPtr &transformationIn)
+    : d(internal::make_unique<Private>(baseCRSIn, hubCRSIn, transformationIn)) {
+}
+
+// ---------------------------------------------------------------------------
+
+BoundCRS::~BoundCRS() = default;
+
+// ---------------------------------------------------------------------------
+
+const CRSNNPtr &BoundCRS::baseCRS() const { return d->baseCRS_; }
+
+// ---------------------------------------------------------------------------
+
+const CRSNNPtr &BoundCRS::hubCRS() const { return d->hubCRS_; }
+
+// ---------------------------------------------------------------------------
+
+const TransformationNNPtr &BoundCRS::transformation() const {
+    return d->transformation_;
+}
+
+// ---------------------------------------------------------------------------
+
+BoundCRSNNPtr BoundCRS::create(const CRSNNPtr &baseCRSIn,
+                               const CRSNNPtr &hubCRSIn,
+                               const TransformationNNPtr &transformationIn) {
+    return BoundCRS::nn_make_shared<BoundCRS>(baseCRSIn, hubCRSIn,
+                                              transformationIn);
+}
+
+// ---------------------------------------------------------------------------
+
+BoundCRSNNPtr
+BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
+                            const std::vector<double> TOWGS84Parameters) {
+    return BoundCRS::nn_make_shared<BoundCRS>(
+        baseCRSIn, GeographicCRS::EPSG_4326,
+        Transformation::createTOWGS84(baseCRSIn, TOWGS84Parameters));
+}
+
+// ---------------------------------------------------------------------------
+
+std::string BoundCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    if (isWKT2) {
+        formatter->startNode(WKTConstants::BOUNDCRS, false);
+        formatter->startNode(WKTConstants::SOURCECRS, false);
+        baseCRS()->exportToWKT(formatter);
+        formatter->endNode();
+        formatter->startNode(WKTConstants::TARGETCRS, false);
+        hubCRS()->exportToWKT(formatter);
+        formatter->endNode();
+        formatter->setAbridgedTransformation(true);
+        transformation()->exportToWKT(formatter);
+        formatter->setAbridgedTransformation(false);
+        formatter->endNode();
+    } else {
+        if (nn_dynamic_pointer_cast<GeographicCRS>(hubCRS()) == nullptr ||
+            *(hubCRS()->name()->description()) != "WGS 84") {
+            throw FormattingException(
+                "Cannot export BoundCRS with non-WGS 84 hub CRS in WKT1");
+        }
+        auto params = transformation()->getTOWGS84Parameters();
+        formatter->setTOWGS84Parameters(params);
+        baseCRS()->exportToWKT(formatter);
+        formatter->setTOWGS84Parameters(std::vector<double>());
+    }
+    return formatter->toString();
+}
+// ---------------------------------------------------------------------------
+
+//! @endcond

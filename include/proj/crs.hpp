@@ -50,9 +50,17 @@ namespace crs {
 
 // ---------------------------------------------------------------------------
 
+class GeographicCRS;
+using GeographicCRSPtr = std::shared_ptr<GeographicCRS>;
+using GeographicCRSNNPtr = util::nn<GeographicCRSPtr>;
+
+// ---------------------------------------------------------------------------
+
 class CRS : public common::ObjectUsage, public io::IWKTExportable {
   public:
     PROJ_DLL virtual ~CRS();
+
+    PROJ_DLL static GeographicCRSPtr extractGeographicCRS(CRSNNPtr crs);
 
   protected:
     CRS();
@@ -140,10 +148,6 @@ class GeodeticCRS : virtual public SingleCRS {
 };
 
 // ---------------------------------------------------------------------------
-
-class GeographicCRS;
-using GeographicCRSPtr = std::shared_ptr<GeographicCRS>;
-using GeographicCRSNNPtr = util::nn<GeographicCRSPtr>;
 
 class GeographicCRS : public GeodeticCRS {
   public:
@@ -305,6 +309,44 @@ class CompoundCRS : public CRS {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+class BoundCRS;
+using BoundCRSPtr = std::shared_ptr<BoundCRS>;
+using BoundCRSNNPtr = util::nn<BoundCRSPtr>;
+
+/* PROJ specific modelization: BoundCRS is WKT2 only, and not present in
+ * ISO-19111 */
+class BoundCRS : public CRS {
+  public:
+    PROJ_DLL ~BoundCRS() override;
+
+    PROJ_DLL const CRSNNPtr &baseCRS() const;
+    PROJ_DLL const CRSNNPtr &hubCRS() const;
+    PROJ_DLL const operation::TransformationNNPtr &transformation() const;
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL static BoundCRSNNPtr
+    create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
+           const operation::TransformationNNPtr &transformationIn);
+
+    PROJ_DLL static BoundCRSNNPtr
+    createFromTOWGS84(const CRSNNPtr &baseCRSIn,
+                      const std::vector<double> TOWGS84Parameters);
+
+  protected:
+    BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
+             const operation::TransformationNNPtr &transformationIn);
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    BoundCRS(const BoundCRS &other) = delete;
+    BoundCRS &operator=(const BoundCRS &other) = delete;
 };
 
 #ifdef notdef

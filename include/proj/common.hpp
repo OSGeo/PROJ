@@ -93,9 +93,12 @@ class UnitOfMeasure {
 
     PROJ_DLL static const UnitOfMeasure NONE;
     PROJ_DLL static const UnitOfMeasure SCALE_UNITY;
+    PROJ_DLL static const UnitOfMeasure PARTS_PER_MILLION;
     PROJ_DLL static const UnitOfMeasure METRE;
     PROJ_DLL static const UnitOfMeasure RADIAN;
+    PROJ_DLL static const UnitOfMeasure MICRORADIAN;
     PROJ_DLL static const UnitOfMeasure DEGREE;
+    PROJ_DLL static const UnitOfMeasure ARC_SECOND;
     PROJ_DLL static const UnitOfMeasure GRAD;
 
   private:
@@ -129,7 +132,9 @@ using MeasureNNPtr = util::nn<MeasurePtr>;
 
 class Scale : public Measure {
   public:
-    PROJ_DLL explicit Scale(double valueIn = 0.0);
+    PROJ_DLL explicit Scale(
+        double valueIn = 0.0,
+        const UnitOfMeasure &unitIn = UnitOfMeasure::SCALE_UNITY);
     PROJ_DLL Scale(const Scale &other);
     PROJ_DLL ~Scale() override;
 
@@ -210,6 +215,7 @@ class IdentifiedObject : public util::BaseObject {
 
     // Non-standard
     PROJ_DLL std::string alias() const;
+    PROJ_DLL bool isEPSG(int code) const;
 
     PROJ_DLL void formatID(io::WKTFormatterNNPtr formatter) const;
     PROJ_DLL void formatRemarks(io::WKTFormatterNNPtr formatter) const;

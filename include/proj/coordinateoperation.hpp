@@ -238,6 +238,10 @@ class OperationParameterValue : public GeneralParameterValue {
     PROJ_DLL static OperationParameterValueNNPtr
     create(OperationParameterNNPtr parameterIn, ParameterValueNNPtr valueIn);
 
+    static bool convertFromAbridged(const std::string &paramName, double &val,
+                                    common::UnitOfMeasure &unit,
+                                    int &paramEPSGCode);
+
   protected:
     OperationParameterValue(OperationParameterNNPtr parameterIn,
                             ParameterValueNNPtr valueIn);
@@ -379,6 +383,9 @@ class Transformation : public SingleOperation {
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_DLL std::vector<double>
+    getTOWGS84Parameters() const; // throw(io::FormattingException)
+
     PROJ_DLL static TransformationNNPtr
     create(const util::PropertyMap &properties,
            const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
@@ -387,6 +394,7 @@ class Transformation : public SingleOperation {
            const std::vector<GeneralParameterValueNNPtr> &values,
            const std::vector<metadata::PositionalAccuracyNNPtr>
                &accuracies); // throw InvalidOperation
+
     PROJ_DLL static TransformationNNPtr
     create(const util::PropertyMap &propertiesTransformation,
            const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
@@ -396,6 +404,32 @@ class Transformation : public SingleOperation {
            const std::vector<ParameterValueNNPtr> &values,
            const std::vector<metadata::PositionalAccuracyNNPtr>
                &accuracies); // throw InvalidOperation
+
+    PROJ_DLL static TransformationNNPtr createGeocentricTranslations(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
+        double translationYMetre, double translationZMetre,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
+    PROJ_DLL static TransformationNNPtr createPositionVector(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
+        double translationYMetre, double translationZMetre,
+        double rotationXMicroRadian, double rotationYMicroRadian,
+        double rotationZMicroRadian, double scaleDifferencePPM,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
+    PROJ_DLL static TransformationNNPtr createCoordinateFrameRotation(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
+        double translationYMetre, double translationZMetre,
+        double rotationXMicroRadian, double rotationYMicroRadian,
+        double rotationZMicroRadian, double scaleDifferencePPM,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
+    PROJ_DLL static TransformationNNPtr createTOWGS84(
+        const crs::CRSNNPtr &sourceCRSIn,
+        const std::vector<double> &TOWGS84Parameters); // throw InvalidOperation
 
   protected:
     Transformation(

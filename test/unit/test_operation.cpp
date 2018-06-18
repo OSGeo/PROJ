@@ -226,3 +226,57 @@ TEST(operation, concatenated_operation) {
                      std::vector<PositionalAccuracyNNPtr>()),
                  InvalidOperation);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_createGeocentricTranslations) {
+
+    auto transf = Transformation::createGeocentricTranslations(
+        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326, 1.0,
+        2.0, 3.0, std::vector<PositionalAccuracyNNPtr>());
+
+    auto params = transf->getTOWGS84Parameters();
+    auto expected = std::vector<double>{1.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.0};
+    EXPECT_EQ(params, expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_createPositionVector) {
+
+    auto transf = Transformation::createPositionVector(
+        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326, 1.0,
+        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, std::vector<PositionalAccuracyNNPtr>());
+
+    auto params = transf->getTOWGS84Parameters();
+    auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
+    EXPECT_EQ(params, expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_createCoordinateFrameRotation) {
+
+    auto transf = Transformation::createCoordinateFrameRotation(
+        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4326, 1.0,
+        2.0, 3.0, -4.0, -5.0, -6.0, 7.0,
+        std::vector<PositionalAccuracyNNPtr>());
+
+    auto params = transf->getTOWGS84Parameters();
+    auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
+    EXPECT_EQ(params, expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_createTOWGS84) {
+
+    EXPECT_THROW(Transformation::createTOWGS84(GeographicCRS::EPSG_4326,
+                                               std::vector<double>()),
+                 InvalidOperation);
+
+    auto crsIn = CompoundCRS::create(PropertyMap(), std::vector<CRSNNPtr>{});
+    EXPECT_THROW(
+        Transformation::createTOWGS84(crsIn, std::vector<double>(7, 0)),
+        InvalidOperation);
+}

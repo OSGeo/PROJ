@@ -38,6 +38,7 @@
 #include "proj/util.hpp"
 
 #include <cmath> // M_PI
+#include <cstdlib>
 #include <memory>
 #include <string>
 #include <vector>
@@ -222,7 +223,8 @@ Measure Measure::convertToUnit(const UnitOfMeasure &otherUnit) const {
 
 // ---------------------------------------------------------------------------
 
-Scale::Scale(double valueIn) : Measure(valueIn, UnitOfMeasure::SCALE_UNITY) {}
+Scale::Scale(double valueIn, const UnitOfMeasure &unitIn)
+    : Measure(valueIn, unitIn) {}
 
 // ---------------------------------------------------------------------------
 
@@ -353,6 +355,17 @@ std::string IdentifiedObject::alias() const {
     if (d->aliases.empty())
         return std::string();
     return d->aliases[0]->toFullyQualifiedName()->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool IdentifiedObject::isEPSG(int code) const {
+    for (const auto &id : identifiers()) {
+        if (ci_equal(*(id->codeSpace()), "EPSG")) {
+            return ::atoi(id->code().c_str()) == code;
+        }
+    }
+    return false;
 }
 
 // ---------------------------------------------------------------------------

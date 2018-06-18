@@ -389,6 +389,15 @@ std::string GeodeticReferenceFrame::exportToWKT(
             formatter->addQuotedString(*anchorDefinition());
             formatter->endNode();
         }
+    } else {
+        const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
+        if (TOWGS84Params.size() == 7) {
+            formatter->startNode(WKTConstants::TOWGS84, false);
+            for (const auto &val : TOWGS84Params) {
+                formatter->add(val);
+            }
+            formatter->endNode();
+        }
     }
     if (formatter->outputId()) {
         formatID(formatter);

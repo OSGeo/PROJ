@@ -85,6 +85,26 @@ constexpr double UTM_FALSE_EASTING = 500000.0;
 constexpr double UTM_NORTH_FALSE_NORTHING = 0.0;
 constexpr double UTM_SOUTH_FALSE_NORTHING = 10000000.0;
 
+constexpr int EPSG_PARAMETER_X_AXIS_TRANSLATION = 8605;
+constexpr int EPSG_PARAMETER_Y_AXIS_TRANSLATION = 8606;
+constexpr int EPSG_PARAMETER_Z_AXIS_TRANSLATION = 8607;
+constexpr int EPSG_PARAMETER_X_AXIS_ROTATION = 8608;
+constexpr int EPSG_PARAMETER_Y_AXIS_ROTATION = 8609;
+constexpr int EPSG_PARAMETER_Z_AXIS_ROTATION = 8610;
+constexpr int EPSG_PARAMETER_SCALE_DIFFERENCE = 8611;
+
+static const std::string
+    EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME("X-axis translation");
+static const std::string
+    EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME("Y-axis translation");
+static const std::string
+    EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME("Z-axis translation");
+static const std::string EPSG_PARAMETER_X_AXIS_ROTATION_NAME("X-axis rotation");
+static const std::string EPSG_PARAMETER_Y_AXIS_ROTATION_NAME("Y-axis rotation");
+static const std::string EPSG_PARAMETER_Z_AXIS_ROTATION_NAME("Z-axis rotation");
+static const std::string
+    EPSG_PARAMETER_SCALE_DIFFERENCE_NAME("Scale difference");
+
 // ---------------------------------------------------------------------------
 
 static const MethodMapping methodMappings[] = {
@@ -475,6 +495,64 @@ OperationParameterValue::_exportToWKT(WKTFormatterNNPtr formatter,
 
 // ---------------------------------------------------------------------------
 
+bool OperationParameterValue::convertFromAbridged(const std::string &paramName,
+                                                  double &val,
+                                                  UnitOfMeasure &unit,
+                                                  int &paramEPSGCode) {
+    if (Identifier::isEquivalentName(paramName,
+                                     EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME) ||
+        paramEPSGCode == EPSG_PARAMETER_X_AXIS_TRANSLATION) {
+        unit = UnitOfMeasure::METRE;
+        paramEPSGCode = EPSG_PARAMETER_X_AXIS_TRANSLATION;
+        return true;
+    } else if (Identifier::isEquivalentName(
+                   paramName, EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME) ||
+               paramEPSGCode == EPSG_PARAMETER_Y_AXIS_TRANSLATION) {
+        unit = UnitOfMeasure::METRE;
+        paramEPSGCode = EPSG_PARAMETER_Y_AXIS_TRANSLATION;
+        return true;
+    } else if (Identifier::isEquivalentName(
+                   paramName, EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME) ||
+               paramEPSGCode == EPSG_PARAMETER_Z_AXIS_TRANSLATION) {
+        unit = UnitOfMeasure::METRE;
+        paramEPSGCode = EPSG_PARAMETER_Z_AXIS_TRANSLATION;
+        return true;
+    } else if (Identifier::isEquivalentName(
+                   paramName, EPSG_PARAMETER_X_AXIS_ROTATION_NAME) ||
+               paramEPSGCode == EPSG_PARAMETER_X_AXIS_ROTATION) {
+        unit = UnitOfMeasure::MICRORADIAN;
+        val = Angle(val, UnitOfMeasure::ARC_SECOND).convertToUnit(unit).value();
+        paramEPSGCode = EPSG_PARAMETER_X_AXIS_ROTATION;
+        return true;
+    } else if (Identifier::isEquivalentName(
+                   paramName, EPSG_PARAMETER_Y_AXIS_ROTATION_NAME) ||
+               paramEPSGCode == EPSG_PARAMETER_Y_AXIS_ROTATION) {
+        unit = UnitOfMeasure::MICRORADIAN;
+        val = Angle(val, UnitOfMeasure::ARC_SECOND).convertToUnit(unit).value();
+        paramEPSGCode = EPSG_PARAMETER_Y_AXIS_ROTATION;
+        return true;
+
+    } else if (Identifier::isEquivalentName(
+                   paramName, EPSG_PARAMETER_Z_AXIS_ROTATION_NAME) ||
+               paramEPSGCode == EPSG_PARAMETER_Z_AXIS_ROTATION) {
+        unit = UnitOfMeasure::MICRORADIAN;
+        val = Angle(val, UnitOfMeasure::ARC_SECOND).convertToUnit(unit).value();
+        paramEPSGCode = EPSG_PARAMETER_Z_AXIS_ROTATION;
+        return true;
+
+    } else if (Identifier::isEquivalentName(
+                   paramName, EPSG_PARAMETER_SCALE_DIFFERENCE_NAME) ||
+               paramEPSGCode == EPSG_PARAMETER_SCALE_DIFFERENCE) {
+        val = (val - 1.0) * 1e6;
+        unit = UnitOfMeasure::PARTS_PER_MILLION;
+        paramEPSGCode = EPSG_PARAMETER_SCALE_DIFFERENCE;
+        return true;
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct GeneralOperationParameter::Private {};
 //! @endcond
@@ -690,7 +768,19 @@ bool ParameterValue::booleanValue() const { return d->booleanValue_; }
 
 std::string ParameterValue::exportToWKT(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    if (type() == Type::MEASURE) {
+
+    if (formatter->abridgedTransformation() && type() == Type::MEASURE) {
+        if (value().unit().type() == UnitOfMeasure::Type::LINEAR) {
+            formatter->add(value().getSIValue());
+        } else if (value().unit().type() == UnitOfMeasure::Type::ANGULAR) {
+            formatter->add(
+                value().convertToUnit(UnitOfMeasure::ARC_SECOND).value());
+        } else if (value().unit() == UnitOfMeasure::PARTS_PER_MILLION) {
+            formatter->add(1.0 + value().value() * 1e-6);
+        } else {
+            formatter->add(value().value());
+        }
+    } else if (type() == Type::MEASURE) {
         formatter->add(value().value());
         const auto &unit = value().unit();
         if (isWKT2 && unit != UnitOfMeasure::NONE) {
@@ -981,6 +1071,128 @@ const CRSNNPtr Transformation::targetCRS() const {
 
 // ---------------------------------------------------------------------------
 
+std::vector<double>
+Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
+{
+    // GDAL WKT1 assumes EPSG:9606 / Position Vector convention
+
+    bool sevenParamsTransform = false;
+    bool threeParamsTransform = false;
+    bool invertRotSigns = false;
+    auto method_name = *(method()->name()->description());
+    if (ci_find(method_name, "Coordinate Frame") != std::string::npos ||
+        method()->isEPSG(1032) || method()->isEPSG(9607)) {
+        sevenParamsTransform = true;
+        invertRotSigns = true;
+    } else if (ci_find(method_name, "Position Vector") != std::string::npos ||
+               method()->isEPSG(1033) || method()->isEPSG(9606)) {
+        sevenParamsTransform = true;
+        invertRotSigns = false;
+    } else if (ci_find(method_name, "Geocentric translations") != std::string::npos ||
+               method()->isEPSG(1031) || method()->isEPSG(9603)) {
+        threeParamsTransform = true;
+    }
+
+    if (threeParamsTransform || sevenParamsTransform) {
+        std::vector<double> params(7, 0.0);
+        bool foundX = false;
+        bool foundY = false;
+        bool foundZ = false;
+        bool foundRotX = false;
+        bool foundRotY = false;
+        bool foundRotZ = false;
+        bool foundScale = false;
+        const double rotSign = invertRotSigns ? -1.0 : 1.0;
+        for (const auto &genOpParamvalue : parameterValues()) {
+            const auto &opParamvalue =
+                util::nn_dynamic_pointer_cast<OperationParameterValue>(
+                    genOpParamvalue);
+            if (opParamvalue) {
+                const auto &parameter = opParamvalue->parameter();
+                const auto &paramName = *(parameter->name()->description());
+                const auto &parameterValue = opParamvalue->parameterValue();
+                if (parameterValue->type() == ParameterValue::Type::MEASURE) {
+                    auto measure = parameterValue->value();
+                    if (Identifier::isEquivalentName(
+                            paramName,
+                            EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME) ||
+                        parameter->isEPSG(EPSG_PARAMETER_X_AXIS_TRANSLATION)) {
+                        params[0] = measure.getSIValue();
+                        foundX = true;
+                    } else if (Identifier::isEquivalentName(
+                                   paramName,
+                                   EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME) ||
+                               parameter->isEPSG(
+                                   EPSG_PARAMETER_Y_AXIS_TRANSLATION)) {
+                        params[1] = measure.getSIValue();
+                        foundY = true;
+                    } else if (Identifier::isEquivalentName(
+                                   paramName,
+                                   EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME) ||
+                               parameter->isEPSG(
+                                   EPSG_PARAMETER_Z_AXIS_TRANSLATION)) {
+                        params[2] = measure.getSIValue();
+                        foundZ = true;
+                    } else if (Identifier::isEquivalentName(
+                                   paramName,
+                                   EPSG_PARAMETER_X_AXIS_ROTATION_NAME) ||
+                               parameter->isEPSG(
+                                   EPSG_PARAMETER_X_AXIS_ROTATION)) {
+                        params[3] =
+                            rotSign *
+                            measure.convertToUnit(UnitOfMeasure::MICRORADIAN)
+                                .value();
+                        foundRotX = true;
+                    } else if (Identifier::isEquivalentName(
+                                   paramName,
+                                   EPSG_PARAMETER_Y_AXIS_ROTATION_NAME) ||
+                               parameter->isEPSG(
+                                   EPSG_PARAMETER_Y_AXIS_ROTATION)) {
+                        params[4] =
+                            rotSign *
+                            measure.convertToUnit(UnitOfMeasure::MICRORADIAN)
+                                .value();
+                        foundRotY = true;
+                    } else if (Identifier::isEquivalentName(
+                                   paramName,
+                                   EPSG_PARAMETER_Z_AXIS_ROTATION_NAME) ||
+                               parameter->isEPSG(
+                                   EPSG_PARAMETER_Z_AXIS_ROTATION)) {
+                        params[5] =
+                            rotSign *
+                            measure.convertToUnit(UnitOfMeasure::MICRORADIAN)
+                                .value();
+                        foundRotZ = true;
+                    } else if (Identifier::isEquivalentName(
+                                   paramName,
+                                   EPSG_PARAMETER_SCALE_DIFFERENCE_NAME) ||
+                               parameter->isEPSG(
+                                   EPSG_PARAMETER_SCALE_DIFFERENCE)) {
+                        params[6] =
+                            measure
+                                .convertToUnit(UnitOfMeasure::PARTS_PER_MILLION)
+                                .value();
+                        foundScale = true;
+                    }
+                }
+            }
+        }
+        if (foundX && foundY && foundZ &&
+            (threeParamsTransform ||
+             (foundRotX && foundRotY && foundRotZ && foundScale))) {
+            return params;
+        } else {
+            throw FormattingException(
+                "Missing required parameter values in transformation");
+        }
+    }
+
+    throw FormattingException(
+        "Transformation cannot be formatted as WKT1 TOWGS84 parameters");
+}
+
+// ---------------------------------------------------------------------------
+
 TransformationNNPtr
 Transformation::create(const PropertyMap &properties,
                        const CRSNNPtr &sourceCRSIn, const CRSNNPtr &targetCRSIn,
@@ -1032,6 +1244,188 @@ Transformation::create(const PropertyMap &propertiesTransformation,
 
 // ---------------------------------------------------------------------------
 
+static TransformationNNPtr createSevenParamsTransform(
+    const PropertyMap &properties, const PropertyMap &methodProperties,
+    const CRSNNPtr &sourceCRSIn, const CRSNNPtr &targetCRSIn,
+    double translationXMetre, double translationYMetre,
+    double translationZMetre, double rotationXMicroRadian,
+    double rotationYMicroRadian, double rotationZMicroRadian,
+    double scaleDifferencePPM,
+    const std::vector<PositionalAccuracyNNPtr> &accuracies) {
+    std::vector<OperationParameterNNPtr> parameters{
+        OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, EPSG_PARAMETER_X_AXIS_TRANSLATION)),
+        OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Y_AXIS_TRANSLATION)),
+        OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Z_AXIS_TRANSLATION)),
+        OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     EPSG_PARAMETER_X_AXIS_ROTATION_NAME)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, EPSG_PARAMETER_X_AXIS_ROTATION)),
+        OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     EPSG_PARAMETER_Y_AXIS_ROTATION_NAME)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Y_AXIS_ROTATION)),
+        OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     EPSG_PARAMETER_Z_AXIS_ROTATION_NAME)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Z_AXIS_ROTATION)),
+        OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     EPSG_PARAMETER_SCALE_DIFFERENCE_NAME)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, EPSG_PARAMETER_SCALE_DIFFERENCE)),
+    };
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(Length(translationXMetre)),
+        ParameterValue::create(Length(translationYMetre)),
+        ParameterValue::create(Length(translationZMetre)),
+        ParameterValue::create(
+            Angle(rotationXMicroRadian, UnitOfMeasure::MICRORADIAN)),
+        ParameterValue::create(
+            Angle(rotationYMicroRadian, UnitOfMeasure::MICRORADIAN)),
+        ParameterValue::create(
+            Angle(rotationZMicroRadian, UnitOfMeasure::MICRORADIAN)),
+        ParameterValue::create(
+            Scale(scaleDifferencePPM, UnitOfMeasure::PARTS_PER_MILLION)),
+    };
+
+    return Transformation::create(properties, sourceCRSIn, targetCRSIn, nullptr,
+                                  methodProperties, parameters, values,
+                                  accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+TransformationNNPtr Transformation::createGeocentricTranslations(
+    const PropertyMap &properties, const CRSNNPtr &sourceCRSIn,
+    const CRSNNPtr &targetCRSIn, double translationXMetre,
+    double translationYMetre, double translationZMetre,
+    const std::vector<PositionalAccuracyNNPtr> &accuracies) {
+    std::vector<OperationParameterNNPtr> parameters{
+        OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, EPSG_PARAMETER_X_AXIS_TRANSLATION)),
+        OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Y_AXIS_TRANSLATION)),
+        OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Z_AXIS_TRANSLATION)),
+    };
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(Length(translationXMetre)),
+        ParameterValue::create(Length(translationYMetre)),
+        ParameterValue::create(Length(translationZMetre)),
+    };
+
+    return create(properties, sourceCRSIn, targetCRSIn, nullptr,
+                  PropertyMap()
+                      .set(IdentifiedObject::NAME_KEY,
+                           "Geocentric translations (geocentric domain)")
+                      .set(Identifier::CODESPACE_KEY, "EPSG")
+                      .set(Identifier::CODE_KEY, 1031),
+                  parameters, values, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+TransformationNNPtr Transformation::createPositionVector(
+    const PropertyMap &properties, const CRSNNPtr &sourceCRSIn,
+    const CRSNNPtr &targetCRSIn, double translationXMetre,
+    double translationYMetre, double translationZMetre,
+    double rotationXMicroRadian, double rotationYMicroRadian,
+    double rotationZMicroRadian, double scaleDifferencePPM,
+    const std::vector<PositionalAccuracyNNPtr> &accuracies) {
+    return createSevenParamsTransform(
+        properties,
+        PropertyMap()
+            .set(IdentifiedObject::NAME_KEY,
+                 "Position Vector transformation (geocentric domain)")
+            .set(Identifier::CODESPACE_KEY, "EPSG")
+            .set(Identifier::CODE_KEY, 1033),
+        sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
+        translationZMetre, rotationXMicroRadian, rotationYMicroRadian,
+        rotationZMicroRadian, scaleDifferencePPM, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+TransformationNNPtr Transformation::createCoordinateFrameRotation(
+    const PropertyMap &properties, const CRSNNPtr &sourceCRSIn,
+    const CRSNNPtr &targetCRSIn, double translationXMetre,
+    double translationYMetre, double translationZMetre,
+    double rotationXMicroRadian, double rotationYMicroRadian,
+    double rotationZMicroRadian, double scaleDifferencePPM,
+    const std::vector<PositionalAccuracyNNPtr> &accuracies) {
+    return createSevenParamsTransform(
+        properties, PropertyMap()
+                        .set(IdentifiedObject::NAME_KEY,
+                             "Coordinate Frame rotation (geocentric domain)")
+                        .set(Identifier::CODESPACE_KEY, "EPSG")
+                        .set(Identifier::CODE_KEY, 1032),
+        sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
+        translationZMetre, rotationXMicroRadian, rotationYMicroRadian,
+        rotationZMicroRadian, scaleDifferencePPM, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+TransformationNNPtr Transformation::createTOWGS84(
+    const CRSNNPtr &sourceCRSIn,
+    const std::vector<double> &TOWGS84Parameters) // throw InvalidOperation
+{
+    if (TOWGS84Parameters.size() != 7) {
+        throw InvalidOperation(
+            "Invalid number of elements in TOWGS84Parameters");
+    }
+
+    CRSPtr transformSourceCRS = CRS::extractGeographicCRS(sourceCRSIn);
+    if (!transformSourceCRS) {
+        throw InvalidOperation(
+            "Cannot find GeographicCRS in sourceCRS of TOWGS84 transformation");
+    }
+
+    return createPositionVector(
+        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                          "Transformation to WGS84"),
+        NN_CHECK_ASSERT(transformSourceCRS), GeographicCRS::EPSG_4326,
+        TOWGS84Parameters[0], TOWGS84Parameters[1], TOWGS84Parameters[2],
+        TOWGS84Parameters[3], TOWGS84Parameters[4], TOWGS84Parameters[5],
+        TOWGS84Parameters[6], std::vector<PositionalAccuracyNNPtr>());
+}
+
+// ---------------------------------------------------------------------------
+
 std::string Transformation::exportToWKT(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     if (!isWKT2) {
@@ -1039,17 +1433,24 @@ std::string Transformation::exportToWKT(WKTFormatterNNPtr formatter) const {
             "Transformation can only be exported to WKT2");
     }
 
-    formatter->startNode(WKTConstants::COORDINATEOPERATION,
-                         !identifiers().empty());
+    if (formatter->abridgedTransformation()) {
+        formatter->startNode(WKTConstants::ABRIDGEDTRANSFORMATION,
+                             !identifiers().empty());
+    } else {
+        formatter->startNode(WKTConstants::COORDINATEOPERATION,
+                             !identifiers().empty());
+    }
     formatter->addQuotedString(*(name()->description()));
 
-    formatter->startNode(WKTConstants::SOURCECRS, false);
-    sourceCRS()->exportToWKT(formatter);
-    formatter->endNode();
+    if (!formatter->abridgedTransformation()) {
+        formatter->startNode(WKTConstants::SOURCECRS, false);
+        sourceCRS()->exportToWKT(formatter);
+        formatter->endNode();
 
-    formatter->startNode(WKTConstants::TARGETCRS, false);
-    targetCRS()->exportToWKT(formatter);
-    formatter->endNode();
+        formatter->startNode(WKTConstants::TARGETCRS, false);
+        targetCRS()->exportToWKT(formatter);
+        formatter->endNode();
+    }
 
     method()->exportToWKT(formatter);
 
@@ -1059,16 +1460,18 @@ std::string Transformation::exportToWKT(WKTFormatterNNPtr formatter) const {
         paramValue->_exportToWKT(formatter, mapping);
     }
 
-    if (interpolationCRS()) {
-        formatter->startNode(WKTConstants::INTERPOLATIONCRS, false);
-        interpolationCRS()->exportToWKT(formatter);
-        formatter->endNode();
-    }
+    if (!formatter->abridgedTransformation()) {
+        if (interpolationCRS()) {
+            formatter->startNode(WKTConstants::INTERPOLATIONCRS, false);
+            interpolationCRS()->exportToWKT(formatter);
+            formatter->endNode();
+        }
 
-    if (!coordinateOperationAccuracies().empty()) {
-        formatter->startNode(WKTConstants::OPERATIONACCURACY, false);
-        formatter->add(coordinateOperationAccuracies()[0]->value());
-        formatter->endNode();
+        if (!coordinateOperationAccuracies().empty()) {
+            formatter->startNode(WKTConstants::OPERATIONACCURACY, false);
+            formatter->add(coordinateOperationAccuracies()[0]->value());
+            formatter->endNode();
+        }
     }
 
     ObjectUsage::_exportToWKT(formatter);
@@ -1087,7 +1490,7 @@ PointMotionOperation::~PointMotionOperation() = default;
 struct ConcatenatedOperation::Private {
     std::vector<CoordinateOperationNNPtr> operations_{};
 
-    Private(const std::vector<CoordinateOperationNNPtr> &operationsIn)
+    explicit Private(const std::vector<CoordinateOperationNNPtr> &operationsIn)
         : operations_(operationsIn) {}
 };
 //! @endcond

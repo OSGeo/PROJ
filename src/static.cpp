@@ -101,6 +101,7 @@ DEFINE_WKT_CONSTANT(PARAMETER);
 DEFINE_WKT_CONSTANT(VERT_CS);
 DEFINE_WKT_CONSTANT(VERT_DATUM);
 DEFINE_WKT_CONSTANT(COMPD_CS);
+DEFINE_WKT_CONSTANT(TOWGS84);
 
 DEFINE_WKT_CONSTANT(GEODCRS);
 DEFINE_WKT_CONSTANT(LENGTHUNIT);
@@ -135,6 +136,8 @@ DEFINE_WKT_CONSTANT(INTERPOLATIONCRS);
 DEFINE_WKT_CONSTANT(OPERATIONACCURACY);
 DEFINE_WKT_CONSTANT(CONCATENATEDOPERATION);
 DEFINE_WKT_CONSTANT(STEP);
+DEFINE_WKT_CONSTANT(BOUNDCRS);
+DEFINE_WKT_CONSTANT(ABRIDGEDTRANSFORMATION);
 
 DEFINE_WKT_CONSTANT(GEODETICCRS);
 DEFINE_WKT_CONSTANT(GEODETICDATUM);
@@ -151,18 +154,27 @@ const UnitOfMeasure UnitOfMeasure::NONE("", 1.0, UnitOfMeasure::Type::NONE);
 const UnitOfMeasure UnitOfMeasure::SCALE_UNITY("unity", 1.0,
                                                UnitOfMeasure::Type::SCALE,
                                                "EPSG", "9201");
+const UnitOfMeasure UnitOfMeasure::PARTS_PER_MILLION("parts per million", 1e-6,
+                                                     UnitOfMeasure::Type::SCALE,
+                                                     "EPSG", "9202");
 const UnitOfMeasure UnitOfMeasure::METRE("metre", 1.0,
                                          UnitOfMeasure::Type::LINEAR, "EPSG",
                                          "9001");
 const UnitOfMeasure UnitOfMeasure::DEGREE("degree", M_PI / 180.,
                                           UnitOfMeasure::Type::ANGULAR, "EPSG",
                                           "9122");
+const UnitOfMeasure UnitOfMeasure::ARC_SECOND("arc-second", M_PI / 180. / 3600.,
+                                              UnitOfMeasure::Type::ANGULAR,
+                                              "EPSG", "9104");
 const UnitOfMeasure UnitOfMeasure::GRAD("grad", M_PI / 200.,
                                         UnitOfMeasure::Type::ANGULAR, "EPSG",
                                         "9105");
 const UnitOfMeasure UnitOfMeasure::RADIAN("radian", 1.0,
                                           UnitOfMeasure::Type::ANGULAR, "EPSG",
                                           "9101");
+const UnitOfMeasure UnitOfMeasure::MICRORADIAN("microradian", 1e-6,
+                                               UnitOfMeasure::Type::ANGULAR,
+                                               "EPSG", "9109");
 
 // ---------------------------------------------------------------------------
 
