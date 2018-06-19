@@ -283,10 +283,10 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
     /* Check first if projection is invertible. */
     if( (P->inv3d == NULL) && (P->inv == NULL))
     {
-        pj_ctx_set_errno( pj_get_ctx(P), -17 );
+        pj_ctx_set_errno(pj_get_ctx(P), PJD_ERR_NON_CONV_INV_MERI_DIST);
         pj_log( pj_get_ctx(P), PJ_LOG_ERROR,
                 "pj_transform(): source projection not invertable" );
-        return -17;
+        return PJD_ERR_NON_CONV_INV_MERI_DIST;
     }
 
     /* If invertible - First try inv3d if defined */
