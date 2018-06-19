@@ -38,8 +38,9 @@ grids in the start of the list takes precedence over the grids in the back of th
 list.
 
 PROJ supports CTable2, NTv1 and NTv2 files for horizontal grid corrections. Details
-about all three formats can be found in the GDAL documentation. GDAL reads and
-writes all three formats. Using GDAL for construction of new grids is recommended.
+about all three formats can be found in the GDAL documentation and/or driver source
+code. GDAL reads and writes all three formats. Using GDAL for construction of
+new grids is recommended.
 
 
 Temporal gridshifting
