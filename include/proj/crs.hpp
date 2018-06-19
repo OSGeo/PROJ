@@ -119,10 +119,6 @@ class GeodeticCRS : virtual public SingleCRS {
     PROJ_DLL static GeodeticCRSNNPtr
     create(const util::PropertyMap &properties,
            const datum::GeodeticReferenceFrameNNPtr &datum,
-           const cs::EllipsoidalCSNNPtr &cs);
-    PROJ_DLL static GeodeticCRSNNPtr
-    create(const util::PropertyMap &properties,
-           const datum::GeodeticReferenceFrameNNPtr &datum,
            const cs::SphericalCSNNPtr &cs);
     PROJ_DLL static GeodeticCRSNNPtr
     create(const util::PropertyMap &properties,
@@ -274,15 +270,6 @@ class ProjectedCRS : public DerivedCRS {
 
 // ---------------------------------------------------------------------------
 
-class DerivedGeodeticCRS : public GeodeticCRS, public DerivedCRS {
-    // TODO
-
-    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
-        const override = 0; // throw(io::FormattingException)
-};
-
-// ---------------------------------------------------------------------------
-
 class CompoundCRS;
 using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
 using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
@@ -348,6 +335,84 @@ class BoundCRS : public CRS {
     BoundCRS(const BoundCRS &other) = delete;
     BoundCRS &operator=(const BoundCRS &other) = delete;
 };
+
+// ---------------------------------------------------------------------------
+
+class DerivedGeodeticCRS;
+using DerivedGeodeticCRSPtr = std::shared_ptr<DerivedGeodeticCRS>;
+using DerivedGeodeticCRSNNPtr = util::nn<DerivedGeodeticCRSPtr>;
+
+class DerivedGeodeticCRS : public GeodeticCRS, public DerivedCRS {
+  public:
+    PROJ_DLL ~DerivedGeodeticCRS() override;
+
+    PROJ_DLL const GeodeticCRSNNPtr baseCRS() const;
+
+    PROJ_DLL static DerivedGeodeticCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const GeodeticCRSNNPtr &baseCRSIn,
+           const operation::ConversionNNPtr &derivingConversionIn,
+           const cs::CartesianCSNNPtr &csIn);
+
+    PROJ_DLL static DerivedGeodeticCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const GeodeticCRSNNPtr &baseCRSIn,
+           const operation::ConversionNNPtr &derivingConversionIn,
+           const cs::SphericalCSNNPtr &csIn);
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+  protected:
+    DerivedGeodeticCRS(const GeodeticCRSNNPtr &baseCRSIn,
+                       const operation::ConversionNNPtr &derivingConversionIn,
+                       const cs::CartesianCSNNPtr &csIn);
+    DerivedGeodeticCRS(const GeodeticCRSNNPtr &baseCRSIn,
+                       const operation::ConversionNNPtr &derivingConversionIn,
+                       const cs::SphericalCSNNPtr &csIn);
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    DerivedGeodeticCRS(const DerivedGeodeticCRS &other) = delete;
+    DerivedGeodeticCRS &operator=(const DerivedGeodeticCRS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
+class DerivedGeographicCRS;
+using DerivedGeographicCRSPtr = std::shared_ptr<DerivedGeographicCRS>;
+using DerivedGeographicCRSNNPtr = util::nn<DerivedGeographicCRSPtr>;
+
+class DerivedGeographicCRS : public GeographicCRS, public DerivedCRS {
+  public:
+    PROJ_DLL ~DerivedGeographicCRS() override;
+
+    PROJ_DLL const GeodeticCRSNNPtr baseCRS() const;
+
+    PROJ_DLL static DerivedGeographicCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const GeodeticCRSNNPtr &baseCRSIn,
+           const operation::ConversionNNPtr &derivingConversionIn,
+           const cs::EllipsoidalCSNNPtr &csIn);
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+  protected:
+    DerivedGeographicCRS(const GeodeticCRSNNPtr &baseCRSIn,
+                         const operation::ConversionNNPtr &derivingConversionIn,
+                         const cs::EllipsoidalCSNNPtr &csIn);
+
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    DerivedGeographicCRS(const DerivedGeographicCRS &other) = delete;
+    DerivedGeographicCRS &operator=(const DerivedGeographicCRS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
 
 #ifdef notdef
 

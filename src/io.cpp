@@ -99,6 +99,7 @@ struct WKTFormatter::Private {
         util::nn_make_shared<UnitOfMeasure>(UnitOfMeasure::NONE)};
     bool outputConversionNode_ = true;
     bool abridgedTransformation_ = false;
+    bool useDerivingConversion_ = false;
     std::vector<double> toWGS84Parameters_{};
     std::string result_{};
 
@@ -519,6 +520,18 @@ bool WKTFormatter::abridgedTransformation() const {
 
 // ---------------------------------------------------------------------------
 
+void WKTFormatter::setUseDerivingConversion(bool useDerivingConversionIn) {
+    d->useDerivingConversion_ = useDerivingConversionIn;
+}
+
+// ---------------------------------------------------------------------------
+
+bool WKTFormatter::useDerivingConversion() const {
+    return d->useDerivingConversion_;
+}
+
+// ---------------------------------------------------------------------------
+
 void WKTFormatter::setTOWGS84Parameters(const std::vector<double> &params) {
     d->toWGS84Parameters_ = params;
 }
@@ -767,6 +780,7 @@ struct WKTParser::Private {
     CoordinateSystemNNPtr buildCS(WKTNodePtr node, /* maybe null */
                                   WKTNodeNNPtr parentNode);
     GeodeticCRSNNPtr buildGeodeticCRS(WKTNodeNNPtr node);
+    CRSNNPtr buildDerivedGeodeticCRS(WKTNodeNNPtr node);
     UnitOfMeasure
     guessUnitForParameter(const std::string &paramName,
                           const UnitOfMeasure &defaultLinearUnit,
@@ -1495,7 +1509,7 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
     if (cartesianCS) {
         if (cartesianCS->axisList().size() != 3) {
             throw ParsingException(
-                "Cartesian CS for a GeodeticCRS should have 3 nodes");
+                "Cartesian CS for a GeodeticCRS should have 3 axis");
         }
         return GeodeticCRS::create(buildProperties(node), datum,
                                    NN_CHECK_ASSERT(cartesianCS));
@@ -1505,6 +1519,66 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
     if (sphericalCS) {
         return GeodeticCRS::create(buildProperties(node), datum,
                                    NN_CHECK_ASSERT(sphericalCS));
+    }
+
+    throw ParsingException("unhandled CS type: " + cs->getWKT2Type());
+}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(WKTNodeNNPtr node) {
+
+    auto baseGeodCRSNode = node->lookForChild(WKTConstants::BASEGEODCRS);
+    if (!baseGeodCRSNode) {
+        baseGeodCRSNode = node->lookForChild(WKTConstants::BASEGEOGCRS);
+    }
+    assert(baseGeodCRSNode !=
+           nullptr); // given the constraints enforced on calling code path
+
+    auto baseGeodCRS = buildGeodeticCRS(NN_CHECK_ASSERT(baseGeodCRSNode));
+
+    auto derivingConversionNode =
+        node->lookForChild(WKTConstants::DERIVINGCONVERSION);
+    if (!derivingConversionNode) {
+        throw ParsingException("Missing DERIVINGCONVERSION node");
+    }
+    auto derivingConversion =
+        buildConversion(NN_CHECK_ASSERT(derivingConversionNode),
+                        UnitOfMeasure(), UnitOfMeasure());
+
+    auto csNode = node->lookForChild(WKTConstants::CS);
+    if (!csNode) {
+        throw ParsingException("Missing CS node");
+    }
+    auto cs = buildCS(csNode, node);
+
+    auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
+    if (ellipsoidalCS) {
+        return DerivedGeographicCRS::create(buildProperties(node), baseGeodCRS,
+                                            derivingConversion,
+                                            NN_CHECK_ASSERT(ellipsoidalCS));
+    } else if (ci_equal(node->value(), WKTConstants::GEOGCRS)) {
+        // This is a WKT2-2018 GeographicCRS. An ellipsoidal CS is expected
+        throw ParsingException("ellipsoidal CS expected, but found " +
+                               cs->getWKT2Type());
+    }
+
+    auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
+    if (cartesianCS) {
+        if (cartesianCS->axisList().size() != 3) {
+            throw ParsingException(
+                "Cartesian CS for a GeodeticCRS should have 3 axis");
+        }
+        return DerivedGeodeticCRS::create(buildProperties(node), baseGeodCRS,
+                                          derivingConversion,
+                                          NN_CHECK_ASSERT(cartesianCS));
+    }
+
+    auto sphericalCS = nn_dynamic_pointer_cast<SphericalCS>(cs);
+    if (sphericalCS) {
+        return DerivedGeodeticCRS::create(buildProperties(node), baseGeodCRS,
+                                          derivingConversion,
+                                          NN_CHECK_ASSERT(sphericalCS));
     }
 
     throw ParsingException("unhandled CS type: " + cs->getWKT2Type());
@@ -1964,7 +2038,12 @@ CRSPtr WKTParser::Private::buildCRS(WKTNodeNNPtr node) {
     const std::string &name(node->value());
 
     if (isGeodeticCRS(name)) {
-        return util::nn_static_pointer_cast<CRS>(buildGeodeticCRS(node));
+        if (node->lookForChild(WKTConstants::BASEGEOGCRS) ||
+            node->lookForChild(WKTConstants::BASEGEODCRS)) {
+            return buildDerivedGeodeticCRS(node);
+        } else {
+            return util::nn_static_pointer_cast<CRS>(buildGeodeticCRS(node));
+        }
     }
 
     if (ci_equal(name, WKTConstants::PROJCS) ||

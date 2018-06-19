@@ -70,6 +70,10 @@ TEST(common, unit_of_measure) {
 
 // ---------------------------------------------------------------------------
 
+TEST(common, measure) { EXPECT_TRUE(Measure(1.0) == Measure(1.0)); }
+
+// ---------------------------------------------------------------------------
+
 TEST(common, identifiedobject_empty) {
     PropertyMap properties;
     auto obj = IdentifiedObject::create(properties);

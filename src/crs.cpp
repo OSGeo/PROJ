@@ -208,16 +208,6 @@ bool GeodeticCRS::isGeocentric() const {
 
 GeodeticCRSNNPtr GeodeticCRS::create(const PropertyMap &properties,
                                      const GeodeticReferenceFrameNNPtr &datum,
-                                     const EllipsoidalCSNNPtr &cs) {
-    auto crs(GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, cs));
-    crs->setProperties(properties);
-    return crs;
-}
-
-// ---------------------------------------------------------------------------
-
-GeodeticCRSNNPtr GeodeticCRS::create(const PropertyMap &properties,
-                                     const GeodeticReferenceFrameNNPtr &datum,
                                      const SphericalCSNNPtr &cs) {
     auto crs(GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, cs));
     crs->setProperties(properties);
@@ -749,6 +739,7 @@ struct BoundCRS::Private {
         : baseCRS_(baseCRSIn), hubCRS_(hubCRSIn),
           transformation_(transformationIn) {}
 };
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -823,6 +814,167 @@ std::string BoundCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
     }
     return formatter->toString();
 }
+
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+struct DerivedGeodeticCRS::Private {};
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+DerivedGeodeticCRS::~DerivedGeodeticCRS() = default;
+
+// ---------------------------------------------------------------------------
+
+DerivedGeodeticCRS::DerivedGeodeticCRS(
+    const GeodeticCRSNNPtr &baseCRSIn,
+    const ConversionNNPtr &derivingConversionIn, const CartesianCSNNPtr &csIn)
+    : SingleCRS(baseCRSIn->datum(), csIn),
+      GeodeticCRS(baseCRSIn->datum(), csIn),
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
+      d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+DerivedGeodeticCRS::DerivedGeodeticCRS(
+    const GeodeticCRSNNPtr &baseCRSIn,
+    const ConversionNNPtr &derivingConversionIn, const SphericalCSNNPtr &csIn)
+    : SingleCRS(baseCRSIn->datum(), csIn),
+      GeodeticCRS(baseCRSIn->datum(), csIn),
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
+      d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+const GeodeticCRSNNPtr DerivedGeodeticCRS::baseCRS() const {
+    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<GeodeticCRS>(
+        DerivedCRS::getPrivate()->baseCRS_));
+}
+
+// ---------------------------------------------------------------------------
+
+DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
+    const PropertyMap &properties, const GeodeticCRSNNPtr &baseCRSIn,
+    const ConversionNNPtr &derivingConversionIn, const CartesianCSNNPtr &csIn) {
+    auto crs(DerivedGeodeticCRS::nn_make_shared<DerivedGeodeticCRS>(
+        baseCRSIn, derivingConversionIn, csIn));
+    crs->setProperties(properties);
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
+    const PropertyMap &properties, const GeodeticCRSNNPtr &baseCRSIn,
+    const ConversionNNPtr &derivingConversionIn, const SphericalCSNNPtr &csIn) {
+    auto crs(DerivedGeodeticCRS::nn_make_shared<DerivedGeodeticCRS>(
+        baseCRSIn, derivingConversionIn, csIn));
+    crs->setProperties(properties);
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string DerivedGeodeticCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        throw FormattingException(
+            "DerivedGeodeticCRS can only be exported to WKT2");
+    }
+    formatter->startNode(WKTConstants::GEODCRS, !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+
+    formatter->startNode((formatter->use2018Keywords() &&
+                          dynamic_cast<const GeographicCRS *>(baseCRS().get()))
+                             ? WKTConstants::BASEGEOGCRS
+                             : WKTConstants::BASEGEODCRS,
+                         !baseCRS()->identifiers().empty());
+    formatter->addQuotedString(*(baseCRS()->name()->description()));
+    baseCRS()->datum()->exportToWKT(formatter);
+    baseCRS()->datum()->primeMeridian()->exportToWKT(formatter);
+    formatter->endNode();
+
+    formatter->setUseDerivingConversion(true);
+    derivingConversion()->exportToWKT(formatter);
+    formatter->setUseDerivingConversion(false);
+
+    coordinateSystem()->exportToWKT(formatter);
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct DerivedGeographicCRS::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+DerivedGeographicCRS::~DerivedGeographicCRS() = default;
+
+// ---------------------------------------------------------------------------
+
+DerivedGeographicCRS::DerivedGeographicCRS(
+    const GeodeticCRSNNPtr &baseCRSIn,
+    const ConversionNNPtr &derivingConversionIn, const EllipsoidalCSNNPtr &csIn)
+    : SingleCRS(baseCRSIn->datum(), csIn),
+      GeographicCRS(baseCRSIn->datum(), csIn),
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
+      d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+const GeodeticCRSNNPtr DerivedGeographicCRS::baseCRS() const {
+    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<GeodeticCRS>(
+        DerivedCRS::getPrivate()->baseCRS_));
+}
+
+// ---------------------------------------------------------------------------
+
+DerivedGeographicCRSNNPtr
+DerivedGeographicCRS::create(const PropertyMap &properties,
+                             const GeodeticCRSNNPtr &baseCRSIn,
+                             const ConversionNNPtr &derivingConversionIn,
+                             const EllipsoidalCSNNPtr &csIn) {
+    auto crs(DerivedGeographicCRS::nn_make_shared<DerivedGeographicCRS>(
+        baseCRSIn, derivingConversionIn, csIn));
+    crs->setProperties(properties);
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string
+DerivedGeographicCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        throw FormattingException(
+            "DerivedGeographicCRS can only be exported to WKT2");
+    }
+    formatter->startNode(formatter->use2018Keywords() ? WKTConstants::GEOGCRS
+                                                      : WKTConstants::GEODCRS,
+                         !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+
+    formatter->startNode((formatter->use2018Keywords() &&
+                          dynamic_cast<const GeographicCRS *>(baseCRS().get()))
+                             ? WKTConstants::BASEGEOGCRS
+                             : WKTConstants::BASEGEODCRS,
+                         !baseCRS()->identifiers().empty());
+    formatter->addQuotedString(*(baseCRS()->name()->description()));
+    baseCRS()->datum()->exportToWKT(formatter);
+    baseCRS()->datum()->primeMeridian()->exportToWKT(formatter);
+    formatter->endNode();
+
+    formatter->setUseDerivingConversion(true);
+    derivingConversion()->exportToWKT(formatter);
+    formatter->setUseDerivingConversion(false);
+
+    coordinateSystem()->exportToWKT(formatter);
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+    return formatter->toString();
+}

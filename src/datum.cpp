@@ -188,18 +188,33 @@ struct Ellipsoid::Private {
     Length semiMajorAxis_{};
     optional<Scale> inverseFlattening_{};
     optional<Length> semiMinorAxis_{};
-    bool isSphere_{false};
     optional<Length> semiMedianAxis_{};
+
+    explicit Private(const Length &radius) : semiMajorAxis_(radius) {}
 
     Private(const Length &semiMajorAxisIn, const Scale &invFlattening)
         : semiMajorAxis_(semiMajorAxisIn), inverseFlattening_(invFlattening) {}
+
+    Private(const Length &semiMajorAxisIn, const Length &semiMinorAxisIn)
+        : semiMajorAxis_(semiMajorAxisIn), semiMinorAxis_(semiMinorAxisIn) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
+Ellipsoid::Ellipsoid(const Length &radius)
+    : d(internal::make_unique<Private>(radius)) {}
+
+// ---------------------------------------------------------------------------
+
 Ellipsoid::Ellipsoid(const Length &semiMajorAxisIn, const Scale &invFlattening)
     : d(internal::make_unique<Private>(semiMajorAxisIn, invFlattening)) {}
+
+// ---------------------------------------------------------------------------
+
+Ellipsoid::Ellipsoid(const Length &semiMajorAxisIn,
+                     const Length &semiMinorAxisIn)
+    : d(internal::make_unique<Private>(semiMajorAxisIn, semiMinorAxisIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -230,12 +245,64 @@ const optional<Length> &Ellipsoid::semiMinorAxis() const {
 
 // ---------------------------------------------------------------------------
 
-bool Ellipsoid::isSphere() const { return d->isSphere_; }
+bool Ellipsoid::isSphere() const {
+    if (inverseFlattening().has_value()) {
+        return inverseFlattening()->value() == 0;
+    }
+
+    if (semiMinorAxis().has_value()) {
+        return semiMajorAxis() == *semiMinorAxis();
+    }
+
+    return true;
+}
 
 // ---------------------------------------------------------------------------
 
 const optional<Length> &Ellipsoid::semiMedianAxis() const {
     return d->semiMedianAxis_;
+}
+
+// ---------------------------------------------------------------------------
+
+Scale Ellipsoid::computeInverseFlattening() const {
+    if (inverseFlattening().has_value()) {
+        return *inverseFlattening();
+    }
+
+    if (semiMinorAxis().has_value()) {
+        const double a = semiMajorAxis().value();
+        const double b = semiMinorAxis()->value();
+        return Scale((a == b) ? 0.0 : a / (a - b));
+    }
+
+    return Scale(0.0);
+}
+
+// ---------------------------------------------------------------------------
+
+Length Ellipsoid::computeSemiMinorAxis() const {
+    if (semiMinorAxis().has_value()) {
+        return *semiMinorAxis();
+    }
+
+    if (inverseFlattening().has_value()) {
+        return Length((1.0 - 1.0 / inverseFlattening()->getSIValue()) *
+                          semiMajorAxis().value(),
+                      semiMajorAxis().unit());
+    }
+
+    return semiMajorAxis();
+}
+
+// ---------------------------------------------------------------------------
+
+/* static */
+EllipsoidNNPtr Ellipsoid::createSphere(const PropertyMap &properties,
+                                       const Length &radius) {
+    auto ellipsoid(Ellipsoid::nn_make_shared<Ellipsoid>(radius));
+    ellipsoid->setProperties(properties);
+    return ellipsoid;
 }
 
 // ---------------------------------------------------------------------------
@@ -250,6 +317,17 @@ EllipsoidNNPtr Ellipsoid::createFlattenedSphere(const PropertyMap &properties,
     return ellipsoid;
 }
 
+// ---------------------------------------------------------------------------
+
+/* static */
+EllipsoidNNPtr Ellipsoid::createTwoAxis(const PropertyMap &properties,
+                                        const Length &semiMajorAxisIn,
+                                        const Length &semiMinorAxisIn) {
+    auto ellipsoid(
+        Ellipsoid::nn_make_shared<Ellipsoid>(semiMajorAxisIn, semiMinorAxisIn));
+    ellipsoid->setProperties(properties);
+    return ellipsoid;
+}
 // ---------------------------------------------------------------------------
 
 const EllipsoidNNPtr Ellipsoid::createEPSG_7030() {
@@ -280,19 +358,7 @@ std::string Ellipsoid::exportToWKT(
             formatter->add(
                 semiMajorAxis().convertToUnit(UnitOfMeasure::METRE).value());
         }
-        if (inverseFlattening()) {
-            formatter->add(inverseFlattening()->value());
-        } else if (semiMinorAxis()) {
-            double a = semiMajorAxis().value();
-            double b = semiMinorAxis()->value();
-            if (a != b) {
-                formatter->add(a / (a - b));
-            } else {
-                formatter->add(0.0);
-            }
-        } else {
-            formatter->add(0.0);
-        }
+        formatter->add(computeInverseFlattening().value());
         if (isWKT2 &&
             !(formatter->ellipsoidUnitOmittedIfMetre() &&
               semiMajorAxis().unit() == UnitOfMeasure::METRE)) {
@@ -311,15 +377,21 @@ std::string Ellipsoid::exportToWKT(
 
 //! @cond Doxygen_Suppress
 struct GeodeticReferenceFrame::Private {
-    PrimeMeridianPtr primeMeridian{};
-    EllipsoidPtr ellipsoid{};
+    PrimeMeridianNNPtr primeMeridian_;
+    EllipsoidNNPtr ellipsoid_;
+
+    Private(const EllipsoidNNPtr &ellipsoidIn,
+            const PrimeMeridianNNPtr &primeMeridianIn)
+        : primeMeridian_(primeMeridianIn), ellipsoid_(ellipsoidIn) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-GeodeticReferenceFrame::GeodeticReferenceFrame()
-    : d(internal::make_unique<Private>()) {}
+GeodeticReferenceFrame::GeodeticReferenceFrame(
+    const EllipsoidNNPtr &ellipsoidIn,
+    const PrimeMeridianNNPtr &primeMeridianIn)
+    : d(internal::make_unique<Private>(ellipsoidIn, primeMeridianIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -335,14 +407,14 @@ GeodeticReferenceFrame::~GeodeticReferenceFrame() = default;
 
 // ---------------------------------------------------------------------------
 
-const PrimeMeridianPtr &GeodeticReferenceFrame::primeMeridian() const {
-    return d->primeMeridian;
+const PrimeMeridianNNPtr &GeodeticReferenceFrame::primeMeridian() const {
+    return d->primeMeridian_;
 }
 
 // ---------------------------------------------------------------------------
 
-const EllipsoidPtr &GeodeticReferenceFrame::ellipsoid() const {
-    return d->ellipsoid;
+const EllipsoidNNPtr &GeodeticReferenceFrame::ellipsoid() const {
+    return d->ellipsoid_;
 }
 // ---------------------------------------------------------------------------
 
@@ -352,11 +424,10 @@ GeodeticReferenceFrame::create(const PropertyMap &properties,
                                const optional<std::string> &anchor,
                                const PrimeMeridianNNPtr &primeMeridian) {
     GeodeticReferenceFrameNNPtr grf(
-        GeodeticReferenceFrame::nn_make_shared<GeodeticReferenceFrame>());
+        GeodeticReferenceFrame::nn_make_shared<GeodeticReferenceFrame>(
+            ellipsoid, primeMeridian));
     util::nn_static_pointer_cast<Datum>(grf)->d->anchorDefinition = anchor;
     grf->setProperties(properties);
-    grf->d->primeMeridian = primeMeridian;
-    grf->d->ellipsoid = ellipsoid;
     return grf;
 }
 
@@ -417,8 +488,11 @@ struct DynamicGeodeticReferenceFrame::Private {
 
 // ---------------------------------------------------------------------------
 
-DynamicGeodeticReferenceFrame::DynamicGeodeticReferenceFrame()
-    : d(internal::make_unique<Private>()) {}
+DynamicGeodeticReferenceFrame::DynamicGeodeticReferenceFrame(
+    const EllipsoidNNPtr &ellipsoidIn,
+    const PrimeMeridianNNPtr &primeMeridianIn)
+    : GeodeticReferenceFrame(ellipsoidIn, primeMeridianIn),
+      d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 

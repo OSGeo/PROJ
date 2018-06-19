@@ -568,23 +568,6 @@ TEST(crs, projectedCRS_as_WKT1_GDAL) {
 
 // ---------------------------------------------------------------------------
 
-TEST(datum, datum_with_ANCHOR) {
-    auto datum = GeodeticReferenceFrame::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "WGS_1984 with anchor"),
-        Ellipsoid::EPSG_7030, optional<std::string>("My anchor"),
-        PrimeMeridian::GREENWICH);
-
-    auto expected = "DATUM[\"WGS_1984 with anchor\",\n"
-                    "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
-                    "        LENGTHUNIT[\"metre\",1],\n"
-                    "        ID[\"EPSG\",7030]],\n"
-                    "    ANCHOR[\"My anchor\"]]";
-
-    EXPECT_EQ(datum->exportToWKT(WKTFormatter::create()), expected);
-}
-
-// ---------------------------------------------------------------------------
-
 TEST(datum, cs_with_MERIDIAN) {
     std::vector<CoordinateSystemAxisNNPtr> axis{
         CoordinateSystemAxis::create(
@@ -1155,4 +1138,203 @@ TEST(crs, extractGeographicCRS) {
         CRS::extractGeographicCRS(CompoundCRS::create(
             PropertyMap(), std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326})),
         GeographicCRS::EPSG_4326);
+}
+
+// ---------------------------------------------------------------------------
+
+static DerivedGeographicCRSNNPtr createDerivedGeographicCRS() {
+
+    auto derivingConversion = Conversion::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Atlantic pole"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Pole rotation"),
+        std::vector<OperationParameterNNPtr>{
+            OperationParameter::create(PropertyMap().set(
+                IdentifiedObject::NAME_KEY, "Latitude of rotated pole")),
+            OperationParameter::create(PropertyMap().set(
+                IdentifiedObject::NAME_KEY, "Longitude of rotated pole")),
+            OperationParameter::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "Axis rotation")),
+        },
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::create(Angle(52.0)),
+            ParameterValue::create(Angle(-30.0)),
+            ParameterValue::create(Angle(-25.0)),
+        });
+
+    return DerivedGeographicCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "WMO Atlantic Pole"),
+        GeographicCRS::EPSG_4326, derivingConversion,
+        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, derivedGeographicCRS_WKT2) {
+
+    auto expected = "GEODCRS[\"WMO Atlantic Pole\",\n"
+                    "    BASEGEODCRS[\"WGS 84\",\n"
+                    "        DATUM[\"WGS_1984\",\n"
+                    "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+                    "                LENGTHUNIT[\"metre\",1]]],\n"
+                    "        PRIMEM[\"Greenwich\",0,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+                    "    DERIVINGCONVERSION[\"Atlantic pole\",\n"
+                    "        METHOD[\"Pole rotation\"],\n"
+                    "        PARAMETER[\"Latitude of rotated pole\",52,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]],\n"
+                    "        PARAMETER[\"Longitude of rotated pole\",-30,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]],\n"
+                    "        PARAMETER[\"Axis rotation\",-25,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]]],\n"
+                    "    CS[ellipsoidal,2],\n"
+                    "        AXIS[\"latitude\",north,\n"
+                    "            ORDER[1],\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]],\n"
+                    "        AXIS[\"longitude\",east,\n"
+                    "            ORDER[2],\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]]]";
+
+    EXPECT_EQ(createDerivedGeographicCRS()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, derivedGeographicCRS_WKT2_2018) {
+
+    auto expected = "GEOGCRS[\"WMO Atlantic Pole\",\n"
+                    "    BASEGEOGCRS[\"WGS 84\",\n"
+                    "        DATUM[\"WGS_1984\",\n"
+                    "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+                    "                LENGTHUNIT[\"metre\",1]]],\n"
+                    "        PRIMEM[\"Greenwich\",0,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+                    "    DERIVINGCONVERSION[\"Atlantic pole\",\n"
+                    "        METHOD[\"Pole rotation\"],\n"
+                    "        PARAMETER[\"Latitude of rotated pole\",52,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]],\n"
+                    "        PARAMETER[\"Longitude of rotated pole\",-30,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]],\n"
+                    "        PARAMETER[\"Axis rotation\",-25,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]]],\n"
+                    "    CS[ellipsoidal,2],\n"
+                    "        AXIS[\"latitude\",north,\n"
+                    "            ORDER[1],\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]],\n"
+                    "        AXIS[\"longitude\",east,\n"
+                    "            ORDER[2],\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                    "                ID[\"EPSG\",9122]]]]";
+
+    EXPECT_EQ(createDerivedGeographicCRS()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, derivedGeographicCRS_WKT1) {
+
+    EXPECT_THROW(createDerivedGeographicCRS()->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+static DerivedGeodeticCRSNNPtr createDerivedGeodeticCRS() {
+
+    auto derivingConversion = Conversion::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Some conversion"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Some method"),
+        std::vector<OperationParameterNNPtr>{},
+        std::vector<ParameterValueNNPtr>{});
+
+    return DerivedGeodeticCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Derived geodetic CRS"),
+        GeographicCRS::EPSG_4326, derivingConversion,
+        CartesianCS::createGeocentric(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, derivedGeodeticCRS_WKT2) {
+
+    auto expected = "GEODCRS[\"Derived geodetic CRS\",\n"
+                    "    BASEGEODCRS[\"WGS 84\",\n"
+                    "        DATUM[\"WGS_1984\",\n"
+                    "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+                    "                LENGTHUNIT[\"metre\",1]]],\n"
+                    "        PRIMEM[\"Greenwich\",0,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+                    "    DERIVINGCONVERSION[\"Some conversion\",\n"
+                    "        METHOD[\"Some method\"]],\n"
+                    "    CS[Cartesian,3],\n"
+                    "        AXIS[\"(X)\",geocentricX,\n"
+                    "            ORDER[1],\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]],\n"
+                    "        AXIS[\"(Y)\",geocentricY,\n"
+                    "            ORDER[2],\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]],\n"
+                    "        AXIS[\"(Z)\",geocentricZ,\n"
+                    "            ORDER[3],\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]]]";
+
+    EXPECT_EQ(createDerivedGeodeticCRS()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, derivedGeodeticCRS_WKT2_2018) {
+
+    auto expected = "GEODCRS[\"Derived geodetic CRS\",\n"
+                    "    BASEGEOGCRS[\"WGS 84\",\n"
+                    "        DATUM[\"WGS_1984\",\n"
+                    "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+                    "                LENGTHUNIT[\"metre\",1]]],\n"
+                    "        PRIMEM[\"Greenwich\",0,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+                    "    DERIVINGCONVERSION[\"Some conversion\",\n"
+                    "        METHOD[\"Some method\"]],\n"
+                    "    CS[Cartesian,3],\n"
+                    "        AXIS[\"(X)\",geocentricX,\n"
+                    "            ORDER[1],\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]],\n"
+                    "        AXIS[\"(Y)\",geocentricY,\n"
+                    "            ORDER[2],\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]],\n"
+                    "        AXIS[\"(Z)\",geocentricZ,\n"
+                    "            ORDER[3],\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]]]";
+
+    EXPECT_EQ(createDerivedGeodeticCRS()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, derivedGeodeticCRS_WKT1) {
+
+    EXPECT_THROW(createDerivedGeodeticCRS()->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
 }

@@ -155,6 +155,9 @@ class WKTFormatter {
     void setAbridgedTransformation(bool abriged);
     bool abridgedTransformation() const;
 
+    void setUseDerivingConversion(bool useDerivingConversionIn);
+    bool useDerivingConversion() const;
+
     void setTOWGS84Parameters(const std::vector<double> &params);
     const std::vector<double> &getTOWGS84Parameters() const;
 

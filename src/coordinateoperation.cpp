@@ -921,7 +921,10 @@ ConversionNNPtr Conversion::createUTM(int zone, bool north) {
 
 std::string Conversion::exportToWKT(WKTFormatterNNPtr formatter) const {
     if (formatter->outputConversionNode()) {
-        formatter->startNode(WKTConstants::CONVERSION, !identifiers().empty());
+        formatter->startNode(formatter->useDerivingConversion()
+                                 ? WKTConstants::DERIVINGCONVERSION
+                                 : WKTConstants::CONVERSION,
+                             !identifiers().empty());
         formatter->addQuotedString(*(name()->description()));
     }
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
@@ -1088,7 +1091,8 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
                method()->isEPSG(1033) || method()->isEPSG(9606)) {
         sevenParamsTransform = true;
         invertRotSigns = false;
-    } else if (ci_find(method_name, "Geocentric translations") != std::string::npos ||
+    } else if (ci_find(method_name, "Geocentric translations") !=
+                   std::string::npos ||
                method()->isEPSG(1031) || method()->isEPSG(9603)) {
         threeParamsTransform = true;
     }

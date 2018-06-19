@@ -121,6 +121,8 @@ class Measure : public util::BaseObject {
 
     PROJ_DLL Measure convertToUnit(const UnitOfMeasure &otherUnit) const;
 
+    PROJ_DLL bool operator==(const Measure &other) const;
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
 };

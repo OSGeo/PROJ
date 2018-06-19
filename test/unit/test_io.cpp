@@ -1291,6 +1291,146 @@ TEST(wkt_parse, TOWGS84) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, DerivedGeographicCRS_WKT2) {
+    auto wkt = "GEODCRS[\"WMO Atlantic Pole\",\n"
+               "    BASEGEODCRS[\"WGS 84\",\n"
+               "        DATUM[\"WGS_1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+               "    DERIVINGCONVERSION[\"Atlantic pole\",\n"
+               "        METHOD[\"Pole rotation\"],\n"
+               "        PARAMETER[\"Latitude of rotated pole\",52,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               "                ID[\"EPSG\",9122]]],\n"
+               "        PARAMETER[\"Longitude of rotated pole\",-30,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               "                ID[\"EPSG\",9122]]],\n"
+               "        PARAMETER[\"Axis rotation\",-25,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               "                ID[\"EPSG\",9122]]]],\n"
+               "    CS[ellipsoidal,2],\n"
+               "        AXIS[\"latitude\",north,\n"
+               "            ORDER[1],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               "                ID[\"EPSG\",9122]]],\n"
+               "        AXIS[\"longitude\",east,\n"
+               "            ORDER[2],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               "                ID[\"EPSG\",9122]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "WMO Atlantic Pole");
+
+    EXPECT_EQ(*(crs->baseCRS()->name()->description()), "WGS 84");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs->baseCRS()) !=
+                nullptr);
+
+    EXPECT_EQ(*(crs->derivingConversion()->name()->description()),
+              "Atlantic pole");
+
+    EXPECT_TRUE(nn_dynamic_pointer_cast<EllipsoidalCS>(
+                    crs->coordinateSystem()) != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, DerivedGeographicCRS_WKT2_2018) {
+    auto wkt = "GEOGCRS[\"WMO Atlantic Pole\",\n"
+               "    BASEGEOGCRS[\"WGS 84\",\n"
+               "        DATUM[\"WGS_1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+               "    DERIVINGCONVERSION[\"Atlantic pole\",\n"
+               "        METHOD[\"Pole rotation\"],\n"
+               "        PARAMETER[\"Latitude of rotated pole\",52,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               "                ID[\"EPSG\",9122]]],\n"
+               "        PARAMETER[\"Longitude of rotated pole\",-30,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               "                ID[\"EPSG\",9122]]],\n"
+               "        PARAMETER[\"Axis rotation\",-25,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               "                ID[\"EPSG\",9122]]]],\n"
+               "    CS[ellipsoidal,2],\n"
+               "        AXIS[\"latitude\",north,\n"
+               "            ORDER[1],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               "                ID[\"EPSG\",9122]]],\n"
+               "        AXIS[\"longitude\",east,\n"
+               "            ORDER[2],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               "                ID[\"EPSG\",9122]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "WMO Atlantic Pole");
+
+    EXPECT_EQ(*(crs->baseCRS()->name()->description()), "WGS 84");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs->baseCRS()) !=
+                nullptr);
+
+    EXPECT_EQ(*(crs->derivingConversion()->name()->description()),
+              "Atlantic pole");
+
+    EXPECT_TRUE(nn_dynamic_pointer_cast<EllipsoidalCS>(
+                    crs->coordinateSystem()) != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, DerivedGeodeticCRS) {
+    auto wkt = "GEODCRS[\"Derived geodetic CRS\",\n"
+               "    BASEGEODCRS[\"WGS 84\",\n"
+               "        DATUM[\"WGS_1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+               "    DERIVINGCONVERSION[\"Some conversion\",\n"
+               "        METHOD[\"Some method\"]],\n"
+               "    CS[Cartesian,3],\n"
+               "        AXIS[\"(X)\",geocentricX,\n"
+               "            ORDER[1],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]],\n"
+               "        AXIS[\"(Y)\",geocentricY,\n"
+               "            ORDER[2],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]],\n"
+               "        AXIS[\"(Z)\",geocentricZ,\n"
+               "            ORDER[3],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]]";
+    ;
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedGeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "Derived geodetic CRS");
+
+    EXPECT_EQ(*(crs->baseCRS()->name()->description()), "WGS 84");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(crs->baseCRS()) !=
+                nullptr);
+
+    EXPECT_EQ(*(crs->derivingConversion()->name()->description()),
+              "Some conversion");
+
+    EXPECT_TRUE(nn_dynamic_pointer_cast<CartesianCS>(crs->coordinateSystem()) !=
+                nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);
@@ -1537,6 +1677,14 @@ TEST(wkt_parse, invalid_CS_of_GEODCRS) {
             ",CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[2]],AXIS["
             "\"longitude\",east]]"),
         ParsingException);
+
+    // Invalid CS type
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     startWKT +
+                     ",CS[vertical,1],\n"
+                     "        AXIS[\"gravity-related height (H)\",up],\n"
+                     "        UNIT[\"metre\",1]]"),
+                 ParsingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -1986,6 +2134,7 @@ TEST(wkt_parse, invalid_BOUNDCRS) {
             "ABRIDGEDTRANSFORMATION[\"foo\",METHOD[]]]"),
         ParsingException);
 }
+
 // ---------------------------------------------------------------------------
 
 TEST(wkt_parse, invalid_TOWGS84) {
@@ -2006,4 +2155,88 @@ TEST(wkt_parse, invalid_TOWGS84) {
                      "    PRIMEM[\"Greenwich\",0],"
                      "    UNIT[\"degree\",0.0174532925199433]]"),
                  ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_DerivedGeographicCRS) {
+
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        "GEODCRS[\"WMO Atlantic Pole\",\n"
+        "    BASEGEODCRS[\"WGS 84\",\n"
+        "        DATUM[\"WGS_1984\",\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
+        "    DERIVINGCONVERSION[\"foo\",\n"
+        "        METHOD[\"bar\"]],\n"
+        "    CS[ellipsoidal,2],\n"
+        "        AXIS[\"latitude\",north],\n"
+        "        AXIS[\"longitude\",east]]"));
+
+    // Missing DERIVINGCONVERSION
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "GEODCRS[\"WMO Atlantic Pole\",\n"
+            "    BASEGEODCRS[\"WGS 84\",\n"
+            "        DATUM[\"WGS_1984\",\n"
+            "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
+            "    CS[ellipsoidal,2],\n"
+            "        AXIS[\"latitude\",north],\n"
+            "        AXIS[\"longitude\",east]]"),
+        ParsingException);
+
+    // Missing CS
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "GEODCRS[\"WMO Atlantic Pole\",\n"
+            "    BASEGEODCRS[\"WGS 84\",\n"
+            "        DATUM[\"WGS_1984\",\n"
+            "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
+            "    DERIVINGCONVERSION[\"foo\",\n"
+            "        METHOD[\"bar\"]]]"),
+        ParsingException);
+
+    // CS should be ellipsoidal given root node is GEOGCRS
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "GEOGCRS[\"WMO Atlantic Pole\",\n"
+            "    BASEGEOGCRS[\"WGS 84\",\n"
+            "        DATUM[\"WGS_1984\",\n"
+            "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
+            "    DERIVINGCONVERSION[\"foo\",\n"
+            "        METHOD[\"bar\"]],\n"
+            "    CS[Cartesian,3],\n"
+            "        AXIS[\"(X)\",geocentricX],\n"
+            "        AXIS[\"(Y)\",geocentricY],\n"
+            "        AXIS[\"(Z)\",geocentricZ],\n"
+            "        UNIT[\"metre\",1]]"),
+        ParsingException);
+
+    // CS should have 3 axis
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "GEODCRS[\"WMO Atlantic Pole\",\n"
+            "    BASEGEODCRS[\"WGS 84\",\n"
+            "        DATUM[\"WGS_1984\",\n"
+            "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
+            "    DERIVINGCONVERSION[\"foo\",\n"
+            "        METHOD[\"bar\"]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"(X)\",geocentricX],\n"
+            "        AXIS[\"(Y)\",geocentricY],\n"
+            "        UNIT[\"metre\",1]]"),
+        ParsingException);
+
+    // Invalid CS type
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "GEODCRS[\"WMO Atlantic Pole\",\n"
+            "    BASEGEODCRS[\"WGS 84\",\n"
+            "        DATUM[\"WGS_1984\",\n"
+            "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]]],\n"
+            "    DERIVINGCONVERSION[\"foo\",\n"
+            "        METHOD[\"bar\"]],\n"
+            "    CS[vertical,1],\n"
+            "        AXIS[\"gravity-related height (H)\",up],\n"
+            "        UNIT[\"metre\",1]]"),
+        ParsingException);
 }

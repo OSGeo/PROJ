@@ -364,7 +364,7 @@ std::string Identifier::exportToWKT(WKTFormatterNNPtr formatter) const {
             formatter->startNode(WKTConstants::ID, false);
             formatter->addQuotedString(*(codeSpace()));
             try {
-                std::stoi(l_code);
+                (void)std::stoi(l_code);
                 formatter->add(l_code);
             } catch (const std::exception &) {
                 formatter->addQuotedString(l_code);
@@ -372,7 +372,7 @@ std::string Identifier::exportToWKT(WKTFormatterNNPtr formatter) const {
             if (version().has_value()) {
                 auto l_version = *(version());
                 try {
-                    std::stod(l_version);
+                    (void)std::stod(l_version);
                     formatter->add(l_version);
                 } catch (const std::exception &) {
                     formatter->addQuotedString(l_version);

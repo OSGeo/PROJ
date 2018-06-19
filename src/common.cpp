@@ -223,6 +223,12 @@ Measure Measure::convertToUnit(const UnitOfMeasure &otherUnit) const {
 
 // ---------------------------------------------------------------------------
 
+bool Measure::operator==(const Measure &other) const {
+    return d->value_ == other.d->value_ && d->unit_ == other.d->unit_;
+}
+
+// ---------------------------------------------------------------------------
+
 Scale::Scale(double valueIn, const UnitOfMeasure &unitIn)
     : Measure(valueIn, unitIn) {}
 

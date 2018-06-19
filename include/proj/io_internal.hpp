@@ -100,6 +100,7 @@ class WKTConstants {
     static const std::string STEP;                  // WKT2-2018
     static const std::string BOUNDCRS;
     static const std::string ABRIDGEDTRANSFORMATION;
+    static const std::string DERIVINGCONVERSION;
 
     // WKT2 long
     static const std::string GEODETICCRS;

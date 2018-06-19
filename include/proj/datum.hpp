@@ -157,10 +157,23 @@ class Ellipsoid : public common::IdentifiedObject, public io::IWKTExportable {
     PROJ_DLL const util::optional<common::Length> &semiMedianAxis() const;
 
     // non-standard
+
+    PROJ_DLL common::Scale computeInverseFlattening() const;
+    PROJ_DLL common::Length computeSemiMinorAxis() const;
+
+    PROJ_DLL static EllipsoidNNPtr
+    createSphere(const util::PropertyMap &properties,
+                 const common::Length &radius);
+
     PROJ_DLL static EllipsoidNNPtr
     createFlattenedSphere(const util::PropertyMap &properties,
                           const common::Length &semiMajorAxisIn,
                           const common::Scale &invFlattening);
+
+    PROJ_DLL static EllipsoidNNPtr
+    createTwoAxis(const util::PropertyMap &properties,
+                  const common::Length &semiMajorAxisIn,
+                  const common::Length &semiMinorAxisIn);
 
     PROJ_DLL static const EllipsoidNNPtr EPSG_7030; // WGS 84
 
@@ -176,8 +189,14 @@ class Ellipsoid : public common::IdentifiedObject, public io::IWKTExportable {
     common::Length *semiMedianAxis_;
 #endif
 
+    Ellipsoid(const common::Length &radius);
+
     Ellipsoid(const common::Length &semiMajorAxisIn,
               const common::Scale &invFlattening);
+
+    Ellipsoid(const common::Length &semiMajorAxisIn,
+              const common::Length &semiMinorAxisIn);
+
     INLINED_MAKE_SHARED
 
   private:
@@ -198,8 +217,11 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
   public:
     PROJ_DLL ~GeodeticReferenceFrame() override;
 
-    PROJ_DLL const PrimeMeridianPtr &primeMeridian() const;
-    PROJ_DLL const EllipsoidPtr &ellipsoid() const;
+    PROJ_DLL const PrimeMeridianNNPtr &primeMeridian() const;
+
+    // We constraint more than the standard into which the ellipsoid might
+    // be omitted for a CRS with a non-ellipsoidal CS
+    PROJ_DLL const EllipsoidNNPtr &ellipsoid() const;
 
     // non-standard
     PROJ_DLL static GeodeticReferenceFrameNNPtr
@@ -218,7 +240,8 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
     Ellipsoid *ellipsoid_;
 #endif
 
-    GeodeticReferenceFrame();
+    GeodeticReferenceFrame(const EllipsoidNNPtr &ellipsoidIn,
+                           const PrimeMeridianNNPtr &primeMeridianIn);
     INLINED_MAKE_SHARED
 
   private:
@@ -242,7 +265,8 @@ class DynamicGeodeticReferenceFrame : public GeodeticReferenceFrame {
     Measure frameReferenceEpoch_;
 #endif
 
-    DynamicGeodeticReferenceFrame();
+    DynamicGeodeticReferenceFrame(const EllipsoidNNPtr &ellipsoidIn,
+                                  const PrimeMeridianNNPtr &primeMeridianIn);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
