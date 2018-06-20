@@ -52,7 +52,8 @@ unset(_save_cxx_flags)
 #
 add_executable(proj_test_unit
   main.cpp
-  basic_test.cpp)
+  basic_test.cpp
+  proj_strtod_test.cpp)
 target_link_libraries(proj_test_unit
   gtest
   ${PROJ_LIBRARIES})
