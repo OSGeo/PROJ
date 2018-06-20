@@ -190,7 +190,7 @@ class CoordinateSystem : public common::IdentifiedObject,
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 
-    PROJ_DLL virtual std::string getWKT2Type() const = 0;
+    PROJ_DLL virtual std::string getWKT2Type(io::WKTFormatterNNPtr) const = 0;
 
   protected:
     CoordinateSystem();
@@ -223,7 +223,9 @@ class SphericalCS : public CoordinateSystem {
            const CoordinateSystemAxisNNPtr &axis1,
            const CoordinateSystemAxisNNPtr &axis2);
 
-    PROJ_DLL std::string getWKT2Type() const override { return "spherical"; }
+    PROJ_DLL std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
+        return "spherical";
+    }
 
   protected:
     SphericalCS();
@@ -259,7 +261,9 @@ class EllipsoidalCS : public CoordinateSystem {
         const common::UnitOfMeasure &angularUnit,
         const common::UnitOfMeasure &linearUnit);
 
-    PROJ_DLL std::string getWKT2Type() const override { return "ellipsoidal"; }
+    PROJ_DLL std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
+        return "ellipsoidal";
+    }
 
   protected:
     EllipsoidalCS();
@@ -287,7 +291,9 @@ class VerticalCS : public CoordinateSystem {
     PROJ_DLL static VerticalCSNNPtr
     createGravityRelatedHeight(const common::UnitOfMeasure &unit);
 
-    PROJ_DLL std::string getWKT2Type() const override { return "vertical"; }
+    PROJ_DLL std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
+        return "vertical";
+    }
 
   protected:
     VerticalCS();
@@ -321,7 +327,9 @@ class CartesianCS : public CoordinateSystem {
     PROJ_DLL static CartesianCSNNPtr
     createGeocentric(const common::UnitOfMeasure &unit);
 
-    PROJ_DLL std::string getWKT2Type() const override { return "Cartesian"; }
+    PROJ_DLL std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
+        return "Cartesian";
+    }
 
   protected:
     CartesianCS();
@@ -329,6 +337,98 @@ class CartesianCS : public CoordinateSystem {
     INLINED_MAKE_SHARED
   private:
     CartesianCS(const CartesianCS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
+class TemporalCS;
+using TemporalCSPtr = std::shared_ptr<TemporalCS>;
+using TemporalCSNNPtr = util::nn<TemporalCSPtr>;
+
+class TemporalCS : public CoordinateSystem {
+  public:
+    PROJ_DLL ~TemporalCS() override;
+
+    PROJ_DLL std::string
+    getWKT2Type(io::WKTFormatterNNPtr formatter) const override = 0;
+
+  protected:
+    explicit TemporalCS(const CoordinateSystemAxisNNPtr &axis);
+    INLINED_MAKE_SHARED
+  private:
+    TemporalCS(const TemporalCS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
+class DateTimeTemporalCS;
+using DateTimeTemporalCSPtr = std::shared_ptr<DateTimeTemporalCS>;
+using DateTimeTemporalCSNNPtr = util::nn<DateTimeTemporalCSPtr>;
+
+class DateTimeTemporalCS : public TemporalCS {
+  public:
+    PROJ_DLL ~DateTimeTemporalCS() override;
+
+    PROJ_DLL static DateTimeTemporalCSNNPtr
+    create(const util::PropertyMap &properties,
+           const CoordinateSystemAxisNNPtr &axis);
+
+    PROJ_DLL std::string
+    getWKT2Type(io::WKTFormatterNNPtr formatter) const override;
+
+  protected:
+    explicit DateTimeTemporalCS(const CoordinateSystemAxisNNPtr &axis);
+    INLINED_MAKE_SHARED
+  private:
+    DateTimeTemporalCS(const DateTimeTemporalCS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
+class TemporalCountCS;
+using TemporalCountCSPtr = std::shared_ptr<TemporalCountCS>;
+using TemporalCountCSNNPtr = util::nn<TemporalCountCSPtr>;
+
+class TemporalCountCS : public TemporalCS {
+  public:
+    PROJ_DLL ~TemporalCountCS() override;
+
+    PROJ_DLL static TemporalCountCSNNPtr
+    create(const util::PropertyMap &properties,
+           const CoordinateSystemAxisNNPtr &axis);
+
+    PROJ_DLL std::string
+    getWKT2Type(io::WKTFormatterNNPtr formatter) const override;
+
+  protected:
+    explicit TemporalCountCS(const CoordinateSystemAxisNNPtr &axis);
+    INLINED_MAKE_SHARED
+  private:
+    TemporalCountCS(const TemporalCountCS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
+class TemporalMeasureCS;
+using TemporalMeasureCSPtr = std::shared_ptr<TemporalMeasureCS>;
+using TemporalMeasureCSNNPtr = util::nn<TemporalMeasureCSPtr>;
+
+class TemporalMeasureCS : public TemporalCS {
+  public:
+    PROJ_DLL ~TemporalMeasureCS() override;
+
+    PROJ_DLL static TemporalMeasureCSNNPtr
+    create(const util::PropertyMap &properties,
+           const CoordinateSystemAxisNNPtr &axis);
+
+    PROJ_DLL std::string
+    getWKT2Type(io::WKTFormatterNNPtr formatter) const override;
+
+  protected:
+    explicit TemporalMeasureCS(const CoordinateSystemAxisNNPtr &axis);
+    INLINED_MAKE_SHARED
+  private:
+    TemporalMeasureCS(const TemporalMeasureCS &other) = delete;
 };
 
 } // namespace cs

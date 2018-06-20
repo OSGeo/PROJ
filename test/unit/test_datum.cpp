@@ -109,3 +109,56 @@ TEST(datum, datum_with_ANCHOR) {
 
     EXPECT_EQ(datum->exportToWKT(WKTFormatter::create()), expected);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, temporal_datum_WKT2) {
+    auto datum = TemporalDatum::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Gregorian calendar"),
+        DateTime::create("0000-01-01"),
+        TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN);
+
+    auto expected = "TDATUM[\"Gregorian calendar\",\n"
+                    "    TIMEORIGIN[0000-01-01]]";
+
+    EXPECT_EQ(datum->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+              expected);
+
+    EXPECT_THROW(datum->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, temporal_datum_time_origin_non_ISO8601) {
+    auto datum = TemporalDatum::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Gregorian calendar"),
+        DateTime::create("0001 January 1st"),
+        TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN);
+
+    auto expected = "TDATUM[\"Gregorian calendar\",\n"
+                    "    TIMEORIGIN[\"0001 January 1st\"]]";
+
+    EXPECT_EQ(datum->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, temporal_datum_WKT2_2018) {
+    auto datum = TemporalDatum::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Gregorian calendar"),
+        DateTime::create("0000-01-01"),
+        TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN);
+
+    auto expected = "TDATUM[\"Gregorian calendar\",\n"
+                    "    CALENDAR[\"proleptic Gregorian\"],\n"
+                    "    TIMEORIGIN[0000-01-01]]";
+
+    EXPECT_EQ(datum->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}

@@ -414,6 +414,40 @@ class DerivedGeographicCRS : public GeographicCRS, public DerivedCRS {
 
 // ---------------------------------------------------------------------------
 
+class TemporalCRS;
+using TemporalCRSPtr = std::shared_ptr<TemporalCRS>;
+using TemporalCRSNNPtr = util::nn<TemporalCRSPtr>;
+
+class TemporalCRS : public SingleCRS {
+  public:
+    PROJ_DLL ~TemporalCRS() override;
+
+    PROJ_DLL const datum::TemporalDatumNNPtr datum() const;
+
+    PROJ_DLL const cs::TemporalCSNNPtr coordinateSystem() const;
+
+    PROJ_DLL static TemporalCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const datum::TemporalDatumNNPtr &datumIn,
+           const cs::TemporalCSNNPtr &csIn);
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+  protected:
+    TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,
+                const cs::TemporalCSNNPtr &csIn);
+
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    TemporalCRS(const TemporalCRS &other) = delete;
+    TemporalCRS &operator=(const TemporalCRS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
 #ifdef notdef
 
 // ---------------------------------------------------------------------------
@@ -431,12 +465,6 @@ class EngineeringCRS : public SingleCRS {
 // ---------------------------------------------------------------------------
 
 class ParametricCRS : public SingleCRS {
-    // TODO
-};
-
-// ---------------------------------------------------------------------------
-
-class TemporalCRS : public SingleCRS {
     // TODO
 };
 

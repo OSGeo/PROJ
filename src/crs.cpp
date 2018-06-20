@@ -194,7 +194,8 @@ GeodeticCRS::velocityModel() const {
 // ---------------------------------------------------------------------------
 
 bool GeodeticCRS::isGeocentric() const {
-    return coordinateSystem()->getWKT2Type() == "Cartesian" &&
+    return coordinateSystem()->getWKT2Type(WKTFormatter::create()) ==
+               "Cartesian" &&
            coordinateSystem()->axisList().size() == 3 &&
            coordinateSystem()->axisList()[0]->axisDirection() ==
                AxisDirection::GEOCENTRIC_X &&
@@ -973,6 +974,62 @@ DerivedGeographicCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
     derivingConversion()->exportToWKT(formatter);
     formatter->setUseDerivingConversion(false);
 
+    coordinateSystem()->exportToWKT(formatter);
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct TemporalCRS::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+TemporalCRS::~TemporalCRS() = default;
+
+// ---------------------------------------------------------------------------
+
+TemporalCRS::TemporalCRS(const TemporalDatumNNPtr &datumIn,
+                         const TemporalCSNNPtr &csIn)
+    : SingleCRS(datumIn, csIn), d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+const TemporalDatumNNPtr TemporalCRS::datum() const {
+    return NN_CHECK_ASSERT(std::dynamic_pointer_cast<TemporalDatum>(
+        SingleCRS::getPrivate()->datum));
+}
+
+// ---------------------------------------------------------------------------
+
+const TemporalCSNNPtr TemporalCRS::coordinateSystem() const {
+    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<TemporalCS>(
+        SingleCRS::getPrivate()->coordinateSystem));
+}
+
+// ---------------------------------------------------------------------------
+
+TemporalCRSNNPtr TemporalCRS::create(const PropertyMap &properties,
+                                     const TemporalDatumNNPtr &datumIn,
+                                     const TemporalCSNNPtr &csIn) {
+    auto crs(TemporalCRS::nn_make_shared<TemporalCRS>(datumIn, csIn));
+    crs->setProperties(properties);
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string TemporalCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        throw FormattingException("TemporalCRS can only be exported to WKT2");
+    }
+    formatter->startNode(WKTConstants::TIMECRS, !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+    datum()->exportToWKT(formatter);
     coordinateSystem()->exportToWKT(formatter);
     ObjectUsage::_exportToWKT(formatter);
     formatter->endNode();

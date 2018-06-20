@@ -329,6 +329,39 @@ class VerticalReferenceFrame : public Datum, public io::IWKTExportable {
 
 // ---------------------------------------------------------------------------
 
+class TemporalDatum;
+using TemporalDatumPtr = std::shared_ptr<TemporalDatum>;
+using TemporalDatumNNPtr = util::nn<TemporalDatumPtr>;
+
+class TemporalDatum : public Datum, public io::IWKTExportable {
+  public:
+    PROJ_DLL ~TemporalDatum() override;
+
+    PROJ_DLL const common::DateTime &temporalOrigin() const;
+    PROJ_DLL const std::string &calendar() const;
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL static const std::string CALENDAR_PROLEPTIC_GREGORIAN;
+
+    // non-standard
+    PROJ_DLL static TemporalDatumNNPtr
+    create(const util::PropertyMap &properties,
+           const common::DateTime &temporalOriginIn,
+           const std::string &calendarIn);
+
+  protected:
+    TemporalDatum(const common::DateTime &temporalOriginIn,
+                  const std::string &calendarIn);
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
 // TODO DynamicVerticalReferenceFrame
 
 } // namespace datum

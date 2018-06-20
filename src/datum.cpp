@@ -516,7 +516,6 @@ const Measure &DynamicGeodeticReferenceFrame::frameReferenceEpoch() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-// cppcheck-suppress copyCtorAndEqOperator
 struct DatumEnsemble::Private {
     std::vector<DatumPtr> datums{};
     PositionalAccuracyNNPtr positionalAccuracy;
@@ -564,7 +563,6 @@ operator=(const RealizationMethod &other) {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-// cppcheck-suppress copyCtorAndEqOperator
 struct VerticalReferenceFrame::Private {
     optional<RealizationMethod> realizationMethod_{};
 };
@@ -632,5 +630,80 @@ std::string VerticalReferenceFrame::exportToWKT(
         }
         formatter->endNode();
     }
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct TemporalDatum::Private {
+    DateTime temporalOrigin_;
+    std::string calendar_;
+
+    Private(const DateTime &temporalOriginIn, const std::string &calendarIn)
+        : temporalOrigin_(temporalOriginIn), calendar_(calendarIn) {}
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+TemporalDatum::TemporalDatum(const DateTime &temporalOriginIn,
+                             const std::string &calendarIn)
+    : d(internal::make_unique<Private>(temporalOriginIn, calendarIn)) {}
+
+// ---------------------------------------------------------------------------
+
+TemporalDatum::~TemporalDatum() = default;
+
+// ---------------------------------------------------------------------------
+
+const DateTime &TemporalDatum::temporalOrigin() const {
+    return d->temporalOrigin_;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::string &TemporalDatum::calendar() const { return d->calendar_; }
+
+// ---------------------------------------------------------------------------
+
+TemporalDatumNNPtr TemporalDatum::create(const PropertyMap &properties,
+                                         const DateTime &temporalOriginIn,
+                                         const std::string &calendarIn) {
+    auto datum(TemporalDatum::nn_make_shared<TemporalDatum>(temporalOriginIn,
+                                                            calendarIn));
+    datum->setProperties(properties);
+    return datum;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string TemporalDatum::exportToWKT(
+    WKTFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        throw FormattingException("TemporalDatum can only be exported to WKT2");
+    }
+    formatter->startNode(WKTConstants::TDATUM, !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+    if (formatter->use2018Keywords()) {
+        formatter->startNode(WKTConstants::CALENDAR, false);
+        formatter->addQuotedString(calendar());
+        formatter->endNode();
+    }
+
+    const auto &timeOriginStr = temporalOrigin().toString();
+    if (!timeOriginStr.empty()) {
+        formatter->startNode(WKTConstants::TIMEORIGIN, false);
+        if (temporalOrigin().isISO_8601()) {
+            formatter->add(timeOriginStr);
+        } else {
+            formatter->addQuotedString(timeOriginStr);
+        }
+        formatter->endNode();
+    }
+
+    formatter->endNode();
     return formatter->toString();
 }

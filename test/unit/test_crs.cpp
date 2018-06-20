@@ -1338,3 +1338,171 @@ TEST(crs, derivedGeodeticCRS_WKT1) {
                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
                  FormattingException);
 }
+
+// ---------------------------------------------------------------------------
+
+static TemporalCRSNNPtr createDateTimeTemporalCRS() {
+
+    auto datum = TemporalDatum::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Gregorian calendar"),
+        DateTime::create("0000-01-01"),
+        TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN);
+
+    auto cs = DateTimeTemporalCS::create(
+        PropertyMap(),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Time"), "T",
+            AxisDirection::FUTURE, UnitOfMeasure::NONE));
+
+    return TemporalCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Temporal CRS"), datum,
+        cs);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, dateTimeTemporalCRS_WKT2) {
+
+    auto expected = "TIMECRS[\"Temporal CRS\",\n"
+                    "    TDATUM[\"Gregorian calendar\",\n"
+                    "        TIMEORIGIN[0000-01-01]],\n"
+                    "    CS[temporal,1],\n"
+                    "        AXIS[\"time (T)\",future]]";
+
+    EXPECT_EQ(createDateTimeTemporalCRS()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+              expected);
+
+    EXPECT_THROW(createDateTimeTemporalCRS()->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, dateTimeTemporalCRS_WKT2_2018) {
+
+    auto expected = "TIMECRS[\"Temporal CRS\",\n"
+                    "    TDATUM[\"Gregorian calendar\",\n"
+                    "        CALENDAR[\"proleptic Gregorian\"],\n"
+                    "        TIMEORIGIN[0000-01-01]],\n"
+                    "    CS[TemporalDateTime,1],\n"
+                    "        AXIS[\"time (T)\",future]]";
+
+    EXPECT_EQ(createDateTimeTemporalCRS()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+static TemporalCRSNNPtr createTemporalCountCRSWithConvFactor() {
+
+    auto datum = TemporalDatum::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "GPS time origin"),
+        DateTime::create("1980-01-01T00:00:00.0Z"),
+        TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN);
+
+    auto cs = TemporalCountCS::create(
+        PropertyMap(),
+        CoordinateSystemAxis::create(PropertyMap(), "T", AxisDirection::FUTURE,
+                                     UnitOfMeasure("milliseconds (ms)", 0.001,
+                                                   UnitOfMeasure::Type::TIME)));
+
+    return TemporalCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "GPS milliseconds"),
+        datum, cs);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, temporalCountCRSWithConvFactor_WKT2_2018) {
+
+    auto expected = "TIMECRS[\"GPS milliseconds\",\n"
+                    "    TDATUM[\"GPS time origin\",\n"
+                    "        CALENDAR[\"proleptic Gregorian\"],\n"
+                    "        TIMEORIGIN[1980-01-01T00:00:00.0Z]],\n"
+                    "    CS[TemporalCount,1],\n"
+                    "        AXIS[\"(T)\",future,\n"
+                    "            TIMEUNIT[\"milliseconds (ms)\",0.001]]]";
+
+    EXPECT_EQ(createTemporalCountCRSWithConvFactor()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+static TemporalCRSNNPtr createTemporalCountCRSWithoutConvFactor() {
+
+    auto datum = TemporalDatum::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "29 December 1979"),
+        DateTime::create("1979-12-29T00"),
+        TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN);
+
+    auto cs = TemporalCountCS::create(
+        PropertyMap(),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Time"), "",
+            AxisDirection::FUTURE,
+            UnitOfMeasure("hour", 0, UnitOfMeasure::Type::TIME)));
+
+    return TemporalCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                          "Calendar hours from 1979-12-29"),
+        datum, cs);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, temporalCountCRSWithoutConvFactor_WKT2_2018) {
+
+    auto expected = "TIMECRS[\"Calendar hours from 1979-12-29\",\n"
+                    "    TDATUM[\"29 December 1979\",\n"
+                    "        CALENDAR[\"proleptic Gregorian\"],\n"
+                    "        TIMEORIGIN[1979-12-29T00]],\n"
+                    "    CS[TemporalCount,1],\n"
+                    "        AXIS[\"time\",future,\n"
+                    "            TIMEUNIT[\"hour\"]]]";
+
+    EXPECT_EQ(createTemporalCountCRSWithoutConvFactor()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+static TemporalCRSNNPtr createTemporalMeasureCRSWithoutConvFactor() {
+
+    auto datum = TemporalDatum::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Common Era"),
+        DateTime::create("0000"), TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN);
+
+    auto cs = TemporalMeasureCS::create(
+        PropertyMap(),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Decimal years"), "a",
+            AxisDirection::FUTURE,
+            UnitOfMeasure("year", 0, UnitOfMeasure::Type::TIME)));
+
+    return TemporalCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Decimal Years CE"),
+        datum, cs);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
+
+    auto expected = "TIMECRS[\"Decimal Years CE\",\n"
+                    "    TDATUM[\"Common Era\",\n"
+                    "        CALENDAR[\"proleptic Gregorian\"],\n"
+                    "        TIMEORIGIN[0000]],\n"
+                    "    CS[TemporalMeasure,1],\n"
+                    "        AXIS[\"decimal years (a)\",future,\n"
+                    "            TIMEUNIT[\"year\"]]]";
+
+    EXPECT_EQ(createTemporalMeasureCRSWithoutConvFactor()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}

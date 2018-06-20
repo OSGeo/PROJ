@@ -1431,6 +1431,176 @@ TEST(wkt_parse, DerivedGeodeticCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, TemporalDatum) {
+    auto wkt = "TDATUM[\"Gregorian calendar\",\n"
+               "    CALENDAR[\"my calendar\"],\n"
+               "    TIMEORIGIN[0000-01-01]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto tdatum = nn_dynamic_pointer_cast<TemporalDatum>(obj);
+    ASSERT_TRUE(tdatum != nullptr);
+
+    EXPECT_EQ(*(tdatum->name()->description()), "Gregorian calendar");
+    EXPECT_EQ(tdatum->temporalOrigin().toString(), "0000-01-01");
+    EXPECT_EQ(tdatum->calendar(), "my calendar");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, TemporalDatum_no_calendar) {
+    auto wkt = "TDATUM[\"Gregorian calendar\",\n"
+               "    TIMEORIGIN[0000-01-01]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto tdatum = nn_dynamic_pointer_cast<TemporalDatum>(obj);
+    ASSERT_TRUE(tdatum != nullptr);
+
+    EXPECT_EQ(*(tdatum->name()->description()), "Gregorian calendar");
+    EXPECT_EQ(tdatum->temporalOrigin().toString(), "0000-01-01");
+    EXPECT_EQ(tdatum->calendar(), "proleptic Gregorian");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, dateTimeTemporalCRS_WKT2) {
+    auto wkt = "TIMECRS[\"Temporal CRS\",\n"
+               "    TDATUM[\"Gregorian calendar\",\n"
+               "        TIMEORIGIN[0000-01-01]],\n"
+               "    CS[temporal,1],\n"
+               "        AXIS[\"time (T)\",future]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<TemporalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "Temporal CRS");
+    auto tdatum = crs->datum();
+    EXPECT_EQ(*(tdatum->name()->description()), "Gregorian calendar");
+    EXPECT_EQ(tdatum->temporalOrigin().toString(), "0000-01-01");
+    EXPECT_EQ(tdatum->calendar(), "proleptic Gregorian");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<DateTimeTemporalCS>(
+                    crs->coordinateSystem()) != nullptr);
+    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().type(),
+              UnitOfMeasure::Type::NONE);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().name(), "");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, dateTimeTemporalCRS_WKT2_2018) {
+    auto wkt = "TIMECRS[\"Temporal CRS\",\n"
+               "    TDATUM[\"Gregorian calendar\",\n"
+               "        CALENDAR[\"proleptic Gregorian\"],\n"
+               "        TIMEORIGIN[0000-01-01]],\n"
+               "    CS[TemporalDateTime,1],\n"
+               "        AXIS[\"time (T)\",future]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<TemporalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "Temporal CRS");
+    auto tdatum = crs->datum();
+    EXPECT_EQ(*(tdatum->name()->description()), "Gregorian calendar");
+    EXPECT_EQ(tdatum->temporalOrigin().toString(), "0000-01-01");
+    EXPECT_EQ(tdatum->calendar(), "proleptic Gregorian");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<DateTimeTemporalCS>(
+                    crs->coordinateSystem()) != nullptr);
+    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().type(),
+              UnitOfMeasure::Type::NONE);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().name(), "");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, temporalCountCRSWithConvFactor_WKT2_2018) {
+    auto wkt = "TIMECRS[\"GPS milliseconds\",\n"
+               "    TDATUM[\"GPS time origin\",\n"
+               "        TIMEORIGIN[1980-01-01T00:00:00.0Z]],\n"
+               "    CS[TemporalCount,1],\n"
+               "        AXIS[\"(T)\",future,\n"
+               "            TIMEUNIT[\"milliseconds (ms)\",0.001]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<TemporalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "GPS milliseconds");
+    auto tdatum = crs->datum();
+    EXPECT_EQ(*(tdatum->name()->description()), "GPS time origin");
+    EXPECT_EQ(tdatum->temporalOrigin().toString(), "1980-01-01T00:00:00.0Z");
+    EXPECT_EQ(tdatum->calendar(), "proleptic Gregorian");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<TemporalCountCS>(
+                    crs->coordinateSystem()) != nullptr);
+    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().name(),
+              "milliseconds (ms)");
+    EXPECT_EQ(
+        crs->coordinateSystem()->axisList()[0]->axisUnitID().conversionToSI(),
+        0.001);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, temporalCountCRSWithoutConvFactor_WKT2_2018) {
+    auto wkt = "TIMECRS[\"Calendar hours from 1979-12-29\",\n"
+               "    TDATUM[\"29 December 1979\",\n"
+               "        CALENDAR[\"proleptic Gregorian\"],\n"
+               "        TIMEORIGIN[1979-12-29T00]],\n"
+               "    CS[TemporalCount,1],\n"
+               "        AXIS[\"time\",future,\n"
+               "            TIMEUNIT[\"hour\"]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<TemporalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "Calendar hours from 1979-12-29");
+    auto tdatum = crs->datum();
+    EXPECT_EQ(*(tdatum->name()->description()), "29 December 1979");
+    EXPECT_EQ(tdatum->temporalOrigin().toString(), "1979-12-29T00");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<TemporalCountCS>(
+                    crs->coordinateSystem()) != nullptr);
+    ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().name(),
+              "hour");
+    EXPECT_EQ(
+        crs->coordinateSystem()->axisList()[0]->axisUnitID().conversionToSI(),
+        0.0);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
+    auto wkt = "TIMECRS[\"Decimal Years CE\",\n"
+               "    TIMEDATUM[\"Common Era\",\n"
+               "        TIMEORIGIN[0000]],\n"
+               "    CS[TemporalMeasure,1],\n"
+               "        AXIS[\"decimal years (a)\",future,\n"
+               "            TIMEUNIT[\"year\"]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<TemporalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "Decimal Years CE");
+    auto tdatum = crs->datum();
+    EXPECT_EQ(*(tdatum->name()->description()), "Common Era");
+    EXPECT_EQ(tdatum->temporalOrigin().toString(), "0000");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<TemporalMeasureCS>(
+                    crs->coordinateSystem()) != nullptr);
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 1);
+    auto axis = cs->axisList()[0];
+    EXPECT_EQ(*(axis->name()->description()), "Decimal years");
+    EXPECT_EQ(axis->axisUnitID().name(), "year");
+    EXPECT_EQ(axis->axisUnitID().conversionToSI(), 0.0);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);
@@ -2238,5 +2408,82 @@ TEST(wkt_parse, invalid_DerivedGeographicCRS) {
             "    CS[vertical,1],\n"
             "        AXIS[\"gravity-related height (H)\",up],\n"
             "        UNIT[\"metre\",1]]"),
+        ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_TemporalCRS) {
+
+    EXPECT_NO_THROW(
+        WKTParser().createFromWKT("TIMECRS[\"Temporal CRS\",\n"
+                                  "    TDATUM[\"Gregorian calendar\",\n"
+                                  "        TIMEORIGIN[0000-01-01]],\n"
+                                  "    CS[temporal,1],\n"
+                                  "        AXIS[\"time (T)\",future]]"));
+
+    // Missing TDATUM
+    EXPECT_THROW(
+        WKTParser().createFromWKT("TIMECRS[\"Temporal CRS\",\n"
+                                  "    CS[temporal,1],\n"
+                                  "        AXIS[\"time (T)\",future]]"),
+        ParsingException);
+
+    // Missing CS
+    EXPECT_THROW(
+        WKTParser().createFromWKT("TIMECRS[\"Temporal CRS\",\n"
+                                  "    TDATUM[\"Gregorian calendar\",\n"
+                                  "        TIMEORIGIN[0000-01-01]]]"),
+        ParsingException);
+
+    // CS should be temporal
+    EXPECT_THROW(
+        WKTParser().createFromWKT("TIMECRS[\"Temporal CRS\",\n"
+                                  "    TDATUM[\"Gregorian calendar\",\n"
+                                  "        TIMEORIGIN[0000-01-01]],\n"
+                                  "    CS[Cartesian,2],\n"
+                                  "        AXIS[\"(X)\",geocentricX],\n"
+                                  "        AXIS[\"(Y)\",geocentricY],\n"
+                                  "        UNIT[\"metre\",1]]"),
+        ParsingException);
+
+    // CS should have 1 axis
+    EXPECT_THROW(
+        WKTParser().createFromWKT("TIMECRS[\"Temporal CRS\",\n"
+                                  "    TDATUM[\"Gregorian calendar\",\n"
+                                  "        TIMEORIGIN[0000-01-01]],\n"
+                                  "    CS[temporal,2],\n"
+                                  "        AXIS[\"time (T)\",future],\n"
+                                  "        AXIS[\"time2 (T)\",future]]"),
+        ParsingException);
+
+    // CS should have 1 axis
+    EXPECT_THROW(
+        WKTParser().createFromWKT("TIMECRS[\"Temporal CRS\",\n"
+                                  "    TDATUM[\"Gregorian calendar\",\n"
+                                  "        TIMEORIGIN[0000-01-01]],\n"
+                                  "    CS[TemporalDateTime,2],\n"
+                                  "        AXIS[\"time (T)\",future],\n"
+                                  "        AXIS[\"time2 (T)\",future]]"),
+        ParsingException);
+
+    // CS should have 1 axis
+    EXPECT_THROW(
+        WKTParser().createFromWKT("TIMECRS[\"Temporal CRS\",\n"
+                                  "    TDATUM[\"Gregorian calendar\",\n"
+                                  "        TIMEORIGIN[0000-01-01]],\n"
+                                  "    CS[TemporalCount,2],\n"
+                                  "        AXIS[\"time (T)\",future],\n"
+                                  "        AXIS[\"time2 (T)\",future]]"),
+        ParsingException);
+
+    // CS should have 1 axis
+    EXPECT_THROW(
+        WKTParser().createFromWKT("TIMECRS[\"Temporal CRS\",\n"
+                                  "    TDATUM[\"Gregorian calendar\",\n"
+                                  "        TIMEORIGIN[0000-01-01]],\n"
+                                  "    CS[TemporalMeasure,2],\n"
+                                  "        AXIS[\"time (T)\",future],\n"
+                                  "        AXIS[\"time2 (T)\",future]]"),
         ParsingException);
 }

@@ -271,7 +271,8 @@ std::string CoordinateSystemAxis::exportToWKT(WKTFormatterNNPtr formatter,
         formatter->add(order);
         formatter->endNode();
     }
-    if (formatter->outputUnit()) {
+    if (formatter->outputUnit() &&
+        axisUnitID().type() != UnitOfMeasure::Type::NONE) {
         axisUnitID().exportToWKT(formatter);
     }
     if (formatter->outputId()) {
@@ -328,7 +329,7 @@ std::string CoordinateSystem::exportToWKT(
 
     if (isWKT2) {
         formatter->startNode(WKTConstants::CS, !identifiers().empty());
-        formatter->add(getWKT2Type());
+        formatter->add(getWKT2Type(formatter));
         formatter->add(axisList().size());
         formatter->endNode();
         formatter->startNode(std::string(),
@@ -645,4 +646,88 @@ const AxisDirectionWKT1 *AxisDirectionWKT1::valueOf(const std::string &nameIn) {
 
 const std::set<std::string> &AxisDirectionWKT1::getKeys() {
     return axisDirectionWKT1Keys;
+}
+
+// ---------------------------------------------------------------------------
+
+TemporalCS::~TemporalCS() = default;
+
+// ---------------------------------------------------------------------------
+
+TemporalCS::TemporalCS(const CoordinateSystemAxisNNPtr &axisIn)
+    : CoordinateSystem(std::vector<CoordinateSystemAxisNNPtr>{axisIn}) {}
+
+// ---------------------------------------------------------------------------
+
+DateTimeTemporalCS::~DateTimeTemporalCS() = default;
+
+// ---------------------------------------------------------------------------
+
+DateTimeTemporalCS::DateTimeTemporalCS(const CoordinateSystemAxisNNPtr &axisIn)
+    : TemporalCS(axisIn) {}
+
+// ---------------------------------------------------------------------------
+
+DateTimeTemporalCSNNPtr
+DateTimeTemporalCS::create(const PropertyMap &properties,
+                           const CoordinateSystemAxisNNPtr &axisIn) {
+    auto cs(DateTimeTemporalCS::nn_make_shared<DateTimeTemporalCS>(axisIn));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string DateTimeTemporalCS::getWKT2Type(WKTFormatterNNPtr formatter) const {
+    return formatter->use2018Keywords() ? "TemporalDateTime" : "temporal";
+}
+
+// ---------------------------------------------------------------------------
+
+TemporalCountCS::~TemporalCountCS() = default;
+
+// ---------------------------------------------------------------------------
+
+TemporalCountCS::TemporalCountCS(const CoordinateSystemAxisNNPtr &axisIn)
+    : TemporalCS(axisIn) {}
+
+// ---------------------------------------------------------------------------
+
+TemporalCountCSNNPtr
+TemporalCountCS::create(const PropertyMap &properties,
+                        const CoordinateSystemAxisNNPtr &axisIn) {
+    auto cs(TemporalCountCS::nn_make_shared<TemporalCountCS>(axisIn));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string TemporalCountCS::getWKT2Type(WKTFormatterNNPtr formatter) const {
+    return formatter->use2018Keywords() ? "TemporalCount" : "temporal";
+}
+
+// ---------------------------------------------------------------------------
+
+TemporalMeasureCS::~TemporalMeasureCS() = default;
+
+// ---------------------------------------------------------------------------
+
+TemporalMeasureCS::TemporalMeasureCS(const CoordinateSystemAxisNNPtr &axisIn)
+    : TemporalCS(axisIn) {}
+
+// ---------------------------------------------------------------------------
+
+TemporalMeasureCSNNPtr
+TemporalMeasureCS::create(const PropertyMap &properties,
+                          const CoordinateSystemAxisNNPtr &axisIn) {
+    auto cs(TemporalMeasureCS::nn_make_shared<TemporalMeasureCS>(axisIn));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string TemporalMeasureCS::getWKT2Type(WKTFormatterNNPtr formatter) const {
+    return formatter->use2018Keywords() ? "TemporalMeasure" : "temporal";
 }

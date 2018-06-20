@@ -65,7 +65,9 @@ class UnitOfMeasure {
         /** Linear unit of measure */
         LINEAR,
         /** Scale unit of measure */
-        SCALE
+        SCALE,
+        /** Time unit of measure */
+        TIME,
     };
 
     PROJ_DLL UnitOfMeasure(const std::string &nameIn = std::string(),
@@ -92,14 +94,20 @@ class UnitOfMeasure {
                     std::string()) const; // throw(io::FormattingException)
 
     PROJ_DLL static const UnitOfMeasure NONE;
+
     PROJ_DLL static const UnitOfMeasure SCALE_UNITY;
     PROJ_DLL static const UnitOfMeasure PARTS_PER_MILLION;
+
     PROJ_DLL static const UnitOfMeasure METRE;
+
     PROJ_DLL static const UnitOfMeasure RADIAN;
     PROJ_DLL static const UnitOfMeasure MICRORADIAN;
     PROJ_DLL static const UnitOfMeasure DEGREE;
     PROJ_DLL static const UnitOfMeasure ARC_SECOND;
     PROJ_DLL static const UnitOfMeasure GRAD;
+
+    PROJ_DLL static const UnitOfMeasure SECOND;
+    PROJ_DLL static const UnitOfMeasure YEAR;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -175,6 +183,26 @@ class Length : public Measure {
   protected:
     friend class util::optional<Length>;
     Length &operator=(const Length &);
+};
+
+// ---------------------------------------------------------------------------
+
+class DateTime {
+  public:
+    PROJ_DLL DateTime(const DateTime &other);
+    PROJ_DLL ~DateTime();
+
+    PROJ_DLL bool isISO_8601() const;
+    PROJ_DLL std::string toString() const;
+
+    PROJ_DLL static DateTime
+    create(const std::string &str); // may throw Exception
+
+  private:
+    explicit DateTime(const std::string &str);
+    DateTime &operator=(const DateTime &other) = delete;
+
+    PROJ_OPAQUE_PRIVATE_DATA
 };
 
 // ---------------------------------------------------------------------------

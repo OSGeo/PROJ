@@ -134,6 +134,8 @@ std::string UnitOfMeasure::exportToWKT(
             formatter->startNode(WKTConstants::ANGLEUNIT, !authority().empty());
         } else if (isWKT2 && type() == Type::SCALE) {
             formatter->startNode(WKTConstants::SCALEUNIT, !authority().empty());
+        } else if (isWKT2 && type() == Type::TIME) {
+            formatter->startNode(WKTConstants::TIMEUNIT, !authority().empty());
         } else {
             formatter->startNode(WKTConstants::UNIT, !authority().empty());
         }
@@ -141,7 +143,11 @@ std::string UnitOfMeasure::exportToWKT(
 
     {
         formatter->addQuotedString(name());
-        formatter->add(conversionToSI());
+        const auto &factor = conversionToSI();
+        if (factor != 0.0) {
+            // Some TIMEUNIT do not have a conversion factor
+            formatter->add(factor);
+        }
         if (!authority().empty() && formatter->outputId()) {
             formatter->startNode(
                 isWKT2 ? WKTConstants::ID : WKTConstants::AUTHORITY, false);
@@ -289,6 +295,45 @@ Length::~Length() = default;
 // ---------------------------------------------------------------------------
 
 Length &Length::operator=(const Length &) = default;
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct DateTime::Private {
+    std::string str_{};
+
+    explicit Private(const std::string &str) : str_(str) {}
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+DateTime::DateTime(const std::string &str)
+    : d(internal::make_unique<Private>(str)) {}
+
+// ---------------------------------------------------------------------------
+
+DateTime::DateTime(const DateTime &other)
+    : d(internal::make_unique<Private>(*(other.d))) {}
+
+// ---------------------------------------------------------------------------
+
+DateTime::~DateTime() = default;
+
+// ---------------------------------------------------------------------------
+
+DateTime DateTime::create(const std::string &str) { return DateTime(str); }
+
+// ---------------------------------------------------------------------------
+
+bool DateTime::isISO_8601() const {
+    return !d->str_.empty() && d->str_[0] >= '0' && d->str_[0] <= '9' &&
+           d->str_.find(' ') == std::string::npos;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string DateTime::toString() const { return d->str_; }
 
 // ---------------------------------------------------------------------------
 

@@ -107,6 +107,7 @@ DEFINE_WKT_CONSTANT(GEODCRS);
 DEFINE_WKT_CONSTANT(LENGTHUNIT);
 DEFINE_WKT_CONSTANT(ANGLEUNIT);
 DEFINE_WKT_CONSTANT(SCALEUNIT);
+DEFINE_WKT_CONSTANT(TIMEUNIT);
 DEFINE_WKT_CONSTANT(ELLIPSOID);
 DEFINE_WKT_CONSTANT(CS);
 DEFINE_WKT_CONSTANT(ID);
@@ -139,6 +140,10 @@ DEFINE_WKT_CONSTANT(STEP);
 DEFINE_WKT_CONSTANT(BOUNDCRS);
 DEFINE_WKT_CONSTANT(ABRIDGEDTRANSFORMATION);
 DEFINE_WKT_CONSTANT(DERIVINGCONVERSION);
+DEFINE_WKT_CONSTANT(TDATUM);
+DEFINE_WKT_CONSTANT(CALENDAR);
+DEFINE_WKT_CONSTANT(TIMEORIGIN);
+DEFINE_WKT_CONSTANT(TIMECRS);
 
 DEFINE_WKT_CONSTANT(GEODETICCRS);
 DEFINE_WKT_CONSTANT(GEODETICDATUM);
@@ -148,6 +153,7 @@ DEFINE_WKT_CONSTANT(GEOGRAPHICCRS);
 DEFINE_WKT_CONSTANT(GEODETICREFERENCEFRAME);
 DEFINE_WKT_CONSTANT(VERTICALCRS);
 DEFINE_WKT_CONSTANT(VERTICALDATUM);
+DEFINE_WKT_CONSTANT(TIMEDATUM);
 
 // ---------------------------------------------------------------------------
 
@@ -176,6 +182,13 @@ const UnitOfMeasure UnitOfMeasure::RADIAN("radian", 1.0,
 const UnitOfMeasure UnitOfMeasure::MICRORADIAN("microradian", 1e-6,
                                                UnitOfMeasure::Type::ANGULAR,
                                                "EPSG", "9109");
+
+const UnitOfMeasure UnitOfMeasure::SECOND("second", 1.0,
+                                          UnitOfMeasure::Type::TIME, "EPSG",
+                                          "1029");
+const UnitOfMeasure UnitOfMeasure::YEAR("year", 31556925.445,
+                                        UnitOfMeasure::Type::TIME, "EPSG",
+                                        "1040");
 
 // ---------------------------------------------------------------------------
 
@@ -279,6 +292,11 @@ const EllipsoidNNPtr Ellipsoid::EPSG_7030(Ellipsoid::createEPSG_7030());
 
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::EPSG_6326(
     GeodeticReferenceFrame::createEPSG_6326());
+
+// ---------------------------------------------------------------------------
+
+const std::string
+    TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN("proleptic Gregorian");
 
 // ---------------------------------------------------------------------------
 

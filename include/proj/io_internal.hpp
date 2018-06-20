@@ -69,6 +69,7 @@ class WKTConstants {
     static const std::string LENGTHUNIT;
     static const std::string ANGLEUNIT;
     static const std::string SCALEUNIT;
+    static const std::string TIMEUNIT;
     static const std::string ELLIPSOID;
     static const std::string CS;
     static const std::string ID;
@@ -101,6 +102,10 @@ class WKTConstants {
     static const std::string BOUNDCRS;
     static const std::string ABRIDGEDTRANSFORMATION;
     static const std::string DERIVINGCONVERSION;
+    static const std::string TDATUM;
+    static const std::string CALENDAR; // WKT2-2018
+    static const std::string TIMEORIGIN;
+    static const std::string TIMECRS;
 
     // WKT2 long
     static const std::string GEODETICCRS;
@@ -111,6 +116,7 @@ class WKTConstants {
     static const std::string GEODETICREFERENCEFRAME; // WKT2-2018
     static const std::string VERTICALCRS;
     static const std::string VERTICALDATUM;
+    static const std::string TIMEDATUM;
 };
 
 } // namespace io
