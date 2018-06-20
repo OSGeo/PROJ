@@ -230,6 +230,7 @@ version numbers in the files.
                           PROJ_VERSION_PATCH.
   - src/proj_api.h:       Update PJ_VERSION.
   - src/pj_release.c:     Update date to the scheduled release date.
+  - CMakelists.txt:       Update proj_version()
 
 
 *Commit changes to master branch.*
