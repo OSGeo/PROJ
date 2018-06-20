@@ -58,6 +58,15 @@ target_link_libraries(proj_test_unit
   ${PROJ_LIBRARIES})
 add_test(NAME proj_test_unit COMMAND proj_test_unit)
 
+add_executable(proj_errno_string_test
+  main.cpp
+  proj_errno_string_test.cpp)
+target_link_libraries(proj_errno_string_test
+  gtest
+  ${PROJ_LIBRARIES})
+add_test(NAME proj_errno_string_test COMMAND proj_errno_string_test)
+
+
 if (MSVC AND BUILD_LIBPROJ_SHARED)
 # ph_phi2_test not compatible of a .dll build
 else()
