@@ -396,6 +396,7 @@ pj_angular_units[] = {
 
 /***********************************************************************/
 static double get_unit_conversion_factor(const char* name,
+                                         int* p_is_linear,
                                          const char** p_normalized_name) {
 /***********************************************************************/
     int i;
@@ -407,6 +408,9 @@ static double get_unit_conversion_factor(const char* name,
             if( p_normalized_name ) {
                 *p_normalized_name = pj_units[i].name;
             }
+            if( p_is_linear ) {
+                *p_is_linear = 1;
+            }
             return pj_units[i].factor;
         }
     }
@@ -417,11 +421,17 @@ static double get_unit_conversion_factor(const char* name,
             if( p_normalized_name ) {
                 *p_normalized_name = pj_angular_units[i].name;
             }
+            if( p_is_linear ) {
+                *p_is_linear = 0;
+            }
             return pj_angular_units[i].factor;
         }
     }
     if( p_normalized_name ) {
         *p_normalized_name = NULL;
+    }
+    if( p_is_linear ) {
+        *p_is_linear = -1;
     }
     return 0.0;
 }
@@ -433,6 +443,10 @@ PJ *CONVERSION(unitconvert,0) {
     char *s, *name;
     int i;
     double f;
+    int xy_in_is_linear = -1; /* unknown */
+    int xy_out_is_linear = -1; /* unknown */
+    int z_in_is_linear = -1; /* unknown */
+    int z_out_is_linear = -1; /* unknown */
 
     if (0==Q)
         return pj_default_destructor (P, ENOMEM);
@@ -457,7 +471,7 @@ PJ *CONVERSION(unitconvert,0) {
 
     if ((name = pj_param (P->ctx, P->params, "sxy_in").s) != NULL) {
         const char* normalized_name = NULL;
-        f = get_unit_conversion_factor(name, &normalized_name);
+        f = get_unit_conversion_factor(name, &xy_in_is_linear, &normalized_name);
         if (f != 0.0) {
             proj_log_debug(P, "xy_in unit: %s", normalized_name);
         } else {
@@ -470,7 +484,7 @@ PJ *CONVERSION(unitconvert,0) {
 
     if ((name = pj_param (P->ctx, P->params, "sxy_out").s) != NULL) {
         const char* normalized_name = NULL;
-        f = get_unit_conversion_factor(name, &normalized_name);
+        f = get_unit_conversion_factor(name, &xy_out_is_linear, &normalized_name);
         if (f != 0.0) {
             proj_log_debug(P, "xy_out unit: %s", normalized_name);
         } else {
@@ -481,9 +495,15 @@ PJ *CONVERSION(unitconvert,0) {
             Q->xy_factor /= f;
     }
 
+    if( xy_in_is_linear >= 0 && xy_out_is_linear >= 0 &&
+        xy_in_is_linear != xy_out_is_linear ) {
+        proj_log_debug(P, "inconsistent unit type between xy_in and xy_out");
+        return pj_default_destructor(P, PJD_ERR_INCONSISTENT_UNIT);
+    }
+
     if ((name = pj_param (P->ctx, P->params, "sz_in").s) != NULL) {
         const char* normalized_name = NULL;
-        f = get_unit_conversion_factor(name, &normalized_name);
+        f = get_unit_conversion_factor(name, &z_in_is_linear, &normalized_name);
         if (f != 0.0) {
             proj_log_debug(P, "z_in unit: %s", normalized_name);
         } else {
@@ -496,7 +516,7 @@ PJ *CONVERSION(unitconvert,0) {
 
     if ((name = pj_param (P->ctx, P->params, "sz_out").s) != NULL) {
         const char* normalized_name = NULL;
-        f = get_unit_conversion_factor(name, &normalized_name);
+        f = get_unit_conversion_factor(name, &z_out_is_linear, &normalized_name);
         if (f != 0.0) {
             proj_log_debug(P, "z_out unit: %s", normalized_name);
         } else {
@@ -507,6 +527,11 @@ PJ *CONVERSION(unitconvert,0) {
             Q->z_factor /= f;
     }
 
+    if( z_in_is_linear >= 0 && z_out_is_linear >= 0 &&
+        z_in_is_linear != z_out_is_linear ) {
+        proj_log_debug(P, "inconsistent unit type between z_in and z_out");
+        return pj_default_destructor(P, PJD_ERR_INCONSISTENT_UNIT);
+    }
 
     if ((name = pj_param (P->ctx, P->params, "st_in").s) != NULL) {
         for (i = 0; (s = time_units[i].id) && strcmp(name, s) ; ++i);

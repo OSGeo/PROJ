@@ -35,5 +35,12 @@ tolerance   0.000000000001
 accept      50 50 1 1
 expect      45 45 1 1
 
+operation   proj=unitconvert xy_in=m xy_out=rad
+accept      1 1 1 1
+expect      failure
+
+operation   proj=unitconvert z_in=rad z_out=m
+accept      1 1 1 1
+expect      failure
 
 </gie>
