@@ -382,6 +382,49 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
     return out;
 }
 
+/* M_PI / 200 */
+#define GRAD_TO_RAD 0.015707963267948967
+
+static const struct PJ_UNITS
+pj_angular_units[] = {
+    {"rad",         "1.0",                   "Radian", 1.0},
+    {"deg",         "0.017453292519943296",  "Degree", DEG_TO_RAD},
+    {"grad",        "0.015707963267948967",  "Grad",   GRAD_TO_RAD},
+    {NULL,          NULL,                     NULL,    0.0}
+};
+
+
+/***********************************************************************/
+static double get_unit_conversion_factor(const char* name,
+                                         const char** p_normalized_name) {
+/***********************************************************************/
+    int i;
+    const char* s;
+
+    /* Try first with linear units */
+    for (i = 0; (s = pj_units[i].id) ; ++i) {
+        if ( strcmp(s, name) == 0 ) {
+            if( p_normalized_name ) {
+                *p_normalized_name = pj_units[i].name;
+            }
+            return pj_units[i].factor;
+        }
+    }
+
+    /* And then angular units */
+    for (i = 0; (s = pj_angular_units[i].id) ; ++i) {
+        if ( strcmp(s, name) == 0 ) {
+            if( p_normalized_name ) {
+                *p_normalized_name = pj_angular_units[i].name;
+            }
+            return pj_angular_units[i].factor;
+        }
+    }
+    if( p_normalized_name ) {
+        *p_normalized_name = NULL;
+    }
+    return 0.0;
+}
 
 /***********************************************************************/
 PJ *CONVERSION(unitconvert,0) {
@@ -413,11 +456,10 @@ PJ *CONVERSION(unitconvert,0) {
     Q->z_factor  = 1.0;
 
     if ((name = pj_param (P->ctx, P->params, "sxy_in").s) != NULL) {
-        for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
-
-        if (s) {
-            f = pj_units[i].factor;
-            proj_log_debug(P, "xy_in unit: %s", pj_units[i].name);
+        const char* normalized_name = NULL;
+        f = get_unit_conversion_factor(name, &normalized_name);
+        if (f != 0.0) {
+            proj_log_debug(P, "xy_in unit: %s", normalized_name);
         } else {
             if ( (f = pj_param (P->ctx, P->params, "dxy_in").f) == 0.0)
                 return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
@@ -427,11 +469,10 @@ PJ *CONVERSION(unitconvert,0) {
     }
 
     if ((name = pj_param (P->ctx, P->params, "sxy_out").s) != NULL) {
-        for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
-
-        if (s) {
-            f = pj_units[i].factor;
-            proj_log_debug(P, "xy_out unit: %s", pj_units[i].name);
+        const char* normalized_name = NULL;
+        f = get_unit_conversion_factor(name, &normalized_name);
+        if (f != 0.0) {
+            proj_log_debug(P, "xy_out unit: %s", normalized_name);
         } else {
             if ( (f = pj_param (P->ctx, P->params, "dxy_out").f) == 0.0)
                 return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
@@ -441,11 +482,10 @@ PJ *CONVERSION(unitconvert,0) {
     }
 
     if ((name = pj_param (P->ctx, P->params, "sz_in").s) != NULL) {
-        for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
-
-        if (s) {
-            f = pj_units[i].factor;
-            proj_log_debug(P, "z_in unit: %s", pj_units[i].name);
+        const char* normalized_name = NULL;
+        f = get_unit_conversion_factor(name, &normalized_name);
+        if (f != 0.0) {
+            proj_log_debug(P, "z_in unit: %s", normalized_name);
         } else {
             if ( (f = pj_param (P->ctx, P->params, "dz_in").f) == 0.0)
                 return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
@@ -455,11 +495,10 @@ PJ *CONVERSION(unitconvert,0) {
     }
 
     if ((name = pj_param (P->ctx, P->params, "sz_out").s) != NULL) {
-        for (i = 0; (s = pj_units[i].id) && strcmp(name, s) ; ++i);
-
-        if (s) {
-            f = pj_units[i].factor;
-            proj_log_debug(P, "z_out unit: %s", pj_units[i].name);
+        const char* normalized_name = NULL;
+        f = get_unit_conversion_factor(name, &normalized_name);
+        if (f != 0.0) {
+            proj_log_debug(P, "z_out unit: %s", normalized_name);
         } else {
             if ( (f = pj_param (P->ctx, P->params, "dz_out").f) == 0.0)
                 return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
