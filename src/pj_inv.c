@@ -100,8 +100,12 @@ static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
 
     /* de-scale and de-offset */
     case PJ_IO_UNITS_CARTESIAN:
-        if (P->is_geocent)
+        coo.xyz.x *= P->to_meter;
+        coo.xyz.y *= P->to_meter;
+        coo.xyz.z *= P->to_meter;
+        if (P->is_geocent) {
             coo = proj_trans (P->cart, PJ_INV, coo);
+        }
 
         return coo;
 
