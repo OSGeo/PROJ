@@ -157,3 +157,5 @@ EXPORTS
     proj_context_errno             @141
 
     pj_isnan                       @142
+
+    proj_errno_string              @143
