@@ -51,7 +51,7 @@ unset(_save_cxx_flags)
 # Build PROJ unit tests
 #
 
-if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC" AND BUILD_LIBPROJ_SHARED)
 add_definitions(-DPROJ_MSVC_DLL_IMPORT=1)
 endif()
 
