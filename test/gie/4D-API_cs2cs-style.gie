@@ -309,4 +309,19 @@ accept      0.0         0.0     0.00
 expect      3396190.0   0.0     0.0
 roundtrip   1
 
+
+-------------------------------------------------------------------------------
+Check that geocent and cart take into account to_meter (#1053)
+-------------------------------------------------------------------------------
+
+operation   +proj=geocent +a=1000 +b=1000 +to_meter=1000
+accept      90 0 0
+expect      0 1 0
+roundtrip   1
+
+operation   +proj=cart +a=1000 +b=1000 +to_meter=1000
+accept      90 0 0
+expect      0 1 0
+roundtrip   1
+
 </gie>
