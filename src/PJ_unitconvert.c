@@ -382,18 +382,6 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
     return out;
 }
 
-/* M_PI / 200 */
-#define GRAD_TO_RAD 0.015707963267948967
-
-static const struct PJ_UNITS
-pj_angular_units[] = {
-    {"rad",         "1.0",                   "Radian", 1.0},
-    {"deg",         "0.017453292519943296",  "Degree", DEG_TO_RAD},
-    {"grad",        "0.015707963267948967",  "Grad",   GRAD_TO_RAD},
-    {NULL,          NULL,                     NULL,    0.0}
-};
-
-
 /***********************************************************************/
 static double get_unit_conversion_factor(const char* name,
                                          int* p_is_linear,

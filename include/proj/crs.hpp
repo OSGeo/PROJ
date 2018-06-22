@@ -100,7 +100,7 @@ class GeodeticCRS;
 using GeodeticCRSPtr = std::shared_ptr<GeodeticCRS>;
 using GeodeticCRSNNPtr = util::nn<GeodeticCRSPtr>;
 
-class GeodeticCRS : virtual public SingleCRS {
+class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
   public:
     PROJ_DLL ~GeodeticCRS() override;
 
@@ -128,6 +128,10 @@ class GeodeticCRS : virtual public SingleCRS {
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
+
   protected:
     GeodeticCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
                 const cs::EllipsoidalCSNNPtr &csIn);
@@ -147,7 +151,7 @@ class GeodeticCRS : virtual public SingleCRS {
 
 class GeographicCRS : public GeodeticCRS {
   public:
-    PROJ_DLL ~GeographicCRS();
+    PROJ_DLL ~GeographicCRS() override;
 
     PROJ_DLL const cs::EllipsoidalCSNNPtr coordinateSystem() const;
 
@@ -157,6 +161,10 @@ class GeographicCRS : public GeodeticCRS {
            const datum::GeodeticReferenceFrameNNPtr &datum,
            const cs::EllipsoidalCSNNPtr &cs);
 
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
+
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4326; // WGS 84 2D
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4807; // NTF Paris
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4979; // WGS 84 3D
@@ -165,6 +173,10 @@ class GeographicCRS : public GeodeticCRS {
     GeographicCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
                   const cs::EllipsoidalCSNNPtr &csIn);
     INLINED_MAKE_SHARED
+
+    friend class ProjectedCRS;
+    void addAngularUnitConvertAndAxisSwap(
+        io::PROJStringFormatterNNPtr formatter) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -240,7 +252,7 @@ class ProjectedCRS;
 using ProjectedCRSPtr = std::shared_ptr<ProjectedCRS>;
 using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
 
-class ProjectedCRS : public DerivedCRS {
+class ProjectedCRS : public DerivedCRS, public io::IPROJStringExportable {
   public:
     PROJ_DLL ~ProjectedCRS() override;
 
@@ -249,6 +261,10 @@ class ProjectedCRS : public DerivedCRS {
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
 
     PROJ_DLL static ProjectedCRSNNPtr
     create(const util::PropertyMap &properties,
@@ -363,6 +379,10 @@ class DerivedGeodeticCRS : public GeodeticCRS, public DerivedCRS {
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
+
   protected:
     DerivedGeodeticCRS(const GeodeticCRSNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
@@ -398,6 +418,10 @@ class DerivedGeographicCRS : public GeographicCRS, public DerivedCRS {
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
 
   protected:
     DerivedGeographicCRS(const GeodeticCRSNNPtr &baseCRSIn,

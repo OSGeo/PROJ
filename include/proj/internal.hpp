@@ -112,6 +112,8 @@ inline bool ci_equal(const std::string &a, const std::string &b) {
 
 std::string stripQuotes(const std::string &osStr);
 
+double c_locale_stod(const std::string &s); // throw(std::invalid_argument)
+
 } // namespace internal
 
 NS_PROJ_END

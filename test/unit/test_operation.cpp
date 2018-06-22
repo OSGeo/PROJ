@@ -280,3 +280,29 @@ TEST(operation, transformation_createTOWGS84) {
         Transformation::createTOWGS84(crsIn, std::vector<double>(7, 0)),
         InvalidOperation);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, utm_to_PROJ_string) {
+    EXPECT_EQ(Conversion::createUTM(PropertyMap(), 1, false)
+                  ->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=utm +zone=1 +south");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, tmerc_to_PROJ_string) {
+    EXPECT_EQ(Conversion::createTM(PropertyMap(), Angle(1), Angle(2), Scale(3),
+                                   Length(4), Length(5))
+                  ->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=tmerc +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc1sp_to_PROJ_string) {
+    EXPECT_EQ(Conversion::createLCC_1SP(PropertyMap(), Angle(1), Angle(2),
+                                        Scale(3), Length(4), Length(5))
+                  ->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=lcc +lat_1=1 +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
+}

@@ -187,7 +187,49 @@ class WKTFormatter {
 
 // ---------------------------------------------------------------------------
 
-/** Exception possibly thrown by IWKTExportable::exportToWKT(). */
+class PROJStringFormatter;
+/** PROJStringFormatter shared pointer. */
+using PROJStringFormatterPtr = std::shared_ptr<PROJStringFormatter>;
+/** PROJStringFormatter non-null shared pointer. */
+using PROJStringFormatterNNPtr = util::nn<PROJStringFormatterPtr>;
+
+/** PROJStringFormatter class. */
+class PROJStringFormatter {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL static PROJStringFormatterNNPtr create();
+
+    PROJ_DLL ~PROJStringFormatter();
+
+    /** Returns the PROJ string. */
+    PROJ_DLL const std::string &toString() const;
+
+    //! @cond Doxygen_Suppress
+    PROJ_DLL void addStep(const std::string &step, bool inversed = false);
+    PROJ_DLL void addParam(const std::string &paramName);
+    PROJ_DLL void addParam(const std::string &paramName, double val);
+    PROJ_DLL void addParam(const std::string &paramName, int val);
+    PROJ_DLL void addParam(const std::string &paramName, const char *val);
+    PROJ_DLL void addParam(const std::string &paramName,
+                           const std::string &val);
+    //! @endcond
+
+  protected:
+    //! @cond Doxygen_Suppress
+    explicit PROJStringFormatter();
+    PROJStringFormatter(const PROJStringFormatter &other) = delete;
+
+    INLINED_MAKE_SHARED
+    //! @endcond
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+/** Exception possibly thrown by IWKTExportable::exportToWKT() or
+ * IPROJStringExportable::exportToPROJString(). */
 class FormattingException : public util::Exception {
   public:
     /** Constructor. */
@@ -222,6 +264,19 @@ class PROJ_DLL IWKTExportable {
     /** Builds a WKT representation. May throw a FormattingException */
     virtual std::string exportToWKT(
         WKTFormatterNNPtr formatter) const = 0; // throw(FormattingException)
+};
+
+// ---------------------------------------------------------------------------
+
+/** Interface for an object that can be exported to a PROJ string. */
+class PROJ_DLL IPROJStringExportable {
+  public:
+    /** \brief Destructor */
+    virtual ~IPROJStringExportable();
+
+    /** Builds a PROJ string representation. May throw a FormattingException */
+    virtual std::string exportToPROJString(PROJStringFormatterNNPtr formatter)
+        const = 0; // throw(FormattingException)
 };
 
 // ---------------------------------------------------------------------------

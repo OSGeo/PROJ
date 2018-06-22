@@ -37,6 +37,8 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include "projects.h"
+
 #include <cmath> // M_PI
 #include <cstdlib>
 #include <memory>
@@ -170,6 +172,27 @@ bool UnitOfMeasure::operator==(const UnitOfMeasure &other) const {
 
 bool UnitOfMeasure::operator!=(const UnitOfMeasure &other) const {
     return name() != other.name();
+}
+
+// ---------------------------------------------------------------------------
+
+std::string UnitOfMeasure::exportToPROJString() const {
+    if (type() == Type::LINEAR) {
+        for (int i = 0; pj_units[i].id != nullptr; i++) {
+            if (::fabs(pj_units[i].factor - conversionToSI()) <
+                1e-10 * conversionToSI()) {
+                return pj_units[i].id;
+            }
+        }
+    } else if (type() == Type::ANGULAR) {
+        for (int i = 0; pj_angular_units[i].id != nullptr; i++) {
+            if (::fabs(pj_angular_units[i].factor - conversionToSI()) <
+                1e-10 * conversionToSI()) {
+                return pj_angular_units[i].id;
+            }
+        }
+    }
+    return std::string();
 }
 
 // ---------------------------------------------------------------------------

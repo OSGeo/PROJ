@@ -283,10 +283,12 @@ const RealizationMethod RealizationMethod::TIDAL("tidal");
 
 const PrimeMeridianNNPtr
     PrimeMeridian::GREENWICH(PrimeMeridian::createGREENWICH());
+const PrimeMeridianNNPtr PrimeMeridian::PARIS(PrimeMeridian::createPARIS());
 
 // ---------------------------------------------------------------------------
 
-const EllipsoidNNPtr Ellipsoid::EPSG_7030(Ellipsoid::createEPSG_7030());
+const EllipsoidNNPtr Ellipsoid::WGS84(Ellipsoid::createWGS84());
+const EllipsoidNNPtr Ellipsoid::GRS1980(Ellipsoid::createGRS1980());
 
 // ---------------------------------------------------------------------------
 

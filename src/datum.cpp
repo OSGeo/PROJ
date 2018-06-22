@@ -38,6 +38,12 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+// PROJ include order is sensitive
+// clang-format off
+#include "projects.h"
+#include "proj_api.h"
+// clang-format on
+
 #include <memory>
 #include <string>
 
@@ -144,6 +150,16 @@ const PrimeMeridianNNPtr PrimeMeridian::createGREENWICH() {
 
 // ---------------------------------------------------------------------------
 
+const PrimeMeridianNNPtr PrimeMeridian::createPARIS() {
+    return create(PropertyMap()
+                      .set(Identifier::CODESPACE_KEY, "EPSG")
+                      .set(Identifier::CODE_KEY, 8903)
+                      .set(IdentifiedObject::NAME_KEY, "Paris"),
+                  Angle(2.5969213, UnitOfMeasure::GRAD));
+}
+
+// ---------------------------------------------------------------------------
+
 std::string PrimeMeridian::exportToWKT(
     WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
@@ -177,6 +193,35 @@ std::string PrimeMeridian::exportToWKT(
             formatID(formatter);
         }
         formatter->endNode();
+    }
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+std::string PrimeMeridian::exportToPROJString(
+    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    if (greenwichLongitude().getSIValue() != 0) {
+        const double valDeg =
+            greenwichLongitude().convertToUnit(UnitOfMeasure::DEGREE).value();
+        const double valRad = greenwichLongitude().getSIValue();
+        std::string projPMName;
+        projCtx ctxt = pj_ctx_alloc();
+        for (int i = 0; pj_prime_meridians[i].id != nullptr; ++i) {
+            double valRefRad =
+                dmstor_ctx(ctxt, pj_prime_meridians[i].defn, nullptr);
+            if (::fabs(valRad - valRefRad) < 1e-10) {
+                projPMName = pj_prime_meridians[i].id;
+                break;
+            }
+        }
+        pj_ctx_free(ctxt);
+        if (!projPMName.empty()) {
+            formatter->addParam("pm", projPMName);
+        } else {
+            formatter->addParam("pm", valDeg);
+        }
     }
     return formatter->toString();
 }
@@ -328,15 +373,27 @@ EllipsoidNNPtr Ellipsoid::createTwoAxis(const PropertyMap &properties,
     ellipsoid->setProperties(properties);
     return ellipsoid;
 }
+
 // ---------------------------------------------------------------------------
 
-const EllipsoidNNPtr Ellipsoid::createEPSG_7030() {
+const EllipsoidNNPtr Ellipsoid::createWGS84() {
     PropertyMap propertiesEllps;
     propertiesEllps.set(Identifier::CODESPACE_KEY, "EPSG")
         .set(Identifier::CODE_KEY, 7030)
         .set(IdentifiedObject::NAME_KEY, "WGS 84");
     return createFlattenedSphere(propertiesEllps, Length(6378137),
                                  Scale(298.257223563));
+}
+
+// ---------------------------------------------------------------------------
+
+const EllipsoidNNPtr Ellipsoid::createGRS1980() {
+    PropertyMap propertiesEllps;
+    propertiesEllps.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 7019)
+        .set(IdentifiedObject::NAME_KEY, "GRS 1980");
+    return createFlattenedSphere(propertiesEllps, Length(6378137),
+                                 Scale(298.257222101));
 }
 
 // ---------------------------------------------------------------------------
@@ -370,6 +427,44 @@ std::string Ellipsoid::exportToWKT(
         }
     }
     formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+std::string Ellipsoid::exportToPROJString(
+    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    const double a = semiMajorAxis().getSIValue();
+    const double b = computeSemiMinorAxis().getSIValue();
+    const double rf = computeInverseFlattening().getSIValue();
+    for (int i = 0; pj_ellps[i].id != nullptr; i++) {
+        assert(strncmp(pj_ellps[i].major, "a=", 2) == 0);
+        const double a_iter = c_locale_stod(pj_ellps[i].major + 2);
+        if (::fabs(a - a_iter) < 1e-10 * a_iter) {
+            if (strncmp(pj_ellps[i].ell, "b=", 2) == 0) {
+                const double b_iter = c_locale_stod(pj_ellps[i].ell + 2);
+                if (::fabs(b - b_iter) < 1e-10 * b_iter) {
+                    formatter->addParam("ellps", pj_ellps[i].id);
+                    return formatter->toString();
+                }
+            } else {
+                assert(strncmp(pj_ellps[i].ell, "rf=", 3) == 0);
+                const double rf_iter = c_locale_stod(pj_ellps[i].ell + 3);
+                if (::fabs(rf - rf_iter) < 1e-10 * rf_iter) {
+                    formatter->addParam("ellps", pj_ellps[i].id);
+                    return formatter->toString();
+                }
+            }
+        }
+    }
+
+    formatter->addParam("a", a);
+    if (inverseFlattening().has_value()) {
+        formatter->addParam("rf", rf);
+    } else {
+        formatter->addParam("b", b);
+    }
     return formatter->toString();
 }
 
@@ -439,8 +534,8 @@ const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6326() {
         .set(Identifier::CODE_KEY, 6326)
         .set(IdentifiedObject::NAME_KEY, "WGS_1984");
 
-    return create(propertiesDatum, Ellipsoid::EPSG_7030,
-                  optional<std::string>(), PrimeMeridian::GREENWICH);
+    return create(propertiesDatum, Ellipsoid::WGS84, optional<std::string>(),
+                  PrimeMeridian::GREENWICH);
 }
 
 // ---------------------------------------------------------------------------

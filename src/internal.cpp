@@ -32,6 +32,9 @@
 
 #include "proj/internal.hpp"
 
+#include <exception>
+#include <locale>
+#include <sstream> // std::istringstream
 #include <string>
 
 NS_PROJ_START
@@ -108,6 +111,19 @@ size_t ci_find(const std::string &str, const std::string &osNeedle,
     auto lowerStr = tolower(str.substr(nStartPos));
     auto lowerNeedle = tolower(osNeedle);
     return lowerStr.find(lowerNeedle);
+}
+
+// ---------------------------------------------------------------------------
+
+double c_locale_stod(const std::string &s) {
+    std::istringstream iss(s);
+    iss.imbue(std::locale::classic());
+    double d;
+    iss >> d;
+    if (!iss.eof() || iss.fail()) {
+        throw std::invalid_argument("non double value");
+    }
+    return d;
 }
 
 // ---------------------------------------------------------------------------

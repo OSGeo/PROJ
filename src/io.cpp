@@ -34,6 +34,7 @@
 #include <cctype>
 #include <cmath>
 #include <iomanip>
+#include <locale>
 #include <sstream> // std::ostringstream
 #include <string>
 #include <vector>
@@ -355,6 +356,7 @@ void WKTFormatter::add(const std::string &str) {
 void WKTFormatter::add(int number) {
     d->startNewChild();
     std::ostringstream buffer;
+    buffer.imbue(std::locale::classic());
     buffer << number;
     d->result_ += buffer.str();
 }
@@ -364,6 +366,7 @@ void WKTFormatter::add(int number) {
 void WKTFormatter::add(size_t number) {
     d->startNewChild();
     std::ostringstream buffer;
+    buffer.imbue(std::locale::classic());
     buffer << number;
     d->result_ += buffer.str();
 }
@@ -373,6 +376,7 @@ void WKTFormatter::add(size_t number) {
 void WKTFormatter::add(double number, int precision) {
     d->startNewChild();
     std::ostringstream buffer;
+    buffer.imbue(std::locale::classic());
     buffer << std::setprecision(precision) << number;
     std::string numberStr = buffer.str();
     d->result_ += numberStr;
@@ -778,7 +782,8 @@ struct WKTParser::Private {
                                         bool isGeocentric,
                                         int expectedOrderNum);
     CoordinateSystemNNPtr buildCS(WKTNodePtr node, /* maybe null */
-                                  WKTNodeNNPtr parentNode);
+                                  WKTNodeNNPtr parentNode,
+                                  const UnitOfMeasure &defaultAngularUnit);
     GeodeticCRSNNPtr buildGeodeticCRS(WKTNodeNNPtr node);
     CRSNNPtr buildDerivedGeodeticCRS(WKTNodeNNPtr node);
     UnitOfMeasure
@@ -842,7 +847,7 @@ void WKTParser::Private::emitRecoverableAssertion(const std::string &errorMsg) {
 
 // ---------------------------------------------------------------------------
 
-static double asDouble(const std::string &val) { return std::stod(val); }
+static double asDouble(const std::string &val) { return c_locale_stod(val); }
 
 // ---------------------------------------------------------------------------
 
@@ -1139,7 +1144,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
         if (TOWGS84Node->children().size() == 7) {
             try {
                 for (const auto &child : TOWGS84Node->children()) {
-                    toWGS84Parameters_.push_back(std::stod(child->value()));
+                    toWGS84Parameters_.push_back(asDouble(child->value()));
                 }
             } catch (const std::exception &) {
                 throw ParsingException("Invalid TOWGS84 node");
@@ -1295,7 +1300,8 @@ WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
 
 CoordinateSystemNNPtr
 WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
-                            WKTNodeNNPtr parentNode) {
+                            WKTNodeNNPtr parentNode,
+                            const UnitOfMeasure &defaultAngularUnit) {
     bool isGeocentric = false;
     std::string csType;
     const int numberOfAxis =
@@ -1354,7 +1360,7 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
                 auto unit = buildUnitInSubNode(parentNode,
                                                UnitOfMeasure::Type::ANGULAR);
                 if (unit == UnitOfMeasure::NONE) {
-                    unit = UnitOfMeasure::DEGREE;
+                    unit = defaultAngularUnit;
                 }
                 return EllipsoidalCS::createLatitudeLongitude(unit);
             }
@@ -1532,10 +1538,13 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
         primeMeridianNode ? buildPrimeMeridian(
                                 NN_CHECK_ASSERT(primeMeridianNode), angularUnit)
                           : PrimeMeridian::GREENWICH;
+    if (angularUnit == UnitOfMeasure::NONE) {
+        angularUnit = primeMeridian->greenwichLongitude().unit();
+    }
 
     auto datum =
         buildGeodeticReferenceFrame(NN_CHECK_ASSERT(datumNode), primeMeridian);
-    auto cs = buildCS(csNode, node);
+    auto cs = buildCS(csNode, node, angularUnit);
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
         assert(!ci_equal(node->value(), WKTConstants::GEOCCS));
@@ -1595,7 +1604,7 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(WKTNodeNNPtr node) {
     if (!csNode) {
         throw ParsingException("Missing CS node");
     }
-    auto cs = buildCS(csNode, node);
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
 
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
@@ -1672,7 +1681,7 @@ void WKTParser::Private::consumeParameters(
                     ParameterValue::create(stripQuotes(paramValue)));
             } else {
                 try {
-                    double val = std::stod(paramValue);
+                    double val = asDouble(paramValue);
                     auto unit = buildUnitInSubNode(childNode);
                     if (unit == UnitOfMeasure::NONE) {
                         auto paramName = childNode->children()[0]->value();
@@ -1886,7 +1895,7 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                 OperationParameter::create(propertiesParameter));
             auto paramValue = childNode->children()[1]->value();
             try {
-                double val = std::stod(paramValue);
+                double val = asDouble(paramValue);
                 auto unit = buildUnitInSubNode(childNode);
                 if (unit == UnitOfMeasure::NONE) {
                     auto paramName = childNode->children()[0]->value();
@@ -1930,7 +1939,8 @@ ProjectedCRSNNPtr WKTParser::Private::buildProjectedCRS(WKTNodeNNPtr node) {
     }
 
     auto linearUnit = buildUnitInSubNode(node);
-    auto angularUnit = buildUnitInSubNode(NN_CHECK_ASSERT(baseGeodCRSNode));
+    auto angularUnit =
+        baseGeodCRS->coordinateSystem()->axisList()[0]->axisUnitID();
 
     auto conversion =
         conversionNode ? buildConversion(NN_CHECK_ASSERT(conversionNode),
@@ -1942,7 +1952,7 @@ ProjectedCRSNNPtr WKTParser::Private::buildProjectedCRS(WKTNodeNNPtr node) {
     if (!csNode && !ci_equal(node->value(), WKTConstants::PROJCS)) {
         throw ParsingException("Missing CS node");
     }
-    auto cs = buildCS(csNode, node);
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
     if (!cartesianCS) {
         throw ParsingException("CS node is not of type Cartesian");
@@ -1998,7 +2008,7 @@ VerticalCRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
     if (!csNode && !ci_equal(node->value(), WKTConstants::VERT_CS)) {
         throw ParsingException("Missing CS node");
     }
-    auto cs = buildCS(csNode, node);
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto verticalCS = nn_dynamic_pointer_cast<VerticalCS>(cs);
     if (!verticalCS) {
         throw ParsingException("CS node is not of type vertical");
@@ -2101,7 +2111,7 @@ TemporalCRSNNPtr WKTParser::Private::buildTemporalCRS(WKTNodeNNPtr node) {
     if (!csNode) {
         throw ParsingException("Missing CS node");
     }
-    auto cs = buildCS(csNode, node);
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
     auto temporalCS = nn_dynamic_pointer_cast<TemporalCS>(cs);
     if (!temporalCS) {
         throw ParsingException("CS node is not of type temporal");
@@ -2266,3 +2276,117 @@ ParsingException::ParsingException(const ParsingException &) = default;
 // ---------------------------------------------------------------------------
 
 ParsingException::~ParsingException() = default;
+
+// ---------------------------------------------------------------------------
+
+IPROJStringExportable::~IPROJStringExportable() = default;
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct PROJStringFormatter::Private {
+    bool pipelinePrefix_{false};
+    int stepCount_ = 0;
+    std::string result_{};
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+PROJStringFormatter::PROJStringFormatter()
+    : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+PROJStringFormatter::~PROJStringFormatter() = default;
+
+// ---------------------------------------------------------------------------
+
+PROJStringFormatterNNPtr PROJStringFormatter::create() {
+    return PROJStringFormatter::nn_make_shared<PROJStringFormatter>();
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addStep(const std::string &step, bool inversed) {
+    if (d->stepCount_ == 1 && !d->pipelinePrefix_) {
+        d->result_ = "+proj=pipeline +step " + d->result_;
+        d->pipelinePrefix_ = true;
+    }
+    if (d->stepCount_ == 0 && inversed) {
+        d->result_ = "+proj=pipeline";
+        d->pipelinePrefix_ = true;
+    }
+    if (d->pipelinePrefix_) {
+        d->result_ += " +step";
+    }
+    if (inversed) {
+        d->result_ += " +inv";
+    }
+    if (!d->result_.empty()) {
+        d->result_ += " ";
+    }
+    d->result_ += "+proj=" + step;
+    d->stepCount_++;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addParam(const std::string &paramName) {
+    if (!d->result_.empty()) {
+        d->result_ += " ";
+    }
+    d->result_ += "+" + paramName;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addParam(const std::string &paramName, int val) {
+    std::ostringstream buffer;
+    buffer.imbue(std::locale::classic());
+    buffer << val;
+    if (!d->result_.empty()) {
+        d->result_ += " ";
+    }
+    d->result_ += "+" + paramName + "=" + buffer.str();
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addParam(const std::string &paramName, double val) {
+    std::ostringstream buffer;
+    buffer.imbue(std::locale::classic());
+    if (std::abs(val * 10 - std::round(val * 10)) < 1e-8) {
+        // For the purpose of
+        // https://www.epsg-registry.org/export.htm?wkt=urn:ogc:def:crs:EPSG::27561
+        // Latitude of natural of origin to be properly rounded from 55 grad to
+        // 49.5 deg
+        val = std::round(val * 10) / 10;
+    }
+    buffer << std::setprecision(15) << val;
+    if (!d->result_.empty()) {
+        d->result_ += " ";
+    }
+    d->result_ += "+" + paramName + "=" + buffer.str();
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addParam(const std::string &paramName,
+                                   const char *val) {
+    addParam(paramName, std::string(val));
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addParam(const std::string &paramName,
+                                   const std::string &val) {
+    if (!d->result_.empty()) {
+        d->result_ += " ";
+    }
+    d->result_ += "+" + paramName + "=" + val;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::string &PROJStringFormatter::toString() const { return d->result_; }

@@ -260,6 +260,34 @@ std::string GeodeticCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
+std::string GeodeticCRS::exportToPROJString(
+    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    if (!isGeocentric()) {
+        throw FormattingException("GeodeticCRS::exportToPROJString() only "
+                                  "supports geocentric coordinate systems");
+    }
+
+    formatter->addStep("cart");
+    datum()->ellipsoid()->exportToPROJString(formatter);
+
+    auto &axisList = coordinateSystem()->axisList();
+    if (!axisList.empty() &&
+        axisList[0]->axisUnitID() != UnitOfMeasure::METRE) {
+        auto projUnit = axisList[0]->axisUnitID().exportToPROJString();
+        if (projUnit.empty()) {
+            formatter->addParam("to_meter",
+                                axisList[0]->axisUnitID().conversionToSI());
+        } else {
+            formatter->addParam("units", projUnit);
+        }
+    }
+
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct GeographicCRS::Private {};
 //! @endcond
@@ -336,12 +364,6 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
     auto ellps(Ellipsoid::createFlattenedSphere(
         propertiesEllps, Length(6378249.2), Scale(293.4660212936269)));
 
-    auto pm(PrimeMeridian::create(PropertyMap()
-                                      .set(Identifier::CODESPACE_KEY, "EPSG")
-                                      .set(Identifier::CODE_KEY, 8903)
-                                      .set(IdentifiedObject::NAME_KEY, "Paris"),
-                                  Angle(2.5969213, UnitOfMeasure::GRAD)));
-
     auto axisLat(CoordinateSystemAxis::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
         AxisAbbreviation::lat, AxisDirection::NORTH, UnitOfMeasure::GRAD));
@@ -357,8 +379,8 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
         .set(Identifier::CODE_KEY, 6807)
         .set(IdentifiedObject::NAME_KEY,
              "Nouvelle_Triangulation_Francaise_Paris");
-    auto datum(GeodeticReferenceFrame::create(propertiesDatum, ellps,
-                                              optional<std::string>(), pm));
+    auto datum(GeodeticReferenceFrame::create(
+        propertiesDatum, ellps, optional<std::string>(), PrimeMeridian::PARIS));
 
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
@@ -366,6 +388,46 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
         .set(IdentifiedObject::NAME_KEY, "NTF (Paris)");
     auto gcrs(create(propertiesCRS, datum, cs));
     return gcrs;
+}
+
+// ---------------------------------------------------------------------------
+
+void GeographicCRS::addAngularUnitConvertAndAxisSwap(
+    PROJStringFormatterNNPtr formatter) const {
+    auto &axisList = coordinateSystem()->axisList();
+    if (!axisList.empty() &&
+        axisList[0]->axisUnitID() != UnitOfMeasure::DEGREE) {
+        formatter->addStep("unitconvert");
+        auto projUnit = axisList[0]->axisUnitID().exportToPROJString();
+        if (projUnit.empty()) {
+            formatter->addParam("xy_in",
+                                axisList[0]->axisUnitID().conversionToSI());
+        } else {
+            formatter->addParam("xy_in", projUnit);
+        }
+        formatter->addParam("xy_out", "rad");
+    }
+
+    if (axisList.size() >= 2 &&
+        ci_equal(*(axisList[0]->name()->description()), "Latitude") &&
+        ci_equal(*(axisList[1]->name()->description()), "Longitude")) {
+        formatter->addStep("axisswap");
+        formatter->addParam("order", "2,1");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+std::string GeographicCRS::exportToPROJString(
+    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    addAngularUnitConvertAndAxisSwap(formatter);
+
+    formatter->addStep("longlat");
+    datum()->ellipsoid()->exportToPROJString(formatter);
+    datum()->primeMeridian()->exportToPROJString(formatter);
+
+    return formatter->toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -623,6 +685,42 @@ std::string ProjectedCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
     coordinateSystem()->exportToWKT(formatter);
     ObjectUsage::_exportToWKT(formatter);
     formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+std::string ProjectedCRS::exportToPROJString(
+    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    auto geogCRS = nn_dynamic_pointer_cast<GeographicCRS>(baseCRS());
+    if (geogCRS) {
+        geogCRS->addAngularUnitConvertAndAxisSwap(formatter);
+    }
+
+    derivingConversion()->exportToPROJString(formatter);
+    baseCRS()->datum()->ellipsoid()->exportToPROJString(formatter);
+    baseCRS()->datum()->primeMeridian()->exportToPROJString(formatter);
+
+    auto &axisList = coordinateSystem()->axisList();
+    if (!axisList.empty() &&
+        axisList[0]->axisUnitID() != UnitOfMeasure::METRE) {
+        auto projUnit = axisList[0]->axisUnitID().exportToPROJString();
+        if (projUnit.empty()) {
+            formatter->addParam("to_meter",
+                                axisList[0]->axisUnitID().conversionToSI());
+        } else {
+            formatter->addParam("units", projUnit);
+        }
+    }
+
+    if (axisList.size() >= 2 &&
+        axisList[0]->axisDirection() == AxisDirection::NORTH &&
+        axisList[1]->axisDirection() == AxisDirection::EAST) {
+        formatter->addStep("axisswap");
+        formatter->addParam("order", "2,1");
+    }
+
     return formatter->toString();
 }
 
@@ -908,6 +1006,15 @@ std::string DerivedGeodeticCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
+std::string DerivedGeodeticCRS::exportToPROJString(
+    PROJStringFormatterNNPtr) const // throw(FormattingException)
+{
+    throw FormattingException(
+        "DerivedGeodeticCRS::exportToPROJString() unimplemented");
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct DerivedGeographicCRS::Private {};
 //! @endcond
@@ -978,6 +1085,15 @@ DerivedGeographicCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
     ObjectUsage::_exportToWKT(formatter);
     formatter->endNode();
     return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+std::string DerivedGeographicCRS::exportToPROJString(
+    PROJStringFormatterNNPtr) const // throw(FormattingException)
+{
+    throw FormattingException(
+        "DerivedGeographicCRS::exportToPROJString() unimplemented");
 }
 
 // ---------------------------------------------------------------------------

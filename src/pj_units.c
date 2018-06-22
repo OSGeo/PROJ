@@ -40,3 +40,14 @@ const PJ_UNITS *proj_list_units()
 {
     return pj_units;
 }
+
+/* M_PI / 200 */
+#define GRAD_TO_RAD 0.015707963267948967
+
+const struct PJ_UNITS
+pj_angular_units[] = {
+    {"rad",         "1.0",                   "Radian", 1.0},
+    {"deg",         "0.017453292519943296",  "Degree", DEG_TO_RAD},
+    {"grad",        "0.015707963267948967",  "Grad",   GRAD_TO_RAD},
+    {NULL,          NULL,                     NULL,    0.0}
+};

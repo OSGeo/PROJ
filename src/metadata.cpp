@@ -372,7 +372,7 @@ std::string Identifier::exportToWKT(WKTFormatterNNPtr formatter) const {
             if (version().has_value()) {
                 auto l_version = *(version());
                 try {
-                    (void)std::stod(l_version);
+                    (void)c_locale_stod(l_version);
                     formatter->add(l_version);
                 } catch (const std::exception &) {
                     formatter->addQuotedString(l_version);

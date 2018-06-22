@@ -93,6 +93,8 @@ class UnitOfMeasure {
                 const std::string &unitType =
                     std::string()) const; // throw(io::FormattingException)
 
+    PROJ_DLL std::string exportToPROJString() const;
+
     PROJ_DLL static const UnitOfMeasure NONE;
 
     PROJ_DLL static const UnitOfMeasure SCALE_UNITY;

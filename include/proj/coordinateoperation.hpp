@@ -315,6 +315,11 @@ class SingleOperation : public CoordinateOperation {
     parameterValues() const;
     PROJ_DLL const OperationMethodNNPtr &method() const;
 
+    PROJ_DLL ParameterValuePtr
+    parameterValue(const std::string &paramName) const;
+    PROJ_DLL common::Measure
+    parameterValueMeasure(const std::string &paramName) const;
+
   protected:
     explicit SingleOperation(const OperationMethodNNPtr &methodIn);
     SingleOperation(const SingleOperation &other);
@@ -333,12 +338,18 @@ class Conversion;
 using ConversionPtr = std::shared_ptr<Conversion>;
 using ConversionNNPtr = util::nn<ConversionPtr>;
 
-class Conversion : public SingleOperation {
+class Conversion : public SingleOperation, public io::IPROJStringExportable {
   public:
     PROJ_DLL ~Conversion() override;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
+
+    PROJ_DLL bool isUTM(int &zone, bool &north) const;
 
     PROJ_DLL ConversionNNPtr identify() const;
 
@@ -354,7 +365,22 @@ class Conversion : public SingleOperation {
            const std::vector<ParameterValueNNPtr>
                &values); // throw InvalidOperation
     PROJ_DLL static ConversionNNPtr create(const ConversionNNPtr &other);
-    PROJ_DLL static ConversionNNPtr createUTM(int zone, bool north);
+
+    PROJ_DLL static ConversionNNPtr
+    createUTM(const util::PropertyMap &properties, int zone, bool north);
+
+    PROJ_DLL static ConversionNNPtr
+    createTM(const util::PropertyMap &properties,
+             const common::Angle &centerLat, const common::Angle &centerLong,
+             const common::Scale &scale, const common::Length &falseEasting,
+             const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createLCC_1SP(const util::PropertyMap &properties,
+                  const common::Angle &centerLat,
+                  const common::Angle &centerLong, const common::Scale &scale,
+                  const common::Length &falseEasting,
+                  const common::Length &falseNorthing);
 
   protected:
     Conversion(const OperationMethodNNPtr &methodIn,

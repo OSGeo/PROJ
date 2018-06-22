@@ -26,9 +26,14 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#include <locale>
+
 #include "gtest_include.h"
 
 GTEST_API_ int main(int argc, char **argv) {
+  // Use a potentially non-C locale to make sure we are robust
+  setlocale(LC_ALL, "");
+
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -773,6 +773,37 @@ TEST(wkt_parse, wkt2_2018_simplified_projected) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projected_angular_unit_from_primem) {
+    auto obj = WKTParser().createFromWKT(
+        "PROJCRS[\"NTF (Paris) / Lambert Nord France\",\n"
+        "  BASEGEODCRS[\"NTF (Paris)\",\n"
+        "    DATUM[\"Nouvelle Triangulation Francaise (Paris)\",\n"
+        "      ELLIPSOID[\"Clarke 1880 "
+        "(IGN)\",6378249.2,293.4660213,LENGTHUNIT[\"metre\",1.0]]],\n"
+        "    PRIMEM[\"Paris\",2.5969213,ANGLEUNIT[\"grad\",0.015707963268]]],\n"
+        "  CONVERSION[\"Lambert Nord France\",\n"
+        "    METHOD[\"Lambert Conic Conformal (1SP)\",ID[\"EPSG\",9801]],\n"
+        "    PARAMETER[\"Latitude of natural "
+        "origin\",55,ANGLEUNIT[\"grad\",0.015707963268]],\n"
+        "    PARAMETER[\"Longitude of natural "
+        "origin\",0,ANGLEUNIT[\"grad\",0.015707963268]],\n"
+        "    PARAMETER[\"Scale factor at natural "
+        "origin\",0.999877341,SCALEUNIT[\"unity\",1.0]],\n"
+        "    PARAMETER[\"False easting\",600000,LENGTHUNIT[\"metre\",1.0]],\n"
+        "    PARAMETER[\"False northing\",200000,LENGTHUNIT[\"metre\",1.0]]],\n"
+        "  CS[cartesian,2],\n"
+        "    AXIS[\"easting (X)\",east,ORDER[1]],\n"
+        "    AXIS[\"northing (Y)\",north,ORDER[2]],\n"
+        "    LENGTHUNIT[\"metre\",1.0],\n"
+        "  ID[\"EPSG\",27561]]");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->baseCRS()->coordinateSystem()->axisList()[0]->axisUnitID(),
+              UnitOfMeasure::GRAD);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, cs_with_MERIDIAN) {
     auto wkt =
         "PROJCRS[\"dummy\",\n"
@@ -1151,7 +1182,7 @@ TEST(wkt_parse, BOUNDCRS_transformation_from_names) {
             PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
             GeodeticReferenceFrame::EPSG_6326,
             EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE)),
-        Conversion::createUTM(31, true),
+        Conversion::createUTM(PropertyMap(), 31, true),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
     auto wkt = "BOUNDCRS[SOURCECRS[" +
@@ -1201,7 +1232,7 @@ TEST(wkt_parse, BOUNDCRS_transformation_from_codes) {
             PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
             GeodeticReferenceFrame::EPSG_6326,
             EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE)),
-        Conversion::createUTM(31, true),
+        Conversion::createUTM(PropertyMap(), 31, true),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
     auto wkt =
@@ -2223,7 +2254,7 @@ TEST(wkt_parse, invalid_BOUNDCRS) {
             PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
             GeodeticReferenceFrame::EPSG_6326,
             EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE)),
-        Conversion::createUTM(31, true),
+        Conversion::createUTM(PropertyMap(), 31, true),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
     EXPECT_NO_THROW(WKTParser().createFromWKT(
@@ -2486,4 +2517,38 @@ TEST(wkt_parse, invalid_TemporalCRS) {
                                   "        AXIS[\"time (T)\",future],\n"
                                   "        AXIS[\"time2 (T)\",future]]"),
         ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projstringformatter) {
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("my_proj");
+        EXPECT_EQ(fmt->toString(), "+proj=my_proj");
+    }
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("my_proj", true);
+        EXPECT_EQ(fmt->toString(), "+proj=pipeline +step +inv +proj=my_proj");
+    }
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("my_proj1");
+        fmt->addStep("my_proj2");
+        EXPECT_EQ(fmt->toString(),
+                  "+proj=pipeline +step +proj=my_proj1 +step +proj=my_proj2");
+    }
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("my_proj1", true);
+        fmt->addStep("my_proj2");
+        EXPECT_EQ(
+            fmt->toString(),
+            "+proj=pipeline +step +inv +proj=my_proj1 +step +proj=my_proj2");
+    }
 }

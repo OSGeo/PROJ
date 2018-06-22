@@ -65,6 +65,10 @@ static const std::string EPSG_METHOD_TRANSVERSE_MERCATOR("Transverse Mercator");
 constexpr int EPSG_METHOD_TRANSVERSE_MERCATOR_CODE = 9807;
 
 static const std::string
+    EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP("Lambert Conic Conformal (1SP)");
+constexpr int EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE = 9801;
+
+static const std::string
     EPSG_LATITUDE_OF_NATURAL_ORIGIN("Latitude of natural origin");
 static const std::string
     EPSG_LONGITUDE_OF_NATURAL_ORIGIN("Longitude of natural origin");
@@ -111,6 +115,17 @@ static const MethodMapping methodMappings[] = {
     {EPSG_METHOD_TRANSVERSE_MERCATOR,
      EPSG_METHOD_TRANSVERSE_MERCATOR_CODE,
      "Transverse_Mercator",
+     {
+         {EPSG_LATITUDE_OF_NATURAL_ORIGIN, 8801, WKT1_LATITUDE_OF_ORIGIN},
+         {EPSG_LONGITUDE_OF_NATURAL_ORIGIN, 8802, WKT1_CENTRAL_MERIDIAN},
+         {EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN, 8805, WKT1_SCALE_FACTOR},
+         {EPSG_FALSE_EASTING, 8806, WKT1_FALSE_EASTING},
+         {EPSG_FALSE_NORTHING, 8807, WKT1_FALSE_NORTHING},
+     }},
+
+    {EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
+     EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE,
+     "Lambert_Conformal_Conic_1SP",
      {
          {EPSG_LATITUDE_OF_NATURAL_ORIGIN, 8801, WKT1_LATITUDE_OF_ORIGIN},
          {EPSG_LONGITUDE_OF_NATURAL_ORIGIN, 8802, WKT1_CENTRAL_MERIDIAN},
@@ -651,6 +666,36 @@ void SingleOperation::setParameterValues(
 
 // ---------------------------------------------------------------------------
 
+ParameterValuePtr
+SingleOperation::parameterValue(const std::string &paramName) const {
+    for (const auto &genOpParamvalue : parameterValues()) {
+        const auto &opParamvalue =
+            util::nn_dynamic_pointer_cast<OperationParameterValue>(
+                genOpParamvalue);
+        if (opParamvalue) {
+            const auto &paramNameIter =
+                *(opParamvalue->parameter()->name()->description());
+            if (ci_equal(paramName, paramNameIter)) {
+                return opParamvalue->parameterValue();
+            }
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+Measure
+SingleOperation::parameterValueMeasure(const std::string &paramName) const {
+    auto val = parameterValue(paramName);
+    if (val && val->type() == ParameterValue::Type::MEASURE) {
+        return val->value();
+    }
+    return Measure();
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct ParameterValue::Private {
     ParameterValue::Type type_{ParameterValue::Type::STRING};
@@ -872,21 +917,27 @@ ConversionNNPtr Conversion::create(const ConversionNNPtr &other) {
 
 // ---------------------------------------------------------------------------
 
-static PropertyMap getUTMConversionProperty(int zone, bool north) {
-    std::ostringstream conversionName;
-    conversionName << "UTM zone ";
-    conversionName << zone;
-    conversionName << (north ? 'N' : 'S');
+static PropertyMap getUTMConversionProperty(const PropertyMap &properties,
+                                            int zone, bool north) {
+    if (properties.find(IdentifiedObject::NAME_KEY) == properties.end()) {
+        std::ostringstream conversionName;
+        conversionName << "UTM zone ";
+        conversionName << zone;
+        conversionName << (north ? 'N' : 'S');
 
-    return PropertyMap()
-        .set(IdentifiedObject::NAME_KEY, conversionName.str())
-        .set(Identifier::CODESPACE_KEY, "EPSG")
-        .set(Identifier::CODE_KEY, (north ? 16000 : 17000) + zone);
+        return PropertyMap()
+            .set(IdentifiedObject::NAME_KEY, conversionName.str())
+            .set(Identifier::CODESPACE_KEY, "EPSG")
+            .set(Identifier::CODE_KEY, (north ? 16000 : 17000) + zone);
+    } else {
+        return properties;
+    }
 }
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr Conversion::createUTM(int zone, bool north) {
+ConversionNNPtr Conversion::createUTM(const PropertyMap &properties, int zone,
+                                      bool north) {
     const MethodMapping *mapping =
         getMapping(EPSG_METHOD_TRANSVERSE_MERCATOR_CODE);
     assert(mapping);
@@ -909,12 +960,97 @@ ConversionNNPtr Conversion::createUTM(int zone, bool north) {
     };
 
     return create(
-        getUTMConversionProperty(zone, north),
+        getUTMConversionProperty(properties, zone, north),
         PropertyMap()
             .set(IdentifiedObject::NAME_KEY, EPSG_METHOD_TRANSVERSE_MERCATOR)
             .set(Identifier::CODESPACE_KEY, "EPSG")
             .set(Identifier::CODE_KEY, EPSG_METHOD_TRANSVERSE_MERCATOR_CODE),
         parameters, values);
+}
+
+// ---------------------------------------------------------------------------
+
+static PropertyMap addDefaultNameIfNeeded(const PropertyMap &properties,
+                                          const std::string &defaultName) {
+    if (properties.find(IdentifiedObject::NAME_KEY) == properties.end()) {
+        return PropertyMap().set(IdentifiedObject::NAME_KEY, defaultName);
+    } else {
+        return properties;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr
+Conversion::createTM(const PropertyMap &properties, const Angle &centerLat,
+                     const Angle &centerLong, const Scale &scale,
+                     const Length &falseEasting, const Length &falseNorthing) {
+    const MethodMapping *mapping =
+        getMapping(EPSG_METHOD_TRANSVERSE_MERCATOR_CODE);
+    assert(mapping);
+    std::vector<OperationParameterNNPtr> parameters;
+    for (const auto &param : mapping->params) {
+        parameters.push_back(OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY, param.wkt2_name)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, param.epsg_code)));
+    }
+
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(scale),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(
+        addDefaultNameIfNeeded(properties, EPSG_METHOD_TRANSVERSE_MERCATOR),
+        PropertyMap()
+            .set(IdentifiedObject::NAME_KEY, EPSG_METHOD_TRANSVERSE_MERCATOR)
+            .set(Identifier::CODESPACE_KEY, "EPSG")
+            .set(Identifier::CODE_KEY, EPSG_METHOD_TRANSVERSE_MERCATOR_CODE),
+        parameters, values);
+}
+
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr Conversion::createLCC_1SP(const PropertyMap &properties,
+                                          const Angle &centerLat,
+                                          const Angle &centerLong,
+                                          const Scale &scale,
+                                          const Length &falseEasting,
+                                          const Length &falseNorthing) {
+    const MethodMapping *mapping =
+        getMapping(EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE);
+    assert(mapping);
+    std::vector<OperationParameterNNPtr> parameters;
+    for (const auto &param : mapping->params) {
+        parameters.push_back(OperationParameter::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY, param.wkt2_name)
+                .set(Identifier::CODESPACE_KEY, "EPSG")
+                .set(Identifier::CODE_KEY, param.epsg_code)));
+    }
+
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(scale),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(addDefaultNameIfNeeded(
+                      properties, EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP),
+                  PropertyMap()
+                      .set(IdentifiedObject::NAME_KEY,
+                           EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP)
+                      .set(Identifier::CODESPACE_KEY, "EPSG")
+                      .set(Identifier::CODE_KEY,
+                           EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE),
+                  parameters, values);
 }
 
 // ---------------------------------------------------------------------------
@@ -955,19 +1091,84 @@ std::string Conversion::exportToWKT(WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr Conversion::identify() const {
+std::string Conversion::exportToPROJString(
+    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+{
     auto projectionMethodName = *(method()->name()->description());
-    auto newConversion = Conversion::nn_make_shared<Conversion>(*this);
+    if (ci_equal(projectionMethodName, EPSG_METHOD_TRANSVERSE_MERCATOR)) {
+        // Check for UTM
+        int zone = 0;
+        bool north = true;
+        if (isUTM(zone, north)) {
+            formatter->addStep("utm");
+            formatter->addParam("zone", zone);
+            if (!north) {
+                formatter->addParam("south");
+            }
+        } else {
+            formatter->addStep("tmerc");
+            formatter->addParam(
+                "lat_0", parameterValueMeasure(EPSG_LATITUDE_OF_NATURAL_ORIGIN)
+                             .convertToUnit(UnitOfMeasure::DEGREE)
+                             .value());
+            formatter->addParam(
+                "lon_0", parameterValueMeasure(EPSG_LONGITUDE_OF_NATURAL_ORIGIN)
+                             .convertToUnit(UnitOfMeasure::DEGREE)
+                             .value());
+            formatter->addParam("k_0", parameterValueMeasure(
+                                           EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN)
+                                           .getSIValue());
+            formatter->addParam(
+                "x_0", parameterValueMeasure(EPSG_FALSE_EASTING).getSIValue());
+            formatter->addParam(
+                "y_0", parameterValueMeasure(EPSG_FALSE_NORTHING).getSIValue());
+        }
+    } else if (ci_equal(projectionMethodName,
+                        EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP)) {
 
+        formatter->addStep("lcc");
+        formatter->addParam(
+            "lat_1", parameterValueMeasure(EPSG_LATITUDE_OF_NATURAL_ORIGIN)
+                         .convertToUnit(UnitOfMeasure::DEGREE)
+                         .value());
+        formatter->addParam(
+            "lat_0", parameterValueMeasure(EPSG_LATITUDE_OF_NATURAL_ORIGIN)
+                         .convertToUnit(UnitOfMeasure::DEGREE)
+                         .value());
+        formatter->addParam(
+            "lon_0", parameterValueMeasure(EPSG_LONGITUDE_OF_NATURAL_ORIGIN)
+                         .convertToUnit(UnitOfMeasure::DEGREE)
+                         .value());
+        formatter->addParam(
+            "k_0", parameterValueMeasure(EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN)
+                       .getSIValue());
+        formatter->addParam(
+            "x_0", parameterValueMeasure(EPSG_FALSE_EASTING).getSIValue());
+        formatter->addParam(
+            "y_0", parameterValueMeasure(EPSG_FALSE_NORTHING).getSIValue());
+
+    } else {
+        throw FormattingException("Unsupported conversion method: " +
+                                  projectionMethodName);
+    }
+
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool Conversion::isUTM(int &zone, bool &north) const {
+    zone = 0;
+    north = true;
+
+    auto projectionMethodName = *(method()->name()->description());
     if (ci_equal(projectionMethodName, EPSG_METHOD_TRANSVERSE_MERCATOR)) {
         // Check for UTM
 
         bool bLatitudeNatOriginUTM = false;
-        int nUTMZone = 0;
         bool bScaleFactorUTM = false;
         bool bFalseEastingUTM = false;
         bool bFalseNorthingUTM = false;
-        bool bNorthUTM = true;
         for (const auto &genOpParamvalue : parameterValues()) {
             const auto &opParamvalue =
                 util::nn_dynamic_pointer_cast<OperationParameterValue>(
@@ -975,9 +1176,9 @@ ConversionNNPtr Conversion::identify() const {
             if (opParamvalue) {
                 const auto &paramName =
                     *(opParamvalue->parameter()->name()->description());
-                const auto &parameterValue = opParamvalue->parameterValue();
-                if (parameterValue->type() == ParameterValue::Type::MEASURE) {
-                    auto measure = parameterValue->value();
+                const auto &l_parameterValue = opParamvalue->parameterValue();
+                if (l_parameterValue->type() == ParameterValue::Type::MEASURE) {
+                    auto measure = l_parameterValue->value();
                     if (paramName == EPSG_LATITUDE_OF_NATURAL_ORIGIN &&
                         measure.value() == UTM_LATITUDE_OF_NATURAL_ORIGIN) {
                         bLatitudeNatOriginUTM = true;
@@ -986,7 +1187,7 @@ ConversionNNPtr Conversion::identify() const {
                         double dfZone = (measure.value() + 183.0) / 6.0;
                         if (dfZone > 0.9 && dfZone < 60.1 &&
                             std::abs(dfZone - std::round(dfZone)) < 1e-10) {
-                            nUTMZone = static_cast<int>(std::lround(dfZone));
+                            zone = static_cast<int>(std::lround(dfZone));
                         }
                     } else if (paramName ==
                                    EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN &&
@@ -1000,20 +1201,37 @@ ConversionNNPtr Conversion::identify() const {
                                measure.unit() == UnitOfMeasure::METRE) {
                         if (measure.value() == UTM_NORTH_FALSE_NORTHING) {
                             bFalseNorthingUTM = true;
-                            bNorthUTM = true;
+                            north = true;
                         } else if (measure.value() ==
                                    UTM_SOUTH_FALSE_NORTHING) {
                             bFalseNorthingUTM = true;
-                            bNorthUTM = false;
+                            north = false;
                         }
                     }
                 }
             }
         }
-        if (bLatitudeNatOriginUTM && nUTMZone > 0 && bScaleFactorUTM &&
+        if (bLatitudeNatOriginUTM && zone > 0 && bScaleFactorUTM &&
             bFalseEastingUTM && bFalseNorthingUTM) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr Conversion::identify() const {
+    auto projectionMethodName = *(method()->name()->description());
+    auto newConversion = Conversion::nn_make_shared<Conversion>(*this);
+
+    if (ci_equal(projectionMethodName, EPSG_METHOD_TRANSVERSE_MERCATOR)) {
+        // Check for UTM
+        int zone = 0;
+        bool north = true;
+        if (isUTM(zone, north)) {
             newConversion->setProperties(
-                getUTMConversionProperty(nUTMZone, bNorthUTM));
+                getUTMConversionProperty(PropertyMap(), zone, north));
         }
     }
 
@@ -1114,9 +1332,9 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
             if (opParamvalue) {
                 const auto &parameter = opParamvalue->parameter();
                 const auto &paramName = *(parameter->name()->description());
-                const auto &parameterValue = opParamvalue->parameterValue();
-                if (parameterValue->type() == ParameterValue::Type::MEASURE) {
-                    auto measure = parameterValue->value();
+                const auto &l_parameterValue = opParamvalue->parameterValue();
+                if (l_parameterValue->type() == ParameterValue::Type::MEASURE) {
+                    auto measure = l_parameterValue->value();
                     if (Identifier::isEquivalentName(
                             paramName,
                             EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME) ||

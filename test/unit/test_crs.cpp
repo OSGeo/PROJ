@@ -199,6 +199,15 @@ TEST(crs, EPSG_4326_as_WKT1_GDAL) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_4326_as_PROJ_string) {
+    auto crs = GeographicCRS::EPSG_4326;
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=longlat +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_4979_as_WKT2_SIMPLIFIED) {
     auto crs = GeographicCRS::EPSG_4979;
     WKTFormatterNNPtr f(
@@ -335,6 +344,114 @@ TEST(crs, EPSG_4807_as_WKT1_GDAL) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_4807_as_PROJ_string) {
+    auto crs = GeographicCRS::EPSG_4807;
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
+              "+step +proj=axisswap +order=2,1 +step +proj=longlat "
+              "+ellps=clrk80ign +pm=paris");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string) {
+    auto obj = WKTParser().createFromWKT(
+        "PROJCRS[\"NTF (Paris) / Lambert Nord France\",\n"
+        "  BASEGEODCRS[\"NTF (Paris)\",\n"
+        "    DATUM[\"Nouvelle Triangulation Francaise (Paris)\",\n"
+        "      ELLIPSOID[\"Clarke 1880 "
+        "(IGN)\",6378249.2,293.4660213,LENGTHUNIT[\"metre\",1.0]]],\n"
+        "    PRIMEM[\"Paris\",2.5969213,ANGLEUNIT[\"grad\",0.015707963268]]],\n"
+        "  CONVERSION[\"Lambert Nord France\",\n"
+        "    METHOD[\"Lambert Conic Conformal (1SP)\",ID[\"EPSG\",9801]],\n"
+        "    PARAMETER[\"Latitude of natural "
+        "origin\",55,ANGLEUNIT[\"grad\",0.015707963268]],\n"
+        "    PARAMETER[\"Longitude of natural "
+        "origin\",0,ANGLEUNIT[\"grad\",0.015707963268]],\n"
+        "    PARAMETER[\"Scale factor at natural "
+        "origin\",0.999877341,SCALEUNIT[\"unity\",1.0]],\n"
+        "    PARAMETER[\"False easting\",600000,LENGTHUNIT[\"metre\",1.0]],\n"
+        "    PARAMETER[\"False northing\",200000,LENGTHUNIT[\"metre\",1.0]]],\n"
+        "  CS[cartesian,2],\n"
+        "    AXIS[\"easting (X)\",east,ORDER[1]],\n"
+        "    AXIS[\"northing (Y)\",north,ORDER[2]],\n"
+        "    LENGTHUNIT[\"metre\",1.0],\n"
+        "  ID[\"EPSG\",27561]]");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
+              "+step +proj=axisswap +order=2,1 +step +proj=lcc +lat_1=49.5 "
+              "+lat_0=49.5 +lon_0=0 "
+              "+k_0=0.999877341 +x_0=600000 +y_0=200000 +ellps=clrk80ign "
+              "+pm=paris");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_3040_projected_northing_easting_as_PROJ_string) {
+    auto obj = WKTParser().createFromWKT(
+        "PROJCRS[\"ETRS89 / UTM zone 28N (N-E)\",\n"
+        "  BASEGEODCRS[\"ETRS89\",\n"
+        "    DATUM[\"European Terrestrial Reference System 1989\",\n"
+        "      ELLIPSOID[\"GRS "
+        "1980\",6378137,298.257222101,LENGTHUNIT[\"metre\",1.0]]]],\n"
+        "  CONVERSION[\"UTM zone 28N\",\n"
+        "    METHOD[\"Transverse Mercator\",ID[\"EPSG\",9807]],\n"
+        "    PARAMETER[\"Latitude of natural "
+        "origin\",0,ANGLEUNIT[\"degree\",0.01745329252]],\n"
+        "    PARAMETER[\"Longitude of natural "
+        "origin\",-15,ANGLEUNIT[\"degree\",0.01745329252]],\n"
+        "    PARAMETER[\"Scale factor at natural "
+        "origin\",0.9996,SCALEUNIT[\"unity\",1.0]],\n"
+        "    PARAMETER[\"False easting\",500000,LENGTHUNIT[\"metre\",1.0]],\n"
+        "    PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1.0]]],\n"
+        "  CS[cartesian,2],\n"
+        "    AXIS[\"northing (N)\",north,ORDER[1]],\n"
+        "    AXIS[\"easting (E)\",east,ORDER[2]],\n"
+        "    LENGTHUNIT[\"metre\",1.0],\n"
+        "  ID[\"EPSG\",3040]]");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=utm "
+              "+zone=28 +ellps=GRS80 +step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_2222_projected_unit_foot_as_PROJ_string) {
+    auto obj = WKTParser().createFromWKT(
+        "PROJCRS[\"NAD83 / Arizona East (ft)\",\n"
+        "  BASEGEODCRS[\"NAD83\",\n"
+        "    DATUM[\"North American Datum 1983\",\n"
+        "      ELLIPSOID[\"GRS "
+        "1980\",6378137,298.257222101,LENGTHUNIT[\"metre\",1.0]]]],\n"
+        "  CONVERSION[\"SPCS83 Arizona East zone (International feet)\",\n"
+        "    METHOD[\"Transverse Mercator\",ID[\"EPSG\",9807]],\n"
+        "    PARAMETER[\"Latitude of natural "
+        "origin\",31,ANGLEUNIT[\"degree\",0.01745329252]],\n"
+        "    PARAMETER[\"Longitude of natural "
+        "origin\",-110.166666666667,ANGLEUNIT[\"degree\",0.01745329252]],\n"
+        "    PARAMETER[\"Scale factor at natural "
+        "origin\",0.9999,SCALEUNIT[\"unity\",1.0]],\n"
+        "    PARAMETER[\"False easting\",700000,LENGTHUNIT[\"foot\",0.3048]],\n"
+        "    PARAMETER[\"False northing\",0,LENGTHUNIT[\"foot\",0.3048]]],\n"
+        "  CS[cartesian,2],\n"
+        "    AXIS[\"easting (X)\",east,ORDER[1]],\n"
+        "    AXIS[\"northing (Y)\",north,ORDER[2]],\n"
+        "    LENGTHUNIT[\"foot\",0.3048],\n"
+        "  ID[\"EPSG\",2222]]");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=tmerc +lat_0=31 +lon_0=-110.166666667025 +k_0=0.9999 "
+              "+x_0=213360 +y_0=0 +ellps=GRS80 +units=ft");
+}
+
+// ---------------------------------------------------------------------------
+
 static GeodeticCRSNNPtr createGeocentric() {
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
@@ -419,6 +536,38 @@ TEST(crs, geocentricCRS_as_WKT1_GDAL) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, geocentricCRS_as_PROJ_string) {
+    auto crs = createGeocentric();
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=cart +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, geocentricCRS_non_meter_unit_as_PROJ_string) {
+    auto crs = GeodeticCRS::create(
+        PropertyMap(), GeodeticReferenceFrame::EPSG_6326,
+        CartesianCS::createGeocentric(
+            UnitOfMeasure("kilometre", 1000.0, UnitOfMeasure::Type::LINEAR)));
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=cart +ellps=WGS84 +units=km");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, geocentricCRS_unsupported_unit_as_PROJ_string) {
+    auto crs = GeodeticCRS::create(
+        PropertyMap(), GeodeticReferenceFrame::EPSG_6326,
+        CartesianCS::createGeocentric(
+            UnitOfMeasure("my unit", 500.0, UnitOfMeasure::Type::LINEAR)));
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=cart +ellps=WGS84 +to_meter=500");
+}
+
+// ---------------------------------------------------------------------------
+
 static ProjectedCRSNNPtr createProjected() {
     PropertyMap propertiesCRS;
     propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
@@ -426,7 +575,7 @@ static ProjectedCRSNNPtr createProjected() {
         .set(IdentifiedObject::NAME_KEY, "WGS 84 / UTM zone 31N");
     return ProjectedCRS::create(
         propertiesCRS, GeographicCRS::EPSG_4326,
-        Conversion::createUTM(31, true),
+        Conversion::createUTM(PropertyMap(), 31, true),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 }
 
@@ -564,6 +713,15 @@ TEST(crs, projectedCRS_as_WKT1_GDAL) {
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
               expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projectedCRS_as_PROJ_string) {
+    auto crs = createProjected();
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=utm "
+              "+zone=31 +ellps=WGS84");
 }
 
 // ---------------------------------------------------------------------------
@@ -900,7 +1058,7 @@ TEST(crs, boundCRS_to_WKT2) {
             PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
             GeodeticReferenceFrame::EPSG_6326,
             EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE)),
-        Conversion::createUTM(31, true),
+        Conversion::createUTM(PropertyMap(), 31, true),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
     auto crs = BoundCRS::createFromTOWGS84(
@@ -1061,7 +1219,7 @@ TEST(crs, boundCRS_to_WKT1) {
             PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
             GeodeticReferenceFrame::EPSG_6326,
             EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE)),
-        Conversion::createUTM(31, true),
+        Conversion::createUTM(PropertyMap(), 31, true),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
     auto crs = BoundCRS::createFromTOWGS84(

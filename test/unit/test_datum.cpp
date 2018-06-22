@@ -53,6 +53,9 @@ TEST(datum, ellipsoid_from_sphere) {
 
     EXPECT_EQ(ellipsoid->computeSemiMinorAxis(), Length(6378137));
     EXPECT_EQ(ellipsoid->computeInverseFlattening(), Scale(0));
+
+    EXPECT_EQ(ellipsoid->exportToPROJString(PROJStringFormatter::create()),
+              "+a=6378137 +b=6378137");
 }
 
 // ---------------------------------------------------------------------------
@@ -73,6 +76,9 @@ TEST(datum, ellipsoid_from_inverse_flattening) {
     EXPECT_NEAR(ellipsoid->computeSemiMinorAxis().value(),
                 Length(6356752.31424518).value(), 1e-9);
     EXPECT_EQ(ellipsoid->computeInverseFlattening(), Scale(298.257223563));
+
+    EXPECT_EQ(ellipsoid->exportToPROJString(PROJStringFormatter::create()),
+              "+ellps=WGS84");
 }
 
 // ---------------------------------------------------------------------------
@@ -91,6 +97,38 @@ TEST(datum, ellipsoid_from_semi_minor_axis) {
     EXPECT_EQ(ellipsoid->computeSemiMinorAxis(), Length(6356752.31424518));
     EXPECT_NEAR(ellipsoid->computeInverseFlattening().value(),
                 Scale(298.257223563).value(), 1e-10);
+
+    EXPECT_EQ(ellipsoid->exportToPROJString(PROJStringFormatter::create()),
+              "+ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, prime_meridian_to_PROJString) {
+
+    EXPECT_EQ(PrimeMeridian::GREENWICH->exportToPROJString(
+                  PROJStringFormatter::create()),
+              "");
+
+    EXPECT_EQ(
+        PrimeMeridian::PARIS->exportToPROJString(PROJStringFormatter::create()),
+        "+pm=paris");
+
+    EXPECT_EQ(PrimeMeridian::create(PropertyMap(), Angle(3.5))
+                  ->exportToPROJString(PROJStringFormatter::create()),
+              "+pm=3.5");
+
+    EXPECT_EQ(
+        PrimeMeridian::create(PropertyMap(), Angle(100, UnitOfMeasure::GRAD))
+            ->exportToPROJString(PROJStringFormatter::create()),
+        "+pm=90");
+
+    EXPECT_EQ(
+        PrimeMeridian::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "Origin meridian"),
+            Angle(0))
+            ->exportToPROJString(PROJStringFormatter::create()),
+        "");
 }
 
 // ---------------------------------------------------------------------------
@@ -98,7 +136,7 @@ TEST(datum, ellipsoid_from_semi_minor_axis) {
 TEST(datum, datum_with_ANCHOR) {
     auto datum = GeodeticReferenceFrame::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "WGS_1984 with anchor"),
-        Ellipsoid::EPSG_7030, optional<std::string>("My anchor"),
+        Ellipsoid::WGS84, optional<std::string>("My anchor"),
         PrimeMeridian::GREENWICH);
 
     auto expected = "DATUM[\"WGS_1984 with anchor\",\n"
@@ -108,6 +146,31 @@ TEST(datum, datum_with_ANCHOR) {
                     "    ANCHOR[\"My anchor\"]]";
 
     EXPECT_EQ(datum->exportToWKT(WKTFormatter::create()), expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, ellipsoid_to_PROJString) {
+
+    EXPECT_EQ(
+        Ellipsoid::WGS84->exportToPROJString(PROJStringFormatter::create()),
+        "+ellps=WGS84");
+
+    EXPECT_EQ(
+        Ellipsoid::GRS1980->exportToPROJString(PROJStringFormatter::create()),
+        "+ellps=GRS80");
+
+    EXPECT_EQ(
+        Ellipsoid::createFlattenedSphere(
+            PropertyMap(), Length(10, UnitOfMeasure("km", 1000)), Scale(0.5))
+            ->exportToPROJString(PROJStringFormatter::create()),
+        "+a=10000 +rf=0.5");
+
+    EXPECT_EQ(Ellipsoid::createTwoAxis(PropertyMap(),
+                                       Length(10, UnitOfMeasure("km", 1000)),
+                                       Length(5, UnitOfMeasure("km", 1000)))
+                  ->exportToPROJString(PROJStringFormatter::create()),
+              "+a=10000 +b=5000");
 }
 
 // ---------------------------------------------------------------------------

@@ -106,7 +106,8 @@ using PrimeMeridianPtr = std::shared_ptr<PrimeMeridian>;
 using PrimeMeridianNNPtr = util::nn<PrimeMeridianPtr>;
 
 class PrimeMeridian : public common::IdentifiedObject,
-                      public io::IWKTExportable {
+                      public io::IWKTExportable,
+                      public io::IPROJStringExportable {
   public:
     PROJ_DLL ~PrimeMeridian() override;
 
@@ -117,9 +118,14 @@ class PrimeMeridian : public common::IdentifiedObject,
     create(const util::PropertyMap &properties, const common::Angle &longitude);
 
     PROJ_DLL static const PrimeMeridianNNPtr GREENWICH;
+    PROJ_DLL static const PrimeMeridianNNPtr PARIS;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -135,6 +141,7 @@ class PrimeMeridian : public common::IdentifiedObject,
     PrimeMeridian &operator=(const PrimeMeridian &other) = delete;
 
     static const PrimeMeridianNNPtr createGREENWICH();
+    static const PrimeMeridianNNPtr createPARIS();
 };
 
 // ---------------------------------------------------------------------------
@@ -143,7 +150,9 @@ class Ellipsoid;
 using EllipsoidPtr = std::shared_ptr<Ellipsoid>;
 using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
 
-class Ellipsoid : public common::IdentifiedObject, public io::IWKTExportable {
+class Ellipsoid : public common::IdentifiedObject,
+                  public io::IWKTExportable,
+                  public io::IPROJStringExportable {
   public:
     PROJ_DLL ~Ellipsoid() override;
 
@@ -175,10 +184,15 @@ class Ellipsoid : public common::IdentifiedObject, public io::IWKTExportable {
                   const common::Length &semiMajorAxisIn,
                   const common::Length &semiMinorAxisIn);
 
-    PROJ_DLL static const EllipsoidNNPtr EPSG_7030; // WGS 84
+    PROJ_DLL static const EllipsoidNNPtr WGS84;
+    PROJ_DLL static const EllipsoidNNPtr GRS1980;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -204,7 +218,8 @@ class Ellipsoid : public common::IdentifiedObject, public io::IWKTExportable {
     Ellipsoid(const Ellipsoid &other) = delete;
     Ellipsoid &operator=(const Ellipsoid &other) = delete;
 
-    static const EllipsoidNNPtr createEPSG_7030(); // WGS 84
+    static const EllipsoidNNPtr createWGS84();
+    static const EllipsoidNNPtr createGRS1980();
 };
 
 // ---------------------------------------------------------------------------
