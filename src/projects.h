@@ -583,6 +583,9 @@ enum deprecated_constants_for_now_dropped_analytical_factors {
 #define PJD_ERR_ELLIPSOIDAL_UNSUPPORTED -56
 #define PJD_ERR_TOO_MANY_INITS          -57
 #define PJD_ERR_INVALID_ARG             -58
+#define PJD_ERR_INCONSISTENT_UNIT       -59
+/* NOTE: Remember to update pj_strerrno.c and transient_error in */
+/* pj_transform.c when adding new value */
 
 struct projFileAPI_t;
 

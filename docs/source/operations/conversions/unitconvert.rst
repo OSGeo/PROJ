@@ -6,7 +6,7 @@ Unit conversion
 
 .. versionadded:: 5.0.0
 
-Convert between various distance and time units.
+Convert between various distance, angular and time units.
 
 +---------------------+--------------------------------------------------------+
 | **Alias**           | unitconvert                                            |
@@ -41,24 +41,32 @@ expected to be in units of decimalyears. This can be fixed with `unitconvert`::
 Parameters
 ################################################################################
 
-.. option:: +xy_in=<unit>
+.. option:: +xy_in=<unit> or <conversion_factor>
 
-    Horizontal input units. See :ref:`distance_units` for a list of available
+    Horizontal input units. See :ref:`distance_units` and :ref:`angular_units`
+    for a list of available units. `<conversion_factor>` is the conversion factor
+    from the input unit to metre for linear units, or to radian for angular
     units.
 
-.. option:: +xy_out=<unit>
+.. option:: +xy_out=<unit> or <conversion_factor>
 
-    Horizontal output units. See :ref:`distance_units` for a list of available
+    Horizontal output units. See :ref:`distance_units` and :ref:`angular_units`
+    for a list of available units. `<conversion_factor>` is the conversion factor
+    from the output unit to metre for linear units, or to radian for angular
     units.
 
-.. option:: +z_in=<unit>
+.. option:: +z_in=<unit> or <conversion_factor>
 
-    Vertical output units. See :ref:`distance_units` for a list of available
+    Vertical output units. See :ref:`distance_units` and :ref:`angular_units`
+    for a list of available units. `<conversion_factor>` is the conversion factor
+    from the input unit to metre for linear units, or to radian for angular
     units.
 
-.. option:: +z_out=<unit>
+.. option:: +z_out=<unit> or <conversion_factor>
 
-    Vertical output units. See :ref:`distance_units` for a list of available
+    Vertical output units. See :ref:`distance_units` and :ref:`angular_units`
+    for a list of available units.  `<conversion_factor>` is the conversion factor
+    from the output unit to metre for linear units, or to radian for angular
     units.
 
 .. option:: +t_in=<unit>
@@ -74,7 +82,7 @@ Parameters
 Distance units
 ###############################################################################
 
-In the table below all distance units supported by PROJ is listed.
+In the table below all distance units supported by PROJ are listed.
 The same list can also be produced on the command line with :program:`proj` or
 :program:`cs2cs`, by adding the `-lu` flag when calling the utility.
 
@@ -124,12 +132,31 @@ The same list can also be produced on the command line with :program:`proj` or
 | ind-ch   | Indian Chain                    |
 +----------+---------------------------------+
 
+.. _angular_units:
+
+Angular units
+###############################################################################
+
+.. versionadded:: 5.2.0
+
+In the table below all angular units supported by PROJ `unitconvert` are listed.
+
++----------+---------------------------------+
+| **Label**| **Name**                        |
++----------+---------------------------------+
+|    deg   | Degree                          |
++----------+---------------------------------+
+|   grad   | Grad                            |
++----------+---------------------------------+
+|    rad   | Radian                          |
++----------+---------------------------------+
+
 .. _time_units:
 
 Time units
 ###############################################################################
 
-In the table below all time units supported by PROJ is listed.
+In the table below all time units supported by PROJ are listed.
 
 +--------------+-----------------------------+
 | **label**    | **Name**                    |
