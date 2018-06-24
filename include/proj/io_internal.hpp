@@ -62,7 +62,8 @@ class WKTConstants {
     static const std::string VERT_CS;
     static const std::string VERT_DATUM;
     static const std::string COMPD_CS;
-    static const std::string TOWGS84; // WKT1 only
+    static const std::string TOWGS84;   // WKT1 only
+    static const std::string EXTENSION; // WK1 only - GDAL specific
 
     // WKT2 preferred
     static const std::string GEODCRS;

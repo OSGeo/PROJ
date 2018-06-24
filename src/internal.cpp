@@ -103,14 +103,23 @@ std::string stripQuotes(const std::string &str) {
 
 // ---------------------------------------------------------------------------
 
-size_t ci_find(const std::string &str, const std::string &osNeedle,
-               size_t nStartPos) {
-    if (nStartPos >= str.size()) {
+size_t ci_find(const std::string &str, const std::string &needle,
+               size_t startPos) {
+    if (startPos >= str.size()) {
         return std::string::npos;
     }
-    auto lowerStr = tolower(str.substr(nStartPos));
-    auto lowerNeedle = tolower(osNeedle);
+    auto lowerStr = tolower(str.substr(startPos));
+    auto lowerNeedle = tolower(needle);
     return lowerStr.find(lowerNeedle);
+}
+
+// ---------------------------------------------------------------------------
+
+bool ends_with(const std::string &str, const std::string &suffix) {
+    if (str.size() < suffix.size()) {
+        return false;
+    }
+    return str.substr(str.size() - suffix.size()) == suffix;
 }
 
 // ---------------------------------------------------------------------------

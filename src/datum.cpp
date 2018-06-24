@@ -720,6 +720,13 @@ std::string VerticalReferenceFrame::exportToWKT(
                                        ? *(name()->description())
                                        : "unnamed");
         formatter->add(2005); // CS_VD_GeoidModelDerived from OGC 01-009
+        std::string extension = formatter->getVDatumExtension();
+        if (!extension.empty()) {
+            formatter->startNode(WKTConstants::EXTENSION, false);
+            formatter->addQuotedString("PROJ4_GRIDS");
+            formatter->addQuotedString(extension);
+            formatter->endNode();
+        }
         if (formatter->outputId()) {
             formatID(formatter);
         }

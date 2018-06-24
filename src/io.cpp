@@ -102,6 +102,7 @@ struct WKTFormatter::Private {
     bool abridgedTransformation_ = false;
     bool useDerivingConversion_ = false;
     std::vector<double> toWGS84Parameters_{};
+    std::string vDatumExtension_{};
     std::string result_{};
 
     void addNewLine();
@@ -548,6 +549,18 @@ const std::vector<double> &WKTFormatter::getTOWGS84Parameters() const {
 
 // ---------------------------------------------------------------------------
 
+void WKTFormatter::setVDatumExtension(const std::string &filename) {
+    d->vDatumExtension_ = filename;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::string &WKTFormatter::getVDatumExtension() const {
+    return d->vDatumExtension_;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct WKTNode::Private {
     std::string value_{};
@@ -805,7 +818,7 @@ struct WKTParser::Private {
     ProjectedCRSNNPtr buildProjectedCRS(WKTNodeNNPtr node);
     VerticalReferenceFrameNNPtr buildVerticalReferenceFrame(WKTNodeNNPtr node);
     TemporalDatumNNPtr buildTemporalDatum(WKTNodeNNPtr node);
-    VerticalCRSNNPtr buildVerticalCRS(WKTNodeNNPtr node);
+    CRSNNPtr buildVerticalCRS(WKTNodeNNPtr node);
     CompoundCRSNNPtr buildCompoundCRS(WKTNodeNNPtr node);
     BoundCRSNNPtr buildBoundCRS(WKTNodeNNPtr node);
     TemporalCRSNNPtr buildTemporalCRS(WKTNodeNNPtr node);
@@ -1013,7 +1026,7 @@ UnitOfMeasure WKTParser::Private::buildUnit(WKTNodeNNPtr node,
         }
         return UnitOfMeasure(
             stripQuotes(children[0]->value()),
-            children.size() == 2 ? asDouble(children[1]->value()) : 0.0, type,
+            children.size() >= 2 ? asDouble(children[1]->value()) : 0.0, type,
             hasValidNode ? stripQuotes(idNode->children()[0]->value())
                          : std::string(),
             hasValidNode ? stripQuotes(idNode->children()[1]->value())
@@ -1991,7 +2004,7 @@ TemporalDatumNNPtr WKTParser::Private::buildTemporalDatum(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-VerticalCRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
+CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
     auto datumNode = node->lookForChild(WKTConstants::VDATUM);
     if (!datumNode) {
         datumNode = node->lookForChild(WKTConstants::VERT_DATUM);
@@ -2014,8 +2027,37 @@ VerticalCRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
         throw ParsingException("CS node is not of type vertical");
     }
 
-    return VerticalCRS::create(buildProperties(node), datum,
-                               NN_CHECK_ASSERT(verticalCS));
+    auto crs = nn_static_pointer_cast<CRS>(VerticalCRS::create(
+        buildProperties(node), datum, NN_CHECK_ASSERT(verticalCS)));
+
+    auto extensionNode = datumNode->lookForChild(WKTConstants::EXTENSION);
+    if (extensionNode && extensionNode->children().size() == 2 &&
+        ci_equal(stripQuotes(extensionNode->children()[0]->value()),
+                 "PROJ4_GRIDS")) {
+        std::string transformationName = *(crs->name()->description());
+        if (!ends_with(transformationName, " height")) {
+            transformationName += " height";
+        }
+        transformationName += " to WGS84 ellipsoidal height";
+        auto transformation = Transformation::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, transformationName),
+            crs, GeographicCRS::EPSG_4979, nullptr,
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              "GravityRelatedHeight to Geographic3D"),
+            std::vector<OperationParameterNNPtr>{OperationParameter::create(
+                PropertyMap()
+                    .set(IdentifiedObject::NAME_KEY,
+                         "Geoid (height correction) model file")
+                    .set(Identifier::CODESPACE_KEY, "EPSG")
+                    .set(Identifier::CODE_KEY, 8666))},
+            std::vector<ParameterValueNNPtr>{ParameterValue::createFilename(
+                stripQuotes(extensionNode->children()[1]->value()))},
+            std::vector<PositionalAccuracyNNPtr>());
+        return nn_static_pointer_cast<CRS>(
+            BoundCRS::create(crs, GeographicCRS::EPSG_4979, transformation));
+    }
+
+    return crs;
 }
 
 // ---------------------------------------------------------------------------
@@ -2287,6 +2329,8 @@ IPROJStringExportable::~IPROJStringExportable() = default;
 struct PROJStringFormatter::Private {
     bool pipelinePrefix_{false};
     int stepCount_ = 0;
+    std::vector<double> toWGS84Parameters_{};
+    std::string vDatumExtension_{};
     std::string result_{};
 };
 //! @endcond
@@ -2353,7 +2397,7 @@ void PROJStringFormatter::addParam(const std::string &paramName, int val) {
 
 // ---------------------------------------------------------------------------
 
-void PROJStringFormatter::addParam(const std::string &paramName, double val) {
+static std::string formatToString(double val) {
     std::ostringstream buffer;
     buffer.imbue(std::locale::classic());
     if (std::abs(val * 10 - std::round(val * 10)) < 1e-8) {
@@ -2364,10 +2408,33 @@ void PROJStringFormatter::addParam(const std::string &paramName, double val) {
         val = std::round(val * 10) / 10;
     }
     buffer << std::setprecision(15) << val;
+    return buffer.str();
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addParam(const std::string &paramName, double val) {
+
     if (!d->result_.empty()) {
         d->result_ += " ";
     }
-    d->result_ += "+" + paramName + "=" + buffer.str();
+    d->result_ += "+" + paramName + "=" + formatToString(val);
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addParam(const std::string &paramName,
+                                   const std::vector<double> &vals) {
+    if (!d->result_.empty()) {
+        d->result_ += " ";
+    }
+    d->result_ += "+" + paramName + "=";
+    for (size_t i = 0; i < vals.size(); ++i) {
+        if (i > 0) {
+            d->result_ += ",";
+        }
+        d->result_ += formatToString(vals[i]);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2390,3 +2457,28 @@ void PROJStringFormatter::addParam(const std::string &paramName,
 // ---------------------------------------------------------------------------
 
 const std::string &PROJStringFormatter::toString() const { return d->result_; }
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::setTOWGS84Parameters(
+    const std::vector<double> &params) {
+    d->toWGS84Parameters_ = params;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::vector<double> &PROJStringFormatter::getTOWGS84Parameters() const {
+    return d->toWGS84Parameters_;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::setVDatumExtension(const std::string &filename) {
+    d->vDatumExtension_ = filename;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::string &PROJStringFormatter::getVDatumExtension() const {
+    return d->vDatumExtension_;
+}

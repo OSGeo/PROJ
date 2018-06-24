@@ -191,7 +191,7 @@ TEST(crs, EPSG_4326_as_WKT1_GDAL) {
               "    PRIMEM[\"Greenwich\",0,\n"
               "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
               "    UNIT[\"degree\",0.0174532925199433,\n"
-              "        AUTHORITY[\"EPSG\",9122]],\n"
+              "        AUTHORITY[\"EPSG\",\"9122\"]],\n"
               "    AXIS[\"Latitude\",NORTH],\n"
               "    AXIS[\"Longitude\",EAST],\n"
               "    AUTHORITY[\"EPSG\",\"4326\"]]");
@@ -267,7 +267,7 @@ TEST(crs, EPSG_4979_as_WKT1_GDAL) {
               "    PRIMEM[\"Greenwich\",0,\n"
               "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
               "    UNIT[\"degree\",0.0174532925199433,\n"
-              "        AUTHORITY[\"EPSG\",9122]],\n"
+              "        AUTHORITY[\"EPSG\",\"9122\"]],\n"
               "    AXIS[\"Latitude\",NORTH],\n"
               "    AXIS[\"Longitude\",EAST],\n"
               "    AXIS[\"Ellipsoidal height\",UP],\n"
@@ -336,7 +336,7 @@ TEST(crs, EPSG_4807_as_WKT1_GDAL) {
                                                 converted to degree */
         "        AUTHORITY[\"EPSG\",\"8903\"]],\n"
         "    UNIT[\"grad\",0.015707963267949,\n"
-        "        AUTHORITY[\"EPSG\",9105]],\n"
+        "        AUTHORITY[\"EPSG\",\"9105\"]],\n"
         "    AXIS[\"Latitude\",NORTH],\n"
         "    AXIS[\"Longitude\",EAST],\n"
         "    AUTHORITY[\"EPSG\",\"4807\"]]");
@@ -527,7 +527,7 @@ TEST(crs, geocentricCRS_as_WKT1_GDAL) {
               "    PRIMEM[\"Greenwich\",0,\n"
               "        AUTHORITY[\"EPSG\",\"8901\"]],\n"
               "    UNIT[\"metre\",1,\n"
-              "        AUTHORITY[\"EPSG\",9001]],\n"
+              "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
               "    AXIS[\"Geocentric X\",OTHER],\n"
               "    AXIS[\"Geocentric Y\",OTHER],\n"
               "    AXIS[\"Geocentric Z\",NORTH],\n"
@@ -694,7 +694,7 @@ TEST(crs, projectedCRS_as_WKT1_GDAL) {
                     "        PRIMEM[\"Greenwich\",0,\n"
                     "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
                     "        UNIT[\"degree\",0.0174532925199433,\n"
-                    "            AUTHORITY[\"EPSG\",9122]],\n"
+                    "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
                     "        AXIS[\"Latitude\",NORTH],\n"
                     "        AXIS[\"Longitude\",EAST],\n"
                     "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
@@ -705,7 +705,7 @@ TEST(crs, projectedCRS_as_WKT1_GDAL) {
                     "    PARAMETER[\"false_easting\",500000],\n"
                     "    PARAMETER[\"false_northing\",0],\n"
                     "    UNIT[\"metre\",1,\n"
-                    "        AUTHORITY[\"EPSG\",9001]],\n"
+                    "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
                     "    AXIS[\"Easting\",EAST],\n"
                     "    AXIS[\"Northing\",NORTH],\n"
                     "    AUTHORITY[\"EPSG\",\"32631\"]]";
@@ -890,7 +890,7 @@ TEST(crs, verticalCRS_as_WKT1_GDAL) {
                     "    VERT_DATUM[\"Ordnance Datum Newlyn\",2005,\n"
                     "        AUTHORITY[\"EPSG\",\"5101\"]],\n"
                     "    UNIT[\"metre\",1,\n"
-                    "        AUTHORITY[\"EPSG\",9001]],\n"
+                    "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
                     "    AXIS[\"Gravity-related height\",UP],\n"
                     "    AUTHORITY[\"EPSG\",\"5701\"]]";
 
@@ -994,7 +994,7 @@ TEST(crs, compoundCRS_as_WKT1_GDAL) {
         "            PRIMEM[\"Greenwich\",0,\n"
         "                AUTHORITY[\"EPSG\",\"8901\"]],\n"
         "            UNIT[\"degree\",0.0174532925199433,\n"
-        "                AUTHORITY[\"EPSG\",9122]],\n"
+        "                AUTHORITY[\"EPSG\",\"9122\"]],\n"
         "            AXIS[\"Latitude\",NORTH],\n"
         "            AXIS[\"Longitude\",EAST],\n"
         "            AUTHORITY[\"EPSG\",\"4326\"]],\n"
@@ -1005,7 +1005,7 @@ TEST(crs, compoundCRS_as_WKT1_GDAL) {
         "        PARAMETER[\"false_easting\",500000],\n"
         "        PARAMETER[\"false_northing\",0],\n"
         "        UNIT[\"metre\",1,\n"
-        "            AUTHORITY[\"EPSG\",9001]],\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
         "        AXIS[\"Easting\",EAST],\n"
         "        AXIS[\"Northing\",NORTH],\n"
         "        AUTHORITY[\"EPSG\",\"32631\"]],\n"
@@ -1013,7 +1013,7 @@ TEST(crs, compoundCRS_as_WKT1_GDAL) {
         "        VERT_DATUM[\"Ordnance Datum Newlyn\",2005,\n"
         "            AUTHORITY[\"EPSG\",\"5101\"]],\n"
         "        UNIT[\"metre\",1,\n"
-        "            AUTHORITY[\"EPSG\",9001]],\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
         "        AXIS[\"Gravity-related height\",UP],\n"
         "        AUTHORITY[\"EPSG\",\"5701\"]],\n"
         "    AUTHORITY[\"codespace\",\"code\"]]";
@@ -1021,6 +1021,16 @@ TEST(crs, compoundCRS_as_WKT1_GDAL) {
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
               expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, compoundCRS_as_PROJ_string) {
+    auto crs = createCompoundCRS();
+    auto expected = "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                    "+proj=utm +zone=31 +ellps=WGS84";
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()), expected);
 }
 
 // ---------------------------------------------------------------------------
@@ -1234,7 +1244,7 @@ TEST(crs, boundCRS_to_WKT1) {
                     "        PRIMEM[\"Greenwich\",0,\n"
                     "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
                     "        UNIT[\"degree\",0.0174532925199433,\n"
-                    "            AUTHORITY[\"EPSG\",9122]],\n"
+                    "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
                     "        AXIS[\"Latitude\",NORTH],\n"
                     "        AXIS[\"Longitude\",EAST]],\n"
                     "    PROJECTION[\"Transverse_Mercator\"],\n"
@@ -1244,13 +1254,51 @@ TEST(crs, boundCRS_to_WKT1) {
                     "    PARAMETER[\"false_easting\",500000],\n"
                     "    PARAMETER[\"false_northing\",0],\n"
                     "    UNIT[\"metre\",1,\n"
-                    "        AUTHORITY[\"EPSG\",9001]],\n"
+                    "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
                     "    AXIS[\"Easting\",EAST],\n"
                     "    AXIS[\"Northing\",NORTH]]";
 
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
               expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, boundCRS_geographicCRS_to_PROJ_string) {
+
+    auto basecrs = GeographicCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
+        GeodeticReferenceFrame::EPSG_6326,
+        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+
+    auto crs = BoundCRS::createFromTOWGS84(
+        basecrs, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=longlat +ellps=WGS84 +towgs84=1,2,3,4,5,6,7");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, boundCRS_projectedCRS_to_PROJ_string) {
+
+    auto projcrs = ProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "my PROJCRS"),
+        GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my GEOGCRS"),
+            GeodeticReferenceFrame::EPSG_6326,
+            EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE)),
+        Conversion::createUTM(PropertyMap(), 31, true),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto crs = BoundCRS::createFromTOWGS84(
+        projcrs, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=utm "
+              "+zone=31 +ellps=WGS84 +towgs84=1,2,3,4,5,6,7");
 }
 
 // ---------------------------------------------------------------------------
@@ -1283,6 +1331,102 @@ TEST(crs, incompatible_boundCRS_transformation_to_WKT1) {
     EXPECT_THROW(crs->exportToWKT(
                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
                  FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_WKT1) {
+    auto wkt = "VERT_CS[\"EGM2008 geoid height\",\n"
+               "    VERT_DATUM[\"EGM2008 geoid\",2005,\n"
+               "        EXTENSION[\"PROJ4_GRIDS\",\"egm08_25.gtx\"],\n"
+               "        AUTHORITY[\"EPSG\",\"1027\"]],\n"
+               "    UNIT[\"metre\",1,\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+               "    AXIS[\"Up\",UP],\n"
+               "    AUTHORITY[\"EPSG\",\"3855\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_WKT2) {
+    auto wkt = "VERT_CS[\"EGM2008 geoid height\",\n"
+               "    VERT_DATUM[\"EGM2008 geoid\",2005,\n"
+               "        EXTENSION[\"PROJ4_GRIDS\",\"egm08_25.gtx\"],\n"
+               "        AUTHORITY[\"EPSG\",\"1027\"]],\n"
+               "    UNIT[\"metre\",1,\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+               "    AXIS[\"Up\",UP],\n"
+               "    AUTHORITY[\"EPSG\",\"3855\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto wkt2 =
+        "BOUNDCRS[\n"
+        "    SOURCECRS[\n"
+        "        VERTCRS[\"EGM2008 geoid height\",\n"
+        "            VDATUM[\"EGM2008 geoid\"],\n"
+        "            CS[vertical,1],\n"
+        "                AXIS[\"up\",up,\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",3855]]],\n"
+        "    TARGETCRS[\n"
+        "        GEODCRS[\"WGS 84\",\n"
+        "            DATUM[\"WGS_1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,3],\n"
+        "                AXIS[\"latitude\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"longitude\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"ellipsoidal height\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",4979]]],\n"
+        "    ABRIDGEDTRANSFORMATION[\"EGM2008 geoid height to WGS84 "
+        "ellipsoidal height\",\n"
+        "        METHOD[\"GravityRelatedHeight to Geographic3D\"],\n"
+        "        PARAMETERFILE[\"Geoid (height correction) model "
+        "file\",\"egm08_25.gtx\",\n"
+        "            ID[\"EPSG\",8666]]]]";
+
+    EXPECT_EQ(
+        crs->exportToWKT(WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+        wkt2);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_PROJ_string) {
+    auto wkt = "VERT_CS[\"EGM2008 geoid height\",\n"
+               "    VERT_DATUM[\"EGM2008 geoid\",2005,\n"
+               "        EXTENSION[\"PROJ4_GRIDS\",\"egm08_25.gtx\"],\n"
+               "        AUTHORITY[\"EPSG\",\"1027\"]],\n"
+               "    UNIT[\"metre\",1,\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+               "    AXIS[\"Up\",UP],\n"
+               "    AUTHORITY[\"EPSG\",\"3855\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+nadgrids=egm08_25.gtx");
 }
 
 // ---------------------------------------------------------------------------

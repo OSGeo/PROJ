@@ -193,7 +193,7 @@ class VerticalCRS;
 using VerticalCRSPtr = std::shared_ptr<VerticalCRS>;
 using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
 
-class VerticalCRS : public SingleCRS {
+class VerticalCRS : public SingleCRS, public io::IPROJStringExportable {
   public:
     PROJ_DLL ~VerticalCRS() override;
 
@@ -206,6 +206,10 @@ class VerticalCRS : public SingleCRS {
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
 
     PROJ_DLL static VerticalCRSNNPtr
     create(const util::PropertyMap &properties,
@@ -290,7 +294,7 @@ class CompoundCRS;
 using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
 using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
 
-class CompoundCRS : public CRS {
+class CompoundCRS : public CRS, public io::IPROJStringExportable {
   public:
     CompoundCRS &operator=(const CompoundCRS &other) = delete;
     PROJ_DLL ~CompoundCRS() override;
@@ -299,6 +303,10 @@ class CompoundCRS : public CRS {
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
 
     PROJ_DLL static CompoundCRSNNPtr
     create(const util::PropertyMap &properties,
@@ -322,7 +330,7 @@ using BoundCRSNNPtr = util::nn<BoundCRSPtr>;
 
 /* PROJ specific modelization: BoundCRS is WKT2 only, and not present in
  * ISO-19111 */
-class BoundCRS : public CRS {
+class BoundCRS : public CRS, public io::IPROJStringExportable {
   public:
     PROJ_DLL ~BoundCRS() override;
 
@@ -332,6 +340,10 @@ class BoundCRS : public CRS {
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
 
     PROJ_DLL static BoundCRSNNPtr
     create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
@@ -345,6 +357,9 @@ class BoundCRS : public CRS {
     BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
              const operation::TransformationNNPtr &transformationIn);
     INLINED_MAKE_SHARED
+
+    bool isTOWGS84Compatible() const;
+    std::string getVDatumPROJ4GRIDS() const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

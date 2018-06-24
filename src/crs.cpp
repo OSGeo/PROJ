@@ -426,6 +426,10 @@ std::string GeographicCRS::exportToPROJString(
     formatter->addStep("longlat");
     datum()->ellipsoid()->exportToPROJString(formatter);
     datum()->primeMeridian()->exportToPROJString(formatter);
+    const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
+    if (TOWGS84Params.size() == 7) {
+        formatter->addParam("towgs84", TOWGS84Params);
+    }
 
     return formatter->toString();
 }
@@ -502,6 +506,31 @@ std::string VerticalCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
     coordinateSystem()->exportToWKT(formatter);
     ObjectUsage::_exportToWKT(formatter);
     formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+std::string VerticalCRS::exportToPROJString(
+    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    auto nadgrids = formatter->getVDatumExtension();
+    if (!nadgrids.empty()) {
+        formatter->addParam("nadgrids", nadgrids);
+    }
+
+    auto &axisList = coordinateSystem()->axisList();
+    if (!axisList.empty() &&
+        axisList[0]->axisUnitID() != UnitOfMeasure::METRE) {
+        auto projUnit = axisList[0]->axisUnitID().exportToPROJString();
+        if (projUnit.empty()) {
+            formatter->addParam("vto_meter",
+                                axisList[0]->axisUnitID().conversionToSI());
+        } else {
+            formatter->addParam("vunits", projUnit);
+        }
+    }
+
     return formatter->toString();
 }
 
@@ -701,6 +730,10 @@ std::string ProjectedCRS::exportToPROJString(
     derivingConversion()->exportToPROJString(formatter);
     baseCRS()->datum()->ellipsoid()->exportToPROJString(formatter);
     baseCRS()->datum()->primeMeridian()->exportToPROJString(formatter);
+    const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
+    if (TOWGS84Params.size() == 7) {
+        formatter->addParam("towgs84", TOWGS84Params);
+    }
 
     auto &axisList = coordinateSystem()->axisList();
     if (!axisList.empty() &&
@@ -827,6 +860,22 @@ std::string CompoundCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
+std::string CompoundCRS::exportToPROJString(
+    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    for (const auto &crs : componentReferenceSystems()) {
+        auto crs_exportable =
+            nn_dynamic_pointer_cast<IPROJStringExportable>(crs);
+        if (crs_exportable) {
+            crs_exportable->exportToPROJString(formatter);
+        }
+    }
+
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct BoundCRS::Private {
     CRSNNPtr baseCRS_;
@@ -886,6 +935,38 @@ BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
 
 // ---------------------------------------------------------------------------
 
+bool BoundCRS::isTOWGS84Compatible() const {
+    return nn_dynamic_pointer_cast<GeographicCRS>(hubCRS()) != nullptr &&
+           ci_equal(*(hubCRS()->name()->description()), "WGS 84");
+}
+
+// ---------------------------------------------------------------------------
+
+std::string BoundCRS::getVDatumPROJ4GRIDS() const {
+    if (nn_dynamic_pointer_cast<VerticalCRS>(baseCRS()) &&
+        ci_equal(*(transformation()->method()->name()->description()),
+                 "GravityRelatedHeight to Geographic3D") &&
+        ci_equal(*(hubCRS()->name()->description()), "WGS 84") &&
+        transformation()->parameterValues().size() == 1) {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(
+                transformation()->parameterValues()[0]);
+        if (opParamvalue) {
+            const auto &paramName =
+                *(opParamvalue->parameter()->name()->description());
+            const auto &parameterValue = opParamvalue->parameterValue();
+            if ((opParamvalue->parameter()->isEPSG(8666) ||
+                 ci_equal(paramName, "Geoid (height correction) model file")) &&
+                parameterValue->type() == ParameterValue::Type::FILENAME) {
+                return parameterValue->valueFile();
+            }
+        }
+    }
+    return std::string();
+}
+
+// ---------------------------------------------------------------------------
+
 std::string BoundCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     if (isWKT2) {
@@ -901,8 +982,16 @@ std::string BoundCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
         formatter->setAbridgedTransformation(false);
         formatter->endNode();
     } else {
-        if (nn_dynamic_pointer_cast<GeographicCRS>(hubCRS()) == nullptr ||
-            *(hubCRS()->name()->description()) != "WGS 84") {
+
+        auto vdatumProj4GridName = getVDatumPROJ4GRIDS();
+        if (!vdatumProj4GridName.empty()) {
+            formatter->setVDatumExtension(vdatumProj4GridName);
+            baseCRS()->exportToWKT(formatter);
+            formatter->setVDatumExtension(std::string());
+            return formatter->toString();
+        }
+
+        if (!isTOWGS84Compatible()) {
             throw FormattingException(
                 "Cannot export BoundCRS with non-WGS 84 hub CRS in WKT1");
         }
@@ -911,6 +1000,35 @@ std::string BoundCRS::exportToWKT(WKTFormatterNNPtr formatter) const {
         baseCRS()->exportToWKT(formatter);
         formatter->setTOWGS84Parameters(std::vector<double>());
     }
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+std::string BoundCRS::exportToPROJString(
+    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    auto crs_exportable =
+        nn_dynamic_pointer_cast<IPROJStringExportable>(baseCRS());
+    if (!crs_exportable) {
+        throw FormattingException(
+            "baseCRS of BoundCRS cannot be exported as a PROJ string");
+    }
+
+    auto vdatumProj4GridName = getVDatumPROJ4GRIDS();
+    if (!vdatumProj4GridName.empty()) {
+        formatter->setVDatumExtension(vdatumProj4GridName);
+        crs_exportable->exportToPROJString(formatter);
+        formatter->setVDatumExtension(std::string());
+    } else {
+        if (isTOWGS84Compatible()) {
+            auto params = transformation()->getTOWGS84Parameters();
+            formatter->setTOWGS84Parameters(params);
+        }
+        crs_exportable->exportToPROJString(formatter);
+        formatter->setTOWGS84Parameters(std::vector<double>());
+    }
+
     return formatter->toString();
 }
 

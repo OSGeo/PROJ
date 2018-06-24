@@ -146,7 +146,7 @@ std::string UnitOfMeasure::exportToWKT(
     {
         formatter->addQuotedString(name());
         const auto &factor = conversionToSI();
-        if (factor != 0.0) {
+        if (!isWKT2 || factor != 0.0) {
             // Some TIMEUNIT do not have a conversion factor
             formatter->add(factor);
         }
@@ -154,7 +154,17 @@ std::string UnitOfMeasure::exportToWKT(
             formatter->startNode(
                 isWKT2 ? WKTConstants::ID : WKTConstants::AUTHORITY, false);
             formatter->addQuotedString(authority());
-            formatter->add(code());
+            const auto &l_code = code();
+            if (isWKT2) {
+                try {
+                    (void)std::stoi(l_code);
+                    formatter->add(l_code);
+                } catch (const std::exception &) {
+                    formatter->addQuotedString(l_code);
+                }
+            } else {
+                formatter->addQuotedString(l_code);
+            }
             formatter->endNode();
         }
     }

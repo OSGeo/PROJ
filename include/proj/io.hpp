@@ -161,6 +161,9 @@ class WKTFormatter {
     void setTOWGS84Parameters(const std::vector<double> &params);
     const std::vector<double> &getTOWGS84Parameters() const;
 
+    void setVDatumExtension(const std::string &filename);
+    const std::string &getVDatumExtension() const;
+
     bool outputAxisOrder() const;
     bool primeMeridianOmittedIfGreenwich() const;
     bool ellipsoidUnitOmittedIfMetre() const;
@@ -212,6 +215,15 @@ class PROJStringFormatter {
     PROJ_DLL void addParam(const std::string &paramName, const char *val);
     PROJ_DLL void addParam(const std::string &paramName,
                            const std::string &val);
+    PROJ_DLL void addParam(const std::string &paramName,
+                           const std::vector<double> &vals);
+
+    void setTOWGS84Parameters(const std::vector<double> &params);
+    const std::vector<double> &getTOWGS84Parameters() const;
+
+    void setVDatumExtension(const std::string &filename);
+    const std::string &getVDatumExtension() const;
+
     //! @endcond
 
   protected:

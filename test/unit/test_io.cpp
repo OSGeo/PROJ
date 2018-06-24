@@ -1322,6 +1322,55 @@ TEST(wkt_parse, TOWGS84) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, WKT1_VERT_DATUM_EXTENSION) {
+    auto wkt = "VERT_CS[\"EGM2008 geoid height\",\n"
+               "    VERT_DATUM[\"EGM2008 geoid\",2005,\n"
+               "        EXTENSION[\"PROJ4_GRIDS\",\"egm08_25.gtx\"],\n"
+               "        AUTHORITY[\"EPSG\",\"1027\"]],\n"
+               "    UNIT[\"metre\",1,\n"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+               "    AXIS[\"Up\",UP],\n"
+               "    AUTHORITY[\"EPSG\",\"3855\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->baseCRS()->name()->description()), "EGM2008 geoid height");
+
+    EXPECT_EQ(*(crs->hubCRS()->name()->description()),
+              *(GeographicCRS::EPSG_4979->name()->description()));
+
+    ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
+    EXPECT_EQ(*(crs->transformation()->sourceCRS()->name()->description()),
+              *(crs->baseCRS()->name()->description()));
+
+    ASSERT_TRUE(crs->transformation()->targetCRS() != nullptr);
+    EXPECT_EQ(*(crs->transformation()->targetCRS()->name()->description()),
+              *(crs->hubCRS()->name()->description()));
+
+    EXPECT_EQ(*crs->transformation()->name()->description(),
+              "EGM2008 geoid height to WGS84 ellipsoidal height");
+    EXPECT_EQ(*crs->transformation()->method()->name()->description(),
+              "GravityRelatedHeight to Geographic3D");
+    ASSERT_EQ(crs->transformation()->parameterValues().size(), 1);
+    {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(
+                crs->transformation()->parameterValues()[0]);
+        ASSERT_TRUE(opParamvalue);
+        const auto &paramName =
+            *(opParamvalue->parameter()->name()->description());
+        const auto &parameterValue = opParamvalue->parameterValue();
+        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8666));
+        EXPECT_EQ(paramName, "Geoid (height correction) model file");
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::FILENAME);
+        EXPECT_EQ(parameterValue->valueFile(), "egm08_25.gtx");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, DerivedGeographicCRS_WKT2) {
     auto wkt = "GEODCRS[\"WMO Atlantic Pole\",\n"
                "    BASEGEODCRS[\"WGS 84\",\n"
