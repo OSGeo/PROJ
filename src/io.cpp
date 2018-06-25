@@ -102,6 +102,7 @@ struct WKTFormatter::Private {
     bool abridgedTransformation_ = false;
     bool useDerivingConversion_ = false;
     std::vector<double> toWGS84Parameters_{};
+    std::string hDatumExtension_{};
     std::string vDatumExtension_{};
     std::string result_{};
 
@@ -561,6 +562,18 @@ const std::string &WKTFormatter::getVDatumExtension() const {
 
 // ---------------------------------------------------------------------------
 
+void WKTFormatter::setHDatumExtension(const std::string &filename) {
+    d->hDatumExtension_ = filename;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::string &WKTFormatter::getHDatumExtension() const {
+    return d->hDatumExtension_;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct WKTNode::Private {
     std::string value_{};
@@ -768,6 +781,7 @@ struct WKTParser::Private {
     bool strict_ = true;
     std::vector<std::string> warningList_{};
     std::vector<double> toWGS84Parameters_{};
+    std::string datumPROJ4Grids_{};
 
     void emitRecoverableAssertion(const std::string &errorMsg);
 
@@ -1165,6 +1179,12 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
         } else {
             throw ParsingException("Invalid TOWGS84 node");
         }
+    }
+    auto extensionNode = node->lookForChild(WKTConstants::EXTENSION);
+    if (extensionNode && extensionNode->children().size() == 2 &&
+        ci_equal(stripQuotes(extensionNode->children()[0]->value()),
+                 "PROJ4_GRIDS")) {
+        datumPROJ4Grids_ = stripQuotes(extensionNode->children()[1]->value());
     }
 
     return GeodeticReferenceFrame::create(buildProperties(node), ellipsoid,
@@ -2228,6 +2248,35 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
                 BoundCRS::createFromTOWGS84(NN_CHECK_ASSERT(crs),
                                             toWGS84Parameters_));
         }
+        if (!datumPROJ4Grids_.empty()) {
+            CRSPtr sourceGeographicCRS =
+                CRS::extractGeographicCRS(NN_CHECK_ASSERT(crs));
+            auto transformationSourceCRS = NN_CHECK_ASSERT(
+                sourceGeographicCRS ? sourceGeographicCRS : crs);
+            std::string transformationName =
+                *(transformationSourceCRS->name()->description());
+            transformationName += " to WGS84";
+            auto transformation = Transformation::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                  transformationName),
+                transformationSourceCRS, GeographicCRS::EPSG_4326, nullptr,
+                PropertyMap()
+                    .set(IdentifiedObject::NAME_KEY, "NTv2")
+                    .set(Identifier::CODESPACE_KEY, "EPSG")
+                    .set(Identifier::CODE_KEY, 9615),
+                std::vector<OperationParameterNNPtr>{OperationParameter::create(
+                    PropertyMap()
+                        .set(IdentifiedObject::NAME_KEY,
+                             "Latitude and longitude difference file")
+                        .set(Identifier::CODESPACE_KEY, "EPSG")
+                        .set(Identifier::CODE_KEY, 8656))},
+                std::vector<ParameterValueNNPtr>{
+                    ParameterValue::createFilename(datumPROJ4Grids_)},
+                std::vector<PositionalAccuracyNNPtr>());
+            return util::nn_static_pointer_cast<BaseObject>(
+                BoundCRS::create(NN_CHECK_ASSERT(crs), GeographicCRS::EPSG_4326,
+                                 transformation));
+        }
         return util::nn_static_pointer_cast<BaseObject>(NN_CHECK_ASSERT(crs));
     }
 
@@ -2331,6 +2380,7 @@ struct PROJStringFormatter::Private {
     int stepCount_ = 0;
     std::vector<double> toWGS84Parameters_{};
     std::string vDatumExtension_{};
+    std::string hDatumExtension_{};
     std::string result_{};
 };
 //! @endcond
@@ -2481,4 +2531,16 @@ void PROJStringFormatter::setVDatumExtension(const std::string &filename) {
 
 const std::string &PROJStringFormatter::getVDatumExtension() const {
     return d->vDatumExtension_;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::setHDatumExtension(const std::string &filename) {
+    d->hDatumExtension_ = filename;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::string &PROJStringFormatter::getHDatumExtension() const {
+    return d->hDatumExtension_;
 }

@@ -1335,6 +1335,41 @@ TEST(crs, incompatible_boundCRS_transformation_to_WKT1) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, WKT1_DATUM_EXTENSION_to_WKT1_and_PROJ_string) {
+    auto wkt =
+        "PROJCS[\"unnamed\",\n"
+        "    GEOGCS[\"International 1909 (Hayford)\",\n"
+        "        DATUM[\"unknown\",\n"
+        "            SPHEROID[\"intl\",6378388,297],\n"
+        "            EXTENSION[\"PROJ4_GRIDS\",\"nzgd2kgrid0005.gsb\"]],\n"
+        "        PRIMEM[\"Greenwich\",0],\n"
+        "        UNIT[\"degree\",0.0174532925199433],\n"
+        "        AXIS[\"Longitude\",EAST],\n"
+        "        AXIS[\"Latitude\",NORTH]],\n"
+        "    PROJECTION[\"New_Zealand_Map_Grid\"],\n"
+        "    PARAMETER[\"latitude_of_origin\",-41],\n"
+        "    PARAMETER[\"central_meridian\",173],\n"
+        "    PARAMETER[\"false_easting\",2510000],\n"
+        "    PARAMETER[\"false_northing\",6023150],\n"
+        "    UNIT[\"Meter\",1],\n"
+        "    AXIS[\"Easting\",EAST],\n"
+        "    AXIS[\"Northing\",NORTH]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              wkt);
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 +y_0=6023150 "
+              "+ellps=intl +nadgrids=nzgd2kgrid0005.gsb +units=m");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_WKT1) {
     auto wkt = "VERT_CS[\"EGM2008 geoid height\",\n"
                "    VERT_DATUM[\"EGM2008 geoid\",2005,\n"

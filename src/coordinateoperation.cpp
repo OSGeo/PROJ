@@ -68,6 +68,9 @@ static const std::string
     EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP("Lambert Conic Conformal (1SP)");
 constexpr int EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE = 9801;
 
+static const std::string EPSG_METHOD_NZMG("New Zealand Map Grid");
+constexpr int EPSG_METHOD_NZMG_CODE = 9811;
+
 static const std::string
     EPSG_LATITUDE_OF_NATURAL_ORIGIN("Latitude of natural origin");
 static const std::string
@@ -111,27 +114,59 @@ static const std::string
 
 // ---------------------------------------------------------------------------
 
+static const ParamMapping paramLatitudeNatOrigin = {
+    EPSG_LATITUDE_OF_NATURAL_ORIGIN, 8801, WKT1_LATITUDE_OF_ORIGIN,
+    UnitOfMeasure::Type::ANGULAR, "lat_0"};
+
+static const ParamMapping paramLongitudeNatOrigin = {
+    EPSG_LONGITUDE_OF_NATURAL_ORIGIN, 8802, WKT1_CENTRAL_MERIDIAN,
+    UnitOfMeasure::Type::ANGULAR, "lon_0"};
+
+static const ParamMapping paramScaleFactor = {
+    EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN, 8805, WKT1_SCALE_FACTOR,
+    UnitOfMeasure::Type::SCALE, "k_0"};
+
+static const ParamMapping paramFalseEasting = {
+    EPSG_FALSE_EASTING, 8806, WKT1_FALSE_EASTING, UnitOfMeasure::Type::LINEAR,
+    "x_0"};
+
+static const ParamMapping paramFalseNorthing = {
+    EPSG_FALSE_NORTHING, 8807, WKT1_FALSE_NORTHING, UnitOfMeasure::Type::LINEAR,
+    "y_0"};
+
 static const MethodMapping methodMappings[] = {
     {EPSG_METHOD_TRANSVERSE_MERCATOR,
      EPSG_METHOD_TRANSVERSE_MERCATOR_CODE,
      "Transverse_Mercator",
+     "tmerc",
      {
-         {EPSG_LATITUDE_OF_NATURAL_ORIGIN, 8801, WKT1_LATITUDE_OF_ORIGIN},
-         {EPSG_LONGITUDE_OF_NATURAL_ORIGIN, 8802, WKT1_CENTRAL_MERIDIAN},
-         {EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN, 8805, WKT1_SCALE_FACTOR},
-         {EPSG_FALSE_EASTING, 8806, WKT1_FALSE_EASTING},
-         {EPSG_FALSE_NORTHING, 8807, WKT1_FALSE_NORTHING},
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramScaleFactor,
+         paramFalseEasting, paramFalseNorthing,
      }},
 
     {EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
      EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE,
      "Lambert_Conformal_Conic_1SP",
+     "lcc",
      {
-         {EPSG_LATITUDE_OF_NATURAL_ORIGIN, 8801, WKT1_LATITUDE_OF_ORIGIN},
-         {EPSG_LONGITUDE_OF_NATURAL_ORIGIN, 8802, WKT1_CENTRAL_MERIDIAN},
-         {EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN, 8805, WKT1_SCALE_FACTOR},
-         {EPSG_FALSE_EASTING, 8806, WKT1_FALSE_EASTING},
-         {EPSG_FALSE_NORTHING, 8807, WKT1_FALSE_NORTHING},
+         {EPSG_LATITUDE_OF_NATURAL_ORIGIN,
+          8801,
+          WKT1_LATITUDE_OF_ORIGIN,
+          UnitOfMeasure::Type::ANGULAR,
+          {"lat_1", "lat_0"}},
+         paramLongitudeNatOrigin,
+         paramScaleFactor,
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_METHOD_NZMG,
+     EPSG_METHOD_NZMG_CODE,
+     "New_Zealand_Map_Grid",
+     "nzmg",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
+         paramFalseNorthing,
      }},
     // TODO: add at least all GDAL supported methods !!!
 };
@@ -179,8 +214,19 @@ const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) {
 
 // ---------------------------------------------------------------------------
 
-const MethodMapping::ParamMapping *
-getMapping(const MethodMapping *mapping, const OperationParameterValue *param) {
+static const MethodMapping *getMapping(const std::string &wkt2_name) {
+    for (const auto &mapping : methodMappings) {
+        if (Identifier::isEquivalentName(mapping.wkt2_name, wkt2_name)) {
+            return &mapping;
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+const ParamMapping *getMapping(const MethodMapping *mapping,
+                               const OperationParameterValue *param) {
     const auto &param_name = param->parameter()->name();
     const std::string name = *(param_name->description());
     const std::string &code = param_name->code();
@@ -196,8 +242,8 @@ getMapping(const MethodMapping *mapping, const OperationParameterValue *param) {
 
 // ---------------------------------------------------------------------------
 
-const MethodMapping::ParamMapping *
-getMappingFromWKT1(const MethodMapping *mapping, const std::string &wkt1_name) {
+const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
+                                       const std::string &wkt1_name) {
     for (const auto &paramMapping : mapping->params) {
         if (paramMapping.wkt1_name == wkt1_name) {
             return &paramMapping;
@@ -485,7 +531,7 @@ OperationParameterValue::exportToWKT(WKTFormatterNNPtr formatter) const {
 std::string
 OperationParameterValue::_exportToWKT(WKTFormatterNNPtr formatter,
                                       const MethodMapping *mapping) const {
-    const MethodMapping::ParamMapping *paramMapping =
+    const ParamMapping *paramMapping =
         mapping ? getMapping(mapping, this) : nullptr;
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     if (isWKT2 && parameterValue()->type() == ParameterValue::Type::FILENAME) {
@@ -982,12 +1028,11 @@ static PropertyMap addDefaultNameIfNeeded(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 ConversionNNPtr
-Conversion::createTM(const PropertyMap &properties, const Angle &centerLat,
-                     const Angle &centerLong, const Scale &scale,
-                     const Length &falseEasting, const Length &falseNorthing) {
-    const MethodMapping *mapping =
-        getMapping(EPSG_METHOD_TRANSVERSE_MERCATOR_CODE);
+Conversion::create(const PropertyMap &properties, int method_epsg_code,
+                   const std::vector<ParameterValueNNPtr> &values) {
+    const MethodMapping *mapping = getMapping(method_epsg_code);
     assert(mapping);
+
     std::vector<OperationParameterNNPtr> parameters;
     for (const auto &param : mapping->params) {
         parameters.push_back(OperationParameter::create(
@@ -997,6 +1042,20 @@ Conversion::createTM(const PropertyMap &properties, const Angle &centerLat,
                 .set(Identifier::CODE_KEY, param.epsg_code)));
     }
 
+    return create(addDefaultNameIfNeeded(properties, mapping->wkt2_name),
+                  PropertyMap()
+                      .set(IdentifiedObject::NAME_KEY, mapping->wkt2_name)
+                      .set(Identifier::CODESPACE_KEY, "EPSG")
+                      .set(Identifier::CODE_KEY, mapping->epsg_code),
+                  parameters, values);
+}
+
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr
+Conversion::createTM(const PropertyMap &properties, const Angle &centerLat,
+                     const Angle &centerLong, const Scale &scale,
+                     const Length &falseEasting, const Length &falseNorthing) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(centerLat),
         ParameterValue::create(centerLong),
@@ -1005,13 +1064,7 @@ Conversion::createTM(const PropertyMap &properties, const Angle &centerLat,
         ParameterValue::create(falseNorthing),
     };
 
-    return create(
-        addDefaultNameIfNeeded(properties, EPSG_METHOD_TRANSVERSE_MERCATOR),
-        PropertyMap()
-            .set(IdentifiedObject::NAME_KEY, EPSG_METHOD_TRANSVERSE_MERCATOR)
-            .set(Identifier::CODESPACE_KEY, "EPSG")
-            .set(Identifier::CODE_KEY, EPSG_METHOD_TRANSVERSE_MERCATOR_CODE),
-        parameters, values);
+    return create(properties, EPSG_METHOD_TRANSVERSE_MERCATOR_CODE, values);
 }
 
 // ---------------------------------------------------------------------------
@@ -1022,18 +1075,6 @@ ConversionNNPtr Conversion::createLCC_1SP(const PropertyMap &properties,
                                           const Scale &scale,
                                           const Length &falseEasting,
                                           const Length &falseNorthing) {
-    const MethodMapping *mapping =
-        getMapping(EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE);
-    assert(mapping);
-    std::vector<OperationParameterNNPtr> parameters;
-    for (const auto &param : mapping->params) {
-        parameters.push_back(OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY, param.wkt2_name)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, param.epsg_code)));
-    }
-
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(centerLat),
         ParameterValue::create(centerLong),
@@ -1042,15 +1083,24 @@ ConversionNNPtr Conversion::createLCC_1SP(const PropertyMap &properties,
         ParameterValue::create(falseNorthing),
     };
 
-    return create(addDefaultNameIfNeeded(
-                      properties, EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP),
-                  PropertyMap()
-                      .set(IdentifiedObject::NAME_KEY,
-                           EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP)
-                      .set(Identifier::CODESPACE_KEY, "EPSG")
-                      .set(Identifier::CODE_KEY,
-                           EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE),
-                  parameters, values);
+    return create(properties, EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr Conversion::createNZMG(const PropertyMap &properties,
+                                       const Angle &centerLat,
+                                       const Angle &centerLong,
+                                       const Length &falseEasting,
+                                       const Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_METHOD_NZMG_CODE, values);
 }
 
 // ---------------------------------------------------------------------------
@@ -1105,48 +1155,27 @@ std::string Conversion::exportToPROJString(
             if (!north) {
                 formatter->addParam("south");
             }
-        } else {
-            formatter->addStep("tmerc");
-            formatter->addParam(
-                "lat_0", parameterValueMeasure(EPSG_LATITUDE_OF_NATURAL_ORIGIN)
-                             .convertToUnit(UnitOfMeasure::DEGREE)
-                             .value());
-            formatter->addParam(
-                "lon_0", parameterValueMeasure(EPSG_LONGITUDE_OF_NATURAL_ORIGIN)
-                             .convertToUnit(UnitOfMeasure::DEGREE)
-                             .value());
-            formatter->addParam("k_0", parameterValueMeasure(
-                                           EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN)
-                                           .getSIValue());
-            formatter->addParam(
-                "x_0", parameterValueMeasure(EPSG_FALSE_EASTING).getSIValue());
-            formatter->addParam(
-                "y_0", parameterValueMeasure(EPSG_FALSE_NORTHING).getSIValue());
+            return formatter->toString();
         }
-    } else if (ci_equal(projectionMethodName,
-                        EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP)) {
+    }
 
-        formatter->addStep("lcc");
-        formatter->addParam(
-            "lat_1", parameterValueMeasure(EPSG_LATITUDE_OF_NATURAL_ORIGIN)
-                         .convertToUnit(UnitOfMeasure::DEGREE)
-                         .value());
-        formatter->addParam(
-            "lat_0", parameterValueMeasure(EPSG_LATITUDE_OF_NATURAL_ORIGIN)
-                         .convertToUnit(UnitOfMeasure::DEGREE)
-                         .value());
-        formatter->addParam(
-            "lon_0", parameterValueMeasure(EPSG_LONGITUDE_OF_NATURAL_ORIGIN)
-                         .convertToUnit(UnitOfMeasure::DEGREE)
-                         .value());
-        formatter->addParam(
-            "k_0", parameterValueMeasure(EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN)
-                       .getSIValue());
-        formatter->addParam(
-            "x_0", parameterValueMeasure(EPSG_FALSE_EASTING).getSIValue());
-        formatter->addParam(
-            "y_0", parameterValueMeasure(EPSG_FALSE_NORTHING).getSIValue());
-
+    const auto &mapping = getMapping(projectionMethodName);
+    if (mapping) {
+        formatter->addStep(mapping->proj_name);
+        for (const auto &param : mapping->params) {
+            for (const auto &proj_name : param.proj_names) {
+                if (param.unit_type == UnitOfMeasure::Type::ANGULAR) {
+                    formatter->addParam(
+                        proj_name, parameterValueMeasure(param.wkt2_name)
+                                       .convertToUnit(UnitOfMeasure::DEGREE)
+                                       .value());
+                } else {
+                    formatter->addParam(
+                        proj_name,
+                        parameterValueMeasure(param.wkt2_name).getSIValue());
+                }
+            }
+        }
     } else {
         throw FormattingException("Unsupported conversion method: " +
                                   projectionMethodName);

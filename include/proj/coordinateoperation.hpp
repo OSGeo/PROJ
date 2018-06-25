@@ -382,6 +382,12 @@ class Conversion : public SingleOperation, public io::IPROJStringExportable {
                   const common::Length &falseEasting,
                   const common::Length &falseNorthing);
 
+    PROJ_DLL static ConversionNNPtr
+    createNZMG(const util::PropertyMap &properties,
+               const common::Angle &centerLat, const common::Angle &centerLong,
+               const common::Length &falseEasting,
+               const common::Length &falseNorthing);
+
   protected:
     Conversion(const OperationMethodNNPtr &methodIn,
                const std::vector<GeneralParameterValueNNPtr> &values);
@@ -391,6 +397,10 @@ class Conversion : public SingleOperation, public io::IPROJStringExportable {
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     Conversion &operator=(const Conversion &other) = delete;
+
+    static ConversionNNPtr
+    create(const util::PropertyMap &properties, int method_epsg_code,
+           const std::vector<ParameterValueNNPtr> &values);
 };
 
 // ---------------------------------------------------------------------------

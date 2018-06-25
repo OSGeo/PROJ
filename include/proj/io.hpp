@@ -164,6 +164,9 @@ class WKTFormatter {
     void setVDatumExtension(const std::string &filename);
     const std::string &getVDatumExtension() const;
 
+    void setHDatumExtension(const std::string &filename);
+    const std::string &getHDatumExtension() const;
+
     bool outputAxisOrder() const;
     bool primeMeridianOmittedIfGreenwich() const;
     bool ellipsoidUnitOmittedIfMetre() const;
@@ -223,6 +226,9 @@ class PROJStringFormatter {
 
     void setVDatumExtension(const std::string &filename);
     const std::string &getVDatumExtension() const;
+
+    void setHDatumExtension(const std::string &filename);
+    const std::string &getHDatumExtension() const;
 
     //! @endcond
 

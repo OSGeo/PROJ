@@ -564,6 +564,13 @@ std::string GeodeticReferenceFrame::exportToWKT(
             }
             formatter->endNode();
         }
+        std::string extension = formatter->getHDatumExtension();
+        if (!extension.empty()) {
+            formatter->startNode(WKTConstants::EXTENSION, false);
+            formatter->addQuotedString("PROJ4_GRIDS");
+            formatter->addQuotedString(extension);
+            formatter->endNode();
+        }
     }
     if (formatter->outputId()) {
         formatID(formatter);

@@ -43,26 +43,37 @@ NS_PROJ_START
 
 namespace operation {
 
-struct MethodMapping {
-    typedef struct {
-        std::string wkt2_name;
-        int epsg_code;
-        std::string wkt1_name;
-    } ParamMapping;
+/* Just std::vector<std::string> but with a friendly initializer in case w
+ * have just a single string (which is most of cases) */
+struct VectorOfString : public std::vector<std::string> {
+    VectorOfString(const char *str) : std::vector<std::string>{str} {}
+    VectorOfString(std::initializer_list<std::string> l)
+        : std::vector<std::string>{l} {}
+};
 
-    std::string wkt2_name;
-    int epsg_code;
-    std::string wkt1_name;
-    std::vector<ParamMapping> params;
+struct ParamMapping {
+    const std::string wkt2_name;
+    const int epsg_code;
+    const std::string wkt1_name;
+    const common::UnitOfMeasure::Type unit_type;
+    const VectorOfString proj_names;
+};
+
+struct MethodMapping {
+    const std::string wkt2_name;
+    const int epsg_code;
+    const std::string wkt1_name;
+    const std::string proj_name;
+    const std::vector<ParamMapping> params;
 };
 
 const MethodMapping *getMapping(int epsg_code);
 const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name);
 const MethodMapping *getMapping(const OperationMethod *method);
-const MethodMapping::ParamMapping *
-getMapping(const MethodMapping *mapping, const OperationParameterValue *param);
-const MethodMapping::ParamMapping *
-getMappingFromWKT1(const MethodMapping *mapping, const std::string &wkt1_name);
+const ParamMapping *getMapping(const MethodMapping *mapping,
+                               const OperationParameterValue *param);
+const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
+                                       const std::string &wkt1_name);
 
 } // namespace operation
 

@@ -141,6 +141,9 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
                 const cs::CartesianCSNNPtr &csIn);
     INLINED_MAKE_SHARED
 
+    friend class ProjectedCRS;
+    void addDatumInfoToPROJString(io::PROJStringFormatterNNPtr formatter) const;
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     GeodeticCRS(const GeodeticCRS &other) = delete;
@@ -359,6 +362,7 @@ class BoundCRS : public CRS, public io::IPROJStringExportable {
     INLINED_MAKE_SHARED
 
     bool isTOWGS84Compatible() const;
+    std::string getHDatumPROJ4GRIDS() const;
     std::string getVDatumPROJ4GRIDS() const;
 
   private:

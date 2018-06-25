@@ -1371,6 +1371,60 @@ TEST(wkt_parse, WKT1_VERT_DATUM_EXTENSION) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, WKT1_DATUM_EXTENSION) {
+    auto wkt =
+        "PROJCS[\"unnamed\",\n"
+        "    GEOGCS[\"International 1909 (Hayford)\",\n"
+        "        DATUM[\"unknown\",\n"
+        "            SPHEROID[\"intl\",6378388,297],\n"
+        "            EXTENSION[\"PROJ4_GRIDS\",\"nzgd2kgrid0005.gsb\"]],\n"
+        "        PRIMEM[\"Greenwich\",0],\n"
+        "        UNIT[\"degree\",0.0174532925199433]],\n"
+        "    PROJECTION[\"New_Zealand_Map_Grid\"],\n"
+        "    PARAMETER[\"latitude_of_origin\",-41],\n"
+        "    PARAMETER[\"central_meridian\",173],\n"
+        "    PARAMETER[\"false_easting\",2510000],\n"
+        "    PARAMETER[\"false_northing\",6023150],\n"
+        "    UNIT[\"Meter\",1]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->baseCRS()->name()->description()), "unnamed");
+
+    EXPECT_EQ(*(crs->hubCRS()->name()->description()),
+              *(GeographicCRS::EPSG_4326->name()->description()));
+
+    ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
+    EXPECT_EQ(*(crs->transformation()->sourceCRS()->name()->description()),
+              "International 1909 (Hayford)");
+
+    ASSERT_TRUE(crs->transformation()->targetCRS() != nullptr);
+    EXPECT_EQ(*(crs->transformation()->targetCRS()->name()->description()),
+              *(crs->hubCRS()->name()->description()));
+
+    EXPECT_EQ(*crs->transformation()->name()->description(),
+              "International 1909 (Hayford) to WGS84");
+    EXPECT_EQ(*crs->transformation()->method()->name()->description(), "NTv2");
+    ASSERT_EQ(crs->transformation()->parameterValues().size(), 1);
+    {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(
+                crs->transformation()->parameterValues()[0]);
+        ASSERT_TRUE(opParamvalue);
+        const auto &paramName =
+            *(opParamvalue->parameter()->name()->description());
+        const auto &parameterValue = opParamvalue->parameterValue();
+        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8656));
+        EXPECT_EQ(paramName, "Latitude and longitude difference file");
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::FILENAME);
+        EXPECT_EQ(parameterValue->valueFile(), "nzgd2kgrid0005.gsb");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, DerivedGeographicCRS_WKT2) {
     auto wkt = "GEODCRS[\"WMO Atlantic Pole\",\n"
                "    BASEGEODCRS[\"WGS 84\",\n"
