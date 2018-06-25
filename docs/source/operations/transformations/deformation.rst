@@ -93,7 +93,7 @@ Required
 .. option:: +xy_grids=<list>
 
     Comma-separated list of grids to load. If a grid is prefixed by an `@` the
-    grid is consideres optional and PROJ will the not complain if the grid is
+    grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
     Grids for the horizontla component of a deformation model is expected to be
@@ -102,7 +102,7 @@ Required
 .. option:: +z_grids=<list>
 
     Comma-separated list of grids to load. If a grid is prefixed by an `@` the
-    grid is consideres optional and PROJ will the not complain if the grid is
+    grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
     Grids for the vertical component of a deformation model is expected to be
