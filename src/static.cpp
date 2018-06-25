@@ -52,21 +52,21 @@
 // increasing order of dependency, to avoid the "static initialization fiasco"
 // See https://isocpp.org/wiki/faq/ctors#static-init-order
 
-using namespace NS_PROJ::common;
-using namespace NS_PROJ::cs;
 using namespace NS_PROJ::crs;
 using namespace NS_PROJ::datum;
 using namespace NS_PROJ::io;
 using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::util;
 
+NS_PROJ_START
+
 // ---------------------------------------------------------------------------
 
-const std::string IdentifiedObject::NAME_KEY("name");
-const std::string IdentifiedObject::IDENTIFIERS_KEY("identifiers");
-const std::string IdentifiedObject::ALIAS_KEY("alias");
-const std::string IdentifiedObject::REMARKS_KEY("remarks");
-const std::string IdentifiedObject::DEPRECATED_KEY("deprecated");
+const std::string common::IdentifiedObject::NAME_KEY("name");
+const std::string common::IdentifiedObject::IDENTIFIERS_KEY("identifiers");
+const std::string common::IdentifiedObject::ALIAS_KEY("alias");
+const std::string common::IdentifiedObject::REMARKS_KEY("remarks");
+const std::string common::IdentifiedObject::DEPRECATED_KEY("deprecated");
 
 // ---------------------------------------------------------------------------
 
@@ -79,9 +79,10 @@ const std::string Identifier::URI_KEY("uri");
 
 // ---------------------------------------------------------------------------
 
-const std::string ObjectUsage::SCOPE_KEY("scope");
-const std::string ObjectUsage::DOMAIN_OF_VALIDITY_KEY("domainOfValidity");
-const std::string ObjectUsage::OBJECT_DOMAIN_KEY("objectUsage");
+const std::string common::ObjectUsage::SCOPE_KEY("scope");
+const std::string
+    common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY("domainOfValidity");
+const std::string common::ObjectUsage::OBJECT_DOMAIN_KEY("objectUsage");
 
 // ---------------------------------------------------------------------------
 
@@ -158,6 +159,7 @@ DEFINE_WKT_CONSTANT(TIMEDATUM);
 
 // ---------------------------------------------------------------------------
 
+namespace common {
 const UnitOfMeasure UnitOfMeasure::NONE("", 1.0, UnitOfMeasure::Type::NONE);
 const UnitOfMeasure UnitOfMeasure::SCALE_UNITY("unity", 1.0,
                                                UnitOfMeasure::Type::SCALE,
@@ -190,9 +192,11 @@ const UnitOfMeasure UnitOfMeasure::SECOND("second", 1.0,
 const UnitOfMeasure UnitOfMeasure::YEAR("year", 31556925.445,
                                         UnitOfMeasure::Type::TIME, "EPSG",
                                         "1040");
+} // namespace common
 
 // ---------------------------------------------------------------------------
 
+namespace cs {
 std::map<std::string, const AxisDirection *>
     AxisDirection::axisDirectionRegistry;
 std::set<std::string> AxisDirection::axisDirectionKeys;
@@ -240,6 +244,8 @@ const AxisDirection AxisDirection::UNSPECIFIED("unspecified");
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
 std::map<std::string, const AxisDirectionWKT1 *>
     AxisDirectionWKT1::axisDirectionWKT1Registry;
 std::set<std::string> AxisDirectionWKT1::axisDirectionWKT1Keys;
@@ -251,6 +257,8 @@ const AxisDirectionWKT1 AxisDirectionWKT1::WEST("WEST");
 const AxisDirectionWKT1 AxisDirectionWKT1::UP("UP");
 const AxisDirectionWKT1 AxisDirectionWKT1::DOWN("DOWN");
 const AxisDirectionWKT1 AxisDirectionWKT1::OTHER("OTHER");
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -273,6 +281,8 @@ const std::string AxisAbbreviation::h("h");
 const std::string AxisAbbreviation::X("X");
 const std::string AxisAbbreviation::Y("Y");
 const std::string AxisAbbreviation::Z("Z");
+
+} // namespace cs
 
 // ---------------------------------------------------------------------------
 
@@ -313,15 +323,16 @@ const GeographicCRSNNPtr
 // ---------------------------------------------------------------------------
 
 // Make sure to instanciate all used instances of optional
-NS_PROJ_START
+
 namespace util {
 template class optional<std::string>;
 template class optional<double>;
 template class optional<Citation>;
 template class optional<Identifier>;
-template class optional<DataEpoch>;
-template class optional<IdentifiedObject>;
-template class optional<Scale>;
-template class optional<Length>;
+template class optional<common::DataEpoch>;
+template class optional<common::IdentifiedObject>;
+template class optional<common::Scale>;
+template class optional<common::Length>;
 }
+
 NS_PROJ_END

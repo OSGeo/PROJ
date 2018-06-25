@@ -202,7 +202,6 @@ using PROJStringFormatterNNPtr = util::nn<PROJStringFormatterPtr>;
 /** PROJStringFormatter class. */
 class PROJStringFormatter {
   public:
-    //! @cond Doxygen_Suppress
     PROJ_DLL static PROJStringFormatterNNPtr create();
 
     PROJ_DLL ~PROJStringFormatter();

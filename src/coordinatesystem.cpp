@@ -45,26 +45,24 @@
 #include <string>
 #include <vector>
 
-using namespace NS_PROJ::common;
-using namespace NS_PROJ::cs;
 using namespace NS_PROJ::internal;
-using namespace NS_PROJ::io;
-using namespace NS_PROJ::metadata;
-using namespace NS_PROJ::util;
+
+NS_PROJ_START
+namespace cs {
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 struct Meridian::Private {
-    Angle longitude_{};
+    common::Angle longitude_{};
 
-    explicit Private(const Angle &longitude) : longitude_(longitude) {}
+    explicit Private(const common::Angle &longitude) : longitude_(longitude) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-Meridian::Meridian(const Angle &longitudeIn)
+Meridian::Meridian(const common::Angle &longitudeIn)
     : d(internal::make_unique<Private>(longitudeIn)) {}
 
 // ---------------------------------------------------------------------------
@@ -80,22 +78,22 @@ Meridian::~Meridian() = default;
 
 // ---------------------------------------------------------------------------
 
-const Angle &Meridian::longitude() const { return d->longitude_; }
+const common::Angle &Meridian::longitude() const { return d->longitude_; }
 
 // ---------------------------------------------------------------------------
 
-MeridianNNPtr Meridian::create(const Angle &longitudeIn) {
+MeridianNNPtr Meridian::create(const common::Angle &longitudeIn) {
     return Meridian::nn_make_shared<Meridian>(longitudeIn);
 }
 
 // ---------------------------------------------------------------------------
 
 std::string Meridian::exportToWKT(
-    WKTFormatterNNPtr formatter) const // throw(FormattingException)
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    formatter->startNode(WKTConstants::MERIDIAN, !identifiers().empty());
+    formatter->startNode(io::WKTConstants::MERIDIAN, !identifiers().empty());
     formatter->add(longitude().value());
-    longitude().unit().exportToWKT(formatter, WKTConstants::ANGLEUNIT);
+    longitude().unit().exportToWKT(formatter, io::WKTConstants::ANGLEUNIT);
     if (formatter->outputId()) {
         formatID(formatter);
     }
@@ -109,9 +107,9 @@ std::string Meridian::exportToWKT(
 struct CoordinateSystemAxis::Private {
     std::string axisAbbrev{};
     const AxisDirection *axisDirection = &(AxisDirection::UNSPECIFIED);
-    UnitOfMeasure axisUnitID{};
-    optional<double> minimumValue{};
-    optional<double> maximumValue{};
+    common::UnitOfMeasure axisUnitID{};
+    util::optional<double> minimumValue{};
+    util::optional<double> maximumValue{};
     MeridianPtr meridian{};
     // TODO rangeMeaning
 };
@@ -147,19 +145,19 @@ const AxisDirection &CoordinateSystemAxis::axisDirection() const {
 
 // ---------------------------------------------------------------------------
 
-const UnitOfMeasure &CoordinateSystemAxis::axisUnitID() const {
+const common::UnitOfMeasure &CoordinateSystemAxis::axisUnitID() const {
     return d->axisUnitID;
 }
 
 // ---------------------------------------------------------------------------
 
-const optional<double> &CoordinateSystemAxis::minimumValue() const {
+const util::optional<double> &CoordinateSystemAxis::minimumValue() const {
     return d->minimumValue;
 }
 
 // ---------------------------------------------------------------------------
 
-const optional<double> &CoordinateSystemAxis::maximumValue() const {
+const util::optional<double> &CoordinateSystemAxis::maximumValue() const {
     return d->maximumValue;
 }
 
@@ -172,8 +170,8 @@ const MeridianPtr &CoordinateSystemAxis::meridian() const {
 // ---------------------------------------------------------------------------
 
 CoordinateSystemAxisNNPtr CoordinateSystemAxis::create(
-    const PropertyMap &properties, const std::string &abbreviation,
-    const AxisDirection &direction, const UnitOfMeasure &unit,
+    const util::PropertyMap &properties, const std::string &abbreviation,
+    const AxisDirection &direction, const common::UnitOfMeasure &unit,
     const MeridianPtr &meridian) {
     auto csa(CoordinateSystemAxis::nn_make_shared<CoordinateSystemAxis>());
     csa->setProperties(properties);
@@ -187,7 +185,7 @@ CoordinateSystemAxisNNPtr CoordinateSystemAxis::create(
 // ---------------------------------------------------------------------------
 
 std::string CoordinateSystemAxis::exportToWKT(
-    WKTFormatterNNPtr formatter) const // throw(FormattingException)
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
     return exportToWKT(formatter, 0, false);
 }
@@ -205,11 +203,11 @@ std::string CoordinateSystemAxis::normalizeAxisName(const std::string &str) {
 
 // ---------------------------------------------------------------------------
 
-std::string CoordinateSystemAxis::exportToWKT(WKTFormatterNNPtr formatter,
+std::string CoordinateSystemAxis::exportToWKT(io::WKTFormatterNNPtr formatter,
                                               int order,
                                               bool disableAbbrev) const {
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    formatter->startNode(WKTConstants::AXIS, !identifiers().empty());
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    formatter->startNode(io::WKTConstants::AXIS, !identifiers().empty());
     std::string axisName = *(name()->description());
     std::string abbrev = axisAbbrev();
     std::string parenthesedAbbrev = "(" + abbrev + ")";
@@ -267,12 +265,12 @@ std::string CoordinateSystemAxis::exportToWKT(WKTFormatterNNPtr formatter,
         meridian()->exportToWKT(formatter);
     }
     if (formatter->outputAxisOrder() && order > 0) {
-        formatter->startNode(WKTConstants::ORDER, false);
+        formatter->startNode(io::WKTConstants::ORDER, false);
         formatter->add(order);
         formatter->endNode();
     }
     if (formatter->outputUnit() &&
-        axisUnitID().type() != UnitOfMeasure::Type::NONE) {
+        axisUnitID().type() != common::UnitOfMeasure::Type::NONE) {
         axisUnitID().exportToWKT(formatter);
     }
     if (formatter->outputId()) {
@@ -323,12 +321,12 @@ CoordinateSystem::axisList() const {
 // ---------------------------------------------------------------------------
 
 std::string CoordinateSystem::exportToWKT(
-    WKTFormatterNNPtr formatter) const // throw(FormattingException)
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
     if (isWKT2) {
-        formatter->startNode(WKTConstants::CS, !identifiers().empty());
+        formatter->startNode(io::WKTConstants::CS, !identifiers().empty());
         formatter->add(getWKT2Type(formatter));
         formatter->add(axisList().size());
         formatter->endNode();
@@ -336,7 +334,7 @@ std::string CoordinateSystem::exportToWKT(
                              false); // anonymous indentation level
     }
 
-    UnitOfMeasure unit = UnitOfMeasure::NONE;
+    common::UnitOfMeasure unit = common::UnitOfMeasure::NONE;
     bool bAllSameUnit = true;
     bool bFirstUnit = true;
     for (auto &axis : axisList()) {
@@ -398,7 +396,7 @@ SphericalCS::SphericalCS(const SphericalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
-SphericalCSNNPtr SphericalCS::create(const PropertyMap &properties,
+SphericalCSNNPtr SphericalCS::create(const util::PropertyMap &properties,
                                      const CoordinateSystemAxisNNPtr &axis0,
                                      const CoordinateSystemAxisNNPtr &axis1,
                                      const CoordinateSystemAxisNNPtr &axis2) {
@@ -431,7 +429,7 @@ EllipsoidalCS::EllipsoidalCS(const EllipsoidalCS &) = default;
 // ---------------------------------------------------------------------------
 
 EllipsoidalCSNNPtr
-EllipsoidalCS::create(const PropertyMap &properties,
+EllipsoidalCS::create(const util::PropertyMap &properties,
                       const CoordinateSystemAxisNNPtr &axis0,
                       const CoordinateSystemAxisNNPtr &axis1) {
     std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1};
@@ -443,7 +441,7 @@ EllipsoidalCS::create(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 EllipsoidalCSNNPtr
-EllipsoidalCS::create(const PropertyMap &properties,
+EllipsoidalCS::create(const util::PropertyMap &properties,
                       const CoordinateSystemAxisNNPtr &axis0,
                       const CoordinateSystemAxisNNPtr &axis1,
                       const CoordinateSystemAxisNNPtr &axis2) {
@@ -456,13 +454,15 @@ EllipsoidalCS::create(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 EllipsoidalCSNNPtr
-EllipsoidalCS::createLatitudeLongitude(const UnitOfMeasure &unit) {
+EllipsoidalCS::createLatitudeLongitude(const common::UnitOfMeasure &unit) {
     std::vector<CoordinateSystemAxisNNPtr> axis{
         CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Latitude),
             AxisAbbreviation::lat, AxisDirection::NORTH, unit),
         CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Longitude),
             AxisAbbreviation::lon, AxisDirection::EAST, unit)};
     auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
     return cs;
@@ -471,17 +471,20 @@ EllipsoidalCS::createLatitudeLongitude(const UnitOfMeasure &unit) {
 // ---------------------------------------------------------------------------
 
 EllipsoidalCSNNPtr EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
-    const UnitOfMeasure &angularUnit, const UnitOfMeasure &linearUnit) {
+    const common::UnitOfMeasure &angularUnit,
+    const common::UnitOfMeasure &linearUnit) {
     std::vector<CoordinateSystemAxisNNPtr> axis{
         CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Latitude),
             AxisAbbreviation::lat, AxisDirection::NORTH, angularUnit),
         CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Longitude),
             AxisAbbreviation::lon, AxisDirection::EAST, angularUnit),
         CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY,
-                              AxisName::Ellipsoidal_height),
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Ellipsoidal_height),
             AxisAbbreviation::h, AxisDirection::UP, linearUnit)};
     auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
     return cs;
@@ -508,7 +511,7 @@ VerticalCS::VerticalCS(const VerticalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
-VerticalCSNNPtr VerticalCS::create(const PropertyMap &properties,
+VerticalCSNNPtr VerticalCS::create(const util::PropertyMap &properties,
                                    const CoordinateSystemAxisNNPtr &axis) {
     auto cs(VerticalCS::nn_make_shared<VerticalCS>(axis));
     cs->setProperties(properties);
@@ -518,9 +521,10 @@ VerticalCSNNPtr VerticalCS::create(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 VerticalCSNNPtr
-VerticalCS::createGravityRelatedHeight(const UnitOfMeasure &unit) {
+VerticalCS::createGravityRelatedHeight(const common::UnitOfMeasure &unit) {
     auto cs(VerticalCS::nn_make_shared<VerticalCS>(CoordinateSystemAxis::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "Gravity-related height"),
+        util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                "Gravity-related height"),
         "H", AxisDirection::UP, unit)));
     return cs;
 }
@@ -546,7 +550,7 @@ CartesianCS::CartesianCS(const CartesianCS &) = default;
 
 // ---------------------------------------------------------------------------
 
-CartesianCSNNPtr CartesianCS::create(const PropertyMap &properties,
+CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
                                      const CoordinateSystemAxisNNPtr &axis0,
                                      const CoordinateSystemAxisNNPtr &axis1) {
     std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1};
@@ -557,7 +561,7 @@ CartesianCSNNPtr CartesianCS::create(const PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-CartesianCSNNPtr CartesianCS::create(const PropertyMap &properties,
+CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
                                      const CoordinateSystemAxisNNPtr &axis0,
                                      const CoordinateSystemAxisNNPtr &axis1,
                                      const CoordinateSystemAxisNNPtr &axis2) {
@@ -569,13 +573,16 @@ CartesianCSNNPtr CartesianCS::create(const PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-CartesianCSNNPtr CartesianCS::createEastingNorthing(const UnitOfMeasure &unit) {
+CartesianCSNNPtr
+CartesianCS::createEastingNorthing(const common::UnitOfMeasure &unit) {
     std::vector<CoordinateSystemAxisNNPtr> axis{
         CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Easting),
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Easting),
             AxisAbbreviation::E, AxisDirection::EAST, unit),
         CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Northing),
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Northing),
             AxisAbbreviation::N, AxisDirection::NORTH, unit)};
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     return cs;
@@ -583,19 +590,20 @@ CartesianCSNNPtr CartesianCS::createEastingNorthing(const UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
-CartesianCSNNPtr CartesianCS::createGeocentric(const UnitOfMeasure &unit) {
+CartesianCSNNPtr
+CartesianCS::createGeocentric(const common::UnitOfMeasure &unit) {
     std::vector<CoordinateSystemAxisNNPtr> axis{
         CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY,
-                              AxisName::Geocentric_X),
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Geocentric_X),
             AxisAbbreviation::X, AxisDirection::GEOCENTRIC_X, unit),
         CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY,
-                              AxisName::Geocentric_Y),
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Geocentric_Y),
             AxisAbbreviation::Y, AxisDirection::GEOCENTRIC_Y, unit),
         CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY,
-                              AxisName::Geocentric_Z),
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Geocentric_Z),
             AxisAbbreviation::Z, AxisDirection::GEOCENTRIC_Z, unit)};
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     return cs;
@@ -624,6 +632,7 @@ const std::set<std::string> &AxisDirection::getKeys() {
     return axisDirectionKeys;
 }
 
+//! @cond Doxygen_Suppress
 // ---------------------------------------------------------------------------
 
 AxisDirectionWKT1::AxisDirectionWKT1(const std::string &nameIn)
@@ -647,6 +656,7 @@ const AxisDirectionWKT1 *AxisDirectionWKT1::valueOf(const std::string &nameIn) {
 const std::set<std::string> &AxisDirectionWKT1::getKeys() {
     return axisDirectionWKT1Keys;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -669,7 +679,7 @@ DateTimeTemporalCS::DateTimeTemporalCS(const CoordinateSystemAxisNNPtr &axisIn)
 // ---------------------------------------------------------------------------
 
 DateTimeTemporalCSNNPtr
-DateTimeTemporalCS::create(const PropertyMap &properties,
+DateTimeTemporalCS::create(const util::PropertyMap &properties,
                            const CoordinateSystemAxisNNPtr &axisIn) {
     auto cs(DateTimeTemporalCS::nn_make_shared<DateTimeTemporalCS>(axisIn));
     cs->setProperties(properties);
@@ -678,7 +688,8 @@ DateTimeTemporalCS::create(const PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string DateTimeTemporalCS::getWKT2Type(WKTFormatterNNPtr formatter) const {
+std::string
+DateTimeTemporalCS::getWKT2Type(io::WKTFormatterNNPtr formatter) const {
     return formatter->use2018Keywords() ? "TemporalDateTime" : "temporal";
 }
 
@@ -694,7 +705,7 @@ TemporalCountCS::TemporalCountCS(const CoordinateSystemAxisNNPtr &axisIn)
 // ---------------------------------------------------------------------------
 
 TemporalCountCSNNPtr
-TemporalCountCS::create(const PropertyMap &properties,
+TemporalCountCS::create(const util::PropertyMap &properties,
                         const CoordinateSystemAxisNNPtr &axisIn) {
     auto cs(TemporalCountCS::nn_make_shared<TemporalCountCS>(axisIn));
     cs->setProperties(properties);
@@ -703,7 +714,8 @@ TemporalCountCS::create(const PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string TemporalCountCS::getWKT2Type(WKTFormatterNNPtr formatter) const {
+std::string
+TemporalCountCS::getWKT2Type(io::WKTFormatterNNPtr formatter) const {
     return formatter->use2018Keywords() ? "TemporalCount" : "temporal";
 }
 
@@ -719,7 +731,7 @@ TemporalMeasureCS::TemporalMeasureCS(const CoordinateSystemAxisNNPtr &axisIn)
 // ---------------------------------------------------------------------------
 
 TemporalMeasureCSNNPtr
-TemporalMeasureCS::create(const PropertyMap &properties,
+TemporalMeasureCS::create(const util::PropertyMap &properties,
                           const CoordinateSystemAxisNNPtr &axisIn) {
     auto cs(TemporalMeasureCS::nn_make_shared<TemporalMeasureCS>(axisIn));
     cs->setProperties(properties);
@@ -728,6 +740,10 @@ TemporalMeasureCS::create(const PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string TemporalMeasureCS::getWKT2Type(WKTFormatterNNPtr formatter) const {
+std::string
+TemporalMeasureCS::getWKT2Type(io::WKTFormatterNNPtr formatter) const {
     return formatter->use2018Keywords() ? "TemporalMeasure" : "temporal";
 }
+
+} // namespace cs
+NS_PROJ_END

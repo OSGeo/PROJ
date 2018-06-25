@@ -41,10 +41,12 @@
 #include <string>
 #include <vector>
 
-using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::internal;
 using namespace NS_PROJ::io;
 using namespace NS_PROJ::util;
+
+NS_PROJ_START
+namespace metadata {
 
 // ---------------------------------------------------------------------------
 
@@ -444,3 +446,6 @@ const std::string &PositionalAccuracy::value() const { return d->value_; }
 PositionalAccuracyNNPtr PositionalAccuracy::create(const std::string &valueIn) {
     return PositionalAccuracy::nn_make_shared<PositionalAccuracy>(valueIn);
 }
+
+} // namespace metadata
+NS_PROJ_END

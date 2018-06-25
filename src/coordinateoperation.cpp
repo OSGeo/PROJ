@@ -47,18 +47,11 @@
 #include <string>
 #include <vector>
 
-using namespace NS_PROJ::common;
-using namespace NS_PROJ::crs;
 using namespace NS_PROJ::internal;
-using namespace NS_PROJ::io;
-using namespace NS_PROJ::metadata;
-using namespace NS_PROJ::operation;
-using namespace NS_PROJ::util;
 
 // ---------------------------------------------------------------------------
 
 NS_PROJ_START
-
 namespace operation {
 
 static const std::string EPSG_METHOD_TRANSVERSE_MERCATOR("Transverse Mercator");
@@ -116,23 +109,23 @@ static const std::string
 
 static const ParamMapping paramLatitudeNatOrigin = {
     EPSG_LATITUDE_OF_NATURAL_ORIGIN, 8801, WKT1_LATITUDE_OF_ORIGIN,
-    UnitOfMeasure::Type::ANGULAR, "lat_0"};
+    common::UnitOfMeasure::Type::ANGULAR, "lat_0"};
 
 static const ParamMapping paramLongitudeNatOrigin = {
     EPSG_LONGITUDE_OF_NATURAL_ORIGIN, 8802, WKT1_CENTRAL_MERIDIAN,
-    UnitOfMeasure::Type::ANGULAR, "lon_0"};
+    common::UnitOfMeasure::Type::ANGULAR, "lon_0"};
 
 static const ParamMapping paramScaleFactor = {
     EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN, 8805, WKT1_SCALE_FACTOR,
-    UnitOfMeasure::Type::SCALE, "k_0"};
+    common::UnitOfMeasure::Type::SCALE, "k_0"};
 
 static const ParamMapping paramFalseEasting = {
-    EPSG_FALSE_EASTING, 8806, WKT1_FALSE_EASTING, UnitOfMeasure::Type::LINEAR,
-    "x_0"};
+    EPSG_FALSE_EASTING, 8806, WKT1_FALSE_EASTING,
+    common::UnitOfMeasure::Type::LINEAR, "x_0"};
 
 static const ParamMapping paramFalseNorthing = {
-    EPSG_FALSE_NORTHING, 8807, WKT1_FALSE_NORTHING, UnitOfMeasure::Type::LINEAR,
-    "y_0"};
+    EPSG_FALSE_NORTHING, 8807, WKT1_FALSE_NORTHING,
+    common::UnitOfMeasure::Type::LINEAR, "y_0"};
 
 static const MethodMapping methodMappings[] = {
     {EPSG_METHOD_TRANSVERSE_MERCATOR,
@@ -152,7 +145,7 @@ static const MethodMapping methodMappings[] = {
          {EPSG_LATITUDE_OF_NATURAL_ORIGIN,
           8801,
           WKT1_LATITUDE_OF_ORIGIN,
-          UnitOfMeasure::Type::ANGULAR,
+          common::UnitOfMeasure::Type::ANGULAR,
           {"lat_1", "lat_0"}},
          paramLongitudeNatOrigin,
          paramScaleFactor,
@@ -205,7 +198,8 @@ const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) {
     }
 
     for (const auto &mapping : methodMappings) {
-        if (Identifier::isEquivalentName(mapping.wkt1_name, wkt1_name)) {
+        if (metadata::Identifier::isEquivalentName(mapping.wkt1_name,
+                                                   wkt1_name)) {
             return &mapping;
         }
     }
@@ -216,7 +210,8 @@ const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) {
 
 static const MethodMapping *getMapping(const std::string &wkt2_name) {
     for (const auto &mapping : methodMappings) {
-        if (Identifier::isEquivalentName(mapping.wkt2_name, wkt2_name)) {
+        if (metadata::Identifier::isEquivalentName(mapping.wkt2_name,
+                                                   wkt2_name)) {
             return &mapping;
         }
     }
@@ -252,25 +247,22 @@ const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
     return nullptr;
 }
 
-} // namespace operation
-
-NS_PROJ_END
-
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 struct CoordinateOperation::Private {
-    optional<std::string> operationVersion_{};
-    std::vector<PositionalAccuracyNNPtr> coordinateOperationAccuracies_{};
-    std::weak_ptr<CRS> sourceCRSWeak_{};
-    std::weak_ptr<CRS> targetCRSWeak_{};
-    CRSPtr sourceCRSLocked_{}; // do not set this for a
-                               // ProjectedCRS.defininingCoversion
-    CRSPtr targetCRSLocked_{}; // do not set this for a
-                               // ProjectedCRS.defininingCoversion
-    CRSPtr interpolationCRS_{};
-    optional<DataEpoch> sourceCoordinateEpoch_{};
-    optional<DataEpoch> targetCoordinateEpoch_{};
+    util::optional<std::string> operationVersion_{};
+    std::vector<metadata::PositionalAccuracyNNPtr>
+        coordinateOperationAccuracies_{};
+    std::weak_ptr<crs::CRS> sourceCRSWeak_{};
+    std::weak_ptr<crs::CRS> targetCRSWeak_{};
+    crs::CRSPtr sourceCRSLocked_{}; // do not set this for a
+                                    // ProjectedCRS.defininingCoversion
+    crs::CRSPtr targetCRSLocked_{}; // do not set this for a
+                                    // ProjectedCRS.defininingCoversion
+    crs::CRSPtr interpolationCRS_{};
+    util::optional<common::DataEpoch> sourceCoordinateEpoch_{};
+    util::optional<common::DataEpoch> targetCoordinateEpoch_{};
 };
 //! @endcond
 
@@ -289,60 +281,63 @@ CoordinateOperation::CoordinateOperation(const CoordinateOperation &other)
 CoordinateOperation::~CoordinateOperation() = default;
 
 // ---------------------------------------------------------------------------
-const optional<std::string> &CoordinateOperation::operationVersion() const {
+const util::optional<std::string> &
+CoordinateOperation::operationVersion() const {
     return d->operationVersion_;
 }
 
 // ---------------------------------------------------------------------------
 
-const std::vector<PositionalAccuracyNNPtr> &
+const std::vector<metadata::PositionalAccuracyNNPtr> &
 CoordinateOperation::coordinateOperationAccuracies() const {
     return d->coordinateOperationAccuracies_;
 }
 
 // ---------------------------------------------------------------------------
 
-const CRSPtr CoordinateOperation::sourceCRS() const {
+const crs::CRSPtr CoordinateOperation::sourceCRS() const {
     return d->sourceCRSWeak_.lock();
 }
 
 // ---------------------------------------------------------------------------
 
-const CRSPtr CoordinateOperation::targetCRS() const {
+const crs::CRSPtr CoordinateOperation::targetCRS() const {
     return d->targetCRSWeak_.lock();
 }
 
 // ---------------------------------------------------------------------------
 
-const CRSPtr &CoordinateOperation::interpolationCRS() const {
+const crs::CRSPtr &CoordinateOperation::interpolationCRS() const {
     return d->interpolationCRS_;
 }
 
 // ---------------------------------------------------------------------------
 
-const optional<DataEpoch> &CoordinateOperation::sourceCoordinateEpoch() const {
+const util::optional<common::DataEpoch> &
+CoordinateOperation::sourceCoordinateEpoch() const {
     return d->sourceCoordinateEpoch_;
 }
 
 // ---------------------------------------------------------------------------
 
-const optional<DataEpoch> &CoordinateOperation::targetCoordinateEpoch() const {
+const util::optional<common::DataEpoch> &
+CoordinateOperation::targetCoordinateEpoch() const {
     return d->targetCoordinateEpoch_;
 }
 
 // ---------------------------------------------------------------------------
 
 void CoordinateOperation::setWeakSourceTargetCRS(
-    std::weak_ptr<CRS> sourceCRSIn, std::weak_ptr<CRS> targetCRSIn) {
+    std::weak_ptr<crs::CRS> sourceCRSIn, std::weak_ptr<crs::CRS> targetCRSIn) {
     d->sourceCRSWeak_ = sourceCRSIn;
     d->targetCRSWeak_ = targetCRSIn;
 }
 
 // ---------------------------------------------------------------------------
 
-void CoordinateOperation::setCRSs(const CRSNNPtr &sourceCRSIn,
-                                  const CRSNNPtr &targetCRSIn,
-                                  const CRSPtr &interpolationCRSIn) {
+void CoordinateOperation::setCRSs(const crs::CRSNNPtr &sourceCRSIn,
+                                  const crs::CRSNNPtr &targetCRSIn,
+                                  const crs::CRSPtr &interpolationCRSIn) {
     d->sourceCRSLocked_ = sourceCRSIn;
     d->sourceCRSWeak_ = sourceCRSIn.as_nullable();
     d->targetCRSLocked_ = targetCRSIn;
@@ -353,7 +348,7 @@ void CoordinateOperation::setCRSs(const CRSNNPtr &sourceCRSIn,
 // ---------------------------------------------------------------------------
 
 void CoordinateOperation::setAccuracies(
-    const std::vector<PositionalAccuracyNNPtr> &accuracies) {
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     d->coordinateOperationAccuracies_ = accuracies;
 }
 
@@ -361,8 +356,8 @@ void CoordinateOperation::setAccuracies(
 
 //! @cond Doxygen_Suppress
 struct OperationMethod::Private {
-    optional<std::string> formula_{};
-    optional<metadata::Citation> formulaCitation_{};
+    util::optional<std::string> formula_{};
+    util::optional<metadata::Citation> formulaCitation_{};
     std::vector<GeneralOperationParameterNNPtr> parameters_{};
 };
 //! @endcond
@@ -382,13 +377,14 @@ OperationMethod::~OperationMethod() = default;
 
 // ---------------------------------------------------------------------------
 
-const optional<std::string> &OperationMethod::formula() const {
+const util::optional<std::string> &OperationMethod::formula() const {
     return d->formula_;
 }
 
 // ---------------------------------------------------------------------------
 
-const optional<Citation> &OperationMethod::formulaCitation() const {
+const util::optional<metadata::Citation> &
+OperationMethod::formulaCitation() const {
     return d->formulaCitation_;
 }
 
@@ -402,7 +398,7 @@ OperationMethod::parameters() const {
 // ---------------------------------------------------------------------------
 
 OperationMethodNNPtr OperationMethod::create(
-    const PropertyMap &properties,
+    const util::PropertyMap &properties,
     const std::vector<GeneralOperationParameterNNPtr> &parameters) {
     OperationMethodNNPtr method(
         OperationMethod::nn_make_shared<OperationMethod>());
@@ -414,7 +410,7 @@ OperationMethodNNPtr OperationMethod::create(
 // ---------------------------------------------------------------------------
 
 OperationMethodNNPtr OperationMethod::create(
-    const PropertyMap &properties,
+    const util::PropertyMap &properties,
     const std::vector<OperationParameterNNPtr> &parameters) {
     std::vector<GeneralOperationParameterNNPtr> parametersGeneral;
     parametersGeneral.reserve(parameters.size());
@@ -426,10 +422,11 @@ OperationMethodNNPtr OperationMethod::create(
 
 // ---------------------------------------------------------------------------
 
-std::string OperationMethod::exportToWKT(WKTFormatterNNPtr formatter) const {
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    formatter->startNode(isWKT2 ? WKTConstants::METHOD
-                                : WKTConstants::PROJECTION,
+std::string
+OperationMethod::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    formatter->startNode(isWKT2 ? io::WKTConstants::METHOD
+                                : io::WKTConstants::PROJECTION,
                          !identifiers().empty());
     std::string l_name(*(name()->description()));
     if (!isWKT2) {
@@ -524,21 +521,21 @@ const ParameterValueNNPtr &OperationParameterValue::parameterValue() const {
 // ---------------------------------------------------------------------------
 
 std::string
-OperationParameterValue::exportToWKT(WKTFormatterNNPtr formatter) const {
+OperationParameterValue::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     return _exportToWKT(formatter, nullptr);
 }
 
 std::string
-OperationParameterValue::_exportToWKT(WKTFormatterNNPtr formatter,
+OperationParameterValue::_exportToWKT(io::WKTFormatterNNPtr formatter,
                                       const MethodMapping *mapping) const {
     const ParamMapping *paramMapping =
         mapping ? getMapping(mapping, this) : nullptr;
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (isWKT2 && parameterValue()->type() == ParameterValue::Type::FILENAME) {
-        formatter->startNode(WKTConstants::PARAMETERFILE,
+        formatter->startNode(io::WKTConstants::PARAMETERFILE,
                              !parameter()->identifiers().empty());
     } else {
-        formatter->startNode(WKTConstants::PARAMETER,
+        formatter->startNode(io::WKTConstants::PARAMETER,
                              !parameter()->identifiers().empty());
     }
     if (paramMapping) {
@@ -558,54 +555,60 @@ OperationParameterValue::_exportToWKT(WKTFormatterNNPtr formatter,
 
 bool OperationParameterValue::convertFromAbridged(const std::string &paramName,
                                                   double &val,
-                                                  UnitOfMeasure &unit,
+                                                  common::UnitOfMeasure &unit,
                                                   int &paramEPSGCode) {
-    if (Identifier::isEquivalentName(paramName,
-                                     EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME) ||
+    if (metadata::Identifier::isEquivalentName(
+            paramName, EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME) ||
         paramEPSGCode == EPSG_PARAMETER_X_AXIS_TRANSLATION) {
-        unit = UnitOfMeasure::METRE;
+        unit = common::UnitOfMeasure::METRE;
         paramEPSGCode = EPSG_PARAMETER_X_AXIS_TRANSLATION;
         return true;
-    } else if (Identifier::isEquivalentName(
+    } else if (metadata::Identifier::isEquivalentName(
                    paramName, EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME) ||
                paramEPSGCode == EPSG_PARAMETER_Y_AXIS_TRANSLATION) {
-        unit = UnitOfMeasure::METRE;
+        unit = common::UnitOfMeasure::METRE;
         paramEPSGCode = EPSG_PARAMETER_Y_AXIS_TRANSLATION;
         return true;
-    } else if (Identifier::isEquivalentName(
+    } else if (metadata::Identifier::isEquivalentName(
                    paramName, EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME) ||
                paramEPSGCode == EPSG_PARAMETER_Z_AXIS_TRANSLATION) {
-        unit = UnitOfMeasure::METRE;
+        unit = common::UnitOfMeasure::METRE;
         paramEPSGCode = EPSG_PARAMETER_Z_AXIS_TRANSLATION;
         return true;
-    } else if (Identifier::isEquivalentName(
+    } else if (metadata::Identifier::isEquivalentName(
                    paramName, EPSG_PARAMETER_X_AXIS_ROTATION_NAME) ||
                paramEPSGCode == EPSG_PARAMETER_X_AXIS_ROTATION) {
-        unit = UnitOfMeasure::MICRORADIAN;
-        val = Angle(val, UnitOfMeasure::ARC_SECOND).convertToUnit(unit).value();
+        unit = common::UnitOfMeasure::MICRORADIAN;
+        val = common::Angle(val, common::UnitOfMeasure::ARC_SECOND)
+                  .convertToUnit(unit)
+                  .value();
         paramEPSGCode = EPSG_PARAMETER_X_AXIS_ROTATION;
         return true;
-    } else if (Identifier::isEquivalentName(
+    } else if (metadata::Identifier::isEquivalentName(
                    paramName, EPSG_PARAMETER_Y_AXIS_ROTATION_NAME) ||
                paramEPSGCode == EPSG_PARAMETER_Y_AXIS_ROTATION) {
-        unit = UnitOfMeasure::MICRORADIAN;
-        val = Angle(val, UnitOfMeasure::ARC_SECOND).convertToUnit(unit).value();
+        unit = common::UnitOfMeasure::MICRORADIAN;
+        val = common::Angle(val, common::UnitOfMeasure::ARC_SECOND)
+                  .convertToUnit(unit)
+                  .value();
         paramEPSGCode = EPSG_PARAMETER_Y_AXIS_ROTATION;
         return true;
 
-    } else if (Identifier::isEquivalentName(
+    } else if (metadata::Identifier::isEquivalentName(
                    paramName, EPSG_PARAMETER_Z_AXIS_ROTATION_NAME) ||
                paramEPSGCode == EPSG_PARAMETER_Z_AXIS_ROTATION) {
-        unit = UnitOfMeasure::MICRORADIAN;
-        val = Angle(val, UnitOfMeasure::ARC_SECOND).convertToUnit(unit).value();
+        unit = common::UnitOfMeasure::MICRORADIAN;
+        val = common::Angle(val, common::UnitOfMeasure::ARC_SECOND)
+                  .convertToUnit(unit)
+                  .value();
         paramEPSGCode = EPSG_PARAMETER_Z_AXIS_ROTATION;
         return true;
 
-    } else if (Identifier::isEquivalentName(
+    } else if (metadata::Identifier::isEquivalentName(
                    paramName, EPSG_PARAMETER_SCALE_DIFFERENCE_NAME) ||
                paramEPSGCode == EPSG_PARAMETER_SCALE_DIFFERENCE) {
         val = (val - 1.0) * 1e6;
-        unit = UnitOfMeasure::PARTS_PER_MILLION;
+        unit = common::UnitOfMeasure::PARTS_PER_MILLION;
         paramEPSGCode = EPSG_PARAMETER_SCALE_DIFFERENCE;
         return true;
     }
@@ -657,7 +660,7 @@ OperationParameter::~OperationParameter() = default;
 // ---------------------------------------------------------------------------
 
 OperationParameterNNPtr
-OperationParameter::create(const PropertyMap &properties) {
+OperationParameter::create(const util::PropertyMap &properties) {
     OperationParameterNNPtr op(
         OperationParameter::nn_make_shared<OperationParameter>());
     op->setProperties(properties);
@@ -731,13 +734,13 @@ SingleOperation::parameterValue(const std::string &paramName) const {
 
 // ---------------------------------------------------------------------------
 
-Measure
+common::Measure
 SingleOperation::parameterValueMeasure(const std::string &paramName) const {
     auto val = parameterValue(paramName);
     if (val && val->type() == ParameterValue::Type::MEASURE) {
         return val->value();
     }
-    return Measure();
+    return common::Measure();
 }
 
 // ---------------------------------------------------------------------------
@@ -745,12 +748,12 @@ SingleOperation::parameterValueMeasure(const std::string &paramName) const {
 //! @cond Doxygen_Suppress
 struct ParameterValue::Private {
     ParameterValue::Type type_{ParameterValue::Type::STRING};
-    Measure measure_{};
+    common::Measure measure_{};
     std::string stringValue_{};
     int integerValue_{};
     bool booleanValue_{};
 
-    explicit Private(const Measure &valueIn)
+    explicit Private(const common::Measure &valueIn)
         : type_(ParameterValue::Type::MEASURE), measure_(valueIn) {}
 
     Private(const std::string &stringValueIn, ParameterValue::Type typeIn)
@@ -770,7 +773,7 @@ ParameterValue::~ParameterValue() = default;
 
 // ---------------------------------------------------------------------------
 
-ParameterValue::ParameterValue(const Measure &measureIn)
+ParameterValue::ParameterValue(const common::Measure &measureIn)
     : d(internal::make_unique<Private>(measureIn)) {}
 
 // ---------------------------------------------------------------------------
@@ -791,7 +794,7 @@ ParameterValue::ParameterValue(bool booleanValueIn)
 
 // ---------------------------------------------------------------------------
 
-ParameterValueNNPtr ParameterValue::create(const Measure &measureIn) {
+ParameterValueNNPtr ParameterValue::create(const common::Measure &measureIn) {
     return ParameterValue::nn_make_shared<ParameterValue>(measureIn);
 }
 
@@ -835,7 +838,7 @@ const ParameterValue::Type &ParameterValue::type() const { return d->type_; }
 
 // ---------------------------------------------------------------------------
 
-const Measure &ParameterValue::value() const { return d->measure_; }
+const common::Measure &ParameterValue::value() const { return d->measure_; }
 
 // ---------------------------------------------------------------------------
 
@@ -857,16 +860,18 @@ bool ParameterValue::booleanValue() const { return d->booleanValue_; }
 
 // ---------------------------------------------------------------------------
 
-std::string ParameterValue::exportToWKT(WKTFormatterNNPtr formatter) const {
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+std::string ParameterValue::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
 
     if (formatter->abridgedTransformation() && type() == Type::MEASURE) {
-        if (value().unit().type() == UnitOfMeasure::Type::LINEAR) {
+        if (value().unit().type() == common::UnitOfMeasure::Type::LINEAR) {
             formatter->add(value().getSIValue());
-        } else if (value().unit().type() == UnitOfMeasure::Type::ANGULAR) {
-            formatter->add(
-                value().convertToUnit(UnitOfMeasure::ARC_SECOND).value());
-        } else if (value().unit() == UnitOfMeasure::PARTS_PER_MILLION) {
+        } else if (value().unit().type() ==
+                   common::UnitOfMeasure::Type::ANGULAR) {
+            formatter->add(value()
+                               .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                               .value());
+        } else if (value().unit() == common::UnitOfMeasure::PARTS_PER_MILLION) {
             formatter->add(1.0 + value().value() * 1e-6);
         } else {
             formatter->add(value().value());
@@ -874,9 +879,9 @@ std::string ParameterValue::exportToWKT(WKTFormatterNNPtr formatter) const {
     } else if (type() == Type::MEASURE) {
         formatter->add(value().value());
         const auto &unit = value().unit();
-        if (isWKT2 && unit != UnitOfMeasure::NONE) {
+        if (isWKT2 && unit != common::UnitOfMeasure::NONE) {
             if (!formatter->primeMeridianOrParameterUnitOmittedIfSameAsAxis() ||
-                (unit != UnitOfMeasure::SCALE_UNITY &&
+                (unit != common::UnitOfMeasure::SCALE_UNITY &&
                  unit != *(formatter->axisLinearUnit()) &&
                  unit != *(formatter->axisAngularUnit()))) {
                 unit.exportToWKT(formatter);
@@ -887,7 +892,7 @@ std::string ParameterValue::exportToWKT(WKTFormatterNNPtr formatter) const {
     } else if (type() == Type::INTEGER) {
         formatter->add(integerValue());
     } else {
-        throw FormattingException("boolean parameter value not handled");
+        throw io::FormattingException("boolean parameter value not handled");
     }
     return formatter->toString();
 }
@@ -917,7 +922,7 @@ Conversion::~Conversion() = default;
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr Conversion::create(const PropertyMap &properties,
+ConversionNNPtr Conversion::create(const util::PropertyMap &properties,
                                    const OperationMethodNNPtr &methodIn,
                                    const std::vector<GeneralParameterValueNNPtr>
                                        &values) // throw InvalidOperation
@@ -934,8 +939,8 @@ ConversionNNPtr Conversion::create(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 ConversionNNPtr Conversion::create(
-    const PropertyMap &propertiesConversion,
-    const PropertyMap &propertiesOperationMethod,
+    const util::PropertyMap &propertiesConversion,
+    const util::PropertyMap &propertiesOperationMethod,
     const std::vector<OperationParameterNNPtr> &parameters,
     const std::vector<ParameterValueNNPtr> &values) // throw InvalidOperation
 {
@@ -963,18 +968,21 @@ ConversionNNPtr Conversion::create(const ConversionNNPtr &other) {
 
 // ---------------------------------------------------------------------------
 
-static PropertyMap getUTMConversionProperty(const PropertyMap &properties,
-                                            int zone, bool north) {
-    if (properties.find(IdentifiedObject::NAME_KEY) == properties.end()) {
+static util::PropertyMap
+getUTMConversionProperty(const util::PropertyMap &properties, int zone,
+                         bool north) {
+    if (properties.find(common::IdentifiedObject::NAME_KEY) ==
+        properties.end()) {
         std::ostringstream conversionName;
         conversionName << "UTM zone ";
         conversionName << zone;
         conversionName << (north ? 'N' : 'S');
 
-        return PropertyMap()
-            .set(IdentifiedObject::NAME_KEY, conversionName.str())
-            .set(Identifier::CODESPACE_KEY, "EPSG")
-            .set(Identifier::CODE_KEY, (north ? 16000 : 17000) + zone);
+        return util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY, conversionName.str())
+            .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+            .set(metadata::Identifier::CODE_KEY,
+                 (north ? 16000 : 17000) + zone);
     } else {
         return properties;
     }
@@ -982,44 +990,48 @@ static PropertyMap getUTMConversionProperty(const PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr Conversion::createUTM(const PropertyMap &properties, int zone,
-                                      bool north) {
+ConversionNNPtr Conversion::createUTM(const util::PropertyMap &properties,
+                                      int zone, bool north) {
     const MethodMapping *mapping =
         getMapping(EPSG_METHOD_TRANSVERSE_MERCATOR_CODE);
     assert(mapping);
     std::vector<OperationParameterNNPtr> parameters;
     for (const auto &param : mapping->params) {
         parameters.push_back(OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY, param.wkt2_name)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, param.epsg_code)));
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY, param.wkt2_name)
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY, param.epsg_code)));
     }
 
     std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(Angle(UTM_LATITUDE_OF_NATURAL_ORIGIN)),
-        ParameterValue::create(Angle(zone * 6.0 - 183.0)),
-        ParameterValue::create(Scale(UTM_SCALE_FACTOR)),
-        ParameterValue::create(Length(UTM_FALSE_EASTING)),
-        ParameterValue::create(Length(north ? UTM_NORTH_FALSE_NORTHING
-                                            : UTM_SOUTH_FALSE_NORTHING)),
+        ParameterValue::create(common::Angle(UTM_LATITUDE_OF_NATURAL_ORIGIN)),
+        ParameterValue::create(common::Angle(zone * 6.0 - 183.0)),
+        ParameterValue::create(common::Scale(UTM_SCALE_FACTOR)),
+        ParameterValue::create(common::Length(UTM_FALSE_EASTING)),
+        ParameterValue::create(common::Length(
+            north ? UTM_NORTH_FALSE_NORTHING : UTM_SOUTH_FALSE_NORTHING)),
     };
 
-    return create(
-        getUTMConversionProperty(properties, zone, north),
-        PropertyMap()
-            .set(IdentifiedObject::NAME_KEY, EPSG_METHOD_TRANSVERSE_MERCATOR)
-            .set(Identifier::CODESPACE_KEY, "EPSG")
-            .set(Identifier::CODE_KEY, EPSG_METHOD_TRANSVERSE_MERCATOR_CODE),
-        parameters, values);
+    return create(getUTMConversionProperty(properties, zone, north),
+                  util::PropertyMap()
+                      .set(common::IdentifiedObject::NAME_KEY,
+                           EPSG_METHOD_TRANSVERSE_MERCATOR)
+                      .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                      .set(metadata::Identifier::CODE_KEY,
+                           EPSG_METHOD_TRANSVERSE_MERCATOR_CODE),
+                  parameters, values);
 }
 
 // ---------------------------------------------------------------------------
 
-static PropertyMap addDefaultNameIfNeeded(const PropertyMap &properties,
-                                          const std::string &defaultName) {
-    if (properties.find(IdentifiedObject::NAME_KEY) == properties.end()) {
-        return PropertyMap().set(IdentifiedObject::NAME_KEY, defaultName);
+static util::PropertyMap
+addDefaultNameIfNeeded(const util::PropertyMap &properties,
+                       const std::string &defaultName) {
+    if (properties.find(common::IdentifiedObject::NAME_KEY) ==
+        properties.end()) {
+        return util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                       defaultName);
     } else {
         return properties;
     }
@@ -1028,7 +1040,7 @@ static PropertyMap addDefaultNameIfNeeded(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 ConversionNNPtr
-Conversion::create(const PropertyMap &properties, int method_epsg_code,
+Conversion::create(const util::PropertyMap &properties, int method_epsg_code,
                    const std::vector<ParameterValueNNPtr> &values) {
     const MethodMapping *mapping = getMapping(method_epsg_code);
     assert(mapping);
@@ -1036,26 +1048,29 @@ Conversion::create(const PropertyMap &properties, int method_epsg_code,
     std::vector<OperationParameterNNPtr> parameters;
     for (const auto &param : mapping->params) {
         parameters.push_back(OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY, param.wkt2_name)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, param.epsg_code)));
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY, param.wkt2_name)
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY, param.epsg_code)));
     }
 
-    return create(addDefaultNameIfNeeded(properties, mapping->wkt2_name),
-                  PropertyMap()
-                      .set(IdentifiedObject::NAME_KEY, mapping->wkt2_name)
-                      .set(Identifier::CODESPACE_KEY, "EPSG")
-                      .set(Identifier::CODE_KEY, mapping->epsg_code),
-                  parameters, values);
+    return create(
+        addDefaultNameIfNeeded(properties, mapping->wkt2_name),
+        util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY, mapping->wkt2_name)
+            .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+            .set(metadata::Identifier::CODE_KEY, mapping->epsg_code),
+        parameters, values);
 }
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr
-Conversion::createTM(const PropertyMap &properties, const Angle &centerLat,
-                     const Angle &centerLong, const Scale &scale,
-                     const Length &falseEasting, const Length &falseNorthing) {
+ConversionNNPtr Conversion::createTM(const util::PropertyMap &properties,
+                                     const common::Angle &centerLat,
+                                     const common::Angle &centerLong,
+                                     const common::Scale &scale,
+                                     const common::Length &falseEasting,
+                                     const common::Length &falseNorthing) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(centerLat),
         ParameterValue::create(centerLong),
@@ -1069,12 +1084,12 @@ Conversion::createTM(const PropertyMap &properties, const Angle &centerLat,
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr Conversion::createLCC_1SP(const PropertyMap &properties,
-                                          const Angle &centerLat,
-                                          const Angle &centerLong,
-                                          const Scale &scale,
-                                          const Length &falseEasting,
-                                          const Length &falseNorthing) {
+ConversionNNPtr Conversion::createLCC_1SP(const util::PropertyMap &properties,
+                                          const common::Angle &centerLat,
+                                          const common::Angle &centerLong,
+                                          const common::Scale &scale,
+                                          const common::Length &falseEasting,
+                                          const common::Length &falseNorthing) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(centerLat),
         ParameterValue::create(centerLong),
@@ -1089,11 +1104,11 @@ ConversionNNPtr Conversion::createLCC_1SP(const PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr Conversion::createNZMG(const PropertyMap &properties,
-                                       const Angle &centerLat,
-                                       const Angle &centerLong,
-                                       const Length &falseEasting,
-                                       const Length &falseNorthing) {
+ConversionNNPtr Conversion::createNZMG(const util::PropertyMap &properties,
+                                       const common::Angle &centerLat,
+                                       const common::Angle &centerLong,
+                                       const common::Length &falseEasting,
+                                       const common::Length &falseNorthing) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(centerLat), ParameterValue::create(centerLong),
         ParameterValue::create(falseEasting),
@@ -1105,15 +1120,15 @@ ConversionNNPtr Conversion::createNZMG(const PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string Conversion::exportToWKT(WKTFormatterNNPtr formatter) const {
+std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     if (formatter->outputConversionNode()) {
         formatter->startNode(formatter->useDerivingConversion()
-                                 ? WKTConstants::DERIVINGCONVERSION
-                                 : WKTConstants::CONVERSION,
+                                 ? io::WKTConstants::DERIVINGCONVERSION
+                                 : io::WKTConstants::CONVERSION,
                              !identifiers().empty());
         formatter->addQuotedString(*(name()->description()));
     }
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
         formatter->pushOutputUnit(false);
         formatter->pushOutputId(false);
@@ -1142,7 +1157,7 @@ std::string Conversion::exportToWKT(WKTFormatterNNPtr formatter) const {
 // ---------------------------------------------------------------------------
 
 std::string Conversion::exportToPROJString(
-    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+    io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
 {
     auto projectionMethodName = *(method()->name()->description());
     if (ci_equal(projectionMethodName, EPSG_METHOD_TRANSVERSE_MERCATOR)) {
@@ -1164,11 +1179,12 @@ std::string Conversion::exportToPROJString(
         formatter->addStep(mapping->proj_name);
         for (const auto &param : mapping->params) {
             for (const auto &proj_name : param.proj_names) {
-                if (param.unit_type == UnitOfMeasure::Type::ANGULAR) {
+                if (param.unit_type == common::UnitOfMeasure::Type::ANGULAR) {
                     formatter->addParam(
-                        proj_name, parameterValueMeasure(param.wkt2_name)
-                                       .convertToUnit(UnitOfMeasure::DEGREE)
-                                       .value());
+                        proj_name,
+                        parameterValueMeasure(param.wkt2_name)
+                            .convertToUnit(common::UnitOfMeasure::DEGREE)
+                            .value());
                 } else {
                     formatter->addParam(
                         proj_name,
@@ -1177,8 +1193,8 @@ std::string Conversion::exportToPROJString(
             }
         }
     } else {
-        throw FormattingException("Unsupported conversion method: " +
-                                  projectionMethodName);
+        throw io::FormattingException("Unsupported conversion method: " +
+                                      projectionMethodName);
     }
 
     return formatter->toString();
@@ -1212,7 +1228,8 @@ bool Conversion::isUTM(int &zone, bool &north) const {
                         measure.value() == UTM_LATITUDE_OF_NATURAL_ORIGIN) {
                         bLatitudeNatOriginUTM = true;
                     } else if (paramName == EPSG_LONGITUDE_OF_NATURAL_ORIGIN &&
-                               measure.unit() == UnitOfMeasure::DEGREE) {
+                               measure.unit() ==
+                                   common::UnitOfMeasure::DEGREE) {
                         double dfZone = (measure.value() + 183.0) / 6.0;
                         if (dfZone > 0.9 && dfZone < 60.1 &&
                             std::abs(dfZone - std::round(dfZone)) < 1e-10) {
@@ -1224,10 +1241,10 @@ bool Conversion::isUTM(int &zone, bool &north) const {
                         bScaleFactorUTM = true;
                     } else if (paramName == EPSG_FALSE_EASTING &&
                                measure.value() == UTM_FALSE_EASTING &&
-                               measure.unit() == UnitOfMeasure::METRE) {
+                               measure.unit() == common::UnitOfMeasure::METRE) {
                         bFalseEastingUTM = true;
                     } else if (paramName == EPSG_FALSE_NORTHING &&
-                               measure.unit() == UnitOfMeasure::METRE) {
+                               measure.unit() == common::UnitOfMeasure::METRE) {
                         if (measure.value() == UTM_NORTH_FALSE_NORTHING) {
                             bFalseNorthingUTM = true;
                             north = true;
@@ -1260,7 +1277,7 @@ ConversionNNPtr Conversion::identify() const {
         bool north = true;
         if (isUTM(zone, north)) {
             newConversion->setProperties(
-                getUTMConversionProperty(PropertyMap(), zone, north));
+                getUTMConversionProperty(util::PropertyMap(), zone, north));
         }
     }
 
@@ -1293,10 +1310,10 @@ struct Transformation::Private {};
 // ---------------------------------------------------------------------------
 
 Transformation::Transformation(
-    const CRSNNPtr &sourceCRSIn, const CRSNNPtr &targetCRSIn,
-    const CRSPtr &interpolationCRSIn, const OperationMethodNNPtr &methodIn,
+    const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
+    const crs::CRSPtr &interpolationCRSIn, const OperationMethodNNPtr &methodIn,
     const std::vector<GeneralParameterValueNNPtr> &values,
-    const std::vector<PositionalAccuracyNNPtr> &accuracies)
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies)
     : SingleOperation(methodIn), d(internal::make_unique<Private>()) {
     setParameterValues(values);
     setCRSs(sourceCRSIn, targetCRSIn, interpolationCRSIn);
@@ -1309,13 +1326,13 @@ Transformation::~Transformation() = default;
 
 // ---------------------------------------------------------------------------
 
-const CRSNNPtr Transformation::sourceCRS() const {
+const crs::CRSNNPtr Transformation::sourceCRS() const {
     return NN_CHECK_ASSERT(CoordinateOperation::sourceCRS());
 }
 
 // ---------------------------------------------------------------------------
 
-const CRSNNPtr Transformation::targetCRS() const {
+const crs::CRSNNPtr Transformation::targetCRS() const {
     return NN_CHECK_ASSERT(CoordinateOperation::targetCRS());
 }
 
@@ -1364,64 +1381,68 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
                 const auto &l_parameterValue = opParamvalue->parameterValue();
                 if (l_parameterValue->type() == ParameterValue::Type::MEASURE) {
                     auto measure = l_parameterValue->value();
-                    if (Identifier::isEquivalentName(
+                    if (metadata::Identifier::isEquivalentName(
                             paramName,
                             EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME) ||
                         parameter->isEPSG(EPSG_PARAMETER_X_AXIS_TRANSLATION)) {
                         params[0] = measure.getSIValue();
                         foundX = true;
-                    } else if (Identifier::isEquivalentName(
+                    } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
                                    EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME) ||
                                parameter->isEPSG(
                                    EPSG_PARAMETER_Y_AXIS_TRANSLATION)) {
                         params[1] = measure.getSIValue();
                         foundY = true;
-                    } else if (Identifier::isEquivalentName(
+                    } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
                                    EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME) ||
                                parameter->isEPSG(
                                    EPSG_PARAMETER_Z_AXIS_TRANSLATION)) {
                         params[2] = measure.getSIValue();
                         foundZ = true;
-                    } else if (Identifier::isEquivalentName(
+                    } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
                                    EPSG_PARAMETER_X_AXIS_ROTATION_NAME) ||
                                parameter->isEPSG(
                                    EPSG_PARAMETER_X_AXIS_ROTATION)) {
-                        params[3] =
-                            rotSign *
-                            measure.convertToUnit(UnitOfMeasure::MICRORADIAN)
-                                .value();
+                        params[3] = rotSign *
+                                    measure
+                                        .convertToUnit(
+                                            common::UnitOfMeasure::MICRORADIAN)
+                                        .value();
                         foundRotX = true;
-                    } else if (Identifier::isEquivalentName(
+                    } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
                                    EPSG_PARAMETER_Y_AXIS_ROTATION_NAME) ||
                                parameter->isEPSG(
                                    EPSG_PARAMETER_Y_AXIS_ROTATION)) {
-                        params[4] =
-                            rotSign *
-                            measure.convertToUnit(UnitOfMeasure::MICRORADIAN)
-                                .value();
+                        params[4] = rotSign *
+                                    measure
+                                        .convertToUnit(
+                                            common::UnitOfMeasure::MICRORADIAN)
+                                        .value();
                         foundRotY = true;
-                    } else if (Identifier::isEquivalentName(
+                    } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
                                    EPSG_PARAMETER_Z_AXIS_ROTATION_NAME) ||
                                parameter->isEPSG(
                                    EPSG_PARAMETER_Z_AXIS_ROTATION)) {
-                        params[5] =
-                            rotSign *
-                            measure.convertToUnit(UnitOfMeasure::MICRORADIAN)
-                                .value();
+                        params[5] = rotSign *
+                                    measure
+                                        .convertToUnit(
+                                            common::UnitOfMeasure::MICRORADIAN)
+                                        .value();
                         foundRotZ = true;
-                    } else if (Identifier::isEquivalentName(
+                    } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
                                    EPSG_PARAMETER_SCALE_DIFFERENCE_NAME) ||
                                parameter->isEPSG(
                                    EPSG_PARAMETER_SCALE_DIFFERENCE)) {
                         params[6] =
                             measure
-                                .convertToUnit(UnitOfMeasure::PARTS_PER_MILLION)
+                                .convertToUnit(
+                                    common::UnitOfMeasure::PARTS_PER_MILLION)
                                 .value();
                         foundScale = true;
                     }
@@ -1433,25 +1454,24 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
              (foundRotX && foundRotY && foundRotZ && foundScale))) {
             return params;
         } else {
-            throw FormattingException(
+            throw io::FormattingException(
                 "Missing required parameter values in transformation");
         }
     }
 
-    throw FormattingException(
+    throw io::FormattingException(
         "Transformation cannot be formatted as WKT1 TOWGS84 parameters");
 }
 
 // ---------------------------------------------------------------------------
 
-TransformationNNPtr
-Transformation::create(const PropertyMap &properties,
-                       const CRSNNPtr &sourceCRSIn, const CRSNNPtr &targetCRSIn,
-                       const CRSPtr &interpolationCRSIn,
-                       const OperationMethodNNPtr &methodIn,
-                       const std::vector<GeneralParameterValueNNPtr> &values,
-                       const std::vector<PositionalAccuracyNNPtr>
-                           &accuracies) // throw InvalidOperation
+TransformationNNPtr Transformation::create(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, const crs::CRSPtr &interpolationCRSIn,
+    const OperationMethodNNPtr &methodIn,
+    const std::vector<GeneralParameterValueNNPtr> &values,
+    const std::vector<metadata::PositionalAccuracyNNPtr>
+        &accuracies) // throw InvalidOperation
 {
     if (methodIn->parameters().size() != values.size()) {
         throw InvalidOperation(
@@ -1467,13 +1487,14 @@ Transformation::create(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 TransformationNNPtr
-Transformation::create(const PropertyMap &propertiesTransformation,
-                       const CRSNNPtr &sourceCRSIn, const CRSNNPtr &targetCRSIn,
-                       const CRSPtr &interpolationCRSIn,
-                       const PropertyMap &propertiesOperationMethod,
+Transformation::create(const util::PropertyMap &propertiesTransformation,
+                       const crs::CRSNNPtr &sourceCRSIn,
+                       const crs::CRSNNPtr &targetCRSIn,
+                       const crs::CRSPtr &interpolationCRSIn,
+                       const util::PropertyMap &propertiesOperationMethod,
                        const std::vector<OperationParameterNNPtr> &parameters,
                        const std::vector<ParameterValueNNPtr> &values,
-                       const std::vector<PositionalAccuracyNNPtr>
+                       const std::vector<metadata::PositionalAccuracyNNPtr>
                            &accuracies) // throw InvalidOperation
 {
     OperationMethodNNPtr op(
@@ -1496,69 +1517,76 @@ Transformation::create(const PropertyMap &propertiesTransformation,
 // ---------------------------------------------------------------------------
 
 static TransformationNNPtr createSevenParamsTransform(
-    const PropertyMap &properties, const PropertyMap &methodProperties,
-    const CRSNNPtr &sourceCRSIn, const CRSNNPtr &targetCRSIn,
-    double translationXMetre, double translationYMetre,
-    double translationZMetre, double rotationXMicroRadian,
-    double rotationYMicroRadian, double rotationZMicroRadian,
-    double scaleDifferencePPM,
-    const std::vector<PositionalAccuracyNNPtr> &accuracies) {
+    const util::PropertyMap &properties,
+    const util::PropertyMap &methodProperties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
+    double translationYMetre, double translationZMetre,
+    double rotationXMicroRadian, double rotationYMicroRadian,
+    double rotationZMicroRadian, double scaleDifferencePPM,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     std::vector<OperationParameterNNPtr> parameters{
         OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY,
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, EPSG_PARAMETER_X_AXIS_TRANSLATION)),
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_PARAMETER_X_AXIS_TRANSLATION)),
         OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY,
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Y_AXIS_TRANSLATION)),
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_PARAMETER_Y_AXIS_TRANSLATION)),
         OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY,
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Z_AXIS_TRANSLATION)),
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_PARAMETER_Z_AXIS_TRANSLATION)),
         OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY,
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_PARAMETER_X_AXIS_ROTATION_NAME)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, EPSG_PARAMETER_X_AXIS_ROTATION)),
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_PARAMETER_X_AXIS_ROTATION)),
         OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY,
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_PARAMETER_Y_AXIS_ROTATION_NAME)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Y_AXIS_ROTATION)),
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_PARAMETER_Y_AXIS_ROTATION)),
         OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY,
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_PARAMETER_Z_AXIS_ROTATION_NAME)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Z_AXIS_ROTATION)),
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_PARAMETER_Z_AXIS_ROTATION)),
         OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY,
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_PARAMETER_SCALE_DIFFERENCE_NAME)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, EPSG_PARAMETER_SCALE_DIFFERENCE)),
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_PARAMETER_SCALE_DIFFERENCE)),
     };
     std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(Length(translationXMetre)),
-        ParameterValue::create(Length(translationYMetre)),
-        ParameterValue::create(Length(translationZMetre)),
-        ParameterValue::create(
-            Angle(rotationXMicroRadian, UnitOfMeasure::MICRORADIAN)),
-        ParameterValue::create(
-            Angle(rotationYMicroRadian, UnitOfMeasure::MICRORADIAN)),
-        ParameterValue::create(
-            Angle(rotationZMicroRadian, UnitOfMeasure::MICRORADIAN)),
-        ParameterValue::create(
-            Scale(scaleDifferencePPM, UnitOfMeasure::PARTS_PER_MILLION)),
+        ParameterValue::create(common::Length(translationXMetre)),
+        ParameterValue::create(common::Length(translationYMetre)),
+        ParameterValue::create(common::Length(translationZMetre)),
+        ParameterValue::create(common::Angle(
+            rotationXMicroRadian, common::UnitOfMeasure::MICRORADIAN)),
+        ParameterValue::create(common::Angle(
+            rotationYMicroRadian, common::UnitOfMeasure::MICRORADIAN)),
+        ParameterValue::create(common::Angle(
+            rotationZMicroRadian, common::UnitOfMeasure::MICRORADIAN)),
+        ParameterValue::create(common::Scale(
+            scaleDifferencePPM, common::UnitOfMeasure::PARTS_PER_MILLION)),
     };
 
     return Transformation::create(properties, sourceCRSIn, targetCRSIn, nullptr,
@@ -1569,61 +1597,64 @@ static TransformationNNPtr createSevenParamsTransform(
 // ---------------------------------------------------------------------------
 
 TransformationNNPtr Transformation::createGeocentricTranslations(
-    const PropertyMap &properties, const CRSNNPtr &sourceCRSIn,
-    const CRSNNPtr &targetCRSIn, double translationXMetre,
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
     double translationYMetre, double translationZMetre,
-    const std::vector<PositionalAccuracyNNPtr> &accuracies) {
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     std::vector<OperationParameterNNPtr> parameters{
         OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY,
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, EPSG_PARAMETER_X_AXIS_TRANSLATION)),
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_PARAMETER_X_AXIS_TRANSLATION)),
         OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY,
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Y_AXIS_TRANSLATION)),
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_PARAMETER_Y_AXIS_TRANSLATION)),
         OperationParameter::create(
-            PropertyMap()
-                .set(IdentifiedObject::NAME_KEY,
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
                      EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME)
-                .set(Identifier::CODESPACE_KEY, "EPSG")
-                .set(Identifier::CODE_KEY, EPSG_PARAMETER_Z_AXIS_TRANSLATION)),
+                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_PARAMETER_Z_AXIS_TRANSLATION)),
     };
     std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(Length(translationXMetre)),
-        ParameterValue::create(Length(translationYMetre)),
-        ParameterValue::create(Length(translationZMetre)),
+        ParameterValue::create(common::Length(translationXMetre)),
+        ParameterValue::create(common::Length(translationYMetre)),
+        ParameterValue::create(common::Length(translationZMetre)),
     };
 
     return create(properties, sourceCRSIn, targetCRSIn, nullptr,
-                  PropertyMap()
-                      .set(IdentifiedObject::NAME_KEY,
+                  util::PropertyMap()
+                      .set(common::IdentifiedObject::NAME_KEY,
                            "Geocentric translations (geocentric domain)")
-                      .set(Identifier::CODESPACE_KEY, "EPSG")
-                      .set(Identifier::CODE_KEY, 1031),
+                      .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                      .set(metadata::Identifier::CODE_KEY, 1031),
                   parameters, values, accuracies);
 }
 
 // ---------------------------------------------------------------------------
 
 TransformationNNPtr Transformation::createPositionVector(
-    const PropertyMap &properties, const CRSNNPtr &sourceCRSIn,
-    const CRSNNPtr &targetCRSIn, double translationXMetre,
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
     double translationYMetre, double translationZMetre,
     double rotationXMicroRadian, double rotationYMicroRadian,
     double rotationZMicroRadian, double scaleDifferencePPM,
-    const std::vector<PositionalAccuracyNNPtr> &accuracies) {
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     return createSevenParamsTransform(
         properties,
-        PropertyMap()
-            .set(IdentifiedObject::NAME_KEY,
+        util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY,
                  "Position Vector transformation (geocentric domain)")
-            .set(Identifier::CODESPACE_KEY, "EPSG")
-            .set(Identifier::CODE_KEY, 1033),
+            .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+            .set(metadata::Identifier::CODE_KEY, 1033),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXMicroRadian, rotationYMicroRadian,
         rotationZMicroRadian, scaleDifferencePPM, accuracies);
@@ -1632,18 +1663,18 @@ TransformationNNPtr Transformation::createPositionVector(
 // ---------------------------------------------------------------------------
 
 TransformationNNPtr Transformation::createCoordinateFrameRotation(
-    const PropertyMap &properties, const CRSNNPtr &sourceCRSIn,
-    const CRSNNPtr &targetCRSIn, double translationXMetre,
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
     double translationYMetre, double translationZMetre,
     double rotationXMicroRadian, double rotationYMicroRadian,
     double rotationZMicroRadian, double scaleDifferencePPM,
-    const std::vector<PositionalAccuracyNNPtr> &accuracies) {
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     return createSevenParamsTransform(
-        properties, PropertyMap()
-                        .set(IdentifiedObject::NAME_KEY,
+        properties, util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
                              "Coordinate Frame rotation (geocentric domain)")
-                        .set(Identifier::CODESPACE_KEY, "EPSG")
-                        .set(Identifier::CODE_KEY, 1032),
+                        .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                        .set(metadata::Identifier::CODE_KEY, 1032),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXMicroRadian, rotationYMicroRadian,
         rotationZMicroRadian, scaleDifferencePPM, accuracies);
@@ -1652,7 +1683,7 @@ TransformationNNPtr Transformation::createCoordinateFrameRotation(
 // ---------------------------------------------------------------------------
 
 TransformationNNPtr Transformation::createTOWGS84(
-    const CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &sourceCRSIn,
     const std::vector<double> &TOWGS84Parameters) // throw InvalidOperation
 {
     if (TOWGS84Parameters.size() != 7) {
@@ -1660,45 +1691,46 @@ TransformationNNPtr Transformation::createTOWGS84(
             "Invalid number of elements in TOWGS84Parameters");
     }
 
-    CRSPtr transformSourceCRS = CRS::extractGeographicCRS(sourceCRSIn);
+    crs::CRSPtr transformSourceCRS =
+        crs::CRS::extractGeographicCRS(sourceCRSIn);
     if (!transformSourceCRS) {
         throw InvalidOperation(
             "Cannot find GeographicCRS in sourceCRS of TOWGS84 transformation");
     }
 
     return createPositionVector(
-        PropertyMap().set(IdentifiedObject::NAME_KEY,
-                          "Transformation to WGS84"),
-        NN_CHECK_ASSERT(transformSourceCRS), GeographicCRS::EPSG_4326,
+        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                "Transformation to WGS84"),
+        NN_CHECK_ASSERT(transformSourceCRS), crs::GeographicCRS::EPSG_4326,
         TOWGS84Parameters[0], TOWGS84Parameters[1], TOWGS84Parameters[2],
         TOWGS84Parameters[3], TOWGS84Parameters[4], TOWGS84Parameters[5],
-        TOWGS84Parameters[6], std::vector<PositionalAccuracyNNPtr>());
+        TOWGS84Parameters[6], std::vector<metadata::PositionalAccuracyNNPtr>());
 }
 
 // ---------------------------------------------------------------------------
 
-std::string Transformation::exportToWKT(WKTFormatterNNPtr formatter) const {
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
-        throw FormattingException(
+        throw io::FormattingException(
             "Transformation can only be exported to WKT2");
     }
 
     if (formatter->abridgedTransformation()) {
-        formatter->startNode(WKTConstants::ABRIDGEDTRANSFORMATION,
+        formatter->startNode(io::WKTConstants::ABRIDGEDTRANSFORMATION,
                              !identifiers().empty());
     } else {
-        formatter->startNode(WKTConstants::COORDINATEOPERATION,
+        formatter->startNode(io::WKTConstants::COORDINATEOPERATION,
                              !identifiers().empty());
     }
     formatter->addQuotedString(*(name()->description()));
 
     if (!formatter->abridgedTransformation()) {
-        formatter->startNode(WKTConstants::SOURCECRS, false);
+        formatter->startNode(io::WKTConstants::SOURCECRS, false);
         sourceCRS()->exportToWKT(formatter);
         formatter->endNode();
 
-        formatter->startNode(WKTConstants::TARGETCRS, false);
+        formatter->startNode(io::WKTConstants::TARGETCRS, false);
         targetCRS()->exportToWKT(formatter);
         formatter->endNode();
     }
@@ -1713,13 +1745,13 @@ std::string Transformation::exportToWKT(WKTFormatterNNPtr formatter) const {
 
     if (!formatter->abridgedTransformation()) {
         if (interpolationCRS()) {
-            formatter->startNode(WKTConstants::INTERPOLATIONCRS, false);
+            formatter->startNode(io::WKTConstants::INTERPOLATIONCRS, false);
             interpolationCRS()->exportToWKT(formatter);
             formatter->endNode();
         }
 
         if (!coordinateOperationAccuracies().empty()) {
-            formatter->startNode(WKTConstants::OPERATIONACCURACY, false);
+            formatter->startNode(io::WKTConstants::OPERATIONACCURACY, false);
             formatter->add(coordinateOperationAccuracies()[0]->value());
             formatter->endNode();
         }
@@ -1766,9 +1798,9 @@ ConcatenatedOperation::operations() const {
 // ---------------------------------------------------------------------------
 
 ConcatenatedOperationNNPtr ConcatenatedOperation::create(
-    const PropertyMap &properties,
+    const util::PropertyMap &properties,
     const std::vector<CoordinateOperationNNPtr> &operationsIn,
-    const std::vector<PositionalAccuracyNNPtr>
+    const std::vector<metadata::PositionalAccuracyNNPtr>
         &accuracies) // throw InvalidOperation
 {
     if (operationsIn.size() < 2) {
@@ -1800,27 +1832,27 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
 // ---------------------------------------------------------------------------
 
 std::string
-ConcatenatedOperation::exportToWKT(WKTFormatterNNPtr formatter) const {
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+ConcatenatedOperation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2 || !formatter->use2018Keywords()) {
-        throw FormattingException(
+        throw io::FormattingException(
             "Transformation can only be exported to WKT2:2018");
     }
 
-    formatter->startNode(WKTConstants::CONCATENATEDOPERATION,
+    formatter->startNode(io::WKTConstants::CONCATENATEDOPERATION,
                          !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
 
-    formatter->startNode(WKTConstants::SOURCECRS, false);
+    formatter->startNode(io::WKTConstants::SOURCECRS, false);
     sourceCRS()->exportToWKT(formatter);
     formatter->endNode();
 
-    formatter->startNode(WKTConstants::TARGETCRS, false);
+    formatter->startNode(io::WKTConstants::TARGETCRS, false);
     targetCRS()->exportToWKT(formatter);
     formatter->endNode();
 
     for (const auto &operation : operations()) {
-        formatter->startNode(WKTConstants::STEP, false);
+        formatter->startNode(io::WKTConstants::STEP, false);
         operation->exportToWKT(formatter);
         formatter->endNode();
     }
@@ -1830,3 +1862,6 @@ ConcatenatedOperation::exportToWKT(WKTFormatterNNPtr formatter) const {
 
     return formatter->toString();
 }
+
+} // namespace operation
+NS_PROJ_END

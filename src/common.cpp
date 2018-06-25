@@ -45,11 +45,13 @@
 #include <string>
 #include <vector>
 
-using namespace NS_PROJ::common;
 using namespace NS_PROJ::internal;
 using namespace NS_PROJ::io;
 using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::util;
+
+NS_PROJ_START
+namespace common {
 
 // ---------------------------------------------------------------------------
 
@@ -808,3 +810,6 @@ void ObjectUsage::_exportToWKT(WKTFormatterNNPtr formatter) const {
         formatRemarks(formatter);
     }
 }
+
+} // namespace common
+NS_PROJ_END

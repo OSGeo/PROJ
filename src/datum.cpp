@@ -47,20 +47,18 @@
 #include <memory>
 #include <string>
 
-using namespace NS_PROJ::common;
-using namespace NS_PROJ::datum;
 using namespace NS_PROJ::internal;
-using namespace NS_PROJ::io;
-using namespace NS_PROJ::metadata;
-using namespace NS_PROJ::util;
+
+NS_PROJ_START
+namespace datum {
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 struct Datum::Private {
-    optional<std::string> anchorDefinition{};
-    optional<Date> publicationDate{};
-    optional<IdentifiedObject> conventionalRS{};
+    util::optional<std::string> anchorDefinition{};
+    util::optional<common::Date> publicationDate{};
+    util::optional<common::IdentifiedObject> conventionalRS{};
 };
 //! @endcond
 
@@ -81,19 +79,19 @@ Datum::~Datum() = default;
 
 // ---------------------------------------------------------------------------
 
-const optional<std::string> &Datum::anchorDefinition() const {
+const util::optional<std::string> &Datum::anchorDefinition() const {
     return d->anchorDefinition;
 }
 
 // ---------------------------------------------------------------------------
 
-const optional<Date> &Datum::publicationDate() const {
+const util::optional<common::Date> &Datum::publicationDate() const {
     return d->publicationDate;
 }
 
 // ---------------------------------------------------------------------------
 
-const optional<IdentifiedObject> &Datum::conventionalRS() const {
+const util::optional<common::IdentifiedObject> &Datum::conventionalRS() const {
     return d->conventionalRS;
 }
 
@@ -101,22 +99,24 @@ const optional<IdentifiedObject> &Datum::conventionalRS() const {
 
 //! @cond Doxygen_Suppress
 struct PrimeMeridian::Private {
-    Angle greenwichLongitude{};
+    common::Angle greenwichLongitude{};
 
-    explicit Private(const Angle &longitude) : greenwichLongitude(longitude) {}
+    explicit Private(const common::Angle &longitude)
+        : greenwichLongitude(longitude) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-PrimeMeridian::PrimeMeridian(const Angle &longitude)
+PrimeMeridian::PrimeMeridian(const common::Angle &longitude)
     : d(internal::make_unique<Private>(longitude)) {}
 
 // ---------------------------------------------------------------------------
 
 #ifdef notdef
 PrimeMeridian::PrimeMeridian(const PrimeMeridian &other)
-    : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+    : common::IdentifiedObject(other),
+      d(internal::make_unique<Private>(*other.d)) {}
 #endif
 
 // ---------------------------------------------------------------------------
@@ -125,14 +125,14 @@ PrimeMeridian::~PrimeMeridian() = default;
 
 // ---------------------------------------------------------------------------
 
-const Angle &PrimeMeridian::greenwichLongitude() const {
+const common::Angle &PrimeMeridian::greenwichLongitude() const {
     return d->greenwichLongitude;
 }
 
 // ---------------------------------------------------------------------------
 
-PrimeMeridianNNPtr PrimeMeridian::create(const PropertyMap &properties,
-                                         const Angle &longitude) {
+PrimeMeridianNNPtr PrimeMeridian::create(const util::PropertyMap &properties,
+                                         const common::Angle &longitude) {
     auto pm(PrimeMeridian::nn_make_shared<PrimeMeridian>(longitude));
     pm->setProperties(properties);
     return pm;
@@ -141,39 +141,39 @@ PrimeMeridianNNPtr PrimeMeridian::create(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 const PrimeMeridianNNPtr PrimeMeridian::createGREENWICH() {
-    return create(PropertyMap()
-                      .set(Identifier::CODESPACE_KEY, "EPSG")
-                      .set(Identifier::CODE_KEY, 8901)
-                      .set(IdentifiedObject::NAME_KEY, "Greenwich"),
-                  Angle(0));
+    return create(util::PropertyMap()
+                      .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                      .set(metadata::Identifier::CODE_KEY, 8901)
+                      .set(common::IdentifiedObject::NAME_KEY, "Greenwich"),
+                  common::Angle(0));
 }
 
 // ---------------------------------------------------------------------------
 
 const PrimeMeridianNNPtr PrimeMeridian::createPARIS() {
-    return create(PropertyMap()
-                      .set(Identifier::CODESPACE_KEY, "EPSG")
-                      .set(Identifier::CODE_KEY, 8903)
-                      .set(IdentifiedObject::NAME_KEY, "Paris"),
-                  Angle(2.5969213, UnitOfMeasure::GRAD));
+    return create(util::PropertyMap()
+                      .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                      .set(metadata::Identifier::CODE_KEY, 8903)
+                      .set(common::IdentifiedObject::NAME_KEY, "Paris"),
+                  common::Angle(2.5969213, common::UnitOfMeasure::GRAD));
 }
 
 // ---------------------------------------------------------------------------
 
 std::string PrimeMeridian::exportToWKT(
-    WKTFormatterNNPtr formatter) const // throw(FormattingException)
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     std::string l_name = name()->description().has_value()
                              ? *(name()->description())
                              : "Greenwich";
     if (!(isWKT2 && formatter->primeMeridianOmittedIfGreenwich() &&
           l_name == "Greenwich")) {
-        formatter->startNode(WKTConstants::PRIMEM, !identifiers().empty());
+        formatter->startNode(io::WKTConstants::PRIMEM, !identifiers().empty());
         formatter->addQuotedString(l_name);
         if (formatter->primeMeridianInDegree()) {
             formatter->add(greenwichLongitude()
-                               .convertToUnit(UnitOfMeasure::DEGREE)
+                               .convertToUnit(common::UnitOfMeasure::DEGREE)
                                .value());
         } else {
             formatter->add(greenwichLongitude().value());
@@ -184,7 +184,7 @@ std::string PrimeMeridian::exportToWKT(
                   greenwichLongitude().unit() ==
                       *(formatter->axisAngularUnit()))) {
                 greenwichLongitude().unit().exportToWKT(
-                    formatter, WKTConstants::ANGLEUNIT);
+                    formatter, io::WKTConstants::ANGLEUNIT);
             }
         } else if (!formatter->primeMeridianInDegree()) {
             greenwichLongitude().unit().exportToWKT(formatter);
@@ -200,11 +200,12 @@ std::string PrimeMeridian::exportToWKT(
 // ---------------------------------------------------------------------------
 
 std::string PrimeMeridian::exportToPROJString(
-    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+    io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
 {
     if (greenwichLongitude().getSIValue() != 0) {
-        const double valDeg =
-            greenwichLongitude().convertToUnit(UnitOfMeasure::DEGREE).value();
+        const double valDeg = greenwichLongitude()
+                                  .convertToUnit(common::UnitOfMeasure::DEGREE)
+                                  .value();
         const double valRad = greenwichLongitude().getSIValue();
         std::string projPMName;
         projCtx ctxt = pj_ctx_alloc();
@@ -230,42 +231,46 @@ std::string PrimeMeridian::exportToPROJString(
 
 //! @cond Doxygen_Suppress
 struct Ellipsoid::Private {
-    Length semiMajorAxis_{};
-    optional<Scale> inverseFlattening_{};
-    optional<Length> semiMinorAxis_{};
-    optional<Length> semiMedianAxis_{};
+    common::Length semiMajorAxis_{};
+    util::optional<common::Scale> inverseFlattening_{};
+    util::optional<common::Length> semiMinorAxis_{};
+    util::optional<common::Length> semiMedianAxis_{};
 
-    explicit Private(const Length &radius) : semiMajorAxis_(radius) {}
+    explicit Private(const common::Length &radius) : semiMajorAxis_(radius) {}
 
-    Private(const Length &semiMajorAxisIn, const Scale &invFlattening)
+    Private(const common::Length &semiMajorAxisIn,
+            const common::Scale &invFlattening)
         : semiMajorAxis_(semiMajorAxisIn), inverseFlattening_(invFlattening) {}
 
-    Private(const Length &semiMajorAxisIn, const Length &semiMinorAxisIn)
+    Private(const common::Length &semiMajorAxisIn,
+            const common::Length &semiMinorAxisIn)
         : semiMajorAxis_(semiMajorAxisIn), semiMinorAxis_(semiMinorAxisIn) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-Ellipsoid::Ellipsoid(const Length &radius)
+Ellipsoid::Ellipsoid(const common::Length &radius)
     : d(internal::make_unique<Private>(radius)) {}
 
 // ---------------------------------------------------------------------------
 
-Ellipsoid::Ellipsoid(const Length &semiMajorAxisIn, const Scale &invFlattening)
+Ellipsoid::Ellipsoid(const common::Length &semiMajorAxisIn,
+                     const common::Scale &invFlattening)
     : d(internal::make_unique<Private>(semiMajorAxisIn, invFlattening)) {}
 
 // ---------------------------------------------------------------------------
 
-Ellipsoid::Ellipsoid(const Length &semiMajorAxisIn,
-                     const Length &semiMinorAxisIn)
+Ellipsoid::Ellipsoid(const common::Length &semiMajorAxisIn,
+                     const common::Length &semiMinorAxisIn)
     : d(internal::make_unique<Private>(semiMajorAxisIn, semiMinorAxisIn)) {}
 
 // ---------------------------------------------------------------------------
 
 #ifdef notdef
 Ellipsoid::Ellipsoid(const Ellipsoid &other)
-    : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+    : common::IdentifiedObject(other),
+      d(internal::make_unique<Private>(*other.d)) {}
 #endif
 
 // ---------------------------------------------------------------------------
@@ -274,17 +279,19 @@ Ellipsoid::~Ellipsoid() = default;
 
 // ---------------------------------------------------------------------------
 
-const Length &Ellipsoid::semiMajorAxis() const { return d->semiMajorAxis_; }
+const common::Length &Ellipsoid::semiMajorAxis() const {
+    return d->semiMajorAxis_;
+}
 
 // ---------------------------------------------------------------------------
 
-const optional<Scale> &Ellipsoid::inverseFlattening() const {
+const util::optional<common::Scale> &Ellipsoid::inverseFlattening() const {
     return d->inverseFlattening_;
 }
 
 // ---------------------------------------------------------------------------
 
-const optional<Length> &Ellipsoid::semiMinorAxis() const {
+const util::optional<common::Length> &Ellipsoid::semiMinorAxis() const {
     return d->semiMinorAxis_;
 }
 
@@ -304,13 +311,13 @@ bool Ellipsoid::isSphere() const {
 
 // ---------------------------------------------------------------------------
 
-const optional<Length> &Ellipsoid::semiMedianAxis() const {
+const util::optional<common::Length> &Ellipsoid::semiMedianAxis() const {
     return d->semiMedianAxis_;
 }
 
 // ---------------------------------------------------------------------------
 
-Scale Ellipsoid::computeInverseFlattening() const {
+common::Scale Ellipsoid::computeInverseFlattening() const {
     if (inverseFlattening().has_value()) {
         return *inverseFlattening();
     }
@@ -318,23 +325,23 @@ Scale Ellipsoid::computeInverseFlattening() const {
     if (semiMinorAxis().has_value()) {
         const double a = semiMajorAxis().value();
         const double b = semiMinorAxis()->value();
-        return Scale((a == b) ? 0.0 : a / (a - b));
+        return common::Scale((a == b) ? 0.0 : a / (a - b));
     }
 
-    return Scale(0.0);
+    return common::Scale(0.0);
 }
 
 // ---------------------------------------------------------------------------
 
-Length Ellipsoid::computeSemiMinorAxis() const {
+common::Length Ellipsoid::computeSemiMinorAxis() const {
     if (semiMinorAxis().has_value()) {
         return *semiMinorAxis();
     }
 
     if (inverseFlattening().has_value()) {
-        return Length((1.0 - 1.0 / inverseFlattening()->getSIValue()) *
-                          semiMajorAxis().value(),
-                      semiMajorAxis().unit());
+        return common::Length((1.0 - 1.0 / inverseFlattening()->getSIValue()) *
+                                  semiMajorAxis().value(),
+                              semiMajorAxis().unit());
     }
 
     return semiMajorAxis();
@@ -343,8 +350,8 @@ Length Ellipsoid::computeSemiMinorAxis() const {
 // ---------------------------------------------------------------------------
 
 /* static */
-EllipsoidNNPtr Ellipsoid::createSphere(const PropertyMap &properties,
-                                       const Length &radius) {
+EllipsoidNNPtr Ellipsoid::createSphere(const util::PropertyMap &properties,
+                                       const common::Length &radius) {
     auto ellipsoid(Ellipsoid::nn_make_shared<Ellipsoid>(radius));
     ellipsoid->setProperties(properties);
     return ellipsoid;
@@ -353,9 +360,10 @@ EllipsoidNNPtr Ellipsoid::createSphere(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /* static */
-EllipsoidNNPtr Ellipsoid::createFlattenedSphere(const PropertyMap &properties,
-                                                const Length &semiMajorAxisIn,
-                                                const Scale &invFlattening) {
+EllipsoidNNPtr
+Ellipsoid::createFlattenedSphere(const util::PropertyMap &properties,
+                                 const common::Length &semiMajorAxisIn,
+                                 const common::Scale &invFlattening) {
     auto ellipsoid(
         Ellipsoid::nn_make_shared<Ellipsoid>(semiMajorAxisIn, invFlattening));
     ellipsoid->setProperties(properties);
@@ -365,9 +373,9 @@ EllipsoidNNPtr Ellipsoid::createFlattenedSphere(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /* static */
-EllipsoidNNPtr Ellipsoid::createTwoAxis(const PropertyMap &properties,
-                                        const Length &semiMajorAxisIn,
-                                        const Length &semiMinorAxisIn) {
+EllipsoidNNPtr Ellipsoid::createTwoAxis(const util::PropertyMap &properties,
+                                        const common::Length &semiMajorAxisIn,
+                                        const common::Length &semiMinorAxisIn) {
     auto ellipsoid(
         Ellipsoid::nn_make_shared<Ellipsoid>(semiMajorAxisIn, semiMinorAxisIn));
     ellipsoid->setProperties(properties);
@@ -377,33 +385,33 @@ EllipsoidNNPtr Ellipsoid::createTwoAxis(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 const EllipsoidNNPtr Ellipsoid::createWGS84() {
-    PropertyMap propertiesEllps;
-    propertiesEllps.set(Identifier::CODESPACE_KEY, "EPSG")
-        .set(Identifier::CODE_KEY, 7030)
-        .set(IdentifiedObject::NAME_KEY, "WGS 84");
-    return createFlattenedSphere(propertiesEllps, Length(6378137),
-                                 Scale(298.257223563));
+    util::PropertyMap propertiesEllps;
+    propertiesEllps.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+        .set(metadata::Identifier::CODE_KEY, 7030)
+        .set(common::IdentifiedObject::NAME_KEY, "WGS 84");
+    return createFlattenedSphere(propertiesEllps, common::Length(6378137),
+                                 common::Scale(298.257223563));
 }
 
 // ---------------------------------------------------------------------------
 
 const EllipsoidNNPtr Ellipsoid::createGRS1980() {
-    PropertyMap propertiesEllps;
-    propertiesEllps.set(Identifier::CODESPACE_KEY, "EPSG")
-        .set(Identifier::CODE_KEY, 7019)
-        .set(IdentifiedObject::NAME_KEY, "GRS 1980");
-    return createFlattenedSphere(propertiesEllps, Length(6378137),
-                                 Scale(298.257222101));
+    util::PropertyMap propertiesEllps;
+    propertiesEllps.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+        .set(metadata::Identifier::CODE_KEY, 7019)
+        .set(common::IdentifiedObject::NAME_KEY, "GRS 1980");
+    return createFlattenedSphere(propertiesEllps, common::Length(6378137),
+                                 common::Scale(298.257222101));
 }
 
 // ---------------------------------------------------------------------------
 
 std::string Ellipsoid::exportToWKT(
-    WKTFormatterNNPtr formatter) const // throw(FormattingException)
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    formatter->startNode(isWKT2 ? WKTConstants::ELLIPSOID
-                                : WKTConstants::SPHEROID,
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    formatter->startNode(isWKT2 ? io::WKTConstants::ELLIPSOID
+                                : io::WKTConstants::SPHEROID,
                          !identifiers().empty());
     {
         formatter->addQuotedString(name()->description().has_value()
@@ -412,15 +420,16 @@ std::string Ellipsoid::exportToWKT(
         if (isWKT2) {
             formatter->add(semiMajorAxis().value());
         } else {
-            formatter->add(
-                semiMajorAxis().convertToUnit(UnitOfMeasure::METRE).value());
+            formatter->add(semiMajorAxis()
+                               .convertToUnit(common::UnitOfMeasure::METRE)
+                               .value());
         }
         formatter->add(computeInverseFlattening().value());
         if (isWKT2 &&
             !(formatter->ellipsoidUnitOmittedIfMetre() &&
-              semiMajorAxis().unit() == UnitOfMeasure::METRE)) {
+              semiMajorAxis().unit() == common::UnitOfMeasure::METRE)) {
             semiMajorAxis().unit().exportToWKT(formatter,
-                                               WKTConstants::LENGTHUNIT);
+                                               io::WKTConstants::LENGTHUNIT);
         }
         if (formatter->outputId()) {
             formatID(formatter);
@@ -433,7 +442,7 @@ std::string Ellipsoid::exportToWKT(
 // ---------------------------------------------------------------------------
 
 std::string Ellipsoid::exportToPROJString(
-    PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+    io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
 {
     const double a = semiMajorAxis().getSIValue();
     const double b = computeSemiMinorAxis().getSIValue();
@@ -514,9 +523,9 @@ const EllipsoidNNPtr &GeodeticReferenceFrame::ellipsoid() const {
 // ---------------------------------------------------------------------------
 
 GeodeticReferenceFrameNNPtr
-GeodeticReferenceFrame::create(const PropertyMap &properties,
+GeodeticReferenceFrame::create(const util::PropertyMap &properties,
                                const EllipsoidNNPtr &ellipsoid,
-                               const optional<std::string> &anchor,
+                               const util::optional<std::string> &anchor,
                                const PrimeMeridianNNPtr &primeMeridian) {
     GeodeticReferenceFrameNNPtr grf(
         GeodeticReferenceFrame::nn_make_shared<GeodeticReferenceFrame>(
@@ -529,36 +538,36 @@ GeodeticReferenceFrame::create(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6326() {
-    PropertyMap propertiesDatum;
-    propertiesDatum.set(Identifier::CODESPACE_KEY, "EPSG")
-        .set(Identifier::CODE_KEY, 6326)
-        .set(IdentifiedObject::NAME_KEY, "WGS_1984");
+    util::PropertyMap propertiesDatum;
+    propertiesDatum.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+        .set(metadata::Identifier::CODE_KEY, 6326)
+        .set(common::IdentifiedObject::NAME_KEY, "WGS_1984");
 
-    return create(propertiesDatum, Ellipsoid::WGS84, optional<std::string>(),
-                  PrimeMeridian::GREENWICH);
+    return create(propertiesDatum, Ellipsoid::WGS84,
+                  util::optional<std::string>(), PrimeMeridian::GREENWICH);
 }
 
 // ---------------------------------------------------------------------------
 
 std::string GeodeticReferenceFrame::exportToWKT(
-    WKTFormatterNNPtr formatter) const // throw(FormattingException)
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    formatter->startNode(WKTConstants::DATUM, !identifiers().empty());
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    formatter->startNode(io::WKTConstants::DATUM, !identifiers().empty());
     formatter->addQuotedString(name()->description().has_value()
                                    ? *(name()->description())
                                    : "unnamed");
     ellipsoid()->exportToWKT(formatter);
     if (isWKT2) {
         if (anchorDefinition()) {
-            formatter->startNode(WKTConstants::ANCHOR, false);
+            formatter->startNode(io::WKTConstants::ANCHOR, false);
             formatter->addQuotedString(*anchorDefinition());
             formatter->endNode();
         }
     } else {
         const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
         if (TOWGS84Params.size() == 7) {
-            formatter->startNode(WKTConstants::TOWGS84, false);
+            formatter->startNode(io::WKTConstants::TOWGS84, false);
             for (const auto &val : TOWGS84Params) {
                 formatter->add(val);
             }
@@ -566,7 +575,7 @@ std::string GeodeticReferenceFrame::exportToWKT(
         }
         std::string extension = formatter->getHDatumExtension();
         if (!extension.empty()) {
-            formatter->startNode(WKTConstants::EXTENSION, false);
+            formatter->startNode(io::WKTConstants::EXTENSION, false);
             formatter->addQuotedString("PROJ4_GRIDS");
             formatter->addQuotedString(extension);
             formatter->endNode();
@@ -584,7 +593,7 @@ std::string GeodeticReferenceFrame::exportToWKT(
 
 //! @cond Doxygen_Suppress
 struct DynamicGeodeticReferenceFrame::Private {
-    Measure frameReferenceEpoch{};
+    common::Measure frameReferenceEpoch{};
 };
 //! @endcond
 
@@ -611,7 +620,8 @@ DynamicGeodeticReferenceFrame::~DynamicGeodeticReferenceFrame() = default;
 
 // ---------------------------------------------------------------------------
 
-const Measure &DynamicGeodeticReferenceFrame::frameReferenceEpoch() const {
+const common::Measure &
+DynamicGeodeticReferenceFrame::frameReferenceEpoch() const {
     return d->frameReferenceEpoch;
 }
 
@@ -620,7 +630,7 @@ const Measure &DynamicGeodeticReferenceFrame::frameReferenceEpoch() const {
 //! @cond Doxygen_Suppress
 struct DatumEnsemble::Private {
     std::vector<DatumPtr> datums{};
-    PositionalAccuracyNNPtr positionalAccuracy;
+    metadata::PositionalAccuracyNNPtr positionalAccuracy;
 };
 //! @endcond
 
@@ -628,7 +638,8 @@ struct DatumEnsemble::Private {
 
 #ifdef notdef
 DatumEnsemble::DatumEnsemble(const DatumEnsemble &other)
-    : IdentifiedObject(other), d(internal::make_unique<Private>(*other.d)) {}
+    : common::IdentifiedObject(other),
+      d(internal::make_unique<Private>(*other.d)) {}
 #endif
 
 // ---------------------------------------------------------------------------
@@ -641,7 +652,8 @@ const std::vector<DatumPtr> &DatumEnsemble::datums() const { return d->datums; }
 
 // ---------------------------------------------------------------------------
 
-const PositionalAccuracyNNPtr &DatumEnsemble::positionalAccuracy() const {
+const metadata::PositionalAccuracyNNPtr &
+DatumEnsemble::positionalAccuracy() const {
     return d->positionalAccuracy;
 }
 
@@ -666,7 +678,7 @@ operator=(const RealizationMethod &other) {
 
 //! @cond Doxygen_Suppress
 struct VerticalReferenceFrame::Private {
-    optional<RealizationMethod> realizationMethod_{};
+    util::optional<RealizationMethod> realizationMethod_{};
 };
 //! @endcond
 
@@ -681,7 +693,7 @@ VerticalReferenceFrame::~VerticalReferenceFrame() = default;
 
 // ---------------------------------------------------------------------------
 
-const optional<RealizationMethod> &
+const util::optional<RealizationMethod> &
 VerticalReferenceFrame::realizationMethod() const {
     return d->realizationMethod_;
 }
@@ -689,8 +701,9 @@ VerticalReferenceFrame::realizationMethod() const {
 // ---------------------------------------------------------------------------
 
 VerticalReferenceFrameNNPtr VerticalReferenceFrame::create(
-    const PropertyMap &properties, const optional<std::string> &anchor,
-    const optional<RealizationMethod> &realizationMethodIn) {
+    const util::PropertyMap &properties,
+    const util::optional<std::string> &anchor,
+    const util::optional<RealizationMethod> &realizationMethodIn) {
     auto rf(VerticalReferenceFrame::nn_make_shared<VerticalReferenceFrame>());
     util::nn_static_pointer_cast<Datum>(rf)->d->anchorDefinition = anchor;
     rf->setProperties(properties);
@@ -704,16 +717,16 @@ VerticalReferenceFrameNNPtr VerticalReferenceFrame::create(
 // ---------------------------------------------------------------------------
 
 std::string VerticalReferenceFrame::exportToWKT(
-    WKTFormatterNNPtr formatter) const // throw(FormattingException)
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (isWKT2) {
-        formatter->startNode(WKTConstants::VDATUM, !identifiers().empty());
+        formatter->startNode(io::WKTConstants::VDATUM, !identifiers().empty());
         formatter->addQuotedString(name()->description().has_value()
                                        ? *(name()->description())
                                        : "unnamed");
         if (anchorDefinition()) {
-            formatter->startNode(WKTConstants::ANCHOR, false);
+            formatter->startNode(io::WKTConstants::ANCHOR, false);
             formatter->addQuotedString(*anchorDefinition());
             formatter->endNode();
         }
@@ -722,14 +735,15 @@ std::string VerticalReferenceFrame::exportToWKT(
         }
         formatter->endNode();
     } else {
-        formatter->startNode(WKTConstants::VERT_DATUM, !identifiers().empty());
+        formatter->startNode(io::WKTConstants::VERT_DATUM,
+                             !identifiers().empty());
         formatter->addQuotedString(name()->description().has_value()
                                        ? *(name()->description())
                                        : "unnamed");
         formatter->add(2005); // CS_VD_GeoidModelDerived from OGC 01-009
         std::string extension = formatter->getVDatumExtension();
         if (!extension.empty()) {
-            formatter->startNode(WKTConstants::EXTENSION, false);
+            formatter->startNode(io::WKTConstants::EXTENSION, false);
             formatter->addQuotedString("PROJ4_GRIDS");
             formatter->addQuotedString(extension);
             formatter->endNode();
@@ -746,17 +760,18 @@ std::string VerticalReferenceFrame::exportToWKT(
 
 //! @cond Doxygen_Suppress
 struct TemporalDatum::Private {
-    DateTime temporalOrigin_;
+    common::DateTime temporalOrigin_;
     std::string calendar_;
 
-    Private(const DateTime &temporalOriginIn, const std::string &calendarIn)
+    Private(const common::DateTime &temporalOriginIn,
+            const std::string &calendarIn)
         : temporalOrigin_(temporalOriginIn), calendar_(calendarIn) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-TemporalDatum::TemporalDatum(const DateTime &temporalOriginIn,
+TemporalDatum::TemporalDatum(const common::DateTime &temporalOriginIn,
                              const std::string &calendarIn)
     : d(internal::make_unique<Private>(temporalOriginIn, calendarIn)) {}
 
@@ -766,7 +781,7 @@ TemporalDatum::~TemporalDatum() = default;
 
 // ---------------------------------------------------------------------------
 
-const DateTime &TemporalDatum::temporalOrigin() const {
+const common::DateTime &TemporalDatum::temporalOrigin() const {
     return d->temporalOrigin_;
 }
 
@@ -776,9 +791,10 @@ const std::string &TemporalDatum::calendar() const { return d->calendar_; }
 
 // ---------------------------------------------------------------------------
 
-TemporalDatumNNPtr TemporalDatum::create(const PropertyMap &properties,
-                                         const DateTime &temporalOriginIn,
-                                         const std::string &calendarIn) {
+TemporalDatumNNPtr
+TemporalDatum::create(const util::PropertyMap &properties,
+                      const common::DateTime &temporalOriginIn,
+                      const std::string &calendarIn) {
     auto datum(TemporalDatum::nn_make_shared<TemporalDatum>(temporalOriginIn,
                                                             calendarIn));
     datum->setProperties(properties);
@@ -788,23 +804,24 @@ TemporalDatumNNPtr TemporalDatum::create(const PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 std::string TemporalDatum::exportToWKT(
-    WKTFormatterNNPtr formatter) const // throw(FormattingException)
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
-        throw FormattingException("TemporalDatum can only be exported to WKT2");
+        throw io::FormattingException(
+            "TemporalDatum can only be exported to WKT2");
     }
-    formatter->startNode(WKTConstants::TDATUM, !identifiers().empty());
+    formatter->startNode(io::WKTConstants::TDATUM, !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
     if (formatter->use2018Keywords()) {
-        formatter->startNode(WKTConstants::CALENDAR, false);
+        formatter->startNode(io::WKTConstants::CALENDAR, false);
         formatter->addQuotedString(calendar());
         formatter->endNode();
     }
 
     const auto &timeOriginStr = temporalOrigin().toString();
     if (!timeOriginStr.empty()) {
-        formatter->startNode(WKTConstants::TIMEORIGIN, false);
+        formatter->startNode(io::WKTConstants::TIMEORIGIN, false);
         if (temporalOrigin().isISO_8601()) {
             formatter->add(timeOriginStr);
         } else {
@@ -816,3 +833,6 @@ std::string TemporalDatum::exportToWKT(
     formatter->endNode();
     return formatter->toString();
 }
+
+} // namespace datum
+NS_PROJ_END

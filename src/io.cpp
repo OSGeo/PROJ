@@ -57,10 +57,12 @@ using namespace NS_PROJ::crs;
 using namespace NS_PROJ::cs;
 using namespace NS_PROJ::datum;
 using namespace NS_PROJ::internal;
-using namespace NS_PROJ::io;
 using namespace NS_PROJ::metadata;
 using namespace NS_PROJ::operation;
 using namespace NS_PROJ::util;
+
+NS_PROJ_START
+namespace io {
 
 // ---------------------------------------------------------------------------
 
@@ -2387,8 +2389,10 @@ struct PROJStringFormatter::Private {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 PROJStringFormatter::PROJStringFormatter()
     : d(internal::make_unique<Private>()) {}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -2402,6 +2406,11 @@ PROJStringFormatterNNPtr PROJStringFormatter::create() {
 
 // ---------------------------------------------------------------------------
 
+const std::string &PROJStringFormatter::toString() const { return d->result_; }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 void PROJStringFormatter::addStep(const std::string &step, bool inversed) {
     if (d->stepCount_ == 1 && !d->pipelinePrefix_) {
         d->result_ = "+proj=pipeline +step " + d->result_;
@@ -2506,10 +2515,6 @@ void PROJStringFormatter::addParam(const std::string &paramName,
 
 // ---------------------------------------------------------------------------
 
-const std::string &PROJStringFormatter::toString() const { return d->result_; }
-
-// ---------------------------------------------------------------------------
-
 void PROJStringFormatter::setTOWGS84Parameters(
     const std::vector<double> &params) {
     d->toWGS84Parameters_ = params;
@@ -2544,3 +2549,7 @@ void PROJStringFormatter::setHDatumExtension(const std::string &filename) {
 const std::string &PROJStringFormatter::getHDatumExtension() const {
     return d->hDatumExtension_;
 }
+//! @endcond
+
+} // namespace io
+NS_PROJ_END

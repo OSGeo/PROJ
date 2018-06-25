@@ -38,8 +38,10 @@
 #include <memory>
 #include <string>
 
-using namespace NS_PROJ::util;
 using namespace NS_PROJ::internal;
+
+NS_PROJ_START
+namespace util {
 
 // ---------------------------------------------------------------------------
 
@@ -561,3 +563,6 @@ InvalidValueTypeException::~InvalidValueTypeException() = default;
 
 InvalidValueTypeException::InvalidValueTypeException(
     const InvalidValueTypeException &) = default;
+
+} // namespace util
+NS_PROJ_END
