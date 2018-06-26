@@ -796,7 +796,7 @@ INPUT_ENCODING         = UTF-8
 # *.m, *.markdown, *.md, *.mm, *.dox, *.py, *.pyw, *.f90, *.f, *.for, *.tcl,
 # *.vhd, *.vhdl, *.ucf, *.qsf, *.as and *.js.
 
-FILE_PATTERNS          = *.hpp *.cpp
+FILE_PATTERNS          = *.hpp *.cpp *.dox
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -2041,7 +2041,8 @@ INCLUDE_FILE_PATTERNS  =
 PREDEFINED             =    DOXYGEN_ENABLED \
                             PROJ_DLL= \
                             NS_PROJ_START="namespace osgeo { namespace proj {" \
-                            NS_PROJ_END="} }"
+                            NS_PROJ_END="} }" \
+                            protected=private
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

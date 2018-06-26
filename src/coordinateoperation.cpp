@@ -54,6 +54,8 @@ using namespace NS_PROJ::internal;
 NS_PROJ_START
 namespace operation {
 
+//! @cond Doxygen_Suppress
+
 static const std::string EPSG_METHOD_TRANSVERSE_MERCATOR("Transverse Mercator");
 constexpr int EPSG_METHOD_TRANSVERSE_MERCATOR_CODE = 9807;
 
@@ -164,7 +166,11 @@ static const MethodMapping methodMappings[] = {
     // TODO: add at least all GDAL supported methods !!!
 };
 
+//! @endcond
+
 // ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 
 const MethodMapping *getMapping(int epsg_code) {
     for (const auto &mapping : methodMappings) {
@@ -247,6 +253,8 @@ const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
     return nullptr;
 }
 
+//! @endcond
+
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
@@ -257,9 +265,9 @@ struct CoordinateOperation::Private {
     std::weak_ptr<crs::CRS> sourceCRSWeak_{};
     std::weak_ptr<crs::CRS> targetCRSWeak_{};
     crs::CRSPtr sourceCRSLocked_{}; // do not set this for a
-                                    // ProjectedCRS.defininingCoversion
+                                    // ProjectedCRS.definingConversion
     crs::CRSPtr targetCRSLocked_{}; // do not set this for a
-                                    // ProjectedCRS.defininingCoversion
+                                    // ProjectedCRS.definingConversion
     crs::CRSPtr interpolationCRS_{};
     util::optional<common::DataEpoch> sourceCoordinateEpoch_{};
     util::optional<common::DataEpoch> targetCoordinateEpoch_{};
@@ -278,9 +286,21 @@ CoordinateOperation::CoordinateOperation(const CoordinateOperation &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 CoordinateOperation::~CoordinateOperation() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
+
+/** \brief Return the version of the coordinate transformation (i.e.
+ * instantiation
+ * due to the stochastic nature of the parameters).
+ *
+ * Mandatory when describing a coordinate transformation or point motion
+ * operation, and should not be supplied for a coordinate conversion.
+ *
+ * @return version or empty.
+ */
 const util::optional<std::string> &
 CoordinateOperation::operationVersion() const {
     return d->operationVersion_;
@@ -288,6 +308,14 @@ CoordinateOperation::operationVersion() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return estimate(s) of the impact of this coordinate operation on
+ * point accuracy.
+ *
+ * Gives position error estimates for target coordinates of this coordinate
+ * operation, assuming no errors in source coordinates.
+ *
+ * @return estimate(s) or empty vector.
+ */
 const std::vector<metadata::PositionalAccuracyNNPtr> &
 CoordinateOperation::coordinateOperationAccuracies() const {
     return d->coordinateOperationAccuracies_;
@@ -295,24 +323,46 @@ CoordinateOperation::coordinateOperationAccuracies() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the source CRS of this coordinate operation.
+ *
+ * This should not be null, expect for of a derivingConversion of a DerivedCRS
+ * when the owning DerivedCRS has been destroyed.
+ *
+ * @return source CRS, or null.
+ */
 const crs::CRSPtr CoordinateOperation::sourceCRS() const {
     return d->sourceCRSWeak_.lock();
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the target CRS of this coordinate operation.
+ *
+ * This should not be null, expect for of a derivingConversion of a DerivedCRS
+ * when the owning DerivedCRS has been destroyed.
+ *
+ * @return target CRS, or null.
+ */
 const crs::CRSPtr CoordinateOperation::targetCRS() const {
     return d->targetCRSWeak_.lock();
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the interpolation CRS of this coordinate operation.
+ *
+ * @return interpolation CRS, or null.
+ */
 const crs::CRSPtr &CoordinateOperation::interpolationCRS() const {
     return d->interpolationCRS_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the source epoch of coordinates.
+ *
+ * @return source epoch of coordinates, or empty.
+ */
 const util::optional<common::DataEpoch> &
 CoordinateOperation::sourceCoordinateEpoch() const {
     return d->sourceCoordinateEpoch_;
@@ -320,6 +370,10 @@ CoordinateOperation::sourceCoordinateEpoch() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the target epoch of coordinates.
+ *
+ * @return target epoch of coordinates, or empty.
+ */
 const util::optional<common::DataEpoch> &
 CoordinateOperation::targetCoordinateEpoch() const {
     return d->targetCoordinateEpoch_;
@@ -373,16 +427,35 @@ OperationMethod::OperationMethod(const OperationMethod &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 OperationMethod::~OperationMethod() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the formula(s) or procedure used by this coordinate operation
+ * method.
+ *
+ * This may be a reference to a publication (in which case use
+ * formulaCitation()).
+ *
+ * Note that the operation method may not be analytic, in which case this
+ * attribute references or contains the procedure, not an analytic formula.
+ *
+ * @return the formula, or empty.
+ */
 const util::optional<std::string> &OperationMethod::formula() const {
     return d->formula_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a reference to a publication giving the formula(s) or
+ * procedure
+ * used by the coordinate operation method.
+ *
+ * @return the formula citation, or empty.
+ */
 const util::optional<metadata::Citation> &
 OperationMethod::formulaCitation() const {
     return d->formulaCitation_;
@@ -390,6 +463,10 @@ OperationMethod::formulaCitation() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the parameters of this operation method.
+ *
+ * @return the parameters.
+ */
 const std::vector<GeneralOperationParameterNNPtr> &
 OperationMethod::parameters() const {
     return d->parameters_;
@@ -397,6 +474,14 @@ OperationMethod::parameters() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a operation method from a vector of
+ * GeneralOperationParameter.
+ *
+ * @param properties See \ref general_properties. At minimum the name should be
+ * defined.
+ * @param parameters Vector of GeneralOperationParameterNNPtr.
+ * @return a new OperationMethod.
+ */
 OperationMethodNNPtr OperationMethod::create(
     const util::PropertyMap &properties,
     const std::vector<GeneralOperationParameterNNPtr> &parameters) {
@@ -409,6 +494,13 @@ OperationMethodNNPtr OperationMethod::create(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a operation method from a vector of OperationParameter.
+ *
+ * @param properties See \ref general_properties. At minimum the name should be
+ * defined.
+ * @param parameters Vector of OperationParameterNNPtr.
+ * @return a new OperationMethod.
+ */
 OperationMethodNNPtr OperationMethod::create(
     const util::PropertyMap &properties,
     const std::vector<OperationParameterNNPtr> &parameters) {
@@ -453,6 +545,7 @@ struct GeneralParameterValue::Private {};
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 GeneralParameterValue::GeneralParameterValue()
     : d(internal::make_unique<Private>()) {}
 
@@ -460,10 +553,13 @@ GeneralParameterValue::GeneralParameterValue()
 
 GeneralParameterValue::GeneralParameterValue(const GeneralParameterValue &other)
     : d(internal::make_unique<Private>(*other.d)) {}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 GeneralParameterValue::~GeneralParameterValue() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -493,6 +589,12 @@ OperationParameterValue::OperationParameterValue(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a OperationParameterValue.
+ *
+ * @param parameterIn Parameter (definition).
+ * @param valueIn Parameter value.
+ * @return a new OperationParameterValue.
+ */
 OperationParameterValueNNPtr
 OperationParameterValue::create(OperationParameterNNPtr parameterIn,
                                 ParameterValueNNPtr valueIn) {
@@ -504,16 +606,26 @@ OperationParameterValue::create(OperationParameterNNPtr parameterIn,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 OperationParameterValue::~OperationParameterValue() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the parameter (definition)
+ *
+ * @return the parameter (definition).
+ */
 const OperationParameterNNPtr &OperationParameterValue::parameter() const {
     return d->parameter;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the parameter value.
+ *
+ * @return the parameter value.
+ */
 const ParameterValueNNPtr &OperationParameterValue::parameterValue() const {
     return d->parameterValue;
 }
@@ -553,6 +665,11 @@ OperationParameterValue::_exportToWKT(io::WKTFormatterNNPtr formatter,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+/** Utility method used on WKT2 import to convert from abridged transformation
+ * to "normal" transformation parameters.
+ */
 bool OperationParameterValue::convertFromAbridged(const std::string &paramName,
                                                   double &val,
                                                   common::UnitOfMeasure &unit,
@@ -614,6 +731,7 @@ bool OperationParameterValue::convertFromAbridged(const std::string &paramName,
     }
     return false;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -634,7 +752,9 @@ GeneralOperationParameter::GeneralOperationParameter(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 GeneralOperationParameter::~GeneralOperationParameter() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -655,10 +775,18 @@ OperationParameter::OperationParameter(const OperationParameter &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 OperationParameter::~OperationParameter() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a OperationParameter.
+ *
+ * @param properties See \ref general_properties. At minimum the name should be
+ * defined.
+ * @return a new OperationParameter.
+ */
 OperationParameterNNPtr
 OperationParameter::create(const util::PropertyMap &properties) {
     OperationParameterNNPtr op(
@@ -691,10 +819,16 @@ SingleOperation::SingleOperation(const SingleOperation &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 SingleOperation::~SingleOperation() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the parameter values.
+ *
+ * @return the parameter values.
+ */
 const std::vector<GeneralParameterValueNNPtr> &
 SingleOperation::parameterValues() const {
     return d->parameterValues_;
@@ -702,6 +836,10 @@ SingleOperation::parameterValues() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the operation method associated to the operation.
+ *
+ * @return the operation method.
+ */
 const OperationMethodNNPtr &SingleOperation::method() const {
     return d->method_;
 }
@@ -715,6 +853,10 @@ void SingleOperation::setParameterValues(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the parameter value corresponding to a parameter name.
+ *
+ * @return the value, or nullptr if not found.
+ */
 ParameterValuePtr
 SingleOperation::parameterValue(const std::string &paramName) const {
     for (const auto &genOpParamvalue : parameterValues()) {
@@ -734,6 +876,11 @@ SingleOperation::parameterValue(const std::string &paramName) const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the parameter value, as a measure, corresponding to a
+ * parameter name.
+ *
+ * @return the measure, or the empty Measure() object if not found.
+ */
 common::Measure
 SingleOperation::parameterValueMeasure(const std::string &paramName) const {
     auto val = parameterValue(paramName);
@@ -769,7 +916,9 @@ struct ParameterValue::Private {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 ParameterValue::~ParameterValue() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -794,12 +943,22 @@ ParameterValue::ParameterValue(bool booleanValueIn)
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a ParameterValue from a Measure (i.e. a value associated
+ * with a
+ * unit)
+ *
+ * @return a new ParameterValue.
+ */
 ParameterValueNNPtr ParameterValue::create(const common::Measure &measureIn) {
     return ParameterValue::nn_make_shared<ParameterValue>(measureIn);
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a ParameterValue from a string value.
+ *
+ * @return a new ParameterValue.
+ */
 ParameterValueNNPtr ParameterValue::create(const char *stringValueIn) {
     return ParameterValue::nn_make_shared<ParameterValue>(
         std::string(stringValueIn), ParameterValue::Type::STRING);
@@ -807,6 +966,10 @@ ParameterValueNNPtr ParameterValue::create(const char *stringValueIn) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a ParameterValue from a string value.
+ *
+ * @return a new ParameterValue.
+ */
 ParameterValueNNPtr ParameterValue::create(const std::string &stringValueIn) {
     return ParameterValue::nn_make_shared<ParameterValue>(
         stringValueIn, ParameterValue::Type::STRING);
@@ -814,6 +977,10 @@ ParameterValueNNPtr ParameterValue::create(const std::string &stringValueIn) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a ParameterValue from a filename.
+ *
+ * @return a new ParameterValue.
+ */
 ParameterValueNNPtr
 ParameterValue::createFilename(const std::string &stringValueIn) {
     return ParameterValue::nn_make_shared<ParameterValue>(
@@ -822,40 +989,67 @@ ParameterValue::createFilename(const std::string &stringValueIn) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a ParameterValue from a integer value.
+ *
+ * @return a new ParameterValue.
+ */
 ParameterValueNNPtr ParameterValue::create(int integerValueIn) {
     return ParameterValue::nn_make_shared<ParameterValue>(integerValueIn);
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a ParameterValue from a boolean value.
+ *
+ * @return a new ParameterValue.
+ */
 ParameterValueNNPtr ParameterValue::create(bool booleanValueIn) {
     return ParameterValue::nn_make_shared<ParameterValue>(booleanValueIn);
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the type of a parameter value.
+ *
+ * @return the type.
+ */
 const ParameterValue::Type &ParameterValue::type() const { return d->type_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the value as a Measure (assumes type() == Type::MEASURE)
+ * @return the value as a Measure.
+ */
 const common::Measure &ParameterValue::value() const { return d->measure_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the value as a string (assumes type() == Type::STRING)
+ * @return the value as a string.
+ */
 const std::string &ParameterValue::stringValue() const {
     return d->stringValue_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the value as a filename (assumes type() == Type::FILENAME)
+ * @return the value as a filename.
+ */
 const std::string &ParameterValue::valueFile() const { return d->stringValue_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the value as a integer (assumes type() == Type::INTEGER)
+ * @return the value as a integer.
+ */
 int ParameterValue::integerValue() const { return d->integerValue_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the value as a boolean (assumes type() == Type::BOOLEAN)
+ * @return the value as a boolean.
+ */
 bool ParameterValue::booleanValue() const { return d->booleanValue_; }
 
 // ---------------------------------------------------------------------------
@@ -918,10 +1112,21 @@ Conversion::Conversion(const Conversion &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Conversion::~Conversion() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Conversion from a vector of GeneralParameterValue.
+ *
+ * @param properties See \ref general_properties. At minimum the name should be
+ * defined.
+ * @param methodIn the operation method.
+ * @param values the values.
+ * @return a new Conversion.
+ * @throws InvalidOperation
+ */
 ConversionNNPtr Conversion::create(const util::PropertyMap &properties,
                                    const OperationMethodNNPtr &methodIn,
                                    const std::vector<GeneralParameterValueNNPtr>
@@ -938,6 +1143,18 @@ ConversionNNPtr Conversion::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Conversion and its OperationMethod
+ *
+ * @param propertiesConversion See \ref general_properties of the conversion.
+ * At minimum the name should be defined.
+ * @param propertiesOperationMethod See \ref general_properties of the operation
+ * method. At minimum the name should be defined.
+ * @param parameters the operation parameters.
+ * @param values the operation values. Constraint:
+ * values.size() == parameters.size()
+ * @return a new Conversion.
+ * @throws InvalidOperation
+ */
 ConversionNNPtr Conversion::create(
     const util::PropertyMap &propertiesConversion,
     const util::PropertyMap &propertiesOperationMethod,
@@ -962,6 +1179,11 @@ ConversionNNPtr Conversion::create(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Clone a Conversion.
+ *
+ * @param other Conversion to clone.
+ * @return a cloned Conversion.
+ */
 ConversionNNPtr Conversion::create(const ConversionNNPtr &other) {
     return Conversion::nn_make_shared<Conversion>(*other);
 }
@@ -986,41 +1208,6 @@ getUTMConversionProperty(const util::PropertyMap &properties, int zone,
     } else {
         return properties;
     }
-}
-
-// ---------------------------------------------------------------------------
-
-ConversionNNPtr Conversion::createUTM(const util::PropertyMap &properties,
-                                      int zone, bool north) {
-    const MethodMapping *mapping =
-        getMapping(EPSG_METHOD_TRANSVERSE_MERCATOR_CODE);
-    assert(mapping);
-    std::vector<OperationParameterNNPtr> parameters;
-    for (const auto &param : mapping->params) {
-        parameters.push_back(OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY, param.wkt2_name)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
-                .set(metadata::Identifier::CODE_KEY, param.epsg_code)));
-    }
-
-    std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(common::Angle(UTM_LATITUDE_OF_NATURAL_ORIGIN)),
-        ParameterValue::create(common::Angle(zone * 6.0 - 183.0)),
-        ParameterValue::create(common::Scale(UTM_SCALE_FACTOR)),
-        ParameterValue::create(common::Length(UTM_FALSE_EASTING)),
-        ParameterValue::create(common::Length(
-            north ? UTM_NORTH_FALSE_NORTHING : UTM_SOUTH_FALSE_NORTHING)),
-    };
-
-    return create(getUTMConversionProperty(properties, zone, north),
-                  util::PropertyMap()
-                      .set(common::IdentifiedObject::NAME_KEY,
-                           EPSG_METHOD_TRANSVERSE_MERCATOR)
-                      .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
-                      .set(metadata::Identifier::CODE_KEY,
-                           EPSG_METHOD_TRANSVERSE_MERCATOR_CODE),
-                  parameters, values);
 }
 
 // ---------------------------------------------------------------------------
@@ -1065,6 +1252,48 @@ Conversion::create(const util::PropertyMap &properties, int method_epsg_code,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a [Universal Transverse Mercator]
+ *(https://proj4.org/operations/projections/utm.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ *is
+ * not provided, it is automatically set.
+ * @param zone UTM zone number between 1 and 60.
+ * @param north true for UTM northern hemisphere, false for UTM southern
+ * hemisphere.
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createUTM(const util::PropertyMap &properties,
+                                      int zone, bool north) {
+
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(common::Angle(UTM_LATITUDE_OF_NATURAL_ORIGIN)),
+        ParameterValue::create(common::Angle(zone * 6.0 - 183.0)),
+        ParameterValue::create(common::Scale(UTM_SCALE_FACTOR)),
+        ParameterValue::create(common::Length(UTM_FALSE_EASTING)),
+        ParameterValue::create(common::Length(
+            north ? UTM_NORTH_FALSE_NORTHING : UTM_SOUTH_FALSE_NORTHING)),
+    };
+
+    return create(getUTMConversionProperty(properties, zone, north),
+                  EPSG_METHOD_TRANSVERSE_MERCATOR_CODE, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a [Transverse Mercator]
+ *(https://proj4.org/operations/projections/tmerc.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ *is
+ * not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param scale See \ref scale
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
 ConversionNNPtr Conversion::createTM(const util::PropertyMap &properties,
                                      const common::Angle &centerLat,
                                      const common::Angle &centerLong,
@@ -1084,6 +1313,19 @@ ConversionNNPtr Conversion::createTM(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a [Lambert Conic Conformal 1SP]
+ *(https://proj4.org/operations/projections/lcc.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ *is
+ * not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param scale See \ref scale
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
 ConversionNNPtr Conversion::createLCC_1SP(const util::PropertyMap &properties,
                                           const common::Angle &centerLat,
                                           const common::Angle &centerLong,
@@ -1104,6 +1346,18 @@ ConversionNNPtr Conversion::createLCC_1SP(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a [New Zealand Map Grid]
+ * (https://proj4.org/operations/projections/nzmg.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is
+ * not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
 ConversionNNPtr Conversion::createNZMG(const util::PropertyMap &properties,
                                        const common::Angle &centerLat,
                                        const common::Angle &centerLong,
@@ -1202,6 +1456,14 @@ std::string Conversion::exportToPROJString(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether a conversion is a [Universal Transverse Mercator]
+ * (https://proj4.org/operations/projections/utm.html) conversion.
+ *
+ * @param[out] zone UTM zone number between 1 and 60.
+ * @param[out] north true for UTM northern hemisphere, false for UTM southern
+ * hemisphere.
+ * @return true if it is a UTM conversion.
+ */
 bool Conversion::isUTM(int &zone, bool &north) const {
     zone = 0;
     north = true;
@@ -1267,6 +1529,11 @@ bool Conversion::isUTM(int &zone, bool &north) const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a Conversion object where some parameters are better
+ * identified.
+ *
+ * @return a new Conversion.
+ */
 ConversionNNPtr Conversion::identify() const {
     auto projectionMethodName = *(method()->name()->description());
     auto newConversion = Conversion::nn_make_shared<Conversion>(*this);
@@ -1284,6 +1551,7 @@ ConversionNNPtr Conversion::identify() const {
     return newConversion;
 }
 
+//! @cond Doxygen_Suppress
 // ---------------------------------------------------------------------------
 
 InvalidOperation::InvalidOperation(const char *message) : Exception(message) {}
@@ -1300,6 +1568,7 @@ InvalidOperation::InvalidOperation(const InvalidOperation &) = default;
 // ---------------------------------------------------------------------------
 
 InvalidOperation::~InvalidOperation() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1322,22 +1591,44 @@ Transformation::Transformation(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Transformation::~Transformation() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the source crs::CRS of the transformation.
+ *
+ * @return the source CRS.
+ */
 const crs::CRSNNPtr Transformation::sourceCRS() const {
     return NN_CHECK_ASSERT(CoordinateOperation::sourceCRS());
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the target crs::CRS of the transformation.
+ *
+ * @return the target CRS.
+ */
 const crs::CRSNNPtr Transformation::targetCRS() const {
     return NN_CHECK_ASSERT(CoordinateOperation::targetCRS());
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the TOWGS84 parameters of the transformation.
+ *
+ * If this transformation uses Coordinate Frame Rotation, Position Vector
+ * transformation or Geocentric translations, a vector of 7 double values
+ * using the Position Vector convention (EPSG:9606) is returned. Those values
+ * can be used as the value of the WKT1 TOWGS84 parameter or
+ * PROJ +towgs84 parameter.
+ *
+ * @return a vector of 7 values if valid, otherwise a io::FormattingException
+ * is thrown.
+ * @throws io::FormattingException
+ */
 std::vector<double>
 Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
 {
@@ -1465,14 +1756,25 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Transformation from a vector of GeneralParameterValue.
+ *
+ * @param properties See \ref general_properties. At minimum the name should be
+ * defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param interpolationCRSIn Interpolation CRS (might be null)
+ * @param methodIn Operation method.
+ * @param values Vector of GeneralOperationParameterNNPtr.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ * @throws InvalidOperation
+ */
 TransformationNNPtr Transformation::create(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
     const crs::CRSNNPtr &targetCRSIn, const crs::CRSPtr &interpolationCRSIn,
     const OperationMethodNNPtr &methodIn,
     const std::vector<GeneralParameterValueNNPtr> &values,
-    const std::vector<metadata::PositionalAccuracyNNPtr>
-        &accuracies) // throw InvalidOperation
-{
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     if (methodIn->parameters().size() != values.size()) {
         throw InvalidOperation(
             "Inconsistent number of parameters and parameter values");
@@ -1486,6 +1788,24 @@ TransformationNNPtr Transformation::create(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Transformation ands its OperationMethod.
+ *
+ * @param propertiesTransformation See \ref general_properties of the
+ * Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param interpolationCRSIn Interpolation CRS (might be null)
+ * @param propertiesOperationMethod See \ref general_properties of the
+ * OperationMethod.
+ * At minimum the name should be defined.
+ * @param parameters Vector of parameters of the operation method.
+ * @param values Vector of ParameterValueNNPtr. Constraint:
+ * values.size() == parameters.size()
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ * @throws InvalidOperation
+ */
 TransformationNNPtr
 Transformation::create(const util::PropertyMap &propertiesTransformation,
                        const crs::CRSNNPtr &sourceCRSIn,
@@ -1596,6 +1916,18 @@ static TransformationNNPtr createSevenParamsTransform(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Transformation with Geocentric Translations method.
+ *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param translationXMetre Value of the Translation_X parameter (in metre).
+ * @param translationYMetre Value of the Translation_Y parameter (in metre).
+ * @param translationZMetre Value of the Translation_Z parameter (in metre).
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ */
 TransformationNNPtr Transformation::createGeocentricTranslations(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
     const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
@@ -1641,6 +1973,30 @@ TransformationNNPtr Transformation::createGeocentricTranslations(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Transformation with Position vector transformation
+ * method.
+ *
+ * This is similar to createCoordinateFrameRotation(), except that the sign of
+ * the rotation terms is inverted.
+ *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param translationXMetre Value of the Translation_X parameter (in metre).
+ * @param translationYMetre Value of the Translation_Y parameter (in metre).
+ * @param translationZMetre Value of the Translation_Z parameter (in metre).
+ * @param rotationXMicroRadian Value of the Rotation_X parameter (in
+ * microradian).
+ * @param rotationYMicroRadian Value of the Rotation_Y parameter (in
+ * microradian).
+ * @param rotationZMicroRadian Value of the Rotation_Z parameter (in
+ * microradian).
+ * @param scaleDifferencePPM Value of the Scale_Difference parameter (in
+ * parts-per-million).
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ */
 TransformationNNPtr Transformation::createPositionVector(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
     const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
@@ -1662,6 +2018,29 @@ TransformationNNPtr Transformation::createPositionVector(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Transformation with Coordinate Frame Rotation method.
+ *
+ * This is similar to createPositionVector(), except that the sign of
+ * the rotation terms is inverted.
+ *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param translationXMetre Value of the Translation_X parameter (in metre).
+ * @param translationYMetre Value of the Translation_Y parameter (in metre).
+ * @param translationZMetre Value of the Translation_Z parameter (in metre).
+ * @param rotationXMicroRadian Value of the Rotation_X parameter (in
+ * microradian).
+ * @param rotationYMicroRadian Value of the Rotation_Y parameter (in
+ * microradian).
+ * @param rotationZMicroRadian Value of the Rotation_Z parameter (in
+ * microradian).
+ * @param scaleDifferencePPM Value of the Scale_Difference parameter (in
+ * parts-per-million).
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ */
 TransformationNNPtr Transformation::createCoordinateFrameRotation(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
     const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
@@ -1682,6 +2061,16 @@ TransformationNNPtr Transformation::createCoordinateFrameRotation(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Transformation from TOWGS84 parameters.
+ *
+ * This is a helper of createPositionVector() with the source CRS being the
+ * GeographicCRS of sourceCRSIn, and the target CRS being EPSG:4326
+ *
+ * @param sourceCRSIn Source CRS.
+ * @param TOWGS84Parameters The vector of 7 double values (Translation_X,_Y,_Z,
+ * Rotation_X,_Y,_Z, Scale_Difference) passed to createPositionVector()
+ * @return new Transformation.
+ */
 TransformationNNPtr Transformation::createTOWGS84(
     const crs::CRSNNPtr &sourceCRSIn,
     const std::vector<double> &TOWGS84Parameters) // throw InvalidOperation
@@ -1765,7 +2154,9 @@ std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 PointMotionOperation::~PointMotionOperation() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1780,7 +2171,9 @@ struct ConcatenatedOperation::Private {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 ConcatenatedOperation::~ConcatenatedOperation() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1790,6 +2183,10 @@ ConcatenatedOperation::ConcatenatedOperation(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the operation steps of the concatenated operation.
+ *
+ * @return the operation steps.
+ */
 const std::vector<CoordinateOperationNNPtr> &
 ConcatenatedOperation::operations() const {
     return d->operations_;
@@ -1797,6 +2194,15 @@ ConcatenatedOperation::operations() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a ConcatenatedOperation
+ *
+ * @param properties See \ref general_properties. At minimum the name should be
+ * defined.
+ * @param operationsIn Vector of the CoordinateOperation steps.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ * @throws InvalidOperation
+ */
 ConcatenatedOperationNNPtr ConcatenatedOperation::create(
     const util::PropertyMap &properties,
     const std::vector<CoordinateOperationNNPtr> &operationsIn,

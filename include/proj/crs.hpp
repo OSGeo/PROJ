@@ -66,7 +66,9 @@ class CRS : public common::ObjectUsage, public io::IWKTExportable {
     CRS();
 };
 
+/** Shared pointer of CRS */
 using CRSPtr = std::shared_ptr<CRS>;
+/** Non-null shared pointer of CRS */
 using CRSNNPtr = util::nn<CRSPtr>;
 
 // ---------------------------------------------------------------------------

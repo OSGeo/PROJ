@@ -1,0 +1,90 @@
+/*!
+
+\page general_doc General documentation
+
+\section general_api_design General API design
+
+The design of the class hierarchy is strongly derived from \ref ISO_19111_2018.
+
+Classes for which the constructors are not directly accessible have their
+instances constructed with create() methods. The returned object is a non-null
+shared pointer. Such objects are immutable, and thread-safe.
+
+TODO
+
+\section general_properties General properties
+
+All classes deriving from IdentifiedObject have general properties that can
+be defined at creation time. Those properties are ...
+TODO
+
+\section standards Applicable standards
+
+\subsection ISO_19111 ISO:19111 / OGC Topic 2 standard
+
+Topic 2 - Spatial referencing by coordinates.
+
+This is an Abstract Specification describes the data elements, relationships and
+associated metadata required for spatial referencing by coordinates. It describes
+Coordinate Reference Systems (CRS), coordinate systems (CS) and coordinate
+transformation or coordinate conversion between two different coordinate
+reference systems.
+
+\subsubsection ISO_19111_2018 ISO 19111:2018
+
+This is the revision mostly used for PROJ C++ modelling.
+
+[OGC 18-005r1, 2018-04-04, ISO 19111:2018]
+(https://portal.opengeospatial.org/files/?artifact_id=78556)
+(not yet adopted, at time of writing)
+
+\subsubsection ISO_19111_2007 ISO 19111:2007
+
+The precedent version of the specification was:
+[OGC 08-015r2, 2010-04-27, ISO 19111:2007]
+(http://portal.opengeospatial.org/files/?artifact_id=39049)
+
+\subsection WKT2 WKT2 standard
+
+Well-known text representation of coordinate reference systems.
+
+Well-known Text (WKT) offers a compact machine- and human-readable
+representation of the critical elements of coordinate reference system (CRS)
+definitions, and coordinate operations. This is an implementation of
+\ref ISO_19111
+
+PROJ implements the two following revisions of the standard:
+
+\subsubsection WKT2_2018 WKT2:2018
+
+[OGC 18-010r1, 2018-06-08, WKT2-2018]
+(https://portal.opengeospatial.org/files/?artifact_id=79826)
+(not yet adopted, at time of writing)
+
+\subsubsection WKT2_2015 WKT2:2015
+
+[OGC 12-063r5, 2015-05-01, WKT2-2015]
+(http://docs.opengeospatial.org/is/12-063r5/12-063r5.html)
+
+\subsection WKT1 WKT1 specification
+
+Older specifications of well-known text representation of coordinate reference
+systems are also supported by PROJ, mostly for compatibility with legacy
+systems, or older versions of GDAL.
+
+GDAL v2.3 and earlier mostly implements:
+
+[OGC 01-009, 2001-01-12, OpenGIS Coordinate Transformation Service Implementation Specification]
+(http://portal.opengeospatial.org/files/?artifact_id=999)
+
+The [GDAL documentation, OGC WKT Coordinate System Issues]
+(http://www.gdal.org/wktproblems.html) discusses issues, and GDAL implementation
+choices.
+
+An older specification of WKT1 is/was used by some software packages:
+
+[OGC 99-049, 1999-05-05, OpenGIS Simple Features Specification For SQL v1.1]
+(http://portal.opengeospatial.org/files/?artifact_id=829)
+
+
+*/

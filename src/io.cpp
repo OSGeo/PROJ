@@ -602,11 +602,11 @@ void WKTNode::addChild(WKTNodeNNPtr child) { d->children_.push_back(child); }
 // ---------------------------------------------------------------------------
 
 WKTNodePtr WKTNode::lookForChild(const std::string &childName,
-                                 int occurence) const {
+                                 int occurrence) const {
     int occCount = 0;
     for (const auto &child : d->children_) {
         if (ci_equal(child->value(), childName)) {
-            if (occurence == occCount) {
+            if (occurrence == occCount) {
                 return child;
             }
             occCount++;

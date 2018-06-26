@@ -52,27 +52,53 @@ class ProjectedCRS;
 
   \brief Coordinate operations (relationship between any two coordinate
   reference systems).
+
+  This covers Conversion, Transformation,
+  PointMotionOperation or ConcatenatedOperation.
 */
 namespace operation {
 
 // ---------------------------------------------------------------------------
 
 class CoordinateOperation;
+/** Shared pointer of CoordinateOperation */
 using CoordinateOperationPtr = std::shared_ptr<CoordinateOperation>;
+/** Non-null shared pointer of CoordinateOperation */
 using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
 
+/** \brief Abstract class for a mathematical operation on coordinates.
+ *
+ * A mathematical operation:
+ * <ul>
+ * <li>on coordinates that transforms or converts them from one coordinate
+ * reference system to another coordinate reference system</li>
+ * <li>or that decribes the change of coordinate values within one coordinate
+ * reference system due to the motion of the point between one coordinate epoch
+ * and another coordinate epoch.</li>
+ * </ul>
+ * Many but not all coordinate operations (from CRS A to CRS B) also uniquely
+ * define the inverse coordinate operation (from CRS B to CRS A). In some cases,
+ * the coordinate operation method algorithm for the inverse coordinate
+ * operation is the same as for the forward algorithm, but the signs of some
+ * coordinate operation parameter values have to be reversed. In other cases,
+ * different algorithms are required for the forward and inverse coordinate
+ * operations, but the same coordinate operation parameter values are used. If
+ * (some) entirely different parameter values are needed, a different coordinate
+ * operation shall be defined.
+ *
+ * \remark Implements CoordinateOperation from \ref ISO_19111_2018
+ */
 class CoordinateOperation : public common::ObjectUsage,
                             public io::IWKTExportable {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateOperation() override;
+    //! @endcond
 
     PROJ_DLL const util::optional<std::string> &operationVersion() const;
     PROJ_DLL const std::vector<metadata::PositionalAccuracyNNPtr> &
     coordinateOperationAccuracies() const;
 
-    // In the case of a derivingConversion of a DerivedCRS, sourceCRS() and
-    // targetCRS()
-    // will return null pointers if the owning DerivedCRS has been destroyed.
     PROJ_DLL const crs::CRSPtr sourceCRS() const;
     PROJ_DLL const crs::CRSPtr targetCRS() const;
     PROJ_DLL const crs::CRSPtr &interpolationCRS() const;
@@ -105,9 +131,16 @@ class CoordinateOperation : public common::ObjectUsage,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Abstract class modelling a parameter value (OperationParameter)
+ * or group of parameters.
+ *
+ * \remark Implements GeneralOperationParameter from \ref ISO_19111_2018
+ */
 class GeneralOperationParameter : public common::IdentifiedObject {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL virtual ~GeneralOperationParameter();
+    //! @endcond
 
   protected:
     GeneralOperationParameter();
@@ -119,18 +152,31 @@ class GeneralOperationParameter : public common::IdentifiedObject {
     operator=(const GeneralOperationParameter &other) = delete;
 };
 
+/** Shared pointer of GeneralOperationParameter */
 using GeneralOperationParameterPtr = std::shared_ptr<GeneralOperationParameter>;
+/** Non-null shared pointer of GeneralOperationParameter */
 using GeneralOperationParameterNNPtr = util::nn<GeneralOperationParameterPtr>;
 
 // ---------------------------------------------------------------------------
 
 class OperationParameter;
+/** Shared pointer of OperationParameter */
 using OperationParameterPtr = std::shared_ptr<OperationParameter>;
+/** Non-null shared pointer of OperationParameter */
 using OperationParameterNNPtr = util::nn<OperationParameterPtr>;
 
+/** \brief The definition of a parameter used by a coordinate operation method.
+ *
+ * Most parameter values are numeric, but other types of parameter values are
+ * possible.
+ *
+ * \remark Implements OperationParameter from \ref ISO_19111_2018
+ */
 class OperationParameter : public GeneralOperationParameter {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL virtual ~OperationParameter();
+    //! @endcond
 
     // non-standard
     PROJ_DLL static OperationParameterNNPtr
@@ -148,16 +194,26 @@ class OperationParameter : public GeneralOperationParameter {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 struct MethodMapping;
+//! @endcond
 
+/** \brief Abstract class modelling a parameter value (OperationParameterValue)
+ * or group of parameter values.
+ *
+ * \remark Implements GeneralParameterValue from \ref ISO_19111_2018
+ */
 class GeneralParameterValue : public io::IWKTExportable {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~GeneralParameterValue() override;
+    //! @endcond
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override = 0; // throw(io::FormattingException)
 
   protected:
+    //! @cond Doxygen_Suppress
     GeneralParameterValue();
     GeneralParameterValue(const GeneralParameterValue &other);
 
@@ -166,6 +222,7 @@ class GeneralParameterValue : public io::IWKTExportable {
     virtual std::string _exportToWKT(io::WKTFormatterNNPtr formatter,
                                      const MethodMapping *mapping)
         const = 0; // throw(io::FormattingException)
+                   //! @endcond
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -173,21 +230,44 @@ class GeneralParameterValue : public io::IWKTExportable {
     operator=(const GeneralParameterValue &other) = delete;
 };
 
+/** Shared pointer of GeneralParameterValue */
 using GeneralParameterValuePtr = std::shared_ptr<GeneralParameterValue>;
+/** Non-null shared pointer of GeneralParameterValue */
 using GeneralParameterValueNNPtr = util::nn<GeneralParameterValuePtr>;
 
 // ---------------------------------------------------------------------------
 
 class ParameterValue;
+/** Shared pointer of ParameterValue */
 using ParameterValuePtr = std::shared_ptr<ParameterValue>;
+/** Non-null shared pointer of ParameterValue */
 using ParameterValueNNPtr = util::nn<ParameterValuePtr>;
 
+/** \brief The value of the coordinate operation parameter.
+ *
+ * Most parameter values are numeric, but other types of parameter values are
+ * possible.
+ *
+ * \remark Implements ParameterValue from \ref ISO_19111_2018
+ */
 class ParameterValue : public io::IWKTExportable {
   public:
-    enum class Type { MEASURE, STRING, INTEGER, BOOLEAN, FILENAME };
-
+    /** Type of the value. */
+    enum class Type {
+        /** Measure (i.e. value with a unit) */
+        MEASURE,
+        /** String */
+        STRING,
+        /** Integer */
+        INTEGER,
+        /** Boolean */
+        BOOLEAN,
+        /** Filename */
+        FILENAME
+    };
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~ParameterValue() override;
-
+    //! @endcond
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 
@@ -222,12 +302,23 @@ class ParameterValue : public io::IWKTExportable {
 // ---------------------------------------------------------------------------
 
 class OperationParameterValue;
+/** Shared pointer of OperationParameterValue */
 using OperationParameterValuePtr = std::shared_ptr<OperationParameterValue>;
+/** Non-null shared pointer of OperationParameterValue */
 using OperationParameterValueNNPtr = util::nn<OperationParameterValuePtr>;
 
+/** \brief A parameter value, ordered sequence of values, or reference to a
+ * file of parameter values.
+ *
+ * This combines a OperationParameter with the corresponding ParameterValue.
+ *
+ * \remark Implements OperationParameterValue from \ref ISO_19111_2018
+ */
 class OperationParameterValue : public GeneralParameterValue {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationParameterValue() override;
+    //! @endcond
 
     PROJ_DLL const OperationParameterNNPtr &parameter() const;
     PROJ_DLL const ParameterValueNNPtr &parameterValue() const;
@@ -238,9 +329,11 @@ class OperationParameterValue : public GeneralParameterValue {
     PROJ_DLL static OperationParameterValueNNPtr
     create(OperationParameterNNPtr parameterIn, ParameterValueNNPtr valueIn);
 
+    //! @cond Doxygen_Suppress
     static bool convertFromAbridged(const std::string &paramName, double &val,
                                     common::UnitOfMeasure &unit,
                                     int &paramEPSGCode);
+    //! @endcond
 
   protected:
     OperationParameterValue(OperationParameterNNPtr parameterIn,
@@ -261,13 +354,25 @@ class OperationParameterValue : public GeneralParameterValue {
 // ---------------------------------------------------------------------------
 
 class OperationMethod;
+/** Shared pointer of OperationMethod */
 using OperationMethodPtr = std::shared_ptr<OperationMethod>;
+/** Non-null shared pointer of OperationMethod */
 using OperationMethodNNPtr = util::nn<OperationMethodPtr>;
 
+/** \brief The method (algorithm or procedure) used to perform the
+ * coordinate operation.
+ *
+ * For a projection method, this contains the name of the projection method
+ * and the name of the projection parameters.
+ *
+ * \remark Implements OperationMethod from \ref ISO_19111_2018
+ */
 class OperationMethod : public common::IdentifiedObject,
                         public io::IWKTExportable {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationMethod() override;
+    //! @endcond
 
     PROJ_DLL const util::optional<std::string> &formula() const;
     PROJ_DLL const util::optional<metadata::Citation> &formulaCitation() const;
@@ -297,19 +402,31 @@ class OperationMethod : public common::IdentifiedObject,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Exception that can be thrown when an invalid operation is attempted
+ * to be constructed.
+ */
 class InvalidOperation : public util::Exception {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL explicit InvalidOperation(const char *message);
     PROJ_DLL explicit InvalidOperation(const std::string &message);
     PROJ_DLL InvalidOperation(const InvalidOperation &other);
     PROJ_DLL ~InvalidOperation() override;
+    //! @endcond
 };
 
 // ---------------------------------------------------------------------------
 
+/** \brief A single (not concatenated) coordinate operation
+ * (CoordinateOperation)
+ *
+ * \remark Implements SingleOperation from \ref ISO_19111_2018
+ */
 class SingleOperation : public CoordinateOperation {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~SingleOperation() override;
+    //! @endcond
 
     PROJ_DLL const std::vector<GeneralParameterValueNNPtr> &
     parameterValues() const;
@@ -335,12 +452,48 @@ class SingleOperation : public CoordinateOperation {
 // ---------------------------------------------------------------------------
 
 class Conversion;
+/** Shared pointer of Conversion */
 using ConversionPtr = std::shared_ptr<Conversion>;
+/** Non-null shared pointer of Conversion */
 using ConversionNNPtr = util::nn<ConversionPtr>;
+
+/** \brief A mathematical operation on coordinates in which the parameter
+ * values are defined rather than empirically derived.
+ *
+ * Application of the coordinate conversion introduces no error into output
+ * coordinates. The best-known example of a coordinate conversion is a map
+ * projection. For coordinate conversions the output coordinates are referenced
+ * to the same datum as are the input coordinates.
+ *
+ * Coordinate conversions forming a component of a derived CRS have a source
+ * crs::CRS and a target crs::CRS that are NOT specified through the source and
+ * target
+ * associations, but through associations from crs::DerivedCRS to
+ * crs::SingleCRS.
+ *
+ * \remark Implements Conversion from \ref ISO_19111_2018
+ */
+
+/*!
+
+\section projection_parameters Projection parameters
+
+\subsection center_latitude Center latitude
+
+\subsection center_longitude Center longitude
+
+\subsection scale Scale
+
+\subsection false_easting False easting
+
+\subsection false_northing False northing
+*/
 
 class Conversion : public SingleOperation, public io::IPROJStringExportable {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~Conversion() override;
+    //! @endcond
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
@@ -406,12 +559,30 @@ class Conversion : public SingleOperation, public io::IPROJStringExportable {
 // ---------------------------------------------------------------------------
 
 class Transformation;
+/** Shared pointer of Transformation */
 using TransformationPtr = std::shared_ptr<Transformation>;
+/** Non-null shared pointer of Transformation */
 using TransformationNNPtr = util::nn<TransformationPtr>;
 
+/** \brief A mathematical operation on coordinates in which parameters are
+ * empirically derived from data containing the coordinates of a series of
+ * points in both coordinate reference systems.
+ *
+ * This computational process is usually "over-determined", allowing derivation
+ * of error (or accuracy) estimates for the coordinate transformation. Also,
+ * the stochastic nature of the parameters may result in multiple (different)
+ * versions of the same coordinate transformations between the same source and
+ * target CRSs. Any single coordinate operation in which the input and output
+ * coordinates are referenced to different datums (reference frames) will be a
+ * coordinate transformation.
+ *
+ * \remark Implements Transformation from \ref ISO_19111_2018
+ */
 class Transformation : public SingleOperation {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~Transformation() override;
+    //! @endcond
 
     PROJ_DLL const crs::CRSNNPtr sourceCRS() const;
     PROJ_DLL const crs::CRSNNPtr targetCRS() const;
@@ -484,13 +655,25 @@ class Transformation : public SingleOperation {
 // ---------------------------------------------------------------------------
 
 class PointMotionOperation;
+/** Shared pointer of PointMotionOperation */
 using PointMotionOperationPtr = std::shared_ptr<PointMotionOperation>;
+/** Non-null shared pointer of PointMotionOperation */
 using PointMotionOperationNNPtr = util::nn<PointMotionOperationPtr>;
 
+/** \brief A mathematical operation that decribes the change of coordinate
+ * values within one coordinate reference system due to the motion of the
+ * point between one coordinate epoch and another coordinate epoch.
+ *
+ * The motion is due to tectonic plate movement or deformation.
+ *
+ * \remark Implements PointMotionOperation from \ref ISO_19111_2018
+ */
 class PointMotionOperation : public SingleOperation {
   public:
     // TODO
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~PointMotionOperation() override;
+    //! @endcond
 
   private:
     PointMotionOperation(const PointMotionOperation &) = delete;
@@ -499,12 +682,25 @@ class PointMotionOperation : public SingleOperation {
 // ---------------------------------------------------------------------------
 
 class ConcatenatedOperation;
+/** Shared pointer of ConcatenatedOperation */
 using ConcatenatedOperationPtr = std::shared_ptr<ConcatenatedOperation>;
+/** Non-null shared pointer of ConcatenatedOperation */
 using ConcatenatedOperationNNPtr = util::nn<ConcatenatedOperationPtr>;
 
+/** \brief An ordered sequence of two or more single coordinate operations
+ * (SingleOperation).
+ *
+ * The sequence of coordinate operations is constrained by the requirement that
+ * the source coordinate reference system of step n+1 shall be the same as
+ * the target coordinate reference system of step n.
+ *
+ * \remark Implements ConcatenatedOperation from \ref ISO_19111_2018
+ */
 class ConcatenatedOperation : public CoordinateOperation {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~ConcatenatedOperation() override;
+    //! @endcond
 
     PROJ_DLL const std::vector<CoordinateOperationNNPtr> &operations() const;
 
