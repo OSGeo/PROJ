@@ -176,7 +176,7 @@ See step 1.6 above. Do not rename the archives with RC postfixes.
 ------------------------------------------------------------------------------
 
   - Update the version number in `doc/source/conf.py`
-  - Add the release notes from `NEWS` to `docs/source/index.rst`
+  - Add the release notes from `NEWS` to `docs/source/news.rst`
   - Update download links in `docs/source/download.rst`
 
 *Commit the changes to master and cherry-pick into maintenance branch.*
