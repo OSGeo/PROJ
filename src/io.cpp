@@ -1574,7 +1574,7 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
                                 NN_CHECK_ASSERT(primeMeridianNode), angularUnit)
                           : PrimeMeridian::GREENWICH;
     if (angularUnit == UnitOfMeasure::NONE) {
-        angularUnit = primeMeridian->greenwichLongitude().unit();
+        angularUnit = primeMeridian->longitude().unit();
     }
 
     auto datum =

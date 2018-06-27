@@ -75,22 +75,57 @@ Datum::Datum(const Datum &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Datum::~Datum() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the anchor definition.
+ *
+ * A description - possibly including coordinates of an identified point or
+ * points - of the relationship used to anchor a coordinate system to the
+ * Earth or alternate object.
+ * <ul>
+ * <li>For modern geodetic reference frames the anchor may be a set of station
+ * coordinates; if the reference frame is dynamic it will also include
+ * coordinate velocities. For a traditional geodetic datum, this anchor may be
+ * a point known as the fundamental point, which is traditionally the point
+ * where the relationship between geoid and ellipsoid is defined, together
+ * with a direction from that point.</li>
+ * <li>For a vertical reference frame the anchor may be the zero level at one
+ * or more defined locations or a conventionally defined surface.</li>
+ * <li>For an engineering datum, the anchor may be an identified physical point
+ * with the orientation defined relative to the object.</li>
+ * </ul>
+ *
+ * @return the anchor definition, or empty.
+ */
 const util::optional<std::string> &Datum::anchorDefinition() const {
     return d->anchorDefinition;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the date on which the datum definition was published.
+ *
+ * @return the publication date, or empty.
+ */
 const util::optional<common::Date> &Datum::publicationDate() const {
     return d->publicationDate;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the conventional reference system.
+ *
+ * This is the name, identifier, alias and remarks for the terrestrial
+ * reference system or vertical reference system realized by this reference
+ * frame, for example "ITRS" for ITRF88 through ITRF2008 and ITRF2014, or
+ * "EVRS" for EVRF2000 and EVRF2007.
+ *
+ * @return the conventional reference system, or empty.
+ */
 const util::optional<common::IdentifiedObject> &Datum::conventionalRS() const {
     return d->conventionalRS;
 }
@@ -99,17 +134,16 @@ const util::optional<common::IdentifiedObject> &Datum::conventionalRS() const {
 
 //! @cond Doxygen_Suppress
 struct PrimeMeridian::Private {
-    common::Angle greenwichLongitude{};
+    common::Angle longitude_{};
 
-    explicit Private(const common::Angle &longitude)
-        : greenwichLongitude(longitude) {}
+    explicit Private(const common::Angle &longitude) : longitude_(longitude) {}
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-PrimeMeridian::PrimeMeridian(const common::Angle &longitude)
-    : d(internal::make_unique<Private>(longitude)) {}
+PrimeMeridian::PrimeMeridian(const common::Angle &longitudeIn)
+    : d(internal::make_unique<Private>(longitudeIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -121,19 +155,34 @@ PrimeMeridian::PrimeMeridian(const PrimeMeridian &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 PrimeMeridian::~PrimeMeridian() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
-const common::Angle &PrimeMeridian::greenwichLongitude() const {
-    return d->greenwichLongitude;
-}
+/** \brief Return the longitude of the prime meridian.
+ *
+ * It is measured from the internationally-recognised reference meridian
+ * ('Greenwich meridian'), positive eastward.
+ * The default value is 0 degrees.
+ *
+ * @return the longitude of the prime meridian.
+ */
+const common::Angle &PrimeMeridian::longitude() const { return d->longitude_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a PrimeMeridian.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param longitudeIn the longitude of the prime meridian.
+ * @return new PrimeMeridian.
+ */
 PrimeMeridianNNPtr PrimeMeridian::create(const util::PropertyMap &properties,
-                                         const common::Angle &longitude) {
-    auto pm(PrimeMeridian::nn_make_shared<PrimeMeridian>(longitude));
+                                         const common::Angle &longitudeIn) {
+    auto pm(PrimeMeridian::nn_make_shared<PrimeMeridian>(longitudeIn));
     pm->setProperties(properties);
     return pm;
 }
@@ -172,22 +221,21 @@ std::string PrimeMeridian::exportToWKT(
         formatter->startNode(io::WKTConstants::PRIMEM, !identifiers().empty());
         formatter->addQuotedString(l_name);
         if (formatter->primeMeridianInDegree()) {
-            formatter->add(greenwichLongitude()
+            formatter->add(longitude()
                                .convertToUnit(common::UnitOfMeasure::DEGREE)
                                .value());
         } else {
-            formatter->add(greenwichLongitude().value());
+            formatter->add(longitude().value());
         }
         if (isWKT2) {
             if (!(formatter
                       ->primeMeridianOrParameterUnitOmittedIfSameAsAxis() &&
-                  greenwichLongitude().unit() ==
-                      *(formatter->axisAngularUnit()))) {
-                greenwichLongitude().unit().exportToWKT(
-                    formatter, io::WKTConstants::ANGLEUNIT);
+                  longitude().unit() == *(formatter->axisAngularUnit()))) {
+                longitude().unit().exportToWKT(formatter,
+                                               io::WKTConstants::ANGLEUNIT);
             }
         } else if (!formatter->primeMeridianInDegree()) {
-            greenwichLongitude().unit().exportToWKT(formatter);
+            longitude().unit().exportToWKT(formatter);
         }
         if (formatter->outputId()) {
             formatID(formatter);
@@ -202,11 +250,10 @@ std::string PrimeMeridian::exportToWKT(
 std::string PrimeMeridian::exportToPROJString(
     io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    if (greenwichLongitude().getSIValue() != 0) {
-        const double valDeg = greenwichLongitude()
-                                  .convertToUnit(common::UnitOfMeasure::DEGREE)
-                                  .value();
-        const double valRad = greenwichLongitude().getSIValue();
+    if (longitude().getSIValue() != 0) {
+        const double valDeg =
+            longitude().convertToUnit(common::UnitOfMeasure::DEGREE).value();
+        const double valRad = longitude().getSIValue();
         std::string projPMName;
         projCtx ctxt = pj_ctx_alloc();
         for (int i = 0; pj_prime_meridians[i].id != nullptr; ++i) {
@@ -275,28 +322,63 @@ Ellipsoid::Ellipsoid(const Ellipsoid &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Ellipsoid::~Ellipsoid() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the length of the semi-major axis of the ellipsoid.
+ *
+ * @return the semi-major axis.
+ */
 const common::Length &Ellipsoid::semiMajorAxis() const {
     return d->semiMajorAxis_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the inverse flattening value of the ellipsoid, if the
+ * ellipsoid
+ * has been defined with this value.
+ *
+ * @see computeInverseFlattening() that will always return a valid value of the
+ * inverse flattening, whether the ellipsoid has been defined through inverse
+ * flattening or semi-minor axis.
+ *
+ * @return the inverse flattening value of the ellipsoid, or empty.
+ */
 const util::optional<common::Scale> &Ellipsoid::inverseFlattening() const {
     return d->inverseFlattening_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the length of the semi-minor axis of the ellipsoid, if the
+ * ellipsoid
+ * has been defined with this value.
+ *
+ * @see computeSemiMinorAxis() that will always return a valid value of the
+ * inverse flattening, whether the ellipsoid has been defined through inverse
+ * flattening or semi-minor axis.
+ *
+ * @return the semi-minor axis of the ellipsoid, or empty.
+ */
 const util::optional<common::Length> &Ellipsoid::semiMinorAxis() const {
     return d->semiMinorAxis_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether the ellipsoid is spherical.
+ *
+ * That is to say is semiMajorAxis() == computeSemiMinorAxis().
+ *
+ * A sphere is completely defined by the semi-major axis, which is the radius
+ * of the sphere.
+ *
+ * @return true if the ellipsoid is spherical.
+ */
 bool Ellipsoid::isSphere() const {
     if (inverseFlattening().has_value()) {
         return inverseFlattening()->value() == 0;
@@ -311,12 +393,25 @@ bool Ellipsoid::isSphere() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the length of the semi-median axis of a triaxial ellipsoid
+ *
+ * This parameter is not required for a biaxial ellipsoid.
+ *
+ * @return the semi-median axis of the ellipsoid, or empty.
+ */
 const util::optional<common::Length> &Ellipsoid::semiMedianAxis() const {
     return d->semiMedianAxis_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return or compute the inverse flattening value of the ellipsoid.
+ *
+ * If computed, the inverse flattening is the result of a / (a - b),
+ * where a is the semi-major axis and b the semi-minor axis.
+ *
+ * @return the inverse flattening value of the ellipsoid, or 0 for a sphere.
+ */
 common::Scale Ellipsoid::computeInverseFlattening() const {
     if (inverseFlattening().has_value()) {
         return *inverseFlattening();
@@ -333,6 +428,13 @@ common::Scale Ellipsoid::computeInverseFlattening() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return or compute the length of the semi-minor axis of the ellipsoid.
+ *
+ * If computed, the semi-minor axis is the result of a * (1 - 1 / rf)
+ * where a is the semi-major axis and rf the reverse/inverse flattening.
+
+ * @return the semi-minor axis of the ellipsoid.
+ */
 common::Length Ellipsoid::computeSemiMinorAxis() const {
     if (semiMinorAxis().has_value()) {
         return *semiMinorAxis();
@@ -349,7 +451,13 @@ common::Length Ellipsoid::computeSemiMinorAxis() const {
 
 // ---------------------------------------------------------------------------
 
-/* static */
+/** \brief Instanciate a Ellipsoid as a sphere.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param radius the sphere radius (semi-major axis).
+ * @return new Ellipsoid.
+ */
 EllipsoidNNPtr Ellipsoid::createSphere(const util::PropertyMap &properties,
                                        const common::Length &radius) {
     auto ellipsoid(Ellipsoid::nn_make_shared<Ellipsoid>(radius));
@@ -359,7 +467,14 @@ EllipsoidNNPtr Ellipsoid::createSphere(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/* static */
+/** \brief Instanciate a Ellipsoid from its inverse/reverse flattening.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param semiMajorAxisIn the semi-major axis.
+ * @param invFlattening the inverse/reverse flattening.
+ * @return new Ellipsoid.
+ */
 EllipsoidNNPtr
 Ellipsoid::createFlattenedSphere(const util::PropertyMap &properties,
                                  const common::Length &semiMajorAxisIn,
@@ -372,7 +487,14 @@ Ellipsoid::createFlattenedSphere(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/* static */
+/** \brief Instanciate a Ellipsoid from the value of its two semi axis.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param semiMajorAxisIn the semi-major axis.
+ * @param semiMinorAxisIn the semi-minor axis.
+ * @return new Ellipsoid.
+ */
 EllipsoidNNPtr Ellipsoid::createTwoAxis(const util::PropertyMap &properties,
                                         const common::Length &semiMajorAxisIn,
                                         const common::Length &semiMinorAxisIn) {
@@ -507,21 +629,46 @@ GeodeticReferenceFrame::GeodeticReferenceFrame(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 GeodeticReferenceFrame::~GeodeticReferenceFrame() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the PrimeMeridian associated with a GeodeticReferenceFrame.
+ *
+ * @return the PrimeMeridian.
+ */
 const PrimeMeridianNNPtr &GeodeticReferenceFrame::primeMeridian() const {
     return d->primeMeridian_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the Ellipsoid associated with a GeodeticReferenceFrame.
+ *
+ * \note The \ref ISO_19111_2018 modelling allows (but discourages) a
+ * GeodeticReferenceFrame
+ * to not be associated with a Ellipsoid in the case where it is used by a
+ * geocentric crs::GeodeticCRS. We have made the choice of making the ellipsoid
+ * specification compulsory.
+ *
+ * @return the Ellipsoid.
+ */
 const EllipsoidNNPtr &GeodeticReferenceFrame::ellipsoid() const {
     return d->ellipsoid_;
 }
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a GeodeticReferenceFrame
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param ellipsoid the Ellipsoid.
+ * @param anchor the anchor definition, or empty.
+ * @param primeMeridian the PrimeMeridian.
+ * @return new GeodeticReferenceFrame.
+ */
 GeodeticReferenceFrameNNPtr
 GeodeticReferenceFrame::create(const util::PropertyMap &properties,
                                const EllipsoidNNPtr &ellipsoid,
@@ -616,10 +763,19 @@ DynamicGeodeticReferenceFrame::DynamicGeodeticReferenceFrame(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 DynamicGeodeticReferenceFrame::~DynamicGeodeticReferenceFrame() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the epoch to which the coordinates of stations defining the
+ * dynamic geodetic reference frame are referenced.
+ *
+ * Usually given as a decimal year e.g. 2016.47.
+ *
+ * @return the frame reference epoch.
+ */
 const common::Measure &
 DynamicGeodeticReferenceFrame::frameReferenceEpoch() const {
     return d->frameReferenceEpoch;
@@ -644,14 +800,30 @@ DatumEnsemble::DatumEnsemble(const DatumEnsemble &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 DatumEnsemble::~DatumEnsemble() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the set of datums which may be considered to be
+ * insignificantly different from each other.
+ *
+ * @return the set of datums of the DatumEnsemble.
+ */
 const std::vector<DatumPtr> &DatumEnsemble::datums() const { return d->datums; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the inaccuracy introduced through use of this collection of
+ * datums.
+ *
+ * It is an indication of the differences in coordinate values at all points
+ * between the various realizations that have been grouped into this datum
+ * ensemble.
+ *
+ * @return the accuracy.
+ */
 const metadata::PositionalAccuracyNNPtr &
 DatumEnsemble::positionalAccuracy() const {
     return d->positionalAccuracy;
@@ -689,10 +861,17 @@ VerticalReferenceFrame::VerticalReferenceFrame()
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 VerticalReferenceFrame::~VerticalReferenceFrame() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the method through which this vertical reference frame is
+ * realized.
+ *
+ * @return the realization method.
+ */
 const util::optional<RealizationMethod> &
 VerticalReferenceFrame::realizationMethod() const {
     return d->realizationMethod_;
@@ -700,6 +879,14 @@ VerticalReferenceFrame::realizationMethod() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a VerticalReferenceFrame
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param anchor the anchor definition, or empty.
+ * @param realizationMethodIn the realization method, or empty.
+ * @return new VerticalReferenceFrame.
+ */
 VerticalReferenceFrameNNPtr VerticalReferenceFrame::create(
     const util::PropertyMap &properties,
     const util::optional<std::string> &anchor,
@@ -777,20 +964,43 @@ TemporalDatum::TemporalDatum(const common::DateTime &temporalOriginIn,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 TemporalDatum::~TemporalDatum() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the date and time to which temporal coordinates are
+ * referenced, expressed in conformance with ISO 8601.
+ *
+ * @return the temporal origin.
+ */
 const common::DateTime &TemporalDatum::temporalOrigin() const {
     return d->temporalOrigin_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the calendar to which the temporal origin is referenced
+ *
+ * Default value: TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN.
+ *
+ * @return the calendar.
+ */
 const std::string &TemporalDatum::calendar() const { return d->calendar_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a TemporalDatum
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param temporalOriginIn the temporal origin into which temporal coordinates
+ * are referenced.
+ * @param calendarIn the calendar (generally
+ * TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN)
+ * @return new VerticalReferenceFrame.
+ */
 TemporalDatumNNPtr
 TemporalDatum::create(const util::PropertyMap &properties,
                       const common::DateTime &temporalOriginIn,

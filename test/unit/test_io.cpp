@@ -247,9 +247,9 @@ TEST(wkt_parse, wkt1_EPSG_4807_grad_mess) {
 
     auto datum = crs->datum();
     auto primem = datum->primeMeridian();
-    ASSERT_EQ(primem->greenwichLongitude().unit(), UnitOfMeasure::GRAD);
+    ASSERT_EQ(primem->longitude().unit(), UnitOfMeasure::GRAD);
     // Check that we have corrected the value that was in degree into grad.
-    ASSERT_EQ(primem->greenwichLongitude().value(), 2.5969213);
+    ASSERT_EQ(primem->longitude().value(), 2.5969213);
 }
 
 // ---------------------------------------------------------------------------
@@ -453,7 +453,7 @@ static void checkGeocentric(GeodeticCRSPtr crs) {
     EXPECT_EQ(*(ellipsoid->name()->description()), "WGS 84");
 
     auto primem = datum->primeMeridian();
-    ASSERT_EQ(primem->greenwichLongitude().unit(), UnitOfMeasure::DEGREE);
+    ASSERT_EQ(primem->longitude().unit(), UnitOfMeasure::DEGREE);
 }
 
 // ---------------------------------------------------------------------------

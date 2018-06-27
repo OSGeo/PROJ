@@ -286,28 +286,39 @@ const std::string AxisAbbreviation::Z("Z");
 
 // ---------------------------------------------------------------------------
 
+/** \brief The realization is by adjustment of a levelling network fixed to one
+ * or more tide gauges. */
 const RealizationMethod RealizationMethod::LEVELLING("levelling");
+/** \brief The realization is through a geoid height model or a height
+ * correction model. This is applied to a specified geodetic CRS. */
 const RealizationMethod RealizationMethod::GEOID("geoid");
+/** \brief The realization is through a tidal model or by tidal predictions. */
 const RealizationMethod RealizationMethod::TIDAL("tidal");
 
 // ---------------------------------------------------------------------------
 
+/** \brief The Greenwich PrimeMeridian */
 const PrimeMeridianNNPtr
     PrimeMeridian::GREENWICH(PrimeMeridian::createGREENWICH());
+/** \brief The Paris PrimeMeridian */
 const PrimeMeridianNNPtr PrimeMeridian::PARIS(PrimeMeridian::createPARIS());
 
 // ---------------------------------------------------------------------------
 
+/** \brief The EPSG:7030 / "WGS 84" Ellipsoid */
 const EllipsoidNNPtr Ellipsoid::WGS84(Ellipsoid::createWGS84());
+/** \brief The EPSG:7019 / "GRS 1980" Ellipsoid */
 const EllipsoidNNPtr Ellipsoid::GRS1980(Ellipsoid::createGRS1980());
 
 // ---------------------------------------------------------------------------
 
+/** \brief The EPSG:6326 / "WGS_1984" GeodeticReferenceFrame */
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::EPSG_6326(
     GeodeticReferenceFrame::createEPSG_6326());
 
 // ---------------------------------------------------------------------------
 
+/** \brief The proleptic Gregorian calendar. */
 const std::string
     TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN("proleptic Gregorian");
 
