@@ -103,7 +103,8 @@ NS_PROJ_START
 
 /** osgeo.proj.util namespace.
  *
- * \brief A set of base types from ISO 19103 + other PROJ specific classes.
+ * \brief A set of base types from ISO 19103, \ref GeoAPI and other PROJ
+ * specific classes.
  */
 namespace util {
 
@@ -121,7 +122,8 @@ template <typename T> using nn_shared_ptr = nn<std::shared_ptr<T>>;
 // To avoid formatting differences between clang-format 3.8 and 7
 #define PROJ_NOEXCEPT noexcept
 
-/** \brief Loose transposition of std::optional available from C++17. */
+/** \brief Loose transposition of [std::optional]
+ * (https://en.cppreference.com/w/cpp/utility/optional) available from C++17. */
 template <class T> class optional {
   public:
     //! @cond Doxygen_Suppress
@@ -154,15 +156,22 @@ template <class T> class optional {
         other.hasVal_ = false;
         return *this;
     }
-    //! @endcond
 
-    PROJ_DLL const T *operator->() const { return &val_; }
     PROJ_DLL T *operator->() { return &val_; }
-
-    PROJ_DLL const T &operator*() const { return val_; }
     PROJ_DLL T &operator*() { return val_; }
 
+    //! @endcond
+
+    /** Returns a pointer to the contained value. */
+    PROJ_DLL const T *operator->() const { return &val_; }
+
+    /** Returns a reference to the contained value. */
+    PROJ_DLL const T &operator*() const { return val_; }
+
+    /** Return whether the optional has a value */
     PROJ_DLL explicit operator bool() const noexcept { return hasVal_; }
+
+    /** Return whether the optional has a value */
     PROJ_DLL bool has_value() const noexcept { return hasVal_; }
 
   private:
@@ -176,10 +185,14 @@ template <class T> class optional {
  */
 class BaseObject {
   public:
+    //! @cond Doxygen_Suppress
     virtual PROJ_DLL ~BaseObject();
+    //! @endcond
 };
 
+/** Shared pointer of BaseObject. */
 using BaseObjectPtr = std::shared_ptr<BaseObject>;
+/** Non-null shared pointer of BaseObject. */
 using BaseObjectNNPtr = util::nn<BaseObjectPtr>;
 
 // ---------------------------------------------------------------------------
@@ -188,7 +201,19 @@ using BaseObjectNNPtr = util::nn<BaseObjectPtr>;
  */
 class BoxedValue : public BaseObject {
   public:
-    enum class Type { OTHER_OBJECT, STRING, INTEGER, BOOLEAN };
+    //! @cond Doxygen_Suppress
+    /** Type of data stored in the BoxedValue. */
+    enum class Type {
+        /** a BaseObjectNNPtr */
+        OTHER_OBJECT,
+        /** a std::string */
+        STRING,
+        /** an integer */
+        INTEGER,
+        /** a boolean */
+        BOOLEAN
+    };
+    //! @endcond
 
     // cppcheck-suppress noExplicitConstructor
     PROJ_DLL BoxedValue(const BaseObjectNNPtr &objectIn);
@@ -204,6 +229,7 @@ class BoxedValue : public BaseObject {
     // cppcheck-suppress noExplicitConstructor
     PROJ_DLL BoxedValue(bool booleanValueIn);
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL BoxedValue(const BoxedValue &other);
     PROJ_DLL BoxedValue &operator=(const BoxedValue &other);
     PROJ_DLL ~BoxedValue() override;
@@ -213,6 +239,7 @@ class BoxedValue : public BaseObject {
     PROJ_DLL const std::string &stringValue() const;
     PROJ_DLL int integerValue() const;
     PROJ_DLL bool booleanValue() const;
+    //! @endcond
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -220,43 +247,57 @@ class BoxedValue : public BaseObject {
     BoxedValue();
 };
 
+/** Shared pointer of BoxedValue. */
 using BoxedValuePtr = std::shared_ptr<BoxedValue>;
+/** Non-null shared pointer of BoxedValue. */
 using BoxedValueNNPtr = util::nn<BoxedValuePtr>;
 
 // ---------------------------------------------------------------------------
 
 class ArrayOfBaseObject;
+/** Shared pointer of ArrayOfBaseObject. */
 using ArrayOfBaseObjectPtr = std::shared_ptr<ArrayOfBaseObject>;
+/** Non-null shared pointer of ArrayOfBaseObject. */
 using ArrayOfBaseObjectNNPtr = util::nn<ArrayOfBaseObjectPtr>;
 
 /** \brief Array of BaseObject.
  */
 class ArrayOfBaseObject : public BaseObject {
   public:
-    PROJ_DLL ArrayOfBaseObject();
-    PROJ_DLL ArrayOfBaseObject(const ArrayOfBaseObject &other);
-    PROJ_DLL ArrayOfBaseObject &operator=(const ArrayOfBaseObject &other);
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~ArrayOfBaseObject() override;
+    //! @endcond
 
     PROJ_DLL void add(BaseObjectNNPtr obj);
 
+    //! @cond Doxygen_Suppress
     std::vector<BaseObjectNNPtr>::const_iterator begin() const;
     std::vector<BaseObjectNNPtr>::const_iterator end() const;
     bool empty() const;
+    //! @endcond
 
     PROJ_DLL static ArrayOfBaseObjectNNPtr create();
 
+  protected:
+    ArrayOfBaseObject();
+    INLINED_MAKE_SHARED
+
   private:
+    ArrayOfBaseObject(const ArrayOfBaseObject &other) = delete;
+    ArrayOfBaseObject &operator=(const ArrayOfBaseObject &other) = delete;
     PROJ_OPAQUE_PRIVATE_DATA
 };
 
 // ---------------------------------------------------------------------------
 
+/** \brief Wrapper of a std::map<std::string, BaseObjectNNPtr> */
 class PropertyMap {
   public:
     PROJ_DLL PropertyMap();
+    //! @cond Doxygen_Suppress
     PROJ_DLL PropertyMap(const PropertyMap &other);
     PROJ_DLL ~PropertyMap();
+    //! @endcond
 
     PROJ_DLL PropertyMap &set(const std::string &key,
                               const BaseObjectNNPtr &val);
@@ -266,9 +307,11 @@ class PropertyMap {
     PROJ_DLL PropertyMap &set(const std::string &key,
                               const std::vector<std::string> &array);
 
-    PROJ_DLL std::map<std::string, BaseObjectNNPtr>::iterator
+    //! @cond Doxygen_Suppress
+    std::map<std::string, BaseObjectNNPtr>::iterator
     find(const std::string &key) const;
-    PROJ_DLL std::map<std::string, BaseObjectNNPtr>::iterator end() const;
+    std::map<std::string, BaseObjectNNPtr>::iterator end() const;
+    //! @endcond
 
     //! @cond Doxygen_Suppress
     // throw(InvalidValueTypeException)
@@ -284,30 +327,52 @@ class PropertyMap {
 // ---------------------------------------------------------------------------
 
 class LocalName;
+/** Shared pointer of LocalName. */
 using LocalNamePtr = std::shared_ptr<LocalName>;
+/** Non-null shared pointer of LocalName. */
 using LocalNameNNPtr = util::nn<LocalNamePtr>;
 
 class NameSpace;
+/** Shared pointer of NameSpace. */
 using NameSpacePtr = std::shared_ptr<NameSpace>;
+/** Non-null shared pointer of NameSpace. */
 using NameSpaceNNPtr = util::nn<NameSpacePtr>;
 
 class GenericName;
+/** Shared pointer of GenericName. */
 using GenericNamePtr = std::shared_ptr<GenericName>;
+/** Non-null shared pointer of GenericName. */
 using GenericNameNNPtr = util::nn<GenericNamePtr>;
 
 // ---------------------------------------------------------------------------
 
+/** \brief A sequence of identifiers rooted within the context of a namespace.
+ *
+ * \remark Simplified version of [GenericName]
+ * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/GenericName.html) from
+ * \ref GeoAPI
+ */
 class GenericName : public BaseObject {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL virtual ~GenericName() override;
-    GenericName(const GenericName &other);
+    //! @endcond
 
+    /** \brief Return the scope of the object, possibly a global one. */
     PROJ_DLL virtual const NameSpacePtr scope() const = 0;
+
+    /** \brief Return the LocalName as a string. */
     PROJ_DLL virtual std::string toString() const = 0;
+
+    /** \brief Return a fully qualified name corresponding to the local name.
+     *
+     * The namespace of the resulting name is a global one.
+     */
     PROJ_DLL virtual GenericNameNNPtr toFullyQualifiedName() const = 0;
 
   protected:
     GenericName();
+    GenericName(const GenericName &other);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -316,10 +381,17 @@ class GenericName : public BaseObject {
 
 // ---------------------------------------------------------------------------
 
+/** \brief A domain in which names given by strings are defined.
+ *
+ * \remark Simplified version of [NameSpace]
+ * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/NameSpace.html) from \ref
+ * GeoAPI
+ */
 class NameSpace {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~NameSpace();
-    NameSpace(const NameSpace &other);
+    //! @endcond
 
     PROJ_DLL bool isGlobal() const;
     PROJ_DLL const GenericNamePtr &name() const;
@@ -328,6 +400,7 @@ class NameSpace {
     friend class NameFactory;
     friend class LocalName;
     explicit NameSpace(const GenericNamePtr &name);
+    NameSpace(const NameSpace &other);
     NameSpaceNNPtr getGlobalFromThis() const;
     const std::string &separator() const;
     static const NameSpaceNNPtr GLOBAL;
@@ -342,10 +415,20 @@ class NameSpace {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Identifier within a NameSpace for a local object.
+ *
+ * Local names are names which are directly accessible to and maintained by a
+ * NameSpace within which they are local, indicated by the scope.
+ *
+ * \remark Simplified version of [LocalName]
+ * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/LocalName.html) from \ref
+ * GeoAPI
+ */
 class LocalName : public GenericName {
   public:
-    LocalName(const LocalName &other);
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~LocalName() override;
+    //! @endcond
 
     PROJ_DLL const NameSpacePtr scope() const override;
     PROJ_DLL std::string toString() const override;
@@ -355,6 +438,7 @@ class LocalName : public GenericName {
     friend class NameFactory;
     friend class NameSpace;
     explicit LocalName(const std::string &nameIn);
+    LocalName(const LocalName &other);
     LocalName(const NameSpacePtr &ns, const std::string &name);
     INLINED_MAKE_SHARED
 
@@ -365,6 +449,12 @@ class LocalName : public GenericName {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Factory for generic names.
+ *
+ * \remark Simplified version of [NameFactory]
+ * (http://www.geoapi.org/3.0/javadoc/org/opengis/util/NameFactory.html) from
+ * \ref GeoAPI
+ */
 class NameFactory {
   public:
     PROJ_DLL static NameSpaceNNPtr
@@ -379,16 +469,22 @@ class NameFactory {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Abstract class to define an enumeration of values.
+ */
 class CodeList {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~CodeList();
+    //! @endcond
 
     PROJ_DLL const std::string &toString() const;
+    /** Return the CodeList item as a string. */
     inline operator std::string() const { return toString(); }
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL bool operator==(const CodeList &other) const;
     PROJ_DLL bool operator!=(const CodeList &other) const;
-
+    //! @endcond
   protected:
     explicit CodeList(const std::string &nameIn);
     CodeList(const CodeList &other);
@@ -400,25 +496,34 @@ class CodeList {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Root exception class.
+ */
 class Exception : public std::exception {
     std::string msg_;
 
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL explicit Exception(const char *message);
     PROJ_DLL explicit Exception(const std::string &message);
     PROJ_DLL Exception(const Exception &other);
     PROJ_DLL ~Exception() override;
+    //! @endcond
     PROJ_DLL virtual const char *what() const noexcept override;
 };
 
 // ---------------------------------------------------------------------------
 
+/** \brief Exception thrown when an invalid value type is set as the value of
+ * a key of a PropertyMap.
+ */
 class InvalidValueTypeException : public Exception {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL explicit InvalidValueTypeException(const char *message);
     PROJ_DLL explicit InvalidValueTypeException(const std::string &message);
     PROJ_DLL InvalidValueTypeException(const InvalidValueTypeException &other);
     PROJ_DLL ~InvalidValueTypeException() override;
+    //! @endcond
 };
 
 } // namespace util

@@ -86,5 +86,16 @@ An older specification of WKT1 is/was used by some software packages:
 [OGC 99-049, 1999-05-05, OpenGIS Simple Features Specification For SQL v1.1]
 (http://portal.opengeospatial.org/files/?artifact_id=829)
 
+\subsection GeoAPI GeoAPI
+
+A set of Java and Python language programming interfaces for geospatial
+applications.
+
+[GeoAPI main page](http://www.geoapi.org/)
+
+[GeoAPI Javadoc](http://www.geoapi.org/3.0/javadoc/index.html)
+
+[OGC GeoAPI Implementation Specification]
+(http://www.opengeospatial.org/standards/geoapi)
 
 */

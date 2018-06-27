@@ -45,7 +45,9 @@ namespace util {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 BaseObject::~BaseObject() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -77,32 +79,43 @@ BoxedValue::BoxedValue() : d(internal::make_unique<Private>(std::string())) {}
 
 // ---------------------------------------------------------------------------
 
+/** \brief Constructs a BoxedValue from a BaseObjectNNPtr.
+ */
 BoxedValue::BoxedValue(const BaseObjectNNPtr &valueIn)
     : d(internal::make_unique<Private>(valueIn)) {}
 
 // ---------------------------------------------------------------------------
 
+/** \brief Constructs a BoxedValue from a string.
+ */
 BoxedValue::BoxedValue(const char *stringValueIn)
     : d(internal::make_unique<Private>(
           std::string(stringValueIn ? stringValueIn : ""))) {}
 
 // ---------------------------------------------------------------------------
 
+/** \brief Constructs a BoxedValue from a string.
+ */
 BoxedValue::BoxedValue(const std::string &stringValueIn)
     : d(internal::make_unique<Private>(stringValueIn)) {}
 
 // ---------------------------------------------------------------------------
 
+/** \brief Constructs a BoxedValue from an integer.
+ */
 BoxedValue::BoxedValue(int integerValueIn)
     : d(internal::make_unique<Private>(integerValueIn)) {}
 
 // ---------------------------------------------------------------------------
 
+/** \brief Constructs a BoxedValue from a boolean.
+ */
 BoxedValue::BoxedValue(bool booleanValueIn)
     : d(internal::make_unique<Private>(booleanValueIn)) {}
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 BoxedValue::BoxedValue(const BoxedValue &other)
     : d(internal::make_unique<Private>(*other.d)) {}
 
@@ -140,6 +153,7 @@ int BoxedValue::integerValue() const { return d->integerValue_; }
 // ---------------------------------------------------------------------------
 
 bool BoxedValue::booleanValue() const { return d->booleanValue_; }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -150,33 +164,25 @@ struct ArrayOfBaseObject::Private {
 //! @endcond
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 ArrayOfBaseObject::ArrayOfBaseObject() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
-ArrayOfBaseObject::ArrayOfBaseObject(const ArrayOfBaseObject &other)
-    : d(internal::make_unique<Private>(*(other.d))) {}
-
-// ---------------------------------------------------------------------------
-
 ArrayOfBaseObject::~ArrayOfBaseObject() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
-ArrayOfBaseObject &ArrayOfBaseObject::
-operator=(const ArrayOfBaseObject &other) {
-    if (this != &other) {
-        *d = *(other.d);
-    }
-    return *this;
-}
-
-// ---------------------------------------------------------------------------
-
+/** \brief Adds an object to the array.
+ *
+ * @param obj the object to add.
+ */
 void ArrayOfBaseObject::add(BaseObjectNNPtr obj) { d->values_.push_back(obj); }
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 std::vector<BaseObjectNNPtr>::const_iterator ArrayOfBaseObject::begin() const {
     return d->values_.begin();
 }
@@ -190,11 +196,16 @@ std::vector<BaseObjectNNPtr>::const_iterator ArrayOfBaseObject::end() const {
 // ---------------------------------------------------------------------------
 
 bool ArrayOfBaseObject::empty() const { return d->values_.empty(); }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a ArrayOfBaseObject.
+ *
+ * @return a new ArrayOfBaseObject.
+ */
 ArrayOfBaseObjectNNPtr ArrayOfBaseObject::create() {
-    return nn_make_shared<ArrayOfBaseObject>();
+    return ArrayOfBaseObject::nn_make_shared<ArrayOfBaseObject>();
 }
 
 // ---------------------------------------------------------------------------
@@ -211,15 +222,20 @@ PropertyMap::PropertyMap() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 PropertyMap::PropertyMap(const PropertyMap &other)
     : d(internal::make_unique<Private>(*(other.d))) {}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 PropertyMap::~PropertyMap() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 std::map<std::string, BaseObjectNNPtr>::iterator
 PropertyMap::find(const std::string &key) const {
     return d->map_.find(key);
@@ -230,9 +246,11 @@ PropertyMap::find(const std::string &key) const {
 std::map<std::string, BaseObjectNNPtr>::iterator PropertyMap::end() const {
     return d->map_.end();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set a BaseObjectNNPtr as the value of a key. */
 PropertyMap &PropertyMap::set(const std::string &key,
                               const BaseObjectNNPtr &val) {
     auto iter = d->map_.find(key);
@@ -246,6 +264,7 @@ PropertyMap &PropertyMap::set(const std::string &key,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set a BoxedValue as the value of a key. */
 PropertyMap &PropertyMap::set(const std::string &key, const BoxedValue &val) {
     auto iter = d->map_.find(key);
     if (iter != d->map_.end()) {
@@ -259,9 +278,10 @@ PropertyMap &PropertyMap::set(const std::string &key, const BoxedValue &val) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set a vector of strings as the value of a key. */
 PropertyMap &PropertyMap::set(const std::string &key,
                               const std::vector<std::string> &arrayIn) {
-    ArrayOfBaseObjectNNPtr array = util::nn_make_shared<ArrayOfBaseObject>();
+    ArrayOfBaseObjectNNPtr array = ArrayOfBaseObject::create();
     for (const auto &str : arrayIn) {
         array->add(util::nn_make_shared<BoxedValue>(str));
     }
@@ -319,7 +339,9 @@ GenericName::GenericName(const GenericName &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 GenericName::~GenericName() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -348,16 +370,19 @@ NameSpace::NameSpace(const NameSpace &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 NameSpace::~NameSpace() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns whether this is a global namespace. */
 bool NameSpace::isGlobal() const { return d->isGlobal; }
 
 // ---------------------------------------------------------------------------
 
 NameSpaceNNPtr NameSpace::getGlobalFromThis() const {
-    NameSpaceNNPtr ns(util::nn_make_shared<NameSpace>(*this));
+    NameSpaceNNPtr ns(NameSpace::nn_make_shared<NameSpace>(*this));
     ns->d->isGlobal = true;
     ns->d->name = LocalName::make_shared<LocalName>("global");
     return ns;
@@ -365,6 +390,7 @@ NameSpaceNNPtr NameSpace::getGlobalFromThis() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the name of this namespace. */
 const GenericNamePtr &NameSpace::name() const { return d->name; }
 
 // ---------------------------------------------------------------------------
@@ -417,7 +443,9 @@ LocalName::LocalName(const LocalName &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 LocalName::~LocalName() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -445,6 +473,13 @@ std::string LocalName::toString() const { return d->name; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a NameSpace.
+ *
+ * @param name name of the namespace.
+ * @param properties Properties. Allowed keys are "separator" and
+ * "separator.head".
+ * @return a new NameFactory.
+ */
 NameSpaceNNPtr NameFactory::createNameSpace(const GenericNameNNPtr &name,
                                             const PropertyMap &properties) {
     NameSpaceNNPtr ns(NameSpace::nn_make_shared<NameSpace>(name));
@@ -456,6 +491,12 @@ NameSpaceNNPtr NameFactory::createNameSpace(const GenericNameNNPtr &name,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a LocalName.
+ *
+ * @param scope scope.
+ * @param name string of the local name.
+ * @return a new LocalName.
+ */
 LocalNameNNPtr NameFactory::createLocalName(const NameSpacePtr &scope,
                                             const std::string &name) {
     return LocalName::nn_make_shared<LocalName>(scope, name);
@@ -463,6 +504,12 @@ LocalNameNNPtr NameFactory::createLocalName(const NameSpacePtr &scope,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a GenericName.
+ *
+ * @param scope scope.
+ * @param parsedNames the components of the name.
+ * @return a new GenericName.
+ */
 GenericNameNNPtr
 NameFactory::createGenericName(const NameSpacePtr &scope,
                                const std::vector<std::string> &parsedNames) {
@@ -501,7 +548,9 @@ CodeList::CodeList(const CodeList &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 CodeList::~CodeList() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -512,10 +561,12 @@ CodeList &CodeList::operator=(const CodeList &other) {
 
 // ---------------------------------------------------------------------------
 
+/** Return the CodeList item as a string. */
 const std::string &CodeList::toString() const { return d->name; }
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 bool CodeList::operator==(const CodeList &other) const {
     return toString() == other.toString();
 }
@@ -525,8 +576,11 @@ bool CodeList::operator==(const CodeList &other) const {
 bool CodeList::operator!=(const CodeList &other) const {
     return toString() != other.toString();
 }
+//! @endcond
+
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Exception::Exception(const char *message) : msg_(message) {}
 
 // ---------------------------------------------------------------------------
@@ -540,13 +594,16 @@ Exception::Exception(const Exception &) = default;
 // ---------------------------------------------------------------------------
 
 Exception::~Exception() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** Return the exception text. */
 const char *Exception::what() const noexcept { return msg_.c_str(); }
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 InvalidValueTypeException::InvalidValueTypeException(const char *message)
     : Exception(message) {}
 
@@ -563,6 +620,7 @@ InvalidValueTypeException::~InvalidValueTypeException() = default;
 
 InvalidValueTypeException::InvalidValueTypeException(
     const InvalidValueTypeException &) = default;
+//! @endcond
 
 } // namespace util
 NS_PROJ_END

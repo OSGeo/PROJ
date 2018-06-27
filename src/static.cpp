@@ -88,6 +88,7 @@ const std::string common::ObjectUsage::OBJECT_DOMAIN_KEY("objectUsage");
 
 #define DEFINE_WKT_CONSTANT(x) const std::string WKTConstants::x(#x)
 
+//! @cond Doxygen_Suppress
 DEFINE_WKT_CONSTANT(GEOCCS);
 DEFINE_WKT_CONSTANT(GEOGCS);
 DEFINE_WKT_CONSTANT(DATUM);
@@ -156,6 +157,7 @@ DEFINE_WKT_CONSTANT(GEODETICREFERENCEFRAME);
 DEFINE_WKT_CONSTANT(VERTICALCRS);
 DEFINE_WKT_CONSTANT(VERTICALDATUM);
 DEFINE_WKT_CONSTANT(TIMEDATUM);
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -353,6 +355,7 @@ const AxisDirectionWKT1 AxisDirectionWKT1::OTHER("OTHER");
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 const std::string AxisName::Longitude("Longitude");
 const std::string AxisName::Latitude("Latitude");
 const std::string AxisName::Easting("Easting");
@@ -361,9 +364,11 @@ const std::string AxisName::Ellipsoidal_height("Ellipsoidal height");
 const std::string AxisName::Geocentric_X("Geocentric X");
 const std::string AxisName::Geocentric_Y("Geocentric Y");
 const std::string AxisName::Geocentric_Z("Geocentric Z");
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 const std::string AxisAbbreviation::lon("lon");
 const std::string AxisAbbreviation::lat("lat");
 const std::string AxisAbbreviation::E("E");
@@ -372,6 +377,7 @@ const std::string AxisAbbreviation::h("h");
 const std::string AxisAbbreviation::X("X");
 const std::string AxisAbbreviation::Y("Y");
 const std::string AxisAbbreviation::Z("Z");
+//! @endcond
 
 } // namespace cs
 
