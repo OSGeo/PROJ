@@ -197,58 +197,149 @@ const UnitOfMeasure UnitOfMeasure::YEAR("year", 31556925.445,
 // ---------------------------------------------------------------------------
 
 namespace cs {
-std::map<std::string, const AxisDirection *>
-    AxisDirection::axisDirectionRegistry;
-std::set<std::string> AxisDirection::axisDirectionKeys;
+std::map<std::string, const AxisDirection *> AxisDirection::registry;
+std::set<std::string> AxisDirection::keys;
 
+/** Axis positive direction is north. In a geodetic or projected CRS, north is
+ * defined through the geodetic reference frame. In an engineering CRS, north
+ * may be defined with respect to an engineering object rather than a
+ * geographical direction. */
 const AxisDirection AxisDirection::NORTH("north");
+
+/** Axis positive direction is approximately north-north-east. */
 const AxisDirection AxisDirection::NORTH_NORTH_EAST("northNorthEast");
+
+/** Axis positive direction is approximately north-east. */
 const AxisDirection AxisDirection::NORTH_EAST("northEast");
+
+/** Axis positive direction is approximately east-north-east. */
 const AxisDirection AxisDirection::EAST_NORTH_EAST("eastNorthEast");
+
+/** Axis positive direction is 90° clockwise from north. */
 const AxisDirection AxisDirection::EAST("east");
+
+/** Axis positive direction is approximately east-south-east. */
 const AxisDirection AxisDirection::EAST_SOUTH_EAST("eastSouthEast");
+
+/** Axis positive direction is approximately south-east. */
 const AxisDirection AxisDirection::SOUTH_EAST("southEast");
+
+/** Axis positive direction is approximately south-south-east. */
 const AxisDirection AxisDirection::SOUTH_SOUTH_EAST("southSouthEast");
+
+/** Axis positive direction is 180° clockwise from north. */
 const AxisDirection AxisDirection::SOUTH("south");
+
+/** Axis positive direction is approximately south-south-west. */
 const AxisDirection AxisDirection::SOUTH_SOUTH_WEST("southSouthWest");
+
+/** Axis positive direction is approximately south-west. */
 const AxisDirection AxisDirection::SOUTH_WEST("southWest");
+
+/** Axis positive direction is approximately west-south-west. */
 const AxisDirection AxisDirection::WEST_SOUTH_WEST("westSouthWest");
+
+/** Axis positive direction is 270° clockwise from north. */
 const AxisDirection AxisDirection::WEST("west");
+
+/** Axis positive direction is approximately west-north-west. */
 const AxisDirection AxisDirection::WEST_NORTH_WEST("westNorthWest");
+
+/** Axis positive direction is approximately north-west. */
 const AxisDirection AxisDirection::NORTH_WEST("northWest");
+
+/** Axis positive direction is approximately north-north-west. */
 const AxisDirection AxisDirection::NORTH_NORTH_WEST("northNorthWest");
+
+/** Axis positive direction is up relative to gravity. */
 const AxisDirection AxisDirection::UP("up");
+
+/** Axis positive direction is down relative to gravity. */
 const AxisDirection AxisDirection::DOWN("down");
+
+/** Axis positive direction is in the equatorial plane from the centre of the
+ * modelled Earth towards the intersection of the equator with the prime
+ * meridian. */
 const AxisDirection AxisDirection::GEOCENTRIC_X("geocentricX");
+
+/** Axis positive direction is in the equatorial plane from the centre of the
+ * modelled Earth towards the intersection of the equator and the meridian 90°
+ * eastwards from the prime meridian. */
 const AxisDirection AxisDirection::GEOCENTRIC_Y("geocentricY");
+
+/** Axis positive direction is from the centre of the modelled Earth parallel to
+ * its rotation axis and towards its north pole. */
 const AxisDirection AxisDirection::GEOCENTRIC_Z("geocentricZ");
+
+/** Axis positive direction is towards higher pixel column. */
 const AxisDirection AxisDirection::COLUMN_POSITIVE("columnPositive");
+
+/** Axis positive direction is towards lower pixel column. */
 const AxisDirection AxisDirection::COLUMN_NEGATIVE("columnNegative");
+
+/** Axis positive direction is towards higher pixel row. */
 const AxisDirection AxisDirection::ROW_POSITIVE("rowPositive");
+
+/** Axis positive direction is towards lower pixel row. */
 const AxisDirection AxisDirection::ROW_NEGATIVE("rowNegative");
+
+/** Axis positive direction is right in display. */
 const AxisDirection AxisDirection::DISPLAY_RIGHT("displayRight");
+
+/** Axis positive direction is left in display. */
 const AxisDirection AxisDirection::DISPLAY_LEFT("displayLeft");
+
+/** Axis positive direction is towards top of approximately vertical display
+ * surface. */
 const AxisDirection AxisDirection::DISPLAY_UP("displayUp");
+
+/** Axis positive direction is towards bottom of approximately vertical display
+ * surface. */
 const AxisDirection AxisDirection::DISPLAY_DOWN("displayDown");
+
+/** Axis positive direction is forward; for an observer at the centre of the
+ * object this is will be towards its front, bow or nose. */
 const AxisDirection AxisDirection::FORWARD("forward");
+
+/** Axis positive direction is aft; for an observer at the centre of the object
+ * this will be towards its back, stern or tail. */
 const AxisDirection AxisDirection::AFT("aft");
+
+/** Axis positive direction is port; for an observer at the centre of the object
+ * this will be towards its left. */
 const AxisDirection AxisDirection::PORT("port");
+
+/** Axis positive direction is starboard; for an observer at the centre of the
+ * object this will be towards its right. */
 const AxisDirection AxisDirection::STARBOARD("starboard");
+
+/** Axis positive direction is clockwise from a specified direction. */
 const AxisDirection AxisDirection::CLOCKWISE("clockwise");
+
+/** Axis positive direction is counter clockwise from a specified direction. */
 const AxisDirection AxisDirection::COUNTER_CLOCKWISE("counterClockwise");
+
+/** Axis positive direction is towards the object. */
 const AxisDirection AxisDirection::TOWARDS("towards");
+
+/** Axis positive direction is away from the object. */
 const AxisDirection AxisDirection::AWAY_FROM("awayFrom");
+
+/** Temporal axis positive direction is towards the future. */
 const AxisDirection AxisDirection::FUTURE("future");
+
+/** Temporal axis positive direction is towards the past. */
 const AxisDirection AxisDirection::PAST("past");
+
+/** Axis positive direction is unspecified. */
 const AxisDirection AxisDirection::UNSPECIFIED("unspecified");
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 
-std::map<std::string, const AxisDirectionWKT1 *>
-    AxisDirectionWKT1::axisDirectionWKT1Registry;
-std::set<std::string> AxisDirectionWKT1::axisDirectionWKT1Keys;
+std::map<std::string, const AxisDirectionWKT1 *> AxisDirectionWKT1::registry;
+std::set<std::string> AxisDirectionWKT1::keys;
 
 const AxisDirectionWKT1 AxisDirectionWKT1::NORTH("NORTH");
 const AxisDirectionWKT1 AxisDirectionWKT1::EAST("EAST");

@@ -74,14 +74,27 @@ Meridian::Meridian(const Meridian &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Meridian::~Meridian() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the longitude of the meridian that the axis follows from the
+ * pole.
+ *
+ * @return the longitude.
+ */
 const common::Angle &Meridian::longitude() const { return d->longitude_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Meridian.
+ *
+ * @param longitudeIn longitude of the meridian that the axis follows from the
+ * pole.
+ * @return new Meridian.
+ */
 MeridianNNPtr Meridian::create(const common::Angle &longitudeIn) {
     return Meridian::nn_make_shared<Meridian>(longitudeIn);
 }
@@ -105,9 +118,9 @@ std::string Meridian::exportToWKT(
 
 //! @cond Doxygen_Suppress
 struct CoordinateSystemAxis::Private {
-    std::string axisAbbrev{};
-    const AxisDirection *axisDirection = &(AxisDirection::UNSPECIFIED);
-    common::UnitOfMeasure axisUnitID{};
+    std::string abbreviation{};
+    const AxisDirection *direction = &(AxisDirection::UNSPECIFIED);
+    common::UnitOfMeasure unit{};
     util::optional<double> minimumValue{};
     util::optional<double> maximumValue{};
     MeridianPtr meridian{};
@@ -129,56 +142,117 @@ CoordinateSystemAxis::CoordinateSystemAxis(const CoordinateSystemAxis &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 CoordinateSystemAxis::~CoordinateSystemAxis() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
-const std::string &CoordinateSystemAxis::axisAbbrev() const {
-    return d->axisAbbrev;
+/** \brief Return the axis abbreviation.
+ *
+ * The abbreviation used for this coordinate system axis; this abbreviation
+ * is also used to identify the coordinates in the coordinate tuple.
+ * Examples are X and Y.
+ *
+ * @return the abbreviation.
+ */
+const std::string &CoordinateSystemAxis::abbreviation() const {
+    return d->abbreviation;
 }
 
 // ---------------------------------------------------------------------------
 
-const AxisDirection &CoordinateSystemAxis::axisDirection() const {
-    return *(d->axisDirection);
+/** \brief Return the axis direction.
+ *
+ * The direction of this coordinate system axis (or in the case of Cartesian
+ * projected coordinates, the direction of this coordinate system axis locally)
+ * Examples: north or south, east or west, up or down. Within any set of
+ * coordinate system axes, only one of each pair of terms can be used. For
+ * Earth-fixed CRSs, this direction is often approximate and intended to
+ * provide a human interpretable meaning to the axis. When a geodetic reference
+ * frame is used, the precise directions of the axes may therefore vary
+ * slightly from this approximate direction. Note that an EngineeringCRS often
+ * requires specific descriptions of the directions of its coordinate system
+ * axes.
+ *
+ * @return the direction.
+ */
+const AxisDirection &CoordinateSystemAxis::direction() const {
+    return *(d->direction);
 }
 
 // ---------------------------------------------------------------------------
 
-const common::UnitOfMeasure &CoordinateSystemAxis::axisUnitID() const {
-    return d->axisUnitID;
+/** \brief Return the axis unit.
+ *
+ * This is the spatial unit or temporal quantity used for this coordinate
+ * system axis. The value of a coordinate in a coordinate tuple shall be
+ * recorded using this unit.
+ *
+ * @return the axis unit.
+ */
+const common::UnitOfMeasure &CoordinateSystemAxis::unit() const {
+    return d->unit;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the minimum value normally allowed for this axis, in the unit
+ * for the axis.
+ *
+ * @return the minimum value, or empty.
+ */
 const util::optional<double> &CoordinateSystemAxis::minimumValue() const {
     return d->minimumValue;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the maximum value normally allowed for this axis, in the unit
+ * for the axis.
+ *
+ * @return the maximum value, or empty.
+ */
 const util::optional<double> &CoordinateSystemAxis::maximumValue() const {
     return d->maximumValue;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the meridian that the axis follows from the pole, for a
+ * coordinate
+ * reference system centered on a pole.
+ *
+ * @return the meridian, or null.
+ */
 const MeridianPtr &CoordinateSystemAxis::meridian() const {
     return d->meridian;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a CoordinateSystemAxis.
+ *
+ * @param properties See \ref general_properties. The name should generally be
+ * defined.
+ * @param abbreviationIn Axis abbreviation (might be empty)
+ * @param directionIn Axis direction
+ * @param unitIn Axis unit
+ * @param meridianIn The meridian that the axis follows from the pole, for a
+ * coordinate
+ * reference system centered on a pole, or nullptr
+ * @return a new CoordinateSystemAxis.
+ */
 CoordinateSystemAxisNNPtr CoordinateSystemAxis::create(
-    const util::PropertyMap &properties, const std::string &abbreviation,
-    const AxisDirection &direction, const common::UnitOfMeasure &unit,
-    const MeridianPtr &meridian) {
+    const util::PropertyMap &properties, const std::string &abbreviationIn,
+    const AxisDirection &directionIn, const common::UnitOfMeasure &unitIn,
+    const MeridianPtr &meridianIn) {
     auto csa(CoordinateSystemAxis::nn_make_shared<CoordinateSystemAxis>());
     csa->setProperties(properties);
-    csa->d->axisAbbrev = abbreviation;
-    csa->d->axisDirection = &direction;
-    csa->d->axisUnitID = unit;
-    csa->d->meridian = meridian;
+    csa->d->abbreviation = abbreviationIn;
+    csa->d->direction = &directionIn;
+    csa->d->unit = unitIn;
+    csa->d->meridian = meridianIn;
     return csa;
 }
 
@@ -192,6 +266,7 @@ std::string CoordinateSystemAxis::exportToWKT(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 std::string CoordinateSystemAxis::normalizeAxisName(const std::string &str) {
     if (str.empty()) {
         return str;
@@ -200,18 +275,20 @@ std::string CoordinateSystemAxis::normalizeAxisName(const std::string &str) {
     // EPSG database.
     return toupper(str.substr(0, 1)) + str.substr(1);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 std::string CoordinateSystemAxis::exportToWKT(io::WKTFormatterNNPtr formatter,
                                               int order,
                                               bool disableAbbrev) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(io::WKTConstants::AXIS, !identifiers().empty());
     std::string axisName = *(name()->description());
-    std::string abbrev = axisAbbrev();
+    std::string abbrev = abbreviation();
     std::string parenthesedAbbrev = "(" + abbrev + ")";
-    std::string dir = axisDirection().toString();
+    std::string dir = direction().toString();
     std::string axisDesignation;
 
     // It seems that the convention in WKT2 for axis name is first letter in
@@ -239,16 +316,16 @@ std::string CoordinateSystemAxis::exportToWKT(io::WKTFormatterNNPtr formatter,
     if (!isWKT2) {
         dir = toupper(dir);
 
-        if (axisDirection() == AxisDirection::GEOCENTRIC_Z) {
+        if (direction() == AxisDirection::GEOCENTRIC_Z) {
             dir = AxisDirectionWKT1::NORTH;
         } else if (AxisDirectionWKT1::valueOf(dir) == nullptr) {
             dir = AxisDirectionWKT1::OTHER;
         }
     } else if (!abbrev.empty()) {
         // For geocentric CS, just put the abbreviation
-        if (axisDirection() == AxisDirection::GEOCENTRIC_X ||
-            axisDirection() == AxisDirection::GEOCENTRIC_Y ||
-            axisDirection() == AxisDirection::GEOCENTRIC_Z) {
+        if (direction() == AxisDirection::GEOCENTRIC_X ||
+            direction() == AxisDirection::GEOCENTRIC_Y ||
+            direction() == AxisDirection::GEOCENTRIC_Z) {
             axisDesignation = parenthesedAbbrev;
         }
         // For cartesian CS with Easting/Northing, export only the abbreviation
@@ -270,8 +347,8 @@ std::string CoordinateSystemAxis::exportToWKT(io::WKTFormatterNNPtr formatter,
         formatter->endNode();
     }
     if (formatter->outputUnit() &&
-        axisUnitID().type() != common::UnitOfMeasure::Type::NONE) {
-        axisUnitID().exportToWKT(formatter);
+        unit().type() != common::UnitOfMeasure::Type::NONE) {
+        unit().exportToWKT(formatter);
     }
     if (formatter->outputId()) {
         formatID(formatter);
@@ -279,6 +356,7 @@ std::string CoordinateSystemAxis::exportToWKT(io::WKTFormatterNNPtr formatter,
     formatter->endNode();
     return formatter->toString();
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -309,10 +387,16 @@ CoordinateSystem::CoordinateSystem(const CoordinateSystem &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 CoordinateSystem::~CoordinateSystem() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the list of axes of this coordinate system.
+ *
+ * @return the axes.
+ */
 const std::vector<CoordinateSystemAxisNNPtr> &
 CoordinateSystem::axisList() const {
     return d->axis;
@@ -339,9 +423,9 @@ std::string CoordinateSystem::exportToWKT(
     bool bFirstUnit = true;
     for (auto &axis : axisList()) {
         if (bFirstUnit) {
-            unit = axis->axisUnitID();
+            unit = axis->unit();
             bFirstUnit = false;
-        } else if (unit != axis->axisUnitID()) {
+        } else if (unit != axis->unit()) {
             bAllSameUnit = false;
         }
     }
@@ -381,7 +465,9 @@ SphericalCS::SphericalCS() = default;
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 SphericalCS::~SphericalCS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -396,11 +482,19 @@ SphericalCS::SphericalCS(const SphericalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a SphericalCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axis1 The first axis.
+ * @param axis2 The second axis.
+ * @param axis3 The third axis.
+ * @return a new SphericalCS.
+ */
 SphericalCSNNPtr SphericalCS::create(const util::PropertyMap &properties,
-                                     const CoordinateSystemAxisNNPtr &axis0,
                                      const CoordinateSystemAxisNNPtr &axis1,
-                                     const CoordinateSystemAxisNNPtr &axis2) {
-    std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1, axis2};
+                                     const CoordinateSystemAxisNNPtr &axis2,
+                                     const CoordinateSystemAxisNNPtr &axis3) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis1, axis2, axis3};
     auto cs(SphericalCS::nn_make_shared<SphericalCS>(axis));
     cs->setProperties(properties);
     return cs;
@@ -412,7 +506,9 @@ EllipsoidalCS::EllipsoidalCS() = default;
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 EllipsoidalCS::~EllipsoidalCS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -428,24 +524,18 @@ EllipsoidalCS::EllipsoidalCS(const EllipsoidalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a EllipsoidalCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axis1 The first axis.
+ * @param axis2 The second axis.
+ * @return a new EllipsoidalCS.
+ */
 EllipsoidalCSNNPtr
 EllipsoidalCS::create(const util::PropertyMap &properties,
-                      const CoordinateSystemAxisNNPtr &axis0,
-                      const CoordinateSystemAxisNNPtr &axis1) {
-    std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1};
-    auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
-    cs->setProperties(properties);
-    return cs;
-}
-
-// ---------------------------------------------------------------------------
-
-EllipsoidalCSNNPtr
-EllipsoidalCS::create(const util::PropertyMap &properties,
-                      const CoordinateSystemAxisNNPtr &axis0,
                       const CoordinateSystemAxisNNPtr &axis1,
                       const CoordinateSystemAxisNNPtr &axis2) {
-    std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1, axis2};
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis1, axis2};
     auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
     cs->setProperties(properties);
     return cs;
@@ -453,6 +543,33 @@ EllipsoidalCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a EllipsoidalCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axis1 The first axis.
+ * @param axis2 The second axis.
+ * @param axis3 The third axis.
+ * @return a new EllipsoidalCS.
+ */
+EllipsoidalCSNNPtr
+EllipsoidalCS::create(const util::PropertyMap &properties,
+                      const CoordinateSystemAxisNNPtr &axis1,
+                      const CoordinateSystemAxisNNPtr &axis2,
+                      const CoordinateSystemAxisNNPtr &axis3) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis1, axis2, axis3};
+    auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a EllipsoidalCS with a Latitude (first) and Longitude
+ * (second) axis.
+ *
+ * @param unit Angular unit of the axes.
+ * @return a new EllipsoidalCS.
+ */
 EllipsoidalCSNNPtr
 EllipsoidalCS::createLatitudeLongitude(const common::UnitOfMeasure &unit) {
     std::vector<CoordinateSystemAxisNNPtr> axis{
@@ -470,6 +587,13 @@ EllipsoidalCS::createLatitudeLongitude(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a EllipsoidalCS with a Latitude (first), Longitude
+ * (second) axis and ellipsoidal height (third) axis.
+ *
+ * @param angularUnit Angular unit of the latitude and longitude axes.
+ * @param linearUnit Linear unit of the ellipsoidal height axis.
+ * @return a new EllipsoidalCS.
+ */
 EllipsoidalCSNNPtr EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
     const common::UnitOfMeasure &angularUnit,
     const common::UnitOfMeasure &linearUnit) {
@@ -496,7 +620,9 @@ VerticalCS::VerticalCS() = default;
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 VerticalCS::~VerticalCS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -511,6 +637,12 @@ VerticalCS::VerticalCS(const VerticalCS &) = default;
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a VerticalCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axis The axis.
+ * @return a new VerticalCS.
+ */
 VerticalCSNNPtr VerticalCS::create(const util::PropertyMap &properties,
                                    const CoordinateSystemAxisNNPtr &axis) {
     auto cs(VerticalCS::nn_make_shared<VerticalCS>(axis));
@@ -520,6 +652,11 @@ VerticalCSNNPtr VerticalCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a VerticalCS with a Gravity-related height axis
+ *
+ * @param unit linear unit.
+ * @return a new VerticalCS.
+ */
 VerticalCSNNPtr
 VerticalCS::createGravityRelatedHeight(const common::UnitOfMeasure &unit) {
     auto cs(VerticalCS::nn_make_shared<VerticalCS>(CoordinateSystemAxis::create(
@@ -535,7 +672,9 @@ CartesianCS::CartesianCS() = default;
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 CartesianCS::~CartesianCS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -550,22 +689,17 @@ CartesianCS::CartesianCS(const CartesianCS &) = default;
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a CartesianCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axis1 The first axis.
+ * @param axis2 The second axis.
+ * @return a new CartesianCS.
+ */
 CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
-                                     const CoordinateSystemAxisNNPtr &axis0,
-                                     const CoordinateSystemAxisNNPtr &axis1) {
-    std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1};
-    auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
-    cs->setProperties(properties);
-    return cs;
-}
-
-// ---------------------------------------------------------------------------
-
-CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
-                                     const CoordinateSystemAxisNNPtr &axis0,
                                      const CoordinateSystemAxisNNPtr &axis1,
                                      const CoordinateSystemAxisNNPtr &axis2) {
-    std::vector<CoordinateSystemAxisNNPtr> axis{axis0, axis1, axis2};
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis1, axis2};
     auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
     cs->setProperties(properties);
     return cs;
@@ -573,6 +707,32 @@ CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a CartesianCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axis1 The first axis.
+ * @param axis2 The second axis.
+ * @param axis3 The third axis.
+ * @return a new CartesianCS.
+ */
+CartesianCSNNPtr CartesianCS::create(const util::PropertyMap &properties,
+                                     const CoordinateSystemAxisNNPtr &axis1,
+                                     const CoordinateSystemAxisNNPtr &axis2,
+                                     const CoordinateSystemAxisNNPtr &axis3) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis1, axis2, axis3};
+    auto cs(CartesianCS::nn_make_shared<CartesianCS>(axis));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a CartesianCS with a Easting (first) and Northing
+ * (second) axis.
+ *
+ * @param unit Linear unit of the axes.
+ * @return a new CartesianCS.
+ */
 CartesianCSNNPtr
 CartesianCS::createEastingNorthing(const common::UnitOfMeasure &unit) {
     std::vector<CoordinateSystemAxisNNPtr> axis{
@@ -590,6 +750,11 @@ CartesianCS::createEastingNorthing(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a CartesianCS with the three geocentric axes.
+ *
+ * @param unit Liinear unit of the axes.
+ * @return a new CartesianCS.
+ */
 CartesianCSNNPtr
 CartesianCS::createGeocentric(const common::UnitOfMeasure &unit) {
     std::vector<CoordinateSystemAxisNNPtr> axis{
@@ -612,55 +777,55 @@ CartesianCS::createGeocentric(const common::UnitOfMeasure &unit) {
 // ---------------------------------------------------------------------------
 
 AxisDirection::AxisDirection(const std::string &nameIn) : CodeList(nameIn) {
-    assert(axisDirectionKeys.find(nameIn) == axisDirectionKeys.end());
-    axisDirectionRegistry[nameIn] = this;
-    axisDirectionKeys.insert(nameIn);
+    assert(keys.find(nameIn) == keys.end());
+    registry[nameIn] = this;
+    keys.insert(nameIn);
 }
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 const AxisDirection *AxisDirection::valueOf(const std::string &nameIn) {
-    auto iter = axisDirectionRegistry.find(nameIn);
-    if (iter == axisDirectionRegistry.end())
+    auto iter = registry.find(nameIn);
+    if (iter == registry.end())
         return nullptr;
     return iter->second;
 }
 
 // ---------------------------------------------------------------------------
 
-const std::set<std::string> &AxisDirection::getKeys() {
-    return axisDirectionKeys;
-}
+const std::set<std::string> &AxisDirection::getKeys() { return keys; }
+//! @endcond
 
 //! @cond Doxygen_Suppress
 // ---------------------------------------------------------------------------
 
 AxisDirectionWKT1::AxisDirectionWKT1(const std::string &nameIn)
     : CodeList(nameIn) {
-    assert(axisDirectionWKT1Keys.find(nameIn) == axisDirectionWKT1Keys.end());
-    axisDirectionWKT1Registry[nameIn] = this;
-    axisDirectionWKT1Keys.insert(nameIn);
+    assert(keys.find(nameIn) == keys.end());
+    registry[nameIn] = this;
+    keys.insert(nameIn);
 }
 
 // ---------------------------------------------------------------------------
 
 const AxisDirectionWKT1 *AxisDirectionWKT1::valueOf(const std::string &nameIn) {
-    auto iter = axisDirectionWKT1Registry.find(nameIn);
-    if (iter == axisDirectionWKT1Registry.end())
+    auto iter = registry.find(nameIn);
+    if (iter == registry.end())
         return nullptr;
     return iter->second;
 }
 
 // ---------------------------------------------------------------------------
 
-const std::set<std::string> &AxisDirectionWKT1::getKeys() {
-    return axisDirectionWKT1Keys;
-}
+const std::set<std::string> &AxisDirectionWKT1::getKeys() { return keys; }
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 TemporalCS::~TemporalCS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -669,7 +834,9 @@ TemporalCS::TemporalCS(const CoordinateSystemAxisNNPtr &axisIn)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 DateTimeTemporalCS::~DateTimeTemporalCS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -678,6 +845,12 @@ DateTimeTemporalCS::DateTimeTemporalCS(const CoordinateSystemAxisNNPtr &axisIn)
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a DateTimeTemporalCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axisIn The axis.
+ * @return a new DateTimeTemporalCS.
+ */
 DateTimeTemporalCSNNPtr
 DateTimeTemporalCS::create(const util::PropertyMap &properties,
                            const CoordinateSystemAxisNNPtr &axisIn) {
@@ -695,7 +868,9 @@ DateTimeTemporalCS::getWKT2Type(io::WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 TemporalCountCS::~TemporalCountCS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -704,6 +879,12 @@ TemporalCountCS::TemporalCountCS(const CoordinateSystemAxisNNPtr &axisIn)
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a TemporalCountCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axisIn The axis.
+ * @return a new TemporalCountCS.
+ */
 TemporalCountCSNNPtr
 TemporalCountCS::create(const util::PropertyMap &properties,
                         const CoordinateSystemAxisNNPtr &axisIn) {
@@ -721,7 +902,9 @@ TemporalCountCS::getWKT2Type(io::WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 TemporalMeasureCS::~TemporalMeasureCS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -730,6 +913,12 @@ TemporalMeasureCS::TemporalMeasureCS(const CoordinateSystemAxisNNPtr &axisIn)
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a TemporalMeasureCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axisIn The axis.
+ * @return a new TemporalMeasureCS.
+ */
 TemporalMeasureCSNNPtr
 TemporalMeasureCS::create(const util::PropertyMap &properties,
                           const CoordinateSystemAxisNNPtr &axisIn) {

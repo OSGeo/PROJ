@@ -278,11 +278,11 @@ bool GeodeticCRS::isGeocentric() const {
     return coordinateSystem()->getWKT2Type(io::WKTFormatter::create()) ==
                "Cartesian" &&
            coordinateSystem()->axisList().size() == 3 &&
-           coordinateSystem()->axisList()[0]->axisDirection() ==
+           coordinateSystem()->axisList()[0]->direction() ==
                cs::AxisDirection::GEOCENTRIC_X &&
-           coordinateSystem()->axisList()[1]->axisDirection() ==
+           coordinateSystem()->axisList()[1]->direction() ==
                cs::AxisDirection::GEOCENTRIC_Y &&
-           coordinateSystem()->axisList()[2]->axisDirection() ==
+           coordinateSystem()->axisList()[2]->direction() ==
                cs::AxisDirection::GEOCENTRIC_Z;
 }
 
@@ -343,8 +343,7 @@ std::string GeodeticCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     auto &axisList = coordinateSystem()->axisList();
     if (!axisList.empty()) {
         formatter->pushAxisAngularUnit(
-            util::nn_make_shared<common::UnitOfMeasure>(
-                axisList[0]->axisUnitID()));
+            util::nn_make_shared<common::UnitOfMeasure>(axisList[0]->unit()));
     }
     datum()->exportToWKT(formatter);
     datum()->primeMeridian()->exportToWKT(formatter);
@@ -353,7 +352,7 @@ std::string GeodeticCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     }
     if (!isWKT2) {
         if (!axisList.empty()) {
-            axisList[0]->axisUnitID().exportToWKT(formatter);
+            axisList[0]->unit().exportToWKT(formatter);
         }
     }
     coordinateSystem()->exportToWKT(formatter);
@@ -378,11 +377,11 @@ GeodeticCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 
     auto &axisList = coordinateSystem()->axisList();
     if (!axisList.empty() &&
-        axisList[0]->axisUnitID() != common::UnitOfMeasure::METRE) {
-        auto projUnit = axisList[0]->axisUnitID().exportToPROJString();
+        axisList[0]->unit() != common::UnitOfMeasure::METRE) {
+        auto projUnit = axisList[0]->unit().exportToPROJString();
         if (projUnit.empty()) {
             formatter->addParam("to_meter",
-                                axisList[0]->axisUnitID().conversionToSI());
+                                axisList[0]->unit().conversionToSI());
         } else {
             formatter->addParam("units", projUnit);
         }
@@ -542,12 +541,11 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
     io::PROJStringFormatterNNPtr formatter) const {
     auto &axisList = coordinateSystem()->axisList();
     if (!axisList.empty() &&
-        axisList[0]->axisUnitID() != common::UnitOfMeasure::DEGREE) {
+        axisList[0]->unit() != common::UnitOfMeasure::DEGREE) {
         formatter->addStep("unitconvert");
-        auto projUnit = axisList[0]->axisUnitID().exportToPROJString();
+        auto projUnit = axisList[0]->unit().exportToPROJString();
         if (projUnit.empty()) {
-            formatter->addParam("xy_in",
-                                axisList[0]->axisUnitID().conversionToSI());
+            formatter->addParam("xy_in", axisList[0]->unit().conversionToSI());
         } else {
             formatter->addParam("xy_in", projUnit);
         }
@@ -666,7 +664,7 @@ std::string VerticalCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     }
     auto &axisList = coordinateSystem()->axisList();
     if (!isWKT2 && !axisList.empty()) {
-        axisList[0]->axisUnitID().exportToWKT(formatter);
+        axisList[0]->unit().exportToWKT(formatter);
     }
     coordinateSystem()->exportToWKT(formatter);
     ObjectUsage::_exportToWKT(formatter);
@@ -687,11 +685,11 @@ VerticalCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 
     auto &axisList = coordinateSystem()->axisList();
     if (!axisList.empty() &&
-        axisList[0]->axisUnitID() != common::UnitOfMeasure::METRE) {
-        auto projUnit = axisList[0]->axisUnitID().exportToPROJString();
+        axisList[0]->unit() != common::UnitOfMeasure::METRE) {
+        auto projUnit = axisList[0]->unit().exportToPROJString();
         if (projUnit.empty()) {
             formatter->addParam("vto_meter",
-                                axisList[0]->axisUnitID().conversionToSI());
+                                axisList[0]->unit().conversionToSI());
         } else {
             formatter->addParam("vunits", projUnit);
         }
@@ -872,7 +870,7 @@ std::string ProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         // http://docs.opengeospatial.org/is/12-063r5/12-063r5.html#61
         if (formatter->primeMeridianOrParameterUnitOmittedIfSameAsAxis() &&
             !geodeticCRSAxisList.empty()) {
-            geodeticCRSAxisList[0]->axisUnitID().exportToWKT(formatter);
+            geodeticCRSAxisList[0]->unit().exportToWKT(formatter);
         }
         baseCRS()->datum()->primeMeridian()->exportToWKT(formatter);
         formatter->endNode();
@@ -887,13 +885,12 @@ std::string ProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     auto &axisList = coordinateSystem()->axisList();
     if (!axisList.empty()) {
         formatter->pushAxisLinearUnit(
-            util::nn_make_shared<common::UnitOfMeasure>(
-                axisList[0]->axisUnitID()));
+            util::nn_make_shared<common::UnitOfMeasure>(axisList[0]->unit()));
     }
     if (!geodeticCRSAxisList.empty()) {
         formatter->pushAxisAngularUnit(
             util::nn_make_shared<common::UnitOfMeasure>(
-                geodeticCRSAxisList[0]->axisUnitID()));
+                geodeticCRSAxisList[0]->unit()));
     }
 
     derivingConversion()->exportToWKT(formatter);
@@ -908,7 +905,7 @@ std::string ProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     if (!isWKT2) {
         formatter->setOutputConversionNode(true);
         if (!axisList.empty()) {
-            axisList[0]->axisUnitID().exportToWKT(formatter);
+            axisList[0]->unit().exportToWKT(formatter);
         }
     }
 
@@ -935,19 +932,19 @@ ProjectedCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 
     auto &axisList = coordinateSystem()->axisList();
     if (!axisList.empty() &&
-        axisList[0]->axisUnitID() != common::UnitOfMeasure::METRE) {
-        auto projUnit = axisList[0]->axisUnitID().exportToPROJString();
+        axisList[0]->unit() != common::UnitOfMeasure::METRE) {
+        auto projUnit = axisList[0]->unit().exportToPROJString();
         if (projUnit.empty()) {
             formatter->addParam("to_meter",
-                                axisList[0]->axisUnitID().conversionToSI());
+                                axisList[0]->unit().conversionToSI());
         } else {
             formatter->addParam("units", projUnit);
         }
     }
 
     if (axisList.size() >= 2 &&
-        axisList[0]->axisDirection() == cs::AxisDirection::NORTH &&
-        axisList[1]->axisDirection() == cs::AxisDirection::EAST) {
+        axisList[0]->direction() == cs::AxisDirection::NORTH &&
+        axisList[1]->direction() == cs::AxisDirection::EAST) {
         formatter->addStep("axisswap");
         formatter->addParam("order", "2,1");
     }

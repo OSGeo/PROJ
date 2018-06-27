@@ -63,9 +63,8 @@ class AxisDirectionWKT1 : public util::CodeList {
   private:
     explicit AxisDirectionWKT1(const std::string &nameIn);
 
-    static std::map<std::string, const AxisDirectionWKT1 *>
-        axisDirectionWKT1Registry;
-    static std::set<std::string> axisDirectionWKT1Keys;
+    static std::map<std::string, const AxisDirectionWKT1 *> registry;
+    static std::set<std::string> keys;
 };
 
 // ---------------------------------------------------------------------------

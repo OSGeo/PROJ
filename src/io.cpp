@@ -1248,32 +1248,32 @@ WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
     std::string axisDesignation(stripQuotes(children[0]->value()));
     size_t sepPos = axisDesignation.find(" (");
     std::string axisName;
-    std::string axisAbbrev;
+    std::string abbreviation;
     if (sepPos != std::string::npos && axisDesignation.back() == ')') {
         axisName = CoordinateSystemAxis::normalizeAxisName(
             axisDesignation.substr(0, sepPos));
-        axisAbbrev = axisDesignation.substr(sepPos + 2);
-        axisAbbrev.resize(axisAbbrev.size() - 1);
+        abbreviation = axisDesignation.substr(sepPos + 2);
+        abbreviation.resize(abbreviation.size() - 1);
     } else if (!axisDesignation.empty() && axisDesignation[0] == '(' &&
                axisDesignation.back() == ')') {
-        axisAbbrev = axisDesignation.substr(1, axisDesignation.size() - 2);
-        if (axisAbbrev == AxisAbbreviation::E) {
+        abbreviation = axisDesignation.substr(1, axisDesignation.size() - 2);
+        if (abbreviation == AxisAbbreviation::E) {
             axisName = AxisName::Easting;
-        } else if (axisAbbrev == AxisAbbreviation::N) {
+        } else if (abbreviation == AxisAbbreviation::N) {
             axisName = AxisName::Northing;
-        } else if (axisAbbrev == AxisAbbreviation::lat) {
+        } else if (abbreviation == AxisAbbreviation::lat) {
             axisName = AxisName::Latitude;
-        } else if (axisAbbrev == AxisAbbreviation::lon) {
+        } else if (abbreviation == AxisAbbreviation::lon) {
             axisName = AxisName::Longitude;
         }
     } else {
         axisName = CoordinateSystemAxis::normalizeAxisName(axisDesignation);
         if (axisName == AxisName::Latitude) {
-            axisAbbrev = AxisAbbreviation::lat;
+            abbreviation = AxisAbbreviation::lat;
         } else if (axisName == AxisName::Longitude) {
-            axisAbbrev = AxisAbbreviation::lon;
+            abbreviation = AxisAbbreviation::lon;
         } else if (axisName == AxisName::Ellipsoidal_height) {
-            axisAbbrev = AxisAbbreviation::h;
+            abbreviation = AxisAbbreviation::h;
         }
     }
     std::string dirString = children[1]->value();
@@ -1281,27 +1281,27 @@ WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
 
     // WKT2, geocentric CS: axis names are omitted
     if (direction == &AxisDirection::GEOCENTRIC_X &&
-        axisAbbrev == AxisAbbreviation::X && axisName.empty()) {
+        abbreviation == AxisAbbreviation::X && axisName.empty()) {
         axisName = AxisName::Geocentric_X;
     } else if (direction == &AxisDirection::GEOCENTRIC_Y &&
-               axisAbbrev == AxisAbbreviation::Y && axisName.empty()) {
+               abbreviation == AxisAbbreviation::Y && axisName.empty()) {
         axisName = AxisName::Geocentric_Y;
     } else if (direction == &AxisDirection::GEOCENTRIC_Z &&
-               axisAbbrev == AxisAbbreviation::Z && axisName.empty()) {
+               abbreviation == AxisAbbreviation::Z && axisName.empty()) {
         axisName = AxisName::Geocentric_Z;
     }
 
     // WKT1
     if (!direction && isGeocentric && axisName == AxisName::Geocentric_X) {
-        axisAbbrev = AxisAbbreviation::X;
+        abbreviation = AxisAbbreviation::X;
         direction = &AxisDirection::GEOCENTRIC_X;
     } else if (!direction && isGeocentric &&
                axisName == AxisName::Geocentric_Y) {
-        axisAbbrev = AxisAbbreviation::Y;
+        abbreviation = AxisAbbreviation::Y;
         direction = &AxisDirection::GEOCENTRIC_Y;
     } else if (isGeocentric && axisName == AxisName::Geocentric_Z &&
                dirString == AxisDirectionWKT1::NORTH.toString()) {
-        axisAbbrev = AxisAbbreviation::Z;
+        abbreviation = AxisAbbreviation::Z;
         direction = &AxisDirection::GEOCENTRIC_Z;
     } else if (dirString == AxisDirectionWKT1::OTHER.toString()) {
         direction = &AxisDirection::UNSPECIFIED;
@@ -1328,7 +1328,7 @@ WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
 
     return CoordinateSystemAxis::create(
         buildProperties(node).set(IdentifiedObject::NAME_KEY, axisName),
-        axisAbbrev, *direction, unit, meridian);
+        abbreviation, *direction, unit, meridian);
 }
 
 // ---------------------------------------------------------------------------
@@ -1974,8 +1974,7 @@ ProjectedCRSNNPtr WKTParser::Private::buildProjectedCRS(WKTNodeNNPtr node) {
     }
 
     auto linearUnit = buildUnitInSubNode(node);
-    auto angularUnit =
-        baseGeodCRS->coordinateSystem()->axisList()[0]->axisUnitID();
+    auto angularUnit = baseGeodCRS->coordinateSystem()->axisList()[0]->unit();
 
     auto conversion =
         conversionNode ? buildConversion(NN_CHECK_ASSERT(conversionNode),

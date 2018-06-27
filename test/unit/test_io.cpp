@@ -170,20 +170,20 @@ static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
     ASSERT_EQ(cs->axisList().size(), 2);
     if (latLong) {
         EXPECT_EQ(*(cs->axisList()[0]->name()->description()), "Latitude");
-        EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "lat");
-        EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::NORTH);
+        EXPECT_EQ(cs->axisList()[0]->abbreviation(), "lat");
+        EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::NORTH);
 
         EXPECT_EQ(*(cs->axisList()[1]->name()->description()), "Longitude");
-        EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "lon");
-        EXPECT_EQ(cs->axisList()[1]->axisDirection(), AxisDirection::EAST);
+        EXPECT_EQ(cs->axisList()[1]->abbreviation(), "lon");
+        EXPECT_EQ(cs->axisList()[1]->direction(), AxisDirection::EAST);
     } else {
         EXPECT_EQ(*(cs->axisList()[0]->name()->description()), "Longitude");
-        EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "lon");
-        EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::EAST);
+        EXPECT_EQ(cs->axisList()[0]->abbreviation(), "lon");
+        EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::EAST);
 
         EXPECT_EQ(*(cs->axisList()[1]->name()->description()), "Latitude");
-        EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "lat");
-        EXPECT_EQ(cs->axisList()[1]->axisDirection(), AxisDirection::NORTH);
+        EXPECT_EQ(cs->axisList()[1]->abbreviation(), "lat");
+        EXPECT_EQ(cs->axisList()[1]->direction(), AxisDirection::NORTH);
     }
 
     auto datum = crs->datum();
@@ -377,17 +377,17 @@ static void checkEPSG_4979(GeographicCRSPtr crs) {
     auto cs = crs->coordinateSystem();
     ASSERT_EQ(cs->axisList().size(), 3);
     EXPECT_EQ(*(cs->axisList()[0]->name()->description()), "Latitude");
-    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "lat");
-    EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::NORTH);
+    EXPECT_EQ(cs->axisList()[0]->abbreviation(), "lat");
+    EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::NORTH);
 
     EXPECT_EQ(*(cs->axisList()[1]->name()->description()), "Longitude");
-    EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "lon");
-    EXPECT_EQ(cs->axisList()[1]->axisDirection(), AxisDirection::EAST);
+    EXPECT_EQ(cs->axisList()[1]->abbreviation(), "lon");
+    EXPECT_EQ(cs->axisList()[1]->direction(), AxisDirection::EAST);
 
     EXPECT_EQ(*(cs->axisList()[2]->name()->description()),
               "Ellipsoidal height");
-    EXPECT_EQ(cs->axisList()[2]->axisAbbrev(), "h");
-    EXPECT_EQ(cs->axisList()[2]->axisDirection(), AxisDirection::UP);
+    EXPECT_EQ(cs->axisList()[2]->abbreviation(), "h");
+    EXPECT_EQ(cs->axisList()[2]->direction(), AxisDirection::UP);
 
     auto datum = crs->datum();
     EXPECT_EQ(*(datum->name()->description()), "WGS_1984");
@@ -432,16 +432,16 @@ static void checkGeocentric(GeodeticCRSPtr crs) {
     ASSERT_EQ(cs->axisList().size(), 3);
 
     EXPECT_EQ(*(cs->axisList()[0]->name()->description()), "Geocentric X");
-    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "X");
-    EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::GEOCENTRIC_X);
+    EXPECT_EQ(cs->axisList()[0]->abbreviation(), "X");
+    EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::GEOCENTRIC_X);
 
     EXPECT_EQ(*(cs->axisList()[1]->name()->description()), "Geocentric Y");
-    EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "Y");
-    EXPECT_EQ(cs->axisList()[1]->axisDirection(), AxisDirection::GEOCENTRIC_Y);
+    EXPECT_EQ(cs->axisList()[1]->abbreviation(), "Y");
+    EXPECT_EQ(cs->axisList()[1]->direction(), AxisDirection::GEOCENTRIC_Y);
 
     EXPECT_EQ(*(cs->axisList()[2]->name()->description()), "Geocentric Z");
-    EXPECT_EQ(cs->axisList()[2]->axisAbbrev(), "Z");
-    EXPECT_EQ(cs->axisList()[2]->axisDirection(), AxisDirection::GEOCENTRIC_Z);
+    EXPECT_EQ(cs->axisList()[2]->abbreviation(), "Z");
+    EXPECT_EQ(cs->axisList()[2]->direction(), AxisDirection::GEOCENTRIC_Z);
 
     auto datum = crs->datum();
     EXPECT_EQ(*(datum->name()->description()), "WGS_1984");
@@ -618,12 +618,12 @@ static void checkProjected(ProjectedCRSPtr crs, bool checkEPSGCodes = true) {
     ASSERT_EQ(cs->axisList().size(), 2);
 
     EXPECT_EQ(*(cs->axisList()[0]->name()->description()), "Easting");
-    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "E");
-    EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::EAST);
+    EXPECT_EQ(cs->axisList()[0]->abbreviation(), "E");
+    EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::EAST);
 
     EXPECT_EQ(*(cs->axisList()[1]->name()->description()), "Northing");
-    EXPECT_EQ(cs->axisList()[1]->axisAbbrev(), "N");
-    EXPECT_EQ(cs->axisList()[1]->axisDirection(), AxisDirection::NORTH);
+    EXPECT_EQ(cs->axisList()[1]->abbreviation(), "N");
+    EXPECT_EQ(cs->axisList()[1]->direction(), AxisDirection::NORTH);
 }
 
 // ---------------------------------------------------------------------------
@@ -798,7 +798,7 @@ TEST(crs, projected_angular_unit_from_primem) {
         "  ID[\"EPSG\",27561]]");
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    EXPECT_EQ(crs->baseCRS()->coordinateSystem()->axisList()[0]->axisUnitID(),
+    EXPECT_EQ(crs->baseCRS()->coordinateSystem()->axisList()[0]->unit(),
               UnitOfMeasure::GRAD);
 }
 
@@ -882,8 +882,8 @@ TEST(wkt_parse, vertcrs_WKT2) {
     ASSERT_EQ(cs->axisList().size(), 1);
     EXPECT_EQ(*(cs->axisList()[0]->name()->description()),
               "Gravity-related height");
-    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), "H");
-    EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::UP);
+    EXPECT_EQ(cs->axisList()[0]->abbreviation(), "H");
+    EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::UP);
 }
 
 // ---------------------------------------------------------------------------
@@ -914,8 +914,8 @@ TEST(wkt_parse, vertcrs_WKT1_GDAL) {
     ASSERT_EQ(cs->axisList().size(), 1);
     EXPECT_EQ(*(cs->axisList()[0]->name()->description()),
               "Gravity-related height");
-    EXPECT_EQ(cs->axisList()[0]->axisAbbrev(), ""); // "H" in WKT2
-    EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::UP);
+    EXPECT_EQ(cs->axisList()[0]->abbreviation(), ""); // "H" in WKT2
+    EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::UP);
 }
 
 // ---------------------------------------------------------------------------
@@ -936,7 +936,7 @@ TEST(wkt_parse, vertcrs_WKT1_GDAL_minimum) {
     ASSERT_EQ(cs->axisList().size(), 1);
     EXPECT_EQ(*(cs->axisList()[0]->name()->description()),
               "Gravity-related height");
-    EXPECT_EQ(cs->axisList()[0]->axisDirection(), AxisDirection::UP);
+    EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::UP);
 }
 
 // ---------------------------------------------------------------------------
@@ -1615,9 +1615,9 @@ TEST(wkt_parse, dateTimeTemporalCRS_WKT2) {
     EXPECT_TRUE(nn_dynamic_pointer_cast<DateTimeTemporalCS>(
                     crs->coordinateSystem()) != nullptr);
     ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
-    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().type(),
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().type(),
               UnitOfMeasure::Type::NONE);
-    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().name(), "");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().name(), "");
 }
 
 // ---------------------------------------------------------------------------
@@ -1642,9 +1642,9 @@ TEST(wkt_parse, dateTimeTemporalCRS_WKT2_2018) {
     EXPECT_TRUE(nn_dynamic_pointer_cast<DateTimeTemporalCS>(
                     crs->coordinateSystem()) != nullptr);
     ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
-    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().type(),
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().type(),
               UnitOfMeasure::Type::NONE);
-    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().name(), "");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().name(), "");
 }
 
 // ---------------------------------------------------------------------------
@@ -1669,11 +1669,10 @@ TEST(wkt_parse, temporalCountCRSWithConvFactor_WKT2_2018) {
     EXPECT_TRUE(nn_dynamic_pointer_cast<TemporalCountCS>(
                     crs->coordinateSystem()) != nullptr);
     ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
-    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().name(),
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().name(),
               "milliseconds (ms)");
-    EXPECT_EQ(
-        crs->coordinateSystem()->axisList()[0]->axisUnitID().conversionToSI(),
-        0.001);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().conversionToSI(),
+              0.001);
 }
 
 // ---------------------------------------------------------------------------
@@ -1698,11 +1697,9 @@ TEST(wkt_parse, temporalCountCRSWithoutConvFactor_WKT2_2018) {
     EXPECT_TRUE(nn_dynamic_pointer_cast<TemporalCountCS>(
                     crs->coordinateSystem()) != nullptr);
     ASSERT_EQ(crs->coordinateSystem()->axisList().size(), 1);
-    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->axisUnitID().name(),
-              "hour");
-    EXPECT_EQ(
-        crs->coordinateSystem()->axisList()[0]->axisUnitID().conversionToSI(),
-        0.0);
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().name(), "hour");
+    EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().conversionToSI(),
+              0.0);
 }
 
 // ---------------------------------------------------------------------------
@@ -1729,8 +1726,8 @@ TEST(wkt_parse, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
     ASSERT_EQ(cs->axisList().size(), 1);
     auto axis = cs->axisList()[0];
     EXPECT_EQ(*(axis->name()->description()), "Decimal years");
-    EXPECT_EQ(axis->axisUnitID().name(), "year");
-    EXPECT_EQ(axis->axisUnitID().conversionToSI(), 0.0);
+    EXPECT_EQ(axis->unit().name(), "year");
+    EXPECT_EQ(axis->unit().conversionToSI(), 0.0);
 }
 
 // ---------------------------------------------------------------------------
