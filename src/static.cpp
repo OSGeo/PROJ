@@ -313,10 +313,13 @@ const std::string
 
 // ---------------------------------------------------------------------------
 
+/** \brief EPSG:4326 / "WGS 84" 2D GeographicCRS */
 const GeographicCRSNNPtr
     GeographicCRS::EPSG_4326(GeographicCRS::createEPSG_4326());
+/** \brief EPSG:4807 / "NTF (Paris)" 2D GeographicCRS */
 const GeographicCRSNNPtr
     GeographicCRS::EPSG_4807(GeographicCRS::createEPSG_4807());
+/** \brief EPSG:4979 / "WGS 84" 3D GeographicCRS */
 const GeographicCRSNNPtr
     GeographicCRS::EPSG_4979(GeographicCRS::createEPSG_4979());
 

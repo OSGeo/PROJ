@@ -44,38 +44,61 @@ NS_PROJ_START
 
 /** osgeo.proj.crs namespace
 
-    \brief CRS (coordinate systems with a datum).
+    \brief CRS (coordinate reference system = coordinate system with a datum).
 */
 namespace crs {
 
 // ---------------------------------------------------------------------------
 
 class GeographicCRS;
+/** Shared pointer of GeographicCRS */
 using GeographicCRSPtr = std::shared_ptr<GeographicCRS>;
+/** Non-null shared pointer of GeographicCRS */
 using GeographicCRSNNPtr = util::nn<GeographicCRSPtr>;
 
 // ---------------------------------------------------------------------------
 
-class CRS : public common::ObjectUsage, public io::IWKTExportable {
-  public:
-    PROJ_DLL virtual ~CRS();
-
-    PROJ_DLL static GeographicCRSPtr extractGeographicCRS(CRSNNPtr crs);
-
-  protected:
-    CRS();
-};
-
+class CRS;
 /** Shared pointer of CRS */
 using CRSPtr = std::shared_ptr<CRS>;
 /** Non-null shared pointer of CRS */
 using CRSNNPtr = util::nn<CRSPtr>;
 
+/** \brief Abstract class modelling a coordinate reference system which is
+ * usually single but may be compound.
+ *
+ * \remark Implements CRS from \ref ISO_19111_2018
+ */
+class CRS : public common::ObjectUsage, public io::IWKTExportable {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~CRS() override;
+    //! @endcond
+
+    PROJ_DLL GeographicCRSPtr extractGeographicCRS() const;
+
+  protected:
+    CRS();
+    PROJ_DLL void assignSelf(CRSNNPtr self);
+    PROJ_DLL CRSNNPtr shared_from_this() const;
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
 // ---------------------------------------------------------------------------
 
+/** \brief Abstract class modelling a coordinate reference system consisting of
+ * one Coordinate System and either one datum::Datum or one
+ * datum::DatumEnsemble.
+ *
+ * \remark Implements SingleCRS from \ref ISO_19111_2018
+ */
 class SingleCRS : public CRS {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~SingleCRS() override;
+    //! @endcond
 
     PROJ_DLL const datum::DatumPtr &datum() const;
     PROJ_DLL const datum::DatumEnsemblePtr &datumEnsemble() const;
@@ -93,18 +116,33 @@ class SingleCRS : public CRS {
     SingleCRS(const SingleCRS &other) = delete;
 };
 
+/** Shared pointer of SingleCRS */
 using SingleCRSPtr = std::shared_ptr<SingleCRS>;
+/** Non-null shared pointer of SingleCRS */
 using SingleCRSNNPtr = util::nn<SingleCRSPtr>;
 
 // ---------------------------------------------------------------------------
 
 class GeodeticCRS;
+/** Shared pointer of GeodeticCRS */
 using GeodeticCRSPtr = std::shared_ptr<GeodeticCRS>;
+/** Non-null shared pointer of GeodeticCRS */
 using GeodeticCRSNNPtr = util::nn<GeodeticCRSPtr>;
 
+/** \brief A coordinate reference system associated with a geodetic reference
+ * frame and a three-dimensional Cartesian or spherical coordinate system.
+ *
+ * If the geodetic reference frame is dynamic or if the geodetic CRS has an
+ * association to a velocity model then the geodetic CRS is dynamic, else it
+ * is static.
+ *
+ * \remark Implements GeodeticCRS from \ref ISO_19111_2018
+ */
 class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~GeodeticCRS() override;
+    //! @endcond
 
     PROJ_DLL const datum::GeodeticReferenceFrameNNPtr datum() const;
 
@@ -154,9 +192,20 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
 
 // ---------------------------------------------------------------------------
 
+/** \brief A coordinate reference system associated with a geodetic reference
+ * frame and a two- or three-dimensional ellipsoidal coordinate system.
+ *
+ * If the geodetic reference frame is dynamic or if the geographic CRS has an
+ * association to a velocity model then the geodetic CRS is dynamic, else it is
+ * static.
+ *
+ * \remark Implements GeographicCRS from \ref ISO_19111_2018
+ */
 class GeographicCRS : public GeodeticCRS {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~GeographicCRS() override;
+    //! @endcond
 
     PROJ_DLL const cs::EllipsoidalCSNNPtr coordinateSystem() const;
 
@@ -195,12 +244,32 @@ class GeographicCRS : public GeodeticCRS {
 // ---------------------------------------------------------------------------
 
 class VerticalCRS;
+/** Shared pointer of VerticalCRS */
 using VerticalCRSPtr = std::shared_ptr<VerticalCRS>;
+/** Non-null shared pointer of VerticalCRS */
 using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
 
+/** \brief A coordinate reference system having a vertical reference frame and
+ * a one-dimensional vertical coordinate system used for recording
+ * gravity-related heights or depths.
+ *
+ * Vertical CRSs make use of the direction of gravity to define the concept of
+ * height or depth, but the relationship with gravity may not be
+ * straightforward. If the vertical reference frame is dynamic or if the
+ * vertical CRS has an association to a velocity model then the CRS is dynamic,
+ * else it is static.
+ *
+ * \note Ellipsoidal heights cannot be captured in a vertical coordinate
+ * reference system. They exist only as an inseparable part of a 3D coordinate
+ * tuple defined in a geographic 3D coordinate reference system.
+ *
+ * \remark Implements VerticalCRS from \ref ISO_19111_2018
+ */
 class VerticalCRS : public SingleCRS, public io::IPROJStringExportable {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~VerticalCRS() override;
+    //! @endcond
 
     PROJ_DLL const datum::VerticalReferenceFramePtr datum() const;
     PROJ_DLL const cs::VerticalCSNNPtr coordinateSystem() const;
@@ -234,9 +303,23 @@ class VerticalCRS : public SingleCRS, public io::IPROJStringExportable {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Abstract class modelling a single coordinate reference system that
+ * is defined through the application of a specified coordinate conversion to
+ * the definition of a previously established single coordinate reference
+ * system referred to as the base CRS.
+ *
+ * A derived coordinate reference system inherits its datum (or datum ensemble)
+ * from its base CRS. The coordinate conversion between the base and derived
+ * coordinate reference system is implemented using the parameters and
+ * formula(s) specified in the definition of the coordinate conversion.
+ *
+ * \remark Implements DerivedCRS from \ref ISO_19111_2018
+ */
 class DerivedCRS : virtual public SingleCRS {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedCRS() override;
+    //! @endcond
 
     PROJ_DLL const SingleCRSNNPtr &baseCRS() const;
     PROJ_DLL const operation::ConversionNNPtr &derivingConversion() const;
@@ -252,18 +335,36 @@ class DerivedCRS : virtual public SingleCRS {
     DerivedCRS &operator=(const DerivedCRS &other) = delete;
 };
 
+/** Shared pointer of DerivedCRS */
 using DerivedCRSPtr = std::shared_ptr<DerivedCRS>;
+/** Non-null shared pointer of DerivedCRS */
 using DerivedCRSNNPtr = util::nn<DerivedCRSPtr>;
 
 // ---------------------------------------------------------------------------
 
 class ProjectedCRS;
+/** Shared pointer of ProjectedCRS */
 using ProjectedCRSPtr = std::shared_ptr<ProjectedCRS>;
+/** Non-null shared pointer of ProjectedCRS */
 using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
 
+/** \brief A derived coordinate reference system which has a geodetic
+ * (usually geographic) coordinate reference system as its base CRS, thereby
+ * inheriting a geodetic reference frame, and is converted using a map
+ * projection.
+ *
+ * It has a Cartesian coordinate system, usually two-dimensional but may be
+ * three-dimensional; in the 3D case the base geographic CRSs ellipsoidal
+ * height is passed through unchanged and forms the vertical axis of the
+ * projected CRS's Cartesian coordinate system.
+ *
+ * \remark Implements ProjectedCRS from \ref ISO_19111_2018
+ */
 class ProjectedCRS : public DerivedCRS, public io::IPROJStringExportable {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~ProjectedCRS() override;
+    //! @endcond
 
     PROJ_DLL const GeodeticCRSNNPtr baseCRS() const;
     PROJ_DLL const cs::CartesianCSNNPtr coordinateSystem() const;
@@ -296,13 +397,32 @@ class ProjectedCRS : public DerivedCRS, public io::IPROJStringExportable {
 // ---------------------------------------------------------------------------
 
 class CompoundCRS;
+/** Shared pointer of CompoundCRS */
 using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
+/** Non-null shared pointer of CompoundCRS */
 using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
 
+/** \brief A coordinate reference system describing the position of points
+ * through two or more independent single coordinate reference systems.
+ *
+ * \note Two coordinate reference systems are independent of each other
+ * if coordinate values in one cannot be converted or transformed into
+ * coordinate values in the other.
+ *
+ * \note As a departure to \ref ISO_19111_2018, we allow to build a CompoundCRS
+ * from CRS objects, whereas ISO19111:2018 restricts the components to
+ * SingleCRS.
+ * Thus nesting of CompoundCRS is possible. That said,
+ * componentReferenceSystems()
+ * will return a flattened view of the components.
+ *
+ * \remark Implements CompoundCRS from \ref ISO_19111_2018
+ */
 class CompoundCRS : public CRS, public io::IPROJStringExportable {
   public:
-    CompoundCRS &operator=(const CompoundCRS &other) = delete;
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~CompoundCRS() override;
+    //! @endcond
 
     PROJ_DLL std::vector<SingleCRSNNPtr> componentReferenceSystems() const;
 
@@ -321,6 +441,7 @@ class CompoundCRS : public CRS, public io::IPROJStringExportable {
     // relaxed: standard say SingleCRSNNPtr
     CompoundCRS(const std::vector<CRSNNPtr> &components);
     CompoundCRS(const CompoundCRS &other) = delete;
+    CompoundCRS &operator=(const CompoundCRS &other) = delete;
     INLINED_MAKE_SHARED
 
   private:
@@ -330,14 +451,41 @@ class CompoundCRS : public CRS, public io::IPROJStringExportable {
 // ---------------------------------------------------------------------------
 
 class BoundCRS;
+/** Shared pointer of BoundCRS */
 using BoundCRSPtr = std::shared_ptr<BoundCRS>;
+/** Non-null shared pointer of BoundCRS */
 using BoundCRSNNPtr = util::nn<BoundCRSPtr>;
 
-/* PROJ specific modelization: BoundCRS is WKT2 only, and not present in
- * ISO-19111 */
+/** \brief A coordinate reference system with an associated transformation to
+ * a target/hub CRS.
+ *
+ * The definition of a CRS is not dependent upon any relationship to an
+ * independent CRS. However in an implementation that merges datasets
+ * referenced to differing CRSs, it is sometimes useful to associate the
+ * definition of the transformation that has been used with the CRS definition.
+ * This facilitates the interrelationship of CRS by concatenating
+ * transformations via a common or hub CRS. This is sometimes referred to as
+ * "early-binding". \ref WKT2 permits the association of an abridged coordinate
+ * transformation description with a coordinate reference system description in
+ * a single text string. In a BoundCRS, the abridged coordinate transformation
+ * is applied to the source CRS with the target CRS being the common or hub
+ * system.
+ *
+ * Coordinates refering to a BoundCRS are expressed into its source/base CRS.
+ *
+ * This abstraction can for example model the concept of TOWGS84 datum shift
+ * present in \ref WKT1.
+ *
+ * \note Contrary to other CRS classes of this package, there is no
+ * \ref ISO_19111_2018 modelling of a BoundCRS.
+ *
+ * \remark Implements BoundCRS from \ref WKT2
+ */
 class BoundCRS : public CRS, public io::IPROJStringExportable {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~BoundCRS() override;
+    //! @endcond
 
     PROJ_DLL const CRSNNPtr &baseCRS() const;
     PROJ_DLL const CRSNNPtr &hubCRS() const;
@@ -376,12 +524,23 @@ class BoundCRS : public CRS, public io::IPROJStringExportable {
 // ---------------------------------------------------------------------------
 
 class DerivedGeodeticCRS;
+/** Shared pointer of DerivedGeodeticCRS */
 using DerivedGeodeticCRSPtr = std::shared_ptr<DerivedGeodeticCRS>;
+/** Non-null shared pointer of DerivedGeodeticCRS */
 using DerivedGeodeticCRSNNPtr = util::nn<DerivedGeodeticCRSPtr>;
 
+/** \brief A derived coordinate reference system which has either a geodetic
+ * or a geographic coordinate reference system as its base CRS, thereby
+ * inheriting a geodetic reference frame, and associated with a 3D Cartesian
+ * or spherical coordinate system.
+ *
+ * \remark Implements DerivedGeodeticCRS from \ref ISO_19111_2018
+ */
 class DerivedGeodeticCRS : public GeodeticCRS, public DerivedCRS {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedGeodeticCRS() override;
+    //! @endcond
 
     PROJ_DLL const GeodeticCRSNNPtr baseCRS() const;
 
@@ -422,12 +581,25 @@ class DerivedGeodeticCRS : public GeodeticCRS, public DerivedCRS {
 // ---------------------------------------------------------------------------
 
 class DerivedGeographicCRS;
+/** Shared pointer of DerivedGeographicCRS */
 using DerivedGeographicCRSPtr = std::shared_ptr<DerivedGeographicCRS>;
+/** Non-null shared pointer of DerivedGeographicCRS */
 using DerivedGeographicCRSNNPtr = util::nn<DerivedGeographicCRSPtr>;
 
+/** \brief A derived coordinate reference system which has either a geodetic or
+ * a geographic coordinate reference system as its base CRS, thereby inheriting
+ * a geodetic reference frame, and an ellipsoidal coordinate system.
+ *
+ * A derived geographic CRS can be based on a geodetic CRS only if that
+ * geodetic CRS definition includes an ellipsoid.
+ *
+ * \remark Implements DerivedGeographicCRS from \ref ISO_19111_2018
+ */
 class DerivedGeographicCRS : public GeographicCRS, public DerivedCRS {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~DerivedGeographicCRS() override;
+    //! @endcond
 
     PROJ_DLL const GeodeticCRSNNPtr baseCRS() const;
 
@@ -460,12 +632,21 @@ class DerivedGeographicCRS : public GeographicCRS, public DerivedCRS {
 // ---------------------------------------------------------------------------
 
 class TemporalCRS;
+/** Shared pointer of TemporalCRS */
 using TemporalCRSPtr = std::shared_ptr<TemporalCRS>;
+/** Non-null shared pointer of TemporalCRS */
 using TemporalCRSNNPtr = util::nn<TemporalCRSPtr>;
 
+/** \brief A coordinate reference system associated with a temporal datum and a
+ * one-dimensional temporal coordinate system.
+ *
+ * \remark Implements TemporalCRS from \ref ISO_19111_2018
+ */
 class TemporalCRS : public SingleCRS {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalCRS() override;
+    //! @endcond
 
     PROJ_DLL const datum::TemporalDatumNNPtr datum() const;
 

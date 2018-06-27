@@ -2140,8 +2140,7 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(WKTNodeNNPtr node) {
 
     CRSPtr sourceTransformationCRS;
     if (std::dynamic_pointer_cast<GeographicCRS>(targetCRS)) {
-        sourceTransformationCRS =
-            CRS::extractGeographicCRS(NN_CHECK_ASSERT(sourceCRS));
+        sourceTransformationCRS = sourceCRS->extractGeographicCRS();
         if (!sourceTransformationCRS) {
             throw ParsingException("Cannot find GeographicCRS in sourceCRS");
         }
@@ -2251,8 +2250,7 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
                                             toWGS84Parameters_));
         }
         if (!datumPROJ4Grids_.empty()) {
-            CRSPtr sourceGeographicCRS =
-                CRS::extractGeographicCRS(NN_CHECK_ASSERT(crs));
+            CRSPtr sourceGeographicCRS = crs->extractGeographicCRS();
             auto transformationSourceCRS = NN_CHECK_ASSERT(
                 sourceGeographicCRS ? sourceGeographicCRS : crs);
             std::string transformationName =

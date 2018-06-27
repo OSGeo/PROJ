@@ -40,6 +40,7 @@
 #include "proj/io_internal.hpp"
 #include "proj/util.hpp"
 
+#include <cassert>
 #include <memory>
 #include <string>
 #include <vector>
@@ -49,34 +50,76 @@ using namespace NS_PROJ::internal;
 NS_PROJ_START
 namespace crs {
 
+//! @cond Doxygen_Suppress
+struct CRS::Private {
+    // This is a manual implementation of std::enable_shared_from_this<> that
+    // avoids publicly deriving from it.
+    std::weak_ptr<CRS> self_{};
+};
+//! @endcond
+
 // ---------------------------------------------------------------------------
 
-CRS::CRS() = default;
+CRS::CRS() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 CRS::~CRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
-GeographicCRSPtr CRS::extractGeographicCRS(CRSNNPtr crs) {
+/** Keep a reference to ourselves as an internal weak pointer. So that
+ * extractGeographicCRS() can later return a shared pointer on itself.
+ */
+void CRS::assignSelf(CRSNNPtr self) {
+    assert(self.get() == this);
+    d->self_ = self.as_nullable();
+}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr CRS::shared_from_this() const {
+    // This assertion checks that in all code paths where we create a
+    // shared pointer, we took care of assigning it to self_, by calling
+    // assignSelf();
+    return NN_CHECK_ASSERT(d->self_.lock());
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the GeographicCRS of the CRS.
+ *
+ * Returns the GeographicCRS contained in a CRS. This works currently with
+ * input parameters of type GeographicCRS or derived, ProjectedCRS,
+ * CompoundCRS or BoundCRS.
+ *
+ * @return a GeographicCRSPtr, that might be null.
+ */
+GeographicCRSPtr CRS::extractGeographicCRS() const {
     CRSPtr transformSourceCRS;
-    auto geogCRS = util::nn_dynamic_pointer_cast<GeographicCRS>(crs);
+    auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
     if (geogCRS) {
-        return geogCRS;
+        return std::dynamic_pointer_cast<GeographicCRS>(
+            shared_from_this().as_nullable());
     }
-    auto projCRS = util::nn_dynamic_pointer_cast<ProjectedCRS>(crs);
+    auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
     if (projCRS) {
-        return util::nn_dynamic_pointer_cast<GeographicCRS>(projCRS->baseCRS());
+        return projCRS->baseCRS()->extractGeographicCRS();
     }
-    auto compoundCRS = util::nn_dynamic_pointer_cast<CompoundCRS>(crs);
+    auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
     if (compoundCRS) {
         for (const auto &subCrs : compoundCRS->componentReferenceSystems()) {
-            geogCRS = util::nn_dynamic_pointer_cast<GeographicCRS>(subCrs);
-            if (geogCRS) {
-                return geogCRS;
+            auto retGeogCRS = subCrs->extractGeographicCRS();
+            if (retGeogCRS) {
+                return retGeogCRS;
             }
         }
+    }
+    auto boundCRS = dynamic_cast<const BoundCRS *>(this);
+    if (boundCRS) {
+        return boundCRS->baseCRS()->extractGeographicCRS();
     }
     return nullptr;
 }
@@ -120,20 +163,40 @@ SingleCRS::SingleCRS(const SingleCRS &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 SingleCRS::~SingleCRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the datum::Datum associated with the CRS.
+ *
+ * This might be null, in which case datumEnsemble() return will not be null.
+ *
+ * @return a Datum that might be null.
+ */
 const datum::DatumPtr &SingleCRS::datum() const { return d->datum; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the datum::DatumEnsemble associated with the CRS.
+ *
+ * This might be null, in which case datum() return will not be null.
+ *
+ * @return a DatumEnsemble that might be null.
+ */
 const datum::DatumEnsemblePtr &SingleCRS::datumEnsemble() const {
     return d->datumEnsemble;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the cs::CoordinateSystem associated with the CRS.
+ *
+ * This might be null, in which case datumEnsemble() return will not be null.
+ *
+ * @return a CoordinateSystem that might be null.
+ */
 const cs::CoordinateSystemNNPtr &SingleCRS::coordinateSystem() const {
     return d->coordinateSystem;
 }
@@ -173,10 +236,16 @@ GeodeticCRS::GeodeticCRS(const GeodeticCRS &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 GeodeticCRS::~GeodeticCRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the datum::GeodeticReferenceFrame associated with the CRS.
+ *
+ * @return a GeodeticReferenceFrame
+ */
 const datum::GeodeticReferenceFrameNNPtr GeodeticCRS::datum() const {
     return NN_CHECK_THROW(
         std::dynamic_pointer_cast<datum::GeodeticReferenceFrame>(
@@ -185,6 +254,10 @@ const datum::GeodeticReferenceFrameNNPtr GeodeticCRS::datum() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the velocity model associated with the CRS.
+ *
+ * @return a velocity model. might be null.
+ */
 const std::vector<operation::PointMotionOperationNNPtr> &
 GeodeticCRS::velocityModel() const {
     return d->velocityModel;
@@ -192,6 +265,15 @@ GeodeticCRS::velocityModel() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether the CRS is a geocentric one.
+ *
+ * A geocentric CRS is a geodetic CRS that has a Cartesian coordinate system
+ * with three axis, whose direction is respectively
+ * cs::AxisDirection::GEOCENTRIC_X,
+ * cs::AxisDirection::GEOCENTRIC_Y and cs::AxisDirection::GEOCENTRIC_Z.
+ *
+ * @return true if the CRS is a geocentric CRS.
+ */
 bool GeodeticCRS::isGeocentric() const {
     return coordinateSystem()->getWKT2Type(io::WKTFormatter::create()) ==
                "Cartesian" &&
@@ -206,22 +288,42 @@ bool GeodeticCRS::isGeocentric() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a GeodeticCRS from a datum::GeodeticReferenceFrame and a
+ * cs::SphericalCS.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datum The datum of the CRS.
+ * @param cs a SphericalCS.
+ * @return new GeodeticCRS.
+ */
 GeodeticCRSNNPtr
 GeodeticCRS::create(const util::PropertyMap &properties,
                     const datum::GeodeticReferenceFrameNNPtr &datum,
                     const cs::SphericalCSNNPtr &cs) {
     auto crs(GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, cs));
+    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
     crs->setProperties(properties);
     return crs;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a GeodeticCRS from a datum::GeodeticReferenceFrame and a
+ * cs::CartesianCS.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datum The datum of the CRS.
+ * @param cs a CartesianCS.
+ * @return new GeodeticCRS.
+ */
 GeodeticCRSNNPtr
 GeodeticCRS::create(const util::PropertyMap &properties,
                     const datum::GeodeticReferenceFrameNNPtr &datum,
                     const cs::CartesianCSNNPtr &cs) {
     auto crs(GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, cs));
+    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
     crs->setProperties(properties);
     return crs;
 }
@@ -330,10 +432,16 @@ GeographicCRS::GeographicCRS(const GeographicCRS &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 GeographicCRS::~GeographicCRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the cs::EllipsoidalCS associated with the CRS.
+ *
+ * @return a EllipsoidalCS.
+ */
 const cs::EllipsoidalCSNNPtr GeographicCRS::coordinateSystem() const {
     return NN_CHECK_THROW(util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(
         SingleCRS::getPrivate()->coordinateSystem));
@@ -341,14 +449,24 @@ const cs::EllipsoidalCSNNPtr GeographicCRS::coordinateSystem() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a GeographicCRS from a datum::Datum and a
+ * cs::EllipsoidalCS.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datum The datum of the CRS.
+ * @param cs a EllipsoidalCS.
+ * @return new GeographicCRS.
+ */
 GeographicCRSNNPtr
 GeographicCRS::create(const util::PropertyMap &properties,
                       const datum::GeodeticReferenceFrameNNPtr &datum,
                       const cs::EllipsoidalCSNNPtr &cs) {
-    GeographicCRSNNPtr gcrs(
+    GeographicCRSNNPtr crs(
         GeographicCRS::nn_make_shared<GeographicCRS>(datum, cs));
-    gcrs->setProperties(properties);
-    return gcrs;
+    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->setProperties(properties);
+    return crs;
 }
 
 // ---------------------------------------------------------------------------
@@ -482,10 +600,16 @@ VerticalCRS::VerticalCRS(const VerticalCRS &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 VerticalCRS::~VerticalCRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the datum::VerticalReferenceFrame associated with the CRS.
+ *
+ * @return a VerticalReferenceFrame.
+ */
 const datum::VerticalReferenceFramePtr VerticalCRS::datum() const {
     return std::dynamic_pointer_cast<datum::VerticalReferenceFrame>(
         SingleCRS::getPrivate()->datum);
@@ -493,6 +617,13 @@ const datum::VerticalReferenceFramePtr VerticalCRS::datum() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the geoid model associated with the CRS.
+ *
+ * Geoid height model or height correction model linked to a geoid-based
+ * vertical CRS.
+ *
+ * @return a geoid model. might be null
+ */
 const std::vector<operation::TransformationNNPtr> &
 VerticalCRS::geoidModel() const {
     return d->geoidModel;
@@ -500,6 +631,10 @@ VerticalCRS::geoidModel() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the velocity model associated with the CRS.
+ *
+ * @return a velocity model. might be null.
+ */
 const std::vector<operation::PointMotionOperationNNPtr> &
 VerticalCRS::velocityModel() const {
     return d->velocityModel;
@@ -507,6 +642,10 @@ VerticalCRS::velocityModel() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the cs::VerticalCS associated with the CRS.
+ *
+ * @return a VerticalCS.
+ */
 const cs::VerticalCSNNPtr VerticalCRS::coordinateSystem() const {
     return NN_CHECK_THROW(util::nn_dynamic_pointer_cast<cs::VerticalCS>(
         SingleCRS::getPrivate()->coordinateSystem));
@@ -563,11 +702,21 @@ VerticalCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a VerticalCRS from a datum::VerticalReferenceFrame and a
+ * cs::VerticalCS.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datumIn The datum of the CRS.
+ * @param csIn a VerticalCS.
+ * @return new VerticalCRS.
+ */
 VerticalCRSNNPtr
 VerticalCRS::create(const util::PropertyMap &properties,
                     const datum::VerticalReferenceFrameNNPtr &datumIn,
                     const cs::VerticalCSNNPtr &csIn) {
     auto crs(VerticalCRS::nn_make_shared<VerticalCRS>(datumIn, csIn));
+    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
     crs->setProperties(properties);
     return crs;
 }
@@ -623,14 +772,24 @@ DerivedCRS::DerivedCRS(const DerivedCRS &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 DerivedCRS::~DerivedCRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the base CRS of a DerivedCRS.
+ *
+ * @return the base CRS.
+ */
 const SingleCRSNNPtr &DerivedCRS::baseCRS() const { return d->baseCRS_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the deriving conversion from the base CRS to this CRS.
+ *
+ * @return the deriving conversion.
+ */
 const operation::ConversionNNPtr &DerivedCRS::derivingConversion() const {
     return d->derivingConversion_;
 }
@@ -661,10 +820,16 @@ ProjectedCRS::ProjectedCRS(const ProjectedCRS &other)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 ProjectedCRS::~ProjectedCRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the base CRS (a GeographicCRS) of the ProjectedCRS.
+ *
+ * @return the base CRS.
+ */
 const GeodeticCRSNNPtr ProjectedCRS::baseCRS() const {
     return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<GeodeticCRS>(
         DerivedCRS::getPrivate()->baseCRS_));
@@ -672,6 +837,10 @@ const GeodeticCRSNNPtr ProjectedCRS::baseCRS() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the cs::CartesianCS associated with the CRS.
+ *
+ * @return a CartesianCS
+ */
 const cs::CartesianCSNNPtr ProjectedCRS::coordinateSystem() const {
     return NN_CHECK_THROW(util::nn_dynamic_pointer_cast<cs::CartesianCS>(
         SingleCRS::getPrivate()->coordinateSystem));
@@ -788,6 +957,19 @@ ProjectedCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a ProjectedCRS from a base CRS, a deriving
+ * operation::Conversion
+ * and a coordinate system.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param baseCRSIn The base CRS.
+ * @param derivingConversionIn The deriving operation::Conversion (typically
+ * using a map
+ * projection method)
+ * @param csIn The coordniate system.
+ * @return new ProjectedCRS.
+ */
 ProjectedCRSNNPtr
 ProjectedCRS::create(const util::PropertyMap &properties,
                      const GeodeticCRSNNPtr &baseCRSIn,
@@ -795,6 +977,7 @@ ProjectedCRS::create(const util::PropertyMap &properties,
                      const cs::CartesianCSNNPtr &csIn) {
     auto crs = ProjectedCRS::nn_make_shared<ProjectedCRS>(
         baseCRSIn, derivingConversionIn, csIn);
+    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
     crs->setProperties(properties);
     crs->derivingConversion()->setWeakSourceTargetCRS(
         static_cast<const GeodeticCRSPtr>(baseCRSIn),
@@ -819,10 +1002,19 @@ CompoundCRS::CompoundCRS(const std::vector<CRSNNPtr> &components)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 CompoundCRS::~CompoundCRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the components of a CompoundCRS.
+ *
+ * If the CompoundCRS is itself made of CompoundCRS components, this method
+ * will return a flattened view of the components as SingleCRS.
+ *
+ * @return the components.
+ */
 std::vector<SingleCRSNNPtr> CompoundCRS::componentReferenceSystems() const {
     // Flatten the potential hierarchy to return only SingleCRS
     std::vector<SingleCRSNNPtr> res;
@@ -843,9 +1035,17 @@ std::vector<SingleCRSNNPtr> CompoundCRS::componentReferenceSystems() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a CompoundCRS from a vector of CRS.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param components the component CRS of the CompoundCRS.
+ * @return new CompoundCRS.
+ */
 CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
                                      const std::vector<CRSNNPtr> &components) {
     auto compoundCRS(CompoundCRS::nn_make_shared<CompoundCRS>(components));
+    compoundCRS->assignSelf(util::nn_static_pointer_cast<CRS>(compoundCRS));
     compoundCRS->setProperties(properties);
     if (properties.find(common::IdentifiedObject::NAME_KEY) ==
         properties.end()) {
@@ -931,39 +1131,84 @@ BoundCRS::BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 BoundCRS::~BoundCRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the base CRS.
+ *
+ * This is the CRS into which coordinates of the BoundCRS are expressed.
+ *
+ * @return the base CRS.
+ */
 const CRSNNPtr &BoundCRS::baseCRS() const { return d->baseCRS_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the target / hub CRS.
+ *
+ * @return the hub CRS.
+ */
 const CRSNNPtr &BoundCRS::hubCRS() const { return d->hubCRS_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the transformation to the hub RS.
+ *
+ * @return transformation.
+ */
 const operation::TransformationNNPtr &BoundCRS::transformation() const {
     return d->transformation_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a BoundCRS from a base CRS, a hub CRS and a
+ * transformation.
+ *
+ * @param baseCRSIn base CRS.
+ * @param hubCRSIn hub CRS.
+ * @param transformationIn transformation from base CRS to hub CRS.
+ * @return new BoundCRS.
+ */
 BoundCRSNNPtr
 BoundCRS::create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
                  const operation::TransformationNNPtr &transformationIn) {
-    return BoundCRS::nn_make_shared<BoundCRS>(baseCRSIn, hubCRSIn,
-                                              transformationIn);
+    auto crs = BoundCRS::nn_make_shared<BoundCRS>(baseCRSIn, hubCRSIn,
+                                                  transformationIn);
+    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    if (baseCRSIn->name()->description().has_value()) {
+        crs->setProperties(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    *(baseCRSIn->name()->description())));
+    }
+    return crs;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a BoundCRS from a base CRS and TOWGS84 parameters
+ *
+ * @param baseCRSIn base CRS.
+ * @param TOWGS84Parameters a vector of 7 double values representing WKT1
+ * TOWGS84 parameter.
+ * @return new BoundCRS.
+ */
 BoundCRSNNPtr
 BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
                             const std::vector<double> TOWGS84Parameters) {
-    return BoundCRS::nn_make_shared<BoundCRS>(
+    auto crs = BoundCRS::nn_make_shared<BoundCRS>(
         baseCRSIn, GeographicCRS::EPSG_4326,
         operation::Transformation::createTOWGS84(baseCRSIn, TOWGS84Parameters));
+    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    if (baseCRSIn->name()->description().has_value()) {
+        crs->setProperties(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    *(baseCRSIn->name()->description())));
+    }
+    return crs;
 }
 
 // ---------------------------------------------------------------------------
@@ -1114,7 +1359,9 @@ struct DerivedGeodeticCRS::Private {};
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 DerivedGeodeticCRS::~DerivedGeodeticCRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1140,6 +1387,10 @@ DerivedGeodeticCRS::DerivedGeodeticCRS(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the base CRS (a GeodeticCRS) of a DerivedGeodeticCRS.
+ *
+ * @return the base CRS.
+ */
 const GeodeticCRSNNPtr DerivedGeodeticCRS::baseCRS() const {
     return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<GeodeticCRS>(
         DerivedCRS::getPrivate()->baseCRS_));
@@ -1147,24 +1398,48 @@ const GeodeticCRSNNPtr DerivedGeodeticCRS::baseCRS() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a DerivedGeodeticCRS from a base CRS, a deriving
+ * conversion and a cs::CartesianCS.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param baseCRSIn base CRS.
+ * @param derivingConversionIn the deriving conversion from the base CRS to this
+ * CRS.
+ * @param csIn the coordinate system.
+ * @return new DerivedGeodeticCRS.
+ */
 DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
     const util::PropertyMap &properties, const GeodeticCRSNNPtr &baseCRSIn,
     const operation::ConversionNNPtr &derivingConversionIn,
     const cs::CartesianCSNNPtr &csIn) {
     auto crs(DerivedGeodeticCRS::nn_make_shared<DerivedGeodeticCRS>(
         baseCRSIn, derivingConversionIn, csIn));
+    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
     crs->setProperties(properties);
     return crs;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a DerivedGeodeticCRS from a base CRS, a deriving
+ * conversion and a cs::SphericalCS.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param baseCRSIn base CRS.
+ * @param derivingConversionIn the deriving conversion from the base CRS to this
+ * CRS.
+ * @param csIn the coordinate system.
+ * @return new DerivedGeodeticCRS.
+ */
 DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
     const util::PropertyMap &properties, const GeodeticCRSNNPtr &baseCRSIn,
     const operation::ConversionNNPtr &derivingConversionIn,
     const cs::SphericalCSNNPtr &csIn) {
     auto crs(DerivedGeodeticCRS::nn_make_shared<DerivedGeodeticCRS>(
         baseCRSIn, derivingConversionIn, csIn));
+    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
     crs->setProperties(properties);
     return crs;
 }
@@ -1218,7 +1493,9 @@ struct DerivedGeographicCRS::Private {};
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 DerivedGeographicCRS::~DerivedGeographicCRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1233,6 +1510,10 @@ DerivedGeographicCRS::DerivedGeographicCRS(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the base CRS (a GeodeticCRS) of a DerivedGeographicCRS.
+ *
+ * @return the base CRS.
+ */
 const GeodeticCRSNNPtr DerivedGeographicCRS::baseCRS() const {
     return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<GeodeticCRS>(
         DerivedCRS::getPrivate()->baseCRS_));
@@ -1240,12 +1521,24 @@ const GeodeticCRSNNPtr DerivedGeographicCRS::baseCRS() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a DerivedGeographicCRS from a base CRS, a deriving
+ * conversion and a cs::EllipsoidalCS.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param baseCRSIn base CRS.
+ * @param derivingConversionIn the deriving conversion from the base CRS to this
+ * CRS.
+ * @param csIn the coordinate system.
+ * @return new DerivedGeographicCRS.
+ */
 DerivedGeographicCRSNNPtr DerivedGeographicCRS::create(
     const util::PropertyMap &properties, const GeodeticCRSNNPtr &baseCRSIn,
     const operation::ConversionNNPtr &derivingConversionIn,
     const cs::EllipsoidalCSNNPtr &csIn) {
     auto crs(DerivedGeographicCRS::nn_make_shared<DerivedGeographicCRS>(
         baseCRSIn, derivingConversionIn, csIn));
+    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
     crs->setProperties(properties);
     return crs;
 }
@@ -1302,7 +1595,9 @@ struct TemporalCRS::Private {};
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 TemporalCRS::~TemporalCRS() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1312,6 +1607,10 @@ TemporalCRS::TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the datum::TemporalDatum associated with the CRS.
+ *
+ * @return a TemporalDatum
+ */
 const datum::TemporalDatumNNPtr TemporalCRS::datum() const {
     return NN_CHECK_ASSERT(std::dynamic_pointer_cast<datum::TemporalDatum>(
         SingleCRS::getPrivate()->datum));
@@ -1319,6 +1618,10 @@ const datum::TemporalDatumNNPtr TemporalCRS::datum() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the cs::TemporalCS associated with the CRS.
+ *
+ * @return a TemporalCS
+ */
 const cs::TemporalCSNNPtr TemporalCRS::coordinateSystem() const {
     return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<cs::TemporalCS>(
         SingleCRS::getPrivate()->coordinateSystem));
@@ -1326,10 +1629,19 @@ const cs::TemporalCSNNPtr TemporalCRS::coordinateSystem() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a TemporalCRS from a datum and a coordinate system.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datumIn the datum.
+ * @param csIn the coordinate system.
+ * @return new TemporalCRS.
+ */
 TemporalCRSNNPtr TemporalCRS::create(const util::PropertyMap &properties,
                                      const datum::TemporalDatumNNPtr &datumIn,
                                      const cs::TemporalCSNNPtr &csIn) {
     auto crs(TemporalCRS::nn_make_shared<TemporalCRS>(datumIn, csIn));
+    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
     crs->setProperties(properties);
     return crs;
 }

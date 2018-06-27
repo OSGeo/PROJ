@@ -1790,13 +1790,13 @@ TransformationNNPtr Transformation::create(
 
 /** \brief Instanciate a Transformation ands its OperationMethod.
  *
- * @param propertiesTransformation See \ref general_properties of the
+ * @param propertiesTransformation The \ref general_properties of the
  * Transformation.
  * At minimum the name should be defined.
  * @param sourceCRSIn Source CRS.
  * @param targetCRSIn Target CRS.
  * @param interpolationCRSIn Interpolation CRS (might be null)
- * @param propertiesOperationMethod See \ref general_properties of the
+ * @param propertiesOperationMethod The \ref general_properties of the
  * OperationMethod.
  * At minimum the name should be defined.
  * @param parameters Vector of parameters of the operation method.
@@ -2080,8 +2080,7 @@ TransformationNNPtr Transformation::createTOWGS84(
             "Invalid number of elements in TOWGS84Parameters");
     }
 
-    crs::CRSPtr transformSourceCRS =
-        crs::CRS::extractGeographicCRS(sourceCRSIn);
+    crs::CRSPtr transformSourceCRS = sourceCRSIn->extractGeographicCRS();
     if (!transformSourceCRS) {
         throw InvalidOperation(
             "Cannot find GeographicCRS in sourceCRS of TOWGS84 transformation");

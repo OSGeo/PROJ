@@ -1467,13 +1467,14 @@ TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_PROJ_string) {
 // ---------------------------------------------------------------------------
 
 TEST(crs, extractGeographicCRS) {
-    EXPECT_EQ(CRS::extractGeographicCRS(GeographicCRS::EPSG_4326),
+    EXPECT_EQ(GeographicCRS::EPSG_4326->extractGeographicCRS(),
               GeographicCRS::EPSG_4326);
-    EXPECT_EQ(CRS::extractGeographicCRS(createProjected()),
+    EXPECT_EQ(createProjected()->extractGeographicCRS(),
               GeographicCRS::EPSG_4326);
     EXPECT_EQ(
-        CRS::extractGeographicCRS(CompoundCRS::create(
-            PropertyMap(), std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326})),
+        CompoundCRS::create(PropertyMap(),
+                            std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326})
+            ->extractGeographicCRS(),
         GeographicCRS::EPSG_4326);
 }
 
