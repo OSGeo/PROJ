@@ -109,8 +109,8 @@ The same program implemented using PROJ v. 5:
             return 1;
 
         while (scanf("%lf %lf", &c.lp.lam, &c.lp.phi) == 2) {
-            c.lp.lam = proj_todeg(c.lp.lam);
-            c.lp.phi = proj_todeg(c.lp.phi);
+            c.lp.lam = proj_torad(c.lp.lam);
+            c.lp.phi = proj_torad(c.lp.phi);
             c = proj_trans(P, PJ_FWD, c);
             printf("%.2f\t%.2f\n", c.xy.x, c.xy.y);
         }
