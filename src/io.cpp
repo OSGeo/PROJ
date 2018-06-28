@@ -617,7 +617,7 @@ void WKTNode::addChild(WKTNodeNNPtr child) { d->children_.push_back(child); }
 /** \brief Return the (occurrence-1)th sub-node of name childName.
  *
  * @param childName name of the child.
- * @param occurrence occurence index (starting at 0)
+ * @param occurrence occurrence index (starting at 0)
  * @return the child, or nullptr.
  */
 WKTNodePtr WKTNode::lookForChild(const std::string &childName,

@@ -29,9 +29,41 @@ For example "EPSG".</li>
 <li>osgeo::proj::metadata::Identifier::VERSION_KEY ("version"): the version
 identifier for the namespace, provided a a string.</li>
 <li>osgeo::proj::metadata::Identifier::AUTHORITY_KEY ("authority"): a citation for the authority,
-provided as a string or a metadata::Citation object. Often unused</li>
+provided as a string or a osgeo::proj::metadata::Citation object. Often unused</li>
 <li>osgeo::proj::metadata::Identifier::URI_KEY ("uri"): the URI of the identifier,
 provided as a string. Often unused</li>
+
+<li>osgeo::proj::common::IdentifiedObject::NAME_KEY ("name"): the name of a
+osgeo::proj::common::IdentifiedObject, provided as a string or
+osgeo::proj::metadata::IdentifierNNPtr.</li>
+<li>osgeo::proj::common::IdentifiedObject::IDENTIFIERS_KEY ("identifiers"):
+the identifier(s) of a osgeo::proj::common::IdentifiedObject, provided as
+a osgeo::proj::common::IdentifierNNPtr or a
+osgeo::proj::util::ArrayOfBaseObjectNNPtr of
+osgeo::proj::metadata::IdentifierNNPtr.</li>
+<li>osgeo::proj::common::IdentifiedObject::ALIAS_KEY ("alias"):
+the alias(es) of a osgeo::proj::common::IdentifiedObject,
+provided as string, a osgeo::proj::util::GenericNameNNPtr or a
+osgeo::proj::util::ArrayOfBaseObjectNNPtr
+of osgeo::proj::util::GenericNameNNPtr.</li>
+<li>osgeo::proj::common::IdentifiedObject::REMARKS_KEY ("remarks"):
+the remarks of a osgeo::proj::common::IdentifiedObject,
+provided as a string.</li>
+<li>osgeo::proj::common::IdentifiedObject::DEPRECATED_KEY ("deprecated"):
+the deprecation flag of a osgeo::proj::common::IdentifiedObject,
+provided as a boolean.</li>
+
+<li>osgeo::proj::common::ObjectUsage::SCOPE_KEY ("scope"):
+the scope of a osgeo::proj::common::ObjectUsage, provided as a string.</li>
+<li>osgeo::proj::common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY ("domainOfValidity"):
+the domain of validity of a osgeo::proj::common::ObjectUsage,
+provided as a osgeo::proj::metadata::ExtentNNPtr.</li>
+<li>osgeo::proj::common::ObjectUsage::OBJECT_DOMAIN_KEY ("objectDomain"):
+the object domain(s) of a osgeo::proj::common::ObjectUsage,
+provided as a osgeo::proj::common::ObjectDomainNNPtr or a
+osgeo::proj::util::ArrayOfBaseObjectNNPtr
+of osgeo::proj::common::ObjectDomainNNPtr.</li>
+
 </ul>
 
 \section standards Applicable standards

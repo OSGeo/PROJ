@@ -117,7 +117,7 @@ const std::string common::IdentifiedObject::NAME_KEY("name");
  */
 const std::string common::IdentifiedObject::IDENTIFIERS_KEY("identifiers");
 
-/** \brief Key to set the alia(es) of a common::IdentifiedObject
+/** \brief Key to set the alias(es) of a common::IdentifiedObject
  *
  * The value is to be provided as string, a util::GenericNameNNPtr or a
  * util::ArrayOfBaseObjectNNPtr
@@ -131,7 +131,7 @@ const std::string common::IdentifiedObject::ALIAS_KEY("alias");
  */
 const std::string common::IdentifiedObject::REMARKS_KEY("remarks");
 
-/** \brief Key to set the remarks of a common::IdentifiedObject
+/** \brief Key to set the deprecation flag of a common::IdentifiedObject
  *
  * The value is to be provided as a boolean.
  */

@@ -72,7 +72,7 @@ using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
  * <ul>
  * <li>on coordinates that transforms or converts them from one coordinate
  * reference system to another coordinate reference system</li>
- * <li>or that decribes the change of coordinate values within one coordinate
+ * <li>or that describes the change of coordinate values within one coordinate
  * reference system due to the motion of the point between one coordinate epoch
  * and another coordinate epoch.</li>
  * </ul>
@@ -660,7 +660,7 @@ using PointMotionOperationPtr = std::shared_ptr<PointMotionOperation>;
 /** Non-null shared pointer of PointMotionOperation */
 using PointMotionOperationNNPtr = util::nn<PointMotionOperationPtr>;
 
-/** \brief A mathematical operation that decribes the change of coordinate
+/** \brief A mathematical operation that describes the change of coordinate
  * values within one coordinate reference system due to the motion of the
  * point between one coordinate epoch and another coordinate epoch.
  *

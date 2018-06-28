@@ -104,7 +104,7 @@ class WKTFormatter {
         /** WKT2_2018 with the simplification rule of WKT2_SIMPLIFIED */
         WKT2_2018_SIMPLIFIED,
 
-        /** WKT1 as traditionaly output by GDAL */
+        /** WKT1 as traditionally output by GDAL */
         WKT1_GDAL
     };
 
@@ -323,7 +323,7 @@ class WKTNode {
 
     PROJ_DLL void addChild(WKTNodeNNPtr child);
     PROJ_DLL WKTNodePtr lookForChild(const std::string &childName,
-                                     int occurence = 0) const;
+                                     int occurrence = 0) const;
     PROJ_DLL int countChildrenOfName(const std::string &childName) const;
 
     PROJ_DLL std::string toString() const;

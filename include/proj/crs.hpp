@@ -471,7 +471,7 @@ using BoundCRSNNPtr = util::nn<BoundCRSPtr>;
  * is applied to the source CRS with the target CRS being the common or hub
  * system.
  *
- * Coordinates refering to a BoundCRS are expressed into its source/base CRS.
+ * Coordinates referring to a BoundCRS are expressed into its source/base CRS.
  *
  * This abstraction can for example model the concept of TOWGS84 datum shift
  * present in \ref WKT1.
