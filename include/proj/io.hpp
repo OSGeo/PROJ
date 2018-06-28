@@ -56,7 +56,7 @@ using WKTFormatterPtr = std::shared_ptr<WKTFormatter>;
 /** WKTFormatter non-null shared pointer. */
 using WKTFormatterNNPtr = util::nn<WKTFormatterPtr>;
 
-/** WKTFormatter class. */
+/** \brief Formatter to WKT strings. */
 class WKTFormatter {
   public:
     //! @cond Doxygen_Suppress
@@ -111,8 +111,9 @@ class WKTFormatter {
     PROJ_DLL static WKTFormatterNNPtr
     create(Convention convention = Convention::WKT2);
     PROJ_DLL static WKTFormatterNNPtr create(WKTFormatterNNPtr other);
-
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~WKTFormatter();
+    //! @endcond
 
     PROJ_DLL WKTFormatter &setMultiLine(bool multiLine);
     PROJ_DLL WKTFormatter &setIndendationWidth(int width);
@@ -199,12 +200,13 @@ using PROJStringFormatterPtr = std::shared_ptr<PROJStringFormatter>;
 /** PROJStringFormatter non-null shared pointer. */
 using PROJStringFormatterNNPtr = util::nn<PROJStringFormatterPtr>;
 
-/** PROJStringFormatter class. */
+/** \brief Formatter to PROJ strings. */
 class PROJStringFormatter {
   public:
     PROJ_DLL static PROJStringFormatterNNPtr create();
-
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~PROJStringFormatter();
+    //! @endcond
 
     /** Returns the PROJ string. */
     PROJ_DLL const std::string &toString() const;
@@ -245,38 +247,40 @@ class PROJStringFormatter {
 
 // ---------------------------------------------------------------------------
 
-/** Exception possibly thrown by IWKTExportable::exportToWKT() or
+/** \brief Exception possibly thrown by IWKTExportable::exportToWKT() or
  * IPROJStringExportable::exportToPROJString(). */
 class FormattingException : public util::Exception {
   public:
-    /** Constructor. */
+    //! @cond Doxygen_Suppress
     PROJ_DLL explicit FormattingException(const char *message);
-    /** Constructor. */
     PROJ_DLL explicit FormattingException(const std::string &message);
     PROJ_DLL FormattingException(const FormattingException &other);
     PROJ_DLL virtual ~FormattingException() override;
+    //! @endcond
 };
 
 // ---------------------------------------------------------------------------
 
-/** Exception possibly thrown by WKTNode::createFrom(). */
+/** \brief Exception possibly thrown by WKTNode::createFrom() or
+ * WKTParser::createFromWKT(). */
 class ParsingException : public util::Exception {
   public:
-    /** Constructor. */
+    //! @cond Doxygen_Suppress
     PROJ_DLL explicit ParsingException(const char *message);
-    /** Constructor. */
     PROJ_DLL explicit ParsingException(const std::string &message);
     PROJ_DLL ParsingException(const ParsingException &other);
     PROJ_DLL virtual ~ParsingException() override;
+    //! @endcond
 };
 
 // ---------------------------------------------------------------------------
 
-/** Interface for an object that can be exported to WKT. */
+/** \brief Interface for an object that can be exported to WKT. */
 class PROJ_DLL IWKTExportable {
   public:
-    /** \brief Destructor */
+    //! @cond Doxygen_Suppress
     virtual ~IWKTExportable();
+    //! @endcond
 
     /** Builds a WKT representation. May throw a FormattingException */
     virtual std::string exportToWKT(
@@ -285,11 +289,12 @@ class PROJ_DLL IWKTExportable {
 
 // ---------------------------------------------------------------------------
 
-/** Interface for an object that can be exported to a PROJ string. */
+/** \brief Interface for an object that can be exported to a PROJ string. */
 class PROJ_DLL IPROJStringExportable {
   public:
-    /** \brief Destructor */
+    //! @cond Doxygen_Suppress
     virtual ~IPROJStringExportable();
+    //! @endcond
 
     /** Builds a PROJ string representation. May throw a FormattingException */
     virtual std::string exportToPROJString(PROJStringFormatterNNPtr formatter)
@@ -299,13 +304,19 @@ class PROJ_DLL IPROJStringExportable {
 // ---------------------------------------------------------------------------
 
 class WKTNode;
+/** Shared pointer of WKTNode. */
 using WKTNodePtr = std::shared_ptr<WKTNode>;
+/** Non-null shared pointer of WKTNode. */
 using WKTNodeNNPtr = util::nn<WKTNodePtr>;
 
+/** \brief Node in the tree-splitted WKT representation.
+ */
 class WKTNode {
   public:
     PROJ_DLL explicit WKTNode(const std::string &valueIn);
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~WKTNode();
+    //! @endcond
 
     PROJ_DLL const std::string &value() const;
     PROJ_DLL const std::vector<WKTNodeNNPtr> &children() const;
@@ -319,6 +330,8 @@ class WKTNode {
 
     PROJ_DLL static WKTNodeNNPtr createFrom(const std::string &wkt,
                                             size_t indexStart = 0);
+
+  protected:
     PROJ_DLL static WKTNodeNNPtr
     createFrom(const std::string &wkt, size_t indexStart, int recLevel,
                size_t &indexEnd); // throw(ParsingException)
@@ -329,10 +342,14 @@ class WKTNode {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Parse a WKT string into the appropriate suclass of util::BaseObject.
+ */
 class WKTParser {
   public:
     PROJ_DLL WKTParser();
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~WKTParser();
+    //! @endcond
 
     PROJ_DLL WKTParser &setStrict(bool strict);
     PROJ_DLL std::vector<std::string> warningList() const;

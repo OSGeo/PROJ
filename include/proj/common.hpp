@@ -116,6 +116,11 @@ class UnitOfMeasure {
     PROJ_OPAQUE_PRIVATE_DATA
 };
 
+/** Shared pointer of UnitOfMeasure. */
+using UnitOfMeasurePtr = std::shared_ptr<UnitOfMeasure>;
+/** Non-null shared pointer of UnitOfMeasure. */
+using UnitOfMeasureNNPtr = util::nn<UnitOfMeasurePtr>;
+
 // ---------------------------------------------------------------------------
 
 /** \brief Numeric value associated with a UnitOfMeasure. */

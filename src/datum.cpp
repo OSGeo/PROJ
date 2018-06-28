@@ -109,7 +109,7 @@ const util::optional<std::string> &Datum::anchorDefinition() const {
 
 /** \brief Return the date on which the datum definition was published.
  *
- * \note Departure from \ref ISO_19111_2018: we return a DateTime instead of
+ * \note Departure from \ref ISO_19111_2018 : we return a DateTime instead of
  * a Citation::Date.
  *
  * @return the publication date, or empty.

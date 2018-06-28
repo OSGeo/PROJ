@@ -66,7 +66,9 @@ namespace io {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 IWKTExportable::~IWKTExportable() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -150,7 +152,9 @@ WKTFormatterNNPtr WKTFormatter::create(WKTFormatterNNPtr other) {
 // ---------------------------------------------------------------------------
 
 /** \brief Destructor. */
+//! @cond Doxygen_Suppress
 WKTFormatter::~WKTFormatter() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -585,6 +589,10 @@ struct WKTNode::Private {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a WKTNode.
+ *
+ * @param valueIn the name of the node.
+ */
 WKTNode::WKTNode(const std::string &valueIn)
     : d(internal::make_unique<Private>()) {
     d->value_ = valueIn;
@@ -592,15 +600,26 @@ WKTNode::WKTNode(const std::string &valueIn)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 WKTNode::~WKTNode() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
-// do not add a parent of this node
+/** \brief Adds a child to the current node.
+ *
+ * @param child child to add. This should not be a parent of this node.
+ */
 void WKTNode::addChild(WKTNodeNNPtr child) { d->children_.push_back(child); }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the (occurrence-1)th sub-node of name childName.
+ *
+ * @param childName name of the child.
+ * @param occurrence occurence index (starting at 0)
+ * @return the child, or nullptr.
+ */
 WKTNodePtr WKTNode::lookForChild(const std::string &childName,
                                  int occurrence) const {
     int occCount = 0;
@@ -617,6 +636,11 @@ WKTNodePtr WKTNode::lookForChild(const std::string &childName,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the count of children of given name.
+ *
+ * @param childName name of the children to look for.
+ * @return count
+ */
 int WKTNode::countChildrenOfName(const std::string &childName) const {
     int occCount = 0;
     for (const auto &child : d->children_) {
@@ -629,10 +653,14 @@ int WKTNode::countChildrenOfName(const std::string &childName) const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the value of a node.
+ */
 const std::string &WKTNode::value() const { return d->value_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the children of a node.
+ */
 const std::vector<WKTNodeNNPtr> &WKTNode::children() const {
     return d->children_;
 }
@@ -740,7 +768,14 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
     indexEnd = i + 1;
     return node;
 }
+// ---------------------------------------------------------------------------
 
+/** \brief Instanciate a WKTNode hierarchy from a WKT string.
+ *
+ * @param wkt the WKT string to parse.
+ * @param indexStart the start index in the wkt string.
+ * @throw ParsingException
+ */
 WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart) {
     size_t indexEnd;
     return createFrom(wkt, indexStart, 0, indexEnd);
@@ -759,6 +794,8 @@ static std::string escapeIfQuotedString(const std::string &str) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a WKT representation of the tree structure.
+ */
 std::string WKTNode::toString() const {
     std::string str(escapeIfQuotedString(d->value_));
     if (!d->children_.empty()) {
@@ -849,10 +886,14 @@ WKTParser::WKTParser() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 WKTParser::~WKTParser() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set whether parsing should be done in strict mode.
+ */
 WKTParser &WKTParser::setStrict(bool strict) {
     d->strict_ = strict;
     return *this;
@@ -860,12 +901,17 @@ WKTParser &WKTParser::setStrict(bool strict) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the list of warnings found during parsing.
+ *
+ * \note The list might be non-empty only is setStrict(false) has been called.
+ */
 std::vector<std::string> WKTParser::warningList() const {
     return d->warningList_;
 }
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 void WKTParser::Private::emitRecoverableAssertion(const std::string &errorMsg) {
     if (strict_) {
         throw ParsingException(errorMsg);
@@ -2322,18 +2368,21 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
 
     throw ParsingException("unhandled keyword: " + name);
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a sub-class of BaseObject from a WKT string.
+ * @throw ParsingException
+ */
 BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
     WKTNodeNNPtr root = WKTNode::createFrom(wkt);
     return d->build(root);
 }
 
-//! @endcond
-
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 FormattingException::FormattingException(const char *message)
     : Exception(message) {}
 
@@ -2370,6 +2419,7 @@ ParsingException::~ParsingException() = default;
 // ---------------------------------------------------------------------------
 
 IPROJStringExportable::~IPROJStringExportable() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -2393,10 +2443,20 @@ PROJStringFormatter::PROJStringFormatter()
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 PROJStringFormatter::~PROJStringFormatter() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Constructs a new formatter.
+ *
+ * A formatter can be used only once (its internal state is mutated)
+ *
+ * Its default behaviour can be adjusted with the different setters.
+ *
+ * @return new formatter.
+ */
 PROJStringFormatterNNPtr PROJStringFormatter::create() {
     return PROJStringFormatter::nn_make_shared<PROJStringFormatter>();
 }
