@@ -626,8 +626,10 @@ VerticalCS::~VerticalCS() = default;
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 VerticalCS::VerticalCS(const CoordinateSystemAxisNNPtr &axisIn)
     : CoordinateSystem(std::vector<CoordinateSystemAxisNNPtr>{axisIn}) {}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -829,8 +831,10 @@ TemporalCS::~TemporalCS() = default;
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 TemporalCS::TemporalCS(const CoordinateSystemAxisNNPtr &axisIn)
     : CoordinateSystem(std::vector<CoordinateSystemAxisNNPtr>{axisIn}) {}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
