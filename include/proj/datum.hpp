@@ -68,7 +68,7 @@ class Datum : public common::ObjectUsage {
     //! @endcond
 
     PROJ_DLL const util::optional<std::string> &anchorDefinition() const;
-    PROJ_DLL const util::optional<common::Date> &publicationDate() const;
+    PROJ_DLL const util::optional<common::DateTime> &publicationDate() const;
     PROJ_DLL const util::optional<common::IdentifiedObject> &
     conventionalRS() const;
 

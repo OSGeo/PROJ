@@ -47,14 +47,10 @@ namespace common {
 
 // ---------------------------------------------------------------------------
 
-class Date {
-    // TODO
-};
-
-// ---------------------------------------------------------------------------
-
+/** \brief Unit of measure. */
 class UnitOfMeasure {
   public:
+    /** \brief Type of unit of measure. */
     enum class PROJ_DLL Type {
         /** Unknown unit of measure */
         UNKNOWN,
@@ -72,28 +68,33 @@ class UnitOfMeasure {
 
     PROJ_DLL UnitOfMeasure(const std::string &nameIn = std::string(),
                            double toSIIn = 1.0, Type typeIn = Type::UNKNOWN,
-                           const std::string &authorityIn = std::string(),
+                           const std::string &codeSpaceIn = std::string(),
                            const std::string &codeIn = std::string());
+
+    //! @cond Doxygen_Suppress
     PROJ_DLL UnitOfMeasure(const UnitOfMeasure &other);
     PROJ_DLL ~UnitOfMeasure();
     PROJ_DLL UnitOfMeasure &operator=(const UnitOfMeasure &other);
+    //! @endcond
 
     PROJ_DLL const std::string &name() const;
     PROJ_DLL double conversionToSI() const;
     PROJ_DLL Type type() const;
 
-    PROJ_DLL const std::string &authority() const;
+    PROJ_DLL const std::string &codeSpace() const;
     PROJ_DLL const std::string &code() const;
 
     PROJ_DLL bool operator==(const UnitOfMeasure &other) const;
     PROJ_DLL bool operator!=(const UnitOfMeasure &other) const;
 
+    //! @cond Doxygen_Suppress
     PROJ_DLL std::string
     exportToWKT(io::WKTFormatterNNPtr formatter,
                 const std::string &unitType =
                     std::string()) const; // throw(io::FormattingException)
 
     PROJ_DLL std::string exportToPROJString() const;
+    //! @endcond
 
     PROJ_DLL static const UnitOfMeasure NONE;
 
@@ -117,13 +118,17 @@ class UnitOfMeasure {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Numeric value associated with a UnitOfMeasure. */
 class Measure : public util::BaseObject {
   public:
     PROJ_DLL Measure(double valueIn = 0.0,
                      const UnitOfMeasure &unitIn = UnitOfMeasure());
+
+    //! @cond Doxygen_Suppress
     PROJ_DLL Measure(const Measure &other);
     PROJ_DLL ~Measure();
     PROJ_DLL Measure &operator=(const Measure &other);
+    //! @endcond
 
     PROJ_DLL const UnitOfMeasure &unit() const;
     PROJ_DLL double getSIValue() const;
@@ -137,18 +142,24 @@ class Measure : public util::BaseObject {
     PROJ_OPAQUE_PRIVATE_DATA
 };
 
+/** Shared pointer of Measure. */
 using MeasurePtr = std::shared_ptr<Measure>;
+/** Non-null shared pointer of Measure. */
 using MeasureNNPtr = util::nn<MeasurePtr>;
 
 // ---------------------------------------------------------------------------
 
+/** \brief Numeric value, without a physical unit of measure. */
 class Scale : public Measure {
   public:
     PROJ_DLL explicit Scale(
         double valueIn = 0.0,
         const UnitOfMeasure &unitIn = UnitOfMeasure::SCALE_UNITY);
+
+    //! @cond Doxygen_Suppress
     PROJ_DLL Scale(const Scale &other);
     PROJ_DLL ~Scale() override;
+    //! @endcond
 
   protected:
     friend class util::optional<Scale>;
@@ -157,12 +168,16 @@ class Scale : public Measure {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Numeric value, with a angular unit of measure. */
 class Angle : public Measure {
   public:
     PROJ_DLL Angle(double valueIn = 0.0,
                    const UnitOfMeasure &unitIn = UnitOfMeasure::DEGREE);
+
+    //! @cond Doxygen_Suppress
     PROJ_DLL Angle(const Angle &other);
     PROJ_DLL ~Angle() override;
+    //! @endcond
 
     PROJ_DLL Angle convertToUnit(const UnitOfMeasure &otherUnit) const;
 
@@ -173,12 +188,16 @@ class Angle : public Measure {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Numeric value, with a linear unit of measure. */
 class Length : public Measure {
   public:
     PROJ_DLL Length(double valueIn = 0.0,
                     const UnitOfMeasure &unitIn = UnitOfMeasure::METRE);
+
+    //! @cond Doxygen_Suppress
     PROJ_DLL Length(const Length &other);
     PROJ_DLL ~Length() override;
+    //! @endcond
 
     PROJ_DLL Length convertToUnit(const UnitOfMeasure &otherUnit) const;
 
@@ -189,16 +208,24 @@ class Length : public Measure {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Date-time value, as a ISO:8601 encoded string, or other string
+ * encoding */
 class DateTime {
   public:
+    //! @cond Doxygen_Suppress
     PROJ_DLL DateTime(const DateTime &other);
     PROJ_DLL ~DateTime();
+    //! @endcond
 
     PROJ_DLL bool isISO_8601() const;
     PROJ_DLL std::string toString() const;
 
     PROJ_DLL static DateTime
     create(const std::string &str); // may throw Exception
+
+  protected:
+    DateTime();
+    friend class util::optional<DateTime>;
 
   private:
     explicit DateTime(const std::string &str);
@@ -209,22 +236,31 @@ class DateTime {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Data epoch */
 class DataEpoch {
     // FIXME
   public:
+    /** FIXME */
     Measure coordinateEpoch{};
 };
 
 // ---------------------------------------------------------------------------
 
 class IdentifiedObject;
+/** Shared pointer of IdentifiedObject. */
 using IdentifiedObjectPtr = std::shared_ptr<IdentifiedObject>;
+/** Non-null shared pointer of IdentifiedObject. */
 using IdentifiedObjectNNPtr = util::nn<IdentifiedObjectPtr>;
 
+/** \brief Identifications of a CRS-related object.
+ *
+ * \remark Implements IdentifiedObject from \ref ISO_19111_2018
+ */
 class IdentifiedObject : public util::BaseObject {
   public:
-    PROJ_DLL IdentifiedObject(const IdentifiedObject &other);
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~IdentifiedObject() override;
+    //! @endcond
 
     PROJ_DLL static IdentifiedObjectNNPtr
     create(const util::PropertyMap
@@ -249,13 +285,16 @@ class IdentifiedObject : public util::BaseObject {
     PROJ_DLL std::string alias() const;
     PROJ_DLL bool isEPSG(int code) const;
 
-    PROJ_DLL void formatID(io::WKTFormatterNNPtr formatter) const;
-    PROJ_DLL void formatRemarks(io::WKTFormatterNNPtr formatter) const;
+    //! @cond Doxygen_Suppress
+    void formatID(io::WKTFormatterNNPtr formatter) const;
+    void formatRemarks(io::WKTFormatterNNPtr formatter) const;
+    //! @endcond
 
   protected:
     friend class util::optional<IdentifiedObject>;
     INLINED_MAKE_SHARED
     IdentifiedObject();
+    IdentifiedObject(const IdentifiedObject &other);
     IdentifiedObject &operator=(const IdentifiedObject &other);
 
     void setProperties(const util::PropertyMap
@@ -268,14 +307,20 @@ class IdentifiedObject : public util::BaseObject {
 // ---------------------------------------------------------------------------
 
 class ObjectDomain;
+/** Shared pointer of ObjectDomain. */
 using ObjectDomainPtr = std::shared_ptr<ObjectDomain>;
+/** Non-null shared pointer of ObjectDomain. */
 using ObjectDomainNNPtr = util::nn<ObjectDomainPtr>;
 
+/** \brief The scope and validity of a CRS-related object.
+ *
+ * \remark Implements ObjectDomain from \ref ISO_19111_2018
+ */
 class ObjectDomain : public util::BaseObject {
   public:
-    PROJ_DLL ObjectDomain(const ObjectDomain &other);
-    PROJ_DLL ObjectDomain &operator=(const ObjectDomain &other) = delete;
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~ObjectDomain();
+    //! @endcond
 
     // In ISO_19111:2018, scope and domain are compulsory, but in WKT2:2015,
     // they
@@ -287,25 +332,32 @@ class ObjectDomain : public util::BaseObject {
     create(const util::optional<std::string> &scopeIn,
            const metadata::ExtentPtr &extent);
 
+    //! @cond Doxygen_Suppress
     std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const; // throw(io::FormattingException)
+               //! @endcond
 
   protected:
     ObjectDomain();
+    ObjectDomain(const ObjectDomain &other);
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    ObjectDomain &operator=(const ObjectDomain &other) = delete;
 };
 
 // ---------------------------------------------------------------------------
 
+/** \brief Usage of a CRS-related object.
+ *
+ * \remark Implements ObjectUsage from \ref ISO_19111_2018
+ */
 class ObjectUsage : public IdentifiedObject {
   public:
-    PROJ_DLL ObjectUsage();
-    PROJ_DLL ObjectUsage(const ObjectUsage &other);
-    PROJ_DLL ObjectUsage &operator=(const ObjectUsage &other) = delete;
+    //! @cond Doxygen_Suppress
     PROJ_DLL ~ObjectUsage();
+    //! @endcond
 
     PROJ_DLL const std::vector<ObjectDomainNNPtr> &domains() const;
 
@@ -315,6 +367,8 @@ class ObjectUsage : public IdentifiedObject {
     PROJ_DLL static const std::string OBJECT_DOMAIN_KEY;
 
   protected:
+    ObjectUsage();
+    ObjectUsage(const ObjectUsage &other);
     void setProperties(const util::PropertyMap
                            &properties); // throw(InvalidValueTypeException)
 
@@ -323,6 +377,7 @@ class ObjectUsage : public IdentifiedObject {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    ObjectUsage &operator=(const ObjectUsage &other) = delete;
 };
 
 } // namespace common

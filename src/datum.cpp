@@ -57,7 +57,7 @@ namespace datum {
 //! @cond Doxygen_Suppress
 struct Datum::Private {
     util::optional<std::string> anchorDefinition{};
-    util::optional<common::Date> publicationDate{};
+    util::optional<common::DateTime> publicationDate{};
     util::optional<common::IdentifiedObject> conventionalRS{};
 };
 //! @endcond
@@ -109,9 +109,12 @@ const util::optional<std::string> &Datum::anchorDefinition() const {
 
 /** \brief Return the date on which the datum definition was published.
  *
+ * \note Departure from \ref ISO_19111_2018: we return a DateTime instead of
+ * a Citation::Date.
+ *
  * @return the publication date, or empty.
  */
-const util::optional<common::Date> &Datum::publicationDate() const {
+const util::optional<common::DateTime> &Datum::publicationDate() const {
     return d->publicationDate;
 }
 

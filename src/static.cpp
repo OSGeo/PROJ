@@ -62,14 +62,6 @@ NS_PROJ_START
 
 // ---------------------------------------------------------------------------
 
-const std::string common::IdentifiedObject::NAME_KEY("name");
-const std::string common::IdentifiedObject::IDENTIFIERS_KEY("identifiers");
-const std::string common::IdentifiedObject::ALIAS_KEY("alias");
-const std::string common::IdentifiedObject::REMARKS_KEY("remarks");
-const std::string common::IdentifiedObject::DEPRECATED_KEY("deprecated");
-
-// ---------------------------------------------------------------------------
-
 /** \brief Key to set the authority citation of a metadata::Identifier.
  *
  * The value is to be provided as a string or a metadata::Citation.
@@ -111,10 +103,62 @@ const std::string Identifier::URI_KEY("uri");
 
 // ---------------------------------------------------------------------------
 
+/** \brief Key to set the name of a common::IdentifiedObject
+ *
+ * The value is to be provided as a string or metadata::IdentifierNNPtr.
+ */
+const std::string common::IdentifiedObject::NAME_KEY("name");
+
+/** \brief Key to set the identifier(s) of a common::IdentifiedObject
+ *
+ * The value is to be provided as a common::IdentifierNNPtr or a
+ * util::ArrayOfBaseObjectNNPtr
+ * of common::IdentifierNNPtr.
+ */
+const std::string common::IdentifiedObject::IDENTIFIERS_KEY("identifiers");
+
+/** \brief Key to set the alia(es) of a common::IdentifiedObject
+ *
+ * The value is to be provided as string, a util::GenericNameNNPtr or a
+ * util::ArrayOfBaseObjectNNPtr
+ * of util::GenericNameNNPtr.
+ */
+const std::string common::IdentifiedObject::ALIAS_KEY("alias");
+
+/** \brief Key to set the remarks of a common::IdentifiedObject
+ *
+ * The value is to be provided as a string.
+ */
+const std::string common::IdentifiedObject::REMARKS_KEY("remarks");
+
+/** \brief Key to set the remarks of a common::IdentifiedObject
+ *
+ * The value is to be provided as a boolean.
+ */
+const std::string common::IdentifiedObject::DEPRECATED_KEY("deprecated");
+
+// ---------------------------------------------------------------------------
+
+/** \brief Key to set the scope of a common::ObjectUsage
+ *
+ * The value is to be provided as a string.
+ */
 const std::string common::ObjectUsage::SCOPE_KEY("scope");
+
+/** \brief Key to set the domain of validity of a common::ObjectUsage
+ *
+ * The value is to be provided as a common::ExtentNNPtr.
+ */
 const std::string
     common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY("domainOfValidity");
-const std::string common::ObjectUsage::OBJECT_DOMAIN_KEY("objectUsage");
+
+/** \brief Key to set the object domain(s) of a common::ObjectUsage
+ *
+ * The value is to be provided as a common::ObjectDomainNNPtr or a
+ * util::ArrayOfBaseObjectNNPtr
+ * of common::ObjectDomainNNPtr.
+ */
+const std::string common::ObjectUsage::OBJECT_DOMAIN_KEY("objectDomain");
 
 // ---------------------------------------------------------------------------
 
@@ -194,35 +238,56 @@ DEFINE_WKT_CONSTANT(TIMEDATUM);
 // ---------------------------------------------------------------------------
 
 namespace common {
+
+/** \brief "Empty"/"None", unit of measure of type NONE. */
 const UnitOfMeasure UnitOfMeasure::NONE("", 1.0, UnitOfMeasure::Type::NONE);
+
+/** \brief Scale unity, unit of measure of type SCALE. */
 const UnitOfMeasure UnitOfMeasure::SCALE_UNITY("unity", 1.0,
                                                UnitOfMeasure::Type::SCALE,
                                                "EPSG", "9201");
+
+/** \brief Parts-per-million, unit of measure of type SCALE. */
 const UnitOfMeasure UnitOfMeasure::PARTS_PER_MILLION("parts per million", 1e-6,
                                                      UnitOfMeasure::Type::SCALE,
                                                      "EPSG", "9202");
+
+/** \brief Metre, unit of measure of type LINEAR (SI unit). */
 const UnitOfMeasure UnitOfMeasure::METRE("metre", 1.0,
                                          UnitOfMeasure::Type::LINEAR, "EPSG",
                                          "9001");
+
+/** \brief Degree, unit of measure of type ANGULAR. */
 const UnitOfMeasure UnitOfMeasure::DEGREE("degree", M_PI / 180.,
                                           UnitOfMeasure::Type::ANGULAR, "EPSG",
                                           "9122");
+
+/** \brief Arc-second, unit of measure of type ANGULAR. */
 const UnitOfMeasure UnitOfMeasure::ARC_SECOND("arc-second", M_PI / 180. / 3600.,
                                               UnitOfMeasure::Type::ANGULAR,
                                               "EPSG", "9104");
+
+/** \brief Grad, unit of measure of type ANGULAR. */
 const UnitOfMeasure UnitOfMeasure::GRAD("grad", M_PI / 200.,
                                         UnitOfMeasure::Type::ANGULAR, "EPSG",
                                         "9105");
+
+/** \brief Radian, unit of measure of type ANGULAR (SI unit). */
 const UnitOfMeasure UnitOfMeasure::RADIAN("radian", 1.0,
                                           UnitOfMeasure::Type::ANGULAR, "EPSG",
                                           "9101");
+
+/** \brief Microradian, unit of measure of type ANGULAR. */
 const UnitOfMeasure UnitOfMeasure::MICRORADIAN("microradian", 1e-6,
                                                UnitOfMeasure::Type::ANGULAR,
                                                "EPSG", "9109");
 
+/** \brief Second, unit of measure of type TIME (SI unit). */
 const UnitOfMeasure UnitOfMeasure::SECOND("second", 1.0,
                                           UnitOfMeasure::Type::TIME, "EPSG",
                                           "1029");
+
+/** \brief Year, unit of measure of type TIME */
 const UnitOfMeasure UnitOfMeasure::YEAR("year", 31556925.445,
                                         UnitOfMeasure::Type::TIME, "EPSG",
                                         "1040");
