@@ -70,11 +70,43 @@ const std::string common::IdentifiedObject::DEPRECATED_KEY("deprecated");
 
 // ---------------------------------------------------------------------------
 
+/** \brief Key to set the authority citation of a metadata::Identifier.
+ *
+ * The value is to be provided as a string or a metadata::Citation.
+ */
 const std::string Identifier::AUTHORITY_KEY("authority");
+
+/** \brief Key to set the code of a metadata::Identifier.
+ *
+ * The value is to be provided as a integer or a string.
+ */
 const std::string Identifier::CODE_KEY("code");
+
+/** \brief Key to set the organization responsible for definition and
+ * maintenance of the code of a metadata::Identifier.
+ *
+ * The value is to be provided as a string.
+ */
 const std::string Identifier::CODESPACE_KEY("codespace");
+
+/** \brief Key to set the version identifier for the namespace of a
+ * metadata::Identifier.
+ *
+ * The value is to be provided as a string.
+ */
 const std::string Identifier::VERSION_KEY("version");
+
+/** \brief Key to set the natural language description of the meaning of the
+ * code value of a metadata::Identifier.
+ *
+ * The value is to be provided as a string.
+ */
 const std::string Identifier::DESCRIPTION_KEY("description");
+
+/** \brief Key to set the URI of a metadata::Identifier.
+ *
+ * The value is to be provided as a string.
+ */
 const std::string Identifier::URI_KEY("uri");
 
 // ---------------------------------------------------------------------------

@@ -15,8 +15,24 @@ TODO
 \section general_properties General properties
 
 All classes deriving from IdentifiedObject have general properties that can
-be defined at creation time. Those properties are ...
-TODO
+be defined at creation time. Those properties are:
+
+<ul>
+<li>osgeo::proj::metadata::Identifier::DESCRIPTION_KEY ("description"): the
+natural language description of the meaning of the code value, provided a a string.</li>
+<li>osgeo::proj::metadata::Identifier::CODE_KEY ("code"): a numeric or
+alphanumeric code, provided as a integer or a string. For example 4326, for
+the EPSG:4326 "WGS84" GeographicalCRS</li>
+<li>osgeo::proj::metadata::Identifier::CODESPACE_KEY ("codespace"): the organization
+responsible for definition and maintenance of the code., provided a a string.
+For example "EPSG".</li>
+<li>osgeo::proj::metadata::Identifier::VERSION_KEY ("version"): the version
+identifier for the namespace, provided a a string.</li>
+<li>osgeo::proj::metadata::Identifier::AUTHORITY_KEY ("authority"): a citation for the authority,
+provided as a string or a metadata::Citation object. Often unused</li>
+<li>osgeo::proj::metadata::Identifier::URI_KEY ("uri"): the URI of the identifier,
+provided as a string. Often unused</li>
+</ul>
 
 \section standards Applicable standards
 
@@ -85,6 +101,15 @@ An older specification of WKT1 is/was used by some software packages:
 
 [OGC 99-049, 1999-05-05, OpenGIS Simple Features Specification For SQL v1.1]
 (http://portal.opengeospatial.org/files/?artifact_id=829)
+
+\subsection ISO_19115 ISO 19115 (Metadata)
+
+Defines the schema required for describing geographic information and services.
+It provides information about the identification, the extent, the quality, the
+spatial and temporal schema, spatial reference, and distribution of digital
+geographic data.
+
+PROJ implements a simplified subset of ISO 19115.
 
 \subsection GeoAPI GeoAPI
 

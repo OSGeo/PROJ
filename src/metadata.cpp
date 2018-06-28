@@ -58,10 +58,13 @@ struct Citation::Private {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Citation::Citation() : d(internal::make_unique<Private>()) {}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Constructs a citation by its title. */
 Citation::Citation(const std::string &titleIn)
     : d(internal::make_unique<Private>()) {
     d->title = titleIn;
@@ -69,6 +72,7 @@ Citation::Citation(const std::string &titleIn)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Citation::Citation(const Citation &other)
     : d(internal::make_unique<Private>(*(other.d))) {}
 
@@ -84,9 +88,11 @@ Citation &Citation::operator=(const Citation &other) {
     }
     return *this;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the name by which the cited resource is known. */
 const optional<std::string> &Citation::title() const { return d->title; }
 
 // ---------------------------------------------------------------------------
@@ -101,7 +107,9 @@ GeographicExtent::GeographicExtent() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 GeographicExtent::~GeographicExtent() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -126,26 +134,60 @@ GeographicBoundingBox::GeographicBoundingBox(double west, double south,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 GeographicBoundingBox::~GeographicBoundingBox() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the western-most coordinate of the limit of the dataset
+ * extent.
+ *
+ * The unit is degrees.
+ */
 double GeographicBoundingBox::westBoundLongitude() const { return d->west_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the southern-most coordinate of the limit of the dataset
+ * extent.
+ *
+ * The unit is degrees.
+ */
 double GeographicBoundingBox::southBoundLongitude() const { return d->south_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the eastern-most coordinate of the limit of the dataset
+ * extent.
+ *
+ * The unit is degrees.
+ */
 double GeographicBoundingBox::eastBoundLongitude() const { return d->east_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the northern-most coordinate of the limit of the dataset
+ * extent.
+ *
+ * The unit is degrees.
+ */
 double GeographicBoundingBox::northBoundLongitude() const { return d->north_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a GeographicBoundingBox.
+ *
+ * @param west Western-most coordinate of the limit of the dataset extent (in
+ * degrees).
+ * @param south Southern-most coordinate of the limit of the dataset extent (in
+ * degrees).
+ * @param east Eastern-most coordinate of the limit of the dataset extent (in
+ * degrees).
+ * @param north Northern-most coordinate of the limit of the dataset extent (in
+ * degrees).
+ * @return a new GeographicBoundingBox.
+ */
 GeographicBoundingBoxNNPtr GeographicBoundingBox::create(double west,
                                                          double south,
                                                          double east,
@@ -165,6 +207,7 @@ struct Extent::Private {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Extent::Extent() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
@@ -176,21 +219,36 @@ Extent::Extent(const Extent &other) : d(internal::make_unique<Private>()) {
 // ---------------------------------------------------------------------------
 
 Extent::~Extent() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** Return a textual description of the extent.
+ *
+ * @return the description, or empty.
+ */
 const optional<std::string> &Extent::description() const {
     return d->description_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** Return the geographic element(s) of the extent
+ *
+ * @return the geographic element(s), or empty.
+ */
 const std::vector<GeographicExtentNNPtr> &Extent::geographicElements() const {
     return d->geographicElements_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Extent.
+ *
+ * @param descriptionIn Textual description, or empty.
+ * @param geographicElementsIn Geographic element(s), or empty.
+ * @return a new Extent.
+ */
 ExtentNNPtr
 Extent::create(const optional<std::string> &descriptionIn,
                const std::vector<GeographicExtentNNPtr> &geographicElementsIn) {
@@ -222,15 +280,24 @@ Identifier::Identifier(const std::string &codeIn)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 Identifier::Identifier(const Identifier &other)
     : d(internal::make_unique<Private>(*(other.d))) {}
 
 // ---------------------------------------------------------------------------
 
 Identifier::~Identifier() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Identifier.
+ *
+ * @param codeIn Alphanumeric value identifying an instance in the codespace
+ * @param properties See \ref general_properties.
+ * Generally, the Identifier::CODESPACE_KEY should be set.
+ * @return a new Identifier.
+ */
 IdentifierNNPtr Identifier::create(const std::string &codeIn,
                                    const PropertyMap &properties) {
     auto id(Identifier::nn_make_shared<Identifier>(codeIn));
@@ -249,32 +316,67 @@ Identifier &Identifier::operator=(const Identifier &other) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a citation for the organization responsible for definition and
+ * maintenance of the code.
+ *
+ * @return the citation for the authority, or empty.
+ */
 const optional<Citation> &Identifier::authority() const {
     return d->authority_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the alphanumeric value identifying an instance in the
+ * codespace.
+ *
+ * e.g. "4326" (for EPSG:4326 WGS 84 GeographicCRS)
+ *
+ * @return the code.
+ */
 const std::string &Identifier::code() const { return d->code_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the organization responsible for definition and maintenance of
+ * the code.
+ *
+ * e.g "EPSG"
+ *
+ * @return the authority codespace, or empty.
+ */
 const optional<std::string> &Identifier::codeSpace() const {
     return d->codeSpace_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the version identifier for the namespace.
+ *
+ * When appropriate, the edition is identified by the effective date, coded
+ * using ISO 8601 date format.
+ *
+ * @return the version or empty.
+ */
 const optional<std::string> &Identifier::version() const { return d->version_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the natural language description of the meaning of the code
+ * value.
+  *
+ * @return the description or empty.
+ */
 const optional<std::string> &Identifier::description() const {
     return d->description_;
 }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the URI of the identifier.
+  *
+ * @return the URI or empty.
+ */
 const optional<std::string> &Identifier::uri() const { return d->uri_; }
 
 // ---------------------------------------------------------------------------
@@ -414,6 +516,11 @@ static std::string canonicalizeName(const std::string &str) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns whether two names are considered equivalent.
+ *
+ * Two names are equivalent by removing any space, underscore, dash, slash,
+ * { or } character from them, and comparing ina case insensitive way.
+ */
 bool Identifier::isEquivalentName(const std::string &a, const std::string &b) {
     return canonicalizeName(a) == canonicalizeName(b);
 }
@@ -435,14 +542,23 @@ PositionalAccuracy::PositionalAccuracy(const std::string &valueIn)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 PositionalAccuracy::~PositionalAccuracy() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the value of the positional accuracy.
+ */
 const std::string &PositionalAccuracy::value() const { return d->value_; }
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a PositionalAccuracy.
+ *
+ * @param valueIn positional accuracy value.
+ * @return a new PositionalAccuracy.
+ */
 PositionalAccuracyNNPtr PositionalAccuracy::create(const std::string &valueIn) {
     return PositionalAccuracy::nn_make_shared<PositionalAccuracy>(valueIn);
 }
