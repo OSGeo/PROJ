@@ -27,7 +27,7 @@ Many North American systems are defined with coordinates in feet. For example
 in Vermont::
 
     +proj=pipeline
-    +step +proj=tmerc +lat_0=42.5 +lon_0=-72.5 +k=0.999964286 +x_0=500000.00001016 +y_0=0
+    +step +proj=tmerc +lat_0=42.5 +lon_0=-72.5 +k_0=0.999964286 +x_0=500000.00001016 +y_0=0
     +step +proj=unitconvert +xy_in=m +xy_out=us-ft
 
 Often when working with GNSS data the timestamps are presented in GPS-weeks,
