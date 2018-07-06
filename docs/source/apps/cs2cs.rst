@@ -171,7 +171,7 @@ The x-y output data will appear as three lines of:
 
 ::
 
-    1402285.99      5076292.42 0.000
+    1402285.98  5076292.42 -0.00
 
 .. only:: man
 
