@@ -50,12 +50,10 @@ using namespace NS_PROJ::internal;
 NS_PROJ_START
 namespace crs {
 
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
-struct CRS::Private {
-    // This is a manual implementation of std::enable_shared_from_this<> that
-    // avoids publicly deriving from it.
-    std::weak_ptr<CRS> self_{};
-};
+struct CRS::Private {};
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -67,25 +65,6 @@ CRS::CRS() : d(internal::make_unique<Private>()) {}
 //! @cond Doxygen_Suppress
 CRS::~CRS() = default;
 //! @endcond
-
-// ---------------------------------------------------------------------------
-
-/** Keep a reference to ourselves as an internal weak pointer. So that
- * extractGeographicCRS() can later return a shared pointer on itself.
- */
-void CRS::assignSelf(CRSNNPtr self) {
-    assert(self.get() == this);
-    d->self_ = self.as_nullable();
-}
-
-// ---------------------------------------------------------------------------
-
-CRSNNPtr CRS::shared_from_this() const {
-    // This assertion checks that in all code paths where we create a
-    // shared pointer, we took care of assigning it to self_, by calling
-    // assignSelf();
-    return NN_CHECK_ASSERT(d->self_.lock());
-}
 
 // ---------------------------------------------------------------------------
 
@@ -203,6 +182,28 @@ const cs::CoordinateSystemNNPtr &SingleCRS::coordinateSystem() const {
 
 // ---------------------------------------------------------------------------
 
+bool SingleCRS::_isEquivalentTo(const util::BaseObjectNNPtr &other,
+                                util::IComparable::Criterion criterion) const {
+    auto otherSingleCRS = util::nn_dynamic_pointer_cast<SingleCRS>(other);
+    if (otherSingleCRS == nullptr ||
+        !ObjectUsage::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    if ((datum() != nullptr) ^ (otherSingleCRS->datum() != nullptr)) {
+        return false;
+    }
+    if (datum() &&
+        !datum()->isEquivalentTo(NN_CHECK_ASSERT(otherSingleCRS->datum()),
+                                 criterion))
+        return false;
+
+    // TODO test DatumEnsemble
+    return coordinateSystem()->isEquivalentTo(
+        otherSingleCRS->coordinateSystem(), criterion);
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct GeodeticCRS::Private {
     std::vector<operation::PointMotionOperationNNPtr> velocityModel{};
@@ -302,7 +303,7 @@ GeodeticCRS::create(const util::PropertyMap &properties,
                     const datum::GeodeticReferenceFrameNNPtr &datum,
                     const cs::SphericalCSNNPtr &cs) {
     auto crs(GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, cs));
-    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
 }
@@ -323,7 +324,7 @@ GeodeticCRS::create(const util::PropertyMap &properties,
                     const datum::GeodeticReferenceFrameNNPtr &datum,
                     const cs::CartesianCSNNPtr &cs) {
     auto crs(GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, cs));
-    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
 }
@@ -410,6 +411,16 @@ void GeodeticCRS::addDatumInfoToPROJString(
 
 // ---------------------------------------------------------------------------
 
+bool GeodeticCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
+                                 util::IComparable::Criterion criterion) const {
+    auto otherGeodCRS = util::nn_dynamic_pointer_cast<GeodeticCRS>(other);
+    // TODO test velocityModel
+    return otherGeodCRS != nullptr &&
+           SingleCRS::_isEquivalentTo(other, criterion);
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct GeographicCRS::Private {};
 //! @endcond
@@ -463,7 +474,7 @@ GeographicCRS::create(const util::PropertyMap &properties,
                       const cs::EllipsoidalCSNNPtr &cs) {
     GeographicCRSNNPtr crs(
         GeographicCRS::nn_make_shared<GeographicCRS>(datum, cs));
-    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
 }
@@ -540,22 +551,37 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
 void GeographicCRS::addAngularUnitConvertAndAxisSwap(
     io::PROJStringFormatterNNPtr formatter) const {
     auto &axisList = coordinateSystem()->axisList();
-    if (!axisList.empty() &&
-        axisList[0]->unit() != common::UnitOfMeasure::DEGREE) {
-        formatter->addStep("unitconvert");
+    if (!axisList.empty()) {
         auto projUnit = axisList[0]->unit().exportToPROJString();
-        if (projUnit.empty()) {
-            formatter->addParam("xy_in", axisList[0]->unit().conversionToSI());
+        if (formatter->isInverted()) {
+            // "optimization" to avoid emitting an inverted step
+            formatter->startInversion();
+            formatter->addStep("unitconvert");
+            formatter->addParam("xy_in", "rad");
+            if (projUnit.empty()) {
+                formatter->addParam("xy_out",
+                                    axisList[0]->unit().conversionToSI());
+            } else {
+                formatter->addParam("xy_out", projUnit);
+            }
+            formatter->stopInversion();
         } else {
-            formatter->addParam("xy_in", projUnit);
+            formatter->addStep("unitconvert");
+            if (projUnit.empty()) {
+                formatter->addParam("xy_in",
+                                    axisList[0]->unit().conversionToSI());
+            } else {
+                formatter->addParam("xy_in", projUnit);
+            }
+            formatter->addParam("xy_out", "rad");
         }
-        formatter->addParam("xy_out", "rad");
     }
 
     if (axisList.size() >= 2 &&
         ci_equal(*(axisList[0]->name()->description()), "Latitude") &&
         ci_equal(*(axisList[1]->name()->description()), "Longitude")) {
         formatter->addStep("axisswap");
+        formatter->setCurrentStepInverseIsSame();
         formatter->addParam("order", "2,1");
     }
 }
@@ -714,9 +740,19 @@ VerticalCRS::create(const util::PropertyMap &properties,
                     const datum::VerticalReferenceFrameNNPtr &datumIn,
                     const cs::VerticalCSNNPtr &csIn) {
     auto crs(VerticalCRS::nn_make_shared<VerticalCRS>(datumIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+bool VerticalCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
+                                 util::IComparable::Criterion criterion) const {
+    auto otherVertCRS = util::nn_dynamic_pointer_cast<VerticalCRS>(other);
+    // TODO test geoidModel and velocityModel
+    return otherVertCRS != nullptr &&
+           SingleCRS::_isEquivalentTo(other, criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -790,6 +826,20 @@ const SingleCRSNNPtr &DerivedCRS::baseCRS() const { return d->baseCRS_; }
  */
 const operation::ConversionNNPtr &DerivedCRS::derivingConversion() const {
     return d->derivingConversion_;
+}
+
+// ---------------------------------------------------------------------------
+
+bool DerivedCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
+                                util::IComparable::Criterion criterion) const {
+    auto otherDerivedCRS = util::nn_dynamic_pointer_cast<DerivedCRS>(other);
+    if (otherDerivedCRS == nullptr ||
+        !SingleCRS::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    return baseCRS()->isEquivalentTo(otherDerivedCRS->baseCRS(), criterion) &&
+           derivingConversion()->isEquivalentTo(
+               otherDerivedCRS->derivingConversion(), criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -946,6 +996,7 @@ ProjectedCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         axisList[0]->direction() == cs::AxisDirection::NORTH &&
         axisList[1]->direction() == cs::AxisDirection::EAST) {
         formatter->addStep("axisswap");
+        formatter->setCurrentStepInverseIsSame();
         formatter->addParam("order", "2,1");
     }
 
@@ -974,12 +1025,22 @@ ProjectedCRS::create(const util::PropertyMap &properties,
                      const cs::CartesianCSNNPtr &csIn) {
     auto crs = ProjectedCRS::nn_make_shared<ProjectedCRS>(
         baseCRSIn, derivingConversionIn, csIn);
-    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     crs->derivingConversion()->setWeakSourceTargetCRS(
         static_cast<const GeodeticCRSPtr>(baseCRSIn),
         static_cast<const ProjectedCRSPtr>(crs));
     return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+bool ProjectedCRS::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherProjCRS = util::nn_dynamic_pointer_cast<ProjectedCRS>(other);
+    return otherProjCRS != nullptr &&
+           DerivedCRS::isEquivalentTo(other, criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -1042,7 +1103,8 @@ std::vector<SingleCRSNNPtr> CompoundCRS::componentReferenceSystems() const {
 CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
                                      const std::vector<CRSNNPtr> &components) {
     auto compoundCRS(CompoundCRS::nn_make_shared<CompoundCRS>(components));
-    compoundCRS->assignSelf(util::nn_static_pointer_cast<CRS>(compoundCRS));
+    compoundCRS->assignSelf(
+        util::nn_static_pointer_cast<util::BaseObject>(compoundCRS));
     compoundCRS->setProperties(properties);
     if (properties.find(common::IdentifiedObject::NAME_KEY) ==
         properties.end()) {
@@ -1102,6 +1164,28 @@ CompoundCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     }
 
     return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool CompoundCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
+                                 util::IComparable::Criterion criterion) const {
+    auto otherCompoundCRS = util::nn_dynamic_pointer_cast<CompoundCRS>(other);
+    if (otherCompoundCRS == nullptr ||
+        !ObjectUsage::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    auto components = componentReferenceSystems();
+    auto otherComponents = otherCompoundCRS->componentReferenceSystems();
+    if (components.size() != otherComponents.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < components.size(); i++) {
+        if (!components[i]->isEquivalentTo(otherComponents[i], criterion)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -1175,7 +1259,7 @@ BoundCRS::create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
                  const operation::TransformationNNPtr &transformationIn) {
     auto crs = BoundCRS::nn_make_shared<BoundCRS>(baseCRSIn, hubCRSIn,
                                                   transformationIn);
-    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     if (baseCRSIn->name()->description().has_value()) {
         crs->setProperties(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
@@ -1199,7 +1283,7 @@ BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
     auto crs = BoundCRS::nn_make_shared<BoundCRS>(
         baseCRSIn, GeographicCRS::EPSG_4326,
         operation::Transformation::createTOWGS84(baseCRSIn, TOWGS84Parameters));
-    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     if (baseCRSIn->name()->description().has_value()) {
         crs->setProperties(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
@@ -1350,6 +1434,21 @@ std::string BoundCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 
 // ---------------------------------------------------------------------------
 
+bool BoundCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
+                              util::IComparable::Criterion criterion) const {
+    auto otherBoundCRS = util::nn_dynamic_pointer_cast<BoundCRS>(other);
+    if (otherBoundCRS == nullptr ||
+        !ObjectUsage::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    return baseCRS()->isEquivalentTo(otherBoundCRS->baseCRS(), criterion) &&
+           hubCRS()->isEquivalentTo(otherBoundCRS->hubCRS(), criterion) &&
+           transformation()->isEquivalentTo(otherBoundCRS->transformation(),
+                                            criterion);
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct DerivedGeodeticCRS::Private {};
 //! @endcond
@@ -1412,7 +1511,7 @@ DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
     const cs::CartesianCSNNPtr &csIn) {
     auto crs(DerivedGeodeticCRS::nn_make_shared<DerivedGeodeticCRS>(
         baseCRSIn, derivingConversionIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
 }
@@ -1436,7 +1535,7 @@ DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
     const cs::SphericalCSNNPtr &csIn) {
     auto crs(DerivedGeodeticCRS::nn_make_shared<DerivedGeodeticCRS>(
         baseCRSIn, derivingConversionIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
 }
@@ -1480,6 +1579,17 @@ std::string DerivedGeodeticCRS::exportToPROJString(
 {
     throw io::FormattingException(
         "DerivedGeodeticCRS::exportToPROJString() unimplemented");
+}
+
+// ---------------------------------------------------------------------------
+
+bool DerivedGeodeticCRS::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherDerivedGeodCRS =
+        util::nn_dynamic_pointer_cast<DerivedGeodeticCRS>(other);
+    return otherDerivedGeodCRS != nullptr &&
+           DerivedCRS::isEquivalentTo(other, criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -1535,7 +1645,7 @@ DerivedGeographicCRSNNPtr DerivedGeographicCRS::create(
     const cs::EllipsoidalCSNNPtr &csIn) {
     auto crs(DerivedGeographicCRS::nn_make_shared<DerivedGeographicCRS>(
         baseCRSIn, derivingConversionIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
 }
@@ -1582,6 +1692,17 @@ std::string DerivedGeographicCRS::exportToPROJString(
 {
     throw io::FormattingException(
         "DerivedGeographicCRS::exportToPROJString() unimplemented");
+}
+
+// ---------------------------------------------------------------------------
+
+bool DerivedGeographicCRS::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherDerivedGeogCRS =
+        util::nn_dynamic_pointer_cast<DerivedGeographicCRS>(other);
+    return otherDerivedGeogCRS != nullptr &&
+           DerivedCRS::isEquivalentTo(other, criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -1638,7 +1759,7 @@ TemporalCRSNNPtr TemporalCRS::create(const util::PropertyMap &properties,
                                      const datum::TemporalDatumNNPtr &datumIn,
                                      const cs::TemporalCSNNPtr &csIn) {
     auto crs(TemporalCRS::nn_make_shared<TemporalCRS>(datumIn, csIn));
-    crs->assignSelf(util::nn_static_pointer_cast<CRS>(crs));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
 }
@@ -1658,6 +1779,15 @@ std::string TemporalCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     ObjectUsage::_exportToWKT(formatter);
     formatter->endNode();
     return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool TemporalCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
+                                 util::IComparable::Criterion criterion) const {
+    auto otherTemporalCRS = util::nn_dynamic_pointer_cast<TemporalCRS>(other);
+    return otherTemporalCRS != nullptr &&
+           SingleCRS::_isEquivalentTo(other, criterion);
 }
 
 } // namespace crs

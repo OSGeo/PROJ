@@ -181,6 +181,12 @@ template <class T> class optional {
 
 // ---------------------------------------------------------------------------
 
+class BaseObject;
+/** Shared pointer of BaseObject. */
+using BaseObjectPtr = std::shared_ptr<BaseObject>;
+/** Non-null shared pointer of BaseObject. */
+using BaseObjectNNPtr = util::nn<BaseObjectPtr>;
+
 /** \brief Class that can be derived from, to emulate Java's Object behaviour.
  */
 class BaseObject {
@@ -188,12 +194,43 @@ class BaseObject {
     //! @cond Doxygen_Suppress
     virtual PROJ_DLL ~BaseObject();
     //! @endcond
+
+  protected:
+    PROJ_DLL BaseObject();
+    PROJ_DLL void assignSelf(BaseObjectNNPtr self);
+    PROJ_DLL BaseObjectNNPtr shared_from_this() const;
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
 };
 
-/** Shared pointer of BaseObject. */
-using BaseObjectPtr = std::shared_ptr<BaseObject>;
-/** Non-null shared pointer of BaseObject. */
-using BaseObjectNNPtr = util::nn<BaseObjectPtr>;
+// ---------------------------------------------------------------------------
+
+/** \brief Interface for an object that can be compared to another.
+ */
+class IComparable {
+  public:
+    //! @cond Doxygen_Suppress
+    virtual PROJ_DLL ~IComparable();
+    //! @endcond
+
+    /** \brief Comparison criterion. */
+    enum class PROJ_DLL Criterion {
+        /** All attributes are identical. */
+        STRICT,
+        /** The objects are equivalent for coordinate operations. */
+        EQUIVALENT
+    };
+
+    /** \brief Returns whether an object is equivalent to another one.
+     * @param other other object to compare to
+     * @param criterion comparaison criterion.
+     * @return true if objects are equivalent.
+     */
+    PROJ_DLL virtual bool
+    isEquivalentTo(const BaseObjectNNPtr &other,
+                   Criterion criterion = Criterion::STRICT) const = 0;
+};
 
 // ---------------------------------------------------------------------------
 
@@ -523,6 +560,22 @@ class InvalidValueTypeException : public Exception {
     PROJ_DLL explicit InvalidValueTypeException(const std::string &message);
     PROJ_DLL InvalidValueTypeException(const InvalidValueTypeException &other);
     PROJ_DLL ~InvalidValueTypeException() override;
+    //! @endcond
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Exception Thrown to indicate that the requested operation is not
+ * supported.
+ */
+class UnsupportedOperationException : public Exception {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL explicit UnsupportedOperationException(const char *message);
+    PROJ_DLL explicit UnsupportedOperationException(const std::string &message);
+    PROJ_DLL
+    UnsupportedOperationException(const UnsupportedOperationException &other);
+    PROJ_DLL ~UnsupportedOperationException() override;
     //! @endcond
 };
 

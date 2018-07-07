@@ -102,6 +102,8 @@ PROJ_DLL std::string replaceAll(const std::string &str,
 size_t ci_find(const std::string &osStr, const std::string &needle,
                size_t startPos = 0);
 
+bool starts_with(const std::string &str, const std::string &prefix);
+
 bool ends_with(const std::string &str, const std::string &suffix);
 
 std::string tolower(const std::string &osStr);

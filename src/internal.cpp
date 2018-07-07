@@ -115,6 +115,15 @@ size_t ci_find(const std::string &str, const std::string &needle,
 
 // ---------------------------------------------------------------------------
 
+bool starts_with(const std::string &str, const std::string &prefix) {
+    if (str.size() < prefix.size()) {
+        return false;
+    }
+    return str.substr(0, prefix.size()) == prefix;
+}
+
+// ---------------------------------------------------------------------------
+
 bool ends_with(const std::string &str, const std::string &suffix) {
     if (str.size() < suffix.size()) {
         return false;

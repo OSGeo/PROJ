@@ -328,6 +328,21 @@ bool Measure::operator==(const Measure &other) const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns whether an object is equivalent to another one.
+ * @param other other object to compare to
+ * @param criterion comparaison criterion.
+ * @return true if objects are equivalent.
+ */
+bool Measure::isEquivalentTo(const Measure &other,
+                             util::IComparable::Criterion criterion) const {
+    if (criterion == util::IComparable::Criterion::STRICT) {
+        return operator==(other);
+    }
+    return getSIValue() == other.getSIValue();
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a Scale.
  *
  * @param valueIn value
@@ -574,16 +589,23 @@ std::string IdentifiedObject::alias() const {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return whether the object has a identifiers() in the EPSG code space.
+/** \brief Return the EPSG code.
+ * @return code, or 0 if not found
  */
-bool IdentifiedObject::isEPSG(int code) const {
+int IdentifiedObject::getEPSGCode() const {
     for (const auto &id : identifiers()) {
         if (ci_equal(*(id->codeSpace()), "EPSG")) {
-            return ::atoi(id->code().c_str()) == code;
+            return ::atoi(id->code().c_str());
         }
     }
-    return false;
+    return 0;
 }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return whether the object has a identifiers() in the EPSG code space.
+ */
+bool IdentifiedObject::isEPSG(int code) const { return getEPSGCode() == code; }
 
 // ---------------------------------------------------------------------------
 
@@ -772,6 +794,31 @@ void IdentifiedObject::formatRemarks(WKTFormatterNNPtr formatter) const {
         formatter->addQuotedString(remarks());
         formatter->endNode();
     }
+}
+
+// ---------------------------------------------------------------------------
+
+bool IdentifiedObject::_isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherIdObj = util::nn_dynamic_pointer_cast<IdentifiedObject>(other);
+    if (!otherIdObj)
+        return false;
+
+    if (criterion == util::IComparable::Criterion::STRICT) {
+        if (!ci_equal(*(name()->description()),
+                      *(otherIdObj->name()->description()))) {
+            return false;
+        }
+        // TODO test id etc
+    } else {
+        if (!metadata::Identifier::isEquivalentName(
+                *(name()->description()),
+                *(otherIdObj->name()->description()))) {
+            return false;
+        }
+    }
+    return true;
 }
 //! @endcond
 
@@ -968,6 +1015,19 @@ void ObjectUsage::_exportToWKT(WKTFormatterNNPtr formatter) const {
     if (isWKT2) {
         formatRemarks(formatter);
     }
+}
+
+// ---------------------------------------------------------------------------
+
+bool ObjectUsage::_isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherObjUsage = util::nn_dynamic_pointer_cast<ObjectUsage>(other);
+    if (!otherObjUsage)
+        return false;
+
+    // TODO: incomplete
+    return IdentifiedObject::_isEquivalentTo(other, criterion);
 }
 
 } // namespace common

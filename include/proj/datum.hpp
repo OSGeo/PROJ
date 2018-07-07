@@ -61,7 +61,7 @@ namespace datum {
  *
  * \remark Implements Datum from \ref ISO_19111_2018
  */
-class Datum : public common::ObjectUsage {
+class Datum : public common::ObjectUsage, public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Datum() override;
@@ -69,11 +69,14 @@ class Datum : public common::ObjectUsage {
 
     PROJ_DLL const util::optional<std::string> &anchorDefinition() const;
     PROJ_DLL const util::optional<common::DateTime> &publicationDate() const;
-    PROJ_DLL const util::optional<common::IdentifiedObject> &
-    conventionalRS() const;
+    PROJ_DLL const common::IdentifiedObjectPtr &conventionalRS() const;
 
   protected:
     Datum();
+
+    bool _isEquivalentTo(const util::BaseObjectNNPtr &other,
+                         util::IComparable::Criterion criterion =
+                             util::IComparable::Criterion::STRICT) const;
 
 #ifdef DOXYGEN_ENABLED
     std::string *anchorDefinition_;
@@ -149,7 +152,8 @@ using PrimeMeridianNNPtr = util::nn<PrimeMeridianPtr>;
  */
 class PrimeMeridian : public common::IdentifiedObject,
                       public io::IWKTExportable,
-                      public io::IPROJStringExportable {
+                      public io::IPROJStringExportable,
+                      public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~PrimeMeridian() override;
@@ -171,6 +175,11 @@ class PrimeMeridian : public common::IdentifiedObject,
     PROJ_DLL std::string
     exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         const override; // throw(FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -207,7 +216,8 @@ using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
  */
 class Ellipsoid : public common::IdentifiedObject,
                   public io::IWKTExportable,
-                  public io::IPROJStringExportable {
+                  public io::IPROJStringExportable,
+                  public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Ellipsoid() override;
@@ -250,6 +260,11 @@ class Ellipsoid : public common::IdentifiedObject,
     PROJ_DLL std::string
     exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         const override; // throw(FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -325,6 +340,11 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
   protected:
 #ifdef DOXYGEN_ENABLED
     PrimeMeridian primeMeridian_;
@@ -368,6 +388,11 @@ class DynamicGeodeticReferenceFrame : public GeodeticReferenceFrame {
     //! @endcond
 
     PROJ_DLL const common::Measure &frameReferenceEpoch() const;
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
 #ifdef DOXYGEN_ENABLED
@@ -441,6 +466,11 @@ class VerticalReferenceFrame : public Datum, public io::IWKTExportable {
            const util::optional<RealizationMethod> &realizationMethodIn =
                util::optional<RealizationMethod>());
 
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
   protected:
 #ifdef DOXYGEN_ENABLED
     RealizationMethod realizationMethod_;
@@ -485,6 +515,11 @@ class TemporalDatum : public Datum, public io::IWKTExportable {
     create(const util::PropertyMap &properties,
            const common::DateTime &temporalOriginIn,
            const std::string &calendarIn);
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
     TemporalDatum(const common::DateTime &temporalOriginIn,

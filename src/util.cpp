@@ -46,8 +46,41 @@ namespace util {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+struct BaseObject::Private {
+    // This is a manual implementation of std::enable_shared_from_this<> that
+    // avoids publicly deriving from it.
+    std::weak_ptr<BaseObject> self_{};
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+BaseObject::BaseObject() : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 BaseObject::~BaseObject() = default;
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** Keep a reference to ourselves as an internal weak pointer. So that
+ * extractGeographicBaseObject() can later return a shared pointer on itself.
+ */
+void BaseObject::assignSelf(BaseObjectNNPtr self) {
+    assert(self.get() == this);
+    d->self_ = self.as_nullable();
+}
+
+// ---------------------------------------------------------------------------
+
+BaseObjectNNPtr BaseObject::shared_from_this() const {
+    // This assertion checks that in all code paths where we create a
+    // shared pointer, we took care of assigning it to self_, by calling
+    // assignSelf();
+    return NN_CHECK_ASSERT(d->self_.lock());
+}
 
 // ---------------------------------------------------------------------------
 
@@ -621,6 +654,37 @@ InvalidValueTypeException::~InvalidValueTypeException() = default;
 InvalidValueTypeException::InvalidValueTypeException(
     const InvalidValueTypeException &) = default;
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+UnsupportedOperationException::UnsupportedOperationException(
+    const char *message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+UnsupportedOperationException::UnsupportedOperationException(
+    const std::string &message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+UnsupportedOperationException::~UnsupportedOperationException() = default;
+
+// ---------------------------------------------------------------------------
+
+UnsupportedOperationException::UnsupportedOperationException(
+    const UnsupportedOperationException &) = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+IComparable::~IComparable() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
 
 } // namespace util
 NS_PROJ_END

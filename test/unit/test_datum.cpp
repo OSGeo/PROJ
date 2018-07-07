@@ -40,6 +40,16 @@ using namespace osgeo::proj::io;
 using namespace osgeo::proj::metadata;
 using namespace osgeo::proj::util;
 
+namespace {
+struct UnrelatedObject : public BaseObject {
+    UnrelatedObject() = default;
+};
+
+static nn<std::shared_ptr<UnrelatedObject>> createUnrelatedObject() {
+    return nn_make_shared<UnrelatedObject>();
+}
+}
+
 // ---------------------------------------------------------------------------
 
 TEST(datum, ellipsoid_from_sphere) {
@@ -56,6 +66,9 @@ TEST(datum, ellipsoid_from_sphere) {
 
     EXPECT_EQ(ellipsoid->exportToPROJString(PROJStringFormatter::create()),
               "+a=6378137 +b=6378137");
+
+    EXPECT_TRUE(ellipsoid->isEquivalentTo(ellipsoid));
+    EXPECT_FALSE(ellipsoid->isEquivalentTo(createUnrelatedObject()));
 }
 
 // ---------------------------------------------------------------------------
@@ -79,6 +92,14 @@ TEST(datum, ellipsoid_from_inverse_flattening) {
 
     EXPECT_EQ(ellipsoid->exportToPROJString(PROJStringFormatter::create()),
               "+ellps=WGS84");
+
+    EXPECT_TRUE(ellipsoid->isEquivalentTo(ellipsoid));
+    EXPECT_FALSE(ellipsoid->isEquivalentTo(Ellipsoid::createTwoAxis(
+        PropertyMap(), Length(6378137), Length(6356752.31424518))));
+    EXPECT_TRUE(ellipsoid->isEquivalentTo(
+        Ellipsoid::createTwoAxis(PropertyMap(), Length(6378137),
+                                 Length(6356752.31424518)),
+        IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------
@@ -100,6 +121,14 @@ TEST(datum, ellipsoid_from_semi_minor_axis) {
 
     EXPECT_EQ(ellipsoid->exportToPROJString(PROJStringFormatter::create()),
               "+ellps=WGS84");
+
+    EXPECT_TRUE(ellipsoid->isEquivalentTo(ellipsoid));
+    EXPECT_FALSE(ellipsoid->isEquivalentTo(Ellipsoid::createFlattenedSphere(
+        PropertyMap(), Length(6378137), Scale(298.257223563))));
+    EXPECT_TRUE(ellipsoid->isEquivalentTo(
+        Ellipsoid::createFlattenedSphere(PropertyMap(), Length(6378137),
+                                         Scale(298.257223563)),
+        IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------
@@ -129,6 +158,11 @@ TEST(datum, prime_meridian_to_PROJString) {
             Angle(0))
             ->exportToPROJString(PROJStringFormatter::create()),
         "");
+
+    EXPECT_TRUE(
+        PrimeMeridian::GREENWICH->isEquivalentTo(PrimeMeridian::GREENWICH));
+    EXPECT_FALSE(
+        PrimeMeridian::GREENWICH->isEquivalentTo(createUnrelatedObject()));
 }
 
 // ---------------------------------------------------------------------------
@@ -191,6 +225,9 @@ TEST(datum, temporal_datum_WKT2) {
     EXPECT_THROW(datum->exportToWKT(
                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
                  FormattingException);
+
+    EXPECT_TRUE(datum->isEquivalentTo(datum));
+    EXPECT_FALSE(datum->isEquivalentTo(createUnrelatedObject()));
 }
 
 // ---------------------------------------------------------------------------

@@ -2631,7 +2631,8 @@ TEST(io, projstringformatter) {
 
     {
         auto fmt = PROJStringFormatter::create();
-        fmt->addStep("my_proj", true);
+        fmt->addStep("my_proj");
+        fmt->setCurrentStepInverted(true);
         EXPECT_EQ(fmt->toString(), "+proj=pipeline +step +inv +proj=my_proj");
     }
 
@@ -2645,10 +2646,36 @@ TEST(io, projstringformatter) {
 
     {
         auto fmt = PROJStringFormatter::create();
-        fmt->addStep("my_proj1", true);
+        fmt->addStep("my_proj1");
+        fmt->setCurrentStepInverted(true);
         fmt->addStep("my_proj2");
         EXPECT_EQ(
             fmt->toString(),
             "+proj=pipeline +step +inv +proj=my_proj1 +step +proj=my_proj2");
+    }
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->startInversion();
+        fmt->addStep("my_proj1");
+        fmt->setCurrentStepInverted(true);
+        fmt->addStep("my_proj2");
+        fmt->stopInversion();
+        EXPECT_EQ(
+            fmt->toString(),
+            "+proj=pipeline +step +inv +proj=my_proj2 +step +proj=my_proj1");
+    }
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->startInversion();
+        fmt->addStep("my_proj1");
+        fmt->setCurrentStepInverted(true);
+        fmt->startInversion();
+        fmt->addStep("my_proj2");
+        fmt->stopInversion();
+        fmt->stopInversion();
+        EXPECT_EQ(fmt->toString(),
+                  "+proj=pipeline +step +proj=my_proj2 +step +proj=my_proj1");
     }
 }

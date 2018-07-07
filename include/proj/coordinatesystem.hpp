@@ -165,7 +165,8 @@ using CoordinateSystemAxisNNPtr = util::nn<CoordinateSystemAxisPtr>;
  * \remark Implements CoordinateSystemAxis from \ref ISO_19111_2018
  */
 class CoordinateSystemAxis : public common::IdentifiedObject,
-                             public io::IWKTExportable {
+                             public io::IWKTExportable,
+                             public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystemAxis() override;
@@ -187,6 +188,11 @@ class CoordinateSystemAxis : public common::IdentifiedObject,
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
     //! @cond Doxygen_Suppress
     std::string exportToWKT(io::WKTFormatterNNPtr formatter, int order,
@@ -217,7 +223,8 @@ class CoordinateSystemAxis : public common::IdentifiedObject,
  * \remark Implements CoordinateSystem from \ref ISO_19111_2018
  */
 class CoordinateSystem : public common::IdentifiedObject,
-                         public io::IWKTExportable {
+                         public io::IWKTExportable,
+                         public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystem() override;
@@ -232,6 +239,11 @@ class CoordinateSystem : public common::IdentifiedObject,
     //! @cond Doxygen_Suppress
     PROJ_DLL virtual std::string getWKT2Type(io::WKTFormatterNNPtr) const = 0;
     //! @endcond
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
     CoordinateSystem();

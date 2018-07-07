@@ -143,6 +143,11 @@ class Measure : public util::BaseObject {
 
     PROJ_DLL bool operator==(const Measure &other) const;
 
+    PROJ_DLL bool
+    isEquivalentTo(const Measure &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const;
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
 };
@@ -288,11 +293,16 @@ class IdentifiedObject : public util::BaseObject {
 
     // Non-standard
     PROJ_DLL std::string alias() const;
+    PROJ_DLL int getEPSGCode() const;
     PROJ_DLL bool isEPSG(int code) const;
 
     //! @cond Doxygen_Suppress
     void formatID(io::WKTFormatterNNPtr formatter) const;
     void formatRemarks(io::WKTFormatterNNPtr formatter) const;
+
+    bool _isEquivalentTo(const util::BaseObjectNNPtr &other,
+                         util::IComparable::Criterion criterion =
+                             util::IComparable::Criterion::STRICT) const;
     //! @endcond
 
   protected:
@@ -379,6 +389,10 @@ class ObjectUsage : public IdentifiedObject {
 
     void _exportToWKT(io::WKTFormatterNNPtr formatter)
         const; // throw(io::FormattingException)
+
+    bool _isEquivalentTo(const util::BaseObjectNNPtr &other,
+                         util::IComparable::Criterion criterion =
+                             util::IComparable::Criterion::STRICT) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

@@ -30,6 +30,7 @@
 #define FROM_PROJ_CPP
 #endif
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <cmath>
@@ -108,6 +109,7 @@ struct WKTFormatter::Private {
     std::vector<double> toWGS84Parameters_{};
     std::string hDatumExtension_{};
     std::string vDatumExtension_{};
+    std::vector<bool> inversionStack_{false};
     std::string result_{};
 
     void addNewLine();
@@ -577,6 +579,23 @@ void WKTFormatter::setHDatumExtension(const std::string &filename) {
 const std::string &WKTFormatter::getHDatumExtension() const {
     return d->hDatumExtension_;
 }
+
+// ---------------------------------------------------------------------------
+
+void WKTFormatter::startInversion() {
+    d->inversionStack_.push_back(!d->inversionStack_.back());
+}
+
+// ---------------------------------------------------------------------------
+
+void WKTFormatter::stopInversion() {
+    assert(!d->inversionStack_.empty());
+    d->inversionStack_.pop_back();
+}
+
+// ---------------------------------------------------------------------------
+
+bool WKTFormatter::isInverted() const { return d->inversionStack_.back(); }
 
 // ---------------------------------------------------------------------------
 
@@ -2425,12 +2444,27 @@ IPROJStringExportable::~IPROJStringExportable() = default;
 
 //! @cond Doxygen_Suppress
 struct PROJStringFormatter::Private {
-    bool pipelinePrefix_{false};
-    int stepCount_ = 0;
     std::vector<double> toWGS84Parameters_{};
     std::string vDatumExtension_{};
     std::string hDatumExtension_{};
+
+    struct Step {
+        std::string name{};
+        bool inverted{false};
+        bool inverseIsSame{false};
+        std::vector<std::string> paramValues{};
+    };
+    std::vector<Step> steps_{};
+
+    struct InversionStackElt {
+        size_t startIdx = 0;
+        bool currentInversionState = false;
+    };
+    std::vector<InversionStackElt> inversionStack_{InversionStackElt()};
+
     std::string result_{};
+
+    void appendToResult(const std::string &str);
 };
 //! @endcond
 
@@ -2463,40 +2497,137 @@ PROJStringFormatterNNPtr PROJStringFormatter::create() {
 
 // ---------------------------------------------------------------------------
 
-const std::string &PROJStringFormatter::toString() const { return d->result_; }
+/** \brief Returns the PROJ string. */
+const std::string &PROJStringFormatter::toString() const {
+    d->result_.clear();
+    if (d->steps_.size() > 1 ||
+        (d->steps_.size() == 1 && d->steps_[0].inverted)) {
+        d->appendToResult("+proj=pipeline");
+    }
+    for (const auto &step : d->steps_) {
+        if (!d->result_.empty()) {
+            d->appendToResult("+step");
+        }
+        if (step.inverted && !step.inverseIsSame) {
+            d->appendToResult("+inv");
+        }
+        if (!step.name.empty()) {
+            d->appendToResult("+proj=" + step.name);
+        }
+        for (const auto &paramValue : step.paramValues) {
+            d->appendToResult("+" + paramValue);
+        }
+    }
+    return d->result_;
+}
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-void PROJStringFormatter::addStep(const std::string &step, bool inversed) {
-    if (d->stepCount_ == 1 && !d->pipelinePrefix_) {
-        d->result_ = "+proj=pipeline +step " + d->result_;
-        d->pipelinePrefix_ = true;
+
+void PROJStringFormatter::Private::appendToResult(const std::string &str) {
+    if (!result_.empty()) {
+        result_ += " ";
     }
-    if (d->stepCount_ == 0 && inversed) {
-        d->result_ = "+proj=pipeline";
-        d->pipelinePrefix_ = true;
+    result_ += str;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::ingestPROJString(
+    const std::string &str) // throw ParsingException
+{
+    std::string word;
+    std::istringstream iss(str, std::istringstream::in);
+    bool inverted = false;
+    bool prevWasStep = false;
+    while (iss >> word) {
+        if (word == "+proj=pipeline") {
+            inverted = false;
+            prevWasStep = false;
+        } else if (word == "+step") {
+            inverted = false;
+            prevWasStep = true;
+        } else if (word == "+inv") {
+            if (prevWasStep) {
+                inverted = true;
+            } else {
+                if (d->steps_.empty()) {
+                    throw ParsingException("+inv found at unexpected place");
+                }
+                d->steps_.back().inverted = true;
+            }
+            prevWasStep = false;
+        } else if (starts_with(word, "+proj=")) {
+            addStep(word.substr(std::string("+proj=").size()));
+            setCurrentStepInverted(inverted);
+            prevWasStep = false;
+        } else if (starts_with(word, "+")) {
+            addParam(word.substr(1));
+            prevWasStep = false;
+        } else {
+            throw ParsingException("Unexpected token: " + word);
+        }
     }
-    if (d->pipelinePrefix_) {
-        d->result_ += " +step";
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::startInversion() {
+    PROJStringFormatter::Private::InversionStackElt elt;
+    elt.startIdx = d->steps_.size();
+    elt.currentInversionState =
+        !d->inversionStack_.back().currentInversionState;
+    d->inversionStack_.push_back(elt);
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::stopInversion() {
+    assert(!d->inversionStack_.empty());
+    auto startIdx = d->inversionStack_.back().startIdx;
+    for (size_t i = startIdx; i < d->steps_.size(); i++) {
+        d->steps_[i].inverted = !d->steps_[i].inverted;
     }
-    if (inversed) {
-        d->result_ += " +inv";
-    }
-    if (!d->result_.empty()) {
-        d->result_ += " ";
-    }
-    d->result_ += "+proj=" + step;
-    d->stepCount_++;
+    std::reverse(d->steps_.begin() + startIdx, d->steps_.end());
+    d->inversionStack_.pop_back();
+}
+
+// ---------------------------------------------------------------------------
+
+bool PROJStringFormatter::isInverted() const {
+    return d->inversionStack_.back().currentInversionState;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::addStep(const std::string &stepName) {
+    PROJStringFormatter::Private::Step step;
+    step.name = stepName;
+    d->steps_.push_back(step);
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::setCurrentStepInverted(bool inverted) {
+    assert(!d->steps_.empty());
+    d->steps_.back().inverted = inverted;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::setCurrentStepInverseIsSame() {
+    assert(!d->steps_.empty());
+    d->steps_.back().inverseIsSame = true;
 }
 
 // ---------------------------------------------------------------------------
 
 void PROJStringFormatter::addParam(const std::string &paramName) {
-    if (!d->result_.empty()) {
-        d->result_ += " ";
+    if (d->steps_.empty()) {
+        addStep(std::string());
     }
-    d->result_ += "+" + paramName;
+    d->steps_.back().paramValues.push_back(paramName);
 }
 
 // ---------------------------------------------------------------------------
@@ -2505,10 +2636,11 @@ void PROJStringFormatter::addParam(const std::string &paramName, int val) {
     std::ostringstream buffer;
     buffer.imbue(std::locale::classic());
     buffer << val;
-    if (!d->result_.empty()) {
-        d->result_ += " ";
+
+    if (d->steps_.empty()) {
+        addStep(std::string());
     }
-    d->result_ += "+" + paramName + "=" + buffer.str();
+    d->steps_.back().paramValues.push_back(paramName + "=" + buffer.str());
 }
 
 // ---------------------------------------------------------------------------
@@ -2531,26 +2663,29 @@ static std::string formatToString(double val) {
 
 void PROJStringFormatter::addParam(const std::string &paramName, double val) {
 
-    if (!d->result_.empty()) {
-        d->result_ += " ";
+    if (d->steps_.empty()) {
+        addStep(std::string());
     }
-    d->result_ += "+" + paramName + "=" + formatToString(val);
+    d->steps_.back().paramValues.push_back(paramName + "=" +
+                                           formatToString(val));
 }
 
 // ---------------------------------------------------------------------------
 
 void PROJStringFormatter::addParam(const std::string &paramName,
                                    const std::vector<double> &vals) {
-    if (!d->result_.empty()) {
-        d->result_ += " ";
-    }
-    d->result_ += "+" + paramName + "=";
+    std::string paramValue = paramName + "=";
     for (size_t i = 0; i < vals.size(); ++i) {
         if (i > 0) {
-            d->result_ += ",";
+            paramValue += ",";
         }
-        d->result_ += formatToString(vals[i]);
+        paramValue += formatToString(vals[i]);
     }
+
+    if (d->steps_.empty()) {
+        addStep(std::string());
+    }
+    d->steps_.back().paramValues.push_back(paramValue);
 }
 
 // ---------------------------------------------------------------------------
@@ -2564,10 +2699,10 @@ void PROJStringFormatter::addParam(const std::string &paramName,
 
 void PROJStringFormatter::addParam(const std::string &paramName,
                                    const std::string &val) {
-    if (!d->result_.empty()) {
-        d->result_ += " ";
+    if (d->steps_.empty()) {
+        addStep(std::string());
     }
-    d->result_ += "+" + paramName + "=" + val;
+    d->steps_.back().paramValues.push_back(paramName + "=" + val);
 }
 
 // ---------------------------------------------------------------------------

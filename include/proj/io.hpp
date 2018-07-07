@@ -56,7 +56,11 @@ using WKTFormatterPtr = std::shared_ptr<WKTFormatter>;
 /** WKTFormatter non-null shared pointer. */
 using WKTFormatterNNPtr = util::nn<WKTFormatterPtr>;
 
-/** \brief Formatter to WKT strings. */
+/** \brief Formatter to WKT strings.
+ *
+ * This class is thread-safe, but one instance can only be used by a single
+ * thread at a time.
+ */
 class WKTFormatter {
   public:
     //! @cond Doxygen_Suppress
@@ -120,7 +124,6 @@ class WKTFormatter {
     PROJ_DLL WKTFormatter &setStrict(bool strict);
     PROJ_DLL bool isStrict() const;
 
-    /** Returns the WKT string. */
     PROJ_DLL const std::string &toString() const;
 
     //! @cond Doxygen_Suppress
@@ -168,6 +171,10 @@ class WKTFormatter {
     void setHDatumExtension(const std::string &filename);
     const std::string &getHDatumExtension() const;
 
+    void startInversion();
+    void stopInversion();
+    bool isInverted() const;
+
     bool outputAxisOrder() const;
     bool primeMeridianOmittedIfGreenwich() const;
     bool ellipsoidUnitOmittedIfMetre() const;
@@ -200,7 +207,11 @@ using PROJStringFormatterPtr = std::shared_ptr<PROJStringFormatter>;
 /** PROJStringFormatter non-null shared pointer. */
 using PROJStringFormatterNNPtr = util::nn<PROJStringFormatterPtr>;
 
-/** \brief Formatter to PROJ strings. */
+/** \brief Formatter to PROJ strings.
+ *
+ * This class is thread-safe, but one instance can only be used by a single
+ * thread at a time.
+ */
 class PROJStringFormatter {
   public:
     PROJ_DLL static PROJStringFormatterNNPtr create();
@@ -208,11 +219,19 @@ class PROJStringFormatter {
     PROJ_DLL ~PROJStringFormatter();
     //! @endcond
 
-    /** Returns the PROJ string. */
     PROJ_DLL const std::string &toString() const;
 
     //! @cond Doxygen_Suppress
-    PROJ_DLL void addStep(const std::string &step, bool inversed = false);
+    PROJ_DLL void startInversion();
+    PROJ_DLL void stopInversion();
+    bool isInverted() const;
+
+    PROJ_DLL void
+    ingestPROJString(const std::string &str); // throw ParsingException
+
+    PROJ_DLL void addStep(const std::string &step);
+    PROJ_DLL void setCurrentStepInverted(bool inverted);
+    PROJ_DLL void setCurrentStepInverseIsSame();
     PROJ_DLL void addParam(const std::string &paramName);
     PROJ_DLL void addParam(const std::string &paramName, double val);
     PROJ_DLL void addParam(const std::string &paramName, int val);

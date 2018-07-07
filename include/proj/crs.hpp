@@ -69,18 +69,20 @@ using CRSNNPtr = util::nn<CRSPtr>;
  *
  * \remark Implements CRS from \ref ISO_19111_2018
  */
-class CRS : public common::ObjectUsage, public io::IWKTExportable {
+class CRS : public common::ObjectUsage,
+            public io::IWKTExportable,
+            public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CRS() override;
     //! @endcond
 
+    // Non-standard
+
     PROJ_DLL GeographicCRSPtr extractGeographicCRS() const;
 
   protected:
     CRS();
-    PROJ_DLL void assignSelf(CRSNNPtr self);
-    PROJ_DLL CRSNNPtr shared_from_this() const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -109,6 +111,10 @@ class SingleCRS : public CRS {
               const cs::CoordinateSystemNNPtr &csIn);
     SingleCRS(const datum::DatumPtr &datumIn,
               const cs::CoordinateSystemNNPtr &csIn);
+
+    bool _isEquivalentTo(const util::BaseObjectNNPtr &other,
+                         util::IComparable::Criterion criterion =
+                             util::IComparable::Criterion::STRICT) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -171,6 +177,11 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     PROJ_DLL std::string
     exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         const override; // throw(FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
     GeodeticCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
@@ -285,6 +296,11 @@ class VerticalCRS : public SingleCRS, public io::IPROJStringExportable {
     exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         const override; // throw(FormattingException)
 
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
     PROJ_DLL static VerticalCRSNNPtr
     create(const util::PropertyMap &properties,
            const datum::VerticalReferenceFrameNNPtr &datumIn,
@@ -323,6 +339,11 @@ class DerivedCRS : virtual public SingleCRS {
 
     PROJ_DLL const SingleCRSNNPtr &baseCRS() const;
     PROJ_DLL const operation::ConversionNNPtr &derivingConversion() const;
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
     DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
@@ -382,6 +403,11 @@ class ProjectedCRS : public DerivedCRS, public io::IPROJStringExportable {
            const operation::ConversionNNPtr &derivingConversionIn,
            const cs::CartesianCSNNPtr &csIn);
 
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
   protected:
     ProjectedCRS(const GeodeticCRSNNPtr &baseCRSIn,
                  const operation::ConversionNNPtr &derivingConversionIn,
@@ -432,6 +458,11 @@ class CompoundCRS : public CRS, public io::IPROJStringExportable {
     PROJ_DLL std::string
     exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         const override; // throw(FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
     PROJ_DLL static CompoundCRSNNPtr
     create(const util::PropertyMap &properties,
@@ -498,6 +529,11 @@ class BoundCRS : public CRS, public io::IPROJStringExportable {
     exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         const override; // throw(FormattingException)
 
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
     PROJ_DLL static BoundCRSNNPtr
     create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
            const operation::TransformationNNPtr &transformationIn);
@@ -563,6 +599,11 @@ class DerivedGeodeticCRS : public GeodeticCRS, public DerivedCRS {
     exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         const override; // throw(FormattingException)
 
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
   protected:
     DerivedGeodeticCRS(const GeodeticCRSNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
@@ -616,6 +657,11 @@ class DerivedGeographicCRS : public GeographicCRS, public DerivedCRS {
     exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         const override; // throw(FormattingException)
 
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
   protected:
     DerivedGeographicCRS(const GeodeticCRSNNPtr &baseCRSIn,
                          const operation::ConversionNNPtr &derivingConversionIn,
@@ -659,6 +705,11 @@ class TemporalCRS : public SingleCRS {
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
     TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,

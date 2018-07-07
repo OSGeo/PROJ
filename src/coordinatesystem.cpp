@@ -360,6 +360,21 @@ std::string CoordinateSystemAxis::exportToWKT(io::WKTFormatterNNPtr formatter,
 
 // ---------------------------------------------------------------------------
 
+bool CoordinateSystemAxis::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherCSA = util::nn_dynamic_pointer_cast<CoordinateSystemAxis>(other);
+    if (otherCSA == nullptr ||
+        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    // TODO other metadata
+    return abbreviation() == otherCSA->abbreviation() &&
+           direction() == otherCSA->direction() && unit() == otherCSA->unit();
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct CoordinateSystem::Private {
     std::vector<CoordinateSystemAxisNNPtr> axis{};
@@ -457,6 +472,34 @@ std::string CoordinateSystem::exportToWKT(
         formatter->endNode();
     }
     return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool CoordinateSystem::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherCS = util::nn_dynamic_pointer_cast<CoordinateSystem>(other);
+    if (otherCS == nullptr ||
+        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    const auto &list = axisList();
+    const auto &otherList = otherCS->axisList();
+    if (list.size() != otherList.size()) {
+        return false;
+    }
+    auto formatter =
+        io::WKTFormatter::create(io::WKTFormatter::Convention::WKT2_2018);
+    if (getWKT2Type(formatter) != otherCS->getWKT2Type(formatter)) {
+        return false;
+    }
+    for (size_t i = 0; i < list.size(); i++) {
+        if (!list[i]->isEquivalentTo(otherList[i], criterion)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // ---------------------------------------------------------------------------

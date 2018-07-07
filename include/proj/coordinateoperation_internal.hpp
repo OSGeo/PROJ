@@ -75,6 +75,69 @@ const ParamMapping *getMapping(const MethodMapping *mapping,
 const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
                                        const std::string &wkt1_name);
 
+// ---------------------------------------------------------------------------
+
+/** \brief Inverse operation of a CoordinateOperation.
+ *
+ * This is used when there is no straightforward way of building another
+ * subclass of CoordinateOperation that models the inverse operation.
+ */
+class InverseCoordinateOperation : public CoordinateOperation {
+  public:
+    InverseCoordinateOperation(CoordinateOperationNNPtr forwardOperation,
+                               bool wktSupportsInversion);
+
+    ~InverseCoordinateOperation() override;
+
+    // Unimplemented
+    std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override;
+
+    bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+    CoordinateOperationNNPtr inverse() const override;
+
+  private:
+    CoordinateOperationNNPtr forwardOperation_;
+    bool wktSupportsInversion_;
+};
+
+// ---------------------------------------------------------------------------
+
+class PROJBasedOperation;
+/** Shared pointer of PROJBasedOperation */
+using PROJBasedOperationPtr = std::shared_ptr<PROJBasedOperation>;
+/** Non-null shared pointer of PROJBasedOperation */
+using PROJBasedOperationNNPtr = util::nn<PROJBasedOperationPtr>;
+
+/** \brief A PROJ-string based coordinate operation.
+ */
+class PROJBasedOperation : public SingleOperation {
+  public:
+    ~PROJBasedOperation() override;
+
+    std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter) const override;
+
+    CoordinateOperationNNPtr inverse() const override;
+
+    static PROJBasedOperationNNPtr create(const std::string &PROJString);
+
+  protected:
+    PROJBasedOperation(const OperationMethodNNPtr &methodIn,
+                       const std::vector<GeneralParameterValueNNPtr> &values);
+    INLINED_MAKE_SHARED
+};
+
 } // namespace operation
 
 NS_PROJ_END

@@ -58,7 +58,7 @@ namespace datum {
 struct Datum::Private {
     util::optional<std::string> anchorDefinition{};
     util::optional<common::DateTime> publicationDate{};
-    util::optional<common::IdentifiedObject> conventionalRS{};
+    common::IdentifiedObjectPtr conventionalRS{};
 };
 //! @endcond
 
@@ -127,10 +127,54 @@ const util::optional<common::DateTime> &Datum::publicationDate() const {
  * frame, for example "ITRS" for ITRF88 through ITRF2008 and ITRF2014, or
  * "EVRS" for EVRF2000 and EVRF2007.
  *
- * @return the conventional reference system, or empty.
+ * @return the conventional reference system, or nullptr.
  */
-const util::optional<common::IdentifiedObject> &Datum::conventionalRS() const {
+const common::IdentifiedObjectPtr &Datum::conventionalRS() const {
     return d->conventionalRS;
+}
+
+// ---------------------------------------------------------------------------
+
+bool Datum::_isEquivalentTo(const util::BaseObjectNNPtr &other,
+                            util::IComparable::Criterion criterion) const {
+    auto otherDatum = util::nn_dynamic_pointer_cast<Datum>(other);
+    if (otherDatum == nullptr ||
+        !ObjectUsage::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    if (criterion == util::IComparable::Criterion::STRICT) {
+        if ((anchorDefinition().has_value() ^
+             otherDatum->anchorDefinition().has_value())) {
+            return false;
+        }
+        if (anchorDefinition().has_value() &&
+            otherDatum->anchorDefinition().has_value() &&
+            *anchorDefinition() != *otherDatum->anchorDefinition()) {
+            return false;
+        }
+
+        if ((publicationDate().has_value() ^
+             otherDatum->publicationDate().has_value())) {
+            return false;
+        }
+        if (publicationDate().has_value() &&
+            otherDatum->publicationDate().has_value() &&
+            publicationDate()->toString() !=
+                otherDatum->publicationDate()->toString()) {
+            return false;
+        }
+
+        if (((conventionalRS() != nullptr) ^
+             (otherDatum->conventionalRS() != nullptr))) {
+            return false;
+        }
+        if (conventionalRS() && otherDatum->conventionalRS() &&
+            conventionalRS()->_isEquivalentTo(
+                NN_CHECK_ASSERT(otherDatum->conventionalRS()), criterion)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -275,6 +319,19 @@ std::string PrimeMeridian::exportToPROJString(
         }
     }
     return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool PrimeMeridian::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherPM = util::nn_dynamic_pointer_cast<PrimeMeridian>(other);
+    if (otherPM == nullptr ||
+        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    return longitude() == otherPM->longitude();
 }
 
 // ---------------------------------------------------------------------------
@@ -604,6 +661,64 @@ std::string Ellipsoid::exportToPROJString(
 
 // ---------------------------------------------------------------------------
 
+bool Ellipsoid::isEquivalentTo(const util::BaseObjectNNPtr &other,
+                               util::IComparable::Criterion criterion) const {
+    auto otherEllipsoid = util::nn_dynamic_pointer_cast<Ellipsoid>(other);
+    if (otherEllipsoid == nullptr ||
+        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    if (!semiMajorAxis().isEquivalentTo(otherEllipsoid->semiMajorAxis(),
+                                        criterion)) {
+        return false;
+    }
+    if (criterion == util::IComparable::Criterion::STRICT) {
+        if ((semiMinorAxis().has_value() ^
+             otherEllipsoid->semiMinorAxis().has_value())) {
+            return false;
+        }
+        if (semiMinorAxis().has_value() &&
+            otherEllipsoid->semiMinorAxis().has_value()) {
+            if (!semiMinorAxis()->isEquivalentTo(
+                    *(otherEllipsoid->semiMinorAxis()), criterion)) {
+                return false;
+            }
+        }
+
+        if ((inverseFlattening().has_value() ^
+             otherEllipsoid->inverseFlattening().has_value())) {
+            return false;
+        }
+        if (inverseFlattening().has_value() &&
+            otherEllipsoid->inverseFlattening().has_value()) {
+            if (!inverseFlattening()->isEquivalentTo(
+                    *(otherEllipsoid->inverseFlattening()), criterion)) {
+                return false;
+            }
+        }
+    } else {
+        if (!otherEllipsoid->computeSemiMinorAxis().isEquivalentTo(
+                otherEllipsoid->computeSemiMinorAxis(), criterion)) {
+            return false;
+        }
+    }
+
+    if ((semiMedianAxis().has_value() ^
+         otherEllipsoid->semiMedianAxis().has_value())) {
+        return false;
+    }
+    if (semiMedianAxis().has_value() &&
+        otherEllipsoid->semiMedianAxis().has_value()) {
+        if (!semiMedianAxis()->isEquivalentTo(
+                *(otherEllipsoid->semiMedianAxis()), criterion)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct GeodeticReferenceFrame::Private {
     PrimeMeridianNNPtr primeMeridian_;
@@ -741,6 +856,21 @@ std::string GeodeticReferenceFrame::exportToWKT(
 
 // ---------------------------------------------------------------------------
 
+bool GeodeticReferenceFrame::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherGRF =
+        util::nn_dynamic_pointer_cast<GeodeticReferenceFrame>(other);
+    if (otherGRF == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    return primeMeridian()->isEquivalentTo(otherGRF->primeMeridian(),
+                                           criterion) &&
+           ellipsoid()->isEquivalentTo(otherGRF->ellipsoid(), criterion);
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct DynamicGeodeticReferenceFrame::Private {
     common::Measure frameReferenceEpoch{};
@@ -782,6 +912,21 @@ DynamicGeodeticReferenceFrame::~DynamicGeodeticReferenceFrame() = default;
 const common::Measure &
 DynamicGeodeticReferenceFrame::frameReferenceEpoch() const {
     return d->frameReferenceEpoch;
+}
+
+// ---------------------------------------------------------------------------
+
+bool DynamicGeodeticReferenceFrame::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherDGRF =
+        util::nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(other);
+    if (otherDGRF == nullptr ||
+        !GeodeticReferenceFrame::isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    return frameReferenceEpoch().isEquivalentTo(
+        otherDGRF->frameReferenceEpoch(), criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -948,6 +1093,29 @@ std::string VerticalReferenceFrame::exportToWKT(
 
 // ---------------------------------------------------------------------------
 
+bool VerticalReferenceFrame::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherVRF =
+        util::nn_dynamic_pointer_cast<VerticalReferenceFrame>(other);
+    if (otherVRF == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    if ((realizationMethod().has_value() ^
+         otherVRF->realizationMethod().has_value())) {
+        return false;
+    }
+    if (realizationMethod().has_value() &&
+        otherVRF->realizationMethod().has_value()) {
+        if (*(realizationMethod()) != *(otherVRF->realizationMethod())) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct TemporalDatum::Private {
     common::DateTime temporalOrigin_;
@@ -1045,6 +1213,20 @@ std::string TemporalDatum::exportToWKT(
 
     formatter->endNode();
     return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool TemporalDatum::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherTD = util::nn_dynamic_pointer_cast<TemporalDatum>(other);
+    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    return temporalOrigin().toString() ==
+               otherTD->temporalOrigin().toString() &&
+           calendar() == otherTD->calendar();
 }
 
 } // namespace datum
