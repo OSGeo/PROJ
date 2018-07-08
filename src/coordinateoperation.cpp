@@ -961,12 +961,16 @@ SingleOperation::parameterValueMeasure(const std::string &paramName,
 /** \brief Instanciate a PROJ-based single operation;
  *
  * @param PROJString the PROJ string.
+ * @param sourceCRS source CRS (might be null).
+ * @param targetCRS target CRS (might be null).
  * @return the new instance
  */
 SingleOperationNNPtr
-SingleOperation::createPROJBased(const std::string &PROJString) {
+SingleOperation::createPROJBased(const std::string &PROJString,
+                                 const crs::CRSPtr sourceCRS,
+                                 const crs::CRSPtr targetCRS) {
     return util::nn_static_pointer_cast<SingleOperation>(
-        PROJBasedOperation::create(PROJString));
+        PROJBasedOperation::create(PROJString, sourceCRS, targetCRS));
 }
 
 // ---------------------------------------------------------------------------
@@ -1574,42 +1578,84 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 std::string Conversion::exportToPROJString(
     io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
 {
+    if (sourceCRS()) {
+        auto geogCRS =
+            std::dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
+        if (geogCRS) {
+            formatter->setOmitProjLongLatIfPossible(true);
+            geogCRS->exportToPROJString(formatter);
+            formatter->setOmitProjLongLatIfPossible(false);
+        }
+    }
+
     auto projectionMethodName = *(method()->name()->description());
+    bool bConversionDone = false;
     if (ci_equal(projectionMethodName, EPSG_METHOD_TRANSVERSE_MERCATOR)) {
         // Check for UTM
         int zone = 0;
         bool north = true;
         if (isUTM(zone, north)) {
+            bConversionDone = true;
             formatter->addStep("utm");
             formatter->addParam("zone", zone);
             if (!north) {
                 formatter->addParam("south");
             }
-            return formatter->toString();
+        }
+    }
+    if (!bConversionDone) {
+        const auto &mapping = getMapping(projectionMethodName);
+        if (mapping) {
+            formatter->addStep(mapping->proj_name);
+            for (const auto &param : mapping->params) {
+                for (const auto &proj_name : param.proj_names) {
+                    if (param.unit_type ==
+                        common::UnitOfMeasure::Type::ANGULAR) {
+                        formatter->addParam(
+                            proj_name,
+                            parameterValueMeasure(param.wkt2_name)
+                                .convertToUnit(common::UnitOfMeasure::DEGREE)
+                                .value());
+                    } else {
+                        formatter->addParam(
+                            proj_name, parameterValueMeasure(param.wkt2_name)
+                                           .getSIValue());
+                    }
+                }
+            }
+
+        } else {
+            throw io::FormattingException("Unsupported conversion method: " +
+                                          projectionMethodName);
         }
     }
 
-    const auto &mapping = getMapping(projectionMethodName);
-    if (mapping) {
-        formatter->addStep(mapping->proj_name);
-        for (const auto &param : mapping->params) {
-            for (const auto &proj_name : param.proj_names) {
-                if (param.unit_type == common::UnitOfMeasure::Type::ANGULAR) {
-                    formatter->addParam(
-                        proj_name,
-                        parameterValueMeasure(param.wkt2_name)
-                            .convertToUnit(common::UnitOfMeasure::DEGREE)
-                            .value());
+    if (targetCRS()) {
+        auto projCRS =
+            std::dynamic_pointer_cast<crs::ProjectedCRS>(targetCRS());
+        if (projCRS) {
+            projCRS->baseCRS()->datum()->ellipsoid()->exportToPROJString(
+                formatter);
+
+            auto &axisList = projCRS->coordinateSystem()->axisList();
+            if (!axisList.empty() &&
+                axisList[0]->unit() != common::UnitOfMeasure::METRE) {
+                auto projUnit = axisList[0]->unit().exportToPROJString();
+                if (projUnit.empty()) {
+                    formatter->addParam("to_meter",
+                                        axisList[0]->unit().conversionToSI());
                 } else {
-                    formatter->addParam(
-                        proj_name,
-                        parameterValueMeasure(param.wkt2_name).getSIValue());
+                    formatter->addParam("units", projUnit);
                 }
             }
+
+            if (axisList.size() >= 2 &&
+                axisList[0]->direction() == cs::AxisDirection::NORTH &&
+                axisList[1]->direction() == cs::AxisDirection::EAST) {
+                formatter->addStep("axisswap");
+                formatter->addParam("order", "2,1");
+            }
         }
-    } else {
-        throw io::FormattingException("Unsupported conversion method: " +
-                                      projectionMethodName);
     }
 
     return formatter->toString();
@@ -2251,8 +2297,10 @@ TransformationNNPtr Transformation::createTOWGS84(
     }
 
     return createPositionVector(
-        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                "Transformation to WGS84"),
+        util::PropertyMap().set(
+            common::IdentifiedObject::NAME_KEY,
+            "Transformation from " +
+                *(transformSourceCRS->name()->description()) + " to WGS84"),
         NN_CHECK_ASSERT(transformSourceCRS), crs::GeographicCRS::EPSG_4326,
         TOWGS84Parameters[0], TOWGS84Parameters[1], TOWGS84Parameters[2],
         TOWGS84Parameters[3], TOWGS84Parameters[4], TOWGS84Parameters[5],
@@ -2324,8 +2372,8 @@ CoordinateOperationNNPtr Transformation::inverse() const {
                 util::PropertyMap().set(
                     common::IdentifiedObject::NAME_KEY,
                     "Transformation from " +
-                        *(sourceCRS()->name()->description()) + " to " +
-                        *(targetCRS()->name()->description())),
+                        *(targetCRS()->name()->description()) + " to " +
+                        *(sourceCRS()->name()->description())),
                 methodProperties, targetCRS(), sourceCRS(), x, y, z, rx, ry, rz,
                 scaleDiff, coordinateOperationAccuracies());
         } else {
@@ -2333,8 +2381,8 @@ CoordinateOperationNNPtr Transformation::inverse() const {
                 util::PropertyMap().set(
                     common::IdentifiedObject::NAME_KEY,
                     "Transformation from " +
-                        *(sourceCRS()->name()->description()) + " to " +
-                        *(targetCRS()->name()->description())),
+                        *(targetCRS()->name()->description()) + " to " +
+                        *(sourceCRS()->name()->description())),
                 targetCRS(), sourceCRS(), x, y, z,
                 coordinateOperationAccuracies());
         }
@@ -2422,7 +2470,93 @@ std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 std::string Transformation::exportToPROJString(
     io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    (void)formatter;
+    bool positionVectorConvention = true;
+    bool sevenParamsTransform = false;
+    bool threeParamsTransform = false;
+    auto method_name = *(method()->name()->description());
+    if (ci_find(method_name, "Coordinate Frame") != std::string::npos ||
+        method()->isEPSG(1032) || method()->isEPSG(9607)) {
+        sevenParamsTransform = true;
+        positionVectorConvention = false;
+    } else if (ci_find(method_name, "Position Vector") != std::string::npos ||
+               method()->isEPSG(1033) || method()->isEPSG(9606)) {
+        sevenParamsTransform = true;
+    } else if (ci_find(method_name, "Geocentric translations") !=
+                   std::string::npos ||
+               method()->isEPSG(1031) || method()->isEPSG(9603)) {
+        threeParamsTransform = true;
+    }
+    if (threeParamsTransform || sevenParamsTransform) {
+        double x = parameterValueMeasure(EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME,
+                                         EPSG_PARAMETER_X_AXIS_TRANSLATION)
+                       .getSIValue();
+        double y = parameterValueMeasure(EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME,
+                                         EPSG_PARAMETER_Y_AXIS_TRANSLATION)
+                       .getSIValue();
+        double z = parameterValueMeasure(EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME,
+                                         EPSG_PARAMETER_Z_AXIS_TRANSLATION)
+                       .getSIValue();
+
+        auto sourceCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
+        if (sourceCRSGeog) {
+            sourceCRSGeog->exportToPROJString(formatter);
+
+            formatter->addStep("cart");
+            formatter->addParam("exact");
+            sourceCRSGeog->datum()->ellipsoid()->exportToPROJString(formatter);
+        }
+
+        formatter->addStep("helmert");
+        formatter->addParam("x", x);
+        formatter->addParam("y", y);
+        formatter->addParam("z", z);
+        if (sevenParamsTransform) {
+            double rx =
+                parameterValueMeasure(EPSG_PARAMETER_X_AXIS_ROTATION_NAME,
+                                      EPSG_PARAMETER_X_AXIS_ROTATION)
+                    .convertToUnit(common::UnitOfMeasure::MICRORADIAN)
+                    .value();
+            double ry =
+                parameterValueMeasure(EPSG_PARAMETER_Y_AXIS_ROTATION_NAME,
+                                      EPSG_PARAMETER_Y_AXIS_ROTATION)
+                    .convertToUnit(common::UnitOfMeasure::MICRORADIAN)
+                    .value();
+            double rz =
+                parameterValueMeasure(EPSG_PARAMETER_Z_AXIS_ROTATION_NAME,
+                                      EPSG_PARAMETER_Z_AXIS_ROTATION)
+                    .convertToUnit(common::UnitOfMeasure::MICRORADIAN)
+                    .value();
+            double scaleDiff =
+                parameterValueMeasure(EPSG_PARAMETER_SCALE_DIFFERENCE_NAME,
+                                      EPSG_PARAMETER_SCALE_DIFFERENCE)
+                    .convertToUnit(common::UnitOfMeasure::PARTS_PER_MILLION)
+                    .value();
+            formatter->addParam("rx", rx);
+            formatter->addParam("ry", ry);
+            formatter->addParam("rz", rz);
+            formatter->addParam("s", scaleDiff);
+            if (!positionVectorConvention) {
+                formatter->addParam("transpose");
+            }
+        }
+
+        auto targetCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS());
+        if (targetCRSGeog) {
+            formatter->addStep("cart");
+            formatter->addParam("exact");
+            formatter->setCurrentStepInverted(true);
+            targetCRSGeog->datum()->ellipsoid()->exportToPROJString(formatter);
+
+            formatter->startInversion();
+            targetCRSGeog->exportToPROJString(formatter);
+            formatter->stopInversion();
+        }
+
+        return formatter->toString();
+    }
+
     throw io::FormattingException("Unimplemented");
 }
 
@@ -2494,8 +2628,8 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
                                    "source and/or target CRS");
         }
         if (i >= 1 &&
-            *(operationsIn[i]->sourceCRS()->name()->description()) !=
-                *(operationsIn[i - 1]->targetCRS()->name()->description())) {
+            !operationsIn[i]->sourceCRS()->isEquivalentTo(
+                NN_CHECK_ASSERT(operationsIn[i - 1]->targetCRS()))) {
             throw InvalidOperation(
                 "Inconsistent chaining of CRS in operations");
         }
@@ -2612,45 +2746,9 @@ CoordinateOperationFactory::CoordinateOperationFactory()
 
 // ---------------------------------------------------------------------------
 
-static std::string simplifyPROJString(const std::string &str) {
-    std::string suffix(" +step");
-    std::string ret(str + suffix);
-    // longlat (or its inverse) with ellipsoid only is a no-op
-    ret =
-        replaceAll(ret, "+step +inv +proj=longlat +ellps=WGS84 +step", "+step");
-    ret = replaceAll(ret, "+step +proj=longlat +ellps=WGS84 +step", "+step");
-
-    // the inverse of axisswap order=2,1 is itself
-    ret = replaceAll(ret, "+step +inv +proj=axisswap +order=2,1 +step",
-                     "+step +proj=axisswap +order=2,1 +step");
-
-    // rework the inverse of unitconvert in a more readable way
-    ret = replaceAll(
-        ret, "+step +inv +proj=unitconvert +xy_in=deg +xy_out=rad +step",
-        "+step +proj=unitconvert +xy_in=rad +xy_out=deg +step");
-    ret = replaceAll(
-        ret, "+step +inv +proj=unitconvert +xy_in=grad +xy_out=rad +step",
-        "+step +proj=unitconvert +xy_in=rad +xy_out=grad +step");
-
-    // unitconvt followed by its inverse is a no-op
-    ret =
-        replaceAll(ret, "+step +proj=unitconvert +xy_in=rad +xy_out=deg +step "
-                        "+proj=unitconvert +xy_in=deg +xy_out=rad +step",
-                   "+step");
-    ret =
-        replaceAll(ret, "+step +proj=unitconvert +xy_in=rad +xy_out=grad +step "
-                        "+proj=unitconvert +xy_in=grad +xy_out=rad +step",
-                   "+step");
-
-    // axisswap order=2,1 followed by itself is a no-op
-    ret = replaceAll(
-        ret,
-        "+step +proj=axisswap +order=2,1 +step +proj=axisswap +order=2,1 +step",
-        "+step");
-    return ret.substr(0, ret.size() - suffix.size());
-}
-
-// ---------------------------------------------------------------------------
+//! @cond Doxygen_Suppress
+#define NN_CO_CAST util::nn_static_pointer_cast<CoordinateOperation>
+//! @endcond
 
 /** \brief Find a CoordinateOperation from sourceCRS to targetCRS.
  *
@@ -2665,54 +2763,115 @@ CoordinateOperationFactory::createOperation(crs::CRSNNPtr sourceCRS,
     if (geogSrc && geogDst) {
         auto formatter = io::PROJStringFormatter::create();
         geogSrc->exportToPROJString(formatter);
-
-        auto formatter2 = io::PROJStringFormatter::create();
-        geogDst->exportToPROJString(formatter2);
-
-        if (formatter->toString() == formatter2->toString()) {
-            // No-op
-            return util::nn_static_pointer_cast<CoordinateOperation>(
-                SingleOperation::createPROJBased(std::string()));
-        }
-
         formatter->startInversion();
         geogDst->exportToPROJString(formatter);
         formatter->stopInversion();
-        return util::nn_static_pointer_cast<CoordinateOperation>(
-            SingleOperation::createPROJBased(
-                simplifyPROJString(formatter->toString())));
+        return NN_CO_CAST(SingleOperation::createPROJBased(
+            formatter->toString(), sourceCRS, targetCRS));
     }
 
-    auto projDst = util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(targetCRS);
-    if (geogSrc && projDst) {
-        auto op = createOperation(NN_CHECK_ASSERT(geogSrc), projDst->baseCRS());
-        if (!op)
+    auto derivedSrc = util::nn_dynamic_pointer_cast<crs::DerivedCRS>(sourceCRS);
+    if (derivedSrc) {
+        auto opSecond = createOperation(derivedSrc->baseCRS(), targetCRS);
+        if (!opSecond) {
             return nullptr;
-        auto formatter = io::PROJStringFormatter::create();
-        op->exportToPROJString(formatter);
-        projDst->exportToPROJString(formatter);
-        return util::nn_static_pointer_cast<CoordinateOperation>(
-            SingleOperation::createPROJBased(
-                simplifyPROJString(formatter->toString())));
+        }
+        return ConcatenatedOperation::create(
+                   util::PropertyMap(),
+                   std::vector<CoordinateOperationNNPtr>{
+                       NN_CO_CAST(derivedSrc->derivingConversion()->inverse()),
+                       NN_CO_CAST(NN_CHECK_ASSERT(opSecond))},
+                   std::vector<metadata::PositionalAccuracyNNPtr>{})
+            .as_nullable();
     }
 
-    auto projSrc = util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(sourceCRS);
-    if (projSrc && geogDst) {
-        auto inv = createOperation(targetCRS, sourceCRS);
-        if (inv)
-            return inv->inverse();
-    }
-
-    if (projSrc && projDst) {
-        auto op = createOperation(NN_CHECK_ASSERT(projSrc), projDst->baseCRS());
-        if (!op)
+    auto derivedDst = util::nn_dynamic_pointer_cast<crs::DerivedCRS>(targetCRS);
+    if (derivedDst) {
+        auto opFirst = createOperation(sourceCRS, derivedDst->baseCRS());
+        if (!opFirst) {
             return nullptr;
-        auto formatter = io::PROJStringFormatter::create();
-        op->exportToPROJString(formatter);
-        projDst->exportToPROJString(formatter);
-        return util::nn_static_pointer_cast<CoordinateOperation>(
-            SingleOperation::createPROJBased(
-                simplifyPROJString(formatter->toString())));
+        }
+        return ConcatenatedOperation::create(
+                   util::PropertyMap(),
+                   std::vector<CoordinateOperationNNPtr>{
+                       NN_CO_CAST(NN_CHECK_ASSERT(opFirst)),
+                       NN_CO_CAST(derivedDst->derivingConversion())},
+                   std::vector<metadata::PositionalAccuracyNNPtr>{})
+            .as_nullable();
+    }
+
+    // boundCRS to a geogCRS that is the same as the hubCRS
+    auto boundSrc = util::nn_dynamic_pointer_cast<crs::BoundCRS>(sourceCRS);
+    if (boundSrc && geogDst) {
+        auto hubSrc = boundSrc->hubCRS();
+        auto hubSrcGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(hubSrc);
+        auto geogCRSOfBaseOfBoundSrc =
+            boundSrc->baseCRS()->extractGeographicCRS();
+        if (hubSrcGeog &&
+            hubSrcGeog->isEquivalentTo(NN_CHECK_ASSERT(geogDst)) &&
+            geogCRSOfBaseOfBoundSrc) {
+            auto opFirst = createOperation(
+                boundSrc->baseCRS(), NN_CHECK_ASSERT(geogCRSOfBaseOfBoundSrc));
+            if (opFirst) {
+                return ConcatenatedOperation::create(
+                           util::PropertyMap(),
+                           std::vector<CoordinateOperationNNPtr>{
+                               NN_CO_CAST(NN_CHECK_ASSERT(opFirst)),
+                               NN_CO_CAST(boundSrc->transformation())},
+                           std::vector<metadata::PositionalAccuracyNNPtr>{})
+                    .as_nullable();
+            }
+        }
+
+        return createOperation(boundSrc->baseCRS(), targetCRS);
+    }
+
+    // reverse of previous case
+    auto boundDst = util::nn_dynamic_pointer_cast<crs::BoundCRS>(targetCRS);
+    if (geogSrc && boundDst) {
+        auto op = createOperation(targetCRS, sourceCRS);
+        if (!op) {
+            return nullptr;
+        }
+        return op->inverse();
+    }
+
+    // boudCRS to boundCRS using the same geographic hubCRS
+    if (boundSrc && boundDst) {
+        auto hubSrc = boundSrc->hubCRS();
+        auto hubSrcGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(hubSrc);
+        auto hubDst = boundDst->hubCRS();
+        auto hubDstGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(hubDst);
+        auto geogCRSOfBaseOfBoundSrc =
+            boundSrc->baseCRS()->extractGeographicCRS();
+        auto geogCRSOfBaseOfBoundDst =
+            boundDst->baseCRS()->extractGeographicCRS();
+        if (hubSrcGeog && hubDstGeog &&
+            hubSrcGeog->isEquivalentTo(NN_CHECK_ASSERT(hubDstGeog)) &&
+            geogCRSOfBaseOfBoundSrc && geogCRSOfBaseOfBoundDst) {
+            auto opFirst = createOperation(
+                boundSrc->baseCRS(), NN_CHECK_ASSERT(geogCRSOfBaseOfBoundSrc));
+            auto opLast = createOperation(
+                NN_CHECK_ASSERT(geogCRSOfBaseOfBoundDst), boundDst->baseCRS());
+            if (opFirst && opLast) {
+                return ConcatenatedOperation::create(
+                           util::PropertyMap(),
+                           std::vector<CoordinateOperationNNPtr>{
+                               NN_CO_CAST(NN_CHECK_ASSERT(opFirst)),
+                               NN_CO_CAST(boundSrc->transformation()),
+                               NN_CO_CAST(
+                                   boundDst->transformation()->inverse()),
+                               NN_CO_CAST(NN_CHECK_ASSERT(opLast)),
+                           },
+                           std::vector<metadata::PositionalAccuracyNNPtr>{})
+                    .as_nullable();
+            }
+        }
+
+        return createOperation(boundSrc->baseCRS(), boundDst->baseCRS());
     }
 
     return nullptr;
@@ -2815,7 +2974,9 @@ PROJBasedOperation::PROJBasedOperation(
 static const std::string PROJSTRING_PARAMETER_NAME("PROJ string");
 
 PROJBasedOperationNNPtr
-PROJBasedOperation::create(const std::string &PROJString) {
+PROJBasedOperation::create(const std::string &PROJString,
+                           const crs::CRSPtr sourceCRS,
+                           const crs::CRSPtr targetCRS) {
     auto parameter = OperationParameter::create(util::PropertyMap().set(
         common::IdentifiedObject::NAME_KEY, PROJSTRING_PARAMETER_NAME));
     auto method = OperationMethod::create(
@@ -2828,6 +2989,10 @@ PROJBasedOperation::create(const std::string &PROJString) {
     auto op =
         PROJBasedOperation::nn_make_shared<PROJBasedOperation>(method, values);
     op->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(op));
+    if (sourceCRS && targetCRS) {
+        op->setCRSs(NN_CHECK_ASSERT(sourceCRS), NN_CHECK_ASSERT(targetCRS),
+                    nullptr);
+    }
     op->setProperties(util::PropertyMap().set(
         common::IdentifiedObject::NAME_KEY, "PROJ-based coordinate operation"));
     return op;
@@ -2848,7 +3013,7 @@ CoordinateOperationNNPtr PROJBasedOperation::inverse() const {
     formatter->stopInversion();
 
     return util::nn_static_pointer_cast<CoordinateOperation>(
-        create(simplifyPROJString(formatter->toString())));
+        create(formatter->toString(), targetCRS(), sourceCRS()));
 }
 
 // ---------------------------------------------------------------------------

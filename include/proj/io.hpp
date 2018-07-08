@@ -231,7 +231,6 @@ class PROJStringFormatter {
 
     PROJ_DLL void addStep(const std::string &step);
     PROJ_DLL void setCurrentStepInverted(bool inverted);
-    PROJ_DLL void setCurrentStepInverseIsSame();
     PROJ_DLL void addParam(const std::string &paramName);
     PROJ_DLL void addParam(const std::string &paramName, double val);
     PROJ_DLL void addParam(const std::string &paramName, int val);
@@ -249,6 +248,9 @@ class PROJStringFormatter {
 
     void setHDatumExtension(const std::string &filename);
     const std::string &getHDatumExtension() const;
+
+    void setOmitProjLongLatIfPossible(bool omit);
+    bool omitProjLongLatIfPossible() const;
 
     //! @endcond
 

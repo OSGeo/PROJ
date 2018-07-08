@@ -802,11 +802,23 @@ GeodeticReferenceFrame::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6269() {
+    util::PropertyMap propertiesDatum;
+    propertiesDatum.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+        .set(metadata::Identifier::CODE_KEY, 6269)
+        .set(common::IdentifiedObject::NAME_KEY, "North American Datum 1983");
+
+    return create(propertiesDatum, Ellipsoid::GRS1980,
+                  util::optional<std::string>(), PrimeMeridian::GREENWICH);
+}
+
+// ---------------------------------------------------------------------------
+
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6326() {
     util::PropertyMap propertiesDatum;
     propertiesDatum.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
         .set(metadata::Identifier::CODE_KEY, 6326)
-        .set(common::IdentifiedObject::NAME_KEY, "WGS_1984");
+        .set(common::IdentifiedObject::NAME_KEY, "World Geodetic System 1984");
 
     return create(propertiesDatum, Ellipsoid::WGS84,
                   util::optional<std::string>(), PrimeMeridian::GREENWICH);
@@ -819,9 +831,16 @@ std::string GeodeticReferenceFrame::exportToWKT(
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(io::WKTConstants::DATUM, !identifiers().empty());
-    formatter->addQuotedString(name()->description().has_value()
-                                   ? *(name()->description())
-                                   : "unnamed");
+    auto l_name = name()->description().has_value() ? *(name()->description())
+                                                    : "unnamed";
+    if (!isWKT2) {
+        l_name = replaceAll(l_name, " ", "_");
+        if (l_name == "World_Geodetic_System_1984") {
+            l_name = "WGS_1984";
+        }
+    }
+    formatter->addQuotedString(l_name);
+
     ellipsoid()->exportToWKT(formatter);
     if (isWKT2) {
         if (anchorDefinition()) {

@@ -34,6 +34,7 @@
 #include <cassert>
 #include <cctype>
 #include <cmath>
+#include <cstring>
 #include <iomanip>
 #include <locale>
 #include <sstream> // std::ostringstream
@@ -1254,7 +1255,14 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
         datumPROJ4Grids_ = stripQuotes(extensionNode->children()[1]->value());
     }
 
-    return GeodeticReferenceFrame::create(buildProperties(node), ellipsoid,
+    auto properties = buildProperties(node);
+    auto name = stripQuotes(node->children()[0]->value());
+    if (name == "WGS_1984") {
+        properties.set(
+            IdentifiedObject::NAME_KEY,
+            *(GeodeticReferenceFrame::EPSG_6326->name()->description()));
+    }
+    return GeodeticReferenceFrame::create(properties, ellipsoid,
                                           getAnchor(node), primeMeridian);
 }
 
@@ -2451,7 +2459,6 @@ struct PROJStringFormatter::Private {
     struct Step {
         std::string name{};
         bool inverted{false};
-        bool inverseIsSame{false};
         std::vector<std::string> paramValues{};
     };
     std::vector<Step> steps_{};
@@ -2461,6 +2468,7 @@ struct PROJStringFormatter::Private {
         bool currentInversionState = false;
     };
     std::vector<InversionStackElt> inversionStack_{InversionStackElt()};
+    bool omitProjLongLatIfPossible_ = false;
 
     std::string result_{};
 
@@ -2500,6 +2508,136 @@ PROJStringFormatterNNPtr PROJStringFormatter::create() {
 /** \brief Returns the PROJ string. */
 const std::string &PROJStringFormatter::toString() const {
     d->result_.clear();
+    if (d->inversionStack_.size() != 1) {
+        return d->result_;
+    }
+
+    bool changeDone;
+    do {
+        changeDone = false;
+        for (size_t i = 1; i < d->steps_.size(); i++) {
+
+            // longlat (or its inverse) with ellipsoid only is a no-op
+            // do that only for an internal step
+            if (i + 1 < d->steps_.size() && d->steps_[i].name == "longlat" &&
+                d->steps_[i].paramValues.size() == 1 &&
+                starts_with(d->steps_[i].paramValues[0], "ellps=")) {
+                d->steps_.erase(d->steps_.begin() + i);
+                changeDone = true;
+                break;
+            }
+
+            // unitconvert followed by its inverse is a no-op
+            if (d->steps_[i].name == "unitconvert" &&
+                d->steps_[i - 1].name == "unitconvert" &&
+                !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
+                d->steps_[i].paramValues.size() == 2 &&
+                d->steps_[i - 1].paramValues.size() == 2 &&
+                starts_with(d->steps_[i].paramValues[0], "xy_in=") &&
+                starts_with(d->steps_[i - 1].paramValues[0], "xy_in=") &&
+                starts_with(d->steps_[i].paramValues[1], "xy_out=") &&
+                starts_with(d->steps_[i - 1].paramValues[1], "xy_out=") &&
+                d->steps_[i].paramValues[0].substr(strlen("xy_in=")) ==
+                    d->steps_[i - 1].paramValues[1].substr(strlen("xy_out=")) &&
+                d->steps_[i].paramValues[1].substr(strlen("xy_out=")) ==
+                    d->steps_[i - 1].paramValues[0].substr(strlen("xy_in="))) {
+                d->steps_.erase(d->steps_.begin() + i - 1,
+                                d->steps_.begin() + i + 1);
+                changeDone = true;
+                break;
+            }
+
+            // axisswap order=2,1 followed by itself is a no-op
+            if (d->steps_[i].name == "axisswap" &&
+                d->steps_[i - 1].name == "axisswap" &&
+                d->steps_[i].paramValues.size() == 1 &&
+                d->steps_[i - 1].paramValues.size() == 1 &&
+                d->steps_[i].paramValues[0] == "order=2,1" &&
+                d->steps_[i - 1].paramValues[0] == "order=2,1") {
+                d->steps_.erase(d->steps_.begin() + i - 1,
+                                d->steps_.begin() + i + 1);
+                changeDone = true;
+                break;
+            }
+
+            // hermert followed by its inverse is a no-op
+            try {
+                if (d->steps_[i].name == "helmert" &&
+                    d->steps_[i - 1].name == "helmert" &&
+                    !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
+                    d->steps_[i].paramValues.size() == 7 &&
+                    d->steps_[i - 1].paramValues.size() == 7 &&
+                    starts_with(d->steps_[i].paramValues[0], "x=") &&
+                    starts_with(d->steps_[i - 1].paramValues[0], "x=") &&
+                    starts_with(d->steps_[i].paramValues[1], "y=") &&
+                    starts_with(d->steps_[i - 1].paramValues[1], "y=") &&
+                    starts_with(d->steps_[i].paramValues[2], "z=") &&
+                    starts_with(d->steps_[i - 1].paramValues[2], "z=") &&
+                    starts_with(d->steps_[i].paramValues[3], "rx=") &&
+                    starts_with(d->steps_[i - 1].paramValues[3], "rx=") &&
+                    starts_with(d->steps_[i].paramValues[4], "ry=") &&
+                    starts_with(d->steps_[i - 1].paramValues[4], "ry=") &&
+                    starts_with(d->steps_[i].paramValues[5], "rz=") &&
+                    starts_with(d->steps_[i - 1].paramValues[5], "rz=") &&
+                    starts_with(d->steps_[i].paramValues[6], "s=") &&
+                    starts_with(d->steps_[i - 1].paramValues[6], "s=") &&
+                    c_locale_stod(
+                        d->steps_[i].paramValues[0].substr(strlen("x="))) ==
+                        -c_locale_stod(d->steps_[i - 1].paramValues[0].substr(
+                            strlen("x="))) &&
+                    c_locale_stod(
+                        d->steps_[i].paramValues[1].substr(strlen("y="))) ==
+                        -c_locale_stod(d->steps_[i - 1].paramValues[1].substr(
+                            strlen("y="))) &&
+                    c_locale_stod(
+                        d->steps_[i].paramValues[2].substr(strlen("z="))) ==
+                        -c_locale_stod(d->steps_[i - 1].paramValues[2].substr(
+                            strlen("z="))) &&
+                    c_locale_stod(
+                        d->steps_[i].paramValues[3].substr(strlen("rx="))) ==
+                        -c_locale_stod(d->steps_[i - 1].paramValues[3].substr(
+                            strlen("rx="))) &&
+                    c_locale_stod(
+                        d->steps_[i].paramValues[4].substr(strlen("ry="))) ==
+                        -c_locale_stod(d->steps_[i - 1].paramValues[4].substr(
+                            strlen("ry="))) &&
+                    c_locale_stod(
+                        d->steps_[i].paramValues[5].substr(strlen("rz="))) ==
+                        -c_locale_stod(d->steps_[i - 1].paramValues[5].substr(
+                            strlen("rz="))) &&
+                    d->steps_[i].paramValues[6] ==
+                        d->steps_[i - 1].paramValues[6]) {
+                    d->steps_.erase(d->steps_.begin() + i - 1,
+                                    d->steps_.begin() + i + 1);
+                    changeDone = true;
+                    break;
+                }
+            } catch (const std::invalid_argument &) {
+            }
+
+            // detect a step and its inverse
+            if (d->steps_[i].inverted != d->steps_[i - 1].inverted &&
+                d->steps_[i].name == d->steps_[i - 1].name &&
+                d->steps_[i].paramValues.size() ==
+                    d->steps_[i - 1].paramValues.size()) {
+                bool allSame = true;
+                for (size_t j = 0; j < d->steps_[i].paramValues.size(); j++) {
+                    if (d->steps_[i].paramValues[j] !=
+                        d->steps_[i - 1].paramValues[j]) {
+                        allSame = false;
+                        break;
+                    }
+                }
+                if (allSame) {
+                    d->steps_.erase(d->steps_.begin() + i - 1,
+                                    d->steps_.begin() + i + 1);
+                    changeDone = true;
+                    break;
+                }
+            }
+        }
+    } while (changeDone);
+
     if (d->steps_.size() > 1 ||
         (d->steps_.size() == 1 && d->steps_[0].inverted)) {
         d->appendToResult("+proj=pipeline");
@@ -2508,8 +2646,22 @@ const std::string &PROJStringFormatter::toString() const {
         if (!d->result_.empty()) {
             d->appendToResult("+step");
         }
-        if (step.inverted && !step.inverseIsSame) {
-            d->appendToResult("+inv");
+        if (step.inverted) {
+            if (step.name == "unitconvert" && step.paramValues.size() == 2 &&
+                starts_with(step.paramValues[0], "xy_in=") &&
+                starts_with(step.paramValues[1], "xy_out=")) {
+                d->appendToResult("+proj=" + step.name);
+                d->appendToResult(
+                    "+xy_in=" + step.paramValues[1].substr(strlen("xy_out=")));
+                d->appendToResult("+xy_out=" +
+                                  step.paramValues[0].substr(strlen("xy_in=")));
+                continue;
+            }
+            // axisswap order=2,1 is its own inverse
+            if (!(step.name == "axisswap" && step.paramValues.size() == 1 &&
+                  step.paramValues[0] == "order=2,1")) {
+                d->appendToResult("+inv");
+            }
         }
         if (!step.name.empty()) {
             d->appendToResult("+proj=" + step.name);
@@ -2612,13 +2764,6 @@ void PROJStringFormatter::addStep(const std::string &stepName) {
 void PROJStringFormatter::setCurrentStepInverted(bool inverted) {
     assert(!d->steps_.empty());
     d->steps_.back().inverted = inverted;
-}
-
-// ---------------------------------------------------------------------------
-
-void PROJStringFormatter::setCurrentStepInverseIsSame() {
-    assert(!d->steps_.empty());
-    d->steps_.back().inverseIsSame = true;
 }
 
 // ---------------------------------------------------------------------------
@@ -2741,6 +2886,19 @@ void PROJStringFormatter::setHDatumExtension(const std::string &filename) {
 const std::string &PROJStringFormatter::getHDatumExtension() const {
     return d->hDatumExtension_;
 }
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::setOmitProjLongLatIfPossible(bool omit) {
+    d->omitProjLongLatIfPossible_ = omit;
+}
+
+// ---------------------------------------------------------------------------
+
+bool PROJStringFormatter::omitProjLongLatIfPossible() const {
+    return d->omitProjLongLatIfPossible_;
+}
+
 //! @endcond
 
 } // namespace io

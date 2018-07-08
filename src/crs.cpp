@@ -393,6 +393,7 @@ GeodeticCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 void GeodeticCRS::addDatumInfoToPROJString(
     io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
@@ -408,6 +409,7 @@ void GeodeticCRS::addDatumInfoToPROJString(
         formatter->addParam("nadgrids", nadgrids);
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -477,6 +479,18 @@ GeographicCRS::create(const util::PropertyMap &properties,
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+GeographicCRSNNPtr GeographicCRS::createEPSG_4269() {
+    util::PropertyMap propertiesCRS;
+    propertiesCRS.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+        .set(metadata::Identifier::CODE_KEY, 4269)
+        .set(common::IdentifiedObject::NAME_KEY, "NAD83");
+    return create(propertiesCRS, datum::GeodeticReferenceFrame::EPSG_6269,
+                  cs::EllipsoidalCS::createLatitudeLongitude(
+                      common::UnitOfMeasure::DEGREE));
 }
 
 // ---------------------------------------------------------------------------
@@ -553,35 +567,19 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
     auto &axisList = coordinateSystem()->axisList();
     if (!axisList.empty()) {
         auto projUnit = axisList[0]->unit().exportToPROJString();
-        if (formatter->isInverted()) {
-            // "optimization" to avoid emitting an inverted step
-            formatter->startInversion();
-            formatter->addStep("unitconvert");
-            formatter->addParam("xy_in", "rad");
-            if (projUnit.empty()) {
-                formatter->addParam("xy_out",
-                                    axisList[0]->unit().conversionToSI());
-            } else {
-                formatter->addParam("xy_out", projUnit);
-            }
-            formatter->stopInversion();
+        formatter->addStep("unitconvert");
+        if (projUnit.empty()) {
+            formatter->addParam("xy_in", axisList[0]->unit().conversionToSI());
         } else {
-            formatter->addStep("unitconvert");
-            if (projUnit.empty()) {
-                formatter->addParam("xy_in",
-                                    axisList[0]->unit().conversionToSI());
-            } else {
-                formatter->addParam("xy_in", projUnit);
-            }
-            formatter->addParam("xy_out", "rad");
+            formatter->addParam("xy_in", projUnit);
         }
+        formatter->addParam("xy_out", "rad");
     }
 
     if (axisList.size() >= 2 &&
         ci_equal(*(axisList[0]->name()->description()), "Latitude") &&
         ci_equal(*(axisList[1]->name()->description()), "Longitude")) {
         formatter->addStep("axisswap");
-        formatter->setCurrentStepInverseIsSame();
         formatter->addParam("order", "2,1");
     }
 }
@@ -594,8 +592,13 @@ GeographicCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 {
     addAngularUnitConvertAndAxisSwap(formatter);
 
-    formatter->addStep("longlat");
-    addDatumInfoToPROJString(formatter);
+    if (!formatter->omitProjLongLatIfPossible() ||
+        datum()->primeMeridian()->longitude().getSIValue() != 0.0 ||
+        !formatter->getTOWGS84Parameters().empty() ||
+        !formatter->getHDatumExtension().empty()) {
+        formatter->addStep("longlat");
+        addDatumInfoToPROJString(formatter);
+    }
 
     return formatter->toString();
 }
@@ -971,34 +974,7 @@ std::string
 ProjectedCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
 {
-    auto geogCRS = util::nn_dynamic_pointer_cast<GeographicCRS>(baseCRS());
-    if (geogCRS) {
-        geogCRS->addAngularUnitConvertAndAxisSwap(formatter);
-    }
-
     derivingConversion()->exportToPROJString(formatter);
-
-    baseCRS()->addDatumInfoToPROJString(formatter);
-
-    auto &axisList = coordinateSystem()->axisList();
-    if (!axisList.empty() &&
-        axisList[0]->unit() != common::UnitOfMeasure::METRE) {
-        auto projUnit = axisList[0]->unit().exportToPROJString();
-        if (projUnit.empty()) {
-            formatter->addParam("to_meter",
-                                axisList[0]->unit().conversionToSI());
-        } else {
-            formatter->addParam("units", projUnit);
-        }
-    }
-
-    if (axisList.size() >= 2 &&
-        axisList[0]->direction() == cs::AxisDirection::NORTH &&
-        axisList[1]->direction() == cs::AxisDirection::EAST) {
-        formatter->addStep("axisswap");
-        formatter->setCurrentStepInverseIsSame();
-        formatter->addParam("order", "2,1");
-    }
 
     return formatter->toString();
 }

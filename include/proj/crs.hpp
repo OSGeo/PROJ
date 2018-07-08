@@ -183,6 +183,10 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    //! @cond Doxygen_Suppress
+    void addDatumInfoToPROJString(io::PROJStringFormatterNNPtr formatter) const;
+    //! @endcond
+
   protected:
     GeodeticCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
                 const cs::EllipsoidalCSNNPtr &csIn);
@@ -191,9 +195,6 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     GeodeticCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
                 const cs::CartesianCSNNPtr &csIn);
     INLINED_MAKE_SHARED
-
-    friend class ProjectedCRS;
-    void addDatumInfoToPROJString(io::PROJStringFormatterNNPtr formatter) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -230,6 +231,7 @@ class GeographicCRS : public GeodeticCRS {
     exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         const override; // throw(FormattingException)
 
+    PROJ_DLL static const GeographicCRSNNPtr EPSG_4269; // NAD83
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4326; // WGS 84 2D
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4807; // NTF Paris
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4979; // WGS 84 3D
@@ -245,6 +247,7 @@ class GeographicCRS : public GeodeticCRS {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    static GeographicCRSNNPtr createEPSG_4269();
     static GeographicCRSNNPtr createEPSG_4326();
     static GeographicCRSNNPtr createEPSG_4807();
     static GeographicCRSNNPtr createEPSG_4979();

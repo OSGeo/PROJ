@@ -335,6 +335,8 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
            const util::optional<std::string> &anchor,
            const PrimeMeridianNNPtr &primeMeridian);
 
+    PROJ_DLL static const GeodeticReferenceFrameNNPtr
+        EPSG_6269; // North American Datum 1983
     PROJ_DLL static const GeodeticReferenceFrameNNPtr EPSG_6326; // WGS 84
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
@@ -357,6 +359,7 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    static const GeodeticReferenceFrameNNPtr createEPSG_6269();
     static const GeodeticReferenceFrameNNPtr createEPSG_6326();
     GeodeticReferenceFrame(const GeodeticReferenceFrame &other) = delete;
     GeodeticReferenceFrame &

@@ -74,7 +74,7 @@ TEST(crs, EPSG_4326_get_components) {
     ASSERT_EQ(datum->identifiers().size(), 1);
     EXPECT_EQ(datum->identifiers()[0]->code(), "6326");
     EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
-    EXPECT_EQ(*(datum->name()->description()), "WGS_1984");
+    EXPECT_EQ(*(datum->name()->description()), "World Geodetic System 1984");
 
     auto ellipsoid = datum->ellipsoid();
     EXPECT_EQ(ellipsoid->semiMajorAxis().value(), 6378137.0);
@@ -123,7 +123,7 @@ TEST(crs, EPSG_4326_as_WKT2) {
     crs->exportToWKT(f);
     EXPECT_EQ(f->toString(),
               "GEODCRS[\"WGS 84\",\n"
-              "    DATUM[\"WGS_1984\",\n"
+              "    DATUM[\"World Geodetic System 1984\",\n"
               "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
               "            LENGTHUNIT[\"metre\",1]]],\n"
               "    PRIMEM[\"Greenwich\",0,\n"
@@ -147,7 +147,7 @@ TEST(crs, EPSG_4326_as_WKT2_2018) {
     crs->exportToWKT(f);
     EXPECT_EQ(f->toString(),
               "GEOGCRS[\"WGS 84\",\n"
-              "    DATUM[\"WGS_1984\",\n"
+              "    DATUM[\"World Geodetic System 1984\",\n"
               "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
               "            LENGTHUNIT[\"metre\",1]]],\n"
               "    PRIMEM[\"Greenwich\",0,\n"
@@ -171,7 +171,7 @@ TEST(crs, EPSG_4326_as_WKT2_SIMPLIFIED) {
     crs->exportToWKT(f);
     EXPECT_EQ(f->toString(),
               "GEODCRS[\"WGS 84\",\n"
-              "    DATUM[\"WGS_1984\",\n"
+              "    DATUM[\"World Geodetic System 1984\",\n"
               "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
               "    CS[ellipsoidal,2],\n"
               "        AXIS[\"latitude\",north],\n"
@@ -190,7 +190,8 @@ TEST(crs, EPSG_4326_as_WKT2_SIMPLIFIED_single_line) {
     crs->exportToWKT(f);
     EXPECT_EQ(
         f->toString(),
-        "GEODCRS[\"WGS 84\",DATUM[\"WGS_1984\",ELLIPSOID[\"WGS "
+        "GEODCRS[\"WGS 84\",DATUM[\"World Geodetic System "
+        "1984\",ELLIPSOID[\"WGS "
         "84\",6378137,298.257223563]],"
         "CS[ellipsoidal,2],AXIS[\"latitude\",north],AXIS[\"longitude\",east],"
         "UNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",4326]]");
@@ -205,7 +206,7 @@ TEST(crs, EPSG_4326_as_WKT2_2018_SIMPLIFIED) {
     crs->exportToWKT(f);
     EXPECT_EQ(f->toString(),
               "GEOGCRS[\"WGS 84\",\n"
-              "    DATUM[\"WGS_1984\",\n"
+              "    DATUM[\"World Geodetic System 1984\",\n"
               "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
               "    CS[ellipsoidal,2],\n"
               "        AXIS[\"latitude\",north],\n"
@@ -255,7 +256,7 @@ TEST(crs, EPSG_4979_as_WKT2_SIMPLIFIED) {
     crs->exportToWKT(f);
     EXPECT_EQ(f->toString(),
               "GEODCRS[\"WGS 84\",\n"
-              "    DATUM[\"WGS_1984\",\n"
+              "    DATUM[\"World Geodetic System 1984\",\n"
               "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
               "    CS[ellipsoidal,3],\n"
               "        AXIS[\"latitude\",north,\n"
@@ -276,7 +277,7 @@ TEST(crs, EPSG_4979_as_WKT2_2018_SIMPLIFIED) {
     crs->exportToWKT(f);
     EXPECT_EQ(f->toString(),
               "GEOGCRS[\"WGS 84\",\n"
-              "    DATUM[\"WGS_1984\",\n"
+              "    DATUM[\"World Geodetic System 1984\",\n"
               "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
               "    CS[ellipsoidal,3],\n"
               "        AXIS[\"latitude\",north,\n"
@@ -421,10 +422,10 @@ TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string) {
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=lcc +lat_1=49.5 "
-              "+lat_0=49.5 +lon_0=0 "
-              "+k_0=0.999877341 +x_0=600000 +y_0=200000 +ellps=clrk80ign "
-              "+pm=paris");
+              "+step +proj=axisswap +order=2,1 +step +proj=longlat "
+              "+ellps=clrk80ign +pm=paris +step +proj=lcc +lat_1=49.5 "
+              "+lat_0=49.5 +lon_0=0 +k_0=0.999877341 +x_0=600000 +y_0=200000 "
+              "+ellps=clrk80ign");
 
     auto nn_crs = NN_CHECK_ASSERT(crs);
     EXPECT_TRUE(nn_crs->isEquivalentTo(nn_crs));
@@ -515,7 +516,7 @@ TEST(crs, geocentricCRS_as_WKT2) {
     auto crs = createGeocentric();
 
     auto expected = "GEODCRS[\"WGS 84\",\n"
-                    "    DATUM[\"WGS_1984\",\n"
+                    "    DATUM[\"World Geodetic System 1984\",\n"
                     "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
                     "            LENGTHUNIT[\"metre\",1]]],\n"
                     "    PRIMEM[\"Greenwich\",0,\n"
@@ -547,7 +548,7 @@ TEST(crs, geocentricCRS_as_WKT2_simplified) {
     auto crs = createGeocentric();
 
     auto expected = "GEODCRS[\"WGS 84\",\n"
-                    "    DATUM[\"WGS_1984\",\n"
+                    "    DATUM[\"World Geodetic System 1984\",\n"
                     "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
                     "    CS[Cartesian,3],\n"
                     "        AXIS[\"(X)\",geocentricX],\n"
@@ -637,7 +638,7 @@ TEST(crs, projectedCRS_as_WKT2) {
     auto expected =
         "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
         "    BASEGEODCRS[\"WGS 84\",\n"
-        "        DATUM[\"WGS_1984\",\n"
+        "        DATUM[\"World Geodetic System 1984\",\n"
         "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
         "                LENGTHUNIT[\"metre\",1]]],\n"
         "        PRIMEM[\"Greenwich\",0,\n"
@@ -680,7 +681,7 @@ TEST(crs, projectedCRS_as_WKT2_simplified) {
     auto expected =
         "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
         "    BASEGEODCRS[\"WGS 84\",\n"
-        "        DATUM[\"WGS_1984\",\n"
+        "        DATUM[\"World Geodetic System 1984\",\n"
         "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
         "        UNIT[\"degree\",0.0174532925199433]],\n"
         "    CONVERSION[\"UTM zone 31N\",\n"
@@ -709,7 +710,7 @@ TEST(crs, projectedCRS_as_WKT2_2018_simplified) {
     auto expected =
         "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
         "    BASEGEOGCRS[\"WGS 84\",\n"
-        "        DATUM[\"WGS_1984\",\n"
+        "        DATUM[\"World Geodetic System 1984\",\n"
         "            ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
         "        UNIT[\"degree\",0.0174532925199433]],\n"
         "    CONVERSION[\"UTM zone 31N\",\n"
@@ -889,7 +890,7 @@ TEST(crs, multiple_ID) {
     auto got_wkt = crs->exportToWKT(
         WKTFormatter::create(WKTFormatter::Convention::WKT2_SIMPLIFIED));
     auto expected = "GEODCRS[\"WGS 84\",\n"
-                    "    DATUM[\"WGS_1984\",\n"
+                    "    DATUM[\"World Geodetic System 1984\",\n"
                     "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
                     "    CS[Cartesian,3],\n"
                     "        AXIS[\"(X)\",geocentricX],\n"
@@ -996,7 +997,7 @@ TEST(crs, compoundCRS_as_WKT2) {
         "COMPOUNDCRS[\"horizontal + vertical\",\n"
         "    PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
         "        BASEGEODCRS[\"WGS 84\",\n"
-        "            DATUM[\"WGS_1984\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
         "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
         "                    LENGTHUNIT[\"metre\",1]]],\n"
         "            PRIMEM[\"Greenwich\",0,\n"
@@ -1034,9 +1035,26 @@ TEST(crs, compoundCRS_as_WKT2) {
         "    ID[\"codespace\",\"code\"]]";
 
     EXPECT_EQ(crs->exportToWKT(WKTFormatter::create()), expected);
+}
 
+// ---------------------------------------------------------------------------
+
+TEST(crs, compoundCRS_isEquivalentTo) {
+
+    auto crs = createCompoundCRS();
     EXPECT_TRUE(crs->isEquivalentTo(crs));
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
+    auto compoundCRSOfProjCRS =
+        CompoundCRS::create(PropertyMap().set(IdentifiedObject::NAME_KEY, ""),
+                            std::vector<CRSNNPtr>{createProjected()});
+    auto emptyCompoundCRS =
+        CompoundCRS::create(PropertyMap().set(IdentifiedObject::NAME_KEY, ""),
+                            std::vector<CRSNNPtr>{});
+    EXPECT_FALSE(compoundCRSOfProjCRS->isEquivalentTo(emptyCompoundCRS));
+    auto compoundCRSOfGeogCRS =
+        CompoundCRS::create(PropertyMap().set(IdentifiedObject::NAME_KEY, ""),
+                            std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326});
+    EXPECT_FALSE(compoundCRSOfProjCRS->isEquivalentTo(compoundCRSOfGeogCRS));
 }
 
 // ---------------------------------------------------------------------------
@@ -1255,7 +1273,8 @@ TEST(crs, boundCRS_to_WKT2) {
         "],\n" + "TARGETCRS[" +
         GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
         "],\n"
-        "    ABRIDGEDTRANSFORMATION[\"Transformation to WGS84\",\n"
+        "    ABRIDGEDTRANSFORMATION[\"Transformation from myGEOGCRS to "
+        "WGS84\",\n"
         "        METHOD[\"Position Vector transformation (geocentric "
         "domain)\",\n"
         "            ID[\"EPSG\",1033]],\n"
@@ -1363,8 +1382,9 @@ TEST(crs, boundCRS_projectedCRS_to_PROJ_string) {
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=utm "
-              "+zone=31 +ellps=WGS84 +towgs84=1,2,3,4,5,6,7");
+              "+step +proj=axisswap +order=2,1 +step +proj=longlat "
+              "+ellps=WGS84 +towgs84=1,2,3,4,5,6,7 +step +proj=utm +zone=31 "
+              "+ellps=WGS84");
 }
 
 // ---------------------------------------------------------------------------
@@ -1431,9 +1451,9 @@ TEST(crs, WKT1_DATUM_EXTENSION_to_WKT1_and_PROJ_string) {
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=longlat +ellps=intl +nadgrids=nzgd2kgrid0005.gsb "
               "+step +proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 "
-              "+y_0=6023150 "
-              "+ellps=intl +nadgrids=nzgd2kgrid0005.gsb +units=m");
+              "+y_0=6023150 +ellps=intl +units=m");
 }
 
 // ---------------------------------------------------------------------------
@@ -1484,7 +1504,7 @@ TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_WKT2) {
         "            ID[\"EPSG\",3855]]],\n"
         "    TARGETCRS[\n"
         "        GEODCRS[\"WGS 84\",\n"
-        "            DATUM[\"WGS_1984\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
         "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
         "                    LENGTHUNIT[\"metre\",1]]],\n"
         "            PRIMEM[\"Greenwich\",0,\n"
@@ -1579,7 +1599,7 @@ TEST(crs, derivedGeographicCRS_WKT2) {
 
     auto expected = "GEODCRS[\"WMO Atlantic Pole\",\n"
                     "    BASEGEODCRS[\"WGS 84\",\n"
-                    "        DATUM[\"WGS_1984\",\n"
+                    "        DATUM[\"World Geodetic System 1984\",\n"
                     "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
                     "                LENGTHUNIT[\"metre\",1]]],\n"
                     "        PRIMEM[\"Greenwich\",0,\n"
@@ -1620,7 +1640,7 @@ TEST(crs, derivedGeographicCRS_WKT2_2018) {
 
     auto expected = "GEOGCRS[\"WMO Atlantic Pole\",\n"
                     "    BASEGEOGCRS[\"WGS 84\",\n"
-                    "        DATUM[\"WGS_1984\",\n"
+                    "        DATUM[\"World Geodetic System 1984\",\n"
                     "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
                     "                LENGTHUNIT[\"metre\",1]]],\n"
                     "        PRIMEM[\"Greenwich\",0,\n"
@@ -1682,7 +1702,7 @@ TEST(crs, derivedGeodeticCRS_WKT2) {
 
     auto expected = "GEODCRS[\"Derived geodetic CRS\",\n"
                     "    BASEGEODCRS[\"WGS 84\",\n"
-                    "        DATUM[\"WGS_1984\",\n"
+                    "        DATUM[\"World Geodetic System 1984\",\n"
                     "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
                     "                LENGTHUNIT[\"metre\",1]]],\n"
                     "        PRIMEM[\"Greenwich\",0,\n"
@@ -1718,7 +1738,7 @@ TEST(crs, derivedGeodeticCRS_WKT2_2018) {
 
     auto expected = "GEODCRS[\"Derived geodetic CRS\",\n"
                     "    BASEGEOGCRS[\"WGS 84\",\n"
-                    "        DATUM[\"WGS_1984\",\n"
+                    "        DATUM[\"World Geodetic System 1984\",\n"
                     "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
                     "                LENGTHUNIT[\"metre\",1]]],\n"
                     "        PRIMEM[\"Greenwich\",0,\n"

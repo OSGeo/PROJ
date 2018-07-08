@@ -506,6 +506,10 @@ const EllipsoidNNPtr Ellipsoid::GRS1980(Ellipsoid::createGRS1980());
 
 // ---------------------------------------------------------------------------
 
+/** \brief The EPSG:6269 / "North_American_Datum_1983" GeodeticReferenceFrame */
+const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::EPSG_6269(
+    GeodeticReferenceFrame::createEPSG_6269());
+
 /** \brief The EPSG:6326 / "WGS_1984" GeodeticReferenceFrame */
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::EPSG_6326(
     GeodeticReferenceFrame::createEPSG_6326());
@@ -518,12 +522,18 @@ const std::string
 
 // ---------------------------------------------------------------------------
 
+/** \brief EPSG:4269 / "NAD83" 2D GeographicCRS */
+const GeographicCRSNNPtr
+    GeographicCRS::EPSG_4269(GeographicCRS::createEPSG_4269());
+
 /** \brief EPSG:4326 / "WGS 84" 2D GeographicCRS */
 const GeographicCRSNNPtr
     GeographicCRS::EPSG_4326(GeographicCRS::createEPSG_4326());
+
 /** \brief EPSG:4807 / "NTF (Paris)" 2D GeographicCRS */
 const GeographicCRSNNPtr
     GeographicCRS::EPSG_4807(GeographicCRS::createEPSG_4807());
+
 /** \brief EPSG:4979 / "WGS 84" 3D GeographicCRS */
 const GeographicCRSNNPtr
     GeographicCRS::EPSG_4979(GeographicCRS::createEPSG_4979());

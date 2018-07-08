@@ -490,7 +490,8 @@ class SingleOperation : public CoordinateOperation {
                                                    int epsg_code = 0) const;
 
     PROJ_DLL static SingleOperationNNPtr
-    createPROJBased(const std::string &PROJString);
+    createPROJBased(const std::string &PROJString, const crs::CRSPtr sourceCRS,
+                    const crs::CRSPtr targetCRS);
 
     PROJ_DLL bool
     isEquivalentTo(const util::BaseObjectNNPtr &other,
