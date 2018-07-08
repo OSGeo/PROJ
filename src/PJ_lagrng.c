@@ -55,13 +55,13 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         x2 = xy.x * xy.x;
         y2p = 2. + xy.y;
         y2m = 2. - xy.y;
-        c = y2p * y2m - x2;
-        if (fabs(c) < TOL) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-            return lp;
-        }
         lp.phi = 2. * atan(pow((y2p * y2p + x2) / (Q->a2 * (y2m * y2m + x2)), Q->hw)) - M_HALFPI;
-        lp.lam = Q->w * atan2(4. * xy.x, c);
+        c = y2p * y2m - x2;
+        if (fabs(c) < TOL)
+           lp.lam = xy.x < 0 ? -M_HALFPI : M_HALFPI;
+        else
+           lp.lam = atan2(4. * xy.x, c);
+        lp.lam *= Q->w;
     }
     return lp;
 }
