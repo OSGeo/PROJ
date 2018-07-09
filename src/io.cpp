@@ -2452,6 +2452,8 @@ IPROJStringExportable::~IPROJStringExportable() = default;
 
 //! @cond Doxygen_Suppress
 struct PROJStringFormatter::Private {
+    PROJStringFormatter::Convention convention_ =
+        PROJStringFormatter::Convention::PROJ_5;
     std::vector<double> toWGS84Parameters_{};
     std::string vDatumExtension_{};
     std::string hDatumExtension_{};
@@ -2469,6 +2471,7 @@ struct PROJStringFormatter::Private {
     };
     std::vector<InversionStackElt> inversionStack_{InversionStackElt()};
     bool omitProjLongLatIfPossible_ = false;
+    int level_ = 0;
 
     std::string result_{};
 
@@ -2479,8 +2482,10 @@ struct PROJStringFormatter::Private {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-PROJStringFormatter::PROJStringFormatter()
-    : d(internal::make_unique<Private>()) {}
+PROJStringFormatter::PROJStringFormatter(Convention conventionIn)
+    : d(internal::make_unique<Private>()) {
+    d->convention_ = conventionIn;
+}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -2497,10 +2502,12 @@ PROJStringFormatter::~PROJStringFormatter() = default;
  *
  * Its default behaviour can be adjusted with the different setters.
  *
+ * @param conventionIn PROJ string flavor. Defaults to Convention::PROJ_5
  * @return new formatter.
  */
-PROJStringFormatterNNPtr PROJStringFormatter::create() {
-    return PROJStringFormatter::nn_make_shared<PROJStringFormatter>();
+PROJStringFormatterNNPtr PROJStringFormatter::create(Convention conventionIn) {
+    return PROJStringFormatter::nn_make_shared<PROJStringFormatter>(
+        conventionIn);
 }
 
 // ---------------------------------------------------------------------------
@@ -2508,7 +2515,7 @@ PROJStringFormatterNNPtr PROJStringFormatter::create() {
 /** \brief Returns the PROJ string. */
 const std::string &PROJStringFormatter::toString() const {
     d->result_.clear();
-    if (d->inversionStack_.size() != 1) {
+    if (d->level_) {
         return d->result_;
     }
 
@@ -2676,6 +2683,47 @@ const std::string &PROJStringFormatter::toString() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+PROJStringFormatter::Convention PROJStringFormatter::convention() const {
+    return d->convention_;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::enter() { ++d->level_; }
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::leave() {
+    assert(d->level_ > 0);
+    --d->level_;
+}
+
+// ---------------------------------------------------------------------------
+
+PROJStringFormatter::Scope::Scope(PROJStringFormatterNNPtr formatter)
+    : formatter_(formatter) {
+    formatter_->enter();
+}
+
+// ---------------------------------------------------------------------------
+
+PROJStringFormatter::Scope::~Scope() {
+    if (formatter_) {
+        formatter_->leave();
+    }
+}
+// ---------------------------------------------------------------------------
+
+std::string PROJStringFormatter::Scope::toString() {
+    assert(formatter_);
+    formatter_->leave();
+    auto ret = formatter_->toString();
+    formatter_ = nullptr;
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
 
 void PROJStringFormatter::Private::appendToResult(const std::string &str) {
     if (!result_.empty()) {

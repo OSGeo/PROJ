@@ -364,6 +364,37 @@ std::string GeodeticCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void GeodeticCRS::addGeocentricUnitConversionIntoPROJString(
+    io::PROJStringFormatterNNPtr formatter) const {
+
+    auto &axisList = coordinateSystem()->axisList();
+    if (!axisList.empty() &&
+        axisList[0]->unit() != common::UnitOfMeasure::METRE) {
+        if (formatter->convention() ==
+            io::PROJStringFormatter::Convention::PROJ_4) {
+            throw io::FormattingException("GeodeticCRS::exportToPROJString(): "
+                                          "non-meter unit not supported for "
+                                          "PROJ.4");
+        }
+        auto projUnit = axisList[0]->unit().exportToPROJString();
+
+        formatter->addStep("unitconvert");
+        formatter->addParam("xy_in", "m");
+        formatter->addParam("z_in", "m");
+        if (projUnit.empty()) {
+            formatter->addParam("xy_out", axisList[0]->unit().conversionToSI());
+            formatter->addParam("z_out", axisList[0]->unit().conversionToSI());
+        } else {
+            formatter->addParam("xy_out", projUnit);
+            formatter->addParam("z_out", projUnit);
+        }
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 std::string
 GeodeticCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
@@ -373,22 +404,18 @@ GeodeticCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
                                       "supports geocentric coordinate systems");
     }
 
-    formatter->addStep("cart");
-    datum()->ellipsoid()->exportToPROJString(formatter);
+    io::PROJStringFormatter::Scope scope(formatter);
 
-    auto &axisList = coordinateSystem()->axisList();
-    if (!axisList.empty() &&
-        axisList[0]->unit() != common::UnitOfMeasure::METRE) {
-        auto projUnit = axisList[0]->unit().exportToPROJString();
-        if (projUnit.empty()) {
-            formatter->addParam("to_meter",
-                                axisList[0]->unit().conversionToSI());
-        } else {
-            formatter->addParam("units", projUnit);
-        }
+    if (formatter->convention() ==
+        io::PROJStringFormatter::Convention::PROJ_4) {
+        formatter->addStep("geocent");
+    } else {
+        formatter->addStep("cart");
     }
+    datum()->ellipsoid()->exportToPROJString(formatter);
+    addGeocentricUnitConversionIntoPROJString(formatter);
 
-    return formatter->toString();
+    return scope.toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -398,13 +425,20 @@ void GeodeticCRS::addDatumInfoToPROJString(
     io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
 {
-    datum()->ellipsoid()->exportToPROJString(formatter);
-    datum()->primeMeridian()->exportToPROJString(formatter);
     const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
+    auto nadgrids = formatter->getHDatumExtension();
+    if (formatter->convention() ==
+            io::PROJStringFormatter::Convention::PROJ_4 &&
+        datum()->isEquivalentTo(datum::GeodeticReferenceFrame::EPSG_6326) &&
+        TOWGS84Params.empty() && nadgrids.empty()) {
+        formatter->addParam("datum", "WGS84");
+    } else {
+        datum()->ellipsoid()->exportToPROJString(formatter);
+        datum()->primeMeridian()->exportToPROJString(formatter);
+    }
     if (TOWGS84Params.size() == 7) {
         formatter->addParam("towgs84", TOWGS84Params);
     }
-    auto nadgrids = formatter->getHDatumExtension();
     if (!nadgrids.empty()) {
         formatter->addParam("nadgrids", nadgrids);
     }
@@ -565,15 +599,16 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
 void GeographicCRS::addAngularUnitConvertAndAxisSwap(
     io::PROJStringFormatterNNPtr formatter) const {
     auto &axisList = coordinateSystem()->axisList();
+
     if (!axisList.empty()) {
         auto projUnit = axisList[0]->unit().exportToPROJString();
         formatter->addStep("unitconvert");
+        formatter->addParam("xy_in", "rad");
         if (projUnit.empty()) {
-            formatter->addParam("xy_in", axisList[0]->unit().conversionToSI());
+            formatter->addParam("xy_out", axisList[0]->unit().conversionToSI());
         } else {
-            formatter->addParam("xy_in", projUnit);
+            formatter->addParam("xy_out", projUnit);
         }
-        formatter->addParam("xy_out", "rad");
     }
 
     if (axisList.size() >= 2 &&
@@ -590,17 +625,27 @@ std::string
 GeographicCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
 {
-    addAngularUnitConvertAndAxisSwap(formatter);
-
+    io::PROJStringFormatter::Scope scope(formatter);
     if (!formatter->omitProjLongLatIfPossible() ||
         datum()->primeMeridian()->longitude().getSIValue() != 0.0 ||
         !formatter->getTOWGS84Parameters().empty() ||
         !formatter->getHDatumExtension().empty()) {
         formatter->addStep("longlat");
+        if (formatter->convention() ==
+                io::PROJStringFormatter::Convention::PROJ_5 &&
+            (datum()->primeMeridian()->longitude().getSIValue() != 0.0 ||
+             !formatter->getTOWGS84Parameters().empty() ||
+             !formatter->getHDatumExtension().empty())) {
+            formatter->setCurrentStepInverted(true);
+        }
         addDatumInfoToPROJString(formatter);
     }
 
-    return formatter->toString();
+    if (formatter->convention() ==
+        io::PROJStringFormatter::Convention::PROJ_5) {
+        addAngularUnitConvertAndAxisSwap(formatter);
+    }
+    return scope.toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -1377,6 +1422,13 @@ std::string BoundCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 std::string BoundCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
 {
+    if (formatter->convention() ==
+        io::PROJStringFormatter::Convention::PROJ_5) {
+        throw io::FormattingException(
+            "BoundCRS cannot be exported as a PROJ.5 string, but its baseCRS "
+            "might");
+    }
+
     auto crs_exportable =
         util::nn_dynamic_pointer_cast<io::IPROJStringExportable>(baseCRS());
     if (!crs_exportable) {

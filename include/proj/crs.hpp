@@ -185,6 +185,8 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
 
     //! @cond Doxygen_Suppress
     void addDatumInfoToPROJString(io::PROJStringFormatterNNPtr formatter) const;
+    void addGeocentricUnitConversionIntoPROJString(
+        io::PROJStringFormatterNNPtr formatter) const;
     //! @endcond
 
   protected:

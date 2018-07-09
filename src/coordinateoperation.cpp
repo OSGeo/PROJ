@@ -1578,12 +1578,18 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 std::string Conversion::exportToPROJString(
     io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
 {
-    if (sourceCRS()) {
+    io::PROJStringFormatter::Scope scope(formatter);
+
+    if (sourceCRS() &&
+        formatter->convention() ==
+            io::PROJStringFormatter::Convention::PROJ_5) {
         auto geogCRS =
             std::dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
         if (geogCRS) {
             formatter->setOmitProjLongLatIfPossible(true);
+            formatter->startInversion();
             geogCRS->exportToPROJString(formatter);
+            formatter->stopInversion();
             formatter->setOmitProjLongLatIfPossible(false);
         }
     }
@@ -1634,31 +1640,55 @@ std::string Conversion::exportToPROJString(
         auto projCRS =
             std::dynamic_pointer_cast<crs::ProjectedCRS>(targetCRS());
         if (projCRS) {
-            projCRS->baseCRS()->datum()->ellipsoid()->exportToPROJString(
-                formatter);
+            if (formatter->convention() ==
+                io::PROJStringFormatter::Convention::PROJ_4) {
+                projCRS->baseCRS()->addDatumInfoToPROJString(formatter);
+            } else {
+                projCRS->baseCRS()->datum()->ellipsoid()->exportToPROJString(
+                    formatter);
+            }
 
             auto &axisList = projCRS->coordinateSystem()->axisList();
             if (!axisList.empty() &&
                 axisList[0]->unit() != common::UnitOfMeasure::METRE) {
                 auto projUnit = axisList[0]->unit().exportToPROJString();
-                if (projUnit.empty()) {
-                    formatter->addParam("to_meter",
-                                        axisList[0]->unit().conversionToSI());
+                if (formatter->convention() ==
+                    io::PROJStringFormatter::Convention::PROJ_5) {
+                    formatter->addStep("unitconvert");
+                    formatter->addParam("xy_in", "m");
+                    formatter->addParam("z_in", "m");
+                    if (projUnit.empty()) {
+                        formatter->addParam(
+                            "xy_out", axisList[0]->unit().conversionToSI());
+                        formatter->addParam(
+                            "z_out", axisList[0]->unit().conversionToSI());
+                    } else {
+                        formatter->addParam("xy_out", projUnit);
+                        formatter->addParam("z_out", projUnit);
+                    }
                 } else {
-                    formatter->addParam("units", projUnit);
+                    if (projUnit.empty()) {
+                        formatter->addParam(
+                            "to_meter", axisList[0]->unit().conversionToSI());
+                    } else {
+                        formatter->addParam("units", projUnit);
+                    }
                 }
             }
 
-            if (axisList.size() >= 2 &&
-                axisList[0]->direction() == cs::AxisDirection::NORTH &&
-                axisList[1]->direction() == cs::AxisDirection::EAST) {
-                formatter->addStep("axisswap");
-                formatter->addParam("order", "2,1");
+            if (formatter->convention() ==
+                io::PROJStringFormatter::Convention::PROJ_5) {
+                if (axisList.size() >= 2 &&
+                    axisList[0]->direction() == cs::AxisDirection::NORTH &&
+                    axisList[1]->direction() == cs::AxisDirection::EAST) {
+                    formatter->addStep("axisswap");
+                    formatter->addParam("order", "2,1");
+                }
             }
         }
     }
 
-    return formatter->toString();
+    return scope.toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -2470,6 +2500,12 @@ std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 std::string Transformation::exportToPROJString(
     io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
 {
+    if (formatter->convention() ==
+        io::PROJStringFormatter::Convention::PROJ_4) {
+        throw io::FormattingException(
+            "Transformation cannot be exported as a PROJ.4 string");
+    }
+
     bool positionVectorConvention = true;
     bool sevenParamsTransform = false;
     bool threeParamsTransform = false;
@@ -2497,14 +2533,27 @@ std::string Transformation::exportToPROJString(
                                          EPSG_PARAMETER_Z_AXIS_TRANSLATION)
                        .getSIValue();
 
+        io::PROJStringFormatter::Scope scope(formatter);
+
         auto sourceCRSGeog =
             util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
         if (sourceCRSGeog) {
+            formatter->startInversion();
             sourceCRSGeog->exportToPROJString(formatter);
+            formatter->stopInversion();
 
             formatter->addStep("cart");
-            formatter->addParam("exact");
             sourceCRSGeog->datum()->ellipsoid()->exportToPROJString(formatter);
+        } else {
+            auto sourceCRSGeod =
+                util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(sourceCRS());
+            if (!sourceCRSGeod) {
+                throw io::FormattingException(
+                    "Can apply Helmert only to GeodeticCRS / GeographicCRS");
+            }
+            formatter->startInversion();
+            sourceCRSGeod->addGeocentricUnitConversionIntoPROJString(formatter);
+            formatter->stopInversion();
         }
 
         formatter->addStep("helmert");
@@ -2545,16 +2594,21 @@ std::string Transformation::exportToPROJString(
             util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS());
         if (targetCRSGeog) {
             formatter->addStep("cart");
-            formatter->addParam("exact");
             formatter->setCurrentStepInverted(true);
             targetCRSGeog->datum()->ellipsoid()->exportToPROJString(formatter);
 
-            formatter->startInversion();
             targetCRSGeog->exportToPROJString(formatter);
-            formatter->stopInversion();
+        } else {
+            auto targetCRSGeod =
+                util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(targetCRS());
+            if (!targetCRSGeod) {
+                throw io::FormattingException(
+                    "Can apply Helmert only to GeodeticCRS / GeographicCRS");
+            }
+            targetCRSGeod->addGeocentricUnitConversionIntoPROJString(formatter);
         }
 
-        return formatter->toString();
+        return scope.toString();
     }
 
     throw io::FormattingException("Unimplemented");
@@ -2699,10 +2753,11 @@ ConcatenatedOperation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 std::string ConcatenatedOperation::exportToPROJString(
     io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
 {
+    io::PROJStringFormatter::Scope scope(formatter);
     for (const auto &operation : operations()) {
         operation->exportToPROJString(formatter);
     }
-    return formatter->toString();
+    return scope.toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -2758,16 +2813,17 @@ CoordinateOperationPtr
 CoordinateOperationFactory::createOperation(crs::CRSNNPtr sourceCRS,
                                             crs::CRSNNPtr targetCRS) const {
 
-    auto geogSrc = util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS);
-    auto geogDst = util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS);
-    if (geogSrc && geogDst) {
+    auto geodSrc = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(sourceCRS);
+    auto geodDst = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(targetCRS);
+    if (geodSrc && geodDst) {
         auto formatter = io::PROJStringFormatter::create();
-        geogSrc->exportToPROJString(formatter);
+        io::PROJStringFormatter::Scope scope(formatter);
         formatter->startInversion();
-        geogDst->exportToPROJString(formatter);
+        geodSrc->exportToPROJString(formatter);
         formatter->stopInversion();
+        geodDst->exportToPROJString(formatter);
         return NN_CO_CAST(SingleOperation::createPROJBased(
-            formatter->toString(), sourceCRS, targetCRS));
+            scope.toString(), sourceCRS, targetCRS));
     }
 
     auto derivedSrc = util::nn_dynamic_pointer_cast<crs::DerivedCRS>(sourceCRS);
@@ -2802,6 +2858,7 @@ CoordinateOperationFactory::createOperation(crs::CRSNNPtr sourceCRS,
 
     // boundCRS to a geogCRS that is the same as the hubCRS
     auto boundSrc = util::nn_dynamic_pointer_cast<crs::BoundCRS>(sourceCRS);
+    auto geogDst = util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS);
     if (boundSrc && geogDst) {
         auto hubSrc = boundSrc->hubCRS();
         auto hubSrcGeog =
@@ -2829,6 +2886,7 @@ CoordinateOperationFactory::createOperation(crs::CRSNNPtr sourceCRS,
 
     // reverse of previous case
     auto boundDst = util::nn_dynamic_pointer_cast<crs::BoundCRS>(targetCRS);
+    auto geogSrc = util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS);
     if (geogSrc && boundDst) {
         auto op = createOperation(targetCRS, sourceCRS);
         if (!op) {
@@ -2936,10 +2994,11 @@ InverseCoordinateOperation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
 std::string InverseCoordinateOperation::exportToPROJString(
     io::PROJStringFormatterNNPtr formatter) const {
+    io::PROJStringFormatter::Scope scope(formatter);
     formatter->startInversion();
     forwardOperation_->exportToPROJString(formatter);
     formatter->stopInversion();
-    return formatter->toString();
+    return scope.toString();
 }
 
 // ---------------------------------------------------------------------------

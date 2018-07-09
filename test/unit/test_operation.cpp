@@ -35,6 +35,7 @@
 #include "proj/coordinateoperation.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
+#include "proj/datum.hpp"
 #include "proj/internal.hpp"
 #include "proj/io.hpp"
 #include "proj/metadata.hpp"
@@ -46,6 +47,7 @@
 using namespace osgeo::proj::common;
 using namespace osgeo::proj::crs;
 using namespace osgeo::proj::cs;
+using namespace osgeo::proj::datum;
 using namespace osgeo::proj::io;
 using namespace osgeo::proj::internal;
 using namespace osgeo::proj::metadata;
@@ -451,11 +453,58 @@ TEST(operation, transformation_createGeocentricTranslations) {
     EXPECT_EQ(inv_transf_as_transf->getTOWGS84Parameters(), expected_inv);
 
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=cart +exact "
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 +step +inv "
-              "+proj=cart +exact +ellps=GRS80 +step +proj=axisswap +order=2,1 "
-              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+              "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+static GeodeticCRSNNPtr createGeocentric() {
+    PropertyMap propertiesCRS;
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 4328)
+        .set(IdentifiedObject::NAME_KEY, "WGS 84");
+    return GeodeticCRS::create(
+        propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
+        CartesianCS::createGeocentric(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+static GeodeticCRSNNPtr createGeocentricKM() {
+    PropertyMap propertiesCRS;
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 4328)
+        .set(IdentifiedObject::NAME_KEY, "WGS 84");
+    return GeodeticCRS::create(
+        propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
+        CartesianCS::createGeocentric(
+            UnitOfMeasure("kilometre", 1000.0, UnitOfMeasure::Type::LINEAR)));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     transformation_createGeocentricTranslations_between_geocentricCRS) {
+
+    auto transf1 = Transformation::createGeocentricTranslations(
+        PropertyMap(), createGeocentric(), createGeocentricKM(), 1.0, 2.0, 3.0,
+        std::vector<PositionalAccuracyNNPtr>());
+
+    EXPECT_EQ(transf1->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=helmert +x=1 +y=2 +z=3 +step "
+              "+proj=unitconvert +xy_in=m +z_in=m +xy_out=km +z_out=km");
+
+    auto transf2 = Transformation::createGeocentricTranslations(
+        PropertyMap(), createGeocentricKM(), createGeocentric(), 1.0, 2.0, 3.0,
+        std::vector<PositionalAccuracyNNPtr>());
+
+    EXPECT_EQ(transf2->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +inv +proj=unitconvert +xy_in=m +z_in=m "
+              "+xy_out=km +z_out=km +step +proj=helmert +x=1 +y=2 +z=3");
 }
 
 // ---------------------------------------------------------------------------
@@ -470,12 +519,12 @@ TEST(operation, transformation_createPositionVector) {
     EXPECT_EQ(transf->getTOWGS84Parameters(), expected);
 
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=cart +exact "
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
-              "+rz=6 +s=7 +step +inv +proj=cart +exact +ellps=GRS80 +step "
-              "+proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=rad "
-              "+xy_out=deg");
+              "+rz=6 +s=7 +step +inv +proj=cart +ellps=GRS80 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
 
     auto inv_transf = transf->inverse();
     auto inv_transf_as_transf =
@@ -505,12 +554,12 @@ TEST(operation, transformation_createCoordinateFrameRotation) {
     EXPECT_EQ(params, expected);
 
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=cart +exact "
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 +rx=-4 +ry=-5 "
-              "+rz=-6 +s=7 +transpose +step +inv +proj=cart +exact "
-              "+ellps=GRS80 +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=rad +xy_out=deg");
+              "+rz=-6 +s=7 +transpose +step +inv +proj=cart +ellps=GRS80 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
 
     auto inv_transf = transf->inverse();
     auto inv_transf_as_transf =
@@ -732,10 +781,10 @@ TEST(operation, geogCRS_to_geogCRS) {
         GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=longlat "
-              "+ellps=clrk80ign +pm=paris +step +proj=axisswap +order=2,1 "
-              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
+              "+ellps=clrk80ign +pm=paris +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -750,74 +799,89 @@ TEST(operation, geogCRS_to_geogCRS_noop) {
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, geogCRS_to_projCRS) {
+TEST(operation, geocentricCRS_to_geogCRS) {
 
-    auto projCRS = ProjectedCRS::create(
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        createGeocentric(), GeographicCRS::EPSG_4326);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +inv +proj=cart +ellps=WGS84 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+static ProjectedCRSNNPtr createUTM31_WGS84() {
+    return ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4326,
         Conversion::createUTM(PropertyMap(), 31, true),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_projCRS) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
-        GeographicCRS::EPSG_4326, projCRS);
+        GeographicCRS::EPSG_4326, createUTM31_WGS84());
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=utm +zone=31 "
-              "+ellps=WGS84");
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm "
+              "+zone=31 +ellps=WGS84");
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(operation, geogCRS_different_from_baseCRS_to_projCRS) {
 
-    auto projCRS = ProjectedCRS::create(
-        PropertyMap(), GeographicCRS::EPSG_4326,
-        Conversion::createUTM(PropertyMap(), 31, true),
-        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
-
     auto op = CoordinateOperationFactory::create()->createOperation(
-        GeographicCRS::EPSG_4807, projCRS);
+        GeographicCRS::EPSG_4807, createUTM31_WGS84());
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=longlat "
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
               "+ellps=clrk80ign +pm=paris +step +proj=utm +zone=31 "
               "+ellps=WGS84");
 }
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, projCRS_to_geogCRS) {
-
-    auto projCRS = ProjectedCRS::create(
-        PropertyMap(), GeographicCRS::EPSG_4326,
-        Conversion::createUTM(PropertyMap(), 31, true),
-        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+TEST(operation, geocentricCRS_to_projCRS) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
-        projCRS, GeographicCRS::EPSG_4326);
+        createGeocentric(), createUTM31_WGS84());
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +inv +proj=cart +ellps=WGS84 +step "
+              "+proj=utm +zone=31 +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, projCRS_to_geogCRS) {
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        createUTM31_WGS84(), GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step "
-              "+proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=rad "
-              "+xy_out=deg");
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(operation, projCRS_to_projCRS) {
 
-    auto utm31 = ProjectedCRS::create(
-        PropertyMap(), GeographicCRS::EPSG_4326,
-        Conversion::createUTM(PropertyMap(), 31, true),
-        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
     auto utm32 = ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4326,
         Conversion::createUTM(PropertyMap(), 32, true),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
-    auto op =
-        CoordinateOperationFactory::create()->createOperation(utm31, utm32);
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        createUTM31_WGS84(), utm32);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step "
@@ -828,17 +892,13 @@ TEST(operation, projCRS_to_projCRS) {
 
 TEST(operation, projCRS_to_projCRS_different_baseCRS) {
 
-    auto utm31 = ProjectedCRS::create(
-        PropertyMap(), GeographicCRS::EPSG_4326,
-        Conversion::createUTM(PropertyMap(), 31, true),
-        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
     auto utm32 = ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4807,
         Conversion::createUTM(PropertyMap(), 32, true),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
-    auto op =
-        CoordinateOperationFactory::create()->createOperation(utm31, utm32);
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        createUTM31_WGS84(), utm32);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step "
@@ -854,13 +914,12 @@ TEST(operation, boundCRS_of_geogCRS_to_geogCRS) {
         boundCRS, GeographicCRS::EPSG_4326);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=longlat "
-              "+ellps=clrk80ign +pm=paris +step +proj=cart +exact "
-              "+ellps=clrk80ign +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
-              "+rz=6 +s=7 +step +inv +proj=cart +exact +ellps=WGS84 +step "
-              "+proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=rad "
-              "+xy_out=deg");
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
+              "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 +step "
+              "+inv +proj=cart +ellps=WGS84 +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -892,10 +951,10 @@ TEST(operation, boundCRS_of_projCRS_to_geogCRS) {
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
-              "+step +proj=cart +exact +ellps=clrk80ign +step +proj=helmert "
-              "+x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 +step +inv +proj=cart "
-              "+exact +ellps=WGS84 +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=rad +xy_out=deg");
+              "+step +proj=cart +ellps=clrk80ign +step +proj=helmert +x=1 +y=2 "
+              "+z=3 +rx=4 +ry=5 +rz=6 +s=7 +step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg +step "
+              "+proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -911,12 +970,12 @@ TEST(operation, boundCRS_of_geogCRS_to_projCRS) {
         CoordinateOperationFactory::create()->createOperation(boundCRS, utm31);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=longlat "
-              "+ellps=clrk80ign +pm=paris +step +proj=cart +exact "
-              "+ellps=clrk80ign +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
-              "+rz=6 +s=7 +step +inv +proj=cart +exact +ellps=WGS84 +step "
-              "+proj=utm +zone=31 +ellps=WGS84");
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
+              "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 +step "
+              "+inv +proj=cart +ellps=WGS84 +step +proj=utm +zone=31 "
+              "+ellps=WGS84");
 }
 
 // ---------------------------------------------------------------------------
@@ -928,13 +987,13 @@ TEST(operation, geogCRS_to_boundCRS_of_geogCRS) {
         GeographicCRS::EPSG_4326, boundCRS);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=cart +exact "
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=WGS84 +step +proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 "
-              "+ry=-5 +rz=-6 +s=7 +step +inv +proj=cart +exact "
-              "+ellps=clrk80ign +step +inv +proj=longlat +ellps=clrk80ign "
-              "+pm=paris +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=rad +xy_out=grad");
+              "+ry=-5 +rz=-6 +s=7 +step +inv +proj=cart +ellps=clrk80ign +step "
+              "+inv +proj=longlat +ellps=clrk80ign +pm=paris +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=grad +step +proj=axisswap "
+              "+order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -957,10 +1016,10 @@ TEST(operation, boundCRS_to_boundCRS) {
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
-              "+step +proj=cart +exact +ellps=clrk80ign +step +proj=helmert "
+              "+step +proj=cart +ellps=clrk80ign +step +proj=helmert "
               "+x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 +step +proj=helmert +x=-8 "
               "+y=-9 +z=-10 +rx=-11 +ry=-12 +rz=-13 +s=14 +step +inv "
-              "+proj=cart +exact +ellps=GRS80 +step +proj=utm +zone=32 "
+              "+proj=cart +ellps=GRS80 +step +proj=utm +zone=32 "
               "+ellps=GRS80");
 }
 
@@ -975,12 +1034,11 @@ TEST(operation, boundCRS_to_boundCRS_noop_for_TOWGS84) {
                                                                     boundCRS2);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=longlat "
-              "+ellps=clrk80ign +pm=paris +step +proj=cart +exact "
-              "+ellps=clrk80ign +step +inv +proj=cart +exact +ellps=GRS80 "
-              "+step +proj=axisswap +order=2,1 +step +proj=unitconvert "
-              "+xy_in=rad +xy_out=deg");
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
+              "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
+              "+step +inv +proj=cart +ellps=GRS80 +step +proj=unitconvert "
+              "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------

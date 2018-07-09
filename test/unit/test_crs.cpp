@@ -242,9 +242,12 @@ TEST(crs, EPSG_4326_as_WKT1_GDAL) {
 TEST(crs, EPSG_4326_as_PROJ_string) {
     auto crs = GeographicCRS::EPSG_4326;
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step "
-              "+proj=longlat +ellps=WGS84");
+              "+proj=pipeline +step +proj=longlat +ellps=WGS84 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=longlat +datum=WGS84");
 }
 
 // ---------------------------------------------------------------------------
@@ -388,9 +391,12 @@ TEST(crs, EPSG_4807_as_WKT1_GDAL) {
 TEST(crs, EPSG_4807_as_PROJ_string) {
     auto crs = GeographicCRS::EPSG_4807;
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=longlat "
-              "+ellps=clrk80ign +pm=paris");
+              "+proj=pipeline +step +inv +proj=longlat +ellps=clrk80ign "
+              "+pm=paris +step +proj=unitconvert +xy_in=rad +xy_out=grad +step "
+              "+proj=axisswap +order=2,1");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=longlat +ellps=clrk80ign +pm=paris");
 }
 
 // ---------------------------------------------------------------------------
@@ -421,11 +427,15 @@ TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=longlat "
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
               "+ellps=clrk80ign +pm=paris +step +proj=lcc +lat_1=49.5 "
               "+lat_0=49.5 +lon_0=0 +k_0=0.999877341 +x_0=600000 +y_0=200000 "
               "+ellps=clrk80ign");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=lcc +lat_1=49.5 +lat_0=49.5 +lon_0=0 +k_0=0.999877341 "
+              "+x_0=600000 +y_0=200000 +ellps=clrk80ign +pm=paris");
 
     auto nn_crs = NN_CHECK_ASSERT(crs);
     EXPECT_TRUE(nn_crs->isEquivalentTo(nn_crs));
@@ -460,8 +470,8 @@ TEST(crs, EPSG_3040_projected_northing_easting_as_PROJ_string) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=utm "
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm "
               "+zone=28 +ellps=GRS80 +step +proj=axisswap +order=2,1");
 }
 
@@ -492,8 +502,13 @@ TEST(crs, EPSG_2222_projected_unit_foot_as_PROJ_string) {
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step "
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=tmerc "
+              "+lat_0=31 +lon_0=-110.166666667025 +k_0=0.9999 +x_0=213360 "
+              "+y_0=0 +ellps=GRS80 +step +proj=unitconvert +xy_in=m +z_in=m "
+              "+xy_out=ft +z_out=ft");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
               "+proj=tmerc +lat_0=31 +lon_0=-110.166666667025 +k_0=0.9999 "
               "+x_0=213360 +y_0=0 +ellps=GRS80 +units=ft");
 }
@@ -591,6 +606,9 @@ TEST(crs, geocentricCRS_as_PROJ_string) {
     auto crs = createGeocentric();
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
               "+proj=cart +ellps=WGS84");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=geocent +ellps=WGS84");
 }
 
 // ---------------------------------------------------------------------------
@@ -602,7 +620,11 @@ TEST(crs, geocentricCRS_non_meter_unit_as_PROJ_string) {
             UnitOfMeasure("kilometre", 1000.0, UnitOfMeasure::Type::LINEAR)));
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=cart +ellps=WGS84 +units=km");
+              "+proj=pipeline +step +proj=cart +ellps=WGS84 +step "
+              "+proj=unitconvert +xy_in=m +z_in=m +xy_out=km +z_out=km");
+    EXPECT_THROW(crs->exportToPROJString(PROJStringFormatter::create(
+                     PROJStringFormatter::Convention::PROJ_4)),
+                 FormattingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -614,7 +636,8 @@ TEST(crs, geocentricCRS_unsupported_unit_as_PROJ_string) {
             UnitOfMeasure("my unit", 500.0, UnitOfMeasure::Type::LINEAR)));
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=cart +ellps=WGS84 +to_meter=500");
+              "+proj=pipeline +step +proj=cart +ellps=WGS84 +step "
+              "+proj=unitconvert +xy_in=m +z_in=m +xy_out=500 +z_out=500");
 }
 
 // ---------------------------------------------------------------------------
@@ -771,9 +794,12 @@ TEST(crs, projectedCRS_as_WKT1_GDAL) {
 TEST(crs, projectedCRS_as_PROJ_string) {
     auto crs = createProjected();
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=utm "
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm "
               "+zone=31 +ellps=WGS84");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=utm +zone=31 +datum=WGS84");
 }
 
 // ---------------------------------------------------------------------------
@@ -1105,11 +1131,14 @@ TEST(crs, compoundCRS_as_WKT1_GDAL) {
 
 TEST(crs, compoundCRS_as_PROJ_string) {
     auto crs = createCompoundCRS();
-    auto expected = "+proj=pipeline +step +proj=unitconvert +xy_in=deg "
-                    "+xy_out=rad +step +proj=axisswap +order=2,1 +step "
-                    "+proj=utm +zone=31 +ellps=WGS84";
+    auto expected = "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                    "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm "
+                    "+zone=31 +ellps=WGS84";
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()), expected);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=utm +zone=31 +datum=WGS84");
 }
 
 // ---------------------------------------------------------------------------
@@ -1358,9 +1387,10 @@ TEST(crs, boundCRS_geographicCRS_to_PROJ_string) {
     auto crs = BoundCRS::createFromTOWGS84(
         basecrs, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
 
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step "
+    EXPECT_THROW(crs->exportToPROJString(PROJStringFormatter::create()),
+                 FormattingException);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
               "+proj=longlat +ellps=WGS84 +towgs84=1,2,3,4,5,6,7");
 }
 
@@ -1380,11 +1410,9 @@ TEST(crs, boundCRS_projectedCRS_to_PROJ_string) {
     auto crs = BoundCRS::createFromTOWGS84(
         projcrs, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
 
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=axisswap +order=2,1 +step +proj=longlat "
-              "+ellps=WGS84 +towgs84=1,2,3,4,5,6,7 +step +proj=utm +zone=31 "
-              "+ellps=WGS84");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=utm +zone=31 +ellps=WGS84 +towgs84=1,2,3,4,5,6,7");
 }
 
 // ---------------------------------------------------------------------------
@@ -1449,11 +1477,10 @@ TEST(crs, WKT1_DATUM_EXTENSION_to_WKT1_and_PROJ_string) {
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
               wkt);
 
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=longlat +ellps=intl +nadgrids=nzgd2kgrid0005.gsb "
-              "+step +proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 "
-              "+y_0=6023150 +ellps=intl +units=m");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=nzmg +lat_0=-41 +lon_0=173 +x_0=2510000 +y_0=6023150 "
+              "+ellps=intl +nadgrids=nzgd2kgrid0005.gsb +units=m");
 }
 
 // ---------------------------------------------------------------------------
@@ -1548,7 +1575,8 @@ TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_PROJ_string) {
     auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
               "+nadgrids=egm08_25.gtx");
 }
 

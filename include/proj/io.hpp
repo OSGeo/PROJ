@@ -214,7 +214,17 @@ using PROJStringFormatterNNPtr = util::nn<PROJStringFormatterPtr>;
  */
 class PROJStringFormatter {
   public:
-    PROJ_DLL static PROJStringFormatterNNPtr create();
+    /** PROJ variant. */
+    enum class PROJ_DLL Convention {
+        /** PROJ v5 string. */
+        PROJ_5,
+
+        /** PROJ v4 string as output by GDAL exportToProj4() */
+        PROJ_4
+    };
+
+    PROJ_DLL static PROJStringFormatterNNPtr
+    create(Convention conventionIn = Convention::PROJ_5);
     //! @cond Doxygen_Suppress
     PROJ_DLL ~PROJStringFormatter();
     //! @endcond
@@ -222,6 +232,17 @@ class PROJStringFormatter {
     PROJ_DLL const std::string &toString() const;
 
     //! @cond Doxygen_Suppress
+
+    class Scope {
+      public:
+        explicit Scope(PROJStringFormatterNNPtr formatter);
+        ~Scope();
+        std::string toString();
+
+      private:
+        PROJStringFormatterPtr formatter_;
+    };
+
     PROJ_DLL void startInversion();
     PROJ_DLL void stopInversion();
     bool isInverted() const;
@@ -252,11 +273,13 @@ class PROJStringFormatter {
     void setOmitProjLongLatIfPossible(bool omit);
     bool omitProjLongLatIfPossible() const;
 
+    Convention convention() const;
+
     //! @endcond
 
   protected:
     //! @cond Doxygen_Suppress
-    explicit PROJStringFormatter();
+    explicit PROJStringFormatter(Convention conventionIn);
     PROJStringFormatter(const PROJStringFormatter &other) = delete;
 
     INLINED_MAKE_SHARED
@@ -264,6 +287,9 @@ class PROJStringFormatter {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+
+    void enter();
+    void leave();
 };
 
 // ---------------------------------------------------------------------------
@@ -317,7 +343,50 @@ class PROJ_DLL IPROJStringExportable {
     virtual ~IPROJStringExportable();
     //! @endcond
 
-    /** Builds a PROJ string representation. May throw a FormattingException */
+    /** \brief Builds a PROJ string representation.
+     *
+     * <ul>
+     * <li>For PROJStringFormatter::Convention::PROJ_5 (the default), return
+     * strings that generally express PROJ.5 pipelines.
+     * <ul>
+     * <li>For a crs::GeographicCRS, returns a string expressing the
+     * transformation from geographic coordinates expressed in radian with
+     * longitude, latitude order, and with respect to the international
+     * reference meridian, into geographic coordinates expressed in the units
+     * and axis order of the CRS, taking into account its prime meridian.</li>
+     * <li>For a geocentric crs::GeodeticCRS, returns a string expressing the
+     * transformation from geographic coordinates expressed in radian with
+     * longitude, latitude order, and with respect to the international
+     * reference meridian, into geocentric coordinates.</li>
+     * <li>For a crs::ProjectedCRS, returns a string expressing the
+     * transformation from the base CRS to the crs::ProjectedCRS.</li>
+     * <li>For a crs::BoundCRS, throws a FormattingException.</li>
+     * <li>For operation::CoordinateTransformations, returns a PROJ
+     * pipeline.</li>
+     * </ul>
+     *
+     * <li>For PROJStringFormatter::Convention::PROJ_4, format a string
+     * compatible with the OGRSpatialReference::exportToProj4() of GDAL
+     * &lt;=2.3.
+     * <ul>
+     * <li>For a crs::GeographicCRS, returns a proj=longlat string, with
+     * ellipsoid / datum / prime meridian information, ignoring axis order
+     * and unit information.</li>
+     * <li>For a geocentric crs::GeodeticCRS, returns the transformation from
+     * geographic coordinates into geocentric coordinates.</li>
+     * <li>For a crs::ProjectedCRS, returns the projection method, ignoring
+     * axis order.</li>
+     * <li>For a crs::BoundCRS, returns the PROJ string of its source/base CRS,
+     * amended with towgs84 / nadgrids parameter when the deriving conversion
+     * can be expressed in that way.</li>
+     * </ul>
+     * </li>
+     *
+     * </ul>
+     *
+     * @param formatter PROJ string formatter.
+     * @return a PROJ string.
+     * @throw FormattingException */
     virtual std::string exportToPROJString(PROJStringFormatterNNPtr formatter)
         const = 0; // throw(FormattingException)
 };
