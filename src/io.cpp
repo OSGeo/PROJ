@@ -1805,7 +1805,7 @@ void WKTParser::Private::consumeParameters(
                             ci_equal(*(parameters.back()
                                            ->identifiers()[0]
                                            ->codeSpace()),
-                                     "EPSG")) {
+                                     Identifier::EPSG)) {
                             paramEPSGCode = ::atoi(parameters.back()
                                                        ->identifiers()[0]
                                                        ->code()
@@ -1815,7 +1815,8 @@ void WKTParser::Private::consumeParameters(
                                 paramName, val, unit, paramEPSGCode)) {
                             parameters.back() = OperationParameter::create(
                                 buildProperties(childNode)
-                                    .set(Identifier::CODESPACE_KEY, "EPSG")
+                                    .set(Identifier::CODESPACE_KEY,
+                                         Identifier::EPSG)
                                     .set(Identifier::CODE_KEY, paramEPSGCode));
                         }
                     }
@@ -1975,7 +1976,7 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
     if (mapping) {
         projectionName = mapping->wkt2_name;
         propertiesMethod.set(Identifier::CODE_KEY, mapping->epsg_code);
-        propertiesMethod.set(Identifier::CODESPACE_KEY, "EPSG");
+        propertiesMethod.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
     }
     propertiesMethod.set(IdentifiedObject::NAME_KEY, projectionName);
 
@@ -1996,7 +1997,8 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                 parameterName = paramMapping->wkt2_name;
                 propertiesParameter.set(Identifier::CODE_KEY,
                                         paramMapping->epsg_code);
-                propertiesParameter.set(Identifier::CODESPACE_KEY, "EPSG");
+                propertiesParameter.set(Identifier::CODESPACE_KEY,
+                                        Identifier::EPSG);
             }
             propertiesParameter.set(IdentifiedObject::NAME_KEY, parameterName);
             parameters.push_back(
@@ -2133,20 +2135,13 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
             transformationName += " height";
         }
         transformationName += " to WGS84 ellipsoidal height";
-        auto transformation = Transformation::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, transformationName),
-            crs, GeographicCRS::EPSG_4979, nullptr,
-            PropertyMap().set(IdentifiedObject::NAME_KEY,
-                              "GravityRelatedHeight to Geographic3D"),
-            std::vector<OperationParameterNNPtr>{OperationParameter::create(
-                PropertyMap()
-                    .set(IdentifiedObject::NAME_KEY,
-                         "Geoid (height correction) model file")
-                    .set(Identifier::CODESPACE_KEY, "EPSG")
-                    .set(Identifier::CODE_KEY, 8666))},
-            std::vector<ParameterValueNNPtr>{ParameterValue::createFilename(
-                stripQuotes(extensionNode->children()[1]->value()))},
-            std::vector<PositionalAccuracyNNPtr>());
+        auto transformation =
+            Transformation::createGravityRelatedHeightToGeographic3D(
+                PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                  transformationName),
+                crs, GeographicCRS::EPSG_4979,
+                stripQuotes(extensionNode->children()[1]->value()),
+                std::vector<PositionalAccuracyNNPtr>());
         return nn_static_pointer_cast<CRS>(
             BoundCRS::create(crs, GeographicCRS::EPSG_4979, transformation));
     }
@@ -2328,23 +2323,11 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
             std::string transformationName =
                 *(transformationSourceCRS->name()->description());
             transformationName += " to WGS84";
-            auto transformation = Transformation::create(
+            auto transformation = Transformation::createNTv2(
                 PropertyMap().set(IdentifiedObject::NAME_KEY,
                                   transformationName),
-                transformationSourceCRS, GeographicCRS::EPSG_4326, nullptr,
-                PropertyMap()
-                    .set(IdentifiedObject::NAME_KEY, "NTv2")
-                    .set(Identifier::CODESPACE_KEY, "EPSG")
-                    .set(Identifier::CODE_KEY, 9615),
-                std::vector<OperationParameterNNPtr>{OperationParameter::create(
-                    PropertyMap()
-                        .set(IdentifiedObject::NAME_KEY,
-                             "Latitude and longitude difference file")
-                        .set(Identifier::CODESPACE_KEY, "EPSG")
-                        .set(Identifier::CODE_KEY, 8656))},
-                std::vector<ParameterValueNNPtr>{
-                    ParameterValue::createFilename(datumPROJ4Grids_)},
-                std::vector<PositionalAccuracyNNPtr>());
+                transformationSourceCRS, GeographicCRS::EPSG_4326,
+                datumPROJ4Grids_, std::vector<PositionalAccuracyNNPtr>());
             return util::nn_static_pointer_cast<BaseObject>(
                 BoundCRS::create(NN_CHECK_ASSERT(crs), GeographicCRS::EPSG_4326,
                                  transformation));
@@ -2572,8 +2555,12 @@ const std::string &PROJStringFormatter::toString() const {
                 if (d->steps_[i].name == "helmert" &&
                     d->steps_[i - 1].name == "helmert" &&
                     !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
-                    d->steps_[i].paramValues.size() == 7 &&
-                    d->steps_[i - 1].paramValues.size() == 7 &&
+                    ((d->steps_[i].paramValues.size() == 7 &&
+                      d->steps_[i - 1].paramValues.size() == 7) ||
+                     (d->steps_[i].paramValues.size() == 8 &&
+                      d->steps_[i].paramValues[7] == "transpose" &&
+                      d->steps_[i - 1].paramValues.size() == 8 &&
+                      d->steps_[i - 1].paramValues[7] == "transpose")) &&
                     starts_with(d->steps_[i].paramValues[0], "x=") &&
                     starts_with(d->steps_[i - 1].paramValues[0], "x=") &&
                     starts_with(d->steps_[i].paramValues[1], "y=") &&

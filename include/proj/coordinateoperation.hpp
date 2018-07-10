@@ -706,6 +706,20 @@ class Transformation : public SingleOperation {
         const crs::CRSNNPtr &sourceCRSIn,
         const std::vector<double> &TOWGS84Parameters); // throw InvalidOperation
 
+    PROJ_DLL static TransformationNNPtr createNTv2(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
+    PROJ_DLL static TransformationNNPtr
+    createGravityRelatedHeightToGeographic3D(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
+    PROJ_DLL std::string getNTv2Filename() const;
+    PROJ_DLL std::string getHeightToGeographic3DFilename() const;
+
   protected:
     Transformation(
         const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
@@ -758,7 +772,8 @@ using ConcatenatedOperationNNPtr = util::nn<ConcatenatedOperationPtr>;
 /** \brief An ordered sequence of two or more single coordinate operations
  * (SingleOperation).
  *
- * The sequence of coordinate operations is constrained by the requirement that
+ * The sequence of coordinate operations is constrained by the requirement
+ * that
  * the source coordinate reference system of step n+1 shall be the same as
  * the target coordinate reference system of step n.
  *
@@ -812,10 +827,12 @@ using CoordinateOperationFactoryPtr =
 using CoordinateOperationFactoryNNPtr = util::nn<CoordinateOperationFactoryPtr>;
 
 /** \brief Creates coordinate operations. This factory is capable to find
- * coordinate transformations or conversions between two coordinate reference
+ * coordinate transformations or conversions between two coordinate
+ * reference
  * systems.
  *
- * \remark Implements (partially) CoordinateOperationFactory from \ref GeoAPI
+ * \remark Implements (partially) CoordinateOperationFactory from \ref
+ * GeoAPI
  */
 class CoordinateOperationFactory {
   public:

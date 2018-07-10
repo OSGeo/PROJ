@@ -233,6 +233,7 @@ set(SRC_LIBPROJ_CPP
         static.cpp
         common.cpp
         coordinateoperation.cpp
+        coordinateoperation_constants.hpp
         coordinatesystem.cpp
         crs.cpp
         datum.cpp

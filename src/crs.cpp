@@ -105,6 +105,38 @@ GeographicCRSPtr CRS::extractGeographicCRS() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the VerticalCRS of the CRS.
+ *
+ * Returns the VerticalCRS contained in a CRS. This works currently with
+ * input parameters of type VerticalCRS or derived, CompoundCRS or BoundCRS.
+ *
+ * @return a VerticalCRSPtr, that might be null.
+ */
+VerticalCRSPtr CRS::extractVerticalCRS() const {
+    CRSPtr transformSourceCRS;
+    auto vertCRS = dynamic_cast<const VerticalCRS *>(this);
+    if (vertCRS) {
+        return std::dynamic_pointer_cast<VerticalCRS>(
+            shared_from_this().as_nullable());
+    }
+    auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+    if (compoundCRS) {
+        for (const auto &subCrs : compoundCRS->componentReferenceSystems()) {
+            auto retVertCRS = subCrs->extractVerticalCRS();
+            if (retVertCRS) {
+                return retVertCRS;
+            }
+        }
+    }
+    auto boundCRS = dynamic_cast<const BoundCRS *>(this);
+    if (boundCRS) {
+        return boundCRS->baseCRS()->extractVerticalCRS();
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct SingleCRS::Private {
     datum::DatumPtr datum{};
@@ -517,9 +549,24 @@ GeographicCRS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return whether the current GeographicCRS is the 2D part of the
+ * other 3D GeographicCRS.
+ */
+bool GeographicCRS::is2DPartOf3D(const GeographicCRSNNPtr &other) const {
+    auto axis = coordinateSystem()->axisList();
+    auto otherAxis = other->coordinateSystem()->axisList();
+    return axis.size() == 2 && otherAxis.size() == 3 &&
+           datum()->isEquivalentTo(other->datum()) &&
+           axis[0]->isEquivalentTo(otherAxis[0]) &&
+           axis[1]->isEquivalentTo(otherAxis[1]);
+}
+
+// ---------------------------------------------------------------------------
+
 GeographicCRSNNPtr GeographicCRS::createEPSG_4269() {
     util::PropertyMap propertiesCRS;
-    propertiesCRS.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+    propertiesCRS
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
         .set(metadata::Identifier::CODE_KEY, 4269)
         .set(common::IdentifiedObject::NAME_KEY, "NAD83");
     return create(propertiesCRS, datum::GeodeticReferenceFrame::EPSG_6269,
@@ -531,7 +578,8 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4269() {
 
 GeographicCRSNNPtr GeographicCRS::createEPSG_4326() {
     util::PropertyMap propertiesCRS;
-    propertiesCRS.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+    propertiesCRS
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
         .set(metadata::Identifier::CODE_KEY, 4326)
         .set(common::IdentifiedObject::NAME_KEY, "WGS 84");
     return create(propertiesCRS, datum::GeodeticReferenceFrame::EPSG_6326,
@@ -543,7 +591,8 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4326() {
 
 GeographicCRSNNPtr GeographicCRS::createEPSG_4979() {
     util::PropertyMap propertiesCRS;
-    propertiesCRS.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+    propertiesCRS
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
         .set(metadata::Identifier::CODE_KEY, 4979)
         .set(common::IdentifiedObject::NAME_KEY, "WGS 84");
     return create(
@@ -556,7 +605,8 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4979() {
 
 GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
     util::PropertyMap propertiesEllps;
-    propertiesEllps.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+    propertiesEllps
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
         .set(metadata::Identifier::CODE_KEY, 6807)
         .set(common::IdentifiedObject::NAME_KEY, "Clarke 1880 (IGN)");
     auto ellps(datum::Ellipsoid::createFlattenedSphere(
@@ -578,7 +628,8 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
     auto cs(cs::EllipsoidalCS::create(util::PropertyMap(), axisLat, axisLong));
 
     util::PropertyMap propertiesDatum;
-    propertiesDatum.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+    propertiesDatum
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
         .set(metadata::Identifier::CODE_KEY, 6807)
         .set(common::IdentifiedObject::NAME_KEY,
              "Nouvelle_Triangulation_Francaise_Paris");
@@ -587,7 +638,8 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
         datum::PrimeMeridian::PARIS));
 
     util::PropertyMap propertiesCRS;
-    propertiesCRS.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+    propertiesCRS
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
         .set(metadata::Identifier::CODE_KEY, 4807)
         .set(common::IdentifiedObject::NAME_KEY, "NTF (Paris)");
     auto gcrs(create(propertiesCRS, datum, cs));
@@ -596,6 +648,7 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 void GeographicCRS::addAngularUnitConvertAndAxisSwap(
     io::PROJStringFormatterNNPtr formatter) const {
     auto &axisList = coordinateSystem()->axisList();
@@ -618,6 +671,7 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
         formatter->addParam("order", "2,1");
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1090,23 +1144,20 @@ CompoundCRS::~CompoundCRS() = default;
 /** \brief Return the components of a CompoundCRS.
  *
  * If the CompoundCRS is itself made of CompoundCRS components, this method
- * will return a flattened view of the components as SingleCRS.
+ * will return a flattened view of the components (as SingleCRS or BoundCRS)
  *
  * @return the components.
  */
-std::vector<SingleCRSNNPtr> CompoundCRS::componentReferenceSystems() const {
+std::vector<CRSNNPtr> CompoundCRS::componentReferenceSystems() const {
     // Flatten the potential hierarchy to return only SingleCRS
-    std::vector<SingleCRSNNPtr> res;
+    std::vector<CRSNNPtr> res;
     for (const auto &crs : d->components_) {
         auto childCompound = util::nn_dynamic_pointer_cast<CompoundCRS>(crs);
         if (childCompound) {
             auto childFlattened = childCompound->componentReferenceSystems();
             res.insert(res.end(), childFlattened.begin(), childFlattened.end());
         } else {
-            auto singleCRS = util::nn_dynamic_pointer_cast<SingleCRS>(crs);
-            if (singleCRS) {
-                res.push_back(NN_CHECK_ASSERT(singleCRS));
-            }
+            res.push_back(crs);
         }
     }
     return res;
@@ -1319,28 +1370,12 @@ bool BoundCRS::isTOWGS84Compatible() const {
     return util::nn_dynamic_pointer_cast<GeographicCRS>(hubCRS()) != nullptr &&
            ci_equal(*(hubCRS()->name()->description()), "WGS 84");
 }
+
 // ---------------------------------------------------------------------------
 
 std::string BoundCRS::getHDatumPROJ4GRIDS() const {
-    if (ci_equal(*(transformation()->method()->name()->description()),
-                 "NTv2") &&
-        ci_equal(*(hubCRS()->name()->description()), "WGS 84") &&
-        transformation()->parameterValues().size() == 1) {
-        const auto &opParamvalue =
-            util::nn_dynamic_pointer_cast<operation::OperationParameterValue>(
-                transformation()->parameterValues()[0]);
-        if (opParamvalue) {
-            const auto &paramName =
-                *(opParamvalue->parameter()->name()->description());
-            const auto &parameterValue = opParamvalue->parameterValue();
-            if ((opParamvalue->parameter()->isEPSG(8656) ||
-                 ci_equal(paramName,
-                          "Latitude and longitude difference file")) &&
-                parameterValue->type() ==
-                    operation::ParameterValue::Type::FILENAME) {
-                return parameterValue->valueFile();
-            }
-        }
+    if (ci_equal(*(hubCRS()->name()->description()), "WGS 84")) {
+        return transformation()->getNTv2Filename();
     }
     return std::string();
 }
@@ -1349,24 +1384,8 @@ std::string BoundCRS::getHDatumPROJ4GRIDS() const {
 
 std::string BoundCRS::getVDatumPROJ4GRIDS() const {
     if (util::nn_dynamic_pointer_cast<VerticalCRS>(baseCRS()) &&
-        ci_equal(*(transformation()->method()->name()->description()),
-                 "GravityRelatedHeight to Geographic3D") &&
-        ci_equal(*(hubCRS()->name()->description()), "WGS 84") &&
-        transformation()->parameterValues().size() == 1) {
-        const auto &opParamvalue =
-            util::nn_dynamic_pointer_cast<operation::OperationParameterValue>(
-                transformation()->parameterValues()[0]);
-        if (opParamvalue) {
-            const auto &paramName =
-                *(opParamvalue->parameter()->name()->description());
-            const auto &parameterValue = opParamvalue->parameterValue();
-            if ((opParamvalue->parameter()->isEPSG(8666) ||
-                 ci_equal(paramName, "Geoid (height correction) model file")) &&
-                parameterValue->type() ==
-                    operation::ParameterValue::Type::FILENAME) {
-                return parameterValue->valueFile();
-            }
-        }
+        ci_equal(*(hubCRS()->name()->description()), "WGS 84")) {
+        return transformation()->getHeightToGeographic3DFilename();
     }
     return std::string();
 }

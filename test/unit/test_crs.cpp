@@ -318,6 +318,17 @@ TEST(crs, EPSG_4979_as_WKT1_GDAL) {
               "    AUTHORITY[\"EPSG\",\"4979\"]]");
 }
 
+TEST(crs, GeographicCRS_is2DPartOf3D) {
+    EXPECT_TRUE(
+        GeographicCRS::EPSG_4326->is2DPartOf3D(GeographicCRS::EPSG_4979));
+    EXPECT_FALSE(
+        GeographicCRS::EPSG_4326->is2DPartOf3D(GeographicCRS::EPSG_4326));
+    EXPECT_FALSE(
+        GeographicCRS::EPSG_4979->is2DPartOf3D(GeographicCRS::EPSG_4326));
+    EXPECT_FALSE(
+        GeographicCRS::EPSG_4979->is2DPartOf3D(GeographicCRS::EPSG_4979));
+}
+
 // ---------------------------------------------------------------------------
 
 TEST(crs, EPSG_4807_as_WKT2) {

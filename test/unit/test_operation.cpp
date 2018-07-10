@@ -1059,3 +1059,157 @@ TEST(operation, boundCRS_to_boundCRS_unralated_hub) {
                   ->createOperation(boundCRS1->baseCRS(), boundCRS2->baseCRS())
                   ->exportToPROJString(PROJStringFormatter::create()));
 }
+
+// ---------------------------------------------------------------------------
+
+static VerticalCRSNNPtr createVerticalCRS() {
+    PropertyMap propertiesVDatum;
+    propertiesVDatum.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 5101)
+        .set(IdentifiedObject::NAME_KEY, "Ordnance Datum Newlyn");
+    auto vdatum = VerticalReferenceFrame::create(propertiesVDatum);
+    PropertyMap propertiesCRS;
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 5701)
+        .set(IdentifiedObject::NAME_KEY, "ODN height");
+    return VerticalCRS::create(
+        propertiesCRS, vdatum,
+        VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_to_geogCRS) {
+
+    auto compound = CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326, createVerticalCRS()});
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        compound, GeographicCRS::EPSG_4807);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              CoordinateOperationFactory::create()
+                  ->createOperation(GeographicCRS::EPSG_4326,
+                                    GeographicCRS::EPSG_4807)
+                  ->exportToPROJString(PROJStringFormatter::create()));
+}
+
+// ---------------------------------------------------------------------------
+
+static BoundCRSNNPtr createBoundVerticalCRS() {
+    auto vertCRS = createVerticalCRS();
+    auto transformation =
+        Transformation::createGravityRelatedHeightToGeographic3D(
+            PropertyMap(), vertCRS, GeographicCRS::EPSG_4979, "egm08_25.gtx",
+            std::vector<PositionalAccuracyNNPtr>());
+    return BoundCRS::create(vertCRS, GeographicCRS::EPSG_4979, transformation);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_height_to_PROJ_string) {
+    EXPECT_EQ(createBoundVerticalCRS()->transformation()->exportToPROJString(
+                  PROJStringFormatter::create()),
+              "+proj=vgridshift +grids=egm08_25.gtx");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_ntv2_to_PROJ_string) {
+    auto transformation = Transformation::createNTv2(
+        PropertyMap(), GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326,
+        "foo.gsb", std::vector<PositionalAccuracyNNPtr>());
+    EXPECT_EQ(transformation->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=hgridshift +grids=foo.gsb");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_with_boundVerticalCRS_to_geogCRS) {
+
+    auto compound = CompoundCRS::create(
+        PropertyMap(), std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326,
+                                             createBoundVerticalCRS()});
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        compound, GeographicCRS::EPSG_4979);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift "
+              "+grids=egm08_25.gtx +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
+
+    auto horizBoundCRS = BoundCRS::createFromTOWGS84(
+        GeographicCRS::EPSG_4807, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+    auto compound = CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{horizBoundCRS, createBoundVerticalCRS()});
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        compound, GeographicCRS::EPSG_4979);
+    ASSERT_TRUE(op != nullptr);
+    // Not completely sure the order of horizontal and vertical operations
+    // makes sense
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
+              "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 +step "
+              "+inv +proj=cart +ellps=WGS84 +step +proj=vgridshift "
+              "+grids=egm08_25.gtx +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
+
+    auto opInverse = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::EPSG_4979, compound);
+    ASSERT_TRUE(opInverse != nullptr);
+    EXPECT_TRUE(opInverse->inverse()->isEquivalentTo(NN_CHECK_ASSERT(op)));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_with_boundProjCRS_and_boundVerticalCRS_to_geogCRS) {
+
+    auto horizBoundCRS = BoundCRS::createFromTOWGS84(
+        ProjectedCRS::create(
+            PropertyMap(), GeographicCRS::EPSG_4807,
+            Conversion::createUTM(PropertyMap(), 31, true),
+            CartesianCS::createEastingNorthing(UnitOfMeasure::METRE)),
+        std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+    auto compound = CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{horizBoundCRS, createBoundVerticalCRS()});
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        compound, GeographicCRS::EPSG_4979);
+    ASSERT_TRUE(op != nullptr);
+    // Not completely sure the order of horizontal and vertical operations
+    // makes sense
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
+              "+step +proj=cart +ellps=clrk80ign +step +proj=helmert +x=1 +y=2 "
+              "+z=3 +rx=4 +ry=5 +rz=6 +s=7 +step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=vgridshift +grids=egm08_25.gtx +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_to_compoundCRS) {
+    auto compound1 = CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326, createVerticalCRS()});
+    auto compound2 = CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{createUTM31_WGS84(), createVerticalCRS()});
+    auto op = CoordinateOperationFactory::create()->createOperation(compound1,
+                                                                    compound2);
+    ASSERT_TRUE(op != nullptr);
+    auto opRef = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::EPSG_4326, createUTM31_WGS84());
+    ASSERT_TRUE(opRef != nullptr);
+    EXPECT_TRUE(op->isEquivalentTo(NN_CHECK_ASSERT(opRef)));
+}

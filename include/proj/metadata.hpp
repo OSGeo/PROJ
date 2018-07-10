@@ -218,6 +218,8 @@ class Identifier : public util::BaseObject, public io::IWKTExportable {
     PROJ_DLL static const std::string DESCRIPTION_KEY;
     PROJ_DLL static const std::string URI_KEY;
 
+    PROJ_DLL static const std::string EPSG;
+
     PROJ_DLL const util::optional<Citation> &authority() const;
     PROJ_DLL const std::string &code() const;
     PROJ_DLL const util::optional<std::string> &codeSpace() const;

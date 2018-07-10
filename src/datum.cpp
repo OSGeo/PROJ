@@ -238,7 +238,8 @@ PrimeMeridianNNPtr PrimeMeridian::create(const util::PropertyMap &properties,
 
 const PrimeMeridianNNPtr PrimeMeridian::createGREENWICH() {
     return create(util::PropertyMap()
-                      .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                      .set(metadata::Identifier::CODESPACE_KEY,
+                           metadata::Identifier::EPSG)
                       .set(metadata::Identifier::CODE_KEY, 8901)
                       .set(common::IdentifiedObject::NAME_KEY, "Greenwich"),
                   common::Angle(0));
@@ -248,7 +249,8 @@ const PrimeMeridianNNPtr PrimeMeridian::createGREENWICH() {
 
 const PrimeMeridianNNPtr PrimeMeridian::createPARIS() {
     return create(util::PropertyMap()
-                      .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                      .set(metadata::Identifier::CODESPACE_KEY,
+                           metadata::Identifier::EPSG)
                       .set(metadata::Identifier::CODE_KEY, 8903)
                       .set(common::IdentifiedObject::NAME_KEY, "Paris"),
                   common::Angle(2.5969213, common::UnitOfMeasure::GRAD));
@@ -568,7 +570,8 @@ EllipsoidNNPtr Ellipsoid::createTwoAxis(const util::PropertyMap &properties,
 
 const EllipsoidNNPtr Ellipsoid::createWGS84() {
     util::PropertyMap propertiesEllps;
-    propertiesEllps.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+    propertiesEllps
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
         .set(metadata::Identifier::CODE_KEY, 7030)
         .set(common::IdentifiedObject::NAME_KEY, "WGS 84");
     return createFlattenedSphere(propertiesEllps, common::Length(6378137),
@@ -579,7 +582,8 @@ const EllipsoidNNPtr Ellipsoid::createWGS84() {
 
 const EllipsoidNNPtr Ellipsoid::createGRS1980() {
     util::PropertyMap propertiesEllps;
-    propertiesEllps.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+    propertiesEllps
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
         .set(metadata::Identifier::CODE_KEY, 7019)
         .set(common::IdentifiedObject::NAME_KEY, "GRS 1980");
     return createFlattenedSphere(propertiesEllps, common::Length(6378137),
@@ -804,7 +808,8 @@ GeodeticReferenceFrame::create(const util::PropertyMap &properties,
 
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6269() {
     util::PropertyMap propertiesDatum;
-    propertiesDatum.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+    propertiesDatum
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
         .set(metadata::Identifier::CODE_KEY, 6269)
         .set(common::IdentifiedObject::NAME_KEY, "North American Datum 1983");
 
@@ -816,7 +821,8 @@ const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6269() {
 
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6326() {
     util::PropertyMap propertiesDatum;
-    propertiesDatum.set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+    propertiesDatum
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
         .set(metadata::Identifier::CODE_KEY, 6326)
         .set(common::IdentifiedObject::NAME_KEY, "World Geodetic System 1984");
 

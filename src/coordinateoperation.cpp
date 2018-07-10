@@ -29,8 +29,10 @@
 #ifndef FROM_PROJ_CPP
 #define FROM_PROJ_CPP
 #endif
+#define FROM_COORDINATE_OPERATION_CPP
 
 #include "proj/coordinateoperation.hpp"
+#include "coordinateoperation_constants.hpp"
 #include "proj/common.hpp"
 #include "proj/coordinateoperation_internal.hpp"
 #include "proj/crs.hpp"
@@ -54,120 +56,6 @@ using namespace NS_PROJ::internal;
 
 NS_PROJ_START
 namespace operation {
-
-//! @cond Doxygen_Suppress
-
-static const std::string EPSG_METHOD_TRANSVERSE_MERCATOR("Transverse Mercator");
-constexpr int EPSG_METHOD_TRANSVERSE_MERCATOR_CODE = 9807;
-
-static const std::string
-    EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP("Lambert Conic Conformal (1SP)");
-constexpr int EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE = 9801;
-
-static const std::string EPSG_METHOD_NZMG("New Zealand Map Grid");
-constexpr int EPSG_METHOD_NZMG_CODE = 9811;
-
-static const std::string
-    EPSG_LATITUDE_OF_NATURAL_ORIGIN("Latitude of natural origin");
-static const std::string
-    EPSG_LONGITUDE_OF_NATURAL_ORIGIN("Longitude of natural origin");
-static const std::string
-    EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN("Scale factor at natural origin");
-static const std::string EPSG_FALSE_EASTING("False easting");
-static const std::string EPSG_FALSE_NORTHING("False northing");
-
-static const std::string WKT1_LATITUDE_OF_ORIGIN("latitude_of_origin");
-static const std::string WKT1_CENTRAL_MERIDIAN("central_meridian");
-static const std::string WKT1_SCALE_FACTOR("scale_factor");
-static const std::string WKT1_FALSE_EASTING("false_easting");
-static const std::string WKT1_FALSE_NORTHING("false_northing");
-
-constexpr double UTM_LATITUDE_OF_NATURAL_ORIGIN = 0.0;
-constexpr double UTM_SCALE_FACTOR = 0.9996;
-constexpr double UTM_FALSE_EASTING = 500000.0;
-constexpr double UTM_NORTH_FALSE_NORTHING = 0.0;
-constexpr double UTM_SOUTH_FALSE_NORTHING = 10000000.0;
-
-constexpr int EPSG_PARAMETER_X_AXIS_TRANSLATION = 8605;
-constexpr int EPSG_PARAMETER_Y_AXIS_TRANSLATION = 8606;
-constexpr int EPSG_PARAMETER_Z_AXIS_TRANSLATION = 8607;
-constexpr int EPSG_PARAMETER_X_AXIS_ROTATION = 8608;
-constexpr int EPSG_PARAMETER_Y_AXIS_ROTATION = 8609;
-constexpr int EPSG_PARAMETER_Z_AXIS_ROTATION = 8610;
-constexpr int EPSG_PARAMETER_SCALE_DIFFERENCE = 8611;
-
-static const std::string
-    EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME("X-axis translation");
-static const std::string
-    EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME("Y-axis translation");
-static const std::string
-    EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME("Z-axis translation");
-static const std::string EPSG_PARAMETER_X_AXIS_ROTATION_NAME("X-axis rotation");
-static const std::string EPSG_PARAMETER_Y_AXIS_ROTATION_NAME("Y-axis rotation");
-static const std::string EPSG_PARAMETER_Z_AXIS_ROTATION_NAME("Z-axis rotation");
-static const std::string
-    EPSG_PARAMETER_SCALE_DIFFERENCE_NAME("Scale difference");
-
-// ---------------------------------------------------------------------------
-
-static const ParamMapping paramLatitudeNatOrigin = {
-    EPSG_LATITUDE_OF_NATURAL_ORIGIN, 8801, WKT1_LATITUDE_OF_ORIGIN,
-    common::UnitOfMeasure::Type::ANGULAR, "lat_0"};
-
-static const ParamMapping paramLongitudeNatOrigin = {
-    EPSG_LONGITUDE_OF_NATURAL_ORIGIN, 8802, WKT1_CENTRAL_MERIDIAN,
-    common::UnitOfMeasure::Type::ANGULAR, "lon_0"};
-
-static const ParamMapping paramScaleFactor = {
-    EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN, 8805, WKT1_SCALE_FACTOR,
-    common::UnitOfMeasure::Type::SCALE, "k_0"};
-
-static const ParamMapping paramFalseEasting = {
-    EPSG_FALSE_EASTING, 8806, WKT1_FALSE_EASTING,
-    common::UnitOfMeasure::Type::LINEAR, "x_0"};
-
-static const ParamMapping paramFalseNorthing = {
-    EPSG_FALSE_NORTHING, 8807, WKT1_FALSE_NORTHING,
-    common::UnitOfMeasure::Type::LINEAR, "y_0"};
-
-static const MethodMapping methodMappings[] = {
-    {EPSG_METHOD_TRANSVERSE_MERCATOR,
-     EPSG_METHOD_TRANSVERSE_MERCATOR_CODE,
-     "Transverse_Mercator",
-     "tmerc",
-     {
-         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramScaleFactor,
-         paramFalseEasting, paramFalseNorthing,
-     }},
-
-    {EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
-     EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE,
-     "Lambert_Conformal_Conic_1SP",
-     "lcc",
-     {
-         {EPSG_LATITUDE_OF_NATURAL_ORIGIN,
-          8801,
-          WKT1_LATITUDE_OF_ORIGIN,
-          common::UnitOfMeasure::Type::ANGULAR,
-          {"lat_1", "lat_0"}},
-         paramLongitudeNatOrigin,
-         paramScaleFactor,
-         paramFalseEasting,
-         paramFalseNorthing,
-     }},
-
-    {EPSG_METHOD_NZMG,
-     EPSG_METHOD_NZMG_CODE,
-     "New_Zealand_Map_Grid",
-     "nzmg",
-     {
-         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
-         paramFalseNorthing,
-     }},
-    // TODO: add at least all GDAL supported methods !!!
-};
-
-//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -201,7 +89,7 @@ const MethodMapping *getMapping(const OperationMethod *method) {
 const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) {
     // Unusual for a WKT1 projection name, but mentionned in OGC 12-063r5 C.4.2
     if (tolower(wkt1_name).find(tolower("UTM zone")) == 0) {
-        return getMapping(EPSG_METHOD_TRANSVERSE_MERCATOR_CODE);
+        return getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR);
     }
 
     for (const auto &mapping : methodMappings) {
@@ -703,58 +591,58 @@ bool OperationParameterValue::convertFromAbridged(const std::string &paramName,
                                                   common::UnitOfMeasure &unit,
                                                   int &paramEPSGCode) {
     if (metadata::Identifier::isEquivalentName(
-            paramName, EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME) ||
-        paramEPSGCode == EPSG_PARAMETER_X_AXIS_TRANSLATION) {
+            paramName, EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION) ||
+        paramEPSGCode == EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION) {
         unit = common::UnitOfMeasure::METRE;
-        paramEPSGCode = EPSG_PARAMETER_X_AXIS_TRANSLATION;
+        paramEPSGCode = EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION;
         return true;
     } else if (metadata::Identifier::isEquivalentName(
-                   paramName, EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME) ||
-               paramEPSGCode == EPSG_PARAMETER_Y_AXIS_TRANSLATION) {
+                   paramName, EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION) ||
+               paramEPSGCode == EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION) {
         unit = common::UnitOfMeasure::METRE;
-        paramEPSGCode = EPSG_PARAMETER_Y_AXIS_TRANSLATION;
+        paramEPSGCode = EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION;
         return true;
     } else if (metadata::Identifier::isEquivalentName(
-                   paramName, EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME) ||
-               paramEPSGCode == EPSG_PARAMETER_Z_AXIS_TRANSLATION) {
+                   paramName, EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION) ||
+               paramEPSGCode == EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION) {
         unit = common::UnitOfMeasure::METRE;
-        paramEPSGCode = EPSG_PARAMETER_Z_AXIS_TRANSLATION;
+        paramEPSGCode = EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION;
         return true;
     } else if (metadata::Identifier::isEquivalentName(
-                   paramName, EPSG_PARAMETER_X_AXIS_ROTATION_NAME) ||
-               paramEPSGCode == EPSG_PARAMETER_X_AXIS_ROTATION) {
+                   paramName, EPSG_NAME_PARAMETER_X_AXIS_ROTATION) ||
+               paramEPSGCode == EPSG_CODE_PARAMETER_X_AXIS_ROTATION) {
         unit = common::UnitOfMeasure::MICRORADIAN;
         val = common::Angle(val, common::UnitOfMeasure::ARC_SECOND)
                   .convertToUnit(unit)
                   .value();
-        paramEPSGCode = EPSG_PARAMETER_X_AXIS_ROTATION;
+        paramEPSGCode = EPSG_CODE_PARAMETER_X_AXIS_ROTATION;
         return true;
     } else if (metadata::Identifier::isEquivalentName(
-                   paramName, EPSG_PARAMETER_Y_AXIS_ROTATION_NAME) ||
-               paramEPSGCode == EPSG_PARAMETER_Y_AXIS_ROTATION) {
+                   paramName, EPSG_NAME_PARAMETER_Y_AXIS_ROTATION) ||
+               paramEPSGCode == EPSG_CODE_PARAMETER_Y_AXIS_ROTATION) {
         unit = common::UnitOfMeasure::MICRORADIAN;
         val = common::Angle(val, common::UnitOfMeasure::ARC_SECOND)
                   .convertToUnit(unit)
                   .value();
-        paramEPSGCode = EPSG_PARAMETER_Y_AXIS_ROTATION;
+        paramEPSGCode = EPSG_CODE_PARAMETER_Y_AXIS_ROTATION;
         return true;
 
     } else if (metadata::Identifier::isEquivalentName(
-                   paramName, EPSG_PARAMETER_Z_AXIS_ROTATION_NAME) ||
-               paramEPSGCode == EPSG_PARAMETER_Z_AXIS_ROTATION) {
+                   paramName, EPSG_NAME_PARAMETER_Z_AXIS_ROTATION) ||
+               paramEPSGCode == EPSG_CODE_PARAMETER_Z_AXIS_ROTATION) {
         unit = common::UnitOfMeasure::MICRORADIAN;
         val = common::Angle(val, common::UnitOfMeasure::ARC_SECOND)
                   .convertToUnit(unit)
                   .value();
-        paramEPSGCode = EPSG_PARAMETER_Z_AXIS_ROTATION;
+        paramEPSGCode = EPSG_CODE_PARAMETER_Z_AXIS_ROTATION;
         return true;
 
     } else if (metadata::Identifier::isEquivalentName(
-                   paramName, EPSG_PARAMETER_SCALE_DIFFERENCE_NAME) ||
-               paramEPSGCode == EPSG_PARAMETER_SCALE_DIFFERENCE) {
+                   paramName, EPSG_NAME_PARAMETER_SCALE_DIFFERENCE) ||
+               paramEPSGCode == EPSG_CODE_PARAMETER_SCALE_DIFFERENCE) {
         val = (val - 1.0) * 1e6;
         unit = common::UnitOfMeasure::PARTS_PER_MILLION;
-        paramEPSGCode = EPSG_PARAMETER_SCALE_DIFFERENCE;
+        paramEPSGCode = EPSG_CODE_PARAMETER_SCALE_DIFFERENCE;
         return true;
     }
     return false;
@@ -1353,7 +1241,8 @@ getUTMConversionProperty(const util::PropertyMap &properties, int zone,
 
         return util::PropertyMap()
             .set(common::IdentifiedObject::NAME_KEY, conversionName.str())
-            .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+            .set(metadata::Identifier::CODESPACE_KEY,
+                 metadata::Identifier::EPSG)
             .set(metadata::Identifier::CODE_KEY,
                  (north ? 16000 : 17000) + zone);
     } else {
@@ -1388,7 +1277,8 @@ Conversion::create(const util::PropertyMap &properties, int method_epsg_code,
         parameters.push_back(OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY, param.wkt2_name)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY, param.epsg_code)));
     }
 
@@ -1396,7 +1286,8 @@ Conversion::create(const util::PropertyMap &properties, int method_epsg_code,
         addDefaultNameIfNeeded(properties, mapping->wkt2_name),
         util::PropertyMap()
             .set(common::IdentifiedObject::NAME_KEY, mapping->wkt2_name)
-            .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+            .set(metadata::Identifier::CODESPACE_KEY,
+                 metadata::Identifier::EPSG)
             .set(metadata::Identifier::CODE_KEY, mapping->epsg_code),
         parameters, values);
 }
@@ -1427,7 +1318,7 @@ ConversionNNPtr Conversion::createUTM(const util::PropertyMap &properties,
     };
 
     return create(getUTMConversionProperty(properties, zone, north),
-                  EPSG_METHOD_TRANSVERSE_MERCATOR_CODE, values);
+                  EPSG_CODE_METHOD_TRANSVERSE_MERCATOR, values);
 }
 
 // ---------------------------------------------------------------------------
@@ -1459,7 +1350,7 @@ ConversionNNPtr Conversion::createTM(const util::PropertyMap &properties,
         ParameterValue::create(falseNorthing),
     };
 
-    return create(properties, EPSG_METHOD_TRANSVERSE_MERCATOR_CODE, values);
+    return create(properties, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR, values);
 }
 
 // ---------------------------------------------------------------------------
@@ -1491,7 +1382,7 @@ ConversionNNPtr Conversion::createLCC_1SP(const util::PropertyMap &properties,
         ParameterValue::create(falseNorthing),
     };
 
-    return create(properties, EPSG_METHOD_LAMBERT_CONIC_CONFORMAL_1SP_CODE,
+    return create(properties, EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
                   values);
 }
 
@@ -1520,7 +1411,7 @@ ConversionNNPtr Conversion::createNZMG(const util::PropertyMap &properties,
         ParameterValue::create(falseNorthing),
     };
 
-    return create(properties, EPSG_METHOD_NZMG_CODE, values);
+    return create(properties, EPSG_CODE_METHOD_NZMG, values);
 }
 
 // ---------------------------------------------------------------------------
@@ -1596,7 +1487,7 @@ std::string Conversion::exportToPROJString(
 
     auto projectionMethodName = *(method()->name()->description());
     bool bConversionDone = false;
-    if (ci_equal(projectionMethodName, EPSG_METHOD_TRANSVERSE_MERCATOR)) {
+    if (ci_equal(projectionMethodName, EPSG_NAME_METHOD_TRANSVERSE_MERCATOR)) {
         // Check for UTM
         int zone = 0;
         bool north = true;
@@ -1706,7 +1597,7 @@ bool Conversion::isUTM(int &zone, bool &north) const {
     north = true;
 
     auto projectionMethodName = *(method()->name()->description());
-    if (ci_equal(projectionMethodName, EPSG_METHOD_TRANSVERSE_MERCATOR)) {
+    if (ci_equal(projectionMethodName, EPSG_NAME_METHOD_TRANSVERSE_MERCATOR)) {
         // Check for UTM
 
         bool bLatitudeNatOriginUTM = false;
@@ -1723,26 +1614,30 @@ bool Conversion::isUTM(int &zone, bool &north) const {
                 const auto &l_parameterValue = opParamvalue->parameterValue();
                 if (l_parameterValue->type() == ParameterValue::Type::MEASURE) {
                     auto measure = l_parameterValue->value();
-                    if (paramName == EPSG_LATITUDE_OF_NATURAL_ORIGIN &&
+                    if (paramName ==
+                            EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN &&
                         measure.value() == UTM_LATITUDE_OF_NATURAL_ORIGIN) {
                         bLatitudeNatOriginUTM = true;
-                    } else if (paramName == EPSG_LONGITUDE_OF_NATURAL_ORIGIN &&
-                               measure.unit() ==
-                                   common::UnitOfMeasure::DEGREE) {
+                    } else if (
+                        paramName ==
+                            EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN &&
+                        measure.unit() == common::UnitOfMeasure::DEGREE) {
                         double dfZone = (measure.value() + 183.0) / 6.0;
                         if (dfZone > 0.9 && dfZone < 60.1 &&
                             std::abs(dfZone - std::round(dfZone)) < 1e-10) {
                             zone = static_cast<int>(std::lround(dfZone));
                         }
-                    } else if (paramName ==
-                                   EPSG_SCALE_FACTOR_AT_NATURAL_ORIGIN &&
-                               measure.value() == UTM_SCALE_FACTOR) {
+                    } else if (
+                        paramName ==
+                            EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN &&
+                        measure.value() == UTM_SCALE_FACTOR) {
                         bScaleFactorUTM = true;
-                    } else if (paramName == EPSG_FALSE_EASTING &&
+                    } else if (paramName == EPSG_NAME_PARAMETER_FALSE_EASTING &&
                                measure.value() == UTM_FALSE_EASTING &&
                                measure.unit() == common::UnitOfMeasure::METRE) {
                         bFalseEastingUTM = true;
-                    } else if (paramName == EPSG_FALSE_NORTHING &&
+                    } else if (paramName ==
+                                   EPSG_NAME_PARAMETER_FALSE_NORTHING &&
                                measure.unit() == common::UnitOfMeasure::METRE) {
                         if (measure.value() == UTM_NORTH_FALSE_NORTHING) {
                             bFalseNorthingUTM = true;
@@ -1777,7 +1672,7 @@ ConversionNNPtr Conversion::identify() const {
     newConversion->assignSelf(
         util::nn_static_pointer_cast<util::BaseObject>(newConversion));
 
-    if (ci_equal(projectionMethodName, EPSG_METHOD_TRANSVERSE_MERCATOR)) {
+    if (ci_equal(projectionMethodName, EPSG_NAME_METHOD_TRANSVERSE_MERCATOR)) {
         // Check for UTM
         int zone = 0;
         bool north = true;
@@ -1878,16 +1773,21 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
     bool invertRotSigns = false;
     auto method_name = *(method()->name()->description());
     if (ci_find(method_name, "Coordinate Frame") != std::string::npos ||
-        method()->isEPSG(1032) || method()->isEPSG(9607)) {
+        method()->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC) ||
+        method()->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC)) {
         sevenParamsTransform = true;
         invertRotSigns = true;
     } else if (ci_find(method_name, "Position Vector") != std::string::npos ||
-               method()->isEPSG(1033) || method()->isEPSG(9606)) {
+               method()->isEPSG(EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC) ||
+               method()->isEPSG(EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC)) {
         sevenParamsTransform = true;
         invertRotSigns = false;
     } else if (ci_find(method_name, "Geocentric translations") !=
                    std::string::npos ||
-               method()->isEPSG(1031) || method()->isEPSG(9603)) {
+               method()->isEPSG(
+                   EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC) ||
+               method()->isEPSG(
+                   EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC)) {
         threeParamsTransform = true;
     }
 
@@ -1913,29 +1813,30 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
                     auto measure = l_parameterValue->value();
                     if (metadata::Identifier::isEquivalentName(
                             paramName,
-                            EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME) ||
-                        parameter->isEPSG(EPSG_PARAMETER_X_AXIS_TRANSLATION)) {
+                            EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION) ||
+                        parameter->isEPSG(
+                            EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)) {
                         params[0] = measure.getSIValue();
                         foundX = true;
                     } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
-                                   EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME) ||
+                                   EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION) ||
                                parameter->isEPSG(
-                                   EPSG_PARAMETER_Y_AXIS_TRANSLATION)) {
+                                   EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)) {
                         params[1] = measure.getSIValue();
                         foundY = true;
                     } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
-                                   EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME) ||
+                                   EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION) ||
                                parameter->isEPSG(
-                                   EPSG_PARAMETER_Z_AXIS_TRANSLATION)) {
+                                   EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)) {
                         params[2] = measure.getSIValue();
                         foundZ = true;
                     } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
-                                   EPSG_PARAMETER_X_AXIS_ROTATION_NAME) ||
+                                   EPSG_NAME_PARAMETER_X_AXIS_ROTATION) ||
                                parameter->isEPSG(
-                                   EPSG_PARAMETER_X_AXIS_ROTATION)) {
+                                   EPSG_CODE_PARAMETER_X_AXIS_ROTATION)) {
                         params[3] = rotSign *
                                     measure
                                         .convertToUnit(
@@ -1944,9 +1845,9 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
                         foundRotX = true;
                     } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
-                                   EPSG_PARAMETER_Y_AXIS_ROTATION_NAME) ||
+                                   EPSG_NAME_PARAMETER_Y_AXIS_ROTATION) ||
                                parameter->isEPSG(
-                                   EPSG_PARAMETER_Y_AXIS_ROTATION)) {
+                                   EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)) {
                         params[4] = rotSign *
                                     measure
                                         .convertToUnit(
@@ -1955,9 +1856,9 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
                         foundRotY = true;
                     } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
-                                   EPSG_PARAMETER_Z_AXIS_ROTATION_NAME) ||
+                                   EPSG_NAME_PARAMETER_Z_AXIS_ROTATION) ||
                                parameter->isEPSG(
-                                   EPSG_PARAMETER_Z_AXIS_ROTATION)) {
+                                   EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)) {
                         params[5] = rotSign *
                                     measure
                                         .convertToUnit(
@@ -1966,9 +1867,9 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
                         foundRotZ = true;
                     } else if (metadata::Identifier::isEquivalentName(
                                    paramName,
-                                   EPSG_PARAMETER_SCALE_DIFFERENCE_NAME) ||
+                                   EPSG_NAME_PARAMETER_SCALE_DIFFERENCE) ||
                                parameter->isEPSG(
-                                   EPSG_PARAMETER_SCALE_DIFFERENCE)) {
+                                   EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)) {
                         params[6] =
                             measure
                                 .convertToUnit(
@@ -2088,52 +1989,59 @@ static TransformationNNPtr createSevenParamsTransform(
         OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
-                     EPSG_PARAMETER_X_AXIS_TRANSLATION)),
+                     EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
         OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                     EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
-                     EPSG_PARAMETER_Y_AXIS_TRANSLATION)),
+                     EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
         OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                     EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
-                     EPSG_PARAMETER_Z_AXIS_TRANSLATION)),
+                     EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
         OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_PARAMETER_X_AXIS_ROTATION_NAME)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                     EPSG_NAME_PARAMETER_X_AXIS_ROTATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
-                     EPSG_PARAMETER_X_AXIS_ROTATION)),
+                     EPSG_CODE_PARAMETER_X_AXIS_ROTATION)),
         OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_PARAMETER_Y_AXIS_ROTATION_NAME)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                     EPSG_NAME_PARAMETER_Y_AXIS_ROTATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
-                     EPSG_PARAMETER_Y_AXIS_ROTATION)),
+                     EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)),
         OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_PARAMETER_Z_AXIS_ROTATION_NAME)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                     EPSG_NAME_PARAMETER_Z_AXIS_ROTATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
-                     EPSG_PARAMETER_Z_AXIS_ROTATION)),
+                     EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)),
         OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_PARAMETER_SCALE_DIFFERENCE_NAME)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                     EPSG_NAME_PARAMETER_SCALE_DIFFERENCE)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
-                     EPSG_PARAMETER_SCALE_DIFFERENCE)),
+                     EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)),
     };
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(common::Length(translationXMetre)),
@@ -2177,24 +2085,27 @@ TransformationNNPtr Transformation::createGeocentricTranslations(
         OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
-                     EPSG_PARAMETER_X_AXIS_TRANSLATION)),
+                     EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
         OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                     EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
-                     EPSG_PARAMETER_Y_AXIS_TRANSLATION)),
+                     EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
         OperationParameter::create(
             util::PropertyMap()
                 .set(common::IdentifiedObject::NAME_KEY,
-                     EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME)
-                .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                     EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY,
-                     EPSG_PARAMETER_Z_AXIS_TRANSLATION)),
+                     EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
     };
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(common::Length(translationXMetre)),
@@ -2205,9 +2116,11 @@ TransformationNNPtr Transformation::createGeocentricTranslations(
     return create(properties, sourceCRSIn, targetCRSIn, nullptr,
                   util::PropertyMap()
                       .set(common::IdentifiedObject::NAME_KEY,
-                           "Geocentric translations (geocentric domain)")
-                      .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
-                      .set(metadata::Identifier::CODE_KEY, 1031),
+                           EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC)
+                      .set(metadata::Identifier::CODESPACE_KEY,
+                           metadata::Identifier::EPSG)
+                      .set(metadata::Identifier::CODE_KEY,
+                           EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC),
                   parameters, values, accuracies);
 }
 
@@ -2245,12 +2158,13 @@ TransformationNNPtr Transformation::createPositionVector(
     double rotationZMicroRadian, double scaleDifferencePPM,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
     return createSevenParamsTransform(
-        properties,
-        util::PropertyMap()
-            .set(common::IdentifiedObject::NAME_KEY,
-                 "Position Vector transformation (geocentric domain)")
-            .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
-            .set(metadata::Identifier::CODE_KEY, 1033),
+        properties, util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_METHOD_POSITION_VECTOR_GEOCENTRIC)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXMicroRadian, rotationYMicroRadian,
         rotationZMicroRadian, scaleDifferencePPM, accuracies);
@@ -2291,9 +2205,11 @@ TransformationNNPtr Transformation::createCoordinateFrameRotation(
     return createSevenParamsTransform(
         properties, util::PropertyMap()
                         .set(common::IdentifiedObject::NAME_KEY,
-                             "Coordinate Frame rotation (geocentric domain)")
-                        .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
-                        .set(metadata::Identifier::CODE_KEY, 1032),
+                             EPSG_NAME_METHOD_COORDINATE_FRAME_GEOCENTRIC)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXMicroRadian, rotationYMicroRadian,
         rotationZMicroRadian, scaleDifferencePPM, accuracies);
@@ -2339,54 +2255,131 @@ TransformationNNPtr Transformation::createTOWGS84(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Transformation with NTv2 method.
+ *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param filename NTv2 filename.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ */
+TransformationNNPtr Transformation::createNTv2(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+
+    return create(
+        properties, sourceCRSIn, targetCRSIn, nullptr,
+        util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY, EPSG_NAME_METHOD_NTV2)
+            .set(metadata::Identifier::CODESPACE_KEY,
+                 metadata::Identifier::EPSG)
+            .set(metadata::Identifier::CODE_KEY, EPSG_CODE_METHOD_NTV2),
+        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_NTV2_FILENAME)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_NTV2_FILENAME))},
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::createFilename(filename)},
+        accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a Transformation from GravityRelatedHeight to
+ * Geographic3D
+ *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param filename GRID filename.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ */
+TransformationNNPtr Transformation::createGravityRelatedHeightToGeographic3D(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+
+    return create(
+        properties, sourceCRSIn, targetCRSIn, nullptr,
+        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D),
+        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_GEOID_CORRECTION_FILENAME)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME))},
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::createFilename(filename)},
+        accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateOperationNNPtr Transformation::inverse() const {
     // some Transformations like Helmert ones can be inverted as Transformation
     bool sevenParamsTransform = false;
     bool threeParamsTransform = false;
     auto method_name = *(method()->name()->description());
     if (ci_find(method_name, "Coordinate Frame") != std::string::npos ||
-        method()->isEPSG(1032) || method()->isEPSG(9607)) {
+        method()->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC) ||
+        method()->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC)) {
         sevenParamsTransform = true;
     } else if (ci_find(method_name, "Position Vector") != std::string::npos ||
-               method()->isEPSG(1033) || method()->isEPSG(9606)) {
+               method()->isEPSG(EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC) ||
+               method()->isEPSG(EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC)) {
         sevenParamsTransform = true;
     } else if (ci_find(method_name, "Geocentric translations") !=
                    std::string::npos ||
-               method()->isEPSG(1031) || method()->isEPSG(9603)) {
+               method()->isEPSG(
+                   EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC) ||
+               method()->isEPSG(
+                   EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC)) {
         threeParamsTransform = true;
     }
     if (threeParamsTransform || sevenParamsTransform) {
         double x =
-            -parameterValueMeasure(EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME,
-                                   EPSG_PARAMETER_X_AXIS_TRANSLATION)
+            -parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
+                                   EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
                  .getSIValue();
         double y =
-            -parameterValueMeasure(EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME,
-                                   EPSG_PARAMETER_Y_AXIS_TRANSLATION)
+            -parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
+                                   EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)
                  .getSIValue();
         double z =
-            -parameterValueMeasure(EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME,
-                                   EPSG_PARAMETER_Z_AXIS_TRANSLATION)
+            -parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
+                                   EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
                  .getSIValue();
         if (sevenParamsTransform) {
             double rx =
-                -parameterValueMeasure(EPSG_PARAMETER_X_AXIS_ROTATION_NAME,
-                                       EPSG_PARAMETER_X_AXIS_ROTATION)
+                -parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_ROTATION,
+                                       EPSG_CODE_PARAMETER_X_AXIS_ROTATION)
                      .convertToUnit(common::UnitOfMeasure::MICRORADIAN)
                      .value();
             double ry =
-                -parameterValueMeasure(EPSG_PARAMETER_Y_AXIS_ROTATION_NAME,
-                                       EPSG_PARAMETER_Y_AXIS_ROTATION)
+                -parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_ROTATION,
+                                       EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)
                      .convertToUnit(common::UnitOfMeasure::MICRORADIAN)
                      .value();
             double rz =
-                -parameterValueMeasure(EPSG_PARAMETER_Z_AXIS_ROTATION_NAME,
-                                       EPSG_PARAMETER_Z_AXIS_ROTATION)
+                -parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_ROTATION,
+                                       EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)
                      .convertToUnit(common::UnitOfMeasure::MICRORADIAN)
                      .value();
             double scaleDiff =
-                parameterValueMeasure(EPSG_PARAMETER_SCALE_DIFFERENCE_NAME,
-                                      EPSG_PARAMETER_SCALE_DIFFERENCE)
+                parameterValueMeasure(EPSG_NAME_PARAMETER_SCALE_DIFFERENCE,
+                                      EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)
                     .convertToUnit(common::UnitOfMeasure::PARTS_PER_MILLION)
                     .value();
             auto methodProperties =
@@ -2395,7 +2388,8 @@ CoordinateOperationNNPtr Transformation::inverse() const {
             int method_epsg_code = method()->getEPSGCode();
             if (method_epsg_code) {
                 methodProperties
-                    .set(metadata::Identifier::CODESPACE_KEY, "EPSG")
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
                     .set(metadata::Identifier::CODE_KEY, method_epsg_code);
             }
             return createSevenParamsTransform(
@@ -2497,6 +2491,50 @@ std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the filename of a NTv2 operation
+ *
+ * @return filename, or empty string
+ */
+std::string Transformation::getNTv2Filename() const {
+
+    auto method_name = *(method()->name()->description());
+    if (ci_find(method_name, EPSG_NAME_METHOD_NTV2) != std::string::npos ||
+        method()->isEPSG(EPSG_CODE_METHOD_NTV2)) {
+        auto fileParameter = parameterValue(EPSG_NAME_PARAMETER_NTV2_FILENAME,
+                                            EPSG_CODE_PARAMETER_NTV2_FILENAME);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+            return fileParameter->valueFile();
+        }
+    }
+    return std::string();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the filename of a height to Geographic3D operation
+ *
+ * @return filename, or empty string
+ */
+std::string Transformation::getHeightToGeographic3DFilename() const {
+
+    auto method_name = *(method()->name()->description());
+
+    if (ci_find(method_name, PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D) !=
+        std::string::npos) {
+        auto fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_GEOID_CORRECTION_FILENAME,
+                           EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+            return fileParameter->valueFile();
+        }
+    }
+    return std::string();
+}
+
+// ---------------------------------------------------------------------------
+
 std::string Transformation::exportToPROJString(
     io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
 {
@@ -2511,26 +2549,31 @@ std::string Transformation::exportToPROJString(
     bool threeParamsTransform = false;
     auto method_name = *(method()->name()->description());
     if (ci_find(method_name, "Coordinate Frame") != std::string::npos ||
-        method()->isEPSG(1032) || method()->isEPSG(9607)) {
+        method()->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC) ||
+        method()->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC)) {
         sevenParamsTransform = true;
         positionVectorConvention = false;
     } else if (ci_find(method_name, "Position Vector") != std::string::npos ||
-               method()->isEPSG(1033) || method()->isEPSG(9606)) {
+               method()->isEPSG(EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC) ||
+               method()->isEPSG(EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC)) {
         sevenParamsTransform = true;
     } else if (ci_find(method_name, "Geocentric translations") !=
                    std::string::npos ||
-               method()->isEPSG(1031) || method()->isEPSG(9603)) {
+               method()->isEPSG(
+                   EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC) ||
+               method()->isEPSG(
+                   EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC)) {
         threeParamsTransform = true;
     }
     if (threeParamsTransform || sevenParamsTransform) {
-        double x = parameterValueMeasure(EPSG_PARAMETER_X_AXIS_TRANSLATION_NAME,
-                                         EPSG_PARAMETER_X_AXIS_TRANSLATION)
+        double x = parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
                        .getSIValue();
-        double y = parameterValueMeasure(EPSG_PARAMETER_Y_AXIS_TRANSLATION_NAME,
-                                         EPSG_PARAMETER_Y_AXIS_TRANSLATION)
+        double y = parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)
                        .getSIValue();
-        double z = parameterValueMeasure(EPSG_PARAMETER_Z_AXIS_TRANSLATION_NAME,
-                                         EPSG_PARAMETER_Z_AXIS_TRANSLATION)
+        double z = parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
                        .getSIValue();
 
         io::PROJStringFormatter::Scope scope(formatter);
@@ -2562,23 +2605,23 @@ std::string Transformation::exportToPROJString(
         formatter->addParam("z", z);
         if (sevenParamsTransform) {
             double rx =
-                parameterValueMeasure(EPSG_PARAMETER_X_AXIS_ROTATION_NAME,
-                                      EPSG_PARAMETER_X_AXIS_ROTATION)
+                parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_ROTATION,
+                                      EPSG_CODE_PARAMETER_X_AXIS_ROTATION)
                     .convertToUnit(common::UnitOfMeasure::MICRORADIAN)
                     .value();
             double ry =
-                parameterValueMeasure(EPSG_PARAMETER_Y_AXIS_ROTATION_NAME,
-                                      EPSG_PARAMETER_Y_AXIS_ROTATION)
+                parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_ROTATION,
+                                      EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)
                     .convertToUnit(common::UnitOfMeasure::MICRORADIAN)
                     .value();
             double rz =
-                parameterValueMeasure(EPSG_PARAMETER_Z_AXIS_ROTATION_NAME,
-                                      EPSG_PARAMETER_Z_AXIS_ROTATION)
+                parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_ROTATION,
+                                      EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)
                     .convertToUnit(common::UnitOfMeasure::MICRORADIAN)
                     .value();
             double scaleDiff =
-                parameterValueMeasure(EPSG_PARAMETER_SCALE_DIFFERENCE_NAME,
-                                      EPSG_PARAMETER_SCALE_DIFFERENCE)
+                parameterValueMeasure(EPSG_NAME_PARAMETER_SCALE_DIFFERENCE,
+                                      EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)
                     .convertToUnit(common::UnitOfMeasure::PARTS_PER_MILLION)
                     .value();
             formatter->addParam("rx", rx);
@@ -2608,6 +2651,22 @@ std::string Transformation::exportToPROJString(
             targetCRSGeod->addGeocentricUnitConversionIntoPROJString(formatter);
         }
 
+        return scope.toString();
+    }
+
+    auto NTv2Filename = getNTv2Filename();
+    if (!NTv2Filename.empty()) {
+        io::PROJStringFormatter::Scope scope(formatter);
+        formatter->addStep("hgridshift");
+        formatter->addParam("grids", NTv2Filename);
+        return scope.toString();
+    }
+
+    auto heightFilename = getHeightToGeographic3DFilename();
+    if (!heightFilename.empty()) {
+        io::PROJStringFormatter::Scope scope(formatter);
+        formatter->addStep("vgridshift");
+        formatter->addParam("grids", heightFilename);
         return scope.toString();
     }
 
@@ -2866,7 +2925,8 @@ CoordinateOperationFactory::createOperation(crs::CRSNNPtr sourceCRS,
         auto geogCRSOfBaseOfBoundSrc =
             boundSrc->baseCRS()->extractGeographicCRS();
         if (hubSrcGeog &&
-            hubSrcGeog->isEquivalentTo(NN_CHECK_ASSERT(geogDst)) &&
+            (hubSrcGeog->isEquivalentTo(NN_CHECK_ASSERT(geogDst)) ||
+             hubSrcGeog->is2DPartOf3D(NN_CHECK_ASSERT(geogDst))) &&
             geogCRSOfBaseOfBoundSrc) {
             auto opFirst = createOperation(
                 boundSrc->baseCRS(), NN_CHECK_ASSERT(geogCRSOfBaseOfBoundSrc));
@@ -2879,6 +2939,13 @@ CoordinateOperationFactory::createOperation(crs::CRSNNPtr sourceCRS,
                            std::vector<metadata::PositionalAccuracyNNPtr>{})
                     .as_nullable();
             }
+        }
+
+        if (hubSrcGeog &&
+            hubSrcGeog->isEquivalentTo(NN_CHECK_ASSERT(geogDst)) &&
+            util::nn_dynamic_pointer_cast<crs::VerticalCRS>(
+                boundSrc->baseCRS())) {
+            return boundSrc->transformation().as_nullable();
         }
 
         return createOperation(boundSrc->baseCRS(), targetCRS);
@@ -2930,6 +2997,64 @@ CoordinateOperationFactory::createOperation(crs::CRSNNPtr sourceCRS,
         }
 
         return createOperation(boundSrc->baseCRS(), boundDst->baseCRS());
+    }
+
+    auto compoundSrc =
+        util::nn_dynamic_pointer_cast<crs::CompoundCRS>(sourceCRS);
+    if (compoundSrc && geogDst) {
+        auto componentsSrc = compoundSrc->componentReferenceSystems();
+        if (!componentsSrc.empty()) {
+            CoordinateOperationPtr horizTransform = nullptr;
+            if (componentsSrc[0]->extractGeographicCRS()) {
+                horizTransform = createOperation(componentsSrc[0], targetCRS);
+            }
+            CoordinateOperationPtr verticalTransform = nullptr;
+            if (componentsSrc.size() >= 2 &&
+                componentsSrc[1]->extractVerticalCRS()) {
+                verticalTransform =
+                    createOperation(componentsSrc[1], targetCRS);
+            }
+            if (horizTransform && verticalTransform) {
+                auto formatter = io::PROJStringFormatter::create();
+                io::PROJStringFormatter::Scope scope(formatter);
+                horizTransform->exportToPROJString(formatter);
+                formatter->startInversion();
+                geogDst->addAngularUnitConvertAndAxisSwap(formatter);
+                formatter->stopInversion();
+                verticalTransform->exportToPROJString(formatter);
+                geogDst->addAngularUnitConvertAndAxisSwap(formatter);
+                return NN_CO_CAST(SingleOperation::createPROJBased(
+                    scope.toString(), sourceCRS, targetCRS));
+            } else {
+                return horizTransform;
+            }
+        }
+    }
+
+    // reverse of previous case
+    auto compoundDst =
+        util::nn_dynamic_pointer_cast<crs::CompoundCRS>(targetCRS);
+    if (geogSrc && compoundDst) {
+        auto op = createOperation(targetCRS, sourceCRS);
+        if (!op) {
+            return nullptr;
+        }
+        return op->inverse();
+    }
+
+    if (compoundSrc && compoundDst) {
+        auto componentsSrc = compoundSrc->componentReferenceSystems();
+        auto componentsDst = compoundDst->componentReferenceSystems();
+        if (!componentsSrc.empty() &&
+            componentsSrc.size() == componentsDst.size()) {
+            if (componentsSrc[0]->extractGeographicCRS() &&
+                componentsDst[0]->extractGeographicCRS()) {
+                auto op = createOperation(componentsSrc[0], componentsDst[0]);
+                if (op) {
+                    return op;
+                }
+            }
+        }
     }
 
     return nullptr;

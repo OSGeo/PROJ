@@ -594,7 +594,7 @@ std::string IdentifiedObject::alias() const {
  */
 int IdentifiedObject::getEPSGCode() const {
     for (const auto &id : identifiers()) {
-        if (ci_equal(*(id->codeSpace()), "EPSG")) {
+        if (ci_equal(*(id->codeSpace()), metadata::Identifier::EPSG)) {
             return ::atoi(id->code().c_str());
         }
     }

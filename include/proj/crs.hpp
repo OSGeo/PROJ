@@ -56,6 +56,12 @@ using GeographicCRSPtr = std::shared_ptr<GeographicCRS>;
 /** Non-null shared pointer of GeographicCRS */
 using GeographicCRSNNPtr = util::nn<GeographicCRSPtr>;
 
+class VerticalCRS;
+/** Shared pointer of VerticalCRS */
+using VerticalCRSPtr = std::shared_ptr<VerticalCRS>;
+/** Non-null shared pointer of VerticalCRS */
+using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
+
 // ---------------------------------------------------------------------------
 
 class CRS;
@@ -80,6 +86,7 @@ class CRS : public common::ObjectUsage,
     // Non-standard
 
     PROJ_DLL GeographicCRSPtr extractGeographicCRS() const;
+    PROJ_DLL VerticalCRSPtr extractVerticalCRS() const;
 
   protected:
     CRS();
@@ -233,19 +240,22 @@ class GeographicCRS : public GeodeticCRS {
     exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         const override; // throw(FormattingException)
 
+    PROJ_DLL bool is2DPartOf3D(const GeographicCRSNNPtr &other) const;
+
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4269; // NAD83
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4326; // WGS 84 2D
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4807; // NTF Paris
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4979; // WGS 84 3D
 
+    //! @cond Doxygen_Suppress
+    void addAngularUnitConvertAndAxisSwap(
+        io::PROJStringFormatterNNPtr formatter) const;
+    //! @endcond
+
   protected:
     GeographicCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
                   const cs::EllipsoidalCSNNPtr &csIn);
     INLINED_MAKE_SHARED
-
-    friend class ProjectedCRS;
-    void addAngularUnitConvertAndAxisSwap(
-        io::PROJStringFormatterNNPtr formatter) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -258,12 +268,6 @@ class GeographicCRS : public GeodeticCRS {
 };
 
 // ---------------------------------------------------------------------------
-
-class VerticalCRS;
-/** Shared pointer of VerticalCRS */
-using VerticalCRSPtr = std::shared_ptr<VerticalCRS>;
-/** Non-null shared pointer of VerticalCRS */
-using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
 
 /** \brief A coordinate reference system having a vertical reference frame and
  * a one-dimensional vertical coordinate system used for recording
@@ -455,7 +459,7 @@ class CompoundCRS : public CRS, public io::IPROJStringExportable {
     PROJ_DLL ~CompoundCRS() override;
     //! @endcond
 
-    PROJ_DLL std::vector<SingleCRSNNPtr> componentReferenceSystems() const;
+    PROJ_DLL std::vector<CRSNNPtr> componentReferenceSystems() const;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)

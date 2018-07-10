@@ -101,6 +101,10 @@ const std::string Identifier::DESCRIPTION_KEY("description");
  */
 const std::string Identifier::URI_KEY("uri");
 
+/** \brief EPSG codespace.
+ */
+const std::string Identifier::EPSG("EPSG");
+
 // ---------------------------------------------------------------------------
 
 /** \brief Key to set the name of a common::IdentifiedObject
@@ -245,52 +249,52 @@ const UnitOfMeasure UnitOfMeasure::NONE("", 1.0, UnitOfMeasure::Type::NONE);
 /** \brief Scale unity, unit of measure of type SCALE. */
 const UnitOfMeasure UnitOfMeasure::SCALE_UNITY("unity", 1.0,
                                                UnitOfMeasure::Type::SCALE,
-                                               "EPSG", "9201");
+                                               Identifier::EPSG, "9201");
 
 /** \brief Parts-per-million, unit of measure of type SCALE. */
 const UnitOfMeasure UnitOfMeasure::PARTS_PER_MILLION("parts per million", 1e-6,
                                                      UnitOfMeasure::Type::SCALE,
-                                                     "EPSG", "9202");
+                                                     Identifier::EPSG, "9202");
 
 /** \brief Metre, unit of measure of type LINEAR (SI unit). */
 const UnitOfMeasure UnitOfMeasure::METRE("metre", 1.0,
-                                         UnitOfMeasure::Type::LINEAR, "EPSG",
-                                         "9001");
+                                         UnitOfMeasure::Type::LINEAR,
+                                         Identifier::EPSG, "9001");
 
 /** \brief Degree, unit of measure of type ANGULAR. */
 const UnitOfMeasure UnitOfMeasure::DEGREE("degree", M_PI / 180.,
-                                          UnitOfMeasure::Type::ANGULAR, "EPSG",
-                                          "9122");
+                                          UnitOfMeasure::Type::ANGULAR,
+                                          Identifier::EPSG, "9122");
 
 /** \brief Arc-second, unit of measure of type ANGULAR. */
 const UnitOfMeasure UnitOfMeasure::ARC_SECOND("arc-second", M_PI / 180. / 3600.,
                                               UnitOfMeasure::Type::ANGULAR,
-                                              "EPSG", "9104");
+                                              Identifier::EPSG, "9104");
 
 /** \brief Grad, unit of measure of type ANGULAR. */
 const UnitOfMeasure UnitOfMeasure::GRAD("grad", M_PI / 200.,
-                                        UnitOfMeasure::Type::ANGULAR, "EPSG",
-                                        "9105");
+                                        UnitOfMeasure::Type::ANGULAR,
+                                        Identifier::EPSG, "9105");
 
 /** \brief Radian, unit of measure of type ANGULAR (SI unit). */
 const UnitOfMeasure UnitOfMeasure::RADIAN("radian", 1.0,
-                                          UnitOfMeasure::Type::ANGULAR, "EPSG",
-                                          "9101");
+                                          UnitOfMeasure::Type::ANGULAR,
+                                          Identifier::EPSG, "9101");
 
 /** \brief Microradian, unit of measure of type ANGULAR. */
 const UnitOfMeasure UnitOfMeasure::MICRORADIAN("microradian", 1e-6,
                                                UnitOfMeasure::Type::ANGULAR,
-                                               "EPSG", "9109");
+                                               Identifier::EPSG, "9109");
 
 /** \brief Second, unit of measure of type TIME (SI unit). */
 const UnitOfMeasure UnitOfMeasure::SECOND("second", 1.0,
-                                          UnitOfMeasure::Type::TIME, "EPSG",
-                                          "1029");
+                                          UnitOfMeasure::Type::TIME,
+                                          Identifier::EPSG, "1029");
 
 /** \brief Year, unit of measure of type TIME */
 const UnitOfMeasure UnitOfMeasure::YEAR("year", 31556925.445,
-                                        UnitOfMeasure::Type::TIME, "EPSG",
-                                        "1040");
+                                        UnitOfMeasure::Type::TIME,
+                                        Identifier::EPSG, "1040");
 } // namespace common
 
 // ---------------------------------------------------------------------------
