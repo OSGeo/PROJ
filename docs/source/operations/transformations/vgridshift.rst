@@ -113,3 +113,19 @@ Optional
 .. include:: ../options/t_final.rst
 .. versionadded:: 5.1.0
 
+.. option:: +multiplier=<value>
+
+    Specify the multiplier to apply to the grid value in the forward transformation
+    direction, such that:
+
+    .. math::
+        :label: multiplier_formula
+
+        Z_{target} = Z_{source} + multiplier \times gridvalue
+
+    The multiplier can be used to control whether the gridvalue should be added
+    or sustracted, and if unit conversion must be done (the multiplied gridvalue
+    must be expressed in metre).
+
+    Note that the default is `-1.0` for historical reasons.
+.. versionadded:: 5.2.0

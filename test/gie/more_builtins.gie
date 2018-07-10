@@ -205,8 +205,12 @@ operation proj=vgridshift grids=nonexistinggrid.gtx
 expect    failure errno failed_to_load_grid
 -------------------------------------------------------------------------------
 
-
-
+-------------------------------------------------------------------------------
+operation  proj=vgridshift  grids=egm96_15.gtx  ellps=GRS80     multiplier=0.1
+tolerance 15 cm
+ignore    pjd_err_failed_to_load_grid
+accept    12.5 55.5   0                  0
+expect    12.5 55.5  3.6021305084228516  0
 
 -------------------------------------------------------------------------------
 Some tests from PJ_hgridshift.c
