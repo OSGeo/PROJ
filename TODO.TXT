@@ -2,7 +2,6 @@
     - export as ESRI WKT 1 ?
     - WKTv2 Bison based validator ?
     - import from Proj4
-    - exportToProj4()
     - derived crs
     - all GDAL projected methods
     - TOWGS84 / boundcrs
@@ -11,7 +10,6 @@
     - dynamic CRS WKT
     - test sphericalCS
 
-- Fix Doxygen warnings
 - Integrate Doxygen doc in PROJ doc
 - More tests
 - Address TODO and FIXME

@@ -717,6 +717,11 @@ class Transformation : public SingleOperation {
         const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
+    PROJ_DLL static TransformationNNPtr createVERTCON(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
     PROJ_DLL std::string getNTv2Filename() const;
     PROJ_DLL std::string getHeightToGeographic3DFilename() const;
 

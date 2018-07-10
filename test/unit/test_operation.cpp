@@ -821,6 +821,15 @@ static ProjectedCRSNNPtr createUTM31_WGS84() {
 
 // ---------------------------------------------------------------------------
 
+static ProjectedCRSNNPtr createUTM32_WGS84() {
+    return ProjectedCRS::create(
+        PropertyMap(), GeographicCRS::EPSG_4326,
+        Conversion::createUTM(PropertyMap(), 32, true),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_projCRS) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
@@ -875,13 +884,8 @@ TEST(operation, projCRS_to_geogCRS) {
 
 TEST(operation, projCRS_to_projCRS) {
 
-    auto utm32 = ProjectedCRS::create(
-        PropertyMap(), GeographicCRS::EPSG_4326,
-        Conversion::createUTM(PropertyMap(), 32, true),
-        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
-
     auto op = CoordinateOperationFactory::create()->createOperation(
-        createUTM31_WGS84(), utm32);
+        createUTM31_WGS84(), createUTM32_WGS84());
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step "
@@ -1125,6 +1129,26 @@ TEST(operation, transformation_ntv2_to_PROJ_string) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, transformation_VERTCON_to_PROJ_string) {
+    auto verticalCRS1 = createVerticalCRS();
+
+    auto verticalCRS2 = VerticalCRS::create(
+        PropertyMap(), VerticalReferenceFrame::create(PropertyMap()),
+        VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+
+    // Use of this type of transformation is a bit of non-sense here
+    // since it should normally be used with NGVD29 and NAVD88 for VerticalCRS,
+    // and NAD27/NAD83 as horizontal CRS...
+    auto vtransformation = Transformation::createVERTCON(
+        PropertyMap(), verticalCRS1, verticalCRS2, "bla.gtx",
+        std::vector<PositionalAccuracyNNPtr>());
+    EXPECT_EQ(
+        vtransformation->exportToPROJString(PROJStringFormatter::create()),
+        "+proj=vgridshift +grids=bla.gtx +multiplier=0.001");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_with_boundVerticalCRS_to_geogCRS) {
 
     auto compound = CompoundCRS::create(
@@ -1194,6 +1218,11 @@ TEST(operation, compoundCRS_with_boundProjCRS_and_boundVerticalCRS_to_geogCRS) {
               "+step +proj=vgridshift +grids=egm08_25.gtx +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
+
+    auto opInverse = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::EPSG_4979, compound);
+    ASSERT_TRUE(opInverse != nullptr);
+    EXPECT_TRUE(opInverse->inverse()->isEquivalentTo(NN_CHECK_ASSERT(op)));
 }
 
 // ---------------------------------------------------------------------------
@@ -1201,15 +1230,53 @@ TEST(operation, compoundCRS_with_boundProjCRS_and_boundVerticalCRS_to_geogCRS) {
 TEST(operation, compoundCRS_to_compoundCRS) {
     auto compound1 = CompoundCRS::create(
         PropertyMap(),
-        std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326, createVerticalCRS()});
+        std::vector<CRSNNPtr>{createUTM31_WGS84(), createVerticalCRS()});
     auto compound2 = CompoundCRS::create(
         PropertyMap(),
-        std::vector<CRSNNPtr>{createUTM31_WGS84(), createVerticalCRS()});
+        std::vector<CRSNNPtr>{createUTM32_WGS84(), createVerticalCRS()});
     auto op = CoordinateOperationFactory::create()->createOperation(compound1,
                                                                     compound2);
     ASSERT_TRUE(op != nullptr);
     auto opRef = CoordinateOperationFactory::create()->createOperation(
-        GeographicCRS::EPSG_4326, createUTM31_WGS84());
+        createUTM31_WGS84(), createUTM32_WGS84());
     ASSERT_TRUE(opRef != nullptr);
     EXPECT_TRUE(op->isEquivalentTo(NN_CHECK_ASSERT(opRef)));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
+    auto verticalCRS1 = createVerticalCRS();
+
+    auto verticalCRS2 = VerticalCRS::create(
+        PropertyMap(), VerticalReferenceFrame::create(PropertyMap()),
+        VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+
+    // Use of this type of transformation is a bit of non-sense here
+    // since it should normally be used with NGVD29 and NAVD88 for VerticalCRS,
+    // and NAD27/NAD83 as horizontal CRS...
+    auto vtransformation = Transformation::createVERTCON(
+        PropertyMap(), verticalCRS1, verticalCRS2, "bla.gtx",
+        std::vector<PositionalAccuracyNNPtr>());
+
+    auto compound1 = CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{
+            createUTM31_WGS84(),
+            BoundCRS::create(verticalCRS1, verticalCRS2, vtransformation)});
+    auto compound2 = CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{createUTM32_WGS84(), verticalCRS2});
+
+    auto op = CoordinateOperationFactory::create()->createOperation(compound1,
+                                                                    compound2);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step +proj=vgridshift +grids=bla.gtx +multiplier=0.001 +step +proj=utm +zone=32 "
+              "+ellps=WGS84");
+
+    auto opInverse = CoordinateOperationFactory::create()->createOperation(
+        compound2, compound1);
+    ASSERT_TRUE(opInverse != nullptr);
+    EXPECT_TRUE(opInverse->inverse()->isEquivalentTo(NN_CHECK_ASSERT(op)));
 }

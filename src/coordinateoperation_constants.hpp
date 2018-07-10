@@ -115,6 +115,8 @@ static const std::string EPSG_NAME_PARAMETER_Z_AXIS_ROTATION("Z-axis rotation");
 static const std::string
     EPSG_NAME_PARAMETER_SCALE_DIFFERENCE("Scale difference");
 
+// ---------------------------------------------------------------------------
+
 constexpr int EPSG_CODE_METHOD_NTV2 = 9615;
 static const std::string EPSG_NAME_METHOD_NTV2("NTv2");
 
@@ -126,8 +128,19 @@ static const std::string EPSG_NAME_PARAMETER_GEOID_CORRECTION_FILENAME(
     "Geoid (height correction) model file");
 constexpr int EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME = 8666;
 
+// ---------------------------------------------------------------------------
+
 static const std::string PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D(
     "GravityRelatedHeight to Geographic3D");
+
+// ---------------------------------------------------------------------------
+
+constexpr int EPSG_CODE_METHOD_VERTCON = 9658;
+static const std::string EPSG_NAME_METHOD_VERTCON("VERTCON");
+
+static const std::string
+    EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE("Vertical offset file");
+constexpr int EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE = 8732;
 
 // ---------------------------------------------------------------------------
 

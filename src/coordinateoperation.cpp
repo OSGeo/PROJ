@@ -2327,6 +2327,43 @@ TransformationNNPtr Transformation::createGravityRelatedHeightToGeographic3D(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Transformation with method VERTCON
+ *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param filename GRID filename.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ */
+TransformationNNPtr Transformation::createVERTCON(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+
+    return create(
+        properties, sourceCRSIn, targetCRSIn, nullptr,
+        util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY, EPSG_NAME_METHOD_VERTCON)
+            .set(metadata::Identifier::CODESPACE_KEY,
+                 metadata::Identifier::EPSG)
+            .set(metadata::Identifier::CODE_KEY, EPSG_CODE_METHOD_VERTCON),
+        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE))},
+        std::vector<ParameterValueNNPtr>{
+            ParameterValue::createFilename(filename)},
+        accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateOperationNNPtr Transformation::inverse() const {
     // some Transformations like Helmert ones can be inverted as Transformation
     bool sevenParamsTransform = false;
@@ -2670,6 +2707,23 @@ std::string Transformation::exportToPROJString(
         return scope.toString();
     }
 
+    if (ci_find(method_name, EPSG_NAME_METHOD_VERTCON) != std::string::npos ||
+        method()->isEPSG(EPSG_CODE_METHOD_VERTCON)) {
+        auto fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
+                           EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+            io::PROJStringFormatter::Scope scope(formatter);
+            formatter->addStep("vgridshift");
+            // The vertcon grids go from NGVD 29 to NAVD 88, with units
+            // in millimeter (see https://github.com/OSGeo/proj.4/issues/1071)
+            formatter->addParam("grids", fileParameter->valueFile());
+            formatter->addParam("multiplier", 0.001);
+            return scope.toString();
+        }
+    }
+
     throw io::FormattingException("Unimplemented");
 }
 
@@ -2962,7 +3016,33 @@ CoordinateOperationFactory::createOperation(crs::CRSNNPtr sourceCRS,
         return op->inverse();
     }
 
-    // boudCRS to boundCRS using the same geographic hubCRS
+    // vertCRS (as boundCRS with transformation to target vertCRS) to vertCRS
+    auto vertDst = util::nn_dynamic_pointer_cast<crs::VerticalCRS>(targetCRS);
+    if (boundSrc && vertDst) {
+        auto baseSrcVert = util::nn_dynamic_pointer_cast<crs::VerticalCRS>(
+            boundSrc->baseCRS());
+        auto hubSrc = boundSrc->hubCRS();
+        auto hubSrcVert =
+            util::nn_dynamic_pointer_cast<crs::VerticalCRS>(hubSrc);
+        if (baseSrcVert && hubSrcVert &&
+            vertDst->isEquivalentTo(NN_CHECK_ASSERT(hubSrcVert))) {
+            return boundSrc->transformation().as_nullable();
+        }
+
+        return createOperation(boundSrc->baseCRS(), targetCRS);
+    }
+
+    // reverse of previous case
+    auto vertSrc = util::nn_dynamic_pointer_cast<crs::VerticalCRS>(sourceCRS);
+    if (boundDst && vertSrc) {
+        auto op = createOperation(targetCRS, sourceCRS);
+        if (!op) {
+            return nullptr;
+        }
+        return op->inverse();
+    }
+
+    // boundCRS to boundCRS using the same geographic hubCRS
     if (boundSrc && boundDst) {
         auto hubSrc = boundSrc->hubCRS();
         auto hubSrcGeog =
@@ -3049,9 +3129,62 @@ CoordinateOperationFactory::createOperation(crs::CRSNNPtr sourceCRS,
             componentsSrc.size() == componentsDst.size()) {
             if (componentsSrc[0]->extractGeographicCRS() &&
                 componentsDst[0]->extractGeographicCRS()) {
-                auto op = createOperation(componentsSrc[0], componentsDst[0]);
-                if (op) {
-                    return op;
+
+                CoordinateOperationPtr verticalTransform = nullptr;
+                if (componentsSrc.size() >= 2 &&
+                    componentsSrc[1]->extractVerticalCRS() &&
+                    componentsDst[1]->extractVerticalCRS()) {
+                    verticalTransform =
+                        createOperation(componentsSrc[1], componentsDst[1]);
+                }
+
+                if (verticalTransform) {
+                    auto interpolationGeogCRS = NN_CHECK_ASSERT(
+                        componentsSrc[0]->extractGeographicCRS());
+                    auto transformationVerticalTransform =
+                        util::nn_dynamic_pointer_cast<Transformation>(
+                            NN_CHECK_ASSERT(verticalTransform));
+                    if (transformationVerticalTransform) {
+                        auto interpTransformCRS =
+                            transformationVerticalTransform->interpolationCRS();
+                        if (interpTransformCRS) {
+                            auto nn_interpTransformCRS =
+                                NN_CHECK_ASSERT(interpTransformCRS);
+                            if (util::nn_dynamic_pointer_cast<
+                                    crs::GeographicCRS>(
+                                    nn_interpTransformCRS)) {
+                                interpolationGeogCRS = NN_CHECK_ASSERT(
+                                    util::nn_dynamic_pointer_cast<
+                                        crs::GeographicCRS>(
+                                        nn_interpTransformCRS));
+                            }
+                        }
+                    }
+                    auto opSrcCRSToGeogCRS =
+                        createOperation(componentsSrc[0], interpolationGeogCRS);
+                    auto opGeogCRStoDstCRS =
+                        createOperation(interpolationGeogCRS, componentsDst[0]);
+                    if (opSrcCRSToGeogCRS && opGeogCRStoDstCRS) {
+                        auto formatter = io::PROJStringFormatter::create();
+                        io::PROJStringFormatter::Scope scope(formatter);
+                        opSrcCRSToGeogCRS->exportToPROJString(formatter);
+                        formatter->startInversion();
+                        interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(
+                            formatter);
+                        formatter->stopInversion();
+                        verticalTransform->exportToPROJString(formatter);
+                        interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(
+                            formatter);
+                        opGeogCRStoDstCRS->exportToPROJString(formatter);
+                        return NN_CO_CAST(SingleOperation::createPROJBased(
+                            scope.toString(), sourceCRS, targetCRS));
+                    }
+                } else {
+                    auto op =
+                        createOperation(componentsSrc[0], componentsDst[0]);
+                    if (op) {
+                        return op;
+                    }
                 }
             }
         }
