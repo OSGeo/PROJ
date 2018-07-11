@@ -40,7 +40,7 @@ geod_set(int argc, char **argv) {
 		to_meter = unit_list[i].factor;
 		fr_meter = 1 / to_meter;
 	} else
-		to_meter = fr_meter = 1.;
+		to_meter = fr_meter = 1;
 	geod_f = es/(1 + sqrt(1 - es));
 	geod_ini();
 	/* check if line or arc mode */
