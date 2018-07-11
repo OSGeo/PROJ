@@ -37,7 +37,8 @@ geod_set(int argc, char **argv) {
 		for (i = 0; (s = unit_list[i].id) && strcmp(name, s) ; ++i) ;
 		if (!s)
 			emess(1,"%s unknown unit conversion id", name);
-		fr_meter = 1. / (to_meter = unit_list[i].factor);
+		to_meter = unit_list[i].factor;
+		fr_meter = 1 / to_meter;
 	} else
 		to_meter = fr_meter = 1.;
 	geod_f = es/(1 + sqrt(1 - es));
