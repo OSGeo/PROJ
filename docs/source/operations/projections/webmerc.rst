@@ -7,7 +7,7 @@ Web Mercator / Pseudo Mercator
 .. versionadded:: 5.1.0
 
 The Web Mercator / Pseudo Mercator projection is a cylindrical map projection.
-It is defined only for ellipsoid, motivated by the regular :ref:`merc` projection, except that the computation is done using equations for Mercator projection of sphere, with radius same as semi-major axis of the ellipsoid. As a consequence it is not a conformal projection.
+It is defined only for ellipsoid, motivated by the regular :ref:`merc` projection, but the equations for ellispoid are chosen to be the same as equations for Mercator projection of a sphere, with radius same as semi-major axis of the ellipsoid. As a consequence it is not a conformal projection.
 
 From `Wikipedia <https://en.wikipedia.org/wiki/Web_Mercator>`_:
 
