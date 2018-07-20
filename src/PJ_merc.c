@@ -92,7 +92,7 @@ PJ *PROJECTION(merc) {
 
 PJ *PROJECTION(webmerc) {
 
-    /* Overriding k_0, lat_0 and lon_0 with fixed parameters */
+    /* Overriding k_0, lat_0, lon_0, x_0 and y_0 with fixed parameters */
     P->k0 = 1.0;
     P->phi0 = 0.0;
     P->lam0 = 0.0;
