@@ -1,13 +1,13 @@
 .. _webmerc:
 
 ********************************************************************************
-Web Mercator / Pseudo Mercator
+WGS 84 Web Mercator / WGS 84 Pseudo Mercator
 ********************************************************************************
 
 .. versionadded:: 5.1.0
 
-The Web Mercator / Pseudo Mercator projection is a cylindrical map projection.
-It is defined only for ellipsoid, motivated by the regular :ref:`merc` projection, but the equations for ellispoid are chosen to be the same as equations for Mercator projection of a sphere, with radius same as semi-major axis of the ellipsoid. As a consequence it is not a conformal projection.
+The WGS 84 Web Mercator / WGS 84 Pseudo Mercator projection is a cylindrical map projection.
+It is defined only for ellipsoid WGS 84, motivated by the regular :ref:`merc` projection, but the equations for ellispoid are chosen to be the same as equations for Mercator projection of a sphere, with radius same as semi-major axis of the WGS 84 ellipsoid. As a consequence it is not a conformal projection.
 
 From `Wikipedia <https://en.wikipedia.org/wiki/Web_Mercator>`_:
 
@@ -20,21 +20,21 @@ From `Wikipedia <https://en.wikipedia.org/wiki/Web_Mercator>`_:
     historically.
 
 
-+---------------------+----------------------------------------------------------+
-| **Classification**  | Non-conformal cylindrical projection of an ellipsoid     |
-+---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, ellipsoidal projection              |
-+---------------------+----------------------------------------------------------+
-| **Defined area**    | Global, but best used near the equator                   |
-+---------------------+----------------------------------------------------------+
-| **Alias**           | webmerc                                                  |
-+---------------------+----------------------------------------------------------+
-| **Domain**          | 2D                                                       |
-+---------------------+----------------------------------------------------------+
-| **Input type**      | Geodetic coordinates                                     |
-+---------------------+----------------------------------------------------------+
-| **Output type**     | Projected coordinates                                    |
-+---------------------+----------------------------------------------------------+
++---------------------+-----------------------------------------------------------------+
+| **Classification**  | Non-conformal cylindrical projection of an WGS 84 ellipsoid     |
++---------------------+-----------------------------------------------------------------+
+| **Available forms** | Forward and inverse, ellipsoidal projection                     |
++---------------------+-----------------------------------------------------------------+
+| **Defined area**    | Global, low linear distortions near the equator                 |
++---------------------+-----------------------------------------------------------------+
+| **Alias**           | webmerc                                                         |
++---------------------+-----------------------------------------------------------------+
+| **Domain**          | 2D                                                              |
++---------------------+-----------------------------------------------------------------+
+| **Input type**      | Geodetic coordinates                                            |
++---------------------+-----------------------------------------------------------------+
+| **Output type**     | Projected coordinates                                           |
++---------------------+-----------------------------------------------------------------+
 
 
 Usage
@@ -48,13 +48,8 @@ Example::
 Parameters
 ################################################################################
 
-.. note:: All parameters for the projection are optional.
+.. note:: Projection does not have any additional parameters. See `EPSG.io  <http://epsg.io/3857>`_
 
-.. include:: ../options/R.rst
-
-.. include:: ../options/x_0.rst
-
-.. include:: ../options/y_0.rst
 
 Mathematical definition
 #######################
