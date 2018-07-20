@@ -196,8 +196,8 @@ PJ *PROJECTION(krovak) {
             P->lam0 = 0.7417649320975901 - 0.308341501185665;
 
     /* if scale not set default to 0.9999 */
-    if (!pj_param(P->ctx, P->params, "tk").i)
-            P->k0 = 0.9999;
+    if (!pj_param(P->ctx, P->params, "tk").i && !pj_param(P->ctx, P->params, "tk_0").i)
+        P->k0 = 0.9999;
 
     Q->czech = 1;
     if( !pj_param(P->ctx, P->params, "tczech").i )
