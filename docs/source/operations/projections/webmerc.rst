@@ -7,7 +7,7 @@ WGS 84 Web Mercator / WGS 84 Pseudo Mercator
 .. versionadded:: 5.1.0
 
 The WGS 84 Web Mercator / WGS 84 Pseudo Mercator projection is a cylindrical map projection.
-It is defined only for ellipsoid WGS 84, motivated by the regular :ref:`merc` projection, but the equations for ellispoid are chosen to be the same as equations for Mercator projection of a sphere, with radius same as semi-major axis of the WGS 84 ellipsoid. As a consequence it is not a conformal projection.
+It is defined only for ellipsoid WGS 84, motivated by the regular :ref:`merc` projection, but the equations for the ellispoid are chosen to be the same as equations for Mercator projection of a sphere, with radius same as semi-major axis of the WGS 84 ellipsoid. As a consequence it is not a conformal projection.
 
 From `Wikipedia <https://en.wikipedia.org/wiki/Web_Mercator>`_:
 
