@@ -99,6 +99,11 @@ PJ *PROJECTION(webmerc) {
     P->x0 = 0;
     P->y0 = 0;
 
+    /* Overriding ellipsoid and using WGS 84 */
+    P->f = 1.0/298.257223563;
+    P->a  = 6378137.0;
+    P->es = P->f*(2-P->f);
+    pj_calc_ellipsoid_params (P, P->a, P->es);
 
     P->inv = s_inverse;
     P->fwd = s_forward;
