@@ -38,7 +38,7 @@ writes both file formats. Using GDAL for construction of new grids is recommende
 Example
 -------------------------------------------------------------------------------
 
-In [Häkli2016]_ coordinate transformation including a deformation model is described.
+In :cite:`Hakli2016` coordinate transformation including a deformation model is described.
 The paper describes how coordinates from the global ITRFxx frames are transformed to the
 local Nordic realisations of ETRS89. Scandinavia is an area with significant post-glacial
 rebound. The deformations from the post-glacial uplift is not accounted for in the
@@ -93,7 +93,7 @@ Required
 .. option:: +xy_grids=<list>
 
     Comma-separated list of grids to load. If a grid is prefixed by an `@` the
-    grid is consideres optional and PROJ will the not complain if the grid is
+    grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
     Grids for the horizontla component of a deformation model is expected to be
@@ -102,7 +102,7 @@ Required
 .. option:: +z_grids=<list>
 
     Comma-separated list of grids to load. If a grid is prefixed by an `@` the
-    grid is consideres optional and PROJ will the not complain if the grid is
+    grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
     Grids for the vertical component of a deformation model is expected to be

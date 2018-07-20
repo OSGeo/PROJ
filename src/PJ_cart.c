@@ -64,7 +64,7 @@ PROJ_HEAD(cart,    "Geodetic/cartesian conversions");
     and
 
     Wikipedia: Geographic Coordinate Conversion,
-    https://en.m.wikipedia.org/wiki/Geographic_coordinate_conversion
+    https://en.wikipedia.org/wiki/Geographic_coordinate_conversion
 
     (WP, below).
 
@@ -94,7 +94,7 @@ PROJ_HEAD(cart,    "Geodetic/cartesian conversions");
 
     Wikipedia: Earth Radius
     https://en.wikipedia.org/wiki/Earth_radius#Radius_at_a_given_geodetic_latitude
-    (Derivation and commentary at http://gis.stackexchange.com/questions/20200/how-do-you-compute-the-earths-radius-at-a-given-geodetic-latitude)
+    (Derivation and commentary at https://gis.stackexchange.com/q/20200)
 
     (WP2, below)
 

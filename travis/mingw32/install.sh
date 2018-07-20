@@ -9,7 +9,7 @@ export CCACHE_CPP2=yes
 # autoconf build
 mkdir build_autoconf
 cd build_autoconf
-CC="ccache i586-mingw32msvc-gcc" LD=i586-mingw32msvc-ld ../configure --host=i586-mingw32msvc --prefix=/tmp/proj_autoconf_install
+CC="ccache x86_64-w64-mingw32-gcc" CXX="ccache x86_64-w64-mingw32-g++" LD=x86_64-w64-mingw32-ld ../configure --host=x86_64-w64-mingw32 --prefix=/tmp/proj_autoconf_install
 make -j3
 make install
 make dist-all
@@ -24,7 +24,7 @@ cd ..
 # autoconf build with grids
 mkdir build_autoconf_nad
 cd build_autoconf_nad
-CC="ccache i586-mingw32msvc-gcc" LD=i586-mingw32msvc-ld ../configure --host=i586-mingw32msvc --prefix=/tmp/proj_autoconf_install_nad
+CC="ccache x86_64-w64-mingw32-gcc" CXX="ccache x86_64-w64-mingw32-g++" LD=x86_64-w64-mingw32-ld ../configure --host=x86_64-w64-mingw32 --prefix=/tmp/proj_autoconf_install_nad
 make -j3
 make install
 find /tmp/proj_autoconf_install_nad

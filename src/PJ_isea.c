@@ -48,7 +48,7 @@
 
 struct hex {
         int iso;
-        int x, y, z;
+        long x, y, z;
 };
 
 /* y *must* be positive down as the xy /iso conversion assumes this */
@@ -77,7 +77,7 @@ static void hex_iso(struct hex *h) {
     h->iso = 1;
 }
 
-static void hexbin2(double width, double x, double y, int *i, int *j) {
+static void hexbin2(double width, double x, double y, long *i, long *j) {
     double z, rx, ry, rz;
     double abs_dx, abs_dy, abs_dz;
     long ix, iy, iz, s;
@@ -666,7 +666,7 @@ static int isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt,
     struct isea_pt  v;
     double          hexwidth;
     double          sidelength; /* in hexes */
-    int             d, i;
+    long             d, i;
     long            maxcoord;
     struct hex      h;
 
@@ -823,10 +823,10 @@ static int isea_ptdi(struct isea_dgg *g, int tri, struct isea_pt *pt,
 
 /* q2di to seqnum */
 
-static int isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
-    int             sidelength;
-    int             sn, height;
-    int             hexes;
+static long isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
+    long             sidelength;
+    long             sn, height;
+    long             hexes;
 
     if (quad == 0) {
         g->serial = 1;
@@ -840,8 +840,8 @@ static int isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
     }
     if (g->aperture == 3 && g->resolution % 2 == 1) {
         height = lround(floor((pow(g->aperture, (g->resolution - 1) / 2.0))));
-        sn = ((int) di->x) * height;
-        sn += ((int) di->y) / height;
+        sn = ((long)di->x) * height;
+        sn += ((long)di->y) / height;
         sn += (quad - 1) * hexes;
         sn += 2;
     } else {

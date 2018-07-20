@@ -1,5 +1,5 @@
  /*
- * Project:  PROJ.4
+ * Project:  PROJ
  * Purpose:  Implementation of the krovak (Krovak) projection.
  *           Definition: http://www.ihsenergy.com/epsg/guid7.html#1.4.3
  * Author:   Thomas Flemming, tf@ttqv.com
@@ -51,7 +51,7 @@
  * paper by Veverka.
  *
  * According to EPSG the full Krovak projection method should have
- * the following parameters.  Within PROJ.4 the azimuth, and pseudo
+ * the following parameters.  Within PROJ the azimuth, and pseudo
  * standard parallel are hardcoded in the algorithm and can't be
  * altered from outside. The others all have defaults to match the
  * common usage with Krovak projection.
@@ -85,8 +85,6 @@
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Ellps.";
 
 #define EPS 1e-15
-#define S45 0.785398163397448  /* 45 deg */
-#define S90 1.570796326794896  /* 90 deg */
 #define UQ  1.04216856380474   /* DU(2, 59, 42, 42.69689) */
 #define S0  1.37008346281555   /* Latitude of pseudo standard parallel 78deg 30'00" N */
 /* Not sure at all of the appropriate number for MAX_ITER... */
@@ -110,14 +108,14 @@ static XY e_forward (LP lp, PJ *P) {                /* Ellipsoidal, forward */
 
     gfi = pow ( (1. + P->e * sin(lp.phi)) / (1. - P->e * sin(lp.phi)), Q->alpha * P->e / 2.);
 
-    u = 2. * (atan(Q->k * pow( tan(lp.phi / 2. + S45), Q->alpha) / gfi)-S45);
+    u = 2. * (atan(Q->k * pow( tan(lp.phi / 2. + M_PI_4), Q->alpha) / gfi)-M_PI_4);
     deltav = -lp.lam * Q->alpha;
 
     s = asin(cos(Q->ad) * sin(u) + sin(Q->ad) * cos(u) * cos(deltav));
     d = asin(cos(u) * sin(deltav) / cos(s));
 
     eps = Q->n * d;
-    rho = Q->rho0 * pow(tan(S0 / 2. + S45) , Q->n) / pow(tan(s / 2. + S45) , Q->n);
+    rho = Q->rho0 * pow(tan(S0 / 2. + M_PI_4) , Q->n) / pow(tan(s / 2. + M_PI_4) , Q->n);
 
     xy.y = rho * cos(eps);
     xy.x = rho * sin(eps);
@@ -147,7 +145,7 @@ static LP e_inverse (XY xy, PJ *P) {                /* Ellipsoidal, inverse */
     eps = atan2(xy.y, xy.x);
 
     d = eps / sin(S0);
-    s = 2. * (atan(  pow(Q->rho0 / rho, 1. / Q->n) * tan(S0 / 2. + S45)) - S45);
+    s = 2. * (atan(  pow(Q->rho0 / rho, 1. / Q->n) * tan(S0 / 2. + M_PI_4)) - M_PI_4);
 
     u = asin(cos(Q->ad) * sin(s) - sin(Q->ad) * cos(s) * cos(d));
     deltav = asin(cos(s) * sin(d) / cos(u));
@@ -159,9 +157,9 @@ static LP e_inverse (XY xy, PJ *P) {                /* Ellipsoidal, inverse */
 
     for (i = MAX_ITER; i ; --i) {
         lp.phi = 2. * ( atan( pow( Q->k, -1. / Q->alpha)  *
-                              pow( tan(u / 2. + S45) , 1. / Q->alpha)  *
+                              pow( tan(u / 2. + M_PI_4) , 1. / Q->alpha)  *
                               pow( (1. + P->e * sin(fi1)) / (1. - P->e * sin(fi1)) , P->e / 2.)
-                            )  - S45);
+                            )  - M_PI_4);
 
         if (fabs(fi1 - lp.phi) < EPS)
             break;
@@ -209,11 +207,11 @@ PJ *PROJECTION(krovak) {
     Q->alpha = sqrt(1. + (P->es * pow(cos(P->phi0), 4)) / (1. - P->es));
     u0 = asin(sin(P->phi0) / Q->alpha);
     g = pow( (1. + P->e * sin(P->phi0)) / (1. - P->e * sin(P->phi0)) , Q->alpha * P->e / 2. );
-    Q->k = tan( u0 / 2. + S45) / pow  (tan(P->phi0 / 2. + S45) , Q->alpha) * g;
+    Q->k = tan( u0 / 2. + M_PI_4) / pow  (tan(P->phi0 / 2. + M_PI_4) , Q->alpha) * g;
     n0 = sqrt(1. - P->es) / (1. - P->es * pow(sin(P->phi0), 2));
     Q->n = sin(S0);
     Q->rho0 = P->k0 * n0 / tan(S0);
-    Q->ad = S90 - UQ;
+    Q->ad = M_PI_2 - UQ;
 
     P->inv = e_inverse;
     P->fwd = e_forward;

@@ -185,8 +185,10 @@ static void print(PJ_LOG_LEVEL log_level, const char *fmt, ...) {
     va_start( args, fmt );
 
     msg_buf = (char *) malloc(100000);
-    if( msg_buf == NULL )
+    if( msg_buf == NULL ) {
+        va_end( args );
         return;
+    }
 
     vsprintf( msg_buf, fmt, args );
 

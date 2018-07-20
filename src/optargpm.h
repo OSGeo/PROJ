@@ -524,29 +524,37 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
                 if (equals)
                     *equals = 0;
                 c = opt_ordinal (o, crepr);
-                if (0==c)
-                    return fprintf (stderr, "Invalid option \"%s\"\n", crepr), (OPTARGS *) 0;
+                if (0==c) {
+                    fprintf (stderr, "Invalid option \"%s\"\n", crepr);
+                    return (OPTARGS *) 0;
+                }
 
                 /* inline (gnu) --foo=bar style arg */
                 if (equals) {
                     *equals = '=';
-                    if (opt_is_flag (o, c))
-                        return fprintf (stderr, "Option \"%s\" takes no arguments\n", crepr), (OPTARGS *) 0;
+                    if (opt_is_flag (o, c)) {
+                        fprintf (stderr, "Option \"%s\" takes no arguments\n", crepr);
+                        return (OPTARGS *) 0;
+                    }
                     o->optarg[c] = equals + 1;
                     break;
                 }
 
                 /* "outline" --foo bar style arg */
                 if (!opt_is_flag (o, c)) {
-                    if ((argc==i + 1) || ('+'==argv[i+1][0]) || ('-'==argv[i+1][0]))
-                        return fprintf (stderr, "Missing argument for option \"%s\"\n", crepr), (OPTARGS *) 0;
+                    if ((argc==i + 1) || ('+'==argv[i+1][0]) || ('-'==argv[i+1][0])) {
+                        fprintf (stderr, "Missing argument for option \"%s\"\n", crepr);
+                        return (OPTARGS *) 0;
+                    }
                     o->optarg[c] = argv[i + 1];
                     i++; /* eat the arg */
                     break;
                 }
 
-                if (!opt_is_flag (o, c))
-                    return fprintf (stderr, "Expected flag style long option here, but got \"%s\"\n", crepr), (OPTARGS *) 0;
+                if (!opt_is_flag (o, c)) {
+                    fprintf (stderr, "Expected flag style long option here, but got \"%s\"\n", crepr);
+                    return (OPTARGS *) 0;
+                }
 
                 /* Flag style option, i.e. taking no arguments */
                 opt_raise_flag (o, c);
@@ -554,8 +562,10 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
             }
 
             /* classic short options */
-            if (0==o->optarg[c])
-                return fprintf (stderr, "Invalid option \"%s\"\n", crepr), (OPTARGS *) 0;
+            if (0==o->optarg[c]) {
+                fprintf (stderr, "Invalid option \"%s\"\n", crepr);
+                return (OPTARGS *) 0;
+            }
 
             /* Flag style option, i.e. taking no arguments */
             if (opt_is_flag (o, c)) {
@@ -568,7 +578,10 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
             /* argument separate (i.e. "-i 10") */
             if (j + 1==arg_group_size) {
                 if ((argc==i + 1) || ('+'==argv[i+1][0]) || ('-'==argv[i+1][0]))
-                    return fprintf (stderr, "Bad or missing arg for option \"%s\"\n", crepr), (OPTARGS *) 0;
+                {
+                    fprintf (stderr, "Bad or missing arg for option \"%s\"\n", crepr);
+                    return (OPTARGS *) 0;
+                }
                 o->optarg[(int) c] = argv[i + 1];
                 i++;
                 break;
@@ -584,7 +597,8 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
     o->pargv = argv + i;
 
     /* Is free format in use, instead of plus-style? */
-    for (free_format = 0, j = 1;  j < argc;  j++) {
+    free_format = 0;
+    for (j = 1;  j < argc;  j++) {
         if (0==strcmp ("--", argv[j])) {
             free_format = j;
             break;

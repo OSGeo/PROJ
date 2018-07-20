@@ -12,43 +12,41 @@ cd ..
 
 # prepare build files
 ./autogen.sh
-# cmake build
-mkdir build_cmake
-cd build_cmake
-cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
-make -j3
-make install
-find /tmp/proj_cmake_install
-cd ..
+
 # autoconf build
 mkdir build_autoconf
 cd build_autoconf
-../configure --prefix=/tmp/proj_autoconf_install
-make -j3
-make install
+../configure
 make dist-all
-find /tmp/proj_autoconf_install
-PROJ_LIB=$GRIDDIR make check
 # Check consistency of generated tarball
 TAR_FILENAME=`ls *.tar.gz`
 TAR_DIRECTORY=`basename $TAR_FILENAME .tar.gz`
 tar xvzf $TAR_FILENAME
 cd $TAR_DIRECTORY
-./configure --prefix=/tmp/proj_autoconf_install_from_dist_all
+
+# autoconf build from generated tarball
+mkdir build_autoconf
+cd build_autoconf
+../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 make -j3
 make install
 PROJ_LIB=$GRIDDIR make check
-CURRENT_PWD=`pwd`
-cd /tmp/proj_autoconf_install
-find | sort > /tmp/list_proj_autoconf_install.txt
-cd /tmp/proj_autoconf_install_from_dist_all
-find | sort > /tmp/list_proj_autoconf_install_from_dist_all.txt
-cd $CURRENT_PWD
-# The list of file is not identical. See http://lists.maptools.org/pipermail/proj/2015-September/007231.html
-#diff -u /tmp/list_proj_autoconf_install.txt /tmp/list_proj_autoconf_install_from_dist_all.txt
+find /tmp/proj_autoconf_install_from_dist_all
 cd ..
-#
+
+# cmake build from generated tarball
+mkdir build_cmake
+cd build_cmake
+cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
+make -j3
+make install
+PROJ_LIB=$GRIDDIR ctest
+find /tmp/proj_cmake_install
 cd ..
+
+# return to root
+cd ../..
+
 # cmake build with grids
 mkdir build_cmake_nad
 cd build_cmake_nad
@@ -73,10 +71,10 @@ PROJ_LIB=../nad src/multistresstest
 cd ..
 # autoconf build with grids and coverage
 if [ $TRAVIS_OS_NAME == "osx" ]; then
-      CFLAGS="--coverage" ./configure;
-    else
-      CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure;
-    fi
+    CFLAGS="--coverage" ./configure;
+else
+    CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure;
+fi
 make -j3
 PROJ_LIB=$GRIDDIR make check
 

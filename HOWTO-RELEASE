@@ -1,24 +1,37 @@
-	Preparing a PROJ.4 Release
-	==========================
+Preparing a PROJ Release
+===============================================================================
 
-1) Update the version number in configure.ac (in AC_INIT()).
+Preparing a PROJ release is a three-step process. Before the actual release is
+published we want to issue one or more release candidates to ensure that the
+code is in fact ready to be released. That is step one. Step two starts when a
+release candidate has been selected for promotion to final release. Step three
+updates version numbers in the master branch to avoid confusion between
+released code and code still in development.
 
-   1a) Update the version number in PROJ_BUILD_VERSION in CMakeLists.txt
-   1b) Update the version number in doc/source/conf.py
-   1c) Update version numbers in man pages in man/man1/ and man/man3/
+The three phases are described below.
 
-2) Update the version number in proj_api.h (#define PJ_VERSION).
+1 Release candidate
+===============================================================================
 
-   2a) Update PROJ_VERSION_MAJOR, PROJ_VERSION_MINOR and PROJ_VERSION_PATCH
-       in src/proj.h
+At least one release candidate is necessary before the final release is
+published. In case more than one release candidate is needed most steps below
+can be skipped depending on what prompted the release candidate 1+n. Steps 1.6
+and 1.7 are mandatory for all release candidates, otherwise it will in most
+cases only be necessary to update the NEWS section (1.3).
 
-3) Update the version number, and date in src/pj_release.c.
+Release candidates should be released about a week before the final release is
+scheduled. When preparing major version releases it may be wise to issue the
+release candidate earlier than that.
 
-4) Update the version number in the -version-info definition in
-   src/Makefile.am.  It consists of "current:revision:age".
+When a release candidate has not prompted any request for changes in 48 hours,
+a motion for promotion to final release should be issued on the PROJ mailing
+list. The PROJ PSC guidelines describes the rules for passing a motion.
 
-   4a) Increment PROJ_BUILD_VERSION in CMakeLists.txt to follow
-       libtool versioning
+1.1 Update ABI version numbers:
+-------------------------------------------------------------------------------
+
+Determine the ABI version number. It consists of "current:revision:age". Follow
+the steps below to determine the next ABI version number:
 
    - If the library source code has changed at all since the last update,
      then increment revision (c:r:a becomes c:r+1:a).
@@ -32,47 +45,192 @@
    - If any interfaces have been removed since the last public release, then
      set age to 0.
 
-4.5) Run "autogen.sh" (hopefully on the same machine it was last run on)
+Update the following files with the new ABI version number:
 
-5) Update man pages:
+    - `src/Makefile.am`     Update -version-info
+    - `CMakelists.txt`:     Update PROJ_BUILD_VERSION (cur:rev:age) and
+                            PROJ_API_VERSION (current)
 
-    ./scripts/update_man.sh
+*Commit the changes to master.*
 
-   The script builds man pages from Sphinx docs, copies them to man/ and commits
-   them to git.
 
-6) Add a note to the ChangeLog that a new release is being issued, and what
-   the release number is.
+1.2 Update man pages
+-------------------------------------------------------------------------------
 
-7) Update NEWS file with summary of release changes.
+Man pages are (mostly) automatically generated from the Sphinx docs. The pages
+in man/man3/ was manually updated in 1.1. Here we update the pages in
+man/man1/. Follow these steps:
 
-8) Update the year in CITATION
+    - Update version number and date in `man/man3/pj_init.3` and
+      `man/man3/geodesic.3`
+    - Temporarily update version in `docs/source/conf.py`
+    - run `script/update_man.sh`
+    - Revert version number in `docs/source/conf.py`
 
-9) If this is a major release, prepare a branch.
+The `update_man.sh` script builds the man pages and commits the update man pages
+to master.
 
-   git checkout -b 5.0
 
-10) Tag the release
+1.3 Write release notes
+-------------------------------------------------------------------------------
 
-   git tag 5.0.0
+Update `NEWS` with descriptions of the changes since the last release.
+Hopefully issues and pull requests that go into the new release have been
+properly tagged with the milestone for the current release.
 
-11) Do a "make dist-all" in the proj root directory.  After some grinding
-   this should result in files like proj-4.4.3.tar.gz and proj-4.4.3.zip
-   being created.  These are full source distributions.
+End the section by thanking the authors that contributed to the release. Get a
+sorted list of contributors in descending order of activity:
 
-12) Put these in the proj ftp area on /osgeo/download/proj on
-   download.osgeo.org.  This can be done via scp using a command like the
-   following.
+```
+git shortlog -sn x.y.z..HEAD | tac | awk '{print $2 " " $3}'
+```
 
-  scp proj-4.4.3.{tar.gz,zip} warmerdam@download.osgeo.org:/osgeo/download/proj
+where `x.y.z` is the tag of the previous release. You may need to edit the list
+slightly since not all authors has properly configured their names in git.
 
-13) Announce the new release on the PROJ.4 and MetaCRS mailing lists.
+*Commit the changes to master.*
 
-14) Issue a new release report on GitHub:
 
-   https://github.com/OSGeo/proj.4/releases/new
+1.4 Update `CITATION`
+-------------------------------------------------------------------------------
 
-NOTES:
+If needed, update the year in `CITATION` and `docs/source/about.rst`.
 
- o Information about preparing binary releases, and RPMs should be formalized.
- o A "beta" release step should likely be incorporated.
+*Commit the changes to master.*
+
+
+1.5 Create maintenance branch
+-------------------------------------------------------------------------------
+
+*Skip this step if you are preparing a patch release or RC2 and later.*
+
+Create the branch:
+
+```
+git branch x.y
+```
+
+where `x` is the major version number and `y` is the minor version number. Bug
+fixes found in the release candidates should be pushed to master and
+subsequently cherry-picked to the maintenance branch.
+
+*Push branch upstream.*
+
+
+1.6 Prepare and upload archives
+-------------------------------------------------------------------------------
+
+Run autoconf and configure the build:
+
+```
+./autogen.sh
+mkdir build
+cd build
+../configure
+make dist
+```
+
+Rename the archives and generate MD5 sum files:
+
+```
+mv proj-x.y.z.tar.gz proj-x.y.zRCn.tar.gz
+mv proj-x.y.z.zip proj-x.y.zRCn.zip
+md5 proj-x.y.zRCn.tar.gz > proj-x.y.zRCn.tar.gz.md5
+md5 proj-x.y.zRCn.zip > proj-x.y.zRCn.zip.md5
+```
+
+Upload to the OSGeo download server:
+
+```
+scp proj-x.y.zRCn.* warmerdam@download.osgeo.org:/osgeo/download/proj
+```
+
+Adjust version numbers and usernames accordingly.
+
+
+1.7 Announce the release candidate
+-------------------------------------------------------------------------------
+
+Announce the release candidate on the PROJ mailing list.
+
+
+1.8 Promotion to final release
+-------------------------------------------------------------------------------
+
+When you are confident that the latest release candidate is ready for promotion
+to final release a motion for promotion should be issued on the PROJ mailing
+list. Allow for a minimum of 48 hours for voting time.
+
+
+2 Final release
+===============================================================================
+
+Barring a successful promotion process we can proceed with the final release.
+
+2.1 Prepare and upload archives
+-------------------------------------------------------------------------------
+
+See step 1.6 above. Do not rename the archives with RC postfixes.
+
+2.2 Update website
+------------------------------------------------------------------------------
+
+  - Update the version number in `doc/source/conf.py`
+  - Add the release notes from `NEWS` to `docs/source/news.rst`
+  - Update download links in `docs/source/download.rst`
+
+*Commit the changes to master and cherry-pick into maintenance branch.*
+
+When pushed upstream the website will be update to the current version.
+
+2.3 Tag the release
+-------------------------------------------------------------------------------
+
+Tag the release with:
+
+```
+git tag -a -m "Create tag x.y.z" x.y.z
+git push --tags
+```
+
+2.4 Prepare the release on GitHub
+-------------------------------------------------------------------------------
+
+When the new tag is pushed upstream GitHub picks up that a new release has been
+issued. Update the new release on https://github.com/OSGeo/proj.4/releases with
+the release notes from `NEWS` and add the prepared source distribution archives
+to the release (otherwise GitHub will just package the entire repository - we
+don't want that).
+
+
+2.5 Announce the new release
+-------------------------------------------------------------------------------
+
+The release should be announced on PROJ and MetaCRS mailing lists. Additionally
+the release announcement should be sent to news_item@osgeo.org which will add
+the announcement to osgeo.org and other OSGeo communication channels.
+
+Make some noise on Twitter and other relevant social media.
+
+
+3 Post final release
+===============================================================================
+
+3.1 Update version numbers
+-------------------------------------------------------------------------------
+
+*Skip this step if you are preparing a patch release.*
+
+PROJ uses [semantic versioning](http://semver.org/). Depending on the changes
+in the release will be either a major, minor or patch release. Update the
+version numbers in the files.
+
+  - configure.ac:         Update the version number in AC_INIT().
+  - src/proj.h:           Update PROJ_VERSION_MAJOR, PROJ_VERSION_MINOR and
+                          PROJ_VERSION_PATCH.
+  - src/proj_api.h:       Update PJ_VERSION.
+  - src/pj_release.c:     Update date to the scheduled release date.
+  - CMakelists.txt:       Update proj_version()
+
+
+*Commit changes to master branch.*

@@ -12,7 +12,7 @@
 cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 
 # For historic reasons, the CMake PROJECT-NAME is PROJ4
-project(PROJ4 C)
+project(PROJ4 LANGUAGES C CXX)
 set(PROJECT_INTERN_NAME PROJ)
 
 if (NOT CMAKE_VERSION VERSION_LESS 3.1)
@@ -23,11 +23,15 @@ endif ()
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   # Suppress warning 4706 about assignment within conditional expression
   # Suppress warning 4996 about sprintf, etc., being unsafe
+  # Suppress warning 4589 about Constructor of abstract class...ignores initializer for virtual base class (see https://github.com/weidai11/cryptopp/issues/214#issuecomment-230283061)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4706 /wd4996 /D_CRT_SECURE_NO_WARNINGS")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /W4 /wd4706 /wd4996 /wd4589 /D_CRT_SECURE_NO_WARNINGS")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-declarations -Wformat -Wformat-security")
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-prototypes -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion -Wc99-extensions -Wc11-extensions")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wswitch -Wshadow -Wunused-parameter -Wmissing-declarations -Wformat -Wformat-security -Wfloat-conversion")
 endif()
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to
@@ -57,7 +61,7 @@ colormsg(_HIBLUE_ "Configuring PROJ:")
 #PROJ version information
 #################################################################################
 include(ProjVersion)
-proj_version(MAJOR 5 MINOR 0 PATCH 0)
+proj_version(MAJOR 5 MINOR 2 PATCH 0)
 set(PROJ_API_VERSION "14")
 set(PROJ_BUILD_VERSION "14.0.1")
 
@@ -124,7 +128,6 @@ endif ()
 option(PROJ_TESTS "Enable build of collection of PROJ tests" ON)
 boost_report_value(PROJ_TESTS)
 if(PROJ_TESTS)
-    include(CTest)
     enable_testing()
 endif(PROJ_TESTS)
 include(ProjTest)

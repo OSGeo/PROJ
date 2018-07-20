@@ -89,7 +89,7 @@ Parameters
 Mathematical definition
 #######################
 
-The formulas describing the Equidistant Cylindrical projection are all taken from Snyder's [Snyder1987]_.
+The formulas describing the Equidistant Cylindrical projection are all taken from :cite:`Snyder1987`.
 
 :math:`\phi_{ts}` is the latitude of true scale, that mean the standard parallels where the scale of the projection is true. It can be set with ``+lat_ts``.
 

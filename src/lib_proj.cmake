@@ -315,7 +315,8 @@ set_target_properties(${PROJ_CORE_TARGET}
 ##############################################
 # Link properties
 ##############################################
-set(PROJ_LIBRARIES ${PROJ_CORE_TARGET} )
+set(PROJ_LIBRARIES ${PROJ_CORE_TARGET})
+set(PROJ_LIBRARIES ${PROJ_LIBRARIES} PARENT_SCOPE) # hack, required for test/unit
 if(UNIX)
     find_library(M_LIB m)
     if(M_LIB)

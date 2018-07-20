@@ -27,6 +27,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#include <errno.h>
 #include <math.h>
 #include <string.h>
 
@@ -68,8 +69,8 @@ static int adjust_axis( projCtx ctx, const char *axis, int denormalize_flag,
 #define M_BF  (defn->datum_params[6])
 
 /*
-** This table is intended to indicate for any given error code in
-** the range 0 to -56, whether that error will occur for all locations (ie.
+** This table is intended to indicate for any given error code
+** whether that error will occur for all locations (ie.
 ** it is a problem with the coordinate system as a whole) in which case the
 ** value would be 0, or if the problem is with the point being transformed
 ** in which case the value is 1.
@@ -96,6 +97,19 @@ static const int transient_error[60] = {
     /* 40 to 49 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
     /* 50 to 59 */ 1, 0, 1, 0, 1, 1, 1, 1, 0, 0 };
 
+
+/* -------------------------------------------------------------------- */
+/*      Read transient_error[] in a safe way.                           */
+/* -------------------------------------------------------------------- */
+static int get_transient_error_value(int pos_index)
+{
+    const int array_size =
+        (int)(sizeof(transient_error) / sizeof(transient_error[0]));
+    if( pos_index < 0 || pos_index >= array_size ) {
+        return 0;
+    }
+    return transient_error[pos_index];
+}
 
 
 /* -------------------------------------------------------------------- */
@@ -206,12 +220,14 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
             projected_loc = pj_fwd3d( geodetic_loc, P);
             if( P->ctx->last_errno != 0 )
             {
-                if( (P->ctx->last_errno != 33 /*EDOM*/
-                        && P->ctx->last_errno != 34 /*ERANGE*/ )
+                if( (P->ctx->last_errno != EDOM
+                        && P->ctx->last_errno != ERANGE)
                     && (P->ctx->last_errno > 0
                         || P->ctx->last_errno < -44 || n == 1
-                        || transient_error[-P->ctx->last_errno] == 0 ) )
+                        || get_transient_error_value(-P->ctx->last_errno) == 0 ) )
+                {
                     return P->ctx->last_errno;
+                }
                 else
                 {
                     projected_loc.u = HUGE_VAL;
@@ -242,12 +258,14 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
         projected_loc = pj_fwd( geodetic_loc, P );
         if( P->ctx->last_errno != 0 )
         {
-            if( (P->ctx->last_errno != 33 /*EDOM*/
-                    && P->ctx->last_errno != 34 /*ERANGE*/ )
+            if( (P->ctx->last_errno != EDOM
+                    && P->ctx->last_errno != ERANGE)
                 && (P->ctx->last_errno > 0
                     || P->ctx->last_errno < -44 || n == 1
-                    || transient_error[-P->ctx->last_errno] == 0 ) )
+                    || get_transient_error_value(-P->ctx->last_errno) == 0 ) )
+            {
                 return P->ctx->last_errno;
+            }
             else
             {
                 projected_loc.u = HUGE_VAL;
@@ -278,10 +296,10 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
     /* Check first if projection is invertible. */
     if( (P->inv3d == NULL) && (P->inv == NULL))
     {
-        pj_ctx_set_errno( pj_get_ctx(P), -17 );
+        pj_ctx_set_errno(pj_get_ctx(P), PJD_ERR_NON_CONV_INV_MERI_DIST);
         pj_log( pj_get_ctx(P), PJ_LOG_ERROR,
                 "pj_transform(): source projection not invertable" );
-        return -17;
+        return PJD_ERR_NON_CONV_INV_MERI_DIST;
     }
 
     /* If invertible - First try inv3d if defined */
@@ -310,12 +328,14 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
             geodetic_loc = pj_inv3d(projected_loc, P);
             if( P->ctx->last_errno != 0 )
             {
-                if( (P->ctx->last_errno != 33 /*EDOM*/
-                        && P->ctx->last_errno != 34 /*ERANGE*/ )
+                if( (P->ctx->last_errno != EDOM
+                        && P->ctx->last_errno != ERANGE)
                     && (P->ctx->last_errno > 0
                         || P->ctx->last_errno < -44 || n == 1
-                        || transient_error[-P->ctx->last_errno] == 0 ) )
+                        || get_transient_error_value(-P->ctx->last_errno) == 0 ) )
+                {
                     return P->ctx->last_errno;
+                }
                 else
                 {
                     geodetic_loc.u = HUGE_VAL;
@@ -347,12 +367,14 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
         geodetic_loc = pj_inv( projected_loc, P );
         if( P->ctx->last_errno != 0 )
         {
-            if( (P->ctx->last_errno != 33 /*EDOM*/
-                    && P->ctx->last_errno != 34 /*ERANGE*/ )
+            if( (P->ctx->last_errno != EDOM
+                    && P->ctx->last_errno != ERANGE)
                 && (P->ctx->last_errno > 0
                     || P->ctx->last_errno < -44 || n == 1
-                    || transient_error[-P->ctx->last_errno] == 0 ) )
+                    || get_transient_error_value(-P->ctx->last_errno) == 0 ) )
+            {
                 return P->ctx->last_errno;
+            }
             else
             {
                 geodetic_loc.u = HUGE_VAL;
@@ -835,13 +857,13 @@ int pj_datum_transform( PJ *src, PJ *dst,
 /* -------------------------------------------------------------------- */
     if( z == NULL )
     {
-        int	bytes = sizeof(double) * point_count * point_offset;
+        size_t	bytes = sizeof(double) * point_count * point_offset;
         z = (double *) pj_malloc(bytes);
         memset( z, 0, bytes );
         z_is_temp = TRUE;
     }
 
-#define CHECK_RETURN(defn) {if( defn->ctx->last_errno != 0 && (defn->ctx->last_errno > 0 || transient_error[-defn->ctx->last_errno] == 0) ) { if( z_is_temp ) pj_dalloc(z); return defn->ctx->last_errno; }}
+#define CHECK_RETURN(defn) {if( defn->ctx->last_errno != 0 && (defn->ctx->last_errno > 0 || get_transient_error_value(-defn->ctx->last_errno) == 0) ) { if( z_is_temp ) pj_dalloc(z); return defn->ctx->last_errno; }}
 
 /* -------------------------------------------------------------------- */
 /*	If this datum requires grid shifts, then apply it to geodetic   */

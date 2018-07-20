@@ -114,6 +114,9 @@ static PJ_COORD fwd_finalize (PJ *P, PJ_COORD coo) {
         if (P->is_geocent) {
             coo = proj_trans (P->cart, PJ_FWD, coo);
         }
+        coo.xyz.x *= P->fr_meter;
+        coo.xyz.y *= P->fr_meter;
+        coo.xyz.z *= P->fr_meter;
 
         break;
 

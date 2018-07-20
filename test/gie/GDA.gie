@@ -61,7 +61,7 @@ ITRF2014@2018 to GDA2020  -  Test point ALIC (Alice Springs)
 -----------------------------------------------------------------------------------
 Just the Helmert transformation, to verify that we are within 100 um
 -----------------------------------------------------------------------------------
-operation proj = helmert    ellps=GRS80 exact
+operation proj = helmert    exact
 
           x = 0   rx = 0   dx = 0   drx = 0.00150379
           y = 0   ry = 0   dy = 0   dry = 0.00118346

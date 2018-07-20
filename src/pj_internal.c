@@ -209,7 +209,9 @@ consuming their surrounding whitespace.
     n = strlen (c);
 
     /* First collapse repeated whitespace (including +/;) */
-    for (i = j = 0, ws = 0;  j < n;  j++) {
+    i = 0;
+    ws = 0;
+    for (j = 0;  j < n;  j++) {
 
         /* Eliminate prefix '+', only if preceded by whitespace */
         /* (i.e. keep it in 1.23e+08) */
@@ -233,7 +235,8 @@ consuming their surrounding whitespace.
     n = strlen(c);
 
     /* Then make ',' and '=' greedy */
-    for (i = j = 0;  j < n;  j++) {
+    i = 0;
+    for (j = 0;  j < n;  j++) {
         if (i==0) {
             c[i++] = c[j];
             continue;
@@ -311,7 +314,8 @@ It is the duty of the caller to free this array.
     if (0==argv)
         return 0;
     argv[0] = args;
-    for (i = 0, j = 1;  ;  i++) {
+    j = 1;
+    for (i = 0;  ;  i++) {
         if (0==args[i]) {
             argv[j++] = args + (i + 1);
         }

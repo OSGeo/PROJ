@@ -170,8 +170,10 @@ static const char *err_const_from_errno (int err);
 
 #define SKIP -1
 
+#define MAX_OPERATION 10000
+
 typedef struct {
-    char operation[10000];
+    char operation[MAX_OPERATION+1];
     PJ *P;
     PJ_COORD a, b, c, e;
     PJ_DIRECTION dir;
@@ -260,12 +262,6 @@ int main (int argc, char **argv) {
         return 0;
     }
 
-
-    if (opt_given (o, "l")) {
-        free (o);
-        return list_err_codes ();
-    }
-
     T.verbosity = opt_given (o, "q");
     if (T.verbosity)
         T.verbosity = -1;
@@ -280,6 +276,11 @@ int main (int argc, char **argv) {
         fprintf (stderr, "%s: Cannot open '%s' for output\n", o->progname, opt_arg (o, "output"));
         free (o);
         return 1;
+    }
+
+    if (opt_given (o, "l")) {
+        free (o);
+        return list_err_codes ();
     }
 
     if (0==o->fargc) {
@@ -386,8 +387,11 @@ static int process_file (const char *fname) {
     T.op_ko = T.total_ko = 0;
     T.op_skip = T.total_skip = 0;
 
-    if (T.skip)
-        return proj_destroy (T.P), T.P = 0, 0;
+    if (T.skip) {
+        proj_destroy (T.P);
+        T.P = 0;
+        return 0;
+    }
 
     f = fopen (fname, "rt");
     if (0==f) {
@@ -404,8 +408,11 @@ static int process_file (const char *fname) {
     T.curr_file = fname;
 
     while (get_inp(F)) {
-        if (SKIP==dispatch (F->tag, F->args))
-            return proj_destroy (T.P), T.P = 0, 0;
+        if (SKIP==dispatch (F->tag, F->args)) {
+            proj_destroy (T.P);
+            T.P = 0;
+            return 0;
+        }
     }
 
     fclose (f);
@@ -552,7 +559,8 @@ either a conversion or a transformation)
 
     T.operation_lineno = F->lineno;
 
-    strcpy (&(T.operation[0]), F->args);
+    strncpy (&(T.operation[0]), F->args, MAX_OPERATION);
+    T.operation[MAX_OPERATION] = '\0';
 
     if (T.verbosity > 1) {
         finish_previous_operation (F->args);
@@ -639,7 +647,8 @@ static PJ_COORD torad_coord (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
     paralist *l = pj_param_exists (P->params, "axis");
     if (l && dir==PJ_INV)
         axis = l->param + strlen ("axis=");
-    for (i = 0,  n = strlen (axis);  i < n;  i++)
+    n = strlen (axis);
+    for (i = 0;  i < n;  i++)
         if (strchr ("news", axis[i]))
             a.v[i] = proj_torad (a.v[i]);
     return a;
@@ -652,7 +661,8 @@ static PJ_COORD todeg_coord (PJ *P, PJ_DIRECTION dir, PJ_COORD a) {
     paralist *l = pj_param_exists (P->params, "axis");
     if (l && dir==PJ_FWD)
         axis = l->param + strlen ("axis=");
-    for (i = 0,  n = strlen (axis);  i < n;  i++)
+    n = strlen (axis);
+    for (i = 0;  i < n;  i++)
         if (strchr ("news", axis[i]))
             a.v[i] = proj_todeg (a.v[i]);
     return a;
@@ -666,11 +676,32 @@ static PJ_COORD parse_coord (const char *args) {
 Attempt to interpret args as a PJ_COORD.
 ******************************************************************************/
     int i;
-    const char *endp, *prev = args;
+    const char *endp;
+    const char *dmsendp;
+    const char *prev = args;
     PJ_COORD a = proj_coord (0,0,0,0);
 
-    for (i = 0, T.dimensions_given = 0;   i < 4;   i++, T.dimensions_given++) {
-        double d = proj_strtod (prev,  (char **) &endp);
+    T.dimensions_given = 0;
+    for (i = 0;   i < 4;   i++) {
+        /* proj_strtod doesn't read values like 123d45'678W so we need a bit */
+        /* of help from proj_dmstor. proj_strtod effectively ignores what    */
+        /* comes after "d", so we use that fact that when dms is larger than */
+        /* d the value was stated in "dms" form.                             */
+        /* This could be avoided if proj_dmstor used the same proj_strtod()  */
+        /* as gie, but that is not the case (yet). When we remove projects.h */
+        /* from the public API we can change that.                           */
+        double d = proj_strtod(prev,  (char **) &endp);
+        double dms = PJ_TODEG(proj_dmstor (prev, (char **) &dmsendp));
+       /* TODO: When projects.h is removed, call proj_dmstor() in all cases */
+        if (d != dms && fabs(d) < fabs(dms) && fabs(dms) < fabs(d) + 1) {
+            d = dms;
+            endp = dmsendp;
+        }
+        /* A number like -81d00'00.000 will be parsed correctly by both */
+        /* proj_strtod and proj_dmstor but only the latter will return  */
+        /* the correct end-pointer.                                     */
+        if (d == dms && endp != dmsendp)
+            endp = dmsendp;
 
         /* Break out if there were no more numerals */
         if (prev==endp)
@@ -678,6 +709,7 @@ Attempt to interpret args as a PJ_COORD.
 
         a.v[i] = d;
         prev = endp;
+        T.dimensions_given++;
     }
 
     return a;
@@ -691,7 +723,7 @@ Read ("ACCEPT") a 2, 3, or 4 dimensional input coordinate.
 ******************************************************************************/
     T.a = parse_coord (args);
     if (T.verbosity > 3)
-        printf ("#  %s\n", args);
+        fprintf (T.fout, "#  %s\n", args);
     T.dimensions_given_at_last_accept = T.dimensions_given;
     return 0;
 }
@@ -877,7 +909,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
         if (expect_failure_with_errno) {
             if (proj_errno (T.P)==expect_failure_with_errno)
                 return another_succeeding_failure ();
-            printf ("errno=%d, expected=%d\n", proj_errno (T.P), expect_failure_with_errno);
+            fprintf (T.fout, "errno=%d, expected=%d\n", proj_errno (T.P), expect_failure_with_errno);
             return another_failing_failure ();
         }
 
@@ -896,11 +928,11 @@ Tell GIE what to expect, when transforming the ACCEPTed input
 
 
     if (T.verbosity > 3) {
-        puts (T.P->inverted? "INVERTED": "NOT INVERTED");
-        puts (T.dir== 1? "forward": "reverse");
-        puts (proj_angular_input (T.P, T.dir)?  "angular in":  "linear in");
-        puts (proj_angular_output (T.P, T.dir)? "angular out": "linear out");
-        printf ("left: %d   right:  %d\n", T.P->left, T.P->right);
+        fprintf (T.fout, "%s\n", T.P->inverted? "INVERTED": "NOT INVERTED");
+        fprintf (T.fout, "%s\n", T.dir== 1? "forward": "reverse");
+        fprintf (T.fout, "%s\n", proj_angular_input (T.P, T.dir)?  "angular in":  "linear in");
+        fprintf (T.fout, "%s\n", proj_angular_output (T.P, T.dir)? "angular out": "linear out");
+        fprintf (T.fout, "left: %d   right:  %d\n", T.P->left, T.P->right);
     }
 
     tests++;
@@ -912,12 +944,14 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     /* expected angular values, probably in degrees */
     ce = proj_angular_output (T.P, T.dir)? torad_coord (T.P, T.dir, T.e): T.e;
     if (T.verbosity > 3)
-        printf ("EXPECTS  %.12f  %.12f  %.12f  %.12f\n", ce.v[0],ce.v[1],ce.v[2],ce.v[3]);
+        fprintf (T.fout, "EXPECTS  %.12f  %.12f  %.12f  %.12f\n",
+                 ce.v[0],ce.v[1],ce.v[2],ce.v[3]);
 
     /* input ("accepted") values, also probably in degrees */
     ci = proj_angular_input (T.P, T.dir)? torad_coord (T.P, T.dir, T.a): T.a;
     if (T.verbosity > 3)
-        printf ("ACCEPTS  %.12f  %.12f  %.12f  %.12f\n", ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
+        fprintf (T.fout, "ACCEPTS  %.12f  %.12f  %.12f  %.12f\n",
+                 ci.v[0],ci.v[1],ci.v[2],ci.v[3]);
 
     /* do the transformation, but mask off dimensions not given in expect-ation */
     co = expect_trans_n_dim (ci);
@@ -929,7 +963,8 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     /* angular output from proj_trans comes in radians */
     T.b = proj_angular_output (T.P, T.dir)? todeg_coord (T.P, T.dir, co): co;
     if (T.verbosity > 3)
-        printf ("GOT      %.12f  %.12f  %.12f  %.12f\n", co.v[0],co.v[1],co.v[2],co.v[3]);
+        fprintf (T.fout, "GOT      %.12f  %.12f  %.12f  %.12f\n",
+                 co.v[0],co.v[1],co.v[2],co.v[3]);
 
 #if 0
     /* We need to handle unusual axis orders - that'll be an item for version 5.1 */
@@ -1092,7 +1127,8 @@ static int list_err_codes (void) {
     for (i = 0;  i < n;  i++) {
         if (9999==lookup[i].the_errno)
             break;
-        printf ("%25s  (%2.2d):  %s\n", lookup[i].the_err_const + 8, lookup[i].the_errno, pj_strerrno(lookup[i].the_errno));
+        fprintf (T.fout, "%25s  (%2.2d):  %s\n", lookup[i].the_err_const + 8,
+                 lookup[i].the_errno, pj_strerrno(lookup[i].the_errno));
     }
     return 0;
 }
@@ -1406,7 +1442,8 @@ static int append_args (ffio *G) {
     if (tag)
         skip_chars = strlen (tag);
 
-    if (G->args_size < args_len + next_len - skip_chars + 1) {
+    /* +2: 1 for the space separator and 1 for the NUL termination. */
+    if (G->args_size < args_len + next_len - skip_chars + 2) {
         void *p = realloc (G->args, 2 * G->args_size);
         if (0==p)
             return 0;
@@ -2012,5 +2049,4 @@ static int unitconvert_selftest (void) {
     ret = test_time(args5, 1e-6, in5, in5);   if (ret) return ret + 50;
 
     return 0;
-
 }

@@ -16,8 +16,10 @@ extern void p_series(Tseries *, FILE *, char *);
 
 void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
               int iargc, char **iargv) {
-	int NU = 15, NV = 15, res = -1, errin = 0, pwr;
-	char *arg, fmt[15];
+	long NU = 15, NV = 15;
+	int errin = 0, pwr;
+	long res = -1;
+	char *arg, fmt[32];
 	projUV low, upp, resid;
 	Tseries *F;
 	double (*input)(const char *, char **);
@@ -54,10 +56,10 @@ void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
 		emess(16,"approx. argument range error");
 	if (low.u > upp.u)
 		low.u -= M_TWOPI;
-	if (NU < 2 || NV < 2)
-		emess(16,"approx. work dimensions (%d %d) too small",NU,NV);
+	if (NU < 2 || NV < 2 || NU > INT_MAX || NV > INT_MAX)
+		emess(16,"approx. work dimensions (%ld %ld) too small or large",NU,NV);
 	if (!(F = mk_cheby(low, upp, pow(10., (double)res)*.5, &resid, proj,
-		NU, NV, pwr)))
+		(int)NU, (int)NV, pwr)))
 		emess(16,"generation of approx failed\nreason: %s\n",
 			pj_strerrno(errno));
 	(void)printf("%c,%.12g,%.12g,%.12g,%.12g,%.12g\n",inverse?'I':'F',
@@ -67,7 +69,7 @@ void gen_cheb(int inverse, projUV (*proj)(projUV), char *s, PJ *P,
 	if (pwr)
 		strcpy(fmt, "%.15g");
 	else if (res <= 0)
-		(void)sprintf(fmt,"%%.%df",-res+1);
+		(void)sprintf(fmt,"%%.%ldf",-res+1);
 	else
 		(void)strcpy(fmt,"%.0f");
 	p_series(F, stdout, fmt);

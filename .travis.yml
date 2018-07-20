@@ -10,8 +10,9 @@ matrix:
   include:
 
     - os: linux
+      dist: trusty
       compiler: gcc
-      language: c
+      language: cpp
       sudo: required
       services:
         - docker
@@ -19,8 +20,9 @@ matrix:
         - BUILD_NAME=linux_gcc
         - DETAILS="linux, gcc"
     - os: linux
+      dist: trusty
       compiler: clang
-      language: c
+      language: cpp
       sudo: required
       services:
         - docker
@@ -28,13 +30,14 @@ matrix:
         - BUILD_NAME=linux_clang
         - DETAILS="linux, clang"
     - os: osx
-      language: c
+      language: cpp
       env:
         - BUILD_NAME=osx
         - DETAILS="osx"
     - os: linux
+      dist: trusty
       compiler: gcc
-      language: c
+      language: cpp
       sudo: required
       env:
         - BUILD_NAME=mingw32
@@ -42,7 +45,7 @@ matrix:
 
     - os: linux
       compiler: gcc
-      language: c
+      language: cpp
       dist: trusty
       env:
         - BUILD_NAME=csa

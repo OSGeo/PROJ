@@ -32,6 +32,10 @@ Transformation setup
 
         PJ *P = proj_create(0, "+proj=etmerc +lat_0=38 +lon_0=125 +ellps=bessel");
 
+    If creation of the transformation object fails, the function returns `0` and
+    the PROJ error number is updated. The error number can be read with
+    :c:func:`proj_errno` or :c:func:`proj_context_errno`.
+
     The returned :c:type:`PJ`-pointer should be deallocated with :c:func:`proj_destroy`.
 
     :param PJ_CONTEXT* ctx: Threading context.
@@ -50,6 +54,10 @@ Transformation setup
 
         char *args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
         PJ* P = proj_create_argv(0, 3, args);
+
+    If creation of the transformation object fails, the function returns `0` and
+    the PROJ error number is updated. The error number can be read with
+    :c:func:`proj_errno` or :c:func:`proj_context_errno`.
 
     The returned :c:type:`PJ`-pointer should be deallocated with :c:func:`proj_destroy`.
 
@@ -80,6 +88,11 @@ Transformation setup
     .. code-block:: C
 
         PJ *P = proj_create_crs_to_crs(0, "epsg:25832", "epsg:25833", 0);
+
+    If creation of the transformation object fails, the function returns `0` and
+    the PROJ error number is updated. The error number can be read with
+    :c:func:`proj_errno` or :c:func:`proj_context_errno`.
+
 
     The returned :c:type:`PJ`-pointer should be deallocated with :c:func:`proj_destroy`.
 
@@ -212,9 +225,22 @@ Error reporting
 
     Get a reading of the current error-state of :c:data:`P`. An non-zero error
     codes indicates an error either with the transformation setup or during a
-    transformation.
+    transformation. In cases :c:data:`P` is `0` the error number of the default
+    context is read. A text representation of the error number can be retrieved
+    with :c:func:`proj_errno_string`.
 
     :param: PJ* P: Transformation object.
+
+    :returns: :c:type:`int`
+
+.. c:function:: int proj_context_errno(PJ_CONTEXT *ctx)
+
+    Get a reading of the current error-state of :c:data:`ctx`. An non-zero error
+    codes indicates an error either with the transformation setup or during a
+    transformation. A text representation of the error number can be retrieved
+    with :c:func:`proj_errno_string`.
+
+    :param: PJ_CONTEXT* ctx: threading context.
 
     :returns: :c:type:`int`
 

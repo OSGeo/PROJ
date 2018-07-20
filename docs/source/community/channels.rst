@@ -35,3 +35,12 @@ The PROJ GitHub page can be found at https://github.com/OSGeo/proj.4
     your questions about the use of PROJ on the mailing list instead.
 
 
+Gitter
+-------------------------------------------------------------------------------
+
+Gitter is the instant messaging alternative to the mailing list. PROJ has a
+room under the OSGeo organization. Most of the core developers stop by from
+time to time for an informal chat. You are more than welcome to join the
+discussion.
+
+The Gitter room can be found at https://gitter.im/OSGeo/proj.4

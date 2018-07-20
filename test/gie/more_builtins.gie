@@ -205,8 +205,12 @@ operation proj=vgridshift grids=nonexistinggrid.gtx
 expect    failure errno failed_to_load_grid
 -------------------------------------------------------------------------------
 
-
-
+-------------------------------------------------------------------------------
+operation  proj=vgridshift  grids=egm96_15.gtx  ellps=GRS80     multiplier=0.1
+tolerance 15 cm
+ignore    pjd_err_failed_to_load_grid
+accept    12.5 55.5   0                  0
+expect    12.5 55.5  3.6021305084228516  0
 
 -------------------------------------------------------------------------------
 Some tests from PJ_hgridshift.c
@@ -249,7 +253,7 @@ A number of tests from PJ_helmert.c
 This example is from Lotti Jivall: "Simplified transformations from
 ITRF2008/IGS08 to ETRS89 for maritime applications"
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80
+operation  proj=helmert
            x=0.67678    y=0.65495   z=-0.52827
            rx=-0.022742 ry=0.012667 rz=0.022704  s=-0.01070
 -------------------------------------------------------------------------------
@@ -262,7 +266,7 @@ expect     3565285.41342351  855948.67986759  5201382.72939791
 -------------------------------------------------------------------------------
 This example is a random point, transformed from ED50 to ETRS89 using KMStrans2
 -------------------------------------------------------------------------------
-operation   proj=helmert   ellps=GRS80   exact
+operation   proj=helmert   exact
             x=-081.0703    rx=-0.48488
             y=-089.3603    ry=-0.02436
             z=-115.7526    rz=-0.41321   s=-0.540645
@@ -280,7 +284,7 @@ Sweden transformed from ITRF2000 @ 2017.0 to ITRF93 @ 2017.0.
 The test coordinate was transformed using GNSStrans, using transformation
 parameters published by ITRF: ftp://itrf.ensg.ign.fr/pub/itrf/ITRF.TP
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80  transpose
+operation  proj=helmert transpose
            x =  0.0127   dx = -0.0029   rx = -0.00039  drx = -0.00011
            y =  0.0065   dy = -0.0002   ry =  0.00080  dry = -0.00019
            z = -0.0209   dz = -0.0006   rz = -0.00114  drz =  0.00007
@@ -302,7 +306,7 @@ The test data is taken from p. 29. Here we are using point 203 and converting it
 from NAD27 (ft) -> NAD83 (m). The paper reports a difference of 0.0014 m from
 measured to computed coordinates, hence the test tolerance is set accordingly.
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80
+operation  proj=helmert
            x=-9597.3572 y=.6112
            s=0.304794780637 theta=-1.244048
 -------------------------------------------------------------------------------
@@ -318,7 +322,7 @@ rotation matrix is updated when necessary.
 
 Test coordinates from GNSStrans.
 -------------------------------------------------------------------------------
-operation  proj=helmert ellps=GRS80 transpose
+operation  proj=helmert transpose
            x = 0.01270  dx =-0.0029  rx =-0.00039  drx =-0.00011
            y = 0.00650  dy =-0.0002  ry = 0.00080  dry =-0.00019
            z =-0.0209   dz =-0.0006  rz =-0.00114  drz = 0.00007
@@ -364,6 +368,45 @@ accept     12   55
 expect        69187.5632    609890.7825
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+Test that gie can read DMS style coordinates as well as coordinates where _
+is used as a thousands separator.
+-------------------------------------------------------------------------------
+operation      +step +proj=latlong
+-------------------------------------------------------------------------------
+tolerance   1 m
+
+accept      -64d43'75.34    17d32'45.6
+expect      -64.737589      17.546000
+
+accept      164d43'75.34    17d32'45.6
+expect      164.737589      17.546000
+
+accept      164d43'75.34    17d32'45.6
+expect      164d43'75.34    17d32'45.6
+
+accept      164d43'75.34W   17d32'45.6S
+expect      -164.737589     -17.546000
+
+accept      90d00'00.00     0d00'00.00
+expect      90.0             0.0
+
+accept      0d00'00.00     0d00'00.00
+expect      0.0             0.0
+
+
+
+operation      +proj=pipeline
+               +step +proj=latlong +datum=NAD27 +inv
+               +step +units=us-ft +init=nad27:3901
+tolerance      1 mm
+
+accept       -80d32'30.000 34d32'30.000 0.0
+expect       2_138_028.224 561_330.721 0.0
+
+accept       -81d00'00.000 34d32'30.000 0.0
+expect       2_000_000.000 561_019.077 0.0
+-------------------------------------------------------------------------------
 
 
 -------------------------------------------------------------------------------

@@ -1,16 +1,21 @@
 *~
+*.bak
+*.pyc
 build.local.bat
 build.local.sh
 Makefile
 Makefile.in
 CMakeFiles
 CMakeCache.txt
+CMakeSettings.json
 CTestTestfile.cmake
 cmake_install.cmake
 install_manifest.txt
 cmake/project-config*.cmake
 README
+test-driver
 
+/.idea
 /.vs*
 /*.manifest
 /*.swp

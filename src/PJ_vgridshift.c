@@ -13,16 +13,18 @@ PROJ_HEAD(vgridshift, "Vertical grid shift");
 struct pj_opaque_vgridshift {
     double t_final;
     double t_epoch;
+    double forward_multiplier;
 };
 
 static XYZ forward_3d(LPZ lpz, PJ *P) {
+    struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
 
     if (P->vgridlist_geoid != NULL) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        point.xyz.z -= proj_vgrid_value(P, point.lp);
+        point.xyz.z += Q->forward_multiplier * proj_vgrid_value(P, point.lp);
     }
 
     return point.xyz;
@@ -30,13 +32,14 @@ static XYZ forward_3d(LPZ lpz, PJ *P) {
 
 
 static LPZ reverse_3d(XYZ xyz, PJ *P) {
+    struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
 
     if (P->vgridlist_geoid != NULL) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        point.xyz.z += proj_vgrid_value(P, point.lp);
+        point.xyz.z -= Q->forward_multiplier * proj_vgrid_value(P, point.lp);
     }
 
     return point.lpz;
@@ -110,6 +113,11 @@ PJ *TRANSFORMATION(vgridshift,0) {
    if (pj_param(P->ctx, P->params, "tt_epoch").i)
         Q->t_epoch = pj_param (P->ctx, P->params, "dt_epoch").f;
 
+    /* historical: the forward direction substracts the grid offset. */
+    Q->forward_multiplier = -1.0;
+    if (pj_param(P->ctx, P->params, "tmultiplier").i) {
+        Q->forward_multiplier = pj_param(P->ctx, P->params, "dmultiplier").f;
+    }
 
     /* Build gridlist. P->vgridlist_geoid can be empty if +grids only ask for optional grids. */
     proj_vgrid_init(P, "grids");

@@ -431,8 +431,9 @@ static PJ_COORD helmert_forward_4d (PJ_COORD point, PJ *P) {
 
     /* We only need to rebuild the rotation matrix if the
      * observation time is different from the last call */
-    if (point.xyzt.t != Q->t_obs) {
-        Q->t_obs = point.xyzt.t;
+    double t_obs = (point.xyzt.t == HUGE_VAL) ? Q->t_epoch : point.xyzt.t;
+    if (t_obs != Q->t_obs) {
+        Q->t_obs = t_obs;
         update_parameters(P);
         build_rot_matrix(P);
     }
@@ -448,8 +449,9 @@ static PJ_COORD helmert_reverse_4d (PJ_COORD point, PJ *P) {
 
     /* We only need to rebuild the rotation matrix if the
      * observation time is different from the last call */
-    if (point.xyzt.t != Q->t_obs) {
-        Q->t_obs = point.xyzt.t;
+    double t_obs = (point.xyzt.t == HUGE_VAL) ? Q->t_epoch : point.xyzt.t;
+    if (t_obs != Q->t_obs) {
+        Q->t_obs = t_obs;
         update_parameters(P);
         build_rot_matrix(P);
     }
