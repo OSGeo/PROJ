@@ -54,7 +54,7 @@ Parameters
 Mathematical definition
 #######################
 
-The formulas describing the Mercator projection are all taken from G. Evenden's libproj manuals [Evenden2005]_.
+The formulas describing the Mercator projection are all taken from G. Evenden's libproj manuals [Evenden2005].
 
 Forward projection
 ==================
