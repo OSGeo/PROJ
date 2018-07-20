@@ -9,7 +9,7 @@
 #include "projects.h"
 
 PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
-PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Sph\n\t";
+PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Ell\n\t";
 
 #define EPS10 1.e-10
 static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
@@ -97,10 +97,6 @@ PJ *PROJECTION(webmerc) {
     P->phi0 = 0.0;
     P->lam0 = 0.0;
 
-    P->b = P->a;
-    /* Clean up the ellipsoidal parameters to reflect the sphere */
-    P->es = P->e = P->f = 0;
-    pj_calc_ellipsoid_params (P, P->a, 0);
     P->inv = s_inverse;
     P->fwd = s_forward;
     return P;
