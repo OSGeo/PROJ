@@ -32,7 +32,7 @@ static int phi12(PJ *P, double *del, double *sig) {
 
     if (!pj_param(P->ctx, P->params, "tlat_1").i ||
         !pj_param(P->ctx, P->params, "tlat_2").i) {
-        err = -41;
+        err = PJD_ERR_LAT_1_2_UNSPECIFIED;
     } else {
         Q->phi_1 = pj_param(P->ctx, P->params, "rlat_1").f;
         Q->phi_2 = pj_param(P->ctx, P->params, "rlat_2").f;
