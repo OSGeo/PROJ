@@ -6,5 +6,25 @@ Vitkovsky I
 
 .. image:: ./images/vitk1.png
    :scale: 50%
-   :alt:   Vitkovsky I  
+   :alt:   Vitkovsky I
 
+Parameters
+################################################################################
+
+Required
+--------------------------------------------------------------------------------
+
+.. include:: ../options/lat_1.rst
+
+.. include:: ../options/lat_2.rst
+
+Optional
+--------------------------------------------------------------------------------
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/R.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst

@@ -34,5 +34,3 @@ Options
 .. include:: ../options/y_0.rst
 
 .. include:: ../options/ellps.rst
-
-.. include:: ../options/R.rst

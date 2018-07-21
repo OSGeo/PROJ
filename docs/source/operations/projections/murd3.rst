@@ -6,5 +6,25 @@ Murdoch III
 
 .. image:: ./images/murd3.png
    :scale: 50%
-   :alt:   Murdoch III  
+   :alt:   Murdoch III
 
+Parameters
+################################################################################
+
+Required
+--------------------------------------------------------------------------------
+
+.. include:: ../options/lat_1.rst
+
+.. include:: ../options/lat_2.rst
+
+Optional
+--------------------------------------------------------------------------------
+
+.. include:: ../options/lon_0.rst
+
+.. include:: ../options/R.rst
+
+.. include:: ../options/x_0.rst
+
+.. include:: ../options/y_0.rst
