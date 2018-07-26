@@ -84,6 +84,9 @@ constexpr int EPSG_CODE_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT = 9832;
 static const std::string EPSG_NAME_METHOD_GUAM_PROJECTION("Guam Projection");
 constexpr int EPSG_CODE_METHOD_GUAM_PROJECTION = 9831;
 
+static const std::string EPSG_NAME_METHOD_BONNE("Bonne");
+constexpr int EPSG_CODE_METHOD_BONNE = 9827;
+
 // ---------------------------------------------------------------------------
 
 static const std::string EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN(
@@ -133,6 +136,7 @@ static const std::string WKT1_CENTRAL_MERIDIAN("central_meridian");
 static const std::string WKT1_SCALE_FACTOR("scale_factor");
 static const std::string WKT1_FALSE_EASTING("false_easting");
 static const std::string WKT1_FALSE_NORTHING("false_northing");
+static const std::string WKT1_STANDARD_PARALLEL_1("standard_parallel_1");
 
 constexpr double UTM_LATITUDE_OF_NATURAL_ORIGIN = 0.0;
 constexpr double UTM_SCALE_FACTOR = 0.9996;
@@ -251,7 +255,7 @@ static const ParamMapping paramFalseNorthingOrigin = {
 
 static const ParamMapping paramLatitude1stStdParallel = {
     EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
-    EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL, "standard_parallel_1",
+    EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL, WKT1_STANDARD_PARALLEL_1,
     common::UnitOfMeasure::Type::ANGULAR, "lat_1"};
 
 static const ParamMapping paramLatitude2ndStdParallel = {
@@ -381,6 +385,20 @@ static const MethodMapping methodMappings[] = {
      {"aeqd", "guam"},
      {
          paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_BONNE,
+     EPSG_CODE_METHOD_BONNE,
+     "Bonne",
+     "bonne",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+          WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
+          "lat_1"},
+         paramLongitudeNatOrigin,
+         paramFalseEasting,
          paramFalseNorthing,
      }},
 

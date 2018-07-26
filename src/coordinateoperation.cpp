@@ -1330,8 +1330,7 @@ Conversion::create(const util::PropertyMap &properties,
  *(https://proj4.org/operations/projections/utm.html) conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
- *is
- * not provided, it is automatically set.
+ * is not provided, it is automatically set.
  * @param zone UTM zone number between 1 and 60.
  * @param north true for UTM northern hemisphere, false for UTM southern
  * hemisphere.
@@ -1359,8 +1358,7 @@ ConversionNNPtr Conversion::createUTM(const util::PropertyMap &properties,
  *(https://proj4.org/operations/projections/tmerc.html) conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
- *is
- * not provided, it is automatically set.
+ * is not provided, it is automatically set.
  * @param centerLat See \ref center_latitude
  * @param centerLong See \ref center_longitude
  * @param scale See \ref scale
@@ -1391,8 +1389,7 @@ ConversionNNPtr Conversion::createTM(const util::PropertyMap &properties,
  *(https://proj4.org/operations/projections/tmerc.html) conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
- *is
- * not provided, it is automatically set.
+ * is not provided, it is automatically set.
  * @param centerLat See \ref center_latitude
  * @param centerLong See \ref center_longitude
  * @param scale See \ref scale
@@ -1425,8 +1422,7 @@ ConversionNNPtr Conversion::createTMSO(const util::PropertyMap &properties,
  *(https://proj4.org/operations/projections/tpeqd.html) conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
- *is
- * not provided, it is automatically set.
+ * is not provided, it is automatically set.
  * @param latitudeFirstPoint Latitude of first point.
  * @param longitudeFirstPoint Longitude of first point.
  * @param latitudeSecondPoint Latitude of second point.
@@ -1460,8 +1456,7 @@ ConversionNNPtr Conversion::createTPED(const util::PropertyMap &properties,
 /** \brief Instanciate a Tunisia Mapping Grid conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
- *is
- * not provided, it is automatically set.
+ * is not provided, it is automatically set.
  * @param centerLat See \ref center_latitude
  * @param centerLong See \ref center_longitude
  * @param falseEasting See \ref false_easting
@@ -1488,8 +1483,7 @@ ConversionNNPtr Conversion::createTMG(const util::PropertyMap &properties,
  *(https://proj4.org/operations/projections/aea.html) conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
- *is
- * not provided, it is automatically set.
+ * is not provided, it is automatically set.
  * @param latitudeFalseOrigin See \ref latitude_false_origin
  * @param longitudeFalseOrigin See \ref longitude_false_origin
  * @param latitudeFirstParallel See \ref latitude_first_std_parallel
@@ -1527,8 +1521,7 @@ Conversion::createAEA(const util::PropertyMap &properties,
  *(https://proj4.org/operations/projections/lcc.html) conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
- *is
- * not provided, it is automatically set.
+ * is not provided, it is automatically set.
  * @param centerLat See \ref center_latitude
  * @param centerLong See \ref center_longitude
  * @param scale See \ref scale
@@ -1560,8 +1553,7 @@ ConversionNNPtr Conversion::createLCC_1SP(const util::PropertyMap &properties,
  *(https://proj4.org/operations/projections/lcc.html) conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
- *is
- * not provided, it is automatically set.
+ * is not provided, it is automatically set.
  * @param latitudeFalseOrigin See \ref latitude_false_origin
  * @param longitudeFalseOrigin See \ref longitude_false_origin
  * @param latitudeFirstParallel See \ref latitude_first_std_parallel
@@ -1600,8 +1592,7 @@ Conversion::createLCC_2SP(const util::PropertyMap &properties,
  *(https://proj4.org/operations/projections/lcc.html) conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
- *is
- * not provided, it is automatically set.
+ * is not provided, it is automatically set.
  * @param latitudeFalseOrigin See \ref latitude_false_origin
  * @param longitudeFalseOrigin See \ref longitude_false_origin
  * @param latitudeFirstParallel See \ref latitude_first_std_parallel
@@ -1640,8 +1631,7 @@ Conversion::createLCC_2SP_Belgium(const util::PropertyMap &properties,
  *(https://proj4.org/operations/projections/aeqd.html) conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
- *is
- * not provided, it is automatically set.
+ * is not provided, it is automatically set.
  * @param latitudeNatOrigin See \ref center_latitude
  * @param longitudeNatOrigin See \ref center_longitude
  * @param falseEasting See \ref false_easting
@@ -1693,12 +1683,40 @@ ConversionNNPtr Conversion::createGuamProjection(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a Bonne]
+ *(https://proj4.org/operations/projections/bonne.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeNatOrigin See \ref center_latitude . PROJ calls its the
+ * standard parallel 1.
+ * @param longitudeNatOrigin See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createBonne(const util::PropertyMap &properties,
+                                        const common::Angle &latitudeNatOrigin,
+                                        const common::Angle &longitudeNatOrigin,
+                                        const common::Length &falseEasting,
+                                        const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeNatOrigin),
+        ParameterValue::create(longitudeNatOrigin),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_BONNE, values);
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a [New Zealand Map Grid]
  * (https://proj4.org/operations/projections/nzmg.html) conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
- * is
- * not provided, it is automatically set.
+ * is not provided, it is automatically set.
  * @param centerLat See \ref center_latitude
  * @param centerLong See \ref center_longitude
  * @param falseEasting See \ref false_easting

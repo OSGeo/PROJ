@@ -982,6 +982,41 @@ TEST(operation, guam_projection_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, bonne_export) {
+    auto conv = Conversion::createBonne(PropertyMap(), Angle(1), Angle(2),
+                                        Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=bonne +lat_1=1 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Bonne\",\n"
+              "    METHOD[\"Bonne\",\n"
+              "        ID[\"EPSG\",9827]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Bonne\"],\n"
+              "PARAMETER[\"standard_parallel_1\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, lcc1sp_export) {
     auto conv = Conversion::createLCC_1SP(PropertyMap(), Angle(1), Angle(2),
                                           Scale(3), Length(4), Length(5));
