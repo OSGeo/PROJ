@@ -129,6 +129,9 @@ class WKTFormatter {
     //! @cond Doxygen_Suppress
     PROJ_DLL WKTFormatter &setOutputId(bool outputIdIn);
 
+    void enter();
+    void leave();
+
     void startNode(const std::string &keyword, bool hasId);
     void endNode();
     void addQuotedString(const std::string &str);
@@ -152,9 +155,6 @@ class WKTFormatter {
     void pushAxisAngularUnit(const common::UnitOfMeasureNNPtr &unit);
     void popAxisAngularUnit();
     const common::UnitOfMeasureNNPtr &axisAngularUnit() const;
-
-    void setOutputConversionNode(bool outputIn);
-    bool outputConversionNode() const;
 
     void setAbridgedTransformation(bool abriged);
     bool abridgedTransformation() const;

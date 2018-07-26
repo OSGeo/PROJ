@@ -95,6 +95,7 @@ struct WKTFormatter::Private {
     Params params_{};
 
     int indentLevel_ = 0;
+    int level_ = 0;
     std::vector<bool> stackHasChild_{};
     std::vector<bool> stackHasId_{false};
     std::vector<bool> stackEmptyKeyword_{};
@@ -104,7 +105,6 @@ struct WKTFormatter::Private {
         util::nn_make_shared<UnitOfMeasure>(UnitOfMeasure::NONE)};
     std::vector<UnitOfMeasureNNPtr> axisAngularUnitStack_{
         util::nn_make_shared<UnitOfMeasure>(UnitOfMeasure::NONE)};
-    bool outputConversionNode_ = true;
     bool abridgedTransformation_ = false;
     bool useDerivingConversion_ = false;
     std::vector<double> toWGS84Parameters_{};
@@ -196,7 +196,7 @@ bool WKTFormatter::isStrict() const { return d->params_.strict_; }
 
 /** Returns the WKT string from the formatter. */
 const std::string &WKTFormatter::toString() const {
-    if (d->indentLevel_ > 0) {
+    if (d->indentLevel_ > 0 || d->level_ > 0) {
         // For intermediary nodes, the formatter is in a inconsistent
         // state, so return a dummy result.
         static const std::string dummyReturn;
@@ -213,8 +213,7 @@ const std::string &WKTFormatter::toString() const {
     if (d->outputUnitStack_.size() != 1)
         throw FormattingException(
             "Unbalanced pushOutputUnit() / popOutputUnit()");
-    if (d->indentLevel_)
-        throw FormattingException("Unbalanced startNode() / endNode()");
+
     return d->result_;
 }
 
@@ -284,14 +283,35 @@ void WKTFormatter::Private::addIndentation() {
 
 // ---------------------------------------------------------------------------
 
+void WKTFormatter::enter() {
+    if (d->indentLevel_ == 0 && d->level_ == 0) {
+        d->stackHasChild_.push_back(false);
+    }
+    ++d->level_;
+}
+
+// ---------------------------------------------------------------------------
+
+void WKTFormatter::leave() {
+    assert(d->level_ > 0);
+    --d->level_;
+    if (d->indentLevel_ == 0 && d->level_ == 0) {
+        d->stackHasChild_.pop_back();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 void WKTFormatter::startNode(const std::string &keyword, bool hasId) {
     if (!d->stackHasChild_.empty()) {
         d->startNewChild();
     }
 
     if (d->params_.multiLine_) {
-        if (d->indentLevel_ && !keyword.empty()) {
-            d->addNewLine();
+        if ((d->indentLevel_ || d->level_) && !keyword.empty()) {
+            if (!d->result_.empty()) {
+                d->addNewLine();
+            }
             d->addIndentation();
         }
     }
@@ -507,18 +527,6 @@ WKTFormatter::Version WKTFormatter::version() const {
 
 bool WKTFormatter::use2018Keywords() const {
     return d->params_.use2018Keywords_;
-}
-
-// ---------------------------------------------------------------------------
-
-void WKTFormatter::setOutputConversionNode(bool outputIn) {
-    d->outputConversionNode_ = outputIn;
-}
-
-// ---------------------------------------------------------------------------
-
-bool WKTFormatter::outputConversionNode() const {
-    return d->outputConversionNode_;
 }
 
 // ---------------------------------------------------------------------------
@@ -1975,8 +1983,10 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
     PropertyMap propertiesMethod;
     if (mapping) {
         projectionName = mapping->wkt2_name;
-        propertiesMethod.set(Identifier::CODE_KEY, mapping->epsg_code);
-        propertiesMethod.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
+        if (mapping->epsg_code != 0) {
+            propertiesMethod.set(Identifier::CODE_KEY, mapping->epsg_code);
+            propertiesMethod.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
+        }
     }
     propertiesMethod.set(IdentifiedObject::NAME_KEY, projectionName);
 
@@ -1995,10 +2005,12 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                 mapping ? getMappingFromWKT1(mapping, parameterName) : nullptr;
             if (paramMapping) {
                 parameterName = paramMapping->wkt2_name;
-                propertiesParameter.set(Identifier::CODE_KEY,
-                                        paramMapping->epsg_code);
-                propertiesParameter.set(Identifier::CODESPACE_KEY,
-                                        Identifier::EPSG);
+                if (paramMapping->epsg_code != 0) {
+                    propertiesParameter.set(Identifier::CODE_KEY,
+                                            paramMapping->epsg_code);
+                    propertiesParameter.set(Identifier::CODESPACE_KEY,
+                                            Identifier::EPSG);
+                }
             }
             propertiesParameter.set(IdentifiedObject::NAME_KEY, parameterName);
             parameters.push_back(

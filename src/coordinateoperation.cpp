@@ -77,7 +77,8 @@ const MethodMapping *getMapping(const OperationMethod *method) {
     const std::string &code = method->name()->code();
     const int epsg_code = !code.empty() ? ::atoi(code.c_str()) : 0;
     for (const auto &mapping : methodMappings) {
-        if (mapping.wkt2_name == name || mapping.epsg_code == epsg_code) {
+        if (mapping.wkt2_name == name ||
+            (epsg_code != 0 && mapping.epsg_code == epsg_code)) {
             return &mapping;
         }
     }
@@ -123,7 +124,7 @@ const ParamMapping *getMapping(const MethodMapping *mapping,
     const int epsg_code = !code.empty() ? ::atoi(code.c_str()) : 0;
     for (const auto &paramMapping : mapping->params) {
         if (paramMapping.wkt2_name == name ||
-            paramMapping.epsg_code == epsg_code) {
+            (epsg_code != 0 && paramMapping.epsg_code == epsg_code)) {
             return &paramMapping;
         }
     }
@@ -1266,30 +1267,57 @@ addDefaultNameIfNeeded(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+static ConversionNNPtr
+createConversion(const util::PropertyMap &properties,
+                 const MethodMapping *mapping,
+                 const std::vector<ParameterValueNNPtr> &values) {
+
+    std::vector<OperationParameterNNPtr> parameters;
+    for (const auto &param : mapping->params) {
+        auto paramProperties = util::PropertyMap().set(
+            common::IdentifiedObject::NAME_KEY, param.wkt2_name);
+        if (param.epsg_code != 0) {
+            paramProperties
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY, param.epsg_code);
+        }
+        auto parameter = OperationParameter::create(paramProperties);
+        parameters.push_back(parameter);
+    }
+
+    auto methodProperties = util::PropertyMap().set(
+        common::IdentifiedObject::NAME_KEY, mapping->wkt2_name);
+    if (mapping->epsg_code != 0) {
+        methodProperties
+            .set(metadata::Identifier::CODESPACE_KEY,
+                 metadata::Identifier::EPSG)
+            .set(metadata::Identifier::CODE_KEY, mapping->epsg_code);
+    }
+    return Conversion::create(
+        addDefaultNameIfNeeded(properties, mapping->wkt2_name),
+        methodProperties, parameters, values);
+}
+
+// ---------------------------------------------------------------------------
+
 ConversionNNPtr
 Conversion::create(const util::PropertyMap &properties, int method_epsg_code,
                    const std::vector<ParameterValueNNPtr> &values) {
     const MethodMapping *mapping = getMapping(method_epsg_code);
     assert(mapping);
+    return createConversion(properties, mapping, values);
+}
 
-    std::vector<OperationParameterNNPtr> parameters;
-    for (const auto &param : mapping->params) {
-        parameters.push_back(OperationParameter::create(
-            util::PropertyMap()
-                .set(common::IdentifiedObject::NAME_KEY, param.wkt2_name)
-                .set(metadata::Identifier::CODESPACE_KEY,
-                     metadata::Identifier::EPSG)
-                .set(metadata::Identifier::CODE_KEY, param.epsg_code)));
-    }
+// ---------------------------------------------------------------------------
 
-    return create(
-        addDefaultNameIfNeeded(properties, mapping->wkt2_name),
-        util::PropertyMap()
-            .set(common::IdentifiedObject::NAME_KEY, mapping->wkt2_name)
-            .set(metadata::Identifier::CODESPACE_KEY,
-                 metadata::Identifier::EPSG)
-            .set(metadata::Identifier::CODE_KEY, mapping->epsg_code),
-        parameters, values);
+ConversionNNPtr
+Conversion::create(const util::PropertyMap &properties,
+                   const std::string &method_wkt2_name,
+                   const std::vector<ParameterValueNNPtr> &values) {
+    const MethodMapping *mapping = getMapping(method_wkt2_name);
+    assert(mapping);
+    return createConversion(properties, mapping, values);
 }
 
 // ---------------------------------------------------------------------------
@@ -1355,6 +1383,142 @@ ConversionNNPtr Conversion::createTM(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a [Transverse Mercator South Orientated]
+ *(https://proj4.org/operations/projections/tmerc.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ *is
+ * not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param scale See \ref scale
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createTMSO(const util::PropertyMap &properties,
+                                       const common::Angle &centerLat,
+                                       const common::Angle &centerLong,
+                                       const common::Scale &scale,
+                                       const common::Length &falseEasting,
+                                       const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(scale),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties,
+                  EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a [Two Point Equidistant]
+ *(https://proj4.org/operations/projections/tpeqd.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ *is
+ * not provided, it is automatically set.
+ * @param latitudeFirstPoint Latitude of first point.
+ * @param longitudeFirstPoint Longitude of first point.
+ * @param latitudeSecondPoint Latitude of second point.
+ * @param longitudeSeconPoint Longitude of second point.
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createTPED(const util::PropertyMap &properties,
+                                       const common::Angle &latitudeFirstPoint,
+                                       const common::Angle &longitudeFirstPoint,
+                                       const common::Angle &latitudeSecondPoint,
+                                       const common::Angle &longitudeSeconPoint,
+                                       const common::Length &falseEasting,
+                                       const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeFirstPoint),
+        ParameterValue::create(longitudeFirstPoint),
+        ParameterValue::create(latitudeSecondPoint),
+        ParameterValue::create(longitudeSeconPoint),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_TWO_POINT_EQUIDISTANT,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a Tunisia Mapping Grid conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ *is
+ * not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createTMG(const util::PropertyMap &properties,
+                                      const common::Angle &centerLat,
+                                      const common::Angle &centerLong,
+                                      const common::Length &falseEasting,
+                                      const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_TUNISIA_MAPPING_GRID, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a [Albers Conic Equal Area]
+ *(https://proj4.org/operations/projections/aea.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ *is
+ * not provided, it is automatically set.
+ * @param latitudeFalseOrigin See \ref latitude_false_origin
+ * @param longitudeFalseOrigin See \ref longitude_false_origin
+ * @param latitudeFirstParallel See \ref latitude_first_std_parallel
+ * @param longitudeFirstParallel See \ref latitude_second_std_parallel
+ * @param eastingFalseOrigin See \ref easting_false_origin
+ * @param northingFalseOrigin See \ref northing_false_origin
+ * @return a new Conversion.
+ *
+ * @note the order of arguments is conformant with the corresponding EPSG
+ * mode and different than OGRSpatialReference::setACEA() of GDAL &lt;= 2.3
+ */
+ConversionNNPtr
+Conversion::createAEA(const util::PropertyMap &properties,
+                      const common::Angle &latitudeFalseOrigin,
+                      const common::Angle &longitudeFalseOrigin,
+                      const common::Angle &latitudeFirstParallel,
+                      const common::Angle &longitudeFirstParallel,
+                      const common::Length &eastingFalseOrigin,
+                      const common::Length &northingFalseOrigin) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeFalseOrigin),
+        ParameterValue::create(longitudeFalseOrigin),
+        ParameterValue::create(latitudeFirstParallel),
+        ParameterValue::create(longitudeFirstParallel),
+        ParameterValue::create(eastingFalseOrigin),
+        ParameterValue::create(northingFalseOrigin),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_ALBERS_EQUAL_AREA, values);
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a [Lambert Conic Conformal 1SP]
  *(https://proj4.org/operations/projections/lcc.html) conversion.
  *
@@ -1384,6 +1548,86 @@ ConversionNNPtr Conversion::createLCC_1SP(const util::PropertyMap &properties,
 
     return create(properties, EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
                   values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a [Lambert Conic Conformal (2SP)]
+ *(https://proj4.org/operations/projections/lcc.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ *is
+ * not provided, it is automatically set.
+ * @param latitudeFalseOrigin See \ref latitude_false_origin
+ * @param longitudeFalseOrigin See \ref longitude_false_origin
+ * @param latitudeFirstParallel See \ref latitude_first_std_parallel
+ * @param longitudeFirstParallel See \ref latitude_second_std_parallel
+ * @param eastingFalseOrigin See \ref easting_false_origin
+ * @param northingFalseOrigin See \ref northing_false_origin
+ * @return a new Conversion.
+ *
+ * @note the order of arguments is conformant with the corresponding EPSG
+ * mode and different than OGRSpatialReference::setLCC() of GDAL &lt;= 2.3
+ */
+ConversionNNPtr
+Conversion::createLCC_2SP(const util::PropertyMap &properties,
+                          const common::Angle &latitudeFalseOrigin,
+                          const common::Angle &longitudeFalseOrigin,
+                          const common::Angle &latitudeFirstParallel,
+                          const common::Angle &longitudeFirstParallel,
+                          const common::Length &eastingFalseOrigin,
+                          const common::Length &northingFalseOrigin) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeFalseOrigin),
+        ParameterValue::create(longitudeFalseOrigin),
+        ParameterValue::create(latitudeFirstParallel),
+        ParameterValue::create(longitudeFirstParallel),
+        ParameterValue::create(eastingFalseOrigin),
+        ParameterValue::create(northingFalseOrigin),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a [Lambert Conic Conformal (2SP Belgium)]
+ *(https://proj4.org/operations/projections/lcc.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ *is
+ * not provided, it is automatically set.
+ * @param latitudeFalseOrigin See \ref latitude_false_origin
+ * @param longitudeFalseOrigin See \ref longitude_false_origin
+ * @param latitudeFirstParallel See \ref latitude_first_std_parallel
+ * @param longitudeFirstParallel See \ref latitude_second_std_parallel
+ * @param eastingFalseOrigin See \ref easting_false_origin
+ * @param northingFalseOrigin See \ref northing_false_origin
+ * @return a new Conversion.
+ *
+ * @note the order of arguments is conformant with the corresponding EPSG
+ * mode and different than OGRSpatialReference::setLCCB() of GDAL &lt;= 2.3
+ */
+ConversionNNPtr
+Conversion::createLCC_2SP_Belgium(const util::PropertyMap &properties,
+                                  const common::Angle &latitudeFalseOrigin,
+                                  const common::Angle &longitudeFalseOrigin,
+                                  const common::Angle &latitudeFirstParallel,
+                                  const common::Angle &longitudeFirstParallel,
+                                  const common::Length &eastingFalseOrigin,
+                                  const common::Length &northingFalseOrigin) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeFalseOrigin),
+        ParameterValue::create(longitudeFalseOrigin),
+        ParameterValue::create(latitudeFirstParallel),
+        ParameterValue::create(longitudeFirstParallel),
+        ParameterValue::create(eastingFalseOrigin),
+        ParameterValue::create(northingFalseOrigin),
+    };
+
+    return create(properties,
+                  EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM, values);
 }
 
 // ---------------------------------------------------------------------------
@@ -1425,7 +1669,8 @@ CoordinateOperationNNPtr Conversion::inverse() const {
 // ---------------------------------------------------------------------------
 
 std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
-    if (formatter->outputConversionNode()) {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (isWKT2) {
         formatter->startNode(formatter->useDerivingConversion()
                                  ? io::WKTConstants::DERIVINGCONVERSION
                                  : io::WKTConstants::CONVERSION,
@@ -1437,9 +1682,8 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         } else {
             formatter->addQuotedString(*(name()->description()));
         }
-    }
-    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (!isWKT2) {
+    } else {
+        formatter->enter();
         formatter->pushOutputUnit(false);
         formatter->pushOutputId(false);
     }
@@ -1451,15 +1695,15 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         paramValue->_exportToWKT(formatter, mapping);
     }
 
-    if (!isWKT2) {
-        formatter->popOutputUnit();
-        formatter->popOutputId();
-    }
-    if (formatter->outputConversionNode()) {
+    if (isWKT2) {
         if (formatter->outputId() && !formatter->isInverted()) {
             formatID(formatter);
         }
         formatter->endNode();
+    } else {
+        formatter->popOutputUnit();
+        formatter->popOutputId();
+        formatter->leave();
     }
     return formatter->toString();
 }
@@ -1502,8 +1746,12 @@ std::string Conversion::exportToPROJString(
     }
     if (!bConversionDone) {
         const auto &mapping = getMapping(projectionMethodName);
-        if (mapping) {
-            formatter->addStep(mapping->proj_name);
+        if (mapping && !mapping->proj_name[0].empty()) {
+            formatter->addStep(mapping->proj_name[0]);
+            for (size_t i = 1; i < mapping->proj_name.size(); ++i) {
+                formatter->addParam(mapping->proj_name[i]);
+            }
+
             for (const auto &param : mapping->params) {
                 for (const auto &proj_name : param.proj_names) {
                     if (param.unit_type ==

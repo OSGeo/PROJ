@@ -63,7 +63,7 @@ struct MethodMapping {
     const std::string wkt2_name;
     const int epsg_code;
     const std::string wkt1_name;
-    const std::string proj_name;
+    const VectorOfString proj_name;
     const std::vector<ParamMapping> params;
 };
 

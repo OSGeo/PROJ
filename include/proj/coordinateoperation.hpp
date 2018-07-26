@@ -539,15 +539,99 @@ using ConversionNNPtr = util::nn<ConversionPtr>;
 
 \section projection_parameters Projection parameters
 
-\subsection center_latitude Center latitude
+\subsection center_latitude Latitude of natural origin/Center Latitude
 
-\subsection center_longitude Center longitude
+The latitude of the point from which the values of both the geographical
+coordinates on the ellipsoid and the grid coordinates on the projection are
+deemed to increment or decrement for computational purposes. Alternatively it
+may be considered as the latitude of the point which in the absence of
+application of false coordinates has grid coordinates of (0,0).
 
-\subsection scale Scale
+EPSG:8801
 
-\subsection false_easting False easting
+\subsection center_longitude Longitude of natural origin/Center Meridian
 
-\subsection false_northing False northing
+The longitude of the point from which the values of both the geographical
+coordinates on the ellipsoid and the grid coordinates on the projection are
+deemed to increment or decrement for computational purposes. Alternatively it
+may be considered as the longitude of the point which in the absence of
+application of false coordinates has grid coordinates of (0,0).  Sometimes known
+as "central meridian (CM)".
+
+EPSG:8802
+
+\subsection scale Scale Factor
+
+The factor by which the map grid is reduced or enlarged during the projection
+process, defined by its value at the natural origin.
+
+EPSG:8805
+
+\subsection false_easting False Easting
+
+Since the natural origin may be at or near the centre of the projection and
+under normal coordinate circumstances would thus give rise to negative
+coordinates over parts of the mapped area, this origin is usually given false
+coordinates which are large enough to avoid this inconvenience. The False
+Easting, FE, is the value assigned to the abscissa (east or west) axis of the
+projection grid at the natural origin.
+
+EPSG:8806
+
+\subsection false_northing False Northing
+
+Since the natural origin may be at or near the centre of the projection and
+under normal coordinate circumstances would thus give rise to negative
+coordinates over parts of the mapped area, this origin is usually given false
+coordinates which are large enough to avoid this inconvenience. The False
+Northing, FN, is the value assigned to the ordinate (north or south) axis of the
+projection grid at the natural origin.
+
+EPSG:8807
+
+\subsection latitude_false_origin Latitude of false origin
+
+The latitude of the point which is not the natural origin and at which grid
+coordinate values false easting and false northing are defined.
+
+EPSG:8821
+
+\subsection longitude_false_origin Longitude of false origin
+
+The longitude of the point which is not the natural origin and at which grid
+coordinate values false easting and false northing are defined.
+
+EPSG:8822
+
+\subsection latitude_first_std_parallel Latitude of 1st standard parallel
+
+For a conic projection with two standard parallels, this is the latitude of one
+of the parallels of intersection of the cone with the ellipsoid. It is normally
+but not necessarily that nearest to the pole. Scale is true along this parallel.
+
+EPSG:8824
+
+\subsection latitude_second_std_parallel Longitude of 1st standard parallel
+
+For a conic projection with two standard parallels, this is the latitude of one
+of the parallels at which the cone intersects with the ellipsoid. It is normally
+but not necessarily that nearest to the equator. Scale is true along this
+parallel.
+
+EPSG:8824
+
+\subsection easting_false_origin Easting of false origin
+
+The easting value assigned to the false origin.
+
+EPSG:8826
+
+\subsection northing_false_origin Northing of false origin
+
+The northing value assigned to the false origin.
+
+EPSG:8827
+
 */
 
 class Conversion : public SingleOperation {
@@ -574,12 +658,14 @@ class Conversion : public SingleOperation {
            const OperationMethodNNPtr &methodIn,
            const std::vector<GeneralParameterValueNNPtr>
                &values); // throw InvalidOperation
+
     PROJ_DLL static ConversionNNPtr
     create(const util::PropertyMap &propertiesConversion,
            const util::PropertyMap &propertiesOperationMethod,
            const std::vector<OperationParameterNNPtr> &parameters,
            const std::vector<ParameterValueNNPtr>
                &values); // throw InvalidOperation
+
     PROJ_DLL static ConversionNNPtr create(const ConversionNNPtr &other);
 
     PROJ_DLL static ConversionNNPtr
@@ -592,11 +678,59 @@ class Conversion : public SingleOperation {
              const common::Length &falseNorthing);
 
     PROJ_DLL static ConversionNNPtr
+    createTMSO(const util::PropertyMap &properties,
+               const common::Angle &centerLat, const common::Angle &centerLong,
+               const common::Scale &scale, const common::Length &falseEasting,
+               const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createTPED(const util::PropertyMap &properties,
+               const common::Angle &latitudeFirstPoint,
+               const common::Angle &longitudeFirstPoint,
+               const common::Angle &latitudeSecondPoint,
+               const common::Angle &longitudeSeconPoint,
+               const common::Length &falseEasting,
+               const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createTMG(const util::PropertyMap &properties,
+              const common::Angle &centerLat, const common::Angle &centerLong,
+              const common::Length &falseEasting,
+              const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createAEA(const util::PropertyMap &properties,
+              const common::Angle &latitudeFalseOrigin,
+              const common::Angle &longitudeFalseOrigin,
+              const common::Angle &latitudeFirstParallel,
+              const common::Angle &longitudeFirstParallel,
+              const common::Length &eastingFalseOrigin,
+              const common::Length &eastingNorthOrigin);
+
+    PROJ_DLL static ConversionNNPtr
     createLCC_1SP(const util::PropertyMap &properties,
                   const common::Angle &centerLat,
                   const common::Angle &centerLong, const common::Scale &scale,
                   const common::Length &falseEasting,
                   const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createLCC_2SP(const util::PropertyMap &properties,
+                  const common::Angle &latitudeFalseOrigin,
+                  const common::Angle &longitudeFalseOrigin,
+                  const common::Angle &latitudeFirstParallel,
+                  const common::Angle &longitudeFirstParallel,
+                  const common::Length &eastingFalseOrigin,
+                  const common::Length &eastingNorthOrigin);
+
+    PROJ_DLL static ConversionNNPtr
+    createLCC_2SP_Belgium(const util::PropertyMap &properties,
+                          const common::Angle &latitudeFalseOrigin,
+                          const common::Angle &longitudeFalseOrigin,
+                          const common::Angle &latitudeFirstParallel,
+                          const common::Angle &longitudeFirstParallel,
+                          const common::Length &eastingFalseOrigin,
+                          const common::Length &eastingNorthOrigin);
 
     PROJ_DLL static ConversionNNPtr
     createNZMG(const util::PropertyMap &properties,
@@ -616,6 +750,11 @@ class Conversion : public SingleOperation {
 
     static ConversionNNPtr
     create(const util::PropertyMap &properties, int method_epsg_code,
+           const std::vector<ParameterValueNNPtr> &values);
+
+    static ConversionNNPtr
+    create(const util::PropertyMap &properties,
+           const std::string &method_wkt2_name,
            const std::vector<ParameterValueNNPtr> &values);
 };
 

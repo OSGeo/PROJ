@@ -653,37 +653,424 @@ TEST(operation, transformation_createTOWGS84) {
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, utm_to_PROJ_string) {
-    EXPECT_EQ(Conversion::createUTM(PropertyMap(), 1, false)
-                  ->exportToPROJString(PROJStringFormatter::create()),
+TEST(operation, utm_export) {
+    auto conv = Conversion::createUTM(PropertyMap(), 1, false);
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=utm +zone=1 +south");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"UTM zone 1S\",\n"
+              "    METHOD[\"Transverse Mercator\",\n"
+              "        ID[\"EPSG\",9807]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",0,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",-177,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8805]],\n"
+              "    PARAMETER[\"False easting\",500000,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",10000000,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]],\n"
+              "    ID[\"EPSG\",17001]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Transverse_Mercator\"],\n"
+              "PARAMETER[\"latitude_of_origin\",0],\n"
+              "PARAMETER[\"central_meridian\",-177],\n"
+              "PARAMETER[\"scale_factor\",0.9996],\n"
+              "PARAMETER[\"false_easting\",500000],\n"
+              "PARAMETER[\"false_northing\",10000000]");
 }
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, tmerc_to_PROJ_string) {
-    EXPECT_EQ(Conversion::createTM(PropertyMap(), Angle(1), Angle(2), Scale(3),
-                                   Length(4), Length(5))
-                  ->exportToPROJString(PROJStringFormatter::create()),
+TEST(operation, tmerc_export) {
+    auto conv = Conversion::createTM(PropertyMap(), Angle(1), Angle(2),
+                                     Scale(3), Length(4), Length(5));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=tmerc +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Transverse Mercator\",\n"
+              "    METHOD[\"Transverse Mercator\",\n"
+              "        ID[\"EPSG\",9807]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Scale factor at natural origin\",3,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8805]],\n"
+              "    PARAMETER[\"False easting\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Transverse_Mercator\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"scale_factor\",3],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, lcc1sp_to_PROJ_string) {
-    EXPECT_EQ(Conversion::createLCC_1SP(PropertyMap(), Angle(1), Angle(2),
-                                        Scale(3), Length(4), Length(5))
-                  ->exportToPROJString(PROJStringFormatter::create()),
+TEST(operation, tmerc_south_oriented_export) {
+    auto conv = Conversion::createTMSO(PropertyMap(), Angle(1), Angle(2),
+                                       Scale(3), Length(4), Length(5));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=tmerc +axis=wsu +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Transverse Mercator (South Orientated)\",\n"
+              "    METHOD[\"Transverse Mercator (South Orientated)\",\n"
+              "        ID[\"EPSG\",9808]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Scale factor at natural origin\",3,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8805]],\n"
+              "    PARAMETER[\"False easting\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Transverse_Mercator_South_Orientated\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"scale_factor\",3],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
+
+    auto wkt = "PROJCRS[\"Hartebeesthoek94 / Lo29\","
+               "  BASEGEODCRS[\"Hartebeesthoek94\","
+               "    DATUM[\"Hartebeesthoek94\","
+               "      ELLIPSOID[\"WGS "
+               "84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1.0]]]],"
+               "  CONVERSION[\"South African Survey Grid zone 29\","
+               "    METHOD[\"Transverse Mercator (South "
+               "Orientated)\",ID[\"EPSG\",9808]],"
+               "    PARAMETER[\"Latitude of natural "
+               "origin\",0,ANGLEUNIT[\"degree\",0.01745329252]],"
+               "    PARAMETER[\"Longitude of natural "
+               "origin\",29,ANGLEUNIT[\"degree\",0.01745329252]],"
+               "    PARAMETER[\"Scale factor at natural "
+               "origin\",1,SCALEUNIT[\"unity\",1.0]],"
+               "    PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1.0]],"
+               "    PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1.0]]],"
+               "  CS[cartesian,2],"
+               "    AXIS[\"westing (Y)\",west,ORDER[1]],"
+               "    AXIS[\"southing (X)\",south,ORDER[2]],"
+               "    LENGTHUNIT[\"metre\",1.0],"
+               "  ID[\"EPSG\",2053]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=tmerc "
+              "+axis=wsu +lat_0=0 +lon_0=29 +k_0=1 +x_0=0 +y_0=0 +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, tped_export) {
+    auto conv =
+        Conversion::createTPED(PropertyMap(), Angle(1), Angle(2), Angle(3),
+                               Angle(4), Length(5), Length(6));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=tpeqd +lat_1=1 +lon_1=2 +lat_2=3 +lon_2=4 +x_0=5 +y_0=6");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Two Point Equidistant\",\n"
+              "    METHOD[\"Two Point Equidistant\"],\n"
+              "    PARAMETER[\"Latitude of first point\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+              "            ID[\"EPSG\",9122]]],\n"
+              "    PARAMETER[\"Longitude of first point\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+              "            ID[\"EPSG\",9122]]],\n"
+              "    PARAMETER[\"Latitude of second point\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+              "            ID[\"EPSG\",9122]]],\n"
+              "    PARAMETER[\"Longitude of second point\",4,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+              "            ID[\"EPSG\",9122]]],\n"
+              "    PARAMETER[\"False easting\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Two_Point_Equidistant\"],\n"
+              "PARAMETER[\"Latitude_Of_1st_Point\",1],\n"
+              "PARAMETER[\"Longitude_Of_1st_Point\",2],\n"
+              "PARAMETER[\"Latitude_Of_2nd_Point\",3],\n"
+              "PARAMETER[\"Longitude_Of_2nd_Point\",4],\n"
+              "PARAMETER[\"false_easting\",5],\n"
+              "PARAMETER[\"false_northing\",6]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, tmg_export) {
+    auto conv = Conversion::createTMG(PropertyMap(), Angle(1), Angle(2),
+                                      Length(3), Length(4));
+    EXPECT_THROW(conv->exportToPROJString(PROJStringFormatter::create()),
+                 FormattingException);
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Tunisia Mapping Grid\",\n"
+              "    METHOD[\"Tunisia Mapping Grid\",\n"
+              "        ID[\"EPSG\",9816]],\n"
+              "    PARAMETER[\"Latitude of false origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8821]],\n"
+              "    PARAMETER[\"Longitude of false origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8822]],\n"
+              "    PARAMETER[\"Easting of false origin\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8826]],\n"
+              "    PARAMETER[\"Northing of false origin\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8827]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Tunisia_Mapping_Grid\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, aea_export) {
+    auto conv = Conversion::createAEA(PropertyMap(), Angle(1), Angle(2),
+                                      Angle(3), Angle(4), Length(5), Length(6));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=aea +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Albers Equal Area\",\n"
+              "    METHOD[\"Albers Equal Area\",\n"
+              "        ID[\"EPSG\",9822]],\n"
+              "    PARAMETER[\"Latitude of false origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8821]],\n"
+              "    PARAMETER[\"Longitude of false origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8822]],\n"
+              "    PARAMETER[\"Latitude of 1st standard parallel\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8823]],\n"
+              "    PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8824]],\n"
+              "    PARAMETER[\"Easting of false origin\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8826]],\n"
+              "    PARAMETER[\"Northing of false origin\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8827]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Albers_Conic_Equal_Area\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"standard_parallel_1\",3],\n"
+              "PARAMETER[\"standard_parallel_2\",4],\n"
+              "PARAMETER[\"false_easting\",5],\n"
+              "PARAMETER[\"false_northing\",6]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc1sp_export) {
+    auto conv = Conversion::createLCC_1SP(PropertyMap(), Angle(1), Angle(2),
+                                          Scale(3), Length(4), Length(5));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=lcc +lat_1=1 +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Lambert Conic Conformal (1SP)\",\n"
+              "    METHOD[\"Lambert Conic Conformal (1SP)\",\n"
+              "        ID[\"EPSG\",9801]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Scale factor at natural origin\",3,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8805]],\n"
+              "    PARAMETER[\"False easting\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Lambert_Conformal_Conic_1SP\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"scale_factor\",3],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, nzmg_to_PROJ_string) {
-    EXPECT_EQ(Conversion::createNZMG(PropertyMap(), Angle(1), Angle(2),
-                                     Length(4), Length(5))
-                  ->exportToPROJString(PROJStringFormatter::create()),
+TEST(operation, lcc2sp_export) {
+    auto conv =
+        Conversion::createLCC_2SP(PropertyMap(), Angle(1), Angle(2), Angle(3),
+                                  Angle(4), Length(5), Length(6));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=lcc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Lambert Conic Conformal (2SP)\",\n"
+              "    METHOD[\"Lambert Conic Conformal (2SP)\",\n"
+              "        ID[\"EPSG\",9802]],\n"
+              "    PARAMETER[\"Latitude of false origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8821]],\n"
+              "    PARAMETER[\"Longitude of false origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8822]],\n"
+              "    PARAMETER[\"Latitude of 1st standard parallel\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8823]],\n"
+              "    PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8824]],\n"
+              "    PARAMETER[\"Easting of false origin\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8826]],\n"
+              "    PARAMETER[\"Northing of false origin\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8827]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Lambert_Conformal_Conic_2SP\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"standard_parallel_1\",3],\n"
+              "PARAMETER[\"standard_parallel_2\",4],\n"
+              "PARAMETER[\"false_easting\",5],\n"
+              "PARAMETER[\"false_northing\",6]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lcc2sp_belgium_export) {
+    auto conv = Conversion::createLCC_2SP_Belgium(PropertyMap(), Angle(1),
+                                                  Angle(2), Angle(3), Angle(4),
+                                                  Length(5), Length(6));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=lcc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Lambert Conic Conformal (2SP Belgium)\",\n"
+              "    METHOD[\"Lambert Conic Conformal (2SP Belgium)\",\n"
+              "        ID[\"EPSG\",9803]],\n"
+              "    PARAMETER[\"Latitude of false origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8821]],\n"
+              "    PARAMETER[\"Longitude of false origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8822]],\n"
+              "    PARAMETER[\"Latitude of 1st standard parallel\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8823]],\n"
+              "    PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8824]],\n"
+              "    PARAMETER[\"Easting of false origin\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8826]],\n"
+              "    PARAMETER[\"Northing of false origin\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8827]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Lambert_Conformal_Conic_2SP_Belgium\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"standard_parallel_1\",3],\n"
+              "PARAMETER[\"standard_parallel_2\",4],\n"
+              "PARAMETER[\"false_easting\",5],\n"
+              "PARAMETER[\"false_northing\",6]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, nzmg_export) {
+    auto conv = Conversion::createNZMG(PropertyMap(), Angle(1), Angle(2),
+                                       Length(4), Length(5));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=nzmg +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"New Zealand Map Grid\",\n"
+              "    METHOD[\"New Zealand Map Grid\",\n"
+              "        ID[\"EPSG\",9811]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"New_Zealand_Map_Grid\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
@@ -1272,7 +1659,9 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
                                                                     compound2);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step +proj=vgridshift +grids=bla.gtx +multiplier=0.001 +step +proj=utm +zone=32 "
+              "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=WGS84 +step "
+              "+proj=vgridshift +grids=bla.gtx +multiplier=0.001 +step "
+              "+proj=utm +zone=32 "
               "+ellps=WGS84");
 
     auto opInverse = CoordinateOperationFactory::create()->createOperation(

@@ -1030,10 +1030,6 @@ std::string ProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         baseCRS()->exportToWKT(formatter);
     }
 
-    if (!isWKT2) {
-        formatter->setOutputConversionNode(false);
-    }
-
     auto &axisList = coordinateSystem()->axisList();
     if (!axisList.empty()) {
         formatter->pushAxisLinearUnit(
@@ -1055,7 +1051,6 @@ std::string ProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     }
 
     if (!isWKT2) {
-        formatter->setOutputConversionNode(true);
         if (!axisList.empty()) {
             axisList[0]->unit().exportToWKT(formatter);
         }
