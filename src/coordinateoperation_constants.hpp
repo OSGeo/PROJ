@@ -87,6 +87,15 @@ constexpr int EPSG_CODE_METHOD_GUAM_PROJECTION = 9831;
 static const std::string EPSG_NAME_METHOD_BONNE("Bonne");
 constexpr int EPSG_CODE_METHOD_BONNE = 9827;
 
+static const std::string
+    EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL(
+        "Lambert Cylindrical Equal Area (Spherical)");
+constexpr int EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL = 9834;
+
+static const std::string EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA(
+    "Lambert Cylindrical Equal Area");
+constexpr int EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA = 9835;
+
 // ---------------------------------------------------------------------------
 
 static const std::string EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN(
@@ -397,6 +406,34 @@ static const MethodMapping methodMappings[] = {
           EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
           WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
           "lat_1"},
+         paramLongitudeNatOrigin,
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
+     EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
+     "Cylindrical_Equal_Area",
+     "cea",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
+          "lat_ts"},
+         paramLongitudeNatOrigin,
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA,
+     EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA,
+     "Cylindrical_Equal_Area",
+     "cea",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
+          "lat_ts"},
          paramLongitudeNatOrigin,
          paramFalseEasting,
          paramFalseNorthing,

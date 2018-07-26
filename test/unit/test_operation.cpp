@@ -1013,6 +1013,95 @@ TEST(operation, bonne_export) {
               "PARAMETER[\"central_meridian\",2],\n"
               "PARAMETER[\"false_easting\",3],\n"
               "PARAMETER[\"false_northing\",4]");
+
+    auto obj = WKTParser().createFromWKT(
+        "PROJCS[\"unnamed\","
+        "GEOGCS[\"unnamed ellipse\","
+        "    DATUM[\"unknown\","
+        "        SPHEROID[\"unnamed\",6378137,298.257223563]],"
+        "    PRIMEM[\"Greenwich\",0],"
+        "    UNIT[\"degree\",0.0174532925199433]],"
+        "PROJECTION[\"Bonne\"],"
+        "PARAMETER[\"standard_parallel_1\",1],"
+        "PARAMETER[\"central_meridian\",2],"
+        "PARAMETER[\"false_easting\",3],"
+        "PARAMETER[\"false_northing\",4],"
+        "UNIT[\"metre\",1]]");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=bonne +lat_1=1 +lon_0=2 +x_0=3 +y_0=4 +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lambert_cylindrical_equal_area_spherical_export) {
+    auto conv = Conversion::createLambertCylindricalEqualAreaSpherical(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=cea +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Lambert Cylindrical Equal Area (Spherical)\",\n"
+              "    METHOD[\"Lambert Cylindrical Equal Area (Spherical)\",\n"
+              "        ID[\"EPSG\",9834]],\n"
+              "    PARAMETER[\"Latitude of 1st standard parallel\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8823]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Cylindrical_Equal_Area\"],\n"
+              "PARAMETER[\"standard_parallel_1\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, lambert_cylindrical_equal_area_export) {
+    auto conv = Conversion::createLambertCylindricalEqualArea(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=cea +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Lambert Cylindrical Equal Area\",\n"
+              "    METHOD[\"Lambert Cylindrical Equal Area\",\n"
+              "        ID[\"EPSG\",9835]],\n"
+              "    PARAMETER[\"Latitude of 1st standard parallel\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8823]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Cylindrical_Equal_Area\"],\n"
+              "PARAMETER[\"standard_parallel_1\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------

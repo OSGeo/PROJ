@@ -1683,7 +1683,7 @@ ConversionNNPtr Conversion::createGuamProjection(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Bonne]
+/** \brief Instanciate a [Bonne]
  *(https://proj4.org/operations/projections/bonne.html) conversion.
  *
  * @param properties See \ref general_properties of the conversion. If the name
@@ -1708,6 +1708,65 @@ ConversionNNPtr Conversion::createBonne(const util::PropertyMap &properties,
     };
 
     return create(properties, EPSG_CODE_METHOD_BONNE, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a [Lambert Cylindrical Equal Area (Spherical)]
+ *(https://proj4.org/operations/projections/cea.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeFirstParallel See \ref latitude_first_std_parallel.
+ * @param longitudeNatOrigin See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createLambertCylindricalEqualAreaSpherical(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeFirstParallel,
+    const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeFirstParallel),
+        ParameterValue::create(longitudeNatOrigin),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties,
+                  EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a [Lambert Cylindrical Equal Area (ellipsoidal form)]
+ *(https://proj4.org/operations/projections/cea.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeFirstParallel See \ref latitude_first_std_parallel.
+ * @param longitudeNatOrigin See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createLambertCylindricalEqualArea(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeFirstParallel,
+    const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeFirstParallel),
+        ParameterValue::create(longitudeNatOrigin),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA,
+                  values);
 }
 
 // ---------------------------------------------------------------------------
