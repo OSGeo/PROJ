@@ -77,6 +77,13 @@ static const std::string EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM(
     "Lambert Conic Conformal (2SP Belgium)");
 constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM = 9803;
 
+static const std::string EPSG_NAME_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT(
+    "Modified Azimuthal Equidistant");
+constexpr int EPSG_CODE_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT = 9832;
+
+static const std::string EPSG_NAME_METHOD_GUAM_PROJECTION("Guam Projection");
+constexpr int EPSG_CODE_METHOD_GUAM_PROJECTION = 9831;
+
 // ---------------------------------------------------------------------------
 
 static const std::string EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN(
@@ -343,6 +350,30 @@ static const MethodMapping methodMappings[] = {
          paramLatitudeFalseOrigin, paramLongitudeFalseOrigin,
          paramLatitude1stStdParallel, paramLatitude2ndStdParallel,
          paramFalseEastingOrigin, paramFalseNorthingOrigin,
+     }},
+
+    {EPSG_NAME_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT,
+     EPSG_CODE_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT,
+     "Azimuthal_Equidistant",
+     "aeqd",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "latitude_of_center",
+          common::UnitOfMeasure::Type::ANGULAR, "lat_0"},
+         {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          "longitude_of_center", common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_GUAM_PROJECTION,
+     EPSG_CODE_METHOD_GUAM_PROJECTION,
+     "", // no mapping to GDAL WKT1
+     {"aeqd", "guam"},
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
+         paramFalseNorthing,
      }},
 
     {EPSG_NAME_METHOD_NZMG,

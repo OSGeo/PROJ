@@ -733,6 +733,20 @@ class Conversion : public SingleOperation {
                           const common::Length &eastingNorthOrigin);
 
     PROJ_DLL static ConversionNNPtr
+    createAzimuthalEquidistant(const util::PropertyMap &properties,
+                               const common::Angle &latitudeNatOrigin,
+                               const common::Angle &longitudeNatOrigin,
+                               const common::Length &falseEasting,
+                               const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createGuamProjection(const util::PropertyMap &properties,
+                         const common::Angle &latitudeNatOrigin,
+                         const common::Angle &longitudeNatOrigin,
+                         const common::Length &falseEasting,
+                         const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
     createNZMG(const util::PropertyMap &properties,
                const common::Angle &centerLat, const common::Angle &centerLong,
                const common::Length &falseEasting,

@@ -420,6 +420,10 @@ OperationMethod::exportToWKT(io::WKTFormatterNNPtr formatter) const {
             l_name = replaceAll(l_name, " ", "_");
         } else {
             l_name = mapping->wkt1_name;
+            if (l_name.empty()) {
+                throw io::FormattingException(
+                    "Unsupported conversion method: " + mapping->wkt2_name);
+            }
         }
     }
     formatter->addQuotedString(l_name);
@@ -1628,6 +1632,63 @@ Conversion::createLCC_2SP_Belgium(const util::PropertyMap &properties,
 
     return create(properties,
                   EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_BELGIUM, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a [Modified Azimuthal Equidistant]
+ *(https://proj4.org/operations/projections/aeqd.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ *is
+ * not provided, it is automatically set.
+ * @param latitudeNatOrigin See \ref center_latitude
+ * @param longitudeNatOrigin See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createAzimuthalEquidistant(
+    const util::PropertyMap &properties, const common::Angle &latitudeNatOrigin,
+    const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeNatOrigin),
+        ParameterValue::create(longitudeNatOrigin),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_MODIFIED_AZIMUTHAL_EQUIDISTANT,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a [Guam Projection]
+ *(https://proj4.org/operations/projections/aeqd.html) conversion.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ *is
+ * not provided, it is automatically set.
+ * @param latitudeNatOrigin See \ref center_latitude
+ * @param longitudeNatOrigin See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createGuamProjection(
+    const util::PropertyMap &properties, const common::Angle &latitudeNatOrigin,
+    const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeNatOrigin),
+        ParameterValue::create(longitudeNatOrigin),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_GUAM_PROJECTION, values);
 }
 
 // ---------------------------------------------------------------------------

@@ -916,6 +916,72 @@ TEST(operation, aea_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, azimuthal_equidistant_export) {
+    auto conv = Conversion::createAzimuthalEquidistant(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=aeqd +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Modified Azimuthal Equidistant\",\n"
+              "    METHOD[\"Modified Azimuthal Equidistant\",\n"
+              "        ID[\"EPSG\",9832]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Azimuthal_Equidistant\"],\n"
+              "PARAMETER[\"latitude_of_center\",1],\n"
+              "PARAMETER[\"longitude_of_center\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, guam_projection_export) {
+    auto conv = Conversion::createGuamProjection(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=aeqd +guam +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Guam Projection\",\n"
+              "    METHOD[\"Guam Projection\",\n"
+              "        ID[\"EPSG\",9831]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_THROW(conv->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, lcc1sp_export) {
     auto conv = Conversion::createLCC_1SP(PropertyMap(), Angle(1), Angle(2),
                                           Scale(3), Length(4), Length(5));
