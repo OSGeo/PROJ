@@ -309,9 +309,17 @@ static const MethodMapping methodMappings[] = {
      "Albers_Conic_Equal_Area",
      "aea",
      {
-         paramLatitudeFalseOrigin, paramLongitudeFalseOrigin,
-         paramLatitude1stStdParallel, paramLatitude2ndStdParallel,
-         paramFalseEastingOrigin, paramFalseNorthingOrigin,
+         {EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN,
+          EPSG_CODE_PARAMETER_LATITUDE_FALSE_ORIGIN, "latitude_of_center",
+          common::UnitOfMeasure::Type::ANGULAR, "lat_0"},
+         {EPSG_NAME_PARAMETER_LONGITUDE_FALSE_ORIGIN,
+          EPSG_CODE_PARAMETER_LONGITUDE_FALSE_ORIGIN, "longitude_of_center",
+          common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
+
+         paramLatitude1stStdParallel,
+         paramLatitude2ndStdParallel,
+         paramFalseEastingOrigin,
+         paramFalseNorthingOrigin,
      }},
 
     {EPSG_NAME_METHOD_LAMBERT_CONIC_CONFORMAL_1SP,
