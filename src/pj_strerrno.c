@@ -74,6 +74,7 @@ pj_err_list[] = {
 };
 
 char *pj_strerrno(int err) {
+    const int max_error = 9999;
     static char note[50];
     size_t adjusted_err;
 
@@ -87,17 +88,19 @@ char *pj_strerrno(int err) {
 #else
         /* Defend string boundary against exorbitantly large err values */
         /* which may occur on platforms with 64-bit ints */
-        sprintf(note,"no system list, errno: %d\n", (err < 9999)? err: 9999);
+        sprintf(note, "no system list, errno: %d\n",
+                (err < max_error) ? err: max_error);
         return note;
 #endif
     }
 
-    /* PROJ.4 error codes are negative */
-    adjusted_err = - err - 1;
+    /* PROJ.4 error codes are negative: -1 to -9999 */
+    adjusted_err = err < -max_error ? max_error : -err - 1;
     if (adjusted_err < (sizeof(pj_err_list) / sizeof(char *)))
         return (char *)pj_err_list[adjusted_err];
 
-    sprintf( note, "invalid projection system error (%d)", (err > -9999)? err: -9999);
+    sprintf(note, "invalid projection system error (%d)",
+            (err > -max_error) ? err: -max_error);
     return note;
 }
 
