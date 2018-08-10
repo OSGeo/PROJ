@@ -458,7 +458,12 @@ struct PJconsts {
 struct ARG_list {
     paralist *next;
     char used;
-    char param[1];
+#ifdef __GNUC__
+    char param[0]; /* variable-length member */
+    /* Safer to use [0] for gcc. See https://github.com/OSGeo/proj.4/pull/1087 */
+#else
+    char param[1]; /* variable-length member */
+#endif
 };
 
 

@@ -42,7 +42,7 @@ paralist *pj_mkparam_ws (char *str) {
     }
 
     /* Use calloc to automagically 0-terminate the copy */
-    newitem = (paralist *) pj_calloc (1, sizeof(paralist) + len);
+    newitem = (paralist *) pj_calloc (1, sizeof(paralist) + len + 1);
     if (0==newitem)
         return 0;
     memmove(newitem->param, str, len);
