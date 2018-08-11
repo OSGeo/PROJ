@@ -458,9 +458,10 @@ struct PJconsts {
 struct ARG_list {
     paralist *next;
     char used;
-#ifdef __GNUC__
-    char param[0]; /* variable-length member */
-    /* Safer to use [0] for gcc. See https://github.com/OSGeo/proj.4/pull/1087 */
+#if defined(__GNUC__) && __GNUC__ >= 8
+    char param[]; /* variable-length member */
+    /* Safer to use [] for gcc 8. See https://github.com/OSGeo/proj.4/pull/1087 */
+    /* and https://gcc.gnu.org/bugzilla/show_bug.cgi?id=86914 */
 #else
     char param[1]; /* variable-length member */
 #endif
