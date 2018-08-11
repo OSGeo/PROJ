@@ -37,7 +37,7 @@ more_builtins: more_builtins.gie
 unitconvert: unitconvert.gie
 	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
-DHDN_ETRS89:
+DHDN_ETRS89: DHDN_ETRS89.gie
 	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
 check-local: 4D-API-cs2cs-style GDA axisswap builtins deformation ellipsoid more_builtins unitconvert DHDN_ETRS89
