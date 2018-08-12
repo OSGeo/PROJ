@@ -275,6 +275,14 @@ gie command language
 
     See ``gie -l`` for a list of error codes that can be ignored.
 
+.. option:: require_grid <grid_name>
+
+    Checks the availability of the grid <grid_name>. If it is not found, then
+    all :option:`accept`/:option:`expect` pairs until the next
+    :option:`operation` will be skipped.
+    :option:`require_grid` can be repeated several times to specify several grids whose
+    presence is required.
+
 .. option:: echo <text>
 
     Add user defined text to the output stream. See the example below.
