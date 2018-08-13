@@ -149,7 +149,7 @@ static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_si
 
 static const char *gie_tags[] = {
     "<gie>", "operation", "accept", "expect", "roundtrip", "banner", "verbose",
-    "direction", "tolerance", "ignore", "builtins", "echo", "skip", "</gie>"
+    "direction", "tolerance", "ignore", "require_grid", "builtins", "echo", "skip", "</gie>"
 };
 
 static const size_t n_gie_tags = sizeof gie_tags / sizeof gie_tags[0];
@@ -187,6 +187,7 @@ typedef struct {
     size_t dimensions_given, dimensions_given_at_last_accept;
     double tolerance;
     int ignore;
+    int skip_test;
     const char *curr_file;
     FILE *fout;
 } gie_ctx;
@@ -516,6 +517,20 @@ static int ignore (const char *args) {
     return 0;
 }
 
+static int require_grid (const char *args) {
+    PJ_GRID_INFO grid_info;
+    const char* grid_filename = column (args, 1);
+    grid_info = proj_grid_info(grid_filename);
+    if( strlen(grid_info.filename) == 0 ) {
+        if (T.verbosity > 1) {
+            fprintf (T.fout, "Test skipped because of missing grid %s\n",
+                    grid_filename);
+        }
+        T.skip_test = 1;
+    }
+    return 0;
+}
+
 static int direction (const char *args) {
     const char *endp = args;
     while (isspace (*endp))
@@ -571,6 +586,7 @@ either a conversion or a transformation)
     T.op_ok = 0;
     T.op_ko = 0;
     T.op_skip = 0;
+    T.skip_test = 0;
 
     direction ("forward");
     tolerance ("0.5 mm");
@@ -1034,6 +1050,11 @@ static int dispatch (const char *cmnd, const char *args) {
     if (T.skip)
         return SKIP;
     if  (0==strcmp (cmnd, "operation")) return  operation ((char *) args);
+    if (T.skip_test)
+    {
+        if  (0==strcmp (cmnd, "expect"))    return  another_skip();
+        return 0;
+    }
     if  (0==strcmp (cmnd, "accept"))    return  accept    (args);
     if  (0==strcmp (cmnd, "expect"))    return  expect    (args);
     if  (0==strcmp (cmnd, "roundtrip")) return  roundtrip (args);
@@ -1042,6 +1063,7 @@ static int dispatch (const char *cmnd, const char *args) {
     if  (0==strcmp (cmnd, "direction")) return  direction (args);
     if  (0==strcmp (cmnd, "tolerance")) return  tolerance (args);
     if  (0==strcmp (cmnd, "ignore"))    return  ignore    (args);
+    if  (0==strcmp (cmnd, "require_grid"))   return  require_grid   (args);
     if  (0==strcmp (cmnd, "builtins"))  return  builtins  (args);
     if  (0==strcmp (cmnd, "echo"))      return  echo      (args);
     if  (0==strcmp (cmnd, "skip"))      return  skip      (args);
