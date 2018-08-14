@@ -96,6 +96,45 @@ static const std::string EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA(
     "Lambert Cylindrical Equal Area");
 constexpr int EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA = 9835;
 
+static const std::string EPSG_NAME_METHOD_CASSINI_SOLDNER("Cassini-Soldner");
+constexpr int EPSG_CODE_METHOD_CASSINI_SOLDNER = 9806;
+
+static const std::string
+    PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC("Equidistant Conic");
+
+static const std::string PROJ_WKT2_NAME_METHOD_ECKERT_I("Eckert I");
+
+static const std::string PROJ_WKT2_NAME_METHOD_ECKERT_II("Eckert II");
+
+static const std::string PROJ_WKT2_NAME_METHOD_ECKERT_III("Eckert III");
+
+static const std::string PROJ_WKT2_NAME_METHOD_ECKERT_IV("Eckert IV");
+
+static const std::string PROJ_WKT2_NAME_METHOD_ECKERT_V("Eckert V");
+
+static const std::string PROJ_WKT2_NAME_METHOD_ECKERT_VI("Eckert VI");
+
+static const std::string EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL(
+    "Equidistant Cylindrical (Spherical)");
+constexpr int EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL = 1019;
+
+static const std::string PROJ_WKT2_NAME_METHOD_GALL("Gall");
+
+static const std::string
+    PROJ_WKT2_NAME_METHOD_GOODE_HOMOLOSINE("Goode Homolosine");
+
+static const std::string PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE(
+    "Interrupted Goode Homolosine");
+
+static const std::string PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X(
+    "Geostationary Satellite (Sweep X)");
+
+static const std::string PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y(
+    "Geostationary Satellite (Sweep Y)");
+
+static const std::string
+    PROJ_WKT2_NAME_METHOD_GAUSS_SCHREIBER_TRANSVERSE_MERCATOR(
+        "Gauss Schreiber Transverse Mercator");
 // ---------------------------------------------------------------------------
 
 static const std::string EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN(
@@ -437,6 +476,152 @@ static const MethodMapping methodMappings[] = {
          paramLongitudeNatOrigin,
          paramFalseEasting,
          paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_CASSINI_SOLDNER,
+     EPSG_CODE_METHOD_CASSINI_SOLDNER,
+     "Cassini_Soldner",
+     "cass",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC,
+     0,
+     "Equidistant_Conic",
+     "eqdc",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "latitude_of_center",
+          common::UnitOfMeasure::Type::ANGULAR, "lat_0"},
+         {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          "longitude_of_center", common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
+         paramLatitude1stStdParallel,
+         paramLatitude2ndStdParallel,
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_ECKERT_I,
+     0,
+     "Eckert_I",
+     "eck1",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_ECKERT_II,
+     0,
+     "Eckert_II",
+     "eck2",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_ECKERT_III,
+     0,
+     "Eckert_III",
+     "eck3",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_ECKERT_IV,
+     0,
+     "Eckert_IV",
+     "eck4",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_ECKERT_V,
+     0,
+     "Eckert_V",
+     "eck5",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_ECKERT_VI,
+     0,
+     "Eckert_VI",
+     "eck6",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL,
+     EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL,
+     "Equirectangular",
+     "eqc",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
+          "lat_ts"},
+         paramLongitudeNatOrigin,
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_GALL,
+     0,
+     "Gall_Stereographic",
+     "gall",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_GOODE_HOMOLOSINE,
+     0,
+     "Goode_Homolosine",
+     "goode",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE,
+     0,
+     "Interrupted_Goode_Homolosine",
+     "igh",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    // No WKT1 representation fr sweep=x
+    {PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X,
+     0,
+     "",
+     {"geos", "sweep=x"},
+     {
+         paramLongitudeNatOrigin,
+         {"Satellite Height", 0, "satellite_height",
+          common::UnitOfMeasure::Type::LINEAR, "h"},
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y,
+     0,
+     "Geostationary_Satellite",
+     {"geos"},
+     {
+         paramLongitudeNatOrigin,
+         {"Satellite Height", 0, "satellite_height",
+          common::UnitOfMeasure::Type::LINEAR, "h"},
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_GAUSS_SCHREIBER_TRANSVERSE_MERCATOR,
+     0,
+     "Gauss_Schreiber_Transverse_Mercator",
+     "gstmerc",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramScaleFactor,
+         paramFalseEasting, paramFalseNorthing,
      }},
 
     {EPSG_NAME_METHOD_NZMG,

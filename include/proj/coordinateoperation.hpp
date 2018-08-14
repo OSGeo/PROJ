@@ -609,9 +609,9 @@ For a conic projection with two standard parallels, this is the latitude of one
 of the parallels of intersection of the cone with the ellipsoid. It is normally
 but not necessarily that nearest to the pole. Scale is true along this parallel.
 
-EPSG:8824
+EPSG:8823
 
-\subsection latitude_second_std_parallel Longitude of 1st standard parallel
+\subsection latitude_second_std_parallel Latitude of 2nd standard parallel
 
 For a conic projection with two standard parallels, this is the latitude of one
 of the parallels at which the cone intersects with the ellipsoid. It is normally
@@ -677,6 +677,12 @@ class Conversion : public SingleOperation {
              const common::Scale &scale, const common::Length &falseEasting,
              const common::Length &falseNorthing);
 
+    PROJ_DLL static ConversionNNPtr createGaussSchreiberTransverseMercator(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Scale &scale,
+        const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
     PROJ_DLL static ConversionNNPtr
     createTMSO(const util::PropertyMap &properties,
                const common::Angle &centerLat, const common::Angle &centerLong,
@@ -703,7 +709,7 @@ class Conversion : public SingleOperation {
               const common::Angle &latitudeFalseOrigin,
               const common::Angle &longitudeFalseOrigin,
               const common::Angle &latitudeFirstParallel,
-              const common::Angle &longitudeFirstParallel,
+              const common::Angle &latitudeSecondParallel,
               const common::Length &eastingFalseOrigin,
               const common::Length &eastingNorthOrigin);
 
@@ -719,7 +725,7 @@ class Conversion : public SingleOperation {
                   const common::Angle &latitudeFalseOrigin,
                   const common::Angle &longitudeFalseOrigin,
                   const common::Angle &latitudeFirstParallel,
-                  const common::Angle &longitudeFirstParallel,
+                  const common::Angle &latitudeSecondParallel,
                   const common::Length &eastingFalseOrigin,
                   const common::Length &eastingNorthOrigin);
 
@@ -728,7 +734,7 @@ class Conversion : public SingleOperation {
                           const common::Angle &latitudeFalseOrigin,
                           const common::Angle &longitudeFalseOrigin,
                           const common::Angle &latitudeFirstParallel,
-                          const common::Angle &longitudeFirstParallel,
+                          const common::Angle &latitudeSecondParallel,
                           const common::Length &eastingFalseOrigin,
                           const common::Length &eastingNorthOrigin);
 
@@ -765,6 +771,91 @@ class Conversion : public SingleOperation {
         const common::Angle &latitudeFirstParallel,
         const common::Angle &longitudeNatOrigin,
         const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createCassiniSoldner(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createEquidistantConic(const util::PropertyMap &properties,
+                           const common::Angle &centerLat,
+                           const common::Angle &centerLong,
+                           const common::Angle &latitudeFirstParallel,
+                           const common::Angle &latitudeSecondParallel,
+                           const common::Length &falseEasting,
+                           const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createEckertI(const util::PropertyMap &properties,
+                  const common::Angle &centerLong,
+                  const common::Length &falseEasting,
+                  const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createEckertII(const util::PropertyMap &properties,
+                   const common::Angle &centerLong,
+                   const common::Length &falseEasting,
+                   const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createEckertIII(const util::PropertyMap &properties,
+                    const common::Angle &centerLong,
+                    const common::Length &falseEasting,
+                    const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createEckertIV(const util::PropertyMap &properties,
+                   const common::Angle &centerLong,
+                   const common::Length &falseEasting,
+                   const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createEckertV(const util::PropertyMap &properties,
+                  const common::Angle &centerLong,
+                  const common::Length &falseEasting,
+                  const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createEckertVI(const util::PropertyMap &properties,
+                   const common::Angle &centerLong,
+                   const common::Length &falseEasting,
+                   const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createEquidistantCylindricalSpherical(
+        const util::PropertyMap &properties,
+        const common::Angle &latitudeFirstParallel,
+        const common::Angle &longitudeNatOrigin,
+        const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createGall(const util::PropertyMap &properties,
+               const common::Angle &centerLong,
+               const common::Length &falseEasting,
+               const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createGoodeHomolosine(const util::PropertyMap &properties,
+                          const common::Angle &centerLong,
+                          const common::Length &falseEasting,
+                          const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createInterruptedGoodeHomolosine(const util::PropertyMap &properties,
+                                     const common::Angle &centerLong,
+                                     const common::Length &falseEasting,
+                                     const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createGeostationarySatelliteSweepX(
+        const util::PropertyMap &properties, const common::Angle &centerLong,
+        const common::Length &height, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createGeostationarySatelliteSweepY(
+        const util::PropertyMap &properties, const common::Angle &centerLong,
+        const common::Length &height, const common::Length &falseEasting,
         const common::Length &falseNorthing);
 
     PROJ_DLL static ConversionNNPtr

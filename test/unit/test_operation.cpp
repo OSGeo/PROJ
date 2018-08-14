@@ -729,6 +729,43 @@ TEST(operation, tmerc_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, gstmerc_export) {
+    auto conv = Conversion::createGaussSchreiberTransverseMercator(
+        PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=gstmerc +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Gauss Schreiber Transverse Mercator\",\n"
+              "    METHOD[\"Gauss Schreiber Transverse Mercator\"],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Scale factor at natural origin\",3,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8805]],\n"
+              "    PARAMETER[\"False easting\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Gauss_Schreiber_Transverse_Mercator\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"scale_factor\",3],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, tmerc_south_oriented_export) {
     auto conv = Conversion::createTMSO(PropertyMap(), Angle(1), Angle(2),
                                        Scale(3), Length(4), Length(5));
@@ -1226,6 +1263,338 @@ TEST(operation, lcc2sp_belgium_export) {
               "PARAMETER[\"standard_parallel_2\",4],\n"
               "PARAMETER[\"false_easting\",5],\n"
               "PARAMETER[\"false_northing\",6]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, cassini_soldner_export) {
+    auto conv = Conversion::createCassiniSoldner(
+        PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=cass +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Cassini-Soldner\",\n"
+              "    METHOD[\"Cassini-Soldner\",\n"
+              "        ID[\"EPSG\",9806]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Cassini_Soldner\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, equidistant_conic_export) {
+    auto conv = Conversion::createEquidistantConic(PropertyMap(), Angle(1),
+                                                   Angle(2), Angle(3), Angle(4),
+                                                   Length(5), Length(6));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=eqdc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Equidistant Conic\",\n"
+              "    METHOD[\"Equidistant Conic\"],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Latitude of 1st standard parallel\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8823]],\n"
+              "    PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8824]],\n"
+              "    PARAMETER[\"False easting\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Equidistant_Conic\"],\n"
+              "PARAMETER[\"latitude_of_center\",1],\n"
+              "PARAMETER[\"longitude_of_center\",2],\n"
+              "PARAMETER[\"standard_parallel_1\",3],\n"
+              "PARAMETER[\"standard_parallel_2\",4],\n"
+              "PARAMETER[\"false_easting\",5],\n"
+              "PARAMETER[\"false_northing\",6]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, eckert_export) {
+
+    std::vector<std::string> numbers{"", "1", "2", "3", "4", "5", "6"};
+    std::vector<std::string> latinNumbers{"",   "I", "II", "III",
+                                          "IV", "V", "VI"};
+
+    for (int i = 1; i <= 6; i++) {
+        auto conv =
+            (i == 1)
+                ? Conversion::createEckertI(PropertyMap(), Angle(1), Length(2),
+                                            Length(3))
+                : (i == 2)
+                      ? Conversion::createEckertII(PropertyMap(), Angle(1),
+                                                   Length(2), Length(3))
+                      : (i == 3)
+                            ? Conversion::createEckertIII(
+                                  PropertyMap(), Angle(1), Length(2), Length(3))
+                            : (i == 4) ? Conversion::createEckertIV(
+                                             PropertyMap(), Angle(1), Length(2),
+                                             Length(3))
+                                       : (i == 5) ? Conversion::createEckertV(
+                                                        PropertyMap(), Angle(1),
+                                                        Length(2), Length(3))
+                                                  :
+
+                                                  Conversion::createEckertVI(
+                                                      PropertyMap(), Angle(1),
+                                                      Length(2), Length(3));
+
+        EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=eck" + numbers[i] + " +lon_0=1 +x_0=2 +y_0=3");
+
+        EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+                  "CONVERSION[\"Eckert " + latinNumbers[i] +
+                      "\",\n"
+                      "    METHOD[\"Eckert " +
+                      latinNumbers[i] +
+                      "\"],\n"
+                      "    PARAMETER[\"Longitude of natural origin\",1,\n"
+                      "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+                      "        ID[\"EPSG\",8802]],\n"
+                      "    PARAMETER[\"False easting\",2,\n"
+                      "        LENGTHUNIT[\"metre\",1],\n"
+                      "        ID[\"EPSG\",8806]],\n"
+                      "    PARAMETER[\"False northing\",3,\n"
+                      "        LENGTHUNIT[\"metre\",1],\n"
+                      "        ID[\"EPSG\",8807]]]");
+
+        EXPECT_EQ(conv->exportToWKT(WKTFormatter::create(
+                      WKTFormatter::Convention::WKT1_GDAL)),
+                  "PROJECTION[\"Eckert_" + latinNumbers[i] +
+                      "\"],\n"
+                      "PARAMETER[\"central_meridian\",1],\n"
+                      "PARAMETER[\"false_easting\",2],\n"
+                      "PARAMETER[\"false_northing\",3]");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createEquidistantCylindricalSpherical) {
+    auto conv = Conversion::createEquidistantCylindricalSpherical(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=eqc +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Equidistant Cylindrical (Spherical)\",\n"
+              "    METHOD[\"Equidistant Cylindrical (Spherical)\",\n"
+              "        ID[\"EPSG\",1019]],\n"
+              "    PARAMETER[\"Latitude of 1st standard parallel\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8823]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Equirectangular\"],\n"
+              "PARAMETER[\"standard_parallel_1\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, gall_export) {
+
+    auto conv =
+        Conversion::createGall(PropertyMap(), Angle(1), Length(2), Length(3));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=gall +lon_0=1 +x_0=2 +y_0=3");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Gall\",\n"
+              "    METHOD[\"Gall\"],\n"
+              "    PARAMETER[\"Longitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",2,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Gall_Stereographic\"],\n"
+              "PARAMETER[\"central_meridian\",1],\n"
+              "PARAMETER[\"false_easting\",2],\n"
+              "PARAMETER[\"false_northing\",3]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, goode_homolosine_export) {
+
+    auto conv = Conversion::createGoodeHomolosine(PropertyMap(), Angle(1),
+                                                  Length(2), Length(3));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=goode +lon_0=1 +x_0=2 +y_0=3");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Goode Homolosine\",\n"
+              "    METHOD[\"Goode Homolosine\"],\n"
+              "    PARAMETER[\"Longitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",2,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Goode_Homolosine\"],\n"
+              "PARAMETER[\"central_meridian\",1],\n"
+              "PARAMETER[\"false_easting\",2],\n"
+              "PARAMETER[\"false_northing\",3]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, interrupted_goode_homolosine_export) {
+
+    auto conv = Conversion::createInterruptedGoodeHomolosine(
+        PropertyMap(), Angle(1), Length(2), Length(3));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=igh +lon_0=1 +x_0=2 +y_0=3");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Interrupted Goode Homolosine\",\n"
+              "    METHOD[\"Interrupted Goode Homolosine\"],\n"
+              "    PARAMETER[\"Longitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",2,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Interrupted_Goode_Homolosine\"],\n"
+              "PARAMETER[\"central_meridian\",1],\n"
+              "PARAMETER[\"false_easting\",2],\n"
+              "PARAMETER[\"false_northing\",3]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geostationary_satellite_sweep_x_export) {
+
+    auto conv = Conversion::createGeostationarySatelliteSweepX(
+        PropertyMap(), Angle(1), Length(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=geos +sweep=x +lon_0=1 +h=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Geostationary Satellite (Sweep X)\",\n"
+              "    METHOD[\"Geostationary Satellite (Sweep X)\"],\n"
+              "    PARAMETER[\"Longitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Satellite Height\",2,\n"
+              "        LENGTHUNIT[\"metre\",1,\n"
+              "            ID[\"EPSG\",9001]]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_THROW(conv->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geostationary_satellite_sweep_y_export) {
+
+    auto conv = Conversion::createGeostationarySatelliteSweepY(
+        PropertyMap(), Angle(1), Length(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=geos +lon_0=1 +h=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Geostationary Satellite (Sweep Y)\",\n"
+              "    METHOD[\"Geostationary Satellite (Sweep Y)\"],\n"
+              "    PARAMETER[\"Longitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Satellite Height\",2,\n"
+              "        LENGTHUNIT[\"metre\",1,\n"
+              "            ID[\"EPSG\",9001]]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Geostationary_Satellite\"],\n"
+              "PARAMETER[\"central_meridian\",1],\n"
+              "PARAMETER[\"satellite_height\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
 }
 
 // ---------------------------------------------------------------------------

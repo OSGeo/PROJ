@@ -1329,6 +1329,10 @@ Conversion::create(const util::PropertyMap &properties,
 /** \brief Instanciate a [Universal Transverse Mercator]
  *(https://proj4.org/operations/projections/utm.html) conversion.
  *
+ * UTM is a family of conversions, of EPSG codes from 16001 to 16060 for the
+ * northern hemisphere, and 17001 t 17060 for the southern hemisphere,
+ * based on the Transverse Mercator projection method.
+ *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
  * @param zone UTM zone number between 1 and 60.
@@ -1354,8 +1358,11 @@ ConversionNNPtr Conversion::createUTM(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Transverse Mercator]
- *(https://proj4.org/operations/projections/tmerc.html) conversion.
+/** \brief Instanciate a conversion based on the [Transverse Mercator]
+ *(https://proj4.org/operations/projections/tmerc.html) projection method.
+ *
+ * This method is defined as [EPSG:9807]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9807)
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -1385,8 +1392,48 @@ ConversionNNPtr Conversion::createTM(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Transverse Mercator South Orientated]
- *(https://proj4.org/operations/projections/tmerc.html) conversion.
+/** \brief Instanciate a conversion based on the [Gauss Schreiber Transverse
+ *Mercator]
+ *(https://proj4.org/operations/projections/gstmerc.html) projection method.
+ *
+ * This method is also known as Gauss-Laborde Reunion.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param scale See \ref scale
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createGaussSchreiberTransverseMercator(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Scale &scale,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(scale),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties,
+                  PROJ_WKT2_NAME_METHOD_GAUSS_SCHREIBER_TRANSVERSE_MERCATOR,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Transverse Mercator South
+ *Orientated]
+ *(https://proj4.org/operations/projections/tmerc.html) projection method.
+ *
+ * This method is defined as [EPSG:9808]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9808)
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -1418,8 +1465,10 @@ ConversionNNPtr Conversion::createTMSO(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Two Point Equidistant]
- *(https://proj4.org/operations/projections/tpeqd.html) conversion.
+/** \brief Instanciate a conversion based on the  [Two Point Equidistant]
+ *(https://proj4.org/operations/projections/tpeqd.html) projection method.
+ *
+ * There is no equivalent in EPSG.
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -1453,7 +1502,13 @@ ConversionNNPtr Conversion::createTPED(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Tunisia Mapping Grid conversion.
+/** \brief Instanciate a conversion based on the Tunisia Mapping Grid projection
+ * method.
+ *
+ * This method is defined as [EPSG:9816]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9816)
+ *
+ * \note There is currently no implementation of the method formulas in PROJ.
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -1479,35 +1534,38 @@ ConversionNNPtr Conversion::createTMG(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Albers Conic Equal Area]
- *(https://proj4.org/operations/projections/aea.html) conversion.
+/** \brief Instanciate a conversion based on the [Albers Conic Equal Area]
+ *(https://proj4.org/operations/projections/aea.html) projection method.
+ *
+ * This method is defined as [EPSG:9822]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9822)
+ *
+ * @note the order of arguments is conformant with the corresponding EPSG
+ * mode and different than OGRSpatialReference::setACEA() of GDAL &lt;= 2.3
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
  * @param latitudeFalseOrigin See \ref latitude_false_origin
  * @param longitudeFalseOrigin See \ref longitude_false_origin
  * @param latitudeFirstParallel See \ref latitude_first_std_parallel
- * @param longitudeFirstParallel See \ref latitude_second_std_parallel
+ * @param latitudeSecondParallel See \ref latitude_second_std_parallel
  * @param eastingFalseOrigin See \ref easting_false_origin
  * @param northingFalseOrigin See \ref northing_false_origin
  * @return a new Conversion.
- *
- * @note the order of arguments is conformant with the corresponding EPSG
- * mode and different than OGRSpatialReference::setACEA() of GDAL &lt;= 2.3
  */
 ConversionNNPtr
 Conversion::createAEA(const util::PropertyMap &properties,
                       const common::Angle &latitudeFalseOrigin,
                       const common::Angle &longitudeFalseOrigin,
                       const common::Angle &latitudeFirstParallel,
-                      const common::Angle &longitudeFirstParallel,
+                      const common::Angle &latitudeSecondParallel,
                       const common::Length &eastingFalseOrigin,
                       const common::Length &northingFalseOrigin) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(latitudeFalseOrigin),
         ParameterValue::create(longitudeFalseOrigin),
         ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(longitudeFirstParallel),
+        ParameterValue::create(latitudeSecondParallel),
         ParameterValue::create(eastingFalseOrigin),
         ParameterValue::create(northingFalseOrigin),
     };
@@ -1517,8 +1575,11 @@ Conversion::createAEA(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Lambert Conic Conformal 1SP]
- *(https://proj4.org/operations/projections/lcc.html) conversion.
+/** \brief Instanciate a conversion based on the [Lambert Conic Conformal 1SP]
+ *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *
+ * This method is defined as [EPSG:9801]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9801)
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -1549,35 +1610,38 @@ ConversionNNPtr Conversion::createLCC_1SP(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Lambert Conic Conformal (2SP)]
- *(https://proj4.org/operations/projections/lcc.html) conversion.
+/** \brief Instanciate a conversion based on the [Lambert Conic Conformal (2SP)]
+ *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *
+ * This method is defined as [EPSG:9802]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9802)
+ *
+ * @note the order of arguments is conformant with the corresponding EPSG
+ * mode and different than OGRSpatialReference::setLCC() of GDAL &lt;= 2.3
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
  * @param latitudeFalseOrigin See \ref latitude_false_origin
  * @param longitudeFalseOrigin See \ref longitude_false_origin
  * @param latitudeFirstParallel See \ref latitude_first_std_parallel
- * @param longitudeFirstParallel See \ref latitude_second_std_parallel
+ * @param latitudeSecondParallel See \ref latitude_second_std_parallel
  * @param eastingFalseOrigin See \ref easting_false_origin
  * @param northingFalseOrigin See \ref northing_false_origin
  * @return a new Conversion.
- *
- * @note the order of arguments is conformant with the corresponding EPSG
- * mode and different than OGRSpatialReference::setLCC() of GDAL &lt;= 2.3
  */
 ConversionNNPtr
 Conversion::createLCC_2SP(const util::PropertyMap &properties,
                           const common::Angle &latitudeFalseOrigin,
                           const common::Angle &longitudeFalseOrigin,
                           const common::Angle &latitudeFirstParallel,
-                          const common::Angle &longitudeFirstParallel,
+                          const common::Angle &latitudeSecondParallel,
                           const common::Length &eastingFalseOrigin,
                           const common::Length &northingFalseOrigin) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(latitudeFalseOrigin),
         ParameterValue::create(longitudeFalseOrigin),
         ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(longitudeFirstParallel),
+        ParameterValue::create(latitudeSecondParallel),
         ParameterValue::create(eastingFalseOrigin),
         ParameterValue::create(northingFalseOrigin),
     };
@@ -1588,35 +1652,42 @@ Conversion::createLCC_2SP(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Lambert Conic Conformal (2SP Belgium)]
- *(https://proj4.org/operations/projections/lcc.html) conversion.
+/** \brief Instanciate a conversion based on the [Lambert Conic Conformal (2SP
+ *Belgium)]
+ *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *
+ * This method is defined as [EPSG:9803]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9803)
+ *
+ * \warning The formulas used currently in PROJ are, incorrectly, the ones of
+ * the regular LCC_2SP method.
+ *
+ * @note the order of arguments is conformant with the corresponding EPSG
+ * mode and different than OGRSpatialReference::setLCCB() of GDAL &lt;= 2.3
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
  * @param latitudeFalseOrigin See \ref latitude_false_origin
  * @param longitudeFalseOrigin See \ref longitude_false_origin
  * @param latitudeFirstParallel See \ref latitude_first_std_parallel
- * @param longitudeFirstParallel See \ref latitude_second_std_parallel
+ * @param latitudeSecondParallel See \ref latitude_second_std_parallel
  * @param eastingFalseOrigin See \ref easting_false_origin
  * @param northingFalseOrigin See \ref northing_false_origin
  * @return a new Conversion.
- *
- * @note the order of arguments is conformant with the corresponding EPSG
- * mode and different than OGRSpatialReference::setLCCB() of GDAL &lt;= 2.3
  */
 ConversionNNPtr
 Conversion::createLCC_2SP_Belgium(const util::PropertyMap &properties,
                                   const common::Angle &latitudeFalseOrigin,
                                   const common::Angle &longitudeFalseOrigin,
                                   const common::Angle &latitudeFirstParallel,
-                                  const common::Angle &longitudeFirstParallel,
+                                  const common::Angle &latitudeSecondParallel,
                                   const common::Length &eastingFalseOrigin,
                                   const common::Length &northingFalseOrigin) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(latitudeFalseOrigin),
         ParameterValue::create(longitudeFalseOrigin),
         ParameterValue::create(latitudeFirstParallel),
-        ParameterValue::create(longitudeFirstParallel),
+        ParameterValue::create(latitudeSecondParallel),
         ParameterValue::create(eastingFalseOrigin),
         ParameterValue::create(northingFalseOrigin),
     };
@@ -1627,8 +1698,12 @@ Conversion::createLCC_2SP_Belgium(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Modified Azimuthal Equidistant]
- *(https://proj4.org/operations/projections/aeqd.html) conversion.
+/** \brief Instanciate a conversion based on the [Modified Azimuthal
+ *Equidistant]
+ *(https://proj4.org/operations/projections/aeqd.html) projection method.
+ *
+ * This method is defined as [EPSG:9832]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9832)
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -1655,8 +1730,11 @@ ConversionNNPtr Conversion::createAzimuthalEquidistant(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Guam Projection]
- *(https://proj4.org/operations/projections/aeqd.html) conversion.
+/** \brief Instanciate a conversion based on the [Guam Projection]
+ *(https://proj4.org/operations/projections/aeqd.html) projection method.
+ *
+ * This method is defined as [EPSG:9831]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9831)
  *
  * @param properties See \ref general_properties of the conversion. If the name
  *is
@@ -1683,8 +1761,11 @@ ConversionNNPtr Conversion::createGuamProjection(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Bonne]
- *(https://proj4.org/operations/projections/bonne.html) conversion.
+/** \brief Instanciate a conversion based on the [Bonne]
+ *(https://proj4.org/operations/projections/bonne.html) projection method.
+ *
+ * This method is defined as [EPSG:9827]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9827)
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -1712,8 +1793,12 @@ ConversionNNPtr Conversion::createBonne(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Lambert Cylindrical Equal Area (Spherical)]
- *(https://proj4.org/operations/projections/cea.html) conversion.
+/** \brief Instanciate a conversion based on the [Lambert Cylindrical Equal Area
+ *(Spherical)]
+ *(https://proj4.org/operations/projections/cea.html) projection method.
+ *
+ * This method is defined as [EPSG:9834]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9834)
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -1742,8 +1827,12 @@ ConversionNNPtr Conversion::createLambertCylindricalEqualAreaSpherical(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [Lambert Cylindrical Equal Area (ellipsoidal form)]
- *(https://proj4.org/operations/projections/cea.html) conversion.
+/** \brief Instanciate a conversion based on the [Lambert Cylindrical Equal Area
+ *(ellipsoidal form)]
+ *(https://proj4.org/operations/projections/cea.html) projection method.
+ *
+ * This method is defined as [EPSG:9835]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9835)
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -1771,8 +1860,422 @@ ConversionNNPtr Conversion::createLambertCylindricalEqualArea(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a [New Zealand Map Grid]
- * (https://proj4.org/operations/projections/nzmg.html) conversion.
+/** \brief Instanciate a conversion based on the [Cassini-Soldner]
+ * (https://proj4.org/operations/projections/cass.html) projection method.
+ *
+ * This method is defined as [EPSG:9806]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9806)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createCassiniSoldner(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_CASSINI_SOLDNER, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Equidistant Conic]
+ *(https://proj4.org/operations/projections/eqdc.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @note Although not found in EPSG, the order of arguments is conformant with
+ * the "spirit" of EPSG and different than OGRSpatialReference::setEC() of GDAL
+ *&lt;= 2.3 * @param properties See \ref general_properties of the conversion.
+ *If the name
+ * is not provided, it is automatically set.
+ *
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param latitudeFirstParallel See \ref latitude_first_std_parallel
+ * @param latitudeSecondParallel See \ref latitude_second_std_parallel
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createEquidistantConic(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Angle &latitudeFirstParallel,
+    const common::Angle &latitudeSecondParallel,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(latitudeFirstParallel),
+        ParameterValue::create(latitudeSecondParallel),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Eckert I]
+ * (https://proj4.org/operations/projections/eck1.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createEckertI(const util::PropertyMap &properties,
+                                          const common::Angle &centerLong,
+                                          const common::Length &falseEasting,
+                                          const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_I, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Eckert II]
+ * (https://proj4.org/operations/projections/eck2.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createEckertII(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_II, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Eckert III]
+ * (https://proj4.org/operations/projections/eck3.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createEckertIII(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_III, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Eckert IV]
+ * (https://proj4.org/operations/projections/eck4.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createEckertIV(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_IV, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Eckert V]
+ * (https://proj4.org/operations/projections/eck5.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createEckertV(const util::PropertyMap &properties,
+                                          const common::Angle &centerLong,
+                                          const common::Length &falseEasting,
+                                          const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_V, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Eckert VI]
+ * (https://proj4.org/operations/projections/eck6.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createEckertVI(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_ECKERT_VI, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Equidistant Cylindrical
+ *(Spherical)]
+ *(https://proj4.org/operations/projections/eqc.html) projection method.
+ *
+ * This is also known as the Equirectangular method, and in the particular case
+ * where the latitude of first parallel is 0.
+ *
+ * This method is defined as [EPSG:1029]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1029)
+ *
+ * @note This is the equivalent OGRSpatialReference::SetEquirectangular2(
+ * 0.0, latitudeFirstParallel, falseEasting, falseNorthing ) of GDAL &lt;= 2.3,
+ * where the lat_0 / center_latitude parameter is forced to 0.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeFirstParallel See \ref latitude_first_std_parallel.
+ * @param longitudeNatOrigin See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createEquidistantCylindricalSpherical(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeFirstParallel,
+    const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeFirstParallel),
+        ParameterValue::create(longitudeNatOrigin),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties,
+                  EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Gall (Stereographic)]
+ * (https://proj4.org/operations/projections/gall.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createGall(const util::PropertyMap &properties,
+                                       const common::Angle &centerLong,
+                                       const common::Length &falseEasting,
+                                       const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_GALL, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Goode Homolosine]
+ * (https://proj4.org/operations/projections/goode.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createGoodeHomolosine(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_GOODE_HOMOLOSINE, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Interrupted Goode Homolosine]
+ * (https://proj4.org/operations/projections/igh.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @note OGRSpatialReference::SetIGH() of GDAL &lt;= 2.3 assumes the 3
+ * projection
+ * parameters to be zero and this is the nominal case.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createInterruptedGoodeHomolosine(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties,
+                  PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Geostationary Satellite View]
+ * (https://proj4.org/operations/projections/geos.html) projection method,
+ * with the sweep angle axis of the viewing instrument being x
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param height Height of the view point above the Earth.
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createGeostationarySatelliteSweepX(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &height, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong), ParameterValue::create(height),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties,
+                  PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Geostationary Satellite View]
+ * (https://proj4.org/operations/projections/geos.html) projection method,
+ * with the sweep angle axis of the viewing instrument being y.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param height Height of the view point above the Earth.
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createGeostationarySatelliteSweepY(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &height, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong), ParameterValue::create(height),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties,
+                  PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [New Zealand Map Grid]
+ * (https://proj4.org/operations/projections/nzmg.html) projection method.
+ *
+ * This method is defined as [EPSG:9811]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9811)
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
