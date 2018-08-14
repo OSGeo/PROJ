@@ -361,6 +361,13 @@ void WKTFormatter::endNode() {
 
 // ---------------------------------------------------------------------------
 
+WKTFormatter &WKTFormatter::simulCurNodeHasId() {
+    d->stackHasId_.back() = true;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
 void WKTFormatter::Private::startNewChild() {
     if (!stackHasChild_.empty() && stackHasChild_.back()) {
         result_ += ",";

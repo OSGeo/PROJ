@@ -134,6 +134,9 @@ class WKTFormatter {
 
     void startNode(const std::string &keyword, bool hasId);
     void endNode();
+
+    PROJ_DLL WKTFormatter &simulCurNodeHasId();
+
     void addQuotedString(const std::string &str);
     void add(const std::string &str);
     void add(int number);

@@ -841,21 +841,19 @@ TEST(operation, tped_export) {
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=tpeqd +lat_1=1 +lon_1=2 +lat_2=3 +lon_2=4 +x_0=5 +y_0=6");
 
-    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+    auto formatter = WKTFormatter::create();
+    formatter->simulCurNodeHasId();
+    EXPECT_EQ(conv->exportToWKT(formatter),
               "CONVERSION[\"Two Point Equidistant\",\n"
               "    METHOD[\"Two Point Equidistant\"],\n"
               "    PARAMETER[\"Latitude of first point\",1,\n"
-              "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-              "            ID[\"EPSG\",9122]]],\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
               "    PARAMETER[\"Longitude of first point\",2,\n"
-              "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-              "            ID[\"EPSG\",9122]]],\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
               "    PARAMETER[\"Latitude of second point\",3,\n"
-              "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-              "            ID[\"EPSG\",9122]]],\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
               "    PARAMETER[\"Longitude of second point\",4,\n"
-              "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-              "            ID[\"EPSG\",9122]]],\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
               "    PARAMETER[\"False easting\",5,\n"
               "        LENGTHUNIT[\"metre\",1],\n"
               "        ID[\"EPSG\",8806]],\n"
@@ -1758,25 +1756,23 @@ TEST(operation, hotine_oblique_mercator_two_point_natural_origin_export) {
               "+proj=omerc +lat_0=1 +lat_1=2 +lon_1=3 +lat_2=4 +lon_2=5 +k=6 "
               "+x_0=7 +y_0=8");
 
+    auto formatter = WKTFormatter::create();
+    formatter->simulCurNodeHasId();
     EXPECT_EQ(
-        conv->exportToWKT(WKTFormatter::create()),
+        conv->exportToWKT(formatter),
         "CONVERSION[\"Hotine Oblique Mercator Two Point Natural Origin\",\n"
         "    METHOD[\"Hotine Oblique Mercator Two Point Natural Origin\"],\n"
         "    PARAMETER[\"Latitude of projection centre\",1,\n"
         "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "        ID[\"EPSG\",8811]],\n"
         "    PARAMETER[\"Latitude of point 1\",2,\n"
-        "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-        "            ID[\"EPSG\",9122]]],\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
         "    PARAMETER[\"Longitude of point 1\",3,\n"
-        "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-        "            ID[\"EPSG\",9122]]],\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
         "    PARAMETER[\"Latitude of point 2\",4,\n"
-        "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-        "            ID[\"EPSG\",9122]]],\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
         "    PARAMETER[\"Longitude of point 2\",5,\n"
-        "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-        "            ID[\"EPSG\",9122]]],\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
         "    PARAMETER[\"Scale factor on initial line\",6,\n"
         "        SCALEUNIT[\"unity\",1],\n"
         "        ID[\"EPSG\",8815]],\n"
@@ -1842,16 +1838,9 @@ TEST(operation, wkt1_import_equivalent_parameters) {
     auto wkt = "PROJCS[\"test\",\n"
                "    GEOGCS[\"WGS 84\",\n"
                "        DATUM[\"WGS 1984\",\n"
-               "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
-               "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
-               "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
-               "        PRIMEM[\"Greenwich\",0,\n"
-               "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
-               "        UNIT[\"degree\",0.0174532925199433,\n"
-               "            AUTHORITY[\"EPSG\",9122]],\n"
-               "        AXIS[\"latitude\",NORTH],\n"
-               "        AXIS[\"longitude\",EAST],\n"
-               "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+               "        PRIMEM[\"Greenwich\",0],\n"
+               "        UNIT[\"degree\",0.0174532925199433]],\n"
                "    PROJECTION[\"Hotine Oblique Mercator Two Point Natural "
                "Origin\"],\n"
                "    PARAMETER[\"latitude_of_origin\",1],\n"
@@ -1861,11 +1850,8 @@ TEST(operation, wkt1_import_equivalent_parameters) {
                "    PARAMETER[\"Longitude_Of 2nd_Point\",5],\n"
                "    PARAMETER[\"scale_factor\",6],\n"
                "    PARAMETER[\"false_easting\",7],\n"
-               "    PARAMETER[\"false_northing\",8]"
-               "    UNIT[\"metre\",1,\n"
-               "        AUTHORITY[\"EPSG\",9001]],\n"
-               "    AXIS[\"(E)\",EAST],\n"
-               "    AXIS[\"(N)\",NORTH]]";
+               "    PARAMETER[\"false_northing\",8],\n"
+               "    UNIT[\"metre\",1]]";
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
