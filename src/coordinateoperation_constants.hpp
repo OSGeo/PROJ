@@ -135,6 +135,21 @@ static const std::string PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y(
 static const std::string
     PROJ_WKT2_NAME_METHOD_GAUSS_SCHREIBER_TRANSVERSE_MERCATOR(
         "Gauss Schreiber Transverse Mercator");
+
+static const std::string PROJ_WKT2_NAME_METHOD_GNOMONIC("Gnomonic");
+
+static const std::string EPSG_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A(
+    "Hotine Oblique Mercator (variant A)");
+constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A = 9812;
+
+static const std::string EPSG_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B(
+    "Hotine Oblique Mercator (variant B)");
+constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B = 9815;
+
+static const std::string
+    PROJ_WKT2_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN(
+        "Hotine Oblique Mercator Two Point Natural Origin");
+
 // ---------------------------------------------------------------------------
 
 static const std::string EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN(
@@ -154,6 +169,34 @@ constexpr int EPSG_CODE_PARAMETER_FALSE_EASTING = 8806;
 
 static const std::string EPSG_NAME_PARAMETER_FALSE_NORTHING("False northing");
 constexpr int EPSG_CODE_PARAMETER_FALSE_NORTHING = 8807;
+
+static const std::string EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE(
+    "Latitude of projection centre");
+constexpr int EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE = 8811;
+
+static const std::string EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE(
+    "Longitude of projection centre");
+constexpr int EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE = 8812;
+
+static const std::string
+    EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE("Azimuth of initial line");
+constexpr int EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE = 8813;
+
+static const std::string EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID(
+    "Angle from Rectified to Skew Grid");
+constexpr int EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID = 8814;
+
+static const std::string EPSG_NAME_PARAMETER_SCALE_FACTOR_INITIAL_LINE(
+    "Scale factor on initial line");
+constexpr int EPSG_CODE_PARAMETER_SCALE_FACTOR_INITIAL_LINE = 8815;
+
+static const std::string EPSG_NAME_PARAMETER_EASTING_PROJECTION_CENTRE(
+    "Easting at projection centre");
+constexpr int EPSG_CODE_PARAMETER_EASTING_PROJECTION_CENTRE = 8816;
+
+static const std::string EPSG_NAME_PARAMETER_NORTHING_PROJECTION_CENTRE(
+    "Northing at projection centre");
+constexpr int EPSG_CODE_PARAMETER_NORTHING_PROJECTION_CENTRE = 8817;
 
 static const std::string
     EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN("Latitude of false origin");
@@ -420,9 +463,11 @@ static const MethodMapping methodMappings[] = {
          {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
           EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "latitude_of_center",
           common::UnitOfMeasure::Type::ANGULAR, "lat_0"},
+
          {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
           EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
           "longitude_of_center", common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
+
          paramFalseEasting,
          paramFalseNorthing,
      }},
@@ -445,6 +490,7 @@ static const MethodMapping methodMappings[] = {
           EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
           WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
           "lat_1"},
+
          paramLongitudeNatOrigin,
          paramFalseEasting,
          paramFalseNorthing,
@@ -459,6 +505,7 @@ static const MethodMapping methodMappings[] = {
           EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
           WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
           "lat_ts"},
+
          paramLongitudeNatOrigin,
          paramFalseEasting,
          paramFalseNorthing,
@@ -473,6 +520,7 @@ static const MethodMapping methodMappings[] = {
           EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
           WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
           "lat_ts"},
+
          paramLongitudeNatOrigin,
          paramFalseEasting,
          paramFalseNorthing,
@@ -495,9 +543,11 @@ static const MethodMapping methodMappings[] = {
          {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
           EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "latitude_of_center",
           common::UnitOfMeasure::Type::ANGULAR, "lat_0"},
+
          {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
           EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
           "longitude_of_center", common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
+
          paramLatitude1stStdParallel,
          paramLatitude2ndStdParallel,
          paramFalseEasting,
@@ -561,6 +611,7 @@ static const MethodMapping methodMappings[] = {
           EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
           WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
           "lat_ts"},
+
          paramLongitudeNatOrigin,
          paramFalseEasting,
          paramFalseNorthing,
@@ -599,6 +650,7 @@ static const MethodMapping methodMappings[] = {
          paramLongitudeNatOrigin,
          {"Satellite Height", 0, "satellite_height",
           common::UnitOfMeasure::Type::LINEAR, "h"},
+
          paramFalseEasting,
          paramFalseNorthing,
      }},
@@ -611,6 +663,7 @@ static const MethodMapping methodMappings[] = {
          paramLongitudeNatOrigin,
          {"Satellite Height", 0, "satellite_height",
           common::UnitOfMeasure::Type::LINEAR, "h"},
+
          paramFalseEasting,
          paramFalseNorthing,
      }},
@@ -624,6 +677,110 @@ static const MethodMapping methodMappings[] = {
          paramFalseEasting, paramFalseNorthing,
      }},
 
+    {PROJ_WKT2_NAME_METHOD_GNOMONIC,
+     0,
+     "Gnomonic",
+     "gnom",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A,
+     EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A,
+     "Hotine_Oblique_Mercator",
+     {"omerc", "no_uoff"},
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE,
+          EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE,
+          WKT1_LATITUDE_OF_ORIGIN, common::UnitOfMeasure::Type::ANGULAR,
+          "lat_0"},
+
+         {EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
+          EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
+          WKT1_CENTRAL_MERIDIAN, common::UnitOfMeasure::Type::ANGULAR, "lonc"},
+
+         {EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
+          EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE, "azimuth",
+          common::UnitOfMeasure::Type::ANGULAR, "alpha"},
+
+         {EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID,
+          EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID,
+          "rectified_grid_angle", common::UnitOfMeasure::Type::ANGULAR,
+          "gamma"},
+
+         {EPSG_NAME_PARAMETER_SCALE_FACTOR_INITIAL_LINE,
+          EPSG_CODE_PARAMETER_SCALE_FACTOR_INITIAL_LINE, WKT1_SCALE_FACTOR,
+          common::UnitOfMeasure::Type::SCALE, "k"},
+
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B,
+     EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B,
+     "Hotine_Oblique_Mercator_Azimuth_Center",
+     "omerc",
+     {{EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE,
+       EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE, WKT1_LATITUDE_OF_ORIGIN,
+       common::UnitOfMeasure::Type::ANGULAR, "lat_0"},
+
+      {EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
+       EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE, WKT1_CENTRAL_MERIDIAN,
+       common::UnitOfMeasure::Type::ANGULAR, "lonc"},
+
+      {EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
+       EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE, "azimuth",
+       common::UnitOfMeasure::Type::ANGULAR, "alpha"},
+
+      {EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID,
+       EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID, "rectified_grid_angle",
+       common::UnitOfMeasure::Type::ANGULAR, "gamma"},
+
+      {EPSG_NAME_PARAMETER_SCALE_FACTOR_INITIAL_LINE,
+       EPSG_CODE_PARAMETER_SCALE_FACTOR_INITIAL_LINE, WKT1_SCALE_FACTOR,
+       common::UnitOfMeasure::Type::SCALE, "k"},
+
+      {EPSG_NAME_PARAMETER_EASTING_PROJECTION_CENTRE,
+       EPSG_CODE_PARAMETER_EASTING_PROJECTION_CENTRE, WKT1_FALSE_EASTING,
+       common::UnitOfMeasure::Type::LINEAR, "x_0"},
+
+      {EPSG_NAME_PARAMETER_NORTHING_PROJECTION_CENTRE,
+       EPSG_CODE_PARAMETER_NORTHING_PROJECTION_CENTRE, WKT1_FALSE_NORTHING,
+       common::UnitOfMeasure::Type::LINEAR, "y_0"}}},
+
+    {PROJ_WKT2_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN,
+     0,
+     "Hotine_Oblique_Mercator_Two_Point_Natural_Origin",
+     "omerc",
+     {{EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE,
+       EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE, WKT1_LATITUDE_OF_ORIGIN,
+       common::UnitOfMeasure::Type::ANGULAR, "lat_0"},
+
+      {"Latitude of point 1", 0, "latitude_of_point_1",
+       common::UnitOfMeasure::Type::ANGULAR, "lat_1"},
+
+      {"Longitude of point 1", 0, "longitude_of_point_1",
+       common::UnitOfMeasure::Type::ANGULAR, "lon_1"},
+
+      {"Latitude of point 2", 0, "latitude_of_point_2",
+       common::UnitOfMeasure::Type::ANGULAR, "lat_2"},
+
+      {"Longitude of point 2", 0, "longitude_of_point_2",
+       common::UnitOfMeasure::Type::ANGULAR, "lon_2"},
+
+      {EPSG_NAME_PARAMETER_SCALE_FACTOR_INITIAL_LINE,
+       EPSG_CODE_PARAMETER_SCALE_FACTOR_INITIAL_LINE, WKT1_SCALE_FACTOR,
+       common::UnitOfMeasure::Type::SCALE, "k"},
+
+      {EPSG_NAME_PARAMETER_EASTING_PROJECTION_CENTRE,
+       EPSG_CODE_PARAMETER_EASTING_PROJECTION_CENTRE, WKT1_FALSE_EASTING,
+       common::UnitOfMeasure::Type::LINEAR, "x_0"},
+
+      {EPSG_NAME_PARAMETER_NORTHING_PROJECTION_CENTRE,
+       EPSG_CODE_PARAMETER_NORTHING_PROJECTION_CENTRE, WKT1_FALSE_NORTHING,
+       common::UnitOfMeasure::Type::LINEAR, "y_0"}}},
+
     {EPSG_NAME_METHOD_NZMG,
      EPSG_CODE_METHOD_NZMG,
      "New_Zealand_Map_Grid",
@@ -633,6 +790,32 @@ static const MethodMapping methodMappings[] = {
          paramFalseNorthing,
      }},
     // TODO: add at least all GDAL supported methods !!!
+};
+
+// ---------------------------------------------------------------------------
+
+static const std::vector<std::vector<std::string>>
+    listOfEquivalentParameterNames = {
+        {"latitude_of_point_1", "Latitude_Of_1st_Point"},
+        {"longitude_of_point_1", "Longitude_Of_1st_Point"},
+        {"latitude_of_point_2", "Latitude_Of_2nd_Point"},
+        {"longitude_of_point_2", "Longitude_Of_2nd_Point"},
+
+        {EPSG_NAME_PARAMETER_FALSE_EASTING,
+         EPSG_NAME_PARAMETER_EASTING_FALSE_ORIGIN,
+         EPSG_NAME_PARAMETER_EASTING_PROJECTION_CENTRE},
+
+        {EPSG_NAME_PARAMETER_FALSE_NORTHING,
+         EPSG_NAME_PARAMETER_NORTHING_FALSE_ORIGIN,
+         EPSG_NAME_PARAMETER_NORTHING_PROJECTION_CENTRE},
+
+        {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+         EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN,
+         EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE},
+
+        {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+         EPSG_NAME_PARAMETER_LONGITUDE_FALSE_ORIGIN,
+         EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE},
 };
 
 //! @endcond

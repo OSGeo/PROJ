@@ -1599,6 +1599,210 @@ TEST(operation, geostationary_satellite_sweep_y_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, gnomonic_export) {
+    auto conv = Conversion::createGnomonic(PropertyMap(), Angle(1), Angle(2),
+                                           Length(4), Length(5));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=gnom +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Gnomonic\",\n"
+              "    METHOD[\"Gnomonic\"],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Gnomonic\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, hotine_oblique_mercator_variant_A_export) {
+    auto conv = Conversion::createHotineObliqueMercatorVariantA(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Scale(5),
+        Length(6), Length(7));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=omerc +no_uoff +lat_0=1 +lonc=2 +alpha=3 +gamma=4 +k=5 "
+              "+x_0=6 +y_0=7");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Hotine Oblique Mercator (variant A)\",\n"
+              "    METHOD[\"Hotine Oblique Mercator (variant A)\",\n"
+              "        ID[\"EPSG\",9812]],\n"
+              "    PARAMETER[\"Latitude of projection centre\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8811]],\n"
+              "    PARAMETER[\"Longitude of projection centre\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8812]],\n"
+              "    PARAMETER[\"Azimuth of initial line\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8813]],\n"
+              "    PARAMETER[\"Angle from Rectified to Skew Grid\",4,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8814]],\n"
+              "    PARAMETER[\"Scale factor on initial line\",5,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8815]],\n"
+              "    PARAMETER[\"False easting\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",7,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Hotine_Oblique_Mercator\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"azimuth\",3],\n"
+              "PARAMETER[\"rectified_grid_angle\",4],\n"
+              "PARAMETER[\"scale_factor\",5],\n"
+              "PARAMETER[\"false_easting\",6],\n"
+              "PARAMETER[\"false_northing\",7]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, hotine_oblique_mercator_variant_A_export_swiss_mercator) {
+    auto conv = Conversion::createHotineObliqueMercatorVariantA(
+        PropertyMap(), Angle(1), Angle(2), Angle(90), Angle(90), Scale(5),
+        Length(6), Length(7));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=somerc +lat_0=1 +lon_0=2 +k_0=5 "
+              "+x_0=6 +y_0=7");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, hotine_oblique_mercator_variant_B_export) {
+    auto conv = Conversion::createHotineObliqueMercatorVariantB(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Scale(5),
+        Length(6), Length(7));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=omerc +lat_0=1 +lonc=2 +alpha=3 +gamma=4 +k=5 "
+              "+x_0=6 +y_0=7");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Hotine Oblique Mercator (variant B)\",\n"
+              "    METHOD[\"Hotine Oblique Mercator (variant B)\",\n"
+              "        ID[\"EPSG\",9815]],\n"
+              "    PARAMETER[\"Latitude of projection centre\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8811]],\n"
+              "    PARAMETER[\"Longitude of projection centre\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8812]],\n"
+              "    PARAMETER[\"Azimuth of initial line\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8813]],\n"
+              "    PARAMETER[\"Angle from Rectified to Skew Grid\",4,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8814]],\n"
+              "    PARAMETER[\"Scale factor on initial line\",5,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8815]],\n"
+              "    PARAMETER[\"Easting at projection centre\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8816]],\n"
+              "    PARAMETER[\"Northing at projection centre\",7,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8817]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Hotine_Oblique_Mercator_Azimuth_Center\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"azimuth\",3],\n"
+              "PARAMETER[\"rectified_grid_angle\",4],\n"
+              "PARAMETER[\"scale_factor\",5],\n"
+              "PARAMETER[\"false_easting\",6],\n"
+              "PARAMETER[\"false_northing\",7]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, hotine_oblique_mercator_variant_B_export_swiss_mercator) {
+    auto conv = Conversion::createHotineObliqueMercatorVariantB(
+        PropertyMap(), Angle(1), Angle(2), Angle(90), Angle(90), Scale(5),
+        Length(6), Length(7));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=somerc +lat_0=1 +lon_0=2 +k_0=5 "
+              "+x_0=6 +y_0=7");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, hotine_oblique_mercator_two_point_natural_origin_export) {
+    auto conv = Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Angle(5),
+        Scale(6), Length(7), Length(8));
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=omerc +lat_0=1 +lat_1=2 +lon_1=3 +lat_2=4 +lon_2=5 +k=6 "
+              "+x_0=7 +y_0=8");
+
+    EXPECT_EQ(
+        conv->exportToWKT(WKTFormatter::create()),
+        "CONVERSION[\"Hotine Oblique Mercator Two Point Natural Origin\",\n"
+        "    METHOD[\"Hotine Oblique Mercator Two Point Natural Origin\"],\n"
+        "    PARAMETER[\"Latitude of projection centre\",1,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8811]],\n"
+        "    PARAMETER[\"Latitude of point 1\",2,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "            ID[\"EPSG\",9122]]],\n"
+        "    PARAMETER[\"Longitude of point 1\",3,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "            ID[\"EPSG\",9122]]],\n"
+        "    PARAMETER[\"Latitude of point 2\",4,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "            ID[\"EPSG\",9122]]],\n"
+        "    PARAMETER[\"Longitude of point 2\",5,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "            ID[\"EPSG\",9122]]],\n"
+        "    PARAMETER[\"Scale factor on initial line\",6,\n"
+        "        SCALEUNIT[\"unity\",1],\n"
+        "        ID[\"EPSG\",8815]],\n"
+        "    PARAMETER[\"Easting at projection centre\",7,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8816]],\n"
+        "    PARAMETER[\"Northing at projection centre\",8,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8817]]]");
+
+    EXPECT_EQ(
+        conv->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+        "PROJECTION[\"Hotine_Oblique_Mercator_Two_Point_Natural_Origin\"],\n"
+        "PARAMETER[\"latitude_of_origin\",1],\n"
+        "PARAMETER[\"latitude_of_point_1\",2],\n"
+        "PARAMETER[\"longitude_of_point_1\",3],\n"
+        "PARAMETER[\"latitude_of_point_2\",4],\n"
+        "PARAMETER[\"longitude_of_point_2\",5],\n"
+        "PARAMETER[\"scale_factor\",6],\n"
+        "PARAMETER[\"false_easting\",7],\n"
+        "PARAMETER[\"false_northing\",8]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, nzmg_export) {
     auto conv = Conversion::createNZMG(PropertyMap(), Angle(1), Angle(2),
                                        Length(4), Length(5));
@@ -1630,6 +1834,51 @@ TEST(operation, nzmg_export) {
               "PARAMETER[\"central_meridian\",2],\n"
               "PARAMETER[\"false_easting\",4],\n"
               "PARAMETER[\"false_northing\",5]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, wkt1_import_equivalent_parameters) {
+    auto wkt = "PROJCS[\"test\",\n"
+               "    GEOGCS[\"WGS 84\",\n"
+               "        DATUM[\"WGS 1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+               "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+               "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+               "        UNIT[\"degree\",0.0174532925199433,\n"
+               "            AUTHORITY[\"EPSG\",9122]],\n"
+               "        AXIS[\"latitude\",NORTH],\n"
+               "        AXIS[\"longitude\",EAST],\n"
+               "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
+               "    PROJECTION[\"Hotine Oblique Mercator Two Point Natural "
+               "Origin\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",1],\n"
+               "    PARAMETER[\"Latitude_Of_1st_Point\",2],\n"
+               "    PARAMETER[\"Longitude_Of_1st_Point\",3],\n"
+               "    PARAMETER[\"Latitude_Of_2nd_Point\",4],\n"
+               "    PARAMETER[\"Longitude_Of 2nd_Point\",5],\n"
+               "    PARAMETER[\"scale_factor\",6],\n"
+               "    PARAMETER[\"false_easting\",7],\n"
+               "    PARAMETER[\"false_northing\",8]"
+               "    UNIT[\"metre\",1,\n"
+               "        AUTHORITY[\"EPSG\",9001]],\n"
+               "    AXIS[\"(E)\",EAST],\n"
+               "    AXIS[\"(N)\",NORTH]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto conversion = crs->derivingConversion();
+    auto convRef = Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Angle(5),
+        Scale(6), Length(7), Length(8));
+
+    EXPECT_EQ(conversion->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              convRef->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)));
 }
 
 // ---------------------------------------------------------------------------

@@ -46,6 +46,7 @@
 #include <cassert>
 #include <cmath>
 #include <memory>
+#include <set>
 #include <sstream> // std::ostringstream
 #include <string>
 #include <vector>
@@ -60,6 +61,43 @@ namespace operation {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+// ---------------------------------------------------------------------------
+
+using PairOfString = std::pair<std::string, std::string>;
+
+static std::set<PairOfString> buildSetEquivalentParameters() {
+    std::set<PairOfString> set;
+    for (const auto &paramList : listOfEquivalentParameterNames) {
+        for (size_t i = 0; i < paramList.size(); i++) {
+            auto a = metadata::Identifier::canonicalizeName(paramList[i]);
+            for (size_t j = i + 1; j < paramList.size(); j++) {
+                auto b = metadata::Identifier::canonicalizeName(paramList[j]);
+                if (a < b)
+                    set.insert(PairOfString(a, b));
+                else
+                    set.insert(PairOfString(b, a));
+            }
+        }
+    }
+    return set;
+}
+
+static bool areEquivalentParameters(const std::string &a,
+                                    const std::string &b) {
+
+    static const std::set<PairOfString> setEquivalentParameters =
+        buildSetEquivalentParameters();
+
+    auto a_can = metadata::Identifier::canonicalizeName(a);
+    auto b_can = metadata::Identifier::canonicalizeName(b);
+    return setEquivalentParameters.find((a_can < b_can)
+                                            ? PairOfString(a_can, b_can)
+                                            : PairOfString(b_can, a_can)) !=
+           setEquivalentParameters.end();
+}
+
+// ---------------------------------------------------------------------------
 
 const MethodMapping *getMapping(int epsg_code) {
     for (const auto &mapping : methodMappings) {
@@ -77,7 +115,7 @@ const MethodMapping *getMapping(const OperationMethod *method) {
     const std::string &code = method->name()->code();
     const int epsg_code = !code.empty() ? ::atoi(code.c_str()) : 0;
     for (const auto &mapping : methodMappings) {
-        if (mapping.wkt2_name == name ||
+        if (metadata::Identifier::isEquivalentName(mapping.wkt2_name, name) ||
             (epsg_code != 0 && mapping.epsg_code == epsg_code)) {
             return &mapping;
         }
@@ -123,8 +161,10 @@ const ParamMapping *getMapping(const MethodMapping *mapping,
     const std::string &code = param_name->code();
     const int epsg_code = !code.empty() ? ::atoi(code.c_str()) : 0;
     for (const auto &paramMapping : mapping->params) {
-        if (paramMapping.wkt2_name == name ||
-            (epsg_code != 0 && paramMapping.epsg_code == epsg_code)) {
+        if (metadata::Identifier::isEquivalentName(paramMapping.wkt2_name,
+                                                   name) ||
+            (epsg_code != 0 && paramMapping.epsg_code == epsg_code) ||
+            areEquivalentParameters(paramMapping.wkt2_name, name)) {
             return &paramMapping;
         }
     }
@@ -136,7 +176,9 @@ const ParamMapping *getMapping(const MethodMapping *mapping,
 const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
                                        const std::string &wkt1_name) {
     for (const auto &paramMapping : mapping->params) {
-        if (paramMapping.wkt1_name == wkt1_name) {
+        if (metadata::Identifier::isEquivalentName(paramMapping.wkt1_name,
+                                                   wkt1_name) ||
+            areEquivalentParameters(paramMapping.wkt1_name, wkt1_name)) {
             return &paramMapping;
         }
     }
@@ -2271,6 +2313,186 @@ ConversionNNPtr Conversion::createGeostationarySatelliteSweepY(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the [Gnomonic]
+ *(https://proj4.org/operations/projections/gnom.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createGnomonic(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_GNOMONIC, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Hotine Oblique Mercator
+ *(Variant A)]
+ *(https://proj4.org/operations/projections/omerc.html) projection method
+ *
+ * This is the variant with the no_uoff parameter, which corresponds to
+ * GDAL &gt;=2.3 Hotine_Oblique_Mercator projection.
+ * In this variant, the false grid coordinates are
+ * defined at the intersection of the initial line and the aposphere (the
+ * equator on one of the intermediate surfaces inherent in the method), that is
+ * at the natural origin of the coordinate system).
+ *
+ * This method is defined as [EPSG:9812]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9812)
+ *
+ * \note In the case where azimuthInitialLine = angleFromRectifiedToSkrewGrid =
+ *90deg,
+ * this maps to the  [Swiss Oblique Mercator]
+ *(https://proj4.org/operations/projections/somerc.html) formulas.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeProjectionCentre See \ref latitude_projection_centre
+ * @param longitudeProjectionCentre See \ref longitude_projection_centre
+ * @param azimuthInitialLine See \ref azimuth_initial_line
+ * @param angleFromRectifiedToSkrewGrid See
+ * \ref angle_from_recitfied_to_skrew_grid
+ * @param scale See \ref scale_factor_initial_line
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createHotineObliqueMercatorVariantA(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeProjectionCentre,
+    const common::Angle &longitudeProjectionCentre,
+    const common::Angle &azimuthInitialLine,
+    const common::Angle &angleFromRectifiedToSkrewGrid,
+    const common::Scale &scale, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeProjectionCentre),
+        ParameterValue::create(longitudeProjectionCentre),
+        ParameterValue::create(azimuthInitialLine),
+        ParameterValue::create(angleFromRectifiedToSkrewGrid),
+        ParameterValue::create(scale),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties,
+                  EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Hotine Oblique Mercator
+ *(Variant B)]
+ *(https://proj4.org/operations/projections/omerc.html) projection method
+ *
+ * This is the variant without the no_uoff parameter, which corresponds to
+ * GDAL &gt;=2.3 Hotine_Oblique_Mercator_Azimuth_Center projection.
+ * In this variant, the false grid coordinates are defined at the projection
+ *centre.
+ *
+ * This method is defined as [EPSG:9815]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9815)
+ *
+ * \note In the case where azimuthInitialLine = angleFromRectifiedToSkrewGrid =
+ *90deg,
+ * this maps to the  [Swiss Oblique Mercator]
+ *(https://proj4.org/operations/projections/somerc.html) formulas.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeProjectionCentre See \ref latitude_projection_centre
+ * @param longitudeProjectionCentre See \ref longitude_projection_centre
+ * @param azimuthInitialLine See \ref azimuth_initial_line
+ * @param angleFromRectifiedToSkrewGrid See
+ * \ref angle_from_recitfied_to_skrew_grid
+ * @param scale See \ref scale_factor_initial_line
+ * @param eastingProjectionCentre See \ref easting_projection_centre
+ * @param northingProjectionCentre See \ref northing_projection_centre
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createHotineObliqueMercatorVariantB(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeProjectionCentre,
+    const common::Angle &longitudeProjectionCentre,
+    const common::Angle &azimuthInitialLine,
+    const common::Angle &angleFromRectifiedToSkrewGrid,
+    const common::Scale &scale, const common::Length &eastingProjectionCentre,
+    const common::Length &northingProjectionCentre) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeProjectionCentre),
+        ParameterValue::create(longitudeProjectionCentre),
+        ParameterValue::create(azimuthInitialLine),
+        ParameterValue::create(angleFromRectifiedToSkrewGrid),
+        ParameterValue::create(scale),
+        ParameterValue::create(eastingProjectionCentre),
+        ParameterValue::create(northingProjectionCentre),
+    };
+
+    return create(properties,
+                  EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Hotine Oblique Mercator Two
+ *Point Natural Origin]
+ *(https://proj4.org/operations/projections/omerc.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeProjectionCentre See \ref latitude_projection_centre
+ * @param latitudePoint1 Latitude of point 1.
+ * @param longitudePoint1 Latitude of point 1.
+ * @param latitudePoint2 Latitude of point 2.
+ * @param longitudePoint2 Longitude of point 2.
+ * @param scale See \ref scale_factor_initial_line
+ * @param eastingProjectionCentre See \ref easting_projection_centre
+ * @param northingProjectionCentre See \ref northing_projection_centre
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeProjectionCentre,
+    const common::Angle &latitudePoint1, const common::Angle &longitudePoint1,
+    const common::Angle &latitudePoint2, const common::Angle &longitudePoint2,
+    const common::Scale &scale, const common::Length &eastingProjectionCentre,
+    const common::Length &northingProjectionCentre) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeProjectionCentre),
+        ParameterValue::create(latitudePoint1),
+        ParameterValue::create(longitudePoint1),
+        ParameterValue::create(latitudePoint2),
+        ParameterValue::create(longitudePoint2),
+        ParameterValue::create(scale),
+        ParameterValue::create(eastingProjectionCentre),
+        ParameterValue::create(northingProjectionCentre),
+    };
+
+    return create(
+        properties,
+        PROJ_WKT2_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN,
+        values);
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a conversion based on the [New Zealand Map Grid]
  * (https://proj4.org/operations/projections/nzmg.html) projection method.
  *
@@ -2371,8 +2593,10 @@ std::string Conversion::exportToPROJString(
     }
 
     auto projectionMethodName = *(method()->name()->description());
+    const int methodEPSGCode = method()->getEPSGCode();
     bool bConversionDone = false;
-    if (ci_equal(projectionMethodName, EPSG_NAME_METHOD_TRANSVERSE_MERCATOR)) {
+    if (ci_equal(projectionMethodName, EPSG_NAME_METHOD_TRANSVERSE_MERCATOR) ||
+        methodEPSGCode == EPSG_CODE_METHOD_TRANSVERSE_MERCATOR) {
         // Check for UTM
         int zone = 0;
         bool north = true;
@@ -2384,9 +2608,111 @@ std::string Conversion::exportToPROJString(
                 formatter->addParam("south");
             }
         }
+    } else if (ci_equal(projectionMethodName,
+                        EPSG_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A) ||
+               methodEPSGCode ==
+                   EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A) {
+        const double azimuth =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
+                                  EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE)
+                .convertToUnit(common::UnitOfMeasure::DEGREE)
+                .value();
+        const double angleRectifiedToSkewGrid =
+            parameterValueMeasure(
+                EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID,
+                EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)
+                .convertToUnit(common::UnitOfMeasure::DEGREE)
+                .value();
+        // Map to Swiss Oblique Mercator / somerc
+        if (std::fabs(azimuth - 90) < 1e-4 &&
+            std::fabs(angleRectifiedToSkewGrid - 90) < 1e-4) {
+            bConversionDone = true;
+            formatter->addStep("somerc");
+            formatter->addParam(
+                "lat_0", parameterValueMeasure(
+                             EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE,
+                             EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE)
+                             .convertToUnit(common::UnitOfMeasure::DEGREE)
+                             .value());
+            formatter->addParam(
+                "lon_0", parameterValueMeasure(
+                             EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
+                             EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE)
+                             .convertToUnit(common::UnitOfMeasure::DEGREE)
+                             .value());
+            formatter->addParam(
+                "k_0", parameterValueMeasure(
+                           EPSG_NAME_PARAMETER_SCALE_FACTOR_INITIAL_LINE,
+                           EPSG_CODE_PARAMETER_SCALE_FACTOR_INITIAL_LINE)
+                           .getSIValue());
+            formatter->addParam(
+                "x_0", parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_EASTING,
+                                             EPSG_CODE_PARAMETER_FALSE_EASTING)
+                           .convertToUnit(common::UnitOfMeasure::DEGREE)
+                           .getSIValue());
+            formatter->addParam(
+                "y_0", parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_NORTHING,
+                                             EPSG_CODE_PARAMETER_FALSE_NORTHING)
+                           .convertToUnit(common::UnitOfMeasure::DEGREE)
+                           .getSIValue());
+        }
+    } else if (ci_equal(projectionMethodName,
+                        EPSG_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B) ||
+               methodEPSGCode ==
+                   EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B) {
+        const double azimuth =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_AZIMUTH_INITIAL_LINE,
+                                  EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE)
+                .convertToUnit(common::UnitOfMeasure::DEGREE)
+                .value();
+        const double angleRectifiedToSkewGrid =
+            parameterValueMeasure(
+                EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID,
+                EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID)
+                .convertToUnit(common::UnitOfMeasure::DEGREE)
+                .value();
+        // Map to Swiss Oblique Mercator / somerc
+        if (std::fabs(azimuth - 90) < 1e-4 &&
+            std::fabs(angleRectifiedToSkewGrid - 90) < 1e-4) {
+            bConversionDone = true;
+            formatter->addStep("somerc");
+            formatter->addParam(
+                "lat_0", parameterValueMeasure(
+                             EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE,
+                             EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE)
+                             .convertToUnit(common::UnitOfMeasure::DEGREE)
+                             .value());
+            formatter->addParam(
+                "lon_0", parameterValueMeasure(
+                             EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
+                             EPSG_CODE_PARAMETER_LONGITUDE_PROJECTION_CENTRE)
+                             .convertToUnit(common::UnitOfMeasure::DEGREE)
+                             .value());
+            formatter->addParam(
+                "k_0", parameterValueMeasure(
+                           EPSG_NAME_PARAMETER_SCALE_FACTOR_INITIAL_LINE,
+                           EPSG_CODE_PARAMETER_SCALE_FACTOR_INITIAL_LINE)
+                           .getSIValue());
+            formatter->addParam(
+                "x_0", parameterValueMeasure(
+                           EPSG_NAME_PARAMETER_EASTING_PROJECTION_CENTRE,
+                           EPSG_CODE_PARAMETER_EASTING_PROJECTION_CENTRE)
+                           .convertToUnit(common::UnitOfMeasure::DEGREE)
+                           .getSIValue());
+            formatter->addParam(
+                "y_0", parameterValueMeasure(
+                           EPSG_NAME_PARAMETER_NORTHING_PROJECTION_CENTRE,
+                           EPSG_CODE_PARAMETER_NORTHING_PROJECTION_CENTRE)
+                           .convertToUnit(common::UnitOfMeasure::DEGREE)
+                           .getSIValue());
+        }
     }
+
     if (!bConversionDone) {
-        const auto &mapping = getMapping(projectionMethodName);
+        const MethodMapping *mapping = getMapping(projectionMethodName);
+        if (!mapping && methodEPSGCode) {
+            mapping = getMapping(methodEPSGCode);
+        }
         if (mapping && !mapping->proj_name[0].empty()) {
             formatter->addStep(mapping->proj_name[0]);
             for (size_t i = 1; i < mapping->proj_name.size(); ++i) {
@@ -2399,12 +2725,14 @@ std::string Conversion::exportToPROJString(
                         common::UnitOfMeasure::Type::ANGULAR) {
                         formatter->addParam(
                             proj_name,
-                            parameterValueMeasure(param.wkt2_name)
+                            parameterValueMeasure(param.wkt2_name,
+                                                  param.epsg_code)
                                 .convertToUnit(common::UnitOfMeasure::DEGREE)
                                 .value());
                     } else {
                         formatter->addParam(
-                            proj_name, parameterValueMeasure(param.wkt2_name)
+                            proj_name, parameterValueMeasure(param.wkt2_name,
+                                                             param.epsg_code)
                                            .getSIValue());
                     }
                 }

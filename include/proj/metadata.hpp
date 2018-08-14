@@ -233,6 +233,10 @@ class Identifier : public util::BaseObject, public io::IWKTExportable {
     std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const override; // throw(io::FormattingException)
 
+    //! @cond Doxygen_Suppress
+    static std::string canonicalizeName(const std::string &str);
+    //! @endcond
+
   protected:
     explicit Identifier(const std::string &codeIn = std::string());
 

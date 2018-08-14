@@ -589,6 +589,55 @@ projection grid at the natural origin.
 
 EPSG:8807
 
+\subsection latitude_projection_centre Latitute of projection centre
+
+For an oblique projection, this is the latitude of the point at which the
+azimuth of the central line is defined.
+
+EPSG:8811
+
+\subsection longitude_projection_centre Longitude of projection centre
+
+For an oblique projection, this is the longitude of the point at which the
+azimuth of the central line is defined.
+
+EPSG:8812
+
+\subsection azimuth_initial_line Azimuth of initial line
+
+The azimuthal direction (north zero, east of north being positive) of the great
+circle which is the centre line of an oblique projection. The azimuth is given
+at the projection centre.
+
+EPSG:8813
+
+\subsection angle_from_recitfied_to_skrew_grid Angle from Rectified to Skew Grid
+
+The angle at the natural origin of an oblique projection through which the
+natural coordinate reference system is rotated to make the projection north
+axis parallel with true north.
+
+EPSG:8814
+
+\subsection scale_factor_initial_line Scale factor on initial line
+
+The factor by which the map grid is reduced or enlarged during the projection
+process, defined by its value at the projection center.
+
+EPSG:8815
+
+\subsection easting_projection_centre Easting at projection centre
+
+The easting value assigned to the projection centre.
+
+EPSG:8816
+
+\subsection northing_projection_centre Northing at projection centre
+
+The northing value assigned to the projection centre.
+
+EPSG:8817
+
 \subsection latitude_false_origin Latitude of false origin
 
 The latitude of the point which is not the natural origin and at which grid
@@ -857,6 +906,41 @@ class Conversion : public SingleOperation {
         const util::PropertyMap &properties, const common::Angle &centerLong,
         const common::Length &height, const common::Length &falseEasting,
         const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createGnomonic(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createHotineObliqueMercatorVariantA(
+        const util::PropertyMap &properties,
+        const common::Angle &latitudeProjectionCentre,
+        const common::Angle &longitudeProjectionCentre,
+        const common::Angle &azimuthInitialLine,
+        const common::Angle &angleFromRectifiedToSkrewGrid,
+        const common::Scale &scale, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createHotineObliqueMercatorVariantB(
+        const util::PropertyMap &properties,
+        const common::Angle &latitudeProjectionCentre,
+        const common::Angle &longitudeProjectionCentre,
+        const common::Angle &azimuthInitialLine,
+        const common::Angle &angleFromRectifiedToSkrewGrid,
+        const common::Scale &scale,
+        const common::Length &eastingProjectionCentre,
+        const common::Length &northingProjectionCentre);
+
+    PROJ_DLL static ConversionNNPtr
+    createHotineObliqueMercatorTwoPointNaturalOrigin(
+        const util::PropertyMap &properties,
+        const common::Angle &latitudeProjectionCentre,
+        const common::Angle &latitudePoint1,
+        const common::Angle &longitudePoint1,
+        const common::Angle &latitudePoint2,
+        const common::Angle &longitudePoint2, const common::Scale &scale,
+        const common::Length &eastingProjectionCentre,
+        const common::Length &northingProjectionCentre);
 
     PROJ_DLL static ConversionNNPtr
     createNZMG(const util::PropertyMap &properties,

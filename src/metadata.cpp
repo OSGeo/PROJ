@@ -506,13 +506,15 @@ std::string Identifier::exportToWKT(WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
-static std::string canonicalizeName(const std::string &str) {
+//! @cond Doxygen_Suppress
+std::string Identifier::canonicalizeName(const std::string &str) {
     std::string res(tolower(str));
     for (auto c : std::vector<std::string>{" ", "_", "-", "/", "(", ")"}) {
         res = replaceAll(res, c, "");
     }
     return res;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
