@@ -55,7 +55,8 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         y6 = y2 * y2 * y2;
         f = yc * (A1 + A2 * y2 + y6 * (A3 + A4 * y2)) - xy.y;
         fder = A1 + 3 * A2 * y2 + y6 * (7 * A3 + 9 * A4 * y2);
-        yc -= tol = f / fder;
+        tol = f / fder;
+        yc -= tol;
         if (fabs(tol) < EPS) {
             break;
         }
