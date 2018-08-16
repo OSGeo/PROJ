@@ -67,6 +67,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_eck5.c
         PJ_eqc.c
         PJ_eqdc.c
+        PJ_eqearth.c
         PJ_fahey.c
         PJ_fouc_s.c
         PJ_gall.c
