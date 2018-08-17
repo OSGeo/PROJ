@@ -308,6 +308,17 @@
         "type": "poly"
     },
     {
+        "filename": "eqearth.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "aea",
+        "projstring": "+proj=eqearth",
+        "res": "low",
+        "type": "poly"
+    },
+    {
         "filename": "euler.png",
         "latmax": 90,
         "latmin": -90,

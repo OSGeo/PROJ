@@ -24,6 +24,7 @@ PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl., Sph.";
 #define A4 0.003796
 #define M (sqrt(3) / 2.0)
 
+#define MAX_Y 1.3173627591574  /* 90° latitude on a sphere with radius 1 */
 #define EPS 1e-11
 #define MAX_ITER 12
 
@@ -48,8 +49,15 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     int i;
     (void) P;
 
+    /* make sure y is inside valid range */
+    if (xy.y > MAX_Y) {
+        xy.y = MAX_Y;
+    } else if (xy.y < -MAX_Y) {
+        xy.y = -MAX_Y;
+    }
 
     yc = xy.y;
+
     for (i = MAX_ITER; i ; --i) { /* Newton-Raphson */
         y2 = yc * yc;
         y6 = y2 * y2 * y2;
