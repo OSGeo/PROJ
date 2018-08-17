@@ -8,7 +8,7 @@ Bojan Savric, Tom Patterson & Bernhard Jenny (2018). The Equal Earth map
 projection, International Journal of Geographical Information Science,
 DOI: 10.1080/13658816.2018.1504949
 
-Port to PROJ.4 by Juernjakob Dugge, 16 August 2018
+Port to PROJ by Juernjakob Dugge, 16 August 2018
 */
 #define PJ_LIB__
 
