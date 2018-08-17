@@ -78,6 +78,7 @@ libproj_la_SOURCES = \
 	pj_tsfn.c pj_units.c pj_ctx.c pj_log.c pj_zpoly1.c rtodms.c \
 	vector1.c pj_release.c pj_gauss.c \
 	PJ_healpix.c PJ_natearth.c PJ_natearth2.c PJ_calcofi.c pj_fileapi.c \
+	PJ_eqearth.c \
 	\
 	pj_gc_reader.c pj_gridcatalog.c \
 	nad_cvt.c nad_init.c nad_intr.c emess.c emess.h \

@@ -408,6 +408,74 @@ accept       -81d00'00.000 34d32'30.000 0.0
 expect       2_000_000.000 561_019.077 0.0
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+Some tests from PJ_eqearth.c
+-------------------------------------------------------------------------------
+operation +proj=eqearth +ellps=WGS84
+-------------------------------------------------------------------------------
+direction forward
+tolerance 1cm
+
+accept    0 0
+expect    0 0
+
+accept    -180 90
+expect    -10227908.09 8402320.16
+
+accept    0 90
+expect    0.00 8402320.16
+
+accept    180 90
+expect    10227908.09 8402320.16
+
+accept    180 45
+expect    14795421.79 5486671.72
+
+accept    180 0
+expect    17263256.84 0.00
+
+accept    -70 -31.2
+expect    -6244707.88 -3924893.29
+
+direction inverse
+
+accept    -6244707.88 -3924893.29
+expect    -70 -31.2
+
+accept    17263256.84 0.00
+expect    180 0
+
+accept    14795421.79 5486671.72
+expect    180 45
+
+accept    0 0
+expect    0 0
+
+accept    -10227908.09 8402320.16
+expect    -180 90
+
+accept    0.00 8402320.16
+expect    0 90
+
+accept    10227908.09 8402320.16
+expect    180 90
+
+operation +proj=eqearth +R=1
+direction inverse
+
+# coordinate in valid region
+accept    0 -1.3
+expect    0 -82.318
+
+# coordinate on edge
+accept    0 -1.3173627591574
+expect    0 -90
+
+# coordinate outside valid region, should be clamped
+accept    0 -1.4
+expect    0 -90
+
+-------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
 run the few gie-builtin tests, which are currently either awkward or impossible
