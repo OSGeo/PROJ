@@ -1,4 +1,4 @@
-.. _natearth:
+.. _eqearth:
 
 ********************************************************************************
 Equal Earth
@@ -28,7 +28,7 @@ Equal Earth
 The Equal Earth projection is intended for making world maps. Equal Earth is a 
 projection inspired by the Robinson projection, but unlike
 the Robinson projection retains the relative size of areas. The projection
-was designed in 2018 by Bojan Savric, Tom Patterson and Bernhard Jenny.
+was designed in 2018 by Bojan Savric, Tom Patterson and Bernhard Jenny :cite:`Savric2018`.
 
 
 Usage
