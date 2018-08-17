@@ -460,6 +460,21 @@ expect    0 90
 accept    10227908.09 8402320.16
 expect    180 90
 
+operation +proj=eqearth +R=1
+direction inverse
+
+# coordinate in valid region
+accept    0 -1.3
+expect    0 -82.318
+
+# coordinate on edge
+accept    0 -1.3173627591574
+expect    0 -90
+
+# coordinate outside valid region, should be clamped
+accept    0 -1.4
+expect    0 -90
+
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------

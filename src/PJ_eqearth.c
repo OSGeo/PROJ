@@ -69,8 +69,11 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
             break;
         }
     }
-    if( i == 0 )
+
+    if( i == 0 ) {
         pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+        return lp;
+    }
 
     y2 = yc * yc;
     y6 = y2 * y2 * y2;
