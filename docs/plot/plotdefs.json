@@ -313,7 +313,7 @@
         "latmin": -90,
         "lonmax": 180,
         "lonmin": -180,
-        "name": "aea",
+        "name": "eqearth",
         "projstring": "+proj=eqearth",
         "res": "low",
         "type": "poly"
