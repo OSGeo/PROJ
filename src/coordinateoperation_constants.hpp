@@ -150,7 +150,21 @@ static const std::string
     PROJ_WKT2_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN(
         "Hotine Oblique Mercator Two Point Natural Origin");
 
+static const std::string PROJ_WKT2_NAME_INTERNATIONAL_MAP_WORLD_POLYCONIC(
+    "International Map of the World Polyconic");
+
+static const std::string
+    EPSG_NAME_METHOD_KROVAK_NORTH_ORIENTED("Krovak (North Orientated)");
+constexpr int EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED = 1041;
+
+static const std::string EPSG_NAME_METHOD_KROVAK("Krovak");
+constexpr int EPSG_CODE_METHOD_KROVAK = 9819;
+
 // ---------------------------------------------------------------------------
+
+static const std::string
+    EPSG_NAME_PARAMETER_COLATITUDE_CONE_AXIS("Co-latitude of cone axis");
+constexpr int EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS = 1036;
 
 static const std::string EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN(
     "Latitude of natural origin");
@@ -198,6 +212,15 @@ static const std::string EPSG_NAME_PARAMETER_NORTHING_PROJECTION_CENTRE(
     "Northing at projection centre");
 constexpr int EPSG_CODE_PARAMETER_NORTHING_PROJECTION_CENTRE = 8817;
 
+static const std::string EPSG_NAME_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL(
+    "Latitude of pseudo standard parallel");
+constexpr int EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL = 8818;
+
+static const std::string
+    EPSG_NAME_PARAMETER_SCALE_FACTOR_PSEUDO_STANDARD_PARALLEL(
+        "Scale factor on pseudo standard parallel");
+constexpr int EPSG_CODE_PARAMETER_SCALE_FACTOR_PSEUDO_STANDARD_PARALLEL = 8819;
+
 static const std::string
     EPSG_NAME_PARAMETER_LATITUDE_FALSE_ORIGIN("Latitude of false origin");
 constexpr int EPSG_CODE_PARAMETER_LATITUDE_FALSE_ORIGIN = 8821;
@@ -221,6 +244,10 @@ constexpr int EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN = 8826;
 static const std::string
     EPSG_NAME_PARAMETER_NORTHING_FALSE_ORIGIN("Northing of false origin");
 constexpr int EPSG_CODE_PARAMETER_NORTHING_FALSE_ORIGIN = 8827;
+
+static const std::string
+    EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN("Longitude of origin");
+constexpr int EPSG_CODE_PARAMETER_LONGITUDE_OF_ORIGIN = 8833;
 
 static const std::string WKT1_LATITUDE_OF_ORIGIN("latitude_of_origin");
 static const std::string WKT1_CENTRAL_MERIDIAN("central_meridian");
@@ -353,6 +380,33 @@ static const ParamMapping paramLatitude2ndStdParallel = {
     EPSG_NAME_PARAMETER_LATITUDE_2ND_STD_PARALLEL,
     EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL, "standard_parallel_2",
     common::UnitOfMeasure::Type::ANGULAR, "lat_2"};
+
+static const std::vector<ParamMapping> krovakParameters = {
+    {EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE,
+     EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE, "latitude_of_center",
+     common::UnitOfMeasure::Type::ANGULAR, "lat_0"},
+
+    {EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_ORIGIN, "longitude_of_center",
+     common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
+
+    {EPSG_NAME_PARAMETER_COLATITUDE_CONE_AXIS,
+     EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS, "azimuth",
+     common::UnitOfMeasure::Type::ANGULAR, ""}, /* ignored by PROJ currently */
+
+    {EPSG_NAME_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL,
+     EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL,
+     "pseudo_standard_parallel_1", common::UnitOfMeasure::Type::ANGULAR,
+     ""}, /* ignored by PROJ currently */
+
+    {EPSG_NAME_PARAMETER_SCALE_FACTOR_PSEUDO_STANDARD_PARALLEL,
+     EPSG_CODE_PARAMETER_SCALE_FACTOR_PSEUDO_STANDARD_PARALLEL,
+     WKT1_SCALE_FACTOR, common::UnitOfMeasure::Type::SCALE, "k"},
+
+    paramFalseEasting,
+    paramFalseNorthing
+
+};
 
 static const MethodMapping methodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR,
@@ -781,6 +835,25 @@ static const MethodMapping methodMappings[] = {
        EPSG_CODE_PARAMETER_NORTHING_PROJECTION_CENTRE, WKT1_FALSE_NORTHING,
        common::UnitOfMeasure::Type::LINEAR, "y_0"}}},
 
+    {PROJ_WKT2_NAME_INTERNATIONAL_MAP_WORLD_POLYCONIC,
+     0,
+     "International_Map_of_the_World_Polyconic",
+     "imw_p",
+     {
+         paramLongitudeNatOrigin, paramLatitude1stStdParallel,
+         paramLatitude2ndStdParallel, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_KROVAK_NORTH_ORIENTED,
+     EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED, "Krovak", "krovak",
+     krovakParameters},
+
+    {EPSG_NAME_METHOD_KROVAK,
+     EPSG_CODE_METHOD_KROVAK,
+     "",
+     {"krovak", "axis=swu"},
+     krovakParameters},
+
     {EPSG_NAME_METHOD_NZMG,
      EPSG_CODE_METHOD_NZMG,
      "New_Zealand_Map_Grid",
@@ -815,7 +888,8 @@ static const std::vector<std::vector<std::string>>
 
         {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
          EPSG_NAME_PARAMETER_LONGITUDE_FALSE_ORIGIN,
-         EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE},
+         EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE,
+         EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN},
 };
 
 //! @endcond

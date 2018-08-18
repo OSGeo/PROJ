@@ -539,6 +539,13 @@ using ConversionNNPtr = util::nn<ConversionPtr>;
 
 \section projection_parameters Projection parameters
 
+\subsection colatitude_cone_axis Co-latitude of cone axis
+
+The rotation applied to spherical coordinates for the oblique projection,
+measured on the conformal sphere in the plane of the meridian of origin.
+
+EPSG:1036
+
 \subsection center_latitude Latitude of natural origin/Center Latitude
 
 The latitude of the point from which the values of both the geographical
@@ -638,6 +645,22 @@ The northing value assigned to the projection centre.
 
 EPSG:8817
 
+\subsection latitude_pseudo_standard_parallel Latitude of pseudo standard
+parallel
+
+atitude of the parallel on which the conic or cylindrical projection is based.
+This latitude is not geographic, but is defined on the conformal sphere AFTER
+its rotation to obtain the oblique aspect of the projection.
+
+EPSG:8818
+
+\subsection scale_factor_pseudo_standard_parallel Scale factor on pseudo
+standard parallel
+
+The factor by which the map grid is reduced or enlarged during the projection
+process, defined by its value at the pseudo-standard parallel.
+EPSG:8819
+
 \subsection latitude_false_origin Latitude of false origin
 
 The latitude of the point which is not the natural origin and at which grid
@@ -680,6 +703,14 @@ EPSG:8826
 The northing value assigned to the false origin.
 
 EPSG:8827
+
+\subsection longitude_of_origin Longitude of origin
+
+For polar aspect azimuthal projections, the meridian along which the
+northing axis increments and also across which parallels of latitude
+increment towards the north pole.
+
+EPSG:8833
 
 */
 
@@ -939,6 +970,33 @@ class Conversion : public SingleOperation {
         const common::Angle &longitudePoint2, const common::Scale &scale,
         const common::Length &eastingProjectionCentre,
         const common::Length &northingProjectionCentre);
+
+    PROJ_DLL static ConversionNNPtr createInternationalMapWorldPolyconic(
+        const util::PropertyMap &properties, const common::Angle &centerLong,
+        const common::Angle &latitudeFirstParallel,
+        const common::Angle &latitudeSecondParallel,
+        const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createKrovakNorthOriented(
+        const util::PropertyMap &properties,
+        const common::Angle &latitudeProjectionCentre,
+        const common::Angle &longitudeOfOrigin,
+        const common::Angle &colatitudeConeAxis,
+        const common::Angle &latitudePseudoStandardParallel,
+        const common::Scale &scaleFactorPseudoStandardParallel,
+        const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createKrovak(const util::PropertyMap &properties,
+                 const common::Angle &latitudeProjectionCentre,
+                 const common::Angle &longitudeOfOrigin,
+                 const common::Angle &colatitudeConeAxis,
+                 const common::Angle &latitudePseudoStandardParallel,
+                 const common::Scale &scaleFactorPseudoStandardParallel,
+                 const common::Length &falseEasting,
+                 const common::Length &falseNorthing);
 
     PROJ_DLL static ConversionNNPtr createNewZealandMappingGrid(
         const util::PropertyMap &properties, const common::Angle &centerLat,

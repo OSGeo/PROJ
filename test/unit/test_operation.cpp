@@ -1800,6 +1800,136 @@ TEST(operation, hotine_oblique_mercator_two_point_natural_origin_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, imw_polyconic_export) {
+    auto conv = Conversion::createInternationalMapWorldPolyconic(
+        PropertyMap(), Angle(1), Angle(3), Angle(4), Length(5), Length(6));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=imw_p +lon_0=1 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"International Map of the World Polyconic\",\n"
+              "    METHOD[\"International Map of the World Polyconic\"],\n"
+              "    PARAMETER[\"Longitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Latitude of 1st standard parallel\",3,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8823]],\n"
+              "    PARAMETER[\"Latitude of 2nd standard parallel\",4,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8824]],\n"
+              "    PARAMETER[\"False easting\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"International_Map_of_the_World_Polyconic\"],\n"
+              "PARAMETER[\"central_meridian\",1],\n"
+              "PARAMETER[\"standard_parallel_1\",3],\n"
+              "PARAMETER[\"standard_parallel_2\",4],\n"
+              "PARAMETER[\"false_easting\",5],\n"
+              "PARAMETER[\"false_northing\",6]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, krovak_north_oriented_export) {
+    auto conv = Conversion::createKrovakNorthOriented(
+        PropertyMap(), Angle(49.5), Angle(42.5), Angle(30.28813972222222),
+        Angle(78.5), Scale(0.9999), Length(5), Length(6));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=krovak +lat_0=49.5 +lon_0=42.5 +k=0.9999 +x_0=5 +y_0=6");
+
+    EXPECT_EQ(
+        conv->exportToWKT(WKTFormatter::create()),
+        "CONVERSION[\"Krovak (North Orientated)\",\n"
+        "    METHOD[\"Krovak (North Orientated)\",\n"
+        "        ID[\"EPSG\",1041]],\n"
+        "    PARAMETER[\"Latitude of projection centre\",49.5,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8811]],\n"
+        "    PARAMETER[\"Longitude of origin\",42.5,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8833]],\n"
+        "    PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",1036]],\n"
+        "    PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8818]],\n"
+        "    PARAMETER[\"Scale factor on pseudo standard parallel\",0.9999,\n"
+        "        SCALEUNIT[\"unity\",1],\n"
+        "        ID[\"EPSG\",8819]],\n"
+        "    PARAMETER[\"False easting\",5,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8806]],\n"
+        "    PARAMETER[\"False northing\",6,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Krovak\"],\n"
+              "PARAMETER[\"latitude_of_center\",49.5],\n"
+              "PARAMETER[\"longitude_of_center\",42.5],\n"
+              "PARAMETER[\"azimuth\",30.2881397222222],\n"
+              "PARAMETER[\"pseudo_standard_parallel_1\",78.5],\n"
+              "PARAMETER[\"scale_factor\",0.9999],\n"
+              "PARAMETER[\"false_easting\",5],\n"
+              "PARAMETER[\"false_northing\",6]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, krovak_export) {
+    auto conv = Conversion::createKrovak(
+        PropertyMap(), Angle(49.5), Angle(42.5), Angle(30.28813972222222),
+        Angle(78.5), Scale(0.9999), Length(5), Length(6));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=krovak +axis=swu +lat_0=49.5 +lon_0=42.5 +k=0.9999 +x_0=5 "
+              "+y_0=6");
+
+    EXPECT_EQ(
+        conv->exportToWKT(WKTFormatter::create()),
+        "CONVERSION[\"Krovak\",\n"
+        "    METHOD[\"Krovak\",\n"
+        "        ID[\"EPSG\",9819]],\n"
+        "    PARAMETER[\"Latitude of projection centre\",49.5,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8811]],\n"
+        "    PARAMETER[\"Longitude of origin\",42.5,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8833]],\n"
+        "    PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",1036]],\n"
+        "    PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8818]],\n"
+        "    PARAMETER[\"Scale factor on pseudo standard parallel\",0.9999,\n"
+        "        SCALEUNIT[\"unity\",1],\n"
+        "        ID[\"EPSG\",8819]],\n"
+        "    PARAMETER[\"False easting\",5,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8806]],\n"
+        "    PARAMETER[\"False northing\",6,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_THROW(conv->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, nzmg_export) {
     auto conv = Conversion::createNewZealandMappingGrid(
         PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));

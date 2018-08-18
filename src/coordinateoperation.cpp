@@ -2487,6 +2487,156 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the [International Map of the World
+ *Polyconic]
+ *(https://proj4.org/operations/projections/imw_p.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @note the order of arguments is conformant with the corresponding EPSG
+ * mode and different than OGRSpatialReference::SetIWMPolyconic() of GDAL &lt;=
+ *2.3
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param latitudeFirstParallel See \ref latitude_first_std_parallel
+ * @param latitudeSecondParallel See \ref latitude_second_std_parallel
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createInternationalMapWorldPolyconic(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Angle &latitudeFirstParallel,
+    const common::Angle &latitudeSecondParallel,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(latitudeFirstParallel),
+        ParameterValue::create(latitudeSecondParallel),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_INTERNATIONAL_MAP_WORLD_POLYCONIC,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Krovak (north oriented)]
+ *(https://proj4.org/operations/projections/krovak.html) projection method.
+ *
+ * This method is defined as [EPSG:1041]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1041)
+ *
+ * The coordinates are returned in the "GIS friendly" order: easting, northing.
+ * This method is similar to createKrovak(), except that the later returns
+ * projected values as southing, westing, where
+ * southing(Krovak) = -northing(Krovak_North) and
+ * westing(Krovak) = -easting(Krovak_North).
+ *
+ * @note The current PROJ implementation of Krovak hard-codes
+ * colatitudeConeAxis = 30°17'17.30311"
+ * and latitudePseudoStandardParallel = 78°30'N, which are the values used for
+ * the ProjectedCRS S-JTSK (Ferro) / Krovak East North (EPSG:5221).
+ * It also hard-codes the parameters of the Bessel ellipsoid typically used for
+ * Krovak.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeProjectionCentre See \ref latitude_projection_centre
+ * @param longitudeOfOrigin See \ref longitude_of_origin
+ * @param colatitudeConeAxis See \ref colatitude_cone_axis
+ * @param latitudePseudoStandardParallel See \ref
+ *latitude_pseudo_standard_parallel
+ * @param scaleFactorPseudoStandardParallel See \ref
+ *scale_factor_pseudo_standard_parallel
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createKrovakNorthOriented(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeProjectionCentre,
+    const common::Angle &longitudeOfOrigin,
+    const common::Angle &colatitudeConeAxis,
+    const common::Angle &latitudePseudoStandardParallel,
+    const common::Scale &scaleFactorPseudoStandardParallel,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeProjectionCentre),
+        ParameterValue::create(longitudeOfOrigin),
+        ParameterValue::create(colatitudeConeAxis),
+        ParameterValue::create(latitudePseudoStandardParallel),
+        ParameterValue::create(scaleFactorPseudoStandardParallel),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Krovak]
+ *(https://proj4.org/operations/projections/krovak.html) projection method.
+ *
+ * This method is defined as [EPSG:9819]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9819)
+ *
+ * The coordinates are returned in the historical order: southing, westing
+ * This method is similar to createKrovakNorthOriented(), except that the later
+ *returns
+ * projected values as easting, northing, where
+ * easting(Krovak_North) = -westing(Krovak) and
+ * northing(Krovak_North) = -southing(Krovak).
+ *
+ * @note The current PROJ implementation of Krovak hard-codes
+ * colatitudeConeAxis = 30°17'17.30311"
+ * and latitudePseudoStandardParallel = 78°30'N, which are the values used for
+ * the ProjectedCRS S-JTSK (Ferro) / Krovak East North (EPSG:5221).
+ * It also hard-codes the parameters of the Bessel ellipsoid typically used for
+ * Krovak.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeProjectionCentre See \ref latitude_projection_centre
+ * @param longitudeOfOrigin See \ref longitude_of_origin
+ * @param colatitudeConeAxis See \ref colatitude_cone_axis
+ * @param latitudePseudoStandardParallel See \ref
+ *latitude_pseudo_standard_parallel
+ * @param scaleFactorPseudoStandardParallel See \ref
+ *scale_factor_pseudo_standard_parallel
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr
+Conversion::createKrovak(const util::PropertyMap &properties,
+                         const common::Angle &latitudeProjectionCentre,
+                         const common::Angle &longitudeOfOrigin,
+                         const common::Angle &colatitudeConeAxis,
+                         const common::Angle &latitudePseudoStandardParallel,
+                         const common::Scale &scaleFactorPseudoStandardParallel,
+                         const common::Length &falseEasting,
+                         const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeProjectionCentre),
+        ParameterValue::create(longitudeOfOrigin),
+        ParameterValue::create(colatitudeConeAxis),
+        ParameterValue::create(latitudePseudoStandardParallel),
+        ParameterValue::create(scaleFactorPseudoStandardParallel),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_KROVAK, values);
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a conversion based on the [New Zealand Map Grid]
  * (https://proj4.org/operations/projections/nzmg.html) projection method.
  *
@@ -2641,12 +2791,10 @@ std::string Conversion::exportToPROJString(
             formatter->addParam(
                 "x_0", parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_EASTING,
                                              EPSG_CODE_PARAMETER_FALSE_EASTING)
-                           .convertToUnit(common::UnitOfMeasure::DEGREE)
                            .getSIValue());
             formatter->addParam(
                 "y_0", parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_NORTHING,
                                              EPSG_CODE_PARAMETER_FALSE_NORTHING)
-                           .convertToUnit(common::UnitOfMeasure::DEGREE)
                            .getSIValue());
         }
     } else if (ci_equal(projectionMethodName,
@@ -2690,14 +2838,36 @@ std::string Conversion::exportToPROJString(
                 "x_0", parameterValueMeasure(
                            EPSG_NAME_PARAMETER_EASTING_PROJECTION_CENTRE,
                            EPSG_CODE_PARAMETER_EASTING_PROJECTION_CENTRE)
-                           .convertToUnit(common::UnitOfMeasure::DEGREE)
                            .getSIValue());
             formatter->addParam(
                 "y_0", parameterValueMeasure(
                            EPSG_NAME_PARAMETER_NORTHING_PROJECTION_CENTRE,
                            EPSG_CODE_PARAMETER_NORTHING_PROJECTION_CENTRE)
-                           .convertToUnit(common::UnitOfMeasure::DEGREE)
                            .getSIValue());
+        }
+    } else if (ci_equal(projectionMethodName,
+                        EPSG_NAME_METHOD_KROVAK_NORTH_ORIENTED) ||
+               methodEPSGCode == EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED) {
+        double colatitude =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_COLATITUDE_CONE_AXIS,
+                                  EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS)
+                .convertToUnit(common::UnitOfMeasure::DEGREE)
+                .value();
+        double latitudePseudoStandardParallel =
+            parameterValueMeasure(
+                EPSG_NAME_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL,
+                EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL)
+                .convertToUnit(common::UnitOfMeasure::DEGREE)
+                .value();
+        if (std::fabs(colatitude - 30.28813972222222) > 1e-8) {
+            throw io::FormattingException(
+                std::string("Unsupported value for ") +
+                EPSG_NAME_PARAMETER_COLATITUDE_CONE_AXIS);
+        }
+        if (std::fabs(latitudePseudoStandardParallel - 78.5) > 1e-8) {
+            throw io::FormattingException(
+                std::string("Unsupported value for ") +
+                EPSG_NAME_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL);
         }
     }
 
@@ -2714,6 +2884,11 @@ std::string Conversion::exportToPROJString(
 
             for (const auto &param : mapping->params) {
                 for (const auto &proj_name : param.proj_names) {
+                    if (proj_name.empty()) {
+                        // Case of Krovak COLATITUDE_CONE_AXIS and
+                        // LATITUDE_PSEUDO_STANDARD_PARALLEL
+                        continue;
+                    }
                     if (param.unit_type ==
                         common::UnitOfMeasure::Type::ANGULAR) {
                         formatter->addParam(
