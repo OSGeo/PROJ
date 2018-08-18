@@ -1415,12 +1415,10 @@ ConversionNNPtr Conversion::createUTM(const util::PropertyMap &properties,
  * @param falseNorthing See \ref false_northing
  * @return a new Conversion.
  */
-ConversionNNPtr Conversion::createTM(const util::PropertyMap &properties,
-                                     const common::Angle &centerLat,
-                                     const common::Angle &centerLong,
-                                     const common::Scale &scale,
-                                     const common::Length &falseEasting,
-                                     const common::Length &falseNorthing) {
+ConversionNNPtr Conversion::createTransverseMercator(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Scale &scale,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(centerLat),
         ParameterValue::create(centerLong),
@@ -1486,12 +1484,10 @@ ConversionNNPtr Conversion::createGaussSchreiberTransverseMercator(
  * @param falseNorthing See \ref false_northing
  * @return a new Conversion.
  */
-ConversionNNPtr Conversion::createTMSO(const util::PropertyMap &properties,
-                                       const common::Angle &centerLat,
-                                       const common::Angle &centerLong,
-                                       const common::Scale &scale,
-                                       const common::Length &falseEasting,
-                                       const common::Length &falseNorthing) {
+ConversionNNPtr Conversion::createTransverseMercatorSouthOriented(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Scale &scale,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(centerLat),
         ParameterValue::create(centerLong),
@@ -1522,13 +1518,14 @@ ConversionNNPtr Conversion::createTMSO(const util::PropertyMap &properties,
  * @param falseNorthing See \ref false_northing
  * @return a new Conversion.
  */
-ConversionNNPtr Conversion::createTPED(const util::PropertyMap &properties,
-                                       const common::Angle &latitudeFirstPoint,
-                                       const common::Angle &longitudeFirstPoint,
-                                       const common::Angle &latitudeSecondPoint,
-                                       const common::Angle &longitudeSeconPoint,
-                                       const common::Length &falseEasting,
-                                       const common::Length &falseNorthing) {
+ConversionNNPtr
+Conversion::createTwoPointEquidistant(const util::PropertyMap &properties,
+                                      const common::Angle &latitudeFirstPoint,
+                                      const common::Angle &longitudeFirstPoint,
+                                      const common::Angle &latitudeSecondPoint,
+                                      const common::Angle &longitudeSeconPoint,
+                                      const common::Length &falseEasting,
+                                      const common::Length &falseNorthing) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(latitudeFirstPoint),
         ParameterValue::create(longitudeFirstPoint),
@@ -1560,11 +1557,10 @@ ConversionNNPtr Conversion::createTPED(const util::PropertyMap &properties,
  * @param falseNorthing See \ref false_northing
  * @return a new Conversion.
  */
-ConversionNNPtr Conversion::createTMG(const util::PropertyMap &properties,
-                                      const common::Angle &centerLat,
-                                      const common::Angle &centerLong,
-                                      const common::Length &falseEasting,
-                                      const common::Length &falseNorthing) {
+ConversionNNPtr Conversion::createTunisiaMappingGrid(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(centerLat), ParameterValue::create(centerLong),
         ParameterValue::create(falseEasting),
@@ -1596,13 +1592,13 @@ ConversionNNPtr Conversion::createTMG(const util::PropertyMap &properties,
  * @return a new Conversion.
  */
 ConversionNNPtr
-Conversion::createAEA(const util::PropertyMap &properties,
-                      const common::Angle &latitudeFalseOrigin,
-                      const common::Angle &longitudeFalseOrigin,
-                      const common::Angle &latitudeFirstParallel,
-                      const common::Angle &latitudeSecondParallel,
-                      const common::Length &eastingFalseOrigin,
-                      const common::Length &northingFalseOrigin) {
+Conversion::createAlbersEqualArea(const util::PropertyMap &properties,
+                                  const common::Angle &latitudeFalseOrigin,
+                                  const common::Angle &longitudeFalseOrigin,
+                                  const common::Angle &latitudeFirstParallel,
+                                  const common::Angle &latitudeSecondParallel,
+                                  const common::Length &eastingFalseOrigin,
+                                  const common::Length &northingFalseOrigin) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(latitudeFalseOrigin),
         ParameterValue::create(longitudeFalseOrigin),
@@ -1632,12 +1628,10 @@ Conversion::createAEA(const util::PropertyMap &properties,
  * @param falseNorthing See \ref false_northing
  * @return a new Conversion.
  */
-ConversionNNPtr Conversion::createLCC_1SP(const util::PropertyMap &properties,
-                                          const common::Angle &centerLat,
-                                          const common::Angle &centerLong,
-                                          const common::Scale &scale,
-                                          const common::Length &falseEasting,
-                                          const common::Length &falseNorthing) {
+ConversionNNPtr Conversion::createLambertConicConformal_1SP(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Scale &scale,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(centerLat),
         ParameterValue::create(centerLong),
@@ -1671,14 +1665,14 @@ ConversionNNPtr Conversion::createLCC_1SP(const util::PropertyMap &properties,
  * @param northingFalseOrigin See \ref northing_false_origin
  * @return a new Conversion.
  */
-ConversionNNPtr
-Conversion::createLCC_2SP(const util::PropertyMap &properties,
-                          const common::Angle &latitudeFalseOrigin,
-                          const common::Angle &longitudeFalseOrigin,
-                          const common::Angle &latitudeFirstParallel,
-                          const common::Angle &latitudeSecondParallel,
-                          const common::Length &eastingFalseOrigin,
-                          const common::Length &northingFalseOrigin) {
+ConversionNNPtr Conversion::createLambertConicConformal_2SP(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeFalseOrigin,
+    const common::Angle &longitudeFalseOrigin,
+    const common::Angle &latitudeFirstParallel,
+    const common::Angle &latitudeSecondParallel,
+    const common::Length &eastingFalseOrigin,
+    const common::Length &northingFalseOrigin) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(latitudeFalseOrigin),
         ParameterValue::create(longitudeFalseOrigin),
@@ -1717,14 +1711,14 @@ Conversion::createLCC_2SP(const util::PropertyMap &properties,
  * @param northingFalseOrigin See \ref northing_false_origin
  * @return a new Conversion.
  */
-ConversionNNPtr
-Conversion::createLCC_2SP_Belgium(const util::PropertyMap &properties,
-                                  const common::Angle &latitudeFalseOrigin,
-                                  const common::Angle &longitudeFalseOrigin,
-                                  const common::Angle &latitudeFirstParallel,
-                                  const common::Angle &latitudeSecondParallel,
-                                  const common::Length &eastingFalseOrigin,
-                                  const common::Length &northingFalseOrigin) {
+ConversionNNPtr Conversion::createLambertConicConformal_2SP_Belgium(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeFalseOrigin,
+    const common::Angle &longitudeFalseOrigin,
+    const common::Angle &latitudeFirstParallel,
+    const common::Angle &latitudeSecondParallel,
+    const common::Length &eastingFalseOrigin,
+    const common::Length &northingFalseOrigin) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(latitudeFalseOrigin),
         ParameterValue::create(longitudeFalseOrigin),
@@ -2507,11 +2501,10 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
  * @param falseNorthing See \ref false_northing
  * @return a new Conversion.
  */
-ConversionNNPtr Conversion::createNZMG(const util::PropertyMap &properties,
-                                       const common::Angle &centerLat,
-                                       const common::Angle &centerLong,
-                                       const common::Length &falseEasting,
-                                       const common::Length &falseNorthing) {
+ConversionNNPtr Conversion::createNewZealandMappingGrid(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
     std::vector<ParameterValueNNPtr> values{
         ParameterValue::create(centerLat), ParameterValue::create(centerLong),
         ParameterValue::create(falseEasting),

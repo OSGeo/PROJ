@@ -692,8 +692,8 @@ TEST(operation, utm_export) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, tmerc_export) {
-    auto conv = Conversion::createTM(PropertyMap(), Angle(1), Angle(2),
-                                     Scale(3), Length(4), Length(5));
+    auto conv = Conversion::createTransverseMercator(
+        PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=tmerc +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
 
@@ -767,8 +767,8 @@ TEST(operation, gstmerc_export) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, tmerc_south_oriented_export) {
-    auto conv = Conversion::createTMSO(PropertyMap(), Angle(1), Angle(2),
-                                       Scale(3), Length(4), Length(5));
+    auto conv = Conversion::createTransverseMercatorSouthOriented(
+        PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=tmerc +axis=wsu +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
@@ -835,9 +835,9 @@ TEST(operation, tmerc_south_oriented_export) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, tped_export) {
-    auto conv =
-        Conversion::createTPED(PropertyMap(), Angle(1), Angle(2), Angle(3),
-                               Angle(4), Length(5), Length(6));
+    auto conv = Conversion::createTwoPointEquidistant(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
+        Length(6));
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=tpeqd +lat_1=1 +lon_1=2 +lat_2=3 +lon_2=4 +x_0=5 +y_0=6");
 
@@ -875,8 +875,8 @@ TEST(operation, tped_export) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, tmg_export) {
-    auto conv = Conversion::createTMG(PropertyMap(), Angle(1), Angle(2),
-                                      Length(3), Length(4));
+    auto conv = Conversion::createTunisiaMappingGrid(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
     EXPECT_THROW(conv->exportToPROJString(PROJStringFormatter::create()),
                  FormattingException);
 
@@ -909,8 +909,9 @@ TEST(operation, tmg_export) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, aea_export) {
-    auto conv = Conversion::createAEA(PropertyMap(), Angle(1), Angle(2),
-                                      Angle(3), Angle(4), Length(5), Length(6));
+    auto conv = Conversion::createAlbersEqualArea(PropertyMap(), Angle(1),
+                                                  Angle(2), Angle(3), Angle(4),
+                                                  Length(5), Length(6));
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=aea +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
@@ -1142,8 +1143,8 @@ TEST(operation, lambert_cylindrical_equal_area_export) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, lcc1sp_export) {
-    auto conv = Conversion::createLCC_1SP(PropertyMap(), Angle(1), Angle(2),
-                                          Scale(3), Length(4), Length(5));
+    auto conv = Conversion::createLambertConicConformal_1SP(
+        PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=lcc +lat_1=1 +lat_0=1 +lon_0=2 +k_0=3 +x_0=4 +y_0=5");
 
@@ -1180,9 +1181,9 @@ TEST(operation, lcc1sp_export) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, lcc2sp_export) {
-    auto conv =
-        Conversion::createLCC_2SP(PropertyMap(), Angle(1), Angle(2), Angle(3),
-                                  Angle(4), Length(5), Length(6));
+    auto conv = Conversion::createLambertConicConformal_2SP(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
+        Length(6));
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=lcc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
 
@@ -1223,9 +1224,9 @@ TEST(operation, lcc2sp_export) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, lcc2sp_belgium_export) {
-    auto conv = Conversion::createLCC_2SP_Belgium(PropertyMap(), Angle(1),
-                                                  Angle(2), Angle(3), Angle(4),
-                                                  Length(5), Length(6));
+    auto conv = Conversion::createLambertConicConformal_2SP_Belgium(
+        PropertyMap(), Angle(1), Angle(2), Angle(3), Angle(4), Length(5),
+        Length(6));
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=lcc +lat_0=1 +lon_0=2 +lat_1=3 +lat_2=4 +x_0=5 +y_0=6");
 
@@ -1800,8 +1801,8 @@ TEST(operation, hotine_oblique_mercator_two_point_natural_origin_export) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, nzmg_export) {
-    auto conv = Conversion::createNZMG(PropertyMap(), Angle(1), Angle(2),
-                                       Length(4), Length(5));
+    auto conv = Conversion::createNewZealandMappingGrid(
+        PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=nzmg +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
@@ -1870,8 +1871,8 @@ TEST(operation, wkt1_import_equivalent_parameters) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, conversion_inverse) {
-    auto conv = Conversion::createTM(PropertyMap(), Angle(1), Angle(2),
-                                     Scale(3), Length(4), Length(5));
+    auto conv = Conversion::createTransverseMercator(
+        PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
     auto inv = conv->inverse();
     EXPECT_EQ(inv->inverse(), conv);
     EXPECT_EQ(inv->exportToWKT(WKTFormatter::create()),

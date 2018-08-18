@@ -720,11 +720,11 @@ class Conversion : public SingleOperation {
     PROJ_DLL static ConversionNNPtr
     createUTM(const util::PropertyMap &properties, int zone, bool north);
 
-    PROJ_DLL static ConversionNNPtr
-    createTM(const util::PropertyMap &properties,
-             const common::Angle &centerLat, const common::Angle &centerLong,
-             const common::Scale &scale, const common::Length &falseEasting,
-             const common::Length &falseNorthing);
+    PROJ_DLL static ConversionNNPtr createTransverseMercator(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Scale &scale,
+        const common::Length &falseEasting,
+        const common::Length &falseNorthing);
 
     PROJ_DLL static ConversionNNPtr createGaussSchreiberTransverseMercator(
         const util::PropertyMap &properties, const common::Angle &centerLat,
@@ -732,60 +732,58 @@ class Conversion : public SingleOperation {
         const common::Length &falseEasting,
         const common::Length &falseNorthing);
 
-    PROJ_DLL static ConversionNNPtr
-    createTMSO(const util::PropertyMap &properties,
-               const common::Angle &centerLat, const common::Angle &centerLong,
-               const common::Scale &scale, const common::Length &falseEasting,
-               const common::Length &falseNorthing);
+    PROJ_DLL static ConversionNNPtr createTransverseMercatorSouthOriented(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Scale &scale,
+        const common::Length &falseEasting,
+        const common::Length &falseNorthing);
 
     PROJ_DLL static ConversionNNPtr
-    createTPED(const util::PropertyMap &properties,
-               const common::Angle &latitudeFirstPoint,
-               const common::Angle &longitudeFirstPoint,
-               const common::Angle &latitudeSecondPoint,
-               const common::Angle &longitudeSeconPoint,
-               const common::Length &falseEasting,
-               const common::Length &falseNorthing);
+    createTwoPointEquidistant(const util::PropertyMap &properties,
+                              const common::Angle &latitudeFirstPoint,
+                              const common::Angle &longitudeFirstPoint,
+                              const common::Angle &latitudeSecondPoint,
+                              const common::Angle &longitudeSeconPoint,
+                              const common::Length &falseEasting,
+                              const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createTunisiaMappingGrid(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
 
     PROJ_DLL static ConversionNNPtr
-    createTMG(const util::PropertyMap &properties,
-              const common::Angle &centerLat, const common::Angle &centerLong,
-              const common::Length &falseEasting,
-              const common::Length &falseNorthing);
-
-    PROJ_DLL static ConversionNNPtr
-    createAEA(const util::PropertyMap &properties,
-              const common::Angle &latitudeFalseOrigin,
-              const common::Angle &longitudeFalseOrigin,
-              const common::Angle &latitudeFirstParallel,
-              const common::Angle &latitudeSecondParallel,
-              const common::Length &eastingFalseOrigin,
-              const common::Length &eastingNorthOrigin);
-
-    PROJ_DLL static ConversionNNPtr
-    createLCC_1SP(const util::PropertyMap &properties,
-                  const common::Angle &centerLat,
-                  const common::Angle &centerLong, const common::Scale &scale,
-                  const common::Length &falseEasting,
-                  const common::Length &falseNorthing);
-
-    PROJ_DLL static ConversionNNPtr
-    createLCC_2SP(const util::PropertyMap &properties,
-                  const common::Angle &latitudeFalseOrigin,
-                  const common::Angle &longitudeFalseOrigin,
-                  const common::Angle &latitudeFirstParallel,
-                  const common::Angle &latitudeSecondParallel,
-                  const common::Length &eastingFalseOrigin,
-                  const common::Length &eastingNorthOrigin);
-
-    PROJ_DLL static ConversionNNPtr
-    createLCC_2SP_Belgium(const util::PropertyMap &properties,
+    createAlbersEqualArea(const util::PropertyMap &properties,
                           const common::Angle &latitudeFalseOrigin,
                           const common::Angle &longitudeFalseOrigin,
                           const common::Angle &latitudeFirstParallel,
                           const common::Angle &latitudeSecondParallel,
                           const common::Length &eastingFalseOrigin,
                           const common::Length &eastingNorthOrigin);
+
+    PROJ_DLL static ConversionNNPtr createLambertConicConformal_1SP(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Scale &scale,
+        const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createLambertConicConformal_2SP(const util::PropertyMap &properties,
+                                    const common::Angle &latitudeFalseOrigin,
+                                    const common::Angle &longitudeFalseOrigin,
+                                    const common::Angle &latitudeFirstParallel,
+                                    const common::Angle &latitudeSecondParallel,
+                                    const common::Length &eastingFalseOrigin,
+                                    const common::Length &eastingNorthOrigin);
+
+    PROJ_DLL static ConversionNNPtr createLambertConicConformal_2SP_Belgium(
+        const util::PropertyMap &properties,
+        const common::Angle &latitudeFalseOrigin,
+        const common::Angle &longitudeFalseOrigin,
+        const common::Angle &latitudeFirstParallel,
+        const common::Angle &latitudeSecondParallel,
+        const common::Length &eastingFalseOrigin,
+        const common::Length &eastingNorthOrigin);
 
     PROJ_DLL static ConversionNNPtr
     createAzimuthalEquidistant(const util::PropertyMap &properties,
@@ -942,11 +940,10 @@ class Conversion : public SingleOperation {
         const common::Length &eastingProjectionCentre,
         const common::Length &northingProjectionCentre);
 
-    PROJ_DLL static ConversionNNPtr
-    createNZMG(const util::PropertyMap &properties,
-               const common::Angle &centerLat, const common::Angle &centerLong,
-               const common::Length &falseEasting,
-               const common::Length &falseNorthing);
+    PROJ_DLL static ConversionNNPtr createNewZealandMappingGrid(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
 
   protected:
     Conversion(const OperationMethodNNPtr &methodIn,
