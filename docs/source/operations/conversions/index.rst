@@ -13,5 +13,6 @@ conversions.
 
    axisswap
    cart
+   geoc
    latlon
    unitconvert

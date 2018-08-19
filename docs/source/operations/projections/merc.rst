@@ -117,7 +117,7 @@ For the elliptical form of the projection we introduce the scaling factor:
 
 .. math::
 
-    k_0 = m\left( \phi_ts \right)
+    k_0 = m\left( \phi_{ts} \right)
 
 where :math:`m\left(\phi\right)` is the parallel radius at latitude :math:`\phi`.
 
