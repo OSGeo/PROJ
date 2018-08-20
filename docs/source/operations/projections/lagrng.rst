@@ -11,7 +11,7 @@ Lagrange
 Parameters
 ################################################################################
 
-.. note:: All parameters are optional for the Gnomomic projection.
+.. note:: All parameters are optional for the projection.
 
 .. option:: +W=<value>
 

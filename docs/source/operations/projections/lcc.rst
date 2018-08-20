@@ -11,7 +11,7 @@ Lambert Conformal Conic
 Parameters
 ################################################################################
 
-.. note:: All parameters are optional for the Gnomomic projection.
+.. note:: All parameters are optional for the projection.
 
 .. include:: ../options/lon_0.rst
 
