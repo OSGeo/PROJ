@@ -1,11 +1,17 @@
 #!/bin/bash
 
+set -e
+
+if test "$TRAVIS_BUILD_DIR" = ""; then
+    TRAVIS_BUILD_DIR=$PWD
+fi
+
 cd docs
 echo "building docs for $TRAVIS_BUILD_DIR/docs"
-docker run -v $TRAVIS_BUILD_DIR:/data -w /data/docs osgeo/proj-docs make html
+docker run --user $(id -u):$(id -g) -v $TRAVIS_BUILD_DIR:/data -w /data/docs osgeo/proj-docs make html
 # workaround for issue with sphinxcontrib-bibtex
-docker run -v $TRAVIS_BUILD_DIR:/data -w /data/docs osgeo/proj-docs touch source/references.rst
-docker run -v $TRAVIS_BUILD_DIR:/data -w /data/docs osgeo/proj-docs make html
-docker run -v $TRAVIS_BUILD_DIR:/data -w /data/docs osgeo/proj-docs make latexpdf
+docker run --user $(id -u):$(id -g) -v $TRAVIS_BUILD_DIR:/data -w /data/docs osgeo/proj-docs touch source/references.rst
+docker run --user $(id -u):$(id -g) -v $TRAVIS_BUILD_DIR:/data -w /data/docs osgeo/proj-docs make html
+docker run --user $(id -u):$(id -g) -v $TRAVIS_BUILD_DIR:/data -w /data/docs osgeo/proj-docs make latexpdf
 
 

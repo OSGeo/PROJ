@@ -1,23 +1,28 @@
 .. _cart:
 
 ================================================================================
-Cartesian to geodetic conversion
+Geodetic to cartesian conversion
 ================================================================================
 
 .. versionadded:: 5.0.0
 
-Convert geodetic coordinates to cartesian coordinates.
+Convert geodetic coordinates to cartesian coordinates (in the forward path).
 
 +---------------------+--------------------------------------------------------+
 | **Alias**           | cart                                                   |
 +---------------------+--------------------------------------------------------+
 | **Domain**          | 3D                                                     |
 +---------------------+--------------------------------------------------------+
-| **Input type**      | Cartesian coordinates                                  |
+| **Input type**      | Geodetic coordinates                                   |
 +---------------------+--------------------------------------------------------+
-| **Output type**     | Cartesian coordinates                                  |
+| **Output type**     | Geocentric cartesian coordinates                       |
 +---------------------+--------------------------------------------------------+
 
+This conversion converts geodetic coordinate values (longitude, latitude,
+elevation above ellipsoid) to their geocentric (X, Y, Z) representation, where
+the first axis (X) points from the Earth centre to the point of longitude=0,
+latitude=0, the second axis (Y) points from the Earth centrer to the point of
+longitude=90, latitude=0 and the third axis (Z) points to the North pole.
 
 Parameters
 ################################################################################
