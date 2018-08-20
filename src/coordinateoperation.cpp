@@ -605,6 +605,8 @@ OperationParameterValue::_exportToWKT(io::WKTFormatterNNPtr formatter,
                                       const MethodMapping *mapping) const {
     const ParamMapping *paramMapping =
         mapping ? getMapping(mapping, this) : nullptr;
+    if (paramMapping && paramMapping->wkt1_name.empty())
+        return std::string();
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (isWKT2 && parameterValue()->type() == ParameterValue::Type::FILENAME) {
         formatter->startNode(io::WKTConstants::PARAMETERFILE,
@@ -1836,6 +1838,9 @@ ConversionNNPtr Conversion::createBonne(const util::PropertyMap &properties,
  * This method is defined as [EPSG:9834]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9834)
  *
+ * \warning The PROJ cea computation code would select the ellipsoidal form if
+ * a non-spherical ellipsoid is used for the base GeographicalCRS.
+ *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
  * @param latitudeFirstParallel See \ref latitude_first_std_parallel.
@@ -2637,6 +2642,134 @@ Conversion::createKrovak(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the [Lambert Azimuthal Equal Area]
+ *(https://proj4.org/operations/projections/laea.html) projection method.
+ *
+ * This method is defined as [EPSG:9820]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9820)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeNatOrigin See \ref center_latitude
+ * @param longitudeNatOrigin See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createLambertAzimuthalEqualArea(
+    const util::PropertyMap &properties, const common::Angle &latitudeNatOrigin,
+    const common::Angle &longitudeNatOrigin, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeNatOrigin),
+        ParameterValue::create(longitudeNatOrigin),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Miller Cylindrical]
+ *(https://proj4.org/operations/projections/mill.html) projection method.
+ *
+ * There is no equivalent in EPSG. *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createMillerCylindrical(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Mercator]
+ *(https://proj4.org/operations/projections/merc.html) projection method.
+ *
+ * This is the variant, also known as Mercator (1SP), defined with the scale
+ * factor. Note that latitude of natural origin (centerLat) is a parameter,
+ * but unused in the transformation formulas.
+ *
+ * This method is defined as [EPSG:9804]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9804)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude . Should be 0.
+ * @param centerLong See \ref center_longitude
+ * @param scale See \ref scale
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createMercatorVariantA(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Scale &scale,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(scale),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_MERCATOR_VARIANT_A, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Mercator]
+ *(https://proj4.org/operations/projections/merc.html) projection method.
+ *
+ * This is the variant, also known as Mercator (2SP), defined with the latitude
+ * of the first standard parallel (the second standard parallel is implicitly
+ * the opposite value). The latitude of natural origin is fixed to zero.
+ *
+ * This method is defined as [EPSG:9805]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9805)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeFirstParallel See \ref latitude_first_std_parallel
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createMercatorVariantB(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeFirstParallel, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeFirstParallel),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_MERCATOR_VARIANT_B, values);
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a conversion based on the [New Zealand Map Grid]
  * (https://proj4.org/operations/projections/nzmg.html) projection method.
  *
@@ -2868,6 +3001,20 @@ std::string Conversion::exportToPROJString(
             throw io::FormattingException(
                 std::string("Unsupported value for ") +
                 EPSG_NAME_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL);
+        }
+    } else if (ci_equal(projectionMethodName,
+                        EPSG_NAME_METHOD_MERCATOR_VARIANT_A) ||
+               methodEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_A) {
+        double latitudeOrigin =
+            parameterValueMeasure(
+                EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+                EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN)
+                .convertToUnit(common::UnitOfMeasure::DEGREE)
+                .value();
+        if (latitudeOrigin != 0) {
+            throw io::FormattingException(
+                std::string("Unsupported value for ") +
+                EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
         }
     }
 

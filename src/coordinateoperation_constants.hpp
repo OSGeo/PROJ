@@ -160,6 +160,21 @@ constexpr int EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED = 1041;
 static const std::string EPSG_NAME_METHOD_KROVAK("Krovak");
 constexpr int EPSG_CODE_METHOD_KROVAK = 9819;
 
+static const std::string EPSG_NAME_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA(
+    "Lambert Azimuthal Equal Area");
+constexpr int EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA = 9820;
+
+static const std::string
+    PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL("Miller Cylindrical");
+
+static const std::string
+    EPSG_NAME_METHOD_MERCATOR_VARIANT_A("Mercator (variant A)");
+constexpr int EPSG_CODE_METHOD_MERCATOR_VARIANT_A = 9804;
+
+static const std::string
+    EPSG_NAME_METHOD_MERCATOR_VARIANT_B("Mercator (variant B)");
+constexpr int EPSG_CODE_METHOD_MERCATOR_VARIANT_B = 9805;
+
 // ---------------------------------------------------------------------------
 
 static const std::string
@@ -853,6 +868,75 @@ static const MethodMapping methodMappings[] = {
      "",
      {"krovak", "axis=swu"},
      krovakParameters},
+
+    {EPSG_NAME_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA,
+     EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA,
+     "Lambert_Azimuthal_Equal_Area",
+     "laea",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "latitude_of_center",
+          common::UnitOfMeasure::Type::ANGULAR, "lat_0"},
+
+         {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          "longitude_of_center", common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
+
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_MILLER_CYLINDRICAL,
+     0,
+     "Miller_Cylindrical",
+     {"mill", "R_A"},
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "latitude_of_center",
+          common::UnitOfMeasure::Type::ANGULAR, "lat_0"},
+
+         {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          "longitude_of_center", common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
+
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_MERCATOR_VARIANT_A,
+     EPSG_CODE_METHOD_MERCATOR_VARIANT_A,
+     "Mercator_1SP",
+     "merc",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+          "", // always set to zero, not to be exported in WKT1
+          common::UnitOfMeasure::Type::ANGULAR,
+          ""}, // always set to zero, not to be exported in PROJ strings
+
+         paramLongitudeNatOrigin,
+
+         {EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, WKT1_SCALE_FACTOR,
+          common::UnitOfMeasure::Type::SCALE, "k"},
+
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_MERCATOR_VARIANT_B,
+     EPSG_CODE_METHOD_MERCATOR_VARIANT_B,
+     "Mercator_2SP",
+     "merc",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
+          "lat_ts"},
+         paramLongitudeNatOrigin,
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
 
     {EPSG_NAME_METHOD_NZMG,
      EPSG_CODE_METHOD_NZMG,

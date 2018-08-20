@@ -1986,6 +1986,7 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
     }
     std::string projectionName =
         stripQuotes(projectionNode->children()[0]->value());
+    const std::string wkt1ProjectionName(projectionName);
     const MethodMapping *mapping = getMappingFromWKT1(projectionName);
     PropertyMap propertiesMethod;
     if (mapping) {
@@ -1999,6 +2000,19 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
 
     std::vector<OperationParameterNNPtr> parameters;
     std::vector<ParameterValueNNPtr> values;
+
+    if (ci_equal(wkt1ProjectionName, "Mercator_1SP") &&
+        projCRSNode->countChildrenOfName("center_latitude") == 0) {
+        PropertyMap propertiesParameter;
+        propertiesParameter.set(IdentifiedObject::NAME_KEY,
+                                "Latitude of natural origin");
+        propertiesParameter.set(Identifier::CODE_KEY, 8801);
+        propertiesParameter.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
+        parameters.push_back(OperationParameter::create(propertiesParameter));
+        values.push_back(
+            ParameterValue::create(Measure(0, UnitOfMeasure::DEGREE)));
+    }
+
     for (const auto &childNode : projCRSNode->children()) {
         if (ci_equal(childNode->value(), WKTConstants::PARAMETER)) {
             if (childNode->children().size() < 2) {

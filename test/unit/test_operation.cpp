@@ -1930,6 +1930,186 @@ TEST(operation, krovak_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, lambert_azimuthal_equal_area_export) {
+    auto conv = Conversion::createLambertAzimuthalEqualArea(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=laea +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Lambert Azimuthal Equal Area\",\n"
+              "    METHOD[\"Lambert Azimuthal Equal Area\",\n"
+              "        ID[\"EPSG\",9820]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Lambert_Azimuthal_Equal_Area\"],\n"
+              "PARAMETER[\"latitude_of_center\",1],\n"
+              "PARAMETER[\"longitude_of_center\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, miller_cylindrical_export) {
+    auto conv = Conversion::createMillerCylindrical(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=mill +R_A +lat_0=1 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Miller Cylindrical\",\n"
+              "    METHOD[\"Miller Cylindrical\"],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Miller_Cylindrical\"],\n"
+              "PARAMETER[\"latitude_of_center\",1],\n"
+              "PARAMETER[\"longitude_of_center\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_variant_A_export) {
+    auto conv = Conversion::createMercatorVariantA(
+        PropertyMap(), Angle(0), Angle(1), Scale(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=merc +lon_0=1 +k=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Mercator (variant A)\",\n"
+              "    METHOD[\"Mercator (variant A)\",\n"
+              "        ID[\"EPSG\",9804]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",0,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Scale factor at natural origin\",2,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8805]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Mercator_1SP\"],\n"
+              "PARAMETER[\"central_meridian\",1],\n"
+              "PARAMETER[\"scale_factor\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_variant_A_export_latitude_origin_non_zero) {
+    auto conv = Conversion::createMercatorVariantA(
+        PropertyMap(), Angle(10), Angle(1), Scale(2), Length(3), Length(4));
+
+    EXPECT_THROW(conv->exportToPROJString(PROJStringFormatter::create()),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, wkt1_import_mercator_variant_A) {
+    auto wkt = "PROJCS[\"test\",\n"
+               "    GEOGCS[\"WGS 84\",\n"
+               "        DATUM[\"WGS 1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+               "        PRIMEM[\"Greenwich\",0],\n"
+               "        UNIT[\"degree\",0.0174532925199433]],\n"
+               "    PROJECTION[\"Mercator_1SP\"],\n"
+               "    PARAMETER[\"central_meridian\",1],\n"
+               "    PARAMETER[\"scale_factor\",2],\n"
+               "    PARAMETER[\"false_easting\",3],\n"
+               "    PARAMETER[\"false_northing\",4],\n"
+               "    UNIT[\"metre\",1]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto conversion = crs->derivingConversion();
+    auto convRef = Conversion::createMercatorVariantA(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(0),
+        Angle(1), Scale(2), Length(3), Length(4));
+
+    EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create()),
+              convRef->exportToWKT(WKTFormatter::create()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, mercator_variant_B_export) {
+    auto conv = Conversion::createMercatorVariantB(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=merc +lat_ts=1 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Mercator (variant B)\",\n"
+              "    METHOD[\"Mercator (variant B)\",\n"
+              "        ID[\"EPSG\",9805]],\n"
+              "    PARAMETER[\"Latitude of 1st standard parallel\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8823]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Mercator_2SP\"],\n"
+              "PARAMETER[\"standard_parallel_1\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",3],\n"
+              "PARAMETER[\"false_northing\",4]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, nzmg_export) {
     auto conv = Conversion::createNewZealandMappingGrid(
         PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));

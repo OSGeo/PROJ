@@ -556,7 +556,7 @@ application of false coordinates has grid coordinates of (0,0).
 
 EPSG:8801
 
-\subsection center_longitude Longitude of natural origin/Center Meridian
+\subsection center_longitude Longitude of natural origin/Central Meridian
 
 The longitude of the point from which the values of both the geographical
 coordinates on the ellipsoid and the grid coordinates on the projection are
@@ -997,6 +997,31 @@ class Conversion : public SingleOperation {
                  const common::Scale &scaleFactorPseudoStandardParallel,
                  const common::Length &falseEasting,
                  const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createLambertAzimuthalEqualArea(const util::PropertyMap &properties,
+                                    const common::Angle &latitudeNatOrigin,
+                                    const common::Angle &longitudeNatOrigin,
+                                    const common::Length &falseEasting,
+                                    const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createMillerCylindrical(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createMercatorVariantA(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Scale &scale,
+        const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createMercatorVariantB(const util::PropertyMap &properties,
+                           const common::Angle &latitudeFirstParallel,
+                           const common::Angle &centerLong,
+                           const common::Length &falseEasting,
+                           const common::Length &falseNorthing);
 
     PROJ_DLL static ConversionNNPtr createNewZealandMappingGrid(
         const util::PropertyMap &properties, const common::Angle &centerLat,

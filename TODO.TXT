@@ -9,7 +9,21 @@
     - WKT2:2018 USAGE
     - dynamic CRS WKT
     - test sphericalCS
+    - revise Helmert in respect with https://github.com/OSGeo/proj.4/issues/1091
 
+    - transformation with WEST longitude
+    GEOGCS["Mars2015",
+        DATUM["D_Mars_2015",
+            SPHEROID["Mars_2015_IAU_OCENTRIC",3396190,169.89444722360980],
+            TOWGS84[0,0,0]],
+        PRIMEM["Airy-0",0.0],
+        UNIT["Degree",0.017453292519943295],
+        AXIS["latitude",NORTH],
+        AXIS["longitude",WEST]]
+    - equalearth: https://github.com/OSGeo/gdal/issues/870
+
+    
+    
 - Integrate Doxygen doc in PROJ doc
 - More tests
 - Address TODO and FIXME
