@@ -79,7 +79,7 @@ PROJ 5.0.1
 *March 1st 2018*
 
 Bug fixes
-***********
+---------
 
 * Handle ellipsoid change correctly in pipelines when ``+towgs84=0,0,0`` is set (`#881 <https://github.com/OSGeo/proj.4/issues/881>`_)
 
@@ -167,7 +167,7 @@ both users and developers.
 
 
 Versioning and naming
-***************************************************************************
+---------------------
 
 For the first time in more than 25 years the major version number of
 the software is changed. The decision to do this is based on the many
@@ -202,7 +202,7 @@ In summary:
   which at the time of writing is at version 1.6.0.
 
 Updates
-***************************************************************************
+-------
 
 * Introduced new API in ``proj.h``.
 
@@ -289,7 +289,7 @@ Updates
 * Removed the VB6 COM interface.
 
 Bug fixes
-***************************************************************************
+---------
 
 * Fixed incorrect convergence calculation in Lambert Conformal Conic. (`#16 <https://github.com/OSGeo/proj.4/issues/16>`_)
 

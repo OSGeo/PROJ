@@ -13,7 +13,7 @@ Parameters
 
 .. note:: All parameters are optional for the projection.
 
-.. options:: +south
+.. option:: +south
 
     South polar aspect.
 
