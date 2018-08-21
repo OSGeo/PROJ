@@ -75,7 +75,7 @@ the introduction). In PROJ it can be implemented as
 
     proj=pipeline
     step proj=cart ellps=intl
-    step proj=helmert
+    step proj=helmert convention=coordinate_frame
          x=-81.0703  y=-89.3603  z=-115.7526
         rx=-0.48488 ry=-0.02436 rz=-0.41321  s=-0.540645
     step proj=cart inv ellps=GRS80
@@ -101,7 +101,7 @@ deprecated system with decimeter level tensions.
     step init=./s45b.pol:s45b_tc32
     step proj=utm inv ellps=intl zone=32
     step proj=cart ellps=intl
-    step proj=helmert
+    step proj=helmert convention=coordinate_frame
           x=-81.0703  y=-89.3603  z=-115.7526
          rx=-0.48488 ry=-0.02436 rz=-0.41321 s=-0.540645
     step proj=cart inv ellps=GRS80
@@ -116,16 +116,15 @@ data, but the 14-parameter Helmert transform expects temporal units in decimalye
 Hence the first step in the pipeline is the unitconvert pseudo-projection that makes
 sure the correct units are passed along to the Helmert transform.
 Most parameters of the Helmert transform are taken from :cite:`Altamimi2002`,
-except the epoch which is the epoch of the transformation. The default setting is to
-use “coordinate frame” convention of the Helmert transform, but “position vector”
-convention can also be used. The last step in the pipeline is converting the
+except the epoch which is the epoch of the transformation.
+The last step in the pipeline is converting the
 coordinate timestamps back to GPS weeks.
 
 ::
 
     proj=pipeline
     step proj=unitconvert t_in=gps_week t_out=decimalyear
-    step proj=helmert
+    step proj=helmert convention=coordinate_frame
          x=0.0127 y=0.0065 z=-0.0209 s=0.00195
          rx=0.00039 ry=-0.00080 rz=0.00114
          dx=-0.0029 dy=-0.0002 dz=-0.0006 ds=0.00001

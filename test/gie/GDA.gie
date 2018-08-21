@@ -26,6 +26,7 @@ GDA94 to GDA2020
 Just the Helmert transformation, to verify that we are within 100 um
 -----------------------------------------------------------------------------------
 operation proj=helmert
+          convention=coordinate_frame
           x =  0.06155   rx = -0.0394924
           y = -0.01087   ry = -0.0327221
           z = -0.04019   rz = -0.0328979    s = -0.009994
@@ -45,6 +46,7 @@ All the way from geographic-to-cartesian-and-back-to-geographic
 operation proj = pipeline ellps=GRS80;
           step proj = cart;
           step proj = helmert
+               convention=coordinate_frame
                x  =  0.06155;   rx = -0.0394924;
                y  = -0.01087;   ry = -0.0327221;
                z  = -0.04019;   rz = -0.0328979;  s = -0.009994;
@@ -61,7 +63,7 @@ ITRF2014@2018 to GDA2020  -  Test point ALIC (Alice Springs)
 -----------------------------------------------------------------------------------
 Just the Helmert transformation, to verify that we are within 100 um
 -----------------------------------------------------------------------------------
-operation proj = helmert    exact
+operation proj = helmert    exact convention=coordinate_frame
 
           x = 0   rx = 0   dx = 0   drx = 0.00150379
           y = 0   ry = 0   dy = 0   dry = 0.00118346

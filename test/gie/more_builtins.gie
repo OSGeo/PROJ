@@ -253,7 +253,7 @@ A number of tests from PJ_helmert.c
 This example is from Lotti Jivall: "Simplified transformations from
 ITRF2008/IGS08 to ETRS89 for maritime applications"
 -------------------------------------------------------------------------------
-operation  proj=helmert
+operation  proj=helmert convention=coordinate_frame
            x=0.67678    y=0.65495   z=-0.52827
            rx=-0.022742 ry=0.012667 rz=0.022704  s=-0.01070
 -------------------------------------------------------------------------------
@@ -266,7 +266,7 @@ expect     3565285.41342351  855948.67986759  5201382.72939791
 -------------------------------------------------------------------------------
 This example is a random point, transformed from ED50 to ETRS89 using KMStrans2
 -------------------------------------------------------------------------------
-operation   proj=helmert   exact
+operation   proj=helmert   exact    convention=coordinate_frame
             x=-081.0703    rx=-0.48488
             y=-089.3603    ry=-0.02436
             z=-115.7526    rz=-0.41321   s=-0.540645
@@ -284,7 +284,7 @@ Sweden transformed from ITRF2000 @ 2017.0 to ITRF93 @ 2017.0.
 The test coordinate was transformed using GNSStrans, using transformation
 parameters published by ITRF: ftp://itrf.ensg.ign.fr/pub/itrf/ITRF.TP
 -------------------------------------------------------------------------------
-operation  proj=helmert transpose
+operation  proj=helmert convention=position_vector
            x =  0.0127   dx = -0.0029   rx = -0.00039  drx = -0.00011
            y =  0.0065   dy = -0.0002   ry =  0.00080  dry = -0.00019
            z = -0.0209   dz = -0.0006   rz = -0.00114  drz =  0.00007
@@ -306,7 +306,7 @@ The test data is taken from p. 29. Here we are using point 203 and converting it
 from NAD27 (ft) -> NAD83 (m). The paper reports a difference of 0.0014 m from
 measured to computed coordinates, hence the test tolerance is set accordingly.
 -------------------------------------------------------------------------------
-operation  proj=helmert
+operation  proj=helmert convention=coordinate_frame
            x=-9597.3572 y=.6112
            s=0.304794780637 theta=-1.244048
 -------------------------------------------------------------------------------
@@ -322,7 +322,7 @@ rotation matrix is updated when necessary.
 
 Test coordinates from GNSStrans.
 -------------------------------------------------------------------------------
-operation  proj=helmert transpose
+operation  proj=helmert convention=position_vector
            x = 0.01270  dx =-0.0029  rx =-0.00039  drx =-0.00011
            y = 0.00650  dy =-0.0002  ry = 0.00080  dry =-0.00019
            z =-0.0209   dz =-0.0006  rz =-0.00114  drz = 0.00007
@@ -336,6 +336,26 @@ accept     3370658.378    711877.314    5349787.086    2018.0
 expect     3370658.18087  711877.42750  5349787.12648  2018.0
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+Test error cases of helmert
+-------------------------------------------------------------------------------
+# A rotational term implies an explicit convention to be specified
+operation  proj=helmert rx=1
+expect     failure   errno missing_arg
+
+operation  proj=helmert rx=1 convention=foo
+expect     failure   errno invalid_arg
+
+operation  proj=helmert rx=1 convention=1
+expect     failure   errno invalid_arg
+
+# towgs84 in helmert context should alwas be position_vector
+operation  proj=helmert towgs84=1,2,3,4,5,6,7 convention=coordinate_frame
+expect     failure   errno invalid_arg
+
+# Transpose no longer accepted
+operation  proj=helmert transpose
+expect     failure   errno invalid_arg
 
 
 -------------------------------------------------------------------------------
