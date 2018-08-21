@@ -454,8 +454,14 @@ OperationMethod::exportToWKT(io::WKTFormatterNNPtr formatter) const {
                                 : io::WKTConstants::PROJECTION,
                          !identifiers().empty() && !formatter->isInverted());
     std::string l_name(*(name()->description()));
-    if (formatter->isInverted())
-        l_name = "Inverse of " + l_name;
+    if (formatter->isInverted()) {
+        if (isWKT2) {
+            l_name = "Inverse of " + l_name;
+        } else {
+            throw io::FormattingException(
+                "Inverse of projection method not supported in WKT1");
+        }
+    }
     if (!isWKT2) {
         const MethodMapping *mapping = getMapping(this);
         if (mapping == nullptr) {
@@ -2770,6 +2776,41 @@ ConversionNNPtr Conversion::createMercatorVariantB(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the [Popular Visualisation Pseudo
+ *Mercator]
+ *(https://proj4.org/operations/projections/webmerc.html) projection method.
+ *
+ * Also known as WebMercator. Mostly/only used for Projected CRS EPSG:3857
+ * (WGS 84 / Pseudo-Mercator)
+ *
+ * This method is defined as [EPSG:1024]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1024)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude . Usually 0
+ * @param centerLong See \ref center_longitude . Usually 0
+ * @param falseEasting See \ref false_easting . Usually 0
+ * @param falseNorthing See \ref false_northing . Usually 0
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createPopularVisualisationPseudoMercator(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties,
+                  EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a conversion based on the [New Zealand Map Grid]
  * (https://proj4.org/operations/projections/nzmg.html) projection method.
  *
@@ -2826,12 +2867,76 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         formatter->pushOutputUnit(false);
         formatter->pushOutputId(false);
     }
-    method()->exportToWKT(formatter);
 
-    const MethodMapping *mapping =
-        !isWKT2 ? getMapping(method().get()) : nullptr;
-    for (const auto &paramValue : parameterValues()) {
-        paramValue->_exportToWKT(formatter, mapping);
+    bool bAlreadyWritten = false;
+    if (!isWKT2) {
+        auto projectionMethodName = *(method()->name()->description());
+        const int methodEPSGCode = method()->getEPSGCode();
+        if (ci_equal(projectionMethodName,
+                     EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) {
+            const double latitudeOrigin =
+                parameterValueMeasure(
+                    EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+                    EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN)
+                    .convertToUnit(common::UnitOfMeasure::DEGREE)
+                    .value();
+            if (latitudeOrigin != 0) {
+                throw io::FormattingException(
+                    std::string("Unsupported value for ") +
+                    EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
+            }
+
+            bAlreadyWritten = true;
+            formatter->startNode(io::WKTConstants::PROJECTION, false);
+            formatter->addQuotedString("Mercator_1SP");
+            formatter->endNode();
+
+            formatter->startNode(io::WKTConstants::PARAMETER, false);
+            formatter->addQuotedString("central_meridian");
+            const double centralMeridian =
+                parameterValueMeasure(
+                    EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+                    EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN)
+                    .convertToUnit(common::UnitOfMeasure::DEGREE)
+                    .value();
+            formatter->add(centralMeridian);
+            formatter->endNode();
+
+            formatter->startNode(io::WKTConstants::PARAMETER, false);
+            formatter->addQuotedString("scale_factor");
+            formatter->add(1.0);
+            formatter->endNode();
+
+            formatter->startNode(io::WKTConstants::PARAMETER, false);
+            formatter->addQuotedString("false_easting");
+            const double falseEasting =
+                parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_EASTING,
+                                      EPSG_CODE_PARAMETER_FALSE_EASTING)
+                    .getSIValue();
+            formatter->add(falseEasting);
+            formatter->endNode();
+
+            formatter->startNode(io::WKTConstants::PARAMETER, false);
+            formatter->addQuotedString("false_northing");
+            const double falseNorthing =
+                parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_NORTHING,
+                                      EPSG_CODE_PARAMETER_FALSE_NORTHING)
+                    .getSIValue();
+            formatter->add(falseNorthing);
+            formatter->endNode();
+        }
+    }
+
+    if (!bAlreadyWritten) {
+        method()->exportToWKT(formatter);
+
+        const MethodMapping *mapping =
+            !isWKT2 ? getMapping(method().get()) : nullptr;
+        for (const auto &paramValue : parameterValues()) {
+            paramValue->_exportToWKT(formatter, mapping);
+        }
     }
 
     if (isWKT2) {
@@ -2845,6 +2950,67 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         formatter->leave();
     }
     return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+void Conversion::addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        auto projectionMethodName = *(method()->name()->description());
+        const int methodEPSGCode = method()->getEPSGCode();
+        if (ci_equal(projectionMethodName,
+                     EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) ||
+            methodEPSGCode ==
+                EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) {
+
+            const double centralMeridian =
+                parameterValueMeasure(
+                    EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+                    EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN)
+                    .convertToUnit(common::UnitOfMeasure::DEGREE)
+                    .value();
+
+            const double falseEasting =
+                parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_EASTING,
+                                      EPSG_CODE_PARAMETER_FALSE_EASTING)
+                    .getSIValue();
+
+            const double falseNorthing =
+                parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_NORTHING,
+                                      EPSG_CODE_PARAMETER_FALSE_NORTHING)
+                    .getSIValue();
+
+            auto geogCRS =
+                std::dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
+            if (geogCRS) {
+                auto projFormatter = io::PROJStringFormatter::create();
+                {
+                    io::PROJStringFormatter::Scope scope(projFormatter);
+                    projFormatter->addStep("merc");
+                    const double a = geogCRS->datum()
+                                         ->ellipsoid()
+                                         ->semiMajorAxis()
+                                         .getSIValue();
+                    projFormatter->addParam("a", a);
+                    projFormatter->addParam("b", a);
+                    projFormatter->addParam("lat_ts", 0.0);
+                    projFormatter->addParam("lon_0", centralMeridian);
+                    projFormatter->addParam("x_0", falseEasting);
+                    projFormatter->addParam("y_0", falseNorthing);
+                    projFormatter->addParam("k", 1.0);
+                    projFormatter->addParam("units", "m");
+                    projFormatter->addParam("nadgrids", "@null");
+                    projFormatter->addParam("wktext");
+                    projFormatter->addParam("no_defs");
+                }
+                formatter->startNode(io::WKTConstants::EXTENSION, false);
+                formatter->addQuotedString("PROJ4");
+                formatter->addQuotedString(projFormatter->toString());
+                formatter->endNode();
+            }
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------

@@ -1057,6 +1057,11 @@ std::string ProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     }
 
     coordinateSystem()->exportToWKT(formatter);
+
+    if (!isWKT2) {
+        derivingConversion()->addWKTExtensionNode(formatter);
+    }
+
     ObjectUsage::_exportToWKT(formatter);
     formatter->endNode();
     return formatter->toString();

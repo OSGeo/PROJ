@@ -2003,14 +2003,51 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
 
     if (ci_equal(wkt1ProjectionName, "Mercator_1SP") &&
         projCRSNode->countChildrenOfName("center_latitude") == 0) {
-        PropertyMap propertiesParameter;
-        propertiesParameter.set(IdentifiedObject::NAME_KEY,
-                                "Latitude of natural origin");
-        propertiesParameter.set(Identifier::CODE_KEY, 8801);
-        propertiesParameter.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
-        parameters.push_back(OperationParameter::create(propertiesParameter));
-        values.push_back(
-            ParameterValue::create(Measure(0, UnitOfMeasure::DEGREE)));
+
+        // Hack to detect the hacky way of encodign webmerc in GDAL WKT1
+        // with a EXTENSION["PROJ", "+proj=merc +a=6378137 +b=6378137
+        // +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m
+        // +nadgrids=@null +wktext +no_defs"] node
+        auto extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
+        if (extensionNode && extensionNode->children().size() == 2 &&
+            ci_equal(stripQuotes(extensionNode->children()[0]->value()),
+                     "PROJ4")) {
+            std::string projString =
+                stripQuotes(extensionNode->children()[1]->value());
+            if (projString.find("+proj=merc") != std::string::npos &&
+                projString.find("+a=6378137") != std::string::npos &&
+                projString.find("+b=6378137") != std::string::npos &&
+                projString.find("+lon_0=0") != std::string::npos &&
+                projString.find("+x_0=0") != std::string::npos &&
+                projString.find("+y_0=0") != std::string::npos &&
+                projString.find("+nadgrids=@null") != std::string::npos &&
+                (projString.find("+lat_ts=") == std::string::npos ||
+                 projString.find("+lat_ts=0") != std::string::npos) &&
+                (projString.find("+k=") == std::string::npos ||
+                 projString.find("+k=1") != std::string::npos) &&
+                (projString.find("+units=") == std::string::npos ||
+                 projString.find("+units=m") != std::string::npos)) {
+
+                return Conversion::createPopularVisualisationPseudoMercator(
+                    PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+                    Angle(0), Angle(0), Length(0), Length(0));
+            }
+        } else {
+            // The latitude of origin, which should always be zero, is missing
+            // in GDAL WKT1, but provisionned in the EPSG Mercator_1SP
+            // definition,
+            // so add it manually.
+            PropertyMap propertiesParameter;
+            propertiesParameter.set(IdentifiedObject::NAME_KEY,
+                                    "Latitude of natural origin");
+            propertiesParameter.set(Identifier::CODE_KEY, 8801);
+            propertiesParameter.set(Identifier::CODESPACE_KEY,
+                                    Identifier::EPSG);
+            parameters.push_back(
+                OperationParameter::create(propertiesParameter));
+            values.push_back(
+                ParameterValue::create(Measure(0, UnitOfMeasure::DEGREE)));
+        }
     }
 
     for (const auto &childNode : projCRSNode->children()) {

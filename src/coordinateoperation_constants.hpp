@@ -175,6 +175,10 @@ static const std::string
     EPSG_NAME_METHOD_MERCATOR_VARIANT_B("Mercator (variant B)");
 constexpr int EPSG_CODE_METHOD_MERCATOR_VARIANT_B = 9805;
 
+static const std::string EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR(
+    "Popular Visualisation Pseudo Mercator");
+constexpr int EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR = 1024;
+
 // ---------------------------------------------------------------------------
 
 static const std::string
@@ -935,6 +939,16 @@ static const MethodMapping methodMappings[] = {
           "lat_ts"},
          paramLongitudeNatOrigin,
          paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR,
+     EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR,
+     "Popular_Visualisation_Pseudo_Mercator", // particular case actually
+                                              // handled manually
+     "webmerc",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
          paramFalseNorthing,
      }},
 

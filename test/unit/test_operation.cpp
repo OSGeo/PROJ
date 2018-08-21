@@ -2110,6 +2110,104 @@ TEST(operation, mercator_variant_B_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, webmerc_export) {
+    auto conv = Conversion::createPopularVisualisationPseudoMercator(
+        PropertyMap(), Angle(0), Angle(2), Length(3), Length(4));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=webmerc +lat_0=0 +lon_0=2 +x_0=3 +y_0=4");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Popular Visualisation Pseudo Mercator\",\n"
+              "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
+              "        ID[\"EPSG\",1024]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",0,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Pseudo-Mercator"),
+        GeographicCRS::EPSG_4326, conv,
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    EXPECT_EQ(projCRS->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJCS[\"Pseudo-Mercator\",\n"
+              "    GEOGCS[\"WGS 84\",\n"
+              "        DATUM[\"WGS_1984\",\n"
+              "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+              "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+              "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+              "        PRIMEM[\"Greenwich\",0,\n"
+              "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+              "        UNIT[\"degree\",0.0174532925199433,\n"
+              "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+              "        AXIS[\"Latitude\",NORTH],\n"
+              "        AXIS[\"Longitude\",EAST],\n"
+              "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
+              "    PROJECTION[\"Mercator_1SP\"],\n"
+              "    PARAMETER[\"central_meridian\",2],\n"
+              "    PARAMETER[\"scale_factor\",1],\n"
+              "    PARAMETER[\"false_easting\",3],\n"
+              "    PARAMETER[\"false_northing\",4],\n"
+              "    UNIT[\"metre\",1,\n"
+              "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+              "    AXIS[\"Easting\",EAST],\n"
+              "    AXIS[\"Northing\",NORTH],\n"
+              "    EXTENSION[\"PROJ4\",\"+proj=merc "
+              "+a=6378137 +b=6378137 +lat_ts=0 +lon_0=2 "
+              "+x_0=3 +y_0=4 +k=1 +units=m "
+              "+nadgrids=@null +wktext +no_defs\"]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, webmerc_import_from_GDAL_wkt1) {
+
+    auto projCRS = ProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Pseudo-Mercator"),
+        GeographicCRS::EPSG_4326,
+        Conversion::createPopularVisualisationPseudoMercator(
+            PropertyMap(), Angle(0), Angle(0), Length(0), Length(0)),
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+
+    auto wkt1 = projCRS->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
+    auto obj = WKTParser().createFromWKT(wkt1);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto convGot = crs->derivingConversion();
+
+    EXPECT_EQ(convGot->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"unnamed\",\n"
+              "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
+              "        ID[\"EPSG\",1024]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",0,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",0,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",0,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",0,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, nzmg_export) {
     auto conv = Conversion::createNewZealandMappingGrid(
         PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));

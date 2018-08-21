@@ -1023,6 +1023,11 @@ class Conversion : public SingleOperation {
                            const common::Length &falseEasting,
                            const common::Length &falseNorthing);
 
+    PROJ_DLL static ConversionNNPtr createPopularVisualisationPseudoMercator(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
     PROJ_DLL static ConversionNNPtr createNewZealandMappingGrid(
         const util::PropertyMap &properties, const common::Angle &centerLat,
         const common::Angle &centerLong, const common::Length &falseEasting,
@@ -1033,6 +1038,9 @@ class Conversion : public SingleOperation {
                const std::vector<GeneralParameterValueNNPtr> &values);
     Conversion(const Conversion &other);
     INLINED_MAKE_SHARED
+
+    friend class crs::ProjectedCRS;
+    void addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
