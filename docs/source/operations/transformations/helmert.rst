@@ -62,7 +62,7 @@ Simplified transformations from ITRF2008/IGS08 to ETRS89 using 7 parameters:
     proj=helmert x=0.67678    y=0.65495   z=-0.52827
                 rx=-0.022742 ry=0.012667 rz=0.022704  s=-0.01070
 
-Transformation from `ITRF2000@2017.0`  to `ITRF93@2017.0` using 15 parameters:
+Transformation from `ITRF2000@2017.0`  to `ITRF93@2017.0` using 14 parameters:
 
 ::
 
