@@ -24,9 +24,9 @@ From `Wikipedia <https://en.wikipedia.org/wiki/Web_Mercator>`_:
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Cylindrical (non conformant if used with ellipsoid)      |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical projection                |
+| **Available forms** | Forward and inverse                                      |
 +---------------------+----------------------------------------------------------+
-| **Defined area**    | Global, but best used near the equator                   |
+| **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
 | **Alias**           | webmerc                                                  |
 +---------------------+----------------------------------------------------------+
@@ -49,9 +49,13 @@ Example::
 Parameters
 ################################################################################
 
-.. note:: All parameters for the projection are optional.
+.. note:: All parameters for the projection are optional, except the ellipsoid
+          definition, which is WGS84 for the typical use case of EPSG:3857.
+          In which case, the other parameters are set to their default 0 value.
 
-.. include:: ../options/R.rst
+.. include:: ../options/ellps.rst
+
+.. include:: ../options/lon_0.rst
 
 .. include:: ../options/x_0.rst
 
