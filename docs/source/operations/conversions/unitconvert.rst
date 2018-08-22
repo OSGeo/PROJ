@@ -35,7 +35,7 @@ but when the data transformed with the `helmert` operation timestamps are
 expected to be in units of decimalyears. This can be fixed with `unitconvert`::
 
     +proj=pipeline
-    +step +proj=unitconvert +t_in=gpsweek +t_out=decimalyear
+    +step +proj=unitconvert +t_in=gps_week +t_out=decimalyear
     +step +proj=helmert +epoch=2000.0 +t_obs=2017.5 ...
 
 Parameters
