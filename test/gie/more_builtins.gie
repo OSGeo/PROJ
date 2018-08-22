@@ -464,6 +464,7 @@ expect    180 90
 
 operation +proj=eqearth +R=6378137
 direction forward
+tolerance 1cm
 
 accept    0 0
 expect    0 0
