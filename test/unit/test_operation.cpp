@@ -2117,6 +2117,10 @@ TEST(operation, webmerc_export) {
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=webmerc +lat_0=0 +lon_0=2 +x_0=3 +y_0=4");
 
+    EXPECT_THROW(conv->exportToPROJString(PROJStringFormatter::create(
+                     PROJStringFormatter::Convention::PROJ_4)),
+                 FormattingException);
+
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
               "CONVERSION[\"Popular Visualisation Pseudo Mercator\",\n"
               "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
@@ -2167,6 +2171,17 @@ TEST(operation, webmerc_export) {
               "+a=6378137 +b=6378137 +lat_ts=0 +lon_0=2 "
               "+x_0=3 +y_0=4 +k=1 +units=m "
               "+nadgrids=@null +wktext +no_defs\"]]");
+
+    EXPECT_EQ(projCRS->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
+              "+lat_0=0 +lon_0=2 +x_0=3 +y_0=4 +ellps=WGS84");
+
+    EXPECT_EQ(projCRS->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=2 +x_0=3 "
+              "+y_0=4 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
 }
 
 // ---------------------------------------------------------------------------

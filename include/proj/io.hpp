@@ -219,7 +219,7 @@ class PROJStringFormatter {
   public:
     /** PROJ variant. */
     enum class PROJ_DLL Convention {
-        /** PROJ v5 string. */
+        /** PROJ v5 (or later versions) string. */
         PROJ_5,
 
         /** PROJ v4 string as output by GDAL exportToProj4() */

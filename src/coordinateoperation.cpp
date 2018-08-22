@@ -2954,6 +2954,50 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
+static bool createPROJ4WebMercator(const Conversion *conv,
+                                   io::PROJStringFormatterNNPtr formatter) {
+    const double centralMeridian =
+        conv->parameterValueMeasure(
+                EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+                EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN)
+            .convertToUnit(common::UnitOfMeasure::DEGREE)
+            .value();
+
+    const double falseEasting =
+        conv->parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_EASTING,
+                                    EPSG_CODE_PARAMETER_FALSE_EASTING)
+            .getSIValue();
+
+    const double falseNorthing =
+        conv->parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_NORTHING,
+                                    EPSG_CODE_PARAMETER_FALSE_NORTHING)
+            .getSIValue();
+
+    auto geogCRS =
+        std::dynamic_pointer_cast<crs::GeographicCRS>(conv->sourceCRS());
+    if (!geogCRS) {
+        return false;
+    }
+    io::PROJStringFormatter::Scope scope(formatter);
+    formatter->addStep("merc");
+    const double a =
+        geogCRS->datum()->ellipsoid()->semiMajorAxis().getSIValue();
+    formatter->addParam("a", a);
+    formatter->addParam("b", a);
+    formatter->addParam("lat_ts", 0.0);
+    formatter->addParam("lon_0", centralMeridian);
+    formatter->addParam("x_0", falseEasting);
+    formatter->addParam("y_0", falseNorthing);
+    formatter->addParam("k", 1.0);
+    formatter->addParam("units", "m");
+    formatter->addParam("nadgrids", "@null");
+    formatter->addParam("wktext");
+    formatter->addParam("no_defs");
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
 void Conversion::addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
@@ -2964,46 +3008,8 @@ void Conversion::addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const {
             methodEPSGCode ==
                 EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) {
 
-            const double centralMeridian =
-                parameterValueMeasure(
-                    EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
-                    EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN)
-                    .convertToUnit(common::UnitOfMeasure::DEGREE)
-                    .value();
-
-            const double falseEasting =
-                parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_EASTING,
-                                      EPSG_CODE_PARAMETER_FALSE_EASTING)
-                    .getSIValue();
-
-            const double falseNorthing =
-                parameterValueMeasure(EPSG_NAME_PARAMETER_FALSE_NORTHING,
-                                      EPSG_CODE_PARAMETER_FALSE_NORTHING)
-                    .getSIValue();
-
-            auto geogCRS =
-                std::dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
-            if (geogCRS) {
-                auto projFormatter = io::PROJStringFormatter::create();
-                {
-                    io::PROJStringFormatter::Scope scope(projFormatter);
-                    projFormatter->addStep("merc");
-                    const double a = geogCRS->datum()
-                                         ->ellipsoid()
-                                         ->semiMajorAxis()
-                                         .getSIValue();
-                    projFormatter->addParam("a", a);
-                    projFormatter->addParam("b", a);
-                    projFormatter->addParam("lat_ts", 0.0);
-                    projFormatter->addParam("lon_0", centralMeridian);
-                    projFormatter->addParam("x_0", falseEasting);
-                    projFormatter->addParam("y_0", falseNorthing);
-                    projFormatter->addParam("k", 1.0);
-                    projFormatter->addParam("units", "m");
-                    projFormatter->addParam("nadgrids", "@null");
-                    projFormatter->addParam("wktext");
-                    projFormatter->addParam("no_defs");
-                }
+            auto projFormatter = io::PROJStringFormatter::create();
+            if (createPROJ4WebMercator(this, projFormatter)) {
                 formatter->startNode(io::WKTConstants::EXTENSION, false);
                 formatter->addQuotedString("PROJ4");
                 formatter->addQuotedString(projFormatter->toString());
@@ -3037,6 +3043,7 @@ std::string Conversion::exportToPROJString(
     auto projectionMethodName = *(method()->name()->description());
     const int methodEPSGCode = method()->getEPSGCode();
     bool bConversionDone = false;
+    bool bEllipsoidParametersDone = false;
     if (ci_equal(projectionMethodName, EPSG_NAME_METHOD_TRANSVERSE_MERCATOR) ||
         methodEPSGCode == EPSG_CODE_METHOD_TRANSVERSE_MERCATOR) {
         // Check for UTM
@@ -3182,6 +3189,22 @@ std::string Conversion::exportToPROJString(
                 std::string("Unsupported value for ") +
                 EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
         }
+        // PROJ.4 specific hack for webmercator
+    } else if (formatter->convention() ==
+                   io::PROJStringFormatter::Convention::PROJ_4 &&
+               (ci_equal(
+                    projectionMethodName,
+                    EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR)) {
+        if (!createPROJ4WebMercator(this, formatter)) {
+            throw io::FormattingException(
+                "Cannot export " +
+                EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR +
+                " as PROJ.4 string outside of a ProjectedCRS context");
+        }
+        bConversionDone = true;
+        bEllipsoidParametersDone = true;
     }
 
     bool bAxisSpecFound = false;
@@ -3233,12 +3256,16 @@ std::string Conversion::exportToPROJString(
         auto projCRS =
             std::dynamic_pointer_cast<crs::ProjectedCRS>(targetCRS());
         if (projCRS) {
-            if (formatter->convention() ==
-                io::PROJStringFormatter::Convention::PROJ_4) {
-                projCRS->baseCRS()->addDatumInfoToPROJString(formatter);
-            } else {
-                projCRS->baseCRS()->datum()->ellipsoid()->exportToPROJString(
-                    formatter);
+            if (!bEllipsoidParametersDone) {
+                if (formatter->convention() ==
+                    io::PROJStringFormatter::Convention::PROJ_4) {
+                    projCRS->baseCRS()->addDatumInfoToPROJString(formatter);
+                } else {
+                    projCRS->baseCRS()
+                        ->datum()
+                        ->ellipsoid()
+                        ->exportToPROJString(formatter);
+                }
             }
 
             auto &axisList = projCRS->coordinateSystem()->axisList();
