@@ -192,6 +192,14 @@ static const std::string
     EPSG_NAME_METHOD_AMERICAN_POLYCONIC("American Polyconic");
 constexpr int EPSG_CODE_METHOD_AMERICAN_POLYCONIC = 9818;
 
+static const std::string EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A(
+    "Polar Stereographic (variant A)");
+constexpr int EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A = 9810;
+
+static const std::string EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B(
+    "Polar Stereographic (variant B)");
+constexpr int EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B = 9829;
+
 // ---------------------------------------------------------------------------
 
 static const std::string
@@ -276,6 +284,10 @@ constexpr int EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN = 8826;
 static const std::string
     EPSG_NAME_PARAMETER_NORTHING_FALSE_ORIGIN("Northing of false origin");
 constexpr int EPSG_CODE_PARAMETER_NORTHING_FALSE_ORIGIN = 8827;
+
+static const std::string
+    EPSG_NAME_PARAMETER_LATITUDE_STD_PARALLEL("Latitude of standard parallel");
+constexpr int EPSG_CODE_PARAMETER_LATITUDE_STD_PARALLEL = 8832;
 
 static const std::string
     EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN("Longitude of origin");
@@ -1013,6 +1025,39 @@ static const MethodMapping methodMappings[] = {
      "poly",
      {
          paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A,
+     EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A,
+     "Polar_Stereographic",
+     "stere",
+     {
+         paramLatitudeNatOrigin,
+         paramLongitudeNatOrigin,
+
+         {EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, WKT1_SCALE_FACTOR,
+          common::UnitOfMeasure::Type::SCALE, "k"},
+
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B,
+     EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B,
+     "Polar_Stereographic",
+     "stere",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_STD_PARALLEL,
+          EPSG_CODE_PARAMETER_LATITUDE_STD_PARALLEL, WKT1_LATITUDE_OF_ORIGIN,
+          common::UnitOfMeasure::Type::ANGULAR, "lat_ts"},
+
+         {EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN,
+          EPSG_CODE_PARAMETER_LONGITUDE_OF_ORIGIN, WKT1_CENTRAL_MERIDIAN,
+          common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
+
+         paramFalseEasting,
          paramFalseNorthing,
      }},
 

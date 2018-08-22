@@ -2397,6 +2397,173 @@ TEST(operation, american_polyconic_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, polar_stereographic_variant_A_export) {
+    auto conv = Conversion::createPolarStereographicVariantA(
+        PropertyMap(), Angle(90), Angle(2), Scale(3), Length(4), Length(5));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=stere +lat_0=90 +lon_0=2 +k=3 +x_0=4 +y_0=5");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Polar Stereographic (variant A)\",\n"
+              "    METHOD[\"Polar Stereographic (variant A)\",\n"
+              "        ID[\"EPSG\",9810]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",90,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"Scale factor at natural origin\",3,\n"
+              "        SCALEUNIT[\"unity\",1],\n"
+              "        ID[\"EPSG\",8805]],\n"
+              "    PARAMETER[\"False easting\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Polar_Stereographic\"],\n"
+              "PARAMETER[\"latitude_of_origin\",90],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"scale_factor\",3],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, polar_stereographic_variant_B_export_positive_lat) {
+    auto conv = Conversion::createPolarStereographicVariantB(
+        PropertyMap(), Angle(70), Angle(2), Length(4), Length(5));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=stere +lat_0=90 +lat_ts=70 +lon_0=2 +x_0=4 +y_0=5");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Polar Stereographic (variant B)\",\n"
+              "    METHOD[\"Polar Stereographic (variant B)\",\n"
+              "        ID[\"EPSG\",9829]],\n"
+              "    PARAMETER[\"Latitude of standard parallel\",70,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8832]],\n"
+              "    PARAMETER[\"Longitude of origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8833]],\n"
+              "    PARAMETER[\"False easting\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Polar_Stereographic\"],\n"
+              "PARAMETER[\"latitude_of_origin\",70],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, polar_stereographic_variant_B_export_negative_lat) {
+    auto conv = Conversion::createPolarStereographicVariantB(
+        PropertyMap(), Angle(-70), Angle(2), Length(4), Length(5));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=stere +lat_0=-90 +lat_ts=-70 +lon_0=2 +x_0=4 +y_0=5");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, wkt1_import_polar_stereographic_variantA) {
+    auto wkt = "PROJCS[\"test\",\n"
+               "    GEOGCS[\"WGS 84\",\n"
+               "        DATUM[\"WGS 1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+               "        PRIMEM[\"Greenwich\",0],\n"
+               "        UNIT[\"degree\",0.0174532925199433]],\n"
+               "    PROJECTION[\"Polar_Stereographic\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",-90],\n"
+               "    PARAMETER[\"central_meridian\",2],\n"
+               "    PARAMETER[\"scale_factor\",3],\n"
+               "    PARAMETER[\"false_easting\",4],\n"
+               "    PARAMETER[\"false_northing\",5]"
+               "    UNIT[\"metre\",1]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto conversion = crs->derivingConversion();
+    auto convRef = Conversion::createPolarStereographicVariantA(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(-90),
+        Angle(2), Scale(3), Length(4), Length(5));
+
+    EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create()),
+              convRef->exportToWKT(WKTFormatter::create()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, wkt1_import_polar_stereographic_variantB) {
+    auto wkt = "PROJCS[\"test\",\n"
+               "    GEOGCS[\"WGS 84\",\n"
+               "        DATUM[\"WGS 1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+               "        PRIMEM[\"Greenwich\",0],\n"
+               "        UNIT[\"degree\",0.0174532925199433]],\n"
+               "    PROJECTION[\"Polar_Stereographic\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",-70],\n"
+               "    PARAMETER[\"central_meridian\",2],\n"
+               "    PARAMETER[\"scale_factor\",1],\n"
+               "    PARAMETER[\"false_easting\",4],\n"
+               "    PARAMETER[\"false_northing\",5]"
+               "    UNIT[\"metre\",1]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto conversion = crs->derivingConversion();
+    auto convRef = Conversion::createPolarStereographicVariantB(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(-70),
+        Angle(2), Length(4), Length(5));
+
+    EXPECT_EQ(conversion->exportToWKT(WKTFormatter::create()),
+              convRef->exportToWKT(WKTFormatter::create()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, wkt1_import_polar_stereographic_ambiguous) {
+    auto wkt = "PROJCS[\"test\",\n"
+               "    GEOGCS[\"WGS 84\",\n"
+               "        DATUM[\"WGS 1984\",\n"
+               "            SPHEROID[\"WGS 84\",6378137,298.257223563]],\n"
+               "        PRIMEM[\"Greenwich\",0],\n"
+               "        UNIT[\"degree\",0.0174532925199433]],\n"
+               "    PROJECTION[\"Polar_Stereographic\"],\n"
+               "    PARAMETER[\"latitude_of_origin\",-70],\n"
+               "    PARAMETER[\"central_meridian\",2],\n"
+               "    PARAMETER[\"scale_factor\",3],\n"
+               "    PARAMETER[\"false_easting\",4],\n"
+               "    PARAMETER[\"false_northing\",5]"
+               "    UNIT[\"metre\",1]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto conversion = crs->derivingConversion();
+    EXPECT_EQ(*(conversion->method()->name()->description()),
+              "Polar_Stereographic");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, wkt1_import_equivalent_parameters) {
     auto wkt = "PROJCS[\"test\",\n"
                "    GEOGCS[\"WGS 84\",\n"

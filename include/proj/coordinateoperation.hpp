@@ -704,6 +704,13 @@ The northing value assigned to the false origin.
 
 EPSG:8827
 
+\subsection latitude_std_parallel Latitude of standard parallel
+
+For polar aspect azimuthal projections, the parallel on which the scale factor
+is defined to be unity.
+
+EPSG:8832
+
 \subsection longitude_of_origin Longitude of origin
 
 For polar aspect azimuthal projections, the meridian along which the
@@ -1053,6 +1060,19 @@ class Conversion : public SingleOperation {
     PROJ_DLL static ConversionNNPtr createAmericanPolyconic(
         const util::PropertyMap &properties, const common::Angle &centerLat,
         const common::Angle &centerLong, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createPolarStereographicVariantA(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Scale &scale,
+        const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createPolarStereographicVariantB(
+        const util::PropertyMap &properties,
+        const common::Angle &latitudeStandardParallel,
+        const common::Angle &longitudeOfOrigin,
+        const common::Length &falseEasting,
         const common::Length &falseNorthing);
 
   protected:

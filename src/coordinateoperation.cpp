@@ -2959,6 +2959,78 @@ ConversionNNPtr Conversion::createAmericanPolyconic(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the [Polar Stereographic (Variant
+ *A)]
+ *(https://proj4.org/operations/projections/stere.html) projection method.
+ *
+ * This method is defined as [EPSG:9810]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9810)
+ *
+ * This is the variant of polar stereographic defined with a scale factor.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude . Should be 90 deg ou -90 deg.
+ * @param centerLong See \ref center_longitude
+ * @param scale See \ref scale
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createPolarStereographicVariantA(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Scale &scale,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(scale),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Polar Stereographic (Variant
+ *B)]
+ *(https://proj4.org/operations/projections/stere.html) projection method.
+ *
+ * This method is defined as [EPSG:9829]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9829)
+ *
+ * This is the variant of polar stereographic defined with a latitude of
+ * standard parallel.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeStandardParallel See \ref latitude_std_parallel
+ * @param longitudeOfOrigin See \ref longitude_of_origin
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createPolarStereographicVariantB(
+    const util::PropertyMap &properties,
+    const common::Angle &latitudeStandardParallel,
+    const common::Angle &longitudeOfOrigin, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeStandardParallel),
+        ParameterValue::create(longitudeOfOrigin),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateOperationNNPtr Conversion::inverse() const {
     return util::nn_make_shared<InverseCoordinateOperation>(
         util::nn_static_pointer_cast<CoordinateOperation>(shared_from_this()),
@@ -3339,6 +3411,20 @@ std::string Conversion::exportToPROJString(
                     bAxisSpecFound = true;
                 }
                 formatter->addParam(mapping->proj_name[i]);
+            }
+
+            if (ci_equal(projectionMethodName,
+                         EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B) ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B) {
+                double latitudeStdParallel =
+                    parameterValueMeasure(
+                        EPSG_NAME_PARAMETER_LATITUDE_STD_PARALLEL,
+                        EPSG_CODE_PARAMETER_LATITUDE_STD_PARALLEL)
+                        .convertToUnit(common::UnitOfMeasure::DEGREE)
+                        .value();
+                formatter->addParam("lat_0",
+                                    (latitudeStdParallel >= 0) ? 90.0 : -90.0);
             }
 
             for (const auto &param : mapping->params) {

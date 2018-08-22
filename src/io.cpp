@@ -1984,24 +1984,15 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
         throw ParsingException("not enough children in " +
                                WKTConstants::PROJECTION + " node");
     }
-    std::string projectionName =
+    const std::string wkt1ProjectionName =
         stripQuotes(projectionNode->children()[0]->value());
-    const std::string wkt1ProjectionName(projectionName);
-    const MethodMapping *mapping = getMappingFromWKT1(projectionName);
-    PropertyMap propertiesMethod;
-    if (mapping) {
-        projectionName = mapping->wkt2_name;
-        if (mapping->epsg_code != 0) {
-            propertiesMethod.set(Identifier::CODE_KEY, mapping->epsg_code);
-            propertiesMethod.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
-        }
-    }
-    propertiesMethod.set(IdentifiedObject::NAME_KEY, projectionName);
 
     std::vector<OperationParameterNNPtr> parameters;
     std::vector<ParameterValueNNPtr> values;
+    bool tryToIdentifyWKT1Method = true;
 
-    if (ci_equal(wkt1ProjectionName, "Mercator_1SP") &&
+    if (metadata::Identifier::isEquivalentName(wkt1ProjectionName,
+                                               "Mercator_1SP") &&
         projCRSNode->countChildrenOfName("center_latitude") == 0) {
 
         // Hack to detect the hacky way of encodign webmerc in GDAL WKT1
@@ -2048,7 +2039,69 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
             values.push_back(
                 ParameterValue::create(Measure(0, UnitOfMeasure::DEGREE)));
         }
+    } else if (metadata::Identifier::isEquivalentName(wkt1ProjectionName,
+                                                      "Polar_Stereographic")) {
+        std::map<std::string, Measure> mapParameters;
+        for (const auto &childNode : projCRSNode->children()) {
+            if (ci_equal(childNode->value(), WKTConstants::PARAMETER) &&
+                childNode->children().size() == 2) {
+                const std::string wkt1ParameterName(
+                    stripQuotes(childNode->children()[0]->value()));
+                auto paramValue = childNode->children()[1]->value();
+                try {
+                    double val = asDouble(paramValue);
+                    auto unit = guessUnitForParameter(wkt1ParameterName,
+                                                      defaultLinearUnit,
+                                                      defaultAngularUnit);
+                    mapParameters[wkt1ParameterName] = Measure(val, unit);
+                } catch (const std::exception &) {
+                }
+            }
+        }
+
+        Measure latitudeOfOrigin = mapParameters["latitude_of_origin"];
+        Measure centralMeridian = mapParameters["central_meridian"];
+        Measure scaleFactor = mapParameters["scale_factor"];
+        if (scaleFactor.unit() == UnitOfMeasure::NONE)
+            scaleFactor = Measure(1.0, UnitOfMeasure::SCALE_UNITY);
+        Measure falseEasting = mapParameters["false_easting"];
+        Measure falseNorthing = mapParameters["false_northing"];
+        if (latitudeOfOrigin.unit() != UnitOfMeasure::NONE &&
+            std::fabs(
+                std::fabs(latitudeOfOrigin.convertToUnit(UnitOfMeasure::DEGREE)
+                              .value()) -
+                90.0) < 1e-10) {
+            return Conversion::createPolarStereographicVariantA(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+                Angle(latitudeOfOrigin.value(), latitudeOfOrigin.unit()),
+                Angle(centralMeridian.value(), centralMeridian.unit()),
+                Scale(scaleFactor.value(), scaleFactor.unit()),
+                Length(falseEasting.value(), falseEasting.unit()),
+                Length(falseNorthing.value(), falseNorthing.unit()));
+        } else if (latitudeOfOrigin.unit() != UnitOfMeasure::NONE &&
+                   scaleFactor.getSIValue() == 1.0) {
+            return Conversion::createPolarStereographicVariantB(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+                Angle(latitudeOfOrigin.value(), latitudeOfOrigin.unit()),
+                Angle(centralMeridian.value(), centralMeridian.unit()),
+                Length(falseEasting.value(), falseEasting.unit()),
+                Length(falseNorthing.value(), falseNorthing.unit()));
+        }
+        tryToIdentifyWKT1Method = false;
     }
+
+    std::string projectionName(wkt1ProjectionName);
+    const MethodMapping *mapping =
+        tryToIdentifyWKT1Method ? getMappingFromWKT1(projectionName) : nullptr;
+    PropertyMap propertiesMethod;
+    if (mapping) {
+        projectionName = mapping->wkt2_name;
+        if (mapping->epsg_code != 0) {
+            propertiesMethod.set(Identifier::CODE_KEY, mapping->epsg_code);
+            propertiesMethod.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
+        }
+    }
+    propertiesMethod.set(IdentifiedObject::NAME_KEY, projectionName);
 
     for (const auto &childNode : projCRSNode->children()) {
         if (ci_equal(childNode->value(), WKTConstants::PARAMETER)) {
@@ -2057,8 +2110,9 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                                        WKTConstants::PARAMETER + " node");
             }
             PropertyMap propertiesParameter;
-            std::string parameterName(
+            const std::string wkt1ParameterName(
                 stripQuotes(childNode->children()[0]->value()));
+            std::string parameterName(wkt1ParameterName);
             const auto *paramMapping =
                 mapping ? getMappingFromWKT1(mapping, parameterName) : nullptr;
             if (paramMapping) {
@@ -2076,12 +2130,8 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
             auto paramValue = childNode->children()[1]->value();
             try {
                 double val = asDouble(paramValue);
-                auto unit = buildUnitInSubNode(childNode);
-                if (unit == UnitOfMeasure::NONE) {
-                    auto paramName = childNode->children()[0]->value();
-                    unit = guessUnitForParameter(paramName, defaultLinearUnit,
-                                                 defaultAngularUnit);
-                }
+                auto unit = guessUnitForParameter(
+                    wkt1ParameterName, defaultLinearUnit, defaultAngularUnit);
                 values.push_back(ParameterValue::create(Measure(val, unit)));
             } catch (const std::exception &) {
                 throw ParsingException("unhandled parameter value type : " +
