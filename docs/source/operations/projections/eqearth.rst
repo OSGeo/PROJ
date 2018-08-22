@@ -50,6 +50,8 @@ Parameters
 
 .. include:: ../options/lon_0.rst
 
+.. include:: ../options/ellps.rst
+
 .. include:: ../options/R.rst
 
 .. include:: ../options/x_0.rst
