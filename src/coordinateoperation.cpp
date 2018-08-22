@@ -2811,6 +2811,33 @@ ConversionNNPtr Conversion::createPopularVisualisationPseudoMercator(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the [Mollweide]
+ * (https://proj4.org/operations/projections/moll.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createMollweide(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties,
+                  PROJ_WKT2_NAME_METHOD_MOLLWEIDE, values);
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a conversion based on the [New Zealand Map Grid]
  * (https://proj4.org/operations/projections/nzmg.html) projection method.
  *
@@ -2836,6 +2863,70 @@ ConversionNNPtr Conversion::createNewZealandMappingGrid(
     };
 
     return create(properties, EPSG_CODE_METHOD_NZMG, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Oblique Stereographic (Alternative)]
+ *(https://proj4.org/operations/projections/sterea.html) projection method.
+ *
+ * This method is defined as [EPSG:9809]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9809)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param scale See \ref scale
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createObliqueStereographic(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Scale &scale,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(scale),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_OBLIQUE_STEREOGRAPHIC, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Orthographic]
+ *(https://proj4.org/operations/projections/ortho.html) projection method.
+ *
+ * This method is defined as [EPSG:9840]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9840)
+ *
+ * \note At the time of writing, PROJ only implements the spherical formulation
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createOrthographic(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_ORTHOGRAPHIC, values);
 }
 
 // ---------------------------------------------------------------------------

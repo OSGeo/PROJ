@@ -1028,9 +1028,28 @@ class Conversion : public SingleOperation {
         const common::Angle &centerLong, const common::Length &falseEasting,
         const common::Length &falseNorthing);
 
+    PROJ_DLL static ConversionNNPtr
+    createMollweide(const util::PropertyMap &properties,
+                                     const common::Angle &centerLong,
+                                     const common::Length &falseEasting,
+                                     const common::Length &falseNorthing);
+
     PROJ_DLL static ConversionNNPtr createNewZealandMappingGrid(
         const util::PropertyMap &properties, const common::Angle &centerLat,
         const common::Angle &centerLong, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createObliqueStereographic(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong,
+        const common::Scale &scale,
+        const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createOrthographic(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong,
+        const common::Length &falseEasting,
         const common::Length &falseNorthing);
 
   protected:

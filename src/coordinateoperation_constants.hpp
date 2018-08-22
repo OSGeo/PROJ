@@ -179,6 +179,15 @@ static const std::string EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR(
     "Popular Visualisation Pseudo Mercator");
 constexpr int EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR = 1024;
 
+static const std::string PROJ_WKT2_NAME_METHOD_MOLLWEIDE("Mollweide");
+
+static const std::string EPSG_NAME_METHOD_OBLIQUE_STEREOGRAPHIC(
+    "Oblique Stereographic");
+constexpr int EPSG_CODE_METHOD_OBLIQUE_STEREOGRAPHIC = 9809;
+
+static const std::string EPSG_NAME_METHOD_ORTHOGRAPHIC("Orthographic");
+constexpr int EPSG_CODE_METHOD_ORTHOGRAPHIC = 9840;
+
 // ---------------------------------------------------------------------------
 
 static const std::string
@@ -952,6 +961,14 @@ static const MethodMapping methodMappings[] = {
          paramFalseNorthing,
      }},
 
+    {PROJ_WKT2_NAME_METHOD_MOLLWEIDE,
+     0,
+     "Mollweide",
+     "moll",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
     {EPSG_NAME_METHOD_NZMG,
      EPSG_CODE_METHOD_NZMG,
      "New_Zealand_Map_Grid",
@@ -960,6 +977,32 @@ static const MethodMapping methodMappings[] = {
          paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
          paramFalseNorthing,
      }},
+
+    {EPSG_NAME_METHOD_OBLIQUE_STEREOGRAPHIC,
+     EPSG_CODE_METHOD_OBLIQUE_STEREOGRAPHIC,
+     "Oblique_Stereographic",
+     "sterea",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin,
+
+         {EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, WKT1_SCALE_FACTOR,
+          common::UnitOfMeasure::Type::SCALE, "k"},
+
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_ORTHOGRAPHIC,
+     EPSG_CODE_METHOD_ORTHOGRAPHIC,
+     "Orthographic",
+     "ortho",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin,
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
     // TODO: add at least all GDAL supported methods !!!
 };
 
