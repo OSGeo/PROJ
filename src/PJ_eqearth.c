@@ -36,20 +36,26 @@ struct pj_opaque {
     double *apa;
 };
 
-static XY e_forward (LP lp, PJ *P) {           /* Ellipsoidal, forward */
+static XY e_forward (LP lp, PJ *P) {           /* Ellipsoidal/Spheroidal, forward */
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
     double sbeta;
     double psi, psi2, psi6;
 
-    /* Authalic latitude */
-    sbeta = pj_qsfn(sin(lp.phi), P->e, 1.0 - P->es) / Q->qp;
-    if (fabs(sbeta) > 1) {
-       /* Rounding error. */
-       sbeta = sbeta > 0 ? 1 : (sbeta < 0 ? -1 : 0);
+    if (P->es != 0.0) {
+       /* Ellipsoidal case, converting to authalic latitude */
+       sbeta = pj_qsfn(sin(lp.phi), P->e, 1.0 - P->es) / Q->qp;
+       if (fabs(sbeta) > 1) {
+          /* Rounding error. */
+          sbeta = sbeta > 0 ? 1 : -1;
+       }
+    }
+    else {
+       /* Spheroidal case, using latitude */
+       sbeta = sin(lp.phi);
     }
 
-    /* Equal Earth on an authalic sphere */
+    /* Equal Earth projection */
     psi  = asin(M * sbeta);
     psi2 = psi * psi;
     psi6 = psi2 * psi2 * psi2;
@@ -64,22 +70,8 @@ static XY e_forward (LP lp, PJ *P) {           /* Ellipsoidal, forward */
     return xy;
 }
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
-    XY xy = {0.0,0.0};
-    double psi, psi2, psi6;
-    (void) P;
 
-    psi  = asin(M * sin(lp.phi));
-    psi2 = psi * psi;
-    psi6 = psi2 * psi2 * psi2;
-
-    xy.x = lp.lam * cos(psi) / (M * (A1 + 3 * A2 * psi2 + psi6 * (7 * A3 + 9 * A4 * psi2)));
-    xy.y = psi * (A1 + A2 * psi2 + psi6 * (A3 + A4 * psi2));
-    return xy;
-}
-
-
-static LP e_inverse (XY xy, PJ *P) {           /* Ellipsoidal, inverse */
+static LP e_inverse (XY xy, PJ *P) {           /* Ellipsoidal/Spheroidal, inverse */
     LP lp = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
     double yc, tol, y2, y6, f, fder;
@@ -123,50 +115,16 @@ static LP e_inverse (XY xy, PJ *P) {           /* Ellipsoidal, inverse */
     lp.lam = M * xy.x * (A1 + 3 * A2 * y2 + y6 * (7 * A3 + 9 * A4 * y2)) / cos(yc);
 
     /* Latitude */
-    beta   = asin(sin(yc) / M);
-    lp.phi = pj_authlat(beta, Q->apa);
-
-    return lp;
-}
-
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
-    LP lp = {0.0,0.0};
-    double yc, tol, y2, y6, f, fder;
-    int i;
-    (void) P;
-
-    /* Make sure y is inside valid range */
-    if (xy.y > MAX_Y) {
-        xy.y = MAX_Y;
-    } else if (xy.y < -MAX_Y) {
-        xy.y = -MAX_Y;
+    beta = asin(sin(yc) / M);
+    if (P->es != 0.0) {
+       /* Ellipsoidal case, converting authalic latitude */
+       lp.phi = pj_authlat(beta, Q->apa);
+    }
+    else {
+       /* Spheroidal case, using latitude */
+       lp.phi = beta;
     }
 
-    yc = xy.y;
-
-    for (i = MAX_ITER; i ; --i) { /* Newton-Raphson */
-        y2 = yc * yc;
-        y6 = y2 * y2 * y2;
-        f = yc * (A1 + A2 * y2 + y6 * (A3 + A4 * y2)) - xy.y;
-        fder = A1 + 3 * A2 * y2 + y6 * (7 * A3 + 9 * A4 * y2);
-        tol = f / fder;
-        yc -= tol;
-        if (fabs(tol) < EPS) {
-            break;
-        }
-    }
-
-    if( i == 0 ) {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
-        return lp;
-    }
-
-    y2 = yc * yc;
-    y6 = y2 * y2 * y2;
-
-    lp.lam = M * xy.x * (A1 + 3 * A2 * y2 + y6 * (7 * A3 + 9 * A4 * y2)) / cos(yc);
-    lp.phi = asin(sin(yc) / M);
-    
     return lp;
 }
 
@@ -195,13 +153,13 @@ PJ *PROJECTION(eqearth) {
           return destructor(P, ENOMEM);
        Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
        Q->rqda = sqrt(0.5*Q->qp); /* Authalic radius devided by major axis */
-       P->fwd = e_forward;
-       P->inv = e_inverse;
     }
     else {
-       P->fwd = s_forward;
-       P->inv = s_inverse;
+       Q->rqda = 1.0;
     }
+
+    P->fwd = e_forward;
+    P->inv = e_inverse;
 
     return P;
 }
