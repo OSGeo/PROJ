@@ -200,6 +200,10 @@ static const std::string EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B(
     "Polar Stereographic (variant B)");
 constexpr int EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B = 9829;
 
+static const std::string PROJ_WKT2_NAME_METHOD_ROBINSON("Robinson");
+
+static const std::string PROJ_WKT2_NAME_METHOD_SINUSOIDAL("Sinusoidal");
+
 // ---------------------------------------------------------------------------
 
 static const std::string
@@ -1056,6 +1060,32 @@ static const MethodMapping methodMappings[] = {
          {EPSG_NAME_PARAMETER_LONGITUDE_OF_ORIGIN,
           EPSG_CODE_PARAMETER_LONGITUDE_OF_ORIGIN, WKT1_CENTRAL_MERIDIAN,
           common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
+
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_ROBINSON,
+     0,
+     "Robinson",
+     "robin",
+     {
+         {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          "longitude_of_center", common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
+
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_SINUSOIDAL,
+     0,
+     "Sinusoidal",
+     "sinu",
+     {
+         {EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+          "longitude_of_center", common::UnitOfMeasure::Type::ANGULAR, "lon_0"},
 
          paramFalseEasting,
          paramFalseNorthing,

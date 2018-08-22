@@ -2599,6 +2599,68 @@ TEST(operation, wkt1_import_equivalent_parameters) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, robinson_export) {
+
+    auto conv = Conversion::createRobinson(PropertyMap(), Angle(1), Length(2),
+                                           Length(3));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=robin +lon_0=1 +x_0=2 +y_0=3");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Robinson\",\n"
+              "    METHOD[\"Robinson\"],\n"
+              "    PARAMETER[\"Longitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",2,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Robinson\"],\n"
+              "PARAMETER[\"longitude_of_center\",1],\n"
+              "PARAMETER[\"false_easting\",2],\n"
+              "PARAMETER[\"false_northing\",3]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, sinusoidal_export) {
+
+    auto conv = Conversion::createSinusoidal(PropertyMap(), Angle(1), Length(2),
+                                           Length(3));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=sinu +lon_0=1 +x_0=2 +y_0=3");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"Sinusoidal\",\n"
+              "    METHOD[\"Sinusoidal\"],\n"
+              "    PARAMETER[\"Longitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",2,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Sinusoidal\"],\n"
+              "PARAMETER[\"longitude_of_center\",1],\n"
+              "PARAMETER[\"false_easting\",2],\n"
+              "PARAMETER[\"false_northing\",3]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, conversion_inverse) {
     auto conv = Conversion::createTransverseMercator(
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));

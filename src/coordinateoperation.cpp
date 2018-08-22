@@ -3031,6 +3031,58 @@ ConversionNNPtr Conversion::createPolarStereographicVariantB(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the [Robinson]
+ * (https://proj4.org/operations/projections/robin.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createRobinson(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_ROBINSON, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Sinusoidal]
+ * (https://proj4.org/operations/projections/sinu.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createSinusoidal(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_SINUSOIDAL, values);
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateOperationNNPtr Conversion::inverse() const {
     return util::nn_make_shared<InverseCoordinateOperation>(
         util::nn_static_pointer_cast<CoordinateOperation>(shared_from_this()),
