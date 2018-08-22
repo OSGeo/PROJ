@@ -181,12 +181,16 @@ constexpr int EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR = 1024;
 
 static const std::string PROJ_WKT2_NAME_METHOD_MOLLWEIDE("Mollweide");
 
-static const std::string EPSG_NAME_METHOD_OBLIQUE_STEREOGRAPHIC(
-    "Oblique Stereographic");
+static const std::string
+    EPSG_NAME_METHOD_OBLIQUE_STEREOGRAPHIC("Oblique Stereographic");
 constexpr int EPSG_CODE_METHOD_OBLIQUE_STEREOGRAPHIC = 9809;
 
 static const std::string EPSG_NAME_METHOD_ORTHOGRAPHIC("Orthographic");
 constexpr int EPSG_CODE_METHOD_ORTHOGRAPHIC = 9840;
+
+static const std::string
+    EPSG_NAME_METHOD_AMERICAN_POLYCONIC("American Polyconic");
+constexpr int EPSG_CODE_METHOD_AMERICAN_POLYCONIC = 9818;
 
 // ---------------------------------------------------------------------------
 
@@ -983,7 +987,8 @@ static const MethodMapping methodMappings[] = {
      "Oblique_Stereographic",
      "sterea",
      {
-         paramLatitudeNatOrigin, paramLongitudeNatOrigin,
+         paramLatitudeNatOrigin,
+         paramLongitudeNatOrigin,
 
          {EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
           EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, WKT1_SCALE_FACTOR,
@@ -998,8 +1003,16 @@ static const MethodMapping methodMappings[] = {
      "Orthographic",
      "ortho",
      {
-         paramLatitudeNatOrigin, paramLongitudeNatOrigin,
-         paramFalseEasting,
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {EPSG_NAME_METHOD_AMERICAN_POLYCONIC,
+     EPSG_CODE_METHOD_AMERICAN_POLYCONIC,
+     "Polyconic",
+     "poly",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
          paramFalseNorthing,
      }},
 

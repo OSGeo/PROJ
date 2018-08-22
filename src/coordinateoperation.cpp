@@ -2832,8 +2832,7 @@ ConversionNNPtr Conversion::createMollweide(
         ParameterValue::create(falseNorthing),
     };
 
-    return create(properties,
-                  PROJ_WKT2_NAME_METHOD_MOLLWEIDE, values);
+    return create(properties, PROJ_WKT2_NAME_METHOD_MOLLWEIDE, values);
 }
 
 // ---------------------------------------------------------------------------
@@ -2867,7 +2866,8 @@ ConversionNNPtr Conversion::createNewZealandMappingGrid(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a conversion based on the [Oblique Stereographic (Alternative)]
+/** \brief Instanciate a conversion based on the [Oblique Stereographic
+ *(Alternative)]
  *(https://proj4.org/operations/projections/sterea.html) projection method.
  *
  * This method is defined as [EPSG:9809]
@@ -2917,16 +2917,44 @@ ConversionNNPtr Conversion::createObliqueStereographic(
  */
 ConversionNNPtr Conversion::createOrthographic(
     const util::PropertyMap &properties, const common::Angle &centerLat,
-    const common::Angle &centerLong,
-    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
     std::vector<ParameterValueNNPtr> values{
-        ParameterValue::create(centerLat),
-        ParameterValue::create(centerLong),
+        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
         ParameterValue::create(falseEasting),
         ParameterValue::create(falseNorthing),
     };
 
     return create(properties, EPSG_CODE_METHOD_ORTHOGRAPHIC, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [American Polyconic]
+ *(https://proj4.org/operations/projections/poly.html) projection method.
+ *
+ * This method is defined as [EPSG:9818]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9818)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createAmericanPolyconic(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, EPSG_CODE_METHOD_AMERICAN_POLYCONIC, values);
 }
 
 // ---------------------------------------------------------------------------

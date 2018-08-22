@@ -2225,8 +2225,8 @@ TEST(operation, webmerc_import_from_GDAL_wkt1) {
 
 TEST(operation, mollweide_export) {
 
-    auto conv = Conversion::createMollweide(PropertyMap(), Angle(1),
-                                                  Length(2), Length(3));
+    auto conv = Conversion::createMollweide(PropertyMap(), Angle(1), Length(2),
+                                            Length(3));
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=moll +lon_0=1 +x_0=2 +y_0=3");
@@ -2317,19 +2317,19 @@ TEST(operation, oblique_stereographic_export) {
 
     EXPECT_EQ(conv->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-"PROJECTION[\"Oblique_Stereographic\"],\n"
-"PARAMETER[\"latitude_of_origin\",1],\n"
-"PARAMETER[\"central_meridian\",2],\n"
-"PARAMETER[\"scale_factor\",3],\n"
-"PARAMETER[\"false_easting\",4],\n"
-"PARAMETER[\"false_northing\",5]");
+              "PROJECTION[\"Oblique_Stereographic\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"scale_factor\",3],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(operation, orthographic_export) {
-    auto conv = Conversion::createOrthographic(
-        PropertyMap(), Angle(1), Angle(2),  Length(4), Length(5));
+    auto conv = Conversion::createOrthographic(PropertyMap(), Angle(1),
+                                               Angle(2), Length(4), Length(5));
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=ortho +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
@@ -2353,11 +2353,46 @@ TEST(operation, orthographic_export) {
 
     EXPECT_EQ(conv->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
-"PROJECTION[\"Orthographic\"],\n"
-"PARAMETER[\"latitude_of_origin\",1],\n"
-"PARAMETER[\"central_meridian\",2],\n"
-"PARAMETER[\"false_easting\",4],\n"
-"PARAMETER[\"false_northing\",5]");
+              "PROJECTION[\"Orthographic\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, american_polyconic_export) {
+    auto conv = Conversion::createAmericanPolyconic(
+        PropertyMap(), Angle(1), Angle(2), Length(4), Length(5));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=poly +lat_0=1 +lon_0=2 +x_0=4 +y_0=5");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"American Polyconic\",\n"
+              "    METHOD[\"American Polyconic\",\n"
+              "        ID[\"EPSG\",9818]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+
+    EXPECT_EQ(conv->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+              "PROJECTION[\"Polyconic\"],\n"
+              "PARAMETER[\"latitude_of_origin\",1],\n"
+              "PARAMETER[\"central_meridian\",2],\n"
+              "PARAMETER[\"false_easting\",4],\n"
+              "PARAMETER[\"false_northing\",5]");
 }
 
 // ---------------------------------------------------------------------------
