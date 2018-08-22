@@ -3184,6 +3184,7 @@ std::string Conversion::exportToPROJString(
         }
     }
 
+    bool bAxisSpecFound = false;
     if (!bConversionDone) {
         const MethodMapping *mapping = getMapping(projectionMethodName);
         if (!mapping && methodEPSGCode) {
@@ -3192,6 +3193,9 @@ std::string Conversion::exportToPROJString(
         if (mapping && !mapping->proj_name[0].empty()) {
             formatter->addStep(mapping->proj_name[0]);
             for (size_t i = 1; i < mapping->proj_name.size(); ++i) {
+                if (internal::starts_with(mapping->proj_name[i], "axis=")) {
+                    bAxisSpecFound = true;
+                }
                 formatter->addParam(mapping->proj_name[i]);
             }
 
@@ -3266,12 +3270,34 @@ std::string Conversion::exportToPROJString(
             }
 
             if (formatter->convention() ==
-                io::PROJStringFormatter::Convention::PROJ_5) {
+                    io::PROJStringFormatter::Convention::PROJ_5 &&
+                !bAxisSpecFound) {
                 if (axisList.size() >= 2 &&
-                    axisList[0]->direction() == cs::AxisDirection::NORTH &&
-                    axisList[1]->direction() == cs::AxisDirection::EAST) {
-                    formatter->addStep("axisswap");
-                    formatter->addParam("order", "2,1");
+                    !(axisList[0]->direction() == cs::AxisDirection::EAST &&
+                      axisList[1]->direction() == cs::AxisDirection::NORTH) &&
+                    // For polar projections, that have south+south direction,
+                    // we don't want to mess with axes.
+                    axisList[0]->direction() != axisList[1]->direction()) {
+
+                    std::string order[2];
+                    for (int i = 0; i < 2; i++) {
+                        if (axisList[i]->direction() == cs::AxisDirection::WEST)
+                            order[i] = "-1";
+                        else if (axisList[i]->direction() ==
+                                 cs::AxisDirection::EAST)
+                            order[i] = "1";
+                        else if (axisList[i]->direction() ==
+                                 cs::AxisDirection::SOUTH)
+                            order[i] = "-2";
+                        else if (axisList[i]->direction() ==
+                                 cs::AxisDirection::NORTH)
+                            order[i] = "2";
+                    }
+
+                    if (!order[0].empty() && !order[1].empty()) {
+                        formatter->addStep("axisswap");
+                        formatter->addParam("order", order[0] + "," + order[1]);
+                    }
                 }
             }
         }
