@@ -117,6 +117,14 @@ TEST(io, wkt_parsing) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, wkt_parsing_with_parenthesis) {
+
+    auto n = WKTNode::createFrom("A(\"x\",B(\"y\"))");
+    EXPECT_EQ(n->toString(), "A[\"x\",B[\"y\"]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, wkt_parsing_with_double_quotes_inside) {
 
     auto n = WKTNode::createFrom("A[\"xy\"\"z\"]");

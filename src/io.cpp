@@ -728,9 +728,9 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
     // As used in examples of OGC 12-063r5
     static const std::string startPrintedQuote("\xE2\x80\x9C");
     static const std::string endPrintedQuote("\xE2\x80\x9D");
-    for (;
-         i < wkt.size() && (inString || (wkt[i] != '[' && wkt[i] != ',' &&
-                                         wkt[i] != ']' && !::isspace(wkt[i])));
+    for (; i < wkt.size() &&
+           (inString || (wkt[i] != '[' && wkt[i] != '(' && wkt[i] != ',' &&
+                         wkt[i] != ']' && wkt[i] != ')' && !::isspace(wkt[i])));
          ++i) {
         if (wkt[i] == '"') {
             if (!inString) {
@@ -780,24 +780,24 @@ WKTNodeNNPtr WKTNode::createFrom(const std::string &wkt, size_t indexStart,
             indexEnd = i + 1;
             return node;
         }
-        if (wkt[i] == ']') {
+        if (wkt[i] == ']' || wkt[i] == ')') {
             indexEnd = i;
             return node;
         }
     }
-    if (wkt[i] != '[') {
+    if (wkt[i] != '[' && wkt[i] != '(') {
         throw ParsingException("missing [");
     }
     ++i; // skip [
     i = skipSpace(wkt, i);
-    while (i < wkt.size() && wkt[i] != ']') {
+    while (i < wkt.size() && wkt[i] != ']' && wkt[i] != ')') {
         size_t indexEndChild;
         node->addChild(createFrom(wkt, i, recLevel + 1, indexEndChild));
         assert(indexEndChild > i);
         i = indexEndChild;
         i = skipSpace(wkt, i);
     }
-    if (i == wkt.size() || wkt[i] != ']') {
+    if (i == wkt.size() || (wkt[i] != ']' && wkt[i] != ')')) {
         throw ParsingException("missing ]");
     }
     indexEnd = i + 1;
