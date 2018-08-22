@@ -9,14 +9,16 @@ projection, International Journal of Geographical Information Science,
 DOI: 10.1080/13658816.2018.1504949
 
 Port to PROJ by Juernjakob Dugge, 16 August 2018
+Added ellipsoidal equations by Bojan Savric, 22 August 2018
 */
 #define PJ_LIB__
 
+#include <errno.h>
 #include <math.h>
 
 #include "projects.h"
 
-PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl., Sph.";
+PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl., Sph&Ell";
 
 #define A1 1.340264
 #define A2 -0.081106
@@ -28,28 +30,59 @@ PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl., Sph.";
 #define EPS 1e-11
 #define MAX_ITER 12
 
-static XY s_forward (LP lp, PJ *P) {           /* Spheroidal, forward */
+struct pj_opaque {
+    double  qp;
+    double  rqda;
+    double *apa;
+};
+
+static XY e_forward (LP lp, PJ *P) {           /* Ellipsoidal/Spheroidal, forward */
     XY xy = {0.0,0.0};
-    double phi, phi2, phi6;
-    (void) P;
+    struct pj_opaque *Q = P->opaque;
+    double sbeta;
+    double psi, psi2, psi6;
 
-    phi = asin(M * sin(lp.phi));
-    phi2 = phi * phi;
-    phi6 = phi2 * phi2 * phi2;
+    if (P->es != 0.0) {
+       /* Ellipsoidal case, converting to authalic latitude */
+       sbeta = pj_qsfn(sin(lp.phi), P->e, 1.0 - P->es) / Q->qp;
+       if (fabs(sbeta) > 1) {
+          /* Rounding error. */
+          sbeta = sbeta > 0 ? 1 : -1;
+       }
+    }
+    else {
+       /* Spheroidal case, using latitude */
+       sbeta = sin(lp.phi);
+    }
 
-    xy.x = lp.lam * cos(phi) / (M * (A1 + 3 * A2 * phi2 + phi6 * (7 * A3 + 9 * A4 * phi2)));
-    xy.y = phi * (A1 + A2 * phi2 + phi6 * (A3 + A4 * phi2));
+    /* Equal Earth projection */
+    psi  = asin(M * sbeta);
+    psi2 = psi * psi;
+    psi6 = psi2 * psi2 * psi2;
+
+    xy.x = lp.lam * cos(psi) / (M * (A1 + 3 * A2 * psi2 + psi6 * (7 * A3 + 9 * A4 * psi2)));
+    xy.y = psi * (A1 + A2 * psi2 + psi6 * (A3 + A4 * psi2));
+    
+    /* Adjusting x and y for authalic radius */
+    xy.x *= Q->rqda;
+    xy.y *= Q->rqda;
+
     return xy;
 }
 
 
-static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
+static LP e_inverse (XY xy, PJ *P) {           /* Ellipsoidal/Spheroidal, inverse */
     LP lp = {0.0,0.0};
+    struct pj_opaque *Q = P->opaque;
     double yc, tol, y2, y6, f, fder;
+    double beta;
     int i;
-    (void) P;
 
-    /* make sure y is inside valid range */
+    /* Adjusting x and y for authalic radius */
+    xy.x /= Q->rqda;
+    xy.y /= Q->rqda;
+
+    /* Make sure y is inside valid range */
     if (xy.y > MAX_Y) {
         xy.y = MAX_Y;
     } else if (xy.y < -MAX_Y) {
@@ -75,20 +108,58 @@ static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
         return lp;
     }
 
+    /* Longitude */
     y2 = yc * yc;
     y6 = y2 * y2 * y2;
 
     lp.lam = M * xy.x * (A1 + 3 * A2 * y2 + y6 * (7 * A3 + 9 * A4 * y2)) / cos(yc);
-    lp.phi = asin(sin(yc) / M);
-    
+
+    /* Latitude */
+    beta = asin(sin(yc) / M);
+    if (P->es != 0.0) {
+       /* Ellipsoidal case, converting authalic latitude */
+       lp.phi = pj_authlat(beta, Q->apa);
+    }
+    else {
+       /* Spheroidal case, using latitude */
+       lp.phi = beta;
+    }
+
     return lp;
+}
+
+static void *destructor (PJ *P, int errlev) { /* Destructor */
+    if (0==P)
+        return 0;
+
+    if (0==P->opaque)
+        return pj_default_destructor (P, errlev);
+
+    pj_dealloc (P->opaque->apa);
+    return pj_default_destructor (P, errlev);
 }
 
 
 PJ *PROJECTION(eqearth) {
-    P->es = 0;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
+    if (0==Q)
+        return pj_default_destructor (P, ENOMEM);
+    P->opaque = Q;
+    P->destructor = destructor;
+
+    if (P->es != 0.0) {
+       Q->apa = pj_authset(P->es); /* For auth_lat(). */
+       if (0 == Q->apa)
+          return destructor(P, ENOMEM);
+       Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
+       Q->rqda = sqrt(0.5*Q->qp); /* Authalic radius devided by major axis */
+    }
+    else {
+       Q->rqda = 1.0;
+    }
+
+    P->fwd = e_forward;
+    P->inv = e_inverse;
 
     return P;
 }

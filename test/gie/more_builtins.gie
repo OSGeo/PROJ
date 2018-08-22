@@ -420,6 +420,56 @@ accept    0 0
 expect    0 0
 
 accept    -180 90
+expect    -10216474.79 8392927.6
+
+accept    0 90
+expect    0 8392927.6
+
+accept    180 90
+expect    10216474.79 8392927.6
+
+accept    180 45
+expect    14792474.75 5466867.76
+
+accept    180 0
+expect    17243959.06 0
+
+accept    -70 -31.2
+expect    -6241081.64 -3907019.16
+
+
+direction inverse
+
+accept    -6241081.64 -3907019.16
+expect    -70 -31.2
+
+accept    17243959.06 0
+expect    180 0
+
+accept    14792474.75 5466867.76
+expect    180 45
+
+accept    0 0
+expect    0 0
+
+accept    -10216474.79 8392927.6
+expect    -180 90
+
+accept    0 8392927.6
+expect    0 90
+
+accept    10216474.79 8392927.6
+expect    180 90
+
+
+operation +proj=eqearth +R=6378137
+direction forward
+tolerance 1cm
+
+accept    0 0
+expect    0 0
+
+accept    -180 90
 expect    -10227908.09 8402320.16
 
 accept    0 90
