@@ -18,7 +18,7 @@ Added ellipsoidal equations by Bojan Savric, 22 August 2018
 
 #include "projects.h"
 
-PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl., Sph&Ell\n\th=";
+PROJ_HEAD(eqearth, "Equal Earth") "\n\tPCyl., Sph&Ell";
 
 #define A1 1.340264
 #define A2 -0.081106
