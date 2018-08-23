@@ -21,6 +21,8 @@
         AXIS["latitude",NORTH],
         AXIS["longitude",WEST]]
     - equalearth: https://github.com/OSGeo/gdal/issues/870
+    - axis inversion for polar cases: EPSG 5041 (East-North) vs EPSG 32661 (North-East)
+    - importFromProj: beware of +proj=stere cases
 
     
     

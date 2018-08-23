@@ -648,7 +648,7 @@ EPSG:8817
 \subsection latitude_pseudo_standard_parallel Latitude of pseudo standard
 parallel
 
-atitude of the parallel on which the conic or cylindrical projection is based.
+Latitude of the parallel on which the conic or cylindrical projection is based.
 This latitude is not geographic, but is defined on the conformal sphere AFTER
 its rotation to obtain the oblique aspect of the projection.
 
@@ -1083,9 +1083,74 @@ class Conversion : public SingleOperation {
 
     PROJ_DLL static ConversionNNPtr
     createSinusoidal(const util::PropertyMap &properties,
+                     const common::Angle &centerLong,
+                     const common::Length &falseEasting,
+                     const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createStereographic(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Scale &scale,
+        const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createVanDerGrinten(const util::PropertyMap &properties,
+                        const common::Angle &centerLong,
+                        const common::Length &falseEasting,
+                        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createWagnerI(const util::PropertyMap &properties,
+                  const common::Angle &centerLong,
+                  const common::Length &falseEasting,
+                  const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createWagnerII(const util::PropertyMap &properties,
                    const common::Angle &centerLong,
                    const common::Length &falseEasting,
                    const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createWagnerIII(const util::PropertyMap &properties,
+                    const common::Angle &latitudeTrueScale,
+                    const common::Angle &centerLong,
+                    const common::Length &falseEasting,
+                    const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createWagnerIV(const util::PropertyMap &properties,
+                   const common::Angle &centerLong,
+                   const common::Length &falseEasting,
+                   const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createWagnerV(const util::PropertyMap &properties,
+                  const common::Angle &centerLong,
+                  const common::Length &falseEasting,
+                  const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createWagnerVI(const util::PropertyMap &properties,
+                   const common::Angle &centerLong,
+                   const common::Length &falseEasting,
+                   const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
+    createWagnerVII(const util::PropertyMap &properties,
+                    const common::Angle &centerLong,
+                    const common::Length &falseEasting,
+                    const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createQuadrilateralizedSphericalCube(
+        const util::PropertyMap &properties, const common::Angle &centerLat,
+        const common::Angle &centerLong, const common::Length &falseEasting,
+        const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr createSphericalCrossTrackHeight(
+        const util::PropertyMap &properties, const common::Angle &pegPointLat,
+        const common::Angle &pegPointLong, const common::Angle &pegPointHeading,
+        const common::Length &pegPointHeight);
 
   protected:
     Conversion(const OperationMethodNNPtr &methodIn,

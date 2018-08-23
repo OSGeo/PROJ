@@ -3083,6 +3083,315 @@ ConversionNNPtr Conversion::createSinusoidal(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a conversion based on the [Stereographic]
+ *(https://proj4.org/operations/projections/stere.html) projection method.
+ *
+ * There is no equivalent in EPSG. This method implements the original "Oblique
+ * Stereographic" method described in "Snyder's Map Projections - A Working
+ *manual",
+ * which is different from the "Oblique Stereographic (alternative") method
+ * implemented in createObliqueStereographic().
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param scale See \ref scale
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createStereographic(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Scale &scale,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(scale),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Van der Grinten]
+ * (https://proj4.org/operations/projections/vandg.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createVanDerGrinten(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_VAN_DER_GRINTEN, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Wagner I]
+ * (https://proj4.org/operations/projections/wag1.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createWagnerI(const util::PropertyMap &properties,
+                                          const common::Angle &centerLong,
+                                          const common::Length &falseEasting,
+                                          const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_I, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Wagner II]
+ * (https://proj4.org/operations/projections/wag2.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createWagnerII(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_II, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Wagner III]
+ * (https://proj4.org/operations/projections/wag3.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param latitudeTrueScale Latitude of true scale.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createWagnerIII(
+    const util::PropertyMap &properties, const common::Angle &latitudeTrueScale,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(latitudeTrueScale),
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_III, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Wagner IV]
+ * (https://proj4.org/operations/projections/wag4.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createWagnerIV(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_IV, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Wagner V]
+ * (https://proj4.org/operations/projections/wag5.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createWagnerV(const util::PropertyMap &properties,
+                                          const common::Angle &centerLong,
+                                          const common::Length &falseEasting,
+                                          const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_V, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Wagner VI]
+ * (https://proj4.org/operations/projections/wag6.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createWagnerVI(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_VI, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Wagner VII]
+ * (https://proj4.org/operations/projections/wag7.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createWagnerVII(
+    const util::PropertyMap &properties, const common::Angle &centerLong,
+    const common::Length &falseEasting, const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties, PROJ_WKT2_NAME_METHOD_WAGNER_VII, values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Quadrilateralized Spherical
+ *Cube]
+ *(https://proj4.org/operations/projections/qsc.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param centerLat See \ref center_latitude
+ * @param centerLong See \ref center_longitude
+ * @param falseEasting See \ref false_easting
+ * @param falseNorthing See \ref false_northing
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createQuadrilateralizedSphericalCube(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(centerLat), ParameterValue::create(centerLong),
+        ParameterValue::create(falseEasting),
+        ParameterValue::create(falseNorthing),
+    };
+
+    return create(properties,
+                  PROJ_WKT2_NAME_METHOD_QUADRILATERALIZED_SPHERICAL_CUBE,
+                  values);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a conversion based on the [Spherical Cross-Track Height]
+ *(https://proj4.org/operations/projections/sch.html) projection method.
+ *
+ * There is no equivalent in EPSG.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param pegPointLat Peg point latitude.
+ * @param pegPointLong Peg point longitude.
+ * @param pegPointHeading Peg point heading.
+ * @param pegPointHeight Peg point height.
+ * @return a new Conversion.
+ */
+ConversionNNPtr Conversion::createSphericalCrossTrackHeight(
+    const util::PropertyMap &properties, const common::Angle &pegPointLat,
+    const common::Angle &pegPointLong, const common::Angle &pegPointHeading,
+    const common::Length &pegPointHeight) {
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(pegPointLat),
+        ParameterValue::create(pegPointLong),
+        ParameterValue::create(pegPointHeading),
+        ParameterValue::create(pegPointHeight),
+    };
+
+    return create(properties,
+                  PROJ_WKT2_NAME_METHOD_SPHERICAL_CROSS_TRACK_HEIGHT, values);
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateOperationNNPtr Conversion::inverse() const {
     return util::nn_make_shared<InverseCoordinateOperation>(
         util::nn_static_pointer_cast<CoordinateOperation>(shared_from_this()),

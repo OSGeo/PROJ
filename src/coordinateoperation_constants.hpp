@@ -204,6 +204,23 @@ static const std::string PROJ_WKT2_NAME_METHOD_ROBINSON("Robinson");
 
 static const std::string PROJ_WKT2_NAME_METHOD_SINUSOIDAL("Sinusoidal");
 
+static const std::string PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC("Stereographic");
+
+static const std::string PROJ_WKT2_NAME_METHOD_VAN_DER_GRINTEN("VanDerGrinten");
+
+static const std::string PROJ_WKT2_NAME_METHOD_WAGNER_I("Wagner I");
+static const std::string PROJ_WKT2_NAME_METHOD_WAGNER_II("Wagner II");
+static const std::string PROJ_WKT2_NAME_METHOD_WAGNER_III("Wagner III");
+static const std::string PROJ_WKT2_NAME_METHOD_WAGNER_IV("Wagner IV");
+static const std::string PROJ_WKT2_NAME_METHOD_WAGNER_V("Wagner V");
+static const std::string PROJ_WKT2_NAME_METHOD_WAGNER_VI("Wagner VI");
+static const std::string PROJ_WKT2_NAME_METHOD_WAGNER_VII("Wagner VII");
+
+static const std::string PROJ_WKT2_NAME_METHOD_QUADRILATERALIZED_SPHERICAL_CUBE(
+    "Quadrilateralized Spherical Cube");
+
+static const std::string PROJ_WKT2_NAME_METHOD_SPHERICAL_CROSS_TRACK_HEIGHT(
+    "Spherical Cross-Track Height");
 // ---------------------------------------------------------------------------
 
 static const std::string
@@ -1089,6 +1106,116 @@ static const MethodMapping methodMappings[] = {
 
          paramFalseEasting,
          paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC,
+     0,
+     "Stereographic",
+     "stere",
+     {
+         paramLatitudeNatOrigin,
+         paramLongitudeNatOrigin,
+
+         {EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, WKT1_SCALE_FACTOR,
+          common::UnitOfMeasure::Type::SCALE, "k"},
+
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_VAN_DER_GRINTEN,
+     0,
+     "VanDerGrinten",
+     {"vandg", "R_A"},
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_WAGNER_I,
+     0,
+     "Wagner_I",
+     "wag1",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_WAGNER_II,
+     0,
+     "Wagner_II",
+     "wag2",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_WAGNER_III,
+     0,
+     "Wagner_III",
+     "wag3",
+     {
+         {"Latitude of true scale", 0, "latitude_of_origin",
+          common::UnitOfMeasure::Type::ANGULAR, "lat_ts"},
+
+         paramLongitudeNatOrigin,
+
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_WAGNER_IV,
+     0,
+     "Wagner_IV",
+     "wag4",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_WAGNER_V,
+     0,
+     "Wagner_V",
+     "wag5",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_WAGNER_VI,
+     0,
+     "Wagner_VI",
+     "wag6",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_WAGNER_VII,
+     0,
+     "Wagner_VII",
+     "wag7",
+     {
+         paramLongitudeNatOrigin, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_QUADRILATERALIZED_SPHERICAL_CUBE,
+     0,
+     "Quadrilateralized_Spherical_Cube",
+     "qsc",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {PROJ_WKT2_NAME_METHOD_SPHERICAL_CROSS_TRACK_HEIGHT,
+     0,
+     "Spherical_Cross_Track_Height",
+     "sch",
+     {
+         {"Peg point latitude", 0, "peg_point_latitude",
+          common::UnitOfMeasure::Type::ANGULAR, "plat_0"},
+         {"Peg point longitude", 0, "peg_point_longitude",
+          common::UnitOfMeasure::Type::ANGULAR, "plon_0"},
+         {"Peg point heading", 0, "peg_point_heading",
+          common::UnitOfMeasure::Type::ANGULAR, "phdg_0"},
+         {"Peg point height", 0, "peg_point_height",
+          common::UnitOfMeasure::Type::LINEAR, "h_0"},
      }},
 
     // TODO: add at least all GDAL supported methods !!!
