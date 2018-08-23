@@ -146,6 +146,20 @@ double c_locale_stod(const std::string &s) {
 
 // ---------------------------------------------------------------------------
 
+std::vector<std::string> split(const std::string &str, char separator) {
+    std::vector<std::string> res;
+    size_t lastPos = 0;
+    size_t newPos = 0;
+    while ((newPos = str.find(separator, lastPos)) != std::string::npos) {
+        res.push_back(str.substr(lastPos, newPos - lastPos));
+        lastPos = newPos + 1;
+    }
+    res.push_back(str.substr(lastPos));
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
 } // namespace internal
 
 NS_PROJ_END

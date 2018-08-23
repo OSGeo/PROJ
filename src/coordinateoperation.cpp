@@ -4540,15 +4540,16 @@ TransformationNNPtr Transformation::createCoordinateFrameRotation(
  * GeographicCRS of sourceCRSIn, and the target CRS being EPSG:4326
  *
  * @param sourceCRSIn Source CRS.
- * @param TOWGS84Parameters The vector of 7 double values (Translation_X,_Y,_Z,
- * Rotation_X,_Y,_Z, Scale_Difference) passed to createPositionVector()
+ * @param TOWGS84Parameters The vector of 3 double values (Translation_X,_Y,_Z)
+ * or 7 double values (Translation_X,_Y,_Z, Rotation_X,_Y,_Z, Scale_Difference)
+ * passed to createPositionVector()
  * @return new Transformation.
  */
 TransformationNNPtr Transformation::createTOWGS84(
     const crs::CRSNNPtr &sourceCRSIn,
     const std::vector<double> &TOWGS84Parameters) // throw InvalidOperation
 {
-    if (TOWGS84Parameters.size() != 7) {
+    if (TOWGS84Parameters.size() != 3 && TOWGS84Parameters.size() != 7) {
         throw InvalidOperation(
             "Invalid number of elements in TOWGS84Parameters");
     }
@@ -4557,6 +4558,17 @@ TransformationNNPtr Transformation::createTOWGS84(
     if (!transformSourceCRS) {
         throw InvalidOperation(
             "Cannot find GeographicCRS in sourceCRS of TOWGS84 transformation");
+    }
+
+    if (TOWGS84Parameters.size() == 3) {
+        return createGeocentricTranslations(
+            util::PropertyMap().set(
+                common::IdentifiedObject::NAME_KEY,
+                "Transformation from " +
+                    *(transformSourceCRS->name()->description()) + " to WGS84"),
+            NN_CHECK_ASSERT(transformSourceCRS), crs::GeographicCRS::EPSG_4326,
+            TOWGS84Parameters[0], TOWGS84Parameters[1], TOWGS84Parameters[2],
+            std::vector<metadata::PositionalAccuracyNNPtr>());
     }
 
     return createPositionVector(

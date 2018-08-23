@@ -3054,7 +3054,64 @@ TEST(io, projparse_longlat_pm_numeric) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_longlat_towgs84_3_terms) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +towgs84=1.2,2,3");
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    crs->exportToWKT(f);
+
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"Geocentric translations") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETER[\"X-axis translation\",1.2") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETER[\"Y-axis translation\",2") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETER[\"Z-axis translation\",3") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_towgs84_7_terms) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +towgs84=1.2,2,3,4,5,6,7");
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    crs->exportToWKT(f);
+
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"Position Vector transformation") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETER[\"X-axis translation\",1.2") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETER[\"Y-axis translation\",2") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETER[\"Z-axis translation\",3") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETER[\"Scale difference\",1.000007") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_errors) {
+    EXPECT_THROW(PROJStringParser().createFromPROJString(""), ParsingException);
+
     EXPECT_THROW(PROJStringParser().createFromPROJString("foo"),
                  ParsingException);
 
@@ -3111,5 +3168,10 @@ TEST(io, projparse_longlat_errors) {
 
     EXPECT_THROW(
         PROJStringParser().createFromPROJString("+proj=longlat +pm=unknown"),
+        ParsingException);
+
+    EXPECT_THROW(
+        PROJStringParser().createFromPROJString(
+            "+proj=longlat +ellps=GRS80 +towgs84=1.2,2,3,4,5,6,invalid"),
         ParsingException);
 }

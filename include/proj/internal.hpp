@@ -110,6 +110,8 @@ std::string tolower(const std::string &osStr);
 
 std::string toupper(const std::string &osStr);
 
+std::vector<std::string> split(const std::string &osStr, char separator);
+
 inline bool ci_equal(const std::string &a, const std::string &b) {
     return tolower(a) == tolower(b);
 }

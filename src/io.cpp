@@ -3410,9 +3410,23 @@ CRSNNPtr PROJStringParser::Private::buildCRS(
         }
     }
 
-    return GeographicCRS::create(
+    CRSNNPtr crs = GeographicCRS::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
         NN_CHECK_ASSERT(datum), cs);
+
+    auto towgs84 = getParamValue(step, "towgs84");
+    if (!towgs84.empty()) {
+        std::vector<double> towgs84Values;
+        for (const auto &str : split(towgs84, ',')) {
+            try {
+                towgs84Values.push_back(c_locale_stod(str));
+            } catch (const std::invalid_argument &) {
+                throw ParsingException("Non numerical value in towgs84 clause");
+            }
+        }
+        crs = BoundCRS::createFromTOWGS84(crs, towgs84Values);
+    }
+    return crs;
 }
 
 //! @endcond
