@@ -4,9 +4,12 @@
 Miller Oblated Stereographic
 ********************************************************************************
 
-.. image:: ./images/mil_os.png
-   :scale: 50%
+.. figure:: ./images/mil_os.png
+   :width: 500 px
+   :align: center
    :alt:   Miller Oblated Stereographic
+
+   proj-string: ``+proj=mil_os``
 
 Parameters
 ################################################################################

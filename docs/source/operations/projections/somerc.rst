@@ -1,12 +1,15 @@
 .. _somerc:
 
 ********************************************************************************
-Swiss. Obl. Mercator
+Swiss Oblique Mercator
 ********************************************************************************
 
-.. image:: ./images/somerc.png
-   :scale: 50%
-   :alt:   Swiss. Obl. Mercator
+.. figure:: ./images/somerc.png
+   :width: 500 px
+   :align: center
+   :alt:   Swiss Oblique Mercator
+
+   proj-string: ``+proj=somerc``
 
 
 Parameters

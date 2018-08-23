@@ -4,9 +4,12 @@
 Werenskiold I
 ********************************************************************************
 
-.. image:: ./images/weren.png
-   :scale: 50%
+.. figure:: ./images/weren.png
+   :width: 500 px
+   :align: center
    :alt:   Werenskiold I
+
+   proj-string: ``+proj=weren``
 
 Parameters
 ################################################################################

@@ -4,9 +4,12 @@
 Fahey
 ********************************************************************************
 
-.. image:: ./images/fahey.png
-   :scale: 50%
+.. figure:: ./images/fahey.png
+   :width: 500 px
+   :align: center
    :alt:   Fahey
+
+   proj-string: ``+proj=fahey``
 
 Parameters
 ################################################################################

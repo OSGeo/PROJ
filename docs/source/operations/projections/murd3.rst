@@ -4,9 +4,12 @@
 Murdoch III
 ********************************************************************************
 
-.. image:: ./images/murd3.png
-   :scale: 50%
+.. figure:: ./images/murd3.png
+   :width: 500 px
+   :align: center
    :alt:   Murdoch III
+
+   proj-string: ``+proj=murd3 +lat_1=30 +lat_2=50``
 
 Parameters
 ################################################################################

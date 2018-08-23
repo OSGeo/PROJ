@@ -4,9 +4,12 @@
 Universal Polar Stereographic
 ********************************************************************************
 
-.. image:: ./images/ups.png
-   :scale: 50%
+.. figure:: ./images/ups.png
+   :width: 500 px
+   :align: center
    :alt:   Universal Polar Stereographic
+
+   proj-string: ``+proj=ups``
 
 Parameters
 ################################################################################

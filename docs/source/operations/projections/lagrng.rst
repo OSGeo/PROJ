@@ -4,9 +4,12 @@
 Lagrange
 ********************************************************************************
 
-.. image:: ./images/lagrng.png
-   :scale: 50%
+.. figure:: ./images/lagrng.png
+   :width: 500 px
+   :align: center
    :alt:   Lagrange
+
+   proj-string: ``+proj=lagrng``
 
 Parameters
 ################################################################################

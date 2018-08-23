@@ -4,9 +4,12 @@
 Central Cylindrical
 ********************************************************************************
 
-.. image:: ./images/cc.png
-   :scale: 50%
+.. figure:: ./images/cc.png
+   :width: 500 px
+   :align: center
    :alt:   Central Cylindrical
+
+   proj-string: ``+proj=cc``
 
 Parameters
 ################################################################################

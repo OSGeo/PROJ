@@ -24,10 +24,12 @@ scanning angle intervals.
 +---------------------+----------------------------------------------------------+
 
 
-.. image:: ./images/geos.png
-   :scale: 50%
+.. figure:: ./images/geos.png
+   :width: 500 px
+   :align: center
    :alt:   Geostationary Satellite View
 
+   proj-string: ``+proj=geos +h=35785831.0 +lon_0=-60 +sweep=y``
 
 Usage
 ###############################################################################
@@ -54,7 +56,8 @@ scanning positions are obtained by rotating the gimbal along a N/S axis (or ``y`
 and a E/W axis (or ``x``).
 
 .. image:: ../../..//images/geos_sweep.png
-   :scale: 50%
+   :width: 500 px
+   :align: center
    :alt:   Gimbal geometry
 
 In the image above, the outer-gimbal axis, or sweep-angle axis, is the N/S axis (``y``)

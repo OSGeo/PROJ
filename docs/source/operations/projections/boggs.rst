@@ -4,9 +4,12 @@
 Boggs Eumorphic
 ********************************************************************************
 
-.. image:: ./images/boggs.png
-   :scale: 50%
+.. figure:: ./images/boggs.png
+   :width: 500 px
+   :align: center
    :alt:   Boggs Eumorphic
+
+   proj-string: ``+proj=boggs``
 
 Parameters
 ################################################################################

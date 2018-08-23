@@ -4,9 +4,12 @@
 Putnins P5
 ********************************************************************************
 
-.. image:: ./images/putp5.png
-   :scale: 50%
+.. figure:: ./images/putp5.png
+   :width: 500 px
+   :align: center
    :alt:   Putnins P5
+
+   proj-string: ``+proj=putp5``
 
 Parameters
 ################################################################################

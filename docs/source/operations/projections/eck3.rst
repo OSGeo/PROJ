@@ -4,9 +4,12 @@
 Eckert III
 ********************************************************************************
 
-.. image:: ./images/eck3.png
-   :scale: 50%
+.. figure:: ./images/eck3.png
+   :width: 500 px
+   :align: center
    :alt:   Eckert III
+
+   proj-string: ``+proj=eck3``
 
 Parameters
 ################################################################################

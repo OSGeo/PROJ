@@ -4,9 +4,12 @@
 Mollweide
 ********************************************************************************
 
-.. image:: ./images/moll.png
-   :scale: 50%
+.. figure:: ./images/moll.png
+   :width: 500 px
+   :align: center
    :alt:   Mollweide
+
+   proj-string: ``+proj=moll``
 
 Parameters
 ################################################################################

@@ -4,10 +4,12 @@
 Transverse Central Cylindrical
 ********************************************************************************
 
-.. image:: ./images/tcc.png
-   :scale: 50%
+.. figure:: ./images/tcc.png
+   :width: 500 px
+   :align: center
    :alt:   Transverse Central Cylindrical
 
+   proj-string: ``+proj=tcc``
 
 Parameters
 ################################################################################

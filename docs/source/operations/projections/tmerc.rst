@@ -25,9 +25,12 @@ The transverse Mercator projection in its various forms is the most widely used 
 
 
 
-.. image:: ./images/tmerc.png
-   :scale: 50%
+.. figure:: ./images/tmerc.png
+   :width: 500 px
+   :align: center
    :alt:   Transverse Mercator  
+
+   proj-string: ``+proj=tmerc``
 
 Usage
 #####

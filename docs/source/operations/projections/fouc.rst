@@ -4,9 +4,12 @@
 Foucaut
 ********************************************************************************
 
-.. image:: ./images/fouc.png
-   :scale: 50%
+.. figure:: ./images/fouc.png
+   :width: 500 px
+   :align: center
    :alt:   Foucaut
+
+   proj-string: ``+proj=fouc``
 
 Parameters
 ################################################################################

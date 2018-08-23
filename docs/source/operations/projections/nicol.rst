@@ -4,9 +4,12 @@
 Nicolosi Globular
 ********************************************************************************
 
-.. image:: ./images/nicol.png
-   :scale: 50%
+.. figure:: ./images/nicol.png
+   :width: 500 px
+   :align: center
    :alt:   Nicolosi Globular
+
+   proj-string: ``+proj=nicol``
 
 Parameters
 ################################################################################

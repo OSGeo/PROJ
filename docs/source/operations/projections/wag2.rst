@@ -4,10 +4,12 @@
 Wagner II
 ********************************************************************************
 
-.. image:: ./images/wag2.png
-   :scale: 50%
+.. figure:: ./images/wag2.png
+   :width: 500 px
+   :align: center
    :alt:   Wagner II
 
+   proj-string: ``+proj=wag2``
 
 .. math::
 

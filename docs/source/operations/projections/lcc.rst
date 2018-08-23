@@ -4,9 +4,12 @@
 Lambert Conformal Conic
 ********************************************************************************
 
-.. image:: ./images/lcc.png
-   :scale: 50%
+.. figure:: ./images/lcc.png
+   :width: 500 px
+   :align: center
    :alt:   Lambert Conformal Conic
+
+   proj-string: ``+proj=lcc +lon_0=-90``
 
 Parameters
 ################################################################################

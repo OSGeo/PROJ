@@ -4,9 +4,12 @@
 Lambert Conformal Conic Alternative
 ********************************************************************************
 
-.. image:: ./images/lcca.png
-   :scale: 50%
+.. figure:: ./images/lcca.png
+   :width: 500 px
+   :align: center
    :alt:   Lambert Conformal Conic Alternative
+
+   proj-string: ``+proj=lcca +lat_0=35``
 
 Parameters
 ################################################################################

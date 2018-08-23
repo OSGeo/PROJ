@@ -4,9 +4,12 @@
 Craster Parabolic (Putnins P4)
 ********************************************************************************
 
-.. image:: ./images/crast.png
-   :scale: 50%
+.. figure:: ./images/crast.png
+   :width: 500 px
+   :align: center
    :alt:   Craster Parabolic (Putnins P4)
+
+   proj-string: ``+proj=crast``
 
 Parameters
 ################################################################################

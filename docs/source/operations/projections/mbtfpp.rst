@@ -4,9 +4,12 @@
 McBride-Thomas Flat-Polar Parabolic
 ********************************************************************************
 
-.. image:: ./images/mbtfpp.png
-   :scale: 50%
+.. figure:: ./images/mbtfpp.png
+   :width: 500 px
+   :align: center
    :alt:   McBride-Thomas Flat-Polar Parabolic
+
+   proj-string: ``+proj=mbtfpp``
 
 Parameters
 ################################################################################

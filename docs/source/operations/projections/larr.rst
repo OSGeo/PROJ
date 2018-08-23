@@ -4,9 +4,12 @@
 Larrivee
 ********************************************************************************
 
-.. image:: ./images/larr.png
-   :scale: 50%
+.. figure:: ./images/larr.png
+   :width: 500 px
+   :align: center
    :alt:   Larrivee
+
+   proj-string: ``+proj=larr``
 
 Parameters
 ################################################################################

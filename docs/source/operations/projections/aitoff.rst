@@ -19,9 +19,12 @@ Aitoff
 | **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
 
-.. image:: ./images/aitoff.png
-   :scale: 50%
+.. figure:: ./images/aitoff.png
+   :width: 500 px
+   :align: center
    :alt:   Aitoff
+
+   proj-string: ``+proj=aitoff``
 
 Parameters
 ################################################################################

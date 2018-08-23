@@ -85,7 +85,7 @@ def interp_coords(coords, tol):
 
     The function tries to densify a list of coordinates based on a simple measure.
     If two adjacent points in the input coordinate list are further away from each
-    other than the specified tolerance, the list will be densied between those two
+    other than the specified tolerance, the list will be densified between those two
     points. Roughly speaking, a point will be inserted every `tol` between the
     points.
 
@@ -230,7 +230,7 @@ def plotproj(plotdef, data, outdir):
     '''
     Plot map.
     '''
-    fig, axes = plt.subplots()
+    axes = plt.axes()
 
     bounds = (plotdef['lonmin'], plotdef['latmin'], plotdef['lonmax'], plotdef['latmax'])
     for geom in data.filter(bbox=bounds):
@@ -288,23 +288,30 @@ def plotproj(plotdef, data, outdir):
         y = feature[:, 1]
         axes.plot(x, y, color=COLOR_GRAT, linewidth=0.4)
 
-    axes.axis('off')
+    # Switch off the axis lines...
+    plt.axis('off')
+    # ... and additionally switch off the visibility of the axis lines and
+    # labels so they can be removed by "bbox_inches='tight'" when saving
+    axes.get_xaxis().set_visible(False)
+    axes.get_yaxis().set_visible(False)
+
     font = {
         'family': 'serif',
         'color': 'black',
         'style': 'italic',
         'size': 12
     }
-    fig.suptitle(plotdef['projstring'], fontdict=font)
 
-    axes.autoscale(tight=True)
+    # Make sure the plot is not stretched
+    axes.set_aspect('equal')
+    
     if not os.path.exists(outdir):
         os.makedirs(outdir)
-    fig.savefig(outdir + '/' + plotdef['filename'], dpi=300)
+    plt.savefig(outdir + '/' + plotdef['filename'],
+                dpi=400,
+                bbox_inches='tight')
 
     # Clean up
-    fig = None
-    del fig
     axes = None
     del axes
     plt.close()

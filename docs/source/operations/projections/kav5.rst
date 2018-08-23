@@ -4,9 +4,12 @@
 Kavraisky V
 ********************************************************************************
 
-.. image:: ./images/kav5.png
-   :scale: 50%
+.. figure:: ./images/kav5.png
+   :width: 500 px
+   :align: center
    :alt:   Kavraisky V
+
+   proj-string: ``+proj=kav5``
 
 Parameters
 ################################################################################

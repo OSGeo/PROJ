@@ -20,9 +20,12 @@ Albers Equal Area
 +---------------------+----------------------------------------------------------+
 
 
-.. image:: ./images/aea.png
-   :scale: 50%
+.. figure:: ./images/aea.png
+   :width: 500 px
+   :align: center
    :alt:   Albers Equal Area
+
+   proj-string: ``+proj=aea``
 
 Options
 ################################################################################

@@ -26,9 +26,12 @@ within the small or great circle defined by an angular distance,
 
 
 
-.. image:: ./images/airy.png
-   :scale: 50%
+.. figure:: ./images/airy.png
+   :width: 500 px
+   :align: center
    :alt:   Airy
+
+   proj-string: ``+proj=airy``
 
 Options
 ################################################################################

@@ -4,9 +4,12 @@
 Kavraisky VII
 ********************************************************************************
 
-.. image:: ./images/kav7.png
-   :scale: 50%
+.. figure:: ./images/kav7.png
+   :width: 500 px
+   :align: center
    :alt:   Kavraisky VII
+
+   proj-string: ``+proj=kav7``
 
 Parameters
 ################################################################################

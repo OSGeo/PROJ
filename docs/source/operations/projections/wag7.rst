@@ -4,7 +4,9 @@
 Wagner VII
 ********************************************************************************
 
-.. image:: ./images/wag7.png
-   :scale: 50%
+.. figure:: ./images/wag7.png
+   :width: 500 px
+   :align: center
    :alt:   Wagner VII  
 
+   proj-string: ``+proj=wag7``

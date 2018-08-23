@@ -4,9 +4,12 @@
 Lambert Azimuthal Equal Area
 ********************************************************************************
 
-.. image:: ./images/laea.png
-   :scale: 50%
+.. figure:: ./images/laea.png
+   :width: 500 px
+   :align: center
    :alt:   Lambert Azimuthal Equal Area
+
+   proj-string: ``+proj=laea``
 
 Parameters
 ################################################################################

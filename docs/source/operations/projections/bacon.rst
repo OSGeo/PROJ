@@ -4,9 +4,12 @@
 Bacon Globular
 ********************************************************************************
 
-.. image:: ./images/bacon.png
-   :scale: 50%
+.. figure:: ./images/bacon.png
+   :width: 500 px
+   :align: center
    :alt:   Bacon Globular
+
+   proj-string: ``+proj=bacon``
 
 Parameters
 ################################################################################

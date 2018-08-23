@@ -4,9 +4,12 @@
 Eckert II
 ********************************************************************************
 
-.. image:: ./images/eck2.png
-   :scale: 50%
+.. figure:: ./images/eck2.png
+   :width: 500 px
+   :align: center
    :alt:   Eckert II
+
+   proj-string: ``+proj=eck2``
 
 Parameters
 ################################################################################

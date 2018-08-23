@@ -4,9 +4,12 @@
 Eckert I
 ********************************************************************************
 
-.. image:: ./images/eck1.png
-   :scale: 50%
+.. figure:: ./images/eck1.png
+   :width: 500 px
+   :align: center
    :alt:   Eckert I
+
+   proj-string: ``+proj=eck1``
 
 
 .. math::

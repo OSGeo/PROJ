@@ -4,9 +4,12 @@
 Equidistant Conic
 ********************************************************************************
 
-.. image:: ./images/eqdc.png
-   :scale: 50%
+.. figure:: ./images/eqdc.png
+   :width: 500 px
+   :align: center
    :alt:   Equidistant Conic
+
+   proj-string: ``+proj=eqdc +lat_1=55 +lat_2=60``
 
 Parameters
 ################################################################################

@@ -4,9 +4,12 @@
 Lee Oblated Stereographic
 ********************************************************************************
 
-.. image:: ./images/lee_os.png
-   :scale: 50%
+.. figure:: ./images/lee_os.png
+   :width: 500 px
+   :align: center
    :alt:   Lee Oblated Stereographic
+
+   proj-string: ``+proj=lee_os``
 
 Parameters
 ################################################################################

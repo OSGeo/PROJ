@@ -4,9 +4,12 @@
 Foucaut Sinusoidal
 ********************************************************************************
 
-.. image:: ./images/fouc_s.png
-   :scale: 50%
+.. figure:: ./images/fouc_s.png
+   :width: 500 px
+   :align: center
    :alt:   Foucaut Sinusoidal
+
+   proj-string: ``+proj=fouc_s``
 
 
 The `y`-axis is based upon a weighted mean of the cylindrical equal-area and

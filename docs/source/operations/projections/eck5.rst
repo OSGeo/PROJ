@@ -4,9 +4,12 @@
 Eckert V
 ********************************************************************************
 
-.. image:: ./images/eck5.png
-   :scale: 50%
+.. figure:: ./images/eck5.png
+   :width: 500 px
+   :align: center
    :alt:   Eckert V
+
+   proj-string: ``+proj=eck5``
 
 Parameters
 ################################################################################

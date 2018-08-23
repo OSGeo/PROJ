@@ -4,9 +4,12 @@
 Winkel I
 ********************************************************************************
 
-.. image:: ./images/wink1.png
-   :scale: 50%
+.. figure:: ./images/wink1.png
+   :width: 500 px
+   :align: center
    :alt:   Winkel I
+
+   proj-string: ``+proj=wink1``
 
 Parameters
 ################################################################################

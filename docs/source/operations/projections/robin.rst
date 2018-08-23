@@ -4,9 +4,12 @@
 Robinson
 ********************************************************************************
 
-.. image:: ./images/robin.png
-   :scale: 50%
+.. figure:: ./images/robin.png
+   :width: 500 px
+   :align: center
    :alt:   Robinson
+
+   proj-string: ``+proj=robin``
 
 Parameters
 ################################################################################

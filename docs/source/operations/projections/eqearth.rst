@@ -24,8 +24,12 @@ Equal Earth
 
 
 
-.. image:: ./images/eqearth.png
+.. figure:: ./images/eqearth.png
+   :width: 500 px
+   :align: center
    :alt:   Equal Earth
+
+   proj-string: ``+proj=eqearth``
 
 
 The Equal Earth projection is intended for making world maps. Equal Earth is a 

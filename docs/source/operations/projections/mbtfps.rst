@@ -4,9 +4,12 @@
 McBryde-Thomas Flat-Polar Sinusoidal
 ********************************************************************************
 
-.. image:: ./images/mbtfps.png
-   :scale: 50%
+.. figure:: ./images/mbtfps.png
+   :width: 500 px
+   :align: center
    :alt:   McBryde-Thomas Flat-Polar Sinusoidal
+
+   proj-string: ``+proj=mbtfps``
 
 Parameters
 ################################################################################

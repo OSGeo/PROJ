@@ -4,9 +4,12 @@
 Roussilhe Stereographic
 ********************************************************************************
 
-.. image:: ./images/rouss.png
-   :scale: 50%
+.. figure:: ./images/rouss.png
+   :width: 500 px
+   :align: center
    :alt:   Roussilhe Stereographic
+
+   proj-string: ``+proj=rouss``
 
 Parameters
 ################################################################################

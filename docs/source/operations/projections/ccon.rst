@@ -26,10 +26,12 @@ latitude, identical with ``conic()`` projection from ``mapproj`` R package.
 +---------------------+----------------------------------------------------------+
 
 
-.. image:: ./images/ccon.png
-   :scale: 50%
+.. figure:: ./images/ccon.png
+   :width: 500 px
+   :align: center
    :alt:   Central Conic
 
+   proj-string: ``+proj=ccon +lat_1=52 +lon_0=19``
 
 Usage
 ########

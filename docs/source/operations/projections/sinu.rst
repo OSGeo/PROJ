@@ -4,11 +4,14 @@
 Sinusoidal (Sanson-Flamsteed)
 ********************************************************************************
 
-.. image:: ./images/sinu.png
-   :scale: 50%
+.. figure:: ./images/sinu.png
+   :width: 500 px
+   :align: center
    :alt:   Sinusoidal (Sanson-Flamsteed)
 
-MacBryde and Thomas developed generalized formulas for sever of the
+   proj-string: ``+proj=sinu``
+
+MacBryde and Thomas developed generalized formulas for several of the
 pseudocylindricals with sinusoidal meridians:
 
 .. math::

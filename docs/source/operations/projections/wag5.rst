@@ -4,10 +4,12 @@
 Wagner V
 ********************************************************************************
 
-.. image:: ./images/wag5.png
-   :scale: 50%
+.. figure:: ./images/wag5.png
+   :width: 500 px
+   :align: center
    :alt:   Wagner V
 
+   proj-string: ``+proj=wag5``
 
 Parameters
 ################################################################################

@@ -24,9 +24,12 @@ The near-sided perspective projection simulates a view from a height
 +---------------------+----------------------------------------------------------+
 
 
-.. image:: ./images/nsper.png
-   :scale: 50%
+.. figure:: ./images/nsper.png
+   :width: 500 px
+   :align: center
    :alt:   Near-sided perspective
+
+   proj-string: ``+proj=nsper +h=3000000 +lat_0=-20 +lon_0=145``
 
 Parameters
 ################################################################################

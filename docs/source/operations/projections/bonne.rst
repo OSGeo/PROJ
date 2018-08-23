@@ -4,9 +4,12 @@
 Bonne (Werner lat_1=90)
 ********************************************************************************
 
-.. image:: ./images/bonne.png
-   :scale: 50%
+.. figure:: ./images/bonne.png
+   :width: 500 px
+   :align: center
    :alt:   Bonne (Werner lat_1=90)
+
+   proj-string: ``+proj=bonne +lat_1=10``
 
 Parameters
 ################################################################################

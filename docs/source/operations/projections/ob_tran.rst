@@ -4,9 +4,12 @@
 General Oblique Transformation
 ********************************************************************************
 
-.. image:: ./images/ob_tran.png
-   :scale: 50%
+.. figure:: ./images/ob_tran.png
+   :width: 500 px
+   :align: center
    :alt:   General Oblique Transformation
+
+   proj-string: ``+proj=ob_tran +o_proj=mill +o_lon_p=40 +o_lat_p=50 +lon_0=60``
 
 Usage
 ################################################################################

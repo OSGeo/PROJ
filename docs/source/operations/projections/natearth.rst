@@ -21,10 +21,12 @@ Natural Earth
 
 
 
-.. image:: ./images/natearth.png
-   :scale: 50%
+.. figure:: ./images/natearth.png
+   :width: 500 px
+   :align: center
    :alt:   Natural Earth
 
+   proj-string: ``+proj=natearth``
 
 The Natural Earth projection is intended for making world maps. A distinguishing trait
 is its slightly rounded corners fashioned to emulate the spherical shape of Earth.

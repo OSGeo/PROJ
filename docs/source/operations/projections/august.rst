@@ -4,9 +4,12 @@
 August Epicycloidal
 ********************************************************************************
 
-.. image:: ./images/august.png
-   :scale: 50%
+.. figure:: ./images/august.png
+   :width: 500 px
+   :align: center
    :alt:   August Epicycloidal
+
+   proj-string: ``+proj=august``
 
 Parameters
 ################################################################################

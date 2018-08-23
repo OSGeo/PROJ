@@ -4,9 +4,12 @@
 Laborde
 ********************************************************************************
 
-.. image:: ./images/labrd.png
-   :scale: 50%
+.. figure:: ./images/labrd.png
+   :width: 500 px
+   :align: center
    :alt:   Laborde
+
+   proj-string: ``+proj=labrd +lon_0=40 +lat_0=-10``
 
 Parameters
 ################################################################################

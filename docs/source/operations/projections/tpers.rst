@@ -21,10 +21,12 @@ Tilted perspective
 
 
 
-.. image:: ./images/tpers.png
-   :scale: 50%
+.. figure:: ./images/tpers.png
+   :width: 500 px
+   :align: center
    :alt:   Tilted perspective
 
+   proj-string: ``+proj=tpers +h=5500000 +lat_0=40``
 
 Tilted Perspective is similar to :ref:`nsper` (``nsper``) in that it simulates a
 perspective view from a height. Where ``nsper`` projects onto a plane tangent to

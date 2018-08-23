@@ -4,9 +4,12 @@
 General Sinusoidal Series
 ********************************************************************************
 
-.. image:: ./images/gn_sinu.png
-   :scale: 50%
+.. figure:: ./images/gn_sinu.png
+   :width: 500 px
+   :align: center
    :alt:   General Sinusoidal Series
+
+   proj-string: ``+proj=gn_sinu +m=2 +n=3``
 
 Parameters
 ################################################################################

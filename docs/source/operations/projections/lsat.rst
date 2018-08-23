@@ -4,9 +4,12 @@
 Space oblique for LANDSAT
 ********************************************************************************
 
-.. image:: ./images/lsat.png
-   :scale: 50%
+.. figure:: ./images/lsat.png
+   :width: 500 px
+   :align: center
    :alt:   Space oblique for LANDSAT
+
+   proj-string: ``+proj=lsat +ellps=GRS80 +lat_1=-60 +lat_2=60 +lsat=2 +path=2``
 
 Parameters
 ################################################################################

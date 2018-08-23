@@ -4,9 +4,12 @@
 Krovak
 ********************************************************************************
 
-.. image:: ./images/krovak.png
-   :scale: 50%
+.. figure:: ./images/krovak.png
+   :width: 500 px
+   :align: center
    :alt:   Krovak
+
+   proj-string: ``+proj=krovak``
 
 Parameters
 ################################################################################

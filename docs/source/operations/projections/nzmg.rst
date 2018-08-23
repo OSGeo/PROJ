@@ -4,9 +4,12 @@
 New Zealand Map Grid
 ********************************************************************************
 
-.. image:: ./images/nzmg.png
-   :scale: 50%
+.. figure:: ./images/nzmg.png
+   :width: 500 px
+   :align: center
    :alt:   New Zealand Map Grid
+
+   proj-string: ``+proj=nzmg``
 
 Parameters
 ################################################################################

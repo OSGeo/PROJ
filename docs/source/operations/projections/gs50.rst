@@ -4,9 +4,12 @@
 Mod. Stererographics of 50 U.S.
 ********************************************************************************
 
-.. image:: ./images/gs50.png
-   :scale: 50%
+.. figure:: ./images/gs50.png
+   :width: 500 px
+   :align: center
    :alt:   Mod. Stererographics of 50 U.S.
+
+   proj-string: ``+proj=gs50``
 
 Parameters
 ################################################################################

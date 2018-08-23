@@ -4,9 +4,12 @@
 Collignon
 ********************************************************************************
 
-.. image:: ./images/collg.png
-   :scale: 50%
+.. figure:: ./images/collg.png
+   :width: 500 px
+   :align: center
    :alt:   Collignon
+
+   proj-string: ``+proj=collg``
 
 Parameters
 ################################################################################
