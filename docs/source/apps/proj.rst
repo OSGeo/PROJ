@@ -20,7 +20,7 @@ Synopsis
 Description
 ***********
 :program:`proj` and :program:`invproj` perform respective forward and inverse
-transformation of cartographic data to or from cartesian data with a wide
+conversion of cartographic data to or from cartesian data with a wide
 range of selectable projection functions.
 
 :program:`invproj` may not be available on all platforms; in this case
@@ -179,7 +179,7 @@ also used for supporting files like datum shift files.
 
 
 One or more files (processed in left to right order) specify the source of
-data to be transformed. A ``-`` will specify the location of processing standard
+data to be converted. A ``-`` will specify the location of processing standard
 input. If no files are specified, the input is assumed to be from stdin.
 For ASCII input data the two data values must be in the first two white space
 separated fields and when both input and output are ASCII all trailing
