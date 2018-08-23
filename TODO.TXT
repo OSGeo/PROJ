@@ -3,7 +3,6 @@
     - WKTv2 Bison based validator ?
     - import from Proj4
     - derived crs
-    - all GDAL projected methods
     - TOWGS84 / boundcrs
     - DATUMENSEMBLE
     - WKT2:2018 USAGE

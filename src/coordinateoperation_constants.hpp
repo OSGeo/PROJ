@@ -1218,7 +1218,83 @@ static const MethodMapping methodMappings[] = {
           common::UnitOfMeasure::Type::LINEAR, "h_0"},
      }},
 
-    // TODO: add at least all GDAL supported methods !!!
+    // The following methods have just the WKT <--> PROJ string mapping, but
+    // no setter. Similarly to GDAL
+
+    {"Aitoff",
+     0,
+     "Aitoff",
+     "aitoff",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {"Winkel I",
+     0,
+     "Winkel_I",
+     "wink1",
+     {
+         paramLatitudeNatOrigin,
+         paramLongitudeNatOrigin,
+         {EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+          WKT1_STANDARD_PARALLEL_1, common::UnitOfMeasure::Type::ANGULAR,
+          "lat_ts"},
+
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {"Winkel II",
+     0,
+     "Winkel_II",
+     "wink2",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin,
+         paramLatitude1stStdParallel, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {"Winkel Tripel",
+     0,
+     "Winkel_Tripel",
+     "wintri",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin,
+         paramLatitude1stStdParallel, paramFalseEasting, paramFalseNorthing,
+     }},
+
+    {"Craster Parabolic",
+     0,
+     "Craster_Parabolic",
+     "crast",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {"Loximuthal",
+     0,
+     "Loximuthal",
+     "loxim",
+     {
+         {EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+          EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+          WKT1_LATITUDE_OF_ORIGIN, common::UnitOfMeasure::Type::ANGULAR,
+          "lat_1"},
+         paramLongitudeNatOrigin,
+         paramFalseEasting,
+         paramFalseNorthing,
+     }},
+
+    {"Quartic Authalic",
+     0,
+     "Quartic_Authalic",
+     "qua_aut",
+     {
+         paramLatitudeNatOrigin, paramLongitudeNatOrigin, paramFalseEasting,
+         paramFalseNorthing,
+     }},
 };
 
 // ---------------------------------------------------------------------------
