@@ -191,6 +191,15 @@ Parameters
 
     See :eq:`rot_exact`
 
+.. option:: +transpose
+
+    .. deprecated:: 5.2.0 (removed)
+
+    Transpose rotation matrix and follow the **Position Vector** rotation
+    convention. If :option:`+transpose` is not added the **Coordinate Frame**
+    rotation convention is used.
+
+
 
 Mathematical description
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
