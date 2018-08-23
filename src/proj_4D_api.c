@@ -503,7 +503,7 @@ Returns 1 on success, 0 on failure
         def = malloc (100+n);
         if (0==def)
             return 0;
-        sprintf (def, "break_cs2cs_recursion     proj=helmert exact %s transpose", s);
+        sprintf (def, "break_cs2cs_recursion     proj=helmert exact %s convention=position_vector", s);
         Q = proj_create (P->ctx, def);
         pj_inherit_ellipsoid_def (P, Q);
         free (def);

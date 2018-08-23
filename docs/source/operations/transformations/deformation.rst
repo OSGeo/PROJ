@@ -51,7 +51,7 @@ to the Danish realisation of ETRS89 is in PROJ described as::
             # ITRF2008@t_obs -> ITRF2000@t_obs
     step    init = ITRF2008:ITRF2000
             # ITRF2000@t_obs -> ETRF2000@t_obs
-    step    proj=helmert t_epoch = 2000.0 transpose
+    step    proj=helmert t_epoch = 2000.0 convention=position_vector
             x =  0.054  rx =  0.000891 drx =  8.1e-05
             y =  0.051  ry =  0.00539  dry =  0.00049
             z = -0.048  rz = -0.008712 drz = -0.000792
@@ -60,7 +60,7 @@ to the Danish realisation of ETRS89 is in PROJ described as::
             xy_grids = ./nkgrf03vel_realigned_xy.ct2
             z_grids  = ./nkgrf03vel_realigned_z.gtx
             # NKG_ETRF@2000.0 -> ETRF92@2000.0
-    step    proj=helmert transpose s = -0.009420e
+    step    proj=helmert convention=position_vector s = -0.009420e
             x = 0.03863 rx = 0.00617753
             y = 0.147   ry = 5.064e-05
             z = 0.02776 rz = 4.729e-05

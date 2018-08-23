@@ -412,7 +412,7 @@ which then expands to
 
     +proj=helmert +x=-0.0001 +y=0.0008 +z=0.0058 +s=-0.0004
     +dx=0.0002 +dy=-0.0001 +dz=0.0018 +ds=-0.000008
-    +t_epoch=2000.0 +transpose
+    +t_epoch=2000.0 +convention=position_vector
     +t_obs=2010.5
 
 Below is a list of the init files that are packaged with PROJ.

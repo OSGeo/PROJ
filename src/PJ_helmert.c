@@ -77,7 +77,8 @@ struct pj_opaque_helmert {
     double dtheta;
     double R[3][3];
     double t_epoch, t_obs;
-    int no_rotation, exact, transpose, fourparam;
+    int no_rotation, exact, fourparam;
+    int is_position_vector; /* 1 = position_vector, 0 = coordinate_frame */
 };
 
 
@@ -200,7 +201,7 @@ static void build_rot_matrix(PJ *P) {
     Sign conventions
     ----------------
 
-    Take care: Two different sign conventions exist.
+    Take care: Two different sign conventions exist for the rotation terms.
 
     Conceptually they relate to whether we rotate the coordinate system
     or the "position vector" (the vector going from the coordinate system
@@ -213,7 +214,7 @@ static void build_rot_matrix(PJ *P) {
     the rotation matrix.
 
     Hence, as geodetic constants should preferably be referred to exactly
-    as published, the "transpose" option provides the ability to switch
+    as published, the "convention" option provides the ability to switch
     between the conventions.
 
 ***************************************************************************/
@@ -228,6 +229,8 @@ static void build_rot_matrix(PJ *P) {
     t = Q->opk.p;
     p = Q->opk.k;
 
+    /* Those equations are given assuming coordinate frame convention. */
+    /* For the position vector convention, we transpose the matrix just after. */
     if (Q->exact) {
         cf = cos(f);
         sf = sin(f);
@@ -290,7 +293,7 @@ static void build_rot_matrix(PJ *P) {
     */
 
 
-    if (Q->transpose) {
+    if (Q->is_position_vector) {
         double r;
         r = R01;    R01 = R10;    R10 = r;
         r = R02;    R02 = R20;    R20 = r;
@@ -461,7 +464,6 @@ static PJ_COORD helmert_reverse_4d (PJ_COORD point, PJ *P) {
     return point;
 }
 
-
 /* Arcsecond to radians */
 #define ARCSEC_TO_RAD (DEG_TO_RAD / 3600.0)
 
@@ -487,6 +489,13 @@ PJ *TRANSFORMATION(helmert, 0) {
     if (pj_param_exists (P->params, "theta")) {
         P->left  = PJ_IO_UNITS_PROJECTED;
         P->right = PJ_IO_UNITS_PROJECTED;
+    }
+
+    /* Detect obsolete transpose flag and error out if found */
+    if (pj_param (P->ctx, P->params, "ttranspose").i) {
+        proj_log_error (P, "helmert: 'transpose' argument is no longer valid. "
+                        "Use convention=position_vector/coordinate_frame");
+        return pj_default_destructor (P, PJD_ERR_INVALID_ARG);
     }
 
     /* Support the classic PROJ towgs84 parameter, but allow later overrides.*/
@@ -580,14 +589,45 @@ PJ *TRANSFORMATION(helmert, 0) {
     if (pj_param (P->ctx, P->params, "bexact").i)
         Q->exact = 1;
 
-    /* Use "other" rotation sign convention? */
-    if (pj_param (P->ctx, P->params, "ttranspose").i)
-        Q->transpose = 1;
-
     Q->xyz    =  Q->xyz_0;
     Q->opk    =  Q->opk_0;
     Q->scale  =  Q->scale_0;
     Q->theta  =  Q->theta_0;
+
+    if ((Q->opk.o==0)  && (Q->opk.p==0)  && (Q->opk.k==0) && (Q->scale==0) &&
+        (Q->dopk.o==0) && (Q->dopk.p==0) && (Q->dopk.k==0)) {
+        Q->no_rotation = 1;
+    }
+
+    /* In case there are rotational terms, we require an explicit convention
+     * to be provided. */
+    if (!Q->no_rotation) {
+        const char* convention = pj_param (P->ctx, P->params, "sconvention").s;
+        if( !convention ) {
+            proj_log_error (P, "helmert: missing 'convention' argument");
+            return pj_default_destructor (P, PJD_ERR_MISSING_ARGS);
+        }
+        if( strcmp(convention, "position_vector") == 0 ) {
+            Q->is_position_vector = 1;
+        }
+        else if( strcmp(convention, "coordinate_frame") == 0 ) {
+            Q->is_position_vector = 0;
+        }
+        else {
+            proj_log_error (P, "helmert: invalid value for 'convention' argument");
+            return pj_default_destructor (P, PJD_ERR_INVALID_ARG);
+        }
+
+        /* historically towgs84 in PROJ has always been using position_vector
+         * convention. Accepting coordinate_frame would be confusing. */
+        if (pj_param_exists (P->params, "towgs84")) {
+            if( !Q->is_position_vector ) {
+                proj_log_error (P, "helmert: towgs84 should only be used with "
+                                "convention=position_vector");
+                return pj_default_destructor (P, PJD_ERR_INVALID_ARG);
+            }
+        }
+    }
 
     /* Let's help with debugging */
     if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
@@ -595,15 +635,16 @@ PJ *TRANSFORMATION(helmert, 0) {
         proj_log_debug(P, "x=  %8.5f  y=  %8.5f  z=  %8.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
         proj_log_debug(P, "rx= %8.5f  ry= %8.5f  rz= %8.5f",
                 Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD, Q->opk.k / ARCSEC_TO_RAD);
-        proj_log_debug(P, "s=  %8.5f  exact=%d  transpose=%d", Q->scale, Q->exact, Q->transpose);
+        proj_log_debug(P, "s=  %8.5f  exact=%d%s", Q->scale, Q->exact,
+                       Q->no_rotation ? "" :
+                       Q->is_position_vector ? "  convention=position_vector" :
+                       "  convention=coordinate_frame");
         proj_log_debug(P, "dx= %8.5f  dy= %8.5f  dz= %8.5f",   Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
         proj_log_debug(P, "drx=%8.5f  dry=%8.5f  drz=%8.5f",   Q->dopk.o, Q->dopk.p, Q->dopk.k);
         proj_log_debug(P, "ds= %8.5f  t_epoch=%8.5f  t_obs=%8.5f", Q->dscale, Q->t_epoch, Q->t_obs);
     }
 
-    if ((Q->opk.o==0)  && (Q->opk.p==0)  && (Q->opk.k==0) && (Q->scale==0) &&
-        (Q->dopk.o==0) && (Q->dopk.p==0) && (Q->dopk.k==0)) {
-        Q->no_rotation = 1;
+    if (Q->no_rotation) {
         return P;
     }
 
