@@ -251,6 +251,9 @@ class Ellipsoid : public common::IdentifiedObject,
                   const common::Length &semiMajorAxisIn,
                   const common::Length &semiMinorAxisIn);
 
+    PROJ_DLL EllipsoidNNPtr identify() const;
+
+    PROJ_DLL static const EllipsoidNNPtr CLARKE_1866;
     PROJ_DLL static const EllipsoidNNPtr WGS84;
     PROJ_DLL static const EllipsoidNNPtr GRS1980;
 
@@ -283,15 +286,20 @@ class Ellipsoid : public common::IdentifiedObject,
     Ellipsoid(const common::Length &semiMajorAxisIn,
               const common::Length &semiMinorAxisIn);
 
+    Ellipsoid(const Ellipsoid &other);
+
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
-    Ellipsoid(const Ellipsoid &other) = delete;
     Ellipsoid &operator=(const Ellipsoid &other) = delete;
 
+    static const EllipsoidNNPtr createCLARKE_1866();
     static const EllipsoidNNPtr createWGS84();
     static const EllipsoidNNPtr createGRS1980();
+
+    bool lookForProjWellKnownEllps(std::string &projEllpsName,
+                                   std::string &ellpsName) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -336,6 +344,8 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
            const PrimeMeridianNNPtr &primeMeridian);
 
     PROJ_DLL static const GeodeticReferenceFrameNNPtr
+        EPSG_6267; // North American Datum 1927
+    PROJ_DLL static const GeodeticReferenceFrameNNPtr
         EPSG_6269; // North American Datum 1983
     PROJ_DLL static const GeodeticReferenceFrameNNPtr EPSG_6326; // WGS 84
 
@@ -359,6 +369,7 @@ class GeodeticReferenceFrame : public Datum, public io::IWKTExportable {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    static const GeodeticReferenceFrameNNPtr createEPSG_6267();
     static const GeodeticReferenceFrameNNPtr createEPSG_6269();
     static const GeodeticReferenceFrameNNPtr createEPSG_6326();
     GeodeticReferenceFrame(const GeodeticReferenceFrame &other) = delete;

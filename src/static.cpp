@@ -503,12 +503,20 @@ const PrimeMeridianNNPtr PrimeMeridian::PARIS(PrimeMeridian::createPARIS());
 
 // ---------------------------------------------------------------------------
 
+/** \brief The EPSG:7008 / "Clarke 1866" Ellipsoid */
+const EllipsoidNNPtr Ellipsoid::CLARKE_1866(Ellipsoid::createCLARKE_1866());
+
 /** \brief The EPSG:7030 / "WGS 84" Ellipsoid */
 const EllipsoidNNPtr Ellipsoid::WGS84(Ellipsoid::createWGS84());
+
 /** \brief The EPSG:7019 / "GRS 1980" Ellipsoid */
 const EllipsoidNNPtr Ellipsoid::GRS1980(Ellipsoid::createGRS1980());
 
 // ---------------------------------------------------------------------------
+
+/** \brief The EPSG:6267 / "North_American_Datum_1927" GeodeticReferenceFrame */
+const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::EPSG_6267(
+    GeodeticReferenceFrame::createEPSG_6267());
 
 /** \brief The EPSG:6269 / "North_American_Datum_1983" GeodeticReferenceFrame */
 const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::EPSG_6269(

@@ -386,6 +386,10 @@ Ellipsoid::Ellipsoid(const Ellipsoid &other)
 
 //! @cond Doxygen_Suppress
 Ellipsoid::~Ellipsoid() = default;
+
+Ellipsoid::Ellipsoid(const Ellipsoid &other)
+    : IdentifiedObject(other), d(internal::make_unique<Private>(*(other.d))) {}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -568,6 +572,18 @@ EllipsoidNNPtr Ellipsoid::createTwoAxis(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+const EllipsoidNNPtr Ellipsoid::createCLARKE_1866() {
+    util::PropertyMap propertiesEllps;
+    propertiesEllps
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
+        .set(metadata::Identifier::CODE_KEY, 7008)
+        .set(common::IdentifiedObject::NAME_KEY, "Clarke 1866");
+    return createTwoAxis(propertiesEllps, common::Length(6378206.4),
+                         common::Length(6356583.8));
+}
+
+// ---------------------------------------------------------------------------
+
 const EllipsoidNNPtr Ellipsoid::createWGS84() {
     util::PropertyMap propertiesEllps;
     propertiesEllps
@@ -627,9 +643,8 @@ std::string Ellipsoid::exportToWKT(
 
 // ---------------------------------------------------------------------------
 
-std::string Ellipsoid::exportToPROJString(
-    io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
-{
+bool Ellipsoid::lookForProjWellKnownEllps(std::string &projEllpsName,
+                                          std::string &ellpsName) const {
     const double a = semiMajorAxis().getSIValue();
     const double b = computeSemiMinorAxis().getSIValue();
     const double rf = computeInverseFlattening().getSIValue();
@@ -640,18 +655,38 @@ std::string Ellipsoid::exportToPROJString(
             if (strncmp(pj_ellps[i].ell, "b=", 2) == 0) {
                 const double b_iter = c_locale_stod(pj_ellps[i].ell + 2);
                 if (::fabs(b - b_iter) < 1e-10 * b_iter) {
-                    formatter->addParam("ellps", pj_ellps[i].id);
-                    return formatter->toString();
+                    projEllpsName = pj_ellps[i].id;
+                    ellpsName = pj_ellps[i].name;
+                    return true;
                 }
             } else {
                 assert(strncmp(pj_ellps[i].ell, "rf=", 3) == 0);
                 const double rf_iter = c_locale_stod(pj_ellps[i].ell + 3);
                 if (::fabs(rf - rf_iter) < 1e-10 * rf_iter) {
-                    formatter->addParam("ellps", pj_ellps[i].id);
-                    return formatter->toString();
+                    projEllpsName = pj_ellps[i].id;
+                    ellpsName = pj_ellps[i].name;
+                    return true;
                 }
             }
         }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string Ellipsoid::exportToPROJString(
+    io::PROJStringFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    const double a = semiMajorAxis().getSIValue();
+    const double b = computeSemiMinorAxis().getSIValue();
+    const double rf = computeInverseFlattening().getSIValue();
+
+    std::string projEllpsName;
+    std::string ellpsName;
+    if (lookForProjWellKnownEllps(projEllpsName, ellpsName)) {
+        formatter->addParam("ellps", projEllpsName);
+        return formatter->toString();
     }
 
     formatter->addParam("a", a);
@@ -661,6 +696,31 @@ std::string Ellipsoid::exportToPROJString(
         formatter->addParam("b", b);
     }
     return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a Ellipsoid object where some parameters are better
+ * identified.
+ *
+ * @return a new Ellipsoid.
+ */
+EllipsoidNNPtr Ellipsoid::identify() const {
+    auto newEllipsoid = Ellipsoid::nn_make_shared<Ellipsoid>(*this);
+    newEllipsoid->assignSelf(
+        util::nn_static_pointer_cast<util::BaseObject>(newEllipsoid));
+
+    if (name()->description()->empty() ||
+        *(name()->description()) == "unknown") {
+        std::string projEllpsName;
+        std::string ellpsName;
+        if (lookForProjWellKnownEllps(projEllpsName, ellpsName)) {
+            newEllipsoid->setProperties(
+                util::PropertyMap().set(IdentifiedObject::NAME_KEY, ellpsName));
+        }
+    }
+
+    return newEllipsoid;
 }
 
 // ---------------------------------------------------------------------------
@@ -802,6 +862,19 @@ GeodeticReferenceFrame::create(const util::PropertyMap &properties,
     util::nn_static_pointer_cast<Datum>(grf)->d->anchorDefinition = anchor;
     grf->setProperties(properties);
     return grf;
+}
+
+// ---------------------------------------------------------------------------
+
+const GeodeticReferenceFrameNNPtr GeodeticReferenceFrame::createEPSG_6267() {
+    util::PropertyMap propertiesDatum;
+    propertiesDatum
+        .set(metadata::Identifier::CODESPACE_KEY, metadata::Identifier::EPSG)
+        .set(metadata::Identifier::CODE_KEY, 6267)
+        .set(common::IdentifiedObject::NAME_KEY, "North American Datum 1927");
+
+    return create(propertiesDatum, Ellipsoid::CLARKE_1866,
+                  util::optional<std::string>(), PrimeMeridian::GREENWICH);
 }
 
 // ---------------------------------------------------------------------------

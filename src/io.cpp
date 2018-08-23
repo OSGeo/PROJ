@@ -39,6 +39,7 @@
 #include <locale>
 #include <sstream> // std::ostringstream
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "proj/common.hpp"
@@ -53,6 +54,12 @@
 #include "proj/io_internal.hpp"
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
+
+// PROJ include order is sensitive
+// clang-format off
+#include "projects.h"
+#include "proj_api.h"
+// clang-format on
 
 using namespace NS_PROJ::common;
 using namespace NS_PROJ::crs;
@@ -2848,14 +2855,20 @@ void PROJStringFormatter::ingestPROJString(
     std::istringstream iss(str, std::istringstream::in);
     bool inverted = false;
     bool prevWasStep = false;
+    bool inProj = false;
     while (iss >> word) {
-        if (word == "+proj=pipeline") {
+        if (word[0] == '+') {
+            word = word.substr(1);
+        }
+
+        if (word == "proj=pipeline") {
             inverted = false;
             prevWasStep = false;
-        } else if (word == "+step") {
+            inProj = true;
+        } else if (word == "step") {
             inverted = false;
             prevWasStep = true;
-        } else if (word == "+inv") {
+        } else if (word == "inv") {
             if (prevWasStep) {
                 inverted = true;
             } else {
@@ -2865,12 +2878,13 @@ void PROJStringFormatter::ingestPROJString(
                 d->steps_.back().inverted = true;
             }
             prevWasStep = false;
-        } else if (starts_with(word, "+proj=")) {
-            addStep(word.substr(std::string("+proj=").size()));
+        } else if (starts_with(word, "proj=")) {
+            addStep(word.substr(std::string("proj=").size()));
             setCurrentStepInverted(inverted);
             prevWasStep = false;
-        } else if (starts_with(word, "+")) {
-            addParam(word.substr(1));
+            inProj = true;
+        } else if (inProj) {
+            addParam(word);
             prevWasStep = false;
         } else {
             throw ParsingException("Unexpected token: " + word);
@@ -3055,6 +3069,439 @@ bool PROJStringFormatter::omitProjLongLatIfPossible() const {
 }
 
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct PROJStringParser::Private {
+    std::vector<std::string> warningList_{};
+
+    struct Step {
+        std::string name{};
+        bool inverted{false};
+        std::vector<std::pair<std::string, std::string>> paramValues{};
+    };
+    std::vector<Step> steps_{};
+    std::vector<std::pair<std::string, std::string>> globalParamValues_{};
+
+    bool hasParamValue(const Step &step, const std::string &key);
+    std::string getParamValue(const Step &step, const std::string &key);
+    CRSNNPtr buildCRS(const Step &step);
+};
+
+// ---------------------------------------------------------------------------
+
+PROJStringParser::PROJStringParser() : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+PROJStringParser::~PROJStringParser() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the list of warnings found during parsing.
+ */
+std::vector<std::string> PROJStringParser::warningList() const {
+    return d->warningList_;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+bool PROJStringParser::Private::hasParamValue(
+    const PROJStringParser::Private::Step &step, const std::string &key) {
+    for (const auto &pair : globalParamValues_) {
+        if (ci_equal(pair.first, key)) {
+            return true;
+        }
+    }
+    for (const auto &pair : step.paramValues) {
+        if (ci_equal(pair.first, key)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string PROJStringParser::Private::getParamValue(
+    const PROJStringParser::Private::Step &step, const std::string &key) {
+    for (const auto &pair : globalParamValues_) {
+        if (ci_equal(pair.first, key)) {
+            return pair.second;
+        }
+    }
+    for (const auto &pair : step.paramValues) {
+        if (ci_equal(pair.first, key)) {
+            return pair.second;
+        }
+    }
+    return std::string();
+}
+
+// ---------------------------------------------------------------------------
+
+static const struct DatumDesc {
+    const char *projName;
+    const char *gcsName;
+    int gcsCode;
+    const char *datumName;
+    int datumCode;
+    const char *ellipsoidName;
+    int ellipsoidCode;
+    double a;
+    double rf;
+} datumDescs[] = {
+    {"GGRS87", "GGRS87", 4121, "Greek Geodetic Reference System 1987", 6121,
+     "GRS 1980", 7019, 6378137, 298.257222101},
+    {"postdam", "DHDN", 4314, "Deutsches Hauptdreiecksnetz", 6314,
+     "Bessel 1841", 7004, 6377397.155, 299.1528128},
+    {"carthage", "Carthage", 4223, "Carthage", 6223, "Clarke 1880 (IGN)", 7011,
+     6378249.2, 293.4660213},
+    {"hermannskogel", "MGI", 4312, "Militar-Geographische Institut", 6312,
+     "Bessel 1841", 7004, 6377397.155, 299.1528128},
+    {"ire65", "TM65", 4299, "TM65", 6299, "Airy Modified 1849", 7002,
+     6377340.189, 299.3249646},
+    {"nzgd49", "NZGD49", 4272, "New Zealand Geodetic Datum 1949", 6272,
+     "International 1924", 7022, 6378388, 297},
+    {"OSGB36", "OSGB 1936", 4277, "OSGB 1936", 6277, "Airy 1830", 7001,
+     6377563.396, 299.3249646},
+};
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr PROJStringParser::Private::buildCRS(
+    const PROJStringParser::Private::Step &step) {
+    auto ellpsStr = getParamValue(step, "ellps");
+    auto datumStr = getParamValue(step, "datum");
+    auto aStr = getParamValue(step, "a");
+    auto bStr = getParamValue(step, "b");
+    auto rfStr = getParamValue(step, "rf");
+    auto RStr = getParamValue(step, "R");
+    auto pmStr = getParamValue(step, "pm");
+    GeodeticReferenceFramePtr datum = nullptr;
+
+    PrimeMeridianNNPtr pm = PrimeMeridian::GREENWICH;
+    if (!pmStr.empty()) {
+        try {
+            double pmValue = c_locale_stod(pmStr);
+            pm = PrimeMeridian::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                Angle(pmValue));
+        } catch (const std::invalid_argument &) {
+            bool found = false;
+            if (pmStr == "paris") {
+                found = true;
+                pm = PrimeMeridian::PARIS;
+            }
+            for (int i = 0; !found && pj_prime_meridians[i].id != nullptr;
+                 i++) {
+                if (pmStr == pj_prime_meridians[i].id) {
+                    found = true;
+                    std::string name = static_cast<char>(::toupper(pmStr[0])) +
+                                       pmStr.substr(1);
+                    double pmValue =
+                        dmstor(pj_prime_meridians[i].defn, nullptr) *
+                        RAD_TO_DEG;
+                    pm = PrimeMeridian::create(
+                        PropertyMap().set(IdentifiedObject::NAME_KEY, name),
+                        Angle(pmValue));
+                    break;
+                }
+            }
+            if (!found) {
+                throw ParsingException("unknown pm " + pmStr);
+            }
+        }
+    }
+
+    if (!datumStr.empty()) {
+        if (datumStr == "WGS84") {
+            datum = GeodeticReferenceFrame::EPSG_6326;
+        } else if (datumStr == "NAD83") {
+            datum = GeodeticReferenceFrame::EPSG_6269;
+        } else if (datumStr == "NAD27") {
+            datum = GeodeticReferenceFrame::EPSG_6267;
+        } else {
+
+            for (const auto &datumDesc : datumDescs) {
+                if (datumStr == datumDesc.projName) {
+                    (void)datumDesc.gcsName; // to please cppcheck
+                    (void)datumDesc.gcsCode; // to please cppcheck
+                    auto ellipsoid = Ellipsoid::createFlattenedSphere(
+                        PropertyMap()
+                            .set(IdentifiedObject::NAME_KEY,
+                                 datumDesc.ellipsoidName)
+                            .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
+                            .set(Identifier::CODE_KEY, datumDesc.ellipsoidCode),
+                        Length(datumDesc.a), Scale(datumDesc.rf));
+                    datum =
+                        GeodeticReferenceFrame::create(
+                            PropertyMap()
+                                .set(IdentifiedObject::NAME_KEY,
+                                     datumDesc.datumName)
+                                .set(Identifier::CODESPACE_KEY,
+                                     Identifier::EPSG)
+                                .set(Identifier::CODE_KEY, datumDesc.datumCode),
+                            ellipsoid, util::optional<std::string>(), pm)
+                            .as_nullable();
+                    break;
+                }
+            }
+        }
+        if (!datum) {
+            throw ParsingException("unknown datum " + datumStr);
+        }
+    } else if (!ellpsStr.empty()) {
+        if (ellpsStr == "WGS84") {
+            datum = GeodeticReferenceFrame::create(
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          "Unknown based on WGS84 ellipsoid"),
+                        Ellipsoid::WGS84, util::optional<std::string>(), pm)
+                        .as_nullable();
+        } else if (ellpsStr == "GRS80") {
+            datum = GeodeticReferenceFrame::create(
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          "Unknown based on GRS80 ellipsoid"),
+                        Ellipsoid::GRS1980, util::optional<std::string>(), pm)
+                        .as_nullable();
+        } else {
+            for (int i = 0; pj_ellps[i].id != nullptr; i++) {
+                if (ellpsStr == pj_ellps[i].id) {
+                    assert(strncmp(pj_ellps[i].major, "a=", 2) == 0);
+                    const double a_iter = c_locale_stod(pj_ellps[i].major + 2);
+                    EllipsoidPtr ellipsoid;
+                    if (strncmp(pj_ellps[i].ell, "b=", 2) == 0) {
+                        const double b_iter =
+                            c_locale_stod(pj_ellps[i].ell + 2);
+                        ellipsoid =
+                            Ellipsoid::createTwoAxis(
+                                PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                  pj_ellps[i].name),
+                                Length(a_iter), Length(b_iter))
+                                .as_nullable();
+                    } else {
+                        assert(strncmp(pj_ellps[i].ell, "rf=", 3) == 0);
+                        const double rf_iter =
+                            c_locale_stod(pj_ellps[i].ell + 3);
+                        ellipsoid =
+                            Ellipsoid::createFlattenedSphere(
+                                PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                  pj_ellps[i].name),
+                                Length(a_iter), Scale(rf_iter))
+                                .as_nullable();
+                    }
+                    datum = GeodeticReferenceFrame::create(
+                                PropertyMap().set(
+                                    IdentifiedObject::NAME_KEY,
+                                    std::string("Unknown based on ") +
+                                        pj_ellps[i].name + " ellipsoid"),
+                                NN_CHECK_ASSERT(ellipsoid),
+                                util::optional<std::string>(), pm)
+                                .as_nullable();
+                    break;
+                }
+            }
+            if (!datum) {
+                throw ParsingException("unknown ellipsoid " + ellpsStr);
+            }
+        }
+    }
+
+    else if (!aStr.empty() && !bStr.empty()) {
+        double a;
+        try {
+            a = c_locale_stod(aStr);
+        } catch (const std::invalid_argument &) {
+            throw ParsingException("Invalid a value");
+        }
+        double b;
+        try {
+            b = c_locale_stod(bStr);
+        } catch (const std::invalid_argument &) {
+            throw ParsingException("Invalid b value");
+        }
+        auto ellipsoid =
+            Ellipsoid::createTwoAxis(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                Length(a), Length(b))
+                ->identify();
+        datum = GeodeticReferenceFrame::create(
+                    PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                    ellipsoid, util::optional<std::string>(), pm)
+                    .as_nullable();
+    }
+
+    else if (!aStr.empty() && !rfStr.empty()) {
+        double a;
+        try {
+            a = c_locale_stod(aStr);
+        } catch (const std::invalid_argument &) {
+            throw ParsingException("Invalid a value");
+        }
+        double rf;
+        try {
+            rf = c_locale_stod(rfStr);
+        } catch (const std::invalid_argument &) {
+            throw ParsingException("Invalid rf value");
+        }
+        auto ellipsoid =
+            Ellipsoid::createFlattenedSphere(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                Length(a), Scale(rf))
+                ->identify();
+        datum = GeodeticReferenceFrame::create(
+                    PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                    ellipsoid, util::optional<std::string>(), pm)
+                    .as_nullable();
+    }
+
+    else if (!RStr.empty()) {
+        double R;
+        try {
+            R = c_locale_stod(RStr);
+        } catch (const std::invalid_argument &) {
+            throw ParsingException("Invalid Rvalue");
+        }
+        auto ellipsoid = Ellipsoid::createSphere(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+            Length(R));
+        datum = GeodeticReferenceFrame::create(
+                    PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                    ellipsoid, util::optional<std::string>(), pm)
+                    .as_nullable();
+    }
+
+    if (!aStr.empty() && bStr.empty() && rfStr.empty()) {
+        throw ParsingException("a found, but b or rf missing");
+    }
+
+    if (!bStr.empty() && aStr.empty()) {
+        throw ParsingException("b found, but a missing");
+    }
+
+    if (!rfStr.empty() && aStr.empty()) {
+        throw ParsingException("rf found, but a missing");
+    }
+
+    std::vector<CoordinateSystemAxisNNPtr> axis{
+        CoordinateSystemAxis::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
+            AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::DEGREE),
+        CoordinateSystemAxis::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
+            AxisAbbreviation::lat, AxisDirection::NORTH,
+            UnitOfMeasure::DEGREE)};
+    auto cs = EllipsoidalCS::create(PropertyMap(), axis[0], axis[1]);
+
+    if (!datum) {
+        if (pm->isEquivalentTo(PrimeMeridian::GREENWICH)) {
+            datum = GeodeticReferenceFrame::EPSG_6326;
+        } else {
+            datum = GeodeticReferenceFrame::create(
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          "Unknown based on WGS84 ellipsoid"),
+                        Ellipsoid::WGS84, util::optional<std::string>(), pm)
+                        .as_nullable();
+        }
+    }
+
+    return GeographicCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+        NN_CHECK_ASSERT(datum), cs);
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a sub-class of BaseObject from a PROJ string.
+ * @throw ParsingException
+ */
+BaseObjectNNPtr
+PROJStringParser::createFromPROJString(const std::string &projString) {
+    std::string word;
+    std::istringstream iss(projString, std::istringstream::in);
+    bool inverted = false;
+    bool prevWasStep = false;
+    bool inProj = false;
+    bool inPipeline = false;
+    while (iss >> word) {
+        if (word[0] == '+') {
+            word = word.substr(1);
+        }
+
+        if (word == "proj=pipeline") {
+            if (inPipeline) {
+                throw ParsingException("nested pipeline not supported");
+            }
+            inverted = false;
+            prevWasStep = false;
+            inProj = true;
+            inPipeline = true;
+        } else if (word == "step") {
+            if (!inPipeline) {
+                throw ParsingException("+step found outside pipeline");
+            }
+            inverted = false;
+            prevWasStep = true;
+        } else if (word == "inv") {
+            if (prevWasStep) {
+                inverted = true;
+            } else {
+                if (d->steps_.empty()) {
+                    throw ParsingException("+inv found at unexpected place");
+                }
+                d->steps_.back().inverted = true;
+            }
+            prevWasStep = false;
+        } else if (starts_with(word, "proj=")) {
+            auto stepName = word.substr(std::string("proj=").size());
+            d->steps_.push_back(Private::Step());
+            d->steps_.back().name = stepName;
+            d->steps_.back().inverted = inverted;
+            prevWasStep = false;
+            inProj = true;
+        } else if (inProj) {
+            std::string key;
+            std::string value;
+            size_t pos = word.find('=');
+            if (pos != std::string::npos) {
+                key = word.substr(0, pos);
+                value = word.substr(pos + 1);
+            } else {
+                key = word;
+            }
+            auto pair = std::make_pair(key, value);
+            if (d->steps_.empty()) {
+                d->globalParamValues_.push_back(pair);
+            } else {
+                d->steps_.back().paramValues.push_back(pair);
+            }
+            prevWasStep = false;
+        } else {
+            throw ParsingException("Unexpected token: " + word);
+        }
+    }
+
+    if (d->steps_.empty()) {
+        throw ParsingException("Missing proj= argument");
+    }
+
+    if (d->steps_.size() == 1 && (ci_equal(d->steps_[0].name, "longlat") ||
+                                  ci_equal(d->steps_[0].name, "latlong") ||
+                                  ci_equal(d->steps_[0].name, "lonlat") ||
+                                  ci_equal(d->steps_[0].name, "latlon"))) {
+        const auto &step = d->steps_[0];
+        return d->buildCRS(step);
+    }
+
+    throw ParsingException("could not parse PROJ string");
+}
 
 } // namespace io
 NS_PROJ_END

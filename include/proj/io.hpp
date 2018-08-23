@@ -454,6 +454,26 @@ class WKTParser {
     PROJ_OPAQUE_PRIVATE_DATA
 };
 
+// ---------------------------------------------------------------------------
+
+/** \brief Parse a PROJ string into the appropriate suclass of util::BaseObject.
+ */
+class PROJStringParser {
+  public:
+    PROJ_DLL PROJStringParser();
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~PROJStringParser();
+    //! @endcond
+
+    PROJ_DLL std::vector<std::string> warningList() const;
+
+    PROJ_DLL util::BaseObjectNNPtr createFromPROJString(
+        const std::string &projString); // throw(ParsingException)
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
 } // namespace io
 
 NS_PROJ_END

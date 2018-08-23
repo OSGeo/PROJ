@@ -2,6 +2,9 @@
     - export as ESRI WKT 1 ?
     - WKTv2 Bison based validator ?
     - import from Proj4
+            beware of +proj=stere cases
+            webmercator
+            projections without WKT
     - derived crs
     - TOWGS84 / boundcrs
     - DATUMENSEMBLE
@@ -9,6 +12,7 @@
     - dynamic CRS WKT
     - test sphericalCS
     - revise Helmert in respect with https://github.com/OSGeo/proj.4/issues/1091
+    - time-dependant Helmert
 
     - transformation with WEST longitude
     GEOGCS["Mars2015",
@@ -21,9 +25,7 @@
         AXIS["longitude",WEST]]
     - equalearth: https://github.com/OSGeo/gdal/issues/870
     - axis inversion for polar cases: EPSG 5041 (East-North) vs EPSG 32661 (North-East)
-    - importFromProj: beware of +proj=stere cases
 
-    
     
 - Integrate Doxygen doc in PROJ doc
 - More tests
