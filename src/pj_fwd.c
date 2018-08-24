@@ -137,39 +137,7 @@ static PJ_COORD fwd_finalize (PJ *P, PJ_COORD coo) {
         break;
 
     case PJ_IO_UNITS_ANGULAR:
-        if (INPUT_UNITS==PJ_IO_UNITS_ANGULAR)
-            break;
-
-        /* adjust longitude to central meridian */
-        if (0==P->over)
-            coo.lpz.lam = adjlon(coo.lpz.lam);
-
-        if (P->vgridshift)
-            coo = proj_trans (P->vgridshift, PJ_FWD, coo); /* Go orthometric from geometric */
-        if (coo.lp.lam==HUGE_VAL)
-            return coo;
-        if (P->hgridshift)
-            coo = proj_trans (P->hgridshift, PJ_INV, coo);
-        else if (P->helmert || (P->cart_wgs84 != 0 && P->cart != 0)) {
-            coo = proj_trans (P->cart_wgs84, PJ_FWD, coo); /* Go cartesian in WGS84 frame */
-            if( P->helmert )
-                coo = proj_trans (P->helmert,    PJ_INV, coo); /* Step into local frame */
-            coo = proj_trans (P->cart,       PJ_INV, coo); /* Go back to angular using local ellps */
-        }
-        if (coo.lp.lam==HUGE_VAL)
-            return coo;
-
-        /* If input latitude was geocentrical, convert back to geocentrical */
-        if (P->geoc)
-            coo = proj_geocentric_latitude (P, PJ_FWD, coo);
-
-
-        /* Distance from central meridian, taking system zero meridian into account */
-        coo.lp.lam = coo.lp.lam + P->from_greenwich + P->lam0;
-
-        /* adjust longitude to central meridian */
-        if (0==P->over)
-            coo.lpz.lam = adjlon(coo.lpz.lam);
+        break;
     }
 
     if (P->axisswap)

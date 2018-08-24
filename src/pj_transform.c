@@ -190,7 +190,7 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
     long i;
 
     /* Nothing to do? */
-    if (P->is_latlong)
+    if (P->is_latlong && !P->geoc)
         return 0;
     if (P->is_geocent)
         return 0;
@@ -290,7 +290,7 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
     long i;
 
     /* Nothing to do? */
-    if (P->is_latlong)
+    if (P->is_latlong && !P->geoc)
         return 0;
 
     /* Check first if projection is invertible. */

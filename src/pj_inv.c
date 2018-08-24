@@ -50,49 +50,6 @@ static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
     if (P->axisswap)
         coo = proj_trans (P->axisswap, PJ_INV, coo);
 
-    /* Check validity of angular input coordinates */
-    if (INPUT_UNITS==PJ_IO_UNITS_ANGULAR) {
-        double t;
-
-        /* check for latitude or longitude over-range */
-        t = (coo.lp.phi < 0  ?  -coo.lp.phi  :  coo.lp.phi) - M_HALFPI;
-        if (t > PJ_EPS_LAT  ||  coo.lp.lam > 10  ||  coo.lp.lam < -10) {
-            proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
-            return proj_coord_error ();
-        }
-
-        /* Clamp latitude to -90..90 degree range */
-        if (coo.lp.phi > M_HALFPI)
-            coo.lp.phi = M_HALFPI;
-        if (coo.lp.phi < -M_HALFPI)
-            coo.lp.phi = -M_HALFPI;
-
-        /* If input latitude is geocentrical, convert to geographical */
-        if (P->geoc)
-            coo = proj_geocentric_latitude (P, PJ_INV, coo);
-
-        /* Distance from central meridian, taking system zero meridian into account */
-        coo.lp.lam = (coo.lp.lam + P->from_greenwich) - P->lam0;
-
-        /* Ensure longitude is in the -pi:pi range */
-        if (0==P->over)
-            coo.lp.lam = adjlon(coo.lp.lam);
-
-        if (P->hgridshift)
-            coo = proj_trans (P->hgridshift, PJ_FWD, coo);
-        else if (P->helmert || (P->cart_wgs84 != 0 && P->cart != 0)) {
-            coo = proj_trans (P->cart,       PJ_FWD, coo); /* Go cartesian in local frame */
-            if( P->helmert )
-                coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into WGS84 */
-            coo = proj_trans (P->cart_wgs84, PJ_INV, coo); /* Go back to angular using WGS84 ellps */
-        }
-        if (coo.lp.lam==HUGE_VAL)
-            return coo;
-        if (P->vgridshift)
-            coo = proj_trans (P->vgridshift, PJ_INV, coo); /* Go geometric from orthometric */
-        return coo;
-    }
-
     /* Handle remaining possible input types */
     switch (INPUT_UNITS) {
     case PJ_IO_UNITS_WHATEVER:
@@ -143,29 +100,27 @@ static PJ_COORD inv_finalize (PJ *P, PJ_COORD coo) {
 
     if (OUTPUT_UNITS==PJ_IO_UNITS_ANGULAR) {
 
-        if (INPUT_UNITS!=PJ_IO_UNITS_ANGULAR) {
-            /* Distance from central meridian, taking system zero meridian into account */
-            coo.lp.lam = coo.lp.lam + P->from_greenwich + P->lam0;
+        /* Distance from central meridian, taking system zero meridian into account */
+        coo.lp.lam = coo.lp.lam + P->from_greenwich + P->lam0;
 
-            /* adjust longitude to central meridian */
-            if (0==P->over)
-                coo.lpz.lam = adjlon(coo.lpz.lam);
+        /* adjust longitude to central meridian */
+        if (0==P->over)
+            coo.lpz.lam = adjlon(coo.lpz.lam);
 
-            if (P->vgridshift)
-                coo = proj_trans (P->vgridshift, PJ_INV, coo); /* Go geometric from orthometric */
-            if (coo.lp.lam==HUGE_VAL)
-                return coo;
-            if (P->hgridshift)
-                coo = proj_trans (P->hgridshift, PJ_FWD, coo);
-            else if (P->helmert || (P->cart_wgs84 != 0 && P->cart != 0)) {
-                coo = proj_trans (P->cart,       PJ_FWD, coo); /* Go cartesian in local frame */
-                if( P->helmert )
-                    coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into WGS84 */
-                coo = proj_trans (P->cart_wgs84, PJ_INV, coo); /* Go back to angular using WGS84 ellps */
-            }
-            if (coo.lp.lam==HUGE_VAL)
-                return coo;
+        if (P->vgridshift)
+            coo = proj_trans (P->vgridshift, PJ_INV, coo); /* Go geometric from orthometric */
+        if (coo.lp.lam==HUGE_VAL)
+            return coo;
+        if (P->hgridshift)
+            coo = proj_trans (P->hgridshift, PJ_FWD, coo);
+        else if (P->helmert || (P->cart_wgs84 != 0 && P->cart != 0)) {
+            coo = proj_trans (P->cart,       PJ_FWD, coo); /* Go cartesian in local frame */
+            if( P->helmert )
+                coo = proj_trans (P->helmert,    PJ_FWD, coo); /* Step into WGS84 */
+            coo = proj_trans (P->cart_wgs84, PJ_INV, coo); /* Go back to angular using WGS84 ellps */
         }
+        if (coo.lp.lam==HUGE_VAL)
+            return coo;
 
         /* If input latitude was geocentrical, convert back to geocentrical */
         if (P->geoc)
