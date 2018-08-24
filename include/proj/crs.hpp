@@ -551,6 +551,9 @@ class BoundCRS : public CRS, public io::IPROJStringExportable {
     createFromTOWGS84(const CRSNNPtr &baseCRSIn,
                       const std::vector<double> TOWGS84Parameters);
 
+    PROJ_DLL static BoundCRSNNPtr
+    createFromNadgrids(const CRSNNPtr &baseCRSIn, const std::string &filename);
+
   protected:
     BoundCRS(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
              const operation::TransformationNNPtr &transformationIn);

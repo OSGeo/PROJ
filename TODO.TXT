@@ -5,6 +5,7 @@
             beware of +proj=stere cases
             webmercator
             projections without WKT
+            init= syntax
     - derived crs
     - TOWGS84 / boundcrs
     - DATUMENSEMBLE

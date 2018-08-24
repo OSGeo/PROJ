@@ -1588,7 +1588,7 @@ TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_PROJ_string) {
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
                   PROJStringFormatter::Convention::PROJ_4)),
-              "+nadgrids=egm08_25.gtx");
+              "+geoidgrids=egm08_25.gtx");
 }
 
 // ---------------------------------------------------------------------------

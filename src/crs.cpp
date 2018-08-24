@@ -806,9 +806,9 @@ std::string
 VerticalCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
 {
-    auto nadgrids = formatter->getVDatumExtension();
-    if (!nadgrids.empty()) {
-        formatter->addParam("nadgrids", nadgrids);
+    auto geoidgrids = formatter->getVDatumExtension();
+    if (!geoidgrids.empty()) {
+        formatter->addParam("geoidgrids", geoidgrids);
     }
 
     auto &axisList = coordinateSystem()->axisList();
@@ -1345,7 +1345,7 @@ BoundCRS::create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
 /** \brief Instanciate a BoundCRS from a base CRS and TOWGS84 parameters
  *
  * @param baseCRSIn base CRS.
- * @param TOWGS84Parameters a vector of 7 double values representing WKT1
+ * @param TOWGS84Parameters a vector of 3 or 7 double values representing WKT1
  * TOWGS84 parameter.
  * @return new BoundCRS.
  */
@@ -1355,6 +1355,39 @@ BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
     auto crs = BoundCRS::nn_make_shared<BoundCRS>(
         baseCRSIn, GeographicCRS::EPSG_4326,
         operation::Transformation::createTOWGS84(baseCRSIn, TOWGS84Parameters));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    if (baseCRSIn->name()->description().has_value()) {
+        crs->setProperties(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    *(baseCRSIn->name()->description())));
+    }
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a BoundCRS from a base CRS and nadgrids parameters
+ *
+ * @param baseCRSIn base CRS.
+ * @param filename Horizontal grid filename
+ * @return new BoundCRS.
+ */
+BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
+                                           const std::string &filename) {
+    const CRSPtr sourceGeographicCRS = baseCRSIn->extractGeographicCRS();
+    auto transformationSourceCRS = NN_CHECK_ASSERT(
+        sourceGeographicCRS ? sourceGeographicCRS : baseCRSIn.as_nullable());
+    std::string transformationName =
+        *(transformationSourceCRS->name()->description());
+    transformationName += " to WGS84";
+
+    auto crs = BoundCRS::nn_make_shared<BoundCRS>(
+        baseCRSIn, GeographicCRS::EPSG_4326,
+        operation::Transformation::createNTv2(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    transformationName),
+            baseCRSIn, GeographicCRS::EPSG_4326, filename,
+            std::vector<metadata::PositionalAccuracyNNPtr>()));
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     if (baseCRSIn->name()->description().has_value()) {
         crs->setProperties(

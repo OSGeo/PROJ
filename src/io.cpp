@@ -2444,20 +2444,9 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
                                             toWGS84Parameters_));
         }
         if (!datumPROJ4Grids_.empty()) {
-            CRSPtr sourceGeographicCRS = crs->extractGeographicCRS();
-            auto transformationSourceCRS = NN_CHECK_ASSERT(
-                sourceGeographicCRS ? sourceGeographicCRS : crs);
-            std::string transformationName =
-                *(transformationSourceCRS->name()->description());
-            transformationName += " to WGS84";
-            auto transformation = Transformation::createNTv2(
-                PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                  transformationName),
-                transformationSourceCRS, GeographicCRS::EPSG_4326,
-                datumPROJ4Grids_, std::vector<PositionalAccuracyNNPtr>());
             return util::nn_static_pointer_cast<BaseObject>(
-                BoundCRS::create(NN_CHECK_ASSERT(crs), GeographicCRS::EPSG_4326,
-                                 transformation));
+                BoundCRS::createFromNadgrids(NN_CHECK_ASSERT(crs),
+                                             datumPROJ4Grids_));
         }
         return util::nn_static_pointer_cast<BaseObject>(NN_CHECK_ASSERT(crs));
     }
@@ -3426,6 +3415,34 @@ CRSNNPtr PROJStringParser::Private::buildCRS(
         }
         crs = BoundCRS::createFromTOWGS84(crs, towgs84Values);
     }
+
+    auto nadgrids = getParamValue(step, "nadgrids");
+    if (!nadgrids.empty()) {
+        crs = BoundCRS::createFromNadgrids(crs, nadgrids);
+    }
+
+    auto geoidgrids = getParamValue(step, "geoidgrids");
+    if (!geoidgrids.empty()) {
+        auto vdatum = VerticalReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"));
+        auto vcrs = VerticalCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), vdatum,
+            VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+
+        auto transformation =
+            Transformation::createGravityRelatedHeightToGeographic3D(
+                PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                  "unknown to WGS84 ellipsoidal height"),
+                crs, GeographicCRS::EPSG_4979, geoidgrids,
+                std::vector<PositionalAccuracyNNPtr>());
+        auto boundvcrs =
+            BoundCRS::create(vcrs, GeographicCRS::EPSG_4979, transformation);
+
+        crs = CompoundCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+            std::vector<CRSNNPtr>{crs, boundvcrs});
+    }
+
     return crs;
 }
 

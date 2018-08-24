@@ -1406,7 +1406,7 @@ TEST(wkt_parse, WKT1_DATUM_EXTENSION) {
 
     ASSERT_TRUE(crs->transformation()->sourceCRS() != nullptr);
     EXPECT_EQ(*(crs->transformation()->sourceCRS()->name()->description()),
-              "International 1909 (Hayford)");
+              *(crs->baseCRS()->name()->description()));
 
     ASSERT_TRUE(crs->transformation()->targetCRS() != nullptr);
     EXPECT_EQ(*(crs->transformation()->targetCRS()->name()->description()),
@@ -3076,6 +3076,10 @@ TEST(io, projparse_longlat_towgs84_3_terms) {
     EXPECT_TRUE(wkt.find("PARAMETER[\"Z-axis translation\",3") !=
                 std::string::npos)
         << wkt;
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=longlat +ellps=GRS80 +towgs84=1.2,2,3,0,0,0,0");
 }
 
 // ---------------------------------------------------------------------------
@@ -3105,6 +3109,58 @@ TEST(io, projparse_longlat_towgs84_7_terms) {
     EXPECT_TRUE(wkt.find("PARAMETER[\"Scale difference\",1.000007") !=
                 std::string::npos)
         << wkt;
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=longlat +ellps=GRS80 +towgs84=1.2,2,3,4,5,6,7");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_nadgrids) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +nadgrids=foo.gsb");
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    crs->exportToWKT(f);
+
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"NTv2\"") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETERFILE[\"Latitude and longitude difference "
+                         "file\",\"foo.gsb\"]") != std::string::npos)
+        << wkt;
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=longlat +ellps=GRS80 +nadgrids=foo.gsb");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_geoidgrids) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +geoidgrids=foo.gtx");
+    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    crs->exportToWKT(f);
+
+    auto wkt = f->toString();
+    EXPECT_TRUE(
+        wkt.find(
+            "ABRIDGEDTRANSFORMATION[\"unknown to WGS84 ellipsoidal height\"") !=
+        std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETERFILE[\"Geoid (height correction) model "
+                         "file\",\"foo.gtx\"]") != std::string::npos)
+        << wkt;
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=longlat +ellps=GRS80 +geoidgrids=foo.gtx");
 }
 
 // ---------------------------------------------------------------------------
