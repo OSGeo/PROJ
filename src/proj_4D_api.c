@@ -505,10 +505,10 @@ Returns 1 on success, 0 on failure
             return 0;
         sprintf (def, "break_cs2cs_recursion     proj=helmert exact %s convention=position_vector", s);
         Q = proj_create (P->ctx, def);
-        pj_inherit_ellipsoid_def (P, Q);
-        free (def);
+        free(def);
         if (0==Q)
             return 0;
+        pj_inherit_ellipsoid_def (P, Q);
         P->helmert = skip_prep_fin (Q);
 
         break;
