@@ -57,7 +57,7 @@ static LP e_inverse (XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 
 static LP s_inverse (XY xy, PJ *P) {           /* Spheroidal, inverse */
     LP lp = {0.0,0.0};
-    lp.phi = M_HALFPI - 2. * atan(exp(-xy.y / P->k0));
+    lp.phi = atan(sinh(xy.y / P->k0));
     lp.lam = xy.x / P->k0;
     return lp;
 }
