@@ -3075,7 +3075,7 @@ struct PROJStringParser::Private {
 
     bool hasParamValue(const Step &step, const std::string &key);
     std::string getParamValue(const Step &step, const std::string &key);
-    CRSNNPtr buildCRS(const Step &step);
+    CRSNNPtr buildCRS(const Step &step, int iUnitConvert, int iAxisSwap);
 };
 
 // ---------------------------------------------------------------------------
@@ -3163,8 +3163,9 @@ static const struct DatumDesc {
 
 // ---------------------------------------------------------------------------
 
-CRSNNPtr PROJStringParser::Private::buildCRS(
-    const PROJStringParser::Private::Step &step) {
+CRSNNPtr
+PROJStringParser::Private::buildCRS(const PROJStringParser::Private::Step &step,
+                                    int iUnitConvert, int iAxisSwap) {
     auto ellpsStr = getParamValue(step, "ellps");
     auto datumStr = getParamValue(step, "datum");
     auto aStr = getParamValue(step, "a");
@@ -3377,14 +3378,83 @@ CRSNNPtr PROJStringParser::Private::buildCRS(
         throw ParsingException("rf found, but a missing");
     }
 
-    std::vector<CoordinateSystemAxisNNPtr> axis{
-        CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
-            AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::DEGREE),
-        CoordinateSystemAxis::create(
-            PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
-            AxisAbbreviation::lat, AxisDirection::NORTH,
-            UnitOfMeasure::DEGREE)};
+    UnitOfMeasure angularUnit = UnitOfMeasure::DEGREE;
+    if (iUnitConvert >= 0) {
+        auto stepUnitConvert = steps_[iUnitConvert];
+        auto xy_in = getParamValue(stepUnitConvert, "xy_in");
+        auto xy_out = getParamValue(stepUnitConvert, "xy_out");
+        if (stepUnitConvert.inverted) {
+            std::swap(xy_in, xy_out);
+        }
+        if (xy_in.empty() || xy_out.empty() || xy_in != "rad" ||
+            (xy_out != "rad" && xy_out != "deg" && xy_out != "grad")) {
+            throw ParsingException("unhandled values for xy_in and/or xy_out");
+        }
+        if (xy_out == "rad") {
+            angularUnit = UnitOfMeasure::RADIAN;
+        } else if (xy_out == "grad") {
+            angularUnit = UnitOfMeasure::GRAD;
+        }
+    }
+
+    CoordinateSystemAxisNNPtr east = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
+        AxisAbbreviation::lon, AxisDirection::EAST, angularUnit);
+    CoordinateSystemAxisNNPtr north = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
+        AxisAbbreviation::lat, AxisDirection::NORTH, angularUnit);
+    CoordinateSystemAxisNNPtr west = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
+        AxisAbbreviation::lon, AxisDirection::WEST, angularUnit);
+    CoordinateSystemAxisNNPtr south = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
+        AxisAbbreviation::lat, AxisDirection::SOUTH, angularUnit);
+
+    std::vector<CoordinateSystemAxisNNPtr> axis{east, north};
+
+    auto axisStr = getParamValue(step, "axis");
+    if (!axisStr.empty()) {
+        if (axisStr.size() == 3) {
+            for (int i = 0; i < 2; i++) {
+                if (axisStr[i] == 'n') {
+                    axis[i] = north;
+                } else if (axisStr[i] == 's') {
+                    axis[i] = south;
+                } else if (axisStr[i] == 'e') {
+                    axis[i] = east;
+                } else if (axisStr[i] == 'w') {
+                    axis[i] = west;
+                } else {
+                    throw ParsingException("Unhandled axis=" + axisStr);
+                }
+            }
+        }
+    } else if (iAxisSwap >= 0) {
+        auto stepAxisSwap = steps_[iAxisSwap];
+        auto orderStr = getParamValue(stepAxisSwap, "order");
+        auto orderTab = split(orderStr, ',');
+        if (orderTab.size() < 2) {
+            throw ParsingException("Unhandled order=" + orderStr);
+        }
+        if (stepAxisSwap.inverted) {
+            throw ParsingException("Unhandled +inv for +proj=axisswap");
+        }
+
+        for (size_t i = 0; i < 2; i++) {
+            if (orderTab[i] == "1") {
+                axis[i] = east;
+            } else if (orderTab[i] == "-1") {
+                axis[i] = west;
+            } else if (orderTab[i] == "2") {
+                axis[i] = north;
+            } else if (orderTab[i] == "-2") {
+                axis[i] = south;
+            } else {
+                throw ParsingException("Unhandled order=" + orderStr);
+            }
+        }
+    }
+
     auto cs = EllipsoidalCS::create(PropertyMap(), axis[0], axis[1]);
 
     if (!datum) {
@@ -3523,12 +3593,27 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         throw ParsingException("Missing proj= argument");
     }
 
-    if (d->steps_.size() == 1 && (ci_equal(d->steps_[0].name, "longlat") ||
-                                  ci_equal(d->steps_[0].name, "latlong") ||
-                                  ci_equal(d->steps_[0].name, "lonlat") ||
-                                  ci_equal(d->steps_[0].name, "latlon"))) {
-        const auto &step = d->steps_[0];
-        return d->buildCRS(step);
+    if (d->steps_.size() <= 3) {
+        int iMain = -1;
+        int iUnitConvert = -1;
+        int iAxisSwap = -1;
+        for (int i = 0; i < static_cast<int>(d->steps_.size()); i++) {
+            if (ci_equal(d->steps_[i].name, "longlat") ||
+                ci_equal(d->steps_[i].name, "latlong") ||
+                ci_equal(d->steps_[i].name, "lonlat") ||
+                ci_equal(d->steps_[i].name, "latlon")) {
+                iMain = i;
+            } else if (ci_equal(d->steps_[i].name, "unitconvert")) {
+                iUnitConvert = i;
+            } else if (ci_equal(d->steps_[i].name, "axisswap")) {
+                iAxisSwap = i;
+            }
+        }
+        if (iMain >= 0 && (1U + ((iUnitConvert >= 0) ? 1U : 0U) +
+                               ((iAxisSwap >= 0) ? 1U : 0U) ==
+                           d->steps_.size())) {
+            return d->buildCRS(d->steps_[iMain], iUnitConvert, iAxisSwap);
+        }
     }
 
     throw ParsingException("could not parse PROJ string");

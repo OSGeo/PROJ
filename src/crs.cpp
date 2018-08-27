@@ -653,22 +653,49 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
     io::PROJStringFormatterNNPtr formatter) const {
     auto &axisList = coordinateSystem()->axisList();
 
-    if (!axisList.empty()) {
-        auto projUnit = axisList[0]->unit().exportToPROJString();
-        formatter->addStep("unitconvert");
-        formatter->addParam("xy_in", "rad");
-        if (projUnit.empty()) {
-            formatter->addParam("xy_out", axisList[0]->unit().conversionToSI());
-        } else {
-            formatter->addParam("xy_out", projUnit);
+    if (formatter->convention() ==
+        io::PROJStringFormatter::Convention::PROJ_5) {
+        if (!axisList.empty()) {
+            auto projUnit = axisList[0]->unit().exportToPROJString();
+            formatter->addStep("unitconvert");
+            formatter->addParam("xy_in", "rad");
+            if (projUnit.empty()) {
+                formatter->addParam("xy_out",
+                                    axisList[0]->unit().conversionToSI());
+            } else {
+                formatter->addParam("xy_out", projUnit);
+            }
         }
-    }
 
-    if (axisList.size() >= 2 &&
-        ci_equal(*(axisList[0]->name()->description()), "Latitude") &&
-        ci_equal(*(axisList[1]->name()->description()), "Longitude")) {
-        formatter->addStep("axisswap");
-        formatter->addParam("order", "2,1");
+        if (axisList.size() >= 2) {
+            std::string order[2];
+            for (int i = 0; i < 2; i++) {
+                if (ci_equal(*(axisList[i]->name()->description()),
+                             "Longitude") &&
+                    axisList[i]->direction() == cs::AxisDirection::WEST) {
+                    order[i] = "-1";
+                } else if (ci_equal(*(axisList[i]->name()->description()),
+                                    "Longitude") &&
+                           axisList[i]->direction() ==
+                               cs::AxisDirection::EAST) {
+                    order[i] = "1";
+                } else if (ci_equal(*(axisList[i]->name()->description()),
+                                    "Latitude") &&
+                           axisList[i]->direction() ==
+                               cs::AxisDirection::SOUTH) {
+                    order[i] = "-2";
+                } else if (ci_equal(*(axisList[i]->name()->description()),
+                                    "Latitude") &&
+                           axisList[i]->direction() ==
+                               cs::AxisDirection::NORTH) {
+                    order[i] = "2";
+                }
+            }
+            if (order[0] != "1" || order[1] != "2") {
+                formatter->addStep("axisswap");
+                formatter->addParam("order", order[0] + "," + order[1]);
+            }
+        }
     }
 }
 //! @endcond
@@ -695,10 +722,8 @@ GeographicCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
         addDatumInfoToPROJString(formatter);
     }
 
-    if (formatter->convention() ==
-        io::PROJStringFormatter::Convention::PROJ_5) {
-        addAngularUnitConvertAndAxisSwap(formatter);
-    }
+    addAngularUnitConvertAndAxisSwap(formatter);
+
     return scope.toString();
 }
 

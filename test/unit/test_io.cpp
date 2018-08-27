@@ -3165,6 +3165,150 @@ TEST(io, projparse_longlat_geoidgrids) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_longlat_axis_enu) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +axis=enu");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("AXIS[\"longitude\",east,ORDER[1]") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("AXIS[\"latitude\",north,ORDER[2]") !=
+                std::string::npos)
+        << wkt;
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_axis_neu) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +axis=neu");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("AXIS[\"latitude\",north,ORDER[1]") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("AXIS[\"longitude\",east,ORDER[2]") !=
+                std::string::npos)
+        << wkt;
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_axis_swu) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +axis=swu");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("AXIS[\"latitude\",south,ORDER[1]") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("AXIS[\"longitude\",west,ORDER[2]") !=
+                std::string::npos)
+        << wkt;
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=-2,-1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_unitconvert_deg) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+        "+proj=unitconvert +xy_in=rad +xy_out=deg");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_unitconvert_grad) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+        "+proj=unitconvert +xy_in=rad +xy_out=grad");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=grad");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_unitconvert_rad) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+        "+proj=unitconvert +xy_in=rad +xy_out=rad");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=rad");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_axisswap) {
+    for (auto order1 : {"1", "-1", "2", "-2"}) {
+        for (auto order2 : {"1", "-1", "2", "-2"}) {
+            if (std::abs(atoi(order1) * atoi(order2)) == 2 &&
+                !(atoi(order1) == 1 && atoi(order2) == 2)) {
+                auto str = "+proj=pipeline +step +proj=longlat +ellps=GRS80 "
+                           "+step +proj=axisswap +order=" +
+                           std::string(order1) + "," + order2;
+                auto obj = PROJStringParser().createFromPROJString(str);
+                auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+                ASSERT_TRUE(crs != nullptr);
+
+                EXPECT_EQ(
+                    crs->exportToPROJString(PROJStringFormatter::create()),
+                    "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+                    "+proj=unitconvert +xy_in=rad +xy_out=deg +step "
+                    "+proj=axisswap +order=" +
+                        std::string(order1) + "," + order2);
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_errors) {
     EXPECT_THROW(PROJStringParser().createFromPROJString(""), ParsingException);
 
@@ -3230,4 +3374,23 @@ TEST(io, projparse_longlat_errors) {
         PROJStringParser().createFromPROJString(
             "+proj=longlat +ellps=GRS80 +towgs84=1.2,2,3,4,5,6,invalid"),
         ParsingException);
+
+    EXPECT_THROW(
+        PROJStringParser().createFromPROJString("+proj=longlat +axis=foo"),
+        ParsingException);
+
+    EXPECT_THROW(PROJStringParser().createFromPROJString(
+                     "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+                     "+proj=unitconvert +xy_in=rad +xy_out=foo"),
+                 ParsingException);
+
+    EXPECT_THROW(PROJStringParser().createFromPROJString(
+                     "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+                     "+proj=axisswap"),
+                 ParsingException);
+
+    EXPECT_THROW(PROJStringParser().createFromPROJString(
+                     "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
+                     "+proj=axisswap +order=0,0"),
+                 ParsingException);
 }
