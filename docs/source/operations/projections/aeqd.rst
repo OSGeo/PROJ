@@ -18,9 +18,12 @@ Azimuthal Equidistant
 +---------------------+----------------------------------------------------------+
 
 
-.. image:: ./images/aeqd.png
-   :scale: 50%
+.. figure:: ./images/aeqd.png
+   :width: 500 px
+   :align: center
    :alt:   Azimuthal Equidistant
+
+   proj-string: ``+proj=aeqd``
 
 
 Options

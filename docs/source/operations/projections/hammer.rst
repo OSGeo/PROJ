@@ -4,10 +4,12 @@
 Hammer & Eckert-Greifendorff
 ********************************************************************************
 
-.. image:: ./images/hammer.png
-   :scale: 50%
+.. figure:: ./images/hammer.png
+   :width: 500 px
+   :align: center
    :alt:   Hammer & Eckert-Greifendorff
 
+   proj-string: ``+proj=hammer``
 
 Parameters
 ################################################################################

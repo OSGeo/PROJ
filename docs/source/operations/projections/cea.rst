@@ -4,9 +4,12 @@
 Equal Area Cylindrical
 ********************************************************************************
 
-.. image:: ./images/cea.png
-   :scale: 50%
+.. figure:: ./images/cea.png
+   :width: 500 px
+   :align: center
    :alt:   Equal Area Cylindrical
+
+   proj-string: ``+proj=cea``
 
 Parameters
 ################################################################################

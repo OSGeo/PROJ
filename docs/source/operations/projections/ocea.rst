@@ -4,9 +4,12 @@
 Oblique Cylindrical Equal Area
 ********************************************************************************
 
-.. image:: ./images/ocea.png
-   :scale: 50%
+.. figure:: ./images/ocea.png
+   :width: 500 px
+   :align: center
    :alt:   Oblique Cylindrical Equal Area
+
+   proj-string: ``+proj=ocea``
 
 Parameters
 ################################################################################

@@ -1,7 +1,3 @@
-
-
-for f in $(ls *.png)
-do
-
-    convert $f -fx '(r+g+b)/3' -colorspace Gray $f
-done;
+# Use Imagemagick to convert all images to grayscale,
+# printing progress information
+mogrify -monitor -colorspace Gray *.png

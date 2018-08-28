@@ -4,9 +4,12 @@
 Mod. Stererographics of 48 U.S.
 ********************************************************************************
 
-.. image:: ./images/gs48.png
-   :scale: 50%
+.. figure:: ./images/gs48.png
+   :width: 500 px
+   :align: center
    :alt:   Mod. Stererographics of 48 U.S.  
+
+   proj-string: ``+proj=gs48``
 
 Parameters
 ################################################################################

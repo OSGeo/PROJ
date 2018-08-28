@@ -4,9 +4,12 @@
 Wagner VI
 ********************************************************************************
 
-.. image:: ./images/wag6.png
-   :scale: 50%
+.. figure:: ./images/wag6.png
+   :width: 500 px
+   :align: center
    :alt:   Wagner VI
+
+   proj-string: ``+proj=wag6``
 
 Parameters
 ################################################################################

@@ -4,9 +4,12 @@
 Wagner IV
 ********************************************************************************
 
-.. image:: ./images/wag4.png
-   :scale: 50%
+.. figure:: ./images/wag4.png
+   :width: 500 px
+   :align: center
    :alt:   Wagner IV
+
+   proj-string: ``+proj=wag4``
 
 Parameters
 ################################################################################

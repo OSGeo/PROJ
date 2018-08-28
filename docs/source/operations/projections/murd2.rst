@@ -4,9 +4,12 @@
 Murdoch II
 ********************************************************************************
 
-.. image:: ./images/murd2.png
-   :scale: 50%
+.. figure:: ./images/murd2.png
+   :width: 500 px
+   :align: center
    :alt:   Murdoch II
+
+   proj-string: ``+proj=murd2 +lat_1=30 +lat_2=50``
 
 Parameters
 ################################################################################

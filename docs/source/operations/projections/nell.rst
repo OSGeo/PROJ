@@ -4,9 +4,12 @@
 Nell
 ********************************************************************************
 
-.. image:: ./images/nell.png
-   :scale: 50%
+.. figure:: ./images/nell.png
+   :width: 500 px
+   :align: center
    :alt:   Nell
+
+   proj-string: ``+proj=nell``
 
 Parameters
 ################################################################################

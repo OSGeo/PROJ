@@ -4,10 +4,12 @@
 Wagner III
 ********************************************************************************
 
-.. image:: ./images/wag3.png
-   :scale: 50%
+.. figure:: ./images/wag3.png
+   :width: 500 px
+   :align: center
    :alt:   Wagner III
 
+   proj-string: ``+proj=wag3``
 
 .. math::
 

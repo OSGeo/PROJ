@@ -4,9 +4,12 @@
 Oblated Equal Area
 ********************************************************************************
 
-.. image:: ./images/oea.png
-   :scale: 50%
+.. figure:: ./images/oea.png
+   :width: 500 px
+   :align: center
    :alt:   Oblated Equal Area
+
+   proj-string: ``+proj=oea +m=1 +n=2``
 
 Described in :cite:`Snyder1988`.
 

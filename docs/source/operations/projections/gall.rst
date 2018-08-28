@@ -24,9 +24,12 @@ It is neither equal-area nor conformal but instead tries to balance the distorti
 +---------------------+----------------------------------------------------------+
 
 
-.. image:: ./images/gall.png
-   :scale: 50%
+.. figure:: ./images/gall.png
+   :width: 500 px
+   :align: center
    :alt:   Gall (Gall Stereographic)
+
+   proj-string: ``+proj=gall``
 
 Usage
 #####

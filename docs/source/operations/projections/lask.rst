@@ -4,9 +4,12 @@
 Laskowski
 ********************************************************************************
 
-.. image:: ./images/lask.png
-   :scale: 50%
+.. figure:: ./images/lask.png
+   :width: 500 px
+   :align: center
    :alt:   Laskowski
+
+   proj-string: ``+proj=lask``
 
 Parameters
 ################################################################################

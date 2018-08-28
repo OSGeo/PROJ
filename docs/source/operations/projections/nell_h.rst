@@ -4,9 +4,12 @@
 Nell-Hammer
 ********************************************************************************
 
-.. image:: ./images/nell_h.png
-   :scale: 50%
+.. figure:: ./images/nell_h.png
+   :width: 500 px
+   :align: center
    :alt:   Nell-Hammer
+
+   proj-string: ``+proj=nell_h``
 
 Parameters
 ################################################################################

@@ -4,9 +4,12 @@
 Euler
 ********************************************************************************
 
-.. image:: ./images/euler.png
-   :scale: 50%
+.. figure:: ./images/euler.png
+   :width: 500 px
+   :align: center
    :alt:   Euler
+
+   proj-string: ``+proj=euler +lat_1=67 +lat_2=75``
 
 
 Parameters

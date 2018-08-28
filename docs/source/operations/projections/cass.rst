@@ -23,9 +23,12 @@ Although the Cassini projection has been largely replaced by the Transverse Merc
 +---------------------+-------------------------------------------------------------------------+
 
 
-.. image:: ./images/cass.png
-   :scale: 50%
+.. figure:: ./images/cass.png
+   :width: 500 px
+   :align: center
    :alt:   Cassini
+
+   proj-string: ``+proj=cass``
 
 Usage
 #####

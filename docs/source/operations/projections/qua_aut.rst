@@ -4,9 +4,12 @@
 Quartic Authalic
 ********************************************************************************
 
-.. image:: ./images/qua_aut.png
-   :scale: 50%
+.. figure:: ./images/qua_aut.png
+   :width: 500 px
+   :align: center
    :alt:   Quartic Authalic
+
+   proj-string: ``+proj=qua_aut``
 
 Parameters
 ################################################################################

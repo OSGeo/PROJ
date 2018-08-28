@@ -25,7 +25,7 @@ The purpose of the Quadrilateralized Spherical Cube (QSC) projection is to proje
 a sphere surface onto the six sides of a cube:
 
 .. image:: ../../../images/qsc_concept.jpg
-   :scale: 50%
+   :width: 500 px
    :align: center
    :alt:   Quadrilateralized Spherical Cube
 
@@ -114,7 +114,7 @@ The resulting images can be laid out in a grid like below.
 
 
 .. |topside| image:: ../../../images/qsc_topside.jpg
-   :scale: 50%
+   :scale: 50 %
    :align: middle
    :alt:   Top side
 

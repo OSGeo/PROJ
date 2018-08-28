@@ -4,9 +4,12 @@
 Ginsburg VIII (TsNIIGAiK)
 ********************************************************************************
 
-.. image:: ./images/gins8.png
-   :scale: 50%
+.. figure:: ./images/gins8.png
+   :width: 500 px
+   :align: center
    :alt:   Ginsburg VIII (TsNIIGAiK)
+
+   proj-string: ``+proj=gins8``
 
 Parameters
 ################################################################################

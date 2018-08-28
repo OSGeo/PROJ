@@ -4,9 +4,12 @@
 Icosahedral Snyder Equal Area
 ********************************************************************************
 
-.. image:: ./images/isea.png
-   :scale: 50%
+.. figure:: ./images/isea.png
+   :width: 500 px
+   :align: center
    :alt:   Icosahedral Snyder Equal Area
+
+   proj-string: ``+proj=isea``
 
 Parameters
 ################################################################################

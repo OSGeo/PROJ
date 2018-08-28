@@ -4,9 +4,12 @@
 Rectangular Polyconic
 ********************************************************************************
 
-.. image:: ./images/rpoly.png
-   :scale: 50%
+.. figure:: ./images/rpoly.png
+   :width: 500 px
+   :align: center
    :alt:   Rectangular Polyconic
+
+   proj-string: ``+proj=rpoly``
 
 Parameters
 ################################################################################

@@ -4,9 +4,12 @@
 Chamberlin Trimetric
 ********************************************************************************
 
-.. image:: ./images/chamb.png
-   :scale: 50%
+.. figure:: ./images/chamb.png
+   :width: 500 px
+   :align: center
    :alt:   Chamberlin Trimetric
+
+   proj-string: ``+proj=chamb +lat_1=10 +lon_1=30 +lon_2=40``
 
 Parameters
 ################################################################################

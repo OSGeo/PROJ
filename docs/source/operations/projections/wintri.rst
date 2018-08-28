@@ -4,9 +4,12 @@
 Winkel Tripel
 ********************************************************************************
 
-.. image:: ./images/wintri.png
-   :scale: 50%
+.. figure:: ./images/wintri.png
+   :width: 500 px
+   :align: center
    :alt:   Winkel Tripel
+
+   proj-string: ``+proj=wintri``
 
 Parameters
 ################################################################################

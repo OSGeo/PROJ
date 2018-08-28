@@ -20,9 +20,12 @@ Modified Stererographics of Alaska
 +---------------------+----------------------------------------------------------+
 
 
-.. image:: ./images/alsk.png
-   :scale: 50%
+.. figure:: ./images/alsk.png
+   :width: 500 px
+   :align: center
    :alt:   Mod. Stererographics of Alaska
+
+   proj-string: ``+proj=alsk``
 
 Options
 ################################################################################

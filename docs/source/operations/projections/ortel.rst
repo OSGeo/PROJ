@@ -4,9 +4,12 @@
 Ortelius Oval
 ********************************************************************************
 
-.. image:: ./images/ortel.png
-   :scale: 50%
+.. figure:: ./images/ortel.png
+   :width: 500 px
+   :align: center
    :alt:   Ortelius Oval
+
+   proj-string: ``+proj=ortel``
 
 Parameters
 ################################################################################

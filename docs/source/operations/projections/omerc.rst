@@ -4,9 +4,12 @@
 Oblique Mercator
 ********************************************************************************
 
-.. image:: ./images/omerc.png
-   :scale: 50%
+.. figure:: ./images/omerc.png
+   :width: 500 px
+   :align: center
    :alt:   Oblique Mercator
+
+   proj-string: ``+proj=omerc +lat_1=45 +lat_2=55``
 
 Parameters
 ################################################################################

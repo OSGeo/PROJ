@@ -23,9 +23,12 @@ The simplest of all projections. Standard parallels (0° when omitted) may be sp
 +---------------------+----------------------------------------------------------+
 
 
-.. image:: ./images/eqc.png
-   :scale: 50%
+.. figure:: ./images/eqc.png
+   :width: 500 px
+   :align: center
    :alt:   Equidistant Cylindrical (Plate Carrée)
+
+   proj-string: ``+proj=eqc``
 
 Usage
 ########

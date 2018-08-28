@@ -4,9 +4,12 @@
 Winkel II
 ********************************************************************************
 
-.. image:: ./images/wink2.png
-   :scale: 50%
+.. figure:: ./images/wink2.png
+   :width: 500 px
+   :align: center
    :alt:   Winkel II
+
+   proj-string: ``+proj=wink2``
 
 Parameters
 ################################################################################

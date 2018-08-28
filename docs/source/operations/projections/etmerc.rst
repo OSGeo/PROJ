@@ -4,9 +4,12 @@
 Extended Transverse Mercator
 ********************************************************************************
 
-.. image:: ./images/etmerc.png
-   :scale: 50%
+.. figure:: ./images/etmerc.png
+   :width: 500 px
+   :align: center
    :alt:   Extended Transverse Mercator
+
+   proj-string: ``+proj=etmerc +lon_0=-40``
 
 Parameters
 ################################################################################

@@ -25,10 +25,12 @@ The projection is conformal which makes it suitable for navigational purposes.
 | **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
 
-.. image:: ./images/merc.png
-   :scale: 50%
+.. figure:: ./images/merc.png
+   :width: 500 px
+   :align: center
    :alt:   Mercator
 
+   proj-string: ``+proj=merc``
 
 Usage
 ########

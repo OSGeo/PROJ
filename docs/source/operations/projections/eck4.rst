@@ -4,10 +4,12 @@
 Eckert IV
 ********************************************************************************
 
-.. image:: ./images/eck4.png
-   :scale: 50%
+.. figure:: ./images/eck4.png
+   :width: 500 px
+   :align: center
    :alt:   Eckert IV
 
+   proj-string: ``+proj=eck4``
 
 .. math::
 

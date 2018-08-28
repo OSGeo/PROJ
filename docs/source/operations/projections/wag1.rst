@@ -4,9 +4,12 @@
 Wagner I (Kavraisky VI)
 ********************************************************************************
 
-.. image:: ./images/wag1.png
-   :scale: 50%
+.. figure:: ./images/wag1.png
+   :width: 500 px
+   :align: center
    :alt:   Wagner I (Kavraisky VI)
+
+   proj-string: ``+proj=wag1``
 
 Parameters
 ################################################################################

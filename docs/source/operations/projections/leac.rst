@@ -4,9 +4,12 @@
 Lambert Equal Area Conic
 ********************************************************************************
 
-.. image:: ./images/leac.png
-   :scale: 50%
+.. figure:: ./images/leac.png
+   :width: 500 px
+   :align: center
    :alt:   Lambert Equal Area Conic
+
+   proj-string: ``+proj=leac``
 
 Parameters
 ################################################################################

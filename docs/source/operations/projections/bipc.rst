@@ -4,9 +4,12 @@
 Bipolar conic of western hemisphere
 ********************************************************************************
 
-.. image:: ./images/bipc.png
-   :scale: 50%
+.. figure:: ./images/bipc.png
+   :width: 500 px
+   :align: center
    :alt:   Bipolar conic of western hemisphere
+
+   proj-string: ``+proj=bipc +ns``
 
 Parameters
 ################################################################################

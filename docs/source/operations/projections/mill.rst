@@ -24,9 +24,12 @@ The latitude is scaled by a factor of :math:`\frac{4}{5}`, projected according t
 +---------------------+----------------------------------------------------------+
 
 
-.. image:: ./images/mill.png
-   :scale: 50%
+.. figure:: ./images/mill.png
+   :width: 500 px
+   :align: center
    :alt:   Miller Cylindrical  
+
+   proj-string: ``+proj=mill``
 
 Usage
 ########

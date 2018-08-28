@@ -4,9 +4,12 @@
 Urmaev V
 ********************************************************************************
 
-.. image:: ./images/urm5.png
-   :scale: 50%
+.. figure:: ./images/urm5.png
+   :width: 500 px
+   :align: center
    :alt:   Urmaev V
+
+   proj-string: ``+proj=urm5 +n=0.9 +alpha=2 +q=4``
 
 Parameters
 ################################################################################

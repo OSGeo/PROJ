@@ -4,9 +4,12 @@
 Interrupted Goode Homolosine
 ********************************************************************************
 
-.. image:: ./images/igh.png
-   :scale: 50%
+.. figure:: ./images/igh.png
+   :width: 500 px
+   :align: center
    :alt:   Interrupted Goode Homolosine
+
+   proj-string: ``+proj=igh``
 
 Parameters
 ################################################################################

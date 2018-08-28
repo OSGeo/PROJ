@@ -4,9 +4,12 @@
 Putnins P6'
 ********************************************************************************
 
-.. image:: ./images/putp6p.png
-   :scale: 50%
+.. figure:: ./images/putp6p.png
+   :width: 500 px
+   :align: center
    :alt:   Putnins P6'
+
+   proj-string: ``+proj=putp6p``
 
 Parameters
 ################################################################################

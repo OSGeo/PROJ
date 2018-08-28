@@ -4,9 +4,12 @@
 Oblique Stereographic Alternative
 ********************************************************************************
 
-.. image:: ./images/sterea.png
-   :scale: 50%
+.. figure:: ./images/sterea.png
+   :width: 500 px
+   :align: center
    :alt:   Oblique Stereographic Alternative
+
+   proj-string: ``+proj=sterea +lat_0=90``
 
 Parameters
 ################################################################################

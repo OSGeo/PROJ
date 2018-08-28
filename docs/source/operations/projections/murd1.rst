@@ -4,9 +4,12 @@
 Murdoch I
 ********************************************************************************
 
-.. image:: ./images/murd1.png
-   :scale: 50%
+.. figure:: ./images/murd1.png
+   :width: 500 px
+   :align: center
    :alt:   Murdoch I
+
+   proj-string: ``+proj=murd1 +lat_1=30 +lat_2=50``
 
 Parameters
 ################################################################################

@@ -4,9 +4,12 @@
 Gauss-Schreiber Transverse Mercator (aka Gauss-Laborde Reunion)
 ********************************************************************************
 
-.. image:: ./images/gstmerc.png
-   :scale: 50%
+.. figure:: ./images/gstmerc.png
+   :width: 500 px
+   :align: center
    :alt:   Gauss-Schreiber Transverse Mercator (aka Gauss-Laborde Reunion)
+
+   proj-string: ``+proj=gstmerc``
 
 Parameters
 ################################################################################

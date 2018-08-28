@@ -4,10 +4,12 @@
 Transverse Cylindrical Equal Area
 ********************************************************************************
 
-.. image:: ./images/tcea.png
-   :scale: 50%
+.. figure:: ./images/tcea.png
+   :width: 500 px
+   :align: center
    :alt:   Transverse Cylindrical Equal Area
 
+   proj-string: ``+proj=tcea``
 
 Parameters
 ################################################################################

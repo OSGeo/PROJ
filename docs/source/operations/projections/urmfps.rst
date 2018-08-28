@@ -4,9 +4,12 @@
 Urmaev Flat-Polar Sinusoidal
 ********************************************************************************
 
-.. image:: ./images/urmfps.png
-   :scale: 50%
+.. figure:: ./images/urmfps.png
+   :width: 500 px
+   :align: center
    :alt:   Urmaev Flat-Polar Sinusoidal
+
+   proj-string: ``+proj=urmfps +n=0.5``
 
 Parameters
 ################################################################################

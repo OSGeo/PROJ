@@ -4,9 +4,12 @@
 International Map of the World Polyconic
 ********************************************************************************
 
-.. image:: ./images/imw_p.png
-   :scale: 50%
+.. figure:: ./images/imw_p.png
+   :width: 500 px
+   :align: center
    :alt:   International Map of the World Polyconic
+
+   proj-string: ``+proj=imw_p +lat_1=30 +lat_2=-40``
 
 Parameters
 ################################################################################

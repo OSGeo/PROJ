@@ -21,9 +21,12 @@ Apian Globular I
 +---------------------+----------------------------------------------------------+
 
 
-.. image:: ./images/apian.png
-   :scale: 50%
+.. figure:: ./images/apian.png
+   :width: 500 px
+   :align: center
    :alt:   Apian Globular I
+
+   proj-string: ``+proj=apian``
 
 Options
 ################################################################################

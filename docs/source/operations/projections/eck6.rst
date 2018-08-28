@@ -4,9 +4,12 @@
 Eckert VI
 ********************************************************************************
 
-.. image:: ./images/eck6.png
-   :scale: 50%
+.. figure:: ./images/eck6.png
+   :width: 500 px
+   :align: center
    :alt:   Eckert VI
+
+   proj-string: ``+proj=eck6``
 
 Parameters
 ################################################################################

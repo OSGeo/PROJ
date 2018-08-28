@@ -4,9 +4,12 @@
 Polyconic (American)
 ********************************************************************************
 
-.. image:: ./images/poly.png
-   :scale: 50%
+.. figure:: ./images/poly.png
+   :width: 500 px
+   :align: center
    :alt:   Polyconic (American)  
+
+   proj-string: ``+proj=poly``
 
 Parameters
 ################################################################################

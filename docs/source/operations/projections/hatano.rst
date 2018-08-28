@@ -25,10 +25,12 @@ Hatano Asymmetrical Equal Area
 
 
 
-.. image:: ./images/hatano.png
-   :scale: 50%
+.. figure:: ./images/hatano.png
+   :width: 500 px
+   :align: center
    :alt:   Hatano Asymmetrical Equal Area
 
+   proj-string: ``+proj=hatano``
 
 Parameters
 ################################################################################

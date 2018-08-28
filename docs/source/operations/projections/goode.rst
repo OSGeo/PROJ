@@ -4,9 +4,12 @@
 Goode Homolosine
 ********************************************************************************
 
-.. image:: ./images/goode.png
-   :scale: 50%
+.. figure:: ./images/goode.png
+   :width: 500 px
+   :align: center
    :alt:   Goode Homolosine
+
+   proj-string: ``+proj=goode``
 
 Parameters
 ################################################################################

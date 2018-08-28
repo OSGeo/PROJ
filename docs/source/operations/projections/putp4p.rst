@@ -4,9 +4,12 @@
 Putnins P4'
 ********************************************************************************
 
-.. image:: ./images/putp4p.png
-   :scale: 50%
+.. figure:: ./images/putp4p.png
+   :width: 500 px
+   :align: center
    :alt:   Putnins P4'
+
+   proj-string: ``+proj=putp4p``
 
 Parameters
 ################################################################################

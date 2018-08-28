@@ -4,9 +4,12 @@
 Loximuthal
 ********************************************************************************
 
-.. image:: ./images/loxim.png
-   :scale: 50%
+.. figure:: ./images/loxim.png
+   :width: 500 px
+   :align: center
    :alt:   Loximuthal
+
+   proj-string: ``+proj=loxim``
 
 Parameters
 ################################################################################

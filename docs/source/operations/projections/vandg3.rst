@@ -4,9 +4,12 @@
 van der Grinten III
 ********************************************************************************
 
-.. image:: ./images/vandg3.png
-   :scale: 50%
+.. figure:: ./images/vandg3.png
+   :width: 500 px
+   :align: center
    :alt:   van der Grinten III
+
+   proj-string: ``+proj=vandg3``
 
 Parameters
 ################################################################################

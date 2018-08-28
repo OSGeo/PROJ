@@ -4,10 +4,12 @@
 Two Point Equidistant
 ********************************************************************************
 
-.. image:: ./images/tpeqd.png
-   :scale: 50%
+.. figure:: ./images/tpeqd.png
+   :width: 500 px
+   :align: center
    :alt:   Two Point Equidistant
 
+   proj-string: ``+proj=tpeqd +lat_1=60 +lat_2=65``
 
 Parameters
 ################################################################################

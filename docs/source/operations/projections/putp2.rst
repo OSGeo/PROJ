@@ -4,9 +4,12 @@
 Putnins P2
 ********************************************************************************
 
-.. image:: ./images/putp2.png
-   :scale: 50%
+.. figure:: ./images/putp2.png
+   :width: 500 px
+   :align: center
    :alt:   Putnins P2
+
+   proj-string: ``+proj=putp2``
 
 Parameters
 ################################################################################

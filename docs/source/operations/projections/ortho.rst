@@ -24,9 +24,12 @@ around a given latitude and longitude.
 | **Output type**     | Projected coordinates                                  |
 +---------------------+--------------------------------------------------------+
 
-.. image:: ./images/ortho.png
-   :scale: 50%
+.. figure:: ./images/ortho.png
+   :width: 500 px
+   :align: center
    :alt:   Orthographic
+
+   proj-string: ``+proj=ortho``
 
 Parameters
 ################################################################################

@@ -4,9 +4,12 @@
 Perspective Conic
 ********************************************************************************
 
-.. image:: ./images/pconic.png
-   :scale: 50%
+.. figure:: ./images/pconic.png
+   :width: 500 px
+   :align: center
    :alt:   Perspective Conic
+
+   proj-string: ``+proj=pconic +lat_1=25 +lat_2=75``
 
 Parameters
 ################################################################################

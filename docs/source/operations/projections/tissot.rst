@@ -4,9 +4,12 @@
 Tissot
 ********************************************************************************
 
-.. image:: ./images/tissot.png
-   :scale: 50%
+.. figure:: ./images/tissot.png
+   :width: 500 px
+   :align: center
    :alt:   Tissot
+
+   proj-string: ``+proj=tissot +lat_1=60 +lat_2=65``
 
 Parameters
 ################################################################################

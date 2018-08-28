@@ -4,9 +4,12 @@
 McBryde-Thomas Flat-Polar Sine (No. 1)
 ********************************************************************************
 
-.. image:: ./images/mbt_s.png
-   :scale: 50%
+.. figure:: ./images/mbt_s.png
+   :width: 500 px
+   :align: center
    :alt:   McBryde-Thomas Flat-Polar Sine (No. 1)
+
+   proj-string: ``+proj=mbt_s``
 
 Parameters
 ################################################################################

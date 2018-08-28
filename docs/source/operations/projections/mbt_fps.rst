@@ -4,9 +4,12 @@
 McBryde-Thomas Flat-Pole Sine (No. 2)
 ********************************************************************************
 
-.. image:: ./images/mbt_fps.png
-   :scale: 50%
+.. figure:: ./images/mbt_fps.png
+   :width: 500 px
+   :align: center
    :alt:   McBryde-Thomas Flat-Pole Sine (No. 2)
+
+   proj-string: ``+proj=mbt_fps``
 
 Parameters
 ################################################################################

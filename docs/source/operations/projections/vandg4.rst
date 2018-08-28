@@ -4,9 +4,12 @@
 van der Grinten IV
 ********************************************************************************
 
-.. image:: ./images/vandg4.png
-   :scale: 50%
+.. figure:: ./images/vandg4.png
+   :width: 500 px
+   :align: center
    :alt:   van der Grinten IV
+
+   proj-string: ``+proj=vandg4``
 
 Parameters
 ################################################################################

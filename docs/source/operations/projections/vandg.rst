@@ -4,9 +4,12 @@
 van der Grinten (I)
 ********************************************************************************
 
-.. image:: ./images/vandg.png
-   :scale: 50%
+.. figure:: ./images/vandg.png
+   :width: 500 px
+   :align: center
    :alt:   van der Grinten (I)
+
+   proj-string: ``+proj=vandg``
 
 Parameters
 ################################################################################

@@ -4,9 +4,12 @@
 Vitkovsky I
 ********************************************************************************
 
-.. image:: ./images/vitk1.png
-   :scale: 50%
+.. figure:: ./images/vitk1.png
+   :width: 500 px
+   :align: center
    :alt:   Vitkovsky I
+
+   proj-string: ``+proj=vitk1 +lat_1=45 +lat_2=55``
 
 Parameters
 ################################################################################

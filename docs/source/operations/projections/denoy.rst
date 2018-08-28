@@ -4,9 +4,12 @@
 Denoyer Semi-Elliptical
 ********************************************************************************
 
-.. image:: ./images/denoy.png
-   :scale: 50%
+.. figure:: ./images/denoy.png
+   :width: 500 px
+   :align: center
    :alt:   Denoyer Semi-Elliptical
+
+   proj-string: ``+proj=denoy``
 
 Parameters
 ################################################################################

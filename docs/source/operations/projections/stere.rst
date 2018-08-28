@@ -4,10 +4,12 @@
 Stereographic
 ********************************************************************************
 
-.. image:: ./images/stere.png
-   :scale: 50%
+.. figure:: ./images/stere.png
+   :width: 500 px
+   :align: center
    :alt:   Stereographic
 
+   proj-string: ``+proj=stere +lat_0=90 +lat_ts=75``
 
 Parameters
 ################################################################################

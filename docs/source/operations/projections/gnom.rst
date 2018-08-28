@@ -4,9 +4,12 @@
 Gnomonic
 ********************************************************************************
 
-.. image:: ./images/gnom.png
-   :scale: 50%
+.. figure:: ./images/gnom.png
+   :width: 500 px
+   :align: center
    :alt:   Gnomonic
+
+   proj-string: ``+proj=gnom +lat_0=90 +lon_0=-50``
 
 Parameters
 ################################################################################
