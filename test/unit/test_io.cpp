@@ -3165,6 +3165,44 @@ TEST(io, projparse_longlat_geoidgrids) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_longlat_geoidgrids_vunits) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +geoidgrids=foo.gtx +vunits=ft");
+    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("AXIS[\"gravity-related height "
+                         "(H)\",up,LENGTHUNIT[\"foot\",0.3048]") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_longlat_vunits) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +vunits=ft");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("AXIS[\"ellipsoidal height "
+                         "(h)\",up,ORDER[3],LENGTHUNIT[\"foot\",0.3048]") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_longlat_axis_enu) {
     auto obj = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +axis=enu");
@@ -3309,6 +3347,135 @@ TEST(io, projparse_longlat_axisswap) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_tmerc) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=tmerc +x_0=1 +lat_0=1 +k_0=2");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    crs->exportToWKT(f);
+    auto expected = "PROJCRS[\"unknown\",\n"
+                    "    BASEGEODCRS[\"unknown\",\n"
+                    "        DATUM[\"World Geodetic System 1984\",\n"
+                    "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+                    "                LENGTHUNIT[\"metre\",1]]],\n"
+                    "        PRIMEM[\"Greenwich\",0,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+                    "    CONVERSION[\"unknown\",\n"
+                    "        METHOD[\"Transverse Mercator\",\n"
+                    "            ID[\"EPSG\",9807]],\n"
+                    "        PARAMETER[\"Latitude of natural origin\",1,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+                    "            ID[\"EPSG\",8801]],\n"
+                    "        PARAMETER[\"Longitude of natural origin\",0,\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+                    "            ID[\"EPSG\",8802]],\n"
+                    "        PARAMETER[\"Scale factor at natural origin\",2,\n"
+                    "            SCALEUNIT[\"unity\",1],\n"
+                    "            ID[\"EPSG\",8805]],\n"
+                    "        PARAMETER[\"False easting\",1,\n"
+                    "            LENGTHUNIT[\"metre\",1],\n"
+                    "            ID[\"EPSG\",8806]],\n"
+                    "        PARAMETER[\"False northing\",0,\n"
+                    "            LENGTHUNIT[\"metre\",1],\n"
+                    "            ID[\"EPSG\",8807]]],\n"
+                    "    CS[Cartesian,2],\n"
+                    "        AXIS[\"(E)\",east,\n"
+                    "            ORDER[1],\n"
+                    "            LENGTHUNIT[\"metre\",1]],\n"
+                    "        AXIS[\"(N)\",north,\n"
+                    "            ORDER[2],\n"
+                    "            LENGTHUNIT[\"metre\",1]]]";
+
+    EXPECT_EQ(f->toString(), expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_projected_units) {
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=tmerc +units=us-ft");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(
+        wkt.find("PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1]") !=
+        std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"US survey "
+                         "foot\",0.304800609601219]") != std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_projected_to_meter_known) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=tmerc +to_meter=0.304800609601219");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(
+        wkt.find("PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1]") !=
+        std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"US survey "
+                         "foot\",0.304800609601219]") != std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_projected_to_meter_unknown) {
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=tmerc +to_meter=0.1234");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(
+        wkt.find("PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1]") !=
+        std::string::npos)
+        << wkt;
+    EXPECT_TRUE(
+        wkt.find("AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"unknown\",0.1234]") !=
+        std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_projected_vunits) {
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=tmerc +vunits=ft");
+    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("CS[Cartesian,2]") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("CS[vertical,1],AXIS[\"gravity-related height "
+                         "(H)\",up,LENGTHUNIT[\"foot\",0.3048]") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_errors) {
     EXPECT_THROW(PROJStringParser().createFromPROJString(""), ParsingException);
 
@@ -3393,4 +3560,12 @@ TEST(io, projparse_longlat_errors) {
                      "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
                      "+proj=axisswap +order=0,0"),
                  ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_projected_errors) {
+    EXPECT_THROW(
+        PROJStringParser().createFromPROJString("+proj=tmerc +units=foo"),
+        ParsingException);
 }

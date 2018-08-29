@@ -26,9 +26,11 @@
         AXIS["longitude",WEST]]
     - equalearth: https://github.com/OSGeo/gdal/issues/870
     - axis inversion for polar cases: EPSG 5041 (East-North) vs EPSG 32661 (North-East)
+    - We might currently create COMPOUNDCRS of horiz CRS + BoundCRS of VertCRS, which is apparently illegal
 
     
 - Integrate Doxygen doc in PROJ doc
 - More tests
 - Address TODO and FIXME
 
+- Once integrated with GDAL, test with BAG WKT

@@ -63,13 +63,15 @@ struct MethodMapping {
     const std::string wkt2_name;
     const int epsg_code;
     const std::string wkt1_name;
-    const VectorOfString proj_name;
+    const VectorOfString proj_names;
     const std::vector<ParamMapping> params;
 };
 
 const MethodMapping *getMapping(int epsg_code);
 const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name);
 const MethodMapping *getMapping(const OperationMethod *method);
+std::vector<const MethodMapping *>
+getMappingsFromPROJName(const std::string &projName);
 const ParamMapping *getMapping(const MethodMapping *mapping,
                                const OperationParameterValue *param);
 const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,

@@ -154,6 +154,19 @@ static const MethodMapping *getMapping(const std::string &wkt2_name) {
 
 // ---------------------------------------------------------------------------
 
+std::vector<const MethodMapping *>
+getMappingsFromPROJName(const std::string &projName) {
+    std::vector<const MethodMapping *> res;
+    for (const auto &mapping : methodMappings) {
+        if (!mapping.proj_names.empty() && mapping.proj_names[0] == projName) {
+            res.push_back(&mapping);
+        }
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
 const ParamMapping *getMapping(const MethodMapping *mapping,
                                const OperationParameterValue *param) {
     const auto &param_name = param->parameter()->name();
@@ -3765,13 +3778,13 @@ std::string Conversion::exportToPROJString(
         if (!mapping && methodEPSGCode) {
             mapping = getMapping(methodEPSGCode);
         }
-        if (mapping && !mapping->proj_name[0].empty()) {
-            formatter->addStep(mapping->proj_name[0]);
-            for (size_t i = 1; i < mapping->proj_name.size(); ++i) {
-                if (internal::starts_with(mapping->proj_name[i], "axis=")) {
+        if (mapping && !mapping->proj_names[0].empty()) {
+            formatter->addStep(mapping->proj_names[0]);
+            for (size_t i = 1; i < mapping->proj_names.size(); ++i) {
+                if (internal::starts_with(mapping->proj_names[i], "axis=")) {
                     bAxisSpecFound = true;
                 }
-                formatter->addParam(mapping->proj_name[i]);
+                formatter->addParam(mapping->proj_names[i]);
             }
 
             if (ci_equal(projectionMethodName,
