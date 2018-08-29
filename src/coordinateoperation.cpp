@@ -5007,8 +5007,10 @@ std::string Transformation::exportToPROJString(
             formatter->addParam("ry", ry);
             formatter->addParam("rz", rz);
             formatter->addParam("s", scaleDiff);
-            if (!positionVectorConvention) {
-                formatter->addParam("transpose");
+            if (positionVectorConvention) {
+                formatter->addParam("convention=position_vector");
+            } else {
+                formatter->addParam("convention=coordinate_frame");
             }
         }
 

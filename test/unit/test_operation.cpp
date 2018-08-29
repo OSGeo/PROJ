@@ -522,7 +522,8 @@ TEST(operation, transformation_createPositionVector) {
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
-              "+rz=6 +s=7 +step +inv +proj=cart +ellps=GRS80 +step "
+              "+rz=6 +s=7 +convention=position_vector +step +inv +proj=cart "
+              "+ellps=GRS80 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
 
@@ -557,7 +558,8 @@ TEST(operation, transformation_createCoordinateFrameRotation) {
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 +rx=-4 +ry=-5 "
-              "+rz=-6 +s=7 +transpose +step +inv +proj=cart +ellps=GRS80 +step "
+              "+rz=-6 +s=7 +convention=coordinate_frame +step +inv +proj=cart "
+              "+ellps=GRS80 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
 
@@ -3133,7 +3135,8 @@ TEST(operation, boundCRS_of_geogCRS_to_geogCRS) {
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
               "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
-              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 +step "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+              "+convention=position_vector +step "
               "+inv +proj=cart +ellps=WGS84 +step +proj=unitconvert +xy_in=rad "
               "+xy_out=deg +step +proj=axisswap +order=2,1");
 }
@@ -3168,7 +3171,8 @@ TEST(operation, boundCRS_of_projCRS_to_geogCRS) {
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
               "+step +proj=cart +ellps=clrk80ign +step +proj=helmert +x=1 +y=2 "
-              "+z=3 +rx=4 +ry=5 +rz=6 +s=7 +step +inv +proj=cart +ellps=WGS84 "
+              "+z=3 +rx=4 +ry=5 +rz=6 +s=7 +convention=position_vector +step "
+              "+inv +proj=cart +ellps=WGS84 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg +step "
               "+proj=axisswap +order=2,1");
 }
@@ -3189,7 +3193,8 @@ TEST(operation, boundCRS_of_geogCRS_to_projCRS) {
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
               "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
-              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 +step "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+              "+convention=position_vector +step "
               "+inv +proj=cart +ellps=WGS84 +step +proj=utm +zone=31 "
               "+ellps=WGS84");
 }
@@ -3206,7 +3211,8 @@ TEST(operation, geogCRS_to_boundCRS_of_geogCRS) {
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=WGS84 +step +proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 "
-              "+ry=-5 +rz=-6 +s=7 +step +inv +proj=cart +ellps=clrk80ign +step "
+              "+ry=-5 +rz=-6 +s=7 +convention=position_vector +step +inv "
+              "+proj=cart +ellps=clrk80ign +step "
               "+inv +proj=longlat +ellps=clrk80ign +pm=paris +step "
               "+proj=unitconvert +xy_in=rad +xy_out=grad +step +proj=axisswap "
               "+order=2,1");
@@ -3233,8 +3239,10 @@ TEST(operation, boundCRS_to_boundCRS) {
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
               "+step +proj=cart +ellps=clrk80ign +step +proj=helmert "
-              "+x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 +step +proj=helmert +x=-8 "
-              "+y=-9 +z=-10 +rx=-11 +ry=-12 +rz=-13 +s=14 +step +inv "
+              "+x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+              "+convention=position_vector +step +proj=helmert +x=-8 "
+              "+y=-9 +z=-10 +rx=-11 +ry=-12 +rz=-13 +s=14 "
+              "+convention=position_vector +step +inv "
               "+proj=cart +ellps=GRS80 +step +proj=utm +zone=32 "
               "+ellps=GRS80");
 }
@@ -3394,7 +3402,8 @@ TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
               "+ellps=clrk80ign +pm=paris +step +proj=cart +ellps=clrk80ign "
-              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 +step "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+              "+convention=position_vector +step "
               "+inv +proj=cart +ellps=WGS84 +step +proj=vgridshift "
               "+grids=egm08_25.gtx +step +proj=unitconvert +xy_in=rad "
               "+xy_out=deg +step +proj=axisswap +order=2,1");
@@ -3426,7 +3435,8 @@ TEST(operation, compoundCRS_with_boundProjCRS_and_boundVerticalCRS_to_geogCRS) {
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
               "+step +proj=cart +ellps=clrk80ign +step +proj=helmert +x=1 +y=2 "
-              "+z=3 +rx=4 +ry=5 +rz=6 +s=7 +step +inv +proj=cart +ellps=WGS84 "
+              "+z=3 +rx=4 +ry=5 +rz=6 +s=7 +convention=position_vector +step "
+              "+inv +proj=cart +ellps=WGS84 "
               "+step +proj=vgridshift +grids=egm08_25.gtx +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");

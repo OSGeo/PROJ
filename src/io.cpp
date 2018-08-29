@@ -2674,9 +2674,17 @@ const std::string &PROJStringFormatter::toString() const {
                     ((d->steps_[i].paramValues.size() == 7 &&
                       d->steps_[i - 1].paramValues.size() == 7) ||
                      (d->steps_[i].paramValues.size() == 8 &&
-                      d->steps_[i].paramValues[7] == "transpose" &&
+                      d->steps_[i].paramValues[7] ==
+                          "convention=position_vector" &&
                       d->steps_[i - 1].paramValues.size() == 8 &&
-                      d->steps_[i - 1].paramValues[7] == "transpose")) &&
+                      d->steps_[i - 1].paramValues[7] ==
+                          "convention=position_vector") ||
+                     (d->steps_[i].paramValues.size() == 8 &&
+                      d->steps_[i].paramValues[7] ==
+                          "convention=coordinate_frame" &&
+                      d->steps_[i - 1].paramValues.size() == 8 &&
+                      d->steps_[i - 1].paramValues[7] ==
+                          "convention=coordinate_frame")) &&
                     starts_with(d->steps_[i].paramValues[0], "x=") &&
                     starts_with(d->steps_[i - 1].paramValues[0], "x=") &&
                     starts_with(d->steps_[i].paramValues[1], "y=") &&

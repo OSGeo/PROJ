@@ -12,7 +12,6 @@
     - WKT2:2018 USAGE
     - dynamic CRS WKT
     - test sphericalCS
-    - revise Helmert in respect with https://github.com/OSGeo/proj.4/issues/1091
     - time-dependant Helmert
 
     - transformation with WEST longitude
