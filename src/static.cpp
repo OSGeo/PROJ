@@ -461,6 +461,8 @@ const std::string AxisName::Longitude("Longitude");
 const std::string AxisName::Latitude("Latitude");
 const std::string AxisName::Easting("Easting");
 const std::string AxisName::Northing("Northing");
+const std::string AxisName::Westing("Westing");
+const std::string AxisName::Southing("Southing");
 const std::string AxisName::Ellipsoidal_height("Ellipsoidal height");
 const std::string AxisName::Geocentric_X("Geocentric X");
 const std::string AxisName::Geocentric_Y("Geocentric Y");

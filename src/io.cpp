@@ -3652,17 +3652,39 @@ CRSNNPtr PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(
 CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     const PROJStringParser::Private::Step &step, GeographicCRSNNPtr geogCRS) {
     auto mappings = getMappingsFromPROJName(step.name);
-    // TODO: handle mappings.size() > 1
+    const MethodMapping *mapping = mappings[0];
+
+    if (step.name == "tmerc" && getParamValue(step, "axis") == "wsu") {
+        constexpr int EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED =
+            9808;
+        mapping =
+            getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED);
+    } else if (step.name == "lcc") {
+        auto lat_0 = getParamValue(step, "lat_0");
+        auto lat_1 = getParamValue(step, "lat_1");
+        auto lat_2 = getParamValue(step, "lat_2");
+        if (lat_2.empty() && !lat_0.empty() && !lat_1.empty() &&
+            dmstor(lat_0.c_str(), nullptr) == dmstor(lat_1.c_str(), nullptr)) {
+            constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP = 9801;
+            mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+        } else {
+            constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP = 9802;
+            mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP);
+        }
+    } else if (step.name == "aeqd" && hasParamValue(step, "guam")) {
+        constexpr int EPSG_CODE_METHOD_GUAM_PROJECTION = 9831;
+        mapping = getMapping(EPSG_CODE_METHOD_GUAM_PROJECTION);
+    }
 
     auto convMap =
-        PropertyMap().set(IdentifiedObject::NAME_KEY, mappings[0]->wkt2_name);
-    if (mappings[0]->epsg_code) {
+        PropertyMap().set(IdentifiedObject::NAME_KEY, mapping->wkt2_name);
+    if (mapping->epsg_code) {
         convMap.set(Identifier::CODESPACE_KEY, Identifier::EPSG)
-            .set(Identifier::CODE_KEY, mappings[0]->epsg_code);
+            .set(Identifier::CODE_KEY, mapping->epsg_code);
     }
     std::vector<OperationParameterNNPtr> parameters;
     std::vector<ParameterValueNNPtr> values;
-    for (const auto &param : mappings[0]->params) {
+    for (const auto &param : mapping->params) {
         auto paramValue = !param.proj_names.empty()
                               ? getParamValue(step, param.proj_names[0])
                               : std::string();
@@ -3674,11 +3696,21 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         }
         double value = 0;
         if (!paramValue.empty()) {
-            try {
-                value = c_locale_stod(paramValue);
-            } catch (const std::invalid_argument &) {
-                throw ParsingException("invalid value for " +
-                                       param.proj_names[0]);
+            if (param.unit_type == UnitOfMeasure::Type::ANGULAR) {
+                char *endptr = nullptr;
+                value = dmstor(paramValue.c_str(), &endptr) * RAD_TO_DEG;
+                if (value == HUGE_VAL ||
+                    endptr != paramValue.c_str() + paramValue.size()) {
+                    throw ParsingException("invalid value for " +
+                                           param.proj_names[0]);
+                }
+            } else {
+                try {
+                    value = c_locale_stod(paramValue);
+                } catch (const std::invalid_argument &) {
+                    throw ParsingException("invalid value for " +
+                                           param.proj_names[0]);
+                }
             }
         } else if (param.unit_type == UnitOfMeasure::Type::SCALE) {
             value = 1;
@@ -3710,16 +3742,39 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     const UnitOfMeasure unit = buildUnit(step, "units", "to_meter");
 
-    std::vector<CoordinateSystemAxisNNPtr> axis{
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Easting),
-            AxisAbbreviation::E, AxisDirection::EAST, unit),
-        CoordinateSystemAxis::create(
-            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                    AxisName::Northing),
-            AxisAbbreviation::N, AxisDirection::NORTH, unit)};
+    CoordinateSystemAxisNNPtr east = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Easting),
+        AxisAbbreviation::E, AxisDirection::EAST, unit);
+    CoordinateSystemAxisNNPtr north = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Northing),
+        AxisAbbreviation::N, AxisDirection::NORTH, unit);
+    CoordinateSystemAxisNNPtr west = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Westing),
+        std::string(), AxisDirection::WEST, unit);
+    CoordinateSystemAxisNNPtr south = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Southing),
+        std::string(), AxisDirection::SOUTH, unit);
 
+    std::vector<CoordinateSystemAxisNNPtr> axis{east, north};
+
+    auto axisStr = getParamValue(step, "axis");
+    if (!axisStr.empty()) {
+        if (axisStr.size() == 3) {
+            for (int i = 0; i < 2; i++) {
+                if (axisStr[i] == 'n') {
+                    axis[i] = north;
+                } else if (axisStr[i] == 's') {
+                    axis[i] = south;
+                } else if (axisStr[i] == 'e') {
+                    axis[i] = east;
+                } else if (axisStr[i] == 'w') {
+                    axis[i] = west;
+                } else {
+                    throw ParsingException("Unhandled axis=" + axisStr);
+                }
+            }
+        }
+    }
     auto cs = CartesianCS::create(PropertyMap(), axis[0], axis[1]);
 
     CRSNNPtr crs = ProjectedCRS::create(

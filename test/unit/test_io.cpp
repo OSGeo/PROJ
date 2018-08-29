@@ -3393,6 +3393,99 @@ TEST(io, projparse_tmerc) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_tmerc_south_oriented) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=tmerc +axis=wsu +x_0=1 +lat_0=1 +k_0=2");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    crs->exportToWKT(f);
+    auto expected =
+        "PROJCRS[\"unknown\",\n"
+        "    BASEGEODCRS[\"unknown\",\n"
+        "        DATUM[\"World Geodetic System 1984\",\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "    CONVERSION[\"unknown\",\n"
+        "        METHOD[\"Transverse Mercator (South Orientated)\",\n"
+        "            ID[\"EPSG\",9808]],\n"
+        "        PARAMETER[\"Latitude of natural origin\",1,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8801]],\n"
+        "        PARAMETER[\"Longitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8802]],\n"
+        "        PARAMETER[\"Scale factor at natural origin\",2,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8805]],\n"
+        "        PARAMETER[\"False easting\",1,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"westing\",west,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"southing\",south,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]]]";
+
+    EXPECT_EQ(f->toString(), expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_lcc_as_lcc1sp) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=lcc +lat_0=45 +lat_1=45");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("Lambert Conic Conformal (1SP)") != std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_lcc_as_lcc2sp) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=lcc +lat_0=45 +lat_1=46");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("Lambert Conic Conformal (2SP)") != std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_aeqd_guam) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=aeqd +guam");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("Guam Projection") != std::string::npos) << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_projected_units) {
     auto obj =
         PROJStringParser().createFromPROJString("+proj=tmerc +units=us-ft");
@@ -3567,5 +3660,11 @@ TEST(io, projparse_longlat_errors) {
 TEST(io, projparse_projected_errors) {
     EXPECT_THROW(
         PROJStringParser().createFromPROJString("+proj=tmerc +units=foo"),
+        ParsingException);
+    EXPECT_THROW(
+        PROJStringParser().createFromPROJString("+proj=tmerc +x_0=foo"),
+        ParsingException);
+    EXPECT_THROW(
+        PROJStringParser().createFromPROJString("+proj=tmerc +lat_0=foo"),
         ParsingException);
 }

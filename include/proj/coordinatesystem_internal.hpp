@@ -75,6 +75,8 @@ class AxisName {
     static const std::string Latitude;
     static const std::string Easting;
     static const std::string Northing;
+    static const std::string Westing;
+    static const std::string Southing;
     static const std::string Ellipsoidal_height;
     static const std::string Geocentric_X;
     static const std::string Geocentric_Y;
