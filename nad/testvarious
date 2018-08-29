@@ -903,6 +903,37 @@ $EXE -f '%0.3f' \
 487147.594520173 4934316.46263998
 EOF
 
+echo  "##############################################################" >> ${OUT}
+echo  "Test vto_meter" >> ${OUT}
+#
+$EXE -f '%0.3f' \
+    +proj=longlat +a=1 +b=1 +vto_meter=1000 \
+    +to +proj=longlat +a=1 +b=1  \
+ -E >> ${OUT} <<EOF
+0 0 1
+EOF
+
+$EXE -f '%0.3f' \
+    +proj=merc +a=1 +b=1 +vto_meter=1000 \
+    +to +proj=longlat +a=1 +b=1  \
+ -E >> ${OUT} <<EOF
+0 0 1
+EOF
+
+$EXE -f '%0.3f' \
+    +proj=longlat +a=1 +b=1 \
+    +to +proj=longlat +a=1 +b=1 +vto_meter=1000 \
+ -E >> ${OUT} <<EOF
+0 0 1000
+EOF
+
+$EXE -f '%0.3f' \
+    +proj=longlat +a=1 +b=1 \
+    +to +proj=merc +a=1 +b=1 +vto_meter=1000 \
+ -E >> ${OUT} <<EOF
+0 0 1000
+EOF
+
 
 # Done!
 # do 'diff' with distribution results

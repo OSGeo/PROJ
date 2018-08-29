@@ -81,8 +81,9 @@ static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
         coo.xyz.x *= P->ra;
         coo.xyz.y *= P->ra;
         return coo;
-    /* Silence some compiler warnings about PJ_IO_UNITS_ANGULAR not handled */
-    default:
+
+    case PJ_IO_UNITS_ANGULAR:
+        coo.lpz.z = P->vto_meter * coo.lpz.z - P->z0;
         break;
     }
 

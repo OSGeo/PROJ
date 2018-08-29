@@ -137,6 +137,7 @@ static PJ_COORD fwd_finalize (PJ *P, PJ_COORD coo) {
         break;
 
     case PJ_IO_UNITS_ANGULAR:
+        coo.lpz.z = P->vfr_meter * (coo.lpz.z + P->z0);
         break;
     }
 

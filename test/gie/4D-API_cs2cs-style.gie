@@ -337,4 +337,33 @@ accept      90 0 0
 expect      0 1 0
 roundtrip   1
 
+-------------------------------------------------------------------------------
+Check that vunits / vto_meter is honored
+-------------------------------------------------------------------------------
+
+operation   +proj=longlat +a=1 +b=1 +vto_meter=1000
+accept      0 0 1000
+expect      0 0 1
+roundtrip   1
+
+operation   +proj=longlat +a=1 +b=1 +vto_meter=1000 +geoc
+accept      0 0 1000
+expect      0 0 1
+roundtrip   1
+
+operation   +proj=longlat +a=1 +b=1 +vunits=km
+accept      0 0 1000
+expect      0 0 1
+roundtrip   1
+
+operation   +proj=merc +a=1 +b=1 +vto_meter=1000
+accept      0 0 1000
+expect      0 0 1
+roundtrip   1
+
+operation   +proj=merc +a=1 +b=1 +vunits=km
+accept      0 0 1000
+expect      0 0 1
+roundtrip   1
+
 </gie>

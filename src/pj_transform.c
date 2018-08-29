@@ -190,7 +190,7 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
     long i;
 
     /* Nothing to do? */
-    if (P->is_latlong && !P->geoc)
+    if (P->is_latlong && !P->geoc && P->vto_meter == 1.0)
         return 0;
     if (P->is_geocent)
         return 0;
@@ -290,7 +290,7 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
     long i;
 
     /* Nothing to do? */
-    if (P->is_latlong && !P->geoc)
+    if (P->is_latlong && !P->geoc && P->vto_meter == 1.0)
         return 0;
 
     /* Check first if projection is invertible. */
@@ -430,6 +430,8 @@ static int height_unit (PJ *P, PJ_DIRECTION dir, long n, int dist, double *z) {
         return 0;
     if (0==z)
         return 0;
+    if (P->is_latlong)
+        return 0; /* done in pj_inv3d() / pj_fwd3d() */
 
     for (i = 0;  i < n;  i++)
         if (z[dist*i] != HUGE_VAL )
