@@ -89,15 +89,36 @@ test-driver
 /src/nad2bin
 /src/proj
 /src/geod
+/src/geodtest.log
+/src/geodtest.trs
 /src/stamp-h*
 /src/proj_config.h
 /src/proj_config.h.in
 /src/cs2cs
 /src/multistresstest
 /src/test228
+/src/test-suite.log
 /src/cct
 /src/gie
 /src/geodtest
+
+# test
+test/googletest/.libs/
+test/googletest/libgtest.la
+test/googletest/src/.deps/
+test/googletest/src/.dirstamp
+test/googletest/src/.libs/
+test/googletest/src/gtest-all.lo
+test/googletest/src/gtest-all.o
+test/unit/.deps/
+test/unit/.libs/
+test/unit/basic_test
+test/unit/basic_test.o
+test/unit/main.o
+test/unit/pj_phi2_test
+test/unit/pj_phi2_test.o
+test/unit/proj_errno_string_test
+test/unit/proj_errno_string_test.o
 
 # Java bridge
 jniwrap/out
