@@ -49,6 +49,7 @@ echoin = 0,	/* echo input data to output line */
 tag = '#';	/* beginning of line tag character */
 	static char
 *oform = (char *)0,	/* output format for x-y or decimal degrees */
+ oform_buffer[16],	/* buffer for oform when using -d */
 *oterr = "*\t*",	/* output line for unprojectable input */
 *usage =
 "%s\nusage: %s [ -eEfIlrstvwW [args] ] [ +opts[=arg] ]\n"
@@ -293,10 +294,15 @@ int main(int argc, char **argv)
               case 's': /* reverse output */
                 reverseout = 1;
                 continue;
-              case 'd': /* set debug level */
+              case 'D': /* set debug level */
                 if (--argc <= 0) goto noargument;
                 pj_ctx_set_debug( pj_get_default_ctx(), atoi(*++argv));
                 continue;
+              case 'd':
+                if (--argc <= 0) goto noargument;
+                snprintf(oform_buffer, sizeof(oform_buffer), "%%.%df", atoi(*++argv));
+                oform = oform_buffer;
+                break;
               default:
                 emess(1, "invalid option: -%c",*arg);
                 break;
