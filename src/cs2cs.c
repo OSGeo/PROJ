@@ -53,7 +53,7 @@ tag = '#';	/* beginning of line tag character */
  oform_buffer[16],	/* buffer for oform when using -d */
 *oterr = "*\t*",	/* output line for unprojectable input */
 *usage =
-"%s\nusage: %s [ -eEfIlrstvwW [args] ] [ +opts[=arg] ]\n"
+"%s\nusage: %s [ -dDeEfIlrstvwW [args] ] [ +opts[=arg] ]\n"
 "                   [+to [+opts[=arg] [ files ]\n";
 
 static double (*informat)(const char *, 

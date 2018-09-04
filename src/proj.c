@@ -50,7 +50,7 @@ static char
 
 static const char
     *oterr = "*\t*",    /* output line for unprojectable input */
-    *usage = "%s\nusage: %s [ -beEfiIlmorsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
+    *usage = "%s\nusage: %s [ -bdeEfiIlmorsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
 
 static struct FACTORS facs;
 
