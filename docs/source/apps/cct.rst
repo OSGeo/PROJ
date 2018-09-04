@@ -32,6 +32,10 @@ The following control parameters can appear in any order:
 
     Specify input columns for (up to) 4 input parameters. Defaults to 1,2,3,4.
 
+.. option:: -d<n>
+
+    Specify the number of decimals in the output. Applies to both angles and distances.
+
 .. option:: -I
 
     Do the inverse transformation.
