@@ -32,9 +32,11 @@ The following control parameters can appear in any order:
 
     Specify input columns for (up to) 4 input parameters. Defaults to 1,2,3,4.
 
-.. option:: -d<n>
+.. option:: -d <n>
 
-    Specify the number of decimals in the output. Applies to both angles and distances.
+.. versionadded:: 5.2.0
+
+    Specify the number of decimals in the output.
 
 .. option:: -I
 
