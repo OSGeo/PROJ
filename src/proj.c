@@ -455,7 +455,7 @@ int main(int argc, char **argv) {
                 continue;
               case 'd':
                 if (--argc <= 0) goto noargument;
-                snprintf(oform_buffer, sizeof(oform_buffer), "%%.%df", atoi(*++argv));
+                sprintf(oform_buffer, "%%.%df", atoi(*++argv));
                 oform = oform_buffer;
                 break;
               case 'r': /* reverse input */
