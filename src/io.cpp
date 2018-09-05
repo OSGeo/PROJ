@@ -3085,7 +3085,7 @@ struct PROJStringParser::Private {
     std::string getParamValue(const Step &step, const std::string &key);
     GeographicCRSNNPtr buildGeographicCRS(const Step &step, int iUnitConvert,
                                           int iAxisSwap);
-    CRSNNPtr buildProjectedCRS(const Step &step, GeographicCRSNNPtr geogCRS);
+    CRSNNPtr buildProjectedCRS(Step &step, GeographicCRSNNPtr geogCRS);
     CRSNNPtr buildBoundOrCompoundCRSIfNeeded(const Step &step, CRSNNPtr crs);
     UnitOfMeasure buildUnit(const Step &step, const std::string &unitsParamName,
                             const std::string &toMeterParamName);
@@ -3649,22 +3649,59 @@ CRSNNPtr PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(
 
 // ---------------------------------------------------------------------------
 
+static double getAngularValue(const std::string &paramValue,
+                              bool *pHasError = nullptr) {
+    char *endptr = nullptr;
+    double value = dmstor(paramValue.c_str(), &endptr) * RAD_TO_DEG;
+    if (value == HUGE_VAL || endptr != paramValue.c_str() + paramValue.size()) {
+        if (pHasError)
+            *pHasError = true;
+        return 0.0;
+    }
+    if (pHasError)
+        *pHasError = false;
+    return value;
+}
+
+// ---------------------------------------------------------------------------
+
+static double getNumericValue(const std::string &paramValue,
+                              bool *pHasError = nullptr) {
+    try {
+        double value = c_locale_stod(paramValue);
+        if (pHasError)
+            *pHasError = false;
+        return value;
+    } catch (const std::invalid_argument &) {
+        if (pHasError)
+            *pHasError = true;
+        return 0.0;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
-    const PROJStringParser::Private::Step &step, GeographicCRSNNPtr geogCRS) {
+    PROJStringParser::Private::Step &step, GeographicCRSNNPtr geogCRS) {
     auto mappings = getMappingsFromPROJName(step.name);
-    const MethodMapping *mapping = mappings[0];
+    const MethodMapping *mapping = mappings.empty() ? nullptr : mappings[0];
 
     if (step.name == "tmerc" && getParamValue(step, "axis") == "wsu") {
         constexpr int EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED =
             9808;
         mapping =
             getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED);
+    } else if (step.name == "etmerc") {
+        constexpr int EPSG_CODE_METHOD_TRANSVERSE_MERCATOR = 9807;
+        mapping = getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR);
+        // TODO: we loose the link to the proj etmerc method here. Add some
+        // property to Conversion to keep it ?
     } else if (step.name == "lcc") {
         auto lat_0 = getParamValue(step, "lat_0");
         auto lat_1 = getParamValue(step, "lat_1");
         auto lat_2 = getParamValue(step, "lat_2");
         if (lat_2.empty() && !lat_0.empty() && !lat_1.empty() &&
-            dmstor(lat_0.c_str(), nullptr) == dmstor(lat_1.c_str(), nullptr)) {
+            getAngularValue(lat_0) == getAngularValue(lat_1)) {
             constexpr int EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP = 9801;
             mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
         } else {
@@ -3674,7 +3711,94 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     } else if (step.name == "aeqd" && hasParamValue(step, "guam")) {
         constexpr int EPSG_CODE_METHOD_GUAM_PROJECTION = 9831;
         mapping = getMapping(EPSG_CODE_METHOD_GUAM_PROJECTION);
+    } else if (step.name == "cea" &&
+               !geogCRS->datum()->ellipsoid()->isSphere()) {
+        constexpr int EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA = 9835;
+        mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA);
+    } else if (step.name == "geos" && getParamValue(step, "sweep") == "x") {
+        static const std::string
+            PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X(
+                "Geostationary Satellite (Sweep X)");
+        mapping =
+            getMapping(PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X);
+    } else if (step.name == "geos") {
+        static const std::string
+            PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y(
+                "Geostationary Satellite (Sweep Y)");
+        mapping =
+            getMapping(PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y);
+    } else if (step.name == "omerc") {
+        if (hasParamValue(step, "no_uoff") || hasParamValue(step, "no_off")) {
+            constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A =
+                9812;
+            mapping =
+                getMapping(EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A);
+        } else if (hasParamValue(step, "lat_1") &&
+                   hasParamValue(step, "lon_1") &&
+                   hasParamValue(step, "lat_2") &&
+                   hasParamValue(step, "lon_2")) {
+            static const std::string
+                PROJ_WKT2_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN(
+                    "Hotine Oblique Mercator Two Point Natural Origin");
+            mapping = getMapping(
+                PROJ_WKT2_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_TWO_POINT_NATURAL_ORIGIN);
+        } else {
+            constexpr int EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B =
+                9815;
+            mapping =
+                getMapping(EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B);
+        }
+    } else if (step.name == "krovak" && getParamValue(step, "axis") == "swu") {
+        constexpr int EPSG_CODE_METHOD_KROVAK = 9819;
+        mapping = getMapping(EPSG_CODE_METHOD_KROVAK);
+    } else if (step.name == "merc") {
+        if (hasParamValue(step, "a") && hasParamValue(step, "b") &&
+            getParamValue(step, "a") == getParamValue(step, "b") &&
+            (!hasParamValue(step, "lat_ts") ||
+             getAngularValue(getParamValue(step, "lat_ts")) == 0.0) &&
+            (!hasParamValue(step, "k") ||
+             getNumericValue(getParamValue(step, "k")) == 1.0) &&
+            getParamValue(step, "nadgrids") == "@null") {
+            constexpr int
+                EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR = 1024;
+            mapping = getMapping(
+                EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR);
+            for (size_t i = 0; i < step.paramValues.size(); ++i) {
+                if (ci_equal(step.paramValues[i].first, "nadgrids")) {
+                    step.paramValues.erase(step.paramValues.begin() + i);
+                    break;
+                }
+            }
+        } else if (hasParamValue(step, "lat_ts")) {
+            constexpr int EPSG_CODE_METHOD_MERCATOR_VARIANT_B = 9805;
+            mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
+        } else {
+            constexpr int EPSG_CODE_METHOD_MERCATOR_VARIANT_A = 9804;
+            mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_A);
+        }
+    } else if (step.name == "stere") {
+        if (hasParamValue(step, "lat_0") &&
+            std::fabs(std::fabs(getAngularValue(getParamValue(step, "lat_0"))) -
+                      90.0) < 1e-10) {
+            if (hasParamValue(step, "lat_ts")) {
+                constexpr int EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B =
+                    9829;
+                mapping =
+                    getMapping(EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B);
+            } else {
+                constexpr int EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A =
+                    9810;
+                mapping =
+                    getMapping(EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A);
+            }
+        } else {
+            static const std::string PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC(
+                "Stereographic");
+            mapping = getMapping(PROJ_WKT2_NAME_METHOD_STEREOGRAPHIC);
+        }
     }
+
+    assert(mapping);
 
     auto convMap =
         PropertyMap().set(IdentifiedObject::NAME_KEY, mapping->wkt2_name);
@@ -3696,24 +3820,28 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         }
         double value = 0;
         if (!paramValue.empty()) {
+            bool hasError = false;
             if (param.unit_type == UnitOfMeasure::Type::ANGULAR) {
-                char *endptr = nullptr;
-                value = dmstor(paramValue.c_str(), &endptr) * RAD_TO_DEG;
-                if (value == HUGE_VAL ||
-                    endptr != paramValue.c_str() + paramValue.size()) {
-                    throw ParsingException("invalid value for " +
-                                           param.proj_names[0]);
-                }
+                value = getAngularValue(paramValue, &hasError);
             } else {
-                try {
-                    value = c_locale_stod(paramValue);
-                } catch (const std::invalid_argument &) {
-                    throw ParsingException("invalid value for " +
-                                           param.proj_names[0]);
-                }
+                value = getNumericValue(paramValue, &hasError);
             }
+            if (hasError) {
+                throw ParsingException("invalid value for " +
+                                       param.proj_names[0]);
+            }
+
         } else if (param.unit_type == UnitOfMeasure::Type::SCALE) {
             value = 1;
+        } else {
+            // For omerc, if gamma is missing, the default value is alpha
+            if (step.name == "omerc" && !param.proj_names.empty() &&
+                param.proj_names[0] == "gamma") {
+                paramValue = getParamValue(step, "alpha");
+                if (!paramValue.empty()) {
+                    value = getAngularValue(paramValue);
+                }
+            }
         }
 
         PropertyMap propertiesParameter;
@@ -3895,9 +4023,13 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             } else if (ci_equal(projName, "axisswap")) {
                 iAxisSwap = i;
             } else {
-                auto res = getMappingsFromPROJName(projName);
-                if (!res.empty()) {
+                if (projName == "etmerc") {
                     iMain = i;
+                } else {
+                    auto res = getMappingsFromPROJName(projName);
+                    if (!res.empty()) {
+                        iMain = i;
+                    }
                 }
             }
         }

@@ -3486,6 +3486,259 @@ TEST(io, projparse_aeqd_guam) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_cea_ellipsoidal) {
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=cea +ellps=GRS80");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(
+        wkt.find(
+            "METHOD[\"Lambert Cylindrical Equal Area\",ID[\"EPSG\",9835]]") !=
+        std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_geos_sweep_x) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=geos +sweep=x");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("Geostationary Satellite (Sweep X)") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_geos_sweep_y) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=geos");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("Geostationary Satellite (Sweep Y)") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_omerc_nouoff) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=omerc +no_uoff +alpha=2 +gamma=3");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"Hotine Oblique Mercator (variant "
+                         "A)\",ID[\"EPSG\",9812]]") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETER[\"Azimuth of initial line\",2") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETER[\"Angle from Rectified to Skew Grid\",3") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_omerc_tpno) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=omerc +lat_1=1 +lat_2=2 +lon_1=3 +lon_2=4");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(
+        wkt.find(
+            "METHOD[\"Hotine Oblique Mercator Two Point Natural Origin\"]") !=
+        std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_omerc_variant_b) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=omerc +alpha=2");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"Hotine Oblique Mercator (variant "
+                         "B)\",ID[\"EPSG\",9815]]") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETER[\"Angle from Rectified to Skew Grid\",2") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_krovak) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=krovak");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(
+        wkt.find("METHOD[\"Krovak (North Orientated)\",ID[\"EPSG\",1041]]") !=
+        std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_krovak_axis_swu) {
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=krovak +axis=swu");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"Krovak\",ID[\"EPSG\",9819]]") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_etmerc) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=etmerc");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"Transverse Mercator\",ID[\"EPSG\",9807]]") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_merc_variant_B) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=merc +lat_ts=1");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(
+        wkt.find("METHOD[\"Mercator (variant B)\",ID[\"EPSG\",9805]]") !=
+        std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("PARAMETER[\"Latitude of 1st standard parallel\",1") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_merc_google_mercator) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 "
+        "+k=1 +units=m +nadgrids=@null");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"Popular Visualisation Pseudo "
+                         "Mercator\",ID[\"EPSG\",1024]") != std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_merc_stere_polar_variant_B) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=stere +lat_0=90 +lat_ts=70");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(
+        wkt.find(
+            "METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]]") !=
+        std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_merc_stere_polar_variant_A) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=stere +lat_0=-90 +k=0.994");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(
+        wkt.find(
+            "METHOD[\"Polar Stereographic (variant A)\",ID[\"EPSG\",9810]]") !=
+        std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_merc_stere) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=stere +lat_0=30");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"Stereographic\"]") != std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_projected_units) {
     auto obj =
         PROJStringParser().createFromPROJString("+proj=tmerc +units=us-ft");

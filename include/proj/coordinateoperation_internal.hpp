@@ -69,6 +69,7 @@ struct MethodMapping {
 
 const MethodMapping *getMapping(int epsg_code);
 const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name);
+const MethodMapping *getMapping(const std::string &wkt2_name);
 const MethodMapping *getMapping(const OperationMethod *method);
 std::vector<const MethodMapping *>
 getMappingsFromPROJName(const std::string &projName);

@@ -2,8 +2,6 @@
     - export as ESRI WKT 1 ?
     - WKTv2 Bison based validator ?
     - import from Proj4
-            beware of +proj=stere cases
-            webmercator
             projections without WKT
             init= syntax
     - derived crs

@@ -142,7 +142,7 @@ const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) {
 
 // ---------------------------------------------------------------------------
 
-static const MethodMapping *getMapping(const std::string &wkt2_name) {
+const MethodMapping *getMapping(const std::string &wkt2_name) {
     for (const auto &mapping : methodMappings) {
         if (metadata::Identifier::isEquivalentName(mapping.wkt2_name,
                                                    wkt2_name)) {
