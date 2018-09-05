@@ -101,6 +101,7 @@ static const char usage[] = {
     "--------------------------------------------------------------------------------\n"
     "    -c x,y,z,t        Specify input columns for (up to) 4 input parameters.\n"
     "                      Defaults to 1,2,3,4\n"
+    "    -d n              Specify number of decimals in output.\n"
     "    -I                Do the inverse transformation\n"
     "    -o /path/to/file  Specify output file name\n"
     "    -t value          Provide a fixed t value for all input data (e.g. -t 0)\n"
@@ -113,6 +114,7 @@ static const char usage[] = {
     "--------------------------------------------------------------------------------\n"
     "    --output          Alias for -o\n"
     "    --columns         Alias for -c\n"
+    "    --decimals        Alias for -d\n"
     "    --height          Alias for -z\n"
     "    --time            Alias for -t\n"
     "    --verbose         Alias for -v\n"
@@ -207,11 +209,14 @@ int main(int argc, char **argv) {
     char *buf;
     int nfields = 4, direction = 1, skip_lines = 0, verbose;
     double fixed_z = HUGE_VAL, fixed_time = HUGE_VAL;
+    int decimals_angles = 10;
+    int decimals_distances = 4;
     int columns_xyzt[] = {1, 2, 3, 4};
     const char *longflags[]  = {"v=verbose", "h=help", "I=inverse", "version", 0};
     const char *longkeys[]   = {
         "o=output",
         "c=columns",
+        "d=decimals",
         "z=height",
         "t=time",
         "s=skip-lines",
@@ -219,7 +224,7 @@ int main(int argc, char **argv) {
 
     fout = stdout;
 
-    o = opt_parse (argc, argv, "hvI", "cozts", longflags, longkeys);
+    o = opt_parse (argc, argv, "hvI", "cdozts", longflags, longkeys);
     if (0==o)
         return 0;
 
@@ -256,6 +261,13 @@ int main(int argc, char **argv) {
 
     if (opt_given (o, "t")) {
         fixed_time = proj_atof (opt_arg (o, "t"));
+        nfields--;
+    }
+
+     if (opt_given (o, "d")) {
+        int dec = atoi (opt_arg (o, "d"));
+        decimals_angles = dec;
+        decimals_distances = dec;
         nfields--;
     }
 
@@ -363,10 +375,10 @@ int main(int argc, char **argv) {
         if (proj_angular_output (P, direction)) {
             point.lpzt.lam = proj_todeg (point.lpzt.lam);
             point.lpzt.phi = proj_todeg (point.lpzt.phi);
-            print (PJ_LOG_NONE, "%14.10f  %14.10f  %12.4f  %12.4f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
+            print (PJ_LOG_NONE, "%14.*f  %14.*f  %12.*f  %12.4f\n", decimals_angles, point.xyzt.x, decimals_angles, point.xyzt.y, decimals_distances, point.xyzt.z, point.xyzt.t);
         }
         else
-            print (PJ_LOG_NONE, "%13.4f  %13.4f  %12.4f  %12.4f\n", point.xyzt.x, point.xyzt.y, point.xyzt.z, point.xyzt.t);
+            print (PJ_LOG_NONE, "%13.*f  %13.*f  %12.*f  %12.4f\n", decimals_distances, point.xyzt.x, decimals_distances, point.xyzt.y, decimals_distances, point.xyzt.z, point.xyzt.t);
     }
 
     if (stdout != fout)

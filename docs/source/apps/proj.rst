@@ -37,6 +37,10 @@ The following control parameters can appear in any order
     floating point words. This option is to be used when :program:`proj` is a child process
     and allows bypassing formatting operations.
 
+.. option:: -d<n>
+
+    Specify the number of decimals in the output. Applies to both angles and distances.
+
 .. option:: -i
 
     Selects binary input only (see :option:`-b`).

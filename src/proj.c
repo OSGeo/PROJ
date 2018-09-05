@@ -45,11 +45,12 @@ static int
 
 static char
     *cheby_str,         /* string controlling Chebychev evaluation */
-    *oform = (char *)0; /* output format for x-y or decimal degrees */
+    *oform = (char *)0, /* output format for x-y or decimal degrees */
+    oform_buffer[16];   /* Buffer for oform when using -d */
 
 static const char
     *oterr = "*\t*",    /* output line for unprojectable input */
-    *usage = "%s\nusage: %s [ -beEfiIlmorsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
+    *usage = "%s\nusage: %s [ -bdeEfiIlmorsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
 
 static struct FACTORS facs;
 
@@ -452,6 +453,11 @@ int main(int argc, char **argv) {
                 if (--argc <= 0) goto noargument;
                 oform = *++argv;
                 continue;
+              case 'd':
+                if (--argc <= 0) goto noargument;
+                sprintf(oform_buffer, "%%.%df", atoi(*++argv));
+                oform = oform_buffer;
+                break;
               case 'r': /* reverse input */
                 reversein = 1;
                 continue;

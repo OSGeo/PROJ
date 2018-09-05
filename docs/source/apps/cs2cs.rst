@@ -36,6 +36,10 @@ The following control parameters can appear in any order:
     line to be passed through without processing. This option applicable to
     ASCII input only. (# is the default value).
 
+.. option:: -d<n>
+
+    Specify the number of decimals in the output. Applies to both angles and distances.
+
 .. option:: -e <string>
 
     Where *string* is an arbitrary string to be output if an error is detected during
