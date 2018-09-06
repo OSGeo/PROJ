@@ -3054,6 +3054,21 @@ TEST(io, projparse_longlat_pm_numeric) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_longlat_complex) {
+    std::string input =
+        "+proj=pipeline +step +inv +proj=longlat +ellps=clrk80ign "
+        "+pm=paris +step +proj=unitconvert +xy_in=rad +xy_out=grad +step "
+        "+proj=axisswap +order=2,1";
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              input);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_longlat_towgs84_3_terms) {
     auto obj = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +towgs84=1.2,2,3");
@@ -3735,6 +3750,70 @@ TEST(io, projparse_merc_stere) {
     auto wkt = f->toString();
     EXPECT_TRUE(wkt.find("METHOD[\"Stereographic\"]") != std::string::npos)
         << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_axisswap_unitconvert_longlat_proj) {
+    std::string input =
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=grad +xy_out=rad +step +proj=longlat "
+        "+ellps=clrk80ign +pm=paris +step +proj=lcc +lat_1=49.5 "
+        "+lat_0=49.5 +lon_0=0 +k_0=0.999877341 +x_0=600000 +y_0=200000 "
+        "+ellps=clrk80ign";
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              input);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_axisswap_unitconvert_proj_axisswap) {
+    std::string input =
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=igh "
+        "+lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80 +step +proj=axisswap +order=2,1";
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              input);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_axisswap_unitconvert_proj_unitconvert) {
+    std::string input =
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=igh "
+        "+lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80 +step +proj=unitconvert +xy_in=m "
+        "+z_in=m +xy_out=ft +z_out=ft";
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              input);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_axisswap_unitconvert_proj_unitconvert_numeric_axisswap) {
+    std::string input =
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=igh "
+        "+lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80 +step +proj=unitconvert +xy_in=m "
+        "+z_in=m +xy_out=2.5 +z_out=2.5 +step +proj=axisswap +order=-2,-1";
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              input);
 }
 
 // ---------------------------------------------------------------------------

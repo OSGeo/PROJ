@@ -3083,10 +3083,11 @@ struct PROJStringParser::Private {
 
     bool hasParamValue(const Step &step, const std::string &key);
     std::string getParamValue(const Step &step, const std::string &key);
-    GeographicCRSNNPtr buildGeographicCRS(const Step &step, int iUnitConvert,
+    GeographicCRSNNPtr buildGeographicCRS(int iStep, int iUnitConvert,
                                           int iAxisSwap);
-    CRSNNPtr buildProjectedCRS(Step &step, GeographicCRSNNPtr geogCRS);
-    CRSNNPtr buildBoundOrCompoundCRSIfNeeded(const Step &step, CRSNNPtr crs);
+    CRSNNPtr buildProjectedCRS(int iStep, GeographicCRSNNPtr geogCRS,
+                               int iUnitConvert, int iAxisSwap);
+    CRSNNPtr buildBoundOrCompoundCRSIfNeeded(int iStep, CRSNNPtr crs);
     UnitOfMeasure buildUnit(const Step &step, const std::string &unitsParamName,
                             const std::string &toMeterParamName);
 };
@@ -3198,6 +3199,30 @@ static const LinearUnitDesc *getLinearUnits(double toMeter) {
 
 // ---------------------------------------------------------------------------
 
+static UnitOfMeasure _buildUnit(const LinearUnitDesc *unitsMatch) {
+    std::string unitsCode;
+    if (unitsMatch->epsgCode) {
+        std::ostringstream buffer;
+        buffer.imbue(std::locale::classic());
+        buffer << unitsMatch->epsgCode;
+        unitsCode = buffer.str();
+    }
+    return UnitOfMeasure(
+        unitsMatch->name, c_locale_stod(unitsMatch->convToMeter),
+        UnitOfMeasure::Type::LINEAR,
+        unitsMatch->epsgCode ? Identifier::EPSG : std::string(), unitsCode);
+}
+
+// ---------------------------------------------------------------------------
+
+static UnitOfMeasure _buildUnit(double to_meter_value) {
+    // TODO: look-up in EPSG catalog
+    return UnitOfMeasure("unknown", to_meter_value,
+                         UnitOfMeasure::Type::LINEAR);
+}
+
+// ---------------------------------------------------------------------------
+
 UnitOfMeasure PROJStringParser::Private::buildUnit(
     const PROJStringParser::Private::Step &step,
     const std::string &unitsParamName, const std::string &toMeterParamName) {
@@ -3222,24 +3247,12 @@ UnitOfMeasure PROJStringParser::Private::buildUnit(
         }
         unitsMatch = getLinearUnits(to_meter_value);
         if (unitsMatch == nullptr) {
-            // TODO: look-up in EPSG catalog
-            unit = UnitOfMeasure("unknown", to_meter_value,
-                                 UnitOfMeasure::Type::LINEAR);
+            unit = _buildUnit(to_meter_value);
         }
     }
 
     if (unitsMatch) {
-        std::string unitsCode;
-        if (unitsMatch->epsgCode) {
-            std::ostringstream buffer;
-            buffer.imbue(std::locale::classic());
-            buffer << unitsMatch->epsgCode;
-            unitsCode = buffer.str();
-        }
-        unit = UnitOfMeasure(
-            unitsMatch->name, c_locale_stod(unitsMatch->convToMeter),
-            UnitOfMeasure::Type::LINEAR,
-            unitsMatch->epsgCode ? Identifier::EPSG : std::string(), unitsCode);
+        unit = _buildUnit(unitsMatch);
     }
 
     return unit;
@@ -3274,11 +3287,20 @@ static const struct DatumDesc {
      6377563.396, 299.3249646},
 };
 
+static bool isGeodeticStep(const std::string &name) {
+    return name == "longlat" || name == "lonlat" || name == "latlong" ||
+           name == "latlon";
+}
+
+static bool isProjectedStep(const std::string &name) {
+    return name == "etmerc" || !getMappingsFromPROJName(name).empty();
+}
 // ---------------------------------------------------------------------------
 
-GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
-    const PROJStringParser::Private::Step &step, int iUnitConvert,
-    int iAxisSwap) {
+GeographicCRSNNPtr
+PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
+                                              int iAxisSwap) {
+    const auto &step = steps_[iStep];
     auto ellpsStr = getParamValue(step, "ellps");
     auto datumStr = getParamValue(step, "datum");
     auto aStr = getParamValue(step, "a");
@@ -3287,6 +3309,11 @@ GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
     auto RStr = getParamValue(step, "R");
     auto pmStr = getParamValue(step, "pm");
     GeodeticReferenceFramePtr datum = nullptr;
+
+    assert(isGeodeticStep(step.name) || isProjectedStep(step.name));
+    assert(iUnitConvert < 0 ||
+           ci_equal(steps_[iUnitConvert].name, "unitconvert"));
+    assert(iAxisSwap < 0 || ci_equal(steps_[iAxisSwap].name, "axisswap"));
 
     PrimeMeridianNNPtr pm = PrimeMeridian::GREENWICH;
     if (!pmStr.empty()) {
@@ -3499,6 +3526,9 @@ GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
         if (stepUnitConvert.inverted) {
             std::swap(xy_in, xy_out);
         }
+        if (iUnitConvert < iStep) {
+            std::swap(xy_in, xy_out);
+        }
         if (xy_in.empty() || xy_out.empty() || xy_in != "rad" ||
             (xy_out != "rad" && xy_out != "deg" && xy_out != "grad")) {
             throw ParsingException("unhandled values for xy_in and/or xy_out");
@@ -3599,8 +3629,10 @@ GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
 
 // ---------------------------------------------------------------------------
 
-CRSNNPtr PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(
-    const PROJStringParser::Private::Step &step, CRSNNPtr crs) {
+CRSNNPtr
+PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
+                                                           CRSNNPtr crs) {
+    const auto &step = steps_[iStep];
     auto towgs84 = getParamValue(step, "towgs84");
     if (!towgs84.empty()) {
         std::vector<double> towgs84Values;
@@ -3682,9 +3714,15 @@ static double getNumericValue(const std::string &paramValue,
 // ---------------------------------------------------------------------------
 
 CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
-    PROJStringParser::Private::Step &step, GeographicCRSNNPtr geogCRS) {
+    int iStep, GeographicCRSNNPtr geogCRS, int iUnitConvert, int iAxisSwap) {
+    auto &step = steps_[iStep];
     auto mappings = getMappingsFromPROJName(step.name);
     const MethodMapping *mapping = mappings.empty() ? nullptr : mappings[0];
+
+    assert(isProjectedStep(step.name));
+    assert(iUnitConvert < 0 ||
+           ci_equal(steps_[iUnitConvert].name, "unitconvert"));
+    assert(iAxisSwap < 0 || ci_equal(steps_[iAxisSwap].name, "axisswap"));
 
     if (step.name == "tmerc" && getParamValue(step, "axis") == "wsu") {
         constexpr int EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED =
@@ -3868,7 +3906,34 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), convMap,
         parameters, values);
 
-    const UnitOfMeasure unit = buildUnit(step, "units", "to_meter");
+    UnitOfMeasure unit = buildUnit(step, "units", "to_meter");
+    if (iUnitConvert >= 0) {
+        auto stepUnitConvert = steps_[iUnitConvert];
+        auto xy_in = getParamValue(stepUnitConvert, "xy_in");
+        auto xy_out = getParamValue(stepUnitConvert, "xy_out");
+        if (stepUnitConvert.inverted) {
+            std::swap(xy_in, xy_out);
+        }
+        if (xy_in.empty() || xy_out.empty() || xy_in != "m") {
+            throw ParsingException("unhandled values for xy_in and/or xy_out");
+        }
+
+        const LinearUnitDesc *unitsMatch = nullptr;
+        try {
+            double to_meter_value = c_locale_stod(xy_out);
+            unitsMatch = getLinearUnits(to_meter_value);
+            if (unitsMatch == nullptr) {
+                unit = _buildUnit(to_meter_value);
+            }
+        } catch (const std::invalid_argument &) {
+            unitsMatch = getLinearUnits(xy_out);
+            if (!unitsMatch) {
+                throw ParsingException(
+                    "unhandled values for xy_in and/or xy_out");
+            }
+            unit = _buildUnit(unitsMatch);
+        }
+    }
 
     CoordinateSystemAxisNNPtr east = CoordinateSystemAxis::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Easting),
@@ -3900,6 +3965,30 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 } else {
                     throw ParsingException("Unhandled axis=" + axisStr);
                 }
+            }
+        }
+    } else if (iAxisSwap >= 0) {
+        auto stepAxisSwap = steps_[iAxisSwap];
+        auto orderStr = getParamValue(stepAxisSwap, "order");
+        auto orderTab = split(orderStr, ',');
+        if (orderTab.size() < 2) {
+            throw ParsingException("Unhandled order=" + orderStr);
+        }
+        if (stepAxisSwap.inverted) {
+            throw ParsingException("Unhandled +inv for +proj=axisswap");
+        }
+
+        for (size_t i = 0; i < 2; i++) {
+            if (orderTab[i] == "1") {
+                axis[i] = east;
+            } else if (orderTab[i] == "-1") {
+                axis[i] = west;
+            } else if (orderTab[i] == "2") {
+                axis[i] = north;
+            } else if (orderTab[i] == "-2") {
+                axis[i] = south;
+            } else {
+                throw ParsingException("Unhandled order=" + orderStr);
             }
         }
     }
@@ -4006,47 +4095,74 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         throw ParsingException("Missing proj= argument");
     }
 
-    if (d->steps_.size() <= 3) {
-        int iMain = -1;
-        int iUnitConvert = -1;
-        int iAxisSwap = -1;
-        bool isGeographic = false;
-        for (int i = 0; i < static_cast<int>(d->steps_.size()); i++) {
-            const auto &projName = d->steps_[i].name;
-            if (ci_equal(projName, "longlat") ||
-                ci_equal(projName, "latlong") || ci_equal(projName, "lonlat") ||
-                ci_equal(projName, "latlon")) {
-                iMain = i;
-                isGeographic = true;
-            } else if (ci_equal(projName, "unitconvert")) {
-                iUnitConvert = i;
-            } else if (ci_equal(projName, "axisswap")) {
-                iAxisSwap = i;
+    int iGeogStep = -1;
+    int iProjStep = -1;
+    int iFirstUnitConvert = -1;
+    int iSecondUnitConvert = -1;
+    int iFirstAxisSwap = -1;
+    int iSecondAxisSwap = -1;
+    bool unexpectedStructure = false;
+    for (int i = 0; i < static_cast<int>(d->steps_.size()); i++) {
+        const auto &stepName = d->steps_[i].name;
+        if (isGeodeticStep(stepName)) {
+            if (iGeogStep >= 0) {
+                unexpectedStructure = true;
+                break;
+            }
+            iGeogStep = i;
+        } else if (ci_equal(stepName, "unitconvert")) {
+            if (iFirstUnitConvert < 0) {
+                iFirstUnitConvert = i;
+            } else if (iSecondUnitConvert < 0) {
+                iSecondUnitConvert = i;
             } else {
-                if (projName == "etmerc") {
-                    iMain = i;
-                } else {
-                    auto res = getMappingsFromPROJName(projName);
-                    if (!res.empty()) {
-                        iMain = i;
-                    }
-                }
+                unexpectedStructure = true;
+                break;
             }
+        } else if (ci_equal(stepName, "axisswap")) {
+            if (iFirstAxisSwap < 0) {
+                iFirstAxisSwap = i;
+            } else if (iSecondAxisSwap < 0) {
+                iSecondAxisSwap = i;
+            } else {
+                unexpectedStructure = true;
+                break;
+            }
+        } else if (isProjectedStep(stepName)) {
+            if (iProjStep >= 0) {
+                unexpectedStructure = true;
+                break;
+            }
+            iProjStep = i;
+        } else {
+            unexpectedStructure = true;
+            break;
         }
-        if (iMain >= 0 && (1U + ((iUnitConvert >= 0) ? 1U : 0U) +
-                               ((iAxisSwap >= 0) ? 1U : 0U) ==
-                           d->steps_.size())) {
-            auto geogCRS = d->buildGeographicCRS(d->steps_[iMain], iUnitConvert,
-                                                 iAxisSwap);
-            if (isGeographic) {
-                return d->buildBoundOrCompoundCRSIfNeeded(d->steps_[iMain],
-                                                          geogCRS);
-            }
-            if (!d->steps_[iMain].inverted) {
-                return d->buildBoundOrCompoundCRSIfNeeded(
-                    d->steps_[iMain],
-                    d->buildProjectedCRS(d->steps_[iMain], geogCRS));
-            }
+    }
+
+    if (!unexpectedStructure) {
+        if (iGeogStep == 0 && iProjStep < 0 &&
+            (iFirstUnitConvert < 0 || iSecondUnitConvert < 0) &&
+            (iFirstAxisSwap < 0 || iSecondAxisSwap < 0)) {
+            return d->buildBoundOrCompoundCRSIfNeeded(
+                0, d->buildGeographicCRS(iGeogStep, iFirstUnitConvert,
+                                         iFirstAxisSwap));
+        }
+        if (iProjStep >= 0 && (iGeogStep < 0 || iGeogStep + 1 == iProjStep)) {
+            if (iGeogStep < 0)
+                iGeogStep = iProjStep;
+            return d->buildBoundOrCompoundCRSIfNeeded(
+                iProjStep,
+                d->buildProjectedCRS(
+                    iProjStep,
+                    d->buildGeographicCRS(
+                        iGeogStep,
+                        iFirstUnitConvert < iGeogStep ? iFirstUnitConvert : -1,
+                        iFirstAxisSwap < iGeogStep ? iFirstAxisSwap : -1),
+                    iFirstUnitConvert < iGeogStep ? iSecondUnitConvert
+                                                  : iFirstUnitConvert,
+                    iFirstAxisSwap < iGeogStep ? iSecondAxisSwap
+                                               : iSecondAxisSwap));
         }
     }
 
