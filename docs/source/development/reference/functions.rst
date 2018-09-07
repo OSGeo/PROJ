@@ -294,14 +294,13 @@ Change the error-state of :c:data:`P` to `err`.
 
 .. c:function:: const char* proj_errno_string(int err)
 
+    .. versionadded:: 5.1.0
+
     Get a text representation of an error number.
 
     :param int err: Error number.
 
     :returns: :c:type:`const char*` String with description of error.
-
-    .. note:: Available from version 5.1.0.
-
 
 Logging
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
