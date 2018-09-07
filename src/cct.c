@@ -206,8 +206,12 @@ int main(int argc, char **argv) {
     PJ_COORD point;
     PJ_PROJ_INFO info;
     OPTARGS *o;
+    char blank_comment[] = "";
+    char whitespace[] = " ";
+    char *comment;
+    char *comment_delimiter;
     char *buf;
-    int nfields = 4, direction = 1, skip_lines = 0, verbose;
+    int i, nfields = 4, direction = 1, skip_lines = 0, verbose;
     double fixed_z = HUGE_VAL, fixed_time = HUGE_VAL;
     int decimals_angles = 10;
     int decimals_distances = 4;
@@ -268,7 +272,6 @@ int main(int argc, char **argv) {
         int dec = atoi (opt_arg (o, "d"));
         decimals_angles = dec;
         decimals_distances = dec;
-        nfields--;
     }
 
     if (opt_given (o, "s")) {
@@ -276,8 +279,13 @@ int main(int argc, char **argv) {
     }
 
     if (opt_given (o, "c")) {
+        int ncols;
+        /* reset colum numbers to ease comment output later on */
+        for (i=0; i<4; i++)
+            columns_xyzt[i] = 0;
+
         /* cppcheck-suppress invalidscanf */
-        int ncols = sscanf (opt_arg (o, "c"), "%d,%d,%d,%d", columns_xyzt, columns_xyzt+1, columns_xyzt+2, columns_xyzt+3);
+        ncols = sscanf (opt_arg (o, "c"), "%d,%d,%d,%d", columns_xyzt, columns_xyzt+1, columns_xyzt+2, columns_xyzt+3);
         if (ncols != nfields) {
             print (PJ_LOG_ERROR, "%s: Too few input columns given: '%s'\n", o->progname, opt_arg (o, "c"));
             free (o);
@@ -371,14 +379,35 @@ int main(int argc, char **argv) {
         }
         proj_errno_restore (P, err);
 
+        /* handle comment string */
+        comment = column(buf, nfields+1);
+        if (opt_given(o, "c")) {
+            /* what number is the last coordinate column in the input data? */
+            int colmax = 0;
+            for (i=0; i<4; i++)
+                colmax = MAX(colmax, columns_xyzt[i]);
+            comment = column(buf, colmax+1);
+        }
+        comment_delimiter = (comment && *comment) ? whitespace : blank_comment;
+
         /* Time to print the result */
         if (proj_angular_output (P, direction)) {
             point.lpzt.lam = proj_todeg (point.lpzt.lam);
             point.lpzt.phi = proj_todeg (point.lpzt.phi);
-            print (PJ_LOG_NONE, "%14.*f  %14.*f  %12.*f  %12.4f\n", decimals_angles, point.xyzt.x, decimals_angles, point.xyzt.y, decimals_distances, point.xyzt.z, point.xyzt.t);
+            print (PJ_LOG_NONE, "%14.*f  %14.*f  %12.*f  %12.4f%s%s\n",
+                   decimals_angles, point.xyzt.x,
+                   decimals_angles, point.xyzt.y,
+                   decimals_distances, point.xyzt.z,
+                   point.xyzt.t, comment_delimiter, comment
+            );
         }
         else
-            print (PJ_LOG_NONE, "%13.*f  %13.*f  %12.*f  %12.4f\n", decimals_distances, point.xyzt.x, decimals_distances, point.xyzt.y, decimals_distances, point.xyzt.z, point.xyzt.t);
+            print (PJ_LOG_NONE, "%13.*f  %13.*f  %12.*f  %12.4f%s%s\n",
+                   decimals_distances, point.xyzt.x,
+                   decimals_distances, point.xyzt.y,
+                   decimals_distances, point.xyzt.z,
+                   point.xyzt.t, comment_delimiter, comment
+            );
     }
 
     if (stdout != fout)
