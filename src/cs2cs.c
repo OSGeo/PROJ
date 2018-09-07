@@ -136,7 +136,7 @@ static void process(FILE *fid)
             }
 
         } else { /* x-y or decimal degree ascii output */
-            if ( proj_angular_output(toProj, PJ_FWD)) {
+            if ( proj_angular_output(toProj, PJ_FWD) ) {
                 data.v *= RAD_TO_DEG;
                 data.u *= RAD_TO_DEG;
             }
