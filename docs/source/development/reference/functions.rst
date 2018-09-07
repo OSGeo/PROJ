@@ -577,7 +577,7 @@ Various
 
 .. c:function:: int proj_angular_output (PJ *P, enum PJ_DIRECTION dir)
 
-   Check if an operation returns angular output.
+    Check if an operation returns angular output.
 
     :param `P`: Transformation object
     :type `P`: const PJ*
