@@ -135,8 +135,8 @@ static void process(FILE *fid)
                 fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
             }
 
-        } else {	/* x-y or decimal degree ascii output */
-            if ( pj_is_latlong(toProj) ) {
+        } else { /* x-y or decimal degree ascii output */
+            if ( proj_angular_output(toProj, PJ_FWD)) {
                 data.v *= RAD_TO_DEG;
                 data.u *= RAD_TO_DEG;
             }
