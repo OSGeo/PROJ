@@ -3754,6 +3754,48 @@ TEST(io, projparse_merc_stere) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_utm) {
+    auto obj = PROJStringParser().createFromPROJString("+proj=utm +zone=1");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("CONVERSION[\"UTM zone 1N\",METHOD[\"Transverse "
+                         "Mercator\",ID[\"EPSG\",9807]]") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Longitude of natural origin\",-177,") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"False northing\",0,") != std::string::npos) << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_utm_south) {
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=utm +zone=1 +south");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("CONVERSION[\"UTM zone 1S\",METHOD[\"Transverse "
+                         "Mercator\",ID[\"EPSG\",9807]]") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Longitude of natural origin\",-177,") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"False northing\",10000000,") != std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_axisswap_unitconvert_longlat_proj) {
     std::string input =
         "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -3897,6 +3939,56 @@ TEST(io, projparse_projected_vunits) {
                          "(H)\",up,LENGTHUNIT[\"foot\",0.3048]") !=
                 std::string::npos)
         << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_geocent) {
+    auto obj =
+        PROJStringParser().createFromPROJString("+proj=geocent +ellps=WGS84");
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_EQ(wkt, "GEODCRS[\"unknown\",DATUM[\"Unknown based on WGS84 "
+                   "ellipsoid\",ELLIPSOID[\"WGS "
+                   "84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],"
+                   "PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0."
+                   "0174532925199433]],CS[Cartesian,3],AXIS[\"(X)\","
+                   "geocentricX,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"(Y)\","
+                   "geocentricY,ORDER[2],LENGTHUNIT[\"metre\",1]],AXIS[\"(Z)\","
+                   "geocentricZ,ORDER[3],LENGTHUNIT[\"metre\",1]]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_cart_unit) {
+    std::string input(
+        "+proj=pipeline +step +proj=cart +ellps=WGS84 +step "
+        "+proj=unitconvert +xy_in=m +z_in=m +xy_out=km +z_out=km");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              input);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_cart_unit_numeric) {
+    std::string input(
+        "+proj=pipeline +step +proj=cart +ellps=WGS84 +step "
+        "+proj=unitconvert +xy_in=m +z_in=m +xy_out=500 +z_out=500");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              input);
 }
 
 // ---------------------------------------------------------------------------

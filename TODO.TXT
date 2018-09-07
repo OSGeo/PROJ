@@ -4,7 +4,6 @@
     - import from Proj4
             projections without WKT
             init= syntax
-            +proj=geocent / +proj=cart
     - derived crs
     - TOWGS84 / boundcrs
     - DATUMENSEMBLE
