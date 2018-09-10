@@ -57,6 +57,7 @@
 
 // PROJ include order is sensitive
 // clang-format off
+#include "proj.h"
 #include "projects.h"
 #include "proj_api.h"
 // clang-format on
@@ -1998,6 +1999,8 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
     std::vector<ParameterValueNNPtr> values;
     bool tryToIdentifyWKT1Method = true;
 
+    auto extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
+
     if (metadata::Identifier::isEquivalentName(wkt1ProjectionName,
                                                "Mercator_1SP") &&
         projCRSNode->countChildrenOfName("center_latitude") == 0) {
@@ -2006,7 +2009,6 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
         // with a EXTENSION["PROJ", "+proj=merc +a=6378137 +b=6378137
         // +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m
         // +nadgrids=@null +wktext +no_defs"] node
-        auto extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
         if (extensionNode && extensionNode->children().size() == 2 &&
             ci_equal(stripQuotes(extensionNode->children()[0]->value()),
                      "PROJ4")) {
@@ -2095,6 +2097,24 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                 Length(falseNorthing.value(), falseNorthing.unit()));
         }
         tryToIdentifyWKT1Method = false;
+        // Import GDAL PROJ4 extension nodes
+    } else if (extensionNode && extensionNode->children().size() == 2 &&
+               ci_equal(stripQuotes(extensionNode->children()[0]->value()),
+                        "PROJ4")) {
+        std::string projString =
+            stripQuotes(extensionNode->children()[1]->value());
+        if (projString.find("+proj=") == 0) {
+            try {
+                auto projObj =
+                    PROJStringParser().createFromPROJString(projString);
+                auto projObjCrs =
+                    nn_dynamic_pointer_cast<ProjectedCRS>(projObj);
+                if (projObjCrs) {
+                    return projObjCrs->derivingConversion();
+                }
+            } catch (const io::ParsingException &) {
+            }
+        }
     }
 
     std::string projectionName(wkt1ProjectionName);
@@ -3305,8 +3325,24 @@ static bool isGeocentricStep(const std::string &name) {
 // ---------------------------------------------------------------------------
 
 static bool isProjectedStep(const std::string &name) {
-    return name == "etmerc" || name == "utm" ||
-           !getMappingsFromPROJName(name).empty();
+    if (name == "etmerc" || name == "utm" ||
+        !getMappingsFromPROJName(name).empty()) {
+        return true;
+    }
+    // IMPROVE ME: have a better way of distinguishing projections from other
+    // transformations.
+    if (name == "pipeline" || name == "geoc" || name == "deformation" ||
+        name == "helmert" || name == "hgridshift" || name == "molodensky" ||
+        name == "vgridshit") {
+        return false;
+    }
+    const auto *operations = proj_list_operations();
+    for (int i = 0; operations[i].id != nullptr; ++i) {
+        if (name == operations[i].id) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -3918,13 +3954,12 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         const int zone = std::atoi(getParamValue(step, "zone").c_str());
         const bool north = !hasParamValue(step, "south");
         conv = Conversion::createUTM(PropertyMap(), zone, north).as_nullable();
-    } else {
-        assert(mapping);
+    } else if (mapping) {
 
-        auto convMap =
+        auto methodMap =
             PropertyMap().set(IdentifiedObject::NAME_KEY, mapping->wkt2_name);
         if (mapping->epsg_code) {
-            convMap.set(Identifier::CODESPACE_KEY, Identifier::EPSG)
+            methodMap.set(Identifier::CODESPACE_KEY, Identifier::EPSG)
                 .set(Identifier::CODE_KEY, mapping->epsg_code);
         }
         std::vector<OperationParameterNNPtr> parameters;
@@ -3989,7 +4024,51 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
         conv = Conversion::create(
                    PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
-                   convMap, parameters, values)
+                   methodMap, parameters, values)
+                   .as_nullable();
+    } else {
+        std::vector<OperationParameterNNPtr> parameters;
+        std::vector<ParameterValueNNPtr> values;
+        std::string methodName = "PROJ " + step.name;
+        for (const auto &param : step.paramValues) {
+            if (param.first == "wktext" || param.first == "no_defs" ||
+                param.first == "datum" || param.first == "ellps" ||
+                param.first == "a" || param.first == "b" ||
+                param.first == "R" || param.first == "towgs84" ||
+                param.first == "nadgrids" || param.first == "geoidgrids" ||
+                param.first == "units" || param.first == "to_meter" ||
+                param.first == "vunits" || param.first == "vto_meter") {
+                continue;
+            }
+            if (param.second.empty()) {
+                methodName += " " + param.first;
+            } else {
+                parameters.push_back(
+                    OperationParameter::create(PropertyMap().set(
+                        IdentifiedObject::NAME_KEY, param.first)));
+                bool hasError = false;
+                if (param.first == "x_0" || param.first == "y_0") {
+                    double value = getNumericValue(param.second, &hasError);
+                    values.push_back(ParameterValue::create(
+                        Measure(value, UnitOfMeasure::METRE)));
+                } else if (param.first == "k" || param.first == "k_0") {
+                    double value = getNumericValue(param.second, &hasError);
+                    values.push_back(ParameterValue::create(
+                        Measure(value, UnitOfMeasure::SCALE_UNITY)));
+                } else {
+                    double value = getAngularValue(param.second, &hasError);
+                    values.push_back(ParameterValue::create(
+                        Measure(value, UnitOfMeasure::DEGREE)));
+                }
+                if (hasError) {
+                    throw ParsingException("invalid value for " + param.first);
+                }
+            }
+        }
+        conv = Conversion::create(
+                   PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                   PropertyMap().set(IdentifiedObject::NAME_KEY, methodName),
+                   parameters, values)
                    .as_nullable();
     }
 

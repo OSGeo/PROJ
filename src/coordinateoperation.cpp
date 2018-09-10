@@ -3491,6 +3491,11 @@ std::string Conversion::exportToWKT(io::WKTFormatterNNPtr formatter) const {
                     .getSIValue();
             formatter->add(falseNorthing);
             formatter->endNode();
+        } else if (starts_with(projectionMethodName, "PROJ ")) {
+            bAlreadyWritten = true;
+            formatter->startNode(io::WKTConstants::PROJECTION, false);
+            formatter->addQuotedString("custom_proj4");
+            formatter->endNode();
         }
     }
 
@@ -3563,6 +3568,66 @@ static bool createPROJ4WebMercator(const Conversion *conv,
 
 // ---------------------------------------------------------------------------
 
+static bool
+createPROJExtensionFromCustomProj(const Conversion *conv,
+                                  io::PROJStringFormatterNNPtr formatter,
+                                  bool forExtensionNode) {
+    auto projectionMethodName = *(conv->method()->name()->description());
+    assert(starts_with(projectionMethodName, "PROJ "));
+    auto tokens = split(projectionMethodName, ' ');
+
+    auto geogCRS =
+        std::dynamic_pointer_cast<crs::GeographicCRS>(conv->sourceCRS());
+    if (!geogCRS) {
+        return false;
+    }
+
+    io::PROJStringFormatter::Scope scope(formatter);
+    formatter->addStep(tokens[1]);
+
+    if (forExtensionNode) {
+        geogCRS->addDatumInfoToPROJString(formatter);
+    }
+
+    for (size_t i = 2; i < tokens.size(); i++) {
+        formatter->addParam(tokens[i]);
+    }
+
+    for (const auto &genOpParamvalue : conv->parameterValues()) {
+        const auto &opParamvalue =
+            util::nn_dynamic_pointer_cast<OperationParameterValue>(
+                genOpParamvalue);
+        if (opParamvalue) {
+            const auto &paramName =
+                *(opParamvalue->parameter()->name()->description());
+            const auto &paramValue = opParamvalue->parameterValue();
+            if (paramValue->type() == ParameterValue::Type::MEASURE) {
+                auto &measure = paramValue->value();
+                if (measure.unit().type() ==
+                    common::UnitOfMeasure::Type::LINEAR) {
+                    formatter->addParam(paramName, measure.getSIValue());
+                } else if (measure.unit().type() ==
+                           common::UnitOfMeasure::Type::ANGULAR) {
+                    formatter->addParam(
+                        paramName,
+                        measure.convertToUnit(common::UnitOfMeasure::DEGREE)
+                            .value());
+                } else {
+                    formatter->addParam(paramName, measure.value());
+                }
+            }
+        }
+    }
+
+    if (forExtensionNode) {
+        formatter->addParam("wktext");
+        formatter->addParam("no_defs");
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
 void Conversion::addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
@@ -3573,8 +3638,18 @@ void Conversion::addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const {
             methodEPSGCode ==
                 EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) {
 
-            auto projFormatter = io::PROJStringFormatter::create();
+            auto projFormatter = io::PROJStringFormatter::create(
+                io::PROJStringFormatter::Convention::PROJ_4);
             if (createPROJ4WebMercator(this, projFormatter)) {
+                formatter->startNode(io::WKTConstants::EXTENSION, false);
+                formatter->addQuotedString("PROJ4");
+                formatter->addQuotedString(projFormatter->toString());
+                formatter->endNode();
+            }
+        } else if (starts_with(projectionMethodName, "PROJ ")) {
+            auto projFormatter = io::PROJStringFormatter::create(
+                io::PROJStringFormatter::Convention::PROJ_4);
+            if (createPROJExtensionFromCustomProj(this, projFormatter, true)) {
                 formatter->startNode(io::WKTConstants::EXTENSION, false);
                 formatter->addQuotedString("PROJ4");
                 formatter->addQuotedString(projFormatter->toString());
@@ -3770,6 +3845,9 @@ std::string Conversion::exportToPROJString(
         }
         bConversionDone = true;
         bEllipsoidParametersDone = true;
+    } else if (starts_with(projectionMethodName, "PROJ ")) {
+        bConversionDone = true;
+        createPROJExtensionFromCustomProj(this, formatter, false);
     }
 
     bool bAxisSpecFound = false;

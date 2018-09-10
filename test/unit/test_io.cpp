@@ -3943,6 +3943,86 @@ TEST(io, projparse_projected_vunits) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_projected_unknown) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=eqearth +unused_flag +lat_0=45 +lon_0=0 +k=1 +x_0=10 +y_0=0");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    {
+        WKTFormatterNNPtr f(WKTFormatter::create());
+        f->simulCurNodeHasId();
+        f->setMultiLine(false);
+        crs->exportToWKT(f);
+        auto wkt = f->toString();
+        EXPECT_TRUE(
+            wkt.find("CONVERSION[\"unknown\",METHOD[\"PROJ eqearth "
+                     "unused_flag\"],PARAMETER[\"lat_0\",45,ANGLEUNIT["
+                     "\"degree\",0.0174532925199433]],PARAMETER[\"lon_0\","
+                     "0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "PARAMETER[\"k\",1,SCALEUNIT[\"unity\",1]],PARAMETER["
+                     "\"x_0\",10,LENGTHUNIT[\"metre\",1]],PARAMETER[\"y_0\","
+                     "0,LENGTHUNIT[\"metre\",1]]]") != std::string::npos)
+            << wkt;
+    }
+
+    std::string expected_wkt1 =
+        "PROJCS[\"unknown\",GEOGCS[\"unknown\",DATUM[\"WGS_1984\",SPHEROID["
+        "\"WGS "
+        "84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY["
+        "\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\","
+        "\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\","
+        "\"9122\"]],AXIS[\"Longitude\",EAST],AXIS[\"Latitude\",NORTH]],"
+        "PROJECTION[\"custom_proj4\"],UNIT[\"metre\",1,AUTHORITY[\"EPSG\","
+        "\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],EXTENSION["
+        "\"PROJ4\",\"+proj=eqearth +datum=WGS84 +unused_flag +lat_0=45 "
+        "+lon_0=0 +k=1 +x_0=10 +y_0=0 +wktext +no_defs\"]]";
+
+    {
+        WKTFormatterNNPtr f(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL));
+        f->simulCurNodeHasId();
+        f->setMultiLine(false);
+        crs->exportToWKT(f);
+        auto wkt = f->toString();
+        EXPECT_EQ(wkt, expected_wkt1);
+    }
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=eqearth +unused_flag +lat_0=45 +lon_0=0 +k=1 +x_0=10 "
+              "+y_0=0 +datum=WGS84");
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=eqearth +unused_flag +lat_0=45 +lon_0=0 +k=1 "
+              "+x_0=10 +y_0=0 +ellps=WGS84");
+
+    {
+        auto obj2 = WKTParser().createFromWKT(expected_wkt1);
+        auto crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj2);
+        ASSERT_TRUE(crs2 != nullptr);
+
+        WKTFormatterNNPtr f(WKTFormatter::create());
+        f->simulCurNodeHasId();
+        f->setMultiLine(false);
+        crs2->exportToWKT(f);
+        auto wkt = f->toString();
+        EXPECT_TRUE(
+            wkt.find("CONVERSION[\"unknown\",METHOD[\"PROJ eqearth "
+                     "unused_flag\"],PARAMETER[\"lat_0\",45,ANGLEUNIT["
+                     "\"degree\",0.0174532925199433]],PARAMETER[\"lon_0\","
+                     "0,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "PARAMETER[\"k\",1,SCALEUNIT[\"unity\",1]],PARAMETER["
+                     "\"x_0\",10,LENGTHUNIT[\"metre\",1]],PARAMETER[\"y_0\","
+                     "0,LENGTHUNIT[\"metre\",1]]]") != std::string::npos)
+            << wkt;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_geocent) {
     auto obj =
         PROJStringParser().createFromPROJString("+proj=geocent +ellps=WGS84");
