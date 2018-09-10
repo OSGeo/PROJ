@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "CS2CS" "1" "May 24, 2018" "5.1.0" "PROJ.4"
+.TH "CS2CS" "1" "Sep 10, 2018" "5.2.0" "PROJ.4"
 .SH NAME
 cs2cs \- Cartographic coordinate system filter
 .
@@ -57,6 +57,13 @@ Where \fIa\fP specifies a character employed as the first character to denote a 
 line to be passed through without processing. This option applicable to
 ASCII input only. (# is the default value).
 .UNINDENT
+.INDENT 0.0
+.TP
+.B \-d <n>
+.UNINDENT
+.sp
+New in version 5.2.0: Specify the number of decimals in the output.
+
 .INDENT 0.0
 .TP
 .B \-e <string>
@@ -203,7 +210,7 @@ The x\-y output data will appear as three lines of:
 .sp
 .nf
 .ft C
-1402285.99      5076292.42 0.000
+1402285.98  5076292.42 \-0.00
 .ft P
 .fi
 .UNINDENT

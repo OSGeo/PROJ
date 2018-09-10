@@ -1,3 +1,78 @@
+5.2.0 Release Notes
+-------------------
+
+ UPDATES
+ -------
+
+ o Added support for deg, rad and grad in unitconvert (#1054)
+
+ o Assume +t_epoch as time input when not otherwise specified (#1065)
+
+ o Added inverse Lagrange projection (#1058)
+
+ o Added +multiplier option to vgridshift (#1072)
+
+ o Added Equal Earth projection (#1085)
+
+ o Added "require_grid" option to gie (#1088)
+
+ o Replace +transpose option of Helmert transform with +convention.
+   From now on the convention used should be explicitly written. An
+   error will be returned when using the +transpose option (#1091)
+
+ o Improved numerical precision of inverse spherical Mercator
+   projection (#1105)
+
+ o cct will now forward text after coordinate input to output
+   stream (#1111)
+
+
+ BUG FIXES
+ ------------
+
+ o Do not pivot over WGS84 when doing cs2cs-emulation with geocent (#1026)
+
+ o Do not scan past the end of the read data in pj_ctx_fgets (#1042)
+
+ o Make sure proj_errno_string() is available in DLL (#1050)
+
+ o Respect +to_meter setting when doing cs2cs-emulation (#1053)
+
+ o Fixed unit conversion factors for geod (#1075)
+
+ o Fixed test failures related to GCC 8 (#1084)
+
+ o Improved handling of +geoc flag (#1093)
+
+ o Calculate correct projection factors for Webmercator (#1095)
+
+ o cs2cs now always outputs degrees when transformed coordinates are
+   in angular units (#1112)
+
+
+ All bug fix numbers refer to issues or pull requests indexed at
+ https://github.com/OSGeo/proj.4/
+
+ THANKS TO
+ ------------
+
+ Version 5.2.0 is made possible by the following contributors:
+
+Søren Holm
+Mateusz Łoskot
+Jürnjakob Dugge
+Greg Minshall
+Aaron Puchert
+Vedran Stojnović
+Bojan Šavrič
+Charles Karney
+Mateusz Loskot
+Howard Butler
+Mike Toews
+Kurt Schwehr
+Even Rouault
+Kristian Evers
+
 5.1.0 Release Notes
 -------------------
 
