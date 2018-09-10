@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "GIE" "1" "May 24, 2018" "5.1.0" "PROJ.4"
+.TH "GIE" "1" "Sep 10, 2018" "5.2.0" "PROJ.4"
 .SH NAME
 gie \- The Geospatial Integrity Investigation Environment
 .
@@ -209,7 +209,7 @@ Many coordinates can be expected for one \fI\%operation\fP\&. For each
 See \fI\%operation\fP for an example.
 .sp
 In addition to expecting a coordinate it is also possible to expect a
-PROJ error code in case an operation can\(aqt be created. This is useful when
+PROJ error code in case an operation can’t be created. This is useful when
 testing that errors are caught and handled correctly. Below is an example of
 that tests that the pipeline operator fails correctly when a non\-invertible
 pipeline is constructed.
@@ -267,7 +267,7 @@ units.
 Do a roundtrip test of an operation. \fI\%roundtrip\fP needs a
 \fI\%operation\fP and a \fI\%accept\fP command
 to function. The accepted coordinate is passed to the operation first in
-it\(aqs forward mode, then the output from the forward operation is passed
+it’s forward mode, then the output from the forward operation is passed
 back to the inverse operation. This procedure is done \fBn\fP times. If the
 resulting coordinate is within the set tolerance of the initial coordinate,
 the test is passed.
@@ -343,7 +343,7 @@ expect 12 55 0 0
 .UNINDENT
 .UNINDENT
 .sp
-The default direction is "forward".
+The default direction is “forward”.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -367,6 +367,15 @@ expect    173                 \-45
 .UNINDENT
 .sp
 See \fBgie \-l\fP for a list of error codes that can be ignored.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B require_grid <grid_name>
+Checks the availability of the grid <grid_name>. If it is not found, then
+all \fI\%accept\fP/\fI\%expect\fP pairs until the next
+\fI\%operation\fP will be skipped.
+\fI\%require_grid\fP can be repeated several times to specify several grids whose
+presence is required.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -431,21 +440,21 @@ expect  0   110579.9
 .UNINDENT
 .SH BACKGROUND
 .sp
-More importantly than being an acronym for "Geospatial Integrity Investigation
-Environment", gie were also the initials, user id, and USGS email address of
-Gerald Ian Evenden (1935\-\-2016), the geospatial visionary, who, already in the
+More importantly than being an acronym for “Geospatial Integrity Investigation
+Environment”, gie were also the initials, user id, and USGS email address of
+Gerald Ian Evenden (1935–2016), the geospatial visionary, who, already in the
 1980s, started what was to become the PROJ of today.
 .sp
-Gerald\(aqs clear vision was that map projections are \fIjust special functions\fP\&.
+Gerald’s clear vision was that map projections are \fIjust special functions\fP\&.
 Some of them rather complex, most of them of two variables, but all of them
 \fIjust special functions\fP, and not particularly more special than the \fBsin()\fP,
 \fBcos()\fP, \fBtan()\fP, and \fBhypot()\fP already available in the C standard library.
 .sp
 And hence, according to Gerald, \fIthey should not be particularly much harder
-to use\fP, for a programmer, than the \fBsin()\fP\(aqs, \fBtan()\fP\(aqs and
-\fBhypot()\fP\(aqs so readily available.
+to use\fP, for a programmer, than the \fBsin()\fP’s, \fBtan()\fP’s and
+\fBhypot()\fP’s so readily available.
 .sp
-Gerald\(aqs ingenuity also showed in the implementation of the vision, where
+Gerald’s ingenuity also showed in the implementation of the vision, where
 he devised a comprehensive, yet simple, system of key\-value pairs for
 parameterising a map projection, and the highly flexible \fBPJ\fP struct, storing
 run\-time compiled versions of those key\-value pairs, hence making a map
@@ -454,15 +463,15 @@ call like \fBhypot(x,y)\fP\&.
 .sp
 While today, we may have more formally well defined metadata systems (most
 prominent the OGC WKT2 representation), nothing comes close being as easily
-readable ("human compatible") as Gerald\(aqs key\-value system. This system in
-particular, and the PROJ system in general, was Gerald\(aqs great gift to anyone
+readable (“human compatible”) as Gerald’s key\-value system. This system in
+particular, and the PROJ system in general, was Gerald’s great gift to anyone
 using and/or communicating about geodata.
 .sp
 It is only reasonable to name a program, keeping an eye on the
 integrity of the PROJ system, in honour of Gerald.
 .sp
 So in honour, and hopefully also in the spirit, of Gerald Ian Evenden
-(1935\-\-2016), this is the Geospatial Integrity Investigation Environment.
+(1935–2016), this is the Geospatial Integrity Investigation Environment.
 .SH SEE ALSO
 .sp
 \fBproj(1)\fP, \fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP
