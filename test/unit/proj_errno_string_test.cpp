@@ -43,13 +43,13 @@ TEST(ProjErrnoStringTest, ProjErrnos) {
     EXPECT_STREQ("invalid projection system error (-1000)", proj_errno_string(-1000));
     EXPECT_STREQ("invalid projection system error (-9999)", proj_errno_string(-9999));
     // for errnos < -9999, -9999 is always returned
-    constexpr int min = std::numeric_limits<int>::min();
+    const int min = std::numeric_limits<int>::min();
     EXPECT_STREQ("invalid projection system error (-9999)",proj_errno_string(min));
     EXPECT_STREQ("invalid projection system error (-9999)", proj_errno_string(-10000));
 }
 
 TEST(ProjErrnoStringTest, SystemErrnos) {
-    constexpr int max = std::numeric_limits<int>::max();
+    const int max = std::numeric_limits<int>::max();
 
 #ifdef HAVE_STRERROR
     EXPECT_STREQ(strerror(5), proj_errno_string(5));
