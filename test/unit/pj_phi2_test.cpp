@@ -64,13 +64,13 @@ TEST(PjPhi2Test, Basic) {
 TEST(PjPhi2Test, AvoidUndefinedBehavior) {
     auto ctx = pj_get_default_ctx();
 
-    constexpr auto nan = std::numeric_limits<double>::quiet_NaN();
+    const auto nan = std::numeric_limits<double>::quiet_NaN();
     EXPECT_TRUE(std::isnan(pj_phi2(ctx, nan, 0.0)));
     EXPECT_TRUE(std::isnan(pj_phi2(ctx, 0.0, nan)));
     EXPECT_TRUE(std::isnan(pj_phi2(ctx, nan, nan)));
 
     // We do not really care about the values that follow.
-    constexpr auto inf = std::numeric_limits<double>::infinity();
+    const auto inf = std::numeric_limits<double>::infinity();
 
     EXPECT_DOUBLE_EQ(-M_PI_2, pj_phi2(ctx, inf, 0.0));
     EXPECT_TRUE(std::isnan(pj_phi2(ctx, 0.0, inf)));
