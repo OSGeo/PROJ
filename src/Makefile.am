@@ -41,7 +41,7 @@ geodtest_LDADD = libproj.la
 
 lib_LTLIBRARIES = libproj.la
 
-libproj_la_LDFLAGS = -no-undefined -version-info 14:0:2
+libproj_la_LDFLAGS = -no-undefined -version-info 14:1:1
 
 libproj_la_SOURCES = \
 	pj_list.h proj_internal.h proj_math.h\
