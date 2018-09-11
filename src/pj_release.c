@@ -11,7 +11,7 @@ char const pj_release[] =
     STR(PROJ_VERSION_MAJOR)"."
     STR(PROJ_VERSION_MINOR)"."
     STR(PROJ_VERSION_PATCH)", "
-    "September 1st, 2018";
+    "September 15th, 2018";
 
 const char *pj_get_release() {
     return pj_release;
