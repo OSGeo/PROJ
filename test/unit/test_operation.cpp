@@ -537,7 +537,7 @@ TEST(operation, transformation_createPositionVector) {
     EXPECT_EQ(*(transf->targetCRS()->name()->description()),
               *(inv_transf_as_transf->sourceCRS()->name()->description()));
     auto expected_inv =
-        std::vector<double>{-1.0, -2.0, -3.0, -4.0, -5.0, -6.0, 7.0};
+        std::vector<double>{-1.0, -2.0, -3.0, -4.0, -5.0, -6.0, -7.0};
     EXPECT_EQ(inv_transf_as_transf->getTOWGS84Parameters(), expected_inv);
 }
 
@@ -573,8 +573,126 @@ TEST(operation, transformation_createCoordinateFrameRotation) {
     EXPECT_EQ(*(transf->targetCRS()->name()->description()),
               *(inv_transf_as_transf->sourceCRS()->name()->description()));
     auto expected_inv =
-        std::vector<double>{-1.0, -2.0, -3.0, -4.0, -5.0, -6.0, 7.0};
+        std::vector<double>{-1.0, -2.0, -3.0, -4.0, -5.0, -6.0, -7.0};
     EXPECT_EQ(inv_transf_as_transf->getTOWGS84Parameters(), expected_inv);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_createTimeDependentPositionVector) {
+
+    auto transf = Transformation::createTimeDependentPositionVector(
+        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 2018.5,
+        std::vector<PositionalAccuracyNNPtr>());
+
+    auto inv_transf = transf->inverse();
+    auto inv_transf_as_transf =
+        nn_dynamic_pointer_cast<Transformation>(inv_transf);
+    ASSERT_TRUE(inv_transf_as_transf != nullptr);
+
+    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
+              *(inv_transf_as_transf->targetCRS()->name()->description()));
+    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
+              *(inv_transf_as_transf->sourceCRS()->name()->description()));
+
+    auto projString =
+        inv_transf_as_transf->exportToPROJString(PROJStringFormatter::create());
+    EXPECT_TRUE(
+        projString.find("+proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 +ry=-5 +rz=-6 "
+                        "+s=-7 +dx=-0.1 +dy=-0.2 +dz=-0.3 +drx=-0.4 +dry=-0.5 "
+                        "+drz=-0.6 +ds=-0.7 +t_epoch=2018.5 "
+                        "+convention=position_vector") != std::string::npos)
+        << projString;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_createTimeDependentCoordinateFrameRotation) {
+
+    auto transf = Transformation::createTimeDependentCoordinateFrameRotation(
+        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 2018.5,
+        std::vector<PositionalAccuracyNNPtr>());
+
+    auto inv_transf = transf->inverse();
+    auto inv_transf_as_transf =
+        nn_dynamic_pointer_cast<Transformation>(inv_transf);
+    ASSERT_TRUE(inv_transf_as_transf != nullptr);
+
+    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
+              *(inv_transf_as_transf->targetCRS()->name()->description()));
+    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
+              *(inv_transf_as_transf->sourceCRS()->name()->description()));
+
+    auto projString =
+        inv_transf_as_transf->exportToPROJString(PROJStringFormatter::create());
+    EXPECT_TRUE(
+        projString.find("+proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 +ry=-5 +rz=-6 "
+                        "+s=-7 +dx=-0.1 +dy=-0.2 +dz=-0.3 +drx=-0.4 +dry=-0.5 "
+                        "+drz=-0.6 +ds=-0.7 +t_epoch=2018.5 "
+                        "+convention=coordinate_frame") != std::string::npos)
+        << projString;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_successive_helmert_noop) {
+
+    auto transf_1 = Transformation::createPositionVector(
+        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, std::vector<PositionalAccuracyNNPtr>());
+    auto transf_2 = Transformation::createPositionVector(
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, -1.0,
+        -2.0, -3.0, -4.0, -5.0, -6.0, -7.0,
+        std::vector<PositionalAccuracyNNPtr>());
+
+    auto concat = ConcatenatedOperation::create(
+        PropertyMap(),
+        std::vector<CoordinateOperationNNPtr>{transf_1, transf_2},
+        std::vector<PositionalAccuracyNNPtr>{});
+
+    EXPECT_EQ(concat->exportToPROJString(PROJStringFormatter::create()), "");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_successive_helmert_non_trivial_1) {
+
+    auto transf_1 = Transformation::createPositionVector(
+        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, std::vector<PositionalAccuracyNNPtr>());
+    auto transf_2 = Transformation::createPositionVector(
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, -1.0,
+        -2.0, -3.0, -4.0, -5.0, -6.0, 7.0,
+        std::vector<PositionalAccuracyNNPtr>());
+
+    auto concat = ConcatenatedOperation::create(
+        PropertyMap(),
+        std::vector<CoordinateOperationNNPtr>{transf_1, transf_2},
+        std::vector<PositionalAccuracyNNPtr>{});
+
+    EXPECT_NE(concat->exportToPROJString(PROJStringFormatter::create()), "");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_successive_helmert_non_trivial_2) {
+
+    auto transf_1 = Transformation::createPositionVector(
+        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, std::vector<PositionalAccuracyNNPtr>());
+    auto transf_2 = Transformation::createCoordinateFrameRotation(
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, -1.0,
+        -2.0, -3.0, -4.0, -5.0, -6.0, -7.0,
+        std::vector<PositionalAccuracyNNPtr>());
+
+    auto concat = ConcatenatedOperation::create(
+        PropertyMap(),
+        std::vector<CoordinateOperationNNPtr>{transf_1, transf_2},
+        std::vector<PositionalAccuracyNNPtr>{});
+
+    EXPECT_NE(concat->exportToPROJString(PROJStringFormatter::create()), "");
 }
 
 // ---------------------------------------------------------------------------
@@ -3211,7 +3329,7 @@ TEST(operation, geogCRS_to_boundCRS_of_geogCRS) {
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
               "+ellps=WGS84 +step +proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 "
-              "+ry=-5 +rz=-6 +s=7 +convention=position_vector +step +inv "
+              "+ry=-5 +rz=-6 +s=-7 +convention=position_vector +step +inv "
               "+proj=cart +ellps=clrk80ign +step "
               "+inv +proj=longlat +ellps=clrk80ign +pm=paris +step "
               "+proj=unitconvert +xy_in=rad +xy_out=grad +step +proj=axisswap "
@@ -3241,7 +3359,7 @@ TEST(operation, boundCRS_to_boundCRS) {
               "+step +proj=cart +ellps=clrk80ign +step +proj=helmert "
               "+x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
               "+convention=position_vector +step +proj=helmert +x=-8 "
-              "+y=-9 +z=-10 +rx=-11 +ry=-12 +rz=-13 +s=14 "
+              "+y=-9 +z=-10 +rx=-11 +ry=-12 +rz=-13 +s=-14 "
               "+convention=position_vector +step +inv "
               "+proj=cart +ellps=GRS80 +step +proj=utm +zone=32 "
               "+ellps=GRS80");

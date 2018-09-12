@@ -1246,16 +1246,41 @@ class Transformation : public SingleOperation {
         const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
         const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
         double translationYMetre, double translationZMetre,
-        double rotationXMicroRadian, double rotationYMicroRadian,
-        double rotationZMicroRadian, double scaleDifferencePPM,
+        double rotationXArcSecond, double rotationYArcSecond,
+        double rotationZArcSecond, double scaleDifferencePPM,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
     PROJ_DLL static TransformationNNPtr createCoordinateFrameRotation(
         const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
         const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
         double translationYMetre, double translationZMetre,
-        double rotationXMicroRadian, double rotationYMicroRadian,
-        double rotationZMicroRadian, double scaleDifferencePPM,
+        double rotationXArcSecond, double rotationYArcSecond,
+        double rotationZArcSecond, double scaleDifferencePPM,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
+    PROJ_DLL static TransformationNNPtr createTimeDependentPositionVector(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
+        double translationYMetre, double translationZMetre,
+        double rotationXArcSecond, double rotationYArcSecond,
+        double rotationZArcSecond, double scaleDifferencePPM,
+        double rateTranslationX, double rateTranslationY,
+        double rateTranslationZ, double rateRotationX, double rateRotationY,
+        double rateRotationZ, double rateScaleDifference,
+        double referenceEpochYear,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
+    PROJ_DLL static TransformationNNPtr
+    createTimeDependentCoordinateFrameRotation(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
+        double translationYMetre, double translationZMetre,
+        double rotationXArcSecond, double rotationYArcSecond,
+        double rotationZArcSecond, double scaleDifferencePPM,
+        double rateTranslationX, double rateTranslationY,
+        double rateTranslationZ, double rateRotationX, double rateRotationY,
+        double rateRotationZ, double rateScaleDifference,
+        double referenceEpochYear,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
     PROJ_DLL static TransformationNNPtr createTOWGS84(

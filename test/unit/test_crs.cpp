@@ -1262,7 +1262,7 @@ TEST(crs, boundCRS_to_WKT2) {
         EXPECT_EQ(paramName, "X-axis rotation");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();
-        EXPECT_EQ(measure.unit(), UnitOfMeasure::MICRORADIAN);
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::ARC_SECOND);
         EXPECT_EQ(measure.value(), 4.0);
     }
     {
@@ -1276,7 +1276,7 @@ TEST(crs, boundCRS_to_WKT2) {
         EXPECT_EQ(paramName, "Y-axis rotation");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();
-        EXPECT_EQ(measure.unit(), UnitOfMeasure::MICRORADIAN);
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::ARC_SECOND);
         EXPECT_EQ(measure.value(), 5.0);
     }
     {
@@ -1290,7 +1290,7 @@ TEST(crs, boundCRS_to_WKT2) {
         EXPECT_EQ(paramName, "Z-axis rotation");
         EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
         auto measure = parameterValue->value();
-        EXPECT_EQ(measure.unit(), UnitOfMeasure::MICRORADIAN);
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::ARC_SECOND);
         EXPECT_EQ(measure.value(), 6.0);
     }
     {
@@ -1315,20 +1315,20 @@ TEST(crs, boundCRS_to_WKT2) {
         "],\n"
         "    ABRIDGEDTRANSFORMATION[\"Transformation from myGEOGCRS to "
         "WGS84\",\n"
-        "        METHOD[\"Position Vector transformation (geocentric "
+        "        METHOD[\"Position Vector transformation (geog2D "
         "domain)\",\n"
-        "            ID[\"EPSG\",1033]],\n"
+        "            ID[\"EPSG\",9606]],\n"
         "        PARAMETER[\"X-axis translation\",1,\n"
         "            ID[\"EPSG\",8605]],\n"
         "        PARAMETER[\"Y-axis translation\",2,\n"
         "            ID[\"EPSG\",8606]],\n"
         "        PARAMETER[\"Z-axis translation\",3,\n"
         "            ID[\"EPSG\",8607]],\n"
-        "        PARAMETER[\"X-axis rotation\",0.825059224988385,\n"
+        "        PARAMETER[\"X-axis rotation\",4,\n"
         "            ID[\"EPSG\",8608]],\n"
-        "        PARAMETER[\"Y-axis rotation\",1.03132403123548,\n"
+        "        PARAMETER[\"Y-axis rotation\",5,\n"
         "            ID[\"EPSG\",8609]],\n"
-        "        PARAMETER[\"Z-axis rotation\",1.23758883748258,\n"
+        "        PARAMETER[\"Z-axis rotation\",6,\n"
         "            ID[\"EPSG\",8610]],\n"
         "        PARAMETER[\"Scale difference\",1.000007,\n"
         "            ID[\"EPSG\",8611]]]]";

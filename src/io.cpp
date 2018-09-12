@@ -37,6 +37,8 @@
 #include <cstring>
 #include <iomanip>
 #include <locale>
+#include <map>
+#include <set>
 #include <sstream> // std::ostringstream
 #include <string>
 #include <utility>
@@ -2691,64 +2693,49 @@ const std::string &PROJStringFormatter::toString() const {
                 if (d->steps_[i].name == "helmert" &&
                     d->steps_[i - 1].name == "helmert" &&
                     !d->steps_[i].inverted && !d->steps_[i - 1].inverted &&
-                    ((d->steps_[i].paramValues.size() == 7 &&
-                      d->steps_[i - 1].paramValues.size() == 7) ||
-                     (d->steps_[i].paramValues.size() == 8 &&
-                      d->steps_[i].paramValues[7] ==
-                          "convention=position_vector" &&
-                      d->steps_[i - 1].paramValues.size() == 8 &&
-                      d->steps_[i - 1].paramValues[7] ==
-                          "convention=position_vector") ||
-                     (d->steps_[i].paramValues.size() == 8 &&
-                      d->steps_[i].paramValues[7] ==
-                          "convention=coordinate_frame" &&
-                      d->steps_[i - 1].paramValues.size() == 8 &&
-                      d->steps_[i - 1].paramValues[7] ==
-                          "convention=coordinate_frame")) &&
-                    starts_with(d->steps_[i].paramValues[0], "x=") &&
-                    starts_with(d->steps_[i - 1].paramValues[0], "x=") &&
-                    starts_with(d->steps_[i].paramValues[1], "y=") &&
-                    starts_with(d->steps_[i - 1].paramValues[1], "y=") &&
-                    starts_with(d->steps_[i].paramValues[2], "z=") &&
-                    starts_with(d->steps_[i - 1].paramValues[2], "z=") &&
-                    starts_with(d->steps_[i].paramValues[3], "rx=") &&
-                    starts_with(d->steps_[i - 1].paramValues[3], "rx=") &&
-                    starts_with(d->steps_[i].paramValues[4], "ry=") &&
-                    starts_with(d->steps_[i - 1].paramValues[4], "ry=") &&
-                    starts_with(d->steps_[i].paramValues[5], "rz=") &&
-                    starts_with(d->steps_[i - 1].paramValues[5], "rz=") &&
-                    starts_with(d->steps_[i].paramValues[6], "s=") &&
-                    starts_with(d->steps_[i - 1].paramValues[6], "s=") &&
-                    c_locale_stod(
-                        d->steps_[i].paramValues[0].substr(strlen("x="))) ==
-                        -c_locale_stod(d->steps_[i - 1].paramValues[0].substr(
-                            strlen("x="))) &&
-                    c_locale_stod(
-                        d->steps_[i].paramValues[1].substr(strlen("y="))) ==
-                        -c_locale_stod(d->steps_[i - 1].paramValues[1].substr(
-                            strlen("y="))) &&
-                    c_locale_stod(
-                        d->steps_[i].paramValues[2].substr(strlen("z="))) ==
-                        -c_locale_stod(d->steps_[i - 1].paramValues[2].substr(
-                            strlen("z="))) &&
-                    c_locale_stod(
-                        d->steps_[i].paramValues[3].substr(strlen("rx="))) ==
-                        -c_locale_stod(d->steps_[i - 1].paramValues[3].substr(
-                            strlen("rx="))) &&
-                    c_locale_stod(
-                        d->steps_[i].paramValues[4].substr(strlen("ry="))) ==
-                        -c_locale_stod(d->steps_[i - 1].paramValues[4].substr(
-                            strlen("ry="))) &&
-                    c_locale_stod(
-                        d->steps_[i].paramValues[5].substr(strlen("rz="))) ==
-                        -c_locale_stod(d->steps_[i - 1].paramValues[5].substr(
-                            strlen("rz="))) &&
-                    d->steps_[i].paramValues[6] ==
-                        d->steps_[i - 1].paramValues[6]) {
-                    d->steps_.erase(d->steps_.begin() + i - 1,
-                                    d->steps_.begin() + i + 1);
-                    changeDone = true;
-                    break;
+                    d->steps_[i].paramValues.size() ==
+                        d->steps_[i - 1].paramValues.size()) {
+                    std::set<std::string> leftParamsSet;
+                    std::set<std::string> rightParamsSet;
+                    std::map<std::string, std::string> leftParamsMap;
+                    std::map<std::string, std::string> rightParamsMap;
+                    for (const auto &str : d->steps_[i - 1].paramValues) {
+                        auto key_value = split(str, '=');
+                        leftParamsSet.insert(key_value[0]);
+                        if (key_value.size() == 2) {
+                            leftParamsMap[key_value[0]] = key_value[1];
+                        }
+                    }
+                    for (const auto &str : d->steps_[i].paramValues) {
+                        auto key_value = split(str, '=');
+                        rightParamsSet.insert(key_value[0]);
+                        if (key_value.size() == 2) {
+                            rightParamsMap[key_value[0]] = key_value[1];
+                        }
+                    }
+                    if (leftParamsSet == rightParamsSet) {
+                        bool doErase = true;
+                        for (const auto &param : leftParamsSet) {
+                            if (param == "convention" || param == "t_epoch" ||
+                                param == "t_obs") {
+                                if (leftParamsMap[param] !=
+                                    rightParamsMap[param]) {
+                                    doErase = false;
+                                    break;
+                                }
+                            } else if (c_locale_stod(leftParamsMap[param]) !=
+                                       -c_locale_stod(rightParamsMap[param])) {
+                                doErase = false;
+                                break;
+                            }
+                        }
+                        if (doErase) {
+                            d->steps_.erase(d->steps_.begin() + i - 1,
+                                            d->steps_.begin() + i + 1);
+                            changeDone = true;
+                            break;
+                        }
+                    }
                 }
             } catch (const std::invalid_argument &) {
             }
@@ -3112,6 +3099,10 @@ struct PROJStringParser::Private {
     CRSNNPtr buildBoundOrCompoundCRSIfNeeded(int iStep, CRSNNPtr crs);
     UnitOfMeasure buildUnit(const Step &step, const std::string &unitsParamName,
                             const std::string &toMeterParamName);
+    TransformationNNPtr buildHelmertTransformation(
+        int iStep, int iFirstAxisSwap = -1, int iFirstUnitConvert = -1,
+        int iFirstGeogStep = -1, int iSecondGeogStep = -1,
+        int iSecondAxisSwap = -1, int iSecondUnitConvert = -1);
 };
 
 // ---------------------------------------------------------------------------
@@ -3584,7 +3575,6 @@ PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
                                               int iAxisSwap) {
     const auto &step = steps_[iStep];
 
-    assert(isGeodeticStep(step.name) || isProjectedStep(step.name));
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
     assert(iAxisSwap < 0 || ci_equal(steps_[iAxisSwap].name, "axisswap"));
@@ -4184,6 +4174,142 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     return crs;
 }
 
+// ---------------------------------------------------------------------------
+
+TransformationNNPtr PROJStringParser::Private::buildHelmertTransformation(
+    int iStep, int iFirstAxisSwap, int iFirstUnitConvert, int iFirstGeogStep,
+    int iSecondGeogStep, int iSecondAxisSwap, int iSecondUnitConvert) {
+    auto &step = steps_[iStep];
+    auto datum = buildDatum(step);
+    auto cs = CartesianCS::createGeocentric(UnitOfMeasure::METRE);
+    auto sourceCRS =
+        iFirstGeogStep >= 0
+            ? buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
+                                 iFirstAxisSwap)
+            : GeodeticCRS::create(
+                  PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                  datum, cs);
+    auto targetCRS =
+        iSecondGeogStep >= 0
+            ? buildGeographicCRS(iSecondGeogStep, iSecondUnitConvert,
+                                 iSecondAxisSwap)
+            : GeodeticCRS::create(
+                  PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                  datum, cs);
+
+    double x = 0;
+    double y = 0;
+    double z = 0;
+    double rx = 0;
+    double ry = 0;
+    double rz = 0;
+    double s = 0;
+    double dx = 0;
+    double dy = 0;
+    double dz = 0;
+    double drx = 0;
+    double dry = 0;
+    double drz = 0;
+    double ds = 0;
+    double t_epoch = 0;
+    bool rotationTerms = false;
+    bool timeDependent = false;
+    bool conventionFound = false;
+    bool positionVectorConvention = false;
+
+    struct Params {
+        double *pValue;
+        std::string name;
+        bool *pPresent;
+    };
+    const std::vector<Params> params = {
+        {&x, "x", nullptr},
+        {&y, "y", nullptr},
+        {&z, "z", nullptr},
+        {&rx, "rx", &rotationTerms},
+        {&ry, "ry", &rotationTerms},
+        {&rz, "rz", &rotationTerms},
+        {&s, "s", &rotationTerms},
+        {&dx, "dx", &timeDependent},
+        {&dy, "dy", &timeDependent},
+        {&dz, "dz", &timeDependent},
+        {&drx, "drx", &timeDependent},
+        {&dry, "dry", &timeDependent},
+        {&drz, "drz", &timeDependent},
+        {&ds, "ds", &timeDependent},
+        {&t_epoch, "t_epoch", &timeDependent},
+        {nullptr, "exact", nullptr},
+    };
+    std::map<std::string, const Params *> mapParams;
+    for (auto &&param : params) {
+        mapParams[param.name] = &param;
+    }
+
+    for (const auto &param : step.paramValues) {
+        if (param.first == "convention") {
+            if (param.second == "position_vector") {
+                positionVectorConvention = true;
+                conventionFound = true;
+            } else if (param.second == "coordinate_frame") {
+                positionVectorConvention = false;
+                conventionFound = true;
+            } else {
+                throw ParsingException("unsupported convention");
+            }
+        } else if (mapParams.find(param.first) == mapParams.end()) {
+            throw ParsingException("unsupported keyword for Helmert: " +
+                                   param.first);
+        } else {
+            const auto *paramDef = mapParams[param.first];
+            if (paramDef->pValue)
+                *(paramDef->pValue) = getNumericValue(param.second);
+            if (paramDef->pPresent)
+                *(paramDef->pPresent) = true;
+        }
+    }
+
+    rotationTerms |= timeDependent;
+    if (rotationTerms && !conventionFound) {
+        throw ParsingException("missing convention");
+    }
+    if (!rotationTerms) {
+        return Transformation::createGeocentricTranslations(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    "unknown"),
+            sourceCRS, targetCRS, x, y, z,
+            std::vector<PositionalAccuracyNNPtr>());
+    }
+    if (positionVectorConvention) {
+        if (timeDependent) {
+            return Transformation::createTimeDependentPositionVector(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        "unknown"),
+                sourceCRS, targetCRS, x, y, z, rx, ry, rz, s, dx, dy, dz, drx,
+                dry, drz, ds, t_epoch, std::vector<PositionalAccuracyNNPtr>());
+        } else {
+            return Transformation::createPositionVector(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        "unknown"),
+                sourceCRS, targetCRS, x, y, z, rx, ry, rz, s,
+                std::vector<PositionalAccuracyNNPtr>());
+        }
+    } else {
+        if (timeDependent) {
+            return Transformation::createTimeDependentCoordinateFrameRotation(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        "unknown"),
+                sourceCRS, targetCRS, x, y, z, rx, ry, rz, s, dx, dy, dz, drx,
+                dry, drz, ds, t_epoch, std::vector<PositionalAccuracyNNPtr>());
+        } else {
+            return Transformation::createCoordinateFrameRotation(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        "unknown"),
+                sourceCRS, targetCRS, x, y, z, rx, ry, rz, s,
+                std::vector<PositionalAccuracyNNPtr>());
+        }
+    }
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -4270,21 +4396,28 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                    : -1);
     }
 
-    int iGeogStep = -1;
+    int iFirstGeogStep = -1;
+    int iSecondGeogStep = -1;
     int iProjStep = -1;
     int iFirstUnitConvert = -1;
     int iSecondUnitConvert = -1;
     int iFirstAxisSwap = -1;
     int iSecondAxisSwap = -1;
+    int iHelmert = -1;
+    int iFirstCart = -1;
+    int iSecondCart = -1;
     bool unexpectedStructure = false;
     for (int i = 0; i < static_cast<int>(d->steps_.size()); i++) {
         const auto &stepName = d->steps_[i].name;
         if (isGeodeticStep(stepName)) {
-            if (iGeogStep >= 0) {
+            if (iFirstGeogStep < 0) {
+                iFirstGeogStep = i;
+            } else if (iSecondGeogStep < 0) {
+                iSecondGeogStep = i;
+            } else {
                 unexpectedStructure = true;
                 break;
             }
-            iGeogStep = i;
         } else if (ci_equal(stepName, "unitconvert")) {
             if (iFirstUnitConvert < 0) {
                 iFirstUnitConvert = i;
@@ -4303,6 +4436,21 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 unexpectedStructure = true;
                 break;
             }
+        } else if (stepName == "helmert") {
+            if (iHelmert >= 0) {
+                unexpectedStructure = true;
+                break;
+            }
+            iHelmert = i;
+        } else if (stepName == "cart") {
+            if (iFirstCart < 0) {
+                iFirstCart = i;
+            } else if (iSecondCart < 0) {
+                iSecondCart = i;
+            } else {
+                unexpectedStructure = true;
+                break;
+            }
         } else if (isProjectedStep(stepName)) {
             if (iProjStep >= 0) {
                 unexpectedStructure = true;
@@ -4316,28 +4464,57 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     }
 
     if (!unexpectedStructure) {
-        if (iGeogStep == 0 && iProjStep < 0 &&
+        if (iFirstGeogStep == 0 && iSecondGeogStep < 0 && iProjStep < 0 &&
+            iHelmert < 0 && iFirstCart < 0 &&
             (iFirstUnitConvert < 0 || iSecondUnitConvert < 0) &&
             (iFirstAxisSwap < 0 || iSecondAxisSwap < 0)) {
             return d->buildBoundOrCompoundCRSIfNeeded(
-                0, d->buildGeographicCRS(iGeogStep, iFirstUnitConvert,
+                0, d->buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
                                          iFirstAxisSwap));
         }
-        if (iProjStep >= 0 && (iGeogStep < 0 || iGeogStep + 1 == iProjStep)) {
-            if (iGeogStep < 0)
-                iGeogStep = iProjStep;
+        if (iProjStep >= 0 &&
+            (iFirstGeogStep < 0 || iFirstGeogStep + 1 == iProjStep) &&
+            iSecondGeogStep < 0 && iFirstCart < 0 && iHelmert < 0) {
+            if (iFirstGeogStep < 0)
+                iFirstGeogStep = iProjStep;
             return d->buildBoundOrCompoundCRSIfNeeded(
                 iProjStep,
                 d->buildProjectedCRS(
                     iProjStep,
                     d->buildGeographicCRS(
-                        iGeogStep,
-                        iFirstUnitConvert < iGeogStep ? iFirstUnitConvert : -1,
-                        iFirstAxisSwap < iGeogStep ? iFirstAxisSwap : -1),
-                    iFirstUnitConvert < iGeogStep ? iSecondUnitConvert
-                                                  : iFirstUnitConvert,
-                    iFirstAxisSwap < iGeogStep ? iSecondAxisSwap
-                                               : iSecondAxisSwap));
+                        iFirstGeogStep,
+                        iFirstUnitConvert < iFirstGeogStep ? iFirstUnitConvert
+                                                           : -1,
+                        iFirstAxisSwap < iFirstGeogStep ? iFirstAxisSwap : -1),
+                    iFirstUnitConvert < iFirstGeogStep ? iSecondUnitConvert
+                                                       : iFirstUnitConvert,
+                    iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap
+                                                    : iSecondAxisSwap));
+        }
+        if (d->steps_.size() == 1 && iHelmert == 0) {
+            return d->buildHelmertTransformation(iHelmert);
+        }
+
+        if (iProjStep < 0 && iHelmert > 0 &&
+            (iFirstGeogStep < 0 || iFirstGeogStep == iFirstCart - 1 ||
+             (iFirstGeogStep == iSecondCart + 1 && iSecondGeogStep < 0)) &&
+            iFirstCart == iHelmert - 1 && iSecondCart == iHelmert + 1 &&
+            (iSecondGeogStep < 0 || iSecondGeogStep == iSecondCart + 1) &&
+            !d->steps_[iFirstCart].inverted &&
+            d->steps_[iSecondCart].inverted && iFirstAxisSwap < iHelmert &&
+            iFirstUnitConvert < iHelmert &&
+            (iSecondAxisSwap < 0 || iSecondAxisSwap > iHelmert) &&
+            (iSecondUnitConvert < 0 || iSecondUnitConvert > iHelmert)) {
+            return d->buildHelmertTransformation(
+                iHelmert, iFirstAxisSwap, iFirstUnitConvert,
+                iFirstGeogStep >= 0 && iFirstGeogStep == iFirstCart - 1
+                    ? iFirstGeogStep
+                    : iFirstCart,
+                iFirstGeogStep == iSecondCart + 1
+                    ? iFirstGeogStep
+                    : iSecondGeogStep == iSecondCart + 1 ? iSecondGeogStep
+                                                         : iSecondCart,
+                iSecondAxisSwap, iSecondUnitConvert);
         }
     }
 

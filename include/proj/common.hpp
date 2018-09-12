@@ -100,14 +100,17 @@ class UnitOfMeasure {
 
     PROJ_DLL static const UnitOfMeasure SCALE_UNITY;
     PROJ_DLL static const UnitOfMeasure PARTS_PER_MILLION;
+    PROJ_DLL static const UnitOfMeasure PPM_PER_YEAR;
 
     PROJ_DLL static const UnitOfMeasure METRE;
+    PROJ_DLL static const UnitOfMeasure METRE_PER_YEAR;
 
     PROJ_DLL static const UnitOfMeasure RADIAN;
     PROJ_DLL static const UnitOfMeasure MICRORADIAN;
     PROJ_DLL static const UnitOfMeasure DEGREE;
     PROJ_DLL static const UnitOfMeasure ARC_SECOND;
     PROJ_DLL static const UnitOfMeasure GRAD;
+    PROJ_DLL static const UnitOfMeasure ARC_SECOND_PER_YEAR;
 
     PROJ_DLL static const UnitOfMeasure SECOND;
     PROJ_DLL static const UnitOfMeasure YEAR;

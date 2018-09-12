@@ -8,7 +8,6 @@
     - WKT2:2018 USAGE
     - dynamic CRS WKT
     - test sphericalCS
-    - time-dependant Helmert
 
     - transformation with WEST longitude
     GEOGCS["Mars2015",

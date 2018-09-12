@@ -1203,9 +1203,9 @@ TEST(wkt_parse, BOUNDCRS_transformation_from_names) {
                "        PARAMETER[\"X-axis translation\",1],\n"
                "        PARAMETER[\"Y-axis translation\",2],\n"
                "        PARAMETER[\"Z-axis translation\",3],\n"
-               "        PARAMETER[\"X-axis rotation\",-0.825059224988385],\n"
-               "        PARAMETER[\"Y-axis rotation\",-1.03132403123548],\n"
-               "        PARAMETER[\"Z-axis rotation\",-1.23758883748258],\n"
+               "        PARAMETER[\"X-axis rotation\",-4],\n"
+               "        PARAMETER[\"Y-axis rotation\",-5],\n"
+               "        PARAMETER[\"Z-axis rotation\",-6],\n"
                "        PARAMETER[\"Scale difference\",1.000007]]]";
 
     auto obj = WKTParser().createFromWKT(wkt);
@@ -1243,20 +1243,20 @@ TEST(wkt_parse, BOUNDCRS_transformation_from_codes) {
         Conversion::createUTM(PropertyMap(), 31, true),
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 
-    auto wkt =
-        "BOUNDCRS[SOURCECRS[" + projcrs->exportToWKT(WKTFormatter::create()) +
-        "],\n" + "TARGETCRS[" +
-        GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
-        "],\n"
-        "    ABRIDGEDTRANSFORMATION[\"Transformation to WGS84\",\n"
-        "        METHOD[\"bla\",ID[\"EPSG\",1032]],\n"
-        "        PARAMETER[\"tx\",1,ID[\"EPSG\",8605]],\n"
-        "        PARAMETER[\"ty\",2,ID[\"EPSG\",8606]],\n"
-        "        PARAMETER[\"tz\",3,ID[\"EPSG\",8607]],\n"
-        "        PARAMETER[\"rotx\",-0.825059224988385,ID[\"EPSG\",8608]],\n"
-        "        PARAMETER[\"roty\",-1.03132403123548,ID[\"EPSG\",8609]],\n"
-        "        PARAMETER[\"rotz\",-1.23758883748258,ID[\"EPSG\",8610]],\n"
-        "        PARAMETER[\"scale\",1.000007,ID[\"EPSG\",8611]]]]";
+    auto wkt = "BOUNDCRS[SOURCECRS[" +
+               projcrs->exportToWKT(WKTFormatter::create()) + "],\n" +
+               "TARGETCRS[" +
+               GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create()) +
+               "],\n"
+               "    ABRIDGEDTRANSFORMATION[\"Transformation to WGS84\",\n"
+               "        METHOD[\"bla\",ID[\"EPSG\",1032]],\n"
+               "        PARAMETER[\"tx\",1,ID[\"EPSG\",8605]],\n"
+               "        PARAMETER[\"ty\",2,ID[\"EPSG\",8606]],\n"
+               "        PARAMETER[\"tz\",3,ID[\"EPSG\",8607]],\n"
+               "        PARAMETER[\"rotx\",-4,ID[\"EPSG\",8608]],\n"
+               "        PARAMETER[\"roty\",-5,ID[\"EPSG\",8609]],\n"
+               "        PARAMETER[\"rotz\",-6,ID[\"EPSG\",8610]],\n"
+               "        PARAMETER[\"scale\",1.000007,ID[\"EPSG\",8611]]]]";
 
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
@@ -4069,6 +4069,130 @@ TEST(io, projparse_cart_unit_numeric) {
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
                   PROJStringFormatter::Convention::PROJ_5)),
               input);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_helmert_translation) {
+    std::string projString("+proj=helmert +x=1 +y=2 +z=3");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              projString);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_helmert_position_vector) {
+    std::string projString("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 "
+                           "+s=7 +convention=position_vector");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              projString);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_helmert_time_dependent_position_vector) {
+    std::string projString("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 "
+                           "+s=7 +dx=0.1 +dy=0.2 +dz=0.3 +drx=0.4 +dry=0.5 "
+                           "+drz=0.6 +ds=0.7 +t_epoch=2018.5 "
+                           "+convention=position_vector");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              projString);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_helmert_coordinate_frame) {
+    std::string projString("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 "
+                           "+s=7 +convention=coordinate_frame");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              projString);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_helmert_time_dependent_coordinate_frame) {
+    std::string projString("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 "
+                           "+s=7 +dx=0.1 +dy=0.2 +dz=0.3 +drx=0.4 +dry=0.5 "
+                           "+drz=0.6 +ds=0.7 +t_epoch=2018.5 "
+                           "+convention=coordinate_frame");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              projString);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_helmert_complex_pipeline) {
+    std::string projString(
+        "+proj=pipeline +step +proj=cart "
+        "+ellps=WGS84 +step +proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 "
+        "+ry=-5 +rz=-6 +s=-7 +convention=position_vector +step +inv "
+        "+proj=cart +ellps=clrk80ign");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=cart +ellps=WGS84 +step +proj=helmert +x=-1 +y=-2 "
+              "+z=-3 +rx=-4 +ry=-5 +rz=-6 +s=-7 +convention=position_vector "
+              "+step +inv +proj=cart +ellps=clrk80ign +step +proj=unitconvert "
+              "+xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_helmert_complex_pipeline_2) {
+    std::string projString(
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+        "+ellps=WGS84 +step +proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 "
+        "+ry=-5 +rz=-6 +s=-7 +convention=position_vector +step +inv "
+        "+proj=cart +ellps=clrk80ign +step "
+        "+inv +proj=longlat +ellps=clrk80ign +pm=paris +step "
+        "+proj=unitconvert +xy_in=rad +xy_out=grad +step +proj=axisswap "
+        "+order=2,1");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              projString);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_helmert_errors) {
+    // Missing convention
+    EXPECT_THROW(PROJStringParser().createFromPROJString("+proj=helmert +rx=4"),
+                 ParsingException);
+
+    EXPECT_THROW(PROJStringParser().createFromPROJString(
+                     "+proj=helmert +convention=unhandled"),
+                 ParsingException);
+
+    EXPECT_THROW(PROJStringParser().createFromPROJString(
+                     "+proj=helmert +unhandled_keyword"),
+                 ParsingException);
 }
 
 // ---------------------------------------------------------------------------

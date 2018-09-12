@@ -332,17 +332,73 @@ constexpr double UTM_SOUTH_FALSE_NORTHING = 10000000.0;
 static const std::string EPSG_NAME_METHOD_COORDINATE_FRAME_GEOCENTRIC(
     "Coordinate Frame rotation (geocentric domain)");
 constexpr int EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC = 1032;
-constexpr int EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC = 9607;
+
+static const std::string EPSG_NAME_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D(
+    "Coordinate Frame rotation (geog2D domain)");
+constexpr int EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D = 9607;
+
+static const std::string EPSG_NAME_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D(
+    "Coordinate Frame rotation (geog3D domain)");
+constexpr int EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D = 1038;
 
 static const std::string EPSG_NAME_METHOD_POSITION_VECTOR_GEOCENTRIC(
     "Position Vector transformation (geocentric domain)");
 constexpr int EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC = 1033;
-constexpr int EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC = 9606;
+
+static const std::string EPSG_NAME_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D(
+    "Position Vector transformation (geog2D domain)");
+constexpr int EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D = 9606;
+
+static const std::string EPSG_NAME_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D(
+    "Position Vector transformation (geog3D domain)");
+constexpr int EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D = 1037;
 
 static const std::string EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC(
     "Geocentric translations (geocentric domain)");
 constexpr int EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC = 1031;
-constexpr int EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC = 9603;
+
+static const std::string EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D(
+    "Geocentric translations (geog2D domain)");
+constexpr int EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D = 9603;
+
+static const std::string EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D(
+    "Geocentric translations (geog3D domain)");
+constexpr int EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D = 1035;
+
+static const std::string
+    EPSG_NAME_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC(
+        "Time-dependent Position Vector tfm (geocentric)");
+constexpr int EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC = 1053;
+
+static const std::string
+    EPSG_NAME_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D(
+        "Time-dependent Position Vector tfm (geog2D)");
+constexpr int EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D =
+    1054;
+
+static const std::string
+    EPSG_NAME_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D(
+        "Time-dependent Position Vector tfm (geog3D)");
+constexpr int EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D =
+    1055;
+
+static const std::string
+    EPSG_NAME_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC(
+        "Time-dependent Coordinate Frame rotation (geocen)");
+constexpr int EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC =
+    1056;
+
+static const std::string
+    EPSG_NAME_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D(
+        "Time-dependent Position Vector tfm (geog2D)");
+constexpr int EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D =
+    1057;
+
+static const std::string
+    EPSG_NAME_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D(
+        "Time-dependent Position Vector tfm (geog3D)");
+constexpr int EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D =
+    1058;
 
 constexpr int EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION = 8605;
 constexpr int EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION = 8606;
@@ -351,6 +407,15 @@ constexpr int EPSG_CODE_PARAMETER_X_AXIS_ROTATION = 8608;
 constexpr int EPSG_CODE_PARAMETER_Y_AXIS_ROTATION = 8609;
 constexpr int EPSG_CODE_PARAMETER_Z_AXIS_ROTATION = 8610;
 constexpr int EPSG_CODE_PARAMETER_SCALE_DIFFERENCE = 8611;
+
+constexpr int EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION = 1040;
+constexpr int EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION = 1041;
+constexpr int EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION = 1042;
+constexpr int EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION = 1043;
+constexpr int EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION = 1044;
+constexpr int EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION = 1045;
+constexpr int EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE = 1046;
+constexpr int EPSG_CODE_PARAMETER_REFERENCE_EPOCH = 1047;
 
 static const std::string
     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION("X-axis translation");
@@ -363,6 +428,23 @@ static const std::string EPSG_NAME_PARAMETER_Y_AXIS_ROTATION("Y-axis rotation");
 static const std::string EPSG_NAME_PARAMETER_Z_AXIS_ROTATION("Z-axis rotation");
 static const std::string
     EPSG_NAME_PARAMETER_SCALE_DIFFERENCE("Scale difference");
+
+static const std::string EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION(
+    "Rate of change of X-axis translation");
+static const std::string EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION(
+    "Rate of change of Y-axis translation");
+static const std::string EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION(
+    "Rate of change of Z-axis translation");
+static const std::string EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION(
+    "Rate of change of X-axis rotation");
+static const std::string EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION(
+    "Rate of change of Y-axis rotation");
+static const std::string EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION(
+    "Rate of change of Z-axis rotation");
+static const std::string EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE(
+    "Rate of change of Scale difference");
+static const std::string
+    EPSG_NAME_PARAMETER_REFERENCE_EPOCH("Parameter reference epoch");
 
 // ---------------------------------------------------------------------------
 

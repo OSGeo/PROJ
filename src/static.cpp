@@ -295,6 +295,24 @@ const UnitOfMeasure UnitOfMeasure::SECOND("second", 1.0,
 const UnitOfMeasure UnitOfMeasure::YEAR("year", 31556925.445,
                                         UnitOfMeasure::Type::TIME,
                                         Identifier::EPSG, "1040");
+
+/** \brief Metre per year, unit of measure of type LINEAR. */
+const UnitOfMeasure UnitOfMeasure::METRE_PER_YEAR("metres per year",
+                                                  1.0 / 31556925.445,
+                                                  UnitOfMeasure::Type::LINEAR,
+                                                  Identifier::EPSG, "1042");
+
+/** \brief Arc-second per year, unit of measure of type ANGULAR. */
+const UnitOfMeasure UnitOfMeasure::ARC_SECOND_PER_YEAR(
+    "arc-seconds per year", M_PI / 180. / 3600. / 31556925.445,
+    UnitOfMeasure::Type::ANGULAR, Identifier::EPSG, "1043");
+
+/** \brief Part-sper-million per year, unit of measure of type SCALE. */
+const UnitOfMeasure UnitOfMeasure::PPM_PER_YEAR("parts per million per year",
+                                                1e-6 / 31556925.445,
+                                                UnitOfMeasure::Type::SCALE,
+                                                Identifier::EPSG, "1036");
+
 } // namespace common
 
 // ---------------------------------------------------------------------------
