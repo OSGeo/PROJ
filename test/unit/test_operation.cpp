@@ -697,6 +697,75 @@ TEST(operation, transformation_successive_helmert_non_trivial_2) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, transformation_createMolodensky) {
+
+    auto transf = Transformation::createMolodensky(
+        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        2.0, 3.0, 4.0, 5.0, std::vector<PositionalAccuracyNNPtr>());
+
+    auto wkt = transf->exportToWKT(WKTFormatter::create());
+    EXPECT_TRUE(replaceAll(replaceAll(wkt, " ", ""), "\n", "")
+                    .find("METHOD[\"Molodensky\",ID[\"EPSG\",9604]]") !=
+                std::string::npos)
+        << wkt;
+
+    auto inv_transf = transf->inverse();
+    auto inv_transf_as_transf =
+        nn_dynamic_pointer_cast<Transformation>(inv_transf);
+    ASSERT_TRUE(inv_transf_as_transf != nullptr);
+
+    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
+              *(inv_transf_as_transf->targetCRS()->name()->description()));
+    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
+              *(inv_transf_as_transf->sourceCRS()->name()->description()));
+
+    auto projString =
+        inv_transf_as_transf->exportToPROJString(PROJStringFormatter::create());
+    EXPECT_EQ(projString, "+proj=pipeline +step +proj=axisswap +order=2,1 "
+                          "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                          "+step +proj=molodensky +ellps=GRS80 +dx=-1 +dy=-2 "
+                          "+dz=-3 +da=-4 +df=-5 +step +proj=unitconvert "
+                          "+xy_in=rad +xy_out=deg +step +proj=axisswap "
+                          "+order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_createAbridgedMolodensky) {
+
+    auto transf = Transformation::createAbridgedMolodensky(
+        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        2.0, 3.0, 4.0, 5.0, std::vector<PositionalAccuracyNNPtr>());
+
+    auto wkt = transf->exportToWKT(WKTFormatter::create());
+    EXPECT_TRUE(replaceAll(replaceAll(wkt, " ", ""), "\n", "")
+                    .find(replaceAll(
+                        "METHOD[\"Abridged Molodensky\",ID[\"EPSG\",9605]]",
+                        " ", "")) != std::string::npos)
+        << wkt;
+
+    auto inv_transf = transf->inverse();
+    auto inv_transf_as_transf =
+        nn_dynamic_pointer_cast<Transformation>(inv_transf);
+    ASSERT_TRUE(inv_transf_as_transf != nullptr);
+
+    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
+              *(inv_transf_as_transf->targetCRS()->name()->description()));
+    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
+              *(inv_transf_as_transf->sourceCRS()->name()->description()));
+
+    auto projString =
+        inv_transf_as_transf->exportToPROJString(PROJStringFormatter::create());
+    EXPECT_EQ(projString, "+proj=pipeline +step +proj=axisswap +order=2,1 "
+                          "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                          "+step +proj=molodensky +ellps=GRS80 +dx=-1 +dy=-2 "
+                          "+dz=-3 +da=-4 +df=-5 +abridged +step "
+                          "+proj=unitconvert +xy_in=rad +xy_out=deg +step "
+                          "+proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, transformation_inverse) {
 
     auto transf = Transformation::create(

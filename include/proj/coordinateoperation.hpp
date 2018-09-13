@@ -1292,6 +1292,20 @@ class Transformation : public SingleOperation {
         const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
+    PROJ_DLL static TransformationNNPtr createMolodensky(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
+        double translationYMetre, double translationZMetre,
+        double semiMajorAxisDifferenceMetre, double flattingDifference,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
+    PROJ_DLL static TransformationNNPtr createAbridgedMolodensky(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
+        double translationYMetre, double translationZMetre,
+        double semiMajorAxisDifferenceMetre, double flattingDifference,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
+
     PROJ_DLL static TransformationNNPtr
     createGravityRelatedHeightToGeographic3D(
         const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,

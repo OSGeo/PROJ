@@ -3103,6 +3103,10 @@ struct PROJStringParser::Private {
         int iStep, int iFirstAxisSwap = -1, int iFirstUnitConvert = -1,
         int iFirstGeogStep = -1, int iSecondGeogStep = -1,
         int iSecondAxisSwap = -1, int iSecondUnitConvert = -1);
+    TransformationNNPtr buildMolodenskyTransformation(
+        int iStep, int iFirstAxisSwap = -1, int iFirstUnitConvert = -1,
+        int iFirstGeogStep = -1, int iSecondGeogStep = -1,
+        int iSecondAxisSwap = -1, int iSecondUnitConvert = -1);
 };
 
 // ---------------------------------------------------------------------------
@@ -4246,6 +4250,10 @@ TransformationNNPtr PROJStringParser::Private::buildHelmertTransformation(
     }
 
     for (const auto &param : step.paramValues) {
+        if (param.first == "datum" || param.first == "ellps" ||
+            param.first == "a" || param.first == "b" || param.first == "R") {
+            continue;
+        }
         if (param.first == "convention") {
             if (param.second == "position_vector") {
                 positionVectorConvention = true;
@@ -4307,6 +4315,102 @@ TransformationNNPtr PROJStringParser::Private::buildHelmertTransformation(
                 sourceCRS, targetCRS, x, y, z, rx, ry, rz, s,
                 std::vector<PositionalAccuracyNNPtr>());
         }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TransformationNNPtr PROJStringParser::Private::buildMolodenskyTransformation(
+    int iStep, int iFirstAxisSwap, int iFirstUnitConvert, int iFirstGeogStep,
+    int iSecondGeogStep, int iSecondAxisSwap, int iSecondUnitConvert) {
+    auto &step = steps_[iStep];
+    auto datum = buildDatum(step);
+    auto sourceCRS = iFirstGeogStep >= 0
+                         ? buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
+                                              iFirstAxisSwap)
+                         : buildGeographicCRS(iStep, -1, -1);
+
+    double dx = 0;
+    double dy = 0;
+    double dz = 0;
+    double da = 0;
+    double df = 0;
+
+    struct Params {
+        double *pValue;
+        std::string name;
+    };
+    const std::vector<Params> params = {
+        {&dx, "dx"}, {&dy, "dy"}, {&dz, "dz"}, {&da, "da"}, {&df, "df"},
+    };
+    bool abridged = false;
+    std::map<std::string, const Params *> mapParams;
+    for (auto &&param : params) {
+        mapParams[param.name] = &param;
+    }
+
+    for (const auto &param : step.paramValues) {
+        if (param.first == "datum" || param.first == "ellps" ||
+            param.first == "a" || param.first == "b" || param.first == "R") {
+            continue;
+        } else if (param.first == "abridged") {
+            abridged = true;
+        } else if (mapParams.find(param.first) == mapParams.end()) {
+            throw ParsingException("unsupported keyword for Helmert: " +
+                                   param.first);
+        } else {
+            const auto *paramDef = mapParams[param.first];
+            if (paramDef->pValue)
+                *(paramDef->pValue) = getNumericValue(param.second);
+        }
+    }
+
+    const double a =
+        sourceCRS->datum()->ellipsoid()->semiMajorAxis().getSIValue();
+    const double rf = sourceCRS->datum()
+                          ->ellipsoid()
+                          ->computeInverseFlattening()
+                          .getSIValue();
+    const double target_a = a + da;
+    const double target_rf = 1.0 / (1.0 / rf + df);
+    auto target_ellipsoid =
+        Ellipsoid::createFlattenedSphere(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+            Length(target_a), Scale(target_rf))
+            ->identify();
+    auto target_datum = GeodeticReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+        target_ellipsoid, util::optional<std::string>(),
+        PrimeMeridian::GREENWICH);
+
+    CoordinateSystemAxisNNPtr east = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
+        AxisAbbreviation::lon, AxisDirection::EAST, UnitOfMeasure::DEGREE);
+    CoordinateSystemAxisNNPtr north = CoordinateSystemAxis::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
+        AxisAbbreviation::lat, AxisDirection::NORTH, UnitOfMeasure::DEGREE);
+
+    auto targetCRS =
+        iSecondGeogStep >= 0
+            ? buildGeographicCRS(iSecondGeogStep, iSecondUnitConvert,
+                                 iSecondAxisSwap)
+            : GeographicCRS::create(
+                  PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"),
+                  target_datum,
+                  EllipsoidalCS::create(PropertyMap(), east, north));
+
+    if (abridged) {
+        return Transformation::createAbridgedMolodensky(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    "unknown"),
+            sourceCRS, targetCRS, dx, dy, dz, da, df,
+            std::vector<PositionalAccuracyNNPtr>());
+    } else {
+        return Transformation::createMolodensky(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    "unknown"),
+            sourceCRS, targetCRS, dx, dy, dz, da, df,
+            std::vector<PositionalAccuracyNNPtr>());
     }
 }
 
@@ -4406,6 +4510,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     int iHelmert = -1;
     int iFirstCart = -1;
     int iSecondCart = -1;
+    int iMolodensky = -1;
     bool unexpectedStructure = false;
     for (int i = 0; i < static_cast<int>(d->steps_.size()); i++) {
         const auto &stepName = d->steps_[i].name;
@@ -4451,6 +4556,12 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 unexpectedStructure = true;
                 break;
             }
+        } else if (stepName == "molodensky") {
+            if (iMolodensky >= 0) {
+                unexpectedStructure = true;
+                break;
+            }
+            iMolodensky = i;
         } else if (isProjectedStep(stepName)) {
             if (iProjStep >= 0) {
                 unexpectedStructure = true;
@@ -4465,7 +4576,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
 
     if (!unexpectedStructure) {
         if (iFirstGeogStep == 0 && iSecondGeogStep < 0 && iProjStep < 0 &&
-            iHelmert < 0 && iFirstCart < 0 &&
+            iHelmert < 0 && iFirstCart < 0 && iMolodensky < 0 &&
             (iFirstUnitConvert < 0 || iSecondUnitConvert < 0) &&
             (iFirstAxisSwap < 0 || iSecondAxisSwap < 0)) {
             return d->buildBoundOrCompoundCRSIfNeeded(
@@ -4474,7 +4585,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         }
         if (iProjStep >= 0 &&
             (iFirstGeogStep < 0 || iFirstGeogStep + 1 == iProjStep) &&
-            iSecondGeogStep < 0 && iFirstCart < 0 && iHelmert < 0) {
+            iMolodensky < 0 && iSecondGeogStep < 0 && iFirstCart < 0 &&
+            iHelmert < 0) {
             if (iFirstGeogStep < 0)
                 iFirstGeogStep = iProjStep;
             return d->buildBoundOrCompoundCRSIfNeeded(
@@ -4495,7 +4607,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             return d->buildHelmertTransformation(iHelmert);
         }
 
-        if (iProjStep < 0 && iHelmert > 0 &&
+        if (iProjStep < 0 && iHelmert > 0 && iMolodensky < 0 &&
             (iFirstGeogStep < 0 || iFirstGeogStep == iFirstCart - 1 ||
              (iFirstGeogStep == iSecondCart + 1 && iSecondGeogStep < 0)) &&
             iFirstCart == iHelmert - 1 && iSecondCart == iHelmert + 1 &&
@@ -4514,6 +4626,29 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     ? iFirstGeogStep
                     : iSecondGeogStep == iSecondCart + 1 ? iSecondGeogStep
                                                          : iSecondCart,
+                iSecondAxisSwap, iSecondUnitConvert);
+        }
+
+        if (d->steps_.size() == 1 && iMolodensky == 0) {
+            return d->buildMolodenskyTransformation(iMolodensky);
+        }
+
+        if (iProjStep < 0 && iHelmert < 0 && iMolodensky > 0 &&
+            (iFirstGeogStep < 0 || iFirstGeogStep == iMolodensky - 1 ||
+             (iFirstGeogStep == iMolodensky + 1 && iSecondGeogStep < 0)) &&
+            (iSecondGeogStep < 0 || iSecondGeogStep == iMolodensky + 1) &&
+            iFirstAxisSwap < iMolodensky && iFirstUnitConvert < iMolodensky &&
+            (iSecondAxisSwap < 0 || iSecondAxisSwap > iMolodensky) &&
+            (iSecondUnitConvert < 0 || iSecondUnitConvert > iMolodensky)) {
+            return d->buildMolodenskyTransformation(
+                iMolodensky, iFirstAxisSwap, iFirstUnitConvert,
+                iFirstGeogStep >= 0 && iFirstGeogStep == iMolodensky - 1
+                    ? iFirstGeogStep
+                    : iMolodensky,
+                iFirstGeogStep == iMolodensky + 1
+                    ? iFirstGeogStep
+                    : iSecondGeogStep == iMolodensky + 1 ? iSecondGeogStep
+                                                         : iMolodensky,
                 iSecondAxisSwap, iSecondUnitConvert);
         }
     }

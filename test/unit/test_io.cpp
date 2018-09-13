@@ -4197,6 +4197,105 @@ TEST(io, projparse_helmert_errors) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_molodensky) {
+    std::string projString("+proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 "
+                           "+dz=116.95 +da=251 +df=1.41927e-05");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    transf->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_EQ(
+        wkt,
+        "COORDINATEOPERATION[\"unknown\",SOURCECRS[GEODCRS[\"unknown\",DATUM["
+        "\"Unknown based on WGS84 ellipsoid\",ELLIPSOID[\"WGS "
+        "84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM["
+        "\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS["
+        "ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\","
+        "0.0174532925199433]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT["
+        "\"degree\",0.0174532925199433]]]],TARGETCRS[GEODCRS[\"unknown\",DATUM["
+        "\"unknown\",ELLIPSOID[\"unknown\",6378388,297.000000198989,LENGTHUNIT["
+        "\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0."
+        "0174532925199433]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],"
+        "ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"latitude\",north,"
+        "ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]]]],METHOD["
+        "\"Molodensky\",ID[\"EPSG\",9604]],PARAMETER[\"X-axis "
+        "translation\",84.87,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8605]],"
+        "PARAMETER[\"Y-axis "
+        "translation\",96.49,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8606]],"
+        "PARAMETER[\"Z-axis "
+        "translation\",116.95,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8607]],"
+        "PARAMETER[\"Semi-major axis length "
+        "difference\",251,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8654]],PARAMETER["
+        "\"Flattening difference\",1.41927e-05,ID[\"EPSG\",8655]]]");
+
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 "
+              "+dz=116.95 +da=251 +df=1.41927e-05 +step +proj=longlat "
+              "+a=6378388 +rf=297.000000198989 +step +proj=unitconvert "
+              "+xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_molodensky_abridged) {
+    std::string projString("+proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 "
+                           "+dz=116.95 +da=251 +df=1.41927e-05 +abridged");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(
+        transf->exportToPROJString(PROJStringFormatter::create(
+            PROJStringFormatter::Convention::PROJ_5)),
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 "
+        "+dz=116.95 +da=251 +df=1.41927e-05 +abridged +step +proj=longlat "
+        "+a=6378388 +rf=297.000000198989 +step "
+        "+proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_molodensky_complex_pipeline) {
+    std::string projString(
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+proj=longlat +ellps=WGS84 +step +proj=molodensky +ellps=WGS84 "
+        "+dx=84.87 +dy=96.49 "
+        "+dz=116.95 +da=251 +df=1.41927e-05 +step +proj=longlat "
+        "+ellps=GRS80 +step +proj=unitconvert "
+        "+xy_in=rad +xy_out=deg");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    transf->exportToWKT(f);
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("SOURCECRS[GEODCRS[\"unknown\",DATUM[\"Unknown based "
+                         "on WGS84 ellipsoid\"") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("TARGETCRS[GEODCRS[\"unknown\",DATUM[\"Unknown based "
+                         "on GRS80 ellipsoid\"") != std::string::npos)
+        << wkt;
+
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=molodensky +ellps=WGS84 +dx=84.87 +dy=96.49 "
+              "+dz=116.95 +da=251 +df=1.41927e-05 +step +proj=unitconvert "
+              "+xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_errors) {
     EXPECT_THROW(PROJStringParser().createFromPROJString(""), ParsingException);
 

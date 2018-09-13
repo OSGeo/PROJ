@@ -4301,7 +4301,7 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation from a vector of GeneralParameterValue.
+/** \brief Instanciate a transformation from a vector of GeneralParameterValue.
  *
  * @param properties See \ref general_properties. At minimum the name should be
  * defined.
@@ -4334,7 +4334,7 @@ TransformationNNPtr Transformation::create(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation ands its OperationMethod.
+/** \brief Instanciate a transformation ands its OperationMethod.
  *
  * @param propertiesTransformation The \ref general_properties of the
  * Transformation.
@@ -4499,7 +4499,7 @@ static void getTransformationType(const crs::CRSNNPtr &sourceCRSIn,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation with Geocentric Translations method.
+/** \brief Instanciate a transformation with Geocentric Translations method.
  *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
@@ -4577,7 +4577,7 @@ TransformationNNPtr Transformation::createGeocentricTranslations(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation with Position vector transformation
+/** \brief Instanciate a transformation with Position vector transformation
  * method.
  *
  * This is similar to createCoordinateFrameRotation(), except that the sign of
@@ -4638,7 +4638,7 @@ TransformationNNPtr Transformation::createPositionVector(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation with Coordinate Frame Rotation method.
+/** \brief Instanciate a transformation with Coordinate Frame Rotation method.
  *
  * This is similar to createPositionVector(), except that the sign of
  * the rotation terms is inverted.
@@ -4870,7 +4870,7 @@ static TransformationNNPtr createFifteenParamsTransform(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation with Time Dependent position vector
+/** \brief Instanciate a transformation with Time Dependent position vector
  * transformation method.
  *
  * This is similar to createTimeDependentCoordinateFrameRotation(), except that
@@ -4956,7 +4956,7 @@ TransformationNNPtr Transformation::createTimeDependentPositionVector(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation with Time Dependent Position coordinate
+/** \brief Instanciate a transformation with Time Dependent Position coordinate
  * frame rotation transformation method.
  *
  * This is similar to createTimeDependentPositionVector(), except that the sign
@@ -5044,7 +5044,196 @@ TransformationNNPtr Transformation::createTimeDependentCoordinateFrameRotation(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation from TOWGS84 parameters.
+/** \brief Instanciate a transformation with Molodensky method.
+ *
+ * @see createAbridgedMolodensky() for a related method.
+ *
+ * This method is defined as [EPSG:9604]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9604)
+ *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param translationXMetre Value of the Translation_X parameter (in metre).
+ * @param translationYMetre Value of the Translation_Y parameter (in metre).
+ * @param translationZMetre Value of the Translation_Z parameter (in metre).
+ * @param semiMajorAxisDifferenceMetre The difference between the semi-major
+ * axis values of the ellipsoids used in the target and source CRS (in metre).
+ * @param flattingDifference The difference  between the flattening values of
+ * the ellipsoids used in the target and source CRS.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ * @throws InvalidOperation
+ */
+TransformationNNPtr Transformation::createMolodensky(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
+    double translationYMetre, double translationZMetre,
+    double semiMajorAxisDifferenceMetre, double flattingDifference,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    std::vector<OperationParameterNNPtr> parameters{
+        OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
+        OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
+        OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
+
+        OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)),
+        OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE)),
+    };
+
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(common::Length(translationXMetre)),
+        ParameterValue::create(common::Length(translationYMetre)),
+        ParameterValue::create(common::Length(translationZMetre)),
+        ParameterValue::create(common::Length(semiMajorAxisDifferenceMetre)),
+        ParameterValue::create(
+            common::Measure(flattingDifference, common::UnitOfMeasure::NONE)),
+    };
+
+    return Transformation::create(
+        properties, sourceCRSIn, targetCRSIn, nullptr,
+        util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY,
+                 EPSG_NAME_METHOD_MOLODENSKY)
+            .set(metadata::Identifier::CODESPACE_KEY,
+                 metadata::Identifier::EPSG)
+            .set(metadata::Identifier::CODE_KEY, EPSG_CODE_METHOD_MOLODENSKY),
+        parameters, values, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a transformation with Abridged Molodensky method.
+ *
+ * @see createdMolodensky() for a related method.
+ *
+ * This method is defined as [EPSG:9605]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9605)
+ *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param translationXMetre Value of the Translation_X parameter (in metre).
+ * @param translationYMetre Value of the Translation_Y parameter (in metre).
+ * @param translationZMetre Value of the Translation_Z parameter (in metre).
+ * @param semiMajorAxisDifferenceMetre The difference between the semi-major
+ * axis values of the ellipsoids used in the target and source CRS (in metre).
+ * @param flattingDifference The difference  between the flattening values of
+ * the ellipsoids used in the target and source CRS.
+ * @param accuracies Vector of positional accuracy (might be empty).
+ * @return new Transformation.
+ * @throws InvalidOperation
+ */
+TransformationNNPtr Transformation::createAbridgedMolodensky(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, double translationXMetre,
+    double translationYMetre, double translationZMetre,
+    double semiMajorAxisDifferenceMetre, double flattingDifference,
+    const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
+    std::vector<OperationParameterNNPtr> parameters{
+        OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)),
+        OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)),
+        OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)),
+
+        OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)),
+        OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE)),
+    };
+
+    std::vector<ParameterValueNNPtr> values{
+        ParameterValue::create(common::Length(translationXMetre)),
+        ParameterValue::create(common::Length(translationYMetre)),
+        ParameterValue::create(common::Length(translationZMetre)),
+        ParameterValue::create(common::Length(semiMajorAxisDifferenceMetre)),
+        ParameterValue::create(
+            common::Measure(flattingDifference, common::UnitOfMeasure::NONE)),
+    };
+
+    return Transformation::create(
+        properties, sourceCRSIn, targetCRSIn, nullptr,
+        util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY,
+                 EPSG_NAME_METHOD_ABRIDGED_MOLODENSKY)
+            .set(metadata::Identifier::CODESPACE_KEY,
+                 metadata::Identifier::EPSG)
+            .set(metadata::Identifier::CODE_KEY,
+                 EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY),
+        parameters, values, accuracies);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a transformation from TOWGS84 parameters.
  *
  * This is a helper of createPositionVector() with the source CRS being the
  * GeographicCRS of sourceCRSIn, and the target CRS being EPSG:4326
@@ -5095,7 +5284,7 @@ TransformationNNPtr Transformation::createTOWGS84(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation with NTv2 method.
+/** \brief Instanciate a transformation with NTv2 method.
  *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
@@ -5132,7 +5321,7 @@ TransformationNNPtr Transformation::createNTv2(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation from GravityRelatedHeight to
+/** \brief Instanciate a transformation from GravityRelatedHeight to
  * Geographic3D
  *
  * @param properties See \ref general_properties of the Transformation.
@@ -5167,7 +5356,7 @@ TransformationNNPtr Transformation::createGravityRelatedHeightToGeographic3D(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a Transformation with method VERTCON
+/** \brief Instanciate a transformation with method VERTCON
  *
  * @param properties See \ref general_properties of the Transformation.
  * At minimum the name should be defined.
@@ -5385,6 +5574,52 @@ CoordinateOperationNNPtr Transformation::inverse() const {
                         *(targetCRS()->name()->description()) + " to " +
                         *(sourceCRS()->name()->description())),
                 targetCRS(), sourceCRS(), x, y, z,
+                coordinateOperationAccuracies());
+        }
+    }
+
+    if (ci_find(method_name, "Molodensky") != std::string::npos ||
+        method()->isEPSG(EPSG_CODE_METHOD_MOLODENSKY) ||
+        method()->isEPSG(EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY)) {
+        double x =
+            -parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
+                                   EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
+                 .getSIValue();
+        double y =
+            -parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
+                                   EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)
+                 .getSIValue();
+        double z =
+            -parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
+                                   EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
+                 .getSIValue();
+        double da = -parameterValueMeasure(
+                         EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE,
+                         EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)
+                         .getSIValue();
+        double df =
+            -parameterValueMeasure(EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE,
+                                   EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE)
+                 .getSIValue();
+
+        if (ci_find(method_name, "Abridged") != std::string::npos ||
+            method()->isEPSG(EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY)) {
+            return createAbridgedMolodensky(
+                util::PropertyMap().set(
+                    common::IdentifiedObject::NAME_KEY,
+                    "Transformation from " +
+                        *(targetCRS()->name()->description()) + " to " +
+                        *(sourceCRS()->name()->description())),
+                targetCRS(), sourceCRS(), x, y, z, da, df,
+                coordinateOperationAccuracies());
+        } else {
+            return createMolodensky(
+                util::PropertyMap().set(
+                    common::IdentifiedObject::NAME_KEY,
+                    "Transformation from " +
+                        *(targetCRS()->name()->description()) + " to " +
+                        *(sourceCRS()->name()->description())),
+                targetCRS(), sourceCRS(), x, y, z, da, df,
                 coordinateOperationAccuracies());
         }
     }
@@ -5720,6 +5955,65 @@ std::string Transformation::exportToPROJString(
             }
             targetCRSGeod->addGeocentricUnitConversionIntoPROJString(formatter);
         }
+
+        return scope.toString();
+    }
+
+    if (ci_find(method_name, "Molodensky") != std::string::npos ||
+        method()->isEPSG(EPSG_CODE_METHOD_MOLODENSKY) ||
+        method()->isEPSG(EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY)) {
+        double x = parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
+                       .getSIValue();
+        double y = parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)
+                       .getSIValue();
+        double z = parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
+                       .getSIValue();
+        double da = parameterValueMeasure(
+                        EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE,
+                        EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)
+                        .getSIValue();
+        double df =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE,
+                                  EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE)
+                .getSIValue();
+
+        auto sourceCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
+        if (!sourceCRSGeog) {
+            throw io::FormattingException(
+                "Can apply Molodensky only to GeographicCRS");
+        }
+
+        auto targetCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS());
+        if (!targetCRSGeog) {
+            throw io::FormattingException(
+                "Can apply Molodensky only to GeographicCRS");
+        }
+
+        io::PROJStringFormatter::Scope scope(formatter);
+
+        formatter->startInversion();
+        sourceCRSGeog->exportToPROJString(formatter);
+        formatter->stopInversion();
+
+        formatter->addStep("molodensky");
+        sourceCRSGeog->datum()->ellipsoid()->exportToPROJString(formatter);
+        formatter->addParam("dx", x);
+        formatter->addParam("dy", y);
+        formatter->addParam("dz", z);
+        formatter->addParam("da", da);
+        formatter->addParam("df", df);
+
+        if (ci_find(method_name, "Abridged") != std::string::npos ||
+            method()->isEPSG(EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY)) {
+            formatter->addParam("abridged");
+        }
+
+        targetCRSGeog->exportToPROJString(formatter);
 
         return scope.toString();
     }
