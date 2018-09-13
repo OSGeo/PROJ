@@ -5,7 +5,6 @@
             init= syntax
     - derived crs
     - DATUMENSEMBLE
-    - WKT2:2018 USAGE
     - dynamic CRS WKT
     - test sphericalCS
 

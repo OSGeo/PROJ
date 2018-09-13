@@ -109,6 +109,7 @@ class WKTConstants {
     static const std::string TIMECRS;
     static const std::string VERTICALEXTENT;
     static const std::string TIMEEXTENT;
+    static const std::string USAGE; // WKT2-2018
 
     // WKT2 long
     static const std::string GEODETICCRS;

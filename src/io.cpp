@@ -873,6 +873,7 @@ struct WKTParser::Private {
 
     IdentifierPtr buildId(WKTNodeNNPtr node, bool tolerant = true);
     PropertyMap buildProperties(WKTNodeNNPtr node);
+    ObjectDomainPtr buildObjectDomain(WKTNodeNNPtr node);
     UnitOfMeasure
     buildUnit(WKTNodeNNPtr node,
               UnitOfMeasure::Type type = UnitOfMeasure::Type::UNKNOWN);
@@ -1047,6 +1048,34 @@ PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
         }
     }
 
+    ArrayOfBaseObjectNNPtr array = ArrayOfBaseObject::create();
+    for (const auto &subNode : node->children()) {
+        if (ci_equal(subNode->value(), WKTConstants::USAGE)) {
+            auto objectDomain = buildObjectDomain(subNode);
+            if (!objectDomain) {
+                throw ParsingException("missing children in " +
+                                       subNode->value() + " node");
+            }
+            array->add(NN_CHECK_ASSERT(objectDomain));
+        }
+    }
+    if (!array->empty()) {
+        properties.set(ObjectUsage::OBJECT_DOMAIN_KEY, array);
+    } else {
+        auto objectDomain = buildObjectDomain(node);
+        if (objectDomain) {
+            properties.set(ObjectUsage::OBJECT_DOMAIN_KEY,
+                           NN_CHECK_ASSERT(objectDomain));
+        }
+    }
+
+    return properties;
+}
+
+// ---------------------------------------------------------------------------
+
+ObjectDomainPtr WKTParser::Private::buildObjectDomain(WKTNodeNNPtr node) {
+
     auto scopeNode = node->lookForChild(WKTConstants::SCOPE);
     auto areaNode = node->lookForChild(WKTConstants::AREA);
     auto bboxNode = node->lookForChild(WKTConstants::BBOX);
@@ -1143,11 +1172,10 @@ PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
                                     temporalExtent)
                          .as_nullable();
         }
-        properties.set(ObjectUsage::OBJECT_DOMAIN_KEY,
-                       ObjectDomain::create(scope, extent));
+        return ObjectDomain::create(scope, extent).as_nullable();
     }
 
-    return properties;
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------

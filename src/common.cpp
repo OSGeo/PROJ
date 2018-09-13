@@ -1027,10 +1027,17 @@ void ObjectUsage::_exportToWKT(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
     if (isWKT2) {
         auto l_domains = domains();
-        if (l_domains.size() == 1) {
-            l_domains[0]->exportToWKT(formatter);
+        if (!l_domains.empty()) {
+            if (formatter->use2018Keywords()) {
+                for (const auto &domain : l_domains) {
+                    formatter->startNode(WKTConstants::USAGE, false);
+                    domain->exportToWKT(formatter);
+                    formatter->endNode();
+                }
+            } else {
+                l_domains[0]->exportToWKT(formatter);
+            }
         }
-        // TODO add support for multiple USAGE nodes in WKT2:2018
     }
     if (formatter->outputId()) {
         formatID(formatter);

@@ -925,6 +925,48 @@ TEST(crs, scope_area_bbox_remark) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, usage) {
+    auto in_wkt = "GEODETICCRS[\"JGD2000\","
+                  "DATUM[\"Japanese Geodetic Datum 2000\","
+                  "  ELLIPSOID[\"GRS 1980\",6378137,298.257222101]],"
+                  "CS[Cartesian,3],"
+                  "  AXIS[\"(X)\",geocentricX],"
+                  "  AXIS[\"(Y)\",geocentricY],"
+                  "  AXIS[\"(Z)\",geocentricZ],"
+                  "  LENGTHUNIT[\"metre\",1.0],"
+                  "USAGE[SCOPE[\"scope\"],AREA[\"area.\"]]]";
+    auto crs =
+        nn_dynamic_pointer_cast<GeodeticCRS>(WKTParser().createFromWKT(in_wkt));
+    ASSERT_TRUE(crs != nullptr);
+
+    auto got_wkt = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+    auto expected = "GEODCRS[\"JGD2000\",\n"
+                    "    DATUM[\"Japanese Geodetic Datum 2000\",\n"
+                    "        ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]]],\n"
+                    "    PRIMEM[\"Greenwich\",0,\n"
+                    "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+                    "        ID[\"EPSG\",8901]],\n"
+                    "    CS[Cartesian,3],\n"
+                    "        AXIS[\"(X)\",geocentricX,\n"
+                    "            ORDER[1],\n"
+                    "            LENGTHUNIT[\"metre\",1]],\n"
+                    "        AXIS[\"(Y)\",geocentricY,\n"
+                    "            ORDER[2],\n"
+                    "            LENGTHUNIT[\"metre\",1]],\n"
+                    "        AXIS[\"(Z)\",geocentricZ,\n"
+                    "            ORDER[3],\n"
+                    "            LENGTHUNIT[\"metre\",1]],\n"
+                    "    USAGE[\n"
+                    "        SCOPE[\"scope\"],\n"
+                    "        AREA[\"area.\"]]]";
+    EXPECT_EQ(got_wkt, expected);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, multiple_ID) {
 
     PropertyMap propertiesCRS;
