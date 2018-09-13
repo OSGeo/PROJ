@@ -359,10 +359,10 @@ TEST(wkt_parse, wkt2_GEODETICDATUM) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, wkt2_GEODETICREFERENCEFRAME) {
+TEST(wkt_parse, wkt2_TRF) {
     auto obj = WKTParser().createFromWKT(
         "GEODCRS[\"WGS 84\",\n"
-        "    GEODETICREFERENCEFRAME[\"World Geodetic System 1984\",\n"
+        "    TRF[\"World Geodetic System 1984\",\n"
         "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
         "    CS[ellipsoidal,2],\n"
         "        AXIS[\"latitude\",north],\n"
@@ -855,6 +855,7 @@ TEST(wkt_parse, cs_with_multiple_ID) {
 
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(*(crs->name()->description()), "WGS 84");
     ASSERT_EQ(crs->identifiers().size(), 2);
     EXPECT_EQ(crs->identifiers()[0]->code(), "codeA");
@@ -875,6 +876,7 @@ TEST(wkt_parse, vertcrs_WKT2) {
 
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(*(crs->name()->description()), "ODN height");
     ASSERT_EQ(crs->identifiers().size(), 1);
     EXPECT_EQ(crs->identifiers()[0]->code(), "5701");
@@ -896,6 +898,21 @@ TEST(wkt_parse, vertcrs_WKT2) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, vertcrs_VRF_WKT2) {
+    auto wkt = "VERTCRS[\"ODN height\",\n"
+               "    VRF[\"Ordnance Datum Newlyn\"],\n"
+               "    CS[vertical,1],\n"
+               "        AXIS[\"gravity-related height (H)\",up,\n"
+               "            LENGTHUNIT[\"metre\",1]],\n"
+               "    ID[\"EPSG\",5701]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, vertcrs_WKT1_GDAL) {
     auto wkt = "VERT_CS[\"ODN height\",\n"
                "    VERT_DATUM[\"Ordnance Datum Newlyn\",2005,\n"
@@ -907,6 +924,7 @@ TEST(wkt_parse, vertcrs_WKT1_GDAL) {
 
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(*(crs->name()->description()), "ODN height");
     ASSERT_EQ(crs->identifiers().size(), 1);
     EXPECT_EQ(crs->identifiers()[0]->code(), "5701");

@@ -1633,7 +1633,7 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
         datumNode = node->lookForChild(WKTConstants::GEODETICDATUM);
         if (!datumNode) {
             datumNode =
-                node->lookForChild(WKTConstants::GEODETICREFERENCEFRAME);
+                node->lookForChild(WKTConstants::TRF);
             if (!datumNode) {
                 throw ParsingException("Missing DATUM node");
             }
@@ -2256,7 +2256,10 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
         if (!datumNode) {
             datumNode = node->lookForChild(WKTConstants::VERTICALDATUM);
             if (!datumNode) {
-                throw ParsingException("Missing VDATUM node");
+                datumNode = node->lookForChild(WKTConstants::VRF);
+                if (!datumNode) {
+                    throw ParsingException("Missing VDATUM node");
+                }
             }
         }
     }
@@ -2475,14 +2478,15 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
 
     if (ci_equal(name, WKTConstants::DATUM) ||
         ci_equal(name, WKTConstants::GEODETICDATUM) ||
-        ci_equal(name, WKTConstants::GEODETICREFERENCEFRAME)) {
+        ci_equal(name, WKTConstants::TRF)) {
         return util::nn_static_pointer_cast<BaseObject>(
             buildGeodeticReferenceFrame(node, PrimeMeridian::GREENWICH));
     }
 
     if (ci_equal(name, WKTConstants::VDATUM) ||
         ci_equal(name, WKTConstants::VERT_DATUM) ||
-        ci_equal(name, WKTConstants::VERTICALDATUM)) {
+        ci_equal(name, WKTConstants::VERTICALDATUM) ||
+        ci_equal(name, WKTConstants::VRF)) {
         return util::nn_static_pointer_cast<BaseObject>(
             buildVerticalReferenceFrame(node));
     }
