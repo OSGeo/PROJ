@@ -199,9 +199,120 @@ GeographicBoundingBoxNNPtr GeographicBoundingBox::create(double west,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+struct VerticalExtent::Private {
+    double minimum_{};
+    double maximum_{};
+    common::UnitOfMeasureNNPtr unit_;
+
+    Private(double minimum, double maximum,
+            const common::UnitOfMeasureNNPtr &unit)
+        : minimum_(minimum), maximum_(maximum), unit_(unit) {}
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+VerticalExtent::VerticalExtent(double minimumIn, double maximumIn,
+                               const common::UnitOfMeasureNNPtr &unitIn)
+    : d(internal::make_unique<Private>(minimumIn, maximumIn, unitIn)) {}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+VerticalExtent::~VerticalExtent() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the minimum of the vertical extent.
+ */
+double VerticalExtent::minimumValue() const { return d->minimum_; }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the maximum of the vertical extent.
+ */
+double VerticalExtent::maximumValue() const { return d->maximum_; }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the unit of the vertical extent.
+ */
+common::UnitOfMeasureNNPtr VerticalExtent::unit() const { return d->unit_; }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a VerticalExtent.
+ *
+ * @param minimumIn minimum.
+ * @param maximumIn maximum.
+ * @param unitIn unit.
+ * @return a new VerticalExtent.
+ */
+VerticalExtentNNPtr
+VerticalExtent::create(double minimumIn, double maximumIn,
+                       const common::UnitOfMeasureNNPtr &unitIn) {
+    return VerticalExtent::nn_make_shared<VerticalExtent>(minimumIn, maximumIn,
+                                                          unitIn);
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct TemporalExtent::Private {
+    std::string start_{};
+    std::string stop_{};
+
+    Private(const std::string &start, const std::string &stop)
+        : start_(start), stop_(stop) {}
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+TemporalExtent::TemporalExtent(const std::string &startIn,
+                               const std::string &stopIn)
+    : d(internal::make_unique<Private>(startIn, stopIn)) {}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+TemporalExtent::~TemporalExtent() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the start of the temporal extent.
+ */
+const std::string &TemporalExtent::start() const { return d->start_; }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the end of the temporal extent.
+ */
+const std::string &TemporalExtent::stop() const { return d->stop_; }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a TemporalExtent.
+ *
+ * @param start start.
+ * @param stop stop.
+ * @return a new TemporalExtent.
+ */
+TemporalExtentNNPtr TemporalExtent::create(const std::string &start,
+                                           const std::string &stop) {
+    return TemporalExtent::nn_make_shared<TemporalExtent>(start, stop);
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 struct Extent::Private {
     optional<std::string> description_{};
     std::vector<GeographicExtentNNPtr> geographicElements_{};
+    std::vector<VerticalExtentNNPtr> verticalElements_{};
+    std::vector<TemporalExtentNNPtr> temporalElements_{};
 };
 //! @endcond
 
@@ -243,18 +354,44 @@ const std::vector<GeographicExtentNNPtr> &Extent::geographicElements() const {
 
 // ---------------------------------------------------------------------------
 
+/** Return the vertical element(s) of the extent
+ *
+ * @return the vertical element(s), or empty.
+ */
+const std::vector<VerticalExtentNNPtr> &Extent::verticalElements() const {
+    return d->verticalElements_;
+}
+
+// ---------------------------------------------------------------------------
+
+/** Return the temporal element(s) of the extent
+ *
+ * @return the temporal element(s), or empty.
+ */
+const std::vector<TemporalExtentNNPtr> &Extent::temporalElements() const {
+    return d->temporalElements_;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a Extent.
  *
  * @param descriptionIn Textual description, or empty.
  * @param geographicElementsIn Geographic element(s), or empty.
+ * @param verticalElementsIn Vertical element(s), or empty.
+ * @param temporalElementsIn Temporal element(s), or empty.
  * @return a new Extent.
  */
 ExtentNNPtr
 Extent::create(const optional<std::string> &descriptionIn,
-               const std::vector<GeographicExtentNNPtr> &geographicElementsIn) {
+               const std::vector<GeographicExtentNNPtr> &geographicElementsIn,
+               const std::vector<VerticalExtentNNPtr> &verticalElementsIn,
+               const std::vector<TemporalExtentNNPtr> &temporalElementsIn) {
     auto extent = Extent::nn_make_shared<Extent>();
     extent->d->description_ = descriptionIn;
     extent->d->geographicElements_ = geographicElementsIn;
+    extent->d->verticalElements_ = verticalElementsIn;
+    extent->d->temporalElements_ = temporalElementsIn;
     return extent;
 }
 

@@ -39,6 +39,9 @@
 NS_PROJ_START
 
 namespace common {
+class UnitOfMeasure;
+using UnitOfMeasurePtr = std::shared_ptr<UnitOfMeasure>;
+using UnitOfMeasureNNPtr = util::nn<UnitOfMeasurePtr>;
 class IdentifiedObject;
 }
 
@@ -149,6 +152,77 @@ class GeographicBoundingBox : public GeographicExtent {
 
 // ---------------------------------------------------------------------------
 
+class TemporalExtent;
+/** Shared pointer of TemporalExtent. */
+using TemporalExtentPtr = std::shared_ptr<TemporalExtent>;
+/** Non-null shared pointer of TemporalExtent. */
+using TemporalExtentNNPtr = util::nn<TemporalExtentPtr>;
+
+/** \brief Time period covered by the content of the dataset.
+ *
+ * \remark Simplified version of [TemporalExtent]
+ * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/TemporalExtent.html)
+ * from \ref GeoAPI
+ */
+class TemporalExtent {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL virtual ~TemporalExtent();
+    //! @endcond
+
+    PROJ_DLL const std::string &start() const;
+    PROJ_DLL const std::string &stop() const;
+
+    PROJ_DLL static TemporalExtentNNPtr create(const std::string &start,
+                                               const std::string &stop);
+
+  protected:
+    TemporalExtent(const std::string &start, const std::string &stop);
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+class VerticalExtent;
+/** Shared pointer of VerticalExtent. */
+using VerticalExtentPtr = std::shared_ptr<VerticalExtent>;
+/** Non-null shared pointer of VerticalExtent. */
+using VerticalExtentNNPtr = util::nn<VerticalExtentPtr>;
+
+/** \brief Vertical domain of dataset.
+ *
+ * \remark Simplified version of [VerticalExtent]
+ * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/VerticalExtent.html)
+ * from \ref GeoAPI
+ */
+class VerticalExtent {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL virtual ~VerticalExtent();
+    //! @endcond
+
+    PROJ_DLL double minimumValue() const;
+    PROJ_DLL double maximumValue() const;
+    PROJ_DLL common::UnitOfMeasureNNPtr unit() const;
+
+    PROJ_DLL static VerticalExtentNNPtr
+    create(double minimumValue, double maximumValue,
+           const common::UnitOfMeasureNNPtr &unitIn);
+
+  protected:
+    VerticalExtent(double minimumValue, double maximumValue,
+                   const common::UnitOfMeasureNNPtr &unitIn);
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
 class Extent;
 /** Shared pointer of Extent. */
 using ExtentPtr = std::shared_ptr<Extent>;
@@ -172,11 +246,14 @@ class Extent : public util::BaseObject {
     PROJ_DLL const util::optional<std::string> &description() const;
     PROJ_DLL const std::vector<GeographicExtentNNPtr> &
     geographicElements() const;
-    // TODO: temporal and vertical part !
+    PROJ_DLL const std::vector<TemporalExtentNNPtr> &temporalElements() const;
+    PROJ_DLL const std::vector<VerticalExtentNNPtr> &verticalElements() const;
 
     PROJ_DLL static ExtentNNPtr
     create(const util::optional<std::string> &descriptionIn,
-           const std::vector<GeographicExtentNNPtr> &geographicElementsIn);
+           const std::vector<GeographicExtentNNPtr> &geographicElementsIn,
+           const std::vector<VerticalExtentNNPtr> &verticalElementsIn,
+           const std::vector<TemporalExtentNNPtr> &temporalElementsIn);
 
   protected:
     Extent();

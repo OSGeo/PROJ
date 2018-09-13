@@ -903,6 +903,29 @@ std::string ObjectDomain::exportToWKT(WKTFormatterNNPtr formatter) const {
                 formatter->endNode();
             }
         }
+        if (d->domainOfValidity_->verticalElements().size() == 1) {
+            auto extent = d->domainOfValidity_->verticalElements()[0];
+            formatter->startNode(WKTConstants::VERTICALEXTENT, false);
+            formatter->add(extent->minimumValue());
+            formatter->add(extent->maximumValue());
+            extent->unit()->exportToWKT(formatter);
+            formatter->endNode();
+        }
+        if (d->domainOfValidity_->temporalElements().size() == 1) {
+            auto extent = d->domainOfValidity_->temporalElements()[0];
+            formatter->startNode(WKTConstants::TIMEEXTENT, false);
+            if (DateTime::create(extent->start()).isISO_8601()) {
+                formatter->add(extent->start());
+            } else {
+                formatter->addQuotedString(extent->start());
+            }
+            if (DateTime::create(extent->stop()).isISO_8601()) {
+                formatter->add(extent->stop());
+            } else {
+                formatter->addQuotedString(extent->stop());
+            }
+            formatter->endNode();
+        }
     }
     return formatter->toString();
 }

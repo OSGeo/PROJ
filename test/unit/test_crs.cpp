@@ -858,7 +858,8 @@ TEST(crs, scope_area_bbox_remark) {
                   "SCOPE[\"Geodesy, topographic mapping and cadastre\"],"
                   "AREA[\"Japan\"],"
                   "BBOX[17.09,122.38,46.05,157.64],"
-                  "TIMEEXTENT[2002-04-01,2011-10-21]," // TODO TIMEEXTENT
+                  "VERTICALEXTENT[-10000,10000],"
+                  "TIMEEXTENT[2002-04-01,2011-10-21],"
                   "ID[\"EPSG\",4946],\n"
                   "REMARK[\"some_remark\"]]";
     auto crs =
@@ -881,6 +882,17 @@ TEST(crs, scope_area_bbox_remark) {
     EXPECT_EQ(bbox->northBoundLongitude(), 46.05);
     EXPECT_EQ(bbox->eastBoundLongitude(), 157.64);
 
+    ASSERT_EQ(domain->domainOfValidity()->verticalElements().size(), 1);
+    auto verticalElement = domain->domainOfValidity()->verticalElements()[0];
+    EXPECT_EQ(verticalElement->minimumValue(), -10000);
+    EXPECT_EQ(verticalElement->maximumValue(), 10000);
+    EXPECT_EQ(*(verticalElement->unit()), UnitOfMeasure::METRE);
+
+    ASSERT_EQ(domain->domainOfValidity()->temporalElements().size(), 1);
+    auto temporalElement = domain->domainOfValidity()->temporalElements()[0];
+    EXPECT_EQ(temporalElement->start(), "2002-04-01");
+    EXPECT_EQ(temporalElement->stop(), "2011-10-21");
+
     auto got_wkt = crs->exportToWKT(WKTFormatter::create());
     auto expected =
         "GEODCRS[\"JGD2000\",\n"
@@ -902,6 +914,9 @@ TEST(crs, scope_area_bbox_remark) {
         "    SCOPE[\"Geodesy, topographic mapping and cadastre\"],\n"
         "    AREA[\"Japan\"],\n"
         "    BBOX[17.09,122.38,46.05,157.64],\n"
+        "    VERTICALEXTENT[-10000,10000,\n"
+        "        LENGTHUNIT[\"metre\",1]],\n"
+        "    TIMEEXTENT[2002-04-01,2011-10-21],\n"
         "    ID[\"EPSG\",4946],\n"
         "    REMARK[\"some_remark\"]]";
 

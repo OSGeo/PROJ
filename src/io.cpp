@@ -1050,7 +1050,10 @@ PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
     auto scopeNode = node->lookForChild(WKTConstants::SCOPE);
     auto areaNode = node->lookForChild(WKTConstants::AREA);
     auto bboxNode = node->lookForChild(WKTConstants::BBOX);
-    if (scopeNode || areaNode || bboxNode) {
+    auto verticalExtentNode = node->lookForChild(WKTConstants::VERTICALEXTENT);
+    auto temporalExtentNode = node->lookForChild(WKTConstants::TIMEEXTENT);
+    if (scopeNode || areaNode || bboxNode || verticalExtentNode ||
+        temporalExtentNode) {
         optional<std::string> scope;
         if (scopeNode && scopeNode->children().size() == 1) {
             scope = stripQuotes(scopeNode->children()[0]->value());
@@ -1059,6 +1062,8 @@ PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
         if (areaNode || bboxNode) {
             util::optional<std::string> description;
             std::vector<GeographicExtentNNPtr> geogExtent;
+            std::vector<VerticalExtentNNPtr> verticalExtent;
+            std::vector<TemporalExtentNNPtr> temporalExtent;
             if (areaNode) {
                 if (areaNode->children().size() == 1) {
                     description = stripQuotes(areaNode->children()[0]->value());
@@ -1092,7 +1097,51 @@ PropertyMap WKTParser::Private::buildProperties(WKTNodeNNPtr node) {
                         bboxNode->value() + " node");
                 }
             }
-            extent = Extent::create(description, geogExtent).as_nullable();
+
+            if (verticalExtentNode) {
+                if (verticalExtentNode->children().size() == 2 ||
+                    verticalExtentNode->children().size() == 3) {
+                    double min;
+                    double max;
+                    try {
+                        min = asDouble(
+                            verticalExtentNode->children()[0]->value());
+                        max = asDouble(
+                            verticalExtentNode->children()[1]->value());
+                    } catch (const std::exception &) {
+                        throw ParsingException("not 2 double values in " +
+                                               verticalExtentNode->value() +
+                                               " node");
+                    }
+                    UnitOfMeasure unit = UnitOfMeasure::METRE;
+                    if (verticalExtentNode->children().size() == 3) {
+                        unit = buildUnit(verticalExtentNode->children()[2],
+                                         UnitOfMeasure::Type::LINEAR);
+                    }
+                    verticalExtent.emplace_back(VerticalExtent::create(
+                        min, max, util::nn_make_shared<UnitOfMeasure>(unit)));
+                } else {
+                    throw ParsingException(
+                        "not required number of children in " +
+                        verticalExtentNode->value() + " node");
+                }
+            }
+
+            if (temporalExtentNode) {
+                if (temporalExtentNode->children().size() == 2) {
+                    temporalExtent.emplace_back(TemporalExtent::create(
+                        stripQuotes(temporalExtentNode->children()[0]->value()),
+                        stripQuotes(
+                            temporalExtentNode->children()[1]->value())));
+                } else {
+                    throw ParsingException(
+                        "not required number of children in " +
+                        temporalExtentNode->value() + " node");
+                }
+            }
+            extent = Extent::create(description, geogExtent, verticalExtent,
+                                    temporalExtent)
+                         .as_nullable();
         }
         properties.set(ObjectUsage::OBJECT_DOMAIN_KEY,
                        ObjectDomain::create(scope, extent));
@@ -1632,8 +1681,7 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
     if (!datumNode) {
         datumNode = node->lookForChild(WKTConstants::GEODETICDATUM);
         if (!datumNode) {
-            datumNode =
-                node->lookForChild(WKTConstants::TRF);
+            datumNode = node->lookForChild(WKTConstants::TRF);
             if (!datumNode) {
                 throw ParsingException("Missing DATUM node");
             }
