@@ -3,6 +3,59 @@
 News
 ###############################################################################
 
+PROJ 5.2.0
+++++++++++++++++++++++++++++++++++++++++
+*September 15th 2018*
+
+UPDATES
+-------
+
+* Added support for deg, rad and grad in unitconvert (`#1054 <https://github.com/OSGeo/proj.4/issues/1054>`_)
+
+* Assume :option:`+t_epoch` as time input when not otherwise specified (`#1065 <https://github.com/OSGeo/proj.4/issues/1065>`_)
+
+* Added inverse Lagrange projection (`#1058 <https://github.com/OSGeo/proj.4/issues/1058>`_)
+
+* Added :option:`+multiplier` option to vgridshift (`#1072 <https://github.com/OSGeo/proj.4/issues/1072>`_)
+
+* Added Equal Earth projection (`#1085 <https://github.com/OSGeo/proj.4/issues/1085>`_)
+
+* Added "require_grid" option to gie (`#1088 <https://github.com/OSGeo/proj.4/issues/1088>`_)
+
+* Replace :option:`+transpose` option of Helmert transform with :option:`+convention`.
+  From now on the convention used should be explicitly written. An
+  error will be returned when using the +transpose option (`#1091 <https://github.com/OSGeo/proj.4/issues/1091>`_)
+
+* Improved numerical precision of inverse spherical Mercator
+  projection (`#1105 <https://github.com/OSGeo/proj.4/issues/1105>`_)
+
+* :program:`cct` will now forward text after coordinate input to output
+  stream (`#1111 <https://github.com/OSGeo/proj.4/issues/1111>`_)
+
+
+BUG FIXES
+------------
+
+* Do not pivot over WGS84 when doing cs2cs-emulation with geocent (`#1026 <https://github.com/OSGeo/proj.4/issues/1026>`_)
+
+* Do not scan past the end of the read data in :c:func:`pj_ctx_fgets` (`#1042 <https://github.com/OSGeo/proj.4/issues/1042>`_)
+
+* Make sure :c:func:`proj_errno_string()` is available in DLL (`#1050 <https://github.com/OSGeo/proj.4/issues/1050>`_)
+
+* Respect `+to_meter` setting when doing cs2cs-emulation (`#1053 <https://github.com/OSGeo/proj.4/issues/1053>`_)
+
+* Fixed unit conversion factors for :program:`geod` (`#1075 <https://github.com/OSGeo/proj.4/issues/1075>`_)
+
+* Fixed test failures related to GCC 8 (`#1084 <https://github.com/OSGeo/proj.4/issues/1084>`_)
+
+* Improved handling of `+geoc` flag (`#1093 <https://github.com/OSGeo/proj.4/issues/1093>`_)
+
+* Calculate correct projection factors for Webmercator (`#1095 <https://github.com/OSGeo/proj.4/issues/1095>`_)
+
+* :program:`cs2cs` now always outputs degrees when transformed coordinates are
+  in angular units (`#1112 <https://github.com/OSGeo/proj.4/issues/1112>`_)
+
+
 PROJ 5.1.0
 ++++++++++++++++++++++++++++++++++++++++
 *June 1st 2018*
