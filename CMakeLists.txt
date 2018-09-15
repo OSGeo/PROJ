@@ -63,7 +63,7 @@ colormsg(_HIBLUE_ "Configuring PROJ:")
 #PROJ version information
 #################################################################################
 include(ProjVersion)
-proj_version(MAJOR 5 MINOR 2 PATCH 0)
+proj_version(MAJOR 6 MINOR 0 PATCH 0)
 set(PROJ_API_VERSION "14")
 set(PROJ_BUILD_VERSION "14.0.2")
 
