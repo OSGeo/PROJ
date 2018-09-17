@@ -101,6 +101,12 @@ using DatumNNPtr = util::nn<DatumPtr>;
 
 // ---------------------------------------------------------------------------
 
+class DatumEnsemble;
+/** Shared pointer of DatumEnsemble */
+using DatumEnsemblePtr = std::shared_ptr<DatumEnsemble>;
+/** Non-null shared pointer of DatumEnsemble */
+using DatumEnsembleNNPtr = util::nn<DatumEnsemblePtr>;
+
 /** \brief A collection of two or more geodetic or vertical reference frames
  * (or if not geodetic or vertical reference frame, a collection of two or more
  * datums) which for all but the highest accuracy requirements may be
@@ -111,31 +117,41 @@ using DatumNNPtr = util::nn<DatumPtr>;
  *
  * \remark Implements DatumEnsemble from \ref ISO_19111_2018
  */
-class DatumEnsemble : public common::IdentifiedObject {
+class DatumEnsemble : public common::IdentifiedObject,
+                      public io::IWKTExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~DatumEnsemble() override;
     //! @endcond
 
-    PROJ_DLL const std::vector<DatumPtr> &datums() const;
+    PROJ_DLL const std::vector<DatumNNPtr> &datums() const;
     PROJ_DLL const metadata::PositionalAccuracyNNPtr &
     positionalAccuracy() const;
+
+    PROJ_DLL static DatumEnsembleNNPtr create(
+        const util::PropertyMap &properties,
+        const std::vector<DatumNNPtr> &datumsIn,
+        const metadata::PositionalAccuracyNNPtr &accuracy); // throw(Exception)
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
 
   protected:
 #ifdef DOXYGEN_ENABLED
     Datum datums_[];
-    PositionalAccuracy positionalAccuracy_
+    PositionalAccuracy positionalAccuracy_;
 #endif
 
-        private : PROJ_OPAQUE_PRIVATE_DATA
-                  DatumEnsemble(const DatumEnsemble &other) = delete;
+    DatumEnsemble(const std::vector<DatumNNPtr> &datumsIn,
+                  const metadata::PositionalAccuracyNNPtr &accuracy);
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+
+    DatumEnsemble(const DatumEnsemble &other) = delete;
     DatumEnsemble &operator=(const DatumEnsemble &other) = delete;
 };
-
-/** Shared pointer of DatumEnsemble */
-using DatumEnsemblePtr = std::shared_ptr<DatumEnsemble>;
-/** Non-null shared pointer of DatumEnsemble */
-using DatumEnsembleNNPtr = util::nn<DatumEnsemblePtr>;
 
 // ---------------------------------------------------------------------------
 

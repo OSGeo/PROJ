@@ -109,13 +109,16 @@ class WKTConstants {
     static const std::string TIMECRS;
     static const std::string VERTICALEXTENT;
     static const std::string TIMEEXTENT;
-    static const std::string USAGE;        // WKT2-2018
-    static const std::string DYNAMIC;      // WKT2-2018
-    static const std::string FRAMEEPOCH;   // WKT2-2018
-    static const std::string MODEL;        // WKT2-2018
-    static const std::string VELOCITYGRID; // WKT2-2018
+    static const std::string USAGE;            // WKT2-2018
+    static const std::string DYNAMIC;          // WKT2-2018
+    static const std::string FRAMEEPOCH;       // WKT2-2018
+    static const std::string MODEL;            // WKT2-2018
+    static const std::string VELOCITYGRID;     // WKT2-2018
+    static const std::string ENSEMBLE;         // WKT2-2018
+    static const std::string MEMBER;           // WKT2-2018
+    static const std::string ENSEMBLEACCURACY; // WKT2-2018
 
-    // WKT2 long
+    // WKT2 alternate (longer or shorter)
     static const std::string GEODETICCRS;
     static const std::string GEODETICDATUM;
     static const std::string PROJECTEDCRS;

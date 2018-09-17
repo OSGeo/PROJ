@@ -180,7 +180,7 @@ TEST(wkt_parse, dynamic_geodetic_reference_frame) {
     auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     auto dgrf =
-        nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(crs->datum());
+        std::dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(crs->datum());
     ASSERT_TRUE(dgrf != nullptr);
     auto anchor = dgrf->anchorDefinition();
     EXPECT_TRUE(anchor.has_value());
@@ -208,7 +208,7 @@ TEST(wkt_parse, dynamic_geodetic_reference_frame_with_model) {
     auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     auto dgrf =
-        nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(crs->datum());
+        std::dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(crs->datum());
     ASSERT_TRUE(dgrf != nullptr);
     auto anchor = dgrf->anchorDefinition();
     EXPECT_TRUE(anchor.has_value());
@@ -237,7 +237,7 @@ TEST(wkt_parse, dynamic_geodetic_reference_frame_with_velocitygrid) {
     auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     auto dgrf =
-        nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(crs->datum());
+        std::dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(crs->datum());
     ASSERT_TRUE(dgrf != nullptr);
     auto anchor = dgrf->anchorDefinition();
     EXPECT_TRUE(anchor.has_value());
@@ -247,6 +247,56 @@ TEST(wkt_parse, dynamic_geodetic_reference_frame_with_velocitygrid) {
     auto model = dgrf->deformationModelName();
     EXPECT_TRUE(model.has_value());
     EXPECT_EQ(*model, "my_model");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, geogcrs_with_ensemble) {
+    auto obj = WKTParser().createFromWKT(
+        "GEOGCRS[\"WGS 84\","
+        "ENSEMBLE[\"WGS 84 ensemble\","
+        "    MEMBER[\"WGS 84 (TRANSIT)\"],"
+        "    MEMBER[\"WGS 84 (G730)\"],"
+        "    MEMBER[\"WGS 84 (G834)\"],"
+        "    MEMBER[\"WGS 84 (G1150)\"],"
+        "    MEMBER[\"WGS 84 (G1674)\"],"
+        "    MEMBER[\"WGS 84 (G1762)\"],"
+        "    ELLIPSOID[\"WGS "
+        "84\",6378137,298.2572236,LENGTHUNIT[\"metre\",1.0]],"
+        "    ENSEMBLEACCURACY[2]"
+        "],"
+        "CS[ellipsoidal,3],"
+        "    AXIS[\"(lat)\",north,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"(lon)\",east,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"ellipsoidal height (h)\",up,LENGTHUNIT[\"metre\",1.0]]"
+        "]");
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    ASSERT_TRUE(crs->datum() == nullptr);
+    ASSERT_TRUE(crs->datumEnsemble() != nullptr);
+    EXPECT_EQ(crs->datumEnsemble()->datums().size(), 6);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_geogcrs_with_ensemble) {
+    auto wkt =
+        "GEOGCRS[\"WGS 84\","
+        "ENSEMBLE[\"WGS 84 ensemble\","
+        "    MEMBER[\"WGS 84 (TRANSIT)\"],"
+        "    MEMBER[\"WGS 84 (G730)\"],"
+        "    MEMBER[\"WGS 84 (G834)\"],"
+        "    MEMBER[\"WGS 84 (G1150)\"],"
+        "    MEMBER[\"WGS 84 (G1674)\"],"
+        "    MEMBER[\"WGS 84 (G1762)\"],"
+        "    ENSEMBLEACCURACY[2]"
+        "],"
+        "CS[ellipsoidal,3],"
+        "    AXIS[\"(lat)\",north,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"(lon)\",east,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"ellipsoidal height (h)\",up,LENGTHUNIT[\"metre\",1.0]]"
+        "]";
+    EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
 }
 
 // ---------------------------------------------------------------------------
@@ -1079,6 +1129,25 @@ TEST(wkt_parse, dynamic_vertical_reference_frame) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, vertcrs_with_ensemble) {
+    auto obj = WKTParser().createFromWKT(
+        "VERTCRS[\"unnamed\",\n"
+        "    ENSEMBLE[\"unnamed\",\n"
+        "        MEMBER[\"vdatum1\"],\n"
+        "        MEMBER[\"vdatum2\"],\n"
+        "        ENSEMBLEACCURACY[100]],\n"
+        "    CS[vertical,1],\n"
+        "        AXIS[\"gravity-related height (H)\",up,\n"
+        "            LENGTHUNIT[\"metre\",1]]]");
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    ASSERT_TRUE(crs->datum() == nullptr);
+    ASSERT_TRUE(crs->datumEnsemble() != nullptr);
+    EXPECT_EQ(crs->datumEnsemble()->datums().size(), 2);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, vdatum_with_ANCHOR) {
     auto obj = WKTParser().createFromWKT("VDATUM[\"Ordnance Datum Newlyn\",\n"
                                          "    ANCHOR[\"my anchor\"],\n"
@@ -1870,6 +1939,58 @@ TEST(wkt_parse, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, ensemble) {
+    auto wkt = "ENSEMBLE[\"test\",\n"
+               "    MEMBER[\"World Geodetic System 1984\",\n"
+               "        ID[\"EPSG\",6326]],\n"
+               "    MEMBER[\"other datum\"],\n"
+               "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "        LENGTHUNIT[\"metre\",1],\n"
+               "        ID[\"EPSG\",7030]],\n"
+               "    ENSEMBLEACCURACY[100]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto ensemble = nn_dynamic_pointer_cast<DatumEnsemble>(obj);
+    ASSERT_TRUE(ensemble != nullptr);
+
+    ASSERT_EQ(ensemble->datums().size(), 2);
+    auto firstDatum =
+        nn_dynamic_pointer_cast<GeodeticReferenceFrame>(ensemble->datums()[0]);
+    ASSERT_TRUE(firstDatum != nullptr);
+    EXPECT_EQ(*(firstDatum->name()->description()),
+              "World Geodetic System 1984");
+    ASSERT_EQ(firstDatum->identifiers().size(), 1);
+    EXPECT_EQ(firstDatum->identifiers()[0]->code(), "6326");
+    EXPECT_EQ(*(firstDatum->identifiers()[0]->codeSpace()), "EPSG");
+
+    EXPECT_EQ(*(firstDatum->ellipsoid()->name()->description()), "WGS 84");
+
+    EXPECT_EQ(ensemble->positionalAccuracy()->value(), "100");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, ensemble_vdatum) {
+    auto wkt = "ENSEMBLE[\"unnamed\",\n"
+               "    MEMBER[\"vdatum1\"],\n"
+               "    MEMBER[\"vdatum2\"],\n"
+               "    ENSEMBLEACCURACY[100]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto ensemble = nn_dynamic_pointer_cast<DatumEnsemble>(obj);
+    ASSERT_TRUE(ensemble != nullptr);
+
+    ASSERT_EQ(ensemble->datums().size(), 2);
+    auto firstDatum =
+        nn_dynamic_pointer_cast<VerticalReferenceFrame>(ensemble->datums()[0]);
+    ASSERT_TRUE(firstDatum != nullptr);
+    EXPECT_EQ(*(firstDatum->name()->description()), "vdatum1");
+
+    EXPECT_EQ(ensemble->positionalAccuracy()->value(), "100");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);
@@ -1899,6 +2020,28 @@ TEST(wkt_parse, invalid_DATUM) {
     EXPECT_THROW(WKTParser().createFromWKT("DATUM[\"x\"]"), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("DATUM[\"x\",FOO[]]"),
                  ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_ENSEMBLE) {
+    EXPECT_THROW(WKTParser().createFromWKT("ENSEMBLE[]"), ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT("ENSEMBLE[\"x\"]"),
+                 ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "ENSEMBLE[\"x\",MEMBER[\"vdatum1\"],MEMBER[\"vdatum2\"]]"),
+                 ParsingException);
+    EXPECT_THROW(
+        WKTParser().createFromWKT("ENSEMBLE[\"x\",MEMBER[],MEMBER[\"vdatum2\"],"
+                                  "ENSEMBLEACCURACY[\"100\"]]"),
+        ParsingException);
+    EXPECT_THROW(
+        WKTParser().createFromWKT("ENSEMBLE[\"x\",MEMBER[\"vdatum1\"],MEMBER["
+                                  "\"vdatum2\"],ENSEMBLEACCURACY[]]"),
+        ParsingException);
+    EXPECT_THROW(
+        WKTParser().createFromWKT("ENSEMBLE[\"x\",ENSEMBLEACCURACY[\"100\"]]"),
+        ParsingException);
 }
 
 // ---------------------------------------------------------------------------

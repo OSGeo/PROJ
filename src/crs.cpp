@@ -143,26 +143,24 @@ struct SingleCRS::Private {
     datum::DatumEnsemblePtr datumEnsemble{};
     cs::CoordinateSystemNNPtr coordinateSystem;
 
-    Private(const datum::DatumNNPtr &datumIn,
-            const cs::CoordinateSystemNNPtr &csIn)
-        : datum(datumIn), coordinateSystem(csIn) {}
     Private(const datum::DatumPtr &datumIn,
+            const datum::DatumEnsemblePtr &datumEnsembleIn,
             const cs::CoordinateSystemNNPtr &csIn)
-        : datum(datumIn), coordinateSystem(csIn) {}
+        : datum(datumIn), datumEnsemble(datumEnsembleIn),
+          coordinateSystem(csIn) {
+        if ((datum ? 1 : 0) + (datumEnsemble ? 1 : 0) != 1) {
+            throw util::Exception("datum or datumEnsemble should be set");
+        }
+    }
 };
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-SingleCRS::SingleCRS(const datum::DatumNNPtr &datumIn,
-                     const cs::CoordinateSystemNNPtr &csIn)
-    : d(internal::make_unique<Private>(datumIn, csIn)) {}
-
-// ---------------------------------------------------------------------------
-
 SingleCRS::SingleCRS(const datum::DatumPtr &datumIn,
+                     const datum::DatumEnsemblePtr &datumEnsembleIn,
                      const cs::CoordinateSystemNNPtr &csIn)
-    : d(internal::make_unique<Private>(datumIn, csIn)) {}
+    : d(internal::make_unique<Private>(datumIn, datumEnsembleIn, csIn)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -237,28 +235,73 @@ bool SingleCRS::_isEquivalentTo(const util::BaseObjectNNPtr &other,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-struct GeodeticCRS::Private {
-    std::vector<operation::PointMotionOperationNNPtr> velocityModel{};
-};
+void SingleCRS::exportDatumOrDatumEnsembleToWkt(
+    io::WKTFormatterNNPtr formatter) const // throw(io::FormattingException)
+{
+    auto l_datum = datum();
+    if (l_datum) {
+        auto exportable =
+            dynamic_cast<const io::IWKTExportable *>(l_datum.get());
+        if (exportable) {
+            exportable->exportToWKT(formatter);
+        }
+    } else {
+        auto l_datumEnsemble = datumEnsemble();
+        assert(l_datumEnsemble);
+        l_datumEnsemble->exportToWKT(formatter);
+    }
+}
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
-GeodeticCRS::GeodeticCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
+//! @cond Doxygen_Suppress
+struct GeodeticCRS::Private {
+    std::vector<operation::PointMotionOperationNNPtr> velocityModel{};
+};
+
+// ---------------------------------------------------------------------------
+
+static const datum::DatumEnsemblePtr &
+checkEnsembleForGeodeticCRS(const datum::DatumEnsemblePtr &ensemble) {
+    if (ensemble) {
+        assert(!ensemble->datums().empty());
+        auto grfFirst =
+            std::dynamic_pointer_cast<datum::GeodeticReferenceFrame>(
+                ensemble->datums()[0].as_nullable());
+        if (!grfFirst) {
+            throw util::Exception(
+                "Ensemble should contain GeodeticReferenceFrame");
+        }
+    }
+    return ensemble;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+GeodeticCRS::GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+                         const datum::DatumEnsemblePtr &datumEnsembleIn,
                          const cs::EllipsoidalCSNNPtr &csIn)
-    : SingleCRS(datumIn, csIn), d(internal::make_unique<Private>()) {}
+    : SingleCRS(datumIn, checkEnsembleForGeodeticCRS(datumEnsembleIn), csIn),
+      d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
-GeodeticCRS::GeodeticCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
+GeodeticCRS::GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+                         const datum::DatumEnsemblePtr &datumEnsembleIn,
                          const cs::SphericalCSNNPtr &csIn)
-    : SingleCRS(datumIn, csIn), d(internal::make_unique<Private>()) {}
+    : SingleCRS(datumIn, checkEnsembleForGeodeticCRS(datumEnsembleIn), csIn),
+      d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
-GeodeticCRS::GeodeticCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
+GeodeticCRS::GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+                         const datum::DatumEnsemblePtr &datumEnsembleIn,
                          const cs::CartesianCSNNPtr &csIn)
-    : SingleCRS(datumIn, csIn), d(internal::make_unique<Private>()) {}
+    : SingleCRS(datumIn, checkEnsembleForGeodeticCRS(datumEnsembleIn), csIn),
+      d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
@@ -277,12 +320,50 @@ GeodeticCRS::~GeodeticCRS() = default;
 
 /** \brief Return the datum::GeodeticReferenceFrame associated with the CRS.
  *
- * @return a GeodeticReferenceFrame
+ * @return a GeodeticReferenceFrame or null (in which case datumEnsemble()
+ * should return a non-null pointer.)
  */
-const datum::GeodeticReferenceFrameNNPtr GeodeticCRS::datum() const {
-    return NN_CHECK_THROW(
-        std::dynamic_pointer_cast<datum::GeodeticReferenceFrame>(
-            SingleCRS::getPrivate()->datum));
+const datum::GeodeticReferenceFramePtr GeodeticCRS::datum() const {
+    return std::dynamic_pointer_cast<datum::GeodeticReferenceFrame>(
+        SingleCRS::getPrivate()->datum);
+}
+
+// ---------------------------------------------------------------------------
+
+datum::GeodeticReferenceFrameNNPtr GeodeticCRS::oneDatum() const {
+    auto l_datum = datum();
+    if (l_datum)
+        return NN_CHECK_ASSERT(l_datum);
+    auto l_datumEnsemble = datumEnsemble();
+    assert(l_datumEnsemble);
+    auto l_datums = l_datumEnsemble->datums();
+    assert(!l_datums.empty());
+    auto first_datum = std::dynamic_pointer_cast<datum::GeodeticReferenceFrame>(
+        l_datums[0].as_nullable());
+    assert(first_datum);
+    return NN_CHECK_ASSERT(first_datum);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the PrimeMeridian associated with the GeodeticReferenceFrame
+ * or with one of the GeodeticReferenceFrame of the datumEnsemble().
+ *
+ * @return the PrimeMeridian.
+ */
+const datum::PrimeMeridianNNPtr &GeodeticCRS::primeMeridian() const {
+    return oneDatum()->primeMeridian();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the ellipsoid associated with the GeodeticReferenceFrame
+ * or with one of the GeodeticReferenceFrame of the datumEnsemble().
+ *
+ * @return the PrimeMeridian.
+ */
+const datum::EllipsoidNNPtr &GeodeticCRS::ellipsoid() const {
+    return oneDatum()->ellipsoid();
 }
 
 // ---------------------------------------------------------------------------
@@ -334,7 +415,30 @@ GeodeticCRSNNPtr
 GeodeticCRS::create(const util::PropertyMap &properties,
                     const datum::GeodeticReferenceFrameNNPtr &datum,
                     const cs::SphericalCSNNPtr &cs) {
-    auto crs(GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, cs));
+    return create(properties, datum.as_nullable(), nullptr, cs);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a GeodeticCRS from a datum::GeodeticReferenceFrame or
+ * datum::DatumEnsemble and a cs::SphericalCS.
+ *
+ * One and only one of datum or datumEnsemble should be set to a non-null value.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datum The datum of the CRS, or nullptr
+ * @param datumEnsemble The datum ensemble of the CRS, or nullptr.
+ * @param cs a SphericalCS.
+ * @return new GeodeticCRS.
+ */
+GeodeticCRSNNPtr
+GeodeticCRS::create(const util::PropertyMap &properties,
+                    const datum::GeodeticReferenceFramePtr &datum,
+                    const datum::DatumEnsemblePtr &datumEnsemble,
+                    const cs::SphericalCSNNPtr &cs) {
+    auto crs(
+        GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, datumEnsemble, cs));
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
@@ -355,7 +459,30 @@ GeodeticCRSNNPtr
 GeodeticCRS::create(const util::PropertyMap &properties,
                     const datum::GeodeticReferenceFrameNNPtr &datum,
                     const cs::CartesianCSNNPtr &cs) {
-    auto crs(GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, cs));
+    return create(properties, datum.as_nullable(), nullptr, cs);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a GeodeticCRS from a datum::GeodeticReferenceFrame or
+ * datum::DatumEnsemble and a cs::CartesianCS.
+ *
+ * One and only one of datum or datumEnsemble should be set to a non-null value.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datum The datum of the CRS, or nullptr
+ * @param datumEnsemble The datum ensemble of the CRS, or nullptr.
+ * @param cs a CartesianCS
+ * @return new GeodeticCRS.
+ */
+GeodeticCRSNNPtr
+GeodeticCRS::create(const util::PropertyMap &properties,
+                    const datum::GeodeticReferenceFramePtr &datum,
+                    const datum::DatumEnsemblePtr &datumEnsemble,
+                    const cs::CartesianCSNNPtr &cs) {
+    auto crs(
+        GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, datumEnsemble, cs));
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
@@ -378,8 +505,8 @@ std::string GeodeticCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         formatter->pushAxisAngularUnit(
             util::nn_make_shared<common::UnitOfMeasure>(axisList[0]->unit()));
     }
-    datum()->exportToWKT(formatter);
-    datum()->primeMeridian()->exportToWKT(formatter);
+    exportDatumOrDatumEnsembleToWkt(formatter);
+    primeMeridian()->exportToWKT(formatter);
     if (!axisList.empty()) {
         formatter->popAxisAngularUnit();
     }
@@ -444,7 +571,7 @@ GeodeticCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     } else {
         formatter->addStep("cart");
     }
-    datum()->ellipsoid()->exportToPROJString(formatter);
+    ellipsoid()->exportToPROJString(formatter);
     addGeocentricUnitConversionIntoPROJString(formatter);
 
     return scope.toString();
@@ -461,12 +588,13 @@ void GeodeticCRS::addDatumInfoToPROJString(
     auto nadgrids = formatter->getHDatumExtension();
     if (formatter->convention() ==
             io::PROJStringFormatter::Convention::PROJ_4 &&
+        datum() &&
         datum()->isEquivalentTo(datum::GeodeticReferenceFrame::EPSG_6326) &&
         TOWGS84Params.empty() && nadgrids.empty()) {
         formatter->addParam("datum", "WGS84");
     } else {
-        datum()->ellipsoid()->exportToPROJString(formatter);
-        datum()->primeMeridian()->exportToPROJString(formatter);
+        ellipsoid()->exportToPROJString(formatter);
+        primeMeridian()->exportToPROJString(formatter);
     }
     if (TOWGS84Params.size() == 7) {
         formatter->addParam("towgs84", TOWGS84Params);
@@ -495,9 +623,11 @@ struct GeographicCRS::Private {};
 
 // ---------------------------------------------------------------------------
 
-GeographicCRS::GeographicCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
+GeographicCRS::GeographicCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+                             const datum::DatumEnsemblePtr &datumEnsembleIn,
                              const cs::EllipsoidalCSNNPtr &csIn)
-    : SingleCRS(datumIn, csIn), GeodeticCRS(datumIn, csIn),
+    : SingleCRS(datumIn, datumEnsembleIn, csIn),
+      GeodeticCRS(datumIn, checkEnsembleForGeodeticCRS(datumEnsembleIn), csIn),
       d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
@@ -527,7 +657,8 @@ const cs::EllipsoidalCSNNPtr GeographicCRS::coordinateSystem() const {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a GeographicCRS from a datum::Datum and a
+/** \brief Instanciate a GeographicCRS from a datum::GeodeticReferenceFrameNNPtr
+ * and a
  * cs::EllipsoidalCS.
  *
  * @param properties See \ref general_properties.
@@ -540,8 +671,32 @@ GeographicCRSNNPtr
 GeographicCRS::create(const util::PropertyMap &properties,
                       const datum::GeodeticReferenceFrameNNPtr &datum,
                       const cs::EllipsoidalCSNNPtr &cs) {
+    return create(properties, datum.as_nullable(), nullptr, cs);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a GeographicCRS from a datum::GeodeticReferenceFramePtr
+ * or
+ * datum::DatumEnsemble and a
+ * cs::EllipsoidalCS.
+ *
+ * One and only one of datum or datumEnsemble should be set to a non-null value.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datum The datum of the CRS, or nullptr
+ * @param datumEnsemble The datum ensemble of the CRS, or nullptr.
+ * @param cs a EllipsoidalCS.
+ * @return new GeographicCRS.
+ */
+GeographicCRSNNPtr
+GeographicCRS::create(const util::PropertyMap &properties,
+                      const datum::GeodeticReferenceFramePtr &datum,
+                      const datum::DatumEnsemblePtr &datumEnsemble,
+                      const cs::EllipsoidalCSNNPtr &cs) {
     GeographicCRSNNPtr crs(
-        GeographicCRS::nn_make_shared<GeographicCRS>(datum, cs));
+        GeographicCRS::nn_make_shared<GeographicCRS>(datum, datumEnsemble, cs));
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
@@ -555,8 +710,9 @@ GeographicCRS::create(const util::PropertyMap &properties,
 bool GeographicCRS::is2DPartOf3D(const GeographicCRSNNPtr &other) const {
     auto axis = coordinateSystem()->axisList();
     auto otherAxis = other->coordinateSystem()->axisList();
-    return axis.size() == 2 && otherAxis.size() == 3 &&
-           datum()->isEquivalentTo(other->datum()) &&
+    return axis.size() == 2 && otherAxis.size() == 3 && datum() &&
+           other->datum() &&
+           datum()->isEquivalentTo(NN_CHECK_ASSERT(other->datum())) &&
            axis[0]->isEquivalentTo(otherAxis[0]) &&
            axis[1]->isEquivalentTo(otherAxis[1]);
 }
@@ -708,13 +864,13 @@ GeographicCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
 {
     io::PROJStringFormatter::Scope scope(formatter);
     if (!formatter->omitProjLongLatIfPossible() ||
-        datum()->primeMeridian()->longitude().getSIValue() != 0.0 ||
+        primeMeridian()->longitude().getSIValue() != 0.0 ||
         !formatter->getTOWGS84Parameters().empty() ||
         !formatter->getHDatumExtension().empty()) {
         formatter->addStep("longlat");
         if (formatter->convention() ==
                 io::PROJStringFormatter::Convention::PROJ_5 &&
-            (datum()->primeMeridian()->longitude().getSIValue() != 0.0 ||
+            (primeMeridian()->longitude().getSIValue() != 0.0 ||
              !formatter->getTOWGS84Parameters().empty() ||
              !formatter->getHDatumExtension().empty())) {
             formatter->setCurrentStepInverted(true);
@@ -736,11 +892,28 @@ struct VerticalCRS::Private {
 };
 //! @endcond
 
+static const datum::DatumEnsemblePtr &
+checkEnsembleForVerticalCRS(const datum::DatumEnsemblePtr &ensemble) {
+    if (ensemble) {
+        assert(!ensemble->datums().empty());
+        auto vrfFirst =
+            std::dynamic_pointer_cast<datum::VerticalReferenceFrame>(
+                ensemble->datums()[0].as_nullable());
+        if (!vrfFirst) {
+            throw util::Exception(
+                "Ensemble should contain VerticalReferenceFrame");
+        }
+    }
+    return ensemble;
+}
+
 // ---------------------------------------------------------------------------
 
-VerticalCRS::VerticalCRS(const datum::VerticalReferenceFrameNNPtr &datumIn,
+VerticalCRS::VerticalCRS(const datum::VerticalReferenceFramePtr &datumIn,
+                         const datum::DatumEnsemblePtr &datumEnsembleIn,
                          const cs::VerticalCSNNPtr &csIn)
-    : SingleCRS(datumIn, csIn), d(internal::make_unique<Private>()) {}
+    : SingleCRS(datumIn, checkEnsembleForVerticalCRS(datumEnsembleIn), csIn),
+      d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
@@ -810,11 +983,8 @@ std::string VerticalCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
                                 : io::WKTConstants::VERT_CS,
                          !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
-    if (datum()) {
-        datum()->exportToWKT(formatter);
-    } else {
-        throw io::FormattingException("Missing VDATUM");
-    }
+    auto l_datum = datum();
+    exportDatumOrDatumEnsembleToWkt(formatter);
     auto &axisList = coordinateSystem()->axisList();
     if (!isWKT2 && !axisList.empty()) {
         axisList[0]->unit().exportToWKT(formatter);
@@ -866,7 +1036,30 @@ VerticalCRSNNPtr
 VerticalCRS::create(const util::PropertyMap &properties,
                     const datum::VerticalReferenceFrameNNPtr &datumIn,
                     const cs::VerticalCSNNPtr &csIn) {
-    auto crs(VerticalCRS::nn_make_shared<VerticalCRS>(datumIn, csIn));
+    return create(properties, datumIn.as_nullable(), nullptr, csIn);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a VerticalCRS from a datum::VerticalReferenceFrame or
+ * datum::DatumEnsemble and a cs::VerticalCS.
+ *
+ * One and only one of datum or datumEnsemble should be set to a non-null value.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datumIn The datum of the CRS, or nullptr
+ * @param datumEnsembleIn The datum ensemble of the CRS, or nullptr.
+ * @param csIn a VerticalCS.
+ * @return new VerticalCRS.
+ */
+VerticalCRSNNPtr
+VerticalCRS::create(const util::PropertyMap &properties,
+                    const datum::VerticalReferenceFramePtr &datumIn,
+                    const datum::DatumEnsemblePtr &datumEnsembleIn,
+                    const cs::VerticalCSNNPtr &csIn) {
+    auto crs(VerticalCRS::nn_make_shared<VerticalCRS>(datumIn, datumEnsembleIn,
+                                                      csIn));
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
     return crs;
@@ -913,7 +1106,7 @@ DerivedCRS::DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
                        )
     :
 #if !defined(COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT)
-      SingleCRS(baseCRSIn->datum(), cs),
+      SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), cs),
 #endif
       d(internal::make_unique<Private>(
           baseCRSIn, operation::Conversion::create(derivingConversionIn))) {
@@ -981,7 +1174,7 @@ ProjectedCRS::ProjectedCRS(
     const GeodeticCRSNNPtr &baseCRSIn,
     const operation::ConversionNNPtr &derivingConversionIn,
     const cs::CartesianCSNNPtr &csIn)
-    : SingleCRS(baseCRSIn->datum(), csIn),
+    : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
       DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
       d(internal::make_unique<Private>()) {}
 
@@ -1030,17 +1223,18 @@ std::string ProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
                          !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
 
-    auto &geodeticCRSAxisList = baseCRS()->coordinateSystem()->axisList();
+    auto l_baseCRS = baseCRS();
+    auto &geodeticCRSAxisList = l_baseCRS->coordinateSystem()->axisList();
 
     if (isWKT2) {
         formatter->startNode(
             (formatter->use2018Keywords() &&
-             dynamic_cast<const GeographicCRS *>(baseCRS().get()))
+             dynamic_cast<const GeographicCRS *>(l_baseCRS.get()))
                 ? io::WKTConstants::BASEGEOGCRS
                 : io::WKTConstants::BASEGEODCRS,
-            !baseCRS()->identifiers().empty());
-        formatter->addQuotedString(*(baseCRS()->name()->description()));
-        baseCRS()->datum()->exportToWKT(formatter);
+            !l_baseCRS->identifiers().empty());
+        formatter->addQuotedString(*(l_baseCRS->name()->description()));
+        l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
         // insert ellipsoidal cs unit when the units of the map
         // projection angular parameters are not explicitly given within those
         // parameters. See
@@ -1049,10 +1243,10 @@ std::string ProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
             !geodeticCRSAxisList.empty()) {
             geodeticCRSAxisList[0]->unit().exportToWKT(formatter);
         }
-        baseCRS()->datum()->primeMeridian()->exportToWKT(formatter);
+        l_baseCRS->primeMeridian()->exportToWKT(formatter);
         formatter->endNode();
     } else {
-        baseCRS()->exportToWKT(formatter);
+        l_baseCRS->exportToWKT(formatter);
     }
 
     auto &axisList = coordinateSystem()->axisList();
@@ -1570,8 +1764,8 @@ DerivedGeodeticCRS::DerivedGeodeticCRS(
     const GeodeticCRSNNPtr &baseCRSIn,
     const operation::ConversionNNPtr &derivingConversionIn,
     const cs::CartesianCSNNPtr &csIn)
-    : SingleCRS(baseCRSIn->datum(), csIn),
-      GeodeticCRS(baseCRSIn->datum(), csIn),
+    : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
+      GeodeticCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
       DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
       d(internal::make_unique<Private>()) {}
 
@@ -1581,8 +1775,8 @@ DerivedGeodeticCRS::DerivedGeodeticCRS(
     const GeodeticCRSNNPtr &baseCRSIn,
     const operation::ConversionNNPtr &derivingConversionIn,
     const cs::SphericalCSNNPtr &csIn)
-    : SingleCRS(baseCRSIn->datum(), csIn),
-      GeodeticCRS(baseCRSIn->datum(), csIn),
+    : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
+      GeodeticCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
       DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
       d(internal::make_unique<Private>()) {}
 
@@ -1657,14 +1851,22 @@ DerivedGeodeticCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     formatter->startNode(io::WKTConstants::GEODCRS, !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
 
+    auto l_baseCRS = baseCRS();
     formatter->startNode((formatter->use2018Keywords() &&
-                          dynamic_cast<const GeographicCRS *>(baseCRS().get()))
+                          dynamic_cast<const GeographicCRS *>(l_baseCRS.get()))
                              ? io::WKTConstants::BASEGEOGCRS
                              : io::WKTConstants::BASEGEODCRS,
                          !baseCRS()->identifiers().empty());
-    formatter->addQuotedString(*(baseCRS()->name()->description()));
-    baseCRS()->datum()->exportToWKT(formatter);
-    baseCRS()->datum()->primeMeridian()->exportToWKT(formatter);
+    formatter->addQuotedString(*(l_baseCRS->name()->description()));
+    auto l_datum = l_baseCRS->datum();
+    if (l_datum) {
+        l_datum->exportToWKT(formatter);
+    } else {
+        auto l_datumEnsemble = datumEnsemble();
+        assert(l_datumEnsemble);
+        l_datumEnsemble->exportToWKT(formatter);
+    }
+    l_baseCRS->primeMeridian()->exportToWKT(formatter);
     formatter->endNode();
 
     formatter->setUseDerivingConversion(true);
@@ -1715,8 +1917,8 @@ DerivedGeographicCRS::DerivedGeographicCRS(
     const GeodeticCRSNNPtr &baseCRSIn,
     const operation::ConversionNNPtr &derivingConversionIn,
     const cs::EllipsoidalCSNNPtr &csIn)
-    : SingleCRS(baseCRSIn->datum(), csIn),
-      GeographicCRS(baseCRSIn->datum(), csIn),
+    : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
+      GeographicCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
       DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
       d(internal::make_unique<Private>()) {}
 
@@ -1826,7 +2028,8 @@ TemporalCRS::~TemporalCRS() = default;
 
 TemporalCRS::TemporalCRS(const datum::TemporalDatumNNPtr &datumIn,
                          const cs::TemporalCSNNPtr &csIn)
-    : SingleCRS(datumIn, csIn), d(internal::make_unique<Private>()) {}
+    : SingleCRS(datumIn.as_nullable(), nullptr, csIn),
+      d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 

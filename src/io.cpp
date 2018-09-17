@@ -905,6 +905,10 @@ struct WKTParser::Private {
                                 PrimeMeridianNNPtr primeMeridian,
                                 WKTNodePtr dynamicNode);
 
+    DatumEnsembleNNPtr buildDatumEnsemble(WKTNodeNNPtr node,
+                                          PrimeMeridianPtr primeMeridian,
+                                          bool expectEllipsoid);
+
     MeridianNNPtr buildMeridian(WKTNodeNNPtr node);
     CoordinateSystemAxisNNPtr buildAxis(WKTNodeNNPtr node,
                                         const UnitOfMeasure &unitIn,
@@ -1416,6 +1420,56 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
 
 // ---------------------------------------------------------------------------
 
+DatumEnsembleNNPtr WKTParser::Private::buildDatumEnsemble(
+    WKTNodeNNPtr node, PrimeMeridianPtr primeMeridian, bool expectEllipsoid) {
+    auto ellipsoidNode = node->lookForChild(WKTConstants::ELLIPSOID);
+    if (!ellipsoidNode) {
+        ellipsoidNode = node->lookForChild(WKTConstants::SPHEROID);
+    }
+    if (expectEllipsoid && !ellipsoidNode) {
+        throw ParsingException("Missing ELLIPSOID node");
+    }
+
+    auto ellipsoid =
+        ellipsoidNode
+            ? buildEllipsoid(NN_CHECK_ASSERT(ellipsoidNode)).as_nullable()
+            : nullptr;
+
+    std::vector<DatumNNPtr> datums;
+    for (const auto &subNode : node->children()) {
+        if (ci_equal(subNode->value(), WKTConstants::MEMBER)) {
+            if (subNode->children().empty()) {
+                throw ParsingException("Invalid MEMBER node");
+            }
+            if (expectEllipsoid) {
+                datums.emplace_back(GeodeticReferenceFrame::create(
+                    buildProperties(subNode), NN_CHECK_ASSERT(ellipsoid),
+                    optional<std::string>(),
+                    primeMeridian ? NN_CHECK_ASSERT(primeMeridian)
+                                  : PrimeMeridian::GREENWICH));
+            } else {
+                datums.emplace_back(
+                    VerticalReferenceFrame::create(buildProperties(subNode)));
+            }
+        }
+    }
+
+    auto accuracyNode = node->lookForChild(WKTConstants::ENSEMBLEACCURACY);
+    if (!accuracyNode || accuracyNode->children().empty()) {
+        throw ParsingException("Missing ENSEMBLEACCURACY node");
+    }
+    auto accuracy =
+        PositionalAccuracy::create(accuracyNode->children()[0]->value());
+
+    try {
+        return DatumEnsemble::create(buildProperties(node), datums, accuracy);
+    } catch (const util::Exception &e) {
+        throw ParsingException(std::string("buildDatumEnsemble: ") + e.what());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 MeridianNNPtr WKTParser::Private::buildMeridian(WKTNodeNNPtr node) {
     const auto &children = node->children();
     if (children.size() < 2) {
@@ -1465,7 +1519,8 @@ WKTParser::Private::buildAxis(WKTNodeNNPtr node, const UnitOfMeasure &unitIn,
         }
     }
 
-    // The axis designation in WK2 can be: "name", "(abbrev)" or "name (abbrev)"
+    // The axis designation in WK2 can be: "name", "(abbrev)" or "name
+    // (abbrev)"
     std::string axisDesignation(stripQuotes(children[0]->value()));
     size_t sepPos = axisDesignation.find(" (");
     std::string axisName;
@@ -1592,7 +1647,8 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
         } else if (ci_equal(parentNode->value(), WKTConstants::GEOGCS)) {
             csType = "Ellipsoidal";
             if (axisCount == 0) {
-                // Missing axis with GEOGCS ? Presumably Long/Lat order implied
+                // Missing axis with GEOGCS ? Presumably Long/Lat order
+                // implied
                 auto unit = buildUnitInSubNode(parentNode,
                                                UnitOfMeasure::Type::ANGULAR);
                 if (unit == UnitOfMeasure::NONE) {
@@ -1716,8 +1772,9 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
     } else if (ci_equal(csType, "temporal")) { // WKT2-2015
         if (axisCount == 1) {
             return DateTimeTemporalCS::create(
-                csMap, axisList[0]); // FIXME: there are 3 possible subtypes of
-                                     // TemporalCS
+                csMap,
+                axisList[0]); // FIXME: there are 3 possible subtypes of
+                              // TemporalCS
         } else {
             throw ParsingException("buildCS: invalid CS axis count for " +
                                    csType);
@@ -1756,11 +1813,13 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
         datumNode = node->lookForChild(WKTConstants::GEODETICDATUM);
         if (!datumNode) {
             datumNode = node->lookForChild(WKTConstants::TRF);
-            if (!datumNode) {
-                throw ParsingException("Missing DATUM node");
-            }
         }
     }
+    auto ensembleNode = node->lookForChild(WKTConstants::ENSEMBLE);
+    if (!datumNode && !ensembleNode) {
+        throw ParsingException("Missing DATUM or ENSEMBLE node");
+    }
+
     auto dynamicNode = node->lookForChild(WKTConstants::DYNAMIC);
 
     auto csNode = node->lookForChild(WKTConstants::CS);
@@ -1799,14 +1858,28 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
         angularUnit = primeMeridian->longitude().unit();
     }
 
-    auto datum = buildGeodeticReferenceFrame(NN_CHECK_ASSERT(datumNode),
-                                             primeMeridian, dynamicNode);
+    auto datum = datumNode
+                     ? buildGeodeticReferenceFrame(NN_CHECK_ASSERT(datumNode),
+                                                   primeMeridian, dynamicNode)
+                           .as_nullable()
+                     : nullptr;
+    auto datumEnsemble = ensembleNode
+                             ? buildDatumEnsemble(NN_CHECK_ASSERT(ensembleNode),
+                                                  primeMeridian, true)
+                                   .as_nullable()
+                             : nullptr;
     auto cs = buildCS(csNode, node, angularUnit);
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
         assert(!ci_equal(node->value(), WKTConstants::GEOCCS));
-        return GeographicCRS::create(buildProperties(node), datum,
-                                     NN_CHECK_ASSERT(ellipsoidalCS));
+        try {
+            return GeographicCRS::create(buildProperties(node), datum,
+                                         datumEnsemble,
+                                         NN_CHECK_ASSERT(ellipsoidalCS));
+        } catch (const util::Exception &e) {
+            throw ParsingException(std::string("buildGeodeticCRS: ") +
+                                   e.what());
+        }
     } else if (ci_equal(node->value(), WKTConstants::GEOGCRS) ||
                ci_equal(node->value(), WKTConstants::GEOGRAPHICCRS) ||
                ci_equal(node->value(), WKTConstants::BASEGEOGCRS)) {
@@ -1821,14 +1894,26 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
             throw ParsingException(
                 "Cartesian CS for a GeodeticCRS should have 3 axis");
         }
-        return GeodeticCRS::create(buildProperties(node), datum,
-                                   NN_CHECK_ASSERT(cartesianCS));
+        try {
+            return GeodeticCRS::create(buildProperties(node), datum,
+                                       datumEnsemble,
+                                       NN_CHECK_ASSERT(cartesianCS));
+        } catch (const util::Exception &e) {
+            throw ParsingException(std::string("buildGeodeticCRS: ") +
+                                   e.what());
+        }
     }
 
     auto sphericalCS = nn_dynamic_pointer_cast<SphericalCS>(cs);
     if (sphericalCS) {
-        return GeodeticCRS::create(buildProperties(node), datum,
-                                   NN_CHECK_ASSERT(sphericalCS));
+        try {
+            return GeodeticCRS::create(buildProperties(node), datum,
+                                       datumEnsemble,
+                                       NN_CHECK_ASSERT(sphericalCS));
+        } catch (const util::Exception &e) {
+            throw ParsingException(std::string("buildGeodeticCRS: ") +
+                                   e.what());
+        }
     }
 
     throw ParsingException("unhandled CS type: " +
@@ -2159,7 +2244,8 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                     Angle(0), Angle(0), Length(0), Length(0));
             }
         } else {
-            // The latitude of origin, which should always be zero, is missing
+            // The latitude of origin, which should always be zero, is
+            // missing
             // in GDAL WKT1, but provisionned in the EPSG Mercator_1SP
             // definition,
             // so add it manually.
@@ -2417,15 +2503,26 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
             datumNode = node->lookForChild(WKTConstants::VERTICALDATUM);
             if (!datumNode) {
                 datumNode = node->lookForChild(WKTConstants::VRF);
-                if (!datumNode) {
-                    throw ParsingException("Missing VDATUM node");
-                }
             }
         }
     }
+
+    auto ensembleNode = node->lookForChild(WKTConstants::ENSEMBLE);
+    if (!datumNode && !ensembleNode) {
+        throw ParsingException("Missing VDATUM or ENSEMBLE node");
+    }
+
     auto dynamicNode = node->lookForChild(WKTConstants::DYNAMIC);
-    auto datum =
-        buildVerticalReferenceFrame(NN_CHECK_ASSERT(datumNode), dynamicNode);
+    auto datum = datumNode
+                     ? buildVerticalReferenceFrame(NN_CHECK_ASSERT(datumNode),
+                                                   dynamicNode)
+                           .as_nullable()
+                     : nullptr;
+    auto datumEnsemble =
+        ensembleNode
+            ? buildDatumEnsemble(NN_CHECK_ASSERT(ensembleNode), nullptr, false)
+                  .as_nullable()
+            : nullptr;
 
     auto csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode && !ci_equal(node->value(), WKTConstants::VERT_CS)) {
@@ -2437,27 +2534,30 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
         throw ParsingException("CS node is not of type vertical");
     }
 
-    auto crs = nn_static_pointer_cast<CRS>(VerticalCRS::create(
-        buildProperties(node), datum, NN_CHECK_ASSERT(verticalCS)));
+    auto crs = nn_static_pointer_cast<CRS>(
+        VerticalCRS::create(buildProperties(node), datum, datumEnsemble,
+                            NN_CHECK_ASSERT(verticalCS)));
 
-    auto extensionNode = datumNode->lookForChild(WKTConstants::EXTENSION);
-    if (extensionNode && extensionNode->children().size() == 2 &&
-        ci_equal(stripQuotes(extensionNode->children()[0]->value()),
-                 "PROJ4_GRIDS")) {
-        std::string transformationName = *(crs->name()->description());
-        if (!ends_with(transformationName, " height")) {
-            transformationName += " height";
+    if (datumNode) {
+        auto extensionNode = datumNode->lookForChild(WKTConstants::EXTENSION);
+        if (extensionNode && extensionNode->children().size() == 2 &&
+            ci_equal(stripQuotes(extensionNode->children()[0]->value()),
+                     "PROJ4_GRIDS")) {
+            std::string transformationName = *(crs->name()->description());
+            if (!ends_with(transformationName, " height")) {
+                transformationName += " height";
+            }
+            transformationName += " to WGS84 ellipsoidal height";
+            auto transformation =
+                Transformation::createGravityRelatedHeightToGeographic3D(
+                    PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                      transformationName),
+                    crs, GeographicCRS::EPSG_4979,
+                    stripQuotes(extensionNode->children()[1]->value()),
+                    std::vector<PositionalAccuracyNNPtr>());
+            return nn_static_pointer_cast<CRS>(BoundCRS::create(
+                crs, GeographicCRS::EPSG_4979, transformation));
         }
-        transformationName += " to WGS84 ellipsoidal height";
-        auto transformation =
-            Transformation::createGravityRelatedHeightToGeographic3D(
-                PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                  transformationName),
-                crs, GeographicCRS::EPSG_4979,
-                stripQuotes(extensionNode->children()[1]->value()),
-                std::vector<PositionalAccuracyNNPtr>());
-        return nn_static_pointer_cast<CRS>(
-            BoundCRS::create(crs, GeographicCRS::EPSG_4979, transformation));
     }
 
     return crs;
@@ -2644,6 +2744,12 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
         return util::nn_static_pointer_cast<BaseObject>(
             buildGeodeticReferenceFrame(node, PrimeMeridian::GREENWICH,
                                         nullptr));
+    }
+
+    if (ci_equal(name, WKTConstants::ENSEMBLE)) {
+        return util::nn_static_pointer_cast<BaseObject>(buildDatumEnsemble(
+            node, PrimeMeridian::GREENWICH,
+            node->lookForChild(WKTConstants::ELLIPSOID) != nullptr));
     }
 
     if (ci_equal(name, WKTConstants::VDATUM) ||
@@ -3136,7 +3242,8 @@ static std::string formatToString(double val) {
     if (std::abs(val * 10 - std::round(val * 10)) < 1e-8) {
         // For the purpose of
         // https://www.epsg-registry.org/export.htm?wkt=urn:ogc:def:crs:EPSG::27561
-        // Latitude of natural of origin to be properly rounded from 55 grad to
+        // Latitude of natural of origin to be properly rounded from 55 grad
+        // to
         // 49.5 deg
         val = std::round(val * 10) / 10;
     }
@@ -3491,7 +3598,8 @@ static bool isProjectedStep(const std::string &name) {
         !getMappingsFromPROJName(name).empty()) {
         return true;
     }
-    // IMPROVE ME: have a better way of distinguishing projections from other
+    // IMPROVE ME: have a better way of distinguishing projections from
+    // other
     // transformations.
     if (name == "pipeline" || name == "geoc" || name == "deformation" ||
         name == "helmert" || name == "hgridshift" || name == "molodensky" ||
@@ -4151,7 +4259,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             } else if (param.unit_type == UnitOfMeasure::Type::SCALE) {
                 value = 1;
             } else {
-                // For omerc, if gamma is missing, the default value is alpha
+                // For omerc, if gamma is missing, the default value is
+                // alpha
                 if (step.name == "omerc" && !param.proj_names.empty() &&
                     param.proj_names[0] == "gamma") {
                     paramValue = getParamValue(step, "alpha");
@@ -4171,7 +4280,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             }
             parameters.push_back(
                 OperationParameter::create(propertiesParameter));
-            // In PROJ convention, angular parameters are always in degree and
+            // In PROJ convention, angular parameters are always in degree
+            // and
             // linear parameters always in metre.
             values.push_back(ParameterValue::create(Measure(
                 value, param.unit_type == UnitOfMeasure::Type::ANGULAR

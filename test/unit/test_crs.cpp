@@ -117,6 +117,64 @@ TEST(crs, GeographicCRS_isEquivalentTo) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, GeographicCRS_datum_ensemble) {
+    auto ensemble_vdatum = DatumEnsemble::create(
+        PropertyMap(),
+        std::vector<DatumNNPtr>{GeodeticReferenceFrame::EPSG_6326,
+                                GeodeticReferenceFrame::EPSG_6326},
+        PositionalAccuracy::create("100"));
+    auto crs = GeographicCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), nullptr,
+        ensemble_vdatum,
+        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+    f->simulCurNodeHasId();
+    crs->exportToWKT(f);
+    auto expected = "GEOGCRS[\"unnamed\",\n"
+                    "    ENSEMBLE[\"unnamed\",\n"
+                    "        MEMBER[\"World Geodetic System 1984\"],\n"
+                    "        MEMBER[\"World Geodetic System 1984\"],\n"
+                    "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+                    "            LENGTHUNIT[\"metre\",1]],\n"
+                    "        ENSEMBLEACCURACY[100]],\n"
+                    "    PRIMEM[\"Greenwich\",0,\n"
+                    "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                    "    CS[ellipsoidal,2],\n"
+                    "        AXIS[\"latitude\",north,\n"
+                    "            ORDER[1],\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                    "        AXIS[\"longitude\",east,\n"
+                    "            ORDER[2],\n"
+                    "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
+
+    EXPECT_EQ(f->toString(), expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, GeographicCRS_ensemble_exception_in_create) {
+    EXPECT_THROW(GeographicCRS::create(PropertyMap(), nullptr, nullptr,
+                                       EllipsoidalCS::createLatitudeLongitude(
+                                           UnitOfMeasure::DEGREE)),
+                 Exception);
+
+    auto ensemble_vdatum = DatumEnsemble::create(
+        PropertyMap(),
+        std::vector<DatumNNPtr>{
+            VerticalReferenceFrame::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "vdatum1")),
+            VerticalReferenceFrame::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "vdatum2"))},
+        PositionalAccuracy::create("100"));
+    EXPECT_THROW(GeographicCRS::create(PropertyMap(), nullptr, ensemble_vdatum,
+                                       EllipsoidalCS::createLatitudeLongitude(
+                                           UnitOfMeasure::DEGREE)),
+                 Exception);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_4326_as_WKT2) {
     auto crs = GeographicCRS::EPSG_4326;
     WKTFormatterNNPtr f(WKTFormatter::create());
@@ -1046,6 +1104,54 @@ TEST(crs, verticalCRS_as_WKT1_GDAL) {
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
               expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, verticalCRS_datum_ensemble) {
+    auto ensemble = DatumEnsemble::create(
+        PropertyMap(),
+        std::vector<DatumNNPtr>{
+            VerticalReferenceFrame::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "vdatum1")),
+            VerticalReferenceFrame::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "vdatum2"))},
+        PositionalAccuracy::create("100"));
+    auto crs = VerticalCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), nullptr,
+        ensemble, VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+    f->simulCurNodeHasId();
+    crs->exportToWKT(f);
+    auto expected = "VERTCRS[\"unnamed\",\n"
+                    "    ENSEMBLE[\"unnamed\",\n"
+                    "        MEMBER[\"vdatum1\"],\n"
+                    "        MEMBER[\"vdatum2\"],\n"
+                    "        ENSEMBLEACCURACY[100]],\n"
+                    "    CS[vertical,1],\n"
+                    "        AXIS[\"gravity-related height (H)\",up,\n"
+                    "            LENGTHUNIT[\"metre\",1]]]";
+    EXPECT_EQ(f->toString(), expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, VerticalCRS_ensemble_exception_in_create) {
+    EXPECT_THROW(VerticalCRS::create(PropertyMap(), nullptr, nullptr,
+                                     VerticalCS::createGravityRelatedHeight(
+                                         UnitOfMeasure::METRE)),
+                 Exception);
+
+    auto ensemble_hdatum = DatumEnsemble::create(
+        PropertyMap(),
+        std::vector<DatumNNPtr>{GeodeticReferenceFrame::EPSG_6326,
+                                GeodeticReferenceFrame::EPSG_6326},
+        PositionalAccuracy::create("100"));
+    EXPECT_THROW(VerticalCRS::create(PropertyMap(), nullptr, ensemble_hdatum,
+                                     VerticalCS::createGravityRelatedHeight(
+                                         UnitOfMeasure::METRE)),
+                 Exception);
 }
 
 // ---------------------------------------------------------------------------

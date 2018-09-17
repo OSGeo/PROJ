@@ -1106,10 +1106,20 @@ DynamicGeodeticReferenceFrameNNPtr DynamicGeodeticReferenceFrame::create(
 
 //! @cond Doxygen_Suppress
 struct DatumEnsemble::Private {
-    std::vector<DatumPtr> datums{};
+    std::vector<DatumNNPtr> datums{};
     metadata::PositionalAccuracyNNPtr positionalAccuracy;
+
+    Private(const std::vector<DatumNNPtr> &datumsIn,
+            const metadata::PositionalAccuracyNNPtr &accuracy)
+        : datums(datumsIn), positionalAccuracy(accuracy) {}
 };
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+DatumEnsemble::DatumEnsemble(const std::vector<DatumNNPtr> &datumsIn,
+                             const metadata::PositionalAccuracyNNPtr &accuracy)
+    : d(internal::make_unique<Private>(datumsIn, accuracy)) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1132,7 +1142,9 @@ DatumEnsemble::~DatumEnsemble() = default;
  *
  * @return the set of datums of the DatumEnsemble.
  */
-const std::vector<DatumPtr> &DatumEnsemble::datums() const { return d->datums; }
+const std::vector<DatumNNPtr> &DatumEnsemble::datums() const {
+    return d->datums;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1148,6 +1160,109 @@ const std::vector<DatumPtr> &DatumEnsemble::datums() const { return d->datums; }
 const metadata::PositionalAccuracyNNPtr &
 DatumEnsemble::positionalAccuracy() const {
     return d->positionalAccuracy;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string DatumEnsemble::exportToWKT(
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (!isWKT2 || !formatter->use2018Keywords()) {
+        throw io::FormattingException(
+            "DatumEnsemble can only be exported to WKT2:2018");
+    }
+
+    auto l_datums = datums();
+    assert(!l_datums.empty());
+
+    formatter->startNode(io::WKTConstants::ENSEMBLE, false);
+    formatter->addQuotedString(name()->description().has_value()
+                                   ? *(name()->description())
+                                   : "unnamed");
+    for (const auto &datum : l_datums) {
+        formatter->startNode(io::WKTConstants::MEMBER,
+                             !datum->identifiers().empty());
+        formatter->addQuotedString(datum->name()->description().has_value()
+                                       ? *(datum->name()->description())
+                                       : "unnamed");
+        if (formatter->outputId()) {
+            datum->formatID(formatter);
+        }
+        formatter->endNode();
+    }
+
+    auto grfFirst = std::dynamic_pointer_cast<GeodeticReferenceFrame>(
+        l_datums[0].as_nullable());
+    if (grfFirst) {
+        grfFirst->ellipsoid()->exportToWKT(formatter);
+    }
+
+    formatter->startNode(io::WKTConstants::ENSEMBLEACCURACY, false);
+    formatter->add(positionalAccuracy()->value());
+    formatter->endNode();
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a DatumEnsemble.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datumsIn Array of at least 2 datums.
+ * @param accuracy Accuracy of the datum ensemble
+ * @return new DatumEnsemble.
+ * @throw util::Exception
+ */
+DatumEnsembleNNPtr DatumEnsemble::create(
+    const util::PropertyMap &properties,
+    const std::vector<DatumNNPtr> &datumsIn,
+    const metadata::PositionalAccuracyNNPtr &accuracy) // throw(Exception)
+{
+    if (datumsIn.size() < 2) {
+        throw util::Exception("ensemble should have at least 2 datums");
+    }
+    auto grfFirst = std::dynamic_pointer_cast<GeodeticReferenceFrame>(
+        datumsIn[0].as_nullable());
+    if (grfFirst) {
+        for (size_t i = 1; i < datumsIn.size(); i++) {
+            auto grf = std::dynamic_pointer_cast<GeodeticReferenceFrame>(
+                datumsIn[i].as_nullable());
+            if (!grf) {
+                throw util::Exception(
+                    "ensemble should have consistent datum types");
+            }
+            if (!grfFirst->ellipsoid()->isEquivalentTo(grf->ellipsoid())) {
+                throw util::Exception(
+                    "ensemble should have datums with identical ellipsoid");
+            }
+            if (!grfFirst->primeMeridian()->isEquivalentTo(
+                    grf->primeMeridian())) {
+                throw util::Exception(
+                    "ensemble should have datums with identical "
+                    "prime meridian");
+            }
+        }
+    } else {
+        auto vrfFirst = std::dynamic_pointer_cast<VerticalReferenceFrame>(
+            datumsIn[0].as_nullable());
+        if (vrfFirst) {
+            for (size_t i = 1; i < datumsIn.size(); i++) {
+                auto vrf = std::dynamic_pointer_cast<VerticalReferenceFrame>(
+                    datumsIn[i].as_nullable());
+                if (!vrf) {
+                    throw util::Exception(
+                        "ensemble should have consistent datum types");
+                }
+            }
+        }
+    }
+    auto ensemble(
+        DatumEnsemble::nn_make_shared<DatumEnsemble>(datumsIn, accuracy));
+    ensemble->setProperties(properties);
+    return ensemble;
 }
 
 // ---------------------------------------------------------------------------

@@ -4,8 +4,6 @@
     - import from Proj4
             init= syntax
     - derived crs
-    - DATUMENSEMBLE
-    - dynamic CRS WKT
     - test sphericalCS
 
     - transformation with WEST longitude

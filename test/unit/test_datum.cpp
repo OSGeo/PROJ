@@ -317,3 +317,104 @@ TEST(datum, dynamic_vertical_reference_frame) {
                   WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
               expected_wtk2_2018);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, datum_ensemble) {
+    auto otherDatum = GeodeticReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "other datum"),
+        Ellipsoid::WGS84, optional<std::string>(), PrimeMeridian::GREENWICH);
+    auto ensemble = DatumEnsemble::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "test"),
+        std::vector<DatumNNPtr>{GeodeticReferenceFrame::EPSG_6326, otherDatum},
+        PositionalAccuracy::create("100"));
+    EXPECT_EQ(ensemble->datums().size(), 2);
+    EXPECT_EQ(ensemble->positionalAccuracy()->value(), "100");
+    EXPECT_THROW(ensemble->exportToWKT(WKTFormatter::create()),
+                 FormattingException);
+    EXPECT_EQ(ensemble->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              "ENSEMBLE[\"test\",\n"
+              "    MEMBER[\"World Geodetic System 1984\",\n"
+              "        ID[\"EPSG\",6326]],\n"
+              "    MEMBER[\"other datum\"],\n"
+              "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",7030]],\n"
+              "    ENSEMBLEACCURACY[100]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, datum_ensemble_vertical) {
+    auto ensemble = DatumEnsemble::create(
+        PropertyMap(),
+        std::vector<DatumNNPtr>{
+            VerticalReferenceFrame::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "vdatum1")),
+            VerticalReferenceFrame::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "vdatum2"))},
+        PositionalAccuracy::create("100"));
+    EXPECT_EQ(ensemble->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              "ENSEMBLE[\"unnamed\",\n"
+              "    MEMBER[\"vdatum1\"],\n"
+              "    MEMBER[\"vdatum2\"],\n"
+              "    ENSEMBLEACCURACY[100]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, datum_ensemble_exceptions) {
+    // No datum
+    EXPECT_THROW(DatumEnsemble::create(PropertyMap(), std::vector<DatumNNPtr>{},
+                                       PositionalAccuracy::create("100")),
+                 Exception);
+
+    // Single datum
+    EXPECT_THROW(DatumEnsemble::create(
+                     PropertyMap(),
+                     std::vector<DatumNNPtr>{GeodeticReferenceFrame::EPSG_6326},
+                     PositionalAccuracy::create("100")),
+                 Exception);
+
+    auto vdatum = VerticalReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "vdatum1"));
+
+    // Different datum type
+    EXPECT_THROW(
+        DatumEnsemble::create(
+            PropertyMap(),
+            std::vector<DatumNNPtr>{GeodeticReferenceFrame::EPSG_6326, vdatum},
+            PositionalAccuracy::create("100")),
+        Exception);
+
+    // Different datum type
+    EXPECT_THROW(
+        DatumEnsemble::create(
+            PropertyMap(),
+            std::vector<DatumNNPtr>{vdatum, GeodeticReferenceFrame::EPSG_6326},
+            PositionalAccuracy::create("100")),
+        Exception);
+
+    // Different ellipsoid
+    EXPECT_THROW(DatumEnsemble::create(
+                     PropertyMap(),
+                     std::vector<DatumNNPtr>{GeodeticReferenceFrame::EPSG_6326,
+                                             GeodeticReferenceFrame::EPSG_6267},
+                     PositionalAccuracy::create("100")),
+                 Exception);
+
+    // Different prime meridian
+    EXPECT_THROW(DatumEnsemble::create(
+                     PropertyMap(),
+                     std::vector<DatumNNPtr>{
+                         GeodeticReferenceFrame::EPSG_6326,
+                         GeodeticReferenceFrame::create(
+                             PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                               "other datum"),
+                             Ellipsoid::WGS84, optional<std::string>(),
+                             PrimeMeridian::PARIS)},
+                     PositionalAccuracy::create("100")),
+                 Exception);
+}

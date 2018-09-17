@@ -3541,8 +3541,7 @@ static bool createPROJ4WebMercator(const Conversion *conv,
     }
     io::PROJStringFormatter::Scope scope(formatter);
     formatter->addStep("merc");
-    const double a =
-        geogCRS->datum()->ellipsoid()->semiMajorAxis().getSIValue();
+    const double a = geogCRS->ellipsoid()->semiMajorAxis().getSIValue();
     formatter->addParam("a", a);
     formatter->addParam("b", a);
     formatter->addParam("lat_ts", 0.0);
@@ -3905,14 +3904,12 @@ std::string Conversion::exportToPROJString(
             std::dynamic_pointer_cast<crs::ProjectedCRS>(targetCRS());
         if (projCRS) {
             if (!bEllipsoidParametersDone) {
+                auto l_baseCRS = projCRS->baseCRS();
                 if (formatter->convention() ==
                     io::PROJStringFormatter::Convention::PROJ_4) {
-                    projCRS->baseCRS()->addDatumInfoToPROJString(formatter);
+                    l_baseCRS->addDatumInfoToPROJString(formatter);
                 } else {
-                    projCRS->baseCRS()
-                        ->datum()
-                        ->ellipsoid()
-                        ->exportToPROJString(formatter);
+                    l_baseCRS->ellipsoid()->exportToPROJString(formatter);
                 }
             }
 
@@ -5829,7 +5826,7 @@ std::string Transformation::exportToPROJString(
             formatter->stopInversion();
 
             formatter->addStep("cart");
-            sourceCRSGeog->datum()->ellipsoid()->exportToPROJString(formatter);
+            sourceCRSGeog->ellipsoid()->exportToPROJString(formatter);
         } else {
             auto sourceCRSGeod =
                 util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(sourceCRS());
@@ -5943,7 +5940,7 @@ std::string Transformation::exportToPROJString(
         if (targetCRSGeog) {
             formatter->addStep("cart");
             formatter->setCurrentStepInverted(true);
-            targetCRSGeog->datum()->ellipsoid()->exportToPROJString(formatter);
+            targetCRSGeog->ellipsoid()->exportToPROJString(formatter);
 
             targetCRSGeog->exportToPROJString(formatter);
         } else {
@@ -6001,7 +5998,7 @@ std::string Transformation::exportToPROJString(
         formatter->stopInversion();
 
         formatter->addStep("molodensky");
-        sourceCRSGeog->datum()->ellipsoid()->exportToPROJString(formatter);
+        sourceCRSGeog->ellipsoid()->exportToPROJString(formatter);
         formatter->addParam("dx", x);
         formatter->addParam("dy", y);
         formatter->addParam("dz", z);

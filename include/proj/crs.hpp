@@ -113,10 +113,14 @@ class SingleCRS : public CRS {
     PROJ_DLL const datum::DatumEnsemblePtr &datumEnsemble() const;
     PROJ_DLL const cs::CoordinateSystemNNPtr &coordinateSystem() const;
 
+    //! @cond Doxygen_Suppress
+    void exportDatumOrDatumEnsembleToWkt(io::WKTFormatterNNPtr formatter)
+        const; // throw(io::FormattingException)
+               //! @endcond
+
   protected:
-    SingleCRS(const datum::DatumNNPtr &datumIn,
-              const cs::CoordinateSystemNNPtr &csIn);
     SingleCRS(const datum::DatumPtr &datumIn,
+              const datum::DatumEnsemblePtr &datumEnsembleIn,
               const cs::CoordinateSystemNNPtr &csIn);
 
     bool _isEquivalentTo(const util::BaseObjectNNPtr &other,
@@ -157,7 +161,10 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     PROJ_DLL ~GeodeticCRS() override;
     //! @endcond
 
-    PROJ_DLL const datum::GeodeticReferenceFrameNNPtr datum() const;
+    PROJ_DLL const datum::GeodeticReferenceFramePtr datum() const;
+
+    PROJ_DLL const datum::PrimeMeridianNNPtr &primeMeridian() const;
+    PROJ_DLL const datum::EllipsoidNNPtr &ellipsoid() const;
 
     // coordinateSystem() returns either a EllipsoidalCS, SphericalCS or
     // CartesianCS
@@ -173,9 +180,22 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     create(const util::PropertyMap &properties,
            const datum::GeodeticReferenceFrameNNPtr &datum,
            const cs::SphericalCSNNPtr &cs);
+
     PROJ_DLL static GeodeticCRSNNPtr
     create(const util::PropertyMap &properties,
            const datum::GeodeticReferenceFrameNNPtr &datum,
+           const cs::CartesianCSNNPtr &cs);
+
+    PROJ_DLL static GeodeticCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const datum::GeodeticReferenceFramePtr &datum,
+           const datum::DatumEnsemblePtr &datumEnsemble,
+           const cs::SphericalCSNNPtr &cs);
+
+    PROJ_DLL static GeodeticCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const datum::GeodeticReferenceFramePtr &datum,
+           const datum::DatumEnsemblePtr &datumEnsemble,
            const cs::CartesianCSNNPtr &cs);
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
@@ -197,13 +217,18 @@ class GeodeticCRS : virtual public SingleCRS, public io::IPROJStringExportable {
     //! @endcond
 
   protected:
-    GeodeticCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
+    GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+                const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::EllipsoidalCSNNPtr &csIn);
-    GeodeticCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
+    GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+                const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::SphericalCSNNPtr &csIn);
-    GeodeticCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
+    GeodeticCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+                const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::CartesianCSNNPtr &csIn);
     INLINED_MAKE_SHARED
+
+    datum::GeodeticReferenceFrameNNPtr oneDatum() const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -235,6 +260,11 @@ class GeographicCRS : public GeodeticCRS {
     create(const util::PropertyMap &properties,
            const datum::GeodeticReferenceFrameNNPtr &datum,
            const cs::EllipsoidalCSNNPtr &cs);
+    PROJ_DLL static GeographicCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const datum::GeodeticReferenceFramePtr &datum,
+           const datum::DatumEnsemblePtr &datumEnsemble,
+           const cs::EllipsoidalCSNNPtr &cs);
 
     PROJ_DLL std::string
     exportToPROJString(io::PROJStringFormatterNNPtr formatter)
@@ -253,7 +283,8 @@ class GeographicCRS : public GeodeticCRS {
     //! @endcond
 
   protected:
-    GeographicCRS(const datum::GeodeticReferenceFrameNNPtr &datumIn,
+    GeographicCRS(const datum::GeodeticReferenceFramePtr &datumIn,
+                  const datum::DatumEnsemblePtr &datumEnsembleIn,
                   const cs::EllipsoidalCSNNPtr &csIn);
     INLINED_MAKE_SHARED
 
@@ -315,8 +346,15 @@ class VerticalCRS : public SingleCRS, public io::IPROJStringExportable {
            const datum::VerticalReferenceFrameNNPtr &datumIn,
            const cs::VerticalCSNNPtr &csIn);
 
+    PROJ_DLL static VerticalCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const datum::VerticalReferenceFramePtr &datumIn,
+           const datum::DatumEnsemblePtr &datumEnsembleIn,
+           const cs::VerticalCSNNPtr &csIn);
+
   protected:
-    VerticalCRS(const datum::VerticalReferenceFrameNNPtr &datumIn,
+    VerticalCRS(const datum::VerticalReferenceFramePtr &datumIn,
+                const datum::DatumEnsemblePtr &datumEnsembleIn,
                 const cs::VerticalCSNNPtr &csIn);
     INLINED_MAKE_SHARED
 
