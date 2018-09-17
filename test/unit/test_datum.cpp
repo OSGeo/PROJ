@@ -184,6 +184,37 @@ TEST(datum, datum_with_ANCHOR) {
 
 // ---------------------------------------------------------------------------
 
+TEST(datum, dynamic_geodetic_reference_frame) {
+    auto drf = DynamicGeodeticReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "test"), Ellipsoid::WGS84,
+        optional<std::string>("My anchor"), PrimeMeridian::GREENWICH,
+        Measure(2018.5, UnitOfMeasure::YEAR),
+        optional<std::string>("My model"));
+
+    auto expected = "DATUM[\"test\",\n"
+                    "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+                    "        LENGTHUNIT[\"metre\",1],\n"
+                    "        ID[\"EPSG\",7030]],\n"
+                    "    ANCHOR[\"My anchor\"]]";
+
+    EXPECT_EQ(drf->exportToWKT(WKTFormatter::create()), expected);
+
+    auto expected_wtk2_2018 =
+        "DYNAMIC[\n"
+        "    FRAMEEPOCH[2018.5],\n"
+        "    MODEL[\"My model\"]],\n"
+        "DATUM[\"test\",\n"
+        "    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "        LENGTHUNIT[\"metre\",1],\n"
+        "        ID[\"EPSG\",7030]],\n"
+        "    ANCHOR[\"My anchor\"]]";
+    EXPECT_EQ(drf->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected_wtk2_2018);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(datum, ellipsoid_to_PROJString) {
 
     EXPECT_EQ(
@@ -261,4 +292,28 @@ TEST(datum, temporal_datum_WKT2_2018) {
     EXPECT_EQ(datum->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
               expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, dynamic_vertical_reference_frame) {
+    auto drf = DynamicVerticalReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "test"),
+        optional<std::string>("My anchor"), optional<RealizationMethod>(),
+        Measure(2018.5, UnitOfMeasure::YEAR),
+        optional<std::string>("My model"));
+
+    auto expected = "VDATUM[\"test\",\n"
+                    "    ANCHOR[\"My anchor\"]]";
+
+    EXPECT_EQ(drf->exportToWKT(WKTFormatter::create()), expected);
+
+    auto expected_wtk2_2018 = "DYNAMIC[\n"
+                              "    FRAMEEPOCH[2018.5],\n"
+                              "    MODEL[\"My model\"]],\n"
+                              "VDATUM[\"test\",\n"
+                              "    ANCHOR[\"My anchor\"]]";
+    EXPECT_EQ(drf->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected_wtk2_2018);
 }

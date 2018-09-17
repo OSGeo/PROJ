@@ -86,7 +86,9 @@ class Datum : public common::ObjectUsage, public util::IComparable {
 
   private:
     friend class GeodeticReferenceFrame;
+    friend class DynamicGeodeticReferenceFrame;
     friend class VerticalReferenceFrame;
+    friend class DynamicVerticalReferenceFrame;
     PROJ_OPAQUE_PRIVATE_DATA
     Datum &operator=(const Datum &other) = delete;
     Datum(const Datum &other) = delete;
@@ -402,19 +404,35 @@ class DynamicGeodeticReferenceFrame : public GeodeticReferenceFrame {
     //! @endcond
 
     PROJ_DLL const common::Measure &frameReferenceEpoch() const;
+    PROJ_DLL const util::optional<std::string> &deformationModelName() const;
+
+    // non-standard
+    PROJ_DLL static DynamicGeodeticReferenceFrameNNPtr
+    create(const util::PropertyMap &properties, const EllipsoidNNPtr &ellipsoid,
+           const util::optional<std::string> &anchor,
+           const PrimeMeridianNNPtr &primeMeridian,
+           const common::Measure &frameReferenceEpochIn,
+           const util::optional<std::string> &deformationModelNameIn);
 
     PROJ_DLL bool
     isEquivalentTo(const util::BaseObjectNNPtr &other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
   protected:
 #ifdef DOXYGEN_ENABLED
     Measure frameReferenceEpoch_;
 #endif
 
-    DynamicGeodeticReferenceFrame(const EllipsoidNNPtr &ellipsoidIn,
-                                  const PrimeMeridianNNPtr &primeMeridianIn);
+    DynamicGeodeticReferenceFrame(
+        const EllipsoidNNPtr &ellipsoidIn,
+        const PrimeMeridianNNPtr &primeMeridianIn,
+        const common::Measure &frameReferenceEpochIn,
+        const util::optional<std::string> &deformationModelNameIn);
+    INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -490,11 +508,74 @@ class VerticalReferenceFrame : public Datum, public io::IWKTExportable {
     RealizationMethod realizationMethod_;
 #endif
 
-    VerticalReferenceFrame();
+    VerticalReferenceFrame(
+        const util::optional<RealizationMethod> &realizationMethodIn);
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+class DynamicVerticalReferenceFrame;
+/** Shared pointer of DynamicVerticalReferenceFrame */
+using DynamicVerticalReferenceFramePtr =
+    std::shared_ptr<DynamicVerticalReferenceFrame>;
+/** Non-null shared pointer of DynamicVerticalReferenceFrame */
+using DynamicVerticalReferenceFrameNNPtr =
+    util::nn<DynamicVerticalReferenceFramePtr>;
+
+/** \brief A vertical reference frame in which some of the defining parameters
+ * have time dependency.
+ *
+ * For example defining station heights have velocity to account for
+ * post-glacial isostatic rebound motion.
+ *
+ * \remark Implements DynamicVerticalReferenceFrame from \ref ISO_19111_2018
+ */
+class DynamicVerticalReferenceFrame : public VerticalReferenceFrame {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~DynamicVerticalReferenceFrame() override;
+    //! @endcond
+
+    PROJ_DLL const common::Measure &frameReferenceEpoch() const;
+    PROJ_DLL const util::optional<std::string> &deformationModelName() const;
+
+    // non-standard
+    PROJ_DLL static DynamicVerticalReferenceFrameNNPtr
+    create(const util::PropertyMap &properties,
+           const util::optional<std::string> &anchor,
+           const util::optional<RealizationMethod> &realizationMethodIn,
+           const common::Measure &frameReferenceEpochIn,
+           const util::optional<std::string> &deformationModelNameIn);
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+  protected:
+#ifdef DOXYGEN_ENABLED
+    Measure frameReferenceEpoch_;
+#endif
+
+    DynamicVerticalReferenceFrame(
+        const util::optional<RealizationMethod> &realizationMethodIn,
+        const common::Measure &frameReferenceEpochIn,
+        const util::optional<std::string> &deformationModelNameIn);
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    DynamicVerticalReferenceFrame(const DynamicVerticalReferenceFrame &other) =
+        delete;
+    DynamicVerticalReferenceFrame &
+    operator=(const DynamicVerticalReferenceFrame &other) = delete;
 };
 
 // ---------------------------------------------------------------------------

@@ -827,7 +827,7 @@ TEST(datum, cs_with_MERIDIAN) {
             Meridian::create(Angle(180.0)))};
     auto cs(CartesianCS::create(PropertyMap(), axis[0], axis[1]));
 
-    auto expected = "CS[Cartesian,2]\n"
+    auto expected = "CS[Cartesian,2],\n"
                     "    AXIS[\"easting (X)\",south,\n"
                     "        MERIDIAN[90,\n"
                     "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"

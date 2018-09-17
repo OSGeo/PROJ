@@ -972,6 +972,7 @@ bool GeodeticReferenceFrame::isEquivalentTo(
 //! @cond Doxygen_Suppress
 struct DynamicGeodeticReferenceFrame::Private {
     common::Measure frameReferenceEpoch{};
+    util::optional<std::string> deformationModelName{};
 };
 //! @endcond
 
@@ -979,9 +980,14 @@ struct DynamicGeodeticReferenceFrame::Private {
 
 DynamicGeodeticReferenceFrame::DynamicGeodeticReferenceFrame(
     const EllipsoidNNPtr &ellipsoidIn,
-    const PrimeMeridianNNPtr &primeMeridianIn)
+    const PrimeMeridianNNPtr &primeMeridianIn,
+    const common::Measure &frameReferenceEpochIn,
+    const util::optional<std::string> &deformationModelNameIn)
     : GeodeticReferenceFrame(ellipsoidIn, primeMeridianIn),
-      d(internal::make_unique<Private>()) {}
+      d(internal::make_unique<Private>()) {
+    d->frameReferenceEpoch = frameReferenceEpochIn;
+    d->deformationModelName = deformationModelNameIn;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1014,6 +1020,20 @@ DynamicGeodeticReferenceFrame::frameReferenceEpoch() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the name of the deformation model.
+ *
+ * @note This is an extension to the \ref ISO_19111_2018 modeling, to
+ * hold the content of the DYNAMIC.MODEL WKT2 node.
+ *
+ * @return the name of the deformation model.
+ */
+const util::optional<std::string> &
+DynamicGeodeticReferenceFrame::deformationModelName() const {
+    return d->deformationModelName;
+}
+
+// ---------------------------------------------------------------------------
+
 bool DynamicGeodeticReferenceFrame::isEquivalentTo(
     const util::BaseObjectNNPtr &other,
     util::IComparable::Criterion criterion) const {
@@ -1024,7 +1044,62 @@ bool DynamicGeodeticReferenceFrame::isEquivalentTo(
         return false;
     }
     return frameReferenceEpoch().isEquivalentTo(
-        otherDGRF->frameReferenceEpoch(), criterion);
+               otherDGRF->frameReferenceEpoch(), criterion) &&
+           metadata::Identifier::isEquivalentName(
+               *deformationModelName(), *otherDGRF->deformationModelName());
+}
+
+// ---------------------------------------------------------------------------
+
+std::string DynamicGeodeticReferenceFrame::exportToWKT(
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (isWKT2 && formatter->use2018Keywords()) {
+        formatter->startNode(io::WKTConstants::DYNAMIC, false);
+        formatter->startNode(io::WKTConstants::FRAMEEPOCH, false);
+        formatter->add(frameReferenceEpoch()
+                           .convertToUnit(common::UnitOfMeasure::YEAR)
+                           .value());
+        formatter->endNode();
+        if (deformationModelName().has_value() &&
+            !deformationModelName()->empty()) {
+            formatter->startNode(io::WKTConstants::MODEL, false);
+            formatter->addQuotedString(*deformationModelName());
+            formatter->endNode();
+        }
+        formatter->endNode();
+    }
+    return GeodeticReferenceFrame::exportToWKT(formatter);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a DyanmicGeodeticReferenceFrame
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param ellipsoid the Ellipsoid.
+ * @param anchor the anchor definition, or empty.
+ * @param primeMeridian the PrimeMeridian.
+ * @param frameReferenceEpochIn the frame reference epoch.
+ * @param deformationModelNameIn deformation model name, or empty
+ * @return new DyanmicGeodeticReferenceFrame.
+ */
+DynamicGeodeticReferenceFrameNNPtr DynamicGeodeticReferenceFrame::create(
+    const util::PropertyMap &properties, const EllipsoidNNPtr &ellipsoid,
+    const util::optional<std::string> &anchor,
+    const PrimeMeridianNNPtr &primeMeridian,
+    const common::Measure &frameReferenceEpochIn,
+    const util::optional<std::string> &deformationModelNameIn) {
+    DynamicGeodeticReferenceFrameNNPtr grf(
+        DynamicGeodeticReferenceFrame::nn_make_shared<
+            DynamicGeodeticReferenceFrame>(ellipsoid, primeMeridian,
+                                           frameReferenceEpochIn,
+                                           deformationModelNameIn));
+    util::nn_static_pointer_cast<Datum>(grf)->d->anchorDefinition = anchor;
+    grf->setProperties(properties);
+    return grf;
 }
 
 // ---------------------------------------------------------------------------
@@ -1102,8 +1177,14 @@ struct VerticalReferenceFrame::Private {
 
 // ---------------------------------------------------------------------------
 
-VerticalReferenceFrame::VerticalReferenceFrame()
-    : d(internal::make_unique<Private>()) {}
+VerticalReferenceFrame::VerticalReferenceFrame(
+    const util::optional<RealizationMethod> &realizationMethodIn)
+    : d(internal::make_unique<Private>()) {
+    if (realizationMethodIn.has_value() &&
+        !realizationMethodIn->toString().empty()) {
+        d->realizationMethod_ = *realizationMethodIn;
+    }
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1137,13 +1218,10 @@ VerticalReferenceFrameNNPtr VerticalReferenceFrame::create(
     const util::PropertyMap &properties,
     const util::optional<std::string> &anchor,
     const util::optional<RealizationMethod> &realizationMethodIn) {
-    auto rf(VerticalReferenceFrame::nn_make_shared<VerticalReferenceFrame>());
+    auto rf(VerticalReferenceFrame::nn_make_shared<VerticalReferenceFrame>(
+        realizationMethodIn));
     util::nn_static_pointer_cast<Datum>(rf)->d->anchorDefinition = anchor;
     rf->setProperties(properties);
-    if (realizationMethodIn.has_value() &&
-        !realizationMethodIn->toString().empty()) {
-        rf->d->realizationMethod_ = *realizationMethodIn;
-    }
     return rf;
 }
 
@@ -1210,6 +1288,139 @@ bool VerticalReferenceFrame::isEquivalentTo(
         }
     }
     return true;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct DynamicVerticalReferenceFrame::Private {
+    common::Measure frameReferenceEpoch{};
+    util::optional<std::string> deformationModelName{};
+};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+DynamicVerticalReferenceFrame::DynamicVerticalReferenceFrame(
+    const util::optional<RealizationMethod> &realizationMethodIn,
+    const common::Measure &frameReferenceEpochIn,
+    const util::optional<std::string> &deformationModelNameIn)
+    : VerticalReferenceFrame(realizationMethodIn),
+      d(internal::make_unique<Private>()) {
+    d->frameReferenceEpoch = frameReferenceEpochIn;
+    d->deformationModelName = deformationModelNameIn;
+}
+
+// ---------------------------------------------------------------------------
+
+#ifdef notdef
+DynamicVerticalReferenceFrame::DynamicVerticalReferenceFrame(
+    const DynamicVerticalReferenceFrame &other)
+    : VerticalReferenceFrame(other),
+      d(internal::make_unique<Private>(*other.d)) {}
+#endif
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+DynamicVerticalReferenceFrame::~DynamicVerticalReferenceFrame() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the epoch to which the coordinates of stations defining the
+ * dynamic geodetic reference frame are referenced.
+ *
+ * Usually given as a decimal year e.g. 2016.47.
+ *
+ * @return the frame reference epoch.
+ */
+const common::Measure &
+DynamicVerticalReferenceFrame::frameReferenceEpoch() const {
+    return d->frameReferenceEpoch;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the name of the deformation model.
+ *
+ * @note This is an extension to the \ref ISO_19111_2018 modeling, to
+ * hold the content of the DYNAMIC.MODEL WKT2 node.
+ *
+ * @return the name of the deformation model.
+ */
+const util::optional<std::string> &
+DynamicVerticalReferenceFrame::deformationModelName() const {
+    return d->deformationModelName;
+}
+
+// ---------------------------------------------------------------------------
+
+bool DynamicVerticalReferenceFrame::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherDGRF =
+        util::nn_dynamic_pointer_cast<DynamicVerticalReferenceFrame>(other);
+    if (otherDGRF == nullptr ||
+        !VerticalReferenceFrame::isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    return frameReferenceEpoch().isEquivalentTo(
+               otherDGRF->frameReferenceEpoch(), criterion) &&
+           metadata::Identifier::isEquivalentName(
+               *deformationModelName(), *otherDGRF->deformationModelName());
+}
+
+// ---------------------------------------------------------------------------
+
+std::string DynamicVerticalReferenceFrame::exportToWKT(
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (isWKT2 && formatter->use2018Keywords()) {
+        formatter->startNode(io::WKTConstants::DYNAMIC, false);
+        formatter->startNode(io::WKTConstants::FRAMEEPOCH, false);
+        formatter->add(frameReferenceEpoch()
+                           .convertToUnit(common::UnitOfMeasure::YEAR)
+                           .value());
+        formatter->endNode();
+        if (deformationModelName().has_value() &&
+            !deformationModelName()->empty()) {
+            formatter->startNode(io::WKTConstants::MODEL, false);
+            formatter->addQuotedString(*deformationModelName());
+            formatter->endNode();
+        }
+        formatter->endNode();
+    }
+    return VerticalReferenceFrame::exportToWKT(formatter);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a DyanmicVerticalReferenceFrame
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param anchor the anchor definition, or empty.
+ * @param realizationMethodIn the realization method, or empty.
+ * @param frameReferenceEpochIn the frame reference epoch.
+ * @param deformationModelNameIn deformation model name, or empty
+ * @return new DyanmicVerticalReferenceFrame.
+ */
+DynamicVerticalReferenceFrameNNPtr DynamicVerticalReferenceFrame::create(
+    const util::PropertyMap &properties,
+    const util::optional<std::string> &anchor,
+    const util::optional<RealizationMethod> &realizationMethodIn,
+    const common::Measure &frameReferenceEpochIn,
+    const util::optional<std::string> &deformationModelNameIn) {
+    DynamicVerticalReferenceFrameNNPtr grf(
+        DynamicVerticalReferenceFrame::nn_make_shared<
+            DynamicVerticalReferenceFrame>(realizationMethodIn,
+                                           frameReferenceEpochIn,
+                                           deformationModelNameIn));
+    util::nn_static_pointer_cast<Datum>(grf)->d->anchorDefinition = anchor;
+    grf->setProperties(properties);
+    return grf;
 }
 
 // ---------------------------------------------------------------------------

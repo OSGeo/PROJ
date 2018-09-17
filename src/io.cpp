@@ -315,6 +315,11 @@ void WKTFormatter::leave() {
 void WKTFormatter::startNode(const std::string &keyword, bool hasId) {
     if (!d->stackHasChild_.empty()) {
         d->startNewChild();
+    } else if (!d->result_.empty()) {
+        d->result_ += ",";
+        if (d->params_.multiLine_ && !keyword.empty()) {
+            d->addNewLine();
+        }
     }
 
     if (d->params_.multiLine_) {
@@ -872,57 +877,86 @@ struct WKTParser::Private {
     BaseObjectNNPtr build(WKTNodeNNPtr node);
 
     IdentifierPtr buildId(WKTNodeNNPtr node, bool tolerant = true);
+
     PropertyMap buildProperties(WKTNodeNNPtr node);
+
     ObjectDomainPtr buildObjectDomain(WKTNodeNNPtr node);
+
     UnitOfMeasure
     buildUnit(WKTNodeNNPtr node,
               UnitOfMeasure::Type type = UnitOfMeasure::Type::UNKNOWN);
+
     UnitOfMeasure buildUnitInSubNode(
         WKTNodeNNPtr node,
         common::UnitOfMeasure::Type type = UnitOfMeasure::Type::UNKNOWN);
+
     EllipsoidNNPtr buildEllipsoid(WKTNodeNNPtr node);
+
     PrimeMeridianNNPtr
     buildPrimeMeridian(WKTNodeNNPtr node,
                        const UnitOfMeasure &defaultAngularUnit);
     optional<std::string> getAnchor(WKTNodeNNPtr node);
+
+    void parseDynamic(WKTNodePtr dynamicNode, double &frameReferenceEpoch,
+                      util::optional<std::string> &modelName);
+
     GeodeticReferenceFrameNNPtr
     buildGeodeticReferenceFrame(WKTNodeNNPtr node,
-                                PrimeMeridianNNPtr primeMeridian);
+                                PrimeMeridianNNPtr primeMeridian,
+                                WKTNodePtr dynamicNode);
+
     MeridianNNPtr buildMeridian(WKTNodeNNPtr node);
     CoordinateSystemAxisNNPtr buildAxis(WKTNodeNNPtr node,
                                         const UnitOfMeasure &unitIn,
                                         bool isGeocentric,
                                         int expectedOrderNum);
+
     CoordinateSystemNNPtr buildCS(WKTNodePtr node, /* maybe null */
                                   WKTNodeNNPtr parentNode,
                                   const UnitOfMeasure &defaultAngularUnit);
+
     GeodeticCRSNNPtr buildGeodeticCRS(WKTNodeNNPtr node);
+
     CRSNNPtr buildDerivedGeodeticCRS(WKTNodeNNPtr node);
     UnitOfMeasure
     guessUnitForParameter(const std::string &paramName,
                           const UnitOfMeasure &defaultLinearUnit,
                           const UnitOfMeasure &defaultAngularUnit);
+
     void consumeParameters(WKTNodeNNPtr node, bool isAbridged,
                            std::vector<OperationParameterNNPtr> &parameters,
                            std::vector<ParameterValueNNPtr> &values,
                            const UnitOfMeasure &defaultLinearUnit,
                            const UnitOfMeasure &defaultAngularUnit);
+
     ConversionNNPtr buildConversion(WKTNodeNNPtr node,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit);
+
     ConversionNNPtr buildProjection(WKTNodeNNPtr projCRSNode,
                                     WKTNodeNNPtr projectionNode,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit);
+
     ProjectedCRSNNPtr buildProjectedCRS(WKTNodeNNPtr node);
-    VerticalReferenceFrameNNPtr buildVerticalReferenceFrame(WKTNodeNNPtr node);
+
+    VerticalReferenceFrameNNPtr
+    buildVerticalReferenceFrame(WKTNodeNNPtr node, WKTNodePtr dynamicNode);
+
     TemporalDatumNNPtr buildTemporalDatum(WKTNodeNNPtr node);
+
     CRSNNPtr buildVerticalCRS(WKTNodeNNPtr node);
+
     CompoundCRSNNPtr buildCompoundCRS(WKTNodeNNPtr node);
+
     BoundCRSNNPtr buildBoundCRS(WKTNodeNNPtr node);
+
     TemporalCRSNNPtr buildTemporalCRS(WKTNodeNNPtr node);
+
     CRSPtr buildCRS(WKTNodeNNPtr node);
+
     CoordinateOperationNNPtr buildCoordinateOperation(WKTNodeNNPtr node);
+
     ConcatenatedOperationNNPtr buildConcatenatedOperation(WKTNodeNNPtr node);
 };
 
@@ -1326,7 +1360,8 @@ optional<std::string> WKTParser::Private::getAnchor(WKTNodeNNPtr node) {
 // ---------------------------------------------------------------------------
 
 GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
-    WKTNodeNNPtr node, PrimeMeridianNNPtr primeMeridian) {
+    WKTNodeNNPtr node, PrimeMeridianNNPtr primeMeridian,
+    WKTNodePtr dynamicNode) {
     auto ellipsoidNode = node->lookForChild(WKTConstants::ELLIPSOID);
     if (!ellipsoidNode) {
         ellipsoidNode = node->lookForChild(WKTConstants::SPHEROID);
@@ -1364,6 +1399,17 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             IdentifiedObject::NAME_KEY,
             *(GeodeticReferenceFrame::EPSG_6326->name()->description()));
     }
+
+    if (dynamicNode) {
+        double frameReferenceEpoch = 0.0;
+        util::optional<std::string> modelName;
+        parseDynamic(dynamicNode, frameReferenceEpoch, modelName);
+        return DynamicGeodeticReferenceFrame::create(
+            properties, ellipsoid, getAnchor(node), primeMeridian,
+            common::Measure(frameReferenceEpoch, common::UnitOfMeasure::YEAR),
+            modelName);
+    }
+
     return GeodeticReferenceFrame::create(properties, ellipsoid,
                                           getAnchor(node), primeMeridian);
 }
@@ -1715,6 +1761,8 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
             }
         }
     }
+    auto dynamicNode = node->lookForChild(WKTConstants::DYNAMIC);
+
     auto csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode && !ci_equal(node->value(), WKTConstants::GEOGCS) &&
         !ci_equal(node->value(), WKTConstants::GEOCCS) &&
@@ -1751,8 +1799,8 @@ GeodeticCRSNNPtr WKTParser::Private::buildGeodeticCRS(WKTNodeNNPtr node) {
         angularUnit = primeMeridian->longitude().unit();
     }
 
-    auto datum =
-        buildGeodeticReferenceFrame(NN_CHECK_ASSERT(datumNode), primeMeridian);
+    auto datum = buildGeodeticReferenceFrame(NN_CHECK_ASSERT(datumNode),
+                                             primeMeridian, dynamicNode);
     auto cs = buildCS(csNode, node, angularUnit);
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
@@ -2298,8 +2346,44 @@ ProjectedCRSNNPtr WKTParser::Private::buildProjectedCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
+void WKTParser::Private::parseDynamic(WKTNodePtr dynamicNode,
+                                      double &frameReferenceEpoch,
+                                      util::optional<std::string> &modelName) {
+    auto frameEpochNode = dynamicNode->lookForChild(WKTConstants::FRAMEEPOCH);
+    if (!frameEpochNode || frameEpochNode->children().empty()) {
+        throw ParsingException("Missing FRAMEEPOCH node");
+    }
+    try {
+        frameReferenceEpoch = asDouble(frameEpochNode->children()[0]->value());
+    } catch (const std::exception &) {
+        throw ParsingException("Invalid FRAMEEPOCH node");
+    }
+    auto modelNode = dynamicNode->lookForChild(WKTConstants::MODEL);
+    if (!modelNode) {
+        modelNode = dynamicNode->lookForChild(WKTConstants::VELOCITYGRID);
+    }
+    if (modelNode && modelNode->children().size() == 1) {
+        modelName = stripQuotes(modelNode->children()[0]->value());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 VerticalReferenceFrameNNPtr
-WKTParser::Private::buildVerticalReferenceFrame(WKTNodeNNPtr node) {
+WKTParser::Private::buildVerticalReferenceFrame(WKTNodeNNPtr node,
+                                                WKTNodePtr dynamicNode) {
+
+    if (dynamicNode) {
+        double frameReferenceEpoch = 0.0;
+        util::optional<std::string> modelName;
+        parseDynamic(dynamicNode, frameReferenceEpoch, modelName);
+        return DynamicVerticalReferenceFrame::create(
+            buildProperties(node), getAnchor(node),
+            optional<RealizationMethod>(),
+            common::Measure(frameReferenceEpoch, common::UnitOfMeasure::YEAR),
+            modelName);
+    }
+
     // WKT1 VERT_DATUM has a datum type after the datum name that we ignore.
     return VerticalReferenceFrame::create(buildProperties(node),
                                           getAnchor(node));
@@ -2339,7 +2423,9 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
             }
         }
     }
-    auto datum = buildVerticalReferenceFrame(NN_CHECK_ASSERT(datumNode));
+    auto dynamicNode = node->lookForChild(WKTConstants::DYNAMIC);
+    auto datum =
+        buildVerticalReferenceFrame(NN_CHECK_ASSERT(datumNode), dynamicNode);
 
     auto csNode = node->lookForChild(WKTConstants::CS);
     if (!csNode && !ci_equal(node->value(), WKTConstants::VERT_CS)) {
@@ -2556,7 +2642,8 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
         ci_equal(name, WKTConstants::GEODETICDATUM) ||
         ci_equal(name, WKTConstants::TRF)) {
         return util::nn_static_pointer_cast<BaseObject>(
-            buildGeodeticReferenceFrame(node, PrimeMeridian::GREENWICH));
+            buildGeodeticReferenceFrame(node, PrimeMeridian::GREENWICH,
+                                        nullptr));
     }
 
     if (ci_equal(name, WKTConstants::VDATUM) ||
@@ -2564,7 +2651,7 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
         ci_equal(name, WKTConstants::VERTICALDATUM) ||
         ci_equal(name, WKTConstants::VRF)) {
         return util::nn_static_pointer_cast<BaseObject>(
-            buildVerticalReferenceFrame(node));
+            buildVerticalReferenceFrame(node, nullptr));
     }
 
     if (ci_equal(name, WKTConstants::TDATUM) ||

@@ -165,6 +165,92 @@ TEST(wkt_parse, datum_with_ANCHOR) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, dynamic_geodetic_reference_frame) {
+    auto obj = WKTParser().createFromWKT(
+        "GEOGCRS[\"WGS 84 (G1762)\","
+        "DYNAMIC[FRAMEEPOCH[2005.0]],"
+        "TRF[\"World Geodetic System 1984 (G1762)\","
+        "    ELLIPSOID[\"WGS 84\",6378137,298.257223563],"
+        "    ANCHOR[\"My anchor\"]],"
+        "CS[ellipsoidal,3],"
+        "    AXIS[\"(lat)\",north,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"(lon)\",east,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"ellipsoidal height (h)\",up,LENGTHUNIT[\"metre\",1.0]]"
+        "]");
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto dgrf =
+        nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(crs->datum());
+    ASSERT_TRUE(dgrf != nullptr);
+    auto anchor = dgrf->anchorDefinition();
+    EXPECT_TRUE(anchor.has_value());
+    EXPECT_EQ(*anchor, "My anchor");
+    EXPECT_TRUE(dgrf->frameReferenceEpoch() ==
+                Measure(2005.0, UnitOfMeasure::YEAR));
+    auto model = dgrf->deformationModelName();
+    EXPECT_TRUE(!model.has_value());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, dynamic_geodetic_reference_frame_with_model) {
+    auto obj = WKTParser().createFromWKT(
+        "GEOGCRS[\"WGS 84 (G1762)\","
+        "DYNAMIC[FRAMEEPOCH[2005.0],MODEL[\"my_model\"]],"
+        "TRF[\"World Geodetic System 1984 (G1762)\","
+        "    ELLIPSOID[\"WGS 84\",6378137,298.257223563],"
+        "    ANCHOR[\"My anchor\"]],"
+        "CS[ellipsoidal,3],"
+        "    AXIS[\"(lat)\",north,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"(lon)\",east,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"ellipsoidal height (h)\",up,LENGTHUNIT[\"metre\",1.0]]"
+        "]");
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto dgrf =
+        nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(crs->datum());
+    ASSERT_TRUE(dgrf != nullptr);
+    auto anchor = dgrf->anchorDefinition();
+    EXPECT_TRUE(anchor.has_value());
+    EXPECT_EQ(*anchor, "My anchor");
+    EXPECT_TRUE(dgrf->frameReferenceEpoch() ==
+                Measure(2005.0, UnitOfMeasure::YEAR));
+    auto model = dgrf->deformationModelName();
+    EXPECT_TRUE(model.has_value());
+    EXPECT_EQ(*model, "my_model");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, dynamic_geodetic_reference_frame_with_velocitygrid) {
+    auto obj = WKTParser().createFromWKT(
+        "GEOGCRS[\"WGS 84 (G1762)\","
+        "DYNAMIC[FRAMEEPOCH[2005.0],VELOCITYGRID[\"my_model\"]],"
+        "TRF[\"World Geodetic System 1984 (G1762)\","
+        "    ELLIPSOID[\"WGS 84\",6378137,298.257223563],"
+        "    ANCHOR[\"My anchor\"]],"
+        "CS[ellipsoidal,3],"
+        "    AXIS[\"(lat)\",north,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"(lon)\",east,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"ellipsoidal height (h)\",up,LENGTHUNIT[\"metre\",1.0]]"
+        "]");
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto dgrf =
+        nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(crs->datum());
+    ASSERT_TRUE(dgrf != nullptr);
+    auto anchor = dgrf->anchorDefinition();
+    EXPECT_TRUE(anchor.has_value());
+    EXPECT_EQ(*anchor, "My anchor");
+    EXPECT_TRUE(dgrf->frameReferenceEpoch() ==
+                Measure(2005.0, UnitOfMeasure::YEAR));
+    auto model = dgrf->deformationModelName();
+    EXPECT_TRUE(model.has_value());
+    EXPECT_EQ(*model, "my_model");
+}
+
+// ---------------------------------------------------------------------------
+
 static void checkEPSG_4326(GeographicCRSPtr crs, bool latLong = true,
                            bool checkEPSGCodes = true) {
     if (checkEPSGCodes) {
@@ -963,6 +1049,32 @@ TEST(wkt_parse, vertcrs_WKT1_GDAL_minimum) {
     EXPECT_EQ(*(cs->axisList()[0]->name()->description()),
               "Gravity-related height");
     EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::UP);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, dynamic_vertical_reference_frame) {
+    auto obj = WKTParser().createFromWKT(
+        "VERTCRS[\"RH2000\","
+        "  DYNAMIC[FRAMEEPOCH[2000.0],MODEL[\"NKG2016LU\"]],"
+        "  VDATUM[\"Rikets Hojdsystem 2000\",ANCHOR[\"my anchor\"]],"
+        "  CS[vertical,1],"
+        "    AXIS[\"gravity-related height (H)\",up],"
+        "    LENGTHUNIT[\"metre\",1.0]"
+        "]");
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto dgrf =
+        std::dynamic_pointer_cast<DynamicVerticalReferenceFrame>(crs->datum());
+    ASSERT_TRUE(dgrf != nullptr);
+    auto anchor = dgrf->anchorDefinition();
+    EXPECT_TRUE(anchor.has_value());
+    EXPECT_EQ(*anchor, "my anchor");
+    EXPECT_TRUE(dgrf->frameReferenceEpoch() ==
+                Measure(2000.0, UnitOfMeasure::YEAR));
+    auto model = dgrf->deformationModelName();
+    EXPECT_TRUE(model.has_value());
+    EXPECT_EQ(*model, "NKG2016LU");
 }
 
 // ---------------------------------------------------------------------------
@@ -2022,6 +2134,32 @@ TEST(wkt_parse, invalid_CS_of_GEOGRAPHICCRS) {
                      "GEOGRAPHICCRS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],"
                      "CS[Cartesian,3],AXIS[\"(X)\",geocentricX],AXIS[\"(Y)\","
                      "geocentricY],AXIS[\"(Z)\",geocentricZ]]"),
+                 ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_DYNAMIC) {
+    std::string prefix("GEOGCRS[\"WGS 84 (G1762)\",");
+    std::string suffix(
+        "TRF[\"World Geodetic System 1984 (G1762)\","
+        "ELLIPSOID[\"WGS 84\",6378137,298.257223563]],"
+        "CS[ellipsoidal,3],"
+        "    AXIS[\"(lat)\",north,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"(lon)\",east,ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    AXIS[\"ellipsoidal height (h)\",up,LENGTHUNIT[\"metre\",1.0]]"
+        "]");
+
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        prefix + "DYNAMIC[FRAMEEPOCH[2015]]," + suffix));
+
+    EXPECT_THROW(WKTParser().createFromWKT(prefix + "DYNAMIC[]," + suffix),
+                 ParsingException);
+    EXPECT_THROW(
+        WKTParser().createFromWKT(prefix + "DYNAMIC[FRAMEEPOCH[]]," + suffix),
+        ParsingException);
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     prefix + "DYNAMIC[FRAMEEPOCH[\"invalid\"]]," + suffix),
                  ParsingException);
 }
 
