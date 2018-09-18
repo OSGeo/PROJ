@@ -93,43 +93,42 @@ Non-Free Grids
 Not all grid shift files have licensing that allows them to be freely
 distributed, but can be obtained by users through free and legal methods.
 
-Great Britain
-................................................................................
-
-
-`Great Britain's OSTN15_NTv2: OSGB 1936 => ETRS89 <https://www.ordnancesurvey.co.uk/docs/gps/OSTN15_NTv2.zip>`__
-
-`Great Britain's OSTN02_NTv2: OSGB 1936 => ETRS89 <http://www.ordnancesurvey.co.uk/business-and-government/help-and-support/navigation-technology/os-net/ostn02-ntv2-format.html>`__
-
 Austria
 ................................................................................
 
 `Austrian Grid <http://www.bev.gv.at/portal/page?_pageid=713,2204753&_dad=portal&_schema=PORTAL>`__ for MGI
-
-Spain
-................................................................................
-
-`Spanish grids <http://www.ign.es/ign/layoutIn/herramientas.do#DATUM>`__ for ED50.
-
-Portugal
-................................................................................
-
-`Portuguese grids <http://www.fc.up.pt/pessoas/jagoncal/coordenadas/index.htm>`__ for ED50, Lisbon 1890, Lisbon 1937 and Datum 73
 
 Brazil
 ................................................................................
 
 `Brazilian grids <http://www.ibge.gov.br/home/geociencias/geodesia/param_transf/default_param_transf.shtm>`__ for datums Corrego Alegre 1961, Corrego Alegre 1970-72, SAD69 and SAD69(96)
 
-South Africa
+Great Britain
 ................................................................................
 
-`South African grid <http://eepublishers.co.za/article/datum-transformations-using-the-ntv2-grid.html>`__ (Cape to Hartebeesthoek94 or WGS84)
+`Great Britain's OSTN15_NTv2: OSGB 1936 => ETRS89 <https://www.ordnancesurvey.co.uk/docs/gps/OSTN15_NTv2.zip>`__
+
+`Great Britain's OSTN02_NTv2: OSGB 1936 => ETRS89 <http://www.ordnancesurvey.co.uk/business-and-government/help-and-support/navigation-technology/os-net/ostn02-ntv2-format.html>`__
 
 Netherlands
 ................................................................................
 
 `Dutch grid <https://www.kadaster.nl/web/Themas/Registraties/Rijksdriehoeksmeting/Transformatie-van-coordinaten.htm>`__ (Registration required before download)
+
+Portugal
+................................................................................
+
+`Portuguese grids <http://www.fc.up.pt/pessoas/jagoncal/coordenadas/index.htm>`__ for ED50, Lisbon 1890, Lisbon 1937 and Datum 73
+
+South Africa
+................................................................................
+
+`South African grid <http://eepublishers.co.za/article/datum-transformations-using-the-ntv2-grid.html>`__ (Cape to Hartebeesthoek94 or WGS84)
+
+Spain
+................................................................................
+
+`Spanish grids <http://www.ign.es/ign/layoutIn/herramientas.do#DATUM>`__ for ED50.
 
 
 
