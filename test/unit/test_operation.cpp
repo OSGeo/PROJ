@@ -3245,6 +3245,21 @@ TEST(operation, geogCRS_to_projCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_longlat_to_projCRS) {
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::create(
+            PropertyMap(), GeodeticReferenceFrame::EPSG_6326,
+            EllipsoidalCS::createLongitudeLatitude(UnitOfMeasure::DEGREE)),
+        createUTM31_WGS84());
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=utm +zone=31 +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_different_from_baseCRS_to_projCRS) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
