@@ -252,7 +252,7 @@ Skipping Missing Grids
 The special prefix ``@`` may be prefixed to a grid to make it optional.  If it
 not found, the search will continue to the next grid.  Normally any grid not
 found will cause an error.  For instance, the following would use the
-``ntv2_0.gsb`` file if available (see :ref:`nonfreegrids`), otherwise it would
+``ntv2_0.gsb`` file if available, otherwise it would
 fallback to using the ``ntv1_can.dat`` file.
 
 ::
