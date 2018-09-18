@@ -1346,6 +1346,70 @@ bool ProjectedCRS::isEquivalentTo(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void ProjectedCRS::addUnitConvertAndAxisSwap(
+    io::PROJStringFormatterNNPtr formatter, bool axisSpecFound) const {
+    auto &axisList = coordinateSystem()->axisList();
+    if (!axisList.empty() &&
+        axisList[0]->unit() != common::UnitOfMeasure::METRE) {
+        auto projUnit = axisList[0]->unit().exportToPROJString();
+        if (formatter->convention() ==
+            io::PROJStringFormatter::Convention::PROJ_5) {
+            formatter->addStep("unitconvert");
+            formatter->addParam("xy_in", "m");
+            formatter->addParam("z_in", "m");
+            if (projUnit.empty()) {
+                formatter->addParam("xy_out",
+                                    axisList[0]->unit().conversionToSI());
+                formatter->addParam("z_out",
+                                    axisList[0]->unit().conversionToSI());
+            } else {
+                formatter->addParam("xy_out", projUnit);
+                formatter->addParam("z_out", projUnit);
+            }
+        } else {
+            if (projUnit.empty()) {
+                formatter->addParam("to_meter",
+                                    axisList[0]->unit().conversionToSI());
+            } else {
+                formatter->addParam("units", projUnit);
+            }
+        }
+    }
+
+    if (formatter->convention() ==
+            io::PROJStringFormatter::Convention::PROJ_5 &&
+        !axisSpecFound) {
+        if (axisList.size() >= 2 &&
+            !(axisList[0]->direction() == cs::AxisDirection::EAST &&
+              axisList[1]->direction() == cs::AxisDirection::NORTH) &&
+            // For polar projections, that have south+south direction,
+            // we don't want to mess with axes.
+            axisList[0]->direction() != axisList[1]->direction()) {
+
+            std::string order[2];
+            for (int i = 0; i < 2; i++) {
+                if (axisList[i]->direction() == cs::AxisDirection::WEST)
+                    order[i] = "-1";
+                else if (axisList[i]->direction() == cs::AxisDirection::EAST)
+                    order[i] = "1";
+                else if (axisList[i]->direction() == cs::AxisDirection::SOUTH)
+                    order[i] = "-2";
+                else if (axisList[i]->direction() == cs::AxisDirection::NORTH)
+                    order[i] = "2";
+            }
+
+            if (!order[0].empty() && !order[1].empty()) {
+                formatter->addStep("axisswap");
+                formatter->addParam("order", order[0] + "," + order[1]);
+            }
+        }
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 struct CompoundCRS::Private {
     std::vector<CRSNNPtr> components_{};
 };

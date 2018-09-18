@@ -361,8 +361,10 @@ class PROJ_DLL IPROJStringExportable {
      * transformation from geographic coordinates expressed in radian with
      * longitude, latitude order, and with respect to the international
      * reference meridian, into geocentric coordinates.</li>
-     * <li>For a crs::ProjectedCRS, returns a string expressing the
-     * transformation from the base CRS to the crs::ProjectedCRS.</li>
+     * <li>For a
+     * crs::ProjectedCRS / crs::DerivedGeographicCRS / crs::DerivedProjectedCRS,
+     * returns a string expressing the transformation from the base CRS to the
+     * CRS</li>
      * <li>For a crs::BoundCRS, throws a FormattingException.</li>
      * <li>For operation::CoordinateTransformations, returns a PROJ
      * pipeline.</li>

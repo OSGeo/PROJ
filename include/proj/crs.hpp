@@ -457,6 +457,11 @@ class ProjectedCRS : public DerivedCRS, public io::IPROJStringExportable {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    //! @cond Doxygen_Suppress
+    void addUnitConvertAndAxisSwap(io::PROJStringFormatterNNPtr formatter,
+                                   bool axisSpecFound) const;
+    //! @endcond
+
   protected:
     ProjectedCRS(const GeodeticCRSNNPtr &baseCRSIn,
                  const operation::ConversionNNPtr &derivingConversionIn,

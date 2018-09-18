@@ -2095,9 +2095,7 @@ TEST(crs, derivedProjectedCRS_to_PROJ) {
 
     auto crs = createDerivedProjectedCRS();
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm "
-              "+zone=31 +ellps=WGS84 +step +proj=unimplemented");
+              "+proj=unimplemented");
 }
 
 // ---------------------------------------------------------------------------

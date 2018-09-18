@@ -3655,11 +3655,12 @@ std::string Conversion::exportToPROJString(
 {
     io::PROJStringFormatter::Scope scope(formatter);
 
-    if (sourceCRS() &&
+    auto l_sourceCRS = sourceCRS();
+    if (l_sourceCRS &&
         formatter->convention() ==
             io::PROJStringFormatter::Convention::PROJ_5) {
         auto geogCRS =
-            std::dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
+            std::dynamic_pointer_cast<crs::GeographicCRS>(l_sourceCRS);
         if (geogCRS) {
             formatter->setOmitProjLongLatIfPossible(true);
             formatter->startInversion();
@@ -3669,9 +3670,11 @@ std::string Conversion::exportToPROJString(
         }
 
         auto projCRS =
-            std::dynamic_pointer_cast<crs::ProjectedCRS>(sourceCRS());
+            std::dynamic_pointer_cast<crs::ProjectedCRS>(l_sourceCRS);
         if (projCRS) {
-            projCRS->exportToPROJString(formatter);
+            formatter->startInversion();
+            projCRS->addUnitConvertAndAxisSwap(formatter, false);
+            formatter->stopInversion();
         }
     }
 
@@ -3904,94 +3907,29 @@ std::string Conversion::exportToPROJString(
         }
     }
 
-    if (targetCRS()) {
-        auto projCRS =
-            std::dynamic_pointer_cast<crs::ProjectedCRS>(targetCRS());
-        if (projCRS) {
-            if (!bEllipsoidParametersDone) {
-                auto l_baseCRS = projCRS->baseCRS();
+    auto l_targetCRS = targetCRS();
+    if (l_targetCRS) {
+        if (!bEllipsoidParametersDone) {
+            auto targetGeogCRS = l_targetCRS->extractGeographicCRS();
+            if (targetGeogCRS) {
                 if (formatter->convention() ==
                     io::PROJStringFormatter::Convention::PROJ_4) {
-                    l_baseCRS->addDatumInfoToPROJString(formatter);
+                    targetGeogCRS->addDatumInfoToPROJString(formatter);
                 } else {
-                    l_baseCRS->ellipsoid()->exportToPROJString(formatter);
-                }
-            }
-
-            auto &axisList = projCRS->coordinateSystem()->axisList();
-            if (!axisList.empty() &&
-                axisList[0]->unit() != common::UnitOfMeasure::METRE) {
-                auto projUnit = axisList[0]->unit().exportToPROJString();
-                if (formatter->convention() ==
-                    io::PROJStringFormatter::Convention::PROJ_5) {
-                    formatter->addStep("unitconvert");
-                    formatter->addParam("xy_in", "m");
-                    formatter->addParam("z_in", "m");
-                    if (projUnit.empty()) {
-                        formatter->addParam(
-                            "xy_out", axisList[0]->unit().conversionToSI());
-                        formatter->addParam(
-                            "z_out", axisList[0]->unit().conversionToSI());
-                    } else {
-                        formatter->addParam("xy_out", projUnit);
-                        formatter->addParam("z_out", projUnit);
-                    }
-                } else {
-                    if (projUnit.empty()) {
-                        formatter->addParam(
-                            "to_meter", axisList[0]->unit().conversionToSI());
-                    } else {
-                        formatter->addParam("units", projUnit);
-                    }
-                }
-            }
-
-            if (formatter->convention() ==
-                    io::PROJStringFormatter::Convention::PROJ_5 &&
-                !bAxisSpecFound) {
-                if (axisList.size() >= 2 &&
-                    !(axisList[0]->direction() == cs::AxisDirection::EAST &&
-                      axisList[1]->direction() == cs::AxisDirection::NORTH) &&
-                    // For polar projections, that have south+south direction,
-                    // we don't want to mess with axes.
-                    axisList[0]->direction() != axisList[1]->direction()) {
-
-                    std::string order[2];
-                    for (int i = 0; i < 2; i++) {
-                        if (axisList[i]->direction() == cs::AxisDirection::WEST)
-                            order[i] = "-1";
-                        else if (axisList[i]->direction() ==
-                                 cs::AxisDirection::EAST)
-                            order[i] = "1";
-                        else if (axisList[i]->direction() ==
-                                 cs::AxisDirection::SOUTH)
-                            order[i] = "-2";
-                        else if (axisList[i]->direction() ==
-                                 cs::AxisDirection::NORTH)
-                            order[i] = "2";
-                    }
-
-                    if (!order[0].empty() && !order[1].empty()) {
-                        formatter->addStep("axisswap");
-                        formatter->addParam("order", order[0] + "," + order[1]);
-                    }
+                    targetGeogCRS->ellipsoid()->exportToPROJString(formatter);
                 }
             }
         }
 
-        auto derivedGeographicCRS =
-            std::dynamic_pointer_cast<crs::DerivedGeographicCRS>(targetCRS());
-        if (derivedGeographicCRS) {
-            if (!bEllipsoidParametersDone) {
-                auto l_baseCRS = derivedGeographicCRS->baseCRS();
-                if (formatter->convention() ==
-                    io::PROJStringFormatter::Convention::PROJ_4) {
-                    l_baseCRS->addDatumInfoToPROJString(formatter);
-                } else {
-                    l_baseCRS->ellipsoid()->exportToPROJString(formatter);
-                }
-            }
+        auto projCRS =
+            std::dynamic_pointer_cast<crs::ProjectedCRS>(l_targetCRS);
+        if (projCRS) {
+            projCRS->addUnitConvertAndAxisSwap(formatter, bAxisSpecFound);
+        }
 
+        auto derivedGeographicCRS =
+            std::dynamic_pointer_cast<crs::DerivedGeographicCRS>(l_targetCRS);
+        if (derivedGeographicCRS) {
             if (formatter->convention() ==
                 io::PROJStringFormatter::Convention::PROJ_5) {
                 auto geogCRS = derivedGeographicCRS->baseCRS();
