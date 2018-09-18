@@ -659,6 +659,29 @@ EllipsoidalCSNNPtr EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a EllipsoidalCS with a Longitude (first) and Latitude
+ * (second) axis.
+ *
+ * @param unit Angular unit of the axes.
+ * @return a new EllipsoidalCS.
+ */
+EllipsoidalCSNNPtr
+EllipsoidalCS::createLongitudeLatitude(const common::UnitOfMeasure &unit) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{
+        CoordinateSystemAxis::create(
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Longitude),
+            AxisAbbreviation::lon, AxisDirection::EAST, unit),
+        CoordinateSystemAxis::create(
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Latitude),
+            AxisAbbreviation::lat, AxisDirection::NORTH, unit)};
+    auto cs(EllipsoidalCS::nn_make_shared<EllipsoidalCS>(axis));
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
 VerticalCS::VerticalCS() = default;
 
 // ---------------------------------------------------------------------------

@@ -1673,16 +1673,8 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
                 if (unit == UnitOfMeasure::NONE) {
                     throw ParsingException("buildCS: missing UNIT");
                 }
-                return EllipsoidalCS::create(
-                    PropertyMap(),
-                    CoordinateSystemAxis::create(
-                        PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                          AxisName::Longitude),
-                        AxisAbbreviation::lon, AxisDirection::EAST, unit),
-                    CoordinateSystemAxis::create(
-                        PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                          AxisName::Latitude),
-                        AxisAbbreviation::lat, AxisDirection::NORTH, unit));
+                // WKT1 --> long/lat
+                return EllipsoidalCS::createLongitudeLatitude(unit);
             }
         } else if (ci_equal(parentNode->value(), WKTConstants::BASEGEODCRS) ||
                    ci_equal(parentNode->value(), WKTConstants::BASEGEOGCRS)) {
@@ -1693,6 +1685,7 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
                 if (unit == UnitOfMeasure::NONE) {
                     unit = defaultAngularUnit;
                 }
+                // WKT2 --> presumably lat/long
                 return EllipsoidalCS::createLatitudeLongitude(unit);
             }
         } else if (ci_equal(parentNode->value(), WKTConstants::PROJCS) ||

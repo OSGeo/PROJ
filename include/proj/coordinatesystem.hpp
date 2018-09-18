@@ -342,6 +342,8 @@ class EllipsoidalCS : public CoordinateSystem {
     PROJ_DLL static EllipsoidalCSNNPtr createLatitudeLongitudeEllipsoidalHeight(
         const common::UnitOfMeasure &angularUnit,
         const common::UnitOfMeasure &linearUnit);
+    PROJ_DLL static EllipsoidalCSNNPtr
+    createLongitudeLatitude(const common::UnitOfMeasure &unit);
 
   protected:
     EllipsoidalCS();
