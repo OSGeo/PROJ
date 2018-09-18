@@ -10,7 +10,9 @@
 #               transformations will be wrong and vice-versa
 # 2009-10-04 :  addition of NTFG to RGF93G test to check if
 #               the gsb grid is still ok
-DATA_DIR=`dirname $0`
+
+TEST_OLD_DIR=`dirname $0`
+DATA_DIR=`dirname $0`/../../data
 EXE=$1
 
 usage()
@@ -21,7 +23,7 @@ usage()
 }
 
 if test -z "${EXE}"; then
-    EXE=../src/cs2cs
+    EXE=../../src/cs2cs
 fi
 
 if test ! -x ${EXE}; then
@@ -29,11 +31,22 @@ if test ! -x ${EXE}; then
     exit 1
 fi
 
+if test -z "${PROJ_LIB}"; then
+    export PROJ_LIB=${DATA_DIR}
+fi
+
 echo "============================================"
 echo "Running ${0} using ${EXE}:"
 echo "============================================"
 
 OUT=proj_outIGNF
+
+REMOVE_IGNF=NO
+if test ! -f IGNF; then
+    cp ${PROJ_LIB}/IGNF .
+    REMOVE_IGNF=YES
+fi
+
 INIT_FILE=./IGNF
 RES="-f %.3f"
 #
@@ -148,10 +161,15 @@ echo "+init=${INIT_FILE}:RGR92 +to +init=${INIT_FILE}:REUN47" >>${OUT}
 $EXE +init=${INIT_FILE}:RGR92 +to +init=${INIT_FILE}:REUN47 -E $RES >>${OUT} <<EOF
 3356123.5400 1303218.3090 5247430.6050
 EOF
+
+if test "${REMOVE_IGNF}" = "YES"; then
+    rm ./IGNF
+fi
+
 #
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
-diff -b ${OUT} ${DATA_DIR}/${OUT}.dist
+diff -b ${OUT} ${TEST_OLD_DIR}/${OUT}.dist
 if [ $? -ne 0 ] ; then
 echo  ""
 echo "PROBLEMS HAVE OCCURRED"

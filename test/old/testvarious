@@ -3,7 +3,8 @@
 # on datum files.
 #
 #
-DATA_DIR=`dirname $0`
+TEST_OLD_DIR=`dirname $0`
+DATA_DIR=`dirname $0`/../../data
 EXE=$1
 
 usage()
@@ -14,12 +15,16 @@ usage()
 }
 
 if test -z "${EXE}"; then
-    EXE=../src/cs2cs
+    EXE=../../src/cs2cs
 fi
 
 if test ! -x ${EXE}; then
     echo "*** ERROR: Can not find '${EXE}' program!"
     exit 1
+fi
+
+if test -z "${PROJ_LIB}"; then
+    export PROJ_LIB=$DATA_DIR
 fi
 
 # Would be great to have a universale way of selecting a locale with
@@ -37,7 +42,7 @@ echo "Running ${0} using ${EXE}:"
 echo "============================================"
 
 OUT=tv_out
-#EXE=../src/cs2cs
+
 #
 echo "doing tests into file ${OUT}, please wait"
 rm -f ${OUT}
@@ -938,7 +943,7 @@ EOF
 # Done!
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
-diff -b ${OUT} ${DATA_DIR}/${OUT}.dist
+diff -b ${OUT} ${TEST_OLD_DIR}/${OUT}.dist
 if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURRED"

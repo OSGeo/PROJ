@@ -6,7 +6,8 @@
 # Proj will vary in the .001ft range with projections using Transverse
 #   Mercator due to greater precision of meridional distance function.
 #
-DATA_DIR=`dirname $0`
+TEST_OLD_DIR=`dirname $0`
+DATA_DIR=`dirname $0`/../../data
 EXE=$1
 
 usage()
@@ -17,7 +18,7 @@ usage()
 }
 
 if test -z "${EXE}"; then
-    EXE=../src/cs2cs
+    EXE=../../src/cs2cs
 fi
 
 if test ! -x ${EXE}; then
@@ -832,7 +833,7 @@ EOF
 #
 # do 'diff' with distribution results
 echo "diff ${OUT} with pj_out27.dist"
-diff -b ${OUT} ${DATA_DIR}/pj_out27.dist
+diff -b ${OUT} ${TEST_OLD_DIR}/pj_out27.dist
 if [ $? -ne 0 ] ; then
 	echo  ""
 	echo "PROBLEMS HAVE OCCURRED"
