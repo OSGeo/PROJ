@@ -922,6 +922,7 @@ struct WKTParser::Private {
     GeodeticCRSNNPtr buildGeodeticCRS(WKTNodeNNPtr node);
 
     CRSNNPtr buildDerivedGeodeticCRS(WKTNodeNNPtr node);
+
     UnitOfMeasure
     guessUnitForParameter(const std::string &paramName,
                           const UnitOfMeasure &defaultLinearUnit,
@@ -954,6 +955,8 @@ struct WKTParser::Private {
     ParametricDatumNNPtr buildParametricDatum(WKTNodeNNPtr node);
 
     CRSNNPtr buildVerticalCRS(WKTNodeNNPtr node);
+
+    DerivedVerticalCRSNNPtr buildDerivedVerticalCRS(WKTNodeNNPtr node);
 
     CompoundCRSNNPtr buildCompoundCRS(WKTNodeNNPtr node);
 
@@ -1707,13 +1710,18 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
                 }
                 return CartesianCS::createEastingNorthing(unit);
             }
-        } else if (ci_equal(parentNode->value(), WKTConstants::VERT_CS)) {
+        } else if (ci_equal(parentNode->value(), WKTConstants::VERT_CS) ||
+                   ci_equal(parentNode->value(), WKTConstants::BASEVERTCRS)) {
             csType = "vertical";
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
                 if (unit == UnitOfMeasure::NONE) {
-                    throw ParsingException("buildCS: missing UNIT");
+                    if (ci_equal(parentNode->value(), WKTConstants::VERT_CS)) {
+                        throw ParsingException("buildCS: missing UNIT");
+                    } else {
+                        unit = UnitOfMeasure::METRE;
+                    }
                 }
                 return VerticalCS::createGravityRelatedHeight(unit);
             }
@@ -2578,7 +2586,8 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
             : nullptr;
 
     auto csNode = node->lookForChild(WKTConstants::CS);
-    if (!csNode && !ci_equal(node->value(), WKTConstants::VERT_CS)) {
+    if (!csNode && !ci_equal(node->value(), WKTConstants::VERT_CS) &&
+        !ci_equal(node->value(), WKTConstants::BASEVERTCRS)) {
         throw ParsingException("Missing CS node");
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
@@ -2614,6 +2623,44 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
     }
 
     return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+DerivedVerticalCRSNNPtr
+WKTParser::Private::buildDerivedVerticalCRS(WKTNodeNNPtr node) {
+
+    auto baseVertCRSNode = node->lookForChild(WKTConstants::BASEVERTCRS);
+    assert(baseVertCRSNode !=
+           nullptr); // given the constraints enforced on calling code path
+
+    auto baseVertCRS_tmp = buildVerticalCRS(NN_CHECK_ASSERT(baseVertCRSNode));
+    auto baseVertCRS = NN_CHECK_ASSERT(baseVertCRS_tmp->extractVerticalCRS());
+
+    auto derivingConversionNode =
+        node->lookForChild(WKTConstants::DERIVINGCONVERSION);
+    if (!derivingConversionNode) {
+        throw ParsingException("Missing DERIVINGCONVERSION node");
+    }
+    auto derivingConversion =
+        buildConversion(NN_CHECK_ASSERT(derivingConversionNode),
+                        UnitOfMeasure::NONE, UnitOfMeasure::NONE);
+
+    auto csNode = node->lookForChild(WKTConstants::CS);
+    if (!csNode) {
+        throw ParsingException("Missing CS node");
+    }
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
+
+    auto verticalCS = nn_dynamic_pointer_cast<VerticalCS>(cs);
+    if (!verticalCS) {
+        throw ParsingException("vertical CS expected, but found " +
+                               cs->getWKT2Type(WKTFormatter::create()));
+    }
+
+    return DerivedVerticalCRS::create(buildProperties(node), baseVertCRS,
+                                      derivingConversion,
+                                      NN_CHECK_ASSERT(verticalCS));
 }
 
 // ---------------------------------------------------------------------------
@@ -2829,7 +2876,12 @@ CRSPtr WKTParser::Private::buildCRS(WKTNodeNNPtr node) {
     if (ci_equal(name, WKTConstants::VERT_CS) ||
         ci_equal(name, WKTConstants::VERTCRS) ||
         ci_equal(name, WKTConstants::VERTICALCRS)) {
-        return util::nn_static_pointer_cast<CRS>(buildVerticalCRS(node));
+        if (node->lookForChild(WKTConstants::BASEVERTCRS)) {
+            return util::nn_static_pointer_cast<CRS>(
+                buildDerivedVerticalCRS(node));
+        } else {
+            return util::nn_static_pointer_cast<CRS>(buildVerticalCRS(node));
+        }
     }
 
     if (ci_equal(name, WKTConstants::COMPD_CS) ||

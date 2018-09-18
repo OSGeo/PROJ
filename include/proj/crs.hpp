@@ -316,7 +316,7 @@ class GeographicCRS : public GeodeticCRS {
  *
  * \remark Implements VerticalCRS from \ref ISO_19111_2018
  */
-class VerticalCRS : public SingleCRS, public io::IPROJStringExportable {
+class VerticalCRS : virtual public SingleCRS, public io::IPROJStringExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~VerticalCRS() override;
@@ -797,7 +797,7 @@ using TemporalCRSNNPtr = util::nn<TemporalCRSPtr>;
  *
  * \remark Implements TemporalCRS from \ref ISO_19111_2018
  */
-class TemporalCRS : public SingleCRS {
+class TemporalCRS : virtual public SingleCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~TemporalCRS() override;
@@ -849,7 +849,7 @@ using EngineeringCRSNNPtr = util::nn<EngineeringCRSPtr>;
  *
  * \remark Implements EngineeringCRS from \ref ISO_19111_2018
  */
-class EngineeringCRS : public SingleCRS {
+class EngineeringCRS : virtual public SingleCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~EngineeringCRS() override;
@@ -899,7 +899,7 @@ using ParametricCRSNNPtr = util::nn<ParametricCRSPtr>;
  *
  * \remark Implements ParametricCRS from \ref ISO_19111_2018
  */
-class ParametricCRS : public SingleCRS {
+class ParametricCRS : virtual public SingleCRS {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~ParametricCRS() override;
@@ -936,13 +936,60 @@ class ParametricCRS : public SingleCRS {
 
 // ---------------------------------------------------------------------------
 
-#ifdef notdef
+class DerivedVerticalCRS;
+/** Shared pointer of DerivedVerticalCRS */
+using DerivedVerticalCRSPtr = std::shared_ptr<DerivedVerticalCRS>;
+/** Non-null shared pointer of DerivedVerticalCRS */
+using DerivedVerticalCRSNNPtr = util::nn<DerivedVerticalCRSPtr>;
+
+/** \brief A derived coordinate reference system which has a vertical
+ * coordinate reference system as its base CRS, thereby inheriting a vertical
+ * reference frame, and a vertical coordinate system.
+ *
+ * \remark Implements DerivedVerticalCRS from \ref ISO_19111_2018
+ */
+class DerivedVerticalCRS : public VerticalCRS, public DerivedCRS {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~DerivedVerticalCRS() override;
+    //! @endcond
+
+    PROJ_DLL const VerticalCRSNNPtr baseCRS() const;
+
+    PROJ_DLL static DerivedVerticalCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const VerticalCRSNNPtr &baseCRSIn,
+           const operation::ConversionNNPtr &derivingConversionIn,
+           const cs::VerticalCSNNPtr &csIn);
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+  protected:
+    DerivedVerticalCRS(const VerticalCRSNNPtr &baseCRSIn,
+                       const operation::ConversionNNPtr &derivingConversionIn,
+                       const cs::VerticalCSNNPtr &csIn);
+
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    DerivedVerticalCRS(const DerivedVerticalCRS &other) = delete;
+    DerivedVerticalCRS &operator=(const DerivedVerticalCRS &other) = delete;
+};
 
 // ---------------------------------------------------------------------------
 
-class DerivedVerticalCRS : public VerticalCRS, public DerivedCRS {
-    // TODO
-};
+#ifdef notdef
 
 // ---------------------------------------------------------------------------
 

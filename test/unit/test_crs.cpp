@@ -2355,3 +2355,47 @@ TEST(crs, parametricCRS_WKT1) {
                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
                  FormattingException);
 }
+
+// ---------------------------------------------------------------------------
+
+static DerivedVerticalCRSNNPtr createDerivedVerticalCRS() {
+
+    auto derivingConversion = Conversion::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
+        std::vector<OperationParameterNNPtr>{},
+        std::vector<ParameterValueNNPtr>{});
+
+    return DerivedVerticalCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Derived vertCRS"),
+        createVerticalCRS(), derivingConversion,
+        VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, DerivedVerticalCRS_WKT2) {
+
+    auto expected = "VERTCRS[\"Derived vertCRS\",\n"
+                    "    BASEVERTCRS[\"ODN height\",\n"
+                    "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
+                    "    DERIVINGCONVERSION[\"unnamed\",\n"
+                    "        METHOD[\"PROJ unimplemented\"]],\n"
+                    "    CS[vertical,1],\n"
+                    "        AXIS[\"gravity-related height (H)\",up,\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]]]";
+
+    EXPECT_EQ(createDerivedVerticalCRS()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, DerivedVerticalCRS_WKT1) {
+
+    EXPECT_THROW(createDerivedVerticalCRS()->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}

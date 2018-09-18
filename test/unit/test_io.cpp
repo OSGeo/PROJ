@@ -2185,6 +2185,24 @@ TEST(wkt_parse, PARAMETRICCRS_PARAMETRICDATUM) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, DerivedVerticalCRS) {
+    auto wkt = "VERTCRS[\"Derived vertCRS\",\n"
+               "    BASEVERTCRS[\"ODN height\",\n"
+               "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
+               "    DERIVINGCONVERSION[\"unnamed\",\n"
+               "        METHOD[\"PROJ unimplemented\"]],\n"
+               "    CS[vertical,1],\n"
+               "        AXIS[\"gravity-related height (H)\",up,\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedVerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, ensemble) {
     auto wkt = "ENSEMBLE[\"test\",\n"
                "    MEMBER[\"World Geodetic System 1984\",\n"
@@ -3290,6 +3308,45 @@ TEST(wkt_parse, invalid_DERIVEDPROJCRS) {
             "    DERIVINGCONVERSION[\"unnamed\",\n"
             "        METHOD[\"PROJ unimplemented\"]]]"),
         ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_DerivedVerticalCRS) {
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        "VERTCRS[\"Derived vertCRS\",\n"
+        "    BASEVERTCRS[\"ODN height\",\n"
+        "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
+        "    DERIVINGCONVERSION[\"unnamed\",\n"
+        "        METHOD[\"PROJ unimplemented\"]],\n"
+        "    CS[vertical,1],\n"
+        "        AXIS[\"gravity-related height (H)\",up]]"));
+
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "VERTCRS[\"Derived vertCRS\",\n"
+                     "    BASEVERTCRS[\"ODN height\",\n"
+                     "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
+                     "    CS[vertical,1],\n"
+                     "        AXIS[\"gravity-related height (H)\",up]]"),
+                 ParsingException);
+
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "VERTCRS[\"Derived vertCRS\",\n"
+                     "    BASEVERTCRS[\"ODN height\",\n"
+                     "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
+                     "    DERIVINGCONVERSION[\"unnamed\",\n"
+                     "        METHOD[\"PROJ unimplemented\"]]]"),
+                 ParsingException);
+
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "VERTCRS[\"Derived vertCRS\",\n"
+                     "    BASEVERTCRS[\"ODN height\",\n"
+                     "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
+                     "    DERIVINGCONVERSION[\"unnamed\",\n"
+                     "        METHOD[\"PROJ unimplemented\"]],\n"
+                     "    CS[parametric,1],\n"
+                     "        AXIS[\"gravity-related height (H)\",up]]"),
+                 ParsingException);
 }
 
 // ---------------------------------------------------------------------------

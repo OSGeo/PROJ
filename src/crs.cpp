@@ -2415,5 +2415,115 @@ bool ParametricCRS::isEquivalentTo(
            SingleCRS::_isEquivalentTo(other, criterion);
 }
 
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct DerivedVerticalCRS::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+DerivedVerticalCRS::~DerivedVerticalCRS() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+DerivedVerticalCRS::DerivedVerticalCRS(
+    const VerticalCRSNNPtr &baseCRSIn,
+    const operation::ConversionNNPtr &derivingConversionIn,
+    const cs::VerticalCSNNPtr &csIn)
+    : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
+      VerticalCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
+      d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the base CRS (a VerticalCRS) of a DerivedVerticalCRS.
+ *
+ * @return the base CRS.
+ */
+const VerticalCRSNNPtr DerivedVerticalCRS::baseCRS() const {
+    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<VerticalCRS>(
+        DerivedCRS::getPrivate()->baseCRS_));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a DerivedVerticalCRS from a base CRS, a deriving
+ * conversion and a cs::VerticalCS.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param baseCRSIn base CRS.
+ * @param derivingConversionIn the deriving conversion from the base CRS to this
+ * CRS.
+ * @param csIn the coordinate system.
+ * @return new DerivedVerticalCRS.
+ */
+DerivedVerticalCRSNNPtr DerivedVerticalCRS::create(
+    const util::PropertyMap &properties, const VerticalCRSNNPtr &baseCRSIn,
+    const operation::ConversionNNPtr &derivingConversionIn,
+    const cs::VerticalCSNNPtr &csIn) {
+    auto crs(DerivedVerticalCRS::nn_make_shared<DerivedVerticalCRS>(
+        baseCRSIn, derivingConversionIn, csIn));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->setProperties(properties);
+    crs->setDerivingConversionCRS();
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string
+DerivedVerticalCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        throw io::FormattingException(
+            "DerivedVerticalCRS can only be exported to WKT2");
+    }
+    formatter->startNode(io::WKTConstants::VERTCRS, !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+
+    auto l_baseCRS = baseCRS();
+    formatter->startNode(io::WKTConstants::BASEVERTCRS,
+                         !l_baseCRS->identifiers().empty());
+    formatter->addQuotedString(*(l_baseCRS->name()->description()));
+    l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
+    formatter->endNode();
+
+    formatter->setUseDerivingConversion(true);
+    derivingConversion()->exportToWKT(formatter);
+    formatter->setUseDerivingConversion(false);
+
+    coordinateSystem()->exportToWKT(formatter);
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+std::string
+DerivedVerticalCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+    const // throw(io::FormattingException)
+{
+    derivingConversion()->exportToPROJString(formatter);
+
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool DerivedVerticalCRS::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherDerivedGeogCRS =
+        util::nn_dynamic_pointer_cast<DerivedVerticalCRS>(other);
+    return otherDerivedGeogCRS != nullptr &&
+           DerivedCRS::isEquivalentTo(other, criterion);
+}
+
 } // namespace crs
 NS_PROJ_END
