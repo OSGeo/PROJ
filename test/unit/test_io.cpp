@@ -2031,6 +2031,86 @@ TEST(wkt_parse, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, EDATUM) {
+    auto wkt = "EDATUM[\"Engineering datum\",\n"
+               "    ANCHOR[\"my anchor\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto edatum = nn_dynamic_pointer_cast<EngineeringDatum>(obj);
+    ASSERT_TRUE(edatum != nullptr);
+
+    EXPECT_EQ(*(edatum->name()->description()), "Engineering datum");
+    auto anchor = edatum->anchorDefinition();
+    EXPECT_TRUE(anchor.has_value());
+    EXPECT_EQ(*anchor, "my anchor");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, ENGINEERINGDATUM) {
+    auto wkt = "ENGINEERINGDATUM[\"Engineering datum\"]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto edatum = nn_dynamic_pointer_cast<EngineeringDatum>(obj);
+    ASSERT_TRUE(edatum != nullptr);
+
+    EXPECT_EQ(*(edatum->name()->description()), "Engineering datum");
+    auto anchor = edatum->anchorDefinition();
+    EXPECT_TRUE(!anchor.has_value());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, ENGCRS) {
+    auto wkt = "ENGCRS[\"Engineering CRS\",\n"
+               "    EDATUM[\"Engineering datum\"],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"(E)\",east,\n"
+               "            ORDER[1],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]],\n"
+               "        AXIS[\"(N)\",north,\n"
+               "            ORDER[2],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "Engineering CRS");
+    EXPECT_EQ(*(crs->datum()->name()->description()), "Engineering datum");
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 2);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, ENGINEERINGCRS) {
+    auto wkt = "ENGINEERINGCRS[\"Engineering CRS\",\n"
+               "    ENGINEERINGDATUM[\"Engineering datum\"],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"(E)\",east,\n"
+               "            ORDER[1],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]],\n"
+               "        AXIS[\"(N)\",north,\n"
+               "            ORDER[2],\n"
+               "            LENGTHUNIT[\"metre\",1,\n"
+               "                ID[\"EPSG\",9001]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<EngineeringCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "Engineering CRS");
+    EXPECT_EQ(*(crs->datum()->name()->description()), "Engineering datum");
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 2);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, ensemble) {
     auto wkt = "ENSEMBLE[\"test\",\n"
                "    MEMBER[\"World Geodetic System 1984\",\n"
@@ -3015,6 +3095,30 @@ TEST(wkt_parse, invalid_TemporalCRS) {
                                   "    CS[TemporalMeasure,2],\n"
                                   "        AXIS[\"time (T)\",future],\n"
                                   "        AXIS[\"time2 (T)\",future]]"),
+        ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_EngineeingCRS) {
+
+    EXPECT_NO_THROW(
+        WKTParser().createFromWKT("ENGCRS[\"name\",\n"
+                                  "    EDATUM[\"name\"],\n"
+                                  "    CS[temporal,1],\n"
+                                  "        AXIS[\"time (T)\",future]]"));
+
+    // Missing EDATUM
+    EXPECT_THROW(
+        WKTParser().createFromWKT("ENGCRS[\"name\",\n"
+                                  "    CS[temporal,1],\n"
+                                  "        AXIS[\"time (T)\",future]]"),
+        ParsingException);
+
+    // Missing CS
+    EXPECT_THROW(
+        WKTParser().createFromWKT("ENGCRS[\"name\",\n"
+                                  "    EDATUM[\"name\"]]"),
         ParsingException);
 }
 

@@ -2271,3 +2271,45 @@ TEST(crs, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
                   WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
               expected);
 }
+
+// ---------------------------------------------------------------------------
+
+static EngineeringCRSNNPtr createEngineeringCRS() {
+
+    auto datum = EngineeringDatum::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Engineering datum"));
+
+    return EngineeringCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Engineering CRS"), datum,
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, engineeringCRS_WKT2) {
+
+    auto expected = "ENGCRS[\"Engineering CRS\",\n"
+                    "    EDATUM[\"Engineering datum\"],\n"
+                    "    CS[Cartesian,2],\n"
+                    "        AXIS[\"(E)\",east,\n"
+                    "            ORDER[1],\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]],\n"
+                    "        AXIS[\"(N)\",north,\n"
+                    "            ORDER[2],\n"
+                    "            LENGTHUNIT[\"metre\",1,\n"
+                    "                ID[\"EPSG\",9001]]]]";
+
+    EXPECT_EQ(createEngineeringCRS()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, engineeringCRS_WKT1) {
+
+    EXPECT_THROW(createEngineeringCRS()->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}

@@ -834,13 +834,57 @@ class TemporalCRS : public SingleCRS {
 
 // ---------------------------------------------------------------------------
 
-#ifdef notdef
+class EngineeringCRS;
+/** Shared pointer of EngineeringCRS */
+using EngineeringCRSPtr = std::shared_ptr<EngineeringCRS>;
+/** Non-null shared pointer of EngineeringCRS */
+using EngineeringCRSNNPtr = util::nn<EngineeringCRSPtr>;
+
+/** \brief Contextually local coordinate reference system associated with an
+ * engineering datum.
+ *
+ * It is applied either to activities on or near the surface of the Earth
+ * without geodetic corrections, or on moving platforms such as road vehicles,
+ * vessels, aircraft or spacecraft, or as the internal CRS of an image;
+ *
+ * \remark Implements EngineeringCRS from \ref ISO_19111_2018
+ */
+class EngineeringCRS : public SingleCRS {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~EngineeringCRS() override;
+    //! @endcond
+
+    PROJ_DLL const datum::EngineeringDatumNNPtr datum() const;
+
+    PROJ_DLL static EngineeringCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const datum::EngineeringDatumNNPtr &datumIn,
+           const cs::CoordinateSystemNNPtr &csIn);
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+  protected:
+    EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
+                   const cs::CoordinateSystemNNPtr &csIn);
+
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    EngineeringCRS(const EngineeringCRS &other) = delete;
+    EngineeringCRS &operator=(const EngineeringCRS &other) = delete;
+};
 
 // ---------------------------------------------------------------------------
 
-class EngineeringCRS : public SingleCRS {
-    // TODO
-};
+#ifdef notdef
 
 // ---------------------------------------------------------------------------
 

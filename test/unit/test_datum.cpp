@@ -418,3 +418,18 @@ TEST(datum, datum_ensemble_exceptions) {
                      PositionalAccuracy::create("100")),
                  Exception);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, edatum) {
+    auto datum = EngineeringDatum::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Engineering datum"),
+        optional<std::string>("my anchor"));
+
+    auto expected = "EDATUM[\"Engineering datum\",\n"
+                    "    ANCHOR[\"my anchor\"]]";
+
+    EXPECT_EQ(datum->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+              expected);
+}

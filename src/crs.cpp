@@ -2247,5 +2247,83 @@ bool TemporalCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
            SingleCRS::_isEquivalentTo(other, criterion);
 }
 
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct EngineeringCRS::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+EngineeringCRS::~EngineeringCRS() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+EngineeringCRS::EngineeringCRS(const datum::EngineeringDatumNNPtr &datumIn,
+                               const cs::CoordinateSystemNNPtr &csIn)
+    : SingleCRS(datumIn.as_nullable(), nullptr, csIn),
+      d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the datum::EngineeringDatum associated with the CRS.
+ *
+ * @return a EngineeringDatum
+ */
+const datum::EngineeringDatumNNPtr EngineeringCRS::datum() const {
+    return NN_CHECK_ASSERT(std::dynamic_pointer_cast<datum::EngineeringDatum>(
+        SingleCRS::getPrivate()->datum));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a EngineeringCRS from a datum and a coordinate system.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datumIn the datum.
+ * @param csIn the coordinate system.
+ * @return new EngineeringCRS.
+ */
+EngineeringCRSNNPtr
+EngineeringCRS::create(const util::PropertyMap &properties,
+                       const datum::EngineeringDatumNNPtr &datumIn,
+                       const cs::CoordinateSystemNNPtr &csIn) {
+    auto crs(EngineeringCRS::nn_make_shared<EngineeringCRS>(datumIn, csIn));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->setProperties(properties);
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string EngineeringCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        throw io::FormattingException(
+            "EngineeringCRS can only be exported to WKT2");
+    }
+    formatter->startNode(io::WKTConstants::ENGCRS, !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+    datum()->exportToWKT(formatter);
+    coordinateSystem()->exportToWKT(formatter);
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool EngineeringCRS::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherEngineeringCRS =
+        util::nn_dynamic_pointer_cast<EngineeringCRS>(other);
+    return otherEngineeringCRS != nullptr &&
+           SingleCRS::_isEquivalentTo(other, criterion);
+}
+
 } // namespace crs
 NS_PROJ_END

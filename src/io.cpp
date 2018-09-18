@@ -949,6 +949,8 @@ struct WKTParser::Private {
 
     TemporalDatumNNPtr buildTemporalDatum(WKTNodeNNPtr node);
 
+    EngineeringDatumNNPtr buildEngineeringDatum(WKTNodeNNPtr node);
+
     CRSNNPtr buildVerticalCRS(WKTNodeNNPtr node);
 
     CompoundCRSNNPtr buildCompoundCRS(WKTNodeNNPtr node);
@@ -956,6 +958,8 @@ struct WKTParser::Private {
     BoundCRSNNPtr buildBoundCRS(WKTNodeNNPtr node);
 
     TemporalCRSNNPtr buildTemporalCRS(WKTNodeNNPtr node);
+
+    EngineeringCRSNNPtr buildEngineeringCRS(WKTNodeNNPtr node);
 
     DerivedProjectedCRSNNPtr buildDerivedProjectedCRS(WKTNodeNNPtr node);
 
@@ -2507,6 +2511,13 @@ TemporalDatumNNPtr WKTParser::Private::buildTemporalDatum(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
+EngineeringDatumNNPtr
+WKTParser::Private::buildEngineeringDatum(WKTNodeNNPtr node) {
+    return EngineeringDatum::create(buildProperties(node), getAnchor(node));
+}
+
+// ---------------------------------------------------------------------------
+
 CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
     auto datumNode = node->lookForChild(WKTConstants::VDATUM);
     if (!datumNode) {
@@ -2679,6 +2690,26 @@ TemporalCRSNNPtr WKTParser::Private::buildTemporalCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
+EngineeringCRSNNPtr WKTParser::Private::buildEngineeringCRS(WKTNodeNNPtr node) {
+    auto datumNode = node->lookForChild(WKTConstants::EDATUM);
+    if (!datumNode) {
+        datumNode = node->lookForChild(WKTConstants::ENGINEERINGDATUM);
+        if (!datumNode) {
+            throw ParsingException("Missing EDATUM / ENGINEERINGDATUM node");
+        }
+    }
+    auto datum = buildEngineeringDatum(NN_CHECK_ASSERT(datumNode));
+
+    auto csNode = node->lookForChild(WKTConstants::CS);
+    if (!csNode) {
+        throw ParsingException("Missing CS node");
+    }
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
+    return EngineeringCRS::create(buildProperties(node), datum, cs);
+}
+
+// ---------------------------------------------------------------------------
+
 DerivedProjectedCRSNNPtr
 WKTParser::Private::buildDerivedProjectedCRS(WKTNodeNNPtr node) {
     auto baseProjCRSNode = node->lookForChild(WKTConstants::BASEPROJCRS);
@@ -2763,6 +2794,11 @@ CRSPtr WKTParser::Private::buildCRS(WKTNodeNNPtr node) {
             buildDerivedProjectedCRS(node));
     }
 
+    if (ci_equal(name, WKTConstants::ENGCRS) ||
+        ci_equal(name, WKTConstants::ENGINEERINGCRS)) {
+        return util::nn_static_pointer_cast<CRS>(buildEngineeringCRS(node));
+    }
+
     return nullptr;
 }
 
@@ -2812,6 +2848,12 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
         ci_equal(name, WKTConstants::TIMEDATUM)) {
         return util::nn_static_pointer_cast<BaseObject>(
             buildTemporalDatum(node));
+    }
+
+    if (ci_equal(name, WKTConstants::EDATUM) ||
+        ci_equal(name, WKTConstants::ENGINEERINGDATUM)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            buildEngineeringDatum(node));
     }
 
     if (ci_equal(name, WKTConstants::ELLIPSOID) ||

@@ -135,6 +135,12 @@ const common::IdentifiedObjectPtr &Datum::conventionalRS() const {
 
 // ---------------------------------------------------------------------------
 
+void Datum::setAnchor(const util::optional<std::string> &anchor) {
+    d->anchorDefinition = anchor;
+}
+
+// ---------------------------------------------------------------------------
+
 bool Datum::_isEquivalentTo(const util::BaseObjectNNPtr &other,
                             util::IComparable::Criterion criterion) const {
     auto otherDatum = util::nn_dynamic_pointer_cast<Datum>(other);
@@ -859,7 +865,7 @@ GeodeticReferenceFrame::create(const util::PropertyMap &properties,
     GeodeticReferenceFrameNNPtr grf(
         GeodeticReferenceFrame::nn_make_shared<GeodeticReferenceFrame>(
             ellipsoid, primeMeridian));
-    util::nn_static_pointer_cast<Datum>(grf)->d->anchorDefinition = anchor;
+    grf->setAnchor(anchor);
     grf->setProperties(properties);
     return grf;
 }
@@ -1097,7 +1103,7 @@ DynamicGeodeticReferenceFrameNNPtr DynamicGeodeticReferenceFrame::create(
             DynamicGeodeticReferenceFrame>(ellipsoid, primeMeridian,
                                            frameReferenceEpochIn,
                                            deformationModelNameIn));
-    util::nn_static_pointer_cast<Datum>(grf)->d->anchorDefinition = anchor;
+    grf->setAnchor(anchor);
     grf->setProperties(properties);
     return grf;
 }
@@ -1335,7 +1341,7 @@ VerticalReferenceFrameNNPtr VerticalReferenceFrame::create(
     const util::optional<RealizationMethod> &realizationMethodIn) {
     auto rf(VerticalReferenceFrame::nn_make_shared<VerticalReferenceFrame>(
         realizationMethodIn));
-    util::nn_static_pointer_cast<Datum>(rf)->d->anchorDefinition = anchor;
+    rf->setAnchor(anchor);
     rf->setProperties(properties);
     return rf;
 }
@@ -1533,7 +1539,7 @@ DynamicVerticalReferenceFrameNNPtr DynamicVerticalReferenceFrame::create(
             DynamicVerticalReferenceFrame>(realizationMethodIn,
                                            frameReferenceEpochIn,
                                            deformationModelNameIn));
-    util::nn_static_pointer_cast<Datum>(grf)->d->anchorDefinition = anchor;
+    grf->setAnchor(anchor);
     grf->setProperties(properties);
     return grf;
 }
@@ -1594,7 +1600,7 @@ const std::string &TemporalDatum::calendar() const { return d->calendar_; }
  * are referenced.
  * @param calendarIn the calendar (generally
  * TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN)
- * @return new VerticalReferenceFrame.
+ * @return new TemporalDatum.
  */
 TemporalDatumNNPtr
 TemporalDatum::create(const util::PropertyMap &properties,
@@ -1651,6 +1657,73 @@ bool TemporalDatum::isEquivalentTo(
     return temporalOrigin().toString() ==
                otherTD->temporalOrigin().toString() &&
            calendar() == otherTD->calendar();
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct EngineeringDatum::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+EngineeringDatum::EngineeringDatum() : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+EngineeringDatum::~EngineeringDatum() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a EngineeringDatum
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param anchor the anchor definition, or empty.
+ * @return new EngineeringDatum.
+ */
+EngineeringDatumNNPtr
+EngineeringDatum::create(const util::PropertyMap &properties,
+                         const util::optional<std::string> &anchor) {
+    auto datum(EngineeringDatum::nn_make_shared<EngineeringDatum>());
+    datum->setAnchor(anchor);
+    datum->setProperties(properties);
+    return datum;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string EngineeringDatum::exportToWKT(
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        throw io::FormattingException(
+            "EngineeringDatum can only be exported to WKT2");
+    }
+    formatter->startNode(io::WKTConstants::EDATUM, !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+    if (anchorDefinition()) {
+        formatter->startNode(io::WKTConstants::ANCHOR, false);
+        formatter->addQuotedString(*anchorDefinition());
+        formatter->endNode();
+    }
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool EngineeringDatum::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherTD = util::nn_dynamic_pointer_cast<EngineeringDatum>(other);
+    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    return true;
 }
 
 } // namespace datum

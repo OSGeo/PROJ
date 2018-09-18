@@ -84,11 +84,10 @@ class Datum : public common::ObjectUsage, public util::IComparable {
     common::IdentifiedObject *conventionalRS_;
 #endif
 
+  protected:
+    void setAnchor(const util::optional<std::string> &anchor);
+
   private:
-    friend class GeodeticReferenceFrame;
-    friend class DynamicGeodeticReferenceFrame;
-    friend class VerticalReferenceFrame;
-    friend class DynamicVerticalReferenceFrame;
     PROJ_OPAQUE_PRIVATE_DATA
     Datum &operator=(const Datum &other) = delete;
     Datum(const Datum &other) = delete;
@@ -643,7 +642,48 @@ class TemporalDatum : public Datum, public io::IWKTExportable {
 
 // ---------------------------------------------------------------------------
 
-// TODO DynamicVerticalReferenceFrame
+class EngineeringDatum;
+/** Shared pointer of EngineeringDatum */
+using EngineeringDatumPtr = std::shared_ptr<EngineeringDatum>;
+/** Non-null shared pointer of EngineeringDatum */
+using EngineeringDatumNNPtr = util::nn<EngineeringDatumPtr>;
+
+/** \brief The definition of the origin and orientation of an engineering
+ * coordinate reference system.
+ *
+ * \note The origin can be fixed with respect to the Earth (such as a defined
+ * point at a construction site), or be a defined point on a moving vehicle
+ * (such as on a ship or satellite), or a defined point of an image.
+ *
+ * \remark Implements EngineeringDatum from \ref ISO_19111_2018
+ */
+class EngineeringDatum : public Datum, public io::IWKTExportable {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~EngineeringDatum() override;
+    //! @endcond
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    // non-standard
+    PROJ_DLL static EngineeringDatumNNPtr
+    create(const util::PropertyMap &properties,
+           const util::optional<std::string> &anchor =
+               util::optional<std::string>());
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+  protected:
+    EngineeringDatum();
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
 
 } // namespace datum
 
