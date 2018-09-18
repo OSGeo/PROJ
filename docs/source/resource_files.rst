@@ -93,44 +93,6 @@ Non-Free Grids
 Not all grid shift files have licensing that allows them to be freely
 distributed, but can be obtained by users through free and legal methods.
 
-Canada NTv2.0
-................................................................................
-Although NTv1 grid shifts are provided freely with PROJ, the higher-quality
-NTv2.0 file needs to be downloaded from Natural Resources Canada. More info:
-http://www.geod.nrcan.gc.ca/tools-outils/ntv2_e.php.
-
-Procedure:
-
-1. Visit the `NTv2 <http://webapp.geod.nrcan.gc.ca/geod/tools-outils/applications.php?locale=en#ntv2>`__, and register/login
-2. Follow the Download NTv2 link near the bottom of the page.
-3. Unzip ``ntv2_100325.zip`` (or similar), and move the grid shift file ``NTV2_0.GSB`` to the proj directory (be sure to change the name to lowercase for consistency) 
-   e.g.: ``mv NTV2_0.GSB /usr/local/share/proj/ntv2_0.gsb``
-4. Test it using:
-
-    ::
-
-        cs2cs +proj=latlong +ellps=clrk66 +nadgrids=@ntv2_0.gsb +to +proj=latlong +ellps=GRS80 +datum=NAD83
-        -111 50
-
-    ::
-
-        111d0'3.006"W   50d0'0.103"N 0.000  # correct answer
-
-Australia
-................................................................................
-
-`Geocentric Datum of Australia AGD66/AGD84 <http://www.icsm.gov.au/gda/tech.html>`__
-
-Canada
-................................................................................
-
-`Canadian NTv2 grid shift binary <http://open.canada.ca/data/en/dataset/b3534942-31ea-59cf-bcc3-f8dc4875081a>`__ for NAD27 <=> NAD83.
-
-Germany
-................................................................................
-
-`German BeTA2007 DHDN GK3 => ETRS89/UTM <http://crs.bkg.bund.de/crseu/crs/descrtrans/BeTA/de_dhdn2etrs_beta.php>`__
-
 Great Britain
 ................................................................................
 
