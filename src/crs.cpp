@@ -1321,9 +1321,8 @@ ProjectedCRS::create(const util::PropertyMap &properties,
         baseCRSIn, derivingConversionIn, csIn);
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
-    crs->derivingConversion()->setWeakSourceTargetCRS(
-        static_cast<const GeodeticCRSPtr>(baseCRSIn),
-        static_cast<const ProjectedCRSPtr>(crs));
+    crs->derivingConversion()->setWeakSourceTargetCRS(baseCRSIn.as_nullable(),
+                                                      crs.as_nullable());
     return crs;
 }
 
@@ -1812,6 +1811,8 @@ DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
         baseCRSIn, derivingConversionIn, csIn));
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
+    crs->derivingConversion()->setWeakSourceTargetCRS(baseCRSIn.as_nullable(),
+                                                      crs.as_nullable());
     return crs;
 }
 
@@ -1836,6 +1837,8 @@ DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
         baseCRSIn, derivingConversionIn, csIn));
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
+    crs->derivingConversion()->setWeakSourceTargetCRS(baseCRSIn.as_nullable(),
+                                                      crs.as_nullable());
     return crs;
 }
 
@@ -1881,11 +1884,13 @@ DerivedGeodeticCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
-std::string DerivedGeodeticCRS::exportToPROJString(
-    io::PROJStringFormatterNNPtr) const // throw(io::FormattingException)
+std::string
+DerivedGeodeticCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+    const // throw(io::FormattingException)
 {
-    throw io::FormattingException(
-        "DerivedGeodeticCRS::exportToPROJString() unimplemented");
+    derivingConversion()->exportToPROJString(formatter);
+
+    return formatter->toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -1954,6 +1959,8 @@ DerivedGeographicCRSNNPtr DerivedGeographicCRS::create(
         baseCRSIn, derivingConversionIn, csIn));
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
+    crs->derivingConversion()->setWeakSourceTargetCRS(baseCRSIn.as_nullable(),
+                                                      crs.as_nullable());
     return crs;
 }
 
@@ -1972,14 +1979,15 @@ DerivedGeographicCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
                          !identifiers().empty());
     formatter->addQuotedString(*(name()->description()));
 
+    auto l_baseCRS = baseCRS();
     formatter->startNode((formatter->use2018Keywords() &&
-                          dynamic_cast<const GeographicCRS *>(baseCRS().get()))
+                          dynamic_cast<const GeographicCRS *>(l_baseCRS.get()))
                              ? io::WKTConstants::BASEGEOGCRS
                              : io::WKTConstants::BASEGEODCRS,
-                         !baseCRS()->identifiers().empty());
-    formatter->addQuotedString(*(baseCRS()->name()->description()));
-    baseCRS()->datum()->exportToWKT(formatter);
-    baseCRS()->datum()->primeMeridian()->exportToWKT(formatter);
+                         !l_baseCRS->identifiers().empty());
+    formatter->addQuotedString(*(l_baseCRS->name()->description()));
+    l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
+    l_baseCRS->primeMeridian()->exportToWKT(formatter);
     formatter->endNode();
 
     formatter->setUseDerivingConversion(true);
@@ -1994,11 +2002,13 @@ DerivedGeographicCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
 
 // ---------------------------------------------------------------------------
 
-std::string DerivedGeographicCRS::exportToPROJString(
-    io::PROJStringFormatterNNPtr) const // throw(io::FormattingException)
+std::string
+DerivedGeographicCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+    const // throw(io::FormattingException)
 {
-    throw io::FormattingException(
-        "DerivedGeographicCRS::exportToPROJString() unimplemented");
+    derivingConversion()->exportToPROJString(formatter);
+
+    return formatter->toString();
 }
 
 // ---------------------------------------------------------------------------

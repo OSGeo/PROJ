@@ -1884,6 +1884,42 @@ TEST(crs, derivedGeographicCRS_WKT1) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, derivedGeographicCRS_to_PROJ) {
+
+    auto wkt = "GEODCRS[\"WMO Atlantic Pole\",\n"
+               "    BASEGEODCRS[\"WGS 84\",\n"
+               "        DATUM[\"World Geodetic System 1984\",\n"
+               "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                LENGTHUNIT[\"metre\",1]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+               "    DERIVINGCONVERSION[\"unnamed\",\n"
+               "        METHOD[\"PROJ ob_tran o_proj=longlat\"],\n"
+               "        PARAMETER[\"o_lat_p\",52],\n"
+               "        PARAMETER[\"o_lon_p\",-30],\n"
+               "        PARAMETER[\"lon_0\",-25]],\n"
+               "    CS[ellipsoidal,2],\n"
+               "        AXIS[\"latitude\",north,\n"
+               "            ORDER[1],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        AXIS[\"longitude\",east,\n"
+               "            ORDER[2],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(
+        crs->exportToPROJString(PROJStringFormatter::create()),
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=ob_tran "
+        "+o_proj=longlat +o_lat_p=52 +o_lon_p=-30 +lon_0=-25 +ellps=WGS84 "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg +step "
+        "+proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 static DerivedGeodeticCRSNNPtr createDerivedGeodeticCRS() {
 
     auto derivingConversion = Conversion::create(

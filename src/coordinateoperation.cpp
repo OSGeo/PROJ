@@ -3973,6 +3973,28 @@ std::string Conversion::exportToPROJString(
                 }
             }
         }
+
+        auto derivedGeographicCRS =
+            std::dynamic_pointer_cast<crs::DerivedGeographicCRS>(targetCRS());
+        if (derivedGeographicCRS) {
+            if (!bEllipsoidParametersDone) {
+                auto l_baseCRS = derivedGeographicCRS->baseCRS();
+                if (formatter->convention() ==
+                    io::PROJStringFormatter::Convention::PROJ_4) {
+                    l_baseCRS->addDatumInfoToPROJString(formatter);
+                } else {
+                    l_baseCRS->ellipsoid()->exportToPROJString(formatter);
+                }
+            }
+
+            if (formatter->convention() ==
+                io::PROJStringFormatter::Convention::PROJ_5) {
+                auto geogCRS = derivedGeographicCRS->baseCRS();
+                formatter->setOmitProjLongLatIfPossible(true);
+                geogCRS->exportToPROJString(formatter);
+                formatter->setOmitProjLongLatIfPossible(false);
+            }
+        }
     }
 
     return scope.toString();

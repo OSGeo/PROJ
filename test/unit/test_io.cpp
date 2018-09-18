@@ -4372,6 +4372,23 @@ TEST(io, projparse_cart_unit_numeric) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_ob_tran_longlat) {
+    std::string input(
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=ob_tran "
+        "+o_proj=longlat +o_lat_p=52 +o_lon_p=-30 +lon_0=-25 +ellps=WGS84 "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg +step "
+        "+proj=axisswap +order=2,1");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              input);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_helmert_translation) {
     std::string projString("+proj=helmert +x=1 +y=2 +z=3");
     auto obj = PROJStringParser().createFromPROJString(projString);

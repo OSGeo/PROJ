@@ -3381,6 +3381,12 @@ struct PROJStringParser::Private {
         int iStep, int iFirstAxisSwap = -1, int iFirstUnitConvert = -1,
         int iFirstGeogStep = -1, int iSecondGeogStep = -1,
         int iSecondAxisSwap = -1, int iSecondUnitConvert = -1);
+
+    std::vector<CoordinateSystemAxisNNPtr>
+    processAxisSwap(const Step &step, const UnitOfMeasure &unit, int iAxisSwap);
+
+    EllipsoidalCSNNPtr buildEllipsoidalCS(int iStep, int iUnitConvert,
+                                          int iAxisSwap);
 };
 
 // ---------------------------------------------------------------------------
@@ -3849,51 +3855,52 @@ GeodeticReferenceFrameNNPtr PROJStringParser::Private::buildDatum(
 
 // ---------------------------------------------------------------------------
 
-GeographicCRSNNPtr
-PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
-                                              int iAxisSwap) {
-    const auto &step = steps_[iStep];
-
-    assert(iUnitConvert < 0 ||
-           ci_equal(steps_[iUnitConvert].name, "unitconvert"));
+std::vector<CoordinateSystemAxisNNPtr>
+PROJStringParser::Private::processAxisSwap(const Step &step,
+                                           const UnitOfMeasure &unit,
+                                           int iAxisSwap) {
     assert(iAxisSwap < 0 || ci_equal(steps_[iAxisSwap].name, "axisswap"));
 
-    auto datum = buildDatum(step);
+    const bool isGeographic = unit.type() == UnitOfMeasure::Type::ANGULAR;
+    CoordinateSystemAxisNNPtr east =
+        isGeographic ? CoordinateSystemAxis::create(
+                           PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                             AxisName::Longitude),
+                           AxisAbbreviation::lon, AxisDirection::EAST, unit)
+                     : CoordinateSystemAxis::create(
+                           PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                             AxisName::Easting),
+                           AxisAbbreviation::E, AxisDirection::EAST, unit);
 
-    UnitOfMeasure angularUnit = UnitOfMeasure::DEGREE;
-    if (iUnitConvert >= 0) {
-        auto stepUnitConvert = steps_[iUnitConvert];
-        auto xy_in = getParamValue(stepUnitConvert, "xy_in");
-        auto xy_out = getParamValue(stepUnitConvert, "xy_out");
-        if (stepUnitConvert.inverted) {
-            std::swap(xy_in, xy_out);
-        }
-        if (iUnitConvert < iStep) {
-            std::swap(xy_in, xy_out);
-        }
-        if (xy_in.empty() || xy_out.empty() || xy_in != "rad" ||
-            (xy_out != "rad" && xy_out != "deg" && xy_out != "grad")) {
-            throw ParsingException("unhandled values for xy_in and/or xy_out");
-        }
-        if (xy_out == "rad") {
-            angularUnit = UnitOfMeasure::RADIAN;
-        } else if (xy_out == "grad") {
-            angularUnit = UnitOfMeasure::GRAD;
-        }
-    }
+    CoordinateSystemAxisNNPtr north =
+        isGeographic ? CoordinateSystemAxis::create(
+                           PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                             AxisName::Latitude),
+                           AxisAbbreviation::lat, AxisDirection::NORTH, unit)
+                     : CoordinateSystemAxis::create(
+                           PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                             AxisName::Northing),
+                           AxisAbbreviation::N, AxisDirection::NORTH, unit);
 
-    CoordinateSystemAxisNNPtr east = CoordinateSystemAxis::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
-        AxisAbbreviation::lon, AxisDirection::EAST, angularUnit);
-    CoordinateSystemAxisNNPtr north = CoordinateSystemAxis::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
-        AxisAbbreviation::lat, AxisDirection::NORTH, angularUnit);
-    CoordinateSystemAxisNNPtr west = CoordinateSystemAxis::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Longitude),
-        AxisAbbreviation::lon, AxisDirection::WEST, angularUnit);
-    CoordinateSystemAxisNNPtr south = CoordinateSystemAxis::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Latitude),
-        AxisAbbreviation::lat, AxisDirection::SOUTH, angularUnit);
+    CoordinateSystemAxisNNPtr west =
+        isGeographic ? CoordinateSystemAxis::create(
+                           PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                             AxisName::Longitude),
+                           AxisAbbreviation::lon, AxisDirection::WEST, unit)
+                     : CoordinateSystemAxis::create(
+                           PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                             AxisName::Westing),
+                           std::string(), AxisDirection::WEST, unit);
+
+    CoordinateSystemAxisNNPtr south =
+        isGeographic ? CoordinateSystemAxis::create(
+                           PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                             AxisName::Latitude),
+                           AxisAbbreviation::lat, AxisDirection::SOUTH, unit)
+                     : CoordinateSystemAxis::create(
+                           PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                             AxisName::Southing),
+                           std::string(), AxisDirection::SOUTH, unit);
 
     std::vector<CoordinateSystemAxisNNPtr> axis{east, north};
 
@@ -3939,7 +3946,42 @@ PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
             }
         }
     }
+    return axis;
+}
 
+// ---------------------------------------------------------------------------
+
+EllipsoidalCSNNPtr
+PROJStringParser::Private::buildEllipsoidalCS(int iStep, int iUnitConvert,
+                                              int iAxisSwap) {
+    const auto &step = steps_[iStep];
+    assert(iUnitConvert < 0 ||
+           ci_equal(steps_[iUnitConvert].name, "unitconvert"));
+
+    UnitOfMeasure angularUnit = UnitOfMeasure::DEGREE;
+    if (iUnitConvert >= 0) {
+        auto stepUnitConvert = steps_[iUnitConvert];
+        auto xy_in = getParamValue(stepUnitConvert, "xy_in");
+        auto xy_out = getParamValue(stepUnitConvert, "xy_out");
+        if (stepUnitConvert.inverted) {
+            std::swap(xy_in, xy_out);
+        }
+        if (iUnitConvert < iStep) {
+            std::swap(xy_in, xy_out);
+        }
+        if (xy_in.empty() || xy_out.empty() || xy_in != "rad" ||
+            (xy_out != "rad" && xy_out != "deg" && xy_out != "grad")) {
+            throw ParsingException("unhandled values for xy_in and/or xy_out");
+        }
+        if (xy_out == "rad") {
+            angularUnit = UnitOfMeasure::RADIAN;
+        } else if (xy_out == "grad") {
+            angularUnit = UnitOfMeasure::GRAD;
+        }
+    }
+
+    std::vector<CoordinateSystemAxisNNPtr> axis =
+        processAxisSwap(step, angularUnit, iAxisSwap);
     CoordinateSystemAxisNNPtr up = CoordinateSystemAxis::create(
         util::PropertyMap().set(IdentifiedObject::NAME_KEY,
                                 AxisName::Ellipsoidal_height),
@@ -3952,8 +3994,21 @@ PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
                   ? EllipsoidalCS::create(PropertyMap(), axis[0], axis[1], up)
                   : EllipsoidalCS::create(PropertyMap(), axis[0], axis[1]);
 
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
+GeographicCRSNNPtr
+PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
+                                              int iAxisSwap) {
+    const auto &step = steps_[iStep];
+
+    auto datum = buildDatum(step);
+
     return GeographicCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), datum, cs);
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unknown"), datum,
+        buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap));
 }
 
 // ---------------------------------------------------------------------------
@@ -4103,7 +4158,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     assert(isProjectedStep(step.name));
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
-    assert(iAxisSwap < 0 || ci_equal(steps_[iAxisSwap].name, "axisswap"));
 
     if (step.name == "tmerc" && getParamValue(step, "axis") == "wsu") {
         constexpr int EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED =
@@ -4313,6 +4367,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             }
             if (param.second.empty()) {
                 methodName += " " + param.first;
+            } else if (param.first == "o_proj") {
+                methodName += " " + param.first + "=" + param.second;
             } else {
                 parameters.push_back(
                     OperationParameter::create(PropertyMap().set(
@@ -4341,6 +4397,13 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                    PropertyMap().set(IdentifiedObject::NAME_KEY, methodName),
                    parameters, values)
                    .as_nullable();
+
+        if (methodName == "PROJ ob_tran o_proj=longlat") {
+            return DerivedGeographicCRS::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+                geogCRS, NN_CHECK_ASSERT(conv),
+                buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap));
+        }
     }
 
     UnitOfMeasure unit = buildUnit(step, "units", "to_meter");
@@ -4372,63 +4435,9 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         }
     }
 
-    CoordinateSystemAxisNNPtr east = CoordinateSystemAxis::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Easting),
-        AxisAbbreviation::E, AxisDirection::EAST, unit);
-    CoordinateSystemAxisNNPtr north = CoordinateSystemAxis::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Northing),
-        AxisAbbreviation::N, AxisDirection::NORTH, unit);
-    CoordinateSystemAxisNNPtr west = CoordinateSystemAxis::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Westing),
-        std::string(), AxisDirection::WEST, unit);
-    CoordinateSystemAxisNNPtr south = CoordinateSystemAxis::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, AxisName::Southing),
-        std::string(), AxisDirection::SOUTH, unit);
+    std::vector<CoordinateSystemAxisNNPtr> axis =
+        processAxisSwap(step, unit, iAxisSwap);
 
-    std::vector<CoordinateSystemAxisNNPtr> axis{east, north};
-
-    auto axisStr = getParamValue(step, "axis");
-    if (!axisStr.empty()) {
-        if (axisStr.size() == 3) {
-            for (int i = 0; i < 2; i++) {
-                if (axisStr[i] == 'n') {
-                    axis[i] = north;
-                } else if (axisStr[i] == 's') {
-                    axis[i] = south;
-                } else if (axisStr[i] == 'e') {
-                    axis[i] = east;
-                } else if (axisStr[i] == 'w') {
-                    axis[i] = west;
-                } else {
-                    throw ParsingException("Unhandled axis=" + axisStr);
-                }
-            }
-        }
-    } else if (iAxisSwap >= 0) {
-        auto stepAxisSwap = steps_[iAxisSwap];
-        auto orderStr = getParamValue(stepAxisSwap, "order");
-        auto orderTab = split(orderStr, ',');
-        if (orderTab.size() < 2) {
-            throw ParsingException("Unhandled order=" + orderStr);
-        }
-        if (stepAxisSwap.inverted) {
-            throw ParsingException("Unhandled +inv for +proj=axisswap");
-        }
-
-        for (size_t i = 0; i < 2; i++) {
-            if (orderTab[i] == "1") {
-                axis[i] = east;
-            } else if (orderTab[i] == "-1") {
-                axis[i] = west;
-            } else if (orderTab[i] == "2") {
-                axis[i] = north;
-            } else if (orderTab[i] == "-2") {
-                axis[i] = south;
-            } else {
-                throw ParsingException("Unhandled order=" + orderStr);
-            }
-        }
-    }
     auto cs = CartesianCS::create(PropertyMap(), axis[0], axis[1]);
 
     CRSNNPtr crs = ProjectedCRS::create(
