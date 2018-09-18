@@ -433,3 +433,18 @@ TEST(datum, edatum) {
                   WKTFormatter::create(WKTFormatter::Convention::WKT2)),
               expected);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, pdatum) {
+    auto datum = ParametricDatum::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Parametric datum"),
+        optional<std::string>("my anchor"));
+
+    auto expected = "PDATUM[\"Parametric datum\",\n"
+                    "    ANCHOR[\"my anchor\"]]";
+
+    EXPECT_EQ(datum->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+              expected);
+}

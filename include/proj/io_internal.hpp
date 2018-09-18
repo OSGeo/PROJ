@@ -121,6 +121,9 @@ class WKTConstants {
     static const std::string BASEPROJCRS;      // WKT2-2018
     static const std::string EDATUM;
     static const std::string ENGCRS;
+    static const std::string PDATUM;
+    static const std::string PARAMETRICCRS;
+    static const std::string PARAMETRICUNIT;
 
     // WKT2 alternate (longer or shorter)
     static const std::string GEODETICCRS;
@@ -135,6 +138,7 @@ class WKTConstants {
     static const std::string TIMEDATUM;
     static const std::string ENGINEERINGDATUM;
     static const std::string ENGINEERINGCRS;
+    static const std::string PARAMETRICDATUM;
 };
 
 } // namespace io

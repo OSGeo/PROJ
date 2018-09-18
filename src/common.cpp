@@ -152,7 +152,7 @@ std::string UnitOfMeasure::exportToWKT(
 {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
 
-    if (formatter->forceUNITKeyword()) {
+    if (formatter->forceUNITKeyword() && type() != Type::PARAMETRIC) {
         formatter->startNode(WKTConstants::UNIT, !codeSpace().empty());
     } else if (!unitType.empty()) {
         formatter->startNode(unitType, !codeSpace().empty());
@@ -166,6 +166,9 @@ std::string UnitOfMeasure::exportToWKT(
             formatter->startNode(WKTConstants::SCALEUNIT, !codeSpace().empty());
         } else if (isWKT2 && type() == Type::TIME) {
             formatter->startNode(WKTConstants::TIMEUNIT, !codeSpace().empty());
+        } else if (isWKT2 && type() == Type::PARAMETRIC) {
+            formatter->startNode(WKTConstants::PARAMETRICUNIT,
+                                 !codeSpace().empty());
         } else {
             formatter->startNode(WKTConstants::UNIT, !codeSpace().empty());
         }

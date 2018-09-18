@@ -858,6 +858,44 @@ OrdinalCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+ParametricCS::ParametricCS() = default;
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+ParametricCS::~ParametricCS() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+ParametricCS::ParametricCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn)
+    : CoordinateSystem(axisIn) {}
+
+// ---------------------------------------------------------------------------
+
+#ifdef notdef
+ParametricCS::ParametricCS(const ParametricCS &) = default;
+#endif
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a ParametricCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axisIn Axis.
+ * @return a new ParametricCS.
+ */
+ParametricCSNNPtr
+ParametricCS::create(const util::PropertyMap &properties,
+                     const CoordinateSystemAxisNNPtr &axisIn) {
+    auto cs(ParametricCS::nn_make_shared<ParametricCS>(
+        std::vector<CoordinateSystemAxisNNPtr>{axisIn}));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
 AxisDirection::AxisDirection(const std::string &nameIn) : CodeList(nameIn) {
     assert(keys.find(nameIn) == keys.end());
     registry[nameIn] = this;

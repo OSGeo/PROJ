@@ -489,6 +489,42 @@ class OrdinalCS : public CoordinateSystem {
 
 // ---------------------------------------------------------------------------
 
+class ParametricCS;
+/** Shared pointer of ParametricCS. */
+using ParametricCSPtr = std::shared_ptr<ParametricCS>;
+/** Non-null shared pointer of ParametricCS. */
+using ParametricCSNNPtr = util::nn<ParametricCSPtr>;
+
+/** \brief one-dimensional coordinate reference system which uses parameter
+ * values or functions that may vary monotonically with height.
+ *
+ * \remark Implements ParametricCS from \ref ISO_19111_2018
+ */
+class ParametricCS : public CoordinateSystem {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~ParametricCS() override;
+    //! @endcond
+
+    PROJ_DLL static ParametricCSNNPtr
+    create(const util::PropertyMap &properties,
+           const CoordinateSystemAxisNNPtr &axisIn);
+
+  protected:
+    ParametricCS();
+    explicit ParametricCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
+    INLINED_MAKE_SHARED
+
+    std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
+        return "parametric";
+    }
+
+  private:
+    ParametricCS(const ParametricCS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
 class TemporalCS;
 /** Shared pointer of TemporalCS. */
 using TemporalCSPtr = std::shared_ptr<TemporalCS>;

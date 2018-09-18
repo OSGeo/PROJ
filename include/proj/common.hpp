@@ -64,6 +64,8 @@ class UnitOfMeasure {
         SCALE,
         /** Time unit of measure */
         TIME,
+        /** Parametric unit of measure */
+        PARAMETRIC,
     };
 
     PROJ_DLL UnitOfMeasure(const std::string &nameIn = std::string(),

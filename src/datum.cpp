@@ -1726,5 +1726,72 @@ bool EngineeringDatum::isEquivalentTo(
     return true;
 }
 
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct ParametricDatum::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+ParametricDatum::ParametricDatum() : d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+ParametricDatum::~ParametricDatum() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a ParametricDatum
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param anchor the anchor definition, or empty.
+ * @return new ParametricDatum.
+ */
+ParametricDatumNNPtr
+ParametricDatum::create(const util::PropertyMap &properties,
+                        const util::optional<std::string> &anchor) {
+    auto datum(ParametricDatum::nn_make_shared<ParametricDatum>());
+    datum->setAnchor(anchor);
+    datum->setProperties(properties);
+    return datum;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string ParametricDatum::exportToWKT(
+    io::WKTFormatterNNPtr formatter) const // throw(FormattingException)
+{
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        throw io::FormattingException(
+            "ParametricDatum can only be exported to WKT2");
+    }
+    formatter->startNode(io::WKTConstants::PDATUM, !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+    if (anchorDefinition()) {
+        formatter->startNode(io::WKTConstants::ANCHOR, false);
+        formatter->addQuotedString(*anchorDefinition());
+        formatter->endNode();
+    }
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool ParametricDatum::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherTD = util::nn_dynamic_pointer_cast<ParametricDatum>(other);
+    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+        return false;
+    }
+    return true;
+}
+
 } // namespace datum
 NS_PROJ_END

@@ -2325,5 +2325,95 @@ bool EngineeringCRS::isEquivalentTo(
            SingleCRS::_isEquivalentTo(other, criterion);
 }
 
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct ParametricCRS::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+ParametricCRS::~ParametricCRS() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+ParametricCRS::ParametricCRS(const datum::ParametricDatumNNPtr &datumIn,
+                             const cs::ParametricCSNNPtr &csIn)
+    : SingleCRS(datumIn.as_nullable(), nullptr, csIn),
+      d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the datum::ParametricDatum associated with the CRS.
+ *
+ * @return a ParametricDatum
+ */
+const datum::ParametricDatumNNPtr ParametricCRS::datum() const {
+    return NN_CHECK_ASSERT(std::dynamic_pointer_cast<datum::ParametricDatum>(
+        SingleCRS::getPrivate()->datum));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the cs::TemporalCS associated with the CRS.
+ *
+ * @return a TemporalCS
+ */
+const cs::ParametricCSNNPtr ParametricCRS::coordinateSystem() const {
+    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<cs::ParametricCS>(
+        SingleCRS::getPrivate()->coordinateSystem));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a ParametricCRS from a datum and a coordinate system.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param datumIn the datum.
+ * @param csIn the coordinate system.
+ * @return new ParametricCRS.
+ */
+ParametricCRSNNPtr
+ParametricCRS::create(const util::PropertyMap &properties,
+                      const datum::ParametricDatumNNPtr &datumIn,
+                      const cs::ParametricCSNNPtr &csIn) {
+    auto crs(ParametricCRS::nn_make_shared<ParametricCRS>(datumIn, csIn));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->setProperties(properties);
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string ParametricCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (!isWKT2) {
+        throw io::FormattingException(
+            "ParametricCRS can only be exported to WKT2");
+    }
+    formatter->startNode(io::WKTConstants::PARAMETRICCRS,
+                         !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+    datum()->exportToWKT(formatter);
+    coordinateSystem()->exportToWKT(formatter);
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool ParametricCRS::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherParametricCRS =
+        util::nn_dynamic_pointer_cast<ParametricCRS>(other);
+    return otherParametricCRS != nullptr &&
+           SingleCRS::_isEquivalentTo(other, criterion);
+}
+
 } // namespace crs
 NS_PROJ_END

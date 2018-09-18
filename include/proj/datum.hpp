@@ -685,6 +685,48 @@ class EngineeringDatum : public Datum, public io::IWKTExportable {
     PROJ_OPAQUE_PRIVATE_DATA
 };
 
+// ---------------------------------------------------------------------------
+
+class ParametricDatum;
+/** Shared pointer of ParametricDatum */
+using ParametricDatumPtr = std::shared_ptr<ParametricDatum>;
+/** Non-null shared pointer of ParametricDatum */
+using ParametricDatumNNPtr = util::nn<ParametricDatumPtr>;
+
+/** \brief Textual description and/or a set of parameters identifying a
+ * particular reference surface used as the origin of a parametric coordinate
+ * system, including its position with respect to the Earth.
+ *
+ * \remark Implements ParametricDatum from \ref ISO_19111_2018
+ */
+class ParametricDatum : public Datum, public io::IWKTExportable {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~ParametricDatum() override;
+    //! @endcond
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    // non-standard
+    PROJ_DLL static ParametricDatumNNPtr
+    create(const util::PropertyMap &properties,
+           const util::optional<std::string> &anchor =
+               util::optional<std::string>());
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+  protected:
+    ParametricDatum();
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
 } // namespace datum
 
 NS_PROJ_END

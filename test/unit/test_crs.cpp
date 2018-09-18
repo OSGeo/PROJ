@@ -2313,3 +2313,45 @@ TEST(crs, engineeringCRS_WKT1) {
                      WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
                  FormattingException);
 }
+
+// ---------------------------------------------------------------------------
+
+static ParametricCRSNNPtr createParametricCRS() {
+
+    auto datum = ParametricDatum::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Parametric datum"));
+
+    return ParametricCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Parametric CRS"), datum,
+        ParametricCS::create(
+            PropertyMap(),
+            CoordinateSystemAxis::create(
+                PropertyMap().set(IdentifiedObject::NAME_KEY, "pressure"),
+                "hPa", AxisDirection::UP,
+                UnitOfMeasure("HectoPascal", 100,
+                              UnitOfMeasure::Type::PARAMETRIC))));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, parametricCRS_WKT2) {
+
+    auto expected = "PARAMETRICCRS[\"Parametric CRS\",\n"
+                    "    PDATUM[\"Parametric datum\"],\n"
+                    "    CS[parametric,1],\n"
+                    "        AXIS[\"pressure (hPa)\",up,\n"
+                    "            PARAMETRICUNIT[\"HectoPascal\",100]]]";
+
+    EXPECT_EQ(createParametricCRS()->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, parametricCRS_WKT1) {
+
+    EXPECT_THROW(createParametricCRS()->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+                 FormattingException);
+}

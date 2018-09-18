@@ -845,7 +845,7 @@ using EngineeringCRSNNPtr = util::nn<EngineeringCRSPtr>;
  *
  * It is applied either to activities on or near the surface of the Earth
  * without geodetic corrections, or on moving platforms such as road vehicles,
- * vessels, aircraft or spacecraft, or as the internal CRS of an image;
+ * vessels, aircraft or spacecraft, or as the internal CRS of an image.
  *
  * \remark Implements EngineeringCRS from \ref ISO_19111_2018
  */
@@ -884,13 +884,59 @@ class EngineeringCRS : public SingleCRS {
 
 // ---------------------------------------------------------------------------
 
-#ifdef notdef
+class ParametricCRS;
+/** Shared pointer of ParametricCRS */
+using ParametricCRSPtr = std::shared_ptr<ParametricCRS>;
+/** Non-null shared pointer of ParametricCRS */
+using ParametricCRSNNPtr = util::nn<ParametricCRSPtr>;
+
+/** \brief Contextually local coordinate reference system associated with an
+ * engineering datum.
+ *
+ * This is applied either to activities on or near the surface of the Earth
+ * without geodetic corrections, or on moving platforms such as road vehicles
+ * vessels, aircraft or spacecraft, or as the internal CRS of an image.
+ *
+ * \remark Implements ParametricCRS from \ref ISO_19111_2018
+ */
+class ParametricCRS : public SingleCRS {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~ParametricCRS() override;
+    //! @endcond
+
+    PROJ_DLL const datum::ParametricDatumNNPtr datum() const;
+
+    PROJ_DLL const cs::ParametricCSNNPtr coordinateSystem() const;
+
+    PROJ_DLL static ParametricCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const datum::ParametricDatumNNPtr &datumIn,
+           const cs::ParametricCSNNPtr &csIn);
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+  protected:
+    ParametricCRS(const datum::ParametricDatumNNPtr &datumIn,
+                  const cs::ParametricCSNNPtr &csIn);
+
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    ParametricCRS(const ParametricCRS &other) = delete;
+    ParametricCRS &operator=(const ParametricCRS &other) = delete;
+};
 
 // ---------------------------------------------------------------------------
 
-class ParametricCRS : public SingleCRS {
-    // TODO
-};
+#ifdef notdef
 
 // ---------------------------------------------------------------------------
 

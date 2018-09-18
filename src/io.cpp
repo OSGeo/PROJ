@@ -951,6 +951,8 @@ struct WKTParser::Private {
 
     EngineeringDatumNNPtr buildEngineeringDatum(WKTNodeNNPtr node);
 
+    ParametricDatumNNPtr buildParametricDatum(WKTNodeNNPtr node);
+
     CRSNNPtr buildVerticalCRS(WKTNodeNNPtr node);
 
     CompoundCRSNNPtr buildCompoundCRS(WKTNodeNNPtr node);
@@ -960,6 +962,8 @@ struct WKTParser::Private {
     TemporalCRSNNPtr buildTemporalCRS(WKTNodeNNPtr node);
 
     EngineeringCRSNNPtr buildEngineeringCRS(WKTNodeNNPtr node);
+
+    ParametricCRSNNPtr buildParametricCRS(WKTNodeNNPtr node);
 
     DerivedProjectedCRSNNPtr buildDerivedProjectedCRS(WKTNodeNNPtr node);
 
@@ -1266,7 +1270,7 @@ UnitOfMeasure WKTParser::Private::buildUnit(WKTNodeNNPtr node,
 
 // ---------------------------------------------------------------------------
 
-// node here is a parent node, not a UNIT/LENGTHUNIT/ANGLEUNIT/TIMEUNIT node
+// node here is a parent node, not a UNIT/LENGTHUNIT/ANGLEUNIT/TIMEUNIT/... node
 UnitOfMeasure WKTParser::Private::buildUnitInSubNode(WKTNodeNNPtr node,
                                                      UnitOfMeasure::Type type) {
     auto unitNode = node->lookForChild(WKTConstants::LENGTHUNIT);
@@ -1289,6 +1293,12 @@ UnitOfMeasure WKTParser::Private::buildUnitInSubNode(WKTNodeNNPtr node,
     unitNode = node->lookForChild(WKTConstants::TIMEUNIT);
     if (unitNode) {
         return buildUnit(NN_CHECK_ASSERT(unitNode), UnitOfMeasure::Type::TIME);
+    }
+
+    unitNode = node->lookForChild(WKTConstants::PARAMETRICUNIT);
+    if (unitNode) {
+        return buildUnit(NN_CHECK_ASSERT(unitNode),
+                         UnitOfMeasure::Type::PARAMETRIC);
     }
 
     unitNode = node->lookForChild(WKTConstants::UNIT);
@@ -1724,19 +1734,22 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
     }
 
     UnitOfMeasure unit = buildUnitInSubNode(
-        parentNode, ci_equal(csType, "ellipsoidal")
-                        ? UnitOfMeasure::Type::ANGULAR
-                        : ci_equal(csType, "ordinal")
-                              ? UnitOfMeasure::Type::NONE
-                              : ci_equal(csType, "Cartesian") ||
-                                        ci_equal(csType, "vertical")
-                                    ? UnitOfMeasure::Type::LINEAR
-                                    : (ci_equal(csType, "temporal") ||
-                                       ci_equal(csType, "TemporalDateTime") ||
-                                       ci_equal(csType, "TemporalCount") ||
-                                       ci_equal(csType, "TemporalMeasure"))
-                                          ? UnitOfMeasure::Type::TIME
-                                          : UnitOfMeasure::Type::UNKNOWN);
+        parentNode,
+        ci_equal(csType, "ellipsoidal")
+            ? UnitOfMeasure::Type::ANGULAR
+            : ci_equal(csType, "ordinal")
+                  ? UnitOfMeasure::Type::NONE
+                  : ci_equal(csType, "parametric")
+                        ? UnitOfMeasure::Type::PARAMETRIC
+                        : ci_equal(csType, "Cartesian") ||
+                                  ci_equal(csType, "vertical")
+                              ? UnitOfMeasure::Type::LINEAR
+                              : (ci_equal(csType, "temporal") ||
+                                 ci_equal(csType, "TemporalDateTime") ||
+                                 ci_equal(csType, "TemporalCount") ||
+                                 ci_equal(csType, "TemporalMeasure"))
+                                    ? UnitOfMeasure::Type::TIME
+                                    : UnitOfMeasure::Type::UNKNOWN);
 
     std::vector<CoordinateSystemAxisNNPtr> axisList;
     for (int i = 0; i < axisCount; i++) {
@@ -1784,6 +1797,16 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
         }
     } else if (ci_equal(csType, "ordinal")) { // WKT2-2018
         return OrdinalCS::create(csMap, axisList);
+    } else if (ci_equal(csType, "parametric")) { // WKT2-2015
+        if (axisCount == 1) {
+            return ParametricCS::create(
+                csMap,
+                axisList[0]); // FIXME: there are 3 possible subtypes of
+                              // TemporalCS
+        } else {
+            throw ParsingException("buildCS: invalid CS axis count for " +
+                                   csType);
+        }
     } else if (ci_equal(csType, "temporal")) { // WKT2-2015
         if (axisCount == 1) {
             return DateTimeTemporalCS::create(
@@ -2518,6 +2541,13 @@ WKTParser::Private::buildEngineeringDatum(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
+ParametricDatumNNPtr
+WKTParser::Private::buildParametricDatum(WKTNodeNNPtr node) {
+    return ParametricDatum::create(buildProperties(node), getAnchor(node));
+}
+
+// ---------------------------------------------------------------------------
+
 CRSNNPtr WKTParser::Private::buildVerticalCRS(WKTNodeNNPtr node) {
     auto datumNode = node->lookForChild(WKTConstants::VDATUM);
     if (!datumNode) {
@@ -2710,6 +2740,32 @@ EngineeringCRSNNPtr WKTParser::Private::buildEngineeringCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
+ParametricCRSNNPtr WKTParser::Private::buildParametricCRS(WKTNodeNNPtr node) {
+    auto datumNode = node->lookForChild(WKTConstants::PDATUM);
+    if (!datumNode) {
+        datumNode = node->lookForChild(WKTConstants::PARAMETRICDATUM);
+        if (!datumNode) {
+            throw ParsingException("Missing PDATUM / PARAMETRICDATUM node");
+        }
+    }
+    auto datum = buildParametricDatum(NN_CHECK_ASSERT(datumNode));
+
+    auto csNode = node->lookForChild(WKTConstants::CS);
+    if (!csNode) {
+        throw ParsingException("Missing CS node");
+    }
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
+    auto parametricCS = nn_dynamic_pointer_cast<ParametricCS>(cs);
+    if (!parametricCS) {
+        throw ParsingException("CS node is not of type parametric");
+    }
+
+    return ParametricCRS::create(buildProperties(node), datum,
+                                 NN_CHECK_ASSERT(parametricCS));
+}
+
+// ---------------------------------------------------------------------------
+
 DerivedProjectedCRSNNPtr
 WKTParser::Private::buildDerivedProjectedCRS(WKTNodeNNPtr node) {
     auto baseProjCRSNode = node->lookForChild(WKTConstants::BASEPROJCRS);
@@ -2799,6 +2855,10 @@ CRSPtr WKTParser::Private::buildCRS(WKTNodeNNPtr node) {
         return util::nn_static_pointer_cast<CRS>(buildEngineeringCRS(node));
     }
 
+    if (ci_equal(name, WKTConstants::PARAMETRICCRS)) {
+        return util::nn_static_pointer_cast<CRS>(buildParametricCRS(node));
+    }
+
     return nullptr;
 }
 
@@ -2854,6 +2914,12 @@ BaseObjectNNPtr WKTParser::Private::build(WKTNodeNNPtr node) {
         ci_equal(name, WKTConstants::ENGINEERINGDATUM)) {
         return util::nn_static_pointer_cast<BaseObject>(
             buildEngineeringDatum(node));
+    }
+
+    if (ci_equal(name, WKTConstants::PDATUM) ||
+        ci_equal(name, WKTConstants::PARAMETRICDATUM)) {
+        return util::nn_static_pointer_cast<BaseObject>(
+            buildParametricDatum(node));
     }
 
     if (ci_equal(name, WKTConstants::ELLIPSOID) ||

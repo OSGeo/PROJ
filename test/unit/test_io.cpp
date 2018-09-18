@@ -2111,6 +2111,80 @@ TEST(wkt_parse, ENGINEERINGCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, PDATUM) {
+    auto wkt = "PDATUM[\"Parametric datum\",\n"
+               "    ANCHOR[\"my anchor\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto datum = nn_dynamic_pointer_cast<ParametricDatum>(obj);
+    ASSERT_TRUE(datum != nullptr);
+
+    EXPECT_EQ(*(datum->name()->description()), "Parametric datum");
+    auto anchor = datum->anchorDefinition();
+    EXPECT_TRUE(anchor.has_value());
+    EXPECT_EQ(*anchor, "my anchor");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, PARAMETRICDATUM) {
+    auto wkt = "PARAMETRICDATUM[\"Parametric datum\",\n"
+               "    ANCHOR[\"my anchor\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto datum = nn_dynamic_pointer_cast<ParametricDatum>(obj);
+    ASSERT_TRUE(datum != nullptr);
+
+    EXPECT_EQ(*(datum->name()->description()), "Parametric datum");
+    auto anchor = datum->anchorDefinition();
+    EXPECT_TRUE(anchor.has_value());
+    EXPECT_EQ(*anchor, "my anchor");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, PARAMETRICCRS) {
+    auto wkt =
+        "PARAMETRICCRS[\"WMO standard atmosphere layer 0\","
+        "     PDATUM[\"Mean Sea Level\",ANCHOR[\"1013.25 hPa at 15°C\"]],"
+        "     CS[parametric,1],"
+        "         AXIS[\"pressure (hPa)\",up],"
+        "         PARAMETRICUNIT[\"HectoPascal\",100.0]"
+        "     ]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ParametricCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "WMO standard atmosphere layer 0");
+    EXPECT_EQ(*(crs->datum()->name()->description()), "Mean Sea Level");
+    auto cs = crs->coordinateSystem();
+    EXPECT_TRUE(nn_dynamic_pointer_cast<ParametricCS>(cs) != nullptr);
+    ASSERT_EQ(cs->axisList().size(), 1);
+    auto axis = cs->axisList()[0];
+    EXPECT_EQ(*(axis->name()->description()), "Pressure");
+    EXPECT_EQ(axis->unit().name(), "HectoPascal");
+    EXPECT_EQ(axis->unit().type(), UnitOfMeasure::Type::PARAMETRIC);
+    EXPECT_EQ(axis->unit().conversionToSI(), 100.0);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, PARAMETRICCRS_PARAMETRICDATUM) {
+    auto wkt = "PARAMETRICCRS[\"WMO standard atmosphere layer 0\","
+               "     PARAMETRICDATUM[\"Mean Sea Level\"],"
+               "     CS[parametric,1],"
+               "         AXIS[\"pressure (hPa)\",up],"
+               "         PARAMETRICUNIT[\"HectoPascal\",100.0]"
+               "     ]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ParametricCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, ensemble) {
     auto wkt = "ENSEMBLE[\"test\",\n"
                "    MEMBER[\"World Geodetic System 1984\",\n"
@@ -3116,9 +3190,48 @@ TEST(wkt_parse, invalid_EngineeingCRS) {
         ParsingException);
 
     // Missing CS
+    EXPECT_THROW(WKTParser().createFromWKT("ENGCRS[\"name\",\n"
+                                           "    EDATUM[\"name\"]]"),
+                 ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_ParametricCRS) {
+
+    EXPECT_NO_THROW(
+        WKTParser().createFromWKT("PARAMETRICCRS[\"name\",\n"
+                                  "    PDATUM[\"name\"],\n"
+                                  "    CS[parametric,1],\n"
+                                  "        AXIS[\"time (T)\",future]]"));
+
+    // Missing PDATUM
     EXPECT_THROW(
-        WKTParser().createFromWKT("ENGCRS[\"name\",\n"
-                                  "    EDATUM[\"name\"]]"),
+        WKTParser().createFromWKT("PARAMETRICCRS[\"name\",\n"
+                                  "    CS[parametric,1],\n"
+                                  "        AXIS[\"time (T)\",future]]"),
+        ParsingException);
+
+    // Missing CS
+    EXPECT_THROW(WKTParser().createFromWKT("PARAMETRICCRS[\"name\",\n"
+                                           "    PDATUM[\"name\"]]"),
+                 ParsingException);
+
+    // Invalid number of axis for CS
+    EXPECT_THROW(
+        WKTParser().createFromWKT("PARAMETRICCRS[\"name\",\n"
+                                  "    PDATUM[\"name\"],\n"
+                                  "    CS[parametric,2],\n"
+                                  "        AXIS[\"time (T)\",future],\n"
+                                  "        AXIS[\"time (T)\",future]]"),
+        ParsingException);
+
+    // Invalid CS type
+    EXPECT_THROW(
+        WKTParser().createFromWKT("PARAMETRICCRS[\"name\",\n"
+                                  "    PDATUM[\"name\"],\n"
+                                  "    CS[temporal,1],\n"
+                                  "        AXIS[\"time (T)\",future]]"),
         ParsingException);
 }
 
