@@ -3236,6 +3236,7 @@ TEST(operation, geogCRS_to_projCRS) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4326, createUTM31_WGS84());
     ASSERT_TRUE(op != nullptr);
+    EXPECT_TRUE(std::dynamic_pointer_cast<Conversion>(op) != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm "

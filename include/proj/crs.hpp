@@ -385,7 +385,11 @@ class DerivedCRS : virtual public SingleCRS {
     //! @endcond
 
     PROJ_DLL const SingleCRSNNPtr &baseCRS() const;
-    PROJ_DLL const operation::ConversionNNPtr &derivingConversion() const;
+    PROJ_DLL const operation::ConversionNNPtr derivingConversion() const;
+
+    //! @cond Doxygen_Suppress
+    const operation::ConversionNNPtr &derivingConversionRef() const;
+    //! @endcond
 
     PROJ_DLL bool
     isEquivalentTo(const util::BaseObjectNNPtr &other,

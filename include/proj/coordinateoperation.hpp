@@ -726,6 +726,10 @@ class Conversion : public SingleOperation {
     PROJ_DLL ~Conversion() override;
     //! @endcond
 
+    //! @cond Doxygen_Suppress
+    ConversionNNPtr shallowClone() const;
+    //! @endcond
+
     PROJ_DLL CoordinateOperationNNPtr inverse() const override;
 
     PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
@@ -751,8 +755,6 @@ class Conversion : public SingleOperation {
            const std::vector<OperationParameterNNPtr> &parameters,
            const std::vector<ParameterValueNNPtr>
                &values); // throw InvalidOperation
-
-    PROJ_DLL static ConversionNNPtr create(const ConversionNNPtr &other);
 
     PROJ_DLL static ConversionNNPtr
     createUTM(const util::PropertyMap &properties, int zone, bool north);

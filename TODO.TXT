@@ -5,6 +5,7 @@
             init= syntax
     - derived crs
     - test sphericalCS
+    - PointMotionOperation
 
     - transformation with WEST longitude
     GEOGCS["Mars2015",

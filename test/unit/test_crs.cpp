@@ -724,6 +724,20 @@ static ProjectedCRSNNPtr createProjected() {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_derivingConversion) {
+    auto conv = createProjected()->derivingConversion();
+    EXPECT_TRUE(conv->sourceCRS() != nullptr);
+    ASSERT_TRUE(conv->targetCRS() != nullptr);
+
+    // derivingConversion() returns a copy of the internal conversion
+    auto targetCRSAsProjCRS =
+        std::dynamic_pointer_cast<ProjectedCRS>(conv->targetCRS());
+    ASSERT_TRUE(targetCRSAsProjCRS != nullptr);
+    EXPECT_NE(targetCRSAsProjCRS->derivingConversion(), conv);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_as_WKT2) {
     auto crs = createProjected();
 

@@ -1213,6 +1213,22 @@ Conversion::~Conversion() = default;
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+ConversionNNPtr Conversion::shallowClone() const {
+    auto conv = Conversion::nn_make_shared<Conversion>(*this);
+    conv->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(conv));
+    auto l_sourceCRS = sourceCRS();
+    auto l_targetCRS = targetCRS();
+    if (l_sourceCRS && l_targetCRS) {
+        conv->setCRSs(NN_CHECK_ASSERT(l_sourceCRS),
+                      NN_CHECK_ASSERT(l_targetCRS), interpolationCRS());
+    }
+    return conv;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instanciate a Conversion from a vector of GeneralParameterValue.
  *
  * @param properties See \ref general_properties. At minimum the name should be
@@ -1271,19 +1287,6 @@ ConversionNNPtr Conversion::create(
             OperationParameterValue::create(parameters[i], values[i]));
     }
     return create(propertiesConversion, op, generalParameterValues);
-}
-
-// ---------------------------------------------------------------------------
-
-/** \brief Clone a Conversion.
- *
- * @param other Conversion to clone.
- * @return a cloned Conversion.
- */
-ConversionNNPtr Conversion::create(const ConversionNNPtr &other) {
-    auto conv = Conversion::nn_make_shared<Conversion>(*other);
-    conv->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(conv));
-    return conv;
 }
 
 // ---------------------------------------------------------------------------
@@ -6245,6 +6248,9 @@ CoordinateOperationFactory::createOperation(crs::CRSNNPtr sourceCRS,
 
     auto derivedDst = util::nn_dynamic_pointer_cast<crs::DerivedCRS>(targetCRS);
     if (derivedDst) {
+        if (sourceCRS->isEquivalentTo(derivedDst->baseCRS())) {
+            return derivedDst->derivingConversion().as_nullable();
+        }
         auto opFirst = createOperation(sourceCRS, derivedDst->baseCRS());
         if (!opFirst) {
             return nullptr;

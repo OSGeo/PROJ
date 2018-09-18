@@ -1108,8 +1108,7 @@ DerivedCRS::DerivedCRS(const SingleCRSNNPtr &baseCRSIn,
 #if !defined(COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT)
       SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), cs),
 #endif
-      d(internal::make_unique<Private>(
-          baseCRSIn, operation::Conversion::create(derivingConversionIn))) {
+      d(internal::make_unique<Private>(baseCRSIn, derivingConversionIn)) {
 }
 
 // ---------------------------------------------------------------------------
@@ -1144,9 +1143,17 @@ const SingleCRSNNPtr &DerivedCRS::baseCRS() const { return d->baseCRS_; }
  *
  * @return the deriving conversion.
  */
-const operation::ConversionNNPtr &DerivedCRS::derivingConversion() const {
+const operation::ConversionNNPtr DerivedCRS::derivingConversion() const {
+    return d->derivingConversion_->shallowClone();
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+const operation::ConversionNNPtr &DerivedCRS::derivingConversionRef() const {
     return d->derivingConversion_;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1158,14 +1165,14 @@ bool DerivedCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
         return false;
     }
     return baseCRS()->isEquivalentTo(otherDerivedCRS->baseCRS(), criterion) &&
-           derivingConversion()->isEquivalentTo(
-               otherDerivedCRS->derivingConversion(), criterion);
+           derivingConversionRef()->isEquivalentTo(
+               otherDerivedCRS->derivingConversionRef(), criterion);
 }
 
 // ---------------------------------------------------------------------------
 
 void DerivedCRS::setDerivingConversionCRS() {
-    derivingConversion()->setWeakSourceTargetCRS(
+    derivingConversionRef()->setWeakSourceTargetCRS(
         baseCRS().as_nullable(),
         std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
 }
@@ -1268,7 +1275,7 @@ std::string ProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
                 geodeticCRSAxisList[0]->unit()));
     }
 
-    derivingConversion()->exportToWKT(formatter);
+    derivingConversionRef()->exportToWKT(formatter);
 
     if (!geodeticCRSAxisList.empty()) {
         formatter->popAxisAngularUnit();
@@ -1286,7 +1293,7 @@ std::string ProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     coordinateSystem()->exportToWKT(formatter);
 
     if (!isWKT2) {
-        derivingConversion()->addWKTExtensionNode(formatter);
+        derivingConversionRef()->addWKTExtensionNode(formatter);
     }
 
     ObjectUsage::_exportToWKT(formatter);
@@ -1300,7 +1307,7 @@ std::string
 ProjectedCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
 {
-    derivingConversion()->exportToPROJString(formatter);
+    derivingConversionRef()->exportToPROJString(formatter);
 
     return formatter->toString();
 }
@@ -1942,7 +1949,7 @@ DerivedGeodeticCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     formatter->endNode();
 
     formatter->setUseDerivingConversion(true);
-    derivingConversion()->exportToWKT(formatter);
+    derivingConversionRef()->exportToWKT(formatter);
     formatter->setUseDerivingConversion(false);
 
     coordinateSystem()->exportToWKT(formatter);
@@ -1957,7 +1964,7 @@ std::string
 DerivedGeodeticCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
 {
-    derivingConversion()->exportToPROJString(formatter);
+    derivingConversionRef()->exportToPROJString(formatter);
 
     return formatter->toString();
 }
@@ -2059,7 +2066,7 @@ DerivedGeographicCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     formatter->endNode();
 
     formatter->setUseDerivingConversion(true);
-    derivingConversion()->exportToWKT(formatter);
+    derivingConversionRef()->exportToWKT(formatter);
     formatter->setUseDerivingConversion(false);
 
     coordinateSystem()->exportToWKT(formatter);
@@ -2074,7 +2081,7 @@ std::string
 DerivedGeographicCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
 {
-    derivingConversion()->exportToPROJString(formatter);
+    derivingConversionRef()->exportToPROJString(formatter);
 
     return formatter->toString();
 }
@@ -2189,12 +2196,12 @@ DerivedProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
         l_baseGeodCRS->primeMeridian()->exportToWKT(formatter);
         formatter->endNode();
 
-        l_baseProjCRS->derivingConversion()->exportToWKT(formatter);
+        l_baseProjCRS->derivingConversionRef()->exportToWKT(formatter);
         formatter->endNode();
     }
 
     formatter->setUseDerivingConversion(true);
-    derivingConversion()->exportToWKT(formatter);
+    derivingConversionRef()->exportToWKT(formatter);
     formatter->setUseDerivingConversion(false);
 
     coordinateSystem()->exportToWKT(formatter);
@@ -2209,7 +2216,7 @@ std::string
 DerivedProjectedCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
 {
-    derivingConversion()->exportToPROJString(formatter);
+    derivingConversionRef()->exportToPROJString(formatter);
 
     return formatter->toString();
 }
@@ -2558,7 +2565,7 @@ DerivedVerticalCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     formatter->endNode();
 
     formatter->setUseDerivingConversion(true);
-    derivingConversion()->exportToWKT(formatter);
+    derivingConversionRef()->exportToWKT(formatter);
     formatter->setUseDerivingConversion(false);
 
     coordinateSystem()->exportToWKT(formatter);
@@ -2573,7 +2580,7 @@ std::string
 DerivedVerticalCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
     const // throw(io::FormattingException)
 {
-    derivingConversion()->exportToPROJString(formatter);
+    derivingConversionRef()->exportToPROJString(formatter);
 
     return formatter->toString();
 }
