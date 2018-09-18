@@ -1772,6 +1772,98 @@ TEST(wkt_parse, DerivedGeodeticCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, DerivedProjectedCRS) {
+    auto wkt =
+        "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
+        "    BASEPROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+        "        BASEGEOGCRS[\"WGS 84\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        CONVERSION[\"UTM zone 31N\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",3,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",500000,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8807]]]],\n"
+        "    DERIVINGCONVERSION[\"unnamed\",\n"
+        "        METHOD[\"PROJ unimplemented\"]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]],\n"
+        "        AXIS[\"(N)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(*(crs->name()->description()), "derived projectedCRS");
+
+    EXPECT_EQ(*(crs->baseCRS()->name()->description()),
+              "WGS 84 / UTM zone 31N");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<ProjectedCRS>(crs->baseCRS()) !=
+                nullptr);
+
+    EXPECT_EQ(*(crs->derivingConversion()->name()->description()), "unnamed");
+
+    EXPECT_TRUE(nn_dynamic_pointer_cast<CartesianCS>(crs->coordinateSystem()) !=
+                nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, DerivedProjectedCRS_ordinal) {
+    auto wkt = "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
+               "    BASEPROJCRS[\"BASEPROJCRS\",\n"
+               "        BASEGEOGCRS[\"WGS 84\",\n"
+               "            DATUM[\"World Geodetic System 1984\",\n"
+               "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+               "                    LENGTHUNIT[\"metre\",1]]],\n"
+               "            PRIMEM[\"Greenwich\",0,\n"
+               "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "                ID[\"EPSG\",8901]]],\n"
+               "        CONVERSION[\"unnamed\",\n"
+               "            METHOD[\"PROJ unimplemented\"]]],\n"
+               "    DERIVINGCONVERSION[\"unnamed\",\n"
+               "        METHOD[\"PROJ unimplemented\"]],\n"
+               "    CS[ordinal,2],\n"
+               "        AXIS[\"inline (I)\",northNorthWest,\n"
+               "            ORDER[1]],\n"
+               "        AXIS[\"crossline (J)\",westSouthWest,\n"
+               "            ORDER[2]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_TRUE(nn_dynamic_pointer_cast<OrdinalCS>(crs->coordinateSystem()) !=
+                nullptr);
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, TemporalDatum) {
     auto wkt = "TDATUM[\"Gregorian calendar\",\n"
                "    CALENDAR[\"my calendar\"],\n"
@@ -2923,6 +3015,63 @@ TEST(wkt_parse, invalid_TemporalCRS) {
                                   "    CS[TemporalMeasure,2],\n"
                                   "        AXIS[\"time (T)\",future],\n"
                                   "        AXIS[\"time2 (T)\",future]]"),
+        ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, invalid_DERIVEDPROJCRS) {
+    EXPECT_NO_THROW(WKTParser().createFromWKT(
+        "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
+        "    BASEPROJCRS[\"BASEPROJCRS\",\n"
+        "        BASEGEOGCRS[\"WGS 84\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]]]],\n"
+        "        CONVERSION[\"unnamed\",\n"
+        "            METHOD[\"PROJ unimplemented\"]]],\n"
+        "    DERIVINGCONVERSION[\"unnamed\",\n"
+        "        METHOD[\"PROJ unimplemented\"]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east],\n"
+        "        AXIS[\"(N)\",north]]"));
+
+    EXPECT_THROW(
+        WKTParser().createFromWKT("DERIVEDPROJCRS[\"derived projectedCRS\",\n"
+                                  "    DERIVINGCONVERSION[\"unnamed\",\n"
+                                  "        METHOD[\"PROJ unimplemented\"]],\n"
+                                  "    CS[Cartesian,2],\n"
+                                  "        AXIS[\"(E)\",east],\n"
+                                  "        AXIS[\"(N)\",north]]"),
+        ParsingException);
+
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
+            "    BASEPROJCRS[\"BASEPROJCRS\",\n"
+            "        BASEGEOGCRS[\"WGS 84\",\n"
+            "            DATUM[\"World Geodetic System 1984\",\n"
+            "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                    LENGTHUNIT[\"metre\",1]]]],\n"
+            "        CONVERSION[\"unnamed\",\n"
+            "            METHOD[\"PROJ unimplemented\"]]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"(E)\",east],\n"
+            "        AXIS[\"(N)\",north]]"),
+        ParsingException);
+
+    EXPECT_THROW(
+        WKTParser().createFromWKT(
+            "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
+            "    BASEPROJCRS[\"BASEPROJCRS\",\n"
+            "        BASEGEOGCRS[\"WGS 84\",\n"
+            "            DATUM[\"World Geodetic System 1984\",\n"
+            "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                    LENGTHUNIT[\"metre\",1]]]],\n"
+            "        CONVERSION[\"unnamed\",\n"
+            "            METHOD[\"PROJ unimplemented\"]]],\n"
+            "    DERIVINGCONVERSION[\"unnamed\",\n"
+            "        METHOD[\"PROJ unimplemented\"]]]"),
         ParsingException);
 }
 

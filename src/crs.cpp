@@ -1164,6 +1164,14 @@ bool DerivedCRS::isEquivalentTo(const util::BaseObjectNNPtr &other,
 
 // ---------------------------------------------------------------------------
 
+void DerivedCRS::setDerivingConversionCRS() {
+    derivingConversion()->setWeakSourceTargetCRS(
+        baseCRS().as_nullable(),
+        std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct ProjectedCRS::Private {};
 //! @endcond
@@ -1321,8 +1329,7 @@ ProjectedCRS::create(const util::PropertyMap &properties,
         baseCRSIn, derivingConversionIn, csIn);
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
-    crs->derivingConversion()->setWeakSourceTargetCRS(baseCRSIn.as_nullable(),
-                                                      crs.as_nullable());
+    crs->setDerivingConversionCRS();
     return crs;
 }
 
@@ -1811,8 +1818,7 @@ DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
         baseCRSIn, derivingConversionIn, csIn));
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
-    crs->derivingConversion()->setWeakSourceTargetCRS(baseCRSIn.as_nullable(),
-                                                      crs.as_nullable());
+    crs->setDerivingConversionCRS();
     return crs;
 }
 
@@ -1837,8 +1843,7 @@ DerivedGeodeticCRSNNPtr DerivedGeodeticCRS::create(
         baseCRSIn, derivingConversionIn, csIn));
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
-    crs->derivingConversion()->setWeakSourceTargetCRS(baseCRSIn.as_nullable(),
-                                                      crs.as_nullable());
+    crs->setDerivingConversionCRS();
     return crs;
 }
 
@@ -1959,8 +1964,7 @@ DerivedGeographicCRSNNPtr DerivedGeographicCRS::create(
         baseCRSIn, derivingConversionIn, csIn));
     crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
     crs->setProperties(properties);
-    crs->derivingConversion()->setWeakSourceTargetCRS(baseCRSIn.as_nullable(),
-                                                      crs.as_nullable());
+    crs->setDerivingConversionCRS();
     return crs;
 }
 
@@ -2018,6 +2022,141 @@ bool DerivedGeographicCRS::isEquivalentTo(
     util::IComparable::Criterion criterion) const {
     auto otherDerivedGeogCRS =
         util::nn_dynamic_pointer_cast<DerivedGeographicCRS>(other);
+    return otherDerivedGeogCRS != nullptr &&
+           DerivedCRS::isEquivalentTo(other, criterion);
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+struct DerivedProjectedCRS::Private {};
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+DerivedProjectedCRS::~DerivedProjectedCRS() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+DerivedProjectedCRS::DerivedProjectedCRS(
+    const ProjectedCRSNNPtr &baseCRSIn,
+    const operation::ConversionNNPtr &derivingConversionIn,
+    const cs::CoordinateSystemNNPtr &csIn)
+    : SingleCRS(baseCRSIn->datum(), baseCRSIn->datumEnsemble(), csIn),
+      DerivedCRS(baseCRSIn, derivingConversionIn, csIn),
+      d(internal::make_unique<Private>()) {}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the base CRS (a ProjectedCRS) of a DerivedProjectedCRS.
+ *
+ * @return the base CRS.
+ */
+const ProjectedCRSNNPtr DerivedProjectedCRS::baseCRS() const {
+    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<ProjectedCRS>(
+        DerivedCRS::getPrivate()->baseCRS_));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a DerivedProjectedCRS from a base CRS, a deriving
+ * conversion and a cs::CS.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param baseCRSIn base CRS.
+ * @param derivingConversionIn the deriving conversion from the base CRS to this
+ * CRS.
+ * @param csIn the coordinate system.
+ * @return new DerivedProjectedCRS.
+ */
+DerivedProjectedCRSNNPtr DerivedProjectedCRS::create(
+    const util::PropertyMap &properties, const ProjectedCRSNNPtr &baseCRSIn,
+    const operation::ConversionNNPtr &derivingConversionIn,
+    const cs::CoordinateSystemNNPtr &csIn) {
+    auto crs(DerivedProjectedCRS::nn_make_shared<DerivedProjectedCRS>(
+        baseCRSIn, derivingConversionIn, csIn));
+    crs->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(crs));
+    crs->setProperties(properties);
+    crs->setDerivingConversionCRS();
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string
+DerivedProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    if (!isWKT2 || !formatter->use2018Keywords()) {
+        throw io::FormattingException(
+            "DerivedProjectedCRS can only be exported to WKT2:2018");
+    }
+    formatter->startNode(io::WKTConstants::DERIVEDPROJCRS,
+                         !identifiers().empty());
+    formatter->addQuotedString(*(name()->description()));
+
+    {
+        auto l_baseProjCRS = baseCRS();
+        formatter->startNode(io::WKTConstants::BASEPROJCRS,
+                             !l_baseProjCRS->identifiers().empty());
+        formatter->addQuotedString(*(l_baseProjCRS->name()->description()));
+
+        auto l_baseGeodCRS = l_baseProjCRS->baseCRS();
+        auto &geodeticCRSAxisList =
+            l_baseGeodCRS->coordinateSystem()->axisList();
+
+        formatter->startNode(
+            dynamic_cast<const GeographicCRS *>(l_baseGeodCRS.get())
+                ? io::WKTConstants::BASEGEOGCRS
+                : io::WKTConstants::BASEGEODCRS,
+            !l_baseGeodCRS->identifiers().empty());
+        formatter->addQuotedString(*(l_baseGeodCRS->name()->description()));
+        l_baseGeodCRS->exportDatumOrDatumEnsembleToWkt(formatter);
+        // insert ellipsoidal cs unit when the units of the map
+        // projection angular parameters are not explicitly given within those
+        // parameters. See
+        // http://docs.opengeospatial.org/is/12-063r5/12-063r5.html#61
+        if (formatter->primeMeridianOrParameterUnitOmittedIfSameAsAxis() &&
+            !geodeticCRSAxisList.empty()) {
+            geodeticCRSAxisList[0]->unit().exportToWKT(formatter);
+        }
+        l_baseGeodCRS->primeMeridian()->exportToWKT(formatter);
+        formatter->endNode();
+
+        l_baseProjCRS->derivingConversion()->exportToWKT(formatter);
+        formatter->endNode();
+    }
+
+    formatter->setUseDerivingConversion(true);
+    derivingConversion()->exportToWKT(formatter);
+    formatter->setUseDerivingConversion(false);
+
+    coordinateSystem()->exportToWKT(formatter);
+    ObjectUsage::_exportToWKT(formatter);
+    formatter->endNode();
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+std::string
+DerivedProjectedCRS::exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+    const // throw(io::FormattingException)
+{
+    derivingConversion()->exportToPROJString(formatter);
+
+    return formatter->toString();
+}
+
+// ---------------------------------------------------------------------------
+
+bool DerivedProjectedCRS::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherDerivedGeogCRS =
+        util::nn_dynamic_pointer_cast<DerivedProjectedCRS>(other);
     return otherDerivedGeogCRS != nullptr &&
            DerivedCRS::isEquivalentTo(other, criterion);
 }

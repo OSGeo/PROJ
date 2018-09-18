@@ -821,6 +821,43 @@ CartesianCS::createGeocentric(const common::UnitOfMeasure &unit) {
 
 // ---------------------------------------------------------------------------
 
+OrdinalCS::OrdinalCS() = default;
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+OrdinalCS::~OrdinalCS() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+OrdinalCS::OrdinalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn)
+    : CoordinateSystem(axisIn) {}
+
+// ---------------------------------------------------------------------------
+
+#ifdef notdef
+OrdinalCS::OrdinalCS(const OrdinalCS &) = default;
+#endif
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a OrdinalCS.
+ *
+ * @param properties See \ref general_properties.
+ * @param axisIn List of axis.
+ * @return a new OrdinalCS.
+ */
+OrdinalCSNNPtr
+OrdinalCS::create(const util::PropertyMap &properties,
+                  const std::vector<CoordinateSystemAxisNNPtr> &axisIn) {
+    auto cs(OrdinalCS::nn_make_shared<OrdinalCS>(axisIn));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
 AxisDirection::AxisDirection(const std::string &nameIn) : CodeList(nameIn) {
     assert(keys.find(nameIn) == keys.end());
     registry[nameIn] = this;

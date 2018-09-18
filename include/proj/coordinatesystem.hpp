@@ -451,6 +451,44 @@ class CartesianCS : public CoordinateSystem {
 
 // ---------------------------------------------------------------------------
 
+class OrdinalCS;
+/** Shared pointer of OrdinalCS. */
+using OrdinalCSPtr = std::shared_ptr<OrdinalCS>;
+/** Non-null shared pointer of OrdinalCS. */
+using OrdinalCSNNPtr = util::nn<OrdinalCSPtr>;
+
+/** \brief n-dimensional coordinate system in which every axis uses integers.
+ *
+ * The number of associations shall equal the
+ * dimension of the CS.
+ *
+ * \remark Implements OrdinalCS from \ref ISO_19111_2018
+ */
+class OrdinalCS : public CoordinateSystem {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~OrdinalCS() override;
+    //! @endcond
+
+    PROJ_DLL static OrdinalCSNNPtr
+    create(const util::PropertyMap &properties,
+           const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
+
+  protected:
+    OrdinalCS();
+    explicit OrdinalCS(const std::vector<CoordinateSystemAxisNNPtr> &axisIn);
+    INLINED_MAKE_SHARED
+
+    std::string getWKT2Type(io::WKTFormatterNNPtr) const override {
+        return "ordinal";
+    }
+
+  private:
+    OrdinalCS(const OrdinalCS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
 class TemporalCS;
 /** Shared pointer of TemporalCS. */
 using TemporalCSPtr = std::shared_ptr<TemporalCS>;

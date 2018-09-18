@@ -44,8 +44,7 @@ class CRS;
 using CRSPtr = std::shared_ptr<CRS>;
 using CRSNNPtr = util::nn<CRSPtr>;
 
-class DerivedGeodeticCRS;
-class DerivedGeographicCRS;
+class DerivedCRS;
 class ProjectedCRS;
 }
 
@@ -125,9 +124,7 @@ class CoordinateOperation : public common::ObjectUsage,
     CoordinateOperation();
     CoordinateOperation(const CoordinateOperation &other);
 
-    friend class crs::DerivedGeodeticCRS;
-    friend class crs::DerivedGeographicCRS;
-    friend class crs::ProjectedCRS;
+    friend class crs::DerivedCRS;
     void setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
                                 std::weak_ptr<crs::CRS> targetCRSIn);
     void setCRSs(const crs::CRSNNPtr &sourceCRSIn,

@@ -3566,16 +3566,15 @@ createPROJExtensionFromCustomProj(const Conversion *conv,
     assert(starts_with(projectionMethodName, "PROJ "));
     auto tokens = split(projectionMethodName, ' ');
 
-    auto geogCRS =
-        std::dynamic_pointer_cast<crs::GeographicCRS>(conv->sourceCRS());
-    if (!geogCRS) {
-        return false;
-    }
-
     io::PROJStringFormatter::Scope scope(formatter);
     formatter->addStep(tokens[1]);
 
     if (forExtensionNode) {
+        auto geogCRS =
+            std::dynamic_pointer_cast<crs::GeographicCRS>(conv->sourceCRS());
+        if (!geogCRS) {
+            return false;
+        }
         geogCRS->addDatumInfoToPROJString(formatter);
     }
 
@@ -3667,6 +3666,12 @@ std::string Conversion::exportToPROJString(
             geogCRS->exportToPROJString(formatter);
             formatter->stopInversion();
             formatter->setOmitProjLongLatIfPossible(false);
+        }
+
+        auto projCRS =
+            std::dynamic_pointer_cast<crs::ProjectedCRS>(sourceCRS());
+        if (projCRS) {
+            projCRS->exportToPROJString(formatter);
         }
     }
 

@@ -957,6 +957,8 @@ struct WKTParser::Private {
 
     TemporalCRSNNPtr buildTemporalCRS(WKTNodeNNPtr node);
 
+    DerivedProjectedCRSNNPtr buildDerivedProjectedCRS(WKTNodeNNPtr node);
+
     CRSPtr buildCRS(WKTNodeNNPtr node);
 
     CoordinateOperationNNPtr buildCoordinateOperation(WKTNodeNNPtr node);
@@ -1676,13 +1678,18 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
                 }
                 return EllipsoidalCS::createLatitudeLongitude(unit);
             }
-        } else if (ci_equal(parentNode->value(), WKTConstants::PROJCS)) {
+        } else if (ci_equal(parentNode->value(), WKTConstants::PROJCS) ||
+                   ci_equal(parentNode->value(), WKTConstants::BASEPROJCRS)) {
             csType = "Cartesian";
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
                 if (unit == UnitOfMeasure::NONE) {
-                    throw ParsingException("buildCS: missing UNIT");
+                    if (ci_equal(parentNode->value(), WKTConstants::PROJCS)) {
+                        throw ParsingException("buildCS: missing UNIT");
+                    } else {
+                        unit = UnitOfMeasure::METRE;
+                    }
                 }
                 return CartesianCS::createEastingNorthing(unit);
             }
@@ -1713,17 +1720,19 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
     }
 
     UnitOfMeasure unit = buildUnitInSubNode(
-        parentNode,
-        ci_equal(csType, "ellipsoidal")
-            ? UnitOfMeasure::Type::ANGULAR
-            : ci_equal(csType, "Cartesian") || ci_equal(csType, "vertical")
-                  ? UnitOfMeasure::Type::LINEAR
-                  : (ci_equal(csType, "temporal") ||
-                     ci_equal(csType, "TemporalDateTime") ||
-                     ci_equal(csType, "TemporalCount") ||
-                     ci_equal(csType, "TemporalMeasure"))
-                        ? UnitOfMeasure::Type::TIME
-                        : UnitOfMeasure::Type::UNKNOWN);
+        parentNode, ci_equal(csType, "ellipsoidal")
+                        ? UnitOfMeasure::Type::ANGULAR
+                        : ci_equal(csType, "ordinal")
+                              ? UnitOfMeasure::Type::NONE
+                              : ci_equal(csType, "Cartesian") ||
+                                        ci_equal(csType, "vertical")
+                                    ? UnitOfMeasure::Type::LINEAR
+                                    : (ci_equal(csType, "temporal") ||
+                                       ci_equal(csType, "TemporalDateTime") ||
+                                       ci_equal(csType, "TemporalCount") ||
+                                       ci_equal(csType, "TemporalMeasure"))
+                                          ? UnitOfMeasure::Type::TIME
+                                          : UnitOfMeasure::Type::UNKNOWN);
 
     std::vector<CoordinateSystemAxisNNPtr> axisList;
     for (int i = 0; i < axisCount; i++) {
@@ -1769,6 +1778,8 @@ WKTParser::Private::buildCS(WKTNodePtr node, /* maybe null */
             throw ParsingException("buildCS: invalid CS axis count for " +
                                    csType);
         }
+    } else if (ci_equal(csType, "ordinal")) { // WKT2-2018
+        return OrdinalCS::create(csMap, axisList);
     } else if (ci_equal(csType, "temporal")) { // WKT2-2015
         if (axisCount == 1) {
             return DateTimeTemporalCS::create(
@@ -2417,7 +2428,8 @@ ProjectedCRSNNPtr WKTParser::Private::buildProjectedCRS(WKTNodeNNPtr node) {
                                          linearUnit, angularUnit);
 
     auto csNode = node->lookForChild(WKTConstants::CS);
-    if (!csNode && !ci_equal(node->value(), WKTConstants::PROJCS)) {
+    if (!csNode && !ci_equal(node->value(), WKTConstants::PROJCS) &&
+        !ci_equal(node->value(), WKTConstants::BASEPROJCRS)) {
         throw ParsingException("Missing CS node");
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
@@ -2667,6 +2679,37 @@ TemporalCRSNNPtr WKTParser::Private::buildTemporalCRS(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
+DerivedProjectedCRSNNPtr
+WKTParser::Private::buildDerivedProjectedCRS(WKTNodeNNPtr node) {
+    auto baseProjCRSNode = node->lookForChild(WKTConstants::BASEPROJCRS);
+    if (!baseProjCRSNode) {
+        throw ParsingException("Missing BASEPROJCRS node");
+    }
+    auto baseProjCRS = buildProjectedCRS(NN_CHECK_ASSERT(baseProjCRSNode));
+
+    auto conversionNode = node->lookForChild(WKTConstants::DERIVINGCONVERSION);
+    if (!conversionNode) {
+        throw ParsingException("Missing DERIVINGCONVERSION node");
+    }
+
+    auto linearUnit = buildUnitInSubNode(node);
+    auto angularUnit =
+        baseProjCRS->baseCRS()->coordinateSystem()->axisList()[0]->unit();
+
+    auto conversion = buildConversion(NN_CHECK_ASSERT(conversionNode),
+                                      linearUnit, angularUnit);
+
+    auto csNode = node->lookForChild(WKTConstants::CS);
+    if (!csNode && !ci_equal(node->value(), WKTConstants::PROJCS)) {
+        throw ParsingException("Missing CS node");
+    }
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
+    return DerivedProjectedCRS::create(buildProperties(node), baseProjCRS,
+                                       conversion, cs);
+}
+
+// ---------------------------------------------------------------------------
+
 static bool isGeodeticCRS(const std::string &name) {
     return ci_equal(name, WKTConstants::GEODCRS) ||       // WKT2
            ci_equal(name, WKTConstants::GEODETICCRS) ||   // WKT2
@@ -2713,6 +2756,11 @@ CRSPtr WKTParser::Private::buildCRS(WKTNodeNNPtr node) {
 
     if (ci_equal(name, WKTConstants::TIMECRS)) {
         return util::nn_static_pointer_cast<CRS>(buildTemporalCRS(node));
+    }
+
+    if (ci_equal(name, WKTConstants::DERIVEDPROJCRS)) {
+        return util::nn_static_pointer_cast<CRS>(
+            buildDerivedProjectedCRS(node));
     }
 
     return nullptr;

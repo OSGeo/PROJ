@@ -2013,6 +2013,95 @@ TEST(crs, derivedGeodeticCRS_WKT1) {
 
 // ---------------------------------------------------------------------------
 
+static DerivedProjectedCRSNNPtr createDerivedProjectedCRS() {
+
+    auto derivingConversion = Conversion::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
+        std::vector<OperationParameterNNPtr>{},
+        std::vector<ParameterValueNNPtr>{});
+
+    return DerivedProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "derived projectedCRS"),
+        createProjected(), derivingConversion,
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, derivedProjectedCRS_WKT2_2018) {
+
+    auto expected =
+        "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
+        "    BASEPROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+        "        BASEGEOGCRS[\"WGS 84\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        CONVERSION[\"UTM zone 31N\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",3,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",500000,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8807]]]],\n"
+        "    DERIVINGCONVERSION[\"unnamed\",\n"
+        "        METHOD[\"PROJ unimplemented\"]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]],\n"
+        "        AXIS[\"(N)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]]]";
+
+    auto crs = createDerivedProjectedCRS();
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+
+    EXPECT_TRUE(crs->isEquivalentTo(crs));
+    EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, derivedProjectedCRS_WKT2_2015) {
+
+    auto crs = createDerivedProjectedCRS();
+    EXPECT_THROW(crs->exportToWKT(
+                     WKTFormatter::create(WKTFormatter::Convention::WKT2_2015)),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, derivedProjectedCRS_to_PROJ) {
+
+    auto crs = createDerivedProjectedCRS();
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm "
+              "+zone=31 +ellps=WGS84 +step +proj=unimplemented");
+}
+
+// ---------------------------------------------------------------------------
+
 static TemporalCRSNNPtr createDateTimeTemporalCRS() {
 
     auto datum = TemporalDatum::create(

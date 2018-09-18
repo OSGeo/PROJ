@@ -397,6 +397,8 @@ class DerivedCRS : virtual public SingleCRS {
                const operation::ConversionNNPtr &derivingConversionIn,
                const cs::CoordinateSystemNNPtr &cs);
 
+    void setDerivingConversionCRS();
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     DerivedCRS(const DerivedCRS &other) = delete;
@@ -727,6 +729,63 @@ class DerivedGeographicCRS : public GeographicCRS, public DerivedCRS {
 
 // ---------------------------------------------------------------------------
 
+class DerivedProjectedCRS;
+/** Shared pointer of DerivedProjectedCRS */
+using DerivedProjectedCRSPtr = std::shared_ptr<DerivedProjectedCRS>;
+/** Non-null shared pointer of DerivedProjectedCRS */
+using DerivedProjectedCRSNNPtr = util::nn<DerivedProjectedCRSPtr>;
+
+/** \brief A derived coordinate reference system which has a projected
+ * coordinate reference system as its base CRS, thereby inheriting a geodetic
+ * reference frame, but also inheriting the distortion characteristics of the
+ * base projected CRS.
+ *
+ * A DerivedProjectedCRS is not a ProjectedCRS.
+ *
+ * \remark Implements DerivedProjectedCRS from \ref ISO_19111_2018
+ */
+class DerivedProjectedCRS : public DerivedCRS,
+                            public io::IPROJStringExportable {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~DerivedProjectedCRS() override;
+    //! @endcond
+
+    PROJ_DLL const ProjectedCRSNNPtr baseCRS() const;
+
+    PROJ_DLL static DerivedProjectedCRSNNPtr
+    create(const util::PropertyMap &properties,
+           const ProjectedCRSNNPtr &baseCRSIn,
+           const operation::ConversionNNPtr &derivingConversionIn,
+           const cs::CoordinateSystemNNPtr &csIn);
+
+    PROJ_DLL std::string exportToWKT(io::WKTFormatterNNPtr formatter)
+        const override; // throw(io::FormattingException)
+
+    PROJ_DLL std::string
+    exportToPROJString(io::PROJStringFormatterNNPtr formatter)
+        const override; // throw(FormattingException)
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
+  protected:
+    DerivedProjectedCRS(const ProjectedCRSNNPtr &baseCRSIn,
+                        const operation::ConversionNNPtr &derivingConversionIn,
+                        const cs::CoordinateSystemNNPtr &csIn);
+
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    DerivedProjectedCRS(const DerivedProjectedCRS &other) = delete;
+    DerivedProjectedCRS &operator=(const DerivedProjectedCRS &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
 class TemporalCRS;
 /** Shared pointer of TemporalCRS */
 using TemporalCRSPtr = std::shared_ptr<TemporalCRS>;
@@ -776,12 +835,6 @@ class TemporalCRS : public SingleCRS {
 // ---------------------------------------------------------------------------
 
 #ifdef notdef
-
-// ---------------------------------------------------------------------------
-
-class DerivedProjectedCRS : public DerivedCRS {
-    // TODO
-};
 
 // ---------------------------------------------------------------------------
 

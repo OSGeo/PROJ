@@ -117,6 +117,8 @@ class WKTConstants {
     static const std::string ENSEMBLE;         // WKT2-2018
     static const std::string MEMBER;           // WKT2-2018
     static const std::string ENSEMBLEACCURACY; // WKT2-2018
+    static const std::string DERIVEDPROJCRS;   // WKT2-2018
+    static const std::string BASEPROJCRS;      // WKT2-2018
 
     // WKT2 alternate (longer or shorter)
     static const std::string GEODETICCRS;
