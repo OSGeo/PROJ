@@ -32,6 +32,11 @@
   * when a few minor-version releases has been made.
   *
   */
+
+#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+#error 'To use the proj_api.h you must define the macro ACCEPT_USE_OF_DEPRECATED_PROJ_API_H'
+#endif
+
 #ifndef PJ_VERSION
 #define PJ_VERSION 600
 #endif
