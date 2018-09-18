@@ -18,12 +18,12 @@ find /tmp/proj_autoconf_install
 cd ..
 # Now with grids
 wget http://download.osgeo.org/proj/proj-datumgrid-1.5.zip
-cd nad
+cd data
 unzip -o ../proj-datumgrid-1.5.zip
 cd ..
 # autoconf build with grids
-mkdir build_autoconf_nad
-cd build_autoconf_nad
+mkdir build_autoconf_grids
+cd build_autoconf_grids
 CC="ccache x86_64-w64-mingw32-gcc" CXX="ccache x86_64-w64-mingw32-g++" LD=x86_64-w64-mingw32-ld ../configure --host=x86_64-w64-mingw32 --prefix=/tmp/proj_autoconf_install_nad
 make -j3
 make install
@@ -33,6 +33,6 @@ cd src
 make multistresstest.exe
 make test228.exe
 cd ..
-PROJ_LIB=../nad src/multistresstest.exe -num_iterations 100000
+PROJ_LIB=../data src/multistresstest.exe -num_iterations 100000
 cd ..
 

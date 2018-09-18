@@ -49,10 +49,10 @@ build_script:
 
 test_script:
   - echo test_script
-  - if "%BUILD_TYPE%" == "cmake" set PROJ_LIB=C:\projects\proj-4\nad
+  - if "%BUILD_TYPE%" == "cmake" set PROJ_LIB=C:\projects\proj-4\data
   - if "%BUILD_TYPE%" == "nmake" set PROJ_LIB=C:\PROJ\SHARE
   - if "%BUILD_TYPE%" == "nmake" mkdir %PROJ_LIB%\tests
-  - if "%BUILD_TYPE%" == "nmake" copy nad\tests\*.* %PROJ_LIB%\tests
+  - if "%BUILD_TYPE%" == "nmake" copy data\tests\*.* %PROJ_LIB%\tests
   - set CURDIR=%CD%
   - cd %PROJ_LIB%
   - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.7.zip

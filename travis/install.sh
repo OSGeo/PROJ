@@ -25,7 +25,7 @@ cd build_autoconf
 ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 make -j3
 make install
-# We have a small issue with out-of-tree builds where the null file is generated in the build directory, but other non-generated stuff is in $(top_srcdir)/nad
+# We have a small issue with out-of-tree builds where the null file is generated in the build directory, but other non-generated stuff is in $(top_srcdir)/data
 # Workaround this by using the install directory...
 PROJ_LIB=/tmp/proj_autoconf_install_from_dist_all/share/proj make check
 find /tmp/proj_autoconf_install_from_dist_all
@@ -47,25 +47,25 @@ cd ..
 cd ../..
 
 # Install grid files
-cd nad
+cd data
 unzip -o ../proj-datumgrid-1.7.zip
 GRIDDIR=`pwd`
 echo $GRIDDIR
 cd ..
 
 # autoconf build with grids
-mkdir build_autoconf_nad
-cd build_autoconf_nad
-../configure --prefix=/tmp/proj_autoconf_install_nad
+mkdir build_autoconf_grids
+cd build_autoconf_grids
+../configure --prefix=/tmp/proj_autoconf_install_grids
 make -j3
 make install
-find /tmp/proj_autoconf_install_nad
+find /tmp/proj_autoconf_install_grids
 PROJ_LIB=$GRIDDIR make check
 cd src
 make multistresstest
 make test228
 cd ..
-PROJ_LIB=../nad src/multistresstest
+PROJ_LIB=../data src/multistresstest
 cd ..
 
 # autoconf build with grids and coverage

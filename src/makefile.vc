@@ -129,7 +129,7 @@ $(MULTISTRESSTEST_EXE): $(MULTISTRESSTEST_OBJ)
 	if exist $(MULTISTRESSTEST_EXE).manifest mt -manifest $(MULTISTRESSTEST_EXE).manifest -outputresource:$(MULTISTRESSTEST_EXE);1
 
 nadshift:	nad2bin.exe
-	cd ..\nad
+	cd ..\data
 	..\src\nad2bin.exe < conus.lla conus
 	..\src\nad2bin.exe < MD.lla MD
 	..\src\nad2bin.exe < TN.lla TN

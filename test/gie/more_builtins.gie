@@ -11,7 +11,7 @@ intends to exercise corner cases.
 <gie>
 
 -------------------------------------------------------------------------------
-Two ob_tran tests from nad/testvarious
+Two ob_tran tests from data/testvarious
 -------------------------------------------------------------------------------
 operation +proj=ob_tran  +o_proj=moll  +R=6378137.0  +o_lon_p=0  +o_lat_p=0  +lon_0=180
 -------------------------------------------------------------------------------

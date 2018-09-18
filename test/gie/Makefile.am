@@ -11,7 +11,7 @@ EXTRA_DIST = 4D-API_cs2cs-style.gie \
 	unitconvert.gie \
 	DHDN_ETRS89.gie
 
-PROJ_LIB ?= $(top_srcdir)/nad
+PROJ_LIB ?= $(top_srcdir)/data
 
 4D-API-cs2cs-style: 4D-API_cs2cs-style.gie
 	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<

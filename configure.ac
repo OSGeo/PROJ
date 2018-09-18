@@ -270,9 +270,9 @@ AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile
                  test/googletest/include/gtest/internal/Makefile
                  test/googletest/include/gtest/internal/custom/Makefile
                  test/googletest/src/Makefile
-                 man/Makefile man/man1/Makefile man/man3/Makefile nad/Makefile
+                 man/Makefile man/man1/Makefile man/man3/Makefile data/Makefile
                  jniwrap/Makefile jniwrap/org.osgeo.proj/Makefile jniwrap/org.osgeo.proj/org/Makefile jniwrap/org.osgeo.proj/org/proj4/Makefile])
-AC_CONFIG_FILES([nad/install], [chmod +x nad/install])
+AC_CONFIG_FILES([data/install], [chmod +x data/install])
 
 AC_CONFIG_FILES([proj.pc])
 
