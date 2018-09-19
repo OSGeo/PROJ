@@ -45,25 +45,18 @@ cd ..
 cd ../..
 
 # Install grid files
-cd data
-unzip -o ../proj-datumgrid-1.7.zip
-GRIDDIR=`pwd`
-echo $GRIDDIR
-cd ..
+(cd data && unzip -o ../proj-datumgrid-1.7.zip)
 
 # autoconf build with grids
 mkdir build_autoconf_grids
 cd build_autoconf_grids
 ../configure --prefix=/tmp/proj_autoconf_install_grids
 make -j3
+make check
+(cd src && make multistresstest && make test228)
+PROJ_LIB=../data src/multistresstest
 make install
 find /tmp/proj_autoconf_install_grids
-PROJ_LIB=$GRIDDIR make check
-cd src
-make multistresstest
-make test228
-cd ..
-PROJ_LIB=../data src/multistresstest
 cd ..
 
 # autoconf build with grids and coverage
@@ -73,10 +66,10 @@ else
     CFLAGS="--coverage" LDFLAGS="-lgcov" ./configure;
 fi
 make -j3
-PROJ_LIB=$GRIDDIR make check
+make check
 
 # Rerun tests without grids not included in proj-datumgrid
-rm -v ${GRIDDIR}/egm96_15.gtx
-PROJ_LIB=$GRIDDIR make check
+rm -v data/egm96_15.gtx
+make check
 
 mv src/.libs/*.gc* src
