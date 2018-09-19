@@ -6,7 +6,8 @@ set -e
 coveralls --extension .c --exclude build_autoconf --exclude build_cmake
 echo "$TRAVIS_SECURE_ENV_VARS"
 ./travis/build_docs.sh
-if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "master"; then
+# Only build and publish docs when changes are made on most recent maintenance branch
+if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "5.2"; then
     echo "publish website";
     ./travis/add_deploy_key.sh;
     ./travis/deploy_website.sh $TRAVIS_BUILD_DIR/docs/build /tmp;
