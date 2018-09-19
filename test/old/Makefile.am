@@ -1,5 +1,5 @@
 # Executables paths passed to test scripts
-DATAPATH = $(top_srcdir)/data
+DATAPATH = ../../data
 THIS_DIR = $(top_srcdir)/test/old
 EXEPATH = ../../src
 PROJEXE = $(EXEPATH)/proj

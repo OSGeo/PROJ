@@ -24,10 +24,8 @@ mkdir build_autoconf
 cd build_autoconf
 ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 make -j3
+make check
 make install
-# We have a small issue with out-of-tree builds where the null file is generated in the build directory, but other non-generated stuff is in $(top_srcdir)/data
-# Workaround this by using the install directory...
-PROJ_LIB=/tmp/proj_autoconf_install_from_dist_all/share/proj make check
 find /tmp/proj_autoconf_install_from_dist_all
 cd ..
 

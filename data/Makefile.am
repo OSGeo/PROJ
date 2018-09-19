@@ -45,3 +45,11 @@ install-data-local: process-nad2bin
 	    $(INSTALL_DATA) $$gridfile $(DESTDIR)$(pkgdatadir)/`basename $$gridfile`; \
           fi; \
 	done
+
+# For out-of-tree builds, link all file of the source data dir to the generated data
+check-local: process-nad2bin
+	@if [ ! -f GL27 ]; then \
+		for x in $(DATAPATH)/*; do \
+			ln -sf $$x .; \
+		done \
+	fi
