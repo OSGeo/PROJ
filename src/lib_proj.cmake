@@ -227,7 +227,6 @@ SET(SRC_LIBPROJ_CORE
  )
 
 set(HEADERS_LIBPROJ
-        projects.h
         proj_api.h
         proj.h
         geodesic.h

@@ -9,6 +9,10 @@
 #  endif
 #endif
 
+#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+#endif
+
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>

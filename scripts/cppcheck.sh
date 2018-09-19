@@ -23,7 +23,7 @@ for dirname in ${TOPDIR}/src; do
     echo "Running cppcheck on $dirname... (can be long)"
     if ! cppcheck --inline-suppr --template='{file}:{line},{severity},{id},{message}' \
         --enable=all --inconclusive --std=posix \
-        -DCPPCHECK \
+        -DCPPCHECK -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H\
         "$dirname" \
         -j 8 >>${LOG_FILE} 2>&1 ; then
         echo "cppcheck failed"
