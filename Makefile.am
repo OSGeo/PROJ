@@ -1,4 +1,4 @@
-SUBDIRS	=	src man nad jniwrap cmake test
+SUBDIRS	=	src man data jniwrap cmake test
 
 EXTRA_DIST = makefile.vc nmake.opt CMakeLists.txt CITATION
 

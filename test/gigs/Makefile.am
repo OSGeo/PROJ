@@ -20,7 +20,7 @@ EXTRA_DIST = \
 	5201.gie \
 	5208.gie
 
-PROJ_LIB ?= $(top_srcdir)/nad
+PROJ_LIB ?= $(top_srcdir)/data
 
 5101.1: 5101.1-jhs.gie
 	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<

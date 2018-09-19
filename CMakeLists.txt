@@ -160,7 +160,7 @@ set(CMAKECONFIGDIR "${DEFAULT_CMAKEDIR}" CACHE PATH "The directory to install cm
 include_directories(${PROJ4_SOURCE_DIR}/src)
 
 message(STATUS "")
-add_subdirectory(nad)
+add_subdirectory(data)
 add_subdirectory(src)
 add_subdirectory(man)
 add_subdirectory(cmake)

@@ -8,10 +8,10 @@ INSTDIR=C:\PROJ
 !ENDIF
 
 # Set the following to the directory where the PROJ distribution data files
-# (ie, the contents of ..\NAD) are to be installed.  It is possible to later
+# (ie, the contents of ..\data) are to be installed.  It is possible to later
 # move the data files to another directory, and define the PROJ_LIB
 # environment variable to point to that directory.  It is also possible to
-# have PROJ_LIB name the original NAD directory of the unpacked PROJ
+# have PROJ_LIB name the original data directory of the unpacked PROJ
 # distribution.  Any setting of the PROJ_LIB environment variable takes
 # precedence at runtime over the setting of the PROJ_LIB_DIR macro stored in
 # the compiled software.

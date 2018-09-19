@@ -52,4 +52,5 @@ proj_add_gie_test("GIGS-5208" "gigs/5208.gie")
 #                    ${TEST_MAIN_SRC}
 #                    ${CATCH2_INCLUDE}  )
 
+add_subdirectory(old)
 add_subdirectory(unit)

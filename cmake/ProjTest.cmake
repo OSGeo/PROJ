@@ -9,7 +9,7 @@ function(proj_add_test_script_sh SH_NAME BIN_USE)
     set(TEST_OK 1)
     if(ARGV2)
          set(TEST_OK 0)
-         set(GRID_FULLNAME ${PROJECT_SOURCE_DIR}/nad/${ARGV2})
+         set(GRID_FULLNAME ${PROJECT_SOURCE_DIR}/data/${ARGV2})
          if(EXISTS ${GRID_FULLNAME})
             set(TEST_OK 1)
          endif(EXISTS ${GRID_FULLNAME})
@@ -22,8 +22,8 @@ function(proj_add_test_script_sh SH_NAME BIN_USE)
 
     if(${TEST_OK})
       add_test( NAME "${testname}"
-                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/nad
-                COMMAND  ${PROJECT_SOURCE_DIR}/nad/${SH_NAME}
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data
+                COMMAND  ${PROJECT_SOURCE_DIR}/test/old/${SH_NAME}
                          ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${${BIN_USE}}
                )
     endif(${TEST_OK})
