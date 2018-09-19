@@ -175,9 +175,10 @@ See step 1.6 above. Do not rename the archives with RC postfixes.
 2.2 Update website
 ------------------------------------------------------------------------------
 
-  - Update the version number in `doc/source/conf.py`
   - Add the release notes from `NEWS` to `docs/source/news.rst`
   - Update download links in `docs/source/download.rst`
+  - Update `$TRAVIS_BRANCH` in `travis\after_success.sh` to new maintenance
+    branch.
 
 *Commit the changes to master and cherry-pick into maintenance branch.*
 
@@ -231,6 +232,7 @@ version numbers in the files.
   - src/proj_api.h:       Update PJ_VERSION.
   - src/pj_release.c:     Update date to the scheduled release date.
   - CMakelists.txt:       Update proj_version()
+  - doc/source/conf.py:   Update version number
 
 
 *Commit changes to master branch.*
