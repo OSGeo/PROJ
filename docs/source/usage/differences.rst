@@ -13,6 +13,19 @@ that uses PROJ.
 Behavioural changes caused by new bugs are not tracked here, as they should be
 fixed in later versions of PROJ.
 
+Version 4.6.0
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The default datum application behavior changed with the 4.6.0 release. PROJ
+will now only apply a datum shift if both the source and destination coordinate
+system have valid datum shift information.
+
+The PROJ 4.6.0 Release Notes states
+
+    MAJOR: Rework :c:func:`pj_transform()` to avoid applying ellipsoid to ellipsoid
+    transformations as a datum shift when no datum info is available.
+
+
 Version 5.0.0
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
