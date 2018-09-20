@@ -102,7 +102,7 @@ How do I use EPSG coordinate system codes with PROJ?
 
 There is somewhat imperfect translation between 2D geographic and projected
 coordinate system codes and PROJ descriptions of the coordinate system
-available in the ``epsg`` definition file that normally lives in the ``proj/nad``
+available in the ``epsg`` definition file that normally lives in the ``proj/data``
 directory.  If installed (it is installed by default on Unix), it is possible
 to use EPSG numbers like this:
 
@@ -123,7 +123,7 @@ to use EPSG numbers like this:
     #
     # +proj=latlong +datum=NAD27 +ellps=clrk66 +nadgrids=conus,ntv1_can.dat
 
-The proj/nad/epsg file can be browsed and searched in a text editor for
+The ``proj/data/epsg`` file can be browsed and searched in a text editor for
 coordinate systems.  There are known to be problems with some coordinate
 systems, and any coordinate systems with odd axes, a non-greenwich prime
 meridian or other quirkiness are unlikely to work properly. Caveat Emptor!

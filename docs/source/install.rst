@@ -140,9 +140,9 @@ In either case, the directory of the prefix path must exist and be writable by
 the installer.
 
 Before proceeding with the installation we need to add the datum grids. Unzip
-the contents of the *proj-datumgrid* package into ``nad/``::
+the contents of the *proj-datumgrid* package into ``data/``::
 
-    unzip proj-datumgrid-1.7.zip -d proj-5.0.1/nad/
+    unzip proj-datumgrid-1.7.zip -d proj-5.0.1/data/
 
 The installation will automatically move the grid files to the correct location.
 Alternatively the grids can be installed manually in the directory pointed to
