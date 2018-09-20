@@ -140,3 +140,17 @@ EXPORTS
     pj_isnan                        @123
 
     proj_errno_string               @124
+
+    pj_param_exists                 @125
+    pj_atof                         @126
+    pj_ell_set                      @127
+    pj_mkparam                      @128
+    pj_param                        @129
+    adjlon                          @130
+    dmstor                          @131
+    rtodms                          @132
+    set_rtodms                      @133
+    mk_cheby                        @134
+    pj_get_datums_ref               @135
+    pj_deallocate_grids             @136
+    pj_factors                      @137
