@@ -62,7 +62,7 @@ from shapely.ops import transform
 from descartes import PolygonPatch
 
 PROJ = '../../src/proj'
-PROJ_LIB = '../../nad'
+PROJ_LIB = '../../data'
 
 LINE_LOW = 'data/coastline.geojson'
 LINE_MED = 'data/coastline50.geojson'
@@ -118,7 +118,7 @@ def interp_coords(coords, tol):
         xy.append((x[offset:i], y[offset:i]))
 
         # Interpolate between points above tolerance.
-        n = np.ceil(dsts[i] / tol)
+        n = int(np.ceil(dsts[i] / tol))
         x1 = np.linspace(x[i], x[i + 1], n + 1)
         y1 = np.linspace(y[i], y[i + 1], n + 1)
         xy.append((x1[:-1], y1[:-1]))
