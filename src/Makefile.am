@@ -55,7 +55,7 @@ libproj_la_SOURCES = \
 	PJ_mill.c PJ_ocea.c PJ_omerc.c PJ_somerc.c \
 	PJ_tcc.c PJ_tcea.c PJ_times.c PJ_tmerc.c \
 	PJ_airy.c PJ_aitoff.c PJ_august.c PJ_bacon.c \
-	PJ_chamb.c PJ_hammer.c PJ_lagrng.c PJ_larr.c \
+	PJ_bertin1953.c PJ_chamb.c PJ_hammer.c PJ_lagrng.c PJ_larr.c \
 	PJ_lask.c PJ_latlong.c PJ_nocol.c PJ_ob_tran.c PJ_oea.c \
 	PJ_tpeqd.c PJ_vandg.c PJ_vandg2.c PJ_vandg4.c \
 	PJ_wag7.c PJ_lcca.c PJ_geos.c proj_etmerc.c \

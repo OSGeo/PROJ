@@ -45,6 +45,7 @@ SET(SRC_LIBPROJ_PJ
         PJ_august.c
         PJ_axisswap.c
         PJ_bacon.c
+        PJ_bertin1953.c
         PJ_bipc.c
         PJ_boggs.c
         PJ_bonne.c
