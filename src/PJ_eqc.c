@@ -10,7 +10,7 @@ struct pj_opaque {
     double rc;
 };
 
-PROJ_HEAD(eqc, "Equidistant Cylindrical (Plate Caree)")
+PROJ_HEAD(eqc, "Equidistant Cylindrical (Plate Carree)")
     "\n\tCyl, Sph\n\tlat_ts=[, lat_0=0]";
 
 
