@@ -10,5 +10,6 @@ EXTRA_DIST = CMakeLists.txt \
 			policies.cmake \
 			proj_config.cmake.in \
 			project-config-version.cmake.in \
-			project-config.cmake.in
+			project-config.cmake.in \
+			FindSqlite3.cmake
 

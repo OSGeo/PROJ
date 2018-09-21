@@ -77,6 +77,20 @@ include(ProjMac)
 include(policies)
 
 #################################################################################
+# Check for sqlite3
+#################################################################################
+find_program(EXE_SQLITE3 sqlite3)
+if (NOT EXE_SQLITE3)
+MESSAGE (SEND_ERROR "sqlite3 binary not found!")
+ENDIF (NOT EXE_SQLITE3)
+
+FIND_PACKAGE(Sqlite3)
+IF (NOT SQLITE3_FOUND)
+MESSAGE (SEND_ERROR "sqlite3 dependency not found!")
+ENDIF (NOT SQLITE3_FOUND)
+
+
+#################################################################################
 # threading configuration
 #################################################################################
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)

@@ -6,3 +6,4 @@ set -e
 
 brew update
 brew install ccache
+brew install sqlite3

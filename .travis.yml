@@ -47,6 +47,7 @@ matrix:
       compiler: gcc
       language: cpp
       dist: trusty
+      sudo: required
       env:
         - BUILD_NAME=csa
         - DETAILS="CLang Static Analyzer"

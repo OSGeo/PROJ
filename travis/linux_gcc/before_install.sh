@@ -8,6 +8,7 @@ sudo apt-get update -qq
 sudo apt-get install -y cppcheck
 sudo apt-get install -qq lcov
 sudo apt-get install -qq doxygen graphviz
+sudo apt-get install -qq sqlite3 libsqlite3-dev
 
 scripts/cppcheck.sh
 scripts/doxygen.sh

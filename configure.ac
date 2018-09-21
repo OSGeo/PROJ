@@ -268,6 +268,51 @@ fi
 AC_SUBST(MUTEX_SETTING,$MUTEX_SETTING)
 AC_SUBST(THREAD_LIB,$THREAD_LIB)
 
+dnl ---------------------------------------------------------------------------
+dnl Check for sqlite3 library and binary
+dnl ---------------------------------------------------------------------------
+
+AC_ARG_WITH(sqlite3-include,
+    [  --with-sqlite3-include=ARG sqlite3 include directory],,,)
+
+if test "x$with_sqlite3_include" = "x" ; then
+SQLITE3_FLAGS=""
+if test -z "`uname | grep Darwin`" ; then
+    AC_CHECK_HEADERS([sqlite3.h])
+    if test "$ac_cv_header_sqlite3_h" = "no" ; then
+        AC_MSG_ERROR([Please install sqlite3 development package.])
+    fi
+fi
+else
+    SQLITE3_FLAGS="-I$with_sqlite3_include"
+fi
+AC_SUBST(SQLITE3_FLAGS,$SQLITE3_FLAGS)
+
+AC_ARG_WITH(sqlite3-ldflags,
+      [  --with-sqlite3-ldflags=ARG   sqlite3 link flags (i.e. -L/xxx -lsqlite3)],,,)
+
+SQLITE3_LDFLAGS=""
+if test "x$with_sqlite3_ldflags" = "x" ; then
+    AC_CHECK_LIB(sqlite3,sqlite3_open,SQLITE3_LIB_FOUND=yes,SQLITE3_LIB_FOUND=no,)
+    if test x"$SQLITE3_LIB_FOUND" != x"yes"; then
+        AC_MSG_ERROR([Please install sqlite3 development package.])
+    fi
+    SQLITE3_LDFLAGS="-lsqlite3"
+else
+    SQLITE3_LDFLAGS="$with_sqlite3_ldflags"
+fi
+AC_SUBST(SQLITE3_LDFLAGS,$SQLITE3_LDFLAGS)
+
+
+AC_CHECK_PROG(SQLITE3_CHECK,sqlite3,yes)
+if test x"$SQLITE3_CHECK" != x"yes" ; then
+    AC_MSG_ERROR([Please install sqlite3 binary.])
+fi
+
+dnl ---------------------------------------------------------------------------
+dnl Generate files
+dnl ---------------------------------------------------------------------------
+
 AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile include/Makefile include/proj/Makefile
                  test/Makefile test/old/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
                  test/googletest/Makefile test/googletest/include/Makefile

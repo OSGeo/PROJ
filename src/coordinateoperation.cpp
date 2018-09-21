@@ -42,6 +42,8 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include "sqlite3.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -67,6 +69,9 @@ namespace operation {
 using PairOfString = std::pair<std::string, std::string>;
 
 static std::set<PairOfString> buildSetEquivalentParameters() {
+
+    sqlite3_libversion(); // FIXME: remove me
+
     std::set<PairOfString> set;
     for (const auto &paramList : listOfEquivalentParameterNames) {
         for (size_t i = 0; i < paramList.size(); i++) {

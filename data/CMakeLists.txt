@@ -39,12 +39,35 @@ if(CONVERT_DATA)
     endif(BUILD_NAD2BIN)
 endif(CONVERT_DATA)
 
+set(ALL_SQL_IN "${CMAKE_CURRENT_SOURCE_DIR}/all.sql.in")
+set(PROJ_DB "${CMAKE_CURRENT_SOURCE_DIR}/proj.db")
+include(sql_filelist.cmake)
+
+add_custom_command(OUTPUT ${ALL_SQL_IN}
+    COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_SOURCE_DIR}/generate_all_sql_in.cmake"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    DEPENDS ${SQL_FILES}
+    COMMENT "Generating all.sql.in"
+    VERBATIM
+)
+
+add_custom_target(generate_all_sql_in ALL DEPENDS ${ALL_SQL_IN})
+
+add_custom_command(OUTPUT ${PROJ_DB}
+    COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJ_DB}
+    COMMAND ${EXE_SQLITE3} -init ${ALL_SQL_IN} ${PROJ_DB} .quit
+    DEPENDS generate_all_sql_in ${ALL_SQL_IN}
+    COMMENT "Generating proj.db"
+    VERBATIM
+)
+
+add_custom_target(generate_proj_db ALL DEPENDS ${PROJ_DB})
 
 #
 #install
 #
 set(ALL_DATA_FILE ${PROJ_DICTIONARY}
                   ${GRIDSHIFT_FILES}
-                  ${GEOID_FILES})
+                  ${GEOID_FILES} "proj.db")
 install(FILES ${ALL_DATA_FILE}
-       DESTINATION ${DATADIR})
+        DESTINATION ${DATADIR})
