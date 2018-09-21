@@ -39,7 +39,6 @@ static int
     inverse = 0,    /* != 0 then inverse projection */
     prescale = 0,   /* != 0 apply cartesian scale factor */
     dofactors = 0,  /* determine scale factors */
-    facs_bad = 0,   /* return condition from pj_factors */
     very_verby = 0, /* very verbose mode */
     postscale = 0;
 
@@ -52,7 +51,7 @@ static const char
     *oterr = "*\t*",    /* output line for unprojectable input */
     *usage = "%s\nusage: %s [ -bdeEfiIlmorsStTvVwW [args] ] [ +opts[=arg] ] [ files ]\n";
 
-static struct FACTORS facs;
+static PJ_FACTORS facs;
 
 static double (*informat)(const char *, char **), /* input data deformatter function */
               fscale = 0.;                        /* cartesian scale factor */
@@ -79,6 +78,7 @@ static void process(FILE *fid) {
     PJ_COORD data;
 
     for (;;) {
+        int facs_bad = 0;
         ++emess_dat.File_line;
 
         if (bin_in) {   /* binary input */
@@ -124,13 +124,20 @@ static void process(FILE *fid) {
         }
 
         if (data.uv.u != HUGE_VAL) {
+            PJ_COORD coord;
+            coord.lp = data.lp;
             if (prescale) { data.uv.u *= fscale; data.uv.v *= fscale; }
-            if (dofactors && !inverse)
-                facs_bad = pj_factors(data.lp, Proj, 0., &facs);
+            if (dofactors && !inverse) {
+                facs = proj_factors(Proj, coord);
+                facs_bad = proj_errno(Proj);
+            }
+
             data.xy = (*proj.fwd)(data.lp, Proj);
 
-            if (dofactors && inverse)
-                facs_bad = pj_factors(data.lp, Proj, 0., &facs);
+            if (dofactors && inverse) {
+                facs = proj_factors(Proj, coord);
+                facs_bad = proj_errno(Proj);
+            }
 
             if (postscale && data.uv.u != HUGE_VAL)
                 { data.uv.u *= fscale; data.uv.v *= fscale; }
@@ -177,8 +184,8 @@ static void process(FILE *fid) {
         if (dofactors) {
             if (!facs_bad)
                 (void)printf("\t<%g %g %g %g %g %g>",
-                    facs.h, facs.k, facs.s,
-                    facs.omega * RAD_TO_DEG, facs.a, facs.b);
+                    facs.meridional_scale, facs.parallel_scale, facs.areal_scale,
+                    facs.angular_distortion * RAD_TO_DEG, facs.tissot_semimajor, facs.tissot_semiminor);
             else
                 (void)fputs("\t<* * * * * *>", stdout);
         }
@@ -192,6 +199,7 @@ static void vprocess(FILE *fid) {
     LP dat_ll;
     projXY dat_xy;
     int linvers;
+    PJ_COORD coord;
 
 
     if (!oform)
@@ -274,7 +282,9 @@ static void vprocess(FILE *fid) {
         }
 
         if (!*s && (s > line)) --s; /* assumed we gobbled \n */
-        if (pj_factors(dat_ll, Proj, 0., &facs)) {
+        coord.lp = dat_ll;
+        facs = proj_factors(Proj, coord);
+        if (proj_errno(Proj)) {
             emess(-1,"failed to compute factors\n\n");
             continue;
         }
@@ -292,15 +302,15 @@ static void vprocess(FILE *fid) {
         (void)printf(oform, dat_xy.x); putchar('\n');
         (void)fputs("Northing (y):  ", stdout);
         (void)printf(oform, dat_xy.y); putchar('\n');
-        (void)printf("Meridian scale (h) : %.8f  ( %.4g %% error )\n", facs.h, (facs.h-1.)*100.);
-        (void)printf("Parallel scale (k) : %.8f  ( %.4g %% error )\n", facs.k, (facs.k-1.)*100.);
-        (void)printf("Areal scale (s):     %.8f  ( %.4g %% error )\n", facs.s, (facs.s-1.)*100.);
-        (void)printf("Angular distortion (w): %.3f\n", facs.omega * RAD_TO_DEG);
-        (void)printf("Meridian/Parallel angle: %.5f\n", facs.thetap * RAD_TO_DEG);
+        (void)printf("Meridian scale (h) : %.8f  ( %.4g %% error )\n", facs.meridional_scale, (facs.meridional_scale-1.)*100.);
+        (void)printf("Parallel scale (k) : %.8f  ( %.4g %% error )\n", facs.parallel_scale, (facs.parallel_scale-1.)*100.);
+        (void)printf("Areal scale (s):     %.8f  ( %.4g %% error )\n", facs.areal_scale, (facs.areal_scale-1.)*100.);
+        (void)printf("Angular distortion (w): %.3f\n", facs.angular_distortion * RAD_TO_DEG);
+        (void)printf("Meridian/Parallel angle: %.5f\n", facs.meridian_parallel_angle * RAD_TO_DEG);
         (void)printf("Convergence : ");
-        (void)fputs(proj_rtodms(pline, facs.conv, 0, 0), stdout);
-        (void)printf(" [ %.8f ]\n", facs.conv * RAD_TO_DEG);
-        (void)printf("Max-min (Tissot axis a-b) scale error: %.5f %.5f\n\n", facs.a, facs.b);
+        (void)fputs(proj_rtodms(pline, facs.meridian_convergence, 0, 0), stdout);
+        (void)printf(" [ %.8f ]\n", facs.meridian_convergence * RAD_TO_DEG);
+        (void)printf("Max-min (Tissot axis a-b) scale error: %.5f %.5f\n\n", facs.tissot_semimajor, facs.tissot_semiminor);
     }
 }
 
