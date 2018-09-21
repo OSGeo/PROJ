@@ -245,8 +245,8 @@ static void vprocess(FILE *fid) {
             }
             dat_ll = pj_inv(dat_xy, Proj);
         } else {
-            dat_ll.lam = dmstor(s, &s);
-            dat_ll.phi = dmstor(s, &s);
+            dat_ll.lam = proj_dmstor(s, &s);
+            dat_ll.phi = proj_dmstor(s, &s);
             if (dat_ll.lam == HUGE_VAL || dat_ll.phi == HUGE_VAL) {
                 emess(-1,"lon-lat input conversion failure\n");
                 continue;
@@ -283,10 +283,10 @@ static void vprocess(FILE *fid) {
             (void)fputs(s, stdout);
 
         (void)fputs("Longitude: ", stdout);
-        (void)fputs(rtodms(pline, dat_ll.lam, 'E', 'W'), stdout);
+        (void)fputs(proj_rtodms(pline, dat_ll.lam, 'E', 'W'), stdout);
         (void)printf(" [ %.11g ]\n", dat_ll.lam * RAD_TO_DEG);
         (void)fputs("Latitude:  ", stdout);
-        (void)fputs(rtodms(pline, dat_ll.phi, 'N', 'S'), stdout);
+        (void)fputs(proj_rtodms(pline, dat_ll.phi, 'N', 'S'), stdout);
         (void)printf(" [ %.11g ]\n", dat_ll.phi * RAD_TO_DEG);
         (void)fputs("Easting (x):   ", stdout);
         (void)printf(oform, dat_xy.x); putchar('\n');
@@ -298,7 +298,7 @@ static void vprocess(FILE *fid) {
         (void)printf("Angular distortion (w): %.3f\n", facs.omega * RAD_TO_DEG);
         (void)printf("Meridian/Parallel angle: %.5f\n", facs.thetap * RAD_TO_DEG);
         (void)printf("Convergence : ");
-        (void)fputs(rtodms(pline, facs.conv, 0, 0), stdout);
+        (void)fputs(proj_rtodms(pline, facs.conv, 0, 0), stdout);
         (void)printf(" [ %.8f ]\n", facs.conv * RAD_TO_DEG);
         (void)printf("Max-min (Tissot axis a-b) scale error: %.5f %.5f\n\n", facs.a, facs.b);
     }
@@ -530,7 +530,7 @@ int main(int argc, char **argv) {
     if (inverse)
         informat = strtod;
     else {
-        informat = dmstor;
+        informat = proj_dmstor;
         if (!oform)
             oform = "%.2f";
     }
