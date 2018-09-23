@@ -128,8 +128,8 @@ static int adjust_axes (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x, do
 
 
 /* ----------------------------------------------------------------------- */
-/*    Transform cartesian ("geocentric") source coordinates to lat/long,   */
-/*    if needed                                                            */
+/*    Transform geographic (lat/long) source coordinates to                */
+/*    cartesian ("geocentric"), if needed                                  */
 /* ----------------------------------------------------------------------- */
 static int geographic_to_cartesian (PJ *P, PJ_DIRECTION dir, long n, int dist, double *x, double *y, double *z) {
     int res;
@@ -632,7 +632,7 @@ int pj_geodetic_to_geocentric( double a, double es,
 }
 
 /************************************************************************/
-/*                     pj_geodetic_to_geocentric()                      */
+/*                     pj_geocentric_to_geodetic()                      */
 /************************************************************************/
 
 int pj_geocentric_to_geodetic( double a, double es,
