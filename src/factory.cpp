@@ -31,6 +31,7 @@
 #endif
 
 #include "proj/common.hpp"
+#include "proj/coordinateoperation.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -42,6 +43,7 @@
 
 #include <cstdlib>
 #include <memory>
+#include <sstream> // std::ostringstream
 #include <string>
 
 #include "projects.h" // DIR_CHAR
@@ -305,29 +307,42 @@ AuthorityFactory::createObject(const std::string &code) const {
         }
         throw FactoryException(msg);
     }
-    if (res[0][0] == "unit_of_measure") {
+    const auto &table_name = res[0][0];
+    if (table_name == "unit_of_measure") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createUnitOfMeasure(code));
     }
-    if (res[0][0] == "prime_meridian") {
+    if (table_name == "prime_meridian") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createPrimeMeridian(code));
     }
-    if (res[0][0] == "ellipsoid") {
+    if (table_name == "ellipsoid") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createEllipsoid(code));
     }
-    if (res[0][0] == "geodetic_datum") {
+    if (table_name == "geodetic_datum") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createGeodeticDatum(code));
     }
-    if (res[0][0] == "vertical_datum") {
+    if (table_name == "vertical_datum") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createVerticalDatum(code));
     }
-    if (res[0][0] == "geodetic_crs") {
+    if (table_name == "geodetic_crs") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createGeodeticCRS(code));
+    }
+    if (table_name == "vertical_crs") {
+        return util::nn_static_pointer_cast<util::BaseObject>(
+            createVerticalCRS(code));
+    }
+    if (table_name == "projected_crs") {
+        return util::nn_static_pointer_cast<util::BaseObject>(
+            createProjectedCRS(code));
+    }
+    if (table_name == "conversion") {
+        return util::nn_static_pointer_cast<util::BaseObject>(
+            createConversion(code));
     }
     throw FactoryException("unimplemented factory for" + res[0][0]);
 }
@@ -723,6 +738,12 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
         }
         throw FactoryException("invalid number of axis for CartesianCS");
     }
+    if (csType == "vertical") {
+        if (axisList.size() == 1) {
+            return cs::VerticalCS::create(props, axisList[0]);
+        }
+        throw FactoryException("invalid number of axis for VerticalCS");
+    }
     throw FactoryException("unhandled coordinate system type: " + csType);
 }
 
@@ -789,6 +810,209 @@ AuthorityFactory::createGeodeticCRS(const std::string &code) const {
                                cs->getWKT2Type(WKTFormatter::create()));
     } catch (const std::exception &ex) {
         throw FactoryException("cannot build geodeticCRS " + code + ": " +
+                               ex.what());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a crs::VerticalCRS from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ */
+
+crs::VerticalCRSNNPtr
+AuthorityFactory::createVerticalCRS(const std::string &code) const {
+    auto res = d->context()->getPrivate()->run(
+        "SELECT name, coordinate_system_auth_name, "
+        "coordinate_system_code, datum_auth_name, datum_code, "
+        "area_of_use_auth_name, area_of_use_code, deprecated FROM "
+        "vertical_crs WHERE auth_name = ? AND code = ?",
+        {getAuthority(), code});
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("verticalCRS not found",
+                                           getAuthority(), code);
+    }
+    try {
+        const auto &row = res[0];
+        const auto &name = row[0];
+        const auto &cs_auth_name = row[1];
+        const auto &cs_code = row[2];
+        const auto &datum_auth_name = row[3];
+        const auto &datum_code = row[4];
+        const auto &area_of_use_auth_name = row[5];
+        const auto &area_of_use_code = row[6];
+        const bool deprecated = row[7] == "1";
+        auto cs =
+            create(d->context(), cs_auth_name)->createCoordinateSystem(cs_code);
+        auto datum = create(d->context(), datum_auth_name)
+                         ->createVerticalDatum(datum_code);
+        auto extent = create(d->context(), area_of_use_auth_name)
+                          ->createExtent(area_of_use_code);
+        auto props =
+            util::PropertyMap()
+                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
+                .set(metadata::Identifier::CODE_KEY, code)
+                .set(common::IdentifiedObject::NAME_KEY, name)
+                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
+                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+        auto verticalCS = util::nn_dynamic_pointer_cast<cs::VerticalCS>(cs);
+        if (verticalCS) {
+            return crs::VerticalCRS::create(props, datum,
+                                            NN_CHECK_ASSERT(verticalCS));
+        }
+        throw FactoryException("unsupported CS type for verticalCRS: " +
+                               cs->getWKT2Type(WKTFormatter::create()));
+    } catch (const std::exception &ex) {
+        throw FactoryException("cannot build verticalCRS " + code + ": " +
+                               ex.what());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a operation::Conversion from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ */
+
+operation::ConversionNNPtr
+AuthorityFactory::createConversion(const std::string &code) const {
+    std::ostringstream buffer;
+    buffer.imbue(std::locale::classic());
+    buffer << "SELECT name, method_auth_name, method_code, method_name";
+    constexpr int N_MAX_PARAMS = 7;
+    for (int i = 1; i <= N_MAX_PARAMS; ++i) {
+        buffer << ", param" << i << "_auth_name";
+        buffer << ", param" << i << "_code";
+        buffer << ", param" << i << "_name";
+        buffer << ", param" << i << "_value";
+        buffer << ", param" << i << "_uom_auth_name";
+        buffer << ", param" << i << "_uom_code";
+    }
+    buffer << " FROM conversion WHERE auth_name = ? AND code = ?";
+
+    auto res =
+        d->context()->getPrivate()->run(buffer.str(), {getAuthority(), code});
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("conversion not found",
+                                           getAuthority(), code);
+    }
+    try {
+        const auto &row = res[0];
+        const auto &name = row[0];
+        const auto &method_auth_name = row[1];
+        const auto &method_code = row[2];
+        const auto &method_name = row[3];
+        constexpr int base_param_idx = 4;
+        std::vector<operation::OperationParameterNNPtr> parameters;
+        std::vector<operation::ParameterValueNNPtr> values;
+        for (int i = 0; i < N_MAX_PARAMS; ++i) {
+            const auto &param_auth_name = row[base_param_idx + i * 6 + 0];
+            if (param_auth_name.empty()) {
+                break;
+            }
+            const auto &param_code = row[base_param_idx + i * 6 + 1];
+            const auto &param_name = row[base_param_idx + i * 6 + 2];
+            const auto &param_value = row[base_param_idx + i * 6 + 3];
+            const auto &param_uom_auth_name = row[base_param_idx + i * 6 + 4];
+            const auto &param_uom_code = row[base_param_idx + i * 6 + 5];
+            parameters.emplace_back(operation::OperationParameter::create(
+                util::PropertyMap()
+                    .set(metadata::Identifier::CODESPACE_KEY, param_auth_name)
+                    .set(metadata::Identifier::CODE_KEY, param_code)
+                    .set(common::IdentifiedObject::NAME_KEY, param_name)));
+            auto uom = create(d->context(), param_uom_auth_name)
+                           ->createUnitOfMeasure(param_uom_code);
+            values.emplace_back(operation::ParameterValue::create(
+                common::Measure(c_locale_stod(param_value), *uom)));
+        }
+        auto propConversion =
+            util::PropertyMap()
+                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
+                .set(metadata::Identifier::CODE_KEY, code)
+                .set(common::IdentifiedObject::NAME_KEY, name);
+        auto propMethod =
+            util::PropertyMap()
+                .set(metadata::Identifier::CODESPACE_KEY, method_auth_name)
+                .set(metadata::Identifier::CODE_KEY, method_code)
+                .set(common::IdentifiedObject::NAME_KEY, method_name);
+        return operation::Conversion::create(propConversion, propMethod,
+                                             parameters, values);
+    } catch (const std::exception &ex) {
+        throw FactoryException("cannot build conversion " + code + ": " +
+                               ex.what());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a crs::ProjectedCRS from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ */
+
+crs::ProjectedCRSNNPtr
+AuthorityFactory::createProjectedCRS(const std::string &code) const {
+    auto res = d->context()->getPrivate()->run(
+        "SELECT name, coordinate_system_auth_name, "
+        "coordinate_system_code, geodetic_crs_auth_name, geodetic_crs_code, "
+        "conversion_auth_name, conversion_code, "
+        "area_of_use_auth_name, area_of_use_code, deprecated FROM "
+        "projected_crs WHERE auth_name = ? AND code = ?",
+        {getAuthority(), code});
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("projectedCRS not found",
+                                           getAuthority(), code);
+    }
+    try {
+        const auto &row = res[0];
+        const auto &name = row[0];
+        const auto &cs_auth_name = row[1];
+        const auto &cs_code = row[2];
+        const auto &geodetic_crs_auth_name = row[3];
+        const auto &geodetic_crs_code = row[4];
+        const auto &conversion_auth_name = row[5];
+        const auto &conversion_code = row[6];
+        const auto &area_of_use_auth_name = row[7];
+        const auto &area_of_use_code = row[8];
+        const bool deprecated = row[9] == "1";
+        auto cs =
+            create(d->context(), cs_auth_name)->createCoordinateSystem(cs_code);
+
+        auto baseCRS = create(d->context(), geodetic_crs_auth_name)
+                           ->createGeodeticCRS(geodetic_crs_code);
+
+        auto conv = create(d->context(), conversion_auth_name)
+                        ->createConversion(conversion_code);
+
+        auto extent = create(d->context(), area_of_use_auth_name)
+                          ->createExtent(area_of_use_code);
+        auto props =
+            util::PropertyMap()
+                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
+                .set(metadata::Identifier::CODE_KEY, code)
+                .set(common::IdentifiedObject::NAME_KEY, name)
+                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
+                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+        auto cartesianCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
+        if (cartesianCS) {
+            return crs::ProjectedCRS::create(props, baseCRS, conv,
+                                             NN_CHECK_ASSERT(cartesianCS));
+        }
+        throw FactoryException("unsupported CS type for projectedCRS: " +
+                               cs->getWKT2Type(WKTFormatter::create()));
+    } catch (const std::exception &ex) {
+        throw FactoryException("cannot build projectedCRS " + code + ": " +
                                ex.what());
     }
 }

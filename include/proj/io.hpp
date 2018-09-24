@@ -85,7 +85,21 @@ using CRSNNPtr = util::nn<CRSPtr>;
 class GeodeticCRS;
 using GeodeticCRSPtr = std::shared_ptr<GeodeticCRS>;
 using GeodeticCRSNNPtr = util::nn<GeodeticCRSPtr>;
+
+class VerticalCRS;
+using VerticalCRSPtr = std::shared_ptr<VerticalCRS>;
+using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
+
+class ProjectedCRS;
+using ProjectedCRSPtr = std::shared_ptr<ProjectedCRS>;
+using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
 } // namespace crs
+
+namespace operation {
+class Conversion;
+using ConversionPtr = std::shared_ptr<Conversion>;
+using ConversionNNPtr = util::nn<ConversionPtr>;
+} // namespace operation
 
 /** osgeo.proj.io namespace.
  *
@@ -595,6 +609,15 @@ class AuthorityFactory {
 
     PROJ_DLL crs::GeodeticCRSNNPtr
     createGeodeticCRS(const std::string &code) const;
+
+    PROJ_DLL crs::VerticalCRSNNPtr
+    createVerticalCRS(const std::string &code) const;
+
+    PROJ_DLL operation::ConversionNNPtr
+    createConversion(const std::string &code) const;
+
+    PROJ_DLL crs::ProjectedCRSNNPtr
+    createProjectedCRS(const std::string &code) const;
 
     PROJ_DLL const std::string &getAuthority() const;
 

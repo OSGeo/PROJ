@@ -29,6 +29,7 @@
 #include "gtest_include.h"
 
 #include "proj/common.hpp"
+#include "proj/coordinateoperation.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/crs.hpp"
 #include "proj/datum.hpp"
@@ -42,6 +43,7 @@ using namespace osgeo::proj::cs;
 using namespace osgeo::proj::datum;
 using namespace osgeo::proj::io;
 using namespace osgeo::proj::metadata;
+using namespace osgeo::proj::operation;
 using namespace osgeo::proj::util;
 
 // ---------------------------------------------------------------------------
@@ -334,6 +336,30 @@ TEST(factory, AuthorityFactory_createCoordinateSystem_geocentric) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_createCoordinateSystem_vertical) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createCoordinateSystem("-1"),
+                 NoSuchAuthorityCodeException);
+
+    auto cs = factory->createCoordinateSystem("6499");
+    auto vertical_cs = nn_dynamic_pointer_cast<VerticalCS>(cs);
+    ASSERT_TRUE(vertical_cs != nullptr);
+
+    ASSERT_EQ(vertical_cs->identifiers().size(), 1);
+    EXPECT_EQ(vertical_cs->identifiers()[0]->code(), "6499");
+    EXPECT_EQ(*(vertical_cs->identifiers()[0]->codeSpace()), "EPSG");
+
+    const auto &axisList = vertical_cs->axisList();
+    EXPECT_EQ(axisList.size(), 1);
+
+    EXPECT_EQ(*(axisList[0]->name()->description()), "Gravity-related height");
+    EXPECT_EQ(axisList[0]->abbreviation(), "H");
+    EXPECT_EQ(axisList[0]->direction(), AxisDirection::UP);
+    EXPECT_EQ(axisList[0]->unit(), UnitOfMeasure::METRE);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createGeodeticCRS("-1"),
@@ -383,4 +409,101 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geocentric) {
     EXPECT_TRUE(crs->datum()->isEquivalentTo(factory->createDatum("6326")));
     EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
         factory->createCoordinateSystem("6500")));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createVerticalCRS) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createVerticalCRS("-1"),
+                 NoSuchAuthorityCodeException);
+
+    auto crs = factory->createVerticalCRS("3855");
+    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "3855");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
+    EXPECT_EQ(*(crs->name()->description()), "EGM2008 height");
+    EXPECT_TRUE(crs->datum()->isEquivalentTo(factory->createDatum("1027")));
+    EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
+        factory->createCoordinateSystem("6499")));
+
+    auto domain = crs->domains()[0];
+    auto extent = domain->domainOfValidity();
+    ASSERT_TRUE(extent != nullptr);
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262")));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createConversion) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createConversion("-1"), NoSuchAuthorityCodeException);
+
+    auto conv = factory->createConversion("16031");
+    ASSERT_EQ(conv->identifiers().size(), 1);
+    EXPECT_EQ(conv->identifiers()[0]->code(), "16031");
+    EXPECT_EQ(*(conv->identifiers()[0]->codeSpace()), "EPSG");
+    EXPECT_EQ(*(conv->name()->description()), "UTM zone 31N");
+
+    auto method = conv->method();
+    ASSERT_EQ(method->identifiers().size(), 1);
+    EXPECT_EQ(method->identifiers()[0]->code(), "9807");
+    EXPECT_EQ(*(method->identifiers()[0]->codeSpace()), "EPSG");
+    EXPECT_EQ(*(method->name()->description()), "Transverse Mercator");
+
+    const auto &values = conv->parameterValues();
+    ASSERT_EQ(values.size(), 5);
+    {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(values[0]);
+        ASSERT_TRUE(opParamvalue);
+        const auto &paramName =
+            *(opParamvalue->parameter()->name()->description());
+        const auto &parameterValue = opParamvalue->parameterValue();
+        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8801));
+        EXPECT_EQ(paramName, "Latitude of natural origin");
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::DEGREE);
+        EXPECT_EQ(measure.value(), 0.0);
+    }
+    {
+        const auto &opParamvalue =
+            nn_dynamic_pointer_cast<OperationParameterValue>(values[1]);
+        ASSERT_TRUE(opParamvalue);
+        const auto &paramName =
+            *(opParamvalue->parameter()->name()->description());
+        const auto &parameterValue = opParamvalue->parameterValue();
+        EXPECT_TRUE(opParamvalue->parameter()->isEPSG(8802));
+        EXPECT_EQ(paramName, "Longitude of natural origin");
+        EXPECT_EQ(parameterValue->type(), ParameterValue::Type::MEASURE);
+        auto measure = parameterValue->value();
+        EXPECT_EQ(measure.unit(), UnitOfMeasure::DEGREE);
+        EXPECT_EQ(measure.value(), 3.0);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createProjectedCRS) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createProjectedCRS("-1"),
+                 NoSuchAuthorityCodeException);
+
+    auto crs = factory->createProjectedCRS("32631");
+    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "32631");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
+    EXPECT_EQ(*(crs->name()->description()), "WGS 84 / UTM zone 31N");
+    EXPECT_TRUE(
+        crs->baseCRS()->isEquivalentTo(factory->createGeodeticCRS("4326")));
+    EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
+        factory->createCoordinateSystem("4400")));
+    EXPECT_TRUE(crs->derivingConversion()->isEquivalentTo(
+        factory->createConversion("16031")));
+
+    auto domain = crs->domains()[0];
+    auto extent = domain->domainOfValidity();
+    ASSERT_TRUE(extent != nullptr);
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("2060")));
 }
