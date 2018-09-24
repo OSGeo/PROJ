@@ -22,7 +22,7 @@ PROJ_HEAD(bertin1953, "Bertin 1953")
     "\n\tMisc Sph no inv.";
 
 struct pj_opaque {
-    double cosDeltaPhi, sinDeltaPhi, cosDeltaGamma, sinDeltaGamma, deltaLambda;
+    double cos_delta_phi, sin_delta_phi, cos_delta_gamma, sin_delta_gamma, deltaLambda;
 };
 
 
@@ -39,10 +39,10 @@ static XY s_forward (LP lp, PJ *P) {
     x = cos(lp.lam) * cosphi;
     y = sin(lp.lam) * cosphi;
     z = sin(lp.phi);
-    z0 = z * Q->cosDeltaPhi + x * Q->sinDeltaPhi;
-    lp.lam = atan2(y * Q->cosDeltaGamma - z0 * Q->sinDeltaGamma,
-       x * Q->cosDeltaPhi - z * Q->sinDeltaPhi);
-    z0 = z0 * Q->cosDeltaGamma + y * Q->sinDeltaGamma;
+    z0 = z * Q->cos_delta_phi + x * Q->sin_delta_phi;
+    lp.lam = atan2(y * Q->cos_delta_gamma - z0 * Q->sin_delta_gamma,
+       x * Q->cos_delta_phi - z * Q->sin_delta_phi);
+    z0 = z0 * Q->cos_delta_gamma + y * Q->sin_delta_gamma;
     lp.phi = asin(z0);
 
     lp.lam = adjlon(lp.lam);
@@ -82,10 +82,10 @@ PJ *PROJECTION(bertin1953) {
     P->lam0 = 0;
     P->phi0 = PJ_TORAD(-42.);
 
-    Q->cosDeltaPhi = cos(P->phi0);
-    Q->sinDeltaPhi = sin(P->phi0);
-    Q->cosDeltaGamma = 1.;
-    Q->sinDeltaGamma = 0.;
+    Q->cos_delta_phi = cos(P->phi0);
+    Q->sin_delta_phi = sin(P->phi0);
+    Q->cos_delta_gamma = 1.;
+    Q->sin_delta_gamma = 0.;
 
     P->es = 0.;
     P->fwd = s_forward;
