@@ -46,7 +46,7 @@
 namespace osgeo {
 /** osgeo.proj namespace */
 namespace proj {}
-}
+} // namespace osgeo
 #endif
 
 //! @cond Doxygen_Suppress
@@ -111,11 +111,11 @@ namespace util {
 //! @cond Doxygen_Suppress
 // Import a few classes from nn.hpp to expose them under our ::util namespace
 // for conveniency.
+using ::dropbox::oxygen::i_promise_i_checked_for_null;
 using ::dropbox::oxygen::nn;
+using ::dropbox::oxygen::nn_dynamic_pointer_cast;
 using ::dropbox::oxygen::nn_make_shared;
 using ::dropbox::oxygen::nn_static_pointer_cast;
-using ::dropbox::oxygen::nn_dynamic_pointer_cast;
-using ::dropbox::oxygen::i_promise_i_checked_for_null;
 template <typename T> using nn_shared_ptr = nn<std::shared_ptr<T>>;
 //! @endcond
 
@@ -256,9 +256,8 @@ class BoxedValue : public BaseObject {
     PROJ_DLL BoxedValue(const BaseObjectNNPtr &objectIn);
 
     // cppcheck-suppress noExplicitConstructor
-    PROJ_DLL BoxedValue(
-        const char *stringValueIn); // needed to avoid the bool constructor
-                                    // to be taken !
+    PROJ_DLL BoxedValue(const char *stringValueIn); // needed to avoid the bool
+                                                    // constructor to be taken !
     // cppcheck-suppress noExplicitConstructor
     PROJ_DLL BoxedValue(const std::string &stringValueIn);
     // cppcheck-suppress noExplicitConstructor

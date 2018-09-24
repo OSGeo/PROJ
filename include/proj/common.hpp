@@ -48,7 +48,7 @@ namespace common {
 // ---------------------------------------------------------------------------
 
 /** \brief Unit of measure. */
-class UnitOfMeasure {
+class UnitOfMeasure : public util::BaseObject {
   public:
     /** \brief Type of unit of measure. */
     enum class PROJ_DLL Type {
@@ -75,7 +75,7 @@ class UnitOfMeasure {
 
     //! @cond Doxygen_Suppress
     PROJ_DLL UnitOfMeasure(const UnitOfMeasure &other);
-    PROJ_DLL ~UnitOfMeasure();
+    PROJ_DLL ~UnitOfMeasure() override;
     PROJ_DLL UnitOfMeasure &operator=(const UnitOfMeasure &other);
     //! @endcond
 
@@ -336,10 +336,10 @@ using ObjectDomainNNPtr = util::nn<ObjectDomainPtr>;
  *
  * \remark Implements ObjectDomain from \ref ISO_19111_2018
  */
-class ObjectDomain : public util::BaseObject {
+class ObjectDomain : public util::BaseObject, public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL ~ObjectDomain();
+    PROJ_DLL ~ObjectDomain() override;
     //! @endcond
 
     // In ISO_19111:2018, scope and domain are compulsory, but in WKT2:2015,
@@ -356,6 +356,11 @@ class ObjectDomain : public util::BaseObject {
     std::string exportToWKT(io::WKTFormatterNNPtr formatter)
         const; // throw(io::FormattingException)
                //! @endcond
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
     ObjectDomain();

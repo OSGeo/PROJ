@@ -154,7 +154,7 @@ double GeographicBoundingBox::westBoundLongitude() const { return d->west_; }
  *
  * The unit is degrees.
  */
-double GeographicBoundingBox::southBoundLongitude() const { return d->south_; }
+double GeographicBoundingBox::southBoundLatitude() const { return d->south_; }
 
 // ---------------------------------------------------------------------------
 
@@ -172,7 +172,7 @@ double GeographicBoundingBox::eastBoundLongitude() const { return d->east_; }
  *
  * The unit is degrees.
  */
-double GeographicBoundingBox::northBoundLongitude() const { return d->north_; }
+double GeographicBoundingBox::northBoundLatitude() const { return d->north_; }
 
 // ---------------------------------------------------------------------------
 
@@ -194,6 +194,20 @@ GeographicBoundingBoxNNPtr GeographicBoundingBox::create(double west,
                                                          double north) {
     return GeographicBoundingBox::nn_make_shared<GeographicBoundingBox>(
         west, south, east, north);
+}
+
+// ---------------------------------------------------------------------------
+
+bool GeographicBoundingBox::isEquivalentTo(const util::BaseObjectNNPtr &other,
+                                           util::IComparable::Criterion) const {
+    auto otherExtent =
+        util::nn_dynamic_pointer_cast<GeographicBoundingBox>(other);
+    if (!otherExtent)
+        return false;
+    return westBoundLongitude() == otherExtent->westBoundLongitude() &&
+           southBoundLatitude() == otherExtent->southBoundLatitude() &&
+           eastBoundLongitude() == otherExtent->eastBoundLongitude() &&
+           northBoundLatitude() == otherExtent->northBoundLatitude();
 }
 
 // ---------------------------------------------------------------------------
@@ -258,6 +272,18 @@ VerticalExtent::create(double minimumIn, double maximumIn,
 
 // ---------------------------------------------------------------------------
 
+bool VerticalExtent::isEquivalentTo(const util::BaseObjectNNPtr &other,
+                                    util::IComparable::Criterion) const {
+    auto otherExtent = util::nn_dynamic_pointer_cast<VerticalExtent>(other);
+    if (!otherExtent)
+        return false;
+    return minimumValue() == otherExtent->minimumValue() &&
+           maximumValue() == otherExtent->maximumValue() &&
+           unit() == otherExtent->unit();
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct TemporalExtent::Private {
     std::string start_{};
@@ -303,6 +329,16 @@ const std::string &TemporalExtent::stop() const { return d->stop_; }
 TemporalExtentNNPtr TemporalExtent::create(const std::string &start,
                                            const std::string &stop) {
     return TemporalExtent::nn_make_shared<TemporalExtent>(start, stop);
+}
+
+// ---------------------------------------------------------------------------
+
+bool TemporalExtent::isEquivalentTo(const util::BaseObjectNNPtr &other,
+                                    util::IComparable::Criterion) const {
+    auto otherExtent = util::nn_dynamic_pointer_cast<TemporalExtent>(other);
+    if (!otherExtent)
+        return false;
+    return start() == otherExtent->start() && stop() == otherExtent->stop();
 }
 
 // ---------------------------------------------------------------------------
@@ -393,6 +429,36 @@ Extent::create(const optional<std::string> &descriptionIn,
     extent->d->verticalElements_ = verticalElementsIn;
     extent->d->temporalElements_ = temporalElementsIn;
     return extent;
+}
+
+// ---------------------------------------------------------------------------
+
+bool Extent::isEquivalentTo(const util::BaseObjectNNPtr &other,
+                            util::IComparable::Criterion criterion) const {
+    auto otherExtent = util::nn_dynamic_pointer_cast<Extent>(other);
+    bool ret =
+        (otherExtent &&
+         description().has_value() == otherExtent->description().has_value() &&
+         *description() == *otherExtent->description() &&
+         geographicElements().size() ==
+             otherExtent->geographicElements().size() &&
+         verticalElements().size() == otherExtent->verticalElements().size() &&
+         temporalElements().size() == otherExtent->temporalElements().size());
+    if (ret) {
+        for (size_t i = 0; ret && i < geographicElements().size(); ++i) {
+            ret = geographicElements()[i]->isEquivalentTo(
+                otherExtent->geographicElements()[i], criterion);
+        }
+        for (size_t i = 0; ret && i < verticalElements().size(); ++i) {
+            ret = verticalElements()[i]->isEquivalentTo(
+                otherExtent->verticalElements()[i], criterion);
+        }
+        for (size_t i = 0; ret && i < temporalElements().size(); ++i) {
+            ret = temporalElements()[i]->isEquivalentTo(
+                otherExtent->temporalElements()[i], criterion);
+        }
+    }
+    return ret;
 }
 
 // ---------------------------------------------------------------------------
@@ -501,7 +567,7 @@ const optional<std::string> &Identifier::version() const { return d->version_; }
 
 /** \brief Return the natural language description of the meaning of the code
  * value.
-  *
+ *
  * @return the description or empty.
  */
 const optional<std::string> &Identifier::description() const {
@@ -511,7 +577,7 @@ const optional<std::string> &Identifier::description() const {
 // ---------------------------------------------------------------------------
 
 /** \brief Return the URI of the identifier.
-  *
+ *
  * @return the URI or empty.
  */
 const optional<std::string> &Identifier::uri() const { return d->uri_; }

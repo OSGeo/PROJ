@@ -241,6 +241,7 @@ set(SRC_LIBPROJ_CPP
         metadata.cpp
         util.cpp
         internal.cpp
+        factory.cpp
 )
 
 set(HEADERS_LIBPROJ

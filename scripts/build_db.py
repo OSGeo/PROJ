@@ -106,7 +106,7 @@ def fill_vertical_datum(proj_db_cursor):
 
 def fill_coordinate_system(proj_db_cursor):
     proj_db_cursor.execute(
-        "INSERT INTO coordinate_system SELECT ?, coord_sys_code, dimension FROM epsg.epsg_coordinatesystem", (EPSG_AUTHORITY,))
+        "INSERT INTO coordinate_system SELECT ?, coord_sys_code, coord_sys_type, dimension FROM epsg.epsg_coordinatesystem", (EPSG_AUTHORITY,))
 
 
 def fill_axis(proj_db_cursor):

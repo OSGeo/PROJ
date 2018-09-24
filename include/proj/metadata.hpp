@@ -43,7 +43,7 @@ class UnitOfMeasure;
 using UnitOfMeasurePtr = std::shared_ptr<UnitOfMeasure>;
 using UnitOfMeasureNNPtr = util::nn<UnitOfMeasurePtr>;
 class IdentifiedObject;
-}
+} // namespace common
 
 /** osgeo.proj.metadata namespace
  *
@@ -95,14 +95,19 @@ using GeographicExtentNNPtr = util::nn<GeographicExtentPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/GeographicExtent.html)
  * from \ref GeoAPI
  */
-class GeographicExtent {
+class GeographicExtent : public util::BaseObject, public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL virtual ~GeographicExtent();
+    PROJ_DLL ~GeographicExtent() override;
     //! @endcond
 
     // GeoAPI has a getInclusion() method. We assume that it is included for our
     // use
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override = 0;
 
   protected:
     GeographicExtent();
@@ -135,12 +140,17 @@ class GeographicBoundingBox : public GeographicExtent {
     //! @endcond
 
     PROJ_DLL double westBoundLongitude() const;
-    PROJ_DLL double southBoundLongitude() const;
+    PROJ_DLL double southBoundLatitude() const;
     PROJ_DLL double eastBoundLongitude() const;
-    PROJ_DLL double northBoundLongitude() const;
+    PROJ_DLL double northBoundLatitude() const;
 
     PROJ_DLL static GeographicBoundingBoxNNPtr
     create(double west, double south, double east, double north);
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
     GeographicBoundingBox(double west, double south, double east, double north);
@@ -164,10 +174,10 @@ using TemporalExtentNNPtr = util::nn<TemporalExtentPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/TemporalExtent.html)
  * from \ref GeoAPI
  */
-class TemporalExtent {
+class TemporalExtent : public util::BaseObject, public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL virtual ~TemporalExtent();
+    PROJ_DLL ~TemporalExtent() override;
     //! @endcond
 
     PROJ_DLL const std::string &start() const;
@@ -175,6 +185,11 @@ class TemporalExtent {
 
     PROJ_DLL static TemporalExtentNNPtr create(const std::string &start,
                                                const std::string &stop);
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
     TemporalExtent(const std::string &start, const std::string &stop);
@@ -198,10 +213,10 @@ using VerticalExtentNNPtr = util::nn<VerticalExtentPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/VerticalExtent.html)
  * from \ref GeoAPI
  */
-class VerticalExtent {
+class VerticalExtent : public util::BaseObject, public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
-    PROJ_DLL virtual ~VerticalExtent();
+    PROJ_DLL ~VerticalExtent() override;
     //! @endcond
 
     PROJ_DLL double minimumValue() const;
@@ -211,6 +226,11 @@ class VerticalExtent {
     PROJ_DLL static VerticalExtentNNPtr
     create(double minimumValue, double maximumValue,
            const common::UnitOfMeasureNNPtr &unitIn);
+
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
 
   protected:
     VerticalExtent(double minimumValue, double maximumValue,
@@ -235,12 +255,11 @@ using ExtentNNPtr = util::nn<ExtentPtr>;
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/Extent.html)
  * from \ref GeoAPI
  */
-class Extent : public util::BaseObject {
+class Extent : public util::BaseObject, public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL Extent(const Extent &other);
-    PROJ_DLL Extent &operator=(const Extent &other) = delete;
-    PROJ_DLL ~Extent();
+    PROJ_DLL ~Extent() override;
     //! @endcond
 
     PROJ_DLL const util::optional<std::string> &description() const;
@@ -255,12 +274,18 @@ class Extent : public util::BaseObject {
            const std::vector<VerticalExtentNNPtr> &verticalElementsIn,
            const std::vector<TemporalExtentNNPtr> &temporalElementsIn);
 
+    PROJ_DLL bool
+    isEquivalentTo(const util::BaseObjectNNPtr &other,
+                   util::IComparable::Criterion criterion =
+                       util::IComparable::Criterion::STRICT) const override;
+
   protected:
     Extent();
     INLINED_MAKE_SHARED
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+    Extent &operator=(const Extent &other) = delete;
 };
 
 // ---------------------------------------------------------------------------

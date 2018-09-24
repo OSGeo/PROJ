@@ -46,7 +46,7 @@ using CRSNNPtr = util::nn<CRSPtr>;
 
 class DerivedCRS;
 class ProjectedCRS;
-}
+} // namespace crs
 
 /** osgeo.proj.operation namespace
 

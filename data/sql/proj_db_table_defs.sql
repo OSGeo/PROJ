@@ -86,6 +86,7 @@ CREATE TABLE vertical_datum (
 CREATE TABLE coordinate_system(
     auth_name TEXT NOT NULL,
     code TEXT NOT NULL,
+    type TEXT NOT NULL,
     dimension SMALLINT NOT NULL,
     CONSTRAINT pk_coordinate_system PRIMARY KEY (auth_name, code)
 );
@@ -144,6 +145,7 @@ CREATE TABLE vertical_crs(
     area_of_use_code TEXT NOT NULL,
     deprecated BOOLEAN NOT NULL,
     CONSTRAINT pk_vertical_crs PRIMARY KEY (auth_name, code),
+    CONSTRAINT fk_vertical_crs_crs FOREIGN KEY (auth_name, code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_vertical_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_vertical_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES vertical_datum(auth_name, code),
     CONSTRAINT fk_vertical_crs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
@@ -407,4 +409,32 @@ CREATE VIEW coordinate_operation_view AS
            source_crs_code, target_crs_auth_name, target_crs_code,
            area_of_use_auth_name, area_of_use_code,
            accuracy, deprecated FROM concatenated_operation
+;
+
+CREATE VIEW object_view AS
+    SELECT 'unit_of_measure' AS table_name, auth_name, code, name FROM unit_of_measure
+    UNION ALL
+    SELECT 'ellipsoid', auth_name, code, name FROM ellipsoid
+    UNION ALL
+    SELECT 'area', auth_name, code, name FROM area
+    UNION ALL
+    SELECT 'prime_meridian', auth_name, code, name FROM prime_meridian
+    UNION ALL
+    SELECT 'geodetic_datum', auth_name, code, name FROM geodetic_datum
+    UNION ALL
+    SELECT 'vertical_datum', auth_name, code, name FROM vertical_datum
+    UNION ALL
+    SELECT 'axis', auth_name, code, name FROM axis
+    UNION ALL
+    SELECT 'geodetic_crs', auth_name, code, name FROM geodetic_crs
+    UNION ALL
+    SELECT 'projected_crs', auth_name, code, name FROM projected_crs
+    UNION ALL
+    SELECT 'vertical_crs', auth_name, code, name FROM vertical_crs
+    UNION ALL
+    SELECT 'compound_crs', auth_name, code, name FROM compound_crs
+    UNION ALL
+    SELECT 'conversion', auth_name, code, name FROM conversion
+    UNION ALL
+    SELECT table_name, auth_name, code, name FROM coordinate_operation_view
 ;

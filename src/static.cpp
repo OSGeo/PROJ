@@ -606,6 +606,6 @@ template class optional<common::DataEpoch>;
 template class optional<common::IdentifiedObject>;
 template class optional<common::Scale>;
 template class optional<common::Length>;
-}
+} // namespace util
 
 NS_PROJ_END

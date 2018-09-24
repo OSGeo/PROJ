@@ -59,7 +59,7 @@ struct UnrelatedObject : public BaseObject {
 static nn<std::shared_ptr<UnrelatedObject>> createUnrelatedObject() {
     return nn_make_shared<UnrelatedObject>();
 }
-}
+} // namespace
 
 // ---------------------------------------------------------------------------
 
@@ -949,9 +949,9 @@ TEST(crs, scope_area_bbox_remark) {
     auto geogElement = domain->domainOfValidity()->geographicElements()[0];
     auto bbox = nn_dynamic_pointer_cast<GeographicBoundingBox>(geogElement);
     ASSERT_TRUE(bbox != nullptr);
-    EXPECT_EQ(bbox->southBoundLongitude(), 17.09);
+    EXPECT_EQ(bbox->southBoundLatitude(), 17.09);
     EXPECT_EQ(bbox->westBoundLongitude(), 122.38);
-    EXPECT_EQ(bbox->northBoundLongitude(), 46.05);
+    EXPECT_EQ(bbox->northBoundLatitude(), 46.05);
     EXPECT_EQ(bbox->eastBoundLongitude(), 157.64);
 
     ASSERT_EQ(domain->domainOfValidity()->verticalElements().size(), 1);

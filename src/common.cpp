@@ -899,9 +899,9 @@ std::string ObjectDomain::exportToWKT(WKTFormatterNNPtr formatter) const {
                 d->domainOfValidity_->geographicElements()[0]);
             if (bbox) {
                 formatter->startNode(WKTConstants::BBOX, false);
-                formatter->add(bbox->southBoundLongitude());
+                formatter->add(bbox->southBoundLatitude());
                 formatter->add(bbox->westBoundLongitude());
-                formatter->add(bbox->northBoundLongitude());
+                formatter->add(bbox->northBoundLatitude());
                 formatter->add(bbox->eastBoundLongitude());
                 formatter->endNode();
             }
@@ -933,6 +933,26 @@ std::string ObjectDomain::exportToWKT(WKTFormatterNNPtr formatter) const {
     return formatter->toString();
 }
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+bool ObjectDomain::isEquivalentTo(
+    const util::BaseObjectNNPtr &other,
+    util::IComparable::Criterion criterion) const {
+    auto otherDomain = util::nn_dynamic_pointer_cast<ObjectDomain>(other);
+    if (!otherDomain)
+        return false;
+    if (scope().has_value() != otherDomain->scope().has_value())
+        return false;
+    if (*scope() != *otherDomain->scope())
+        return false;
+    if ((domainOfValidity().get() != nullptr) ^
+        (otherDomain->domainOfValidity().get() != nullptr))
+        return false;
+    return domainOfValidity().get() == nullptr ||
+           domainOfValidity()->isEquivalentTo(
+               NN_CHECK_ASSERT(otherDomain->domainOfValidity()), criterion);
+}
 
 // ---------------------------------------------------------------------------
 

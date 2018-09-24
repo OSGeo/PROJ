@@ -48,7 +48,7 @@ struct UnrelatedObject : public BaseObject {
 static nn<std::shared_ptr<UnrelatedObject>> createUnrelatedObject() {
     return nn_make_shared<UnrelatedObject>();
 }
-}
+} // namespace
 
 // ---------------------------------------------------------------------------
 

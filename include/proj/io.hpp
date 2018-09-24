@@ -30,6 +30,7 @@
 #define IO_HH_INCLUDED
 
 #include <memory>
+#include <set>
 #include <string>
 
 #include "util.hpp"
@@ -40,7 +41,51 @@ namespace common {
 class UnitOfMeasure;
 using UnitOfMeasurePtr = std::shared_ptr<UnitOfMeasure>;
 using UnitOfMeasureNNPtr = util::nn<UnitOfMeasurePtr>;
-}
+} // namespace common
+
+namespace cs {
+class CoordinateSystem;
+using CoordinateSystemPtr = std::shared_ptr<CoordinateSystem>;
+using CoordinateSystemNNPtr = util::nn<CoordinateSystemPtr>;
+} // namespace cs
+
+namespace metadata {
+class Extent;
+using ExtentPtr = std::shared_ptr<Extent>;
+using ExtentNNPtr = util::nn<ExtentPtr>;
+} // namespace metadata
+
+namespace datum {
+class Datum;
+using DatumPtr = std::shared_ptr<Datum>;
+using DatumNNPtr = util::nn<DatumPtr>;
+
+class Ellipsoid;
+using EllipsoidPtr = std::shared_ptr<Ellipsoid>;
+using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
+
+class PrimeMeridian;
+using PrimeMeridianPtr = std::shared_ptr<PrimeMeridian>;
+using PrimeMeridianNNPtr = util::nn<PrimeMeridianPtr>;
+
+class GeodeticReferenceFrame;
+using GeodeticReferenceFramePtr = std::shared_ptr<GeodeticReferenceFrame>;
+using GeodeticReferenceFrameNNPtr = util::nn<GeodeticReferenceFramePtr>;
+
+class VerticalReferenceFrame;
+using VerticalReferenceFramePtr = std::shared_ptr<VerticalReferenceFrame>;
+using VerticalReferenceFrameNNPtr = util::nn<VerticalReferenceFramePtr>;
+} // namespace datum
+
+namespace crs {
+class CRS;
+using CRSPtr = std::shared_ptr<CRS>;
+using CRSNNPtr = util::nn<CRSPtr>;
+
+class GeodeticCRS;
+using GeodeticCRSPtr = std::shared_ptr<GeodeticCRS>;
+using GeodeticCRSNNPtr = util::nn<GeodeticCRSPtr>;
+} // namespace crs
 
 /** osgeo.proj.io namespace.
  *
@@ -427,9 +472,9 @@ class WKTNode {
                                             size_t indexStart = 0);
 
   protected:
-    PROJ_DLL static WKTNodeNNPtr
-    createFrom(const std::string &wkt, size_t indexStart, int recLevel,
-               size_t &indexEnd); // throw(ParsingException)
+    static WKTNodeNNPtr createFrom(const std::string &wkt, size_t indexStart,
+                                   int recLevel,
+                                   size_t &indexEnd); // throw(ParsingException)
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -471,6 +516,140 @@ class PROJStringParser {
 
     PROJ_DLL util::BaseObjectNNPtr createFromPROJString(
         const std::string &projString); // throw(ParsingException)
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+class DatabaseContext;
+/** Shared pointer of DatabaseContext. */
+using DatabaseContextPtr = std::shared_ptr<DatabaseContext>;
+/** Non-null shared pointer of DatabaseContext. */
+using DatabaseContextNNPtr = util::nn<DatabaseContextPtr>;
+
+/** \brief Database context. */
+class DatabaseContext {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~DatabaseContext();
+    //! @endcond
+
+    PROJ_DLL static DatabaseContextNNPtr create();
+
+  protected:
+    DatabaseContext();
+    INLINED_MAKE_SHARED
+    friend class AuthorityFactory;
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+    DatabaseContext(const DatabaseContext &) = delete;
+    DatabaseContext &operator=(const DatabaseContext &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
+class AuthorityFactory;
+/** Shared pointer of AuthorityFactory. */
+using AuthorityFactoryPtr = std::shared_ptr<AuthorityFactory>;
+/** Non-null shared pointer of AuthorityFactory. */
+using AuthorityFactoryNNPtr = util::nn<AuthorityFactoryPtr>;
+
+/** \brief Builds object from an authority database.
+ *
+ * \remark Implements [AuthorityFactory]
+ * (http://www.geoapi.org/3.0/javadoc/org/opengis/referencing/AuthorityFactory.html)
+ * from \ref GeoAPI
+ */
+class AuthorityFactory {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~AuthorityFactory();
+    //! @endcond
+
+    PROJ_DLL util::BaseObjectNNPtr createObject(const std::string &code) const;
+
+    PROJ_DLL common::UnitOfMeasureNNPtr
+    createUnitOfMeasure(const std::string &code) const;
+
+    PROJ_DLL metadata::ExtentNNPtr createExtent(const std::string &code) const;
+
+    PROJ_DLL datum::PrimeMeridianNNPtr
+    createPrimeMeridian(const std::string &code) const;
+
+    PROJ_DLL datum::EllipsoidNNPtr
+    createEllipsoid(const std::string &code) const;
+
+    PROJ_DLL datum::DatumNNPtr createDatum(const std::string &code) const;
+
+    PROJ_DLL datum::GeodeticReferenceFrameNNPtr
+    createGeodeticDatum(const std::string &code) const;
+
+    PROJ_DLL datum::VerticalReferenceFrameNNPtr
+    createVerticalDatum(const std::string &code) const;
+
+    PROJ_DLL cs::CoordinateSystemNNPtr
+    createCoordinateSystem(const std::string &code) const;
+
+    PROJ_DLL crs::GeodeticCRSNNPtr
+    createGeodeticCRS(const std::string &code) const;
+
+    PROJ_DLL const std::string &getAuthority() const;
+
+    PROJ_DLL std::set<std::string>
+    getAuthorityCodes(const std::string &type) const;
+
+    PROJ_DLL std::string getDescriptionText(const std::string &code) const;
+
+    // non-standard
+    PROJ_DLL static AuthorityFactoryNNPtr
+    create(DatabaseContextNNPtr context, const std::string &authorityName);
+
+  protected:
+    AuthorityFactory(DatabaseContextNNPtr context,
+                     const std::string &authorityName);
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Exception thrown when a factory can't create an instance of the
+ * requested object.
+ */
+class FactoryException : public util::Exception {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL explicit FactoryException(const char *message);
+    PROJ_DLL explicit FactoryException(const std::string &message);
+    PROJ_DLL
+    FactoryException(const FactoryException &other);
+    PROJ_DLL ~FactoryException() override;
+    //! @endcond
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Exception thrown when an authority factory can't find the requested
+ * authority code.
+ */
+class NoSuchAuthorityCodeException : public FactoryException {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL explicit NoSuchAuthorityCodeException(const std::string &message,
+                                                   const std::string &authority,
+                                                   const std::string &code);
+    PROJ_DLL
+    NoSuchAuthorityCodeException(const NoSuchAuthorityCodeException &other);
+    PROJ_DLL ~NoSuchAuthorityCodeException() override;
+    //! @endcond
+
+    PROJ_DLL const std::string &getAuthority() const;
+    PROJ_DLL const std::string &getAuthorityCode() const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
