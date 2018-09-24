@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <math.h>
 
+#include "proj_internal.h"
 #include "proj.h"
 #include "projects.h"
 
@@ -21,8 +22,6 @@ PROJ_HEAD(bertin1953, "Bertin 1953")
     "\n\tMisc Sph no inv.";
 
 struct pj_opaque {
-    double w;
-    double m, rm;
     double cosDeltaPhi, sinDeltaPhi, cosDeltaGamma, sinDeltaGamma, deltaLambda;
 };
 
@@ -31,45 +30,38 @@ static XY s_forward (LP lp, PJ *P) {
     XY xy = {0.0,0.0};
     struct pj_opaque *Q = P->opaque;
 
-    /* Projection constants */
-    double fu = 1.4, k = 12., w = 1.68;
+    double fu = 1.4, k = 12., w = 1.68, d;
 
-    /* Aliases */
-    double lambda = lp.lam, phi = lp.phi;
-    
-    /* Variable */
-    double d;
-
-    /* Apply rotation */
+    /* Rotate */
     double cosphi, x, y, z, z0;
-	lambda += Q->deltaLambda;
-    cosphi = cos(phi);
-    x = cos(lambda) * cosphi;
-    y = sin(lambda) * cosphi;
-    z = sin(phi);
+    lp.lam += PJ_TORAD(-16.5);
+    cosphi = cos(lp.phi);
+    x = cos(lp.lam) * cosphi;
+    y = sin(lp.lam) * cosphi;
+    z = sin(lp.phi);
     z0 = z * Q->cosDeltaPhi + x * Q->sinDeltaPhi;
-    lambda = atan2(y * Q->cosDeltaGamma - z0 * Q->sinDeltaGamma,
+    lp.lam = atan2(y * Q->cosDeltaGamma - z0 * Q->sinDeltaGamma,
        x * Q->cosDeltaPhi - z * Q->sinDeltaPhi);
     z0 = z0 * Q->cosDeltaGamma + y * Q->sinDeltaGamma;
-    phi = asin(z0);
+    lp.phi = asin(z0);
 
-    lambda = adjlon(lambda);
+    lp.lam = adjlon(lp.lam);
 
     /* Adjust pre-projection */
-    if (lambda + phi < -fu) {
-      d = (lambda - phi + 1.6) * (lambda + phi + fu) / 8.;
-      lambda += d;
-      phi -= 0.8 * d * sin(phi + M_PI / 2.);
+    if (lp.lam + lp.phi < -fu) {
+      d = (lp.lam - lp.phi + 1.6) * (lp.lam + lp.phi + fu) / 8.;
+      lp.lam += d;
+      lp.phi -= 0.8 * d * sin(lp.phi + M_PI / 2.);
     }
 
     /* Project with Hammer (1.68,2) */
-    cosphi = cos(phi);
-    d = sqrt(2./(1. + cosphi * cos(lambda / 2.)));
-    xy.x = w * d * cosphi * sin(lambda / 2.);
-    xy.y = d * sin(phi);
+    cosphi = cos(lp.phi);
+    d = sqrt(2./(1. + cosphi * cos(lp.lam / 2.)));
+    xy.x = w * d * cosphi * sin(lp.lam / 2.);
+    xy.y = d * sin(lp.phi);
 
     /* Adjust post-projection */
-    d = (1. - cos(lambda * phi)) / k;
+    d = (1. - cos(lp.lam * lp.phi)) / k;
     if (xy.y < 0.) {
       xy.x *= 1. + d;
     }
@@ -82,28 +74,21 @@ static XY s_forward (LP lp, PJ *P) {
 
 
 PJ *PROJECTION(bertin1953) {
-    double deltaLambda, deltaPhi, deltaGamma;
     struct pj_opaque *Q = pj_calloc (1, sizeof (struct pj_opaque));
     if (0==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
-    /* force +lon_0 = -16.5 */
-    deltaLambda = P->lam0 -16.5 / 180. * M_PI;
+    P->lam0 = 0;
+    P->phi0 = PJ_TORAD(-42.);
 
-    /* force +lat_0=-42 */
-    deltaPhi = -42. / 180. * M_PI;
-    deltaGamma = 0. / 180. * M_PI;
-
-    Q->deltaLambda = deltaLambda;
-    Q->cosDeltaPhi = cos(deltaPhi);
-    Q->sinDeltaPhi = sin(deltaPhi);
-    Q->cosDeltaGamma = cos(deltaGamma);
-    Q->sinDeltaGamma = sin(deltaGamma);
+    Q->cosDeltaPhi = cos(P->phi0);
+    Q->sinDeltaPhi = sin(P->phi0);
+    Q->cosDeltaGamma = 1.;
+    Q->sinDeltaGamma = 0.;
 
     P->es = 0.;
     P->fwd = s_forward;
-    /* P->inv = s_inverse; */
 
     return P;
 }
