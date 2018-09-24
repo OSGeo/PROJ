@@ -170,7 +170,7 @@ DatabaseContext::Private::run(const std::string &sql,
         }
     }
     if (iSubstitution != parameters.size()) {
-        throw FactoryException("unusedparameters in substitution list");
+        throw FactoryException("unused parameters in substitution list");
     }
 
     char **papszResult = nullptr;
@@ -339,6 +339,10 @@ AuthorityFactory::createObject(const std::string &code) const {
     if (table_name == "projected_crs") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createProjectedCRS(code));
+    }
+    if (table_name == "compound_crs") {
+        return util::nn_static_pointer_cast<util::BaseObject>(
+            createCompoundCRS(code));
     }
     if (table_name == "conversion") {
         return util::nn_static_pointer_cast<util::BaseObject>(
@@ -1015,6 +1019,103 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         throw FactoryException("cannot build projectedCRS " + code + ": " +
                                ex.what());
     }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a crs::CompoundCRS from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ */
+
+crs::CompoundCRSNNPtr
+AuthorityFactory::createCompoundCRS(const std::string &code) const {
+    auto res = d->context()->getPrivate()->run(
+        "SELECT name, horiz_crs_auth_name, horiz_crs_code, "
+        "vertical_crs_auth_name, vertical_crs_code, "
+        "area_of_use_auth_name, area_of_use_code, deprecated FROM "
+        "compound_crs WHERE auth_name = ? AND code = ?",
+        {getAuthority(), code});
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("compoundCRS not found",
+                                           getAuthority(), code);
+    }
+    try {
+        const auto &row = res[0];
+        const auto &name = row[0];
+        const auto &horiz_crs_auth_name = row[1];
+        const auto &horiz_crs_code = row[2];
+        const auto &vertical_crs_auth_name = row[3];
+        const auto &vertical_crs_code = row[4];
+        const auto &area_of_use_auth_name = row[5];
+        const auto &area_of_use_code = row[6];
+        const bool deprecated = row[7] == "1";
+
+        auto horizCRS =
+            create(d->context(), horiz_crs_auth_name)
+                ->createCoordinateReferenceSystem(horiz_crs_code, false);
+        auto vertCRS = create(d->context(), vertical_crs_auth_name)
+                           ->createVerticalCRS(vertical_crs_code);
+        auto extent = create(d->context(), area_of_use_auth_name)
+                          ->createExtent(area_of_use_code);
+        auto props =
+            util::PropertyMap()
+                .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
+                .set(metadata::Identifier::CODE_KEY, code)
+                .set(common::IdentifiedObject::NAME_KEY, name)
+                .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
+                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+        return crs::CompoundCRS::create(
+            props, std::vector<crs::CRSNNPtr>{horizCRS, vertCRS});
+    } catch (const std::exception &ex) {
+        throw FactoryException("cannot build compoundCRS " + code + ": " +
+                               ex.what());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a crs::CRS from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ */
+
+crs::CRSNNPtr AuthorityFactory::createCoordinateReferenceSystem(
+    const std::string &code) const {
+    return createCoordinateReferenceSystem(code, true);
+}
+
+crs::CRSNNPtr
+AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
+                                                  bool allowCompound) const {
+    auto res = d->context()->getPrivate()->run(
+        "SELECT type FROM crs WHERE auth_name = ? AND code = ?",
+        {getAuthority(), code});
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("crs not found", getAuthority(),
+                                           code);
+    }
+    const auto &type = res[0][0];
+    if (type == "geographic 2D" || type == "geographic 3D" ||
+        type == "geocentric") {
+        return createGeodeticCRS(code);
+    }
+    if (type == "vertical") {
+        return createVerticalCRS(code);
+    }
+    if (type == "projected") {
+        return createProjectedCRS(code);
+    }
+    if (allowCompound && type == "compound") {
+        return createCompoundCRS(code);
+    }
+    throw FactoryException("unhandled CRS type: " + type);
 }
 
 // ---------------------------------------------------------------------------

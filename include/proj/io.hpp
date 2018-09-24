@@ -93,6 +93,10 @@ using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
 class ProjectedCRS;
 using ProjectedCRSPtr = std::shared_ptr<ProjectedCRS>;
 using ProjectedCRSNNPtr = util::nn<ProjectedCRSPtr>;
+
+class CompoundCRS;
+using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
+using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
 } // namespace crs
 
 namespace operation {
@@ -619,6 +623,12 @@ class AuthorityFactory {
     PROJ_DLL crs::ProjectedCRSNNPtr
     createProjectedCRS(const std::string &code) const;
 
+    PROJ_DLL crs::CompoundCRSNNPtr
+    createCompoundCRS(const std::string &code) const;
+
+    PROJ_DLL crs::CRSNNPtr
+    createCoordinateReferenceSystem(const std::string &code) const;
+
     PROJ_DLL const std::string &getAuthority() const;
 
     PROJ_DLL std::set<std::string>
@@ -633,6 +643,10 @@ class AuthorityFactory {
   protected:
     AuthorityFactory(DatabaseContextNNPtr context,
                      const std::string &authorityName);
+
+    crs::CRSNNPtr createCoordinateReferenceSystem(const std::string &code,
+                                                  bool allowCompound) const;
+
     INLINED_MAKE_SHARED
 
   private:

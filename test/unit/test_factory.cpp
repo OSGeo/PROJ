@@ -507,3 +507,50 @@ TEST(factory, AuthorityFactory_createProjectedCRS) {
     ASSERT_TRUE(extent != nullptr);
     EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("2060")));
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createCompoundCRS) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createCompoundCRS("-1"),
+                 NoSuchAuthorityCodeException);
+
+    auto crs = factory->createCompoundCRS("6871");
+    ASSERT_EQ(crs->identifiers().size(), 1);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "6871");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
+    EXPECT_EQ(*(crs->name()->description()),
+              "WGS 84 / Pseudo-Mercator +  EGM2008 geoid height");
+
+    auto components = crs->componentReferenceSystems();
+    ASSERT_EQ(components.size(), 2);
+    EXPECT_TRUE(
+        components[0]->isEquivalentTo(factory->createProjectedCRS("3857")));
+    EXPECT_TRUE(
+        components[1]->isEquivalentTo(factory->createVerticalCRS("3855")));
+
+    auto domain = crs->domains()[0];
+    auto extent = domain->domainOfValidity();
+    ASSERT_TRUE(extent != nullptr);
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262")));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createCoordinateReferenceSystem) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createCoordinateReferenceSystem("-1"),
+                 NoSuchAuthorityCodeException);
+    EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(
+        factory->createCoordinateReferenceSystem("4326")));
+    EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(
+        factory->createCoordinateReferenceSystem("4979")));
+    EXPECT_TRUE(nn_dynamic_pointer_cast<GeodeticCRS>(
+        factory->createCoordinateReferenceSystem("4978")));
+    EXPECT_TRUE(nn_dynamic_pointer_cast<ProjectedCRS>(
+        factory->createCoordinateReferenceSystem("32631")));
+    EXPECT_TRUE(nn_dynamic_pointer_cast<VerticalCRS>(
+        factory->createCoordinateReferenceSystem("3855")));
+    EXPECT_TRUE(nn_dynamic_pointer_cast<CompoundCRS>(
+        factory->createCoordinateReferenceSystem("6871")));
+}
