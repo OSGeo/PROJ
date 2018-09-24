@@ -2354,7 +2354,7 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                         "PROJ4")) {
         std::string projString =
             stripQuotes(extensionNode->children()[1]->value());
-        if (projString.find("+proj=") == 0) {
+        if (starts_with(projString, "+proj=")) {
             try {
                 auto projObj =
                     PROJStringParser().createFromPROJString(projString);
@@ -5088,7 +5088,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     iFirstUnitConvert < iFirstGeogStep ? iSecondUnitConvert
                                                        : iFirstUnitConvert,
                     iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap
-                                                    : iSecondAxisSwap));
+                                                    : iFirstAxisSwap));
         }
         if (d->steps_.size() == 1 && iHelmert == 0) {
             return d->buildHelmertTransformation(iHelmert);
