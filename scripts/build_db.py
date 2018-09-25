@@ -314,7 +314,7 @@ def fill_grid_transformation(proj_db_cursor):
         elif method_code == 1071: # Vertical Offset by Grid Interpolation (NZLVD) 
             assert param_code[1] == 1048, param_code[1]
             interpolation_crs_auth_name = EPSG_AUTHORITY
-            interpolation_crs_code = param_value[1]
+            interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
         else:
             assert n_params == 1, (code, method_code)
 
@@ -365,8 +365,12 @@ def fill_concatenated_operation(proj_db_cursor):
                )
 
         proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'concatenated_operation')", (EPSG_AUTHORITY, code))
-        proj_db_cursor.execute('INSERT INTO concatenated_operation VALUES (' +
+        try:
+            proj_db_cursor.execute('INSERT INTO concatenated_operation VALUES (' +
             '?,?,?, ?,?, ?,?, ?,?, ?, ?,?, ?,?, ?,?, ?)', arg)
+        except Exception as e:
+            print(e)
+            print(arg)
 
 epsg_db_conn, epsg_tmp_db_filename = ingest_epsg()
 
@@ -378,7 +382,7 @@ if os.path.exists(proj_db_filename):
     os.unlink(proj_db_filename)
 proj_db_conn = sqlite3.connect(proj_db_filename)
 proj_db_cursor = proj_db_conn.cursor()
-#proj_db_cursor.execute('PRAGMA foreign_keys = 1;')
+proj_db_cursor.execute('PRAGMA foreign_keys = 1;')
 
 ingest_sqlite_dump(proj_db_cursor, os.path.join(sql_dir_name, 'proj_db_table_defs.sql'))
 proj_db_cursor.execute("ATTACH DATABASE '%s' AS epsg;" % epsg_tmp_db_filename)

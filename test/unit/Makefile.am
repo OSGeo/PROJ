@@ -4,7 +4,7 @@ EXTRA_DIST = CMakeLists.txt
 
 noinst_HEADERS = gtest_include.h
 
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include -I$(top_srcdir)/test -I$(top_srcdir)/test/googletest/include
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include -I$(top_srcdir)/test -I$(top_srcdir)/test/googletest/include @SQLITE3_FLAGS@
 AM_CXXFLAGS = @CXX_WFLAGS@ @NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG@
 
 PROJ_LIB ?= ../../data
@@ -18,7 +18,7 @@ basic_test_SOURCES = basic_test.cpp main.cpp
 basic_test_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la
 
 test_cpp_api_SOURCES = test_common.cpp test_crs.cpp test_metadata.cpp test_io.cpp test_operation.cpp test_datum.cpp test_factory.cpp main.cpp
-test_cpp_api_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la
+test_cpp_api_LDADD = ../../src/libproj.la ../../test/googletest/libgtest.la @SQLITE3_LDFLAGS@
 
 test_cpp_SOURCES = test_cpp.cpp
 test_cpp_LDADD = ../../src/libproj.la

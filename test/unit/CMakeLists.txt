@@ -56,6 +56,7 @@ add_definitions(-DPROJ_MSVC_DLL_IMPORT=1)
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${SQLITE3_INCLUDE_DIR})
 
 add_executable(proj_test_unit
   main.cpp
@@ -97,5 +98,6 @@ add_executable(proj_test_cpp_api
   test_factory.cpp)
 target_link_libraries(proj_test_cpp_api
   gtest
-  ${PROJ_LIBRARIES})
+  ${PROJ_LIBRARIES}
+  ${SQLITE3_LIBRARY})
 add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)

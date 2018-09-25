@@ -54,11 +54,11 @@ test_script:
   - cd %CURDIR%
 #
   - if "%platform%" == "x64" cd build_dll
-  - if "%platform%" == "x64" ctest -C Release
+  - if "%platform%" == "x64" ctest -V -C Release
   - if "%platform%" == "x64" cd ..
 #
   - if "%platform%" == "x86" cd build_static
-  - if "%platform%" == "x86" ctest -C Release
+  - if "%platform%" == "x86" ctest -V -C Release
   - if "%platform%" == "x86" cd ..
 
 deploy: off

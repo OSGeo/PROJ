@@ -10,12 +10,12 @@ SQL_ORDERED_LIST = sql/proj_db_table_defs.sql \
 		sql/metadata.sql \
 		sql/unit_of_measure.sql \
 		sql/area.sql \
+		sql/coordinate_system.sql \
 		sql/axis.sql \
 		sql/ellipsoid.sql \
 		sql/prime_meridian.sql \
 		sql/geodetic_datum.sql \
 		sql/vertical_datum.sql \
-		sql/coordinate_system.sql \
 		sql/coordinate_operation.sql \
 		sql/conversion.sql \
 		sql/crs.sql \

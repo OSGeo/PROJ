@@ -87,12 +87,17 @@ struct DatabaseContext::Private {
     Private();
     ~Private();
 
-    void open();
+    void open(const std::string &databasePath = std::string());
+    void setHandle(sqlite3 *sqlite_handle);
+
+    sqlite3 *handle() const { return sqlite_handle_; }
+
     SQLResultSet
     run(const std::string &sql,
         const std::vector<SQLValues> &parameters = std::vector<SQLValues>());
 
   private:
+    bool close_handle_ = true;
     sqlite3 *sqlite_handle_{};
 };
 
@@ -103,28 +108,40 @@ DatabaseContext::Private::Private() = default;
 // ---------------------------------------------------------------------------
 
 DatabaseContext::Private::~Private() {
-    //
-    sqlite3_close(sqlite_handle_);
+    if (close_handle_) {
+        sqlite3_close(sqlite_handle_);
+    }
 }
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::open() {
-    const char *proj_lib = std::getenv("PROJ_LIB");
+void DatabaseContext::Private::open(const std::string &databasePath) {
+    std::string path(databasePath);
+    if (path.empty()) {
+        const char *proj_lib = std::getenv("PROJ_LIB");
 #ifdef PROJ_LIB
-    if (!proj_lib) {
-        proj_lib = PROJ_LIB;
-    }
+        if (!proj_lib) {
+            proj_lib = PROJ_LIB;
+        }
 #endif
-    if (!proj_lib) {
-        throw FactoryException("Cannot find proj.db due to missing PROJ_LIB");
+        if (!proj_lib) {
+            throw FactoryException(
+                "Cannot find proj.db due to missing PROJ_LIB");
+        }
+        path = std::string(proj_lib) + DIR_CHAR + "proj.db";
     }
-    std::string path(std::string(proj_lib) + DIR_CHAR + "proj.db");
     if (sqlite3_open_v2(path.c_str(), &sqlite_handle_, SQLITE_OPEN_READONLY,
                         nullptr) != SQLITE_OK ||
         !sqlite_handle_) {
         throw FactoryException("Open of " + path + " failed");
     }
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::setHandle(sqlite3 *sqlite_handle) {
+    sqlite_handle_ = sqlite_handle;
+    close_handle_ = false;
 }
 
 // ---------------------------------------------------------------------------
@@ -212,7 +229,11 @@ DatabaseContext::DatabaseContext() : d(internal::make_unique<Private>()) {}
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instanciate a database context.
+/** \brief Instanciate a database context, using the default proj.db file
+ *
+ * It will be searched in the directory pointed by the PROJ_LIB environment
+ * variable. If not found, on Unix builds, it will be then searched first in
+ * the pkgdatadir directory of the installation prefix.
  *
  * This database context should be used only by one thread at a time.
  * @throw FactoryException
@@ -222,6 +243,38 @@ DatabaseContextNNPtr DatabaseContext::create() {
     ctxt->getPrivate()->open();
     return ctxt;
 }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instanciate a database context from a full filename.
+ *
+ * This database context should be used only by one thread at a time.
+ * @param databasePath Path and filename of the database.
+ * @throw FactoryException
+ */
+DatabaseContextNNPtr DatabaseContext::create(const std::string &databasePath) {
+    auto ctxt = DatabaseContext::nn_make_shared<DatabaseContext>();
+    ctxt->getPrivate()->open(databasePath);
+    return ctxt;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+DatabaseContextNNPtr DatabaseContext::create(void *sqlite_handle) {
+    auto ctxt = DatabaseContext::nn_make_shared<DatabaseContext>();
+    ctxt->getPrivate()->setHandle(static_cast<sqlite3 *>(sqlite_handle));
+    return ctxt;
+}
+
+// ---------------------------------------------------------------------------
+
+void *DatabaseContext::getSqliteHandle() const {
+    return getPrivate()->handle();
+}
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -308,6 +361,10 @@ AuthorityFactory::createObject(const std::string &code) const {
         throw FactoryException(msg);
     }
     const auto &table_name = res[0][0];
+    if (table_name == "area") {
+        return util::nn_static_pointer_cast<util::BaseObject>(
+            createExtent(code));
+    }
     if (table_name == "unit_of_measure") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createUnitOfMeasure(code));
@@ -348,7 +405,7 @@ AuthorityFactory::createObject(const std::string &code) const {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createConversion(code));
     }
-    throw FactoryException("unimplemented factory for" + res[0][0]);
+    throw FactoryException("unimplemented factory for " + res[0][0]);
 }
 
 // ---------------------------------------------------------------------------

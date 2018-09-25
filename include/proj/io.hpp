@@ -556,6 +556,14 @@ class DatabaseContext {
 
     PROJ_DLL static DatabaseContextNNPtr create();
 
+    PROJ_DLL static DatabaseContextNNPtr
+    create(const std::string &databasePath);
+
+    //! @cond Doxygen_Suppress
+    PROJ_DLL void *getSqliteHandle() const;
+    PROJ_DLL static DatabaseContextNNPtr create(void *sqlite_handle);
+    //! @endcond
+
   protected:
     DatabaseContext();
     INLINED_MAKE_SHARED
