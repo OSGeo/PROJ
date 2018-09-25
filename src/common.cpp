@@ -1048,7 +1048,7 @@ void ObjectUsage::setProperties(
 
 void ObjectUsage::_exportToWKT(WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
-    if (isWKT2) {
+    if (isWKT2 && formatter->outputId()) {
         auto l_domains = domains();
         if (!l_domains.empty()) {
             if (formatter->use2018Keywords()) {

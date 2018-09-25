@@ -826,28 +826,21 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
         if (axisList.size() >= 2) {
             std::string order[2];
             for (int i = 0; i < 2; i++) {
-                if (ci_equal(*(axisList[i]->name()->description()),
-                             "Longitude") &&
-                    axisList[i]->direction() == cs::AxisDirection::WEST) {
+                if (axisList[i]->direction() == cs::AxisDirection::WEST) {
                     order[i] = "-1";
-                } else if (ci_equal(*(axisList[i]->name()->description()),
-                                    "Longitude") &&
-                           axisList[i]->direction() ==
-                               cs::AxisDirection::EAST) {
+                } else if (axisList[i]->direction() ==
+                           cs::AxisDirection::EAST) {
                     order[i] = "1";
-                } else if (ci_equal(*(axisList[i]->name()->description()),
-                                    "Latitude") &&
-                           axisList[i]->direction() ==
-                               cs::AxisDirection::SOUTH) {
+                } else if (axisList[i]->direction() ==
+                           cs::AxisDirection::SOUTH) {
                     order[i] = "-2";
-                } else if (ci_equal(*(axisList[i]->name()->description()),
-                                    "Latitude") &&
-                           axisList[i]->direction() ==
-                               cs::AxisDirection::NORTH) {
+                } else if (axisList[i]->direction() ==
+                           cs::AxisDirection::NORTH) {
                     order[i] = "2";
                 }
             }
-            if (order[0] != "1" || order[1] != "2") {
+            if (!order[0].empty() && !order[1].empty() &&
+                (order[0] != "1" || order[1] != "2")) {
                 formatter->addStep("axisswap");
                 formatter->addParam("order", order[0] + "," + order[1]);
             }

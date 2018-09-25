@@ -232,13 +232,13 @@ def fill_helmert_transformation(proj_db_cursor):
             assert param_code[6] == 8611
             assert param_uom_code[3] == param_uom_code[4]
             assert param_uom_code[3] == param_uom_code[5]
-        if n_params == 8:
+        if n_params == 8: # Time-specific transformation
             assert param_code[7] == 1049, (code, name, param_code[7])
             param_value[14] = param_value[7]
             param_uom_code[14] = param_uom_code[7]
             param_value[7] = None
             param_uom_code[7] = None
-        elif n_params > 7:
+        elif n_params > 7: # Time-dependant transformation
             assert param_code[7] == 1040, (code, name, param_code[7])
             assert param_code[8] == 1041
             assert param_code[9] == 1042
@@ -303,6 +303,7 @@ def fill_grid_transformation(proj_db_cursor):
 
         grid2_param_auth_name = None
         grid2_param_code = None
+        grid2_param_name = None
         grid2_value = None
         interpolation_crs_auth_name = None
         interpolation_crs_code = None
@@ -311,6 +312,7 @@ def fill_grid_transformation(proj_db_cursor):
             assert param_code[1] == 8658, param_code[1]
             grid2_param_auth_name = EPSG_AUTHORITY
             grid2_param_code = param_code[1]
+            grid2_param_name = param_name[1]
             grid2_value = param_value[1]
         elif method_code == 1071: # Vertical Offset by Grid Interpolation (NZLVD) 
             assert param_code[1] == 1048, param_code[1]
@@ -326,15 +328,15 @@ def fill_grid_transformation(proj_db_cursor):
                EPSG_AUTHORITY, target_crs_code,
                EPSG_AUTHORITY, area_of_use_code,
                coord_op_accuracy,
-               EPSG_AUTHORITY, param_code[0], param_value[0],
-               grid2_param_auth_name, grid2_param_code, grid2_value,
+               EPSG_AUTHORITY, param_code[0], param_name[0], param_value[0],
+               grid2_param_auth_name, grid2_param_code, grid2_param_name, grid2_value,
                interpolation_crs_auth_name, interpolation_crs_code,
                deprecated
                )
 
         proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'grid_transformation')", (EPSG_AUTHORITY, code))
         proj_db_cursor.execute('INSERT INTO grid_transformation VALUES (' +
-            '?,?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?, ?,?,?, ?,?, ?)', arg)
+            '?,?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?, ?,?,?,?, ?,?, ?)', arg)
 
 def fill_other_transformation(proj_db_cursor):
     proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (9601)")

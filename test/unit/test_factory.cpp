@@ -92,7 +92,7 @@ TEST(factory, AuthorityFactory_createUnitOfMeasure_angular) {
     auto uom = factory->createUnitOfMeasure("9102");
     EXPECT_EQ(uom->name(), "degree");
     EXPECT_EQ(uom->type(), UnitOfMeasure::Type::ANGULAR);
-    EXPECT_EQ(uom->conversionToSI(), 0.0174532925199433);
+    EXPECT_EQ(uom->conversionToSI(), UnitOfMeasure::DEGREE.conversionToSI());
     EXPECT_EQ(uom->codeSpace(), "EPSG");
     EXPECT_EQ(uom->code(), "9102");
 }
@@ -388,6 +388,11 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
     EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262")));
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=longlat +ellps=WGS84 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -564,6 +569,320 @@ TEST(factory, AuthorityFactory_createCoordinateReferenceSystem) {
     EXPECT_TRUE(nn_dynamic_pointer_cast<CompoundCRS>(
         factory->createCoordinateReferenceSystem("6871")));
 }
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_3) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createCoordinateOperation("-1"),
+                 NoSuchAuthorityCodeException);
+    auto op = factory->createCoordinateOperation("1113");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +inv "
+              "+proj=longlat +a=6378249.145 +rf=293.4663077 +step +proj=cart "
+              "+a=6378249.145 +rf=293.4663077 +step +proj=helmert +x=-143 "
+              "+y=-90 +z=-294 +step +inv +proj=cart +ellps=WGS84 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
+              "+order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_7) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("7676");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+              "+ellps=bessel +step +proj=helmert +x=577.88891 +y=165.22205 "
+              "+z=391.18289 +rx=-4.9145 +ry=0.94729 +rz=13.05098 +s=7.78664 "
+              "+convention=coordinate_frame +step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg +step "
+              "+proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_8) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("7702");
+    auto expected = "    PARAMETER[\"Transformation reference epoch\",2002,\n"
+                    "        TIMEUNIT[\"year\",31556925.445],\n"
+                    "        ID[\"EPSG\",1049]],\n";
+
+    auto wkt = op->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+    EXPECT_TRUE(wkt.find(expected) != std::string::npos) << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("6276");
+    auto expected =
+        "COORDINATEOPERATION[\"ITRF2008 to GDA94 (1)\",\n"
+        "    SOURCECRS[\n"
+        "        GEODCRS[\"ITRF2008\",\n"
+        "            DATUM[\"International Terrestrial Reference Frame "
+        "2008\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[Cartesian,3],\n"
+        "                AXIS[\"(X)\",geocentricX,\n"
+        "                    ORDER[1],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                AXIS[\"(Y)\",geocentricY,\n"
+        "                    ORDER[2],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                AXIS[\"(Z)\",geocentricZ,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]]]],\n"
+        "    TARGETCRS[\n"
+        "        GEODCRS[\"GDA94\",\n"
+        "            DATUM[\"Geocentric Datum of Australia 1994\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[Cartesian,3],\n"
+        "                AXIS[\"(X)\",geocentricX,\n"
+        "                    ORDER[1],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                AXIS[\"(Y)\",geocentricY,\n"
+        "                    ORDER[2],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                AXIS[\"(Z)\",geocentricZ,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]]]],\n"
+        "    METHOD[\"Time-dependent Coordinate Frame rotation (geocen)\",\n"
+        "        ID[\"EPSG\",1056]],\n"
+        "    PARAMETER[\"X-axis translation\",-84.68,\n"
+        "        LENGTHUNIT[\"millimetre\",0.001],\n"
+        "        ID[\"EPSG\",8605]],\n"
+        "    PARAMETER[\"Y-axis translation\",-19.42,\n"
+        "        LENGTHUNIT[\"millimetre\",0.001],\n"
+        "        ID[\"EPSG\",8606]],\n"
+        "    PARAMETER[\"Z-axis translation\",32.01,\n"
+        "        LENGTHUNIT[\"millimetre\",0.001],\n"
+        "        ID[\"EPSG\",8607]],\n"
+        "    PARAMETER[\"X-axis rotation\",-0.4254,\n"
+        "        ANGLEUNIT[\"milliarc-second\",4.84813681109536e-09],\n"
+        "        ID[\"EPSG\",8608]],\n"
+        "    PARAMETER[\"Y-axis rotation\",2.2578,\n"
+        "        ANGLEUNIT[\"milliarc-second\",4.84813681109536e-09],\n"
+        "        ID[\"EPSG\",8609]],\n"
+        "    PARAMETER[\"Z-axis rotation\",2.4015,\n"
+        "        ANGLEUNIT[\"milliarc-second\",4.84813681109536e-09],\n"
+        "        ID[\"EPSG\",8610]],\n"
+        "    PARAMETER[\"Scale difference\",9.71,\n"
+        "        SCALEUNIT[\"parts per billion\",1e-09],\n"
+        "        ID[\"EPSG\",8611]],\n"
+        "    PARAMETER[\"Rate of change of X-axis translation\",1.42,\n"
+        "        LENGTHUNIT[\"millimetres per year\",3.16887651727315e-11],\n"
+        "        ID[\"EPSG\",1040]],\n"
+        "    PARAMETER[\"Rate of change of Y-axis translation\",1.34,\n"
+        "        LENGTHUNIT[\"millimetres per year\",3.16887651727315e-11],\n"
+        "        ID[\"EPSG\",1041]],\n"
+        "    PARAMETER[\"Rate of change of Z-axis translation\",0.9,\n"
+        "        LENGTHUNIT[\"millimetres per year\",3.16887651727315e-11],\n"
+        "        ID[\"EPSG\",1042]],\n"
+        "    PARAMETER[\"Rate of change of X-axis rotation\",1.5461,\n"
+        "        ANGLEUNIT[\"milliarc-seconds per "
+        "year\",1.53631468932076e-16],\n"
+        "        ID[\"EPSG\",1043]],\n"
+        "    PARAMETER[\"Rate of change of Y-axis rotation\",1.182,\n"
+        "        ANGLEUNIT[\"milliarc-seconds per "
+        "year\",1.53631468932076e-16],\n"
+        "        ID[\"EPSG\",1044]],\n"
+        "    PARAMETER[\"Rate of change of Z-axis rotation\",1.1551,\n"
+        "        ANGLEUNIT[\"milliarc-seconds per "
+        "year\",1.53631468932076e-16],\n"
+        "        ID[\"EPSG\",1045]],\n"
+        "    PARAMETER[\"Rate of change of Scale difference\",0.109,\n"
+        "        SCALEUNIT[\"parts per billion per "
+        "year\",3.16887651727315e-17],\n"
+        "        ID[\"EPSG\",1046]],\n"
+        "    PARAMETER[\"Parameter reference epoch\",1994,\n"
+        "        TIMEUNIT[\"year\",31556925.445],\n"
+        "        ID[\"EPSG\",1047]],\n"
+        "    OPERATIONACCURACY[0.03],\n"
+        "    USAGE[\n"
+        "        AREA[\"Australia - onshore and EEZ\"],\n"
+        "        BBOX[-47.2,109.23,-8.88,163.2]],\n"
+        "    ID[\"EPSG\",6276]]";
+
+    EXPECT_EQ(op->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    factory,
+    AuthorityFactory_createCoordinateOperation_grid_transformation_one_parameter) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("1295");
+    auto expected =
+        "COORDINATEOPERATION[\"RGNC91-93 to NEA74 Noumea (4)\",\n"
+        "    SOURCECRS[\n"
+        "        GEOGCRS[\"RGNC91-93\",\n"
+        "            DATUM[\"Reseau Geodesique de Nouvelle Caledonie 91-93\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,2],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]]]],\n"
+        "    TARGETCRS[\n"
+        "        GEOGCRS[\"NEA74 Noumea\",\n"
+        "            DATUM[\"NEA74 Noumea\",\n"
+        "                ELLIPSOID[\"International 1924\",6378388,297,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,2],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]]]],\n"
+        "    METHOD[\"NTv2\",\n"
+        "        ID[\"EPSG\",9615]],\n"
+        "    PARAMETERFILE[\"Latitude and longitude difference "
+        "file\",\"RGNC1991_NEA74Noumea.gsb\"],\n"
+        "    OPERATIONACCURACY[0.05],\n"
+        "    USAGE[\n"
+        "        AREA[\"New Caledonia - Grande Terre - Noumea\"],\n"
+        "        BBOX[-22.37,166.35,-22.19,166.54]],\n"
+        "    ID[\"EPSG\",1295]]";
+    EXPECT_EQ(op->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    factory,
+    AuthorityFactory_createCoordinateOperation_grid_transformation_two_parameter) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("15864");
+    auto expected =
+        "    PARAMETERFILE[\"Latitude difference file\",\"alaska.las\"],\n"
+        "    PARAMETERFILE[\"Longitude difference file\",\"alaska.los\"],\n";
+
+    auto wkt = op->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+    EXPECT_TRUE(wkt.find(expected) != std::string::npos) << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // This also tests conversion from unit of measure EPSG:9110 DDD.MMSSsss
+    auto op = factory->createCoordinateOperation("1884");
+    auto expected =
+        "COORDINATEOPERATION[\"S-JTSK (Ferro) to S-JTSK (1)\",\n"
+        "    SOURCECRS[\n"
+        "        GEOGCRS[\"S-JTSK (Ferro)\",\n"
+        "            DATUM[\"System of the Unified Trigonometrical Cadastral "
+        "Network (Ferro)\",\n"
+        "                ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Ferro\",-17.6666666666667,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,2],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]]]],\n"
+        "    TARGETCRS[\n"
+        "        GEOGCRS[\"S-JTSK\",\n"
+        "            DATUM[\"System of the Unified Trigonometrical Cadastral "
+        "Network\",\n"
+        "                ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,2],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]]]],\n"
+        "    METHOD[\"Longitude rotation\",\n"
+        "        ID[\"EPSG\",9601]],\n"
+        "    PARAMETER[\"Longitude offset\",-17.6666666666667,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8602]],\n"
+        "    OPERATIONACCURACY[0.0],\n"
+        "    USAGE[\n"
+        "        AREA[\"Europe - Czechoslovakia\"],\n"
+        "        BBOX[47.73,12.09,51.06,22.56]],\n"
+        "    ID[\"EPSG\",1884]]";
+
+    EXPECT_EQ(op->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
+              expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory,
+     AuthorityFactory_createCoordinateOperation_concatenated_operation) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("3896");
+    auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
+    ASSERT_TRUE(concatenated != nullptr);
+    auto operations = concatenated->operations();
+    ASSERT_EQ(operations.size(), 2);
+    EXPECT_TRUE(operations[0]->isEquivalentTo(
+        factory->createCoordinateOperation("3895")));
+    EXPECT_TRUE(operations[1]->isEquivalentTo(
+        factory->createCoordinateOperation("1618")));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    factory,
+    AuthorityFactory_createCoordinateOperation_concatenated_operation_three_steps) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("8647");
+    auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
+    ASSERT_TRUE(concatenated != nullptr);
+    auto operations = concatenated->operations();
+    ASSERT_EQ(operations.size(), 3);
+    EXPECT_TRUE(operations[0]->isEquivalentTo(
+        factory->createCoordinateOperation("1313")));
+    EXPECT_TRUE(operations[1]->isEquivalentTo(
+        factory->createCoordinateOperation("1950")));
+    EXPECT_TRUE(operations[2]->isEquivalentTo(
+        factory->createCoordinateOperation("1946")));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createCoordinateOperation_conversion) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("16031");
+    auto conversion = nn_dynamic_pointer_cast<Conversion>(op);
+    ASSERT_TRUE(conversion != nullptr);
+}
 
 // ---------------------------------------------------------------------------
 
@@ -728,6 +1047,63 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_test_with_fake_database) {
         "EGM2008 geoid height','EPSG','4326','EPSG','3855','EPSG','1262',0);"))
         << last_error();
 
+    ASSERT_TRUE(
+        execute("INSERT INTO coordinate_operation "
+                "VALUES('EPSG','DUMMY_HELMERT','helmert_transformation');"))
+        << last_error();
+    ASSERT_TRUE(
+        execute("INSERT INTO helmert_transformation "
+                "VALUES('EPSG','DUMMY_HELMERT','name','EPSG','9603','"
+                "Geocentric translations (geog2D "
+                "domain)','EPSG','4326','EPSG','4326','EPSG','1262',44.0,-143."
+                "0,-90.0,-294.0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+
+    ASSERT_TRUE(execute(
+        "INSERT INTO coordinate_operation "
+        "VALUES('EPSG','DUMMY_GRID_TRANSFORMATION','grid_transformation');"))
+        << last_error();
+    ASSERT_TRUE(
+        execute("INSERT INTO grid_transformation "
+                "VALUES('EPSG','DUMMY_GRID_TRANSFORMATION','name','EPSG','9615'"
+                ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',1.0,'EPSG','"
+                "8656','Latitude and longitude difference "
+                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+
+    ASSERT_TRUE(
+        execute("INSERT INTO unit_of_measure VALUES('EPSG','9110','sexagesimal "
+                "DMS','angle',NULL,0);"))
+        << last_error();
+    ASSERT_TRUE(execute(
+        "INSERT INTO coordinate_operation "
+        "VALUES('EPSG','DUMMY_OTHER_TRANSFORMATION','other_transformation');"))
+        << last_error();
+    ASSERT_TRUE(
+        execute("INSERT INTO other_transformation "
+                "VALUES('EPSG','DUMMY_OTHER_TRANSFORMATION','name','EPSG','"
+                "9601','Longitude "
+                "rotation','EPSG','4326','EPSG','4326','EPSG','1262',0.0,'EPSG'"
+                ",'8602','Longitude "
+                "offset',-17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+
+    ASSERT_TRUE(execute(
+        "INSERT INTO coordinate_operation "
+        "VALUES('EPSG','DUMMY_CONCATENATED','concatenated_operation');"))
+        << last_error();
+    ASSERT_TRUE(
+        execute("INSERT INTO concatenated_operation "
+                "VALUES('EPSG','DUMMY_CONCATENATED','name','EPSG','4326','EPSG'"
+                ",'4326','EPSG','1262',NULL,'EPSG','DUMMY_OTHER_TRANSFORMATION'"
+                ",'EPSG','DUMMY_OTHER_TRANSFORMATION',NULL,NULL,0);"))
+        << last_error();
+
     auto factory =
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "EPSG");
 
@@ -763,6 +1139,18 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_test_with_fake_database) {
 
     EXPECT_TRUE(nn_dynamic_pointer_cast<CompoundCRS>(
                     factory->createObject("MY_COMPOUND")) != nullptr);
+
+    EXPECT_TRUE(nn_dynamic_pointer_cast<Transformation>(
+                    factory->createObject("DUMMY_HELMERT")) != nullptr);
+
+    EXPECT_TRUE(nn_dynamic_pointer_cast<Transformation>(factory->createObject(
+                    "DUMMY_GRID_TRANSFORMATION")) != nullptr);
+
+    EXPECT_TRUE(nn_dynamic_pointer_cast<Transformation>(factory->createObject(
+                    "DUMMY_OTHER_TRANSFORMATION")) != nullptr);
+
+    EXPECT_TRUE(nn_dynamic_pointer_cast<ConcatenatedOperation>(
+                    factory->createObject("DUMMY_CONCATENATED")) != nullptr);
 }
 
 } // namespace

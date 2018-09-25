@@ -400,6 +400,8 @@ static const std::string
 constexpr int EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D =
     1058;
 
+#include "helmert_constants.hpp"
+
 static const std::string EPSG_NAME_METHOD_MOLODENSKY("Molodensky");
 constexpr int EPSG_CODE_METHOD_MOLODENSKY = 9604;
 
@@ -407,54 +409,8 @@ static const std::string
     EPSG_NAME_METHOD_ABRIDGED_MOLODENSKY("Abridged Molodensky");
 constexpr int EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY = 9605;
 
-constexpr int EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION = 8605;
-constexpr int EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION = 8606;
-constexpr int EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION = 8607;
-constexpr int EPSG_CODE_PARAMETER_X_AXIS_ROTATION = 8608;
-constexpr int EPSG_CODE_PARAMETER_Y_AXIS_ROTATION = 8609;
-constexpr int EPSG_CODE_PARAMETER_Z_AXIS_ROTATION = 8610;
-constexpr int EPSG_CODE_PARAMETER_SCALE_DIFFERENCE = 8611;
-
-constexpr int EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION = 1040;
-constexpr int EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION = 1041;
-constexpr int EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION = 1042;
-constexpr int EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION = 1043;
-constexpr int EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION = 1044;
-constexpr int EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION = 1045;
-constexpr int EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE = 1046;
-constexpr int EPSG_CODE_PARAMETER_REFERENCE_EPOCH = 1047;
-
 constexpr int EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE = 8654;
 constexpr int EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE = 8655;
-
-static const std::string
-    EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION("X-axis translation");
-static const std::string
-    EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION("Y-axis translation");
-static const std::string
-    EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION("Z-axis translation");
-static const std::string EPSG_NAME_PARAMETER_X_AXIS_ROTATION("X-axis rotation");
-static const std::string EPSG_NAME_PARAMETER_Y_AXIS_ROTATION("Y-axis rotation");
-static const std::string EPSG_NAME_PARAMETER_Z_AXIS_ROTATION("Z-axis rotation");
-static const std::string
-    EPSG_NAME_PARAMETER_SCALE_DIFFERENCE("Scale difference");
-
-static const std::string EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION(
-    "Rate of change of X-axis translation");
-static const std::string EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION(
-    "Rate of change of Y-axis translation");
-static const std::string EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION(
-    "Rate of change of Z-axis translation");
-static const std::string EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION(
-    "Rate of change of X-axis rotation");
-static const std::string EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION(
-    "Rate of change of Y-axis rotation");
-static const std::string EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION(
-    "Rate of change of Z-axis rotation");
-static const std::string EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE(
-    "Rate of change of Scale difference");
-static const std::string
-    EPSG_NAME_PARAMETER_REFERENCE_EPOCH("Parameter reference epoch");
 
 static const std::string EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE(
     "Semi-major axis length difference");

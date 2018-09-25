@@ -41,7 +41,9 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include <cmath>
 #include <cstdlib>
+#include <iomanip>
 #include <memory>
 #include <sstream> // std::ostringstream
 #include <string>
@@ -405,6 +407,13 @@ AuthorityFactory::createObject(const std::string &code) const {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createConversion(code));
     }
+    if (table_name == "helmert_transformation" ||
+        table_name == "grid_transformation" ||
+        table_name == "other_transformation" ||
+        table_name == "concatenated_operation") {
+        return util::nn_static_pointer_cast<util::BaseObject>(
+            createCoordinateOperation(code));
+    }
     throw FactoryException("unimplemented factory for " + res[0][0]);
 }
 
@@ -477,6 +486,16 @@ AuthorityFactory::createUnitOfMeasure(const std::string &code) const {
         double conv_factor = (code == "9107" || code == "9108")
                                  ? UnitOfMeasure::DEGREE.conversionToSI()
                                  : c_locale_stod(row[1]);
+        constexpr double EPS = 1e-10;
+        if (std::fabs(conv_factor - UnitOfMeasure::DEGREE.conversionToSI()) <
+            EPS * UnitOfMeasure::DEGREE.conversionToSI()) {
+            conv_factor = UnitOfMeasure::DEGREE.conversionToSI();
+        }
+        if (std::fabs(conv_factor -
+                      UnitOfMeasure::ARC_SECOND.conversionToSI()) <
+            EPS * UnitOfMeasure::ARC_SECOND.conversionToSI()) {
+            conv_factor = UnitOfMeasure::ARC_SECOND.conversionToSI();
+        }
         const auto &type_str = row[2];
         UnitOfMeasure::Type unitType = UnitOfMeasure::Type::UNKNOWN;
         if (type_str == "length")
@@ -494,6 +513,34 @@ AuthorityFactory::createUnitOfMeasure(const std::string &code) const {
                                ex.what());
     }
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+static void normalizeMeasure(const std::string &uom_code,
+                             const std::string &value,
+                             std::string &normalized_uom_code,
+                             double &normalized_value) {
+    normalized_uom_code = uom_code;
+    normalized_value = c_locale_stod(value);
+    if (uom_code == "9110") // DDD.MMSSsss
+    {
+        std::ostringstream buffer;
+        buffer.imbue(std::locale::classic());
+        buffer << std::fixed << std::setprecision(7) << normalized_value;
+        auto formatted = buffer.str();
+        size_t dotPos = formatted.find('.');
+        assert(dotPos + 1 + 7 == formatted.size());
+        auto MM = formatted.substr(dotPos + 1, 2);
+        auto SSsss = formatted.substr(dotPos + 3, 2 + 3);
+        normalized_value =
+            (normalized_value < 0 ? -1.0 : 1.0) *
+            (int(std::fabs(normalized_value)) + c_locale_stod(MM) / 60. +
+             (c_locale_stod(SSsss) / 100000.0) / 3600.);
+        normalized_uom_code = common::UnitOfMeasure::DEGREE.code();
+    }
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -519,20 +566,26 @@ AuthorityFactory::createPrimeMeridian(const std::string &code) const {
     try {
         const auto &row = res[0];
         const auto &name = row[0];
-        double longitude = c_locale_stod(row[1]);
+        const auto &longitude = row[1];
         const auto &uom_auth_name = row[2];
         const auto &uom_code = row[3];
         const bool deprecated = row[4] == "1";
-        auto uom =
-            create(d->context(), uom_auth_name)->createUnitOfMeasure(uom_code);
+
+        std::string normalized_uom_code(uom_code);
+        double normalized_value(c_locale_stod(longitude));
+        normalizeMeasure(uom_code, longitude, normalized_uom_code,
+                         normalized_value);
+
+        auto uom = create(d->context(), uom_auth_name)
+                       ->createUnitOfMeasure(normalized_uom_code);
         auto props =
             util::PropertyMap()
                 .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
                 .set(metadata::Identifier::CODE_KEY, code)
                 .set(common::IdentifiedObject::NAME_KEY, name)
                 .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated);
-        return datum::PrimeMeridian::create(props,
-                                            common::Angle(longitude, *uom));
+        return datum::PrimeMeridian::create(
+            props, common::Angle(normalized_value, *uom));
     } catch (const std::exception &ex) {
         throw FactoryException("cannot build prime meridian " + code + ": " +
                                ex.what());
@@ -989,10 +1042,14 @@ AuthorityFactory::createConversion(const std::string &code) const {
                     .set(metadata::Identifier::CODESPACE_KEY, param_auth_name)
                     .set(metadata::Identifier::CODE_KEY, param_code)
                     .set(common::IdentifiedObject::NAME_KEY, param_name)));
+            std::string normalized_uom_code(param_uom_code);
+            double normalized_value(c_locale_stod(param_value));
+            normalizeMeasure(param_uom_code, param_value, normalized_uom_code,
+                             normalized_value);
             auto uom = create(d->context(), param_uom_auth_name)
-                           ->createUnitOfMeasure(param_uom_code);
+                           ->createUnitOfMeasure(normalized_uom_code);
             values.emplace_back(operation::ParameterValue::create(
-                common::Measure(c_locale_stod(param_value), *uom)));
+                common::Measure(normalized_value, *uom)));
         }
         auto propConversion =
             util::PropertyMap()
@@ -1173,6 +1230,681 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
         return createCompoundCRS(code);
     }
     throw FactoryException("unhandled CRS type: " + type);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a operation::CoordinateOperation from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ */
+
+operation::CoordinateOperationNNPtr
+AuthorityFactory::createCoordinateOperation(const std::string &code) const {
+    return createCoordinateOperation(code, true);
+}
+
+operation::CoordinateOperationNNPtr
+AuthorityFactory::createCoordinateOperation(const std::string &code,
+                                            bool allowConcatenated) const {
+    auto res =
+        d->context()->getPrivate()->run("SELECT type FROM coordinate_operation "
+                                        "WHERE auth_name = ? AND code = ?",
+                                        {getAuthority(), code});
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("coordinate operation not found",
+                                           getAuthority(), code);
+    }
+    const auto type = res[0][0];
+    if (type == "conversion") {
+        return createConversion(code);
+    }
+
+    if (type == "helmert_transformation") {
+
+#include "helmert_constants.hpp"
+
+        res = d->context()->getPrivate()->run(
+            "SELECT name, method_auth_name, method_code, method_name, "
+            "source_crs_auth_name, source_crs_code, target_crs_auth_name, "
+            "target_crs_code, area_of_use_auth_name, area_of_use_code, "
+            "accuracy, tx, ty, tz, translation_uom_auth_name, "
+            "translation_uom_code, rx, ry, rz, rotation_uom_auth_name, "
+            "rotation_uom_code, scale_difference, "
+            "scale_difference_uom_auth_name, scale_difference_uom_code, "
+            "rate_tx, rate_ty, rate_tz, rate_translation_uom_auth_name, "
+            "rate_translation_uom_code, rate_rx, rate_ry, rate_rz, "
+            "rate_rotation_uom_auth_name, rate_rotation_uom_code, "
+            "rate_scale_difference, rate_scale_difference_uom_auth_name, "
+            "rate_scale_difference_uom_code, epoch, epoch_uom_auth_name, "
+            "epoch_uom_code, deprecated FROM "
+            "helmert_transformation WHERE auth_name = ? AND code = ?",
+            {getAuthority(), code});
+        if (res.empty()) {
+            // shouldn't happen if foreign keys are OK
+            throw NoSuchAuthorityCodeException(
+                "helmert_transformation not found", getAuthority(), code);
+        }
+        try {
+            const auto &row = res[0];
+            size_t idx = 0;
+            const auto &name = row[idx++];
+            const auto &method_auth_name = row[idx++];
+            const auto &method_code = row[idx++];
+            const auto &method_name = row[idx++];
+            const auto &source_crs_auth_name = row[idx++];
+            const auto &source_crs_code = row[idx++];
+            const auto &target_crs_auth_name = row[idx++];
+            const auto &target_crs_code = row[idx++];
+            const auto &area_of_use_auth_name = row[idx++];
+            const auto &area_of_use_code = row[idx++];
+            const auto &accuracy = row[idx++];
+
+            const auto &tx = row[idx++];
+            const auto &ty = row[idx++];
+            const auto &tz = row[idx++];
+            const auto &translation_uom_auth_name = row[idx++];
+            const auto &translation_uom_code = row[idx++];
+            const auto &rx = row[idx++];
+            const auto &ry = row[idx++];
+            const auto &rz = row[idx++];
+            const auto &rotation_uom_auth_name = row[idx++];
+            const auto &rotation_uom_code = row[idx++];
+            const auto &scale_difference = row[idx++];
+            const auto &scale_difference_uom_auth_name = row[idx++];
+            const auto &scale_difference_uom_code = row[idx++];
+
+            const auto &rate_tx = row[idx++];
+            const auto &rate_ty = row[idx++];
+            const auto &rate_tz = row[idx++];
+            const auto &rate_translation_uom_auth_name = row[idx++];
+            const auto &rate_translation_uom_code = row[idx++];
+            const auto &rate_rx = row[idx++];
+            const auto &rate_ry = row[idx++];
+            const auto &rate_rz = row[idx++];
+            const auto &rate_rotation_uom_auth_name = row[idx++];
+            const auto &rate_rotation_uom_code = row[idx++];
+            const auto &rate_scale_difference = row[idx++];
+            const auto &rate_scale_difference_uom_auth_name = row[idx++];
+            const auto &rate_scale_difference_uom_code = row[idx++];
+
+            const auto &epoch = row[idx++];
+            const auto &epoch_uom_auth_name = row[idx++];
+            const auto &epoch_uom_code = row[idx++];
+
+            const auto &deprecated_str = row[idx++];
+            const bool deprecated = deprecated_str == "1";
+            assert(idx == row.size());
+
+            auto uom_translation =
+                *create(d->context(), translation_uom_auth_name)
+                     ->createUnitOfMeasure(translation_uom_code);
+            auto uom_rotation =
+                rotation_uom_auth_name.empty()
+                    ? common::UnitOfMeasure::NONE
+                    : *create(d->context(), rotation_uom_auth_name)
+                           ->createUnitOfMeasure(rotation_uom_code);
+            auto uom_scale_difference =
+                scale_difference_uom_auth_name.empty()
+                    ? common::UnitOfMeasure::NONE
+                    : *create(d->context(), scale_difference_uom_auth_name)
+                           ->createUnitOfMeasure(scale_difference_uom_code);
+            auto uom_rate_translation =
+                rate_translation_uom_auth_name.empty()
+                    ? common::UnitOfMeasure::NONE
+                    : *create(d->context(), rate_translation_uom_auth_name)
+                           ->createUnitOfMeasure(rate_translation_uom_code);
+            auto uom_rate_rotation =
+                rate_rotation_uom_auth_name.empty()
+                    ? common::UnitOfMeasure::NONE
+                    : *create(d->context(), rate_rotation_uom_auth_name)
+                           ->createUnitOfMeasure(rate_rotation_uom_code);
+            auto uom_rate_scale_difference =
+                rate_scale_difference_uom_auth_name.empty()
+                    ? common::UnitOfMeasure::NONE
+                    : *create(d->context(), rate_scale_difference_uom_auth_name)
+                           ->createUnitOfMeasure(
+                               rate_scale_difference_uom_code);
+            auto uom_epoch = epoch_uom_auth_name.empty()
+                                 ? common::UnitOfMeasure::NONE
+                                 : *create(d->context(), epoch_uom_auth_name)
+                                        ->createUnitOfMeasure(epoch_uom_code);
+
+            auto sourceCRS =
+                create(d->context(), source_crs_auth_name)
+                    ->createCoordinateReferenceSystem(source_crs_code);
+            auto targetCRS =
+                create(d->context(), target_crs_auth_name)
+                    ->createCoordinateReferenceSystem(target_crs_code);
+            auto extent = create(d->context(), area_of_use_auth_name)
+                              ->createExtent(area_of_use_code);
+
+            std::vector<operation::OperationParameterNNPtr> parameters;
+            std::vector<operation::ParameterValueNNPtr> values;
+
+            parameters.emplace_back(operation::OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)));
+            values.emplace_back(operation::ParameterValue::create(
+                common::Length(c_locale_stod(tx), uom_translation)));
+
+            parameters.emplace_back(operation::OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)));
+            values.emplace_back(operation::ParameterValue::create(
+                common::Length(c_locale_stod(ty), uom_translation)));
+
+            parameters.emplace_back(operation::OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY,
+                         EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         metadata::Identifier::EPSG)
+                    .set(metadata::Identifier::CODE_KEY,
+                         EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)));
+            values.emplace_back(operation::ParameterValue::create(
+                common::Length(c_locale_stod(tz), uom_translation)));
+
+            if (uom_rotation != common::UnitOfMeasure::NONE) {
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_X_AXIS_ROTATION)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_X_AXIS_ROTATION)));
+                values.emplace_back(operation::ParameterValue::create(
+                    common::Angle(c_locale_stod(rx), uom_rotation)));
+
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_Y_AXIS_ROTATION)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)));
+                values.emplace_back(operation::ParameterValue::create(
+                    common::Angle(c_locale_stod(ry), uom_rotation)));
+
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_Z_AXIS_ROTATION)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)));
+                values.emplace_back(operation::ParameterValue::create(
+                    common::Angle(c_locale_stod(rz), uom_rotation)));
+
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_SCALE_DIFFERENCE)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)));
+                values.emplace_back(operation::ParameterValue::create(
+                    common::Scale(c_locale_stod(scale_difference),
+                                  uom_scale_difference)));
+            }
+
+            if (uom_rate_translation != common::UnitOfMeasure::NONE) {
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION)));
+                values.emplace_back(
+                    operation::ParameterValue::create(common::Length(
+                        c_locale_stod(rate_tx), uom_rate_translation)));
+
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION)));
+                values.emplace_back(
+                    operation::ParameterValue::create(common::Length(
+                        c_locale_stod(rate_ty), uom_rate_translation)));
+
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION)));
+                values.emplace_back(
+                    operation::ParameterValue::create(common::Length(
+                        c_locale_stod(rate_tz), uom_rate_translation)));
+
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION)));
+                values.emplace_back(operation::ParameterValue::create(
+                    common::Angle(c_locale_stod(rate_rx), uom_rate_rotation)));
+
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION)));
+                values.emplace_back(operation::ParameterValue::create(
+                    common::Angle(c_locale_stod(rate_ry), uom_rate_rotation)));
+
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION)));
+                values.emplace_back(operation::ParameterValue::create(
+                    common::Angle(c_locale_stod(rate_rz), uom_rate_rotation)));
+
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE)));
+                values.emplace_back(operation::ParameterValue::create(
+                    common::Scale(c_locale_stod(rate_scale_difference),
+                                  uom_rate_scale_difference)));
+
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_REFERENCE_EPOCH)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(metadata::Identifier::CODE_KEY,
+                             EPSG_CODE_PARAMETER_REFERENCE_EPOCH)));
+                values.emplace_back(operation::ParameterValue::create(
+                    common::Measure(c_locale_stod(epoch), uom_epoch)));
+            } else if (uom_epoch != common::UnitOfMeasure::NONE) {
+                constexpr int
+                    EPSG_CODE_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH = 1049;
+                static const std::string
+                    EPSG_NAME_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH(
+                        "Transformation reference epoch");
+
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             EPSG_NAME_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             metadata::Identifier::EPSG)
+                        .set(
+                            metadata::Identifier::CODE_KEY,
+                            EPSG_CODE_PARAMETER_TRANSFORMATION_REFERENCE_EPOCH)));
+                values.emplace_back(operation::ParameterValue::create(
+                    common::Measure(c_locale_stod(epoch), uom_epoch)));
+            }
+
+            auto props =
+                util::PropertyMap()
+                    .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
+                    .set(metadata::Identifier::CODE_KEY, code)
+                    .set(common::IdentifiedObject::NAME_KEY, name)
+                    .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
+                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+
+            auto propsMethod =
+                util::PropertyMap()
+                    .set(metadata::Identifier::CODESPACE_KEY, method_auth_name)
+                    .set(metadata::Identifier::CODE_KEY, method_code)
+                    .set(common::IdentifiedObject::NAME_KEY, method_name);
+
+            std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
+            if (!accuracy.empty()) {
+                accuracies.emplace_back(
+                    metadata::PositionalAccuracy::create(accuracy));
+            }
+            return operation::Transformation::create(
+                props, sourceCRS, targetCRS, nullptr, propsMethod, parameters,
+                values, accuracies);
+
+        } catch (const std::exception &ex) {
+            throw FactoryException("cannot build transformation " + code +
+                                   ": " + ex.what());
+        }
+    }
+
+    if (type == "grid_transformation") {
+        res = d->context()->getPrivate()->run(
+            "SELECT name, method_auth_name, method_code, method_name, "
+            "source_crs_auth_name, source_crs_code, target_crs_auth_name, "
+            "target_crs_code, area_of_use_auth_name, area_of_use_code, "
+            "accuracy, grid_param_auth_name, grid_param_code, grid_param_name, "
+            "grid_name, "
+            "grid2_param_auth_name, grid2_param_code, grid2_param_name, "
+            "grid2_name, "
+            "interpolation_crs_auth_name, interpolation_crs_code, deprecated "
+            "FROM "
+            "grid_transformation WHERE auth_name = ? AND code = ?",
+            {getAuthority(), code});
+        if (res.empty()) {
+            // shouldn't happen if foreign keys are OK
+            throw NoSuchAuthorityCodeException("grid_transformation not found",
+                                               getAuthority(), code);
+        }
+        try {
+            const auto &row = res[0];
+            size_t idx = 0;
+            const auto &name = row[idx++];
+            const auto &method_auth_name = row[idx++];
+            const auto &method_code = row[idx++];
+            const auto &method_name = row[idx++];
+            const auto &source_crs_auth_name = row[idx++];
+            const auto &source_crs_code = row[idx++];
+            const auto &target_crs_auth_name = row[idx++];
+            const auto &target_crs_code = row[idx++];
+            const auto &area_of_use_auth_name = row[idx++];
+            const auto &area_of_use_code = row[idx++];
+            const auto &accuracy = row[idx++];
+            const auto &grid_param_auth_name = row[idx++];
+            const auto &grid_param_code = row[idx++];
+            const auto &grid_param_name = row[idx++];
+            const auto &grid_name = row[idx++];
+            const auto &grid2_param_auth_name = row[idx++];
+            const auto &grid2_param_code = row[idx++];
+            const auto &grid2_param_name = row[idx++];
+            const auto &grid2_name = row[idx++];
+            const auto &interpolation_crs_auth_name = row[idx++];
+            const auto &interpolation_crs_code = row[idx++];
+
+            const auto &deprecated_str = row[idx++];
+            const bool deprecated = deprecated_str == "1";
+            assert(idx == row.size());
+
+            auto sourceCRS =
+                create(d->context(), source_crs_auth_name)
+                    ->createCoordinateReferenceSystem(source_crs_code);
+            auto targetCRS =
+                create(d->context(), target_crs_auth_name)
+                    ->createCoordinateReferenceSystem(target_crs_code);
+            auto interpolationCRS =
+                interpolation_crs_auth_name.empty()
+                    ? nullptr
+                    : create(d->context(), interpolation_crs_auth_name)
+                          ->createCoordinateReferenceSystem(
+                              interpolation_crs_code)
+                          .as_nullable();
+            auto extent = create(d->context(), area_of_use_auth_name)
+                              ->createExtent(area_of_use_code);
+
+            std::vector<operation::OperationParameterNNPtr> parameters;
+            std::vector<operation::ParameterValueNNPtr> values;
+
+            parameters.emplace_back(operation::OperationParameter::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY, grid_param_name)
+                    .set(metadata::Identifier::CODESPACE_KEY,
+                         grid_param_auth_name)
+                    .set(metadata::Identifier::CODE_KEY, grid_param_code)));
+            values.emplace_back(
+                operation::ParameterValue::createFilename(grid_name));
+            if (!grid2_name.empty()) {
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             grid2_param_name)
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             grid2_param_auth_name)
+                        .set(metadata::Identifier::CODE_KEY,
+                             grid2_param_code)));
+                values.emplace_back(
+                    operation::ParameterValue::createFilename(grid2_name));
+            }
+
+            auto props =
+                util::PropertyMap()
+                    .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
+                    .set(metadata::Identifier::CODE_KEY, code)
+                    .set(common::IdentifiedObject::NAME_KEY, name)
+                    .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
+                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+
+            auto propsMethod =
+                util::PropertyMap()
+                    .set(metadata::Identifier::CODESPACE_KEY, method_auth_name)
+                    .set(metadata::Identifier::CODE_KEY, method_code)
+                    .set(common::IdentifiedObject::NAME_KEY, method_name);
+
+            std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
+            if (!accuracy.empty()) {
+                accuracies.emplace_back(
+                    metadata::PositionalAccuracy::create(accuracy));
+            }
+            return operation::Transformation::create(
+                props, sourceCRS, targetCRS, interpolationCRS, propsMethod,
+                parameters, values, accuracies);
+
+        } catch (const std::exception &ex) {
+            throw FactoryException("cannot build transformation " + code +
+                                   ": " + ex.what());
+        }
+    }
+
+    if (type == "other_transformation") {
+        std::ostringstream buffer;
+        buffer.imbue(std::locale::classic());
+        buffer
+            << "SELECT name, method_auth_name, method_code, method_name, "
+               "source_crs_auth_name, source_crs_code, target_crs_auth_name, "
+               "target_crs_code, area_of_use_auth_name, area_of_use_code, "
+               "accuracy";
+        constexpr int N_MAX_PARAMS = 7;
+        for (int i = 1; i <= N_MAX_PARAMS; ++i) {
+            buffer << ", param" << i << "_auth_name";
+            buffer << ", param" << i << "_code";
+            buffer << ", param" << i << "_name";
+            buffer << ", param" << i << "_value";
+            buffer << ", param" << i << "_uom_auth_name";
+            buffer << ", param" << i << "_uom_code";
+        }
+        buffer << ", deprecated FROM other_transformation WHERE auth_name = ? "
+                  "AND code = ?";
+
+        res = d->context()->getPrivate()->run(buffer.str(),
+                                              {getAuthority(), code});
+        if (res.empty()) {
+            // shouldn't happen if foreign keys are OK
+            throw NoSuchAuthorityCodeException("other_transformation not found",
+                                               getAuthority(), code);
+        }
+        try {
+            const auto &row = res[0];
+            size_t idx = 0;
+            const auto &name = row[idx++];
+            const auto &method_auth_name = row[idx++];
+            const auto &method_code = row[idx++];
+            const auto &method_name = row[idx++];
+            const auto &source_crs_auth_name = row[idx++];
+            const auto &source_crs_code = row[idx++];
+            const auto &target_crs_auth_name = row[idx++];
+            const auto &target_crs_code = row[idx++];
+            const auto &area_of_use_auth_name = row[idx++];
+            const auto &area_of_use_code = row[idx++];
+            const auto &accuracy = row[idx++];
+
+            const size_t base_param_idx = idx;
+            std::vector<operation::OperationParameterNNPtr> parameters;
+            std::vector<operation::ParameterValueNNPtr> values;
+            for (int i = 0; i < N_MAX_PARAMS; ++i) {
+                const auto &param_auth_name = row[base_param_idx + i * 6 + 0];
+                if (param_auth_name.empty()) {
+                    break;
+                }
+                const auto &param_code = row[base_param_idx + i * 6 + 1];
+                const auto &param_name = row[base_param_idx + i * 6 + 2];
+                const auto &param_value = row[base_param_idx + i * 6 + 3];
+                const auto &param_uom_auth_name =
+                    row[base_param_idx + i * 6 + 4];
+                const auto &param_uom_code = row[base_param_idx + i * 6 + 5];
+                parameters.emplace_back(operation::OperationParameter::create(
+                    util::PropertyMap()
+                        .set(metadata::Identifier::CODESPACE_KEY,
+                             param_auth_name)
+                        .set(metadata::Identifier::CODE_KEY, param_code)
+                        .set(common::IdentifiedObject::NAME_KEY, param_name)));
+                std::string normalized_uom_code(param_uom_code);
+                double normalized_value(c_locale_stod(param_value));
+                normalizeMeasure(param_uom_code, param_value,
+                                 normalized_uom_code, normalized_value);
+                auto uom = create(d->context(), param_uom_auth_name)
+                               ->createUnitOfMeasure(normalized_uom_code);
+                values.emplace_back(operation::ParameterValue::create(
+                    common::Measure(normalized_value, *uom)));
+            }
+            idx = base_param_idx + 6 * N_MAX_PARAMS;
+
+            const auto &deprecated_str = row[idx++];
+            const bool deprecated = deprecated_str == "1";
+            assert(idx == row.size());
+
+            auto sourceCRS =
+                create(d->context(), source_crs_auth_name)
+                    ->createCoordinateReferenceSystem(source_crs_code);
+            auto targetCRS =
+                create(d->context(), target_crs_auth_name)
+                    ->createCoordinateReferenceSystem(target_crs_code);
+
+            auto extent = create(d->context(), area_of_use_auth_name)
+                              ->createExtent(area_of_use_code);
+
+            auto props =
+                util::PropertyMap()
+                    .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
+                    .set(metadata::Identifier::CODE_KEY, code)
+                    .set(common::IdentifiedObject::NAME_KEY, name)
+                    .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
+                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+
+            auto propsMethod =
+                util::PropertyMap()
+                    .set(metadata::Identifier::CODESPACE_KEY, method_auth_name)
+                    .set(metadata::Identifier::CODE_KEY, method_code)
+                    .set(common::IdentifiedObject::NAME_KEY, method_name);
+
+            std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
+            if (!accuracy.empty()) {
+                accuracies.emplace_back(
+                    metadata::PositionalAccuracy::create(accuracy));
+            }
+            return operation::Transformation::create(
+                props, sourceCRS, targetCRS, nullptr, propsMethod, parameters,
+                values, accuracies);
+
+        } catch (const std::exception &ex) {
+            throw FactoryException("cannot build transformation " + code +
+                                   ": " + ex.what());
+        }
+    }
+
+    if (allowConcatenated && type == "concatenated_operation") {
+        res = d->context()->getPrivate()->run(
+            "SELECT name, area_of_use_auth_name, area_of_use_code, accuracy, "
+            "step1_auth_name, step1_code, step2_auth_name, step2_code, "
+            "step3_auth_name, step3_code, deprecated FROM "
+            "concatenated_operation WHERE auth_name = ? AND code = ?",
+            {getAuthority(), code});
+        if (res.empty()) {
+            // shouldn't happen if foreign keys are OK
+            throw NoSuchAuthorityCodeException(
+                "concatenated_operation not found", getAuthority(), code);
+        }
+        try {
+            const auto &row = res[0];
+            size_t idx = 0;
+            const auto &name = row[idx++];
+            const auto &area_of_use_auth_name = row[idx++];
+            const auto &area_of_use_code = row[idx++];
+            const auto &accuracy = row[idx++];
+            const auto &step1_auth_name = row[idx++];
+            const auto &step1_code = row[idx++];
+            const auto &step2_auth_name = row[idx++];
+            const auto &step2_code = row[idx++];
+            const auto &step3_auth_name = row[idx++];
+            const auto &step3_code = row[idx++];
+            const auto &deprecated_str = row[idx++];
+            const bool deprecated = deprecated_str == "1";
+
+            std::vector<operation::CoordinateOperationNNPtr> operations;
+            operations.push_back(
+                create(d->context(), step1_auth_name)
+                    ->createCoordinateOperation(step1_code, false));
+            operations.push_back(
+                create(d->context(), step2_auth_name)
+                    ->createCoordinateOperation(step2_code, false));
+            if (!step3_auth_name.empty()) {
+                operations.push_back(
+                    create(d->context(), step3_auth_name)
+                        ->createCoordinateOperation(step3_code, false));
+            }
+
+            auto extent = create(d->context(), area_of_use_auth_name)
+                              ->createExtent(area_of_use_code);
+
+            auto props =
+                util::PropertyMap()
+                    .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
+                    .set(metadata::Identifier::CODE_KEY, code)
+                    .set(common::IdentifiedObject::NAME_KEY, name)
+                    .set(common::IdentifiedObject::DEPRECATED_KEY, deprecated)
+                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY, extent);
+
+            std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
+            if (!accuracy.empty()) {
+                accuracies.emplace_back(
+                    metadata::PositionalAccuracy::create(accuracy));
+            }
+            return operation::ConcatenatedOperation::create(props, operations,
+                                                            accuracies);
+
+        } catch (const std::exception &ex) {
+            throw FactoryException("cannot build transformation " + code +
+                                   ": " + ex.what());
+        }
+    }
+
+    throw FactoryException("unhandled coordinate operation type: " + type);
 }
 
 // ---------------------------------------------------------------------------

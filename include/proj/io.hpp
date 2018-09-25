@@ -103,6 +103,10 @@ namespace operation {
 class Conversion;
 using ConversionPtr = std::shared_ptr<Conversion>;
 using ConversionNNPtr = util::nn<ConversionPtr>;
+
+class CoordinateOperation;
+using CoordinateOperationPtr = std::shared_ptr<CoordinateOperation>;
+using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
 } // namespace operation
 
 /** osgeo.proj.io namespace.
@@ -637,6 +641,9 @@ class AuthorityFactory {
     PROJ_DLL crs::CRSNNPtr
     createCoordinateReferenceSystem(const std::string &code) const;
 
+    PROJ_DLL operation::CoordinateOperationNNPtr
+    createCoordinateOperation(const std::string &code) const;
+
     PROJ_DLL const std::string &getAuthority() const;
 
     PROJ_DLL std::set<std::string>
@@ -654,6 +661,10 @@ class AuthorityFactory {
 
     crs::CRSNNPtr createCoordinateReferenceSystem(const std::string &code,
                                                   bool allowCompound) const;
+
+    operation::CoordinateOperationNNPtr
+    createCoordinateOperation(const std::string &code,
+                              bool allowConcatenated) const;
 
     INLINED_MAKE_SHARED
 

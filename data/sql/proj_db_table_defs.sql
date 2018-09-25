@@ -353,10 +353,12 @@ CREATE TABLE grid_transformation(
 
     grid_param_auth_name TEXT NOT NULL,
     grid_param_code TEXT NOT NULL,
+    grid_param_name TEXT NOT NULL,
     grid_name TEXT NOT NULL,
 
     grid2_param_auth_name TEXT,
     grid2_param_code TEXT,
+    grid2_param_name TEXT,
     grid2_name TEXT,
 
     interpolation_crs_auth_name TEXT,
