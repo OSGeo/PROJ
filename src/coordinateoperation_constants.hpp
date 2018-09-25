@@ -490,6 +490,16 @@ constexpr int EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE = 8732;
 
 // ---------------------------------------------------------------------------
 
+constexpr int EPSG_CODE_METHOD_LONGITUDE_ROTATION = 9601;
+static const std::string
+    EPSG_NAME_METHOD_LONGITUDE_ROTATION("Longitude rotation");
+
+static const std::string
+    EPSG_NAME_PARAMETER_LONGITUDE_OFFSET("Longitude offset");
+constexpr int EPSG_CODE_PARAMETER_LONGITUDE_OFFSET = 8602;
+
+// ---------------------------------------------------------------------------
+
 static const ParamMapping paramLatitudeNatOrigin = {
     EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, WKT1_LATITUDE_OF_ORIGIN,

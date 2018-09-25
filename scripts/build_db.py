@@ -135,19 +135,20 @@ def fill_conversion(proj_db_cursor):
     proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH'")
     for (code, name, method_code, method_name) in proj_db_cursor.fetchall():
         expected_order = 1
-        param_auth_name = [None for i in range(7)]
-        param_code = [None for i in range(7)]
-        param_name = [None for i in range(7)]
-        param_value = [None for i in range(7)]
-        param_uom_auth_name = [None for i in range(7)]
-        param_uom_code = [None for i in range(7)]
+        max_n_params = 7
+        param_auth_name = [None for i in range(max_n_params)]
+        param_code = [None for i in range(max_n_params)]
+        param_name = [None for i in range(max_n_params)]
+        param_value = [None for i in range(max_n_params)]
+        param_uom_auth_name = [None for i in range(max_n_params)]
+        param_uom_code = [None for i in range(max_n_params)]
 
         iterator = proj_db_cursor.execute("SELECT sort_order, cop.parameter_code, parameter_name, parameter_value, uom_code from epsg_coordoperationparam cop LEFT JOIN epsg_coordoperationparamvalue copv LEFT JOIN epsg_coordoperationparamusage copu ON cop.parameter_code = copv.parameter_code AND copu.parameter_code = copv.parameter_code WHERE copu.coord_op_method_code = copv.coord_op_method_code AND coord_op_code = ? AND copv.coord_op_method_code = ? ORDER BY sort_order", (code, method_code))
         for (order, parameter_code, parameter_name, parameter_value, uom_code) in iterator:
             # Modified Krovak and Krovak North Oriented: keep only the 7 first parameters
-            if order == 8 and method_code in (1042, 1043):
+            if order == max_n_params + 1 and method_code in (1042, 1043):
                 break
-            assert order < 8
+            assert order <= max_n_params
             assert order == expected_order
             param_auth_name[order - 1] = EPSG_AUTHORITY
             param_code[order - 1] = parameter_code
@@ -335,6 +336,57 @@ def fill_grid_transformation(proj_db_cursor):
         proj_db_cursor.execute('INSERT INTO grid_transformation VALUES (' +
             '?,?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?, ?,?,?, ?,?, ?)', arg)
 
+def fill_other_transformation(proj_db_cursor):
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (9601)")
+    for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, deprecated) in proj_db_cursor.fetchall():
+        expected_order = 1
+        max_n_params = 7
+        param_auth_name = [None for i in range(max_n_params)]
+        param_code = [None for i in range(max_n_params)]
+        param_name = [None for i in range(max_n_params)]
+        param_value = [None for i in range(max_n_params)]
+        param_uom_auth_name = [None for i in range(max_n_params)]
+        param_uom_code = [None for i in range(max_n_params)]
+
+        iterator = proj_db_cursor.execute("SELECT sort_order, cop.parameter_code, parameter_name, parameter_value, uom_code from epsg_coordoperationparam cop LEFT JOIN epsg_coordoperationparamvalue copv LEFT JOIN epsg_coordoperationparamusage copu ON cop.parameter_code = copv.parameter_code AND copu.parameter_code = copv.parameter_code WHERE copu.coord_op_method_code = copv.coord_op_method_code AND coord_op_code = ? AND copv.coord_op_method_code = ? ORDER BY sort_order", (code, method_code))
+        for (order, parameter_code, parameter_name, parameter_value, uom_code) in iterator:
+            assert order <= max_n_params
+            assert order == expected_order
+            param_auth_name[order - 1] = EPSG_AUTHORITY
+            param_code[order - 1] = parameter_code
+            param_name[order - 1] = parameter_name
+            param_value[order - 1] = parameter_value
+            param_uom_auth_name[order - 1] = EPSG_AUTHORITY
+            param_uom_code[order - 1] = uom_code
+            expected_order += 1
+
+        arg = (EPSG_AUTHORITY, code, name,
+               EPSG_AUTHORITY, method_code, method_name,
+               EPSG_AUTHORITY, source_crs_code,
+               EPSG_AUTHORITY, target_crs_code,
+               EPSG_AUTHORITY, area_of_use_code,
+               coord_op_accuracy,
+               param_auth_name[0], param_code[0], param_name[0],
+               param_value[0], param_uom_auth_name[0], param_uom_code[0],
+               param_auth_name[1], param_code[1], param_name[1], param_value[1],
+               param_uom_auth_name[1], param_uom_code[1], param_auth_name[2],
+               param_code[2], param_name[2], param_value[2],
+               param_uom_auth_name[2], param_uom_code[2],
+               param_auth_name[3], param_code[3], param_name[3], param_value[3],
+               param_uom_auth_name[3], param_uom_code[3], param_auth_name[4],
+               param_code[4], param_name[4], param_value[4],
+               param_uom_auth_name[4], param_uom_code[4], param_auth_name[5],
+               param_code[5], param_name[5], param_value[5],
+               param_uom_auth_name[5], param_uom_code[5], param_auth_name[6],
+               param_code[6], param_name[6], param_value[6],
+               param_uom_auth_name[6], param_uom_code[6],
+               deprecated)
+
+        proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'other_transformation')", (EPSG_AUTHORITY, code))
+        proj_db_cursor.execute('INSERT INTO other_transformation VALUES (' +
+            '?,?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ' +
+            '?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?)', arg)
+
 def fill_concatenated_operation(proj_db_cursor):
     proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'concatenated operation'")
     for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, deprecated) in proj_db_cursor.fetchall():
@@ -372,6 +424,15 @@ def fill_concatenated_operation(proj_db_cursor):
             print(e)
             print(arg)
 
+
+def report_non_imported_operations(proj_db_cursor):
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_type, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_code NOT IN (SELECT code FROM coordinate_operation)")
+    rows = []
+    for row in proj_db_cursor.fetchall():
+        print(row)
+        rows.append(row)
+    return rows
+
 epsg_db_conn, epsg_tmp_db_filename = ingest_epsg()
 
 script_dir_name = os.path.dirname(os.path.realpath(__file__))
@@ -402,7 +463,9 @@ fill_projected_crs(proj_db_cursor)
 fill_compound_crs(proj_db_cursor)
 fill_helmert_transformation(proj_db_cursor)
 fill_grid_transformation(proj_db_cursor)
+fill_other_transformation(proj_db_cursor)
 fill_concatenated_operation(proj_db_cursor)
+non_imported_operations = report_non_imported_operations(proj_db_cursor)
 
 proj_db_cursor.close()
 proj_db_conn.commit()
@@ -421,6 +484,9 @@ for line in proj_db_conn.iterdump():
             f.write("--- This file has been generated by scripts/build_db.py. DO NOT EDIT !\n\n")
             files[table_name] = f
         f.write((line + '\n').encode('UTF-8'))
+f = files['coordinate_operation']
+for row in non_imported_operations:
+    f.write(("--- Non imported: " + str(row) + '\n').encode('UTF-8'))
 del files
 
 proj_db_conn = None

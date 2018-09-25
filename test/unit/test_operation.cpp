@@ -3200,6 +3200,30 @@ TEST(operation, geogCRS_to_geogCRS_noop) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_longitude_rotation) {
+
+    auto src = GeographicCRS::create(
+        PropertyMap(), GeodeticReferenceFrame::create(
+                           PropertyMap(), Ellipsoid::WGS84,
+                           optional<std::string>(), PrimeMeridian::GREENWICH),
+        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+    auto dest = GeographicCRS::create(
+        PropertyMap(), GeodeticReferenceFrame::create(
+                           PropertyMap(), Ellipsoid::WGS84,
+                           optional<std::string>(), PrimeMeridian::PARIS),
+        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+
+    auto op = CoordinateOperationFactory::create()->createOperation(src, dest);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(
+        op->exportToPROJString(PROJStringFormatter::create()),
+        "+proj=pipeline +step +inv +proj=longlat +ellps=WGS84 +pm=-2.33722917");
+    EXPECT_TRUE(op->inverse()->isEquivalentTo(NN_CHECK_ASSERT(
+        CoordinateOperationFactory::create()->createOperation(dest, src))));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geocentricCRS_to_geogCRS) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
@@ -3568,6 +3592,29 @@ TEST(operation, transformation_VERTCON_to_PROJ_string) {
     EXPECT_EQ(
         vtransformation->exportToPROJString(PROJStringFormatter::create()),
         "+proj=vgridshift +grids=bla.gtx +multiplier=0.001");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, transformation_longitude_rotation_to_PROJ_string) {
+
+    auto src = GeographicCRS::create(
+        PropertyMap(), GeodeticReferenceFrame::create(
+                           PropertyMap(), Ellipsoid::WGS84,
+                           optional<std::string>(), PrimeMeridian::GREENWICH),
+        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+    auto dest = GeographicCRS::create(
+        PropertyMap(), GeodeticReferenceFrame::create(
+                           PropertyMap(), Ellipsoid::WGS84,
+                           optional<std::string>(), PrimeMeridian::PARIS),
+        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+    auto transformation = Transformation::createLongitudeRotation(
+        PropertyMap(), src, dest, Angle(10));
+    EXPECT_EQ(transformation->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +inv +proj=longlat +ellps=WGS84 +pm=10");
+    EXPECT_EQ(transformation->inverse()->exportToPROJString(
+                  PROJStringFormatter::create()),
+              "+proj=pipeline +step +inv +proj=longlat +ellps=WGS84 +pm=-10");
 }
 
 // ---------------------------------------------------------------------------

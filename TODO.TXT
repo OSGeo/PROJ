@@ -6,7 +6,6 @@
     - derived crs
     - test sphericalCS
     - PointMotionOperation
-    - implement transformation Longitude offset ?
 
     - transformation with WEST longitude
     GEOGCS["Mars2015",

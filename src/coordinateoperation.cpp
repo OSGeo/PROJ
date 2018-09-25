@@ -5359,6 +5359,45 @@ TransformationNNPtr Transformation::createVERTCON(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instanciate a transformation with method Longitude rotation
+ *
+ * This method is defined as [EPSG:9601]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9601)
+ * *
+ * @param properties See \ref general_properties of the Transformation.
+ * At minimum the name should be defined.
+ * @param sourceCRSIn Source CRS.
+ * @param targetCRSIn Target CRS.
+ * @param offset Longitude offset to add.
+ * @return new Transformation.
+ */
+TransformationNNPtr Transformation::createLongitudeRotation(
+    const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+    const crs::CRSNNPtr &targetCRSIn, const common::Angle &offset) {
+
+    return create(
+        properties, sourceCRSIn, targetCRSIn, nullptr,
+        util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY,
+                 EPSG_NAME_METHOD_LONGITUDE_ROTATION)
+            .set(metadata::Identifier::CODESPACE_KEY,
+                 metadata::Identifier::EPSG)
+            .set(metadata::Identifier::CODE_KEY,
+                 EPSG_CODE_METHOD_LONGITUDE_ROTATION),
+        std::vector<OperationParameterNNPtr>{OperationParameter::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_PARAMETER_LONGITUDE_OFFSET)
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY,
+                     EPSG_CODE_PARAMETER_LONGITUDE_OFFSET))},
+        std::vector<ParameterValueNNPtr>{ParameterValue::create(offset)},
+        std::vector<metadata::PositionalAccuracyNNPtr>());
+}
+
+// ---------------------------------------------------------------------------
+
 static bool isTimeDependent(const std::string &method_name) {
     return ci_find(method_name, "Time dependent") != std::string::npos ||
            ci_find(method_name, "Time-dependent") != std::string::npos;
@@ -5588,6 +5627,20 @@ CoordinateOperationNNPtr Transformation::inverse() const {
                 targetCRS(), sourceCRS(), x, y, z, da, df,
                 coordinateOperationAccuracies());
         }
+    }
+
+    if (ci_equal(method_name, EPSG_NAME_METHOD_LONGITUDE_ROTATION) ||
+        method()->isEPSG(EPSG_CODE_METHOD_LONGITUDE_ROTATION)) {
+        auto offset =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LONGITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
+        const common::Angle newOffset(-offset.value(), offset.unit());
+        return createLongitudeRotation(
+            util::PropertyMap().set(
+                common::IdentifiedObject::NAME_KEY,
+                "Transformation from " + *(targetCRS()->name()->description()) +
+                    " to " + *(sourceCRS()->name()->description())),
+            targetCRS(), sourceCRS(), newOffset);
     }
 
     return util::nn_make_shared<InverseCoordinateOperation>(
@@ -6017,6 +6070,49 @@ std::string Transformation::exportToPROJString(
         }
     }
 
+    if (ci_equal(method_name, EPSG_NAME_METHOD_LONGITUDE_ROTATION) ||
+        method()->isEPSG(EPSG_CODE_METHOD_LONGITUDE_ROTATION)) {
+        double offsetDeg =
+            parameterValueMeasure(EPSG_NAME_PARAMETER_LONGITUDE_OFFSET,
+                                  EPSG_CODE_PARAMETER_LONGITUDE_OFFSET)
+                .convertToUnit(common::UnitOfMeasure::DEGREE)
+                .value();
+
+        auto sourceCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS());
+        if (!sourceCRSGeog) {
+            throw io::FormattingException(
+                "Can apply Longitude rotation only to GeographicCRS");
+        }
+
+        auto targetCRSGeog =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS());
+        if (!targetCRSGeog) {
+            throw io::FormattingException(
+                "Can apply Longitude rotation only to GeographicCRS");
+        }
+
+        if (!sourceCRSGeog->ellipsoid()->isEquivalentTo(
+                targetCRSGeog->ellipsoid())) {
+            throw io::FormattingException(
+                "Can apply Longitude rotation only to SRS with same ellipsoid");
+        }
+
+        if (!sourceCRSGeog->coordinateSystem()->isEquivalentTo(
+                targetCRSGeog->coordinateSystem())) {
+            throw io::FormattingException("Can apply Longitude rotation only "
+                                          "to SRS with same coordinate system");
+        }
+
+        io::PROJStringFormatter::Scope scope(formatter);
+        formatter->startInversion();
+        formatter->addStep("longlat");
+        sourceCRSGeog->ellipsoid()->exportToPROJString(formatter);
+        formatter->addParam("pm", offsetDeg);
+        formatter->stopInversion();
+        return scope.toString();
+    }
+
     throw io::FormattingException("Unimplemented");
 }
 
@@ -6215,13 +6311,36 @@ CoordinateOperationFactory::CoordinateOperationFactory()
  *
  * @return a CoordinateOperation or nullptr.
  */
-CoordinateOperationPtr
-CoordinateOperationFactory::createOperation(crs::CRSNNPtr sourceCRS,
-                                            crs::CRSNNPtr targetCRS) const {
+CoordinateOperationPtr CoordinateOperationFactory::createOperation(
+    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS) const {
 
     auto geodSrc = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(sourceCRS);
     auto geodDst = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(targetCRS);
     if (geodSrc && geodDst) {
+
+        auto geogSrc =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(sourceCRS);
+        auto geogDst =
+            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS);
+        if (geogSrc && geogDst &&
+            geogSrc->ellipsoid()->isEquivalentTo(geogDst->ellipsoid()) &&
+            geogSrc->coordinateSystem()->isEquivalentTo(
+                geogDst->coordinateSystem())) {
+            double src_pm = geogSrc->primeMeridian()->longitude().getSIValue();
+            double dst_pm = geogDst->primeMeridian()->longitude().getSIValue();
+            if (src_pm != dst_pm) {
+                return NN_CO_CAST(Transformation::createLongitudeRotation(
+                    util::PropertyMap().set(
+                        common::IdentifiedObject::NAME_KEY,
+                        "Transformation from " +
+                            *(sourceCRS->name()->description()) + " to " +
+                            *(targetCRS->name()->description())),
+                    sourceCRS, targetCRS,
+                    common::Angle(src_pm - dst_pm,
+                                  common::UnitOfMeasure::RADIAN)));
+            }
+        }
+
         auto formatter = io::PROJStringFormatter::create();
         io::PROJStringFormatter::Scope scope(formatter);
         formatter->startInversion();

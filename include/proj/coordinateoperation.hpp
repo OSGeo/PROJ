@@ -1318,6 +1318,10 @@ class Transformation : public SingleOperation {
         const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
+    PROJ_DLL static TransformationNNPtr createLongitudeRotation(
+        const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
+        const crs::CRSNNPtr &targetCRSIn, const common::Angle &offset);
+
     PROJ_DLL std::string getNTv2Filename() const;
     PROJ_DLL std::string getHeightToGeographic3DFilename() const;
 
@@ -1441,8 +1445,8 @@ class CoordinateOperationFactory {
     PROJ_DLL virtual ~CoordinateOperationFactory();
     //! @endcond
 
-    PROJ_DLL CoordinateOperationPtr
-    createOperation(crs::CRSNNPtr sourceCRS, crs::CRSNNPtr targetCRS) const;
+    PROJ_DLL CoordinateOperationPtr createOperation(
+        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS) const;
 
     PROJ_DLL static CoordinateOperationFactoryNNPtr create();
 

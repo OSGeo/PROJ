@@ -365,10 +365,95 @@ CREATE TABLE grid_transformation(
     deprecated BOOLEAN NOT NULL,
 
     CONSTRAINT pk_grid_transformation PRIMARY KEY (auth_name, code),
+    CONSTRAINT fk_grid_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_grid_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_grid_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_grid_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_grid_transformation_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
+);
+
+CREATE TABLE other_transformation(
+    auth_name TEXT NOT NULL,
+    code TEXT NOT NULL,
+    name TEXT NOT NULL,
+
+    method_auth_name TEXT NOT NULL,
+    method_code TEXT NOT NULL,
+    method_name NOT NULL,
+
+    source_crs_auth_name TEXT NOT NULL,
+    source_crs_code TEXT NOT NULL,
+    target_crs_auth_name TEXT NOT NULL,
+    target_crs_code TEXT NOT NULL,
+
+    area_of_use_auth_name TEXT NOT NULL,
+    area_of_use_code TEXT NOT NULL,
+
+    accuracy FLOAT,
+
+    param1_auth_name TEXT,
+    param1_code TEXT,
+    param1_name TEXT,
+    param1_value FLOAT,
+    param1_uom_auth_name TEXT,
+    param1_uom_code TEXT,
+
+    param2_auth_name TEXT,
+    param2_code TEXT,
+    param2_name TEXT,
+    param2_value FLOAT,
+    param2_uom_auth_name TEXT,
+    param2_uom_code TEXT,
+
+    param3_auth_name TEXT,
+    param3_code TEXT,
+    param3_name TEXT,
+    param3_value FLOAT,
+    param3_uom_auth_name TEXT,
+    param3_uom_code TEXT,
+
+    param4_auth_name TEXT,
+    param4_code TEXT,
+    param4_name TEXT,
+    param4_value FLOAT,
+    param4_uom_auth_name TEXT,
+    param4_uom_code TEXT,
+
+    param5_auth_name TEXT,
+    param5_code TEXT,
+    param5_name TEXT,
+    param5_value FLOAT,
+    param5_uom_auth_name TEXT,
+    param5_uom_code TEXT,
+
+    param6_auth_name TEXT,
+    param6_code TEXT,
+    param6_name TEXT,
+    param6_value FLOAT,
+    param6_uom_auth_name TEXT,
+    param6_uom_code TEXT,
+
+    param7_auth_name TEXT,
+    param7_code TEXT,
+    param7_name TEXT,
+    param7_value FLOAT,
+    param7_uom_auth_name TEXT,
+    param7_uom_code TEXT,
+
+    deprecated BOOLEAN NOT NULL,
+
+    CONSTRAINT pk_other_transformation PRIMARY KEY (auth_name, code),
+    CONSTRAINT fk_other_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
+    CONSTRAINT fk_other_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
+    CONSTRAINT fk_other_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
+    CONSTRAINT fk_other_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
+    CONSTRAINT fk_other_transformation_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code),
+    CONSTRAINT fk_other_transformation_param2_uom FOREIGN KEY (param2_uom_auth_name, param2_uom_code) REFERENCES unit_of_measure(auth_name, code),
+    CONSTRAINT fk_other_transformation_param3_uom FOREIGN KEY (param3_uom_auth_name, param3_uom_code) REFERENCES unit_of_measure(auth_name, code),
+    CONSTRAINT fk_other_transformation_param4_uom FOREIGN KEY (param4_uom_auth_name, param4_uom_code) REFERENCES unit_of_measure(auth_name, code),
+    CONSTRAINT fk_other_transformation_param5_uom FOREIGN KEY (param5_uom_auth_name, param5_uom_code) REFERENCES unit_of_measure(auth_name, code),
+    CONSTRAINT fk_other_transformation_param6_uom FOREIGN KEY (param6_uom_auth_name, param6_uom_code) REFERENCES unit_of_measure(auth_name, code),
+    CONSTRAINT fk_other_transformation_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code)
 );
 
 CREATE TABLE concatenated_operation(
@@ -398,6 +483,7 @@ CREATE TABLE concatenated_operation(
     deprecated BOOLEAN NOT NULL,
 
     CONSTRAINT pk_concatenated_operation PRIMARY KEY (auth_name, code),
+    CONSTRAINT fk_concatenated_operation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_concatenated_operation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_concatenated_operation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_concatenated_operation_step1 FOREIGN KEY (step1_auth_name, step1_code) REFERENCES coordinate_operation(auth_name, code),
@@ -418,6 +504,12 @@ CREATE VIEW coordinate_operation_view AS
            source_crs_code, target_crs_auth_name, target_crs_code,
            area_of_use_auth_name, area_of_use_code,
            accuracy, deprecated FROM helmert_transformation
+    UNION ALL
+    SELECT 'other_transformation' AS table_name, auth_name, code, name,
+           method_auth_name, method_code, method_name, source_crs_auth_name,
+           source_crs_code, target_crs_auth_name, target_crs_code,
+           area_of_use_auth_name, area_of_use_code,
+           accuracy, deprecated FROM other_transformation
     UNION ALL
     SELECT 'concatenated_operation' AS table_name, auth_name, code, name,
            NULL, NULL, NULL, source_crs_auth_name,
