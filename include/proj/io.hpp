@@ -86,6 +86,10 @@ class GeodeticCRS;
 using GeodeticCRSPtr = std::shared_ptr<GeodeticCRS>;
 using GeodeticCRSNNPtr = util::nn<GeodeticCRSPtr>;
 
+class GeographicCRS;
+using GeographicCRSPtr = std::shared_ptr<GeographicCRS>;
+using GeographicCRSNNPtr = util::nn<GeographicCRSPtr>;
+
 class VerticalCRS;
 using VerticalCRSPtr = std::shared_ptr<VerticalCRS>;
 using VerticalCRSNNPtr = util::nn<VerticalCRSPtr>;
@@ -626,6 +630,9 @@ class AuthorityFactory {
     PROJ_DLL crs::GeodeticCRSNNPtr
     createGeodeticCRS(const std::string &code) const;
 
+    PROJ_DLL crs::GeographicCRSNNPtr
+    createGeographicCRS(const std::string &code) const;
+
     PROJ_DLL crs::VerticalCRSNNPtr
     createVerticalCRS(const std::string &code) const;
 
@@ -646,8 +653,47 @@ class AuthorityFactory {
 
     PROJ_DLL const std::string &getAuthority() const;
 
+    /** Object type. */
+    enum class ObjectType {
+        /** Object of type datum::PrimeMeridian */
+        PRIME_MERIDIAN,
+        /** Object of type datum::Ellipsoid */
+        ELLIPSOID,
+        /** Object of type datum::Datum (and derived classes) */
+        DATUM,
+        /** Object of type datum::GeodeticReferenceFrame (and derived
+           classes) */
+        GEODETIC_REFERENCE_FRAME,
+        /** Object of type datum::VerticalReferenceFrame (and derived
+           classes) */
+        VERTICAL_REFERENCE_FRAME,
+        /** Object of type crs::CRS (and derived classes) */
+        CRS,
+        /** Object of type crs::GeodeticCRS (and derived classes) */
+        GEODETIC_CRS,
+        /** Object of type crs::GeographicCRS (and derived classes) */
+        GEOGRAPHIC_CRS,
+        /** Object of type crs::ProjectedCRS (and derived classes) */
+        PROJECTED_CRS,
+        /** Object of type crs::VerticalCRS (and derived classes) */
+        VERTICAL_CRS,
+        /** Object of type crs::CompoundCRS (and derived classes) */
+        COMPOUND_CRS,
+        /** Object of type operation::CoordinateOperation (and derived
+           classes) */
+        COORDINATE_OPERATION,
+        /** Object of type operation::Conversion (and derived classes) */
+        CONVERSION,
+        /** Object of type operation::Transformation (and derived classes)
+           */
+        TRANSFORMATION,
+        /** Object of type operation::ConcatenatedOperation (and derived
+           classes) */
+        CONCATENATED_OPERATION,
+    };
+
     PROJ_DLL std::set<std::string>
-    getAuthorityCodes(const std::string &type) const;
+    getAuthorityCodes(const ObjectType &type) const;
 
     PROJ_DLL std::string getDescriptionText(const std::string &code) const;
 
@@ -661,6 +707,9 @@ class AuthorityFactory {
 
     crs::CRSNNPtr createCoordinateReferenceSystem(const std::string &code,
                                                   bool allowCompound) const;
+
+    crs::GeodeticCRSNNPtr createGeodeticCRS(const std::string &code,
+                                            bool geographicOnly) const;
 
     operation::CoordinateOperationNNPtr
     createCoordinateOperation(const std::string &code,

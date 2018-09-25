@@ -873,12 +873,38 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
 
 crs::GeodeticCRSNNPtr
 AuthorityFactory::createGeodeticCRS(const std::string &code) const {
-    auto res = d->context()->getPrivate()->run(
-        "SELECT name, type, coordinate_system_auth_name, "
-        "coordinate_system_code, datum_auth_name, datum_code, "
-        "area_of_use_auth_name, area_of_use_code, deprecated FROM "
-        "geodetic_crs WHERE auth_name = ? AND code = ?",
-        {getAuthority(), code});
+    return createGeodeticCRS(code, false);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a crs::GeographicCRS from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @return object.
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ */
+
+crs::GeographicCRSNNPtr
+AuthorityFactory::createGeographicCRS(const std::string &code) const {
+    return NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+        createGeodeticCRS(code, true)));
+}
+
+// ---------------------------------------------------------------------------
+
+crs::GeodeticCRSNNPtr
+AuthorityFactory::createGeodeticCRS(const std::string &code,
+                                    bool geographicOnly) const {
+    std::string sql("SELECT name, type, coordinate_system_auth_name, "
+                    "coordinate_system_code, datum_auth_name, datum_code, "
+                    "area_of_use_auth_name, area_of_use_code, deprecated FROM "
+                    "geodetic_crs WHERE auth_name = ? AND code = ?");
+    if (geographicOnly) {
+        sql += " AND type in ('geographic 2D', 'geographic 3D')";
+    }
+    auto res = d->context()->getPrivate()->run(sql, {getAuthority(), code});
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("geodeticCRS not found",
                                            getAuthority(), code);
@@ -1920,21 +1946,80 @@ const std::string &AuthorityFactory::getAuthority() const {
 
 /** \brief Returns the set of authority codes of the given object type.
  *
- * @param type Among "CRS", "Datum", etc...
+ * @param type Objec type.
  * @return the set of authority codes for spatial reference objects of the given
  * type
  * @throw FactoryException
  */
 std::set<std::string>
-AuthorityFactory::getAuthorityCodes(const std::string &type) const {
-    (void)type;
-    // TODO
-    return std::set<std::string>();
+AuthorityFactory::getAuthorityCodes(const ObjectType &type) const {
+    std::string sql;
+    switch (type) {
+    case ObjectType::PRIME_MERIDIAN:
+        sql = "SELECT code FROM prime_meridian WHERE ";
+        break;
+    case ObjectType::ELLIPSOID:
+        sql = "SELECT code FROM ellipsoid WHERE ";
+        break;
+    case ObjectType::DATUM:
+        sql = "SELECT code FROM object_view WHERE table_name IN "
+              "('geodetic_datum', 'vertical_datum') AND ";
+        break;
+    case ObjectType::GEODETIC_REFERENCE_FRAME:
+        sql = "SELECT code FROM geodetic_datum WHERE ";
+        break;
+    case ObjectType::VERTICAL_REFERENCE_FRAME:
+        sql = "SELECT code FROM vertical_datum WHERE ";
+        break;
+    case ObjectType::CRS:
+        sql = "SELECT code FROM crs WHERE ";
+        break;
+    case ObjectType::GEODETIC_CRS:
+        sql = "SELECT code FROM geodetic_crs WHERE ";
+        break;
+    case ObjectType::GEOGRAPHIC_CRS:
+        sql = "SELECT code FROM geodetic_crs WHERE type IN ('geographic 2D', "
+              "'geographic 3D') AND ";
+        break;
+    case ObjectType::VERTICAL_CRS:
+        sql = "SELECT code FROM vertical_crs WHERE ";
+        break;
+    case ObjectType::PROJECTED_CRS:
+        sql = "SELECT code FROM projected_crs WHERE ";
+        break;
+    case ObjectType::COMPOUND_CRS:
+        sql = "SELECT code FROM compound_crs WHERE ";
+        break;
+    case ObjectType::COORDINATE_OPERATION:
+        sql = "SELECT code FROM coordinate_operation WHERE ";
+        break;
+    case ObjectType::CONVERSION:
+        sql = "SELECT code FROM conversion WHERE ";
+        break;
+    case ObjectType::TRANSFORMATION:
+        sql = "SELECT code FROM coordinate_operation_view WHERE table_name != "
+              "'concatenated_operation' AND ";
+        break;
+    case ObjectType::CONCATENATED_OPERATION:
+        sql = "SELECT code FROM concatenated_operation WHERE ";
+        break;
+    }
+    auto res = d->context()->getPrivate()->run(sql + "auth_name = ?",
+                                               {getAuthority()});
+    std::set<std::string> set;
+    for (const auto &row : res) {
+        set.insert(row[0]);
+    }
+    return set;
 }
 
 // ---------------------------------------------------------------------------
 
 /** \brief Gets a description of the object corresponding to a code.
+ *
+ * \note In case of several objects of different types with the same code,
+ * one of them will be arbitrarily selected.
+ *
  * @param code Object code allocated by authority. (e.g. "4326")
  * @return description.
  * @throw NoSuchAuthorityCodeException
@@ -1942,9 +2027,14 @@ AuthorityFactory::getAuthorityCodes(const std::string &type) const {
  */
 std::string
 AuthorityFactory::getDescriptionText(const std::string &code) const {
-    (void)code;
-    // TODO
-    return std::string();
+    auto sql = "SELECT name FROM object_view WHERE auth_name = ? AND code = "
+               "? ORDER BY table_name";
+    auto res = d->context()->getPrivate()->run(sql, {getAuthority(), code});
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("object not found", getAuthority(),
+                                           code);
+    }
+    return res[0][0];
 }
 
 // ---------------------------------------------------------------------------

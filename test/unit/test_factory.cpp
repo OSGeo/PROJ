@@ -886,6 +886,154 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_conversion) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_getAuthorityCodes) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    {
+        auto set = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::PRIME_MERIDIAN);
+        ASSERT_TRUE(!set.empty());
+        factory->createPrimeMeridian(*(set.begin()));
+    }
+    {
+        auto set =
+            factory->getAuthorityCodes(AuthorityFactory::ObjectType::ELLIPSOID);
+        ASSERT_TRUE(!set.empty());
+        factory->createEllipsoid(*(set.begin()));
+    }
+    {
+        auto setDatum =
+            factory->getAuthorityCodes(AuthorityFactory::ObjectType::DATUM);
+        ASSERT_TRUE(!setDatum.empty());
+        factory->createDatum(*(setDatum.begin()));
+
+        auto setGeodeticDatum = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME);
+        ASSERT_TRUE(!setGeodeticDatum.empty());
+        factory->createGeodeticDatum(*(setGeodeticDatum.begin()));
+
+        auto setVerticalDatum = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::VERTICAL_REFERENCE_FRAME);
+        ASSERT_TRUE(!setVerticalDatum.empty());
+        factory->createVerticalDatum(*(setVerticalDatum.begin()));
+
+        std::set<std::string> setMerged;
+        for (const auto &v : setGeodeticDatum) {
+            setMerged.insert(v);
+        }
+        for (const auto &v : setVerticalDatum) {
+            setMerged.insert(v);
+        }
+        EXPECT_EQ(setDatum, setMerged);
+    }
+    {
+        auto setCRS =
+            factory->getAuthorityCodes(AuthorityFactory::ObjectType::CRS);
+        ASSERT_TRUE(!setCRS.empty());
+        factory->createCoordinateReferenceSystem(*(setCRS.begin()));
+
+        auto setGeodeticCRS = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::GEODETIC_CRS);
+        ASSERT_TRUE(!setGeodeticCRS.empty());
+        factory->createGeodeticCRS(*(setGeodeticCRS.begin()));
+
+        auto setGeographicCRS = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::GEOGRAPHIC_CRS);
+        ASSERT_TRUE(!setGeographicCRS.empty());
+        factory->createGeographicCRS(*(setGeographicCRS.begin()));
+        EXPECT_LT(setGeographicCRS.size(), setGeodeticCRS.size());
+        for (const auto &v : setGeographicCRS) {
+            EXPECT_TRUE(setGeodeticCRS.find(v) != setGeodeticCRS.end());
+        }
+
+        auto setVerticalCRS = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::VERTICAL_CRS);
+        ASSERT_TRUE(!setVerticalCRS.empty());
+        factory->createVerticalCRS(*(setVerticalCRS.begin()));
+
+        auto setProjectedCRS = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::PROJECTED_CRS);
+        ASSERT_TRUE(!setProjectedCRS.empty());
+        factory->createProjectedCRS(*(setProjectedCRS.begin()));
+
+        auto setCompoundCRS = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::COMPOUND_CRS);
+        ASSERT_TRUE(!setCompoundCRS.empty());
+        factory->createCompoundCRS(*(setCompoundCRS.begin()));
+
+        std::set<std::string> setMerged;
+        for (const auto &v : setGeodeticCRS) {
+            setMerged.insert(v);
+        }
+        for (const auto &v : setVerticalCRS) {
+            setMerged.insert(v);
+        }
+        for (const auto &v : setProjectedCRS) {
+            setMerged.insert(v);
+        }
+        for (const auto &v : setCompoundCRS) {
+            setMerged.insert(v);
+        }
+        EXPECT_EQ(setCRS, setMerged);
+    }
+    {
+        auto setCO = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::COORDINATE_OPERATION);
+        ASSERT_TRUE(!setCO.empty());
+        factory->createCoordinateOperation(*(setCO.begin()));
+
+        auto setConversion = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::CONVERSION);
+        ASSERT_TRUE(!setConversion.empty());
+        factory->createConversion(*(setConversion.begin()));
+
+        auto setTransformation = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::TRANSFORMATION);
+        ASSERT_TRUE(!setTransformation.empty());
+        ASSERT_TRUE(nn_dynamic_pointer_cast<Transformation>(
+                        factory->createCoordinateOperation(
+                            *(setTransformation.begin()))) != nullptr);
+
+        auto setConcatenated = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::CONCATENATED_OPERATION);
+        ASSERT_TRUE(!setConcatenated.empty());
+        ASSERT_TRUE(nn_dynamic_pointer_cast<ConcatenatedOperation>(
+                        factory->createCoordinateOperation(
+                            *(setConcatenated.begin()))) != nullptr);
+
+        std::set<std::string> setMerged;
+        for (const auto &v : setConversion) {
+            setMerged.insert(v);
+        }
+        for (const auto &v : setTransformation) {
+            setMerged.insert(v);
+        }
+        for (const auto &v : setConcatenated) {
+            setMerged.insert(v);
+        }
+        EXPECT_EQ(setCO.size(), setMerged.size());
+        std::set<std::string> setMissing;
+        for (const auto &v : setCO) {
+            if (setMerged.find(v) == setMerged.end()) {
+                setMissing.insert(v);
+            }
+        }
+        EXPECT_EQ(setMissing, std::set<std::string>());
+        EXPECT_EQ(setCO, setMerged);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_getDescriptionText) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->getDescriptionText("-1"),
+                 NoSuchAuthorityCodeException);
+    EXPECT_EQ(factory->getDescriptionText("10000"),
+              "RGF93 to NGF IGN69 height (1)");
+}
+
+// ---------------------------------------------------------------------------
+
 class FactoryWithTmpDatabase : public ::testing::Test {
   protected:
     void SetUp() override { sqlite3_open(":memory:", &m_ctxt); }

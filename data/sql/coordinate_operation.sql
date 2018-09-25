@@ -4143,8 +4143,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','3896','concatenated_operation'
 INSERT INTO "coordinate_operation" VALUES('EPSG','3966','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','4435','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','4837','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','5190','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','5192','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','5230','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','5240','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','5242','concatenated_operation');
@@ -4152,17 +4150,10 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','5838','concatenated_operation'
 INSERT INTO "coordinate_operation" VALUES('EPSG','6714','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','6739','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','6874','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','7810','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','7811','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','7965','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','7967','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','7973','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','7974','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','7975','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','7983','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','7986','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','7987','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','8046','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8047','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8094','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8174','concatenated_operation');
@@ -4185,7 +4176,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8221','concatenated_operation'
 INSERT INTO "coordinate_operation" VALUES('EPSG','8223','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8234','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8236','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','8241','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8243','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8245','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8263','concatenated_operation');
@@ -4263,10 +4253,8 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8563','concatenated_operation'
 INSERT INTO "coordinate_operation" VALUES('EPSG','8564','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8565','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8566','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','8567','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8568','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8569','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','8570','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8571','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8572','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8573','concatenated_operation');
@@ -4339,8 +4327,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8639','concatenated_operation'
 INSERT INTO "coordinate_operation" VALUES('EPSG','8640','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8641','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8642','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','8643','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','8644','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8645','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8646','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8647','concatenated_operation');
@@ -4349,8 +4335,6 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8649','concatenated_operation'
 INSERT INTO "coordinate_operation" VALUES('EPSG','8650','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8651','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8652','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','8653','concatenated_operation');
-INSERT INTO "coordinate_operation" VALUES('EPSG','8654','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8655','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8656','concatenated_operation');
 INSERT INTO "coordinate_operation" VALUES('EPSG','8657','concatenated_operation');
@@ -4624,7 +4608,9 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (5099, u'transformation', u'Nahrwan 1967 / UTM zone 38N to Karbala 1979 / UTM zone 38N (23)', 9656, u'Cartesian Grid Offsets', 27038, 3392, 3708, 5.0, 1)
 --- Non imported: (5166, u'transformation', u'ED50 / UTM zone 31N to ETRS89 / UTM zone 31N (1)', 9621, u'Similarity transformation', 23031, 25831, 3732, 0.05, 0)
 --- Non imported: (5189, u'transformation', u'Korean 1985 to Korea 2000 (1)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4162, 4737, 3266, 1.0, 0)
+--- Non imported: (5190, u'concatenated operation', u'Tokyo 1892 to Korea 2000 (1)', None, None, 5132, 4737, 3266, None, 0)
 --- Non imported: (5191, u'transformation', u'Korean 1985 to WGS 84 (1)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 4162, 4326, 3266, 1.0, 0)
+--- Non imported: (5192, u'concatenated operation', u'Tokyo 1892 to WGS 84 (1)', None, None, 5132, 4326, 3266, None, 0)
 --- Non imported: (5196, u'transformation', u'HVRS71 height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5610, 5730, 3234, 0.1, 0)
 --- Non imported: (5197, u'transformation', u'HVRS71 height to EVRF2007 height (1)', 1046, u'Vertical Offset and Slope', 5610, 5621, 3234, 0.1, 0)
 --- Non imported: (5198, u'transformation', u'Oostende height to EVRF2000 height (1)', 1046, u'Vertical Offset and Slope', 5710, 5730, 1347, 0.1, 0)
@@ -4754,6 +4740,7 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (7701, u'transformation', u'Latvia 2000 height to EVRF2007 height (1)', 1046, u'Vertical Offset and Slope', 7700, 5621, 3268, 0.1, 0)
 --- Non imported: (7708, u'transformation', u'OSGB 1936 / British National Grid to ETRS89 (3)', 9633, u'Ordnance Survey National Transformation', 27700, 4258, 4390, 0.0, 1)
 --- Non imported: (7806, u'transformation', u'Pulkovo 1942(83) to BGS2005 (1)', 1063, u'Molodensky-Badekas (PV geog2D domain)', 4178, 7798, 3224, 5.0, 0)
+--- Non imported: (7810, u'concatenated operation', u'NTF (Paris) to RGF93 (1)', None, None, 4807, 4171, 3694, None, 0)
 --- Non imported: (7838, u'transformation', u'DHHN2016 height to EVRF2007 height (1)', 1046, u'Vertical Offset and Slope', 7837, 5621, 3339, 0.1, 0)
 --- Non imported: (7873, u'transformation', u'EGM96 height to POM96 height (1)', 9616, u'Vertical Offset', 5773, 7832, 4425, 0.0, 0)
 --- Non imported: (7874, u'transformation', u'EGM2008 height to POM08 height (1)', 9616, u'Vertical Offset', 3855, 7841, 4425, 0.0, 0)
@@ -4761,10 +4748,17 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (7952, u'transformation', u'ETRS89 to OSGB 1936 / British National Grid (2)', 9633, u'Ordnance Survey National Transformation', 4258, 27700, 1264, 0.0, 0)
 --- Non imported: (7953, u'transformation', u'ETRS89 to OSGB 1936 / British National Grid (3)', 9633, u'Ordnance Survey National Transformation', 4258, 27700, 4390, 0.0, 0)
 --- Non imported: (7964, u'transformation', u'Poolbeg height (m) to Malin Head height (1)', 9616, u'Vertical Offset', 7962, 5731, 1305, 0.1, 0)
+--- Non imported: (7965, u'concatenated operation', u'Poolbeg height (ft(Br36)) to Malin Head height (1)', None, None, 5754, 5731, 1305, None, 0)
 --- Non imported: (7966, u'transformation', u'Poolbeg height (m) to Belfast height (1)', 9616, u'Vertical Offset', 7962, 5732, 1305, 0.1, 0)
+--- Non imported: (7967, u'concatenated operation', u'Poolbeg height (ft(Br36)) to Belfast height (1)', None, None, 5754, 5732, 1305, None, 0)
 --- Non imported: (7977, u'transformation', u'HKPD depth to HKCD depth (1)', 9616, u'Vertical Offset', 7976, 5739, 3335, 0.0, 0)
 --- Non imported: (7980, u'transformation', u'KOC CD height to KOC WD height (1)', 9616, u'Vertical Offset', 5790, 7979, 3267, 0.1, 0)
 --- Non imported: (7981, u'transformation', u'Kuwait PWD height to KOC WD height (1)', 9616, u'Vertical Offset', 5788, 7979, 3267, 0.1, 0)
+--- Non imported: (7983, u'concatenated operation', u'HKPD height to HKCD depth (1)', None, None, 5738, 5739, 3335, None, 0)
+--- Non imported: (7986, u'concatenated operation', u'KOC CD height to KOC WD depth (1)', None, None, 5790, 5789, 3267, None, 0)
+--- Non imported: (7987, u'concatenated operation', u'KOC CD height to KOC WD depth (ft) (1)', None, None, 5790, 5614, 3267, None, 0)
+--- Non imported: (8046, u'concatenated operation', u'ED50 to WGS 84 (14)', None, None, 4230, 4326, 2330, None, 1)
+--- Non imported: (8241, u'concatenated operation', u'Madrid 1870 (Madrid) to WGS 84 (1)', None, None, 4903, 4326, 2366, None, 0)
 --- Non imported: (8435, u'transformation', u'Macao 2008 to Macao 1920 (1)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 8431, 8428, 1147, 999.0, 0)
 --- Non imported: (8438, u'transformation', u'Macao 1920 to WGS 84 (1)', 9636, u'Molodensky-Badekas (CF geog2D domain)', 8428, 4326, 1147, 1.0, 0)
 --- Non imported: (8546, u'transformation', u'St. George Island to NAD83 (2)', 1074, u'NADCON5 (2D)', 4138, 4269, 1331, 0.15, 0)
@@ -4780,6 +4774,12 @@ INSERT INTO "coordinate_operation" VALUES('EPSG','8659','concatenated_operation'
 --- Non imported: (8558, u'transformation', u'NAD83(FBN) to NAD83(NSRS2007) (1)', 1075, u'NADCON5 (3D)', 8449, 4759, 4516, 0.05, 0)
 --- Non imported: (8559, u'transformation', u'NAD83(NSRS2007) to NAD83(2011) (1)', 1075, u'NADCON5 (3D)', 4759, 6318, 4516, 0.05, 0)
 --- Non imported: (8561, u'transformation', u'Old Hawaiian to NAD83 (2)', 1074, u'NADCON5 (2D)', 4135, 4269, 1334, 0.2, 0)
+--- Non imported: (8567, u'concatenated operation', u'OSGB36 / National Grid to WGS 84 (1)', None, None, 27700, 4326, 1264, None, 1)
+--- Non imported: (8570, u'concatenated operation', u'ED50 to ETRS89 (2)', None, None, 4230, 4258, 2330, None, 1)
+--- Non imported: (8643, u'concatenated operation', u'Greek to WGS 84 (1)', None, None, 4120, 4326, 3254, None, 0)
+--- Non imported: (8644, u'concatenated operation', u'Greek (Athens) to WGS 84 (1)', None, None, 4815, 4326, 3254, None, 0)
+--- Non imported: (8653, u'concatenated operation', u'ED50 to WGS 84 (14)', None, None, 4230, 4326, 2330, None, 0)
+--- Non imported: (8654, u'concatenated operation', u'ED50 to ETRS89 (2)', None, None, 4230, 4258, 2330, None, 0)
 --- Non imported: (8658, u'concatenated operation', u'Pulkovo 1942 to WGS 84 (16)', None, None, 4284, 4326, 1198, None, 1)
 --- Non imported: (8660, u'transformation', u'NAD83 to NAD83(HARN) (49)', 1074, u'NADCON5 (2D)', 4269, 4152, 1334, 0.05, 0)
 --- Non imported: (8661, u'transformation', u'NAD83(HARN) to NAD83(PA11) (1)', 1075, u'NADCON5 (3D)', 4152, 6322, 1334, 0.05, 0)
