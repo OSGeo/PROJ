@@ -44,9 +44,12 @@
 #include <cmath>
 #include <cstdlib>
 #include <iomanip>
+#include <map>
 #include <memory>
 #include <sstream> // std::ostringstream
 #include <string>
+
+#include "lru_cache.hpp"
 
 #include "projects.h" // DIR_CHAR
 
@@ -101,6 +104,8 @@ struct DatabaseContext::Private {
   private:
     bool close_handle_ = true;
     sqlite3 *sqlite_handle_{};
+
+    void registerFunctions();
 };
 
 // ---------------------------------------------------------------------------
@@ -137,6 +142,8 @@ void DatabaseContext::Private::open(const std::string &databasePath) {
         !sqlite_handle_) {
         throw FactoryException("Open of " + path + " failed");
     }
+
+    registerFunctions();
 }
 
 // ---------------------------------------------------------------------------
@@ -144,6 +151,64 @@ void DatabaseContext::Private::open(const std::string &databasePath) {
 void DatabaseContext::Private::setHandle(sqlite3 *sqlite_handle) {
     sqlite_handle_ = sqlite_handle;
     close_handle_ = false;
+
+    registerFunctions();
+}
+
+// ---------------------------------------------------------------------------
+
+static double PROJ_SQLITE_GetValAsDouble(sqlite3_value *val, bool &gotVal) {
+    switch (sqlite3_value_type(val)) {
+    case SQLITE_FLOAT:
+        gotVal = true;
+        return sqlite3_value_double(val);
+
+    case SQLITE_INTEGER:
+        gotVal = true;
+        return static_cast<double>(sqlite3_value_int64(val));
+
+    default:
+        gotVal = false;
+        return 0.0;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+static void PROJ_SQLITE_pseudo_area_from_swne(sqlite3_context *pContext,
+                                              int /* argc */,
+                                              sqlite3_value **argv) {
+    bool b0, b1, b2, b3;
+    double south_lat = PROJ_SQLITE_GetValAsDouble(argv[0], b0);
+    double west_lon = PROJ_SQLITE_GetValAsDouble(argv[1], b1);
+    double north_lat = PROJ_SQLITE_GetValAsDouble(argv[2], b2);
+    double east_lon = PROJ_SQLITE_GetValAsDouble(argv[3], b3);
+    if (!b0 || !b1 || !b2 || !b3) {
+        sqlite3_result_null(pContext);
+        return;
+    }
+    // Deal with area crossing antimeridian
+    if (east_lon < west_lon) {
+        east_lon += 360.0;
+    }
+    // Integrate cos(lat) between south_lat and north_lat
+    double pseudo_area = (east_lon - west_lon) *
+                         (std::sin(common::Angle(north_lat).getSIValue()) -
+                          std::sin(common::Angle(south_lat).getSIValue()));
+    sqlite3_result_double(pContext, pseudo_area);
+}
+
+// ---------------------------------------------------------------------------
+
+#ifndef SQLITE_DETERMINISTIC
+#define SQLITE_DETERMINISTIC 0
+#endif
+
+void DatabaseContext::Private::registerFunctions() {
+    sqlite3_create_function(sqlite_handle_, "pseudo_area_from_swne", 4,
+                            SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr,
+                            PROJ_SQLITE_pseudo_area_from_swne, nullptr,
+                            nullptr);
 }
 
 // ---------------------------------------------------------------------------
@@ -286,12 +351,74 @@ struct AuthorityFactory::Private {
         : context_(contextIn), authority_(authorityName) {}
 
     const std::string &authority() const { return authority_; }
+
     DatabaseContextNNPtr context() const { return context_; }
+
+    // cppcheck-suppress functionStatic
+    void setThis(AuthorityFactoryNNPtr factory) {
+        thisFactory_ = factory.as_nullable();
+    }
+
+    AuthorityFactoryNNPtr createFactory(const std::string &auth_name);
+
+    crs::CRSPtr getCRSFromCache(const std::string &code);
+    void cache(const std::string &code, const crs::CRSNNPtr &crs);
 
   private:
     DatabaseContextNNPtr context_;
     std::string authority_;
+    std::weak_ptr<AuthorityFactory> thisFactory_{};
+    std::weak_ptr<AuthorityFactory> parentFactory_{};
+    std::map<std::string, AuthorityFactoryNNPtr> mapFactory_{};
+    lru11::Cache<std::string, crs::CRSPtr> cacheCRS_{};
 };
+
+// ---------------------------------------------------------------------------
+
+AuthorityFactoryNNPtr
+AuthorityFactory::Private::createFactory(const std::string &auth_name) {
+
+    // If we are a child factory, then create new factory on the parent
+    auto parentFactoryLocked(parentFactory_.lock());
+    if (parentFactoryLocked) {
+        return parentFactoryLocked->d->createFactory(auth_name);
+    }
+
+    // If asked for a factory with our name, return ourselves.
+    auto lockedThisFactory(thisFactory_.lock());
+    assert(lockedThisFactory);
+    if (auth_name == lockedThisFactory->getAuthority()) {
+        return NN_CHECK_ASSERT(lockedThisFactory);
+    }
+
+    // Find if there is already a child factory with the passed name.
+    auto iter = mapFactory_.find(auth_name);
+    if (iter == mapFactory_.end()) {
+        auto newFactory = AuthorityFactory::create(context_, auth_name);
+        newFactory->d->parentFactory_ = thisFactory_;
+        mapFactory_.insert(std::pair<std::string, AuthorityFactoryNNPtr>(
+            auth_name, newFactory));
+        return newFactory;
+    }
+    return iter->second;
+}
+
+// ---------------------------------------------------------------------------
+
+crs::CRSPtr
+AuthorityFactory::Private::getCRSFromCache(const std::string &code) {
+    crs::CRSPtr crs = nullptr;
+    cacheCRS_.tryGet(code, crs);
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+void AuthorityFactory::Private::cache(const std::string &code,
+                                      const crs::CRSNNPtr &crs) {
+    cacheCRS_.insert(code, crs.as_nullable());
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -308,17 +435,26 @@ AuthorityFactory::AuthorityFactory(DatabaseContextNNPtr context,
 
 // ---------------------------------------------------------------------------
 
+// clang-format off
 /** \brief Instanciate a AuthorityFactory.
+ *
+ * The authority name might be set to the empty string in the particular case
+ * where createFromCoordinateReferenceSystemCodes(const std::string&,const std::string&,const std::string&,const std::string&) const
+ * is called.
  *
  * @param context Contexte.
  * @param authorityName Authority name.
  * @return new AuthorityFactory.
  */
+// clang-format on
+
 AuthorityFactoryNNPtr
 AuthorityFactory::create(DatabaseContextNNPtr context,
                          const std::string &authorityName) {
-    return AuthorityFactory::nn_make_shared<AuthorityFactory>(context,
-                                                              authorityName);
+    auto factory = AuthorityFactory::nn_make_shared<AuthorityFactory>(
+        context, authorityName);
+    factory->d->setThis(factory);
+    return factory;
 }
 
 // ---------------------------------------------------------------------------
@@ -576,7 +712,7 @@ AuthorityFactory::createPrimeMeridian(const std::string &code) const {
         normalizeMeasure(uom_code, longitude, normalized_uom_code,
                          normalized_value);
 
-        auto uom = create(d->context(), uom_auth_name)
+        auto uom = d->createFactory(uom_auth_name)
                        ->createUnitOfMeasure(normalized_uom_code);
         auto props =
             util::PropertyMap()
@@ -625,7 +761,7 @@ AuthorityFactory::createEllipsoid(const std::string &code) const {
         const auto &semi_minor_axis_str = row[5];
         const bool deprecated = row[6] == "1";
         auto uom =
-            create(d->context(), uom_auth_name)->createUnitOfMeasure(uom_code);
+            d->createFactory(uom_auth_name)->createUnitOfMeasure(uom_code);
         auto props =
             util::PropertyMap()
                 .set(metadata::Identifier::CODESPACE_KEY, getAuthority())
@@ -682,11 +818,11 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
         const auto &area_of_use_auth_name = row[5];
         const auto &area_of_use_code = row[6];
         const bool deprecated = row[7] == "1";
-        auto ellipsoid = create(d->context(), ellipsoid_auth_name)
+        auto ellipsoid = d->createFactory(ellipsoid_auth_name)
                              ->createEllipsoid(ellipsoid_code);
-        auto pm = create(d->context(), prime_meridian_auth_name)
+        auto pm = d->createFactory(prime_meridian_auth_name)
                       ->createPrimeMeridian(prime_meridian_code);
-        auto extent = create(d->context(), area_of_use_auth_name)
+        auto extent = d->createFactory(area_of_use_auth_name)
                           ->createExtent(area_of_use_code);
         auto props =
             util::PropertyMap()
@@ -730,7 +866,7 @@ AuthorityFactory::createVerticalDatum(const std::string &code) const {
         const auto &area_of_use_auth_name = row[1];
         const auto &area_of_use_code = row[2];
         const bool deprecated = row[3] == "1";
-        auto extent = create(d->context(), area_of_use_auth_name)
+        auto extent = d->createFactory(area_of_use_auth_name)
                           ->createExtent(area_of_use_code);
         auto props =
             util::PropertyMap()
@@ -809,7 +945,7 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
         const auto &uom_auth_name = row[3];
         const auto &uom_code = row[4];
         auto uom =
-            create(d->context(), uom_auth_name)->createUnitOfMeasure(uom_code);
+            d->createFactory(uom_auth_name)->createUnitOfMeasure(uom_code);
         auto props =
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name);
         const cs::AxisDirection *direction =
@@ -897,6 +1033,11 @@ AuthorityFactory::createGeographicCRS(const std::string &code) const {
 crs::GeodeticCRSNNPtr
 AuthorityFactory::createGeodeticCRS(const std::string &code,
                                     bool geographicOnly) const {
+    auto crs =
+        std::dynamic_pointer_cast<crs::GeodeticCRS>(d->getCRSFromCache(code));
+    if (crs) {
+        return NN_CHECK_ASSERT(crs);
+    }
     std::string sql("SELECT name, type, coordinate_system_auth_name, "
                     "coordinate_system_code, datum_auth_name, datum_code, "
                     "area_of_use_auth_name, area_of_use_code, deprecated FROM "
@@ -921,10 +1062,10 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         const auto &area_of_use_code = row[7];
         const bool deprecated = row[8] == "1";
         auto cs =
-            create(d->context(), cs_auth_name)->createCoordinateSystem(cs_code);
-        auto datum = create(d->context(), datum_auth_name)
-                         ->createGeodeticDatum(datum_code);
-        auto extent = create(d->context(), area_of_use_auth_name)
+            d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
+        auto datum =
+            d->createFactory(datum_auth_name)->createGeodeticDatum(datum_code);
+        auto extent = d->createFactory(area_of_use_auth_name)
                           ->createExtent(area_of_use_code);
         auto props =
             util::PropertyMap()
@@ -937,13 +1078,17 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(cs);
         if ((type == "geographic 2D" || type == "geographic 3D") &&
             ellipsoidalCS) {
-            return crs::GeographicCRS::create(props, datum,
-                                              NN_CHECK_ASSERT(ellipsoidalCS));
+            auto crsRet = crs::GeographicCRS::create(
+                props, datum, NN_CHECK_ASSERT(ellipsoidalCS));
+            d->cache(code, util::nn_static_pointer_cast<crs::CRS>(crsRet));
+            return crsRet;
         }
         auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
         if (type == "geocentric" && geocentricCS) {
-            return crs::GeodeticCRS::create(props, datum,
-                                            NN_CHECK_ASSERT(geocentricCS));
+            auto crsRet = crs::GeodeticCRS::create(
+                props, datum, NN_CHECK_ASSERT(geocentricCS));
+            d->cache(code, util::nn_static_pointer_cast<crs::CRS>(crsRet));
+            return crsRet;
         }
         throw FactoryException("unsupported (type, CS type) for geodeticCRS: " +
                                type + ", " +
@@ -987,10 +1132,10 @@ AuthorityFactory::createVerticalCRS(const std::string &code) const {
         const auto &area_of_use_code = row[6];
         const bool deprecated = row[7] == "1";
         auto cs =
-            create(d->context(), cs_auth_name)->createCoordinateSystem(cs_code);
-        auto datum = create(d->context(), datum_auth_name)
-                         ->createVerticalDatum(datum_code);
-        auto extent = create(d->context(), area_of_use_auth_name)
+            d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
+        auto datum =
+            d->createFactory(datum_auth_name)->createVerticalDatum(datum_code);
+        auto extent = d->createFactory(area_of_use_auth_name)
                           ->createExtent(area_of_use_code);
         auto props =
             util::PropertyMap()
@@ -1072,7 +1217,7 @@ AuthorityFactory::createConversion(const std::string &code) const {
             double normalized_value(c_locale_stod(param_value));
             normalizeMeasure(param_uom_code, param_value, normalized_uom_code,
                              normalized_value);
-            auto uom = create(d->context(), param_uom_auth_name)
+            auto uom = d->createFactory(param_uom_auth_name)
                            ->createUnitOfMeasure(normalized_uom_code);
             values.emplace_back(operation::ParameterValue::create(
                 common::Measure(normalized_value, *uom)));
@@ -1131,15 +1276,15 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         const auto &area_of_use_code = row[8];
         const bool deprecated = row[9] == "1";
         auto cs =
-            create(d->context(), cs_auth_name)->createCoordinateSystem(cs_code);
+            d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
 
-        auto baseCRS = create(d->context(), geodetic_crs_auth_name)
+        auto baseCRS = d->createFactory(geodetic_crs_auth_name)
                            ->createGeodeticCRS(geodetic_crs_code);
 
-        auto conv = create(d->context(), conversion_auth_name)
+        auto conv = d->createFactory(conversion_auth_name)
                         ->createConversion(conversion_code);
 
-        auto extent = create(d->context(), area_of_use_auth_name)
+        auto extent = d->createFactory(area_of_use_auth_name)
                           ->createExtent(area_of_use_code);
         auto props =
             util::PropertyMap()
@@ -1195,11 +1340,11 @@ AuthorityFactory::createCompoundCRS(const std::string &code) const {
         const bool deprecated = row[7] == "1";
 
         auto horizCRS =
-            create(d->context(), horiz_crs_auth_name)
+            d->createFactory(horiz_crs_auth_name)
                 ->createCoordinateReferenceSystem(horiz_crs_code, false);
-        auto vertCRS = create(d->context(), vertical_crs_auth_name)
+        auto vertCRS = d->createFactory(vertical_crs_auth_name)
                            ->createVerticalCRS(vertical_crs_code);
-        auto extent = create(d->context(), area_of_use_auth_name)
+        auto extent = d->createFactory(area_of_use_auth_name)
                           ->createExtent(area_of_use_code);
         auto props =
             util::PropertyMap()
@@ -1234,6 +1379,10 @@ crs::CRSNNPtr AuthorityFactory::createCoordinateReferenceSystem(
 crs::CRSNNPtr
 AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
                                                   bool allowCompound) const {
+    auto crs = d->getCRSFromCache(code);
+    if (crs) {
+        return NN_CHECK_ASSERT(crs);
+    }
     auto res = d->context()->getPrivate()->run(
         "SELECT type FROM crs WHERE auth_name = ? AND code = ?",
         {getAuthority(), code});
@@ -1366,46 +1515,46 @@ AuthorityFactory::createCoordinateOperation(const std::string &code,
             assert(idx == row.size());
 
             auto uom_translation =
-                *create(d->context(), translation_uom_auth_name)
+                *d->createFactory(translation_uom_auth_name)
                      ->createUnitOfMeasure(translation_uom_code);
             auto uom_rotation =
                 rotation_uom_auth_name.empty()
                     ? common::UnitOfMeasure::NONE
-                    : *create(d->context(), rotation_uom_auth_name)
+                    : *d->createFactory(rotation_uom_auth_name)
                            ->createUnitOfMeasure(rotation_uom_code);
             auto uom_scale_difference =
                 scale_difference_uom_auth_name.empty()
                     ? common::UnitOfMeasure::NONE
-                    : *create(d->context(), scale_difference_uom_auth_name)
+                    : *d->createFactory(scale_difference_uom_auth_name)
                            ->createUnitOfMeasure(scale_difference_uom_code);
             auto uom_rate_translation =
                 rate_translation_uom_auth_name.empty()
                     ? common::UnitOfMeasure::NONE
-                    : *create(d->context(), rate_translation_uom_auth_name)
+                    : *d->createFactory(rate_translation_uom_auth_name)
                            ->createUnitOfMeasure(rate_translation_uom_code);
             auto uom_rate_rotation =
                 rate_rotation_uom_auth_name.empty()
                     ? common::UnitOfMeasure::NONE
-                    : *create(d->context(), rate_rotation_uom_auth_name)
+                    : *d->createFactory(rate_rotation_uom_auth_name)
                            ->createUnitOfMeasure(rate_rotation_uom_code);
             auto uom_rate_scale_difference =
                 rate_scale_difference_uom_auth_name.empty()
                     ? common::UnitOfMeasure::NONE
-                    : *create(d->context(), rate_scale_difference_uom_auth_name)
+                    : *d->createFactory(rate_scale_difference_uom_auth_name)
                            ->createUnitOfMeasure(
                                rate_scale_difference_uom_code);
             auto uom_epoch = epoch_uom_auth_name.empty()
                                  ? common::UnitOfMeasure::NONE
-                                 : *create(d->context(), epoch_uom_auth_name)
+                                 : *d->createFactory(epoch_uom_auth_name)
                                         ->createUnitOfMeasure(epoch_uom_code);
 
             auto sourceCRS =
-                create(d->context(), source_crs_auth_name)
+                d->createFactory(source_crs_auth_name)
                     ->createCoordinateReferenceSystem(source_crs_code);
             auto targetCRS =
-                create(d->context(), target_crs_auth_name)
+                d->createFactory(target_crs_auth_name)
                     ->createCoordinateReferenceSystem(target_crs_code);
-            auto extent = create(d->context(), area_of_use_auth_name)
+            auto extent = d->createFactory(area_of_use_auth_name)
                               ->createExtent(area_of_use_code);
 
             std::vector<operation::OperationParameterNNPtr> parameters;
@@ -1680,19 +1829,19 @@ AuthorityFactory::createCoordinateOperation(const std::string &code,
             assert(idx == row.size());
 
             auto sourceCRS =
-                create(d->context(), source_crs_auth_name)
+                d->createFactory(source_crs_auth_name)
                     ->createCoordinateReferenceSystem(source_crs_code);
             auto targetCRS =
-                create(d->context(), target_crs_auth_name)
+                d->createFactory(target_crs_auth_name)
                     ->createCoordinateReferenceSystem(target_crs_code);
             auto interpolationCRS =
                 interpolation_crs_auth_name.empty()
                     ? nullptr
-                    : create(d->context(), interpolation_crs_auth_name)
+                    : d->createFactory(interpolation_crs_auth_name)
                           ->createCoordinateReferenceSystem(
                               interpolation_crs_code)
                           .as_nullable();
-            auto extent = create(d->context(), area_of_use_auth_name)
+            auto extent = d->createFactory(area_of_use_auth_name)
                               ->createExtent(area_of_use_code);
 
             std::vector<operation::OperationParameterNNPtr> parameters;
@@ -1814,7 +1963,7 @@ AuthorityFactory::createCoordinateOperation(const std::string &code,
                 double normalized_value(c_locale_stod(param_value));
                 normalizeMeasure(param_uom_code, param_value,
                                  normalized_uom_code, normalized_value);
-                auto uom = create(d->context(), param_uom_auth_name)
+                auto uom = d->createFactory(param_uom_auth_name)
                                ->createUnitOfMeasure(normalized_uom_code);
                 values.emplace_back(operation::ParameterValue::create(
                     common::Measure(normalized_value, *uom)));
@@ -1826,13 +1975,13 @@ AuthorityFactory::createCoordinateOperation(const std::string &code,
             assert(idx == row.size());
 
             auto sourceCRS =
-                create(d->context(), source_crs_auth_name)
+                d->createFactory(source_crs_auth_name)
                     ->createCoordinateReferenceSystem(source_crs_code);
             auto targetCRS =
-                create(d->context(), target_crs_auth_name)
+                d->createFactory(target_crs_auth_name)
                     ->createCoordinateReferenceSystem(target_crs_code);
 
-            auto extent = create(d->context(), area_of_use_auth_name)
+            auto extent = d->createFactory(area_of_use_auth_name)
                               ->createExtent(area_of_use_code);
 
             auto props =
@@ -1894,18 +2043,18 @@ AuthorityFactory::createCoordinateOperation(const std::string &code,
 
             std::vector<operation::CoordinateOperationNNPtr> operations;
             operations.push_back(
-                create(d->context(), step1_auth_name)
+                d->createFactory(step1_auth_name)
                     ->createCoordinateOperation(step1_code, false));
             operations.push_back(
-                create(d->context(), step2_auth_name)
+                d->createFactory(step2_auth_name)
                     ->createCoordinateOperation(step2_code, false));
             if (!step3_auth_name.empty()) {
                 operations.push_back(
-                    create(d->context(), step3_auth_name)
+                    d->createFactory(step3_auth_name)
                         ->createCoordinateOperation(step3_code, false));
             }
 
-            auto extent = create(d->context(), area_of_use_auth_name)
+            auto extent = d->createFactory(area_of_use_auth_name)
                               ->createExtent(area_of_use_code);
 
             auto props =
@@ -1931,6 +2080,104 @@ AuthorityFactory::createCoordinateOperation(const std::string &code,
     }
 
     throw FactoryException("unhandled coordinate operation type: " + type);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a list operation::CoordinateOperation between two CRS.
+ *
+ * The list is ordered with preferred operations first. No attempt is made
+ * at infering operations that are not explicitly in the database.
+ *
+ * Deprecated operations are rejected.
+ *
+ * @param sourceCRSCode Source CRS code allocated by authority.
+ * @param targetCRSCode Source CRS code allocated by authority.
+ * @return list of coordinate operations
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ */
+
+std::vector<operation::CoordinateOperationNNPtr>
+AuthorityFactory::createFromCoordinateReferenceSystemCodes(
+    const std::string &sourceCRSCode, const std::string &targetCRSCode) const {
+    return createFromCoordinateReferenceSystemCodes(
+        getAuthority(), sourceCRSCode, getAuthority(), targetCRSCode);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a list operation::CoordinateOperation between two CRS.
+ *
+ * The list is ordered with preferred operations first. No attempt is made
+ * at infering operations that are not explicitly in the database.
+ *
+ * Deprecated operations are rejected.
+ *
+ * If getAuthority() returns empty, then coordinate operations from all
+ * authorities are considered.
+ *
+ * @param sourceCRSAuthName Authority name of sourceCRSCode
+ * @param sourceCRSCode Source CRS code allocated by authority
+ * sourceCRSAuthName.
+ * @param targetCRSAuthName Authority name of targetCRSCode
+ * @param targetCRSCode Source CRS code allocated by authority
+ * targetCRSAuthName.
+ * @return list of coordinate operations
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ */
+
+std::vector<operation::CoordinateOperationNNPtr>
+AuthorityFactory::createFromCoordinateReferenceSystemCodes(
+    const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
+    const std::string &targetCRSAuthName,
+    const std::string &targetCRSCode) const {
+    std::vector<operation::CoordinateOperationNNPtr> list;
+
+    // Look-up first for conversion which is the most precise.
+    std::string sql(
+        "SELECT conversion_auth_name, conversion_code FROM "
+        "projected_crs WHERE geodetic_crs_auth_name = ? AND geodetic_crs_code "
+        "= ? AND auth_name = ? AND code = ? AND deprecated != 1");
+    auto params = std::vector<SQLValues>{sourceCRSAuthName, sourceCRSCode,
+                                         targetCRSAuthName, targetCRSCode};
+    if (!getAuthority().empty()) {
+        sql += " AND conversion_auth_name = ?";
+        params.emplace_back(getAuthority());
+    }
+    auto res = d->context()->getPrivate()->run(sql, params);
+    if (!res.empty()) {
+        const auto &auth_name = res[0][0];
+        const auto &code = res[0][1];
+        list.emplace_back(d->createFactory(auth_name)->createConversion(code));
+        return list;
+    }
+    sql =
+        "SELECT cov.auth_name, cov.code FROM "
+        "coordinate_operation_view cov JOIN area ON cov.area_of_use_auth_name "
+        "= area.auth_name AND cov.area_of_use_code = area.code WHERE "
+        "source_crs_auth_name = ? AND source_crs_code = ? AND "
+        "target_crs_auth_name = ? AND target_crs_code = ? AND "
+        "cov.deprecated != 1";
+    params = {sourceCRSAuthName, sourceCRSCode, targetCRSAuthName,
+              targetCRSCode};
+    if (!getAuthority().empty()) {
+        sql += " AND cov.auth_name = ?";
+        params.emplace_back(getAuthority());
+    }
+    sql += " ORDER BY (CASE WHEN accuracy is NULL THEN 1 ELSE 0 END) ASC, "
+           "accuracy "
+           "ASC, pseudo_area_from_swne(south_lat, west_lon, north_lat, "
+           "east_lon) DESC";
+    res = d->context()->getPrivate()->run(sql, params);
+    for (const auto &row : res) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        list.emplace_back(
+            d->createFactory(auth_name)->createCoordinateOperation(code));
+    }
+    return list;
 }
 
 // ---------------------------------------------------------------------------

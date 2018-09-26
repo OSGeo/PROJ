@@ -16,5 +16,7 @@ esac
 TOPDIR="$SCRIPT_DIR/.."
 
 for i in "$TOPDIR"/include/proj/*.hpp "$TOPDIR"/src/*.cpp "$TOPDIR"/src/*.hpp "$TOPDIR"/test/unit/test*.cpp; do
-    "$SCRIPT_DIR"/reformat.sh "$i";
+    if ! echo "$i" | grep -q "lru_cache.hpp"; then
+        "$SCRIPT_DIR"/reformat.sh "$i";
+    fi
 done

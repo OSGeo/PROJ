@@ -32,6 +32,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <vector>
 
 #include "util.hpp"
 
@@ -555,7 +556,10 @@ using DatabaseContextPtr = std::shared_ptr<DatabaseContext>;
 /** Non-null shared pointer of DatabaseContext. */
 using DatabaseContextNNPtr = util::nn<DatabaseContextPtr>;
 
-/** \brief Database context. */
+/** \brief Database context.
+ *
+ * A database context should be used only by one thread at a time.
+ */
 class DatabaseContext {
   public:
     //! @cond Doxygen_Suppress
@@ -592,6 +596,8 @@ using AuthorityFactoryPtr = std::shared_ptr<AuthorityFactory>;
 using AuthorityFactoryNNPtr = util::nn<AuthorityFactoryPtr>;
 
 /** \brief Builds object from an authority database.
+ *
+ * A AuthorityFactory should be used only by one thread at a time.
  *
  * \remark Implements [AuthorityFactory]
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/referencing/AuthorityFactory.html)
@@ -651,6 +657,11 @@ class AuthorityFactory {
     PROJ_DLL operation::CoordinateOperationNNPtr
     createCoordinateOperation(const std::string &code) const;
 
+    PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
+    createFromCoordinateReferenceSystemCodes(
+        const std::string &sourceCRSCode,
+        const std::string &targetCRSCode) const;
+
     PROJ_DLL const std::string &getAuthority() const;
 
     /** Object type. */
@@ -700,6 +711,12 @@ class AuthorityFactory {
     // non-standard
     PROJ_DLL static AuthorityFactoryNNPtr
     create(DatabaseContextNNPtr context, const std::string &authorityName);
+
+    PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
+    createFromCoordinateReferenceSystemCodes(
+        const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
+        const std::string &targetCRSAuthName,
+        const std::string &targetCRSCode) const;
 
   protected:
     AuthorityFactory(DatabaseContextNNPtr context,
