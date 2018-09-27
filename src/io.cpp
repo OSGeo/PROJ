@@ -3574,11 +3574,11 @@ struct PROJStringParser::Private {
     CRSNNPtr buildBoundOrCompoundCRSIfNeeded(int iStep, CRSNNPtr crs);
     UnitOfMeasure buildUnit(const Step &step, const std::string &unitsParamName,
                             const std::string &toMeterParamName);
-    TransformationNNPtr buildHelmertTransformation(
+    CoordinateOperationNNPtr buildHelmertTransformation(
         int iStep, int iFirstAxisSwap = -1, int iFirstUnitConvert = -1,
         int iFirstGeogStep = -1, int iSecondGeogStep = -1,
         int iSecondAxisSwap = -1, int iSecondUnitConvert = -1);
-    TransformationNNPtr buildMolodenskyTransformation(
+    CoordinateOperationNNPtr buildMolodenskyTransformation(
         int iStep, int iFirstAxisSwap = -1, int iFirstUnitConvert = -1,
         int iFirstGeogStep = -1, int iSecondGeogStep = -1,
         int iSecondAxisSwap = -1, int iSecondUnitConvert = -1);
@@ -4667,7 +4667,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
 // ---------------------------------------------------------------------------
 
-TransformationNNPtr PROJStringParser::Private::buildHelmertTransformation(
+CoordinateOperationNNPtr PROJStringParser::Private::buildHelmertTransformation(
     int iStep, int iFirstAxisSwap, int iFirstUnitConvert, int iFirstGeogStep,
     int iSecondGeogStep, int iSecondAxisSwap, int iSecondUnitConvert) {
     auto &step = steps_[iStep];
@@ -4767,47 +4767,66 @@ TransformationNNPtr PROJStringParser::Private::buildHelmertTransformation(
     if (rotationTerms && !conventionFound) {
         throw ParsingException("missing convention");
     }
+
+    CoordinateOperationPtr transf;
     if (!rotationTerms) {
-        return Transformation::createGeocentricTranslations(
-            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                    "unknown"),
-            sourceCRS, targetCRS, x, y, z,
-            std::vector<PositionalAccuracyNNPtr>());
-    }
-    if (positionVectorConvention) {
+        transf = std::static_pointer_cast<CoordinateOperation>(
+            Transformation::createGeocentricTranslations(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        "unknown"),
+                sourceCRS, targetCRS, x, y, z,
+                std::vector<PositionalAccuracyNNPtr>())
+                .as_nullable());
+    } else if (positionVectorConvention) {
         if (timeDependent) {
-            return Transformation::createTimeDependentPositionVector(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        "unknown"),
-                sourceCRS, targetCRS, x, y, z, rx, ry, rz, s, dx, dy, dz, drx,
-                dry, drz, ds, t_epoch, std::vector<PositionalAccuracyNNPtr>());
+            transf = std::static_pointer_cast<CoordinateOperation>(
+                Transformation::createTimeDependentPositionVector(
+                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                            "unknown"),
+                    sourceCRS, targetCRS, x, y, z, rx, ry, rz, s, dx, dy, dz,
+                    drx, dry, drz, ds, t_epoch,
+                    std::vector<PositionalAccuracyNNPtr>())
+                    .as_nullable());
         } else {
-            return Transformation::createPositionVector(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        "unknown"),
-                sourceCRS, targetCRS, x, y, z, rx, ry, rz, s,
-                std::vector<PositionalAccuracyNNPtr>());
+            transf = std::static_pointer_cast<CoordinateOperation>(
+                Transformation::createPositionVector(
+                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                            "unknown"),
+                    sourceCRS, targetCRS, x, y, z, rx, ry, rz, s,
+                    std::vector<PositionalAccuracyNNPtr>())
+                    .as_nullable());
         }
     } else {
         if (timeDependent) {
-            return Transformation::createTimeDependentCoordinateFrameRotation(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        "unknown"),
-                sourceCRS, targetCRS, x, y, z, rx, ry, rz, s, dx, dy, dz, drx,
-                dry, drz, ds, t_epoch, std::vector<PositionalAccuracyNNPtr>());
+            transf = std::static_pointer_cast<CoordinateOperation>(
+                Transformation::createTimeDependentCoordinateFrameRotation(
+                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                            "unknown"),
+                    sourceCRS, targetCRS, x, y, z, rx, ry, rz, s, dx, dy, dz,
+                    drx, dry, drz, ds, t_epoch,
+                    std::vector<PositionalAccuracyNNPtr>())
+                    .as_nullable());
         } else {
-            return Transformation::createCoordinateFrameRotation(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        "unknown"),
-                sourceCRS, targetCRS, x, y, z, rx, ry, rz, s,
-                std::vector<PositionalAccuracyNNPtr>());
+            transf = std::static_pointer_cast<CoordinateOperation>(
+                Transformation::createCoordinateFrameRotation(
+                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                            "unknown"),
+                    sourceCRS, targetCRS, x, y, z, rx, ry, rz, s,
+                    std::vector<PositionalAccuracyNNPtr>())
+                    .as_nullable());
         }
     }
+
+    if (step.inverted) {
+        transf = transf->inverse().as_nullable();
+    }
+    return NN_CHECK_ASSERT(transf);
 }
 
 // ---------------------------------------------------------------------------
 
-TransformationNNPtr PROJStringParser::Private::buildMolodenskyTransformation(
+CoordinateOperationNNPtr
+PROJStringParser::Private::buildMolodenskyTransformation(
     int iStep, int iFirstAxisSwap, int iFirstUnitConvert, int iFirstGeogStep,
     int iSecondGeogStep, int iSecondAxisSwap, int iSecondUnitConvert) {
     auto &step = steps_[iStep];
@@ -4886,19 +4905,29 @@ TransformationNNPtr PROJStringParser::Private::buildMolodenskyTransformation(
                   target_datum,
                   EllipsoidalCS::create(PropertyMap(), east, north));
 
+    CoordinateOperationPtr transf;
     if (abridged) {
-        return Transformation::createAbridgedMolodensky(
-            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                    "unknown"),
-            sourceCRS, targetCRS, dx, dy, dz, da, df,
-            std::vector<PositionalAccuracyNNPtr>());
+        transf = std::static_pointer_cast<CoordinateOperation>(
+            Transformation::createAbridgedMolodensky(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        "unknown"),
+                sourceCRS, targetCRS, dx, dy, dz, da, df,
+                std::vector<PositionalAccuracyNNPtr>())
+                .as_nullable());
     } else {
-        return Transformation::createMolodensky(
-            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                    "unknown"),
-            sourceCRS, targetCRS, dx, dy, dz, da, df,
-            std::vector<PositionalAccuracyNNPtr>());
+        transf = std::static_pointer_cast<CoordinateOperation>(
+            Transformation::createMolodensky(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        "unknown"),
+                sourceCRS, targetCRS, dx, dy, dz, da, df,
+                std::vector<PositionalAccuracyNNPtr>())
+                .as_nullable());
     }
+
+    if (step.inverted) {
+        transf = transf->inverse().as_nullable();
+    }
+    return NN_CHECK_ASSERT(transf);
 }
 
 //! @endcond
@@ -5070,7 +5099,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 0, d->buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
                                          iFirstAxisSwap));
         }
-        if (iProjStep >= 0 &&
+        if (iProjStep >= 0 && !d->steps_[iProjStep].inverted &&
             (iFirstGeogStep < 0 || iFirstGeogStep + 1 == iProjStep) &&
             iMolodensky < 0 && iSecondGeogStep < 0 && iFirstCart < 0 &&
             iHelmert < 0) {

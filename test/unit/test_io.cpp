@@ -4824,11 +4824,38 @@ TEST(io, projparse_helmert_translation) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_helmert_translation_inv) {
+    std::string projString(
+        "+proj=pipeline +step +inv +proj=helmert +x=1 +y=2 +z=3");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              "+proj=helmert +x=-1 +y=-2 +z=-3");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_helmert_position_vector) {
     std::string projString("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 "
                            "+s=7 +convention=position_vector");
     auto obj = PROJStringParser().createFromPROJString(projString);
     auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              projString);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_helmert_position_vector_inv) {
+    std::string projString("+proj=pipeline +step +inv +proj=helmert +x=1 +y=2 "
+                           "+z=3 +rx=4 +ry=5 +rz=6 "
+                           "+s=7 +convention=position_vector");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
     ASSERT_TRUE(transf != nullptr);
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
                   PROJStringFormatter::Convention::PROJ_5)),
@@ -4979,6 +5006,24 @@ TEST(io, projparse_molodensky) {
               "+dz=116.95 +da=251 +df=1.41927e-05 +step +proj=longlat "
               "+a=6378388 +rf=297.000000198989 +step +proj=unitconvert "
               "+xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_molodensky_inv) {
+    std::string projString("+proj=pipeline +step +inv +proj=molodensky "
+                           "+ellps=WGS84 +dx=84.87 +dy=96.49 "
+                           "+dz=116.95 +da=251 +df=1.41927e-05");
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto transf = nn_dynamic_pointer_cast<CoordinateOperation>(obj);
+    ASSERT_TRUE(transf != nullptr);
+    EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_5)),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=longlat +a=6378388 +rf=297.000000198989 +step "
+              "+proj=molodensky +a=6378388 +rf=297.000000198989 +dx=-84.87 "
+              "+dy=-96.49 +dz=-116.95 +da=-251 +df=-1.41927e-05 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg");
 }
 
 // ---------------------------------------------------------------------------
