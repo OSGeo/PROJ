@@ -105,6 +105,8 @@ PJ *pj_latlong_from_proj( PJ *pj_in )
         {
             char* ptr = defn+strlen(defn);
             sprintf( ptr, " +es=%.16g",  pj_in->es );
+            /* TODO later: use C++ ostringstream with imbue(std::locale::classic()) */
+            /* to be locale unaware */
             for(; *ptr; ptr++)
             {
                 if( *ptr == ',' )

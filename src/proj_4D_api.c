@@ -519,6 +519,17 @@ Returns 1 on success, 0 on failure
     if (P->is_geocent || P->helmert || do_cart) {
         char def[150];
         sprintf (def, "break_cs2cs_recursion     proj=cart   a=%40.20g  es=%40.20g", P->a_orig, P->es_orig);
+        {
+            /* In case the current locale does not use dot but comma as decimal */
+            /* separator, replace it with dot, so that proj_atof() behaves */
+            /* correctly. */
+            /* TODO later: use C++ ostringstream with imbue(std::locale::classic()) */
+            /* to be locale unaware */
+            char* next_pos;
+            for (next_pos = def; (next_pos = strchr (next_pos, ',')) != NULL; next_pos++) {
+                *next_pos = '.';
+            }
+        }
         Q = proj_create (P->ctx, def);
         if (0==Q)
             return 0;
