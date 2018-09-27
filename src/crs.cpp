@@ -1226,6 +1226,50 @@ const cs::CartesianCSNNPtr ProjectedCRS::coordinateSystem() const {
 
 std::string ProjectedCRS::exportToWKT(io::WKTFormatterNNPtr formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+
+    if (!isWKT2 && starts_with(*(name()->description()),
+                               "Popular Visualisation CRS / Mercator")) {
+        formatter->startNode(io::WKTConstants::PROJCS, !identifiers().empty());
+        formatter->addQuotedString(*(name()->description()));
+        formatter->setTOWGS84Parameters({0, 0, 0, 0, 0, 0, 0});
+        baseCRS()->exportToWKT(formatter);
+        formatter->setTOWGS84Parameters({});
+
+        formatter->startNode(io::WKTConstants::PROJECTION, false);
+        formatter->addQuotedString("Mercator_1SP");
+        formatter->endNode();
+
+        formatter->startNode(io::WKTConstants::PARAMETER, false);
+        formatter->addQuotedString("central_meridian");
+        formatter->add(0.0);
+        formatter->endNode();
+
+        formatter->startNode(io::WKTConstants::PARAMETER, false);
+        formatter->addQuotedString("scale_factor");
+        formatter->add(1.0);
+        formatter->endNode();
+
+        formatter->startNode(io::WKTConstants::PARAMETER, false);
+        formatter->addQuotedString("false_easting");
+        formatter->add(0.0);
+        formatter->endNode();
+
+        formatter->startNode(io::WKTConstants::PARAMETER, false);
+        formatter->addQuotedString("false_northing");
+        formatter->add(0.0);
+        formatter->endNode();
+
+        auto &axisList = coordinateSystem()->axisList();
+        if (!axisList.empty()) {
+            axisList[0]->unit().exportToWKT(formatter);
+        }
+        coordinateSystem()->exportToWKT(formatter);
+        derivingConversionRef()->addWKTExtensionNode(formatter);
+        ObjectUsage::_exportToWKT(formatter);
+        formatter->endNode();
+        return formatter->toString();
+    }
+
     formatter->startNode(isWKT2 ? io::WKTConstants::PROJCRS
                                 : io::WKTConstants::PROJCS,
                          !identifiers().empty());

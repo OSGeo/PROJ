@@ -2560,6 +2560,151 @@ TEST(operation, webmerc_import_from_GDAL_wkt1) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, webmerc_import_from_GDAL_wkt1_EPSG_3785_deprecated) {
+
+    auto wkt1 =
+        "PROJCS[\"Popular Visualisation CRS / Mercator (deprecated)\","
+        "    GEOGCS[\"Popular Visualisation CRS\","
+        "        DATUM[\"Popular_Visualisation_Datum\","
+        "            SPHEROID[\"Popular Visualisation Sphere\",6378137,0,"
+        "                AUTHORITY[\"EPSG\",\"7059\"]],"
+        "            TOWGS84[0,0,0,0,0,0,0],"
+        "            AUTHORITY[\"EPSG\",\"6055\"]],"
+        "        PRIMEM[\"Greenwich\",0,"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],"
+        "        UNIT[\"degree\",0.0174532925199433,"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],"
+        "        AUTHORITY[\"EPSG\",\"4055\"]],"
+        "    PROJECTION[\"Mercator_1SP\"],"
+        "    PARAMETER[\"central_meridian\",0],"
+        "    PARAMETER[\"scale_factor\",1],"
+        "    PARAMETER[\"false_easting\",0],"
+        "    PARAMETER[\"false_northing\",0],"
+        "    UNIT[\"metre\",1,"
+        "        AUTHORITY[\"EPSG\",\"9001\"]],"
+        "    AXIS[\"X\",EAST],"
+        "    AXIS[\"Y\",NORTH],"
+        "    EXTENSION[\"PROJ4\",\"+proj=merc +a=6378137 +b=6378137 "
+        "+lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m "
+        "+nadgrids=@null +wktext  +no_defs\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt1);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
+              "+lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+              "+ellps=WGS84");
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
+              "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
+
+    auto convGot = crs->derivingConversion();
+
+    EXPECT_EQ(convGot->exportToWKT(WKTFormatter::create()),
+              "CONVERSION[\"unnamed\",\n"
+              "    METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
+              "        ID[\"EPSG\",1024]],\n"
+              "    PARAMETER[\"Latitude of natural origin\",0,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8801]],\n"
+              "    PARAMETER[\"Longitude of natural origin\",0,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8802]],\n"
+              "    PARAMETER[\"False easting\",0,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",0,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, webmerc_import_from_WKT2_EPSG_3785_deprecated) {
+    auto wkt2 =
+        "PROJCRS[\"Popular Visualisation CRS / Mercator\",\n"
+        "    BASEGEODCRS[\"Popular Visualisation CRS\",\n"
+        "        DATUM[\"Popular Visualisation Datum\",\n"
+        "            ELLIPSOID[\"Popular Visualisation Sphere\",6378137,0,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "    CONVERSION[\"Popular Visualisation Mercator\",\n"
+        "        METHOD[\"Mercator (1SP) (Spherical)\",\n"
+        "            ID[\"EPSG\",9841]],\n"
+        "        PARAMETER[\"Latitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8801]],\n"
+        "        PARAMETER[\"Longitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8802]],\n"
+        "        PARAMETER[\"Scale factor at natural origin\",1,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8805]],\n"
+        "        PARAMETER[\"False easting\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"easting (X)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"northing (Y)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt2);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=webmerc "
+              "+ellps=WGS84");
+
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create(
+                  PROJStringFormatter::Convention::PROJ_4)),
+              "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
+              "+y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs");
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT2_2015)),
+              wkt2);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)),
+        "PROJCS[\"Popular Visualisation CRS / Mercator\",\n"
+        "    GEOGCS[\"Popular Visualisation CRS\",\n"
+        "        DATUM[\"Popular_Visualisation_Datum\",\n"
+        "            SPHEROID[\"Popular Visualisation Sphere\",6378137,0],\n"
+        "            TOWGS84[0,0,0,0,0,0,0]],\n"
+        "        PRIMEM[\"Greenwich\",0],\n"
+        "        UNIT[\"degree\",0.0174532925199433],\n"
+        "        AXIS[\"Latitude\",NORTH],\n"
+        "        AXIS[\"Longitude\",EAST]],\n"
+        "    PROJECTION[\"Mercator_1SP\"],\n"
+        "    PARAMETER[\"central_meridian\",0],\n"
+        "    PARAMETER[\"scale_factor\",1],\n"
+        "    PARAMETER[\"false_easting\",0],\n"
+        "    PARAMETER[\"false_northing\",0],\n"
+        "    UNIT[\"metre\",1],\n"
+        "    AXIS[\"Easting\",EAST],\n"
+        "    AXIS[\"Northing\",NORTH],\n"
+        "    EXTENSION[\"PROJ4\",\"+proj=merc +a=6378137 +b=6378137 +lat_ts=0 "
+        "+lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext "
+        "+no_defs\"]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, mollweide_export) {
 
     auto conv = Conversion::createMollweide(PropertyMap(), Angle(1), Length(2),

@@ -938,6 +938,9 @@ struct WKTParser::Private {
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit);
 
+    bool hasWebMercPROJ4String(WKTNodeNNPtr projCRSNode,
+                               WKTNodeNNPtr projectionNode);
+
     ConversionNNPtr buildProjection(WKTNodeNNPtr projCRSNode,
                                     WKTNodeNNPtr projectionNode,
                                     const UnitOfMeasure &defaultLinearUnit,
@@ -2233,21 +2236,14 @@ WKTParser::Private::buildConcatenatedOperation(WKTNodeNNPtr node) {
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr
-WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
-                                    WKTNodeNNPtr projectionNode,
-                                    const UnitOfMeasure &defaultLinearUnit,
-                                    const UnitOfMeasure &defaultAngularUnit) {
+bool WKTParser::Private::hasWebMercPROJ4String(WKTNodeNNPtr projCRSNode,
+                                               WKTNodeNNPtr projectionNode) {
     if (projectionNode->children().empty()) {
         throw ParsingException("not enough children in " +
                                WKTConstants::PROJECTION + " node");
     }
     const std::string wkt1ProjectionName =
         stripQuotes(projectionNode->children()[0]->value());
-
-    std::vector<OperationParameterNNPtr> parameters;
-    std::vector<ParameterValueNNPtr> values;
-    bool tryToIdentifyWKT1Method = true;
 
     auto extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
 
@@ -2277,28 +2273,51 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
                  projString.find("+k=1") != std::string::npos) &&
                 (projString.find("+units=") == std::string::npos ||
                  projString.find("+units=m") != std::string::npos)) {
-
-                return Conversion::createPopularVisualisationPseudoMercator(
-                    PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
-                    Angle(0), Angle(0), Length(0), Length(0));
+                return true;
             }
-        } else {
-            // The latitude of origin, which should always be zero, is
-            // missing
-            // in GDAL WKT1, but provisionned in the EPSG Mercator_1SP
-            // definition,
-            // so add it manually.
-            PropertyMap propertiesParameter;
-            propertiesParameter.set(IdentifiedObject::NAME_KEY,
-                                    "Latitude of natural origin");
-            propertiesParameter.set(Identifier::CODE_KEY, 8801);
-            propertiesParameter.set(Identifier::CODESPACE_KEY,
-                                    Identifier::EPSG);
-            parameters.push_back(
-                OperationParameter::create(propertiesParameter));
-            values.push_back(
-                ParameterValue::create(Measure(0, UnitOfMeasure::DEGREE)));
         }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr
+WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
+                                    WKTNodeNNPtr projectionNode,
+                                    const UnitOfMeasure &defaultLinearUnit,
+                                    const UnitOfMeasure &defaultAngularUnit) {
+    if (projectionNode->children().empty()) {
+        throw ParsingException("not enough children in " +
+                               WKTConstants::PROJECTION + " node");
+    }
+    const std::string wkt1ProjectionName =
+        stripQuotes(projectionNode->children()[0]->value());
+
+    std::vector<OperationParameterNNPtr> parameters;
+    std::vector<ParameterValueNNPtr> values;
+    bool tryToIdentifyWKT1Method = true;
+
+    auto extensionNode = projCRSNode->lookForChild(WKTConstants::EXTENSION);
+
+    if (metadata::Identifier::isEquivalentName(wkt1ProjectionName,
+                                               "Mercator_1SP") &&
+        projCRSNode->countChildrenOfName("center_latitude") == 0) {
+
+        // The latitude of origin, which should always be zero, is
+        // missing
+        // in GDAL WKT1, but provisionned in the EPSG Mercator_1SP
+        // definition,
+        // so add it manually.
+        PropertyMap propertiesParameter;
+        propertiesParameter.set(IdentifiedObject::NAME_KEY,
+                                "Latitude of natural origin");
+        propertiesParameter.set(Identifier::CODE_KEY, 8801);
+        propertiesParameter.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
+        parameters.push_back(OperationParameter::create(propertiesParameter));
+        values.push_back(
+            ParameterValue::create(Measure(0, UnitOfMeasure::DEGREE)));
+
     } else if (metadata::Identifier::isEquivalentName(wkt1ProjectionName,
                                                       "Polar_Stereographic")) {
         std::map<std::string, Measure> mapParameters;
@@ -2427,6 +2446,24 @@ WKTParser::Private::buildProjection(WKTNodeNNPtr projCRSNode,
 // ---------------------------------------------------------------------------
 
 ProjectedCRSNNPtr WKTParser::Private::buildProjectedCRS(WKTNodeNNPtr node) {
+
+    auto conversionNode = node->lookForChild(WKTConstants::CONVERSION);
+    auto projectionNode = node->lookForChild(WKTConstants::PROJECTION);
+    if (!conversionNode && !projectionNode) {
+        throw ParsingException("Missing CONVERSION node");
+    }
+    if (!conversionNode &&
+        hasWebMercPROJ4String(node, NN_CHECK_ASSERT(projectionNode))) {
+        auto conversion = Conversion::createPopularVisualisationPseudoMercator(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(0),
+            Angle(0), Length(0), Length(0));
+        return ProjectedCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                              "WGS 84 / Pseudo-Mercator"),
+            GeographicCRS::EPSG_4326, conversion,
+            CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    }
+
     auto baseGeodCRSNode = node->lookForChild(WKTConstants::BASEGEODCRS);
     if (!baseGeodCRSNode) {
         baseGeodCRSNode = node->lookForChild(WKTConstants::BASEGEOGCRS);
@@ -2439,12 +2476,6 @@ ProjectedCRSNNPtr WKTParser::Private::buildProjectedCRS(WKTNodeNNPtr node) {
         }
     }
     auto baseGeodCRS = buildGeodeticCRS(NN_CHECK_ASSERT(baseGeodCRSNode));
-
-    auto conversionNode = node->lookForChild(WKTConstants::CONVERSION);
-    auto projectionNode = node->lookForChild(WKTConstants::PROJECTION);
-    if (!conversionNode && !projectionNode) {
-        throw ParsingException("Missing CONVERSION node");
-    }
 
     auto linearUnit = buildUnitInSubNode(node);
     auto angularUnit = baseGeodCRS->coordinateSystem()->axisList()[0]->unit();

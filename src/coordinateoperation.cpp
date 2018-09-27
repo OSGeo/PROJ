@@ -3737,7 +3737,8 @@ void Conversion::addWKTExtensionNode(io::WKTFormatterNNPtr formatter) const {
         if (ci_equal(projectionMethodName,
                      EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) ||
             methodEPSGCode ==
-                EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR) {
+                EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR ||
+            *(name()->description()) == "Popular Visualisation Mercator") {
 
             auto projFormatter = io::PROJStringFormatter::create(
                 io::PROJStringFormatter::Convention::PROJ_4);
@@ -3790,6 +3791,7 @@ std::string Conversion::exportToPROJString(
         }
     }
 
+    auto convName = *(name()->description());
     auto projectionMethodName = *(method()->name()->description());
     const int methodEPSGCode = method()->getEPSGCode();
     bool bConversionDone = false;
@@ -3952,6 +3954,22 @@ std::string Conversion::exportToPROJString(
                 "Cannot export " +
                 EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR +
                 " as PROJ.4 string outside of a ProjectedCRS context");
+        }
+        bConversionDone = true;
+        bEllipsoidParametersDone = true;
+    } else if (ci_equal(convName, "Popular Visualisation Mercator")) {
+        if (formatter->convention() ==
+            io::PROJStringFormatter::Convention::PROJ_4) {
+            if (!createPROJ4WebMercator(this, formatter)) {
+                throw io::FormattingException(
+                    "Cannot export " + convName +
+                    " as PROJ.4 string outside of a ProjectedCRS context");
+            }
+        } else {
+            formatter->addStep("webmerc");
+            if (l_sourceCRS) {
+                datum::Ellipsoid::WGS84->exportToPROJString(formatter);
+            }
         }
         bConversionDone = true;
         bEllipsoidParametersDone = true;
