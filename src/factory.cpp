@@ -672,7 +672,7 @@ static void normalizeMeasure(const std::string &uom_code,
         normalized_value =
             (normalized_value < 0 ? -1.0 : 1.0) *
             (int(std::fabs(normalized_value)) + c_locale_stod(MM) / 60. +
-             (c_locale_stod(SSsss) / 100000.0) / 3600.);
+             (c_locale_stod(SSsss) / 1000.0) / 3600.);
         normalized_uom_code = common::UnitOfMeasure::DEGREE.code();
     }
 }

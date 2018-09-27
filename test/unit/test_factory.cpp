@@ -790,7 +790,6 @@ TEST(
 
 TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
-    // This also tests conversion from unit of measure EPSG:9110 DDD.MMSSsss
     auto op = factory->createCoordinateOperation("1884");
     auto expected =
         "COORDINATEOPERATION[\"S-JTSK (Ferro) to S-JTSK (1)\",\n"
@@ -838,6 +837,20 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
     EXPECT_EQ(op->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT2_2018)),
               expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_test_uom_9110) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // This tests conversion from unit of measure EPSG:9110 DDD.MMSSsss
+    auto crs = factory->createProjectedCRS("2172");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=sterea "
+              "+lat_0=53.0019444444444 +lon_0=21.5027777777778 +k=0.9998 "
+              "+x_0=4603000 +y_0=5806000 +ellps=krass +step +proj=axisswap "
+              "+order=2,1");
 }
 
 // ---------------------------------------------------------------------------
