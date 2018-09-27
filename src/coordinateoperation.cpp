@@ -5507,7 +5507,8 @@ TransformationNNPtr Transformation::createLongitudeRotation(
 // ---------------------------------------------------------------------------
 
 static util::PropertyMap
-createPropertiesForInverse(const CoordinateOperation *op) {
+createPropertiesForInverse(const CoordinateOperation *op,
+                           bool approximateInversion = false) {
     util::PropertyMap map;
 
     // The domain(s) are unchanged by the inverse operation
@@ -5550,6 +5551,9 @@ createPropertiesForInverse(const CoordinateOperation *op) {
         name = opType + " from " + *(targetCRS->name()->description()) +
                " to " + *(sourceCRS->name()->description());
     }
+    if (approximateInversion) {
+        name += " (approx. inversion)";
+    }
 
     if (dynamic_cast<const PROJBasedOperation *>(op)) {
         name = forwardName;
@@ -5588,58 +5592,179 @@ static bool isTimeDependent(const std::string &method_name) {
 
 // ---------------------------------------------------------------------------
 
-CoordinateOperationNNPtr Transformation::inverse() const {
-    // some Transformations like Helmert ones can be inverted as Transformation
+static CoordinateOperationPtr
+createApproximateInverseIfPossible(const Transformation *op) {
     bool sevenParamsTransform = false;
-    bool threeParamsTransform = false;
     bool fifteenParamsTransform = false;
-    auto method_name = *(method()->name()->description());
+    auto method = op->method();
+    auto method_name = *(method->name()->description());
+
+    // See end of "2.4.3.3 Helmert 7-parameter transformations"
+    // in EPSG 7-2 guidance
+    // For practical purposes, the inverse of 7- or 15-parameters Helmert
+    // can be obtained by using the forward method with all parameters negated
+    // (except reference epoch!)
+    // So for WKT export use that. But for PROJ string, we use the +inv flag
+    // so as to get "perfect" round-tripability.
     if ((ci_find(method_name, "Coordinate Frame") != std::string::npos &&
          !isTimeDependent(method_name)) ||
-        method()->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC) ||
-        method()->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D) ||
-        method()->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D)) {
+        method->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC) ||
+        method->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D) ||
+        method->isEPSG(EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D)) {
         sevenParamsTransform = true;
     } else if (
         (ci_find(method_name, "Coordinate Frame") != std::string::npos &&
          isTimeDependent(method_name)) ||
-        method()->isEPSG(
+        method->isEPSG(
             EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC) ||
-        method()->isEPSG(
+        method->isEPSG(
             EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D) ||
-        method()->isEPSG(
+        method->isEPSG(
             EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D)) {
         fifteenParamsTransform = true;
     } else if ((ci_find(method_name, "Position Vector") != std::string::npos &&
                 !isTimeDependent(method_name)) ||
-               method()->isEPSG(EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC) ||
-               method()->isEPSG(
-                   EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D) ||
-               method()->isEPSG(
-                   EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D)) {
+               method->isEPSG(EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC) ||
+               method->isEPSG(EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D) ||
+               method->isEPSG(EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D)) {
         sevenParamsTransform = true;
     } else if (
         (ci_find(method_name, "Position Vector") != std::string::npos &&
          isTimeDependent(method_name)) ||
-        method()->isEPSG(
+        method->isEPSG(
             EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC) ||
-        method()->isEPSG(
+        method->isEPSG(
             EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D) ||
-        method()->isEPSG(
+        method->isEPSG(
             EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D)) {
         fifteenParamsTransform = true;
-    } else if (ci_find(method_name, "Geocentric translations") !=
-                   std::string::npos ||
-               method()->isEPSG(
-                   EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC) ||
-               method()->isEPSG(
-                   EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D) ||
-               method()->isEPSG(
-                   EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D)) {
-        threeParamsTransform = true;
     }
-    if (threeParamsTransform || sevenParamsTransform ||
-        fifteenParamsTransform) {
+    if (sevenParamsTransform || fifteenParamsTransform) {
+        double x =
+            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
+                                       EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
+                 .getSIValue();
+        double y =
+            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
+                                       EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)
+                 .getSIValue();
+        double z =
+            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
+                                       EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
+                 .getSIValue();
+        double rx =
+            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_ROTATION,
+                                       EPSG_CODE_PARAMETER_X_AXIS_ROTATION)
+                 .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                 .value();
+        double ry =
+            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_ROTATION,
+                                       EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)
+                 .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                 .value();
+        double rz =
+            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_ROTATION,
+                                       EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)
+                 .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                 .value();
+        double scaleDiff =
+            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_SCALE_DIFFERENCE,
+                                       EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)
+                 .convertToUnit(common::UnitOfMeasure::PARTS_PER_MILLION)
+                 .value();
+        auto methodProperties = util::PropertyMap().set(
+            common::IdentifiedObject::NAME_KEY, method_name);
+        int method_epsg_code = method->getEPSGCode();
+        if (method_epsg_code) {
+            methodProperties
+                .set(metadata::Identifier::CODESPACE_KEY,
+                     metadata::Identifier::EPSG)
+                .set(metadata::Identifier::CODE_KEY, method_epsg_code);
+        }
+        if (fifteenParamsTransform) {
+            double rate_x =
+                -op->parameterValueMeasure(
+                       EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION,
+                       EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION)
+                     .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
+                     .value();
+            double rate_y =
+                -op->parameterValueMeasure(
+                       EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION,
+                       EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION)
+                     .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
+                     .value();
+            double rate_z =
+                -op->parameterValueMeasure(
+                       EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION,
+                       EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION)
+                     .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
+                     .value();
+            double rate_rx =
+                -op->parameterValueMeasure(
+                       EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION,
+                       EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION)
+                     .convertToUnit(common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
+                     .value();
+            double rate_ry =
+                -op->parameterValueMeasure(
+                       EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION,
+                       EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION)
+                     .convertToUnit(common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
+                     .value();
+            double rate_rz =
+                -op->parameterValueMeasure(
+                       EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION,
+                       EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION)
+                     .convertToUnit(common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
+                     .value();
+            double rate_scaleDiff =
+                -op->parameterValueMeasure(
+                       EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE,
+                       EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE)
+                     .convertToUnit(common::UnitOfMeasure::PPM_PER_YEAR)
+                     .value();
+            double referenceEpochYear =
+                op->parameterValueMeasure(EPSG_NAME_PARAMETER_REFERENCE_EPOCH,
+                                          EPSG_CODE_PARAMETER_REFERENCE_EPOCH)
+                    .convertToUnit(common::UnitOfMeasure::YEAR)
+                    .value();
+            return util::nn_static_pointer_cast<CoordinateOperation>(
+                       createFifteenParamsTransform(
+                           createPropertiesForInverse(op, true),
+                           methodProperties, op->targetCRS(), op->sourceCRS(),
+                           x, y, z, rx, ry, rz, scaleDiff, rate_x, rate_y,
+                           rate_z, rate_rx, rate_ry, rate_rz, rate_scaleDiff,
+                           referenceEpochYear,
+                           op->coordinateOperationAccuracies()))
+                .as_nullable();
+        } else {
+            return util::nn_static_pointer_cast<CoordinateOperation>(
+                       createSevenParamsTransform(
+                           createPropertiesForInverse(op, true),
+                           methodProperties, op->targetCRS(), op->sourceCRS(),
+                           x, y, z, rx, ry, rz, scaleDiff,
+                           op->coordinateOperationAccuracies()))
+                .as_nullable();
+        }
+    }
+
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+CoordinateOperationNNPtr Transformation::inverse() const {
+    auto method_name = *(method()->name()->description());
+
+    // For geocentric translation, the inverse is exactly the negation of
+    // the parameters.
+    if (ci_find(method_name, "Geocentric translations") != std::string::npos ||
+        method()->isEPSG(EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC) ||
+        method()->isEPSG(
+            EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D) ||
+        method()->isEPSG(
+            EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D)) {
         double x =
             -parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
                                    EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
@@ -5652,105 +5777,9 @@ CoordinateOperationNNPtr Transformation::inverse() const {
             -parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
                                    EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
                  .getSIValue();
-        if (sevenParamsTransform || fifteenParamsTransform) {
-            double rx =
-                -parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_ROTATION,
-                                       EPSG_CODE_PARAMETER_X_AXIS_ROTATION)
-                     .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
-                     .value();
-            double ry =
-                -parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_ROTATION,
-                                       EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)
-                     .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
-                     .value();
-            double rz =
-                -parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_ROTATION,
-                                       EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)
-                     .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
-                     .value();
-            double scaleDiff =
-                -parameterValueMeasure(EPSG_NAME_PARAMETER_SCALE_DIFFERENCE,
-                                       EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)
-                     .convertToUnit(common::UnitOfMeasure::PARTS_PER_MILLION)
-                     .value();
-            auto methodProperties =
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        *(method()->name()->description()));
-            int method_epsg_code = method()->getEPSGCode();
-            if (method_epsg_code) {
-                methodProperties
-                    .set(metadata::Identifier::CODESPACE_KEY,
-                         metadata::Identifier::EPSG)
-                    .set(metadata::Identifier::CODE_KEY, method_epsg_code);
-            }
-            if (fifteenParamsTransform) {
-                double rate_x =
-                    -parameterValueMeasure(
-                         EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION,
-                         EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION)
-                         .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
-                         .value();
-                double rate_y =
-                    -parameterValueMeasure(
-                         EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION,
-                         EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION)
-                         .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
-                         .value();
-                double rate_z =
-                    -parameterValueMeasure(
-                         EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION,
-                         EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION)
-                         .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
-                         .value();
-                double rate_rx =
-                    -parameterValueMeasure(
-                         EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION,
-                         EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION)
-                         .convertToUnit(
-                             common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
-                         .value();
-                double rate_ry =
-                    -parameterValueMeasure(
-                         EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION,
-                         EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION)
-                         .convertToUnit(
-                             common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
-                         .value();
-                double rate_rz =
-                    -parameterValueMeasure(
-                         EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION,
-                         EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION)
-                         .convertToUnit(
-                             common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
-                         .value();
-                double rate_scaleDiff =
-                    -parameterValueMeasure(
-                         EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE,
-                         EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE)
-                         .convertToUnit(common::UnitOfMeasure::PPM_PER_YEAR)
-                         .value();
-                double referenceEpochYear =
-                    parameterValueMeasure(EPSG_NAME_PARAMETER_REFERENCE_EPOCH,
-                                          EPSG_CODE_PARAMETER_REFERENCE_EPOCH)
-                        .convertToUnit(common::UnitOfMeasure::YEAR)
-                        .value();
-                return createFifteenParamsTransform(
-                    createPropertiesForInverse(this), methodProperties,
-                    targetCRS(), sourceCRS(), x, y, z, rx, ry, rz, scaleDiff,
-                    rate_x, rate_y, rate_z, rate_rx, rate_ry, rate_rz,
-                    rate_scaleDiff, referenceEpochYear,
-                    coordinateOperationAccuracies());
-            } else {
-                return createSevenParamsTransform(
-                    createPropertiesForInverse(this), methodProperties,
-                    targetCRS(), sourceCRS(), x, y, z, rx, ry, rz, scaleDiff,
-                    coordinateOperationAccuracies());
-            }
-        } else {
-            return createGeocentricTranslations(
-                createPropertiesForInverse(this), targetCRS(), sourceCRS(), x,
-                y, z, coordinateOperationAccuracies());
-        }
+        return createGeocentricTranslations(createPropertiesForInverse(this),
+                                            targetCRS(), sourceCRS(), x, y, z,
+                                            coordinateOperationAccuracies());
     }
 
     if (ci_find(method_name, "Molodensky") != std::string::npos ||
@@ -5799,14 +5828,26 @@ CoordinateOperationNNPtr Transformation::inverse() const {
                                        targetCRS(), sourceCRS(), newOffset);
     }
 
-    return util::nn_make_shared<InverseCoordinateOperation>(
+    auto l_inverse = InverseCoordinateOperation::create(
         util::nn_static_pointer_cast<CoordinateOperation>(shared_from_this()),
         true);
+    return util::nn_static_pointer_cast<CoordinateOperation>(l_inverse);
 }
 
 // ---------------------------------------------------------------------------
 
 std::string Transformation::exportToWKT(io::WKTFormatterNNPtr formatter) const {
+
+    if (formatter->isInverted()) {
+        auto approxInverse = createApproximateInverseIfPossible(this);
+        if (approxInverse) {
+            formatter->stopInversion();
+            auto ret = approxInverse->exportToWKT(formatter);
+            formatter->startInversion();
+            return ret;
+        }
+    }
+
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
         throw io::FormattingException(
@@ -7047,12 +7088,23 @@ InverseCoordinateOperation::InverseCoordinateOperation(
     : forwardOperation_(forwardOperation),
       wktSupportsInversion_(wktSupportsInversion) {
     setProperties(createPropertiesForInverse(forwardOperation.get()));
-    setAccuracies(coordinateOperationAccuracies());
+    setAccuracies(forwardOperation->coordinateOperationAccuracies());
     if (forwardOperation->sourceCRS() && forwardOperation->targetCRS()) {
         setCRSs(NN_CHECK_ASSERT(forwardOperation->targetCRS()),
                 NN_CHECK_ASSERT(forwardOperation->sourceCRS()),
                 forwardOperation->interpolationCRS());
     }
+}
+
+// ---------------------------------------------------------------------------
+
+InverseCoordinateOperationNNPtr
+InverseCoordinateOperation::create(CoordinateOperationNNPtr forwardOperation,
+                                   bool wktSupportsInversion) {
+    auto op = util::nn_make_shared<InverseCoordinateOperation>(
+        forwardOperation, wktSupportsInversion);
+    op->assignSelf(util::nn_static_pointer_cast<util::BaseObject>(op));
+    return op;
 }
 
 // ---------------------------------------------------------------------------

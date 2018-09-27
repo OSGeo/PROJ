@@ -430,7 +430,7 @@ TEST(operation, concatenated_operation) {
 TEST(operation, transformation_createGeocentricTranslations) {
 
     auto transf = Transformation::createGeocentricTranslations(
-        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
         2.0, 3.0, std::vector<PositionalAccuracyNNPtr>());
 
     auto params = transf->getTOWGS84Parameters();
@@ -453,8 +453,8 @@ TEST(operation, transformation_createGeocentricTranslations) {
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-              "+ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 +step +inv "
-              "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+              "+ellps=GRS80 +step +proj=helmert +x=1 +y=2 +z=3 +step +inv "
+              "+proj=cart +ellps=WGS84 +step +proj=unitconvert +xy_in=rad "
               "+xy_out=deg +step +proj=axisswap +order=2,1");
 }
 
@@ -510,9 +510,10 @@ TEST(operation,
 TEST(operation, transformation_createPositionVector) {
 
     auto transf = Transformation::createPositionVector(
-        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
         2.0, 3.0, 4.0, 5.0, 6.0, 7.0, std::vector<PositionalAccuracyNNPtr>{
                                           PositionalAccuracy::create("100")});
+    ASSERT_EQ(transf->coordinateOperationAccuracies().size(), 1);
 
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
     EXPECT_EQ(transf->getTOWGS84Parameters(), expected);
@@ -520,26 +521,55 @@ TEST(operation, transformation_createPositionVector) {
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-              "+ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
+              "+ellps=GRS80 +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
               "+rz=6 +s=7 +convention=position_vector +step +inv +proj=cart "
-              "+ellps=GRS80 +step "
+              "+ellps=WGS84 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
 
     auto inv_transf = transf->inverse();
     ASSERT_EQ(inv_transf->coordinateOperationAccuracies().size(), 1);
 
+    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
+              *(inv_transf->targetCRS()->name()->description()));
+    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
+              *(inv_transf->sourceCRS()->name()->description()));
+
+#ifdef USE_APPROXIMATE_HELMERT_INVERSE
     auto inv_transf_as_transf =
         nn_dynamic_pointer_cast<Transformation>(inv_transf);
     ASSERT_TRUE(inv_transf_as_transf != nullptr);
+#else
+    EXPECT_EQ(inv_transf->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+              "+ellps=WGS84 +step +inv +proj=helmert +x=1 +y=2 +z=3 +rx=4 "
+              "+ry=5 +rz=6 +s=7 +convention=position_vector +step +inv "
+              "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
 
-    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
-              *(inv_transf_as_transf->targetCRS()->name()->description()));
-    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
-              *(inv_transf_as_transf->sourceCRS()->name()->description()));
-    auto expected_inv =
-        std::vector<double>{-1.0, -2.0, -3.0, -4.0, -5.0, -6.0, -7.0};
-    EXPECT_EQ(inv_transf_as_transf->getTOWGS84Parameters(), expected_inv);
+    // In WKT, use approximate formula
+    auto wkt = inv_transf->exportToWKT(WKTFormatter::create());
+    EXPECT_TRUE(
+        wkt.find("Transformation from WGS 84 to NAD83 (approx. inversion)") !=
+        std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("Position Vector transformation (geog2D domain)") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("ID[\"EPSG\",9606]]") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"X-axis translation\",-1") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Y-axis translation\",-2") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Z-axis translation\",-3") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"X-axis rotation\",-4") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Y-axis rotation\",-5") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Z-axis rotation\",-6") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Scale difference\",-7") != std::string::npos)
+        << wkt;
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -547,7 +577,7 @@ TEST(operation, transformation_createPositionVector) {
 TEST(operation, transformation_createCoordinateFrameRotation) {
 
     auto transf = Transformation::createCoordinateFrameRotation(
-        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
         2.0, 3.0, -4.0, -5.0, -6.0, 7.0,
         std::vector<PositionalAccuracyNNPtr>());
 
@@ -558,24 +588,55 @@ TEST(operation, transformation_createCoordinateFrameRotation) {
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-              "+ellps=WGS84 +step +proj=helmert +x=1 +y=2 +z=3 +rx=-4 +ry=-5 "
+              "+ellps=GRS80 +step +proj=helmert +x=1 +y=2 +z=3 +rx=-4 +ry=-5 "
               "+rz=-6 +s=7 +convention=coordinate_frame +step +inv +proj=cart "
-              "+ellps=GRS80 +step "
+              "+ellps=WGS84 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
               "+order=2,1");
 
     auto inv_transf = transf->inverse();
+    ASSERT_EQ(inv_transf->coordinateOperationAccuracies().size(), 0);
+
+    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
+              *(inv_transf->targetCRS()->name()->description()));
+    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
+              *(inv_transf->sourceCRS()->name()->description()));
+
+#ifdef USE_APPROXIMATE_HELMERT_INVERSE
     auto inv_transf_as_transf =
         nn_dynamic_pointer_cast<Transformation>(inv_transf);
     ASSERT_TRUE(inv_transf_as_transf != nullptr);
+#else
+    EXPECT_EQ(inv_transf->exportToPROJString(PROJStringFormatter::create()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+              "+ellps=WGS84 +step +inv +proj=helmert +x=1 +y=2 +z=3 +rx=-4 "
+              "+ry=-5 +rz=-6 +s=7 +convention=coordinate_frame +step +inv "
+              "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=deg +step +proj=axisswap +order=2,1");
 
-    EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
-              *(inv_transf_as_transf->targetCRS()->name()->description()));
-    EXPECT_EQ(*(transf->targetCRS()->name()->description()),
-              *(inv_transf_as_transf->sourceCRS()->name()->description()));
-    auto expected_inv =
-        std::vector<double>{-1.0, -2.0, -3.0, -4.0, -5.0, -6.0, -7.0};
-    EXPECT_EQ(inv_transf_as_transf->getTOWGS84Parameters(), expected_inv);
+    // In WKT, use approximate formula
+    auto wkt = inv_transf->exportToWKT(WKTFormatter::create());
+    EXPECT_TRUE(
+        wkt.find("Transformation from WGS 84 to NAD83 (approx. inversion)") !=
+        std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("Coordinate Frame rotation (geog2D domain)") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("ID[\"EPSG\",9607]]") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"X-axis translation\",-1") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Y-axis translation\",-2") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Z-axis translation\",-3") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"X-axis rotation\",4") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Y-axis rotation\",5") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Z-axis rotation\",6") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Scale difference\",-7") != std::string::npos)
+        << wkt;
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -583,28 +644,71 @@ TEST(operation, transformation_createCoordinateFrameRotation) {
 TEST(operation, transformation_createTimeDependentPositionVector) {
 
     auto transf = Transformation::createTimeDependentPositionVector(
-        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
         2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 2018.5,
         std::vector<PositionalAccuracyNNPtr>());
 
     auto inv_transf = transf->inverse();
-    auto inv_transf_as_transf =
-        nn_dynamic_pointer_cast<Transformation>(inv_transf);
-    ASSERT_TRUE(inv_transf_as_transf != nullptr);
 
     EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
-              *(inv_transf_as_transf->targetCRS()->name()->description()));
+              *(inv_transf->targetCRS()->name()->description()));
     EXPECT_EQ(*(transf->targetCRS()->name()->description()),
-              *(inv_transf_as_transf->sourceCRS()->name()->description()));
+              *(inv_transf->sourceCRS()->name()->description()));
 
     auto projString =
-        inv_transf_as_transf->exportToPROJString(PROJStringFormatter::create());
-    EXPECT_TRUE(
-        projString.find("+proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 +ry=-5 +rz=-6 "
-                        "+s=-7 +dx=-0.1 +dy=-0.2 +dz=-0.3 +drx=-0.4 +dry=-0.5 "
-                        "+drz=-0.6 +ds=-0.7 +t_epoch=2018.5 "
-                        "+convention=position_vector") != std::string::npos)
+        inv_transf->exportToPROJString(PROJStringFormatter::create());
+    EXPECT_TRUE(projString.find("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
+                                "+rz=6 +s=7 +dx=0.1 +dy=0.2 +dz=0.3 +drx=0.4 "
+                                "+dry=0.5 +drz=0.6 +ds=0.7 +t_epoch=2018.5 "
+                                "+convention=position_vector") !=
+                std::string::npos)
         << projString;
+
+    // In WKT, use approximate formula
+    auto wkt = inv_transf->exportToWKT(WKTFormatter::create());
+    EXPECT_TRUE(
+        wkt.find("Transformation from WGS 84 to NAD83 (approx. inversion)") !=
+        std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("Time-dependent Position Vector tfm (geog2D)") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("ID[\"EPSG\",1054]]") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"X-axis translation\",-1") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Y-axis translation\",-2") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Z-axis translation\",-3") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"X-axis rotation\",-4") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Y-axis rotation\",-5") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Z-axis rotation\",-6") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Scale difference\",-7") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of X-axis translation\",-0.1") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of Y-axis translation\",-0.2") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of Z-axis translation\",-0.3") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of X-axis rotation\",-0.4") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of Y-axis rotation\",-0.5") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of Z-axis rotation\",-0.6") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of Scale difference\",-0.7") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Parameter reference epoch\",2018.5") !=
+                std::string::npos)
+        << wkt;
 }
 
 // ---------------------------------------------------------------------------
@@ -612,28 +716,71 @@ TEST(operation, transformation_createTimeDependentPositionVector) {
 TEST(operation, transformation_createTimeDependentCoordinateFrameRotation) {
 
     auto transf = Transformation::createTimeDependentCoordinateFrameRotation(
-        PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
+        PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
         2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 2018.5,
         std::vector<PositionalAccuracyNNPtr>());
 
     auto inv_transf = transf->inverse();
-    auto inv_transf_as_transf =
-        nn_dynamic_pointer_cast<Transformation>(inv_transf);
-    ASSERT_TRUE(inv_transf_as_transf != nullptr);
 
     EXPECT_EQ(*(transf->sourceCRS()->name()->description()),
-              *(inv_transf_as_transf->targetCRS()->name()->description()));
+              *(inv_transf->targetCRS()->name()->description()));
     EXPECT_EQ(*(transf->targetCRS()->name()->description()),
-              *(inv_transf_as_transf->sourceCRS()->name()->description()));
+              *(inv_transf->sourceCRS()->name()->description()));
 
     auto projString =
-        inv_transf_as_transf->exportToPROJString(PROJStringFormatter::create());
-    EXPECT_TRUE(
-        projString.find("+proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 +ry=-5 +rz=-6 "
-                        "+s=-7 +dx=-0.1 +dy=-0.2 +dz=-0.3 +drx=-0.4 +dry=-0.5 "
-                        "+drz=-0.6 +ds=-0.7 +t_epoch=2018.5 "
-                        "+convention=coordinate_frame") != std::string::npos)
+        inv_transf->exportToPROJString(PROJStringFormatter::create());
+    EXPECT_TRUE(projString.find("+proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
+                                "+rz=6 +s=7 +dx=0.1 +dy=0.2 +dz=0.3 +drx=0.4 "
+                                "+dry=0.5 +drz=0.6 +ds=0.7 +t_epoch=2018.5 "
+                                "+convention=coordinate_frame") !=
+                std::string::npos)
         << projString;
+
+    // In WKT, use approximate formula
+    auto wkt = inv_transf->exportToWKT(WKTFormatter::create());
+    EXPECT_TRUE(
+        wkt.find("Transformation from WGS 84 to NAD83 (approx. inversion)") !=
+        std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("Time-dependent Coordinate Frame rotation (geog2D)") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("ID[\"EPSG\",1057]]") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"X-axis translation\",-1") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Y-axis translation\",-2") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Z-axis translation\",-3") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"X-axis rotation\",-4") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Y-axis rotation\",-5") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Z-axis rotation\",-6") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("\"Scale difference\",-7") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of X-axis translation\",-0.1") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of Y-axis translation\",-0.2") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of Z-axis translation\",-0.3") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of X-axis rotation\",-0.4") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of Y-axis rotation\",-0.5") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of Z-axis rotation\",-0.6") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Rate of change of Scale difference\",-0.7") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("\"Parameter reference epoch\",2018.5") !=
+                std::string::npos)
+        << wkt;
 }
 
 // ---------------------------------------------------------------------------
@@ -3234,11 +3381,11 @@ TEST(operation, geogCRS_to_geogCRS_context_default) {
         EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
                   "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
                   "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-                  "+ellps=GRS80 +step +proj=helmert +x=-2.3287 +y=147.0425 "
-                  "+z=92.0802 +rx=-0.3092483 +ry=0.32482185 +rz=0.49729934 "
-                  "+s=-5.68906266 +convention=coordinate_frame +step +inv "
-                  "+proj=cart +ellps=krass +step +proj=unitconvert +xy_in=rad "
-                  "+xy_out=deg +step +proj=axisswap +order=2,1");
+                  "+ellps=GRS80 +step +inv +proj=helmert +x=2.3287 "
+                  "+y=-147.0425 +z=-92.0802 +rx=0.3092483 +ry=-0.32482185 "
+                  "+rz=-0.49729934 +s=5.68906266 +convention=coordinate_frame "
+                  "+step +inv +proj=cart +ellps=krass +step +proj=unitconvert "
+                  "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
     }
 }
 
@@ -3561,12 +3708,11 @@ TEST(operation, geogCRS_to_boundCRS_of_geogCRS) {
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-              "+ellps=WGS84 +step +proj=helmert +x=-1 +y=-2 +z=-3 +rx=-4 "
-              "+ry=-5 +rz=-6 +s=-7 +convention=position_vector +step +inv "
-              "+proj=cart +ellps=clrk80ign +step "
-              "+inv +proj=longlat +ellps=clrk80ign +pm=paris +step "
-              "+proj=unitconvert +xy_in=rad +xy_out=grad +step +proj=axisswap "
-              "+order=2,1");
+              "+ellps=WGS84 +step +inv +proj=helmert +x=1 +y=2 +z=3 +rx=4 "
+              "+ry=5 +rz=6 +s=7 +convention=position_vector +step +inv "
+              "+proj=cart +ellps=clrk80ign +step +inv +proj=longlat "
+              "+ellps=clrk80ign +pm=paris +step +proj=unitconvert +xy_in=rad "
+              "+xy_out=grad +step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -3589,13 +3735,11 @@ TEST(operation, boundCRS_to_boundCRS) {
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create()),
               "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
-              "+step +proj=cart +ellps=clrk80ign +step +proj=helmert "
-              "+x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
-              "+convention=position_vector +step +proj=helmert +x=-8 "
-              "+y=-9 +z=-10 +rx=-11 +ry=-12 +rz=-13 +s=-14 "
-              "+convention=position_vector +step +inv "
-              "+proj=cart +ellps=GRS80 +step +proj=utm +zone=32 "
-              "+ellps=GRS80");
+              "+step +proj=cart +ellps=clrk80ign +step +proj=helmert +x=1 +y=2 "
+              "+z=3 +rx=4 +ry=5 +rz=6 +s=7 +convention=position_vector +step "
+              "+inv +proj=helmert +x=8 +y=9 +z=10 +rx=11 +ry=12 +rz=13 +s=14 "
+              "+convention=position_vector +step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=utm +zone=32 +ellps=GRS80");
 }
 
 // ---------------------------------------------------------------------------

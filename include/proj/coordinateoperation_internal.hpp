@@ -80,6 +80,13 @@ const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
 
 // ---------------------------------------------------------------------------
 
+class InverseCoordinateOperation;
+/** Shared pointer of InverseCoordinateOperation */
+using InverseCoordinateOperationPtr =
+    std::shared_ptr<InverseCoordinateOperation>;
+/** Non-null shared pointer of InverseCoordinateOperation */
+using InverseCoordinateOperationNNPtr = util::nn<InverseCoordinateOperationPtr>;
+
 /** \brief Inverse operation of a CoordinateOperation.
  *
  * This is used when there is no straightforward way of building another
@@ -105,6 +112,10 @@ class InverseCoordinateOperation : public CoordinateOperation {
                        util::IComparable::Criterion::STRICT) const override;
 
     CoordinateOperationNNPtr inverse() const override;
+
+    static InverseCoordinateOperationNNPtr
+    create(CoordinateOperationNNPtr forwardOperation,
+           bool wktSupportsInversion);
 
   private:
     CoordinateOperationNNPtr forwardOperation_;
