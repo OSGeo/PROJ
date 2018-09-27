@@ -390,13 +390,13 @@ constexpr int EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC =
 
 static const std::string
     EPSG_NAME_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D(
-        "Time-dependent Position Vector tfm (geog2D)");
+        "Time-dependent Coordinate Frame rotation (geog2D)");
 constexpr int EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D =
     1057;
 
 static const std::string
     EPSG_NAME_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D(
-        "Time-dependent Position Vector tfm (geog3D)");
+        "Time-dependent Coordinate Frame rotation (geog3D)");
 constexpr int EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D =
     1058;
 
