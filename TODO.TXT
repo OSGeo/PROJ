@@ -5,7 +5,8 @@
             init= syntax
     - derived crs
     - test sphericalCS
-    - PointMotionOperation
+    - identification of CRS code from registry from name, etc
+    - proj.db: integrate ESRI catalog, IGNF ?
 
     - transformation with WEST longitude
     GEOGCS["Mars2015",
@@ -18,6 +19,11 @@
         AXIS["longitude",WEST]]
     - axis inversion for polar cases: EPSG 5041 (East-North) vs EPSG 32661 (North-East)
     - We might currently create COMPOUNDCRS of horiz CRS + BoundCRS of VertCRS, which is apparently illegal
+
+    - Time dependent stuff:
+        - PointMotionOperation
+        - time-specific Helmert (codes 1065 and 1066)
+        - sourceEpochCoordinate and targetEpochCoordinate in CoordinateOperation are unused/unset
 
     
 - Integrate Doxygen doc in PROJ doc

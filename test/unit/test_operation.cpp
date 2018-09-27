@@ -397,11 +397,9 @@ TEST(operation, concatenated_operation) {
 
     ASSERT_EQ(inv_as_concat->operations().size(), 2);
     EXPECT_EQ(*(inv_as_concat->operations()[0]->name()->description()),
-              "Inverse of " +
-                  *(concat->operations()[1]->name()->description()));
+              "Inverse of transformationName");
     EXPECT_EQ(*(inv_as_concat->operations()[1]->name()->description()),
-              "Inverse of " +
-                  *(concat->operations()[0]->name()->description()));
+              "Inverse of transformationName");
 
     EXPECT_TRUE(concat->isEquivalentTo(concat));
     EXPECT_FALSE(concat->isEquivalentTo(createUnrelatedObject()));
@@ -513,7 +511,8 @@ TEST(operation, transformation_createPositionVector) {
 
     auto transf = Transformation::createPositionVector(
         PropertyMap(), GeographicCRS::EPSG_4326, GeographicCRS::EPSG_4269, 1.0,
-        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, std::vector<PositionalAccuracyNNPtr>());
+        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, std::vector<PositionalAccuracyNNPtr>{
+                                          PositionalAccuracy::create("100")});
 
     auto expected = std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
     EXPECT_EQ(transf->getTOWGS84Parameters(), expected);
@@ -528,6 +527,8 @@ TEST(operation, transformation_createPositionVector) {
               "+order=2,1");
 
     auto inv_transf = transf->inverse();
+    ASSERT_EQ(inv_transf->coordinateOperationAccuracies().size(), 1);
+
     auto inv_transf_as_transf =
         nn_dynamic_pointer_cast<Transformation>(inv_transf);
     ASSERT_TRUE(inv_transf_as_transf != nullptr);
@@ -3124,8 +3125,8 @@ TEST(operation, conversion_inverse) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, PROJ_based) {
-    auto conv =
-        SingleOperation::createPROJBased("+proj=merc", nullptr, nullptr);
+    auto conv = SingleOperation::createPROJBased(PropertyMap(), "+proj=merc",
+                                                 nullptr, nullptr);
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()),
               "+proj=merc");
@@ -3142,22 +3143,26 @@ TEST(operation, PROJ_based) {
     auto str = "+proj=pipeline +step +proj=unitconvert +xy_in=grad +xy_out=rad "
                "+step +proj=axisswap +order=2,1 +step +proj=longlat "
                "+ellps=clrk80ign +pm=paris +step +proj=axisswap +order=2,1";
-    EXPECT_EQ(SingleOperation::createPROJBased(str, nullptr, nullptr)
-                  ->exportToPROJString(PROJStringFormatter::create()),
-              str);
+    EXPECT_EQ(
+        SingleOperation::createPROJBased(PropertyMap(), str, nullptr, nullptr)
+            ->exportToPROJString(PROJStringFormatter::create()),
+        str);
 
-    EXPECT_THROW(SingleOperation::createPROJBased("+inv", nullptr, nullptr)
+    EXPECT_THROW(SingleOperation::createPROJBased(PropertyMap(), "+inv",
+                                                  nullptr, nullptr)
                      ->exportToPROJString(PROJStringFormatter::create()),
                  FormattingException);
-    EXPECT_THROW(SingleOperation::createPROJBased("foo", nullptr, nullptr)
-                     ->exportToPROJString(PROJStringFormatter::create()),
-                 FormattingException);
+    EXPECT_THROW(
+        SingleOperation::createPROJBased(PropertyMap(), "foo", nullptr, nullptr)
+            ->exportToPROJString(PROJStringFormatter::create()),
+        FormattingException);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(operation, PROJ_based_empty) {
-    auto conv = SingleOperation::createPROJBased("", nullptr, nullptr);
+    auto conv =
+        SingleOperation::createPROJBased(PropertyMap(), "", nullptr, nullptr);
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create()), "");
 
@@ -3190,6 +3195,121 @@ TEST(operation, geogCRS_to_geogCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_default) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
+
+    // Directly found in database
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("4179"),
+            authFactory->createCoordinateReferenceSystem("4258"), ctxt);
+        ASSERT_EQ(list.size(), 3);
+        // Romania has a larger area than Poland (given our approx formula)
+        EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
+        EXPECT_EQ(list[1]->getEPSGCode(), 15993); // Romania - 10m
+        EXPECT_EQ(list[2]->getEPSGCode(), 1644);  // Poland - 1m
+
+        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+                  "+ellps=krass +step +proj=helmert +x=2.3287 +y=-147.0425 "
+                  "+z=-92.0802 +rx=0.3092483 +ry=-0.32482185 +rz=-0.49729934 "
+                  "+s=5.68906266 +convention=coordinate_frame +step +inv "
+                  "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
+                  "+xy_out=deg +step +proj=axisswap +order=2,1");
+    }
+
+    // Reverse case
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("4258"),
+            authFactory->createCoordinateReferenceSystem("4179"), ctxt);
+        ASSERT_EQ(list.size(), 3);
+        // Romania has a larger area than Poland (given our approx formula)
+        EXPECT_EQ(*list[0]->name()->description(),
+                  "Inverse of Pulkovo 1942(58) to ETRS89 (4)"); // Romania - 3m
+
+        EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create()),
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                  "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
+                  "+ellps=GRS80 +step +proj=helmert +x=-2.3287 +y=147.0425 "
+                  "+z=92.0802 +rx=-0.3092483 +ry=0.32482185 +rz=0.49729934 "
+                  "+s=-5.68906266 +convention=coordinate_frame +step +inv "
+                  "+proj=cart +ellps=krass +step +proj=unitconvert +xy_in=rad "
+                  "+xy_out=deg +step +proj=axisswap +order=2,1");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geogCRS_context_filter_accuracy) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 1.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("4179"),
+            authFactory->createCoordinateReferenceSystem("4258"), ctxt);
+        ASSERT_EQ(list.size(), 1);
+        EXPECT_EQ(list[0]->getEPSGCode(), 1644); // Poland - 1m
+    }
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.9);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("4179"),
+            authFactory->createCoordinateReferenceSystem("4258"), ctxt);
+        ASSERT_EQ(list.size(), 0);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // INSERT INTO "area" VALUES('EPSG','1197','Romania','Romania - onshore and
+    // offshore.',43.44,48.27,20.26,31.41,0);
+    {
+        auto ctxt = CoordinateOperationContext::create(
+            authFactory, Extent::createFromBBOX(20.26, 43.44, 31.41, 48.27),
+            0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("4179"),
+            authFactory->createCoordinateReferenceSystem("4258"), ctxt);
+        ASSERT_EQ(list.size(), 2);
+        EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
+        EXPECT_EQ(list[1]->getEPSGCode(), 15993); // Romania - 10m
+    }
+    {
+        auto ctxt = CoordinateOperationContext::create(
+            authFactory, Extent::createFromBBOX(20.26 + .1, 43.44 + .1,
+                                                31.41 - .1, 48.27 - .1),
+            0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("4179"),
+            authFactory->createCoordinateReferenceSystem("4258"), ctxt);
+        ASSERT_EQ(list.size(), 2);
+        EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
+        EXPECT_EQ(list[1]->getEPSGCode(), 15993); // Romania - 10m
+    }
+    {
+        auto ctxt = CoordinateOperationContext::create(
+            authFactory, Extent::createFromBBOX(20.26 - .1, 43.44 - .1,
+                                                31.41 + .1, 48.27 + .1),
+            0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("4179"),
+            authFactory->createCoordinateReferenceSystem("4258"), ctxt);
+        ASSERT_EQ(list.size(), 0);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_geogCRS_noop) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
@@ -3218,6 +3338,10 @@ TEST(operation, geogCRS_to_geogCRS_longitude_rotation) {
     EXPECT_EQ(
         op->exportToPROJString(PROJStringFormatter::create()),
         "+proj=pipeline +step +inv +proj=longlat +ellps=WGS84 +pm=-2.33722917");
+    EXPECT_EQ(op->inverse()->exportToWKT(WKTFormatter::create()),
+              CoordinateOperationFactory::create()
+                  ->createOperation(dest, src)
+                  ->exportToWKT(WKTFormatter::create()));
     EXPECT_TRUE(op->inverse()->isEquivalentTo(NN_CHECK_ASSERT(
         CoordinateOperationFactory::create()->createOperation(dest, src))));
 }

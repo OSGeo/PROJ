@@ -109,6 +109,14 @@ class GeographicExtent : public util::BaseObject, public util::IComparable {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override = 0;
 
+    /** \brief Returns whether this extent contains the other one. */
+    PROJ_DLL virtual bool
+    contains(const GeographicExtentNNPtr &other) const = 0;
+
+    /** \brief Returns the intersection of this extent with another one. */
+    PROJ_DLL virtual GeographicExtentPtr
+    intersection(const GeographicExtentNNPtr &other) const = 0;
+
   protected:
     GeographicExtent();
 
@@ -152,6 +160,11 @@ class GeographicBoundingBox : public GeographicExtent {
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_DLL bool contains(const GeographicExtentNNPtr &other) const override;
+
+    PROJ_DLL GeographicExtentPtr
+    intersection(const GeographicExtentNNPtr &other) const override;
+
   protected:
     GeographicBoundingBox(double west, double south, double east, double north);
     INLINED_MAKE_SHARED
@@ -190,6 +203,8 @@ class TemporalExtent : public util::BaseObject, public util::IComparable {
     isEquivalentTo(const util::BaseObjectNNPtr &other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_DLL bool contains(const TemporalExtentNNPtr &other) const;
 
   protected:
     TemporalExtent(const std::string &start, const std::string &stop);
@@ -231,6 +246,8 @@ class VerticalExtent : public util::BaseObject, public util::IComparable {
     isEquivalentTo(const util::BaseObjectNNPtr &other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_DLL bool contains(const VerticalExtentNNPtr &other) const;
 
   protected:
     VerticalExtent(double minimumValue, double maximumValue,
@@ -274,10 +291,19 @@ class Extent : public util::BaseObject, public util::IComparable {
            const std::vector<VerticalExtentNNPtr> &verticalElementsIn,
            const std::vector<TemporalExtentNNPtr> &temporalElementsIn);
 
+    PROJ_DLL static ExtentNNPtr
+    createFromBBOX(double west, double south, double east, double north,
+                   const util::optional<std::string> &descriptionIn =
+                       util::optional<std::string>());
+
     PROJ_DLL bool
     isEquivalentTo(const util::BaseObjectNNPtr &other,
                    util::IComparable::Criterion criterion =
                        util::IComparable::Criterion::STRICT) const override;
+
+    PROJ_DLL bool contains(const ExtentNNPtr &other) const;
+
+    PROJ_DLL ExtentPtr intersection(const ExtentNNPtr &other) const;
 
   protected:
     Extent();

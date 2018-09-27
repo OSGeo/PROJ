@@ -488,9 +488,11 @@ class SingleOperation : public CoordinateOperation {
     PROJ_DLL common::Measure parameterValueMeasure(const std::string &paramName,
                                                    int epsg_code = 0) const;
 
-    PROJ_DLL static SingleOperationNNPtr
-    createPROJBased(const std::string &PROJString, const crs::CRSPtr sourceCRS,
-                    const crs::CRSPtr targetCRS);
+    PROJ_DLL static SingleOperationNNPtr createPROJBased(
+        const util::PropertyMap &properties, const std::string &PROJString,
+        const crs::CRSPtr sourceCRS, const crs::CRSPtr targetCRS,
+        const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies =
+            std::vector<metadata::PositionalAccuracyNNPtr>());
 
     PROJ_DLL bool
     isEquivalentTo(const util::BaseObjectNNPtr &other,
@@ -1411,6 +1413,11 @@ class ConcatenatedOperation : public CoordinateOperation {
            const std::vector<metadata::PositionalAccuracyNNPtr>
                &accuracies); // throw InvalidOperation
 
+    PROJ_DLL static ConcatenatedOperationNNPtr
+    createComputeAccuracy(const util::PropertyMap &properties,
+                          const std::vector<CoordinateOperationNNPtr>
+                              &operationsIn); // throw InvalidOperation
+
   protected:
     explicit ConcatenatedOperation(
         const std::vector<CoordinateOperationNNPtr> &operationsIn);
@@ -1420,6 +1427,47 @@ class ConcatenatedOperation : public CoordinateOperation {
     PROJ_OPAQUE_PRIVATE_DATA
     ConcatenatedOperation &
     operator=(const ConcatenatedOperation &other) = delete;
+};
+
+// ---------------------------------------------------------------------------
+
+class CoordinateOperationContext;
+/** Shared pointer of CoordinateOperationContext */
+using CoordinateOperationContextPtr =
+    std::shared_ptr<CoordinateOperationContext>;
+/** Non-null shared pointer of CoordinateOperationContext */
+using CoordinateOperationContextNNPtr = util::nn<CoordinateOperationContextPtr>;
+
+/** \brief Context in which a coordinate operation is to be used.
+ *
+ * \remark Implements [CoordinateOperationFactory
+ * https://sis.apache.org/apidocs/org/apache/sis/referencing/operation/CoordinateOperationContext.html]
+ * from
+ * Apache SIS
+ */
+
+class CoordinateOperationContext {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL virtual ~CoordinateOperationContext();
+    //! @endcond
+
+    PROJ_DLL io::AuthorityFactoryPtr getAuthorityFactory() const;
+
+    PROJ_DLL metadata::ExtentPtr getAreaOfInterest() const;
+
+    PROJ_DLL double getDesiredAccuracy() const;
+
+    PROJ_DLL static CoordinateOperationContextNNPtr
+    create(io::AuthorityFactoryPtr authorityFactory, metadata::ExtentPtr extent,
+           double accuracy);
+
+  protected:
+    CoordinateOperationContext();
+    INLINED_MAKE_SHARED
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
 };
 
 // ---------------------------------------------------------------------------
@@ -1447,6 +1495,11 @@ class CoordinateOperationFactory {
 
     PROJ_DLL CoordinateOperationPtr createOperation(
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS) const;
+
+    PROJ_DLL std::vector<CoordinateOperationNNPtr>
+    createOperations(const crs::CRSNNPtr &sourceCRS,
+                     const crs::CRSNNPtr &targetCRS,
+                     CoordinateOperationContextNNPtr context) const;
 
     PROJ_DLL static CoordinateOperationFactoryNNPtr create();
 

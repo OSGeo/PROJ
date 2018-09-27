@@ -1343,6 +1343,15 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
             EXPECT_FALSE(conv->isDeprecated());
         }
     }
+    {
+        auto list =
+            factory->createFromCoordinateReferenceSystemCodes("4179", "4258");
+        ASSERT_EQ(list.size(), 3);
+        // Romania has a larger area than Poland (given our approx formula)
+        EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
+        EXPECT_EQ(list[1]->getEPSGCode(), 15993); // Romania - 10m
+        EXPECT_EQ(list[2]->getEPSGCode(), 1644);  // Poland - 1m
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1510,9 +1519,9 @@ TEST_F(FactoryWithTmpDatabase,
         "EPSG", "4326", "EPSG", "4326");
     ASSERT_EQ(res.size(), 3);
     EXPECT_EQ(*(res[0]->name()->description()), "TRANSFORMATION_1M");
-    EXPECT_EQ(*(res[1]->name()->description()),
+    EXPECT_EQ(*(res[1]->name()->description()), "TRANSFORMATION_10M");
+    EXPECT_EQ(*(res[2]->name()->description()),
               "TRANSFORMATION_1M_SMALL_EXTENT");
-    EXPECT_EQ(*(res[2]->name()->description()), "TRANSFORMATION_10M");
 }
 
 } // namespace

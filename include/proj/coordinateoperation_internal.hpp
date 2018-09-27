@@ -133,9 +133,10 @@ class PROJBasedOperation : public SingleOperation {
 
     CoordinateOperationNNPtr inverse() const override;
 
-    static PROJBasedOperationNNPtr create(const std::string &PROJString,
-                                          const crs::CRSPtr sourceCRS,
-                                          const crs::CRSPtr targetCRS);
+    static PROJBasedOperationNNPtr
+    create(const util::PropertyMap &properties, const std::string &PROJString,
+           const crs::CRSPtr sourceCRS, const crs::CRSPtr targetCRS,
+           const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
   protected:
     PROJBasedOperation(const OperationMethodNNPtr &methodIn,

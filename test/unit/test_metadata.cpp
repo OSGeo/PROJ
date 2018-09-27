@@ -47,11 +47,125 @@ TEST(metadata, citation) {
 
 // ---------------------------------------------------------------------------
 
+static bool equals(ExtentNNPtr extent1, ExtentNNPtr extent2) {
+    return extent1->contains(extent2) && extent2->contains(extent1);
+}
+
 TEST(metadata, extent) {
-    auto extent = Extent::create(
+    Extent::create(
         optional<std::string>(), std::vector<GeographicExtentNNPtr>(),
         std::vector<VerticalExtentNNPtr>(), std::vector<TemporalExtentNNPtr>());
-    // TODO
+
+    auto world = Extent::createFromBBOX(-180, -90, 180, 90);
+    EXPECT_TRUE(world->contains(world));
+
+    auto world_inter_world = world->intersection(world);
+    ASSERT_TRUE(world_inter_world != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(world_inter_world), world));
+
+    auto france = Extent::createFromBBOX(-5, 40, 12, 51);
+    EXPECT_TRUE(france->contains(france));
+    EXPECT_TRUE(world->contains(france));
+    EXPECT_TRUE(!france->contains(
+        world)); // We are only speaking about geography here ;-)
+
+    auto france_inter_france = france->intersection(france);
+    ASSERT_TRUE(france_inter_france != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(france_inter_france), france));
+
+    auto france_inter_world = france->intersection(world);
+    ASSERT_TRUE(france_inter_world != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(france_inter_world), france));
+
+    auto world_inter_france = world->intersection(france);
+    ASSERT_TRUE(world_inter_france != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(world_inter_france), france));
+
+    auto europe = Extent::createFromBBOX(-30, 25, 30, 70);
+    EXPECT_TRUE(europe->contains(france));
+    EXPECT_TRUE(!france->contains(europe));
+
+    auto france_inter_europe = france->intersection(europe);
+    ASSERT_TRUE(france_inter_europe != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(france_inter_europe), france));
+
+    auto europe_intersects_france = europe->intersection(france);
+    ASSERT_TRUE(europe_intersects_france != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(europe_intersects_france), france));
+
+    auto nz = Extent::createFromBBOX(155.0, -60.0, -170.0, -25.0);
+    EXPECT_TRUE(nz->contains(nz));
+    EXPECT_TRUE(world->contains(nz));
+    EXPECT_TRUE(!nz->contains(world));
+    EXPECT_TRUE(!nz->contains(france));
+    EXPECT_TRUE(!france->contains(nz));
+
+    auto nz_inter_world = nz->intersection(world);
+    ASSERT_TRUE(nz_inter_world != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_inter_world), nz));
+
+    auto world_inter_nz = nz->intersection(world);
+    ASSERT_TRUE(world_inter_nz != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(world_inter_nz), nz));
+
+    EXPECT_TRUE(nz->intersection(france) == nullptr);
+    EXPECT_TRUE(france->intersection(nz) == nullptr);
+
+    auto nz_smaller = Extent::createFromBBOX(160, -55.0, -175.0, -30.0);
+    EXPECT_TRUE(nz->contains(nz_smaller));
+    EXPECT_TRUE(!nz_smaller->contains(nz));
+
+    auto nz_inter_nz_smaller = nz->intersection(nz_smaller);
+    ASSERT_TRUE(nz_inter_nz_smaller != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_inter_nz_smaller), nz_smaller));
+
+    auto nz_smaller_inter_nz = nz_smaller->intersection(nz);
+    ASSERT_TRUE(nz_smaller_inter_nz != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_smaller_inter_nz), nz_smaller));
+
+    auto world_smaller = Extent::createFromBBOX(-179, -90, 179, 90);
+    EXPECT_TRUE(!world_smaller->contains(nz));
+    EXPECT_TRUE(!nz->contains(world_smaller));
+
+    auto nz_inter_world_smaller = nz->intersection(world_smaller);
+    ASSERT_TRUE(nz_inter_world_smaller != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_inter_world_smaller),
+                       Extent::createFromBBOX(155, -60, 179, -25)));
+
+    auto world_smaller_inter_nz = world_smaller->intersection(nz);
+    ASSERT_TRUE(world_smaller_inter_nz != nullptr);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(world_smaller_inter_nz),
+                       Extent::createFromBBOX(155, -60, 179, -25)));
+
+    auto world_smaller_east = Extent::createFromBBOX(-179, -90, 150, 90);
+    EXPECT_TRUE(!world_smaller_east->contains(nz));
+    EXPECT_TRUE(!nz->contains(world_smaller_east));
+
+    auto nz_inter_world_smaller_east = nz->intersection(world_smaller_east);
+    ASSERT_TRUE(nz_inter_world_smaller_east != nullptr);
+    EXPECT_EQ(nn_dynamic_pointer_cast<GeographicBoundingBox>(
+                  nz_inter_world_smaller_east->geographicElements()[0])
+                  ->westBoundLongitude(),
+              -179);
+    EXPECT_EQ(nn_dynamic_pointer_cast<GeographicBoundingBox>(
+                  nz_inter_world_smaller_east->geographicElements()[0])
+                  ->eastBoundLongitude(),
+              -170);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(nz_inter_world_smaller_east),
+                       Extent::createFromBBOX(-179, -60, -170, -25)));
+
+    auto world_smaller_east_inter_nz = world_smaller_east->intersection(nz);
+    ASSERT_TRUE(world_smaller_east_inter_nz != nullptr);
+    EXPECT_EQ(nn_dynamic_pointer_cast<GeographicBoundingBox>(
+                  world_smaller_east_inter_nz->geographicElements()[0])
+                  ->westBoundLongitude(),
+              -179);
+    EXPECT_EQ(nn_dynamic_pointer_cast<GeographicBoundingBox>(
+                  world_smaller_east_inter_nz->geographicElements()[0])
+                  ->eastBoundLongitude(),
+              -170);
+    EXPECT_TRUE(equals(NN_CHECK_ASSERT(world_smaller_east_inter_nz),
+                       Extent::createFromBBOX(-179, -60, -170, -25)));
 }
 
 // ---------------------------------------------------------------------------

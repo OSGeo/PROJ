@@ -2166,10 +2166,9 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         sql += " AND cov.auth_name = ?";
         params.emplace_back(getAuthority());
     }
-    sql += " ORDER BY (CASE WHEN accuracy is NULL THEN 1 ELSE 0 END) ASC, "
-           "accuracy "
-           "ASC, pseudo_area_from_swne(south_lat, west_lon, north_lat, "
-           "east_lon) DESC";
+    sql += " ORDER BY pseudo_area_from_swne(south_lat, west_lon, north_lat, "
+           "east_lon) DESC, "
+           "(CASE WHEN accuracy is NULL THEN 1 ELSE 0 END), accuracy";
     res = d->context()->getPrivate()->run(sql, params);
     for (const auto &row : res) {
         const auto &auth_name = row[0];
