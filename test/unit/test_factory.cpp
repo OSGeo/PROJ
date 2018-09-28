@@ -710,6 +710,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15) {
         "        ID[\"EPSG\",1047]],\n"
         "    OPERATIONACCURACY[0.03],\n"
         "    USAGE[\n"
+        "        SCOPE[\"unknown\"],\n"
         "        AREA[\"Australia - onshore and EEZ\"],\n"
         "        BBOX[-47.2,109.23,-8.88,163.2]],\n"
         "    ID[\"EPSG\",6276]]";
@@ -762,6 +763,7 @@ TEST(
         "file\",\"RGNC1991_NEA74Noumea.gsb\"],\n"
         "    OPERATIONACCURACY[0.05],\n"
         "    USAGE[\n"
+        "        SCOPE[\"unknown\"],\n"
         "        AREA[\"New Caledonia - Grande Terre - Noumea\"],\n"
         "        BBOX[-22.37,166.35,-22.19,166.54]],\n"
         "    ID[\"EPSG\",1295]]";
@@ -830,6 +832,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
         "        ID[\"EPSG\",8602]],\n"
         "    OPERATIONACCURACY[0.0],\n"
         "    USAGE[\n"
+        "        SCOPE[\"unknown\"],\n"
         "        AREA[\"Europe - Czechoslovakia\"],\n"
         "        BBOX[47.73,12.09,51.06,22.56]],\n"
         "    ID[\"EPSG\",1884]]";

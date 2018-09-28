@@ -887,6 +887,10 @@ std::string ObjectDomain::exportToWKT(WKTFormatterNNPtr formatter) const {
         formatter->startNode(WKTConstants::SCOPE, false);
         formatter->addQuotedString(*(d->scope_));
         formatter->endNode();
+    } else if (formatter->use2018Keywords()) {
+        formatter->startNode(WKTConstants::SCOPE, false);
+        formatter->addQuotedString("unknown");
+        formatter->endNode();
     }
     if (d->domainOfValidity_) {
         if (d->domainOfValidity_->description().has_value()) {
