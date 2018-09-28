@@ -507,6 +507,19 @@ TEST(operation,
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, transformation_createGeocentricTranslations_null) {
+
+    auto transf = Transformation::createGeocentricTranslations(
+        PropertyMap(), createGeocentric(), createGeocentric(), 0.0, -0.0, 0.0,
+        std::vector<PositionalAccuracyNNPtr>());
+
+    EXPECT_EQ(
+        transf->inverse()->exportToPROJString(PROJStringFormatter::create()),
+        "+proj=helmert +x=0 +y=0 +z=0");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, transformation_createPositionVector) {
 
     auto transf = Transformation::createPositionVector(

@@ -5610,6 +5610,16 @@ static bool isTimeDependent(const std::string &method_name) {
 
 // ---------------------------------------------------------------------------
 
+// to avoid -0...
+static double negate(double val) {
+    if (val != 0) {
+        return -val;
+    }
+    return 0.0;
+}
+
+// ---------------------------------------------------------------------------
+
 static CoordinateOperationPtr
 createApproximateInverseIfPossible(const Transformation *op) {
     bool sevenParamsTransform = false;
@@ -5658,38 +5668,38 @@ createApproximateInverseIfPossible(const Transformation *op) {
         fifteenParamsTransform = true;
     }
     if (sevenParamsTransform || fifteenParamsTransform) {
-        double x =
-            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
-                                       EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
-                 .getSIValue();
-        double y =
-            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
-                                       EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)
-                 .getSIValue();
-        double z =
-            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
-                                       EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
-                 .getSIValue();
-        double rx =
-            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_ROTATION,
-                                       EPSG_CODE_PARAMETER_X_AXIS_ROTATION)
-                 .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
-                 .value();
-        double ry =
-            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_ROTATION,
-                                       EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)
-                 .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
-                 .value();
-        double rz =
-            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_ROTATION,
-                                       EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)
-                 .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
-                 .value();
-        double scaleDiff =
-            -op->parameterValueMeasure(EPSG_NAME_PARAMETER_SCALE_DIFFERENCE,
-                                       EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)
-                 .convertToUnit(common::UnitOfMeasure::PARTS_PER_MILLION)
-                 .value();
+        double neg_x = negate(
+            op->parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
+                                      EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
+                .getSIValue());
+        double neg_y = negate(
+            op->parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
+                                      EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)
+                .getSIValue());
+        double neg_z = negate(
+            op->parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
+                                      EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
+                .getSIValue());
+        double neg_rx = negate(
+            op->parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_ROTATION,
+                                      EPSG_CODE_PARAMETER_X_AXIS_ROTATION)
+                .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                .value());
+        double neg_ry = negate(
+            op->parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_ROTATION,
+                                      EPSG_CODE_PARAMETER_Y_AXIS_ROTATION)
+                .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                .value());
+        double neg_rz = negate(
+            op->parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_ROTATION,
+                                      EPSG_CODE_PARAMETER_Z_AXIS_ROTATION)
+                .convertToUnit(common::UnitOfMeasure::ARC_SECOND)
+                .value());
+        double neg_scaleDiff = negate(
+            op->parameterValueMeasure(EPSG_NAME_PARAMETER_SCALE_DIFFERENCE,
+                                      EPSG_CODE_PARAMETER_SCALE_DIFFERENCE)
+                .convertToUnit(common::UnitOfMeasure::PARTS_PER_MILLION)
+                .value());
         auto methodProperties = util::PropertyMap().set(
             common::IdentifiedObject::NAME_KEY, method_name);
         int method_epsg_code = method->getEPSGCode();
@@ -5700,48 +5710,48 @@ createApproximateInverseIfPossible(const Transformation *op) {
                 .set(metadata::Identifier::CODE_KEY, method_epsg_code);
         }
         if (fifteenParamsTransform) {
-            double rate_x =
-                -op->parameterValueMeasure(
-                       EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION,
-                       EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION)
-                     .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
-                     .value();
-            double rate_y =
-                -op->parameterValueMeasure(
-                       EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION,
-                       EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION)
-                     .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
-                     .value();
-            double rate_z =
-                -op->parameterValueMeasure(
-                       EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION,
-                       EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION)
-                     .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
-                     .value();
-            double rate_rx =
-                -op->parameterValueMeasure(
-                       EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION,
-                       EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION)
-                     .convertToUnit(common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
-                     .value();
-            double rate_ry =
-                -op->parameterValueMeasure(
-                       EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION,
-                       EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION)
-                     .convertToUnit(common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
-                     .value();
-            double rate_rz =
-                -op->parameterValueMeasure(
-                       EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION,
-                       EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION)
-                     .convertToUnit(common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
-                     .value();
-            double rate_scaleDiff =
-                -op->parameterValueMeasure(
-                       EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE,
-                       EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE)
-                     .convertToUnit(common::UnitOfMeasure::PPM_PER_YEAR)
-                     .value();
+            double neg_rate_x =
+                negate(op->parameterValueMeasure(
+                             EPSG_NAME_PARAMETER_RATE_X_AXIS_TRANSLATION,
+                             EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION)
+                           .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
+                           .value());
+            double neg_rate_y =
+                negate(op->parameterValueMeasure(
+                             EPSG_NAME_PARAMETER_RATE_Y_AXIS_TRANSLATION,
+                             EPSG_CODE_PARAMETER_RATE_Y_AXIS_TRANSLATION)
+                           .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
+                           .value());
+            double neg_rate_z =
+                negate(op->parameterValueMeasure(
+                             EPSG_NAME_PARAMETER_RATE_Z_AXIS_TRANSLATION,
+                             EPSG_CODE_PARAMETER_RATE_Z_AXIS_TRANSLATION)
+                           .convertToUnit(common::UnitOfMeasure::METRE_PER_YEAR)
+                           .value());
+            double neg_rate_rx = negate(
+                op->parameterValueMeasure(
+                      EPSG_NAME_PARAMETER_RATE_X_AXIS_ROTATION,
+                      EPSG_CODE_PARAMETER_RATE_X_AXIS_ROTATION)
+                    .convertToUnit(common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
+                    .value());
+            double neg_rate_ry = negate(
+                op->parameterValueMeasure(
+                      EPSG_NAME_PARAMETER_RATE_Y_AXIS_ROTATION,
+                      EPSG_CODE_PARAMETER_RATE_Y_AXIS_ROTATION)
+                    .convertToUnit(common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
+                    .value());
+            double neg_rate_rz = negate(
+                op->parameterValueMeasure(
+                      EPSG_NAME_PARAMETER_RATE_Z_AXIS_ROTATION,
+                      EPSG_CODE_PARAMETER_RATE_Z_AXIS_ROTATION)
+                    .convertToUnit(common::UnitOfMeasure::ARC_SECOND_PER_YEAR)
+                    .value());
+            double neg_rate_scaleDiff =
+                negate(op->parameterValueMeasure(
+                             EPSG_NAME_PARAMETER_RATE_SCALE_DIFFERENCE,
+                             EPSG_CODE_PARAMETER_RATE_SCALE_DIFFERENCE)
+                           .convertToUnit(common::UnitOfMeasure::PPM_PER_YEAR)
+                           .value());
             double referenceEpochYear =
                 op->parameterValueMeasure(EPSG_NAME_PARAMETER_REFERENCE_EPOCH,
                                           EPSG_CODE_PARAMETER_REFERENCE_EPOCH)
@@ -5751,9 +5761,10 @@ createApproximateInverseIfPossible(const Transformation *op) {
                        createFifteenParamsTransform(
                            createPropertiesForInverse(op, true),
                            methodProperties, op->targetCRS(), op->sourceCRS(),
-                           x, y, z, rx, ry, rz, scaleDiff, rate_x, rate_y,
-                           rate_z, rate_rx, rate_ry, rate_rz, rate_scaleDiff,
-                           referenceEpochYear,
+                           neg_x, neg_y, neg_z, neg_rx, neg_ry, neg_rz,
+                           neg_scaleDiff, neg_rate_x, neg_rate_y, neg_rate_z,
+                           neg_rate_rx, neg_rate_ry, neg_rate_rz,
+                           neg_rate_scaleDiff, referenceEpochYear,
                            op->coordinateOperationAccuracies()))
                 .as_nullable();
         } else {
@@ -5761,8 +5772,8 @@ createApproximateInverseIfPossible(const Transformation *op) {
                        createSevenParamsTransform(
                            createPropertiesForInverse(op, true),
                            methodProperties, op->targetCRS(), op->sourceCRS(),
-                           x, y, z, rx, ry, rz, scaleDiff,
-                           op->coordinateOperationAccuracies()))
+                           neg_x, neg_y, neg_z, neg_rx, neg_ry, neg_rz,
+                           neg_scaleDiff, op->coordinateOperationAccuracies()))
                 .as_nullable();
         }
     }
@@ -5783,56 +5794,52 @@ CoordinateOperationNNPtr Transformation::inverse() const {
             EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D) ||
         method()->isEPSG(
             EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D)) {
-        double x =
-            -parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
-                                   EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
-                 .getSIValue();
-        double y =
-            -parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
-                                   EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)
-                 .getSIValue();
-        double z =
-            -parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
-                                   EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
-                 .getSIValue();
-        return createGeocentricTranslations(createPropertiesForInverse(this),
-                                            targetCRS(), sourceCRS(), x, y, z,
-                                            coordinateOperationAccuracies());
+        double x = parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
+                       .getSIValue();
+        double y = parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)
+                       .getSIValue();
+        double z = parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
+                       .getSIValue();
+        return createGeocentricTranslations(
+            createPropertiesForInverse(this), targetCRS(), sourceCRS(),
+            negate(x), negate(y), negate(z), coordinateOperationAccuracies());
     }
 
     if (ci_find(method_name, "Molodensky") != std::string::npos ||
         method()->isEPSG(EPSG_CODE_METHOD_MOLODENSKY) ||
         method()->isEPSG(EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY)) {
-        double x =
-            -parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
-                                   EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
-                 .getSIValue();
-        double y =
-            -parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
-                                   EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)
-                 .getSIValue();
-        double z =
-            -parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
-                                   EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
-                 .getSIValue();
-        double da = -parameterValueMeasure(
-                         EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE,
-                         EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)
-                         .getSIValue();
+        double x = parameterValueMeasure(EPSG_NAME_PARAMETER_X_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION)
+                       .getSIValue();
+        double y = parameterValueMeasure(EPSG_NAME_PARAMETER_Y_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION)
+                       .getSIValue();
+        double z = parameterValueMeasure(EPSG_NAME_PARAMETER_Z_AXIS_TRANSLATION,
+                                         EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION)
+                       .getSIValue();
+        double da = parameterValueMeasure(
+                        EPSG_NAME_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE,
+                        EPSG_CODE_PARAMETER_SEMI_MAJOR_AXIS_DIFFERENCE)
+                        .getSIValue();
         double df =
-            -parameterValueMeasure(EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE,
-                                   EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE)
-                 .getSIValue();
+            parameterValueMeasure(EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE,
+                                  EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE)
+                .getSIValue();
 
         if (ci_find(method_name, "Abridged") != std::string::npos ||
             method()->isEPSG(EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY)) {
             return createAbridgedMolodensky(
-                createPropertiesForInverse(this), targetCRS(), sourceCRS(), x,
-                y, z, da, df, coordinateOperationAccuracies());
+                createPropertiesForInverse(this), targetCRS(), sourceCRS(),
+                negate(x), negate(y), negate(z), negate(da), negate(df),
+                coordinateOperationAccuracies());
         } else {
-            return createMolodensky(createPropertiesForInverse(this),
-                                    targetCRS(), sourceCRS(), x, y, z, da, df,
-                                    coordinateOperationAccuracies());
+            return createMolodensky(
+                createPropertiesForInverse(this), targetCRS(), sourceCRS(),
+                negate(x), negate(y), negate(z), negate(da), negate(df),
+                coordinateOperationAccuracies());
         }
     }
 
@@ -5841,7 +5848,7 @@ CoordinateOperationNNPtr Transformation::inverse() const {
         auto offset =
             parameterValueMeasure(EPSG_NAME_PARAMETER_LONGITUDE_OFFSET,
                                   EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
-        const common::Angle newOffset(-offset.value(), offset.unit());
+        const common::Angle newOffset(negate(offset.value()), offset.unit());
         return createLongitudeRotation(createPropertiesForInverse(this),
                                        targetCRS(), sourceCRS(), newOffset);
     }
