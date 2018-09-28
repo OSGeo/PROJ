@@ -1,1 +1,1 @@
-INSERT INTO "metadata" VALUES('EPSG v9.5.2');
+INSERT INTO "metadata" VALUES('EPSG', 'v9.5.3');

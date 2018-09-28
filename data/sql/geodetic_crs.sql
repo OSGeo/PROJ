@@ -883,7 +883,7 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','8428','Macao 1920','geographic 2D','EP
 INSERT INTO "geodetic_crs" VALUES('EPSG','8429','Macao 2008','geocentric','EPSG','6500','EPSG','1208','EPSG','1147',0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','8430','Macao 2008','geographic 3D','EPSG','6423','EPSG','1208','EPSG','1147',0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','8431','Macao 2008','geographic 2D','EPSG','6422','EPSG','1208','EPSG','1147',0);
-INSERT INTO "geodetic_crs" VALUES('EPSG','8449','NAD83(FBN)','geographic 2D','EPSG','6423','EPSG','6152','EPSG','4515',0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','8449','NAD83(FBN)','geographic 2D','EPSG','6423','EPSG','6152','EPSG','4515',1);
 INSERT INTO "geodetic_crs" VALUES('EPSG','8541','NAD83(FBN)','geocentric','EPSG','6500','EPSG','1211','EPSG','4515',0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','8542','NAD83(FBN)','geographic 3D','EPSG','6423','EPSG','1211','EPSG','4515',0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','8543','NAD83(HARN Corrected)','geocentric','EPSG','6500','EPSG','1212','EPSG','3634',0);
@@ -895,3 +895,4 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','8685','SRB_ETRS89','geographic 2D','EP
 INSERT INTO "geodetic_crs" VALUES('EPSG','8816','MTRF-2000','geocentric','EPSG','6500','EPSG','1218','EPSG','1206',0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','8817','MTRF-2000','geographic 3D','EPSG','6423','EPSG','1218','EPSG','1206',0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','8818','MTRF-2000','geographic 2D','EPSG','6422','EPSG','1218','EPSG','1206',0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','8860','NAD83(FBN)','geographic 2D','EPSG','6422','EPSG','1211','EPSG','4515',0);

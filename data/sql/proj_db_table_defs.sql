@@ -4,7 +4,8 @@ PRAGMA page_size = 4096;
 PRAGMA foreign_keys = 1;
 
 CREATE TABLE metadata(
-    record TEXT NOT NULL
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
 );
 
 CREATE TABLE unit_of_measure(

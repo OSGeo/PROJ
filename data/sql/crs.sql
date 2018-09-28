@@ -895,6 +895,7 @@ INSERT INTO "crs" VALUES('EPSG','8685','geographic 2D');
 INSERT INTO "crs" VALUES('EPSG','8816','geocentric');
 INSERT INTO "crs" VALUES('EPSG','8817','geographic 3D');
 INSERT INTO "crs" VALUES('EPSG','8818','geographic 2D');
+INSERT INTO "crs" VALUES('EPSG','8860','geographic 2D');
 INSERT INTO "crs" VALUES('EPSG','3855','vertical');
 INSERT INTO "crs" VALUES('EPSG','3886','vertical');
 INSERT INTO "crs" VALUES('EPSG','3900','vertical');
