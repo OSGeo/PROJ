@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Known differences between versions &mdash; PROJ.4 5.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Applications" href="../apps/index.html" />
+    <link rel="prev" title="Environment variables" href="environmentvars.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Using PROJ</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="projections.html">Cartographic projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformation.html">Geodetic transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environmentvars.html">Environment variables</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Known differences between versions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#version-4-6-0">Version 4.6.0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#version-5-0-0">Version 5.0.0</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#longitude-wrapping-when-using-custom-central-meridian">Longitude wrapping when using custom central meridian</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../community/index.html">Community</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Using PROJ</a> &raquo;</li>
+        
+      <li>Known differences between versions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="known-differences-between-versions">
+<span id="differences"></span><h1>Known differences between versions<a class="headerlink" href="#known-differences-between-versions" title="Permalink to this headline">¶</a></h1>
+<p>Once in a while, a new version of PROJ causes changes in the existing behaviour.
+In this section we track deliberate changes to PROJ that break from previous
+behaviour. Most times that will be caused by a bug fix. Unfortunately, some bugs
+have existed for so long that their faulty behaviour is relied upon by software
+that uses PROJ.</p>
+<p>Behavioural changes caused by new bugs are not tracked here, as they should be
+fixed in later versions of PROJ.</p>
+<div class="section" id="version-4-6-0">
+<h2>Version 4.6.0<a class="headerlink" href="#version-4-6-0" title="Permalink to this headline">¶</a></h2>
+<p>The default datum application behavior changed with the 4.6.0 release. PROJ
+will now only apply a datum shift if both the source and destination coordinate
+system have valid datum shift information.</p>
+<p>The PROJ 4.6.0 Release Notes states</p>
+<blockquote>
+<div>MAJOR: Rework <code class="xref c c-func docutils literal notranslate"><span class="pre">pj_transform()</span></code> to avoid applying ellipsoid to ellipsoid
+transformations as a datum shift when no datum info is available.</div></blockquote>
+</div>
+<div class="section" id="version-5-0-0">
+<h2>Version 5.0.0<a class="headerlink" href="#version-5-0-0" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="longitude-wrapping-when-using-custom-central-meridian">
+<h3>Longitude wrapping when using custom central meridian<a class="headerlink" href="#longitude-wrapping-when-using-custom-central-meridian" title="Permalink to this headline">¶</a></h3>
+<p>By default PROJ wraps output longitudes in the range -180 to 180. Previous to
+PROJ 5, this was handled incorrectly when a custom central meridian was set with
+<a class="reference internal" href="../operations/projections/wintri.html#cmdoption-arg-lon-0"><code class="xref std std-option docutils literal notranslate"><span class="pre">+lon_0</span></code></a>. This caused a change in sign on the resulting easting as seen
+below:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ proj +proj=merc +lon_0=110
+-70 0
+-20037508.34    0.00
+290 0
+20037508.34     0.00
+</pre></div>
+</div>
+<p>From PROJ 5 on onwards, the same input now results in same coordinates, as seen
+from the example below where PROJ 5 is used:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ proj +proj=merc +lon_0=110
+-70 0
+-20037508.34    0.00
+290 0
+-20037508.34    0.00
+</pre></div>
+</div>
+<p>The change is made on the basis that <span class="math notranslate nohighlight">\(\lambda=290^{\circ}\)</span> is a full
+rotation of the circle larger than <span class="math notranslate nohighlight">\(\lambda=-70^{\circ}\)</span> and hence
+should return the same output for both.</p>
+<p>Adding the <code class="docutils literal notranslate"><span class="pre">+over</span></code> flag to the projection definition provides
+the old behaviour.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../apps/index.html" class="btn btn-neutral float-right" title="Applications" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="environmentvars.html" class="btn btn-neutral" title="Environment variables" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1983-2018.
+      Last updated on 28 Sep 2018.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'5.2.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

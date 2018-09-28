@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cs2cs &mdash; PROJ.4 5.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="geod" href="geod.html" />
+    <link rel="prev" title="cct" href="cct.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Applications</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="proj.html">proj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cct.html">cct</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">cs2cs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#synopsis">Synopsis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geod.html">geod</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gie.html">gie</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../community/index.html">Community</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Applications</a> &raquo;</li>
+        
+      <li>cs2cs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cs2cs">
+<span id="id1"></span><h1>cs2cs<a class="headerlink" href="#cs2cs" title="Permalink to this headline">¶</a></h1>
+<p>Cartographic coordinate system filter.</p>
+<div class="section" id="synopsis">
+<h2>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><strong>cs2cs</strong> [ <strong>-eEfIlrstvwW</strong> [ args ] ] [ <em>+opts[=arg]</em> ] [ +to [<em>+opts[=arg]</em>] ] file[s]</div></blockquote>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p><strong class="program">cs2cs</strong> performs transformation between the source and destination
+cartographic coordinate system on a set of input points. The coordinate
+system transformation can include translation between projected and
+geographic coordinates as well as the application of datum shifts.</p>
+<p>The following control parameters can appear in any order:</p>
+<dl class="option">
+<dt id="cmdoption-cs2cs-i">
+<code class="descname">-I</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-i" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to specify inverse translation, convert from <em>+to</em> coordinate system to
+the primary coordinate system defined.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-t-a">
+<code class="descname">-t&lt;a&gt;</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-t-a" title="Permalink to this definition">¶</a></dt>
+<dd><p>Where <em>a</em> specifies a character employed as the first character to denote a control
+line to be passed through without processing. This option applicable to
+ASCII input only. (# is the default value).</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-d">
+<code class="descname">-d</code><code class="descclassname"> &lt;n&gt;</code><a class="headerlink" href="#cmdoption-cs2cs-d" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="versionadded">
+<p><span class="versionmodified">New in version 5.2.0: </span>Specify the number of decimals in the output.</p>
+</div>
+<dl class="option">
+<dt id="cmdoption-cs2cs-e">
+<code class="descname">-e</code><code class="descclassname"> &lt;string&gt;</code><a class="headerlink" href="#cmdoption-cs2cs-e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Where <em>string</em> is an arbitrary string to be output if an error is detected during
+data transformations. The default value is a three character string: <code class="docutils literal notranslate"><span class="pre">*\t*</span></code>.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="id2">
+<code class="descname">-E</code><code class="descclassname"></code><a class="headerlink" href="#id2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Causes the input coordinates to be copied to the output line prior to
+printing the converted values.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-l">
+<code class="descname">-l&lt;[</code><code class="descclassname">=id]&gt;</code><a class="headerlink" href="#cmdoption-cs2cs-l" title="Permalink to this definition">¶</a></dt>
+<dd><p>List projection identifiers that can be selected with <em>+proj</em>. <code class="docutils literal notranslate"><span class="pre">cs2cs</span> <span class="pre">-l=id</span></code>
+gives expanded description of projection <em>id</em>, e.g. <code class="docutils literal notranslate"><span class="pre">cs2cs</span> <span class="pre">-l=merc</span></code>.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-lp">
+<code class="descname">-lp</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-lp" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all projection id that can be used with the <em>+proj</em> parameter.
+Equivalent to <code class="docutils literal notranslate"><span class="pre">cs2cs</span> <span class="pre">-l</span></code>.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="id3">
+<code class="descname">-lP</code><code class="descclassname"></code><a class="headerlink" href="#id3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expanded description of all projections that can be used with the <em>+proj</em>
+parameter.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-le">
+<code class="descname">-le</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-le" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all ellipsoids that can be selected with the <em>+ellps</em> parameters.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-lu">
+<code class="descname">-lu</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-lu" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all distance units that can be selected with the <em>+units</em> parameter.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-ld">
+<code class="descname">-ld</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-ld" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of datums that can be selected with the <em>+datum</em> parameter.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-r">
+<code class="descname">-r</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-r" title="Permalink to this definition">¶</a></dt>
+<dd><p>This options reverses the order of the expected input from
+longitude-latitude or x-y to latitude-longitude or y-x.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-s">
+<code class="descname">-s</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-s" title="Permalink to this definition">¶</a></dt>
+<dd><p>This options reverses the order of the output from x-y or longitude-latitude
+to y-x or latitude-longitude.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-f">
+<code class="descname">-f</code><code class="descclassname"> &lt;format&gt;</code><a class="headerlink" href="#cmdoption-cs2cs-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Where <em>format</em> is a printf format string to control the form of the output values.
+For inverse projections, the output will be in degrees when this option is
+employed. If a format is specified for inverse projection the output data
+will be in decimal degrees. The default format is <code class="docutils literal notranslate"><span class="pre">&quot;%.2f&quot;</span></code> for forward
+projection and DMS for inverse.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-w-n">
+<code class="descname">-w&lt;n&gt;</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-w-n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Where <em>n</em> is the number of significant fractional digits to employ for seconds
+output (when the option is not specified, <code class="docutils literal notranslate"><span class="pre">-w3</span></code> is assumed).</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="id4">
+<code class="descname">-W&lt;n&gt;</code><code class="descclassname"></code><a class="headerlink" href="#id4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Where <em>n</em> is the number of significant fractional digits to employ for seconds
+output. When <code class="docutils literal notranslate"><span class="pre">-W</span></code> is employed the fields will be constant width
+with leading zeroes.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cs2cs-v">
+<code class="descname">-v</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-cs2cs-v" title="Permalink to this definition">¶</a></dt>
+<dd><p>Causes a listing of cartographic control parameters tested for and used by
+the program to be printed prior to input data.</p>
+</dd></dl>
+
+<p>The <em>+args</em> run-line arguments are associated with cartographic
+parameters. Usage varies with projection and for a complete description
+consult the <a class="reference internal" href="../operations/projections/index.html#projections"><span class="std std-ref">projection pages</span></a>.</p>
+<p>The <strong class="program">cs2cs</strong> program requires two coordinate system definitions. The first (or
+primary is defined based on all projection parameters not appearing after the
+<em>+to</em> argument. All projection parameters appearing after the <em>+to</em> argument
+are considered the definition of the second coordinate system. If there is no
+second coordinate system defined, a geographic coordinate system based on the
+datum and ellipsoid of the source coordinate system is assumed. Note that the
+source and destination coordinate system can both be projections, both be
+geographic, or one of each and may have the same or different datums.</p>
+<p>Additional projection control parameters may be contained in two auxiliary
+control files: the first is optionally referenced with the
+<em>+init=file:id</em> and the second is always processed after the name of the
+projection has been established from either the run-line or the contents of
+<em>+init</em> file. The environment parameter <span class="target" id="index-0"></span><a class="reference internal" href="../usage/environmentvars.html#envvar-PROJ_LIB"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PROJ_LIB</span></code></a> establishes the default
+directory for a file reference without an absolute path. This is also used
+for supporting files like datum shift files.</p>
+<p>One or more files (processed in left to right order) specify the source of
+data to be transformed. A <code class="docutils literal notranslate"><span class="pre">-</span></code> will specify the location of processing standard
+input. If no files are specified, the input is assumed to be from stdin.
+For input data the two data values must be in the first two white space
+separated fields and when both input and output are ASCII all trailing portions
+of the input line are appended to the output line.</p>
+<p>Input geographic data (longitude and latitude) must be in DMS or decimal
+degrees format and input cartesian data must be in units consistent with the
+ellipsoid major axis or sphere radius units. Output geographic coordinates will
+normally be in DMS format (use <code class="docutils literal notranslate"><span class="pre">-f</span> <span class="pre">%.12f</span></code> for decimal degrees with 12 decimal
+places), while projected (cartesian) coordinates will be in linear
+(meter, feet) units.</p>
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>The following script</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cs2cs +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27 -r &lt;&lt;EOF
+45d15&#39;33.1&quot; 111.5W
+45d15.551666667N -111d30
++45.25919444444 111d30&#39;000w
+EOF
+</pre></div>
+</div>
+<p>will transform the input NAD83 geographic coordinates into NAD27 coordinates in
+the UTM projection with zone 10 selected. The geographic values of this
+example are equivalent and meant as examples of various forms of DMS input.
+The x-y output data will appear as three lines of:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1402285.98  5076292.42 -0.00
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="geod.html" class="btn btn-neutral float-right" title="geod" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cct.html" class="btn btn-neutral" title="cct" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1983-2018.
+      Last updated on 28 Sep 2018.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'5.2.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

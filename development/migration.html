@@ -1,0 +1,445 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Version 4 to 5 API Migration &mdash; PROJ.4 5.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Community" href="../community/index.html" />
+    <link rel="prev" title="Language bindings" href="bindings.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PROJ.4
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformations.html">Transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="errorhandling.html">Error handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="threads.html">Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/index.html">Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cmake.html">Using PROJ in CMake projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bindings.html">Language bindings</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Version 4 to 5 API Migration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#background">Background</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-example">Code example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#function-mapping-from-old-to-new-api">Function mapping from old to new API</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../community/index.html">Community</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PROJ.4</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Development</a> &raquo;</li>
+        
+      <li>Version 4 to 5 API Migration</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="version-4-to-5-api-migration">
+<span id="api-migration"></span><h1>Version 4 to 5 API Migration<a class="headerlink" href="#version-4-to-5-api-migration" title="Permalink to this headline">¶</a></h1>
+<p>This is a transition guide for developers wanting to migrate their code to use
+PROJ version 5.</p>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<p>Before we go on, a bit of background is needed. The new API takes a different
+view of the world than the old because it is needed in order to obtain high
+accuracy transformations. The old API is constructed in such a way that any transformation
+between two coordinate reference systems <em>must</em> pass through the ill-defined
+WGS84 reference frame, using it as a hub. The new API does away with this limitation to
+transformations in PROJ. It is still possible to do that type of transformations
+but in many cases there will be a better alternative.</p>
+<p>The world view represented by the old API is always sufficient if all you care about is
+meter level accuracy - and in many cases it will provide much higher accuracy
+than that. But the view that “WGS84 is the <em>true</em> foundation of the world, and
+everything else can be transformed natively to and from WGS84” is inherently flawed.</p>
+<p>First and foremost because any time WGS84 is mentioned, you should ask yourself
+“Which of the six WGS84 realizations are we talking about here?”.</p>
+<p>Second, because for many (especially legacy) systems, it may not be straightforward
+to transform to WGS84 (or actually ITRF-something, ETRS-something or NAD-something
+which appear to be the practical meaning of the term WGS84 in everyday PROJ related
+work), while centimeter-level accurate transformations may exist between pairs of
+older systems.</p>
+<p>The concept of a hub reference frame (“datum”) is not inherently bad, but in many
+cases you need to handle and select that datum with more care than the old API allows.
+The primary aim of the new API is to allow just that. And to do that, you must realize
+that the world is inherently 4 dimensional. You may in many cases assume one or more of
+the coordinates to be constant, but basically, to obtain geodetic accuracy transformations,
+you need to work in 4 dimensions.</p>
+<p>Now, having described the background for introducing the new API, let’s try to show
+how to use it. First note that in order to go from system A to system B, the old API
+starts by doing an <strong>inverse</strong> transformation from system A to WGS84, then does a
+<strong>forward</strong> transformation from WGS84 to system B.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">cs2cs</span></code> being the command line interface to the old API, and <code class="docutils literal notranslate"><span class="pre">cct</span></code> being the same
+for the new, this example of doing the same thing in both world views will should give
+an idea of the differences:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ echo 300000 6100000 | cs2cs +proj=utm +zone=33 +ellps=GRS80 +to +proj=utm +zone=32 +ellps=GRS80
+683687.87       6099299.66 0.00
+
+
+$ echo 300000 6100000 0 0 | cct +proj=pipeline +step +inv +proj=utm +zone=33 +ellps=GRS80 +step +proj=utm +zone=32 +ellps=GRS80
+683687.8667   6099299.6624    0.0000    0.0000
+</pre></div>
+</div>
+<p>Lookout for the <code class="docutils literal notranslate"><span class="pre">+inv</span></code> in the first <code class="docutils literal notranslate"><span class="pre">+step</span></code>, indicating an inverse transform.</p>
+</div>
+<div class="section" id="code-example">
+<h2>Code example<a class="headerlink" href="#code-example" title="Permalink to this headline">¶</a></h2>
+<p>The difference between the old and new API is shown here with a few examples. Below
+we implement the same program with the two different API’s. The program reads
+input latitude and longitude from the command line and convert them to
+projected coordinates with the Mercator projection.</p>
+<p>We start by writing the program for PROJ v. 4:</p>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;proj_api.h&gt;</span><span class="cp"></span>
+
+<span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">projPJ</span> <span class="n">pj_merc</span><span class="p">,</span> <span class="n">pj_latlong</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">pj_merc</span> <span class="o">=</span> <span class="n">pj_init_plus</span><span class="p">(</span><span class="s">&quot;+proj=merc +ellps=clrk66 +lat_ts=33&quot;</span><span class="p">))</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">pj_latlong</span> <span class="o">=</span> <span class="n">pj_init_plus</span><span class="p">(</span><span class="s">&quot;+proj=latlong +ellps=clrk66&quot;</span><span class="p">))</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="n">scanf</span><span class="p">(</span><span class="s">&quot;%lf %lf&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">x</span> <span class="o">*=</span> <span class="n">DEG_TO_RAD</span><span class="p">;</span>
+        <span class="n">y</span> <span class="o">*=</span> <span class="n">DEG_TO_RAD</span><span class="p">;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">pj_transform</span><span class="p">(</span><span class="n">pj_latlong</span><span class="p">,</span> <span class="n">pj_merc</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%.2f</span><span class="se">\t</span><span class="s">%.2f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The same program implemented using PROJ v. 5:</p>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;proj.h&gt;</span><span class="cp"></span>
+
+<span class="n">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PJ</span> <span class="o">*</span><span class="n">P</span><span class="p">;</span>
+    <span class="n">PJ_COORD</span> <span class="n">c</span><span class="p">;</span>
+
+    <span class="n">P</span> <span class="o">=</span> <span class="n">proj_create</span><span class="p">(</span><span class="n">PJ_DEFAULT_CTX</span><span class="p">,</span> <span class="s">&quot;+proj=merc +ellps=clrk66 +lat_ts=33&quot;</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">P</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="n">scanf</span><span class="p">(</span><span class="s">&quot;%lf %lf&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">lam</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">phi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">c</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">proj_torad</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">lam</span><span class="p">);</span>
+        <span class="n">c</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">proj_torad</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">lp</span><span class="p">.</span><span class="n">phi</span><span class="p">);</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">proj_trans</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">PJ_FWD</span><span class="p">,</span> <span class="n">c</span><span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%.2f</span><span class="se">\t</span><span class="s">%.2f</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">c</span><span class="p">.</span><span class="n">xy</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">c</span><span class="p">.</span><span class="n">xy</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+    <span class="p">}</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Looking at the two different programs, there’s a few immediate
+differences that catches the eye. First off, the included header file describing
+the API has changed from <code class="docutils literal notranslate"><span class="pre">proj_api.h</span></code> to simply <code class="docutils literal notranslate"><span class="pre">proj.h</span></code>. All functions in <code class="docutils literal notranslate"><span class="pre">proj.h</span></code>
+belongs to the <code class="docutils literal notranslate"><span class="pre">proj_</span></code> namespace.</p>
+<p>With the new API also comes new datatypes. E.g. the transformation object <code class="docutils literal notranslate"><span class="pre">projPJ</span></code>
+which has been changed to a pointer of type <code class="docutils literal notranslate"><span class="pre">PJ</span></code>. This is done to highlight the
+actual nature of the object, instead of hiding it away behind a typedef. New data
+types for handling coordinates have also been introduced. In the above example we
+use the <code class="docutils literal notranslate"><span class="pre">PJ_COORD</span></code>, which is a union of various types. The benefit of this is that
+it is possible to use the various structs in the union to communicate what state
+the data is in at different points in the program. For instance as in the above
+example where the coordinate is read from STDIN as a geodetic coordinate,
+communicated to the reader of the code by using the <code class="docutils literal notranslate"><span class="pre">c.lp</span></code> struct.
+After it has been projected we print it to STDOUT by accessing the individual
+elements in <code class="docutils literal notranslate"><span class="pre">c.xy</span></code> to illustrate that the coordinate is now in projected space.
+Data types are prefixed with <cite>PJ_</cite>.</p>
+<p>The final, and perhaps biggest, change is that the fundamental concept of
+transformations in PROJ are now handled in a single transformation object (<code class="docutils literal notranslate"><span class="pre">PJ</span></code>)
+and not by stating the source and destination systems as previously. It is of
+course still possible to do just that, but the transformation object now
+captures the whole transformation from source to destination in one. In the
+example with the old API the source system is described as
+<code class="docutils literal notranslate"><span class="pre">+proj=latlon</span> <span class="pre">+ellps=clrk66</span></code> and the destination system is described as
+<code class="docutils literal notranslate"><span class="pre">+proj=merc</span> <span class="pre">+ellps=clrk66</span> <span class="pre">+lat_ts=33</span></code>. Since the Mercator projection accepts
+geodetic coordinates as its input, the description of the source in this case
+is superfluous. We use that to our advantage in the new API and simply state
+the destination. This is simple at a glance, but is actually a big conceptual
+change. We are now focused on the path between two systems instead of what the
+source and destination systems are.</p>
+</div>
+<div class="section" id="function-mapping-from-old-to-new-api">
+<h2>Function mapping from old to new API<a class="headerlink" href="#function-mapping-from-old-to-new-api" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Old API functions</strong></td>
+<td><strong>New API functions</strong></td>
+</tr>
+<tr class="row-even"><td>pj_fwd</td>
+<td>proj_trans</td>
+</tr>
+<tr class="row-odd"><td>pj_inv</td>
+<td>proj_trans</td>
+</tr>
+<tr class="row-even"><td>pj_fwd3</td>
+<td>proj_trans</td>
+</tr>
+<tr class="row-odd"><td>pj_inv3</td>
+<td>proj_trans</td>
+</tr>
+<tr class="row-even"><td>pj_transform</td>
+<td>proj_trans_array or proj_trans_generic</td>
+</tr>
+<tr class="row-odd"><td>pj_init</td>
+<td>proj_create</td>
+</tr>
+<tr class="row-even"><td>pj_init_plus</td>
+<td>proj_create</td>
+</tr>
+<tr class="row-odd"><td>pj_free</td>
+<td>proj_destroy</td>
+</tr>
+<tr class="row-even"><td>pj_is_latlong</td>
+<td>proj_angular_output</td>
+</tr>
+<tr class="row-odd"><td>pj_is_geocent</td>
+<td>proj_angular_outout</td>
+</tr>
+<tr class="row-even"><td>pj_get_def</td>
+<td>proj_pj_info</td>
+</tr>
+<tr class="row-odd"><td>pj_latlong_from_proj</td>
+<td><em>No equivalent</em></td>
+</tr>
+<tr class="row-even"><td>pj_set_finder</td>
+<td><em>No equivalent</em></td>
+</tr>
+<tr class="row-odd"><td>pj_set_searchpath</td>
+<td><em>No equivalent</em></td>
+</tr>
+<tr class="row-even"><td>pj_deallocate_grids</td>
+<td><em>No equivalent</em></td>
+</tr>
+<tr class="row-odd"><td>pj_strerrno</td>
+<td><em>No equivalent</em></td>
+</tr>
+<tr class="row-even"><td>pj_get_errno_ref</td>
+<td>proj_errno</td>
+</tr>
+<tr class="row-odd"><td>pj_get_release</td>
+<td>proj_info</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../community/index.html" class="btn btn-neutral float-right" title="Community" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="bindings.html" class="btn btn-neutral" title="Language bindings" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 1983-2018.
+      Last updated on 28 Sep 2018.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'5.2.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

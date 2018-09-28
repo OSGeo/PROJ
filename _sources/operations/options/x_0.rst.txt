@@ -1,0 +1,5 @@
+.. option:: +x_0=<value>
+
+    False easting.
+
+    *Defaults to 0.0.*
