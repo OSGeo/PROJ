@@ -6,76 +6,50 @@ environment:
   matrix:
 
 # VS 2015
-  - BUILD_TYPE: cmake
-    VS_VERSION: Visual Studio 14
+  - VS_VERSION: Visual Studio 14
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
 # VS 2017
-  - BUILD_TYPE: cmake
-    VS_VERSION: Visual Studio 15
+  - VS_VERSION: Visual Studio 15
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-
-  - BUILD_TYPE: nmake
 
 shallow_clone: true
 
 build_script:
   - echo build_script
-  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x86" call "%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat"
-  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
-  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" call "%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" x86_amd64
-  - if "%BUILD_TYPE%" == "nmake" nmake /f makefile.vc
-  - if "%BUILD_TYPE%" == "nmake" nmake /f makefile.vc install-all
-  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" cd src
-  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" nmake /f makefile.vc multistresstest.exe
-# Disabled for now as it scales badly
-#  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" multistresstest.exe
-  - if "%BUILD_TYPE%" == "nmake" if "%platform%" == "x64" cd ..
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
-  - if "%BUILD_TYPE%" == "cmake" echo "%VS_FULL%"
+  - if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
+  - if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
+  - echo "%VS_FULL%"
 #
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" mkdir build_dll
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cd build_dll
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/WX"
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cmake --build . --config Release
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cd ..
+  - if "%platform%" == "x64" mkdir build_dll
+  - if "%platform%" == "x64" cd build_dll
+  - if "%platform%" == "x64" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=ON -DCMAKE_C_FLAGS="/WX"
+  - if "%platform%" == "x64" cmake --build . --config Release
+  - if "%platform%" == "x64" cd ..
 #
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" mkdir build_static
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cd build_static
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS="/WX"
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cmake --build . --config Release
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cd ..
+  - if "%platform%" == "x86" mkdir build_static
+  - if "%platform%" == "x86" cd build_static
+  - if "%platform%" == "x86" cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS="/WX"
+  - if "%platform%" == "x86" cmake --build . --config Release
+  - if "%platform%" == "x86" cd ..
 
 test_script:
   - echo test_script
-  - if "%BUILD_TYPE%" == "cmake" set PROJ_LIB=C:\projects\proj-4\data
-  - if "%BUILD_TYPE%" == "nmake" set PROJ_LIB=C:\PROJ\SHARE
-  - if "%BUILD_TYPE%" == "nmake" mkdir %PROJ_LIB%\tests
-  - if "%BUILD_TYPE%" == "nmake" copy data\tests\*.* %PROJ_LIB%\tests
+  - set PROJ_LIB=C:\projects\proj-4\data
   - set CURDIR=%CD%
   - cd %PROJ_LIB%
   - curl -O http://download.osgeo.org/proj/proj-datumgrid-1.7.zip
   - 7z e -aoa -y proj-datumgrid-1.7.zip
   - dir
   - cd ..
-  - if "%BUILD_TYPE%" == "nmake" dir
-  - if "%BUILD_TYPE%" == "nmake" cd bin
-  - if "%BUILD_TYPE%" == "nmake" echo "Contents of current directory:"
-  - if "%BUILD_TYPE%" == "nmake" dir
-  - if "%BUILD_TYPE%" == "nmake" echo "Contents of ..\test\gie:"
-  - if "%BUILD_TYPE%" == "nmake" dir ..\test\gie
-  - if "%BUILD_TYPE%" == "nmake" echo "Contents of PROJ_LIB " %PROJ_LIB%
-  - if "%BUILD_TYPE%" == "nmake" dir %PROJ_LIB%
-  - if "%BUILD_TYPE%" == "nmake" gie.exe ..\test\gie\*.gie ..\test\gigs\*.gie
   - cd %CURDIR%
 #
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cd build_dll
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" ctest -C Release
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x64" cd ..
+  - if "%platform%" == "x64" cd build_dll
+  - if "%platform%" == "x64" ctest -C Release
+  - if "%platform%" == "x64" cd ..
 #
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cd build_static
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" ctest -C Release
-  - if "%BUILD_TYPE%" == "cmake" if "%platform%" == "x86" cd ..
+  - if "%platform%" == "x86" cd build_static
+  - if "%platform%" == "x86" ctest -C Release
+  - if "%platform%" == "x86" cd ..
 
 deploy: off

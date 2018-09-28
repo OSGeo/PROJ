@@ -13,7 +13,7 @@ AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 include_HEADERS = proj.h proj_api.h geodesic.h \
 	org_proj4_PJ.h
 
-EXTRA_DIST = makefile.vc proj.def bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
+EXTRA_DIST = proj.def bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 			 bin_geod.cmake bin_nad2bin.cmake bin_proj.cmake \
 			 lib_proj.cmake CMakeLists.txt bin_geodtest.cmake geodtest.c
 
