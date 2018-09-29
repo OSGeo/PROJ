@@ -11,6 +11,7 @@ systems are based on different datums.
    :maxdepth: 1
 
    deformation
+   geogoffset
    helmert
    molodensky
    hgridshift
